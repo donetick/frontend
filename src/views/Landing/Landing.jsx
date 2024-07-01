@@ -15,6 +15,10 @@ const Landing = () => {
   const [currentUser, setCurrentUser] = useState(getCurrentUser())
 
   useEffect(() => {
+    // if the host is https://app.donetick.com/ then redirect to https://app.donetick.com/my/chores:
+    if (window.location.host === 'app.donetick.com') {
+      Navigate('/my/chores')
+    }
     AOS.init({
       once: false, // whether animation should happen only once - while scrolling down
     })
