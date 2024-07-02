@@ -6,7 +6,6 @@ import {
   Card,
   Chip,
   FormControl,
-  FormLabel,
   Input,
   ListItem,
   ListItemContent,
@@ -91,7 +90,7 @@ const ThingTriggerSection = ({
       <Typography level='h5'>
         Trigger a task when a thing state changes to a desired state
       </Typography>
-      {things.length !== 0 && (
+      {things?.length === 0 && (
         <Typography level='body-sm'>
           it's look like you don't have any things yet, create a thing to
           trigger a task when the state changes.

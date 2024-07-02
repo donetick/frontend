@@ -12,12 +12,15 @@ import {
   Box,
   Card,
   Chip,
+  CircularProgress,
   Container,
   Grid,
   IconButton,
+  Snackbar,
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   CreateThing,
   DeleteThing,
@@ -27,13 +30,14 @@ import {
 } from '../../utils/Fetcher'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import CreateThingModal from '../Modals/Inputs/CreateThingModal'
-
 const ThingCard = ({
   thing,
   onEditClick,
   onStateChangeRequest,
   onDeleteClick,
 }) => {
+  const [isDisabled, setIsDisabled] = useState(false)
+  const Navigate = useNavigate()
   const getThingIcon = type => {
     if (type === 'text') {
       return <Flip />
@@ -49,6 +53,15 @@ const ThingCard = ({
       return <ToggleOff />
     }
   }
+
+  const handleRequestChange = thing => {
+    setIsDisabled(true)
+    onStateChangeRequest(thing)
+    setTimeout(() => {
+      setIsDisabled(false)
+    }, 2000)
+  }
+
   return (
     <Card
       variant='outlined'
@@ -71,6 +84,9 @@ const ThingCard = ({
               flexDirection: 'row',
               gap: 1,
             }}
+            onClick={() => {
+              Navigate(`/things/${thing?.id}`)
+            }}
           >
             <Typography level='title-lg' component='h2'>
               {thing?.name}
@@ -91,21 +107,39 @@ const ThingCard = ({
         <Grid item xs={3}>
           <Box display='flex' justifyContent='flex-end' alignItems='flex-end'>
             {/* <ButtonGroup> */}
-            <IconButton
-              variant='solid'
-              color='success'
-              onClick={() => {
-                onStateChangeRequest(thing)
-              }}
-              sx={{
-                borderRadius: '50%',
-                width: 50,
-                height: 50,
-                zIndex: 1,
-              }}
-            >
-              {getThingIcon(thing?.type)}
-            </IconButton>
+            <div className='relative grid place-items-center'>
+              <IconButton
+                variant='solid'
+                color='success'
+                onClick={() => {
+                  handleRequestChange(thing)
+                }}
+                sx={{
+                  borderRadius: '50%',
+                  width: 50,
+                  minWidth: 50,
+                  height: 50,
+                  zIndex: 1,
+                }}
+                disabled={isDisabled}
+              >
+                {getThingIcon(thing?.type)}
+              </IconButton>
+              {isDisabled && (
+                <CircularProgress
+                  variant='solid'
+                  color='success'
+                  size='md'
+                  sx={{
+                    color: 'success.main',
+                    position: 'absolute',
+                    '--CircularProgress-size': '55px',
+
+                    zIndex: 0,
+                  }}
+                />
+              )}
+            </div>
             <IconButton
               // sx={{ width: 15 }}
               variant='soft'
@@ -154,6 +188,10 @@ const ThingsView = () => {
   const [isShowCreateThingModal, setIsShowCreateThingModal] = useState(false)
   const [createModalThing, setCreateModalThing] = useState(null)
   const [confirmModelConfig, setConfirmModelConfig] = useState({})
+
+  const [isSnackbarOpen, setIsSnackbarOpen] = useState(false)
+  const [snackBarMessage, setSnackBarMessage] = useState('')
+
   useEffect(() => {
     // fetch things
     GetThings().then(result => {
@@ -184,6 +222,8 @@ const ThingsView = () => {
         }
       })
     })
+    setSnackBarMessage('Thing saved successfully')
+    setIsSnackbarOpen(true)
   }
   const handleEditClick = thing => {
     setCreateModalThing(thing)
@@ -240,6 +280,8 @@ const ThingsView = () => {
         })
       })
     }
+    setSnackBarMessage('Thing state updated successfully')
+    setIsSnackbarOpen(true)
   }
 
   return (
@@ -317,6 +359,19 @@ const ThingsView = () => {
         )}
         <ConfirmationModal config={confirmModelConfig} />
       </Box>
+      <Snackbar
+        open={isSnackbarOpen}
+        onClose={() => {
+          setIsSnackbarOpen(false)
+        }}
+        autoHideDuration={3000}
+        variant='soft'
+        color='success'
+        size='lg'
+        invertedColors
+      >
+        <Typography level='title-md'>{snackBarMessage}</Typography>
+      </Snackbar>
     </Container>
   )
 }
