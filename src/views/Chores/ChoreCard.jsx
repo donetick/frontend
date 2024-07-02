@@ -125,7 +125,7 @@ const ChoreCard = ({ chore, performers, onChoreUpdate, onChoreRemove, sx }) => {
       }
     })
     setIsDisabled(true)
-    setTimeout(() => setIsDisabled(false), 5000) // Re-enable the button after 5 seconds
+    setTimeout(() => setIsDisabled(false), 3000) // Re-enable the button after 5 seconds
   }
   const handleChangeDueDate = newDate => {
     if (activeUserId === null) {

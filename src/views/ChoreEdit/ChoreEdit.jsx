@@ -506,7 +506,7 @@ const ChoreEdit = () => {
           </FormControl>
         )}
       </Box>
-      {!['once', 'no_repeat'].includes(frequencyType) && (
+      {!['once', 'no_repeat', 'trigger'].includes(frequencyType) && (
         <Box mt={2}>
           <Typography level='h4'>Scheduling Preferences: </Typography>
           <Typography level='h5'>

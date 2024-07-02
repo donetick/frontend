@@ -197,6 +197,13 @@ const DeleteThing = id => {
   })
 }
 
+const GetThingHistory = (id, offset) => {
+  return Fetch(`${API_URL}/things/${id}/history?offset=${offset}`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+}
+
 const CreateLongLiveToken = name => {
   return Fetch(`${API_URL}/users/tokens`, {
     method: 'POST',
@@ -236,6 +243,7 @@ export {
   GetCircleMemberRequests,
   GetLongLiveTokens,
   GetSubscriptionSession,
+  GetThingHistory,
   GetThings,
   GetUserCircle,
   GetUserProfile,
