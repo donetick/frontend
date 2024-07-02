@@ -3,7 +3,6 @@ import {
   Button,
   FormControl,
   FormHelperText,
-  FormLabel,
   Input,
   Modal,
   ModalDialog,
@@ -67,76 +66,67 @@ function CreateThingModal({ isOpen, onClose, onSave, currentThing }) {
           {currentThing?.id ? 'Edit' : 'Create'} Thing
         </Typography>
         <FormControl>
-          <FormLabel>
-            Name
-            <Textarea
-              placeholder='Thing name'
-              value={name}
-              onChange={e => setName(e.target.value)}
-              sx={{ minWidth: 300 }}
-            />
-          </FormLabel>
+          <Typography>Name</Typography>
+          <Textarea
+            placeholder='Thing name'
+            value={name}
+            onChange={e => setName(e.target.value)}
+            sx={{ minWidth: 300 }}
+          />
           <FormHelperText color='danger'>{errors.name}</FormHelperText>
         </FormControl>
         <FormControl>
-          <FormLabel>
-            Type
-            <Select value={type} sx={{ minWidth: 300 }}>
-              {['text', 'number', 'boolean'].map(type => (
-                <Option value={type} key={type} onClick={() => setType(type)}>
-                  {type.charAt(0).toUpperCase() + type.slice(1)}
-                </Option>
-              ))}
-            </Select>
-          </FormLabel>
+          <Typography>Type</Typography>
+          <Select value={type} sx={{ minWidth: 300 }}>
+            {['text', 'number', 'boolean'].map(type => (
+              <Option value={type} key={type} onClick={() => setType(type)}>
+                {type.charAt(0).toUpperCase() + type.slice(1)}
+              </Option>
+            ))}
+          </Select>
+
           <FormHelperText color='danger'>{errors.type}</FormHelperText>
         </FormControl>
         {type === 'text' && (
           <FormControl>
-            <FormLabel>
-              Value
-              <Input
-                placeholder='Thing value'
-                value={state || ''}
-                onChange={e => setState(e.target.value)}
-                sx={{ minWidth: 300 }}
-              />
-            </FormLabel>
+            <Typography>Value</Typography>
+            <Input
+              placeholder='Thing value'
+              value={state || ''}
+              onChange={e => setState(e.target.value)}
+              sx={{ minWidth: 300 }}
+            />
             <FormHelperText color='danger'>{errors.state}</FormHelperText>
           </FormControl>
         )}
         {type === 'number' && (
           <FormControl>
-            <FormLabel>
-              Value
-              <Input
-                placeholder='Thing value'
-                type='number'
-                value={state || ''}
-                onChange={e => {
-                  setState(e.target.value)
-                }}
-                sx={{ minWidth: 300 }}
-              />
-            </FormLabel>
+            <Typography>Value</Typography>
+            <Input
+              placeholder='Thing value'
+              type='number'
+              value={state || ''}
+              onChange={e => {
+                setState(e.target.value)
+              }}
+              sx={{ minWidth: 300 }}
+            />
           </FormControl>
         )}
         {type === 'boolean' && (
           <FormControl>
-            <FormLabel>
-              Value
-              <Select sx={{ minWidth: 300 }} value={state}>
-                {['true', 'false'].map(value => (
-                  <Option
-                    value={value}
-                    key={value}
-                    onClick={() => setState(value)}
-                  >
-                    {value.charAt(0).toUpperCase() + value.slice(1)}
-                  </Option>
-                ))}
-              </Select>
-            </FormLabel>
+            <Typography>Value</Typography>
+            <Select sx={{ minWidth: 300 }} value={state}>
+              {['true', 'false'].map(value => (
+                <Option
+                  value={value}
+                  key={value}
+                  onClick={() => setState(value)}
+                >
+                  {value.charAt(0).toUpperCase() + value.slice(1)}
+                </Option>
+              ))}
+            </Select>
           </FormControl>
         )}
 

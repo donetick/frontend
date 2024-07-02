@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import FeaturesSection from './FeaturesSection'
 import HomeHero from './HomeHero'
-import PricingSection from './PricingSection'
 const Landing = () => {
   const Navigate = useNavigate()
   const getCurrentUser = () => {
@@ -24,7 +23,7 @@ const Landing = () => {
     <Container className='flex h-full items-center justify-center'>
       <HomeHero />
       <FeaturesSection />
-      <PricingSection />
+      {/* <PricingSection /> */}
     </Container>
   )
 }
