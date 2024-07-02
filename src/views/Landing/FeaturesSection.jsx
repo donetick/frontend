@@ -116,16 +116,22 @@ function FeaturesSection() {
   return (
     <Container sx={{ textAlign: 'center' }}>
       <Typography level='h4' mt={2} mb={4}>
-        Donetick
+        Donetick is under development
       </Typography>
 
       <Container maxWidth={'lg'} sx={{ mb: 8 }}>
         <Typography level='body-md' color='neutral'>
-          Navigate personal growth with genuine insights, thoughtful privacy,
-          and actionable steps tailored just for you.
+          Donetick is beta software. and is still under development. thing may
+          change, break, or disappear at any time. Please use it at your own
+          risk and discretion. I will do my best to keep the service running
         </Typography>
       </Container>
 
+      <Typography level='h4' mt={2} mb={4}>
+        Features Overview
+      </Typography>
+
+      <Container maxWidth={'lg'} sx={{ mb: 8 }}></Container>
       <div
         className='align-center mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'
         data-aos-id-features2-blocks
