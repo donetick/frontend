@@ -190,7 +190,8 @@ const ThingsView = () => {
   const [confirmModelConfig, setConfirmModelConfig] = useState({})
 
   const [isSnackbarOpen, setIsSnackbarOpen] = useState(false)
-  const [snackBarMessage, setSnackBarMessage] = useState('')
+  const [snackbarMessage, setSnackbarMessage] = useState('')
+  const [snackbarColor, setSnackbarColor] = useState('success')
 
   useEffect(() => {
     // fetch things
@@ -222,7 +223,8 @@ const ThingsView = () => {
         }
       })
     })
-    setSnackBarMessage('Thing saved successfully')
+    setSnackbarMessage('Thing saved successfully')
+    setSnackbarColor('success')
     setIsSnackbarOpen(true)
   }
   const handleEditClick = thing => {
@@ -246,7 +248,12 @@ const ThingsView = () => {
               )
               currentThings.splice(thingIndex, 1)
               setThings(currentThings)
+            } else if (response.status === 405) {
+              setSnackbarMessage('Unable to delete thing with associated tasks')
+              setSnackbarColor('danger')
+              setIsSnackbarOpen(true)
             }
+            // if method not allwo show snackbar:
           })
         }
         setConfirmModelConfig({})
@@ -280,7 +287,7 @@ const ThingsView = () => {
         })
       })
     }
-    setSnackBarMessage('Thing state updated successfully')
+    setSnackbarMessage('Thing state updated successfully')
     setIsSnackbarOpen(true)
   }
 
@@ -366,11 +373,11 @@ const ThingsView = () => {
         }}
         autoHideDuration={3000}
         variant='soft'
-        color='success'
+        color={snackbarColor}
         size='lg'
         invertedColors
       >
-        <Typography level='title-md'>{snackBarMessage}</Typography>
+        <Typography level='title-md'>{snackbarMessage}</Typography>
       </Snackbar>
     </Container>
   )
