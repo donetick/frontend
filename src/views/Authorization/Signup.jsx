@@ -60,10 +60,10 @@ const SignupView = () => {
       setUsernameError('Username must be at least 4 characters')
       isValid = false
     }
-    // if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    //   setEmailError('Invalid email address')
-    //   isValid = false
-    // }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setEmailError('Invalid email address')
+      isValid = false
+    }
 
     if (password.length < 8) {
       setPasswordError('Password must be at least 8 characters')
@@ -158,10 +158,10 @@ const SignupView = () => {
             margin='normal'
             required
             fullWidth
-            id='email'
-            label='Email Address'
-            name='email'
-            autoComplete='email'
+            id='username'
+            label='Username'
+            name='username'
+            autoComplete='username'
             autoFocus
             value={username}
             onChange={e => {
@@ -173,6 +173,26 @@ const SignupView = () => {
             <FormHelperText c>{usernameError}</FormHelperText>
           </FormControl>
           {/* Error message display */}
+          <Typography level='body2' alignSelf={'start'}>
+            Email
+          </Typography>
+          <Input
+            margin='normal'
+            required
+            fullWidth
+            id='email'
+            label='email'
+            name='email'
+            autoComplete='email'
+            value={email}
+            onChange={e => {
+              setEmailError(null)
+              setEmail(e.target.value.trim())
+            }}
+          />
+          <FormControl error={emailError}>
+            <FormHelperText c>{emailError}</FormHelperText>
+          </FormControl>
           <Typography level='body2' alignSelf={'start'}>
             Password:
           </Typography>

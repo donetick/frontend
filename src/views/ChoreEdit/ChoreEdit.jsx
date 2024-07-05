@@ -16,6 +16,8 @@ import {
   RadioGroup,
   Select,
   Sheet,
+  Snackbar,
+  Stack,
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
@@ -77,7 +79,9 @@ const ChoreEdit = () => {
   const [createdBy, setCreatedBy] = useState(0)
   const [errors, setErrors] = useState({})
   const [attemptToSave, setAttemptToSave] = useState(false)
-
+  const [isSnackbarOpen, setIsSnackbarOpen] = useState(false)
+  const [snackbarMessage, setSnackbarMessage] = useState('')
+  const [snackbarColor, setSnackbarColor] = useState('warning')
   const Navigate = useNavigate()
 
   const HandleValidateChore = () => {
@@ -127,8 +131,24 @@ const ChoreEdit = () => {
     // if there is any error then return false:
     setErrors(errors)
     if (Object.keys(errors).length > 0) {
+      // generate a list with error and set it in snackbar:
+
+      const errorList = Object.keys(errors).map(key => (
+        <ListItem key={key}>{errors[key]}</ListItem>
+      ))
+      setSnackbarMessage(
+        <Stack spacing={0.5}>
+          <Typography level='title-md'>
+            Please resolve the following errors:
+          </Typography>
+          <List>{errorList}</List>
+        </Stack>,
+      )
+      setSnackbarColor('danger')
+      setIsSnackbarOpen(true)
       return false
     }
+
     return true
   }
 
@@ -506,7 +526,7 @@ const ChoreEdit = () => {
           </FormControl>
         )}
       </Box>
-      {!['once', 'no_repeat', 'trigger'].includes(frequencyType) && (
+      {!['once', 'no_repeat'].includes(frequencyType) && (
         <Box mt={2}>
           <Typography level='h4'>Scheduling Preferences: </Typography>
           <Typography level='h5'>
@@ -737,6 +757,20 @@ const ChoreEdit = () => {
       </Sheet>
       <ConfirmationModal config={confirmModelConfig} />
       {/* <ChoreHistory ChoreHistory={choresHistory} UsersData={performers} /> */}
+      <Snackbar
+        open={isSnackbarOpen}
+        onClose={() => {
+          setIsSnackbarOpen(false)
+          setSnackbarMessage(null)
+        }}
+        color={snackbarColor}
+        autoHideDuration={4000}
+        sx={{ bottom: 70 }}
+        invertedColors={true}
+        variant='soft'
+      >
+        {snackbarMessage}
+      </Snackbar>
     </Container>
   )
 }

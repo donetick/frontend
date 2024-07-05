@@ -8,6 +8,7 @@ import {
   ManageSearch,
   MoreTime,
   MoreVert,
+  Nfc,
   NoteAdd,
   RecordVoiceOver,
   Repeat,
@@ -34,6 +35,7 @@ import moment from 'moment'
 import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { API_URL } from '../../Config'
+import writeToNFC from '../../service/NFCWriter'
 import { Fetch } from '../../utils/TokenManager'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import DateModal from '../Modals/Inputs/DateModal'
@@ -517,6 +519,15 @@ const ChoreCard = ({ chore, performers, onChoreUpdate, onChoreRemove, sx }) => {
                 >
                   <MoreTime />
                   Change due date
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    // write current chore URL to NFC
+                    writeToNFC(`${window.location.origin}/chores/${chore.id}`)
+                  }}
+                >
+                  <Nfc />
+                  Write to NFC
                 </MenuItem>
                 <MenuItem onClick={handleEdit}>
                   <Edit />

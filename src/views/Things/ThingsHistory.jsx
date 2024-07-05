@@ -107,47 +107,49 @@ const ThingsHistory = () => {
       <Typography level='h3' mb={1.5}>
         History:
       </Typography>
-      <List sx={{ p: 0 }}>
-        {thingsHistory.map((history, index) => (
-          <>
-            <ListItem sx={{ gap: 1.5, alignItems: 'flex-start' }}>
-              <ListItemContent sx={{ my: 0 }}>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}
-                >
-                  <Typography level='body1' sx={{ fontWeight: 'md' }}>
-                    {moment(history.updatedAt).format(
-                      'ddd MM/DD/yyyy HH:mm:ss',
-                    )}
-                  </Typography>
-                  <Chip>{history.state === '1' ? 'Active' : 'Inactive'}</Chip>
-                </Box>
-              </ListItemContent>
-            </ListItem>
-            {index < thingsHistory.length - 1 && (
-              <>
-                <ListDivider component='li'>
-                  {/* time between two completion: */}
-                  {index < thingsHistory.length - 1 &&
-                    thingsHistory[index + 1].createdAt && (
-                      <Typography level='body3' color='text.tertiary'>
-                        {formatTimeDifference(
-                          history.createdAt,
-                          thingsHistory[index + 1].createdAt,
-                        )}{' '}
-                        before
-                      </Typography>
-                    )}
-                </ListDivider>
-              </>
-            )}
-          </>
-        ))}
-      </List>
+      <Box sx={{ borderRadius: 'sm', p: 2, boxShadow: 'md' }}>
+        <List sx={{ p: 0 }}>
+          {thingsHistory.map((history, index) => (
+            <>
+              <ListItem sx={{ gap: 1.5, alignItems: 'flex-start' }}>
+                <ListItemContent sx={{ my: 0 }}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Typography level='body1' sx={{ fontWeight: 'md' }}>
+                      {moment(history.updatedAt).format(
+                        'ddd MM/DD/yyyy HH:mm:ss',
+                      )}
+                    </Typography>
+                    <Chip>{history.state === '1' ? 'Active' : 'Inactive'}</Chip>
+                  </Box>
+                </ListItemContent>
+              </ListItem>
+              {index < thingsHistory.length - 1 && (
+                <>
+                  <ListDivider component='li'>
+                    {/* time between two completion: */}
+                    {index < thingsHistory.length - 1 &&
+                      thingsHistory[index + 1].createdAt && (
+                        <Typography level='body3' color='text.tertiary'>
+                          {formatTimeDifference(
+                            history.createdAt,
+                            thingsHistory[index + 1].createdAt,
+                          )}{' '}
+                          before
+                        </Typography>
+                      )}
+                  </ListDivider>
+                </>
+              )}
+            </>
+          ))}
+        </List>
+      </Box>
       {/* Load more Button  */}
       <Box
         sx={{
