@@ -62,7 +62,6 @@ const LoginView = () => {
   }
 
   const loggedWithProvider = function (provider, data) {
-    console.log(provider, data)
     return fetch(API_URL + `/auth/${provider}/callback`, {
       method: 'POST',
       headers: {
@@ -80,8 +79,14 @@ const LoginView = () => {
         return response.json().then(data => {
           localStorage.setItem('ca_token', data.token)
           localStorage.setItem('ca_expiration', data.expire)
-          // setIsLoggedIn(true);
-          getUserProfileAndNavigateToHome()
+
+          const redirectUrl = Cookies.get('ca_redirect')
+          if (redirectUrl) {
+            Cookies.remove('ca_redirect')
+            Navigate(redirectUrl)
+          } else {
+            getUserProfileAndNavigateToHome()
+          }
         })
       }
       return response.json().then(error => {

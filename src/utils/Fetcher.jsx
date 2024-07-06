@@ -51,6 +51,19 @@ const GetChoreByID = id => {
     headers: HEADERS(),
   })
 }
+const GetChoreDetailById = id => {
+  return Fetch(`${API_URL}/chores/${id}/details`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+}
+
+const MarkChoreComplete = id => {
+  return Fetch(`${API_URL}/chores/${id}/do`, {
+    method: 'POST',
+    headers: HEADERS(),
+  })
+}
 const CreateChore = chore => {
   return Fetch(`${API_URL}/chores/`, {
     method: 'POST',
@@ -238,6 +251,7 @@ export {
   GetAllCircleMembers,
   GetAllUsers,
   GetChoreByID,
+  GetChoreDetailById,
   GetChoreHistory,
   GetChores,
   GetCircleMemberRequests,
@@ -250,6 +264,7 @@ export {
   JoinCircle,
   LeaveCircle,
   login,
+  MarkChoreComplete,
   SaveChore,
   SaveThing,
   signUp,

@@ -155,6 +155,10 @@ const NavBar = () => {
               <ListItemContent>Logout</ListItemContent>
             </ListItemButton>
             <Typography
+              onClick={
+                // force service worker to update:
+                () => window.location.reload(true)
+              }
               level='body-xs'
               sx={{
                 // p: 2,
