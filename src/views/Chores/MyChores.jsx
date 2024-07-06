@@ -298,12 +298,14 @@ const MyChores = () => {
           }}
           onChange={handleSearchChange}
           endDecorator={
-            <CancelRounded
-              onClick={() => {
-                setSearchTerm('')
-                setFilteredChores(chores)
-              }}
-            />
+            searchTerm && (
+              <CancelRounded
+                onClick={() => {
+                  setSearchTerm('')
+                  setFilteredChores(chores)
+                }}
+              />
+            )
           }
         />
       </Box>
