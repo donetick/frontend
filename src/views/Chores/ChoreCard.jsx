@@ -35,12 +35,13 @@ import moment from 'moment'
 import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { API_URL } from '../../Config'
-import writeToNFC from '../../service/NFCWriter'
+import { MarkChoreComplete } from '../../utils/Fetcher'
 import { Fetch } from '../../utils/TokenManager'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import DateModal from '../Modals/Inputs/DateModal'
 import SelectModal from '../Modals/Inputs/SelectModal'
 import TextModal from '../Modals/Inputs/TextModal'
+import WriteNFCModal from '../Modals/Inputs/WriteNFCModal'
 const ChoreCard = ({ chore, performers, onChoreUpdate, onChoreRemove, sx }) => {
   const [activeUserId, setActiveUserId] = React.useState(0)
   const [isChangeDueDateModalOpen, setIsChangeDueDateModalOpen] =
@@ -52,6 +53,7 @@ const ChoreCard = ({ chore, performers, onChoreUpdate, onChoreRemove, sx }) => {
   const [isCompleteWithNoteModalOpen, setIsCompleteWithNoteModalOpen] =
     React.useState(false)
   const [confirmModelConfig, setConfirmModelConfig] = React.useState({})
+  const [isNFCModalOpen, setIsNFCModalOpen] = React.useState(false)
   const [anchorEl, setAnchorEl] = React.useState(null)
   const menuRef = React.useRef(null)
   const navigate = useNavigate()
@@ -116,9 +118,7 @@ const ChoreCard = ({ chore, performers, onChoreUpdate, onChoreRemove, sx }) => {
   }
 
   const handleCompleteChore = () => {
-    Fetch(`${API_URL}/chores/${chore.id}/do`, {
-      method: 'POST',
-    }).then(response => {
+    MarkChoreComplete(chore.id).then(response => {
       if (response.ok) {
         response.json().then(data => {
           const newChore = data.res
@@ -323,7 +323,6 @@ const ChoreCard = ({ chore, performers, onChoreUpdate, onChoreRemove, sx }) => {
           }}
         >
           {getFrequencyIcon(chore)}
-
           {getRecurrentChipText(chore)}
         </div>
       </Chip>
@@ -344,7 +343,13 @@ const ChoreCard = ({ chore, performers, onChoreUpdate, onChoreRemove, sx }) => {
         }}
       >
         <Grid container>
-          <Grid item xs={9}>
+          <Grid
+            item
+            xs={9}
+            onClick={() => {
+              navigate(`/chores/${chore.id}`)
+            }}
+          >
             {/* Box in top right with Chip showing next due date  */}
             <Box display='flex' justifyContent='start' alignItems='center'>
               <Avatar sx={{ mr: 1, fontSize: 22 }}>
@@ -408,7 +413,7 @@ const ChoreCard = ({ chore, performers, onChoreUpdate, onChoreRemove, sx }) => {
                 disabled={isDisabled}
                 sx={{
                   borderRadius: '50%',
-                  width: 50,
+                  minWidth: 50,
                   height: 50,
                   zIndex: 1,
                 }}
@@ -523,7 +528,8 @@ const ChoreCard = ({ chore, performers, onChoreUpdate, onChoreRemove, sx }) => {
                 <MenuItem
                   onClick={() => {
                     // write current chore URL to NFC
-                    writeToNFC(`${window.location.origin}/chores/${chore.id}`)
+                    // writeToNFC(`${window.location.origin}/chores/${chore.id}`)
+                    setIsNFCModalOpen(true)
                   }}
                 >
                   <Nfc />
@@ -580,6 +586,15 @@ const ChoreCard = ({ chore, performers, onChoreUpdate, onChoreRemove, sx }) => {
           }}
           okText={'Complete'}
           onSave={handleCompleteWithNote}
+        />
+        <WriteNFCModal
+          config={{
+            isOpen: isNFCModalOpen,
+            url: `${window.location.origin}/chores/${chore.id}`,
+            onClose: () => {
+              setIsNFCModalOpen(false)
+            },
+          }}
         />
       </Card>
     </>

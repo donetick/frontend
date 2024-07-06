@@ -8,6 +8,7 @@ import ForgotPasswordView from '../views/Authorization/ForgotPasswordView'
 import LoginView from '../views/Authorization/LoginView'
 import SignupView from '../views/Authorization/Signup'
 import UpdatePasswordView from '../views/Authorization/UpdatePasswordView'
+import ChoreView from '../views/ChoreEdit/ChoreView'
 import MyChores from '../views/Chores/MyChores'
 import JoinCircleView from '../views/Circles/JoinCircle'
 import ChoreHistory from '../views/History/ChoreHistory'
@@ -40,6 +41,10 @@ const Router = createBrowserRouter([
       {
         path: '/chores/:choreId/edit',
         element: <ChoreEdit />,
+      },
+      {
+        path: '/chores/:choreId',
+        element: <ChoreView />,
       },
       {
         path: '/chores/create',
