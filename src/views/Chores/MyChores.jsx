@@ -1,4 +1,4 @@
-import { Add, EditCalendar } from '@mui/icons-material'
+import { Add, CancelRounded, EditCalendar } from '@mui/icons-material'
 import {
   Badge,
   Box,
@@ -6,6 +6,7 @@ import {
   CircularProgress,
   Container,
   IconButton,
+  Input,
   List,
   ListItem,
   Menu,
@@ -13,6 +14,7 @@ import {
   Snackbar,
   Typography,
 } from '@mui/joy'
+import Fuse from 'fuse.js'
 import { useContext, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { UserContext } from '../../contexts/UserContext'
@@ -27,6 +29,7 @@ const MyChores = () => {
   const [chores, setChores] = useState([])
   const [filteredChores, setFilteredChores] = useState([])
   const [selectedFilter, setSelectedFilter] = useState('All')
+  const [searchTerm, setSearchTerm] = useState('')
   const [activeUserId, setActiveUserId] = useState(0)
   const [performers, setPerformers] = useState([])
   const [anchorEl, setAnchorEl] = useState(null)
@@ -158,6 +161,28 @@ const MyChores = () => {
     setFilteredChores(newFilteredChores)
   }
 
+  const searchOptions = {
+    // keys to search in
+    keys: ['name', 'labels'],
+    includeScore: true, // Optional: if you want to see how well each result matched the search term
+    isCaseSensitive: false,
+    findAllMatches: true,
+  }
+  const fuse = new Fuse(chores, searchOptions)
+
+  const handleSearchChange = e => {
+    const search = e.target.value
+    if (search === '') {
+      setFilteredChores(chores)
+      setSearchTerm('')
+      return
+    }
+
+    const term = search.toLowerCase()
+    setSearchTerm(term)
+    setFilteredChores(fuse.search(term).map(result => result.item))
+  }
+
   if (userProfile === null) {
     return (
       <Container className='flex h-full items-center justify-center'>
@@ -258,6 +283,31 @@ const MyChores = () => {
           </MenuItem>
         </Menu>
       </List>
+      {/* Search box to filter  */}
+      <Box>
+        <Input
+          placeholder='Search'
+          value={searchTerm}
+          sx={{
+            mt: 1,
+            mb: 1,
+            borderRadius: 20,
+            // border: '1px solid',
+            borderColor: 'text.disabled',
+            padding: 1,
+          }}
+          onChange={handleSearchChange}
+          endDecorator={
+            <CancelRounded
+              onClick={() => {
+                setSearchTerm('')
+                setFilteredChores(chores)
+              }}
+            />
+          }
+        />
+      </Box>
+
       {/* </Sheet> */}
       {filteredChores.length === 0 && (
         <Box
