@@ -489,7 +489,7 @@ const ChoreCard = ({ chore, performers, onChoreUpdate, onChoreRemove, sx }) => {
               </IconButton>
               {/* </ButtonGroup> */}
               <Menu
-                size='md'
+                size='lg'
                 ref={menuRef}
                 anchorEl={anchorEl}
                 open={Boolean(anchorEl)}
