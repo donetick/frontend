@@ -57,11 +57,20 @@ const GetChoreDetailById = id => {
     headers: HEADERS(),
   })
 }
-
-const MarkChoreComplete = id => {
-  return Fetch(`${API_URL}/chores/${id}/do`, {
+const MarkChoreComplete = (id, note, completedDate) => {
+  const body = {
+    note,
+  }
+  let completedDateFormated = ''
+  if (completedDate) {
+    completedDateFormated = `?completedDate=${new Date(
+      completedDate,
+    ).toISOString()}`
+  }
+  return Fetch(`${API_URL}/chores/${id}/do${completedDateFormated}`, {
     method: 'POST',
     headers: HEADERS(),
+    body: JSON.stringify(body),
   })
 }
 const CreateChore = chore => {
