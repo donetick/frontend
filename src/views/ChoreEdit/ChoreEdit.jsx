@@ -67,7 +67,7 @@ const ChoreEdit = () => {
   const [frequencyMetadata, setFrequencyMetadata] = useState({})
   const [labels, setLabels] = useState([])
   const [allUserThings, setAllUserThings] = useState([])
-  const [thingTrigger, setThingTrigger] = useState({})
+  const [thingTrigger, setThingTrigger] = useState(null)
   const [isThingValid, setIsThingValid] = useState(false)
 
   const [notificationMetadata, setNotificationMetadata] = useState({})
@@ -459,6 +459,12 @@ const ChoreEdit = () => {
         onFrequencyTypeUpdate={setFrequencyType}
         frequencyMetadata={frequencyMetadata}
         onFrequencyMetadataUpdate={setFrequencyMetadata}
+        onFrequencyTimeUpdate={t => {
+          setFrequencyMetadata({
+            ...frequencyMetadata,
+            time: t,
+          })
+        }}
         frequencyError={errors?.frequency}
         allUserThings={allUserThings}
         onTriggerUpdate={thingUpdate => {

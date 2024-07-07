@@ -1,4 +1,5 @@
 // create boilerplate for ResetPasswordView:
+import LogoSVG from '@/assets/logo.svg'
 import {
   Box,
   Button,
@@ -12,7 +13,6 @@ import {
 } from '@mui/joy'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-
 import { API_URL } from './../../Config'
 
 const ForgotPasswordView = () => {
@@ -105,12 +105,7 @@ const ForgotPasswordView = () => {
           }}
         >
           <Box>
-            <img
-              src='/src/assets/logo.svg'
-              alt='logo'
-              width='128px'
-              height='128px'
-            />
+            <img src={LogoSVG} alt='logo' width='128px' height='128px' />
             {/* <Logo /> */}
             <Typography level='h2'>
               Done

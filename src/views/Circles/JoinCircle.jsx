@@ -40,12 +40,6 @@ const JoinCircleView = () => {
             boxShadow: 'md',
           }}
         >
-          {/* <img
-            src='/src/assets/logo.svg'
-            alt='logo'
-            width='128px'
-            height='128px'
-          /> */}
           <Logo />
 
           <Typography level='h2'>
