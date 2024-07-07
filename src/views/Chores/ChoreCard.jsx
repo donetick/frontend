@@ -324,7 +324,7 @@ const ChoreCard = ({ chore, performers, onChoreUpdate, onChoreRemove, sx }) => {
     const split = Array.from(chore.name)
     // if the first character is emoji then remove it from the name
     if (/\p{Emoji}/u.test(split[0])) {
-      return split.slice(2).join('')
+      return split.slice(1).join('').trim()
     }
     return name
   }
