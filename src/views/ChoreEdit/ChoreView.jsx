@@ -344,16 +344,16 @@ const ChoreView = () => {
                 setSecondsLeftToCancel(null) // Reset or adjust as needed
               }
             }}
-            size='md'
+            size='lg'
             variant='outlined'
-            color='primary'
+            color='danger'
             startDecorator={<CancelScheduleSend />}
           >
             Cancel
           </Button>
         }
       >
-        <Typography level='body2' textAlign={'center'}>
+        <Typography level='body-md' textAlign={'center'}>
           Task will be marked as completed in {secondsLeftToCancel} seconds
         </Typography>
       </Snackbar>
