@@ -10,9 +10,9 @@ import {
 import {
   Box,
   Button,
+  Card,
   Checkbox,
   Container,
-  Divider,
   FormControl,
   Grid,
   Input,
@@ -26,7 +26,7 @@ import {
 } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import {
   GetAllUsers,
   GetChoreDetailById,
@@ -49,8 +49,6 @@ const ChoreView = () => {
   const [infoCards, setInfoCards] = useState([])
   const { choreId } = useParams()
   const [note, setNote] = useState(null)
-
-  const Navigate = useNavigate()
 
   const [searchParams] = useSearchParams()
 
@@ -128,12 +126,9 @@ const ChoreView = () => {
               chore.lastCompletedDate &&
               moment(chore.lastCompletedDate).fromNow()
               // moment(chore.lastCompletedDate).format('MM/DD/YYYY hh:mm A'))
-            }(
-              ${
-                performers.find(p => p.id === chore.lastCompletedBy)
-                  ?.displayName
-              }
-              )`
+            }(${
+              performers.find(p => p.id === chore.lastCompletedBy)?.displayName
+            })`
           : 'Never',
       },
       {
@@ -234,13 +229,20 @@ const ChoreView = () => {
           ))}
         </Grid>
       </Box>
-      <Divider
+      {/* <Divider
         sx={{
           my: 2,
         }}
-      />
+      /> */}
 
-      <Box>
+      <Card
+        sx={{
+          p: 2,
+          borderRadius: 'md',
+          boxShadow: 'sm',
+          mt: 2,
+        }}
+      >
         <Typography level='title-md'>Additional Notes</Typography>
         <Input
           fullWidth
@@ -260,11 +262,13 @@ const ChoreView = () => {
             my: 1,
           }}
         />
+
         <FormControl size='sm' sx={{ width: 400 }}>
           <Checkbox
             defaultChecked={completedDate !== null}
             checked={completedDate !== null}
             value={completedDate !== null}
+            size='lg'
             onChange={e => {
               if (e.target.checked) {
                 setCompletedDate(
@@ -330,7 +334,7 @@ const ChoreView = () => {
           >
             <Box>Mark as {isPendingCompletion ? 'completed' : 'done'}</Box>
           </Button> */}
-      </Box>
+      </Card>
 
       <Snackbar
         open={isPendingCompletion}
