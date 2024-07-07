@@ -284,6 +284,8 @@ const ChoreCard = ({ chore, performers, onChoreUpdate, onChoreRemove, sx }) => {
       return 'Trigger'
     } else if (chore.frequencyType === 'daily') {
       return 'Daily'
+    } else if (chore.frequencyType === 'adaptive') {
+      return 'Adaptive'
     } else if (chore.frequencyType === 'weekly') {
       return 'Weekly'
     } else if (chore.frequencyType === 'monthly') {
@@ -317,6 +319,14 @@ const ChoreCard = ({ chore, performers, onChoreUpdate, onChoreRemove, sx }) => {
     } else {
       return <Repeat />
     }
+  }
+  const getName = name => {
+    const split = Array.from(chore.name)
+    // if the first character is emoji then remove it from the name
+    if (/\p{Emoji}/u.test(split[0])) {
+      return split.slice(2).join('')
+    }
+    return name
   }
 
   return (
@@ -385,7 +395,7 @@ const ChoreCard = ({ chore, performers, onChoreUpdate, onChoreRemove, sx }) => {
                 {Array.from(chore.name)[0]}
               </Avatar>
               <Box display='flex' flexDirection='column'>
-                <Typography level='title-md'>{chore.name}</Typography>
+                <Typography level='title-md'>{getName(chore.name)}</Typography>
                 <Typography level='body-md' color='text.disabled'>
                   Assigned to{' '}
                   <Chip variant='outlined'>
@@ -396,17 +406,16 @@ const ChoreCard = ({ chore, performers, onChoreUpdate, onChoreRemove, sx }) => {
                   </Chip>
                 </Typography>
                 <Box>
-                  {chore.labels?.split(',').map(label => (
+                  {chore.labels?.split(',').map((label, index) => (
                     <Chip
                       variant='solid'
                       key={label}
                       color='primary'
                       sx={{
                         position: 'relative',
-                        ml: 0.5,
-                        top: 10,
+                        ml: index === 0 ? 0 : 0.5,
+                        top: 2,
                         zIndex: 1,
-                        left: 10,
                       }}
                       startDecorator={getIconForLabel(label)}
                     >
