@@ -1,4 +1,5 @@
 import {
+  CancelScheduleSend,
   Check,
   Delete,
   Edit,
@@ -21,6 +22,7 @@ import {
 import {
   Avatar,
   Box,
+  Button,
   Card,
   Chip,
   CircularProgress,
@@ -29,6 +31,7 @@ import {
   IconButton,
   Menu,
   MenuItem,
+  Snackbar,
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
@@ -59,6 +62,9 @@ const ChoreCard = ({ chore, performers, onChoreUpdate, onChoreRemove, sx }) => {
   const navigate = useNavigate()
   const [isDisabled, setIsDisabled] = React.useState(false)
 
+  const [isPendingCompletion, setIsPendingCompletion] = React.useState(false)
+  const [secondsLeftToCancel, setSecondsLeftToCancel] = React.useState(null)
+  const [timeoutId, setTimeoutId] = React.useState(null)
   // useEffect(() => {
   //   GetAllUsers()
   //     .then(response => response.json())
@@ -117,18 +123,41 @@ const ChoreCard = ({ chore, performers, onChoreUpdate, onChoreRemove, sx }) => {
     })
   }
 
-  const handleCompleteChore = () => {
-    MarkChoreComplete(chore.id).then(response => {
-      if (response.ok) {
-        response.json().then(data => {
-          const newChore = data.res
-          onChoreUpdate(newChore, 'completed')
-        })
+  const handleTaskCompletion = () => {
+    setIsPendingCompletion(true)
+    let seconds = 3 // Starting countdown from 3 seconds
+    setSecondsLeftToCancel(seconds)
+
+    const countdownInterval = setInterval(() => {
+      seconds -= 1
+      setSecondsLeftToCancel(seconds)
+
+      if (seconds <= 0) {
+        clearInterval(countdownInterval) // Stop the countdown when it reaches 0
       }
-    })
-    setIsDisabled(true)
-    setTimeout(() => setIsDisabled(false), 3000) // Re-enable the button after 5 seconds
+    }, 1000)
+
+    const id = setTimeout(() => {
+      MarkChoreComplete(chore.id)
+        .then(resp => {
+          if (resp.ok) {
+            return resp.json().then(data => {
+              onChoreUpdate(data.res, 'completed')
+            })
+          }
+        })
+        .then(() => {
+          setIsPendingCompletion(false)
+          clearTimeout(id)
+          clearInterval(countdownInterval) // Ensure to clear this interval as well
+          setTimeoutId(null)
+          setSecondsLeftToCancel(null)
+        })
+    }, 3000)
+
+    setTimeoutId(id)
   }
+
   const handleChangeDueDate = newDate => {
     if (activeUserId === null) {
       alert('Please select a performer')
@@ -353,7 +382,7 @@ const ChoreCard = ({ chore, performers, onChoreUpdate, onChoreRemove, sx }) => {
             {/* Box in top right with Chip showing next due date  */}
             <Box display='flex' justifyContent='start' alignItems='center'>
               <Avatar sx={{ mr: 1, fontSize: 22 }}>
-                {chore.name.charAt(0).toUpperCase()}
+                {Array.from(chore.name)[0]}
               </Avatar>
               <Box display='flex' flexDirection='column'>
                 <Typography level='title-md'>{chore.name}</Typography>
@@ -409,8 +438,8 @@ const ChoreCard = ({ chore, performers, onChoreUpdate, onChoreRemove, sx }) => {
               <IconButton
                 variant='solid'
                 color='success'
-                onClick={handleCompleteChore}
-                disabled={isDisabled}
+                onClick={handleTaskCompletion}
+                disabled={isPendingCompletion}
                 sx={{
                   borderRadius: '50%',
                   minWidth: 50,
@@ -420,7 +449,7 @@ const ChoreCard = ({ chore, performers, onChoreUpdate, onChoreRemove, sx }) => {
               >
                 <div className='relative grid place-items-center'>
                   <Check />
-                  {isDisabled && (
+                  {isPendingCompletion && (
                     <CircularProgress
                       variant='solid'
                       color='success'
@@ -596,6 +625,32 @@ const ChoreCard = ({ chore, performers, onChoreUpdate, onChoreRemove, sx }) => {
             },
           }}
         />
+
+        <Snackbar
+          open={isPendingCompletion}
+          endDecorator={
+            <Button
+              onClick={() => {
+                if (timeoutId) {
+                  clearTimeout(timeoutId)
+                  setIsPendingCompletion(false)
+                  setTimeoutId(null)
+                  setSecondsLeftToCancel(null) // Reset or adjust as needed
+                }
+              }}
+              size='md'
+              variant='outlined'
+              color='primary'
+              startDecorator={<CancelScheduleSend />}
+            >
+              Cancel
+            </Button>
+          }
+        >
+          <Typography level='body2' textAlign={'center'}>
+            Task will be marked as completed in {secondsLeftToCancel} seconds
+          </Typography>
+        </Snackbar>
       </Card>
     </>
   )
