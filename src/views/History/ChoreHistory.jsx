@@ -3,12 +3,10 @@ import {
   Avatar,
   Box,
   Button,
-  Chip,
   CircularProgress,
   Container,
   Grid,
   List,
-  ListDivider,
   ListItem,
   ListItemContent,
   ListItemDecorator,
@@ -21,6 +19,7 @@ import { Link, useParams } from 'react-router-dom'
 import { API_URL } from '../../Config'
 import { GetAllCircleMembers } from '../../utils/Fetcher'
 import { Fetch } from '../../utils/TokenManager'
+import HistoryCard from './HistoryCard'
 
 const ChoreHistory = () => {
   const [choreHistory, setChoresHistory] = useState([])
@@ -144,25 +143,6 @@ const ChoreHistory = () => {
     setHistoryInfo(historyInfo)
   }
 
-  function formatTimeDifference(startDate, endDate) {
-    const diffInMinutes = moment(startDate).diff(endDate, 'minutes')
-    let timeValue = diffInMinutes
-    let unit = 'minute'
-
-    if (diffInMinutes >= 60) {
-      const diffInHours = moment(startDate).diff(endDate, 'hours')
-      timeValue = diffInHours
-      unit = 'hour'
-
-      if (diffInHours >= 24) {
-        const diffInDays = moment(startDate).diff(endDate, 'days')
-        timeValue = diffInDays
-        unit = 'day'
-      }
-    }
-
-    return `${timeValue} ${unit}${timeValue !== 1 ? 's' : ''}`
-  }
   if (isLoading) {
     return <CircularProgress /> // Show loading indicator
   }
@@ -251,89 +231,14 @@ const ChoreHistory = () => {
         {/* Chore History List (Updated Style) */}
 
         <List sx={{ p: 0 }}>
-          {choreHistory.map((chore, index) => (
-            <>
-              <ListItem sx={{ gap: 1.5, alignItems: 'flex-start' }}>
-                {' '}
-                {/* Adjusted spacing and alignment */}
-                <ListItemDecorator>
-                  <Avatar sx={{ mr: 1 }}>
-                    {performers
-                      .find(p => p.userId === chore.completedBy)
-                      ?.displayName?.charAt(0) || '?'}
-                  </Avatar>
-                </ListItemDecorator>
-                <ListItemContent sx={{ my: 0 }}>
-                  {' '}
-                  {/* Removed vertical margin */}
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <Typography level='body1' sx={{ fontWeight: 'md' }}>
-                      {moment(chore.completedAt).format('ddd MM/DD/yyyy HH:mm')}
-                    </Typography>
-
-                    <Chip>
-                      {chore.dueDate && chore.completedAt > chore.dueDate
-                        ? 'Late'
-                        : 'On Time'}
-                    </Chip>
-                  </Box>
-                  <Typography level='body2' color='text.tertiary'>
-                    <Chip>
-                      {
-                        performers.find(p => p.userId === chore.completedBy)
-                          ?.displayName
-                      }
-                    </Chip>{' '}
-                    completed
-                    {chore.completedBy !== chore.assignedTo && (
-                      <>
-                        {', '}
-                        assigned to{' '}
-                        <Chip>
-                          {
-                            performers.find(p => p.userId === chore.assignedTo)
-                              ?.displayName
-                          }
-                        </Chip>
-                      </>
-                    )}
-                  </Typography>
-                  {chore.dueDate && (
-                    <Typography level='body2' color='text.tertiary'>
-                      Due: {moment(chore.dueDate).format('ddd MM/DD/yyyy')}
-                    </Typography>
-                  )}
-                  {chore.notes && (
-                    <Typography level='body2' color='text.tertiary'>
-                      Note: {chore.notes}
-                    </Typography>
-                  )}
-                </ListItemContent>
-              </ListItem>
-              {index < choreHistory.length - 1 && (
-                <>
-                  <ListDivider component='li'>
-                    {/* time between two completion: */}
-                    {index < choreHistory.length - 1 &&
-                      choreHistory[index + 1].completedAt && (
-                        <Typography level='body3' color='text.tertiary'>
-                          {formatTimeDifference(
-                            chore.completedAt,
-                            choreHistory[index + 1].completedAt,
-                          )}{' '}
-                          before
-                        </Typography>
-                      )}
-                  </ListDivider>
-                </>
-              )}
-            </>
+          {choreHistory.map((historyEntry, index) => (
+            <HistoryCard
+              historyEntry={historyEntry}
+              performers={performers}
+              allHistory={choreHistory}
+              key={index}
+              index={index}
+            />
           ))}
         </List>
       </Box>

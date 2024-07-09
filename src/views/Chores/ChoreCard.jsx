@@ -45,7 +45,14 @@ import DateModal from '../Modals/Inputs/DateModal'
 import SelectModal from '../Modals/Inputs/SelectModal'
 import TextModal from '../Modals/Inputs/TextModal'
 import WriteNFCModal from '../Modals/Inputs/WriteNFCModal'
-const ChoreCard = ({ chore, performers, onChoreUpdate, onChoreRemove, sx }) => {
+const ChoreCard = ({
+  chore,
+  performers,
+  onChoreUpdate,
+  onChoreRemove,
+  sx,
+  viewOnly,
+}) => {
   const [activeUserId, setActiveUserId] = React.useState(0)
   const [isChangeDueDateModalOpen, setIsChangeDueDateModalOpen] =
     React.useState(false)
@@ -367,6 +374,7 @@ const ChoreCard = ({ chore, performers, onChoreUpdate, onChoreRemove, sx }) => {
       </Chip>
 
       <Card
+        style={viewOnly ? { pointerEvents: 'none' } : {}}
         variant='plain'
         sx={{
           ...sx,
