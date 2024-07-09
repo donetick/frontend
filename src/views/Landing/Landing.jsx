@@ -1,8 +1,12 @@
-import { Container } from '@mui/joy'
+import { Container, Grid } from '@mui/joy'
 import AOS from 'aos'
 import 'aos/dist/aos.css'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import DemoAssignee from './DemoAssignee'
+import DemoHistory from './DemoHistory'
+import DemoMyChore from './DemoMyChore'
+import DemoScheduler from './DemoScheduler'
 import FeaturesSection from './FeaturesSection'
 import HomeHero from './HomeHero'
 const Landing = () => {
@@ -10,7 +14,6 @@ const Landing = () => {
   const getCurrentUser = () => {
     return JSON.parse(localStorage.getItem('user'))
   }
-  const [users, setUsers] = useState([])
   const [currentUser, setCurrentUser] = useState(getCurrentUser())
 
   useEffect(() => {
@@ -22,6 +25,23 @@ const Landing = () => {
   return (
     <Container className='flex h-full items-center justify-center'>
       <HomeHero />
+      <Grid
+        overflow={'hidden'}
+        container
+        spacing={4}
+        sx={{
+          mt: 5,
+          mb: 5,
+          // align item vertically:
+          alignItems: 'center',
+        }}
+      >
+        <DemoMyChore />
+        <DemoAssignee />
+        <DemoScheduler />
+
+        <DemoHistory />
+      </Grid>
       <FeaturesSection />
       {/* <PricingSection /> */}
     </Container>

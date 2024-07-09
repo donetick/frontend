@@ -4,15 +4,18 @@ import { Button } from '@mui/joy'
 import Typography from '@mui/joy/Typography'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import Logo from '@/assets/logo.svg'
 import screenShotMyChore from '@/assets/screenshot-my-chore.png'
 import { GitHub } from '@mui/icons-material'
+import useWindowWidth from '../../hooks/useWindowWidth'
 
 const HomeHero = () => {
   const navigate = useNavigate()
+  const windowWidth = useWindowWidth()
+  const windowThreshold = 600
   const HERO_TEXT_THAT = [
     // 'Donetick simplifies the entire process, from scheduling and reminders to automatic task assignment and progress tracking.',
     // 'Donetick is the intuitive task and chore management app designed for groups. Take charge of shared responsibilities, automate your workflow, and achieve more together.',
@@ -21,7 +24,7 @@ const HomeHero = () => {
 
   const [heroTextIndex, setHeroTextIndex] = React.useState(0)
 
-  React.useEffect(() => {
+  useEffect(() => {
     // const intervalId = setInterval(
     //   () => setHeroTextIndex(index => index + 1),
     //   4000, // every 4 seconds
@@ -162,23 +165,24 @@ const HomeHero = () => {
           </Box>
         </div>
       </Grid>
-
-      <Grid item xs={12} md={5}>
-        <div className='flex justify-center'>
-          <img
-            src={screenShotMyChore}
-            width={'100%'}
-            style={{
-              maxWidth: 300,
-            }}
-            height={'auto'}
-            alt='Hero img'
-            data-aos-delay={100 * 2}
-            data-aos-anchor='[data-aos-id-hero]'
-            data-aos='fade-left'
-          />
-        </div>
-      </Grid>
+      {windowWidth > windowThreshold && (
+        <Grid item xs={12} md={5}>
+          <div className='flex justify-center'>
+            <img
+              src={screenShotMyChore}
+              width={'100%'}
+              style={{
+                maxWidth: 300,
+              }}
+              height={'auto'}
+              alt='Hero img'
+              data-aos-delay={100 * 2}
+              data-aos-anchor='[data-aos-id-hero]'
+              data-aos='fade-left'
+            />
+          </div>
+        </Grid>
+      )}
     </Grid>
   )
 }
