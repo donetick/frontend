@@ -61,6 +61,17 @@ const HomeHero = () => {
         >
           tick
         </span>
+        <span
+          style={{
+            fontSize: 20,
+            fontWeight: 700,
+            position: 'relative',
+            top: 12,
+            right: 45,
+          }}
+        >
+          Beta
+        </span>
       </Typography>
     </Box>
   )
