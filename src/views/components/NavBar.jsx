@@ -71,9 +71,15 @@ const NavBar = () => {
   const location = useLocation()
   // if url has /landing then remove the navbar:
   if (
-    ['/', '/signup', '/login', '/landing', '/forgot-password'].includes(
+    ['/signup', '/login', '/landing', '/forgot-password'].includes(
       location.pathname,
     )
+  ) {
+    return null
+  }
+  if (
+    location.pathname === '/' &&
+    import.meta.env.VITE_IS_LANDING_DEFAULT === 'true'
   ) {
     return null
   }
@@ -102,6 +108,17 @@ const NavBar = () => {
             tick✓
           </span>
         </Typography>
+        <span
+          style={{
+            fontSize: 12,
+            fontWeight: 700,
+            position: 'relative',
+            top: 12,
+            right: 45,
+          }}
+        >
+          Beta
+        </span>
       </Box>
       <Drawer
         open={drawerOpen}

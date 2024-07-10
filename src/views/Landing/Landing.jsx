@@ -1,7 +1,7 @@
 import { Container, Grid } from '@mui/joy'
 import AOS from 'aos'
 import 'aos/dist/aos.css'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import DemoAssignee from './DemoAssignee'
 import DemoHistory from './DemoHistory'
@@ -11,11 +11,6 @@ import FeaturesSection from './FeaturesSection'
 import HomeHero from './HomeHero'
 const Landing = () => {
   const Navigate = useNavigate()
-  const getCurrentUser = () => {
-    return JSON.parse(localStorage.getItem('user'))
-  }
-  const [currentUser, setCurrentUser] = useState(getCurrentUser())
-
   useEffect(() => {
     AOS.init({
       once: false, // whether animation should happen only once - while scrolling down
