@@ -1,4 +1,4 @@
-import { Container, Grid } from '@mui/joy'
+import { Box, Container, Grid } from '@mui/joy'
 import AOS from 'aos'
 import 'aos/dist/aos.css'
 import { useEffect } from 'react'
@@ -8,6 +8,7 @@ import DemoHistory from './DemoHistory'
 import DemoMyChore from './DemoMyChore'
 import DemoScheduler from './DemoScheduler'
 import FeaturesSection from './FeaturesSection'
+import Footer from './Footer'
 import HomeHero from './HomeHero'
 const Landing = () => {
   const Navigate = useNavigate()
@@ -39,6 +40,17 @@ const Landing = () => {
       </Grid>
       <FeaturesSection />
       {/* <PricingSection /> */}
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          mt: 5,
+          mb: 5,
+        }}
+      ></Box>
+
+      <Footer />
     </Container>
   )
 }
