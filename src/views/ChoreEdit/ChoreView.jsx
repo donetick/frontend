@@ -3,15 +3,19 @@ import {
   CancelScheduleSend,
   Check,
   Checklist,
+  Edit,
+  History,
   Note,
   PeopleAlt,
   Person,
+  Timelapse,
 } from '@mui/icons-material'
 import {
   Box,
   Button,
   Card,
   Checkbox,
+  Chip,
   Container,
   FormControl,
   Grid,
@@ -84,21 +88,24 @@ const ChoreView = () => {
 
   const generateInfoCards = chore => {
     const cards = [
+      // {
+      //   size: 6,
+      //   icon: <CalendarMonth />,
+      //   text: 'Due Date',
+      //   subtext: moment(chore.nextDueDate).format('MM/DD/YYYY hh:mm A'),
+      // },
       {
-        icon: <CalendarMonth />,
-        text: 'Due Date',
-        subtext: moment(chore.nextDueDate).format('MM/DD/YYYY hh:mm A'),
-      },
-      {
+        size: 6,
         icon: <PeopleAlt />,
         text: 'Assigned To',
         subtext: performers.find(p => p.id === chore.assignedTo)?.displayName,
       },
-      {
-        icon: <Person />,
-        text: 'Created By',
-        subtext: performers.find(p => p.id === chore.createdBy)?.displayName,
-      },
+      // {
+      //   size: 6,
+      //   icon: <Person />,
+      //   text: 'Created By',
+      //   subtext: performers.find(p => p.id === chore.createdBy)?.displayName,
+      // },
       //   {
       //     icon: <TextFields />,
       //     text: 'Frequency',
@@ -107,20 +114,23 @@ const ChoreView = () => {
       //       chore.frequencyType.slice(1),
       //   },
       {
+        size: 6,
         icon: <Checklist />,
-        text: 'Total Completed',
-        subtext: `${chore.totalCompletedCount}`,
+        text: 'Completed',
+        subtext: `${chore.totalCompletedCount} times`,
       },
-      //   {
-      //     icon: <Timelapse />,
-      //     text: 'Last Completed',
-      //     subtext:
-      //       chore.lastCompletedDate &&
-      //       moment(chore.lastCompletedDate).format('MM/DD/YYYY hh:mm A'),
-      //   },
       {
+        size: 6,
+        icon: <Timelapse />,
+        text: 'Last time',
+        subtext:
+          chore.lastCompletedDate &&
+          moment(chore.lastCompletedDate).format('MM/DD/YYYY hh:mm A'),
+      },
+      {
+        size: 6,
         icon: <Person />,
-        text: 'Last Completed',
+        text: 'Last',
         subtext: chore.lastCompletedDate
           ? `${
               chore.lastCompletedDate &&
@@ -132,6 +142,7 @@ const ChoreView = () => {
           : 'Never',
       },
       {
+        size: 12,
         icon: <Note />,
         text: 'Recent Note',
         subtext: chore.notes || '--',
@@ -195,22 +206,43 @@ const ChoreView = () => {
         justifyContent: 'space-between',
       }}
     >
-      <Box>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          textAlign: 'center',
+        }}
+      >
         <Typography
           level='h3'
-          textAlign={'center'}
+          // textAlign={'center'}
           sx={{
             mt: 2,
-            mb: 4,
+            mb: 1,
           }}
         >
           {chore.name}
         </Typography>
-
+        <Chip startDecorator={<CalendarMonth />} size='lg' sx={{ mb: 4 }}>
+          {chore.nextDueDate
+            ? `Due at ${moment(chore.nextDueDate).format('MM/DD/YYYY hh:mm A')}`
+            : 'N/A'}
+        </Chip>
+      </Box>
+      <Box>
         <Grid container spacing={1}>
           {infoCards.map((info, index) => (
-            <Grid key={index} item xs={12} sm={6}>
-              <Sheet sx={{ mb: 1, borderRadius: 'md', p: 1, boxShadow: 'sm' }}>
+            <Grid key={index} item xs={info.size} sm={info.size}>
+              <Sheet
+                sx={{
+                  mb: 1,
+                  borderRadius: 'lg',
+                  p: 1,
+                  boxShadow: 'sm',
+                }}
+              >
                 <ListItem>
                   <ListItemDecorator>
                     <IconCard>{info.icon}</IconCard>
@@ -227,6 +259,28 @@ const ChoreView = () => {
               </Sheet>
             </Grid>
           ))}
+          <Grid item xs={6}>
+            <Button
+              startDecorator={<History />}
+              size='lg'
+              color='success'
+              variant='outlined'
+              fullWidth
+            >
+              History
+            </Button>
+          </Grid>
+          <Grid item xs={6}>
+            <Button
+              startDecorator={<Edit />}
+              size='lg'
+              color='success'
+              variant='outlined'
+              fullWidth
+            >
+              Edit
+            </Button>
+          </Grid>
         </Grid>
       </Box>
       {/* <Divider

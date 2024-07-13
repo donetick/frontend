@@ -21,7 +21,7 @@ import {
   Typography,
 } from '@mui/joy'
 import { useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { version } from '../../../package.json'
 import NavBarLink from './NavBarLink'
 const links = [
@@ -63,6 +63,7 @@ const links = [
 ]
 
 const NavBar = () => {
+  const navigate = useNavigate()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [openDrawer, closeDrawer] = [
     () => setDrawerOpen(true),
@@ -89,7 +90,12 @@ const NavBar = () => {
       <IconButton size='sm' variant='plain' onClick={() => setDrawerOpen(true)}>
         <MenuRounded />
       </IconButton>
-      <Box className='flex items-center gap-2'>
+      <Box
+        className='flex items-center gap-2'
+        onClick={() => {
+          navigate('/my/chores')
+        }}
+      >
         <img component='img' src={Logo} width='34' />
         <Typography
           level='title-lg'

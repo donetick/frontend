@@ -25,44 +25,39 @@ const FeatureIcon = styled('div')({
 const CardData = [
   {
     title: 'Open Source & Transparent',
-    headline: 'Built for the Community',
+
     description:
-      'Donetick is a community-driven, open-source project. Contribute, customize, and make task management truly yours.',
+      'Donetick is open source software. You can view, modify, and contribute to the code on GitHub.',
     icon: CodeRounded,
   },
   {
     title: 'Circles: Your Task Hub',
-    headline: 'Share & Conquer Together',
     description:
-      'Create circles for your family, friends, or team. Easily share tasks and track progress within each group.',
+      'build with sharing in mind. invite other to the circle and you can assign tasks to each other. and only see the tasks the should be shared',
     icon: GroupRounded,
   },
   {
     title: 'Track Your Progress',
-    headline: "See Who's Done What",
     description:
-      'View a history of task completion for each member of your circles. Celebrate successes and stay on top of your goals.',
+      'View a history of completed tasks. or use things to track simply things!',
     icon: HistoryRounded,
   },
   {
-    title: 'Automated Chore Scheduling',
-    headline: 'Fully Customizable Recurring Tasks',
+    title: 'Automated Task Scheduling',
     description:
-      'Set up chores to repeat daily, weekly, or monthly. Donetick will automatically assign and track each task for you.',
+      'Set up Tasks to repeat daily, weekly, or monthly, or maybe specifc day in specifc months? Donetick have a flexible scheduling system',
     icon: AutoAwesomeMosaicOutlined,
   },
   {
     title: 'Automated Task Assignment',
-    headline: 'Share Responsibilities Equally',
     description:
-      'can automatically assigns tasks to each member of your circle. Randomly or based on past completion.',
+      'For shared tasks, Donetick can randomly rotate assignments or choose based on last completion or least assigned.',
     icon: AutoAwesomeRounded,
   },
   {
     title: 'Integrations & Webhooks',
-    headline: 'API & 3rd Party Integrations',
     description:
-      'Connect Donetick with your favorite apps and services. Trigger tasks based on events from other platforms.',
+      'Donetick can update things programmatically with API call. you can update things from other services like IFTTT, Homeassistant or even your own service',
     icon: Webhook,
   },
 ]
@@ -80,7 +75,7 @@ function Feature2({ icon: Icon, title, headline, description, index }) {
         <FeatureIcon>
           <Icon
             color='primary'
-            style={{ Width: '30px', height: '30px' }}
+            style={{ Width: '30px', height: '30px', fontSize: '30px' }}
             stroke={1.5}
           />
         </FeatureIcon>
@@ -106,7 +101,7 @@ function FeaturesSection() {
     <Feature2
       icon={feature.icon}
       title={feature.title}
-      headline={feature.headline}
+      // headline={feature.headline}
       description={feature.description}
       index={index}
       key={index}
@@ -128,7 +123,7 @@ function FeaturesSection() {
       </Container>
 
       <Typography level='h4' mt={2} mb={4}>
-        Features Overview
+        Why Donetick?
       </Typography>
 
       <Container maxWidth={'lg'} sx={{ mb: 8 }}></Container>
