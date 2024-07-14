@@ -509,7 +509,7 @@ const RepeatSection = ({
           }}
         >
           Is this something that should be done when a thing state changes?{' '}
-          {!isPlusAccount(userProfile) && (
+          {userProfile && !isPlusAccount(userProfile) && (
             <Chip variant='soft' color='warning'>
               Not available in Basic Plan
             </Chip>
