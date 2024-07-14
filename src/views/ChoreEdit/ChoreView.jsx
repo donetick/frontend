@@ -30,7 +30,7 @@ import {
 } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
-import { useParams, useSearchParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
   GetAllUsers,
   GetChoreDetailById,
@@ -48,7 +48,7 @@ const IconCard = styled('div')({
 })
 const ChoreView = () => {
   const [chore, setChore] = useState({})
-
+  const navigate = useNavigate()
   const [performers, setPerformers] = useState([])
   const [infoCards, setInfoCards] = useState([])
   const { choreId } = useParams()
@@ -266,6 +266,9 @@ const ChoreView = () => {
               color='success'
               variant='outlined'
               fullWidth
+              onClick={() => {
+                navigate(`/chores/${choreId}/history`)
+              }}
             >
               History
             </Button>
@@ -277,6 +280,9 @@ const ChoreView = () => {
               color='success'
               variant='outlined'
               fullWidth
+              onClick={() => {
+                navigate(`/chores/${choreId}/edit`)
+              }}
             >
               Edit
             </Button>
@@ -333,9 +339,11 @@ const ChoreView = () => {
               }
             }}
             overlay
-            sx={{
-              my: 1,
-            }}
+            sx={
+              {
+                // my: 1,
+              }
+            }
             label={<Typography level='body2'>Set completion date</Typography>}
           />
         </FormControl>
@@ -349,21 +357,23 @@ const ChoreView = () => {
             }}
           />
         )}
-        {completedDate === null && (
-          // placeholder for the completion date with margin:
+
+        {/* {completedDate === null && (
+                  // placeholder for the completion date with margin:
+
           <Box
             sx={{
               height: 56,
             }}
           />
-        )}
+        )} */}
 
         <Button
           fullWidth
           size='lg'
           sx={{
             height: 50,
-            mb: 2,
+            // mb: 2,
           }}
           onClick={handleTaskCompletion}
           disabled={isPendingCompletion}
