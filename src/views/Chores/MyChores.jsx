@@ -3,7 +3,6 @@ import {
   Badge,
   Box,
   Checkbox,
-  CircularProgress,
   Container,
   IconButton,
   Input,
@@ -18,8 +17,8 @@ import Fuse from 'fuse.js'
 import { useContext, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { UserContext } from '../../contexts/UserContext'
-import Logo from '../../Logo'
 import { GetAllUsers, GetChores, GetUserProfile } from '../../utils/Fetcher'
+import LoadingComponent from '../components/Loading'
 import ChoreCard from './ChoreCard'
 
 const MyChores = () => {
@@ -184,18 +183,7 @@ const MyChores = () => {
   }
 
   if (userProfile === null) {
-    return (
-      <Container className='flex h-full items-center justify-center'>
-        <Box className='flex flex-col items-center justify-center'>
-          <CircularProgress
-            color='success'
-            sx={{ '--CircularProgress-size': '200px' }}
-          >
-            <Logo />
-          </CircularProgress>
-        </Box>
-      </Container>
-    )
+    return <LoadingComponent />
   }
 
   return (
