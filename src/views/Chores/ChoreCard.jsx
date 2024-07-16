@@ -38,7 +38,7 @@ import moment from 'moment'
 import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { API_URL } from '../../Config'
-import { MarkChoreComplete } from '../../utils/Fetcher'
+import { MarkChoreComplete, SkipChore } from '../../utils/Fetcher'
 import { Fetch } from '../../utils/TokenManager'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import DateModal from '../Modals/Inputs/DateModal'
@@ -521,13 +521,7 @@ const ChoreCard = ({
                 </MenuItem>
                 <MenuItem
                   onClick={() => {
-                    Fetch(`${API_URL}/chores/${chore.id}/skip`, {
-                      method: 'POST',
-                      headers: {
-                        'Content-Type': 'application/json',
-                      },
-                      body: JSON.stringify({}),
-                    }).then(response => {
+                    SkipChore(chore.id).then(response => {
                       if (response.ok) {
                         response.json().then(data => {
                           const newChore = data.res
