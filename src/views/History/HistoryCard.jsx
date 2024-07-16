@@ -1,3 +1,4 @@
+import { CalendarViewDay, Check, Timelapse } from '@mui/icons-material'
 import {
   Avatar,
   Box,
@@ -30,6 +31,50 @@ const HistoryCard = ({ allHistory, performers, historyEntry, index }) => {
 
     return `${timeValue} ${unit}${timeValue !== 1 ? 's' : ''}`
   }
+
+  const getCompletedChip = historyEntry => {
+    var text = 'No Due Date'
+    var color = 'info'
+    var icon = <CalendarViewDay />
+    // if completed few hours +-6 hours
+    if (
+      historyEntry.dueDate &&
+      historyEntry.completedAt > historyEntry.dueDate - 1000 * 60 * 60 * 6 &&
+      historyEntry.completedAt < historyEntry.dueDate + 1000 * 60 * 60 * 6
+    ) {
+      text = 'On Time'
+      color = 'success'
+      icon = <Check />
+    } else if (
+      historyEntry.dueDate &&
+      historyEntry.completedAt < historyEntry.dueDate
+    ) {
+      text = 'On Time'
+      color = 'success'
+      icon = <Check />
+    }
+
+    // if completed after due date then it's late
+    else if (
+      historyEntry.dueDate &&
+      historyEntry.completedAt > historyEntry.dueDate
+    ) {
+      text = 'Late'
+      color = 'warning'
+      icon = <Timelapse />
+    } else {
+      text = 'No Due Date'
+      color = 'info'
+      icon = <CalendarViewDay />
+    }
+
+    return (
+      <Chip startDecorator={icon} color={color}>
+        {text}
+      </Chip>
+    )
+  }
+
   return (
     <>
       <ListItem sx={{ gap: 1.5, alignItems: 'flex-start' }}>
@@ -55,13 +100,7 @@ const HistoryCard = ({ allHistory, performers, historyEntry, index }) => {
             <Typography level='body1' sx={{ fontWeight: 'md' }}>
               {moment(historyEntry.completedAt).format('ddd MM/DD/yyyy HH:mm')}
             </Typography>
-
-            <Chip>
-              {historyEntry.dueDate &&
-              historyEntry.completedAt > historyEntry.dueDate
-                ? 'Late'
-                : 'On Time'}
-            </Chip>
+            {getCompletedChip(historyEntry)}
           </Box>
           <Typography level='body2' color='text.tertiary'>
             <Chip>

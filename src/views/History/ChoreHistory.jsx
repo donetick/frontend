@@ -1,15 +1,13 @@
-import { Checklist, EventBusy, Timelapse } from '@mui/icons-material'
+import { Checklist, EventBusy, Group, Timelapse } from '@mui/icons-material'
 import {
   Avatar,
-  Box,
   Button,
-  CircularProgress,
+  Chip,
   Container,
   Grid,
   List,
   ListItem,
   ListItemContent,
-  ListItemDecorator,
   Sheet,
   Typography,
 } from '@mui/joy'
@@ -19,6 +17,7 @@ import { Link, useParams } from 'react-router-dom'
 import { API_URL } from '../../Config'
 import { GetAllCircleMembers } from '../../utils/Fetcher'
 import { Fetch } from '../../utils/TokenManager'
+import LoadingComponent from '../components/Loading'
 import HistoryCard from './HistoryCard'
 
 const ChoreHistory = () => {
@@ -92,59 +91,49 @@ const ChoreHistory = () => {
 
     const historyInfo = [
       {
-        icon: (
-          <Avatar>
-            <Checklist />
-          </Avatar>
-        ),
-        text: `${histories.length} completed`,
-        subtext: `${Object.keys(userHistories).length} users contributed`,
+        icon: <Checklist />,
+        text: 'Total Completed',
+        subtext: `${histories.length} times`,
       },
       {
-        icon: (
-          <Avatar>
-            <Timelapse />
-          </Avatar>
-        ),
-        text: `Completed within ${moment
-          .duration(averageDelayMoment)
-          .humanize()}`,
-        subtext: `Maximum delay was ${moment
-          .duration(maxDelayMoment)
-          .humanize()}`,
+        icon: <Timelapse />,
+        text: 'Usually Within',
+        subtext: moment.duration(averageDelayMoment).humanize(),
       },
       {
-        icon: <Avatar></Avatar>,
-        text: `${
+        icon: <Timelapse />,
+        text: 'Maximum Delay',
+        subtext: moment.duration(maxDelayMoment).humanize(),
+      },
+      {
+        icon: <Avatar />,
+        text: ' Completed Most',
+        subtext: `${
           performers.find(p => p.userId === Number(userCompletedByMost))
             ?.displayName
-        } completed most`,
-        subtext: `${userHistories[userCompletedByMost]} time/s`,
+        } `,
+      },
+      //  contributes:
+      {
+        icon: <Group />,
+        text: 'Total Performers',
+        subtext: `${Object.keys(userHistories).length} users`,
+      },
+      {
+        icon: <Avatar />,
+        text: 'Last Completed',
+        subtext: `${
+          performers.find(p => p.userId === Number(histories[0].completedBy))
+            ?.displayName
+        }`,
       },
     ]
-    if (userCompletedByLeast !== userCompletedByMost) {
-      historyInfo.push({
-        icon: (
-          <Avatar>
-            {
-              performers.find(p => p.userId === userCompletedByLeast)
-                ?.displayName
-            }
-          </Avatar>
-        ),
-        text: `${
-          performers.find(p => p.userId === Number(userCompletedByLeast))
-            .displayName
-        } completed least`,
-        subtext: `${userHistories[userCompletedByLeast]} time/s`,
-      })
-    }
 
     setHistoryInfo(historyInfo)
   }
 
   if (isLoading) {
-    return <CircularProgress /> // Show loading indicator
+    return <LoadingComponent />
   }
   if (!choreHistory.length) {
     return (
@@ -184,50 +173,43 @@ const ChoreHistory = () => {
 
   return (
     <Container maxWidth='md'>
-      <Typography level='h3' mb={1.5}>
+      <Typography level='title-md' mb={1.5}>
         Summary:
       </Typography>
-      {/* <Sheet sx={{ mb: 1, borderRadius: 'sm', p: 2, boxShadow: 'md' }}>
-        <ListItem sx={{ gap: 1.5 }}>
-          <ListItemDecorator>
-            <Avatar>
-              <AccountCircle />
-            </Avatar>
-          </ListItemDecorator>
-          <ListItemContent>
-            <Typography level='body1' sx={{ fontWeight: 'md' }}>
-              {choreHistory.length} completed
-            </Typography>
-            <Typography level='body2' color='text.tertiary'>
-              {Object.keys(userHistory).length} users contributed
-            </Typography>
-          </ListItemContent>
-        </ListItem>
-      </Sheet> */}
-      <Grid container>
-        {historyInfo.map((info, index) => (
-          <Grid key={index} item xs={12} sm={6}>
-            <Sheet sx={{ mb: 1, borderRadius: 'sm', p: 2, boxShadow: 'md' }}>
-              <ListItem sx={{ gap: 1.5 }}>
-                <ListItemDecorator>{info.icon}</ListItemDecorator>
+      <Sheet
+        // sx={{
+        //   mb: 1,
+        //   borderRadius: 'lg',
+        //   p: 2,
+        // }}
+        sx={{ borderRadius: 'sm', p: 2 }}
+        variant='outlined'
+      >
+        <Grid container spacing={1}>
+          {historyInfo.map((info, index) => (
+            <Grid item xs={4} key={index}>
+              {/* divider between the list items: */}
+
+              <ListItem key={index}>
                 <ListItemContent>
-                  <Typography level='body1' sx={{ fontWeight: 'md' }}>
+                  <Typography level='body-xs' sx={{ fontWeight: 'md' }}>
                     {info.text}
                   </Typography>
-                  <Typography level='body1' color='text.tertiary'>
-                    {info.subtext}
-                  </Typography>
+                  <Chip color='primary' size='md' startDecorator={info.icon}>
+                    {info.subtext ? info.subtext : '--'}
+                  </Chip>
                 </ListItemContent>
               </ListItem>
-            </Sheet>
-          </Grid>
-        ))}
-      </Grid>
+            </Grid>
+          ))}
+        </Grid>
+      </Sheet>
+
       {/* User History Cards */}
-      <Typography level='h3' my={1.5}>
+      <Typography level='title-md' my={1.5}>
         History:
       </Typography>
-      <Box sx={{ borderRadius: 'sm', p: 2, boxShadow: 'md' }}>
+      <Sheet sx={{ borderRadius: 'sm', p: 2, boxShadow: 'md' }}>
         {/* Chore History List (Updated Style) */}
 
         <List sx={{ p: 0 }}>
@@ -241,7 +223,7 @@ const ChoreHistory = () => {
             />
           ))}
         </List>
-      </Box>
+      </Sheet>
     </Container>
   )
 }

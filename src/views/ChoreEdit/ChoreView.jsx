@@ -26,6 +26,7 @@ import {
   styled,
   Typography,
 } from '@mui/joy'
+import { Divider } from '@mui/material'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
@@ -135,7 +136,7 @@ const ChoreView = () => {
           ? `${
               performers.find(p => p.id === chore.lastCompletedBy)?.displayName
             }`
-          : 'Never',
+          : '--',
       },
       {
         size: 6,
@@ -230,8 +231,8 @@ const ChoreView = () => {
           level='h3'
           // textAlign={'center'}
           sx={{
-            mt: 2,
-            mb: 1,
+            mt: 1,
+            mb: 0.5,
           }}
         >
           {chore.name}
@@ -243,7 +244,7 @@ const ChoreView = () => {
         </Chip>
       </Box>
       <Box>
-        <Typography level='title-md' sx={{ mb: 1 }}>
+        <Typography level='title-md' sx={{ mb: 0.5 }}>
           Details
         </Typography>
 
@@ -265,9 +266,13 @@ const ChoreView = () => {
                     <Typography level='body-xs' sx={{ fontWeight: 'md' }}>
                       {detail.text}
                     </Typography>
-                    <Typography level='body-sm' color='text.tertiary'>
+                    <Chip
+                      color='primary'
+                      size='md'
+                      startDecorator={detail.icon}
+                    >
                       {detail.subtext ? detail.subtext : '--'}
-                    </Typography>
+                    </Chip>
                   </ListItemContent>
                 </ListItem>
               </Grid>
@@ -286,28 +291,6 @@ const ChoreView = () => {
             </Sheet>
           </>
         )}
-
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'row',
-            gap: 1,
-            alignContent: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Button
-            startDecorator={<History />}
-            size='lg'
-            color='success'
-            variant='plain'
-            onClick={() => {
-              navigate(`/chores/${choreId}/history`)
-            }}
-          >
-            View History
-          </Button>
-        </Box>
       </Box>
       {/* <Divider
         sx={{
@@ -325,25 +308,63 @@ const ChoreView = () => {
           mt: 2,
         }}
       >
-        <Typography level='title-md'>Additional Notes</Typography>
-        <Input
-          fullWidth
-          multiline
-          label='Additional Notes'
-          placeholder='note or information about the task'
-          value={note || ''}
-          onChange={e => {
-            if (e.target.value.trim() === '') {
-              setNote(null)
-              return
+        <Typography level='body-md' sx={{ mb: 1 }}>
+          Complete the task
+        </Typography>
+
+        <FormControl size='sm'>
+          <Checkbox
+            defaultChecked={note !== null}
+            checked={note !== null}
+            value={note !== null}
+            size='lg'
+            onChange={e => {
+              if (e.target.checked) {
+                setNote('')
+              } else {
+                setNote(null)
+              }
+            }}
+            overlay
+            sx={
+              {
+                // my: 1,
+              }
             }
-            setNote(e.target.value)
-          }}
-          size='md'
-          sx={{
-            mb: 1,
-          }}
-        />
+            label={
+              <Typography
+                level='body-sm'
+                sx={{
+                  // center vertically
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              >
+                Add Additional Notes
+              </Typography>
+            }
+          />
+        </FormControl>
+        {note !== null && (
+          <Input
+            fullWidth
+            multiline
+            label='Additional Notes'
+            placeholder='note or information about the task'
+            value={note || ''}
+            onChange={e => {
+              if (e.target.value.trim() === '') {
+                setNote(null)
+                return
+              }
+              setNote(e.target.value)
+            }}
+            size='md'
+            sx={{
+              mb: 1,
+            }}
+          />
+        )}
 
         <FormControl size='sm'>
           <Checkbox
@@ -366,7 +387,18 @@ const ChoreView = () => {
                 // my: 1,
               }
             }
-            label={<Typography level='body2'>Set completion date</Typography>}
+            label={
+              <Typography
+                level='body-sm'
+                sx={{
+                  // center vertically
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              >
+                Specify completion date
+              </Typography>
+            }
           />
         </FormControl>
         {completedDate !== null && (
@@ -390,30 +422,55 @@ const ChoreView = () => {
         >
           <Box>Mark as done</Box>
         </Button>
-        <Button
-          fullWidth
-          size='lg'
-          onClick={() => {
-            setConfirmModelConfig({
-              isOpen: true,
-              title: 'Skip Task',
+        <Divider sx={{ my: 0.5 }}>or</Divider>
 
-              message: 'Are you sure you want to skip this task?',
-
-              confirmText: 'Skip',
-              cancelText: 'Cancel',
-              onClose: confirmed => {
-                if (confirmed) {
-                  handleSkippingTask()
-                }
-                setConfirmModelConfig({})
-              },
-            })
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            gap: 1,
+            alignContent: 'center',
+            justifyContent: 'center',
           }}
-          startDecorator={<SwitchAccessShortcut />}
         >
-          <Box>Skip</Box>
-        </Button>
+          <Button
+            fullWidth
+            size='lg'
+            onClick={() => {
+              setConfirmModelConfig({
+                isOpen: true,
+                title: 'Skip Task',
+
+                message: 'Are you sure you want to skip this task?',
+
+                confirmText: 'Skip',
+                cancelText: 'Cancel',
+                onClose: confirmed => {
+                  if (confirmed) {
+                    handleSkippingTask()
+                  }
+                  setConfirmModelConfig({})
+                },
+              })
+            }}
+            startDecorator={<SwitchAccessShortcut />}
+          >
+            <Box>Skip</Box>
+          </Button>
+          <Button
+            startDecorator={<History />}
+            size='lg'
+            color='primary'
+            variant='outlined'
+            fullWidth
+            onClick={() => {
+              navigate(`/chores/${choreId}/history`)
+            }}
+          >
+            History
+          </Button>
+        </Box>
+
         <Snackbar
           open={isPendingCompletion}
           endDecorator={

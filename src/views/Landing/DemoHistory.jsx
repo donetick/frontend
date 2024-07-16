@@ -7,7 +7,7 @@ const DemoHistory = () => {
     {
       id: 32,
       choreId: 12,
-      completedAt: moment().format(),
+      completedAt: moment().hour(4).format(),
       completedBy: 1,
       assignedTo: 1,
       notes: null,
@@ -25,8 +25,8 @@ const DemoHistory = () => {
     {
       id: 31,
       choreId: 12,
-      completedAt: moment().day(-10).format(),
-      completedBy: 1,
+      completedAt: moment().day(-10).hour(1).format(),
+      completedBy: 2,
       assignedTo: 1,
       notes: null,
       dueDate: moment().day(-10).format(),

@@ -17,6 +17,7 @@ import {
   SwitchAccessShortcut,
   TimesOneMobiledata,
   Update,
+  ViewCarousel,
   Webhook,
 } from '@mui/icons-material'
 import {
@@ -106,6 +107,9 @@ const ChoreCard = ({
   }
   const handleEdit = () => {
     navigate(`/chores/${chore.id}/edit`)
+  }
+  const handleView = () => {
+    navigate(`/chores/${chore.id}`)
   }
   const handleDelete = () => {
     setConfirmModelConfig({
@@ -578,6 +582,10 @@ const ChoreCard = ({
                 <MenuItem onClick={handleEdit}>
                   <Edit />
                   Edit
+                </MenuItem>
+                <MenuItem onClick={handleView}>
+                  <ViewCarousel />
+                  View
                 </MenuItem>
                 <MenuItem onClick={handleDelete} color='danger'>
                   <Delete />
