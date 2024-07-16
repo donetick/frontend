@@ -3,48 +3,53 @@ import {
   CancelScheduleSend,
   Check,
   Checklist,
-  Note,
+  History,
   PeopleAlt,
   Person,
+  SwitchAccessShortcut,
+  Timelapse,
 } from '@mui/icons-material'
 import {
   Box,
   Button,
   Card,
   Checkbox,
+  Chip,
   Container,
   FormControl,
   Grid,
   Input,
   ListItem,
   ListItemContent,
-  ListItemDecorator,
   Sheet,
   Snackbar,
   styled,
   Typography,
 } from '@mui/joy'
+import { Divider } from '@mui/material'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
-import { useParams, useSearchParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
   GetAllUsers,
   GetChoreDetailById,
   MarkChoreComplete,
+  SkipChore,
 } from '../../utils/Fetcher'
+import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 const IconCard = styled('div')({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   backgroundColor: '#f0f0f0', // Adjust the background color as needed
   borderRadius: '50%',
-  minWidth: '50px',
-  height: '50px',
+  minWidth: '40px',
+  height: '40px',
   marginRight: '16px',
 })
 const ChoreView = () => {
   const [chore, setChore] = useState({})
-
+  const navigate = useNavigate()
   const [performers, setPerformers] = useState([])
   const [infoCards, setInfoCards] = useState([])
   const { choreId } = useParams()
@@ -56,6 +61,8 @@ const ChoreView = () => {
   const [timeoutId, setTimeoutId] = useState(null)
   const [secondsLeftToCancel, setSecondsLeftToCancel] = useState(null)
   const [completedDate, setCompletedDate] = useState(null)
+  const [confirmModelConfig, setConfirmModelConfig] = useState({})
+
   useEffect(() => {
     Promise.all([
       GetChoreDetailById(choreId).then(resp => {
@@ -85,20 +92,20 @@ const ChoreView = () => {
   const generateInfoCards = chore => {
     const cards = [
       {
-        icon: <CalendarMonth />,
-        text: 'Due Date',
-        subtext: moment(chore.nextDueDate).format('MM/DD/YYYY hh:mm A'),
-      },
-      {
+        size: 6,
         icon: <PeopleAlt />,
         text: 'Assigned To',
         subtext: performers.find(p => p.id === chore.assignedTo)?.displayName,
       },
       {
-        icon: <Person />,
-        text: 'Created By',
-        subtext: performers.find(p => p.id === chore.createdBy)?.displayName,
+        size: 6,
+        icon: <CalendarMonth />,
+        text: 'Due Date',
+        subtext: chore.nextDueDate
+          ? moment(chore.nextDueDate).fromNow()
+          : 'N/A',
       },
+
       //   {
       //     icon: <TextFields />,
       //     text: 'Frequency',
@@ -107,35 +114,42 @@ const ChoreView = () => {
       //       chore.frequencyType.slice(1),
       //   },
       {
+        size: 6,
         icon: <Checklist />,
         text: 'Total Completed',
-        subtext: `${chore.totalCompletedCount}`,
+        subtext: `${chore.totalCompletedCount} times`,
       },
-      //   {
-      //     icon: <Timelapse />,
-      //     text: 'Last Completed',
-      //     subtext:
-      //       chore.lastCompletedDate &&
-      //       moment(chore.lastCompletedDate).format('MM/DD/YYYY hh:mm A'),
-      //   },
       {
-        icon: <Person />,
+        size: 6,
+        icon: <Timelapse />,
         text: 'Last Completed',
+        subtext:
+          // chore.lastCompletedDate &&
+          // moment(chore.lastCompletedDate).format('MM/DD/YYYY hh:mm A'),
+          chore.lastCompletedDate && moment(chore.lastCompletedDate).fromNow(),
+      },
+      {
+        size: 6,
+        icon: <Person />,
+        text: 'Last Performer',
         subtext: chore.lastCompletedDate
           ? `${
-              chore.lastCompletedDate &&
-              moment(chore.lastCompletedDate).fromNow()
-              // moment(chore.lastCompletedDate).format('MM/DD/YYYY hh:mm A'))
-            }(${
               performers.find(p => p.id === chore.lastCompletedBy)?.displayName
-            })`
-          : 'Never',
+            }`
+          : '--',
       },
       {
-        icon: <Note />,
-        text: 'Recent Note',
-        subtext: chore.notes || '--',
+        size: 6,
+        icon: <Person />,
+        text: 'Created By',
+        subtext: performers.find(p => p.id === chore.createdBy)?.displayName,
       },
+      // {
+      //   size: 12,
+      //   icon: <Note />,
+      //   text: 'Recent Note',
+      //   subtext: chore.notes || '--',
+      // },
     ]
     setInfoCards(cards)
   }
@@ -184,7 +198,16 @@ const ChoreView = () => {
 
     setTimeoutId(id)
   }
-
+  const handleSkippingTask = () => {
+    SkipChore(choreId).then(response => {
+      if (response.ok) {
+        response.json().then(data => {
+          const newChore = data.res
+          setChore(newChore)
+        })
+      }
+    })
+  }
   return (
     <Container
       maxWidth='sm'
@@ -195,46 +218,88 @@ const ChoreView = () => {
         justifyContent: 'space-between',
       }}
     >
-      <Box>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          textAlign: 'center',
+        }}
+      >
         <Typography
           level='h3'
-          textAlign={'center'}
+          // textAlign={'center'}
           sx={{
-            mt: 2,
-            mb: 4,
+            mt: 1,
+            mb: 0.5,
           }}
         >
           {chore.name}
         </Typography>
+        <Chip startDecorator={<CalendarMonth />} size='lg' sx={{ mb: 4 }}>
+          {chore.nextDueDate
+            ? `Due at ${moment(chore.nextDueDate).format('MM/DD/YYYY hh:mm A')}`
+            : 'N/A'}
+        </Chip>
+      </Box>
+      <Box>
+        <Typography level='title-md' sx={{ mb: 0.5 }}>
+          Details
+        </Typography>
 
-        <Grid container spacing={1}>
-          {infoCards.map((info, index) => (
-            <Grid key={index} item xs={12} sm={6}>
-              <Sheet sx={{ mb: 1, borderRadius: 'md', p: 1, boxShadow: 'sm' }}>
-                <ListItem>
-                  <ListItemDecorator>
-                    <IconCard>{info.icon}</IconCard>
-                  </ListItemDecorator>
+        <Sheet
+          sx={{
+            mb: 1,
+            borderRadius: 'lg',
+            p: 2,
+          }}
+          variant='outlined'
+        >
+          <Grid container spacing={1}>
+            {infoCards.map((detail, index) => (
+              <Grid item xs={4} key={index}>
+                {/* divider between the list items: */}
+
+                <ListItem key={index}>
                   <ListItemContent>
-                    <Typography level='body1' sx={{ fontWeight: 'md' }}>
-                      {info.text}
+                    <Typography level='body-xs' sx={{ fontWeight: 'md' }}>
+                      {detail.text}
                     </Typography>
-                    <Typography level='body1' color='text.tertiary'>
-                      {info.subtext ? info.subtext : '--'}
-                    </Typography>
+                    <Chip
+                      color='primary'
+                      size='md'
+                      startDecorator={detail.icon}
+                    >
+                      {detail.subtext ? detail.subtext : '--'}
+                    </Chip>
                   </ListItemContent>
                 </ListItem>
-              </Sheet>
-            </Grid>
-          ))}
-        </Grid>
+              </Grid>
+            ))}
+          </Grid>
+        </Sheet>
+        {chore.notes && (
+          <>
+            <Typography level='title-md' sx={{ mb: 1 }}>
+              Previous note:
+            </Typography>
+            <Sheet variant='outlined' sx={{ p: 2, borderRadius: 'lg' }}>
+              <Typography level='body-md' sx={{ mb: 1 }}>
+                {chore.notes || '--'}
+              </Typography>
+            </Sheet>
+          </>
+        )}
       </Box>
       {/* <Divider
         sx={{
           my: 2,
         }}
       /> */}
-
+      <Typography level='title-md' sx={{ mt: 1 }}>
+        Actions
+      </Typography>
       <Card
         sx={{
           p: 2,
@@ -243,27 +308,65 @@ const ChoreView = () => {
           mt: 2,
         }}
       >
-        <Typography level='title-md'>Additional Notes</Typography>
-        <Input
-          fullWidth
-          multiline
-          label='Additional Notes'
-          placeholder='note or information about the task'
-          value={note || ''}
-          onChange={e => {
-            if (e.target.value.trim() === '') {
-              setNote(null)
-              return
-            }
-            setNote(e.target.value)
-          }}
-          size='md'
-          sx={{
-            my: 1,
-          }}
-        />
+        <Typography level='body-md' sx={{ mb: 1 }}>
+          Complete the task
+        </Typography>
 
-        <FormControl size='sm' sx={{ width: 400 }}>
+        <FormControl size='sm'>
+          <Checkbox
+            defaultChecked={note !== null}
+            checked={note !== null}
+            value={note !== null}
+            size='lg'
+            onChange={e => {
+              if (e.target.checked) {
+                setNote('')
+              } else {
+                setNote(null)
+              }
+            }}
+            overlay
+            sx={
+              {
+                // my: 1,
+              }
+            }
+            label={
+              <Typography
+                level='body-sm'
+                sx={{
+                  // center vertically
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              >
+                Add Additional Notes
+              </Typography>
+            }
+          />
+        </FormControl>
+        {note !== null && (
+          <Input
+            fullWidth
+            multiline
+            label='Additional Notes'
+            placeholder='note or information about the task'
+            value={note || ''}
+            onChange={e => {
+              if (e.target.value.trim() === '') {
+                setNote(null)
+                return
+              }
+              setNote(e.target.value)
+            }}
+            size='md'
+            sx={{
+              mb: 1,
+            }}
+          />
+        )}
+
+        <FormControl size='sm'>
           <Checkbox
             defaultChecked={completedDate !== null}
             checked={completedDate !== null}
@@ -279,10 +382,23 @@ const ChoreView = () => {
               }
             }}
             overlay
-            sx={{
-              my: 1,
-            }}
-            label={<Typography level='body2'>Set completion date</Typography>}
+            sx={
+              {
+                // my: 1,
+              }
+            }
+            label={
+              <Typography
+                level='body-sm'
+                sx={{
+                  // center vertically
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              >
+                Specify completion date
+              </Typography>
+            }
           />
         </FormControl>
         {completedDate !== null && (
@@ -295,22 +411,10 @@ const ChoreView = () => {
             }}
           />
         )}
-        {completedDate === null && (
-          // placeholder for the completion date with margin:
-          <Box
-            sx={{
-              height: 56,
-            }}
-          />
-        )}
 
         <Button
           fullWidth
           size='lg'
-          sx={{
-            height: 50,
-            mb: 2,
-          }}
           onClick={handleTaskCompletion}
           disabled={isPendingCompletion}
           color={isPendingCompletion ? 'danger' : 'success'}
@@ -318,49 +422,82 @@ const ChoreView = () => {
         >
           <Box>Mark as done</Box>
         </Button>
-        {/* <Button
-            sx={{
-              borderRadius: '32px',
-              mt: 1,
-              height: 50,
-              zIndex: 1,
-            }}
-            onClick={() => {
-              Navigate('/my/chores')
-            }}
-            color={isPendingCompletion ? 'danger' : 'success'}
-            startDecorator={isPendingCompletion ? <Close /> : <Check />}
-            fullWidth
-          >
-            <Box>Mark as {isPendingCompletion ? 'completed' : 'done'}</Box>
-          </Button> */}
-      </Card>
+        <Divider sx={{ my: 0.5 }}>or</Divider>
 
-      <Snackbar
-        open={isPendingCompletion}
-        endDecorator={
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            gap: 1,
+            alignContent: 'center',
+            justifyContent: 'center',
+          }}
+        >
           <Button
-            onClick={() => {
-              if (timeoutId) {
-                clearTimeout(timeoutId)
-                setIsPendingCompletion(false)
-                setTimeoutId(null)
-                setSecondsLeftToCancel(null) // Reset or adjust as needed
-              }
-            }}
+            fullWidth
             size='lg'
-            variant='outlined'
-            color='danger'
-            startDecorator={<CancelScheduleSend />}
+            onClick={() => {
+              setConfirmModelConfig({
+                isOpen: true,
+                title: 'Skip Task',
+
+                message: 'Are you sure you want to skip this task?',
+
+                confirmText: 'Skip',
+                cancelText: 'Cancel',
+                onClose: confirmed => {
+                  if (confirmed) {
+                    handleSkippingTask()
+                  }
+                  setConfirmModelConfig({})
+                },
+              })
+            }}
+            startDecorator={<SwitchAccessShortcut />}
           >
-            Cancel
+            <Box>Skip</Box>
           </Button>
-        }
-      >
-        <Typography level='body-md' textAlign={'center'}>
-          Task will be marked as completed in {secondsLeftToCancel} seconds
-        </Typography>
-      </Snackbar>
+          <Button
+            startDecorator={<History />}
+            size='lg'
+            color='primary'
+            variant='outlined'
+            fullWidth
+            onClick={() => {
+              navigate(`/chores/${choreId}/history`)
+            }}
+          >
+            History
+          </Button>
+        </Box>
+
+        <Snackbar
+          open={isPendingCompletion}
+          endDecorator={
+            <Button
+              onClick={() => {
+                if (timeoutId) {
+                  clearTimeout(timeoutId)
+                  setIsPendingCompletion(false)
+                  setTimeoutId(null)
+                  setSecondsLeftToCancel(null) // Reset or adjust as needed
+                }
+              }}
+              size='lg'
+              variant='outlined'
+              color='danger'
+              startDecorator={<CancelScheduleSend />}
+            >
+              Cancel
+            </Button>
+          }
+        >
+          <Typography level='body-md' textAlign={'center'}>
+            Task will be marked as completed in {secondsLeftToCancel} seconds
+          </Typography>
+        </Snackbar>
+        <ConfirmationModal config={confirmModelConfig} />
+      </Card>
     </Container>
   )
 }

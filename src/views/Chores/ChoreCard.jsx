@@ -17,6 +17,7 @@ import {
   SwitchAccessShortcut,
   TimesOneMobiledata,
   Update,
+  ViewCarousel,
   Webhook,
 } from '@mui/icons-material'
 import {
@@ -38,7 +39,7 @@ import moment from 'moment'
 import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { API_URL } from '../../Config'
-import { MarkChoreComplete } from '../../utils/Fetcher'
+import { MarkChoreComplete, SkipChore } from '../../utils/Fetcher'
 import { Fetch } from '../../utils/TokenManager'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import DateModal from '../Modals/Inputs/DateModal'
@@ -106,6 +107,9 @@ const ChoreCard = ({
   }
   const handleEdit = () => {
     navigate(`/chores/${chore.id}/edit`)
+  }
+  const handleView = () => {
+    navigate(`/chores/${chore.id}`)
   }
   const handleDelete = () => {
     setConfirmModelConfig({
@@ -521,13 +525,7 @@ const ChoreCard = ({
                 </MenuItem>
                 <MenuItem
                   onClick={() => {
-                    Fetch(`${API_URL}/chores/${chore.id}/skip`, {
-                      method: 'POST',
-                      headers: {
-                        'Content-Type': 'application/json',
-                      },
-                      body: JSON.stringify({}),
-                    }).then(response => {
+                    SkipChore(chore.id).then(response => {
                       if (response.ok) {
                         response.json().then(data => {
                           const newChore = data.res
@@ -584,6 +582,10 @@ const ChoreCard = ({
                 <MenuItem onClick={handleEdit}>
                   <Edit />
                   Edit
+                </MenuItem>
+                <MenuItem onClick={handleView}>
+                  <ViewCarousel />
+                  View
                 </MenuItem>
                 <MenuItem onClick={handleDelete} color='danger'>
                   <Delete />
