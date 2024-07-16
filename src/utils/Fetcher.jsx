@@ -73,6 +73,16 @@ const MarkChoreComplete = (id, note, completedDate) => {
     body: JSON.stringify(body),
   })
 }
+
+const SkipChore = id => {
+  return Fetch(`${API_URL}/chores/${id}/skip`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({}),
+  })
+}
 const CreateChore = chore => {
   return Fetch(`${API_URL}/chores/`, {
     method: 'POST',
@@ -277,6 +287,7 @@ export {
   SaveChore,
   SaveThing,
   signUp,
+  SkipChore,
   UpdateThingState,
   UpdateUserDetails,
 }
