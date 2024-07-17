@@ -595,7 +595,7 @@ const ChoreEdit = () => {
               opacity: !isPlusAccount(userProfile) ? 0.5 : 1,
             }}
           >
-            Receive notifications for this task
+            When should receive notifications for this task
           </FormHelperText>
         </FormControl>
       </Box>
@@ -658,6 +658,65 @@ const ChoreEdit = () => {
                 <FormHelperText>{item.description}</FormHelperText>
               </FormControl>
             ))}
+
+            <Typography level='h5'>
+              What things should trigger the notification?
+            </Typography>
+            <FormControl>
+              <Checkbox
+                overlay
+                disabled={true}
+                checked={true}
+                label='All Assignees'
+              />
+              <FormHelperText>Notify all assignees</FormHelperText>
+            </FormControl>
+
+            <FormControl>
+              <Checkbox
+                overlay
+                onClick={() => {
+                  if (notificationMetadata['circleGroup']) {
+                    delete notificationMetadata['circleGroupID']
+                  }
+
+                  setNotificationMetadata({
+                    ...notificationMetadata,
+                    ['circleGroup']: !notificationMetadata['circleGroup'],
+                  })
+                }}
+                checked={
+                  notificationMetadata
+                    ? notificationMetadata['circleGroup']
+                    : false
+                }
+                label='Specific Group'
+              />
+              <FormHelperText>Notify a specific group</FormHelperText>
+            </FormControl>
+
+            {notificationMetadata['circleGroup'] && (
+              <Box
+                sx={{
+                  mt: 0,
+                  ml: 4,
+                }}
+              >
+                <Typography level='body-sm'>Telegram Group ID:</Typography>
+
+                <Input
+                  type='number'
+                  value={notificationMetadata['circleGroupID']}
+                  placeholder='Telegram Group ID'
+                  onChange={e => {
+                    setNotificationMetadata({
+                      ...notificationMetadata,
+                      ['circleGroupID']: parseInt(e.target.value),
+                    })
+                  }}
+                />
+              </Box>
+            )}
           </Card>
         </Box>
       )}
