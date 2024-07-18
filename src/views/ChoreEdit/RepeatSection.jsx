@@ -116,6 +116,7 @@ const RepeatOnSections = ({
                   onClick={() => {
                     setIntervalUnit(item)
                     onFrequencyMetadataUpdate({
+                      ...frequencyMetadata,
                       unit: item,
                     })
                   }}
@@ -167,6 +168,7 @@ const RepeatOnSections = ({
                         }
 
                         onFrequencyMetadataUpdate({
+                          ...frequencyMetadata,
                           days: newDaysOfTheWeek.sort(),
                         })
                       }}
@@ -247,6 +249,7 @@ const RepeatOnSections = ({
                         }
 
                         onFrequencyMetadataUpdate({
+                          ...frequencyMetadata,
                           months: newMonthsOfTheYear.sort(),
                         })
                         console.log('newMonthsOfTheYear', newMonthsOfTheYear)
@@ -363,7 +366,15 @@ const RepeatSection = ({
                         onFrequencyUpdate(1)
                         onFrequencyMetadataUpdate({
                           unit: 'days',
+                          time: frequencyMetadata?.time
+                            ? frequencyMetadata?.time
+                            : moment(
+                                moment(new Date()).format('YYYY-MM-DD') +
+                                  'T' +
+                                  '18:00',
+                              ).format(),
                         })
+
                         return
                       }
                       onFrequencyTypeUpdate(item)
@@ -419,11 +430,20 @@ const RepeatSection = ({
                                 }
                                 onFrequencyTypeUpdate(item)
                                 if (item === 'days_of_the_week') {
-                                  onFrequencyMetadataUpdate({ days: [] })
+                                  onFrequencyMetadataUpdate({
+                                    ...frequencyMetadata,
+                                    days: [],
+                                  })
                                 } else if (item === 'day_of_the_month') {
-                                  onFrequencyMetadataUpdate({ months: [] })
+                                  onFrequencyMetadataUpdate({
+                                    ...frequencyMetadata,
+                                    months: [],
+                                  })
                                 } else if (item === 'interval') {
-                                  onFrequencyMetadataUpdate({ unit: 'days' })
+                                  onFrequencyMetadataUpdate({
+                                    ...frequencyMetadata,
+                                    unit: 'days',
+                                  })
                                 }
                                 // setRepeatOn(item)
                               }}
