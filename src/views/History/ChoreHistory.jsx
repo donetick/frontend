@@ -15,9 +15,14 @@ import moment from 'moment'
 import React, { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { API_URL } from '../../Config'
-import { GetAllCircleMembers } from '../../utils/Fetcher'
+import {
+  DeleteChoreHistory,
+  GetAllCircleMembers,
+  UpdateChoreHistory,
+} from '../../utils/Fetcher'
 import { Fetch } from '../../utils/TokenManager'
 import LoadingComponent from '../components/Loading'
+import EditHistoryModal from '../Modals/EditHistoryModal'
 import HistoryCard from './HistoryCard'
 
 const ChoreHistory = () => {
@@ -28,6 +33,8 @@ const ChoreHistory = () => {
 
   const [isLoading, setIsLoading] = useState(true) // Add loading state
   const { choreId } = useParams()
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [editHistory, setEditHistory] = useState({})
 
   useEffect(() => {
     setIsLoading(true) // Start loading
@@ -63,12 +70,12 @@ const ChoreHistory = () => {
 
     const averageDelay =
       histories.reduce((acc, chore) => {
-        if (chore.dueDate) {
+        if (chore.dueDate && chore.completedAt) {
           // Only consider chores with a due date
           return acc + moment(chore.completedAt).diff(chore.dueDate, 'hours')
         }
         return acc
-      }, 0) / histories.length
+      }, 0) / histories.filter(chore => chore.dueDate).length
     const averageDelayMoment = moment.duration(averageDelay, 'hours')
     const maximumDelay = histories.reduce((acc, chore) => {
       if (chore.dueDate) {
@@ -215,6 +222,10 @@ const ChoreHistory = () => {
         <List sx={{ p: 0 }}>
           {choreHistory.map((historyEntry, index) => (
             <HistoryCard
+              onClick={() => {
+                setIsEditModalOpen(true)
+                setEditHistory(historyEntry)
+              }}
               historyEntry={historyEntry}
               performers={performers}
               allHistory={choreHistory}
@@ -224,6 +235,46 @@ const ChoreHistory = () => {
           ))}
         </List>
       </Sheet>
+      <EditHistoryModal
+        config={{
+          isOpen: isEditModalOpen,
+          onClose: () => {
+            setIsEditModalOpen(false)
+          },
+          onSave: updated => {
+            UpdateChoreHistory(choreId, editHistory.id, {
+              completedAt: updated.completedAt,
+              dueDate: updated.dueDate,
+              notes: updated.notes,
+            }).then(res => {
+              if (!res.ok) {
+                console.error('Failed to update chore history:', res)
+                return
+              }
+
+              const newRecord = res.json().then(data => {
+                const newRecord = data.res
+                const newHistory = choreHistory.map(record =>
+                  record.id === newRecord.id ? newRecord : record,
+                )
+                setChoresHistory(newHistory)
+                setEditHistory(newRecord)
+                setIsEditModalOpen(false)
+              })
+            })
+          },
+          onDelete: () => {
+            DeleteChoreHistory(choreId, editHistory.id).then(() => {
+              const newHistory = choreHistory.filter(
+                record => record.id !== editHistory.id,
+              )
+              setChoresHistory(newHistory)
+              setIsEditModalOpen(false)
+            })
+          },
+        }}
+        historyRecord={editHistory}
+      />
     </Container>
   )
 }
