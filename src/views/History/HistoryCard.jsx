@@ -11,7 +11,13 @@ import {
 } from '@mui/joy'
 import moment from 'moment'
 
-const HistoryCard = ({ allHistory, performers, historyEntry, index }) => {
+const HistoryCard = ({
+  allHistory,
+  performers,
+  historyEntry,
+  index,
+  onClick,
+}) => {
   function formatTimeDifference(startDate, endDate) {
     const diffInMinutes = moment(startDate).diff(endDate, 'minutes')
     let timeValue = diffInMinutes
@@ -64,7 +70,7 @@ const HistoryCard = ({ allHistory, performers, historyEntry, index }) => {
       icon = <Timelapse />
     } else {
       text = 'No Due Date'
-      color = 'info'
+      color = 'neutral'
       icon = <CalendarViewDay />
     }
 
@@ -77,7 +83,7 @@ const HistoryCard = ({ allHistory, performers, historyEntry, index }) => {
 
   return (
     <>
-      <ListItem sx={{ gap: 1.5, alignItems: 'flex-start' }}>
+      <ListItem sx={{ gap: 1.5, alignItems: 'flex-start' }} onClick={onClick}>
         {' '}
         {/* Adjusted spacing and alignment */}
         <ListItemDecorator>
@@ -98,7 +104,11 @@ const HistoryCard = ({ allHistory, performers, historyEntry, index }) => {
             }}
           >
             <Typography level='body1' sx={{ fontWeight: 'md' }}>
-              {moment(historyEntry.completedAt).format('ddd MM/DD/yyyy HH:mm')}
+              {historyEntry.completedAt
+                ? moment(historyEntry.completedAt).format(
+                    'ddd MM/DD/yyyy HH:mm',
+                  )
+                : 'Skipped'}
             </Typography>
             {getCompletedChip(historyEntry)}
           </Box>

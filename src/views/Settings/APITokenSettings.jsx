@@ -38,7 +38,7 @@ const APITokenSettings = () => {
 
   return (
     <div className='grid gap-4 py-4' id='apitokens'>
-      <Typography level='h3'>Long Live Token</Typography>
+      <Typography level='h3'>Access Token</Typography>
       <Divider />
       <Typography level='body-sm'>
         Create token to use with the API to update things that trigger task or

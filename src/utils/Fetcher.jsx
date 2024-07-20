@@ -112,6 +112,20 @@ const GetChoreHistory = choreId => {
     headers: HEADERS(),
   })
 }
+const DeleteChoreHistory = (choreId, id) => {
+  return Fetch(`${API_URL}/chores/${choreId}/history/${id}`, {
+    method: 'DELETE',
+    headers: HEADERS(),
+  })
+}
+
+const UpdateChoreHistory = (choreId, id, choreHistory) => {
+  return Fetch(`${API_URL}/chores/${choreId}/history/${id}`, {
+    method: 'PUT',
+    headers: HEADERS(),
+    body: JSON.stringify(choreHistory),
+  })
+}
 
 const GetAllCircleMembers = () => {
   return Fetch(`${API_URL}/circles/members`, {
@@ -264,6 +278,7 @@ export {
   CreateLongLiveToken,
   CreateThing,
   DeleteChore,
+  DeleteChoreHistory,
   DeleteCircleMember,
   DeleteLongLiveToken,
   DeleteThing,
@@ -288,6 +303,7 @@ export {
   SaveThing,
   signUp,
   SkipChore,
+  UpdateChoreHistory,
   UpdateThingState,
   UpdateUserDetails,
 }
