@@ -13,6 +13,7 @@
     "start": "vite --host",
     "dev": "vite",
     "build": "vite build",
+    "build-selfhosted": "vite build --mode selfhosted",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "release": "npm version patch && npm run build && git push origin develop --tags",
