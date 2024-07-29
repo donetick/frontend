@@ -1,7 +1,7 @@
 {
   "name": "donetick",
   "private": true,
-  "version": "0.1.70",
+  "version": "0.1.71",
   "type": "module",
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
