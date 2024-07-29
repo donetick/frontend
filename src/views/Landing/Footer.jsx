@@ -4,6 +4,7 @@ import Box from '@mui/joy/Box'
 import Link from '@mui/joy/Link'
 import Typography from '@mui/joy/Typography'
 import * as React from 'react'
+import { version } from '../../../package.json'
 
 function Footer() {
   return (
@@ -102,6 +103,9 @@ function Footer() {
           </Link>
           <Link disabled={true} level='body2' sx={{ display: 'block' }}>
             Changelog(soon)
+          </Link>
+          <Link disabled={true} level='body2' sx={{ display: 'block' }}>
+            V{version}
           </Link>
         </Box>
         {/* <Box>
