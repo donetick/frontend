@@ -14,7 +14,10 @@ export default defineConfig({
         'safari-pinned-tab.svg',
         'mstile-150x150.png',
       ],
-      injectManifest: true,
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html,png,svg}'],
+        globIgnores: ['index.html'],
+      },
       manifest: {
         name: 'Donetick: Simplify Tasks & Chores, Together.',
         short_name: 'Donetick',
@@ -54,6 +57,10 @@ export default defineConfig({
         theme_color: '#ffffff',
         background_color: '#ffffff',
         display: 'standalone',
+      },
+      workbox: {
+        skipWaiting: true, // Force the waiting service worker to become the active service worker
+        clientsClaim: true, // Take control of uncontrolled clients as soon as the service worker becomes active
       },
     }),
   ],
