@@ -111,18 +111,6 @@ function FeaturesSection() {
   return (
     <Container sx={{ textAlign: 'center' }}>
       <Typography level='h4' mt={2} mb={4}>
-        Donetick is under development
-      </Typography>
-
-      <Container maxWidth={'lg'} sx={{ mb: 8 }}>
-        <Typography level='body-md' color='neutral'>
-          Donetick is beta software. and is still under development. thing may
-          change, break, or disappear at any time. Please use it at your own
-          risk and discretion. I will do my best to keep the service running
-        </Typography>
-      </Container>
-
-      <Typography level='h4' mt={2} mb={4}>
         Why Donetick?
       </Typography>
 

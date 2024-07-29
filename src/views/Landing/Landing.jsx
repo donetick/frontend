@@ -9,6 +9,7 @@ import DemoMyChore from './DemoMyChore'
 import DemoScheduler from './DemoScheduler'
 import FeaturesSection from './FeaturesSection'
 import Footer from './Footer'
+import GettingStarted from './GettingStarted'
 import HomeHero from './HomeHero'
 const Landing = () => {
   const Navigate = useNavigate()
@@ -39,6 +40,8 @@ const Landing = () => {
         <DemoHistory />
       </Grid>
       <FeaturesSection />
+      <GettingStarted />
+
       {/* <PricingSection /> */}
       <Box
         sx={{
