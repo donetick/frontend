@@ -114,17 +114,6 @@ const NavBar = () => {
             tick✓
           </span>
         </Typography>
-        <span
-          style={{
-            fontSize: 12,
-            fontWeight: 700,
-            position: 'relative',
-            top: 12,
-            right: 45,
-          }}
-        >
-          Beta
-        </span>
       </Box>
       <Drawer
         open={drawerOpen}

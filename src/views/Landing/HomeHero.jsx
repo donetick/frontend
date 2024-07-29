@@ -61,17 +61,6 @@ const HomeHero = () => {
         >
           tick
         </span>
-        <span
-          style={{
-            fontSize: 20,
-            fontWeight: 700,
-            position: 'relative',
-            top: 12,
-            right: 45,
-          }}
-        >
-          Beta
-        </span>
       </Typography>
     </Box>
   )
@@ -167,7 +156,7 @@ const HomeHero = () => {
               className='hover:scale-105'
               onClick={() => {
                 // new window open to https://github.com/Donetick:
-                window.open('https://github.com/donetick', '_blank')
+                window.open('https://github.com/donetick/donetick', '_blank')
               }}
               startDecorator={<GitHub />}
             >
