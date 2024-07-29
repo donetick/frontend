@@ -7,6 +7,7 @@ import {
   Storage,
 } from '@mui/icons-material'
 import { Box, Button, Card, Grid, styled, Typography } from '@mui/joy'
+import { useNavigate } from 'react-router-dom'
 const IconContainer = styled('div')({
   display: 'flex',
   alignItems: 'center',
@@ -65,6 +66,7 @@ function StartOptionCard({ icon: Icon, title, description, button, index }) {
 }
 
 const GettingStarted = () => {
+  const navigate = useNavigate()
   const information = [
     {
       title: 'Donetick Web',
@@ -72,7 +74,14 @@ const GettingStarted = () => {
       description:
         'The easiest way! just create account and start using DoneTick',
       button: (
-        <Button size='lg' fullWidth startDecorator={<AutoAwesome />}>
+        <Button
+          size='lg'
+          fullWidth
+          startDecorator={<AutoAwesome />}
+          onClick={() => {
+            navigate('/my/chores')
+          }}
+        >
           Start Now!
         </Button>
       ),
