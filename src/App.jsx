@@ -1,5 +1,6 @@
 import NavBar from '@/views/components/NavBar'
 import { Button, Snackbar, Typography, useColorScheme } from '@mui/joy'
+import Tracker from '@openreplay/tracker'
 import { useEffect, useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import { useRegisterSW } from 'virtual:pwa-register/react'
@@ -19,6 +20,8 @@ const remove = className => {
 const intervalMS = 5 * 60 * 1000 // 5 minutes
 
 function App() {
+  startOpenReplay()
+
   const { mode, systemMode } = useColorScheme()
   const [userProfile, setUserProfile] = useState(null)
   const [showUpdateSnackbar, setShowUpdateSnackbar] = useState(true)
@@ -115,4 +118,11 @@ function App() {
   )
 }
 
+const startOpenReplay = () => {
+  if (!import.meta.env.VITE_OPENREPLAY_PROJECT_KEY) return
+  const tracker = new Tracker({
+    projectKey: import.meta.env.VITE_OPENREPLAY_PROJECT_KEY,
+  })
+  tracker.start()
+}
 export default App
