@@ -3,6 +3,7 @@ import {
   CancelScheduleSend,
   Check,
   Checklist,
+  Edit,
   History,
   PeopleAlt,
   Person,
@@ -258,7 +259,7 @@ const ChoreView = () => {
         >
           <Grid container spacing={1}>
             {infoCards.map((detail, index) => (
-              <Grid item xs={4} key={index}>
+              <Grid item xs={6} key={index}>
                 {/* divider between the list items: */}
 
                 <ListItem key={index}>
@@ -411,20 +412,7 @@ const ChoreView = () => {
             }}
           />
         )}
-
-        <Button
-          fullWidth
-          size='lg'
-          onClick={handleTaskCompletion}
-          disabled={isPendingCompletion}
-          color={isPendingCompletion ? 'danger' : 'success'}
-          startDecorator={<Check />}
-        >
-          <Box>Mark as done</Box>
-        </Button>
-        <Divider sx={{ my: 0.5 }}>or</Divider>
-
-        <Box
+     <Box
           sx={{
             display: 'flex',
             flexDirection: 'row',
@@ -433,6 +421,22 @@ const ChoreView = () => {
             justifyContent: 'center',
           }}
         >
+        <Button
+          fullWidth
+          size='lg'
+          onClick={handleTaskCompletion}
+          disabled={isPendingCompletion}
+          color={isPendingCompletion ? 'danger' : 'success'}
+          startDecorator={<Check />}
+          sx={
+            {
+              flex: 4,
+            }
+          }
+        >
+          <Box>Mark as done</Box>
+        </Button>
+   
           <Button
             fullWidth
             size='lg'
@@ -454,9 +458,26 @@ const ChoreView = () => {
               })
             }}
             startDecorator={<SwitchAccessShortcut />}
+            sx={
+              {
+                flex: 1,
+              }
+            }
           >
             <Box>Skip</Box>
           </Button>
+          </Box>
+        <Divider sx={{ my: 0.5 }}>More</Divider>
+
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            gap: 1,
+            alignContent: 'center',
+            justifyContent: 'center',
+          }}
+        > 
           <Button
             startDecorator={<History />}
             size='lg'
@@ -469,8 +490,21 @@ const ChoreView = () => {
           >
             History
           </Button>
-        </Box>
 
+     <Button
+            startDecorator={<Edit />}
+            size='lg'
+            color='primary'
+            variant='outlined'
+            fullWidth
+            onClick={() => {
+              navigate(`/chores/${choreId}/edit`)
+            }}
+          >
+            Edit
+          </Button>
+           
+</Box>
         <Snackbar
           open={isPendingCompletion}
           endDecorator={

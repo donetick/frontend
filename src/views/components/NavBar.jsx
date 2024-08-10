@@ -30,11 +30,11 @@ const links = [
     label: 'Home',
     icon: <HomeOutlined />,
   },
-  {
-    to: '/chores',
-    label: 'Desktop View',
-    icon: <ListAltRounded />,
-  },
+  // {
+  //   to: '/chores',
+  //   label: 'Desktop View',
+  //   icon: <ListAltRounded />,
+  // },
   {
     to: '/things',
     label: 'Things',

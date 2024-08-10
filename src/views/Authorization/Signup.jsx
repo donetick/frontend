@@ -7,6 +7,7 @@ import {
   FormHelperText,
   Input,
   Sheet,
+  Snackbar,
   Typography,
 } from '@mui/joy'
 import React from 'react'
@@ -25,6 +26,8 @@ const SignupView = () => {
   const [emailError, setEmailError] = React.useState('')
   const [displayNameError, setDisplayNameError] = React.useState('')
   const [error, setError] = React.useState(null)
+  const [snackbarOpen, setSnackbarOpen] = React.useState(false)
+  const [snackbarMessage, setSnackbarMessage] = React.useState('')
   const handleLogin = (username, password) => {
     login(username, password).then(response => {
       if (response.status === 200) {
@@ -39,6 +42,7 @@ const SignupView = () => {
         })
       } else {
         console.log('Login failed', response)
+        
         // Navigate('/login')
       }
     })
@@ -101,7 +105,10 @@ const SignupView = () => {
         handleLogin(username, password)
       } else {
         console.log('Signup failed')
-        setError('Signup failed')
+        response.json().then(res => {
+          setError(res.error)
+        }
+        )
       }
     })
   }
@@ -256,6 +263,14 @@ const SignupView = () => {
           </Button>
         </Sheet>
       </Box>
+      <Snackbar
+        open={error !== null}
+        onClose={() => setError(null)}
+        autoHideDuration={5000}
+        message={error}
+      >
+        {error}
+      </Snackbar>
     </Container>
   )
 }

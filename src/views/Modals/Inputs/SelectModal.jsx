@@ -9,7 +9,7 @@ import {
 } from '@mui/joy'
 import React from 'react'
 
-function SelectModal({ isOpen, onClose, onSave, options, title, displayKey }) {
+function SelectModal({ isOpen, onClose, onSave, options, title, displayKey,placeholder }) {
   const [selected, setSelected] = React.useState(null)
   const handleSave = () => {
     onSave(options.find(item => item.id === selected))
@@ -20,7 +20,7 @@ function SelectModal({ isOpen, onClose, onSave, options, title, displayKey }) {
     <Modal open={isOpen} onClose={onClose}>
       <ModalDialog>
         <Typography variant='h4'>{title}</Typography>
-        <Select>
+        <Select placeholder={placeholder}>
           {options.map((item, index) => (
             <Option
               value={item.id}
