@@ -39,7 +39,7 @@ import moment from 'moment'
 import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { API_URL } from '../../Config'
-import { MarkChoreComplete, SkipChore } from '../../utils/Fetcher'
+import { MarkChoreComplete, SkipChore, UpdateChoreAssignee } from '../../utils/Fetcher'
 import { Fetch } from '../../utils/TokenManager'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import DateModal from '../Modals/Inputs/DateModal'
@@ -219,7 +219,16 @@ const ChoreCard = ({
     })
   }
   const handleAssigneChange = assigneeId => {
-    // TODO: Implement assignee change
+    UpdateChoreAssignee(chore.id, assigneeId).then(response => {
+      if (response.ok) {
+        response.json().then(data => {
+          const newChore = data.res
+          onChoreUpdate(newChore, 'assigned')
+        })
+      }
+    }
+    )
+    
   }
   const handleCompleteWithNote = note => {
     Fetch(`${API_URL}/chores/${chore.id}/do`, {
@@ -547,10 +556,6 @@ const ChoreCard = ({
                   <RecordVoiceOver />
                   Delegate to someone else
                 </MenuItem>
-                <MenuItem>
-                  <HowToReg />
-                  Complete as someone else
-                </MenuItem>
                 <Divider />
                 <MenuItem
                   onClick={() => {
@@ -620,10 +625,14 @@ const ChoreCard = ({
           options={performers}
           displayKey='displayName'
           title={`Delegate to someone else`}
+          placeholder={'Select a performer'}
           onClose={() => {
             setIsChangeAssigneeModalOpen(false)
           }}
-          onSave={handleAssigneChange}
+          onSave={(selected)=>{            
+            handleAssigneChange(selected.id)
+          }
+        }
         />
         <ConfirmationModal config={confirmModelConfig} />
         <TextModal

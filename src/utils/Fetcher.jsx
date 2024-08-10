@@ -83,6 +83,15 @@ const SkipChore = id => {
     body: JSON.stringify({}),
   })
 }
+
+const UpdateChoreAssignee = (id, assignee) => {
+  return Fetch(`${API_URL}/chores/${id}/assignee`, {
+    method: 'PUT',
+    headers: HEADERS(),
+    body: JSON.stringify({ assignee:Number(assignee) }),
+  })
+}
+
 const CreateChore = chore => {
   return Fetch(`${API_URL}/chores/`, {
     method: 'POST',
@@ -306,4 +315,5 @@ export {
   UpdateChoreHistory,
   UpdateThingState,
   UpdateUserDetails,
+  UpdateChoreAssignee,
 }
