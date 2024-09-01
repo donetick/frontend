@@ -3,6 +3,7 @@ import AOS from 'aos'
 import 'aos/dist/aos.css'
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import CookiePermissionSnackbar from './CookiePermissionSnackbar'
 import DemoAssignee from './DemoAssignee'
 import DemoHistory from './DemoHistory'
 import DemoMyChore from './DemoMyChore'
@@ -52,7 +53,7 @@ const Landing = () => {
           mb: 5,
         }}
       ></Box>
-
+      <CookiePermissionSnackbar />
       <Footer />
     </Container>
   )
