@@ -13,7 +13,7 @@ const CookiePermissionSnackbar = () => {
 
   const [open, setOpen] = useState(false)
   const handleClose = () => {
-    // Cookies.set('cookies_permission', 'true')
+    Cookies.set('cookies_permission', 'true')
     setOpen(false)
   }
 
