@@ -3,7 +3,6 @@ import {
   Check,
   Delete,
   Edit,
-  HowToReg,
   KeyboardDoubleArrowUp,
   LocalOffer,
   ManageSearch,
@@ -39,7 +38,11 @@ import moment from 'moment'
 import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { API_URL } from '../../Config'
-import { MarkChoreComplete, SkipChore, UpdateChoreAssignee } from '../../utils/Fetcher'
+import {
+  MarkChoreComplete,
+  SkipChore,
+  UpdateChoreAssignee,
+} from '../../utils/Fetcher'
 import { Fetch } from '../../utils/TokenManager'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import DateModal from '../Modals/Inputs/DateModal'
@@ -226,9 +229,7 @@ const ChoreCard = ({
           onChoreUpdate(newChore, 'assigned')
         })
       }
-    }
-    )
-    
+    })
   }
   const handleCompleteWithNote = note => {
     Fetch(`${API_URL}/chores/${chore.id}/do`, {
@@ -314,8 +315,28 @@ const ChoreCard = ({
       return 'Yearly'
     } else if (chore.frequencyType === 'days_of_the_week') {
       let days = JSON.parse(chore.frequencyMetadata).days
-      days = days.map(d => moment().day(d).format('ddd'))
-      return days.join(', ')
+      if (days.length > 4) {
+        const allDays = [
+          'Sunday',
+          'Monday',
+          'Tuesday',
+          'Wednesday',
+          'Thursday',
+          'Friday',
+          'Saturday',
+        ]
+        const selectedDays = days.map(d => moment().day(d).format('dddd'))
+        const notSelectedDay = allDays.filter(
+          day => !selectedDays.includes(day),
+        )
+        const notSelectedShortdays = notSelectedDay.map(d =>
+          moment().day(d).format('ddd'),
+        )
+        return `Daily except ${notSelectedShortdays.join(', ')}`
+      } else {
+        days = days.map(d => moment().day(d).format('ddd'))
+        return days.join(', ')
+      }
     } else if (chore.frequencyType === 'day_of_the_month') {
       let freqData = JSON.parse(chore.frequencyMetadata)
       const months = freqData.months.map(m => moment().month(m).format('MMM'))
@@ -629,10 +650,9 @@ const ChoreCard = ({
           onClose={() => {
             setIsChangeAssigneeModalOpen(false)
           }}
-          onSave={(selected)=>{            
+          onSave={selected => {
             handleAssigneChange(selected.id)
-          }
-        }
+          }}
         />
         <ConfirmationModal config={confirmModelConfig} />
         <TextModal
