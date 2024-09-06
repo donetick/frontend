@@ -30,11 +30,11 @@ const links = [
     label: 'Home',
     icon: <HomeOutlined />,
   },
-  {
-    to: '/chores',
-    label: 'Desktop View',
-    icon: <ListAltRounded />,
-  },
+  // {
+  //   to: '/chores',
+  //   label: 'Desktop View',
+  //   icon: <ListAltRounded />,
+  // },
   {
     to: '/things',
     label: 'Things',
@@ -114,17 +114,6 @@ const NavBar = () => {
             tick✓
           </span>
         </Typography>
-        <span
-          style={{
-            fontSize: 12,
-            fontWeight: 700,
-            position: 'relative',
-            top: 12,
-            right: 45,
-          }}
-        >
-          Beta
-        </span>
       </Box>
       <Drawer
         open={drawerOpen}

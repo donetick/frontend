@@ -4,6 +4,7 @@ import Box from '@mui/joy/Box'
 import Link from '@mui/joy/Link'
 import Typography from '@mui/joy/Typography'
 import * as React from 'react'
+import { version } from '../../../package.json'
 
 function Footer() {
   return (
@@ -47,17 +48,6 @@ function Footer() {
                 tick✓
               </span>
             </Typography>
-            <span
-              style={{
-                fontSize: 12,
-                fontWeight: 700,
-                position: 'relative',
-                top: 12,
-                right: 45,
-              }}
-            >
-              Beta
-            </span>
           </Box>
         </Box>
         <Box>
@@ -65,11 +55,11 @@ function Footer() {
             Github
           </Typography>
           <Link
-            href='https://github.com/donetick/core'
+            href='https://github.com/donetick/donetick'
             level='body2'
             sx={{ display: 'block' }}
           >
-            Core(Backend)
+            Donetick
           </Link>
           <Link
             href='https://github.com/donetick/frontend'
@@ -86,11 +76,18 @@ function Footer() {
             Home Assistant Addon
           </Link>
           <Link
-            href='https://github.com/orgs/Donetick/packages'
+            href='https://github.com/orgs/donetick/packages'
             level='body2'
             sx={{ display: 'block' }}
           >
-            Packages
+            Docker Images
+          </Link>
+          <Link
+            href='https://github.com/donetick/donetick/releases'
+            level='body2'
+            sx={{ display: 'block' }}
+          >
+            Releases
           </Link>
         </Box>
         <Box>
@@ -106,6 +103,9 @@ function Footer() {
           </Link>
           <Link disabled={true} level='body2' sx={{ display: 'block' }}>
             Changelog(soon)
+          </Link>
+          <Link disabled={true} level='body2' sx={{ display: 'block' }}>
+            V{version}
           </Link>
         </Box>
         {/* <Box>

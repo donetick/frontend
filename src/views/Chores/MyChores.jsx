@@ -1,13 +1,17 @@
-import { Add, CancelRounded, EditCalendar } from '@mui/icons-material'
 import {
-  Badge,
+  Add,
+  CancelRounded,
+  EditCalendar,
+  FilterAlt,
+  FilterAltOff,
+} from '@mui/icons-material'
+import {
   Box,
-  Checkbox,
+  Chip,
   Container,
   IconButton,
   Input,
   List,
-  ListItem,
   Menu,
   MenuItem,
   Snackbar,
@@ -192,95 +196,27 @@ const MyChores = () => {
         My Chores
       </Typography> */}
       {/* <Sheet> */}
-      <List
-        orientation='horizontal'
-        wrap
+
+      {/* Search box to filter  */}
+      <Box
         sx={{
-          '--List-gap': '8px',
-          '--ListItem-radius': '20px',
-          '--ListItem-minHeight': '32px',
-          '--ListItem-gap': '4px',
-          mt: 0.2,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignContent: 'center',
+          alignItems: 'center',
+          gap: 1,
         }}
       >
-        {['All', 'Overdue', 'Due today', 'Due in week'].map(filter => (
-          <Badge
-            key={filter}
-            anchorOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
-            }}
-            variant='outlined'
-            color={selectedFilter === filter ? 'primary' : 'neutral'}
-            badgeContent={FILTERS[filter](chores).length}
-            badgeInset={'5px'}
-          >
-            <ListItem key={filter}>
-              <Checkbox
-                key={'checkbox' + filter}
-                label={filter}
-                onClick={() => handleSelectedFilter(filter)}
-                checked={filter === selectedFilter}
-                disableIcon
-                overlay
-                size='sm'
-              />
-            </ListItem>
-          </Badge>
-        ))}
-
-        <ListItem onClick={handleFilterMenuOpen}>
-          <Checkbox key='checkboxAll' label='⋮' disableIcon overlay size='lg' />
-        </ListItem>
-        <Menu
-          ref={menuRef}
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={handleFilterMenuClose}
-        >
-          <MenuItem
-            onClick={() => {
-              setFilteredChores(
-                FILTERS['Assigned To Me'](chores, userProfile.id),
-              )
-              setSelectedFilter('Assigned To Me')
-              handleFilterMenuClose()
-            }}
-          >
-            Assigned to me
-          </MenuItem>
-          <MenuItem
-            onClick={() => {
-              setFilteredChores(
-                FILTERS['Created By Me'](chores, userProfile.id),
-              )
-              setSelectedFilter('Created By Me')
-              handleFilterMenuClose()
-            }}
-          >
-            Created by me
-          </MenuItem>
-          <MenuItem
-            onClick={() => {
-              setFilteredChores(FILTERS['No Due Date'](chores, userProfile.id))
-              setSelectedFilter('No Due Date')
-              handleFilterMenuClose()
-            }}
-          >
-            No Due Date
-          </MenuItem>
-        </Menu>
-      </List>
-      {/* Search box to filter  */}
-      <Box>
         <Input
           placeholder='Search'
           value={searchTerm}
+          fullWidth
           sx={{
             mt: 1,
             mb: 1,
-            borderRadius: 20,
+            borderRadius: 24,
             // border: '1px solid',
+            height: 24,
             borderColor: 'text.disabled',
             padding: 1,
           }}
@@ -296,6 +232,73 @@ const MyChores = () => {
             )
           }
         />
+        <IconButton
+          onClick={handleFilterMenuOpen}
+          variant='outlined'
+          color={
+            selectedFilter && selectedFilter != 'All' ? 'primary' : 'neutral'
+          }
+          size='sm'
+          sx={{
+            height: 24,
+            borderRadius: 24,
+          }}
+        >
+          {selectedFilter && selectedFilter != 'All' ? (
+            <FilterAltOff />
+          ) : (
+            <FilterAlt />
+          )}
+        </IconButton>
+        <List
+          orientation='horizontal'
+          wrap
+          sx={{
+            // '--List-gap': '8px',
+            // '--ListItem-radius': '20px',
+            // '--ListItem-minHeight': '32px',
+            // '--ListItem-gap': '4px',
+            mt: 0.2,
+          }}
+        >
+          {/* <Checkbox
+                key='checkboxAll'
+                label=''
+                disableIcon
+                overlay
+                size='sm'
+              /> */}
+
+          <Menu
+            ref={menuRef}
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleFilterMenuClose}
+          >
+            {Object.keys(FILTERS).map(filter => (
+              <MenuItem
+                key={filter}
+                onClick={() => {
+                  const filterFunction = FILTERS[filter]
+                  const filteredChores =
+                    filterFunction.length === 2
+                      ? filterFunction(chores, userProfile.id)
+                      : filterFunction(chores)
+                  setFilteredChores(filteredChores)
+                  setSelectedFilter(filter)
+                  handleFilterMenuClose()
+                }}
+              >
+                {filter}
+                <Chip color={selectedFilter === filter ? 'primary' : 'neutral'}>
+                  {FILTERS[filter].length === 2
+                    ? FILTERS[filter](chores, userProfile.id).length
+                    : FILTERS[filter](chores).length}
+                </Chip>
+              </MenuItem>
+            ))}
+          </Menu>
+        </List>
       </Box>
 
       {/* </Sheet> */}

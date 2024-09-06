@@ -3,12 +3,14 @@ import AOS from 'aos'
 import 'aos/dist/aos.css'
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import CookiePermissionSnackbar from './CookiePermissionSnackbar'
 import DemoAssignee from './DemoAssignee'
 import DemoHistory from './DemoHistory'
 import DemoMyChore from './DemoMyChore'
 import DemoScheduler from './DemoScheduler'
 import FeaturesSection from './FeaturesSection'
 import Footer from './Footer'
+import GettingStarted from './GettingStarted'
 import HomeHero from './HomeHero'
 const Landing = () => {
   const Navigate = useNavigate()
@@ -39,6 +41,8 @@ const Landing = () => {
         <DemoHistory />
       </Grid>
       <FeaturesSection />
+      <GettingStarted />
+
       {/* <PricingSection /> */}
       <Box
         sx={{
@@ -49,7 +53,7 @@ const Landing = () => {
           mb: 5,
         }}
       ></Box>
-
+      <CookiePermissionSnackbar />
       <Footer />
     </Container>
   )
