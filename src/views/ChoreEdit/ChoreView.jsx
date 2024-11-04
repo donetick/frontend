@@ -5,6 +5,7 @@ import {
   Checklist,
   Edit,
   History,
+  LowPriority,
   PeopleAlt,
   Person,
   SwitchAccessShortcut,
@@ -17,11 +18,15 @@ import {
   Checkbox,
   Chip,
   Container,
+  Dropdown,
   FormControl,
   Grid,
   Input,
   ListItem,
   ListItemContent,
+  Menu,
+  MenuButton,
+  MenuItem,
   Sheet,
   Snackbar,
   styled,
@@ -36,7 +41,9 @@ import {
   GetChoreDetailById,
   MarkChoreComplete,
   SkipChore,
+  UpdateChorePriority,
 } from '../../utils/Fetcher'
+import Priorities from '../../utils/Priorities'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 const IconCard = styled('div')({
   display: 'flex',
@@ -48,6 +55,7 @@ const IconCard = styled('div')({
   height: '40px',
   marginRight: '16px',
 })
+
 const ChoreView = () => {
   const [chore, setChore] = useState({})
   const navigate = useNavigate()
@@ -63,13 +71,17 @@ const ChoreView = () => {
   const [secondsLeftToCancel, setSecondsLeftToCancel] = useState(null)
   const [completedDate, setCompletedDate] = useState(null)
   const [confirmModelConfig, setConfirmModelConfig] = useState({})
-
+  const [chorePriority, setChorePriority] = useState(null)
   useEffect(() => {
     Promise.all([
       GetChoreDetailById(choreId).then(resp => {
         if (resp.ok) {
           return resp.json().then(data => {
             setChore(data.res)
+            setChorePriority(
+              Priorities.find(p => p.value === data.res.priority),
+            )
+            document.title = 'Donetick: ' + data.res.name
           })
         }
       }),
@@ -89,7 +101,14 @@ const ChoreView = () => {
       generateInfoCards(chore)
     }
   }, [chore, performers])
-
+  const handleUpdatePriority = priority => {
+    if (priority.value === 0) {
+      setChorePriority(null)
+    } else {
+      setChorePriority(priority)
+    }
+    UpdateChorePriority(choreId, priority.value)
+  }
   const generateInfoCards = chore => {
     const cards = [
       {
@@ -217,6 +236,8 @@ const ChoreView = () => {
         flexDirection: 'column',
         // space between :
         justifyContent: 'space-between',
+        // max height of the container:
+        maxHeight: 'calc(100vh - 500px)',
       }}
     >
       <Box
@@ -238,17 +259,13 @@ const ChoreView = () => {
         >
           {chore.name}
         </Typography>
-        <Chip startDecorator={<CalendarMonth />} size='lg' sx={{ mb: 4 }}>
+        <Chip startDecorator={<CalendarMonth />} size='md' sx={{ mb: 1 }}>
           {chore.nextDueDate
             ? `Due at ${moment(chore.nextDueDate).format('MM/DD/YYYY hh:mm A')}`
             : 'N/A'}
         </Chip>
       </Box>
       <Box>
-        <Typography level='title-md' sx={{ mb: 0.5 }}>
-          Details
-        </Typography>
-
         <Sheet
           sx={{
             mb: 1,
@@ -280,6 +297,101 @@ const ChoreView = () => {
             ))}
           </Grid>
         </Sheet>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            gap: 1,
+            alignContent: 'center',
+            justifyContent: 'center',
+            mb: 1,
+          }}
+        >
+          <Dropdown>
+            <MenuButton
+              color={
+                chorePriority?.name === 'P1'
+                  ? 'danger'
+                  : chorePriority?.name === 'P2'
+                    ? 'warning'
+                    : 'neutral'
+              }
+              sx={{
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                p: 1,
+              }}
+              fullWidth
+            >
+              {chorePriority ? chorePriority.icon : <LowPriority />}
+              {chorePriority ? chorePriority.name : 'No Priority'}
+            </MenuButton>
+            <Menu>
+              {Priorities.map((priority, index) => (
+                <MenuItem
+                  key={index}
+                  onClick={() => {
+                    handleUpdatePriority(priority)
+                  }}
+                >
+                  {priority.name}
+                </MenuItem>
+              ))}
+              <Divider />
+              <MenuItem
+                onClick={() => {
+                  handleUpdatePriority({
+                    name: 'No Priority',
+                    value: 0,
+                  })
+                  setChorePriority(null)
+                }}
+              >
+                No Priority
+              </MenuItem>
+            </Menu>
+          </Dropdown>
+
+          <Button
+            size='sm'
+            color='neutral'
+            variant='outlined'
+            fullWidth
+            onClick={() => {
+              navigate(`/chores/${choreId}/history`)
+            }}
+            sx={{
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              p: 1,
+            }}
+          >
+            <History />
+            History
+          </Button>
+          <Button
+            size='sm'
+            color='neutral'
+            variant='outlined'
+            fullWidth
+            sx={{
+              // top right of the card:
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              p: 1,
+            }}
+            onClick={() => {
+              navigate(`/chores/${choreId}/edit`)
+            }}
+          >
+            <Edit />
+            Edit
+          </Button>
+        </Box>
+
         {chore.notes && (
           <>
             <Typography level='title-md' sx={{ mb: 1 }}>
@@ -298,9 +410,7 @@ const ChoreView = () => {
           my: 2,
         }}
       /> */}
-      <Typography level='title-md' sx={{ mt: 1 }}>
-        Actions
-      </Typography>
+
       <Card
         sx={{
           p: 2,
@@ -412,7 +522,8 @@ const ChoreView = () => {
             }}
           />
         )}
-     <Box
+
+        <Box
           sx={{
             display: 'flex',
             flexDirection: 'row',
@@ -421,22 +532,20 @@ const ChoreView = () => {
             justifyContent: 'center',
           }}
         >
-        <Button
-          fullWidth
-          size='lg'
-          onClick={handleTaskCompletion}
-          disabled={isPendingCompletion}
-          color={isPendingCompletion ? 'danger' : 'success'}
-          startDecorator={<Check />}
-          sx={
-            {
+          <Button
+            fullWidth
+            size='lg'
+            onClick={handleTaskCompletion}
+            disabled={isPendingCompletion}
+            color={isPendingCompletion ? 'danger' : 'success'}
+            startDecorator={<Check />}
+            sx={{
               flex: 4,
-            }
-          }
-        >
-          <Box>Mark as done</Box>
-        </Button>
-   
+            }}
+          >
+            <Box>Mark as done</Box>
+          </Button>
+
           <Button
             fullWidth
             size='lg'
@@ -458,53 +567,14 @@ const ChoreView = () => {
               })
             }}
             startDecorator={<SwitchAccessShortcut />}
-            sx={
-              {
-                flex: 1,
-              }
-            }
+            sx={{
+              flex: 1,
+            }}
           >
             <Box>Skip</Box>
           </Button>
-          </Box>
-        <Divider sx={{ my: 0.5 }}>More</Divider>
+        </Box>
 
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'row',
-            gap: 1,
-            alignContent: 'center',
-            justifyContent: 'center',
-          }}
-        > 
-          <Button
-            startDecorator={<History />}
-            size='lg'
-            color='primary'
-            variant='outlined'
-            fullWidth
-            onClick={() => {
-              navigate(`/chores/${choreId}/history`)
-            }}
-          >
-            History
-          </Button>
-
-     <Button
-            startDecorator={<Edit />}
-            size='lg'
-            color='primary'
-            variant='outlined'
-            fullWidth
-            onClick={() => {
-              navigate(`/chores/${choreId}/edit`)
-            }}
-          >
-            Edit
-          </Button>
-           
-</Box>
         <Snackbar
           open={isPendingCompletion}
           endDecorator={
