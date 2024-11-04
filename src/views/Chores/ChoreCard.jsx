@@ -3,6 +3,8 @@ import {
   Check,
   Delete,
   Edit,
+  HorizontalRule,
+  KeyboardControlKey,
   KeyboardDoubleArrowUp,
   LocalOffer,
   ManageSearch,
@@ -10,6 +12,7 @@ import {
   MoreVert,
   Nfc,
   NoteAdd,
+  PriorityHigh,
   RecordVoiceOver,
   Repeat,
   Report,
@@ -38,6 +41,7 @@ import moment from 'moment'
 import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { API_URL } from '../../Config'
+import { UserContext } from '../../contexts/UserContext'
 import {
   MarkChoreComplete,
   SkipChore,
@@ -76,14 +80,7 @@ const ChoreCard = ({
   const [isPendingCompletion, setIsPendingCompletion] = React.useState(false)
   const [secondsLeftToCancel, setSecondsLeftToCancel] = React.useState(null)
   const [timeoutId, setTimeoutId] = React.useState(null)
-  // useEffect(() => {
-  //   GetAllUsers()
-  //     .then(response => response.json())
-  //     .then(data => {
-  //       setPerformers(data.res)
-  //     })
-  // }, [])
-
+  const { userProfile } = React.useContext(UserContext)
   useEffect(() => {
     document.addEventListener('mousedown', handleMenuOutsideClick)
     return () => {
@@ -282,7 +279,18 @@ const ChoreCard = ({
         return <LocalOffer />
     }
   }
-
+  const getPriorityIcon = priority => {
+    switch (Number(priority)) {
+      case 1:
+        return <PriorityHigh />
+      case 2:
+        return <KeyboardDoubleArrowUp />
+      case 3:
+        return <KeyboardControlKey />
+      default:
+        return <HorizontalRule />
+    }
+  }
   const getRecurrentChipText = chore => {
     const dayOfMonthSuffix = n => {
       if (n >= 11 && n <= 13) {
@@ -438,16 +446,37 @@ const ChoreCard = ({
               </Avatar>
               <Box display='flex' flexDirection='column'>
                 <Typography level='title-md'>{getName(chore.name)}</Typography>
-                <Typography level='body-md' color='text.disabled'>
-                  Assigned to{' '}
-                  <Chip variant='outlined'>
-                    {
-                      performers.find(p => p.id === chore.assignedTo)
-                        ?.displayName
-                    }
-                  </Chip>
-                </Typography>
+                {chore.assignedTo !== userProfile.id && (
+                  <Typography level='body-md' color='text.disabled'>
+                    Assigned to{' '}
+                    <Chip variant='outlined'>
+                      {
+                        performers.find(p => p.id === chore.assignedTo)
+                          ?.displayName
+                      }
+                    </Chip>
+                  </Typography>
+                )}
                 <Box>
+                  {chore.priority > 0 && (
+                    <Chip
+                      sx={{
+                        position: 'relative',
+                        mr: 0.5,
+                        top: 2,
+                        zIndex: 1,
+                      }}
+                      color={
+                        chore.priority === 1
+                          ? 'danger'
+                          : chore.priority === 2
+                            ? 'warning'
+                            : 'neutral'
+                      }
+                    >
+                      P{chore.priority}
+                    </Chip>
+                  )}
                   {chore.labels?.split(',').map((label, index) => (
                     <Chip
                       variant='solid'

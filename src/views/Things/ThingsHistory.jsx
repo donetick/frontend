@@ -125,7 +125,7 @@ const ThingsHistory = () => {
                         'ddd MM/DD/yyyy HH:mm:ss',
                       )}
                     </Typography>
-                    <Chip>{history.state === '1' ? 'Active' : 'Inactive'}</Chip>
+                    <Chip>{history.state}</Chip>
                   </Box>
                 </ListItemContent>
               </ListItem>

@@ -88,7 +88,7 @@ const UpdateChoreAssignee = (id, assignee) => {
   return Fetch(`${API_URL}/chores/${id}/assignee`, {
     method: 'PUT',
     headers: HEADERS(),
-    body: JSON.stringify({ assignee:Number(assignee) }),
+    body: JSON.stringify({ assignee: Number(assignee) }),
   })
 }
 
@@ -108,11 +108,18 @@ const DeleteChore = id => {
 }
 
 const SaveChore = chore => {
-  console.log('chore', chore)
   return Fetch(`${API_URL}/chores/`, {
     method: 'PUT',
     headers: HEADERS(),
     body: JSON.stringify(chore),
+  })
+}
+
+const UpdateChorePriority = (id, priority) => {
+  return Fetch(`${API_URL}/chores/${id}/priority `, {
+    method: 'PUT',
+    headers: HEADERS(),
+    body: JSON.stringify({ priority: priority }),
   })
 }
 const GetChoreHistory = choreId => {
@@ -312,8 +319,9 @@ export {
   SaveThing,
   signUp,
   SkipChore,
+  UpdateChoreAssignee,
   UpdateChoreHistory,
+  UpdateChorePriority,
   UpdateThingState,
   UpdateUserDetails,
-  UpdateChoreAssignee,
 }
