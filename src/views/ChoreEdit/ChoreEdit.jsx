@@ -630,10 +630,11 @@ const ChoreEdit = () => {
                 description: 'before a task is due in few hours',
                 id: 'predue',
               },
-              {
-                title: 'Overdue',
-                description: 'A notification when a task is overdue',
-              },
+              // {
+              //   title: 'Overdue',
+              //   description: 'A notification when a task is overdue',
+              //   id: 'overdue',
+              // },
               {
                 title: 'Nagging',
                 description: 'Daily reminders until the task is completed',

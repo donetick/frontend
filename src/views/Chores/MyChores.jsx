@@ -66,12 +66,6 @@ const MyChores = () => {
     return aDueDate - bDueDate // Sort ascending by due date
   }
 
-  const handleSelectedFilter = selected => {
-    setFilteredChores(FILTERS[selected](chores))
-
-    setSelectedFilter(selected)
-  }
-
   useEffect(() => {
     if (userProfile === null) {
       GetUserProfile()
