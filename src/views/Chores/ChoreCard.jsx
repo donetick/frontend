@@ -446,7 +446,7 @@ const ChoreCard = ({
               </Avatar>
               <Box display='flex' flexDirection='column'>
                 <Typography level='title-md'>{getName(chore.name)}</Typography>
-                {chore.assignedTo !== userProfile.id && (
+                {userProfile && chore.assignedTo !== userProfile.id && (
                   <Typography level='body-md' color='text.disabled'>
                     Assigned to{' '}
                     <Chip variant='outlined'>
