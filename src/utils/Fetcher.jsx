@@ -21,6 +21,14 @@ const signUp = (username, password, displayName, email) => {
   })
 }
 
+const UpdatePassword = newPassword => {
+  return fetch(`${API_URL}/users/change_password`, {
+    method: 'PUT',
+    headers: HEADERS(),
+    body: JSON.stringify({ password: newPassword }),
+  })
+}
+
 const login = (username, password) => {
   return fetch(`${API_URL}/auth/login`, {
     headers: {
@@ -322,6 +330,7 @@ export {
   UpdateChoreAssignee,
   UpdateChoreHistory,
   UpdateChorePriority,
+  UpdatePassword,
   UpdateThingState,
   UpdateUserDetails,
 }
