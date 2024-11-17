@@ -24,7 +24,9 @@ import {
   GetUserProfile,
   JoinCircle,
   LeaveCircle,
+  UpdatePassword,
 } from '../../utils/Fetcher'
+import PassowrdChangeModal from '../Modals/Inputs/PasswordChangeModal'
 import APITokenSettings from './APITokenSettings'
 import NotificationSetting from './NotificationSetting'
 import ThemeToggle from './ThemeToggle'
@@ -35,6 +37,7 @@ const Settings = () => {
   const [circleMemberRequests, setCircleMemberRequests] = useState([])
   const [circleInviteCode, setCircleInviteCode] = useState('')
   const [circleMembers, setCircleMembers] = useState([])
+  const [changePasswordModal, setChangePasswordModal] = useState(false)
   useEffect(() => {
     GetUserProfile().then(resp => {
       resp.json().then(data => {
@@ -314,7 +317,7 @@ const Settings = () => {
         <Typography level='h3'>Account Settings</Typography>
         <Divider />
         <Typography level='body-md'>
-          Change your account settings, including your password, display name
+          Change your account settings, type or update your password
         </Typography>
         <Typography level='title-md' mb={-1}>
           Account Type : {getSubscriptionStatus()}
@@ -365,6 +368,39 @@ const Settings = () => {
             </Button>
           )}
         </Box>
+        {import.meta.env.VITE_IS_SELF_HOSTED === 'true' && (
+          <Box>
+            <Typography level='title-md' mb={1}>
+              Password :
+            </Typography>
+            <Typography mb={1} level='body-sm'></Typography>
+            <Button
+              variant='soft'
+              onClick={() => {
+                setChangePasswordModal(true)
+              }}
+            >
+              Change Password
+            </Button>
+            {changePasswordModal ? (
+              <PassowrdChangeModal
+                isOpen={changePasswordModal}
+                onClose={password => {
+                  if (password) {
+                    UpdatePassword(password).then(resp => {
+                      if (resp.ok) {
+                        alert('Password changed successfully')
+                      } else {
+                        alert('Password change failed')
+                      }
+                    })
+                  }
+                  setChangePasswordModal(false)
+                }}
+              />
+            ) : null}
+          </Box>
+        )}
       </div>
       <NotificationSetting />
       <APITokenSettings />
