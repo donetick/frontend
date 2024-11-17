@@ -317,7 +317,7 @@ const Settings = () => {
         <Typography level='h3'>Account Settings</Typography>
         <Divider />
         <Typography level='body-md'>
-          Change your account settings, including your password, display name
+          Change your account settings, type or update your password
         </Typography>
         <Typography level='title-md' mb={-1}>
           Account Type : {getSubscriptionStatus()}
