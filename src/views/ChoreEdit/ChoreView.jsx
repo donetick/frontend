@@ -330,16 +330,26 @@ const ChoreView = () => {
             <Menu>
               {Priorities.map((priority, index) => (
                 <MenuItem
+                  sx={{
+                    pr: 1,
+                    py: 1,
+                  }}
                   key={index}
                   onClick={() => {
                     handleUpdatePriority(priority)
                   }}
+                  color={priority.color}
                 >
+                  {priority.icon}
                   {priority.name}
                 </MenuItem>
               ))}
               <Divider />
               <MenuItem
+                sx={{
+                  pr: 1,
+                  py: 1,
+                }}
                 onClick={() => {
                   handleUpdatePriority({
                     name: 'No Priority',
