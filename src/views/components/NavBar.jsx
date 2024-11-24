@@ -2,7 +2,7 @@ import Logo from '@/assets/logo.svg'
 import {
   AccountBox,
   HomeOutlined,
-  ListAltRounded,
+  ListAlt,
   Logout,
   MenuRounded,
   Message,
@@ -30,6 +30,7 @@ const links = [
     label: 'Home',
     icon: <HomeOutlined />,
   },
+
   // {
   //   to: '/chores',
   //   label: 'Desktop View',
@@ -39,6 +40,11 @@ const links = [
     to: '/things',
     label: 'Things',
     icon: <Widgets />,
+  },
+  {
+    to: 'labels',
+    label: 'Labels',
+    icon: <ListAlt />,
   },
   {
     to: '/settings#sharing',

@@ -12,6 +12,7 @@ import ChoreView from '../views/ChoreEdit/ChoreView'
 import MyChores from '../views/Chores/MyChores'
 import JoinCircleView from '../views/Circles/JoinCircle'
 import ChoreHistory from '../views/History/ChoreHistory'
+import LabelView from '../views/Labels/LabelView'
 import Landing from '../views/Landing/Landing'
 import PaymentCancelledView from '../views/Payments/PaymentFailView'
 import PaymentSuccessView from '../views/Payments/PaymentSuccessView'
@@ -115,6 +116,10 @@ const Router = createBrowserRouter([
       {
         path: 'things/:id',
         element: <ThingsHistory />,
+      },
+      {
+        path: 'labels/',
+        element: <LabelView />,
       },
     ],
   },

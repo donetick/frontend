@@ -7,14 +7,18 @@ import * as React from 'react'
 
 const filter = createFilterOptions()
 
-export default function FreeSoloCreateOption({ options, onSelectChange }) {
+export default function FreeSoloCreateOption({
+  options,
+  onSelectChange,
+  selected,
+}) {
   React.useEffect(() => {
     setValue(options)
   }, [options])
 
-  const [value, setValue] = React.useState([])
+  const [value, setValue] = React.useState([selected])
   const [selectOptions, setSelectOptions] = React.useState(
-    options ? options : [],
+    selected ? selected : [],
   )
   return (
     <FormControl id='free-solo-with-text-demo'>
@@ -38,26 +42,27 @@ export default function FreeSoloCreateOption({ options, onSelectChange }) {
           }
           onSelectChange(newValue)
         }}
-        filterOptions={(options, params) => {
-          const filtered = filter(options, params)
+        filterOptions={(selected, params) => {
+          const filtered = filter(selected, params)
 
           const { inputValue } = params
           // Suggest the creation of a new value
-          const isExisting = options.some(option => inputValue === option.title)
+          const isExisting = selected.some(
+            option => inputValue === option.title,
+          )
           if (inputValue !== '' && !isExisting) {
             filtered.push({
               inputValue,
               title: `Add "${inputValue}"`,
             })
           }
-
           return filtered
         }}
         selectOnFocus
         clearOnBlur
         handleHomeEndKeys
         // freeSolo
-        options={selectOptions}
+        options={options}
         getOptionLabel={option => {
           // Value selected with enter, right from the input
           if (typeof option === 'string') {
