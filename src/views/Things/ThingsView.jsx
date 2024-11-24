@@ -70,7 +70,6 @@ const ThingCard = ({
         // flexDirection: 'row', // Change to 'row'
         justifyContent: 'space-between',
         p: 2,
-        backgroundColor: 'white',
         boxShadow: 'sm',
         borderRadius: 8,
         mb: 1,
