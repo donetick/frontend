@@ -40,7 +40,6 @@ function LabelModal({ isOpen, onClose, onSave, label }) {
       setError('Name cannot be empty')
       return false
     } else if (
-      !label ||
       userLabels.some(
         userLabel => userLabel.name === labelName && userLabel.id !== label.id,
       )
@@ -69,8 +68,12 @@ function LabelModal({ isOpen, onClose, onSave, label }) {
         setError('Failed to save label. Please try again.')
         return
       }
-      queryClient.invalidateQueries('labels').then(() => {
-        onSave({ id: label?.id, name: labelName, color })
+      res.json().then(data => {
+        if (data.error) {
+          setError('Failed to save label. Please try again.')
+          return
+        }
+        onSave({ id: data?.res?.id, name: labelName, color })
         onClose()
       })
     })
