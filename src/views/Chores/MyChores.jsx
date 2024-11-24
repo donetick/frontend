@@ -21,8 +21,10 @@ import Fuse from 'fuse.js'
 import { useContext, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { UserContext } from '../../contexts/UserContext'
-import { GetAllUsers, GetChores, GetUserProfile } from '../../utils/Fetcher'
+import { useChores } from '../../queries/ChoreQueries'
+import { GetAllUsers, GetUserProfile } from '../../utils/Fetcher'
 import LoadingComponent from '../components/Loading'
+import { useLabels } from '../Labels/LabelQueries'
 import ChoreCard from './ChoreCard'
 
 const MyChores = () => {
@@ -38,6 +40,8 @@ const MyChores = () => {
   const [anchorEl, setAnchorEl] = useState(null)
   const menuRef = useRef(null)
   const Navigate = useNavigate()
+  const { data: userLabels, isLoading: userLabelsLoading } = useLabels()
+  const { data: choresData, isLoading: choresLoading } = useChores()
   const choreSorter = (a, b) => {
     // 1. Handle null due dates (always last):
     if (!a.nextDueDate && !b.nextDueDate) return 0 // Both null, no order
@@ -74,14 +78,6 @@ const MyChores = () => {
           setUserProfile(data.res)
         })
     }
-    GetChores()
-      .then(response => response.json())
-      .then(data => {
-        data.res.sort(choreSorter)
-        setChores(data.res)
-
-        setFilteredChores(data.res)
-      })
 
     GetAllUsers()
       .then(response => response.json())
@@ -94,6 +90,15 @@ const MyChores = () => {
       setActiveUserId(currentUser.id)
     }
   }, [])
+
+  useEffect(() => {
+    if (choresData) {
+      const sortedChores = choresData.res.sort(choreSorter)
+      setChores(sortedChores)
+      setFilteredChores(sortedChores)
+    }
+  }, [choresData, choresLoading])
+
   useEffect(() => {
     document.addEventListener('mousedown', handleMenuOutsideClick)
     return () => {
@@ -160,12 +165,21 @@ const MyChores = () => {
 
   const searchOptions = {
     // keys to search in
-    keys: ['name', 'labels'],
+    keys: ['name', 'raw_label'],
     includeScore: true, // Optional: if you want to see how well each result matched the search term
     isCaseSensitive: false,
     findAllMatches: true,
   }
-  const fuse = new Fuse(chores, searchOptions)
+
+  const fuse = new Fuse(
+    chores.map(c => ({
+      ...c,
+      raw_label: c.labelsV2
+        .map(l => userLabels.find(x => (x.id = l.id)).name)
+        .join(' '),
+    })),
+    searchOptions,
+  )
 
   const handleSearchChange = e => {
     const search = e.target.value
@@ -180,7 +194,12 @@ const MyChores = () => {
     setFilteredChores(fuse.search(term).map(result => result.item))
   }
 
-  if (userProfile === null) {
+  if (
+    userProfile === null ||
+    userLabelsLoading ||
+    performers.length === 0 ||
+    choresLoading
+  ) {
     return <LoadingComponent />
   }
 
@@ -326,6 +345,7 @@ const MyChores = () => {
           onChoreUpdate={handleChoreUpdated}
           onChoreRemove={handleChoreDeleted}
           performers={performers}
+          userLabels={userLabels}
         />
       ))}
 

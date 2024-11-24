@@ -43,6 +43,7 @@ import {
   SkipChore,
   UpdateChorePriority,
 } from '../../utils/Fetcher'
+import { getTextColorFromBackgroundColor } from '../../utils/LabelColors'
 import Priorities from '../../utils/Priorities'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 const IconCard = styled('div')({
@@ -264,6 +265,22 @@ const ChoreView = () => {
             ? `Due at ${moment(chore.nextDueDate).format('MM/DD/YYYY hh:mm A')}`
             : 'N/A'}
         </Chip>
+        {/* show each label : */}
+        {chore?.labelsV2?.map((label, index) => (
+          <Chip
+            key={index}
+            sx={{
+              position: 'relative',
+              ml: index === 0 ? 0 : 0.5,
+              top: 2,
+              zIndex: 1,
+              backgroundColor: label?.color,
+              color: getTextColorFromBackgroundColor(label?.color),
+            }}
+          >
+            {label?.name}
+          </Chip>
+        ))}
       </Box>
       <Box>
         <Sheet
@@ -330,16 +347,26 @@ const ChoreView = () => {
             <Menu>
               {Priorities.map((priority, index) => (
                 <MenuItem
+                  sx={{
+                    pr: 1,
+                    py: 1,
+                  }}
                   key={index}
                   onClick={() => {
                     handleUpdatePriority(priority)
                   }}
+                  color={priority.color}
                 >
+                  {priority.icon}
                   {priority.name}
                 </MenuItem>
               ))}
               <Divider />
               <MenuItem
+                sx={{
+                  pr: 1,
+                  py: 1,
+                }}
                 onClick={() => {
                   handleUpdatePriority({
                     name: 'No Priority',

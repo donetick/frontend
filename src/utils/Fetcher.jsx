@@ -45,6 +45,13 @@ const GetAllUsers = () => {
     headers: HEADERS(),
   })
 }
+const GetChoresNew = async () => {
+  const resp = await Fetch(`${API_URL}/chores/`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+  return resp.json()
+}
 
 const GetChores = () => {
   return Fetch(`${API_URL}/chores/`, {
@@ -294,16 +301,49 @@ const GetLongLiveTokens = () => {
     headers: HEADERS(),
   })
 }
+
+const CreateLabel = label => {
+  return Fetch(`${API_URL}/labels`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify(label),
+  })
+}
+
+const GetLabels = async () => {
+  const resp = await Fetch(`${API_URL}/labels`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+  return resp.json()
+}
+
+const UpdateLabel = label => {
+  return Fetch(`${API_URL}/labels`, {
+    method: 'PUT',
+    headers: HEADERS(),
+    body: JSON.stringify(label),
+  })
+}
+const DeleteLabel = id => {
+  return Fetch(`${API_URL}/labels/${id}`, {
+    method: 'DELETE',
+    headers: HEADERS(),
+  })
+}
+
 export {
   AcceptCircleMemberRequest,
   CancelSubscription,
   createChore,
   CreateChore,
+  CreateLabel,
   CreateLongLiveToken,
   CreateThing,
   DeleteChore,
   DeleteChoreHistory,
   DeleteCircleMember,
+  DeleteLabel,
   DeleteLongLiveToken,
   DeleteThing,
   GetAllCircleMembers,
@@ -312,7 +352,9 @@ export {
   GetChoreDetailById,
   GetChoreHistory,
   GetChores,
+  GetChoresNew,
   GetCircleMemberRequests,
+  GetLabels,
   GetLongLiveTokens,
   GetSubscriptionSession,
   GetThingHistory,
@@ -330,6 +372,7 @@ export {
   UpdateChoreAssignee,
   UpdateChoreHistory,
   UpdateChorePriority,
+  UpdateLabel,
   UpdatePassword,
   UpdateThingState,
   UpdateUserDetails,
