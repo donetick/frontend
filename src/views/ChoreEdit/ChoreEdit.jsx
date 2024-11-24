@@ -46,6 +46,7 @@ const ASSIGN_STRATEGIES = [
   'least_assigned',
   'least_completed',
   'keep_last_assigned',
+  'random_except_last_assigned',
 ]
 const REPEAT_ON_TYPE = ['interval', 'days_of_the_week', 'day_of_the_month']
 
@@ -88,7 +89,15 @@ const ChoreEdit = () => {
   const [snackbarMessage, setSnackbarMessage] = useState('')
   const [snackbarColor, setSnackbarColor] = useState('warning')
   const [addLabelModalOpen, setAddLabelModalOpen] = useState(false)
-  const { data: userLabels, isLoading: isUserLabelsLoading } = useLabels()
+  const { data: userLabelsRaw, isLoading: isUserLabelsLoading } = useLabels()
+
+  const [userLabels, setUserLabels] = useState([])
+
+  useEffect(() => {
+    if (userLabelsRaw) {
+      setUserLabels(userLabelsRaw)
+    }
+  }, [userLabelsRaw])
 
   const Navigate = useNavigate()
 
@@ -938,7 +947,13 @@ const ChoreEdit = () => {
         <LabelModal
           isOpen={addLabelModalOpen}
           onSave={label => {
-            setLabels([...labels, label])
+            console.log('label', label)
+
+            const newLabels = [...labelsV2]
+            newLabels.push(label)
+            setUserLabels([...userLabels, label])
+
+            setLabelsV2([...labelsV2, label])
             setAddLabelModalOpen(false)
           }}
           onClose={() => setAddLabelModalOpen(false)}
