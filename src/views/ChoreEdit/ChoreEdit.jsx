@@ -1,3 +1,4 @@
+import { Add } from '@mui/icons-material'
 import {
   Box,
   Button,
@@ -11,6 +12,7 @@ import {
   Input,
   List,
   ListItem,
+  MenuItem,
   Option,
   Radio,
   RadioGroup,
@@ -34,8 +36,10 @@ import {
   SaveChore,
 } from '../../utils/Fetcher'
 import { isPlusAccount } from '../../utils/Helpers'
-import FreeSoloCreateOption from '../components/AutocompleteSelect'
+import { getTextColorFromBackgroundColor } from '../../utils/LabelColors'
+import { useLabels } from '../Labels/LabelQueries'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
+import LabelModal from '../Modals/Inputs/LabelModal'
 import RepeatSection from './RepeatSection'
 const ASSIGN_STRATEGIES = [
   'random',
@@ -66,6 +70,7 @@ const ChoreEdit = () => {
   const [frequency, setFrequency] = useState(1)
   const [frequencyMetadata, setFrequencyMetadata] = useState({})
   const [labels, setLabels] = useState([])
+  const [labelsV2, setLabelsV2] = useState([])
   const [allUserThings, setAllUserThings] = useState([])
   const [thingTrigger, setThingTrigger] = useState(null)
   const [isThingValid, setIsThingValid] = useState(false)
@@ -82,6 +87,9 @@ const ChoreEdit = () => {
   const [isSnackbarOpen, setIsSnackbarOpen] = useState(false)
   const [snackbarMessage, setSnackbarMessage] = useState('')
   const [snackbarColor, setSnackbarColor] = useState('warning')
+  const [addLabelModalOpen, setAddLabelModalOpen] = useState(false)
+  const { data: userLabels, isLoading: isUserLabelsLoading } = useLabels()
+
   const Navigate = useNavigate()
 
   const HandleValidateChore = () => {
@@ -172,7 +180,8 @@ const ChoreEdit = () => {
       isRolling: isRolling,
       isActive: isActive,
       notification: isNotificable,
-      labels: labels,
+      labels: labels.map(l => l.name),
+      labelsV2: labelsV2,
       notificationMetadata: notificationMetadata,
       thingTrigger: thingTrigger,
     }
@@ -226,8 +235,9 @@ const ChoreEdit = () => {
           setFrequency(data.res.frequency)
 
           setNotificationMetadata(JSON.parse(data.res.notificationMetadata))
-          setLabels(data.res.labels ? data.res.labels.split(',') : [])
+          // setLabels(data.res.labels ? data.res.labels.split(',') : [])
 
+          setLabelsV2(data.res.labelsV2)
           setAssignStrategy(
             data.res.assignStrategy
               ? data.res.assignStrategy
@@ -274,6 +284,14 @@ const ChoreEdit = () => {
       document.querySelector('input').focus()
     }
   }, [])
+
+  // useEffect(() => {
+  //   if (userLabels && userLabels.length == 0 && labelsV2.length == 0) {
+  //     return
+  //   }
+  //   const labelIds = labelsV2.map(l => l.id)
+  //   setLabelsV2(userLabels.filter(l => labelIds.indexOf(l.id) > -1))
+  // }, [userLabels, labelsV2])
 
   useEffect(() => {
     // if frequancy type change to somthing need a due date then set it to the current date:
@@ -329,6 +347,7 @@ const ChoreEdit = () => {
       },
     })
   }
+
   return (
     <Container maxWidth='md'>
       {/* <Typography level='h3' mb={1.5}>
@@ -726,8 +745,9 @@ const ChoreEdit = () => {
         <Typography level='h5'>
           Things to remember about this chore or to tag it
         </Typography>
-        <FreeSoloCreateOption
-          options={labels}
+        {/* <FreeSoloCreateOption
+          options={[...labels, 'test']}
+          selected={labels}
           onSelectChange={changes => {
             const newLabels = []
             changes.map(change => {
@@ -741,7 +761,99 @@ const ChoreEdit = () => {
             })
             setLabels(newLabels)
           }}
-        />
+        /> */}
+        <Select
+          multiple
+          onChange={(event, newValue) => {
+            setLabelsV2(userLabels.filter(l => newValue.indexOf(l.name) > -1))
+          }}
+          value={labelsV2.map(l => l.name)}
+          renderValue={selected => (
+            <Box sx={{ display: 'flex', gap: '0.25rem' }}>
+              {labelsV2.map(selectedOption => {
+                return (
+                  <Chip
+                    variant='soft'
+                    color='primary'
+                    key={selectedOption.id}
+                    size='lg'
+                    sx={{
+                      background: selectedOption.color,
+                      color: getTextColorFromBackgroundColor(
+                        selectedOption.color,
+                      ),
+                    }}
+                  >
+                    {selectedOption.name}
+                  </Chip>
+                )
+              })}
+            </Box>
+          )}
+          sx={{ minWidth: '15rem' }}
+          slotProps={{
+            listbox: {
+              sx: {
+                width: '100%',
+              },
+            },
+          }}
+        >
+          {userLabels &&
+            userLabels
+              // .map(l => l.name)
+              .map(label => (
+                <Option key={label.id + label.name} value={label.name}>
+                  <div
+                    style={{
+                      width: '20 px',
+                      height: '20 px',
+                      borderRadius: '50%',
+                      background: label.color,
+                    }}
+                  />
+                  {label.name}
+                </Option>
+              ))}
+          <MenuItem
+            key={'addNewLabel'}
+            value={' New Label'}
+            onClick={() => {
+              setAddLabelModalOpen(true)
+            }}
+          >
+            <Add />
+            Add New Label
+          </MenuItem>
+        </Select>
+        {/* <Card>
+          <List
+            orientation='horizontal'
+            wrap
+            sx={{
+              '--List-gap': '8px',
+              '--ListItem-radius': '20px',
+            }}
+          >
+            {labels?.map((label, index) => (
+              <ListItem key={label}>
+                <Chip
+                  onClick={() => {
+                    setLabels(labels.filter(l => l !== label))
+                  }}
+                  checked={true}
+                  overlay
+                  variant='soft'
+                  color='primary'
+                  size='lg'
+                  endDecorator={<Cancel />}
+                >
+                  {label}
+                </Chip>
+              </ListItem>
+            ))}
+          </List>
+        </Card> */}
       </Box>
       {choreId > 0 && (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
@@ -822,6 +934,16 @@ const ChoreEdit = () => {
         </Button>
       </Sheet>
       <ConfirmationModal config={confirmModelConfig} />
+      {addLabelModalOpen && (
+        <LabelModal
+          isOpen={addLabelModalOpen}
+          onSave={label => {
+            setLabels([...labels, label])
+            setAddLabelModalOpen(false)
+          }}
+          onClose={() => setAddLabelModalOpen(false)}
+        />
+      )}
       {/* <ChoreHistory ChoreHistory={choresHistory} UsersData={performers} /> */}
       <Snackbar
         open={isSnackbarOpen}

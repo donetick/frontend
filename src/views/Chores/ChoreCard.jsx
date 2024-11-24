@@ -47,6 +47,7 @@ import {
   SkipChore,
   UpdateChoreAssignee,
 } from '../../utils/Fetcher'
+import { getTextColorFromBackgroundColor } from '../../utils/LabelColors'
 import { Fetch } from '../../utils/TokenManager'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import DateModal from '../Modals/Inputs/DateModal'
@@ -58,6 +59,7 @@ const ChoreCard = ({
   performers,
   onChoreUpdate,
   onChoreRemove,
+  userLabels,
   sx,
   viewOnly,
 }) => {
@@ -407,7 +409,7 @@ const ChoreCard = ({
   }
 
   return (
-    <>
+    <Box key={chore.id + '-box'}>
       <Chip
         variant='soft'
         sx={{
@@ -455,6 +457,7 @@ const ChoreCard = ({
           // backgroundColor: 'white',
           boxShadow: 'sm',
           borderRadius: 20,
+          key: `${chore.id}-card`,
 
           // mb: 2,
         }}
@@ -485,7 +488,7 @@ const ChoreCard = ({
                     </Chip>
                   </Typography>
                 )}
-                <Box>
+                <Box key={`${chore.id}-labels`}>
                   {chore.priority > 0 && (
                     <Chip
                       sx={{
@@ -505,22 +508,27 @@ const ChoreCard = ({
                       P{chore.priority}
                     </Chip>
                   )}
-                  {chore.labels?.split(',').map((label, index) => (
-                    <Chip
-                      variant='solid'
-                      key={label}
-                      color='primary'
-                      sx={{
-                        position: 'relative',
-                        ml: index === 0 ? 0 : 0.5,
-                        top: 2,
-                        zIndex: 1,
-                      }}
-                      startDecorator={getIconForLabel(label)}
-                    >
-                      {label}
-                    </Chip>
-                  ))}
+                  {chore.labelsV2?.map((l, index) => {
+                    return (
+                      <Chip
+                        variant='solid'
+                        key={l.id}
+                        color='primary'
+                        sx={{
+                          position: 'relative',
+                          ml: index === 0 ? 0 : 0.5,
+                          top: 2,
+                          zIndex: 1,
+                          backgroundColor: l?.color,
+                          color: getTextColorFromBackgroundColor(l?.color),
+                        }}
+
+                        // startDecorator={getIconForLabel(label)}
+                      >
+                        {l?.name}
+                      </Chip>
+                    )
+                  })}
                 </Box>
               </Box>
             </Box>
@@ -757,7 +765,7 @@ const ChoreCard = ({
           </Typography>
         </Snackbar>
       </Card>
-    </>
+    </Box>
   )
 }
 

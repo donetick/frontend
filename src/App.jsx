@@ -2,6 +2,7 @@ import NavBar from '@/views/components/NavBar'
 import { Button, Snackbar, Typography, useColorScheme } from '@mui/joy'
 import Tracker from '@openreplay/tracker'
 import { useEffect, useState } from 'react'
+import { QueryClient, QueryClientProvider } from 'react-query'
 import { Outlet } from 'react-router-dom'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 import { UserContext } from './contexts/UserContext'
@@ -20,6 +21,8 @@ const remove = className => {
 const intervalMS = 5 * 60 * 1000 // 5 minutes
 
 function App() {
+  const queryClient = new QueryClient()
+
   startOpenReplay()
 
   const { mode, systemMode } = useColorScheme()
@@ -92,28 +95,31 @@ function App() {
 
   return (
     <div className='min-h-screen'>
-      <AuthenticationProvider />
-      <UserContext.Provider value={{ userProfile, setUserProfile }}>
-        <NavBar />
-        <Outlet />
-      </UserContext.Provider>
-      {needRefresh && (
-        <Snackbar open={showUpdateSnackbar}>
-          <Typography level='body-md'>
-            A new version is now available.Click on reload button to update.
-          </Typography>
-          <Button
-            color='secondary'
-            size='small'
-            onClick={() => {
-              updateServiceWorker(true)
-              setShowUpdateSnackbar(false)
-            }}
-          >
-            Refresh
-          </Button>
-        </Snackbar>
-      )}
+      <QueryClientProvider client={queryClient}>
+        <AuthenticationProvider />
+        <UserContext.Provider value={{ userProfile, setUserProfile }}>
+          <NavBar />
+          <Outlet />
+        </UserContext.Provider>
+        {needRefresh && (
+          <Snackbar open={showUpdateSnackbar}>
+            <Typography level='body-md'>
+              A new version is now available.Click on reload button to update.
+            </Typography>
+            <Button
+              color='secondary'
+              size='small'
+              onClick={() => {
+                updateServiceWorker(true)
+                setShowUpdateSnackbar(false)
+              }}
+            >
+              Refresh
+            </Button>
+          </Snackbar>
+        )}
+      </QueryClientProvider>
+      ,
     </div>
   )
 }
