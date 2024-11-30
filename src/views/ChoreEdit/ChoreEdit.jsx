@@ -364,7 +364,7 @@ const ChoreEdit = () => {
       </Typography> */}
       <Box>
         <FormControl error={errors.name}>
-          <Typography level='h4'>Descritpion :</Typography>
+          <Typography level='h4'>Description :</Typography>
           <Typography level='h5'>What is this chore about?</Typography>
           <Input value={name} onChange={e => setName(e.target.value)} />
           <FormHelperText error>{errors.name}</FormHelperText>
