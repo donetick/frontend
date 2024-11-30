@@ -1,6 +1,7 @@
 import {
   Add,
   CancelRounded,
+  CloseRounded,
   EditCalendar,
   FilterAlt,
   PriorityHigh,
@@ -33,6 +34,7 @@ import IconButtonWithMenu from './IconButtonWithMenu'
 
 const MyChores = () => {
   const { userProfile, setUserProfile } = useContext(UserContext)
+  const [isSearchFocused, setSearchFocused] = useState(false)
   const [isSnackbarOpen, setIsSnackbarOpen] = useState(false)
   const [snackBarMessage, setSnackBarMessage] = useState(null)
   const [chores, setChores] = useState([])
@@ -46,6 +48,7 @@ const MyChores = () => {
   const Navigate = useNavigate()
   const { data: userLabels, isLoading: userLabelsLoading } = useLabels()
   const { data: choresData, isLoading: choresLoading } = useChores()
+
   const choreSorter = (a, b) => {
     // 1. Handle null due dates (always last):
     if (!a.nextDueDate && !b.nextDueDate) return 0 // Both null, no order
@@ -109,6 +112,7 @@ const MyChores = () => {
       document.removeEventListener('mousedown', handleMenuOutsideClick)
     }
   }, [anchorEl])
+
   const handleMenuOutsideClick = event => {
     if (
       anchorEl &&
@@ -118,6 +122,7 @@ const MyChores = () => {
       handleFilterMenuClose()
     }
   }
+
   const handleFilterMenuOpen = event => {
     event.preventDefault()
     setAnchorEl(event.currentTarget)
@@ -189,6 +194,10 @@ const MyChores = () => {
     setFilteredChores(newFilteredChores)
   }
 
+  const handleFocus = () => {
+    setSearchFocused(true)
+  }
+
   const searchOptions = {
     // keys to search in
     keys: ['name', 'raw_label'],
@@ -234,134 +243,169 @@ const MyChores = () => {
 
   return (
     <Container maxWidth='md'>
-      {/* <Typography level='h3' mb={1.5}>
-        My Chores
-      </Typography> */}
-      {/* <Sheet> */}
-      {/* Search box to filter  */}
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignContent: 'center',
-          alignItems: 'center',
-          gap: 0.5,
-        }}
-      >
+      <Box className='flex flex-col gap-1'>
         <Input
           placeholder='Search'
           value={searchTerm}
+          onFocus={handleFocus}
           fullWidth
           sx={{
             mt: 1,
             mb: 1,
             borderRadius: 24,
-            // border: '1px solid',
             height: 24,
             borderColor: 'text.disabled',
             padding: 1,
+            px: 2,
           }}
           onChange={handleSearchChange}
           endDecorator={
-            searchTerm && (
+            searchTerm ? (
               <CancelRounded
                 onClick={() => {
                   setSearchTerm('')
                   setFilteredChores(chores)
                 }}
               />
+            ) : (
+              !isSearchFocused && (
+                <IconButton
+                  onClick={() => setSearchFocused(true)}
+                  variant='plain'
+                  color='neutral'
+                  size='sm'
+                  sx={{
+                    height: 24,
+                    borderRadius: 24,
+                  }}
+                >
+                  <FilterAlt />
+                </IconButton>
+              )
             )
           }
         />
-        <IconButtonWithMenu
-          key={'icon-menu-labels-filter'}
-          icon={<PriorityHigh />}
-          options={Priorities}
-          selectedItem={selectedFilter}
-          onItemSelect={selected => {
-            handleLabelFiltering({ priority: selected.value })
-          }}
-          mouseClickHandler={handleMenuOutsideClick}
-          isActive={selectedFilter.startsWith('Priority: ')}
-        />
-        <IconButtonWithMenu
-          key={'icon-menu-labels-filter'}
-          icon={<Style />}
-          options={userLabels}
-          selectedItem={selectedFilter}
-          onItemSelect={selected => {
-            handleLabelFiltering({ label: selected })
-          }}
-          isActive={selectedFilter.startsWith('Label: ')}
-          mouseClickHandler={handleMenuOutsideClick}
-          useChips
-        />
 
-        <IconButton
-          onClick={handleFilterMenuOpen}
-          variant='outlined'
-          color={
-            selectedFilter && FILTERS[selectedFilter] && selectedFilter != 'All'
-              ? 'primary'
-              : 'neutral'
-          }
-          size='sm'
-          sx={{
-            height: 24,
-            borderRadius: 24,
-          }}
+        <div
+          className={`overflow-hidden transition-all ${
+            isSearchFocused ? 'h-8 opacity-100' : 'h-0 opacity-100'
+          }`}
         >
-          <FilterAlt />
-        </IconButton>
-        <List
-          orientation='horizontal'
-          wrap
-          sx={{
-            mt: 0.2,
-          }}
-        >
-          <Menu
-            ref={menuRef}
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleFilterMenuClose}
-          >
-            {Object.keys(FILTERS).map((filter, index) => (
-              <MenuItem
-                key={`filter-list-${filter}-${index}`}
-                onClick={() => {
-                  const filterFunction = FILTERS[filter]
-                  const filteredChores =
-                    filterFunction.length === 2
-                      ? filterFunction(chores, userProfile.id)
-                      : filterFunction(chores)
-                  setFilteredChores(filteredChores)
-                  setSelectedFilter(filter)
-                  handleFilterMenuClose()
+          <div className='flex gap-4'>
+            <div className='grid flex-1 grid-cols-3 gap-4'>
+              <IconButtonWithMenu
+                key={'icon-menu-labels-filter'}
+                icon={<PriorityHigh />}
+                options={Priorities}
+                selectedItem={selectedFilter}
+                onItemSelect={selected => {
+                  handleLabelFiltering({ priority: selected.value })
+                }}
+                mouseClickHandler={handleMenuOutsideClick}
+                isActive={selectedFilter.startsWith('Priority: ')}
+              />
+
+              <IconButtonWithMenu
+                key={'icon-menu-labels-filter'}
+                icon={<Style />}
+                options={userLabels}
+                selectedItem={selectedFilter}
+                onItemSelect={selected => {
+                  handleLabelFiltering({ label: selected })
+                }}
+                isActive={selectedFilter.startsWith('Label: ')}
+                mouseClickHandler={handleMenuOutsideClick}
+                useChips
+              />
+
+              <IconButton
+                onClick={handleFilterMenuOpen}
+                variant='outlined'
+                color={
+                  selectedFilter &&
+                  FILTERS[selectedFilter] &&
+                  selectedFilter != 'All'
+                    ? 'primary'
+                    : 'neutral'
+                }
+                size='sm'
+                sx={{
+                  height: 24,
+                  borderRadius: 24,
                 }}
               >
-                {filter}
-                <Chip color={selectedFilter === filter ? 'primary' : 'neutral'}>
-                  {FILTERS[filter].length === 2
-                    ? FILTERS[filter](chores, userProfile.id).length
-                    : FILTERS[filter](chores).length}
-                </Chip>
-              </MenuItem>
-            ))}
-            {selectedFilter.startsWith('Label: ') ||
-              (selectedFilter.startsWith('Priority: ') && (
-                <MenuItem
-                  key={`filter-list-cancel-all-filters`}
-                  onClick={() => {
-                    setFilteredChores(chores)
-                    setSelectedFilter('All')
-                  }}
+                <FilterAlt />
+              </IconButton>
+
+              <List
+                orientation='horizontal'
+                wrap
+                sx={{
+                  mt: 0.2,
+                }}
+              >
+                <Menu
+                  ref={menuRef}
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={handleFilterMenuClose}
                 >
-                  Cancel All Filters
-                </MenuItem>
-              ))}
-          </Menu>
-        </List>
+                  {Object.keys(FILTERS).map((filter, index) => (
+                    <MenuItem
+                      key={`filter-list-${filter}-${index}`}
+                      onClick={() => {
+                        const filterFunction = FILTERS[filter]
+                        const filteredChores =
+                          filterFunction.length === 2
+                            ? filterFunction(chores, userProfile.id)
+                            : filterFunction(chores)
+                        setFilteredChores(filteredChores)
+                        setSelectedFilter(filter)
+                        handleFilterMenuClose()
+                      }}
+                    >
+                      {filter}
+                      <Chip
+                        color={
+                          selectedFilter === filter ? 'primary' : 'neutral'
+                        }
+                      >
+                        {FILTERS[filter].length === 2
+                          ? FILTERS[filter](chores, userProfile.id).length
+                          : FILTERS[filter](chores).length}
+                      </Chip>
+                    </MenuItem>
+                  ))}
+
+                  {selectedFilter.startsWith('Label: ') ||
+                    (selectedFilter.startsWith('Priority: ') && (
+                      <MenuItem
+                        key={`filter-list-cancel-all-filters`}
+                        onClick={() => {
+                          setFilteredChores(chores)
+                          setSelectedFilter('All')
+                        }}
+                      >
+                        Cancel All Filters
+                      </MenuItem>
+                    ))}
+                </Menu>
+              </List>
+            </div>
+            <IconButton
+              onClick={() => setSearchFocused(false)}
+              variant='outlined'
+              color='neutral'
+              size='sm'
+              sx={{
+                height: 24,
+                borderRadius: 24,
+              }}
+            >
+              <CloseRounded />
+            </IconButton>
+          </div>
+        </div>
       </Box>
       {selectedFilter !== 'All' && (
         <Chip
