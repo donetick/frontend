@@ -48,6 +48,7 @@ import {
   UpdateChoreAssignee,
 } from '../../utils/Fetcher'
 import { getTextColorFromBackgroundColor } from '../../utils/LabelColors'
+import Priorities from '../../utils/Priorities'
 import { Fetch } from '../../utils/TokenManager'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import DateModal from '../Modals/Inputs/DateModal'
@@ -62,6 +63,7 @@ const ChoreCard = ({
   userLabels,
   sx,
   viewOnly,
+  onChipClick,
 }) => {
   const [activeUserId, setActiveUserId] = React.useState(0)
   const [isChangeDueDateModalOpen, setIsChangeDueDateModalOpen] =
@@ -504,6 +506,13 @@ const ChoreCard = ({
                             ? 'warning'
                             : 'neutral'
                       }
+                      startDecorator={
+                        Priorities.find(p => p.value === chore.priority)?.icon
+                      }
+                      onClick={e => {
+                        e.stopPropagation()
+                        onChipClick({ priority: chore.priority })
+                      }}
                     >
                       P{chore.priority}
                     </Chip>
@@ -512,16 +521,22 @@ const ChoreCard = ({
                     return (
                       <Chip
                         variant='solid'
-                        key={l.id}
+                        key={`chorecard-${chore.id}-label-${l.id}`}
                         color='primary'
                         sx={{
                           position: 'relative',
                           ml: index === 0 ? 0 : 0.5,
                           top: 2,
                           zIndex: 1,
-                          backgroundColor: l?.color,
+                          backgroundColor: `${l?.color} !important`,
                           color: getTextColorFromBackgroundColor(l?.color),
+
+                          // apply background color for th clickable button:
                         }}
+                        // onClick={e => {
+                        //   e.stopPropagation()
+                        //   onChipClick({ label: l })
+                        // }}
 
                         // startDecorator={getIconForLabel(label)}
                       >
@@ -719,7 +734,9 @@ const ChoreCard = ({
             handleAssigneChange(selected.id)
           }}
         />
-        <ConfirmationModal config={confirmModelConfig} />
+        {confirmModelConfig?.isOpen && (
+          <ConfirmationModal config={confirmModelConfig} />
+        )}
         <TextModal
           isOpen={isCompleteWithNoteModalOpen}
           title='Add note to attach to this completion:'

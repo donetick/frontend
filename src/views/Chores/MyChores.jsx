@@ -3,10 +3,12 @@ import {
   CancelRounded,
   EditCalendar,
   FilterAlt,
-  FilterAltOff,
+  PriorityHigh,
+  Style,
 } from '@mui/icons-material'
 import {
   Box,
+  Button,
   Chip,
   Container,
   IconButton,
@@ -23,9 +25,11 @@ import { useNavigate } from 'react-router-dom'
 import { UserContext } from '../../contexts/UserContext'
 import { useChores } from '../../queries/ChoreQueries'
 import { GetAllUsers, GetUserProfile } from '../../utils/Fetcher'
+import Priorities from '../../utils/Priorities'
 import LoadingComponent from '../components/Loading'
 import { useLabels } from '../Labels/LabelQueries'
 import ChoreCard from './ChoreCard'
+import IconButtonWithMenu from './IconButtonWithMenu'
 
 const MyChores = () => {
   const { userProfile, setUserProfile } = useContext(UserContext)
@@ -122,6 +126,28 @@ const MyChores = () => {
   const handleFilterMenuClose = () => {
     setAnchorEl(null)
   }
+
+  const handleLabelFiltering = chipClicked => {
+    console.log('chipClicked', chipClicked)
+
+    if (chipClicked.label) {
+      const label = chipClicked.label
+      const labelFiltered = [...chores].filter(chore =>
+        chore.labelsV2.some(l => l.id === label.id),
+      )
+      console.log('labelFiltered', labelFiltered)
+      setFilteredChores(labelFiltered)
+      setSelectedFilter('Label: ' + label.name)
+    } else if (chipClicked.priority) {
+      const priority = chipClicked.priority
+      const priorityFiltered = chores.filter(
+        chore => chore.priority === priority,
+      )
+      setFilteredChores(priorityFiltered)
+      setSelectedFilter('Priority: ' + priority)
+    }
+  }
+
   const handleChoreUpdated = (updatedChore, event) => {
     const newChores = chores.map(chore => {
       if (chore.id === updatedChore.id) {
@@ -175,13 +201,16 @@ const MyChores = () => {
     chores.map(c => ({
       ...c,
       raw_label: c.labelsV2
-        .map(l => userLabels.find(x => (x.id = l.id)).name)
+        .map(l => userLabels.find(x => x.id === l.id).name)
         .join(' '),
     })),
     searchOptions,
   )
 
   const handleSearchChange = e => {
+    if (selectedFilter !== 'All') {
+      setSelectedFilter('All')
+    }
     const search = e.target.value
     if (search === '') {
       setFilteredChores(chores)
@@ -209,7 +238,6 @@ const MyChores = () => {
         My Chores
       </Typography> */}
       {/* <Sheet> */}
-
       {/* Search box to filter  */}
       <Box
         sx={{
@@ -217,7 +245,7 @@ const MyChores = () => {
           justifyContent: 'space-between',
           alignContent: 'center',
           alignItems: 'center',
-          gap: 1,
+          gap: 0.5,
         }}
       >
         <Input
@@ -245,11 +273,37 @@ const MyChores = () => {
             )
           }
         />
+        <IconButtonWithMenu
+          key={'icon-menu-labels-filter'}
+          icon={<PriorityHigh />}
+          options={Priorities}
+          selectedItem={selectedFilter}
+          onItemSelect={selected => {
+            handleLabelFiltering({ priority: selected.value })
+          }}
+          mouseClickHandler={handleMenuOutsideClick}
+          isActive={selectedFilter.startsWith('Priority: ')}
+        />
+        <IconButtonWithMenu
+          key={'icon-menu-labels-filter'}
+          icon={<Style />}
+          options={userLabels}
+          selectedItem={selectedFilter}
+          onItemSelect={selected => {
+            handleLabelFiltering({ label: selected })
+          }}
+          isActive={selectedFilter.startsWith('Label: ')}
+          mouseClickHandler={handleMenuOutsideClick}
+          useChips
+        />
+
         <IconButton
           onClick={handleFilterMenuOpen}
           variant='outlined'
           color={
-            selectedFilter && selectedFilter != 'All' ? 'primary' : 'neutral'
+            selectedFilter && FILTERS[selectedFilter] && selectedFilter != 'All'
+              ? 'primary'
+              : 'neutral'
           }
           size='sm'
           sx={{
@@ -257,40 +311,24 @@ const MyChores = () => {
             borderRadius: 24,
           }}
         >
-          {selectedFilter && selectedFilter != 'All' ? (
-            <FilterAltOff />
-          ) : (
-            <FilterAlt />
-          )}
+          <FilterAlt />
         </IconButton>
         <List
           orientation='horizontal'
           wrap
           sx={{
-            // '--List-gap': '8px',
-            // '--ListItem-radius': '20px',
-            // '--ListItem-minHeight': '32px',
-            // '--ListItem-gap': '4px',
             mt: 0.2,
           }}
         >
-          {/* <Checkbox
-                key='checkboxAll'
-                label=''
-                disableIcon
-                overlay
-                size='sm'
-              /> */}
-
           <Menu
             ref={menuRef}
             anchorEl={anchorEl}
             open={Boolean(anchorEl)}
             onClose={handleFilterMenuClose}
           >
-            {Object.keys(FILTERS).map(filter => (
+            {Object.keys(FILTERS).map((filter, index) => (
               <MenuItem
-                key={filter}
+                key={`filter-list-${filter}-${index}`}
                 onClick={() => {
                   const filterFunction = FILTERS[filter]
                   const filteredChores =
@@ -310,10 +348,40 @@ const MyChores = () => {
                 </Chip>
               </MenuItem>
             ))}
+            {selectedFilter.startsWith('Label: ') ||
+              (selectedFilter.startsWith('Priority: ') && (
+                <MenuItem
+                  key={`filter-list-cancel-all-filters`}
+                  onClick={() => {
+                    setFilteredChores(chores)
+                    setSelectedFilter('All')
+                  }}
+                >
+                  Cancel All Filters
+                </MenuItem>
+              ))}
           </Menu>
         </List>
       </Box>
-
+      {selectedFilter !== 'All' && (
+        <Chip
+          level='title-md'
+          gutterBottom
+          color='warning'
+          label={selectedFilter}
+          onDelete={() => {
+            setFilteredChores(chores)
+            setSelectedFilter('All')
+          }}
+          endDecorator={<CancelRounded />}
+          onClick={() => {
+            setFilteredChores(chores)
+            setSelectedFilter('All')
+          }}
+        >
+          Current Filter: {selectedFilter}
+        </Chip>
+      )}
       {/* </Sheet> */}
       {filteredChores.length === 0 && (
         <Box
@@ -335,6 +403,17 @@ const MyChores = () => {
           <Typography level='title-md' gutterBottom>
             Nothing scheduled
           </Typography>
+          {chores.length > 0 && (
+            <>
+              <Button
+                onClick={() => setFilteredChores(chores)}
+                variant='outlined'
+                color='neutral'
+              >
+                Reset filters
+              </Button>
+            </>
+          )}
         </Box>
       )}
 
@@ -346,6 +425,7 @@ const MyChores = () => {
           onChoreRemove={handleChoreDeleted}
           performers={performers}
           userLabels={userLabels}
+          onChipClick={handleLabelFiltering}
         />
       ))}
 
@@ -418,6 +498,13 @@ const FILTERS = {
         new Date(chore.nextDueDate) <
           new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) &&
         new Date(chore.nextDueDate) > new Date()
+      )
+    })
+  },
+  'Due Later': function (chores) {
+    return chores.filter(chore => {
+      return (
+        new Date(chore.nextDueDate) > new Date(Date.now() + 24 * 60 * 60 * 1000)
       )
     })
   },

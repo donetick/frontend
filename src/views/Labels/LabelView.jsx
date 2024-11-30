@@ -16,37 +16,58 @@ import { useLabels } from './LabelQueries'
 // import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Add } from '@mui/icons-material'
 import { useQueryClient } from 'react-query'
+import { useNavigate } from 'react-router-dom'
 import { DeleteLabel } from '../../utils/Fetcher'
 import { getTextColorFromBackgroundColor } from '../../utils/LabelColors'
+import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 
 const LabelView = () => {
   const { data: labels, isLabelsLoading, isError } = useLabels()
 
   const [userLabels, setUserLabels] = useState([labels])
   const [modalOpen, setModalOpen] = useState(false)
-  const [currentLabel, setCurrentLabel] = useState(null) // Label being edited or null for new label
 
+  const [currentLabel, setCurrentLabel] = useState(null)
   const queryClient = useQueryClient()
-
+  const [confirmationModel, setConfirmationModel] = useState({})
+  const Navigate = useNavigate()
   const handleAddLabel = () => {
-    setCurrentLabel(null) // Adding a new label
+    setCurrentLabel(null)
     setModalOpen(true)
   }
 
   const handleEditLabel = label => {
-    setCurrentLabel(label) // Editing an existing label
+    setCurrentLabel(label)
     setModalOpen(true)
+  }
+
+  const handleDeleteClicked = id => {
+    setConfirmationModel({
+      isOpen: true,
+      title: 'Delete Label',
+
+      message:
+        'Are you sure you want to delete this label? This will remove the label from all tasks.',
+
+      confirmText: 'Delete',
+      color: 'danger',
+      cancelText: 'Cancel',
+      onClose: confirmed => {
+        if (confirmed) {
+          handleDeleteLabel(id)
+        }
+        setConfirmationModel({})
+      },
+    })
   }
 
   const handleDeleteLabel = id => {
     DeleteLabel(id).then(res => {
-      // Invalidate and refetch labels after deleting a label
       const updatedLabels = userLabels.filter(label => label.id !== id)
       setUserLabels(updatedLabels)
 
       queryClient.invalidateQueries('labels')
     })
-    // Implement deletion logic here
   }
 
   const handleSaveLabel = newOrUpdatedLabel => {
@@ -87,9 +108,6 @@ const LabelView = () => {
 
   return (
     <Container maxWidth='md'>
-      <Typography level='h2' sx={{ my: 2 }}>
-        Labels
-      </Typography>
       <div className='flex flex-col gap-2'>
         {userLabels.map(label => (
           <div
@@ -116,6 +134,7 @@ const LabelView = () => {
                 color='neutral'
                 onClick={() => handleEditLabel(label)}
                 startDecorator={<EditIcon />}
+
               >
                 Edit
               </Button>
@@ -131,6 +150,7 @@ const LabelView = () => {
           </div>
         ))}
       </div>
+
 
       {userLabels.length === 0 && (
         <Typography textAlign='center' mt={2}>
@@ -152,7 +172,7 @@ const LabelView = () => {
           position: 'fixed',
           bottom: 0,
           left: 10,
-          p: 2, // padding
+          p: 2,
           display: 'flex',
           justifyContent: 'flex-end',
           gap: 2,
@@ -172,6 +192,7 @@ const LabelView = () => {
           <Add />
         </IconButton>
       </Box>
+      <ConfirmationModal config={confirmationModel} />
     </Container>
   )
 }
