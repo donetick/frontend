@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from 'react'
 import {
   Box,
   Button,
@@ -9,18 +10,16 @@ import {
   Select,
   Typography,
 } from '@mui/joy'
-
-import React, { useEffect } from 'react'
-import { useQueryClient } from 'react-query'
+import { useQueryClient, useMutation } from 'react-query'
 import { CreateLabel, UpdateLabel } from '../../../utils/Fetcher'
 import LABEL_COLORS from '../../../utils/LabelColors'
 import { useLabels } from '../../Labels/LabelQueries'
 
-function LabelModal({ isOpen, onClose, onSave, label }) {
-  const [labelName, setLabelName] = React.useState('')
-  const [color, setColor] = React.useState('')
-  const [error, setError] = React.useState('')
-  const { data: userLabels, isLoadingLabels } = useLabels()
+function LabelModal({ isOpen, onClose, label }) {
+  const [labelName, setLabelName] = useState('')
+  const [color, setColor] = useState('')
+  const [error, setError] = useState('')
+  const { data: userLabels = [] } = useLabels()
   const queryClient = useQueryClient()
 
   // Populate the form fields when editing
@@ -35,48 +34,48 @@ function LabelModal({ isOpen, onClose, onSave, label }) {
     setError('')
   }, [label])
 
+  // Validation logic
   const validateLabel = () => {
-    if (!labelName || labelName.trim() === '') {
+    if (!labelName.trim()) {
       setError('Name cannot be empty')
       return false
-    } else if (
+    }
+    if (
       userLabels.some(
-        userLabel => userLabel.name === labelName && userLabel.id !== label.id,
+        userLabel => userLabel.name === labelName && userLabel.id !== label?.id,
       )
     ) {
       setError('Label with this name already exists')
       return false
-    } else if (color === '') {
+    }
+    if (!color) {
       setError('Please select a color')
       return false
     }
     return true
   }
 
-  const handleSave = () => {
-    if (!validateLabel()) {
-      return
-    }
-
-    const saveAction = label
-      ? UpdateLabel({ id: label.id, name: labelName, color })
-      : CreateLabel({ name: labelName, color })
-
-    saveAction.then(res => {
-      if (res.error) {
-        console.log(res.error)
-        setError('Failed to save label. Please try again.')
-        return
-      }
-      res.json().then(data => {
-        if (data.error) {
-          setError('Failed to save label. Please try again.')
-          return
-        }
-        onSave({ id: data?.res?.id, name: labelName, color })
+  // Mutation for saving labels
+  const saveLabelMutation = useMutation(
+    newLabel =>
+      label
+        ? UpdateLabel({ id: label.id, ...newLabel })
+        : CreateLabel(newLabel),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('labels')
         onClose()
-      })
-    })
+      },
+      onError: () => {
+        setError('Failed to save label. Please try again.')
+      },
+    },
+  )
+
+  const handleSave = () => {
+    if (!validateLabel()) return
+
+    saveLabelMutation.mutate({ name: labelName, color })
   }
 
   return (
@@ -85,51 +84,39 @@ function LabelModal({ isOpen, onClose, onSave, label }) {
         <Typography level='title-md' mb={1}>
           {label ? 'Edit Label' : 'Add Label'}
         </Typography>
+
         <FormControl>
-          <Typography level='body-sm' alignSelf={'start'}>
+          <Typography gutterBottom level='body-sm' alignSelf='start'>
             Name
           </Typography>
           <Input
-            margin='normal'
-            required
             fullWidth
-            name='labelName'
-            type='text'
             id='labelName'
             value={labelName}
             onChange={e => setLabelName(e.target.value)}
           />
         </FormControl>
 
-        {/* Color Selection */}
         <FormControl>
-          <Typography level='body-sm' alignSelf={'start'}>
-            Color:
+          <Typography gutterBottom level='body-sm' alignSelf='start'>
+            Color
           </Typography>
-
           <Select
-            label='Color'
             value={color}
+            onChange={(e, value) => value && setColor(value)}
             renderValue={selected => (
               <Typography
-                key={selected.value}
                 startDecorator={
                   <Box
                     className='h-4 w-4'
                     borderRadius={10}
-                    sx={{
-                      background: selected.value,
-                      shadow: { xs: 1 },
-                    }}
+                    sx={{ background: selected.value }}
                   />
                 }
               >
                 {selected.label}
               </Typography>
             )}
-            onChange={(e, value) => {
-              value && setColor(value)
-            }}
           >
             {LABEL_COLORS.map(val => (
               <Option key={val.value} value={val.value}>
@@ -138,31 +125,24 @@ function LabelModal({ isOpen, onClose, onSave, label }) {
                     width={20}
                     height={20}
                     borderRadius={10}
-                    sx={{
-                      background: val.value,
-                    }}
+                    sx={{ background: val.value }}
                   />
-                  <Typography
-                    sx={{
-                      ml: 1,
-                      color: 'text.secondary',
-                    }}
-                    variant='caption'
-                  >
+                  <Typography sx={{ ml: 1 }} variant='caption'>
                     {val.name}
                   </Typography>
                 </Box>
               </Option>
             ))}
           </Select>
-          {error && (
-            <Typography color='warning' level='body-sm'>
-              {error}
-            </Typography>
-          )}
         </FormControl>
 
-        <Box display={'flex'} justifyContent={'space-around'} mt={1}>
+        {error && (
+          <Typography color='warning' level='body-sm'>
+            {error}
+          </Typography>
+        )}
+
+        <Box display='flex' justifyContent='space-around' mt={1}>
           <Button onClick={handleSave} fullWidth sx={{ mr: 1 }}>
             {label ? 'Save Changes' : 'Add Label'}
           </Button>
