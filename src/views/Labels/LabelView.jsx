@@ -15,33 +15,55 @@ import { useLabels } from './LabelQueries'
 // import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Add } from '@mui/icons-material'
 import { useQueryClient } from 'react-query'
+import { useNavigate } from 'react-router-dom'
 import { DeleteLabel } from '../../utils/Fetcher'
+import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 
 const LabelView = () => {
   const { data: labels, isLabelsLoading, isError } = useLabels()
   const [userLabels, setUserLabels] = useState([labels])
   const [modalOpen, setModalOpen] = useState(false)
-  const [currentLabel, setCurrentLabel] = useState(null) // Label being edited or null for new label
+  const [currentLabel, setCurrentLabel] = useState(null)
   const queryClient = useQueryClient()
+  const [confirmationModel, setConfirmationModel] = useState({})
+  const Navigate = useNavigate()
   const handleAddLabel = () => {
-    setCurrentLabel(null) // Adding a new label
+    setCurrentLabel(null)
     setModalOpen(true)
   }
 
   const handleEditLabel = label => {
-    setCurrentLabel(label) // Editing an existing label
+    setCurrentLabel(label)
     setModalOpen(true)
+  }
+
+  const handleDeleteClicked = id => {
+    setConfirmationModel({
+      isOpen: true,
+      title: 'Delete Label',
+
+      message:
+        'Are you sure you want to delete this label? This will remove the label from all tasks.',
+
+      confirmText: 'Delete',
+      color: 'danger',
+      cancelText: 'Cancel',
+      onClose: confirmed => {
+        if (confirmed) {
+          handleDeleteLabel(id)
+        }
+        setConfirmationModel({})
+      },
+    })
   }
 
   const handleDeleteLabel = id => {
     DeleteLabel(id).then(res => {
-      // Invalidate and refetch labels after deleting a label
       const updatedLabels = userLabels.filter(label => label.id !== id)
       setUserLabels(updatedLabels)
 
       queryClient.invalidateQueries('labels')
     })
-    // Implement deletion logic here
   }
 
   const handleSaveLabel = newOrUpdatedLabel => {
@@ -92,7 +114,13 @@ const LabelView = () => {
         <tbody>
           {userLabels.map(label => (
             <tr key={label.id}>
-              <td>{label.name}</td>
+              <td
+                onClick={() => {
+                  Navigate('/my/chores', { state: { label: label.id } })
+                }}
+              >
+                {label.name}
+              </td>
               <td
                 style={{
                   // center without display flex:
@@ -121,7 +149,7 @@ const LabelView = () => {
                   <EditIcon />
                 </IconButton>
                 <IconButton
-                  onClick={() => handleDeleteLabel(label.id)}
+                  onClick={() => handleDeleteClicked(label.id)}
                   color='danger'
                 >
                   <DeleteIcon />
@@ -151,7 +179,7 @@ const LabelView = () => {
           position: 'fixed',
           bottom: 0,
           left: 10,
-          p: 2, // padding
+          p: 2,
           display: 'flex',
           justifyContent: 'flex-end',
           gap: 2,
@@ -171,6 +199,7 @@ const LabelView = () => {
           <Add />
         </IconButton>
       </Box>
+      <ConfirmationModal config={confirmationModel} />
     </Container>
   )
 }

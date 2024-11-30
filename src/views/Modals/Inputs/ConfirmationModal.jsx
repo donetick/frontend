@@ -24,6 +24,7 @@ function ConfirmationModal({ config }) {
             }}
             fullWidth
             sx={{ mr: 1 }}
+            color={config.color ? config.color : 'primary'}
           >
             {config?.confirmText}
           </Button>

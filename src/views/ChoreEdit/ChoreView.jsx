@@ -103,12 +103,13 @@ const ChoreView = () => {
     }
   }, [chore, performers])
   const handleUpdatePriority = priority => {
-    if (priority.value === 0) {
-      setChorePriority(null)
-    } else {
-      setChorePriority(priority)
-    }
-    UpdateChorePriority(choreId, priority.value)
+    UpdateChorePriority(choreId, priority.value).then(response => {
+      if (response.ok) {
+        response.json().then(data => {
+          setChorePriority(priority)
+        })
+      }
+    })
   }
   const generateInfoCards = chore => {
     const cards = [
@@ -265,7 +266,6 @@ const ChoreView = () => {
             ? `Due at ${moment(chore.nextDueDate).format('MM/DD/YYYY hh:mm A')}`
             : 'N/A'}
         </Chip>
-        {/* show each label : */}
         {chore?.labelsV2?.map((label, index) => (
           <Chip
             key={index}
