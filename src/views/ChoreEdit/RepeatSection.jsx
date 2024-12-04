@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   Card,
   Checkbox,
   Chip,
@@ -52,6 +53,30 @@ const MONTH_WITH_NO_31_DAYS = [
   'june',
   'september',
   'november',
+]
+const MONTHS = [
+  'january',
+  'february',
+  'march',
+  'april',
+  'may',
+  'june',
+  'july',
+  'august',
+  'september',
+  'october',
+  'november',
+  'december',
+]
+
+const DAYS = [
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+  'sunday',
 ]
 const RepeatOnSections = ({
   frequencyType,
@@ -142,19 +167,9 @@ const RepeatOnSections = ({
                   '--ListItem-radius': '20px',
                 }}
               >
-                {[
-                  'monday',
-                  'tuesday',
-                  'wednesday',
-                  'thursday',
-                  'friday',
-                  'saturday',
-                  'sunday',
-                ].map(item => (
+                {DAYS.map(item => (
                   <ListItem key={item}>
                     <Checkbox
-                      // disabled={index === 0}
-
                       checked={frequencyMetadata?.days?.includes(item) || false}
                       onClick={() => {
                         const newDaysOfTheWeek = frequencyMetadata['days'] || []
@@ -180,6 +195,31 @@ const RepeatOnSections = ({
                   </ListItem>
                 ))}
               </List>
+              <Button
+                size='sm'
+                variant='soft'
+                color='neutral'
+                checked={frequencyMetadata?.days?.length === 7}
+                onClick={() => {
+                  if (frequencyMetadata?.days?.length === 7) {
+                    onFrequencyMetadataUpdate({
+                      ...frequencyMetadata,
+                      days: [],
+                    })
+                  } else {
+                    onFrequencyMetadataUpdate({
+                      ...frequencyMetadata,
+                      days: DAYS.map(item => item),
+                    })
+                  }
+                }}
+                overlay
+                disableIcon
+              >
+                {frequencyMetadata?.days?.length === 7
+                  ? 'Unselect All'
+                  : 'Select All'}
+              </Button>
             </Card>
           </Grid>
           {timePickerComponent}
@@ -207,35 +247,10 @@ const RepeatOnSections = ({
                   '--ListItem-radius': '20px',
                 }}
               >
-                {[
-                  'january',
-                  'february',
-                  'march',
-                  'april',
-                  'may',
-                  'june',
-                  'july',
-                  'august',
-                  'september',
-                  'october',
-                  'november',
-                  'december',
-                ].map(item => (
+                {MONTHS.map(item => (
                   <ListItem key={item}>
                     <Checkbox
-                      // disabled={index === 0}
                       checked={frequencyMetadata?.months?.includes(item)}
-                      // checked={months[item] || false}
-                      // onClick={() => {
-                      //   const newMonthsOfTheYear = {
-                      //     ...monthsOfTheYear,
-                      //   }
-                      //   newMonthsOfTheYear[item] = !newMonthsOfTheYear[item]
-                      //   onFrequencyMetadataUpdate({
-                      //     months: newMonthsOfTheYear,
-                      //   })
-                      //   setMonthsOfTheYear(newMonthsOfTheYear)
-                      // }}
                       onClick={() => {
                         const newMonthsOfTheYear =
                           frequencyMetadata['months'] || []
@@ -263,6 +278,31 @@ const RepeatOnSections = ({
                   </ListItem>
                 ))}
               </List>
+              <Button
+                size='sm'
+                variant='soft'
+                color='neutral'
+                checked={frequencyMetadata?.months?.length === 12}
+                onClick={() => {
+                  if (frequencyMetadata?.months?.length === 12) {
+                    onFrequencyMetadataUpdate({
+                      ...frequencyMetadata,
+                      months: [],
+                    })
+                  } else {
+                    onFrequencyMetadataUpdate({
+                      ...frequencyMetadata,
+                      months: MONTHS.map(item => item),
+                    })
+                  }
+                }}
+                overlay
+                disableIcon
+              >
+                {frequencyMetadata?.months?.length === 12
+                  ? 'Unselect All'
+                  : 'Select All'}
+              </Button>
             </Card>
           </Grid>
           <Box
