@@ -124,12 +124,15 @@ const RepeatOnSections = ({
           <Grid item sm={12} sx={{ display: 'flex', alignItems: 'center' }}>
             <Typography level='h5'>Every: </Typography>
             <Input
+              slotProps={{
+                input: {
+                  min: 1,
+                  max: 1000,
+                },
+              }}
               type='number'
               value={frequency}
               onChange={e => {
-                if (e.target.value < 1) {
-                  e.target.value = 1
-                }
                 onFrequencyUpdate(e.target.value)
               }}
             />
