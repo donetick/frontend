@@ -128,14 +128,13 @@ const MyChores = () => {
   }
 
   const handleLabelFiltering = chipClicked => {
-    console.log('chipClicked', chipClicked)
-
     if (chipClicked.label) {
       const label = chipClicked.label
       const labelFiltered = [...chores].filter(chore =>
-        chore.labelsV2.some(l => l.id === label.id),
+        chore.labelsV2.some(
+          l => l.id === label.id && l.created_by === label.created_by,
+        ),
       )
-      console.log('labelFiltered', labelFiltered)
       setFilteredChores(labelFiltered)
       setSelectedFilter('Label: ' + label.name)
     } else if (chipClicked.priority) {
@@ -200,9 +199,7 @@ const MyChores = () => {
   const fuse = new Fuse(
     chores.map(c => ({
       ...c,
-      raw_label: c.labelsV2
-        .map(l => userLabels.find(x => x.id === l.id).name)
-        .join(' '),
+      raw_label: c.labelsV2.map(c => c.name).join(' '),
     })),
     searchOptions,
   )
@@ -287,7 +284,23 @@ const MyChores = () => {
         <IconButtonWithMenu
           key={'icon-menu-labels-filter'}
           icon={<Style />}
-          options={userLabels}
+          // TODO : this need simplification we want to display both user labels and chore labels
+          // that why we are merging them here.
+          // we also filter out the labels that user created as those will be part of user labels
+          options={[
+            ...userLabels,
+            ...chores
+              .map(c => c.labelsV2)
+              .flat()
+              .filter(l => l.created_by !== userProfile.id)
+              .map(l => {
+                //  if user created it don't show it:
+                return {
+                  ...l,
+                  name: l.name + ' (Shared Label)',
+                }
+              }),
+          ]}
           selectedItem={selectedFilter}
           onItemSelect={selected => {
             handleLabelFiltering({ label: selected })
