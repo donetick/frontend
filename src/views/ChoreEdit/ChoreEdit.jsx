@@ -113,8 +113,8 @@ const ChoreEdit = () => {
     if (assignedTo < 0) {
       errors.assignedTo = 'Assigned to is required'
     }
-    if (frequencyType === 'interval' && frequency < 1) {
-      errors.frequency = 'Frequency is required'
+    if (frequencyType === 'interval' && !frequency > 0) {
+      errors.frequency = `Invalid frequency, the ${frequencyMetadata.unit} should be > 0`
     }
     if (
       frequencyType === 'days_of_the_week' &&
