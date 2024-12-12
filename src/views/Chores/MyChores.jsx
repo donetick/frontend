@@ -2,15 +2,20 @@ import {
   Add,
   CancelRounded,
   EditCalendar,
+  ExpandCircleDown,
   FilterAlt,
   PriorityHigh,
   Style,
 } from '@mui/icons-material'
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionGroup,
   Box,
   Button,
   Chip,
   Container,
+  Divider,
   IconButton,
   Input,
   List,
@@ -38,6 +43,8 @@ const MyChores = () => {
   const [chores, setChores] = useState([])
   const [filteredChores, setFilteredChores] = useState([])
   const [selectedFilter, setSelectedFilter] = useState('All')
+  const [choreSections, setChoreSections] = useState([])
+  const [openChoreSections, setOpenChoreSections] = useState({})
   const [searchTerm, setSearchTerm] = useState('')
   const [activeUserId, setActiveUserId] = useState(0)
   const [performers, setPerformers] = useState([])
@@ -74,6 +81,108 @@ const MyChores = () => {
     return aDueDate - bDueDate // Sort ascending by due date
   }
 
+  const sectionSorter = (t, chores) => {
+    // sort by priority then due date:
+    chores.sort((a, b) => {
+      // no priority is lowest priority:
+      if (a.priority === 0) {
+        return 1
+      }
+      if (a.priority !== b.priority) {
+        return a.priority - b.priority
+      }
+      if (a.nextDueDate === null) {
+        return 1
+      }
+      if (b.nextDueDate === null) {
+        return -1
+      }
+      return new Date(a.nextDueDate) - new Date(b.nextDueDate)
+    })
+
+    var groups = []
+    switch (t) {
+      case 'due_date':
+        var groupRaw = {
+          Today: [],
+          'In a week': [],
+          'This month': [],
+          Later: [],
+          Overdue: [],
+          Anytime: [],
+        }
+        chores.forEach(chore => {
+          if (chore.nextDueDate === null) {
+            groupRaw['Anytime'].push(chore)
+          } else if (new Date(chore.nextDueDate) < new Date()) {
+            groupRaw['Overdue'].push(chore)
+          } else if (
+            new Date(chore.nextDueDate).toDateString() ===
+            new Date().toDateString()
+          ) {
+            groupRaw['Today'].push(chore)
+          } else if (
+            new Date(chore.nextDueDate) <
+              new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) &&
+            new Date(chore.nextDueDate) > new Date()
+          ) {
+            groupRaw['In a week'].push(chore)
+          } else if (
+            new Date(chore.nextDueDate).getMonth() === new Date().getMonth()
+          ) {
+            groupRaw['This month'].push(chore)
+          } else {
+            groupRaw['Later'].push(chore)
+          }
+        })
+        groups = [
+          { name: 'Overdue', content: groupRaw['Overdue'] },
+          { name: 'Today', content: groupRaw['Today'] },
+          { name: 'In a week', content: groupRaw['In a week'] },
+          { name: 'This month', content: groupRaw['This month'] },
+          { name: 'Later', content: groupRaw['Later'] },
+          { name: 'Anytime', content: groupRaw['Anytime'] },
+        ]
+        break
+      case 'priority':
+        groupRaw = {
+          p1: [],
+          p2: [],
+          p3: [],
+          p4: [],
+          no_priority: [],
+        }
+        chores.forEach(chore => {
+          switch (chore.priority) {
+            case 1:
+              groupRaw['p1'].push(chore)
+              break
+            case 2:
+              groupRaw['p2'].push(chore)
+              break
+            case 3:
+              groupRaw['p3'].push(chore)
+              break
+            case 4:
+              groupRaw['p4'].push(chore)
+              break
+          }
+        })
+        break
+      case 'labels':
+        groupRaw = {}
+        chores.forEach(chore => {
+          chore.labelsV2.forEach(label => {
+            if (groupRaw[label.id] === undefined) {
+              groupRaw[label.id] = []
+            }
+            groupRaw[label.id].push(chore)
+          })
+        })
+    }
+    return groups
+  }
+
   useEffect(() => {
     if (userProfile === null) {
       GetUserProfile()
@@ -100,6 +209,14 @@ const MyChores = () => {
       const sortedChores = choresData.res.sort(choreSorter)
       setChores(sortedChores)
       setFilteredChores(sortedChores)
+      const sections = sectionSorter('due_date', sortedChores)
+      setChoreSections(sections)
+      setOpenChoreSections(
+        Object.keys(sections).reduce((acc, key) => {
+          acc[key] = true
+          return acc
+        }, {}),
+      )
     }
   }, [choresData, choresLoading])
 
@@ -231,11 +348,6 @@ const MyChores = () => {
 
   return (
     <Container maxWidth='md'>
-      {/* <Typography level='h3' mb={1.5}>
-        My Chores
-      </Typography> */}
-      {/* <Sheet> */}
-      {/* Search box to filter  */}
       <Box
         sx={{
           display: 'flex',
@@ -253,7 +365,6 @@ const MyChores = () => {
             mt: 1,
             mb: 1,
             borderRadius: 24,
-            // border: '1px solid',
             height: 24,
             borderColor: 'text.disabled',
             padding: 1,
@@ -271,7 +382,6 @@ const MyChores = () => {
           }
         />
         <IconButtonWithMenu
-          key={'icon-menu-labels-filter'}
           icon={<PriorityHigh />}
           options={Priorities}
           selectedItem={selectedFilter}
@@ -282,7 +392,6 @@ const MyChores = () => {
           isActive={selectedFilter.startsWith('Priority: ')}
         />
         <IconButtonWithMenu
-          key={'icon-menu-labels-filter'}
           icon={<Style />}
           // TODO : this need simplification we want to display both user labels and chore labels
           // that why we are merging them here.
@@ -395,7 +504,6 @@ const MyChores = () => {
           Current Filter: {selectedFilter}
         </Chip>
       )}
-      {/* </Sheet> */}
       {filteredChores.length === 0 && (
         <Box
           sx={{
@@ -419,7 +527,10 @@ const MyChores = () => {
           {chores.length > 0 && (
             <>
               <Button
-                onClick={() => setFilteredChores(chores)}
+                onClick={() => {
+                  setFilteredChores(chores)
+                  setSearchTerm('')
+                }}
                 variant='outlined'
                 color='neutral'
               >
@@ -429,19 +540,92 @@ const MyChores = () => {
           )}
         </Box>
       )}
-
-      {filteredChores.map(chore => (
-        <ChoreCard
-          key={chore.id}
-          chore={chore}
-          onChoreUpdate={handleChoreUpdated}
-          onChoreRemove={handleChoreDeleted}
-          performers={performers}
-          userLabels={userLabels}
-          onChipClick={handleLabelFiltering}
-        />
-      ))}
-
+      {(searchTerm?.length > 0 || selectedFilter !== 'All') &&
+        filteredChores.map(chore => (
+          <ChoreCard
+            key={`filtered-${chore.id} `}
+            chore={chore}
+            onChoreUpdate={handleChoreUpdated}
+            onChoreRemove={handleChoreDeleted}
+            performers={performers}
+            userLabels={userLabels}
+            onChipClick={handleLabelFiltering}
+          />
+        ))}
+      {searchTerm.length === 0 && selectedFilter === 'All' && (
+        <AccordionGroup transition='0.2s ease' disableDivider>
+          {choreSections.map((section, index) => {
+            if (section.content.length === 0) return null
+            return (
+              <Accordion
+                title={section.name}
+                key={section.name + index}
+                sx={{
+                  my: 0,
+                }}
+                expanded={Boolean(openChoreSections[index])}
+              >
+                <Divider orientation='horizontal'>
+                  <Chip
+                    variant='soft'
+                    color='neutral'
+                    size='md'
+                    onClick={() => {
+                      if (openChoreSections[index]) {
+                        const newOpenChoreSections = { ...openChoreSections }
+                        delete newOpenChoreSections[index]
+                        setOpenChoreSections(newOpenChoreSections)
+                      } else {
+                        setOpenChoreSections({
+                          ...openChoreSections,
+                          [index]: true,
+                        })
+                      }
+                    }}
+                    endDecorator={
+                      openChoreSections[index] ? (
+                        <ExpandCircleDown
+                          color='primary'
+                          sx={{ transform: 'rotate(180deg)' }}
+                        />
+                      ) : (
+                        <ExpandCircleDown color='primary' />
+                      )
+                    }
+                    startDecorator={
+                      <>
+                        <Chip color='primary' size='sm' variant='soft'>
+                          {section?.content?.length}
+                        </Chip>
+                      </>
+                    }
+                  >
+                    {section.name}
+                  </Chip>
+                </Divider>
+                <AccordionDetails
+                  sx={{
+                    flexDirection: 'column',
+                    my: 0,
+                  }}
+                >
+                  {section.content?.map(chore => (
+                    <ChoreCard
+                      key={chore.id}
+                      chore={chore}
+                      onChoreUpdate={handleChoreUpdated}
+                      onChoreRemove={handleChoreDeleted}
+                      performers={performers}
+                      userLabels={userLabels}
+                      onChipClick={handleLabelFiltering}
+                    />
+                  ))}
+                </AccordionDetails>
+              </Accordion>
+            )
+          })}
+        </AccordionGroup>
+      )}
       <Box
         // variant='outlined'
         sx={{
