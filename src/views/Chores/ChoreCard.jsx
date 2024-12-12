@@ -466,7 +466,6 @@ const ChoreCard = ({
       >
         <Grid container>
           <Grid
-            item
             xs={9}
             onClick={() => {
               navigate(`/chores/${chore.id}`)
@@ -556,7 +555,6 @@ const ChoreCard = ({
         </Box> */}
           </Grid>
           <Grid
-            item
             xs={3}
             sx={{
               display: 'flex',
