@@ -1,4 +1,14 @@
-import { Box, Button, Card, Chip, Divider, Typography } from '@mui/joy'
+import { CopyAll } from '@mui/icons-material'
+import {
+  Box,
+  Button,
+  Card,
+  Chip,
+  Divider,
+  IconButton,
+  Input,
+  Typography,
+} from '@mui/joy'
 import moment from 'moment'
 import { useContext, useEffect, useState } from 'react'
 import { UserContext } from '../../contexts/UserContext'
@@ -13,6 +23,7 @@ import TextModal from '../Modals/Inputs/TextModal'
 const APITokenSettings = () => {
   const [tokens, setTokens] = useState([])
   const [isGetTokenNameModalOpen, setIsGetTokenNameModalOpen] = useState(false)
+  const [showTokenId, setShowTokenId] = useState(null)
   const { userProfile, setUserProfile } = useContext(UserContext)
   useEffect(() => {
     GetLongLiveTokens().then(resp => {
@@ -61,19 +72,21 @@ const APITokenSettings = () => {
               </Typography>
             </Box>
             <Box>
-              {token.token && (
-                <Button
-                  variant='outlined'
-                  color='primary'
-                  sx={{ mr: 1 }}
-                  onClick={() => {
-                    navigator.clipboard.writeText(token.token)
-                    alert('Token copied to clipboard')
-                  }}
-                >
-                  Copy Token
-                </Button>
-              )}
+              <Button
+                variant='outlined'
+                color='primary'
+                sx={{ mr: 1 }}
+                onClick={() => {
+                  if (showTokenId === token.id) {
+                    setShowTokenId(null)
+                    return
+                  }
+
+                  setShowTokenId(token.id)
+                }}
+              >
+                {showTokenId === token?.id ? 'Hide' : 'Show'} Token
+              </Button>
 
               <Button
                 variant='outlined'
@@ -97,6 +110,28 @@ const APITokenSettings = () => {
               </Button>
             </Box>
           </Box>
+          {showTokenId === token?.id && (
+            <Box>
+              <Input
+                value={token.token}
+                sx={{ width: '100%', mt: 2 }}
+                readOnly
+                endDecorator={
+                  <IconButton
+                    variant='outlined'
+                    color='primary'
+                    onClick={() => {
+                      navigator.clipboard.writeText(token.token)
+                      alert('Token copied to clipboard')
+                      setShowTokenId(null)
+                    }}
+                  >
+                    <CopyAll />
+                  </IconButton>
+                }
+              />
+            </Box>
+          )}
         </Card>
       ))}
 
