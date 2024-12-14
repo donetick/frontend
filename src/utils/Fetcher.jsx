@@ -225,6 +225,14 @@ const UpdateUserDetails = userDetails => {
   })
 }
 
+const UpdateNotificationTarget = notificationTarget => {
+  return Fetch(`${API_URL}/users/targets`, {
+    method: 'PUT',
+    headers: HEADERS(),
+    body: JSON.stringify(notificationTarget),
+  })
+}
+
 const GetSubscriptionSession = () => {
   return Fetch(API_URL + `/payments/create-subscription`, {
     method: 'GET',
@@ -373,6 +381,7 @@ export {
   UpdateChoreHistory,
   UpdateChorePriority,
   UpdateLabel,
+  UpdateNotificationTarget,
   UpdatePassword,
   UpdateThingState,
   UpdateUserDetails,

@@ -42,7 +42,7 @@ const SignupView = () => {
         })
       } else {
         console.log('Login failed', response)
-        
+
         // Navigate('/login')
       }
     })
@@ -103,12 +103,13 @@ const SignupView = () => {
     signUp(username, password, displayName, email).then(response => {
       if (response.status === 201) {
         handleLogin(username, password)
+      } else if (response.status === 403) {
+        setError('Signup disabled, please contact admin')
       } else {
         console.log('Signup failed')
         response.json().then(res => {
           setError(res.error)
-        }
-        )
+        })
       }
     })
   }
