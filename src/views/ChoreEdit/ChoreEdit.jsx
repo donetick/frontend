@@ -169,6 +169,9 @@ const ChoreEdit = () => {
     return true
   }
 
+  const handleDueDateChange = e => {
+    setDueDate(e.target.value)
+  }
   const HandleSaveChore = () => {
     setAttemptToSave(true)
     if (!HandleValidateChore()) {
@@ -386,12 +389,15 @@ const ChoreEdit = () => {
               <ListItem key={item.id}>
                 <Checkbox
                   // disabled={index === 0}
-                  checked={assignees.find(a => a.userId == item.id) != null}
+                  checked={assignees.find(a => a.userId == item.userId) != null}
                   onClick={() => {
-                    if (assignees.find(a => a.userId == item.id)) {
-                      setAssignees(assignees.filter(i => i.userId !== item.id))
+                    if (assignees.some(a => a.userId === item.userId)) {
+                      const newAssignees = assignees.filter(
+                        a => a.userId !== item.userId,
+                      )
+                      setAssignees(newAssignees)
                     } else {
-                      setAssignees([...assignees, { userId: item.id }])
+                      setAssignees([...assignees, { userId: item.userId }])
                     }
                   }}
                   overlay
@@ -431,10 +437,10 @@ const ChoreEdit = () => {
                 ?.filter(p => assignees.find(a => a.userId == p.userId))
                 .map((item, index) => (
                   <Option
-                    value={item.id}
+                    value={item.userId}
                     key={item.displayName}
                     onClick={() => {
-                      setAssignedTo(item.id)
+                      setAssignedTo(item.userId)
                     }}
                   >
                     {item.displayName}
@@ -552,9 +558,7 @@ const ChoreEdit = () => {
             <Input
               type='datetime-local'
               value={dueDate}
-              onChange={e => {
-                setDueDate(e.target.value)
-              }}
+              onChange={handleDueDateChange}
             />
             <FormHelperText>{errors.dueDate}</FormHelperText>
           </FormControl>
