@@ -59,6 +59,12 @@ const GetChores = () => {
     headers: HEADERS(),
   })
 }
+const GetArchivedChores = () => {
+  return Fetch(`${API_URL}/chores/archived`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+}
 
 const GetChoreByID = id => {
   return Fetch(`${API_URL}/chores/${id}`, {
@@ -356,6 +362,7 @@ export {
   DeleteThing,
   GetAllCircleMembers,
   GetAllUsers,
+  GetArchivedChores,
   GetChoreByID,
   GetChoreDetailById,
   GetChoreHistory,

@@ -6,6 +6,7 @@ import {
   FilterAlt,
   PriorityHigh,
   Style,
+  Unarchive,
 } from '@mui/icons-material'
 import {
   Accordion,
@@ -29,7 +30,11 @@ import { useContext, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { UserContext } from '../../contexts/UserContext'
 import { useChores } from '../../queries/ChoreQueries'
-import { GetAllUsers, GetUserProfile } from '../../utils/Fetcher'
+import {
+  GetAllUsers,
+  GetArchivedChores,
+  GetUserProfile,
+} from '../../utils/Fetcher'
 import Priorities from '../../utils/Priorities'
 import LoadingComponent from '../components/Loading'
 import { useLabels } from '../Labels/LabelQueries'
@@ -41,6 +46,7 @@ const MyChores = () => {
   const [isSnackbarOpen, setIsSnackbarOpen] = useState(false)
   const [snackBarMessage, setSnackBarMessage] = useState(null)
   const [chores, setChores] = useState([])
+  const [archivedChores, setArchivedChores] = useState(null)
   const [filteredChores, setFilteredChores] = useState([])
   const [selectedFilter, setSelectedFilter] = useState('All')
   const [choreSections, setChoreSections] = useState([])
@@ -226,6 +232,7 @@ const MyChores = () => {
       document.removeEventListener('mousedown', handleMenuOutsideClick)
     }
   }, [anchorEl])
+
   const handleMenuOutsideClick = event => {
     if (
       anchorEl &&
@@ -280,6 +287,7 @@ const MyChores = () => {
     })
     setChores(newChores)
     setFilteredChores(newFilteredChores)
+    setChoreSections(sectionSorter('due_date', newChores))
     switch (event) {
       case 'completed':
         setSnackBarMessage('Completed')
@@ -303,6 +311,7 @@ const MyChores = () => {
     )
     setChores(newChores)
     setFilteredChores(newFilteredChores)
+    setChoreSections(sectionSorter('due_date', newChores))
   }
 
   const searchOptions = {
@@ -627,6 +636,65 @@ const MyChores = () => {
         </AccordionGroup>
       )}
       <Box
+        sx={{
+          // center the button
+          justifyContent: 'center',
+          mt: 2,
+        }}
+      >
+        {archivedChores === null && (
+          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Button
+              sx={{}}
+              onClick={() => {
+                GetArchivedChores()
+                  .then(response => response.json())
+                  .then(data => {
+                    setArchivedChores(data.res)
+                  })
+              }}
+              variant='outlined'
+              color='neutral'
+              startDecorator={<Unarchive />}
+            >
+              Show Archived
+            </Button>
+          </Box>
+        )}
+        {archivedChores !== null && (
+          <>
+            <Divider orientation='horizontal'>
+              <Chip
+                variant='soft'
+                color='danger'
+                size='md'
+                startDecorator={
+                  <>
+                    <Chip color='danger' size='sm' variant='plain'>
+                      {archivedChores?.length}
+                    </Chip>
+                  </>
+                }
+              >
+                Archived
+              </Chip>
+            </Divider>
+
+            {archivedChores?.map(chore => (
+              <ChoreCard
+                key={chore.id}
+                chore={chore}
+                onChoreUpdate={handleChoreUpdated}
+                onChoreRemove={handleChoreDeleted}
+                performers={performers}
+                userLabels={userLabels}
+                onChipClick={handleLabelFiltering}
+              />
+            ))}
+          </>
+        )}
+      </Box>
+      <Box
         // variant='outlined'
         sx={{
           position: 'fixed',
@@ -647,7 +715,6 @@ const MyChores = () => {
             width: 50,
             height: 50,
           }}
-          //   startDecorator={<Add />}
           onClick={() => {
             Navigate(`/chores/create`)
           }}
