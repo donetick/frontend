@@ -272,22 +272,39 @@ const MyChores = () => {
   }
 
   const handleChoreUpdated = (updatedChore, event) => {
-    const newChores = chores.map(chore => {
+    var newChores = chores.map(chore => {
       if (chore.id === updatedChore.id) {
         return updatedChore
       }
       return chore
     })
 
-    const newFilteredChores = filteredChores.map(chore => {
+    var newFilteredChores = filteredChores.map(chore => {
       if (chore.id === updatedChore.id) {
         return updatedChore
       }
       return chore
     })
+    if (event === 'archive') {
+      newChores = newChores.filter(chore => chore.id !== updatedChore.id)
+      newFilteredChores = newFilteredChores.filter(
+        chore => chore.id !== updatedChore.id,
+      )
+      if (archivedChores !== null) {
+        setArchivedChores([...archivedChores, updatedChore])
+      }
+    }
+    if (event === 'unarchive') {
+      newChores.push(updatedChore)
+      newFilteredChores.push(updatedChore)
+      setArchivedChores(
+        archivedChores.filter(chore => chore.id !== updatedChore.id),
+      )
+    }
     setChores(newChores)
     setFilteredChores(newFilteredChores)
     setChoreSections(sectionSorter('due_date', newChores))
+
     switch (event) {
       case 'completed':
         setSnackBarMessage('Completed')
@@ -297,6 +314,12 @@ const MyChores = () => {
         break
       case 'rescheduled':
         setSnackBarMessage('Rescheduled')
+        break
+      case 'unarchive':
+        setSnackBarMessage('Unarchive')
+        break
+      case 'archive':
+        setSnackBarMessage('Archived')
         break
       default:
         setSnackBarMessage('Updated')
