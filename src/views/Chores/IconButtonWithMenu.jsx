@@ -1,4 +1,4 @@
-import { Chip, Menu, MenuItem } from '@mui/joy'
+import { Chip, Menu, MenuItem, Typography } from '@mui/joy'
 import IconButton from '@mui/joy/IconButton'
 import React, { useEffect, useRef, useState } from 'react'
 import { getTextColorFromBackgroundColor } from '../../utils/LabelColors'
@@ -12,6 +12,7 @@ const IconButtonWithMenu = ({
   setSelectedItem,
   isActive,
   useChips,
+  title,
 }) => {
   const [anchorEl, setAnchorEl] = useState(null)
   const menuRef = useRef(null)
@@ -58,6 +59,13 @@ const IconButtonWithMenu = ({
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
       >
+        {title && (
+          <MenuItem key={`${key}-title`} disabled>
+            <Typography level='body-sm' sx={{ fontWeight: 'bold' }}>
+              {title}
+            </Typography>
+          </MenuItem>
+        )}
         {options?.map(item => (
           <MenuItem
             key={`${key}-${item?.id}`}
