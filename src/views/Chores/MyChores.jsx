@@ -172,18 +172,39 @@ const MyChores = () => {
             case 4:
               groupRaw['p4'].push(chore)
               break
+            default:
+              groupRaw['no_priority'].push(chore)
+              break
           }
         })
+        groups = [
+          { name: 'Priority 1', content: groupRaw['p1'] },
+          { name: 'Priority 2', content: groupRaw['p2'] },
+          { name: 'Priority 3', content: groupRaw['p3'] },
+          { name: 'Priority 4', content: groupRaw['p4'] },
+          { name: 'No Priority', content: groupRaw['no_priority'] },
+        ]
         break
       case 'labels':
         groupRaw = {}
+        var labels = {}
         chores.forEach(chore => {
           chore.labelsV2.forEach(label => {
+            labels[label.id] = label
             if (groupRaw[label.id] === undefined) {
               groupRaw[label.id] = []
             }
             groupRaw[label.id].push(chore)
           })
+        })
+        groups = Object.keys(groupRaw).map(key => {
+          return {
+            name: labels[key].name,
+            content: groupRaw[key],
+          }
+        })
+        groups.sort((a, b) => {
+          a.name < b.name ? 1 : -1
         })
     }
     return groups
@@ -272,22 +293,39 @@ const MyChores = () => {
   }
 
   const handleChoreUpdated = (updatedChore, event) => {
-    const newChores = chores.map(chore => {
+    var newChores = chores.map(chore => {
       if (chore.id === updatedChore.id) {
         return updatedChore
       }
       return chore
     })
 
-    const newFilteredChores = filteredChores.map(chore => {
+    var newFilteredChores = filteredChores.map(chore => {
       if (chore.id === updatedChore.id) {
         return updatedChore
       }
       return chore
     })
+    if (event === 'archive') {
+      newChores = newChores.filter(chore => chore.id !== updatedChore.id)
+      newFilteredChores = newFilteredChores.filter(
+        chore => chore.id !== updatedChore.id,
+      )
+      if (archivedChores !== null) {
+        setArchivedChores([...archivedChores, updatedChore])
+      }
+    }
+    if (event === 'unarchive') {
+      newChores.push(updatedChore)
+      newFilteredChores.push(updatedChore)
+      setArchivedChores(
+        archivedChores.filter(chore => chore.id !== updatedChore.id),
+      )
+    }
     setChores(newChores)
     setFilteredChores(newFilteredChores)
     setChoreSections(sectionSorter('due_date', newChores))
+
     switch (event) {
       case 'completed':
         setSnackBarMessage('Completed')
@@ -297,6 +335,12 @@ const MyChores = () => {
         break
       case 'rescheduled':
         setSnackBarMessage('Rescheduled')
+        break
+      case 'unarchive':
+        setSnackBarMessage('Unarchive')
+        break
+      case 'archive':
+        setSnackBarMessage('Archived')
         break
       default:
         setSnackBarMessage('Updated')

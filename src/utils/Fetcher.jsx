@@ -65,6 +65,18 @@ const GetArchivedChores = () => {
     headers: HEADERS(),
   })
 }
+const ArchiveChore = id => {
+  return Fetch(`${API_URL}/chores/${id}/archive`, {
+    method: 'PUT',
+    headers: HEADERS(),
+  })
+}
+const UnArchiveChore = id => {
+  return Fetch(`${API_URL}/chores/${id}/unarchive`, {
+    method: 'PUT',
+    headers: HEADERS(),
+  })
+}
 
 const GetChoreByID = id => {
   return Fetch(`${API_URL}/chores/${id}`, {
@@ -348,6 +360,7 @@ const DeleteLabel = id => {
 
 export {
   AcceptCircleMemberRequest,
+  ArchiveChore,
   CancelSubscription,
   createChore,
   CreateChore,
@@ -384,6 +397,7 @@ export {
   SaveThing,
   signUp,
   SkipChore,
+  UnArchiveChore,
   UpdateChoreAssignee,
   UpdateChoreHistory,
   UpdateChorePriority,
