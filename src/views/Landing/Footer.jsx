@@ -76,7 +76,7 @@ function Footer() {
             Home Assistant Addon
           </Link>
           <Link
-            href='https://github.com/orgs/donetick/packages'
+            href='https://hub.docker.com/r/donetick/donetick'
             level='body2'
             sx={{ display: 'block' }}
           >
@@ -94,14 +94,28 @@ function Footer() {
           <Typography level='body2' fontWeight='bold' mb={1}>
             Links
           </Typography>
-
-          <Link disabled={true} level='body2' sx={{ display: 'block' }}>
-            Roadmap(soon)
+          <Link
+            level='body2'
+            sx={{ display: 'block' }}
+            href='https://github.com/donetick/donetick/discussions'
+          >
+            Discussions
+          </Link>
+          <Link
+            level='body2'
+            sx={{ display: 'block' }}
+            href='https://github.com/orgs/donetick/projects/3'
+          >
+            Roadmap
           </Link>
           <Link disabled={true} level='body2' sx={{ display: 'block' }}>
             Documentation(soon)
           </Link>
-          <Link disabled={true} level='body2' sx={{ display: 'block' }}>
+          <Link
+            href='https://github.com/donetick/donetick/releases'
+            level='body2'
+            sx={{ display: 'block' }}
+          >
             Changelog(soon)
           </Link>
           <Link disabled={true} level='body2' sx={{ display: 'block' }}>
