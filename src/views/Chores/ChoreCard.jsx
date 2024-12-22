@@ -1,4 +1,5 @@
 import {
+  Archive,
   CancelScheduleSend,
   Check,
   Delete,
@@ -18,6 +19,7 @@ import {
   Report,
   SwitchAccessShortcut,
   TimesOneMobiledata,
+  Unarchive,
   Update,
   ViewCarousel,
   Webhook,
@@ -43,8 +45,10 @@ import { useNavigate } from 'react-router-dom'
 import { API_URL } from '../../Config'
 import { UserContext } from '../../contexts/UserContext'
 import {
+  ArchiveChore,
   MarkChoreComplete,
   SkipChore,
+  UnArchiveChore,
   UpdateChoreAssignee,
 } from '../../utils/Fetcher'
 import { getTextColorFromBackgroundColor } from '../../utils/LabelColors'
@@ -136,6 +140,30 @@ const ChoreCard = ({
         setConfirmModelConfig({})
       },
     })
+  }
+  const handleArchive = () => {
+    if (chore.isActive) {
+      ArchiveChore(chore.id).then(response => {
+        if (response.ok) {
+          response.json().then(data => {
+            const newChore = { ...chore, isActive: false }
+
+            onChoreUpdate(newChore, 'archive')
+          })
+        }
+      })
+    } else {
+      UnArchiveChore(chore.id).then(response => {
+        if (response.ok) {
+          response.json().then(data => {
+            const newChore = { ...chore, isActive: true }
+            onChoreUpdate(newChore, 'unarchive')
+          })
+        }
+      })
+    }
+
+    handleMenuClose()
   }
 
   const handleTaskCompletion = () => {
@@ -691,6 +719,12 @@ const ChoreCard = ({
                   <ViewCarousel />
                   View
                 </MenuItem>
+                <MenuItem onClick={handleArchive} color='neutral'>
+                  {chore.isActive ? <Archive /> : <Unarchive />}
+                  {chore.isActive ? 'Archive' : 'Unarchive'}
+                </MenuItem>
+                <Divider />
+
                 <MenuItem onClick={handleDelete} color='danger'>
                   <Delete />
                   Delete

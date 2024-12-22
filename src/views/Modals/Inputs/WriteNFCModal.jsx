@@ -1,7 +1,9 @@
+import { CopyAll } from '@mui/icons-material'
 import {
   Box,
   Button,
   Checkbox,
+  Input,
   ListItem,
   Modal,
   ModalDialog,
@@ -38,7 +40,9 @@ function WriteNFCModal({ config }) {
       }
     } else {
       setNfcStatus('error')
-      setErrorMessage('NFC is not supported by this browser.')
+      setErrorMessage(
+        'NFC is not supported by this browser. You can still copy the URL and write it to an NFC tag using a compatible device.',
+      )
     }
   }
 
@@ -73,6 +77,22 @@ function WriteNFCModal({ config }) {
                 ? errorMessage
                 : 'Press the button below to write to NFC.'}
             </Typography>
+            <Input
+              value={getURL()}
+              fullWidth
+              readOnly
+              label='URL'
+              sx={{ mt: 1 }}
+              endDecorator={
+                <CopyAll
+                  sx={{ cursor: 'pointer' }}
+                  onClick={() => {
+                    navigator.clipboard.writeText(getURL())
+                    alert('URL copied to clipboard!')
+                  }}
+                />
+              }
+            />
             <ListItem>
               <Checkbox
                 checked={isAutoCompleteWhenScan}
@@ -95,12 +115,6 @@ function WriteNFCModal({ config }) {
             </Box>
           </>
         )}
-
-        <Box display={'flex'} justifyContent={'center'} mt={2}>
-          <Button onClick={handleClose} variant='outlined'>
-            Close
-          </Button>
-        </Box>
       </ModalDialog>
     </Modal>
   )

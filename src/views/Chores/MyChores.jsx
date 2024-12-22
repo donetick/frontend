@@ -5,6 +5,7 @@ import {
   ExpandCircleDown,
   FilterAlt,
   PriorityHigh,
+  Sort,
   Style,
   Unarchive,
 } from '@mui/icons-material'
@@ -50,6 +51,7 @@ const MyChores = () => {
   const [filteredChores, setFilteredChores] = useState([])
   const [selectedFilter, setSelectedFilter] = useState('All')
   const [choreSections, setChoreSections] = useState([])
+  const [selectedChoreSection, setSelectedChoreSection] = useState('due_date')
   const [openChoreSections, setOpenChoreSections] = useState({})
   const [searchTerm, setSearchTerm] = useState('')
   const [activeUserId, setActiveUserId] = useState(0)
@@ -172,18 +174,39 @@ const MyChores = () => {
             case 4:
               groupRaw['p4'].push(chore)
               break
+            default:
+              groupRaw['no_priority'].push(chore)
+              break
           }
         })
+        groups = [
+          { name: 'Priority 1', content: groupRaw['p1'] },
+          { name: 'Priority 2', content: groupRaw['p2'] },
+          { name: 'Priority 3', content: groupRaw['p3'] },
+          { name: 'Priority 4', content: groupRaw['p4'] },
+          { name: 'No Priority', content: groupRaw['no_priority'] },
+        ]
         break
       case 'labels':
         groupRaw = {}
+        var labels = {}
         chores.forEach(chore => {
           chore.labelsV2.forEach(label => {
+            labels[label.id] = label
             if (groupRaw[label.id] === undefined) {
               groupRaw[label.id] = []
             }
             groupRaw[label.id].push(chore)
           })
+        })
+        groups = Object.keys(groupRaw).map(key => {
+          return {
+            name: labels[key].name,
+            content: groupRaw[key],
+          }
+        })
+        groups.sort((a, b) => {
+          a.name < b.name ? 1 : -1
         })
     }
     return groups
@@ -272,22 +295,39 @@ const MyChores = () => {
   }
 
   const handleChoreUpdated = (updatedChore, event) => {
-    const newChores = chores.map(chore => {
+    var newChores = chores.map(chore => {
       if (chore.id === updatedChore.id) {
         return updatedChore
       }
       return chore
     })
 
-    const newFilteredChores = filteredChores.map(chore => {
+    var newFilteredChores = filteredChores.map(chore => {
       if (chore.id === updatedChore.id) {
         return updatedChore
       }
       return chore
     })
+    if (event === 'archive') {
+      newChores = newChores.filter(chore => chore.id !== updatedChore.id)
+      newFilteredChores = newFilteredChores.filter(
+        chore => chore.id !== updatedChore.id,
+      )
+      if (archivedChores !== null) {
+        setArchivedChores([...archivedChores, updatedChore])
+      }
+    }
+    if (event === 'unarchive') {
+      newChores.push(updatedChore)
+      newFilteredChores.push(updatedChore)
+      setArchivedChores(
+        archivedChores.filter(chore => chore.id !== updatedChore.id),
+      )
+    }
     setChores(newChores)
     setFilteredChores(newFilteredChores)
     setChoreSections(sectionSorter('due_date', newChores))
+
     switch (event) {
       case 'completed':
         setSnackBarMessage('Completed')
@@ -297,6 +337,12 @@ const MyChores = () => {
         break
       case 'rescheduled':
         setSnackBarMessage('Rescheduled')
+        break
+      case 'unarchive':
+        setSnackBarMessage('Unarchive')
+        break
+      case 'archive':
+        setSnackBarMessage('Archived')
         break
       default:
         setSnackBarMessage('Updated')
@@ -392,6 +438,7 @@ const MyChores = () => {
         />
         <IconButtonWithMenu
           icon={<PriorityHigh />}
+          title='Filter by Priority'
           options={Priorities}
           selectedItem={selectedFilter}
           onItemSelect={selected => {
@@ -405,6 +452,7 @@ const MyChores = () => {
           // TODO : this need simplification we want to display both user labels and chore labels
           // that why we are merging them here.
           // we also filter out the labels that user created as those will be part of user labels
+          title='Filter by Label'
           options={[
             ...userLabels,
             ...chores
@@ -493,6 +541,25 @@ const MyChores = () => {
               ))}
           </Menu>
         </List>
+        <Divider orientation='vertical' />
+        <IconButtonWithMenu
+          title='Group by'
+          icon={<Sort />}
+          options={[
+            { name: 'Due Date', value: 'due_date' },
+            { name: 'Priority', value: 'priority' },
+            { name: 'Labels', value: 'labels' },
+          ]}
+          selectedItem={selectedChoreSection}
+          onItemSelect={selected => {
+            const section = sectionSorter(selected.value, chores)
+            setChoreSections(section)
+            setSelectedChoreSection(selected.value)
+            setFilteredChores(chores)
+            setSelectedFilter('All')
+          }}
+          mouseClickHandler={handleMenuOutsideClick}
+        />
       </Box>
       {selectedFilter !== 'All' && (
         <Chip
