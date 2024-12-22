@@ -5,6 +5,7 @@ import {
   ExpandCircleDown,
   FilterAlt,
   PriorityHigh,
+  Sort,
   Style,
   Unarchive,
 } from '@mui/icons-material'
@@ -50,6 +51,7 @@ const MyChores = () => {
   const [filteredChores, setFilteredChores] = useState([])
   const [selectedFilter, setSelectedFilter] = useState('All')
   const [choreSections, setChoreSections] = useState([])
+  const [selectedChoreSection, setSelectedChoreSection] = useState('due_date')
   const [openChoreSections, setOpenChoreSections] = useState({})
   const [searchTerm, setSearchTerm] = useState('')
   const [activeUserId, setActiveUserId] = useState(0)
@@ -436,6 +438,7 @@ const MyChores = () => {
         />
         <IconButtonWithMenu
           icon={<PriorityHigh />}
+          title='Filter by Priority'
           options={Priorities}
           selectedItem={selectedFilter}
           onItemSelect={selected => {
@@ -449,6 +452,7 @@ const MyChores = () => {
           // TODO : this need simplification we want to display both user labels and chore labels
           // that why we are merging them here.
           // we also filter out the labels that user created as those will be part of user labels
+          title='Filter by Label'
           options={[
             ...userLabels,
             ...chores
@@ -537,6 +541,25 @@ const MyChores = () => {
               ))}
           </Menu>
         </List>
+        <Divider orientation='vertical' />
+        <IconButtonWithMenu
+          title='Group by'
+          icon={<Sort />}
+          options={[
+            { name: 'Due Date', value: 'due_date' },
+            { name: 'Priority', value: 'priority' },
+            { name: 'Labels', value: 'labels' },
+          ]}
+          selectedItem={selectedChoreSection}
+          onItemSelect={selected => {
+            const section = sectionSorter(selected.value, chores)
+            setChoreSections(section)
+            setSelectedChoreSection(selected.value)
+            setFilteredChores(chores)
+            setSelectedFilter('All')
+          }}
+          mouseClickHandler={handleMenuOutsideClick}
+        />
       </Box>
       {selectedFilter !== 'All' && (
         <Chip
