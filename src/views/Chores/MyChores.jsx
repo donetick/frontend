@@ -172,18 +172,39 @@ const MyChores = () => {
             case 4:
               groupRaw['p4'].push(chore)
               break
+            default:
+              groupRaw['no_priority'].push(chore)
+              break
           }
         })
+        groups = [
+          { name: 'Priority 1', content: groupRaw['p1'] },
+          { name: 'Priority 2', content: groupRaw['p2'] },
+          { name: 'Priority 3', content: groupRaw['p3'] },
+          { name: 'Priority 4', content: groupRaw['p4'] },
+          { name: 'No Priority', content: groupRaw['no_priority'] },
+        ]
         break
       case 'labels':
         groupRaw = {}
+        var labels = {}
         chores.forEach(chore => {
           chore.labelsV2.forEach(label => {
+            labels[label.id] = label
             if (groupRaw[label.id] === undefined) {
               groupRaw[label.id] = []
             }
             groupRaw[label.id].push(chore)
           })
+        })
+        groups = Object.keys(groupRaw).map(key => {
+          return {
+            name: labels[key].name,
+            content: groupRaw[key],
+          }
+        })
+        groups.sort((a, b) => {
+          a.name < b.name ? 1 : -1
         })
     }
     return groups
