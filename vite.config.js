@@ -61,6 +61,7 @@ export default defineConfig({
       workbox: {
         skipWaiting: true, // Force the waiting service worker to become the active service worker
         clientsClaim: true, // Take control of uncontrolled clients as soon as the service worker becomes active
+        updateViaCache: 'none', // Do not use the cache for the update process
       },
     }),
   ],
