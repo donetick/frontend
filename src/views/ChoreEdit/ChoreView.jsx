@@ -190,7 +190,7 @@ const ChoreView = () => {
     }, 1000)
 
     const id = setTimeout(() => {
-      MarkChoreComplete(choreId, note, completedDate)
+      MarkChoreComplete(choreId, note, completedDate, null)
         .then(resp => {
           if (resp.ok) {
             return resp.json().then(data => {

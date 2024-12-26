@@ -120,6 +120,7 @@ const NavBar = () => {
             tick✓
           </span>
         </Typography>
+      
       </Box>
       <Drawer
         open={drawerOpen}

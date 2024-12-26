@@ -15,6 +15,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import { API_URL } from '../../Config'
 import Logo from '../../Logo'
+import { ChangePassword } from '../../utils/Fetcher'
 
 const UpdatePasswordView = () => {
   const navigate = useNavigate()
@@ -52,17 +53,8 @@ const UpdatePasswordView = () => {
       return
     }
     try {
-      const response = await fetch(
-        `${API_URL}/auth/password?c=${verifiticationCode}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ password: password }),
-        },
-      )
-
+      const response = await ChangePassword(verifiticationCode, password)
+    
       if (response.ok) {
         setUpdateStatusOk(true)
         //  wait 3 seconds and then redirect to login:

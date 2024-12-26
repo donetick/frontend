@@ -14,6 +14,7 @@ import {
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { API_URL } from './../../Config'
+import {  ResetPassword } from '../../utils/Fetcher'
 
 const ForgotPasswordView = () => {
   const navigate = useNavigate()
@@ -43,13 +44,7 @@ const ForgotPasswordView = () => {
     }
 
     try {
-      const response = await fetch(`${API_URL}/auth/reset`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: email }),
-      })
+      const response = await ResetPassword(email)
 
       if (response.ok) {
         setResetStatusOk(true)
