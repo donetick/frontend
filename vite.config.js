@@ -70,6 +70,7 @@ export default defineConfig({
         '@rollup/rollup-linux-x64-gnu'
       ]
     },
+  },
 
   resolve: {
     alias: [
