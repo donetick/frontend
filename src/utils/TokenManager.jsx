@@ -1,55 +1,52 @@
 import Cookies from 'js-cookie'
 import { API_URL } from '../Config'
-import { login, RefreshToken } from './Fetcher'
+import { RefreshToken } from './Fetcher'
 
 import { Preferences } from '@capacitor/preferences'
 
 class ApiManager {
-  constructor(){
+  constructor() {
     this.customServerURL = API_URL
     this.initialized = false
   }
-  async init(){
-    if(this.initialized){
+  async init() {
+    if (this.initialized) {
       return
     }
-    const { value: serverURL } = await Preferences.get({ key: 'customServerUrl' });
-    
+    const { value: serverURL } = await Preferences.get({
+      key: 'customServerUrl',
+    })
+
     this.customServerURL = serverURL || this.apiURL
     this.initialized = true
-    
-    
   }
-  getApiURL(){
+  getApiURL() {
     return this.customServerURL
   }
-  updateApiURL(url){
+  updateApiURL(url) {
     this.customServerURL = url
   }
 }
 
-
-export const apiManager = new ApiManager();
-
+export const apiManager = new ApiManager()
 
 export function Fetch(url, options) {
-  
   if (!isTokenValid()) {
     // store current location in cookie
-    Cookies.set('ca_redirect', window.location.pathname);
+    Cookies.set('ca_redirect', window.location.pathname)
     // Assuming you have a function isTokenValid() that checks token validity
-    window.location.href = '/login'; // Redirect to login page
+    window.location.href = '/login' // Redirect to login page
     // return Promise.reject("Token is not valid");
   }
   if (!options) {
-    options = {};
+    options = {}
   }
-  options.headers = { ...options.headers, ...HEADERS() };
+  options.headers = { ...options.headers, ...HEADERS() }
 
-  const baseURL = apiManager.getApiURL();
+  const baseURL = apiManager.getApiURL()
 
-  const fullURL = `${baseURL}${url}`;
-  return fetch(fullURL, options);
+  const fullURL = `${baseURL}${url}`
+  return fetch(fullURL, options)
 }
 
 export const HEADERS = () => {
@@ -81,8 +78,7 @@ export const isTokenValid = () => {
 }
 
 export const refreshAccessToken = () => {
-  RefreshToken()
-  .then(res => {
+  RefreshToken().then(res => {
     if (res.status === 200) {
       res.json().then(data => {
         localStorage.setItem('ca_token', data.token)
