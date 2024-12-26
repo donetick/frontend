@@ -18,6 +18,7 @@ import { API_URL } from '../../Config'
 import {
   DeleteChoreHistory,
   GetAllCircleMembers,
+  GetChoreHistory,
   UpdateChoreHistory,
 } from '../../utils/Fetcher'
 import { Fetch } from '../../utils/TokenManager'
@@ -40,7 +41,7 @@ const ChoreHistory = () => {
     setIsLoading(true) // Start loading
 
     Promise.all([
-      Fetch(`${API_URL}/chores/${choreId}/history`).then(res => res.json()),
+      GetChoreHistory(choreId).then(res => res.json()),
       GetAllCircleMembers().then(res => res.json()),
     ])
       .then(([historyData, usersData]) => {

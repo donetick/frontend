@@ -1,8 +1,11 @@
 import { API_URL } from '../Config'
-import { Fetch, HEADERS } from './TokenManager'
+import { Fetch, HEADERS, apiManager } from './TokenManager'
+
+
+
 
 const createChore = userID => {
-  return Fetch(`${API_URL}/chores/`, {
+  return Fetch(`/chores/`, {
     method: 'POST',
     headers: HEADERS(),
     body: JSON.stringify({
@@ -12,7 +15,7 @@ const createChore = userID => {
 }
 
 const signUp = (username, password, displayName, email) => {
-  return fetch(`${API_URL}/auth/`, {
+  return fetch(`/auth/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -22,7 +25,7 @@ const signUp = (username, password, displayName, email) => {
 }
 
 const UpdatePassword = newPassword => {
-  return fetch(`${API_URL}/users/change_password`, {
+  return fetch(`/users/change_password`, {
     method: 'PUT',
     headers: HEADERS(),
     body: JSON.stringify({ password: newPassword }),
@@ -30,7 +33,8 @@ const UpdatePassword = newPassword => {
 }
 
 const login = (username, password) => {
-  return fetch(`${API_URL}/auth/login`, {
+  const baseURL = apiManager.getApiURL();
+  return fetch(`${baseURL}/auth/login`, {
     headers: {
       'Content-Type': 'application/json',
     },
@@ -40,13 +44,13 @@ const login = (username, password) => {
 }
 
 const GetAllUsers = () => {
-  return fetch(`${API_URL}/users/`, {
+  return Fetch(`/users/`, {
     method: 'GET',
     headers: HEADERS(),
   })
 }
 const GetChoresNew = async () => {
-  const resp = await Fetch(`${API_URL}/chores/`, {
+  const resp = await Fetch(`/chores/`, {
     method: 'GET',
     headers: HEADERS(),
   })
@@ -54,43 +58,45 @@ const GetChoresNew = async () => {
 }
 
 const GetChores = () => {
-  return Fetch(`${API_URL}/chores/`, {
+  return Fetch(`/chores/`, {
     method: 'GET',
     headers: HEADERS(),
   })
 }
 const GetArchivedChores = () => {
-  return Fetch(`${API_URL}/chores/archived`, {
+  return Fetch(`/chores/archived`, {
     method: 'GET',
     headers: HEADERS(),
   })
 }
 const ArchiveChore = id => {
-  return Fetch(`${API_URL}/chores/${id}/archive`, {
+  return Fetch(`/chores/${id}/archive`, {
     method: 'PUT',
     headers: HEADERS(),
   })
 }
 const UnArchiveChore = id => {
-  return Fetch(`${API_URL}/chores/${id}/unarchive`, {
+  return Fetch(`/chores/${id}/unarchive`, {
     method: 'PUT',
     headers: HEADERS(),
   })
 }
 
 const GetChoreByID = id => {
-  return Fetch(`${API_URL}/chores/${id}`, {
+  return Fetch(`/chores/${id}`, {
     method: 'GET',
     headers: HEADERS(),
   })
 }
 const GetChoreDetailById = id => {
-  return Fetch(`${API_URL}/chores/${id}/details`, {
+  return Fetch(`/chores/${id}/details`, {
     method: 'GET',
     headers: HEADERS(),
   })
 }
-const MarkChoreComplete = (id, note, completedDate) => {
+const MarkChoreComplete = (id, note, completedDate, performer) => {
+  var markChoreURL =`/chores/${id}/do`
+
   const body = {
     note,
   }
@@ -99,8 +105,20 @@ const MarkChoreComplete = (id, note, completedDate) => {
     completedDateFormated = `?completedDate=${new Date(
       completedDate,
     ).toISOString()}`
+    markChoreURL += completedDateFormated
   }
-  return Fetch(`${API_URL}/chores/${id}/do${completedDateFormated}`, {
+  if (performer) {
+    body.performer = Number(performer)
+    if(completedDateFormated === ''){
+    markChoreURL += `&performer=${performer}`
+    }
+    else{
+      markChoreURL += `?performer=${performer}`
+    }
+  }
+
+
+  return Fetch(markChoreURL, {
     method: 'POST',
     headers: HEADERS(),
     body: JSON.stringify(body),
@@ -108,7 +126,7 @@ const MarkChoreComplete = (id, note, completedDate) => {
 }
 
 const SkipChore = id => {
-  return Fetch(`${API_URL}/chores/${id}/skip`, {
+  return Fetch(`/chores/${id}/skip`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -118,7 +136,7 @@ const SkipChore = id => {
 }
 
 const UpdateChoreAssignee = (id, assignee) => {
-  return Fetch(`${API_URL}/chores/${id}/assignee`, {
+  return Fetch(`/chores/${id}/assignee`, {
     method: 'PUT',
     headers: HEADERS(),
     body: JSON.stringify({ assignee: Number(assignee) }),
@@ -126,7 +144,7 @@ const UpdateChoreAssignee = (id, assignee) => {
 }
 
 const CreateChore = chore => {
-  return Fetch(`${API_URL}/chores/`, {
+  return Fetch(`/chores/`, {
     method: 'POST',
     headers: HEADERS(),
     body: JSON.stringify(chore),
@@ -134,14 +152,14 @@ const CreateChore = chore => {
 }
 
 const DeleteChore = id => {
-  return Fetch(`${API_URL}/chores/${id}`, {
+  return Fetch(`/chores/${id}`, {
     method: 'DELETE',
     headers: HEADERS(),
   })
 }
 
 const SaveChore = chore => {
-  return Fetch(`${API_URL}/chores/`, {
+  return Fetch(`/chores/`, {
     method: 'PUT',
     headers: HEADERS(),
     body: JSON.stringify(chore),
@@ -149,27 +167,27 @@ const SaveChore = chore => {
 }
 
 const UpdateChorePriority = (id, priority) => {
-  return Fetch(`${API_URL}/chores/${id}/priority `, {
+  return Fetch(`/chores/${id}/priority `, {
     method: 'PUT',
     headers: HEADERS(),
     body: JSON.stringify({ priority: priority }),
   })
 }
 const GetChoreHistory = choreId => {
-  return Fetch(`${API_URL}/chores/${choreId}/history`, {
+  return Fetch(`/chores/${choreId}/history`, {
     method: 'GET',
     headers: HEADERS(),
   })
 }
 const DeleteChoreHistory = (choreId, id) => {
-  return Fetch(`${API_URL}/chores/${choreId}/history/${id}`, {
+  return Fetch(`/chores/${choreId}/history/${id}`, {
     method: 'DELETE',
     headers: HEADERS(),
   })
 }
 
 const UpdateChoreHistory = (choreId, id, choreHistory) => {
-  return Fetch(`${API_URL}/chores/${choreId}/history/${id}`, {
+  return Fetch(`/chores/${choreId}/history/${id}`, {
     method: 'PUT',
     headers: HEADERS(),
     body: JSON.stringify(choreHistory),
@@ -177,49 +195,49 @@ const UpdateChoreHistory = (choreId, id, choreHistory) => {
 }
 
 const GetAllCircleMembers = () => {
-  return Fetch(`${API_URL}/circles/members`, {
+  return Fetch(`/circles/members`, {
     method: 'GET',
     headers: HEADERS(),
   })
 }
 
 const GetUserProfile = () => {
-  return Fetch(`${API_URL}/users/profile`, {
+  return Fetch(`/users/profile`, {
     method: 'GET',
     headers: HEADERS(),
   })
 }
 
 const GetUserCircle = () => {
-  return Fetch(`${API_URL}/circles/`, {
+  return Fetch(`/circles/`, {
     method: 'GET',
     headers: HEADERS(),
   })
 }
 
 const JoinCircle = inviteCode => {
-  return Fetch(`${API_URL}/circles/join?invite_code=${inviteCode}`, {
+  return Fetch(`/circles/join?invite_code=${inviteCode}`, {
     method: 'POST',
     headers: HEADERS(),
   })
 }
 
 const GetCircleMemberRequests = () => {
-  return Fetch(`${API_URL}/circles/members/requests`, {
+  return Fetch(`/circles/members/requests`, {
     method: 'GET',
     headers: HEADERS(),
   })
 }
 
 const AcceptCircleMemberRequest = id => {
-  return Fetch(`${API_URL}/circles/members/requests/accept?requestId=${id}`, {
+  return Fetch(`/circles/members/requests/accept?requestId=${id}`, {
     method: 'PUT',
     headers: HEADERS(),
   })
 }
 
 const LeaveCircle = id => {
-  return Fetch(`${API_URL}/circles/leave?circle_id=${id}`, {
+  return Fetch(`/circles/leave?circle_id=${id}`, {
     method: 'DELETE',
     headers: HEADERS(),
   })
@@ -227,7 +245,7 @@ const LeaveCircle = id => {
 
 const DeleteCircleMember = (circleID, memberID) => {
   return Fetch(
-    `${API_URL}/circles/${circleID}/members/delete?member_id=${memberID}`,
+    `/circles/${circleID}/members/delete?member_id=${memberID}`,
     {
       method: 'DELETE',
       headers: HEADERS(),
@@ -236,7 +254,7 @@ const DeleteCircleMember = (circleID, memberID) => {
 }
 
 const UpdateUserDetails = userDetails => {
-  return Fetch(`${API_URL}/users`, {
+  return Fetch(`/users`, {
     method: 'PUT',
     headers: HEADERS(),
     body: JSON.stringify(userDetails),
@@ -244,7 +262,7 @@ const UpdateUserDetails = userDetails => {
 }
 
 const UpdateNotificationTarget = notificationTarget => {
-  return Fetch(`${API_URL}/users/targets`, {
+  return Fetch(`/users/targets`, {
     method: 'PUT',
     headers: HEADERS(),
     body: JSON.stringify(notificationTarget),
@@ -252,27 +270,27 @@ const UpdateNotificationTarget = notificationTarget => {
 }
 
 const GetSubscriptionSession = () => {
-  return Fetch(API_URL + `/payments/create-subscription`, {
+  return Fetch(`/payments/create-subscription`, {
     method: 'GET',
     headers: HEADERS(),
   })
 }
 
 const CancelSubscription = () => {
-  return Fetch(API_URL + `/payments/cancel-subscription`, {
+  return Fetch(`/payments/cancel-subscription`, {
     method: 'POST',
     headers: HEADERS(),
   })
 }
 
 const GetThings = () => {
-  return Fetch(`${API_URL}/things`, {
+  return Fetch(`/things`, {
     method: 'GET',
     headers: HEADERS(),
   })
 }
 const CreateThing = thing => {
-  return Fetch(`${API_URL}/things`, {
+  return Fetch(`/things`, {
     method: 'POST',
     headers: HEADERS(),
     body: JSON.stringify(thing),
@@ -280,7 +298,7 @@ const CreateThing = thing => {
 }
 
 const SaveThing = thing => {
-  return Fetch(`${API_URL}/things`, {
+  return Fetch(`/things`, {
     method: 'PUT',
     headers: HEADERS(),
     body: JSON.stringify(thing),
@@ -288,48 +306,55 @@ const SaveThing = thing => {
 }
 
 const UpdateThingState = thing => {
-  return Fetch(`${API_URL}/things/${thing.id}/state?value=${thing.state}`, {
+  return Fetch(`/things/${thing.id}/state?value=${thing.state}`, {
     method: 'PUT',
     headers: HEADERS(),
   })
 }
 const DeleteThing = id => {
-  return Fetch(`${API_URL}/things/${id}`, {
+  return Fetch(`/things/${id}`, {
     method: 'DELETE',
     headers: HEADERS(),
   })
 }
 
 const GetThingHistory = (id, offset) => {
-  return Fetch(`${API_URL}/things/${id}/history?offset=${offset}`, {
+  return Fetch(`/things/${id}/history?offset=${offset}`, {
     method: 'GET',
     headers: HEADERS(),
   })
 }
 
 const CreateLongLiveToken = name => {
-  return Fetch(`${API_URL}/users/tokens`, {
+  return Fetch(`/users/tokens`, {
     method: 'POST',
     headers: HEADERS(),
     body: JSON.stringify({ name }),
   })
 }
 const DeleteLongLiveToken = id => {
-  return Fetch(`${API_URL}/users/tokens/${id}`, {
+  return Fetch(`/users/tokens/${id}`, {
     method: 'DELETE',
     headers: HEADERS(),
   })
 }
 
 const GetLongLiveTokens = () => {
-  return Fetch(`${API_URL}/users/tokens`, {
+  return Fetch(`/users/tokens`, {
     method: 'GET',
     headers: HEADERS(),
   })
 }
-
+const PutNotificationTarget = ( platform, deviceToken) => {
+  return Fetch(`/users/targets`, {
+    method: 'PUT',
+    headers: HEADERS(),
+    body: JSON.stringify({  platform,deviceToken }),
+  }
+  )
+}
 const CreateLabel = label => {
-  return Fetch(`${API_URL}/labels`, {
+  return Fetch(`/labels`, {
     method: 'POST',
     headers: HEADERS(),
     body: JSON.stringify(label),
@@ -337,7 +362,7 @@ const CreateLabel = label => {
 }
 
 const GetLabels = async () => {
-  const resp = await Fetch(`${API_URL}/labels`, {
+  const resp = await Fetch(`/labels`, {
     method: 'GET',
     headers: HEADERS(),
   })
@@ -345,19 +370,64 @@ const GetLabels = async () => {
 }
 
 const UpdateLabel = label => {
-  return Fetch(`${API_URL}/labels`, {
+  return Fetch(`/labels`, {
     method: 'PUT',
     headers: HEADERS(),
     body: JSON.stringify(label),
   })
 }
 const DeleteLabel = id => {
-  return Fetch(`${API_URL}/labels/${id}`, {
+  return Fetch(`/labels/${id}`, {
     method: 'DELETE',
     headers: HEADERS(),
   })
 }
 
+const ChangePassword =  (verifiticationCode, password) => {
+  const baseURL = apiManager.getApiURL();
+  return fetch(
+    `${baseURL}/auth/password?c=${verifiticationCode}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ password: password }),
+    },
+  )
+}
+
+const ResetPassword = email => {
+  const basedURL = apiManager.getApiURL();
+  return fetch(`${basedURL}/auth/reset`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email: email }),
+  })
+}
+
+const UpdateDueDate = (id, dueDate) => {
+  return Fetch(`/chores/${chore.id}/dueDate`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      dueDate: newDate ? new Date(newDate).toISOString() : null,
+      UpdatedBy: activeUserId,
+    }),
+  })
+}
+
+const RefreshToken = () => {
+  const basedURL = apiManager.getApiURL();
+  return fetch(basedURL + '/auth/refresh', {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+}
 export {
   AcceptCircleMemberRequest,
   ArchiveChore,
@@ -369,6 +439,7 @@ export {
   CreateThing,
   DeleteChore,
   DeleteChoreHistory,
+  ChangePassword,
   DeleteCircleMember,
   DeleteLabel,
   DeleteLongLiveToken,
@@ -393,6 +464,9 @@ export {
   LeaveCircle,
   login,
   MarkChoreComplete,
+  RefreshToken, 
+  ResetPassword,
+  PutNotificationTarget,
   SaveChore,
   SaveThing,
   signUp,
@@ -401,6 +475,7 @@ export {
   UpdateChoreAssignee,
   UpdateChoreHistory,
   UpdateChorePriority,
+  UpdateDueDate,
   UpdateLabel,
   UpdateNotificationTarget,
   UpdatePassword,

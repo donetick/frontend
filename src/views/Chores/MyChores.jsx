@@ -34,6 +34,7 @@ import { useChores } from '../../queries/ChoreQueries'
 import {
   GetAllUsers,
   GetArchivedChores,
+  GetChores,
   GetUserProfile,
 } from '../../utils/Fetcher'
 import Priorities from '../../utils/Priorities'
@@ -41,6 +42,9 @@ import LoadingComponent from '../components/Loading'
 import { useLabels } from '../Labels/LabelQueries'
 import ChoreCard from './ChoreCard'
 import IconButtonWithMenu from './IconButtonWithMenu'
+
+import { canScheduleNotification, scheduleChoreNotification } from './LocalNotificationScheduler'
+import NotificationAccessSnackbar from './NotificationAccessSnackbar'
 
 const MyChores = () => {
   const { userProfile, setUserProfile } = useContext(UserContext)
@@ -54,7 +58,6 @@ const MyChores = () => {
   const [selectedChoreSection, setSelectedChoreSection] = useState('due_date')
   const [openChoreSections, setOpenChoreSections] = useState({})
   const [searchTerm, setSearchTerm] = useState('')
-  const [activeUserId, setActiveUserId] = useState(0)
   const [performers, setPerformers] = useState([])
   const [anchorEl, setAnchorEl] = useState(null)
   const menuRef = useRef(null)
@@ -211,26 +214,51 @@ const MyChores = () => {
     }
     return groups
   }
-
   useEffect(() => {
-    if (userProfile === null) {
-      GetUserProfile()
-        .then(response => response.json())
-        .then(data => {
-          setUserProfile(data.res)
-        })
-    }
 
-    GetAllUsers()
-      .then(response => response.json())
-      .then(data => {
-        setPerformers(data.res)
-      })
+  
+   
+        Promise.all([GetChores(), GetAllUsers(),GetUserProfile()]).then(responses => {
+          const [choresResponse, usersResponse, userProfileResponse] = responses;
+          if (!choresResponse.ok) {
+            throw new Error(choresResponse.statusText);
+          }
+          if (!usersResponse.ok) {
+            throw new Error(usersResponse.statusText);
+          }
+          if (!userProfileResponse.ok) {
+            throw new Error(userProfileResponse.statusText);
+        }
+        Promise.all([choresResponse.json(), usersResponse.json(), userProfileResponse.json()]).then(data => {
+         const [choresData, usersData, userProfileData] = data;
+          setUserProfile(userProfileData.res);
+          choresData.res.sort(choreSorter);
+          setChores(choresData.res);
+          setFilteredChores(choresData.res);
+          setPerformers(usersData.res);
+          if (canScheduleNotification()) {
+            scheduleChoreNotification(choresData.res, userProfileData.res, usersData.res);
+          }
+        });
+        
 
-    const currentUser = JSON.parse(localStorage.getItem('user'))
-    if (currentUser !== null) {
-      setActiveUserId(currentUser.id)
-    }
+      }) 
+      
+
+
+    // GetAllUsers()
+    //   .then(response => response.json())
+    //   .then(data => {
+    //     setPerformers(data.res)
+    //   })
+    // GetUserProfile().then(response => response.json()).then(data => {
+    //   setUserProfile(data.res)
+    // })
+
+    // const currentUser = JSON.parse(localStorage.getItem('user'))
+    // if (currentUser !== null) {
+    //   setActiveUserId(currentUser.id)
+    // }
   }, [])
 
   useEffect(() => {
@@ -391,13 +419,13 @@ const MyChores = () => {
     setSearchTerm(term)
     setFilteredChores(fuse.search(term).map(result => result.item))
   }
-
+  
   if (
     userProfile === null ||
     userLabelsLoading ||
     performers.length === 0 ||
     choresLoading
-  ) {
+  ) {   
     return <LoadingComponent />
   }
 
@@ -802,6 +830,7 @@ const MyChores = () => {
       >
         <Typography level='title-md'>{snackBarMessage}</Typography>
       </Snackbar>
+      <NotificationAccessSnackbar />
     </Container>
   )
 }

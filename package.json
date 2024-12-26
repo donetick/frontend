@@ -17,9 +17,21 @@
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "release": "npm version patch && npm run build && git push origin develop --tags",
-    "merge": "git checkout main && git merge develop && git push origin main && git checkout develop"
+    "merge": "git checkout main && git merge develop && git push origin main && git checkout develop",
+    "ionic:build": "npm run build",
+    "ionic:serve": "npm run start"
   },
   "dependencies": {
+    "@capacitor/android": "^6.1.1",
+    "@capacitor/app": "^6.0.0",
+    "@capacitor/cli": "^6.1.1",
+    "@capacitor/core": "^6.1.1",
+    "@capacitor/device": "^6.0.2",
+    "@capacitor/ios": "6.1.1",
+    "@capacitor/local-notifications": "^6.0.0",
+    "@capacitor/preferences": "^6.0.1",
+    "@capacitor/push-notifications": "^6.0.1",
+    "@codetrix-studio/capacitor-google-auth": "^3.4.0-rc.4",
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.15.2",
@@ -43,6 +55,7 @@
     "vite-plugin-pwa": "^0.20.0"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
     "@tanstack/eslint-plugin-query": "^5.14.6",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
