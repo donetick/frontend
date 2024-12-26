@@ -2,13 +2,14 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import {
   Box,
+  Button,
+  Chip,
   CircularProgress,
   Container,
   IconButton,
-  Table,
   Typography,
 } from '@mui/joy'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import LabelModal from '../Modals/Inputs/LabelModal'
 import { useLabels } from './LabelQueries'
 
@@ -17,12 +18,15 @@ import { Add } from '@mui/icons-material'
 import { useQueryClient } from 'react-query'
 import { useNavigate } from 'react-router-dom'
 import { DeleteLabel } from '../../utils/Fetcher'
+import { getTextColorFromBackgroundColor } from '../../utils/LabelColors'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 
 const LabelView = () => {
   const { data: labels, isLabelsLoading, isError } = useLabels()
+
   const [userLabels, setUserLabels] = useState([labels])
   const [modalOpen, setModalOpen] = useState(false)
+
   const [currentLabel, setCurrentLabel] = useState(null)
   const queryClient = useQueryClient()
   const [confirmationModel, setConfirmationModel] = useState({})
@@ -74,6 +78,7 @@ const LabelView = () => {
     )
     setUserLabels(updatedLabels)
   }
+
   useEffect(() => {
     if (labels) {
       setUserLabels(labels)
@@ -103,62 +108,49 @@ const LabelView = () => {
 
   return (
     <Container maxWidth='md'>
-      <Table aria-label='Manage Labels' stickyHeader hoverRow>
-        <thead>
-          <tr>
-            <th style={{ textAlign: 'center' }}>Label</th>
-            <th style={{ textAlign: 'center' }}>Color</th>
-            <th style={{ textAlign: 'center' }}>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {userLabels.map(label => (
-            <tr key={label.id}>
-              <td
-                onClick={() => {
-                  Navigate('/my/chores', { state: { label: label.id } })
-                }}
+      <div className='flex flex-col gap-2'>
+        {userLabels.map(label => (
+          <div
+            key={label}
+            className='grid w-full grid-cols-[1fr,auto,auto] rounded-lg border border-zinc-200/80 p-4 shadow-sm dark:bg-zinc-900'
+          >
+            <Chip
+              variant='outlined'
+              color='primary'
+              size='lg'
+              sx={{
+                background: label.color,
+                borderColor: label.color,
+                color: getTextColorFromBackgroundColor(label.color),
+              }}
+            >
+              {label.name}
+            </Chip>
+
+            <div className='flex gap-2'>
+              <Button
+                size='sm'
+                variant='soft'
+                color='neutral'
+                onClick={() => handleEditLabel(label)}
+                startDecorator={<EditIcon />}
+
               >
-                {label.name}
-              </td>
-              <td
-                style={{
-                  // center without display flex:
-                  textAlign: 'center',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
+                Edit
+              </Button>
+              <IconButton
+                size='sm'
+                variant='soft'
+                onClick={() => handleDeleteLabel(label.id)}
+                color='danger'
               >
-                <Box
-                  width={20}
-                  height={20}
-                  borderRadius='50%'
-                  sx={{
-                    backgroundColor: label.color,
-                  }}
-                />
-              </td>
-              <td
-                style={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}
-              >
-                <IconButton onClick={() => handleEditLabel(label)}>
-                  <EditIcon />
-                </IconButton>
-                <IconButton
-                  onClick={() => handleDeleteClicked(label.id)}
-                  color='danger'
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
+                <DeleteIcon />
+              </IconButton>
+            </div>
+          </div>
+        ))}
+      </div>
+
 
       {userLabels.length === 0 && (
         <Typography textAlign='center' mt={2}>
@@ -174,6 +166,7 @@ const LabelView = () => {
           label={currentLabel}
         />
       )}
+
       <Box
         sx={{
           position: 'fixed',
