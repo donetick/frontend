@@ -34,7 +34,7 @@
     "@codetrix-studio/capacitor-google-auth": "^3.4.0-rc.4",
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
-    "@mui/icons-material": "^5.15.2",
+    "@mui/icons-material": "^5.16.13",
     "@mui/joy": "^5.0.0-beta.20",
     "@mui/material": "^5.15.2",
     "@openreplay/tracker": "^14.0.4",
@@ -52,6 +52,7 @@
     "react-router-dom": "^6.21.1",
     "react-transition-group": "^4.4.5",
     "reactjs-social-login": "^2.6.3",
+    "reusify": "^1.0.4",
     "vite-plugin-pwa": "^0.20.0"
   },
   "devDependencies": {
