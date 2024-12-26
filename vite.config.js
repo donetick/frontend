@@ -61,16 +61,10 @@ export default defineConfig({
       workbox: {
         skipWaiting: true, // Force the waiting service worker to become the active service worker
         clientsClaim: true, // Take control of uncontrolled clients as soon as the service worker becomes active
+        maximumFileSizeToCacheInBytes: 6000000, // 6MB
       },
     }),
   ],
-  build: {
-    rollupOptions: {
-      external: [
-        '@rollup/rollup-linux-x64-gnu'
-      ]
-    },
-  },
 
   resolve: {
     alias: [
