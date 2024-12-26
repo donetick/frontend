@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "91663798177",
+    "project_id": "donetick-5f910",
+    "storage_bucket": "donetick-5f910.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:91663798177:android:e8e90eb668dedb729285e0",
+        "android_client_info": {
+          "package_name": "com.donetick.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBRvAzITSeto_HFPZM1RZL8yari7uFmh9g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
