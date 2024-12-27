@@ -17,7 +17,7 @@ class ApiManager {
       key: 'customServerUrl',
     })
 
-    this.customServerURL = serverURL || this.apiURL
+    this.customServerURL = serverURL || API_URL
     this.initialized = true
   }
   getApiURL() {
