@@ -45,7 +45,11 @@ const NotificationSetting = () => {
       target: chatID,
       type: Number(notificationTarget),
     }).then(resp => {
-      alert('Notification target updated')
+      if (resp.status != 200) {
+        alert(`Error while updating notification target: ${resp.statusText}`)
+        return
+      }
+
       setUserProfile({
         ...userProfile,
         notification_target: {
@@ -53,6 +57,7 @@ const NotificationSetting = () => {
           type: Number(notificationTarget),
         },
       })
+      alert('Notification target updated')
     })
   }
   return (
