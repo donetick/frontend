@@ -1,8 +1,4 @@
-import { API_URL } from '../Config'
 import { Fetch, HEADERS, apiManager } from './TokenManager'
-
-
-
 
 const createChore = userID => {
   return Fetch(`/chores/`, {
@@ -33,7 +29,7 @@ const UpdatePassword = newPassword => {
 }
 
 const login = (username, password) => {
-  const baseURL = apiManager.getApiURL();
+  const baseURL = apiManager.getApiURL()
   return fetch(`${baseURL}/auth/login`, {
     headers: {
       'Content-Type': 'application/json',
@@ -49,8 +45,13 @@ const GetAllUsers = () => {
     headers: HEADERS(),
   })
 }
-const GetChoresNew = async () => {
-  const resp = await Fetch(`/chores/`, {
+const GetChoresNew = async includeArchived => {
+  var url = `/chores/`
+  if (includeArchived) {
+    url += `?includeArchived=true`
+  }
+
+  const resp = await Fetch(url, {
     method: 'GET',
     headers: HEADERS(),
   })
@@ -95,7 +96,7 @@ const GetChoreDetailById = id => {
   })
 }
 const MarkChoreComplete = (id, note, completedDate, performer) => {
-  var markChoreURL =`/chores/${id}/do`
+  var markChoreURL = `/chores/${id}/do`
 
   const body = {
     note,
@@ -109,14 +110,12 @@ const MarkChoreComplete = (id, note, completedDate, performer) => {
   }
   if (performer) {
     body.performer = Number(performer)
-    if(completedDateFormated === ''){
-    markChoreURL += `&performer=${performer}`
-    }
-    else{
+    if (completedDateFormated === '') {
+      markChoreURL += `&performer=${performer}`
+    } else {
       markChoreURL += `?performer=${performer}`
     }
   }
-
 
   return Fetch(markChoreURL, {
     method: 'POST',
@@ -244,13 +243,10 @@ const LeaveCircle = id => {
 }
 
 const DeleteCircleMember = (circleID, memberID) => {
-  return Fetch(
-    `/circles/${circleID}/members/delete?member_id=${memberID}`,
-    {
-      method: 'DELETE',
-      headers: HEADERS(),
-    },
-  )
+  return Fetch(`/circles/${circleID}/members/delete?member_id=${memberID}`, {
+    method: 'DELETE',
+    headers: HEADERS(),
+  })
 }
 
 const UpdateUserDetails = userDetails => {
@@ -345,13 +341,12 @@ const GetLongLiveTokens = () => {
     headers: HEADERS(),
   })
 }
-const PutNotificationTarget = ( platform, deviceToken) => {
+const PutNotificationTarget = (platform, deviceToken) => {
   return Fetch(`/users/targets`, {
     method: 'PUT',
     headers: HEADERS(),
-    body: JSON.stringify({  platform,deviceToken }),
-  }
-  )
+    body: JSON.stringify({ platform, deviceToken }),
+  })
 }
 const CreateLabel = label => {
   return Fetch(`/labels`, {
@@ -383,22 +378,19 @@ const DeleteLabel = id => {
   })
 }
 
-const ChangePassword =  (verifiticationCode, password) => {
-  const baseURL = apiManager.getApiURL();
-  return fetch(
-    `${baseURL}/auth/password?c=${verifiticationCode}`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ password: password }),
+const ChangePassword = (verifiticationCode, password) => {
+  const baseURL = apiManager.getApiURL()
+  return fetch(`${baseURL}/auth/password?c=${verifiticationCode}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
     },
-  )
+    body: JSON.stringify({ password: password }),
+  })
 }
 
 const ResetPassword = email => {
-  const basedURL = apiManager.getApiURL();
+  const basedURL = apiManager.getApiURL()
   return fetch(`${basedURL}/auth/reset`, {
     method: 'POST',
     headers: {
@@ -422,24 +414,34 @@ const UpdateDueDate = (id, dueDate) => {
 }
 
 const RefreshToken = () => {
-  const basedURL = apiManager.getApiURL();
+  const basedURL = apiManager.getApiURL()
   return fetch(basedURL + '/auth/refresh', {
     method: 'GET',
     headers: HEADERS(),
   })
 }
+const GetChoresHistory = async limit => {
+  var url = `/chores/history`
+  if (limit) {
+    url += `?limit=${limit}`
+  }
+  const resp = await Fetch(url, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+  return resp.json()
+}
 export {
   AcceptCircleMemberRequest,
   ArchiveChore,
   CancelSubscription,
-  createChore,
+  ChangePassword,
   CreateChore,
   CreateLabel,
   CreateLongLiveToken,
   CreateThing,
   DeleteChore,
   DeleteChoreHistory,
-  ChangePassword,
   DeleteCircleMember,
   DeleteLabel,
   DeleteLongLiveToken,
@@ -451,6 +453,7 @@ export {
   GetChoreDetailById,
   GetChoreHistory,
   GetChores,
+  GetChoresHistory,
   GetChoresNew,
   GetCircleMemberRequests,
   GetLabels,
@@ -462,14 +465,12 @@ export {
   GetUserProfile,
   JoinCircle,
   LeaveCircle,
-  login,
   MarkChoreComplete,
-  RefreshToken, 
-  ResetPassword,
   PutNotificationTarget,
+  RefreshToken,
+  ResetPassword,
   SaveChore,
   SaveThing,
-  signUp,
   SkipChore,
   UnArchiveChore,
   UpdateChoreAssignee,
@@ -481,4 +482,7 @@ export {
   UpdatePassword,
   UpdateThingState,
   UpdateUserDetails,
+  createChore,
+  login,
+  signUp,
 }

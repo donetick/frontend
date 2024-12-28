@@ -9,6 +9,7 @@ import {
   Divider,
   FormControl,
   FormHelperText,
+  FormLabel,
   Input,
   List,
   ListItem,
@@ -20,12 +21,14 @@ import {
   Sheet,
   Snackbar,
   Stack,
+  Switch,
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
 import { useContext, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { UserContext } from '../../contexts/UserContext'
+import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import {
   CreateChore,
   DeleteChore,
@@ -36,7 +39,6 @@ import {
   SaveChore,
 } from '../../utils/Fetcher'
 import { isPlusAccount } from '../../utils/Helpers'
-import { getTextColorFromBackgroundColor } from '../../utils/LabelColors'
 import { useLabels } from '../Labels/LabelQueries'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import LabelModal from '../Modals/Inputs/LabelModal'
@@ -72,6 +74,7 @@ const ChoreEdit = () => {
   const [frequencyMetadata, setFrequencyMetadata] = useState({})
   const [labels, setLabels] = useState([])
   const [labelsV2, setLabelsV2] = useState([])
+  const [points, setPoints] = useState(-1)
   const [allUserThings, setAllUserThings] = useState([])
   const [thingTrigger, setThingTrigger] = useState(null)
   const [isThingValid, setIsThingValid] = useState(false)
@@ -196,6 +199,7 @@ const ChoreEdit = () => {
       labelsV2: labelsV2,
       notificationMetadata: notificationMetadata,
       thingTrigger: thingTrigger,
+      points: points < 0 ? null : points,
     }
     let SaveFunction = CreateChore
     if (choreId > 0) {
@@ -247,6 +251,9 @@ const ChoreEdit = () => {
           setFrequency(data.res.frequency)
 
           setNotificationMetadata(JSON.parse(data.res.notificationMetadata))
+          setPoints(
+            data.res.points && data.res.points > -1 ? data.res.points : -1,
+          )
           // setLabels(data.res.labels ? data.res.labels.split(',') : [])
 
           setLabelsV2(data.res.labelsV2)
@@ -758,23 +765,6 @@ const ChoreEdit = () => {
         <Typography level='h5'>
           Things to remember about this chore or to tag it
         </Typography>
-        {/* <FreeSoloCreateOption
-          options={[...labels, 'test']}
-          selected={labels}
-          onSelectChange={changes => {
-            const newLabels = []
-            changes.map(change => {
-              // if type is string :
-              if (typeof change === 'string') {
-                // add the change to the labels array:
-                newLabels.push(change)
-              } else {
-                newLabels.push(change.inputValue)
-              }
-            })
-            setLabels(newLabels)
-          }}
-        /> */}
         <Select
           multiple
           onChange={(event, newValue) => {
@@ -839,37 +829,80 @@ const ChoreEdit = () => {
             Add New Label
           </MenuItem>
         </Select>
-        {/* <Card>
-          <List
-            orientation='horizontal'
-            wrap
-            sx={{
-              '--List-gap': '8px',
-              '--ListItem-radius': '20px',
-            }}
-          >
-            {labels?.map((label, index) => (
-              <ListItem key={label}>
-                <Chip
-                  onClick={() => {
-                    setLabels(labels.filter(l => l !== label))
-                  }}
-                  checked={true}
-                  overlay
-                  variant='soft'
-                  color='primary'
-                  size='lg'
-                  endDecorator={<Cancel />}
-                >
-                  {label}
-                </Chip>
-              </ListItem>
-            ))}
-          </List>
-        </Card> */}
       </Box>
+
+      <Box mt={2}>
+        <Typography level='h4' gutterBottom>
+          Others :
+        </Typography>
+
+        <FormControl
+          orientation='horizontal'
+          sx={{ width: 400, justifyContent: 'space-between' }}
+        >
+          <div>
+            <FormLabel>Assign Points</FormLabel>
+            <FormHelperText sx={{ mt: 0 }}>
+              Assign points to this task and user will earn points when they
+              completed it
+            </FormHelperText>
+          </div>
+          <Switch
+            checked={points > -1}
+            onClick={event => {
+              event.preventDefault()
+              if (points > -1) {
+                setPoints(-1)
+              } else {
+                setPoints(1)
+              }
+            }}
+            color={points !== -1 ? 'success' : 'neutral'}
+            variant={points !== -1 ? 'solid' : 'outlined'}
+            // endDecorator={points !== -1 ? 'On' : 'Off'}
+            slotProps={{
+              endDecorator: {
+                sx: {
+                  minWidth: 24,
+                },
+              },
+            }}
+          />
+        </FormControl>
+
+        {points != -1 && (
+          <Card variant='outlined'>
+            <Box
+              sx={{
+                mt: 0,
+                ml: 4,
+              }}
+            >
+              <Typography level='body-sm'>Points:</Typography>
+
+              <Input
+                type='number'
+                value={points}
+                sx={{ maxWidth: 100 }}
+                // add min points is 0 and max is 1000
+                slotProps={{
+                  input: {
+                    min: 0,
+                    max: 1000,
+                  },
+                }}
+                placeholder='Points'
+                onChange={e => {
+                  setPoints(parseInt(e.target.value))
+                }}
+              />
+            </Box>
+          </Card>
+        )}
+      </Box>
+
       {choreId > 0 && (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mt: 3 }}>
           <Sheet
             sx={{
               p: 2,
@@ -900,6 +933,7 @@ const ChoreEdit = () => {
           </Sheet>
         </Box>
       )}
+
       <Divider sx={{ mb: 9 }} />
 
       {/* <Box mt={2} alignSelf={'flex-start'} display='flex' gap={2}>

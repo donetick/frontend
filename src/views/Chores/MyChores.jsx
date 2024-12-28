@@ -43,7 +43,11 @@ import { useLabels } from '../Labels/LabelQueries'
 import ChoreCard from './ChoreCard'
 import IconButtonWithMenu from './IconButtonWithMenu'
 
-import { canScheduleNotification, scheduleChoreNotification } from './LocalNotificationScheduler'
+import { ChoresGrouper } from '../../utils/Chores'
+import {
+  canScheduleNotification,
+  scheduleChoreNotification,
+} from './LocalNotificationScheduler'
 import NotificationAccessSnackbar from './NotificationAccessSnackbar'
 
 const MyChores = () => {
@@ -92,159 +96,40 @@ const MyChores = () => {
     return aDueDate - bDueDate // Sort ascending by due date
   }
 
-  const sectionSorter = (t, chores) => {
-    // sort by priority then due date:
-    chores.sort((a, b) => {
-      // no priority is lowest priority:
-      if (a.priority === 0) {
-        return 1
-      }
-      if (a.priority !== b.priority) {
-        return a.priority - b.priority
-      }
-      if (a.nextDueDate === null) {
-        return 1
-      }
-      if (b.nextDueDate === null) {
-        return -1
-      }
-      return new Date(a.nextDueDate) - new Date(b.nextDueDate)
-    })
-
-    var groups = []
-    switch (t) {
-      case 'due_date':
-        var groupRaw = {
-          Today: [],
-          'In a week': [],
-          'This month': [],
-          Later: [],
-          Overdue: [],
-          Anytime: [],
-        }
-        chores.forEach(chore => {
-          if (chore.nextDueDate === null) {
-            groupRaw['Anytime'].push(chore)
-          } else if (new Date(chore.nextDueDate) < new Date()) {
-            groupRaw['Overdue'].push(chore)
-          } else if (
-            new Date(chore.nextDueDate).toDateString() ===
-            new Date().toDateString()
-          ) {
-            groupRaw['Today'].push(chore)
-          } else if (
-            new Date(chore.nextDueDate) <
-              new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) &&
-            new Date(chore.nextDueDate) > new Date()
-          ) {
-            groupRaw['In a week'].push(chore)
-          } else if (
-            new Date(chore.nextDueDate).getMonth() === new Date().getMonth()
-          ) {
-            groupRaw['This month'].push(chore)
-          } else {
-            groupRaw['Later'].push(chore)
-          }
-        })
-        groups = [
-          { name: 'Overdue', content: groupRaw['Overdue'] },
-          { name: 'Today', content: groupRaw['Today'] },
-          { name: 'In a week', content: groupRaw['In a week'] },
-          { name: 'This month', content: groupRaw['This month'] },
-          { name: 'Later', content: groupRaw['Later'] },
-          { name: 'Anytime', content: groupRaw['Anytime'] },
-        ]
-        break
-      case 'priority':
-        groupRaw = {
-          p1: [],
-          p2: [],
-          p3: [],
-          p4: [],
-          no_priority: [],
-        }
-        chores.forEach(chore => {
-          switch (chore.priority) {
-            case 1:
-              groupRaw['p1'].push(chore)
-              break
-            case 2:
-              groupRaw['p2'].push(chore)
-              break
-            case 3:
-              groupRaw['p3'].push(chore)
-              break
-            case 4:
-              groupRaw['p4'].push(chore)
-              break
-            default:
-              groupRaw['no_priority'].push(chore)
-              break
-          }
-        })
-        groups = [
-          { name: 'Priority 1', content: groupRaw['p1'] },
-          { name: 'Priority 2', content: groupRaw['p2'] },
-          { name: 'Priority 3', content: groupRaw['p3'] },
-          { name: 'Priority 4', content: groupRaw['p4'] },
-          { name: 'No Priority', content: groupRaw['no_priority'] },
-        ]
-        break
-      case 'labels':
-        groupRaw = {}
-        var labels = {}
-        chores.forEach(chore => {
-          chore.labelsV2.forEach(label => {
-            labels[label.id] = label
-            if (groupRaw[label.id] === undefined) {
-              groupRaw[label.id] = []
-            }
-            groupRaw[label.id].push(chore)
-          })
-        })
-        groups = Object.keys(groupRaw).map(key => {
-          return {
-            name: labels[key].name,
-            content: groupRaw[key],
-          }
-        })
-        groups.sort((a, b) => {
-          a.name < b.name ? 1 : -1
-        })
-    }
-    return groups
-  }
   useEffect(() => {
-
-  
-   
-        Promise.all([GetChores(), GetAllUsers(),GetUserProfile()]).then(responses => {
-          const [choresResponse, usersResponse, userProfileResponse] = responses;
-          if (!choresResponse.ok) {
-            throw new Error(choresResponse.statusText);
-          }
-          if (!usersResponse.ok) {
-            throw new Error(usersResponse.statusText);
-          }
-          if (!userProfileResponse.ok) {
-            throw new Error(userProfileResponse.statusText);
+    Promise.all([GetChores(), GetAllUsers(), GetUserProfile()]).then(
+      responses => {
+        const [choresResponse, usersResponse, userProfileResponse] = responses
+        if (!choresResponse.ok) {
+          throw new Error(choresResponse.statusText)
         }
-        Promise.all([choresResponse.json(), usersResponse.json(), userProfileResponse.json()]).then(data => {
-         const [choresData, usersData, userProfileData] = data;
-          setUserProfile(userProfileData.res);
-          choresData.res.sort(choreSorter);
-          setChores(choresData.res);
-          setFilteredChores(choresData.res);
-          setPerformers(usersData.res);
+        if (!usersResponse.ok) {
+          throw new Error(usersResponse.statusText)
+        }
+        if (!userProfileResponse.ok) {
+          throw new Error(userProfileResponse.statusText)
+        }
+        Promise.all([
+          choresResponse.json(),
+          usersResponse.json(),
+          userProfileResponse.json(),
+        ]).then(data => {
+          const [choresData, usersData, userProfileData] = data
+          setUserProfile(userProfileData.res)
+          choresData.res.sort(choreSorter)
+          setChores(choresData.res)
+          setFilteredChores(choresData.res)
+          setPerformers(usersData.res)
           if (canScheduleNotification()) {
-            scheduleChoreNotification(choresData.res, userProfileData.res, usersData.res);
+            scheduleChoreNotification(
+              choresData.res,
+              userProfileData.res,
+              usersData.res,
+            )
           }
-        });
-        
-
-      }) 
-      
-
+        })
+      },
+    )
 
     // GetAllUsers()
     //   .then(response => response.json())
@@ -266,7 +151,7 @@ const MyChores = () => {
       const sortedChores = choresData.res.sort(choreSorter)
       setChores(sortedChores)
       setFilteredChores(sortedChores)
-      const sections = sectionSorter('due_date', sortedChores)
+      const sections = ChoresGrouper('due_date', sortedChores)
       setChoreSections(sections)
       setOpenChoreSections(
         Object.keys(sections).reduce((acc, key) => {
@@ -354,7 +239,7 @@ const MyChores = () => {
     }
     setChores(newChores)
     setFilteredChores(newFilteredChores)
-    setChoreSections(sectionSorter('due_date', newChores))
+    setChoreSections(ChoresGrouper('due_date', newChores))
 
     switch (event) {
       case 'completed':
@@ -385,7 +270,7 @@ const MyChores = () => {
     )
     setChores(newChores)
     setFilteredChores(newFilteredChores)
-    setChoreSections(sectionSorter('due_date', newChores))
+    setChoreSections(ChoresGrouper('due_date', newChores))
   }
 
   const searchOptions = {
@@ -419,13 +304,13 @@ const MyChores = () => {
     setSearchTerm(term)
     setFilteredChores(fuse.search(term).map(result => result.item))
   }
-  
+
   if (
     userProfile === null ||
     userLabelsLoading ||
     performers.length === 0 ||
     choresLoading
-  ) {   
+  ) {
     return <LoadingComponent />
   }
 
@@ -580,7 +465,7 @@ const MyChores = () => {
           ]}
           selectedItem={selectedChoreSection}
           onItemSelect={selected => {
-            const section = sectionSorter(selected.value, chores)
+            const section = ChoresGrouper(selected.value, chores)
             setChoreSections(section)
             setSelectedChoreSection(selected.value)
             setFilteredChores(chores)
