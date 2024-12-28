@@ -1,9 +1,37 @@
 import Cookies from 'js-cookie'
 import { API_URL } from '../Config'
+import { RefreshToken } from './Fetcher'
+
+import { Preferences } from '@capacitor/preferences'
+
+class ApiManager {
+  constructor() {
+    this.customServerURL = API_URL
+    this.initialized = false
+  }
+  async init() {
+    if (this.initialized) {
+      return
+    }
+    const { value: serverURL } = await Preferences.get({
+      key: 'customServerUrl',
+    })
+
+    this.customServerURL = serverURL || API_URL
+    this.initialized = true
+  }
+  getApiURL() {
+    return this.customServerURL
+  }
+  updateApiURL(url) {
+    this.customServerURL = url
+  }
+}
+
+export const apiManager = new ApiManager()
+
 export function Fetch(url, options) {
   if (!isTokenValid()) {
-    console.log('FETCH: Token is not valid')
-    console.log(localStorage.getItem('ca_token'))
     // store current location in cookie
     Cookies.set('ca_redirect', window.location.pathname)
     // Assuming you have a function isTokenValid() that checks token validity
@@ -15,7 +43,10 @@ export function Fetch(url, options) {
   }
   options.headers = { ...options.headers, ...HEADERS() }
 
-  return fetch(url, options)
+  const baseURL = apiManager.getApiURL()
+
+  const fullURL = `${baseURL}${url}`
+  return fetch(fullURL, options)
 }
 
 export const HEADERS = () => {
@@ -47,10 +78,7 @@ export const isTokenValid = () => {
 }
 
 export const refreshAccessToken = () => {
-  fetch(API_URL + '/auth/refresh', {
-    method: 'GET',
-    headers: HEADERS(),
-  }).then(res => {
+  RefreshToken().then(res => {
     if (res.status === 200) {
       res.json().then(data => {
         localStorage.setItem('ca_token', data.token)

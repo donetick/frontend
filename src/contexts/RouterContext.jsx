@@ -5,6 +5,7 @@ import Error from '@/views/Error'
 import Settings from '@/views/Settings/Settings'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import ForgotPasswordView from '../views/Authorization/ForgotPasswordView'
+import LoginSettings from '../views/Authorization/LoginSettings'
 import LoginView from '../views/Authorization/LoginView'
 import SignupView from '../views/Authorization/Signup'
 import UpdatePasswordView from '../views/Authorization/UpdatePasswordView'
@@ -21,6 +22,7 @@ import TermsView from '../views/Terms/TermsView'
 import TestView from '../views/TestView/Test'
 import ThingsHistory from '../views/Things/ThingsHistory'
 import ThingsView from '../views/Things/ThingsView'
+import UserActivities from '../views/User/UserActivities'
 const getMainRoute = () => {
   if (import.meta.env.VITE_IS_LANDING_DEFAULT === 'true') {
     return <Landing />
@@ -66,8 +68,16 @@ const Router = createBrowserRouter([
         element: <MyChores />,
       },
       {
+        path: '/activities',
+        element: <UserActivities />,
+      },
+      {
         path: '/login',
         element: <LoginView />,
+      },
+      {
+        path: '/login/settings',
+        element: <LoginSettings />,
       },
       {
         path: '/signup',

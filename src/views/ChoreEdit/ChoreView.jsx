@@ -36,6 +36,7 @@ import { Divider } from '@mui/material'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import {
   GetAllUsers,
   GetChoreDetailById,
@@ -43,7 +44,6 @@ import {
   SkipChore,
   UpdateChorePriority,
 } from '../../utils/Fetcher'
-import { getTextColorFromBackgroundColor } from '../../utils/LabelColors'
 import Priorities from '../../utils/Priorities'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 const IconCard = styled('div')({
@@ -190,7 +190,7 @@ const ChoreView = () => {
     }, 1000)
 
     const id = setTimeout(() => {
-      MarkChoreComplete(choreId, note, completedDate)
+      MarkChoreComplete(choreId, note, completedDate, null)
         .then(resp => {
           if (resp.ok) {
             return resp.json().then(data => {

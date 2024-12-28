@@ -27,7 +27,7 @@ import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { API_URL } from '../Config'
-import { GetAllUsers } from '../utils/Fetcher'
+import { GetAllUsers, GetChores, MarkChoreComplete } from '../utils/Fetcher'
 import { Fetch } from '../utils/TokenManager'
 import DateModal from './Modals/Inputs/DateModal'
 // import moment from 'moment'
@@ -98,7 +98,7 @@ const ChoresOverview = () => {
   }
   useEffect(() => {
     // fetch chores:
-    Fetch(`${API_URL}/chores/`)
+    GetChores()
       .then(response => response.json())
       .then(data => {
         const filteredData = data.res.filter(
@@ -263,9 +263,8 @@ const ChoresOverview = () => {
                     size='sm'
                     // sx={{ borderRadius: '50%' }}
                     onClick={() => {
-                      Fetch(`${API_URL}/chores/${chore.id}/do`, {
-                        method: 'POST',
-                      }).then(response => {
+                      MarkChoreComplete(chore.id,null,null,null)
+                      .then(response => {
                         if (response.ok) {
                           response.json().then(data => {
                             const newChore = data.res
@@ -326,14 +325,8 @@ const ChoresOverview = () => {
             alert('Please select a performer')
             return
           }
-          fetch(
-            `${API_URL}/chores/${choreId}/do?performer=${activeUserId}&completedDate=${new Date(
-              date,
-            ).toISOString()}`,
-            {
-              method: 'POST',
-            },
-          ).then(response => {
+          MarkChoreComplete(choreId, null, date, activeUserId)
+          .then(response => {
             if (response.ok) {
               response.json().then(data => {
                 const newChore = data.res

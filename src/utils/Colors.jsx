@@ -26,6 +26,60 @@ const LABEL_COLORS = [
   { name: 'Sand', value: '#d7ccc8' },
 ]
 
+export const COLORS = {
+  white: '#FFFFFF',
+  salmon: '#ff7961',
+  teal: '#26a69a',
+  skyBlue: '#80d8ff',
+  grape: '#7e57c2',
+  sunshine: '#ffee58',
+  coral: '#ff7043',
+  lavender: '#ce93d8',
+  rose: '#f48fb1',
+  charcoal: '#616161',
+  sienna: '#8d6e63',
+  mint: '#a7ffeb',
+  amber: '#ffc107',
+  cobalt: '#3f51b5',
+  emerald: '#4caf50',
+  peach: '#ffab91',
+  ocean: '#0288d1',
+  mustard: '#ffca28',
+  ruby: '#d32f2f',
+  periwinkle: '#b39ddb',
+  turquoise: '#00bcd4',
+  lime: '#cddc39',
+  blush: '#f8bbd0',
+  ash: '#90a4ae',
+  sand: '#d7ccc8',
+}
+
+export const TASK_COLOR = {
+  COMPLETED: '#4ec1a2',
+  LATE: '#f6ad55',
+  MISSED: '#F03A47',
+  UPCOMING: '#AF5B5B',
+  SKIPPED: '#E2C2FF',
+
+  // For the calendar
+  OVERDUE: '#F03A47',
+  TODAY: '#ffc107',
+  IN_A_WEEK: '#4ec1a2',
+  THIS_MONTH: '#00bcd4',
+  LATER: '#d7ccc8',
+  ANYTIME: '#90a4ae',
+
+  // FOR ASSIGNEE:
+  ASSIGNED_TO_ME: '#4ec1a2',
+  ASSIGNED_TO_OTHER: '#b39ddb',
+
+  // FOR PRIORITY:
+  PRIORITY_1: '#F03A47',
+  PRIORITY_2: '#ffc107',
+  PRIORITY_3: '#00bcd4',
+  PRIORITY_4: '#7e57c2',
+  NO_PRIORITY: '#90a4ae',
+}
 export default LABEL_COLORS
 
 export const getTextColorFromBackgroundColor = bgColor => {

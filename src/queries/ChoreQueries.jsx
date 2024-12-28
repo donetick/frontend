@@ -1,9 +1,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 import { useQuery } from 'react-query'
-import { CreateChore, GetChoresNew } from '../utils/Fetcher'
+import { CreateChore, GetChoresHistory, GetChoresNew } from '../utils/Fetcher'
 
-export const useChores = () => {
-  return useQuery('chores', GetChoresNew)
+export const useChores = includeArchive => {
+  return useQuery(['chores', includeArchive], () =>
+    GetChoresNew(includeArchive),
+  )
 }
 
 export const useCreateChore = () => {
@@ -14,4 +17,18 @@ export const useCreateChore = () => {
       queryClient.invalidateQueries('chores')
     },
   })
+}
+
+export const useChoresHistory = initialLimit => {
+  const [limit, setLimit] = useState(initialLimit) // Initially, no limit is selected
+
+  const { data, error, isLoading } = useQuery(['choresHistory', limit], () =>
+    GetChoresHistory(limit),
+  )
+
+  const handleLimitChange = newLimit => {
+    setLimit(newLimit)
+  }
+
+  return { data, error, isLoading, handleLimitChange }
 }

@@ -9,6 +9,8 @@ import { UserContext } from './contexts/UserContext'
 import { AuthenticationProvider } from './service/AuthenticationService'
 import { GetUserProfile } from './utils/Fetcher'
 import { isTokenValid } from './utils/TokenManager'
+import { registerCapacitorListeners } from './CapacitorListener'
+import {apiManager} from './utils/TokenManager'
 
 const add = className => {
   document.getElementById('root').classList.add(className)
@@ -20,11 +22,12 @@ const remove = className => {
 // TODO: Update the interval to at 60 minutes
 const intervalMS = 5 * 60 * 1000 // 5 minutes
 
+
 function App() {
-  const queryClient = new QueryClient()
 
+  startApiManager()
   startOpenReplay()
-
+  const queryClient = new QueryClient()
   const { mode, systemMode } = useColorScheme()
   const [userProfile, setUserProfile] = useState(null)
   const [showUpdateSnackbar, setShowUpdateSnackbar] = useState(true)
@@ -88,6 +91,7 @@ function App() {
     setThemeClass()
   }, [mode, systemMode])
   useEffect(() => {
+    registerCapacitorListeners()
     if (isTokenValid()) {
       if (!userProfile) getUserProfile()
     }
@@ -132,3 +136,7 @@ const startOpenReplay = () => {
   tracker.start()
 }
 export default App
+
+const startApiManager = () => {
+  apiManager.init();
+}

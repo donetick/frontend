@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from 'react'
 import {
   Box,
   Button,
@@ -10,9 +9,11 @@ import {
   Select,
   Typography,
 } from '@mui/joy'
-import { useQueryClient, useMutation } from 'react-query'
+import { useEffect, useState } from 'react'
+
+import { useMutation, useQueryClient } from 'react-query'
+import LABEL_COLORS from '../../../utils/Colors.jsx'
 import { CreateLabel, UpdateLabel } from '../../../utils/Fetcher'
-import LABEL_COLORS from '../../../utils/LabelColors'
 import { useLabels } from '../../Labels/LabelQueries'
 
 function LabelModal({ isOpen, onClose, label }) {

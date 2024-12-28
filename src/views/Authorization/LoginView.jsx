@@ -5,6 +5,7 @@ import {
   Button,
   Container,
   Divider,
+  IconButton,
   Input,
   Sheet,
   Snackbar,
@@ -17,7 +18,13 @@ import { LoginSocialGoogle } from 'reactjs-social-login'
 import { API_URL, GOOGLE_CLIENT_ID, REDIRECT_URL } from '../../Config'
 import { UserContext } from '../../contexts/UserContext'
 import Logo from '../../Logo'
-import { GetUserProfile } from '../../utils/Fetcher'
+import { GetUserProfile, login } from '../../utils/Fetcher'
+import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
+import { Capacitor } from '@capacitor/core'
+import { Settings } from '@mui/icons-material'
+
+
+
 const LoginView = () => {
   const { userProfile, setUserProfile } = React.useContext(UserContext)
   const [username, setUsername] = React.useState('')
@@ -26,14 +33,8 @@ const LoginView = () => {
   const Navigate = useNavigate()
   const handleSubmit = async e => {
     e.preventDefault()
-
-    fetch(`${API_URL}/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ username, password }),
-    })
+    login(username, password)
+   
       .then(response => {
         if (response.status === 200) {
           return response.json().then(data => {
@@ -71,7 +72,7 @@ const LoginView = () => {
         provider: provider,
         token:
           data['access_token'] || // data["access_token"] is for Google
-          data['accessToken'], // data["accessToken"] is for Facebook
+          data['accessToken'], // data["accessToken"] is for Google Capacitor
         data: data,
       }),
     }).then(response => {
@@ -140,6 +141,20 @@ const LoginView = () => {
             boxShadow: 'md',
           }}
         >
+         <IconButton 
+        //  on top right of the screen:
+          sx={{
+            position: 'absolute',
+            top: 2,
+            right: 2,
+            color: 'black',
+          }}
+          onClick={() => {
+            Navigate('/login/settings')
+
+          }
+          }
+          > <Settings /></IconButton>
           {/* <img
             src='/src/assets/logo.svg'
             alt='logo'
@@ -285,7 +300,7 @@ const LoginView = () => {
             </>
           )}
           <Divider> or </Divider>
-
+          {!Capacitor.isNativePlatform() && (
           <Box sx={{ width: '100%' }}>
             <LoginSocialGoogle
               client_id={GOOGLE_CLIENT_ID}
@@ -320,7 +335,32 @@ const LoginView = () => {
                 </div>
               </Button>
             </LoginSocialGoogle>
+          </Box> )}
+
+          {Capacitor.isNativePlatform() && (
+          <Box sx={{ width: '100%' }}>
+          <Button fullWidth variant='soft' size='lg' sx={{ mt: 3, mb: 2 }}
+          onClick={()=>{
+            GoogleAuth.initialize({
+              clientId: import.meta.env.VITE_APP_GOOGLE_CLIENT_ID,
+              scopes: ['profile', 'email','openid'],
+              grantOfflineAccess: true,
+            });
+            GoogleAuth.signIn().then((user) => {
+              console.log("Google user", user);
+
+              loggedWithProvider("google", user.authentication) 
+            });
+            
+          }}>
+                <div className='flex gap-2'>
+                  <GoogleIcon />
+                  Continue with Google
+                </div>
+          </Button>
           </Box>
+          )}
+          
 
           <Button
             onClick={() => {

@@ -11,6 +11,49 @@ import {
 } from '@mui/joy'
 import moment from 'moment'
 
+export const getCompletedChip = historyEntry => {
+  var text = 'No Due Date'
+  var color = 'info'
+  var icon = <CalendarViewDay />
+  // if completed few hours +-6 hours
+  if (
+    historyEntry.dueDate &&
+    historyEntry.completedAt > historyEntry.dueDate - 1000 * 60 * 60 * 6 &&
+    historyEntry.completedAt < historyEntry.dueDate + 1000 * 60 * 60 * 6
+  ) {
+    text = 'On Time'
+    color = 'success'
+    icon = <Check />
+  } else if (
+    historyEntry.dueDate &&
+    historyEntry.completedAt < historyEntry.dueDate
+  ) {
+    text = 'On Time'
+    color = 'success'
+    icon = <Check />
+  }
+
+  // if completed after due date then it's late
+  else if (
+    historyEntry.dueDate &&
+    historyEntry.completedAt > historyEntry.dueDate
+  ) {
+    text = 'Late'
+    color = 'warning'
+    icon = <Timelapse />
+  } else {
+    text = 'No Due Date'
+    color = 'neutral'
+    icon = <CalendarViewDay />
+  }
+
+  return (
+    <Chip startDecorator={icon} color={color}>
+      {text}
+    </Chip>
+  )
+}
+
 const HistoryCard = ({
   allHistory,
   performers,
@@ -36,49 +79,6 @@ const HistoryCard = ({
     }
 
     return `${timeValue} ${unit}${timeValue !== 1 ? 's' : ''}`
-  }
-
-  const getCompletedChip = historyEntry => {
-    var text = 'No Due Date'
-    var color = 'info'
-    var icon = <CalendarViewDay />
-    // if completed few hours +-6 hours
-    if (
-      historyEntry.dueDate &&
-      historyEntry.completedAt > historyEntry.dueDate - 1000 * 60 * 60 * 6 &&
-      historyEntry.completedAt < historyEntry.dueDate + 1000 * 60 * 60 * 6
-    ) {
-      text = 'On Time'
-      color = 'success'
-      icon = <Check />
-    } else if (
-      historyEntry.dueDate &&
-      historyEntry.completedAt < historyEntry.dueDate
-    ) {
-      text = 'On Time'
-      color = 'success'
-      icon = <Check />
-    }
-
-    // if completed after due date then it's late
-    else if (
-      historyEntry.dueDate &&
-      historyEntry.completedAt > historyEntry.dueDate
-    ) {
-      text = 'Late'
-      color = 'warning'
-      icon = <Timelapse />
-    } else {
-      text = 'No Due Date'
-      color = 'neutral'
-      icon = <CalendarViewDay />
-    }
-
-    return (
-      <Chip startDecorator={icon} color={color}>
-        {text}
-      </Chip>
-    )
   }
 
   return (
