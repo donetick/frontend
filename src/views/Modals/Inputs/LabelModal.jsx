@@ -12,8 +12,8 @@ import {
 
 import React, { useEffect } from 'react'
 import { useQueryClient } from 'react-query'
+import LABEL_COLORS from '../../../utils/Colors.jsx'
 import { CreateLabel, UpdateLabel } from '../../../utils/Fetcher'
-import LABEL_COLORS from '../../../utils/LabelColors'
 import { useLabels } from '../../Labels/LabelQueries'
 
 function LabelModal({ isOpen, onClose, onSave, label }) {

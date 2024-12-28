@@ -1,6 +1,7 @@
 import Logo from '@/assets/logo.svg'
 import {
   AccountBox,
+  History,
   HomeOutlined,
   ListAlt,
   Logout,
@@ -23,6 +24,7 @@ import {
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { version } from '../../../package.json'
+import ThemeToggleButton from '../Settings/ThemeToggleButton'
 import NavBarLink from './NavBarLink'
 const links = [
   {
@@ -40,6 +42,11 @@ const links = [
     to: '/things',
     label: 'Things',
     icon: <Widgets />,
+  },
+  {
+    to: 'activities',
+    label: 'Activities',
+    icon: <History />,
   },
   {
     to: 'labels',
@@ -120,7 +127,12 @@ const NavBar = () => {
             tick✓
           </span>
         </Typography>
-      
+        <ThemeToggleButton
+          sx={{
+            position: 'absolute',
+            right: 10,
+          }}
+        />
       </Box>
       <Drawer
         open={drawerOpen}

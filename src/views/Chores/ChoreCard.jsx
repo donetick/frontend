@@ -42,8 +42,8 @@ import {
 import moment from 'moment'
 import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { API_URL } from '../../Config'
 import { UserContext } from '../../contexts/UserContext'
+import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import {
   ArchiveChore,
   DeleteChore,
@@ -53,9 +53,7 @@ import {
   UpdateChoreAssignee,
   UpdateDueDate,
 } from '../../utils/Fetcher'
-import { getTextColorFromBackgroundColor } from '../../utils/LabelColors'
 import Priorities from '../../utils/Priorities'
-import { Fetch } from '../../utils/TokenManager'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import DateModal from '../Modals/Inputs/DateModal'
 import SelectModal from '../Modals/Inputs/SelectModal'
@@ -130,8 +128,7 @@ const ChoreCard = ({
       message: 'Are you sure you want to delete this chore?',
       onClose: isConfirmed => {
         if (isConfirmed === true) {
-          DeleteChore(chore.id)
-          .then(response => {
+          DeleteChore(chore.id).then(response => {
             if (response.ok) {
               onChoreRemove(chore)
             }
@@ -181,7 +178,7 @@ const ChoreCard = ({
     }, 1000)
 
     const id = setTimeout(() => {
-      MarkChoreComplete(chore.id, null, null,null)
+      MarkChoreComplete(chore.id, null, null, null)
         .then(resp => {
           if (resp.ok) {
             return resp.json().then(data => {
@@ -221,9 +218,13 @@ const ChoreCard = ({
       alert('Please select a performer')
       return
     }
- 
-    MarkChoreComplete(chore.id, null, new Date(newDate).toISOString(), null)
-    .then(response => {
+
+    MarkChoreComplete(
+      chore.id,
+      null,
+      new Date(newDate).toISOString(),
+      null,
+    ).then(response => {
       if (response.ok) {
         response.json().then(data => {
           const newChore = data.res
@@ -243,9 +244,7 @@ const ChoreCard = ({
     })
   }
   const handleCompleteWithNote = note => {
-   
-    MarkChoreComplete(chore.id, note, null, null)
-    .then(response => {
+    MarkChoreComplete(chore.id, note, null, null).then(response => {
       if (response.ok) {
         response.json().then(data => {
           const newChore = data.res
