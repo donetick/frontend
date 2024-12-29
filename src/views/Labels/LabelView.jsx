@@ -17,8 +17,8 @@ import { useLabels } from './LabelQueries'
 import { Add } from '@mui/icons-material'
 import { useQueryClient } from 'react-query'
 import { useNavigate } from 'react-router-dom'
+import { getTextColorFromBackgroundColor } from '../../utils/Colors'
 import { DeleteLabel } from '../../utils/Fetcher'
-import { getTextColorFromBackgroundColor } from '../../utils/LabelColors'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 
 const LabelView = () => {
@@ -134,7 +134,6 @@ const LabelView = () => {
                 color='neutral'
                 onClick={() => handleEditLabel(label)}
                 startDecorator={<EditIcon />}
-
               >
                 Edit
               </Button>
@@ -150,7 +149,6 @@ const LabelView = () => {
           </div>
         ))}
       </div>
-
 
       {userLabels.length === 0 && (
         <Typography textAlign='center' mt={2}>
