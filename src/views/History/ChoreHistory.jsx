@@ -14,14 +14,12 @@ import {
 import moment from 'moment'
 import React, { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { API_URL } from '../../Config'
 import {
   DeleteChoreHistory,
   GetAllCircleMembers,
   GetChoreHistory,
   UpdateChoreHistory,
 } from '../../utils/Fetcher'
-import { Fetch } from '../../utils/TokenManager'
 import LoadingComponent from '../components/Loading'
 import EditHistoryModal from '../Modals/EditHistoryModal'
 import HistoryCard from './HistoryCard'
@@ -42,7 +40,7 @@ const ChoreHistory = () => {
 
     Promise.all([
       GetChoreHistory(choreId).then(res => res.json()),
-      GetAllCircleMembers().then(res => res.json()),
+      GetAllCircleMembers(),
     ])
       .then(([historyData, usersData]) => {
         setChoresHistory(historyData.res)
