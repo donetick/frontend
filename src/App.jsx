@@ -123,7 +123,6 @@ function App() {
           </Snackbar>
         )}
       </QueryClientProvider>
-      ,
     </div>
   )
 }
