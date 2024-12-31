@@ -3,14 +3,16 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import CircleIcon from '@mui/icons-material/Circle'
 import { Cell, Legend, Pie, PieChart, Tooltip } from 'recharts'
 
-import { Toll } from '@mui/icons-material'
+import { EventBusy, Toll } from '@mui/icons-material'
 import {
   Box,
+  Button,
   Card,
   Chip,
   Container,
   Divider,
   Grid,
+  Link,
   Stack,
   Tab,
   TabList,
@@ -173,7 +175,7 @@ const UserActivites = () => {
     data: choresHistory,
     isChoresHistoryLoading,
     handleLimitChange: refetchHistory,
-  } = useChoresHistory(tabValue ? tabValue : 30)
+  } = useChoresHistory(tabValue ? tabValue : 30, false)
   useEffect(() => {
     if (!isChoresHistoryLoading && !isChoresLoading && choresHistory) {
       const enrichedHistory = choresHistory.res.map(item => {
@@ -304,6 +306,40 @@ const UserActivites = () => {
       title: 'Priority',
       description: 'Tasks by priority',
     },
+  }
+
+  if (!choresData.res?.length > 0 || !choresHistory?.res?.length > 0) {
+    return (
+      <Container
+        maxWidth='md'
+        sx={{
+          textAlign: 'center',
+          display: 'flex',
+          // make sure the content is centered vertically:
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexDirection: 'column',
+          height: '50vh',
+        }}
+      >
+        <EventBusy
+          sx={{
+            fontSize: '6rem',
+            mb: 1,
+          }}
+        />
+
+        <Typography level='h3' gutterBottom>
+          No activities
+        </Typography>
+        <Typography level='body1'>
+          You have no activities for the selected period.
+        </Typography>
+        <Button variant='soft' sx={{ mt: 2 }}>
+          <Link to='/my/chores'>Go back to chores</Link>
+        </Button>
+      </Container>
+    )
   }
 
   return (

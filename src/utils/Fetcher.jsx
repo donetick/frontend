@@ -11,7 +11,8 @@ const createChore = userID => {
 }
 
 const signUp = (username, password, displayName, email) => {
-  return fetch(`/auth/`, {
+  const baseURL = apiManager.getApiURL()
+  return fetch(`${baseURL}/auth/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -193,11 +194,12 @@ const UpdateChoreHistory = (choreId, id, choreHistory) => {
   })
 }
 
-const GetAllCircleMembers = () => {
-  return Fetch(`/circles/members`, {
+const GetAllCircleMembers = async () => {
+  const resp = await Fetch(`/circles/members`, {
     method: 'GET',
     headers: HEADERS(),
   })
+  return resp.json()
 }
 
 const GetUserProfile = () => {
@@ -420,10 +422,15 @@ const RefreshToken = () => {
     headers: HEADERS(),
   })
 }
-const GetChoresHistory = async limit => {
+const GetChoresHistory = async (limit, includeMembers) => {
   var url = `/chores/history`
+  if (!limit) limit = 7
+
   if (limit) {
     url += `?limit=${limit}`
+  }
+  if (includeMembers) {
+    url += `&members=true`
   }
   const resp = await Fetch(url, {
     method: 'GET',

@@ -1,3 +1,4 @@
+import moment from 'moment'
 import { TASK_COLOR } from './Colors.jsx'
 
 export const ChoresGrouper = (groupBy, chores) => {
@@ -157,4 +158,13 @@ export const ChoresGrouper = (groupBy, chores) => {
       })
   }
   return groups
+}
+
+export const notInCompletionWindow = chore => {
+  return (
+    chore.completionWindow &&
+    chore.completionWindow > -1 &&
+    chore.nextDueDate &&
+    moment().add(chore.completionWindow, 'hours') < moment(chore.nextDueDate)
+  )
 }

@@ -41,7 +41,7 @@ const ChoreHistory = () => {
 
     Promise.all([
       GetChoreHistory(choreId).then(res => res.json()),
-      GetAllCircleMembers().then(res => res.json()),
+      GetAllCircleMembers(),
     ])
       .then(([historyData, usersData]) => {
         setChoresHistory(historyData.res)

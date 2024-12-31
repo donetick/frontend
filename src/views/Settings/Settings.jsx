@@ -54,11 +54,9 @@ const Settings = () => {
         setCircleMemberRequests(data.res ? data.res : [])
       })
     })
-    GetAllCircleMembers()
-      .then(res => res.json())
-      .then(data => {
-        setCircleMembers(data.res ? data.res : [])
-      })
+    GetAllCircleMembers().then(data => {
+      setCircleMembers(data.res ? data.res : [])
+    })
   }, [])
 
   useEffect(() => {

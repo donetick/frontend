@@ -23,6 +23,7 @@ import TestView from '../views/TestView/Test'
 import ThingsHistory from '../views/Things/ThingsHistory'
 import ThingsView from '../views/Things/ThingsView'
 import UserActivities from '../views/User/UserActivities'
+import UserPoints from '../views/User/UserPoints'
 const getMainRoute = () => {
   if (import.meta.env.VITE_IS_LANDING_DEFAULT === 'true') {
     return <Landing />
@@ -70,6 +71,10 @@ const Router = createBrowserRouter([
       {
         path: '/activities',
         element: <UserActivities />,
+      },
+      {
+        path: '/points',
+        element: <UserPoints />,
       },
       {
         path: '/login',

@@ -36,6 +36,7 @@ import { Divider } from '@mui/material'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { notInCompletionWindow } from '../../utils/Chores.jsx'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import {
   GetAllUsers,
@@ -563,7 +564,7 @@ const ChoreView = () => {
             fullWidth
             size='lg'
             onClick={handleTaskCompletion}
-            disabled={isPendingCompletion}
+            disabled={isPendingCompletion || notInCompletionWindow(chore)}
             color={isPendingCompletion ? 'danger' : 'success'}
             startDecorator={<Check />}
             sx={{
