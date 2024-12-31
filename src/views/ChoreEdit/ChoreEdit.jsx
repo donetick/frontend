@@ -75,6 +75,7 @@ const ChoreEdit = () => {
   const [labels, setLabels] = useState([])
   const [labelsV2, setLabelsV2] = useState([])
   const [points, setPoints] = useState(-1)
+  const [completionWindow, setCompletionWindow] = useState(-1)
   const [allUserThings, setAllUserThings] = useState([])
   const [thingTrigger, setThingTrigger] = useState(null)
   const [isThingValid, setIsThingValid] = useState(false)
@@ -200,6 +201,7 @@ const ChoreEdit = () => {
       notificationMetadata: notificationMetadata,
       thingTrigger: thingTrigger,
       points: points < 0 ? null : points,
+      completionWindow: completionWindow < 0 ? null : completionWindow,
     }
     let SaveFunction = CreateChore
     if (choreId > 0) {
@@ -216,11 +218,9 @@ const ChoreEdit = () => {
   }
   useEffect(() => {
     //fetch performers:
-    GetAllCircleMembers()
-      .then(response => response.json())
-      .then(data => {
-        setPerformers(data.res)
-      })
+    GetAllCircleMembers().then(data => {
+      setPerformers(data.res)
+    })
     GetThings().then(response => {
       response.json().then(data => {
         setAllUserThings(data.res)
@@ -254,7 +254,11 @@ const ChoreEdit = () => {
           setPoints(
             data.res.points && data.res.points > -1 ? data.res.points : -1,
           )
-          // setLabels(data.res.labels ? data.res.labels.split(',') : [])
+          setCompletionWindow(
+            data.res.completionWindow && data.res.completionWindow > -1
+              ? data.res.completionWindow
+              : -1,
+          )
 
           setLabelsV2(data.res.labelsV2)
           setAssignStrategy(
@@ -569,6 +573,70 @@ const ChoreEdit = () => {
             />
             <FormHelperText>{errors.dueDate}</FormHelperText>
           </FormControl>
+        )}
+
+        <FormControl
+          orientation='horizontal'
+          sx={{ width: 400, justifyContent: 'space-between' }}
+        >
+          <div>
+            {/* <FormLabel>Completion window (hours)</FormLabel> */}
+            <Typography level='h5'>Completion window (hours)</Typography>
+
+            <FormHelperText sx={{ mt: 0 }}>
+              {"Set a time window that task can't be completed before"}
+            </FormHelperText>
+          </div>
+          <Switch
+            checked={completionWindow != -1}
+            onClick={event => {
+              event.preventDefault()
+              if (completionWindow != -1) {
+                setCompletionWindow(-1)
+              } else {
+                setCompletionWindow(1)
+              }
+            }}
+            color={completionWindow !== -1 ? 'success' : 'neutral'}
+            variant={completionWindow !== -1 ? 'solid' : 'outlined'}
+            // endDecorator={points !== -1 ? 'On' : 'Off'}
+            slotProps={{
+              endDecorator: {
+                sx: {
+                  minWidth: 24,
+                },
+              },
+            }}
+          />
+        </FormControl>
+        {completionWindow != -1 && (
+          <Card variant='outlined'>
+            <Box
+              sx={{
+                mt: 0,
+                ml: 4,
+              }}
+            >
+              <Typography level='body-sm'>Hours:</Typography>
+
+              <Input
+                type='number'
+                value={completionWindow}
+                sx={{ maxWidth: 100 }}
+                // add min points is 0 and max is 1000
+                slotProps={{
+                  input: {
+                    min: 0,
+                    max: 24 * 7,
+                  },
+                }}
+                placeholder='Hours'
+                onChange={e => {
+                  setCompletionWindow(parseInt(e.target.value))
+                }}
+              />
+            </Box>
+          </Card>
         )}
       </Box>
       {!['once', 'no_repeat'].includes(frequencyType) && (

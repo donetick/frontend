@@ -194,11 +194,12 @@ const UpdateChoreHistory = (choreId, id, choreHistory) => {
   })
 }
 
-const GetAllCircleMembers = () => {
-  return Fetch(`/circles/members`, {
+const GetAllCircleMembers = async () => {
+  const resp = await Fetch(`/circles/members`, {
     method: 'GET',
     headers: HEADERS(),
   })
+  return resp.json()
 }
 
 const GetUserProfile = () => {
