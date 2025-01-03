@@ -6,7 +6,7 @@ import { Preferences } from '@capacitor/preferences'
 
 class ApiManager {
   constructor() {
-    this.customServerURL = API_URL
+    this.customServerURL = `${API_URL}/api/v1`
     this.initialized = false
   }
   async init() {
@@ -17,7 +17,7 @@ class ApiManager {
       key: 'customServerUrl',
     })
 
-    this.customServerURL = serverURL || API_URL
+    this.customServerURL = `${serverURL || API_URL}/api/v1`
     this.initialized = true
   }
   getApiURL() {

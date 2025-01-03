@@ -204,7 +204,7 @@ const ChoreCard = ({
       alert('Please select a performer')
       return
     }
-    UpdateDueDate.then(response => {
+    UpdateDueDate(chore.id, newDate).then(response => {
       if (response.ok) {
         response.json().then(data => {
           const newChore = data.res
