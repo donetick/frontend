@@ -22,7 +22,8 @@ const signUp = (username, password, displayName, email) => {
 }
 
 const UpdatePassword = newPassword => {
-  return fetch(`/users/change_password`, {
+  const baseURL = apiManager.getApiURL()
+  return fetch(`${baseURL}/users/change_password`, {
     method: 'PUT',
     headers: HEADERS(),
     body: JSON.stringify({ password: newPassword }),
@@ -403,21 +404,20 @@ const ResetPassword = email => {
 }
 
 const UpdateDueDate = (id, dueDate) => {
-  return Fetch(`/chores/${chore.id}/dueDate`, {
+  return Fetch(`/chores/${id}/dueDate`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      dueDate: newDate ? new Date(newDate).toISOString() : null,
-      UpdatedBy: activeUserId,
+      dueDate: dueDate ? new Date(dueDate).toISOString() : null,
     }),
   })
 }
 
 const RefreshToken = () => {
   const basedURL = apiManager.getApiURL()
-  return fetch(basedURL + '/auth/refresh', {
+  return fetch(`${basedURL}/auth/refresh`, {
     method: 'GET',
     headers: HEADERS(),
   })
