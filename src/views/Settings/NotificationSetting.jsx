@@ -35,6 +35,8 @@ const NotificationSetting = () => {
         resp.json().then(data => {
           setUserProfile(data.res)
           setChatID(data.res.chatID)
+          setWebHookMethod(data.res.notification_target.webhook_method)
+          setWebHookUrl(data.res.notification_target.webhook_url)
         })
       })
     }
@@ -98,6 +100,12 @@ const NotificationSetting = () => {
   const [chatID, setChatID] = useState(
     userProfile?.notification_target?.target_id,
   )
+  const [webHookMethod, setWebHookMethod] = useState(
+    userProfile?.notification_target?.webhook_method,
+  )
+  const [webHookUrl, setWebHookUrl] = useState(
+    userProfile?.notification_target?.webhook_url,
+  )
   const [error, setError] = useState('')
   const SaveValidation = () => {
     switch (notificationTarget) {
@@ -116,6 +124,12 @@ const NotificationSetting = () => {
           return false
         }
         break
+      case '3':
+        if (webHookUrl === '') {
+          setError('WebHook URL is required')
+          return false
+        }
+        return true
       default:
         break
     }
@@ -128,6 +142,8 @@ const NotificationSetting = () => {
     UpdateNotificationTarget({
       target: chatID,
       type: Number(notificationTarget),
+      webhook_method: webHookMethod,
+      webhook_url: webHookUrl,
     }).then(resp => {
       if (resp.status != 200) {
         alert(`Error while updating notification target: ${resp.statusText}`)
@@ -139,6 +155,8 @@ const NotificationSetting = () => {
         notification_target: {
           target: chatID,
           type: Number(notificationTarget),
+          webHookMethod: webHookMethod,
+          webHookUrl: webHookUrl,
         },
       })
       alert('Notification target updated')
@@ -386,6 +404,7 @@ const NotificationSetting = () => {
             <Option value='0'>None</Option>
             <Option value='1'>Telegram</Option>
             <Option value='2'>Pushover</Option>
+            <Option value='3'>Web Hook</Option>
           </Select>
           {notificationTarget === '1' && (
             <>
@@ -437,6 +456,28 @@ const NotificationSetting = () => {
                 value={chatID}
                 onChange={e => setChatID(e.target.value)}
                 placeholder='User ID'
+                sx={{
+                  width: '200px',
+                }}
+              />
+            </>
+          )}
+          {notificationTarget === '3' && (
+            <>
+              <Typography level='body-sm'>Method</Typography>
+              <Select
+                value={webHookMethod ?? 'GET'}
+                sx={{ maxWidth: '200px' }}
+                onChange={(e, selected) => setWebHookMethod(selected)}
+              >
+                <Option value='GET'>GET</Option>
+                <Option value='POST'>POST</Option>
+              </Select>
+              <Typography level='body-sm'>URL</Typography>
+              <Input
+                value={webHookUrl}
+                onChange={e => setWebHookUrl(e.target.value)}
+                placeholder='http://example.com/api/webhook/wYpEZ7fgFjJ3NAQye9ruAyLhQEBq89xh'
                 sx={{
                   width: '200px',
                 }}
