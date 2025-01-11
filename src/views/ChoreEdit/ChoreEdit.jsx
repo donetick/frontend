@@ -317,7 +317,7 @@ const ChoreEdit = () => {
   // }, [userLabels, labelsV2])
 
   useEffect(() => {
-    // if frequancy type change to somthing need a due date then set it to the current date:
+    // if frequency type change to somthing need a due date then set it to the current date:
     if (!NO_DUE_DATE_REQUIRED_TYPE.includes(frequencyType) && !dueDate) {
       setDueDate(moment(new Date()).format('YYYY-MM-DDTHH:mm:00'))
     }
