@@ -377,9 +377,13 @@ const ChoreCard = ({
         const notSelectedShortMonths = notSelectedMonth.map(m =>
           moment().month(m).format('MMM'),
         )
-        return `${chore.frequency}${dayOfMonthSuffix(
+        let result = `Monthly ${chore.frequency}${dayOfMonthSuffix(
           chore.frequency,
-        )} except ${notSelectedShortMonths.join(', ')}`
+        )}`
+        if (notSelectedShortMonths.length > 0)
+          result += `
+        except ${notSelectedShortMonths.join(', ')}`
+        return result
       } else {
         let freqData = JSON.parse(chore.frequencyMetadata)
         const months = freqData.months.map(m => moment().month(m).format('MMM'))
