@@ -5,12 +5,11 @@ import { useEffect, useState } from 'react'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { Outlet } from 'react-router-dom'
 import { useRegisterSW } from 'virtual:pwa-register/react'
+import { registerCapacitorListeners } from './CapacitorListener'
 import { UserContext } from './contexts/UserContext'
 import { AuthenticationProvider } from './service/AuthenticationService'
 import { GetUserProfile } from './utils/Fetcher'
-import { isTokenValid } from './utils/TokenManager'
-import { registerCapacitorListeners } from './CapacitorListener'
-import {apiManager} from './utils/TokenManager'
+import { apiManager, isTokenValid } from './utils/TokenManager'
 
 const add = className => {
   document.getElementById('root').classList.add(className)
@@ -22,9 +21,7 @@ const remove = className => {
 // TODO: Update the interval to at 60 minutes
 const intervalMS = 5 * 60 * 1000 // 5 minutes
 
-
 function App() {
-
   startApiManager()
   startOpenReplay()
   const queryClient = new QueryClient()
@@ -137,5 +134,5 @@ const startOpenReplay = () => {
 export default App
 
 const startApiManager = () => {
-  apiManager.init();
+  apiManager.init()
 }

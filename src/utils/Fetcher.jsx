@@ -195,6 +195,14 @@ const UpdateChoreHistory = (choreId, id, choreHistory) => {
   })
 }
 
+const UpdateChoreStatus = (choreId, status) => {
+  return Fetch(`/chores/${choreId}/status`, {
+    method: 'PUT',
+    headers: HEADERS(),
+    body: JSON.stringify({ status }),
+  })
+}
+
 const GetAllCircleMembers = async () => {
   const resp = await Fetch(`/circles/members`, {
     method: 'GET',
@@ -415,6 +423,14 @@ const UpdateDueDate = (id, dueDate) => {
   })
 }
 
+const RedeemPoints = (userId, points, circleID) => {
+  return Fetch(`/circles/${circleID}/members/points/redeem`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify({ points, userId }),
+  })
+}
+
 const RefreshToken = () => {
   const basedURL = apiManager.getApiURL()
   return fetch(`${basedURL}/auth/refresh`, {
@@ -474,6 +490,7 @@ export {
   LeaveCircle,
   MarkChoreComplete,
   PutNotificationTarget,
+  RedeemPoints,
   RefreshToken,
   ResetPassword,
   SaveChore,
@@ -483,6 +500,7 @@ export {
   UpdateChoreAssignee,
   UpdateChoreHistory,
   UpdateChorePriority,
+  UpdateChoreStatus,
   UpdateDueDate,
   UpdateLabel,
   UpdateNotificationTarget,
