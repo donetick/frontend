@@ -3,45 +3,42 @@
   max-width: 600px;
   font-family: 'Roboto', sans-serif;
   background-color: transparent;
+  border: none;
 }
 
 .react-calendar__tile {
-  padding: 1em;
-  min-height: 3rem;
+  padding: 10px;
+  min-height: 45px;
   text-align: center;
   border-radius: 8px;
   transition: background-color 0.3s ease;
 }
+
 .react-calendar__tile:enabled:hover {
-  /* lighten existing color: ; */
-  background-color: rgba(0, 123, 255, 0.2);
+  background-color: #cbcbcb;
 }
 
 .react-calendar__tile--active {
   background-color: #007bff !important;
 }
 
-/* Today's tile styles */
-.react-calendar .react-calendar__tile--now {
-  /* More specific selector */
-  /* background-color: #4ec1a2e3; */
-  border: 2px dotted #4ec1a2e3;
-  border-radius: 8px; /* Consistent with other tiles */
+.react-calendar__tile--now {
+  border: 1px dotted #4ec1a2e3 !important;
+  border-radius: 8px;
   background-color: inherit;
 }
 
-.react-calendar .react-calendar__tile--now:enabled:hover {
+.react-calendar__tile--now:enabled:hover {
   background-color: rgba(0, 123, 255, 0.1);
 }
 
-/* Ensure dot container doesn't break row height */
 .dot-container {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 16px;
-  /* if more than 4 dot make them go to the new line: */
   flex-wrap: wrap;
+  position: relative;
 }
 
 .dot {
@@ -49,11 +46,6 @@
   height: 0.3em;
   border-radius: 50%;
   margin: 0 1px;
-}
-
-/* Tooltip styles */
-.dot-container {
-  position: relative;
 }
 
 .chore-tooltip {
@@ -73,7 +65,6 @@
     visibility 0.2s ease;
 }
 
-/* remove different color on weekend: */
 .react-calendar__month-view__days__day--weekend {
   color: inherit;
 }
