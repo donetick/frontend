@@ -259,25 +259,30 @@ const UserActivites = () => {
   }
 
   const generateHistoryPieChartData = history => {
-    const totalCompleted = history.filter(
-      item => item.dueDate > item.completedAt,
-    ).length
-    const totalLate = history.filter(
-      item => item.dueDate < item.completedAt,
-    ).length
+    const totalCompleted =
+      history.filter(item => item.dueDate > item.completedAt).length || 0
+    const totalLate =
+      history.filter(item => item.dueDate < item.completedAt).length || 0
+    const totalNoDueDate = history.filter(item => !item.dueDate).length || 0
 
     return [
       {
         label: `On time`,
         value: totalCompleted,
-        color: '#4ec1a2',
+        color: TASK_COLOR.COMPLETED,
         id: 1,
       },
       {
         label: `Late`,
         value: totalLate,
-        color: '#f6ad55',
+        color: TASK_COLOR.LATE,
         id: 2,
+      },
+      {
+        label: `Completed`,
+        value: totalNoDueDate,
+        color: TASK_COLOR.ANYTIME,
+        id: 3,
       },
     ]
   }
