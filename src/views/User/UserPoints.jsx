@@ -7,10 +7,11 @@ import {
   YAxis,
 } from 'recharts'
 
-import { Toll } from '@mui/icons-material'
+import { CreditCard, Toll } from '@mui/icons-material'
 import {
   Avatar,
   Box,
+  Button,
   Card,
   Chip,
   Container,
@@ -27,11 +28,17 @@ import LoadingComponent from '../components/Loading.jsx'
 
 import { useChoresHistory } from '../../queries/ChoreQueries.jsx'
 import { useCircleMembers } from '../../queries/UserQueries.jsx'
+import { RedeemPoints } from '../../utils/Fetcher.jsx'
+import RedeemPointsModal from '../Modals/RedeemPointsModal'
 const UserPoints = () => {
   const [tabValue, setTabValue] = useState(7)
+  const [isRedeemModalOpen, setIsRedeemModalOpen] = useState(false)
 
-  const { data: circleMembersData, isLoading: isCircleMembersLoading } =
-    useCircleMembers()
+  const {
+    data: circleMembersData,
+    isLoading: isCircleMembersLoading,
+    handleRefetch: handleCircleMembersRefetch,
+  } = useCircleMembers()
 
   const {
     data: choresHistoryData,
@@ -208,7 +215,7 @@ const UserPoints = () => {
     return yearlyAggregated
   }
 
-  if (isChoresHistoryLoading || isCircleMembersLoading) {
+  if (isChoresHistoryLoading || isCircleMembersLoading || !userProfile) {
     return <LoadingComponent />
   }
 
@@ -233,6 +240,8 @@ const UserPoints = () => {
           sx={{
             gap: 1,
             my: 2,
+            display: 'flex',
+            justifyContent: 'start',
           }}
         >
           <Select
@@ -278,6 +287,19 @@ const UserPoints = () => {
               </Option>
             ))}
           </Select>
+          {circleUsers.find(user => user.userId === userProfile.id)?.role ===
+            'admin' && (
+            <Button
+              variant='soft'
+              size='md'
+              startDecorator={<CreditCard />}
+              onClick={() => {
+                setIsRedeemModalOpen(true)
+              }}
+            >
+              Redeem Points
+            </Button>
+          )}
         </Box>
 
         <Box
@@ -458,6 +480,27 @@ const UserPoints = () => {
           </ResponsiveContainer>
         </Box>
       </Box>
+      <RedeemPointsModal
+        config={{
+          onClose: () => {
+            setIsRedeemModalOpen(false)
+          },
+          isOpen: isRedeemModalOpen,
+          available: circleUsers.find(user => user.userId === selectedUser)
+            ?.points,
+          user: circleUsers.find(user => user.userId === selectedUser),
+          onSave: ({ userId, points }) => {
+            RedeemPoints(userId, points, userProfile.circleID)
+              .then(res => {
+                setIsRedeemModalOpen(false)
+                handleCircleMembersRefetch()
+              })
+              .catch(err => {
+                console.log(err)
+              })
+          },
+        }}
+      />
     </Container>
   )
 }
