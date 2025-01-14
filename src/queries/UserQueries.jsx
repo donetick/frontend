@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useQuery } from 'react-query'
 import { GetAllCircleMembers, GetAllUsers } from '../utils/Fetcher'
 
@@ -6,5 +7,16 @@ export const useAllUsers = () => {
 }
 
 export const useCircleMembers = () => {
-  return useQuery('allCircleMembers', GetAllCircleMembers)
+  const [refetchKey, setRefetchKey] = useState(0)
+
+  const { data, error, isLoading, refetch } = useQuery(
+    ['allCircleMembers', refetchKey],
+    GetAllCircleMembers,
+  )
+  const handleRefetch = () => {
+    setRefetchKey(prevKey => prevKey + 1)
+    refetch()
+  }
+
+  return { data, error, isLoading, handleRefetch }
 }
