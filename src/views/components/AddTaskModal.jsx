@@ -1,4 +1,4 @@
-import { KeyboardReturnOutlined, OpenInFull } from '@mui/icons-material'
+import { KeyboardReturnOutlined } from '@mui/icons-material'
 import {
   Box,
   Button,
@@ -116,8 +116,8 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
     setTaskText('')
   }
 
-  const parsePriority = sentence => {
-    sentence = sentence.toLowerCase()
+  const parsePriority = inputSentence => {
+    let sentence = inputSentence.toLowerCase()
     const priorityMap = {
       1: ['p1', 'priority 1', 'high priority', 'urgent', 'asap', 'important'],
       2: ['p2', 'priority 2', 'medium priority'],
@@ -129,14 +129,18 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
       if (terms.some(term => sentence.includes(term))) {
         return {
           result: priority,
-          cleanedSentence: terms.reduce((s, t) => s.replace(t, ''), sentence),
+          cleanedSentence: terms.reduce(
+            (s, t) => s.replace(t, ''),
+            inputSentence,
+          ),
         }
       }
     }
-    return { result: 0, cleanedSentence: sentence }
+    return { result: 0, cleanedSentence: inputSentence }
   }
 
-  const parseRepeatV2 = sentence => {
+  const parseRepeatV2 = inputSentence => {
+    const sentence = inputSentence.toLowerCase()
     const result = {
       frequency: 1,
       frequencyType: null,
@@ -231,7 +235,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
           return {
             result,
             name: pattern.name,
-            cleanedSentence: sentence.replace(match[0], '').trim(),
+            cleanedSentence: inputSentence.replace(match[0], '').trim(),
           }
 
         case 'interval':
@@ -242,7 +246,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
             name: pattern.name
               .replace('{frequency}', result.frequency)
               .replace('{unit}', result.frequencyMetadata.unit),
-            cleanedSentence: sentence.replace(match[0], '').trim(),
+            cleanedSentence: inputSentence.replace(match[0], '').trim(),
           }
 
         case 'days_of_the_week':
@@ -253,14 +257,14 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
             .filter(day => VALID_DAYS[day])
             .map(day => VALID_DAYS[day])
           if (!result.frequencyMetadata.days.length)
-            return { result: null, name: null, cleanedSentence: sentence }
+            return { result: null, name: null, cleanedSentence: inputSentence }
           return {
             result,
             name: pattern.name.replace(
               '{days}',
               result.frequencyMetadata.days.join(', '),
             ),
-            cleanedSentence: sentence.replace(match[0], '').trim(),
+            cleanedSentence: inputSentence.replace(match[0], '').trim(),
           }
 
         case 'day_of_the_month':
@@ -277,7 +281,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
             name: pattern.name
               .replace('{day}', result.frequency)
               .replace('{months}', result.frequencyMetadata.months.join(', ')),
-            cleanedSentence: sentence.replace(match[0], '').trim(),
+            cleanedSentence: inputSentence.replace(match[0], '').trim(),
           }
 
         case 'interval:every_other':
@@ -288,7 +292,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
           return {
             result,
             name: pattern.name,
-            cleanedSentence: sentence.replace(match[0], '').trim(),
+            cleanedSentence: inputSentence.replace(match[0], '').trim(),
           }
 
         case 'day_of_the_month:every':
@@ -300,11 +304,11 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
             name: pattern.name
               .replace('{day}', result.frequency)
               .replace('{months}', result.frequencyMetadata.months.join(', ')),
-            cleanedSentence: sentence.replace(match[0], '').trim(),
+            cleanedSentence: inputSentence.replace(match[0], '').trim(),
           }
       }
     }
-    return { result: null, name: null, cleanedSentence: sentence }
+    return { result: null, name: null, cleanedSentence: inputSentence }
   }
 
   const handleTextChange = e => {
@@ -410,22 +414,19 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
 
       <Modal open={openModal} onClose={handleCloseModal}>
         <ModalDialog>
-          <Button
+          {/* <Button
             size='sm'
             onClick={() => navigate(`/chores/create`)}
             variant='outlined'
             sx={{ position: 'absolute', right: 20 }}
             startDecorator={<OpenInFull />}
           >
-            Advance Mode
-          </Button>
-          <Typography level='h4'>
-            Create new task
-            <Chip startDecorator='🚧' variant='soft' color='warning' size='sm'>
-              Experimental
-            </Chip>
-          </Typography>
-
+            Full Editor
+          </Button> */}
+          <Typography level='h4'>Create new task</Typography>
+          <Chip startDecorator='🚧' variant='soft' color='warning' size='sm'>
+            Experimental
+          </Chip>
           <Box>
             <Typography level='body-sm'>Task in a sentence:</Typography>
             <Input
