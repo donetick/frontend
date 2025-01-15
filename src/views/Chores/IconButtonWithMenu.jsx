@@ -5,7 +5,7 @@ import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 
 const IconButtonWithMenu = ({
   label,
-  key,
+  k,
   icon,
   options,
   onItemSelect,
@@ -72,14 +72,14 @@ const IconButtonWithMenu = ({
       )}
 
       <Menu
-        key={key}
+        key={k}
         ref={menuRef}
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
       >
         {title && (
-          <MenuItem key={`${key}-title`} disabled>
+          <MenuItem key={`${k}-title`} disabled>
             <Typography level='body-sm' sx={{ fontWeight: 'bold' }}>
               {title}
             </Typography>
@@ -87,7 +87,7 @@ const IconButtonWithMenu = ({
         )}
         {options?.map(item => (
           <MenuItem
-            key={`${key}-${item?.id}`}
+            key={`${k}-${item?.id}`}
             onClick={() => {
               onItemSelect(item)
               setSelectedItem?.selectedItem(item.name)
