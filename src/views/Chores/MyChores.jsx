@@ -430,7 +430,7 @@ const MyChores = () => {
 
           <IconButtonWithMenu
             title='Group by'
-            key={'icon-menu-group-by'}
+            k={'icon-menu-group-by'}
             icon={<Sort />}
             options={[
               { name: 'Due Date', value: 'due_date' },
@@ -453,7 +453,7 @@ const MyChores = () => {
             <div className='grid flex-1 grid-cols-3 gap-4'>
               <IconButtonWithMenu
                 label={' Priority'}
-                key={'icon-menu-priority-filter'}
+                k={'icon-menu-priority-filter'}
                 icon={<PriorityHigh />}
                 options={Priorities}
                 selectedItem={selectedFilter}
@@ -465,7 +465,7 @@ const MyChores = () => {
               />
 
               <IconButtonWithMenu
-                key={'icon-menu-labels-filter'}
+                k={'icon-menu-labels-filter'}
                 label={' Labels'}
                 icon={<Style />}
                 options={userLabels}
