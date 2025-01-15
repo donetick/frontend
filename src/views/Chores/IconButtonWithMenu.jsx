@@ -1,9 +1,10 @@
-import { Chip, Menu, MenuItem, Typography } from '@mui/joy'
+import { Button, Chip, Menu, MenuItem, Typography } from '@mui/joy'
 import IconButton from '@mui/joy/IconButton'
 import React, { useEffect, useRef, useState } from 'react'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 
 const IconButtonWithMenu = ({
+  label,
   key,
   icon,
   options,
@@ -39,18 +40,36 @@ const IconButtonWithMenu = ({
 
   return (
     <>
-      <IconButton
-        onClick={handleMenuOpen}
-        variant='outlined'
-        color={isActive ? 'primary' : 'neutral'}
-        size='sm'
-        sx={{
-          height: 24,
-          borderRadius: 24,
-        }}
-      >
-        {icon}
-      </IconButton>
+      {!label && (
+        <IconButton
+          onClick={handleMenuOpen}
+          variant='outlined'
+          color={isActive ? 'primary' : 'neutral'}
+          size='sm'
+          sx={{
+            height: 24,
+            borderRadius: 24,
+          }}
+        >
+          {icon}
+          {label ? label : null}
+        </IconButton>
+      )}
+      {label && (
+        <Button
+          onClick={handleMenuOpen}
+          variant='outlined'
+          color={isActive ? 'primary' : 'neutral'}
+          size='sm'
+          startDecorator={icon}
+          sx={{
+            height: 24,
+            borderRadius: 24,
+          }}
+        >
+          {label}
+        </Button>
+      )}
 
       <Menu
         key={key}

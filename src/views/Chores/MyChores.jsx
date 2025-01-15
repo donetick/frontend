@@ -390,26 +390,25 @@ const MyChores = () => {
             />
           )}
           {activeTextField != 'task' && (
-            <Button
+            <IconButton
               variant='outlined'
               size='sm'
               color='neutral'
               sx={{
                 height: 24,
                 borderRadius: 24,
-                minWidth: 100,
+                // minWidth: 100,
               }}
-              startDecorator={<EditCalendar />}
               onClick={() => {
                 setActiveTextField('task')
                 setTaskInputFocus(taskInputFocus + 1)
               }}
             >
-              Task
-            </Button>
+              <EditCalendar />
+            </IconButton>
           )}
           {activeTextField != 'search' && (
-            <Button
+            <IconButton
               variant='outlined'
               color='neutral'
               size='sm'
@@ -417,7 +416,6 @@ const MyChores = () => {
                 height: 24,
                 borderRadius: 24,
               }}
-              startDecorator={<Search />}
               onClick={() => {
                 setActiveTextField('search')
                 setSearchInputFocus(searchInputFocus + 1)
@@ -429,119 +427,11 @@ const MyChores = () => {
                   searchInputRef.current.value?.length
               }}
             >
-              Search
-            </Button>
+              <Search />
+            </IconButton>
           )}
           <Divider orientation='vertical' />
-          <IconButtonWithMenu
-            icon={<PriorityHigh />}
-            title='Filter by Priority'
-            options={Priorities}
-            selectedItem={selectedFilter}
-            onItemSelect={selected => {
-              handleLabelFiltering({ priority: selected.value })
-            }}
-            mouseClickHandler={handleMenuOutsideClick}
-            isActive={selectedFilter.startsWith('Priority: ')}
-          />
-          <IconButtonWithMenu
-            icon={<Style />}
-            // TODO : this need simplification we want to display both user labels and chore labels
-            // that why we are merging them here.
-            // we also filter out the labels that user created as those will be part of user labels
-            title='Filter by Label'
-            options={[
-              ...userLabels,
-              ...chores
-                .map(c => c.labelsV2)
-                .flat()
-                .filter(l => l.created_by !== userProfile.id)
-                .map(l => {
-                  //  if user created it don't show it:
-                  return {
-                    ...l,
-                    name: l.name + ' (Shared Label)',
-                  }
-                }),
-            ]}
-            selectedItem={selectedFilter}
-            onItemSelect={selected => {
-              handleLabelFiltering({ label: selected })
-            }}
-            isActive={selectedFilter.startsWith('Label: ')}
-            mouseClickHandler={handleMenuOutsideClick}
-            useChips
-          />
-          <IconButton
-            onClick={handleFilterMenuOpen}
-            variant='outlined'
-            color={
-              selectedFilter &&
-              FILTERS[selectedFilter] &&
-              selectedFilter != 'All'
-                ? 'primary'
-                : 'neutral'
-            }
-            size='sm'
-            sx={{
-              height: 24,
-              borderRadius: 24,
-            }}
-          >
-            <FilterAlt />
-          </IconButton>
-          <List
-            orientation='horizontal'
-            wrap
-            sx={{
-              mt: 0.2,
-            }}
-          >
-            <Menu
-              ref={menuRef}
-              anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={handleFilterMenuClose}
-            >
-              {Object.keys(FILTERS).map((filter, index) => (
-                <MenuItem
-                  key={`filter-list-${filter}-${index}`}
-                  onClick={() => {
-                    const filterFunction = FILTERS[filter]
-                    const filteredChores =
-                      filterFunction.length === 2
-                        ? filterFunction(chores, userProfile.id)
-                        : filterFunction(chores)
-                    setFilteredChores(filteredChores)
-                    setSelectedFilter(filter)
-                    handleFilterMenuClose()
-                  }}
-                >
-                  {filter}
-                  <Chip
-                    color={selectedFilter === filter ? 'primary' : 'neutral'}
-                  >
-                    {FILTERS[filter].length === 2
-                      ? FILTERS[filter](chores, userProfile.id).length
-                      : FILTERS[filter](chores).length}
-                  </Chip>
-                </MenuItem>
-              ))}
-              {selectedFilter.startsWith('Label: ') ||
-                (selectedFilter.startsWith('Priority: ') && (
-                  <MenuItem
-                    key={`filter-list-cancel-all-filters`}
-                    onClick={() => {
-                      setFilteredChores(chores)
-                      setSelectedFilter('All')
-                    }}
-                  >
-                    Cancel All Filters
-                  </MenuItem>
-                ))}
-            </Menu>
-          </List>
-          <Divider orientation='vertical' />
+
           <IconButtonWithMenu
             title='Group by'
             icon={<Sort />}
@@ -561,6 +451,113 @@ const MyChores = () => {
             mouseClickHandler={handleMenuOutsideClick}
           />
         </Box>
+        {activeTextField === 'search' && (
+          <div className='flex gap-4'>
+            <div className='grid flex-1 grid-cols-3 gap-4'>
+              <IconButtonWithMenu
+                label={' Priority'}
+                key={'icon-menu-labels-filter'}
+                icon={<PriorityHigh />}
+                options={Priorities}
+                selectedItem={selectedFilter}
+                onItemSelect={selected => {
+                  handleLabelFiltering({ priority: selected.value })
+                }}
+                mouseClickHandler={handleMenuOutsideClick}
+                isActive={selectedFilter.startsWith('Priority: ')}
+              />
+
+              <IconButtonWithMenu
+                key={'icon-menu-labels-filter'}
+                label={' Labels'}
+                icon={<Style />}
+                options={userLabels}
+                selectedItem={selectedFilter}
+                onItemSelect={selected => {
+                  handleLabelFiltering({ label: selected })
+                }}
+                isActive={selectedFilter.startsWith('Label: ')}
+                mouseClickHandler={handleMenuOutsideClick}
+                useChips
+              />
+
+              <Button
+                onClick={handleFilterMenuOpen}
+                variant='outlined'
+                startDecorator={<FilterAlt />}
+                color={
+                  selectedFilter &&
+                  FILTERS[selectedFilter] &&
+                  selectedFilter != 'All'
+                    ? 'primary'
+                    : 'neutral'
+                }
+                size='sm'
+                sx={{
+                  height: 24,
+                  borderRadius: 24,
+                }}
+              >
+                {' Other'}
+              </Button>
+
+              <List
+                orientation='horizontal'
+                wrap
+                sx={{
+                  mt: 0.2,
+                }}
+              >
+                <Menu
+                  ref={menuRef}
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={handleFilterMenuClose}
+                >
+                  {Object.keys(FILTERS).map((filter, index) => (
+                    <MenuItem
+                      key={`filter-list-${filter}-${index}`}
+                      onClick={() => {
+                        const filterFunction = FILTERS[filter]
+                        const filteredChores =
+                          filterFunction.length === 2
+                            ? filterFunction(chores, userProfile.id)
+                            : filterFunction(chores)
+                        setFilteredChores(filteredChores)
+                        setSelectedFilter(filter)
+                        handleFilterMenuClose()
+                      }}
+                    >
+                      {filter}
+                      <Chip
+                        color={
+                          selectedFilter === filter ? 'primary' : 'neutral'
+                        }
+                      >
+                        {FILTERS[filter].length === 2
+                          ? FILTERS[filter](chores, userProfile.id).length
+                          : FILTERS[filter](chores).length}
+                      </Chip>
+                    </MenuItem>
+                  ))}
+
+                  {selectedFilter.startsWith('Label: ') ||
+                    (selectedFilter.startsWith('Priority: ') && (
+                      <MenuItem
+                        key={`filter-list-cancel-all-filters`}
+                        onClick={() => {
+                          setFilteredChores(chores)
+                          setSelectedFilter('All')
+                        }}
+                      >
+                        Cancel All Filters
+                      </MenuItem>
+                    ))}
+                </Menu>
+              </List>
+            </div>
+          </div>
+        )}
         {selectedFilter !== 'All' && (
           <Chip
             level='title-md'
