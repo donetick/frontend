@@ -20,6 +20,7 @@ import { useNavigate } from 'react-router-dom'
 import { CSSTransition } from 'react-transition-group'
 import { UserContext } from '../../contexts/UserContext'
 import { CreateChore } from '../../utils/Fetcher'
+import LearnMoreButton from './LearnMore'
 const VALID_DAYS = {
   monday: 'Monday',
   mon: 'Monday',
@@ -203,7 +204,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
       {
         frequencyType: 'days_of_the_week',
         regex: /every ([\w, ]+(?:day)?(?:, [\w, ]+(?:day)?)*)$/i,
-        name: 'Every {days} of the week',
+        name: 'Every {days}',
       },
       {
         frequencyType: 'day_of_the_month',
@@ -314,7 +315,6 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
   const handleTextChange = e => {
     if (!e.target.value) {
       setTaskText('')
-      setOpenModal(false)
       setDueDate(null)
       setFrequency(null)
       setFrequencyHumanReadable(null)
@@ -327,6 +327,13 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
     if (priority.result) setPriority(priority.result)
     cleanedSentence = priority.cleanedSentence
 
+    const repeat = parseRepeatV2(cleanedSentence)
+    if (repeat.result) {
+      setFrequency(repeat.result)
+      setFrequencyHumanReadable(repeat.name)
+      cleanedSentence = repeat.cleanedSentence
+    }
+
     const parsedDueDate = chrono.parse(cleanedSentence, new Date(), {
       forwardDate: true,
     })
@@ -335,13 +342,6 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
         moment(parsedDueDate[0].start.date()).format('YYYY-MM-DDTHH:mm:ss'),
       )
       cleanedSentence = cleanedSentence.replace(parsedDueDate[0].text, '')
-    }
-
-    const repeat = parseRepeatV2(cleanedSentence)
-    if (repeat.result) {
-      setFrequency(repeat.result)
-      setFrequencyHumanReadable(repeat.name)
-      cleanedSentence = repeat.cleanedSentence
     }
 
     if (priority.result || parsedDueDate[0]?.index > -1 || repeat.result) {
@@ -425,7 +425,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
           </Button> */}
           <Typography level='h4'>Create new task</Typography>
           <Chip startDecorator='🚧' variant='soft' color='warning' size='sm'>
-            Experimental
+            Experimental Feature
           </Chip>
           <Box>
             <Typography level='body-sm'>Task in a sentence:</Typography>
@@ -438,13 +438,54 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
               placeholder='Type your full text here...'
               sx={{ width: '100%', fontSize: '16px' }}
             />
+            <LearnMoreButton
+              content={
+                <>
+                  <Typography level='body-sm' sx={{ mb: 1 }}>
+                    This feature lets you create a task simply by typing a
+                    sentence. It attempt parses the sentence to identify the
+                    task's due date, priority, and frequency.
+                  </Typography>
+
+                  <Typography
+                    level='body-sm'
+                    sx={{ fontWeight: 'bold', mt: 2 }}
+                  >
+                    Examples:
+                  </Typography>
+
+                  <Typography
+                    level='body-sm'
+                    component='ul'
+                    sx={{ pl: 2, mt: 1, listStyle: 'disc' }}
+                  >
+                    <li>
+                      <strong>Priority:</strong>For highest priority any of the
+                      following keyword <em>P1</em>, <em>Urgent</em>,{' '}
+                      <em>Important</em>, or <em>ASAP</em>. For lower
+                      priorities, use <em>P2</em>, <em>P3</em>, or <em>P4</em>.
+                    </li>
+                    <li>
+                      <strong>Due date:</strong> Specify dates with phrases like{' '}
+                      <em>tomorrow</em>, <em>next week</em>, <em>Monday</em>, or{' '}
+                      <em>August 1st at 12pm</em>.
+                    </li>
+                    <li>
+                      <strong>Frequency:</strong> Set recurring tasks with terms
+                      like <em>daily</em>, <em>weekly</em>, <em>monthly</em>,{' '}
+                      <em>yearly</em>, or patterns such as{' '}
+                      <em>every Tuesday and Thursday</em>.
+                    </li>
+                  </Typography>
+                </>
+              }
+            />
           </Box>
           <Box>
             <Typography level='body-sm'>Title:</Typography>
             <Input
               value={taskTitle}
               onChange={e => setTaskTitle(e.target.value)}
-              placeholder='Type your full text here...'
               sx={{ width: '100%', fontSize: '16px' }}
             />
           </Box>
