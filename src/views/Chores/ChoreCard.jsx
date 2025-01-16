@@ -300,6 +300,12 @@ const ChoreCard = ({
     }
   }
   const getRecurrentChipText = chore => {
+    // if chore.frequencyMetadata is type string then parse it otherwise assigned to the metadata:
+    const metadata =
+      typeof chore.frequencyMetadata === 'string'
+        ? JSON.parse(chore.frequencyMetadata)
+        : chore.frequencyMetadata
+
     const dayOfMonthSuffix = n => {
       if (n >= 11 && n <= 13) {
         return 'th'
@@ -330,7 +336,7 @@ const ChoreCard = ({
     } else if (chore.frequencyType === 'yearly') {
       return 'Yearly'
     } else if (chore.frequencyType === 'days_of_the_week') {
-      let days = JSON.parse(chore.frequencyMetadata).days
+      let days = metadata.days
       if (days.length > 4) {
         const allDays = [
           'Sunday',
@@ -354,7 +360,7 @@ const ChoreCard = ({
         return days.join(', ')
       }
     } else if (chore.frequencyType === 'day_of_the_month') {
-      let months = JSON.parse(chore.frequencyMetadata).months
+      let months = metadata.months
       if (months.length > 6) {
         const allMonths = [
           'January',
@@ -385,16 +391,14 @@ const ChoreCard = ({
         except ${notSelectedShortMonths.join(', ')}`
         return result
       } else {
-        let freqData = JSON.parse(chore.frequencyMetadata)
+        let freqData = metadata
         const months = freqData.months.map(m => moment().month(m).format('MMM'))
         return `${chore.frequency}${dayOfMonthSuffix(
           chore.frequency,
         )} of ${months.join(', ')}`
       }
     } else if (chore.frequencyType === 'interval') {
-      return `Every ${chore.frequency} ${
-        JSON.parse(chore.frequencyMetadata).unit
-      }`
+      return `Every ${chore.frequency} ${metadata.unit}`
     } else {
       return chore.frequencyType
     }
