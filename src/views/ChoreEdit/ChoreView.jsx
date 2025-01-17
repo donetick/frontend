@@ -3,9 +3,11 @@ import {
   CancelScheduleSend,
   Check,
   Checklist,
+  CloseFullscreen,
   Edit,
   History,
   LowPriority,
+  OpenInFull,
   PeopleAlt,
   Person,
   SwitchAccessShortcut,
@@ -21,6 +23,7 @@ import {
   Dropdown,
   FormControl,
   Grid,
+  IconButton,
   Input,
   ListItem,
   ListItemContent,
@@ -74,6 +77,7 @@ const ChoreView = () => {
   const [completedDate, setCompletedDate] = useState(null)
   const [confirmModelConfig, setConfirmModelConfig] = useState({})
   const [chorePriority, setChorePriority] = useState(null)
+  const [isDescriptionOpen, setIsDescriptionOpen] = useState(false)
   useEffect(() => {
     Promise.all([
       GetChoreDetailById(choreId).then(resp => {
@@ -419,6 +423,47 @@ const ChoreView = () => {
             Edit
           </Button>
         </Box>
+
+        {chore.description && (
+          <>
+            <Typography level='title-md' sx={{ mb: 1 }}>
+              Description :
+            </Typography>
+
+            <Sheet
+              variant='outlined'
+              sx={{
+                p: 2,
+                borderRadius: 'lg',
+              }}
+            >
+              <IconButton
+                variant='plain'
+                onClick={() => {
+                  setIsDescriptionOpen(!isDescriptionOpen)
+                }}
+                size='sm'
+                sx={{
+                  position: 'absolute',
+                  bottom: 5,
+                  right: 5,
+                }}
+              >
+                {isDescriptionOpen ? <CloseFullscreen /> : <OpenInFull />}
+              </IconButton>
+              <Box
+                sx={{
+                  maxHeight: isDescriptionOpen ? 'none' : '100px',
+                  overflowY: 'auto',
+                }}
+              >
+                <Typography level='body-md' sx={{ mb: 1 }}>
+                  {chore.description || '--'}
+                </Typography>
+              </Box>
+            </Sheet>
+          </>
+        )}
 
         {chore.notes && (
           <>
