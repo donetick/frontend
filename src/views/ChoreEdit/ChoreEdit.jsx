@@ -22,6 +22,7 @@ import {
   Snackbar,
   Stack,
   Switch,
+  Textarea,
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
@@ -61,6 +62,7 @@ const ChoreEdit = () => {
   const [userHistory, setUserHistory] = useState({})
   const { choreId } = useParams()
   const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
   const [confirmModelConfig, setConfirmModelConfig] = useState({})
   const [assignees, setAssignees] = useState([])
   const [performers, setPerformers] = useState([])
@@ -186,6 +188,7 @@ const ChoreEdit = () => {
     const chore = {
       id: Number(choreId),
       name: name,
+      description: description,
       assignees: assignees,
       dueDate: dueDate ? new Date(dueDate).toISOString() : null,
       frequencyType: frequencyType,
@@ -241,6 +244,7 @@ const ChoreEdit = () => {
         .then(data => {
           setChore(data.res)
           setName(data.res.name ? data.res.name : '')
+          setDescription(data.res.description ? data.res.description : '')
           setAssignees(data.res.assignees ? data.res.assignees : [])
           setAssignedTo(data.res.assignedTo)
           setFrequencyType(
@@ -379,8 +383,19 @@ const ChoreEdit = () => {
       <Box>
         <FormControl error={errors.name}>
           <Typography level='h4'>Title :</Typography>
-          <Typography level='h5'>What is this chore about?</Typography>
+          <Typography level='h5'> What is the name of this chore?</Typography>
           <Input value={name} onChange={e => setName(e.target.value)} />
+          <FormHelperText error>{errors.name}</FormHelperText>
+        </FormControl>
+      </Box>
+      <Box mt={2}>
+        <FormControl error={errors.description}>
+          <Typography level='h4'>Details:</Typography>
+          <Typography level='h5'>What is this chore about?</Typography>
+          <Textarea
+            value={description}
+            onChange={e => setDescription(e.target.value)}
+          />
           <FormHelperText error>{errors.name}</FormHelperText>
         </FormControl>
       </Box>

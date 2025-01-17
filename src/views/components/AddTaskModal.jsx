@@ -196,6 +196,11 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
         name: 'Every day',
       },
       {
+        frequencyType: 'daily:time',
+        regex: /every (morning|noon|afternoon|evening|night)$/i,
+        name: 'Every {time} daily',
+      },
+      {
         frequencyType: 'weekly',
         regex: /(every week|weekly)$/i,
         name: 'Every week',
@@ -322,6 +327,17 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
           return {
             result,
             name: pattern.name,
+            cleanedSentence: inputSentence.replace(match[0], '').trim(),
+          }
+        case 'daily:time':
+          result.frequency = 1
+          result.frequencyMetadata.unit = 'days'
+          result.frequencyType = 'daily'
+          return {
+            result,
+            name: pattern.name.replace('{time}', match[1]),
+            // replace every x with ''
+
             cleanedSentence: inputSentence.replace(match[0], '').trim(),
           }
 
