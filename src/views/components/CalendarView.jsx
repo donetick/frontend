@@ -132,12 +132,7 @@ const CalendarView = ({ chores }) => {
                   mb: 0.4,
                   py: 1,
                   px: 1,
-
-                  // backgroundColor: getAssigneeColor(
-                  //   chore.assignedTo,
-                  //   userProfile,
-                  // ),
-                  // everything show in one row:
+                  cursor: 'pointer',
                 }}
               >
                 <CardContent>

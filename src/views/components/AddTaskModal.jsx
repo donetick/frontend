@@ -19,7 +19,9 @@ import { useContext, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CSSTransition } from 'react-transition-group'
 import { UserContext } from '../../contexts/UserContext'
+import useDebounce from '../../utils/Debounce'
 import { CreateChore } from '../../utils/Fetcher'
+import { useLabels } from '../Labels/LabelQueries'
 import LearnMoreButton from './LearnMore'
 const VALID_DAYS = {
   monday: 'Monday',
@@ -69,9 +71,11 @@ const ALL_MONTHS = Object.values(VALID_MONTHS).filter(
 )
 
 const TaskInput = ({ autoFocus, onChoreUpdate }) => {
+  const { data: userLabels, isLoading: userLabelsLoading } = useLabels()
   const { userProfile } = useContext(UserContext)
   const navigate = useNavigate()
   const [taskText, setTaskText] = useState('')
+  const debounceParsing = useDebounce(taskText, 300)
   const [taskTitle, setTaskTitle] = useState('')
   const [openModal, setOpenModal] = useState(false)
   const textareaRef = useRef(null)
@@ -97,6 +101,12 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
       mainInputRef.current.selectionEnd = mainInputRef.current.value?.length
     }
   }, [autoFocus])
+
+  useEffect(() => {
+    if (debounceParsing) {
+      processText(debounceParsing)
+    }
+  }, [debounceParsing])
 
   const handleEnterPressed = e => {
     if (e.key === 'Enter') {
@@ -139,7 +149,28 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
     }
     return { result: 0, cleanedSentence: inputSentence }
   }
-
+  const parseLabels = inputSentence => {
+    let sentence = inputSentence.toLowerCase()
+    const currentLabels = []
+    // label will always be prefixed #:
+    for (const label of userLabels) {
+      if (sentence.includes(`#${label.name.toLowerCase()}`)) {
+        currentLabels.push(label)
+        sentence = sentence.replace(`#${label.name.toLowerCase()}`, '')
+      }
+    }
+    if (currentLabels.length > 0) {
+      return {
+        result: currentLabels,
+        cleanedSentence: sentence,
+      }
+    }
+    return { result: null, cleanedSentence: sentence }
+  }
+  const parseAssignee = inputSentence => {
+    let sentence = inputSentence.toLowerCase()
+    const assigneeMap = {}
+  }
   const parseRepeatV2 = inputSentence => {
     const sentence = inputSentence.toLowerCase()
     const result = {
@@ -163,6 +194,11 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
         frequencyType: 'daily',
         regex: /(every day|daily)$/i,
         name: 'Every day',
+      },
+      {
+        frequencyType: 'daily:time',
+        regex: /every (morning|noon|afternoon|evening|night)$/i,
+        name: 'Every {time} daily',
       },
       {
         frequencyType: 'weekly',
@@ -284,8 +320,6 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
               .replace('{months}', result.frequencyMetadata.months.join(', ')),
             cleanedSentence: inputSentence.replace(match[0], '').trim(),
           }
-
-        case 'interval:every_other':
         case 'interval:2week':
           result.frequency = 2
           result.frequencyMetadata.unit = 'weeks'
@@ -293,6 +327,17 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
           return {
             result,
             name: pattern.name,
+            cleanedSentence: inputSentence.replace(match[0], '').trim(),
+          }
+        case 'daily:time':
+          result.frequency = 1
+          result.frequencyMetadata.unit = 'days'
+          result.frequencyType = 'daily'
+          return {
+            result,
+            name: pattern.name.replace('{time}', match[1]),
+            // replace every x with ''
+
             cleanedSentence: inputSentence.replace(match[0], '').trim(),
           }
 
@@ -305,6 +350,15 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
             name: pattern.name
               .replace('{day}', result.frequency)
               .replace('{months}', result.frequencyMetadata.months.join(', ')),
+            cleanedSentence: inputSentence.replace(match[0], '').trim(),
+          }
+        case 'interval:every_other':
+          result.frequency = 2
+          result.frequencyMetadata.unit = match[1]
+          result.frequencyType = 'interval'
+          return {
+            result,
+            name: pattern.name.replace('{unit}', result.frequencyMetadata.unit),
             cleanedSentence: inputSentence.replace(match[0], '').trim(),
           }
       }
@@ -321,8 +375,10 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
       setPriority(0)
       return
     }
-
-    let cleanedSentence = e.target.value
+    setTaskText(e.target.value)
+  }
+  const processText = sentence => {
+    let cleanedSentence = sentence
     const priority = parsePriority(cleanedSentence)
     if (priority.result) setPriority(priority.result)
     cleanedSentence = priority.cleanedSentence
@@ -344,11 +400,24 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
       cleanedSentence = cleanedSentence.replace(parsedDueDate[0].text, '')
     }
 
+    if (repeat.result) {
+      // if repeat has result the cleaned sentence will remove the date related info which mean
+      // we need to reparse the date again to get the correct due date:
+      const parsedDueDate = chrono.parse(sentence, new Date(), {
+        forwardDate: true,
+      })
+      if (parsedDueDate[0]?.index > -1) {
+        setDueDate(
+          moment(parsedDueDate[0].start.date()).format('YYYY-MM-DDTHH:mm:ss'),
+        )
+      }
+    }
+
     if (priority.result || parsedDueDate[0]?.index > -1 || repeat.result) {
       setOpenModal(true)
     }
 
-    setTaskText(e.target.value)
+    setTaskText(sentence)
     setTaskTitle(cleanedSentence.trim())
   }
 
@@ -504,6 +573,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
             <FormControl>
               <Typography level='body-sm'>Priority</Typography>
               <Select
+                defaultValue={0}
                 value={priority}
                 onChange={(e, value) => setPriority(value)}
               >
@@ -535,9 +605,9 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
           >
             <FormControl>
               <Typography level='body-sm'>Assignee</Typography>
-              <Select value={'0'}>
+              <Select value={'0'} disabled>
                 <Option value='0'>Me</Option>
-                <Option value='1'>Other</Option>
+                {/* <Option value='1'>Other</Option> */}
               </Select>
             </FormControl>
             <FormControl>
