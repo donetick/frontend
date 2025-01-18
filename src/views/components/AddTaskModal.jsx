@@ -192,7 +192,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
       },
       {
         frequencyType: 'daily',
-        regex: /(every day|daily)$/i,
+        regex: /(every day|daily|everyday)$/i,
         name: 'Every day',
       },
       {
