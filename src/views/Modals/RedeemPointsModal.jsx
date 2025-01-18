@@ -48,6 +48,7 @@ function RedeemPointsModal({ config }) {
           {predefinedPoints.map(point => (
             <IconButton
               variant='outlined'
+              disabled={points + point > config.available}
               sx={{ borderRadius: '50%' }}
               key={point}
               onClick={() => {
@@ -69,7 +70,7 @@ function RedeemPointsModal({ config }) {
           <Button
             onClick={() =>
               config.onSave({
-                points,
+                points: Number(points),
                 userId: config.user.userId,
               })
             }
