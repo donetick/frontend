@@ -109,7 +109,7 @@ function LabelModal({ isOpen, onClose, label }) {
               <Typography
                 startDecorator={
                   <Box
-                    className='h-4 w-4'
+                    className='size-4'
                     borderRadius={10}
                     sx={{ background: selected.value }}
                   />
