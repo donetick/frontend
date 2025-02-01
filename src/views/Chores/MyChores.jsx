@@ -426,7 +426,6 @@ const MyChores = () => {
               <Search />
             </IconButton>
           )}
-          <Divider orientation='vertical' />
 
           <IconButtonWithMenu
             title='Group by'
@@ -632,6 +631,7 @@ const MyChores = () => {
                   key={section.name + index}
                   sx={{
                     my: 0,
+                    px: 0,
                   }}
                   expanded={Boolean(openChoreSections[index])}
                 >

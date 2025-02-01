@@ -64,15 +64,15 @@ const ThingCard = ({
 
   return (
     <Card
-      variant='outlined'
+      variant='plain'
       sx={{
-        // display: 'flex',
-        // flexDirection: 'row', // Change to 'row'
+        display: 'flex',
+        flexDirection: 'column',
         justifyContent: 'space-between',
         p: 2,
         boxShadow: 'sm',
-        borderRadius: 8,
-        mb: 1,
+        borderRadius: 20,
+        mb: 2,
       }}
     >
       <Grid container>

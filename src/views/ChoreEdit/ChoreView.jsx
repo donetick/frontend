@@ -435,6 +435,7 @@ const ChoreView = () => {
               sx={{
                 p: 2,
                 borderRadius: 'lg',
+                mb: 1,
               }}
             >
               <IconButton

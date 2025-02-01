@@ -124,7 +124,7 @@ const CalendarView = ({ chores }) => {
             .map((chore, idx) => (
               <Card
                 key={idx}
-                variant='soft'
+                variant='outlined'
                 onClick={() => {
                   Navigate('/chores/' + chore.id)
                 }}

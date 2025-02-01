@@ -25,6 +25,7 @@ class ApiManager {
   }
   updateApiURL(url) {
     this.customServerURL = url
+    this.init()
   }
 }
 

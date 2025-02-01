@@ -194,7 +194,7 @@ const ChoreCard = ({
           setTimeoutId(null)
           setSecondsLeftToCancel(null)
         })
-    }, 3000)
+    }, 2000)
 
     setTimeoutId(id)
   }
@@ -529,29 +529,45 @@ const ChoreCard = ({
                   )}
                   {chore.labelsV2?.map((l, index) => {
                     return (
-                      <Chip
-                        variant='solid'
-                        key={`chorecard-${chore.id}-label-${l.id}`}
-                        color='primary'
-                        sx={{
-                          position: 'relative',
-                          ml: index === 0 ? 0 : 0.5,
-                          top: 2,
-                          zIndex: 1,
-                          backgroundColor: `${l?.color} !important`,
-                          color: getTextColorFromBackgroundColor(l?.color),
-
-                          // apply background color for th clickable button:
+                      <div
+                        role='none'
+                        tabIndex={0}
+                        onClick={e => {
+                          e.stopPropagation()
+                          onChipClick({ label: l })
                         }}
-                        // onClick={e => {
-                        //   e.stopPropagation()
-                        //   onChipClick({ label: l })
-                        // }}
-
-                        // startDecorator={getIconForLabel(label)}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.stopPropagation()
+                            onChipClick({ label: l })
+                          }
+                        }}
+                        style={{ display: 'inline-block', cursor: 'pointer' }} // Make the wrapper clickable
+                        key={`chorecard-${chore.id}-label-${l.id}`}
                       >
-                        {l?.name}
-                      </Chip>
+                        <Chip
+                          variant='solid'
+                          color='primary'
+                          sx={{
+                            position: 'relative',
+                            ml: index === 0 ? 0 : 0.5,
+                            top: 2,
+                            zIndex: 1,
+                            backgroundColor: `${l?.color} !important`,
+                            color: getTextColorFromBackgroundColor(l?.color),
+
+                            // apply background color for th clickable button:
+                          }}
+                          // onClick={e => {
+                          //   e.stopPropagation()
+                          //   onChipClick({ label: l })
+                          // }}
+
+                          // startDecorator={getIconForLabel(label)}
+                        >
+                          {l?.name}
+                        </Chip>
+                      </div>
                     )
                   })}
                 </Box>
