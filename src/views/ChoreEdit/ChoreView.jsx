@@ -11,12 +11,12 @@ import {
   PeopleAlt,
   Person,
   SwitchAccessShortcut,
-  Timelapse,
 } from '@mui/icons-material'
 import {
   Box,
   Button,
   Card,
+  CardContent,
   Checkbox,
   Chip,
   Container,
@@ -25,8 +25,6 @@ import {
   Grid,
   IconButton,
   Input,
-  ListItem,
-  ListItemContent,
   Menu,
   MenuButton,
   MenuItem,
@@ -121,62 +119,43 @@ const ChoreView = () => {
       {
         size: 6,
         icon: <PeopleAlt />,
-        text: 'Assigned To',
-        subtext: performers.find(p => p.id === chore.assignedTo)?.displayName,
+        title: 'Assignment',
+        text: `Assigned: ${
+          performers.find(p => p.id === chore.assignedTo)?.displayName || 'N/A'
+        }`,
+        subtext: ` Last: ${
+          chore.lastCompletedDate
+            ? performers.find(p => p.id === chore.lastCompletedBy)?.displayName
+            : '--'
+        }`,
       },
       {
         size: 6,
         icon: <CalendarMonth />,
-        text: 'Due Date',
-        subtext: chore.nextDueDate
-          ? moment(chore.nextDueDate).fromNow()
-          : 'N/A',
+        title: 'Schedule',
+        text: `Due: ${
+          chore.nextDueDate ? moment(chore.nextDueDate).fromNow() : 'N/A'
+        }`,
+        subtext: `Last: ${
+          chore.lastCompletedDate
+            ? moment(chore.lastCompletedDate).fromNow()
+            : 'N/A'
+        }`,
       },
-
-      //   {
-      //     icon: <TextFields />,
-      //     text: 'Frequency',
-      //     subtext:
-      //       chore.frequencyType.charAt(0).toUpperCase() +
-      //       chore.frequencyType.slice(1),
-      //   },
       {
         size: 6,
         icon: <Checklist />,
-        text: 'Total Completed',
-        subtext: `${chore.totalCompletedCount} times`,
-      },
-      {
-        size: 6,
-        icon: <Timelapse />,
-        text: 'Last Completed',
-        subtext:
-          // chore.lastCompletedDate &&
-          // moment(chore.lastCompletedDate).format('MM/DD/YYYY hh:mm A'),
-          chore.lastCompletedDate && moment(chore.lastCompletedDate).fromNow(),
+        title: 'Statistics',
+        text: `Completed: ${chore.totalCompletedCount || 0} times`,
       },
       {
         size: 6,
         icon: <Person />,
-        text: 'Last Performer',
-        subtext: chore.lastCompletedDate
-          ? `${
-              performers.find(p => p.id === chore.lastCompletedBy)?.displayName
-            }`
-          : '--',
+        title: 'Details',
+        subtext: `Created By: ${
+          performers.find(p => p.id === chore.createdBy)?.displayName || 'N/A'
+        }`,
       },
-      {
-        size: 6,
-        icon: <Person />,
-        text: 'Created By',
-        subtext: performers.find(p => p.id === chore.createdBy)?.displayName,
-      },
-      // {
-      //   size: 12,
-      //   icon: <Note />,
-      //   text: 'Recent Note',
-      //   subtext: chore.notes || '--',
-      // },
     ]
     setInfoCards(cards)
   }
@@ -287,38 +266,70 @@ const ChoreView = () => {
           </Chip>
         ))}
       </Box>
+
       <Box>
-        <Sheet
+        <Grid
+          container
+          spacing={1}
           sx={{
             mb: 1,
-            borderRadius: 'lg',
-            p: 2,
           }}
-          variant='outlined'
         >
-          <Grid container spacing={1}>
-            {infoCards.map((detail, index) => (
-              <Grid item xs={6} key={index}>
-                {/* divider between the list items: */}
+          {infoCards.map((card, index) => (
+            <Grid item xs={6} sm={6} key={index}>
+              <Card
+                variant='soft'
+                sx={{
+                  borderRadius: 'md',
+                  boxShadow: 1,
+                  px: 2,
+                  py: 1,
+                  minHeight: 90,
+                  // change from space-between to start:
+                  justifyContent: 'start',
+                }}
+              >
+                <CardContent>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'start',
+                      mb: 0.5,
+                    }}
+                  >
+                    {card.icon}
 
-                <ListItem key={index}>
-                  <ListItemContent>
-                    <Typography level='body-xs' sx={{ fontWeight: 'md' }}>
-                      {detail.text}
-                    </Typography>
-                    <Chip
-                      color='primary'
-                      size='md'
-                      startDecorator={detail.icon}
+                    <Typography
+                      level='body-md'
+                      sx={{
+                        ml: 1,
+                        fontWeight: '500',
+                        color: 'text.primary',
+                      }}
                     >
-                      {detail.subtext ? detail.subtext : '--'}
-                    </Chip>
-                  </ListItemContent>
-                </ListItem>
-              </Grid>
-            ))}
-          </Grid>
-        </Sheet>
+                      {card.title}
+                    </Typography>
+                  </Box>
+                  <Box>
+                    <Typography
+                      level='body-sm'
+                      sx={{ color: 'text.secondary', lineHeight: 1.5 }}
+                    >
+                      {card.text}
+                    </Typography>
+                    <Typography
+                      level='body-sm'
+                      sx={{ color: 'text.secondary', lineHeight: 1.5 }}
+                    >
+                      {card.subtext}
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
         <Box
           sx={{
             display: 'flex',
@@ -345,6 +356,7 @@ const ChoreView = () => {
                 p: 1,
               }}
               fullWidth
+              variant='plain'
             >
               {chorePriority ? chorePriority.icon : <LowPriority />}
               {chorePriority ? chorePriority.name : 'No Priority'}
@@ -388,7 +400,7 @@ const ChoreView = () => {
           <Button
             size='sm'
             color='neutral'
-            variant='outlined'
+            variant='plain'
             fullWidth
             onClick={() => {
               navigate(`/chores/${choreId}/history`)
@@ -406,7 +418,7 @@ const ChoreView = () => {
           <Button
             size='sm'
             color='neutral'
-            variant='outlined'
+            variant='plain'
             fullWidth
             sx={{
               // top right of the card:
@@ -431,7 +443,7 @@ const ChoreView = () => {
             </Typography>
 
             <Sheet
-              variant='outlined'
+              variant='plain'
               sx={{
                 p: 2,
                 borderRadius: 'lg',
@@ -471,7 +483,7 @@ const ChoreView = () => {
             <Typography level='title-md' sx={{ mb: 1 }}>
               Previous note:
             </Typography>
-            <Sheet variant='outlined' sx={{ p: 2, borderRadius: 'lg' }}>
+            <Sheet variant='plain' sx={{ p: 2, borderRadius: 'lg' }}>
               <Typography level='body-md' sx={{ mb: 1 }}>
                 {chore.notes || '--'}
               </Typography>
@@ -479,11 +491,6 @@ const ChoreView = () => {
           </>
         )}
       </Box>
-      {/* <Divider
-        sx={{
-          my: 2,
-        }}
-      /> */}
 
       <Card
         sx={{
@@ -492,6 +499,7 @@ const ChoreView = () => {
           boxShadow: 'sm',
           mt: 2,
         }}
+        variant='soft'
       >
         <Typography level='body-md' sx={{ mb: 1 }}>
           Complete the task
@@ -511,16 +519,10 @@ const ChoreView = () => {
               }
             }}
             overlay
-            sx={
-              {
-                // my: 1,
-              }
-            }
             label={
               <Typography
                 level='body-sm'
                 sx={{
-                  // center vertically
                   display: 'flex',
                   alignItems: 'center',
                 }}

@@ -10,9 +10,8 @@ import {
 } from '@mui/icons-material'
 import {
   Box,
-  Card,
+  Button,
   Chip,
-  CircularProgress,
   Container,
   Grid,
   IconButton,
@@ -63,122 +62,102 @@ const ThingCard = ({
   }
 
   return (
-    <Card
-      variant='plain'
+    <Box
+      className='rounded-lg border border-zinc-200/80 p-4 shadow-sm'
       sx={{
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
         p: 2,
-        boxShadow: 'sm',
-        borderRadius: 20,
+
         mb: 2,
       }}
     >
-      <Grid container>
-        <Grid item xs={9}>
+      <Grid container alignItems='center'>
+        <Grid
+          item
+          xs={12}
+          sm={8}
+          onClick={() => Navigate(`/things/${thing?.id}`)}
+        >
           <Box
             sx={{
               display: 'flex',
               flexDirection: 'row',
+              alignItems: 'center',
               gap: 1,
+              cursor: 'pointer',
             }}
-            onClick={() => {
-              Navigate(`/things/${thing?.id}`)
-            }}
+            onClick={() => Navigate(`/things/${thing?.id}`)}
           >
-            <Typography level='title-lg' component='h2'>
-              {thing?.name}
-            </Typography>
-            <Chip level='body-md' component='p'>
+            <Typography level='title-lg'>{thing?.name}</Typography>
+            <Chip
+              size='sm'
+              sx={{
+                ml: 1,
+              }}
+            >
               {thing?.type}
             </Chip>
           </Box>
-          <Box>
-            <Typography level='body-sm' component='p'>
-              Current state:
-              <Chip level='title-md' component='span' size='sm'>
-                {thing?.state}
-              </Chip>
-            </Typography>
-          </Box>
+          State: <Chip size='md'>{thing?.state}</Chip>
         </Grid>
-        <Grid item xs={3}>
-          <Box display='flex' justifyContent='flex-end' alignItems='flex-end'>
-            {/* <ButtonGroup> */}
-            <div className='relative grid place-items-center'>
-              <IconButton
-                variant='solid'
-                color='success'
-                onClick={() => {
-                  handleRequestChange(thing)
-                }}
-                sx={{
-                  borderRadius: '50%',
-                  width: 50,
-                  minWidth: 50,
-                  height: 50,
-                  zIndex: 1,
-                }}
-                disabled={isDisabled}
-              >
-                {getThingIcon(thing?.type)}
-              </IconButton>
-              {isDisabled && (
-                <CircularProgress
-                  variant='solid'
-                  color='success'
-                  size='md'
-                  sx={{
-                    color: 'success.main',
-                    position: 'absolute',
-                    '--CircularProgress-size': '55px',
-
-                    zIndex: 0,
-                  }}
-                />
-              )}
-            </div>
-            <IconButton
-              // sx={{ width: 15 }}
-              variant='soft'
-              color='success'
-              onClick={() => {
+        <Grid
+          item
+          xs={12}
+          sm={4}
+          container
+          justifyContent='flex-end'
+          alignItems='center'
+        >
+          <Button
+            variant='soft'
+            color='success'
+            onClick={() => {
+              if (thing?.type === 'text') {
                 onEditClick(thing)
-              }}
-              sx={{
-                borderRadius: '50%',
-                width: 25,
-                height: 25,
-                position: 'relative',
-                left: -10,
-              }}
-            >
-              <Edit />
-            </IconButton>
-            {/* add delete icon: */}
-            <IconButton
-              // sx={{ width: 15 }}
-
-              color='danger'
-              variant='soft'
-              onClick={() => {
-                onDeleteClick(thing)
-              }}
-              sx={{
-                borderRadius: '50%',
-                width: 25,
-                height: 25,
-                position: 'relative',
-                left: -10,
-              }}
-            >
-              <Delete />
-            </IconButton>
-          </Box>
+              } else {
+                handleRequestChange(thing)
+              }
+            }}
+            disabled={isDisabled}
+            startDecorator={getThingIcon(thing?.type)}
+          >
+            {thing?.type === 'text'
+              ? 'Change'
+              : thing?.type === 'number'
+                ? 'Increment'
+                : 'Toggle'}
+          </Button>
+          <IconButton
+            color='primary'
+            onClick={() => onEditClick(thing)}
+            sx={{
+              borderRadius: '50%',
+              width: 30,
+              height: 30,
+              ml: 1,
+              transition: 'background-color 0.2s',
+              '&:hover': { backgroundColor: 'action.hover' },
+            }}
+          >
+            <Edit />
+          </IconButton>
+          <IconButton
+            color='danger'
+            onClick={() => onDeleteClick(thing)}
+            sx={{
+              borderRadius: '50%',
+              width: 30,
+              height: 30,
+              ml: 1,
+            }}
+          >
+            <Delete fontSize='small' />
+          </IconButton>
         </Grid>
       </Grid>
-    </Card>
+    </Box>
   )
 }
 

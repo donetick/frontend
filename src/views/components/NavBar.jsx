@@ -105,22 +105,22 @@ const NavBar = () => {
   }
 
   return (
-    <nav className='flex gap-2 p-3'>
+    <nav className='flex gap-2 p-2'>
       <IconButton size='sm' variant='plain' onClick={() => setDrawerOpen(true)}>
         <MenuRounded />
       </IconButton>
       <Box
-        className='flex items-center gap-2'
+        className='flex items-center gap-1'
         onClick={() => {
           navigate('/my/chores')
         }}
       >
-        <img component='img' src={Logo} width='34' />
+        <img component='img' src={Logo} width='25' />
         <Typography
           level='title-lg'
           sx={{
             fontWeight: 700,
-            fontSize: 24,
+            fontSize: 20,
           }}
         >
           Done
