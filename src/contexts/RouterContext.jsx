@@ -3,6 +3,7 @@ import ChoreEdit from '@/views/ChoreEdit/ChoreEdit'
 import ChoresOverview from '@/views/ChoresOverview'
 import Error from '@/views/Error'
 import Settings from '@/views/Settings/Settings'
+import { Capacitor } from '@capacitor/core'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import ForgotPasswordView from '../views/Authorization/ForgotPasswordView'
 import LoginSettings from '../views/Authorization/LoginSettings'
@@ -25,7 +26,10 @@ import ThingsView from '../views/Things/ThingsView'
 import UserActivities from '../views/User/UserActivities'
 import UserPoints from '../views/User/UserPoints'
 const getMainRoute = () => {
-  if (import.meta.env.VITE_IS_LANDING_DEFAULT === 'true') {
+  if (
+    import.meta.env.VITE_IS_LANDING_DEFAULT === 'true' &&
+    !Capacitor.isNativePlatform()
+  ) {
     return <Landing />
   }
   return <MyChores />
