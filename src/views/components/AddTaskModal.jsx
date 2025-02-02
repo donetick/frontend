@@ -21,6 +21,7 @@ import { CSSTransition } from 'react-transition-group'
 import { UserContext } from '../../contexts/UserContext'
 import useDebounce from '../../utils/Debounce'
 import { CreateChore } from '../../utils/Fetcher'
+import { isPlusAccount } from '../../utils/Helpers'
 import { useLabels } from '../Labels/LabelQueries'
 import LearnMoreButton from './LearnMore'
 const VALID_DAYS = {
@@ -429,16 +430,22 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
       assignedTo: userProfile.id,
       assignStrategy: 'random',
       isRolling: false,
+      notification: false,
       description: description || null,
       labelsV2: [],
       priority: priority || 0,
       status: 0,
+      frequencyType: 'once',
     }
 
     if (frequency) {
       chore.frequencyType = frequency.frequencyType
       chore.frequencyMetadata = frequency.frequencyMetadata
       chore.frequency = frequency.frequency
+      if (isPlusAccount()) {
+        chore.notification = true
+        chore.notificationMetadata = { dueDate: true }
+      }
     }
 
     CreateChore(chore).then(resp => {

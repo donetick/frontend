@@ -13,6 +13,14 @@ import {
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import {
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
 import { GetThingHistory } from '../../utils/Fetcher'
 
 const ThingsHistory = () => {
@@ -67,7 +75,7 @@ const ThingsHistory = () => {
 
     return `${timeValue} ${unit}${timeValue !== 1 ? 's' : ''}`
   }
-  if (errLoading || !thingsHistory) {
+  if (errLoading || !thingsHistory || thingsHistory.length === 0) {
     return (
       <Container
         maxWidth='md'
@@ -106,6 +114,60 @@ const ThingsHistory = () => {
     <Container maxWidth='md'>
       <Typography level='h3' mb={1.5}>
         History:
+      </Typography>
+      {/* check if all the states are number the show it: */}
+      {thingsHistory.every(history => !isNaN(history.state)) &&
+        thingsHistory.length > 1 && (
+          <>
+            <Typography level='h4' gutterBottom>
+              Chart:
+            </Typography>
+
+            <Box sx={{ borderRadius: 'sm', p: 2, boxShadow: 'md', mb: 2 }}>
+              <ResponsiveContainer width='100%' height={200}>
+                <LineChart
+                  width={500}
+                  height={300}
+                  data={thingsHistory.toReversed()}
+                >
+                  {/* <CartesianGrid strokeDasharray='3 3' /> */}
+                  <XAxis
+                    dataKey='updatedAt'
+                    hide='true'
+                    tick='false'
+                    tickLine='false'
+                    axisLine='false'
+                    tickFormatter={tick =>
+                      moment(tick).format('ddd MM/DD/yyyy HH:mm:ss')
+                    }
+                  />
+                  <YAxis
+                    hide='true'
+                    dataKey='state'
+                    tick='false'
+                    tickLine='true'
+                    axisLine='false'
+                  />
+                  <Tooltip
+                    labelFormatter={label =>
+                      moment(label).format('ddd MM/DD/yyyy HH:mm:ss')
+                    }
+                  />
+
+                  <Line
+                    type='monotone'
+                    dataKey='state'
+                    stroke='#8884d8'
+                    activeDot={{ r: 8 }}
+                    dot={{ r: 4 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </Box>
+          </>
+        )}
+      <Typography level='h4' gutterBottom>
+        Change log:
       </Typography>
       <Box sx={{ borderRadius: 'sm', p: 2, boxShadow: 'md' }}>
         <List sx={{ p: 0 }}>

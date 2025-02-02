@@ -31,7 +31,7 @@ const Sidepanel = ({ chores }) => {
   }
   return (
     <Sheet
-      variant='outlined'
+      variant='plain'
       sx={{
         p: 2,
         // borderRadius: 'sm',
