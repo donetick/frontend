@@ -22,6 +22,7 @@ import {
   YAxis,
 } from 'recharts'
 import { GetThingHistory } from '../../utils/Fetcher'
+import LoadingComponent from '../components/Loading'
 
 const ThingsHistory = () => {
   const { id } = useParams()
@@ -75,6 +76,11 @@ const ThingsHistory = () => {
 
     return `${timeValue} ${unit}${timeValue !== 1 ? 's' : ''}`
   }
+  // if loading show loading spinner:
+  if (thingsHistory.length === 0) {
+    return <LoadingComponent />
+  }
+
   if (errLoading || !thingsHistory || thingsHistory.length === 0) {
     return (
       <Container
