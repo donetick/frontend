@@ -22,7 +22,7 @@ import { UserContext } from '../../contexts/UserContext'
 import { isPlusAccount } from '../../utils/Helpers'
 import ThingTriggerSection from './ThingTriggerSection'
 
-const FREQUANCY_TYPES_RADIOS = [
+const FREQUENCY_TYPES_RADIOS = [
   'daily',
   'weekly',
   'monthly',
@@ -37,23 +37,6 @@ const FREQUENCY_TYPE_MESSAGE = {
   custom: 'This chore will be scheduled based on a custom frequency.',
 }
 const REPEAT_ON_TYPE = ['interval', 'days_of_the_week', 'day_of_the_month']
-const FREQUANCY_TYPES = [
-  'once',
-  'daily',
-  'weekly',
-  'monthly',
-  'yearly',
-  'adaptive',
-  ...REPEAT_ON_TYPE,
-]
-const MONTH_WITH_NO_31_DAYS = [
-  // TODO: Handle these months if day is 31
-  'february',
-  'april',
-  'june',
-  'september',
-  'november',
-]
 const MONTHS = [
   'january',
   'february',
@@ -93,7 +76,6 @@ const RepeatOnSections = ({
   const [daysOfTheWeek, setDaysOfTheWeek] = useState({})
   const [monthsOfTheYear, setMonthsOfTheYear] = useState({})
   const [intervalUnit, setIntervalUnit] = useState('days')
-  const [frequancyMetadata, setFrequancyMetadata] = useState({})
   const [time, setTime] = useState('18:00')
   const timePickerComponent = (
     <Grid item sm={12} sx={{ display: 'flex', alignItems: 'center' }}>
@@ -393,7 +375,7 @@ const RepeatSection = ({
                 '--ListItem-radius': '20px',
               }}
             >
-              {FREQUANCY_TYPES_RADIOS.map((item, index) => (
+              {FREQUENCY_TYPES_RADIOS.map((item, index) => (
                 <ListItem key={item}>
                   <Checkbox
                     // disabled={index === 0}
