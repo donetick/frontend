@@ -21,6 +21,7 @@ import { LoginSocialGoogle } from 'reactjs-social-login'
 import { GOOGLE_CLIENT_ID, REDIRECT_URL } from '../../Config'
 import { UserContext } from '../../contexts/UserContext'
 import Logo from '../../Logo'
+import { useResource } from '../../queries/ResourceQueries'
 import { GetUserProfile, login } from '../../utils/Fetcher'
 import { apiManager } from '../../utils/TokenManager'
 
@@ -29,6 +30,7 @@ const LoginView = () => {
   const [username, setUsername] = React.useState('')
   const [password, setPassword] = React.useState('')
   const [error, setError] = React.useState(null)
+  const { data: resource } = useResource()
   const Navigate = useNavigate()
   const handleSubmit = async e => {
     e.preventDefault()
@@ -112,6 +114,28 @@ const LoginView = () => {
   const handleForgotPassword = () => {
     Navigate('/forgot-password')
   }
+  const generateRandomState = () => {
+    const randomState = Math.random().toString(36).substring(7)
+    localStorage.setItem('authState', randomState)
+
+    return randomState
+  }
+
+  const handleAuthentikLogin = () => {
+    const authentikAuthorizeUrl = resource?.identity_provider?.auth_url
+
+    const params = new URLSearchParams({
+      response_type: 'code',
+      client_id: resource?.identity_provider?.client_id,
+      redirect_uri: `${window.location.origin}/auth/oauth2`,
+      scope: 'openid profile email', // Your scopes
+      state: generateRandomState(),
+    })
+    console.log('redirect', `${authentikAuthorizeUrl}?${params.toString()}`)
+
+    window.location.href = `${authentikAuthorizeUrl}?${params.toString()}`
+  }
+
   return (
     <Container
       component='main'
@@ -296,70 +320,85 @@ const LoginView = () => {
             </>
           )}
           <Divider> or </Divider>
-          {!Capacitor.isNativePlatform() && (
-            <Box sx={{ width: '100%' }}>
-              <LoginSocialGoogle
-                client_id={GOOGLE_CLIENT_ID}
-                redirect_uri={REDIRECT_URL}
-                scope='openid profile email'
-                discoveryDocs='claims_supported'
-                access_type='online'
-                isOnlyGetToken={true}
-                onResolve={({ provider, data }) => {
-                  loggedWithProvider(provider, data)
-                }}
-                onReject={err => {
-                  setError("Couldn't log in with Google, please try again")
-                }}
-              >
-                <Button
-                  variant='soft'
-                  color='neutral'
-                  size='lg'
-                  fullWidth
-                  sx={{
-                    width: '100%',
-                    mt: 1,
-                    mb: 1,
-                    border: 'moccasin',
-                    borderRadius: '8px',
-                  }}
-                >
-                  <div className='flex gap-2'>
-                    <GoogleIcon />
-                    Continue with Google
-                  </div>
-                </Button>
-              </LoginSocialGoogle>
-            </Box>
+          {import.meta.env.VITE_IS_SELF_HOSTED !== 'true' && (
+            <>
+              {!Capacitor.isNativePlatform() && (
+                <Box sx={{ width: '100%' }}>
+                  <LoginSocialGoogle
+                    client_id={GOOGLE_CLIENT_ID}
+                    redirect_uri={REDIRECT_URL}
+                    scope='openid profile email'
+                    discoveryDocs='claims_supported'
+                    access_type='online'
+                    isOnlyGetToken={true}
+                    onResolve={({ provider, data }) => {
+                      loggedWithProvider(provider, data)
+                    }}
+                    onReject={err => {
+                      setError("Couldn't log in with Google, please try again")
+                    }}
+                  >
+                    <Button
+                      variant='soft'
+                      color='neutral'
+                      size='lg'
+                      fullWidth
+                      sx={{
+                        width: '100%',
+                        mt: 1,
+                        mb: 1,
+                        border: 'moccasin',
+                        borderRadius: '8px',
+                      }}
+                    >
+                      <div className='flex gap-2'>
+                        <GoogleIcon />
+                        Continue with Google
+                      </div>
+                    </Button>
+                  </LoginSocialGoogle>
+                </Box>
+              )}
+              {Capacitor.isNativePlatform() && (
+                <Box sx={{ width: '100%' }}>
+                  <Button
+                    fullWidth
+                    variant='soft'
+                    size='lg'
+                    sx={{ mt: 3, mb: 2 }}
+                    onClick={() => {
+                      GoogleAuth.initialize({
+                        clientId: import.meta.env.VITE_APP_GOOGLE_CLIENT_ID,
+                        scopes: ['profile', 'email', 'openid'],
+                        grantOfflineAccess: true,
+                      })
+                      GoogleAuth.signIn().then(user => {
+                        console.log('Google user', user)
+
+                        loggedWithProvider('google', user.authentication)
+                      })
+                    }}
+                  >
+                    <div className='flex gap-2'>
+                      <GoogleIcon />
+                      Continue with Google
+                    </div>
+                  </Button>
+                </Box>
+              )}
+            </>
           )}
-
-          {Capacitor.isNativePlatform() && (
-            <Box sx={{ width: '100%' }}>
-              <Button
-                fullWidth
-                variant='soft'
-                size='lg'
-                sx={{ mt: 3, mb: 2 }}
-                onClick={() => {
-                  GoogleAuth.initialize({
-                    clientId: import.meta.env.VITE_APP_GOOGLE_CLIENT_ID,
-                    scopes: ['profile', 'email', 'openid'],
-                    grantOfflineAccess: true,
-                  })
-                  GoogleAuth.signIn().then(user => {
-                    console.log('Google user', user)
-
-                    loggedWithProvider('google', user.authentication)
-                  })
-                }}
-              >
-                <div className='flex gap-2'>
-                  <GoogleIcon />
-                  Continue with Google
-                </div>
-              </Button>
-            </Box>
+          {resource?.identity_provider?.client_id && (
+            <Button
+              fullWidth
+              color='neutral'
+              variant='soft'
+              size='lg'
+              sx={{ mt: 3, mb: 2 }}
+              onClick={handleAuthentikLogin}
+            >
+              Continue with {resource?.identity_provider?.name}
+            </Button>
           )}
 
           <Button

@@ -375,6 +375,15 @@ const GetLabels = async () => {
   return resp.json()
 }
 
+const GetResource = async () => {
+  const basedURL = apiManager.getApiURL()
+  const resp = await fetch(`${basedURL}/resource`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+  return resp.json()
+}
+
 const UpdateLabel = label => {
   return Fetch(`/labels`, {
     method: 'PUT',
@@ -430,7 +439,6 @@ const RedeemPoints = (userId, points, circleID) => {
     body: JSON.stringify({ points, userId }),
   })
 }
-
 const RefreshToken = () => {
   const basedURL = apiManager.getApiURL()
   return fetch(`${basedURL}/auth/refresh`, {
@@ -481,6 +489,7 @@ export {
   GetCircleMemberRequests,
   GetLabels,
   GetLongLiveTokens,
+  GetResource,
   GetSubscriptionSession,
   GetThingHistory,
   GetThings,

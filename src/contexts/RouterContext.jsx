@@ -5,6 +5,7 @@ import Error from '@/views/Error'
 import Settings from '@/views/Settings/Settings'
 import { Capacitor } from '@capacitor/core'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
+import AuthenticationLoading from '../views/Authorization/Authenticating'
 import ForgotPasswordView from '../views/Authorization/ForgotPasswordView'
 import LoginSettings from '../views/Authorization/LoginSettings'
 import LoginView from '../views/Authorization/LoginView'
@@ -91,6 +92,10 @@ const Router = createBrowserRouter([
       {
         path: '/signup',
         element: <SignupView />,
+      },
+      {
+        path: '/auth/:provider',
+        element: <AuthenticationLoading />,
       },
       {
         path: '/landing',
