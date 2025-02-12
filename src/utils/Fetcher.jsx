@@ -462,6 +462,15 @@ const GetChoresHistory = async (limit, includeMembers) => {
   })
   return resp.json()
 }
+
+const PutWebhookURL = url => {
+  return Fetch(`/users/webhook`, {
+    method: 'PUT',
+    headers: HEADERS(),
+    body: JSON.stringify({ url }),
+  })
+}
+
 export {
   AcceptCircleMemberRequest,
   ArchiveChore,
@@ -499,6 +508,7 @@ export {
   LeaveCircle,
   MarkChoreComplete,
   PutNotificationTarget,
+  PutWebhookURL,
   RedeemPoints,
   RefreshToken,
   ResetPassword,
