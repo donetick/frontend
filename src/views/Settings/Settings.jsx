@@ -7,6 +7,8 @@ import {
   CircularProgress,
   Container,
   Divider,
+  FormControl,
+  FormHelperText,
   Input,
   Typography,
 } from '@mui/joy'
@@ -28,6 +30,7 @@ import {
   PutWebhookURL,
   UpdatePassword,
 } from '../../utils/Fetcher'
+import { isPlusAccount } from '../../utils/Helpers'
 import PassowrdChangeModal from '../Modals/Inputs/PasswordChangeModal'
 import APITokenSettings from './APITokenSettings'
 import NotificationSetting from './NotificationSetting'
@@ -327,52 +330,69 @@ const Settings = () => {
               services when events happen in your Circle. Use the webhook URL
               below to
             </Typography>
-            <Checkbox
-              checked={webhookURL !== null}
-              onClick={() => {
-                if (webhookURL === null) {
-                  setWebhookURL('')
-                } else {
-                  setWebhookURL(null)
-                }
-              }}
-              variant='soft'
-              label={'Enable Webhook'}
-            />
-            <>
-              {webhookURL !== null && (
-                <Typography level='title-sm'>
-                  Webhook URL
-                  <Input
-                    value={webhookURL ? webhookURL : ''}
-                    onChange={e => setWebhookURL(e.target.value)}
-                    size='lg'
-                    sx={{
-                      width: '220px',
-                      mb: 1,
-                    }}
-                  />
-                  <Typography level='body-sm' color='danger'>
-                    {webhookError}
-                  </Typography>
-                </Typography>
-              )}
-              <Button
-                variant='soft'
-                sx={{ width: '110px' }}
+            <FormControl sx={{ mt: 1 }}>
+              <Checkbox
+                checked={webhookURL !== null}
                 onClick={() => {
-                  PutWebhookURL(webhookURL).then(resp => {
-                    if (resp.ok) {
-                      alert('Webhook URL updated successfully.')
-                    } else {
-                      alert('Failed to update webhook URL.')
-                    }
-                  })
+                  if (webhookURL === null) {
+                    setWebhookURL('')
+                  } else {
+                    setWebhookURL(null)
+                  }
+                }}
+                variant='soft'
+                label='Enable Webhook'
+                disabled={!isPlusAccount(userProfile)}
+                overlay
+              />
+              <FormHelperText
+                sx={{
+                  opacity: !isPlusAccount(userProfile) ? 0.5 : 1,
                 }}
               >
-                Save
-              </Button>
-            </>
+                Enable webhook notifications for tasks and things updates.{' '}
+                {userProfile && !isPlusAccount(userProfile) && (
+                  <Chip variant='soft' color='warning'>
+                    Not available in Basic Plan
+                  </Chip>
+                )}
+              </FormHelperText>
+              <>
+                {webhookURL !== null && (
+                  <Typography level='title-sm'>
+                    Webhook URL
+                    <Input
+                      value={webhookURL ? webhookURL : ''}
+                      onChange={e => setWebhookURL(e.target.value)}
+                      size='lg'
+                      sx={{
+                        width: '220px',
+                        mb: 1,
+                      }}
+                    />
+                    <Typography level='body-sm' color='danger'>
+                      {webhookError}
+                    </Typography>
+                  </Typography>
+                )}
+                <Button
+                  variant='soft'
+                  sx={{ width: '110px', mt: 1 }}
+                  onClick={() => {
+                    PutWebhookURL(webhookURL).then(resp => {
+                      if (resp.ok) {
+                        alert('Webhook URL updated successfully.')
+                      } else {
+                        alert('Failed to update webhook URL.')
+                      }
+                    })
+                  }}
+                  disabled={!isPlusAccount(userProfile)}
+                >
+                  Save
+                </Button>
+              </>
+            </FormControl>
           </>
         )}
       </div>
