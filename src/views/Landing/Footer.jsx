@@ -108,15 +108,19 @@ function Footer() {
           >
             Roadmap
           </Link>
-          <Link disabled={true} level='body2' sx={{ display: 'block' }}>
-            Documentation(soon)
+          <Link
+            href='https://docs.donetick.com/'
+            level='body2'
+            sx={{ display: 'block' }}
+          >
+            Documentation
           </Link>
           <Link
             href='https://github.com/donetick/donetick/releases'
             level='body2'
             sx={{ display: 'block' }}
           >
-            Changelog(soon)
+            Changelog
           </Link>
           <Link disabled={true} level='body2' sx={{ display: 'block' }}>
             V{version}
