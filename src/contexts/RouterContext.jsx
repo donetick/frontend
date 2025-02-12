@@ -26,6 +26,7 @@ import ThingsHistory from '../views/Things/ThingsHistory'
 import ThingsView from '../views/Things/ThingsView'
 import UserActivities from '../views/User/UserActivities'
 import UserPoints from '../views/User/UserPoints'
+import NotFound from '../views/components/NotFound'
 const getMainRoute = () => {
   if (
     import.meta.env.VITE_IS_LANDING_DEFAULT === 'true' &&
@@ -144,6 +145,10 @@ const Router = createBrowserRouter([
       {
         path: 'labels/',
         element: <LabelView />,
+      },
+      {
+        path: '*',
+        element: <NotFound />,
       },
     ],
   },
