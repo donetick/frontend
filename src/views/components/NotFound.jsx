@@ -1,16 +1,10 @@
 import { HomeRounded, Login } from '@mui/icons-material'
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Container,
-  Textarea,
-  Typography,
-} from '@mui/joy'
-import { Link } from 'react-router-dom'
-import Logo from '../Logo' // Adjust the import path as necessary
+import { Box, Button, CircularProgress, Container } from '@mui/joy'
+import { Typography } from '@mui/material'
+import { Link } from 'react-router-dom' // Assuming you are using React Router
+import Logo from '../../Logo'
 
-const Error = () => {
+const NotFound = () => {
   return (
     <Container className='flex h-full items-center justify-center'>
       <Box
@@ -34,20 +28,11 @@ const Error = () => {
             mt: 2,
           }}
         >
-          Ops, something went wrong
+          Page Not Found
         </Box>
-        <Typography level='body-md' fontWeight={500} textAlign={'center'}>
-          if you think this is a mistake, please contact us or{' '}
-          <a
-            href='https://github.com/donetick/donetick/issues/new'
-            style={{
-              textDecoration: 'underline',
-            }}
-          >
-            open issue here
-          </a>{' '}
+        <Typography level='h2' fontWeight={500} textAlign={'center'}>
+          Sorry, I could be wrong but I think you are lost.
         </Typography>
-
         <Button
           component={Link}
           to='/my/chores'
@@ -75,4 +60,4 @@ const Error = () => {
   )
 }
 
-export default Error
+export default NotFound

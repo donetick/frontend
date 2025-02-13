@@ -29,6 +29,7 @@ import {
 } from '../../utils/Fetcher'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import CreateThingModal from '../Modals/Inputs/CreateThingModal'
+import EditThingStateModal from '../Modals/Inputs/EditThingState'
 const ThingCard = ({
   thing,
   onEditClick,
@@ -164,6 +165,7 @@ const ThingCard = ({
 const ThingsView = () => {
   const [things, setThings] = useState([])
   const [isShowCreateThingModal, setIsShowCreateThingModal] = useState(false)
+  const [isShowEditThingStateModal, setIsShowEditStateModal] = useState(false)
   const [createModalThing, setCreateModalThing] = useState(null)
   const [confirmModelConfig, setConfirmModelConfig] = useState({})
 
@@ -206,8 +208,8 @@ const ThingsView = () => {
     setIsSnackbarOpen(true)
   }
   const handleEditClick = thing => {
+    setIsShowEditStateModal(true)
     setCreateModalThing(thing)
-    setIsShowCreateThingModal(true)
   }
   const handleDeleteClick = thing => {
     setConfirmModelConfig({
@@ -240,31 +242,27 @@ const ThingsView = () => {
   }
 
   const handleStateChangeRequest = thing => {
-    if (thing?.type === 'text') {
-      setCreateModalThing(thing)
-      setIsShowCreateThingModal(true)
-    } else {
-      if (thing?.type === 'number') {
-        thing.state = Number(thing.state) + 1
-      } else if (thing?.type === 'boolean') {
-        if (thing.state === 'true') {
-          thing.state = 'false'
-        } else {
-          thing.state = 'true'
-        }
+    if (thing?.type === 'number') {
+      thing.state = Number(thing.state) + 1
+    } else if (thing?.type === 'boolean') {
+      if (thing.state === 'true') {
+        thing.state = 'false'
+      } else {
+        thing.state = 'true'
       }
-
-      UpdateThingState(thing).then(result => {
-        result.json().then(data => {
-          const currentThings = [...things]
-          const thingIndex = currentThings.findIndex(
-            currentThing => currentThing.id === thing.id,
-          )
-          currentThings[thingIndex] = data.res
-          setThings(currentThings)
-        })
-      })
     }
+
+    UpdateThingState(thing).then(result => {
+      result.json().then(data => {
+        const currentThings = [...things]
+        const thingIndex = currentThings.findIndex(
+          currentThing => currentThing.id === thing.id,
+        )
+        currentThings[thingIndex] = data.res
+        setThings(currentThings)
+      })
+    })
+
     setSnackbarMessage('Thing state updated successfully')
     setIsSnackbarOpen(true)
   }
@@ -342,6 +340,18 @@ const ThingsView = () => {
             currentThing={createModalThing}
           />
         )}
+        {isShowEditThingStateModal && (
+          <EditThingStateModal
+            isOpen={isShowEditThingStateModal}
+            onClose={() => {
+              setIsShowEditStateModal(false)
+              setCreateModalThing(null)
+            }}
+            onSave={handleStateChangeRequest}
+            currentThing={createModalThing}
+          />
+        )}
+
         <ConfirmationModal config={confirmModelConfig} />
       </Box>
       <Snackbar

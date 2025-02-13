@@ -2,10 +2,13 @@ import {
   Box,
   Button,
   Card,
+  Checkbox,
   Chip,
   CircularProgress,
   Container,
   Divider,
+  FormControl,
+  FormHelperText,
   Input,
   Typography,
 } from '@mui/joy'
@@ -24,8 +27,10 @@ import {
   GetUserProfile,
   JoinCircle,
   LeaveCircle,
+  PutWebhookURL,
   UpdatePassword,
 } from '../../utils/Fetcher'
+import { isPlusAccount } from '../../utils/Helpers'
 import PassowrdChangeModal from '../Modals/Inputs/PasswordChangeModal'
 import APITokenSettings from './APITokenSettings'
 import NotificationSetting from './NotificationSetting'
@@ -37,6 +42,9 @@ const Settings = () => {
   const [circleMemberRequests, setCircleMemberRequests] = useState([])
   const [circleInviteCode, setCircleInviteCode] = useState('')
   const [circleMembers, setCircleMembers] = useState([])
+  const [webhookURL, setWebhookURL] = useState(null)
+  const [webhookError, setWebhookError] = useState(null)
+
   const [changePasswordModal, setChangePasswordModal] = useState(false)
   useEffect(() => {
     GetUserProfile().then(resp => {
@@ -47,6 +55,7 @@ const Settings = () => {
     GetUserCircle().then(resp => {
       resp.json().then(data => {
         setUserCircles(data.res ? data.res : [])
+        setWebhookURL(data.res ? data.res[0].webhook_url : null)
       })
     })
     GetCircleMemberRequests().then(resp => {
@@ -116,7 +125,7 @@ const Settings = () => {
   return (
     <Container>
       <div className='grid gap-4 py-4' id='sharing'>
-        <Typography level='h3'>Sharing settings</Typography>
+        <Typography level='h3'>Circle settings</Typography>
         <Divider />
         <Typography level='body-md'>
           Your account is automatically connected to a Circle when you create or
@@ -184,6 +193,7 @@ const Settings = () => {
             </Button>
           )}
         </Typography>
+
         <Typography level='title-md'>Circle Members</Typography>
         {circleMembers.map(member => (
           <Card key={member.id} className='p-4'>
@@ -309,6 +319,82 @@ const Settings = () => {
             Join Circle
           </Button>
         </Typography>
+        {circleMembers.find(m => userProfile.id == m.userId)?.role ===
+          'admin' && (
+          <>
+            <Typography level='title-lg' mt={2}>
+              Webhook
+            </Typography>
+            <Typography level='body-md' mt={-1}>
+              Webhooks allow you to send real-time notifications to other
+              services when events happen in your Circle. Use the webhook URL
+              below to
+            </Typography>
+            <FormControl sx={{ mt: 1 }}>
+              <Checkbox
+                checked={webhookURL !== null}
+                onClick={() => {
+                  if (webhookURL === null) {
+                    setWebhookURL('')
+                  } else {
+                    setWebhookURL(null)
+                  }
+                }}
+                variant='soft'
+                label='Enable Webhook'
+                disabled={!isPlusAccount(userProfile)}
+                overlay
+              />
+              <FormHelperText
+                sx={{
+                  opacity: !isPlusAccount(userProfile) ? 0.5 : 1,
+                }}
+              >
+                Enable webhook notifications for tasks and things updates.{' '}
+                {userProfile && !isPlusAccount(userProfile) && (
+                  <Chip variant='soft' color='warning'>
+                    Not available in Basic Plan
+                  </Chip>
+                )}
+              </FormHelperText>
+              <>
+                {webhookURL !== null && (
+                  <Typography level='title-sm'>
+                    Webhook URL
+                    <Input
+                      value={webhookURL ? webhookURL : ''}
+                      onChange={e => setWebhookURL(e.target.value)}
+                      size='lg'
+                      sx={{
+                        width: '220px',
+                        mb: 1,
+                      }}
+                    />
+                    <Typography level='body-sm' color='danger'>
+                      {webhookError}
+                    </Typography>
+                  </Typography>
+                )}
+                <Button
+                  variant='soft'
+                  sx={{ width: '110px', mt: 1 }}
+                  onClick={() => {
+                    PutWebhookURL(webhookURL).then(resp => {
+                      if (resp.ok) {
+                        alert('Webhook URL updated successfully.')
+                      } else {
+                        alert('Failed to update webhook URL.')
+                      }
+                    })
+                  }}
+                  disabled={!isPlusAccount(userProfile)}
+                >
+                  Save
+                </Button>
+              </>
+            </FormControl>
+          </>
+        )}
       </div>
 
       <div className='grid gap-4 py-4' id='account'>

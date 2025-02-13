@@ -121,6 +121,7 @@ const NavBar = () => {
           sx={{
             fontWeight: 700,
             fontSize: 20,
+            cursor: 'pointer',
           }}
         >
           Done

@@ -244,7 +244,10 @@ const MyChores = () => {
       }
       return chore
     })
-    if (event === 'archive') {
+    if (
+      event === 'archive' ||
+      (event === 'completed' && updatedChore.frequencyType === 'once')
+    ) {
       newChores = newChores.filter(chore => chore.id !== updatedChore.id)
       newFilteredChores = newFilteredChores.filter(
         chore => chore.id !== updatedChore.id,

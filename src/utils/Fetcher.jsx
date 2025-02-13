@@ -375,6 +375,15 @@ const GetLabels = async () => {
   return resp.json()
 }
 
+const GetResource = async () => {
+  const basedURL = apiManager.getApiURL()
+  const resp = await fetch(`${basedURL}/resource`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+  return resp.json()
+}
+
 const UpdateLabel = label => {
   return Fetch(`/labels`, {
     method: 'PUT',
@@ -430,7 +439,6 @@ const RedeemPoints = (userId, points, circleID) => {
     body: JSON.stringify({ points, userId }),
   })
 }
-
 const RefreshToken = () => {
   const basedURL = apiManager.getApiURL()
   return fetch(`${basedURL}/auth/refresh`, {
@@ -454,6 +462,15 @@ const GetChoresHistory = async (limit, includeMembers) => {
   })
   return resp.json()
 }
+
+const PutWebhookURL = url => {
+  return Fetch(`/users/webhook`, {
+    method: 'PUT',
+    headers: HEADERS(),
+    body: JSON.stringify({ url }),
+  })
+}
+
 export {
   AcceptCircleMemberRequest,
   ArchiveChore,
@@ -481,6 +498,7 @@ export {
   GetCircleMemberRequests,
   GetLabels,
   GetLongLiveTokens,
+  GetResource,
   GetSubscriptionSession,
   GetThingHistory,
   GetThings,
@@ -490,6 +508,7 @@ export {
   LeaveCircle,
   MarkChoreComplete,
   PutNotificationTarget,
+  PutWebhookURL,
   RedeemPoints,
   RefreshToken,
   ResetPassword,

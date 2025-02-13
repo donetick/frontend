@@ -13,7 +13,6 @@ import {
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
-import { API_URL } from '../../Config'
 import Logo from '../../Logo'
 import { ChangePassword } from '../../utils/Fetcher'
 
@@ -54,7 +53,7 @@ const UpdatePasswordView = () => {
     }
     try {
       const response = await ChangePassword(verifiticationCode, password)
-    
+
       if (response.ok) {
         setUpdateStatusOk(true)
         //  wait 3 seconds and then redirect to login:
@@ -171,7 +170,7 @@ const UpdatePasswordView = () => {
         </Sheet>
       </Box>
       <Snackbar
-        open={updateStatusOk !== true}
+        open={updateStatusOk === false}
         autoHideDuration={6000}
         onClose={() => {
           setUpdateStatusOk(null)

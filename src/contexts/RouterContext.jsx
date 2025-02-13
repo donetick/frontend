@@ -5,6 +5,7 @@ import Error from '@/views/Error'
 import Settings from '@/views/Settings/Settings'
 import { Capacitor } from '@capacitor/core'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
+import AuthenticationLoading from '../views/Authorization/Authenticating'
 import ForgotPasswordView from '../views/Authorization/ForgotPasswordView'
 import LoginSettings from '../views/Authorization/LoginSettings'
 import LoginView from '../views/Authorization/LoginView'
@@ -25,6 +26,7 @@ import ThingsHistory from '../views/Things/ThingsHistory'
 import ThingsView from '../views/Things/ThingsView'
 import UserActivities from '../views/User/UserActivities'
 import UserPoints from '../views/User/UserPoints'
+import NotFound from '../views/components/NotFound'
 const getMainRoute = () => {
   if (
     import.meta.env.VITE_IS_LANDING_DEFAULT === 'true' &&
@@ -93,6 +95,10 @@ const Router = createBrowserRouter([
         element: <SignupView />,
       },
       {
+        path: '/auth/:provider',
+        element: <AuthenticationLoading />,
+      },
+      {
         path: '/landing',
         element: <Landing />,
       },
@@ -139,6 +145,10 @@ const Router = createBrowserRouter([
       {
         path: 'labels/',
         element: <LabelView />,
+      },
+      {
+        path: '*',
+        element: <NotFound />,
       },
     ],
   },
