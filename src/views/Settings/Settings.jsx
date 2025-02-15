@@ -319,7 +319,7 @@ const Settings = () => {
             Join Circle
           </Button>
         </Typography>
-        {circleMembers.find(m => userProfile.id == m.userId).role ===
+        {circleMembers.find(m => userProfile.id == m.userId)?.role ===
           'admin' && (
           <>
             <Typography level='title-lg' mt={2}>
