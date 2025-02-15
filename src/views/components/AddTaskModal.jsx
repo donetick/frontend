@@ -436,6 +436,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
       priority: priority || 0,
       status: 0,
       frequencyType: 'once',
+      notificationMetadata: {},
     }
 
     if (frequency) {
