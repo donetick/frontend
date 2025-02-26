@@ -7,16 +7,10 @@ import {
 
 const Priorities = [
   {
-    name: 'P4',
-    value: 4,
-    icon: <HorizontalRule />,
-    color: '',
-  },
-  {
-    name: 'P3 ',
-    value: 3,
-    icon: <KeyboardControlKey />,
-    color: '',
+    name: 'P1',
+    value: 1,
+    icon: <PriorityHigh />,
+    color: 'danger',
   },
   {
     name: 'P2',
@@ -25,10 +19,16 @@ const Priorities = [
     color: 'warning',
   },
   {
-    name: 'P1',
-    value: 1,
-    icon: <PriorityHigh />,
-    color: 'danger',
+    name: 'P3 ',
+    value: 3,
+    icon: <KeyboardControlKey />,
+    color: '',
+  },
+  {
+    name: 'P4',
+    value: 4,
+    icon: <HorizontalRule />,
+    color: '',
   },
 ]
 

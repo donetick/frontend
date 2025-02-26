@@ -1,7 +1,7 @@
 {
   "name": "donetick",
   "private": true,
-  "version": "0.1.94",
+  "version": "0.1.95",
   "type": "module",
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -32,6 +32,8 @@
     "@capacitor/preferences": "^6.0.1",
     "@capacitor/push-notifications": "^6.0.1",
     "@codetrix-studio/capacitor-google-auth": "^3.4.0-rc.4",
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.15.2",

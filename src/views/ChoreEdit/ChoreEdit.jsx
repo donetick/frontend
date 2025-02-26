@@ -9,7 +9,6 @@ import {
   Divider,
   FormControl,
   FormHelperText,
-  FormLabel,
   Input,
   List,
   ListItem,
@@ -40,6 +39,8 @@ import {
   SaveChore,
 } from '../../utils/Fetcher'
 import { isPlusAccount } from '../../utils/Helpers'
+import Priorities from '../../utils/Priorities.jsx'
+import SubTasks from '../components/SubTask.jsx'
 import { useLabels } from '../Labels/LabelQueries'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import LabelModal from '../Modals/Inputs/LabelModal'
@@ -76,7 +77,9 @@ const ChoreEdit = () => {
   const [frequencyMetadata, setFrequencyMetadata] = useState({})
   const [labels, setLabels] = useState([])
   const [labelsV2, setLabelsV2] = useState([])
+  const [priority, setPriority] = useState(0)
   const [points, setPoints] = useState(-1)
+  const [subTasks, setSubTasks] = useState(null)
   const [completionWindow, setCompletionWindow] = useState(-1)
   const [allUserThings, setAllUserThings] = useState([])
   const [thingTrigger, setThingTrigger] = useState(null)
@@ -201,10 +204,12 @@ const ChoreEdit = () => {
       notification: isNotificable,
       labels: labels.map(l => l.name),
       labelsV2: labelsV2,
+      subTasks: subTasks,
       notificationMetadata: notificationMetadata,
       thingTrigger: thingTrigger,
       points: points < 0 ? null : points,
       completionWindow: completionWindow < 0 ? null : completionWindow,
+      priority: priority,
     }
     let SaveFunction = CreateChore
     if (choreId > 0) {
@@ -265,6 +270,8 @@ const ChoreEdit = () => {
           )
 
           setLabelsV2(data.res.labelsV2)
+          setSubTasks(data.res.subTasks)
+          setPriority(data.res.priority)
           setAssignStrategy(
             data.res.assignStrategy
               ? data.res.assignStrategy
@@ -382,7 +389,7 @@ const ChoreEdit = () => {
       </Typography> */}
       <Box>
         <FormControl error={errors.name}>
-          <Typography level='h4'>Title :</Typography>
+          <Typography level='h4'>Name :</Typography>
           <Typography level='h5'> What is the name of this chore?</Typography>
           <Input value={name} onChange={e => setName(e.target.value)} />
           <FormHelperText error>{errors.name}</FormHelperText>
@@ -390,8 +397,8 @@ const ChoreEdit = () => {
       </Box>
       <Box mt={2}>
         <FormControl error={errors.description}>
-          <Typography level='h4'>Details:</Typography>
-          <Typography level='h5'>What is this chore about?</Typography>
+          <Typography level='h4'>Additional Details :</Typography>
+          <Typography level='h5'>What is this task about?</Typography>
           <Textarea
             value={description}
             onChange={e => setDescription(e.target.value)}
@@ -401,7 +408,7 @@ const ChoreEdit = () => {
       </Box>
       <Box mt={2}>
         <Typography level='h4'>Assignees :</Typography>
-        <Typography level='h5'>Who can do this chore?</Typography>
+        <Typography level='h5'>Who can do this task?</Typography>
         <Card>
           <List
             orientation='horizontal'
@@ -590,18 +597,7 @@ const ChoreEdit = () => {
           </FormControl>
         )}
 
-        <FormControl
-          orientation='horizontal'
-          sx={{ width: 400, justifyContent: 'space-between' }}
-        >
-          <div>
-            {/* <FormLabel>Completion window (hours)</FormLabel> */}
-            <Typography level='h5'>Completion window (hours)</Typography>
-
-            <FormHelperText sx={{ mt: 0 }}>
-              {"Set a time window that task can't be completed before"}
-            </FormHelperText>
-          </div>
+        <FormControl orientation='horizontal'>
           <Switch
             checked={completionWindow != -1}
             onClick={event => {
@@ -615,14 +611,18 @@ const ChoreEdit = () => {
             color={completionWindow !== -1 ? 'success' : 'neutral'}
             variant={completionWindow !== -1 ? 'solid' : 'outlined'}
             // endDecorator={points !== -1 ? 'On' : 'Off'}
-            slotProps={{
-              endDecorator: {
-                sx: {
-                  minWidth: 24,
-                },
-              },
+            sx={{
+              mr: 2,
             }}
           />
+          <div>
+            {/* <FormLabel>Completion window (hours)</FormLabel> */}
+            <Typography level='h5'>Completion window (hours)</Typography>
+
+            <FormHelperText sx={{ mt: 0 }}>
+              {"Set a time window that task can't be completed before"}
+            </FormHelperText>
+          </div>
         </FormControl>
         {completionWindow != -1 && (
           <Card variant='outlined'>
@@ -913,44 +913,89 @@ const ChoreEdit = () => {
           </MenuItem>
         </Select>
       </Box>
+      <Box mt={2}>
+        <Typography level='h4'>Priority :</Typography>
+        <Typography level='h5'>How important is this task?</Typography>
+        <Select
+          onChange={(event, newValue) => {
+            setPriority(newValue)
+          }}
+          value={priority}
+          sx={{ minWidth: '15rem' }}
+          slotProps={{
+            listbox: {
+              sx: {
+                width: '100%',
+              },
+            },
+          }}
+        >
+          {Priorities.map(priority => (
+            <Option key={priority.id + priority.name} value={priority.value}>
+              <div
+                style={{
+                  width: '20 px',
+                  height: '20 px',
+                  borderRadius: '50%',
+                  background: priority.color,
+                }}
+              />
+              {priority.name}
+            </Option>
+          ))}
+          <Option value={0}>No Priority</Option>
+        </Select>
+      </Box>
 
       <Box mt={2}>
         <Typography level='h4' gutterBottom>
           Others :
         </Typography>
 
-        <FormControl
-          orientation='horizontal'
-          sx={{ width: 400, justifyContent: 'space-between' }}
-        >
-          <div>
-            <FormLabel>Assign Points</FormLabel>
-            <FormHelperText sx={{ mt: 0 }}>
-              Assign points to this task and user will earn points when they
-              completed it
-            </FormHelperText>
-          </div>
-          <Switch
-            checked={points > -1}
-            onClick={event => {
-              event.preventDefault()
-              if (points > -1) {
-                setPoints(-1)
+        <FormControl sx={{ mt: 1 }}>
+          <Checkbox
+            onChange={e => {
+              if (e.target.checked) {
+                setSubTasks([])
               } else {
-                setPoints(1)
+                setSubTasks(null)
               }
             }}
-            color={points !== -1 ? 'success' : 'neutral'}
-            variant={points !== -1 ? 'solid' : 'outlined'}
-            // endDecorator={points !== -1 ? 'On' : 'Off'}
-            slotProps={{
-              endDecorator: {
-                sx: {
-                  minWidth: 24,
-                },
-              },
-            }}
+            overlay
+            checked={subTasks != null}
+            value={subTasks != null}
+            label='Sub Tasks'
           />
+          <FormHelperText>Add sub tasks to this task</FormHelperText>
+        </FormControl>
+        {subTasks != null && (
+          <Card
+            variant='outlined'
+            sx={{
+              p: 1,
+            }}
+          >
+            <SubTasks editMode={true} tasks={subTasks} setTasks={setSubTasks} />
+          </Card>
+        )}
+        <FormControl sx={{ mt: 1 }}>
+          <Checkbox
+            onChange={e => {
+              if (e.target.checked) {
+                setPoints(1)
+              } else {
+                setPoints(-1)
+              }
+            }}
+            checked={points > -1}
+            value={points > -1}
+            overlay
+            label='Assign Points'
+          />
+          <FormHelperText>
+            Assign points to this task and user will earn points when they
+            completed it
+          </FormHelperText>
         </FormControl>
 
         {points != -1 && (
