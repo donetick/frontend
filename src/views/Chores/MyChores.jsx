@@ -3,7 +3,7 @@ import {
   CancelRounded,
   EditCalendar,
   ExpandCircleDown,
-  FilterAlt,
+  Grain,
   PriorityHigh,
   Search,
   Sort,
@@ -44,7 +44,7 @@ import { useLabels } from '../Labels/LabelQueries'
 import ChoreCard from './ChoreCard'
 import IconButtonWithMenu from './IconButtonWithMenu'
 
-import { ChoresGrouper } from '../../utils/Chores'
+import { ChoresGrouper, ChoreSorter } from '../../utils/Chores'
 import TaskInput from '../components/AddTaskModal'
 import {
   canScheduleNotification,
@@ -66,8 +66,12 @@ const MyChores = () => {
   const [taskInputFocus, setTaskInputFocus] = useState(0)
   const searchInputRef = useRef()
   const [searchInputFocus, setSearchInputFocus] = useState(0)
-  const [selectedChoreSection, setSelectedChoreSection] = useState('due_date')
-  const [openChoreSections, setOpenChoreSections] = useState({})
+  const [selectedChoreSection, setSelectedChoreSection] = useState(
+    localStorage.getItem('selectedChoreSection') || 'due_date',
+  )
+  const [openChoreSections, setOpenChoreSections] = useState(
+    JSON.parse(localStorage.getItem('openChoreSections')) || {},
+  )
   const [searchTerm, setSearchTerm] = useState('')
   const [performers, setPerformers] = useState([])
   const [anchorEl, setAnchorEl] = useState(null)
@@ -75,33 +79,6 @@ const MyChores = () => {
   const Navigate = useNavigate()
   const { data: userLabels, isLoading: userLabelsLoading } = useLabels()
   const { data: choresData, isLoading: choresLoading } = useChores()
-  const choreSorter = (a, b) => {
-    // 1. Handle null due dates (always last):
-    if (!a.nextDueDate && !b.nextDueDate) return 0 // Both null, no order
-    if (!a.nextDueDate) return 1 // a is null, comes later
-    if (!b.nextDueDate) return -1 // b is null, comes earlier
-
-    const aDueDate = new Date(a.nextDueDate)
-    const bDueDate = new Date(b.nextDueDate)
-    const now = new Date()
-
-    const oneDayInMs = 24 * 60 * 60 * 1000
-
-    // 2. Prioritize tasks due today +- 1 day:
-    const aTodayOrNear = Math.abs(aDueDate - now) <= oneDayInMs
-    const bTodayOrNear = Math.abs(bDueDate - now) <= oneDayInMs
-    if (aTodayOrNear && !bTodayOrNear) return -1 // a is closer
-    if (!aTodayOrNear && bTodayOrNear) return 1 // b is closer
-
-    // 3. Handle overdue tasks (excluding today +- 1):
-    const aOverdue = aDueDate < now && !aTodayOrNear
-    const bOverdue = bDueDate < now && !bTodayOrNear
-    if (aOverdue && !bOverdue) return -1 // a is overdue, comes earlier
-    if (!aOverdue && bOverdue) return 1 // b is overdue, comes earlier
-
-    // 4. Sort future tasks by due date:
-    return aDueDate - bDueDate // Sort ascending by due date
-  }
 
   useEffect(() => {
     Promise.all([GetChores(), GetAllUsers(), GetUserProfile()]).then(
@@ -123,7 +100,7 @@ const MyChores = () => {
         ]).then(data => {
           const [choresData, usersData, userProfileData] = data
           setUserProfile(userProfileData.res)
-          choresData.res.sort(choreSorter)
+          choresData.res.sort(ChoreSorter)
           setChores(choresData.res)
           setFilteredChores(choresData.res)
           setPerformers(usersData.res)
@@ -155,17 +132,20 @@ const MyChores = () => {
 
   useEffect(() => {
     if (choresData) {
-      const sortedChores = choresData.res.sort(choreSorter)
+      const sortedChores = choresData.res.sort(ChoreSorter)
       setChores(sortedChores)
       setFilteredChores(sortedChores)
-      const sections = ChoresGrouper('due_date', sortedChores)
+      const sections = ChoresGrouper(selectedChoreSection, sortedChores)
       setChoreSections(sections)
-      setOpenChoreSections(
-        Object.keys(sections).reduce((acc, key) => {
-          acc[key] = true
-          return acc
-        }, {}),
-      )
+      if (localStorage.getItem('openChoreSections') === null) {
+        setSelectedChoreSectionWithCache(selectedChoreSection)
+        setOpenChoreSections(
+          Object.keys(sections).reduce((acc, key) => {
+            acc[key] = true
+            return acc
+          }, {}),
+        )
+      }
     }
   }, [choresData, choresLoading])
 
@@ -184,12 +164,21 @@ const MyChores = () => {
       searchInputRef.current.selectionEnd = searchInputRef.current.value?.length
     }
   }, [searchInputFocus])
+  const setSelectedChoreSectionWithCache = value => {
+    setSelectedChoreSection(value)
+    localStorage.setItem('selectedChoreSection', value)
+  }
+  const setOpenChoreSectionsWithCache = value => {
+    setOpenChoreSections(value)
+    localStorage.setItem('openChoreSections', JSON.stringify(value))
+  }
+
   const updateChores = newChore => {
     const newChores = chores
     newChores.push(newChore)
     setChores(newChores)
     setFilteredChores(newChores)
-    setChoreSections(ChoresGrouper('due_date', newChores))
+    setChoreSections(ChoresGrouper(selectedChoreSection, newChores))
     setSelectedFilter('All')
   }
   const handleMenuOutsideClick = event => {
@@ -265,7 +254,7 @@ const MyChores = () => {
     }
     setChores(newChores)
     setFilteredChores(newFilteredChores)
-    setChoreSections(ChoresGrouper('due_date', newChores))
+    setChoreSections(ChoresGrouper(selectedChoreSection, newChores))
 
     switch (event) {
       case 'completed':
@@ -296,7 +285,7 @@ const MyChores = () => {
     )
     setChores(newChores)
     setFilteredChores(newFilteredChores)
-    setChoreSections(ChoresGrouper('due_date', newChores))
+    setChoreSections(ChoresGrouper(selectedChoreSection, newChores))
   }
 
   const searchOptions = {
@@ -443,7 +432,14 @@ const MyChores = () => {
             onItemSelect={selected => {
               const section = ChoresGrouper(selected.value, chores)
               setChoreSections(section)
-              setSelectedChoreSection(selected.value)
+              setSelectedChoreSectionWithCache(selected.value)
+              setOpenChoreSectionsWithCache(
+                // open all sections by default
+                Object.keys(section).reduce((acc, key) => {
+                  acc[key] = true
+                  return acc
+                }, {}),
+              )
               setFilteredChores(chores)
               setSelectedFilter('All')
             }}
@@ -483,7 +479,7 @@ const MyChores = () => {
               <Button
                 onClick={handleFilterMenuOpen}
                 variant='outlined'
-                startDecorator={<FilterAlt />}
+                startDecorator={<Grain />}
                 color={
                   selectedFilter &&
                   FILTERS[selectedFilter] &&
@@ -649,9 +645,9 @@ const MyChores = () => {
                             ...openChoreSections,
                           }
                           delete newOpenChoreSections[index]
-                          setOpenChoreSections(newOpenChoreSections)
+                          setOpenChoreSectionsWithCache(newOpenChoreSections)
                         } else {
-                          setOpenChoreSections({
+                          setOpenChoreSectionsWithCache({
                             ...openChoreSections,
                             [index]: true,
                           })

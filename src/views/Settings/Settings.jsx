@@ -357,22 +357,23 @@ const Settings = () => {
                   </Chip>
                 )}
               </FormHelperText>
-              <>
-                {webhookURL !== null && (
-                  <Typography level='title-sm'>
-                    Webhook URL
-                    <Input
-                      value={webhookURL ? webhookURL : ''}
-                      onChange={e => setWebhookURL(e.target.value)}
-                      size='lg'
-                      sx={{
-                        width: '220px',
-                        mb: 1,
-                      }}
-                    />
-                    <Typography level='body-sm' color='danger'>
-                      {webhookError}
-                    </Typography>
+            </FormControl>
+
+            {webhookURL !== null && (
+              <Box>
+                <Typography level='title-sm'>Webhook URL</Typography>
+                <Input
+                  value={webhookURL ? webhookURL : ''}
+                  onChange={e => setWebhookURL(e.target.value)}
+                  size='lg'
+                  sx={{
+                    width: '220px',
+                    mb: 1,
+                  }}
+                />
+                {webhookError && (
+                  <Typography level='body-sm' color='danger'>
+                    {webhookError}
                   </Typography>
                 )}
                 <Button
@@ -391,8 +392,8 @@ const Settings = () => {
                 >
                   Save
                 </Button>
-              </>
-            </FormControl>
+              </Box>
+            )}
           </>
         )}
       </div>

@@ -48,6 +48,7 @@ import {
 } from '../../utils/Fetcher'
 import Priorities from '../../utils/Priorities'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
+import SubTasks from '../components/SubTask.jsx'
 const IconCard = styled('div')({
   display: 'flex',
   alignItems: 'center',
@@ -483,12 +484,32 @@ const ChoreView = () => {
             <Typography level='title-md' sx={{ mb: 1 }}>
               Previous note:
             </Typography>
-            <Sheet variant='plain' sx={{ p: 2, borderRadius: 'lg' }}>
+            <Sheet variant='plain' sx={{ p: 2, borderRadius: 'lg', mb: 1 }}>
               <Typography level='body-md' sx={{ mb: 1 }}>
                 {chore.notes || '--'}
               </Typography>
             </Sheet>
           </>
+        )}
+        {chore.subTasks && chore.subTasks.length > 0 && (
+          <Box sx={{ p: 0, m: 0, mb: 2 }}>
+            <Typography level='title-md' sx={{ mb: 1 }}>
+              Subtasks :
+            </Typography>
+            <Sheet variant='plain' sx={{ borderRadius: 'lg', p: 1 }}>
+              <SubTasks
+                editMode={false}
+                tasks={chore.subTasks}
+                setTasks={tasks => {
+                  setChore({
+                    ...chore,
+                    subTasks: tasks,
+                  })
+                }}
+                choreId={choreId}
+              />
+            </Sheet>
+          </Box>
         )}
       </Box>
 
@@ -497,7 +518,6 @@ const ChoreView = () => {
           p: 2,
           borderRadius: 'md',
           boxShadow: 'sm',
-          mt: 2,
         }}
         variant='soft'
       >
@@ -612,7 +632,12 @@ const ChoreView = () => {
             fullWidth
             size='lg'
             onClick={handleTaskCompletion}
-            disabled={isPendingCompletion || notInCompletionWindow(chore)}
+            disabled={
+              isPendingCompletion ||
+              notInCompletionWindow(chore) ||
+              (chore.lastCompletedDate !== null &&
+                chore.frequencyType === 'once')
+            }
             color={isPendingCompletion ? 'danger' : 'success'}
             startDecorator={<Check />}
             sx={{
@@ -642,6 +667,9 @@ const ChoreView = () => {
                 },
               })
             }}
+            disabled={
+              chore.lastCompletedDate !== null && chore.frequencyType === 'once'
+            }
             startDecorator={<SwitchAccessShortcut />}
             sx={{
               flex: 1,
