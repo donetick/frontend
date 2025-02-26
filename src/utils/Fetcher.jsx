@@ -126,6 +126,15 @@ const MarkChoreComplete = (id, note, completedDate, performer) => {
   })
 }
 
+const CompleteSubTask = (id, choreId, completedAt) => {
+  var markChoreURL = `/chores/${choreId}/subtask`
+  return Fetch(markChoreURL, {
+    method: 'PUT',
+    headers: HEADERS(),
+    body: JSON.stringify({ completedAt, id, choreId }),
+  })
+}
+
 const SkipChore = id => {
   return Fetch(`/chores/${id}/skip`, {
     method: 'POST',
@@ -476,6 +485,7 @@ export {
   ArchiveChore,
   CancelSubscription,
   ChangePassword,
+  CompleteSubTask,
   CreateChore,
   CreateLabel,
   CreateLongLiveToken,

@@ -150,18 +150,7 @@ const NotificationSetting = () => {
       <Divider />
       <Typography level='body-md'>Manage your Device Notificaiton</Typography>
 
-      <FormControl
-        orientation='horizontal'
-        sx={{ width: 400, justifyContent: 'space-between' }}
-      >
-        <div>
-          <FormLabel>Device Notification</FormLabel>
-          <FormHelperText sx={{ mt: 0 }}>
-            {Capacitor.isNativePlatform()
-              ? 'Receive notification on your device when a task is due'
-              : 'This feature is only available on mobile devices'}{' '}
-          </FormHelperText>
-        </div>
+      <FormControl orientation='horizontal'>
         <Switch
           disabled={!Capacitor.isNativePlatform()}
           checked={deviceNotification}
@@ -184,15 +173,16 @@ const NotificationSetting = () => {
           }}
           color={deviceNotification ? 'success' : 'neutral'}
           variant={deviceNotification ? 'solid' : 'outlined'}
-          endDecorator={deviceNotification ? 'On' : 'Off'}
-          slotProps={{
-            endDecorator: {
-              sx: {
-                minWidth: 24,
-              },
-            },
-          }}
+          sx={{ mr: 1 }}
         />
+        <div>
+          <FormLabel>Device Notification</FormLabel>
+          <FormHelperText sx={{ mt: 0 }}>
+            {Capacitor.isNativePlatform()
+              ? 'Receive notification on your device when a task is due'
+              : 'This feature is only available on mobile devices'}{' '}
+          </FormHelperText>
+        </div>
       </FormControl>
       {deviceNotification && (
         <Card>
@@ -329,17 +319,9 @@ const NotificationSetting = () => {
         Notificaiton through other platform like Telegram or Pushover
       </Typography>
 
-      <FormControl
-        orientation='horizontal'
-        sx={{ width: 400, justifyContent: 'space-between' }}
-      >
-        <div>
-          <FormLabel>Custom Notification</FormLabel>
-          <FormHelperText sx={{ mt: 0 }}>
-            Receive notification on other platform
-          </FormHelperText>
-        </div>
+      <FormControl orientation='horizontal'>
         <Switch
+          sx={{ mr: 1 }}
           checked={chatID !== 0}
           onClick={event => {
             event.preventDefault()
@@ -360,15 +342,19 @@ const NotificationSetting = () => {
           }}
           color={chatID !== 0 ? 'success' : 'neutral'}
           variant={chatID !== 0 ? 'solid' : 'outlined'}
-          endDecorator={chatID !== 0 ? 'On' : 'Off'}
+          // endDecorator={chatID !== 0 ? 'On' : 'Off'}
           slotProps={{
             endDecorator: {
-              sx: {
-                minWidth: 24,
-              },
+              sx: {},
             },
           }}
         />
+        <div>
+          <FormLabel>Custom Notification</FormLabel>
+          <FormHelperText sx={{ mt: 0 }}>
+            Receive notification on other platform
+          </FormHelperText>
+        </div>
       </FormControl>
       {chatID !== 0 && (
         <Box
@@ -386,6 +372,7 @@ const NotificationSetting = () => {
             <Option value='0'>None</Option>
             <Option value='1'>Telegram</Option>
             <Option value='2'>Pushover</Option>
+            <Option value='3'>Webhook</Option>
           </Select>
           {notificationTarget === '1' && (
             <>

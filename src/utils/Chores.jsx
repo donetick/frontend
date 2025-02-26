@@ -1,25 +1,11 @@
 import moment from 'moment'
 import { TASK_COLOR } from './Colors.jsx'
 
+const priorityOrder = [1, 2, 3, 4, 0]
+
 export const ChoresGrouper = (groupBy, chores) => {
   // sort by priority then due date:
-  chores.sort((a, b) => {
-    // no priority is lowest priority:
-    if (a.priority === 0) {
-      return 1
-    }
-    if (a.priority !== b.priority) {
-      return a.priority - b.priority
-    }
-    if (a.nextDueDate === null) {
-      return 1
-    }
-    if (b.nextDueDate === null) {
-      return -1
-    }
-    return new Date(a.nextDueDate) - new Date(b.nextDueDate)
-  })
-
+  chores.sort(ChoreSorter)
   var groups = []
   switch (groupBy) {
     case 'due_date':
@@ -159,7 +145,25 @@ export const ChoresGrouper = (groupBy, chores) => {
   }
   return groups
 }
+export const ChoreSorter = (a, b) => {
+  const priorityA = priorityOrder.indexOf(a.priority)
+  const priorityB = priorityOrder.indexOf(b.priority)
+  if (priorityA !== priorityB) {
+    return priorityA - priorityB
+  }
 
+  // Status sorting (0 > 1 > ... ascending order)
+  if (a.status !== b.status) {
+    return a.status - b.status
+  }
+
+  // Due date sorting (earlier dates first, null/undefined last)
+  if (!a.nextDueDate && !b.nextDueDate) return 0
+  if (!a.nextDueDate) return 1
+  if (!b.nextDueDate) return -1
+
+  return new Date(a.nextDueDate) - new Date(b.nextDueDate)
+}
 export const notInCompletionWindow = chore => {
   return (
     chore.completionWindow &&
