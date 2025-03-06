@@ -13,7 +13,7 @@ const Sidepanel = ({ chores }) => {
   }, [])
 
   const generateChoreDuePieChartData = chores => {
-    const groups = ChoresGrouper('due_date', chores)
+    const groups = ChoresGrouper('due_date', chores, null)
     return groups
       .map(group => {
         return {

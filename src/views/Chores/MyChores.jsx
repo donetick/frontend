@@ -44,7 +44,7 @@ import { useLabels } from '../Labels/LabelQueries'
 import ChoreCard from './ChoreCard'
 import IconButtonWithMenu from './IconButtonWithMenu'
 
-import { ChoresGrouper, ChoreSorter } from '../../utils/Chores'
+import { ChoreFilters, ChoresGrouper, ChoreSorter } from '../../utils/Chores'
 import TaskInput from '../components/AddTaskModal'
 import {
   canScheduleNotification,
@@ -52,6 +52,7 @@ import {
 } from './LocalNotificationScheduler'
 import NotificationAccessSnackbar from './NotificationAccessSnackbar'
 import Sidepanel from './Sidepanel'
+import SortAndGrouping from './SortAndGrouping'
 
 const MyChores = () => {
   const { userProfile, setUserProfile } = useContext(UserContext)
@@ -60,7 +61,7 @@ const MyChores = () => {
   const [chores, setChores] = useState([])
   const [archivedChores, setArchivedChores] = useState(null)
   const [filteredChores, setFilteredChores] = useState([])
-  const [selectedFilter, setSelectedFilter] = useState('All')
+  const [searchFilter, setSearchFilter] = useState('All')
   const [choreSections, setChoreSections] = useState([])
   const [activeTextField, setActiveTextField] = useState('task')
   const [taskInputFocus, setTaskInputFocus] = useState(0)
@@ -71,6 +72,9 @@ const MyChores = () => {
   )
   const [openChoreSections, setOpenChoreSections] = useState(
     JSON.parse(localStorage.getItem('openChoreSections')) || {},
+  )
+  const [selectedChoreFilter, setSelectedChoreFilter] = useState(
+    JSON.parse(localStorage.getItem('selectedChoreFilter')) || 'anyone',
   )
   const [searchTerm, setSearchTerm] = useState('')
   const [performers, setPerformers] = useState([])
@@ -172,6 +176,10 @@ const MyChores = () => {
     setOpenChoreSections(value)
     localStorage.setItem('openChoreSections', JSON.stringify(value))
   }
+  const setSelectedChoreFilterWithCache = value => {
+    setSelectedChoreFilter(value)
+    localStorage.setItem('selectedChoreFilter', JSON.stringify(value))
+  }
 
   const updateChores = newChore => {
     const newChores = chores
@@ -179,7 +187,7 @@ const MyChores = () => {
     setChores(newChores)
     setFilteredChores(newChores)
     setChoreSections(ChoresGrouper(selectedChoreSection, newChores))
-    setSelectedFilter('All')
+    setSearchFilter('All')
   }
   const handleMenuOutsideClick = event => {
     if (
@@ -208,14 +216,14 @@ const MyChores = () => {
         ),
       )
       setFilteredChores(labelFiltered)
-      setSelectedFilter('Label: ' + label.name)
+      setSearchFilter('Label: ' + label.name)
     } else if (chipClicked.priority) {
       const priority = chipClicked.priority
       const priorityFiltered = chores.filter(
         chore => chore.priority === priority,
       )
       setFilteredChores(priorityFiltered)
-      setSelectedFilter('Priority: ' + priority)
+      setSearchFilter('Priority: ' + priority)
     }
   }
 
@@ -305,8 +313,8 @@ const MyChores = () => {
   )
 
   const handleSearchChange = e => {
-    if (selectedFilter !== 'All') {
-      setSelectedFilter('All')
+    if (searchFilter !== 'All') {
+      setSearchFilter('All')
     }
     const search = e.target.value
     if (search === '') {
@@ -418,17 +426,28 @@ const MyChores = () => {
               <Search />
             </IconButton>
           )}
-
-          <IconButtonWithMenu
+          <SortAndGrouping
             title='Group by'
             k={'icon-menu-group-by'}
             icon={<Sort />}
-            options={[
-              { name: 'Due Date', value: 'due_date' },
-              { name: 'Priority', value: 'priority' },
-              { name: 'Labels', value: 'labels' },
-            ]}
             selectedItem={selectedChoreSection}
+            selectedFilter={selectedChoreFilter}
+            setFilter={filter => {
+              setSelectedChoreFilterWithCache(filter)
+              const section = ChoresGrouper(
+                selectedChoreSection,
+                chores,
+                ChoreFilters(userProfile)[filter],
+              )
+              setChoreSections(section)
+              setOpenChoreSectionsWithCache(
+                // open all sections by default
+                Object.keys(section).reduce((acc, key) => {
+                  acc[key] = true
+                  return acc
+                }, {}),
+              )
+            }}
             onItemSelect={selected => {
               const section = ChoresGrouper(selected.value, chores)
               setChoreSections(section)
@@ -441,7 +460,7 @@ const MyChores = () => {
                 }, {}),
               )
               setFilteredChores(chores)
-              setSelectedFilter('All')
+              setSearchFilter('All')
             }}
             mouseClickHandler={handleMenuOutsideClick}
           />
@@ -454,12 +473,12 @@ const MyChores = () => {
                 k={'icon-menu-priority-filter'}
                 icon={<PriorityHigh />}
                 options={Priorities}
-                selectedItem={selectedFilter}
+                selectedItem={searchFilter}
                 onItemSelect={selected => {
                   handleLabelFiltering({ priority: selected.value })
                 }}
                 mouseClickHandler={handleMenuOutsideClick}
-                isActive={selectedFilter.startsWith('Priority: ')}
+                isActive={searchFilter.startsWith('Priority: ')}
               />
 
               <IconButtonWithMenu
@@ -467,11 +486,11 @@ const MyChores = () => {
                 label={' Labels'}
                 icon={<Style />}
                 options={userLabels}
-                selectedItem={selectedFilter}
+                selectedItem={searchFilter}
                 onItemSelect={selected => {
                   handleLabelFiltering({ label: selected })
                 }}
-                isActive={selectedFilter.startsWith('Label: ')}
+                isActive={searchFilter.startsWith('Label: ')}
                 mouseClickHandler={handleMenuOutsideClick}
                 useChips
               />
@@ -481,9 +500,7 @@ const MyChores = () => {
                 variant='outlined'
                 startDecorator={<Grain />}
                 color={
-                  selectedFilter &&
-                  FILTERS[selectedFilter] &&
-                  selectedFilter != 'All'
+                  searchFilter && FILTERS[searchFilter] && searchFilter != 'All'
                     ? 'primary'
                     : 'neutral'
                 }
@@ -519,15 +536,13 @@ const MyChores = () => {
                             ? filterFunction(chores, userProfile.id)
                             : filterFunction(chores)
                         setFilteredChores(filteredChores)
-                        setSelectedFilter(filter)
+                        setSearchFilter(filter)
                         handleFilterMenuClose()
                       }}
                     >
                       {filter}
                       <Chip
-                        color={
-                          selectedFilter === filter ? 'primary' : 'neutral'
-                        }
+                        color={searchFilter === filter ? 'primary' : 'neutral'}
                       >
                         {FILTERS[filter].length === 2
                           ? FILTERS[filter](chores, userProfile.id).length
@@ -536,13 +551,13 @@ const MyChores = () => {
                     </MenuItem>
                   ))}
 
-                  {selectedFilter.startsWith('Label: ') ||
-                    (selectedFilter.startsWith('Priority: ') && (
+                  {searchFilter.startsWith('Label: ') ||
+                    (searchFilter.startsWith('Priority: ') && (
                       <MenuItem
                         key={`filter-list-cancel-all-filters`}
                         onClick={() => {
                           setFilteredChores(chores)
-                          setSelectedFilter('All')
+                          setSearchFilter('All')
                         }}
                       >
                         Cancel All Filters
@@ -553,23 +568,23 @@ const MyChores = () => {
             </div>
           </div>
         )}
-        {selectedFilter !== 'All' && (
+        {searchFilter !== 'All' && (
           <Chip
             level='title-md'
             gutterBottom
             color='warning'
-            label={selectedFilter}
+            label={searchFilter}
             onDelete={() => {
               setFilteredChores(chores)
-              setSelectedFilter('All')
+              setSearchFilter('All')
             }}
             endDecorator={<CancelRounded />}
             onClick={() => {
               setFilteredChores(chores)
-              setSelectedFilter('All')
+              setSearchFilter('All')
             }}
           >
-            Current Filter: {selectedFilter}
+            Current Filter: {searchFilter}
           </Chip>
         )}
         {filteredChores.length === 0 && (
@@ -608,7 +623,7 @@ const MyChores = () => {
             )}
           </Box>
         )}
-        {(searchTerm?.length > 0 || selectedFilter !== 'All') &&
+        {(searchTerm?.length > 0 || searchFilter !== 'All') &&
           filteredChores.map(chore => (
             <ChoreCard
               key={`filtered-${chore.id} `}
@@ -620,7 +635,7 @@ const MyChores = () => {
               onChipClick={handleLabelFiltering}
             />
           ))}
-        {searchTerm.length === 0 && selectedFilter === 'All' && (
+        {searchTerm.length === 0 && searchFilter === 'All' && (
           <AccordionGroup transition='0.2s ease' disableDivider>
             {choreSections.map((section, index) => {
               if (section.content.length === 0) return null
