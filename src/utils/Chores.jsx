@@ -3,7 +3,11 @@ import { TASK_COLOR } from './Colors.jsx'
 
 const priorityOrder = [1, 2, 3, 4, 0]
 
-export const ChoresGrouper = (groupBy, chores) => {
+export const ChoresGrouper = (groupBy, chores, filter) => {
+  if (filter) {
+    chores = chores.filter(chore => filter(chore))
+  }
+
   // sort by priority then due date:
   chores.sort(ChoreSorter)
   var groups = []
@@ -172,3 +176,12 @@ export const notInCompletionWindow = chore => {
     moment().add(chore.completionWindow, 'hours') < moment(chore.nextDueDate)
   )
 }
+export const ChoreFilters = userProfile => ({
+  anyone: () => true,
+  assigned_to_me: chore => {
+    return chore.assignedTo && chore.assignedTo === userProfile.id
+  },
+  assigned_to_others: chore => {
+    return chore.assignedTo && chore.assignedTo !== userProfile.id
+  },
+})

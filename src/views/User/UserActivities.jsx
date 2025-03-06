@@ -232,7 +232,7 @@ const UserActivites = () => {
   }
 
   const generateChoreDuePieChartData = chores => {
-    const groups = ChoresGrouper('due_date', chores)
+    const groups = ChoresGrouper('due_date', chores, null)
     return groups
       .map(group => {
         return {
@@ -245,7 +245,7 @@ const UserActivites = () => {
       .filter(item => item.value > 0)
   }
   const generateChorePriorityPieChartData = chores => {
-    const groups = ChoresGrouper('priority', chores)
+    const groups = ChoresGrouper('priority', chores, null)
     return groups
       .map(group => {
         return {
