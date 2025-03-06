@@ -76,12 +76,12 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
   const { userProfile } = useContext(UserContext)
   const navigate = useNavigate()
   const [taskText, setTaskText] = useState('')
-  const debounceParsing = useDebounce(taskText, 300)
+  const debounceParsing = useDebounce(taskText, 30)
   const [taskTitle, setTaskTitle] = useState('')
   const [openModal, setOpenModal] = useState(false)
   const textareaRef = useRef(null)
   const mainInputRef = useRef(null)
-  const [priority, setPriority] = useState('0')
+  const [priority, setPriority] = useState(0)
   const [dueDate, setDueDate] = useState(null)
   const [description, setDescription] = useState(null)
   const [frequency, setFrequency] = useState(null)
@@ -436,7 +436,6 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
       priority: priority || 0,
       status: 0,
       frequencyType: 'once',
-      notificationMetadata: {},
     }
 
     if (frequency) {
@@ -451,7 +450,12 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
 
     CreateChore(chore).then(resp => {
       resp.json().then(data => {
-        onChoreUpdate({ ...chore, id: data.res, nextDueDate: chore.dueDate })
+        if (resp.status !== 200) {
+          console.error('Error creating chore:', data)
+          return
+        } else {
+          onChoreUpdate({ ...chore, id: data.res, nextDueDate: chore.dueDate })
+        }
       })
     })
   }

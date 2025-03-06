@@ -208,7 +208,9 @@ const ChoreEdit = () => {
       notificationMetadata: notificationMetadata,
       thingTrigger: thingTrigger,
       points: points < 0 ? null : points,
-      completionWindow: completionWindow < 0 ? null : completionWindow,
+      completionWindow:
+        // if completionWindow is -1 then set it to null or dueDate is null
+        completionWindow < 0 || dueDate === null ? null : completionWindow,
       priority: priority,
     }
     let SaveFunction = CreateChore
@@ -596,62 +598,65 @@ const ChoreEdit = () => {
             <FormHelperText>{errors.dueDate}</FormHelperText>
           </FormControl>
         )}
-
-        <FormControl orientation='horizontal'>
-          <Switch
-            checked={completionWindow != -1}
-            onClick={event => {
-              event.preventDefault()
-              if (completionWindow != -1) {
-                setCompletionWindow(-1)
-              } else {
-                setCompletionWindow(1)
-              }
-            }}
-            color={completionWindow !== -1 ? 'success' : 'neutral'}
-            variant={completionWindow !== -1 ? 'solid' : 'outlined'}
-            // endDecorator={points !== -1 ? 'On' : 'Off'}
-            sx={{
-              mr: 2,
-            }}
-          />
-          <div>
-            {/* <FormLabel>Completion window (hours)</FormLabel> */}
-            <Typography level='h5'>Completion window (hours)</Typography>
-
-            <FormHelperText sx={{ mt: 0 }}>
-              {"Set a time window that task can't be completed before"}
-            </FormHelperText>
-          </div>
-        </FormControl>
-        {completionWindow != -1 && (
-          <Card variant='outlined'>
-            <Box
-              sx={{
-                mt: 0,
-                ml: 4,
-              }}
-            >
-              <Typography level='body-sm'>Hours:</Typography>
-
-              <Input
-                type='number'
-                value={completionWindow}
-                sx={{ maxWidth: 100 }}
-                // add min points is 0 and max is 1000
-                slotProps={{
-                  input: {
-                    min: 0,
-                    max: 24 * 7,
-                  },
+        {dueDate && (
+          <>
+            <FormControl orientation='horizontal'>
+              <Switch
+                checked={completionWindow != -1}
+                onClick={event => {
+                  event.preventDefault()
+                  if (completionWindow != -1) {
+                    setCompletionWindow(-1)
+                  } else {
+                    setCompletionWindow(1)
+                  }
                 }}
-                placeholder='Hours'
-                onChange={e => {
-                  setCompletionWindow(parseInt(e.target.value))
+                color={completionWindow !== -1 ? 'success' : 'neutral'}
+                variant={completionWindow !== -1 ? 'solid' : 'outlined'}
+                // endDecorator={points !== -1 ? 'On' : 'Off'}
+                sx={{
+                  mr: 2,
                 }}
               />
-            </Box>
-          </Card>
+              <div>
+                {/* <FormLabel>Completion window (hours)</FormLabel> */}
+                <Typography level='h5'>Completion window (hours)</Typography>
+
+                <FormHelperText sx={{ mt: 0 }}>
+                  {"Set a time window that task can't be completed before"}
+                </FormHelperText>
+              </div>
+            </FormControl>
+            {completionWindow != -1 && (
+              <Card variant='outlined'>
+                <Box
+                  sx={{
+                    mt: 0,
+                    ml: 4,
+                  }}
+                >
+                  <Typography level='body-sm'>Hours:</Typography>
+
+                  <Input
+                    type='number'
+                    value={completionWindow}
+                    sx={{ maxWidth: 100 }}
+                    // add min points is 0 and max is 1000
+                    slotProps={{
+                      input: {
+                        min: 0,
+                        max: 24 * 7,
+                      },
+                    }}
+                    placeholder='Hours'
+                    onChange={e => {
+                      setCompletionWindow(parseInt(e.target.value))
+                    }}
+                  />
+                </Box>
+              </Card>
+            )}
+          </>
         )}
       </Box>
       {!['once', 'no_repeat'].includes(frequencyType) && (
@@ -975,7 +980,12 @@ const ChoreEdit = () => {
               p: 1,
             }}
           >
-            <SubTasks editMode={true} tasks={subTasks} setTasks={setSubTasks} />
+            <SubTasks
+              editMode={true}
+              tasks={subTasks}
+              setTasks={setSubTasks}
+              choreId={choreId}
+            />
           </Card>
         )}
         <FormControl sx={{ mt: 1 }}>

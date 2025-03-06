@@ -173,7 +173,14 @@ const NotificationSetting = () => {
           }}
           color={deviceNotification ? 'success' : 'neutral'}
           variant={deviceNotification ? 'solid' : 'outlined'}
-          sx={{ mr: 1 }}
+          slotProps={{
+            endDecorator: {
+              sx: {
+                minWidth: 24,
+              },
+            },
+          }}
+          sx={{ mr: 2 }}
         />
         <div>
           <FormLabel>Device Notification</FormLabel>
@@ -321,7 +328,6 @@ const NotificationSetting = () => {
 
       <FormControl orientation='horizontal'>
         <Switch
-          sx={{ mr: 1 }}
           checked={chatID !== 0}
           onClick={event => {
             event.preventDefault()
@@ -342,12 +348,14 @@ const NotificationSetting = () => {
           }}
           color={chatID !== 0 ? 'success' : 'neutral'}
           variant={chatID !== 0 ? 'solid' : 'outlined'}
-          // endDecorator={chatID !== 0 ? 'On' : 'Off'}
           slotProps={{
             endDecorator: {
-              sx: {},
+              sx: {
+                minWidth: 24,
+              },
             },
           }}
+          sx={{ mr: 2 }}
         />
         <div>
           <FormLabel>Custom Notification</FormLabel>
@@ -372,7 +380,7 @@ const NotificationSetting = () => {
             <Option value='0'>None</Option>
             <Option value='1'>Telegram</Option>
             <Option value='2'>Pushover</Option>
-            <Option value='3'>Webhook</Option>
+            <Option value='3'>Webhooks</Option>
           </Select>
           {notificationTarget === '1' && (
             <>
