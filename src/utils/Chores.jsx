@@ -179,9 +179,9 @@ export const notInCompletionWindow = chore => {
 export const ChoreFilters = userProfile => ({
   anyone: () => true,
   assigned_to_me: chore => {
-    return chore.assignedTo && chore.assignedTo === userProfile.id
+    return chore.assignedTo && chore.assignedTo === userProfile?.id
   },
   assigned_to_others: chore => {
-    return chore.assignedTo && chore.assignedTo !== userProfile.id
+    return chore.assignedTo && chore.assignedTo !== userProfile?.id
   },
 })
