@@ -21,6 +21,13 @@ const config: CapacitorConfig = {
       iosClientId: process.env.VITE_APP_IOS_CLIENT_ID,
   },
 }
-};
+,
+    android: {
+       buildOptions: {
+          keystorePath: 'undefined',
+          keystoreAlias: 'undefined',
+       }
+    }
+  };
 
 export default config;
