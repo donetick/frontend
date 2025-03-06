@@ -139,7 +139,11 @@ const MyChores = () => {
       const sortedChores = choresData.res.sort(ChoreSorter)
       setChores(sortedChores)
       setFilteredChores(sortedChores)
-      const sections = ChoresGrouper(selectedChoreSection, sortedChores)
+      const sections = ChoresGrouper(
+        selectedChoreSection,
+        sortedChores,
+        ChoreFilters(userProfile)[selectedChoreFilter],
+      )
       setChoreSections(sections)
       if (localStorage.getItem('openChoreSections') === null) {
         setSelectedChoreSectionWithCache(selectedChoreSection)
@@ -178,7 +182,7 @@ const MyChores = () => {
   }
   const setSelectedChoreFilterWithCache = value => {
     setSelectedChoreFilter(value)
-    localStorage.setItem('selectedChoreFilter', JSON.stringify(value))
+    localStorage.setItem('selectedChoreFilter', value)
   }
 
   const updateChores = newChore => {
@@ -186,7 +190,13 @@ const MyChores = () => {
     newChores.push(newChore)
     setChores(newChores)
     setFilteredChores(newChores)
-    setChoreSections(ChoresGrouper(selectedChoreSection, newChores))
+    setChoreSections(
+      ChoresGrouper(
+        selectedChoreSection,
+        newChores,
+        ChoreFilters(userProfile)[selectedChoreFilter],
+      ),
+    )
     setSearchFilter('All')
   }
   const handleMenuOutsideClick = event => {
@@ -262,7 +272,13 @@ const MyChores = () => {
     }
     setChores(newChores)
     setFilteredChores(newFilteredChores)
-    setChoreSections(ChoresGrouper(selectedChoreSection, newChores))
+    setChoreSections(
+      ChoresGrouper(
+        selectedChoreSection,
+        newChores,
+        ChoreFilters(userProfile)[selectedChoreFilter],
+      ),
+    )
 
     switch (event) {
       case 'completed':
@@ -293,7 +309,13 @@ const MyChores = () => {
     )
     setChores(newChores)
     setFilteredChores(newFilteredChores)
-    setChoreSections(ChoresGrouper(selectedChoreSection, newChores))
+    setChoreSections(
+      ChoresGrouper(
+        selectedChoreSection,
+        newChores,
+        ChoreFilters(userProfile)[selectedChoreFilter],
+      ),
+    )
   }
 
   const searchOptions = {
@@ -449,7 +471,11 @@ const MyChores = () => {
               )
             }}
             onItemSelect={selected => {
-              const section = ChoresGrouper(selected.value, chores)
+              const section = ChoresGrouper(
+                selected.value,
+                chores,
+                ChoreFilters(userProfile)[selectedChoreFilter],
+              )
               setChoreSections(section)
               setSelectedChoreSectionWithCache(selected.value)
               setOpenChoreSectionsWithCache(
