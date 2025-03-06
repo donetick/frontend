@@ -74,7 +74,7 @@ const MyChores = () => {
     JSON.parse(localStorage.getItem('openChoreSections')) || {},
   )
   const [selectedChoreFilter, setSelectedChoreFilter] = useState(
-    JSON.parse(localStorage.getItem('selectedChoreFilter')) || 'anyone',
+    localStorage.getItem('selectedChoreFilter') || 'anyone',
   )
   const [searchTerm, setSearchTerm] = useState('')
   const [performers, setPerformers] = useState([])
