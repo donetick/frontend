@@ -98,13 +98,12 @@ const MyChores = () => {
           throw new Error(userProfileResponse.statusText)
         }
         Promise.all([
+          userProfileResponse.json(),
           choresResponse.json(),
           usersResponse.json(),
-          userProfileResponse.json(),
         ]).then(data => {
-          const [choresData, usersData, userProfileData] = data
+          const [userProfileData, choresData, usersData] = data
           setUserProfile(userProfileData.res)
-          choresData.res.sort(ChoreSorter)
           setChores(choresData.res)
           setFilteredChores(choresData.res)
           setPerformers(usersData.res)
