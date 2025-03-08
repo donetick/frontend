@@ -1,4 +1,6 @@
 import NavBar from '@/views/components/NavBar'
+import { Capacitor } from '@capacitor/core'
+import { StatusBar, Style } from '@capacitor/status-bar'
 import { Button, Snackbar, Typography, useColorScheme } from '@mui/joy'
 import Tracker from '@openreplay/tracker'
 import { useEffect, useState } from 'react'
@@ -88,14 +90,22 @@ function App() {
     setThemeClass()
   }, [mode, systemMode])
   useEffect(() => {
+    configureStatusBar()
     registerCapacitorListeners()
     if (isTokenValid()) {
       if (!userProfile) getUserProfile()
     }
   }, [])
+  const configureStatusBar = () => {
+    if (Capacitor.isNativePlatform()) {
+      StatusBar.setStyle({ style: Style.Default })
+      StatusBar.setOverlaysWebView({ overlay: false })
+      StatusBar.show()
+    }
+  }
 
   return (
-    <div className='min-h-screen'>
+    <div>
       <QueryClientProvider client={queryClient}>
         <AuthenticationProvider />
         <UserContext.Provider value={{ userProfile, setUserProfile }}>

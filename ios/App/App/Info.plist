@@ -8,7 +8,6 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>com.googleusercontent.apps.682262497914-5dacpk46qcc1494lood6ch8ul9c83kop</string>
-				<string>REVERSED_CLIENT_ID</string>
 			</array>
 		</dict>
 	</array>
