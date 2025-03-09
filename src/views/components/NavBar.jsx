@@ -1,4 +1,5 @@
 import Logo from '@/assets/logo.svg'
+import { Capacitor } from '@capacitor/core'
 import {
   AccountBox,
   History,
@@ -99,7 +100,8 @@ const NavBar = () => {
   }
   if (
     location.pathname === '/' &&
-    import.meta.env.VITE_IS_LANDING_DEFAULT === 'true'
+    import.meta.env.VITE_IS_LANDING_DEFAULT === 'true' &&
+    !Capacitor.isNativePlatform()
   ) {
     return null
   }
