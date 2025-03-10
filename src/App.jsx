@@ -102,13 +102,15 @@ function App() {
       StatusBar.setStyle({ style: Style.Dark })
       StatusBar.setOverlaysWebView({ overlay: false })
       StatusBar.show()
-      SafeArea.getSafeAreaInsets().then(data => {
-        const { insets } = data
-        document.body.style.paddingTop = `${insets.top}px`
-        document.body.style.paddingRight = `${insets.right}px`
-        document.body.style.paddingBottom = `${insets.bottom}px`
-        document.body.style.paddingLeft = `${insets.left}px`
-      })
+      if (Capacitor.getPlatform() === 'android') {
+        SafeArea.getSafeAreaInsets().then(data => {
+          const { insets } = data
+          document.body.style.paddingTop = `${insets.top}px`
+          document.body.style.paddingRight = `${insets.right}px`
+          document.body.style.paddingBottom = `${insets.bottom}px`
+          document.body.style.paddingLeft = `${insets.left}px`
+        })
+      }
     }
   }
 
