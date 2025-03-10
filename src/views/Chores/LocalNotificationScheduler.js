@@ -59,6 +59,7 @@ const scheduleChoreNotification = async (
       notifications,
     )
   }
+
   LocalNotifications.schedule({
     notifications,
   })
@@ -85,13 +86,15 @@ const scheduleDueNotification = (
   if (diff < 0) {
     return
   }
-
+  const performer = allPerformers.find(p => p.id === chore.assignedTo) || {
+    displayName: 'Unknown',
+  }
   const notification = {
     title: `${chore.name} is due! 🕒`,
     body:
       userProfile.id === chore.assignedTo
         ? `It's assigned to you!`
-        : `It is ${allPerformers[chore.assignedTo].name}'s turn`,
+        : `It is ${performer?.displayName}'s turn`,
     id: chore.id,
     allowWhileIdle: true,
     schedule: {

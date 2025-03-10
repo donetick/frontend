@@ -23,7 +23,8 @@ import {
   ListItemDecorator,
   Typography,
 } from '@mui/joy'
-import { useState } from 'react'
+import { SafeArea } from 'capacitor-plugin-safe-area'
+import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { version } from '../../../package.json'
 import ThemeToggleButton from '../Settings/ThemeToggleButton'
@@ -90,6 +91,18 @@ const NavBar = () => {
     () => setDrawerOpen(false),
   ]
   const location = useLocation()
+  useEffect(() => {
+    SafeArea.getSafeAreaInsets().then(data => {
+      const { insets } = data
+      const drawerContent = document.querySelector('.drawer-content')
+      if (drawerContent) {
+        drawerContent.style.paddingTop = `${insets.top}px`
+        drawerContent.style.paddingRight = `${insets.right}px`
+        drawerContent.style.paddingBottom = `${insets.bottom}px`
+        drawerContent.style.paddingLeft = `${insets.left}px`
+      }
+    })
+  }, [])
   // if url has /landing then remove the navbar:
   if (
     ['/signup', '/login', '/landing', '/forgot-password'].includes(
@@ -149,7 +162,7 @@ const NavBar = () => {
         size='sm'
         onClick={closeDrawer}
       >
-        <div>
+        <div className='drawer-content'>
           {/* <div className='align-center flex px-5 pt-4'>
             <ModalClose size='sm' sx={{ top: 'unset', right: 20 }} />
           </div> */}

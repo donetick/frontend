@@ -3,6 +3,7 @@ import { Capacitor } from '@capacitor/core'
 import { StatusBar, Style } from '@capacitor/status-bar'
 import { Button, Snackbar, Typography, useColorScheme } from '@mui/joy'
 import Tracker from '@openreplay/tracker'
+import { SafeArea } from 'capacitor-plugin-safe-area'
 import { useEffect, useState } from 'react'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { Outlet } from 'react-router-dom'
@@ -98,9 +99,16 @@ function App() {
   }, [])
   const configureStatusBar = () => {
     if (Capacitor.isNativePlatform()) {
-      StatusBar.setStyle({ style: Style.Default })
+      StatusBar.setStyle({ style: Style.Dark })
       StatusBar.setOverlaysWebView({ overlay: false })
       StatusBar.show()
+      SafeArea.getSafeAreaInsets().then(data => {
+        const { insets } = data
+        document.body.style.paddingTop = `${insets.top}px`
+        document.body.style.paddingRight = `${insets.right}px`
+        document.body.style.paddingBottom = `${insets.bottom}px`
+        document.body.style.paddingLeft = `${insets.left}px`
+      })
     }
   }
 
