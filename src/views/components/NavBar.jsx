@@ -105,12 +105,12 @@ const NavBar = () => {
   }
 
   return (
-    <nav className='flex gap-2 p-2'>
-      <IconButton size='sm' variant='plain' onClick={() => setDrawerOpen(true)}>
+    <nav className='flex gap-2 p-3'>
+      <IconButton size='md' variant='plain' onClick={() => setDrawerOpen(true)}>
         <MenuRounded />
       </IconButton>
       <Box
-        className='flex items-center gap-1'
+        className='flex items-center gap-2'
         onClick={() => {
           navigate('/my/chores')
         }}
