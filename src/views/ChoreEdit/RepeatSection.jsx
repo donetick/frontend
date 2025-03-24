@@ -68,7 +68,6 @@ const RepeatOnSections = ({
   onFrequencyTypeUpdate,
   frequencyMetadata,
   onFrequencyMetadataUpdate,
-  onFrequencyTimeUpdate,
   things,
 }) => {
   const [months, setMonths] = useState({})
@@ -88,12 +87,13 @@ const RepeatOnSections = ({
             : '18:00'
         }
         onChange={e => {
-          // create new today date with selected time with Timezone:
-          onFrequencyTimeUpdate(
-            moment(
+          onFrequencyMetadataUpdate({
+            ...frequencyMetadata,
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            time: moment(
               moment(new Date()).format('YYYY-MM-DD') + 'T' + e.target.value,
             ).format(),
-          )
+          })
         }}
       />
     </Grid>
@@ -331,7 +331,6 @@ const RepeatSection = ({
   onFrequencyTypeUpdate,
   frequencyMetadata,
   onFrequencyMetadataUpdate,
-  onFrequencyTimeUpdate,
   frequencyError,
   allUserThings,
   onTriggerUpdate,
@@ -398,6 +397,7 @@ const RepeatSection = ({
                                   'T' +
                                   '18:00',
                               ).format(),
+                          timezone: moment.tz.guess(),
                         })
 
                         return
@@ -520,7 +520,6 @@ const RepeatSection = ({
                       onFrequencyTypeUpdate={onFrequencyTypeUpdate}
                       frequencyMetadata={frequencyMetadata || {}}
                       onFrequencyMetadataUpdate={onFrequencyMetadataUpdate}
-                      onFrequencyTimeUpdate={onFrequencyTimeUpdate}
                       things={allUserThings}
                     />
                   </Grid>

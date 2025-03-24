@@ -666,7 +666,6 @@ const MyChores = () => {
               if (section.content.length === 0) return null
               return (
                 <Accordion
-                  title={section.name}
                   key={section.name + index}
                   sx={{
                     my: 0,

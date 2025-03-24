@@ -19,6 +19,7 @@ import {
   Report,
   SwitchAccessShortcut,
   TimesOneMobiledata,
+  Toll,
   Unarchive,
   Update,
   ViewCarousel,
@@ -525,6 +526,21 @@ const ChoreCard = ({
                       }}
                     >
                       P{chore.priority}
+                    </Chip>
+                  )}
+                  {/* show points chip if there is points assigned */}
+                  {chore.points > 0 && (
+                    <Chip
+                      sx={{
+                        position: 'relative',
+                        mr: 0.5,
+                        top: 2,
+                        zIndex: 1,
+                      }}
+                      color='success'
+                      startDecorator={<Toll />}
+                    >
+                      {chore.points}
                     </Chip>
                   )}
                   {chore.labelsV2?.map((l, index) => {

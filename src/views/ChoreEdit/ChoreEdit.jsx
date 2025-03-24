@@ -528,12 +528,6 @@ const ChoreEdit = () => {
         onFrequencyTypeUpdate={setFrequencyType}
         frequencyMetadata={frequencyMetadata}
         onFrequencyMetadataUpdate={setFrequencyMetadata}
-        onFrequencyTimeUpdate={t => {
-          setFrequencyMetadata({
-            ...frequencyMetadata,
-            time: t,
-          })
-        }}
         frequencyError={errors?.frequency}
         allUserThings={allUserThings}
         onTriggerUpdate={thingUpdate => {
