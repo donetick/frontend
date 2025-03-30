@@ -292,7 +292,7 @@ const Settings = () => {
             variant='soft'
             onClick={() => {
               const confirmed = confirm(
-                `Are you sure you want to leave you circle and join '${circleInviteCode}'?`,
+                `Are you sure you want to leave your circle and join '${circleInviteCode}'?`,
               )
               if (confirmed) {
                 JoinCircle(circleInviteCode).then(resp => {
