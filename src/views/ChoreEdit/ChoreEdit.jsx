@@ -385,7 +385,7 @@ const ChoreEdit = () => {
   }
 
   return (
-    <Container maxWidth='md'>
+    <Container maxWidth='md' className='overflow-auto'>
       {/* <Typography level='h3' mb={1.5}>
         Edit Chore
       </Typography> */}
