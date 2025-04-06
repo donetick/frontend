@@ -21,11 +21,15 @@ const CalendarView = ({ chores }) => {
 
   const tileContent = ({ date, view }) => {
     if (view === 'month') {
-      const dayChores = chores.filter(
-        chore =>
-          new Date(chore.nextDueDate)?.toISOString().split('T')[0] ===
-          date.toISOString().split('T')[0],
-      )
+      const dayChores = chores.filter(chore => {
+        // Validate chore.nextDueDate before using it
+        if (!chore.nextDueDate) return false
+
+        const choreDate = new Date(chore.nextDueDate)
+        if (isNaN(choreDate)) return false // Check if the date is invalid
+        if (!date) return false
+        return choreDate.toLocaleDateString() === date.toLocaleDateString()
+      })
 
       return (
         <div className='dot-container'>
@@ -66,7 +70,7 @@ const CalendarView = ({ chores }) => {
       <Calendar
         tileContent={tileContent}
         onChange={d => {
-          setSeletedDate(new Date(d))
+          setSeletedDate(new Date(d.toLocaleDateString()))
         }}
       />
       {!selectedDate && (
@@ -118,8 +122,8 @@ const CalendarView = ({ chores }) => {
           {chores
             .filter(
               chore =>
-                new Date(chore.nextDueDate)?.toISOString().split('T')[0] ===
-                selectedDate.toISOString().split('T')[0],
+                new Date(chore.nextDueDate)?.toLocaleDateString() ===
+                selectedDate.toLocaleDateString(),
             )
             .map((chore, idx) => (
               <Card
