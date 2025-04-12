@@ -63,7 +63,9 @@ const MyChores = () => {
   const [filteredChores, setFilteredChores] = useState([])
   const [searchFilter, setSearchFilter] = useState('All')
   const [choreSections, setChoreSections] = useState([])
-  const [activeTextField, setActiveTextField] = useState('task')
+  const [activeTextField, setActiveTextField] = useState(
+    localStorage.getItem('activeTextField') || 'task',
+  )
   const [taskInputFocus, setTaskInputFocus] = useState(0)
   const searchInputRef = useRef()
   const [searchInputFocus, setSearchInputFocus] = useState(0)
@@ -182,6 +184,10 @@ const MyChores = () => {
   const setSelectedChoreFilterWithCache = value => {
     setSelectedChoreFilter(value)
     localStorage.setItem('selectedChoreFilter', value)
+  }
+  const setActiveTextFieldWithCache = value => {
+    setActiveTextField(value)
+    localStorage.setItem('activeTextField', value)
   }
 
   const updateChores = newChore => {
@@ -421,7 +427,7 @@ const MyChores = () => {
                 // minWidth: 100,
               }}
               onClick={() => {
-                setActiveTextField('task')
+                setActiveTextFieldWithCache('task')
                 setTaskInputFocus(taskInputFocus + 1)
               }}
             >
@@ -438,7 +444,7 @@ const MyChores = () => {
                 borderRadius: 24,
               }}
               onClick={() => {
-                setActiveTextField('search')
+                setActiveTextFieldWithCache('search')
                 setSearchInputFocus(searchInputFocus + 1)
 
                 searchInputRef?.current?.focus()

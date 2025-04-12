@@ -3,8 +3,9 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import CircleIcon from '@mui/icons-material/Circle'
 import { Cell, Legend, Pie, PieChart, Tooltip } from 'recharts'
 
-import { EventBusy, Toll } from '@mui/icons-material'
+import { EventBusy, Style, Toll } from '@mui/icons-material'
 import {
+  Avatar,
   Box,
   Button,
   Card,
@@ -13,17 +14,21 @@ import {
   Divider,
   Grid,
   Link,
+  Option,
+  Select,
   Stack,
   Tab,
   TabList,
   Tabs,
   Typography,
 } from '@mui/joy'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { UserContext } from '../../contexts/UserContext'
 import { useChores, useChoresHistory } from '../../queries/ChoreQueries'
+import { useCircleMembers } from '../../queries/UserQueries.jsx'
 import { ChoresGrouper } from '../../utils/Chores'
 import { TASK_COLOR } from '../../utils/Colors.jsx'
+import IconButtonWithMenu from '../Chores/IconButtonWithMenu'
 import LoadingComponent from '../components/Loading'
 
 const groupByDate = history => {
@@ -156,10 +161,17 @@ const renderPieChart = (data, size, isPrimary) => (
   </PieChart>
 )
 
+const USER_FILTER = (history, userId) => {
+  if (userId === undefined) return true
+  return history.completedBy === userId
+}
+
 const UserActivites = () => {
   const { userProfile } = React.useContext(UserContext)
   const [tabValue, setTabValue] = React.useState(30)
   const [selectedHistory, setSelectedHistory] = React.useState([])
+  const [enrichedHistory, setEnrichedHistory] = React.useState([])
+  const [selectedFilter, setSelectedFilter] = React.useState('Anyone')
   const [selectedChart, setSelectedChart] = React.useState('history')
 
   const [historyPieChartData, setHistoryPieChartData] = React.useState([])
@@ -175,7 +187,21 @@ const UserActivites = () => {
     data: choresHistory,
     isChoresHistoryLoading,
     handleLimitChange: refetchHistory,
-  } = useChoresHistory(tabValue ? tabValue : 30, false)
+  } = useChoresHistory(tabValue ? tabValue : 30, true)
+  const {
+    data: circleMembersData,
+    isLoading: isCircleMembersLoading,
+    handleRefetch: handleCircleMembersRefetch,
+  } = useCircleMembers()
+  const [selectedUser, setSelectedUser] = React.useState(userProfile?.id)
+  const [circleUsers, setCircleUsers] = useState([])
+
+  useEffect(() => {
+    if (circleMembersData) {
+      setCircleUsers(circleMembersData.res)
+    }
+  }, [circleMembersData])
+
   useEffect(() => {
     if (!isChoresHistoryLoading && !isChoresLoading && choresHistory) {
       const enrichedHistory = choresHistory.res.map(item => {
@@ -185,8 +211,11 @@ const UserActivites = () => {
           choreName: chore?.name,
         }
       })
+      setEnrichedHistory(enrichedHistory)
 
-      setSelectedHistory(enrichedHistory)
+      setSelectedHistory(
+        enrichedHistory.filter(h => USER_FILTER(h, selectedUser)),
+      )
       setHistoryPieChartData(generateHistoryPieChartData(enrichedHistory))
     }
   }, [isChoresHistoryLoading, isChoresLoading, choresHistory])
@@ -357,51 +386,123 @@ const UserActivites = () => {
         justifyContent: 'center',
       }}
     >
-      <Tabs
-        onChange={(e, tabValue) => {
-          setTabValue(tabValue)
-          refetchHistory(tabValue)
-        }}
-        defaultValue={7}
-        sx={{
-          py: 0.5,
-          borderRadius: 16,
-          maxWidth: 400,
-          mb: 1,
-        }}
-      >
-        <TabList
-          disableUnderline
+      <Box>
+        <Typography mb={2} level='h4'>
+          Points Overview
+        </Typography>
+        <Select
           sx={{
+            width: 150,
+          }}
+          variant='soft'
+          label='User'
+          value={selectedUser}
+          onChange={(e, selected) => {
+            setSelectedUser(selected)
+            setSelectedHistory(
+              enrichedHistory.filter(h => USER_FILTER(h, selected)),
+            )
+            console.log(
+              enrichedHistory,
+              selected,
+              enrichedHistory.filter(h => USER_FILTER(h, selected)),
+            )
+          }}
+          renderValue={selected => (
+            <Typography
+              startDecorator={
+                <Avatar color='primary' m={0} size='sm'>
+                  {
+                    circleUsers.find(user => user.userId === selectedUser)
+                      ?.displayName[0]
+                  }
+                </Avatar>
+              }
+            >
+              {
+                circleUsers.find(user => user.userId === selectedUser)
+                  ?.displayName
+              }
+            </Typography>
+          )}
+        >
+          {circleUsers.map(user => (
+            <Option key={user.userId} value={user.userId}>
+              <Typography>{user.displayName}</Typography>
+              <Chip
+                color='success'
+                size='sm'
+                variant='soft'
+                startDecorator={<Toll />}
+              >
+                {user.points - user.pointsRedeemed}
+              </Chip>
+            </Option>
+          ))}
+        </Select>
+      </Box>
+      <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+        <Tabs
+          onChange={(e, tabValue) => {
+            setTabValue(tabValue)
+            refetchHistory(tabValue)
+          }}
+          defaultValue={7}
+          sx={{
+            py: 0.5,
             borderRadius: 16,
-            backgroundColor: 'background.paper',
-            boxShadow: 1,
-            justifyContent: 'space-evenly',
+            maxWidth: 400,
+            mb: 1,
           }}
         >
-          {[
-            { label: '7 Days', value: 7 },
-            { label: '30 Days', value: 30 },
-            { label: '90 Days', value: 90 },
-          ].map((tab, index) => (
-            <Tab
-              key={index}
-              sx={{
-                borderRadius: 16,
-                color: 'text.secondary',
-                '&.Mui-selected': {
-                  color: 'text.primary',
-                  backgroundColor: 'primary.light',
-                },
-              }}
-              disableIndicator
-              value={tab.value}
-            >
-              {tab.label}
-            </Tab>
-          ))}
-        </TabList>
-      </Tabs>
+          <TabList
+            disableUnderline
+            sx={{
+              borderRadius: 16,
+              backgroundColor: 'background.paper',
+              boxShadow: 1,
+              justifyContent: 'space-evenly',
+            }}
+          >
+            {[
+              { label: '7 Days', value: 7 },
+              { label: '30 Days', value: 30 },
+              { label: '90 Days', value: 90 },
+            ].map((tab, index) => (
+              <Tab
+                key={index}
+                sx={{
+                  borderRadius: 16,
+                  color: 'text.secondary',
+                  '&.Mui-selected': {
+                    color: 'text.primary',
+                    backgroundColor: 'primary.light',
+                  },
+                }}
+                disableIndicator
+                value={tab.value}
+              >
+                {tab.label}
+              </Tab>
+            ))}
+          </TabList>
+        </Tabs>
+        <Box sx={{ ml: 2 }}>
+          <IconButtonWithMenu
+            k={'icon-menu-labels-filter'}
+            // label={' Labels'}
+            icon={<Style />}
+            options={[{ name: 'Anyone' }, { name: 'Me' }]}
+            selectedItem={'Anyone'}
+            onItemSelect={selected => {
+              console.log(selected)
+            }}
+            // isActive={searchFilter.startsWith('Label: ')}
+            // mouseClickHandler={handleMenuOutsideClick}
+            // useChips
+          />
+        </Box>
+      </Box>
       <Box sx={{ mb: 4 }}>
         <Typography level='h4' textAlign='center'>
           {chartData[selectedChart].title}

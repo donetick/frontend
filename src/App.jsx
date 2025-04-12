@@ -10,7 +10,7 @@ import { UserContext } from './contexts/UserContext'
 import { AuthenticationProvider } from './service/AuthenticationService'
 import { GetUserProfile } from './utils/Fetcher'
 import { apiManager, isTokenValid } from './utils/TokenManager'
-
+import NetworkBanner from './views/components/NetworkBanner'
 const add = className => {
   document.getElementById('root').classList.add(className)
 }
@@ -51,14 +51,6 @@ function App() {
     setNeedRefresh(false)
   }
 
-  // const updateServiceWorker = useRegisterSW({
-  //   onRegistered(r) {
-  //     r &&
-  //       setInterval(() => {
-  //         r.update()
-  //       }, intervalMS)
-  //   },
-  // })
   const setThemeClass = () => {
     const value = JSON.parse(localStorage.getItem('themeMode')) || mode
 
@@ -96,6 +88,7 @@ function App() {
 
   return (
     <div className='min-h-screen'>
+      <NetworkBanner />
       <QueryClientProvider client={queryClient}>
         <AuthenticationProvider />
         <UserContext.Provider value={{ userProfile, setUserProfile }}>

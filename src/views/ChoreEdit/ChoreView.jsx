@@ -37,10 +37,11 @@ import { Divider } from '@mui/material'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useChore } from '../../queries/ChoreQueries.jsx'
+import { useCircleMembers } from '../../queries/UserQueries.jsx'
 import { notInCompletionWindow } from '../../utils/Chores.jsx'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import {
-  GetAllUsers,
   GetChoreDetailById,
   MarkChoreComplete,
   SkipChore,
@@ -48,6 +49,7 @@ import {
 } from '../../utils/Fetcher'
 import Priorities from '../../utils/Priorities'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
+import LoadingComponent from '../components/Loading.jsx'
 import SubTasks from '../components/SubTask.jsx'
 const IconCard = styled('div')({
   display: 'flex',
@@ -77,32 +79,35 @@ const ChoreView = () => {
   const [confirmModelConfig, setConfirmModelConfig] = useState({})
   const [chorePriority, setChorePriority] = useState(null)
   const [isDescriptionOpen, setIsDescriptionOpen] = useState(false)
+  const {
+    data: circleMembersData,
+    isLoading: isCircleMembersLoading,
+    handleRefetch: handleCircleMembersRefetch,
+  } = useCircleMembers()
+
+  const {
+    data: choreData,
+    isLoading: isChoreLoading,
+    refetch: refetchChore,
+  } = useChore(choreId)
+
   useEffect(() => {
-    Promise.all([
-      GetChoreDetailById(choreId).then(resp => {
-        if (resp.ok) {
-          return resp.json().then(data => {
-            setChore(data.res)
-            setChorePriority(
-              Priorities.find(p => p.value === data.res.priority),
-            )
-            document.title = 'Donetick: ' + data.res.name
-          })
-        }
-      }),
-      GetAllUsers()
-        .then(response => response.json())
-        .then(data => {
-          setPerformers(data.res)
-        }),
-    ])
+    if (!choreData || !choreData.res || !circleMembersData) {
+      return
+    }
+    setChore(choreData.res)
+    setChorePriority(Priorities.find(p => p.value === choreData.res.priority))
+    document.title = 'Donetick: ' + choreData.res.name
+
+    setPerformers(circleMembersData.res)
     const auto_complete = searchParams.get('auto_complete')
     if (auto_complete === 'true') {
       handleTaskCompletion()
     }
-  }, [])
+  }, [choreData, circleMembersData])
+
   useEffect(() => {
-    if (chore && performers.length > 0) {
+    if (chore && performers?.length > 0) {
       generateInfoCards(chore)
     }
   }, [chore, performers])
@@ -214,6 +219,10 @@ const ChoreView = () => {
         })
       }
     })
+  }
+  if (isChoreLoading || isCircleMembersLoading) {
+    // while loading the chore or circle members, return a loading state
+    return <LoadingComponent />
   }
   return (
     <Container
@@ -527,9 +536,7 @@ const ChoreView = () => {
 
         <FormControl size='sm'>
           <Checkbox
-            defaultChecked={note !== null}
             checked={note !== null}
-            value={note !== null}
             size='lg'
             onChange={e => {
               if (e.target.checked) {
@@ -575,9 +582,7 @@ const ChoreView = () => {
 
         <FormControl size='sm'>
           <Checkbox
-            defaultChecked={completedDate !== null}
             checked={completedDate !== null}
-            value={completedDate !== null}
             size='lg'
             onChange={e => {
               if (e.target.checked) {

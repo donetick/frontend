@@ -1,7 +1,7 @@
 {
   "name": "donetick",
   "private": true,
-  "version": "0.1.97",
+  "version": "0.1.99",
   "type": "module",
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -22,6 +22,7 @@
     "ionic:serve": "npm run start"
   },
   "dependencies": {
+    "@capacitor-community/sqlite": "^6.0.2",
     "@capacitor/android": "^6.1.1",
     "@capacitor/app": "^6.0.0",
     "@capacitor/cli": "^6.1.1",
@@ -29,6 +30,7 @@
     "@capacitor/device": "^6.0.2",
     "@capacitor/ios": "6.1.1",
     "@capacitor/local-notifications": "^6.0.0",
+    "@capacitor/network": "^6.0.3",
     "@capacitor/preferences": "^6.0.1",
     "@capacitor/push-notifications": "^6.0.1",
     "@codetrix-studio/capacitor-google-auth": "^3.4.0-rc.4",
@@ -45,14 +47,15 @@
     "chrono-node": "^2.7.7",
     "dotenv": "^16.4.5",
     "esm": "^3.2.25",
+    "farmhash": "^4.0.1",
     "fuse.js": "^7.0.0",
     "js-cookie": "^3.0.5",
     "moment": "^2.30.1",
+    "murmurhash": "^2.0.1",
     "prop-types": "^15.8.1",
     "react": "^18.2.0",
     "react-calendar": "^5.1.0",
     "react-dom": "^18.2.0",
-    "react-query": "^3.39.3",
     "react-router-dom": "^6.21.1",
     "react-transition-group": "^4.4.5",
     "reactjs-social-login": "^2.6.3",

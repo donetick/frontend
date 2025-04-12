@@ -28,18 +28,20 @@ import moment from 'moment'
 import { useContext, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { UserContext } from '../../contexts/UserContext'
+import {
+  useChore,
+  useCreateChore,
+  useUpdateChore,
+} from '../../queries/ChoreQueries.jsx'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import {
-  CreateChore,
   DeleteChore,
   GetAllCircleMembers,
-  GetChoreByID,
-  GetChoreHistory,
   GetThings,
-  SaveChore,
 } from '../../utils/Fetcher'
 import { isPlusAccount } from '../../utils/Helpers'
 import Priorities from '../../utils/Priorities.jsx'
+import LoadingComponent from '../components/Loading.jsx'
 import SubTasks from '../components/SubTask.jsx'
 import { useLabels } from '../Labels/LabelQueries'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
@@ -99,6 +101,13 @@ const ChoreEdit = () => {
   const [snackbarColor, setSnackbarColor] = useState('warning')
   const [addLabelModalOpen, setAddLabelModalOpen] = useState(false)
   const { data: userLabelsRaw, isLoading: isUserLabelsLoading } = useLabels()
+  const updateChoreMutation = useUpdateChore()
+  const createChoreMutation = useCreateChore()
+  const {
+    data: choreData,
+    isLoading: isChoreLoading,
+    refetch: refetchChore,
+  } = useChore(choreId)
 
   const [userLabels, setUserLabels] = useState([])
 
@@ -143,6 +152,8 @@ const ChoreEdit = () => {
       !NO_DUE_DATE_ALLOWED_TYPE.includes(frequencyType)
     ) {
       if (REPEAT_ON_TYPE.includes(frequencyType)) {
+        console.log('VALIDATION:', dueDate, frequencyType)
+
         errors.dueDate = 'Start date is required'
       } else {
         errors.dueDate = 'Due date is required'
@@ -213,18 +224,44 @@ const ChoreEdit = () => {
         completionWindow < 0 || dueDate === null ? null : completionWindow,
       priority: priority,
     }
-    let SaveFunction = CreateChore
+    let SaveFunction = createChoreMutation.mutateAsync
     if (choreId > 0) {
-      SaveFunction = SaveChore
+      SaveFunction = updateChoreMutation.mutateAsync
     }
 
-    SaveFunction(chore).then(response => {
-      if (response.status === 200) {
-        Navigate(`/my/chores`)
-      } else {
-        alert('Failed to save chore')
-      }
-    })
+    SaveFunction(chore)
+      .then(() => {
+        setSnackbarColor('success')
+        setSnackbarMessage('Chore saved successfully!')
+        setIsSnackbarOpen(true)
+        Navigate('/my/chores/')
+      })
+      .catch(error => {
+        console.error('Failed to save chore:', error)
+        setSnackbarColor('danger')
+        setSnackbarMessage('Failed to save chore, please try again.')
+        setIsSnackbarOpen(true)
+      })
+
+    // handle if mutateAsync fails, if successful then redirect to the chore view page::
+    // .then(data => {
+    //   data.json().then(res => {
+    //     if (res && res.res && res.res.id) {
+    //       // chore saved successfully:
+    //       setSnackbarMessage('Chore saved successfully!')
+    //       setSnackbarColor('success')
+    //       setIsSnackbarOpen(true)
+    //       refetchChore() // refetch the chore to get the latest data
+    //       Navigate('/my/chores/') // redirect to the chore view page
+    //     }
+    //   })
+    // })
+    // .catch(error => {
+    //   console.error('Failed! to save chore:', error)
+    //   setSnackbarMessage('Failed! to save chore, please try again.')
+    //   setSnackbarColor('danger')
+    //   setIsSnackbarOpen(true)
+    // })
   }
   useEffect(() => {
     //fetch performers:
@@ -236,90 +273,56 @@ const ChoreEdit = () => {
         setAllUserThings(data.res)
       })
     })
-    // fetch chores:
-    if (choreId > 0) {
-      GetChoreByID(choreId)
-        .then(response => {
-          if (response.status !== 200) {
-            alert('You are not authorized to view this chore.')
-            Navigate('/my/chores')
-            return null
-          } else {
-            return response.json()
-          }
-        })
-        .then(data => {
-          setChore(data.res)
-          setName(data.res.name ? data.res.name : '')
-          setDescription(data.res.description ? data.res.description : '')
-          setAssignees(data.res.assignees ? data.res.assignees : [])
-          setAssignedTo(data.res.assignedTo)
-          setFrequencyType(
-            data.res.frequencyType ? data.res.frequencyType : 'once',
-          )
-
-          setFrequencyMetadata(JSON.parse(data.res.frequencyMetadata))
-          setFrequency(data.res.frequency)
-
-          setNotificationMetadata(JSON.parse(data.res.notificationMetadata))
-          setPoints(
-            data.res.points && data.res.points > -1 ? data.res.points : -1,
-          )
-          setCompletionWindow(
-            data.res.completionWindow && data.res.completionWindow > -1
-              ? data.res.completionWindow
-              : -1,
-          )
-
-          setLabelsV2(data.res.labelsV2)
-          setSubTasks(data.res.subTasks)
-          setPriority(data.res.priority)
-          setAssignStrategy(
-            data.res.assignStrategy
-              ? data.res.assignStrategy
-              : ASSIGN_STRATEGIES[2],
-          )
-          setIsRolling(data.res.isRolling)
-          setIsActive(data.res.isActive)
-          // parse the due date to a string from this format "2021-10-10T00:00:00.000Z"
-          // use moment.js or date-fns to format the date for to be usable in the input field:
-          setDueDate(
-            data.res.nextDueDate
-              ? moment(data.res.nextDueDate).format('YYYY-MM-DDTHH:mm:ss')
-              : null,
-          )
-          setUpdatedBy(data.res.updatedBy)
-          setCreatedBy(data.res.createdBy)
-          setIsNotificable(data.res.notification)
-          setThingTrigger(data.res.thingChore)
-          // setDueDate(data.res.dueDate)
-          // setCompleted(data.res.completed)
-          // setCompletedDate(data.res.completedDate)
-        })
-
-      // fetch chores history:
-      GetChoreHistory(choreId)
-        .then(response => response.json())
-        .then(data => {
-          setChoresHistory(data.res)
-          const newUserChoreHistory = {}
-          data.res.forEach(choreHistory => {
-            if (newUserChoreHistory[choreHistory.completedBy]) {
-              newUserChoreHistory[choreHistory.completedBy] += 1
-            } else {
-              newUserChoreHistory[choreHistory.completedBy] = 1
-            }
-          })
-
-          setUserHistory(newUserChoreHistory)
-        })
-    }
-    // set focus on the first input field:
-    else {
-      // new task/ chore set focus on the first input field:
-      document.querySelector('input').focus()
-    }
   }, [])
+  useEffect(() => {
+    if (isChoreLoading === false && choreData && choreId) {
+      const data = choreData
+
+      setChore(data.res)
+      setName(data.res.name ? data.res.name : '')
+      setDescription(data.res.description ? data.res.description : '')
+      setAssignees(data.res.assignees ? data.res.assignees : [])
+      setAssignedTo(data.res.assignedTo)
+      setFrequencyType(data.res.frequencyType ? data.res.frequencyType : 'once')
+
+      setFrequencyMetadata(data.res.frequencyMetadata)
+      setFrequency(data.res.frequency)
+
+      setNotificationMetadata(data.res.notificationMetadata)
+      setPoints(data.res.points && data.res.points > -1 ? data.res.points : -1)
+      setCompletionWindow(
+        data.res.completionWindow && data.res.completionWindow > -1
+          ? data.res.completionWindow
+          : -1,
+      )
+
+      setLabelsV2(data.res.labelsV2)
+      setSubTasks(data.res.subTasks)
+      setPriority(data.res.priority)
+      setAssignStrategy(
+        data.res.assignStrategy
+          ? data.res.assignStrategy
+          : ASSIGN_STRATEGIES[2],
+      )
+      setIsRolling(data.res.isRolling)
+      setIsActive(data.res.isActive)
+      // parse the due date to a string from this format "2021-10-10T00:00:00.000Z"
+      // use moment.js or date-fns to format the date for to be usable in the input field:
+      setDueDate(
+        data.res.nextDueDate
+          ? moment(data.res.nextDueDate).format('YYYY-MM-DDTHH:mm:ss')
+          : null,
+      )
+
+      setUpdatedBy(data.res.updatedBy)
+      setCreatedBy(data.res.createdBy)
+      setIsNotificable(data.res.notification)
+      setThingTrigger(data.res.thingChore)
+      // setDueDate(data.res.dueDate)
+      // setCompleted(data.res.completed)
+      // setCompletedDate(data.res.completedDate)
+    }
+  }, [choreData, isChoreLoading])
 
   // useEffect(() => {
   //   if (userLabels && userLabels.length == 0 && labelsV2.length == 0) {
@@ -383,7 +386,9 @@ const ChoreEdit = () => {
       },
     })
   }
-
+  if (isChoreLoading && choreId) {
+    return <LoadingComponent />
+  }
   return (
     <Container maxWidth='md'>
       {/* <Typography level='h3' mb={1.5}>

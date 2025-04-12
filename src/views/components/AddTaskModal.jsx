@@ -7,6 +7,7 @@ import {
   Input,
   Modal,
   ModalDialog,
+  ModalOverflow,
   Option,
   Select,
   Textarea,
@@ -19,11 +20,12 @@ import { useContext, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CSSTransition } from 'react-transition-group'
 import { UserContext } from '../../contexts/UserContext'
+import { useCreateChore } from '../../queries/ChoreQueries'
 import useDebounce from '../../utils/Debounce'
-import { CreateChore } from '../../utils/Fetcher'
 import { isPlusAccount } from '../../utils/Helpers'
 import { useLabels } from '../Labels/LabelQueries'
 import LearnMoreButton from './LearnMore'
+import SubTasks from './SubTask'
 const VALID_DAYS = {
   monday: 'Monday',
   mon: 'Monday',
@@ -73,6 +75,8 @@ const ALL_MONTHS = Object.values(VALID_MONTHS).filter(
 
 const TaskInput = ({ autoFocus, onChoreUpdate }) => {
   const { data: userLabels, isLoading: userLabelsLoading } = useLabels()
+  const createChoreMutation = useCreateChore()
+
   const { userProfile } = useContext(UserContext)
   const navigate = useNavigate()
   const [taskText, setTaskText] = useState('')
@@ -86,6 +90,8 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
   const [description, setDescription] = useState(null)
   const [frequency, setFrequency] = useState(null)
   const [frequencyHumanReadable, setFrequencyHumanReadable] = useState(null)
+  const [subTasks, setSubTasks] = useState([])
+  const [hasDescription, setHasDescription] = useState(false)
 
   useEffect(() => {
     if (openModal && textareaRef.current) {
@@ -120,6 +126,14 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
   const handleCloseModal = () => {
     setOpenModal(false)
     setTaskText('')
+    setTaskTitle('')
+    setDueDate(null)
+    setFrequency(null)
+    setFrequencyHumanReadable(null)
+    setPriority(0)
+    setHasDescription(false)
+    setDescription(null)
+    setSubTasks([])
   }
 
   const handleSubmit = () => {
@@ -438,6 +452,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
       frequencyType: 'once',
       frequencyMetadata: {},
       notificationMetadata: {},
+      subTasks: subTasks.length > 0 ? subTasks : null,
     }
 
     if (frequency) {
@@ -449,8 +464,12 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
         chore.notificationMetadata = { dueDate: true }
       }
     }
+    if (!frequency && dueDate) {
+      // use dueDate converted to UTC:
+      chore.nextDueDate = new Date(dueDate).toUTCString()
+    }
 
-    CreateChore(chore).then(resp => {
+    createChoreMutation.mutateAsync(chore).then(resp => {
       resp.json().then(data => {
         if (resp.status !== 200) {
           console.error('Error creating chore:', data)
@@ -496,8 +515,9 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
       )}
 
       <Modal open={openModal} onClose={handleCloseModal}>
-        <ModalDialog>
-          {/* <Button
+        <ModalOverflow>
+          <ModalDialog>
+            {/* <Button
             size='sm'
             onClick={() => navigate(`/chores/create`)}
             variant='outlined'
@@ -506,150 +526,173 @@ const TaskInput = ({ autoFocus, onChoreUpdate }) => {
           >
             Full Editor
           </Button> */}
-          <Typography level='h4'>Create new task</Typography>
-          <Chip startDecorator='🚧' variant='soft' color='warning' size='sm'>
-            Experimental Feature
-          </Chip>
-          <Box>
-            <Typography level='body-sm'>Task in a sentence:</Typography>
-            <Input
-              autoFocus
-              ref={textareaRef}
-              value={taskText}
-              onChange={handleTextChange}
-              onKeyUp={handleEnterPressed}
-              placeholder='Type your full text here...'
-              sx={{ width: '100%', fontSize: '16px' }}
-            />
-            <LearnMoreButton
-              content={
-                <>
-                  <Typography level='body-sm' sx={{ mb: 1 }}>
-                    This feature lets you create a task simply by typing a
-                    sentence. It attempt parses the sentence to identify the
-                    task's due date, priority, and frequency.
-                  </Typography>
-
-                  <Typography
-                    level='body-sm'
-                    sx={{ fontWeight: 'bold', mt: 2 }}
-                  >
-                    Examples:
-                  </Typography>
-
-                  <Typography
-                    level='body-sm'
-                    component='ul'
-                    sx={{ pl: 2, mt: 1, listStyle: 'disc' }}
-                  >
-                    <li>
-                      <strong>Priority:</strong>For highest priority any of the
-                      following keyword <em>P1</em>, <em>Urgent</em>,{' '}
-                      <em>Important</em>, or <em>ASAP</em>. For lower
-                      priorities, use <em>P2</em>, <em>P3</em>, or <em>P4</em>.
-                    </li>
-                    <li>
-                      <strong>Due date:</strong> Specify dates with phrases like{' '}
-                      <em>tomorrow</em>, <em>next week</em>, <em>Monday</em>, or{' '}
-                      <em>August 1st at 12pm</em>.
-                    </li>
-                    <li>
-                      <strong>Frequency:</strong> Set recurring tasks with terms
-                      like <em>daily</em>, <em>weekly</em>, <em>monthly</em>,{' '}
-                      <em>yearly</em>, or patterns such as{' '}
-                      <em>every Tuesday and Thursday</em>.
-                    </li>
-                  </Typography>
-                </>
-              }
-            />
-          </Box>
-          <Box>
-            <Typography level='body-sm'>Title:</Typography>
-            <Input
-              value={taskTitle}
-              onChange={e => setTaskTitle(e.target.value)}
-              sx={{ width: '100%', fontSize: '16px' }}
-            />
-          </Box>
-          <Box>
-            <Typography level='body-sm'>Description:</Typography>
-            <Textarea
-              minRows={2}
-              value={description}
-              onChange={e => setDescription(e.target.value)}
-            />
-          </Box>
-
-          <Box
-            sx={{ marginTop: 2, display: 'flex', flexDirection: 'row', gap: 2 }}
-          >
-            <FormControl>
-              <Typography level='body-sm'>Priority</Typography>
-              <Select
-                defaultValue={0}
-                value={priority}
-                onChange={(e, value) => setPriority(value)}
-              >
-                <Option value='0'>No Priority</Option>
-                <Option value='1'>P1</Option>
-                <Option value='2'>P2</Option>
-                <Option value='3'>P3</Option>
-                <Option value='4'>P4</Option>
-              </Select>
-            </FormControl>
-            <FormControl>
-              <Typography level='body-sm'>Due Date</Typography>
+            <Typography level='h4'>Create new task</Typography>
+            <Chip startDecorator='🚧' variant='soft' color='warning' size='sm'>
+              Experimental Feature
+            </Chip>
+            <Box>
+              <Typography level='body-sm'>Task in a sentence:</Typography>
               <Input
-                type='datetime-local'
-                value={dueDate}
-                onChange={e => setDueDate(e.target.value)}
+                autoFocus
+                ref={textareaRef}
+                value={taskText}
+                onChange={handleTextChange}
+                onKeyUp={handleEnterPressed}
+                placeholder='Type your full text here...'
                 sx={{ width: '100%', fontSize: '16px' }}
               />
-            </FormControl>
-          </Box>
-          <Box
-            sx={{
-              marginTop: 2,
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'start',
-              gap: 2,
-            }}
-          >
-            <FormControl>
-              <Typography level='body-sm'>Assignee</Typography>
-              <Select value={'0'} disabled>
-                <Option value='0'>Me</Option>
-                {/* <Option value='1'>Other</Option> */}
-              </Select>
-            </FormControl>
-            <FormControl>
-              <Typography level='body-sm'>Frequency</Typography>
-              <Input value={frequencyHumanReadable || 'Once'} variant='plain' />
-            </FormControl>
-          </Box>
-          <Box
-            sx={{
-              marginTop: 2,
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'end',
-              gap: 1,
-            }}
-          >
-            <Button
-              variant='outlined'
-              color='neutral'
-              onClick={handleCloseModal}
+              <LearnMoreButton
+                content={
+                  <>
+                    <Typography level='body-sm' sx={{ mb: 1 }}>
+                      This feature lets you create a task simply by typing a
+                      sentence. It attempt parses the sentence to identify the
+                      task's due date, priority, and frequency.
+                    </Typography>
+
+                    <Typography
+                      level='body-sm'
+                      sx={{ fontWeight: 'bold', mt: 2 }}
+                    >
+                      Examples:
+                    </Typography>
+
+                    <Typography
+                      level='body-sm'
+                      component='ul'
+                      sx={{ pl: 2, mt: 1, listStyle: 'disc' }}
+                    >
+                      <li>
+                        <strong>Priority:</strong>For highest priority any of
+                        the following keyword <em>P1</em>, <em>Urgent</em>,{' '}
+                        <em>Important</em>, or <em>ASAP</em>. For lower
+                        priorities, use <em>P2</em>, <em>P3</em>, or <em>P4</em>
+                        .
+                      </li>
+                      <li>
+                        <strong>Due date:</strong> Specify dates with phrases
+                        like <em>tomorrow</em>, <em>next week</em>,{' '}
+                        <em>Monday</em>, or <em>August 1st at 12pm</em>.
+                      </li>
+                      <li>
+                        <strong>Frequency:</strong> Set recurring tasks with
+                        terms like <em>daily</em>, <em>weekly</em>,{' '}
+                        <em>monthly</em>, <em>yearly</em>, or patterns such as{' '}
+                        <em>every Tuesday and Thursday</em>.
+                      </li>
+                    </Typography>
+                  </>
+                }
+              />
+            </Box>
+            <Box>
+              <Typography level='body-sm'>Title:</Typography>
+              <Input
+                value={taskTitle}
+                onChange={e => setTaskTitle(e.target.value)}
+                sx={{ width: '100%', fontSize: '16px' }}
+              />
+            </Box>
+
+            {hasDescription ? (
+              <Box>
+                <Typography level='body-sm'>Description:</Typography>
+                <Textarea
+                  minRows={2}
+                  value={description}
+                  onChange={e => setDescription(e.target.value)}
+                />
+              </Box>
+            ) : (
+              <Button
+                variant='plain'
+                size='sm'
+                onClick={() => setHasDescription(true)}
+              >
+                Add Description
+              </Button>
+            )}
+            <Typography level='body-sm'>Subtasks:</Typography>
+            <SubTasks editMode={true} tasks={subTasks} setTasks={setSubTasks} />
+
+            <Box
+              sx={{
+                marginTop: 2,
+                display: 'flex',
+                flexDirection: 'row',
+                gap: 2,
+              }}
             >
-              Cancel
-            </Button>
-            <Button variant='solid' color='primary' onClick={handleSubmit}>
-              Create
-            </Button>
-          </Box>
-        </ModalDialog>
+              <FormControl>
+                <Typography level='body-sm'>Priority</Typography>
+                <Select
+                  defaultValue={0}
+                  value={priority}
+                  onChange={(e, value) => setPriority(value)}
+                >
+                  <Option value='0'>No Priority</Option>
+                  <Option value='1'>P1</Option>
+                  <Option value='2'>P2</Option>
+                  <Option value='3'>P3</Option>
+                  <Option value='4'>P4</Option>
+                </Select>
+              </FormControl>
+              <FormControl>
+                <Typography level='body-sm'>Due Date</Typography>
+                <Input
+                  type='datetime-local'
+                  value={dueDate}
+                  onChange={e => setDueDate(e.target.value)}
+                  sx={{ width: '100%', fontSize: '16px' }}
+                />
+              </FormControl>
+            </Box>
+            <Box
+              sx={{
+                marginTop: 2,
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'start',
+                gap: 2,
+              }}
+            >
+              <FormControl>
+                <Typography level='body-sm'>Assignee</Typography>
+                <Select value={'0'} disabled>
+                  <Option value='0'>Me</Option>
+                  {/* <Option value='1'>Other</Option> */}
+                </Select>
+              </FormControl>
+              <FormControl>
+                <Typography level='body-sm'>Frequency</Typography>
+                <Input
+                  value={frequencyHumanReadable || 'Once'}
+                  variant='plain'
+                />
+              </FormControl>
+            </Box>
+            <Box
+              sx={{
+                marginTop: 2,
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'end',
+                gap: 1,
+              }}
+            >
+              <Button
+                variant='outlined'
+                color='neutral'
+                onClick={handleCloseModal}
+              >
+                Cancel
+              </Button>
+              <Button variant='solid' color='primary' onClick={handleSubmit}>
+                Create
+              </Button>
+            </Box>
+          </ModalDialog>
+        </ModalOverflow>
       </Modal>
     </>
   )
