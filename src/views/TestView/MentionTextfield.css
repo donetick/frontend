@@ -1,0 +1,152 @@
+.task-editor-container {
+  background-color: #2d2d2d;
+  color: #ffffff;
+  padding: 15px;
+  border-radius: 8px;
+  max-width: 500px;
+  margin: 20px auto;
+}
+
+.smart-task-input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: none;
+  background-color: transparent;
+  color: #ffffff;
+  font-size: 1.2em;
+  outline: none;
+}
+
+.task-description-input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: none;
+  background-color: transparent;
+  color: #ffffff;
+  font-size: 1em;
+  min-height: 80px;
+  resize: vertical;
+  outline: none;
+}
+
+.task-attributes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.attribute-tag {
+  background-color: #444;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 0.9em;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.remove-tag {
+  margin-left: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.task-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.project-select select {
+  padding: 5px;
+  border-radius: 4px;
+  background-color: #444;
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+}
+
+.action-buttons button {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1em;
+  margin-left: 10px;
+}
+
+.cancel-button {
+  background-color: #666;
+  color: #ffffff;
+}
+
+.add-task-button {
+  background-color: #d9534f;
+  color: #ffffff;
+}
+
+.smart-task-input {
+  width: 100%;
+  position: absolute;
+  z-index: 1;
+  /* color: transparent;
+  caret-color: white;
+  
+
+  padding: 0px; 
+  margin: 0; 
+  border: none; 
+  outline: none; 
+  box-sizing: border-box; 
+
+  
+}
+
+.smart-task-display {
+  position: absolute;
+  width: 100%;
+  /* top: 0;
+  left: 0; */
+
+  z-index: 10;
+  pointer-events: none;
+
+  padding: 0px;
+  margin: 0;
+  border: none;
+
+  overflow-y: auto;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  box-sizing: border-box;
+}
+.smart-task-common {
+  font-size: 1.2em;
+  line-height: 1.2em;
+  font-family: inherit;
+}
+
+.highlight-date {
+  color: #f08080;
+  background-color: #ffffff;
+}
+
+.highlight-label {
+  color: #add8e6;
+}
+
+.highlight-priority {
+  color: #ffb6c1;
+}
+
+.task-input {
+  position: relative;
+  width: 100%;
+  background-color: #2d2d2d;
+  color: #ffffff;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
