@@ -20,6 +20,7 @@ import {
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useError } from '../../service/ErrorProvider'
 import {
   CreateThing,
   DeleteThing,
@@ -172,6 +173,7 @@ const ThingsView = () => {
   const [isSnackbarOpen, setIsSnackbarOpen] = useState(false)
   const [snackbarMessage, setSnackbarMessage] = useState('')
   const [snackbarColor, setSnackbarColor] = useState('success')
+  const { showError } = useError()
 
   useEffect(() => {
     // fetch things
@@ -187,25 +189,39 @@ const ThingsView = () => {
     if (thing?.id) {
       saveFunc = SaveThing
     }
-    saveFunc(thing).then(result => {
-      result.json().then(data => {
-        if (thing?.id) {
-          const currentThings = [...things]
-          const thingIndex = currentThings.findIndex(
-            currentThing => currentThing.id === thing.id,
-          )
-          currentThings[thingIndex] = data.res
-          setThings(currentThings)
+    saveFunc(thing)
+      .then(result => {
+        result.json().then(data => {
+          if (thing?.id) {
+            const currentThings = [...things]
+            const thingIndex = currentThings.findIndex(
+              currentThing => currentThing.id === thing.id,
+            )
+            currentThings[thingIndex] = data.res
+            setThings(currentThings)
+          } else {
+            const currentThings = [...things]
+            currentThings.push(data.res)
+            setThings(currentThings)
+          }
+          setSnackbarMessage('Thing saved successfully')
+          setSnackbarColor('success')
+          setIsSnackbarOpen(true)
+        })
+      })
+      .catch(error => {
+        if (error?.queued) {
+          showError({
+            title: 'Unable to save thing',
+            message: 'You are offline and the request has been queued',
+          })
         } else {
-          const currentThings = [...things]
-          currentThings.push(data.res)
-          setThings(currentThings)
+          showError({
+            title: 'Unable to save thing',
+            message: 'An error occurred while saving the thing',
+          })
         }
       })
-    })
-    setSnackbarMessage('Thing saved successfully')
-    setSnackbarColor('success')
-    setIsSnackbarOpen(true)
   }
   const handleEditClick = thing => {
     setIsShowEditStateModal(true)
@@ -220,21 +236,37 @@ const ThingsView = () => {
       message: 'Are you sure you want to delete this Thing?',
       onClose: isConfirmed => {
         if (isConfirmed === true) {
-          DeleteThing(thing.id).then(response => {
-            if (response.ok) {
-              const currentThings = [...things]
-              const thingIndex = currentThings.findIndex(
-                currentThing => currentThing.id === thing.id,
-              )
-              currentThings.splice(thingIndex, 1)
-              setThings(currentThings)
-            } else if (response.status === 405) {
-              setSnackbarMessage('Unable to delete thing with associated tasks')
-              setSnackbarColor('danger')
-              setIsSnackbarOpen(true)
-            }
-            // if method not allwo show snackbar:
-          })
+          DeleteThing(thing.id)
+            .then(response => {
+              if (response.ok) {
+                const currentThings = [...things]
+                const thingIndex = currentThings.findIndex(
+                  currentThing => currentThing.id === thing.id,
+                )
+                currentThings.splice(thingIndex, 1)
+                setThings(currentThings)
+              } else if (response.status === 405) {
+                setSnackbarMessage(
+                  'Unable to delete thing with associated tasks',
+                )
+                setSnackbarColor('danger')
+                setIsSnackbarOpen(true)
+              }
+              // if method not allwo show snackbar:
+            })
+            .catch(error => {
+              if (error?.queued) {
+                showError({
+                  title: 'Unable to delete thing',
+                  message: 'You are offline and the request has been queued',
+                })
+              } else {
+                showError({
+                  title: 'Unable to delete thing',
+                  message: 'An error occurred while deleting the thing',
+                })
+              }
+            })
         }
         setConfirmModelConfig({})
       },
@@ -252,19 +284,32 @@ const ThingsView = () => {
       }
     }
 
-    UpdateThingState(thing).then(result => {
-      result.json().then(data => {
-        const currentThings = [...things]
-        const thingIndex = currentThings.findIndex(
-          currentThing => currentThing.id === thing.id,
-        )
-        currentThings[thingIndex] = data.res
-        setThings(currentThings)
+    UpdateThingState(thing)
+      .then(result => {
+        result.json().then(data => {
+          const currentThings = [...things]
+          const thingIndex = currentThings.findIndex(
+            currentThing => currentThing.id === thing.id,
+          )
+          currentThings[thingIndex] = data.res
+          setThings(currentThings)
+          setSnackbarMessage('Thing state updated successfully')
+          setIsSnackbarOpen(true)
+        })
       })
-    })
-
-    setSnackbarMessage('Thing state updated successfully')
-    setIsSnackbarOpen(true)
+      .catch(error => {
+        if (error?.queued) {
+          showError({
+            title: 'Unable to update thing state',
+            message: 'You are offline and the request has been queued',
+          })
+        } else {
+          showError({
+            title: 'Unable to update thing state',
+            message: 'An error occurred while updating the thing state',
+          })
+        }
+      })
   }
 
   return (

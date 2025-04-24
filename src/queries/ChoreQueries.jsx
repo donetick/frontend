@@ -67,19 +67,22 @@ export const useCreateChore = () => {
           { ...newTask, id: tempId, tempId }, // Use the tempId for offline tracking
         ]
         await localStore.saveToCache('offlineTasks', updateOfflineTasks) // Save to local storage
-
+        // force useChores to refetch:
+        queryClient.invalidateQueries(['chores'])
+        // Force the chores query to refetch
+        queryClient.refetchQueries(['chores'])
         // Update the chores query cache immediately
-        queryClient.setQueryData(['chores'], oldData => {
-          console.log('ATTEMPT TO SAVE OFFLINE TASKS:', updateOfflineTasks)
+        // queryClient.setQueryData(['chores'], oldData => {
+        //   console.log('ATTEMPT TO SAVE OFFLINE TASKS:', updateOfflineTasks)
 
-          if (!oldData)
-            return {
-              res: [{ ...newTask, id: tempId, tempId }],
-            } // If no data, return offline tasks
-          return {
-            res: [...oldData.res, { ...newTask, id: tempId, tempId }],
-          }
-        })
+        //   if (!oldData)
+        //     return {
+        //       res: [{ ...newTask, id: tempId, tempId }],
+        //     } // If no data, return offline tasks
+        //   return {
+        //     res: [...oldData.res, { ...newTask, id: tempId, tempId }],
+        //   }
+        // })
         return { tempId }
       }
       return { tempId: null }
@@ -135,11 +138,11 @@ export const useUpdateChore = () => {
           throw new Error('Failed to save chore')
         }
         const updatedChoreRes = await resp.json()
-        if (!updatedChoreRes || !updatedChoreRes.res) {
+        if (!updatedChoreRes) {
           throw new Error('Failed to get updated chore data')
         }
         // Successfully updated the chore on the server, return the updated chore
-        return updatedChoreRes.res
+        return updatedChoreRes?.res || updatedChoreRes
       }
     },
     onSuccess: (data, variables) => {
@@ -158,9 +161,13 @@ export const useUpdateChore = () => {
 export const useChoresHistory = (initialLimit, includeMembers) => {
   const [limit, setLimit] = useState(initialLimit) // Initially, no limit is selected
 
-  const { data, error, isLoading } = useQuery(['choresHistory', limit], () =>
-    GetChoresHistory(limit, includeMembers),
-  )
+  const { data, error, isLoading } = useQuery({
+    queryKey: ['choresHistory', limit],
+    queryFn: async () => {
+      const resp = await GetChoresHistory(limit, includeMembers)
+      return resp?.res || []
+    },
+  })
 
   const handleLimitChange = newLimit => {
     setLimit(newLimit)

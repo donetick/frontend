@@ -1,5 +1,5 @@
 import { Network } from '@capacitor/network'
-// import { localStore } from '../utils/LocalStore'
+import { localStore } from '../utils/LocalStore'
 import { syncManager } from '../utils/SyncManager.jsx' // Ensure you import syncManager if needed for syncing
 class NetworkManager {
   constructor() {
@@ -23,29 +23,33 @@ class NetworkManager {
         this.isOnline = status.connected
       }
     })
+    const syncQueue = () => {
+      localStore
+        .syncQueuedRequests()
+        .then(hasMessages => {
+          console.log(
+            'Queued requests synced successfully. Queue has messaage is: ',
+            hasMessages,
+          )
+          if (hasMessages) {
+            this.notifyBackendSync()
+          }
+        })
+        .catch(error => {
+          console.error('Error syncing queued requests:', error)
+        })
+    }
     this.registerNetworkListener(async isOnline => {
       if (isOnline && this.isNetworkOn) {
         // TODO: Delete when Sync manager Implemented
-        // localStore
-        //   .syncQueuedRequests()
-        //   .then(hasMessages => {
-        //     console.log(
-        //       'Queued requests synced successfully. Queue has messaage is: ',
-        //       hasMessages,
-        //     )
-        //     if (hasMessages) {
-        //       this.notifyBackendSync()
-        //     }
-        //   })
-        //   .catch(error => {
-        //     console.error('Error syncing queued requests:', error)
-        //   })
+        syncQueue()
         console.log('NetworkManager: Network is back online. with SYNCMANAGER')
 
         await syncManager.syncTasks()
         console.log('Finished syncing queued requests.')
       }
     })
+    syncQueue()
   }
 
   setOffline() {

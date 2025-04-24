@@ -1,5 +1,4 @@
 import { CapacitorSQLite } from '@capacitor-community/sqlite'
-import { Capacitor } from '@capacitor/core'
 
 const CACHE_TABLE = 'offline_cache'
 const QUEUE_TABLE = 'offline_request_queue'
@@ -8,7 +7,8 @@ const OFFLINE_TASK = 'offlineTasks' // For storing offline tasks
 class LocalStore {
   constructor() {
     this.db = null
-    this.useLocalStorage = !Capacitor.isNativePlatform()
+    // this.useLocalStorage = !Capacitor.isNativePlatform()
+    this.useLocalStorage = true // default to localStorage for now.
   }
 
   async initDatabase() {
@@ -153,10 +153,15 @@ class LocalStore {
     )
   }
 
-  async queueRequest(requestId, requestBody) {
+  async queueRequest(requestId, requestPayload) {
     if (this.useLocalStorage) {
       const queue = JSON.parse(localStorage.getItem(QUEUE_TABLE)) || []
-      queue.push({ requestId, requestBody })
+      console.log('requestPayload', requestPayload)
+
+      if (typeof requestPayload?.options?.body['id'] === 'string') {
+        requestPayload['id'] = null
+      }
+      queue.push({ requestId, requestBody: requestPayload })
       localStorage.setItem(QUEUE_TABLE, JSON.stringify(queue))
       return
     }
@@ -167,11 +172,13 @@ class LocalStore {
       INSERT INTO ${QUEUE_TABLE} (url, requestBody)
       VALUES (?, ?);
     `,
-      [requestId, JSON.stringify(requestBody)],
+      [requestId, JSON.stringify(requestPayload)],
     )
   }
 
   async syncQueuedRequests() {
+    console.log('Syncing queued requests...')
+
     var queueSize = 0
     if (this.useLocalStorage) {
       const queue = JSON.parse(localStorage.getItem(QUEUE_TABLE)) || []
