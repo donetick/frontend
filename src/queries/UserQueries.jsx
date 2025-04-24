@@ -1,5 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { GetAllCircleMembers, GetAllUsers } from '../utils/Fetcher'
 
 export const useAllUsers = () => {
@@ -10,15 +9,15 @@ export const useAllUsers = () => {
 }
 
 export const useCircleMembers = () => {
-  const [refetchKey, setRefetchKey] = useState(0)
+  const queryClient = useQueryClient()
 
-  const { data, error, isLoading, refetch } = useQuery({
-    queryKey: ['allCircleMembers', refetchKey],
+  const { data, error, isLoading } = useQuery({
+    queryKey: ['allCircleMembers'],
     queryFn: GetAllCircleMembers,
   })
+
   const handleRefetch = () => {
-    setRefetchKey(prevKey => prevKey + 1)
-    refetch()
+    queryClient.invalidateQueries(['allCircleMembers'])
   }
 
   return { data, error, isLoading, handleRefetch }

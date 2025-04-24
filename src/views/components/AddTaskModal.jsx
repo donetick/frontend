@@ -190,23 +190,41 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
     // Combine all highlight ranges and sort them by their start index
     const allHighlights = []
     if (repeatHighlight) {
-      repeatHighlight.forEach(h => allHighlights.push({ ...h, type: 'repeat' }))
+      repeatHighlight.forEach(h =>
+        allHighlights.push({ ...h, type: 'repeat', priority: 40 }),
+      )
     }
     if (priorityHighlight) {
       priorityHighlight.forEach(h =>
-        allHighlights.push({ ...h, type: 'priority' }),
+        allHighlights.push({ ...h, type: 'priority', priority: 30 }),
       )
     }
     if (labelsHighlight) {
-      labelsHighlight.forEach(h => allHighlights.push({ ...h, type: 'label' }))
+      labelsHighlight.forEach(h =>
+        allHighlights.push({ ...h, type: 'label', priority: 20 }),
+      )
     }
     if (dueDateHighlight) {
-      allHighlights.push({ ...dueDateHighlight, type: 'dueDate' })
+      allHighlights.push({ ...dueDateHighlight, type: 'dueDate', priority: 10 })
     }
 
     allHighlights.sort((a, b) => a.start - b.start)
+    const resolvedHighlights = []
+    for (let i = 0; i < allHighlights.length; i++) {
+      const current = allHighlights[i]
+      const previous = resolvedHighlights[resolvedHighlights.length - 1]
 
-    for (const highlight of allHighlights) {
+      if (previous && current.start < previous.end) {
+        if (current.priority > previous.priority) {
+          resolvedHighlights.pop()
+          resolvedHighlights.push(current)
+        }
+      } else {
+        // No overlap, add the current highlight
+        resolvedHighlights.push(current)
+      }
+    }
+    for (const highlight of resolvedHighlights) {
       // Add the text before the highlight
       if (highlight.start > lastIndex) {
         parts.push(sentence.substring(lastIndex, highlight.start))
