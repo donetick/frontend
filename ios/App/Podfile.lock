@@ -134,18 +134,18 @@ SPEC CHECKSUMS:
   Alamofire: 7193b3b92c74a07f85569e1a6c4f4237291e7496
   AppAuth: d4f13a8fe0baf391b2108511793e4b479691fb73
   AppCheckCore: cc8fd0a3a230ddd401f326489c99990b013f0c4f
-  Capacitor: 03bc7cbdde6a629a8b910a9d7d78c3cc7ed09ea7
-  CapacitorApp: febecbb9582cb353aed037e18ec765141f880fe9
-  CapacitorCommunitySqlite: b11e556cf5d149f9e0b6fbbb47959a6cd718c3d0
+  Capacitor: 106e7a4205f4618d582b886a975657c61179138d
+  CapacitorApp: d63334c052278caf5d81585d80b21905c6f93f39
+  CapacitorCommunitySqlite: 6501e7349acf998346acf24ef757861bb3f6fc2b
   CapacitorCordova: 5967b9ba03915ef1d585469d6e31f31dc49be96f
-  CapacitorDevice: c6f6d587dd310527f8a48bf09c4e7b4a4cf14329
-  CapacitorLocalNotifications: c2212755b33d2513b8bb325096ce3a64d4039ae3
-  CapacitorNetwork: 15cb4385f0913a8ceb5e9a4d7af1ec554bdb8de8
-  CapacitorPluginSafeArea: 22031c3436269ca80fac90ec2c94bc7c1e59a81d
-  CapacitorPreferences: 6c98117d4d7508034a4af9db64d6b26fc75d7b94
-  CapacitorPushNotifications: 6a2794788c583dd89215f1805ca4bced1b13dbdf
-  CapacitorStatusBar: 6e7af040d8fc4dd655999819625cae9c2d74c36f
-  CapgoCapacitorSocialLogin: 0daa087f32775c656fbfba09b8eae7c089b85ce2
+  CapacitorDevice: fe3f190e1d718f4607bdc6b73993433d1c84f409
+  CapacitorLocalNotifications: 4ea60b9347eac60b37cb4daaf62d12060bb00972
+  CapacitorNetwork: 07ec4c69c1bb696f41c23e00d31bda1bbb221bba
+  CapacitorPluginSafeArea: af80830df43015a915e504a56318a3027d3fc806
+  CapacitorPreferences: cbf154e5e5519b7f5ab33817a334dda1e98387f9
+  CapacitorPushNotifications: 0b653a3264d56daccf0e8769fff15d2f48306de6
+  CapacitorStatusBar: 275cbf2f4dfc00388f519ef80c7ec22edda342c9
+  CapgoCapacitorSocialLogin: f2865de1274abed4633acc282231f581c8f7ba14
   FBAEMKit: 58cb5f302cdd715a56d4c1d0dfdd2e423ac1421a
   FBSDKCoreKit: 94d7461d0cecf441b1ba7c41acfff41daa8ccd41
   FBSDKCoreKit_Basics: 151b43db8b834d3f0e02f95d36a44ffd36265e45
@@ -160,4 +160,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 54ec5ec72c1c5e3e8d03bd96cc1ec0deaf577d9e
 
-COCOAPODS: 1.16.2
+COCOAPODS: 1.15.2
