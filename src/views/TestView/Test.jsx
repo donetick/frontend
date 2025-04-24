@@ -1,10 +1,11 @@
-import MuiIconPicker from './IconPicker'
-
+import { Typography } from '@mui/joy'
 const TestView = () => {
   return (
-    <div>
-      <MuiIconPicker />
-    </div>
+    <>
+      <Typography level='h2' sx={{ mb: 2 }}>
+        Test View
+      </Typography>
+    </>
   )
 }
 

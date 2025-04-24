@@ -26,9 +26,7 @@ import {
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { API_URL } from '../Config'
 import { GetAllUsers, GetChores, MarkChoreComplete } from '../utils/Fetcher'
-import { Fetch } from '../utils/TokenManager'
 import DateModal from './Modals/Inputs/DateModal'
 // import moment from 'moment'
 
@@ -263,21 +261,22 @@ const ChoresOverview = () => {
                     size='sm'
                     // sx={{ borderRadius: '50%' }}
                     onClick={() => {
-                      MarkChoreComplete(chore.id,null,null,null)
-                      .then(response => {
-                        if (response.ok) {
-                          response.json().then(data => {
-                            const newChore = data.res
-                            const newChores = [...chores]
-                            const index = newChores.findIndex(
-                              c => c.id === chore.id,
-                            )
-                            newChores[index] = newChore
-                            setChores(newChores)
-                            setFilteredChores(newChores)
-                          })
-                        }
-                      })
+                      MarkChoreComplete(chore.id, null, null, null).then(
+                        response => {
+                          if (response.ok) {
+                            response.json().then(data => {
+                              const newChore = data.res
+                              const newChores = [...chores]
+                              const index = newChores.findIndex(
+                                c => c.id === chore.id,
+                              )
+                              newChores[index] = newChore
+                              setChores(newChores)
+                              setFilteredChores(newChores)
+                            })
+                          }
+                        },
+                      )
                     }}
                     aria-setsize={2}
                   >
@@ -325,19 +324,20 @@ const ChoresOverview = () => {
             alert('Please select a performer')
             return
           }
-          MarkChoreComplete(choreId, null, date, activeUserId)
-          .then(response => {
-            if (response.ok) {
-              response.json().then(data => {
-                const newChore = data.res
-                const newChores = [...chores]
-                const index = newChores.findIndex(c => c.id === chore.id)
-                newChores[index] = newChore
-                setChores(newChores)
-                setFilteredChores(newChores)
-              })
-            }
-          })
+          MarkChoreComplete(choreId, null, date, activeUserId).then(
+            response => {
+              if (response.ok) {
+                response.json().then(data => {
+                  const newChore = data.res
+                  const newChores = [...chores]
+                  const index = newChores.findIndex(c => c.id === chore.id)
+                  newChores[index] = newChore
+                  setChores(newChores)
+                  setFilteredChores(newChores)
+                })
+              }
+            },
+          )
         }}
       />
     </Container>

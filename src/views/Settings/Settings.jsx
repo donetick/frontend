@@ -14,6 +14,7 @@ import {
 } from '@mui/joy'
 import moment from 'moment'
 import { useContext, useEffect, useState } from 'react'
+import { Navigate } from 'react-router-dom'
 import { UserContext } from '../../contexts/UserContext'
 import Logo from '../../Logo'
 import {
@@ -497,6 +498,46 @@ const Settings = () => {
           your system and automatically switch between day and night themes.
         </Typography>
         <ThemeToggle />
+      </div>
+
+      <div className='grid gap-4 py-4'>
+        <Typography level='h3'>Experimental Features </Typography>
+        <Divider />
+        <Typography level='body-md'>
+          Clean up some part of the local storage and cache. Only use if you
+          know are you doing.
+        </Typography>
+        <Button
+          variant='soft'
+          color='danger'
+          onClick={() => {
+            const confirmed = confirm(
+              `Are you sure you want to clear your local storage and cache? This will remove all your data. on device and require login`,
+            )
+            if (confirmed) {
+              localStorage.clear()
+              Navigate('/login')
+            }
+          }}
+        >
+          Clear Local Storage and Cache
+        </Button>
+        <Button
+          variant='outlined'
+          color='danger'
+          onClick={() => {
+            const confirmed = confirm(
+              `Are you sure you want to clear your local storage and cache? This will remove all your data.`,
+            )
+            if (confirmed) {
+              localStorage.removeItem('offline_cache')
+              localStorage.removeItem('offline_request_queue')
+              localStorage.removeItem('offlineTasks')
+            }
+          }}
+        >
+          Clear Offline Cache and Offline tasks
+        </Button>
       </div>
     </Container>
   )

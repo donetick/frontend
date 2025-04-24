@@ -19,6 +19,7 @@ import {
   Report,
   SwitchAccessShortcut,
   TimesOneMobiledata,
+  Toll,
   Unarchive,
   Update,
   ViewCarousel,
@@ -43,6 +44,7 @@ import moment from 'moment'
 import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { UserContext } from '../../contexts/UserContext'
+import { useError } from '../../service/ErrorProvider'
 import { notInCompletionWindow } from '../../utils/Chores.jsx'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import {
@@ -90,6 +92,7 @@ const ChoreCard = ({
   const [secondsLeftToCancel, setSecondsLeftToCancel] = React.useState(null)
   const [timeoutId, setTimeoutId] = React.useState(null)
   const { userProfile } = React.useContext(UserContext)
+  const { showError } = useError()
   useEffect(() => {
     document.addEventListener('mousedown', handleMenuOutsideClick)
     return () => {
@@ -175,6 +178,7 @@ const ChoreCard = ({
 
       if (seconds <= 0) {
         clearInterval(countdownInterval) // Stop the countdown when it reaches 0
+        setIsPendingCompletion(false) // Reset the state
       }
     }, 1000)
 
@@ -188,6 +192,25 @@ const ChoreCard = ({
           }
         })
         .then(() => {
+          setIsPendingCompletion(false)
+          clearTimeout(id)
+          clearInterval(countdownInterval) // Ensure to clear this interval as well
+          setTimeoutId(null)
+          setSecondsLeftToCancel(null)
+        })
+        .catch(error => {
+          if (error?.queued) {
+            showError({
+              title: 'Update Failed',
+              message: 'Request will be reattempt when you are online',
+            })
+          } else {
+            showError({
+              title: 'Failed to update',
+              message: error,
+            })
+          }
+
           setIsPendingCompletion(false)
           clearTimeout(id)
           clearInterval(countdownInterval) // Ensure to clear this interval as well
@@ -527,6 +550,21 @@ const ChoreCard = ({
                       P{chore.priority}
                     </Chip>
                   )}
+                  {/* show points chip if there is points assigned */}
+                  {chore.points > 0 && (
+                    <Chip
+                      sx={{
+                        position: 'relative',
+                        mr: 0.5,
+                        top: 2,
+                        zIndex: 1,
+                      }}
+                      color='success'
+                      startDecorator={<Toll />}
+                    >
+                      {chore.points}
+                    </Chip>
+                  )}
                   {chore.labelsV2?.map((l, index) => {
                     return (
                       <div
@@ -660,15 +698,30 @@ const ChoreCard = ({
                 </MenuItem>
                 <MenuItem
                   onClick={() => {
-                    SkipChore(chore.id).then(response => {
-                      if (response.ok) {
-                        response.json().then(data => {
-                          const newChore = data.res
-                          onChoreUpdate(newChore, 'skipped')
-                          handleMenuClose()
-                        })
-                      }
-                    })
+                    SkipChore(chore.id)
+                      .then(response => {
+                        if (response.ok) {
+                          response.json().then(data => {
+                            const newChore = data.res
+                            onChoreUpdate(newChore, 'skipped')
+                            handleMenuClose()
+                          })
+                        }
+                      })
+                      .catch(error => {
+                        if (error?.queued) {
+                          showError({
+                            title: 'Failed to update',
+                            message:
+                              'Request will be processed when you are online',
+                          })
+                        } else {
+                          showError({
+                            title: 'Failed to update',
+                            message: error,
+                          })
+                        }
+                      })
                   }}
                 >
                   <SwitchAccessShortcut />

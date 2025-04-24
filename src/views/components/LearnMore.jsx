@@ -1,5 +1,5 @@
 import { Info } from '@mui/icons-material'
-import { Box, Button, Sheet } from '@mui/joy'
+import { Box, IconButton, Sheet } from '@mui/joy'
 import React, { useRef, useState } from 'react'
 
 const LearnMoreButton = ({ content }) => {
@@ -29,16 +29,15 @@ const LearnMoreButton = ({ content }) => {
 
   return (
     <Box sx={{ position: 'relative', display: 'inline-block' }}>
-      <Button
+      <IconButton
         ref={anchorRef}
         variant='plain'
-        startDecorator={<Info />}
         size='sm'
         color='primary'
         onClick={handleToggle}
       >
-        Learn More
-      </Button>
+        <Info />
+      </IconButton>
       {open && (
         <Sheet
           variant='outlined'

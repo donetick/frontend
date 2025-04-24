@@ -65,13 +65,13 @@ const UserPoints = () => {
     if (choresHistoryData) {
       var history
       if (tabValue === 7) {
-        history = generateWeeklySummary(choresHistoryData.res, selectedUser)
+        history = generateWeeklySummary(choresHistoryData, selectedUser)
       } else if (tabValue === 30) {
-        history = generateMonthSummary(choresHistoryData.res, selectedUser)
+        history = generateMonthSummary(choresHistoryData, selectedUser)
       } else if (tabValue === 6 * 30) {
-        history = generateMonthlySummary(choresHistoryData.res, selectedUser)
+        history = generateMonthlySummary(choresHistoryData, selectedUser)
       } else {
-        history = generateYearlySummary(choresHistoryData.res, selectedUser)
+        history = generateYearlySummary(choresHistoryData, selectedUser)
       }
       setSelectedHistory(history)
     }
@@ -394,7 +394,7 @@ const UserPoints = () => {
                 { label: '7 Days', value: 7 },
                 // { label: '3 Month', value: 30 },
                 { label: '6 Months', value: 6 * 30 },
-                { label: 'All Time', value: 90 },
+                { label: 'All Time', value: 24 * 30 },
               ].map((tab, index) => (
                 <Tab
                   key={index}

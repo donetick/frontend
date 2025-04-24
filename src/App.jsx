@@ -4,16 +4,17 @@ import { StatusBar, Style } from '@capacitor/status-bar'
 import { Button, Snackbar, Typography, useColorScheme } from '@mui/joy'
 import Tracker from '@openreplay/tracker'
 import { SafeArea } from 'capacitor-plugin-safe-area'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
-import { QueryClient, QueryClientProvider } from 'react-query'
 import { Outlet } from 'react-router-dom'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 import { registerCapacitorListeners } from './CapacitorListener'
 import { UserContext } from './contexts/UserContext'
 import { AuthenticationProvider } from './service/AuthenticationService'
+import { ErrorProvider } from './service/ErrorProvider'
 import { GetUserProfile } from './utils/Fetcher'
 import { apiManager, isTokenValid } from './utils/TokenManager'
-
+import NetworkBanner from './views/components/NetworkBanner'
 const add = className => {
   document.getElementById('root').classList.add(className)
 }
@@ -54,14 +55,6 @@ function App() {
     setNeedRefresh(false)
   }
 
-  // const updateServiceWorker = useRegisterSW({
-  //   onRegistered(r) {
-  //     r &&
-  //       setInterval(() => {
-  //         r.update()
-  //       }, intervalMS)
-  //   },
-  // })
   const setThemeClass = () => {
     const value = JSON.parse(localStorage.getItem('themeMode')) || mode
 
@@ -116,12 +109,15 @@ function App() {
 
   return (
     <div>
+      <NetworkBanner />
       <QueryClientProvider client={queryClient}>
         <AuthenticationProvider />
-        <UserContext.Provider value={{ userProfile, setUserProfile }}>
-          <NavBar />
-          <Outlet />
-        </UserContext.Provider>
+        <ErrorProvider>
+          <UserContext.Provider value={{ userProfile, setUserProfile }}>
+            <NavBar />
+            <Outlet />
+          </UserContext.Provider>
+        </ErrorProvider>
         {needRefresh && (
           <Snackbar open={showUpdateSnackbar}>
             <Typography level='body-md'>
