@@ -137,7 +137,11 @@ async function handleOfflineRequest(url, options) {
     const requestId = murmurhash.v3(JSON.stringify({ url, options }))
     await localStore.queueRequest(requestId, { url, options })
     console.log('Request queued for later processing:', requestId)
-    return Promise.reject(new Error('Offline and request queued: ' + requestId))
+    return Promise.reject({
+      error: 'Offline and request queued',
+      requestId,
+      queued: true,
+    })
   }
 }
 async function attemptFetchFromCache(url, options) {
@@ -152,6 +156,7 @@ async function attemptFetchFromCache(url, options) {
       json: async () => cachedData,
     })
   } else {
+    // TODO: change this to throw error instead of returning promise
     return Promise.reject(
       new Error(
         'No cached data found for URL: ' +

@@ -243,6 +243,7 @@ const ChoreView = () => {
           justifyContent: 'center',
           alignItems: 'center',
           textAlign: 'center',
+          mb: 1,
         }}
       >
         <Typography
@@ -260,21 +261,31 @@ const ChoreView = () => {
             ? `Due at ${moment(chore.nextDueDate).format('MM/DD/YYYY hh:mm A')}`
             : 'N/A'}
         </Chip>
-        {chore?.labelsV2?.map((label, index) => (
-          <Chip
-            key={index}
-            sx={{
-              position: 'relative',
-              ml: index === 0 ? 0 : 0.5,
-              top: 2,
-              zIndex: 1,
-              backgroundColor: label?.color,
-              color: getTextColorFromBackgroundColor(label?.color),
-            }}
-          >
-            {label?.name}
-          </Chip>
-        ))}
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            mb: 1,
+          }}
+        >
+          {chore?.labelsV2?.map((label, index) => (
+            <Chip
+              key={index}
+              sx={{
+                position: 'relative',
+                ml: index === 0 ? 0 : 0.5,
+                top: 2,
+                zIndex: 1,
+                backgroundColor: label?.color,
+                color: getTextColorFromBackgroundColor(label?.color),
+              }}
+            >
+              {label?.name}
+            </Chip>
+          ))}
+        </Box>
       </Box>
 
       <Box>

@@ -1,11 +1,11 @@
 import {
   Add,
+  Bolt,
   CancelRounded,
   EditCalendar,
   ExpandCircleDown,
   Grain,
   PriorityHigh,
-  Search,
   Sort,
   Style,
   Unarchive,
@@ -63,11 +63,11 @@ const MyChores = () => {
   const [filteredChores, setFilteredChores] = useState([])
   const [searchFilter, setSearchFilter] = useState('All')
   const [choreSections, setChoreSections] = useState([])
-  const [activeTextField, setActiveTextField] = useState(
-    localStorage.getItem('activeTextField') || 'task',
-  )
+
+  const [showSearchFilter, setShowSearchFilter] = useState(false)
+  const [addTaskModalOpen, setAddTaskModalOpen] = useState(false)
   const [taskInputFocus, setTaskInputFocus] = useState(0)
-  const searchInputRef = useRef()
+  const searchInputRef = useRef(null)
   const [searchInputFocus, setSearchInputFocus] = useState(0)
   const [selectedChoreSection, setSelectedChoreSection] = useState(
     localStorage.getItem('selectedChoreSection') || 'due_date',
@@ -84,7 +84,11 @@ const MyChores = () => {
   const menuRef = useRef(null)
   const Navigate = useNavigate()
   const { data: userLabels, isLoading: userLabelsLoading } = useLabels()
-  const { data: choresData, isLoading: choresLoading } = useChores()
+  const {
+    data: choresData,
+    isLoading: choresLoading,
+    refetch: refetchChores,
+  } = useChores()
 
   useEffect(() => {
     Promise.all([GetChores(), GetAllUsers(), GetUserProfile()]).then(
@@ -173,6 +177,21 @@ const MyChores = () => {
       searchInputRef.current.selectionEnd = searchInputRef.current.value?.length
     }
   }, [searchInputFocus])
+
+  // add listern to Control/Command + K to focus on search input
+  useEffect(() => {
+    const handleKeyDown = event => {
+      if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+        event.preventDefault()
+        setAddTaskModalOpen(true)
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [])
   const setSelectedChoreSectionWithCache = value => {
     setSelectedChoreSection(value)
     localStorage.setItem('selectedChoreSection', value)
@@ -184,10 +203,6 @@ const MyChores = () => {
   const setSelectedChoreFilterWithCache = value => {
     setSelectedChoreFilter(value)
     localStorage.setItem('selectedChoreFilter', value)
-  }
-  const setActiveTextFieldWithCache = value => {
-    setActiveTextField(value)
-    localStorage.setItem('activeTextField', value)
   }
 
   const updateChores = newChore => {
@@ -381,60 +396,36 @@ const MyChores = () => {
             gap: 0.5,
           }}
         >
-          {activeTextField == 'task' && (
-            <TaskInput
-              autoFocus={taskInputFocus}
-              onChoreUpdate={updateChores}
-            />
-          )}
+          <Input
+            ref={searchInputRef}
+            placeholder='Search'
+            value={searchTerm}
+            onFocus={() => {
+              setShowSearchFilter(true)
+            }}
+            fullWidth
+            sx={{
+              mt: 1,
+              mb: 1,
+              borderRadius: 24,
+              height: 24,
+              borderColor: 'text.disabled',
+              padding: 1,
+            }}
+            onChange={handleSearchChange}
+            endDecorator={
+              searchTerm && (
+                <CancelRounded
+                  onClick={() => {
+                    setSearchTerm('')
+                    setFilteredChores(chores)
+                  }}
+                />
+              )
+            }
+          />
 
-          {activeTextField == 'search' && (
-            <Input
-              ref={searchInputRef}
-              autoFocus={searchInputFocus > 0}
-              placeholder='Search'
-              value={searchTerm}
-              fullWidth
-              sx={{
-                mt: 1,
-                mb: 1,
-                borderRadius: 24,
-                height: 24,
-                borderColor: 'text.disabled',
-                padding: 1,
-              }}
-              onChange={handleSearchChange}
-              endDecorator={
-                searchTerm && (
-                  <CancelRounded
-                    onClick={() => {
-                      setSearchTerm('')
-                      setFilteredChores(chores)
-                    }}
-                  />
-                )
-              }
-            />
-          )}
-          {activeTextField != 'task' && (
-            <IconButton
-              variant='outlined'
-              size='sm'
-              color='neutral'
-              sx={{
-                height: 24,
-                borderRadius: 24,
-                // minWidth: 100,
-              }}
-              onClick={() => {
-                setActiveTextFieldWithCache('task')
-                setTaskInputFocus(taskInputFocus + 1)
-              }}
-            >
-              <EditCalendar />
-            </IconButton>
-          )}
-          {activeTextField != 'search' && (
+          {/* {activeTextField != 'search' && (
             <IconButton
               variant='outlined'
               color='neutral'
@@ -452,7 +443,7 @@ const MyChores = () => {
             >
               <Search />
             </IconButton>
-          )}
+          )} */}
           <SortAndGrouping
             title='Group by'
             k={'icon-menu-group-by'}
@@ -496,7 +487,7 @@ const MyChores = () => {
             mouseClickHandler={handleMenuOutsideClick}
           />
         </Box>
-        {activeTextField === 'search' && (
+        {showSearchFilter && (
           <div className='flex gap-4'>
             <div className='grid flex-1 grid-cols-3 gap-4'>
               <IconButtonWithMenu
@@ -597,6 +588,23 @@ const MyChores = () => {
                 </Menu>
               </List>
             </div>
+            <IconButton
+              variant='outlined'
+              color='neutral'
+              size='sm'
+              sx={{
+                height: 24,
+                borderRadius: 24,
+              }}
+              onClick={() => {
+                setShowSearchFilter(false)
+                setSearchTerm('')
+                setFilteredChores(chores)
+                setSearchFilter('All')
+              }}
+            >
+              <CancelRounded />
+            </IconButton>
           </div>
         )}
         {searchFilter !== 'All' && (
@@ -811,7 +819,7 @@ const MyChores = () => {
             display: 'flex',
             justifyContent: 'flex-end',
             gap: 2,
-            'z-index': 1000,
+            'z-index': 100,
           }}
         >
           <IconButton
@@ -821,12 +829,34 @@ const MyChores = () => {
               borderRadius: '50%',
               width: 50,
               height: 50,
+              zIndex: 101,
             }}
             onClick={() => {
               Navigate(`/chores/create`)
             }}
           >
             <Add />
+          </IconButton>
+          <IconButton
+            color='primary'
+            variant='soft'
+            sx={{
+              borderRadius: '50%',
+              width: 25,
+              height: 25,
+              position: 'relative',
+              left: -25,
+              top: 22,
+            }}
+            onClick={() => {
+              setAddTaskModalOpen(true)
+            }}
+          >
+            <Bolt
+              style={{
+                rotate: '20deg',
+              }}
+            />
           </IconButton>
         </Box>
         <Snackbar
@@ -843,6 +873,19 @@ const MyChores = () => {
           <Typography level='title-md'>{snackBarMessage}</Typography>
         </Snackbar>
         <NotificationAccessSnackbar />
+        {addTaskModalOpen && (
+          <TaskInput
+            autoFocus={taskInputFocus}
+            onChoreUpdate={updateChores}
+            isModalOpen={addTaskModalOpen}
+            onClose={forceRefresh => {
+              setAddTaskModalOpen(false)
+              if (forceRefresh) {
+                refetchChores()
+              }
+            }}
+          />
+        )}
       </Container>
 
       <Sidepanel chores={chores} performers={performers} />
