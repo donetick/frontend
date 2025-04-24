@@ -11,7 +11,7 @@ import {
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
 
-import { useMutation, useQueryClient } from 'react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import LABEL_COLORS from '../../../utils/Colors.jsx'
 import { CreateLabel, UpdateLabel } from '../../../utils/Fetcher'
 import { useLabels } from '../../Labels/LabelQueries'
@@ -109,7 +109,7 @@ function LabelModal({ isOpen, onClose, label }) {
               <Typography
                 startDecorator={
                   <Box
-                    className='h-4 w-4'
+                    className='size-4'
                     borderRadius={10}
                     sx={{ background: selected.value }}
                   />

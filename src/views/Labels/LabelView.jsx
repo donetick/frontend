@@ -15,7 +15,7 @@ import { useLabels } from './LabelQueries'
 
 // import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Add } from '@mui/icons-material'
-import { useQueryClient } from 'react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors'
 import { DeleteLabel } from '../../utils/Fetcher'
