@@ -1,5 +1,6 @@
 import { Capacitor } from '@capacitor/core'
-import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth'
+// import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth'
+import { SocialLogin } from '@capgo/capacitor-social-login'
 import { Settings } from '@mui/icons-material'
 import GoogleIcon from '@mui/icons-material/Google'
 import {
@@ -15,7 +16,7 @@ import {
   Typography,
 } from '@mui/joy'
 import Cookies from 'js-cookie'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { LoginSocialGoogle } from 'reactjs-social-login'
 import { GOOGLE_CLIENT_ID, REDIRECT_URL } from '../../Config'
@@ -32,6 +33,19 @@ const LoginView = () => {
   const [error, setError] = React.useState(null)
   const { data: resource } = useResource()
   const Navigate = useNavigate()
+  useEffect(() => {
+    const initializeSocialLogin = async () => {
+      await SocialLogin.initialize({
+        google: {
+          webClientId: import.meta.env.VITE_APP_GOOGLE_CLIENT_ID,
+          iOSClientId: import.meta.env.VITE_APP_IOS_CLIENT_ID,
+          mode: 'online', // replaces grantOfflineAccess
+        },
+      })
+    }
+    initializeSocialLogin()
+  }, [])
+
   const handleSubmit = async e => {
     e.preventDefault()
     login(username, password)
@@ -64,16 +78,23 @@ const LoginView = () => {
 
   const loggedWithProvider = function (provider, data) {
     const baseURL = apiManager.getApiURL()
+
+    const getAccessToken = data => {
+      if (data['access_token']) {
+        // data["access_token"] is for Google
+        return data['access_token']
+      } else if (data['accessToken']) {
+        // data["accessToken"] is for Google Capacitor
+        return data['accessToken']['token']
+      }
+    }
+
     return fetch(`${baseURL}/auth/${provider}/callback`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         provider: provider,
-        token:
-          data['access_token'] || // data["access_token"] is for Google
-          data['accessToken'], // data["accessToken"] is for Google Capacitor
+        token: getAccessToken(data),
         data: data,
       }),
     }).then(response => {
@@ -167,12 +188,7 @@ const LoginView = () => {
           {Capacitor.isNativePlatform() && (
             <IconButton
               //  on top right of the screen:
-              sx={{
-                position: 'absolute',
-                top: 2,
-                right: 2,
-                color: 'black',
-              }}
+              sx={{ position: 'absolute', top: 2, right: 2, color: 'black' }}
               onClick={() => {
                 Navigate('/login/settings')
               }}
@@ -185,13 +201,7 @@ const LoginView = () => {
 
           <Typography level='h2'>
             Done
-            <span
-              style={{
-                color: '#06b6d4',
-              }}
-            >
-              tick
-            </span>
+            <span style={{ color: '#06b6d4' }}>tick</span>
           </Typography>
 
           {userProfile && (
@@ -200,12 +210,7 @@ const LoginView = () => {
                 src={userProfile?.image}
                 alt={userProfile?.username}
                 size='lg'
-                sx={{
-                  mt: 2,
-                  width: '96px',
-                  height: '96px',
-                  mb: 1,
-                }}
+                sx={{ mt: 2, width: '96px', height: '96px', mb: 1 }}
               />
               <Typography level='body-md' alignSelf={'center'}>
                 Welcome back,{' '}
@@ -367,15 +372,22 @@ const LoginView = () => {
                     size='lg'
                     sx={{ mt: 3, mb: 2 }}
                     onClick={() => {
-                      GoogleAuth.initialize({
-                        clientId: import.meta.env.VITE_APP_GOOGLE_CLIENT_ID,
-                        scopes: ['profile', 'email', 'openid'],
-                        grantOfflineAccess: true,
-                      })
-                      GoogleAuth.signIn().then(user => {
-                        console.log('Google user', user)
+                      // GoogleAuth.initialize({
+                      //   clientId: import.meta.env.VITE_APP_GOOGLE_CLIENT_ID,
+                      //   scopes: ['profile', 'email', 'openid'],
+                      //   grantOfflineAccess: true,
+                      // })
+                      // GoogleAuth.signIn().then(user => {
+                      //   console.log('Google user', user)
+                      //   loggedWithProvider('google', user.authentication)
+                      // })
 
-                        loggedWithProvider('google', user.authentication)
+                      SocialLogin.login({
+                        provider: 'google',
+                        options: { scopes: ['profile', 'email', 'openid'] },
+                      }).then(user => {
+                        console.log('Google user', user)
+                        loggedWithProvider('google', user.result)
                       })
                     }}
                   >

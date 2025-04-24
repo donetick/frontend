@@ -4,8 +4,12 @@ import { GetResource } from '../utils/Fetcher'
 export const useResource = () => {
   const { data, isLoading, error } = useQuery({
     queryKey: ['resource'],
-    queryFn: GetResource,
-    cacheTime: 1000 * 60 * 10, // 10 minutes
+    queryFn: async () => {
+      const response = await GetResource()
+      return response.json()
+    },
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   })
   return { data, isLoading, error }
 }

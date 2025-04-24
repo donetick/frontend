@@ -11,7 +11,7 @@ export const useAllUsers = () => {
 export const useCircleMembers = () => {
   const queryClient = useQueryClient()
 
-  const { data, error, isLoading, refetch } = useQuery({
+  const { data, error, isLoading } = useQuery({
     queryKey: ['allCircleMembers'],
     queryFn: GetAllCircleMembers,
   })

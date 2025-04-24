@@ -11,7 +11,8 @@ import {
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
 
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
+import { useError } from '../../../service/ErrorProvider.jsx'
 import LABEL_COLORS from '../../../utils/Colors.jsx'
 import { CreateLabel, UpdateLabel } from '../../../utils/Fetcher'
 import { useLabels } from '../../Labels/LabelQueries'
@@ -22,6 +23,7 @@ function LabelModal({ isOpen, onClose, label }) {
   const [error, setError] = useState('')
   const { data: userLabels = [] } = useLabels()
   const queryClient = useQueryClient()
+  const { showError } = useError()
 
   // Populate the form fields when editing
   useEffect(() => {
@@ -57,26 +59,54 @@ function LabelModal({ isOpen, onClose, label }) {
   }
 
   // Mutation for saving labels
-  const saveLabelMutation = useMutation(
-    newLabel =>
-      label
-        ? UpdateLabel({ id: label.id, ...newLabel })
-        : CreateLabel(newLabel),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries('labels')
-        onClose()
-      },
-      onError: () => {
-        setError('Failed to save label. Please try again.')
-      },
-    },
-  )
+  // const saveLabelMutation = useMutation(
+  //   newLabel =>
+  //     label
+  //       ? UpdateLabel({ id: label.id, ...newLabel })
+  //       : CreateLabel(newLabel),
+  //   {
+  //     onSuccess: () => {
+  //       queryClient.invalidateQueries('labels')
+  //       onClose()
+  //     },
+  //     onError: () => {
+  //       setError('Failed to save label. Please try again.')
+  //     },
+  //   },
+  // )
 
   const handleSave = () => {
     if (!validateLabel()) return
-
-    saveLabelMutation.mutate({ name: labelName, color })
+    const saveLabel = label?.id && label.id !== -1 ? UpdateLabel : CreateLabel
+    // ? { id: label.id, name: labelName, color }
+    // : { name: labelName, color }
+    // saveLabelMutation.mutate({ name: labelName, color })
+    saveLabel({
+      id: label?.id,
+      name: labelName,
+      color,
+    })
+      .then(res => {
+        if (res?.error) {
+          setError(res.error)
+        } else {
+          queryClient.invalidateQueries('labels')
+          onClose()
+        }
+      })
+      .catch(err => {
+        if (err.queued) {
+          showError({
+            title: 'Failed to save label',
+            message: 'Unable to save label. Please try again.',
+          })
+        } else {
+          showError({
+            title: 'Failed to save label',
+            message: 'Unable to save label. Please try again.',
+          })
+        }
+      })
   }
 
   return (

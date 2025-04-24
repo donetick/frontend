@@ -11,26 +11,25 @@ import {
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
 import LabelModal from '../Modals/Inputs/LabelModal'
-import { useLabels } from './LabelQueries'
 
 // import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Add } from '@mui/icons-material'
 import { useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors'
 import { DeleteLabel } from '../../utils/Fetcher'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
+import { useLabels } from './LabelQueries'
 
 const LabelView = () => {
   const { data: labels, isLabelsLoading, isError } = useLabels()
 
-  const [userLabels, setUserLabels] = useState([labels])
+  const [userLabels, setUserLabels] = useState([])
   const [modalOpen, setModalOpen] = useState(false)
 
   const [currentLabel, setCurrentLabel] = useState(null)
   const queryClient = useQueryClient()
   const [confirmationModel, setConfirmationModel] = useState({})
-  const Navigate = useNavigate()
+
   const handleAddLabel = () => {
     setCurrentLabel(null)
     setModalOpen(true)
@@ -53,7 +52,7 @@ const LabelView = () => {
       color: 'danger',
       cancelText: 'Cancel',
       onClose: confirmed => {
-        if (confirmed) {
+        if (confirmed === true) {
           handleDeleteLabel(id)
         }
         setConfirmationModel({})
@@ -140,7 +139,7 @@ const LabelView = () => {
               <IconButton
                 size='sm'
                 variant='soft'
-                onClick={() => handleDeleteLabel(label.id)}
+                onClick={() => handleDeleteClicked(label.id)}
                 color='danger'
               >
                 <DeleteIcon />

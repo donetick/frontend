@@ -8,6 +8,7 @@ import { useRegisterSW } from 'virtual:pwa-register/react'
 import { registerCapacitorListeners } from './CapacitorListener'
 import { UserContext } from './contexts/UserContext'
 import { AuthenticationProvider } from './service/AuthenticationService'
+import { ErrorProvider } from './service/ErrorProvider'
 import { GetUserProfile } from './utils/Fetcher'
 import { apiManager, isTokenValid } from './utils/TokenManager'
 import NetworkBanner from './views/components/NetworkBanner'
@@ -91,10 +92,12 @@ function App() {
       <NetworkBanner />
       <QueryClientProvider client={queryClient}>
         <AuthenticationProvider />
-        <UserContext.Provider value={{ userProfile, setUserProfile }}>
-          <NavBar />
-          <Outlet />
-        </UserContext.Provider>
+        <ErrorProvider>
+          <UserContext.Provider value={{ userProfile, setUserProfile }}>
+            <NavBar />
+            <Outlet />
+          </UserContext.Provider>
+        </ErrorProvider>
         {needRefresh && (
           <Snackbar open={showUpdateSnackbar}>
             <Typography level='body-md'>

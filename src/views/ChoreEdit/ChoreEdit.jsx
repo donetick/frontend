@@ -386,7 +386,7 @@ const ChoreEdit = () => {
       },
     })
   }
-  if (isChoreLoading && choreId) {
+  if ((isChoreLoading && choreId) || isUserLabelsLoading) {
     return <LoadingComponent />
   }
   return (
@@ -573,7 +573,6 @@ const ChoreEdit = () => {
               }}
               defaultChecked={dueDate !== null}
               checked={dueDate !== null}
-              value={dueDate !== null}
               overlay
               label='Give this task a due date'
             />
@@ -711,7 +710,6 @@ const ChoreEdit = () => {
             }}
             defaultChecked={isNotificable}
             checked={isNotificable}
-            value={isNotificable}
             disabled={!isPlusAccount(userProfile)}
             overlay
             label='Notify for this task'
@@ -967,7 +965,6 @@ const ChoreEdit = () => {
             }}
             overlay
             checked={subTasks != null}
-            value={subTasks != null}
             label='Sub Tasks'
           />
           <FormHelperText>Add sub tasks to this task</FormHelperText>
@@ -997,7 +994,6 @@ const ChoreEdit = () => {
               }
             }}
             checked={points > -1}
-            value={points > -1}
             overlay
             label='Assign Points'
           />

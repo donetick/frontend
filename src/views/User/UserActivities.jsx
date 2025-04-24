@@ -3,7 +3,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import CircleIcon from '@mui/icons-material/Circle'
 import { Cell, Legend, Pie, PieChart, Tooltip } from 'recharts'
 
-import { EventBusy, Style, Toll } from '@mui/icons-material'
+import { EventBusy, Toll } from '@mui/icons-material'
 import {
   Avatar,
   Box,
@@ -28,7 +28,6 @@ import { useChores, useChoresHistory } from '../../queries/ChoreQueries'
 import { useCircleMembers } from '../../queries/UserQueries.jsx'
 import { ChoresGrouper } from '../../utils/Chores'
 import { TASK_COLOR } from '../../utils/Colors.jsx'
-import IconButtonWithMenu from '../Chores/IconButtonWithMenu'
 import LoadingComponent from '../components/Loading'
 
 const groupByDate = history => {
@@ -204,7 +203,7 @@ const UserActivites = () => {
 
   useEffect(() => {
     if (!isChoresHistoryLoading && !isChoresLoading && choresHistory) {
-      const enrichedHistory = choresHistory.res.map(item => {
+      const enrichedHistory = choresHistory.map(item => {
         const chore = choresData.res.find(chore => chore.id === item.choreId)
         return {
           ...item,
@@ -235,7 +234,7 @@ const UserActivites = () => {
     var assignedToMe = 0
     var assignedToOthers = 0
     chores.forEach(chore => {
-      if (chore.assignedTo === userProfile.id) {
+      if (chore.assignedTo === userProfile?.id) {
         assignedToMe++
       } else assignedToOthers++
     })
@@ -342,7 +341,7 @@ const UserActivites = () => {
     },
   }
 
-  if (!choresData.res?.length > 0 || !choresHistory?.res?.length > 0) {
+  if (!choresData.res?.length > 0 || !choresHistory?.length > 0) {
     return (
       <Container
         maxWidth='md'
@@ -386,7 +385,7 @@ const UserActivites = () => {
         justifyContent: 'center',
       }}
     >
-      <Box>
+      <Box mb={1}>
         <Typography mb={2} level='h4'>
           Points Overview
         </Typography>
@@ -487,21 +486,6 @@ const UserActivites = () => {
             ))}
           </TabList>
         </Tabs>
-        <Box sx={{ ml: 2 }}>
-          <IconButtonWithMenu
-            k={'icon-menu-labels-filter'}
-            // label={' Labels'}
-            icon={<Style />}
-            options={[{ name: 'Anyone' }, { name: 'Me' }]}
-            selectedItem={'Anyone'}
-            onItemSelect={selected => {
-              console.log(selected)
-            }}
-            // isActive={searchFilter.startsWith('Label: ')}
-            // mouseClickHandler={handleMenuOutsideClick}
-            // useChips
-          />
-        </Box>
       </Box>
       <Box sx={{ mb: 4 }}>
         <Typography level='h4' textAlign='center'>

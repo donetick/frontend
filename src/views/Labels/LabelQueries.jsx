@@ -1,9 +1,16 @@
 import { useQuery } from '@tanstack/react-query'
-import { GetLabels } from '../../utils/Fetcher'
+import { CreateLabel, GetLabels } from '../../utils/Fetcher'
+
 export const useLabels = () => {
   return useQuery({
     queryKey: ['labels'],
     queryFn: GetLabels,
-    initialData: [],
+  })
+}
+
+export const useCreateLabel = () => {
+  return useQuery({
+    queryKey: ['createLabel'],
+    queryFn: CreateLabel,
   })
 }
