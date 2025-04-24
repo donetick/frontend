@@ -49,4 +49,4 @@ While maintaining Donetick's commitment to open source, this hosted option will 
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details. I might consider changing it later to something else
+This project is licensed under the AGPLv3 License. See the [LICENSE](LICENSE) file for more details. I might consider changing it later to something else
