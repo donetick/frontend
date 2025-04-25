@@ -181,7 +181,7 @@ const SmartTaskTitleInput = ({
 
   return (
     <div>
-      <div className='task-input h-20 overflow-auto rounded border'>
+      <div className='task-input overflow-auto rounded border'>
         <textarea
           ref={titleInputRef}
           autoFocus={autoFocus}
