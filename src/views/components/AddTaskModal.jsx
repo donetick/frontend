@@ -161,7 +161,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
 
     setTaskText(sentence)
     setTaskTitle(cleanedSentence.trim())
-    const { rendered, plainText } = renderHighlightedSentence(
+    const { parts, plainText } = renderHighlightedSentence(
       sentence,
       repeat.highlight,
       priority.highlight,
@@ -175,7 +175,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
         : null,
     )
 
-    setRenderedParts(rendered)
+    setRenderedParts(parts)
     setTaskTitle(plainText)
   }
   const renderHighlightedSentence = (
