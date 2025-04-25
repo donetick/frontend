@@ -48,10 +48,10 @@ const ALL_MONTHS = Object.values(VALID_MONTHS).filter(
 export const parsePriority = inputSentence => {
   let sentence = inputSentence.toLowerCase()
   const priorityMap = {
-    1: ['p1', 'priority 1', 'high priority', 'urgent', 'asap', 'important'],
-    2: ['p2', 'priority 2', 'medium priority'],
-    3: ['p3', 'priority 3', 'low priority'],
-    4: ['p4', 'priority 4'],
+    1: ['!p1', 'priority 1', 'high priority', 'urgent', 'asap', 'important'],
+    2: ['!p2', 'priority 2', 'medium priority'],
+    3: ['!p3', 'priority 3', 'low priority'],
+    4: ['!p4', 'priority 4'],
   }
 
   for (const [priority, terms] of Object.entries(priorityMap)) {
@@ -69,14 +69,18 @@ export const parsePriority = inputSentence => {
           })
           .filter(term => term.start !== -1),
 
-        cleanedSentence: terms.reduce(
-          (s, t) => s.replace(t, ''),
-          inputSentence,
+        cleanedSentence: sentence.replace(
+          new RegExp(`(${terms.join('|')})`, 'g'),
+          '',
         ),
       }
     }
   }
-  return { result: 0, cleanedSentence: inputSentence }
+  return {
+    result: 0,
+    highlight: [],
+    cleanedSentence: inputSentence,
+  }
 }
 export const parseLabels = (inputSentence, userLabels) => {
   let sentence = inputSentence.toLowerCase()
@@ -103,7 +107,10 @@ export const parseLabels = (inputSentence, userLabels) => {
         }
       }),
 
-      cleanedSentence: sentence,
+      cleanedSentence: sentence.replace(
+        new RegExp(`#(${userLabels.map(l => l.name).join('|')})`, 'g'),
+        '',
+      ),
     }
   }
   return { result: null, cleanedSentence: sentence }

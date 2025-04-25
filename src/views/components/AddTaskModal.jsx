@@ -161,7 +161,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
 
     setTaskText(sentence)
     setTaskTitle(cleanedSentence.trim())
-    const rendered = renderText(
+    const { rendered, plainText } = renderHighlightedSentence(
       sentence,
       repeat.highlight,
       priority.highlight,
@@ -176,8 +176,9 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
     )
 
     setRenderedParts(rendered)
+    setTaskTitle(plainText)
   }
-  const renderText = (
+  const renderHighlightedSentence = (
     sentence,
     repeatHighlight,
     priorityHighlight,
@@ -186,6 +187,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
   ) => {
     const parts = []
     let lastIndex = 0
+    let plainText = ''
 
     // Combine all highlight ranges and sort them by their start index
     const allHighlights = []
@@ -224,10 +226,13 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
         resolvedHighlights.push(current)
       }
     }
+
     for (const highlight of resolvedHighlights) {
       // Add the text before the highlight
       if (highlight.start > lastIndex) {
-        parts.push(sentence.substring(lastIndex, highlight.start))
+        const textBefore = sentence.substring(lastIndex, highlight.start)
+        parts.push(textBefore)
+        plainText += textBefore
       }
 
       // Determine the class name based on the highlight type
@@ -250,6 +255,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
       }
 
       // Add the highlighted span
+      const highlightedText = sentence.substring(highlight.start, highlight.end)
       parts.push(
         <span
           key={highlight.start}
@@ -262,7 +268,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
             textDecorationStyle: 'dashed',
           }}
         >
-          {sentence.substring(highlight.start, highlight.end)}
+          {highlightedText}
         </span>,
       )
 
@@ -272,10 +278,15 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
 
     // Add any remaining text after the last highlight
     if (lastIndex < sentence.length) {
-      parts.push(sentence.substring(lastIndex))
+      const remainingText = sentence.substring(lastIndex)
+      parts.push(remainingText)
+      plainText += remainingText
     }
 
-    return parts
+    return {
+      parts,
+      plainText,
+    }
   }
   const createChore = () => {
     const chore = {
@@ -415,7 +426,16 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
                   display: 'name',
                   options: userLabels ? userLabels : [],
                 },
-                '!': ['P1', 'P2', 'P3', 'P4'],
+                '!': {
+                  value: 'id',
+                  display: 'name',
+                  options: [
+                    { id: '1', name: 'P1' },
+                    { id: '2', name: 'P2' },
+                    { id: '3', name: 'P3' },
+                    { id: '4', name: 'P4' },
+                  ],
+                },
                 '@': {
                   // value: 'userId',
                   // display: 'displayName',

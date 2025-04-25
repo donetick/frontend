@@ -85,7 +85,7 @@ const SmartTaskTitleInput = ({
     if (
       lastWord.startsWith('@') ||
       lastWord.startsWith('#') ||
-      lastWord.startsWith('P')
+      lastWord.startsWith('!')
     ) {
       setSuggestionTrigger(lastWord[0])
       // last word without the first character:
