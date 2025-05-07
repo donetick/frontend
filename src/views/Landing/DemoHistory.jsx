@@ -78,7 +78,7 @@ const DemoHistory = () => {
           data-aos='fade-left'
         >
           <Typography level='h3' textAlign='center' sx={{ mt: 2, mb: 4 }}>
-            History with a purpose
+            History with a Purpose
           </Typography>
           <Typography level='body-lg' textAlign='center' sx={{ mb: 4 }}>
             Keep track of all your chores and tasks with ease. Donetick records
