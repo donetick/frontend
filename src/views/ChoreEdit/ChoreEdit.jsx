@@ -26,7 +26,7 @@ import {
 } from '@mui/joy'
 import moment from 'moment'
 import { useContext, useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { UserContext } from '../../contexts/UserContext'
 import {
   useChore,
@@ -64,6 +64,7 @@ const ChoreEdit = () => {
   const [choresHistory, setChoresHistory] = useState([])
   const [userHistory, setUserHistory] = useState({})
   const { choreId } = useParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [confirmModelConfig, setConfirmModelConfig] = useState({})
@@ -199,8 +200,12 @@ const ChoreEdit = () => {
       console.log(errors)
       return
     }
+    let newChoreId = choreId
+    if (searchParams.get('clone') === 'true') {
+      newChoreId = null
+    }
     const chore = {
-      id: Number(choreId),
+      id: Number(newChoreId),
       name: name,
       description: description,
       assignees: assignees,
@@ -225,7 +230,7 @@ const ChoreEdit = () => {
       priority: priority,
     }
     let SaveFunction = createChoreMutation.mutateAsync
-    if (choreId > 0) {
+    if (newChoreId > 0) {
       SaveFunction = updateChoreMutation.mutateAsync
     }
 
@@ -242,26 +247,6 @@ const ChoreEdit = () => {
         setSnackbarMessage('Failed to save chore, please try again.')
         setIsSnackbarOpen(true)
       })
-
-    // handle if mutateAsync fails, if successful then redirect to the chore view page::
-    // .then(data => {
-    //   data.json().then(res => {
-    //     if (res && res.res && res.res.id) {
-    //       // chore saved successfully:
-    //       setSnackbarMessage('Chore saved successfully!')
-    //       setSnackbarColor('success')
-    //       setIsSnackbarOpen(true)
-    //       refetchChore() // refetch the chore to get the latest data
-    //       Navigate('/my/chores/') // redirect to the chore view page
-    //     }
-    //   })
-    // })
-    // .catch(error => {
-    //   console.error('Failed! to save chore:', error)
-    //   setSnackbarMessage('Failed! to save chore, please try again.')
-    //   setSnackbarColor('danger')
-    //   setIsSnackbarOpen(true)
-    // })
   }
   useEffect(() => {
     //fetch performers:

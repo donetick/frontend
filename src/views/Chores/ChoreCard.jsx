@@ -2,6 +2,7 @@ import {
   Archive,
   CancelScheduleSend,
   Check,
+  CopyAll,
   Delete,
   Edit,
   HorizontalRule,
@@ -119,6 +120,9 @@ const ChoreCard = ({
   }
   const handleEdit = () => {
     navigate(`/chores/${chore.id}/edit`)
+  }
+  const handleClone = () => {
+    navigate(`/chores/${chore.id}/edit?clone=true`)
   }
   const handleView = () => {
     navigate(`/chores/${chore.id}`)
@@ -766,6 +770,10 @@ const ChoreCard = ({
                 <MenuItem onClick={handleEdit}>
                   <Edit />
                   Edit
+                </MenuItem>
+                <MenuItem onClick={handleClone}>
+                  <CopyAll />
+                  Clone
                 </MenuItem>
                 <MenuItem onClick={handleView}>
                   <ViewCarousel />
