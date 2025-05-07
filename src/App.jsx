@@ -3,7 +3,7 @@ import { Button, Snackbar, Typography, useColorScheme } from '@mui/joy'
 import Tracker from '@openreplay/tracker'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useNavigate } from 'react-router-dom'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 import { registerCapacitorListeners } from './CapacitorListener'
 import { UserContext } from './contexts/UserContext'
@@ -23,7 +23,8 @@ const remove = className => {
 const intervalMS = 5 * 60 * 1000 // 5 minutes
 
 function App() {
-  startApiManager()
+  const navigate = useNavigate()
+  startApiManager(navigate)
   startOpenReplay()
   const queryClient = new QueryClient()
   const { mode, systemMode } = useColorScheme()
@@ -129,6 +130,9 @@ const startOpenReplay = () => {
 }
 export default App
 
-const startApiManager = () => {
+const startApiManager = navigate => {
   apiManager.init()
+  apiManager.setNavigateToLogin(() => {
+    navigate('/login')
+  })
 }

@@ -11,6 +11,7 @@ class ApiManager {
   constructor() {
     this.customServerURL = `${API_URL}/api/v1`
     this.initialized = false
+    this.navigateToLogin = () => {}
   }
 
   async init() {
@@ -34,6 +35,9 @@ class ApiManager {
   updateApiURL(url) {
     this.customServerURL = url
     this.init()
+  }
+  setNavigateToLogin(callback) {
+    this.navigateToLogin = callback
   }
 }
 
@@ -68,6 +72,13 @@ export async function Fetch(url, options) {
       const optionsHash = murmurhash.v3(JSON.stringify(options))
       await localStore.saveToCache(fullURL + optionsHash, data)
       networkManager.setOnline()
+    } else if (response.status === 401) {
+      // Handle 401 Unauthorized
+      const errorData = await response.json()
+      console.error('Unauthorized:', errorData)
+      localStorage.removeItem('ca_token')
+      localStorage.removeItem('ca_expiration')
+      apiManager.navigateToLogin()
     } else if (
       response.status === 503 ||
       response.type === 'opaque' ||
