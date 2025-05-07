@@ -21,11 +21,11 @@ const CalendarView = ({ chores }) => {
 
   const tileContent = ({ date, view }) => {
     if (view === 'month') {
-      const dayChores = chores.filter(
-        chore =>
-          new Date(chore.nextDueDate)?.toISOString().split('T')[0] ===
-          date.toISOString().split('T')[0],
-      )
+      const dayChores = chores.filter(chore => {
+        const choreDate = new Date(chore.nextDueDate).toLocaleDateString()
+        const tileDate = date.toLocaleDateString()
+        return choreDate === tileDate
+      })
 
       return (
         <div className='dot-container'>
@@ -116,11 +116,11 @@ const CalendarView = ({ chores }) => {
           }}
         >
           {chores
-            .filter(
-              chore =>
-                new Date(chore.nextDueDate)?.toISOString().split('T')[0] ===
-                selectedDate.toISOString().split('T')[0],
-            )
+            .filter(chore => {
+              const choreDate = new Date(chore.nextDueDate).toLocaleDateString()
+              const selectedLocalDate = selectedDate.toLocaleDateString()
+              return choreDate === selectedLocalDate
+            })
             .map((chore, idx) => (
               <Card
                 key={idx}
