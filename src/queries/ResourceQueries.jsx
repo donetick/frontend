@@ -6,7 +6,7 @@ export const useResource = () => {
     queryKey: ['resource'],
     queryFn: async () => {
       const response = await GetResource()
-      return response.json()
+      return response
     },
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
