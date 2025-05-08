@@ -31,7 +31,7 @@ const LoginView = () => {
   const [username, setUsername] = React.useState('')
   const [password, setPassword] = React.useState('')
   const [error, setError] = React.useState(null)
-  const { data: resource } = useResource()
+  const { data: resource, isLoading: isResourceLoading } = useResource()
   const Navigate = useNavigate()
   useEffect(() => {
     const initializeSocialLogin = async () => {
@@ -400,7 +400,7 @@ const LoginView = () => {
               )}
             </>
           )}
-          {resource?.identity_provider?.client_id && (
+          {!isResourceLoading && resource?.identity_provider?.client_id && (
             <Button
               fullWidth
               color='neutral'
@@ -409,7 +409,7 @@ const LoginView = () => {
               sx={{ mt: 3, mb: 2 }}
               onClick={handleAuthentikLogin}
             >
-              Continue with {resource?.identity_provider?.name}
+              Continue with {resource.identity_provider.name}
             </Button>
           )}
 
