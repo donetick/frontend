@@ -6,10 +6,11 @@ import Tracker from '@openreplay/tracker'
 import { SafeArea } from 'capacitor-plugin-safe-area'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useNavigate } from 'react-router-dom'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 import { registerCapacitorListeners } from './CapacitorListener'
 import { UserContext } from './contexts/UserContext'
+import { useResource } from './queries/ResourceQueries'
 import { AuthenticationProvider } from './service/AuthenticationService'
 import { ErrorProvider } from './service/ErrorProvider'
 import { GetUserProfile } from './utils/Fetcher'
@@ -26,7 +27,9 @@ const remove = className => {
 const intervalMS = 5 * 60 * 1000 // 5 minutes
 
 function App() {
-  startApiManager()
+  const resource = useResource()
+  const navigate = useNavigate()
+  startApiManager(navigate)
   startOpenReplay()
   const queryClient = new QueryClient()
   const { mode, systemMode } = useColorScheme()
@@ -149,6 +152,9 @@ const startOpenReplay = () => {
 }
 export default App
 
-const startApiManager = () => {
+const startApiManager = navigate => {
   apiManager.init()
+  apiManager.setNavigateToLogin(() => {
+    navigate('/login')
+  })
 }
