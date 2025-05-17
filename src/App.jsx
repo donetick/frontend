@@ -7,6 +7,7 @@ import { Outlet, useNavigate } from 'react-router-dom'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 import { registerCapacitorListeners } from './CapacitorListener'
 import { UserContext } from './contexts/UserContext'
+import { useResource } from './queries/ResourceQueries'
 import { AuthenticationProvider } from './service/AuthenticationService'
 import { ErrorProvider } from './service/ErrorProvider'
 import { GetUserProfile } from './utils/Fetcher'
@@ -23,6 +24,7 @@ const remove = className => {
 const intervalMS = 5 * 60 * 1000 // 5 minutes
 
 function App() {
+  const resource = useResource()
   const navigate = useNavigate()
   startApiManager(navigate)
   startOpenReplay()
