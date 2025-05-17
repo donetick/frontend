@@ -119,7 +119,7 @@ const DemoMyChore = () => {
           data-aos='fade-left'
         >
           <Typography level='h3' textAlign='center' sx={{ mt: 2, mb: 4 }}>
-            Glance at your task and chores
+            Glance at Your Task and Chores
           </Typography>
           <Typography level='body-lg' textAlign='center' sx={{ mb: 4 }}>
             Main view prioritize tasks due today, followed by overdue ones, and
