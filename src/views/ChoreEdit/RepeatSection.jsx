@@ -70,22 +70,13 @@ const RepeatOnSections = ({
   onFrequencyMetadataUpdate,
   things,
 }) => {
-  const [months, setMonths] = useState({})
-  // const [dayOftheMonth, setDayOftheMonth] = useState(1)
-  const [daysOfTheWeek, setDaysOfTheWeek] = useState({})
-  const [monthsOfTheYear, setMonthsOfTheYear] = useState({})
   const [intervalUnit, setIntervalUnit] = useState('days')
-  const [time, setTime] = useState('18:00')
   const timePickerComponent = (
     <Grid item sm={12} sx={{ display: 'flex', alignItems: 'center' }}>
       <Typography level='h5'>At: </Typography>
       <Input
         type='time'
-        defaultValue={
-          frequencyMetadata?.time
-            ? moment(frequencyMetadata?.time).format('HH:mm')
-            : '18:00'
-        }
+        defaultValue={moment(frequencyMetadata?.time).format('HH:mm')}
         onChange={e => {
           onFrequencyMetadataUpdate({
             ...frequencyMetadata,
@@ -397,7 +388,8 @@ const RepeatSection = ({
                                   'T' +
                                   '18:00',
                               ).format(),
-                          timezone: moment.tz.guess(),
+                          timezone:
+                            Intl.DateTimeFormat().resolvedOptions().timeZone,
                         })
 
                         return
