@@ -29,6 +29,7 @@ import LoadingComponent from '../components/Loading.jsx'
 import { useChoresHistory } from '../../queries/ChoreQueries.jsx'
 import { useCircleMembers } from '../../queries/UserQueries.jsx'
 import { RedeemPoints } from '../../utils/Fetcher.jsx'
+import { resolvePhotoURL } from '../../utils/Helpers.jsx'
 import RedeemPointsModal from '../Modals/RedeemPointsModal'
 const UserPoints = () => {
   const [tabValue, setTabValue] = useState(7)
@@ -258,7 +259,15 @@ const UserPoints = () => {
             renderValue={selected => (
               <Typography
                 startDecorator={
-                  <Avatar color='primary' m={0} size='sm'>
+                  <Avatar
+                    color='primary'
+                    m={0}
+                    size='sm'
+                    src={resolvePhotoURL(
+                      circleUsers.find(user => user.userId === selectedUser)
+                        ?.image,
+                    )}
+                  >
                     {
                       circleUsers.find(user => user.userId === selectedUser)
                         ?.displayName[0]
@@ -275,6 +284,14 @@ const UserPoints = () => {
           >
             {circleUsers.map(user => (
               <Option key={user.userId} value={user.userId}>
+                <Avatar
+                  color='primary'
+                  m={0}
+                  size='sm'
+                  src={resolvePhotoURL(user.image)}
+                >
+                  {user.displayName[0]}
+                </Avatar>
                 <Typography>{user.displayName}</Typography>
                 <Chip
                   color='success'

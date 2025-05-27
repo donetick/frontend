@@ -9,7 +9,6 @@ import {
   ModalOverflow,
   Option,
   Select,
-  Textarea,
   Typography,
 } from '@mui/joy'
 import { FormControl } from '@mui/material'
@@ -25,7 +24,9 @@ import { isPlusAccount } from '../../utils/Helpers'
 import { useLabels } from '../Labels/LabelQueries'
 import SmartTaskTitleInput from '../TestView/SmartTaskTitleInput'
 import { parseLabels, parsePriority, parseRepeatV2 } from './CustomParsers'
+
 import LearnMoreButton from './LearnMore'
+import RichTextEditor from './RichTextEditor'
 import SubTasks from './SubTask'
 
 const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
@@ -497,11 +498,12 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
           {hasDescription && (
             <Box>
               <Typography level='body-sm'>Description:</Typography>
-              <Textarea
-                minRows={2}
-                value={description}
-                onChange={e => setDescription(e.target.value)}
-              />
+              <div>
+                <RichTextEditor
+                  onChange={setDescription}
+                  entityType={'chore_description'}
+                />
+              </div>
             </Box>
           )}
           {hasSubTasks && (

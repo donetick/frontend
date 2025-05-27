@@ -21,7 +21,6 @@ import {
   Snackbar,
   Stack,
   Switch,
-  Textarea,
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
@@ -42,11 +41,13 @@ import {
 import { isPlusAccount } from '../../utils/Helpers'
 import Priorities from '../../utils/Priorities.jsx'
 import LoadingComponent from '../components/Loading.jsx'
+import RichTextEditor from '../components/RichTextEditor.jsx'
 import SubTasks from '../components/SubTask.jsx'
 import { useLabels } from '../Labels/LabelQueries'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import LabelModal from '../Modals/Inputs/LabelModal'
 import RepeatSection from './RepeatSection'
+
 const ASSIGN_STRATEGIES = [
   'random',
   'least_assigned',
@@ -391,10 +392,18 @@ const ChoreEdit = () => {
         <FormControl error={errors.description}>
           <Typography level='h4'>Additional Details :</Typography>
           <Typography level='h5'>What is this task about?</Typography>
-          <Textarea
+          {/* <Textarea
             value={description}
             onChange={e => setDescription(e.target.value)}
+          /> */}
+
+          <RichTextEditor
+            value={description}
+            onChange={setDescription}
+            entityId={choreId}
+            entityType={'chore_description'}
           />
+
           <FormHelperText error>{errors.name}</FormHelperText>
         </FormControl>
       </Box>

@@ -28,6 +28,7 @@ import { useChores, useChoresHistory } from '../../queries/ChoreQueries'
 import { useCircleMembers } from '../../queries/UserQueries.jsx'
 import { ChoresGrouper } from '../../utils/Chores'
 import { TASK_COLOR } from '../../utils/Colors.jsx'
+import { resolvePhotoURL } from '../../utils/Helpers.jsx'
 import LoadingComponent from '../components/Loading'
 
 const groupByDate = history => {
@@ -410,10 +411,18 @@ const UserActivites = () => {
           renderValue={selected => (
             <Typography
               startDecorator={
-                <Avatar color='primary' m={0} size='sm'>
+                <Avatar
+                  color='primary'
+                  m={0}
+                  size='sm'
+                  src={resolvePhotoURL(
+                    circleUsers.find(user => user.userId === selectedUser)
+                      ?.image,
+                  )}
+                >
                   {
                     circleUsers.find(user => user.userId === selectedUser)
-                      ?.displayName[0]
+                      ?.image
                   }
                 </Avatar>
               }
@@ -427,6 +436,14 @@ const UserActivites = () => {
         >
           {circleUsers.map(user => (
             <Option key={user.userId} value={user.userId}>
+              <Avatar
+                color='primary'
+                m={0}
+                size='sm'
+                src={resolvePhotoURL(user.image)}
+              >
+                {user.image}
+              </Avatar>
               <Typography>{user.displayName}</Typography>
               <Chip
                 color='success'

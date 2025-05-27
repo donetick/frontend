@@ -480,6 +480,13 @@ const PutWebhookURL = url => {
   })
 }
 
+const GetStorageUsage = () => {
+  return Fetch(`/users/storage`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+}
+
 export {
   AcceptCircleMemberRequest,
   ArchiveChore,
@@ -509,6 +516,7 @@ export {
   GetLabels,
   GetLongLiveTokens,
   GetResource,
+  GetStorageUsage,
   GetSubscriptionSession,
   GetThingHistory,
   GetThings,

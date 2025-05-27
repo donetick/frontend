@@ -1,0 +1,53 @@
+.editor-view-mode h1 {
+  font-size: 2em;
+  font-weight: bold;
+}
+.editor-view-mode h2 {
+  font-size: 1.5em;
+  font-weight: bold;
+}
+.editor-view-mode h3 {
+  font-size: 1.17em;
+}
+.editor-view-mode h4 {
+  font-size: 1em;
+}
+.editor-view-mode h5 {
+  font-size: 0.83em;
+}
+.editor-view-mode h6 {
+  font-size: 0.67em;
+}
+.editor-view-mode p {
+  font-size: 1em;
+}
+.editor-view-mode ul {
+  list-style-type: disc;
+  padding-left: 20px;
+}
+.editor-view-mode ol {
+  list-style-type: decimal;
+  padding-left: 20px;
+}
+.editor-view-mode li {
+  margin-bottom: 0.5em;
+}
+.editor-view-mode blockquote {
+  border-left: 4px solid #ccc;
+  padding-left: 20px;
+  margin: 1em 0;
+}
+.editor-view-mode pre {
+  background-color: #f5f5f5;
+  padding: 10px;
+  overflow-x: auto;
+}
+.editor-view-mode code {
+  background-color: #f5f5f5;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+.editor-view-mode img {
+  max-width: 100%;
+  height: auto;
+}
