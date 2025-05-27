@@ -10,6 +10,9 @@ import {
   FormControl,
   FormHelperText,
   Input,
+  ListItem,
+  Option,
+  Select,
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
@@ -28,6 +31,7 @@ import {
   JoinCircle,
   LeaveCircle,
   PutWebhookURL,
+  UpdateMemberRole,
   UpdatePassword,
 } from '../../utils/Fetcher'
 import { isPlusAccount } from '../../utils/Helpers'
@@ -46,6 +50,7 @@ const Settings = () => {
   const [circleMembers, setCircleMembers] = useState([])
   const [webhookURL, setWebhookURL] = useState(null)
   const [webhookError, setWebhookError] = useState(null)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   const [changePasswordModal, setChangePasswordModal] = useState(false)
   useEffect(() => {
@@ -69,6 +74,16 @@ const Settings = () => {
       setCircleMembers(data.res ? data.res : [])
     })
   }, [])
+
+  // useEffect when circleMembers and userprofile:
+  useEffect(() => {
+    if (userProfile && userProfile.id) {
+      const isUserAdmin = circleMembers.some(
+        member => member.userId === userProfile.id && member.role === 'admin',
+      )
+      setIsAdmin(isUserAdmin)
+    }
+  }, [circleMembers, userProfile])
 
   useEffect(() => {
     const hash = window.location.hash
@@ -222,33 +237,110 @@ const Settings = () => {
                   </Typography>
                 )}
               </Box>
-              {member.userId !== userProfile.id && member.isActive && (
-                <Button
-                  disabled={
-                    circleMembers.find(m => userProfile.id == m.userId).role !==
-                    'admin'
-                  }
-                  variant='outlined'
-                  color='danger'
-                  size='sm'
-                  onClick={() => {
-                    const confirmed = confirm(
-                      `Are you sure you want to remove ${member.displayName} from your circle?`,
-                    )
-                    if (confirmed) {
-                      DeleteCircleMember(member.circleId, member.userId).then(
-                        resp => {
-                          if (resp.ok) {
-                            alert('Removed member successfully.')
-                          }
-                        },
-                      )
-                    }
-                  }}
-                >
-                  Remove
-                </Button>
-              )}
+
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                {member.userId !== userProfile.id && isAdmin && (
+                  <Select
+                    size='sm'
+                    sx={{ mr: 1 }}
+                    value={member.role}
+                    renderValue={() => (
+                      <Typography>
+                        {member.role.charAt(0).toUpperCase() +
+                          member.role.slice(1)}
+                      </Typography>
+                    )}
+                    onChange={(e, value) => {
+                      UpdateMemberRole(member.userId, value).then(resp => {
+                        if (resp.ok) {
+                          const newCircleMembers = circleMembers.map(m => {
+                            if (m.userId === member.userId) {
+                              m.role = value
+                            }
+                            return m
+                          })
+                          setCircleMembers(newCircleMembers)
+                        } else {
+                          alert('Failed to update role')
+                        }
+                      })
+                    }}
+                  >
+                    {[
+                      {
+                        value: 'member',
+                        description: 'Just a regular member of the circle',
+                      },
+                      {
+                        value: 'manager',
+                        description:
+                          'Can impersonate users and perform actions on their behalf',
+                      },
+                      {
+                        value: 'admin',
+                        description: 'Full access to the circle',
+                      },
+                    ].map((option, index) => (
+                      <Option value={option.value} key={index}>
+                        <ListItem
+                          sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'start',
+                            alignItems: 'start',
+                            width: '100%',
+                            gap: 0.5,
+                          }}
+                        >
+                          <Typography
+                            level='title-sm'
+                            sx={{ mb: 0, mt: 0, lineHeight: 1.1 }}
+                          >
+                            {option.value.charAt(0).toUpperCase() +
+                              option.value.slice(1)}
+                          </Typography>
+                          <Typography
+                            level='body-sm'
+                            sx={{ mt: 0, mb: 0, lineHeight: 1.1 }}
+                          >
+                            {option.description}
+                          </Typography>
+                        </ListItem>
+                      </Option>
+                    ))}
+                  </Select>
+                )}
+                {userProfile.role === 'admin' &&
+                  member.userId !== userProfile.id &&
+                  member.isActive && (
+                    <Button
+                      disabled={
+                        circleMembers.find(m => userProfile.id == m.userId)
+                          .role !== 'admin'
+                      }
+                      variant='outlined'
+                      color='danger'
+                      size='sm'
+                      onClick={() => {
+                        const confirmed = confirm(
+                          `Are you sure you want to remove ${member.displayName} from your circle?`,
+                        )
+                        if (confirmed) {
+                          DeleteCircleMember(
+                            member.circleId,
+                            member.userId,
+                          ).then(resp => {
+                            if (resp.ok) {
+                              alert('Removed member successfully.')
+                            }
+                          })
+                        }
+                      }}
+                    >
+                      Remove
+                    </Button>
+                  )}
+              </Box>
             </Box>
           </Card>
         ))}

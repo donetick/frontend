@@ -97,12 +97,9 @@ const GetChoreDetailById = id => {
     headers: HEADERS(),
   })
 }
-const MarkChoreComplete = (id, note, completedDate, performer) => {
+const MarkChoreComplete = (id, body, completedDate, performer) => {
   var markChoreURL = `/chores/${id}/do`
 
-  const body = {
-    note,
-  }
   let completedDateFormated = ''
   if (completedDate) {
     completedDateFormated = `?completedDate=${new Date(
@@ -218,6 +215,14 @@ const GetAllCircleMembers = async () => {
     headers: HEADERS(),
   })
   return resp.json()
+}
+
+const UpdateMemberRole = async (memberId, role) => {
+  return Fetch(`/circles/members/role`, {
+    method: 'PUT',
+    headers: HEADERS(),
+    body: JSON.stringify({ role, memberId }),
+  })
 }
 
 const GetUserProfile = () => {
@@ -540,6 +545,7 @@ export {
   UpdateChoreStatus,
   UpdateDueDate,
   UpdateLabel,
+  UpdateMemberRole,
   UpdateNotificationTarget,
   UpdatePassword,
   UpdateThingState,

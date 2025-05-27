@@ -31,12 +31,12 @@ const RichTextEditor = ({
       if (!file) return
 
       try {
-        // Define compression options based on entity type
+        // Define compression options based on entity type ( this need a revist later)
         const compressionOptions = {
           maxSizeMB: entityType === 'profile' ? 0.5 : 1, // Smaller size for profile images
           maxWidthOrHeight: entityType === 'profile' ? 320 : 1200, // Smaller dimensions for profile images
           useWebWorker: true,
-          fileType: 'image/jpeg', // Always convert to JPEG
+          fileType: 'image/jpeg',
         }
 
         // Compress the image
@@ -59,6 +59,7 @@ const RichTextEditor = ({
         formData.append('file', compressedJpegFile)
         formData.append('entityId', entityId)
         formData.append('entityType', entityType)
+
         const response = await UploadFile('/assets/chore', {
           method: 'POST',
           body: formData,
@@ -83,7 +84,6 @@ const RichTextEditor = ({
           })
           return
         }
-
         const data = await response.json()
         const url = resolvePhotoURL(data.url || data.sign)
         // Insert image into Quill

@@ -43,6 +43,28 @@ class ApiManager {
 
 export const apiManager = new ApiManager()
 
+export const getAssetURL = path => {
+  const baseURL = apiManager.getApiURL()
+  return `${baseURL}/assets/${path}`
+}
+export async function UploadFile(url, options) {
+  if (!isTokenValid()) {
+    Cookies.set('ca_redirect', window.location.pathname)
+    window.location.href = '/login'
+  }
+
+  if (!options) {
+    options = {}
+  }
+  const headers = HEADERS()
+  options.headers = { Authorization: headers['Authorization'] }
+
+  const baseURL = apiManager.getApiURL()
+  const fullURL = `${baseURL}${url}`
+
+  return fetch(fullURL, options)
+}
+
 export async function Fetch(url, options) {
   if (!isTokenValid()) {
     Cookies.set('ca_redirect', window.location.pathname)

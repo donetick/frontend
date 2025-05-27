@@ -37,6 +37,8 @@ import { Divider } from '@mui/material'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+
+import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useChoreDetails } from '../../queries/ChoreQueries.jsx'
 import { useCircleMembers } from '../../queries/UserQueries.jsx'
 import { notInCompletionWindow } from '../../utils/Chores.jsx'
@@ -85,6 +87,7 @@ const ChoreView = () => {
     isLoading: isCircleMembersLoading,
     handleRefetch: handleCircleMembersRefetch,
   } = useCircleMembers()
+  const { impersonatedUser } = useImpersonateUser()
 
   const {
     data: choreData,
@@ -181,7 +184,14 @@ const ChoreView = () => {
     }, 1000)
 
     const id = setTimeout(() => {
-      MarkChoreComplete(choreId, note, completedDate, null)
+      MarkChoreComplete(
+        choreId,
+        impersonatedUser
+          ? { completedBy: impersonatedUser.userId, note }
+          : { note },
+        completedDate,
+        null,
+      )
         .then(resp => {
           if (resp.ok) {
             return resp.json().then(data => {
