@@ -11,6 +11,8 @@
   text-decoration: none;
   font-weight: 500;
   padding: 0.5em;
+  color: #666;
+  font-size: 0.875rem;
 }
 
 .react-calendar__month-view__weekdays__weekday abbr {
@@ -19,31 +21,67 @@
   cursor: default;
 }
 
+/* reduce the naivation bar height */
+.react-calendar__navigation {
+  height: 30px;
+  margin-bottom: 10px;
+}
+
 .react-calendar__tile {
   padding: 10px;
   max-height: 40px;
   min-width: 40px;
   text-align: center;
-  border-radius: 50px;
-  transition: background-color 0.3s ease;
+  border-radius: 50%;
+  transition: all 0.2s ease-in-out;
+  position: relative;
+  font-size: 0.875rem;
 }
 
 .react-calendar__tile:enabled:hover {
-  background-color: #cbcbcb;
+  background-color: rgba(8, 114, 221, 0.08);
+  color: #0872dd;
 }
 
+/* Active/Selected date */
 .react-calendar__tile--active {
-  border: 1px dotted #4ec1a2e3 !important;
-  /* background-color: inherit; */
+  background-color: #0872dd !important;
+  color: white !important;
+  border: none !important;
+  box-shadow: 0 2px 4px rgba(8, 114, 221, 0.2);
 }
 
+.react-calendar__tile--active:hover {
+  background-color: #0766c7 !important;
+}
+
+/* Today's date */
 .react-calendar__tile--now {
-  background-color: #007bff !important;
-  border-radius: 50px;
+  background-color: transparent !important;
+  border: 1.5px solid #0872dd !important;
+  color: #0872dd !important;
+  font-weight: 500;
 }
 
 .react-calendar__tile--now:enabled:hover {
-  background-color: rgba(0, 123, 255, 0.1);
+  background-color: rgba(8, 114, 221, 0.08) !important;
+}
+
+/* Disabled dates */
+.react-calendar__tile:disabled {
+  color: #cbd5e1;
+  cursor: not-allowed;
+  background: transparent;
+}
+
+/* Weekend dates */
+.react-calendar__month-view__days__day--weekend {
+  color: #64748b;
+}
+
+/* Neighboring month dates */
+.react-calendar__month-view__days__day--neighboringMonth {
+  color: #94a3b8;
 }
 
 .dot-container {
@@ -89,8 +127,4 @@
   transition:
     opacity 0.2s ease,
     visibility 0.2s ease;
-}
-
-.react-calendar__month-view__days__day--weekend {
-  color: inherit;
 }

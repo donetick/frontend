@@ -1,3 +1,4 @@
+import { Person } from '@mui/icons-material'
 import { Avatar, Box, Button, Sheet, Typography } from '@mui/joy'
 
 import { useContext, useEffect, useState } from 'react'
@@ -5,18 +6,14 @@ import { useImpersonateUser } from '../../contexts/ImpersonateUserContext'
 import { UserContext } from '../../contexts/UserContext'
 import { useCircleMembers } from '../../queries/UserQueries'
 import UserModal from '../Modals/Inputs/UserModal'
-const WelcomeCard = chores => {
+const WelcomeCard = () => {
   const { impersonatedUser, setImpersonatedUser } = useImpersonateUser()
   const [isAdmin, setIsAdmin] = useState(false)
   const { userProfile } = useContext(UserContext)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [summarytext, setSummaryText] = useState('')
 
-  const {
-    data: circleMembersData,
-    isLoading: isCircleMembersLoading,
-    handleRefetch: handleCircleMembersRefetch,
-  } = useCircleMembers()
+  const { data: circleMembersData, isLoading: isCircleMembersLoading } =
+    useCircleMembers()
 
   useEffect(() => {
     if (userProfile && userProfile?.id) {
@@ -50,14 +47,28 @@ const WelcomeCard = chores => {
           justifyContent: 'space-between',
           boxShadow: 'sm',
           borderRadius: 20,
-          width: '290px',
+          width: '315px',
           mb: 1,
         }}
       >
         <Box sx={{ textAlign: 'center', width: '100%' }}>
+          {/* Header */}
+          <Box sx={{ mb: 2 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+                gap: 1,
+              }}
+            >
+              <Person color='primary' />
+              <Typography level='title-md'>Current User</Typography>
+            </Box>
+          </Box>
           <Box sx={{ mb: 2 }}>
             <Typography level='title-md' sx={{ mb: 0.5 }}>
-              Who's checking in?
+              Who&apos;s checking in?
             </Typography>
           </Box>
           <Button
@@ -106,6 +117,21 @@ const WelcomeCard = chores => {
           mb: 2,
         }}
       >
+        {/* Header */}
+        <Box sx={{ mb: 2, width: '100%' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              gap: 1,
+            }}
+          >
+            <Person color='primary' />
+            <Typography level='title-md'>Current User</Typography>
+          </Box>
+        </Box>
+
         <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
           <Box sx={{ mr: 2 }}>
             <Avatar

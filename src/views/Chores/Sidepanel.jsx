@@ -1,13 +1,20 @@
 import { Box, Sheet } from '@mui/joy'
 import { useMediaQuery } from '@mui/material'
 import { useEffect, useState } from 'react'
+import { useChoresHistory } from '../../queries/ChoreQueries'
 import { ChoresGrouper } from '../../utils/Chores'
 import CalendarView from '../components/CalendarView'
+import ActivitiesCard from './ActivitesCard'
 import WelcomeCard from './WelcomeCard'
 
 const Sidepanel = ({ chores }) => {
   const isLargeScreen = useMediaQuery(theme => theme.breakpoints.up('md'))
   const [dueDatePieChartData, setDueDatePieChartData] = useState([])
+  const {
+    data: choresHistory,
+    isChoresHistoryLoading,
+    handleLimitChange: refetchHistory,
+  } = useChoresHistory(7, true)
 
   useEffect(() => {
     setDueDatePieChartData(generateChoreDuePieChartData(chores))
@@ -33,6 +40,7 @@ const Sidepanel = ({ chores }) => {
   return (
     <Box>
       <WelcomeCard chores={chores} />
+      <ActivitiesCard chores={chores} choreHistory={choresHistory} />
       <Sheet
         variant='plain'
         sx={{
@@ -45,7 +53,7 @@ const Sidepanel = ({ chores }) => {
           boxShadow: 'sm',
           borderRadius: 20,
           height: '80vh',
-          width: '290px',
+          width: '315px',
         }}
       >
         <Box sx={{ width: '100%' }}>

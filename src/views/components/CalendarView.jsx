@@ -1,3 +1,4 @@
+import { CalendarMonth } from '@mui/icons-material'
 import { Box, Card, CardContent, Chip, Grid, Typography } from '@mui/joy'
 import moment from 'moment'
 import React, { useState } from 'react'
@@ -81,15 +82,30 @@ const CalendarView = ({ chores }) => {
         justifyContent: 'center',
       }}
     >
+      {/* Calendar Header */}
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-start',
+          gap: 1,
+          width: '100%',
+          mb: 2,
+        }}
+      >
+        <CalendarMonth color='primary' />
+        <Typography level='title-md'>Calendar Overview</Typography>
+      </Box>
+
       <Calendar
         tileContent={tileContent}
         onChange={d => {
           setSeletedDate(new Date(d))
         }}
         // format the days from MON, TUE, WED, THU, FRI, SAT, SUN to first three letters:
-        // formatShortWeekday={(locale, date) =>
-        //   ['S', 'M', 'T', 'W', 'T', 'F', 'S'][date.getDay()]
-        // }
+        formatShortWeekday={(locale, date) =>
+          ['S', 'M', 'T', 'W', 'T', 'F', 'S'][date.getDay()]
+        }
       />
       {!selectedDate && (
         <Grid container ml={-3} mt={1}>
