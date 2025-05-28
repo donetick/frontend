@@ -26,14 +26,32 @@ const CalendarView = ({ chores }) => {
         const tileDate = date.toLocaleDateString()
         return choreDate === tileDate
       })
+      if (dayChores.length === 0) {
+        return (
+          <div className='dot-container'>
+            <span className='dot-empty'></span>
+          </div>
+        )
+      }
+      if (dayChores.length > 3) {
+        return (
+          <div className='dot-container'>
+            <span
+              className='dot-with-line'
+              style={{
+                backgroundColor: getAssigneeColor(
+                  dayChores[0].assignedTo,
+                  userProfile,
+                ),
+              }}
+            ></span>
+          </div>
+        )
+      }
 
       return (
         <div className='dot-container'>
           {dayChores.map((chore, index) => {
-            if (index > 6) {
-              return null
-            }
-
             return (
               <span
                 key={index}
@@ -68,9 +86,13 @@ const CalendarView = ({ chores }) => {
         onChange={d => {
           setSeletedDate(new Date(d))
         }}
+        // format the days from MON, TUE, WED, THU, FRI, SAT, SUN to first three letters:
+        // formatShortWeekday={(locale, date) =>
+        //   ['S', 'M', 'T', 'W', 'T', 'F', 'S'][date.getDay()]
+        // }
       />
       {!selectedDate && (
-        <Grid container ml={-3}>
+        <Grid container ml={-3} mt={1}>
           {[
             { name: 'Assigned to me', color: TASK_COLOR.ASSIGNED_TO_ME },
             { name: 'Assigned to other', color: TASK_COLOR.ASSIGNED_TO_OTHER },
@@ -108,6 +130,7 @@ const CalendarView = ({ chores }) => {
             // p: 2,
             // borderRadius: 20,
             // if exceed the height, scroll:
+            mt: 1,
             maxHeight: '160px',
             overflowY: 'auto',
             // minimum height to fit the content:
