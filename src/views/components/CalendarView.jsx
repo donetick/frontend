@@ -1,12 +1,12 @@
 import { CalendarMonth } from '@mui/icons-material'
-import { Box, Card, CardContent, Chip, Grid, Typography } from '@mui/joy'
+import { Box, Chip, Grid, Typography } from '@mui/joy'
 import moment from 'moment'
 import React, { useState } from 'react'
 import Calendar from 'react-calendar'
 import 'react-calendar/dist/Calendar.css'
 import { useNavigate } from 'react-router-dom'
 import { UserContext } from '../../contexts/UserContext'
-import { getTextColorFromBackgroundColor, TASK_COLOR } from '../../utils/Colors'
+import { TASK_COLOR } from '../../utils/Colors'
 import './Calendar.css'
 
 const getAssigneeColor = (assignee, userProfile) => {
@@ -93,7 +93,7 @@ const CalendarView = ({ chores }) => {
           mb: 2,
         }}
       >
-        <CalendarMonth color='primary' />
+        <CalendarMonth />
         <Typography level='title-md'>Calendar Overview</Typography>
       </Box>
 
@@ -141,66 +141,136 @@ const CalendarView = ({ chores }) => {
       )}
       {selectedDate && (
         <Box
-          variant='outlined'
           sx={{
-            // p: 2,
-            // borderRadius: 20,
-            // if exceed the height, scroll:
-            mt: 1,
-            maxHeight: '160px',
-            overflowY: 'auto',
-            // minimum height to fit the content:
-            height: '50vh',
+            mt: 2,
             width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
           }}
         >
-          {chores
-            .filter(chore => {
-              const choreDate = new Date(chore.nextDueDate).toLocaleDateString()
-              const selectedLocalDate = selectedDate.toLocaleDateString()
-              return choreDate === selectedLocalDate
-            })
-            .map((chore, idx) => (
-              <Card
-                key={idx}
-                variant='outlined'
-                onClick={() => {
-                  Navigate('/chores/' + chore.id)
-                }}
-                sx={{
-                  mb: 0.4,
-                  py: 1,
-                  px: 1,
-                  cursor: 'pointer',
-                }}
-              >
-                <CardContent>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              width: '100%',
+            }}
+          >
+            <Typography level='title-md'>
+              {moment(selectedDate).format('MMMM D, YYYY')}
+            </Typography>
+            <Chip variant='soft' color='primary' size='md'>
+              {(() => {
+                const count = chores.filter(chore => {
+                  const choreDate = new Date(
+                    chore.nextDueDate,
+                  ).toLocaleDateString()
+                  const selectedLocalDate = selectedDate.toLocaleDateString()
+                  return choreDate === selectedLocalDate
+                }).length
+                return `${count} Tasks`
+              })()}
+            </Chip>
+          </Box>
+
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 1,
+              // maxHeight: 'calc(100vh - 500px)',
+              overflowY: 'auto',
+              maxHeight: '170px',
+
+              p: 1,
+            }}
+          >
+            {chores
+              .filter(chore => {
+                const choreDate = new Date(
+                  chore.nextDueDate,
+                ).toLocaleDateString()
+                const selectedLocalDate = selectedDate.toLocaleDateString()
+                return choreDate === selectedLocalDate
+              })
+              .sort((a, b) => moment(a.nextDueDate).diff(moment(b.nextDueDate)))
+              .map((chore, idx) => (
+                <Box
+                  key={idx}
+                  onClick={() => {
+                    Navigate('/chores/' + chore.id)
+                  }}
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 0.25,
+                    cursor: 'pointer',
+                    position: 'relative',
+                    pl: '16px',
+                    py: 0.75,
+                    transition: 'all 0.2s ease-in-out',
+                    borderRadius: 'sm',
+                    '&:hover': {
+                      // transform: 'translateX(4px)',
+                      bgcolor: 'background.level1',
+                    },
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      left: 0,
+                      top: 0,
+                      bottom: 0,
+                      width: '3px',
+                      backgroundColor: getAssigneeColor(
+                        chore.assignedTo,
+                        userProfile,
+                      ),
+                      borderRadius: '2px',
+                    },
+                  }}
+                >
                   <Typography
-                    key={chore.id}
-                    className='truncate'
-                    maxWidth='100%'
+                    level='body-sm'
+                    sx={{
+                      flex: 1,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      color: 'text.primary',
+                    }}
                   >
-                    <Chip
-                      variant='plain'
-                      size='sm'
-                      sx={{
-                        backgroundColor: getAssigneeColor(
-                          chore.assignedTo,
-                          userProfile,
-                        ),
-                        mr: 0.5,
-                        color: getTextColorFromBackgroundColor(
-                          getAssigneeColor(chore.assignedTo, userProfile),
-                        ),
-                      }}
-                    >
-                      {moment(chore.nextDueDate).format('hh:mm A')}
-                    </Chip>
                     {chore.name}
                   </Typography>
-                </CardContent>
-              </Card>
-            ))}
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1,
+                    }}
+                  >
+                    <Typography
+                      level='body-xs'
+                      sx={{
+                        color: 'neutral.500',
+                      }}
+                    >
+                      {moment(chore.nextDueDate).format('h:mm A')}
+                    </Typography>
+                    <Typography
+                      level='body-xs'
+                      sx={{
+                        color: getAssigneeColor(chore.assignedTo, userProfile),
+                      }}
+                    >
+                      {chore.assignedTo === userProfile.id
+                        ? 'Assigned to me'
+                        : 'Assigned to other'}
+                    </Typography>
+                  </Box>
+                </Box>
+              ))}
+          </Box>
         </Box>
       )}
     </div>
