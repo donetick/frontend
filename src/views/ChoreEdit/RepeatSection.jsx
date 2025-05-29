@@ -17,7 +17,7 @@ import {
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
-import { useContext, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { UserContext } from '../../contexts/UserContext'
 import { isPlusAccount } from '../../utils/Helpers'
 import ThingTriggerSection from './ThingTriggerSection'
@@ -71,6 +71,16 @@ const RepeatOnSections = ({
   things,
 }) => {
   const [intervalUnit, setIntervalUnit] = useState('days')
+  // if time on frequencyMetadata is not set, try to set it to the nextDueDate if available,
+  // otherwise set it to 18:00 of the current day
+  useEffect(() => {
+    if (!frequencyMetadata?.time) {
+      frequencyMetadata.time = moment(
+        moment(new Date()).format('YYYY-MM-DD') + 'T' + '18:00',
+      ).format()
+    }
+  }, [])
+
   const timePickerComponent = (
     <Grid item sm={12} sx={{ display: 'flex', alignItems: 'center' }}>
       <Typography level='h5'>At: </Typography>

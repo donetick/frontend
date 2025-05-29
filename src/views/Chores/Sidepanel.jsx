@@ -40,10 +40,10 @@ const Sidepanel = ({ chores }) => {
   return (
     <Box>
       <WelcomeCard chores={chores} />
-      <ActivitiesCard chores={chores} choreHistory={choresHistory} />
       <Sheet
         variant='plain'
         sx={{
+          my: 1,
           p: 2,
           display: 'flex',
           flexDirection: 'column',
@@ -52,14 +52,14 @@ const Sidepanel = ({ chores }) => {
           justifyContent: 'space-between',
           boxShadow: 'sm',
           borderRadius: 20,
-          height: '80vh',
           width: '315px',
         }}
       >
-        <Box sx={{ width: '100%' }}>
+        <Box sx={{ width: '100%', overflowY: 'hidden' }}>
           <CalendarView chores={chores} />
         </Box>
       </Sheet>
+      <ActivitiesCard chores={chores} choreHistory={choresHistory} />
     </Box>
   )
 }

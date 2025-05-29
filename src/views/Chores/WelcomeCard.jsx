@@ -62,7 +62,7 @@ const WelcomeCard = () => {
                 gap: 1,
               }}
             >
-              <Person color='primary' />
+              <Person color='' />
               <Typography level='title-md'>Current User</Typography>
             </Box>
           </Box>
@@ -105,7 +105,7 @@ const WelcomeCard = () => {
         justifyContent: 'space-between',
         boxShadow: 'sm',
         borderRadius: 20,
-        width: '290px',
+        width: '310px',
         mb: 1,
       }}
     >
@@ -127,7 +127,7 @@ const WelcomeCard = () => {
               gap: 1,
             }}
           >
-            <Person color='primary' />
+            <Person color='' />
             <Typography level='title-md'>Current User</Typography>
           </Box>
         </Box>

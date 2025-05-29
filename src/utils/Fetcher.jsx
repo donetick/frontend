@@ -123,12 +123,12 @@ const MarkChoreComplete = (id, body, completedDate, performer) => {
   })
 }
 
-const CompleteSubTask = (id, choreId, completedAt) => {
+const CompleteSubTask = (id, choreId, performedAt) => {
   var markChoreURL = `/chores/${choreId}/subtask`
   return Fetch(markChoreURL, {
     method: 'PUT',
     headers: HEADERS(),
-    body: JSON.stringify({ completedAt, id, choreId }),
+    body: JSON.stringify({ performedAt, id, choreId }),
   })
 }
 
