@@ -626,42 +626,44 @@ const MyChores = () => {
             Current Filter: {searchFilter}
           </Chip>
         )}
-        {filteredChores.length === 0 && (
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              flexDirection: 'column',
-              height: '50vh',
-            }}
-          >
-            <EditCalendar
-              sx={{
-                fontSize: '4rem',
-                // color: 'text.disabled',
-                mb: 1,
-              }}
-            />
-            <Typography level='title-md' gutterBottom>
-              Nothing scheduled
-            </Typography>
-            {chores.length > 0 && (
-              <>
-                <Button
-                  onClick={() => {
-                    setFilteredChores(chores)
-                    setSearchTerm('')
+        {filteredChores.length === 0 &&
+          archivedChores==null &&
+            (
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  flexDirection: 'column',
+                  height: '50vh',
+                }}
+              >
+                <EditCalendar
+                  sx={{
+                    fontSize: '4rem',
+                    // color: 'text.disabled',
+                    mb: 1,
                   }}
-                  variant='outlined'
-                  color='neutral'
-                >
-                  Reset filters
-                </Button>
-              </>
+                />
+                <Typography level='title-md' gutterBottom>
+                  Nothing scheduled
+                </Typography>
+                {chores.length > 0 && (
+                  <>
+                    <Button
+                      onClick={() => {
+                        setFilteredChores(chores)
+                        setSearchTerm('')
+                      }}
+                      variant='outlined'
+                      color='neutral'
+                    >
+                      Reset filters
+                    </Button>
+                  </>
+                )}
+              </Box>,
             )}
-          </Box>
-        )}
         {(searchTerm?.length > 0 || searchFilter !== 'All') &&
           filteredChores.map(chore => (
             <ChoreCard
