@@ -107,7 +107,7 @@ const UserPoints = () => {
       })
     }
     history.forEach(chore => {
-      const dayName = new Date(chore.completedAt).toLocaleString('en-US', {
+      const dayName = new Date(chore.performedAt).toLocaleString('en-US', {
         weekday: 'short',
       })
 
@@ -136,7 +136,7 @@ const UserPoints = () => {
       })
     }
     history.forEach(chore => {
-      const dayName = new Date(chore.completedAt).toLocaleString('en-US', {
+      const dayName = new Date(chore.performedAt).toLocaleString('en-US', {
         day: 'numeric',
       })
 
@@ -167,7 +167,7 @@ const UserPoints = () => {
       })
     }
     history.forEach(chore => {
-      const monthName = new Date(chore.completedAt).toLocaleString('en-US', {
+      const monthName = new Date(chore.performedAt).toLocaleString('en-US', {
         month: 'short',
       })
 
@@ -198,7 +198,7 @@ const UserPoints = () => {
       })
     }
     history.forEach(chore => {
-      const yearName = new Date(chore.completedAt).toLocaleString('en-US', {
+      const yearName = new Date(chore.performedAt).toLocaleString('en-US', {
         year: 'numeric',
       })
 

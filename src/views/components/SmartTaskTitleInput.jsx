@@ -1,6 +1,6 @@
 import { useColorScheme } from '@mui/joy'
 import { useEffect, useRef, useState } from 'react'
-import AutocompleteDropdown from './AutocompleteDropdown'
+import AutocompleteDropdown from '../TestView/AutocompleteDropdown'
 import './SmartTaskTitleInput.css'
 const renderHighlightedText = (text, cursorPosition) => {
   const parts = []

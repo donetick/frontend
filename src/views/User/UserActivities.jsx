@@ -35,7 +35,7 @@ const groupByDate = history => {
   const aggregated = {}
   for (let i = 0; i < history.length; i++) {
     const item = history[i]
-    const date = new Date(item.completedAt).toLocaleDateString()
+    const date = new Date(item.performedAt).toLocaleDateString()
     if (!aggregated[date]) {
       aggregated[date] = []
     }
@@ -114,7 +114,7 @@ const ChoreHistoryTimeline = ({ history }) => {
               <>
                 <ChoreHistoryItem
                   key={record.id}
-                  time={new Date(record.completedAt).toLocaleTimeString([], {
+                  time={new Date(record.performedAt).toLocaleTimeString([], {
                     hour: '2-digit',
                     minute: '2-digit',
                   })}
@@ -289,9 +289,9 @@ const UserActivites = () => {
 
   const generateHistoryPieChartData = history => {
     const totalCompleted =
-      history.filter(item => item.dueDate > item.completedAt).length || 0
+      history.filter(item => item.dueDate > item.performedAt).length || 0
     const totalLate =
-      history.filter(item => item.dueDate < item.completedAt).length || 0
+      history.filter(item => item.dueDate < item.performedAt).length || 0
     const totalNoDueDate = history.filter(item => !item.dueDate).length || 0
 
     return [

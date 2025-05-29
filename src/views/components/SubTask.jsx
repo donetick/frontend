@@ -1,4 +1,10 @@
-import { DndContext, closestCenter } from '@dnd-kit/core'
+import {
+  DndContext,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
 import {
   SortableContext,
   arrayMove,
@@ -24,7 +30,7 @@ import {
   ListItem,
   Typography,
 } from '@mui/joy'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { CompleteSubTask } from '../../utils/Fetcher'
 
 function SortableItem({
@@ -39,7 +45,17 @@ function SortableItem({
   editMode,
 }) {
   const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: task.id })
+    useSortable({
+      id: task.id,
+      // Add touch sensor options for better mobile scrolling
+      options: {
+        activationConstraint: {
+          // Require a small movement before activating drag to allow scrolling
+          delay: 250,
+          tolerance: 5,
+        },
+      },
+    })
 
   const [isEditing, setIsEditing] = useState(false)
   const [editedText, setEditedText] = useState(task.name)
@@ -58,7 +74,8 @@ function SortableItem({
     alignItems: 'center',
     gap: '0.5rem',
     flexDirection: { xs: 'column', sm: 'row' },
-    touchAction: 'none',
+    // Enable default touch behavior for scrolling
+    touchAction: 'auto',
     paddingLeft: `${level * 24}px`,
   }
 
@@ -102,7 +119,15 @@ function SortableItem({
     <>
       <ListItem ref={setNodeRef} style={style} {...attributes}>
         {editMode && (
-          <IconButton {...listeners} {...attributes} size='sm'>
+          <IconButton
+            {...listeners}
+            {...attributes}
+            size='sm'
+            // Add data attribute for selective activation
+            data-drag-handle='true'
+            // Only restrict touch actions on the drag handle
+            sx={{ touchAction: 'none' }}
+          >
             <DragIndicator />
           </IconButton>
         )}
@@ -119,7 +144,7 @@ function SortableItem({
         )}
 
         {!hasChildren && level > 0 && (
-          <Box sx={{ width: 28 }} /> // Spacer for alignment not sure of better way for now it's good
+          <Box sx={{ width: 28 }} /> // Spacer for alignment
         )}
 
         <Box
@@ -269,6 +294,17 @@ const SubTasks = ({ editMode = true, choreId = 0, tasks = [], setTasks }) => {
 
   const topLevelTasks = tasks.filter(task => task.parentId === null)
 
+  // Create sensors for touch handling
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      // Configure for better mobile scrolling
+      activationConstraint: {
+        delay: 100,
+        tolerance: 8,
+      },
+    }),
+  )
+
   const handleToggle = taskId => {
     const updatedTask = tasks.find(task => task.id === taskId)
     const newCompletedAt = updatedTask.completedAt
@@ -405,9 +441,21 @@ const SubTasks = ({ editMode = true, choreId = 0, tasks = [], setTasks }) => {
 
   return (
     <>
-      <DndContext collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+      <DndContext
+        collisionDetection={closestCenter}
+        onDragEnd={onDragEnd}
+        sensors={sensors}
+      >
         <SortableContext items={tasks} strategy={verticalListSortingStrategy}>
-          <List sx={{ padding: 0 }}>
+          <List
+            sx={{
+              padding: 0,
+              // Improve scrolling behavior on mobile
+              maxHeight: 'inherit',
+              overflow: 'visible',
+              WebkitOverflowScrolling: 'touch',
+            }}
+          >
             {topLevelTasks
               .sort((a, b) => a.orderId - b.orderId)
               .map((task, index) => (

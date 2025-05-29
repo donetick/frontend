@@ -12,7 +12,7 @@ import {
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
   DeleteChoreHistory,
@@ -69,9 +69,9 @@ const ChoreHistory = () => {
 
     const averageDelay =
       histories.reduce((acc, chore) => {
-        if (chore.dueDate && chore.completedAt) {
+        if (chore.dueDate && chore.performedAt) {
           // Only consider chores with a due date
-          return acc + moment(chore.completedAt).diff(chore.dueDate, 'hours')
+          return acc + moment(chore.performedAt).diff(chore.dueDate, 'hours')
         }
         return acc
       }, 0) / histories.filter(chore => chore.dueDate).length
@@ -79,7 +79,7 @@ const ChoreHistory = () => {
     const maximumDelay = histories.reduce((acc, chore) => {
       if (chore.dueDate) {
         // Only consider chores with a due date
-        const delay = moment(chore.completedAt).diff(chore.dueDate, 'hours')
+        const delay = moment(chore.performedAt).diff(chore.dueDate, 'hours')
         return delay > acc ? delay : acc
       }
       return acc
@@ -242,7 +242,7 @@ const ChoreHistory = () => {
           },
           onSave: updated => {
             UpdateChoreHistory(choreId, editHistory.id, {
-              completedAt: updated.completedAt,
+              performedAt: updated.performedAt,
               dueDate: updated.dueDate,
               notes: updated.notes,
             }).then(res => {
