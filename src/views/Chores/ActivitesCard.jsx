@@ -3,6 +3,7 @@ import {
   EventNote,
   Notes,
   Person,
+  Redo,
   Refresh,
   Toll,
   WatchLater,
@@ -31,9 +32,9 @@ const ActivityItem = ({ activity, members }) => {
     member => member.userId === activity.completedBy,
   )
 
-  const getTimeDisplay = completedAt => {
+  const getTimeDisplay = performedAt => {
     const now = moment()
-    const completed = moment(completedAt)
+    const completed = moment(performedAt)
     const diffInHours = now.diff(completed, 'hours')
     const diffInDays = now.diff(completed, 'days')
 
@@ -49,27 +50,34 @@ const ActivityItem = ({ activity, members }) => {
   }
 
   const getStatusInfo = activity => {
-    if (!activity.dueDate) {
+    if (!activity.status === 1) {
       return {
         color: 'neutral',
         text: 'Completed',
         icon: <CheckCircle />,
       }
+    } else if (activity.status === 2) {
+      // skipped
+      return {
+        color: 'warning',
+        text: 'Skipped',
+        icon: <Redo />,
+      }
     }
 
-    const wasOnTime = moment(activity.completedAt).isSameOrBefore(
+    const wasOnTime = moment(activity.performedAt).isSameOrBefore(
       moment(activity.dueDate),
     )
 
     if (wasOnTime) {
       return {
         color: 'success',
-        text: 'On Time',
+        text: 'Done',
         icon: <CheckCircle />,
       }
     } else {
       return {
-        color: 'warning',
+        color: 'primary',
         text: 'Late',
         icon: <WatchLater />,
       }
@@ -97,13 +105,14 @@ const ActivityItem = ({ activity, members }) => {
               {activity.choreName}
             </Typography>
             <Typography level='body-xs' color='text.secondary'>
-              {getTimeDisplay(activity.completedAt)}
+              {getTimeDisplay(activity.performedAt)}
             </Typography>
           </Box>
 
           {/* Who completed it */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
             {/* Status chip */}
+
             <Chip
               size='sm'
               variant='soft'
@@ -171,7 +180,7 @@ const groupActivitiesByDate = activities => {
   const groups = {}
 
   activities.forEach(activity => {
-    const date = moment(activity.completedAt).format('YYYY-MM-DD')
+    const date = moment(activity.performedAt).format('YYYY-MM-DD')
     if (!groups[date]) {
       groups[date] = []
     }
@@ -229,7 +238,6 @@ const ActivitiesCard = ({ title = 'Recent Activities' }) => {
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-          <EventNote />
           <Typography level='title-md'>{title}</Typography>
         </Box>
         <Box
@@ -262,7 +270,7 @@ const ActivitiesCard = ({ title = 'Recent Activities' }) => {
   const sortedHistory = enrichedHistory
     .sort(
       (a, b) =>
-        moment(b.completedAt).valueOf() - moment(a.completedAt).valueOf(),
+        moment(b.performedAt).valueOf() - moment(a.performedAt).valueOf(),
     )
     .slice(0, 10) // Show only latest 10 activities
 
@@ -286,7 +294,7 @@ const ActivitiesCard = ({ title = 'Recent Activities' }) => {
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-          <EventNote color='primary' />
+          <EventNote color='' />
           <Typography level='title-md'>{title}</Typography>
         </Box>
         <Box
@@ -331,7 +339,7 @@ const ActivitiesCard = ({ title = 'Recent Activities' }) => {
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <EventNote color='primary' />
+            <EventNote color='' />
             <Typography level='title-md'>{title}</Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

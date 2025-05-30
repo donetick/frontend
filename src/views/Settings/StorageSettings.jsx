@@ -1,22 +1,34 @@
 import { Capacitor } from '@capacitor/core'
-import { Button, Card, Divider, LinearProgress, Typography } from '@mui/joy'
-import { useEffect, useState } from 'react'
+import {
+  Button,
+  Card,
+  Chip,
+  Divider,
+  LinearProgress,
+  Typography,
+} from '@mui/joy'
+import { useContext, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { UserContext } from '../../contexts/UserContext'
 import { GetStorageUsage } from '../../utils/Fetcher'
+import { isPlusAccount } from '../../utils/Helpers'
 
 const StorageSettings = () => {
   const Navigate = useNavigate()
+  const { userProfile } = useContext(UserContext)
   const [usage, setUsage] = useState({ used: 0, total: 0 })
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    GetStorageUsage().then(resp => {
-      resp.json().then(data => {
-        setUsage(data.res)
-        setLoading(false)
+    if (isPlusAccount(userProfile)) {
+      GetStorageUsage().then(resp => {
+        resp.json().then(data => {
+          setUsage(data.res)
+          setLoading(false)
+        })
       })
-    })
-  }, [])
+    }
+  }, [userProfile])
 
   const percent =
     usage.total > 0 ? Math.round((usage.used / usage.total) * 100) : 0
@@ -30,13 +42,42 @@ const StorageSettings = () => {
       <Card className='p-4' sx={{ maxWidth: 500, mb: 2 }}>
         <Typography level='title-md' sx={{ mb: 1 }}>
           Server Storage Usage
+          {!isPlusAccount(userProfile) && (
+            <Chip variant='soft' color='warning' sx={{ ml: 1 }}>
+              Plus Feature
+            </Chip>
+          )}
         </Typography>
         <Typography level='body-sm' sx={{ mb: 1 }}>
           This is the storage used by your account on our servers (e.g. files,
           images, and data you have uploaded).
         </Typography>
-        {loading ? (
-          <Typography level='body-xs'>Loading...</Typography>
+        {!isPlusAccount(userProfile) ? (
+          <>
+            <LinearProgress
+              determinate
+              value={0}
+              sx={{
+                mb: 1,
+                opacity: 0.4,
+                '& .MuiLinearProgress-bar': {
+                  backgroundColor: 'var(--joy-palette-neutral-400)',
+                },
+              }}
+            />
+            <Typography level='body-xs' sx={{ opacity: 0.6, mb: 1 }}>
+              -- MB used / -- MB total (--)
+            </Typography>
+            <Typography level='body-sm' color='warning'>
+              Server storage monitoring is not available in the Basic plan.
+              Upgrade to Plus to track your server storage usage.
+            </Typography>
+          </>
+        ) : loading ? (
+          <>
+            <LinearProgress sx={{ mb: 1 }} />
+            <Typography level='body-xs'>Loading...</Typography>
+          </>
         ) : (
           <>
             <LinearProgress determinate value={percent} sx={{ mb: 1 }} />

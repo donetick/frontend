@@ -422,9 +422,15 @@ const Settings = () => {
             </Typography>
             <Typography level='body-md' mt={-1}>
               Webhooks allow you to send real-time notifications to other
-              services when events happen in your Circle. Use the webhook URL
-              below to
+              services when events happen in your Circle. Configure a webhook
+              URL to receive real-time updates.
             </Typography>
+            {!isPlusAccount(userProfile) && (
+              <Typography level='body-sm' color='warning' sx={{ mt: 1 }}>
+                Webhook notifications are not available in the Basic plan.
+                Upgrade to Plus to receive real-time updates via webhooks.
+              </Typography>
+            )}
             <FormControl sx={{ mt: 1 }}>
               <Checkbox
                 checked={webhookURL !== null}
@@ -448,7 +454,7 @@ const Settings = () => {
                 Enable webhook notifications for tasks and things updates.{' '}
                 {userProfile && !isPlusAccount(userProfile) && (
                   <Chip variant='soft' color='warning'>
-                    Not available in Basic Plan
+                    Plus Feature
                   </Chip>
                 )}
               </FormHelperText>

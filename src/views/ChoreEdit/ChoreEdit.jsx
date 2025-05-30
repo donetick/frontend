@@ -692,10 +692,16 @@ const ChoreEdit = () => {
           Get Reminders when this task is due or completed
           {!isPlusAccount(userProfile) && (
             <Chip variant='soft' color='warning'>
-              Not available in Basic Plan
+              Plus Feature
             </Chip>
           )}
         </Typography>
+        {!isPlusAccount(userProfile) && (
+          <Typography level='body-sm' color='warning' sx={{ mb: 1 }}>
+            Task notifications are not available in the Basic plan. Upgrade to
+            Plus to receive reminders when tasks are due or completed.
+          </Typography>
+        )}
 
         <FormControl sx={{ mt: 1 }}>
           <Checkbox

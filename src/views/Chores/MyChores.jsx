@@ -9,6 +9,8 @@ import {
   Sort,
   Style,
   Unarchive,
+  ViewAgenda,
+  ViewModule,
 } from '@mui/icons-material'
 import {
   Accordion,
@@ -42,6 +44,7 @@ import Priorities from '../../utils/Priorities'
 import LoadingComponent from '../components/Loading'
 import { useLabels } from '../Labels/LabelQueries'
 import ChoreCard from './ChoreCard'
+import CompactChoreCard from './CompactChoreCard'
 import IconButtonWithMenu from './IconButtonWithMenu'
 
 import { ChoreFilters, ChoresGrouper, ChoreSorter } from '../../utils/Chores'
@@ -81,6 +84,9 @@ const MyChores = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [performers, setPerformers] = useState([])
   const [anchorEl, setAnchorEl] = useState(null)
+  const [isCompactView, setIsCompactView] = useState(
+    localStorage.getItem('choreCardViewMode') === 'compact',
+  )
   const menuRef = useRef(null)
   const Navigate = useNavigate()
   const { data: userLabels, isLoading: userLabelsLoading } = useLabels()
@@ -203,6 +209,28 @@ const MyChores = () => {
   const setSelectedChoreFilterWithCache = value => {
     setSelectedChoreFilter(value)
     localStorage.setItem('selectedChoreFilter', value)
+  }
+
+  const toggleViewMode = () => {
+    const newMode = !isCompactView
+    setIsCompactView(newMode)
+    localStorage.setItem('choreCardViewMode', newMode ? 'compact' : 'default')
+  }
+
+  // Helper function to render the appropriate card component
+  const renderChoreCard = (chore, key) => {
+    const CardComponent = isCompactView ? CompactChoreCard : ChoreCard
+    return (
+      <CardComponent
+        key={key || chore.id}
+        chore={chore}
+        onChoreUpdate={handleChoreUpdated}
+        onChoreRemove={handleChoreDeleted}
+        performers={performers}
+        userLabels={userLabels}
+        onChipClick={handleLabelFiltering}
+      />
+    )
   }
 
   const updateChores = newChore => {
@@ -486,6 +514,24 @@ const MyChores = () => {
             }}
             mouseClickHandler={handleMenuOutsideClick}
           />
+
+          {/* View Mode Toggle Button */}
+          <IconButton
+            variant='outlined'
+            color='neutral'
+            size='sm'
+            sx={{
+              height: 32,
+              width: 32,
+              borderRadius: '50%',
+            }}
+            onClick={toggleViewMode}
+            title={
+              isCompactView ? 'Switch to Card View' : 'Switch to Compact View'
+            }
+          >
+            {isCompactView ? <ViewModule /> : <ViewAgenda />}
+          </IconButton>
         </Box>
         {showSearchFilter && (
           <div className='flex gap-4'>
@@ -626,56 +672,46 @@ const MyChores = () => {
             Current Filter: {searchFilter}
           </Chip>
         )}
-        {filteredChores.length === 0 &&
-          archivedChores==null &&
-            (
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  flexDirection: 'column',
-                  height: '50vh',
-                }}
-              >
-                <EditCalendar
-                  sx={{
-                    fontSize: '4rem',
-                    // color: 'text.disabled',
-                    mb: 1,
-                  }}
-                />
-                <Typography level='title-md' gutterBottom>
-                  Nothing scheduled
-                </Typography>
-                {chores.length > 0 && (
-                  <>
-                    <Button
-                      onClick={() => {
-                        setFilteredChores(chores)
-                        setSearchTerm('')
-                      }}
-                      variant='outlined'
-                      color='neutral'
-                    >
-                      Reset filters
-                    </Button>
-                  </>
-                )}
-              </Box>,
-            )}
-        {(searchTerm?.length > 0 || searchFilter !== 'All') &&
-          filteredChores.map(chore => (
-            <ChoreCard
-              key={`filtered-${chore.id} `}
-              chore={chore}
-              onChoreUpdate={handleChoreUpdated}
-              onChoreRemove={handleChoreDeleted}
-              performers={performers}
-              userLabels={userLabels}
-              onChipClick={handleLabelFiltering}
+        {filteredChores.length === 0 && archivedChores == null && (
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              flexDirection: 'column',
+              height: '50vh',
+            }}
+          >
+            <EditCalendar
+              sx={{
+                fontSize: '4rem',
+                // color: 'text.disabled',
+                mb: 1,
+              }}
             />
-          ))}
+            <Typography level='title-md' gutterBottom>
+              Nothing scheduled
+            </Typography>
+            {chores.length > 0 && (
+              <>
+                <Button
+                  onClick={() => {
+                    setFilteredChores(chores)
+                    setSearchTerm('')
+                  }}
+                  variant='outlined'
+                  color='neutral'
+                >
+                  Reset filters
+                </Button>
+              </>
+            )}
+          </Box>
+        )}
+        {(searchTerm?.length > 0 || searchFilter !== 'All') &&
+          filteredChores.map(chore =>
+            renderChoreCard(chore, `filtered-${chore.id}`),
+          )}
         {searchTerm.length === 0 && searchFilter === 'All' && (
           <AccordionGroup transition='0.2s ease' disableDivider>
             {choreSections.map((section, index) => {
@@ -735,17 +771,7 @@ const MyChores = () => {
                       my: 0,
                     }}
                   >
-                    {section.content?.map(chore => (
-                      <ChoreCard
-                        key={chore.id}
-                        chore={chore}
-                        onChoreUpdate={handleChoreUpdated}
-                        onChoreRemove={handleChoreDeleted}
-                        performers={performers}
-                        userLabels={userLabels}
-                        onChipClick={handleLabelFiltering}
-                      />
-                    ))}
+                    {section.content?.map(chore => renderChoreCard(chore))}
                   </AccordionDetails>
                 </Accordion>
               )
@@ -797,17 +823,7 @@ const MyChores = () => {
                 </Chip>
               </Divider>
 
-              {archivedChores?.map(chore => (
-                <ChoreCard
-                  key={chore.id}
-                  chore={chore}
-                  onChoreUpdate={handleChoreUpdated}
-                  onChoreRemove={handleChoreDeleted}
-                  performers={performers}
-                  userLabels={userLabels}
-                  onChipClick={handleLabelFiltering}
-                />
-              ))}
+              {archivedChores?.map(chore => renderChoreCard(chore))}
             </>
           )}
         </Box>
