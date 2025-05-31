@@ -721,7 +721,11 @@ const MyChores = () => {
                   <AccordionDetails
                     sx={{
                       flexDirection: 'column',
-                      my: 0,
+                      ['& > *']: {
+                        // px: 0.5,
+                        px: 0.5,
+                        // pr: 0,
+                      },
                     }}
                   >
                     {section.content?.map(chore => renderChoreCard(chore))}
