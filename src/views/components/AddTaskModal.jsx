@@ -20,12 +20,7 @@ import { useCreateChore } from '../../queries/ChoreQueries'
 import { useCircleMembers } from '../../queries/UserQueries'
 import { isPlusAccount } from '../../utils/Helpers'
 import { useLabels } from '../Labels/LabelQueries'
-import {
-  parseAssignees,
-  parseLabels,
-  parsePriority,
-  parseRepeatV2,
-} from './CustomParsers'
+import { parseLabels, parsePriority, parseRepeatV2 } from './CustomParsers'
 import SmartTaskTitleInput from './SmartTaskTitleInput'
 
 import LearnMoreButton from './LearnMore'
@@ -212,33 +207,32 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
         cleanedSentence = repeat.cleanedSentence
       }
       // Parse assignees using circle members
-      const circleMembersList = circleMembers?.res || []
-      const assigneesForParsing = circleMembersList.map(member => ({
-        userId: member.userId,
-        username:
-          member.username ||
-          member.displayName?.toLowerCase().replace(/\s+/g, ''),
-        displayName: member.displayName,
-        name: member.displayName,
-        id: member.userId,
-      }))
+      // const circleMembersList = circleMembers?.res || []
+      // const assigneesForParsing = circleMembersList.map(member => ({
+      //   userId: member.userId,
+      //   username:
+      //     member.username ||
+      //     member.displayName?.toLowerCase().replace(/\s+/g, ''),
+      //   displayName: member.displayName,
+      //   name: member.displayName,
+      //   id: member.userId,
+      // }))
 
-      const assigneesResult = parseAssignees(sentence, assigneesForParsing)
-      if (assigneesResult.result) {
-        cleanedSentence = assigneesResult.cleanedSentence
-        setAssignees(assigneesResult.result)
-      } else {
-        // Default to current user if no assignees parsed
-        setAssignees([
-          {
-            userId: userProfile.id,
-            username: userProfile.username,
-            displayName: userProfile.displayName,
-            name: userProfile.displayName,
-            id: userProfile.id,
-          },
-        ])
-      }
+      // const assigneesResult = parseAssignees(sentence, assigneesForParsing)
+      // if (assigneesResult.result) {
+      //   cleanedSentence = assigneesResult.cleanedSentence
+      //   setAssignees(
+      //     assigneesResult.result.map(assignee => ({
+      //       userId: assignee.userId,
+      //     })),
+      //   )
+      // } else {
+      //   setAssignees([
+      //     {
+      //       userId: userProfile.id,
+      //     },
+      //   ])
+      // }
       const parsedDueDate = chrono.parse(sentence, new Date(), {
         forwardDate: true,
       })
@@ -327,7 +321,8 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
   const createChore = () => {
     const chore = {
       name: taskTitle,
-      assignees: assignees.map(assignee => ({ userId: assignee.userId })),
+      assignees:
+        assignees.length > 0 ? assignees : [{ userId: userProfile.id }],
       dueDate: dueDate ? new Date(dueDate).toISOString() : null,
       assignedTo: assignees.length > 0 ? assignees[0].userId : userProfile.id,
       assignStrategy: 'random',
@@ -590,7 +585,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
               gap: 2,
             }}
           >
-            <FormControl>
+            {/* <FormControl>
               <Typography level='body-sm'>Assignees</Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                 {assignees.length > 0 ? (
@@ -598,7 +593,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
                     <Chip
                       key={assignee.userId || index}
                       variant='soft'
-                      size='sm'
+                      size='lg'
                       color='primary'
                     >
                       {assignee.displayName || assignee.username}
@@ -610,7 +605,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
                   </Chip>
                 )}
               </Box>
-            </FormControl>
+            </FormControl> */}
             <FormControl>
               <Typography level='body-sm'>Frequency</Typography>
               <Input value={frequencyHumanReadable || 'Once'} variant='plain' />

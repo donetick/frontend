@@ -464,7 +464,7 @@ const CompactChoreCard = ({
           ...sx,
           display: 'flex',
           alignItems: 'center',
-          px: 1,
+          // px: 1,
           //   py: 0.75,
           minHeight: 56, // More compact height
           cursor: 'pointer',
@@ -594,11 +594,11 @@ const CompactChoreCard = ({
                   }
                 }}
                 style={{
-                  display: 'inline-block',
                   cursor: 'pointer',
-                  // remove any padding or margin:
                   padding: 0,
                   margin: 0,
+                  display: 'flex',
+                  alignItems: 'center',
                 }}
                 key={`compact-chorecard-${chore.id}-label-${l.id}`}
               >

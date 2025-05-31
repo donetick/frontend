@@ -23,11 +23,6 @@ const WelcomeCard = () => {
           member.userId === userProfile?.id &&
           (member.role === 'admin' || member.role === 'manager'),
       )
-      members.forEach(m =>
-        console.log('Member:', userProfile?.id, m.id, m.role),
-      )
-      console.log('Circle Members:', members)
-      console.log(isUserAdmin)
 
       setIsAdmin(isUserAdmin)
     }

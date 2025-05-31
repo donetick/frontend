@@ -532,15 +532,17 @@ const ChoreCard = ({
               <Box display='flex' flexDirection='column'>
                 <Typography level='title-md'>{getName(chore.name)}</Typography>
                 {userProfile && chore.assignedTo !== userProfile.id && (
-                  <Typography level='body-md' color='text.disabled'>
-                    Assigned to{' '}
+                  <Box display='flex' alignItems='center' gap={0.5}>
+                    <Typography level='body-md' color='text.disabled'>
+                      Assigned to
+                    </Typography>
                     <Chip variant='outlined'>
                       {
                         performers.find(p => p.id === chore.assignedTo)
                           ?.displayName
                       }
                     </Chip>
-                  </Typography>
+                  </Box>
                 )}
                 <Box key={`${chore.id}-labels`}>
                   {chore.priority > 0 && (
