@@ -375,7 +375,6 @@ export const parseAssignees = (inputSentence, users) => {
   const sentence = inputSentence.toLowerCase()
   const result = []
   const highlight = []
-  console.log('users:', users)
 
   for (const user of users) {
     if (sentence.includes(`@${user.username.toLowerCase()}`)) {

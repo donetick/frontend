@@ -25,12 +25,15 @@ import Logo from '../../Logo'
 import { useResource } from '../../queries/ResourceQueries'
 import { GetUserProfile, login } from '../../utils/Fetcher'
 import { apiManager } from '../../utils/TokenManager'
+import MFAVerificationModal from './MFAVerificationModal'
 
 const LoginView = () => {
   const { userProfile, setUserProfile } = React.useContext(UserContext)
   const [username, setUsername] = React.useState('')
   const [password, setPassword] = React.useState('')
   const [error, setError] = React.useState(null)
+  const [mfaModalOpen, setMfaModalOpen] = React.useState(false)
+  const [mfaSessionToken, setMfaSessionToken] = React.useState('')
   const { data: resource } = useResource()
   const Navigate = useNavigate()
   useEffect(() => {
@@ -52,10 +55,17 @@ const LoginView = () => {
       .then(response => {
         if (response.status === 200) {
           return response.json().then(data => {
+            // Check if MFA is required
+            if (data.mfaRequired) {
+              setMfaSessionToken(data.sessionToken)
+              setMfaModalOpen(true)
+              return
+            }
+
+            // Normal login without MFA
             localStorage.setItem('ca_token', data.token)
             localStorage.setItem('ca_expiration', data.expire)
             const redirectUrl = Cookies.get('ca_redirect')
-            // console.log('redirectUrl', redirectUrl)
             if (redirectUrl) {
               Cookies.remove('ca_redirect')
               Navigate(redirectUrl)
@@ -100,6 +110,14 @@ const LoginView = () => {
     }).then(response => {
       if (response.status === 200) {
         return response.json().then(data => {
+          // Check if MFA is required for OAuth login
+          if (data.mfaRequired) {
+            setMfaSessionToken(data.sessionToken)
+            setMfaModalOpen(true)
+            return
+          }
+
+          // Normal OAuth login without MFA
           localStorage.setItem('ca_token', data.token)
           localStorage.setItem('ca_expiration', data.expire)
 
@@ -112,7 +130,7 @@ const LoginView = () => {
           }
         })
       }
-      return response.json().then(error => {
+      return response.json().then(() => {
         setError("Couldn't log in with Google, please try again")
       })
     })
@@ -132,6 +150,31 @@ const LoginView = () => {
       })
     })
   }
+
+  const handleMFASuccess = data => {
+    localStorage.setItem('ca_token', data.token)
+    localStorage.setItem('ca_expiration', data.expire)
+    setMfaModalOpen(false)
+    setMfaSessionToken('')
+
+    const redirectUrl = Cookies.get('ca_redirect')
+    if (redirectUrl) {
+      Cookies.remove('ca_redirect')
+      Navigate(redirectUrl)
+    } else {
+      Navigate('/my/chores')
+    }
+  }
+
+  const handleMFAError = errorMessage => {
+    setError(errorMessage)
+  }
+
+  const handleMFAClose = () => {
+    setMfaModalOpen(false)
+    setMfaSessionToken('')
+  }
+
   const handleForgotPassword = () => {
     Navigate('/forgot-password')
   }
@@ -434,6 +477,14 @@ const LoginView = () => {
       >
         {error}
       </Snackbar>
+
+      <MFAVerificationModal
+        open={mfaModalOpen}
+        onClose={handleMFAClose}
+        sessionToken={mfaSessionToken}
+        onSuccess={handleMFASuccess}
+        onError={handleMFAError}
+      />
     </Container>
   )
 }

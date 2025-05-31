@@ -54,6 +54,7 @@ const ASSIGN_STRATEGIES = [
   'least_completed',
   'keep_last_assigned',
   'random_except_last_assigned',
+  'round_robin',
 ]
 const REPEAT_ON_TYPE = ['interval', 'days_of_the_week', 'day_of_the_month']
 

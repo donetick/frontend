@@ -2,9 +2,10 @@ import imageCompression from 'browser-image-compression'
 import Quill from 'quill'
 import 'quill/dist/quill.snow.css'
 import QuillMarkdown from 'quilljs-markdown'
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useContext, useEffect, useRef } from 'react'
+import { UserContext } from '../../contexts/UserContext'
 import { useError } from '../../service/ErrorProvider'
-import { resolvePhotoURL } from '../../utils/Helpers'
+import { isPlusAccount, resolvePhotoURL } from '../../utils/Helpers'
 import { UploadFile } from '../../utils/TokenManager'
 import './RichTextEditor.css'
 
@@ -12,16 +13,28 @@ const RichTextEditor = ({
   value = '',
   onChange,
   isEditable = true,
+  placeholder = 'Enter description...',
   variant = 'outlined',
   entityId,
   entityType,
 }) => {
   const { showError } = useError()
+  const { userProfile } = useContext(UserContext)
   const quillRef = useRef(null)
   const editorRef = useRef(null)
 
   // Image upload handler - wrapped in useCallback to avoid recreating on every render
   const handleImageUpload = useCallback(() => {
+    // Check if user has plus account
+    if (!isPlusAccount(userProfile)) {
+      showError({
+        title: 'Plus Feature',
+        message:
+          'Image uploads are not available in the Basic plan. Upgrade to Plus to add images to your content.',
+      })
+      return
+    }
+
     const input = document.createElement('input')
     input.setAttribute('type', 'file')
     input.setAttribute('accept', 'image/*')
@@ -77,6 +90,19 @@ const RichTextEditor = ({
             message: 'The file you are trying to upload is too large.',
           })
           return
+        } else if (response.status === 403 && !isPlusAccount()) {
+          showError({
+            title: 'Upgrade Required',
+            message:
+              'Image uploads are only available for Plus accounts. Please ',
+          })
+          return
+        } else if (response.status === 403) {
+          showError({
+            title: 'Permission Denied',
+            message: 'You do not have permission to upload files.',
+          })
+          return
         } else if (!response.ok) {
           showError({
             title: 'Upload Failed',
@@ -98,7 +124,7 @@ const RichTextEditor = ({
         })
       }
     }
-  }, [entityId, entityType, showError]) // Dependencies for useCallback
+  }, [entityId, entityType, showError, userProfile]) // Dependencies for useCallback
 
   useEffect(() => {
     if (!quillRef.current) return
@@ -120,7 +146,7 @@ const RichTextEditor = ({
             },
           },
         },
-        placeholder: 'Enter description...',
+        placeholder: placeholder,
       })
       new QuillMarkdown(editorRef.current, {})
       editorRef.current.root.innerHTML = value
@@ -141,7 +167,7 @@ const RichTextEditor = ({
         editorRef.current.readOnly = false
       }
     }
-  }, [onChange, value, isEditable, variant, handleImageUpload]) // Added handleImageUpload to dependency array
+  }, [onChange, value, isEditable, variant, handleImageUpload, userProfile]) // Added handleImageUpload and userProfile to dependency array
 
   useEffect(() => {
     if (editorRef.current && isEditable) {
@@ -178,7 +204,13 @@ const RichTextEditor = ({
 
   return (
     <div className={`quill-root quill-variant-${variant}`}>
-      <div ref={quillRef} style={{ minHeight: 120 }} />
+      <div
+        ref={quillRef}
+        style={{
+          minHeight: 120,
+          background: 'var(--joy-palette-background-surface, #fff)',
+        }}
+      />
     </div>
   )
 }

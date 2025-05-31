@@ -14,16 +14,19 @@ import {
 import { FormControl } from '@mui/material'
 import * as chrono from 'chrono-node'
 import moment from 'moment'
-import { useContext, useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { UserContext } from '../../contexts/UserContext'
 import { useCreateChore } from '../../queries/ChoreQueries'
-import { useAllUsers } from '../../queries/UserQueries'
-import useDebounce from '../../utils/Debounce'
+import { useCircleMembers } from '../../queries/UserQueries'
 import { isPlusAccount } from '../../utils/Helpers'
 import { useLabels } from '../Labels/LabelQueries'
-import SmartTaskTitleInput from '../TestView/SmartTaskTitleInput'
-import { parseLabels, parsePriority, parseRepeatV2 } from './CustomParsers'
+import {
+  parseAssignees,
+  parseLabels,
+  parsePriority,
+  parseRepeatV2,
+} from './CustomParsers'
+import SmartTaskTitleInput from './SmartTaskTitleInput'
 
 import LearnMoreButton from './LearnMore'
 import RichTextEditor from './RichTextEditor'
@@ -31,13 +34,12 @@ import SubTasks from './SubTask'
 
 const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
   const { data: userLabels, isLoading: userLabelsLoading } = useLabels()
-  const { data: allUsers, isLoading: isAllUserLoading } = useAllUsers()
+  const { data: circleMembers, isLoading: isCircleMembersLoading } =
+    useCircleMembers()
   const createChoreMutation = useCreateChore()
 
   const { userProfile } = useContext(UserContext)
-  const navigate = useNavigate()
   const [taskText, setTaskText] = useState('')
-  const debounceParsing = useDebounce(taskText, 30)
   const [taskTitle, setTaskTitle] = useState('')
   const [renderedParts, setRenderedParts] = useState([])
 
@@ -46,7 +48,6 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
   const [priority, setPriority] = useState(0)
   const [dueDate, setDueDate] = useState(null)
   const [description, setDescription] = useState(null)
-  const [assignedTo, setAssignedTo] = useState(userProfile?.id)
   const [assignees, setAssignees] = useState([])
   const [labelsV2, setLabelsV2] = useState([])
   const [frequency, setFrequency] = useState(null)
@@ -71,13 +72,231 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
     }
   }, [autoFocus])
 
+  const renderHighlightedSentence = useCallback(
+    (
+      sentence,
+      repeatHighlight,
+      priorityHighlight,
+      labelsHighlight,
+      dueDateHighlight,
+    ) => {
+      const parts = []
+      let lastIndex = 0
+      let plainText = ''
+
+      // Combine all highlight ranges and sort them by their start index
+      const allHighlights = []
+      if (repeatHighlight) {
+        repeatHighlight.forEach(h =>
+          allHighlights.push({ ...h, type: 'repeat', priority: 40 }),
+        )
+      }
+      if (priorityHighlight) {
+        priorityHighlight.forEach(h =>
+          allHighlights.push({ ...h, type: 'priority', priority: 30 }),
+        )
+      }
+      if (labelsHighlight) {
+        labelsHighlight.forEach(h =>
+          allHighlights.push({ ...h, type: 'label', priority: 20 }),
+        )
+      }
+      if (dueDateHighlight) {
+        allHighlights.push({
+          ...dueDateHighlight,
+          type: 'dueDate',
+          priority: 10,
+        })
+      }
+
+      allHighlights.sort((a, b) => a.start - b.start)
+      const resolvedHighlights = []
+      for (let i = 0; i < allHighlights.length; i++) {
+        const current = allHighlights[i]
+        const previous = resolvedHighlights[resolvedHighlights.length - 1]
+
+        if (previous && current.start < previous.end) {
+          if (current.priority > previous.priority) {
+            resolvedHighlights.pop()
+            resolvedHighlights.push(current)
+          }
+        } else {
+          // No overlap, add the current highlight
+          resolvedHighlights.push(current)
+        }
+      }
+
+      for (const highlight of resolvedHighlights) {
+        // Add the text before the highlight
+        if (highlight.start > lastIndex) {
+          const textBefore = sentence.substring(lastIndex, highlight.start)
+          parts.push(textBefore)
+          plainText += textBefore
+        }
+
+        // Determine the class name based on the highlight type
+        let className = ''
+        switch (highlight.type) {
+          case 'repeat':
+            className = 'highlight-repeat'
+            break
+          case 'priority':
+            className = 'highlight-priority'
+            break
+          case 'label':
+            className = 'highlight-label'
+            break
+          case 'dueDate':
+            className = 'highlight-date'
+            break
+          default:
+            break
+        }
+
+        // Add the highlighted span
+        const highlightedText = sentence.substring(
+          highlight.start,
+          highlight.end,
+        )
+        parts.push(
+          <span
+            key={highlight.start}
+            className={className}
+            style={{
+              // text underline:
+              textDecoration: 'underline',
+              // textDecorationColor: 'red',
+              textDecorationThickness: '2px',
+              textDecorationStyle: 'dashed',
+            }}
+          >
+            {highlightedText}
+          </span>,
+        )
+
+        // Update the last index to the end of the current highlight
+        lastIndex = highlight.end
+      }
+
+      // Add any remaining text after the last highlight
+      if (lastIndex < sentence.length) {
+        const remainingText = sentence.substring(lastIndex)
+        parts.push(remainingText)
+        plainText += remainingText
+      }
+
+      return {
+        parts,
+        plainText,
+      }
+    },
+    [],
+  )
+
+  const processText = useCallback(
+    sentence => {
+      let cleanedSentence = sentence
+      const priority = parsePriority(sentence)
+      if (priority.result) setPriority(priority.result)
+      cleanedSentence = priority.cleanedSentence
+      const labels = parseLabels(sentence, userLabels)
+      if (labels.result) {
+        cleanedSentence = labels.cleanedSentence
+        setLabelsV2(labels.result)
+      }
+
+      const repeat = parseRepeatV2(sentence)
+      if (repeat.result) {
+        setFrequency(repeat.result)
+        setFrequencyHumanReadable(repeat.name)
+        cleanedSentence = repeat.cleanedSentence
+      }
+      // Parse assignees using circle members
+      const circleMembersList = circleMembers?.res || []
+      const assigneesForParsing = circleMembersList.map(member => ({
+        userId: member.userId,
+        username:
+          member.username ||
+          member.displayName?.toLowerCase().replace(/\s+/g, ''),
+        displayName: member.displayName,
+        name: member.displayName,
+        id: member.userId,
+      }))
+
+      const assigneesResult = parseAssignees(sentence, assigneesForParsing)
+      if (assigneesResult.result) {
+        cleanedSentence = assigneesResult.cleanedSentence
+        setAssignees(assigneesResult.result)
+      } else {
+        // Default to current user if no assignees parsed
+        setAssignees([
+          {
+            userId: userProfile.id,
+            username: userProfile.username,
+            displayName: userProfile.displayName,
+            name: userProfile.displayName,
+            id: userProfile.id,
+          },
+        ])
+      }
+      const parsedDueDate = chrono.parse(sentence, new Date(), {
+        forwardDate: true,
+      })
+      if (parsedDueDate[0]?.index > -1) {
+        setDueDate(
+          moment(parsedDueDate[0].start.date()).format('YYYY-MM-DDTHH:mm:ss'),
+        )
+        cleanedSentence = cleanedSentence.replace(parsedDueDate[0].text, '')
+      }
+
+      if (repeat.result) {
+        // if repeat has result the cleaned sentence will remove the date related info which mean
+        // we need to reparse the date again to get the correct due date:
+        const parsedDueDate = chrono.parse(sentence, new Date(), {
+          forwardDate: true,
+        })
+        if (parsedDueDate[0]?.index > -1) {
+          setDueDate(
+            moment(parsedDueDate[0].start.date()).format('YYYY-MM-DDTHH:mm:ss'),
+          )
+        }
+      }
+
+      setTaskText(sentence)
+      setTaskTitle(cleanedSentence.trim())
+      const { parts, plainText } = renderHighlightedSentence(
+        sentence,
+        repeat.highlight,
+        priority.highlight,
+        labels.highlight,
+        parsedDueDate && parsedDueDate[0]
+          ? {
+              start: parsedDueDate[0].index,
+              end: parsedDueDate[0].index + parsedDueDate[0].text.length,
+              text: parsedDueDate[0].text,
+            }
+          : null,
+      )
+
+      setRenderedParts(parts)
+      setTaskTitle(plainText)
+    },
+    [circleMembers, userLabels, userProfile, renderHighlightedSentence],
+  )
+
   useEffect(() => {
-    if (!isModalOpen || userLabelsLoading || isAllUserLoading) {
+    if (!isModalOpen || userLabelsLoading || isCircleMembersLoading) {
       return
     }
 
     processText(taskText)
-  }, [taskText, userLabelsLoading, isAllUserLoading])
+  }, [
+    taskText,
+    userLabelsLoading,
+    isCircleMembersLoading,
+    isModalOpen,
+    processText,
+  ])
 
   const handleEnterPressed = () => {
     createChore()
@@ -96,6 +315,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
     setSubTasks(null)
     setHasSubTasks(false)
     setLabelsV2([])
+    setAssignees([])
   }
 
   const handleSubmit = () => {
@@ -104,197 +324,12 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
     setTaskText('')
   }
 
-  const handleTextChange = e => {
-    if (!e.target.value) {
-      setTaskText('')
-      setDueDate(null)
-      setFrequency(null)
-      setFrequencyHumanReadable(null)
-      setPriority(0)
-      return
-    }
-    setTaskText(e.target.value)
-  }
-  const processText = sentence => {
-    let cleanedSentence = sentence
-    const priority = parsePriority(sentence)
-    if (priority.result) setPriority(priority.result)
-    cleanedSentence = priority.cleanedSentence
-    const labels = parseLabels(sentence, userLabels)
-    if (labels.result) {
-      cleanedSentence = labels.cleanedSentence
-      setLabelsV2(labels.result)
-    }
-
-    const repeat = parseRepeatV2(sentence)
-    if (repeat.result) {
-      setFrequency(repeat.result)
-      setFrequencyHumanReadable(repeat.name)
-      cleanedSentence = repeat.cleanedSentence
-    }
-    // const assignees = parseAssignees(sentence)
-    // if (assignees.result) {
-    //   cleanedSentence = assignees.cleanedSentence
-    //   set
-    // }
-    const parsedDueDate = chrono.parse(sentence, new Date(), {
-      forwardDate: true,
-    })
-    if (parsedDueDate[0]?.index > -1) {
-      setDueDate(
-        moment(parsedDueDate[0].start.date()).format('YYYY-MM-DDTHH:mm:ss'),
-      )
-      cleanedSentence = cleanedSentence.replace(parsedDueDate[0].text, '')
-    }
-
-    if (repeat.result) {
-      // if repeat has result the cleaned sentence will remove the date related info which mean
-      // we need to reparse the date again to get the correct due date:
-      const parsedDueDate = chrono.parse(sentence, new Date(), {
-        forwardDate: true,
-      })
-      if (parsedDueDate[0]?.index > -1) {
-        setDueDate(
-          moment(parsedDueDate[0].start.date()).format('YYYY-MM-DDTHH:mm:ss'),
-        )
-      }
-    }
-
-    setTaskText(sentence)
-    setTaskTitle(cleanedSentence.trim())
-    const { parts, plainText } = renderHighlightedSentence(
-      sentence,
-      repeat.highlight,
-      priority.highlight,
-      labels.highlight,
-      parsedDueDate && parsedDueDate[0]
-        ? {
-            start: parsedDueDate[0].index,
-            end: parsedDueDate[0].index + parsedDueDate[0].text.length,
-            text: parsedDueDate[0].text,
-          }
-        : null,
-    )
-
-    setRenderedParts(parts)
-    setTaskTitle(plainText)
-  }
-  const renderHighlightedSentence = (
-    sentence,
-    repeatHighlight,
-    priorityHighlight,
-    labelsHighlight,
-    dueDateHighlight,
-  ) => {
-    const parts = []
-    let lastIndex = 0
-    let plainText = ''
-
-    // Combine all highlight ranges and sort them by their start index
-    const allHighlights = []
-    if (repeatHighlight) {
-      repeatHighlight.forEach(h =>
-        allHighlights.push({ ...h, type: 'repeat', priority: 40 }),
-      )
-    }
-    if (priorityHighlight) {
-      priorityHighlight.forEach(h =>
-        allHighlights.push({ ...h, type: 'priority', priority: 30 }),
-      )
-    }
-    if (labelsHighlight) {
-      labelsHighlight.forEach(h =>
-        allHighlights.push({ ...h, type: 'label', priority: 20 }),
-      )
-    }
-    if (dueDateHighlight) {
-      allHighlights.push({ ...dueDateHighlight, type: 'dueDate', priority: 10 })
-    }
-
-    allHighlights.sort((a, b) => a.start - b.start)
-    const resolvedHighlights = []
-    for (let i = 0; i < allHighlights.length; i++) {
-      const current = allHighlights[i]
-      const previous = resolvedHighlights[resolvedHighlights.length - 1]
-
-      if (previous && current.start < previous.end) {
-        if (current.priority > previous.priority) {
-          resolvedHighlights.pop()
-          resolvedHighlights.push(current)
-        }
-      } else {
-        // No overlap, add the current highlight
-        resolvedHighlights.push(current)
-      }
-    }
-
-    for (const highlight of resolvedHighlights) {
-      // Add the text before the highlight
-      if (highlight.start > lastIndex) {
-        const textBefore = sentence.substring(lastIndex, highlight.start)
-        parts.push(textBefore)
-        plainText += textBefore
-      }
-
-      // Determine the class name based on the highlight type
-      let className = ''
-      switch (highlight.type) {
-        case 'repeat':
-          className = 'highlight-repeat'
-          break
-        case 'priority':
-          className = 'highlight-priority'
-          break
-        case 'label':
-          className = 'highlight-label'
-          break
-        case 'dueDate':
-          className = 'highlight-date'
-          break
-        default:
-          break
-      }
-
-      // Add the highlighted span
-      const highlightedText = sentence.substring(highlight.start, highlight.end)
-      parts.push(
-        <span
-          key={highlight.start}
-          className={className}
-          style={{
-            // text underline:
-            textDecoration: 'underline',
-            // textDecorationColor: 'red',
-            textDecorationThickness: '2px',
-            textDecorationStyle: 'dashed',
-          }}
-        >
-          {highlightedText}
-        </span>,
-      )
-
-      // Update the last index to the end of the current highlight
-      lastIndex = highlight.end
-    }
-
-    // Add any remaining text after the last highlight
-    if (lastIndex < sentence.length) {
-      const remainingText = sentence.substring(lastIndex)
-      parts.push(remainingText)
-      plainText += remainingText
-    }
-
-    return {
-      parts,
-      plainText,
-    }
-  }
   const createChore = () => {
     const chore = {
       name: taskTitle,
-      assignees: [{ userId: userProfile.id }],
+      assignees: assignees.map(assignee => ({ userId: assignee.userId })),
       dueDate: dueDate ? new Date(dueDate).toISOString() : null,
-      assignedTo: userProfile.id,
+      assignedTo: assignees.length > 0 ? assignees[0].userId : userProfile.id,
       assignStrategy: 'random',
       isRolling: false,
       notification: false,
@@ -346,7 +381,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
         }
       })
   }
-  if (userLabelsLoading || isAllUserLoading) {
+  if (userLabelsLoading || isCircleMembersLoading) {
     return <></>
   }
 
@@ -373,7 +408,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
                     <Typography level='body-sm' sx={{ mb: 1 }}>
                       This feature lets you create a task simply by typing a
                       sentence. It attempt parses the sentence to identify the
-                      task's due date, priority, and frequency.
+                      task&apos;s due date, priority, and frequency.
                     </Typography>
 
                     <Typography
@@ -438,14 +473,9 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
                   ],
                 },
                 '@': {
-                  // value: 'userId',
-                  // display: 'displayName',
-                  // options: allUsers ? allUsers : [],
-                  value: 'id',
-                  display: 'name',
-                  options: [
-                    { id: userProfile.id, name: userProfile.displayName },
-                  ],
+                  value: 'userId',
+                  display: 'displayName',
+                  options: circleMembers?.res || [],
                 },
               }}
             />
@@ -561,11 +591,25 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
             }}
           >
             <FormControl>
-              <Typography level='body-sm'>Assignee</Typography>
-              <Select value={'0'} disabled>
-                <Option value='0'>Me</Option>
-                {/* <Option value='1'>Other</Option> */}
-              </Select>
+              <Typography level='body-sm'>Assignees</Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                {assignees.length > 0 ? (
+                  assignees.map((assignee, index) => (
+                    <Chip
+                      key={assignee.userId || index}
+                      variant='soft'
+                      size='sm'
+                      color='primary'
+                    >
+                      {assignee.displayName || assignee.username}
+                    </Chip>
+                  ))
+                ) : (
+                  <Chip variant='soft' size='sm' color='neutral'>
+                    {userProfile.displayName}
+                  </Chip>
+                )}
+              </Box>
             </FormControl>
             <FormControl>
               <Typography level='body-sm'>Frequency</Typography>

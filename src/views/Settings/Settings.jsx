@@ -37,6 +37,7 @@ import {
 import { isPlusAccount } from '../../utils/Helpers'
 import PassowrdChangeModal from '../Modals/Inputs/PasswordChangeModal'
 import APITokenSettings from './APITokenSettings'
+import MFASettings from './MFASettings'
 import NotificationSetting from './NotificationSetting'
 import ProfileSettings from './ProfileSettings'
 import StorageSettings from './StorageSettings'
@@ -589,6 +590,7 @@ const Settings = () => {
         )}
       </div>
       <NotificationSetting />
+      <MFASettings />
       <APITokenSettings />
       <StorageSettings />
       <div className='grid gap-4 py-4'>

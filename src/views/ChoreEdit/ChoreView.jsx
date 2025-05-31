@@ -601,7 +601,6 @@ const ChoreView = () => {
               }
               setNote(e.target.value)
             }}
-            size='md'
             sx={{
               mb: 1,
             }}

@@ -1,11 +1,12 @@
 import { CalendarMonth } from '@mui/icons-material'
-import { Box, Chip, Grid, Typography } from '@mui/joy'
+import { Avatar, Box, Chip, Grid, Typography } from '@mui/joy'
 import moment from 'moment'
 import React, { useState } from 'react'
 import Calendar from 'react-calendar'
 import 'react-calendar/dist/Calendar.css'
 import { useNavigate } from 'react-router-dom'
 import { UserContext } from '../../contexts/UserContext'
+import { useCircleMembers } from '../../queries/UserQueries'
 import { TASK_COLOR } from '../../utils/Colors'
 import './Calendar.css'
 
@@ -19,6 +20,19 @@ const CalendarView = ({ chores }) => {
   const { userProfile } = React.useContext(UserContext)
   const [selectedDate, setSeletedDate] = useState(null)
   const Navigate = useNavigate()
+
+  // Fetch circle members data to get assignee names
+  const { data: circleMembersData } = useCircleMembers()
+  const circleMembers = circleMembersData?.res || []
+
+  // Helper function to get assignee display name
+  const getAssigneeName = assignedTo => {
+    if (assignedTo === userProfile.id) {
+      return userProfile.displayName
+    }
+    const assignee = circleMembers.find(member => member.userId === assignedTo)
+    return assignee ? `${assignee.displayName}` : 'Assigned to other'
+  }
 
   const tileContent = ({ date, view }) => {
     if (view === 'month') {
@@ -109,34 +123,60 @@ const CalendarView = ({ chores }) => {
       />
       {!selectedDate && (
         <Grid container ml={-3} mt={1}>
-          {[
-            { name: 'Assigned to me', color: TASK_COLOR.ASSIGNED_TO_ME },
-            { name: 'Assigned to other', color: TASK_COLOR.ASSIGNED_TO_OTHER },
-          ].map((item, index) => (
-            <Grid
-              key={index}
-              item
-              xs={12}
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'start',
-              }}
-            >
-              <Box
+          {/* Show legend with current user first, then other circle members who have assignments */}
+          {(() => {
+            const assignedUserIds = new Set(
+              chores.map(chore => chore.assignedTo).filter(Boolean),
+            )
+            const legendItems = []
+
+            // Add current user if they have assignments
+            if (assignedUserIds.has(userProfile.id)) {
+              legendItems.push({
+                name: 'Assigned to me',
+                color: TASK_COLOR.ASSIGNED_TO_ME,
+              })
+            }
+
+            // Add other circle members who have assignments
+            circleMembers.forEach(member => {
+              if (
+                member.userId !== userProfile.id &&
+                assignedUserIds.has(member.userId)
+              ) {
+                legendItems.push({
+                  name: `Assigned to ${member.displayName}`,
+                  color: TASK_COLOR.ASSIGNED_TO_OTHER,
+                })
+              }
+            })
+
+            return legendItems.map((item, index) => (
+              <Grid
+                key={index}
+                item
+                xs={12}
                 sx={{
-                  display: 'inline-block',
-                  width: 5,
-                  height: 5,
-                  borderRadius: '50%',
-                  backgroundColor: item.color,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'start',
                 }}
-              />
-              <Typography level='body-xs' ml={0.3}>
-                {item.name}
-              </Typography>
-            </Grid>
-          ))}
+              >
+                <Box
+                  sx={{
+                    display: 'inline-block',
+                    width: 5,
+                    height: 5,
+                    borderRadius: '50%',
+                    backgroundColor: item.color,
+                  }}
+                />
+                <Typography level='body-xs' ml={0.3}>
+                  {item.name}
+                </Typography>
+              </Grid>
+            ))
+          })()}
         </Grid>
       )}
       {selectedDate && (
@@ -257,16 +297,37 @@ const CalendarView = ({ chores }) => {
                     >
                       {moment(chore.nextDueDate).format('h:mm A')}
                     </Typography>
-                    <Typography
+                    {/* <Typography
                       level='body-xs'
                       sx={{
                         color: getAssigneeColor(chore.assignedTo, userProfile),
                       }}
                     >
-                      {chore.assignedTo === userProfile.id
-                        ? 'Assigned to me'
-                        : 'Assigned to other'}
-                    </Typography>
+                      {getAssigneeName(chore.assignedTo)}
+                    </Typography> */}
+                    <Chip
+                      variant='soft'
+                      color='neutral'
+                      size='sm'
+                      startDecorator={
+                        <Avatar
+                          src={
+                            circleMembers.find(
+                              member => member.userId === chore.assignedTo,
+                            )?.image
+                          }
+                        />
+                      }
+                      sx={{
+                        backgroundColor: getAssigneeColor(
+                          chore.assignedTo,
+                          userProfile,
+                        ),
+                        color: 'white',
+                      }}
+                    >
+                      {getAssigneeName(chore.assignedTo)}
+                    </Chip>
                   </Box>
                 </Box>
               ))}

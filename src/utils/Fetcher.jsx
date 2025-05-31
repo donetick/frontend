@@ -434,6 +434,63 @@ const ResetPassword = email => {
   })
 }
 
+// MFA Related Functions
+const GetMFAStatus = () => {
+  return Fetch(`/users/mfa/status`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+}
+
+const SetupMFA = () => {
+  return Fetch(`/users/mfa/setup`, {
+    method: 'POST',
+    headers: HEADERS(),
+  })
+}
+
+const ConfirmMFA = (secret, code, backupCodes) => {
+  return Fetch(`/users/mfa/confirm`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify({
+      secret,
+      code,
+      backupCodes,
+    }),
+  })
+}
+
+const DisableMFA = code => {
+  return Fetch(`/users/mfa/disable`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify({ code }),
+  })
+}
+
+const RegenerateBackupCodes = code => {
+  return Fetch(`/users/mfa/regenerate-backup-codes`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify({ code }),
+  })
+}
+
+const VerifyMFA = (sessionToken, code) => {
+  const baseURL = apiManager.getApiURL()
+  return fetch(`${baseURL}/auth/mfa/verify`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      sessionToken,
+      code,
+    }),
+  })
+}
+
 const UpdateDueDate = (id, dueDate) => {
   return Fetch(`/chores/${id}/dueDate`, {
     method: 'PUT',
@@ -498,6 +555,7 @@ export {
   CancelSubscription,
   ChangePassword,
   CompleteSubTask,
+  ConfirmMFA,
   CreateChore,
   CreateLabel,
   CreateLongLiveToken,
@@ -508,6 +566,7 @@ export {
   DeleteLabel,
   DeleteLongLiveToken,
   DeleteThing,
+  DisableMFA,
   GetAllCircleMembers,
   GetAllUsers,
   GetArchivedChores,
@@ -520,6 +579,7 @@ export {
   GetCircleMemberRequests,
   GetLabels,
   GetLongLiveTokens,
+  GetMFAStatus,
   GetResource,
   GetStorageUsage,
   GetSubscriptionSession,
@@ -534,9 +594,11 @@ export {
   PutWebhookURL,
   RedeemPoints,
   RefreshToken,
+  RegenerateBackupCodes,
   ResetPassword,
   SaveChore,
   SaveThing,
+  SetupMFA,
   SkipChore,
   UnArchiveChore,
   UpdateChoreAssignee,
@@ -550,6 +612,7 @@ export {
   UpdatePassword,
   UpdateThingState,
   UpdateUserDetails,
+  VerifyMFA,
   createChore,
   login,
   signUp,

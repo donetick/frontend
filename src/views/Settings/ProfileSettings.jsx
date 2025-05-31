@@ -1,9 +1,11 @@
 import {
+  Autocomplete,
   Avatar,
   Box,
   Button,
   Card,
   Divider,
+  Input,
   Snackbar,
   Typography,
 } from '@mui/joy'
@@ -12,6 +14,7 @@ import ModalDialog from '@mui/joy/ModalDialog'
 import { useContext, useRef, useState } from 'react'
 import Cropper from 'react-easy-crop'
 import { UserContext } from '../../contexts/UserContext'
+import { UpdateUserDetails } from '../../utils/Fetcher'
 import { resolvePhotoURL } from '../../utils/Helpers'
 import { getCroppedImg } from '../../utils/imageCropUtils'
 import { UploadFile } from '../../utils/TokenManager'
@@ -19,8 +22,12 @@ import { UploadFile } from '../../utils/TokenManager'
 const ProfileSettings = () => {
   const { userProfile, setUserProfile } = useContext(UserContext)
   const [displayName, setDisplayName] = useState(userProfile?.displayName || '')
+  const [timezone, setTimezone] = useState(
+    userProfile?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+  )
   const [photoURL, setPhotoURL] = useState(userProfile?.image || '')
   const [isUploading, setIsUploading] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
@@ -32,6 +39,9 @@ const ProfileSettings = () => {
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null)
   const [showCropper, setShowCropper] = useState(false)
   const [selectedFile, setSelectedFile] = useState(null)
+
+  // Get available timezones
+  const timezones = Intl.supportedValuesOf('timeZone')
 
   const onCropComplete = (croppedArea, croppedAreaPixels) => {
     setCroppedAreaPixels(croppedAreaPixels)
@@ -84,13 +94,31 @@ const ProfileSettings = () => {
     }
   }
 
-  const handleSave = () => {
-    setUserProfile({ ...userProfile, displayName })
-    setSnackbar({
-      open: true,
-      message: 'Profile updated!',
-      color: 'success',
-    })
+  const handleSave = async () => {
+    setIsSaving(true)
+    try {
+      const userDetails = { displayName, timezone }
+      const response = await UpdateUserDetails(userDetails)
+
+      if (response.ok) {
+        setUserProfile({ ...userProfile, displayName, timezone })
+        setSnackbar({
+          open: true,
+          message: 'Profile updated successfully!',
+          color: 'success',
+        })
+      } else {
+        throw new Error('Failed to update profile')
+      }
+    } catch (err) {
+      setSnackbar({
+        open: true,
+        message: 'Failed to update profile.',
+        color: 'danger',
+      })
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   // Helper to resolve photoURL with baseURL if needed
@@ -199,7 +227,7 @@ const ProfileSettings = () => {
           </Box>
         </ModalDialog>
       </Modal>
-      {/* <Box sx={{ maxWidth: 400 }}>
+      <Box sx={{ maxWidth: 400, mt: 3 }}>
         <Typography level='body-sm' sx={{ mb: 0.5 }}>
           Display Name
         </Typography>
@@ -209,15 +237,51 @@ const ProfileSettings = () => {
           placeholder='Enter your display name'
           sx={{ mb: 2 }}
         />
+
+        <Typography level='body-sm' sx={{ mb: 0.5 }}>
+          Timezone
+        </Typography>
+        <Autocomplete
+          value={timezone}
+          onChange={(e, newValue) => setTimezone(newValue)}
+          options={timezones}
+          getOptionLabel={tz => {
+            const formattedTimezone = tz.replace(/_/g, ' ')
+            const currentTime = new Date().toLocaleString('en-US', {
+              timeZone: tz,
+              timeStyle: 'short',
+            })
+            return `${formattedTimezone} (${currentTime})`
+          }}
+          filterOptions={(options, { inputValue }) => {
+            if (!inputValue) return options
+
+            const searchTerms = inputValue.toLowerCase().split(/\s+/)
+            return options.filter(tz => {
+              const timezoneLower = tz.toLowerCase()
+              const timezoneParts = tz.toLowerCase().split(/[/_]/)
+
+              return searchTerms.every(
+                term =>
+                  timezoneLower.includes(term) ||
+                  timezoneParts.some(part => part.includes(term)),
+              )
+            })
+          }}
+          placeholder='Select your timezone'
+          sx={{ mb: 2 }}
+        />
+
         <Button
           variant='soft'
           color='primary'
           onClick={handleSave}
+          loading={isSaving}
           sx={{ width: 120 }}
         >
           Save
         </Button>
-      </Box> */}
+      </Box>
       <Snackbar
         open={snackbar.open}
         color={snackbar.color}
