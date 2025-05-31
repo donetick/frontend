@@ -145,7 +145,7 @@ const CalendarView = ({ chores }) => {
                 assignedUserIds.has(member.userId)
               ) {
                 legendItems.push({
-                  name: `Assigned to ${member.displayName}`,
+                  name: `Assigned to others`,
                   color: TASK_COLOR.ASSIGNED_TO_OTHER,
                 })
               }
