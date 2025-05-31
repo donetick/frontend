@@ -37,7 +37,9 @@ import { Divider } from '@mui/material'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { useChore } from '../../queries/ChoreQueries.jsx'
+
+import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
+import { useChoreDetails } from '../../queries/ChoreQueries.jsx'
 import { useCircleMembers } from '../../queries/UserQueries.jsx'
 import { notInCompletionWindow } from '../../utils/Chores.jsx'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
@@ -50,6 +52,7 @@ import {
 import Priorities from '../../utils/Priorities'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import LoadingComponent from '../components/Loading.jsx'
+import RichTextEditor from '../components/RichTextEditor.jsx'
 import SubTasks from '../components/SubTask.jsx'
 const IconCard = styled('div')({
   display: 'flex',
@@ -84,12 +87,13 @@ const ChoreView = () => {
     isLoading: isCircleMembersLoading,
     handleRefetch: handleCircleMembersRefetch,
   } = useCircleMembers()
+  const { impersonatedUser } = useImpersonateUser()
 
   const {
     data: choreData,
     isLoading: isChoreLoading,
     refetch: refetchChore,
-  } = useChore(choreId)
+  } = useChoreDetails(choreId)
 
   useEffect(() => {
     if (!choreData || !choreData.res || !circleMembersData) {
@@ -180,7 +184,14 @@ const ChoreView = () => {
     }, 1000)
 
     const id = setTimeout(() => {
-      MarkChoreComplete(choreId, note, completedDate, null)
+      MarkChoreComplete(
+        choreId,
+        impersonatedUser
+          ? { completedBy: impersonatedUser.userId, note }
+          : { note },
+        completedDate,
+        null,
+      )
         .then(resp => {
           if (resp.ok) {
             return resp.json().then(data => {
@@ -491,9 +502,7 @@ const ChoreView = () => {
                   overflowY: 'auto',
                 }}
               >
-                <Typography level='body-md' sx={{ mb: 1 }}>
-                  {chore.description || '--'}
-                </Typography>
+                <RichTextEditor value={chore.description} isEditable={false} />
               </Box>
             </Sheet>
           </>
@@ -516,7 +525,15 @@ const ChoreView = () => {
             <Typography level='title-md' sx={{ mb: 1 }}>
               Subtasks :
             </Typography>
-            <Sheet variant='plain' sx={{ borderRadius: 'lg', p: 1 }}>
+            <Sheet
+              variant='plain'
+              sx={{
+                borderRadius: 'lg',
+                p: 1,
+                overflow: 'auto',
+                // maxHeight: '100px',
+              }}
+            >
               <SubTasks
                 editMode={false}
                 tasks={chore.subTasks}
@@ -584,7 +601,6 @@ const ChoreView = () => {
               }
               setNote(e.target.value)
             }}
-            size='md'
             sx={{
               mb: 1,
             }}

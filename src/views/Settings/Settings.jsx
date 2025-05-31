@@ -10,11 +10,13 @@ import {
   FormControl,
   FormHelperText,
   Input,
+  ListItem,
+  Option,
+  Select,
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
 import { useContext, useEffect, useState } from 'react'
-import { Navigate } from 'react-router-dom'
 import { UserContext } from '../../contexts/UserContext'
 import Logo from '../../Logo'
 import {
@@ -29,12 +31,16 @@ import {
   JoinCircle,
   LeaveCircle,
   PutWebhookURL,
+  UpdateMemberRole,
   UpdatePassword,
 } from '../../utils/Fetcher'
 import { isPlusAccount } from '../../utils/Helpers'
 import PassowrdChangeModal from '../Modals/Inputs/PasswordChangeModal'
 import APITokenSettings from './APITokenSettings'
+import MFASettings from './MFASettings'
 import NotificationSetting from './NotificationSetting'
+import ProfileSettings from './ProfileSettings'
+import StorageSettings from './StorageSettings'
 import ThemeToggle from './ThemeToggle'
 
 const Settings = () => {
@@ -45,6 +51,7 @@ const Settings = () => {
   const [circleMembers, setCircleMembers] = useState([])
   const [webhookURL, setWebhookURL] = useState(null)
   const [webhookError, setWebhookError] = useState(null)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   const [changePasswordModal, setChangePasswordModal] = useState(false)
   useEffect(() => {
@@ -68,6 +75,16 @@ const Settings = () => {
       setCircleMembers(data.res ? data.res : [])
     })
   }, [])
+
+  // useEffect when circleMembers and userprofile:
+  useEffect(() => {
+    if (userProfile && userProfile.id) {
+      const isUserAdmin = circleMembers.some(
+        member => member.userId === userProfile.id && member.role === 'admin',
+      )
+      setIsAdmin(isUserAdmin)
+    }
+  }, [circleMembers, userProfile])
 
   useEffect(() => {
     const hash = window.location.hash
@@ -125,6 +142,7 @@ const Settings = () => {
   }
   return (
     <Container>
+      <ProfileSettings />
       <div className='grid gap-4 py-4' id='sharing'>
         <Typography level='h3'>Circle settings</Typography>
         <Divider />
@@ -220,33 +238,110 @@ const Settings = () => {
                   </Typography>
                 )}
               </Box>
-              {member.userId !== userProfile.id && member.isActive && (
-                <Button
-                  disabled={
-                    circleMembers.find(m => userProfile.id == m.userId).role !==
-                    'admin'
-                  }
-                  variant='outlined'
-                  color='danger'
-                  size='sm'
-                  onClick={() => {
-                    const confirmed = confirm(
-                      `Are you sure you want to remove ${member.displayName} from your circle?`,
-                    )
-                    if (confirmed) {
-                      DeleteCircleMember(member.circleId, member.userId).then(
-                        resp => {
-                          if (resp.ok) {
-                            alert('Removed member successfully.')
-                          }
-                        },
-                      )
-                    }
-                  }}
-                >
-                  Remove
-                </Button>
-              )}
+
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                {member.userId !== userProfile.id && isAdmin && (
+                  <Select
+                    size='sm'
+                    sx={{ mr: 1 }}
+                    value={member.role}
+                    renderValue={() => (
+                      <Typography>
+                        {member.role.charAt(0).toUpperCase() +
+                          member.role.slice(1)}
+                      </Typography>
+                    )}
+                    onChange={(e, value) => {
+                      UpdateMemberRole(member.userId, value).then(resp => {
+                        if (resp.ok) {
+                          const newCircleMembers = circleMembers.map(m => {
+                            if (m.userId === member.userId) {
+                              m.role = value
+                            }
+                            return m
+                          })
+                          setCircleMembers(newCircleMembers)
+                        } else {
+                          alert('Failed to update role')
+                        }
+                      })
+                    }}
+                  >
+                    {[
+                      {
+                        value: 'member',
+                        description: 'Just a regular member of the circle',
+                      },
+                      {
+                        value: 'manager',
+                        description:
+                          'Can impersonate users and perform actions on their behalf',
+                      },
+                      {
+                        value: 'admin',
+                        description: 'Full access to the circle',
+                      },
+                    ].map((option, index) => (
+                      <Option value={option.value} key={index}>
+                        <ListItem
+                          sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'start',
+                            alignItems: 'start',
+                            width: '100%',
+                            gap: 0.5,
+                          }}
+                        >
+                          <Typography
+                            level='title-sm'
+                            sx={{ mb: 0, mt: 0, lineHeight: 1.1 }}
+                          >
+                            {option.value.charAt(0).toUpperCase() +
+                              option.value.slice(1)}
+                          </Typography>
+                          <Typography
+                            level='body-sm'
+                            sx={{ mt: 0, mb: 0, lineHeight: 1.1 }}
+                          >
+                            {option.description}
+                          </Typography>
+                        </ListItem>
+                      </Option>
+                    ))}
+                  </Select>
+                )}
+                {userProfile.role === 'admin' &&
+                  member.userId !== userProfile.id &&
+                  member.isActive && (
+                    <Button
+                      disabled={
+                        circleMembers.find(m => userProfile.id == m.userId)
+                          .role !== 'admin'
+                      }
+                      variant='outlined'
+                      color='danger'
+                      size='sm'
+                      onClick={() => {
+                        const confirmed = confirm(
+                          `Are you sure you want to remove ${member.displayName} from your circle?`,
+                        )
+                        if (confirmed) {
+                          DeleteCircleMember(
+                            member.circleId,
+                            member.userId,
+                          ).then(resp => {
+                            if (resp.ok) {
+                              alert('Removed member successfully.')
+                            }
+                          })
+                        }
+                      }}
+                    >
+                      Remove
+                    </Button>
+                  )}
+              </Box>
             </Box>
           </Card>
         ))}
@@ -328,9 +423,15 @@ const Settings = () => {
             </Typography>
             <Typography level='body-md' mt={-1}>
               Webhooks allow you to send real-time notifications to other
-              services when events happen in your Circle. Use the webhook URL
-              below to
+              services when events happen in your Circle. Configure a webhook
+              URL to receive real-time updates.
             </Typography>
+            {!isPlusAccount(userProfile) && (
+              <Typography level='body-sm' color='warning' sx={{ mt: 1 }}>
+                Webhook notifications are not available in the Basic plan.
+                Upgrade to Plus to receive real-time updates via webhooks.
+              </Typography>
+            )}
             <FormControl sx={{ mt: 1 }}>
               <Checkbox
                 checked={webhookURL !== null}
@@ -354,7 +455,7 @@ const Settings = () => {
                 Enable webhook notifications for tasks and things updates.{' '}
                 {userProfile && !isPlusAccount(userProfile) && (
                   <Chip variant='soft' color='warning'>
-                    Not available in Basic Plan
+                    Plus Feature
                   </Chip>
                 )}
               </FormHelperText>
@@ -489,7 +590,9 @@ const Settings = () => {
         )}
       </div>
       <NotificationSetting />
+      <MFASettings />
       <APITokenSettings />
+      <StorageSettings />
       <div className='grid gap-4 py-4'>
         <Typography level='h3'>Theme preferences</Typography>
         <Divider />
@@ -498,46 +601,6 @@ const Settings = () => {
           your system and automatically switch between day and night themes.
         </Typography>
         <ThemeToggle />
-      </div>
-
-      <div className='grid gap-4 py-4'>
-        <Typography level='h3'>Experimental Features </Typography>
-        <Divider />
-        <Typography level='body-md'>
-          Clean up some part of the local storage and cache. Only use if you
-          know are you doing.
-        </Typography>
-        <Button
-          variant='soft'
-          color='danger'
-          onClick={() => {
-            const confirmed = confirm(
-              `Are you sure you want to clear your local storage and cache? This will remove all your data. on device and require login`,
-            )
-            if (confirmed) {
-              localStorage.clear()
-              Navigate('/login')
-            }
-          }}
-        >
-          Clear Local Storage and Cache
-        </Button>
-        <Button
-          variant='outlined'
-          color='danger'
-          onClick={() => {
-            const confirmed = confirm(
-              `Are you sure you want to clear your local storage and cache? This will remove all your data.`,
-            )
-            if (confirmed) {
-              localStorage.removeItem('offline_cache')
-              localStorage.removeItem('offline_request_queue')
-              localStorage.removeItem('offlineTasks')
-            }
-          }}
-        >
-          Clear Offline Cache and Offline tasks
-        </Button>
       </div>
     </Container>
   )

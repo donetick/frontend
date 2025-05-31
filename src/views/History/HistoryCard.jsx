@@ -18,15 +18,15 @@ export const getCompletedChip = historyEntry => {
   // if completed few hours +-6 hours
   if (
     historyEntry.dueDate &&
-    historyEntry.completedAt > historyEntry.dueDate - 1000 * 60 * 60 * 6 &&
-    historyEntry.completedAt < historyEntry.dueDate + 1000 * 60 * 60 * 6
+    historyEntry.performedAt > historyEntry.dueDate - 1000 * 60 * 60 * 6 &&
+    historyEntry.performedAt < historyEntry.dueDate + 1000 * 60 * 60 * 6
   ) {
     text = 'On Time'
     color = 'success'
     icon = <Check />
   } else if (
     historyEntry.dueDate &&
-    historyEntry.completedAt < historyEntry.dueDate
+    historyEntry.performedAt < historyEntry.dueDate
   ) {
     text = 'On Time'
     color = 'success'
@@ -36,7 +36,7 @@ export const getCompletedChip = historyEntry => {
   // if completed after due date then it's late
   else if (
     historyEntry.dueDate &&
-    historyEntry.completedAt > historyEntry.dueDate
+    historyEntry.performedAt > historyEntry.dueDate
   ) {
     text = 'Late'
     color = 'warning'
@@ -104,8 +104,8 @@ const HistoryCard = ({
             }}
           >
             <Typography level='body1' sx={{ fontWeight: 'md' }}>
-              {historyEntry.completedAt
-                ? moment(historyEntry.completedAt).format(
+              {historyEntry.performedAt
+                ? moment(historyEntry.performedAt).format(
                     'ddd MM/DD/yyyy HH:mm',
                   )
                 : 'Skipped'}
@@ -150,11 +150,11 @@ const HistoryCard = ({
           <ListDivider component='li'>
             {/* time between two completion: */}
             {index < allHistory.length - 1 &&
-              allHistory[index + 1].completedAt && (
+              allHistory[index + 1].performedAt && (
                 <Typography level='body3' color='text.tertiary'>
                   {formatTimeDifference(
-                    historyEntry.completedAt,
-                    allHistory[index + 1].completedAt,
+                    historyEntry.performedAt,
+                    allHistory[index + 1].performedAt,
                   )}{' '}
                   before
                 </Typography>

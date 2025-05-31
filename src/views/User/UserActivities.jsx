@@ -28,13 +28,14 @@ import { useChores, useChoresHistory } from '../../queries/ChoreQueries'
 import { useCircleMembers } from '../../queries/UserQueries.jsx'
 import { ChoresGrouper } from '../../utils/Chores'
 import { TASK_COLOR } from '../../utils/Colors.jsx'
+import { resolvePhotoURL } from '../../utils/Helpers.jsx'
 import LoadingComponent from '../components/Loading'
 
 const groupByDate = history => {
   const aggregated = {}
   for (let i = 0; i < history.length; i++) {
     const item = history[i]
-    const date = new Date(item.completedAt).toLocaleDateString()
+    const date = new Date(item.performedAt).toLocaleDateString()
     if (!aggregated[date]) {
       aggregated[date] = []
     }
@@ -113,7 +114,7 @@ const ChoreHistoryTimeline = ({ history }) => {
               <>
                 <ChoreHistoryItem
                   key={record.id}
-                  time={new Date(record.completedAt).toLocaleTimeString([], {
+                  time={new Date(record.performedAt).toLocaleTimeString([], {
                     hour: '2-digit',
                     minute: '2-digit',
                   })}
@@ -288,9 +289,9 @@ const UserActivites = () => {
 
   const generateHistoryPieChartData = history => {
     const totalCompleted =
-      history.filter(item => item.dueDate > item.completedAt).length || 0
+      history.filter(item => item.dueDate > item.performedAt).length || 0
     const totalLate =
-      history.filter(item => item.dueDate < item.completedAt).length || 0
+      history.filter(item => item.dueDate < item.performedAt).length || 0
     const totalNoDueDate = history.filter(item => !item.dueDate).length || 0
 
     return [
@@ -410,10 +411,18 @@ const UserActivites = () => {
           renderValue={selected => (
             <Typography
               startDecorator={
-                <Avatar color='primary' m={0} size='sm'>
+                <Avatar
+                  color='primary'
+                  m={0}
+                  size='sm'
+                  src={resolvePhotoURL(
+                    circleUsers.find(user => user.userId === selectedUser)
+                      ?.image,
+                  )}
+                >
                   {
                     circleUsers.find(user => user.userId === selectedUser)
-                      ?.displayName[0]
+                      ?.image
                   }
                 </Avatar>
               }
@@ -427,6 +436,14 @@ const UserActivites = () => {
         >
           {circleUsers.map(user => (
             <Option key={user.userId} value={user.userId}>
+              <Avatar
+                color='primary'
+                m={0}
+                size='sm'
+                src={resolvePhotoURL(user.image)}
+              >
+                {user.image}
+              </Avatar>
               <Typography>{user.displayName}</Typography>
               <Chip
                 color='success'

@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 import { registerCapacitorListeners } from './CapacitorListener'
+import { ImpersonateUserProvider } from './contexts/ImpersonateUserContext'
 import { UserContext } from './contexts/UserContext'
 import { useResource } from './queries/ResourceQueries'
 import { AuthenticationProvider } from './service/AuthenticationService'
@@ -113,14 +114,18 @@ function App() {
   return (
     <div>
       <NetworkBanner />
+
       <QueryClientProvider client={queryClient}>
         <AuthenticationProvider />
         <ErrorProvider>
-          <UserContext.Provider value={{ userProfile, setUserProfile }}>
-            <NavBar />
-            <Outlet />
-          </UserContext.Provider>
+          <ImpersonateUserProvider>
+            <UserContext.Provider value={{ userProfile, setUserProfile }}>
+              <NavBar />
+              <Outlet />
+            </UserContext.Provider>
+          </ImpersonateUserProvider>
         </ErrorProvider>
+
         {needRefresh && (
           <Snackbar open={showUpdateSnackbar}>
             <Typography level='body-md'>

@@ -21,7 +21,6 @@ import {
   Snackbar,
   Stack,
   Switch,
-  Textarea,
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
@@ -42,17 +41,20 @@ import {
 import { isPlusAccount } from '../../utils/Helpers'
 import Priorities from '../../utils/Priorities.jsx'
 import LoadingComponent from '../components/Loading.jsx'
+import RichTextEditor from '../components/RichTextEditor.jsx'
 import SubTasks from '../components/SubTask.jsx'
 import { useLabels } from '../Labels/LabelQueries'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import LabelModal from '../Modals/Inputs/LabelModal'
 import RepeatSection from './RepeatSection'
+
 const ASSIGN_STRATEGIES = [
   'random',
   'least_assigned',
   'least_completed',
   'keep_last_assigned',
   'random_except_last_assigned',
+  'round_robin',
 ]
 const REPEAT_ON_TYPE = ['interval', 'days_of_the_week', 'day_of_the_month']
 
@@ -391,10 +393,18 @@ const ChoreEdit = () => {
         <FormControl error={errors.description}>
           <Typography level='h4'>Additional Details :</Typography>
           <Typography level='h5'>What is this task about?</Typography>
-          <Textarea
+          {/* <Textarea
             value={description}
             onChange={e => setDescription(e.target.value)}
+          /> */}
+
+          <RichTextEditor
+            value={description}
+            onChange={setDescription}
+            entityId={choreId}
+            entityType={'chore_description'}
           />
+
           <FormHelperText error>{errors.name}</FormHelperText>
         </FormControl>
       </Box>
@@ -683,10 +693,16 @@ const ChoreEdit = () => {
           Get Reminders when this task is due or completed
           {!isPlusAccount(userProfile) && (
             <Chip variant='soft' color='warning'>
-              Not available in Basic Plan
+              Plus Feature
             </Chip>
           )}
         </Typography>
+        {!isPlusAccount(userProfile) && (
+          <Typography level='body-sm' color='warning' sx={{ mb: 1 }}>
+            Task notifications are not available in the Basic plan. Upgrade to
+            Plus to receive reminders when tasks are due or completed.
+          </Typography>
+        )}
 
         <FormControl sx={{ mt: 1 }}>
           <Checkbox

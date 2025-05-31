@@ -24,7 +24,7 @@ const APITokenSettings = () => {
   const [tokens, setTokens] = useState([])
   const [isGetTokenNameModalOpen, setIsGetTokenNameModalOpen] = useState(false)
   const [showTokenId, setShowTokenId] = useState(null)
-  const { userProfile, setUserProfile } = useContext(UserContext)
+  const { userProfile } = useContext(UserContext)
   useEffect(() => {
     GetLongLiveTokens().then(resp => {
       resp.json().then(data => {
@@ -56,9 +56,16 @@ const APITokenSettings = () => {
         chores
       </Typography>
       {!isPlusAccount(userProfile) && (
-        <Chip variant='soft' color='warning'>
-          Not available in Basic Plan
-        </Chip>
+        <>
+          <Chip variant='soft' color='warning'>
+            Plus Feature
+          </Chip>
+          <Typography level='body-sm' color='warning' sx={{ mt: 1 }}>
+            API tokens are not available in the Basic plan. Upgrade to Plus to
+            generate API tokens for integrating with external systems and
+            automating your tasks.
+          </Typography>
+        </>
       )}
 
       {tokens.map(token => (

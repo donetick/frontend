@@ -17,7 +17,7 @@ import {
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
-import { useContext, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { UserContext } from '../../contexts/UserContext'
 import { isPlusAccount } from '../../utils/Helpers'
 import ThingTriggerSection from './ThingTriggerSection'
@@ -65,27 +65,26 @@ const RepeatOnSections = ({
   frequencyType,
   frequency,
   onFrequencyUpdate,
-  onFrequencyTypeUpdate,
   frequencyMetadata,
   onFrequencyMetadataUpdate,
-  things,
 }) => {
-  const [months, setMonths] = useState({})
-  // const [dayOftheMonth, setDayOftheMonth] = useState(1)
-  const [daysOfTheWeek, setDaysOfTheWeek] = useState({})
-  const [monthsOfTheYear, setMonthsOfTheYear] = useState({})
   const [intervalUnit, setIntervalUnit] = useState('days')
-  const [time, setTime] = useState('18:00')
+  // if time on frequencyMetadata is not set, try to set it to the nextDueDate if available,
+  // otherwise set it to 18:00 of the current day
+  useEffect(() => {
+    if (!frequencyMetadata?.time) {
+      frequencyMetadata.time = moment(
+        moment(new Date()).format('YYYY-MM-DD') + 'T' + '18:00',
+      ).format()
+    }
+  }, [frequencyMetadata])
+
   const timePickerComponent = (
     <Grid item sm={12} sx={{ display: 'flex', alignItems: 'center' }}>
       <Typography level='h5'>At: </Typography>
       <Input
         type='time'
-        defaultValue={
-          frequencyMetadata?.time
-            ? moment(frequencyMetadata?.time).format('HH:mm')
-            : '18:00'
-        }
+        defaultValue={moment(frequencyMetadata?.time).format('HH:mm')}
         onChange={e => {
           onFrequencyMetadataUpdate({
             ...frequencyMetadata,
@@ -338,8 +337,7 @@ const RepeatSection = ({
   isAttemptToSave,
   selectedThing,
 }) => {
-  const [repeatOn, setRepeatOn] = useState('interval')
-  const { userProfile, setUserProfile } = useContext(UserContext)
+  const { userProfile } = useContext(UserContext)
   return (
     <Box mt={2}>
       <Typography level='h4'>Repeat :</Typography>
@@ -374,7 +372,7 @@ const RepeatSection = ({
                 '--ListItem-radius': '20px',
               }}
             >
-              {FREQUENCY_TYPES_RADIOS.map((item, index) => (
+              {FREQUENCY_TYPES_RADIOS.map(item => (
                 <ListItem key={item}>
                   <Checkbox
                     // disabled={index === 0}
@@ -397,7 +395,8 @@ const RepeatSection = ({
                                   'T' +
                                   '18:00',
                               ).format(),
-                          timezone: moment.tz.guess(),
+                          timezone:
+                            Intl.DateTimeFormat().resolvedOptions().timeZone,
                         })
 
                         return
@@ -555,10 +554,16 @@ const RepeatSection = ({
           Is this something that should be done when a thing state changes?{' '}
           {userProfile && !isPlusAccount(userProfile) && (
             <Chip variant='soft' color='warning'>
-              Not available in Basic Plan
+              Plus Feature
             </Chip>
           )}
         </FormHelperText>
+        {!isPlusAccount(userProfile) && (
+          <Typography level='body-sm' color='warning' sx={{ mt: 1 }}>
+            Thing-based triggers are not available in the Basic plan. Upgrade to
+            Plus to automatically trigger tasks when device states change.
+          </Typography>
+        )}
       </FormControl>
       {frequencyType === 'trigger' && (
         <ThingTriggerSection

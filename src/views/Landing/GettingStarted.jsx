@@ -72,7 +72,7 @@ const GettingStarted = () => {
       title: 'Donetick Web',
       icon: <Cloud style={{ fontSize: '48px' }} />,
       description:
-        'The easiest way! just create account and start using DoneTick',
+        'The easiest way! Just create account and start using Donetick',
       button: (
         <Button
           size='lg'
@@ -89,7 +89,7 @@ const GettingStarted = () => {
     {
       title: 'Selfhosted',
       icon: <Storage style={{ fontSize: '48px' }} />,
-      description: 'Download the binary and manage your own DoneTick instance',
+      description: 'Download the binary and manage your own Donetick instance',
       button: (
         <Button
           size='lg'
@@ -110,7 +110,7 @@ const GettingStarted = () => {
       title: 'Hassio Addon',
       icon: <AddHome style={{ fontSize: '48px' }} />,
       description:
-        'have Home Assistant? install DoneTick as a Home Assistant Addon with single click',
+        'Have Home Assistant? Install Donetick as a Home Assistant Addon with single click',
       button: (
         <Button
           size='lg'
@@ -143,11 +143,11 @@ const GettingStarted = () => {
 
       <Box maxWidth={'lg'} sx={{ mb: 8 }}>
         <Typography level='body-md' color='neutral'>
-          you can start using DoneTick in multiple ways, easiest way is to use
-          Donetick Web and you can start in seconds, or if you are into
-          selfhosting you can download the binary and run it on your own server,
-          or if you are using Home Assistant you can install DoneTick as a Home
-          Assistant Addon
+          You can start using Donetick in multiple ways, the easiest of which is
+          to use Donetick Web so you can get started in seconds, or if you are
+          into selfhosting you can download the binary and run it on your own
+          server, or if you are using Home Assistant you can install Donetick as
+          a Home Assistant Addon
         </Typography>
         <div data-aos-id-getting-started-container>
           <Grid container spacing={4} mt={4}>

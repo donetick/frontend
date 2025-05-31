@@ -44,6 +44,7 @@ import {
 import moment from 'moment'
 import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { UserContext } from '../../contexts/UserContext'
 import { useError } from '../../service/ErrorProvider'
 import { notInCompletionWindow } from '../../utils/Chores.jsx'
@@ -93,6 +94,8 @@ const ChoreCard = ({
   const [secondsLeftToCancel, setSecondsLeftToCancel] = React.useState(null)
   const [timeoutId, setTimeoutId] = React.useState(null)
   const { userProfile } = React.useContext(UserContext)
+  const { impersonatedUser } = useImpersonateUser()
+
   const { showError } = useError()
   useEffect(() => {
     document.addEventListener('mousedown', handleMenuOutsideClick)
@@ -187,7 +190,12 @@ const ChoreCard = ({
     }, 1000)
 
     const id = setTimeout(() => {
-      MarkChoreComplete(chore.id, null, null, null)
+      MarkChoreComplete(
+        chore.id,
+        impersonatedUser ? { completedBy: impersonatedUser.userId } : null,
+        null,
+        null,
+      )
         .then(resp => {
           if (resp.ok) {
             return resp.json().then(data => {
@@ -249,7 +257,7 @@ const ChoreCard = ({
 
     MarkChoreComplete(
       chore.id,
-      null,
+      impersonatedUser ? { completedBy: impersonatedUser.userId } : null,
       new Date(newDate).toISOString(),
       null,
     ).then(response => {
@@ -272,7 +280,14 @@ const ChoreCard = ({
     })
   }
   const handleCompleteWithNote = note => {
-    MarkChoreComplete(chore.id, note, null, null).then(response => {
+    MarkChoreComplete(
+      chore.id,
+      impersonatedUser
+        ? { note, completedBy: impersonatedUser.userId }
+        : { note },
+      null,
+      null,
+    ).then(response => {
       if (response.ok) {
         response.json().then(data => {
           const newChore = data.res

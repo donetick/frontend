@@ -14,7 +14,7 @@ import ConfirmationModal from './Inputs/ConfirmationModal'
 function EditHistoryModal({ config, historyRecord }) {
   useEffect(() => {
     setCompletedDate(
-      moment(historyRecord.completedAt).format('YYYY-MM-DDTHH:mm'),
+      moment(historyRecord.performedAt).format('YYYY-MM-DDTHH:mm'),
     )
     setDueDate(moment(historyRecord.dueDate).format('YYYY-MM-DDTHH:mm'))
     setNotes(historyRecord.notes)
@@ -76,7 +76,7 @@ function EditHistoryModal({ config, historyRecord }) {
             onClick={() =>
               config.onSave({
                 id: historyRecord.id,
-                completedAt: moment(completedDate).toISOString(),
+                performedAt: moment(completedDate).toISOString(),
                 dueDate: moment(dueDate).toISOString(),
                 notes,
               })

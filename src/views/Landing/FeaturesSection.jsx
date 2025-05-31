@@ -33,31 +33,31 @@ const CardData = [
   {
     title: 'Circles: Your Task Hub',
     description:
-      'build with sharing in mind. invite other to the circle and you can assign tasks to each other. and only see the tasks the should be shared',
+      'Built with sharing in mind. Invite others a circle so you can assign tasks to each other, only seeing the tasks the should be shared.',
     icon: GroupRounded,
   },
   {
     title: 'Track Your Progress',
     description:
-      'View a history of completed tasks. or use things to track simply things!',
+      "See a full history of completed tasks so you can keep track of what's been achieved!",
     icon: HistoryRounded,
   },
   {
     title: 'Automated Task Scheduling',
     description:
-      'Set up Tasks to repeat daily, weekly, or monthly, or maybe specifc day in specifc months? Donetick have a flexible scheduling system',
+      'Set up tasks to repeat daily, weekly, monthly, or even specific days in specific months? Donetick has a flexible scheduling system.',
     icon: AutoAwesomeMosaicOutlined,
   },
   {
     title: 'Automated Task Assignment',
     description:
-      'For shared tasks, Donetick can randomly rotate assignments or choose based on last completion or least assigned.',
+      'For shared tasks Donetick can randomly rotate assignments, or choose based on last completion or least assigned.',
     icon: AutoAwesomeRounded,
   },
   {
     title: 'Integrations & Webhooks',
     description:
-      'Donetick can update things programmatically with API call. you can update things from other services like IFTTT, Homeassistant or even your own service',
+      'Donetick can update things programmatically with API calls. It can integrate with IFTTT, Home Assistant or even your own services.',
     icon: Webhook,
   },
 ]

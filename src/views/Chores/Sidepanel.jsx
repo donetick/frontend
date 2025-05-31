@@ -1,12 +1,20 @@
 import { Box, Sheet } from '@mui/joy'
 import { useMediaQuery } from '@mui/material'
 import { useEffect, useState } from 'react'
+import { useChoresHistory } from '../../queries/ChoreQueries'
 import { ChoresGrouper } from '../../utils/Chores'
 import CalendarView from '../components/CalendarView'
+import ActivitiesCard from './ActivitesCard'
+import WelcomeCard from './WelcomeCard'
 
 const Sidepanel = ({ chores }) => {
   const isLargeScreen = useMediaQuery(theme => theme.breakpoints.up('md'))
   const [dueDatePieChartData, setDueDatePieChartData] = useState([])
+  const {
+    data: choresHistory,
+    isChoresHistoryLoading,
+    handleLimitChange: refetchHistory,
+  } = useChoresHistory(7, true)
 
   useEffect(() => {
     setDueDatePieChartData(generateChoreDuePieChartData(chores))
@@ -30,61 +38,29 @@ const Sidepanel = ({ chores }) => {
     return null
   }
   return (
-    <Sheet
-      variant='plain'
-      sx={{
-        p: 2,
-        // borderRadius: 'sm',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        mr: 10,
-        justifyContent: 'space-between',
-        boxShadow: 'sm',
-        borderRadius: 20,
-
-        // minimum height to fit the content:
-        height: '80vh',
-        width: '290px',
-      }}
-    >
-      {/* <Box
+    <Box>
+      <WelcomeCard chores={chores} />
+      <Sheet
+        variant='plain'
         sx={{
+          my: 1,
+          p: 2,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
+          mr: 10,
+          justifyContent: 'space-between',
+          boxShadow: 'sm',
+          borderRadius: 20,
+          width: '315px',
         }}
       >
-        <PieChart width={200} height={200}>
-          <Pie
-            data={dueDatePieChartData}
-            dataKey='value'
-            nameKey='label'
-            innerRadius={30}
-            paddingAngle={5}
-            cornerRadius={5}
-          >
-            {dueDatePieChartData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.color} />
-            ))}
-          </Pie>
-
-          <Legend
-            layout='horizontal'
-            align='center'
-            iconType='circle'
-            iconSize={8}
-            fontSize={12}
-            formatter={(label, value) => `${label}: ${value.payload.value}`}
-            wrapperStyle={{ paddingTop: 0, marginTop: 0 }} // Adjust padding and margin
-          />
-          <Tooltip />
-        </PieChart>
-      </Box> */}
-      <Box sx={{ width: '100%' }}>
-        <CalendarView chores={chores} />
-      </Box>
-    </Sheet>
+        <Box sx={{ width: '100%', overflowY: 'hidden' }}>
+          <CalendarView chores={chores} />
+        </Box>
+      </Sheet>
+      <ActivitiesCard chores={chores} choreHistory={choresHistory} />
+    </Box>
   )
 }
 

@@ -29,6 +29,7 @@ import LoadingComponent from '../components/Loading.jsx'
 import { useChoresHistory } from '../../queries/ChoreQueries.jsx'
 import { useCircleMembers } from '../../queries/UserQueries.jsx'
 import { RedeemPoints } from '../../utils/Fetcher.jsx'
+import { resolvePhotoURL } from '../../utils/Helpers.jsx'
 import RedeemPointsModal from '../Modals/RedeemPointsModal'
 const UserPoints = () => {
   const [tabValue, setTabValue] = useState(7)
@@ -106,7 +107,7 @@ const UserPoints = () => {
       })
     }
     history.forEach(chore => {
-      const dayName = new Date(chore.completedAt).toLocaleString('en-US', {
+      const dayName = new Date(chore.performedAt).toLocaleString('en-US', {
         weekday: 'short',
       })
 
@@ -135,7 +136,7 @@ const UserPoints = () => {
       })
     }
     history.forEach(chore => {
-      const dayName = new Date(chore.completedAt).toLocaleString('en-US', {
+      const dayName = new Date(chore.performedAt).toLocaleString('en-US', {
         day: 'numeric',
       })
 
@@ -166,7 +167,7 @@ const UserPoints = () => {
       })
     }
     history.forEach(chore => {
-      const monthName = new Date(chore.completedAt).toLocaleString('en-US', {
+      const monthName = new Date(chore.performedAt).toLocaleString('en-US', {
         month: 'short',
       })
 
@@ -197,7 +198,7 @@ const UserPoints = () => {
       })
     }
     history.forEach(chore => {
-      const yearName = new Date(chore.completedAt).toLocaleString('en-US', {
+      const yearName = new Date(chore.performedAt).toLocaleString('en-US', {
         year: 'numeric',
       })
 
@@ -258,7 +259,15 @@ const UserPoints = () => {
             renderValue={selected => (
               <Typography
                 startDecorator={
-                  <Avatar color='primary' m={0} size='sm'>
+                  <Avatar
+                    color='primary'
+                    m={0}
+                    size='sm'
+                    src={resolvePhotoURL(
+                      circleUsers.find(user => user.userId === selectedUser)
+                        ?.image,
+                    )}
+                  >
                     {
                       circleUsers.find(user => user.userId === selectedUser)
                         ?.displayName[0]
@@ -275,6 +284,14 @@ const UserPoints = () => {
           >
             {circleUsers.map(user => (
               <Option key={user.userId} value={user.userId}>
+                <Avatar
+                  color='primary'
+                  m={0}
+                  size='sm'
+                  src={resolvePhotoURL(user.image)}
+                >
+                  {user.displayName[0]}
+                </Avatar>
                 <Typography>{user.displayName}</Typography>
                 <Chip
                   color='success'
