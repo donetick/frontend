@@ -34,12 +34,7 @@ import { useContext, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { UserContext } from '../../contexts/UserContext'
 import { useChores } from '../../queries/ChoreQueries'
-import {
-  GetAllUsers,
-  GetArchivedChores,
-  GetChores,
-  GetUserProfile,
-} from '../../utils/Fetcher'
+import { GetArchivedChores } from '../../utils/Fetcher'
 import Priorities from '../../utils/Priorities'
 import LoadingComponent from '../components/Loading'
 import { useLabels } from '../Labels/LabelQueries'
@@ -47,6 +42,7 @@ import ChoreCard from './ChoreCard'
 import CompactChoreCard from './CompactChoreCard'
 import IconButtonWithMenu from './IconButtonWithMenu'
 
+import { useCircleMembers } from '../../queries/UserQueries'
 import { ChoreFilters, ChoresGrouper, ChoreSorter } from '../../utils/Chores'
 import TaskInput from '../components/AddTaskModal'
 import {
@@ -95,58 +91,11 @@ const MyChores = () => {
     isLoading: choresLoading,
     refetch: refetchChores,
   } = useChores()
+  const { data: membersData, isLoading: membersLoading } = useCircleMembers()
 
   useEffect(() => {
-    Promise.all([GetChores(), GetAllUsers(), GetUserProfile()]).then(
-      responses => {
-        const [choresResponse, usersResponse, userProfileResponse] = responses
-        if (!choresResponse.ok) {
-          throw new Error(choresResponse.statusText)
-        }
-        if (!usersResponse.ok) {
-          throw new Error(usersResponse.statusText)
-        }
-        if (!userProfileResponse.ok) {
-          throw new Error(userProfileResponse.statusText)
-        }
-        Promise.all([
-          userProfileResponse.json(),
-          choresResponse.json(),
-          usersResponse.json(),
-        ]).then(data => {
-          const [userProfileData, choresData, usersData] = data
-          setUserProfile(userProfileData.res)
-          setChores(choresData.res)
-          setFilteredChores(choresData.res)
-          setPerformers(usersData.res)
-          if (canScheduleNotification()) {
-            scheduleChoreNotification(
-              choresData.res,
-              userProfileData.res,
-              usersData.res,
-            )
-          }
-        })
-      },
-    )
-
-    // GetAllUsers()
-    //   .then(response => response.json())
-    //   .then(data => {
-    //     setPerformers(data.res)
-    //   })
-    // GetUserProfile().then(response => response.json()).then(data => {
-    //   setUserProfile(data.res)
-    // })
-
-    // const currentUser = JSON.parse(localStorage.getItem('user'))
-    // if (currentUser !== null) {
-    //   setActiveUserId(currentUser.id)
-    // }
-  }, [])
-
-  useEffect(() => {
-    if (choresData) {
+    if (!choresLoading && !membersLoading && userProfile) {
+      setPerformers(membersData.res)
       const sortedChores = choresData.res.sort(ChoreSorter)
       setChores(sortedChores)
       setFilteredChores(sortedChores)
@@ -165,8 +114,12 @@ const MyChores = () => {
           }, {}),
         )
       }
+
+      if (canScheduleNotification()) {
+        scheduleChoreNotification(choresData.res, userProfile, membersData.res)
+      }
     }
-  }, [choresData, choresLoading])
+  }, [membersLoading, choresLoading, userProfile])
 
   useEffect(() => {
     document.addEventListener('mousedown', handleMenuOutsideClick)
