@@ -62,6 +62,7 @@ export default defineConfig({
         skipWaiting: true, // Force the waiting service worker to become the active service worker
         clientsClaim: true, // Take control of uncontrolled clients as soon as the service worker becomes active
         maximumFileSizeToCacheInBytes: 6000000, // 6MB
+        navigateFallbackDenylist: [/^\/eapi\/.+/], // Prevent caching of external API routes
       },
     }),
   ],
