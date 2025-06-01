@@ -122,7 +122,18 @@ const CalendarView = ({ chores }) => {
         }
       />
       {!selectedDate && (
-        <Grid container ml={-3} mt={1}>
+        <Grid
+          container
+          ml={3}
+          mt={1}
+          // start from left:
+          sx={{
+            width: '100%',
+            display: 'flex',
+            // alignItems: 'center',
+            justifyContent: 'start',
+          }}
+        >
           {/* Show legend with current user first, then other circle members who have assignments */}
           {(() => {
             const assignedUserIds = new Set(
@@ -171,7 +182,7 @@ const CalendarView = ({ chores }) => {
                     backgroundColor: item.color,
                   }}
                 />
-                <Typography level='body-xs' ml={0.3}>
+                <Typography level='body-xs' ml={0.5}>
                   {item.name}
                 </Typography>
               </Grid>

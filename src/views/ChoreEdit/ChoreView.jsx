@@ -30,7 +30,6 @@ import {
   MenuItem,
   Sheet,
   Snackbar,
-  styled,
   Typography,
 } from '@mui/joy'
 import { Divider } from '@mui/material'
@@ -54,16 +53,6 @@ import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import LoadingComponent from '../components/Loading.jsx'
 import RichTextEditor from '../components/RichTextEditor.jsx'
 import SubTasks from '../components/SubTask.jsx'
-const IconCard = styled('div')({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  backgroundColor: '#f0f0f0', // Adjust the background color as needed
-  borderRadius: '50%',
-  minWidth: '40px',
-  height: '40px',
-  marginRight: '16px',
-})
 
 const ChoreView = () => {
   const [chore, setChore] = useState({})

@@ -1,4 +1,4 @@
-import { CheckCircle, Key, Security, Smartphone } from '@mui/icons-material'
+import { CheckCircle, Security, Smartphone } from '@mui/icons-material'
 import {
   Alert,
   Box,
@@ -264,7 +264,7 @@ const MFASettings = () => {
           </Box>
         </Box>
       </Card>
-
+      {/* 
       {mfaEnabled && (
         <Card variant='outlined'>
           <Box className='flex items-center justify-between'>
@@ -288,7 +288,7 @@ const MFASettings = () => {
             </Button>
           </Box>
         </Card>
-      )}
+      )} */}
 
       {/* Setup MFA Modal */}
       <Modal open={setupModalOpen} onClose={closeSetupModal}>
