@@ -413,14 +413,14 @@ const ChoreCard = ({
               </Avatar>
               <Box display='flex' flexDirection='column'>
                 <Typography level='title-md'>{getName(chore.name)}</Typography>
-                {userProfile && chore.assignedTo !== userProfile.id && (
+                {userProfile && chore.assignedTo !== userProfile.userId && (
                   <Box display='flex' alignItems='center' gap={0.5}>
                     <Typography level='body-md' color='text.disabled'>
                       Assigned to
                     </Typography>
                     <Chip variant='outlined'>
                       {
-                        performers.find(p => p.id === chore.assignedTo)
+                        performers.find(p => p.userId === chore.assignedTo)
                           ?.displayName
                       }
                     </Chip>
@@ -606,7 +606,7 @@ const ChoreCard = ({
             setIsChangeAssigneeModalOpen(false)
           }}
           onSave={selected => {
-            handleAssigneChange(selected.id)
+            handleAssigneChange(selected.userId)
           }}
         />
         {confirmModelConfig?.isOpen && (
