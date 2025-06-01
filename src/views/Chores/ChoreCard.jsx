@@ -1,29 +1,9 @@
 import {
-  Archive,
   CancelScheduleSend,
   Check,
-  CopyAll,
-  Delete,
-  Edit,
-  HorizontalRule,
-  KeyboardControlKey,
-  KeyboardDoubleArrowUp,
-  LocalOffer,
-  ManageSearch,
-  MoreTime,
-  MoreVert,
-  Nfc,
-  NoteAdd,
-  PriorityHigh,
-  RecordVoiceOver,
   Repeat,
-  Report,
-  SwitchAccessShortcut,
   TimesOneMobiledata,
   Toll,
-  Unarchive,
-  Update,
-  ViewCarousel,
   Webhook,
 } from '@mui/icons-material'
 import {
@@ -33,16 +13,13 @@ import {
   Card,
   Chip,
   CircularProgress,
-  Divider,
   Grid,
   IconButton,
-  Menu,
-  MenuItem,
   Snackbar,
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
-import React, { useEffect } from 'react'
+import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { UserContext } from '../../contexts/UserContext'
@@ -50,11 +27,8 @@ import { useError } from '../../service/ErrorProvider'
 import { notInCompletionWindow } from '../../utils/Chores.jsx'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import {
-  ArchiveChore,
   DeleteChore,
   MarkChoreComplete,
-  SkipChore,
-  UnArchiveChore,
   UpdateChoreAssignee,
   UpdateDueDate,
 } from '../../utils/Fetcher'
@@ -64,17 +38,16 @@ import DateModal from '../Modals/Inputs/DateModal'
 import SelectModal from '../Modals/Inputs/SelectModal'
 import TextModal from '../Modals/Inputs/TextModal'
 import WriteNFCModal from '../Modals/Inputs/WriteNFCModal'
+import ChoreActionMenu from '../components/ChoreActionMenu'
 const ChoreCard = ({
   chore,
   performers,
   onChoreUpdate,
   onChoreRemove,
-  userLabels,
   sx,
   viewOnly,
   onChipClick,
 }) => {
-  const [activeUserId, setActiveUserId] = React.useState(0)
   const [isChangeDueDateModalOpen, setIsChangeDueDateModalOpen] =
     React.useState(false)
   const [isCompleteWithPastDateModalOpen, setIsCompleteWithPastDateModalOpen] =
@@ -85,10 +58,7 @@ const ChoreCard = ({
     React.useState(false)
   const [confirmModelConfig, setConfirmModelConfig] = React.useState({})
   const [isNFCModalOpen, setIsNFCModalOpen] = React.useState(false)
-  const [anchorEl, setAnchorEl] = React.useState(null)
-  const menuRef = React.useRef(null)
   const navigate = useNavigate()
-  const [isDisabled, setIsDisabled] = React.useState(false)
 
   const [isPendingCompletion, setIsPendingCompletion] = React.useState(false)
   const [secondsLeftToCancel, setSecondsLeftToCancel] = React.useState(null)
@@ -97,39 +67,7 @@ const ChoreCard = ({
   const { impersonatedUser } = useImpersonateUser()
 
   const { showError } = useError()
-  useEffect(() => {
-    document.addEventListener('mousedown', handleMenuOutsideClick)
-    return () => {
-      document.removeEventListener('mousedown', handleMenuOutsideClick)
-    }
-  }, [anchorEl])
 
-  const handleMenuOpen = event => {
-    setAnchorEl(event.currentTarget)
-  }
-
-  const handleMenuClose = () => {
-    setAnchorEl(null)
-  }
-
-  const handleMenuOutsideClick = event => {
-    if (
-      anchorEl &&
-      !anchorEl.contains(event.target) &&
-      !menuRef.current.contains(event.target)
-    ) {
-      handleMenuClose()
-    }
-  }
-  const handleEdit = () => {
-    navigate(`/chores/${chore.id}/edit`)
-  }
-  const handleClone = () => {
-    navigate(`/chores/${chore.id}/edit?clone=true`)
-  }
-  const handleView = () => {
-    navigate(`/chores/${chore.id}`)
-  }
   const handleDelete = () => {
     setConfirmModelConfig({
       isOpen: true,
@@ -148,30 +86,6 @@ const ChoreCard = ({
         setConfirmModelConfig({})
       },
     })
-  }
-  const handleArchive = () => {
-    if (chore.isActive) {
-      ArchiveChore(chore.id).then(response => {
-        if (response.ok) {
-          response.json().then(data => {
-            const newChore = { ...chore, isActive: false }
-
-            onChoreUpdate(newChore, 'archive')
-          })
-        }
-      })
-    } else {
-      UnArchiveChore(chore.id).then(response => {
-        if (response.ok) {
-          response.json().then(data => {
-            const newChore = { ...chore, isActive: true }
-            onChoreUpdate(newChore, 'unarchive')
-          })
-        }
-      })
-    }
-
-    handleMenuClose()
   }
 
   const handleTaskCompletion = () => {
@@ -235,10 +149,6 @@ const ChoreCard = ({
   }
 
   const handleChangeDueDate = newDate => {
-    if (activeUserId === null) {
-      alert('Please select a performer')
-      return
-    }
     UpdateDueDate(chore.id, newDate).then(response => {
       if (response.ok) {
         response.json().then(data => {
@@ -250,11 +160,6 @@ const ChoreCard = ({
   }
 
   const handleCompleteWithPastDate = newDate => {
-    if (activeUserId === null) {
-      alert('Please select a performer')
-      return
-    }
-
     MarkChoreComplete(
       chore.id,
       impersonatedUser ? { completedBy: impersonatedUser.userId } : null,
@@ -318,29 +223,6 @@ const ChoreCard = ({
     return 'neutral'
   }
 
-  const getIconForLabel = label => {
-    if (!label || label.trim() === '') return <></>
-    switch (String(label).toLowerCase()) {
-      case 'high':
-        return <KeyboardDoubleArrowUp />
-      case 'important':
-        return <Report />
-      default:
-        return <LocalOffer />
-    }
-  }
-  const getPriorityIcon = priority => {
-    switch (Number(priority)) {
-      case 1:
-        return <PriorityHigh />
-      case 2:
-        return <KeyboardDoubleArrowUp />
-      case 3:
-        return <KeyboardControlKey />
-      default:
-        return <HorizontalRule />
-    }
-  }
   const getRecurrentChipText = chore => {
     // if chore.frequencyMetadata is type string then parse it otherwise assigned to the metadata:
     const metadata =
@@ -678,135 +560,19 @@ const ChoreCard = ({
                   )}
                 </div>
               </IconButton>
-              <IconButton
-                // sx={{ width: 15 }}
-                variant='soft'
-                color='success'
-                onClick={handleMenuOpen}
-                sx={{
-                  borderRadius: '50%',
-                  width: 25,
-                  height: 25,
-                  position: 'relative',
-                  left: -10,
-                }}
-              >
-                <MoreVert />
-              </IconButton>
-              {/* </ButtonGroup> */}
-              <Menu
-                size='lg'
-                ref={menuRef}
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={handleMenuClose}
-              >
-                <MenuItem
-                  onClick={() => {
-                    setIsCompleteWithNoteModalOpen(true)
-                  }}
-                >
-                  <NoteAdd />
-                  Complete with note
-                </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    setIsCompleteWithPastDateModalOpen(true)
-                  }}
-                >
-                  <Update />
-                  Complete in past
-                </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    SkipChore(chore.id)
-                      .then(response => {
-                        if (response.ok) {
-                          response.json().then(data => {
-                            const newChore = data.res
-                            onChoreUpdate(newChore, 'skipped')
-                            handleMenuClose()
-                          })
-                        }
-                      })
-                      .catch(error => {
-                        if (error?.queued) {
-                          showError({
-                            title: 'Failed to update',
-                            message:
-                              'Request will be processed when you are online',
-                          })
-                        } else {
-                          showError({
-                            title: 'Failed to update',
-                            message: error,
-                          })
-                        }
-                      })
-                  }}
-                >
-                  <SwitchAccessShortcut />
-                  Skip to next due date
-                </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    setIsChangeAssigneeModalOpen(true)
-                  }}
-                >
-                  <RecordVoiceOver />
-                  Delegate to someone else
-                </MenuItem>
-                <Divider />
-                <MenuItem
-                  onClick={() => {
-                    navigate(`/chores/${chore.id}/history`)
-                  }}
-                >
-                  <ManageSearch />
-                  History
-                </MenuItem>
-                <Divider />
-                <MenuItem
-                  onClick={() => {
-                    setIsChangeDueDateModalOpen(true)
-                  }}
-                >
-                  <MoreTime />
-                  Change due date
-                </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    // write current chore URL to NFC
-                    // writeToNFC(`${window.location.origin}/chores/${chore.id}`)
-                    setIsNFCModalOpen(true)
-                  }}
-                >
-                  <Nfc />
-                  Write to NFC
-                </MenuItem>
-                <MenuItem onClick={handleEdit}>
-                  <Edit />
-                  Edit
-                </MenuItem>
-                <MenuItem onClick={handleClone}>
-                  <CopyAll />
-                  Clone
-                </MenuItem>
-                <MenuItem onClick={handleView}>
-                  <ViewCarousel />
-                  View
-                </MenuItem>
-                <MenuItem onClick={handleArchive} color='neutral'>
-                  {chore.isActive ? <Archive /> : <Unarchive />}
-                  {chore.isActive ? 'Archive' : 'Unarchive'}
-                </MenuItem>
-                <Divider />
-
-                <MenuItem onClick={handleDelete} color='danger'>
-                  <Delete />
-                  Delete
-                </MenuItem>
-              </Menu>
+              <ChoreActionMenu
+                chore={chore}
+                onChoreUpdate={onChoreUpdate}
+                onChoreRemove={onChoreRemove}
+                onCompleteWithNote={() => setIsCompleteWithNoteModalOpen(true)}
+                onCompleteWithPastDate={() =>
+                  setIsCompleteWithPastDateModalOpen(true)
+                }
+                onChangeAssignee={() => setIsChangeAssigneeModalOpen(true)}
+                onChangeDueDate={() => setIsChangeDueDateModalOpen(true)}
+                onWriteNFC={() => setIsNFCModalOpen(true)}
+                onDelete={handleDelete}
+              />
             </Box>
           </Grid>
         </Grid>
