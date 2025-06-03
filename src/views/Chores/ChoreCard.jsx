@@ -420,7 +420,7 @@ const ChoreCard = ({
                     </Typography>
                     <Chip variant='outlined'>
                       {
-                        performers.find(p => p.id === chore.assignedTo)
+                        performers.find(p => p.userId === chore.assignedTo)
                           ?.displayName
                       }
                     </Chip>
