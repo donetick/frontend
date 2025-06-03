@@ -64,10 +64,16 @@ export const TASK_COLOR = {
   // For the calendar
   OVERDUE: '#F03A47',
   TODAY: '#ffc107',
+  TOMORROW: '#4ec1a2',
+  NEXT_7_DAYS: '#00bcd4',
+  LATER_THIS_MONTH: '#b39ddb',
+  FUTURE: '#d7ccc8',
+  ANYTIME: '#90a4ae',
+
+  // Legacy colors for backward compatibility
   IN_A_WEEK: '#4ec1a2',
   THIS_MONTH: '#00bcd4',
   LATER: '#d7ccc8',
-  ANYTIME: '#90a4ae',
 
   // FOR ASSIGNEE:
   ASSIGNED_TO_ME: '#4ec1a2',

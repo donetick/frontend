@@ -15,9 +15,10 @@ export const ChoresGrouper = (groupBy, chores, filter) => {
     case 'due_date':
       var groupRaw = {
         Today: [],
-        'In a week': [],
-        'This month': [],
-        Later: [],
+        Tomorrow: [],
+        'Next 7 Days': [],
+        'Later This Month': [],
+        Future: [],
         Overdue: [],
         Anytime: [],
       }
@@ -32,17 +33,24 @@ export const ChoresGrouper = (groupBy, chores, filter) => {
         ) {
           groupRaw['Today'].push(chore)
         } else if (
-          new Date(chore.nextDueDate) <
-            new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) &&
-          new Date(chore.nextDueDate) > new Date()
+          new Date(chore.nextDueDate).toDateString() ===
+          new Date(Date.now() + 24 * 60 * 60 * 1000).toDateString()
         ) {
-          groupRaw['In a week'].push(chore)
+          groupRaw['Tomorrow'].push(chore)
         } else if (
-          new Date(chore.nextDueDate).getMonth() === new Date().getMonth()
+          new Date(chore.nextDueDate) <
+            new Date(Date.now() + 8 * 24 * 60 * 60 * 1000) &&
+          new Date(chore.nextDueDate) >
+            new Date(Date.now() + 24 * 60 * 60 * 1000)
         ) {
-          groupRaw['This month'].push(chore)
+          groupRaw['Next 7 Days'].push(chore)
+        } else if (
+          new Date(chore.nextDueDate).getMonth() === new Date().getMonth() &&
+          new Date(chore.nextDueDate).getFullYear() === new Date().getFullYear()
+        ) {
+          groupRaw['Later This Month'].push(chore)
         } else {
-          groupRaw['Later'].push(chore)
+          groupRaw['Future'].push(chore)
         }
       })
       groups = [
@@ -53,16 +61,25 @@ export const ChoresGrouper = (groupBy, chores, filter) => {
         },
         { name: 'Today', content: groupRaw['Today'], color: TASK_COLOR.TODAY },
         {
-          name: 'In a week',
-          content: groupRaw['In a week'],
-          color: TASK_COLOR.IN_A_WEEK,
+          name: 'Tomorrow',
+          content: groupRaw['Tomorrow'],
+          color: TASK_COLOR.TOMORROW,
         },
         {
-          name: 'This month',
-          content: groupRaw['This month'],
-          color: TASK_COLOR.THIS_MONTH,
+          name: 'Next 7 Days',
+          content: groupRaw['Next 7 Days'],
+          color: TASK_COLOR.NEXT_7_DAYS,
         },
-        { name: 'Later', content: groupRaw['Later'], color: TASK_COLOR.LATER },
+        {
+          name: 'Later This Month',
+          content: groupRaw['Later This Month'],
+          color: TASK_COLOR.LATER_THIS_MONTH,
+        },
+        {
+          name: 'Future',
+          content: groupRaw['Future'],
+          color: TASK_COLOR.FUTURE,
+        },
         {
           name: 'Anytime',
           content: groupRaw['Anytime'],
