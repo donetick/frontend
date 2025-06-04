@@ -55,7 +55,7 @@ const Sidepanel = ({ chores }) => {
           width: '315px',
         }}
       >
-        <Box sx={{ width: '100%', overflowY: 'hidden' }}>
+        <Box sx={{ width: '100%', overflowY: 'hidden', overflowX: 'hidden' }}>
           <CalendarView chores={chores} />
         </Box>
       </Sheet>
