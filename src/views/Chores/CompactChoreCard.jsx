@@ -205,13 +205,12 @@ const CompactChoreCard = ({
   // Utility functions
   const getDueDateText = nextDueDate => {
     if (chore.nextDueDate === null) return 'No Due Date'
+    // if due in next 48 hours, we should it in this format : Tomorrow 11:00 AM
     const diff = moment(nextDueDate).diff(moment(), 'hours')
-    if (diff < 24 && diff > 0) {
+    if (diff < 48 && diff > 0) {
       return moment(nextDueDate).calendar().replace(' at', '')
     }
-    if (diff < 0) {
-      return 'Overdue'
-    }
+
     return moment(nextDueDate).fromNow()
   }
 
