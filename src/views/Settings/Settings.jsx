@@ -16,9 +16,9 @@ import {
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
-import { useContext, useEffect, useState } from 'react'
-import { UserContext } from '../../contexts/UserContext'
+import { useEffect, useState } from 'react'
 import Logo from '../../Logo'
+import { useUserProfile } from '../../queries/UserQueries'
 import {
   AcceptCircleMemberRequest,
   CancelSubscription,
@@ -27,7 +27,6 @@ import {
   GetCircleMemberRequests,
   GetSubscriptionSession,
   GetUserCircle,
-  GetUserProfile,
   JoinCircle,
   LeaveCircle,
   PutWebhookURL,
@@ -44,7 +43,8 @@ import StorageSettings from './StorageSettings'
 import ThemeToggle from './ThemeToggle'
 
 const Settings = () => {
-  const { userProfile, setUserProfile } = useContext(UserContext)
+  const { data: userProfile } = useUserProfile()
+
   const [userCircles, setUserCircles] = useState([])
   const [circleMemberRequests, setCircleMemberRequests] = useState([])
   const [circleInviteCode, setCircleInviteCode] = useState('')
@@ -55,11 +55,6 @@ const Settings = () => {
 
   const [changePasswordModal, setChangePasswordModal] = useState(false)
   useEffect(() => {
-    GetUserProfile().then(resp => {
-      resp.json().then(data => {
-        setUserProfile(data.res)
-      })
-    })
     GetUserCircle().then(resp => {
       resp.json().then(data => {
         setUserCircles(data.res ? data.res : [])

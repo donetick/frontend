@@ -10,8 +10,9 @@ import {
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
-import { useContext, useEffect, useState } from 'react'
-import { UserContext } from '../../contexts/UserContext'
+
+import { useEffect, useState } from 'react'
+import { useUserProfile } from '../../queries/UserQueries'
 import {
   CreateLongLiveToken,
   DeleteLongLiveToken,
@@ -21,10 +22,10 @@ import { isPlusAccount } from '../../utils/Helpers'
 import TextModal from '../Modals/Inputs/TextModal'
 
 const APITokenSettings = () => {
+  const { data: userProfile } = useUserProfile()
   const [tokens, setTokens] = useState([])
   const [isGetTokenNameModalOpen, setIsGetTokenNameModalOpen] = useState(false)
   const [showTokenId, setShowTokenId] = useState(null)
-  const { userProfile } = useContext(UserContext)
   useEffect(() => {
     GetLongLiveTokens().then(resp => {
       resp.json().then(data => {

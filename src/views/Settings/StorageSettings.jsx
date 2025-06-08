@@ -7,15 +7,15 @@ import {
   LinearProgress,
   Typography,
 } from '@mui/joy'
-import { useContext, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { UserContext } from '../../contexts/UserContext'
+import { useUserProfile } from '../../queries/UserQueries'
 import { GetStorageUsage } from '../../utils/Fetcher'
 import { isPlusAccount } from '../../utils/Helpers'
 
 const StorageSettings = () => {
   const Navigate = useNavigate()
-  const { userProfile } = useContext(UserContext)
+  const { data: userProfile } = useUserProfile()
   const [usage, setUsage] = useState({ used: 0, total: 0 })
   const [loading, setLoading] = useState(true)
 

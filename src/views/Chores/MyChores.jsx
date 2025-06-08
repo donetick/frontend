@@ -30,9 +30,8 @@ import {
   Typography,
 } from '@mui/joy'
 import Fuse from 'fuse.js'
-import { useContext, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { UserContext } from '../../contexts/UserContext'
 import { useChores } from '../../queries/ChoreQueries'
 import { GetArchivedChores } from '../../utils/Fetcher'
 import Priorities from '../../utils/Priorities'
@@ -42,7 +41,7 @@ import ChoreCard from './ChoreCard'
 import CompactChoreCard from './CompactChoreCard'
 import IconButtonWithMenu from './IconButtonWithMenu'
 
-import { useCircleMembers } from '../../queries/UserQueries'
+import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { ChoreFilters, ChoresGrouper, ChoreSorter } from '../../utils/Chores'
 import TaskInput from '../components/AddTaskModal'
 import {
@@ -54,7 +53,8 @@ import Sidepanel from './Sidepanel'
 import SortAndGrouping from './SortAndGrouping'
 
 const MyChores = () => {
-  const { userProfile, setUserProfile } = useContext(UserContext)
+  const { data: userProfile, isLoading: isUserProfileLoading } =
+    useUserProfile()
   const [isSnackbarOpen, setIsSnackbarOpen] = useState(false)
   const [snackBarMessage, setSnackBarMessage] = useState(null)
   const [chores, setChores] = useState([])
@@ -119,7 +119,7 @@ const MyChores = () => {
         scheduleChoreNotification(choresData.res, userProfile, membersData.res)
       }
     }
-  }, [membersLoading, choresLoading, userProfile])
+  }, [membersLoading, choresLoading, isUserProfileLoading])
 
   useEffect(() => {
     document.addEventListener('mousedown', handleMenuOutsideClick)
@@ -352,12 +352,39 @@ const MyChores = () => {
   }
 
   if (
-    userProfile === null ||
+    isUserProfileLoading ||
     userLabelsLoading ||
     performers.length === 0 ||
     choresLoading
   ) {
-    return <LoadingComponent />
+    console.log(
+      'userProfile:',
+      userProfile,
+      'userLabelsLoading:',
+      userLabelsLoading,
+      'performers:',
+      performers.length,
+      'choresLoading:',
+      choresLoading,
+    )
+
+    return (
+      <>
+        <Typography level='title-lg' sx={{ mt: 2, mb: 2 }}>
+          {JSON.stringify(userProfile) === 'null'}
+        </Typography>
+        <Typography level='title-lg' sx={{ mt: 2, mb: 2 }}>
+          {userLabelsLoading}
+        </Typography>
+        <Typography level='title-lg' sx={{ mt: 2, mb: 2 }}>
+          {performers.length === 0}
+        </Typography>
+        <Typography level='title-lg' sx={{ mt: 2, mb: 2 }}>
+          {choresLoading}
+        </Typography>
+        <LoadingComponent />
+      </>
+    )
   }
 
   return (

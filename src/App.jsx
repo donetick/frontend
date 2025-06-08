@@ -7,12 +7,10 @@ import { Outlet, useNavigate } from 'react-router-dom'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 import { registerCapacitorListeners } from './CapacitorListener'
 import { ImpersonateUserProvider } from './contexts/ImpersonateUserContext'
-import { UserContext } from './contexts/UserContext'
 import { useResource } from './queries/ResourceQueries'
 import { AuthenticationProvider } from './service/AuthenticationService'
 import { ErrorProvider } from './service/ErrorProvider'
-import { GetUserProfile } from './utils/Fetcher'
-import { apiManager, isTokenValid } from './utils/TokenManager'
+import { apiManager } from './utils/TokenManager'
 import NetworkBanner from './views/components/NetworkBanner'
 const add = className => {
   document.getElementById('root').classList.add(className)
@@ -23,15 +21,14 @@ const remove = className => {
 }
 // TODO: Update the interval to at 60 minutes
 const intervalMS = 5 * 60 * 1000 // 5 minutes
-
+const queryClient = new QueryClient({})
 function App() {
   const resource = useResource()
   const navigate = useNavigate()
   startApiManager(navigate)
   startOpenReplay()
-  const queryClient = new QueryClient()
+
   const { mode, systemMode } = useColorScheme()
-  const [userProfile, setUserProfile] = useState(null)
   const [showUpdateSnackbar, setShowUpdateSnackbar] = useState(true)
 
   const {
@@ -72,23 +69,12 @@ function App() {
 
     return remove('dark')
   }
-  const getUserProfile = () => {
-    GetUserProfile()
-      .then(res => {
-        res.json().then(data => {
-          setUserProfile(data.res)
-        })
-      })
-      .catch(error => {})
-  }
+
   useEffect(() => {
     setThemeClass()
   }, [mode, systemMode])
   useEffect(() => {
     registerCapacitorListeners()
-    if (isTokenValid()) {
-      if (!userProfile) getUserProfile()
-    }
   }, [])
 
   return (
@@ -99,10 +85,8 @@ function App() {
         <AuthenticationProvider />
         <ErrorProvider>
           <ImpersonateUserProvider>
-            <UserContext.Provider value={{ userProfile, setUserProfile }}>
-              <NavBar />
-              <Outlet />
-            </UserContext.Provider>
+            <NavBar />
+            <Outlet />
           </ImpersonateUserProvider>
         </ErrorProvider>
 
@@ -133,6 +117,7 @@ const startOpenReplay = () => {
   const tracker = new Tracker({
     projectKey: import.meta.env.VITE_OPENREPLAY_PROJECT_KEY,
   })
+
   tracker.start()
 }
 export default App

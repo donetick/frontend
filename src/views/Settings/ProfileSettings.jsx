@@ -11,16 +11,16 @@ import {
 } from '@mui/joy'
 import Modal from '@mui/joy/Modal'
 import ModalDialog from '@mui/joy/ModalDialog'
-import { useContext, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import Cropper from 'react-easy-crop'
-import { UserContext } from '../../contexts/UserContext'
+import { useUserProfile } from '../../queries/UserQueries'
 import { UpdateUserDetails } from '../../utils/Fetcher'
 import { resolvePhotoURL } from '../../utils/Helpers'
 import { getCroppedImg } from '../../utils/imageCropUtils'
 import { UploadFile } from '../../utils/TokenManager'
 
 const ProfileSettings = () => {
-  const { userProfile, setUserProfile } = useContext(UserContext)
+  const { data: userProfile } = useUserProfile()
   const [displayName, setDisplayName] = useState(userProfile?.displayName || '')
   const [timezone, setTimezone] = useState(
     userProfile?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -75,7 +75,6 @@ const ProfileSettings = () => {
       const url = resolvePhotoURL(data.url || data.sign)
 
       setPhotoURL(url)
-      setUserProfile({ ...userProfile, image: url })
       setSnackbar({
         open: true,
         message: 'Profile photo updated!',
@@ -101,7 +100,6 @@ const ProfileSettings = () => {
       const response = await UpdateUserDetails(userDetails)
 
       if (response.ok) {
-        setUserProfile({ ...userProfile, displayName, timezone })
         setSnackbar({
           open: true,
           message: 'Profile updated successfully!',

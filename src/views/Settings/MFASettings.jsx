@@ -468,11 +468,6 @@ const MFASettings = () => {
                 fontSize: '1.2em',
                 letterSpacing: verificationCode.length === 0 ? '' : '0.4em',
               }}
-              onKeyDown={e => {
-                if (e.key === 'Enter' && verificationCode.length === 6) {
-                  handleDisableMFA()
-                }
-              }}
               slotProps={{
                 input: {
                   maxLength: 6,

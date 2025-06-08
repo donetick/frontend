@@ -68,12 +68,16 @@ export async function UploadFile(url, options) {
 export async function Fetch(url, options) {
   if (!isTokenValid()) {
     Cookies.set('ca_redirect', window.location.pathname)
-    window.location.href = '/login'
+    if (!window.location.pathname === '/login') {
+      window.location.href = '/login'
+    }
   }
 
   if (!options) {
     options = {}
   }
+  // clone options to avoid mutation
+  const cacheKey = { ...options }
   options.headers = { ...options.headers, ...HEADERS() }
 
   const baseURL = apiManager.getApiURL()

@@ -1,5 +1,10 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { GetAllCircleMembers, GetAllUsers } from '../utils/Fetcher'
+import {
+  GetAllCircleMembers,
+  GetAllUsers,
+  GetUserProfile,
+} from '../utils/Fetcher'
+import { isTokenValid } from '../utils/TokenManager'
 
 export const useAllUsers = () => {
   return useQuery({
@@ -21,4 +26,28 @@ export const useCircleMembers = () => {
   }
 
   return { data, error, isLoading, handleRefetch }
+}
+
+export const useUserProfile = () => {
+  const queryClient = useQueryClient()
+
+  const { data, error, isLoading } = useQuery({
+    queryKey: ['userProfile'],
+    queryFn: async () => {
+      const resp = await GetUserProfile()
+      const result = await resp.json()
+      if (!isTokenValid()) {
+        return null // Token is invalid, return null to indicate no profile
+      }
+      return result.res // Return the actual user profile data
+    },
+    staleTime: 30 * 60 * 1000, // 30 minutes in milliseconds
+    gcTime: 30 * 60 * 1000, // 30 minutes in milliseconds
+  })
+  return {
+    data,
+    error,
+    isLoading,
+    refetch: () => queryClient.invalidateQueries(['userProfile']),
+  }
 }
