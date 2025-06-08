@@ -22,8 +22,8 @@ import {
   Tabs,
   Typography,
 } from '@mui/joy'
-import { useContext, useEffect, useState } from 'react'
-import { UserContext } from '../../contexts/UserContext.js'
+import { useEffect, useState } from 'react'
+import { useUserProfile } from '../../queries/UserQueries'
 import LoadingComponent from '../components/Loading.jsx'
 
 import { useChoresHistory } from '../../queries/ChoreQueries.jsx'
@@ -47,7 +47,7 @@ const UserPoints = () => {
     handleLimitChange: handleChoresHistoryLimitChange,
   } = useChoresHistory(7)
 
-  const { userProfile } = useContext(UserContext)
+  const { data: userProfile } = useUserProfile()
   const [selectedUser, setSelectedUser] = useState(userProfile?.id)
   const [circleUsers, setCircleUsers] = useState([])
   const [selectedHistory, setSelectedHistory] = useState([])
