@@ -1,4 +1,4 @@
-import { Add } from '@mui/icons-material'
+import { Add, EditNotifications } from '@mui/icons-material'
 import {
   Box,
   Button,
@@ -14,15 +14,20 @@ import {
 import { FormControl } from '@mui/material'
 import * as chrono from 'chrono-node'
 import moment from 'moment'
-import { useCallback, useContext, useEffect, useRef, useState } from 'react'
-import { UserContext } from '../../contexts/UserContext'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useCreateChore } from '../../queries/ChoreQueries'
-import { useCircleMembers } from '../../queries/UserQueries'
+import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { isPlusAccount } from '../../utils/Helpers'
 import { useLabels } from '../Labels/LabelQueries'
-import { parseLabels, parsePriority, parseRepeatV2 } from './CustomParsers'
+import {
+  parseDueDate,
+  parseLabels,
+  parsePriority,
+  parseRepeatV2,
+} from './CustomParsers'
 import SmartTaskTitleInput from './SmartTaskTitleInput'
 
+import NotificationTemplate from '../../components/NotificationTemplate'
 import LearnMoreButton from './LearnMore'
 import RichTextEditor from './RichTextEditor'
 import SubTasks from './SubTask'
@@ -33,7 +38,8 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
     useCircleMembers()
   const createChoreMutation = useCreateChore()
 
-  const { userProfile } = useContext(UserContext)
+  const { data: userProfile } = useUserProfile()
+
   const [taskText, setTaskText] = useState('')
   const [taskTitle, setTaskTitle] = useState('')
   const [renderedParts, setRenderedParts] = useState([])
@@ -46,11 +52,14 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
   const [assignees, setAssignees] = useState([])
   const [labelsV2, setLabelsV2] = useState([])
   const [frequency, setFrequency] = useState(null)
+  const [notificationMetadata, setNotificationMetadata] = useState({
+    templates: [],
+  })
   const [frequencyHumanReadable, setFrequencyHumanReadable] = useState(null)
   const [subTasks, setSubTasks] = useState(null)
   const [hasDescription, setHasDescription] = useState(false)
   const [hasSubTasks, setHasSubTasks] = useState(false)
-
+  const [hasNotifications, setHasNotifications] = useState(false)
   useEffect(() => {
     if (isModalOpen && textareaRef.current) {
       textareaRef.current.focus()
@@ -233,25 +242,22 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
       //     },
       //   ])
       // }
-      const parsedDueDate = chrono.parse(sentence, new Date(), {
-        forwardDate: true,
-      })
-      if (parsedDueDate[0]?.index > -1) {
-        setDueDate(
-          moment(parsedDueDate[0].start.date()).format('YYYY-MM-DDTHH:mm:ss'),
-        )
-        cleanedSentence = cleanedSentence.replace(parsedDueDate[0].text, '')
+      // Parse due date
+      const dueDateParsed = parseDueDate(sentence, chrono)
+      let dueDateHighlight = null
+      if (dueDateParsed.result) {
+        setDueDate(moment(dueDateParsed.result).format('YYYY-MM-DDTHH:mm:ss'))
+        cleanedSentence = dueDateParsed.cleanedSentence
+        dueDateHighlight = dueDateParsed.highlight[0]
       }
 
       if (repeat.result) {
         // if repeat has result the cleaned sentence will remove the date related info which mean
         // we need to reparse the date again to get the correct due date:
-        const parsedDueDate = chrono.parse(sentence, new Date(), {
-          forwardDate: true,
-        })
-        if (parsedDueDate[0]?.index > -1) {
+        const dueDateParsedAgain = parseDueDate(sentence, chrono)
+        if (dueDateParsedAgain.result) {
           setDueDate(
-            moment(parsedDueDate[0].start.date()).format('YYYY-MM-DDTHH:mm:ss'),
+            moment(dueDateParsedAgain.result).format('YYYY-MM-DDTHH:mm:ss'),
           )
         }
       }
@@ -263,19 +269,13 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
         repeat.highlight,
         priority.highlight,
         labels.highlight,
-        parsedDueDate && parsedDueDate[0]
-          ? {
-              start: parsedDueDate[0].index,
-              end: parsedDueDate[0].index + parsedDueDate[0].text.length,
-              text: parsedDueDate[0].text,
-            }
-          : null,
+        dueDateHighlight,
       )
 
       setRenderedParts(parts)
       setTaskTitle(plainText)
     },
-    [circleMembers, userLabels, userProfile, renderHighlightedSentence],
+    [userLabels, renderHighlightedSentence],
   )
 
   useEffect(() => {
@@ -313,9 +313,11 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
   }
 
   const handleSubmit = () => {
-    createChore()
-    handleCloseModal()
-    setTaskText('')
+    console.log('Submitting task:', isPlusAccount(userProfile))
+
+    // createChore()
+    // handleCloseModal()
+    // setTaskText('')
   }
 
   const createChore = () => {
@@ -327,8 +329,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
       assignedTo: assignees.length > 0 ? assignees[0].userId : userProfile.id,
       assignStrategy: 'random',
       isRolling: false,
-      notification: false,
-      description: description || null,
+
       labelsV2: labelsV2,
       priority: priority ? Number(priority) : 0,
       status: 0,
@@ -342,9 +343,9 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
       chore.frequencyType = frequency.frequencyType
       chore.frequencyMetadata = frequency.frequencyMetadata
       chore.frequency = frequency.frequency
-      if (isPlusAccount()) {
+      if (isPlusAccount(userProfile)) {
         chore.notification = true
-        chore.notificationMetadata = { dueDate: true }
+        chore.notificationMetadata = notificationMetadata
       }
     }
     if (!frequency && dueDate) {
@@ -518,6 +519,23 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
                 Due Date
               </Button>
             )}
+            {!hasNotifications && dueDate && (
+              <Button
+                startDecorator={<EditNotifications />}
+                variant='plain'
+                size='sm'
+                onClick={() => {
+                  setHasNotifications(true)
+                  setFrequencyHumanReadable('Once')
+                  setFrequency(null)
+                  setDueDate(
+                    moment().add(1, 'day').format('YYYY-MM-DDTHH:00:00'),
+                  )
+                }}
+              >
+                Edit Notifications
+              </Button>
+            )}
           </Box>
 
           {hasDescription && (
@@ -606,10 +624,29 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
                 )}
               </Box>
             </FormControl> */}
-            <FormControl>
-              <Typography level='body-sm'>Frequency</Typography>
-              <Input value={frequencyHumanReadable || 'Once'} variant='plain' />
-            </FormControl>
+            {hasNotifications && dueDate && (
+              <Box
+                sx={{
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                }}
+              >
+                <Typography level='body-sm'>Notification Schedule</Typography>
+                <Box sx={{ p: 0.5 }}>
+                  <NotificationTemplate
+                    onChange={metadata => {
+                      const newNotificaitonMetadata = {
+                        ...notificationMetadata,
+                        templates: metadata.notifications,
+                      }
+                      setNotificationMetadata(newNotificaitonMetadata)
+                    }}
+                    value={notificationMetadata}
+                    showTimeline={false}
+                  />
+                </Box>
+              </Box>
+            )}
           </Box>
           <Box
             sx={{
