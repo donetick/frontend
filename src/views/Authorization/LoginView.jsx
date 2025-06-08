@@ -16,24 +16,26 @@ import {
   Typography,
 } from '@mui/joy'
 import Cookies from 'js-cookie'
-import React, { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { LoginSocialGoogle } from 'reactjs-social-login'
 import { GOOGLE_CLIENT_ID, REDIRECT_URL } from '../../Config'
-import { UserContext } from '../../contexts/UserContext'
 import Logo from '../../Logo'
 import { useResource } from '../../queries/ResourceQueries'
-import { GetUserProfile, login } from '../../utils/Fetcher'
+import { useUserProfile } from '../../queries/UserQueries'
+import { login } from '../../utils/Fetcher'
 import { apiManager } from '../../utils/TokenManager'
 import MFAVerificationModal from './MFAVerificationModal'
 
 const LoginView = () => {
-  const { userProfile, setUserProfile } = React.useContext(UserContext)
-  const [username, setUsername] = React.useState('')
-  const [password, setPassword] = React.useState('')
-  const [error, setError] = React.useState(null)
-  const [mfaModalOpen, setMfaModalOpen] = React.useState(false)
-  const [mfaSessionToken, setMfaSessionToken] = React.useState('')
+  // Only fetch user profile if token is valid to prevent unnecessary queries
+  const { data: userProfileData } = useUserProfile()
+  const [userProfile, setUserProfile] = useState(null)
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState(null)
+  const [mfaModalOpen, setMfaModalOpen] = useState(false)
+  const [mfaSessionToken, setMfaSessionToken] = useState('')
   const { data: resource } = useResource()
   const Navigate = useNavigate()
   useEffect(() => {
@@ -136,19 +138,17 @@ const LoginView = () => {
     })
   }
   const getUserProfileAndNavigateToHome = () => {
-    GetUserProfile().then(data => {
-      data.json().then(data => {
-        setUserProfile(data.res)
-        // check if redirect url is set in cookie:
-        const redirectUrl = Cookies.get('ca_redirect')
-        if (redirectUrl) {
-          Cookies.remove('ca_redirect')
-          Navigate(redirectUrl)
-        } else {
-          Navigate('/my/chores')
-        }
-      })
-    })
+    // Refetch user profile after login
+    // refetchUserProfile().then(() => {
+    //   // check if redirect url is set in cookie:
+    const redirectUrl = Cookies.get('ca_redirect')
+    if (redirectUrl) {
+      Cookies.remove('ca_redirect')
+      Navigate(redirectUrl)
+    } else {
+      Navigate('/my/chores')
+    }
+    // })
   }
 
   const handleMFASuccess = data => {
@@ -274,7 +274,6 @@ const LoginView = () => {
                 type='submit'
                 fullWidth
                 size='lg'
-                q
                 variant='plain'
                 sx={{
                   width: '100%',
@@ -283,7 +282,6 @@ const LoginView = () => {
                   borderRadius: '8px',
                 }}
                 onClick={() => {
-                  setUserProfile(null)
                   localStorage.removeItem('ca_token')
                   localStorage.removeItem('ca_expiration')
                   // go to login page:
@@ -353,7 +351,6 @@ const LoginView = () => {
                 type='submit'
                 fullWidth
                 size='lg'
-                q
                 variant='plain'
                 sx={{
                   width: '100%',
@@ -382,7 +379,7 @@ const LoginView = () => {
                     onResolve={({ provider, data }) => {
                       loggedWithProvider(provider, data)
                     }}
-                    onReject={err => {
+                    onReject={() => {
                       setError("Couldn't log in with Google, please try again")
                     }}
                   >

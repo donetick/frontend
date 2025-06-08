@@ -1,15 +1,15 @@
 import { Person } from '@mui/icons-material'
 import { Avatar, Box, Button, Sheet, Typography } from '@mui/joy'
 
-import { useContext, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext'
-import { UserContext } from '../../contexts/UserContext'
-import { useCircleMembers } from '../../queries/UserQueries'
+import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import UserModal from '../Modals/Inputs/UserModal'
 const WelcomeCard = () => {
   const { impersonatedUser, setImpersonatedUser } = useImpersonateUser()
   const [isAdmin, setIsAdmin] = useState(false)
-  const { userProfile } = useContext(UserContext)
+  const { data: userProfile } = useUserProfile()
+
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const { data: circleMembersData, isLoading: isCircleMembersLoading } =

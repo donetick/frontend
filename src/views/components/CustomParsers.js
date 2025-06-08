@@ -402,3 +402,80 @@ export const parseAssignees = (inputSentence, users) => {
   }
   return { result: null, cleanedSentence: sentence }
 }
+
+export const parseDueDate = (inputSentence, chrono) => {
+  // Parse the due date using chrono
+  const parsedDueDate = chrono.parse(inputSentence, new Date(), {
+    forwardDate: true,
+  })
+
+  if (!parsedDueDate[0] || parsedDueDate[0].index === -1) {
+    return {
+      result: null,
+      highlight: [],
+      cleanedSentence: inputSentence,
+    }
+  }
+
+  const dueDateMatch = parsedDueDate[0]
+  const dueDateText = dueDateMatch.text
+  const dueDateStartIndex = dueDateMatch.index
+  const dueDateEndIndex = dueDateStartIndex + dueDateText.length
+
+  // Define words that might precede the due date and should be removed
+  const precedingWords = [
+    'starting',
+    'from',
+    'beginning',
+    'begin',
+    'commence',
+    'commencing',
+  ]
+
+  // Look for preceding words before the due date
+  let cleanStartIndex = dueDateStartIndex
+  let highlightStartIndex = dueDateStartIndex
+  let precedingWord = ''
+
+  // Extract text before the due date to check for preceding words
+  const textBeforeDueDate = inputSentence.substring(0, dueDateStartIndex).trim()
+
+  for (const word of precedingWords) {
+    // Check if the text before due date ends with this preceding word
+    const wordPattern = new RegExp(`\\b${word}\\s*$`, 'i')
+    const match = textBeforeDueDate.match(wordPattern)
+
+    if (match) {
+      // Found a preceding word, include it in the text to be removed
+      const matchStart = textBeforeDueDate.length - match[0].length
+      cleanStartIndex = matchStart
+      highlightStartIndex = matchStart
+      precedingWord = match[0].trim()
+      break
+    }
+  }
+
+  // Create the highlight text
+  const fullHighlightText = precedingWord
+    ? `${precedingWord} ${dueDateText}`
+    : dueDateText
+
+  // Create cleaned sentence by removing the full match (preceding word + due date)
+  const textToRemove = inputSentence.substring(cleanStartIndex, dueDateEndIndex)
+  const cleanedSentence = inputSentence
+    .replace(textToRemove, '')
+    .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+    .trim()
+
+  return {
+    result: dueDateMatch.start.date(),
+    highlight: [
+      {
+        text: fullHighlightText,
+        start: highlightStartIndex,
+        end: dueDateEndIndex,
+      },
+    ],
+    cleanedSentence: cleanedSentence,
+  }
+}

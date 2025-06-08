@@ -22,12 +22,11 @@ import {
   Tabs,
   Typography,
 } from '@mui/joy'
-import { useContext, useEffect, useState } from 'react'
-import { UserContext } from '../../contexts/UserContext.js'
+import { useEffect, useState } from 'react'
 import LoadingComponent from '../components/Loading.jsx'
 
 import { useChoresHistory } from '../../queries/ChoreQueries.jsx'
-import { useCircleMembers } from '../../queries/UserQueries.jsx'
+import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import { RedeemPoints } from '../../utils/Fetcher.jsx'
 import { resolvePhotoURL } from '../../utils/Helpers.jsx'
 import RedeemPointsModal from '../Modals/RedeemPointsModal'
@@ -47,7 +46,7 @@ const UserPoints = () => {
     handleLimitChange: handleChoresHistoryLimitChange,
   } = useChoresHistory(7)
 
-  const { userProfile } = useContext(UserContext)
+  const { data: userProfile } = useUserProfile()
   const [selectedUser, setSelectedUser] = useState(userProfile?.id)
   const [circleUsers, setCircleUsers] = useState([])
   const [selectedHistory, setSelectedHistory] = useState([])

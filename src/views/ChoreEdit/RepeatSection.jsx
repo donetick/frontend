@@ -17,8 +17,9 @@ import {
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
-import { useContext, useEffect, useState } from 'react'
-import { UserContext } from '../../contexts/UserContext'
+import { useEffect } from 'react'
+
+import { useUserProfile } from '../../queries/UserQueries'
 import { isPlusAccount } from '../../utils/Helpers'
 import ThingTriggerSection from './ThingTriggerSection'
 
@@ -68,7 +69,6 @@ const RepeatOnSections = ({
   frequencyMetadata,
   onFrequencyMetadataUpdate,
 }) => {
-  const [intervalUnit, setIntervalUnit] = useState('days')
   // if time on frequencyMetadata is not set, try to set it to the nextDueDate if available,
   // otherwise set it to 18:00 of the current day
   useEffect(() => {
@@ -117,13 +117,16 @@ const RepeatOnSections = ({
                 onFrequencyUpdate(e.target.value)
               }}
             />
-            <Select placeholder='Unit' value={intervalUnit}>
+            <Select
+              placeholder='Unit'
+              value={frequencyMetadata?.unit || 'days'}
+              sx={{ ml: 1 }}
+            >
               {['hours', 'days', 'weeks', 'months', 'years'].map(item => (
                 <Option
                   key={item}
                   value={item}
                   onClick={() => {
-                    setIntervalUnit(item)
                     onFrequencyMetadataUpdate({
                       ...frequencyMetadata,
                       unit: item,
@@ -337,7 +340,8 @@ const RepeatSection = ({
   isAttemptToSave,
   selectedThing,
 }) => {
-  const { userProfile } = useContext(UserContext)
+  const { data: userProfile } = useUserProfile()
+
   return (
     <Box mt={2}>
       <Typography level='h4'>Repeat :</Typography>

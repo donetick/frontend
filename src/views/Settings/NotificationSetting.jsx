@@ -18,27 +18,18 @@ import {
   Switch,
   Typography,
 } from '@mui/joy'
-import React, { useContext, useEffect, useState } from 'react'
-import { UserContext } from '../../contexts/UserContext'
+import { useEffect, useState } from 'react'
+
+import { useUserProfile } from '../../queries/UserQueries'
 import {
-  GetUserProfile,
   UpdateNotificationTarget,
   UpdateUserDetails,
 } from '../../utils/Fetcher'
 
 const NotificationSetting = () => {
   const [isSnackbarOpen, setIsSnackbarOpen] = useState(false)
-  const { userProfile, setUserProfile } = useContext(UserContext)
-  useEffect(() => {
-    if (!userProfile) {
-      GetUserProfile().then(resp => {
-        resp.json().then(data => {
-          setUserProfile(data.res)
-          setChatID(data.res.chatID)
-        })
-      })
-    }
-  }, [])
+  const { data: userProfile, refetch: refetchUserProfile } = useUserProfile()
+
   const getNotificationPreferences = async () => {
     const ret = await Preferences.get({ key: 'notificationPreferences' })
     return JSON.parse(ret.value)
@@ -134,13 +125,7 @@ const NotificationSetting = () => {
         return
       }
 
-      setUserProfile({
-        ...userProfile,
-        notification_target: {
-          target: chatID,
-          type: Number(notificationTarget),
-        },
-      })
+      refetchUserProfile()
       alert('Notification target updated')
     })
   }
@@ -339,7 +324,7 @@ const NotificationSetting = () => {
                 chatID: Number(0),
               }).then(resp => {
                 resp.json().then(data => {
-                  setUserProfile(data)
+                  refetchUserProfile()
                 })
               })
             }

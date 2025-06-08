@@ -24,14 +24,15 @@ import {
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
-import { useContext, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { UserContext } from '../../contexts/UserContext'
+import NotificationTemplate from '../../components/NotificationTemplate.jsx'
 import {
   useChore,
   useCreateChore,
   useUpdateChore,
 } from '../../queries/ChoreQueries.jsx'
+import { useUserProfile } from '../../queries/UserQueries.jsx'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import {
   DeleteChore,
@@ -61,7 +62,8 @@ const REPEAT_ON_TYPE = ['interval', 'days_of_the_week', 'day_of_the_month']
 const NO_DUE_DATE_REQUIRED_TYPE = ['no_repeat', 'once']
 const NO_DUE_DATE_ALLOWED_TYPE = ['trigger']
 const ChoreEdit = () => {
-  const { userProfile, setUserProfile } = useContext(UserContext)
+  const { data: userProfile } = useUserProfile()
+
   const [chore, setChore] = useState([])
   const [choresHistory, setChoresHistory] = useState([])
   const [userHistory, setUserHistory] = useState({})
@@ -708,6 +710,10 @@ const ChoreEdit = () => {
           <Checkbox
             onChange={e => {
               setIsNotificable(e.target.checked)
+              // if unchecking, reset notification metadata:
+              if (!e.target.checked) {
+                setNotificationMetadata({})
+              }
             }}
             defaultChecked={isNotificable}
             checked={isNotificable}
@@ -726,7 +732,6 @@ const ChoreEdit = () => {
       </Box>
       {isNotificable && (
         <Box
-          ml={4}
           sx={{
             display: 'flex',
             flexDirection: 'column',
@@ -736,58 +741,20 @@ const ChoreEdit = () => {
           }}
         >
           <Card variant='outlined'>
-            <Typography level='h5'>
-              What things should trigger the notification?
-            </Typography>
-            {[
-              {
-                title: 'Due Date/Time',
-                description: 'A simple reminder that a task is due',
-                id: 'dueDate',
-              },
-              // {
-              //   title: 'Upon Completion',
-              //   description: 'A notification when a task is completed',
-              //   id: 'completion',
-              // },
-              {
-                title: 'Predued',
-                description: 'before a task is due in few hours',
-                id: 'predue',
-              },
-              // {
-              //   title: 'Overdue',
-              //   description: 'A notification when a task is overdue',
-              //   id: 'overdue',
-              // },
-              {
-                title: 'Nagging',
-                description: 'Daily reminders until the task is completed',
-                id: 'nagging',
-              },
-            ].map(item => (
-              <FormControl sx={{ mb: 1 }} key={item.id}>
-                <Checkbox
-                  overlay
-                  onClick={() => {
-                    setNotificationMetadata({
-                      ...notificationMetadata,
-                      [item.id]: !notificationMetadata[item.id],
-                    })
-                  }}
-                  checked={
-                    notificationMetadata ? notificationMetadata[item.id] : false
+            <Typography level='body-md'>Notification Schedule:</Typography>
+            <Box sx={{ p: 0.5 }}>
+              <NotificationTemplate
+                onChange={metadata => {
+                  const newNotificaitonMetadata = {
+                    ...notificationMetadata,
+                    templates: metadata.notifications,
                   }
-                  label={item.title}
-                  key={item.title}
-                />
-                <FormHelperText>{item.description}</FormHelperText>
-              </FormControl>
-            ))}
-
-            <Typography level='h5'>
-              What things should trigger the notification?
-            </Typography>
+                  setNotificationMetadata(newNotificaitonMetadata)
+                }}
+                value={notificationMetadata}
+              />
+            </Box>
+            <Typography level='h5'>Choose Who to Notify:</Typography>
             <FormControl>
               <Checkbox
                 overlay
@@ -856,7 +823,7 @@ const ChoreEdit = () => {
           onChange={(event, newValue) => {
             setLabelsV2(userLabels.filter(l => newValue.indexOf(l.name) > -1))
           }}
-          value={labelsV2.map(l => l.name)}
+          value={labelsV2?.map(l => l.name)}
           renderValue={selected => (
             <Box sx={{ display: 'flex', gap: '0.25rem' }}>
               {labelsV2.map(selectedOption => {

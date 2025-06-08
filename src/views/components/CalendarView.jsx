@@ -1,12 +1,11 @@
 import { CalendarMonth } from '@mui/icons-material'
 import { Avatar, Box, Chip, Grid, Typography } from '@mui/joy'
 import moment from 'moment'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import Calendar from 'react-calendar'
 import 'react-calendar/dist/Calendar.css'
 import { useNavigate } from 'react-router-dom'
-import { UserContext } from '../../contexts/UserContext'
-import { useCircleMembers } from '../../queries/UserQueries'
+import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { TASK_COLOR } from '../../utils/Colors'
 import './Calendar.css'
 
@@ -17,7 +16,8 @@ const getAssigneeColor = (assignee, userProfile) => {
 }
 
 const CalendarView = ({ chores }) => {
-  const { userProfile } = React.useContext(UserContext)
+  const { data: userProfile } = useUserProfile()
+
   const [selectedDate, setSeletedDate] = useState(null)
   const Navigate = useNavigate()
 

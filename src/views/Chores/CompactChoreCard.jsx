@@ -18,7 +18,7 @@ import moment from 'moment'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
-import { UserContext } from '../../contexts/UserContext'
+import { useUserProfile } from '../../queries/UserQueries.jsx'
 import { useError } from '../../service/ErrorProvider'
 import { notInCompletionWindow } from '../../utils/Chores.jsx'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
@@ -60,7 +60,8 @@ const CompactChoreCard = ({
   const [isPendingCompletion, setIsPendingCompletion] = React.useState(false)
   const [secondsLeftToCancel, setSecondsLeftToCancel] = React.useState(null)
   const [timeoutId, setTimeoutId] = React.useState(null)
-  const { userProfile } = React.useContext(UserContext)
+  const { data: userProfile } = useUserProfile()
+
   const { impersonatedUser } = useImpersonateUser()
 
   const { showError } = useError()
@@ -577,10 +578,11 @@ const CompactChoreCard = ({
             onDelete={handleDelete}
             sx={{
               width: 28,
+              marginRight: -3,
               height: 28,
               // opacity: 0.6,
               '&:hover': {
-                opacity: 1,
+                opacity: 0,
               },
             }}
           />

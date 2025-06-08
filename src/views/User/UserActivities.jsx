@@ -23,9 +23,9 @@ import {
   Typography,
 } from '@mui/joy'
 import React, { useEffect, useState } from 'react'
-import { UserContext } from '../../contexts/UserContext'
+
 import { useChores, useChoresHistory } from '../../queries/ChoreQueries'
-import { useCircleMembers } from '../../queries/UserQueries.jsx'
+import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import { ChoresGrouper } from '../../utils/Chores'
 import { TASK_COLOR } from '../../utils/Colors.jsx'
 import { resolvePhotoURL } from '../../utils/Helpers.jsx'
@@ -167,7 +167,8 @@ const USER_FILTER = (history, userId) => {
 }
 
 const UserActivites = () => {
-  const { userProfile } = React.useContext(UserContext)
+  const { data: userProfile } = useUserProfile()
+
   const [tabValue, setTabValue] = React.useState(30)
   const [selectedHistory, setSelectedHistory] = React.useState([])
   const [enrichedHistory, setEnrichedHistory] = React.useState([])

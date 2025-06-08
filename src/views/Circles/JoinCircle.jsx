@@ -2,12 +2,12 @@ import { Box, Container, Input, Sheet, Typography } from '@mui/joy'
 import Logo from '../../Logo'
 
 import { Button } from '@mui/joy'
-import { useContext } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { UserContext } from '../../contexts/UserContext'
+import { useUserProfile } from '../../queries/UserQueries'
 import { JoinCircle } from '../../utils/Fetcher'
 const JoinCircleView = () => {
-  const { userProfile, setUserProfile } = useContext(UserContext)
+  const { data: userProfile } = useUserProfile()
+
   let [searchParams, setSearchParams] = useSearchParams()
   const navigate = useNavigate()
   const code = searchParams.get('code')
