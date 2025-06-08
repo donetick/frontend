@@ -23,11 +23,10 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
-import { useUserProfile } from '../../queries/UserQueries'
 import LoadingComponent from '../components/Loading.jsx'
 
 import { useChoresHistory } from '../../queries/ChoreQueries.jsx'
-import { useCircleMembers } from '../../queries/UserQueries.jsx'
+import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import { RedeemPoints } from '../../utils/Fetcher.jsx'
 import { resolvePhotoURL } from '../../utils/Helpers.jsx'
 import RedeemPointsModal from '../Modals/RedeemPointsModal'
