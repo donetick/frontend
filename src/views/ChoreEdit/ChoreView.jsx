@@ -33,6 +33,7 @@ import {
   Typography,
 } from '@mui/joy'
 import { Divider } from '@mui/material'
+import { useQueryClient } from '@tanstack/react-query'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
@@ -61,6 +62,7 @@ const ChoreView = () => {
   const [infoCards, setInfoCards] = useState([])
   const { choreId } = useParams()
   const [note, setNote] = useState(null)
+  const queryClient = useQueryClient()
 
   const [searchParams] = useSearchParams()
 
@@ -71,18 +73,12 @@ const ChoreView = () => {
   const [confirmModelConfig, setConfirmModelConfig] = useState({})
   const [chorePriority, setChorePriority] = useState(null)
   const [isDescriptionOpen, setIsDescriptionOpen] = useState(false)
-  const {
-    data: circleMembersData,
-    isLoading: isCircleMembersLoading,
-    handleRefetch: handleCircleMembersRefetch,
-  } = useCircleMembers()
+  const { data: circleMembersData, isLoading: isCircleMembersLoading } =
+    useCircleMembers()
   const { impersonatedUser } = useImpersonateUser()
 
-  const {
-    data: choreData,
-    isLoading: isChoreLoading,
-    refetch: refetchChore,
-  } = useChoreDetails(choreId)
+  const { data: choreData, isLoading: isChoreLoading } =
+    useChoreDetails(choreId)
 
   useEffect(() => {
     if (!choreData || !choreData.res || !circleMembersData) {
@@ -107,8 +103,10 @@ const ChoreView = () => {
   const handleUpdatePriority = priority => {
     UpdateChorePriority(choreId, priority.value).then(response => {
       if (response.ok) {
-        response.json().then(data => {
+        response.json().then(() => {
           setChorePriority(priority)
+          // Invalidate chores cache to refetch data
+          queryClient.invalidateQueries(['chores'])
         })
       }
     })
@@ -195,6 +193,8 @@ const ChoreView = () => {
           clearInterval(countdownInterval) // Ensure to clear this interval as well
           setTimeoutId(null)
           setSecondsLeftToCancel(null)
+          // Invalidate chores cache to refetch data
+          queryClient.invalidateQueries(['chores'])
         })
         .then(() => {
           // refetch the chore details
@@ -216,6 +216,8 @@ const ChoreView = () => {
         response.json().then(data => {
           const newChore = data.res
           setChore(newChore)
+          // Invalidate chores cache to refetch data
+          queryClient.invalidateQueries(['chores'])
         })
       }
     })

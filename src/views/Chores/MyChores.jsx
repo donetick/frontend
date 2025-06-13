@@ -119,7 +119,14 @@ const MyChores = () => {
         scheduleChoreNotification(choresData.res, userProfile, membersData.res)
       }
     }
-  }, [membersLoading, choresLoading, isUserProfileLoading])
+  }, [
+    membersLoading,
+    choresLoading,
+    isUserProfileLoading,
+    choresData,
+    membersData,
+    userProfile,
+  ])
 
   useEffect(() => {
     document.addEventListener('mousedown', handleMenuOutsideClick)

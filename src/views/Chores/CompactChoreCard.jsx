@@ -21,14 +21,16 @@ import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useUserProfile } from '../../queries/UserQueries.jsx'
 import { useError } from '../../service/ErrorProvider'
 import { notInCompletionWindow } from '../../utils/Chores.jsx'
-import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
+import {
+  getTextColorFromBackgroundColor,
+  TASK_COLOR,
+} from '../../utils/Colors.jsx'
 import {
   DeleteChore,
   MarkChoreComplete,
   UpdateChoreAssignee,
   UpdateDueDate,
 } from '../../utils/Fetcher'
-import Priorities from '../../utils/Priorities'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import DateModal from '../Modals/Inputs/DateModal'
 import SelectModal from '../Modals/Inputs/SelectModal'
@@ -364,6 +366,26 @@ const CompactChoreCard = ({
     return parts.join(' • ')
   }
 
+  const getPriorityColor = priority => {
+    switch (priority) {
+      case 1:
+        return TASK_COLOR.PRIORITY_1
+      // return '#e53e3e' // Red for high priority
+      case 2:
+        return TASK_COLOR.PRIORITY_2
+      // return '#d69e2e' // Orange/yellow for medium priority
+      case 3:
+        return TASK_COLOR.PRIORITY_3
+      // return '#3182ce' // Blue for low priority
+      case 4:
+        return TASK_COLOR.PRIORITY_4
+      // return 'rgba(49, 130, 206, 0.5)' // Light blue for very low priority
+      default:
+        return TASK_COLOR.NO_PRIORITY
+      // return 'transparent' // No priority
+    }
+  }
+
   return (
     <Box key={chore.id + '-compact-box'}>
       <Box
@@ -378,15 +400,45 @@ const CompactChoreCard = ({
           cursor: 'pointer',
           borderBottom: '1px solid',
           borderColor: 'divider',
+          position: 'relative',
+          pl: '16px', // Add left padding for the priority bar
           '&:hover': {
             bgcolor: 'background.level1',
           },
           '&:last-child': {
             borderBottom: 'none',
           },
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: '3px',
+            backgroundColor: getPriorityColor(chore.priority),
+            borderRadius: '2px',
+          },
         }}
         onClick={() => navigate(`/chores/${chore.id}`)}
       >
+        {/* Priority bar clickable area */}
+        {chore.priority > 0 && (
+          <Box
+            sx={{
+              position: 'absolute',
+              left: 0,
+              top: 0,
+              bottom: 0,
+              width: '12px',
+              cursor: 'pointer',
+              zIndex: 1,
+            }}
+            onClick={e => {
+              e.stopPropagation()
+              onChipClick({ priority: chore.priority })
+            }}
+          />
+        )}
         {/* Left side - Content */}
 
         <Box
@@ -458,35 +510,7 @@ const CompactChoreCard = ({
               {formatMetadata()}
             </Typography>
 
-            {/* Labels */}
-            {chore.priority > 0 && (
-              <Chip
-                variant='solid'
-                size='sm'
-                color={
-                  chore.priority === 1
-                    ? 'danger'
-                    : chore.priority === 2
-                      ? 'warning'
-                      : 'neutral'
-                }
-                startDecorator={
-                  Priorities.find(p => p.value === chore.priority)?.icon
-                }
-                onClick={e => {
-                  e.stopPropagation()
-                  onChipClick({ priority: chore.priority })
-                }}
-                sx={{
-                  ml: 0.5,
-                  //   height: 16,
-                  //   fontSize: 9,
-                  //   px: 0.5,
-                }}
-              >
-                P{chore.priority}
-              </Chip>
-            )}
+            {/* Labels - Priority chip removed, now shown as vertical bar */}
             {chore.labelsV2?.map(l => (
               <div
                 role='none'
