@@ -35,6 +35,7 @@ import {
 } from '../../utils/Fetcher'
 import { isPlusAccount } from '../../utils/Helpers'
 import PassowrdChangeModal from '../Modals/Inputs/PasswordChangeModal'
+import WebSocketSettings from '../../components/WebSocketSettings'
 import APITokenSettings from './APITokenSettings'
 import MFASettings from './MFASettings'
 import NotificationSetting from './NotificationSetting'
@@ -493,6 +494,9 @@ const Settings = () => {
             )}
           </>
         )}
+
+        {/* WebSocket Settings */}
+        <WebSocketSettings />
       </div>
 
       <div className='grid gap-4 py-4' id='account'>
