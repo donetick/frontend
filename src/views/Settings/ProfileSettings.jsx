@@ -104,7 +104,8 @@ const ProfileSettings = () => {
     } catch (err) {
       showError({
         title: 'Update Failed',
-        message: 'Unable to update your profile. Please check your connection and try again.',
+        message:
+          'Unable to update your profile. Please check your connection and try again.',
       })
     } finally {
       setIsSaving(false)

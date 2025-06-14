@@ -397,7 +397,8 @@ const LoginView = () => {
                     onReject={() => {
                       showError({
                         title: 'Google Login Failed',
-                        message: "Couldn't log in with Google, please try again",
+                        message:
+                          "Couldn't log in with Google, please try again",
                       })
                     }}
                   >

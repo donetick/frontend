@@ -106,7 +106,8 @@ const LoginSettings = () => {
               if (!isValidServerURL()) {
                 showError({
                   title: 'Invalid Server URL',
-                  message: 'Please enter a valid server URL with protocol (http:// or https://)',
+                  message:
+                    'Please enter a valid server URL with protocol (http:// or https://)',
                 })
                 return
               }

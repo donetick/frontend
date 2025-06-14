@@ -315,7 +315,8 @@ const MyChores = () => {
       case 'archive':
         showSuccess({
           title: 'Task Archived',
-          message: 'The task has been archived and hidden from the active list.',
+          message:
+            'The task has been archived and hidden from the active list.',
         })
         break
       default:

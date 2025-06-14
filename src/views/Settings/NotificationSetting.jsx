@@ -147,7 +147,8 @@ const NotificationSetting = () => {
                 } else if (resp.display === 'denied') {
                   showWarning({
                     title: 'Notification Permission Denied',
-                    message: 'You have denied notification permissions. You can enable them later in your device settings.',
+                    message:
+                      'You have denied notification permissions. You can enable them later in your device settings.',
                   })
                   setDeviceNotification(false)
                   setNotificationPreferences({ granted: false })

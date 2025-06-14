@@ -104,14 +104,14 @@ const SignupView = () => {
       } else if (response.status === 403) {
         showError({
           title: 'Signup Failed',
-          message: 'Signup disabled, please contact admin'
+          message: 'Signup disabled, please contact admin',
         })
       } else {
         console.log('Signup failed')
         response.json().then(res => {
           showError({
             title: 'Signup Failed',
-            message: res.error || 'An error occurred during signup'
+            message: res.error || 'An error occurred during signup',
           })
         })
       }
