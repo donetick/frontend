@@ -6,7 +6,6 @@ import {
   Card,
   Divider,
   Input,
-  Snackbar,
   Typography,
 } from '@mui/joy'
 import Modal from '@mui/joy/Modal'
@@ -14,6 +13,7 @@ import ModalDialog from '@mui/joy/ModalDialog'
 import { useRef, useState } from 'react'
 import Cropper from 'react-easy-crop'
 import { useUserProfile } from '../../queries/UserQueries'
+import { useNotification } from '../../service/NotificationProvider'
 import { UpdateUserDetails } from '../../utils/Fetcher'
 import { resolvePhotoURL } from '../../utils/Helpers'
 import { getCroppedImg } from '../../utils/imageCropUtils'
@@ -21,6 +21,7 @@ import { UploadFile } from '../../utils/TokenManager'
 
 const ProfileSettings = () => {
   const { data: userProfile } = useUserProfile()
+  const { showSuccess, showError } = useNotification()
   const [displayName, setDisplayName] = useState(userProfile?.displayName || '')
   const [timezone, setTimezone] = useState(
     userProfile?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -28,11 +29,6 @@ const ProfileSettings = () => {
   const [photoURL, setPhotoURL] = useState(userProfile?.image || '')
   const [isUploading, setIsUploading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: '',
-    color: 'success',
-  })
   const fileInputRef = useRef()
   const [crop, setCrop] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
@@ -75,16 +71,14 @@ const ProfileSettings = () => {
       const url = resolvePhotoURL(data.url || data.sign)
 
       setPhotoURL(url)
-      setSnackbar({
-        open: true,
-        message: 'Profile photo updated!',
-        color: 'success',
+      showSuccess({
+        title: 'Photo Updated',
+        message: 'Your profile photo has been updated successfully!',
       })
     } catch (err) {
-      setSnackbar({
-        open: true,
-        message: 'Failed to upload photo.',
-        color: 'danger',
+      showError({
+        title: 'Upload Failed',
+        message: 'Failed to upload your photo. Please try again.',
       })
     } finally {
       setIsUploading(false)
@@ -100,19 +94,17 @@ const ProfileSettings = () => {
       const response = await UpdateUserDetails(userDetails)
 
       if (response.ok) {
-        setSnackbar({
-          open: true,
-          message: 'Profile updated successfully!',
-          color: 'success',
+        showSuccess({
+          title: 'Profile Updated',
+          message: 'Your profile information has been saved successfully!',
         })
       } else {
         throw new Error('Failed to update profile')
       }
     } catch (err) {
-      setSnackbar({
-        open: true,
-        message: 'Failed to update profile.',
-        color: 'danger',
+      showError({
+        title: 'Update Failed',
+        message: 'Unable to update your profile. Please check your connection and try again.',
       })
     } finally {
       setIsSaving(false)
@@ -280,14 +272,6 @@ const ProfileSettings = () => {
           Save
         </Button>
       </Box>
-      <Snackbar
-        open={snackbar.open}
-        color={snackbar.color}
-        autoHideDuration={3000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-      >
-        {snackbar.message}
-      </Snackbar>
     </div>
   )
 }

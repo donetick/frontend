@@ -323,9 +323,23 @@ const MFASettings = () => {
                 )}
               </Box>
 
-              <Alert color='neutral' variant='soft'>
-                <Typography level='body-sm'>
-                  <strong>Manual entry key:</strong> {setupData.secret}
+              <Alert
+                color='neutral'
+                variant='soft'
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-start',
+                }}
+              >
+                <Typography level='title-sm'>
+                  <strong>Manual entry key:</strong>
+                </Typography>
+                <Typography
+                  level='body-sm'
+                  sx={{ wordBreak: 'break-all', whiteSpace: 'pre-wrap' }}
+                >
+                  {setupData.secret}
                 </Typography>
               </Alert>
 
