@@ -23,7 +23,7 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useUserProfile } from '../../queries/UserQueries.jsx'
-import { useError } from '../../service/ErrorProvider'
+import { useNotification } from '../../service/NotificationProvider'
 import { notInCompletionWindow } from '../../utils/Chores.jsx'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import {
@@ -67,7 +67,7 @@ const ChoreCard = ({
 
   const { impersonatedUser } = useImpersonateUser()
 
-  const { showError } = useError()
+  const { showError } = useNotification()
 
   const handleDelete = () => {
     setConfirmModelConfig({

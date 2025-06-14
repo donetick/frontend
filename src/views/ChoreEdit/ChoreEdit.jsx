@@ -18,7 +18,6 @@ import {
   RadioGroup,
   Select,
   Sheet,
-  Snackbar,
   Stack,
   Switch,
   Typography,
@@ -33,6 +32,7 @@ import {
   useUpdateChore,
 } from '../../queries/ChoreQueries.jsx'
 import { useUserProfile } from '../../queries/UserQueries.jsx'
+import { useNotification } from '../../service/NotificationProvider'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import {
   DeleteChore,
@@ -101,9 +101,6 @@ const ChoreEdit = () => {
   const [createdBy, setCreatedBy] = useState(0)
   const [errors, setErrors] = useState({})
   const [attemptToSave, setAttemptToSave] = useState(false)
-  const [isSnackbarOpen, setIsSnackbarOpen] = useState(false)
-  const [snackbarMessage, setSnackbarMessage] = useState('')
-  const [snackbarColor, setSnackbarColor] = useState('warning')
   const [addLabelModalOpen, setAddLabelModalOpen] = useState(false)
   const { data: userLabelsRaw, isLoading: isUserLabelsLoading } = useLabels()
   const updateChoreMutation = useUpdateChore()
@@ -113,6 +110,7 @@ const ChoreEdit = () => {
     isLoading: isChoreLoading,
     refetch: refetchChore,
   } = useChore(choreId)
+  const { showSuccess, showError } = useNotification()
 
   const [userLabels, setUserLabels] = useState([])
 
@@ -178,16 +176,10 @@ const ChoreEdit = () => {
       const errorList = Object.keys(errors).map(key => (
         <ListItem key={key}>{errors[key]}</ListItem>
       ))
-      setSnackbarMessage(
-        <Stack spacing={0.5}>
-          <Typography level='title-md'>
-            Please resolve the following errors:
-          </Typography>
-          <List>{errorList}</List>
-        </Stack>,
-      )
-      setSnackbarColor('danger')
-      setIsSnackbarOpen(true)
+      showError({
+        title: 'Please resolve the following errors:',
+        message: <List>{errorList}</List>,
+      })
       return false
     }
 
@@ -240,16 +232,18 @@ const ChoreEdit = () => {
 
     SaveFunction(chore)
       .then(() => {
-        setSnackbarColor('success')
-        setSnackbarMessage('Chore saved successfully!')
-        setIsSnackbarOpen(true)
+        showSuccess({
+          title: 'Chore Saved',
+          message: 'Your task has been saved successfully!',
+        })
         Navigate('/my/chores/')
       })
       .catch(error => {
         console.error('Failed to save chore:', error)
-        setSnackbarColor('danger')
-        setSnackbarMessage('Failed to save chore, please try again.')
-        setIsSnackbarOpen(true)
+        showError({
+          title: 'Save Failed',
+          message: 'Failed to save chore, please try again.',
+        })
       })
   }
   useEffect(() => {
@@ -1099,20 +1093,6 @@ const ChoreEdit = () => {
         />
       )}
       {/* <ChoreHistory ChoreHistory={choresHistory} UsersData={performers} /> */}
-      <Snackbar
-        open={isSnackbarOpen}
-        onClose={() => {
-          setIsSnackbarOpen(false)
-          setSnackbarMessage(null)
-        }}
-        color={snackbarColor}
-        autoHideDuration={4000}
-        sx={{ bottom: 70 }}
-        invertedColors={true}
-        variant='soft'
-      >
-        {snackbarMessage}
-      </Snackbar>
     </Container>
   )
 }

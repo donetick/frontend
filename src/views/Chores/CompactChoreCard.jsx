@@ -19,7 +19,7 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useUserProfile } from '../../queries/UserQueries.jsx'
-import { useError } from '../../service/ErrorProvider'
+import { useNotification } from '../../service/NotificationProvider'
 import { notInCompletionWindow } from '../../utils/Chores.jsx'
 import {
   getTextColorFromBackgroundColor,
@@ -66,7 +66,7 @@ const CompactChoreCard = ({
 
   const { impersonatedUser } = useImpersonateUser()
 
-  const { showError } = useError()
+  const { showError } = useNotification()
 
   // All the existing handler methods (same as original ChoreCard)
   const handleDelete = () => {
@@ -370,19 +370,14 @@ const CompactChoreCard = ({
     switch (priority) {
       case 1:
         return TASK_COLOR.PRIORITY_1
-      // return '#e53e3e' // Red for high priority
       case 2:
         return TASK_COLOR.PRIORITY_2
-      // return '#d69e2e' // Orange/yellow for medium priority
       case 3:
         return TASK_COLOR.PRIORITY_3
-      // return '#3182ce' // Blue for low priority
       case 4:
         return TASK_COLOR.PRIORITY_4
-      // return 'rgba(49, 130, 206, 0.5)' // Light blue for very low priority
       default:
         return TASK_COLOR.NO_PRIORITY
-      // return 'transparent' // No priority
     }
   }
 
@@ -416,7 +411,7 @@ const CompactChoreCard = ({
             bottom: 0,
             width: '3px',
             backgroundColor: getPriorityColor(chore.priority),
-            borderRadius: '2px',
+            borderRadius: '16px',
           },
         }}
         onClick={() => navigate(`/chores/${chore.id}`)}

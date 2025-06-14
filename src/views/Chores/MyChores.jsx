@@ -26,13 +26,13 @@ import {
   List,
   Menu,
   MenuItem,
-  Snackbar,
   Typography,
 } from '@mui/joy'
 import Fuse from 'fuse.js'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useChores } from '../../queries/ChoreQueries'
+import { useNotification } from '../../service/NotificationProvider'
 import { GetArchivedChores } from '../../utils/Fetcher'
 import Priorities from '../../utils/Priorities'
 import LoadingComponent from '../components/Loading'
@@ -55,8 +55,7 @@ import SortAndGrouping from './SortAndGrouping'
 const MyChores = () => {
   const { data: userProfile, isLoading: isUserProfileLoading } =
     useUserProfile()
-  const [isSnackbarOpen, setIsSnackbarOpen] = useState(false)
-  const [snackBarMessage, setSnackBarMessage] = useState(null)
+  const { showSuccess } = useNotification()
   const [chores, setChores] = useState([])
   const [archivedChores, setArchivedChores] = useState(null)
   const [filteredChores, setFilteredChores] = useState([])
@@ -290,24 +289,41 @@ const MyChores = () => {
 
     switch (event) {
       case 'completed':
-        setSnackBarMessage('Completed')
+        showSuccess({
+          title: 'Task Completed',
+          message: 'Great job! The task has been marked as completed.',
+        })
         break
       case 'skipped':
-        setSnackBarMessage('Skipped')
+        showSuccess({
+          title: 'Task Skipped',
+          message: 'The task has been moved to the next due date.',
+        })
         break
       case 'rescheduled':
-        setSnackBarMessage('Rescheduled')
+        showSuccess({
+          title: 'Task Rescheduled',
+          message: 'The task due date has been updated successfully.',
+        })
         break
       case 'unarchive':
-        setSnackBarMessage('Unarchive')
+        showSuccess({
+          title: 'Task Restored',
+          message: 'The task has been restored and is now active.',
+        })
         break
       case 'archive':
-        setSnackBarMessage('Archived')
+        showSuccess({
+          title: 'Task Archived',
+          message: 'The task has been archived and hidden from the active list.',
+        })
         break
       default:
-        setSnackBarMessage('Updated')
+        showSuccess({
+          title: 'Task Updated',
+          message: 'Your changes have been saved successfully.',
+        })
     }
-    setIsSnackbarOpen(true)
   }
 
   const handleChoreDeleted = deletedChore => {
@@ -868,19 +884,6 @@ const MyChores = () => {
             />
           </IconButton>
         </Box>
-        <Snackbar
-          open={isSnackbarOpen}
-          onClose={() => {
-            setIsSnackbarOpen(false)
-          }}
-          autoHideDuration={3000}
-          variant='soft'
-          color='success'
-          size='lg'
-          invertedColors
-        >
-          <Typography level='title-md'>{snackBarMessage}</Typography>
-        </Snackbar>
         <NotificationAccessSnackbar />
         {addTaskModalOpen && (
           <TaskInput

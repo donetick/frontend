@@ -7,13 +7,13 @@ import {
   FormHelperText,
   Input,
   Sheet,
-  Snackbar,
   Typography,
 } from '@mui/joy'
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import Logo from '../../Logo'
+import { useNotification } from '../../service/NotificationProvider'
 import { ChangePassword } from '../../utils/Fetcher'
 
 const UpdatePasswordView = () => {
@@ -24,8 +24,7 @@ const UpdatePasswordView = () => {
   const [passworConfirmationError, setPasswordConfirmationError] =
     useState(null)
   const [searchParams] = useSearchParams()
-
-  const [updateStatusOk, setUpdateStatusOk] = useState(null)
+  const { showError, showNotification } = useNotification()
 
   const verifiticationCode = searchParams.get('c')
 
@@ -55,16 +54,27 @@ const UpdatePasswordView = () => {
       const response = await ChangePassword(verifiticationCode, password)
 
       if (response.ok) {
-        setUpdateStatusOk(true)
+        showNotification({
+          type: 'success',
+          title: 'Password Updated',
+          message:
+            'Your password has been updated successfully. Redirecting to login...',
+        })
         //  wait 3 seconds and then redirect to login:
         setTimeout(() => {
           navigate('/login')
         }, 3000)
       } else {
-        setUpdateStatusOk(false)
+        showError({
+          title: 'Password Update Failed',
+          message: 'Failed to update password, please try again later',
+        })
       }
     } catch (error) {
-      setUpdateStatusOk(false)
+      showError({
+        title: 'Password Update Failed',
+        message: 'Failed to update password, please try again later',
+      })
     }
   }
   return (
@@ -169,15 +179,6 @@ const UpdatePasswordView = () => {
           </Button>
         </Sheet>
       </Box>
-      <Snackbar
-        open={updateStatusOk === false}
-        autoHideDuration={6000}
-        onClose={() => {
-          setUpdateStatusOk(null)
-        }}
-      >
-        Password update failed, try again later
-      </Snackbar>
     </Container>
   )
 }

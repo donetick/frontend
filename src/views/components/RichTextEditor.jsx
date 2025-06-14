@@ -2,9 +2,9 @@ import imageCompression from 'browser-image-compression'
 import Quill from 'quill'
 import 'quill/dist/quill.snow.css'
 import QuillMarkdown from 'quilljs-markdown'
-import { useCallback, useContext, useEffect, useRef } from 'react'
-import { UserContext } from '../../contexts/UserContext'
-import { useError } from '../../service/ErrorProvider'
+import { useCallback, useEffect, useRef } from 'react'
+import { useUserProfile } from '../../queries/UserQueries'
+import { useNotification } from '../../service/NotificationProvider'
 import { isPlusAccount, resolvePhotoURL } from '../../utils/Helpers'
 import { UploadFile } from '../../utils/TokenManager'
 import './RichTextEditor.css'
@@ -18,8 +18,8 @@ const RichTextEditor = ({
   entityId,
   entityType,
 }) => {
-  const { showError } = useError()
-  const { userProfile } = useContext(UserContext)
+  const { showError } = useNotification()
+  const { data: userProfile } = useUserProfile()
   const quillRef = useRef(null)
   const editorRef = useRef(null)
 

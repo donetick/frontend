@@ -7,12 +7,12 @@ import {
   FormHelperText,
   Input,
   Sheet,
-  Snackbar,
   Typography,
 } from '@mui/joy'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import Logo from '../../Logo'
+import { useNotification } from '../../service/NotificationProvider'
 import { login, signUp } from '../../utils/Fetcher'
 
 const SignupView = () => {
@@ -25,9 +25,7 @@ const SignupView = () => {
   const [passwordError, setPasswordError] = React.useState('')
   const [emailError, setEmailError] = React.useState('')
   const [displayNameError, setDisplayNameError] = React.useState('')
-  const [error, setError] = React.useState(null)
-  const [snackbarOpen, setSnackbarOpen] = React.useState(false)
-  const [snackbarMessage, setSnackbarMessage] = React.useState('')
+  const { showError } = useNotification()
   const handleLogin = (username, password) => {
     login(username, password).then(response => {
       if (response.status === 200) {
@@ -104,11 +102,17 @@ const SignupView = () => {
       if (response.status === 201) {
         handleLogin(username, password)
       } else if (response.status === 403) {
-        setError('Signup disabled, please contact admin')
+        showError({
+          title: 'Signup Failed',
+          message: 'Signup disabled, please contact admin'
+        })
       } else {
         console.log('Signup failed')
         response.json().then(res => {
-          setError(res.error)
+          showError({
+            title: 'Signup Failed',
+            message: res.error || 'An error occurred during signup'
+          })
         })
       }
     })
@@ -264,14 +268,6 @@ const SignupView = () => {
           </Button>
         </Sheet>
       </Box>
-      <Snackbar
-        open={error !== null}
-        onClose={() => setError(null)}
-        autoHideDuration={5000}
-        message={error}
-      >
-        {error}
-      </Snackbar>
     </Container>
   )
 }

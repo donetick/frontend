@@ -1,23 +1,15 @@
 import { Preferences } from '@capacitor/preferences'
-import {
-  Box,
-  Button,
-  Container,
-  Input,
-  Sheet,
-  Snackbar,
-  Typography,
-} from '@mui/joy'
+import { Box, Button, Container, Input, Sheet, Typography } from '@mui/joy'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { API_URL } from '../../Config'
 import Logo from '../../Logo'
+import { useNotification } from '../../service/NotificationProvider'
 import { apiManager } from '../../utils/TokenManager'
 const LoginSettings = () => {
-  const [error, setError] = React.useState(null)
   const Navigate = useNavigate()
-
   const [serverURL, setServerURL] = React.useState('')
+  const { showError } = useNotification()
 
   React.useEffect(() => {
     Preferences.get({ key: 'customServerUrl' }).then(result => {
@@ -112,7 +104,10 @@ const LoginSettings = () => {
                 return
               }
               if (!isValidServerURL()) {
-                setError('Invalid server URL')
+                showError({
+                  title: 'Invalid Server URL',
+                  message: 'Please enter a valid server URL with protocol (http:// or https://)',
+                })
                 return
               }
               Preferences.set({
@@ -150,14 +145,6 @@ const LoginSettings = () => {
           </Button>
         </Sheet>
       </Box>
-      <Snackbar
-        open={error !== null}
-        onClose={() => setError(null)}
-        autoHideDuration={3000}
-        message={error}
-      >
-        {error}
-      </Snackbar>
     </Container>
   )
 }

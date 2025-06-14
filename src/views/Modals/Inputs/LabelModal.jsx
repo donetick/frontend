@@ -12,7 +12,7 @@ import {
 import { useEffect, useState } from 'react'
 
 import { useQueryClient } from '@tanstack/react-query'
-import { useError } from '../../../service/ErrorProvider.jsx'
+import { useNotification } from '../../../service/NotificationProvider.jsx'
 import LABEL_COLORS from '../../../utils/Colors.jsx'
 import { CreateLabel, UpdateLabel } from '../../../utils/Fetcher'
 import { useLabels } from '../../Labels/LabelQueries'
@@ -23,7 +23,7 @@ function LabelModal({ isOpen, onClose, label }) {
   const [error, setError] = useState('')
   const { data: userLabels = [] } = useLabels()
   const queryClient = useQueryClient()
-  const { showError } = useError()
+  const { showError } = useNotification()
 
   // Populate the form fields when editing
   useEffect(() => {

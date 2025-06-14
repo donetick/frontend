@@ -12,7 +12,6 @@ import {
   IconButton,
   Input,
   Sheet,
-  Snackbar,
   Typography,
 } from '@mui/joy'
 import Cookies from 'js-cookie'
@@ -23,6 +22,7 @@ import { GOOGLE_CLIENT_ID, REDIRECT_URL } from '../../Config'
 import Logo from '../../Logo'
 import { useResource } from '../../queries/ResourceQueries'
 import { useUserProfile } from '../../queries/UserQueries'
+import { useNotification } from '../../service/NotificationProvider'
 import { login } from '../../utils/Fetcher'
 import { apiManager } from '../../utils/TokenManager'
 import MFAVerificationModal from './MFAVerificationModal'
@@ -33,10 +33,10 @@ const LoginView = () => {
   const [userProfile, setUserProfile] = useState(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState(null)
   const [mfaModalOpen, setMfaModalOpen] = useState(false)
   const [mfaSessionToken, setMfaSessionToken] = useState('')
   const { data: resource } = useResource()
+  const { showError } = useNotification()
   const Navigate = useNavigate()
   useEffect(() => {
     const initializeSocialLogin = async () => {
@@ -76,14 +76,23 @@ const LoginView = () => {
             }
           })
         } else if (response.status === 401) {
-          setError('Wrong username or password')
+          showError({
+            title: 'Login Failed',
+            message: 'Wrong username or password',
+          })
         } else {
-          setError('An error occurred, please try again')
+          showError({
+            title: 'Login Failed',
+            message: 'An error occurred, please try again',
+          })
           console.log('Login failed')
         }
       })
       .catch(err => {
-        setError('Unable to communicate with server, please try again')
+        showError({
+          title: 'Connection Error',
+          message: 'Unable to communicate with server, please try again',
+        })
         console.log('Login failed', err)
       })
   }
@@ -133,7 +142,10 @@ const LoginView = () => {
         })
       }
       return response.json().then(() => {
-        setError("Couldn't log in with Google, please try again")
+        showError({
+          title: 'Google Login Failed',
+          message: "Couldn't log in with Google, please try again",
+        })
       })
     })
   }
@@ -167,7 +179,10 @@ const LoginView = () => {
   }
 
   const handleMFAError = errorMessage => {
-    setError(errorMessage)
+    showError({
+      title: 'Two-Factor Authentication Failed',
+      message: errorMessage,
+    })
   }
 
   const handleMFAClose = () => {
@@ -380,7 +395,10 @@ const LoginView = () => {
                       loggedWithProvider(provider, data)
                     }}
                     onReject={() => {
-                      setError("Couldn't log in with Google, please try again")
+                      showError({
+                        title: 'Google Login Failed',
+                        message: "Couldn't log in with Google, please try again",
+                      })
                     }}
                   >
                     <Button
@@ -466,14 +484,6 @@ const LoginView = () => {
           </Button>
         </Sheet>
       </Box>
-      <Snackbar
-        open={error !== null}
-        onClose={() => setError(null)}
-        autoHideDuration={3000}
-        message={error}
-      >
-        {error}
-      </Snackbar>
 
       <MFAVerificationModal
         open={mfaModalOpen}
