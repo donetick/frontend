@@ -10,6 +10,7 @@ import {
 } from '@mui/joy'
 import Modal from '@mui/joy/Modal'
 import ModalDialog from '@mui/joy/ModalDialog'
+import imageCompression from 'browser-image-compression'
 import { useRef, useState } from 'react'
 import Cropper from 'react-easy-crop'
 import { useUserProfile } from '../../queries/UserQueries'
@@ -56,12 +57,32 @@ const ProfileSettings = () => {
       const croppedBlob = await getCroppedImg(
         selectedFile,
         croppedAreaPixels,
-        320,
-        320,
+        160,
+        160,
         'image/jpeg',
       )
+
+      // Compress the cropped image
+      const compressionOptions = {
+        maxSizeMB: 0.02, // Smaller size for profile images
+        maxWidthOrHeight: 160, // Match the cropped dimensions
+        useWebWorker: true,
+        fileType: 'image/jpeg',
+        initialQuality: 0.8,
+      }
+
+      const compressedFile = await imageCompression(
+        croppedBlob,
+        compressionOptions,
+      )
+
+      console.log(`Original size: ${(croppedBlob.size / 1024).toFixed(2)} KB`)
+      console.log(
+        `Compressed size: ${(compressedFile.size / 1024).toFixed(2)} KB`,
+      )
+
       const formData = new FormData()
-      formData.append('file', croppedBlob, 'profile.jpg')
+      formData.append('file', compressedFile, 'profile.jpg')
       const response = await UploadFile('/users/profile_photo', {
         method: 'POST',
         body: formData,
