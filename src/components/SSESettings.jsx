@@ -9,65 +9,73 @@ import {
   Switch,
   Typography,
 } from '@mui/joy'
-import { useWebSocketContext } from '../contexts/WebSocketContext'
+import { useSSEContext } from '../hooks/useSSEContext'
 import { useUserProfile } from '../queries/UserQueries'
 import { isPlusAccount } from '../utils/Helpers'
-import WebSocketConnectionStatus from './WebSocketConnectionStatus'
+import SSEConnectionStatus from './SSEConnectionStatus'
 
-const WebSocketSettings = () => {
+const SSESettings = () => {
   const { data: userProfile } = useUserProfile()
   const {
     isConnected,
     isConnecting,
     error,
     getConnectionStatus,
-    toggleWebSocketEnabled,
-    isWebSocketEnabled,
-  } = useWebSocketContext()
+    toggleSSEEnabled,
+    isSSEEnabled,
+  } = useSSEContext()
 
   const handleToggle = () => {
+    console.log('=== TOGGLE CLICKED ===')
     if (!isPlusAccount(userProfile)) {
+      console.log('Not a Plus account, returning early')
       return // Don't allow toggle for non-Plus users
     }
-    const currentlyEnabled = isWebSocketEnabled()
-    toggleWebSocketEnabled(!currentlyEnabled)
+    const currentlyEnabled = isSSEEnabled()
+    console.log('SSE Settings - Toggle clicked:', {
+      currentlyEnabled,
+      newState: !currentlyEnabled,
+      userProfile,
+      isPlusAccount: isPlusAccount(userProfile),
+    })
+    toggleSSEEnabled(!currentlyEnabled)
   }
 
   const getStatusDescription = () => {
     if (!isPlusAccount(userProfile)) {
-      return 'Real-time updates are not available in the Basic plan. Upgrade to Plus to receive instant notifications when chores are updated.'
+      return 'Real-time updates (SSE) are not available in the Basic plan. Upgrade to Plus to receive instant notifications when chores are updated.'
     }
 
-    if (!isWebSocketEnabled()) {
-      return 'Real-time updates are disabled. Enable to see live changes when you or other circle members complete, skip, or modify chores.'
+    if (!isSSEEnabled()) {
+      return 'Real-time updates (SSE) are disabled. Enable to see live changes when you or other circle members complete, skip, or modify chores.'
     }
 
     if (isConnected) {
-      return "Real-time updates are working. You'll see live changes when you or other circle members complete, skip, or modify chores."
+      return "Real-time updates (SSE) are working. You'll see live changes when you or other circle members complete, skip, or modify chores."
     }
 
     if (isConnecting) {
-      return 'Connecting to real-time updates...'
+      return 'Connecting to real-time updates (SSE)...'
     }
 
     if (error) {
-      return `Real-time updates are enabled but not working: ${error}`
+      return `Real-time updates (SSE) are enabled but not working: ${error}`
     }
 
-    return 'Real-time updates are enabled but not currently connected.'
+    return 'Real-time updates (SSE) are enabled but not currently connected.'
   }
 
   return (
     <Card sx={{ mt: 2, p: 3 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-        {isWebSocketEnabled() && isPlusAccount(userProfile) ? (
+        {isSSEEnabled() && isPlusAccount(userProfile) ? (
           <Sync color={isConnected ? 'success' : 'disabled'} />
         ) : (
           <SyncDisabled color='disabled' />
         )}
         <Box sx={{ flex: 1 }}>
           <Typography level='title-md'>
-            Real-time Updates
+            Real-time Updates (SSE)
             {!isPlusAccount(userProfile) && (
               <Chip variant='soft' color='warning' sx={{ ml: 1 }}>
                 Plus Feature
@@ -75,39 +83,37 @@ const WebSocketSettings = () => {
             )}
           </Typography>
           <Typography level='body-sm' color='neutral'>
-            Get instant notifications when chores are updated
+            Get instant notifications via Server-Sent Events
           </Typography>
         </Box>
-        {isWebSocketEnabled() && isPlusAccount(userProfile) && (
-          <WebSocketConnectionStatus variant='chip' />
+        {isSSEEnabled() && isPlusAccount(userProfile) && (
+          <SSEConnectionStatus variant='chip' />
         )}
       </Box>
 
       <FormControl orientation='horizontal' sx={{ mb: 2 }}>
         <Box sx={{ flex: 1 }}>
-          <FormLabel>Enable Real-time Updates</FormLabel>
+          <FormLabel>Enable Real-time Updates (SSE)</FormLabel>
           <FormHelperText sx={{ mt: 0 }}>
             {getStatusDescription()}
           </FormHelperText>
         </Box>
         <Switch
-          checked={Boolean(isWebSocketEnabled() && isPlusAccount(userProfile))}
+          checked={isSSEEnabled() && isPlusAccount(userProfile)}
           onChange={handleToggle}
           disabled={!isPlusAccount(userProfile)}
           color={
-            isWebSocketEnabled() && isPlusAccount(userProfile)
-              ? 'success'
-              : 'neutral'
+            isSSEEnabled() && isPlusAccount(userProfile) ? 'success' : 'neutral'
           }
           variant='solid'
           endDecorator={
-            isWebSocketEnabled() && isPlusAccount(userProfile) ? 'On' : 'Off'
+            isSSEEnabled() && isPlusAccount(userProfile) ? 'On' : 'Off'
           }
           slotProps={{ endDecorator: { sx: { minWidth: 24 } } }}
         />
       </FormControl>
 
-      {isWebSocketEnabled() && isPlusAccount(userProfile) && (
+      {isSSEEnabled() && isPlusAccount(userProfile) && (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
           <Typography level='body-xs' color='neutral'>
             Status:
@@ -131,13 +137,13 @@ const WebSocketSettings = () => {
 
       {!isPlusAccount(userProfile) && (
         <Typography level='body-sm' color='warning' sx={{ mt: 1 }}>
-          Real-time updates are not available in the Basic plan. Upgrade to Plus
-          to receive instant notifications when you or other circle members
-          complete, skip, or modify chores.
+          Real-time updates (SSE) are not available in the Basic plan. Upgrade
+          to Plus to receive instant notifications when you or other circle
+          members complete, skip, or modify chores.
         </Typography>
       )}
     </Card>
   )
 }
 
-export default WebSocketSettings
+export default SSESettings

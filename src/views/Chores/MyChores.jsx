@@ -1,5 +1,6 @@
 import {
   Add,
+  Archive,
   Bolt,
   CancelRounded,
   CheckBox,
@@ -40,7 +41,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useChores } from '../../queries/ChoreQueries'
 import { useNotification } from '../../service/NotificationProvider'
-import { GetArchivedChores } from '../../utils/Fetcher'
+import { ArchiveChore, GetArchivedChores } from '../../utils/Fetcher'
 import Priorities from '../../utils/Priorities'
 import LoadingComponent from '../components/Loading'
 import { useLabels } from '../Labels/LabelQueries'
@@ -637,7 +638,63 @@ const MyChores = () => {
       },
     })
   }
-
+  const handleBulkArchive = async () => {
+    const selectedData = getSelectedChoresData()
+    if (selectedData.length === 0) return
+    setConfirmModelConfig({
+      isOpen: true,
+      title: 'Archive Tasks',
+      confirmText: 'Archive',
+      cancelText: 'Cancel',
+      message: `Archive ${selectedData.length} task${selectedData.length > 1 ? 's' : ''}?`,
+      onClose: async isConfirmed => {
+        if (isConfirmed === true) {
+          try {
+            const archivedTasks = []
+            const failedTasks = []
+            for (const chore of selectedData) {
+              try {
+                const archivedChore = await ArchiveChore(chore.id)
+                archivedTasks.push(archivedChore)
+                // Remove from chores and filteredChores
+                setChores(chores.filter(c => c.id !== chore.id))
+                setFilteredChores(filteredChores.filter(c => c.id !== chore.id))
+              } catch (error) {
+                failedTasks.push(chore)
+              }
+            }
+            if (archivedTasks.length > 0) {
+              showSuccess({
+                title: '📦 Tasks Archived',
+                message: `Successfully archived ${archivedTasks.length} task${archivedTasks.length > 1 ? 's' : ''}.`,
+              })
+              // Update archived chores state
+              setArchivedChores([
+                ...(archivedChores || []),
+                ...archivedTasks.map(c => ({
+                  ...c,
+                  archived: true,
+                })),
+              ])
+            }
+            if (failedTasks.length > 0) {
+              showError({
+                title: 'Some Tasks Failed',
+                message: `${failedTasks.length} task${failedTasks.length > 1 ? 's' : ''} could not be archived.`,
+              })
+            }
+            clearSelection()
+          } catch (error) {
+            showError({
+              title: 'Bulk Archive Failed',
+              message: 'An unexpected error occurred. Please try again.',
+            })
+          }
+        }
+        setConfirmModelConfig({})
+      },
+    })
+  }
   const handleBulkDelete = async () => {
     const selectedData = getSelectedChoresData()
     if (selectedData.length === 0) return
@@ -1056,17 +1113,22 @@ const MyChores = () => {
         {isMultiSelectMode && (
           <Box
             sx={{
+              position: 'sticky',
+              top: 0,
+              zIndex: 1000,
+              backgroundColor: 'background.surface',
+              backdropFilter: 'blur(8px)',
               borderRadius: 'lg',
               p: 2,
               mb: 2,
               border: '1px solid',
               borderColor: 'divider',
-              // boxShadow: 'sm',
+              boxShadow: 'm',
               gap: 2,
               display: 'flex',
               flexDirection: {
-                xs: 'column', // Stack vertically on mobile
-                sm: 'row', // Horizontal on tablet and larger
+                sm: 'column', // Stack vertically on mobile
+                md: 'row', // Horizontal on tablet and larger
               },
               alignItems: {
                 xs: 'stretch', // Full width on mobile
@@ -1165,6 +1227,7 @@ const MyChores = () => {
                 },
               }}
             >
+              {/* Primary Actions - Safe operations */}
               <Button
                 size='sm'
                 variant='solid'
@@ -1174,13 +1237,15 @@ const MyChores = () => {
                 disabled={selectedChores.size === 0}
                 sx={{
                   '--Button-paddingInline': { xs: '0.75rem', sm: '1rem' },
+                  fontWeight: 'md',
                 }}
               >
                 Complete
               </Button>
+              
               <Button
                 size='sm'
-                variant='soft'
+                variant='outlined'
                 color='warning'
                 onClick={handleBulkSkip}
                 startDecorator={<SkipNext />}
@@ -1191,19 +1256,53 @@ const MyChores = () => {
               >
                 Skip
               </Button>
+
+              {/* Visual separator for destructive actions */}
+              <Divider
+                orientation='vertical'
+                sx={{
+                  height: '24px',
+                  display: { xs: 'none', sm: 'block' },
+                  mx: 0.5,
+                }}
+              />
+
+              {/* Secondary Actions - Less destructive */}
               <Button
                 size='sm'
-                variant='soft'
+                variant='outlined'
+                color='neutral'
+                onClick={handleBulkArchive}
+                startDecorator={<Archive />}
+                disabled={selectedChores.size === 0}
+                sx={{
+                  '--Button-paddingInline': { xs: '0.75rem', sm: '1rem' },
+                  borderStyle: 'dashed',
+                }}
+              >
+                Archive
+              </Button>
+
+              {/* Most destructive action - visually distinct */}
+              <Button
+                size='sm'
+                variant='outlined'
                 color='danger'
                 onClick={handleBulkDelete}
                 startDecorator={<Delete />}
                 disabled={selectedChores.size === 0}
                 sx={{
                   '--Button-paddingInline': { xs: '0.75rem', sm: '1rem' },
+                  borderWidth: '2px',
+                  '&:hover': {
+                    borderWidth: '2px',
+                    backgroundColor: 'danger.softBg',
+                  },
                 }}
               >
                 Delete
               </Button>
+
               {/* 
               <Divider
                 orientation='vertical'

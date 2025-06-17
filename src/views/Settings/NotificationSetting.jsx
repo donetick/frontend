@@ -68,13 +68,17 @@ const NotificationSetting = () => {
 
   useEffect(() => {
     getNotificationPreferences().then(resp => {
-      setDeviceNotification(resp.granted)
-      setDueNotification(resp.dueNotification)
-      setPreDueNotification(resp.preDueNotification)
-      setNaggingNotification(resp.naggingNotification)
+      if (resp) {
+        setDeviceNotification(Boolean(resp.granted))
+        setDueNotification(Boolean(resp.dueNotification ?? true))
+        setPreDueNotification(Boolean(resp.preDueNotification))
+        setNaggingNotification(Boolean(resp.naggingNotification))
+      }
     })
     getPushNotificationPreferences().then(resp => {
-      setPushNotification(resp.granted)
+      if (resp) {
+        setPushNotification(Boolean(resp.granted))
+      }
     })
   }, [])
 
@@ -85,7 +89,7 @@ const NotificationSetting = () => {
   )
 
   const [chatID, setChatID] = useState(
-    userProfile?.notification_target?.target_id,
+    userProfile?.notification_target?.target_id ?? 0,
   )
   const [error, setError] = useState('')
   const SaveValidation = () => {
@@ -317,7 +321,7 @@ const NotificationSetting = () => {
 
       <FormControl orientation='horizontal'>
         <Switch
-          checked={chatID !== 0}
+          checked={Boolean(chatID !== 0)}
           onClick={event => {
             event.preventDefault()
             if (chatID !== 0) {

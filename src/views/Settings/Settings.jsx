@@ -10,13 +10,13 @@ import {
   FormControl,
   FormHelperText,
   Input,
-  ListItem,
   Option,
   Select,
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
+import RealTimeSettings from '../../components/RealTimeSettings'
 import Logo from '../../Logo'
 import { useUserProfile } from '../../queries/UserQueries'
 import {
@@ -35,7 +35,6 @@ import {
 } from '../../utils/Fetcher'
 import { isPlusAccount } from '../../utils/Helpers'
 import PassowrdChangeModal from '../Modals/Inputs/PasswordChangeModal'
-import WebSocketSettings from '../../components/WebSocketSettings'
 import APITokenSettings from './APITokenSettings'
 import MFASettings from './MFASettings'
 import NotificationSetting from './NotificationSetting'
@@ -279,7 +278,7 @@ const Settings = () => {
                       },
                     ].map((option, index) => (
                       <Option value={option.value} key={index}>
-                        <ListItem
+                        <Box
                           sx={{
                             display: 'flex',
                             flexDirection: 'column',
@@ -302,7 +301,7 @@ const Settings = () => {
                           >
                             {option.description}
                           </Typography>
-                        </ListItem>
+                        </Box>
                       </Option>
                     ))}
                   </Select>
@@ -496,7 +495,8 @@ const Settings = () => {
         )}
 
         {/* WebSocket Settings */}
-        <WebSocketSettings />
+        {/* <WebSocketSettings /> */}
+        <RealTimeSettings />
       </div>
 
       <div className='grid gap-4 py-4' id='account'>

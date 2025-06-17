@@ -42,25 +42,21 @@ export const useWebSocket = () => {
       return null
     }
 
-    // Get the API URL from apiManager and convert to WebSocket URL
-    const apiUrl = apiManager.getApiURL() // e.g., "http://localhost:8080/api/v1"
+    const apiUrl = apiManager.getApiURL()
 
     // Convert HTTP/HTTPS to WebSocket protocol and remove /api/v1 suffix
-    let wsUrl = apiUrl.replace(/\/api\/v1$/, '') // Remove /api/v1 suffix
+    let wsUrl = apiUrl.replace(/\/api\/v1$/, '')
     if (wsUrl.startsWith('http://')) {
       wsUrl = wsUrl.replace('http://', 'ws://')
     } else if (wsUrl.startsWith('https://')) {
       wsUrl = wsUrl.replace('https://', 'wss://')
     } else {
-      // If no protocol specified, use the current page's protocol
       const isHttps = window.location.protocol === 'https:'
       wsUrl = `${isHttps ? 'wss:' : 'ws:'}//${wsUrl}`
     }
 
-    // Add the WebSocket endpoint path
     wsUrl = `${wsUrl}/api/v1/realtime/ws?token=${token}&circleId=${userProfile.circleID}`
 
-    console.log('WebSocket: Generated URL:', wsUrl)
     return wsUrl
   }, [userProfile])
 
@@ -70,16 +66,14 @@ export const useWebSocket = () => {
         const eventData = JSON.parse(event.data)
         setLastEvent(eventData)
 
-        console.log('WebSocket event received:', eventData.type, eventData)
+        console.debug('WebSocket event received:', eventData.type, eventData)
 
         // Handle different event types and update React Query cache accordingly
         switch (eventData.type) {
           case 'chore.created':
           case 'chore.updated':
           case 'chore.completed':
-            queryClient.invalidateQueries(['choresHistory', 7])
           case 'chore.skipped':
-            queryClient.invalidateQueries(['choresHistory', 7])
           case 'chore.deleted':
             // Invalidate chores queries to refetch data
             queryClient.invalidateQueries(['chores'])
@@ -92,6 +86,11 @@ export const useWebSocket = () => {
                 eventData.data.chore.id,
               ])
             }
+            // expire the history so feed on dashboard gert updated :
+            // need to find a better way to do this as we don't need to do it with every single update for anything
+            // but not sure if i can do it with the fall-through switch case in javascript :)
+            queryClient.invalidateQueries(['choresHistory', 7])
+
             break
 
           case 'subtask.updated':
@@ -110,7 +109,7 @@ export const useWebSocket = () => {
 
           case 'heartbeat':
             // Heartbeat events don't need cache invalidation
-            console.debug('Heartbeat received')
+            console.debug('Heartbeat!')
             break
 
           case 'connection.established':
@@ -136,10 +135,7 @@ export const useWebSocket = () => {
 
   const createWebSocketConnection = useCallback(
     wsUrl => {
-      const token = localStorage.getItem('ca_token')
-
       try {
-        console.log('Connecting to WebSocket:', wsUrl)
         setConnectionState(WEBSOCKET_STATES.CONNECTING)
         isManuallyClosedRef.current = false
 
@@ -147,7 +143,6 @@ export const useWebSocket = () => {
         wsRef.current = new WebSocket(wsUrl)
 
         wsRef.current.onopen = () => {
-          console.log('WebSocket connection opened')
           setConnectionState(WEBSOCKET_STATES.OPEN)
           setError(null)
           reconnectAttemptsRef.current = 0
@@ -218,9 +213,6 @@ export const useWebSocket = () => {
   }, [scheduleReconnect])
 
   const connect = useCallback(() => {
-    console.log('WebSocket connect called')
-    console.log('WebSocket current state:', wsRef.current?.readyState)
-
     if (wsRef.current?.readyState === WEBSOCKET_STATES.OPEN) {
       console.log('WebSocket: Already connected')
       return // Already connected
@@ -273,12 +265,6 @@ export const useWebSocket = () => {
 
   // Auto-connect when user profile is available and token is valid
   useEffect(() => {
-    console.log('WebSocket auto-connect effect triggered')
-    console.log('UserProfile:', userProfile)
-    console.log('circleID:', userProfile?.circleID)
-    console.log('Token valid:', isTokenValid())
-    console.log('Is Plus account:', isPlusAccount(userProfile))
-
     // Check if WebSocket is enabled in settings
     const isWebSocketEnabledSetting =
       localStorage.getItem('websocket_enabled') !== 'false'

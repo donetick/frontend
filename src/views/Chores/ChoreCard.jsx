@@ -405,12 +405,20 @@ const ChoreCard = ({
           border: '1px solid',
           borderColor: 'divider',
           transition: 'all 0.2s ease-in-out',
+          cursor: isMultiSelectMode ? 'pointer' : 'default',
           '&:hover': {
             boxShadow: 'md',
-            borderColor: 'primary.300',
+            borderColor: isMultiSelectMode ? 'primary.500' : 'primary.300',
           },
           // Add padding when in multi-select mode to account for checkbox
           pl: isMultiSelectMode ? 6 : 2,
+          // Visual feedback when selected
+          ...(isMultiSelectMode &&
+            isSelected && {
+              borderColor: 'primary.500',
+              backgroundColor: 'primary.softBg',
+              boxShadow: 'sm',
+            }),
         }}
       >
         {/* Multi-select checkbox */}
@@ -420,13 +428,12 @@ const ChoreCard = ({
             onChange={onSelectionToggle}
             sx={{
               position: 'absolute',
-              top: 12,
+              top: '50%',
               left: 12,
+              transform: 'translateY(-50%)',
               zIndex: 2,
               bgcolor: 'background.surface',
               borderRadius: 'md',
-              boxShadow: 'sm',
-              border: '2px solid',
               borderColor: 'divider',
               '&:hover': {
                 bgcolor: 'background.level1',
@@ -448,8 +455,13 @@ const ChoreCard = ({
         <Grid container>
           <Grid
             xs={9}
+            sx={{ cursor: 'pointer' }}
             onClick={() => {
-              navigate(`/chores/${chore.id}`)
+              if (isMultiSelectMode) {
+                onSelectionToggle()
+              } else {
+                navigate(`/chores/${chore.id}`)
+              }
             }}
           >
             {/* Box in top right with Chip showing next due date  */}
