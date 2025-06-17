@@ -8,6 +8,7 @@ import {
 import {
   Box,
   Button,
+  Checkbox,
   Chip,
   CircularProgress,
   IconButton,
@@ -46,6 +47,10 @@ const CompactChoreCard = ({
   sx,
   viewOnly,
   onChipClick,
+  // Multi-select props
+  isMultiSelectMode = false,
+  isSelected = false,
+  onSelectionToggle,
 }) => {
   const [isChangeDueDateModalOpen, setIsChangeDueDateModalOpen] =
     React.useState(false)
@@ -389,16 +394,17 @@ const CompactChoreCard = ({
           ...sx,
           display: 'flex',
           alignItems: 'center',
-          // px: 1,
-          //   py: 0.75,
           minHeight: 56, // More compact height
           cursor: 'pointer',
           borderBottom: '1px solid',
           borderColor: 'divider',
           position: 'relative',
-          pl: '16px', // Add left padding for the priority bar
+          pl: isMultiSelectMode ? '48px' : '16px', // Add space for checkbox when in multi-select mode
+          backgroundColor: 'background.surface',
+          transition: 'all 0.2s ease-in-out',
           '&:hover': {
             bgcolor: 'background.level1',
+            boxShadow: 'sm',
           },
           '&:last-child': {
             borderBottom: 'none',
@@ -416,6 +422,37 @@ const CompactChoreCard = ({
         }}
         onClick={() => navigate(`/chores/${chore.id}`)}
       >
+        {/* Multi-select checkbox */}
+        {isMultiSelectMode && (
+          <Checkbox
+            checked={isSelected}
+            onChange={onSelectionToggle}
+            sx={{
+              position: 'absolute',
+              left: 16,
+              zIndex: 2,
+              bgcolor: 'background.surface',
+              borderRadius: 'md',
+              boxShadow: 'sm',
+              border: '2px solid',
+              borderColor: 'divider',
+              '&:hover': {
+                bgcolor: 'background.level1',
+                borderColor: 'primary.300',
+              },
+              '&.Mui-checked': {
+                bgcolor: 'primary.500',
+                borderColor: 'primary.500',
+                color: 'primary.solidColor',
+                '&:hover': {
+                  bgcolor: 'primary.600',
+                  borderColor: 'primary.600',
+                },
+              },
+            }}
+            onClick={e => e.stopPropagation()}
+          />
+        )}
         {/* Priority bar clickable area */}
         {chore.priority > 0 && (
           <Box

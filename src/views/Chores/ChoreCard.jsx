@@ -11,6 +11,7 @@ import {
   Box,
   Button,
   Card,
+  Checkbox,
   Chip,
   CircularProgress,
   Grid,
@@ -47,6 +48,10 @@ const ChoreCard = ({
   sx,
   viewOnly,
   onChipClick,
+  // Multi-select props
+  isMultiSelectMode = false,
+  isSelected = false,
+  onSelectionToggle,
 }) => {
   const [isChangeDueDateModalOpen, setIsChangeDueDateModalOpen] =
     React.useState(false)
@@ -392,14 +397,54 @@ const ChoreCard = ({
           flexDirection: 'column',
           justifyContent: 'space-between',
           p: 2,
-          // backgroundColor: 'white',
           boxShadow: 'sm',
           borderRadius: 20,
           key: `${chore.id}-card`,
-
-          // mb: 2,
+          position: 'relative',
+          backgroundColor: 'background.surface',
+          border: '1px solid',
+          borderColor: 'divider',
+          transition: 'all 0.2s ease-in-out',
+          '&:hover': {
+            boxShadow: 'md',
+            borderColor: 'primary.300',
+          },
+          // Add padding when in multi-select mode to account for checkbox
+          pl: isMultiSelectMode ? 6 : 2,
         }}
       >
+        {/* Multi-select checkbox */}
+        {isMultiSelectMode && (
+          <Checkbox
+            checked={isSelected}
+            onChange={onSelectionToggle}
+            sx={{
+              position: 'absolute',
+              top: 12,
+              left: 12,
+              zIndex: 2,
+              bgcolor: 'background.surface',
+              borderRadius: 'md',
+              boxShadow: 'sm',
+              border: '2px solid',
+              borderColor: 'divider',
+              '&:hover': {
+                bgcolor: 'background.level1',
+                borderColor: 'primary.300',
+              },
+              '&.Mui-checked': {
+                bgcolor: 'primary.500',
+                borderColor: 'primary.500',
+                color: 'primary.solidColor',
+                '&:hover': {
+                  bgcolor: 'primary.600',
+                  borderColor: 'primary.600',
+                },
+              },
+            }}
+            onClick={e => e.stopPropagation()}
+          />
+        )}
         <Grid container>
           <Grid
             xs={9}
