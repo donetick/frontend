@@ -165,7 +165,6 @@ const CalendarView = ({ chores }) => {
             return legendItems.map((item, index) => (
               <Grid
                 key={index}
-                item
                 xs={12}
                 sx={{
                   display: 'flex',

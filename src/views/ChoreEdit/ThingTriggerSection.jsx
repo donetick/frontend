@@ -7,9 +7,6 @@ import {
   Chip,
   FormControl,
   Input,
-  ListItem,
-  ListItemContent,
-  ListItemDecorator,
   Option,
   Select,
   TextField,
@@ -113,7 +110,7 @@ const ThingTriggerSection = ({
           onChange={(e, newValue) => setSelectedThing(newValue)}
           getOptionLabel={option => option.name}
           renderOption={(props, option) => (
-            <ListItem {...props}>
+            <Box {...props}>
               <Box
                 sx={{
                   display: 'flex',
@@ -123,19 +120,19 @@ const ThingTriggerSection = ({
                   p: 1,
                 }}
               >
-                <ListItemDecorator sx={{ alignSelf: 'flex-start' }}>
+                <Box sx={{ alignSelf: 'flex-start' }}>
                   <Typography level='body-lg' textColor='primary'>
                     {option.name}
                   </Typography>
-                </ListItemDecorator>
-                <ListItemContent>
+                </Box>
+                <Box>
                   <Typography level='body2' textColor='text.secondary'>
                     <Chip>type: {option.type}</Chip>{' '}
                     <Chip>state: {option.state}</Chip>
                   </Typography>
-                </ListItemContent>
+                </Box>
               </Box>
-            </ListItem>
+            </Box>
           )}
           renderInput={params => (
             <TextField {...params} label='Select a thing' />

@@ -1,46 +1,26 @@
 import { Sync, SyncDisabled } from '@mui/icons-material'
-import {
-  Box,
-  Card,
-  Chip,
-  FormControl,
-  FormHelperText,
-  FormLabel,
-  Option,
-  Select,
-  Typography,
-} from '@mui/joy'
+import { Box, Card, Chip, FormHelperText, Switch, Typography } from '@mui/joy'
 import { useState } from 'react'
-import { useWebSocketContext } from '../contexts/WebSocketContext'
 import { useSSEContext } from '../hooks/useSSEContext'
 import { useUserProfile } from '../queries/UserQueries'
 import { isPlusAccount } from '../utils/Helpers'
 import SSEConnectionStatus from './SSEConnectionStatus'
-import WebSocketConnectionStatus from './WebSocketConnectionStatus'
 
 const REALTIME_TYPES = {
   DISABLED: 'disabled',
-  WEBSOCKET: 'websocket',
   SSE: 'sse',
 }
 
 const RealTimeSettings = () => {
   const { data: userProfile } = useUserProfile()
 
-  // WebSocket context
-  const webSocketContext = useWebSocketContext()
-
   // SSE context
   const sseContext = useSSEContext()
 
   // Get current realtime type from localStorage
   const getCurrentRealtimeType = () => {
-    const wsEnabled = localStorage.getItem('websocket_enabled') !== 'false'
     const sseEnabled = localStorage.getItem('sse_enabled') === 'true'
-
-    if (sseEnabled) return REALTIME_TYPES.SSE
-    if (wsEnabled) return REALTIME_TYPES.WEBSOCKET
-    return REALTIME_TYPES.DISABLED
+    return sseEnabled ? REALTIME_TYPES.SSE : REALTIME_TYPES.DISABLED
   }
 
   const [realtimeType, setRealtimeType] = useState(getCurrentRealtimeType())
@@ -55,21 +35,11 @@ const RealTimeSettings = () => {
     // Update localStorage and toggle connections
     switch (newValue) {
       case REALTIME_TYPES.DISABLED:
-        localStorage.setItem('websocket_enabled', 'false')
-        localStorage.setItem('sse_enabled', 'false')
-        webSocketContext.disconnect()
-        sseContext.disconnect()
-        break
-      case REALTIME_TYPES.WEBSOCKET:
-        localStorage.setItem('websocket_enabled', 'true')
         localStorage.setItem('sse_enabled', 'false')
         sseContext.disconnect()
-        webSocketContext.connect()
         break
       case REALTIME_TYPES.SSE:
-        localStorage.setItem('websocket_enabled', 'false')
         localStorage.setItem('sse_enabled', 'true')
-        webSocketContext.disconnect()
         sseContext.connect()
         break
     }
@@ -77,8 +47,6 @@ const RealTimeSettings = () => {
 
   const getCurrentContext = () => {
     switch (realtimeType) {
-      case REALTIME_TYPES.WEBSOCKET:
-        return webSocketContext
       case REALTIME_TYPES.SSE:
         return sseContext
       default:
@@ -99,31 +67,26 @@ const RealTimeSettings = () => {
     }
 
     if (realtimeType === REALTIME_TYPES.DISABLED) {
-      return 'Real-time updates are disabled. Enable WebSocket or SSE to see live changes when you or other circle members complete, skip, or modify chores.'
+      return 'Real-time updates are disabled. Enable them to see live changes when you or other circle members complete, skip, or modify chores.'
     }
 
-    const typeLabel =
-      realtimeType === REALTIME_TYPES.WEBSOCKET ? 'WebSocket' : 'SSE'
-
     if (context.isConnected) {
-      return `Real-time updates (${typeLabel}) are working. You'll see live changes when you or other circle members complete, skip, or modify chores.`
+      return "Real-time updates are working. You'll see live changes when you or other circle members complete, skip, or modify chores."
     }
 
     if (context.isConnecting) {
-      return `Connecting to real-time updates (${typeLabel})...`
+      return 'Connecting to real-time updates...'
     }
 
     if (context.error) {
-      return `Real-time updates (${typeLabel}) are enabled but not working: ${context.error}`
+      return `Real-time updates are enabled but not working: ${context.error}`
     }
 
-    return `Real-time updates (${typeLabel}) are enabled but not currently connected.`
+    return 'Real-time updates are enabled but not currently connected.'
   }
 
   const getConnectionStatusComponent = () => {
     switch (realtimeType) {
-      case REALTIME_TYPES.WEBSOCKET:
-        return <WebSocketConnectionStatus variant='chip' />
       case REALTIME_TYPES.SSE:
         return <SSEConnectionStatus variant='chip' />
       default:
@@ -133,7 +96,7 @@ const RealTimeSettings = () => {
 
   return (
     <Card sx={{ mt: 2, p: 3 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, mb: 2 }}>
         {realtimeType !== REALTIME_TYPES.DISABLED &&
         isPlusAccount(userProfile) ? (
           <Sync color={context.isConnected ? 'success' : 'disabled'} />
@@ -141,24 +104,44 @@ const RealTimeSettings = () => {
           <SyncDisabled color='disabled' />
         )}
         <Box sx={{ flex: 1 }}>
-          <Typography level='title-md'>
-            Real-time Updates
-            {!isPlusAccount(userProfile) && (
-              <Chip variant='soft' color='warning' sx={{ ml: 1 }}>
-                Plus Feature
-              </Chip>
-            )}
-          </Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              mb: 0.5,
+            }}
+          >
+            <Typography level='title-md'>
+              Real-time Updates
+              {!isPlusAccount(userProfile) && (
+                <Chip variant='soft' color='warning' sx={{ ml: 1 }}>
+                  Plus Feature
+                </Chip>
+              )}
+            </Typography>
+
+            <Switch
+              checked={realtimeType !== REALTIME_TYPES.DISABLED}
+              onChange={e => {
+                handleRealtimeTypeChange(
+                  null,
+                  e.target.checked
+                    ? REALTIME_TYPES.SSE
+                    : REALTIME_TYPES.DISABLED,
+                )
+              }}
+              disabled={!isPlusAccount(userProfile)}
+              inputProps={{ 'aria-label': 'Enable Real-time Updates' }}
+            />
+          </Box>
           <Typography level='body-sm' color='neutral'>
             Get instant notifications when chores are updated
           </Typography>
         </Box>
-        {realtimeType !== REALTIME_TYPES.DISABLED &&
-          isPlusAccount(userProfile) &&
-          getConnectionStatusComponent()}
       </Box>
 
-      <FormControl orientation='horizontal' sx={{ mb: 2 }}>
+      {/* <FormControl orientation='horizontal' sx={{ mb: 2 }}>
         <Box sx={{ flex: 1 }}>
           <FormLabel>Real-time Connection Type</FormLabel>
           <FormHelperText sx={{ mt: 0 }}>
@@ -175,7 +158,7 @@ const RealTimeSettings = () => {
           <Option value={REALTIME_TYPES.WEBSOCKET}>WebSocket</Option>
           <Option value={REALTIME_TYPES.SSE}>SSE</Option>
         </Select>
-      </FormControl>
+      </FormControl> */}
 
       <FormHelperText sx={{ mb: 2 }}>{getStatusDescription()}</FormHelperText>
 
@@ -185,19 +168,7 @@ const RealTimeSettings = () => {
             <Typography level='body-xs' color='neutral'>
               Status:
             </Typography>
-            <Chip
-              size='sm'
-              variant='soft'
-              color={
-                context.isConnected
-                  ? 'success'
-                  : context.isConnecting
-                    ? 'warning'
-                    : 'danger'
-              }
-            >
-              {context.getConnectionStatus()}
-            </Chip>
+            {getConnectionStatusComponent()}
             {context.error && (
               <Typography level='body-xs' color='danger'>
                 {context.error}
@@ -213,30 +184,6 @@ const RealTimeSettings = () => {
           complete, skip, or modify chores.
         </Typography>
       )}
-
-      {realtimeType !== REALTIME_TYPES.DISABLED &&
-        isPlusAccount(userProfile) && (
-          <Box
-            sx={{
-              mt: 2,
-              p: 2,
-              bgcolor: 'background.level1',
-              borderRadius: 'sm',
-            }}
-          >
-            <Typography level='body-sm' sx={{ fontWeight: 'bold', mb: 1 }}>
-              Connection Types:
-            </Typography>
-            <Typography level='body-xs' sx={{ mb: 1 }}>
-              • <strong>WebSocket:</strong> Traditional bi-directional real-time
-              connection
-            </Typography>
-            <Typography level='body-xs'>
-              • <strong>SSE:</strong> Server-Sent Events - lighter weight,
-              one-way updates from server
-            </Typography>
-          </Box>
-        )}
     </Card>
   )
 }

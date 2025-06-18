@@ -1,8 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { EventSourcePolyfill } from 'event-source-polyfill'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useUserProfile } from '../queries/UserQueries'
-import { isPlusAccount } from '../utils/Helpers'
 import { apiManager, isTokenValid } from '../utils/TokenManager'
 
 const SSE_STATES = {
@@ -29,16 +27,8 @@ export const useSSE = () => {
   const heartbeatMonitorRef = useRef(null)
 
   const queryClient = useQueryClient()
-  const { data: userProfile } = useUserProfile()
 
   const getSSEUrl = useCallback(() => {
-    if (!userProfile?.circleID) {
-      console.log(
-        'SSE: User not part of any circle - real-time features unavailable',
-      )
-      return null
-    }
-
     const token = localStorage.getItem('ca_token')
     if (!token || !isTokenValid()) {
       console.log('SSE: No valid authentication token')
@@ -48,20 +38,17 @@ export const useSSE = () => {
     // Get the API URL from apiManager
     const apiUrl = apiManager.getApiURL() // e.g., "http://localhost:8080/api/v1"
 
-    // Build SSE URL
-    const sseUrl = `${apiUrl}/realtime/sse?circleId=${userProfile.circleID}`
+    // Build SSE URL - let backend determine circle from authenticated user
+    const sseUrl = `${apiUrl}/realtime/sse`
 
-    console.log('SSE: Generated URL:', sseUrl)
     return { url: sseUrl, token }
-  }, [userProfile])
+  }, [])
 
   const handleSSEMessage = useCallback(
     event => {
       try {
         const eventData = JSON.parse(event.data)
         setLastEvent(eventData)
-
-        console.log('SSE event received:', eventData.type, eventData)
 
         // Update heartbeat timestamp
         if (eventData.type === 'heartbeat') {
@@ -152,14 +139,8 @@ export const useSSE = () => {
 
   // Create connect function that can be called from anywhere
   const connect = useCallback(() => {
-    console.log('SSE connect called')
-    console.log('SSE current state:', eventSourceRef.current?.readyState)
-
-    // Circuit breaker: prevent infinite reconnection loops
     if (isCircuitBreakerOpen) {
-      console.warn(
-        'SSE: Circuit breaker is open, preventing connection attempt',
-      )
+      console.log('SSE: Circuit breaker is open, preventing connection attempt')
       setError(
         'Connection blocked due to repeated failures. Please try again later.',
       )
@@ -209,8 +190,9 @@ export const useSSE = () => {
       setConnectionState(SSE_STATES.CONNECTING)
       isManuallyClosedRef.current = false
 
-      // Option 1: Use EventSource polyfill with Authorization header (Recommended)
-      // This is the most secure and standard way to authenticate SSE connections
+      // here use EventSource polyfill with Authorization header as the native EventSource does not support headers
+      // the other option was to pass via query param which is less secure and also there.
+      // TODO: use cookie-based once/if at all i move from local storage to httpOnly cookies.
       eventSourceRef.current = new EventSourcePolyfill(sseConfig.url, {
         headers: {
           Authorization: `Bearer ${sseConfig.token}`,
@@ -306,7 +288,7 @@ export const useSSE = () => {
       setError('Failed to establish connection')
       setConnectionState(SSE_STATES.CLOSED)
     }
-  }, [getSSEUrl, handleSSEMessage, stopHeartbeatMonitor])
+  }, [getSSEUrl, handleSSEMessage, stopHeartbeatMonitor, isCircuitBreakerOpen])
 
   const disconnect = useCallback(() => {
     isManuallyClosedRef.current = true
@@ -330,12 +312,10 @@ export const useSSE = () => {
     enabled => {
       console.log('SSE toggleSSEEnabled called:', {
         enabled,
-        userProfile: userProfile?.circleID,
         isTokenValid: isTokenValid(),
-        isPlusAccount: isPlusAccount(userProfile),
       })
       localStorage.setItem('sse_enabled', enabled.toString())
-      if (enabled && userProfile?.circleID && isTokenValid()) {
+      if (enabled && isTokenValid()) {
         console.log('SSE toggleSSEEnabled: Calling connect()')
         connect()
       } else {
@@ -343,38 +323,27 @@ export const useSSE = () => {
         disconnect()
       }
     },
-    [connect, disconnect, userProfile],
+    [connect, disconnect],
   )
 
   const isSSEEnabled = useCallback(() => {
     return localStorage.getItem('sse_enabled') === 'true'
   }, [])
 
-  // Auto-connect when user profile is available and token is valid
+  // Auto-connect when SSE is enabled and token is valid
   useEffect(() => {
     console.log('SSE auto-connect effect triggered')
-    console.log('UserProfile:', userProfile)
-    console.log('circleID:', userProfile?.circleID)
     console.log('Token valid:', isTokenValid())
-    console.log('Is Plus account:', isPlusAccount(userProfile))
 
     // Check if SSE is enabled in settings
     const isSSEEnabledSetting = localStorage.getItem('sse_enabled') === 'true'
     console.log('SSE enabled in settings:', isSSEEnabledSetting)
 
-    if (
-      userProfile?.circleID &&
-      isTokenValid() &&
-      isSSEEnabledSetting &&
-      isPlusAccount(userProfile)
-    ) {
+    if (isTokenValid() && isSSEEnabledSetting) {
       console.log('SSE: Conditions met, attempting to connect')
       connect()
     } else {
       console.log('SSE: Conditions not met, disconnecting')
-      if (!isPlusAccount(userProfile)) {
-        console.log('SSE: Not a Plus account - feature unavailable')
-      }
       disconnect()
     }
 
@@ -383,7 +352,7 @@ export const useSSE = () => {
       disconnect()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userProfile?.circleID, userProfile?.expiration]) // Only depend on essential userProfile fields
+  }, []) // Only run once on mount
 
   // Cleanup timeouts on unmount
   useEffect(() => {
@@ -410,10 +379,8 @@ export const useSSE = () => {
         const isSSEEnabledSetting =
           localStorage.getItem('sse_enabled') === 'true'
         if (
-          userProfile?.circleID &&
           isTokenValid() &&
           isSSEEnabledSetting &&
-          isPlusAccount(userProfile) &&
           connectionState !== SSE_STATES.OPEN
         ) {
           connect()
@@ -426,8 +393,7 @@ export const useSSE = () => {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userProfile?.circleID, userProfile?.expiration, connectionState])
+  }, [connectionState, connect])
 
   return {
     connectionState,

@@ -1,7 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useUserProfile } from '../queries/UserQueries'
-import { isPlusAccount } from '../utils/Helpers'
 import { apiManager, isTokenValid } from '../utils/TokenManager'
 
 const WEBSOCKET_STATES = {
@@ -26,16 +24,8 @@ export const useWebSocket = () => {
   const isManuallyClosedRef = useRef(false)
 
   const queryClient = useQueryClient()
-  const { data: userProfile } = useUserProfile()
 
   const getWebSocketUrl = useCallback(() => {
-    if (!userProfile?.circleID) {
-      console.log(
-        'WebSocket: User not part of any circle - real-time features unavailable',
-      )
-      return null
-    }
-
     const token = localStorage.getItem('ca_token')
     if (!token || !isTokenValid()) {
       console.log('WebSocket: No valid authentication token')
@@ -55,10 +45,11 @@ export const useWebSocket = () => {
       wsUrl = `${isHttps ? 'wss:' : 'ws:'}//${wsUrl}`
     }
 
-    wsUrl = `${wsUrl}/api/v1/realtime/ws?token=${token}&circleId=${userProfile.circleID}`
+    // Let backend determine circle from authenticated user
+    wsUrl = `${wsUrl}/api/v1/realtime/ws?token=${token}`
 
     return wsUrl
-  }, [userProfile])
+  }, [])
 
   const handleWebSocketMessage = useCallback(
     event => {
@@ -250,39 +241,31 @@ export const useWebSocket = () => {
   const toggleWebSocketEnabled = useCallback(
     enabled => {
       localStorage.setItem('websocket_enabled', enabled.toString())
-      if (enabled && userProfile?.circleID && isTokenValid()) {
+      if (enabled && isTokenValid()) {
         connect()
       } else {
         disconnect()
       }
     },
-    [connect, disconnect, userProfile],
+    [connect, disconnect],
   )
 
   const isWebSocketEnabled = useCallback(() => {
     return localStorage.getItem('websocket_enabled') !== 'false'
   }, [])
 
-  // Auto-connect when user profile is available and token is valid
+  // Auto-connect when WebSocket is enabled and token is valid
   useEffect(() => {
     // Check if WebSocket is enabled in settings
     const isWebSocketEnabledSetting =
       localStorage.getItem('websocket_enabled') !== 'false'
     console.log('WebSocket enabled in settings:', isWebSocketEnabledSetting)
 
-    if (
-      userProfile?.circleID &&
-      isTokenValid() &&
-      isWebSocketEnabledSetting &&
-      isPlusAccount(userProfile)
-    ) {
+    if (isTokenValid() && isWebSocketEnabledSetting) {
       console.log('WebSocket: Conditions met, attempting to connect')
       connect()
     } else {
       console.log('WebSocket: Conditions not met, disconnecting')
-      if (!isPlusAccount(userProfile)) {
-        console.log('WebSocket: Not a Plus account - feature unavailable')
-      }
       disconnect()
     }
 
@@ -290,7 +273,8 @@ export const useWebSocket = () => {
     return () => {
       disconnect()
     }
-  }, [userProfile, connect, disconnect])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Only run once on mount
 
   // Cleanup timeouts on unmount
   useEffect(() => {

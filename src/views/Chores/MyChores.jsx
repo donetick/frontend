@@ -825,18 +825,6 @@ const MyChores = () => {
 
     return (
       <>
-        <Typography level='title-lg' sx={{ mt: 2, mb: 2 }}>
-          {JSON.stringify(userProfile) === 'null'}
-        </Typography>
-        <Typography level='title-lg' sx={{ mt: 2, mb: 2 }}>
-          {userLabelsLoading}
-        </Typography>
-        <Typography level='title-lg' sx={{ mt: 2, mb: 2 }}>
-          {performers.length === 0}
-        </Typography>
-        <Typography level='title-lg' sx={{ mt: 2, mb: 2 }}>
-          {choresLoading}
-        </Typography>
         <LoadingComponent />
       </>
     )
@@ -1227,7 +1215,6 @@ const MyChores = () => {
                 },
               }}
             >
-              {/* Primary Actions - Safe operations */}
               <Button
                 size='sm'
                 variant='solid'
@@ -1237,15 +1224,13 @@ const MyChores = () => {
                 disabled={selectedChores.size === 0}
                 sx={{
                   '--Button-paddingInline': { xs: '0.75rem', sm: '1rem' },
-                  fontWeight: 'md',
                 }}
               >
                 Complete
               </Button>
-              
               <Button
                 size='sm'
-                variant='outlined'
+                variant='soft'
                 color='warning'
                 onClick={handleBulkSkip}
                 startDecorator={<SkipNext />}
@@ -1256,48 +1241,29 @@ const MyChores = () => {
               >
                 Skip
               </Button>
-
-              {/* Visual separator for destructive actions */}
-              <Divider
-                orientation='vertical'
-                sx={{
-                  height: '24px',
-                  display: { xs: 'none', sm: 'block' },
-                  mx: 0.5,
-                }}
-              />
-
-              {/* Secondary Actions - Less destructive */}
               <Button
                 size='sm'
-                variant='outlined'
-                color='neutral'
+                variant='soft'
+                color='danger'
                 onClick={handleBulkArchive}
                 startDecorator={<Archive />}
                 disabled={selectedChores.size === 0}
                 sx={{
                   '--Button-paddingInline': { xs: '0.75rem', sm: '1rem' },
-                  borderStyle: 'dashed',
                 }}
               >
                 Archive
               </Button>
 
-              {/* Most destructive action - visually distinct */}
               <Button
                 size='sm'
-                variant='outlined'
+                variant='soft'
                 color='danger'
                 onClick={handleBulkDelete}
                 startDecorator={<Delete />}
                 disabled={selectedChores.size === 0}
                 sx={{
                   '--Button-paddingInline': { xs: '0.75rem', sm: '1rem' },
-                  borderWidth: '2px',
-                  '&:hover': {
-                    borderWidth: '2px',
-                    backgroundColor: 'danger.softBg',
-                  },
                 }}
               >
                 Delete

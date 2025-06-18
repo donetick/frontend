@@ -110,7 +110,7 @@ const MultiSelectHelp = ({ isVisible = true }) => {
                   description='Mark selected tasks as completed'
                 />
                 <ShortcutItem
-                  keys={['Del']}
+                  keys={['Del', '⌫']}
                   description='Delete selected tasks'
                 />
               </Box>

@@ -21,7 +21,6 @@ import { LoginSocialGoogle } from 'reactjs-social-login'
 import { GOOGLE_CLIENT_ID, REDIRECT_URL } from '../../Config'
 import Logo from '../../Logo'
 import { useResource } from '../../queries/ResourceQueries'
-import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { login } from '../../utils/Fetcher'
 import { apiManager } from '../../utils/TokenManager'
@@ -29,7 +28,7 @@ import MFAVerificationModal from './MFAVerificationModal'
 
 const LoginView = () => {
   // Only fetch user profile if token is valid to prevent unnecessary queries
-  const { data: userProfileData } = useUserProfile()
+  // const { data: userProfileData } = useUserProfile()
   const [userProfile, setUserProfile] = useState(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
