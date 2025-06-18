@@ -6,6 +6,7 @@ import { useEffect } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 import { registerCapacitorListeners } from './CapacitorListener'
+import PageTransition from './components/animations/PageTransition'
 import { ImpersonateUserProvider } from './contexts/ImpersonateUserContext'
 import { useResource } from './queries/ResourceQueries'
 import { AuthenticationProvider } from './service/AuthenticationService'
@@ -78,7 +79,9 @@ const AppContent = () => {
     <>
       <ImpersonateUserProvider>
         <NavBar />
-        <Outlet />
+        <PageTransition>
+          <Outlet />
+        </PageTransition>
       </ImpersonateUserProvider>
     </>
   )
