@@ -171,8 +171,26 @@ const MyChores = () => {
         return
       }
 
+      // Ctrl/Cmd + F to focus search input:
+      else if ((event.ctrlKey || event.metaKey) && event.key === 'f') {
+        event.preventDefault()
+        searchInputRef.current?.focus()
+        return
+      }
+
+      // Ctrl/Cmd + S Toggle Multi-select mode
+      else if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+        event.preventDefault()
+        toggleMultiSelectMode()
+        return
+      }
+
       // Ctrl/Cmd + A to select all - works both in and out of multi-select mode
-      if ((event.ctrlKey || event.metaKey) && event.key === 'a') {
+      else if (
+        (event.ctrlKey || event.metaKey) &&
+        event.key === 'a' &&
+        !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)
+      ) {
         event.preventDefault()
         if (!isMultiSelectMode) {
           // Enable multi-select mode and select all visible tasks
@@ -248,7 +266,6 @@ const MyChores = () => {
             }
           }
         }
-        return
       }
 
       // Multi-select keyboard shortcuts (only when in multi-select mode)
@@ -812,17 +829,6 @@ const MyChores = () => {
     performers.length === 0 ||
     choresLoading
   ) {
-    console.log(
-      'userProfile:',
-      userProfile,
-      'userLabelsLoading:',
-      userLabelsLoading,
-      'performers:',
-      performers.length,
-      'choresLoading:',
-      choresLoading,
-    )
-
     return (
       <>
         <LoadingComponent />
@@ -848,7 +854,7 @@ const MyChores = () => {
           }}
         >
           <Input
-            ref={searchInputRef}
+            slotProps={{ input: { ref: searchInputRef } }}
             placeholder='Search'
             value={searchTerm}
             onFocus={() => {

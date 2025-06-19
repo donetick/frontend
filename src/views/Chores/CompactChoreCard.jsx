@@ -420,7 +420,13 @@ const CompactChoreCard = ({
             borderRadius: '16px',
           },
         }}
-        onClick={() => navigate(`/chores/${chore.id}`)}
+        onClick={() => {
+          if (isMultiSelectMode) {
+            onSelectionToggle()
+          } else {
+            navigate(`/chores/${chore.id}`)
+          }
+        }}
       >
         {/* Multi-select checkbox */}
         {isMultiSelectMode && (
@@ -471,8 +477,50 @@ const CompactChoreCard = ({
             }}
           />
         )}
-        {/* Left side - Content */}
+        {/* Complete Button - Left side like typical task apps */}
+        <IconButton
+          variant='soft'
+          color='success'
+          size='sm'
+          onClick={e => {
+            e.stopPropagation()
+            handleTaskCompletion()
+          }}
+          disabled={isPendingCompletion || notInCompletionWindow(chore)}
+          sx={{
+            width: 32,
+            height: 32,
+            borderRadius: '50%',
+            mr: 1.5,
+            flexShrink: 0,
+            bgcolor: 'success.softBg',
+            color: 'success.600',
+            border: '1px solid',
+            borderColor: 'success.200',
+            transition: 'all 0.2s ease',
+            '&:hover': {
+              bgcolor: 'success.solidBg',
+              color: 'success.solidColor',
+              borderColor: 'success.400',
+              transform: 'scale(1.05)',
+            },
+            '&:active': {
+              transform: 'scale(0.95)',
+            },
+            '&:disabled': {
+              opacity: 0.5,
+              transform: 'none',
+            },
+          }}
+        >
+          {isPendingCompletion ? (
+            <CircularProgress size='sm' />
+          ) : (
+            <Check sx={{ fontSize: 16 }} />
+          )}
+        </IconButton>
 
+        {/* Content - Center */}
         <Box
           sx={{
             flex: 1,
@@ -482,7 +530,7 @@ const CompactChoreCard = ({
             flexDirection: 'column',
           }}
         >
-          {/* Line 1: Name + Due Date + Frequency */}
+          {/* Line 1: Name + Due Date */}
           <Box
             sx={{
               display: 'flex',
@@ -491,36 +539,35 @@ const CompactChoreCard = ({
               mb: 0.25,
             }}
           >
-            <Box
+            {/* Chore Name */}
+            <Typography
+              level='title-sm'
               sx={{
-                display: 'flex',
-                alignItems: 'center',
-                minWidth: 0,
+                fontWeight: 600,
+                fontSize: 14,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                mr: 1,
                 flex: 1,
+                minWidth: 0,
               }}
             >
-              {/* Chore Name */}
-              <Typography
-                level='title-sm'
-                sx={{
-                  fontWeight: 600,
-                  fontSize: 14,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                  mr: 1,
-                }}
-              >
-                {chore.name}
-              </Typography>
-            </Box>
+              {chore.name}
+            </Typography>
 
-            {/* Due Date */}
+            {/* Due Date - Inline with name */}
             <Chip
               variant='soft'
               size='sm'
               color={getDueDateColor(chore.nextDueDate)}
-              sx={{ fontSize: 10, height: 20, flexShrink: 0 }}
+              sx={{
+                fontSize: 10,
+                height: 18,
+                px: 0.75,
+                flexShrink: 0,
+                ml: 1,
+              }}
             >
               {getDueDateText(chore.nextDueDate)}
             </Chip>
@@ -586,63 +633,31 @@ const CompactChoreCard = ({
           </Box>
         </Box>
 
-        {/* Right side - Actions */}
-        <Box
+        {/* Right side - Action Menu only */}
+        <ChoreActionMenu
+          variant='plain'
+          chore={chore}
+          onChoreUpdate={onChoreUpdate}
+          onChoreRemove={onChoreRemove}
+          onCompleteWithNote={() => setIsCompleteWithNoteModalOpen(true)}
+          onCompleteWithPastDate={() =>
+            setIsCompleteWithPastDateModalOpen(true)
+          }
+          onChangeAssignee={() => setIsChangeAssigneeModalOpen(true)}
+          onChangeDueDate={() => setIsChangeDueDateModalOpen(true)}
+          onWriteNFC={() => setIsNFCModalOpen(true)}
+          onDelete={handleDelete}
           sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 0.25,
+            width: 32,
+            height: 32,
+            color: 'text.tertiary',
             flexShrink: 0,
+            '&:hover': {
+              color: 'text.secondary',
+              bgcolor: 'background.level1',
+            },
           }}
-        >
-          {/* Complete Button */}
-          <IconButton
-            variant='solid'
-            color='success'
-            size='sm'
-            onClick={e => {
-              e.stopPropagation()
-              handleTaskCompletion()
-            }}
-            disabled={isPendingCompletion || notInCompletionWindow(chore)}
-            sx={{
-              width: 32,
-              height: 32,
-              borderRadius: '50%',
-            }}
-          >
-            {isPendingCompletion ? (
-              <CircularProgress size='sm' color='success' />
-            ) : (
-              <Check sx={{ fontSize: 16 }} />
-            )}
-          </IconButton>
-
-          {/* Chore Action Menu */}
-          <ChoreActionMenu
-            variant='plain'
-            chore={chore}
-            onChoreUpdate={onChoreUpdate}
-            onChoreRemove={onChoreRemove}
-            onCompleteWithNote={() => setIsCompleteWithNoteModalOpen(true)}
-            onCompleteWithPastDate={() =>
-              setIsCompleteWithPastDateModalOpen(true)
-            }
-            onChangeAssignee={() => setIsChangeAssigneeModalOpen(true)}
-            onChangeDueDate={() => setIsChangeDueDateModalOpen(true)}
-            onWriteNFC={() => setIsNFCModalOpen(true)}
-            onDelete={handleDelete}
-            sx={{
-              width: 28,
-              marginRight: -3,
-              height: 28,
-              // opacity: 0.6,
-              '&:hover': {
-                opacity: 0,
-              },
-            }}
-          />
-        </Box>
+        />
       </Box>
 
       {/* All modals (same as original) */}
