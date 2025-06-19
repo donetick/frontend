@@ -384,7 +384,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
   return (
     <Modal open={isModalOpen} onClose={handleCloseModal}>
       <ModalOverflow>
-        <ModalDialog size='lg' sx={{ minWidth: '80%' }}>
+        <ModalDialog size='lg' sx={{ minWidth: '100%' }}>
           <Typography level='h4'>Create new task</Typography>
           <Chip startDecorator='🚧' variant='soft' color='warning' size='sm'>
             Experimental Feature

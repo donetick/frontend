@@ -399,8 +399,8 @@ const CompactChoreCard = ({
           borderBottom: '1px solid',
           borderColor: 'divider',
           position: 'relative',
-          pl: isMultiSelectMode ? '48px' : '16px', // Add space for checkbox when in multi-select mode
-          backgroundColor: 'background.surface',
+          pl: '16px', // Consistent padding since both elements are in the same position
+          // backgroundColor: 'background.surface',
           transition: 'all 0.2s ease-in-out',
           '&:hover': {
             bgcolor: 'background.level1',
@@ -428,37 +428,6 @@ const CompactChoreCard = ({
           }
         }}
       >
-        {/* Multi-select checkbox */}
-        {isMultiSelectMode && (
-          <Checkbox
-            checked={isSelected}
-            onChange={onSelectionToggle}
-            sx={{
-              position: 'absolute',
-              left: 16,
-              zIndex: 2,
-              bgcolor: 'background.surface',
-              borderRadius: 'md',
-              boxShadow: 'sm',
-              border: '2px solid',
-              borderColor: 'divider',
-              '&:hover': {
-                bgcolor: 'background.level1',
-                borderColor: 'primary.300',
-              },
-              '&.Mui-checked': {
-                bgcolor: 'primary.500',
-                borderColor: 'primary.500',
-                color: 'primary.solidColor',
-                '&:hover': {
-                  bgcolor: 'primary.600',
-                  borderColor: 'primary.600',
-                },
-              },
-            }}
-            onClick={e => e.stopPropagation()}
-          />
-        )}
         {/* Priority bar clickable area */}
         {chore.priority > 0 && (
           <Box
@@ -477,48 +446,128 @@ const CompactChoreCard = ({
             }}
           />
         )}
-        {/* Complete Button - Left side like typical task apps */}
-        <IconButton
-          variant='soft'
-          color='success'
-          size='sm'
-          onClick={e => {
-            e.stopPropagation()
-            handleTaskCompletion()
-          }}
-          disabled={isPendingCompletion || notInCompletionWindow(chore)}
+        
+        {/* Animated transition container for Complete Button / Multi-select checkbox */}
+        <Box
           sx={{
-            width: 32,
-            height: 32,
-            borderRadius: '50%',
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 40,
+            height: 40,
             mr: 1.5,
             flexShrink: 0,
-            bgcolor: 'success.softBg',
-            color: 'success.600',
-            border: '1px solid',
-            borderColor: 'success.200',
-            transition: 'all 0.2s ease',
-            '&:hover': {
-              bgcolor: 'success.solidBg',
-              color: 'success.solidColor',
-              borderColor: 'success.400',
-              transform: 'scale(1.05)',
-            },
-            '&:active': {
-              transform: 'scale(0.95)',
-            },
-            '&:disabled': {
-              opacity: 0.5,
-              transform: 'none',
-            },
           }}
         >
-          {isPendingCompletion ? (
-            <CircularProgress size='sm' />
-          ) : (
-            <Check sx={{ fontSize: 16 }} />
-          )}
-        </IconButton>
+          {/* Complete Button */}
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition:
+                'opacity 0.3s ease-in-out, transform 0.3s ease-in-out',
+              opacity: isMultiSelectMode ? 0 : 1,
+              transform: isMultiSelectMode
+                ? 'scale(0.8) rotate(45deg)'
+                : 'scale(1) rotate(0deg)',
+              pointerEvents: isMultiSelectMode ? 'none' : 'auto',
+            }}
+          >
+            <IconButton
+              variant='soft'
+              color='success'
+              size='sm'
+              onClick={e => {
+                e.stopPropagation()
+                handleTaskCompletion()
+              }}
+              disabled={isPendingCompletion || notInCompletionWindow(chore)}
+              sx={{
+                width: 32,
+                height: 32,
+                borderRadius: '50%',
+                bgcolor: 'success.softBg',
+                color: 'success.600',
+                border: '1px solid',
+                borderColor: 'success.200',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  bgcolor: 'success.solidBg',
+                  color: 'success.solidColor',
+                  borderColor: 'success.400',
+                  transform: 'scale(1.05)',
+                },
+                '&:active': {
+                  transform: 'scale(0.95)',
+                },
+                '&:disabled': {
+                  opacity: 0.5,
+                  transform: 'none',
+                },
+              }}
+            >
+              {isPendingCompletion ? (
+                <CircularProgress size='sm' />
+              ) : (
+                <Check sx={{ fontSize: 16 }} />
+              )}
+            </IconButton>
+          </Box>
+
+          {/* Multi-select Checkbox */}
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition:
+                'opacity 0.3s ease-in-out, transform 0.3s ease-in-out',
+              opacity: isMultiSelectMode ? 1 : 0,
+              transform: isMultiSelectMode
+                ? 'scale(1) rotate(0deg)'
+                : 'scale(0.8) rotate(-45deg)',
+              pointerEvents: isMultiSelectMode ? 'auto' : 'none',
+            }}
+          >
+            <Checkbox
+              checked={isSelected}
+              onChange={onSelectionToggle}
+              sx={{
+                bgcolor: 'background.surface',
+                borderRadius: 'md',
+                boxShadow: 'sm',
+                border: '2px solid',
+                borderColor: 'divider',
+                '&:hover': {
+                  bgcolor: 'background.level1',
+                  borderColor: 'primary.300',
+                },
+                '&.Mui-checked': {
+                  bgcolor: 'primary.500',
+                  borderColor: 'primary.500',
+                  color: 'primary.solidColor',
+                  '&:hover': {
+                    bgcolor: 'primary.600',
+                    borderColor: 'primary.600',
+                  },
+                },
+              }}
+              onClick={e => e.stopPropagation()}
+            />
+          </Box>
+        </Box>
 
         {/* Content - Center */}
         <Box
@@ -633,31 +682,46 @@ const CompactChoreCard = ({
           </Box>
         </Box>
 
-        {/* Right side - Action Menu only */}
-        <ChoreActionMenu
-          variant='plain'
-          chore={chore}
-          onChoreUpdate={onChoreUpdate}
-          onChoreRemove={onChoreRemove}
-          onCompleteWithNote={() => setIsCompleteWithNoteModalOpen(true)}
-          onCompleteWithPastDate={() =>
-            setIsCompleteWithPastDateModalOpen(true)
-          }
-          onChangeAssignee={() => setIsChangeAssigneeModalOpen(true)}
-          onChangeDueDate={() => setIsChangeDueDateModalOpen(true)}
-          onWriteNFC={() => setIsNFCModalOpen(true)}
-          onDelete={handleDelete}
+        {/* Right side - Action Menu with animation */}
+        <Box
           sx={{
-            width: 32,
-            height: 32,
-            color: 'text.tertiary',
-            flexShrink: 0,
-            '&:hover': {
-              color: 'text.secondary',
-              bgcolor: 'background.level1',
-            },
+            transition:
+              'opacity 0.3s ease-in-out, transform 0.3s ease-in-out, width 0.3s ease-in-out, margin 0.3s ease-in-out',
+            opacity: isMultiSelectMode ? 0 : 1,
+            transform: isMultiSelectMode
+              ? 'translateX(20px) scale(0.8)'
+              : 'translateX(0) scale(1)',
+            width: isMultiSelectMode ? 0 : 32,
+            marginRight: isMultiSelectMode ? 0 : undefined,
+            overflow: 'hidden',
+            pointerEvents: isMultiSelectMode ? 'none' : 'auto',
           }}
-        />
+        >
+          <ChoreActionMenu
+            variant='plain'
+            chore={chore}
+            onChoreUpdate={onChoreUpdate}
+            onChoreRemove={onChoreRemove}
+            onCompleteWithNote={() => setIsCompleteWithNoteModalOpen(true)}
+            onCompleteWithPastDate={() =>
+              setIsCompleteWithPastDateModalOpen(true)
+            }
+            onChangeAssignee={() => setIsChangeAssigneeModalOpen(true)}
+            onChangeDueDate={() => setIsChangeDueDateModalOpen(true)}
+            onWriteNFC={() => setIsNFCModalOpen(true)}
+            onDelete={handleDelete}
+            sx={{
+              width: 32,
+              height: 32,
+              color: 'text.tertiary',
+              flexShrink: 0,
+              '&:hover': {
+                color: 'text.secondary',
+                bgcolor: 'background.level1',
+              },
+            }}
+          />
+        </Box>
       </Box>
 
       {/* All modals (same as original) */}

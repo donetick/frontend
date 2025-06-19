@@ -982,7 +982,18 @@ const MyChores = () => {
             {isMultiSelectMode ? <CheckBox /> : <CheckBoxOutlineBlank />}
           </IconButton>
         </Box>
-        {showSearchFilter && (
+
+        {/* Search Filter with animation */}
+        <Box
+          sx={{
+            overflow: 'hidden',
+            transition: 'all 0.3s ease-in-out',
+            maxHeight: showSearchFilter ? '150px' : '0',
+            opacity: showSearchFilter ? 1 : 0,
+            transform: showSearchFilter ? 'translateY(0)' : 'translateY(-10px)',
+            marginBottom: showSearchFilter ? 1 : 0,
+          }}
+        >
           <div className='flex gap-4'>
             <div className='grid flex-1 grid-cols-3 gap-4'>
               <IconButtonWithMenu
@@ -1101,20 +1112,30 @@ const MyChores = () => {
               <CancelRounded />
             </IconButton>
           </div>
-        )}
+        </Box>
 
-        {/* Multi-select Toolbar */}
-        {isMultiSelectMode && (
+        {/* Multi-select Toolbar with animation */}
+        <Box
+          sx={{
+            position: 'sticky',
+            top: 0,
+            zIndex: 1000,
+            overflow: 'hidden',
+            transition: 'all 0.3s ease-in-out',
+            maxHeight: isMultiSelectMode ? '200px' : '0',
+            opacity: isMultiSelectMode ? 1 : 0,
+            transform: isMultiSelectMode
+              ? 'translateY(0)'
+              : 'translateY(-20px)',
+            marginBottom: isMultiSelectMode ? 2 : 0,
+          }}
+        >
           <Box
             sx={{
-              position: 'sticky',
-              top: 0,
-              zIndex: 1000,
               backgroundColor: 'background.surface',
               backdropFilter: 'blur(8px)',
               borderRadius: 'lg',
               p: 2,
-              mb: 2,
               border: '1px solid',
               borderColor: 'divider',
               boxShadow: 'm',
@@ -1300,7 +1321,7 @@ const MyChores = () => {
               </IconButton> */}
             </Box>
           </Box>
-        )}
+        </Box>
 
         {searchFilter !== 'All' && (
           <Chip
