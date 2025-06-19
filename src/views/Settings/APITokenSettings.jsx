@@ -13,19 +13,47 @@ import moment from 'moment'
 
 import { useEffect, useState } from 'react'
 import { useUserProfile } from '../../queries/UserQueries'
+import { useNotification } from '../../service/NotificationProvider'
 import {
   CreateLongLiveToken,
   DeleteLongLiveToken,
   GetLongLiveTokens,
 } from '../../utils/Fetcher'
 import { isPlusAccount } from '../../utils/Helpers'
+import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import TextModal from '../Modals/Inputs/TextModal'
 
 const APITokenSettings = () => {
   const { data: userProfile } = useUserProfile()
+  const { showNotification } = useNotification()
   const [tokens, setTokens] = useState([])
   const [isGetTokenNameModalOpen, setIsGetTokenNameModalOpen] = useState(false)
   const [showTokenId, setShowTokenId] = useState(null)
+  const [confirmModalConfig, setConfirmModalConfig] = useState({})
+
+  const showConfirmation = (
+    message,
+    title,
+    onConfirm,
+    confirmText = 'Confirm',
+    cancelText = 'Cancel',
+    color = 'primary',
+  ) => {
+    setConfirmModalConfig({
+      isOpen: true,
+      message,
+      title,
+      confirmText,
+      cancelText,
+      color,
+      onClose: isConfirmed => {
+        if (isConfirmed) {
+          onConfirm()
+        }
+        setConfirmModalConfig({})
+      },
+    })
+  }
   useEffect(() => {
     GetLongLiveTokens().then(resp => {
       resp.json().then(data => {
@@ -100,18 +128,28 @@ const APITokenSettings = () => {
                 variant='outlined'
                 color='danger'
                 onClick={() => {
-                  const confirmed = confirm(
-                    `Are you sure you want to remove ${token.name} ?`,
+                  showConfirmation(
+                    `Are you sure you want to remove ${token.name}?`,
+                    'Remove Token',
+                    () => {
+                      DeleteLongLiveToken(token.id).then(resp => {
+                        if (resp.ok) {
+                          showNotification({
+                            type: 'success',
+                            title: 'Removed',
+                            message: 'API token has been removed',
+                          })
+                          const newTokens = tokens.filter(
+                            t => t.id !== token.id,
+                          )
+                          setTokens(newTokens)
+                        }
+                      })
+                    },
+                    'Remove',
+                    'Cancel',
+                    'danger',
                   )
-                  if (confirmed) {
-                    DeleteLongLiveToken(token.id).then(resp => {
-                      if (resp.ok) {
-                        alert('Token removed')
-                        const newTokens = tokens.filter(t => t.id !== token.id)
-                        setTokens(newTokens)
-                      }
-                    })
-                  }
                 }}
               >
                 Remove
@@ -130,7 +168,10 @@ const APITokenSettings = () => {
                     color='primary'
                     onClick={() => {
                       navigator.clipboard.writeText(token.token)
-                      alert('Token copied to clipboard')
+                      showNotification({
+                        type: 'success',
+                        message: 'Token copied to clipboard',
+                      })
                       setShowTokenId(null)
                     }}
                   >
@@ -166,6 +207,11 @@ const APITokenSettings = () => {
         okText={'Generate Token'}
         onSave={handleSaveToken}
       />
+
+      {/* Modals */}
+      {confirmModalConfig?.isOpen && (
+        <ConfirmationModal config={confirmModalConfig} />
+      )}
     </div>
   )
 }

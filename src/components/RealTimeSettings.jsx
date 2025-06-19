@@ -63,15 +63,15 @@ const RealTimeSettings = () => {
 
   const getStatusDescription = () => {
     if (!isPlusAccount(userProfile)) {
-      return 'Real-time updates are not available in the Basic plan. Upgrade to Plus to receive instant notifications when chores are updated.'
+      return 'Real-time updates are not available in the Basic plan. Upgrade to Plus to receive instant notifications when tasks are updated.'
     }
 
     if (realtimeType === REALTIME_TYPES.DISABLED) {
-      return 'Real-time updates are disabled. Enable them to see live changes when you or other circle members complete, skip, or modify chores.'
+      return 'Real-time updates are disabled. Enable them to see live changes when you or other circle members complete, skip, or modify tasks.'
     }
 
     if (context.isConnected) {
-      return "Real-time updates are working. You'll see live changes when you or other circle members complete, skip, or modify chores."
+      return "Real-time updates are working. You'll see live changes when you or other circle members complete, skip, or modify tasks."
     }
 
     if (context.isConnecting) {
@@ -97,12 +97,18 @@ const RealTimeSettings = () => {
   return (
     <Card sx={{ mt: 2, p: 3 }}>
       <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, mb: 2 }}>
-        {realtimeType !== REALTIME_TYPES.DISABLED &&
-        isPlusAccount(userProfile) ? (
-          <Sync color={context.isConnected ? 'success' : 'disabled'} />
-        ) : (
-          <SyncDisabled color='disabled' />
-        )}
+        <Switch
+          color='success'
+          checked={realtimeType !== REALTIME_TYPES.DISABLED}
+          onChange={e => {
+            handleRealtimeTypeChange(
+              null,
+              e.target.checked ? REALTIME_TYPES.SSE : REALTIME_TYPES.DISABLED,
+            )
+          }}
+          disabled={!isPlusAccount(userProfile)}
+          inputProps={{ 'aria-label': 'Enable Real-time Updates' }}
+        />
         <Box sx={{ flex: 1 }}>
           <Box
             sx={{
@@ -121,22 +127,15 @@ const RealTimeSettings = () => {
               )}
             </Typography>
 
-            <Switch
-              checked={realtimeType !== REALTIME_TYPES.DISABLED}
-              onChange={e => {
-                handleRealtimeTypeChange(
-                  null,
-                  e.target.checked
-                    ? REALTIME_TYPES.SSE
-                    : REALTIME_TYPES.DISABLED,
-                )
-              }}
-              disabled={!isPlusAccount(userProfile)}
-              inputProps={{ 'aria-label': 'Enable Real-time Updates' }}
-            />
+            {realtimeType !== REALTIME_TYPES.DISABLED &&
+            isPlusAccount(userProfile) ? (
+              <Sync color={context.isConnected ? 'success' : 'disabled'} />
+            ) : (
+              <SyncDisabled color='disabled' />
+            )}
           </Box>
           <Typography level='body-sm' color='neutral'>
-            Get instant notifications when chores are updated
+            Get instant notifications when tasks are updated
           </Typography>
         </Box>
       </Box>
@@ -181,7 +180,7 @@ const RealTimeSettings = () => {
         <Typography level='body-sm' color='warning' sx={{ mt: 1 }}>
           Real-time updates are not available in the Basic plan. Upgrade to Plus
           to receive instant notifications when you or other circle members
-          complete, skip, or modify chores.
+          complete, skip, or modify tasks.
         </Typography>
       )}
     </Card>
