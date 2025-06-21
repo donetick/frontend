@@ -3,6 +3,10 @@
   "private": true,
   "version": "0.1.103",
   "type": "module",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=9.0.0"
+  },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "eslint --fix",
@@ -13,6 +17,7 @@
     "start": "vite --host",
     "dev": "vite",
     "build": "vite build",
+    "build-cf": "rm -rf node_modules package-lock.json && npm install && vite build",
     "build-selfhosted": "vite build --mode selfhosted",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
