@@ -93,7 +93,7 @@ const DemoMyChore = () => {
     // },
   ]
 
-  const users = [{ displayName: 'Me', id: 1 }]
+  const users = [{ displayName: 'Me', id: 1, userId: 1 }]
   return (
     <>
       <Grid item xs={12} sm={5} data-aos-first-tasks-list>

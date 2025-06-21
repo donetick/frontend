@@ -11,6 +11,7 @@ import {
   Box,
   Button,
   Card,
+  Checkbox,
   Chip,
   CircularProgress,
   Grid,
@@ -23,7 +24,7 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useUserProfile } from '../../queries/UserQueries.jsx'
-import { useError } from '../../service/ErrorProvider'
+import { useNotification } from '../../service/NotificationProvider'
 import { notInCompletionWindow } from '../../utils/Chores.jsx'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import {
@@ -47,6 +48,10 @@ const ChoreCard = ({
   sx,
   viewOnly,
   onChipClick,
+  // Multi-select props
+  isMultiSelectMode = false,
+  isSelected = false,
+  onSelectionToggle,
 }) => {
   const [isChangeDueDateModalOpen, setIsChangeDueDateModalOpen] =
     React.useState(false)
@@ -67,7 +72,7 @@ const ChoreCard = ({
 
   const { impersonatedUser } = useImpersonateUser()
 
-  const { showError } = useError()
+  const { showError } = useNotification()
 
   const handleDelete = () => {
     setConfirmModelConfig({
@@ -392,19 +397,71 @@ const ChoreCard = ({
           flexDirection: 'column',
           justifyContent: 'space-between',
           p: 2,
-          // backgroundColor: 'white',
           boxShadow: 'sm',
           borderRadius: 20,
           key: `${chore.id}-card`,
-
-          // mb: 2,
+          position: 'relative',
+          backgroundColor: 'background.surface',
+          border: '1px solid',
+          borderColor: 'divider',
+          transition: 'all 0.2s ease-in-out',
+          cursor: isMultiSelectMode ? 'pointer' : 'default',
+          '&:hover': {
+            boxShadow: 'md',
+            borderColor: isMultiSelectMode ? 'primary.500' : 'primary.300',
+          },
+          // Add padding when in multi-select mode to account for checkbox
+          pl: isMultiSelectMode ? 6 : 2,
+          // Visual feedback when selected
+          ...(isMultiSelectMode &&
+            isSelected && {
+              borderColor: 'primary.500',
+              backgroundColor: 'primary.softBg',
+              boxShadow: 'sm',
+            }),
         }}
       >
+        {/* Multi-select checkbox */}
+        {isMultiSelectMode && (
+          <Checkbox
+            checked={isSelected}
+            onChange={onSelectionToggle}
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: 12,
+              transform: 'translateY(-50%)',
+              zIndex: 2,
+              bgcolor: 'background.surface',
+              borderRadius: 'md',
+              borderColor: 'divider',
+              '&:hover': {
+                bgcolor: 'background.level1',
+                borderColor: 'primary.300',
+              },
+              '&.Mui-checked': {
+                bgcolor: 'primary.500',
+                borderColor: 'primary.500',
+                color: 'primary.solidColor',
+                '&:hover': {
+                  bgcolor: 'primary.600',
+                  borderColor: 'primary.600',
+                },
+              },
+            }}
+            onClick={e => e.stopPropagation()}
+          />
+        )}
         <Grid container>
           <Grid
             xs={9}
+            sx={{ cursor: 'pointer' }}
             onClick={() => {
-              navigate(`/chores/${chore.id}`)
+              if (isMultiSelectMode) {
+                onSelectionToggle()
+              } else {
+                navigate(`/chores/${chore.id}`)
+              }
             }}
           >
             {/* Box in top right with Chip showing next due date  */}

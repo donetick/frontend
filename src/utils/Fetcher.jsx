@@ -146,7 +146,10 @@ const UpdateChoreAssignee = (id, assignee) => {
   return Fetch(`/chores/${id}/assignee`, {
     method: 'PUT',
     headers: HEADERS(),
-    body: JSON.stringify({ assignee: Number(assignee) }),
+    body: JSON.stringify({
+      assignee: Number(assignee),
+      updatedAt: new Date().toISOString(),
+    }),
   })
 }
 
@@ -499,6 +502,7 @@ const UpdateDueDate = (id, dueDate) => {
     },
     body: JSON.stringify({
       dueDate: dueDate ? new Date(dueDate).toISOString() : null,
+      updatedAt: new Date().toISOString(),
     }),
   })
 }

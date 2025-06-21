@@ -10,13 +10,13 @@ import {
   FormControl,
   FormHelperText,
   Input,
-  ListItem,
   Option,
   Select,
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
+import RealTimeSettings from '../../components/RealTimeSettings'
 import Logo from '../../Logo'
 import { useUserProfile } from '../../queries/UserQueries'
 import {
@@ -34,6 +34,7 @@ import {
   UpdatePassword,
 } from '../../utils/Fetcher'
 import { isPlusAccount } from '../../utils/Helpers'
+import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import PassowrdChangeModal from '../Modals/Inputs/PasswordChangeModal'
 import APITokenSettings from './APITokenSettings'
 import MFASettings from './MFASettings'
@@ -41,9 +42,11 @@ import NotificationSetting from './NotificationSetting'
 import ProfileSettings from './ProfileSettings'
 import StorageSettings from './StorageSettings'
 import ThemeToggle from './ThemeToggle'
+import { useNotification } from '../../service/NotificationProvider'
 
 const Settings = () => {
   const { data: userProfile } = useUserProfile()
+  const { showNotification } = useNotification()
 
   const [userCircles, setUserCircles] = useState([])
   const [circleMemberRequests, setCircleMemberRequests] = useState([])
@@ -54,6 +57,31 @@ const Settings = () => {
   const [isAdmin, setIsAdmin] = useState(false)
 
   const [changePasswordModal, setChangePasswordModal] = useState(false)
+  const [confirmModalConfig, setConfirmModalConfig] = useState({})
+
+  const showConfirmation = (
+    message,
+    title,
+    onConfirm,
+    confirmText = 'Confirm',
+    cancelText = 'Cancel',
+    color = 'primary',
+  ) => {
+    setConfirmModalConfig({
+      isOpen: true,
+      message,
+      title,
+      confirmText,
+      cancelText,
+      color,
+      onClose: isConfirmed => {
+        if (isConfirmed) {
+          onConfirm()
+        }
+        setConfirmModalConfig({})
+      },
+    })
+  }
   useEffect(() => {
     GetUserCircle().then(resp => {
       resp.json().then(data => {
@@ -165,7 +193,10 @@ const Settings = () => {
             variant='soft'
             onClick={() => {
               navigator.clipboard.writeText(userCircles[0]?.invite_code)
-              alert('Code Copied to clipboard')
+              showNotification({
+                type: 'success',
+                message: 'Code copied to clipboard',
+              })
             }}
           >
             Copy Code
@@ -180,27 +211,42 @@ const Settings = () => {
                   window.location.host +
                   `/circle/join?code=${userCircles[0]?.invite_code}`,
               )
-              alert('Link Copied to clipboard')
+              showNotification({
+                type: 'success',
+                message: 'Link copied to clipboard',
+              })
             }}
           >
             Copy Link
           </Button>
           {userCircles.length > 0 && userCircles[0]?.userRole === 'member' && (
             <Button
+              color='danger'
+              variant='outlined'
               sx={{ ml: 1 }}
               onClick={() => {
-                const confirmed = confirm(
-                  `Are you sure you want to leave your circle?`,
+                showConfirmation(
+                  'Are you sure you want to leave your circle?',
+                  'Leave Circle',
+                  () => {
+                    LeaveCircle(userCircles[0]?.id).then(resp => {
+                      if (resp.ok) {
+                        showNotification({
+                          type: 'success',
+                          message: 'Left circle successfully',
+                        })
+                      } else {
+                        showNotification({
+                          type: 'error',
+                          message: 'Failed to leave circle',
+                        })
+                      }
+                    })
+                  },
+                  'Leave',
+                  'Cancel',
+                  'danger',
                 )
-                if (confirmed) {
-                  LeaveCircle(userCircles[0]?.id).then(resp => {
-                    if (resp.ok) {
-                      alert('Left circle successfully.')
-                    } else {
-                      alert('Failed to leave circle.')
-                    }
-                  })
-                }
               }}
             >
               Leave Circle
@@ -257,7 +303,10 @@ const Settings = () => {
                           })
                           setCircleMembers(newCircleMembers)
                         } else {
-                          alert('Failed to update role')
+                          showNotification({
+                            type: 'error',
+                            message: 'Failed to update role',
+                          })
                         }
                       })
                     }}
@@ -278,7 +327,7 @@ const Settings = () => {
                       },
                     ].map((option, index) => (
                       <Option value={option.value} key={index}>
-                        <ListItem
+                        <Box
                           sx={{
                             display: 'flex',
                             flexDirection: 'column',
@@ -301,7 +350,7 @@ const Settings = () => {
                           >
                             {option.description}
                           </Typography>
-                        </ListItem>
+                        </Box>
                       </Option>
                     ))}
                   </Select>
@@ -318,19 +367,26 @@ const Settings = () => {
                       color='danger'
                       size='sm'
                       onClick={() => {
-                        const confirmed = confirm(
+                        showConfirmation(
                           `Are you sure you want to remove ${member.displayName} from your circle?`,
+                          'Remove Member',
+                          () => {
+                            DeleteCircleMember(
+                              member.circleId,
+                              member.userId,
+                            ).then(resp => {
+                              if (resp.ok) {
+                                showNotification({
+                                  type: 'success',
+                                  message: 'Removed member successfully',
+                                })
+                              }
+                            })
+                          },
+                          'Remove',
+                          'Cancel',
+                          'danger',
                         )
-                        if (confirmed) {
-                          DeleteCircleMember(
-                            member.circleId,
-                            member.userId,
-                          ).then(resp => {
-                            if (resp.ok) {
-                              alert('Removed member successfully.')
-                            }
-                          })
-                        }
                       }}
                     >
                       Remove
@@ -353,18 +409,24 @@ const Settings = () => {
               variant='soft'
               color='success'
               onClick={() => {
-                const confirmed = confirm(
-                  `Are you sure you want to accept ${request.displayName}(username:${request.username}) to join your circle?`,
+                showConfirmation(
+                  `Are you sure you want to accept ${request.displayName} (username: ${request.username}) to join your circle?`,
+                  'Accept Member Request',
+                  () => {
+                    AcceptCircleMemberRequest(request.id).then(resp => {
+                      if (resp.ok) {
+                        showNotification({
+                          type: 'success',
+                          message: 'Accepted request successfully',
+                        })
+                        // reload the page
+                        window.location.reload()
+                      }
+                    })
+                  },
+                  'Accept',
+                  'Cancel',
                 )
-                if (confirmed) {
-                  AcceptCircleMemberRequest(request.id).then(resp => {
-                    if (resp.ok) {
-                      alert('Accepted request successfully.')
-                      // reload the page
-                      window.location.reload()
-                    }
-                  })
-                }
               }}
             >
               Accept
@@ -393,18 +455,23 @@ const Settings = () => {
           <Button
             variant='soft'
             onClick={() => {
-              const confirmed = confirm(
-                `Are you sure you want to leave you circle and join '${circleInviteCode}'?`,
+              showConfirmation(
+                `Are you sure you want to leave your circle and join '${circleInviteCode}'?`,
+                'Join Circle',
+                () => {
+                  JoinCircle(circleInviteCode).then(resp => {
+                    if (resp.ok) {
+                      showNotification({
+                        type: 'success',
+                        message:
+                          'Joined circle successfully, wait for the circle owner to accept your request.',
+                      })
+                    }
+                  })
+                },
+                'Join',
+                'Cancel',
               )
-              if (confirmed) {
-                JoinCircle(circleInviteCode).then(resp => {
-                  if (resp.ok) {
-                    alert(
-                      'Joined circle successfully, wait for the circle owner to accept your request.',
-                    )
-                  }
-                })
-              }
             }}
           >
             Join Circle
@@ -479,9 +546,15 @@ const Settings = () => {
                   onClick={() => {
                     PutWebhookURL(webhookURL).then(resp => {
                       if (resp.ok) {
-                        alert('Webhook URL updated successfully.')
+                        showNotification({
+                          type: 'success',
+                          message: 'Webhook URL updated successfully',
+                        })
                       } else {
-                        alert('Failed to update webhook URL.')
+                        showNotification({
+                          type: 'error',
+                          message: 'Failed to update webhook URL',
+                        })
                       }
                     })
                   }}
@@ -493,6 +566,10 @@ const Settings = () => {
             )}
           </>
         )}
+
+        {/* WebSocket Settings */}
+        {/* <WebSocketSettings /> */}
+        <RealTimeSettings />
       </div>
 
       <div className='grid gap-4 py-4' id='account'>
@@ -537,10 +614,14 @@ const Settings = () => {
                 ml: 1,
               }}
               variant='outlined'
+              color='danger'
               onClick={() => {
                 CancelSubscription().then(resp => {
                   if (resp.ok) {
-                    alert('Subscription cancelled.')
+                    showNotification({
+                      type: 'success',
+                      message: 'Subscription cancelled',
+                    })
                     window.location.reload()
                   }
                 })
@@ -571,9 +652,15 @@ const Settings = () => {
                   if (password) {
                     UpdatePassword(password).then(resp => {
                       if (resp.ok) {
-                        alert('Password changed successfully')
+                        showNotification({
+                          type: 'success',
+                          message: 'Password changed successfully',
+                        })
                       } else {
-                        alert('Password change failed')
+                        showNotification({
+                          type: 'error',
+                          message: 'Password change failed',
+                        })
                       }
                     })
                   }
@@ -597,6 +684,11 @@ const Settings = () => {
         </Typography>
         <ThemeToggle />
       </div>
+
+      {/* Modals */}
+      {confirmModalConfig?.isOpen && (
+        <ConfirmationModal config={confirmModalConfig} />
+      )}
     </Container>
   )
 }

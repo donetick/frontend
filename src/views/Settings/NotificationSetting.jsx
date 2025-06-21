@@ -1,7 +1,6 @@
 import { Capacitor } from '@capacitor/core'
 import { LocalNotifications } from '@capacitor/local-notifications'
 import { Preferences } from '@capacitor/preferences'
-import { Close } from '@mui/icons-material'
 import {
   Box,
   Button,
@@ -10,24 +9,23 @@ import {
   FormControl,
   FormHelperText,
   FormLabel,
-  IconButton,
   Input,
   Option,
   Select,
-  Snackbar,
   Switch,
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
 
 import { useUserProfile } from '../../queries/UserQueries'
+import { useNotification } from '../../service/NotificationProvider'
 import {
   UpdateNotificationTarget,
   UpdateUserDetails,
 } from '../../utils/Fetcher'
 
 const NotificationSetting = () => {
-  const [isSnackbarOpen, setIsSnackbarOpen] = useState(false)
+  const { showWarning } = useNotification()
   const { data: userProfile, refetch: refetchUserProfile } = useUserProfile()
 
   const getNotificationPreferences = async () => {
@@ -70,13 +68,17 @@ const NotificationSetting = () => {
 
   useEffect(() => {
     getNotificationPreferences().then(resp => {
-      setDeviceNotification(resp.granted)
-      setDueNotification(resp.dueNotification)
-      setPreDueNotification(resp.preDueNotification)
-      setNaggingNotification(resp.naggingNotification)
+      if (resp) {
+        setDeviceNotification(Boolean(resp.granted))
+        setDueNotification(Boolean(resp.dueNotification ?? true))
+        setPreDueNotification(Boolean(resp.preDueNotification))
+        setNaggingNotification(Boolean(resp.naggingNotification))
+      }
     })
     getPushNotificationPreferences().then(resp => {
-      setPushNotification(resp.granted)
+      if (resp) {
+        setPushNotification(Boolean(resp.granted))
+      }
     })
   }, [])
 
@@ -87,7 +89,7 @@ const NotificationSetting = () => {
   )
 
   const [chatID, setChatID] = useState(
-    userProfile?.notification_target?.target_id,
+    userProfile?.notification_target?.target_id ?? 0,
   )
   const [error, setError] = useState('')
   const SaveValidation = () => {
@@ -147,7 +149,11 @@ const NotificationSetting = () => {
                   setDeviceNotification(true)
                   setNotificationPreferences({ granted: true })
                 } else if (resp.display === 'denied') {
-                  setIsSnackbarOpen(true)
+                  showWarning({
+                    title: 'Notification Permission Denied',
+                    message:
+                      'You have denied notification permissions. You can enable them later in your device settings.',
+                  })
                   setDeviceNotification(false)
                   setNotificationPreferences({ granted: false })
                 }
@@ -251,12 +257,14 @@ const NotificationSetting = () => {
                 setPushNotification(true)
                 setPushNotificationPreferences({granted: true})
               }
-              if (resp.receive!== 'granted') {
-                setIsSnackbarOpen(true)
+              if (resp.receive !== 'granted') {
+                showWarning({
+                  title: 'Push Notification Permission Denied',
+                  message: 'Push notifications have been disabled. You can enable them in your device settings if needed.',
+                })
                 setPushNotification(false)
                 setPushNotificationPreferences({granted: false})
                 console.log("User denied permission", resp)
-
               }
             })
           }
@@ -313,7 +321,7 @@ const NotificationSetting = () => {
 
       <FormControl orientation='horizontal'>
         <Switch
-          checked={chatID !== 0}
+          checked={Boolean(chatID !== 0)}
           onClick={event => {
             event.preventDefault()
             if (chatID !== 0) {
@@ -440,30 +448,6 @@ const NotificationSetting = () => {
           </Button>
         </Box>
       )}
-      <Snackbar
-        open={isSnackbarOpen}
-        autoHideDuration={8000}
-        onClose={() => setIsSnackbarOpen(false)}
-        endDecorator={
-          <IconButton size='md' onClick={() => setIsSnackbarOpen(false)}>
-            <Close />
-          </IconButton>
-        }
-      >
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-          }}
-        >
-          <Typography level='title-md'>Permission Denied</Typography>
-          <Typography level='body-md'>
-            You have denied the permission to receive notification on this
-            device. Please enable it in your device settings
-          </Typography>
-        </div>
-      </Snackbar>
     </div>
   )
 }

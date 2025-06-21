@@ -8,21 +8,19 @@ import {
   FormHelperText,
   Input,
   Sheet,
-  Snackbar,
   Typography,
 } from '@mui/joy'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { API_URL } from './../../Config'
-import {  ResetPassword } from '../../utils/Fetcher'
+import { useNotification } from '../../service/NotificationProvider'
+import { ResetPassword } from '../../utils/Fetcher'
 
 const ForgotPasswordView = () => {
   const navigate = useNavigate()
-  // const [showLoginSnackbar, setShowLoginSnackbar] = useState(false)
-  // const [snackbarMessage, setSnackbarMessage] = useState('')
   const [resetStatusOk, setResetStatusOk] = useState(null)
   const [email, setEmail] = useState('')
   const [emailError, setEmailError] = useState(null)
+  const { showError, showNotification } = useNotification()
 
   const validateEmail = email => {
     return !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email)
@@ -48,12 +46,24 @@ const ForgotPasswordView = () => {
 
       if (response.ok) {
         setResetStatusOk(true)
-        //  wait 3 seconds and then redirect to login:
+        showNotification({
+          type: 'success',
+          title: 'Reset Email Sent',
+          message: 'Check your email for password reset instructions',
+        })
       } else {
         setResetStatusOk(false)
+        showError({
+          title: 'Reset Failed',
+          message: 'Failed to send reset email, please try again later',
+        })
       }
     } catch (error) {
       setResetStatusOk(false)
+      showError({
+        title: 'Reset Failed',
+        message: 'Failed to send reset email, please try again later',
+      })
     }
   }
 
@@ -195,19 +205,6 @@ const ForgotPasswordView = () => {
               </Button>
             </>
           )}
-          <Snackbar
-            open={resetStatusOk ? resetStatusOk : resetStatusOk === false}
-            autoHideDuration={5000}
-            onClose={() => {
-              if (resetStatusOk) {
-                navigate('/login')
-              }
-            }}
-          >
-            {resetStatusOk
-              ? 'Reset email sent, check your email'
-              : 'Reset email failed, try again later'}
-          </Snackbar>
         </Sheet>
       </Box>
     </Container>

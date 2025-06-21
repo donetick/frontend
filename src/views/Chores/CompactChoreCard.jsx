@@ -8,6 +8,7 @@ import {
 import {
   Box,
   Button,
+  Checkbox,
   Chip,
   CircularProgress,
   IconButton,
@@ -19,16 +20,18 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useUserProfile } from '../../queries/UserQueries.jsx'
-import { useError } from '../../service/ErrorProvider'
+import { useNotification } from '../../service/NotificationProvider'
 import { notInCompletionWindow } from '../../utils/Chores.jsx'
-import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
+import {
+  getTextColorFromBackgroundColor,
+  TASK_COLOR,
+} from '../../utils/Colors.jsx'
 import {
   DeleteChore,
   MarkChoreComplete,
   UpdateChoreAssignee,
   UpdateDueDate,
 } from '../../utils/Fetcher'
-import Priorities from '../../utils/Priorities'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import DateModal from '../Modals/Inputs/DateModal'
 import SelectModal from '../Modals/Inputs/SelectModal'
@@ -44,6 +47,10 @@ const CompactChoreCard = ({
   sx,
   viewOnly,
   onChipClick,
+  // Multi-select props
+  isMultiSelectMode = false,
+  isSelected = false,
+  onSelectionToggle,
 }) => {
   const [isChangeDueDateModalOpen, setIsChangeDueDateModalOpen] =
     React.useState(false)
@@ -64,7 +71,7 @@ const CompactChoreCard = ({
 
   const { impersonatedUser } = useImpersonateUser()
 
-  const { showError } = useError()
+  const { showError } = useNotification()
 
   // All the existing handler methods (same as original ChoreCard)
   const handleDelete = () => {
@@ -364,6 +371,21 @@ const CompactChoreCard = ({
     return parts.join(' • ')
   }
 
+  const getPriorityColor = priority => {
+    switch (priority) {
+      case 1:
+        return TASK_COLOR.PRIORITY_1
+      case 2:
+        return TASK_COLOR.PRIORITY_2
+      case 3:
+        return TASK_COLOR.PRIORITY_3
+      case 4:
+        return TASK_COLOR.PRIORITY_4
+      default:
+        return TASK_COLOR.NO_PRIORITY
+    }
+  }
+
   return (
     <Box key={chore.id + '-compact-box'}>
       <Box
@@ -372,23 +394,173 @@ const CompactChoreCard = ({
           ...sx,
           display: 'flex',
           alignItems: 'center',
-          // px: 1,
-          //   py: 0.75,
           minHeight: 56, // More compact height
           cursor: 'pointer',
           borderBottom: '1px solid',
           borderColor: 'divider',
+          position: 'relative',
+          pl: '16px', // Consistent padding since both elements are in the same position
+          // backgroundColor: 'background.surface',
+          transition: 'all 0.2s ease-in-out',
           '&:hover': {
             bgcolor: 'background.level1',
+            boxShadow: 'sm',
           },
           '&:last-child': {
             borderBottom: 'none',
           },
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: '3px',
+            backgroundColor: getPriorityColor(chore.priority),
+            borderRadius: '16px',
+          },
         }}
-        onClick={() => navigate(`/chores/${chore.id}`)}
+        onClick={() => {
+          if (isMultiSelectMode) {
+            onSelectionToggle()
+          } else {
+            navigate(`/chores/${chore.id}`)
+          }
+        }}
       >
-        {/* Left side - Content */}
+        {/* Priority bar clickable area */}
+        {chore.priority > 0 && (
+          <Box
+            sx={{
+              position: 'absolute',
+              left: 0,
+              top: 0,
+              bottom: 0,
+              width: '12px',
+              cursor: 'pointer',
+              zIndex: 1,
+            }}
+            onClick={e => {
+              e.stopPropagation()
+              onChipClick({ priority: chore.priority })
+            }}
+          />
+        )}
 
+        {/* Animated transition container for Complete Button / Multi-select checkbox */}
+        <Box
+          sx={{
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 40,
+            height: 40,
+            mr: 1.5,
+            flexShrink: 0,
+          }}
+        >
+          {/* Complete Button */}
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition:
+                'opacity 0.3s ease-in-out, transform 0.3s ease-in-out',
+              opacity: isMultiSelectMode ? 0 : 1,
+              transform: isMultiSelectMode
+                ? 'scale(0.8) rotate(45deg)'
+                : 'scale(1) rotate(0deg)',
+              pointerEvents: isMultiSelectMode ? 'none' : 'auto',
+            }}
+          >
+            <IconButton
+              variant='solid'
+              color='success'
+              size='sm'
+              onClick={e => {
+                e.stopPropagation()
+                handleTaskCompletion()
+              }}
+              disabled={isPendingCompletion || notInCompletionWindow(chore)}
+              sx={{
+                width: 32,
+                height: 32,
+                borderRadius: '50%',
+                transition: 'all 0.2s ease',
+
+                '&:active': {
+                  transform: 'scale(0.95)',
+                },
+                '&:disabled': {
+                  opacity: 0.5,
+                  transform: 'none',
+                },
+              }}
+            >
+              {isPendingCompletion ? (
+                <CircularProgress size='sm' />
+              ) : (
+                <Check sx={{ fontSize: 16 }} />
+              )}
+            </IconButton>
+          </Box>
+
+          {/* Multi-select Checkbox */}
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition:
+                'opacity 0.3s ease-in-out, transform 0.3s ease-in-out',
+              opacity: isMultiSelectMode ? 1 : 0,
+              transform: isMultiSelectMode
+                ? 'scale(1) rotate(0deg)'
+                : 'scale(0.8) rotate(-45deg)',
+              pointerEvents: isMultiSelectMode ? 'auto' : 'none',
+            }}
+          >
+            <Checkbox
+              checked={isSelected}
+              onChange={onSelectionToggle}
+              sx={{
+                bgcolor: 'background.surface',
+                borderRadius: 'md',
+                boxShadow: 'sm',
+                border: '2px solid',
+                borderColor: 'divider',
+                '&:hover': {
+                  bgcolor: 'background.level1',
+                  borderColor: 'primary.300',
+                },
+                '&.Mui-checked': {
+                  bgcolor: 'primary.500',
+                  borderColor: 'primary.500',
+                  color: 'primary.solidColor',
+                  '&:hover': {
+                    bgcolor: 'primary.600',
+                    borderColor: 'primary.600',
+                  },
+                },
+              }}
+              onClick={e => e.stopPropagation()}
+            />
+          </Box>
+        </Box>
+
+        {/* Content - Center */}
         <Box
           sx={{
             flex: 1,
@@ -398,7 +570,7 @@ const CompactChoreCard = ({
             flexDirection: 'column',
           }}
         >
-          {/* Line 1: Name + Due Date + Frequency */}
+          {/* Line 1: Name + Due Date */}
           <Box
             sx={{
               display: 'flex',
@@ -407,36 +579,35 @@ const CompactChoreCard = ({
               mb: 0.25,
             }}
           >
-            <Box
+            {/* Chore Name */}
+            <Typography
+              level='title-sm'
               sx={{
-                display: 'flex',
-                alignItems: 'center',
-                minWidth: 0,
+                fontWeight: 600,
+                fontSize: 14,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                mr: 1,
                 flex: 1,
+                minWidth: 0,
               }}
             >
-              {/* Chore Name */}
-              <Typography
-                level='title-sm'
-                sx={{
-                  fontWeight: 600,
-                  fontSize: 14,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                  mr: 1,
-                }}
-              >
-                {chore.name}
-              </Typography>
-            </Box>
+              {chore.name}
+            </Typography>
 
-            {/* Due Date */}
+            {/* Due Date - Inline with name */}
             <Chip
               variant='soft'
               size='sm'
               color={getDueDateColor(chore.nextDueDate)}
-              sx={{ fontSize: 10, height: 20, flexShrink: 0 }}
+              sx={{
+                fontSize: 10,
+                height: 18,
+                px: 0.75,
+                flexShrink: 0,
+                ml: 1,
+              }}
             >
               {getDueDateText(chore.nextDueDate)}
             </Chip>
@@ -458,35 +629,7 @@ const CompactChoreCard = ({
               {formatMetadata()}
             </Typography>
 
-            {/* Labels */}
-            {chore.priority > 0 && (
-              <Chip
-                variant='solid'
-                size='sm'
-                color={
-                  chore.priority === 1
-                    ? 'danger'
-                    : chore.priority === 2
-                      ? 'warning'
-                      : 'neutral'
-                }
-                startDecorator={
-                  Priorities.find(p => p.value === chore.priority)?.icon
-                }
-                onClick={e => {
-                  e.stopPropagation()
-                  onChipClick({ priority: chore.priority })
-                }}
-                sx={{
-                  ml: 0.5,
-                  //   height: 16,
-                  //   fontSize: 9,
-                  //   px: 0.5,
-                }}
-              >
-                P{chore.priority}
-              </Chip>
-            )}
+            {/* Labels - Priority chip removed, now shown as vertical bar */}
             {chore.labelsV2?.map(l => (
               <div
                 role='none'
@@ -530,39 +673,21 @@ const CompactChoreCard = ({
           </Box>
         </Box>
 
-        {/* Right side - Actions */}
+        {/* Right side - Action Menu with animation */}
         <Box
           sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 0.25,
-            flexShrink: 0,
+            transition:
+              'opacity 0.3s ease-in-out, transform 0.3s ease-in-out, width 0.3s ease-in-out, margin 0.3s ease-in-out',
+            opacity: isMultiSelectMode ? 0 : 1,
+            transform: isMultiSelectMode
+              ? 'translateX(20px) scale(0.8)'
+              : 'translateX(0) scale(1)',
+            width: isMultiSelectMode ? 0 : 32,
+            marginRight: isMultiSelectMode ? 0 : undefined,
+            overflow: 'hidden',
+            pointerEvents: isMultiSelectMode ? 'none' : 'auto',
           }}
         >
-          {/* Complete Button */}
-          <IconButton
-            variant='solid'
-            color='success'
-            size='sm'
-            onClick={e => {
-              e.stopPropagation()
-              handleTaskCompletion()
-            }}
-            disabled={isPendingCompletion || notInCompletionWindow(chore)}
-            sx={{
-              width: 32,
-              height: 32,
-              borderRadius: '50%',
-            }}
-          >
-            {isPendingCompletion ? (
-              <CircularProgress size='sm' color='success' />
-            ) : (
-              <Check sx={{ fontSize: 16 }} />
-            )}
-          </IconButton>
-
-          {/* Chore Action Menu */}
           <ChoreActionMenu
             variant='plain'
             chore={chore}
@@ -577,12 +702,13 @@ const CompactChoreCard = ({
             onWriteNFC={() => setIsNFCModalOpen(true)}
             onDelete={handleDelete}
             sx={{
-              width: 28,
-              marginRight: -3,
-              height: 28,
-              // opacity: 0.6,
+              width: 32,
+              height: 32,
+              color: 'text.tertiary',
+              flexShrink: 0,
               '&:hover': {
-                opacity: 0,
+                color: 'text.secondary',
+                bgcolor: 'background.level1',
               },
             }}
           />

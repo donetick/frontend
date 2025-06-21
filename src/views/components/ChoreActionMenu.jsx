@@ -17,7 +17,7 @@ import {
 import { Divider, IconButton, Menu, MenuItem } from '@mui/joy'
 import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useError } from '../../service/ErrorProvider'
+import { useNotification } from '../../service/NotificationProvider'
 import {
   ArchiveChore,
   DeleteChore,
@@ -41,7 +41,7 @@ const ChoreActionMenu = ({
   const [anchorEl, setAnchorEl] = React.useState(null)
   const menuRef = React.useRef(null)
   const navigate = useNavigate()
-  const { showError } = useError()
+  const { showError } = useNotification()
 
   useEffect(() => {
     const handleMenuOutsideClick = event => {

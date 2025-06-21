@@ -1,15 +1,18 @@
 import NavBar from '@/views/components/NavBar'
-import { Button, Snackbar, Typography, useColorScheme } from '@mui/joy'
+import { Button, Typography, useColorScheme } from '@mui/joy'
 import Tracker from '@openreplay/tracker'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 import { registerCapacitorListeners } from './CapacitorListener'
 import { ImpersonateUserProvider } from './contexts/ImpersonateUserContext'
 import { useResource } from './queries/ResourceQueries'
 import { AuthenticationProvider } from './service/AuthenticationService'
-import { ErrorProvider } from './service/ErrorProvider'
+import {
+  NotificationProvider,
+  useNotification,
+} from './service/NotificationProvider'
 import { apiManager } from './utils/TokenManager'
 import NetworkBanner from './views/components/NetworkBanner'
 const add = className => {
@@ -22,22 +25,15 @@ const remove = className => {
 // TODO: Update the interval to at 60 minutes
 const intervalMS = 5 * 60 * 1000 // 5 minutes
 const queryClient = new QueryClient({})
-function App() {
-  const resource = useResource()
-  const navigate = useNavigate()
-  startApiManager(navigate)
-  startOpenReplay()
 
-  const { mode, systemMode } = useColorScheme()
-  const [showUpdateSnackbar, setShowUpdateSnackbar] = useState(true)
+const AppContent = () => {
+  const { showNotification } = useNotification()
 
   const {
-    offlineReady: [offlineReady, setOfflineReady],
     needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
   } = useRegisterSW({
     onRegistered(r) {
-      // eslint-disable-next-line prefer-template
       console.log('SW Registered: ' + r)
       r &&
         setInterval(() => {
@@ -48,10 +44,53 @@ function App() {
       console.log('SW registration error', error)
     },
   })
-  const close = () => {
-    setOfflineReady(false)
-    setNeedRefresh(false)
-  }
+
+  useEffect(() => {
+    if (needRefresh) {
+      showNotification({
+        type: 'custom',
+        component: (
+          <div>
+            <Typography level='body-md'>
+              A new version is now available. Click on reload button to update.
+            </Typography>
+            <Button
+              color='secondary'
+              size='small'
+              onClick={() => {
+                updateServiceWorker(true)
+                setNeedRefresh(false)
+              }}
+              sx={{ ml: 2 }}
+            >
+              Refresh
+            </Button>
+          </div>
+        ),
+        snackbarProps: {
+          autoHideDuration: null, // Persistent until user action
+        },
+      })
+    }
+  }, [needRefresh, showNotification, updateServiceWorker, setNeedRefresh])
+
+  return (
+    <>
+      <ImpersonateUserProvider>
+        <NavBar />
+        <Outlet />
+      </ImpersonateUserProvider>
+    </>
+  )
+}
+
+function App() {
+  const resource = useResource()
+  const navigate = useNavigate()
+  startApiManager(navigate)
+  startOpenReplay()
+
+  const { mode, systemMode } = useColorScheme()
 
   const setThemeClass = () => {
     const value = JSON.parse(localStorage.getItem('themeMode')) || mode
@@ -73,6 +112,7 @@ function App() {
   useEffect(() => {
     setThemeClass()
   }, [mode, systemMode])
+
   useEffect(() => {
     registerCapacitorListeners()
   }, [])
@@ -83,30 +123,9 @@ function App() {
 
       <QueryClientProvider client={queryClient}>
         <AuthenticationProvider />
-        <ErrorProvider>
-          <ImpersonateUserProvider>
-            <NavBar />
-            <Outlet />
-          </ImpersonateUserProvider>
-        </ErrorProvider>
-
-        {needRefresh && (
-          <Snackbar open={showUpdateSnackbar}>
-            <Typography level='body-md'>
-              A new version is now available.Click on reload button to update.
-            </Typography>
-            <Button
-              color='secondary'
-              size='small'
-              onClick={() => {
-                updateServiceWorker(true)
-                setShowUpdateSnackbar(false)
-              }}
-            >
-              Refresh
-            </Button>
-          </Snackbar>
-        )}
+        <NotificationProvider>
+          <AppContent />
+        </NotificationProvider>
       </QueryClientProvider>
     </div>
   )

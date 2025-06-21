@@ -15,12 +15,11 @@ import {
   Container,
   Grid,
   IconButton,
-  Snackbar,
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useError } from '../../service/ErrorProvider'
+import { useNotification } from '../../service/NotificationProvider'
 import {
   CreateThing,
   DeleteThing,
@@ -169,11 +168,7 @@ const ThingsView = () => {
   const [isShowEditThingStateModal, setIsShowEditStateModal] = useState(false)
   const [createModalThing, setCreateModalThing] = useState(null)
   const [confirmModelConfig, setConfirmModelConfig] = useState({})
-
-  const [isSnackbarOpen, setIsSnackbarOpen] = useState(false)
-  const [snackbarMessage, setSnackbarMessage] = useState('')
-  const [snackbarColor, setSnackbarColor] = useState('success')
-  const { showError } = useError()
+  const { showError, showNotification } = useNotification()
 
   useEffect(() => {
     // fetch things
@@ -204,9 +199,11 @@ const ThingsView = () => {
             currentThings.push(data.res)
             setThings(currentThings)
           }
-          setSnackbarMessage('Thing saved successfully')
-          setSnackbarColor('success')
-          setIsSnackbarOpen(true)
+          showNotification({
+            type: 'success',
+            title: 'Thing Saved',
+            message: 'Thing saved successfully',
+          })
         })
       })
       .catch(error => {
@@ -246,11 +243,10 @@ const ThingsView = () => {
                 currentThings.splice(thingIndex, 1)
                 setThings(currentThings)
               } else if (response.status === 405) {
-                setSnackbarMessage(
-                  'Unable to delete thing with associated tasks',
-                )
-                setSnackbarColor('danger')
-                setIsSnackbarOpen(true)
+                showError({
+                  title: 'Unable to Delete Thing',
+                  message: 'Unable to delete thing with associated tasks',
+                })
               }
               // if method not allwo show snackbar:
             })
@@ -293,8 +289,11 @@ const ThingsView = () => {
           )
           currentThings[thingIndex] = data.res
           setThings(currentThings)
-          setSnackbarMessage('Thing state updated successfully')
-          setIsSnackbarOpen(true)
+          showNotification({
+            type: 'success',
+            title: 'Thing Updated',
+            message: 'Thing state updated successfully',
+          })
         })
       })
       .catch(error => {
@@ -399,19 +398,6 @@ const ThingsView = () => {
 
         <ConfirmationModal config={confirmModelConfig} />
       </Box>
-      <Snackbar
-        open={isSnackbarOpen}
-        onClose={() => {
-          setIsSnackbarOpen(false)
-        }}
-        autoHideDuration={3000}
-        variant='soft'
-        color={snackbarColor}
-        size='lg'
-        invertedColors
-      >
-        <Typography level='title-md'>{snackbarMessage}</Typography>
-      </Snackbar>
     </Container>
   )
 }

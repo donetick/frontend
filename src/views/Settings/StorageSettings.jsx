@@ -12,12 +12,38 @@ import { useNavigate } from 'react-router-dom'
 import { useUserProfile } from '../../queries/UserQueries'
 import { GetStorageUsage } from '../../utils/Fetcher'
 import { isPlusAccount } from '../../utils/Helpers'
+import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 
 const StorageSettings = () => {
   const Navigate = useNavigate()
   const { data: userProfile } = useUserProfile()
   const [usage, setUsage] = useState({ used: 0, total: 0 })
   const [loading, setLoading] = useState(true)
+  const [confirmModalConfig, setConfirmModalConfig] = useState({})
+
+  const showConfirmation = (
+    message,
+    title,
+    onConfirm,
+    confirmText = 'Confirm',
+    cancelText = 'Cancel',
+    color = 'primary',
+  ) => {
+    setConfirmModalConfig({
+      isOpen: true,
+      message,
+      title,
+      confirmText,
+      cancelText,
+      color,
+      onClose: isConfirmed => {
+        if (isConfirmed) {
+          onConfirm()
+        }
+        setConfirmModalConfig({})
+      },
+    })
+  }
 
   useEffect(() => {
     if (isPlusAccount(userProfile)) {
@@ -101,13 +127,17 @@ const StorageSettings = () => {
           variant='soft'
           color='danger'
           onClick={() => {
-            const confirmed = confirm(
-              `Are you sure you want to clear your local storage and cache? This will remove all your data from this browser and require login.`,
+            showConfirmation(
+              'Are you sure you want to clear your local storage and cache? This will remove all your data from this browser and require login.',
+              'Clear All Local Storage',
+              () => {
+                localStorage.clear()
+                Navigate('/login')
+              },
+              'Clear All',
+              'Cancel',
+              'danger',
             )
-            if (confirmed) {
-              localStorage.clear()
-              Navigate('/login')
-            }
           }}
         >
           Clear All Local Storage and Cache
@@ -116,20 +146,29 @@ const StorageSettings = () => {
           variant='outlined'
           color='danger'
           onClick={() => {
-            const confirmed = confirm(
-              `Are you sure you want to clear only the offline cache and tasks?`,
+            showConfirmation(
+              'Are you sure you want to clear only the offline cache and tasks?',
+              'Clear Offline Cache',
+              () => {
+                localStorage.removeItem('offline_cache')
+                localStorage.removeItem('offline_request_queue')
+                localStorage.removeItem('offlineTasks')
+              },
+              'Clear Cache',
+              'Cancel',
+              'danger',
             )
-            if (confirmed) {
-              localStorage.removeItem('offline_cache')
-              localStorage.removeItem('offline_request_queue')
-              localStorage.removeItem('offlineTasks')
-            }
           }}
           sx={{ mt: 1 }}
         >
           Clear Offline Cache and Offline Tasks
         </Button>
       </Card>
+
+      {/* Modals */}
+      {confirmModalConfig?.isOpen && (
+        <ConfirmationModal config={confirmModalConfig} />
+      )}
     </div>
   )
 }
