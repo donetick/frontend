@@ -1,6 +1,6 @@
 /* eslint-disable tailwindcss/no-custom-classname */
 // import { StyledButton } from '@/components/styled-button'
-import { Button, useColorScheme } from '@mui/joy'
+import { Button, IconButton, useColorScheme } from '@mui/joy'
 import Typography from '@mui/joy/Typography'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
@@ -10,14 +10,14 @@ import { useNavigate } from 'react-router-dom'
 import Logo from '@/assets/logo.svg'
 import screenShotMyChoreDark from '@/assets/screenshot-my-chore-dark.png'
 import screenShotMyChore from '@/assets/screenshot-my-chore.png'
-import { GitHub } from '@mui/icons-material'
+import { DarkMode, GitHub, LightMode } from '@mui/icons-material'
 import useWindowWidth from '../../hooks/useWindowWidth'
 
 const HomeHero = () => {
   const navigate = useNavigate()
   const windowWidth = useWindowWidth()
   const windowThreshold = 600
-  const { mode } = useColorScheme()
+  const { mode, setMode } = useColorScheme()
   const HERO_TEXT_THAT = [
     'An open-source, user-friendly app for managing tasks and chores, featuring customizable options to help you and others stay organized',
   ]
@@ -190,6 +190,39 @@ const HomeHero = () => {
           </div>
         </Grid>
       )}
+      <Grid
+        item
+        xs={12}
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          position: 'absolute',
+          top: -90,
+          right: 16,
+        }}
+      >
+        <IconButton
+          onClick={() => {
+            setMode(mode === 'dark' ? 'light' : 'dark')
+          }}
+          sx={{
+            backgroundColor: 'rgba(255, 255, 255, 0.8)',
+            borderRadius: '50%',
+            boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
+            transition: 'background-color 0.3s',
+          }}
+        >
+          {mode === 'dark' ? (
+            <LightMode sx={{ color: '#333' }} />
+          ) : (
+            <DarkMode
+              sx={{
+                color: '#333',
+              }}
+            />
+          )}
+        </IconButton>
+      </Grid>
     </Grid>
   )
 }
