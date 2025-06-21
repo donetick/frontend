@@ -171,14 +171,21 @@ const HomeHero = () => {
             <img
               src={mode === 'dark' ? screenShotMyChoreDark : screenShotMyChore}
               width={'100%'}
-              style={{
-                maxWidth: 300,
-              }}
               height={'auto'}
               alt='Hero img'
               data-aos-delay={100 * 2}
               data-aos-anchor='[data-aos-id-hero]'
               data-aos='fade-left'
+              style={{
+                width: '100%',
+                maxWidth: 300,
+              }}
+              onMouseEnter={e => {
+                e.target.style.transform = 'rotate(0deg) scale(1.05)'
+              }}
+              onMouseLeave={e => {
+                e.target.style.transform = 'rotate(5deg) scale(1)'
+              }}
             />
           </div>
         </Grid>
