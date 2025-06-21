@@ -446,7 +446,7 @@ const CompactChoreCard = ({
             }}
           />
         )}
-        
+
         {/* Animated transition container for Complete Button / Multi-select checkbox */}
         <Box
           sx={{
@@ -481,7 +481,7 @@ const CompactChoreCard = ({
             }}
           >
             <IconButton
-              variant='soft'
+              variant='solid'
               color='success'
               size='sm'
               onClick={e => {
@@ -493,17 +493,8 @@ const CompactChoreCard = ({
                 width: 32,
                 height: 32,
                 borderRadius: '50%',
-                bgcolor: 'success.softBg',
-                color: 'success.600',
-                border: '1px solid',
-                borderColor: 'success.200',
                 transition: 'all 0.2s ease',
-                '&:hover': {
-                  bgcolor: 'success.solidBg',
-                  color: 'success.solidColor',
-                  borderColor: 'success.400',
-                  transform: 'scale(1.05)',
-                },
+
                 '&:active': {
                   transform: 'scale(0.95)',
                 },
