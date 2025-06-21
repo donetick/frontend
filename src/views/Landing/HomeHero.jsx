@@ -1,6 +1,6 @@
 /* eslint-disable tailwindcss/no-custom-classname */
 // import { StyledButton } from '@/components/styled-button'
-import { Button } from '@mui/joy'
+import { Button, useColorScheme } from '@mui/joy'
 import Typography from '@mui/joy/Typography'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
@@ -8,6 +8,7 @@ import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import Logo from '@/assets/logo.svg'
+import screenShotMyChoreDark from '@/assets/screenshot-my-chore-dark.png'
 import screenShotMyChore from '@/assets/screenshot-my-chore.png'
 import { GitHub } from '@mui/icons-material'
 import useWindowWidth from '../../hooks/useWindowWidth'
@@ -16,9 +17,8 @@ const HomeHero = () => {
   const navigate = useNavigate()
   const windowWidth = useWindowWidth()
   const windowThreshold = 600
+  const { mode } = useColorScheme()
   const HERO_TEXT_THAT = [
-    // 'Donetick simplifies the entire process, from scheduling and reminders to automatic task assignment and progress tracking.',
-    // 'Donetick is the intuitive task and chore management app designed for groups. Take charge of shared responsibilities, automate your workflow, and achieve more together.',
     'An open-source, user-friendly app for managing tasks and chores, featuring customizable options to help you and others stay organized',
   ]
 
@@ -169,7 +169,7 @@ const HomeHero = () => {
         <Grid item xs={12} md={5}>
           <div className='flex justify-center'>
             <img
-              src={screenShotMyChore}
+              src={mode === 'dark' ? screenShotMyChoreDark : screenShotMyChore}
               width={'100%'}
               style={{
                 maxWidth: 300,
