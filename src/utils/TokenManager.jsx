@@ -77,7 +77,6 @@ export async function Fetch(url, options) {
     options = {}
   }
   // clone options to avoid mutation
-  const cacheKey = { ...options }
   options.headers = { ...options.headers, ...HEADERS() }
 
   const baseURL = apiManager.getApiURL()

@@ -61,7 +61,8 @@ const REPEAT_ON_TYPE = ['interval', 'days_of_the_week', 'day_of_the_month']
 const NO_DUE_DATE_REQUIRED_TYPE = ['no_repeat', 'once']
 const NO_DUE_DATE_ALLOWED_TYPE = ['trigger']
 const ChoreEdit = () => {
-  const { data: userProfile } = useUserProfile()
+  const { data: userProfile, isLoading: isUserProfileLoading } =
+    useUserProfile()
 
   const [chore, setChore] = useState([])
   const [choresHistory, setChoresHistory] = useState([])
@@ -331,14 +332,14 @@ const ChoreEdit = () => {
   }, [assignees])
 
   useEffect(() => {
-    if (performers.length > 0 && assignees.length === 0) {
+    if (performers.length > 0 && assignees.length === 0 && userProfile) {
       setAssignees([
         {
-          userId: userProfile.id,
+          userId: userProfile?.id,
         },
       ])
     }
-  }, [performers])
+  }, [performers, userProfile])
 
   // if user resolve the error trigger validation to remove the error message from the respective field
   useEffect(() => {
@@ -368,7 +369,11 @@ const ChoreEdit = () => {
       },
     })
   }
-  if ((isChoreLoading && choreId) || isUserLabelsLoading) {
+  if (
+    (isChoreLoading && choreId) ||
+    isUserLabelsLoading ||
+    isUserProfileLoading
+  ) {
     return <LoadingComponent />
   }
   return (
@@ -738,11 +743,13 @@ const ChoreEdit = () => {
             <Box sx={{ p: 0.5 }}>
               <NotificationTemplate
                 onChange={metadata => {
-                  const newNotificaitonMetadata = {
-                    ...notificationMetadata,
-                    templates: metadata.notifications,
+                  const newTemplates = metadata.notifications
+                  if (notificationMetadata.templates !== newTemplates) {
+                    setNotificationMetadata({
+                      ...notificationMetadata,
+                      templates: newTemplates,
+                    })
                   }
-                  setNotificationMetadata(newNotificaitonMetadata)
                 }}
                 value={notificationMetadata}
               />
@@ -1007,7 +1014,7 @@ const ChoreEdit = () => {
             <Typography level='body1'>
               Created by{' '}
               <Chip variant='solid'>
-                {performers.find(f => f.id === createdBy)?.displayName}
+                {performers.find(f => f.userId === createdBy)?.displayName}
               </Chip>{' '}
               {moment(chore.createdAt).fromNow()}
             </Typography>
@@ -1018,7 +1025,7 @@ const ChoreEdit = () => {
                 <Typography level='body1'>
                   Updated by{' '}
                   <Chip variant='solid'>
-                    {performers.find(f => f.id === updatedBy)?.displayName}
+                    {performers.find(f => f.userId === updatedBy)?.displayName}
                   </Chip>{' '}
                   {moment(chore.updatedAt).fromNow()}
                 </Typography>

@@ -22,8 +22,8 @@ import { GOOGLE_CLIENT_ID, REDIRECT_URL } from '../../Config'
 import Logo from '../../Logo'
 import { useResource } from '../../queries/ResourceQueries'
 import { useNotification } from '../../service/NotificationProvider'
-import { login } from '../../utils/Fetcher'
-import { apiManager } from '../../utils/TokenManager'
+import { GetUserProfile, login } from '../../utils/Fetcher'
+import { apiManager, isTokenValid } from '../../utils/TokenManager'
 import MFAVerificationModal from './MFAVerificationModal'
 
 const LoginView = () => {
@@ -49,7 +49,19 @@ const LoginView = () => {
     }
     initializeSocialLogin()
   }, [])
-
+  useEffect(() => {
+    if (isTokenValid()) {
+      GetUserProfile().then(response => {
+        if (response.status === 200) {
+          return response.json().then(data => {
+            setUserProfile(data.res)
+          })
+        } else {
+          console.log('Failed to fetch user profile')
+        }
+      })
+    }
+  }, [])
   const handleSubmit = async e => {
     e.preventDefault()
     login(username, password)
