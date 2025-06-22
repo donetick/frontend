@@ -15,23 +15,52 @@ import Typography from '@mui/joy/Typography'
 import { useCallback, useEffect, useState } from 'react'
 
 const timeUnits = [
-  { label: 'Mins', value: 'minutes' },
-  { label: 'Hours', value: 'hours' },
-  { label: 'Days', value: 'days' },
+  { label: 'Mins', value: 'm' },
+  { label: 'Hours', value: 'h' },
+  { label: 'Days', value: 'd' },
 ]
 
-const beforeAfterOptions = [
+const timingOptions = [
   { label: 'Before', value: 'before' },
   { label: 'On Due', value: 'ondue' },
   { label: 'After', value: 'after' },
 ]
 
 function getRelativeLabel(notification) {
-  const { value, unit, type } = notification
-  if (type === 'ondue') {
+  const { value, unit } = notification
+  const numericValue = Number(value)
+  if (numericValue === 0) {
     return 'On due date'
   }
-  return `${value} ${unit} ${type === 'before' ? 'before' : 'after'} due`
+  const unitName = unit === 'm' ? 'minutes' : unit === 'h' ? 'hours' : 'days'
+  const absValue = Math.abs(numericValue)
+  return `${absValue} ${unitName} ${numericValue < 0 ? 'before' : 'after'} due`
+}
+
+// Helper functions to convert between internal value and UI representation
+function getUIRepresentation(notification) {
+  const numericValue = Number(notification.value)
+  if (numericValue === 0) {
+    return { timing: 'ondue', displayValue: 0, unit: notification.unit }
+  } else if (numericValue < 0) {
+    return {
+      timing: 'before',
+      displayValue: Math.abs(numericValue),
+      unit: notification.unit,
+    }
+  } else {
+    return {
+      timing: 'after',
+      displayValue: numericValue,
+      unit: notification.unit,
+    }
+  }
+}
+
+function getInternalValue(timing, displayValue) {
+  if (timing === 'ondue') return 0
+  if (timing === 'before') return -Math.abs(displayValue)
+  return Math.abs(displayValue) // 'after'
 }
 
 const NotificationTemplate = ({
@@ -40,9 +69,6 @@ const NotificationTemplate = ({
   value,
   showTimeline = true,
 }) => {
-  const [templateName, setTemplateName] = useState(
-    value?.name || 'New Notification Template',
-  )
   const [notifications, setNotifications] = useState(
     value?.templates ||
       JSON.parse(localStorage.getItem('defaultNotificationTemplate')) ||
@@ -55,45 +81,33 @@ const NotificationTemplate = ({
   const [notificationIndexMap, setNotificationIndexMap] = useState({})
 
   const updateNotificationIndices = useCallback(() => {
-    // Sort notifications for consistent ordering
+    // Convert notifications to minutes for proper chronological sorting
+    const convertToMinutes = (value, unit) => {
+      const numericValue = Number(value)
+      if (numericValue === 0) return 0
+      let minutes = Math.abs(numericValue)
+      if (unit === 'h') minutes *= 60
+      if (unit === 'd') minutes *= 24 * 60
+      return numericValue < 0 ? -minutes : minutes
+    }
+
+    // Sort notifications for consistent ordering by actual time duration
     const sorted = [...notifications].sort((a, b) => {
-      // Always ensure correct ordering: Before Due -> On Due -> After Due
-      if (a.type !== b.type) {
-        // Before Due  first
-        if (a.type === 'before') return -1
-        if (b.type === 'before') return 1
-
-        // On Due comes before After Due
-        if (a.type === 'ondue') return -1
-        if (b.type === 'ondue') return 1
-        // DEFAULT CASE ( NOT SURE FOR FUTURE )?
-        return 0
-      }
-
-      const getMinutes = notif => {
-        const { value, unit } = notif
-        let minutes = value
-        if (unit === 'hours') minutes *= 60
-        if (unit === 'days') minutes *= 24 * 60
-        return minutes
-      }
-
-      // For Before Due: sort in descending order (furthest from due first)
-      // For After Due: sort in ascending order (closest to due first)
-      const aMinutes = getMinutes(a)
-      const bMinutes = getMinutes(b)
-      return a.type === 'before' ? bMinutes - aMinutes : aMinutes - bMinutes
+      const aMinutes = convertToMinutes(a.value, a.unit)
+      const bMinutes = convertToMinutes(b.value, b.unit)
+      return aMinutes - bMinutes
     })
 
     const indexMap = {}
-    sorted.forEach((item, index) => {
-      const originalIdx = notifications.findIndex(
-        n =>
-          n.value === item.value &&
-          n.unit === item.unit &&
-          n.type === item.type,
+    // Map original array indices to their chronological position numbers
+    notifications.forEach((originalNotification, originalIdx) => {
+      const chronologicalPosition = sorted.findIndex(
+        sortedNotification =>
+          Number(sortedNotification.value) ===
+            Number(originalNotification.value) &&
+          sortedNotification.unit === originalNotification.unit,
       )
-      indexMap[originalIdx] = index + 1
+      indexMap[originalIdx] = chronologicalPosition + 1
     })
 
     setNotificationIndexMap(indexMap)
@@ -118,31 +132,48 @@ const NotificationTemplate = ({
       if (idx === currentIdx) return false
 
       return (
-        n.value === notification.value &&
-        n.unit === notification.unit &&
-        n.type === notification.type
+        Number(n.value) === Number(notification.value) &&
+        n.unit === notification.unit
       )
     })
   }
 
   const handleChange = (idx, field, value) => {
-    let updatedNotification = {
-      ...notifications[idx],
-      [field]: value,
+    const currentNotification = notifications[idx]
+    const uiRep = getUIRepresentation(currentNotification)
+
+    let updatedUIRep = { ...uiRep }
+    let updatedNotification = { ...currentNotification }
+
+    // Update the UI representation based on the field being changed
+    if (field === 'timing') {
+      updatedUIRep.timing = value
+      // Reset display value when switching to "On Due"
+      if (value === 'ondue') {
+        updatedUIRep.displayValue = 0
+      }
+    } else if (field === 'displayValue') {
+      updatedUIRep.displayValue = Math.max(0, Number(value))
+    } else if (field === 'unit') {
+      updatedUIRep.unit = value
+      updatedNotification.unit = value
     }
 
-    // Special handling for "On Due" option
-    if (field === 'type' && value === 'ondue') {
-      // Set default values for On Due (not applicable)
-      updatedNotification = {
-        ...updatedNotification,
-        value: 1,
-        unit: 'minutes',
-      }
+    // Convert back to internal representation
+    const newInternalValue = getInternalValue(
+      updatedUIRep.timing,
+      updatedUIRep.displayValue,
+    )
+    updatedNotification = {
+      ...updatedNotification,
+      value: newInternalValue,
+      unit: updatedUIRep.unit,
+    }
 
-      // Check if another notification is already "On Due"
+    // Check if another notification is already "On Due" (value = 0)
+    if (newInternalValue === 0) {
       const existingOnDue = notifications.findIndex(
-        (n, i) => i !== idx && n.type === 'ondue',
+        (n, i) => i !== idx && Number(n.value) === 0,
       )
 
       if (existingOnDue !== -1) {
@@ -177,28 +208,25 @@ const NotificationTemplate = ({
       case 'reminder':
         // Suggest common reminder times that don't exist
         suggestions = [
-          { value: 1, unit: 'hours', type: 'before' },
-          { value: 1, unit: 'days', type: 'before' },
-          { value: 30, unit: 'minutes', type: 'before' },
-          { value: 2, unit: 'hours', type: 'before' },
-          { value: 3, unit: 'days', type: 'before' },
+          { value: -1, unit: 'd' }, // 1 day before
+          { value: -3, unit: 'h' }, // 3 hours before
+          { value: -30, unit: 'm' }, // 3 days before
         ]
         break
 
       case 'due':
-        if (notifications.some(n => n.type === 'ondue')) {
+        if (notifications.some(n => Number(n.value) === 0)) {
           setError('Only one "Due Alert" notification is allowed.')
           return
         }
-        newNotification = { value: 0, unit: 'minutes', type: 'ondue' }
+        newNotification = { value: 0, unit: 'm' }
         break
 
       case 'followup':
         suggestions = [
-          { value: 1, unit: 'hours', type: 'after' },
-          { value: 1, unit: 'days', type: 'after' },
-          { value: 3, unit: 'days', type: 'after' },
-          { value: 1, unit: 'weeks', type: 'after' },
+          { value: 1, unit: 'd' }, // 1 day after
+          { value: 3, unit: 'd' }, // 3 days after
+          { value: 7, unit: 'd' }, // 1 week after
         ]
         break
     }
@@ -213,24 +241,8 @@ const NotificationTemplate = ({
       }
     }
 
-    // Insert the new notification in the correct chronological position
-    const updatedNotifications = [...notifications, newNotification].sort(
-      (a, b) => {
-        // Convert everything to minutes for consistent comparison
-        const getMinutes = notif => {
-          const { value, unit, type } = notif
-          // On Due is exactly at due date (0 minutes)
-          if (type === 'ondue') return 0
-
-          let minutes = value
-          if (unit === 'hours') minutes *= 60
-          if (unit === 'days') minutes *= 24 * 60
-          return type === 'before' ? -minutes : minutes
-        }
-
-        return getMinutes(a) - getMinutes(b)
-      },
-    )
+    // Add the new notification to the end (don't sort, keep form order)
+    const updatedNotifications = [...notifications, newNotification]
 
     setNotifications(updatedNotifications)
     setError(null)
@@ -240,61 +252,45 @@ const NotificationTemplate = ({
     const updated = notifications.filter((_, i) => i !== idx)
     setNotifications(updated)
     onChange && onChange(updated)
+    setShowSaveDefault(true)
   }
   const renderTimeline = () => {
-    // Sort notifications chronologically
+    // Convert notifications to minutes for proper chronological sorting
+    const convertToMinutes = (value, unit) => {
+      const numericValue = Number(value)
+      if (numericValue === 0) return 0
+      let minutes = Math.abs(numericValue)
+      if (unit === 'h') minutes *= 60
+      if (unit === 'd') minutes *= 24 * 60
+      return numericValue < 0 ? -minutes : minutes
+    }
+
+    // Sort notifications chronologically by actual time (in minutes)
     const sorted = [...notifications].sort((a, b) => {
-      // Convert everything to minutes for consistent comparison
-      const getMinutes = notif => {
-        const { value, unit, type } = notif
-        // On Due is exactly at due date (0 minutes)
-        if (type === 'ondue') return 0
-
-        let minutes = value
-        if (unit === 'hours') minutes *= 60
-        if (unit === 'days') minutes *= 24 * 60
-        return type === 'before' ? -minutes : minutes
-      }
-
-      return getMinutes(a) - getMinutes(b)
+      const aMinutes = convertToMinutes(a.value, a.unit)
+      const bMinutes = convertToMinutes(b.value, b.unit)
+      return aMinutes - bMinutes
     })
 
-    // Create a map to track sorted indices for original notifications
-    const notificationIndexMap = {}
-    sorted.forEach((item, index) => {
-      // Find the original index of this item in notifications array
-      const originalIdx = notifications.findIndex(
-        n =>
-          n.value === item.value &&
-          n.unit === item.unit &&
-          n.type === item.type,
-      )
-      notificationIndexMap[originalIdx] = index + 1
-    }) // Get min and max notification times for dynamic scaling
-    const minutesValues = sorted.map(n => {
-      if (n.type === 'ondue') return 0
-
-      let minutes = n.value
-      if (n.unit === 'hours') minutes *= 60
-      if (n.unit === 'days') minutes *= 24 * 60
-      return n.type === 'before' ? -minutes : minutes
-    })
-
+    // Get min and max notification times in minutes for dynamic scaling
+    const minutesValues = sorted.map(n => convertToMinutes(n.value, n.unit))
     const minBefore = Math.min(0, ...minutesValues) // Default to 0 if no "before" notifications
     const maxAfter = Math.max(0, ...minutesValues) // Default to 0 if no "after" notifications
 
-    const getPositionPercent = minutes => {
+    const getPositionPercent = (value, unit) => {
+      const minutes = convertToMinutes(value, unit)
+
       // Due date is always at center (50%)
       if (minutes === 0) return 50
 
-      // For notifications before due date
+      // For notifications before due date (negative values)
       if (minutes < 0) {
         if (minBefore === 0) return 30 // Default position if no before notifications
         // Scale between 10% (furthest left) and 45% (closest to due)
         return 45 - (Math.abs(minutes) / Math.abs(minBefore)) * 35
       }
 
-      // For notifications after due date
+      // For notifications after due date (positive values)
       if (maxAfter === 0) return 70 // Default position if no after notifications
       // Scale between 55% (closest to due) and 90% (furthest right)
       return 55 + (minutes / maxAfter) * 35
@@ -361,18 +357,8 @@ const NotificationTemplate = ({
 
             {/* Notification markers */}
             {sorted.map((n, i) => {
-              // Convert to minutes for consistent scale
-              let minutes = 0
-              if (n.type !== 'ondue') {
-                minutes = n.value
-                if (n.unit === 'hours') minutes *= 60
-                if (n.unit === 'days') minutes *= 24 * 60
-                if (n.type === 'before') minutes = -minutes
-              }
-              // On Due notifications are always at the due date (0 minutes)
-
-              // Calculate position based on dynamic scaling
-              const percent = getPositionPercent(minutes)
+              // Calculate position based on actual time duration
+              const percent = getPositionPercent(n.value, n.unit)
 
               return (
                 <Box
@@ -382,9 +368,9 @@ const NotificationTemplate = ({
                     left: `${percent}%`,
                     transform: 'translateX(-50%)',
                     color:
-                      n.type === 'before'
+                      Number(n.value) < 0
                         ? 'primary.600'
-                        : n.type === 'ondue'
+                        : Number(n.value) === 0
                           ? 'warning.600'
                           : 'success.600',
                     display: 'flex',
@@ -402,13 +388,21 @@ const NotificationTemplate = ({
                   title={getRelativeLabel(n)}
                 >
                   <Badge
-                    badgeContent={i + 1}
+                    badgeContent={
+                      notificationIndexMap[
+                        notifications.findIndex(
+                          original =>
+                            Number(original.value) === Number(n.value) &&
+                            original.unit === n.unit,
+                        )
+                      ] || i + 1
+                    }
                     size={'sm'}
                     variant={'solid'}
                     color={
-                      n.type === 'before'
+                      Number(n.value) < 0
                         ? 'success'
-                        : n.type === 'ondue'
+                        : Number(n.value) === 0
                           ? 'warning'
                           : 'danger'
                     }
@@ -480,105 +474,108 @@ const NotificationTemplate = ({
         </Alert>
       )}
 
-      {notifications.map((n, idx) => {
-        // Get ordered badge number from timeline sorting
-        const badgeNumber = notificationIndexMap[idx]
+      {notifications
+        .map((n, idx) => ({ notification: n, originalIndex: idx }))
+        .sort((a, b) => {
+          const aBadgeNumber = notificationIndexMap[a.originalIndex] || 0
+          const bBadgeNumber = notificationIndexMap[b.originalIndex] || 0
+          return aBadgeNumber - bBadgeNumber
+        })
+        .map(({ notification: n, originalIndex: idx }) => {
+          // Get ordered badge number from timeline sorting
+          const badgeNumber = notificationIndexMap[idx]
+          const uiRep = getUIRepresentation(n)
 
-        return (
-          <Box key={idx} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+          return (
             <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'start',
-                width: 18,
-
-                flexShrink: 0,
-              }}
+              key={idx}
+              sx={{ display: 'flex', alignItems: 'center', mb: 1 }}
             >
-              <Badge
-                badgeContent={badgeNumber}
-                size={'sm'}
+              <Box
                 sx={{
-                  '--Badge-minHeight': '20px',
-                  '--Badge-fontSize': '0.75rem',
-                  //   centering the badge:
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'start',
+                  width: 18,
+                  flexShrink: 0,
                 }}
-                color={
-                  n.type === 'before'
-                    ? 'success'
-                    : n.type === 'ondue'
-                      ? 'warning'
-                      : 'danger'
-                }
               >
-                {/* Empty box to attach badge to */}
-              </Badge>
+                <Badge
+                  badgeContent={badgeNumber}
+                  size={'sm'}
+                  sx={{
+                    '--Badge-minHeight': '20px',
+                    '--Badge-fontSize': '0.75rem',
+                  }}
+                  color={
+                    Number(n.value) < 0
+                      ? 'success'
+                      : Number(n.value) === 0
+                        ? 'warning'
+                        : 'danger'
+                  }
+                >
+                  {/* Empty box to attach badge to */}
+                </Badge>
+              </Box>
+              <Select
+                value={uiRep.timing}
+                onChange={(_, value) => handleChange(idx, 'timing', value)}
+                sx={{ mr: 1, minWidth: 100 }}
+                size={'sm'}
+              >
+                {timingOptions.map(opt => (
+                  <Option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </Option>
+                ))}
+              </Select>
+              <Input
+                type={'number'}
+                min={0}
+                value={uiRep.displayValue}
+                disabled={uiRep.timing === 'ondue'}
+                onChange={e =>
+                  handleChange(idx, 'displayValue', e.target.value)
+                }
+                sx={{
+                  width: 80,
+                  mr: 1,
+                  opacity: uiRep.timing === 'ondue' ? 0.6 : 1,
+                }}
+                size={'sm'}
+                placeholder='0'
+              />
+              <Select
+                value={n.unit}
+                disabled={uiRep.timing === 'ondue'}
+                onChange={(_, value) => handleChange(idx, 'unit', value)}
+                sx={{
+                  mr: 1,
+                  minWidth: 80,
+                  opacity: uiRep.timing === 'ondue' ? 0.6 : 1,
+                }}
+                size={'sm'}
+              >
+                {timeUnits.map(opt => (
+                  <Option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </Option>
+                ))}
+              </Select>
+              <IconButton
+                onClick={() => removeNotification(idx)}
+                disabled={notifications.length === 1}
+                color={'danger'}
+                size={'sm'}
+                sx={{ mr: 1 }}
+                variant={'soft'}
+              >
+                <DeleteIcon fontSize={'small'} />
+              </IconButton>
             </Box>
-            <Select
-              value={n.type}
-              onChange={(_, value) => handleChange(idx, 'type', value)}
-              sx={{ mr: 1, minWidth: 100 }}
-              size={'sm'}
-            >
-              {beforeAfterOptions.map(opt => (
-                <Option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </Option>
-              ))}
-            </Select>
-            {/* Show disabled fields for "On Due" option for visual consistency */}
-            <Input
-              type={'number'}
-              min={1}
-              disabled={n.type === 'ondue'}
-              value={n.type === 'ondue' ? '—' : n.value}
-              onChange={e =>
-                handleChange(idx, 'value', Math.max(1, Number(e.target.value)))
-              }
-              sx={{
-                width: 70,
-                mr: 1,
-                opacity: n.type === 'ondue' ? 0.6 : 1,
-                ...(n.type === 'ondue' && {
-                  '& input': {
-                    textAlign: 'center',
-                  },
-                }),
-              }}
-              size={'sm'}
-              placeholder={n.type === 'ondue' ? '—' : ''}
-            />
-            <Select
-              value={n.unit}
-              disabled={n.type === 'ondue'}
-              onChange={(_, value) => handleChange(idx, 'unit', value)}
-              sx={{
-                mr: 1,
-                minWidth: 80,
-                opacity: n.type === 'ondue' ? 0.6 : 1,
-              }}
-              size={'sm'}
-            >
-              {timeUnits.map(opt => (
-                <Option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </Option>
-              ))}
-            </Select>
-            <IconButton
-              onClick={() => removeNotification(idx)}
-              disabled={notifications.length === 1}
-              color={'danger'}
-              size={'sm'}
-              sx={{ mr: 1 }}
-              variant={'soft'}
-            >
-              <DeleteIcon fontSize={'small'} />
-            </IconButton>
-          </Box>
-        )
-      })}
+          )
+        })}
       <Box sx={{ display: 'flex', gap: 1, mt: 1, mb: 2, flexWrap: 'wrap' }}>
         <Button
           onClick={() => addSmartNotification('reminder')}
@@ -594,7 +591,7 @@ const NotificationTemplate = ({
           onClick={() => addSmartNotification('due')}
           disabled={
             notifications.length >= maxNotifications ||
-            notifications.some(n => n.type === 'ondue')
+            notifications.some(n => Number(n.value) === 0)
           }
           startDecorator={<AddIcon />}
           size={'sm'}

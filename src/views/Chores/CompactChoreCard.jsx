@@ -481,7 +481,7 @@ const CompactChoreCard = ({
             }}
           >
             <IconButton
-              variant='solid'
+              variant='soft'
               color='success'
               size='sm'
               onClick={e => {
@@ -494,6 +494,9 @@ const CompactChoreCard = ({
                 height: 32,
                 borderRadius: '50%',
                 transition: 'all 0.2s ease',
+                '&:hover': {
+                  transform: 'scale(1.05)',
+                },
 
                 '&:active': {
                   transform: 'scale(0.95)',

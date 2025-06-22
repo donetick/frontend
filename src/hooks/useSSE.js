@@ -9,9 +9,9 @@ const SSE_STATES = {
   CLOSED: 2,
 }
 
-const RECONNECT_INTERVALS = [1000, 2000, 5000, 10000, 30000] // Progressive backoff
+const RECONNECT_INTERVALS = [2000, 5000, 10000, 30000, 360000, 600000, 900000] //  2s, 5s, 10s, 30s, 6m, 10m, 15m
 const MAX_RECONNECT_ATTEMPTS = 10 // Circuit breaker limit
-const CIRCUIT_BREAKER_RESET_TIME = 300000 // 5 minutes
+const CIRCUIT_BREAKER_RESET_TIME = 600000 // 10 minutes
 
 export const useSSE = () => {
   const [connectionState, setConnectionState] = useState(SSE_STATES.CLOSED)
@@ -104,7 +104,7 @@ export const useSSE = () => {
 
           case 'heartbeat':
             // Heartbeat events don't need cache invalidation
-            console.debug('SSE Heartbeat received')
+            console.debug('SSE Heartbeat received at', new Date().toISOString())
             break
 
           case 'connection.established':
@@ -199,6 +199,12 @@ export const useSSE = () => {
           'Cache-Control': 'no-cache',
           Accept: 'text/event-stream',
         },
+        // Increase timeout to prevent premature disconnections
+        // Default is 45000ms (45s), increasing to 2 minutes
+        // TODO: send this in the resource object so it can be configured per instance
+        heartbeatTimeout: 120000,
+        // Enable silentTimeoutRetry to handle temporary network issues
+        silentTimeoutRetry: true,
       })
 
       eventSourceRef.current.onopen = () => {
@@ -214,15 +220,22 @@ export const useSSE = () => {
         }
         heartbeatMonitorRef.current = setInterval(() => {
           const timeSinceLastHeartbeat = Date.now() - lastHeartbeatRef.current
-          const heartbeatTimeout = 90000 // 90 seconds
+          const heartbeatTimeout = 150000 // 2.5 minutes - should be longer than server heartbeat interval
 
           if (timeSinceLastHeartbeat > heartbeatTimeout) {
             console.warn(
-              'SSE: No heartbeat received, connection may be stale. Reconnecting...',
+              `SSE: No heartbeat received for ${Math.round(timeSinceLastHeartbeat / 1000)}s, connection may be stale. Reconnecting...`,
             )
             if (!isManuallyClosedRef.current) {
               // Clear current heartbeat monitor before reconnecting
               stopHeartbeatMonitor()
+
+              // Close current connection gracefully
+              if (eventSourceRef.current) {
+                eventSourceRef.current.close()
+                eventSourceRef.current = null
+              }
+              setConnectionState(SSE_STATES.CLOSED)
 
               // Schedule reconnect
               if (reconnectTimeoutRef.current) {
@@ -247,7 +260,7 @@ export const useSSE = () => {
               }, delay)
             }
           }
-        }, 30000) // Check every 30 seconds
+        }, 60000) // Check every minute
       }
 
       eventSourceRef.current.onmessage = handleSSEMessage
@@ -258,7 +271,17 @@ export const useSSE = () => {
         stopHeartbeatMonitor()
 
         if (!isManuallyClosedRef.current) {
-          setError('Connection error occurred')
+          // Check if this is a timeout error specifically
+          const isTimeoutError =
+            error.error?.message?.includes('No activity within') ||
+            error.error?.message?.includes('timeout')
+
+          if (isTimeoutError) {
+            console.log('SSE timeout detected, attempting reconnection...')
+            setError('Connection timeout - reconnecting...')
+          } else {
+            setError('Connection error occurred')
+          }
 
           // Schedule reconnect
           if (reconnectTimeoutRef.current) {
@@ -417,5 +440,14 @@ export const useSSE = () => {
           return 'disconnected'
       }
     },
+    // Additional debugging information
+    getDebugInfo: () => ({
+      connectionState,
+      reconnectAttempts: reconnectAttemptsRef.current,
+      isCircuitBreakerOpen,
+      lastHeartbeat: lastHeartbeatRef.current,
+      timeSinceLastHeartbeat: Date.now() - lastHeartbeatRef.current,
+      isManuallyCloseRef: isManuallyClosedRef.current,
+    }),
   }
 }

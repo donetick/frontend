@@ -98,7 +98,6 @@ const RealTimeSettings = () => {
     <Card sx={{ mt: 2, p: 3 }}>
       <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, mb: 2 }}>
         <Switch
-          color='success'
           checked={realtimeType !== REALTIME_TYPES.DISABLED}
           onChange={e => {
             handleRealtimeTypeChange(
@@ -106,6 +105,9 @@ const RealTimeSettings = () => {
               e.target.checked ? REALTIME_TYPES.SSE : REALTIME_TYPES.DISABLED,
             )
           }}
+          color={
+            realtimeType !== REALTIME_TYPES.DISABLED ? 'success' : 'neutral'
+          }
           disabled={!isPlusAccount(userProfile)}
           inputProps={{ 'aria-label': 'Enable Real-time Updates' }}
         />
