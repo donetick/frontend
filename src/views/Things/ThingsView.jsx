@@ -201,7 +201,7 @@ const ThingsView = () => {
           }
           showNotification({
             type: 'success',
-            title: 'Thing Saved',
+            title: 'Saved',
             message: 'Thing saved successfully',
           })
         })
@@ -291,7 +291,7 @@ const ThingsView = () => {
           setThings(currentThings)
           showNotification({
             type: 'success',
-            title: 'Thing Updated',
+            title: 'Updated',
             message: 'Thing state updated successfully',
           })
         })
