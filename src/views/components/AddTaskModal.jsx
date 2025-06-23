@@ -31,6 +31,23 @@ import NotificationTemplate from '../../components/NotificationTemplate'
 import LearnMoreButton from './LearnMore'
 import RichTextEditor from './RichTextEditor'
 import SubTasks from './SubTask'
+const getDefaultNotification = () => {
+  const storedDefault = localStorage.getItem('defaultNotificationTemplate')
+  if (storedDefault) {
+    return JSON.parse(storedDefault)
+  }
+  const defaultNotification = [
+    { value: 1, unit: 'days', type: 'before' },
+    { value: 0, unit: 'minutes', type: 'ondue' },
+    { value: 1, unit: 'days', type: 'after' },
+  ]
+
+  localStorage.setItem(
+    'defaultNotification',
+    JSON.stringify(defaultNotification),
+  )
+  return defaultNotification
+}
 
 const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
   const { data: userLabels, isLoading: userLabelsLoading } = useLabels()
@@ -53,7 +70,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
   const [labelsV2, setLabelsV2] = useState([])
   const [frequency, setFrequency] = useState(null)
   const [notificationMetadata, setNotificationMetadata] = useState({
-    templates: [],
+    templates: getDefaultNotification(),
   })
   const [frequencyHumanReadable, setFrequencyHumanReadable] = useState(null)
   const [subTasks, setSubTasks] = useState(null)
@@ -635,11 +652,16 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
                 <Box sx={{ p: 0.5 }}>
                   <NotificationTemplate
                     onChange={metadata => {
-                      const newNotificaitonMetadata = {
-                        ...notificationMetadata,
-                        templates: metadata.notifications,
+                      if (
+                        metadata.notifications !==
+                        notificationMetadata.templates
+                      ) {
+                        const newNotificaitonMetadata = {
+                          ...notificationMetadata,
+                          templates: metadata.notifications,
+                        }
+                        setNotificationMetadata(newNotificaitonMetadata)
                       }
-                      setNotificationMetadata(newNotificaitonMetadata)
                     }}
                     value={notificationMetadata}
                     showTimeline={false}
