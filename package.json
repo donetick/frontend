@@ -18,7 +18,7 @@
     "dev": "vite",
     "build": "vite build",
     "build-cf": "rm -rf  package-lock.json && npm install && npm install --force @rollup/rollup-linux-x64-gnu@4.34.9 @swc/core-linux-x64-gnu && vite build",
-    "build-selfhosted": "vite build --mode selfhosted",
+    "build-selfhosted": "rm -rf  package-lock.json && npm install && npm install --force @rollup/rollup-linux-x64-gnu@4.34.9 @swc/core-linux-x64-gnu && vite build --mode selfhosted",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "setup-m1": "rm -rf node_modules package-lock.json && npm install && npm install --force @rollup/rollup-darwin-arm64 @swc/core-darwin-arm64",
