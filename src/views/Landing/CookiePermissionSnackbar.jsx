@@ -1,42 +1,39 @@
-import { Button } from '@mui/joy'
+import { Button, Snackbar } from '@mui/joy'
 import Cookies from 'js-cookie'
-import { useEffect } from 'react'
-import { useNotification } from '../../service/NotificationProvider'
+import { useEffect, useState } from 'react'
 
 const CookiePermissionSnackbar = () => {
-  const { showNotification } = useNotification()
-
   useEffect(() => {
     const cookiePermission = Cookies.get('cookies_permission')
 
     if (cookiePermission !== 'true') {
-      showNotification({
-        type: 'custom',
-        component: <CookieAcceptComponent />,
-        snackbarProps: {
-          autoHideDuration: null,
-        },
-        anchorOrigin: { vertical: 'bottom', horizontal: 'center' },
-      })
+      setOpen(true)
     }
-  }, [showNotification])
+  }, [])
 
-  return null
-}
-
-const CookieAcceptComponent = ({ onClose }) => {
-  const handleAccept = () => {
+  const [open, setOpen] = useState(false)
+  const handleClose = () => {
     Cookies.set('cookies_permission', 'true')
-    onClose?.()
+    setOpen(false)
   }
 
   return (
-    <div>
+    <Snackbar
+      open={open}
+      anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      onClose={(event, reason) => {
+        if (reason === 'clickaway') {
+          return
+        }
+        // Cookies.set('cookies_permission', 'true')
+        handleClose()
+      }}
+    >
       We use cookies to ensure you get the best experience on our website.
-      <Button variant='soft' onClick={handleAccept} sx={{ ml: 2 }}>
+      <Button variant='soft' onClick={handleClose}>
         Accept
       </Button>
-    </div>
+    </Snackbar>
   )
 }
 
