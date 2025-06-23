@@ -17,12 +17,13 @@
     "start": "vite --host",
     "dev": "vite",
     "build": "vite build",
-    "build-cf": "rm -rf node_modules package-lock.json && npm install --omit=optional && vite build",
+    "build-cf": "rm -rf node_modules package-lock.json && npm install && vite build",
     "build-selfhosted": "vite build --mode selfhosted",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "setup-m1": "rm -rf node_modules package-lock.json && npm install && npm install --force @rollup/rollup-darwin-arm64 @swc/core-darwin-arm64",
-    "setup-apple-silicon": "npm install --force @rollup/rollup-darwin-arm64 @swc/core-darwin-arm64",
+    "setup-apple-silicon": "npm install --no-optional && npm install --force @rollup/rollup-darwin-arm64 @swc/core-darwin-arm64",
+    "test-cloudflare-build": "rm -rf node_modules package-lock.json && npm install && npm install --force @rollup/rollup-linux-x64-gnu @swc/core-linux-x64-gnu && vite build",
     "release": "npm version patch && npm run build && git push origin develop --tags",
     "merge": "git checkout main && git merge develop && git push origin main && git checkout develop",
     "ionic:build": "npm run build",
@@ -108,6 +109,8 @@
   },
   "optionalDependencies": {
     "@rollup/rollup-darwin-arm64": "^4.44.0",
-    "@swc/core-darwin-arm64": "^1.12.5"
+    "@rollup/rollup-linux-x64-gnu": "^4.44.0",
+    "@swc/core-darwin-arm64": "^1.12.5",
+    "@swc/core-linux-x64-gnu": "^1.12.5"
   }
 }
