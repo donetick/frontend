@@ -1,15 +1,7 @@
 import { CopyAll } from '@mui/icons-material'
-import {
-  Box,
-  Button,
-  Checkbox,
-  Input,
-  ListItem,
-  Modal,
-  ModalDialog,
-  Typography,
-} from '@mui/joy'
-import React, { useState } from 'react'
+import { Box, Button, Checkbox, Input, ListItem, Typography } from '@mui/joy'
+import { useState } from 'react'
+import FadeModal from '../../../components/common/FadeModal'
 
 function WriteNFCModal({ config }) {
   const [nfcStatus, setNfcStatus] = useState('idle') // 'idle', 'writing', 'success', 'error'
@@ -60,63 +52,61 @@ function WriteNFCModal({ config }) {
     return url
   }
   return (
-    <Modal open={config?.isOpen} onClose={handleClose}>
-      <ModalDialog>
-        <Typography level='h4' mb={1}>
-          {nfcStatus === 'success' ? 'Success!' : 'Write to NFC'}
-        </Typography>
+    <FadeModal open={config?.isOpen} onClose={handleClose}>
+      <Typography level='h4' mb={1}>
+        {nfcStatus === 'success' ? 'Success!' : 'Write to NFC'}
+      </Typography>
 
-        {nfcStatus === 'success' ? (
+      {nfcStatus === 'success' ? (
+        <Typography level='body-md' gutterBottom>
+          URL written to NFC tag successfully!
+        </Typography>
+      ) : (
+        <>
           <Typography level='body-md' gutterBottom>
-            URL written to NFC tag successfully!
+            {nfcStatus === 'error'
+              ? errorMessage
+              : 'Press the button below to write to NFC.'}
           </Typography>
-        ) : (
-          <>
-            <Typography level='body-md' gutterBottom>
-              {nfcStatus === 'error'
-                ? errorMessage
-                : 'Press the button below to write to NFC.'}
-            </Typography>
-            <Input
-              value={getURL()}
-              fullWidth
-              readOnly
-              label='URL'
-              sx={{ mt: 1 }}
-              endDecorator={
-                <CopyAll
-                  sx={{ cursor: 'pointer' }}
-                  onClick={() => {
-                    navigator.clipboard.writeText(getURL())
-                    alert('URL copied to clipboard!')
-                  }}
-                />
-              }
-            />
-            <ListItem>
-              <Checkbox
-                checked={isAutoCompleteWhenScan}
-                onChange={e => setIsAutoCompleteWhenScan(e.target.checked)}
-                label='Auto-complete when scanned'
+          <Input
+            value={getURL()}
+            fullWidth
+            readOnly
+            label='URL'
+            sx={{ mt: 1 }}
+            endDecorator={
+              <CopyAll
+                sx={{ cursor: 'pointer' }}
+                onClick={() => {
+                  navigator.clipboard.writeText(getURL())
+                  alert('URL copied to clipboard!')
+                }}
               />
-            </ListItem>
-            <Box display={'flex'} justifyContent={'space-around'} mt={1}>
-              <Button
-                onClick={() => writeToNFC(getURL())}
-                fullWidth
-                sx={{ mr: 1 }}
-                disabled={nfcStatus === 'writing'}
-              >
-                Write NFC
-              </Button>
-              <Button onClick={requestNFCAccess} variant='outlined'>
-                Request Access
-              </Button>
-            </Box>
-          </>
-        )}
-      </ModalDialog>
-    </Modal>
+            }
+          />
+          <ListItem>
+            <Checkbox
+              checked={isAutoCompleteWhenScan}
+              onChange={e => setIsAutoCompleteWhenScan(e.target.checked)}
+              label='Auto-complete when scanned'
+            />
+          </ListItem>
+          <Box display={'flex'} justifyContent={'space-around'} mt={1}>
+            <Button
+              onClick={() => writeToNFC(getURL())}
+              fullWidth
+              sx={{ mr: 1 }}
+              disabled={nfcStatus === 'writing'}
+            >
+              Write NFC
+            </Button>
+            <Button onClick={requestNFCAccess} variant='outlined'>
+              Request Access
+            </Button>
+          </Box>
+        </>
+      )}
+    </FadeModal>
   )
 }
 

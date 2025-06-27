@@ -1,20 +1,10 @@
 import { Add, EditNotifications } from '@mui/icons-material'
-import {
-  Box,
-  Button,
-  Chip,
-  Input,
-  Modal,
-  ModalDialog,
-  ModalOverflow,
-  Option,
-  Select,
-  Typography,
-} from '@mui/joy'
+import { Box, Button, Chip, Input, Option, Select, Typography } from '@mui/joy'
 import { FormControl } from '@mui/material'
 import * as chrono from 'chrono-node'
 import moment from 'moment'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import FadeModal from '../../components/common/FadeModal'
 import { useCreateChore } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { isPlusAccount } from '../../utils/Helpers'
@@ -399,101 +389,100 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
   }
 
   return (
-    <Modal open={isModalOpen} onClose={handleCloseModal}>
-      <ModalOverflow>
-        <ModalDialog size='lg' sx={{ minWidth: '100%' }}>
-          <Typography level='h4'>Create new task</Typography>
-          <Chip startDecorator='🚧' variant='soft' color='warning' size='sm'>
-            Experimental Feature
-          </Chip>
-          <Box>
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-              }}
-            >
-              <Typography level='body-sm'>Task in a sentence:</Typography>
-              <LearnMoreButton
-                content={
-                  <>
-                    <Typography level='body-sm' sx={{ mb: 1 }}>
-                      This feature lets you create a task simply by typing a
-                      sentence. It attempt parses the sentence to identify the
-                      task&apos;s due date, priority, and frequency.
-                    </Typography>
+    <FadeModal
+      open={isModalOpen}
+      onClose={handleCloseModal}
+      size='lg'
+      fullWidth={true}
+    >
+      <Typography level='h4'>Create new task</Typography>
+      <Chip startDecorator='🚧' variant='soft' color='warning' size='sm'>
+        Experimental Feature
+      </Chip>
+      <Box>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}
+        >
+          <Typography level='body-sm'>Task in a sentence:</Typography>
+          <LearnMoreButton
+            content={
+              <>
+                <Typography level='body-sm' sx={{ mb: 1 }}>
+                  This feature lets you create a task simply by typing a
+                  sentence. It attempt parses the sentence to identify the
+                  task&apos;s due date, priority, and frequency.
+                </Typography>
 
-                    <Typography
-                      level='body-sm'
-                      sx={{ fontWeight: 'bold', mt: 2 }}
-                    >
-                      Examples:
-                    </Typography>
+                <Typography level='body-sm' sx={{ fontWeight: 'bold', mt: 2 }}>
+                  Examples:
+                </Typography>
 
-                    <Typography
-                      level='body-sm'
-                      component='ul'
-                      sx={{ pl: 2, mt: 1, listStyle: 'disc' }}
-                    >
-                      <li>
-                        <strong>Priority:</strong>For highest priority any of
-                        the following keyword <em>P1</em>, <em>Urgent</em>,{' '}
-                        <em>Important</em>, or <em>ASAP</em>. For lower
-                        priorities, use <em>P2</em>, <em>P3</em>, or <em>P4</em>
-                        .
-                      </li>
-                      <li>
-                        <strong>Due date:</strong> Specify dates with phrases
-                        like <em>tomorrow</em>, <em>next week</em>,{' '}
-                        <em>Monday</em>, or <em>August 1st at 12pm</em>.
-                      </li>
-                      <li>
-                        <strong>Frequency:</strong> Set recurring tasks with
-                        terms like <em>daily</em>, <em>weekly</em>,{' '}
-                        <em>monthly</em>, <em>yearly</em>, or patterns such as{' '}
-                        <em>every Tuesday and Thursday</em>.
-                      </li>
-                    </Typography>
-                  </>
-                }
-              />
-            </Box>
+                <Typography
+                  level='body-sm'
+                  component='ul'
+                  sx={{ pl: 2, mt: 1, listStyle: 'disc' }}
+                >
+                  <li>
+                    <strong>Priority:</strong>For highest priority any of the
+                    following keyword <em>P1</em>, <em>Urgent</em>,{' '}
+                    <em>Important</em>, or <em>ASAP</em>. For lower priorities,
+                    use <em>P2</em>, <em>P3</em>, or <em>P4</em>.
+                  </li>
+                  <li>
+                    <strong>Due date:</strong> Specify dates with phrases like{' '}
+                    <em>tomorrow</em>, <em>next week</em>, <em>Monday</em>, or{' '}
+                    <em>August 1st at 12pm</em>.
+                  </li>
+                  <li>
+                    <strong>Frequency:</strong> Set recurring tasks with terms
+                    like <em>daily</em>, <em>weekly</em>, <em>monthly</em>,{' '}
+                    <em>yearly</em>, or patterns such as{' '}
+                    <em>every Tuesday and Thursday</em>.
+                  </li>
+                </Typography>
+              </>
+            }
+          />
+        </Box>
 
-            <SmartTaskTitleInput
-              autoFocus
-              value={taskText}
-              placeholder='Type your full text here...'
-              onChange={text => {
-                setTaskText(text)
-              }}
-              customRenderer={renderedParts}
-              onEnterPressed={handleEnterPressed}
-              suggestions={{
-                '#': {
-                  value: 'id',
-                  display: 'name',
-                  options: userLabels ? userLabels : [],
-                },
-                '!': {
-                  value: 'id',
-                  display: 'name',
-                  options: [
-                    { id: '1', name: 'P1' },
-                    { id: '2', name: 'P2' },
-                    { id: '3', name: 'P3' },
-                    { id: '4', name: 'P4' },
-                  ],
-                },
-                '@': {
-                  value: 'userId',
-                  display: 'displayName',
-                  options: circleMembers?.res || [],
-                },
-              }}
-            />
-          </Box>
-          {/* <Box>
+        <SmartTaskTitleInput
+          autoFocus
+          value={taskText}
+          placeholder='Type your full text here...'
+          onChange={text => {
+            setTaskText(text)
+          }}
+          customRenderer={renderedParts}
+          onEnterPressed={handleEnterPressed}
+          suggestions={{
+            '#': {
+              value: 'id',
+              display: 'name',
+              options: userLabels ? userLabels : [],
+            },
+            '!': {
+              value: 'id',
+              display: 'name',
+              options: [
+                { id: '1', name: 'P1' },
+                { id: '2', name: 'P2' },
+                { id: '3', name: 'P3' },
+                { id: '4', name: 'P4' },
+              ],
+            },
+            '@': {
+              value: 'userId',
+              display: 'displayName',
+              options: circleMembers?.res || [],
+            },
+          }}
+        />
+      </Box>
+      {/* <Box>
               <Typography level='body-sm'>Title:</Typography>
               <Input
                 value={taskTitle}
@@ -501,126 +490,122 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
                 sx={{ width: '100%', fontSize: '16px' }}
               />
             </Box> */}
-          <Box>
-            {!hasDescription && (
-              <Button
-                startDecorator={<Add />}
-                variant='plain'
-                size='sm'
-                onClick={() => setHasDescription(true)}
-              >
-                Description
-              </Button>
-            )}
-            {!hasSubTasks && (
-              <Button
-                startDecorator={<Add />}
-                variant='plain'
-                size='sm'
-                onClick={() => setHasSubTasks(true)}
-              >
-                Subtasks
-              </Button>
-            )}
-            {!dueDate && (
-              <Button
-                startDecorator={<Add />}
-                variant='plain'
-                size='sm'
-                onClick={() => {
-                  setDueDate(
-                    moment().add(1, 'day').format('YYYY-MM-DDTHH:00:00'),
-                  )
-                }}
-              >
-                Due Date
-              </Button>
-            )}
-            {!hasNotifications && dueDate && (
-              <Button
-                startDecorator={<EditNotifications />}
-                variant='plain'
-                size='sm'
-                onClick={() => {
-                  setHasNotifications(true)
-                  setFrequencyHumanReadable('Once')
-                  setFrequency(null)
-                  setDueDate(
-                    moment().add(1, 'day').format('YYYY-MM-DDTHH:00:00'),
-                  )
-                }}
-              >
-                Edit Notifications
-              </Button>
-            )}
-          </Box>
-
-          {hasDescription && (
-            <Box>
-              <Typography level='body-sm'>Description:</Typography>
-              <div>
-                <RichTextEditor
-                  onChange={setDescription}
-                  entityType={'chore_description'}
-                />
-              </div>
-            </Box>
-          )}
-          {hasSubTasks && (
-            <Box>
-              <Typography level='body-sm'>Subtasks:</Typography>
-              <SubTasks
-                editMode={true}
-                tasks={subTasks ? subTasks : []}
-                setTasks={setSubTasks}
-              />
-            </Box>
-          )}
-
-          <Box
-            sx={{
-              marginTop: 2,
-              display: 'flex',
-              flexDirection: 'row',
-              gap: 2,
+      <Box>
+        {!hasDescription && (
+          <Button
+            startDecorator={<Add />}
+            variant='plain'
+            size='sm'
+            onClick={() => setHasDescription(true)}
+          >
+            Description
+          </Button>
+        )}
+        {!hasSubTasks && (
+          <Button
+            startDecorator={<Add />}
+            variant='plain'
+            size='sm'
+            onClick={() => setHasSubTasks(true)}
+          >
+            Subtasks
+          </Button>
+        )}
+        {!dueDate && (
+          <Button
+            startDecorator={<Add />}
+            variant='plain'
+            size='sm'
+            onClick={() => {
+              setDueDate(moment().add(1, 'day').format('YYYY-MM-DDTHH:00:00'))
             }}
           >
-            <FormControl>
-              <Typography level='body-sm'>Priority</Typography>
-              <Select
-                defaultValue={0}
-                value={priority}
-                onChange={(e, value) => setPriority(value)}
-              >
-                <Option value='0'>No Priority</Option>
-                <Option value='1'>P1</Option>
-                <Option value='2'>P2</Option>
-                <Option value='3'>P3</Option>
-                <Option value='4'>P4</Option>
-              </Select>
-            </FormControl>
-            {dueDate && (
-              <FormControl>
-                <Typography level='body-sm'>Due Date</Typography>
-                <Input
-                  type='datetime-local'
-                  value={dueDate}
-                  onChange={e => setDueDate(e.target.value)}
-                  sx={{ width: '100%', fontSize: '16px' }}
-                />
-              </FormControl>
-            )}
-          </Box>
-          <Box
-            sx={{
-              marginTop: 2,
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'start',
-              gap: 2,
+            Due Date
+          </Button>
+        )}
+        {!hasNotifications && dueDate && (
+          <Button
+            startDecorator={<EditNotifications />}
+            variant='plain'
+            size='sm'
+            onClick={() => {
+              setHasNotifications(true)
+              setFrequencyHumanReadable('Once')
+              setFrequency(null)
+              setDueDate(moment().add(1, 'day').format('YYYY-MM-DDTHH:00:00'))
             }}
           >
-            {/* <FormControl>
+            Edit Notifications
+          </Button>
+        )}
+      </Box>
+
+      {hasDescription && (
+        <Box>
+          <Typography level='body-sm'>Description:</Typography>
+          <div>
+            <RichTextEditor
+              onChange={setDescription}
+              entityType={'chore_description'}
+            />
+          </div>
+        </Box>
+      )}
+      {hasSubTasks && (
+        <Box>
+          <Typography level='body-sm'>Subtasks:</Typography>
+          <SubTasks
+            editMode={true}
+            tasks={subTasks ? subTasks : []}
+            setTasks={setSubTasks}
+          />
+        </Box>
+      )}
+
+      <Box
+        sx={{
+          marginTop: 2,
+          display: 'flex',
+          flexDirection: 'row',
+          gap: 2,
+        }}
+      >
+        <FormControl>
+          <Typography level='body-sm'>Priority</Typography>
+          <Select
+            defaultValue={0}
+            value={priority}
+            onChange={(e, value) => setPriority(value)}
+          >
+            <Option value='0'>No Priority</Option>
+            <Option value='1'>P1</Option>
+            <Option value='2'>P2</Option>
+            <Option value='3'>P3</Option>
+            <Option value='4'>P4</Option>
+          </Select>
+        </FormControl>
+        {dueDate && (
+          <FormControl>
+            <Typography level='body-sm'>Due Date</Typography>
+            <Input
+              type='datetime-local'
+              value={dueDate}
+              onChange={e => setDueDate(e.target.value)}
+              sx={{ width: '100%', fontSize: '16px' }}
+            />
+          </FormControl>
+        )}
+      </Box>
+      <Box
+        sx={{
+          marginTop: 2,
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'start',
+          gap: 2,
+        }}
+      >
+        {/* <FormControl>
               <Typography level='body-sm'>Assignees</Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                 {assignees.length > 0 ? (
@@ -641,58 +626,51 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
                 )}
               </Box>
             </FormControl> */}
-            {hasNotifications && dueDate && (
-              <Box
-                sx={{
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                }}
-              >
-                <Typography level='body-sm'>Notification Schedule</Typography>
-                <Box sx={{ p: 0.5 }}>
-                  <NotificationTemplate
-                    onChange={metadata => {
-                      if (
-                        metadata.notifications !==
-                        notificationMetadata.templates
-                      ) {
-                        const newNotificaitonMetadata = {
-                          ...notificationMetadata,
-                          templates: metadata.notifications,
-                        }
-                        setNotificationMetadata(newNotificaitonMetadata)
-                      }
-                    }}
-                    value={notificationMetadata}
-                    showTimeline={false}
-                  />
-                </Box>
-              </Box>
-            )}
-          </Box>
+        {hasNotifications && dueDate && (
           <Box
             sx={{
-              marginTop: 2,
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'end',
-              gap: 1,
+              flexDirection: 'column',
+              alignItems: 'center',
             }}
           >
-            <Button
-              variant='outlined'
-              color='neutral'
-              onClick={handleCloseModal}
-            >
-              Cancel
-            </Button>
-            <Button variant='solid' color='primary' onClick={handleSubmit}>
-              Create
-            </Button>
+            <Typography level='body-sm'>Notification Schedule</Typography>
+            <Box sx={{ p: 0.5 }}>
+              <NotificationTemplate
+                onChange={metadata => {
+                  if (
+                    metadata.notifications !== notificationMetadata.templates
+                  ) {
+                    const newNotificaitonMetadata = {
+                      ...notificationMetadata,
+                      templates: metadata.notifications,
+                    }
+                    setNotificationMetadata(newNotificaitonMetadata)
+                  }
+                }}
+                value={notificationMetadata}
+                showTimeline={false}
+              />
+            </Box>
           </Box>
-        </ModalDialog>
-      </ModalOverflow>
-    </Modal>
+        )}
+      </Box>
+      <Box
+        sx={{
+          marginTop: 2,
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'end',
+          gap: 1,
+        }}
+      >
+        <Button variant='outlined' color='neutral' onClick={handleCloseModal}>
+          Cancel
+        </Button>
+        <Button variant='solid' color='primary' onClick={handleSubmit}>
+          Create
+        </Button>
+      </Box>
+    </FadeModal>
   )
 }
 
