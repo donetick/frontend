@@ -358,7 +358,7 @@ const CompactChoreCard = ({
     // Assignee (if not current user)
     if (userProfile && chore.assignedTo !== userProfile.id) {
       const assignee = performers.find(
-        p => p.id === chore.assignedTo,
+        p => p.userId === chore.assignedTo,
       )?.displayName
       if (assignee) parts.push(assignee)
     }
