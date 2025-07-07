@@ -205,7 +205,7 @@ const ChoresOverview = () => {
                 {chore.assignedTo > 0 ? (
                   <Tooltip
                     title={
-                      performers.find(p => p.id === chore.assignedTo)
+                      performers.find(p => p.userId === chore.assignedTo)
                         ?.displayName
                     }
                     size='sm'
@@ -214,13 +214,13 @@ const ChoresOverview = () => {
                       startDecorator={
                         <Avatar color='primary'>
                           {
-                            performers.find(p => p.id === chore.assignedTo)
+                            performers.find(p => p.userId === chore.assignedTo)
                               ?.displayName[0]
                           }
                         </Avatar>
                       }
                     >
-                      {performers.find(p => p.id === chore.assignedTo)?.name}
+                      {performers.find(p => p.userId === chore.assignedTo)?.name}
                     </Chip>
                   </Tooltip>
                 ) : (

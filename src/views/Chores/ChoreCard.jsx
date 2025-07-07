@@ -471,7 +471,7 @@ const ChoreCard = ({
               </Avatar>
               <Box display='flex' flexDirection='column'>
                 <Typography level='title-md'>{getName(chore.name)}</Typography>
-                {userProfile && chore.assignedTo !== userProfile.id && (
+                {userProfile && chore.assignedTo !== userProfile.userId && (
                   <Box display='flex' alignItems='center' gap={0.5}>
                     <Typography level='body-md' color='text.disabled'>
                       Assigned to
