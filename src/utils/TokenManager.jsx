@@ -68,15 +68,14 @@ export async function UploadFile(url, options) {
 export async function Fetch(url, options) {
   if (!isTokenValid()) {
     Cookies.set('ca_redirect', window.location.pathname)
-    if (!window.location.pathname === '/login') {
+    if (window.location.pathname !== '/login') {
       window.location.href = '/login'
+      // stop here so we don’t send an invalid bearer
+      return Promise.reject(new Error('Redirecting to login'))
     }
   }
 
-  if (!options) {
-    options = {}
-  }
-  // clone options to avoid mutation
+  options = options || {}
   options.headers = { ...options.headers, ...HEADERS() }
 
   const baseURL = apiManager.getApiURL()
@@ -133,20 +132,24 @@ export const isTokenValid = () => {
   const expiration = localStorage.getItem('ca_expiration')
   const token = localStorage.getItem('ca_token')
 
-  if (token) {
-    const now = new Date()
-    const expire = new Date(expiration)
-    if (now < expire) {
-      if (now.getTime() + 24 * 60 * 60 * 1000 > expire.getTime()) {
-        refreshAccessToken()
-      }
-      return true
-    } else {
-      localStorage.removeItem('ca_token')
-      localStorage.removeItem('ca_expiration')
-    }
+  if (!token) {
     return false
   }
+
+  const now = new Date()
+  const expire = new Date(expiration)
+  if (now < expire) {
+    // refresh if about to expire
+    if (now.getTime() + 24 * 60 * 60 * 1000 > expire.getTime()) {
+      refreshAccessToken()
+    }
+    return true
+  }
+
+  // expired
+  localStorage.removeItem('ca_token')
+  localStorage.removeItem('ca_expiration')
+  return false
 }
 
 export const refreshAccessToken = () => {
