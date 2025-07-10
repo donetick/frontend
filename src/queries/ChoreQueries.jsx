@@ -178,7 +178,7 @@ export const useChoresHistory = (initialLimit, includeMembers) => {
 
 export const useChoreDetails = choreId => {
   return useQuery({
-    queryKey: ['chore', choreId],
+    queryKey: ['choreDetails', choreId],
     queryFn: async () => {
       var onlineChore = null
 

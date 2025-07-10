@@ -1,24 +1,374 @@
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import {
+  Avatar,
   Box,
-  Button,
   Chip,
   CircularProgress,
   Container,
   IconButton,
   Typography,
 } from '@mui/joy'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import LabelModal from '../Modals/Inputs/LabelModal'
 
 // import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Add } from '@mui/icons-material'
 import { useQueryClient } from '@tanstack/react-query'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors'
+import LABEL_COLORS from '../../utils/Colors'
 import { DeleteLabel } from '../../utils/Fetcher'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import { useLabels } from './LabelQueries'
+
+const LabelCard = ({ label, onEditClick, onDeleteClick }) => {
+  // Helper function to get color name from hex value
+  const getColorName = hexValue => {
+    const colorObj = LABEL_COLORS.find(
+      color => color.value.toLowerCase() === hexValue.toLowerCase(),
+    )
+    return colorObj ? colorObj.name : hexValue
+  }
+
+  // Swipe functionality state
+  const [swipeTranslateX, setSwipeTranslateX] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
+  const [isSwipeRevealed, setIsSwipeRevealed] = useState(false)
+  const [hoverTimer, setHoverTimer] = useState(null)
+  const swipeThreshold = 80
+  const maxSwipeDistance = 160
+  const dragStartX = useRef(0)
+  const cardRef = useRef(null)
+
+  // Swipe gesture handlers
+  const handleTouchStart = e => {
+    dragStartX.current = e.touches[0].clientX
+    setIsDragging(true)
+  }
+
+  const handleTouchMove = e => {
+    if (!isDragging) return
+
+    const currentX = e.touches[0].clientX
+    const deltaX = currentX - dragStartX.current
+
+    if (isSwipeRevealed) {
+      if (deltaX > 0) {
+        const clampedDelta = Math.min(deltaX - maxSwipeDistance, 0)
+        setSwipeTranslateX(clampedDelta)
+      }
+    } else {
+      if (deltaX < 0) {
+        const clampedDelta = Math.max(deltaX, -maxSwipeDistance)
+        setSwipeTranslateX(clampedDelta)
+      }
+    }
+  }
+
+  const handleTouchEnd = () => {
+    if (!isDragging) return
+    setIsDragging(false)
+
+    if (isSwipeRevealed) {
+      if (swipeTranslateX > -swipeThreshold) {
+        setSwipeTranslateX(0)
+        setIsSwipeRevealed(false)
+      } else {
+        setSwipeTranslateX(-maxSwipeDistance)
+      }
+    } else {
+      if (Math.abs(swipeTranslateX) > swipeThreshold) {
+        setSwipeTranslateX(-maxSwipeDistance)
+        setIsSwipeRevealed(true)
+      } else {
+        setSwipeTranslateX(0)
+        setIsSwipeRevealed(false)
+      }
+    }
+  }
+
+  const handleMouseDown = e => {
+    dragStartX.current = e.clientX
+    setIsDragging(true)
+  }
+
+  const handleMouseMove = e => {
+    if (!isDragging) return
+
+    const currentX = e.clientX
+    const deltaX = currentX - dragStartX.current
+
+    if (isSwipeRevealed) {
+      if (deltaX > 0) {
+        const clampedDelta = Math.min(deltaX - maxSwipeDistance, 0)
+        setSwipeTranslateX(clampedDelta)
+      }
+    } else {
+      if (deltaX < 0) {
+        const clampedDelta = Math.max(deltaX, -maxSwipeDistance)
+        setSwipeTranslateX(clampedDelta)
+      }
+    }
+  }
+
+  const handleMouseUp = () => {
+    if (!isDragging) return
+    setIsDragging(false)
+
+    if (isSwipeRevealed) {
+      if (swipeTranslateX > -swipeThreshold) {
+        setSwipeTranslateX(0)
+        setIsSwipeRevealed(false)
+      } else {
+        setSwipeTranslateX(-maxSwipeDistance)
+      }
+    } else {
+      if (Math.abs(swipeTranslateX) > swipeThreshold) {
+        setSwipeTranslateX(-maxSwipeDistance)
+        setIsSwipeRevealed(true)
+      } else {
+        setSwipeTranslateX(0)
+        setIsSwipeRevealed(false)
+      }
+    }
+  }
+
+  const resetSwipe = () => {
+    setSwipeTranslateX(0)
+    setIsSwipeRevealed(false)
+  }
+
+  // Hover functionality for desktop
+  const handleMouseEnter = () => {
+    if (isSwipeRevealed) return
+    const timer = setTimeout(() => {
+      setSwipeTranslateX(-maxSwipeDistance)
+      setIsSwipeRevealed(true)
+      setHoverTimer(null)
+    }, 1500)
+    setHoverTimer(timer)
+  }
+
+  const handleMouseLeave = () => {
+    if (hoverTimer) {
+      clearTimeout(hoverTimer)
+      setHoverTimer(null)
+    }
+    if (isSwipeRevealed) {
+      resetSwipe()
+    }
+  }
+
+  const handleActionAreaMouseEnter = () => {
+    if (hoverTimer) {
+      clearTimeout(hoverTimer)
+      setHoverTimer(null)
+    }
+  }
+
+  // Clean up timer on unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimer) {
+        clearTimeout(hoverTimer)
+      }
+    }
+  }, [hoverTimer])
+
+  return (
+    <Box key={label.id + '-compact-box'}>
+      <Box
+        sx={{
+          position: 'relative',
+          overflow: 'hidden',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+          '&:last-child': {
+            borderBottom: 'none',
+          },
+        }}
+        onMouseLeave={handleMouseLeave}
+      >
+        {/* Action buttons underneath (revealed on swipe) */}
+        <Box
+          sx={{
+            position: 'absolute',
+            right: 0,
+            top: 0,
+            bottom: 0,
+            width: maxSwipeDistance,
+            display: 'flex',
+            alignItems: 'center',
+            boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.06)',
+            zIndex: 0,
+          }}
+          onMouseEnter={handleActionAreaMouseEnter}
+        >
+          <IconButton
+            variant='plain'
+            color='neutral'
+            size='sm'
+            onClick={e => {
+              e.stopPropagation()
+              resetSwipe()
+              onEditClick(label)
+            }}
+            sx={{
+              width: 40,
+              height: 40,
+              mx: 1,
+              bgcolor: 'primary.100',
+              color: 'primary.600',
+              '&:hover': {
+                bgcolor: 'primary.200',
+              },
+            }}
+          >
+            <EditIcon sx={{ fontSize: 16 }} />
+          </IconButton>
+
+          <IconButton
+            variant='plain'
+            color='danger'
+            size='sm'
+            onClick={e => {
+              e.stopPropagation()
+              resetSwipe()
+              onDeleteClick(label.id)
+            }}
+            sx={{
+              width: 40,
+              height: 40,
+              mx: 1,
+              bgcolor: 'danger.100',
+              color: 'danger.600',
+              '&:hover': {
+                bgcolor: 'danger.200',
+              },
+            }}
+          >
+            <DeleteIcon sx={{ fontSize: 16 }} />
+          </IconButton>
+        </Box>
+
+        {/* Main card content */}
+        <Box
+          ref={cardRef}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            minHeight: 64,
+            cursor: 'pointer',
+            position: 'relative',
+            px: 2,
+            py: 1.5,
+            bgcolor: 'background.body',
+            transform: `translateX(${swipeTranslateX}px)`,
+            transition: isDragging ? 'none' : 'transform 0.3s ease-out',
+            zIndex: 1,
+            '&:hover': {
+              bgcolor: isSwipeRevealed
+                ? 'background.surface'
+                : 'background.level1',
+              boxShadow: isSwipeRevealed ? 'none' : 'sm',
+            },
+          }}
+          onClick={() => {
+            if (isSwipeRevealed) {
+              resetSwipe()
+              return
+            }
+            // Optional: Navigate to label details or edit directly
+            onEditClick(label)
+          }}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseEnter={handleMouseEnter}
+        >
+          {/* Color Avatar */}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              mr: 2,
+              flexShrink: 0,
+            }}
+          >
+            <Avatar
+              size='sm'
+              sx={{
+                width: 32,
+                height: 32,
+                bgcolor: label.color,
+                border: '2px solid',
+                borderColor: 'background.surface',
+                boxShadow: 'sm',
+              }}
+            >
+              <Typography
+                level='body-xs'
+                sx={{
+                  color: getTextColorFromBackgroundColor(label.color),
+                  fontWeight: 'bold',
+                  fontSize: 10,
+                }}
+              >
+                {label.name.charAt(0).toUpperCase()}
+              </Typography>
+            </Avatar>
+          </Box>
+
+          {/* Content - Center */}
+          <Box
+            sx={{
+              flex: 1,
+              minWidth: 0,
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            {/* Label Name */}
+            <Typography
+              level='title-sm'
+              sx={{
+                fontWeight: 600,
+                fontSize: 14,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                mb: 0.25,
+              }}
+            >
+              {label.name}
+            </Typography>
+
+            {/* Color Info */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Chip
+                size='sm'
+                variant='soft'
+                sx={{
+                  fontSize: 10,
+                  height: 18,
+                  px: 0.75,
+                  bgcolor: `${label.color}20`,
+                  color: label.color,
+                  border: `1px solid ${label.color}30`,
+                }}
+              >
+                {getColorName(label.color)}
+              </Chip>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+    </Box>
+  )
+}
 
 const LabelView = () => {
   const { data: labels, isLabelsLoading, isError } = useLabels()
@@ -61,7 +411,7 @@ const LabelView = () => {
   }
 
   const handleDeleteLabel = id => {
-    DeleteLabel(id).then(res => {
+    DeleteLabel(id).then(() => {
       const updatedLabels = userLabels.filter(label => label.id !== id)
       setUserLabels(updatedLabels)
 
@@ -106,54 +456,40 @@ const LabelView = () => {
   }
 
   return (
-    <Container maxWidth='md'>
-      <div className='flex flex-col gap-2'>
-        {userLabels.map(label => (
-          <div
-            key={label}
-            className='grid w-full grid-cols-[1fr,auto,auto] rounded-lg border border-zinc-200/80 p-4 shadow-sm dark:bg-zinc-900'
+    <Container maxWidth='md' sx={{ px: 0 }}>
+      <Box
+        sx={{
+          bgcolor: 'background.body',
+          border: '1px solid',
+          borderColor: 'divider',
+          borderRadius: 'md',
+          overflow: 'hidden',
+        }}
+      >
+        {userLabels.length === 0 && (
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              flexDirection: 'column',
+              height: '50vh',
+            }}
           >
-            <Chip
-              variant='outlined'
-              color='primary'
-              size='lg'
-              sx={{
-                background: label.color,
-                borderColor: label.color,
-                color: getTextColorFromBackgroundColor(label.color),
-              }}
-            >
-              {label.name}
-            </Chip>
-
-            <div className='flex gap-2'>
-              <Button
-                size='sm'
-                variant='soft'
-                color='neutral'
-                onClick={() => handleEditLabel(label)}
-                startDecorator={<EditIcon />}
-              >
-                Edit
-              </Button>
-              <IconButton
-                size='sm'
-                variant='soft'
-                onClick={() => handleDeleteClicked(label.id)}
-                color='danger'
-              >
-                <DeleteIcon />
-              </IconButton>
-            </div>
-          </div>
+            <Typography level='title-md' gutterBottom>
+              No labels available. Add a new label to get started.
+            </Typography>
+          </Box>
+        )}
+        {userLabels.map(label => (
+          <LabelCard
+            key={label.id}
+            label={label}
+            onEditClick={handleEditLabel}
+            onDeleteClick={handleDeleteClicked}
+          />
         ))}
-      </div>
-
-      {userLabels.length === 0 && (
-        <Typography textAlign='center' mt={2}>
-          No labels available. Add a new label to get started.
-        </Typography>
-      )}
+      </Box>
 
       {modalOpen && (
         <LabelModal

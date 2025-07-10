@@ -51,15 +51,13 @@ import CompactChoreCard from './CompactChoreCard'
 import IconButtonWithMenu from './IconButtonWithMenu'
 import MultiSelectHelp from './MultiSelectHelp'
 
+import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { ChoreFilters, ChoresGrouper, ChoreSorter } from '../../utils/Chores'
 import { DeleteChore, MarkChoreComplete, SkipChore } from '../../utils/Fetcher'
 import TaskInput from '../components/AddTaskModal'
-import {
-  canScheduleNotification,
-  scheduleChoreNotification,
-} from './LocalNotificationScheduler'
+import { canScheduleNotification } from './LocalNotificationScheduler'
 import NotificationAccessSnackbar from './NotificationAccessSnackbar'
 import Sidepanel from './Sidepanel'
 import SortAndGrouping from './SortAndGrouping'
@@ -102,40 +100,50 @@ const MyChores = () => {
     data: choresData,
     isLoading: choresLoading,
     refetch: refetchChores,
-  } = useChores()
+  } = useChores(false)
   const { data: membersData, isLoading: membersLoading } = useCircleMembers()
 
   // Multi-select state
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false)
   const [selectedChores, setSelectedChores] = useState(new Set())
   const [confirmModelConfig, setConfirmModelConfig] = useState({})
-
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
   useEffect(() => {
-    if (!choresLoading && !membersLoading && userProfile) {
-      setPerformers(membersData.res)
-      const sortedChores = choresData.res.sort(ChoreSorter)
-      setChores(sortedChores)
-      setFilteredChores(sortedChores)
-      const sections = ChoresGrouper(
-        selectedChoreSection,
-        sortedChores,
-        ChoreFilters(userProfile)[selectedChoreFilter],
-      )
-      setChoreSections(sections)
-      if (localStorage.getItem('openChoreSections') === null) {
-        setSelectedChoreSectionWithCache(selectedChoreSection)
-        setOpenChoreSections(
-          Object.keys(sections).reduce((acc, key) => {
-            acc[key] = true
-            return acc
-          }, {}),
+    ;(async () => {
+      if (!choresLoading && !membersLoading && userProfile) {
+        setPerformers(membersData.res)
+        const sortedChores = choresData.res.sort(ChoreSorter)
+        setChores(sortedChores)
+        setFilteredChores(sortedChores)
+        const sections = ChoresGrouper(
+          selectedChoreSection,
+          sortedChores,
+          ChoreFilters(userProfile)[selectedChoreFilter],
         )
-      }
+        setChoreSections(sections)
+        if (localStorage.getItem('openChoreSections') === null) {
+          setSelectedChoreSectionWithCache(selectedChoreSection)
+          setOpenChoreSections(
+            Object.keys(sections).reduce((acc, key) => {
+              acc[key] = true
+              return acc
+            }, {}),
+          )
+        }
+        console.log(
+          'Checking if can schedule notification',
+          canScheduleNotification(),
+        )
 
-      if (canScheduleNotification()) {
-        scheduleChoreNotification(choresData.res, userProfile, membersData.res)
+        if (await canScheduleNotification()) {
+          // scheduleChoreNotification(
+          //   choresData.res,
+          //   userProfile,
+          //   membersData.res,
+          // )
+        }
       }
-    }
+    })()
   }, [
     membersLoading,
     choresLoading,
@@ -164,6 +172,11 @@ const MyChores = () => {
   // Keyboard shortcuts for multi-select and other actions
   useEffect(() => {
     const handleKeyDown = event => {
+      // if Ctrl/Cmd + / then show keyboard shortcuts modal
+      if (event.ctrlKey || event.metaKey) {
+        setShowKeyboardShortcuts(true)
+      }
+
       // Ctrl/Cmd + K to open task modal
       if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
         event.preventDefault()
@@ -176,8 +189,13 @@ const MyChores = () => {
         event.preventDefault()
         searchInputRef.current?.focus()
         return
+        // Ctrl/Cmd + X to close search input
+      } else if ((event.ctrlKey || event.metaKey) && event.key === 'x') {
+        event.preventDefault()
+        if (searchTerm?.length > 0) {
+          handleSearchClose()
+        }
       }
-
       // Ctrl/Cmd + S Toggle Multi-select mode
       else if ((event.ctrlKey || event.metaKey) && event.key === 's') {
         event.preventDefault()
@@ -299,10 +317,17 @@ const MyChores = () => {
         }
       }
     }
+    const handleKeyUp = event => {
+      if (!event.ctrlKey && !event.metaKey) {
+        setShowKeyboardShortcuts(false)
+      }
+    }
 
     document.addEventListener('keydown', handleKeyDown)
+    document.addEventListener('keyup', handleKeyUp)
     return () => {
       document.removeEventListener('keydown', handleKeyDown)
+      document.removeEventListener('keyup', handleKeyUp)
     }
   }, [isMultiSelectMode, selectedChores.size])
   const setSelectedChoreSectionWithCache = value => {
@@ -506,7 +531,7 @@ const MyChores = () => {
   const fuse = new Fuse(
     chores.map(c => ({
       ...c,
-      raw_label: c.labelsV2.map(c => c.name).join(' '),
+      raw_label: c.labelsV2?.map(c => c.name).join(' '),
     })),
     searchOptions,
   )
@@ -525,6 +550,12 @@ const MyChores = () => {
     const term = search.toLowerCase()
     setSearchTerm(term)
     setFilteredChores(fuse.search(term).map(result => result.item))
+  }
+  const handleSearchClose = () => {
+    setSearchTerm('')
+    setFilteredChores(chores)
+    // remove the focus from the search input:
+    setSearchInputFocus(0)
   }
 
   // Multi-select helper functions
@@ -870,15 +901,21 @@ const MyChores = () => {
               padding: 1,
             }}
             onChange={handleSearchChange}
+            startDecorator={
+              <KeyboardShortcutHint shortcut='F' show={showKeyboardShortcuts} />
+            }
             endDecorator={
-              searchTerm && (
-                <CancelRounded
-                  onClick={() => {
-                    setSearchTerm('')
-                    setFilteredChores(chores)
-                  }}
-                />
-              )
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                {searchTerm && (
+                  <>
+                    <KeyboardShortcutHint
+                      shortcut='X'
+                      show={showKeyboardShortcuts}
+                    />
+                    <CancelRounded onClick={handleSearchClose} />
+                  </>
+                )}
+              </Box>
             }
           />
 
@@ -981,6 +1018,7 @@ const MyChores = () => {
           >
             {isMultiSelectMode ? <CheckBox /> : <CheckBoxOutlineBlank />}
           </IconButton>
+          <KeyboardShortcutHint shortcut='S' show={showKeyboardShortcuts} />
         </Box>
 
         {/* Search Filter with animation */}
@@ -1202,6 +1240,12 @@ const MyChores = () => {
                     minWidth: 'auto',
                     '--Button-paddingInline': '0.75rem',
                   }}
+                  endDecorator={
+                    <KeyboardShortcutHint
+                      shortcut='A'
+                      show={showKeyboardShortcuts && selectedChores.size > 0}
+                    />
+                  }
                 >
                   All
                 </Button>
@@ -1220,6 +1264,13 @@ const MyChores = () => {
                     minWidth: 'auto',
                     '--Button-paddingInline': '0.75rem',
                   }}
+                  endDecorator={
+                    <KeyboardShortcutHint
+                      withCtrl={false}
+                      shortcut='Esc'
+                      show={showKeyboardShortcuts && selectedChores.size > 0}
+                    />
+                  }
                 >
                   {selectedChores.size === 0 ? 'Close' : 'Clear'}
                 </Button>
@@ -1252,6 +1303,12 @@ const MyChores = () => {
                 sx={{
                   '--Button-paddingInline': { xs: '0.75rem', sm: '1rem' },
                 }}
+                endDecorator={
+                  <KeyboardShortcutHint
+                    shortcut='Enter'
+                    show={showKeyboardShortcuts && selectedChores.size > 0}
+                  />
+                }
               >
                 Complete
               </Button>
@@ -1265,6 +1322,12 @@ const MyChores = () => {
                 sx={{
                   '--Button-paddingInline': { xs: '0.75rem', sm: '1rem' },
                 }}
+                endDecorator={
+                  <KeyboardShortcutHint
+                    shortcut='/'
+                    show={showKeyboardShortcuts && selectedChores.size > 0}
+                  />
+                }
               >
                 Skip
               </Button>
@@ -1278,6 +1341,12 @@ const MyChores = () => {
                 sx={{
                   '--Button-paddingInline': { xs: '0.75rem', sm: '1rem' },
                 }}
+                endDecorator={
+                  <KeyboardShortcutHint
+                    shortcut='X'
+                    show={showKeyboardShortcuts && selectedChores.size > 0}
+                  />
+                }
               >
                 Archive
               </Button>
@@ -1292,6 +1361,13 @@ const MyChores = () => {
                 sx={{
                   '--Button-paddingInline': { xs: '0.75rem', sm: '1rem' },
                 }}
+                endDecorator={
+                  <KeyboardShortcutHint
+                    withShift={true}
+                    shortcut='X'
+                    show={showKeyboardShortcuts && selectedChores.size > 0}
+                  />
+                }
               >
                 Delete
               </Button>
@@ -1473,6 +1549,12 @@ const MyChores = () => {
                 variant='outlined'
                 color='neutral'
                 startDecorator={<Unarchive />}
+                endDecorator={
+                  <KeyboardShortcutHint
+                    shortcut='A'
+                    show={showKeyboardShortcuts}
+                  />
+                }
               >
                 Show Archived
               </Button>
@@ -1550,6 +1632,12 @@ const MyChores = () => {
               }}
             />
           </IconButton>
+
+          <KeyboardShortcutHint
+            sx={{ position: 'relative', left: -40, top: 30 }}
+            show={showKeyboardShortcuts}
+            shortcut='K'
+          />
         </Box>
         <NotificationAccessSnackbar />
         {addTaskModalOpen && (

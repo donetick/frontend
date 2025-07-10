@@ -527,6 +527,7 @@ const ChoreView = () => {
             >
               <SubTasks
                 editMode={false}
+                performers={performers}
                 tasks={chore.subTasks}
                 setTasks={tasks => {
                   setChore({

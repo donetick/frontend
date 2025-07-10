@@ -1,13 +1,11 @@
 import NavBar from '@/views/components/NavBar'
 import { Button, Typography, useColorScheme } from '@mui/joy'
 import Tracker from '@openreplay/tracker'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 import { registerCapacitorListeners } from './CapacitorListener'
 import { ImpersonateUserProvider } from './contexts/ImpersonateUserContext'
-import { useResource } from './queries/ResourceQueries'
 import { AuthenticationProvider } from './service/AuthenticationService'
 import {
   NotificationProvider,
@@ -15,6 +13,7 @@ import {
 } from './service/NotificationProvider'
 import { apiManager } from './utils/TokenManager'
 import NetworkBanner from './views/components/NetworkBanner'
+
 const add = className => {
   document.getElementById('root').classList.add(className)
 }
@@ -22,9 +21,9 @@ const add = className => {
 const remove = className => {
   document.getElementById('root').classList.remove(className)
 }
+
 // TODO: Update the interval to at 60 minutes
 const intervalMS = 5 * 60 * 1000 // 5 minutes
-const queryClient = new QueryClient({})
 
 const AppContent = () => {
   const { showNotification } = useNotification()
@@ -85,14 +84,13 @@ const AppContent = () => {
 }
 
 function App() {
-  const resource = useResource()
   const navigate = useNavigate()
   startApiManager(navigate)
   startOpenReplay()
 
   const { mode, systemMode } = useColorScheme()
 
-  const setThemeClass = () => {
+  const setThemeClass = useCallback(() => {
     const value = JSON.parse(localStorage.getItem('themeMode')) || mode
 
     if (value === 'system') {
@@ -107,11 +105,11 @@ function App() {
     }
 
     return remove('dark')
-  }
+  }, [mode, systemMode])
 
   useEffect(() => {
     setThemeClass()
-  }, [mode, systemMode])
+  }, [setThemeClass])
 
   useEffect(() => {
     registerCapacitorListeners()
@@ -120,13 +118,11 @@ function App() {
   return (
     <div className='min-h-screen'>
       <NetworkBanner />
-
-      <QueryClientProvider client={queryClient}>
-        <AuthenticationProvider />
+      <AuthenticationProvider>
         <NotificationProvider>
           <AppContent />
         </NotificationProvider>
-      </QueryClientProvider>
+      </AuthenticationProvider>
     </div>
   )
 }
@@ -139,7 +135,6 @@ const startOpenReplay = () => {
 
   tracker.start()
 }
-export default App
 
 const startApiManager = navigate => {
   apiManager.init()
@@ -147,3 +142,5 @@ const startApiManager = navigate => {
     navigate('/login')
   })
 }
+
+export default App

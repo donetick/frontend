@@ -6,11 +6,14 @@ import {
   PlusOne,
   ToggleOff,
   ToggleOn,
+  TrendingUp,
   Widgets,
 } from '@mui/icons-material'
 import {
+  Avatar,
   Box,
   Button,
+  Card,
   Chip,
   Container,
   Grid,
@@ -38,6 +41,7 @@ const ThingCard = ({
 }) => {
   const [isDisabled, setIsDisabled] = useState(false)
   const Navigate = useNavigate()
+
   const getThingIcon = type => {
     if (type === 'text') {
       return <Flip />
@@ -54,6 +58,43 @@ const ThingCard = ({
     }
   }
 
+  const getThingAvatar = () => {
+    const typeConfig = {
+      text: { color: 'primary', icon: <Flip /> },
+      number: { color: 'success', icon: <PlusOne /> },
+      boolean: { 
+        color: thing.state === 'true' ? 'success' : 'neutral', 
+        icon: thing.state === 'true' ? <ToggleOn /> : <ToggleOff /> 
+      },
+    }
+
+    const config = typeConfig[thing?.type] || typeConfig.boolean
+    return (
+      <Avatar
+        size='sm'
+        color={config.color}
+        variant='solid'
+        sx={{
+          width: 28,
+          height: 28,
+          '& svg': { fontSize: '16px' },
+        }}
+      >
+        {config.icon}
+      </Avatar>
+    )
+  }
+
+  const getActionButtonProps = () => {
+    const buttonConfig = {
+      text: { text: 'Change', color: 'primary' },
+      number: { text: 'Increment', color: 'success' },
+      boolean: { text: 'Toggle', color: 'warning' },
+    }
+    
+    return buttonConfig[thing?.type] || buttonConfig.boolean
+  }
+
   const handleRequestChange = thing => {
     setIsDisabled(true)
     onStateChangeRequest(thing)
@@ -62,103 +103,158 @@ const ThingCard = ({
     }, 2000)
   }
 
-  return (
-    <Box
-      className='rounded-lg border border-zinc-200/80 p-4 shadow-sm'
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        p: 2,
+  const actionProps = getActionButtonProps()
 
+  return (
+    <Card
+      variant='outlined'
+      sx={{
         mb: 2,
+        p: 2,
+        transition: 'all 0.2s ease-in-out',
+        cursor: 'pointer',
+        '&:hover': {
+          borderColor: 'primary.300',
+          boxShadow: 'sm',
+          transform: 'translateY(-1px)',
+        },
       }}
+      onClick={() => Navigate(`/things/${thing?.id}`)}
     >
-      <Grid container alignItems='center'>
-        <Grid
-          item
-          xs={12}
-          sm={8}
-          onClick={() => Navigate(`/things/${thing?.id}`)}
-        >
+      <Grid container spacing={2} alignItems='center'>
+        {/* First Row: Thing Info */}
+        <Grid xs={12} sm={8}>
           <Box
             sx={{
               display: 'flex',
-              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 1.5,
+              mb: 1,
+            }}
+          >
+            {getThingAvatar()}
+            
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography
+                level='title-md'
+                sx={{ 
+                  fontWeight: 'lg',
+                  color: 'text.primary',
+                  mb: 0.5,
+                }}
+              >
+                {thing?.name}
+              </Typography>
+              
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                <Chip
+                  size='sm'
+                  variant='soft'
+                  color='neutral'
+                >
+                  {thing?.type}
+                </Chip>
+                
+                <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+                  •
+                </Typography>
+                
+                <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
+                  Current state:
+                </Typography>
+                
+                <Chip
+                  size='sm'
+                  variant='solid'
+                  color={thing?.type === 'boolean' && thing?.state === 'true' ? 'success' : 'primary'}
+                  sx={{ fontWeight: 'md' }}
+                >
+                  {thing?.state}
+                </Chip>
+              </Box>
+            </Box>
+          </Box>
+        </Grid>
+
+        {/* Second Row: Action Buttons */}
+        <Grid xs={12} sm={4}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: { xs: 'flex-start', sm: 'flex-end' },
               alignItems: 'center',
               gap: 1,
-              cursor: 'pointer',
             }}
-            onClick={() => Navigate(`/things/${thing?.id}`)}
+            onClick={(e) => e.stopPropagation()}
           >
-            <Typography level='title-lg'>{thing?.name}</Typography>
-            <Chip
+            <Button
+              variant='solid'
+              color={actionProps.color}
               size='sm'
-              sx={{
-                ml: 1,
+              onClick={() => {
+                if (thing?.type === 'text') {
+                  onEditClick(thing)
+                } else {
+                  handleRequestChange(thing)
+                }
+              }}
+              disabled={isDisabled}
+              startDecorator={getThingIcon(thing?.type)}
+              sx={{ 
+                minWidth: '80px',
+                fontWeight: 'md',
               }}
             >
-              {thing?.type}
-            </Chip>
-          </Box>
-          State: <Chip size='md'>{thing?.state}</Chip>
-        </Grid>
-        <Grid
-          item
-          xs={12}
-          sm={4}
-          container
-          justifyContent='flex-end'
-          alignItems='center'
-        >
-          <Button
-            variant='soft'
-            color='success'
-            onClick={() => {
-              if (thing?.type === 'text') {
+              {actionProps.text}
+            </Button>
+
+            <IconButton
+              variant='outlined'
+              color='neutral'
+              size='sm'
+              onClick={(e) => {
+                e.stopPropagation()
                 onEditClick(thing)
-              } else {
-                handleRequestChange(thing)
-              }
-            }}
-            disabled={isDisabled}
-            startDecorator={getThingIcon(thing?.type)}
-          >
-            {thing?.type === 'text'
-              ? 'Change'
-              : thing?.type === 'number'
-                ? 'Increment'
-                : 'Toggle'}
-          </Button>
-          <IconButton
-            color='primary'
-            onClick={() => onEditClick(thing)}
-            sx={{
-              borderRadius: '50%',
-              width: 30,
-              height: 30,
-              ml: 1,
-              transition: 'background-color 0.2s',
-              '&:hover': { backgroundColor: 'action.hover' },
-            }}
-          >
-            <Edit />
-          </IconButton>
-          <IconButton
-            color='danger'
-            onClick={() => onDeleteClick(thing)}
-            sx={{
-              borderRadius: '50%',
-              width: 30,
-              height: 30,
-              ml: 1,
-            }}
-          >
-            <Delete fontSize='small' />
-          </IconButton>
+              }}
+              sx={{
+                borderRadius: '50%',
+                width: 32,
+                height: 32,
+                transition: 'all 0.2s',
+                '&:hover': { 
+                  backgroundColor: 'primary.softBg',
+                  borderColor: 'primary.300',
+                },
+              }}
+            >
+              <Edit fontSize='small' />
+            </IconButton>
+
+            <IconButton
+              variant='outlined'
+              color='danger'
+              size='sm'
+              onClick={(e) => {
+                e.stopPropagation()
+                onDeleteClick(thing)
+              }}
+              sx={{
+                borderRadius: '50%',
+                width: 32,
+                height: 32,
+                transition: 'all 0.2s',
+                '&:hover': { 
+                  backgroundColor: 'danger.softBg',
+                  borderColor: 'danger.300',
+                },
+              }}
+            >
+              <Delete fontSize='small' />
+            </IconButton>
+          </Box>
         </Grid>
       </Grid>
-    </Box>
+    </Card>
   )
 }
 

@@ -24,6 +24,7 @@ import {
 import {
   Box,
   Checkbox,
+  Chip,
   IconButton,
   Input,
   List,
@@ -31,6 +32,7 @@ import {
   Typography,
 } from '@mui/joy'
 import { useState } from 'react'
+import { useUserProfile } from '../../queries/UserQueries'
 import { CompleteSubTask } from '../../utils/Fetcher'
 
 function SortableItem({
@@ -43,10 +45,12 @@ function SortableItem({
   setTasks,
   level = 0,
   editMode,
+  performers = [],
 }) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({
       id: task.id,
+      data: { completedAt: task.completedAt, completedBy: task.completedBy },
       // Add touch sensor options for better mobile scrolling
       options: {
         activationConstraint: {
@@ -206,6 +210,14 @@ function SortableItem({
                 }}
               >
                 {new Date(task.completedAt).toLocaleString()}
+                {performers.find(p => p.userId === task.completedBy) ? (
+                  <Chip>
+                    {
+                      performers.find(p => p.userId === task.completedBy)
+                        .displayName
+                    }
+                  </Chip>
+                ) : null}
               </Typography>
             )}
           </Box>
@@ -281,6 +293,7 @@ function SortableItem({
                 setTasks={setTasks}
                 level={level + 1}
                 editMode={editMode}
+                performers={performers}
               />
             ))}
         </Box>
@@ -289,8 +302,15 @@ function SortableItem({
   )
 }
 
-const SubTasks = ({ editMode = true, choreId = 0, tasks = [], setTasks }) => {
+const SubTasks = ({
+  editMode = true,
+  choreId = 0,
+  tasks = [],
+  setTasks,
+  performers,
+}) => {
   const [newTask, setNewTask] = useState('')
+  const { data: userProfile } = useUserProfile()
 
   const topLevelTasks = tasks.filter(task => task.parentId === null)
 
@@ -313,7 +333,13 @@ const SubTasks = ({ editMode = true, choreId = 0, tasks = [], setTasks }) => {
 
     // Update the task
     const updatedTasks = tasks.map(task =>
-      task.id === taskId ? { ...task, completedAt: newCompletedAt } : task,
+      task.id === taskId
+        ? {
+            ...task,
+            completedAt: newCompletedAt,
+            completedBy: userProfile?.id,
+          }
+        : task,
     )
 
     // If completing a task, also complete all child tasks
@@ -469,6 +495,7 @@ const SubTasks = ({ editMode = true, choreId = 0, tasks = [], setTasks }) => {
                   allTasks={tasks}
                   setTasks={setTasks}
                   editMode={editMode}
+                  performers={performers}
                 />
               ))}
             {editMode && (
