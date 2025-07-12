@@ -1,6 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { EventSourcePolyfill } from 'event-source-polyfill'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useUserProfile } from '../queries/UserQueries'
 import { useAlerts } from '../service/AlertsProvider'
 import { useNotification } from '../service/NotificationProvider'
 import { apiManager, isTokenValid } from '../utils/TokenManager'
@@ -15,6 +16,7 @@ const MAX_RECONNECT_ATTEMPTS = 10 // Circuit breaker limit
 const CIRCUIT_BREAKER_RESET_TIME = 600000 // 10 minutes
 
 export const useSSE = () => {
+  const { data: userProfile } = useUserProfile()
   const [connectionState, setConnectionState] = useState(SSE_STATES.CLOSED)
   const [lastEvent, setLastEvent] = useState(null)
   const [error, setError] = useState(null)
@@ -65,12 +67,14 @@ export const useSSE = () => {
           case 'chore.updated':
           case 'chore.completed':
           case 'chore.skipped': {
-            showNotification({
-              type: 'info',
-              title: `Task ${eventData.type.replace('chore.', '')}`,
-              message: `${eventData.data.user.displayName}  ${eventData.type.replace('chore.', '')} "${eventData.data.chore.name}"`,
-              duration: 5000,
-            })
+            if (eventData?.data?.user?.id !== userProfile?.id) {
+              showNotification({
+                type: 'info',
+                title: `Task ${eventData.type.replace('chore.', '')}`,
+                message: `${eventData.data.user.displayName}  ${eventData.type.replace('chore.', '')} "${eventData.data.chore.name}"`,
+                duration: 5000,
+              })
+            }
             const updatedChore = eventData.data.chore
 
             // Update individual chore cache
