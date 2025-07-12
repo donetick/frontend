@@ -387,8 +387,8 @@ const TimerDetails = () => {
                     <Box>
                       <Typography
                         level='h4'
+                        color='success'
                         sx={{
-                          color: 'success.600',
                           fontWeight: 'bold',
                           lineHeight: 1.5,
                         }}
@@ -442,8 +442,8 @@ const TimerDetails = () => {
                     <Box>
                       <Typography
                         level='h4'
+                        color='warning'
                         sx={{
-                          color: 'warning.600',
                           fontWeight: 'bold',
                           lineHeight: 1.5,
                         }}
@@ -498,7 +498,7 @@ const TimerDetails = () => {
                       <Typography
                         level='h4'
                         sx={{
-                          color: 'primary.600',
+                          color: 'text.secondary',
                           fontWeight: 'bold',
                           lineHeight: 1.5,
                         }}
@@ -553,7 +553,7 @@ const TimerDetails = () => {
                       <Typography
                         level='h4'
                         sx={{
-                          color: 'neutral.700',
+                          color: 'text.secondary',
                           fontWeight: 'bold',
                           lineHeight: 1.5,
                         }}
