@@ -106,7 +106,7 @@ const NavBar = () => {
 
   return (
     <nav
-      className='mt-2 flex gap-2 p-3'
+      className='mt-2 flex gap-2 p-3 pt-5'
       style={{
         paddingTop: `calc( env(safe-area-inset-top, 0px))`,
         position: 'sticky',
