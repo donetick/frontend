@@ -1,3 +1,5 @@
+import { AlertsProvider } from '../service/AlertsProvider'
+import { NotificationProvider } from '../service/NotificationProvider'
 import QueryContext from './QueryContext'
 import RouterContext from './RouterContext'
 import SSEProvider from './SSEContext'
@@ -6,8 +8,10 @@ import WebSocketProvider from './WebSocketContext'
 
 const Contexts = () => {
   const contexts = [
+    AlertsProvider,
     ThemeContext,
     QueryContext,
+    NotificationProvider,
     SSEProvider,
     WebSocketProvider,
     RouterContext,

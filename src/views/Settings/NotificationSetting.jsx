@@ -199,7 +199,7 @@ const NotificationSetting = () => {
               set: setPreDueNotification,
               label: 'Notification a few hours before the task is due',
               property: 'preDueNotification',
-              disabled: true,
+              disabled: false,
             },
             {
               title: 'Overdue Notification',
@@ -207,7 +207,7 @@ const NotificationSetting = () => {
               set: setNaggingNotification,
               label: 'Notification when the task is overdue',
               property: 'naggingNotification',
-              disabled: true,
+              disabled: false,
             },
           ].map(item => (
             <FormControl

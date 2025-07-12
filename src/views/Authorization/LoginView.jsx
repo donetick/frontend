@@ -14,6 +14,7 @@ import {
   Sheet,
   Typography,
 } from '@mui/joy'
+import { useQueryClient } from '@tanstack/react-query'
 import Cookies from 'js-cookie'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -27,8 +28,8 @@ import { apiManager, isTokenValid } from '../../utils/TokenManager'
 import MFAVerificationModal from './MFAVerificationModal'
 
 const LoginView = () => {
-  // Only fetch user profile if token is valid to prevent unnecessary queries
-  // const { data: userProfileData } = useUserProfile()
+  // Use React Query client directly to invalidate the user profile query
+  const queryClient = useQueryClient()
   const [userProfile, setUserProfile] = useState(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -78,11 +79,19 @@ const LoginView = () => {
             // Normal login without MFA
             localStorage.setItem('ca_token', data.token)
             localStorage.setItem('ca_expiration', data.expire)
+
+            // Refetch user profile after successful login
+            queryClient.refetchQueries(['userProfile'])
+
             const redirectUrl = Cookies.get('ca_redirect')
-            if (redirectUrl) {
+
+            if (redirectUrl && redirectUrl !== '/') {
+              console.log('Redirecting to', redirectUrl)
+
               Cookies.remove('ca_redirect')
               Navigate(redirectUrl)
             } else {
+              Cookies.remove('ca_redirect')
               Navigate('/my/chores')
             }
           })
@@ -143,6 +152,9 @@ const LoginView = () => {
           localStorage.setItem('ca_token', data.token)
           localStorage.setItem('ca_expiration', data.expire)
 
+          // Refetch user profile after successful OAuth login
+          queryClient.invalidateQueries(['userProfile'])
+
           const redirectUrl = Cookies.get('ca_redirect')
           if (redirectUrl) {
             Cookies.remove('ca_redirect')
@@ -161,17 +173,17 @@ const LoginView = () => {
     })
   }
   const getUserProfileAndNavigateToHome = () => {
-    // Refetch user profile after login
-    // refetchUserProfile().then(() => {
-    //   // check if redirect url is set in cookie:
-    const redirectUrl = Cookies.get('ca_redirect')
-    if (redirectUrl) {
-      Cookies.remove('ca_redirect')
-      Navigate(redirectUrl)
-    } else {
-      Navigate('/my/chores')
-    }
-    // })
+    // Refetch user profile after login using React Query
+    queryClient.invalidateQueries(['userProfile']).then(() => {
+      // check if redirect url is set in cookie:
+      const redirectUrl = Cookies.get('ca_redirect')
+      if (redirectUrl) {
+        Cookies.remove('ca_redirect')
+        Navigate(redirectUrl)
+      } else {
+        Navigate('/my/chores')
+      }
+    })
   }
 
   const handleMFASuccess = data => {
@@ -179,6 +191,9 @@ const LoginView = () => {
     localStorage.setItem('ca_expiration', data.expire)
     setMfaModalOpen(false)
     setMfaSessionToken('')
+
+    // Refetch user profile after MFA success
+    queryClient.invalidateQueries(['userProfile'])
 
     const redirectUrl = Cookies.get('ca_redirect')
     if (redirectUrl) {

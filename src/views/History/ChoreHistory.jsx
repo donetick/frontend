@@ -104,12 +104,16 @@ const ChoreHistory = () => {
       {
         icon: <Timelapse />,
         text: 'Usually Within',
-        subtext: moment.duration(averageDelayMoment).humanize(),
+        subtext: moment.duration(averageDelayMoment).isValid()
+          ? moment.duration(averageDelayMoment).humanize()
+          : '--',
       },
       {
         icon: <Timelapse />,
         text: 'Maximum Delay',
-        subtext: moment.duration(maxDelayMoment).humanize(),
+        subtext: moment.duration(maxDelayMoment).isValid()
+          ? moment.duration(maxDelayMoment).humanize()
+          : '--',
       },
       {
         icon: <Avatar />,
@@ -215,7 +219,7 @@ const ChoreHistory = () => {
       <Typography level='title-md' my={1.5}>
         History:
       </Typography>
-      <Sheet sx={{ borderRadius: 'sm', p: 2, boxShadow: 'md' }}>
+      <Sheet variant='plain' sx={{ borderRadius: 'sm', boxShadow: 'md' }}>
         {/* Chore History List (Updated Style) */}
 
         <List sx={{ p: 0 }}>

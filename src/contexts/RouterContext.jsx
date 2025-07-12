@@ -24,6 +24,7 @@ import TermsView from '../views/Terms/TermsView'
 import TestView from '../views/TestView/Test'
 import ThingsHistory from '../views/Things/ThingsHistory'
 import ThingsView from '../views/Things/ThingsView'
+import TimerDetails from '../views/Timer/TimerDetails'
 import UserActivities from '../views/User/UserActivities'
 import UserPoints from '../views/User/UserPoints'
 import NotFound from '../views/components/NotFound'
@@ -69,6 +70,10 @@ const Router = createBrowserRouter([
       {
         path: '/chores/:choreId/history',
         element: <ChoreHistory />,
+      },
+      {
+        path: '/chores/:choreId/timer',
+        element: <TimerDetails />,
       },
       {
         path: '/my/chores',

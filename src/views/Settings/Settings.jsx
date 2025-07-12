@@ -19,6 +19,7 @@ import { useEffect, useState } from 'react'
 import RealTimeSettings from '../../components/RealTimeSettings'
 import Logo from '../../Logo'
 import { useUserProfile } from '../../queries/UserQueries'
+import { useNotification } from '../../service/NotificationProvider'
 import {
   AcceptCircleMemberRequest,
   CancelSubscription,
@@ -34,6 +35,7 @@ import {
   UpdatePassword,
 } from '../../utils/Fetcher'
 import { isPlusAccount } from '../../utils/Helpers'
+import LoadingComponent from '../components/Loading'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import PassowrdChangeModal from '../Modals/Inputs/PasswordChangeModal'
 import APITokenSettings from './APITokenSettings'
@@ -42,7 +44,6 @@ import NotificationSetting from './NotificationSetting'
 import ProfileSettings from './ProfileSettings'
 import StorageSettings from './StorageSettings'
 import ThemeToggle from './ThemeToggle'
-import { useNotification } from '../../service/NotificationProvider'
 
 const Settings = () => {
   const { data: userProfile } = useUserProfile()
@@ -162,6 +163,9 @@ const Settings = () => {
         </Box>
       </Container>
     )
+  }
+  if (!userProfile) {
+    return <LoadingComponent />
   }
   return (
     <Container>

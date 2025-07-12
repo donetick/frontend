@@ -1,15 +1,7 @@
 import { Close, HelpOutline, Keyboard } from '@mui/icons-material'
-import {
-  Box,
-  Button,
-  Card,
-  Divider,
-  IconButton,
-  Modal,
-  ModalDialog,
-  Typography,
-} from '@mui/joy'
+import { Box, Button, Card, Divider, IconButton, Typography } from '@mui/joy'
 import { useState } from 'react'
+import FadeModal from '../../components/common/FadeModal'
 
 const MultiSelectHelp = ({ isVisible = true }) => {
   const [isHelpOpen, setIsHelpOpen] = useState(false)
@@ -40,112 +32,90 @@ const MultiSelectHelp = ({ isVisible = true }) => {
       </IconButton>
 
       {/* Help Modal */}
-      <Modal open={isHelpOpen} onClose={() => setIsHelpOpen(false)}>
-        <ModalDialog
-          variant='outlined'
-          size='md'
+      <FadeModal open={isHelpOpen} onClose={() => setIsHelpOpen(false)}>
+        <Box
           sx={{
-            maxWidth: 500,
-            p: 3,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            mb: 2,
           }}
         >
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              mb: 2,
-            }}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Keyboard color='primary' />
+            <Typography level='title-lg'>Multi-select Mode</Typography>
+          </Box>
+          <IconButton
+            variant='plain'
+            size='sm'
+            onClick={() => setIsHelpOpen(false)}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Keyboard color='primary' />
-              <Typography level='title-lg'>Multi-select Mode</Typography>
+            <Close />
+          </IconButton>
+        </Box>
+        <Typography level='body-md' sx={{ mb: 3, color: 'text.secondary' }}>
+          Use these keyboard shortcuts to work more efficiently with multiple
+          tasks:
+        </Typography>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {/* Selection shortcuts */}
+          <Card variant='soft' sx={{ p: 2 }}>
+            <Typography level='title-sm' sx={{ mb: 1.5, color: 'primary.600' }}>
+              Selection
+            </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <ShortcutItem
+                keys={['Ctrl', 'A']}
+                description='Select all visible tasks'
+              />
+              <ShortcutItem
+                keys={['Esc']}
+                description='Clear selection or exit multi-select mode'
+              />
             </Box>
-            <IconButton
-              variant='plain'
-              size='sm'
-              onClick={() => setIsHelpOpen(false)}
-            >
-              <Close />
-            </IconButton>
-          </Box>
+          </Card>
 
-          <Typography level='body-md' sx={{ mb: 3, color: 'text.secondary' }}>
-            Use these keyboard shortcuts to work more efficiently with multiple
-            tasks:
-          </Typography>
+          {/* Action shortcuts */}
+          <Card variant='soft' sx={{ p: 2 }}>
+            <Typography level='title-sm' sx={{ mb: 1.5, color: 'success.600' }}>
+              Actions
+            </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <ShortcutItem
+                keys={['Enter']}
+                description='Mark selected tasks as completed'
+              />
+              <ShortcutItem
+                keys={['Del', '⌫']}
+                description='Delete selected tasks'
+              />
+            </Box>
+          </Card>
 
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {/* Selection shortcuts */}
-            <Card variant='soft' sx={{ p: 2 }}>
-              <Typography
-                level='title-sm'
-                sx={{ mb: 1.5, color: 'primary.600' }}
-              >
-                Selection
-              </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <ShortcutItem
-                  keys={['Ctrl', 'A']}
-                  description='Select all visible tasks'
-                />
-                <ShortcutItem
-                  keys={['Esc']}
-                  description='Clear selection or exit multi-select mode'
-                />
-              </Box>
-            </Card>
-
-            {/* Action shortcuts */}
-            <Card variant='soft' sx={{ p: 2 }}>
-              <Typography
-                level='title-sm'
-                sx={{ mb: 1.5, color: 'success.600' }}
-              >
-                Actions
-              </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <ShortcutItem
-                  keys={['Enter']}
-                  description='Mark selected tasks as completed'
-                />
-                <ShortcutItem
-                  keys={['Del', '⌫']}
-                  description='Delete selected tasks'
-                />
-              </Box>
-            </Card>
-
-            {/* Interface shortcuts */}
-            <Card variant='soft' sx={{ p: 2 }}>
-              <Typography
-                level='title-sm'
-                sx={{ mb: 1.5, color: 'warning.600' }}
-              >
-                Interface
-              </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <ShortcutItem
-                  keys={['Ctrl', 'K']}
-                  description='Quick add new task'
-                />
-              </Box>
-            </Card>
-          </Box>
-
-          <Divider sx={{ my: 3 }} />
-
-          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-            <Button
-              variant='soft'
-              onClick={() => setIsHelpOpen(false)}
-              sx={{ minWidth: 120 }}
-            >
-              Got it!
-            </Button>
-          </Box>
-        </ModalDialog>
-      </Modal>
+          {/* Interface shortcuts */}
+          <Card variant='soft' sx={{ p: 2 }}>
+            <Typography level='title-sm' sx={{ mb: 1.5, color: 'warning.600' }}>
+              Interface
+            </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <ShortcutItem
+                keys={['Ctrl', 'K']}
+                description='Quick add new task'
+              />
+            </Box>
+          </Card>
+        </Box>
+        <Divider sx={{ my: 3 }} />
+        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+          <Button
+            variant='soft'
+            onClick={() => setIsHelpOpen(false)}
+            sx={{ minWidth: 120 }}
+          >
+            Got it!
+          </Button>
+        </Box>
+      </FadeModal>
     </>
   )
 }
@@ -159,9 +129,9 @@ const ShortcutItem = ({ keys, description }) => (
       gap: 2,
     }}
   >
-    <Typography level='body-sm' sx={{ flex: 1 }}>
-      {description}
-    </Typography>
+    <Box sx={{ flex: 1, display: 'flex', alignItems: 'center' }}>
+      <Typography level='body-sm'>{description}</Typography>
+    </Box>
     <Box sx={{ display: 'flex', gap: 0.5 }}>
       {keys.map((key, index) => (
         <Box

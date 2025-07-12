@@ -2,6 +2,13 @@ import moment from 'moment'
 import { TASK_COLOR } from './Colors.jsx'
 
 const priorityOrder = [1, 2, 3, 4, 0]
+// ChoreGrouperOptions enum:
+export const GROUPING_OPTIONS = {
+  SMART: 'default',
+  DUE_DATE: 'due_date',
+  PRIORITY: 'priority',
+  LABELS: 'labels',
+}
 
 export const ChoresGrouper = (groupBy, chores, filter) => {
   if (filter) {
@@ -12,6 +19,110 @@ export const ChoresGrouper = (groupBy, chores, filter) => {
   chores.sort(ChoreSorter)
   var groups = []
   switch (groupBy) {
+    case 'default':
+      // same as due_date but hide empty groups: and if status is 1 or 2 have seperated catigory as Started:
+      var groupRaw = {
+        Started: [],
+        Today: [],
+        Tomorrow: [],
+        'Next 7 Days': [],
+        'Later This Month': [],
+        Future: [],
+        Overdue: [],
+        Anytime: [],
+      }
+      chores.forEach(chore => {
+        if (chore.status === 1 || chore.status === 2) {
+          groupRaw['Started'].push(chore)
+        } else if (chore.nextDueDate === null) {
+          groupRaw['Anytime'].push(chore)
+        } else if (new Date(chore.nextDueDate) < new Date()) {
+          groupRaw['Overdue'].push(chore)
+        } else if (
+          new Date(chore.nextDueDate).toDateString() ===
+          new Date().toDateString()
+        ) {
+          groupRaw['Today'].push(chore)
+        } else if (
+          new Date(chore.nextDueDate).toDateString() ===
+          new Date(Date.now() + 24 * 60 * 60 * 1000).toDateString()
+        ) {
+          groupRaw['Tomorrow'].push(chore)
+        } else if (
+          new Date(chore.nextDueDate) <
+            new Date(Date.now() + 8 * 24 * 60 * 60 * 1000) &&
+          new Date(chore.nextDueDate) >
+            new Date(Date.now() + 24 * 60 * 60 * 1000)
+        ) {
+          groupRaw['Next 7 Days'].push(chore)
+        } else if (
+          new Date(chore.nextDueDate).getMonth() === new Date().getMonth() &&
+          new Date(chore.nextDueDate).getFullYear() === new Date().getFullYear()
+        ) {
+          groupRaw['Later This Month'].push(chore)
+        } else {
+          groupRaw['Future'].push(chore)
+        }
+      })
+      groups = []
+      if (groupRaw['Started'].length > 0) {
+        groups.push({
+          name: 'Started',
+          content: groupRaw['Started'],
+          color: TASK_COLOR.STARTED,
+        })
+      }
+      if (groupRaw['Overdue'].length > 0) {
+        groups.push({
+          name: 'Overdue',
+          content: groupRaw['Overdue'],
+          color: TASK_COLOR.OVERDUE,
+        })
+      }
+      if (groupRaw['Today'].length > 0) {
+        groups.push({
+          name: 'Today',
+          content: groupRaw['Today'],
+          color: TASK_COLOR.TODAY,
+        })
+      }
+      if (groupRaw['Tomorrow'].length > 0) {
+        groups.push({
+          name: 'Tomorrow',
+          content: groupRaw['Tomorrow'],
+          color: TASK_COLOR.TOMORROW,
+        })
+      }
+      if (groupRaw['Next 7 Days'].length > 0) {
+        groups.push({
+          name: 'Next 7 Days',
+          content: groupRaw['Next 7 Days'],
+          color: TASK_COLOR.NEXT_7_DAYS,
+        })
+      }
+      if (groupRaw['Later This Month'].length > 0) {
+        groups.push({
+          name: 'Later This Month',
+          content: groupRaw['Later This Month'],
+          color: TASK_COLOR.LATER_THIS_MONTH,
+        })
+      }
+      if (groupRaw['Future'].length > 0) {
+        groups.push({
+          name: 'Future',
+          content: groupRaw['Future'],
+          color: TASK_COLOR.FUTURE,
+        })
+      }
+      if (groupRaw['Anytime'].length > 0) {
+        groups.push({
+          name: 'Anytime',
+          content: groupRaw['Anytime'],
+          color: TASK_COLOR.ANYTIME,
+        })
+      }
+      break
+
     case 'due_date':
       var groupRaw = {
         Today: [],
