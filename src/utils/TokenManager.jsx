@@ -1,4 +1,3 @@
-import { Network } from '@capacitor/network'
 import { Preferences } from '@capacitor/preferences'
 import Cookies from 'js-cookie'
 import murmurhash from 'murmurhash'
@@ -82,11 +81,11 @@ export async function Fetch(url, options) {
   const baseURL = apiManager.getApiURL()
   const fullURL = `${baseURL}${url}`
 
-  const networkStatus = await Network.getStatus()
+  // const networkStatus = await Network.getStatus()
 
-  if (!networkStatus.connected) {
-    return handleOfflineRequest(fullURL, options)
-  }
+  // if (!networkStatus.connected) {
+  //   return handleOfflineRequest(fullURL, options)
+  // }
 
   // Online: Perform the fetch
   try {

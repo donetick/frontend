@@ -260,6 +260,7 @@ const ChoreEdit = () => {
   useEffect(() => {
     if (isChoreLoading === false && choreData && choreId) {
       const data = choreData
+      const isCloneMode = searchParams.get('clone') === 'true'
 
       setChore(data.res)
       setName(data.res.name ? data.res.name : '')
@@ -280,7 +281,7 @@ const ChoreEdit = () => {
       )
 
       setLabelsV2(data.res.labelsV2)
-      setSubTasks(data.res.subTasks)
+
       setPriority(data.res.priority)
       setAssignStrategy(
         data.res.assignStrategy
@@ -289,23 +290,30 @@ const ChoreEdit = () => {
       )
       setIsRolling(data.res.isRolling)
       setIsActive(data.res.isActive)
-      // parse the due date to a string from this format "2021-10-10T00:00:00.000Z"
-      // use moment.js or date-fns to format the date for to be usable in the input field:
-      setDueDate(
-        data.res.nextDueDate
-          ? moment(data.res.nextDueDate).format('YYYY-MM-DDTHH:mm:ss')
-          : null,
-      )
 
-      setUpdatedBy(data.res.updatedBy)
-      setCreatedBy(data.res.createdBy)
+      if (isCloneMode) {
+        if (data.res.subTasks) {
+          const clonedSubTasks = data.res.subTasks.map(subTask => ({
+            ...subTask,
+            id: -subTask.id, // Negate ID to indicate new sub task
+            parentId: subTask.parentId ? -subTask.parentId : null, // Negate parent ID if exists
+            completed: false, // Reset completion status
+            completedAt: null, // Reset completion date
+          }))
+          setSubTasks(clonedSubTasks)
+        }
+        if (data.res.name) {
+          setName(`Copy of ${data.res.name}`)
+        }
+      }
+
       setIsNotificable(data.res.notification)
       setThingTrigger(data.res.thingChore)
       // setDueDate(data.res.dueDate)
       // setCompleted(data.res.completed)
       // setCompletedDate(data.res.completedDate)
     }
-  }, [choreData, isChoreLoading])
+  }, [choreData, isChoreLoading, searchParams])
 
   // useEffect(() => {
   //   if (userLabels && userLabels.length == 0 && labelsV2.length == 0) {

@@ -10,6 +10,7 @@ import {
   OpenInFull,
   PeopleAlt,
   Person,
+  PlayArrow,
   SwitchAccessShortcut,
 } from '@mui/icons-material'
 import {
@@ -44,9 +45,14 @@ import { useCircleMembers } from '../../queries/UserQueries.jsx'
 import { notInCompletionWindow } from '../../utils/Chores.jsx'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import {
+  DeleteTimeSession,
   GetChoreDetailById,
+  GetChoreTimer,
   MarkChoreComplete,
+  PauseChore,
+  ResetChoreTimer,
   SkipChore,
+  StartChore,
   UpdateChorePriority,
 } from '../../utils/Fetcher'
 import Priorities from '../../utils/Priorities'
@@ -54,6 +60,8 @@ import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import LoadingComponent from '../components/Loading.jsx'
 import RichTextEditor from '../components/RichTextEditor.jsx'
 import SubTasks from '../components/SubTask.jsx'
+import TimePassedCard from './TimePassedCard.jsx'
+import TimerSplitButton from './TimerSplitButton.jsx'
 
 const ChoreView = () => {
   const [chore, setChore] = useState({})
@@ -73,6 +81,7 @@ const ChoreView = () => {
   const [confirmModelConfig, setConfirmModelConfig] = useState({})
   const [chorePriority, setChorePriority] = useState(null)
   const [isDescriptionOpen, setIsDescriptionOpen] = useState(false)
+  const [timerActionConfig, setTimerActionConfig] = useState({})
   const { data: circleMembersData, isLoading: isCircleMembersLoading } =
     useCircleMembers()
   const { impersonatedUser } = useImpersonateUser()
@@ -222,6 +231,95 @@ const ChoreView = () => {
       }
     })
   }
+  const handleChoreStart = () => {
+    StartChore(choreId).then(response => {
+      if (response.ok) {
+        response.json().then(data => {
+          const newChore = {
+            ...chore,
+            ...data.res,
+          }
+          setChore(newChore)
+        })
+      }
+    })
+  }
+
+  const handleChorePause = () => {
+    PauseChore(choreId).then(response => {
+      if (response.ok) {
+        response.json().then(data => {
+          const newChore = {
+            ...chore,
+            ...data.res,
+          }
+          setChore(newChore)
+        })
+      }
+    })
+  }
+
+  const handleResetTimer = () => {
+    setTimerActionConfig({
+      isOpen: true,
+      title: 'Reset Timer',
+      message:
+        'Are you sure you want to reset the timer? This will clear all time records since you started the task.',
+      confirmText: 'Reset Timer',
+      cancelText: 'Cancel',
+      onClose: confirmed => {
+        if (confirmed) {
+          ResetChoreTimer(choreId).then(response => {
+            if (response.ok) {
+              response.json().then(data => {
+                const newChore = {
+                  ...chore,
+                  ...data.res,
+                }
+                setChore(newChore)
+                queryClient.invalidateQueries(['chores'])
+              })
+            }
+          })
+        }
+        setTimerActionConfig({})
+      },
+    })
+  }
+
+  const handleClearAllTime = () => {
+    setTimerActionConfig({
+      isOpen: true,
+      title: 'Clear All Time Records',
+      message:
+        'This will permanently delete all timers for this task and set it back to "not started".',
+      confirmText: 'Clear All Time',
+      cancelText: 'Cancel',
+      onClose: async confirmed => {
+        if (confirmed) {
+          const resp = await GetChoreTimer(choreId)
+          if (resp.ok) {
+            const data = await resp.json()
+            const sessionId = data?.res?.id
+            DeleteTimeSession(choreId, sessionId).then(response => {
+              if (response.ok) {
+                response.json().then(data => {
+                  const newChore = {
+                    ...chore,
+                    ...data.res,
+                  }
+                  setChore(newChore)
+                  queryClient.invalidateQueries(['chores'])
+                })
+              }
+            })
+          }
+        }
+        setTimerActionConfig({})
+      },
+    })
+  }
+
   if (isChoreLoading || isCircleMembersLoading) {
     // while loading the chore or circle members, return a loading state
     return <LoadingComponent />
@@ -298,6 +396,21 @@ const ChoreView = () => {
             mb: 1,
           }}
         >
+          {chore.status !== 0 && (
+            <Grid item xs={12}>
+              <TimePassedCard
+                chore={chore}
+                handleAction={action => {
+                  if (action === 'pause') {
+                    handleChorePause()
+                  } else if (action === 'resume') {
+                    handleChoreStart()
+                  }
+                }}
+                onShowDetails={() => navigate(`/chores/${choreId}/timer`)}
+              />
+            </Grid>
+          )}
           {infoCards.map((card, index) => (
             <Grid item xs={6} sm={6} key={index}>
               <Card
@@ -308,6 +421,7 @@ const ChoreView = () => {
                   px: 2,
                   py: 1,
                   minHeight: 90,
+                  height: '100%',
                   // change from space-between to start:
                   justifyContent: 'start',
                 }}
@@ -551,7 +665,7 @@ const ChoreView = () => {
         variant='soft'
       >
         <Typography level='body-md' sx={{ mb: 1 }}>
-          Complete the task
+          Completion options
         </Typography>
 
         <FormControl size='sm'>
@@ -574,7 +688,7 @@ const ChoreView = () => {
                   alignItems: 'center',
                 }}
               >
-                Add Additional Notes
+                Add a note
               </Typography>
             }
           />
@@ -584,7 +698,7 @@ const ChoreView = () => {
             fullWidth
             multiline
             label='Additional Notes'
-            placeholder='note or information about the task'
+            placeholder='Add any additional notes here...'
             value={note || ''}
             onChange={e => {
               if (e.target.value.trim() === '') {
@@ -627,7 +741,7 @@ const ChoreView = () => {
                   alignItems: 'center',
                 }}
               >
-                Specify completion date
+                Set custom completion time
               </Typography>
             }
           />
@@ -646,61 +760,113 @@ const ChoreView = () => {
         <Box
           sx={{
             display: 'flex',
-            flexDirection: 'row',
+            flexDirection: 'column',
             gap: 1,
             alignContent: 'center',
             justifyContent: 'center',
           }}
         >
-          <Button
-            fullWidth
-            size='lg'
-            onClick={handleTaskCompletion}
-            disabled={
-              isPendingCompletion ||
-              notInCompletionWindow(chore) ||
-              (chore.lastCompletedDate !== null &&
-                chore.frequencyType === 'once')
-            }
-            color={isPendingCompletion ? 'danger' : 'success'}
-            startDecorator={<Check />}
+          <Box
             sx={{
-              flex: 4,
+              display: 'flex',
+              flexDirection: 'row',
+              gap: 1,
+              alignContent: 'center',
+              justifyContent: 'center',
+              mb: 1,
             }}
           >
-            <Box>Mark as done</Box>
-          </Button>
+            <Button
+              fullWidth
+              size='lg'
+              onClick={handleTaskCompletion}
+              disabled={
+                isPendingCompletion ||
+                notInCompletionWindow(chore) ||
+                (chore.lastCompletedDate !== null &&
+                  chore.frequencyType === 'once')
+              }
+              color={isPendingCompletion ? 'danger' : 'success'}
+              startDecorator={<Check />}
+              sx={{
+                flex: 4,
+              }}
+            >
+              <Box>Mark as done</Box>
+            </Button>
 
-          <Button
-            fullWidth
-            size='lg'
-            onClick={() => {
-              setConfirmModelConfig({
-                isOpen: true,
-                title: 'Skip Task',
+            <Button
+              fullWidth
+              size='lg'
+              onClick={() => {
+                setConfirmModelConfig({
+                  isOpen: true,
+                  title: 'Skip Task',
 
-                message: 'Are you sure you want to skip this task?',
+                  message: 'Are you sure you want to skip this task?',
 
-                confirmText: 'Skip',
-                cancelText: 'Cancel',
-                onClose: confirmed => {
-                  if (confirmed) {
-                    handleSkippingTask()
-                  }
-                  setConfirmModelConfig({})
-                },
-              })
-            }}
-            disabled={
-              chore.lastCompletedDate !== null && chore.frequencyType === 'once'
-            }
-            startDecorator={<SwitchAccessShortcut />}
-            sx={{
-              flex: 1,
-            }}
-          >
-            <Box>Skip</Box>
-          </Button>
+                  confirmText: 'Skip',
+                  cancelText: 'Cancel',
+                  onClose: confirmed => {
+                    if (confirmed) {
+                      handleSkippingTask()
+                    }
+                    setConfirmModelConfig({})
+                  },
+                })
+              }}
+              disabled={
+                chore.lastCompletedDate !== null &&
+                chore.frequencyType === 'once'
+              }
+              startDecorator={<SwitchAccessShortcut />}
+              sx={{
+                flex: 1,
+              }}
+            >
+              <Box>Skip</Box>
+            </Button>
+          </Box>
+          {/* Timer Button - Show split button when timer is active, regular button otherwise */}
+          {chore.status !== 0 ? (
+            <TimerSplitButton
+              disabled={
+                chore.lastCompletedDate !== null &&
+                chore.frequencyType === 'once'
+              }
+              chore={chore}
+              onAction={action => {
+                if (action === 'pause') {
+                  handleChorePause()
+                } else if (action === 'resume') {
+                  handleChoreStart()
+                }
+              }}
+              onShowDetails={() => navigate(`/chores/${choreId}/timer`)}
+              onResetTimer={handleResetTimer}
+              onClearAllTime={handleClearAllTime}
+              fullWidth
+            />
+          ) : (
+            <Button
+              size='lg'
+              onClick={() => {
+                handleChoreStart()
+              }}
+              variant='soft'
+              color='success'
+              disabled={
+                chore.lastCompletedDate !== null &&
+                chore.frequencyType === 'once'
+              }
+              startDecorator={<PlayArrow />}
+              sx={{
+                flex: 1,
+              }}
+            >
+              Start
+            </Button>
+          )}
         </Box>
 
         <Snackbar
@@ -729,6 +895,7 @@ const ChoreView = () => {
           </Typography>
         </Snackbar>
         <ConfirmationModal config={confirmModelConfig} />
+        <ConfirmationModal config={timerActionConfig} />
       </Card>
     </Container>
   )

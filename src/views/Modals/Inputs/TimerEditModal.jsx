@@ -345,104 +345,220 @@ const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
                 }}
               >
                 {/* Active Time */}
-                <Box
+                <Card
+                  variant='soft'
                   sx={{
-                    textAlign: 'center',
-                    p: 2,
                     borderRadius: 'md',
-                    border: '1px solid',
-                    borderColor: 'success.500',
+                    boxShadow: 1,
+                    px: 2,
+                    py: 1,
+                    minHeight: 90,
+                    height: '100%',
+                    justifyContent: 'start',
                   }}
                 >
-                  <Typography
-                    level='h4'
+                  <Box
                     sx={{
-                      color: 'success.600',
-                      fontWeight: 'bold',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'start',
                       mb: 0.5,
                     }}
                   >
-                    {formatDuration(calculateCurrentActiveDuration())}
-                  </Typography>
-                  <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
-                    Active Work
-                  </Typography>
-                </Box>
+                    <Box
+                      sx={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        backgroundColor: 'success.500',
+                        mr: 1,
+                      }}
+                    />
+                    <Typography
+                      level='body-md'
+                      sx={{
+                        fontWeight: '500',
+                        color: 'text.primary',
+                      }}
+                    >
+                      Active Work
+                    </Typography>
+                  </Box>
+                  <Box>
+                    <Typography
+                      level='h4'
+                      sx={{
+                        color: 'success.600',
+                        fontWeight: 'bold',
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      {formatDuration(calculateCurrentActiveDuration())}
+                    </Typography>
+                  </Box>
+                </Card>
 
                 {/* Idle Time */}
-                <Box
+                <Card
+                  variant='soft'
                   sx={{
-                    textAlign: 'center',
-                    p: 2,
                     borderRadius: 'md',
-                    border: '1px solid',
-                    borderColor: 'warning.500',
+                    boxShadow: 1,
+                    px: 2,
+                    py: 1,
+                    minHeight: 90,
+                    height: '100%',
+                    justifyContent: 'start',
                   }}
                 >
-                  <Typography
-                    level='h4'
+                  <Box
                     sx={{
-                      color: 'warning.600',
-                      fontWeight: 'bold',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'start',
                       mb: 0.5,
                     }}
                   >
-                    {formatDuration(calculateIdleTime())}
-                  </Typography>
-                  <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
-                    Break Time
-                  </Typography>
-                </Box>
+                    <Box
+                      sx={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        backgroundColor: 'warning.500',
+                        mr: 1,
+                      }}
+                    />
+                    <Typography
+                      level='body-md'
+                      sx={{
+                        fontWeight: '500',
+                        color: 'text.primary',
+                      }}
+                    >
+                      Break Time
+                    </Typography>
+                  </Box>
+                  <Box>
+                    <Typography
+                      level='h4'
+                      sx={{
+                        color: 'warning.600',
+                        fontWeight: 'bold',
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      {formatDuration(calculateIdleTime())}
+                    </Typography>
+                  </Box>
+                </Card>
 
                 {/* Total Sessions */}
-                <Box
+                <Card
+                  variant='soft'
                   sx={{
-                    textAlign: 'center',
-                    p: 2,
                     borderRadius: 'md',
-                    border: '1px solid',
-                    borderColor: 'primary.500',
+                    boxShadow: 1,
+                    px: 2,
+                    py: 1,
+                    minHeight: 90,
+                    height: '100%',
+                    justifyContent: 'start',
                   }}
                 >
-                  <Typography
-                    level='h4'
+                  <Box
                     sx={{
-                      color: 'primary.600',
-                      fontWeight: 'bold',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'start',
                       mb: 0.5,
                     }}
                   >
-                    {timerData.pauseLog?.length || 0}
-                  </Typography>
-                  <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
-                    Work Sessions
-                  </Typography>
-                </Box>
+                    <Box
+                      sx={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        backgroundColor: 'primary.500',
+                        mr: 1,
+                      }}
+                    />
+                    <Typography
+                      level='body-md'
+                      sx={{
+                        fontWeight: '500',
+                        color: 'text.primary',
+                      }}
+                    >
+                      Work Sessions
+                    </Typography>
+                  </Box>
+                  <Box>
+                    <Typography
+                      level='h4'
+                      sx={{
+                        color: 'primary.600',
+                        fontWeight: 'bold',
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      {timerData.pauseLog?.length || 0}
+                    </Typography>
+                  </Box>
+                </Card>
 
                 {/* Total Session Time */}
-                <Box
+                <Card
+                  variant='soft'
                   sx={{
-                    textAlign: 'center',
-                    p: 2,
                     borderRadius: 'md',
-                    border: '1px solid',
-                    borderColor: 'neutral.500',
+                    boxShadow: 1,
+                    px: 2,
+                    py: 1,
+                    minHeight: 90,
+                    height: '100%',
+                    justifyContent: 'start',
                   }}
                 >
-                  <Typography
-                    level='h4'
+                  <Box
                     sx={{
-                      color: 'neutral.700',
-                      fontWeight: 'bold',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'start',
                       mb: 0.5,
                     }}
                   >
-                    {formatTime(calculateTotalDuration())}
-                  </Typography>
-                  <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
-                    Total Time
-                  </Typography>
-                </Box>
+                    <Box
+                      sx={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        backgroundColor: 'neutral.500',
+                        mr: 1,
+                      }}
+                    />
+                    <Typography
+                      level='body-md'
+                      sx={{
+                        fontWeight: '500',
+                        color: 'text.primary',
+                      }}
+                    >
+                      Total Time
+                    </Typography>
+                  </Box>
+                  <Box>
+                    <Typography
+                      level='h4'
+                      sx={{
+                        color: 'neutral.700',
+                        fontWeight: 'bold',
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      {formatTime(calculateTotalDuration())}
+                    </Typography>
+                  </Box>
+                </Card>
               </Box>
 
               {/* Progress Bar */}

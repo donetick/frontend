@@ -17,6 +17,7 @@ import {
 } from './CustomParsers'
 import SmartTaskTitleInput from './SmartTaskTitleInput'
 
+import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import NotificationTemplate from '../../components/NotificationTemplate'
 import LearnMoreButton from './LearnMore'
 import RichTextEditor from './RichTextEditor'
@@ -53,6 +54,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
 
   const textareaRef = useRef(null)
   const mainInputRef = useRef(null)
+  const richTextEditorRef = useRef(null)
   const [priority, setPriority] = useState(0)
   const [dueDate, setDueDate] = useState(null)
   const [description, setDescription] = useState(null)
@@ -67,6 +69,82 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
   const [hasDescription, setHasDescription] = useState(false)
   const [hasSubTasks, setHasSubTasks] = useState(false)
   const [hasNotifications, setHasNotifications] = useState(false)
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(true)
+
+  // set showKeyboardShortcuts true as soon as the user hold ctrl or cmd key:
+  useEffect(() => {
+    if (hasDescription && richTextEditorRef.current) {
+      // Small delay to ensure the component is fully rendered
+      setTimeout(() => {
+        richTextEditorRef.current.focus()
+      }, 100)
+    }
+  }, [hasDescription])
+
+  // set showKeyboardShortcuts true as soon as the user hold ctrl or cmd key:
+  useEffect(() => {
+    const handleKeyDown = event => {
+      const isHoldingCmd = event.ctrlKey || event.metaKey
+      if (isHoldingCmd) {
+        // event.preventDefault()
+        setShowKeyboardShortcuts(true)
+      }
+      if (
+        isHoldingCmd &&
+        event.key.toLowerCase() === 'e' &&
+        isModalOpen &&
+        !hasDescription
+      ) {
+        setHasDescription(true)
+        setShowKeyboardShortcuts(false)
+      }
+      if (isHoldingCmd && event.key.toLowerCase() === 'j' && isModalOpen) {
+        // add subtask:
+        setHasSubTasks(true)
+        setShowKeyboardShortcuts(false)
+        // set focus on the first subtask input:
+      }
+      if (
+        isHoldingCmd &&
+        event.key.toLowerCase() === 'b' &&
+        isModalOpen &&
+        !dueDate
+      ) {
+        // add due date:
+        setDueDate(moment().add(1, 'day').format('YYYY-MM-DDTHH:00:00'))
+        setShowKeyboardShortcuts(false)
+      }
+      // Enter key to create task
+      if (
+        event.key === 'Enter' &&
+        (event.ctrlKey || event.metaKey) &&
+        isModalOpen
+      ) {
+        event.preventDefault()
+        createChore()
+        return
+      }
+      // Escape key to cancel/close modal
+      if (event.key === 'Escape' && isModalOpen) {
+        event.preventDefault()
+        handleCloseModal()
+        return
+      }
+    }
+
+    const handleKeyUp = event => {
+      if (event.key === 'Control' || event.key === 'Meta') {
+        setShowKeyboardShortcuts(false)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('keyup', handleKeyUp)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('keyup', handleKeyUp)
+    }
+  }, [])
+
   useEffect(() => {
     if (isModalOpen && textareaRef.current) {
       textareaRef.current.focus()
@@ -319,14 +397,6 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
     setAssignees([])
   }
 
-  const handleSubmit = () => {
-    console.log('Submitting task:', isPlusAccount(userProfile))
-
-    // createChore()
-    // handleCloseModal()
-    // setTaskText('')
-  }
-
   const createChore = () => {
     const chore = {
       name: taskTitle,
@@ -376,6 +446,8 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
 
             handleCloseModal(false)
           }
+          handleCloseModal()
+          setTaskText('')
         })
       })
       .catch(error => {
@@ -490,23 +562,36 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
                 sx={{ width: '100%', fontSize: '16px' }}
               />
             </Box> */}
+
       <Box>
         {!hasDescription && (
           <Button
             startDecorator={<Add />}
             variant='plain'
             size='sm'
-            onClick={() => setHasDescription(true)}
+            onClick={() => {
+              setHasDescription(true)
+              // Focus will be handled by the useEffect hook
+            }}
+            endDecorator={
+              showKeyboardShortcuts && <KeyboardShortcutHint shortcut='E' />
+            }
           >
             Description
           </Button>
         )}
+
         {!hasSubTasks && (
           <Button
             startDecorator={<Add />}
             variant='plain'
             size='sm'
-            onClick={() => setHasSubTasks(true)}
+            onClick={() => {
+              setHasSubTasks(true)
+            }}
+            endDecorator={
+              showKeyboardShortcuts && <KeyboardShortcutHint shortcut='J' />
+            }
           >
             Subtasks
           </Button>
@@ -519,6 +604,9 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
             onClick={() => {
               setDueDate(moment().add(1, 'day').format('YYYY-MM-DDTHH:00:00'))
             }}
+            endDecorator={
+              showKeyboardShortcuts && <KeyboardShortcutHint shortcut='B' />
+            }
           >
             Due Date
           </Button>
@@ -545,6 +633,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
           <Typography level='body-sm'>Description:</Typography>
           <div>
             <RichTextEditor
+              ref={richTextEditorRef}
               onChange={setDescription}
               entityType={'chore_description'}
             />
@@ -558,6 +647,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
             editMode={true}
             tasks={subTasks ? subTasks : []}
             setTasks={setSubTasks}
+            shouldFocus={true}
           />
         </Box>
       )}
@@ -570,20 +660,22 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
           gap: 2,
         }}
       >
-        <FormControl>
-          <Typography level='body-sm'>Priority</Typography>
-          <Select
-            defaultValue={0}
-            value={priority}
-            onChange={(e, value) => setPriority(value)}
-          >
-            <Option value='0'>No Priority</Option>
-            <Option value='1'>P1</Option>
-            <Option value='2'>P2</Option>
-            <Option value='3'>P3</Option>
-            <Option value='4'>P4</Option>
-          </Select>
-        </FormControl>
+        {priority > 0 && (
+          <FormControl>
+            <Typography level='body-sm'>Priority</Typography>
+            <Select
+              defaultValue={0}
+              value={priority}
+              onChange={(e, value) => setPriority(value)}
+            >
+              <Option value='0'>No Priority</Option>
+              <Option value='1'>P1</Option>
+              <Option value='2'>P2</Option>
+              <Option value='3'>P3</Option>
+              <Option value='4'>P4</Option>
+            </Select>
+          </FormControl>
+        )}
         {dueDate && (
           <FormControl>
             <Typography level='body-sm'>Due Date</Typography>
@@ -665,9 +757,19 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
       >
         <Button variant='outlined' color='neutral' onClick={handleCloseModal}>
           Cancel
+          {showKeyboardShortcuts && (
+            <KeyboardShortcutHint
+              shortcut='Esc'
+              sx={{ ml: 1 }}
+              withCtrl={false}
+            />
+          )}
         </Button>
-        <Button variant='solid' color='primary' onClick={handleSubmit}>
+        <Button variant='solid' color='primary' onClick={createChore}>
           Create
+          {showKeyboardShortcuts && (
+            <KeyboardShortcutHint shortcut='Enter' sx={{ ml: 1 }} />
+          )}
         </Button>
       </Box>
     </FadeModal>

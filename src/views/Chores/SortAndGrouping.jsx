@@ -8,7 +8,7 @@ import {
   Typography,
 } from '@mui/joy'
 import IconButton from '@mui/joy/IconButton'
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 
 const SortAndGrouping = ({
@@ -100,6 +100,7 @@ const SortAndGrouping = ({
         </MenuItem>
 
         {[
+          { name: 'Smart', value: 'default' },
           { name: 'Due Date', value: 'due_date' },
           { name: 'Priority', value: 'priority' },
           { name: 'Labels', value: 'labels' },

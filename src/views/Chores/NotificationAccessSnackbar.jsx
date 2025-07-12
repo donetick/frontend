@@ -1,29 +1,35 @@
 import { Capacitor } from '@capacitor/core'
 import { LocalNotifications } from '@capacitor/local-notifications'
 import { Preferences } from '@capacitor/preferences'
-import { Button, Stack, Typography } from '@mui/joy'
+import { Button, Snackbar, Stack, Typography } from '@mui/joy'
 import { useEffect, useState } from 'react'
 
 const NotificationAccessSnackbar = () => {
   const [open, setOpen] = useState(false)
 
-  if (!Capacitor.isNativePlatform()) {
-    return null
-  }
+  // Define the function outside of useEffect
   const getNotificationPreferences = async () => {
     const ret = await Preferences.get({ key: 'notificationPreferences' })
-    return JSON.parse(ret.value)
+    return JSON.parse(ret.value) || {}
   }
 
   useEffect(() => {
-    getNotificationPreferences().then(data => {
-      // if optOut is true then don't show the snackbar
-      if (data?.optOut === true || data?.granted === true) {
-        return
-      }
-      setOpen(true)
-    })
+    // Only run the effect on native platforms
+    if (Capacitor.isNativePlatform()) {
+      getNotificationPreferences().then(data => {
+        // if optOut is true then don't show the snackbar
+        if (data?.optOut === true || data?.granted === true) {
+          return
+        }
+        setOpen(true)
+      })
+    }
   }, [])
+
+  // Return early if not on a native platform
+  if (!Capacitor.isNativePlatform()) {
+    return null
+  }
 
   return (
     <Snackbar

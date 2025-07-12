@@ -1,9 +1,11 @@
-import { EventBusy } from '@mui/icons-material'
+import { EventBusy, Schedule, TrendingUp } from '@mui/icons-material'
 import {
+  Avatar,
   Box,
   Button,
   Chip,
   Container,
+  Grid,
   List,
   ListDivider,
   ListItem,
@@ -42,7 +44,7 @@ const ThingsHistory = () => {
         setErrLoading(true)
       }
     })
-  }, [])
+  }, [id])
 
   const handleLoadMore = () => {
     GetThingHistory(id, thingsHistory.length).then(resp => {
@@ -107,7 +109,7 @@ const ThingsHistory = () => {
           No history found
         </Typography>
         <Typography level='body1'>
-          It's look like there is no history for this thing yet.
+          It looks like there is no history for this thing yet.
         </Typography>
         <Button variant='soft' sx={{ mt: 2 }}>
           <Link to='/things'>Go back to things</Link>
@@ -175,46 +177,118 @@ const ThingsHistory = () => {
       <Typography level='h4' gutterBottom>
         Change log:
       </Typography>
-      <Box sx={{ borderRadius: 'sm', p: 2, boxShadow: 'md' }}>
+      <Box sx={{ borderRadius: 'sm', p: 1, boxShadow: 'md' }}>
         <List sx={{ p: 0 }}>
           {thingsHistory.map((history, index) => (
-            <>
-              <ListItem sx={{ gap: 1.5, alignItems: 'flex-start' }}>
-                <ListItemContent sx={{ my: 0 }}>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <Typography level='body1' sx={{ fontWeight: 'md' }}>
-                      {moment(history.updatedAt).format(
-                        'ddd MM/DD/yyyy HH:mm:ss',
-                      )}
-                    </Typography>
-                    <Chip>{history.state}</Chip>
-                  </Box>
+            <Box key={index}>
+              <ListItem
+                sx={{
+                  py: 1.5,
+                  px: 2,
+                  borderRadius: 'sm',
+                  transition: 'background-color 0.2s',
+                  '&:hover': {
+                    backgroundColor: 'background.level1',
+                  },
+                }}
+              >
+                <ListItemContent>
+                  <Grid container spacing={1} alignItems='center'>
+                    {/* First Row: Status and Time Info */}
+                    <Grid xs={12} sm={8}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                          flexWrap: 'wrap',
+                        }}
+                      >
+                        <Avatar
+                          size='sm'
+                          color='primary'
+                          variant='solid'
+                          sx={{
+                            width: 24,
+                            height: 24,
+                            '& svg': { fontSize: '14px' },
+                          }}
+                        >
+                          <TrendingUp />
+                        </Avatar>
+
+                        <Typography
+                          level='body-sm'
+                          sx={{
+                            color: 'text.secondary',
+                            fontWeight: 'md',
+                            display: { xs: 'none', sm: 'block' },
+                          }}
+                        >
+                          Updated
+                        </Typography>
+
+                        <Chip
+                          size='sm'
+                          variant='soft'
+                          color='primary'
+                          startDecorator={<Schedule />}
+                        >
+                          {moment(history.updatedAt).format('MMM DD, h:mm A')}
+                        </Chip>
+                      </Box>
+                    </Grid>
+
+                    {/* Second Row: State Value */}
+                    <Grid xs={12} sm={4}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: { xs: 'flex-start', sm: 'flex-end' },
+                          alignItems: 'center',
+                          gap: 1,
+                        }}
+                      >
+                        <Chip
+                          size='md'
+                          variant='solid'
+                          color='success'
+                          sx={{ fontWeight: 'bold' }}
+                        >
+                          {history.state}
+                        </Chip>
+                      </Box>
+                    </Grid>
+                  </Grid>
                 </ListItemContent>
               </ListItem>
+
+              {/* Divider with time difference */}
               {index < thingsHistory.length - 1 && (
-                <>
-                  <ListDivider component='li'>
-                    {/* time between two completion: */}
-                    {index < thingsHistory.length - 1 &&
-                      thingsHistory[index + 1].createdAt && (
-                        <Typography level='body3' color='text.tertiary'>
-                          {formatTimeDifference(
-                            history.createdAt,
-                            thingsHistory[index + 1].createdAt,
-                          )}{' '}
-                          before
-                        </Typography>
-                      )}
-                  </ListDivider>
-                </>
+                <ListDivider
+                  component='li'
+                  sx={{
+                    my: 0.5,
+                  }}
+                >
+                  <Typography
+                    level='body-xs'
+                    sx={{
+                      color: 'text.tertiary',
+                      backgroundColor: 'background.surface',
+                      px: 1,
+                      fontSize: '0.75rem',
+                    }}
+                  >
+                    {formatTimeDifference(
+                      history.createdAt,
+                      thingsHistory[index + 1].createdAt,
+                    )}{' '}
+                    before
+                  </Typography>
+                </ListDivider>
               )}
-            </>
+            </Box>
           ))}
         </List>
       </Box>

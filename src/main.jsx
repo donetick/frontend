@@ -1,6 +1,6 @@
+import { QueryClient } from '@tanstack/react-query'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { QueryClient } from '@tanstack/react-query'
 import App from './App.jsx'
 import Contexts from './contexts/Contexts.jsx'
 import './index.css'

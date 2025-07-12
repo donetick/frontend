@@ -184,8 +184,8 @@ function SortableItem({
                 value={editedText}
                 onChange={e => setEditedText(e.target.value)}
                 onBlur={handleSave}
-                onKeyPress={e => {
-                  if (e.key === 'Enter') {
+                onKeyDown={e => {
+                  if (!(e.metaKey || e.ctrlKey) && e.key === 'Enter') {
                     handleSave()
                   }
                 }}
@@ -308,6 +308,7 @@ const SubTasks = ({
   tasks = [],
   setTasks,
   performers,
+  shouldFocus = false,
 }) => {
   const [newTask, setNewTask] = useState('')
   const { data: userProfile } = useUserProfile()
@@ -501,6 +502,7 @@ const SubTasks = ({
             {editMode && (
               <ListItem sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Input
+                  autoFocus={shouldFocus}
                   placeholder='Add new task...'
                   value={newTask}
                   onChange={e => setNewTask(e.target.value)}

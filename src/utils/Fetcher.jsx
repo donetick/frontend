@@ -123,6 +123,20 @@ const MarkChoreComplete = (id, body, completedDate, performer) => {
   })
 }
 
+const StartChore = id => {
+  return Fetch(`/chores/${id}/start`, {
+    method: 'PUT',
+    headers: HEADERS(),
+  })
+}
+
+const PauseChore = id => {
+  return Fetch(`/chores/${id}/pause`, {
+    method: 'PUT',
+    headers: HEADERS(),
+  })
+}
+
 const CompleteSubTask = (id, choreId, completedAt) => {
   var markChoreURL = `/chores/${choreId}/subtask`
   return Fetch(markChoreURL, {
@@ -201,14 +215,6 @@ const UpdateChoreHistory = (choreId, id, choreHistory) => {
     method: 'PUT',
     headers: HEADERS(),
     body: JSON.stringify(choreHistory),
-  })
-}
-
-const UpdateChoreStatus = (choreId, status) => {
-  return Fetch(`/chores/${choreId}/status`, {
-    method: 'PUT',
-    headers: HEADERS(),
-    body: JSON.stringify({ status }),
   })
 }
 
@@ -553,11 +559,49 @@ const GetStorageUsage = () => {
   })
 }
 
+// Timer/TimeSession API functions
+const GetChoreTimer = choreId => {
+  return Fetch(`/chores/${choreId}/timer`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+}
+
+const UpdateTimeSession = (choreId, sessionId, sessionData) => {
+  return Fetch(`/chores/${choreId}/timer/${sessionId}`, {
+    method: 'PUT',
+    headers: HEADERS(),
+    body: JSON.stringify(sessionData),
+  })
+}
+
+const DeleteTimeSession = (choreId, sessionId) => {
+  return Fetch(`/chores/${choreId}/timer/${sessionId}`, {
+    method: 'DELETE',
+    headers: HEADERS(),
+  })
+}
+
+const ResetChoreTimer = choreId => {
+  return Fetch(`/chores/${choreId}/timer/reset`, {
+    method: 'PUT',
+    headers: HEADERS(),
+  })
+}
+
+const ClearChoreTimer = choreId => {
+  return Fetch(`/chores/${choreId}/timer`, {
+    method: 'DELETE',
+    headers: HEADERS(),
+  })
+}
+
 export {
   AcceptCircleMemberRequest,
   ArchiveChore,
   CancelSubscription,
   ChangePassword,
+  ClearChoreTimer,
   CompleteSubTask,
   ConfirmMFA,
   CreateChore,
@@ -570,6 +614,7 @@ export {
   DeleteLabel,
   DeleteLongLiveToken,
   DeleteThing,
+  DeleteTimeSession,
   DisableMFA,
   GetAllCircleMembers,
   GetAllUsers,
@@ -577,6 +622,7 @@ export {
   GetChoreByID,
   GetChoreDetailById,
   GetChoreHistory,
+  GetChoreTimer,
   GetChores,
   GetChoresHistory,
   GetChoresNew,
@@ -594,27 +640,30 @@ export {
   JoinCircle,
   LeaveCircle,
   MarkChoreComplete,
+  PauseChore,
   PutNotificationTarget,
   PutWebhookURL,
   RedeemPoints,
   RefreshToken,
   RegenerateBackupCodes,
+  ResetChoreTimer,
   ResetPassword,
   SaveChore,
   SaveThing,
   SetupMFA,
   SkipChore,
+  StartChore,
   UnArchiveChore,
   UpdateChoreAssignee,
   UpdateChoreHistory,
   UpdateChorePriority,
-  UpdateChoreStatus,
   UpdateDueDate,
   UpdateLabel,
   UpdateMemberRole,
   UpdateNotificationTarget,
   UpdatePassword,
   UpdateThingState,
+  UpdateTimeSession,
   UpdateUserDetails,
   VerifyMFA,
   createChore,

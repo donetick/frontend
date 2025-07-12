@@ -17,6 +17,7 @@ import {
   Container,
   Option,
   Select,
+  Stack,
   Tab,
   TabList,
   Tabs,
@@ -50,16 +51,15 @@ const UserPoints = () => {
   const [selectedUser, setSelectedUser] = useState(userProfile?.id)
   const [circleUsers, setCircleUsers] = useState([])
   const [selectedHistory, setSelectedHistory] = useState([])
-  const [userPointsBarChartData, setUserPointsBarChartData] = useState([])
-
-  const [choresHistory, setChoresHistory] = useState([])
 
   useEffect(() => {
     if (circleMembersData && choresHistoryData && userProfile) {
       setCircleUsers(circleMembersData.res)
-      setSelectedHistory(generateWeeklySummary(choresHistory, userProfile?.id))
+      setSelectedHistory(
+        generateWeeklySummary(choresHistoryData, userProfile?.id),
+      )
     }
-  }, [circleMembersData, choresHistoryData])
+  }, [circleMembersData, choresHistoryData, userProfile])
 
   useEffect(() => {
     if (choresHistoryData) {
@@ -75,24 +75,11 @@ const UserPoints = () => {
       }
       setSelectedHistory(history)
     }
-  }, [selectedUser, choresHistoryData])
+  }, [selectedUser, choresHistoryData, tabValue])
 
   useEffect(() => {
     setSelectedUser(userProfile?.id)
   }, [userProfile])
-
-  const generateUserPointsHistory = history => {
-    const userPoints = {}
-    for (let i = 0; i < history.length; i++) {
-      const chore = history[i]
-      if (!userPoints[chore.completedBy]) {
-        userPoints[chore.completedBy] = chore.points ? chore.points : 0
-      } else {
-        userPoints[chore.completedBy] += chore.points ? chore.points : 0
-      }
-    }
-    return userPoints
-  }
 
   const generateWeeklySummary = (history, userId) => {
     const daysAggregated = []
@@ -221,103 +208,229 @@ const UserPoints = () => {
 
   return (
     <Container
-      maxWidth='md'
+      maxWidth='xl'
       sx={{
         display: 'flex',
         flexDirection: 'column',
+        px: { xs: 2, sm: 3 },
       }}
     >
+      <Typography
+        mb={3}
+        level='h4'
+        sx={{
+          alignSelf: 'flex-start',
+        }}
+      >
+        Points Overview
+      </Typography>
+
+      {/* Improved Filter Bar */}
+      <Card
+        variant='outlined'
+        sx={{
+          width: '100%',
+          p: 2,
+          mb: 3,
+          borderRadius: 12,
+          background:
+            'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+          backdropFilter: 'blur(10px)',
+        }}
+      >
+        <Stack spacing={2}>
+          <Typography level='title-sm' sx={{ color: 'text.secondary' }}>
+            Filter Points
+          </Typography>
+
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={2}
+            alignItems={{ xs: 'stretch', sm: 'center' }}
+          >
+            {/* User Filter */}
+            <Box sx={{ flex: 1, minWidth: 200 }}>
+              <Typography level='body-sm' sx={{ mb: 1, fontWeight: 500 }}>
+                Show points for:
+              </Typography>
+              <Select
+                sx={{
+                  width: '100%',
+                }}
+                variant='outlined'
+                value={selectedUser}
+                onChange={(e, selected) => {
+                  setSelectedUser(selected)
+                  setSelectedHistory(
+                    generateWeeklySummary(choresHistoryData, selected),
+                  )
+                }}
+                renderValue={() => {
+                  return (
+                    <Typography
+                      startDecorator={
+                        <Avatar
+                          color='primary'
+                          size='sm'
+                          src={resolvePhotoURL(
+                            circleUsers.find(
+                              user => user.userId === selectedUser,
+                            )?.image,
+                          )}
+                        >
+                          {circleUsers
+                            .find(user => user.userId === selectedUser)
+                            ?.displayName?.charAt(0)}
+                        </Avatar>
+                      }
+                    >
+                      {
+                        circleUsers.find(user => user.userId === selectedUser)
+                          ?.displayName
+                      }
+                    </Typography>
+                  )
+                }}
+              >
+                {circleUsers.map(user => (
+                  <Option key={user.userId} value={user.userId}>
+                    <Avatar
+                      color='primary'
+                      size='sm'
+                      src={resolvePhotoURL(user.image)}
+                    >
+                      {user.displayName?.charAt(0)}
+                    </Avatar>
+                    <Typography>{user.displayName}</Typography>
+                    <Chip
+                      color='success'
+                      size='sm'
+                      variant='soft'
+                      startDecorator={<Toll />}
+                    >
+                      {user.points - user.pointsRedeemed}
+                    </Chip>
+                  </Option>
+                ))}
+              </Select>
+            </Box>
+
+            {/* Time Period Filter */}
+            <Box sx={{ flex: 1, minWidth: 200 }}>
+              <Typography level='body-sm' sx={{ mb: 1, fontWeight: 500 }}>
+                Time period:
+              </Typography>
+              <Tabs
+                onChange={(e, tabValue) => {
+                  setTabValue(tabValue)
+                  handleChoresHistoryLimitChange(tabValue)
+                }}
+                value={tabValue}
+                sx={{
+                  borderRadius: 8,
+                  backgroundColor: 'background.surface',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                }}
+              >
+                <TabList
+                  disableUnderline
+                  sx={{
+                    borderRadius: 8,
+                    backgroundColor: 'transparent',
+                    p: 0.5,
+                    gap: 0.5,
+                  }}
+                >
+                  {[
+                    { label: '7 Days', value: 7 },
+                    { label: '6 Months', value: 6 * 30 },
+                    { label: 'All Time', value: 24 * 30 },
+                  ].map((tab, index) => (
+                    <Tab
+                      key={index}
+                      sx={{
+                        borderRadius: 6,
+                        minWidth: 'auto',
+                        px: 2,
+                        py: 1,
+                        fontSize: 'sm',
+                        fontWeight: 500,
+                        color: 'text.secondary',
+                        '&.Mui-selected': {
+                          color: 'primary.plainColor',
+                          backgroundColor: 'primary.softBg',
+                          fontWeight: 600,
+                        },
+                        '&:hover': {
+                          backgroundColor: 'neutral.softHoverBg',
+                        },
+                      }}
+                      disableIndicator
+                      value={tab.value}
+                    >
+                      {tab.label}
+                    </Tab>
+                  ))}
+                </TabList>
+              </Tabs>
+            </Box>
+
+            {/* Redeem Points Button */}
+            {circleUsers.find(user => user.userId === userProfile.id)?.role ===
+              'admin' && (
+              <Box sx={{ display: 'flex', alignItems: 'flex-end' }}>
+                <Button
+                  variant='soft'
+                  size='md'
+                  startDecorator={<CreditCard />}
+                  onClick={() => {
+                    setIsRedeemModalOpen(true)
+                  }}
+                  sx={{ mt: 'auto' }}
+                >
+                  Redeem Points
+                </Button>
+              </Box>
+            )}
+          </Stack>
+        </Stack>
+      </Card>
+
+      {/* Current Filter Summary */}
+      <Box sx={{ mb: 3, textAlign: 'center' }}>
+        <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+          Showing points for{' '}
+          <Typography
+            component='span'
+            sx={{ fontWeight: 600, color: 'primary.500' }}
+          >
+            {circleUsers.find(user => user.userId === selectedUser)
+              ?.displayName || 'Unknown User'}
+          </Typography>{' '}
+          over the{' '}
+          <Typography
+            component='span'
+            sx={{ fontWeight: 600, color: 'primary.500' }}
+          >
+            {tabValue === 24 * 30
+              ? 'All Time'
+              : tabValue === 6 * 30
+                ? 'Last 6 Months'
+                : `Last ${tabValue} Days`}
+          </Typography>
+        </Typography>
+      </Box>
+
       <Box
         sx={{
           mb: 4,
           display: 'flex',
           flexDirection: 'column',
-          gap: 1,
+          gap: 3,
         }}
       >
-        <Typography level='h4'>Points Overview</Typography>
-        <Box
-          sx={{
-            gap: 1,
-            my: 2,
-            display: 'flex',
-            justifyContent: 'start',
-          }}
-        >
-          <Select
-            sx={{
-              width: 200,
-            }}
-            variant='soft'
-            label='User'
-            value={selectedUser}
-            onChange={(e, selected) => {
-              setSelectedUser(selected)
-              setSelectedHistory(generateWeeklySummary(choresHistory, selected))
-            }}
-            renderValue={selected => (
-              <Typography
-                startDecorator={
-                  <Avatar
-                    color='primary'
-                    m={0}
-                    size='sm'
-                    src={resolvePhotoURL(
-                      circleUsers.find(user => user.userId === selectedUser)
-                        ?.image,
-                    )}
-                  >
-                    {
-                      circleUsers.find(user => user.userId === selectedUser)
-                        ?.displayName[0]
-                    }
-                  </Avatar>
-                }
-              >
-                {
-                  circleUsers.find(user => user.userId === selectedUser)
-                    ?.displayName
-                }
-              </Typography>
-            )}
-          >
-            {circleUsers.map(user => (
-              <Option key={user.userId} value={user.userId}>
-                <Avatar
-                  color='primary'
-                  m={0}
-                  size='sm'
-                  src={resolvePhotoURL(user.image)}
-                >
-                  {user.displayName[0]}
-                </Avatar>
-                <Typography>{user.displayName}</Typography>
-                <Chip
-                  color='success'
-                  size='sm'
-                  variant='soft'
-                  startDecorator={<Toll />}
-                >
-                  {user.points - user.pointsRedeemed}
-                </Chip>
-              </Option>
-            ))}
-          </Select>
-          {circleUsers.find(user => user.userId === userProfile.id)?.role ===
-            'admin' && (
-            <Button
-              variant='soft'
-              size='md'
-              startDecorator={<CreditCard />}
-              onClick={() => {
-                setIsRedeemModalOpen(true)
-              }}
-            >
-              Redeem Points
-            </Button>
-          )}
-        </Box>
-
+        {/* Points Cards */}
         <Box
           sx={{
             // resposive width based on parent available space:
@@ -344,7 +457,6 @@ const UserPoints = () => {
                 if (!user) return 0
                 return user.points - user.pointsRedeemed
               })(),
-
               color: 'success',
             },
             {
@@ -374,63 +486,11 @@ const UserPoints = () => {
             </Card>
           ))}
         </Box>
-        <Typography level='h4'>Points History</Typography>
 
-        <Box
-          sx={{
-            // center vertically:
-            display: 'flex',
-            justifyContent: 'left',
-            gap: 1,
-          }}
-        >
-          <Tabs
-            onChange={(e, tabValue) => {
-              setTabValue(tabValue)
-              handleChoresHistoryLimitChange(tabValue)
-            }}
-            defaultValue={tabValue}
-            sx={{
-              py: 0.5,
-              borderRadius: 16,
-              maxWidth: 400,
-              mb: 1,
-            }}
-          >
-            <TabList
-              disableUnderline
-              sx={{
-                borderRadius: 16,
-                backgroundColor: 'background.paper',
-                boxShadow: 1,
-                justifyContent: 'space-evenly',
-              }}
-            >
-              {[
-                { label: '7 Days', value: 7 },
-                // { label: '3 Month', value: 30 },
-                { label: '6 Months', value: 6 * 30 },
-                { label: 'All Time', value: 24 * 30 },
-              ].map((tab, index) => (
-                <Tab
-                  key={index}
-                  sx={{
-                    borderRadius: 16,
-                    color: 'text.secondary',
-                    '&.Mui-selected': {
-                      color: 'text.primary',
-                      backgroundColor: 'primary.light',
-                    },
-                  }}
-                  disableIndicator
-                  value={tab.value}
-                >
-                  {tab.label}
-                </Tab>
-              ))}
-            </TabList>
-          </Tabs>
-        </Box>
+        {/* Points History Section */}
+        <Typography level='h4' sx={{ mt: 2, mb: 2 }}>
+          Points History
+        </Typography>
 
         <Box
           sx={{
@@ -439,6 +499,7 @@ const UserPoints = () => {
             display: 'flex',
             justifyContent: 'left',
             gap: 1,
+            mb: 3,
           }}
         >
           {[
@@ -471,7 +532,8 @@ const UserPoints = () => {
             </Card>
           ))}
         </Box>
-        {/* Bar Chart for points overtime : */}
+
+        {/* Bar Chart for points overtime */}
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
           <ResponsiveContainer height={300}>
             <BarChart
@@ -480,22 +542,18 @@ const UserPoints = () => {
             >
               <CartesianGrid strokeDasharray={'3 3'} />
               <XAxis dataKey='label' axisLine={false} tickLine={false} />
-
               <YAxis axisLine={false} tickLine={false} />
-
               <Bar
                 fill='#4183F2'
                 dataKey='points'
                 barSize={30}
                 radius={[5, 5, 0, 0]}
-              >
-                {/* Rounded top corners, blue fill, set bar width */}
-                {/* Add a slightly darker top section to the 'Jul' bar */}
-              </Bar>
+              />
             </BarChart>
           </ResponsiveContainer>
         </Box>
       </Box>
+
       <RedeemPointsModal
         config={{
           onClose: () => {
@@ -507,7 +565,7 @@ const UserPoints = () => {
           user: circleUsers.find(user => user.userId === selectedUser),
           onSave: ({ userId, points }) => {
             RedeemPoints(userId, points, userProfile.circleID)
-              .then(res => {
+              .then(() => {
                 setIsRedeemModalOpen(false)
                 handleCircleMembersRefetch()
               })

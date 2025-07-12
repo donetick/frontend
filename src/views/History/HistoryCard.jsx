@@ -1,11 +1,13 @@
 import {
   AccessTime,
-  Assignment,
-  CalendarViewDay,
+  CalendarMonth,
   Check,
+  CheckCircle,
   EventNote,
   Person,
+  Redo,
   Timelapse,
+  Toll,
 } from '@mui/icons-material'
 import {
   Avatar,
@@ -19,28 +21,25 @@ import {
 } from '@mui/joy'
 import moment from 'moment'
 
-/**
- * Enhanced completion status chip with better logic and visual design
- */
 const getCompletedChip = historyEntry => {
   if (historyEntry.status === 0) {
     return null
   }
   if (!historyEntry.dueDate) {
-    return (
-      <Chip
-        size='sm'
-        variant='soft'
-        color='neutral'
-        startDecorator={<CalendarViewDay />}
-      >
-        No Due Date
-      </Chip>
-    )
+    return null
+    // <Chip
+    //   size='sm'
+    //   variant='soft'
+    //   color='neutral'
+    //   startDecorator={<CalendarViewDay />}
+    // >
+    //   No Due Date
+    // </Chip>
   }
 
   const performedAt = moment(historyEntry.performedAt)
   const dueDate = moment(historyEntry.dueDate)
+  // TODO: make this a config at some point
   const gracePeriod = 6 * 60 * 60 * 1000 // 6 hours in milliseconds
 
   if (Math.abs(performedAt - dueDate) <= gracePeriod) {
@@ -72,6 +71,16 @@ const getCompletedChip = historyEntry => {
       </Chip>
     )
   }
+}
+
+const formatTime = seconds => {
+  if (typeof seconds !== 'number' || isNaN(seconds) || seconds < 0) {
+    return null
+  }
+  const hours = Math.floor(seconds / 3600)
+  const minutes = Math.floor((seconds % 3600) / 60)
+  const secs = seconds % 60
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
 }
 
 /**
@@ -111,7 +120,7 @@ const HistoryCard = ({
     const statusMap = {
       0: { icon: <AccessTime />, color: 'primary' }, // Started
       1: { icon: <Check />, color: 'success' }, // Completed
-      2: { icon: <Timelapse />, color: 'danger' }, // Skipped
+      2: { icon: <Redo />, color: 'warning' }, // Skipped
     }
 
     const config = statusMap[historyEntry.status] || statusMap[1]
@@ -119,7 +128,7 @@ const HistoryCard = ({
       <Avatar
         size='sm'
         color={config.color}
-        variant='solid'
+        variant='soft'
         sx={{
           width: 24,
           height: 24,
@@ -176,14 +185,11 @@ const HistoryCard = ({
                       : 'Skipped'}
                 </Typography>
 
-                <Typography
-                  level='body-xs'
-                  sx={{ fontWeight: 'sm', color: 'text.primary' }}
-                >
+                <Chip size='sm' startDecorator={<EventNote />}>
                   {moment(
                     historyEntry.performedAt || historyEntry.updatedAt,
                   ).format('MMM DD, h:mm A')}
-                </Typography>
+                </Chip>
 
                 <Box sx={{ display: 'flex', gap: 0.5 }}>
                   {getCompletedChip(historyEntry)}
@@ -202,12 +208,9 @@ const HistoryCard = ({
                 }}
               >
                 {historyEntry.dueDate && (
-                  <Typography
-                    level='body-xs'
-                    sx={{ color: 'text.tertiary', whiteSpace: 'nowrap' }}
-                  >
-                    Due: {moment(historyEntry.dueDate).format('MMM DD')}
-                  </Typography>
+                  <Chip size='sm' startDecorator={<CalendarMonth />}>
+                    {moment(historyEntry.dueDate).format('MMM DD h:mm A')}
+                  </Chip>
                 )}
               </Box>
             </Grid>
@@ -240,7 +243,7 @@ const HistoryCard = ({
                         size='sm'
                         variant='soft'
                         color='neutral'
-                        startDecorator={<Assignment />}
+                        startDecorator={<CheckCircle />}
                       >
                         {assignedTo.displayName}
                       </Chip>
@@ -256,6 +259,28 @@ const HistoryCard = ({
                     sx={{ maxWidth: '120px', overflow: 'hidden' }}
                   >
                     Note
+                  </Chip>
+                )}
+                {/* add a duration chip if we have duration */}
+                {historyEntry?.duration > 0 && (
+                  <Chip
+                    size='sm'
+                    variant='soft'
+                    color='primary'
+                    startDecorator={<AccessTime />}
+                  >
+                    {formatTime(historyEntry.duration)}
+                  </Chip>
+                )}
+                {historyEntry?.points > 0 && (
+                  <Chip
+                    size='sm'
+                    variant='solid'
+                    color='success'
+                    startDecorator={<Toll />}
+                  >
+                    {historyEntry.points} pt
+                    {historyEntry.points > 1 ? 's' : ''}
                   </Chip>
                 )}
               </Box>

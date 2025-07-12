@@ -5,6 +5,7 @@ import {
   Person,
   Redo,
   Refresh,
+  Timelapse,
   Toll,
   WatchLater,
 } from '@mui/icons-material'
@@ -32,9 +33,9 @@ const ActivityItem = ({ activity, members }) => {
     member => member.userId === activity.completedBy,
   )
 
-  const getTimeDisplay = performedAt => {
+  const getTimeDisplay = dateToDisplay => {
     const now = moment()
-    const completed = moment(performedAt)
+    const completed = moment(dateToDisplay)
     const diffInHours = now.diff(completed, 'hours')
     const diffInDays = now.diff(completed, 'days')
 
@@ -50,6 +51,13 @@ const ActivityItem = ({ activity, members }) => {
   }
 
   const getStatusInfo = activity => {
+    if (activity.status === 0) {
+      return {
+        color: 'primary',
+        text: 'Started',
+        icon: <Timelapse />,
+      }
+    }
     if (!activity.status === 1) {
       return {
         color: 'neutral',
@@ -105,7 +113,11 @@ const ActivityItem = ({ activity, members }) => {
               {activity.choreName}
             </Typography>
             <Typography level='body-xs' color='text.secondary'>
-              {getTimeDisplay(activity.performedAt)}
+              {getTimeDisplay(
+                activity.performedAt ||
+                  activity.updatedAt ||
+                  activity.createdAt,
+              )}
             </Typography>
           </Box>
 
@@ -127,18 +139,6 @@ const ActivityItem = ({ activity, members }) => {
                 completedByMember?.name ||
                 'Unknown'}
             </Typography>
-          </Box>
-
-          {/* Status, Points, and Notes */}
-          <Box
-            sx={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 0.5,
-              mt: 0.5,
-              ml: 2.5,
-            }}
-          >
             {/* Points chip */}
             {activity.points && activity.points > 0 && (
               <Chip
@@ -151,6 +151,17 @@ const ActivityItem = ({ activity, members }) => {
               </Chip>
             )}
           </Box>
+
+          {/* Status, Points, and Notes */}
+          <Box
+            sx={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 0.5,
+              mt: 0.5,
+              ml: 2.5,
+            }}
+          ></Box>
 
           {/* Notes */}
           {activity.notes && (
@@ -180,7 +191,9 @@ const groupActivitiesByDate = activities => {
   const groups = {}
 
   activities.forEach(activity => {
-    const date = moment(activity.performedAt).format('YYYY-MM-DD')
+    const date = moment(
+      activity.performedAt || activity.updatedAt || activity.createdAt,
+    ).format('YYYY-MM-DD')
     if (!groups[date]) {
       groups[date] = []
     }
@@ -270,7 +283,8 @@ const ActivitiesCard = ({ title = 'Recent Activities' }) => {
   const sortedHistory = enrichedHistory
     .sort(
       (a, b) =>
-        moment(b.performedAt).valueOf() - moment(a.performedAt).valueOf(),
+        moment(b.performedAt || b.updatedAt).valueOf() -
+        moment(a.performedAt || a.updatedAt).valueOf(),
     )
     .slice(0, 10) // Show only latest 10 activities
 

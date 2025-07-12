@@ -13,7 +13,7 @@ import { localStore } from '../utils/LocalStore'
 
 export const useChores = includeArchive => {
   return useQuery({
-    queryKey: ['chores'],
+    queryKey: ['chores', includeArchive],
     queryFn: async () => {
       const onlineChores = await GetChoresNew(includeArchive)
 

@@ -13,15 +13,17 @@ import { useEffect, useRef, useState } from 'react'
 import LabelModal from '../Modals/Inputs/LabelModal'
 
 // import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Add } from '@mui/icons-material'
+import { Add, ColorLens } from '@mui/icons-material'
 import { useQueryClient } from '@tanstack/react-query'
-import { getTextColorFromBackgroundColor } from '../../utils/Colors'
-import LABEL_COLORS from '../../utils/Colors'
+import { useUserProfile } from '../../queries/UserQueries'
+import LABEL_COLORS, {
+  getTextColorFromBackgroundColor,
+} from '../../utils/Colors'
 import { DeleteLabel } from '../../utils/Fetcher'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import { useLabels } from './LabelQueries'
 
-const LabelCard = ({ label, onEditClick, onDeleteClick }) => {
+const LabelCard = ({ label, onEditClick, onDeleteClick, currentUserId }) => {
   // Helper function to get color name from hex value
   const getColorName = hexValue => {
     const colorObj = LABEL_COLORS.find(
@@ -29,6 +31,9 @@ const LabelCard = ({ label, onEditClick, onDeleteClick }) => {
     )
     return colorObj ? colorObj.name : hexValue
   }
+
+  // Check if current user owns this label
+  const isOwnedByCurrentUser = label.created_by === currentUserId
 
   // Swipe functionality state
   const [swipeTranslateX, setSwipeTranslateX] = useState(0)
@@ -138,14 +143,14 @@ const LabelCard = ({ label, onEditClick, onDeleteClick }) => {
     setIsSwipeRevealed(false)
   }
 
-  // Hover functionality for desktop
+  // Hover functionality for desktop - only trigger from drag area
   const handleMouseEnter = () => {
     if (isSwipeRevealed) return
     const timer = setTimeout(() => {
       setSwipeTranslateX(-maxSwipeDistance)
       setIsSwipeRevealed(true)
       setHoverTimer(null)
-    }, 1500)
+    }, 800) // Shorter delay for drag area
     setHoverTimer(timer)
   }
 
@@ -154,15 +159,29 @@ const LabelCard = ({ label, onEditClick, onDeleteClick }) => {
       clearTimeout(hoverTimer)
       setHoverTimer(null)
     }
-    if (isSwipeRevealed) {
-      resetSwipe()
+    // Only add hide timer if we're leaving the drag area and actions are NOT revealed
+    // If actions are revealed, let the action area handle the hiding
+    if (!isSwipeRevealed) {
+      // Actions are not revealed, so we can safely hide after delay
+      const hideTimer = setTimeout(() => {
+        resetSwipe()
+      }, 300)
+      setHoverTimer(hideTimer)
     }
   }
 
   const handleActionAreaMouseEnter = () => {
+    // Clear any pending timer when entering action area
     if (hoverTimer) {
       clearTimeout(hoverTimer)
       setHoverTimer(null)
+    }
+  }
+
+  const handleActionAreaMouseLeave = () => {
+    // Hide immediately when leaving action area
+    if (isSwipeRevealed) {
+      resetSwipe()
     }
   }
 
@@ -187,7 +206,13 @@ const LabelCard = ({ label, onEditClick, onDeleteClick }) => {
             borderBottom: 'none',
           },
         }}
-        onMouseLeave={handleMouseLeave}
+        onMouseLeave={() => {
+          // Only clear timers, don't auto-hide
+          if (hoverTimer) {
+            clearTimeout(hoverTimer)
+            setHoverTimer(null)
+          }
+        }}
       >
         {/* Action buttons underneath (revealed on swipe) */}
         <Box
@@ -203,6 +228,7 @@ const LabelCard = ({ label, onEditClick, onDeleteClick }) => {
             zIndex: 0,
           }}
           onMouseEnter={handleActionAreaMouseEnter}
+          onMouseLeave={handleActionAreaMouseLeave}
         >
           <IconButton
             variant='plain'
@@ -287,8 +313,54 @@ const LabelCard = ({ label, onEditClick, onDeleteClick }) => {
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
-          onMouseEnter={handleMouseEnter}
         >
+          {/* Right drag area - only triggers reveal on hover */}
+          <Box
+            sx={{
+              position: 'absolute',
+              right: 0,
+              top: 0,
+              bottom: 0,
+              width: '20px',
+              cursor: 'grab',
+              zIndex: 2,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              opacity: isSwipeRevealed ? 0 : 0.3, // Hide when action area is revealed
+              transition: 'opacity 0.2s ease',
+              pointerEvents: isSwipeRevealed ? 'none' : 'auto', // Disable pointer events when revealed
+              '&:hover': {
+                opacity: isSwipeRevealed ? 0 : 0.7,
+              },
+              '&:active': {
+                cursor: 'grabbing',
+              },
+            }}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
+            {/* Drag indicator dots */}
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 0.25,
+              }}
+            >
+              {[...Array(3)].map((_, i) => (
+                <Box
+                  key={i}
+                  sx={{
+                    width: 3,
+                    height: 3,
+                    borderRadius: '50%',
+                    bgcolor: 'text.tertiary',
+                  }}
+                />
+              ))}
+            </Box>
+          </Box>
           {/* Color Avatar */}
           <Box
             sx={{
@@ -305,8 +377,12 @@ const LabelCard = ({ label, onEditClick, onDeleteClick }) => {
                 height: 32,
                 bgcolor: label.color,
                 border: '2px solid',
-                borderColor: 'background.surface',
-                boxShadow: 'sm',
+                borderColor: isOwnedByCurrentUser
+                  ? 'background.surface'
+                  : 'warning.300',
+                boxShadow: isOwnedByCurrentUser
+                  ? 'sm'
+                  : '0 0 0 1px var(--joy-palette-warning-300)',
               }}
             >
               <Typography
@@ -348,20 +424,38 @@ const LabelCard = ({ label, onEditClick, onDeleteClick }) => {
 
             {/* Color Info */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Chip
-                size='sm'
-                variant='soft'
-                sx={{
-                  fontSize: 10,
-                  height: 18,
-                  px: 0.75,
-                  bgcolor: `${label.color}20`,
-                  color: label.color,
-                  border: `1px solid ${label.color}30`,
-                }}
-              >
-                {getColorName(label.color)}
-              </Chip>
+              {label.color && (
+                <Chip
+                  size='sm'
+                  variant='soft'
+                  startDecorator={<ColorLens />}
+                  sx={{
+                    fontSize: 10,
+                    height: 18,
+                    px: 0.75,
+                    bgcolor: `${label.color}20`,
+                    color: label.color,
+                    border: `1px solid ${label.color}30`,
+                  }}
+                >
+                  {getColorName(label.color)}
+                </Chip>
+              )}
+              {!isOwnedByCurrentUser && (
+                <Chip
+                  size='sm'
+                  variant='soft'
+                  color='warning'
+                  sx={{
+                    fontSize: 9,
+                    height: 16,
+                    px: 0.5,
+                    fontWeight: 'md',
+                  }}
+                >
+                  Shared
+                </Chip>
+              )}
             </Box>
           </Box>
         </Box>
@@ -372,6 +466,7 @@ const LabelCard = ({ label, onEditClick, onDeleteClick }) => {
 
 const LabelView = () => {
   const { data: labels, isLabelsLoading, isError } = useLabels()
+  const { data: userProfile } = useUserProfile()
 
   const [userLabels, setUserLabels] = useState([])
   const [modalOpen, setModalOpen] = useState(false)
@@ -459,10 +554,10 @@ const LabelView = () => {
     <Container maxWidth='md' sx={{ px: 0 }}>
       <Box
         sx={{
-          bgcolor: 'background.body',
-          border: '1px solid',
-          borderColor: 'divider',
-          borderRadius: 'md',
+          // bgcolor: 'background.body',
+          // border: '1px solid',
+          // borderColor: 'divider',
+          // borderRadius: 'md',
           overflow: 'hidden',
         }}
       >
@@ -487,6 +582,7 @@ const LabelView = () => {
             label={label}
             onEditClick={handleEditLabel}
             onDeleteClick={handleDeleteClicked}
+            currentUserId={userProfile?.id}
           />
         ))}
       </Box>

@@ -1,8 +1,9 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { EventSourcePolyfill } from 'event-source-polyfill'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useAlerts } from '../service/AlertsProvider'
+import { useNotification } from '../service/NotificationProvider'
 import { apiManager, isTokenValid } from '../utils/TokenManager'
-
 const SSE_STATES = {
   CONNECTING: 0,
   OPEN: 1,
@@ -27,6 +28,8 @@ export const useSSE = () => {
   const heartbeatMonitorRef = useRef(null)
 
   const queryClient = useQueryClient()
+  const { showError, showNotification } = useNotification()
+  const { showAlert } = useAlerts()
 
   const getSSEUrl = useCallback(() => {
     const token = localStorage.getItem('ca_token')
@@ -54,54 +57,111 @@ export const useSSE = () => {
         if (eventData.type === 'heartbeat') {
           lastHeartbeatRef.current = Date.now()
         }
+        console.log('SSE Message received:', eventData)
 
         // Handle different event types and update React Query cache accordingly
         switch (eventData.type) {
           case 'chore.created':
           case 'chore.updated':
           case 'chore.completed':
-          case 'chore.skipped':
-            queryClient.invalidateQueries(['choresHistory', 7])
-            queryClient.invalidateQueries(['chores'])
+          case 'chore.skipped': {
+            showNotification({
+              type: 'info',
+              title: `Task ${eventData.type.replace('chore.', '')}`,
+              message: `${eventData.data.user.displayName}  ${eventData.type.replace('chore.', '')} "${eventData.data.chore.name}"`,
+              duration: 5000,
+            })
+            const updatedChore = eventData.data.chore
 
-            // If it's a specific chore event, also invalidate that chore's details
-            if (eventData.data.chore?.id) {
-              queryClient.invalidateQueries(['chore', eventData.data.chore.id])
-              queryClient.invalidateQueries([
-                'choreDetails',
-                eventData.data.chore.id,
-              ])
-            }
+            // Update individual chore cache
+            queryClient.setQueryData(['chore', updatedChore.id], oldData => {
+              if (!oldData) return { res: updatedChore }
+              return { res: { ...oldData.res, ...updatedChore } }
+            })
+
+            // Update chores list cache - add debugging
+            queryClient.setQueryData(['chores'], oldData => {
+              if (!oldData) return { res: [updatedChore] }
+
+              if (!oldData.res || !Array.isArray(oldData.res)) {
+                return { res: [updatedChore] }
+              }
+
+              // Check if the chore exists in the cache
+              const choreExists = oldData.res.some(
+                chore => chore.id === updatedChore.id,
+              )
+
+              // If it's a one-time chore that's completed, we might need to remove it
+              if (
+                eventData.type === 'chore.completed' &&
+                updatedChore.frequencyType === 'once'
+              ) {
+                return {
+                  res: oldData.res.filter(
+                    chore => chore.id !== updatedChore.id,
+                  ),
+                }
+              }
+
+              // If chore update then also refetch chore details:
+              if (eventData.type === 'chore.updated') {
+                queryClient.invalidateQueries(['choreDetails', updatedChore.id])
+                queryClient.refetchQueries({
+                  queryKey: ['choreDetails', updatedChore.id],
+                })
+              }
+
+              // Otherwise update the existing chore or add if it doesn't exist
+              return {
+                res: choreExists
+                  ? oldData.res.map(chore => {
+                      if (chore.id === updatedChore.id) {
+                        return { ...chore, ...updatedChore }
+                      }
+                      return chore
+                    })
+                  : [...oldData.res, updatedChore],
+              }
+            })
+
             break
+          }
 
           case 'chore.deleted':
-            // Invalidate chores queries to refetch data
-            queryClient.invalidateQueries(['chores'])
+            // update chores list cache
+            queryClient.setQueryData(['chores'], oldData => {
+              if (!oldData || !oldData.res) return oldData
+              return {
+                res: oldData.res.filter(
+                  chore => chore.id !== eventData.data.choreId,
+                ),
+              }
+            })
 
-            // If it's a specific chore event, also invalidate that chore's details
-            if (eventData.data.chore?.id) {
-              queryClient.invalidateQueries(['chore', eventData.data.chore.id])
-              queryClient.invalidateQueries([
-                'choreDetails',
-                eventData.data.chore.id,
-              ])
-            }
             break
 
           case 'subtask.updated':
           case 'subtask.completed':
-            // Invalidate the specific chore that contains this subtask
-            if (eventData.data.choreId) {
-              queryClient.invalidateQueries(['chore', eventData.data.choreId])
-              queryClient.invalidateQueries([
-                'choreDetails',
-                eventData.data.choreId,
-              ])
-            }
-            // Also invalidate general chores list
-            queryClient.invalidateQueries(['chores'])
-            break
+            queryClient.refetchQueries({
+              queryKey: ['choreDetails', eventData.data.choreId],
+            })
 
+            // Invalidate the specific chore that contains this subtask
+            // if (eventData.data.choreId) {
+            //   queryClient.invalidateQueries(['chore', eventData.data.choreId])
+            //   queryClient.invalidateQueries([
+            //     'choreDetails',
+            //     eventData.data.choreId,
+            //   ])
+            // }
+            // Also invalidate general chores list
+            // queryClient.invalidateQueries(['chores'])
+            break
+          case 'chore.status':
+            console.log('SSE chore.status event received:', eventData.data)
+
+            break
           case 'heartbeat':
             // Heartbeat events don't need cache invalidation
             console.debug('SSE Heartbeat received at', new Date().toISOString())
@@ -111,11 +171,21 @@ export const useSSE = () => {
             console.log('SSE connection established')
             setError(null)
             lastHeartbeatRef.current = Date.now()
+            showAlert({
+              type: 'success',
+              color: 'success',
+              message: 'You are now receiving real-time as they happen.',
+            })
             break
 
           case 'error':
             console.error('SSE error event:', eventData.data)
-            setError(eventData.data.message || 'SSE error occurred')
+            showError({
+              title: 'Real-time Error',
+              message:
+                eventData.data.message ||
+                'An error occurred with real-time updates',
+            })
             break
 
           default:
@@ -123,11 +193,14 @@ export const useSSE = () => {
         }
       } catch (err) {
         console.error('Failed to parse SSE message:', err)
-        setError('Failed to parse server message')
+        showError({
+          title: 'Message Error',
+          message: 'Failed to parse server message',
+        })
         return // Stop processing if JSON parsing fails
       }
     },
-    [queryClient],
+    [queryClient, showNotification, showError],
   )
 
   const stopHeartbeatMonitor = useCallback(() => {
@@ -141,9 +214,11 @@ export const useSSE = () => {
   const connect = useCallback(() => {
     if (isCircuitBreakerOpen) {
       console.log('SSE: Circuit breaker is open, preventing connection attempt')
-      setError(
-        'Connection blocked due to repeated failures. Please try again later.',
-      )
+      showError({
+        title: 'Connection Temporarily Disabled',
+        message:
+          'Connection blocked due to repeated failures. Please try again later.',
+      })
       return
     }
 
@@ -152,9 +227,11 @@ export const useSSE = () => {
         'SSE: Maximum reconnection attempts reached, opening circuit breaker',
       )
       setIsCircuitBreakerOpen(true)
-      setError(
-        'Maximum connection attempts reached. SSE disabled for 5 minutes.',
-      )
+      showError({
+        title: 'Connection Failed',
+        message:
+          'Maximum connection attempts reached. SSE disabled for 10 minutes.',
+      })
 
       // Reset circuit breaker after timeout
       setTimeout(() => {
@@ -308,10 +385,19 @@ export const useSSE = () => {
       }
     } catch (err) {
       console.error('Failed to create SSE connection:', err)
-      setError('Failed to establish connection')
+      showError({
+        title: 'Connection Error',
+        message: 'Failed to establish real-time connection. Please try again.',
+      })
       setConnectionState(SSE_STATES.CLOSED)
     }
-  }, [getSSEUrl, handleSSEMessage, stopHeartbeatMonitor, isCircuitBreakerOpen])
+  }, [
+    getSSEUrl,
+    handleSSEMessage,
+    stopHeartbeatMonitor,
+    isCircuitBreakerOpen,
+    showError,
+  ])
 
   const disconnect = useCallback(() => {
     isManuallyClosedRef.current = true

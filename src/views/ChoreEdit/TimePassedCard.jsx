@@ -1,8 +1,8 @@
-import { Flag, Schedule } from '@mui/icons-material'
+import { Flag, Pause, PlayArrow, Schedule } from '@mui/icons-material'
 import { Box, Card, Chip, Typography } from '@mui/joy'
 import { useEffect, useRef, useState } from 'react'
 
-const TimePassedCard = ({ chore }) => {
+const TimePassedCard = ({ chore, handleAction, onShowDetails }) => {
   const [time, setTime] = useState(0)
   const [shouldAnimate, setShouldAnimate] = useState(false)
   const [prevStatus, setPrevStatus] = useState(null) // Initialize as null
@@ -26,14 +26,20 @@ const TimePassedCard = ({ chore }) => {
     const calculateCurrentTime = () => {
       if (chore.timerUpdatedAt && chore.status === 1) {
         // Active session: base duration + time since start
-        return (
-          Math.floor(
-            (Date.now() - new Date(chore.timerUpdatedAt).getTime()) / 1000,
-          ) + (chore.duration || 0)
+        const timeSinceStart = Math.floor(
+          (Date.now() - new Date(chore.timerUpdatedAt).getTime()) / 1000,
         )
+
+        return timeSinceStart + (chore.duration || 0)
       }
       // Not active: just return accumulated duration
       return chore.duration || 0
+    }
+
+    // Clear any existing timer first
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+      intervalRef.current = null
     }
 
     // Set initial time
@@ -44,14 +50,9 @@ const TimePassedCard = ({ chore }) => {
     if (chore.status === 1) {
       // Active: start interval timer
       intervalRef.current = setInterval(() => {
-        setTime(calculateCurrentTime())
+        const newTime = calculateCurrentTime()
+        setTime(newTime)
       }, 1000)
-    } else {
-      // Not active: clear any existing timer
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
-        intervalRef.current = null
-      }
     }
 
     // Cleanup function
@@ -61,7 +62,7 @@ const TimePassedCard = ({ chore }) => {
         intervalRef.current = null
       }
     }
-  }, [chore.status, chore.timerUpdatedAt, chore.duration])
+  }, [chore.status, chore.duration, chore.timerUpdatedAt])
 
   const formatTime = seconds => {
     const hours = Math.floor(seconds / 3600)
@@ -76,8 +77,10 @@ const TimePassedCard = ({ chore }) => {
       sx={{
         borderRadius: 'md',
         boxShadow: 1,
+        gap: 0,
         px: 2,
         py: 1,
+        height: '75px',
         alignItems: 'center',
         ...(shouldAnimate && {
           animation: 'slideInUp 0.3s ease-out',
@@ -99,46 +102,51 @@ const TimePassedCard = ({ chore }) => {
         level='h4'
         sx={{
           fontWeight: 600,
-          pt: 1,
           color: chore.status === 1 ? 'success.main' : 'text.primary',
+          // mb: 0.5,
           mb: 0.5,
           transition: 'all 0.3s ease',
           transform: chore.status === 1 ? 'scale(1.40)' : 'scale(1)',
+          cursor: 'pointer',
+          '&:hover': {
+            textDecoration: 'underline',
+          },
         }}
+        onClick={() => onShowDetails?.()}
       >
         {formatTime(time)}
       </Typography>
 
       {/* Status and info section */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
-        {/* <Chip
-          variant='solid'
-          color={
-            chore.status === 1
-              ? 'success'
-              : chore.status === 2
-                ? 'warning'
-                : 'neutral'
-          }
-          size='sm'
-          startDecorator={
-            chore.status === 1 ? (
-              <PlayArrow sx={{ fontSize: 14 }} />
-            ) : chore.status === 2 ? (
-              <Pause sx={{ fontSize: 14 }} />
-            ) : (
-              <AccessTime sx={{ fontSize: 14 }} />
-            )
-          }
-        >
-          {chore.status === 1
-            ? 'Active'
-            : chore.status === 2
-              ? 'Paused'
-              : 'Idle'}
-        </Chip> */}
-
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0 }}>
         {/* Show start time and user if active */}
+        {chore.status === 1 ? (
+          <Chip
+            variant='soft'
+            color='warning'
+            size='md'
+            startDecorator={<Pause sx={{ fontSize: 14 }} />}
+            onClick={() => {
+              handleAction('pause')
+            }}
+          >
+            Pause
+          </Chip>
+        ) : (
+          <Chip
+            variant='solid'
+            color='success'
+            size='md'
+            startDecorator={<PlayArrow sx={{ fontSize: 14 }} />}
+            onClick={() => {
+              handleAction('resume')
+            }}
+          >
+            Resume
+          </Chip>
+        )}
+
+        {/* Chips for start time and current session */}
         {chore.status === 1 && chore.timerUpdatedAt && (
           <>
             {/* Original start time */}
@@ -146,10 +154,9 @@ const TimePassedCard = ({ chore }) => {
               <Chip
                 variant='plain'
                 color='primary'
-                size='sm'
+                size='md'
                 startDecorator={<Flag sx={{ fontSize: 14 }} />}
               >
-                {'Started '}
                 {new Date(chore.startTime).toLocaleTimeString([], {
                   hour: '2-digit',
                   minute: '2-digit',
@@ -162,10 +169,9 @@ const TimePassedCard = ({ chore }) => {
               <Chip
                 variant='plain'
                 color='neutral'
-                size='sm'
+                size='md'
                 startDecorator={<Schedule sx={{ fontSize: 14 }} />}
               >
-                {'Session '}
                 {new Date(chore.timerUpdatedAt).toLocaleTimeString([], {
                   hour: '2-digit',
                   minute: '2-digit',
@@ -175,29 +181,19 @@ const TimePassedCard = ({ chore }) => {
           </>
         )}
 
-        {/* Chips  FOr paused : */}
+        {/* Chips for paused state */}
         {chore.status === 2 && (
-          <>
-            <Chip
-              variant='solid'
-              color='warning'
-              size='sm'
-              startDecorator={<Schedule sx={{ fontSize: 14 }} />}
-            >
-              Paused
-            </Chip>
-            <Chip
-              variant='plain'
-              color='neutral'
-              size='sm'
-              startDecorator={<Flag sx={{ fontSize: 14 }} />}
-            >
-              {new Date(chore.timerUpdatedAt).toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
-            </Chip>
-          </>
+          <Chip
+            variant='plain'
+            color='neutral'
+            size='md'
+            startDecorator={<Schedule sx={{ fontSize: 14 }} />}
+          >
+            {new Date(chore.timerUpdatedAt).toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
+          </Chip>
         )}
       </Box>
     </Card>

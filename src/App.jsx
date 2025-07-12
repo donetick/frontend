@@ -7,10 +7,7 @@ import { useRegisterSW } from 'virtual:pwa-register/react'
 import { registerCapacitorListeners } from './CapacitorListener'
 import { ImpersonateUserProvider } from './contexts/ImpersonateUserContext'
 import { AuthenticationProvider } from './service/AuthenticationService'
-import {
-  NotificationProvider,
-  useNotification,
-} from './service/NotificationProvider'
+import { useNotification } from './service/NotificationProvider'
 import { apiManager } from './utils/TokenManager'
 import NetworkBanner from './views/components/NetworkBanner'
 
@@ -118,10 +115,9 @@ function App() {
   return (
     <div className='min-h-screen'>
       <NetworkBanner />
+
       <AuthenticationProvider>
-        <NotificationProvider>
-          <AppContent />
-        </NotificationProvider>
+        <AppContent />
       </AuthenticationProvider>
     </div>
   )

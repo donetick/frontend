@@ -35,6 +35,9 @@ const ChoreActionMenu = ({
   onChangeDueDate,
   onWriteNFC,
   onDelete,
+  onOpen,
+  onMouseEnter,
+  onMouseLeave,
   sx = {},
   variant = 'soft',
 }) => {
@@ -55,6 +58,9 @@ const ChoreActionMenu = ({
     }
 
     document.addEventListener('mousedown', handleMenuOutsideClick)
+    if (anchorEl) {
+      onOpen()
+    }
     return () => {
       document.removeEventListener('mousedown', handleMenuOutsideClick)
     }
@@ -158,6 +164,8 @@ const ChoreActionMenu = ({
         variant={variant}
         color='success'
         onClick={handleMenuOpen}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
         sx={{
           borderRadius: '50%',
           width: 25,
@@ -171,11 +179,16 @@ const ChoreActionMenu = ({
       </IconButton>
 
       <Menu
-        size='lg'
+        size='md'
         ref={menuRef}
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
+        sx={{
+          position: 'absolute',
+          top: '100%',
+          left: '50%',
+        }}
       >
         <MenuItem
           onClick={e => {
