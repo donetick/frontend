@@ -22,8 +22,11 @@ const canScheduleNotification = async () => {
 }
 
 const getIdFromTemplate = (choreId, template) => {
-  // convert to base 32 int for notification id using  murmurhash :
-  return murmurhash.v3(`${choreId}-${template.value}-${template.unit}`)
+  // Generate a hash and convert to valid Java int range
+  const hash = murmurhash.v3(`${choreId}-${template.value}-${template.unit}`)
+  // Use Math.abs() with modulo to ensure positive ID within Java int range
+  // This guarantees the ID is always positive and within 1 to 2^31-1
+  return Math.abs(hash) % 2147483647
 }
 
 const getTimeFromTemplate = (template, relativeTime) => {
@@ -53,12 +56,6 @@ const scheduleNotificationFromTemplate = (
 ) => {
   for (const template of chore.notificationMetadata?.templates || []) {
     // convert the template to time:
-    console.log(
-      'Scheduling notification for chore:',
-      chore.id,
-      'with template:',
-      template,
-    )
     const dueDate = new Date(chore.nextDueDate)
     const now = new Date()
     const time = getTimeFromTemplate(template, dueDate)
@@ -89,11 +86,11 @@ const getNotificationText = (choreName, template = {}) => {
     }
 
     if (template.value < 0) {
-      return 'reminder' // Before due date
+      return 'reminder'
     } else if (template.value === 0) {
-      return 'due' // Due now
+      return 'due'
     } else {
-      return 'overdue' // After due date
+      return 'overdue'
     }
   }
 
@@ -189,8 +186,6 @@ const scheduleChoreNotification = async (
   await cancelPendingNotifications()
   const notifications = []
 
-  const devicePreferences = await getNotificationPreferences()
-
   for (let i = 0; i < chores.length; i++) {
     const chore = chores[i]
     try {
@@ -216,7 +211,7 @@ const scheduleChoreNotification = async (
   LocalNotifications.schedule({
     notifications,
   })
-  console.log('Scheduled notifications:', notifications)
+  return notifications
 }
 
 export { canScheduleNotification, scheduleChoreNotification }
