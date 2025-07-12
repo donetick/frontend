@@ -106,14 +106,14 @@ const NavBar = () => {
 
   return (
     <nav
-      className='mt-2 flex gap-2 p-3'
+      className='mt-2 flex gap-2 p-3 pt-5'
       style={{
         paddingTop: `calc( env(safe-area-inset-top, 0px))`,
         position: 'sticky',
         zIndex: 10000,
         top: 0,
         minHeight: '45px',
-        backgroundColor: 'var(--joy-palette-background-surface)',
+        backgroundColor: 'var(--joy-palette-background-body)',
       }}
     >
       <IconButton size='md' variant='plain' onClick={() => setDrawerOpen(true)}>

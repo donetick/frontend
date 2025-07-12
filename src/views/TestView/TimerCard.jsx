@@ -1,6 +1,7 @@
 import { Pause, PlayArrow, Stop, WatchLater } from '@mui/icons-material'
 import { Box, Card, CardContent, IconButton, Typography } from '@mui/joy'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo } from 'react'
+import useTimer from '../../hooks/useTimer'
 
 const TimerCard = ({
   variant = 'standalone', // 'standalone' | 'infoCard' | 'floating'
@@ -8,55 +9,59 @@ const TimerCard = ({
   onTimeUpdate = () => {},
   title = 'Timer',
 }) => {
-  const [time, setTime] = useState(0) // Time in seconds
-  const [isRunning, setIsRunning] = useState(false)
-  const [isPaused, setIsPaused] = useState(false)
-  const intervalRef = useRef(null)
+  // Use the custom timer hook
+  const {
+    time,
+    isRunning,
+    isPaused,
+    startTimer,
+    pauseTimer,
+    resumeTimer,
+    stopTimer,
+  } = useTimer(onTimeUpdate)
 
-  // Format time as HH:MM:SS
-  const formatTime = seconds => {
-    const hours = Math.floor(seconds / 3600)
-    const minutes = Math.floor((seconds % 3600) / 60)
-    const secs = seconds % 60
+  // Memoize formatted time for better performance
+  const formattedTime = useMemo(() => {
+    const hours = Math.floor(time / 3600)
+    const minutes = Math.floor((time % 3600) / 60)
+    const secs = time % 60
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-  }
+  }, [time])
 
-  // Handle timer logic
+  // Add keyboard shortcuts
   useEffect(() => {
-    if (isRunning && !isPaused) {
-      intervalRef.current = setInterval(() => {
-        setTime(prevTime => {
-          const newTime = prevTime + 1
-          onTimeUpdate(newTime)
-          return newTime
-        })
-      }, 1000)
-    } else {
-      clearInterval(intervalRef.current)
+    const handleKeyPress = event => {
+      // Only handle if no input is focused
+      if (
+        document.activeElement?.tagName === 'INPUT' ||
+        document.activeElement?.tagName === 'TEXTAREA'
+      ) {
+        return
+      }
+
+      switch (event.code) {
+        case 'Space':
+          event.preventDefault()
+          if (!isRunning) {
+            startTimer()
+          } else if (isPaused) {
+            resumeTimer()
+          } else {
+            pauseTimer()
+          }
+          break
+        case 'Escape':
+          event.preventDefault()
+          stopTimer()
+          break
+        default:
+          break
+      }
     }
 
-    return () => clearInterval(intervalRef.current)
-  }, [isRunning, isPaused, onTimeUpdate])
-
-  const startTimer = () => {
-    setIsRunning(true)
-    setIsPaused(false)
-  }
-
-  const pauseTimer = () => {
-    setIsPaused(true)
-  }
-
-  const stopTimer = () => {
-    setIsRunning(false)
-    setIsPaused(false)
-    setTime(0)
-    onTimeUpdate(0)
-  }
-
-  const resumeTimer = () => {
-    setIsPaused(false)
-  }
+    window.addEventListener('keydown', handleKeyPress)
+    return () => window.removeEventListener('keydown', handleKeyPress)
+  }, [isRunning, isPaused, startTimer, pauseTimer, resumeTimer, stopTimer])
 
   // Info Card variant - fits in ChoreView grid
   if (variant === 'infoCard') {
@@ -103,7 +108,7 @@ const TimerCard = ({
                 transition: 'color 0.3s ease',
               }}
             >
-              {formatTime(time)}
+              {formattedTime}
             </Typography>
             {!isRunning ? (
               <IconButton
@@ -112,6 +117,8 @@ const TimerCard = ({
                 size='sm'
                 onClick={startTimer}
                 sx={{ width: 24, height: 24 }}
+                aria-label='Start timer'
+                title='Start timer (Spacebar)'
               >
                 <PlayArrow sx={{ fontSize: '1rem' }} />
               </IconButton>
@@ -123,6 +130,12 @@ const TimerCard = ({
                   size='sm'
                   onClick={isPaused ? resumeTimer : pauseTimer}
                   sx={{ width: 24, height: 24 }}
+                  aria-label={isPaused ? 'Resume timer' : 'Pause timer'}
+                  title={
+                    isPaused
+                      ? 'Resume timer (Spacebar)'
+                      : 'Pause timer (Spacebar)'
+                  }
                 >
                   {isPaused ? (
                     <PlayArrow sx={{ fontSize: '1rem' }} />
@@ -136,6 +149,8 @@ const TimerCard = ({
                   size='sm'
                   onClick={stopTimer}
                   sx={{ width: 24, height: 24 }}
+                  aria-label='Stop timer'
+                  title='Stop timer (Escape)'
                 >
                   <Stop sx={{ fontSize: '1rem' }} />
                 </IconButton>
@@ -193,7 +208,7 @@ const TimerCard = ({
               transition: 'color 0.3s ease',
             }}
           >
-            {formatTime(time)}
+            {formattedTime}
           </Typography>
           <Typography level='body-xs' color='text.secondary'>
             {isRunning && !isPaused ? 'Running' : isPaused ? 'Paused' : 'Ready'}
@@ -350,7 +365,7 @@ const TimerCard = ({
                 mb: 0.5,
               }}
             >
-              {formatTime(time)}
+              {formattedTime}
             </Typography>
             <Typography
               level='body-xs'
