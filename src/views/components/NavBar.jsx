@@ -113,7 +113,7 @@ const NavBar = () => {
         zIndex: 10000,
         top: 0,
         minHeight: '45px',
-        backgroundColor: 'var(--joy-palette-background-surface)',
+        backgroundColor: 'var(--joy-palette-background-body)',
       }}
     >
       <IconButton size='md' variant='plain' onClick={() => setDrawerOpen(true)}>
