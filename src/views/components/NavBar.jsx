@@ -105,7 +105,16 @@ const NavBar = () => {
   }
 
   return (
-    <nav className='flex gap-2 p-3'>
+    <nav
+      className='flex gap-2 p-2'
+      style={{
+        paddingTop: `calc( env(safe-area-inset-top, 0px))`,
+        position: 'sticky',
+        zIndex: 10000,
+        top: 0,
+        backgroundColor: 'var(--joy-palette-background-surface)',
+      }}
+    >
       <IconButton size='md' variant='plain' onClick={() => setDrawerOpen(true)}>
         <MenuRounded />
       </IconButton>
@@ -146,6 +155,17 @@ const NavBar = () => {
         onClose={closeDrawer}
         size='sm'
         onClick={closeDrawer}
+        sx={{
+          '& .MuiDrawer-content': {
+            position: 'fixed',
+            // top: 'calc(env(safe-area-inset-top, 0px))',
+            left: 0,
+            // height:
+            // 'calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))',
+            overflow: 'auto',
+            zIndex: 999,
+          },
+        }}
       >
         <div>
           {/* <div className='align-center flex px-5 pt-4'>
