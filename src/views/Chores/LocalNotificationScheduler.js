@@ -22,7 +22,6 @@ const canScheduleNotification = async () => {
 }
 
 const getIdFromTemplate = (choreId, template) => {
-  // Generate a hash and convert to valid Java int range
   const hash = murmurhash.v3(`${choreId}-${template.value}-${template.unit}`)
   // Use Math.abs() with modulo to ensure positive ID within Java int range
   // This guarantees the ID is always positive and within 1 to 2^31-1
