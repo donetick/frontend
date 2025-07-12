@@ -106,12 +106,13 @@ const NavBar = () => {
 
   return (
     <nav
-      className='flex gap-2 p-2'
+      className='mt-2 flex gap-2 p-3'
       style={{
         paddingTop: `calc( env(safe-area-inset-top, 0px))`,
         position: 'sticky',
         zIndex: 10000,
         top: 0,
+        minHeight: '45px',
         backgroundColor: 'var(--joy-palette-background-surface)',
       }}
     >
@@ -158,10 +159,10 @@ const NavBar = () => {
         sx={{
           '& .MuiDrawer-content': {
             position: 'fixed',
-            // top: 'calc(env(safe-area-inset-top, 0px))',
+            top: 'calc(env(safe-area-inset-top, 0px) + 35px)',
             left: 0,
-            // height:
-            // 'calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))',
+            height:
+              'calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))',
             overflow: 'auto',
             zIndex: 999,
           },
