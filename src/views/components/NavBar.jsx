@@ -159,7 +159,7 @@ const NavBar = () => {
         sx={{
           '& .MuiDrawer-content': {
             position: 'fixed',
-            top: 'calc(env(safe-area-inset-top, 0px) + 35px)',
+            top: 'calc(env(safe-area-inset-top, 0px) + 45px)',
             left: 0,
             height:
               'calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))',
@@ -224,7 +224,7 @@ const NavBar = () => {
                 p: 1,
                 color: 'text.tertiary',
                 textAlign: 'center',
-                bottom: 0,
+                mb: 'calc(env(safe-area-inset-bottom, 0px) + 45px)',
                 // mb: -2,
               }}
             >

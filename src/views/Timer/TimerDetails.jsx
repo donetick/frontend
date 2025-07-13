@@ -18,29 +18,45 @@ import {
   FormControl,
   FormHelperText,
   Grid,
+  IconButton,
   Input,
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
-import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { useParams } from 'react-router-dom'
 import { useNotification } from '../../service/NotificationProvider'
 import {
-  DeleteTimeSession,
   GetChoreTimer,
+  PauseChore,
+  StartChore,
   UpdateTimeSession,
 } from '../../utils/Fetcher'
-import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 
 const TimerDetails = () => {
   const { choreId } = useParams()
-  const navigate = useNavigate()
   const [timerData, setTimerData] = useState(null)
   const [loading, setLoading] = useState(false)
   const [editingSessions, setEditingSessions] = useState({})
-  const [confirmDeleteConfig, setConfirmDeleteConfig] = useState({})
   const [currentTime, setCurrentTime] = useState(new Date())
+  const [timerActionLoading, setTimerActionLoading] = useState(false)
   const { showError, showSuccess } = useNotification()
+
+  // Swipe functionality state for session cards
+  const [sessionSwipeStates, setSessionSwipeStates] = useState({})
+  const swipeThreshold = 80
+  const maxSwipeDistance = 160
+  const dragStartX = useRef(0)
+  const [isDragging, setIsDragging] = useState(false)
+  const [isTouchDevice, setIsTouchDevice] = useState(false)
+
+  // Detect if device supports touch
+  useEffect(() => {
+    const checkTouchDevice = () => {
+      setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0)
+    }
+    checkTouchDevice()
+  }, [])
 
   // Fetch timer data when component mounts
   useEffect(() => {
@@ -227,53 +243,63 @@ const TimerDetails = () => {
     }
   }
 
-  const deleteSession = async sessionId => {
-    setLoading(true)
+  // Timer control functions
+  const handleStartTimer = async () => {
+    setTimerActionLoading(true)
     try {
-      const response = await DeleteTimeSession(choreId, sessionId)
+      const response = await StartChore(choreId)
       if (response.ok) {
         showSuccess({
-          title: 'Session deleted',
-          message: 'Timer session has been deleted successfully.',
+          title: 'Timer Started',
+          message: 'Work session has been started successfully.',
         })
         await fetchTimerData()
-        // Navigate back after successful deletion
-        navigate(`/chores/${choreId}`)
       } else {
         showError({
-          title: 'Failed to delete session',
+          title: 'Failed to start timer',
           message: 'Please try again.',
         })
       }
     } catch (error) {
       showError({
-        title: 'Error deleting session',
+        title: 'Error starting timer',
         message: error.message,
       })
     } finally {
-      setLoading(false)
+      setTimerActionLoading(false)
     }
   }
 
-  const confirmDeleteSession = sessionId => {
-    setConfirmDeleteConfig({
-      isOpen: true,
-      title: 'Delete Timer Session',
-      message: 'Are you sure you want to delete this timer session?',
-      confirmText: 'Delete',
-      cancelText: 'Cancel',
-      color: 'danger',
-      onClose: isConfirmed => {
-        if (isConfirmed) {
-          deleteSession(sessionId)
-        }
-        setConfirmDeleteConfig({})
-      },
-    })
+  const handlePauseTimer = async () => {
+    setTimerActionLoading(true)
+    try {
+      const response = await PauseChore(choreId)
+      if (response.ok) {
+        showSuccess({
+          title: 'Timer Paused',
+          message: 'Work session has been paused.',
+        })
+        await fetchTimerData()
+      } else {
+        showError({
+          title: 'Failed to pause timer',
+          message: 'Please try again.',
+        })
+      }
+    } catch (error) {
+      showError({
+        title: 'Error pausing timer',
+        message: error.message,
+      })
+    } finally {
+      setTimerActionLoading(false)
+    }
   }
 
-  const handleGoBack = () => {
-    navigate(`/chores/${choreId}`)
+  // Determine if timer is currently running
+  const isTimerRunning = () => {
+    if (!timerData || !timerData.pauseLog) return false
+    return timerData.pauseLog.some(session => session.start && !session.end)
   }
 
   // Calculate total duration from start to now/end (real-time)
@@ -318,8 +344,165 @@ const TimerDetails = () => {
     return Math.max(0, totalDuration - activeDuration)
   }
 
+  // Swipe functionality methods
+  const getSessionSwipeState = sessionIndex => {
+    return (
+      sessionSwipeStates[sessionIndex] || {
+        translateX: 0,
+        isRevealed: false,
+      }
+    )
+  }
+
+  const updateSessionSwipeState = (sessionIndex, newState) => {
+    setSessionSwipeStates(prev => ({
+      ...prev,
+      [sessionIndex]: {
+        ...prev[sessionIndex],
+        ...newState,
+      },
+    }))
+  }
+
+  const resetSessionSwipe = sessionIndex => {
+    updateSessionSwipeState(sessionIndex, {
+      translateX: 0,
+      isRevealed: false,
+    })
+  }
+
+  const resetAllSwipes = () => {
+    setSessionSwipeStates({})
+  }
+
+  // Touch handlers for swipe
+  const handleSessionTouchStart = e => {
+    dragStartX.current = e.touches[0].clientX
+    setIsDragging(true)
+  }
+
+  const handleSessionTouchMove = (e, sessionIndex) => {
+    if (!isDragging) return
+
+    const currentX = e.touches[0].clientX
+    const deltaX = currentX - dragStartX.current
+    const currentState = getSessionSwipeState(sessionIndex)
+
+    if (currentState.isRevealed) {
+      if (deltaX > 0) {
+        const clampedDelta = Math.min(deltaX - maxSwipeDistance, 0)
+        updateSessionSwipeState(sessionIndex, { translateX: clampedDelta })
+      }
+    } else {
+      if (deltaX < 0) {
+        const clampedDelta = Math.max(deltaX, -maxSwipeDistance)
+        updateSessionSwipeState(sessionIndex, { translateX: clampedDelta })
+      }
+    }
+  }
+
+  const handleSessionTouchEnd = (e, sessionIndex) => {
+    if (!isDragging) return
+    setIsDragging(false)
+
+    const currentState = getSessionSwipeState(sessionIndex)
+
+    if (currentState.isRevealed) {
+      if (currentState.translateX > -swipeThreshold) {
+        resetSessionSwipe(sessionIndex)
+      } else {
+        updateSessionSwipeState(sessionIndex, {
+          translateX: -maxSwipeDistance,
+          isRevealed: true,
+        })
+      }
+    } else {
+      if (Math.abs(currentState.translateX) > swipeThreshold) {
+        updateSessionSwipeState(sessionIndex, {
+          translateX: -maxSwipeDistance,
+          isRevealed: true,
+        })
+      } else {
+        resetSessionSwipe(sessionIndex)
+      }
+    }
+  }
+
+  // Mouse handlers for swipe (desktop)
+  const handleSessionMouseDown = e => {
+    dragStartX.current = e.clientX
+    setIsDragging(true)
+  }
+
+  const handleSessionMouseMove = (e, sessionIndex) => {
+    if (!isDragging) return
+
+    const currentX = e.clientX
+    const deltaX = currentX - dragStartX.current
+    const currentState = getSessionSwipeState(sessionIndex)
+
+    if (currentState.isRevealed) {
+      if (deltaX > 0) {
+        const clampedDelta = Math.min(deltaX - maxSwipeDistance, 0)
+        updateSessionSwipeState(sessionIndex, { translateX: clampedDelta })
+      }
+    } else {
+      if (deltaX < 0) {
+        const clampedDelta = Math.max(deltaX, -maxSwipeDistance)
+        updateSessionSwipeState(sessionIndex, { translateX: clampedDelta })
+      }
+    }
+  }
+
+  const handleSessionMouseUp = (e, sessionIndex) => {
+    if (!isDragging) return
+    setIsDragging(false)
+
+    const currentState = getSessionSwipeState(sessionIndex)
+
+    if (currentState.isRevealed) {
+      if (currentState.translateX > -swipeThreshold) {
+        resetSessionSwipe(sessionIndex)
+      } else {
+        updateSessionSwipeState(sessionIndex, {
+          translateX: -maxSwipeDistance,
+          isRevealed: true,
+        })
+      }
+    } else {
+      if (Math.abs(currentState.translateX) > swipeThreshold) {
+        updateSessionSwipeState(sessionIndex, {
+          translateX: -maxSwipeDistance,
+          isRevealed: true,
+        })
+      } else {
+        resetSessionSwipe(sessionIndex)
+      }
+    }
+  }
+
+  const handleEditSession = () => {
+    resetAllSwipes()
+    // Trigger the existing edit functionality
+    startEditingSession()
+  }
+
+  const handleDeleteSession = sessionIndex => {
+    resetAllSwipes()
+    // For now, just show an alert since we'd need to implement session deletion API
+    showError({
+      title: 'Delete Session',
+      message: `Session #${sessionIndex + 1} deletion would be implemented here`,
+    })
+  }
+
+  // Reset swipes when editing mode changes
+  useEffect(() => {
+    resetAllSwipes()
+  }, [editingSessions])
+
   return (
-    <Container maxWidth='lg' sx={{ py: 2, pb: 12 }}>
+    <Container maxWidth='lg' sx={{ py: 2 }}>
       {/* Header */}
 
       {loading && (
@@ -607,14 +790,269 @@ const TimerDetails = () => {
                   }}
                 />
               </Box>
+
+              {/* Timeline Graph */}
+              <Box sx={{ mt: 3 }}>
+                <Typography
+                  level='body-sm'
+                  sx={{ color: 'text.secondary', fontWeight: 'medium', mb: 2 }}
+                >
+                  Activity Timeline
+                </Typography>
+
+                {timerData &&
+                timerData.pauseLog &&
+                timerData.pauseLog.length > 0 ? (
+                  <Box>
+                    {/* Timeline visualization */}
+                    <Box
+                      sx={{
+                        height: 40,
+                        backgroundColor: 'neutral.100',
+                        borderRadius: 'sm',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        mb: 2,
+                      }}
+                    >
+                      {(() => {
+                        const totalDuration = calculateTotalDuration()
+                        const startTime = new Date(timerData.startTime)
+
+                        return timerData.pauseLog.map((session, index) => {
+                          const sessionStart = new Date(session.start)
+                          const sessionEnd = session.end
+                            ? new Date(session.end)
+                            : currentTime
+
+                          // Calculate position and width as percentages
+                          const startOffset = Math.max(
+                            0,
+                            (sessionStart - startTime) / 1000,
+                          )
+                          const sessionDuration = Math.max(
+                            0,
+                            (sessionEnd - sessionStart) / 1000,
+                          )
+
+                          const leftPercent =
+                            (startOffset / Math.max(totalDuration, 1)) * 100
+                          const widthPercent =
+                            (sessionDuration / Math.max(totalDuration, 1)) * 100
+
+                          const isOngoing = !session.end
+
+                          return (
+                            <Box
+                              key={index}
+                              sx={{
+                                position: 'absolute',
+                                left: `${leftPercent}%`,
+                                width: `${widthPercent}%`,
+                                height: '100%',
+                                backgroundColor: isOngoing
+                                  ? 'success.500'
+                                  : 'success.400',
+                                borderRight: isOngoing ? '2px solid' : 'none',
+                                borderRightColor: 'success.600',
+                                transition: 'all 0.3s ease-in-out',
+                                '&:hover': {
+                                  backgroundColor: isOngoing
+                                    ? 'success.600'
+                                    : 'success.500',
+                                  zIndex: 1,
+                                },
+                              }}
+                              title={`Session ${index + 1}: ${formatDuration(sessionDuration)} ${isOngoing ? '(ongoing)' : ''}`}
+                            />
+                          )
+                        })
+                      })()}
+                    </Box>
+
+                    {/* Legend and time markers */}
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        flexWrap: 'wrap',
+                        gap: 2,
+                      }}
+                    >
+                      {/* Legend */}
+                      <Box
+                        sx={{ display: 'flex', gap: 2, alignItems: 'center' }}
+                      >
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 0.5,
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              width: 12,
+                              height: 12,
+                              backgroundColor: 'success.400',
+                              borderRadius: 'xs',
+                            }}
+                          />
+                          <Typography
+                            level='body-xs'
+                            sx={{ color: 'text.tertiary' }}
+                          >
+                            Active Work
+                          </Typography>
+                        </Box>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 0.5,
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              width: 12,
+                              height: 12,
+                              backgroundColor: 'neutral.100',
+                              borderRadius: 'xs',
+                              border: '1px solid',
+                              borderColor: 'divider',
+                            }}
+                          />
+                          <Typography
+                            level='body-xs'
+                            sx={{ color: 'text.tertiary' }}
+                          >
+                            Break Time
+                          </Typography>
+                        </Box>
+                        {isTimerRunning() && (
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 0.5,
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                width: 12,
+                                height: 12,
+                                backgroundColor: 'success.500',
+                                borderRadius: 'xs',
+                                border: '2px solid',
+                                borderColor: 'success.600',
+                              }}
+                            />
+                            <Typography
+                              level='body-xs'
+                              sx={{ color: 'text.tertiary' }}
+                            >
+                              Live Session
+                            </Typography>
+                          </Box>
+                        )}
+                      </Box>
+
+                      {/* Time markers */}
+                      <Box
+                        sx={{ display: 'flex', gap: 2, alignItems: 'center' }}
+                      >
+                        <Typography
+                          level='body-xs'
+                          sx={{ color: 'text.tertiary' }}
+                        >
+                          Started: {moment(timerData.startTime).format('HH:mm')}
+                        </Typography>
+                        {timerData.endTime && (
+                          <Typography
+                            level='body-xs'
+                            sx={{ color: 'text.tertiary' }}
+                          >
+                            Ended: {moment(timerData.endTime).format('HH:mm')}
+                          </Typography>
+                        )}
+                        {!timerData.endTime && (
+                          <Typography
+                            level='body-xs'
+                            sx={{ color: 'success.500' }}
+                          >
+                            Now: {moment(currentTime).format('HH:mm')}
+                          </Typography>
+                        )}
+                        <Typography
+                          level='body-xs'
+                          sx={{ color: 'text.tertiary' }}
+                        >
+                          Active:{' '}
+                          {calculateCurrentActiveDuration() > 0
+                            ? `${Math.round((calculateCurrentActiveDuration() / calculateTotalDuration()) * 100)}%`
+                            : '0%'}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                ) : (
+                  <Alert color='neutral' variant='soft' sx={{ py: 2 }}>
+                    <Typography level='body-sm'>
+                      No activity timeline available. Start working to see your
+                      activity pattern.
+                    </Typography>
+                  </Alert>
+                )}
+              </Box>
             </Box>
           </Card>
 
           {/* Session Breakdown */}
           <Box sx={{ mt: 2 }}>
-            <Typography level='h4' sx={{ mb: 2 }}>
-              Session Breakdown
-            </Typography>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                mb: 2,
+              }}
+            >
+              <Typography level='h4'>Session Breakdown</Typography>
+              {!editingSessions[timerData.id] && (
+                <Button
+                  variant='outlined'
+                  color='primary'
+                  startDecorator={<Edit />}
+                  onClick={() => startEditingSession()}
+                  size='sm'
+                >
+                  Edit
+                </Button>
+              )}
+              {editingSessions[timerData.id] && (
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <Button
+                    variant='outlined'
+                    onClick={() => cancelEditingSession(timerData.id)}
+                    size='sm'
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant='solid'
+                    color='primary'
+                    onClick={() => saveSession(timerData.id)}
+                    loading={loading}
+                    size='sm'
+                  >
+                    Save Changes
+                  </Button>
+                </Box>
+              )}
+            </Box>
 
             {!editingSessions[timerData.id] ? (
               <Box>
@@ -656,93 +1094,233 @@ const TimerDetails = () => {
                               )
                             : pause.duration
 
+                          const swipeState = getSessionSwipeState(pauseIndex)
+
                           return (
-                            <Card
+                            <Box
                               key={pauseIndex}
-                              variant='soft'
                               sx={{
-                                p: 2,
-                                display: 'flex',
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                gap: 2,
-                                minHeight: 'auto',
-                                borderColor: isOngoing
-                                  ? 'success.300'
-                                  : 'divider',
                                 position: 'relative',
+                                overflow: 'hidden',
+                                borderRadius: 'md',
                               }}
                             >
-                              {/* Session indicator */}
+                              {/* Action buttons underneath (revealed on swipe) */}
                               <Box
                                 sx={{
-                                  width: 8,
-                                  height: 8,
-                                  borderRadius: '50%',
-                                  backgroundColor: isOngoing
-                                    ? 'success.500'
-                                    : 'neutral.400',
-                                  flexShrink: 0,
-                                }}
-                              />
-
-                              {/* Duration - Main focus */}
-                              <Box sx={{ flexShrink: 0 }}>
-                                <Typography
-                                  level='h4'
-                                  sx={{
-                                    fontWeight: 'bold',
-                                    color: isOngoing
-                                      ? 'success.600'
-                                      : 'text.primary',
-                                    lineHeight: 1,
-                                    mb: 0.3,
-                                  }}
-                                >
-                                  {formatDuration(realTimeDuration)}
-                                </Typography>
-                                {isOngoing && (
-                                  <Chip
-                                    size='sm'
-                                    color='success'
-                                    variant='soft'
-                                    sx={{ fontSize: '0.7rem' }}
-                                  >
-                                    Live
-                                  </Chip>
-                                )}
-                              </Box>
-
-                              {/* Session details */}
-                              <Box
-                                sx={{
-                                  flex: 1,
-                                  minWidth: 0,
-                                  textAlign: 'right',
+                                  position: 'absolute',
+                                  right: 0,
+                                  top: 0,
+                                  bottom: 0,
+                                  width: maxSwipeDistance,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.06)',
+                                  zIndex: 0,
                                 }}
                               >
-                                <Typography
-                                  level='body-sm'
+                                <IconButton
+                                  variant='soft'
+                                  color='primary'
+                                  size='sm'
+                                  onClick={e => {
+                                    e.stopPropagation()
+                                    handleEditSession()
+                                  }}
                                   sx={{
-                                    fontWeight: 'medium',
-                                    color: 'text.secondary',
-                                    mb: 0.2,
+                                    width: 40,
+                                    height: 40,
+                                    mx: 1,
                                   }}
                                 >
-                                  Session #{pauseIndex + 1} • {sessionDate}
-                                </Typography>
-                                <Typography
-                                  level='body-xs'
+                                  <Edit sx={{ fontSize: 16 }} />
+                                </IconButton>
+
+                                <IconButton
+                                  variant='soft'
+                                  color='danger'
+                                  size='sm'
+                                  onClick={e => {
+                                    e.stopPropagation()
+                                    handleDeleteSession(pauseIndex)
+                                  }}
                                   sx={{
-                                    color: 'text.tertiary',
-                                    fontFamily: 'monospace',
+                                    width: 40,
+                                    height: 40,
+                                    mx: 1,
                                   }}
                                 >
-                                  {startTime}{' '}
-                                  {endTime ? `→ ${endTime}` : '→ ongoing'}
-                                </Typography>
+                                  <Delete sx={{ fontSize: 16 }} />
+                                </IconButton>
                               </Box>
-                            </Card>
+
+                              {/* Session Card */}
+                              <Card
+                                variant='soft'
+                                sx={{
+                                  p: 2,
+                                  display: 'flex',
+                                  flexDirection: 'row',
+                                  alignItems: 'center',
+                                  gap: 2,
+                                  minHeight: 'auto',
+                                  borderColor: isOngoing
+                                    ? 'success.300'
+                                    : 'divider',
+                                  position: 'relative',
+                                  transform: `translateX(${swipeState.translateX}px)`,
+                                  transition: isDragging
+                                    ? 'none'
+                                    : 'transform 0.3s ease-out',
+                                  zIndex: 1,
+                                  cursor: 'pointer',
+                                  '&:hover': {
+                                    bgcolor: swipeState.isRevealed
+                                      ? 'background.surface'
+                                      : 'background.level1',
+                                  },
+                                }}
+                                onClick={() => {
+                                  if (swipeState.isRevealed) {
+                                    resetSessionSwipe(pauseIndex)
+                                    return
+                                  }
+                                  // Optional: Navigate to session details
+                                }}
+                                onTouchStart={handleSessionTouchStart}
+                                onTouchMove={e =>
+                                  handleSessionTouchMove(e, pauseIndex)
+                                }
+                                onTouchEnd={e =>
+                                  handleSessionTouchEnd(e, pauseIndex)
+                                }
+                                onMouseDown={handleSessionMouseDown}
+                                onMouseMove={e =>
+                                  handleSessionMouseMove(e, pauseIndex)
+                                }
+                                onMouseUp={e =>
+                                  handleSessionMouseUp(e, pauseIndex)
+                                }
+                              >
+                                {/* Session indicator */}
+                                <Box
+                                  sx={{
+                                    width: 8,
+                                    height: 8,
+                                    borderRadius: '50%',
+                                    backgroundColor: isOngoing
+                                      ? 'success.500'
+                                      : 'neutral.400',
+                                    flexShrink: 0,
+                                  }}
+                                />
+
+                                {/* Duration - Main focus */}
+                                <Box sx={{ flexShrink: 0 }}>
+                                  <Typography
+                                    level='h4'
+                                    sx={{
+                                      fontWeight: 'bold',
+                                      color: isOngoing
+                                        ? 'success.600'
+                                        : 'text.primary',
+                                      lineHeight: 1,
+                                      mb: 0.3,
+                                    }}
+                                  >
+                                    {formatDuration(realTimeDuration)}
+                                  </Typography>
+                                  {isOngoing && (
+                                    <Chip
+                                      size='sm'
+                                      color='success'
+                                      variant='soft'
+                                      sx={{ fontSize: '0.7rem' }}
+                                    >
+                                      Live
+                                    </Chip>
+                                  )}
+                                </Box>
+
+                                {/* Session details */}
+                                <Box
+                                  sx={{
+                                    flex: 1,
+                                    minWidth: 0,
+                                    textAlign: 'right',
+                                  }}
+                                >
+                                  <Typography
+                                    level='body-sm'
+                                    sx={{
+                                      fontWeight: 'medium',
+                                      color: 'text.secondary',
+                                      mb: 0.2,
+                                    }}
+                                  >
+                                    Session #{pauseIndex + 1} • {sessionDate}
+                                  </Typography>
+                                  <Typography
+                                    level='body-xs'
+                                    sx={{
+                                      color: 'text.tertiary',
+                                      fontFamily: 'monospace',
+                                    }}
+                                  >
+                                    {startTime}{' '}
+                                    {endTime ? `→ ${endTime}` : '→ ongoing'}
+                                  </Typography>
+                                </Box>
+
+                                {/* Right drag indicator (desktop only) */}
+                                {!isTouchDevice && (
+                                  <Box
+                                    sx={{
+                                      position: 'absolute',
+                                      right: 8,
+                                      top: '50%',
+                                      transform: 'translateY(-50%)',
+                                      width: '20px',
+                                      height: '20px',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      opacity: swipeState.isRevealed ? 0 : 0.3,
+                                      transition: 'opacity 0.2s ease',
+                                      pointerEvents: swipeState.isRevealed
+                                        ? 'none'
+                                        : 'auto',
+                                      '&:hover': {
+                                        opacity: swipeState.isRevealed
+                                          ? 0
+                                          : 0.7,
+                                      },
+                                    }}
+                                  >
+                                    {/* Drag indicator dots */}
+                                    <Box
+                                      sx={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: 0.25,
+                                      }}
+                                    >
+                                      {[...Array(3)].map((_, i) => (
+                                        <Box
+                                          key={i}
+                                          sx={{
+                                            width: 3,
+                                            height: 3,
+                                            borderRadius: '50%',
+                                            bgcolor: 'text.tertiary',
+                                          }}
+                                        />
+                                      ))}
+                                    </Box>
+                                  </Box>
+                                )}
+                              </Card>
+                            </Box>
                           )
                         })}
                     </Box>
@@ -917,81 +1495,73 @@ const TimerDetails = () => {
         </Box>
       )}
 
-      {/* Sticky Bottom Actions */}
-      <Box
-        sx={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          p: 2,
-          backgroundColor: 'background.surface',
-          borderTop: '1px solid',
-          borderColor: 'divider',
-          boxShadow: 'lg',
-          zIndex: 1000,
-        }}
-      >
-        <Container maxWidth='lg'>
-          <Box
-            sx={{
-              display: 'flex',
-              // justifyContent: 'space-between',
-              justifyContent: 'end',
-              alignItems: 'center',
-              gap: 2,
-            }}
-          >
-            {/* <Button variant='outlined' color='neutral' onClick={handleGoBack}>
-              Back to Chore
-            </Button> */}
-
-            {/* Right side - Action buttons */}
-            {!loading && timerData && !editingSessions[timerData.id] && (
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <Button
-                  size='sm'
-                  variant='outlined'
-                  color='danger'
-                  onClick={() => confirmDeleteSession(timerData.id)}
-                >
-                  Delete
-                </Button>
-                <Button
-                  variant='solid'
-                  color='primary'
-                  startDecorator={<Edit />}
-                  onClick={() => startEditingSession()}
-                >
-                  Edit
-                </Button>
-              </Box>
-            )}
-
-            {/* Save/Cancel buttons when editing */}
-            {!loading && timerData && editingSessions[timerData.id] && (
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <Button
-                  variant='outlined'
-                  onClick={() => cancelEditingSession(timerData.id)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant='solid'
-                  color='primary'
-                  onClick={() => saveSession(timerData.id)}
-                  loading={loading}
-                >
-                  Save Changes
-                </Button>
-              </Box>
-            )}
-          </Box>
-        </Container>
-      </Box>
-
-      <ConfirmationModal config={confirmDeleteConfig} />
+      {/* Floating Timer Control Button */}
+      {!loading && timerData && (
+        <IconButton
+          color={isTimerRunning() ? 'warning' : 'success'}
+          variant='solid'
+          onClick={isTimerRunning() ? handlePauseTimer : handleStartTimer}
+          loading={timerActionLoading}
+          disabled={loading}
+          sx={{
+            position: 'fixed',
+            bottom: 16,
+            left: 16,
+            width: 56,
+            height: 56,
+            borderRadius: '50%',
+            zIndex: 1000,
+            boxShadow: 'lg',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            transform: timerActionLoading ? 'scale(0.95)' : 'scale(1)',
+            animation: isTimerRunning()
+              ? 'pulse-warning 2s infinite'
+              : 'pulse-success 2s infinite',
+            '&:hover': {
+              transform: 'scale(1.1)',
+              boxShadow: 'xl',
+            },
+            '&:active': {
+              transform: 'scale(0.95)',
+            },
+            '@keyframes pulse-success': {
+              '0%': {
+                boxShadow:
+                  '0 4px 12px rgba(76, 175, 80, 0.3), 0 0 0 0 rgba(76, 175, 80, 0.7)',
+              },
+              '70%': {
+                boxShadow:
+                  '0 4px 12px rgba(76, 175, 80, 0.3), 0 0 0 10px rgba(76, 175, 80, 0)',
+              },
+              '100%': {
+                boxShadow:
+                  '0 4px 12px rgba(76, 175, 80, 0.3), 0 0 0 0 rgba(76, 175, 80, 0)',
+              },
+            },
+            '@keyframes pulse-warning': {
+              '0%': {
+                boxShadow:
+                  '0 4px 12px rgba(255, 152, 0, 0.3), 0 0 0 0 rgba(255, 152, 0, 0.7)',
+              },
+              '70%': {
+                boxShadow:
+                  '0 4px 12px rgba(255, 152, 0, 0.3), 0 0 0 10px rgba(255, 152, 0, 0)',
+              },
+              '100%': {
+                boxShadow:
+                  '0 4px 12px rgba(255, 152, 0, 0.3), 0 0 0 0 rgba(255, 152, 0, 0)',
+              },
+            },
+          }}
+          title={isTimerRunning() ? 'Pause Timer' : 'Start Timer'}
+        >
+          {isTimerRunning() ? (
+            <PauseCircle sx={{ fontSize: 24 }} />
+          ) : (
+            <PlayArrow sx={{ fontSize: 24 }} />
+          )}
+        </IconButton>
+      )}
     </Container>
   )
 }
