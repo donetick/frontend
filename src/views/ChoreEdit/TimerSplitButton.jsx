@@ -4,7 +4,6 @@ import {
   Info,
   Pause,
   PlayArrow,
-  RestartAlt,
 } from '@mui/icons-material'
 import { Box, ButtonGroup, IconButton, Menu, MenuItem } from '@mui/joy'
 import { useEffect, useRef, useState } from 'react'
@@ -146,10 +145,10 @@ const TimerSplitButton = ({
           <Info sx={{ mr: 1 }} />
           Timer Details
         </MenuItem>
-        <MenuItem onClick={handleResetTimer}>
+        {/* <MenuItem onClick={handleResetTimer}>
           <RestartAlt sx={{ mr: 1 }} />
           Restart timer
-        </MenuItem>
+        </MenuItem> */}
         <MenuItem onClick={handleClearAllTime} color='danger'>
           <DeleteSweep sx={{ mr: 1 }} />
           Clear & Reset

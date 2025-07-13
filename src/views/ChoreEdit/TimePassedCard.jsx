@@ -1,8 +1,16 @@
-import { Flag, Pause, PlayArrow, Schedule } from '@mui/icons-material'
+import {
+  Flag,
+  OpenInFull,
+  Pause,
+  PlayArrow,
+  Schedule,
+} from '@mui/icons-material'
 import { Box, Card, Chip, Typography } from '@mui/joy'
 import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const TimePassedCard = ({ chore, handleAction, onShowDetails }) => {
+  const navigate = useNavigate()
   const [time, setTime] = useState(0)
   const [shouldAnimate, setShouldAnimate] = useState(false)
   const [prevStatus, setPrevStatus] = useState(null) // Initialize as null
@@ -96,8 +104,30 @@ const TimePassedCard = ({ chore, handleAction, onShowDetails }) => {
           },
         },
         transition: 'all 0.3s ease',
+        cursor: 'pointer',
+      }}
+      onClick={e => {
+        // if this click on this element itself and not its children:
+        if (e.target !== e.currentTarget) return
+        navigate('./timer')
       }}
     >
+      <OpenInFull
+        sx={{
+          position: 'absolute',
+          top: 8,
+          right: 8,
+          zIndex: 2,
+          cursor: 'pointer',
+          color: 'text.secondary',
+          fontSize: '15px',
+          '&:hover': { color: 'primary.main' },
+        }}
+        onClick={e => {
+          e.stopPropagation()
+          navigate('./timer')
+        }}
+      ></OpenInFull>
       <Typography
         level='h4'
         sx={{

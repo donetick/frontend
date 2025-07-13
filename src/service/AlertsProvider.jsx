@@ -43,11 +43,12 @@ export const AlertsProvider = ({ children }) => {
       {visibleAlert && (
         <Box
           sx={{
+            pt: `calc( env(safe-area-inset-top, 0px))`,
             position: 'fixed',
             top: 0,
             left: 0,
             width: '100%',
-            zIndex: 2000,
+            zIndex: 10000,
             overflow: 'hidden',
           }}
         >
