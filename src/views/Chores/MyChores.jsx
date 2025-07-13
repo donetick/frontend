@@ -178,14 +178,13 @@ const MyChores = () => {
       if (event.ctrlKey || event.metaKey) {
         setShowKeyboardShortcuts(true)
       }
-
+      const isHoldingCmdOrCtrl = event.ctrlKey || event.metaKey
       // Ctrl/Cmd + K to open task modal
-      if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+      if (isHoldingCmdOrCtrl && event.key === 'k') {
         event.preventDefault()
         setAddTaskModalOpen(true)
         return
       }
-      console.log('addTaskModalOpen', addTaskModalOpen)
 
       if (addTaskModalOpen) {
         // we want to ignore anything in here until the modal close
@@ -193,26 +192,26 @@ const MyChores = () => {
       }
 
       // Ctrl/Cmd + J to navigate to create chore page
-      if ((event.ctrlKey || event.metaKey) && event.key === 'j') {
+      if (isHoldingCmdOrCtrl && event.key === 'j') {
         event.preventDefault()
         Navigate(`/chores/create`)
         return
       }
 
       // Ctrl/Cmd + F to focus search input:
-      else if ((event.ctrlKey || event.metaKey) && event.key === 'f') {
+      else if (isHoldingCmdOrCtrl && event.key === 'f') {
         event.preventDefault()
         searchInputRef.current?.focus()
         return
         // Ctrl/Cmd + X to close search input
-      } else if ((event.ctrlKey || event.metaKey) && event.key === 'x') {
+      } else if (isHoldingCmdOrCtrl && event.key === 'x') {
         event.preventDefault()
         if (searchTerm?.length > 0) {
           handleSearchClose()
         }
       }
       // Ctrl/Cmd + S Toggle Multi-select mode
-      else if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+      else if (isHoldingCmdOrCtrl && event.key === 's') {
         event.preventDefault()
         toggleMultiSelectMode()
         return
@@ -220,7 +219,7 @@ const MyChores = () => {
 
       // Ctrl/Cmd + A to select all - works both in and out of multi-select mode
       else if (
-        (event.ctrlKey || event.metaKey) &&
+        isHoldingCmdOrCtrl &&
         event.key === 'a' &&
         !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)
       ) {
@@ -314,25 +313,23 @@ const MyChores = () => {
           return
         }
 
-        // Delete/Backspace key for bulk delete (with confirmation)
+        // Enter key for bulk complete
         if (
-          (event.key === 'Delete' || event.key === 'Backspace') &&
+          isHoldingCmdOrCtrl &&
+          event.key === 'Enter' &&
           selectedChores.size > 0
         ) {
-          event.preventDefault()
-          handleBulkDelete()
-          return
-        }
-
-        // Enter key for bulk complete
-        if (event.key === 'Enter' && selectedChores.size > 0) {
           event.preventDefault()
           handleBulkComplete()
           return
         }
 
         // "/" key for bulk skip
-        if (event.key === '/' && selectedChores.size > 0) {
+        if (
+          isHoldingCmdOrCtrl &&
+          event.key === '/' &&
+          selectedChores.size > 0
+        ) {
           event.preventDefault()
           handleBulkSkip()
           return
@@ -340,10 +337,8 @@ const MyChores = () => {
 
         // "x" key for bulk archive (without shift or modifiers)
         if (
-          event.key === 'x' &&
-          !event.shiftKey &&
-          !event.ctrlKey &&
-          !event.metaKey &&
+          isHoldingCmdOrCtrl &&
+          (event.key === 'x' || event.key === 'X') &&
           selectedChores.size > 0 &&
           !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)
         ) {
@@ -351,79 +346,17 @@ const MyChores = () => {
           handleBulkArchive()
           return
         }
-
-        // "X" key (Shift + x) for bulk delete - without Ctrl/Cmd modifiers
-        if (
-          event.shiftKey &&
-          (event.key === 'X' || event.key === 'x') &&
-          !event.ctrlKey &&
-          !event.metaKey &&
-          selectedChores.size > 0 &&
-          !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)
-        ) {
-          event.preventDefault()
-          handleBulkDelete()
-          return
-        }
       }
 
-      // Global shortcuts (work outside multi-select mode)
-      // "o" key to show archived chores (when not in multi-select and archived chores not shown)
       if (
-        event.key === 'o' &&
-        !isMultiSelectMode &&
-        archivedChores === null &&
-        !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)
-      ) {
-        event.preventDefault()
-        GetArchivedChores()
-          .then(response => response.json())
-          .then(data => {
-            setArchivedChores(data.res)
-          })
-        return
-      }
-
-      // Ctrl/Cmd + X for bulk archive (works in both multi-select and normal mode)
-      if (
-        (event.ctrlKey || event.metaKey) &&
-        event.key === 'x' &&
-        !event.shiftKey &&
-        !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)
-      ) {
-        event.preventDefault()
-        if (isMultiSelectMode && selectedChores.size > 0) {
-          handleBulkArchive()
-        } else if (!isMultiSelectMode) {
-          // Enable multi-select mode first, then show a message
-          setIsMultiSelectMode(true)
-          showSuccess({
-            title: '📦 Archive Mode',
-            message:
-              'Multi-select enabled. Select tasks to archive, or use Cmd+X again.',
-          })
-        }
-        return
-      }
-
-      // Ctrl/Cmd + Shift + X for bulk delete (works in both multi-select and normal mode)
-      if (
-        (event.ctrlKey || event.metaKey) &&
-        event.shiftKey &&
-        event.key === 'X' &&
+        isHoldingCmdOrCtrl &&
+        (event.key === 'e' || event.key === 'E') &&
+        selectedChores.size > 0 &&
         !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)
       ) {
         event.preventDefault()
         if (isMultiSelectMode && selectedChores.size > 0) {
           handleBulkDelete()
-        } else if (!isMultiSelectMode) {
-          // Enable multi-select mode first, then show a message
-          setIsMultiSelectMode(true)
-          showSuccess({
-            title: '🗑️ Delete Mode',
-            message:
-              'Multi-select enabled. Select tasks to delete, or use Cmd+Shift+X again.',
-          })
         }
         return
       }
@@ -1546,8 +1479,7 @@ const MyChores = () => {
                 Delete
                 {showKeyboardShortcuts && selectedChores.size > 0 && (
                   <KeyboardShortcutHint
-                    withShift={true}
-                    shortcut='X'
+                    shortcut='E'
                     sx={{
                       position: 'absolute',
                       top: -8,
