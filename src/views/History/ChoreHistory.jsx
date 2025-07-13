@@ -14,13 +14,13 @@ import {
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { LoadingScreen, SmoothCard } from '../../components/animations'
 import {
   DeleteChoreHistory,
   GetAllCircleMembers,
   GetChoreHistory,
   UpdateChoreHistory,
 } from '../../utils/Fetcher'
-import LoadingComponent from '../components/Loading'
 import EditHistoryModal from '../Modals/EditHistoryModal'
 import HistoryCard from './HistoryCard'
 
@@ -143,7 +143,7 @@ const ChoreHistory = () => {
   }
 
   if (isLoading) {
-    return <LoadingComponent />
+    return <LoadingScreen message='Loading task history...' />
   }
   if (!choreHistory.length) {
     return (
