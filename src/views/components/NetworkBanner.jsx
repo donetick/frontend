@@ -1,6 +1,7 @@
 import { WifiOff } from '@mui/icons-material'
 import { Alert, Box } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import Z_INDEX from '../../constants/zIndex'
 import { networkManager } from '../../hooks/NetworkManager'
 
 const NetworkBanner = () => {
@@ -23,7 +24,7 @@ const NetworkBanner = () => {
             position: 'fixed',
             top: 0,
             left: 0,
-            zIndex: 10001,
+            zIndex: Z_INDEX.NETWORK_BANNER,
             padding: '4px',
             pt: `calc( env(safe-area-inset-top, 0px))`,
             width: '100%',

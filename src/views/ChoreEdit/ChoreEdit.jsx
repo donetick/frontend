@@ -30,7 +30,7 @@ import {
   useCreateChore,
   useUpdateChore,
 } from '../../queries/ChoreQueries.jsx'
-import { useUserProfile } from '../../queries/UserQueries.jsx'
+import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import { useNotification } from '../../service/NotificationProvider'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import {
@@ -76,8 +76,6 @@ const ChoreEdit = () => {
   const [performers, setPerformers] = useState([])
   const [assignStrategy, setAssignStrategy] = useState(ASSIGN_STRATEGIES[2])
   const [dueDate, setDueDate] = useState(null)
-  const [completed, setCompleted] = useState(false)
-  const [completedDate, setCompletedDate] = useState('')
   const [assignedTo, setAssignedTo] = useState(-1)
   const [frequencyType, setFrequencyType] = useState('once')
   const [frequency, setFrequency] = useState(1)
@@ -110,6 +108,8 @@ const ChoreEdit = () => {
     isLoading: isChoreLoading,
     refetch: refetchChore,
   } = useChore(choreId)
+  const { data: membersData, isLoading: isMemberDataLoading } =
+    useCircleMembers()
   const { showSuccess, showError } = useNotification()
 
   const [userLabels, setUserLabels] = useState([])
@@ -309,9 +309,13 @@ const ChoreEdit = () => {
 
       setIsNotificable(data.res.notification)
       setThingTrigger(data.res.thingChore)
-      // setDueDate(data.res.dueDate)
-      // setCompleted(data.res.completed)
-      // setCompletedDate(data.res.completedDate)
+      setDueDate(
+        data.res.nextDueDate
+          ? moment(data.res.nextDueDate).format('YYYY-MM-DDTHH:mm:00')
+          : null,
+      )
+      setCreatedBy(data.res.createdBy)
+      setUpdatedBy(data.res.updatedBy)
     }
   }, [choreData, isChoreLoading, searchParams])
 
@@ -380,7 +384,8 @@ const ChoreEdit = () => {
   if (
     (isChoreLoading && choreId) ||
     isUserLabelsLoading ||
-    isUserProfileLoading
+    isUserProfileLoading ||
+    isMemberDataLoading
   ) {
     return <LoadingComponent />
   }
@@ -1009,7 +1014,6 @@ const ChoreEdit = () => {
           </Card>
         )}
       </Box>
-
       {choreId > 0 && (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mt: 3 }}>
           <Sheet
@@ -1022,7 +1026,7 @@ const ChoreEdit = () => {
             <Typography level='body1'>
               Created by{' '}
               <Chip variant='solid'>
-                {performers.find(f => f.userId === createdBy)?.displayName}
+                {membersData.res.find(f => f.userId === createdBy)?.displayName}
               </Chip>{' '}
               {moment(chore.createdAt).fromNow()}
             </Typography>
@@ -1033,7 +1037,10 @@ const ChoreEdit = () => {
                 <Typography level='body1'>
                   Updated by{' '}
                   <Chip variant='solid'>
-                    {performers.find(f => f.userId === updatedBy)?.displayName}
+                    {
+                      membersData.res.find(f => f.userId === updatedBy)
+                        ?.displayName
+                    }
                   </Chip>{' '}
                   {moment(chore.updatedAt).fromNow()}
                 </Typography>

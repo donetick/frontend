@@ -22,6 +22,7 @@ import {
   ListItemDecorator,
   Typography,
 } from '@mui/joy'
+
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { version } from '../../../package.json'
@@ -81,6 +82,8 @@ const links = [
   },
 ]
 
+import Z_INDEX from '../../constants/zIndex'
+
 const NavBar = () => {
   const navigate = useNavigate()
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -110,7 +113,7 @@ const NavBar = () => {
       style={{
         paddingTop: `calc( env(safe-area-inset-top, 0px))`,
         position: 'sticky',
-        zIndex: 10000,
+        zIndex: Z_INDEX.NAVBAR,
         top: 0,
         minHeight: '45px',
         backgroundColor: 'var(--joy-palette-background-body)',
@@ -164,7 +167,7 @@ const NavBar = () => {
             height:
               'calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))',
             overflow: 'auto',
-            zIndex: 999,
+            zIndex: Z_INDEX.DRAWER,
           },
         }}
       >

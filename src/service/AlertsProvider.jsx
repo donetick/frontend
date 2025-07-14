@@ -1,6 +1,7 @@
 import { Alert, Box } from '@mui/joy'
 import PropTypes from 'prop-types'
 import { createContext, useCallback, useContext, useState } from 'react'
+import Z_INDEX from '../constants/zIndex'
 
 const FADE_DURATION = 400 // ms
 const ALERT_DURATION = 5000 // ms
@@ -48,7 +49,7 @@ export const AlertsProvider = ({ children }) => {
             top: 0,
             left: 0,
             width: '100%',
-            zIndex: 10000,
+            zIndex: Z_INDEX.ALERTS,
             overflow: 'hidden',
           }}
         >
