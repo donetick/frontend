@@ -162,7 +162,7 @@ const NavBar = () => {
         sx={{
           '& .MuiDrawer-content': {
             position: 'fixed',
-            top: 'calc(env(safe-area-inset-top, 0px) + 45px)',
+            pt: 'calc(env(safe-area-inset-top, 0px))',
             left: 0,
             height:
               'calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))',
