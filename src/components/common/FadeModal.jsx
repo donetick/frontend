@@ -1,5 +1,5 @@
 import { Modal, ModalDialog, ModalOverflow } from '@mui/joy'
-import Z_INDEX from '../../constants/zIndex'
+import { Z_INDEX } from '../../constants/zIndex'
 
 /**
  * FadeModal component with consistent fade-in/out animations
@@ -19,10 +19,8 @@ const FadeModal = ({
       open={open}
       onClose={onClose}
       sx={{
-        zIndex: Z_INDEX.MODAL_BACKDROP,
         '& .MuiModal-backdrop': {
           backdropFilter: backdropBlur ? 'blur(3px)' : 'none',
-          zIndex: Z_INDEX.MODAL_BACKDROP,
         },
       }}
       keepMounted
