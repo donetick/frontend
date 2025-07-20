@@ -1,7 +1,7 @@
 import CancelIcon from '@mui/icons-material/Cancel'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import CircleIcon from '@mui/icons-material/Circle'
-import { Cell, Legend, Pie, PieChart, Tooltip } from 'recharts'
+import { Cell, Pie, PieChart, Tooltip } from 'recharts'
 
 import { EventBusy, Group, Toll } from '@mui/icons-material'
 import {
@@ -131,44 +131,202 @@ const ChoreHistoryTimeline = ({ history }) => {
   )
 }
 
-const renderPieChart = (data, size, isPrimary, chartType = null) => (
-  <PieChart width={size} height={size}>
-    <Pie
-      data={data}
-      dataKey='value'
-      nameKey='label'
-      cx='50%'
-      cy='50%'
-      innerRadius={isPrimary ? size / 4 : size / 6}
-      paddingAngle={5}
-      cornerRadius={5}
-    >
-      {data.map((entry, index) => (
-        <Cell key={`cell-${index}`} fill={entry.color} />
-      ))}
-    </Pie>
-    {isPrimary && (
-      <Tooltip
-        formatter={(value, name, props) => {
-          if (chartType === 'tasksTime' && props.payload.count) {
-            return [`${value}h (${props.payload.count} times)`, name]
-          }
-          return [`${value}`, name]
+const renderPieChart = (data, size, isPrimary, chartType = null) => {
+  // Filter out items with zero or negative values
+  const validData = data.filter(item => item.value > 0)
+
+  if (validData.length === 0) {
+    return (
+      <Box
+        sx={{
+          width: size,
+          height: size,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          border: '1px dashed',
+          borderColor: 'divider',
+          borderRadius: '8px',
         }}
-      />
-    )}
-    {isPrimary && (
-      <Legend
-        layout='horizontal'
-        verticalAlign='bottom'
-        align='center'
-        // format as : {entry.payload.label}: {value}
-        iconType='circle'
-        formatter={(label, value) => `${label}: ${value.payload.value}`}
-      />
-    )}
-  </PieChart>
-)
+      >
+        <Typography level='body-sm' color='neutral'>
+          No data available
+        </Typography>
+      </Box>
+    )
+  }
+
+  // For primary charts, render chart and legend separately to control layout better
+  if (isPrimary) {
+    const chartSize = Math.min(size - 20, 220) // Reserve space and limit max size
+
+    return (
+      <Box
+        sx={{
+          width: size,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: validData.length <= 3 ? 1.5 : 2, // Smaller gap for fewer items
+        }}
+      >
+        {/* Chart Container */}
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <PieChart width={chartSize} height={chartSize}>
+            <Pie
+              data={validData}
+              dataKey='value'
+              nameKey='label'
+              cx='50%'
+              cy='50%'
+              outerRadius={chartSize / 3}
+              innerRadius={chartSize / 8}
+              paddingAngle={validData.length > 1 ? 2 : 0}
+              cornerRadius={3}
+              minAngle={5}
+            >
+              {validData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Pie>
+            <Tooltip
+              formatter={(value, name, props) => {
+                if (chartType === 'tasksTime' && props.payload.count) {
+                  return [`${value}h (${props.payload.count} times)`, name]
+                }
+                return [`${value}`, name]
+              }}
+            />
+          </PieChart>
+        </Box>
+
+        {/* Scrollable Legend Container */}
+        <Box
+          sx={{
+            width: '100%',
+            maxHeight: validData.length <= 3 ? 'auto' : '120px', // Dynamic height based on data count
+            minHeight: validData.length <= 3 ? 'auto' : '60px', // No minimum height for few items
+            overflowY: validData.length <= 3 ? 'visible' : 'auto', // No scroll for few items
+            overflowX: 'hidden',
+            px: 1,
+            '&::-webkit-scrollbar': {
+              width: '6px',
+            },
+            '&::-webkit-scrollbar-track': {
+              backgroundColor: 'neutral.100',
+              borderRadius: '3px',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              backgroundColor: 'neutral.400',
+              borderRadius: '3px',
+              '&:hover': {
+                backgroundColor: 'neutral.500',
+              },
+            },
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 0.5,
+              justifyContent: 'center',
+              alignItems: 'flex-start',
+            }}
+          >
+            {validData.map((entry, index) => (
+              <Chip
+                key={`legend-${index}`}
+                size='sm'
+                variant='soft'
+                sx={{
+                  // backgroundColor: `${entry.color}20`, // 20% opacity
+                  // borderColor: entry.color,
+                  // border: '1px solid',
+                  color: 'text.primary',
+                  fontSize: '0.7rem',
+                  py: 0.5,
+                  px: 1,
+                  maxWidth: '100%',
+                  '&:hover': {
+                    backgroundColor: `${entry.color}30`, // 30% opacity on hover
+                  },
+                }}
+                startDecorator={
+                  <Box
+                    sx={{
+                      width: 8,
+                      height: 8,
+                      backgroundColor: entry.color,
+                      borderRadius: '50%',
+                      flexShrink: 0,
+                    }}
+                  />
+                }
+              >
+                <Typography
+                  level='body-xs'
+                  sx={{
+                    fontSize: '0.7rem',
+                    fontWeight: 500,
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    maxWidth: '150px',
+                  }}
+                  title={`${entry.label}: ${entry.value}${
+                    chartType === 'tasksTime' && entry.count
+                      ? ` (${entry.count} times)`
+                      : ''
+                  }${
+                    chartType === 'labelsDuration' || chartType === 'tasksTime'
+                      ? 'h'
+                      : ''
+                  }`}
+                >
+                  {entry.label}: {entry.value}
+                  {chartType === 'tasksTime' && entry.count
+                    ? ` (${entry.count}x)`
+                    : ''}
+                  {chartType === 'labelsDuration' || chartType === 'tasksTime'
+                    ? 'h'
+                    : ''}
+                </Typography>
+              </Chip>
+            ))}
+          </Box>
+        </Box>
+      </Box>
+    )
+  }
+
+  // For small preview charts, keep it simple without legend
+  return (
+    <PieChart width={size} height={size}>
+      <Pie
+        data={validData}
+        dataKey='value'
+        nameKey='label'
+        cx='50%'
+        cy='50%'
+        outerRadius={size / 3.5}
+        innerRadius={size / 8}
+        paddingAngle={validData.length > 1 ? 1 : 0}
+        cornerRadius={2}
+      >
+        {validData.map((entry, index) => (
+          <Cell key={`cell-${index}`} fill={entry.color} />
+        ))}
+      </Pie>
+    </PieChart>
+  )
+}
 
 const USER_FILTER = (history, userId) => {
   if (userId === undefined || userId === 'all') return true
@@ -185,9 +343,6 @@ const UserActivites = () => {
 
   const [historyPieChartData, setHistoryPieChartData] = React.useState([])
   const [choreDuePieChartData, setChoreDuePieChartData] = React.useState([])
-  const [choresAssignedChartData, setChoresAssignedChartData] = React.useState(
-    [],
-  )
   const [choresPriorityChartData, setChoresPriorityChartData] = React.useState(
     [],
   )
@@ -247,6 +402,13 @@ const UserActivites = () => {
 
       // Generate tasks time chart data
       setTasksTimeChartData(generateTasksTimeChartData(filteredHistory))
+    } else {
+      // Reset data when loading or no data
+      setEnrichedHistory([])
+      setSelectedHistory([])
+      setHistoryPieChartData([])
+      setChoresLabelsDurationChartData([])
+      setTasksTimeChartData([])
     }
   }, [
     isChoresHistoryLoading,
@@ -263,35 +425,6 @@ const UserActivites = () => {
         selectedUser === 'all' || selectedUser === undefined
           ? choresData.res
           : choresData.res.filter(chore => chore.assignedTo === selectedUser)
-
-      const generateChoreAssignedChartData = chores => {
-        var assignedToMe = 0
-        var assignedToOthers = 0
-        chores.forEach(chore => {
-          if (chore.assignedTo === userProfile?.id) {
-            assignedToMe++
-          } else assignedToOthers++
-        })
-
-        const group = []
-        if (assignedToMe > 0) {
-          group.push({
-            label: `Assigned to me`,
-            value: assignedToMe,
-            color: TASK_COLOR.ASSIGNED_TO_ME,
-            id: 1,
-          })
-        }
-        if (assignedToOthers > 0) {
-          group.push({
-            label: `Assigned to others`,
-            value: assignedToOthers,
-            color: TASK_COLOR.ASSIGNED_TO_OTHERS,
-            id: 2,
-          })
-        }
-        return group
-      }
 
       const generateChorePriorityPieChartData = chores => {
         const groups = ChoresGrouper('priority', chores, null)
@@ -400,7 +533,6 @@ const UserActivites = () => {
 
       const choreDuePieChartData = generateChoreDuePieChartData(filteredChores)
       setChoreDuePieChartData(choreDuePieChartData)
-      setChoresAssignedChartData(generateChoreAssignedChartData(filteredChores))
       setChoresPriorityChartData(
         generateChorePriorityPieChartData(filteredChores),
       )
@@ -412,6 +544,10 @@ const UserActivites = () => {
   }, [isChoresLoading, choresData, userProfile?.id, circleUsers, selectedUser])
 
   const generateChoreLabelsWithDurationChartData = (chores, history) => {
+    if (!chores || !history || chores.length === 0 || history.length === 0) {
+      return []
+    }
+
     const labelDurations = {}
     let unlabeledDuration = 0
 
@@ -467,6 +603,10 @@ const UserActivites = () => {
   }
 
   const generateTasksTimeChartData = history => {
+    if (!history || history.length === 0) {
+      return []
+    }
+
     const taskDurations = {}
     const colorValues = Object.values(COLORS)
 
@@ -504,6 +644,10 @@ const UserActivites = () => {
   }
 
   const generateChoreDuePieChartData = chores => {
+    if (!chores || chores.length === 0) {
+      return []
+    }
+
     const groups = ChoresGrouper('due_date', chores, null)
     return groups
       .map(group => {
@@ -518,44 +662,58 @@ const UserActivites = () => {
   }
 
   const generateHistoryPieChartData = history => {
+    if (!history || history.length === 0) {
+      return []
+    }
+
     const totalCompleted =
       history.filter(item => item.dueDate > item.performedAt).length || 0
     const totalLate =
       history.filter(item => item.dueDate < item.performedAt).length || 0
     const totalNoDueDate = history.filter(item => !item.dueDate).length || 0
 
-    return [
-      {
+    const result = []
+
+    if (totalCompleted > 0) {
+      result.push({
         label: `On time`,
         value: totalCompleted,
         color: TASK_COLOR.COMPLETED,
         id: 1,
-      },
-      {
+      })
+    }
+
+    if (totalLate > 0) {
+      result.push({
         label: `Late`,
         value: totalLate,
         color: TASK_COLOR.LATE,
         id: 2,
-      },
-      {
+      })
+    }
+
+    if (totalNoDueDate > 0) {
+      result.push({
         label: `Completed`,
         value: totalNoDueDate,
         color: TASK_COLOR.ANYTIME,
         id: 3,
-      },
-    ]
+      })
+    }
+
+    return result
   }
   if (isChoresHistoryLoading || isChoresLoading) {
     return <LoadingComponent />
   }
   const chartData = {
     history: {
-      data: historyPieChartData,
+      data: historyPieChartData || [],
       title: 'Status',
       description: 'Completed tasks status',
     },
     due: {
-      data: choreDuePieChartData,
+      data: choreDuePieChartData || [],
       title: 'Due Date',
       description: 'Current tasks due date',
     },
@@ -565,27 +723,27 @@ const UserActivites = () => {
     //   description: 'Tasks assigned to you vs others',
     // },
     priority: {
-      data: choresPriorityChartData,
+      data: choresPriorityChartData || [],
       title: 'Priority',
       description: 'Tasks by priority',
     },
     labels: {
-      data: choresLabelsChartData,
+      data: choresLabelsChartData || [],
       title: 'Labels',
       description: 'Tasks by labels',
     },
     labelsDuration: {
-      data: choresLabelsDurationChartData,
+      data: choresLabelsDurationChartData || [],
       title: 'Labels (time)',
       description: 'Time spent by labels (hours)',
     },
     tasksTime: {
-      data: tasksTimeChartData,
+      data: tasksTimeChartData || [],
       title: 'Tasks (time)',
       description: 'Time spent by individual tasks (hours)',
     },
     assigneeBreakdown: {
-      data: choresAssigneeBreakdownChartData,
+      data: choresAssigneeBreakdownChartData || [],
       title: 'by Assignee',
       description: 'Tasks grouped by assignee',
     },
@@ -629,7 +787,7 @@ const UserActivites = () => {
 
   return (
     <Container
-      maxWidth='xl'
+      maxWidth='lg'
       sx={{
         display: 'flex',
         flexDirection: 'column',
@@ -871,7 +1029,7 @@ const UserActivites = () => {
           sx={{
             width: { xs: '100%', lg: '350px' },
             position: { xs: 'static', lg: 'sticky' },
-            top: { lg: '20px' },
+            top: { lg: '60px' },
             alignSelf: { lg: 'flex-start' },
             maxHeight: { lg: 'calc(100vh - 40px)' },
             overflowY: { lg: 'auto' },
@@ -880,12 +1038,26 @@ const UserActivites = () => {
         >
           {/* Charts Container */}
           <Card
-            variant='outlined'
+            variant='plain'
             sx={{
+              // maxHeight: { lg: '90vh' },
               p: 2,
-              borderRadius: 12,
-              backdropFilter: 'blur(10px)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              mr: 10,
+              justifyContent: 'space-between',
+              boxShadow: 'sm',
+              borderRadius: 20,
+              width: '315px',
+              mb: 1,
             }}
+            // variant='outlined'
+            // sx={{
+            //   p: 2,
+            //   borderRadius: 12,
+            //   backdropFilter: 'blur(10px)',
+            // }}
           >
             <Stack spacing={3}>
               {/* Main Chart */}
@@ -894,9 +1066,20 @@ const UserActivites = () => {
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  justifyContent: 'center',
+                  justifyContent: 'flex-start',
                   textAlign: 'center',
-                  minHeight: { lg: '400px' },
+                  minHeight: {
+                    lg:
+                      chartData[selectedChart].data.length <= 3
+                        ? '350px'
+                        : '450px',
+                  }, // Dynamic height based on legend needs
+                  maxHeight: {
+                    lg:
+                      chartData[selectedChart].data.length <= 3
+                        ? '400px'
+                        : '500px',
+                  },
                 }}
               >
                 <Typography level='h4' textAlign='center' sx={{ mb: 1 }}>
@@ -907,14 +1090,16 @@ const UserActivites = () => {
                 </Typography>
                 <Box
                   sx={{
+                    flex: 1,
                     display: 'flex',
                     justifyContent: 'center',
-                    alignItems: 'center',
+                    alignItems: 'flex-start',
+                    width: '100%',
                   }}
                 >
                   {renderPieChart(
                     chartData[selectedChart].data,
-                    240,
+                    300, // Increased size for better chart container
                     true,
                     selectedChart,
                   )}

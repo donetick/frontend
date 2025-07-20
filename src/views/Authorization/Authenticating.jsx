@@ -29,7 +29,7 @@ const AuthenticationLoading = () => {
   const getUserProfileAndNavigateToHome = () => {
     GetUserProfile().then(data => {
       data.json().then(data => {
-        refetchUserProfile.then(() => {
+        refetchUserProfile().then(() => {
           // check if redirect url is set in cookie:
           const redirectUrl = Cookies.get('ca_redirect')
           if (redirectUrl) {

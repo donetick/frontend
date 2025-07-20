@@ -13,7 +13,6 @@ import {
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
-import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
   Line,
@@ -23,40 +22,27 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { GetThingHistory } from '../../utils/Fetcher'
+import { useTheme } from '@mui/joy/styles'
+import { useThingHistory } from '../../queries/ThingQueries'
 import LoadingComponent from '../components/Loading'
 
 const ThingsHistory = () => {
   const { id } = useParams()
-  const [thingsHistory, setThingsHistory] = useState([])
-  const [noMoreHistory, setNoMoreHistory] = useState(false)
-  const [errLoading, setErrLoading] = useState(false)
-  useEffect(() => {
-    GetThingHistory(id, 0, 10).then(resp => {
-      if (resp.ok) {
-        resp.json().then(data => {
-          setThingsHistory(data.res)
-          if (data.res.length < 10) {
-            setNoMoreHistory(true)
-          }
-        })
-      } else {
-        setErrLoading(true)
-      }
-    })
-  }, [id])
+  const theme = useTheme()
+  const {
+    data,
+    error,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useThingHistory(id)
+
+  // Flatten all pages of history data
+  const thingsHistory = data?.pages.flatMap(page => page.res) || []
 
   const handleLoadMore = () => {
-    GetThingHistory(id, thingsHistory.length).then(resp => {
-      if (resp.ok) {
-        resp.json().then(data => {
-          setThingsHistory([...thingsHistory, ...data.res])
-          if (data.res.length < 10) {
-            setNoMoreHistory(true)
-          }
-        })
-      }
-    })
+    fetchNextPage()
   }
 
   const formatTimeDifference = (startDate, endDate) => {
@@ -79,11 +65,11 @@ const ThingsHistory = () => {
     return `${timeValue} ${unit}${timeValue !== 1 ? 's' : ''}`
   }
   // if loading show loading spinner:
-  if (thingsHistory.length === 0) {
+  if (isLoading) {
     return <LoadingComponent />
   }
 
-  if (errLoading || !thingsHistory || thingsHistory.length === 0) {
+  if (error || !thingsHistory || thingsHistory.length === 0) {
     return (
       <Container
         maxWidth='md'
@@ -165,9 +151,17 @@ const ThingsHistory = () => {
                   <Line
                     type='monotone'
                     dataKey='state'
-                    stroke='#8884d8'
-                    activeDot={{ r: 8 }}
-                    dot={{ r: 4 }}
+                    stroke={theme.palette.primary[500]}
+                    activeDot={{
+                      r: 8,
+                      fill: theme.palette.primary[600],
+                      stroke: theme.palette.primary[300],
+                    }}
+                    dot={{
+                      r: 4,
+                      fill: theme.palette.primary[500],
+                      stroke: theme.palette.primary[300],
+                    }}
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -305,9 +299,13 @@ const ThingsHistory = () => {
           fullWidth
           color='primary'
           onClick={handleLoadMore}
-          disabled={noMoreHistory}
+          disabled={!hasNextPage || isFetchingNextPage}
         >
-          {noMoreHistory ? 'No more history' : 'Load more'}
+          {isFetchingNextPage
+            ? 'Loading...'
+            : !hasNextPage
+              ? 'No more history'
+              : 'Load more'}
         </Button>
       </Box>
     </Container>
