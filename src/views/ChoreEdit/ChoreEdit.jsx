@@ -290,6 +290,7 @@ const ChoreEdit = () => {
       )
       setIsRolling(data.res.isRolling)
       setIsActive(data.res.isActive)
+      setSubTasks(data.res.subTasks ? data.res.subTasks : [])
 
       if (isCloneMode) {
         if (data.res.subTasks) {

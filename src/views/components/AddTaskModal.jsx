@@ -428,6 +428,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
     if (!frequency && dueDate) {
       // use dueDate converted to UTC:
       chore.nextDueDate = new Date(dueDate).toUTCString()
+      chore.notificationMetadata = notificationMetadata
     }
 
     createChoreMutation
@@ -620,7 +621,6 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
               setHasNotifications(true)
               setFrequencyHumanReadable('Once')
               setFrequency(null)
-              setDueDate(moment().add(1, 'day').format('YYYY-MM-DDTHH:00:00'))
             }}
           >
             Edit Notifications
