@@ -694,23 +694,17 @@ const ChoreView = () => {
           />
         </FormControl>
         {note !== null && (
-          <Input
-            fullWidth
-            multiline
-            label='Additional Notes'
-            placeholder='Add any additional notes here...'
-            value={note || ''}
-            onChange={e => {
-              if (e.target.value.trim() === '') {
-                setNote(null)
-                return
-              }
-              setNote(e.target.value)
-            }}
-            sx={{
-              mb: 1,
-            }}
-          />
+          <Box sx={{ mb: 1 }}>
+            <Typography level='body-sm' sx={{ mb: 1 }}>
+              Additional Notes:
+            </Typography>
+            <RichTextEditor
+              value={note || ''}
+              onChange={setNote}
+              entityType={'chore_completion_note'}
+              placeholder='Add a note about the completion...'
+            />
+          </Box>
         )}
 
         <FormControl size='sm'>

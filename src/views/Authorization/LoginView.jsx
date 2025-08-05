@@ -1,7 +1,9 @@
 import { Capacitor } from '@capacitor/core'
+import { Device } from '@capacitor/device'
 // import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth'
 import { SocialLogin } from '@capgo/capacitor-social-login'
 import { Settings } from '@mui/icons-material'
+import AppleIcon from '@mui/icons-material/Apple'
 import GoogleIcon from '@mui/icons-material/Google'
 import {
   Avatar,
@@ -35,6 +37,7 @@ const LoginView = () => {
   const [password, setPassword] = useState('')
   const [mfaModalOpen, setMfaModalOpen] = useState(false)
   const [mfaSessionToken, setMfaSessionToken] = useState('')
+  const [isAppleSignInSupported, setIsAppleSignInSupported] = useState(false)
   const { data: resource } = useResource()
   const { showError } = useNotification()
   const Navigate = useNavigate()
@@ -47,6 +50,21 @@ const LoginView = () => {
           mode: 'online', // replaces grantOfflineAccess
         },
       })
+
+      // Check if Apple Sign In is supported (iOS 13+)
+      if (Capacitor.isNativePlatform()) {
+        try {
+          const deviceInfo = await Device.getInfo()
+          if (deviceInfo.platform === 'ios') {
+            const majorVersion = parseInt(deviceInfo.osVersion.split('.')[0])
+            setIsAppleSignInSupported(majorVersion >= 13)
+          }
+        } catch (error) {
+          console.log(
+            'Could not determine device info for Apple Sign In support',
+          )
+        }
+      }
     }
     initializeSocialLogin()
   }, [])
@@ -127,6 +145,12 @@ const LoginView = () => {
       } else if (data['accessToken']) {
         // data["accessToken"] is for Google Capacitor
         return data['accessToken']['token']
+      } else if (data['response'] && data['response']['id_token']) {
+        // Apple Sign In returns id_token in response
+        return data['response']['id_token']
+      } else if (data['id_token']) {
+        // Direct id_token for Apple
+        return data['id_token']
       }
     }
 
@@ -165,9 +189,10 @@ const LoginView = () => {
         })
       }
       return response.json().then(() => {
+        const providerName = provider === 'apple' ? 'Apple' : 'Google'
         showError({
-          title: 'Google Login Failed',
-          message: "Couldn't log in with Google, please try again",
+          title: `${providerName} Login Failed`,
+          message: `Couldn't log in with ${providerName}, please try again`,
         })
       })
     })
@@ -447,8 +472,50 @@ const LoginView = () => {
                       </div>
                     </Button>
                   </LoginSocialGoogle>
+
+                  {/* <Button
+                    fullWidth
+                    variant='soft'
+                    color='neutral'
+                    size='lg'
+                    sx={{
+                      mt: 1,
+                      mb: 1,
+                      backgroundColor: 'black',
+                      color: 'white',
+                      '&:hover': {
+                        backgroundColor: '#333',
+                      },
+                    }}
+                    onClick={() => {
+                      SocialLogin.login({
+                        provider: 'apple',
+                        options: {
+                          scopes: ['email', 'name'],
+                        },
+                      })
+                        .then(user => {
+                          console.log('Apple user', user)
+                          loggedWithProvider('apple', user)
+                        })
+                        .catch(error => {
+                          console.error('Apple login error:', error)
+                          showError({
+                            title: 'Apple Login Failed',
+                            message:
+                              "Couldn't log in with Apple, please try again",
+                          })
+                        })
+                    }}
+                  >
+                    <div className='flex gap-2'>
+                      <AppleIcon />
+                      Continue with Apple
+                    </div>
+                  </Button> */}
                 </Box>
               )}
+
               {Capacitor.isNativePlatform() && (
                 <Box sx={{ width: '100%' }}>
                   <Button
@@ -457,16 +524,6 @@ const LoginView = () => {
                     size='lg'
                     sx={{ mt: 3, mb: 2 }}
                     onClick={() => {
-                      // GoogleAuth.initialize({
-                      //   clientId: import.meta.env.VITE_APP_GOOGLE_CLIENT_ID,
-                      //   scopes: ['profile', 'email', 'openid'],
-                      //   grantOfflineAccess: true,
-                      // })
-                      // GoogleAuth.signIn().then(user => {
-                      //   console.log('Google user', user)
-                      //   loggedWithProvider('google', user.authentication)
-                      // })
-
                       SocialLogin.login({
                         provider: 'google',
                         options: { scopes: ['profile', 'email', 'openid'] },
@@ -481,6 +538,45 @@ const LoginView = () => {
                       Continue with Google
                     </div>
                   </Button>
+
+                  {/* Apple Sign In Button for Native Platforms */}
+                  {isAppleSignInSupported && (
+                    <Button
+                      fullWidth
+                      variant='soft'
+                      color='neutral'
+                      size='lg'
+                      sx={{
+                        mb: 1,
+                      }}
+                      onClick={() => {
+                        SocialLogin.login({
+                          provider: 'apple',
+                          options: {
+                            scopes: ['email', 'name'],
+                            state: 'random_string',
+                          },
+                        })
+                          .then(user => {
+                            console.log('Apple user', user)
+                            loggedWithProvider('apple', user)
+                          })
+                          .catch(error => {
+                            console.error('Apple login error:', error)
+                            showError({
+                              title: 'Apple Login Failed',
+                              message:
+                                "Couldn't log in with Apple, please try again",
+                            })
+                          })
+                      }}
+                    >
+                      <div className='flex gap-2'>
+                        <AppleIcon />
+                        Continue with Apple
+                      </div>
+                    </Button>
+                  )}
                 </Box>
               )}
             </>

@@ -1,3 +1,4 @@
+import { Capacitor } from '@capacitor/core'
 import {
   Box,
   Button,
@@ -14,9 +15,11 @@ import {
   Select,
   Typography,
 } from '@mui/joy'
+import { Purchases } from '@revenuecat/purchases-capacitor'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import RealTimeSettings from '../../components/RealTimeSettings'
+import SubscriptionModal from '../../components/SubscriptionModal'
 import Logo from '../../Logo'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
@@ -26,7 +29,6 @@ import {
   DeleteCircleMember,
   GetAllCircleMembers,
   GetCircleMemberRequests,
-  GetSubscriptionSession,
   GetUserCircle,
   JoinCircle,
   LeaveCircle,
@@ -38,6 +40,7 @@ import { isPlusAccount } from '../../utils/Helpers'
 import LoadingComponent from '../components/Loading'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import PassowrdChangeModal from '../Modals/Inputs/PasswordChangeModal'
+import UserDeletionModal from '../Modals/Inputs/UserDeletionModal'
 import APITokenSettings from './APITokenSettings'
 import MFASettings from './MFASettings'
 import NotificationSetting from './NotificationSetting'
@@ -58,6 +61,8 @@ const Settings = () => {
   const [isAdmin, setIsAdmin] = useState(false)
 
   const [changePasswordModal, setChangePasswordModal] = useState(false)
+  const [subscriptionModal, setSubscriptionModal] = useState(false)
+  const [userDeletionModal, setUserDeletionModal] = useState(false)
   const [confirmModalConfig, setConfirmModalConfig] = useState({})
 
   const showConfirmation = (
@@ -127,7 +132,7 @@ const Settings = () => {
       return `You are currently subscribed to the Plus plan. Your subscription will renew on ${moment(
         userProfile?.expiration,
       ).format('MMM DD, YYYY')}.`
-    } else if (userProfile?.subscription === 'canceled') {
+    } else if (userProfile?.subscription === 'cancelled') {
       return `You have cancelled your subscription. Your account will be downgraded to the Free plan on ${moment(
         userProfile?.expiration,
       ).format('MMM DD, YYYY')}.`
@@ -138,7 +143,7 @@ const Settings = () => {
   const getSubscriptionStatus = () => {
     if (userProfile?.subscription === 'active') {
       return `Plus`
-    } else if (userProfile?.subscription === 'canceled') {
+    } else if (userProfile?.subscription === 'cancelled') {
       if (moment().isBefore(userProfile?.expiration)) {
         return `Plus(until ${moment(userProfile?.expiration).format(
           'MMM DD, YYYY',
@@ -594,17 +599,45 @@ const Settings = () => {
             }}
             disabled={
               userProfile?.subscription === 'active' ||
-              moment(userProfile?.expiration).isAfter(moment())
+              (moment(userProfile?.expiration).isAfter(moment()) &&
+                userProfile?.subscription !== 'cancelled')
             }
-            onClick={() => {
-              GetSubscriptionSession().then(data => {
-                data.json().then(data => {
-                  console.log(data)
-                  window.location.href = data.sessionURL
-                  // open in new window:
-                  // window.open(data.sessionURL, '_blank')
-                })
-              })
+            onClick={async () => {
+              if (Capacitor.isNativePlatform()) {
+                try {
+                  const { RevenueCatUI } = await import(
+                    '@revenuecat/purchases-capacitor-ui'
+                  )
+                  await Purchases.configure({
+                    apiKey: import.meta.env.VITE_REACT_APP_REVENUECAT_API_KEY,
+                    appUserID: String(userProfile?.id),
+                  })
+                  const offering = await Purchases.getOfferings()
+                  await RevenueCatUI.presentPaywall({
+                    offering: offering.current,
+                  })
+
+                  // Check if user now has entitlement after paywall interaction
+                  const customerInfo = await Purchases.getCustomerInfo()
+                  if (customerInfo.entitlements.active['plus']) {
+                    showNotification({
+                      type: 'success',
+                      message:
+                        'Purchase successful! Please restart the app to access Plus features.',
+                    })
+                  }
+                } catch (error) {
+                  if (error.code !== '1') {
+                    // User cancelled
+                    showNotification({
+                      type: 'error',
+                      message: 'Purchase failed. Please try again.',
+                    })
+                  }
+                }
+              } else {
+                setSubscriptionModal(true)
+              }
             }}
           >
             Upgrade
@@ -674,6 +707,23 @@ const Settings = () => {
             ) : null}
           </Box>
         )}
+
+        <Box>
+          <Typography level='title-md' mb={1} color='danger'>
+            Danger Zone
+          </Typography>
+          <Typography level='body-sm' mb={2} color='neutral'>
+            Once you delete your account, there is no going back. Please be
+            certain.
+          </Typography>
+          <Button
+            variant='outlined'
+            color='danger'
+            onClick={() => setUserDeletionModal(true)}
+          >
+            Delete Account
+          </Button>
+        </Box>
       </div>
       <NotificationSetting />
       <MFASettings />
@@ -693,6 +743,25 @@ const Settings = () => {
       {confirmModalConfig?.isOpen && (
         <ConfirmationModal config={confirmModalConfig} />
       )}
+
+      <SubscriptionModal
+        open={subscriptionModal}
+        onClose={() => setSubscriptionModal(false)}
+      />
+
+      <UserDeletionModal
+        isOpen={userDeletionModal}
+        onClose={success => {
+          setUserDeletionModal(false)
+          if (success) {
+            showNotification({
+              type: 'success',
+              message: 'Account deleted successfully',
+            })
+          }
+        }}
+        userProfile={userProfile}
+      />
     </Container>
   )
 }

@@ -1,20 +1,27 @@
-import { Checklist, EventBusy, Group, Timelapse } from '@mui/icons-material'
 import {
-  Avatar,
+  Analytics,
+  Checklist,
+  EventBusy,
+  Group,
+  Star,
+  Timelapse,
+  TrendingUp,
+} from '@mui/icons-material'
+import {
+  Box,
   Button,
-  Chip,
+  Card,
+  CardContent,
   Container,
   Grid,
   List,
-  ListItem,
-  ListItemContent,
   Sheet,
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { LoadingScreen, SmoothCard } from '../../components/animations'
+import { LoadingScreen } from '../../components/animations'
 import {
   DeleteChoreHistory,
   GetAllCircleMembers,
@@ -102,39 +109,38 @@ const ChoreHistory = () => {
         subtext: `${histories.length} times`,
       },
       {
-        icon: <Timelapse />,
-        text: 'Usually Within',
+        icon: <TrendingUp />,
+        text: 'Average Timing',
         subtext: moment.duration(averageDelayMoment).isValid()
           ? moment.duration(averageDelayMoment).humanize()
-          : '--',
+          : 'On time',
       },
       {
         icon: <Timelapse />,
         text: 'Maximum Delay',
         subtext: moment.duration(maxDelayMoment).isValid()
           ? moment.duration(maxDelayMoment).humanize()
-          : '--',
+          : 'Never late',
       },
       {
-        icon: <Avatar />,
-        text: ' Completed Most',
+        icon: <Star />,
+        text: 'Top Performer',
         subtext: `${
           performers.find(p => p.userId === Number(userCompletedByMost))
-            ?.displayName
-        } `,
+            ?.displayName || 'Unknown'
+        }`,
       },
-      //  contributes:
       {
         icon: <Group />,
-        text: 'Total Performers',
-        subtext: `${Object.keys(userHistories).length} users`,
+        text: 'Team Members',
+        subtext: `${Object.keys(userHistories).length} active`,
       },
       {
-        icon: <Avatar />,
-        text: 'Last Completed',
+        icon: <Analytics />,
+        text: 'Last Completed By',
         subtext: `${
           performers.find(p => p.userId === Number(histories[0].completedBy))
-            ?.displayName
+            ?.displayName || 'Unknown'
         }`,
       },
     ]
@@ -183,42 +189,67 @@ const ChoreHistory = () => {
 
   return (
     <Container maxWidth='md'>
-      <Typography level='title-md' mb={1.5}>
-        Summary:
-      </Typography>
-      <Sheet
-        // sx={{
-        //   mb: 1,
-        //   borderRadius: 'lg',
-        //   p: 2,
-        // }}
-        sx={{ borderRadius: 'sm', p: 2 }}
-        variant='outlined'
-      >
-        <Grid container spacing={1}>
+      {/* Enhanced Header Section */}
+      <Box sx={{ mb: 4 }}>
+        {/* Statistics Cards Grid */}
+        <Grid container spacing={1} sx={{ mb: 1 }}>
           {historyInfo.map((info, index) => (
-            <Grid item xs={4} key={index}>
-              {/* divider between the list items: */}
-
-              <ListItem key={index}>
-                <ListItemContent>
-                  <Typography level='body-xs' sx={{ fontWeight: 'md' }}>
-                    {info.text}
-                  </Typography>
-                  <Chip color='primary' size='md' startDecorator={info.icon}>
-                    {info.subtext ? info.subtext : '--'}
-                  </Chip>
-                </ListItemContent>
-              </ListItem>
+            <Grid item xs={6} sm={6} key={index}>
+              <Card
+                variant='soft'
+                sx={{
+                  borderRadius: 'md',
+                  boxShadow: 1,
+                  px: 2,
+                  py: 1,
+                  minHeight: 90,
+                  height: '100%',
+                  justifyContent: 'start',
+                }}
+              >
+                <CardContent>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'start',
+                      mb: 0.5,
+                    }}
+                  >
+                    {info.icon}
+                    <Typography
+                      level='body-md'
+                      sx={{
+                        ml: 1,
+                        fontWeight: '500',
+                        color: 'text.primary',
+                      }}
+                    >
+                      {info.text}
+                    </Typography>
+                  </Box>
+                  <Box>
+                    <Typography
+                      level='body-sm'
+                      sx={{ color: 'text.secondary', lineHeight: 1.5 }}
+                    >
+                      {info.subtext || '--'}
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </Card>
             </Grid>
           ))}
         </Grid>
-      </Sheet>
+      </Box>
 
-      {/* User History Cards */}
-      <Typography level='title-md' my={1.5}>
-        History:
-      </Typography>
+      {/* History Section Header */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+        <Analytics sx={{ fontSize: '1.5rem', color: 'primary.500' }} />
+        <Typography level='h4' sx={{ fontWeight: 'lg', color: 'text.primary' }}>
+          Completion History
+        </Typography>
+      </Box>
       <Sheet variant='plain' sx={{ borderRadius: 'sm', boxShadow: 'md' }}>
         {/* Chore History List (Updated Style) */}
 

@@ -27,7 +27,6 @@ const LABEL_COLORS = [
 ]
 
 export const COLORS = {
-  white: '#FFFFFF',
   salmon: '#ff7961',
   teal: '#26a69a',
   skyBlue: '#80d8ff',
@@ -52,6 +51,7 @@ export const COLORS = {
   blush: '#f8bbd0',
   ash: '#90a4ae',
   sand: '#d7ccc8',
+  white: '#FFFFFF',
 }
 
 export const TASK_COLOR = {

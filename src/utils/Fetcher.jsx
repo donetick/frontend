@@ -596,14 +596,61 @@ const ClearChoreTimer = choreId => {
   })
 }
 
+const CheckUserDeletion = (password) => {
+  return Fetch(`/users/delete/check`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify({
+      password,
+    }),
+  })
+}
+
+const DeleteUser = (password, confirmation, transferOptions = []) => {
+  return Fetch(`/users/delete`, {
+    method: 'DELETE',
+    headers: HEADERS(),
+    body: JSON.stringify({
+      password,
+      confirmation,
+      transferOptions,
+    }),
+  })
+}
+
+const CreateBackup = (encryptionKey, includeAssets = true, backupName = '') => {
+  return Fetch(`/backup/create`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify({
+      encryption_key: encryptionKey,
+      include_assets: includeAssets,
+      backup_name: backupName,
+    }),
+  })
+}
+
+const RestoreBackup = (encryptionKey, backupData) => {
+  return Fetch(`/backup/restore`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify({
+      encryption_key: encryptionKey,
+      backup_data: backupData,
+    }),
+  })
+}
+
 export {
   AcceptCircleMemberRequest,
   ArchiveChore,
   CancelSubscription,
   ChangePassword,
+  CheckUserDeletion,
   ClearChoreTimer,
   CompleteSubTask,
   ConfirmMFA,
+  CreateBackup,
   CreateChore,
   CreateLabel,
   CreateLongLiveToken,
@@ -615,6 +662,7 @@ export {
   DeleteLongLiveToken,
   DeleteThing,
   DeleteTimeSession,
+  DeleteUser,
   DisableMFA,
   GetAllCircleMembers,
   GetAllUsers,
@@ -648,6 +696,7 @@ export {
   RegenerateBackupCodes,
   ResetChoreTimer,
   ResetPassword,
+  RestoreBackup,
   SaveChore,
   SaveThing,
   SetupMFA,

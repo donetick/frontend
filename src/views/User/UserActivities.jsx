@@ -3,7 +3,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import CircleIcon from '@mui/icons-material/Circle'
 import { Cell, Pie, PieChart, Tooltip } from 'recharts'
 
-import { EventBusy, Group, Toll } from '@mui/icons-material'
+import { EventBusy, Group, Timeline, Toll } from '@mui/icons-material'
 import {
   Avatar,
   Box,
@@ -94,9 +94,12 @@ const ChoreHistoryTimeline = ({ history }) => {
 
   return (
     <Container sx={{ p: 2 }}>
-      <Typography level='h4' sx={{ mb: 2 }}>
-        Activities Timeline
-      </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+        <Timeline sx={{ fontSize: '1.5rem', color: 'primary.500' }} />
+        <Typography level='h4' sx={{ fontWeight: 'lg', color: 'text.primary' }}>
+          Activities Timeline
+        </Typography>
+      </Box>
 
       {Object.entries(groupedHistory).map(([date, items]) => (
         <Box key={date} sx={{ mb: 4 }}>
@@ -785,6 +788,7 @@ const UserActivites = () => {
     )
   }
 
+  // Calculate activities analytics
   return (
     <Container
       maxWidth='lg'
@@ -794,16 +798,6 @@ const UserActivites = () => {
         px: { xs: 2, sm: 3 },
       }}
     >
-      <Typography
-        mb={3}
-        level='h4'
-        sx={{
-          alignSelf: 'flex-start',
-        }}
-      >
-        Activities Overview
-      </Typography>
-
       {/* Main Content Area - Mobile: Stack vertically, Desktop: Side by side */}
       <Box
         sx={{
@@ -1040,24 +1034,17 @@ const UserActivites = () => {
           <Card
             variant='plain'
             sx={{
-              // maxHeight: { lg: '90vh' },
               p: 2,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              mr: 10,
               justifyContent: 'space-between',
               boxShadow: 'sm',
               borderRadius: 20,
-              width: '315px',
+              width: { xs: '100%', lg: '315px' },
+              mr: { xs: 0, lg: 10 },
               mb: 1,
             }}
-            // variant='outlined'
-            // sx={{
-            //   p: 2,
-            //   borderRadius: 12,
-            //   backdropFilter: 'blur(10px)',
-            // }}
           >
             <Stack spacing={3}>
               {/* Main Chart */}
