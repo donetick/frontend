@@ -399,8 +399,7 @@ const RepeatSection = ({
                                   'T' +
                                   '18:00',
                               ).format(),
-                          timezone:
-                            Intl.DateTimeFormat().resolvedOptions().timeZone,
+                          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
                         })
 
                         return
