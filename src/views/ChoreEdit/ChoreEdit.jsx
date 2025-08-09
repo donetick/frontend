@@ -758,7 +758,7 @@ const ChoreEdit = () => {
               <NotificationTemplate
                 onChange={metadata => {
                   const newTemplates = metadata.notifications
-                  if (notificationMetadata.templates !== newTemplates) {
+                  if (notificationMetadata?.templates !== newTemplates) {
                     setNotificationMetadata({
                       ...notificationMetadata,
                       templates: newTemplates,
@@ -783,18 +783,18 @@ const ChoreEdit = () => {
               <Checkbox
                 overlay
                 onClick={() => {
-                  if (notificationMetadata['circleGroup']) {
-                    delete notificationMetadata['circleGroupID']
+                  if (notificationMetadata?.circleGroup) {
+                    delete notificationMetadata.circleGroupID
                   }
 
                   setNotificationMetadata({
                     ...notificationMetadata,
-                    ['circleGroup']: !notificationMetadata['circleGroup'],
+                    circleGroup: !notificationMetadata?.circleGroup,
                   })
                 }}
                 checked={
                   notificationMetadata
-                    ? notificationMetadata['circleGroup']
+                    ? notificationMetadata?.circleGroup
                     : false
                 }
                 label='Specific Group'
@@ -802,7 +802,7 @@ const ChoreEdit = () => {
               <FormHelperText>Notify a specific group</FormHelperText>
             </FormControl>
 
-            {notificationMetadata['circleGroup'] && (
+            {notificationMetadata?.circleGroup && (
               <Box
                 sx={{
                   mt: 0,
@@ -813,12 +813,12 @@ const ChoreEdit = () => {
 
                 <Input
                   type='number'
-                  value={notificationMetadata['circleGroupID']}
+                  value={notificationMetadata?.circleGroupID}
                   placeholder='Telegram Group ID'
                   onChange={e => {
                     setNotificationMetadata({
                       ...notificationMetadata,
-                      ['circleGroupID']: parseInt(e.target.value),
+                      circleGroupID: parseInt(e.target.value),
                     })
                   }}
                 />
