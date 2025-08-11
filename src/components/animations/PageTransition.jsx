@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react'
-import { CSSTransition, TransitionGroup } from 'react-transition-group'
+import { useEffect, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
+import { CSSTransition, TransitionGroup } from 'react-transition-group'
 import './PageTransition.css'
 
 // Route hierarchy for determining navigation direction
@@ -24,7 +24,7 @@ const getRouteLevel = pathname => {
   if (routeHierarchy[pathname] !== undefined) {
     return routeHierarchy[pathname]
   }
-  
+
   // Check for dynamic routes (e.g., /chores/123/edit)
   if (pathname.includes('/chores/') && pathname.includes('/edit')) {
     return 3
@@ -32,13 +32,17 @@ const getRouteLevel = pathname => {
   if (pathname.includes('/chores/') && pathname.includes('/history')) {
     return 3
   }
-  if (pathname.includes('/chores/') && !pathname.includes('/edit') && !pathname.includes('/history')) {
+  if (
+    pathname.includes('/chores/') &&
+    !pathname.includes('/edit') &&
+    !pathname.includes('/history')
+  ) {
     return 2
   }
   if (pathname.includes('/things/')) {
     return 2
   }
-  
+
   // Default level
   return 1
 }
@@ -51,18 +55,23 @@ const PageTransition = ({ children }) => {
   useEffect(() => {
     const currentLevel = getRouteLevel(location.pathname)
     const previousLevel = getRouteLevel(prevLocation.current.pathname)
-    
+
     // Determine if we're navigating back (to a higher level in hierarchy)
     isNavigatingBack.current = currentLevel < previousLevel
-    
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+
     prevLocation.current = location
   }, [location])
 
   const getTransitionClasses = () => {
-    if (location.pathname.includes('/login') || location.pathname.includes('/signup') || location.pathname.includes('/landing')) {
+    if (
+      location.pathname.includes('/login') ||
+      location.pathname.includes('/signup') ||
+      location.pathname.includes('/landing')
+    ) {
       return 'fade' // Use fade for auth pages
     }
-    
+
     return isNavigatingBack.current ? 'page-back' : 'page'
   }
 
@@ -77,9 +86,7 @@ const PageTransition = ({ children }) => {
         }}
         unmountOnExit
       >
-        <div className="page-wrapper">
-          {children}
-        </div>
+        <div className='page-wrapper'>{children}</div>
       </CSSTransition>
     </TransitionGroup>
   )
