@@ -1,4 +1,4 @@
-import { Add } from '@mui/icons-material'
+import { Add, HorizontalRule } from '@mui/icons-material'
 import {
   Box,
   Button,
@@ -409,220 +409,398 @@ const ChoreEdit = () => {
   }
   return (
     <Container maxWidth='md'>
-      {/* <Typography level='h3' mb={1.5}>
-        Edit Chore
-      </Typography> */}
-      <Box>
-        <FormControl error={errors.name}>
-          <Typography level='h4'>Name :</Typography>
-          <Typography level='h5'> What is the name of this chore?</Typography>
-          <Input value={name} onChange={e => setName(e.target.value)} />
-          <FormHelperText error>{errors.name}</FormHelperText>
-        </FormControl>
-      </Box>
-      <Box mt={2}>
-        <FormControl error={errors.description}>
-          <Typography level='h4'>Additional Details :</Typography>
-          <Typography level='h5'>What is this task about?</Typography>
-          {/* <Textarea
-            value={description}
-            onChange={e => setDescription(e.target.value)}
-          /> */}
+      {/* Section 1: Basic Information */}
+      <Box mb={4}>
+        {/* <Typography
+          level='h3'
+          mb={2}
+          sx={{ borderBottom: '2px solid', borderColor: 'primary.main', pb: 1 }}
+        >
+          Basic Information
+        </Typography> */}
 
-          <RichTextEditor
-            value={description}
-            onChange={setDescription}
-            entityId={choreId}
-            entityType={'chore_description'}
-          />
-          <FormHelperText error>{errors.description}</FormHelperText>
-        </FormControl>
-      </Box>
-      <Box mt={2}>
-        <Typography level='h4'>Assignees :</Typography>
-        <Typography level='h5'>Who can do this task?</Typography>
-        <Card>
-          <List
-            orientation='horizontal'
-            wrap
+        <Box mb={3}>
+          <FormControl error={errors.name}>
+            <Typography level='h4'>Name</Typography>
+            <Typography level='h5'>What is the name of this chore?</Typography>
+            <Input value={name} onChange={e => setName(e.target.value)} />
+            <FormHelperText error>{errors.name}</FormHelperText>
+          </FormControl>
+        </Box>
+
+        <Box mb={3}>
+          <FormControl error={errors.description}>
+            <Typography level='h4'>Description</Typography>
+            <Typography level='h5'>What is this task about?</Typography>
+            <RichTextEditor
+              value={description}
+              onChange={setDescription}
+              entityId={choreId}
+              entityType={'chore_description'}
+            />
+            <FormHelperText error>{errors.description}</FormHelperText>
+          </FormControl>
+        </Box>
+
+        <Box mb={3}>
+          <Typography level='h4'>Priority</Typography>
+          <Typography level='h5'>How important is this task?</Typography>
+
+          {/* Priority Chip Selection */}
+          <Box
             sx={{
-              '--List-gap': '8px',
-              '--ListItem-radius': '20px',
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 2,
+              mt: 2,
             }}
           >
-            {performers?.map((item, index) => (
-              <ListItem key={item.id}>
-                <Checkbox
-                  // disabled={index === 0}
-                  checked={assignees.find(a => a.userId == item.userId) != null}
-                  onClick={() => {
-                    if (assignees.some(a => a.userId === item.userId)) {
-                      const newAssignees = assignees.filter(
-                        a => a.userId !== item.userId,
-                      )
-                      setAssignees(newAssignees)
-                    } else {
-                      setAssignees([...assignees, { userId: item.userId }])
-                    }
-                  }}
-                  overlay
-                  disableIcon
-                  variant='soft'
-                  label={item.displayName}
-                />
-              </ListItem>
-            ))}
-          </List>
-        </Card>
-        <FormControl error={Boolean(errors.assignee)}>
-          <FormHelperText error>{Boolean(errors.assignee)}</FormHelperText>
-        </FormControl>
-      </Box>
-      {assignees.length > 1 && (
-        // this wrap the details that needed if we have more than one assingee
-        // we need to pick the next assignedTo and also the strategy to pick the next assignee.
-        // if we have only one then no need to display this section
-        <>
-          <Box mt={2}>
-            <Typography level='title-lg'>Assigned :</Typography>
-            <Typography level='body-md'>
-              Who is assigned the next due?
-            </Typography>
-
-            <Select
-              placeholder={
-                assignees.length === 0
-                  ? 'No Assignees yet can perform this task'
-                  : 'Select an assignee for this task'
-              }
-              disabled={assignees.length === 0}
-              value={assignedTo > -1 ? assignedTo : null}
-            >
-              {performers
-                ?.filter(p => assignees.find(a => a.userId == p.userId))
-                .map((item, index) => (
-                  <Option
-                    value={item.userId}
-                    key={item.displayName}
-                    onClick={() => {
-                      setAssignedTo(item.userId)
-                    }}
-                  >
-                    {item.displayName}
-                    {/* <Chip size='sm' color='neutral' variant='soft'>
-                </Chip> */}
-                  </Option>
-                ))}
-            </Select>
-          </Box>
-          <Box mt={2}>
-            <Typography level='title-lg'>Picking Mode :</Typography>
-            <Typography level='body-md'>
-              How to pick the next assignee for the following task?
-            </Typography>
-
-            <Card>
-              <List
-                orientation='horizontal'
-                wrap
+            {/* Priority Chips P1-P4 */}
+            {Priorities.map(priorityItem => (
+              <Chip
+                key={priorityItem.value}
+                variant={priority === priorityItem.value ? 'solid' : 'outlined'}
+                color={
+                  priority === priorityItem.value
+                    ? priorityItem.color || 'primary'
+                    : 'neutral'
+                }
+                size='lg'
+                onClick={() => setPriority(priorityItem.value)}
+                startDecorator={priorityItem.icon}
                 sx={{
-                  '--List-gap': '8px',
-                  '--ListItem-radius': '20px',
+                  fontWeight: 'md',
+                  cursor: 'pointer',
+                  minHeight: 34,
                 }}
               >
-                {ASSIGN_STRATEGIES.map((item, idx) => (
-                  <ListItem key={item}>
-                    <Checkbox
-                      // disabled={index === 0}
-                      checked={assignStrategy === item}
-                      onClick={() => setAssignStrategy(item)}
-                      overlay
-                      disableIcon
-                      variant='soft'
-                      label={item
-                        .split('_')
-                        .map(x => x.charAt(0).toUpperCase() + x.slice(1))
-                        .join(' ')}
-                    />
-                  </ListItem>
-                ))}
-              </List>
-            </Card>
+                {priorityItem.name}
+              </Chip>
+            ))}
+            {/* No Priority Chip */}
+            <Chip
+              variant={priority === 0 ? 'solid' : 'outlined'}
+              color='neutral'
+              size='lg'
+              onClick={() => setPriority(0)}
+              startDecorator={<HorizontalRule />}
+              sx={{
+                fontWeight: 'md',
+                cursor: 'pointer',
+                minHeight: 34,
+              }}
+            >
+              No Priority
+            </Chip>
           </Box>
-        </>
-      )}
-      <RepeatSection
-        frequency={frequency}
-        onFrequencyUpdate={setFrequency}
-        frequencyType={frequencyType}
-        onFrequencyTypeUpdate={setFrequencyType}
-        frequencyMetadata={frequencyMetadata}
-        onFrequencyMetadataUpdate={setFrequencyMetadata}
-        frequencyError={errors?.frequency}
-        allUserThings={allUserThings}
-        onTriggerUpdate={thingUpdate => {
-          if (thingUpdate === null) {
-            setThingTrigger(null)
-            return
-          }
-          setThingTrigger({
-            triggerState: thingUpdate.triggerState,
-            condition: thingUpdate.condition,
-            thingID: thingUpdate.thing.id,
-          })
-        }}
-        OnTriggerValidate={setIsThingValid}
-        isAttemptToSave={attemptToSave}
-        selectedThing={thingTrigger}
-      />
+        </Box>
 
-      <Box mt={2}>
-        <Typography level='title-lg'>
-          {REPEAT_ON_TYPE.includes(frequencyType) ? 'Start date' : 'Due date'} :
-        </Typography>
-        {frequencyType === 'trigger' && !dueDate && (
-          <Typography level='body-sm'>
-            Due Date will be set when the trigger of the thing is met
+        <Box mb={3}>
+          <Typography level='h4'>Labels</Typography>
+          <Typography level='h5'>
+            Things to remember about this task or to tag it
           </Typography>
-        )}
+          <Select
+            multiple
+            onChange={(event, newValue) => {
+              setLabelsV2(userLabels.filter(l => newValue.indexOf(l.name) > -1))
+            }}
+            value={labelsV2?.map(l => l.name)}
+            renderValue={selected => (
+              <Box sx={{ display: 'flex', gap: '0.25rem' }}>
+                {labelsV2.map(selectedOption => {
+                  return (
+                    <Chip
+                      variant='soft'
+                      color='primary'
+                      key={selectedOption.id}
+                      size='lg'
+                      sx={{
+                        background: selectedOption.color,
+                        color: getTextColorFromBackgroundColor(
+                          selectedOption.color,
+                        ),
+                      }}
+                    >
+                      {selectedOption.name}
+                    </Chip>
+                  )
+                })}
+              </Box>
+            )}
+            sx={{ minWidth: '15rem' }}
+            slotProps={{
+              listbox: {
+                sx: {
+                  width: '100%',
+                },
+              },
+            }}
+          >
+            {userLabels &&
+              userLabels.map(label => (
+                <Option key={label.id + label.name} value={label.name}>
+                  <div
+                    style={{
+                      width: '20 px',
+                      height: '20 px',
+                      borderRadius: '50%',
+                      background: label.color,
+                    }}
+                  />
+                  {label.name}
+                </Option>
+              ))}
+            <MenuItem
+              key={'addNewLabel'}
+              value={' New Label'}
+              onClick={() => {
+                setAddLabelModalOpen(true)
+              }}
+            >
+              <Add />
+              Add New Label
+            </MenuItem>
+          </Select>
+        </Box>
 
-        {NO_DUE_DATE_REQUIRED_TYPE.includes(frequencyType) && (
-          <FormControl sx={{ mt: 1 }}>
+        <Box>
+          <Typography level='h4'>Sub Tasks</Typography>
+          {/* <FormControl sx={{ mt: 1 }}>
             <Checkbox
               onChange={e => {
                 if (e.target.checked) {
-                  setDueDate(moment(new Date()).format('YYYY-MM-DDTHH:mm:00'))
+                  setSubTasks([])
                 } else {
-                  setDueDate(null)
+                  setSubTasks(null)
                 }
               }}
-              defaultChecked={dueDate !== null}
-              checked={dueDate !== null}
               overlay
-              label='Give this task a due date'
+              checked={subTasks != null}
+              label='Add sub tasks to this task'
             />
-            <FormHelperText>
-              task needs to be completed by a specific time.
-            </FormHelperText>
-          </FormControl>
-        )}
-        {dueDate && (
-          <FormControl error={Boolean(errors.dueDate)}>
-            <Typography level='body-md'>
-              {REPEAT_ON_TYPE.includes(frequencyType)
-                ? 'When does this task start?'
-                : 'When is the next first time this task is due?'}
-            </Typography>
-            <Input
-              type='datetime-local'
-              value={dueDate}
-              onChange={handleDueDateChange}
+            <FormHelperText>Break this task into smaller steps</FormHelperText>
+          </FormControl> */}
+          <Card
+            variant='outlined'
+            sx={{
+              p: 1,
+              mt: 2,
+            }}
+          >
+            <SubTasks
+              editMode={true}
+              tasks={subTasks ? subTasks : []}
+              setTasks={setSubTasks}
+              choreId={choreId}
             />
-            <FormHelperText>{errors.dueDate}</FormHelperText>
+          </Card>
+        </Box>
+      </Box>
+
+      {/* Section 2: Assignment & Responsibility */}
+      <Box mb={4}>
+        <Typography
+          level='h3'
+          mb={2}
+          sx={{ borderBottom: '2px solid', borderColor: 'primary.main', pb: 1 }}
+        >
+          Assignment
+        </Typography>
+
+        <Box mb={3}>
+          <Typography level='h4'>Assignees</Typography>
+          <Typography level='h5'>Who can do this task?</Typography>
+          <Card>
+            <List
+              orientation='horizontal'
+              wrap
+              sx={{
+                '--List-gap': '8px',
+                '--ListItem-radius': '20px',
+              }}
+            >
+              {performers?.map((item, index) => (
+                <ListItem key={item.id}>
+                  <Checkbox
+                    checked={
+                      assignees.find(a => a.userId == item.userId) != null
+                    }
+                    onClick={() => {
+                      if (assignees.some(a => a.userId === item.userId)) {
+                        const newAssignees = assignees.filter(
+                          a => a.userId !== item.userId,
+                        )
+                        setAssignees(newAssignees)
+                      } else {
+                        setAssignees([...assignees, { userId: item.userId }])
+                      }
+                    }}
+                    overlay
+                    disableIcon
+                    variant='soft'
+                    label={item.displayName}
+                  />
+                </ListItem>
+              ))}
+            </List>
+          </Card>
+          <FormControl error={Boolean(errors.assignee)}>
+            <FormHelperText error>{Boolean(errors.assignee)}</FormHelperText>
           </FormControl>
-        )}
-        {dueDate && (
+        </Box>
+
+        {assignees.length > 1 && (
           <>
+            <Box mb={3}>
+              <Typography level='h4'>Currently Assigned To</Typography>
+              <Typography level='h5'>Who is assigned the next due?</Typography>
+              <Select
+                placeholder={
+                  assignees.length === 0
+                    ? 'No Assignees yet can perform this task'
+                    : 'Select an assignee for this task'
+                }
+                disabled={assignees.length === 0}
+                value={assignedTo > -1 ? assignedTo : null}
+              >
+                {performers
+                  ?.filter(p => assignees.find(a => a.userId == p.userId))
+                  .map((item, index) => (
+                    <Option
+                      value={item.userId}
+                      key={item.displayName}
+                      onClick={() => {
+                        setAssignedTo(item.userId)
+                      }}
+                    >
+                      {item.displayName}
+                    </Option>
+                  ))}
+              </Select>
+            </Box>
+
+            <Box>
+              <Typography level='h4'>Assignment Strategy</Typography>
+              <Typography level='h5'>
+                How to pick the next assignee for the following task?
+              </Typography>
+              <Card>
+                <List
+                  orientation='horizontal'
+                  wrap
+                  sx={{
+                    '--List-gap': '8px',
+                    '--ListItem-radius': '20px',
+                  }}
+                >
+                  {ASSIGN_STRATEGIES.map((item, idx) => (
+                    <ListItem key={item}>
+                      <Checkbox
+                        checked={assignStrategy === item}
+                        onClick={() => setAssignStrategy(item)}
+                        overlay
+                        disableIcon
+                        variant='soft'
+                        label={item
+                          .split('_')
+                          .map(x => x.charAt(0).toUpperCase() + x.slice(1))
+                          .join(' ')}
+                      />
+                    </ListItem>
+                  ))}
+                </List>
+              </Card>
+            </Box>
+          </>
+        )}
+      </Box>
+
+      {/* Section 3: Schedule & Timing */}
+      <Box mb={4}>
+        <Typography
+          level='h3'
+          mb={2}
+          sx={{ borderBottom: '2px solid', borderColor: 'primary.main', pb: 1 }}
+        >
+          Schedule & Timing
+        </Typography>
+
+        <RepeatSection
+          frequency={frequency}
+          onFrequencyUpdate={setFrequency}
+          frequencyType={frequencyType}
+          onFrequencyTypeUpdate={setFrequencyType}
+          frequencyMetadata={frequencyMetadata}
+          onFrequencyMetadataUpdate={setFrequencyMetadata}
+          frequencyError={errors?.frequency}
+          allUserThings={allUserThings}
+          onTriggerUpdate={thingUpdate => {
+            if (thingUpdate === null) {
+              setThingTrigger(null)
+              return
+            }
+            setThingTrigger({
+              triggerState: thingUpdate.triggerState,
+              condition: thingUpdate.condition,
+              thingID: thingUpdate.thing.id,
+            })
+          }}
+          OnTriggerValidate={setIsThingValid}
+          isAttemptToSave={attemptToSave}
+          selectedThing={thingTrigger}
+        />
+
+        <Box mt={3} mb={3}>
+          <Typography level='h4'>
+            {REPEAT_ON_TYPE.includes(frequencyType) ? 'Start Date' : 'Due Date'}
+          </Typography>
+          {frequencyType === 'trigger' && !dueDate && (
+            <Typography level='body-sm'>
+              Due Date will be set when the trigger of the thing is met
+            </Typography>
+          )}
+
+          {NO_DUE_DATE_REQUIRED_TYPE.includes(frequencyType) && (
+            <FormControl sx={{ mt: 1 }}>
+              <Checkbox
+                onChange={e => {
+                  if (e.target.checked) {
+                    setDueDate(moment(new Date()).format('YYYY-MM-DDTHH:mm:00'))
+                  } else {
+                    setDueDate(null)
+                  }
+                }}
+                defaultChecked={dueDate !== null}
+                checked={dueDate !== null}
+                overlay
+                label='Give this task a due date'
+              />
+              <FormHelperText>
+                task needs to be completed by a specific time.
+              </FormHelperText>
+            </FormControl>
+          )}
+          {dueDate && (
+            <FormControl error={Boolean(errors.dueDate)}>
+              <Typography level='body-md'>
+                {REPEAT_ON_TYPE.includes(frequencyType)
+                  ? 'When does this task start?'
+                  : 'When is the next first time this task is due?'}
+              </Typography>
+              <Input
+                type='datetime-local'
+                value={dueDate}
+                onChange={handleDueDateChange}
+              />
+              <FormHelperText>{errors.dueDate}</FormHelperText>
+            </FormControl>
+          )}
+        </Box>
+
+        {dueDate && (
+          <Box mb={3}>
+            <Typography level='h4'>Completion Window</Typography>
             <FormControl orientation='horizontal'>
               <Switch
                 checked={completionWindow != -1}
@@ -636,17 +814,14 @@ const ChoreEdit = () => {
                 }}
                 color={completionWindow !== -1 ? 'success' : 'neutral'}
                 variant={completionWindow !== -1 ? 'solid' : 'outlined'}
-                // endDecorator={points !== -1 ? 'On' : 'Off'}
                 sx={{
                   mr: 2,
                 }}
               />
               <div>
-                {/* <FormLabel>Completion window (hours)</FormLabel> */}
                 <Typography level='body-md'>
                   Completion window (hours)
                 </Typography>
-
                 <FormHelperText sx={{ mt: 0 }}>
                   {"Set a time window that task can't be completed before"}
                 </FormHelperText>
@@ -661,12 +836,10 @@ const ChoreEdit = () => {
                   }}
                 >
                   <Typography level='body-sm'>Hours:</Typography>
-
                   <Input
                     type='number'
                     value={completionWindow}
                     sx={{ maxWidth: 100 }}
-                    // add min points is 0 and max is 1000
                     slotProps={{
                       input: {
                         min: 0,
@@ -681,399 +854,271 @@ const ChoreEdit = () => {
                 </Box>
               </Card>
             )}
-          </>
+          </Box>
         )}
-      </Box>
-      {!['once', 'no_repeat'].includes(frequencyType) && (
-        <Box mt={2}>
-          <Typography level='title-lg'>Scheduling Preferences: </Typography>
-          <Typography level='body-md'>
-            How to reschedule the next due date?
-          </Typography>
 
-          <RadioGroup name='tiers' sx={{ gap: 1, '& > div': { p: 1 } }}>
-            <FormControl>
-              <Radio
-                overlay
-                checked={!isRolling}
-                onClick={() => setIsRolling(false)}
-                label='Reschedule from due date'
-              />
-              <FormHelperText>
-                the next task will be scheduled from the original due date, even
-                if the previous task was completed late
-              </FormHelperText>
-            </FormControl>
-            <FormControl>
-              <Radio
-                overlay
-                checked={isRolling}
-                onClick={() => setIsRolling(true)}
-                label='Reschedule from completion date'
-              />
-              <FormHelperText>
-                the next task will be scheduled from the actual completion date
-                of the previous task
-              </FormHelperText>
-            </FormControl>
-          </RadioGroup>
-        </Box>
-      )}
-      <Box mt={2}>
-        <Typography level='title-lg'>Notifications : </Typography>
-        <Typography level='body-md'>
-          Get Reminders when this task is due or completed
+        {!['once', 'no_repeat'].includes(frequencyType) && (
+          <Box>
+            <Typography level='h4'>Scheduling Preferences</Typography>
+            <Typography level='h5'>
+              How to reschedule the next due date?
+            </Typography>
+            <RadioGroup name='tiers' sx={{ gap: 1, '& > div': { p: 1 } }}>
+              <FormControl>
+                <Radio
+                  overlay
+                  checked={!isRolling}
+                  onClick={() => setIsRolling(false)}
+                  label='Reschedule from due date'
+                />
+                <FormHelperText>
+                  the next task will be scheduled from the original due date,
+                  even if the previous task was completed late
+                </FormHelperText>
+              </FormControl>
+              <FormControl>
+                <Radio
+                  overlay
+                  checked={isRolling}
+                  onClick={() => setIsRolling(true)}
+                  label='Reschedule from completion date'
+                />
+                <FormHelperText>
+                  the next task will be scheduled from the actual completion
+                  date of the previous task
+                </FormHelperText>
+              </FormControl>
+            </RadioGroup>
+          </Box>
+        )}
+        {/* Section 3.1: Notifications */}
+
+        <Box mb={3}>
+          <Typography level='h4'>Notifications</Typography>
           {!isPlusAccount(userProfile) && (
-            <Chip variant='soft' color='warning'>
-              Plus Feature
-            </Chip>
+            <Typography level='body-sm' color='warning' sx={{ mb: 1 }}>
+              Task notifications are not available in the Basic plan. Upgrade to
+              Plus to receive reminders when tasks are due or completed.
+            </Typography>
           )}
-        </Typography>
-        {!isPlusAccount(userProfile) && (
-          <Typography level='body-sm' color='warning' sx={{ mb: 1 }}>
-            Task notifications are not available in the Basic plan. Upgrade to
-            Plus to receive reminders when tasks are due or completed.
-          </Typography>
-        )}
 
-        <FormControl sx={{ mt: 1 }}>
-          <Checkbox
-            onChange={e => {
-              setIsNotificable(e.target.checked)
-              // if unchecking, reset notification metadata:
-              if (!e.target.checked) {
-                setNotificationMetadata({})
-              }
-            }}
-            defaultChecked={isNotificable}
-            checked={isNotificable}
-            disabled={!isPlusAccount(userProfile)}
-            overlay
-            label='Notify for this task'
-          />
-          <FormHelperText
+          <FormControl sx={{ mt: 1 }}>
+            <Checkbox
+              onChange={e => {
+                setIsNotificable(e.target.checked)
+                if (!e.target.checked) {
+                  setNotificationMetadata({})
+                }
+              }}
+              defaultChecked={isNotificable}
+              checked={isNotificable}
+              disabled={!isPlusAccount(userProfile)}
+              overlay
+              label='Notify for this task'
+            />
+            <FormHelperText
+              sx={{
+                opacity: !isPlusAccount(userProfile) ? 0.5 : 1,
+              }}
+            >
+              When should receive notifications for this task
+            </FormHelperText>
+          </FormControl>
+        </Box>
+
+        {isNotificable && (
+          <Box
             sx={{
-              opacity: !isPlusAccount(userProfile) ? 0.5 : 1,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 2,
             }}
           >
-            When should receive notifications for this task
-          </FormHelperText>
-        </FormControl>
-      </Box>
-      {isNotificable && (
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 2,
+            <Card variant='outlined'>
+              <Typography level='h4' mb={2}>
+                Notification Schedule
+              </Typography>
+              <Box sx={{ p: 0.5 }}>
+                <NotificationTemplate
+                  onChange={metadata => {
+                    const newTemplates = metadata.notifications
+                    if (notificationMetadata?.templates !== newTemplates) {
+                      setNotificationMetadata({
+                        ...notificationMetadata,
+                        templates: newTemplates,
+                      })
+                    }
+                  }}
+                  value={notificationMetadata}
+                />
+              </Box>
 
-            '& > div': { p: 2, borderRadius: 'md', display: 'flex' },
-          }}
-        >
-          <Card variant='outlined'>
-            <Typography level='body-md'>Notification Schedule:</Typography>
-            <Box sx={{ p: 0.5 }}>
-              <NotificationTemplate
-                onChange={metadata => {
-                  const newTemplates = metadata.notifications
-                  if (notificationMetadata?.templates !== newTemplates) {
+              <Typography level='h4' mt={3} mb={2}>
+                Who to Notify
+              </Typography>
+              <FormControl>
+                <Checkbox
+                  overlay
+                  disabled={true}
+                  checked={true}
+                  label='All Assignees'
+                />
+                <FormHelperText>Notify all assignees</FormHelperText>
+              </FormControl>
+
+              <FormControl>
+                <Checkbox
+                  overlay
+                  onClick={() => {
+                    if (notificationMetadata?.circleGroup) {
+                      delete notificationMetadata.circleGroupID
+                    }
+
                     setNotificationMetadata({
                       ...notificationMetadata,
-                      templates: newTemplates,
+                      circleGroup: !notificationMetadata?.circleGroup,
                     })
+                  }}
+                  checked={
+                    notificationMetadata
+                      ? notificationMetadata?.circleGroup
+                      : false
                   }
-                }}
-                value={notificationMetadata}
-              />
-            </Box>
-            <Typography level='body-md'> Who to Notify:</Typography>
-            <FormControl>
-              <Checkbox
-                overlay
-                disabled={true}
-                checked={true}
-                label='All Assignees'
-              />
-              <FormHelperText>Notify all assignees</FormHelperText>
-            </FormControl>
+                  label='Specific Group'
+                />
+                <FormHelperText>Notify a specific group</FormHelperText>
+              </FormControl>
 
-            <FormControl>
-              <Checkbox
-                overlay
-                onClick={() => {
-                  if (notificationMetadata?.circleGroup) {
-                    delete notificationMetadata.circleGroupID
-                  }
+              {notificationMetadata?.circleGroup && (
+                <Box
+                  sx={{
+                    mt: 0,
+                    ml: 4,
+                  }}
+                >
+                  <Typography level='body-sm'>Telegram Group ID:</Typography>
+                  <Input
+                    type='number'
+                    value={notificationMetadata?.circleGroupID}
+                    placeholder='Telegram Group ID'
+                    onChange={e => {
+                      setNotificationMetadata({
+                        ...notificationMetadata,
+                        circleGroupID: parseInt(e.target.value),
+                      })
+                    }}
+                  />
+                </Box>
+              )}
+            </Card>
+          </Box>
+        )}
+      </Box>
 
-                  setNotificationMetadata({
-                    ...notificationMetadata,
-                    circleGroup: !notificationMetadata?.circleGroup,
-                  })
-                }}
-                checked={
-                  notificationMetadata
-                    ? notificationMetadata?.circleGroup
-                    : false
+      {/* Section 4: Task Settings */}
+      <Box mb={4}>
+        <Typography
+          level='h3'
+          mb={2}
+          sx={{ borderBottom: '2px solid', borderColor: 'primary.main', pb: 1 }}
+        >
+          Task Settings
+        </Typography>
+
+        <Box mb={3}>
+          <Typography level='h4'>Points System</Typography>
+          <FormControl sx={{ mt: 1 }}>
+            <Checkbox
+              onChange={e => {
+                if (e.target.checked) {
+                  setPoints(1)
+                } else {
+                  setPoints(-1)
                 }
-                label='Specific Group'
-              />
-              <FormHelperText>Notify a specific group</FormHelperText>
-            </FormControl>
-
-            {notificationMetadata?.circleGroup && (
+              }}
+              checked={points > -1}
+              overlay
+              label='Assign points for completion'
+            />
+            <FormHelperText>
+              Assign points to this task and user will earn points when they
+              completed it
+            </FormHelperText>
+          </FormControl>
+          {points != -1 && (
+            <Card variant='outlined' sx={{ mt: 2 }}>
               <Box
                 sx={{
                   mt: 0,
                   ml: 4,
                 }}
               >
-                <Typography level='body-sm'>Telegram Group ID:</Typography>
-
+                <Typography level='body-sm'>Points:</Typography>
                 <Input
                   type='number'
-                  value={notificationMetadata?.circleGroupID}
-                  placeholder='Telegram Group ID'
+                  value={points}
+                  sx={{ maxWidth: 100 }}
+                  slotProps={{
+                    input: {
+                      min: 0,
+                      max: 1000,
+                    },
+                  }}
+                  placeholder='Points'
                   onChange={e => {
-                    setNotificationMetadata({
-                      ...notificationMetadata,
-                      circleGroupID: parseInt(e.target.value),
-                    })
+                    setPoints(parseInt(e.target.value))
                   }}
                 />
               </Box>
-            )}
-          </Card>
-        </Box>
-      )}
-      <Box mt={2}>
-        <Typography level='title-lg'>Labels :</Typography>
-        <Typography level='body-md'>
-          Things to remember about this task or to tag it
-        </Typography>
-        <Select
-          multiple
-          onChange={(event, newValue) => {
-            setLabelsV2(userLabels.filter(l => newValue.indexOf(l.name) > -1))
-          }}
-          value={labelsV2?.map(l => l.name)}
-          renderValue={selected => (
-            <Box sx={{ display: 'flex', gap: '0.25rem' }}>
-              {labelsV2.map(selectedOption => {
-                return (
-                  <Chip
-                    variant='soft'
-                    color='primary'
-                    key={selectedOption.id}
-                    size='lg'
-                    sx={{
-                      background: selectedOption.color,
-                      color: getTextColorFromBackgroundColor(
-                        selectedOption.color,
-                      ),
-                    }}
-                  >
-                    {selectedOption.name}
-                  </Chip>
-                )
-              })}
-            </Box>
+            </Card>
           )}
-          sx={{ minWidth: '15rem' }}
-          slotProps={{
-            listbox: {
-              sx: {
-                width: '100%',
-              },
-            },
-          }}
-        >
-          {userLabels &&
-            userLabels
-              // .map(l => l.name)
-              .map(label => (
-                <Option key={label.id + label.name} value={label.name}>
-                  <div
-                    style={{
-                      width: '20 px',
-                      height: '20 px',
-                      borderRadius: '50%',
-                      background: label.color,
-                    }}
-                  />
-                  {label.name}
-                </Option>
-              ))}
-          <MenuItem
-            key={'addNewLabel'}
-            value={' New Label'}
-            onClick={() => {
-              setAddLabelModalOpen(true)
-            }}
-          >
-            <Add />
-            Add New Label
-          </MenuItem>
-        </Select>
-      </Box>
-      <Box mt={2}>
-        <Typography level='title-lg'>Priority :</Typography>
-        <Typography level='body-md'>How important is this task?</Typography>
-        <Select
-          onChange={(event, newValue) => {
-            setPriority(newValue)
-          }}
-          value={priority}
-          sx={{ minWidth: '15rem' }}
-          slotProps={{
-            listbox: {
-              sx: {
-                width: '100%',
-              },
-            },
-          }}
-        >
-          {Priorities.map(priority => (
-            <Option key={priority.id + priority.name} value={priority.value}>
-              <div
-                style={{
-                  width: '20 px',
-                  height: '20 px',
-                  borderRadius: '50%',
-                  background: priority.color,
-                }}
-              />
-              {priority.name}
-            </Option>
-          ))}
-          <Option value={0}>No Priority</Option>
-        </Select>
-      </Box>
+        </Box>
 
-      <Box mt={2}>
-        <Typography level='title-lg' gutterBottom>
-          Others :
-        </Typography>
-
-        <FormControl sx={{ mt: 1 }}>
-          <Checkbox
-            onChange={e => {
-              if (e.target.checked) {
-                setSubTasks([])
-              } else {
-                setSubTasks(null)
-              }
-            }}
-            overlay
-            checked={subTasks != null}
-            label='Sub Tasks'
-          />
-          <FormHelperText>Add sub tasks to this task</FormHelperText>
-        </FormControl>
-        {subTasks != null && (
-          <Card
-            variant='outlined'
-            sx={{
-              p: 1,
-            }}
-          >
-            <SubTasks
-              editMode={true}
-              tasks={subTasks}
-              setTasks={setSubTasks}
-              choreId={choreId}
-            />
-          </Card>
-        )}
-        <FormControl sx={{ mt: 1 }}>
-          <Checkbox
-            onChange={e => {
-              if (e.target.checked) {
-                setPoints(1)
-              } else {
-                setPoints(-1)
-              }
-            }}
-            checked={points > -1}
-            overlay
-            label='Assign Points'
-          />
-          <FormHelperText>
-            Assign points to this task and user will earn points when they
-            completed it
-          </FormHelperText>
-        </FormControl>
-
-        {points != -1 && (
-          <Card variant='outlined'>
-            <Box
-              sx={{
-                mt: 0,
-                ml: 4,
+        <Box mb={3}>
+          <Typography level='h4'>Approval Requirement</Typography>
+          <FormControl sx={{ mt: 1 }}>
+            <Checkbox
+              onChange={e => {
+                setRequireApproval(e.target.checked)
               }}
-            >
-              <Typography level='body-sm'>Points:</Typography>
-
-              <Input
-                type='number'
-                value={points}
-                sx={{ maxWidth: 100 }}
-                // add min points is 0 and max is 1000
-                slotProps={{
-                  input: {
-                    min: 0,
-                    max: 1000,
-                  },
-                }}
-                placeholder='Points'
-                onChange={e => {
-                  setPoints(parseInt(e.target.value))
-                }}
-              />
-            </Box>
-          </Card>
-        )}
-        <FormControl sx={{ mt: 1 }}>
-          <Checkbox
-            onChange={e => {
-              setRequireApproval(e.target.checked)
-            }}
-            checked={requireApproval}
-            overlay
-            label='Require Approval'
-          />
-          <FormHelperText>
-            This task will need approval from an admin before being marked as
-            complete
-          </FormHelperText>
-        </FormControl>
-      </Box>
-      <Box mt={2} mb={2}>
-        <Typography level='title-lg'>Visibility:</Typography>
-        <Typography level='body-md' sx={{ mb: 2 }}>
-          Choose who can see this task
-        </Typography>
-
-        <RadioGroup
-          name='isPrivate'
-          value={isPrivate}
-          onChange={event => setIsPrivate(event.target.value)}
-          sx={{
-            '& > div': { p: 1 },
-          }}
-        >
-          <FormControl>
-            <Radio overlay value={false} label='Public' />
-            <FormHelperText>Everyone in your circle</FormHelperText>
-          </FormControl>
-
-          <FormControl>
-            <Radio overlay value={true} label='Private' />
+              checked={requireApproval}
+              overlay
+              label='Require admin approval'
+            />
             <FormHelperText>
-              Only you and others that are assigned to the task
+              This task will need approval from an admin before being marked as
+              complete
             </FormHelperText>
           </FormControl>
-        </RadioGroup>
+        </Box>
+
+        <Box>
+          <Typography level='h4'>Visibility</Typography>
+          <Typography level='h5' sx={{ mb: 2 }}>
+            Choose who can see this task
+          </Typography>
+          <RadioGroup
+            name='isPrivate'
+            value={isPrivate}
+            onChange={event => setIsPrivate(event.target.value)}
+            sx={{
+              '& > div': { p: 1 },
+            }}
+          >
+            <FormControl>
+              <Radio overlay value={false} label='Public' />
+              <FormHelperText>Everyone in your circle</FormHelperText>
+            </FormControl>
+            <FormControl>
+              <Radio overlay value={true} label='Private' />
+              <FormHelperText>
+                Only you and others that are assigned to the task
+              </FormHelperText>
+            </FormControl>
+          </RadioGroup>
+        </Box>
       </Box>
+
       {choreId > 0 && (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mt: 3 }}>
           <Sheet
