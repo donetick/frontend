@@ -150,10 +150,12 @@ const ChoreEdit = () => {
         <Box
           onClick={() => toggleSection(sectionKey)}
           sx={{
+            mx: 0,
             display: 'flex',
             alignItems: 'center',
             cursor: 'pointer',
-            p: 2,
+            width: '100%',
+            py: 2,
             borderRadius: 'md',
             backgroundColor: 'background.level1',
             border: '1px solid',
@@ -193,16 +195,9 @@ const ChoreEdit = () => {
         {isExpanded && (
           <Box
             sx={{
-              pl: 2,
-              pr: 2,
+              // pl: 2,
+              // pr: 2,
               pb: 2,
-              borderRadius: 'md',
-              backgroundColor: 'background.surface',
-              border: '1px solid',
-              borderColor: 'divider',
-              borderTop: 'none',
-              borderTopLeftRadius: 0,
-              borderTopRightRadius: 0,
             }}
           >
             {children}
