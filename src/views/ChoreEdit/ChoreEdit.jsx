@@ -84,6 +84,8 @@ const ChoreEdit = () => {
   const [labelsV2, setLabelsV2] = useState([])
   const [priority, setPriority] = useState(0)
   const [points, setPoints] = useState(-1)
+  const [requireApproval, setRequireApproval] = useState(false)
+  const [isPrivate, setIsPrivate] = useState(false)
   const [subTasks, setSubTasks] = useState(null)
   const [completionWindow, setCompletionWindow] = useState(-1)
   const [allUserThings, setAllUserThings] = useState([])
@@ -141,13 +143,24 @@ const ChoreEdit = () => {
       frequencyType === 'days_of_the_week' &&
       frequencyMetadata['days']?.length === 0
     ) {
-      errors.frequency = 'At least 1 day is required'
+      errors.frequency = 'Please select at least one day of the week'
+    }
+
+    // Validate advanced scheduling patterns
+    if (
+      frequencyType === 'days_of_the_week' &&
+      frequencyMetadata?.weekPattern === 'nth_day_of_month' &&
+      (!frequencyMetadata?.occurrences ||
+        frequencyMetadata.occurrences.length === 0)
+    ) {
+      errors.frequency =
+        'Please select at least one day occurrence for the month'
     }
     if (
       frequencyType === 'day_of_the_month' &&
       frequencyMetadata['months']?.length === 0
     ) {
-      errors.frequency = 'At least 1 month is required'
+      errors.frequency = 'Please select at least one month'
     }
     if (
       dueDate === null &&
@@ -220,6 +233,8 @@ const ChoreEdit = () => {
       notificationMetadata: notificationMetadata,
       thingTrigger: thingTrigger,
       points: points < 0 ? null : points,
+      requireApproval: requireApproval,
+      isPrivate: isPrivate,
       completionWindow:
         // if completionWindow is -1 then set it to null or dueDate is null
         completionWindow < 0 || dueDate === null ? null : completionWindow,
@@ -274,6 +289,8 @@ const ChoreEdit = () => {
 
       setNotificationMetadata(data.res.notificationMetadata)
       setPoints(data.res.points && data.res.points > -1 ? data.res.points : -1)
+      setRequireApproval(data.res.requireApproval || false)
+      setIsPrivate(data.res.isPrivate || false)
       setCompletionWindow(
         data.res.completionWindow && data.res.completionWindow > -1
           ? data.res.completionWindow
@@ -418,8 +435,7 @@ const ChoreEdit = () => {
             entityId={choreId}
             entityType={'chore_description'}
           />
-
-          <FormHelperText error>{errors.name}</FormHelperText>
+          <FormHelperText error>{errors.description}</FormHelperText>
         </FormControl>
       </Box>
       <Box mt={2}>
@@ -468,16 +484,16 @@ const ChoreEdit = () => {
         // if we have only one then no need to display this section
         <>
           <Box mt={2}>
-            <Typography level='h4'>Assigned :</Typography>
-            <Typography level='h5'>
-              Who is assigned the next due chore?
+            <Typography level='title-lg'>Assigned :</Typography>
+            <Typography level='body-md'>
+              Who is assigned the next due?
             </Typography>
 
             <Select
               placeholder={
                 assignees.length === 0
-                  ? 'No Assignees yet can perform this chore'
-                  : 'Select an assignee for this chore'
+                  ? 'No Assignees yet can perform this task'
+                  : 'Select an assignee for this task'
               }
               disabled={assignees.length === 0}
               value={assignedTo > -1 ? assignedTo : null}
@@ -500,9 +516,9 @@ const ChoreEdit = () => {
             </Select>
           </Box>
           <Box mt={2}>
-            <Typography level='h4'>Picking Mode :</Typography>
-            <Typography level='h5'>
-              How to pick the next assignee for the following chore?
+            <Typography level='title-lg'>Picking Mode :</Typography>
+            <Typography level='body-md'>
+              How to pick the next assignee for the following task?
             </Typography>
 
             <Card>
@@ -561,7 +577,7 @@ const ChoreEdit = () => {
       />
 
       <Box mt={2}>
-        <Typography level='h4'>
+        <Typography level='title-lg'>
           {REPEAT_ON_TYPE.includes(frequencyType) ? 'Start date' : 'Due date'} :
         </Typography>
         {frequencyType === 'trigger' && !dueDate && (
@@ -592,10 +608,10 @@ const ChoreEdit = () => {
         )}
         {dueDate && (
           <FormControl error={Boolean(errors.dueDate)}>
-            <Typography level='h5'>
+            <Typography level='body-md'>
               {REPEAT_ON_TYPE.includes(frequencyType)
-                ? 'When does this chore start?'
-                : 'When is the next first time this chore is due?'}
+                ? 'When does this task start?'
+                : 'When is the next first time this task is due?'}
             </Typography>
             <Input
               type='datetime-local'
@@ -627,7 +643,9 @@ const ChoreEdit = () => {
               />
               <div>
                 {/* <FormLabel>Completion window (hours)</FormLabel> */}
-                <Typography level='h5'>Completion window (hours)</Typography>
+                <Typography level='body-md'>
+                  Completion window (hours)
+                </Typography>
 
                 <FormHelperText sx={{ mt: 0 }}>
                   {"Set a time window that task can't be completed before"}
@@ -668,8 +686,8 @@ const ChoreEdit = () => {
       </Box>
       {!['once', 'no_repeat'].includes(frequencyType) && (
         <Box mt={2}>
-          <Typography level='h4'>Scheduling Preferences: </Typography>
-          <Typography level='h5'>
+          <Typography level='title-lg'>Scheduling Preferences: </Typography>
+          <Typography level='body-md'>
             How to reschedule the next due date?
           </Typography>
 
@@ -702,8 +720,8 @@ const ChoreEdit = () => {
         </Box>
       )}
       <Box mt={2}>
-        <Typography level='h4'>Notifications : </Typography>
-        <Typography level='h5'>
+        <Typography level='title-lg'>Notifications : </Typography>
+        <Typography level='body-md'>
           Get Reminders when this task is due or completed
           {!isPlusAccount(userProfile) && (
             <Chip variant='soft' color='warning'>
@@ -768,7 +786,7 @@ const ChoreEdit = () => {
                 value={notificationMetadata}
               />
             </Box>
-            <Typography level='h5'>Choose Who to Notify:</Typography>
+            <Typography level='body-md'> Who to Notify:</Typography>
             <FormControl>
               <Checkbox
                 overlay
@@ -828,9 +846,9 @@ const ChoreEdit = () => {
         </Box>
       )}
       <Box mt={2}>
-        <Typography level='h4'>Labels :</Typography>
-        <Typography level='h5'>
-          Things to remember about this chore or to tag it
+        <Typography level='title-lg'>Labels :</Typography>
+        <Typography level='body-md'>
+          Things to remember about this task or to tag it
         </Typography>
         <Select
           multiple
@@ -898,8 +916,8 @@ const ChoreEdit = () => {
         </Select>
       </Box>
       <Box mt={2}>
-        <Typography level='h4'>Priority :</Typography>
-        <Typography level='h5'>How important is this task?</Typography>
+        <Typography level='title-lg'>Priority :</Typography>
+        <Typography level='body-md'>How important is this task?</Typography>
         <Select
           onChange={(event, newValue) => {
             setPriority(newValue)
@@ -932,7 +950,7 @@ const ChoreEdit = () => {
       </Box>
 
       <Box mt={2}>
-        <Typography level='h4' gutterBottom>
+        <Typography level='title-lg' gutterBottom>
           Others :
         </Typography>
 
@@ -1014,6 +1032,47 @@ const ChoreEdit = () => {
             </Box>
           </Card>
         )}
+        <FormControl sx={{ mt: 1 }}>
+          <Checkbox
+            onChange={e => {
+              setRequireApproval(e.target.checked)
+            }}
+            checked={requireApproval}
+            overlay
+            label='Require Approval'
+          />
+          <FormHelperText>
+            This task will need approval from an admin before being marked as
+            complete
+          </FormHelperText>
+        </FormControl>
+      </Box>
+      <Box mt={2} mb={2}>
+        <Typography level='title-lg'>Visibility:</Typography>
+        <Typography level='body-md' sx={{ mb: 2 }}>
+          Choose who can see this task
+        </Typography>
+
+        <RadioGroup
+          name='isPrivate'
+          value={isPrivate}
+          onChange={event => setIsPrivate(event.target.value)}
+          sx={{
+            '& > div': { p: 1 },
+          }}
+        >
+          <FormControl>
+            <Radio overlay value={false} label='Public' />
+            <FormHelperText>Everyone in your circle</FormHelperText>
+          </FormControl>
+
+          <FormControl>
+            <Radio overlay value={true} label='Private' />
+            <FormHelperText>
+              Only you and others that are assigned to the task
+            </FormHelperText>
+          </FormControl>
+        </RadioGroup>
       </Box>
       {choreId > 0 && (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mt: 3 }}>
