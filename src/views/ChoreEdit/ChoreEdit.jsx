@@ -1,4 +1,9 @@
-import { Add, HorizontalRule } from '@mui/icons-material'
+import {
+  Add,
+  ChevronRight,
+  ExpandMore,
+  HorizontalRule,
+} from '@mui/icons-material'
 import {
   Box,
   Button,
@@ -102,6 +107,12 @@ const ChoreEdit = () => {
   const [errors, setErrors] = useState({})
   const [attemptToSave, setAttemptToSave] = useState(false)
   const [addLabelModalOpen, setAddLabelModalOpen] = useState(false)
+  const [expandedSections, setExpandedSections] = useState({
+    basicInfo: true,
+    assignment: true,
+    schedule: true,
+    taskSettings: true,
+  })
   const { data: userLabelsRaw, isLoading: isUserLabelsLoading } = useLabels()
   const updateChoreMutation = useUpdateChore()
   const createChoreMutation = useCreateChore()
@@ -123,6 +134,83 @@ const ChoreEdit = () => {
   }, [userLabelsRaw])
 
   const Navigate = useNavigate()
+
+  const toggleSection = sectionKey => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [sectionKey]: !prev[sectionKey],
+    }))
+  }
+
+  const CollapsibleSection = ({ sectionKey, title, subtitle, children }) => {
+    const isExpanded = expandedSections[sectionKey]
+
+    return (
+      <Box mb={4}>
+        <Box
+          onClick={() => toggleSection(sectionKey)}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            cursor: 'pointer',
+            p: 2,
+            borderRadius: 'md',
+            backgroundColor: 'background.level1',
+            border: '1px solid',
+            borderColor: 'divider',
+            mb: isExpanded ? 2 : 0,
+            transition: 'all 0.2s ease-in-out',
+            '&:hover': {
+              backgroundColor: 'background.level2',
+              borderColor: 'primary.main',
+            },
+          }}
+        >
+          {isExpanded ? (
+            <ExpandMore sx={{ mr: 1, color: 'primary.main' }} />
+          ) : (
+            <ChevronRight sx={{ mr: 1, color: 'text.secondary' }} />
+          )}
+          <Box sx={{ flexGrow: 1 }}>
+            <Typography
+              level='h3'
+              sx={{
+                color: isExpanded ? 'primary.main' : 'text.primary',
+                fontWeight: 'bold',
+                mb: subtitle ? 0.5 : 0,
+              }}
+            >
+              {title}
+            </Typography>
+            {subtitle && (
+              <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+                {subtitle}
+              </Typography>
+            )}
+          </Box>
+        </Box>
+
+        {isExpanded && (
+          <Box
+            sx={{
+              pl: 2,
+              pr: 2,
+              pb: 2,
+              borderRadius: 'md',
+              backgroundColor: 'background.surface',
+              border: '1px solid',
+              borderColor: 'divider',
+              borderTop: 'none',
+              borderTopLeftRadius: 0,
+              borderTopRightRadius: 0,
+            }}
+          >
+            {children}
+          </Box>
+        )}
+      </Box>
+    )
+  }
 
   const HandleValidateChore = () => {
     const errors = {}
@@ -410,15 +498,11 @@ const ChoreEdit = () => {
   return (
     <Container maxWidth='md'>
       {/* Section 1: Basic Information */}
-      <Box mb={4}>
-        {/* <Typography
-          level='h3'
-          mb={2}
-          sx={{ borderBottom: '2px solid', borderColor: 'primary.main', pb: 1 }}
-        >
-          Basic Information
-        </Typography> */}
-
+      <CollapsibleSection
+        sectionKey='basicInfo'
+        title='Basic Information'
+        subtitle='Essential details about your task'
+      >
         <Box mb={3}>
           <FormControl error={errors.name}>
             <Typography level='h4'>Name</Typography>
@@ -596,18 +680,14 @@ const ChoreEdit = () => {
             />
           </Card>
         </Box>
-      </Box>
+      </CollapsibleSection>
 
       {/* Section 2: Assignment & Responsibility */}
-      <Box mb={4}>
-        <Typography
-          level='h3'
-          mb={2}
-          sx={{ borderBottom: '2px solid', borderColor: 'primary.main', pb: 1 }}
-        >
-          Assignment
-        </Typography>
-
+      <CollapsibleSection
+        sectionKey='assignment'
+        title='Assignment & Responsibility'
+        subtitle='Who will be responsible for this task'
+      >
         <Box mb={3}>
           <Typography level='h4'>Assignees</Typography>
           <Typography level='h5'>Who can do this task?</Typography>
@@ -714,18 +794,14 @@ const ChoreEdit = () => {
             </Box>
           </>
         )}
-      </Box>
+      </CollapsibleSection>
 
       {/* Section 3: Schedule & Timing */}
-      <Box mb={4}>
-        <Typography
-          level='h3'
-          mb={2}
-          sx={{ borderBottom: '2px solid', borderColor: 'primary.main', pb: 1 }}
-        >
-          Schedule & Timing
-        </Typography>
-
+      <CollapsibleSection
+        sectionKey='schedule'
+        title='Schedule & Timing'
+        subtitle='When and how often this task should be done'
+      >
         <RepeatSection
           frequency={frequency}
           onFrequencyUpdate={setFrequency}
@@ -1013,18 +1089,14 @@ const ChoreEdit = () => {
             </Card>
           </Box>
         )}
-      </Box>
+      </CollapsibleSection>
 
       {/* Section 4: Task Settings */}
-      <Box mb={4}>
-        <Typography
-          level='h3'
-          mb={2}
-          sx={{ borderBottom: '2px solid', borderColor: 'primary.main', pb: 1 }}
-        >
-          Task Settings
-        </Typography>
-
+      <CollapsibleSection
+        sectionKey='taskSettings'
+        title='Task Settings'
+        subtitle='Additional options and configurations'
+      >
         <Box mb={3}>
           <Typography level='h4'>Points System</Typography>
           <FormControl sx={{ mt: 1 }}>
@@ -1117,7 +1189,7 @@ const ChoreEdit = () => {
             </FormControl>
           </RadioGroup>
         </Box>
-      </Box>
+      </CollapsibleSection>
 
       {choreId > 0 && (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mt: 3 }}>
