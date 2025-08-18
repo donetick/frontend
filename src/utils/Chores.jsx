@@ -3,13 +3,26 @@ import { TASK_COLOR } from './Colors.jsx'
 
 const priorityOrder = [1, 2, 3, 4, 0]
 // ChoreGrouperOptions enum:
-export const GROUPING_OPTIONS = {
+export const GROUPING_OPTIONS = Object.freeze({
   SMART: 'default',
   DUE_DATE: 'due_date',
   PRIORITY: 'priority',
   LABELS: 'labels',
-}
+})
 
+export const ChoreHistoryStatus = Object.freeze({
+  STARTED: 0,
+  COMPLETED: 1,
+  SKIPPED: 2,
+  PENDING_APPROVAL: 3,
+  REJECTED: 4,
+})
+export const ChoreStatus = Object.freeze({
+  INACTIVE: 0,
+  ACTIVE: 1,
+  PAUSED: 2,
+  PENDING_APPROVAL: 3,
+})
 export const ChoresGrouper = (groupBy, chores, filter) => {
   if (filter) {
     chores = chores.filter(chore => filter(chore))
@@ -22,6 +35,7 @@ export const ChoresGrouper = (groupBy, chores, filter) => {
     case 'default':
       // same as due_date but hide empty groups: and if status is 1 or 2 have seperated catigory as Started:
       var groupRaw = {
+        PendingApproval: [],
         Started: [],
         Today: [],
         Tomorrow: [],
@@ -34,6 +48,8 @@ export const ChoresGrouper = (groupBy, chores, filter) => {
       chores.forEach(chore => {
         if (chore.status === 1 || chore.status === 2) {
           groupRaw['Started'].push(chore)
+        } else if (chore.status === 3) {
+          groupRaw['PendingApproval'].push(chore)
         } else if (chore.nextDueDate === null) {
           groupRaw['Anytime'].push(chore)
         } else if (new Date(chore.nextDueDate) < new Date()) {
@@ -70,6 +86,13 @@ export const ChoresGrouper = (groupBy, chores, filter) => {
           name: 'Started',
           content: groupRaw['Started'],
           color: TASK_COLOR.STARTED,
+        })
+      }
+      if (groupRaw['PendingApproval'].length > 0) {
+        groups.push({
+          name: 'Pending Approval',
+          content: groupRaw['PendingApproval'],
+          color: TASK_COLOR.LATE,
         })
       }
       if (groupRaw['Overdue'].length > 0) {
@@ -311,5 +334,14 @@ export const ChoreFilters = userProfile => ({
   },
   assigned_to_others: chore => {
     return chore.assignedTo && chore.assignedTo !== userProfile?.id
+  },
+  assigned_to_me_tasks: chore => {
+    return (
+      chore.assignees &&
+      chore.assignees.some(assignee => assignee.userId === userProfile?.id)
+    )
+  },
+  created_by_me: chore => {
+    return chore.createdBy && chore.createdBy === userProfile?.id
   },
 })
