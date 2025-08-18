@@ -156,6 +156,22 @@ const SkipChore = id => {
   })
 }
 
+const ApproveChore = id => {
+  return Fetch(`/chores/${id}/approve`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify({}),
+  })
+}
+
+const RejectChore = id => {
+  return Fetch(`/chores/${id}/reject`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify({}),
+  })
+}
+
 const UpdateChoreAssignee = (id, assignee) => {
   return Fetch(`/chores/${id}/assignee`, {
     method: 'PUT',
@@ -596,7 +612,7 @@ const ClearChoreTimer = choreId => {
   })
 }
 
-const CheckUserDeletion = (password) => {
+const CheckUserDeletion = password => {
   return Fetch(`/users/delete/check`, {
     method: 'POST',
     headers: HEADERS(),
@@ -643,6 +659,7 @@ const RestoreBackup = (encryptionKey, backupData) => {
 
 export {
   AcceptCircleMemberRequest,
+  ApproveChore,
   ArchiveChore,
   CancelSubscription,
   ChangePassword,
@@ -694,6 +711,7 @@ export {
   RedeemPoints,
   RefreshToken,
   RegenerateBackupCodes,
+  RejectChore,
   ResetChoreTimer,
   ResetPassword,
   RestoreBackup,

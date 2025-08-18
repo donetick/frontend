@@ -1,10 +1,12 @@
 import {
   CheckCircle,
   EventNote,
+  HourglassEmpty,
   Notes,
   Person,
   Redo,
   Refresh,
+  ThumbDown,
   Timelapse,
   Toll,
   WatchLater,
@@ -57,38 +59,49 @@ const ActivityItem = ({ activity, members }) => {
         text: 'Started',
         icon: <Timelapse />,
       }
-    }
-    if (!activity.status === 1) {
-      return {
-        color: 'neutral',
-        text: 'Completed',
-        icon: <CheckCircle />,
+    } else if (activity.status === 1) {
+      const wasOnTime = moment(activity.performedAt).isSameOrBefore(
+        moment(activity.dueDate),
+      )
+
+      if (wasOnTime) {
+        return {
+          color: 'success',
+          text: 'Done',
+          icon: <CheckCircle />,
+        }
+      } else {
+        return {
+          color: 'primary',
+          text: 'Late',
+          icon: <WatchLater />,
+        }
       }
     } else if (activity.status === 2) {
-      // skipped
       return {
         color: 'warning',
         text: 'Skipped',
         icon: <Redo />,
       }
+    } else if (activity.status === 3) {
+      return {
+        color: 'neutral',
+        text: 'Pending Approval',
+        icon: <HourglassEmpty />,
+      }
+    } else if (activity.status === 4) {
+      return {
+        color: 'danger',
+        text: 'Rejected',
+        icon: <ThumbDown />,
+      }
     }
 
-    const wasOnTime = moment(activity.performedAt).isSameOrBefore(
-      moment(activity.dueDate),
-    )
-
-    if (wasOnTime) {
-      return {
-        color: 'success',
-        text: 'Done',
-        icon: <CheckCircle />,
-      }
-    } else {
-      return {
-        color: 'primary',
-        text: 'Late',
-        icon: <WatchLater />,
-      }
+    // Fallback for completed status
+    return {
+      color: 'success',
+      text: 'Completed',
+      icon: <CheckCircle />,
     }
   }
 
