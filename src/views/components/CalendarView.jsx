@@ -9,12 +9,25 @@ import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { TASK_COLOR } from '../../utils/Colors'
 import './Calendar.css'
 
+const getPriorityColor = priority => {
+  switch (priority) {
+    case 1:
+      return TASK_COLOR.PRIORITY_1
+    case 2:
+      return TASK_COLOR.PRIORITY_2
+    case 3:
+      return TASK_COLOR.PRIORITY_3
+    case 4:
+      return TASK_COLOR.PRIORITY_4
+    default:
+      return TASK_COLOR.NO_PRIORITY
+  }
+}
 const getAssigneeColor = (assignee, userProfile) => {
   return assignee === userProfile.id
     ? TASK_COLOR.ASSIGNED_TO_ME
     : TASK_COLOR.ASSIGNED_TO_OTHER
 }
-
 const CalendarView = ({ chores }) => {
   const { data: userProfile } = useUserProfile()
 
@@ -54,10 +67,7 @@ const CalendarView = ({ chores }) => {
             <span
               className='dot-with-line'
               style={{
-                backgroundColor: getAssigneeColor(
-                  dayChores[0].assignedTo,
-                  userProfile,
-                ),
+                backgroundColor: getPriorityColor(dayChores[0].priority),
               }}
             ></span>
           </div>
@@ -72,10 +82,7 @@ const CalendarView = ({ chores }) => {
                 key={index}
                 className='dot'
                 style={{
-                  backgroundColor: getAssigneeColor(
-                    chore.assignedTo,
-                    userProfile,
-                  ),
+                  backgroundColor: getPriorityColor(chore.priority),
                 }}
               ></span>
             )
@@ -134,38 +141,54 @@ const CalendarView = ({ chores }) => {
             justifyContent: 'start',
           }}
         >
-          {/* Show legend with current user first, then other circle members who have assignments */}
+          {/* Show legend with priority colors */}
           {(() => {
-            const assignedUserIds = new Set(
-              chores.map(chore => chore.assignedTo).filter(Boolean),
+            const priorityLevels = new Set(
+              chores.map(chore => chore.priority).filter(p => p !== undefined),
             )
             const legendItems = []
 
-            // Add current user if they have assignments
-            if (assignedUserIds.has(userProfile.id)) {
+            // Add priority levels that exist in the chores
+            if (priorityLevels.has(1)) {
               legendItems.push({
-                name: 'Assigned to me',
-                color: TASK_COLOR.ASSIGNED_TO_ME,
+                name: 'High Priority',
+                color: TASK_COLOR.PRIORITY_1,
               })
             }
-
-            // Add other circle members who have assignments
-            circleMembers.forEach(member => {
-              if (
-                member.userId !== userProfile.id &&
-                assignedUserIds.has(member.userId)
-              ) {
-                legendItems.push({
-                  name: `Assigned to others`,
-                  color: TASK_COLOR.ASSIGNED_TO_OTHER,
-                })
-              }
-            })
+            if (priorityLevels.has(2)) {
+              legendItems.push({
+                name: 'Medium Priority',
+                color: TASK_COLOR.PRIORITY_2,
+              })
+            }
+            if (priorityLevels.has(3)) {
+              legendItems.push({
+                name: 'Low Priority',
+                color: TASK_COLOR.PRIORITY_3,
+              })
+            }
+            if (priorityLevels.has(4)) {
+              legendItems.push({
+                name: 'Lowest Priority',
+                color: TASK_COLOR.PRIORITY_4,
+              })
+            }
+            if (
+              chores.some(
+                chore =>
+                  chore.priority === undefined || chore.priority === null,
+              )
+            ) {
+              legendItems.push({
+                name: 'No Priority',
+                color: TASK_COLOR.NO_PRIORITY,
+              })
+            }
 
             return legendItems.map((item, index) => (
               <Grid
                 key={index}
-                xs={12}
+                xs={6}
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
@@ -272,10 +295,7 @@ const CalendarView = ({ chores }) => {
                       top: 0,
                       bottom: 0,
                       width: '3px',
-                      backgroundColor: getAssigneeColor(
-                        chore.assignedTo,
-                        userProfile,
-                      ),
+                      backgroundColor: getPriorityColor(chore.priority),
                       borderRadius: '2px',
                     },
                   }}

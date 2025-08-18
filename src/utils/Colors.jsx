@@ -95,7 +95,7 @@ export const TASK_COLOR = {
   PRIORITY_3: '#0288d1',
   // PRIORITY_4: '#388e3c',
   PRIORITY_4: '#90a4ae',
-  // NO_PRIORITY: '#90a4ae80',
+  NO_PRIORITY: '#90a4ae80',
 }
 export default LABEL_COLORS
 
