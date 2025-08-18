@@ -4,8 +4,10 @@ import {
   Check,
   CheckCircle,
   EventNote,
+  HourglassEmpty,
   Person,
   Redo,
+  ThumbDown,
   Timelapse,
   Toll,
 } from '@mui/icons-material'
@@ -121,6 +123,8 @@ const HistoryCard = ({
       0: { icon: <AccessTime />, color: 'primary' }, // Started
       1: { icon: <Check />, color: 'success' }, // Completed
       2: { icon: <Redo />, color: 'warning' }, // Skipped
+      3: { icon: <HourglassEmpty />, color: 'neutral' }, // Pending Approval
+      4: { icon: <ThumbDown />, color: 'danger' }, // Rejected
     }
 
     const config = statusMap[historyEntry.status] || statusMap[1]
@@ -182,7 +186,13 @@ const HistoryCard = ({
                     ? 'In Progress'
                     : historyEntry.status === 1
                       ? 'Completed'
-                      : 'Skipped'}
+                      : historyEntry.status === 2
+                        ? 'Skipped'
+                        : historyEntry.status === 3
+                          ? 'Pending Approval'
+                          : historyEntry.status === 4
+                            ? 'Rejected'
+                            : 'Completed'}
                 </Typography>
 
                 <Chip size='sm' startDecorator={<EventNote />}>

@@ -6,12 +6,15 @@ import {
   CloseFullscreen,
   Edit,
   History,
+  HourglassEmpty,
   LowPriority,
   OpenInFull,
   PeopleAlt,
   Person,
   PlayArrow,
   SwitchAccessShortcut,
+  ThumbDown,
+  ThumbUp,
 } from '@mui/icons-material'
 import {
   Box,
@@ -41,15 +44,17 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useChoreDetails } from '../../queries/ChoreQueries.jsx'
-import { useCircleMembers } from '../../queries/UserQueries.jsx'
-import { notInCompletionWindow } from '../../utils/Chores.jsx'
+import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
+import { ChoreStatus, notInCompletionWindow } from '../../utils/Chores.jsx'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import {
+  ApproveChore,
   DeleteTimeSession,
   GetChoreDetailById,
   GetChoreTimer,
   MarkChoreComplete,
   PauseChore,
+  RejectChore,
   ResetChoreTimer,
   SkipChore,
   StartChore,
@@ -84,6 +89,7 @@ const ChoreView = () => {
   const [timerActionConfig, setTimerActionConfig] = useState({})
   const { data: circleMembersData, isLoading: isCircleMembersLoading } =
     useCircleMembers()
+  const { data: userProfile } = useUserProfile()
   const { impersonatedUser } = useImpersonateUser()
 
   const { data: choreData, isLoading: isChoreLoading } =
@@ -320,6 +326,48 @@ const ChoreView = () => {
     })
   }
 
+  const handleApproveChore = () => {
+    ApproveChore(choreId).then(response => {
+      if (response.ok) {
+        response.json().then(data => {
+          setChore(data.res)
+          // Invalidate chores cache to refetch data
+          queryClient.invalidateQueries(['chores'])
+        })
+      }
+    })
+  }
+
+  const handleRejectChore = () => {
+    RejectChore(choreId).then(response => {
+      if (response.ok) {
+        response.json().then(data => {
+          setChore(data.res)
+          // Invalidate chores cache to refetch data
+          queryClient.invalidateQueries(['chores'])
+        })
+      }
+    })
+  }
+
+  // Check if the current user can approve/reject (admin, manager, or task owner)
+  const canApproveReject = () => {
+    if (!circleMembersData?.res || !chore) return false
+
+    const currentUser = circleMembersData.res.find(
+      member => member.userId === (impersonatedUser?.userId || userProfile?.id),
+    )
+
+    // User can approve/reject if they are:
+    // 1. Admin or manager of the circle
+    // 2. Owner/creator of the task
+    return (
+      currentUser?.role === 'admin' ||
+      currentUser?.role === 'manager' ||
+      chore.createdBy === (impersonatedUser?.userId || userProfile?.id)
+    )
+  }
+
   if (isChoreLoading || isCircleMembersLoading) {
     // while loading the chore or circle members, return a loading state
     return <LoadingComponent />
@@ -396,7 +444,7 @@ const ChoreView = () => {
             mb: 1,
           }}
         >
-          {chore.status !== 0 && (
+          {[ChoreStatus.ACTIVE, ChoreStatus.PAUSED].includes(chore.status) && (
             <Grid item xs={12}>
               <TimePassedCard
                 chore={chore}
@@ -665,7 +713,7 @@ const ChoreView = () => {
         variant='soft'
       >
         <Typography level='body-md' sx={{ mb: 1 }}>
-          Completion options
+          Task Actions
         </Typography>
 
         <FormControl size='sm'>
@@ -770,59 +818,104 @@ const ChoreView = () => {
               mb: 1,
             }}
           >
-            <Button
-              fullWidth
-              size='lg'
-              onClick={handleTaskCompletion}
-              disabled={
-                isPendingCompletion ||
-                notInCompletionWindow(chore) ||
-                (chore.lastCompletedDate !== null &&
-                  chore.frequencyType === 'once')
-              }
-              color={isPendingCompletion ? 'danger' : 'success'}
-              startDecorator={<Check />}
-              sx={{
-                flex: 4,
-              }}
-            >
-              <Box>Mark as done</Box>
-            </Button>
+            {chore.status === 3 ? (
+              // Pending approval: Show approve/reject for admins/managers/owners, grayed out button for others
+              canApproveReject() ? (
+                <>
+                  <Button
+                    fullWidth
+                    size='lg'
+                    onClick={handleApproveChore}
+                    color='success'
+                    startDecorator={<ThumbUp />}
+                    sx={{
+                      flex: 1,
+                    }}
+                  >
+                    Approve
+                  </Button>
+                  <Button
+                    fullWidth
+                    size='lg'
+                    onClick={handleRejectChore}
+                    color='danger'
+                    startDecorator={<ThumbDown />}
+                    sx={{
+                      flex: 1,
+                    }}
+                  >
+                    <Box>Reject</Box>
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  fullWidth
+                  size='lg'
+                  disabled={true}
+                  color='neutral'
+                  startDecorator={<HourglassEmpty />}
+                >
+                  <Box>Pending Approval</Box>
+                </Button>
+              )
+            ) : (
+              // Normal completion flow
+              <>
+                <Button
+                  fullWidth
+                  size='lg'
+                  onClick={handleTaskCompletion}
+                  disabled={
+                    isPendingCompletion ||
+                    notInCompletionWindow(chore) ||
+                    (chore.lastCompletedDate !== null &&
+                      chore.frequencyType === 'once')
+                  }
+                  color={isPendingCompletion ? 'danger' : 'success'}
+                  startDecorator={<Check />}
+                  sx={{
+                    flex: 4,
+                  }}
+                >
+                  <Box>Mark as done</Box>
+                </Button>
 
-            <Button
-              fullWidth
-              size='lg'
-              onClick={() => {
-                setConfirmModelConfig({
-                  isOpen: true,
-                  title: 'Skip Task',
+                <Button
+                  fullWidth
+                  size='lg'
+                  onClick={() => {
+                    setConfirmModelConfig({
+                      isOpen: true,
+                      title: 'Skip Task',
 
-                  message: 'Are you sure you want to skip this task?',
+                      message: 'Are you sure you want to skip this task?',
 
-                  confirmText: 'Skip',
-                  cancelText: 'Cancel',
-                  onClose: confirmed => {
-                    if (confirmed) {
-                      handleSkippingTask()
-                    }
-                    setConfirmModelConfig({})
-                  },
-                })
-              }}
-              disabled={
-                chore.lastCompletedDate !== null &&
-                chore.frequencyType === 'once'
-              }
-              startDecorator={<SwitchAccessShortcut />}
-              sx={{
-                flex: 1,
-              }}
-            >
-              <Box>Skip</Box>
-            </Button>
+                      confirmText: 'Skip',
+                      cancelText: 'Cancel',
+                      onClose: confirmed => {
+                        if (confirmed) {
+                          handleSkippingTask()
+                        }
+                        setConfirmModelConfig({})
+                      },
+                    })
+                  }}
+                  disabled={
+                    chore.lastCompletedDate !== null &&
+                    chore.frequencyType === 'once'
+                  }
+                  startDecorator={<SwitchAccessShortcut />}
+                  sx={{
+                    flex: 1,
+                  }}
+                >
+                  <Box>Skip</Box>
+                </Button>
+              </>
+            )}
           </Box>
           {/* Timer Button - Show split button when timer is active, regular button otherwise */}
-          {chore.status !== 0 ? (
+          {[ChoreStatus.ACTIVE, ChoreStatus.PAUSED].includes(chore.status) ? (
             <TimerSplitButton
               disabled={
                 chore.lastCompletedDate !== null &&
@@ -841,6 +934,8 @@ const ChoreView = () => {
               onClearAllTime={handleClearAllTime}
               fullWidth
             />
+          ) : chore.status === ChoreStatus.PENDING_APPROVAL ? (
+            <></>
           ) : (
             <Button
               size='lg'

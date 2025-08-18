@@ -662,10 +662,6 @@ const ThingsView = () => {
     <Container maxWidth='md' sx={{ px: 0 }}>
       <Box
         sx={{
-          // bgcolor: 'background.body',
-          // border: '1px solid',
-          // borderColor: 'divider',
-          // borderRadius: 'md',
           overflow: 'hidden',
         }}
       >

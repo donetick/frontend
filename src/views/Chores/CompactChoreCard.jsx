@@ -3,10 +3,13 @@ import {
   Check,
   Delete,
   Edit,
+  HourglassEmpty,
   Pause,
   PlayArrow,
   Repeat,
   Schedule,
+  ThumbDown,
+  ThumbUp,
   TimesOneMobiledata,
   Webhook,
 } from '@mui/icons-material'
@@ -24,7 +27,7 @@ import moment from 'moment'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
-import { useUserProfile } from '../../queries/UserQueries.jsx'
+import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import { useNotification } from '../../service/NotificationProvider'
 import { notInCompletionWindow } from '../../utils/Chores.jsx'
 import {
@@ -32,9 +35,11 @@ import {
   TASK_COLOR,
 } from '../../utils/Colors.jsx'
 import {
+  ApproveChore,
   DeleteChore,
   MarkChoreComplete,
   PauseChore,
+  RejectChore,
   StartChore,
   UpdateChoreAssignee,
   UpdateDueDate,
@@ -75,6 +80,7 @@ const CompactChoreCard = ({
   const [secondsLeftToCancel, setSecondsLeftToCancel] = React.useState(null)
   const [timeoutId, setTimeoutId] = React.useState(null)
   const { data: userProfile } = useUserProfile()
+  const { data: circleMembersData } = useCircleMembers()
 
   const { impersonatedUser } = useImpersonateUser()
 
@@ -407,6 +413,46 @@ const CompactChoreCard = ({
     })
   }
 
+  const handleApproveChore = () => {
+    resetSwipe()
+    ApproveChore(chore.id).then(response => {
+      if (response.ok) {
+        response.json().then(data => {
+          onChoreUpdate(data.res, 'approved')
+        })
+      }
+    })
+  }
+
+  const handleRejectChore = () => {
+    resetSwipe()
+    RejectChore(chore.id).then(response => {
+      if (response.ok) {
+        response.json().then(data => {
+          onChoreUpdate(data.res, 'rejected')
+        })
+      }
+    })
+  }
+
+  // Check if the current user can approve/reject (admin, manager, or task owner)
+  const canApproveReject = () => {
+    if (!circleMembersData?.res || !chore) return false
+
+    const currentUser = circleMembersData.res.find(
+      member => member.userId === (impersonatedUser?.userId || userProfile?.id),
+    )
+
+    // User can approve/reject if they are:
+    // 1. Admin or manager of the circle
+    // 2. Owner/creator of the task
+    return (
+      currentUser?.role === 'admin' ||
+      currentUser?.role === 'manager' ||
+      chore.createdBy === (impersonatedUser?.userId || userProfile?.id)
+    )
+  }
+
   // Utility functions
   const getDueDateText = nextDueDate => {
     if (chore.nextDueDate === null) return 'No Due Date'
@@ -641,38 +687,81 @@ const CompactChoreCard = ({
           onMouseEnter={handleActionAreaMouseEnter}
           onMouseLeave={handleActionAreaMouseLeave}
         >
-          <IconButton
-            variant='soft'
-            color='success'
-            size='sm'
-            onClick={e => {
-              e.stopPropagation()
-              resetSwipe()
-
-              if (chore.status === 0 || chore.status === 2) {
-                handleChoreStart()
-              } else {
-                // handleChorePause()
-                handleTaskCompletion()
-              }
-            }}
-            sx={{
-              width: 40,
-              height: 40,
-              mx: 1,
-              // bgcolor: 'success.100',
-              // color: 'success.600',
-              // '&:hover': {
-              //   bgcolor: 'success.200',
-              // },
-            }}
-          >
-            {chore.status !== 1 ? (
-              <PlayArrow sx={{ fontSize: 16 }} />
+          {chore.status === 3 ? (
+            // Pending approval: Show approve/reject for admins/managers/owners
+            canApproveReject() ? (
+              <>
+                {/* <IconButton
+                  variant='soft'
+                  color='success'
+                  size='sm'
+                  onClick={handleApproveChore}
+                  sx={{
+                    width: 40,
+                    height: 40,
+                    mx: 1,
+                  }}
+                >
+                  <ThumbUp sx={{ fontSize: 16 }} />
+                </IconButton> */}
+                <IconButton
+                  variant='soft'
+                  color='danger'
+                  size='sm'
+                  onClick={handleRejectChore}
+                  sx={{
+                    width: 40,
+                    height: 40,
+                    mx: 1,
+                  }}
+                >
+                  <ThumbDown sx={{ fontSize: 16 }} />
+                </IconButton>
+              </>
             ) : (
-              <Check sx={{ fontSize: 16 }} />
-            )}
-          </IconButton>
+              <IconButton
+                variant='soft'
+                color='neutral'
+                size='sm'
+                disabled={true}
+                sx={{
+                  width: 40,
+                  height: 40,
+                  mx: 1,
+                }}
+              >
+                <HourglassEmpty sx={{ fontSize: 16 }} />
+              </IconButton>
+            )
+          ) : (
+            <IconButton
+              variant='soft'
+              color='success'
+              size='sm'
+              onClick={e => {
+                e.stopPropagation()
+                resetSwipe()
+
+                if (chore.status === 0 || chore.status === 2) {
+                  handleChoreStart()
+                } else {
+                  // handleChorePause()
+                  handleTaskCompletion()
+                }
+              }}
+              sx={{
+                width: 40,
+                height: 40,
+                mx: 1,
+              }}
+            >
+              {chore.status !== 1 ? (
+                <PlayArrow sx={{ fontSize: 16 }} />
+              ) : (
+                <Check sx={{ fontSize: 16 }} />
+              )}
+            </IconButton>
+          )}
 
           <IconButton
             variant='soft'
@@ -843,49 +932,118 @@ const CompactChoreCard = ({
                 pointerEvents: isMultiSelectMode ? 'none' : 'auto',
               }}
             >
-              <IconButton
-                variant='soft'
-                color={chore.status === 0 ? 'success' : 'warning'}
-                size='sm'
-                onClick={e => {
-                  e.stopPropagation()
-                  if (chore.status === 0) {
-                    handleTaskCompletion()
-                  } else if (chore.status === 1) {
-                    handleChorePause()
-                  } else {
-                    handleChoreStart()
-                  }
-                }}
-                disabled={isPendingCompletion || notInCompletionWindow(chore)}
-                sx={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: '50%',
-                  transition: 'all 0.2s ease',
-                  '&:hover': {
-                    transform: 'scale(1.05)',
-                  },
-
-                  '&:active': {
-                    transform: 'scale(0.95)',
-                  },
-                  '&:disabled': {
-                    opacity: 0.5,
-                    transform: 'none',
-                  },
-                }}
-              >
-                {isPendingCompletion ? (
-                  <CircularProgress size='sm' />
-                ) : chore.status === 0 ? (
-                  <Check sx={{ fontSize: 16 }} />
-                ) : chore.status === 1 ? (
-                  <Pause sx={{ fontSize: 16 }} />
+              {chore.status === 3 ? (
+                // Pending approval: Show approve/reject for admins/managers/owners, grayed out for others
+                canApproveReject() ? (
+                  <Box sx={{ display: 'flex', gap: 0.25 }}>
+                    <IconButton
+                      variant='soft'
+                      color='success'
+                      size='sm'
+                      onClick={e => {
+                        e.stopPropagation()
+                        handleApproveChore()
+                      }}
+                      sx={{
+                        width: 24,
+                        height: 24,
+                        borderRadius: '50%',
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          transform: 'scale(1.05)',
+                        },
+                        '&:active': {
+                          transform: 'scale(0.95)',
+                        },
+                      }}
+                    >
+                      <ThumbUp sx={{ fontSize: 12 }} />
+                    </IconButton>
+                    {/* <IconButton
+                      variant='soft'
+                      color='danger'
+                      size='sm'
+                      onClick={e => {
+                        e.stopPropagation()
+                        handleRejectChore()
+                      }}
+                      sx={{
+                        width: 24,
+                        height: 24,
+                        borderRadius: '50%',
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          transform: 'scale(1.05)',
+                        },
+                        '&:active': {
+                          transform: 'scale(0.95)',
+                        },
+                      }}
+                    >
+                      <ThumbDown sx={{ fontSize: 12 }} />
+                    </IconButton> */}
+                  </Box>
                 ) : (
-                  <PlayArrow sx={{ fontSize: 16 }} />
-                )}
-              </IconButton>
+                  <IconButton
+                    variant='soft'
+                    color='neutral'
+                    size='sm'
+                    disabled={true}
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: '50%',
+                      opacity: 0.5,
+                    }}
+                  >
+                    <HourglassEmpty sx={{ fontSize: 16 }} />
+                  </IconButton>
+                )
+              ) : (
+                <IconButton
+                  variant='soft'
+                  color={chore.status === 0 ? 'success' : 'warning'}
+                  size='sm'
+                  onClick={e => {
+                    e.stopPropagation()
+                    if (chore.status === 0) {
+                      handleTaskCompletion()
+                    } else if (chore.status === 1) {
+                      handleChorePause()
+                    } else {
+                      handleChoreStart()
+                    }
+                  }}
+                  disabled={isPendingCompletion || notInCompletionWindow(chore)}
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: '50%',
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                      transform: 'scale(1.05)',
+                    },
+
+                    '&:active': {
+                      transform: 'scale(0.95)',
+                    },
+                    '&:disabled': {
+                      opacity: 0.5,
+                      transform: 'none',
+                    },
+                  }}
+                >
+                  {isPendingCompletion ? (
+                    <CircularProgress size='sm' />
+                  ) : chore.status === 0 ? (
+                    <Check sx={{ fontSize: 16 }} />
+                  ) : chore.status === 1 ? (
+                    <Pause sx={{ fontSize: 16 }} />
+                  ) : (
+                    <PlayArrow sx={{ fontSize: 16 }} />
+                  )}
+                </IconButton>
+              )}
             </Box>
 
             {/* Multi-select Checkbox */}

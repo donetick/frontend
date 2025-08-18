@@ -10,6 +10,7 @@ import {
 import {
   AccountBalanceWallet,
   Analytics,
+  AssignmentTurnedIn,
   CreditCard,
   EmojiEvents,
   MilitaryTech,
@@ -530,7 +531,13 @@ const UserPoints = () => {
                     <Box
                       sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
                     >
-                      <Toll sx={{ fontSize: '1rem', color: 'success.500' }} />
+                      {leaderboardMode === 'points' ? (
+                        <Toll sx={{ fontSize: '1rem', color: 'success.500' }} />
+                      ) : (
+                        <AssignmentTurnedIn
+                          sx={{ fontSize: '1rem', color: 'success.500' }}
+                        />
+                      )}
                       <Typography
                         level='title-md'
                         sx={{

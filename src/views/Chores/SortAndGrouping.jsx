@@ -145,7 +145,7 @@ const SortAndGrouping = ({
 
         <MenuItem key={`${k}-assignee-title`} disabled>
           <Typography level='body-xs' fontWeight='md'>
-            Assigned to:
+            Assigned to :
           </Typography>
         </MenuItem>
 
@@ -174,6 +174,20 @@ const SortAndGrouping = ({
           <Typography level='body-sm'>Assigned to me</Typography>
         </MenuItem>
 
+        {/* <MenuItem
+          key={`${k}-assignee-assignable-to-me`}
+          onClick={() => {
+            setFilter('assignable_to_me')
+            handleMenuClose()
+          }}
+        >
+          <Radio
+            checked={selectedFilter === 'assignable_to_me'}
+            variant='outlined'
+          />
+          <Typography level='body-sm'>Available for me</Typography>
+        </MenuItem> */}
+
         <MenuItem
           key={`${k}-assignee-assigned-to-others`}
           onClick={() => {
@@ -187,6 +201,21 @@ const SortAndGrouping = ({
           />
           <Typography level='body-sm'>Assigned to others</Typography>
         </MenuItem>
+        {/* 
+// i need this but i think it have a bad UX and confusing so commenting it for now
+        <MenuItem
+          key={`${k}-assignee-created-by-me`}
+          onClick={() => {
+            setFilter('created_by_me')
+            handleMenuClose()
+          }}
+        >
+          <Radio
+            checked={selectedFilter === 'created_by_me'}
+            variant='outlined'
+          />
+          <Typography level='body-sm'>Created by me</Typography>
+        </MenuItem> */}
       </Menu>
     </>
   )

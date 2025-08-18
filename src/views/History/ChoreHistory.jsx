@@ -3,6 +3,7 @@ import {
   Checklist,
   EventBusy,
   Group,
+  History,
   Star,
   Timelapse,
   TrendingUp,
@@ -11,7 +12,6 @@ import {
   Box,
   Button,
   Card,
-  CardContent,
   Container,
   Grid,
   List,
@@ -22,6 +22,7 @@ import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { LoadingScreen } from '../../components/animations'
+import { ChoreHistoryStatus } from '../../utils/Chores'
 import {
   DeleteChoreHistory,
   GetAllCircleMembers,
@@ -98,15 +99,12 @@ const ChoreHistory = () => {
     const userCompletedByMost = Object.keys(userHistories).reduce((a, b) =>
       userHistories[a] > userHistories[b] ? a : b,
     )
-    const userCompletedByLeast = Object.keys(userHistories).reduce((a, b) =>
-      userHistories[a] < userHistories[b] ? a : b,
-    )
 
     const historyInfo = [
       {
         icon: <Checklist />,
-        text: 'Total Completed',
-        subtext: `${histories.length} times`,
+        text: 'All Completed',
+        subtext: `${histories.filter(h => h.status === ChoreHistoryStatus.COMPLETED).length} times`,
       },
       {
         icon: <TrendingUp />,
@@ -117,14 +115,14 @@ const ChoreHistory = () => {
       },
       {
         icon: <Timelapse />,
-        text: 'Maximum Delay',
+        text: 'Longest Delay',
         subtext: moment.duration(maxDelayMoment).isValid()
           ? moment.duration(maxDelayMoment).humanize()
           : 'Never late',
       },
       {
         icon: <Star />,
-        text: 'Top Performer',
+        text: 'Completed Most',
         subtext: `${
           performers.find(p => p.userId === Number(userCompletedByMost))
             ?.displayName || 'Unknown'
@@ -132,12 +130,12 @@ const ChoreHistory = () => {
       },
       {
         icon: <Group />,
-        text: 'Team Members',
-        subtext: `${Object.keys(userHistories).length} active`,
+        text: 'Members Involved',
+        subtext: `${Object.keys(userHistories).length} members`,
       },
       {
         icon: <Analytics />,
-        text: 'Last Completed By',
+        text: 'Last Completed',
         subtext: `${
           performers.find(p => p.userId === Number(histories[0].completedBy))
             ?.displayName || 'Unknown'
@@ -191,52 +189,76 @@ const ChoreHistory = () => {
     <Container maxWidth='md'>
       {/* Enhanced Header Section */}
       <Box sx={{ mb: 4 }}>
-        {/* Statistics Cards Grid */}
-        <Grid container spacing={1} sx={{ mb: 1 }}>
+        {/* Statistics Cards Grid - Compact Design */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+          <History sx={{ fontSize: '1.5rem' }} />
+          <Typography
+            level='title-md'
+            sx={{ fontWeight: 'lg', color: 'text.primary' }}
+          >
+            Task Summary
+          </Typography>
+        </Box>
+        <Grid container spacing={0.5} sx={{ mb: 2 }}>
           {historyInfo.map((info, index) => (
-            <Grid item xs={6} sm={6} key={index}>
+            <Grid item xs={4} sm={2} key={index}>
               <Card
                 variant='soft'
                 sx={{
-                  borderRadius: 'md',
-                  boxShadow: 1,
-                  px: 2,
-                  py: 1,
-                  minHeight: 90,
-                  height: '100%',
-                  justifyContent: 'start',
+                  borderRadius: 'sm',
+                  p: 1,
+                  height: 85,
+                  textAlign: 'center',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  overflow: 'hidden',
                 }}
               >
-                <CardContent>
-                  <Box
+                <Box sx={{ opacity: 0.8, flexShrink: 0 }}>{info.icon}</Box>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: 0.25,
+                    flex: 1,
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Typography
+                    level='body-xs'
                     sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'start',
-                      mb: 0.5,
+                      fontWeight: '600',
+                      color: 'text.primary',
+                      textAlign: 'center',
+                      lineHeight: 1.1,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      width: '100%',
+                      fontSize: '0.75rem',
                     }}
                   >
-                    {info.icon}
-                    <Typography
-                      level='body-md'
-                      sx={{
-                        ml: 1,
-                        fontWeight: '500',
-                        color: 'text.primary',
-                      }}
-                    >
-                      {info.text}
-                    </Typography>
-                  </Box>
-                  <Box>
-                    <Typography
-                      level='body-sm'
-                      sx={{ color: 'text.secondary', lineHeight: 1.5 }}
-                    >
-                      {info.subtext || '--'}
-                    </Typography>
-                  </Box>
-                </CardContent>
+                    {info.text}
+                  </Typography>
+                  <Typography
+                    level='body-xs'
+                    sx={{
+                      color: 'text.secondary',
+                      textAlign: 'center',
+                      lineHeight: 1.1,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      width: '100%',
+                      fontSize: '0.7rem',
+                    }}
+                  >
+                    {info.subtext || '--'}
+                  </Typography>
+                </Box>
               </Card>
             </Grid>
           ))}
@@ -245,9 +267,12 @@ const ChoreHistory = () => {
 
       {/* History Section Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-        <Analytics sx={{ fontSize: '1.5rem', color: 'primary.500' }} />
-        <Typography level='h4' sx={{ fontWeight: 'lg', color: 'text.primary' }}>
-          Completion History
+        <Analytics sx={{ fontSize: '1.5rem' }} />
+        <Typography
+          level='title-md'
+          sx={{ fontWeight: 'lg', color: 'text.primary' }}
+        >
+          Task Activity
         </Typography>
       </Box>
       <Sheet variant='plain' sx={{ borderRadius: 'sm', boxShadow: 'md' }}>

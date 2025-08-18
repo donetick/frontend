@@ -14,7 +14,6 @@ import {
   Box,
   Button,
   Card,
-  CardContent,
   Chip,
   Container,
   Grid,
@@ -22,7 +21,6 @@ import {
   ListDivider,
   ListItem,
   ListItemContent,
-  Stack,
   Typography,
 } from '@mui/joy'
 import { useTheme } from '@mui/joy/styles'
@@ -188,68 +186,78 @@ const ThingsHistory = () => {
   return (
     <Container maxWidth='md'>
       {/* Enhanced Analytics Header Section */}
-      <Box sx={{ mb: 4 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-          <BarChart sx={{ fontSize: '2rem', color: 'primary.500' }} />
-          <Stack>
-            <Typography
-              level='h3'
-              sx={{ fontWeight: 'lg', color: 'text.primary' }}
-            >
-              Things Details
-            </Typography>
-            <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-              Quick overview of the thing's history and analytics
-            </Typography>
-          </Stack>
+      <Box sx={{ mb: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+          <BarChart sx={{ fontSize: '1.5rem' }} />
+          <Typography
+            level='title-md'
+            sx={{ fontWeight: 'lg', color: 'text.primary' }}
+          >
+            Things Overview
+          </Typography>
         </Box>
 
-        {/* Statistics Cards Grid */}
-        <Grid container spacing={1} sx={{ mb: 1 }}>
+        {/* Statistics Cards Grid - Compact Design */}
+        <Grid container spacing={0.5} sx={{ mb: 2 }}>
           {analyticsData.map((info, index) => (
-            <Grid xs={6} sm={6} key={index}>
+            <Grid xs={6} sm={3} key={index}>
               <Card
                 variant='soft'
                 sx={{
-                  borderRadius: 'md',
-                  boxShadow: 1,
-                  px: 2,
-                  py: 1,
-                  minHeight: 90,
-                  height: '100%',
-                  justifyContent: 'start',
+                  borderRadius: 'sm',
+                  p: 1,
+                  height: 85,
+                  textAlign: 'center',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  overflow: 'hidden',
                 }}
               >
-                <CardContent>
-                  <Box
+                <Box sx={{ opacity: 0.8, flexShrink: 0 }}>{info.icon}</Box>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: 0.25,
+                    flex: 1,
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Typography
+                    level='body-xs'
                     sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'start',
-                      mb: 0.5,
+                      fontWeight: '600',
+                      color: 'text.primary',
+                      textAlign: 'center',
+                      lineHeight: 1.1,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      width: '100%',
+                      fontSize: '0.75rem',
                     }}
                   >
-                    {info.icon}
-                    <Typography
-                      level='body-md'
-                      sx={{
-                        ml: 1,
-                        fontWeight: '500',
-                        color: 'text.primary',
-                      }}
-                    >
-                      {info.text}
-                    </Typography>
-                  </Box>
-                  <Box>
-                    <Typography
-                      level='body-sm'
-                      sx={{ color: 'text.secondary', lineHeight: 1.5 }}
-                    >
-                      {info.subtext || '--'}
-                    </Typography>
-                  </Box>
-                </CardContent>
+                    {info.text}
+                  </Typography>
+                  <Typography
+                    level='body-xs'
+                    sx={{
+                      color: 'text.secondary',
+                      textAlign: 'center',
+                      lineHeight: 1.1,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      width: '100%',
+                      fontSize: '0.7rem',
+                    }}
+                  >
+                    {info.subtext || '--'}
+                  </Typography>
+                </Box>
               </Card>
             </Grid>
           ))}
@@ -260,9 +268,9 @@ const ThingsHistory = () => {
       {thingsHistory.every(history => !isNaN(history.state)) &&
         thingsHistory.length > 1 && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-            <Analytics sx={{ fontSize: '1.5rem', color: 'primary.500' }} />
+            <Analytics sx={{ fontSize: '1.5rem' }} />
             <Typography
-              level='h4'
+              level='title-md'
               sx={{ fontWeight: 'lg', color: 'text.primary' }}
             >
               Data Visualization
@@ -324,9 +332,13 @@ const ThingsHistory = () => {
         )}
 
       {/* History Section Header */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-        <Timeline sx={{ fontSize: '1.5rem', color: 'primary.500' }} />
-        <Typography level='h4' sx={{ fontWeight: 'lg', color: 'text.primary' }}>
+
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+        <Timeline sx={{ fontSize: '1.5rem' }} />
+        <Typography
+          level='title-md'
+          sx={{ fontWeight: 'lg', color: 'text.primary' }}
+        >
           Change History
         </Typography>
       </Box>

@@ -1,9 +1,17 @@
-import CancelIcon from '@mui/icons-material/Cancel'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import CircleIcon from '@mui/icons-material/Circle'
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty'
+import ThumbDownIcon from '@mui/icons-material/ThumbDown'
+import TimelapseIcon from '@mui/icons-material/Timelapse'
 import { Cell, Pie, PieChart, Tooltip } from 'recharts'
 
-import { EventBusy, Group, Timeline, Toll } from '@mui/icons-material'
+import {
+  Block,
+  Check,
+  EventBusy,
+  Group,
+  Timeline,
+  Toll,
+} from '@mui/icons-material'
 import {
   Avatar,
   Box,
@@ -44,11 +52,22 @@ const groupByDate = history => {
   return aggregated
 }
 
-const ChoreHistoryItem = ({ time, name, points, status }) => {
-  const statusIcon = {
-    completed: <CheckCircleIcon color='success' />,
-    missed: <CancelIcon color='error' />,
-    pending: <CircleIcon color='neutral' />,
+const ChoreHistoryItem = ({ time, name, points, status, performer }) => {
+  const getStatusIcon = status => {
+    switch (status) {
+      case 0:
+        return <TimelapseIcon color='primary' />
+      case 1:
+        return <Check color='success' />
+      case 2:
+        return <Block color='warning' />
+      case 3:
+        return <HourglassEmptyIcon color='action' />
+      case 4:
+        return <ThumbDownIcon color='error' />
+      default:
+        return <CheckCircleIcon color='success' />
+    }
   }
 
   return (
@@ -56,15 +75,25 @@ const ChoreHistoryItem = ({ time, name, points, status }) => {
       <Typography level='body-md' sx={{ minWidth: 80 }}>
         {time}
       </Typography>
-      <Box>
-        {statusIcon[status] ? statusIcon[status] : statusIcon['completed']}
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minWidth: 32,
+          minHeight: 32,
+          borderRadius: '50%',
+          backgroundColor: 'background.level2',
+          boxShadow: 'sm',
+        }}
+      >
+        {getStatusIcon(status)}
       </Box>
       <Box
         sx={{
           display: 'flex',
           flexDirection: 'column',
           minHeight: 40,
-          // center vertically:
           justifyContent: 'center',
         }}
       >
@@ -795,7 +824,6 @@ const UserActivites = () => {
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        px: { xs: 2, sm: 3 },
       }}
     >
       {/* Main Content Area - Mobile: Stack vertically, Desktop: Side by side */}

@@ -3,10 +3,13 @@ import {
   Check,
   Delete,
   Edit,
+  HourglassEmpty,
   Pause,
   PlayArrow,
   Repeat,
   Schedule,
+  ThumbDown,
+  ThumbUp,
   TimesOneMobiledata,
   Toll,
   Webhook,
@@ -28,14 +31,16 @@ import moment from 'moment'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
-import { useUserProfile } from '../../queries/UserQueries.jsx'
+import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import { useNotification } from '../../service/NotificationProvider'
 import { notInCompletionWindow } from '../../utils/Chores.jsx'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import {
+  ApproveChore,
   DeleteChore,
   MarkChoreComplete,
   PauseChore,
+  RejectChore,
   StartChore,
   UpdateChoreAssignee,
   UpdateDueDate,
@@ -76,6 +81,7 @@ const ChoreCard = ({
   const [secondsLeftToCancel, setSecondsLeftToCancel] = React.useState(null)
   const [timeoutId, setTimeoutId] = React.useState(null)
   const { data: userProfile } = useUserProfile()
+  const { data: circleMembersData } = useCircleMembers()
 
   const { impersonatedUser } = useImpersonateUser()
 
@@ -232,6 +238,46 @@ const ChoreCard = ({
         })
       }
     })
+  }
+
+  const handleApproveChore = () => {
+    resetSwipe()
+    ApproveChore(chore.id).then(response => {
+      if (response.ok) {
+        response.json().then(data => {
+          onChoreUpdate(data.res, 'approved')
+        })
+      }
+    })
+  }
+
+  const handleRejectChore = () => {
+    resetSwipe()
+    RejectChore(chore.id).then(response => {
+      if (response.ok) {
+        response.json().then(data => {
+          onChoreUpdate(data.res, 'rejected')
+        })
+      }
+    })
+  }
+
+  // Check if the current user can approve/reject (admin, manager, or task owner)
+  const canApproveReject = () => {
+    if (!circleMembersData?.res || !chore) return false
+
+    const currentUser = circleMembersData.res.find(
+      member => member.userId === (impersonatedUser?.userId || userProfile?.id),
+    )
+
+    // User can approve/reject if they are:
+    // 1. Admin or manager of the circle
+    // 2. Owner/creator of the task
+    return (
+      currentUser?.role === 'admin' ||
+      currentUser?.role === 'manager' ||
+      chore.createdBy === (impersonatedUser?.userId || userProfile?.id)
+    )
   }
 
   // Swipe gesture handlers
@@ -642,32 +688,80 @@ const ChoreCard = ({
           onMouseEnter={handleActionAreaMouseEnter}
           onMouseLeave={handleActionAreaMouseLeave}
         >
-          <IconButton
-            variant='soft'
-            color='success'
-            size='md'
-            onClick={e => {
-              e.stopPropagation()
-              resetSwipe()
-
-              if (chore.status !== 0) {
-                handleTaskCompletion()
-              } else {
-                handleChoreStart()
-              }
-            }}
-            sx={{
-              width: 40,
-              height: 40,
-              mx: 1,
-            }}
-          >
-            {chore.status !== 0 ? (
-              <Check sx={{ fontSize: 20 }} />
+          {chore.status === 3 ? (
+            // Pending approval: Show approve/reject for admins/managers/owners
+            canApproveReject() ? (
+              <>
+                {/* <IconButton
+                  variant='soft'
+                  color='success'
+                  size='md'
+                  onClick={handleApproveChore}
+                  sx={{
+                    width: 40,
+                    height: 40,
+                    mx: 1,
+                  }}
+                >
+                  <ThumbUp sx={{ fontSize: 20 }} />
+                </IconButton> */}
+                <IconButton
+                  variant='soft'
+                  color='danger'
+                  size='md'
+                  onClick={handleRejectChore}
+                  sx={{
+                    width: 40,
+                    height: 40,
+                    mx: 1,
+                  }}
+                >
+                  <ThumbDown sx={{ fontSize: 20 }} />
+                </IconButton>
+              </>
             ) : (
-              <PlayArrow sx={{ fontSize: 20 }} />
-            )}
-          </IconButton>
+              <IconButton
+                variant='soft'
+                color='neutral'
+                size='md'
+                disabled={true}
+                sx={{
+                  width: 40,
+                  height: 40,
+                  mx: 1,
+                }}
+              >
+                <HourglassEmpty sx={{ fontSize: 20 }} />
+              </IconButton>
+            )
+          ) : (
+            <IconButton
+              variant='soft'
+              color='success'
+              size='md'
+              onClick={e => {
+                e.stopPropagation()
+                resetSwipe()
+
+                if (chore.status !== 0) {
+                  handleTaskCompletion()
+                } else {
+                  handleChoreStart()
+                }
+              }}
+              sx={{
+                width: 40,
+                height: 40,
+                mx: 1,
+              }}
+            >
+              {chore.status !== 0 ? (
+                <Check sx={{ fontSize: 20 }} />
+              ) : (
+                <PlayArrow sx={{ fontSize: 20 }} />
+              )}
+            </IconButton>
+          )}
 
           <IconButton
             variant='soft'
@@ -949,68 +1043,143 @@ const ChoreCard = ({
                 alignItems='flex-end'
               >
                 {/* <ButtonGroup> */}
-                <IconButton
-                  variant={chore.status === 0 ? 'solid' : 'soft'}
-                  color={chore.status === 0 ? 'success' : 'warning'}
-                  onClick={e => {
-                    e.stopPropagation()
-                    switch (chore.status) {
-                      case 0: // Not started
-                        handleTaskCompletion()
-                        break
-                      case 1: // In progress
-                        handleChorePause()
-                        break
-                      case 2: // Paused
-                        handleChoreStart()
-                        break
-                      default:
-                        break
-                    }
-                  }}
-                  disabled={isPendingCompletion || notInCompletionWindow(chore)}
-                  sx={{
-                    borderRadius: '50%',
-                    minWidth: 50,
-                    height: 50,
-                    zIndex: 1,
-                    transition: 'all 0.2s ease',
-                    '&:hover': {
-                      transform: 'scale(1.05)',
-                    },
-                    '&:active': {
-                      transform: 'scale(0.95)',
-                    },
-                    '&:disabled': {
-                      opacity: 0.5,
-                      transform: 'none',
-                    },
-                  }}
-                >
-                  <div className='relative grid place-items-center'>
-                    {isPendingCompletion ? (
-                      <CircularProgress size='md' />
-                    ) : chore.status === 0 ? (
-                      <Check />
-                    ) : chore.status === 1 ? (
-                      <Pause />
-                    ) : (
-                      <PlayArrow />
-                    )}
-                    {isPendingCompletion && (
-                      <CircularProgress
-                        variant='solid'
+                {chore.status === 3 ? (
+                  // Pending approval: Show approve/reject for admins/managers/owners, grayed out for others
+                  canApproveReject() ? (
+                    <Box sx={{ display: 'flex', gap: 0.5 }}>
+                      <IconButton
+                        variant='soft'
                         color='success'
-                        size='md'
-                        sx={{
-                          color: 'success.main',
-                          position: 'absolute',
-                          zIndex: 0,
+                        onClick={e => {
+                          e.stopPropagation()
+                          handleApproveChore()
                         }}
-                      />
-                    )}
-                  </div>
-                </IconButton>
+                        sx={{
+                          borderRadius: '50%',
+                          minWidth: 50,
+                          height: 50,
+                          zIndex: 1,
+                          transition: 'all 0.2s ease',
+                          '&:hover': {
+                            transform: 'scale(1.05)',
+                          },
+                          '&:active': {
+                            transform: 'scale(0.95)',
+                          },
+                          '&:disabled': {
+                            opacity: 0.5,
+                            transform: 'none',
+                          },
+                        }}
+                      >
+                        <ThumbUp sx={{ fontSize: 18 }} />
+                      </IconButton>
+                      {/* <IconButton
+                        variant='soft'
+                        color='danger'
+                        onClick={e => {
+                          e.stopPropagation()
+                          handleRejectChore()
+                        }}
+                        sx={{
+                          borderRadius: '50%',
+                          minWidth: 40,
+                          height: 40,
+                          zIndex: 1,
+                          transition: 'all 0.2s ease',
+                          '&:hover': {
+                            transform: 'scale(1.05)',
+                          },
+                          '&:active': {
+                            transform: 'scale(0.95)',
+                          },
+                        }}
+                      >
+                        <ThumbDown sx={{ fontSize: 18 }} />
+                      </IconButton> */}
+                    </Box>
+                  ) : (
+                    <IconButton
+                      variant='soft'
+                      color='neutral'
+                      disabled={true}
+                      sx={{
+                        borderRadius: '50%',
+                        minWidth: 50,
+                        height: 50,
+                        zIndex: 1,
+                        opacity: 0.5,
+                      }}
+                    >
+                      <HourglassEmpty />
+                    </IconButton>
+                  )
+                ) : (
+                  <IconButton
+                    variant={chore.status === 0 ? 'solid' : 'soft'}
+                    color={chore.status === 0 ? 'success' : 'warning'}
+                    onClick={e => {
+                      e.stopPropagation()
+                      switch (chore.status) {
+                        case 0: // Not started
+                          handleTaskCompletion()
+                          break
+                        case 1: // In progress
+                          handleChorePause()
+                          break
+                        case 2: // Paused
+                          handleChoreStart()
+                          break
+                        default:
+                          break
+                      }
+                    }}
+                    disabled={
+                      isPendingCompletion || notInCompletionWindow(chore)
+                    }
+                    sx={{
+                      borderRadius: '50%',
+                      minWidth: 50,
+                      height: 50,
+                      zIndex: 1,
+                      transition: 'all 0.2s ease',
+                      '&:hover': {
+                        transform: 'scale(1.05)',
+                      },
+                      '&:active': {
+                        transform: 'scale(0.95)',
+                      },
+                      '&:disabled': {
+                        opacity: 0.5,
+                        transform: 'none',
+                      },
+                    }}
+                  >
+                    <div className='relative grid place-items-center'>
+                      {isPendingCompletion ? (
+                        <CircularProgress size='md' />
+                      ) : chore.status === 0 ? (
+                        <Check />
+                      ) : chore.status === 1 ? (
+                        <Pause />
+                      ) : (
+                        <PlayArrow />
+                      )}
+                      {isPendingCompletion && (
+                        <CircularProgress
+                          variant='solid'
+                          color='success'
+                          size='md'
+                          sx={{
+                            color: 'success.main',
+                            position: 'absolute',
+                            zIndex: 0,
+                          }}
+                        />
+                      )}
+                    </div>
+                  </IconButton>
+                )}
                 <ChoreActionMenu
                   chore={chore}
                   onChoreUpdate={onChoreUpdate}

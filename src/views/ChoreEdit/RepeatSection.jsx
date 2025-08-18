@@ -93,9 +93,9 @@ const generateSchedulePreview = metadata => {
 
   if (
     metadata.weekPattern === 'nth_day_of_month' &&
-    metadata.dayOccurrences?.length
+    metadata.occurrences?.length
   ) {
-    const occurrenceStr = metadata.dayOccurrences
+    const occurrenceStr = metadata.occurrences
       .map(w => {
         if (w === -1) return 'last'
         return `${w}${w === 1 ? 'st' : w === 2 ? 'nd' : w === 3 ? 'rd' : 'th'}`
@@ -127,7 +127,7 @@ const RepeatOnSections = ({
       onFrequencyMetadataUpdate({
         ...frequencyMetadata,
         weekPattern: 'every_week',
-        dayOccurrences: [],
+        occurrences: [],
       })
     }
   }, [frequencyMetadata, onFrequencyMetadataUpdate])
@@ -255,7 +255,7 @@ const RepeatOnSections = ({
                       ...frequencyMetadata,
                       days: [],
                       weekPattern: 'every_week',
-                      dayOccurrences: [],
+                      occurrences: [],
                     })
                   } else {
                     onFrequencyMetadataUpdate({
@@ -283,10 +283,10 @@ const RepeatOnSections = ({
                   onFrequencyMetadataUpdate({
                     ...frequencyMetadata,
                     weekPattern: newPattern,
-                    dayOccurrences:
+                    occurrences:
                       newPattern === 'every_week'
                         ? []
-                        : frequencyMetadata?.dayOccurrences || [],
+                        : frequencyMetadata?.occurrences || [],
                   })
                 }}
                 sx={{ gap: 1, '& > div': { p: 1 } }}
@@ -330,13 +330,13 @@ const RepeatOnSections = ({
                         <ListItem key={option.value}>
                           <Checkbox
                             checked={
-                              frequencyMetadata?.dayOccurrences?.includes(
+                              frequencyMetadata?.occurrences?.includes(
                                 option.value,
                               ) || false
                             }
                             onChange={() => {
                               const currentOccurrences =
-                                frequencyMetadata?.dayOccurrences || []
+                                frequencyMetadata?.occurrences || []
                               const newOccurrences =
                                 currentOccurrences.includes(option.value)
                                   ? currentOccurrences.filter(
@@ -345,7 +345,7 @@ const RepeatOnSections = ({
                                   : [...currentOccurrences, option.value]
                               onFrequencyMetadataUpdate({
                                 ...frequencyMetadata,
-                                dayOccurrences: newOccurrences.sort((a, b) => {
+                                occurrences: newOccurrences.sort((a, b) => {
                                   if (a === -1) return 1 // Last occurrence goes to end
                                   if (b === -1) return -1
                                   return a - b
@@ -366,17 +366,17 @@ const RepeatOnSections = ({
                       color='neutral'
                       onClick={() => {
                         if (
-                          frequencyMetadata?.dayOccurrences?.length ===
+                          frequencyMetadata?.occurrences?.length ===
                           DAY_OCCURRENCE_OPTIONS.length
                         ) {
                           onFrequencyMetadataUpdate({
                             ...frequencyMetadata,
-                            dayOccurrences: [],
+                            occurrences: [],
                           })
                         } else {
                           onFrequencyMetadataUpdate({
                             ...frequencyMetadata,
-                            dayOccurrences: DAY_OCCURRENCE_OPTIONS.map(
+                            occurrences: DAY_OCCURRENCE_OPTIONS.map(
                               option => option.value,
                             ),
                           })
@@ -385,7 +385,7 @@ const RepeatOnSections = ({
                       overlay
                       disableIcon
                     >
-                      {frequencyMetadata?.dayOccurrences?.length ===
+                      {frequencyMetadata?.occurrences?.length ===
                       DAY_OCCURRENCE_OPTIONS.length
                         ? 'Unselect All'
                         : 'Select All'}
