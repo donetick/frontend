@@ -527,6 +527,12 @@ const MyChores = () => {
           message: 'The task due date has been updated successfully.',
         })
         break
+      case 'due-date-removed':
+        showSuccess({
+          title: 'Task Unplanned',
+          message: 'The task is now unplanned and has no due date.',
+        })
+        break
       case 'unarchive':
         showSuccess({
           title: 'Task Restored',
