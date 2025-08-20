@@ -2,27 +2,13 @@ import { CalendarMonth } from '@mui/icons-material'
 import { Avatar, Box, Chip, Grid, Typography } from '@mui/joy'
 import moment from 'moment'
 import { useState } from 'react'
-import Calendar from 'react-calendar'
-import 'react-calendar/dist/Calendar.css'
+// import 'react-calendar/dist/Calendar.css'
 import { useNavigate } from 'react-router-dom'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
-import { TASK_COLOR } from '../../utils/Colors'
-import './Calendar.css'
+import { getPriorityColor, TASK_COLOR } from '../../utils/Colors'
 
-const getPriorityColor = priority => {
-  switch (priority) {
-    case 1:
-      return TASK_COLOR.PRIORITY_1
-    case 2:
-      return TASK_COLOR.PRIORITY_2
-    case 3:
-      return TASK_COLOR.PRIORITY_3
-    case 4:
-      return TASK_COLOR.PRIORITY_4
-    default:
-      return TASK_COLOR.NO_PRIORITY
-  }
-}
+import CalendarMonthly from './CalendarMonthly'
+
 const getAssigneeColor = (assignee, userProfile) => {
   return assignee === userProfile.id
     ? TASK_COLOR.ASSIGNED_TO_ME
@@ -47,52 +33,6 @@ const CalendarView = ({ chores }) => {
     return assignee ? `${assignee.displayName}` : 'Assigned to other'
   }
 
-  const tileContent = ({ date, view }) => {
-    if (view === 'month') {
-      const dayChores = chores.filter(chore => {
-        const choreDate = new Date(chore.nextDueDate).toLocaleDateString()
-        const tileDate = date.toLocaleDateString()
-        return choreDate === tileDate
-      })
-      if (dayChores.length === 0) {
-        return (
-          <div className='dot-container'>
-            <span className='dot-empty'></span>
-          </div>
-        )
-      }
-      if (dayChores.length > 3) {
-        return (
-          <div className='dot-container'>
-            <span
-              className='dot-with-line'
-              style={{
-                backgroundColor: getPriorityColor(dayChores[0].priority),
-              }}
-            ></span>
-          </div>
-        )
-      }
-
-      return (
-        <div className='dot-container'>
-          {dayChores.map((chore, index) => {
-            return (
-              <span
-                key={index}
-                className='dot'
-                style={{
-                  backgroundColor: getPriorityColor(chore.priority),
-                }}
-              ></span>
-            )
-          })}
-        </div>
-      )
-    }
-    return null
-  }
-
   return (
     <div
       style={{
@@ -110,7 +50,7 @@ const CalendarView = ({ chores }) => {
           alignItems: 'center',
           justifyContent: 'flex-start',
           gap: 1,
-          width: '100%',
+          maxWidth: '250px',
           mb: 2,
         }}
       >
@@ -118,16 +58,16 @@ const CalendarView = ({ chores }) => {
         <Typography level='title-md'>Calendar Overview</Typography>
       </Box>
 
-      <Calendar
-        tileContent={tileContent}
-        onChange={d => {
-          setSeletedDate(new Date(d))
-        }}
-        // format the days from MON, TUE, WED, THU, FRI, SAT, SUN to first three letters:
-        formatShortWeekday={(locale, date) =>
-          ['S', 'M', 'T', 'W', 'T', 'F', 'S'][date.getDay()]
-        }
-      />
+      <div>
+        <CalendarMonthly
+          // className={styled.reactCalendar}
+          chores={chores}
+          onDateChange={date => {
+            setSeletedDate(date)
+          }}
+        />
+      </div>
+
       {!selectedDate && (
         <Grid
           container
