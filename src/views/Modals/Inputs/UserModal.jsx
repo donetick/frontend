@@ -1,9 +1,11 @@
 import { Avatar, Box, Button, List, ListItem, Typography } from '@mui/joy'
-import FadeModal from '../../../components/common/FadeModal'
+import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
 const UserModal = ({ isOpen, performers = [], onSelect, onClose }) => {
+  const { ResponsiveModal } = useResponsiveModal()
+
   return (
-    <FadeModal open={isOpen} onClose={onClose} size='md' fullWidth>
+    <ResponsiveModal open={isOpen} onClose={onClose} size='md' fullWidth>
       <Typography level='h4' sx={{ mb: 2 }}>
         Select User
       </Typography>
@@ -38,7 +40,7 @@ const UserModal = ({ isOpen, performers = [], onSelect, onClose }) => {
           Cancel
         </Button>
       </Box>
-    </FadeModal>
+    </ResponsiveModal>
   )
 }
 

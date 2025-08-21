@@ -1,8 +1,10 @@
 import { Box, Button, Input, Typography } from '@mui/joy'
 import { useState } from 'react'
-import FadeModal from '../../../components/common/FadeModal'
+import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
 function DateModal({ isOpen, onClose, onSave, current, title }) {
+  const { ResponsiveModal } = useResponsiveModal()
+
   const [date, setDate] = useState(
     current ? new Date(current).toISOString().split('T')[0] : null,
   )
@@ -13,7 +15,7 @@ function DateModal({ isOpen, onClose, onSave, current, title }) {
   }
 
   return (
-    <FadeModal open={isOpen} onClose={onClose}>
+    <ResponsiveModal open={isOpen} onClose={onClose}>
       <Typography variant='h4'>{title}</Typography>
       <Input
         sx={{ mt: 3 }}
@@ -29,7 +31,7 @@ function DateModal({ isOpen, onClose, onSave, current, title }) {
           Cancel
         </Button>
       </Box>
-    </FadeModal>
+    </ResponsiveModal>
   )
 }
 export default DateModal

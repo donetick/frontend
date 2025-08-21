@@ -14,10 +14,12 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
-import FadeModal from '../../components/common/FadeModal'
+
 import { resolvePhotoURL } from '../../utils/Helpers.jsx'
 
 function RedeemPointsModal({ config }) {
+  const { ResponsiveModal } = useResponsiveModal()
+
   const [points, setPoints] = useState(0)
   const predefinedPoints = [1, 5, 10, 25, 50]
 
@@ -50,7 +52,7 @@ function RedeemPointsModal({ config }) {
   const canRedeem = points > 0 && points <= config.available
 
   return (
-    <FadeModal open={config?.isOpen} onClose={config?.onClose} size='md'>
+    <ResponsiveModal open={config?.isOpen} onClose={config?.onClose} size='md'>
       {/* Header Section */}
       <Stack spacing={2}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -242,7 +244,7 @@ function RedeemPointsModal({ config }) {
           </Button>
         </Stack>
       </Stack>
-    </FadeModal>
+    </ResponsiveModal>
   )
 }
 

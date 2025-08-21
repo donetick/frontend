@@ -63,7 +63,10 @@ const BottomSheetModal = forwardRef(
       if (internalOpen) {
         document.addEventListener('keydown', handleEscape)
         // Prevent body scroll when modal is open
-        document.body.style.overflow = 'hidden'
+        // document.body.style.overflow = 'hidden'
+      } else {
+        // Restore scroll immediately when modal starts closing
+        // document.body.style.overflow = 'unset'
       }
 
       return () => {
@@ -95,6 +98,7 @@ const BottomSheetModal = forwardRef(
           ref={ref}
           sx={{
             zIndex: Z_INDEX.MODAL_CONTENT,
+            minHeight: '30%',
             width: '100%',
             height: currentHeight,
             maxHeight: isExpanded ? expandedHeight : maxHeight,
@@ -185,7 +189,9 @@ const BottomSheetModal = forwardRef(
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  padding: showHandle ? '0 20px 16px 20px' : '16px 20px 16px 20px',
+                  padding: showHandle
+                    ? '0 20px 16px 20px'
+                    : '16px 20px 16px 20px',
                   paddingRight: showCloseButton ? '60px' : '20px', // Add space for close button
                   minHeight: 24,
                 }}

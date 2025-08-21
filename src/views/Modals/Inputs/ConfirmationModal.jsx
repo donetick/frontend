@@ -1,9 +1,10 @@
 import { Box, Button, Typography } from '@mui/joy'
 import { useCallback, useEffect, useState } from 'react'
-import FadeModal from '../../../components/common/FadeModal'
 import KeyboardShortcutHint from '../../../components/common/KeyboardShortcutHint'
+import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
 function ConfirmationModal({ config }) {
+  const { ResponsiveModal } = useResponsiveModal()
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
 
   const handleAction = useCallback(
@@ -70,7 +71,7 @@ function ConfirmationModal({ config }) {
   }, [config?.isOpen, handleAction])
 
   return (
-    <FadeModal
+    <ResponsiveModal
       open={config?.isOpen}
       onClose={config?.onClose}
       size='sm'
@@ -79,7 +80,6 @@ function ConfirmationModal({ config }) {
       <Typography level='h4' mb={1}>
         {config?.title}
       </Typography>
-
       <Typography level='body-md' gutterBottom>
         {config?.message}
       </Typography>
@@ -90,7 +90,7 @@ function ConfirmationModal({ config }) {
             handleAction(true)
           }}
           fullWidth
-          color={config.color ? config.color : 'primary'}
+          color={config?.color || 'primary'}
           endDecorator={
             <KeyboardShortcutHint shortcut='Y' show={showKeyboardShortcuts} />
           }
@@ -110,7 +110,7 @@ function ConfirmationModal({ config }) {
           {config?.cancelText}
         </Button>
       </Box>
-    </FadeModal>
+    </ResponsiveModal>
   )
 }
 export default ConfirmationModal

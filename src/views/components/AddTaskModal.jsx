@@ -4,12 +4,13 @@ import { FormControl } from '@mui/material'
 import * as chrono from 'chrono-node'
 import moment from 'moment'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import FadeModal from '../../components/common/FadeModal'
+import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import { useCreateChore } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { isPlusAccount } from '../../utils/Helpers'
 import { useLabels } from '../Labels/LabelQueries'
 import {
+  parseAssignees,
   parseDueDate,
   parseLabels,
   parsePriority,
@@ -41,6 +42,7 @@ const getDefaultNotification = () => {
 }
 
 const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
+  const { ResponsiveModal } = useResponsiveModal()
   const { data: userLabels, isLoading: userLabelsLoading } = useLabels()
   const { data: circleMembers, isLoading: isCircleMembersLoading } =
     useCircleMembers()
@@ -69,7 +71,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
   const [hasDescription, setHasDescription] = useState(false)
   const [hasSubTasks, setHasSubTasks] = useState(false)
   const [hasNotifications, setHasNotifications] = useState(false)
-  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(true)
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
 
   // set showKeyboardShortcuts true as soon as the user hold ctrl or cmd key:
   useEffect(() => {
@@ -301,32 +303,34 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
         cleanedSentence = repeat.cleanedSentence
       }
       // Parse assignees using circle members
-      // const circleMembersList = circleMembers?.res || []
-      // const assigneesForParsing = circleMembersList.map(member => ({
-      //   userId: member.userId,
-      //   username:
-      //     member.username ||
-      //     member.displayName?.toLowerCase().replace(/\s+/g, ''),
-      //   displayName: member.displayName,
-      //   name: member.displayName,
-      //   id: member.userId,
-      // }))
+      const circleMembersList = circleMembers?.res || []
+      const assigneesForParsing = circleMembersList.map(member => ({
+        userId: member.userId,
+        username:
+          member.username ||
+          member.displayName?.toLowerCase().replace(/\s+/g, ''),
+        displayName: member.displayName,
+        name: member.displayName,
+        id: member.userId,
+      }))
 
-      // const assigneesResult = parseAssignees(sentence, assigneesForParsing)
-      // if (assigneesResult.result) {
-      //   cleanedSentence = assigneesResult.cleanedSentence
-      //   setAssignees(
-      //     assigneesResult.result.map(assignee => ({
-      //       userId: assignee.userId,
-      //     })),
-      //   )
-      // } else {
-      //   setAssignees([
-      //     {
-      //       userId: userProfile.id,
-      //     },
-      //   ])
-      // }
+      const assigneesResult = parseAssignees(sentence, assigneesForParsing)
+      if (assigneesResult.result) {
+        cleanedSentence = assigneesResult.cleanedSentence
+        console.log('CLEANED', cleanedSentence)
+
+        setAssignees(
+          assigneesResult.result.map(assignee => ({
+            userId: assignee.userId,
+          })),
+        )
+      } else {
+        setAssignees([
+          {
+            userId: userProfile.id,
+          },
+        ])
+      }
       // Parse due date
       const dueDateParsed = parseDueDate(sentence, chrono)
       let dueDateHighlight = null
@@ -462,13 +466,13 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
   }
 
   return (
-    <FadeModal
+    <ResponsiveModal
       open={isModalOpen}
       onClose={handleCloseModal}
       size='lg'
       fullWidth={true}
+      title='Create new task'
     >
-      <Typography level='h4'>Create new task</Typography>
       <Chip startDecorator='🚧' variant='soft' color='warning' size='sm'>
         Experimental Feature
       </Chip>
@@ -772,7 +776,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
           )}
         </Button>
       </Box>
-    </FadeModal>
+    </ResponsiveModal>
   )
 }
 

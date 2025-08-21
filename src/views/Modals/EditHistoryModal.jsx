@@ -1,10 +1,13 @@
 import { Box, Button, FormLabel, Input, Typography } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
-import FadeModal from '../../components/common/FadeModal'
+
+import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import ConfirmationModal from './Inputs/ConfirmationModal'
 
 function EditHistoryModal({ config, historyRecord }) {
+  const { ResponsiveModal } = useResponsiveModal()
+
   useEffect(() => {
     setCompletedDate(
       moment(historyRecord.performedAt).format('YYYY-MM-DDTHH:mm'),
@@ -22,7 +25,7 @@ function EditHistoryModal({ config, historyRecord }) {
   const [notes, setNotes] = useState(historyRecord.notes)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   return (
-    <FadeModal open={config?.isOpen} onClose={config?.onClose}>
+    <ResponsiveModal open={config?.isOpen} onClose={config?.onClose}>
       <Typography level='h4' mb={1}>
         Edit History
       </Typography>
@@ -106,7 +109,7 @@ function EditHistoryModal({ config, historyRecord }) {
           cancelText: 'Cancel',
         }}
       />
-    </FadeModal>
+    </ResponsiveModal>
   )
 }
 export default EditHistoryModal

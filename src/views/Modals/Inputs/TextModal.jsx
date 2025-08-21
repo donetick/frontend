@@ -1,6 +1,6 @@
 import { Box, Button, Textarea, Typography } from '@mui/joy'
 import { useState } from 'react'
-import FadeModal from '../../../components/common/FadeModal'
+import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
 function TextModal({
   isOpen,
@@ -11,6 +11,8 @@ function TextModal({
   okText,
   cancelText,
 }) {
+  const { ResponsiveModal } = useResponsiveModal()
+
   const [text, setText] = useState(current)
 
   const handleSave = () => {
@@ -19,7 +21,7 @@ function TextModal({
   }
 
   return (
-    <FadeModal open={isOpen} onClose={onClose}>
+    <ResponsiveModal open={isOpen} onClose={onClose}>
       <Typography variant='h4'>{title}</Typography>
       <Textarea
         placeholder='Type in here…'
@@ -38,7 +40,7 @@ function TextModal({
           {cancelText ? cancelText : 'Cancel'}
         </Button>
       </Box>
-    </FadeModal>
+    </ResponsiveModal>
   )
 }
 export default TextModal

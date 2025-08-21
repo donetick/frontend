@@ -10,9 +10,10 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
-import FadeModal from '../../../components/common/FadeModal'
 
 function CreateThingModal({ isOpen, onClose, onSave, currentThing }) {
+  const { ResponsiveModal } = useResponsiveModal()
+
   const [name, setName] = useState(currentThing?.name || '')
   const [type, setType] = useState(currentThing?.type || 'number')
   const [state, setState] = useState(currentThing?.state || '')
@@ -58,7 +59,7 @@ function CreateThingModal({ isOpen, onClose, onSave, currentThing }) {
   }
 
   return (
-    <FadeModal open={isOpen} onClose={onClose}>
+    <ResponsiveModal open={isOpen} onClose={onClose}>
       <Typography level='h4'>
         {currentThing?.id ? 'Edit' : 'Create'} Thing
       </Typography>
@@ -131,7 +132,7 @@ function CreateThingModal({ isOpen, onClose, onSave, currentThing }) {
           {currentThing?.id ? 'Cancel' : 'Close'}
         </Button>
       </Box>
-    </FadeModal>
+    </ResponsiveModal>
   )
 }
 export default CreateThingModal

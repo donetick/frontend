@@ -1,6 +1,6 @@
 import { Box, Button, Option, Select, Typography } from '@mui/joy'
 import React from 'react'
-import FadeModal from '../../../components/common/FadeModal'
+import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
 function SelectModal({
   isOpen,
@@ -11,6 +11,8 @@ function SelectModal({
   displayKey,
   placeholder,
 }) {
+  const { ResponsiveModal } = useResponsiveModal()
+
   const [selected, setSelected] = React.useState(null)
   const handleSave = () => {
     onSave(options.find(item => item.id === selected))
@@ -18,7 +20,7 @@ function SelectModal({
   }
 
   return (
-    <FadeModal open={isOpen} onClose={onClose}>
+    <ResponsiveModal open={isOpen} onClose={onClose}>
       <Typography variant='h4'>{title}</Typography>
       <Select placeholder={placeholder}>
         {options.map((item, index) => (
@@ -42,7 +44,7 @@ function SelectModal({
           Cancel
         </Button>
       </Box>
-    </FadeModal>
+    </ResponsiveModal>
   )
 }
 export default SelectModal

@@ -12,7 +12,7 @@ import {
 } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
-import FadeModal from '../../../components/common/FadeModal'
+import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { useNotification } from '../../../service/NotificationProvider'
 import {
   DeleteTimeSession,
@@ -22,6 +22,8 @@ import {
 import ConfirmationModal from './ConfirmationModal'
 
 const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
+  const { ResponsiveModal } = useResponsiveModal()
+
   const [timerData, setTimerData] = useState(null)
   const [loading, setLoading] = useState(false)
   const [editingSessions, setEditingSessions] = useState({})
@@ -310,7 +312,12 @@ const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
 
   return (
     <>
-      <FadeModal open={isOpen} onClose={onClose} size='lg' fullWidth={true}>
+      <ResponsiveModal
+        open={isOpen}
+        onClose={onClose}
+        size='lg'
+        fullWidth={true}
+      >
         <Typography level='h4'>Timer Details</Typography>
 
         {loading && (
@@ -976,7 +983,7 @@ const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
             )}
           </Box>
         </Box>
-      </FadeModal>
+      </ResponsiveModal>
 
       <ConfirmationModal config={confirmDeleteConfig} />
     </>

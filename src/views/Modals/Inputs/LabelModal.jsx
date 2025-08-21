@@ -8,15 +8,17 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
-import FadeModal from '../../../components/common/FadeModal'
 
 import { useQueryClient } from '@tanstack/react-query'
+import { useResponsiveModal } from '../../../hooks/useResponsiveModal.js'
 import { useNotification } from '../../../service/NotificationProvider.jsx'
 import LABEL_COLORS from '../../../utils/Colors.jsx'
 import { CreateLabel, UpdateLabel } from '../../../utils/Fetcher'
 import { useLabels } from '../../Labels/LabelQueries'
 
 function LabelModal({ isOpen, onClose, label }) {
+  const { ResponsiveModal } = useResponsiveModal()
+
   const [labelName, setLabelName] = useState('')
   const [color, setColor] = useState('')
   const [error, setError] = useState('')
@@ -89,7 +91,7 @@ function LabelModal({ isOpen, onClose, label }) {
   }
 
   return (
-    <FadeModal open={isOpen} onClose={onClose}>
+    <ResponsiveModal open={isOpen} onClose={onClose}>
       <Typography level='title-md' mb={1}>
         {label ? 'Edit Label' : 'Add Label'}
       </Typography>
@@ -159,7 +161,7 @@ function LabelModal({ isOpen, onClose, label }) {
           Cancel
         </Button>
       </Box>
-    </FadeModal>
+    </ResponsiveModal>
   )
 }
 

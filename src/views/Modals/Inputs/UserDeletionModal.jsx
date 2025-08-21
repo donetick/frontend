@@ -13,10 +13,11 @@ import {
 import { data } from 'autoprefixer'
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import FadeModal from '../../../components/common/FadeModal'
+import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { CheckUserDeletion, DeleteUser } from '../../../utils/Fetcher'
 
 function UserDeletionModal({ isOpen, onClose, userProfile }) {
+  const { ResponsiveModal } = useResponsiveModal()
   const Navigate = useNavigate()
   const [step, setStep] = useState(1) // 1: Warning, 2: Transfer, 3: Confirm
   const [password, setPassword] = useState('')
@@ -340,11 +341,11 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
   }
 
   return (
-    <FadeModal
+    <ResponsiveModal
       open={isOpen}
       onClose={() => handleClose(false)}
       size='md'
-      unmountDelay={250}
+      title='Delete Account'
     >
       {loading && step === 1 ? (
         <Box
@@ -358,7 +359,7 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
       ) : (
         renderStep()
       )}
-    </FadeModal>
+    </ResponsiveModal>
   )
 }
 

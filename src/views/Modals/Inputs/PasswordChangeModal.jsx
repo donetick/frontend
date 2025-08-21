@@ -7,9 +7,11 @@ import {
   Typography,
 } from '@mui/joy'
 import React, { useEffect } from 'react'
-import FadeModal from '../../../components/common/FadeModal'
+import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
 function PassowrdChangeModal({ isOpen, onClose }) {
+  const { ResponsiveModal } = useResponsiveModal()
+
   const [password, setPassword] = React.useState('')
   const [confirmPassword, setConfirmPassword] = React.useState('')
   const [passwordError, setPasswordError] = React.useState(false)
@@ -39,7 +41,7 @@ function PassowrdChangeModal({ isOpen, onClose }) {
   }
 
   return (
-    <FadeModal open={isOpen} onClose={onClose}>
+    <ResponsiveModal open={isOpen} onClose={onClose}>
       <Typography level='h4' mb={1}>
         Change Password
       </Typography>
@@ -108,7 +110,7 @@ function PassowrdChangeModal({ isOpen, onClose }) {
           Cancel
         </Button>
       </Box>
-    </FadeModal>
+    </ResponsiveModal>
   )
 }
 export default PassowrdChangeModal

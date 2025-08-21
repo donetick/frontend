@@ -1,9 +1,11 @@
 import { CopyAll } from '@mui/icons-material'
 import { Box, Button, Checkbox, Input, ListItem, Typography } from '@mui/joy'
 import { useState } from 'react'
-import FadeModal from '../../../components/common/FadeModal'
+import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
 function WriteNFCModal({ config }) {
+  const { ResponsiveModal } = useResponsiveModal()
+
   const [nfcStatus, setNfcStatus] = useState('idle') // 'idle', 'writing', 'success', 'error'
   const [errorMessage, setErrorMessage] = useState('')
   const [isAutoCompleteWhenScan, setIsAutoCompleteWhenScan] = useState(false)
@@ -52,7 +54,7 @@ function WriteNFCModal({ config }) {
     return url
   }
   return (
-    <FadeModal open={config?.isOpen} onClose={handleClose}>
+    <ResponsiveModal open={config?.isOpen} onClose={handleClose}>
       <Typography level='h4' mb={1}>
         {nfcStatus === 'success' ? 'Success!' : 'Write to NFC'}
       </Typography>
@@ -106,7 +108,7 @@ function WriteNFCModal({ config }) {
           </Box>
         </>
       )}
-    </FadeModal>
+    </ResponsiveModal>
   )
 }
 
