@@ -7,9 +7,11 @@ import {
   Typography,
 } from '@mui/joy'
 import { useState } from 'react'
-import FadeModal from '../../../components/common/FadeModal'
+import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
 function EditThingStateModal({ isOpen, onClose, onSave, currentThing }) {
+  const { ResponsiveModal } = useResponsiveModal()
+
   const [state, setState] = useState(currentThing?.state || '')
   const [errors, setErrors] = useState({})
 
@@ -38,7 +40,7 @@ function EditThingStateModal({ isOpen, onClose, onSave, currentThing }) {
   }
 
   return (
-    <FadeModal open={isOpen} onClose={onClose}>
+    <ResponsiveModal open={isOpen} onClose={onClose}>
       <Typography level='h4'>Update state</Typography>
 
       <FormControl>
@@ -60,7 +62,7 @@ function EditThingStateModal({ isOpen, onClose, onSave, currentThing }) {
           {currentThing?.id ? 'Cancel' : 'Close'}
         </Button>
       </Box>
-    </FadeModal>
+    </ResponsiveModal>
   )
 }
 export default EditThingStateModal
