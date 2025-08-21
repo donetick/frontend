@@ -2,6 +2,7 @@ import {
   Add,
   Archive,
   Bolt,
+  CalendarMonth,
   CancelRounded,
   CheckBox,
   CheckBoxOutlineBlank,
@@ -51,12 +52,15 @@ import CompactChoreCard from './CompactChoreCard'
 import IconButtonWithMenu from './IconButtonWithMenu'
 import MultiSelectHelp from './MultiSelectHelp'
 
+import { useMediaQuery } from '@mui/material'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { ChoreFilters, ChoresGrouper, ChoreSorter } from '../../utils/Chores'
 import { DeleteChore, MarkChoreComplete, SkipChore } from '../../utils/Fetcher'
 import TaskInput from '../components/AddTaskModal'
+import CalendarDual from '../components/CalendarDual'
+import CalendarMonthly from '../components/CalendarMonthly.jsx'
 import {
   canScheduleNotification,
   scheduleChoreNotification,
@@ -68,6 +72,7 @@ import SortAndGrouping from './SortAndGrouping'
 const MyChores = () => {
   const { data: userProfile, isLoading: isUserProfileLoading } =
     useUserProfile()
+  const isLargeScreen = useMediaQuery(theme => theme.breakpoints.up('md'))
   const { showSuccess, showError, showWarning } = useNotification()
   const { impersonatedUser } = useImpersonateUser()
   const [chores, setChores] = useState([])
@@ -93,9 +98,10 @@ const MyChores = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [performers, setPerformers] = useState([])
   const [anchorEl, setAnchorEl] = useState(null)
-  const [isCompactView, setIsCompactView] = useState(
-    localStorage.getItem('choreCardViewMode') === 'compact',
+  const [viewMode, setViewMode] = useState(
+    localStorage.getItem('choreCardViewMode') || 'default',
   )
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState(new Date())
   const menuRef = useRef(null)
   const Navigate = useNavigate()
   const { data: userLabels, isLoading: userLabelsLoading } = useLabels()
@@ -385,17 +391,27 @@ const MyChores = () => {
   const setSelectedChoreFilterWithCache = value => {
     setSelectedChoreFilter(value)
     localStorage.setItem('selectedChoreFilter', value)
+    // Clear selected calendar date when filters change
+    setSelectedCalendarDate(null)
   }
 
   const toggleViewMode = () => {
-    const newMode = !isCompactView
-    setIsCompactView(newMode)
-    localStorage.setItem('choreCardViewMode', newMode ? 'compact' : 'default')
+    const modes = ['default', 'compact', 'calendar']
+    const currentIndex = modes.indexOf(viewMode)
+    const nextIndex = (currentIndex + 1) % modes.length
+    const newMode = modes[nextIndex]
+    setViewMode(newMode)
+    localStorage.setItem('choreCardViewMode', newMode)
+
+    // Clear selected calendar date when switching away from calendar view
+    if (newMode !== 'calendar') {
+      setSelectedCalendarDate(null)
+    }
   }
 
   // Helper function to render the appropriate card component
   const renderChoreCard = (chore, key) => {
-    const CardComponent = isCompactView ? CompactChoreCard : ChoreCard
+    const CardComponent = viewMode === 'compact' ? CompactChoreCard : ChoreCard
     return (
       <CardComponent
         key={key || chore.id}
@@ -411,6 +427,25 @@ const MyChores = () => {
         onSelectionToggle={() => toggleChoreSelection(chore.id)}
       />
     )
+  }
+
+  // Helper function to get filtered chores for display
+  const getFilteredChores = () => {
+    if (searchTerm?.length > 0 || searchFilter !== 'All') {
+      return filteredChores
+    }
+    return chores.filter(ChoreFilters(userProfile)[selectedChoreFilter])
+  }
+
+  // Helper function to get chores for a specific date
+  const getChoresForDate = date => {
+    const filteredChores = getFilteredChores()
+    return filteredChores.filter(chore => {
+      if (!chore.nextDueDate) return false
+      const choreDate = new Date(chore.nextDueDate).toLocaleDateString()
+      const selectedDate = date.toLocaleDateString()
+      return choreDate === selectedDate
+    })
   }
 
   const updateChores = newChore => {
@@ -463,6 +498,8 @@ const MyChores = () => {
       setFilteredChores(priorityFiltered)
       setSearchFilter('Priority: ' + priority)
     }
+    // Clear selected calendar date when filters change
+    setSelectedCalendarDate(null)
   }
 
   const handleChoreUpdated = (updatedChore, event) => {
@@ -607,18 +644,24 @@ const MyChores = () => {
     if (search === '') {
       setFilteredChores(chores)
       setSearchTerm('')
+      // Clear selected calendar date when search changes
+      setSelectedCalendarDate(null)
       return
     }
 
     const term = search.toLowerCase()
     setSearchTerm(term)
     setFilteredChores(fuse.search(term).map(result => result.item))
+    // Clear selected calendar date when search changes
+    setSelectedCalendarDate(null)
   }
   const handleSearchClose = () => {
     setSearchTerm('')
     setFilteredChores(chores)
     // remove the focus from the search input:
     setSearchInputFocus(0)
+    // Clear selected calendar date when search closes
+    setSelectedCalendarDate(null)
   }
 
   // Multi-select helper functions
@@ -1065,10 +1108,20 @@ const MyChores = () => {
             }}
             onClick={toggleViewMode}
             title={
-              isCompactView ? 'Switch to Card View' : 'Switch to Compact View'
+              viewMode === 'default'
+                ? 'Switch to Compact View'
+                : viewMode === 'compact'
+                  ? 'Switch to Calendar View'
+                  : 'Switch to Card View'
             }
           >
-            {isCompactView ? <ViewModule /> : <ViewAgenda />}
+            {viewMode === 'default' ? (
+              <ViewAgenda />
+            ) : viewMode === 'compact' ? (
+              <CalendarMonth />
+            ) : (
+              <ViewModule />
+            )}
           </IconButton>
 
           {/* Multi-select Toggle Button */}
@@ -1579,79 +1632,153 @@ const MyChores = () => {
           </Box>
         )}
         {(searchTerm?.length > 0 || searchFilter !== 'All') &&
+          viewMode !== 'calendar' &&
           filteredChores.map(chore =>
             renderChoreCard(chore, `filtered-${chore.id}`),
           )}
-        {searchTerm.length === 0 && searchFilter === 'All' && (
-          <AccordionGroup transition='0.2s ease' disableDivider>
-            {choreSections.map((section, index) => {
-              if (section.content.length === 0) return null
-              return (
-                <Accordion
-                  key={section.name + index}
-                  sx={{
-                    my: 0,
-                    px: 0,
+        {viewMode === 'calendar' && (
+          <>
+            {/* Calendar Monthly View */}
+            <Box sx={{ mb: 2 }}>
+              {isLargeScreen ? (
+                <CalendarDual
+                  chores={getFilteredChores()}
+                  onDateChange={date => {
+                    setSelectedCalendarDate(date)
                   }}
-                  expanded={Boolean(openChoreSections[index])}
-                >
-                  <Divider orientation='horizontal'>
-                    <Chip
-                      variant='soft'
-                      color='neutral'
-                      size='md'
-                      onClick={() => {
-                        if (openChoreSections[index]) {
-                          const newOpenChoreSections = {
-                            ...openChoreSections,
-                          }
-                          delete newOpenChoreSections[index]
-                          setOpenChoreSectionsWithCache(newOpenChoreSections)
-                        } else {
-                          setOpenChoreSectionsWithCache({
-                            ...openChoreSections,
-                            [index]: true,
-                          })
-                        }
-                      }}
-                      endDecorator={
-                        openChoreSections[index] ? (
-                          <ExpandCircleDown
-                            color='primary'
-                            sx={{ transform: 'rotate(180deg)' }}
-                          />
-                        ) : (
-                          <ExpandCircleDown color='primary' />
-                        )
-                      }
-                      startDecorator={
-                        <>
-                          <Chip color='primary' size='sm' variant='soft'>
-                            {section?.content?.length}
-                          </Chip>
-                        </>
-                      }
-                    >
-                      {section.name}
-                    </Chip>
-                  </Divider>
-                  <AccordionDetails
-                    sx={{
-                      flexDirection: 'column',
-                      ['& > *']: {
-                        // px: 0.5,
-                        px: 0.5,
-                        // pr: 0,
-                      },
+                />
+              ) : (
+                <div className='calendar-dual'>
+                  <CalendarMonthly
+                    chores={getFilteredChores()}
+                    onDateChange={date => {
+                      setSelectedCalendarDate(date)
                     }}
-                  >
-                    {section.content?.map(chore => renderChoreCard(chore))}
-                  </AccordionDetails>
-                </Accordion>
-              )
-            })}
-          </AccordionGroup>
+                  />
+                </div>
+              )}
+            </Box>
+
+            {/* Selected Date Tasks */}
+            {selectedCalendarDate && (
+              <Box sx={{ mt: 2 }}>
+                <Typography level='title-md' gutterBottom>
+                  Tasks for {selectedCalendarDate.toLocaleDateString()}
+                </Typography>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 1,
+                    maxHeight: '400px',
+                    overflowY: 'auto',
+                  }}
+                >
+                  {getChoresForDate(selectedCalendarDate).length === 0 ? (
+                    <Typography
+                      level='body-sm'
+                      sx={{
+                        textAlign: 'center',
+                        py: 2,
+                        color: 'text.tertiary',
+                      }}
+                    >
+                      No tasks scheduled for this date
+                    </Typography>
+                  ) : (
+                    getChoresForDate(selectedCalendarDate).map(chore => (
+                      <CompactChoreCard
+                        key={`calendar-${chore.id}`}
+                        chore={chore}
+                        onChoreUpdate={handleChoreUpdated}
+                        onChoreRemove={handleChoreDeleted}
+                        performers={performers}
+                        userLabels={userLabels}
+                        onChipClick={handleLabelFiltering}
+                        // Multi-select props
+                        isMultiSelectMode={isMultiSelectMode}
+                        isSelected={selectedChores.has(chore.id)}
+                        onSelectionToggle={() => toggleChoreSelection(chore.id)}
+                      />
+                    ))
+                  )}
+                </Box>
+              </Box>
+            )}
+          </>
         )}
+        {searchTerm.length === 0 &&
+          searchFilter === 'All' &&
+          viewMode !== 'calendar' && (
+            <AccordionGroup transition='0.2s ease' disableDivider>
+              {choreSections.map((section, index) => {
+                if (section.content.length === 0) return null
+                return (
+                  <Accordion
+                    key={section.name + index}
+                    sx={{
+                      my: 0,
+                      px: 0,
+                    }}
+                    expanded={Boolean(openChoreSections[index])}
+                  >
+                    <Divider orientation='horizontal'>
+                      <Chip
+                        variant='soft'
+                        color='neutral'
+                        size='md'
+                        onClick={() => {
+                          if (openChoreSections[index]) {
+                            const newOpenChoreSections = {
+                              ...openChoreSections,
+                            }
+                            delete newOpenChoreSections[index]
+                            setOpenChoreSectionsWithCache(newOpenChoreSections)
+                          } else {
+                            setOpenChoreSectionsWithCache({
+                              ...openChoreSections,
+                              [index]: true,
+                            })
+                          }
+                        }}
+                        endDecorator={
+                          openChoreSections[index] ? (
+                            <ExpandCircleDown
+                              color='primary'
+                              sx={{ transform: 'rotate(180deg)' }}
+                            />
+                          ) : (
+                            <ExpandCircleDown color='primary' />
+                          )
+                        }
+                        startDecorator={
+                          <>
+                            <Chip color='primary' size='sm' variant='soft'>
+                              {section?.content?.length}
+                            </Chip>
+                          </>
+                        }
+                      >
+                        {section.name}
+                      </Chip>
+                    </Divider>
+                    <AccordionDetails
+                      sx={{
+                        flexDirection: 'column',
+                        ['& > *']: {
+                          // px: 0.5,
+                          px: 0.5,
+                          // pr: 0,
+                        },
+                      }}
+                    >
+                      {section.content?.map(chore => renderChoreCard(chore))}
+                    </AccordionDetails>
+                  </Accordion>
+                )
+              })}
+            </AccordionGroup>
+          )}
         <Box
           sx={{
             // center the button
