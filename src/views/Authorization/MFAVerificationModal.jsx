@@ -10,7 +10,8 @@ import {
   Typography,
 } from '@mui/joy'
 import { useState } from 'react'
-import FadeModal from '../../components/common/FadeModal'
+
+import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import { VerifyMFA } from '../../utils/Fetcher'
 
 const MFAVerificationModal = ({
@@ -24,7 +25,7 @@ const MFAVerificationModal = ({
   const [isBackupCode, setIsBackupCode] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-
+  const { ResponsiveModal } = useResponsiveModal()
   const handleVerify = async () => {
     if (!verificationCode.trim()) {
       setError('Please enter a verification code')
@@ -69,7 +70,7 @@ const MFAVerificationModal = ({
   }
 
   return (
-    <FadeModal open={open} onClose={handleClose} size='sm'>
+    <ResponsiveModal open={open} onClose={handleClose} size='sm'>
       <ModalClose />
 
       <Box className='mb-4 text-center'>
@@ -150,7 +151,7 @@ const MFAVerificationModal = ({
           </Typography>
         </Alert>
       </Stack>
-    </FadeModal>
+    </ResponsiveModal>
   )
 }
 

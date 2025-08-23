@@ -15,6 +15,7 @@ import {
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
 
+import { useResponsiveModal } from '../../hooks/useResponsiveModal.js'
 import { resolvePhotoURL } from '../../utils/Helpers.jsx'
 
 function RedeemPointsModal({ config }) {

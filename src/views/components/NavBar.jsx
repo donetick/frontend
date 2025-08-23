@@ -1,14 +1,13 @@
 import Logo from '@/assets/logo.svg'
 import {
-  AccountBox,
+  Archive,
+  ArrowBack,
   History,
-  HomeOutlined,
+  Inbox,
   ListAlt,
   Logout,
   MenuRounded,
-  Message,
   SettingsOutlined,
-  ShareOutlined,
   Toll,
   Widgets,
 } from '@mui/icons-material'
@@ -30,9 +29,14 @@ import ThemeToggleButton from '../Settings/ThemeToggleButton'
 import NavBarLink from './NavBarLink'
 const links = [
   {
-    to: '/my/chores',
-    label: 'Home',
-    icon: <HomeOutlined />,
+    to: '/chores',
+    label: 'All Tasks',
+    icon: <Inbox />,
+  },
+  {
+    to: '/archived',
+    label: 'Archived',
+    icon: <Archive />,
   },
 
   // {
@@ -60,21 +64,21 @@ const links = [
     label: 'Points',
     icon: <Toll />,
   },
-  {
-    to: '/settings#sharing',
-    label: 'Sharing',
-    icon: <ShareOutlined />,
-  },
-  {
-    to: '/settings#notifications',
-    label: 'Notifications',
-    icon: <Message />,
-  },
-  {
-    to: '/settings#account',
-    label: 'Account',
-    icon: <AccountBox />,
-  },
+  // {
+  //   to: '/settings#sharing',
+  //   label: 'Sharing',
+  //   icon: <ShareOutlined />,
+  // },
+  // {
+  //   to: '/settings#notifications',
+  //   label: 'Notifications',
+  //   icon: <Message />,
+  // },
+  // {
+  //   to: '/settings#account',
+  //   label: 'Account',
+  //   icon: <AccountBox />,
+  // },
   {
     to: '/settings',
     label: 'Settings',
@@ -119,16 +123,26 @@ const NavBar = () => {
         backgroundColor: 'var(--joy-palette-background-body)',
       }}
     >
-      <IconButton size='md' variant='plain' onClick={() => setDrawerOpen(true)}>
-        <MenuRounded />
-      </IconButton>
+      {['/chores', '/'].includes(location.pathname) ? (
+        <IconButton
+          size='md'
+          variant='plain'
+          onClick={() => setDrawerOpen(true)}
+        >
+          <MenuRounded />
+        </IconButton>
+      ) : (
+        <IconButton size='md' variant='plain' onClick={() => navigate(-1)}>
+          <ArrowBack />
+        </IconButton>
+      )}
       <Box
         className='flex items-center gap-2'
         onClick={() => {
-          navigate('/my/chores')
+          navigate('/chores')
         }}
       >
-        <img component='img' src={Logo} width='25' />
+        <img src={Logo} width='25' alt='Logo' />
         <Typography
           level='title-lg'
           sx={{

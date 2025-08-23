@@ -107,3 +107,18 @@ export const getTextColorFromBackgroundColor = bgColor => {
   const b = parseInt(hex.substring(4, 6), 16)
   return r * 0.299 + g * 0.587 + b * 0.114 > 186 ? '#000000' : '#ffffff'
 }
+
+export const getPriorityColor = priority => {
+  switch (priority) {
+    case 1:
+      return TASK_COLOR.PRIORITY_1
+    case 2:
+      return TASK_COLOR.PRIORITY_2
+    case 3:
+      return TASK_COLOR.PRIORITY_3
+    case 4:
+      return TASK_COLOR.PRIORITY_4
+    default:
+      return TASK_COLOR.NO_PRIORITY
+  }
+}

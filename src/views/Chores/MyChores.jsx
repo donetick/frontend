@@ -17,7 +17,6 @@ import {
   SkipNext,
   Sort,
   Style,
-  Unarchive,
   ViewAgenda,
   ViewModule,
 } from '@mui/icons-material'
@@ -42,7 +41,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useChores } from '../../queries/ChoreQueries'
 import { useNotification } from '../../service/NotificationProvider'
-import { ArchiveChore, GetArchivedChores } from '../../utils/Fetcher'
+import { ArchiveChore } from '../../utils/Fetcher'
 import Priorities from '../../utils/Priorities'
 import LoadingComponent from '../components/Loading'
 import { useLabels } from '../Labels/LabelQueries'
@@ -76,7 +75,6 @@ const MyChores = () => {
   const { showSuccess, showError, showWarning } = useNotification()
   const { impersonatedUser } = useImpersonateUser()
   const [chores, setChores] = useState([])
-  const [archivedChores, setArchivedChores] = useState(null)
   const [filteredChores, setFilteredChores] = useState([])
   const [searchFilter, setSearchFilter] = useState('All')
   const [choreSections, setChoreSections] = useState([])
@@ -366,6 +364,13 @@ const MyChores = () => {
         }
         return
       }
+
+      // Ctrl/Cmd + O to navigate to archived tasks
+      if (isHoldingCmdOrCtrl && event.key === 'o') {
+        event.preventDefault()
+        Navigate('/archived')
+        return
+      }
     }
     const handleKeyUp = event => {
       if (!event.ctrlKey && !event.metaKey) {
@@ -523,16 +528,6 @@ const MyChores = () => {
       newChores = newChores.filter(chore => chore.id !== updatedChore.id)
       newFilteredChores = newFilteredChores.filter(
         chore => chore.id !== updatedChore.id,
-      )
-      if (archivedChores !== null) {
-        setArchivedChores([...archivedChores, updatedChore])
-      }
-    }
-    if (event === 'unarchive') {
-      newChores.push(updatedChore)
-      newFilteredChores.push(updatedChore)
-      setArchivedChores(
-        archivedChores.filter(chore => chore.id !== updatedChore.id),
       )
     }
     setChores(newChores)
@@ -726,9 +721,8 @@ const MyChores = () => {
   }
 
   const getSelectedChoresData = () => {
-    const allChores = [...chores, ...(archivedChores || [])]
     return Array.from(selectedChores)
-      .map(id => allChores.find(chore => chore.id === id))
+      .map(id => chores.find(chore => chore.id === id))
       .filter(Boolean)
   }
 
@@ -822,14 +816,6 @@ const MyChores = () => {
                 title: '📦 Tasks Archived',
                 message: `Successfully archived ${archivedTasks.length} task${archivedTasks.length > 1 ? 's' : ''}.`,
               })
-              // Update archived chores state
-              setArchivedChores([
-                ...(archivedChores || []),
-                ...archivedTasks.map(c => ({
-                  ...c,
-                  archived: true,
-                })),
-              ])
             }
             if (failedTasks.length > 0) {
               showError({
@@ -1595,7 +1581,7 @@ const MyChores = () => {
             Current Filter: {searchFilter}
           </Chip>
         )}
-        {filteredChores.length === 0 && archivedChores == null && (
+        {filteredChores.length === 0 && (
           <Box
             sx={{
               display: 'flex',
@@ -1785,55 +1771,7 @@ const MyChores = () => {
             justifyContent: 'center',
             mt: 2,
           }}
-        >
-          {archivedChores === null && (
-            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-              <Button
-                sx={{}}
-                onClick={() => {
-                  GetArchivedChores()
-                    .then(response => response.json())
-                    .then(data => {
-                      setArchivedChores(data.res)
-                    })
-                }}
-                variant='outlined'
-                color='neutral'
-                startDecorator={<Unarchive />}
-                endDecorator={
-                  <KeyboardShortcutHint
-                    shortcut='O'
-                    show={showKeyboardShortcuts}
-                  />
-                }
-              >
-                Show Archived
-              </Button>
-            </Box>
-          )}
-          {archivedChores !== null && (
-            <>
-              <Divider orientation='horizontal'>
-                <Chip
-                  variant='soft'
-                  color='danger'
-                  size='md'
-                  startDecorator={
-                    <>
-                      <Chip color='danger' size='sm' variant='plain'>
-                        {archivedChores?.length}
-                      </Chip>
-                    </>
-                  }
-                >
-                  Archived
-                </Chip>
-              </Divider>
-
-              {archivedChores?.map(chore => renderChoreCard(chore))}
-            </>
-          )}
-        </Box>
+        ></Box>
         <Box
           // variant='outlined'
           sx={{

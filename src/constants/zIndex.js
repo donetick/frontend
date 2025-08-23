@@ -21,6 +21,7 @@ export const Z_INDEX = {
   // Modals and Overlays (2000-8999)
   MODAL_BACKDROP: 2000,
   MODAL_CONTENT: 2001,
+  MODAL_CLOSE_BUTTON: 2002,
   TOAST: 3000,
 
   // Critical System UI (9000-9999)

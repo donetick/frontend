@@ -136,6 +136,18 @@ export const parseRepeatV2 = inputSentence => {
       name: 'Every {day} of every month',
     },
     {
+      frequencyType: 'days_of_the_week:nth_occurrence',
+      regex:
+        /(first|second|third|fourth|last|\d+(?:st|nd|rd|th)?) (monday|tuesday|wednesday|thursday|friday|saturday|sunday) of (?:the )?month/i,
+      name: '{occurrence} {day} of the month',
+    },
+    {
+      frequencyType: 'days_of_the_week:nth_occurrence_multiple',
+      regex:
+        /((?:first|second|third|fourth|last|\d+(?:st|nd|rd|th)?)(?:,? (?:and |& )?))+\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)s? of (?:the )?month/i,
+      name: '{occurrences} {day} of the month',
+    },
+    {
       frequencyType: 'daily',
       regex: /(every day|daily|everyday)/i,
       name: 'Every day',
@@ -361,6 +373,116 @@ export const parseRepeatV2 = inputSentence => {
           ],
           cleanedSentence: inputSentence.replace(match[0], '').trim(),
         }
+
+      case 'days_of_the_week:nth_occurrence':
+        const occurrenceText = match[1].toLowerCase()
+        const dayName = match[2].toLowerCase()
+
+        // Map occurrence words to numbers
+        const occurrenceMap = {
+          first: 1,
+          '1st': 1,
+          second: 2,
+          '2nd': 2,
+          third: 3,
+          '3rd': 3,
+          fourth: 4,
+          '4th': 4,
+          last: -1,
+        }
+
+        const occurrence =
+          occurrenceMap[occurrenceText] ||
+          parseInt(occurrenceText.replace(/\D/g, ''), 10)
+
+        if (!VALID_DAYS[dayName]) {
+          return { result: null, name: null, cleanedSentence: inputSentence }
+        }
+
+        result.frequencyType = 'days_of_the_week'
+        result.frequencyMetadata.days = [VALID_DAYS[dayName].toLowerCase()]
+        result.frequencyMetadata.weekPattern = 'nth_day_of_month'
+        result.frequencyMetadata.occurrences = [occurrence]
+
+        const startIndex = inputSentence
+          .toLowerCase()
+          .indexOf(match[0].toLowerCase())
+        return {
+          result,
+          name: pattern.name
+            .replace('{occurrence}', match[1])
+            .replace('{day}', VALID_DAYS[dayName]),
+          highlight: [
+            {
+              text: inputSentence.substring(
+                startIndex,
+                startIndex + match[0].length,
+              ),
+              start: startIndex,
+              end: startIndex + match[0].length,
+            },
+          ],
+          cleanedSentence: inputSentence.replace(match[0], '').trim(),
+        }
+
+      case 'days_of_the_week:nth_occurrence_multiple':
+        const occurrencesText = match[1].toLowerCase()
+        const dayName2 = match[2].toLowerCase()
+
+        if (!VALID_DAYS[dayName2]) {
+          return { result: null, name: null, cleanedSentence: inputSentence }
+        }
+
+        // Parse multiple occurrences like "first, second and third"
+        const occurrences = occurrencesText
+          .replace(/,?\s*(and|&)\s*/g, ' ')
+          .split(/\s+/)
+          .filter(word => word.trim())
+          .map(word => {
+            const cleanWord = word.replace(',', '').trim()
+            const occurrenceMap = {
+              first: 1,
+              '1st': 1,
+              second: 2,
+              '2nd': 2,
+              third: 3,
+              '3rd': 3,
+              fourth: 4,
+              '4th': 4,
+              last: -1,
+            }
+            return (
+              occurrenceMap[cleanWord] ||
+              parseInt(cleanWord.replace(/\D/g, ''), 10)
+            )
+          })
+          .filter(num => !isNaN(num))
+
+        result.frequencyType = 'days_of_the_week'
+        result.frequencyMetadata.days = [VALID_DAYS[dayName2].toLowerCase()]
+        result.frequencyMetadata.weekPattern = 'nth_day_of_month'
+        result.frequencyMetadata.occurrences = occurrences
+
+        const startIndex2 = inputSentence
+          .toLowerCase()
+          .indexOf(match[0].toLowerCase())
+        return {
+          result,
+          name: pattern.name
+            .replace('{occurrences}', match[1])
+            .replace('{day}', VALID_DAYS[dayName2]),
+          highlight: [
+            {
+              text: inputSentence.substring(
+                startIndex2,
+                startIndex2 + match[0].length,
+              ),
+              start: startIndex2,
+              end: startIndex2 + match[0].length,
+            },
+          ],
+          cleanedSentence: inputSentence.replace(match[0], '').trim(),
+        }
     }
   }
   return {
@@ -375,17 +497,19 @@ export const parseAssignees = (inputSentence, users) => {
   const sentence = inputSentence.toLowerCase()
   const result = []
   const highlight = []
-
-  for (const user of users) {
-    if (sentence.includes(`@${user.username.toLowerCase()}`)) {
+  // sort users by the longest so we remove first the full match:
+  for (const user of users.sort(
+    (a, b) => b.displayName.length - a.displayName.length,
+  )) {
+    if (sentence.includes(`@${user.displayName.toLowerCase()}`)) {
       result.push(user)
       const index = inputSentence
         .toLowerCase()
-        .indexOf(`@${user.username.toLowerCase()}`)
+        .indexOf(`@${user.displayName.toLowerCase()}`)
       highlight.push({
-        text: `@${user.username}`,
+        text: `@${user.displayName}`,
         start: index,
-        end: index + user.username.length + 1,
+        end: index + user.displayName.length + 1,
       })
     }
   }
@@ -395,7 +519,10 @@ export const parseAssignees = (inputSentence, users) => {
       result,
       highlight,
       cleanedSentence: sentence.replace(
-        new RegExp(`@(${users.map(u => u.username).join('|')})`, 'g'),
+        new RegExp(
+          `@(${result.map(u => u.displayName.toLowerCase()).join('|')})`,
+          'g',
+        ),
         '',
       ),
     }

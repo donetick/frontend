@@ -31,8 +31,8 @@ import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import { useNotification } from '../../service/NotificationProvider'
 import { notInCompletionWindow } from '../../utils/Chores.jsx'
 import {
+  getPriorityColor,
   getTextColorFromBackgroundColor,
-  TASK_COLOR,
 } from '../../utils/Colors.jsx'
 import {
   ApproveChore,
@@ -614,20 +614,6 @@ const CompactChoreCard = ({
     return parts.join(' • ')
   }
 
-  const getPriorityColor = priority => {
-    switch (priority) {
-      case 1:
-        return TASK_COLOR.PRIORITY_1
-      case 2:
-        return TASK_COLOR.PRIORITY_2
-      case 3:
-        return TASK_COLOR.PRIORITY_3
-      case 4:
-        return TASK_COLOR.PRIORITY_4
-      default:
-        return TASK_COLOR.NO_PRIORITY
-    }
-  }
   const handleChorePause = () => {
     PauseChore(chore.id).then(response => {
       if (response.ok) {
