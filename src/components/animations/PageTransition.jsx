@@ -57,7 +57,7 @@ const PageTransition = ({ children }) => {
     const previousLevel = getRouteLevel(prevLocation.current.pathname)
 
     // Determine if we're navigating back (to a higher level in hierarchy)
-    isNavigatingBack.current = currentLevel < previousLevel
+    // isNavigatingBack.current = currentLevel < previousLevel
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
 
     prevLocation.current = location

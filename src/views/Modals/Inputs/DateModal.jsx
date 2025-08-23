@@ -23,11 +23,11 @@ function DateModal({ isOpen, onClose, onSave, current, title }) {
         value={date}
         onChange={e => setDate(e.target.value)}
       />
-      <Box display={'flex'} justifyContent={'space-around'} mt={1}>
-        <Button onClick={handleSave} fullWidth sx={{ mr: 1 }}>
+      <Box display={'flex'} justifyContent={'space-around'} mt={6}>
+        <Button size='lg' onClick={handleSave} fullWidth sx={{ mr: 1 }}>
           Save
         </Button>
-        <Button onClick={onClose} variant='outlined'>
+        <Button size='lg' onClick={onClose} variant='outlined'>
           Cancel
         </Button>
       </Box>

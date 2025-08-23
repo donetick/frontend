@@ -10,6 +10,7 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
 function CreateThingModal({ isOpen, onClose, onSave, currentThing }) {
   const { ResponsiveModal } = useResponsiveModal()
@@ -125,10 +126,10 @@ function CreateThingModal({ isOpen, onClose, onSave, currentThing }) {
       )}
 
       <Box display={'flex'} justifyContent={'space-around'} mt={1}>
-        <Button onClick={handleSave} fullWidth sx={{ mr: 1 }}>
+        <Button size='lg' onClick={handleSave} fullWidth sx={{ mr: 1 }}>
           {currentThing?.id ? 'Update' : 'Create'}
         </Button>
-        <Button onClick={onClose} variant='outlined'>
+        <Button size='lg' onClick={onClose} variant='outlined'>
           {currentThing?.id ? 'Cancel' : 'Close'}
         </Button>
       </Box>

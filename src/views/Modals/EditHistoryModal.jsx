@@ -68,6 +68,7 @@ function EditHistoryModal({ config, historyRecord }) {
       {/* 3 button save , cancel and delete */}
       <Box display={'flex'} justifyContent={'space-around'} mt={1}>
         <Button
+          size='lg'
           onClick={() =>
             config.onSave({
               id: historyRecord.id,
@@ -81,10 +82,11 @@ function EditHistoryModal({ config, historyRecord }) {
         >
           Save
         </Button>
-        <Button onClick={config.onClose} variant='outlined'>
+        <Button size='' onClick={config.onClose} variant='outlined'>
           Cancel
         </Button>
         <Button
+          size='lg'
           onClick={() => {
             setIsDeleteModalOpen(true)
           }}

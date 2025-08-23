@@ -240,10 +240,11 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
       )}
 
       <Box display='flex' justifyContent='space-between' gap={2}>
-        <Button variant='outlined' onClick={handleClose} fullWidth>
+        <Button size='lg' variant='outlined' onClick={handleClose} fullWidth>
           Cancel
         </Button>
         <Button
+          size='lg'
           color='primary'
           onClick={handleCreateBackup}
           loading={loading}
@@ -295,10 +296,11 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
       )}
 
       <Box display='flex' justifyContent='space-between' gap={2}>
-        <Button variant='outlined' onClick={handleClose} fullWidth>
+        <Button size='lg' variant='outlined' onClick={handleClose} fullWidth>
           Cancel
         </Button>
         <Button
+          size='lg'
           color='warning'
           onClick={handleRestore}
           loading={loading}

@@ -36,7 +36,7 @@ const UserModal = ({ isOpen, performers = [], onSelect, onClose }) => {
         ))}
       </List>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-        <Button variant='outlined' color='neutral' onClick={onClose}>
+        <Button size='lg' variant='outlined' color='neutral' onClick={onClose}>
           Cancel
         </Button>
       </Box>

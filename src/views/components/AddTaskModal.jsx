@@ -759,7 +759,12 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
           gap: 1,
         }}
       >
-        <Button variant='outlined' color='neutral' onClick={handleCloseModal}>
+        <Button
+          size='lg'
+          variant='outlined'
+          color='neutral'
+          onClick={handleCloseModal}
+        >
           Cancel
           {showKeyboardShortcuts && (
             <KeyboardShortcutHint
@@ -769,7 +774,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
             />
           )}
         </Button>
-        <Button variant='solid' color='primary' onClick={createChore}>
+        <Button size='lg' variant='solid' color='primary' onClick={createChore}>
           Create
           {showKeyboardShortcuts && (
             <KeyboardShortcutHint shortcut='Enter' sx={{ ml: 1 }} />

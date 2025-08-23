@@ -1,6 +1,5 @@
 import App from '@/App'
 import ChoreEdit from '@/views/ChoreEdit/ChoreEdit'
-import ChoresOverview from '@/views/ChoresOverview'
 import Error from '@/views/Error'
 import Settings from '@/views/Settings/Settings'
 import { Capacitor } from '@capacitor/core'
@@ -12,6 +11,7 @@ import LoginView from '../views/Authorization/LoginView'
 import SignupView from '../views/Authorization/Signup'
 import UpdatePasswordView from '../views/Authorization/UpdatePasswordView'
 import ChoreView from '../views/ChoreEdit/ChoreView'
+import ArchivedTasks from '../views/Chores/ArchivedTasks'
 import MyChores from '../views/Chores/MyChores'
 import JoinCircleView from '../views/Circles/JoinCircle'
 import ChoreHistory from '../views/History/ChoreHistory'
@@ -53,7 +53,11 @@ const Router = createBrowserRouter([
       },
       {
         path: '/chores',
-        element: <ChoresOverview />,
+        element: <MyChores />,
+      },
+      {
+        path: '/archived',
+        element: <ArchivedTasks />,
       },
       {
         path: '/chores/:choreId/edit',
@@ -99,6 +103,7 @@ const Router = createBrowserRouter([
         path: '/signup',
         element: <SignupView />,
       },
+
       {
         path: '/auth/:provider',
         element: <AuthenticationLoading />,
@@ -151,6 +156,7 @@ const Router = createBrowserRouter([
         path: 'labels/',
         element: <LabelView />,
       },
+
       {
         path: '*',
         element: <NotFound />,

@@ -86,6 +86,7 @@ function ConfirmationModal({ config }) {
 
       <Box display={'flex'} justifyContent={'space-around'} mt={1} gap={1}>
         <Button
+          size='lg'
           onClick={() => {
             handleAction(true)
           }}
@@ -99,6 +100,7 @@ function ConfirmationModal({ config }) {
         </Button>
 
         <Button
+          size='lg'
           onClick={() => {
             handleAction(false)
           }}

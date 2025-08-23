@@ -137,7 +137,8 @@ const ChoreView = () => {
         }`,
         subtext: ` Last: ${
           chore.lastCompletedDate
-            ? performers.find(p => p.id === chore.lastCompletedBy)?.displayName
+            ? performers.find(p => p.userId === chore.lastCompletedBy)
+                ?.displayName
             : '--'
         }`,
       },
@@ -165,7 +166,8 @@ const ChoreView = () => {
         icon: <Person />,
         title: 'Details',
         subtext: `Created By: ${
-          performers.find(p => p.id === chore.createdBy)?.displayName || 'N/A'
+          performers.find(p => p.userId === chore.createdBy)?.displayName ||
+          'N/A'
         }`,
       },
     ]

@@ -92,6 +92,7 @@ function PassowrdChangeModal({ isOpen, onClose }) {
       </FormControl>
       <Box display={'flex'} justifyContent={'space-around'} mt={1}>
         <Button
+          size='lg'
           disabled={passwordError != null}
           onClick={() => {
             handleAction(true)
@@ -102,6 +103,7 @@ function PassowrdChangeModal({ isOpen, onClose }) {
           Change Password
         </Button>
         <Button
+          size='lg'
           onClick={() => {
             handleAction(false)
           }}

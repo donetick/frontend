@@ -95,6 +95,7 @@ function WriteNFCModal({ config }) {
           </ListItem>
           <Box display={'flex'} justifyContent={'space-around'} mt={1}>
             <Button
+              size='lg'
               onClick={() => writeToNFC(getURL())}
               fullWidth
               sx={{ mr: 1 }}
@@ -102,7 +103,7 @@ function WriteNFCModal({ config }) {
             >
               Write NFC
             </Button>
-            <Button onClick={requestNFCAccess} variant='outlined'>
+            <Button size='lg' onClick={requestNFCAccess} variant='outlined'>
               Request Access
             </Button>
           </Box>

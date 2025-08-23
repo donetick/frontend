@@ -215,6 +215,7 @@ function RedeemPointsModal({ config }) {
         {/* Action Buttons */}
         <Stack direction='row' spacing={2}>
           <Button
+            size='lg'
             onClick={config?.onClose}
             variant='outlined'
             color='neutral'
@@ -228,6 +229,7 @@ function RedeemPointsModal({ config }) {
             Cancel
           </Button>
           <Button
+            size='lg'
             onClick={() =>
               config?.onSave({
                 points: Number(points),

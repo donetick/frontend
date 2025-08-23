@@ -93,7 +93,9 @@ export async function Fetch(url, options) {
 
     if (response.ok) {
       const data = await response.clone().json()
-      const optionsHash = murmurhash.v3(JSON.stringify(options))
+      const optionWithoutToken = { ...options }
+      delete optionWithoutToken.headers.Authorization
+      const optionsHash = murmurhash.v3(JSON.stringify(optionWithoutToken))
       await localStore.saveToCache(fullURL + optionsHash, data)
       networkManager.setOnline()
     } else if (response.status === 401) {

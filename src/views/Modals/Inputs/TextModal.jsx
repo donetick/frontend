@@ -33,10 +33,10 @@ function TextModal({
       />
 
       <Box display={'flex'} justifyContent={'space-around'} mt={1}>
-        <Button onClick={handleSave} fullWidth sx={{ mr: 1 }}>
+        <Button size='lg' onClick={handleSave} fullWidth sx={{ mr: 1 }}>
           {okText ? okText : 'Save'}
         </Button>
-        <Button onClick={onClose} variant='outlined'>
+        <Button size='lg' onClick={onClose} variant='outlined'>
           {cancelText ? cancelText : 'Cancel'}
         </Button>
       </Box>
