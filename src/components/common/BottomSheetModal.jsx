@@ -98,7 +98,7 @@ const BottomSheetModal = forwardRef(
           ref={ref}
           sx={{
             zIndex: Z_INDEX.MODAL_CONTENT,
-            minHeight: '30%',
+            minHeight: '20%',
             width: '100%',
             height: currentHeight,
             maxHeight: isExpanded ? expandedHeight : maxHeight,
@@ -167,6 +167,7 @@ const BottomSheetModal = forwardRef(
                   padding: '12px 0 8px 0',
                   cursor: 'pointer',
                   userSelect: 'none',
+                  marginBottom: 16,
                 }}
                 onClick={handleToggleExpansion}
                 title={isExpanded ? 'Collapse' : 'Expand'}
