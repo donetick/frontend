@@ -179,8 +179,9 @@ const NavBar = () => {
             position: 'fixed',
             pt: 'calc(env(safe-area-inset-top, 0px))',
             left: 0,
-            height:
-              'calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))',
+            pb: 'calc(env(safe-area-inset-bottom, 0px))',
+            // height:
+            //   'calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))',
             overflow: 'auto',
             zIndex: Z_INDEX.DRAWER,
           },

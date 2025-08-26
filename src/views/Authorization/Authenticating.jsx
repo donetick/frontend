@@ -36,7 +36,7 @@ const AuthenticationLoading = () => {
             Cookies.remove('ca_redirect')
             Navigate(redirectUrl)
           } else {
-            Navigate('/my/chores')
+            Navigate('/chores')
           }
         })
       })

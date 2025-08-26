@@ -179,7 +179,7 @@ const ChoreHistory = () => {
           they'll show up here.
         </Typography>
         <Button variant='soft' sx={{ mt: 2 }}>
-          <Link to='/my/chores'>Go back to chores</Link>
+          <Link to='/chores'>Go back to chores</Link>
         </Button>
       </Container>
     )

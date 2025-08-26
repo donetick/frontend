@@ -85,14 +85,14 @@ const JoinCircleView = () => {
                       alert(
                         'Joined circle successfully, wait for the circle owner to accept your request.',
                       )
-                      navigate('/my/chores')
+                      navigate('/chores')
                     } else {
                       if (resp.status === 409) {
                         alert('You are already a member of this circle')
                       } else {
                         alert('Failed to join circle')
                       }
-                      navigate('/my/chores')
+                      navigate('/chores')
                     }
                   })
                 }}
@@ -111,7 +111,7 @@ const JoinCircleView = () => {
                   borderRadius: '8px',
                 }}
                 onClick={() => {
-                  navigate('/my/chores')
+                  navigate('/chores')
                 }}
               >
                 Cancel

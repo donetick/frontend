@@ -97,12 +97,12 @@ const HomeHero = () => {
       }}
       className='hover:scale-105'
       onClick={() => {
-        // if the url is donetick.com then navigate to app.donetick.com/my/chores
-        // else navigate to /my/chores
+        // if the url is donetick.com then navigate to app.donetick.com/chores
+        // else navigate to /chores
         if (window.location.hostname === 'donetick.com') {
-          window.location.href = 'https://app.donetick.com/my/chores'
+          window.location.href = 'https://app.donetick.com/chores'
         } else {
-          navigate('/my/chores')
+          navigate('/chores')
         }
       }}
     >

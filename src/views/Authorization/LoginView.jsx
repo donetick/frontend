@@ -110,7 +110,7 @@ const LoginView = () => {
               Navigate(redirectUrl)
             } else {
               Cookies.remove('ca_redirect')
-              Navigate('/my/chores')
+              Navigate('/chores')
             }
           })
         } else if (response.status === 401) {
@@ -206,7 +206,7 @@ const LoginView = () => {
         Cookies.remove('ca_redirect')
         Navigate(redirectUrl)
       } else {
-        Navigate('/my/chores')
+        Navigate('/chores')
       }
     })
   }
@@ -225,7 +225,7 @@ const LoginView = () => {
       Cookies.remove('ca_redirect')
       Navigate(redirectUrl)
     } else {
-      Navigate('/my/chores')
+      Navigate('/chores')
     }
   }
 

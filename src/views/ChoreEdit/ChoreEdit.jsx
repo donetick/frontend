@@ -252,7 +252,7 @@ const ChoreEdit = () => {
           title: 'Chore Saved',
           message: 'Your task has been saved successfully!',
         })
-        Navigate('/my/chores/')
+        Navigate('/chores/')
       })
       .catch(error => {
         console.error('Failed to save chore:', error)
@@ -390,7 +390,7 @@ const ChoreEdit = () => {
         if (isConfirmed === true) {
           DeleteChore(choreId).then(response => {
             if (response.status === 200) {
-              Navigate('/my/chores')
+              Navigate('/chores')
             } else {
               alert('Failed to delete chore')
             }

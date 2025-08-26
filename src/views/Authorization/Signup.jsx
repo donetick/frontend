@@ -35,7 +35,7 @@ const SignupView = () => {
           setTimeout(() => {
             // TODO: not sure if there is a race condition here
             // but on first sign up it renavigates to login.
-            Navigate('/my/chores')
+            Navigate('/chores')
           }, 500)
         })
       } else {
