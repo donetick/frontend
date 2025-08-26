@@ -8,7 +8,6 @@ import {
   Logout,
   MenuRounded,
   SettingsOutlined,
-  SwitchAccessShortcutAdd,
   Toll,
   Widgets,
 } from '@mui/icons-material'
@@ -217,7 +216,7 @@ const NavBar = () => {
             onClick={openDrawer}
           >
             {/*  Add List item to invite the user to upgrade to Plus: */}
-            <ListItemButton
+            {/* <ListItemButton
               onClick={() => navigate('/settings#subscription')}
               sx={{
                 py: 1.2,
@@ -227,7 +226,7 @@ const NavBar = () => {
                 <SwitchAccessShortcutAdd />
               </ListItemDecorator>
               <ListItemContent>Upgrade to Plus</ListItemContent>
-            </ListItemButton>
+            </ListItemButton> */}
             <ListItemButton
               onClick={() => {
                 localStorage.removeItem('ca_token')
