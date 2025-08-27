@@ -31,7 +31,7 @@ import moment from 'moment'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
-import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
+import { useUserProfile } from '../../queries/UserQueries.jsx'
 import { useNotification } from '../../service/NotificationProvider'
 import { notInCompletionWindow } from '../../utils/Chores.jsx'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
@@ -81,7 +81,6 @@ const ChoreCard = ({
   const [secondsLeftToCancel, setSecondsLeftToCancel] = React.useState(null)
   const [timeoutId, setTimeoutId] = React.useState(null)
   const { data: userProfile } = useUserProfile()
-  const { data: circleMembersData } = useCircleMembers()
 
   const { impersonatedUser } = useImpersonateUser()
 
@@ -264,9 +263,9 @@ const ChoreCard = ({
 
   // Check if the current user can approve/reject (admin, manager, or task owner)
   const canApproveReject = () => {
-    if (!circleMembersData?.res || !chore) return false
+    if (!performers || !chore) return false
 
-    const currentUser = circleMembersData.res.find(
+    const currentUser = performers.find(
       member => member.userId === (impersonatedUser?.userId || userProfile?.id),
     )
 
