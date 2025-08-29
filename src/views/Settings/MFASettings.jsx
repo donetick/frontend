@@ -210,7 +210,7 @@ const MFASettings = () => {
   }
 
   return (
-    <div className='grid gap-4 py-4'>
+    <div className='grid gap-4 py-4' id='mfa'>
       <Typography level='h3'>Multi-Factor Authentication</Typography>
       <Divider />
       <Typography level='body-md'>

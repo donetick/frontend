@@ -117,7 +117,13 @@ const MyChores = () => {
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
   useEffect(() => {
     ;(async () => {
-      if (!choresLoading && !membersLoading && userProfile) {
+      if (
+        !choresLoading &&
+        !membersLoading &&
+        userProfile &&
+        membersData?.res &&
+        choresData?.res
+      ) {
         setPerformers(membersData.res)
         const sortedChores = choresData.res.sort(ChoreSorter)
         setChores(sortedChores)

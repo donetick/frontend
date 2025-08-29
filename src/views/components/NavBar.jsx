@@ -25,6 +25,7 @@ import {
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { version } from '../../../package.json'
+import UserProfileAvatar from '../../components/UserProfileAvatar'
 import ThemeToggleButton from '../Settings/ThemeToggleButton'
 import NavBarLink from './NavBarLink'
 const links = [
@@ -113,9 +114,9 @@ const NavBar = () => {
 
   return (
     <nav
-      className='mt-2 flex gap-2 p-3 pt-5'
+      className='flex gap-2 p-3'
       style={{
-        paddingTop: `calc( env(safe-area-inset-top, 0px))`,
+        paddingTop: `calc(var(--safe-area-inset-top, 0px) + 12px)`,
         position: 'sticky',
         zIndex: Z_INDEX.NAVBAR,
         top: 0,
@@ -136,37 +137,10 @@ const NavBar = () => {
           <ArrowBack />
         </IconButton>
       )}
-      <Box
-        className='flex items-center gap-2'
-        onClick={() => {
-          navigate('/chores')
-        }}
-      >
-        <img src={Logo} width='25' alt='Logo' />
-        <Typography
-          level='title-lg'
-          sx={{
-            fontWeight: 700,
-            fontSize: 20,
-            cursor: 'pointer',
-          }}
-        >
-          Done
-          <span
-            style={{
-              color: '#06b6d4',
-              fontWeight: 600,
-            }}
-          >
-            tick✓
-          </span>
-        </Typography>
-        <ThemeToggleButton
-          sx={{
-            position: 'absolute',
-            right: 10,
-          }}
-        />
+      <Box className='flex-1' />
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <UserProfileAvatar />
+        <ThemeToggleButton />
       </Box>
       <Drawer
         open={drawerOpen}
@@ -176,11 +150,11 @@ const NavBar = () => {
         sx={{
           '& .MuiDrawer-content': {
             position: 'fixed',
-            pt: 'calc(env(safe-area-inset-top, 0px))',
+            // pt: 'calc(var(--safe-area-inset-top, 0px))',
             left: 0,
-            pb: 'calc(env(safe-area-inset-bottom, 0px))',
+            // pb: 'calc(var(--safe-area-inset-bottom, 0px))',
             // height:
-            //   'calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))',
+            //   'calc(100vh - var(--safe-area-inset-top, 0px) - var(--safe-area-inset-bottom, 0px))',
             overflow: 'auto',
             zIndex: Z_INDEX.DRAWER,
           },
@@ -254,7 +228,7 @@ const NavBar = () => {
                 p: 1,
                 color: 'text.tertiary',
                 textAlign: 'center',
-                mb: 'calc(env(safe-area-inset-bottom, 0px) + 45px)',
+                mb: 'calc(var(--safe-area-inset-bottom, 0px) )',
                 // mb: -2,
               }}
             >

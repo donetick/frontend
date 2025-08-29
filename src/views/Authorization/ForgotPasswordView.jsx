@@ -1,5 +1,5 @@
 // create boilerplate for ResetPasswordView:
-import LogoSVG from '@/assets/logo.svg'
+import Logo from '../../Logo'
 import {
   Box,
   Button,
@@ -80,16 +80,12 @@ const ForgotPasswordView = () => {
     <Container
       component='main'
       maxWidth='xs'
-
-      // make content center in the middle of the page:
     >
       <Box
         sx={{
           marginTop: 4,
           display: 'flex',
           flexDirection: 'column',
-
-          justifyContent: 'space-between',
           alignItems: 'center',
         }}
       >
@@ -104,102 +100,83 @@ const ForgotPasswordView = () => {
             padding: 2,
             borderRadius: '8px',
             boxShadow: 'md',
-            minHeight: '70vh',
-            justifyContent: 'space-between',
-            justifyItems: 'center',
           }}
         >
-          <Box>
-            <img src={LogoSVG} alt='logo' width='128px' height='128px' />
-            {/* <Logo /> */}
-            <Typography level='h2'>
-              Done
-              <span
-                style={{
-                  color: '#06b6d4',
-                }}
-              >
-                tick
-              </span>
-            </Typography>
-          </Box>
-          {/* HERE */}
-          <Box sx={{ textAlign: 'center' }}></Box>
+          <Logo />
+
+          <Typography level='h2'>
+            Done
+            <span style={{ color: '#06b6d4' }}>tick</span>
+          </Typography>
           {resetStatusOk === null && (
-            <form onSubmit={handleSubmit}>
-              <div className='grid gap-6'>
-                <Typography level='body2' gutterBottom>
-                  Enter your email, and we'll send you a link to get into your
-                  account.
-                </Typography>
-                <FormControl error={emailError !== null}>
-                  <Input
-                    placeholder='Email'
-                    type='email'
-                    variant='soft'
-                    fullWidth
-                    size='lg'
-                    value={email}
-                    onChange={handleEmailChange}
-                    error={emailError !== null}
-                    onKeyDown={e => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault()
-                        handleSubmit()
-                      }
-                    }}
-                  />
-                  <FormHelperText>{emailError}</FormHelperText>
-                </FormControl>
-                <Box>
-                  <Button
-                    variant='solid'
-                    size='lg'
-                    fullWidth
-                    sx={{
-                      mb: 1,
-                    }}
-                    onClick={handleSubmit}
-                  >
-                    Reset Password
-                  </Button>
-                  <Button
-                    fullWidth
-                    size='lg'
-                    variant='soft'
-                    sx={{
-                      width: '100%',
-                      border: 'moccasin',
-                      borderRadius: '8px',
-                    }}
-                    onClick={() => {
-                      navigate('/login')
-                    }}
-                    color='neutral'
-                  >
-                    Back to Login
-                  </Button>
-                </Box>
-              </div>
-            </form>
-          )}
-          {resetStatusOk != null && (
             <>
-              <Box mt={-30}>
-                <Typography level='body-md'>
-                  if there is an account associated with the email you entered,
-                  you will receive an email with instructions on how to reset
-                  your
-                </Typography>
-              </Box>
+              <Typography level='body2' sx={{ textAlign: 'center', mt: 2, mb: 3 }}>
+                Enter your email, and we'll send you a link to get into your
+                account.
+              </Typography>
+              <FormControl error={emailError !== null} sx={{ width: '100%', mb: 2 }}>
+                <Input
+                  placeholder='Email'
+                  type='email'
+                  variant='soft'
+                  fullWidth
+                  size='lg'
+                  value={email}
+                  onChange={handleEmailChange}
+                  error={emailError !== null}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      handleSubmit()
+                    }
+                  }}
+                />
+                <FormHelperText>{emailError}</FormHelperText>
+              </FormControl>
+
               <Button
-                variant='soft'
+                variant='solid'
                 size='lg'
-                sx={{ position: 'relative', bottom: '0' }}
+                fullWidth
+                sx={{ mb: 2 }}
+                onClick={handleSubmit}
+              >
+                Reset Password
+              </Button>
+
+              <Button
+                fullWidth
+                size='lg'
+                variant='plain'
+                sx={{
+                  width: '100%',
+                  border: 'moccasin',
+                  borderRadius: '8px',
+                }}
                 onClick={() => {
                   navigate('/login')
                 }}
+                color='neutral'
+              >
+                Back to Login
+              </Button>
+            </>
+          )}
+          {resetStatusOk != null && (
+            <>
+              <Typography level='body-md' sx={{ textAlign: 'center', mt: 2, mb: 3 }}>
+                If there is an account associated with the email you entered,
+                you will receive an email with instructions on how to reset
+                your password.
+              </Typography>
+              
+              <Button
+                variant='solid'
+                size='lg'
                 fullWidth
+                onClick={() => {
+                  navigate('/login')
+                }}
               >
                 Go to Login
               </Button>

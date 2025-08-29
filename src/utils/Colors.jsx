@@ -60,6 +60,11 @@ export const TASK_COLOR = {
   MISSED: '#F03A47',
   UPCOMING: '#AF5B5B',
   SKIPPED: '#E2C2FF',
+  IN_PROGRESS: '#00bcd4',
+  // PENDING_REVIEW: '#b39ddb',
+  OVERDUE: '#F03A47',
+  SCHEDULED: '#10B982',
+  PENDING_REVIEW: '#8B6CE1',
 
   // For the calendar
   OVERDUE: '#F03A47',

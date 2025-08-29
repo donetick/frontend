@@ -86,7 +86,14 @@ const PageTransition = ({ children }) => {
         }}
         unmountOnExit
       >
-        <div className='page-wrapper'>{children}</div>
+        <div 
+          className='page-wrapper'
+          style={{
+            paddingBottom: `var(--safe-area-inset-bottom, 0px)`,
+          }}
+        >
+          {children}
+        </div>
       </CSSTransition>
     </TransitionGroup>
   )

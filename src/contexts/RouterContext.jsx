@@ -2,6 +2,7 @@ import App from '@/App'
 import ChoreEdit from '@/views/ChoreEdit/ChoreEdit'
 import Error from '@/views/Error'
 import Settings from '@/views/Settings/Settings'
+import SettingsOverview from '@/views/Settings/SettingsOverview'
 import { Capacitor } from '@capacitor/core'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import AuthenticationLoading from '../views/Authorization/Authenticating'
@@ -49,6 +50,10 @@ const Router = createBrowserRouter([
       },
       {
         path: '/settings',
+        element: <SettingsOverview />,
+      },
+      {
+        path: '/settings/detailed',
         element: <Settings />,
       },
       {

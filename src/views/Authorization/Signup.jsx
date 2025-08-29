@@ -11,6 +11,7 @@ import {
 } from '@mui/joy'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import Logo from '../../Logo'
 import { useNotification } from '../../service/NotificationProvider'
 import { login, signUp } from '../../utils/Fetcher'
@@ -19,6 +20,7 @@ const SignupView = () => {
   const [username, setUsername] = React.useState('')
   const [password, setPassword] = React.useState('')
   const Navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [displayName, setDisplayName] = React.useState('')
   const [email, setEmail] = React.useState('')
   const [usernameError, setUsernameError] = React.useState('')
@@ -32,11 +34,11 @@ const SignupView = () => {
         response.json().then(res => {
           localStorage.setItem('ca_token', res.token)
           localStorage.setItem('ca_expiration', res.expire)
-          setTimeout(() => {
-            // TODO: not sure if there is a race condition here
-            // but on first sign up it renavigates to login.
-            Navigate('/chores')
-          }, 500)
+          
+          // Invalidate user profile queries to ensure fresh data
+          queryClient.invalidateQueries(['userProfile'])
+          
+          Navigate('/chores')
         })
       } else {
         console.log('Login failed', response)

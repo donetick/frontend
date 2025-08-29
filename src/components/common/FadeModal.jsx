@@ -41,7 +41,7 @@ const FadeModal = ({
           size={size}
           sx={{
             zIndex: Z_INDEX.MODAL_CONTENT,
-            minWidth: fullWidth ? '100%' : 'auto',
+            minWidth: fullWidth ? '90%' : 'auto',
             animation: open
               ? 'modalFadeIn 0.35s forwards'
               : 'modalFadeOut 0.25s forwards',

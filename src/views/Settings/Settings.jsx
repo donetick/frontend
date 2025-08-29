@@ -1,4 +1,5 @@
 import { Capacitor } from '@capacitor/core'
+import { Refresh } from '@mui/icons-material'
 import {
   Box,
   Button,
@@ -18,6 +19,7 @@ import {
 import { Purchases } from '@revenuecat/purchases-capacitor'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import RealTimeSettings from '../../components/RealTimeSettings'
 import SubscriptionModal from '../../components/SubscriptionModal'
 import Logo from '../../Logo'
@@ -45,12 +47,14 @@ import APITokenSettings from './APITokenSettings'
 import MFASettings from './MFASettings'
 import NotificationSetting from './NotificationSetting'
 import ProfileSettings from './ProfileSettings'
+import SidepanelSettings from './SidepanelSettings'
 import StorageSettings from './StorageSettings'
 import ThemeToggle from './ThemeToggle'
 
 const Settings = () => {
   const { data: userProfile } = useUserProfile()
   const { showNotification } = useNotification()
+  const navigate = useNavigate()
 
   const [userCircles, setUserCircles] = useState([])
   const [circleMemberRequests, setCircleMemberRequests] = useState([])
@@ -59,6 +63,8 @@ const Settings = () => {
   const [webhookURL, setWebhookURL] = useState(null)
   const [webhookError, setWebhookError] = useState(null)
   const [isAdmin, setIsAdmin] = useState(false)
+  const [lastRefresh, setLastRefresh] = useState(null)
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   const [changePasswordModal, setChangePasswordModal] = useState(false)
   const [subscriptionModal, setSubscriptionModal] = useState(false)
@@ -88,6 +94,23 @@ const Settings = () => {
       },
     })
   }
+  const refreshMemberRequests = async () => {
+    setIsRefreshing(true)
+    try {
+      const resp = await GetCircleMemberRequests()
+      const data = await resp.json()
+      setCircleMemberRequests(data.res ? data.res : [])
+      setLastRefresh(new Date())
+    } catch (error) {
+      showNotification({
+        type: 'error',
+        message: 'Failed to refresh member requests',
+      })
+    } finally {
+      setIsRefreshing(false)
+    }
+  }
+
   useEffect(() => {
     GetUserCircle().then(resp => {
       resp.json().then(data => {
@@ -98,6 +121,7 @@ const Settings = () => {
     GetCircleMemberRequests().then(resp => {
       resp.json().then(data => {
         setCircleMemberRequests(data.res ? data.res : [])
+        setLastRefresh(new Date())
       })
     })
     GetAllCircleMembers().then(data => {
@@ -116,14 +140,34 @@ const Settings = () => {
   }, [circleMembers, userProfile])
 
   useEffect(() => {
-    const hash = window.location.hash
-    if (hash) {
-      const sharingSection = document.getElementById(
-        window.location.hash.slice(1),
-      )
-      if (sharingSection) {
-        sharingSection.scrollIntoView({ behavior: 'smooth' })
+    const handleHashChange = () => {
+      const hash = window.location.hash
+      if (hash) {
+        // Small delay to ensure the component is fully rendered before scrolling
+        setTimeout(() => {
+          const section = document.getElementById(hash.slice(1))
+          if (section) {
+            // Get the element position and scroll with some offset for the title
+            const elementPosition = section.offsetTop
+            const offsetPosition = elementPosition - 20 // 20px padding above the title
+
+            window.scrollTo({
+              top: offsetPosition,
+              behavior: 'instant', // Use 'smooth' for smooth scrolling
+            })
+          }
+        }, 500)
       }
+    }
+
+    // Handle initial hash on mount
+    handleHashChange()
+
+    // Listen for hash changes
+    window.addEventListener('hashchange', handleHashChange)
+
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange)
     }
   }, [])
 
@@ -172,10 +216,11 @@ const Settings = () => {
   if (!userProfile) {
     return <LoadingComponent />
   }
+
   return (
     <Container>
       <ProfileSettings />
-      <div className='grid gap-4 py-4' id='sharing'>
+      <div className='grid gap-4 py-4' id='circle'>
         <Typography level='h3'>Circle settings</Typography>
         <Divider />
         <Typography level='body-md'>
@@ -406,9 +451,35 @@ const Settings = () => {
           </Card>
         ))}
 
-        {circleMemberRequests.length > 0 && (
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            mb: 1,
+          }}
+        >
           <Typography level='title-md'>Circle Member Requests</Typography>
-        )}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {lastRefresh && (
+              <Typography level='body-sm' color='neutral'>
+                Last updated: {moment(lastRefresh).format('MMM DD, HH:mm')}
+              </Typography>
+            )}
+            <Button
+              size='sm'
+              variant='soft'
+              onClick={refreshMemberRequests}
+              disabled={isRefreshing}
+              startDecorator={
+                isRefreshing ? <CircularProgress size='sm' /> : <Refresh />
+              }
+            >
+              {isRefreshing ? 'Refreshing...' : 'Refresh'}
+            </Button>
+          </Box>
+        </Box>
+
         {circleMemberRequests.map(request => (
           <Card key={request.id} className='p-4'>
             <Typography level='body-md'>
@@ -729,7 +800,18 @@ const Settings = () => {
       <MFASettings />
       <APITokenSettings />
       <StorageSettings />
-      <div className='grid gap-4 py-4'>
+      <div className='grid gap-4 py-4' id='sidepanel'>
+        <Typography level='h3'>Sidepanel Customization</Typography>
+        <Divider />
+        <Typography level='body-md'>
+          Customize the layout and visibility of cards in the sidepanel. the
+          section only available on large screen devices such as tablets and
+          desktops..
+        </Typography>
+        <SidepanelSettings />
+      </div>
+
+      <div className='grid gap-4 py-4' id='theme'>
         <Typography level='h3'>Theme preferences</Typography>
         <Divider />
         <Typography level='body-md'>

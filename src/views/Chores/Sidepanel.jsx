@@ -3,13 +3,16 @@ import { useMediaQuery } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useChoresHistory } from '../../queries/ChoreQueries'
 import { ChoresGrouper } from '../../utils/Chores'
+import { getSidepanelConfig } from '../../utils/SidepanelConfig'
 import CalendarView from '../components/CalendarView'
 import ActivitiesCard from './ActivitesCard'
+import TasksByAssigneeCard from './TasksByAssigneeCard'
 import WelcomeCard from './WelcomeCard'
 
 const Sidepanel = ({ chores }) => {
   const isLargeScreen = useMediaQuery(theme => theme.breakpoints.up('md'))
   const [dueDatePieChartData, setDueDatePieChartData] = useState([])
+  const [sidepanelConfig, setSidepanelConfig] = useState([])
   const {
     data: choresHistory,
     isChoresHistoryLoading,
@@ -18,6 +21,18 @@ const Sidepanel = ({ chores }) => {
 
   useEffect(() => {
     setDueDatePieChartData(generateChoreDuePieChartData(chores))
+    setSidepanelConfig(getSidepanelConfig())
+  }, [])
+
+  useEffect(() => {
+    const handleConfigChange = () => {
+      setSidepanelConfig(getSidepanelConfig())
+    }
+
+    window.addEventListener('sidepanelConfigChanged', handleConfigChange)
+    return () => {
+      window.removeEventListener('sidepanelConfigChanged', handleConfigChange)
+    }
   }, [])
 
   const generateChoreDuePieChartData = chores => {
@@ -34,34 +49,60 @@ const Sidepanel = ({ chores }) => {
       .filter(item => item.value > 0)
   }
 
+  const renderCard = cardConfig => {
+    if (!cardConfig.enabled) return null
+
+    switch (cardConfig.id) {
+      case 'welcome':
+        return <WelcomeCard key='welcome' chores={chores} />
+      case 'assignees':
+        return <TasksByAssigneeCard key='assignees' chores={chores} />
+      case 'calendar':
+        return (
+          <Sheet
+            key='calendar'
+            variant='plain'
+            sx={{
+              my: 1,
+              p: 2,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              mr: 10,
+              justifyContent: 'space-between',
+              boxShadow: 'sm',
+              borderRadius: 20,
+              width: '315px',
+            }}
+          >
+            <Box
+              sx={{ width: '100%', overflowY: 'hidden', overflowX: 'hidden' }}
+            >
+              <CalendarView chores={chores} />
+            </Box>
+          </Sheet>
+        )
+      case 'activities':
+        return (
+          <ActivitiesCard
+            key='activities'
+            chores={chores}
+            choreHistory={choresHistory}
+          />
+        )
+
+      default:
+        return null
+    }
+  }
+
   if (!isLargeScreen) {
     return null
   }
-  return (
-    <Box>
-      <WelcomeCard chores={chores} />
-      <Sheet
-        variant='plain'
-        sx={{
-          my: 1,
-          p: 2,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          mr: 10,
-          justifyContent: 'space-between',
-          boxShadow: 'sm',
-          borderRadius: 20,
-          width: '315px',
-        }}
-      >
-        <Box sx={{ width: '100%', overflowY: 'hidden', overflowX: 'hidden' }}>
-          <CalendarView chores={chores} />
-        </Box>
-      </Sheet>
-      <ActivitiesCard chores={chores} choreHistory={choresHistory} />
-    </Box>
-  )
+
+  const sortedCards = [...sidepanelConfig].sort((a, b) => a.order - b.order)
+
+  return <Box>{sortedCards.map(cardConfig => renderCard(cardConfig))}</Box>
 }
 
 export default Sidepanel

@@ -1,3 +1,4 @@
+import { Browser } from '@capacitor/browser'
 import { Capacitor } from '@capacitor/core'
 import { Device } from '@capacitor/device'
 // import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth'
@@ -251,19 +252,52 @@ const LoginView = () => {
     return randomState
   }
 
-  const handleAuthentikLogin = () => {
+  const handleAuthentikLogin = async () => {
     const authentikAuthorizeUrl = resource?.identity_provider?.auth_url
+    const state = generateRandomState()
 
-    const params = new URLSearchParams({
-      response_type: 'code',
-      client_id: resource?.identity_provider?.client_id,
-      redirect_uri: `${window.location.origin}/auth/oauth2`,
-      scope: 'openid profile email', // Your scopes
-      state: generateRandomState(),
-    })
-    console.log('redirect', `${authentikAuthorizeUrl}?${params.toString()}`)
+    if (Capacitor.isNativePlatform()) {
+      // For mobile devices, use a custom URL scheme for the redirect
+      const redirectUri = 'donetick://auth/oauth2'
+      
+      const params = new URLSearchParams({
+        response_type: 'code',
+        client_id: resource?.identity_provider?.client_id,
+        redirect_uri: redirectUri,
+        scope: 'openid profile email',
+        state: state,
+      })
 
-    window.location.href = `${authentikAuthorizeUrl}?${params.toString()}`
+      const authUrl = `${authentikAuthorizeUrl}?${params.toString()}`
+      console.log('Opening OAuth in browser:', authUrl)
+
+      try {
+        // Open OAuth flow in system browser
+        await Browser.open({ url: authUrl })
+        
+        // Note: The OAuth callback will be handled by deep link handling
+        // You'll need to implement deep link handling to catch the redirect
+        // and extract the authorization code
+      } catch (error) {
+        console.error('Failed to open OAuth browser:', error)
+        showError({
+          title: 'OAuth Error',
+          message: 'Failed to open authentication browser',
+        })
+      }
+    } else {
+      // For web platforms, use the current approach
+      const params = new URLSearchParams({
+        response_type: 'code',
+        client_id: resource?.identity_provider?.client_id,
+        redirect_uri: `${window.location.origin}/auth/oauth2`,
+        scope: 'openid profile email',
+        state: state,
+      })
+      
+      console.log('redirect', `${authentikAuthorizeUrl}?${params.toString()}`)
+      window.location.href = `${authentikAuthorizeUrl}?${params.toString()}`
+    }
   }
 
   return (
