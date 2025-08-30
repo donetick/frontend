@@ -67,7 +67,7 @@ export async function UploadFile(url, options) {
 export async function Fetch(url, options) {
   if (!isTokenValid()) {
     Cookies.set('ca_redirect', window.location.pathname)
-    if (!window.location.pathname === '/login') {
+    if (window.location.pathname !== '/login') {
       window.location.href = '/login'
     }
   }

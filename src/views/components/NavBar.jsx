@@ -1,4 +1,4 @@
-import Logo from '@/assets/logo.svg'
+import { Capacitor } from '@capacitor/core'
 import {
   Archive,
   ArrowBack,
@@ -22,7 +22,7 @@ import {
   Typography,
 } from '@mui/joy'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { version } from '../../../package.json'
 import UserProfileAvatar from '../../components/UserProfileAvatar'
@@ -87,6 +87,7 @@ const links = [
   },
 ]
 
+import { SafeArea } from 'capacitor-plugin-safe-area'
 import Z_INDEX from '../../constants/zIndex'
 
 const NavBar = () => {
@@ -97,12 +98,35 @@ const NavBar = () => {
     () => setDrawerOpen(false),
   ]
   const location = useLocation()
-  // if url has /landing then remove the navbar:
+  useEffect(() => {
+    SafeArea.getSafeAreaInsets().then(data => {
+      const { insets } = data
+      const drawerContent = document.querySelector('.drawer-content')
+      if (drawerContent) {
+        drawerContent.style.paddingTop = `${insets.top}px`
+        drawerContent.style.paddingRight = `${insets.right}px`
+        drawerContent.style.paddingBottom = `${insets.bottom}px`
+        drawerContent.style.paddingLeft = `${insets.left}px`
+      }
+    })
+  }, [])
   if (
-    ['/signup', '/login', '/landing', '/forgot-password'].includes(
+    ['/signup', '/login', '/forgot-password', '/login/settings'].includes(
       location.pathname,
     )
   ) {
+    return (
+      // no navbar but show the safe area padding
+      <div
+        style={{
+          paddingTop: `calc(var(--safe-area-inset-top, 0px))`,
+          top: 0,
+        }}
+      />
+    )
+  }
+  // if url has /landing then remove the navbar:
+  if (location.pathname === '/landing') {
     return null
   }
   if (
@@ -116,11 +140,14 @@ const NavBar = () => {
     <nav
       className='flex gap-2 p-3'
       style={{
-        paddingTop: `calc(var(--safe-area-inset-top, 0px) + 12px)`,
+        paddingTop:
+          Capacitor.getPlatform() === 'android'
+            ? `calc(var(--safe-area-inset-top, 0px))`
+            : '',
         position: 'sticky',
         zIndex: Z_INDEX.NAVBAR,
         top: 0,
-        minHeight: '45px',
+        minHeight: '35px',
         backgroundColor: 'var(--joy-palette-background-body)',
       }}
     >

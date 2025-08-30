@@ -42,14 +42,15 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
-	<true/>
-	
-	<!-- Camera permissions -->
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string></string>
+		</dict>
+	</array>
 	<key>NSCameraUsageDescription</key>
-	<string>This app needs access to camera to take photos for your profile picture.</string>
+	<string>This app needs access to camera to take photos to attach to task or use as profile photo</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>This app needs access to photo library to select photos for your profile picture.</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>This app needs access to save photos to your photo library.</string>
+	<string>This app needs access to photo library to select images to attach to task or use as profile photo</string>
 </dict>
 </plist>

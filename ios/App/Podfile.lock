@@ -10,15 +10,17 @@ PODS:
     - GoogleUtilities/Environment (~> 8.0)
     - GoogleUtilities/UserDefaults (~> 8.0)
     - PromisesObjC (~> 2.4)
-  - Capacitor (7.4.2):
+  - Capacitor (7.4.0):
     - CapacitorCordova
   - CapacitorApp (7.0.1):
     - Capacitor
-  - CapacitorCommunitySqlite (7.0.1):
+  - CapacitorBrowser (7.0.2):
+    - Capacitor
+  - CapacitorCommunitySqlite (7.0.0):
     - Capacitor
     - SQLCipher
     - ZIPFoundation
-  - CapacitorCordova (7.4.2)
+  - CapacitorCordova (7.4.0)
   - CapacitorDevice (7.0.1):
     - Capacitor
   - CapacitorLocalNotifications (7.0.1):
@@ -39,8 +41,6 @@ PODS:
     - FBSDKCoreKit (= 17.4.0)
     - FBSDKLoginKit (= 17.4.0)
     - GoogleSignIn (~> 8.0.0)
-  - CordovaPlugins (7.4.2):
-    - CapacitorCordova
   - FBAEMKit (17.4.0):
     - FBSDKCoreKit_Basics (= 17.4.0)
   - FBSDKCoreKit (17.4.0):
@@ -68,20 +68,20 @@ PODS:
     - GTMSessionFetcher/Core (< 4.0, >= 3.3)
   - GTMSessionFetcher/Core (3.5.0)
   - PromisesObjC (2.4.0)
-  - PurchasesHybridCommon (16.1.0):
-    - RevenueCat (= 5.33.1)
-  - PurchasesHybridCommonUI (16.1.0):
-    - PurchasesHybridCommon (= 16.1.0)
-    - RevenueCatUI (= 5.33.1)
-  - RevenueCat (5.33.1)
-  - RevenuecatPurchasesCapacitor (11.1.0):
+  - PurchasesHybridCommon (16.2.0):
+    - RevenueCat (= 5.34.0)
+  - PurchasesHybridCommonUI (16.2.0):
+    - PurchasesHybridCommon (= 16.2.0)
+    - RevenueCatUI (= 5.34.0)
+  - RevenueCat (5.34.0)
+  - RevenuecatPurchasesCapacitor (11.1.1):
     - Capacitor
-    - PurchasesHybridCommon (= 16.1.0)
-  - RevenuecatPurchasesCapacitorUi (11.1.0):
+    - PurchasesHybridCommon (= 16.2.0)
+  - RevenuecatPurchasesCapacitorUi (11.1.1):
     - Capacitor
-    - PurchasesHybridCommonUI (= 16.1.0)
-  - RevenueCatUI (5.33.1):
-    - RevenueCat (= 5.33.1)
+    - PurchasesHybridCommonUI (= 16.2.0)
+  - RevenueCatUI (5.34.0):
+    - RevenueCat (= 5.34.0)
   - SQLCipher (4.7.0):
     - SQLCipher/standard (= 4.7.0)
   - SQLCipher/common (4.7.0)
@@ -92,6 +92,7 @@ PODS:
 DEPENDENCIES:
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorApp (from `../../node_modules/@capacitor/app`)"
+  - "CapacitorBrowser (from `../../node_modules/@capacitor/browser`)"
   - "CapacitorCommunitySqlite (from `../../node_modules/@capacitor-community/sqlite`)"
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorDevice (from `../../node_modules/@capacitor/device`)"
@@ -102,7 +103,6 @@ DEPENDENCIES:
   - "CapacitorPushNotifications (from `../../node_modules/@capacitor/push-notifications`)"
   - "CapacitorStatusBar (from `../../node_modules/@capacitor/status-bar`)"
   - "CapgoCapacitorSocialLogin (from `../../node_modules/@capgo/capacitor-social-login`)"
-  - CordovaPlugins (from `../capacitor-cordova-ios-plugins`)
   - "RevenuecatPurchasesCapacitor (from `../../node_modules/@revenuecat/purchases-capacitor`)"
   - "RevenuecatPurchasesCapacitorUi (from `../../node_modules/@revenuecat/purchases-capacitor-ui`)"
 
@@ -132,6 +132,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/ios"
   CapacitorApp:
     :path: "../../node_modules/@capacitor/app"
+  CapacitorBrowser:
+    :path: "../../node_modules/@capacitor/browser"
   CapacitorCommunitySqlite:
     :path: "../../node_modules/@capacitor-community/sqlite"
   CapacitorCordova:
@@ -152,8 +154,6 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/status-bar"
   CapgoCapacitorSocialLogin:
     :path: "../../node_modules/@capgo/capacitor-social-login"
-  CordovaPlugins:
-    :path: "../capacitor-cordova-ios-plugins"
   RevenuecatPurchasesCapacitor:
     :path: "../../node_modules/@revenuecat/purchases-capacitor"
   RevenuecatPurchasesCapacitorUi:
@@ -163,10 +163,11 @@ SPEC CHECKSUMS:
   Alamofire: 7193b3b92c74a07f85569e1a6c4f4237291e7496
   AppAuth: d4f13a8fe0baf391b2108511793e4b479691fb73
   AppCheckCore: cc8fd0a3a230ddd401f326489c99990b013f0c4f
-  Capacitor: 9d9e481b79ffaeacaf7a85d6a11adec32bd33b59
+  Capacitor: 10feab36396883c55373328124a677f118cd4b5f
   CapacitorApp: febecbb9582cb353aed037e18ec765141f880fe9
-  CapacitorCommunitySqlite: 8b2c6bab33e3519280811d481f8bd0fa90343e1b
-  CapacitorCordova: 5e58d04631bc5094894ac106e2bf1da18a9e6151
+  CapacitorBrowser: 22541e48442de44dc629c214388290d6eecc6ae9
+  CapacitorCommunitySqlite: b11e556cf5d149f9e0b6fbbb47959a6cd718c3d0
+  CapacitorCordova: 723e017d8a80ab2ede9959fbe37556c35ac860d5
   CapacitorDevice: c6f6d587dd310527f8a48bf09c4e7b4a4cf14329
   CapacitorLocalNotifications: c2212755b33d2513b8bb325096ce3a64d4039ae3
   CapacitorNetwork: 15cb4385f0913a8ceb5e9a4d7af1ec554bdb8de8
@@ -174,8 +175,7 @@ SPEC CHECKSUMS:
   CapacitorPreferences: 6c98117d4d7508034a4af9db64d6b26fc75d7b94
   CapacitorPushNotifications: 6a2794788c583dd89215f1805ca4bced1b13dbdf
   CapacitorStatusBar: 6e7af040d8fc4dd655999819625cae9c2d74c36f
-  CapgoCapacitorSocialLogin: 0daa087f32775c656fbfba09b8eae7c089b85ce2
-  CordovaPlugins: b2618e17f8dd580d2354710b7b52b0af9d6f03f2
+  CapgoCapacitorSocialLogin: 001d85f081a5167bde4ec4456353dbe4c03d4cd2
   FBAEMKit: 58cb5f302cdd715a56d4c1d0dfdd2e423ac1421a
   FBSDKCoreKit: 94d7461d0cecf441b1ba7c41acfff41daa8ccd41
   FBSDKCoreKit_Basics: 151b43db8b834d3f0e02f95d36a44ffd36265e45
@@ -185,15 +185,15 @@ SPEC CHECKSUMS:
   GTMAppAuth: f69bd07d68cd3b766125f7e072c45d7340dea0de
   GTMSessionFetcher: 5aea5ba6bd522a239e236100971f10cb71b96ab6
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
-  PurchasesHybridCommon: acbd336f8248da5599893ecf9ac32c561a2fd446
-  PurchasesHybridCommonUI: cf20e6ac6f148385bdb6a15db38c4c0c7377f480
-  RevenueCat: b0ed01125b05a45b8264a2951ad68acb61942038
-  RevenuecatPurchasesCapacitor: 554b5d4711cac8df01feed6333b075296b5d9082
-  RevenuecatPurchasesCapacitorUi: 7863f7e39e940d937925b085a67369feecb048e4
-  RevenueCatUI: e6fad6a8bec67d910da78cd171328f1104afea77
+  PurchasesHybridCommon: 55e97b4e090015ed138988e6559def2bd4c50ebe
+  PurchasesHybridCommonUI: 25c66f6ddcf8856ecbcffee897b2525eb272a5e7
+  RevenueCat: eb2aa042789d9c99ad5172bd96e28b96286d6ada
+  RevenuecatPurchasesCapacitor: 420b762736c2842bfb64436b7e0b88d2f672c943
+  RevenuecatPurchasesCapacitorUi: 0cf343ae4e1c8b30b294c971a50827316b210a63
+  RevenueCatUI: 03025a80b64ce8ff8e43f47a7eb9dbbb6b4f486e
   SQLCipher: ba9d0076041ed767c5bd3d3f77098318d04a403c
   ZIPFoundation: b8c29ea7ae353b309bc810586181fd073cb3312c
 
-PODFILE CHECKSUM: 8a9fb4ff57aa677972b999357aa5abe97d1f2b30
+PODFILE CHECKSUM: 289063dee9cd9d5cc8abd18e13b4153b38864021
 
 COCOAPODS: 1.16.2

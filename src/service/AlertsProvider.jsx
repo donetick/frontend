@@ -44,7 +44,6 @@ export const AlertsProvider = ({ children }) => {
       {visibleAlert && (
         <Box
           sx={{
-            pt: `calc( env(safe-area-inset-top, 0px))`,
             position: 'fixed',
             top: 0,
             left: 0,
@@ -67,6 +66,8 @@ export const AlertsProvider = ({ children }) => {
               justifyContent: 'center',
               alignItems: 'center',
               padding: '4px',
+              paddingTop: `calc(var(--safe-area-inset-top, 0px))`,
+
               fontSize: '10px',
               fontWeight: 'md',
             }}

@@ -21,11 +21,12 @@ const NetworkBanner = () => {
           variant='soft'
           color='warning'
           sx={{
+            padding: '4px',
             position: 'fixed',
+            paddingTop: `calc(var(--safe-area-inset-top, 0px))`,
             top: 0,
             left: 0,
             zIndex: Z_INDEX.NETWORK_BANNER,
-            padding: '4px',
             pt: `calc( env(safe-area-inset-top, 0px))`,
             width: '100%',
             justifyContent: 'center',
