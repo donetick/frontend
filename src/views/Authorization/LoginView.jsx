@@ -150,7 +150,7 @@ const LoginView = () => {
         // Apple Sign In returns id_token in response
         return data['response']['id_token']
       } else if (data['id_token']) {
-        // Direct id_token for Apple
+        // Direct id_token for Apple (fallback)
         return data['id_token']
       }
     }
@@ -259,7 +259,7 @@ const LoginView = () => {
     if (Capacitor.isNativePlatform()) {
       // For mobile devices, use a custom URL scheme for the redirect
       const redirectUri = 'donetick://auth/oauth2'
-      
+
       const params = new URLSearchParams({
         response_type: 'code',
         client_id: resource?.identity_provider?.client_id,
@@ -274,7 +274,7 @@ const LoginView = () => {
       try {
         // Open OAuth flow in system browser
         await Browser.open({ url: authUrl })
-        
+
         // Note: The OAuth callback will be handled by deep link handling
         // You'll need to implement deep link handling to catch the redirect
         // and extract the authorization code
@@ -294,7 +294,7 @@ const LoginView = () => {
         scope: 'openid profile email',
         state: state,
       })
-      
+
       console.log('redirect', `${authentikAuthorizeUrl}?${params.toString()}`)
       window.location.href = `${authentikAuthorizeUrl}?${params.toString()}`
     }
@@ -639,6 +639,29 @@ const LoginView = () => {
           >
             Create new account
           </Button>
+
+          <Box
+            sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}
+          >
+            <Button
+              variant='plain'
+              size='sm'
+              onClick={() => {
+                window.open('https://donetick.com/privacy-policy', '_blank')
+              }}
+            >
+              Privacy Policy
+            </Button>
+            <Button
+              variant='plain'
+              size='sm'
+              onClick={() => {
+                window.open('https://donetick.com/terms', '_blank')
+              }}
+            >
+              Terms of Use
+            </Button>
+          </Box>
         </Sheet>
       </Box>
 

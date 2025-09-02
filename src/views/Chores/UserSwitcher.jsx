@@ -1,11 +1,11 @@
-import { Person } from '@mui/icons-material'
+import { SupervisorAccount } from '@mui/icons-material'
 import { Avatar, Box, Button, Sheet, Typography } from '@mui/joy'
 
 import { useEffect, useState } from 'react'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import UserModal from '../Modals/Inputs/UserModal'
-const WelcomeCard = () => {
+const UserSwitcher = () => {
   const { impersonatedUser, setImpersonatedUser } = useImpersonateUser()
   const [isAdmin, setIsAdmin] = useState(false)
   const { data: userProfile } = useUserProfile()
@@ -57,13 +57,16 @@ const WelcomeCard = () => {
                 gap: 1,
               }}
             >
-              <Person color='' />
-              <Typography level='title-md'>Current User</Typography>
+              <SupervisorAccount color='' />
+              <Typography level='title-md'>View tasks as</Typography>
             </Box>
           </Box>
           <Box sx={{ mb: 2 }}>
             <Typography level='title-md' sx={{ mb: 0.5 }}>
-              Who&apos;s checking in?
+              Switch to user view
+            </Typography>
+            <Typography level='body-sm' sx={{ mb: 1, color: 'text.secondary' }}>
+              Tasks will be filtered to show only assignments for selected user
             </Typography>
           </Box>
           <Button
@@ -72,7 +75,7 @@ const WelcomeCard = () => {
             onClick={() => setIsModalOpen(true)}
             size='sm'
           >
-            Select User
+            Choose User
           </Button>
           <UserModal
             isOpen={isModalOpen}
@@ -122,8 +125,8 @@ const WelcomeCard = () => {
               gap: 1,
             }}
           >
-            <Person color='' />
-            <Typography level='title-md'>Current User</Typography>
+            <SupervisorAccount color='' />
+            <Typography level='title-md'>View tasks as</Typography>
           </Box>
         </Box>
 
@@ -187,4 +190,4 @@ const WelcomeCard = () => {
     </Sheet>
   )
 }
-export default WelcomeCard
+export default UserSwitcher

@@ -7,10 +7,10 @@ import { getSidepanelConfig } from '../../utils/SidepanelConfig'
 import CalendarView from '../components/CalendarView'
 import ActivitiesCard from './ActivitesCard'
 import TasksByAssigneeCard from './TasksByAssigneeCard'
-import WelcomeCard from './WelcomeCard'
+import UserSwitcher from './UserSwitcher'
 
 const Sidepanel = ({ chores }) => {
-  const isLargeScreen = useMediaQuery(theme => theme.breakpoints.up('md'))
+  const isLargeScreen = useMediaQuery(theme => theme.breakpoints.up('lg'))
   const [dueDatePieChartData, setDueDatePieChartData] = useState([])
   const [sidepanelConfig, setSidepanelConfig] = useState([])
   const {
@@ -54,7 +54,7 @@ const Sidepanel = ({ chores }) => {
 
     switch (cardConfig.id) {
       case 'welcome':
-        return <WelcomeCard key='welcome' chores={chores} />
+        return <UserSwitcher key='welcome' chores={chores} />
       case 'assignees':
         return <TasksByAssigneeCard key='assignees' chores={chores} />
       case 'calendar':

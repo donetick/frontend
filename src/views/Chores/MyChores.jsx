@@ -125,7 +125,15 @@ const MyChores = () => {
         choresData?.res
       ) {
         setPerformers(membersData.res)
-        const sortedChores = choresData.res.sort(ChoreSorter)
+        let sortedChores = choresData.res.sort(ChoreSorter)
+        
+        // Filter chores based on impersonated user
+        if (impersonatedUser) {
+          sortedChores = sortedChores.filter(chore => 
+            chore.assignedTo === impersonatedUser.userId
+          )
+        }
+        
         setChores(sortedChores)
         setFilteredChores(sortedChores)
         const sections = ChoresGrouper(
@@ -161,6 +169,7 @@ const MyChores = () => {
     choresData,
     membersData,
     userProfile,
+    impersonatedUser,
   ])
 
   useEffect(() => {
@@ -445,7 +454,17 @@ const MyChores = () => {
     if (searchTerm?.length > 0 || searchFilter !== 'All') {
       return filteredChores
     }
-    return chores.filter(ChoreFilters(userProfile)[selectedChoreFilter])
+    
+    let choresToFilter = chores
+    
+    // Filter by impersonated user first if set
+    if (impersonatedUser) {
+      choresToFilter = choresToFilter.filter(chore => 
+        chore.assignedTo === impersonatedUser.userId
+      )
+    }
+    
+    return choresToFilter.filter(ChoreFilters(userProfile)[selectedChoreFilter])
   }
 
   // Helper function to get chores for a specific date
@@ -460,8 +479,15 @@ const MyChores = () => {
   }
 
   const updateChores = newChore => {
-    const newChores = chores
-    newChores.push(newChore)
+    let newChores = [...chores, newChore]
+    
+    // Filter chores based on impersonated user
+    if (impersonatedUser) {
+      newChores = newChores.filter(chore => 
+        chore.assignedTo === impersonatedUser.userId
+      )
+    }
+    
     setChores(newChores)
     setFilteredChores(newChores)
     setChoreSections(
@@ -1587,42 +1613,44 @@ const MyChores = () => {
             Current Filter: {searchFilter}
           </Chip>
         )}
-        {filteredChores.length === 0 && (
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              flexDirection: 'column',
-              height: '50vh',
-            }}
-          >
-            <EditCalendar
+        {filteredChores.length === 0 &&
+          // only if not in calendar view:
+          viewMode !== 'calendar' && (
+            <Box
               sx={{
-                fontSize: '4rem',
-                // color: 'text.disabled',
-                mb: 1,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                flexDirection: 'column',
+                height: '50vh',
               }}
-            />
-            <Typography level='title-md' gutterBottom>
-              Nothing scheduled
-            </Typography>
-            {chores.length > 0 && (
-              <>
-                <Button
-                  onClick={() => {
-                    setFilteredChores(chores)
-                    setSearchTerm('')
-                  }}
-                  variant='outlined'
-                  color='neutral'
-                >
-                  Reset filters
-                </Button>
-              </>
-            )}
-          </Box>
-        )}
+            >
+              <EditCalendar
+                sx={{
+                  fontSize: '4rem',
+                  // color: 'text.disabled',
+                  mb: 1,
+                }}
+              />
+              <Typography level='title-md' gutterBottom>
+                Nothing scheduled
+              </Typography>
+              {chores.length > 0 && (
+                <>
+                  <Button
+                    onClick={() => {
+                      setFilteredChores(chores)
+                      setSearchTerm('')
+                    }}
+                    variant='outlined'
+                    color='neutral'
+                  >
+                    Reset filters
+                  </Button>
+                </>
+              )}
+            </Box>
+          )}
         {(searchTerm?.length > 0 || searchFilter !== 'All') &&
           viewMode !== 'calendar' &&
           filteredChores.map(chore =>

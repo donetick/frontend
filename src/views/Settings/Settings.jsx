@@ -17,6 +17,7 @@ import {
   Typography,
 } from '@mui/joy'
 import { Purchases } from '@revenuecat/purchases-capacitor'
+import { useQueryClient } from '@tanstack/react-query'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -41,6 +42,7 @@ import {
 import { isPlusAccount } from '../../utils/Helpers'
 import LoadingComponent from '../components/Loading'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
+import NativeCancelSubscriptionModal from '../Modals/Inputs/NativeCancelSubscriptionModal'
 import PassowrdChangeModal from '../Modals/Inputs/PasswordChangeModal'
 import UserDeletionModal from '../Modals/Inputs/UserDeletionModal'
 import APITokenSettings from './APITokenSettings'
@@ -53,6 +55,7 @@ import ThemeToggle from './ThemeToggle'
 
 const Settings = () => {
   const { data: userProfile } = useUserProfile()
+  const queryClient = useQueryClient()
   const { showNotification } = useNotification()
   const navigate = useNavigate()
 
@@ -69,6 +72,7 @@ const Settings = () => {
   const [changePasswordModal, setChangePasswordModal] = useState(false)
   const [subscriptionModal, setSubscriptionModal] = useState(false)
   const [userDeletionModal, setUserDeletionModal] = useState(false)
+  const [nativeCancelModal, setNativeCancelModal] = useState(false)
   const [confirmModalConfig, setConfirmModalConfig] = useState({})
 
   const showConfirmation = (
@@ -128,6 +132,17 @@ const Settings = () => {
       setCircleMembers(data.res ? data.res : [])
     })
   }, [])
+  useEffect(() => {
+    async function configurePurchases() {
+      if (Capacitor.isNativePlatform() && userProfile) {
+        await Purchases.configure({
+          apiKey: import.meta.env.VITE_REACT_APP_REVENUECAT_API_KEY,
+          appUserID: String(userProfile?.id),
+        })
+      }
+    }
+    configurePurchases()
+  }, [userProfile])
 
   // useEffect when circleMembers and userprofile:
   useEffect(() => {
@@ -679,30 +694,95 @@ const Settings = () => {
                   const { RevenueCatUI } = await import(
                     '@revenuecat/purchases-capacitor-ui'
                   )
-                  await Purchases.configure({
-                    apiKey: import.meta.env.VITE_REACT_APP_REVENUECAT_API_KEY,
-                    appUserID: String(userProfile?.id),
-                  })
+
                   const offering = await Purchases.getOfferings()
                   await RevenueCatUI.presentPaywall({
                     offering: offering.current,
                   })
 
                   // Check if user now has entitlement after paywall interaction
-                  const customerInfo = await Purchases.getCustomerInfo()
-                  if (customerInfo.entitlements.active['plus']) {
+                  const { customerInfo } = await Purchases.getCustomerInfo()
+                  if (customerInfo.entitlements.active['Donetick Plus']) {
+                    queryClient.invalidateQueries(['userProfile'])
+                    queryClient.refetchQueries(['userProfile'])
                     showNotification({
                       type: 'success',
                       message:
                         'Purchase successful! Please restart the app to access Plus features.',
                     })
+                    // invalidate user profile to get new subscription status:
                   }
                 } catch (error) {
-                  if (error.code !== '1') {
-                    // User cancelled
+                  console.log('Purchase error:', error)
+
+                  // Handle different error types
+                  if (error.code === '1') {
+                    // User cancelled - don't show error
+                    return
+                  } else if (error.code === '2') {
+                    // Store problem
                     showNotification({
                       type: 'error',
-                      message: 'Purchase failed. Please try again.',
+                      message:
+                        'Store connection issue. Please check your network and try again.',
+                    })
+                  } else if (error.code === '3') {
+                    // Purchase not allowed
+                    showNotification({
+                      type: 'error',
+                      message:
+                        'Purchases are not allowed on this device. Please check your device restrictions.',
+                    })
+                  } else if (error.code === '4') {
+                    // Product not available
+                    showNotification({
+                      type: 'error',
+                      message:
+                        'This subscription is not available. Please try again later.',
+                    })
+                  } else if (error.code === '5') {
+                    // Receipt already in use
+                    showNotification({
+                      type: 'error',
+                      message:
+                        'This purchase has already been processed. If you believe this is an error, please contact support.',
+                    })
+                  } else if (error.code === '6') {
+                    // Missing receipt file
+                    showNotification({
+                      type: 'error',
+                      message:
+                        'Purchase receipt missing. Please try purchasing again.',
+                    })
+                  } else if (error.code === '7') {
+                    // Network error
+                    showNotification({
+                      type: 'error',
+                      message:
+                        'Network error. Please check your connection and try again.',
+                    })
+                  } else if (error.code === '8') {
+                    // Invalid receipt
+                    showNotification({
+                      type: 'error',
+                      message:
+                        'Invalid purchase receipt. Please contact support if this persists.',
+                    })
+                  } else if (error.code === '9') {
+                    // Payment pending
+                    showNotification({
+                      type: 'warning',
+                      message:
+                        'Payment is pending approval. You will receive access once approved.',
+                    })
+                  } else {
+                    // Generic error
+                    // log on what part of the code the error happened
+                    console.error('Unexpected purchase error:', error)
+                    console.error('Error occurred in purchase flow')
+                    showNotification({
+                      type: 'error',
+                      message: `Purchase failed: ${error.message || 'Unknown error'}. Please try again or contact support.`,
                     })
                   }
                 }
@@ -724,15 +804,7 @@ const Settings = () => {
               variant='outlined'
               color='danger'
               onClick={() => {
-                CancelSubscription().then(resp => {
-                  if (resp.ok) {
-                    showNotification({
-                      type: 'success',
-                      message: 'Subscription cancelled',
-                    })
-                    window.location.reload()
-                  }
-                })
+                setNativeCancelModal(true)
               }}
             >
               Cancel
@@ -843,6 +915,29 @@ const Settings = () => {
           }
         }}
         userProfile={userProfile}
+      />
+
+      <NativeCancelSubscriptionModal
+        isOpen={nativeCancelModal}
+        onClose={action => {
+          setNativeCancelModal(false)
+          if (action === 'desktop') {
+            CancelSubscription().then(resp => {
+              if (resp.ok) {
+                showNotification({
+                  type: 'success',
+                  message: 'Subscription cancelled',
+                })
+                window.location.reload()
+              } else {
+                showNotification({
+                  type: 'error',
+                  message: 'Failed to cancel subscription',
+                })
+              }
+            })
+          }
+        }}
       />
     </Container>
   )

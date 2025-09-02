@@ -268,6 +268,27 @@ const SignupView = () => {
           >
             Login
           </Button>
+
+          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}>
+            <Button
+              variant='plain'
+              size='sm'
+              onClick={() => {
+                window.open('https://donetick.com/privacy-policy', '_blank')
+              }}
+            >
+              Privacy Policy
+            </Button>
+            <Button
+              variant='plain'
+              size='sm'
+              onClick={() => {
+                window.open('https://donetick.com/terms', '_blank')
+              }}
+            >
+              Terms of Use
+            </Button>
+          </Box>
         </Sheet>
       </Box>
     </Container>

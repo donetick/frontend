@@ -1,9 +1,9 @@
 export const DEFAULT_SIDEPANEL_CONFIG = [
   {
-    id: 'welcome',
-    name: 'Welcome Card',
-    description: 'Shows greeting and quick stats',
-    iconName: 'WavingHand',
+    id: 'welcome', // legacy name, now represents User Switcher
+    name: 'User Switcher',
+    description: 'Allows admins/managers to view tasks as different users',
+    iconName: 'SupervisorAccount',
     enabled: true,
     order: 0,
   },
