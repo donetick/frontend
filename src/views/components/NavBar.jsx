@@ -26,7 +26,6 @@ import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { version } from '../../../package.json'
 import UserProfileAvatar from '../../components/UserProfileAvatar'
-import ThemeToggleButton from '../Settings/ThemeToggleButton'
 import NavBarLink from './NavBarLink'
 const links = [
   {
@@ -167,7 +166,7 @@ const NavBar = () => {
       <Box className='flex-1' />
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <UserProfileAvatar />
-        <ThemeToggleButton />
+        {/* <ThemeToggleButton /> */}
       </Box>
       <Drawer
         open={drawerOpen}

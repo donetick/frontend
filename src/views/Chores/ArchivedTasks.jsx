@@ -17,6 +17,7 @@ import {
   IconButton,
   Input,
   List,
+  Stack,
   Typography,
 } from '@mui/joy'
 import Fuse from 'fuse.js'
@@ -448,6 +449,20 @@ const ArchivedTasks = () => {
 
   return (
     <Container maxWidth='md'>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+        {/* <EmojiEvents sx={{ fontSize: '2rem', color: '#FFD700' }} /> */}
+        <Stack sx={{ flex: 1 }}>
+          <Typography
+            level='h3'
+            sx={{ fontWeight: 'lg', color: 'text.primary' }}
+          >
+            Archived Tasks
+          </Typography>
+          <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+            View and manage tasks that have been archived or completed.
+          </Typography>
+        </Stack>
+      </Box>
       {/* Header */}
       {/* <Box
         sx={{

@@ -8,7 +8,15 @@ import {
   ToggleOn,
   Widgets,
 } from '@mui/icons-material'
-import { Avatar, Box, Chip, Container, IconButton, Typography } from '@mui/joy'
+import {
+  Avatar,
+  Box,
+  Chip,
+  Container,
+  IconButton,
+  Stack,
+  Typography,
+} from '@mui/joy'
 import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useNotification } from '../../service/NotificationProvider'
@@ -660,6 +668,23 @@ const ThingsView = () => {
 
   return (
     <Container maxWidth='md' sx={{ px: 0 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+        {/* <EmojiEvents sx={{ fontSize: '2rem', color: '#FFD700' }} /> */}
+        <Stack sx={{ flex: 1 }}>
+          <Typography
+            level='h3'
+            sx={{ fontWeight: 'lg', color: 'text.primary' }}
+          >
+            Things
+          </Typography>
+          <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+            Things are custom fields that can be attached to tasks to capture
+            additional information. They can be of type text, number, or
+            boolean. You can associate things with tasks and have the task due
+            once condition is met
+          </Typography>
+        </Stack>
+      </Box>
       <Box
         sx={{
           overflow: 'hidden',

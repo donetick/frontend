@@ -18,6 +18,7 @@ import {
   CardContent,
   Container,
   Grid,
+  Stack,
   Typography,
 } from '@mui/joy'
 import { useNavigate } from 'react-router-dom'
@@ -109,13 +110,19 @@ const SettingsOverview = () => {
 
   return (
     <Container maxWidth='lg' sx={{ py: 4 }}>
-      <Box sx={{ mb: 4 }}>
-        <Typography level='h2' sx={{ mb: 1 }}>
-          Settings
-        </Typography>
-        <Typography level='body-lg' color='neutral'>
-          Customize your experience and manage your account preferences
-        </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+        {/* <EmojiEvents sx={{ fontSize: '2rem', color: '#FFD700' }} /> */}
+        <Stack sx={{ flex: 1 }}>
+          <Typography
+            level='h3'
+            sx={{ fontWeight: 'lg', color: 'text.primary' }}
+          >
+            Settings
+          </Typography>
+          <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+            Customize your experience and manage your account preferences
+          </Typography>
+        </Stack>
       </Box>
 
       {/* Upgrade Card - Only show if user is not a Plus member */}

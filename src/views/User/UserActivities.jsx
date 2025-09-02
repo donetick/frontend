@@ -826,6 +826,20 @@ const UserActivites = () => {
         flexDirection: 'column',
       }}
     >
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+        {/* <EmojiEvents sx={{ fontSize: '2rem', color: '#FFD700' }} /> */}
+        <Stack sx={{ flex: 1 }}>
+          <Typography
+            level='h3'
+            sx={{ fontWeight: 'lg', color: 'text.primary' }}
+          >
+            User Activities
+          </Typography>
+          <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+            Overview of user activities and task statistics
+          </Typography>
+        </Stack>
+      </Box>
       {/* Main Content Area - Mobile: Stack vertically, Desktop: Side by side */}
       <Box
         sx={{
