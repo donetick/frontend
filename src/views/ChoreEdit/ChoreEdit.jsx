@@ -252,7 +252,7 @@ const ChoreEdit = () => {
           title: 'Chore Saved',
           message: 'Your task has been saved successfully!',
         })
-        Navigate('/chores/')
+        Navigate('/chores')
       })
       .catch(error => {
         console.error('Failed to save chore:', error)
