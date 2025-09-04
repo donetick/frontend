@@ -333,21 +333,7 @@ const Footer = () => {
             <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
               Version {version}
             </Typography>
-            <Typography
-              level='body-sm'
-              sx={{
-                color: 'primary.500',
-                fontWeight: 600,
-                px: 2,
-                py: 0.5,
-                borderRadius: 8,
-                background: 'primary.50',
-                border: '1px solid',
-                borderColor: 'primary.200',
-              }}
-            >
-              100% Open Source
-            </Typography>
+         
           </Box>
         </Box>
       </Container>
