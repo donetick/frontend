@@ -1,6 +1,5 @@
+import ipad_screenshot from '@/assets/ipad_dashbard_calendar.png'
 import { Box, Container, Typography } from '@mui/joy'
-import ipadDashboardCalendar from '../../assets/ipad_dashboard_calendar.png'
-
 const TabletInstallationSection = () => {
   return (
     <Container maxWidth='xl' sx={{ py: { xs: 6, sm: 8, md: 12 } }}>
@@ -51,7 +50,8 @@ const TabletInstallationSection = () => {
           mb: { xs: 4, md: 6 },
         }}
       >
-          src={ipadDashboardCalendar}
+        <img
+          src={ipad_screenshot}
           alt='DoneTick dashboard with calendar view showing task management interface'
           style={{
             maxWidth: '90%',
@@ -61,7 +61,6 @@ const TabletInstallationSection = () => {
             boxShadow:
               '0 25px 50px rgba(0, 0, 0, 0.25), 0 10px 20px rgba(0, 0, 0, 0.15)',
           }}
-        />
         />
       </Box>
 
