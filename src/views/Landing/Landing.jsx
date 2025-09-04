@@ -7,11 +7,13 @@ import CookiePermissionSnackbar from './CookiePermissionSnackbar'
 import DemoAssignee from './DemoAssignee'
 import DemoHistory from './DemoHistory'
 import DemoMyChore from './DemoMyChore'
+import DemoNotificationTemplate from './DemoNotificationTemplate'
 import DemoScheduler from './DemoScheduler'
 import FeaturesSection from './FeaturesSection'
 import Footer from './Footer'
 import GettingStarted from './GettingStarted'
 import HomeHero from './HomeHero'
+import TabletInstallationSection from './TabletInstallationSection'
 const Landing = () => {
   const Navigate = useNavigate()
   useEffect(() => {
@@ -37,13 +39,13 @@ const Landing = () => {
         <DemoMyChore />
         <DemoAssignee />
         <DemoScheduler />
+        <DemoNotificationTemplate />
 
         <DemoHistory />
       </Grid>
       <FeaturesSection />
+      <TabletInstallationSection />
       <GettingStarted />
-
-      {/* <PricingSection /> */}
       <Box
         sx={{
           display: 'flex',

@@ -10,6 +10,7 @@ import {
   Psychology,
   Schedule,
   Security,
+  Settings,
   Timer,
 } from '@mui/icons-material'
 import { Box, Card, Container, Grid, Typography, useTheme } from '@mui/joy'
@@ -19,10 +20,10 @@ const FeaturesSection = () => {
 
   const features = [
     {
-      icon: <Schedule />,
-      title: 'Smart Scheduling',
+      icon: <Psychology />,
+      title: 'Natural Language Input',
       description:
-        'Flexible recurring tasks: daily, weekly, monthly, or custom intervals. Choose rolling or fixed schedules and set completion windows to fit any routine.',
+        'Add tasks just by typing. Donetick understands dates, priorities, labels. you can have quickest way to add tasks.',
     },
     {
       icon: <Groups />,
@@ -32,9 +33,21 @@ const FeaturesSection = () => {
     },
     {
       icon: <EmojiEvents />,
-      title: 'Motivating Gamification',
+      title: 'Gamification and Points',
       description:
-        'Earn points, climb leaderboards, and unlock achievements for completing tasks. Make productivity fun and rewarding.',
+        'Earn points, climb leaderboards for completing tasks. You can even require admin approval for points!',
+    },
+    {
+      icon: <CalendarMonth />,
+      title: 'Visual Calendar View',
+      description:
+        'See all your tasks in a color-coded calendar. Filter by assignee, view daily agendas, and plan with ease.',
+    },
+    {
+      icon: <Schedule />,
+      title: 'Smart Scheduling',
+      description:
+        'Flexible recurring tasks: daily, weekly, monthly, or custom intervals. Choose rolling or fixed schedules and set completion windows to fit any routine.',
     },
     {
       icon: <Assignment />,
@@ -43,52 +56,46 @@ const FeaturesSection = () => {
         'Distribute tasks fairly using smart algorithms: round-robin, least busy, random, or custom rules. No more manual juggling.',
     },
     {
-      icon: <Analytics />,
-      title: 'Insightful Analytics',
-      description:
-        'Track progress, view completion history, and spot trends with clear reports and visualizations. Understand your productivity at a glance.',
-    },
-    {
-      icon: <AutoAwesome />,
-      title: 'Advanced Organization',
-      description:
-        'Break down tasks with subtasks, set priorities, add labels and tags, and use templates for quick setup. Stay organized your way.',
-    },
-    {
-      icon: <Notifications />,
-      title: 'Smart Notifications',
-      description:
-        'Get timely reminders via email, Telegram, push, or webhooks. Customize alerts so you never miss what matters.',
-    },
-    {
-      icon: <Api />,
-      title: 'Seamless Integrations',
-      description:
-        'Connect with REST API, webhooks, and automation tools. Import, export, and trigger actions to fit your workflow.',
-    },
-    {
-      icon: <Security />,
-      title: 'Privacy & Security',
-      description:
-        'Open-source and secure by design. Choose cloud or self-hosting for full control over your data.',
-    },
-    {
       icon: <Timer />,
       title: 'Built-in Time Tracking',
       description:
         'Track work sessions with a timer, review detailed logs, and analyze productivity patterns for every task.',
     },
     {
-      icon: <Psychology />,
-      title: 'Natural Language Input',
+      icon: <AutoAwesome />,
+      title: 'Advanced Organization',
       description:
-        'Add tasks just by typing. Our AI understands dates, priorities, labels, and more—no forms needed.',
+        'Break down tasks with subtasks, set priorities, add labels and tags, and use templates for quick setup.',
     },
     {
-      icon: <CalendarMonth />,
-      title: 'Visual Calendar View',
+      icon: <Settings />,
+      title: 'Advanced Task Settings',
       description:
-        'See all your tasks in a color-coded calendar. Filter by assignee, view daily agendas, and plan with ease.',
+        'Configure task-specific settings like completion windows, custom point values, and require admin approval for tasks.',
+    },
+    {
+      icon: <Analytics />,
+      title: 'Insightful Analytics',
+      description:
+        'Track progress, view completion history, and spot trends with clear reports and visualizations.',
+    },
+    {
+      icon: <Notifications />,
+      title: 'Smart Notifications',
+      description:
+        'Get timely reminders via Donetick app or other way like Telegram, push, or webhooks.',
+    },
+    {
+      icon: <Api />,
+      title: 'Seamless Integrations',
+      description:
+        'Connect with REST API, webhooks, and automation tools. Import, export, and trigger actions to fit your workflows.',
+    },
+    {
+      icon: <Security />,
+      title: 'Privacy & Security',
+      description:
+        'Open-source and transparent. For security, you can secure your account with 2FA.',
     },
   ]
 
@@ -179,33 +186,6 @@ const FeaturesSection = () => {
                   transition: 'opacity 0.4s ease',
                   pointerEvents: 'none',
                 },
-                '&:hover': {
-                  transform: { xs: 'translateY(-4px)', sm: 'translateY(-8px)' },
-                  boxShadow: {
-                    xs: '0 15px 30px rgba(0, 0, 0, 0.08)',
-                    sm: '0 25px 50px rgba(0, 0, 0, 0.1)',
-                  },
-                  borderColor: 'primary.200',
-                  '&::before': {
-                    transform: 'scaleX(1)',
-                  },
-                  '&::after': {
-                    opacity: 1,
-                  },
-                  '& .feature-icon': {
-                    transform: {
-                      xs: 'scale(1.05)',
-                      sm: 'scale(1.1) rotate(5deg)',
-                    },
-                    background:
-                      'linear-gradient(135deg, var(--joy-palette-primary-500) 0%, var(--joy-palette-primary-600) 100%)',
-                    color: 'primary.50',
-                    boxShadow: '0 8px 20px rgba(6, 182, 212, 0.3)',
-                  },
-                  '& .feature-title': {
-                    color: 'primary.600',
-                  },
-                },
                 '@media (max-width: 600px)': {
                   '&:active': {
                     transform: 'scale(0.98)',
@@ -286,62 +266,7 @@ const FeaturesSection = () => {
         mt={{ xs: 8, sm: 10, md: 12 }}
         data-aos='fade-up'
         data-aos-duration='800'
-      >
-        <Box
-          sx={{
-            p: { xs: 4, sm: 5, md: 6 },
-            borderRadius: { xs: 20, md: 24 },
-            background:
-              'linear-gradient(135deg, rgba(6, 182, 212, 0.05) 0%, rgba(8, 145, 178, 0.08) 100%)',
-            border: '1px solid rgba(6, 182, 212, 0.15)',
-            maxWidth: { xs: '100%', sm: 550, md: 600 },
-            mx: 'auto',
-            position: 'relative',
-            overflow: 'hidden',
-            '&::before': {
-              content: '""',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background:
-                'radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.1) 0%, transparent 70%)',
-              pointerEvents: 'none',
-            },
-          }}
-        >
-          <Typography
-            level='h3'
-            sx={{
-              fontSize: { xs: 22, sm: 26, md: 28 },
-              fontWeight: 700,
-              mb: { xs: 1.5, sm: 2 },
-              color: 'text.primary',
-              lineHeight: 1.2,
-              position: 'relative',
-              zIndex: 1,
-            }}
-          >
-            Ready to Transform Your Task Management?
-          </Typography>
-          <Typography
-            level='body-lg'
-            sx={{
-              color: 'text.secondary',
-              mb: { xs: 3, sm: 4 },
-              lineHeight: 1.6,
-              fontSize: { xs: 15, sm: 16 },
-              position: 'relative',
-              zIndex: 1,
-              px: { xs: 0, sm: 2 },
-            }}
-          >
-            Join thousands who have streamlined their workflows with Donetick's
-            powerful features
-          </Typography>
-        </Box>
-      </Box>
+      ></Box>
     </Container>
   )
 }

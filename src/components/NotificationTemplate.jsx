@@ -13,6 +13,7 @@ import Option from '@mui/joy/Option'
 import Select from '@mui/joy/Select'
 import Typography from '@mui/joy/Typography'
 import { useCallback, useEffect, useState } from 'react'
+import { NOTIFICATION_TYPE, TASK_COLOR } from '../utils/Colors'
 
 const timeUnits = [
   { label: 'Mins', value: 'm' },
@@ -307,8 +308,10 @@ const NotificationTemplate = ({
             flexDirection: 'column',
             position: 'relative',
             height: 90,
-            bgcolor: 'background.level1',
+            bgcolor: 'background.surface',
             borderRadius: 'md',
+            border: '1px solid',
+            borderColor: 'neutral.outlinedBorder',
             p: 2,
             transition: 'height 0.3s ease',
             // '&:hover': {
@@ -368,11 +371,11 @@ const NotificationTemplate = ({
                     left: `${percent}%`,
                     transform: 'translateX(-50%)',
                     color:
-                      Number(n.value) < 0
-                        ? 'primary.600'
-                        : Number(n.value) === 0
-                          ? 'warning.600'
-                          : 'success.600',
+                      convertToMinutes(n.value, n.unit) < 0
+                        ? TASK_COLOR.SCHEDULED
+                        : convertToMinutes(n.value, n.unit) === 0
+                          ? TASK_COLOR.TODAY
+                          : TASK_COLOR.LATE,
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
@@ -399,13 +402,6 @@ const NotificationTemplate = ({
                     }
                     size={'sm'}
                     variant={'solid'}
-                    color={
-                      Number(n.value) < 0
-                        ? 'success'
-                        : Number(n.value) === 0
-                          ? 'warning'
-                          : 'danger'
-                    }
                     sx={{
                       '--Badge-paddingX': '4px',
                       '--Badge-minHeight': '16px',
@@ -413,6 +409,15 @@ const NotificationTemplate = ({
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
+                      '& .MuiBadge-badge': {
+                        background:
+                          convertToMinutes(n.value, n.unit) < 0
+                            ? NOTIFICATION_TYPE.PREDUE
+                            : convertToMinutes(n.value, n.unit) === 0
+                              ? NOTIFICATION_TYPE.DUE_DATE
+                              : NOTIFICATION_TYPE.POSTDUE,
+                        color: 'white',
+                      },
                     }}
                   >
                     <NotificationsIcon
@@ -433,36 +438,7 @@ const NotificationTemplate = ({
   }
 
   return (
-    <Box
-      sx={
-        {
-          // border: '1px solid',
-          // borderColor: 'neutral.outlinedBorder',
-          // borderRadius: 2,
-          // p: 3,
-          // maxWidth: 500,
-          // bgcolor: 'background.body',
-          // boxShadow: 'sm',
-        }
-      }
-    >
-      {/* <Typography level={'h4'} sx={{ mb: 2 }}>
-        Schedule Name
-      </Typography> */}
-
-      {/* Template Name Field */}
-      {/* <Box sx={{ mb: 3 }}>
-        <Typography level={'body2'} sx={{ mb: 1, fontWeight: 'md' }}>
-          Template Name
-        </Typography>
-        <Input
-          value={templateName}
-          onChange={handleNameChange}
-          placeholder='Enter template name'
-          sx={{ width: '100%' }}
-        />
-      </Box> */}
-
+    <Box>
       {error && (
         <Alert
           variant='soft'
@@ -486,104 +462,200 @@ const NotificationTemplate = ({
           const badgeNumber = notificationIndexMap[idx]
           const uiRep = getUIRepresentation(n)
 
+          const getNotificationColors = value => {
+            if (Number(value) < 0) {
+              return {
+                bgColor: NOTIFICATION_TYPE.PREDUE,
+                lightBg: `${NOTIFICATION_TYPE.PREDUE}20`,
+                borderColor: `${NOTIFICATION_TYPE.PREDUE}40`,
+                textColor: NOTIFICATION_TYPE.PREDUE,
+              }
+            } else if (Number(value) === 0) {
+              return {
+                bgColor: NOTIFICATION_TYPE.DUE_DATE,
+                lightBg: `${NOTIFICATION_TYPE.DUE_DATE}20`,
+                borderColor: `${NOTIFICATION_TYPE.DUE_DATE}40`,
+                textColor: NOTIFICATION_TYPE.DUE_DATE,
+              }
+            } else {
+              return {
+                bgColor: NOTIFICATION_TYPE.POSTDUE,
+                lightBg: `${NOTIFICATION_TYPE.POSTDUE}20`,
+                borderColor: `${NOTIFICATION_TYPE.POSTDUE}40`,
+                textColor: NOTIFICATION_TYPE.POSTDUE,
+              }
+            }
+          }
+
+          const colors = getNotificationColors(n.value)
+
           return (
             <Box
               key={idx}
-              sx={{ display: 'flex', alignItems: 'center', mb: 1 }}
+              sx={{
+                mb: 1.5,
+                p: 2,
+                borderRadius: 8,
+                border: '1px solid',
+                borderColor: 'neutral.outlinedBorder',
+                background: 'background.surface',
+                transition: 'all 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1.5,
+              }}
             >
               <Box
+                className='notification-icon'
                 sx={{
-                  display: 'flex',
+                  display: 'inline-flex',
                   alignItems: 'center',
-                  justifyContent: 'start',
-                  width: 18,
+                  justifyContent: 'center',
+                  width: 32,
+                  height: 32,
+                  borderRadius: 6,
+                  background: `${colors.bgColor}15`,
+                  color: colors.textColor,
+                  position: 'relative',
                   flexShrink: 0,
+                  '& svg': {
+                    fontSize: 16,
+                  },
                 }}
               >
                 <Badge
                   badgeContent={badgeNumber}
                   size={'sm'}
                   sx={{
-                    '--Badge-minHeight': '20px',
-                    '--Badge-fontSize': '0.75rem',
+                    '--Badge-minHeight': '16px',
+                    '--Badge-fontSize': '0.7rem',
+                    '--Badge-paddingX': '5px',
+                    position: 'absolute',
+                    top: -6,
+                    right: -6,
+                    '& .MuiBadge-badge': {
+                      background: colors.bgColor,
+                      color: 'white',
+                    },
                   }}
-                  color={
-                    Number(n.value) < 0
-                      ? 'success'
-                      : Number(n.value) === 0
-                        ? 'warning'
-                        : 'danger'
-                  }
-                >
-                  {/* Empty box to attach badge to */}
-                </Badge>
+                />
+                <NotificationsIcon />
               </Box>
-              <Select
-                value={uiRep.timing}
-                onChange={(_, value) => handleChange(idx, 'timing', value)}
-                sx={{ mr: 1, minWidth: 100 }}
-                size={'sm'}
-              >
-                {timingOptions.map(opt => (
-                  <Option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </Option>
-                ))}
-              </Select>
-              <Input
-                type={'number'}
-                min={0}
-                value={uiRep.displayValue}
-                disabled={uiRep.timing === 'ondue'}
-                onChange={e =>
-                  handleChange(idx, 'displayValue', e.target.value)
-                }
+
+              <Box
                 sx={{
-                  width: 80,
-                  mr: 1,
-                  opacity: uiRep.timing === 'ondue' ? 0.6 : 1,
+                  minWidth: 0,
+                  flex: '1',
+                  display: { xs: 'none', md: 'flex' }, // Show only on md and up
                 }}
-                size={'sm'}
-                placeholder='0'
-              />
-              <Select
-                value={n.unit}
-                disabled={uiRep.timing === 'ondue'}
-                onChange={(_, value) => handleChange(idx, 'unit', value)}
+              >
+                <Typography
+                  level='body-sm'
+                  sx={{
+                    fontWeight: 600,
+                    color: 'text.primary',
+                    fontSize: 14,
+                  }}
+                >
+                  {getRelativeLabel(n)}
+                </Typography>
+              </Box>
+
+              <Box
                 sx={{
-                  mr: 1,
-                  minWidth: 80,
-                  opacity: uiRep.timing === 'ondue' ? 0.6 : 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  flexShrink: 0,
                 }}
-                size={'sm'}
               >
-                {timeUnits.map(opt => (
-                  <Option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </Option>
-                ))}
-              </Select>
-              <IconButton
-                onClick={() => removeNotification(idx)}
-                disabled={notifications.length === 1}
-                color={'danger'}
-                size={'sm'}
-                sx={{ mr: 1 }}
-                variant={'soft'}
-              >
-                <DeleteIcon fontSize={'small'} />
-              </IconButton>
+                <Select
+                  value={uiRep.timing}
+                  onChange={(_, value) => handleChange(idx, 'timing', value)}
+                  sx={{ minWidth: 80 }}
+                  size={'sm'}
+                >
+                  {timingOptions.map(opt => (
+                    <Option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </Option>
+                  ))}
+                </Select>
+                <Input
+                  type={'number'}
+                  min={0}
+                  value={uiRep.displayValue}
+                  disabled={uiRep.timing === 'ondue'}
+                  onChange={e =>
+                    handleChange(idx, 'displayValue', e.target.value)
+                  }
+                  sx={{
+                    width: 60,
+                    opacity: uiRep.timing === 'ondue' ? 0.6 : 1,
+                  }}
+                  size={'sm'}
+                  placeholder='0'
+                />
+                <Select
+                  value={n.unit}
+                  disabled={uiRep.timing === 'ondue'}
+                  onChange={(_, value) => handleChange(idx, 'unit', value)}
+                  sx={{
+                    minWidth: 70,
+                    opacity: uiRep.timing === 'ondue' ? 0.6 : 1,
+                  }}
+                  size={'sm'}
+                >
+                  {timeUnits.map(opt => (
+                    <Option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </Option>
+                  ))}
+                </Select>
+                <IconButton
+                  onClick={() => removeNotification(idx)}
+                  disabled={notifications.length === 1}
+                  color={'danger'}
+                  size={'sm'}
+                  variant={'soft'}
+                  sx={{
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                      transform: 'scale(1.1)',
+                    },
+                  }}
+                >
+                  <DeleteIcon fontSize={'small'} />
+                </IconButton>
+              </Box>
             </Box>
           )
         })}
-      <Box sx={{ display: 'flex', gap: 1, mt: 1, mb: 2, flexWrap: 'wrap' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          gap: 1.5,
+          mt: 1,
+          mb: 2,
+          flexWrap: 'wrap',
+        }}
+      >
         <Button
           onClick={() => addSmartNotification('reminder')}
           disabled={notifications.length >= maxNotifications}
           startDecorator={<AddIcon />}
           size={'sm'}
           variant={'outlined'}
-          color={'primary'}
+          sx={{
+            borderRadius: 6,
+            fontWeight: 500,
+            borderColor: `${TASK_COLOR.SCHEDULED}60`,
+            color: TASK_COLOR.SCHEDULED,
+            '&:hover': {
+              borderColor: TASK_COLOR.SCHEDULED,
+              background: `${TASK_COLOR.SCHEDULED}10`,
+            },
+          }}
         >
           Reminder
         </Button>
@@ -596,7 +668,16 @@ const NotificationTemplate = ({
           startDecorator={<AddIcon />}
           size={'sm'}
           variant={'outlined'}
-          color={'warning'}
+          sx={{
+            borderRadius: 6,
+            fontWeight: 500,
+            borderColor: `${NOTIFICATION_TYPE.DUE_DATE}60`,
+            color: NOTIFICATION_TYPE.DUE_DATE,
+            '&:hover': {
+              borderColor: NOTIFICATION_TYPE.DUE_DATE,
+              background: `${NOTIFICATION_TYPE.DUE_DATE}10`,
+            },
+          }}
         >
           Due Alert
         </Button>
@@ -606,28 +687,45 @@ const NotificationTemplate = ({
           startDecorator={<AddIcon />}
           size={'sm'}
           variant={'outlined'}
-          color={'danger'}
+          sx={{
+            borderRadius: 6,
+            fontWeight: 500,
+            borderColor: `${NOTIFICATION_TYPE.POSTDUE}60`,
+            color: NOTIFICATION_TYPE.POSTDUE,
+            '&:hover': {
+              borderColor: NOTIFICATION_TYPE.POSTDUE,
+              background: `${NOTIFICATION_TYPE.POSTDUE}10`,
+            },
+          }}
         >
           Follow-up
         </Button>
       </Box>
       {showSaveDefault && (
-        <Button
-          variant='outlined'
-          size='sm'
-          color='neutral'
-          // sx={{ ml: 'auto', mt: 0.5 }}
-          startDecorator={<Save />}
-          onClick={() => {
-            localStorage.setItem(
-              'defaultNotificationTemplate',
-              JSON.stringify(notifications),
-            )
-            setShowSaveDefault(false)
-          }}
-        >
-          Save as Default for Future Tasks
-        </Button>
+        <Box sx={{ mt: 1, display: 'flex', justifyContent: 'center' }}>
+          <Button
+            variant='outlined'
+            size='sm'
+            color='neutral'
+            startDecorator={<Save />}
+            sx={{
+              borderRadius: 6,
+              fontWeight: 500,
+              '&:hover': {
+                background: 'neutral.softHoverBg',
+              },
+            }}
+            onClick={() => {
+              localStorage.setItem(
+                'defaultNotificationTemplate',
+                JSON.stringify(notifications),
+              )
+              setShowSaveDefault(false)
+            }}
+          >
+            Save as Default
+          </Button>
+        </Box>
       )}
 
       {showTimeline && renderTimeline()}

@@ -53,6 +53,11 @@ export const COLORS = {
   sand: '#d7ccc8',
   white: '#FFFFFF',
 }
+export const NOTIFICATION_TYPE = {
+  PREDUE: '#4ec1a2',
+  DUE_DATE: '#f6ad55',
+  POSTDUE: '#F03A47',
+}
 
 export const TASK_COLOR = {
   COMPLETED: '#4ec1a2',

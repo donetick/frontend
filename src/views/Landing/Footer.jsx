@@ -21,11 +21,13 @@ const Footer = () => {
       { label: 'Features', href: '#features' },
       { label: 'Demo', href: '#demo' },
       { label: 'Getting Started', href: '#getting-started' },
-      { label: 'Pricing', href: '/pricing' },
     ],
     resources: [
       { label: 'Documentation', href: 'https://docs.donetick.com/' },
-      { label: 'API Reference', href: 'https://docs.donetick.com/api' },
+      {
+        label: 'API Reference',
+        href: 'https://docs.donetick.com/advance-settings/api',
+      },
       {
         label: 'Discussions',
         href: 'https://github.com/donetick/donetick/discussions',

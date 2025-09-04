@@ -22,6 +22,7 @@ import {
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
+import { TASK_COLOR } from '../../utils/Colors.jsx'
 
 const getCompletedChip = historyEntry => {
   if (historyEntry.status === 0) {
@@ -49,7 +50,7 @@ const getCompletedChip = historyEntry => {
       <Chip
         size='sm'
         variant='solid'
-        color='success'
+        sx={{ backgroundColor: TASK_COLOR.COMPLETED, color: 'white' }}
         startDecorator={<Check />}
       >
         On Time
@@ -57,7 +58,12 @@ const getCompletedChip = historyEntry => {
     )
   } else if (performedAt.isBefore(dueDate)) {
     return (
-      <Chip size='sm' variant='soft' color='primary' startDecorator={<Check />}>
+      <Chip
+        size='sm'
+        variant='soft'
+        sx={{ backgroundColor: TASK_COLOR.SCHEDULED, color: 'white' }}
+        startDecorator={<Check />}
+      >
         Early
       </Chip>
     )
@@ -66,7 +72,7 @@ const getCompletedChip = historyEntry => {
       <Chip
         size='sm'
         variant='solid'
-        color='warning'
+        sx={{ backgroundColor: TASK_COLOR.LATE, color: 'white' }}
         startDecorator={<Timelapse />}
       >
         Late
