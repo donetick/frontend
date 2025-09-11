@@ -1,7 +1,7 @@
 import { CalendarMonth } from '@mui/icons-material'
 import { Avatar, Box, Chip, Grid, Typography } from '@mui/joy'
 import moment from 'moment'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { getPriorityColor, TASK_COLOR } from '../../utils/Colors'
@@ -13,7 +13,7 @@ const getAssigneeColor = (assignee, userProfile) => {
     ? TASK_COLOR.ASSIGNED_TO_ME
     : TASK_COLOR.ASSIGNED_TO_OTHER
 }
-const CalendarView = ({ chores }) => {
+const CalendarCard = ({ chores }) => {
   const { data: userProfile } = useUserProfile()
 
   const [selectedDate, setSeletedDate] = useState(null)
@@ -22,6 +22,33 @@ const CalendarView = ({ chores }) => {
   // Fetch circle members data to get assignee names
   const { data: circleMembersData } = useCircleMembers()
   const circleMembers = circleMembersData?.res || []
+
+  // Auto-update selected calendar date when day changes
+  useEffect(() => {
+    if (!selectedDate) {
+      return
+    }
+
+    const now = new Date()
+    const tomorrow = new Date(now)
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    tomorrow.setHours(0, 0, 0, 0) // Set to start of tomorrow
+    
+    const msUntilTomorrow = tomorrow.getTime() - now.getTime()
+
+    const timeout = setTimeout(() => {
+      const today = new Date()
+      const yesterday = new Date(today)
+      yesterday.setDate(yesterday.getDate() - 1)
+      
+      // Check if selected date is now yesterday and update to today
+      if (selectedDate.toDateString() === yesterday.toDateString()) {
+        setSeletedDate(today)
+      }
+    }, msUntilTomorrow)
+
+    return () => clearTimeout(timeout)
+  }, [selectedDate])
 
   // Helper function to get assignee display name
   const getAssigneeName = assignedTo => {
@@ -307,4 +334,4 @@ const CalendarView = ({ chores }) => {
   )
 }
 
-export default CalendarView
+export default CalendarCard

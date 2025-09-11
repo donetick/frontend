@@ -23,7 +23,7 @@ import {
 } from '@mui/joy'
 
 import { useEffect, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { version } from '../../../package.json'
 import UserProfileAvatar from '../../components/UserProfileAvatar'
 import NavBarLink from './NavBarLink'
@@ -97,6 +97,7 @@ const NavBar = () => {
     () => setDrawerOpen(false),
   ]
   const location = useLocation()
+  const [searchParams] = useSearchParams()
   useEffect(() => {
     SafeArea.getSafeAreaInsets().then(data => {
       const { insets } = data
@@ -150,7 +151,8 @@ const NavBar = () => {
         backgroundColor: 'var(--joy-palette-background-body)',
       }}
     >
-      {['/chores', '/'].includes(location.pathname) ? (
+      {['/chores', '/'].includes(location.pathname) &&
+      !searchParams.get('filter') ? (
         <IconButton
           size='md'
           variant='plain'
@@ -159,7 +161,24 @@ const NavBar = () => {
           <MenuRounded />
         </IconButton>
       ) : (
-        <IconButton size='md' variant='plain' onClick={() => navigate(-1)}>
+        <IconButton
+          size='md'
+          variant='plain'
+          onClick={() => {
+            if (location.pathname === '/chores') {
+              // Navigate back to calendar view
+              navigate('/')
+            } else {
+              // Default back navigation
+              navigate(-1)
+            }
+          }}
+          title={
+            searchParams.get('from') === 'calendar'
+              ? 'Back to Calendar'
+              : 'Back'
+          }
+        >
           <ArrowBack />
         </IconButton>
       )}
@@ -192,9 +211,18 @@ const NavBar = () => {
           </div> */}
           <List
             // sx={{ p: 2, height: 'min-content' }}
+
             size='md'
             onClick={openDrawer}
-            sx={{ borderRadius: 4, width: '100%', padding: 1 }}
+            sx={{
+              borderRadius: 4,
+              width: '100%',
+              padding: 1,
+              paddingTop:
+                Capacitor.getPlatform() === 'android'
+                  ? `calc(var(--safe-area-inset-top, 0px))`
+                  : '',
+            }}
           >
             {links.map((link, index) => (
               <NavBarLink key={index} link={link} />

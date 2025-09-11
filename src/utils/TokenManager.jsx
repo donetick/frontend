@@ -10,21 +10,31 @@ class ApiManager {
   constructor() {
     this.customServerURL = `${API_URL}/api/v1`
     this.initialized = false
+    this.initPromise = null
     this.navigateToLogin = () => {}
   }
 
   async init() {
-    if (this.initialized) {
-      return
+    if (this.initPromise) {
+      return this.initPromise
     }
 
+    if (this.initialized) {
+      return Promise.resolve()
+    }
+
+    this.initPromise = this._doInit()
+    return this.initPromise
+  }
+
+  async _doInit() {
     const { value: serverURL } = await Preferences.get({
       key: 'customServerUrl',
     })
 
     this.customServerURL = `${serverURL || API_URL}/api/v1`
-    await localStore.initDatabase()
     this.initialized = true
+    await localStore.initDatabase()
   }
 
   getApiURL() {
@@ -47,6 +57,8 @@ export const getAssetURL = path => {
   return `${baseURL}/assets/${path}`
 }
 export async function UploadFile(url, options) {
+  await apiManager.init()
+
   if (!isTokenValid()) {
     Cookies.set('ca_redirect', window.location.pathname)
     window.location.href = '/login'
@@ -65,6 +77,7 @@ export async function UploadFile(url, options) {
 }
 
 export async function Fetch(url, options) {
+  await apiManager.init()
   if (!isTokenValid()) {
     Cookies.set('ca_redirect', window.location.pathname)
     if (window.location.pathname !== '/login') {
@@ -148,6 +161,7 @@ export const isTokenValid = () => {
     }
     return false
   }
+  return false
 }
 
 export const refreshAccessToken = () => {

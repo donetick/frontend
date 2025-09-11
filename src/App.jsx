@@ -23,6 +23,21 @@ const remove = className => {
 // TODO: Update the interval to at 60 minutes
 const intervalMS = 5 * 60 * 1000 // 5 minutes
 
+const startOpenReplay = () => {
+  if (!import.meta.env.VITE_OPENREPLAY_PROJECT_KEY) return
+  const tracker = new Tracker({
+    projectKey: import.meta.env.VITE_OPENREPLAY_PROJECT_KEY,
+  })
+  tracker.start()
+}
+
+const startApiManager = async navigate => {
+  await apiManager.init()
+  apiManager.setNavigateToLogin(() => {
+    navigate('/login')
+  })
+}
+
 const AppContent = () => {
   const { showNotification } = useNotification()
 
@@ -124,22 +139,6 @@ function App() {
       </AuthenticationProvider>
     </div>
   )
-}
-
-const startOpenReplay = () => {
-  if (!import.meta.env.VITE_OPENREPLAY_PROJECT_KEY) return
-  const tracker = new Tracker({
-    projectKey: import.meta.env.VITE_OPENREPLAY_PROJECT_KEY,
-  })
-
-  tracker.start()
-}
-
-const startApiManager = navigate => {
-  apiManager.init()
-  apiManager.setNavigateToLogin(() => {
-    navigate('/login')
-  })
 }
 
 export default App

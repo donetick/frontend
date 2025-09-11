@@ -553,7 +553,7 @@ const LabelView = () => {
 
   return (
     <Container maxWidth='md' sx={{ px: 0 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, p: 2 }}>
         {/* <EmojiEvents sx={{ fontSize: '2rem', color: '#FFD700' }} /> */}
         <Stack sx={{ flex: 1 }}>
           <Typography

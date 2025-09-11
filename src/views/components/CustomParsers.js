@@ -118,6 +118,7 @@ export const parseLabels = (inputSentence, userLabels) => {
 
 export const parseRepeatV2 = inputSentence => {
   const sentence = inputSentence.toLowerCase()
+  const lowerInputSentence = inputSentence.toLowerCase()
   const result = {
     frequency: 1,
     frequencyType: null,
@@ -232,8 +233,8 @@ export const parseRepeatV2 = inputSentence => {
           highlight: [
             {
               text: pattern.name,
-              start: inputSentence.indexOf(match[0]),
-              end: inputSentence.indexOf(match[0]) + match[0].length,
+              start: lowerInputSentence.indexOf(match[0]),
+              end: lowerInputSentence.indexOf(match[0]) + match[0].length,
             },
           ],
           cleanedSentence: inputSentence.replace(match[0], '').trim(),
@@ -250,8 +251,8 @@ export const parseRepeatV2 = inputSentence => {
           highlight: [
             {
               text: pattern.name,
-              start: inputSentence.indexOf(match[0]),
-              end: inputSentence.indexOf(match[0]) + match[0].length,
+              start: lowerInputSentence.indexOf(match[0]),
+              end: lowerInputSentence.indexOf(match[0]) + match[0].length,
             },
           ],
           cleanedSentence: inputSentence.replace(match[0], '').trim(),
@@ -275,8 +276,8 @@ export const parseRepeatV2 = inputSentence => {
           highlight: [
             {
               text: pattern.name,
-              start: inputSentence.indexOf(match[0]),
-              end: inputSentence.indexOf(match[0]) + match[0].length,
+              start: lowerInputSentence.indexOf(match[0]),
+              end: lowerInputSentence.indexOf(match[0]) + match[0].length,
             },
           ],
           cleanedSentence: inputSentence.replace(match[0], '').trim(),
@@ -299,8 +300,8 @@ export const parseRepeatV2 = inputSentence => {
           highlight: [
             {
               text: pattern.name,
-              start: inputSentence.indexOf(match[0]),
-              end: inputSentence.indexOf(match[0]) + match[0].length,
+              start: lowerInputSentence.indexOf(match[0]),
+              end: lowerInputSentence.indexOf(match[0]) + match[0].length,
             },
           ],
           cleanedSentence: inputSentence.replace(match[0], '').trim(),
@@ -315,8 +316,8 @@ export const parseRepeatV2 = inputSentence => {
           highlight: [
             {
               text: pattern.name,
-              start: inputSentence.indexOf(match[0]),
-              end: inputSentence.indexOf(match[0]) + match[0].length,
+              start: lowerInputSentence.indexOf(match[0]),
+              end: lowerInputSentence.indexOf(match[0]) + match[0].length,
             },
           ],
           cleanedSentence: inputSentence.replace(match[0], '').trim(),
@@ -332,8 +333,8 @@ export const parseRepeatV2 = inputSentence => {
           highlight: [
             {
               text: pattern.name,
-              start: inputSentence.indexOf(match[0]),
-              end: inputSentence.indexOf(match[0]) + match[0].length,
+              start: lowerInputSentence.indexOf(match[0]),
+              end: lowerInputSentence.indexOf(match[0]) + match[0].length,
             },
           ],
           cleanedSentence: inputSentence.replace(match[0], '').trim(),
@@ -351,8 +352,8 @@ export const parseRepeatV2 = inputSentence => {
           highlight: [
             {
               text: pattern.name,
-              start: inputSentence.indexOf(match[0]),
-              end: inputSentence.indexOf(match[0]) + match[0].length,
+              start: lowerInputSentence.indexOf(match[0]),
+              end: lowerInputSentence.indexOf(match[0]) + match[0].length,
             },
           ],
           cleanedSentence: inputSentence.replace(match[0], '').trim(),
@@ -367,8 +368,8 @@ export const parseRepeatV2 = inputSentence => {
           highlight: [
             {
               text: pattern.name,
-              start: inputSentence.indexOf(match[0]),
-              end: inputSentence.indexOf(match[0]) + match[0].length,
+              start: lowerInputSentence.indexOf(match[0]),
+              end: lowerInputSentence.indexOf(match[0]) + match[0].length,
             },
           ],
           cleanedSentence: inputSentence.replace(match[0], '').trim(),

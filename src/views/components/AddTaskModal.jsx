@@ -1,5 +1,5 @@
 import { Add, EditNotifications } from '@mui/icons-material'
-import { Box, Button, Chip, Input, Option, Select, Typography } from '@mui/joy'
+import { Box, Button, Input, Option, Select, Typography } from '@mui/joy'
 import { FormControl } from '@mui/material'
 import * as chrono from 'chrono-node'
 import moment from 'moment'
@@ -473,9 +473,6 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
       fullWidth={true}
       title='Create new task'
     >
-      <Chip startDecorator='🚧' variant='soft' color='warning' size='sm'>
-        Experimental Feature
-      </Chip>
       <Box>
         <Box
           sx={{

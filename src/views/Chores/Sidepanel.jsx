@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useChoresHistory } from '../../queries/ChoreQueries'
 import { ChoresGrouper } from '../../utils/Chores'
 import { getSidepanelConfig } from '../../utils/SidepanelConfig'
-import CalendarView from '../components/CalendarView'
+import CalendarCard from '../components/CalendarCard'
 import ActivitiesCard from './ActivitesCard'
 import TasksByAssigneeCard from './TasksByAssigneeCard'
 import UserSwitcher from './UserSwitcher'
@@ -78,7 +78,7 @@ const Sidepanel = ({ chores }) => {
             <Box
               sx={{ width: '100%', overflowY: 'hidden', overflowX: 'hidden' }}
             >
-              <CalendarView chores={chores} />
+              <CalendarCard chores={chores} />
             </Box>
           </Sheet>
         )

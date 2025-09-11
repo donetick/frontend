@@ -1,4 +1,4 @@
-import { Add, HorizontalRule } from '@mui/icons-material'
+import { Add, HorizontalRule, Save } from '@mui/icons-material'
 import {
   Box,
   Button,
@@ -102,6 +102,10 @@ const ChoreEdit = () => {
   const [errors, setErrors] = useState({})
   const [attemptToSave, setAttemptToSave] = useState(false)
   const [addLabelModalOpen, setAddLabelModalOpen] = useState(false)
+  const [showSavePrivacyDefault, setShowSavePrivacyDefault] = useState(false)
+  const [privacySaved, setPrivacySaved] = useState(false)
+  const [showSaveNotificationDefault, setShowSaveNotificationDefault] =
+    useState(false)
 
   const { data: userLabelsRaw, isLoading: isUserLabelsLoading } = useLabels()
   const updateChoreMutation = useUpdateChore()
@@ -272,6 +276,23 @@ const ChoreEdit = () => {
         setAllUserThings(data.res)
       })
     })
+
+    // Load default privacy setting for new chores
+    if (!choreId) {
+      const defaultPrivacySetting = localStorage.getItem(
+        'defaultPrivacySetting',
+      )
+      if (defaultPrivacySetting !== null) {
+        setIsPrivate(JSON.parse(defaultPrivacySetting))
+      }
+
+      const defaultNotificationSetting = localStorage.getItem(
+        'defaultNotificationSetting',
+      )
+      if (defaultNotificationSetting !== null) {
+        setIsNotificable(JSON.parse(defaultNotificationSetting))
+      }
+    }
   }, [])
   useEffect(() => {
     if (isChoreLoading === false && choreData && choreId) {
@@ -1091,7 +1112,9 @@ const ChoreEdit = () => {
             name='isPrivate'
             value={isPrivate}
             onChange={event => {
-              setIsPrivate(event.target.value === 'true' ? true : false)
+              const newValue = event.target.value === 'true' ? true : false
+              setIsPrivate(newValue)
+              setShowSavePrivacyDefault(true)
             }}
             sx={{
               '& > div': { py: 1 },
@@ -1108,6 +1131,33 @@ const ChoreEdit = () => {
               </FormHelperText>
             </FormControl>
           </RadioGroup>
+
+          {showSavePrivacyDefault && (
+            <Box sx={{ mt: 0, display: 'flex', justifyContent: 'start' }}>
+              <Button
+                variant='outlined'
+                size='sm'
+                color='neutral'
+                startDecorator={<Save />}
+                sx={{
+                  borderRadius: 6,
+                  fontWeight: 500,
+                  '&:hover': {
+                    background: 'neutral.softHoverBg',
+                  },
+                }}
+                onClick={() => {
+                  localStorage.setItem(
+                    'defaultPrivacySetting',
+                    JSON.stringify(isPrivate),
+                  )
+                  setShowSavePrivacyDefault(false)
+                }}
+              >
+                Save Preference
+              </Button>
+            </Box>
+          )}
         </Box>
       </Box>
 

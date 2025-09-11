@@ -1,5 +1,5 @@
 import { Capacitor } from '@capacitor/core'
-import { Refresh } from '@mui/icons-material'
+import { Delete, Refresh } from '@mui/icons-material'
 import {
   Box,
   Button,
@@ -424,14 +424,10 @@ const Settings = () => {
                     ))}
                   </Select>
                 )}
-                {userProfile.role === 'admin' &&
+                {isAdmin &&
                   member.userId !== userProfile.id &&
                   member.isActive && (
                     <Button
-                      disabled={
-                        circleMembers.find(m => userProfile.id == m.userId)
-                          .role !== 'admin'
-                      }
                       variant='outlined'
                       color='danger'
                       size='sm'
@@ -449,6 +445,17 @@ const Settings = () => {
                                   type: 'success',
                                   message: 'Removed member successfully',
                                 })
+                                // Invalidate and refetch circle-related queries
+                                queryClient.invalidateQueries(['circleMembers'])
+                                queryClient.invalidateQueries(['userCircle'])
+                                queryClient.refetchQueries(['circleMembers'])
+                                queryClient.refetchQueries(['userCircle'])
+                                // Update local state immediately
+                                setCircleMembers(prevMembers =>
+                                  prevMembers.filter(
+                                    m => m.userId !== member.userId,
+                                  ),
+                                )
                               }
                             })
                           },
@@ -458,7 +465,7 @@ const Settings = () => {
                         )
                       }}
                     >
-                      Remove
+                      <Delete />
                     </Button>
                   )}
               </Box>
@@ -514,8 +521,18 @@ const Settings = () => {
                           type: 'success',
                           message: 'Accepted request successfully',
                         })
-                        // reload the page
-                        window.location.reload()
+                        // Invalidate and refetch circle-related queries
+                        queryClient.invalidateQueries(['circleMembers'])
+                        queryClient.invalidateQueries(['circleMemberRequests'])
+                        queryClient.invalidateQueries(['userCircle'])
+                        queryClient.refetchQueries(['circleMembers'])
+                        queryClient.refetchQueries(['circleMemberRequests'])
+                        queryClient.refetchQueries(['userCircle'])
+                        // Refresh local state
+                        refreshMemberRequests()
+                        GetAllCircleMembers().then(data => {
+                          setCircleMembers(data.res ? data.res : [])
+                        })
                       }
                     })
                   },
@@ -550,23 +567,29 @@ const Settings = () => {
           <Button
             variant='soft'
             onClick={() => {
-              showConfirmation(
-                `Are you sure you want to leave your circle and join '${circleInviteCode}'?`,
-                'Join Circle',
-                () => {
-                  JoinCircle(circleInviteCode).then(resp => {
-                    if (resp.ok) {
-                      showNotification({
-                        type: 'success',
-                        message:
-                          'Joined circle successfully, wait for the circle owner to accept your request.',
-                      })
-                    }
+              JoinCircle(circleInviteCode).then(resp => {
+                if (resp.ok) {
+                  showNotification({
+                    type: 'success',
+                    message:
+                      'Joined circle successfully, wait for the circle owner to accept your request.',
                   })
-                },
-                'Join',
-                'Cancel',
-              )
+                  setTimeout(() => navigate('/'), 3000)
+                } else {
+                  if (resp.status === 409) {
+                    showNotification({
+                      type: 'error',
+                      message: 'You are already a member of this circle',
+                    })
+                  } else {
+                    showNotification({
+                      type: 'error',
+                      message: 'Failed to join circle',
+                    })
+                  }
+                  setTimeout(() => navigate('/'), 3000)
+                }
+              })
             }}
           >
             Join Circle

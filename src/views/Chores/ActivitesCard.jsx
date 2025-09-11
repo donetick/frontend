@@ -254,12 +254,11 @@ const ActivitiesCard = ({ title = 'Recent Activities' }) => {
           p: 2,
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'space-between',
           boxShadow: 'sm',
           borderRadius: 20,
+          width: '310px',
           minHeight: 300,
-          width: '315px',
+          maxHeight: 400,
           mb: 1,
         }}
       >
@@ -311,12 +310,11 @@ const ActivitiesCard = ({ title = 'Recent Activities' }) => {
           p: 2,
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'space-between',
           boxShadow: 'sm',
           borderRadius: 20,
-          //   width: '290px',
+          width: '310px',
           minHeight: 300,
+          maxHeight: 400,
           mb: 1,
         }}
       >

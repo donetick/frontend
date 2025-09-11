@@ -4,7 +4,6 @@ import {
   Box,
   Button,
   Card,
-  Divider,
   Input,
   Typography,
 } from '@mui/joy'
@@ -19,6 +18,7 @@ import { UpdateUserDetails } from '../../utils/Fetcher'
 import { resolvePhotoURL } from '../../utils/Helpers'
 import { getCroppedImg } from '../../utils/imageCropUtils'
 import { UploadFile } from '../../utils/TokenManager'
+import SettingsLayout from './SettingsLayout'
 
 const ProfileSettings = () => {
   const { data: userProfile } = useUserProfile()
@@ -136,165 +136,165 @@ const ProfileSettings = () => {
   // Helper to resolve photoURL with baseURL if needed
 
   return (
-    <div className='grid gap-4 py-4' id='profile'>
-      <Typography level='h3'>Profile Settings</Typography>
-      <Divider />
-      <Typography level='body-md'>
-        Update your display name and profile photo.
-      </Typography>
-      <Card
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 2,
-          p: 2,
-          maxWidth: 400,
-        }}
-      >
-        <Avatar src={photoURL} sx={{ width: 64, height: 64 }} />
-        <Box sx={{ flex: 1 }}>
+    <SettingsLayout title='Profile Settings'>
+      <div className='grid gap-4 py-4' id='profile'>
+        <Typography level='body-md'>
+          Update your display name and profile photo.
+        </Typography>
+        <Card
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            p: 2,
+            maxWidth: 400,
+          }}
+        >
+          <Avatar src={photoURL} sx={{ width: 64, height: 64 }} />
+          <Box sx={{ flex: 1 }}>
+            <Button
+              variant='soft'
+              color='primary'
+              onClick={() => fileInputRef.current.click()}
+              loading={isUploading}
+              sx={{ mb: 1 }}
+            >
+              Change Photo
+            </Button>
+            <input
+              ref={fileInputRef}
+              type='file'
+              accept='image/*'
+              style={{ display: 'none' }}
+              onChange={handlePhotoChange}
+            />
+          </Box>
+        </Card>
+        <Modal
+          open={showCropper}
+          onClose={() => {
+            setShowCropper(false)
+            setSelectedFile(null)
+          }}
+        >
+          <ModalDialog
+            layout='center'
+            sx={{
+              width: 360,
+              maxWidth: '90vw',
+              bgcolor: '#fff',
+              borderRadius: 2,
+              boxShadow: 24,
+              p: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minHeight: 420,
+            }}
+          >
+            <Box sx={{ width: 320, height: 320, position: 'relative', mt: 2 }}>
+              <Cropper
+                image={selectedFile}
+                crop={crop}
+                zoom={zoom}
+                aspect={1}
+                cropShape='round'
+                showGrid={false}
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={onCropComplete}
+              />
+            </Box>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                width: '100%',
+                p: 2,
+                mt: 2,
+              }}
+            >
+              <Button
+                onClick={handleCropSave}
+                loading={isUploading}
+                variant='solid'
+                color='primary'
+                size='md'
+                sx={{ mr: 1 }}
+              >
+                Save
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowCropper(false)
+                  setSelectedFile(null)
+                }}
+                variant='soft'
+                color='neutral'
+              >
+                Cancel
+              </Button>
+            </Box>
+          </ModalDialog>
+        </Modal>
+        <Box sx={{ maxWidth: 400, mt: 3 }}>
+          <Typography level='body-sm' sx={{ mb: 0.5 }}>
+            Display Name
+          </Typography>
+          <Input
+            value={displayName}
+            onChange={e => setDisplayName(e.target.value)}
+            placeholder='Enter your display name'
+            sx={{ mb: 2 }}
+          />
+
+          <Typography level='body-sm' sx={{ mb: 0.5 }}>
+            Timezone
+          </Typography>
+          <Autocomplete
+            value={timezone}
+            onChange={(e, newValue) => setTimezone(newValue)}
+            options={timezones}
+            getOptionLabel={tz => {
+              const formattedTimezone = tz.replace(/_/g, ' ')
+              const currentTime = new Date().toLocaleString('en-US', {
+                timeZone: tz,
+                timeStyle: 'short',
+              })
+              return `${formattedTimezone} (${currentTime})`
+            }}
+            filterOptions={(options, { inputValue }) => {
+              if (!inputValue) return options
+
+              const searchTerms = inputValue.toLowerCase().split(/\s+/)
+              return options.filter(tz => {
+                const timezoneLower = tz.toLowerCase()
+                const timezoneParts = tz.toLowerCase().split(/[/_]/)
+
+                return searchTerms.every(
+                  term =>
+                    timezoneLower.includes(term) ||
+                    timezoneParts.some(part => part.includes(term)),
+                )
+              })
+            }}
+            placeholder='Select your timezone'
+            sx={{ mb: 2 }}
+          />
+
           <Button
             variant='soft'
             color='primary'
-            onClick={() => fileInputRef.current.click()}
-            loading={isUploading}
-            sx={{ mb: 1 }}
+            onClick={handleSave}
+            loading={isSaving}
+            sx={{ width: 120 }}
           >
-            Change Photo
+            Save
           </Button>
-          <input
-            ref={fileInputRef}
-            type='file'
-            accept='image/*'
-            style={{ display: 'none' }}
-            onChange={handlePhotoChange}
-          />
         </Box>
-      </Card>
-      <Modal
-        open={showCropper}
-        onClose={() => {
-          setShowCropper(false)
-          setSelectedFile(null)
-        }}
-      >
-        <ModalDialog
-          layout='center'
-          sx={{
-            width: 360,
-            maxWidth: '90vw',
-            bgcolor: '#fff',
-            borderRadius: 2,
-            boxShadow: 24,
-            p: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minHeight: 420,
-          }}
-        >
-          <Box sx={{ width: 320, height: 320, position: 'relative', mt: 2 }}>
-            <Cropper
-              image={selectedFile}
-              crop={crop}
-              zoom={zoom}
-              aspect={1}
-              cropShape='round'
-              showGrid={false}
-              onCropChange={setCrop}
-              onZoomChange={setZoom}
-              onCropComplete={onCropComplete}
-            />
-          </Box>
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              width: '100%',
-              p: 2,
-              mt: 2,
-            }}
-          >
-            <Button
-              onClick={handleCropSave}
-              loading={isUploading}
-              variant='solid'
-              color='primary'
-              size='md'
-              sx={{ mr: 1 }}
-            >
-              Save
-            </Button>
-            <Button
-              onClick={() => {
-                setShowCropper(false)
-                setSelectedFile(null)
-              }}
-              variant='soft'
-              color='neutral'
-            >
-              Cancel
-            </Button>
-          </Box>
-        </ModalDialog>
-      </Modal>
-      <Box sx={{ maxWidth: 400, mt: 3 }}>
-        <Typography level='body-sm' sx={{ mb: 0.5 }}>
-          Display Name
-        </Typography>
-        <Input
-          value={displayName}
-          onChange={e => setDisplayName(e.target.value)}
-          placeholder='Enter your display name'
-          sx={{ mb: 2 }}
-        />
-
-        <Typography level='body-sm' sx={{ mb: 0.5 }}>
-          Timezone
-        </Typography>
-        <Autocomplete
-          value={timezone}
-          onChange={(e, newValue) => setTimezone(newValue)}
-          options={timezones}
-          getOptionLabel={tz => {
-            const formattedTimezone = tz.replace(/_/g, ' ')
-            const currentTime = new Date().toLocaleString('en-US', {
-              timeZone: tz,
-              timeStyle: 'short',
-            })
-            return `${formattedTimezone} (${currentTime})`
-          }}
-          filterOptions={(options, { inputValue }) => {
-            if (!inputValue) return options
-
-            const searchTerms = inputValue.toLowerCase().split(/\s+/)
-            return options.filter(tz => {
-              const timezoneLower = tz.toLowerCase()
-              const timezoneParts = tz.toLowerCase().split(/[/_]/)
-
-              return searchTerms.every(
-                term =>
-                  timezoneLower.includes(term) ||
-                  timezoneParts.some(part => part.includes(term)),
-              )
-            })
-          }}
-          placeholder='Select your timezone'
-          sx={{ mb: 2 }}
-        />
-
-        <Button
-          variant='soft'
-          color='primary'
-          onClick={handleSave}
-          loading={isSaving}
-          sx={{ width: 120 }}
-        >
-          Save
-        </Button>
-      </Box>
-    </div>
+      </div>
+    </SettingsLayout>
   )
 }
 

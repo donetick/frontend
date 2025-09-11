@@ -38,9 +38,10 @@ import {
 } from '@mui/joy'
 import Fuse from 'fuse.js'
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useChores } from '../../queries/ChoreQueries'
 import { useNotification } from '../../service/NotificationProvider'
+import { TASK_COLOR } from '../../utils/Colors'
 import { ArchiveChore } from '../../utils/Fetcher'
 import Priorities from '../../utils/Priorities'
 import LoadingComponent from '../components/Loading'
@@ -102,6 +103,7 @@ const MyChores = () => {
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(new Date())
   const menuRef = useRef(null)
   const Navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { data: userLabels, isLoading: userLabelsLoading } = useLabels()
   const {
     data: choresData,
@@ -126,14 +128,14 @@ const MyChores = () => {
       ) {
         setPerformers(membersData.res)
         let sortedChores = choresData.res.sort(ChoreSorter)
-        
+
         // Filter chores based on impersonated user
         if (impersonatedUser) {
-          sortedChores = sortedChores.filter(chore => 
-            chore.assignedTo === impersonatedUser.userId
+          sortedChores = sortedChores.filter(
+            chore => chore.assignedTo === impersonatedUser.userId,
           )
         }
-        
+
         setChores(sortedChores)
         setFilteredChores(sortedChores)
         const sections = ChoresGrouper(
@@ -400,6 +402,72 @@ const MyChores = () => {
       document.removeEventListener('keyup', handleKeyUp)
     }
   }, [isMultiSelectMode, selectedChores.size, addTaskModalOpen])
+
+  // Auto-update selected calendar date when day changes (large screen only)
+  useEffect(() => {
+    if (!isLargeScreen || viewMode !== 'calendar' || !selectedCalendarDate) {
+      return
+    }
+
+    const now = new Date()
+    const tomorrow = new Date(now)
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    tomorrow.setHours(0, 0, 0, 0) // Set to start of tomorrow
+
+    const msUntilTomorrow = tomorrow.getTime() - now.getTime()
+
+    const timeout = setTimeout(() => {
+      const today = new Date()
+      const yesterday = new Date(today)
+      yesterday.setDate(yesterday.getDate() - 1)
+
+      // Check if selected date is now yesterday and update to today
+      if (selectedCalendarDate.toDateString() === yesterday.toDateString()) {
+        setSelectedCalendarDate(today)
+      }
+    }, msUntilTomorrow)
+
+    return () => clearTimeout(timeout)
+  }, [isLargeScreen, viewMode, selectedCalendarDate])
+
+  // Handle URL parameters for navigation from calendar
+  useEffect(() => {
+    const filter = searchParams.get('filter')
+    const view = searchParams.get('view')
+
+    if (view === 'calendar') {
+      setViewMode('calendar')
+      setSearchFilter('All')
+      setSelectedCalendarDate(null)
+      return
+    }
+
+    if (filter && chores.length > 0) {
+      let filterKey = ''
+      let filteredChores = []
+
+      switch (filter) {
+        case 'overdue':
+          filterKey = 'Overdue'
+          filteredChores = FILTERS['Overdue'](chores)
+          break
+        case 'unplanned':
+          filterKey = 'No Due Date'
+          filteredChores = FILTERS['No Due Date'](chores)
+          break
+        case 'pending-approval':
+          filterKey = 'Pending Approval'
+          filteredChores = FILTERS['Pending Approval'](chores)
+          break
+        default:
+          return
+      }
+
+      setFilteredChores(filteredChores)
+      setSearchFilter(filterKey)
+      setViewMode('default')
+    }
+  }, [searchParams, chores])
   const setSelectedChoreSectionWithCache = value => {
     setSelectedChoreSection(value)
     localStorage.setItem('selectedChoreSection', value)
@@ -454,16 +522,16 @@ const MyChores = () => {
     if (searchTerm?.length > 0 || searchFilter !== 'All') {
       return filteredChores
     }
-    
+
     let choresToFilter = chores
-    
+
     // Filter by impersonated user first if set
     if (impersonatedUser) {
-      choresToFilter = choresToFilter.filter(chore => 
-        chore.assignedTo === impersonatedUser.userId
+      choresToFilter = choresToFilter.filter(
+        chore => chore.assignedTo === impersonatedUser.userId,
       )
     }
-    
+
     return choresToFilter.filter(ChoreFilters(userProfile)[selectedChoreFilter])
   }
 
@@ -480,14 +548,14 @@ const MyChores = () => {
 
   const updateChores = newChore => {
     let newChores = [...chores, newChore]
-    
+
     // Filter chores based on impersonated user
     if (impersonatedUser) {
-      newChores = newChores.filter(chore => 
-        chore.assignedTo === impersonatedUser.userId
+      newChores = newChores.filter(
+        chore => chore.assignedTo === impersonatedUser.userId,
       )
     }
-    
+
     setChores(newChores)
     setFilteredChores(newChores)
     setChoreSections(
@@ -1658,6 +1726,128 @@ const MyChores = () => {
           )}
         {viewMode === 'calendar' && (
           <>
+            {/* Summary Chips when no date selected */}
+            <Box
+              sx={{
+                mt: 1,
+                mb: 1,
+                display: 'flex',
+                gap: 1.5,
+                justifyContent: 'start',
+                flexWrap: 'wrap',
+              }}
+            >
+              {FILTERS['Overdue'](getFilteredChores()).length > 0 && (
+                <Chip
+                  variant='soft'
+                  color='danger'
+                  size='lg'
+                  onClick={() => {
+                    // Update URL for navigation context
+                    Navigate('/chores?filter=overdue', {
+                      replace: false,
+                    })
+
+                    // Also update state directly for immediate smooth transition
+                    const overdueChores =
+                      FILTERS['Overdue'](getFilteredChores())
+                    setFilteredChores(overdueChores)
+                    setSearchFilter('Overdue')
+                    setViewMode('default')
+                    setSelectedCalendarDate(null)
+                  }}
+                  sx={{
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    px: 1,
+                    py: 0.5,
+                  }}
+                  startDecorator={
+                    <Chip size='md' variant='solid' color='danger'>
+                      {FILTERS['Overdue'](getFilteredChores()).length}
+                    </Chip>
+                  }
+                >
+                  Overdue
+                </Chip>
+              )}
+
+              {FILTERS['No Due Date'](getFilteredChores()).length > 0 && (
+                <Chip
+                  variant='soft'
+                  color='neutral'
+                  size='lg'
+                  onClick={() => {
+                    // Update URL for navigation context
+                    Navigate('/chores?filter=unplanned', {
+                      replace: false,
+                    })
+
+                    // Also update state directly for immediate smooth transition
+                    const unplannedChores =
+                      FILTERS['No Due Date'](getFilteredChores())
+                    setFilteredChores(unplannedChores)
+                    setSearchFilter('No Due Date')
+                    setViewMode('default')
+                    setSelectedCalendarDate(null)
+                  }}
+                  sx={{
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    px: 1,
+                    py: 0.5,
+                  }}
+                  startDecorator={
+                    <Chip size='md' variant='solid' color='neutral'>
+                      {FILTERS['No Due Date'](getFilteredChores()).length}
+                    </Chip>
+                  }
+                >
+                  Unplanned
+                </Chip>
+              )}
+
+              {FILTERS['Pending Approval'](getFilteredChores()).length > 0 && (
+                <Chip
+                  variant='soft'
+                  size='lg'
+                  onClick={() => {
+                    // Update URL for navigation context
+                    Navigate('/chores?filter=pending-approval', {
+                      replace: true,
+                    })
+
+                    // Also update state directly for immediate smooth transition
+                    const pendingApprovalChores =
+                      FILTERS['Pending Approval'](getFilteredChores())
+                    setFilteredChores(pendingApprovalChores)
+                    setSearchFilter('Pending Approval')
+                    setViewMode('default')
+                    setSelectedCalendarDate(null)
+                  }}
+                  sx={{
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    px: 1,
+                    py: 0.5,
+                  }}
+                  startDecorator={
+                    <Chip
+                      size='md'
+                      variant='solid'
+                      sx={{
+                        bgcolor: TASK_COLOR.PENDING_REVIEW,
+                        color: 'white',
+                      }}
+                    >
+                      {FILTERS['Pending Approval'](getFilteredChores()).length}
+                    </Chip>
+                  }
+                >
+                  Pending Approval
+                </Chip>
+              )}
+            </Box>
             {/* Calendar Monthly View */}
             <Box sx={{ mb: 2 }}>
               {isLargeScreen ? (
@@ -1949,6 +2139,11 @@ const FILTERS = {
   'No Due Date': function (chores) {
     return chores.filter(chore => {
       return chore.nextDueDate === null
+    })
+  },
+  'Pending Approval': function (chores) {
+    return chores.filter(chore => {
+      return chore.status === 3
     })
   },
 }

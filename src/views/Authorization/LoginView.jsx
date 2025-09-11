@@ -425,6 +425,7 @@ const LoginView = () => {
                 label='Password'
                 type='password'
                 id='password'
+                autoComplete='password'
                 value={password}
                 onChange={e => {
                   setPassword(e.target.value)

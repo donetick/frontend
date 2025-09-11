@@ -702,7 +702,15 @@ const NotificationTemplate = ({
         </Button>
       </Box>
       {showSaveDefault && (
-        <Box sx={{ mt: 1, display: 'flex', justifyContent: 'center' }}>
+        <Box
+          sx={{
+            mt: 1,
+            display: 'flex',
+            justifyContent: 'start',
+            alignItems: 'center',
+            gap: 1,
+          }}
+        >
           <Button
             variant='outlined'
             size='sm'
@@ -723,7 +731,7 @@ const NotificationTemplate = ({
               setShowSaveDefault(false)
             }}
           >
-            Save as Default
+            Save Preference
           </Button>
         </Box>
       )}
