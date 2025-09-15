@@ -19,7 +19,8 @@ const HomeHero = () => {
   const windowThreshold = 600
   const { mode, setMode } = useColorScheme()
   const HERO_TEXT_THAT = [
-    'The task manager that helps familiesand individuals stay on top of chores with smart scheduling, fair assignments, and powerful automation.',
+    // 'The collaborative task manager that makes household management fair, fun, and effortless.',
+    'The smart task manager that keeps individuals and families organized with intelligent scheduling and fair task distribution.',
   ]
 
   const [heroTextIndex, setHeroTextIndex] = React.useState(0)
