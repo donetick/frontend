@@ -246,12 +246,15 @@ const SignupView = () => {
           <FormControl error={displayNameError}>
             <FormHelperText>{displayNameError}</FormHelperText>
           </FormControl>
+          <Typography level='body2' sx={{ mt: 2, mb: 1, textAlign: 'center', color: 'text.secondary' }}>
+            By signing up, you agree to our Terms of Service and Privacy Policy
+          </Typography>
           <Button
             // type='submit'
             size='lg'
             fullWidth
             variant='solid'
-            sx={{ mt: 3, mb: 1 }}
+            sx={{ mt: 1, mb: 1 }}
             onClick={handleSubmit}
           >
             Sign Up
