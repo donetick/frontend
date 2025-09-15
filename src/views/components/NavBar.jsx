@@ -89,6 +89,7 @@ const links = [
 import { SafeArea } from 'capacitor-plugin-safe-area'
 import Z_INDEX from '../../constants/zIndex'
 
+const publicPages = ['/landing', '/privacy', '/terms']
 const NavBar = () => {
   const navigate = useNavigate()
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -126,7 +127,7 @@ const NavBar = () => {
     )
   }
   // if url has /landing then remove the navbar:
-  if (location.pathname === '/landing') {
+  if (publicPages.includes(location.pathname)) {
     return null
   }
   if (
