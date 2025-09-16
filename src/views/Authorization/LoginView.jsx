@@ -648,7 +648,7 @@ const LoginView = () => {
               variant='plain'
               size='sm'
               onClick={() => {
-                window.open('https://donetick.com/privacy-policy', '_blank')
+                window.open('https://donetick.com/privacy', '_blank')
               }}
             >
               Privacy Policy

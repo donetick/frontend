@@ -6,30 +6,24 @@ import { useImpersonateUser } from '../../contexts/ImpersonateUserContext'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import UserModal from '../Modals/Inputs/UserModal'
 const UserSwitcher = () => {
-  const { impersonatedUser, setImpersonatedUser } = useImpersonateUser()
-  const [isAdmin, setIsAdmin] = useState(false)
+  const { 
+    impersonatedUser, 
+    isImpersonating,
+    startImpersonation, 
+    stopImpersonation,
+    canImpersonate 
+  } = useImpersonateUser()
   const { data: userProfile } = useUserProfile()
-
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const { data: circleMembersData, isLoading: isCircleMembersLoading } =
     useCircleMembers()
 
-  useEffect(() => {
-    if (userProfile && userProfile?.id) {
-      const members = circleMembersData?.res || []
-      const isUserAdmin = members.some(
-        member =>
-          member.userId === userProfile?.id &&
-          (member.role === 'admin' || member.role === 'manager'),
-      )
-
-      setIsAdmin(isUserAdmin)
-    }
-  }, [userProfile, circleMembersData])
+  // Check if current user can impersonate
+  const isAdmin = canImpersonate(userProfile, circleMembersData?.res)
   if (!isAdmin) {
     return null
-  } else if (isCircleMembersLoading || impersonatedUser === null) {
+  } else if (isCircleMembersLoading || !isImpersonating) {
     return (
       <Sheet
         variant='plain'
@@ -81,7 +75,7 @@ const UserSwitcher = () => {
             isOpen={isModalOpen}
             performers={circleMembersData?.res}
             onSelect={user => {
-              setImpersonatedUser(user)
+              startImpersonation(user, userProfile)
               setIsModalOpen(false)
             }}
             onClose={() => setIsModalOpen(false)}
@@ -167,7 +161,7 @@ const UserSwitcher = () => {
                 size='sm'
                 sx={{ ml: 0.5 }}
                 onClick={() => {
-                  setImpersonatedUser(null)
+                  stopImpersonation()
                 }}
               >
                 Cancel
@@ -180,7 +174,7 @@ const UserSwitcher = () => {
         isOpen={isModalOpen}
         performers={circleMembersData?.res}
         onSelect={user => {
-          setImpersonatedUser(user)
+          startImpersonation(user, userProfile)
           setIsModalOpen(false)
         }}
         onClose={() => {

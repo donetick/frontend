@@ -1,7 +1,7 @@
 import {
   AdminPanelSettings,
   DarkModeOutlined,
-  Email,
+  GroupAdd,
   LightModeOutlined,
   Logout,
   Person,
@@ -24,8 +24,9 @@ import {
   Typography,
   useColorScheme,
 } from '@mui/joy'
+import { useMediaQuery } from '@mui/material'
 import moment from 'moment'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useImpersonateUser } from '../contexts/ImpersonateUserContext'
 import useStickyState from '../hooks/useStickyState'
@@ -38,29 +39,23 @@ const UserProfileAvatar = () => {
   const navigate = useNavigate()
   const { mode, setMode } = useColorScheme()
   const { data: userProfile } = useUserProfile()
-  const { impersonatedUser, setImpersonatedUser } = useImpersonateUser()
+  const {
+    isImpersonating,
+    startImpersonation,
+    stopImpersonation,
+    canImpersonate,
+    getEffectiveUser,
+  } = useImpersonateUser()
   const { data: circleMembersData } = useCircleMembers()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false)
-  const [isAdmin, setIsAdmin] = useState(false)
   const [themeMode, setThemeMode] = useStickyState(mode, 'themeMode')
-
-  useEffect(() => {
-    if (userProfile && userProfile?.id) {
-      const members = circleMembersData?.res || []
-      const isUserAdmin = members.some(
-        member =>
-          member.userId === userProfile?.id &&
-          (member.role === 'admin' || member.role === 'manager'),
-      )
-      setIsAdmin(isUserAdmin)
-    }
-  }, [userProfile, circleMembersData])
+  const isLargeScreen = useMediaQuery(theme => theme.breakpoints.up('lg'))
 
   if (!userProfile) return null
 
-  const currentUser = impersonatedUser || userProfile
-  const isImpersonating = !!impersonatedUser
+  const currentUser = getEffectiveUser(userProfile)
+  const isAdmin = canImpersonate(userProfile, circleMembersData?.res)
   const isPlusUser = isPlusAccount(userProfile)
 
   const getSubscriptionStatus = () => {
@@ -310,7 +305,7 @@ const UserProfileAvatar = () => {
 
               {isImpersonating && (
                 <MenuItem
-                  onClick={() => setImpersonatedUser(null)}
+                  onClick={() => stopImpersonation()}
                   sx={{
                     borderRadius: 'var(--joy-radius-sm)',
                     '&:hover': {
@@ -367,7 +362,7 @@ const UserProfileAvatar = () => {
           </MenuItem>
 
           <MenuItem
-            onClick={() => navigate('/settings/detailed#sidepanel')}
+            onClick={() => navigate('/settings/circle')}
             sx={{
               borderRadius: 'var(--joy-radius-sm)',
               '&:hover': {
@@ -375,21 +370,49 @@ const UserProfileAvatar = () => {
               },
             }}
           >
-            <ListItemDecorator sx={{ color: 'var(--joy-palette-neutral-500)' }}>
-              <Tune />
+            <ListItemDecorator sx={{ color: 'var(--joy-palette-primary-500)' }}>
+              <GroupAdd />
             </ListItemDecorator>
             <ListItemContent>
               <Typography level='body-sm' sx={{ fontWeight: 500 }}>
-                Sidepanel Settings
+                Invite People
               </Typography>
               <Typography
                 level='body-xs'
                 sx={{ color: 'var(--joy-palette-text-tertiary)' }}
               >
-                Customize layout & cards
+                Add members to your circle
               </Typography>
             </ListItemContent>
           </MenuItem>
+          {isLargeScreen && (
+            <MenuItem
+              onClick={() => navigate('/settings/detailed#sidepanel')}
+              sx={{
+                borderRadius: 'var(--joy-radius-sm)',
+                '&:hover': {
+                  backgroundColor: 'var(--joy-palette-neutral-softHoverBg)',
+                },
+              }}
+            >
+              <ListItemDecorator
+                sx={{ color: 'var(--joy-palette-neutral-500)' }}
+              >
+                <Tune />
+              </ListItemDecorator>
+              <ListItemContent>
+                <Typography level='body-sm' sx={{ fontWeight: 500 }}>
+                  Side Panel Settings
+                </Typography>
+                <Typography
+                  level='body-xs'
+                  sx={{ color: 'var(--joy-palette-text-tertiary)' }}
+                >
+                  Customize layout & cards
+                </Typography>
+              </ListItemContent>
+            </MenuItem>
+          )}
 
           <MenuItem
             onClick={handleThemeToggle}
@@ -445,7 +468,7 @@ const UserProfileAvatar = () => {
             </MenuItem>
           )}
 
-          <MenuItem
+          {/* <MenuItem
             onClick={handleSupportEmail}
             sx={{
               borderRadius: 'var(--joy-radius-sm)',
@@ -468,7 +491,7 @@ const UserProfileAvatar = () => {
                 support@donetick.com
               </Typography>
             </ListItemContent>
-          </MenuItem>
+          </MenuItem> */}
 
           <Divider sx={{ my: 1 }} />
 
@@ -500,7 +523,7 @@ const UserProfileAvatar = () => {
         isOpen={isModalOpen}
         performers={circleMembersData?.res}
         onSelect={user => {
-          setImpersonatedUser(user)
+          startImpersonation(user, userProfile)
           setIsModalOpen(false)
         }}
         onClose={() => setIsModalOpen(false)}

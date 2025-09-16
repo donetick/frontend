@@ -232,7 +232,7 @@ const LabelCard = ({ label, onEditClick, onDeleteClick, currentUserId }) => {
           onMouseLeave={handleActionAreaMouseLeave}
         >
           <IconButton
-            variant='plain'
+            variant='soft'
             color='neutral'
             size='sm'
             onClick={e => {
@@ -244,18 +244,13 @@ const LabelCard = ({ label, onEditClick, onDeleteClick, currentUserId }) => {
               width: 40,
               height: 40,
               mx: 1,
-              bgcolor: 'primary.100',
-              color: 'primary.600',
-              '&:hover': {
-                bgcolor: 'primary.200',
-              },
             }}
           >
             <EditIcon sx={{ fontSize: 16 }} />
           </IconButton>
 
           <IconButton
-            variant='plain'
+            variant='soft'
             color='danger'
             size='sm'
             onClick={e => {
@@ -267,11 +262,6 @@ const LabelCard = ({ label, onEditClick, onDeleteClick, currentUserId }) => {
               width: 40,
               height: 40,
               mx: 1,
-              bgcolor: 'danger.100',
-              color: 'danger.600',
-              '&:hover': {
-                bgcolor: 'danger.200',
-              },
             }}
           >
             <DeleteIcon sx={{ fontSize: 16 }} />

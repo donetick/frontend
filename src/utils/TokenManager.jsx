@@ -137,9 +137,13 @@ export async function Fetch(url, options) {
 }
 
 export const HEADERS = () => {
+  // Import here to avoid circular dependency issues
+  const impersonateUserId = localStorage.getItem('impersonatedUserId')
+
   return {
     'Content-Type': 'application/json',
     Authorization: 'Bearer ' + localStorage.getItem('ca_token'),
+    ...(impersonateUserId && { 'X-Impersonate-User-ID': impersonateUserId }),
   }
 }
 

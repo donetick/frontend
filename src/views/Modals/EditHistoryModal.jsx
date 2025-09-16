@@ -25,7 +25,12 @@ function EditHistoryModal({ config, historyRecord }) {
   const [notes, setNotes] = useState(historyRecord.notes)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   return (
-    <ResponsiveModal open={config?.isOpen} onClose={config?.onClose}>
+    <ResponsiveModal
+      open={config?.isOpen}
+      onClose={config?.onClose}
+      size='lg'
+      // fullWidth={true}
+    >
       <Typography level='h4' mb={1}>
         Edit History
       </Typography>
@@ -82,18 +87,8 @@ function EditHistoryModal({ config, historyRecord }) {
         >
           Save
         </Button>
-        <Button size='' onClick={config.onClose} variant='outlined'>
+        <Button fullWidth size='lg' onClick={config.onClose} variant='outlined'>
           Cancel
-        </Button>
-        <Button
-          size='lg'
-          onClick={() => {
-            setIsDeleteModalOpen(true)
-          }}
-          variant='outlined'
-          color='danger'
-        >
-          Delete
         </Button>
       </Box>
       <ConfirmationModal

@@ -5,10 +5,12 @@ import {
   Delete,
   Edit,
   PauseCircle,
+  Person,
   PlayArrow,
 } from '@mui/icons-material'
 import {
   Alert,
+  Avatar,
   Box,
   Button,
   Card,
@@ -25,6 +27,7 @@ import {
 import moment from 'moment'
 import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { useCircleMembers } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import {
   GetChoreTimer,
@@ -32,6 +35,7 @@ import {
   StartChore,
   UpdateTimeSession,
 } from '../../utils/Fetcher'
+import { resolvePhotoURL } from '../../utils/Helpers'
 
 const TimerDetails = () => {
   const { choreId } = useParams()
@@ -49,6 +53,17 @@ const TimerDetails = () => {
   const dragStartX = useRef(0)
   const [isDragging, setIsDragging] = useState(false)
   const [isTouchDevice, setIsTouchDevice] = useState(false)
+
+  // Fetch circle members data
+  const { data: circleMembersData, isLoading: isCircleMembersLoading } =
+    useCircleMembers()
+
+  const members = circleMembersData?.res || []
+
+  // Helper function to find member by user ID
+  const getMemberById = userId => {
+    return members?.find(member => member.userId === userId)
+  }
 
   // Detect if device supports touch
   useEffect(() => {
@@ -1230,16 +1245,56 @@ const TimerDetails = () => {
                                   >
                                     {formatDuration(realTimeDuration)}
                                   </Typography>
-                                  {isOngoing && (
-                                    <Chip
-                                      size='sm'
-                                      color='success'
-                                      variant='soft'
-                                      sx={{ fontSize: '0.7rem' }}
-                                    >
-                                      Live
-                                    </Chip>
-                                  )}
+                                  <Box
+                                    sx={{ display: 'flex', gap: 0.5, mt: 0.5 }}
+                                  >
+                                    {isOngoing && (
+                                      <Chip
+                                        size='sm'
+                                        color='success'
+                                        variant='soft'
+                                        sx={{ fontSize: '0.7rem' }}
+                                      >
+                                        Live
+                                      </Chip>
+                                    )}
+                                    {/* User chip showing who started the session */}
+                                    {pause.updatedBy &&
+                                      pause.updatedBy !== 0 &&
+                                      (() => {
+                                        const sessionUser = getMemberById(
+                                          pause.updatedBy,
+                                        )
+                                        return sessionUser ? (
+                                          <Chip
+                                            size='sm'
+                                            variant='outlined'
+                                            color='neutral'
+                                            startDecorator={
+                                              <Avatar
+                                                size='sm'
+                                                src={resolvePhotoURL(
+                                                  sessionUser?.image,
+                                                )}
+                                                sx={{ width: 16, height: 16 }}
+                                              >
+                                                {sessionUser?.displayName?.charAt(
+                                                  0,
+                                                ) ||
+                                                  sessionUser?.name?.charAt(
+                                                    0,
+                                                  ) || <Person />}
+                                              </Avatar>
+                                            }
+                                            sx={{ fontSize: '0.7rem' }}
+                                          >
+                                            {sessionUser?.displayName ||
+                                              sessionUser?.name ||
+                                              'Unknown'}
+                                          </Chip>
+                                        ) : null
+                                      })()}
+                                  </Box>
                                 </Box>
 
                                 {/* Session details */}

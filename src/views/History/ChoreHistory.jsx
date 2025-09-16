@@ -22,6 +22,7 @@ import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { LoadingScreen } from '../../components/animations'
+import useConfirmationModal from '../../hooks/useConfirmationModal'
 import { ChoreHistoryStatus } from '../../utils/Chores'
 import {
   DeleteChoreHistory,
@@ -29,6 +30,7 @@ import {
   GetChoreHistory,
   UpdateChoreHistory,
 } from '../../utils/Fetcher'
+import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import EditHistoryModal from '../Modals/EditHistoryModal'
 import HistoryCard from './HistoryCard'
 
@@ -42,6 +44,31 @@ const ChoreHistory = () => {
   const { choreId } = useParams()
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [editHistory, setEditHistory] = useState({})
+  const { confirmModalConfig, showConfirmation } = useConfirmationModal()
+
+  const handleDelete = historyEntry => {
+    showConfirmation(
+      `Are you sure you want to delete this history record?`,
+      'Delete History Record',
+      () => {
+        DeleteChoreHistory(choreId, historyEntry.id).then(() => {
+          const newHistory = choreHistory.filter(
+            record => record.id !== historyEntry.id,
+          )
+          setChoresHistory(newHistory)
+          updateHistoryInfo(newHistory, userHistory, performers)
+        })
+      },
+      'Delete',
+      'Cancel',
+      'danger',
+    )
+  }
+
+  const handleEdit = historyEntry => {
+    setIsEditModalOpen(true)
+    setEditHistory(historyEntry)
+  }
 
   useEffect(() => {
     setIsLoading(true) // Start loading
@@ -281,10 +308,9 @@ const ChoreHistory = () => {
         <List sx={{ p: 0 }}>
           {choreHistory.map((historyEntry, index) => (
             <HistoryCard
-              onClick={() => {
-                setIsEditModalOpen(true)
-                setEditHistory(historyEntry)
-              }}
+              onClick={() => handleEdit(historyEntry)}
+              onEditClick={handleEdit}
+              onDeleteClick={handleDelete}
               historyEntry={historyEntry}
               performers={performers}
               allHistory={choreHistory}
@@ -334,6 +360,7 @@ const ChoreHistory = () => {
         }}
         historyRecord={editHistory}
       />
+      <ConfirmationModal config={confirmModalConfig} />
     </Container>
   )
 }

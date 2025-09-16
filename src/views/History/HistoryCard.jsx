@@ -3,6 +3,8 @@ import {
   CalendarMonth,
   Check,
   CheckCircle,
+  Delete,
+  Edit,
   EventNote,
   HourglassEmpty,
   Person,
@@ -16,12 +18,14 @@ import {
   Box,
   Chip,
   Grid,
+  IconButton,
   ListDivider,
   ListItem,
   ListItemContent,
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
+import React, { useEffect, useRef, useState } from 'react'
 import { TASK_COLOR } from '../../utils/Colors.jsx'
 
 const getCompletedChip = historyEntry => {
@@ -100,9 +104,21 @@ const HistoryCard = ({
   historyEntry,
   index,
   onClick,
+  onEditClick,
+  onDeleteClick,
 }) => {
   const performer = performers.find(p => p.userId === historyEntry.completedBy)
   const assignedTo = performers.find(p => p.userId === historyEntry.assignedTo)
+
+  // Swipe functionality state
+  const [swipeTranslateX, setSwipeTranslateX] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
+  const [isSwipeRevealed, setIsSwipeRevealed] = useState(false)
+  const [hoverTimer, setHoverTimer] = useState(null)
+  const swipeThreshold = 80
+  const maxSwipeDistance = 200
+  const dragStartX = useRef(0)
+  const cardRef = useRef(null)
 
   const formatTimeDifference = (startDate, endDate) => {
     const diffInMinutes = moment(startDate).diff(endDate, 'minutes')
@@ -150,23 +166,265 @@ const HistoryCard = ({
     )
   }
 
+  // Swipe gesture handlers
+  const handleTouchStart = e => {
+    dragStartX.current = e.touches[0].clientX
+    setIsDragging(true)
+  }
+
+  const handleTouchMove = e => {
+    if (!isDragging) return
+
+    const currentX = e.touches[0].clientX
+    const deltaX = currentX - dragStartX.current
+
+    if (isSwipeRevealed) {
+      if (deltaX > 0) {
+        const clampedDelta = Math.min(deltaX - maxSwipeDistance, 0)
+        setSwipeTranslateX(clampedDelta)
+      }
+    } else {
+      if (deltaX < 0) {
+        const clampedDelta = Math.max(deltaX, -maxSwipeDistance)
+        setSwipeTranslateX(clampedDelta)
+      }
+    }
+  }
+
+  const handleTouchEnd = () => {
+    if (!isDragging) return
+    setIsDragging(false)
+
+    if (isSwipeRevealed) {
+      if (swipeTranslateX > -swipeThreshold) {
+        setSwipeTranslateX(0)
+        setIsSwipeRevealed(false)
+      } else {
+        setSwipeTranslateX(-maxSwipeDistance)
+      }
+    } else {
+      if (Math.abs(swipeTranslateX) > swipeThreshold) {
+        setSwipeTranslateX(-maxSwipeDistance)
+        setIsSwipeRevealed(true)
+      } else {
+        setSwipeTranslateX(0)
+        setIsSwipeRevealed(false)
+      }
+    }
+  }
+
+  const handleMouseDown = e => {
+    dragStartX.current = e.clientX
+    setIsDragging(true)
+  }
+
+  const handleMouseMove = e => {
+    if (!isDragging) return
+
+    const currentX = e.clientX
+    const deltaX = currentX - dragStartX.current
+
+    if (isSwipeRevealed) {
+      if (deltaX > 0) {
+        const clampedDelta = Math.min(deltaX - maxSwipeDistance, 0)
+        setSwipeTranslateX(clampedDelta)
+      }
+    } else {
+      if (deltaX < 0) {
+        const clampedDelta = Math.max(deltaX, -maxSwipeDistance)
+        setSwipeTranslateX(clampedDelta)
+      }
+    }
+  }
+
+  const handleMouseUp = () => {
+    if (!isDragging) return
+    setIsDragging(false)
+
+    if (isSwipeRevealed) {
+      if (swipeTranslateX > -swipeThreshold) {
+        setSwipeTranslateX(0)
+        setIsSwipeRevealed(false)
+      } else {
+        setSwipeTranslateX(-maxSwipeDistance)
+      }
+    } else {
+      if (Math.abs(swipeTranslateX) > swipeThreshold) {
+        setSwipeTranslateX(-maxSwipeDistance)
+        setIsSwipeRevealed(true)
+      } else {
+        setSwipeTranslateX(0)
+        setIsSwipeRevealed(false)
+      }
+    }
+  }
+
+  const resetSwipe = () => {
+    setSwipeTranslateX(0)
+    setIsSwipeRevealed(false)
+  }
+
+  // Hover functionality for desktop - only trigger from drag area
+  const handleMouseEnter = () => {
+    if (isSwipeRevealed) return
+    const timer = setTimeout(() => {
+      setSwipeTranslateX(-maxSwipeDistance)
+      setIsSwipeRevealed(true)
+      setHoverTimer(null)
+    }, 800) // Shorter delay for drag area
+    setHoverTimer(timer)
+  }
+
+  const handleMouseLeave = () => {
+    if (hoverTimer) {
+      clearTimeout(hoverTimer)
+      setHoverTimer(null)
+    }
+    // Only add hide timer if we're leaving the drag area and actions are NOT revealed
+    // If actions are revealed, let the action area handle the hiding
+    if (!isSwipeRevealed) {
+      // Actions are not revealed, so we can safely hide after delay
+      const hideTimer = setTimeout(() => {
+        resetSwipe()
+      }, 300)
+      setHoverTimer(hideTimer)
+    }
+  }
+
+  const handleActionAreaMouseEnter = () => {
+    // Clear any pending timer when entering action area
+    if (hoverTimer) {
+      clearTimeout(hoverTimer)
+      setHoverTimer(null)
+    }
+  }
+
+  const handleActionAreaMouseLeave = () => {
+    // Hide immediately when leaving action area
+    if (isSwipeRevealed) {
+      resetSwipe()
+    }
+  }
+
+  // Clean up timer on unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimer) {
+        clearTimeout(hoverTimer)
+      }
+    }
+  }, [hoverTimer])
+
   return (
     <>
-      <ListItem
-        onClick={onClick}
+      <Box
         sx={{
-          cursor: onClick ? 'pointer' : 'default',
-          py: 1.5,
-          px: 2,
-          '&:hover': onClick
-            ? {
-                backgroundColor: 'background.level1',
-              }
-            : {},
-          borderRadius: 'sm',
-          transition: 'background-color 0.2s',
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+        onMouseLeave={() => {
+          // Only clear timers, don't auto-hide
+          if (hoverTimer) {
+            clearTimeout(hoverTimer)
+            setHoverTimer(null)
+          }
         }}
       >
+        {/* Action buttons underneath (revealed on swipe) */}
+        {(onEditClick || onDeleteClick) && (
+          <Box
+            sx={{
+              position: 'absolute',
+              right: 0,
+              top: 0,
+              bottom: 0,
+              width: maxSwipeDistance,
+              display: 'flex',
+              alignItems: 'center',
+              boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.06)',
+              zIndex: 0,
+            }}
+            onMouseEnter={handleActionAreaMouseEnter}
+            onMouseLeave={handleActionAreaMouseLeave}
+          >
+              {onEditClick && (
+                <IconButton
+                  variant='soft'
+                  color='neutral'
+                  size='sm'
+                  onClick={e => {
+                    e.stopPropagation()
+                    resetSwipe()
+                    onEditClick(historyEntry)
+                  }}
+                  sx={{
+                    width: 40,
+                    height: 40,
+                    mx: 1,
+                  }}
+                >
+                  <Edit sx={{ fontSize: 16 }} />
+                </IconButton>
+              )}
+
+              {onDeleteClick && (
+                <IconButton
+                  variant='soft'
+                  color='danger'
+                  size='sm'
+                  onClick={e => {
+                    e.stopPropagation()
+                    resetSwipe()
+                    onDeleteClick(historyEntry)
+                  }}
+                  sx={{
+                    width: 40,
+                    height: 40,
+                    mx: 1,
+                  }}
+                >
+                  <Delete sx={{ fontSize: 16 }} />
+                </IconButton>
+              )}
+          </Box>
+        )}
+
+        {/* Main card content */}
+        <ListItem
+          ref={cardRef}
+          onClick={() => {
+            if (isSwipeRevealed) {
+              resetSwipe()
+              return
+            }
+            if (onClick) onClick()
+          }}
+          sx={{
+            cursor: onClick ? 'pointer' : 'default',
+            py: 1.5,
+            px: 2,
+            position: 'relative',
+            bgcolor: 'background.surface',
+            transform: `translateX(${swipeTranslateX}px)`,
+            transition: isDragging ? 'none' : 'transform 0.3s ease-out',
+            zIndex: 1,
+            width: '100%',
+            '&:hover': onClick
+              ? {
+                  bgcolor: isSwipeRevealed
+                    ? 'background.surface'
+                    : 'background.level1',
+                }
+              : {},
+            borderRadius: 'sm',
+          }}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+        >
         <ListItemContent>
           <Grid container spacing={1} alignItems='center'>
             {/* First Row/Column: Status and Time Info */}
@@ -303,6 +561,56 @@ const HistoryCard = ({
             </Grid>
           </Grid>
         </ListItemContent>
+
+        {/* Right drag area - only triggers reveal on hover */}
+        {(onEditClick || onDeleteClick) && (
+          <Box
+          sx={{
+            position: 'absolute',
+            right: 0,
+            top: 0,
+            bottom: 0,
+            width: '20px',
+            cursor: 'grab',
+            zIndex: 2,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            opacity: isSwipeRevealed ? 0 : 0.3, // Hide when action area is revealed
+            transition: 'opacity 0.2s ease',
+            pointerEvents: isSwipeRevealed ? 'none' : 'auto', // Disable pointer events when revealed
+            '&:hover': {
+              opacity: isSwipeRevealed ? 0 : 0.7,
+            },
+            '&:active': {
+              cursor: 'grabbing',
+            },
+          }}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
+          {/* Drag indicator dots */}
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 0.25,
+            }}
+          >
+            {[...Array(3)].map((_, i) => (
+              <Box
+                key={i}
+                sx={{
+                  width: 3,
+                  height: 3,
+                  borderRadius: '50%',
+                  backgroundColor: 'text.tertiary',
+                }}
+              />
+            ))}
+          </Box>
+        </Box>
+        )}
       </ListItem>
 
       {/* Compact Divider with Time Difference */}
@@ -330,6 +638,7 @@ const HistoryCard = ({
           </Typography>
         </ListDivider>
       )}
+      </Box>
     </>
   )
 }
