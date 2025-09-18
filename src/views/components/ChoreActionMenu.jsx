@@ -9,6 +9,7 @@ import {
   MoreVert,
   NextWeek,
   Nfc,
+  Notifications,
   NoteAdd,
   RecordVoiceOver,
   SwitchAccessShortcut,
@@ -40,6 +41,7 @@ const ChoreActionMenu = ({
   onChangeAssignee,
   onChangeDueDate,
   onWriteNFC,
+  onNudge,
   onDelete,
   onOpen,
   onMouseEnter,
@@ -314,6 +316,16 @@ const ChoreActionMenu = ({
         >
           <RecordVoiceOver />
           Delegate to someone else
+        </MenuItem>
+        <MenuItem
+          onClick={e => {
+            e.stopPropagation()
+            onNudge?.()
+            handleMenuClose()
+          }}
+        >
+          <Notifications />
+          Send nudge
         </MenuItem>
         <Divider />
         <MenuItem

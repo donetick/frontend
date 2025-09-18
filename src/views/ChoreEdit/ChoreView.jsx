@@ -133,7 +133,8 @@ const ChoreView = () => {
         icon: <PeopleAlt />,
         title: 'Assignment',
         text: `Assigned: ${
-          performers.find(p => p.id === chore.assignedTo)?.displayName || 'N/A'
+          performers.find(p => p.userId === chore.assignedTo)?.displayName ||
+          'N/A'
         }`,
         subtext: ` Last: ${
           chore.lastCompletedDate

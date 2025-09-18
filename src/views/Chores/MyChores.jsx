@@ -132,7 +132,12 @@ const MyChores = () => {
         // Filter chores based on impersonated user
         if (impersonatedUser) {
           sortedChores = sortedChores.filter(
-            chore => chore.assignedTo === impersonatedUser.userId,
+            chore =>
+              chore.assignedTo === impersonatedUser.userId ||
+              chore.assignees?.some(
+                a => a.userId === impersonatedUser.userId,
+              ) ||
+              chore.isPrivate === false,
           )
         }
 
@@ -1150,7 +1155,7 @@ const MyChores = () => {
               const section = ChoresGrouper(
                 selectedChoreSection,
                 chores,
-                ChoreFilters(userProfile)[filter],
+                ChoreFilters(impersonatedUser | userProfile)[filter],
               )
               setChoreSections(section)
               setOpenChoreSectionsWithCache(

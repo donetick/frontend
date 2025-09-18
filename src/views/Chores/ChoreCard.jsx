@@ -4,6 +4,7 @@ import {
   Delete,
   Edit,
   HourglassEmpty,
+  Notifications,
   Pause,
   PlayArrow,
   Repeat,
@@ -39,6 +40,7 @@ import {
   ApproveChore,
   DeleteChore,
   MarkChoreComplete,
+  NudgeChore,
   PauseChore,
   RejectChore,
   StartChore,
@@ -48,6 +50,7 @@ import {
 import Priorities from '../../utils/Priorities'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import DateModal from '../Modals/Inputs/DateModal'
+import NudgeModal from '../Modals/Inputs/NudgeModal'
 import SelectModal from '../Modals/Inputs/SelectModal'
 import TextModal from '../Modals/Inputs/TextModal'
 import WriteNFCModal from '../Modals/Inputs/WriteNFCModal'
@@ -75,6 +78,7 @@ const ChoreCard = ({
     React.useState(false)
   const [confirmModelConfig, setConfirmModelConfig] = React.useState({})
   const [isNFCModalOpen, setIsNFCModalOpen] = React.useState(false)
+  const [isNudgeModalOpen, setIsNudgeModalOpen] = React.useState(false)
   const navigate = useNavigate()
 
   const [isPendingCompletion, setIsPendingCompletion] = React.useState(false)
@@ -84,7 +88,7 @@ const ChoreCard = ({
 
   const { impersonatedUser } = useImpersonateUser()
 
-  const { showError } = useNotification()
+  const { showError, showNotification } = useNotification()
 
   // Swipe functionality state
   const [swipeTranslateX, setSwipeTranslateX] = React.useState(0)
@@ -93,7 +97,7 @@ const ChoreCard = ({
   const [hoverTimer, setHoverTimer] = React.useState(null)
   const [isTouchDevice, setIsTouchDevice] = React.useState(false)
   const swipeThreshold = 80 // Minimum swipe distance to reveal actions
-  const maxSwipeDistance = 220 // Maximum swipe distance
+  const maxSwipeDistance = 260 // Maximum swipe distance
   const dragStartX = React.useRef(0)
   const cardRef = React.useRef(null)
 
@@ -259,6 +263,30 @@ const ChoreCard = ({
         })
       }
     })
+  }
+
+  const handleNudge = async ({ choreId, message, notifyAllAssignees }) => {
+    try {
+      const response = await NudgeChore(choreId, { message, notifyAllAssignees })
+      if (response.ok) {
+        const data = await response.json()
+        showNotification({
+          type: 'success',
+          title: 'Nudge Sent!',
+          message: data.message || 'Nudge sent successfully',
+        })
+      } else {
+        throw new Error('Failed to send nudge')
+      }
+    } catch (error) {
+      showError({
+        title: 'Failed to Send Nudge',
+        message: error.message || 'Unable to send nudge at this time',
+      })
+    } finally {
+      setIsNudgeModalOpen(false)
+      resetSwipe()
+    }
   }
 
   // Check if the current user can approve/reject (admin, manager, or task owner)
@@ -800,6 +828,24 @@ const ChoreCard = ({
 
           <IconButton
             variant='soft'
+            color='warning'
+            size='md'
+            onClick={e => {
+              e.stopPropagation()
+              resetSwipe()
+              setIsNudgeModalOpen(true)
+            }}
+            sx={{
+              width: 40,
+              height: 40,
+              mx: 1,
+            }}
+          >
+            <Notifications sx={{ fontSize: 20 }} />
+          </IconButton>
+
+          <IconButton
+            variant='soft'
             color='danger'
             size='md'
             onClick={e => {
@@ -1192,6 +1238,7 @@ const ChoreCard = ({
                   onChangeAssignee={() => setIsChangeAssigneeModalOpen(true)}
                   onChangeDueDate={() => setIsChangeDueDateModalOpen(true)}
                   onWriteNFC={() => setIsNFCModalOpen(true)}
+                  onNudge={() => setIsNudgeModalOpen(true)}
                   onDelete={handleDelete}
                   onMouseEnter={handleMouseEnter}
                   onOpen={() => {
@@ -1257,6 +1304,15 @@ const ChoreCard = ({
               onClose: () => {
                 setIsNFCModalOpen(false)
               },
+            }}
+          />
+
+          <NudgeModal
+            config={{
+              isOpen: isNudgeModalOpen,
+              choreId: chore.id,
+              onClose: () => setIsNudgeModalOpen(false),
+              onConfirm: handleNudge,
             }}
           />
         </Card>
