@@ -17,6 +17,8 @@ import {
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
 
+import { PushNotifications } from '@capacitor/push-notifications'
+import { registerPushNotifications } from '../../CapacitorListener'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import {
@@ -236,55 +238,62 @@ const NotificationSetting = () => {
           ))}
         </Card>
       )}
-      {/* <FormControl
-      orientation="horizontal"
-      sx={{ width: 400, justifyContent: 'space-between' }}
-    >
-      <div>
-        <FormLabel>Push Notifications</FormLabel>
-        <FormHelperText sx={{ mt: 0 }}>{Capacitor.isNativePlatform()? 'Receive push notification when someone complete task' : 'This feature is only available on mobile devices'} </FormHelperText>
-      </div>
-      <Switch
-      disabled={!Capacitor.isNativePlatform()}
-        checked={pushNotification}
-        onClick={(event) =>{
-          event.preventDefault()
-          if (pushNotification === false){
-            PushNotifications.requestPermissions().then((resp) => {
-              console.log("user PushNotifications permission",resp);
-              if (resp.receive === 'granted') {
-
-                setPushNotification(true)
-                setPushNotificationPreferences({granted: true})
+      <FormControl
+        orientation='horizontal'
+        sx={{ width: 400, justifyContent: 'space-between' }}
+      >
+        <div>
+          <FormLabel>Push Notifications</FormLabel>
+          <FormHelperText sx={{ mt: 0 }}>
+            {Capacitor.isNativePlatform()
+              ? 'Receive Nudges, Announcements, and Chore Assignments via Push Notifications'
+              : 'This feature is only available on mobile devices'}{' '}
+          </FormHelperText>
+        </div>
+        <Switch
+          disabled={!Capacitor.isNativePlatform()}
+          checked={pushNotification}
+          onClick={async event => {
+            event.preventDefault()
+            if (pushNotification === false) {
+              try {
+                const resp = await PushNotifications.requestPermissions()
+                console.log('user PushNotifications permission', resp)
+                if (resp.receive === 'granted') {
+                  setPushNotification(true)
+                  setPushNotificationPreferences({ granted: true })
+                  // Register push notifications after permission is granted
+                  await registerPushNotifications()
+                }
+                if (resp.receive !== 'granted') {
+                  showWarning({
+                    title: 'Push Notification Permission Denied',
+                    message:
+                      'Push notifications have been disabled. You can enable them in your device settings if needed.',
+                  })
+                  setPushNotification(false)
+                  setPushNotificationPreferences({ granted: false })
+                  console.log('User denied permission', resp)
+                }
+              } catch (error) {
+                console.error('Error setting up push notifications:', error)
               }
-              if (resp.receive !== 'granted') {
-                showWarning({
-                  title: 'Push Notification Permission Denied',
-                  message: 'Push notifications have been disabled. You can enable them in your device settings if needed.',
-                })
-                setPushNotification(false)
-                setPushNotificationPreferences({granted: false})
-                console.log("User denied permission", resp)
-              }
-            })
-          }
-          else{
-            setPushNotification(false)
-          }
-        }
-        }
-        color={pushNotification ? 'success' : 'neutral'}
-        variant={pushNotification ? 'solid' : 'outlined'}
-        endDecorator={pushNotification ? 'On' : 'Off'}
-        slotProps={{
-          endDecorator: {
-            sx: {
-              minWidth: 24,
+            } else {
+              setPushNotification(false)
+            }
+          }}
+          color={pushNotification ? 'success' : 'neutral'}
+          variant={pushNotification ? 'solid' : 'outlined'}
+          endDecorator={pushNotification ? 'On' : 'Off'}
+          slotProps={{
+            endDecorator: {
+              sx: {
+                minWidth: 24,
+              },
             },
-          },
-        }}
-      />
-    </FormControl> */}
+          }}
+        />
+      </FormControl>
 
       <Button
         variant='soft'

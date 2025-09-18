@@ -3,6 +3,7 @@ import { LocalNotifications } from '@capacitor/local-notifications'
 import { Preferences } from '@capacitor/preferences'
 import { Button, Snackbar, Stack, Typography } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import { registerPushNotifications } from '../../CapacitorListener'
 
 const NotificationAccessSnackbar = () => {
   const [open, setOpen] = useState(false)
@@ -56,14 +57,20 @@ const NotificationAccessSnackbar = () => {
           <Button
             variant='solid'
             color='primary'
-            onClick={() => {
+            onClick={async () => {
               const notificationPreferences = { optOut: false }
-              LocalNotifications.requestPermissions().then(resp => {
+              try {
+                const resp = await LocalNotifications.requestPermissions()
                 if (resp.display === 'granted') {
                   notificationPreferences['granted'] = true
+                  // Register for push notifications after local permission is granted
+                  await registerPushNotifications()
                 }
-              })
-              Preferences.set({
+              } catch (error) {
+                console.error('Error setting up notifications:', error)
+              }
+              
+              await Preferences.set({
                 key: 'notificationPreferences',
                 value: JSON.stringify(notificationPreferences),
               })

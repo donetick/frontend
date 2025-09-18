@@ -21,7 +21,6 @@ import {
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { LoadingScreen } from '../../components/animations'
 import useConfirmationModal from '../../hooks/useConfirmationModal'
 import { ChoreHistoryStatus } from '../../utils/Chores'
 import {
@@ -30,8 +29,9 @@ import {
   GetChoreHistory,
   UpdateChoreHistory,
 } from '../../utils/Fetcher'
-import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
+import LoadingComponent from '../components/Loading'
 import EditHistoryModal from '../Modals/EditHistoryModal'
+import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import HistoryCard from './HistoryCard'
 
 const ChoreHistory = () => {
@@ -174,7 +174,7 @@ const ChoreHistory = () => {
   }
 
   if (isLoading) {
-    return <LoadingScreen message='Loading task history...' />
+    return <LoadingComponent />
   }
   if (!choreHistory.length) {
     return (

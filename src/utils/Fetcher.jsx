@@ -172,6 +172,17 @@ const RejectChore = id => {
   })
 }
 
+const NudgeChore = (id, { message, notifyAllAssignees }) => {
+  return Fetch(`/chores/${id}/nudge`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify({
+      all_assignees: notifyAllAssignees,
+      message: message || '',
+    }),
+  })
+}
+
 const UpdateChoreAssignee = (id, assignee) => {
   return Fetch(`/chores/${id}/assignee`, {
     method: 'PUT',
@@ -657,6 +668,38 @@ const RestoreBackup = (encryptionKey, backupData) => {
   })
 }
 
+const RegisterDeviceToken = (token, deviceId, platform, appVersion, deviceModel) => {
+  return Fetch(`/devices/tokens`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify({
+      token,
+      deviceId,
+      platform,
+      appVersion,
+      deviceModel,
+    }),
+  })
+}
+
+const UnregisterDeviceToken = (deviceId, token) => {
+  return Fetch(`/devices/tokens`, {
+    method: 'DELETE',
+    headers: HEADERS(),
+    body: JSON.stringify({
+      deviceId,
+      token,
+    }),
+  })
+}
+
+const GetDeviceTokens = (active = true) => {
+  return Fetch(`/devices/tokens?active=${active}`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+}
+
 export {
   AcceptCircleMemberRequest,
   ApproveChore,
@@ -692,6 +735,7 @@ export {
   GetChoresHistory,
   GetChoresNew,
   GetCircleMemberRequests,
+  GetDeviceTokens,
   GetLabels,
   GetLongLiveTokens,
   GetMFAStatus,
@@ -705,12 +749,14 @@ export {
   JoinCircle,
   LeaveCircle,
   MarkChoreComplete,
+  NudgeChore,
   PauseChore,
   PutNotificationTarget,
   PutWebhookURL,
   RedeemPoints,
   RefreshToken,
   RegenerateBackupCodes,
+  RegisterDeviceToken,
   RejectChore,
   ResetChoreTimer,
   ResetPassword,
@@ -721,6 +767,7 @@ export {
   SkipChore,
   StartChore,
   UnArchiveChore,
+  UnregisterDeviceToken,
   UpdateChoreAssignee,
   UpdateChoreHistory,
   UpdateChorePriority,

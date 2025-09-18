@@ -12,7 +12,7 @@ const UserModal = ({ isOpen, performers = [], onSelect, onClose }) => {
       <List sx={{ mb: 2 }}>
         {performers.map(user => (
           <ListItem
-            key={user.id}
+            key={user.userId}
             sx={{
               cursor: 'pointer',
               '&:hover': {

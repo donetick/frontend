@@ -530,7 +530,7 @@ const UserProfileAvatar = () => {
       />
 
       <SubscriptionModal
-        isOpen={isSubscriptionModalOpen}
+        open={isSubscriptionModalOpen}
         onClose={() => setIsSubscriptionModalOpen(false)}
       />
     </>

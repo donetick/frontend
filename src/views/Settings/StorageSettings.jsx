@@ -158,6 +158,48 @@ const StorageSettings = () => {
           </Button>
         </Card>
 
+        {Capacitor.isNativePlatform() && (
+          <Card className='p-4' sx={{ maxWidth: 500, mb: 2 }}>
+            <Typography level='title-md' sx={{ mb: 1 }}>
+              App Preferences
+              <Chip variant='soft' color='info' sx={{ ml: 1 }}>
+                Device Only
+              </Chip>
+            </Typography>
+            <Typography level='body-sm' sx={{ mb: 1 }}>
+              These are preferences and settings stored locally on your device
+              by the app. Clearing them will reset app-specific settings and may
+              log you out, but will not affect your server data.
+            </Typography>
+            <Button
+              variant='soft'
+              color='danger'
+              onClick={() => {
+                showConfirmation(
+                  'Are you sure you want to clear all app preferences? This will reset your app settings and may require you to log in again.',
+                  'Clear App Preferences',
+                  async () => {
+                    try {
+                      const { Preferences } = await import(
+                        '@capacitor/preferences'
+                      )
+                      await Preferences.clear()
+                      Navigate('/login')
+                    } catch (e) {
+                      // Optionally show error feedback
+                    }
+                  },
+                  'Clear Preferences',
+                  'Cancel',
+                  'danger',
+                )
+              }}
+            >
+              Clear App Preferences
+            </Button>
+          </Card>
+        )}
+
         {/* Modals */}
         {confirmModalConfig?.isOpen && (
           <ConfirmationModal config={confirmModalConfig} />

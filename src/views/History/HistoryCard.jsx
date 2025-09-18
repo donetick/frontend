@@ -25,7 +25,7 @@ import {
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { TASK_COLOR } from '../../utils/Colors.jsx'
 
 const getCompletedChip = historyEntry => {
@@ -347,45 +347,45 @@ const HistoryCard = ({
             onMouseEnter={handleActionAreaMouseEnter}
             onMouseLeave={handleActionAreaMouseLeave}
           >
-              {onEditClick && (
-                <IconButton
-                  variant='soft'
-                  color='neutral'
-                  size='sm'
-                  onClick={e => {
-                    e.stopPropagation()
-                    resetSwipe()
-                    onEditClick(historyEntry)
-                  }}
-                  sx={{
-                    width: 40,
-                    height: 40,
-                    mx: 1,
-                  }}
-                >
-                  <Edit sx={{ fontSize: 16 }} />
-                </IconButton>
-              )}
+            {onEditClick && (
+              <IconButton
+                variant='soft'
+                color='neutral'
+                size='sm'
+                onClick={e => {
+                  e.stopPropagation()
+                  resetSwipe()
+                  onEditClick(historyEntry)
+                }}
+                sx={{
+                  width: 40,
+                  height: 40,
+                  mx: 1,
+                }}
+              >
+                <Edit sx={{ fontSize: 16 }} />
+              </IconButton>
+            )}
 
-              {onDeleteClick && (
-                <IconButton
-                  variant='soft'
-                  color='danger'
-                  size='sm'
-                  onClick={e => {
-                    e.stopPropagation()
-                    resetSwipe()
-                    onDeleteClick(historyEntry)
-                  }}
-                  sx={{
-                    width: 40,
-                    height: 40,
-                    mx: 1,
-                  }}
-                >
-                  <Delete sx={{ fontSize: 16 }} />
-                </IconButton>
-              )}
+            {onDeleteClick && (
+              <IconButton
+                variant='soft'
+                color='danger'
+                size='sm'
+                onClick={e => {
+                  e.stopPropagation()
+                  resetSwipe()
+                  onDeleteClick(historyEntry)
+                }}
+                sx={{
+                  width: 40,
+                  height: 40,
+                  mx: 1,
+                }}
+              >
+                <Delete sx={{ fontSize: 16 }} />
+              </IconButton>
+            )}
           </Box>
         )}
 
@@ -425,219 +425,223 @@ const HistoryCard = ({
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
         >
-        <ListItemContent>
-          <Grid container spacing={1} alignItems='center'>
-            {/* First Row/Column: Status and Time Info */}
-            <Grid xs={12} sm={8}>
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                  flexWrap: 'wrap',
-                }}
-              >
-                {getStatusAvatar()}
-
-                <Typography
-                  level='body-sm'
+          <ListItemContent>
+            <Grid container spacing={1} alignItems='center'>
+              {/* First Row/Column: Status and Time Info */}
+              <Grid xs={12} sm={8}>
+                <Box
                   sx={{
-                    color: 'text.secondary',
-                    fontWeight: 'md',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    flexWrap: 'wrap',
                   }}
                 >
-                  {historyEntry.status === 0
-                    ? 'In Progress'
-                    : historyEntry.status === 1
-                      ? 'Completed'
-                      : historyEntry.status === 2
-                        ? 'Skipped'
-                        : historyEntry.status === 3
-                          ? 'Pending Approval'
-                          : historyEntry.status === 4
-                            ? 'Rejected'
-                            : 'Completed'}
-                </Typography>
+                  {getStatusAvatar()}
 
-                <Chip size='sm' startDecorator={<EventNote />}>
-                  {moment(
-                    historyEntry.performedAt || historyEntry.updatedAt,
-                  ).format('MMM DD, h:mm A')}
-                </Chip>
+                  <Typography
+                    level='body-sm'
+                    sx={{
+                      color: 'text.secondary',
+                      fontWeight: 'md',
+                    }}
+                  >
+                    {historyEntry.status === 0
+                      ? 'In Progress'
+                      : historyEntry.status === 1
+                        ? 'Completed'
+                        : historyEntry.status === 2
+                          ? 'Skipped'
+                          : historyEntry.status === 3
+                            ? 'Pending Approval'
+                            : historyEntry.status === 4
+                              ? 'Rejected'
+                              : 'Completed'}
+                  </Typography>
 
-                <Box sx={{ display: 'flex', gap: 0.5 }}>
-                  {getCompletedChip(historyEntry)}
+                  <Chip size='sm' startDecorator={<EventNote />}>
+                    {moment(
+                      historyEntry.performedAt || historyEntry.updatedAt,
+                    ).format('MMM DD, h:mm A')}
+                  </Chip>
+
+                  <Box sx={{ display: 'flex', gap: 0.5 }}>
+                    {getCompletedChip(historyEntry)}
+                  </Box>
                 </Box>
-              </Box>
-            </Grid>
+              </Grid>
 
-            {/* Second Row/Column: Completion Status (right side on desktop) */}
-            <Grid xs={12} sm={4}>
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: { xs: 'flex-start', sm: 'flex-end' },
-                  alignItems: 'center',
-                  gap: 1,
-                }}
-              >
-                {historyEntry.dueDate && (
-                  <Chip size='sm' startDecorator={<CalendarMonth />}>
-                    {moment(historyEntry.dueDate).format('MMM DD h:mm A')}
-                  </Chip>
-                )}
-              </Box>
-            </Grid>
-
-            {/* Third Row: Performer and Assignment Info */}
-            <Grid xs={12}>
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                  flexWrap: 'wrap',
-                  mt: 0.5,
-                }}
-              >
-                <Chip size='sm' variant='outlined' startDecorator={<Person />}>
-                  {performer?.displayName || 'Unknown'}
-                </Chip>
-
-                {historyEntry.completedBy !== historyEntry.assignedTo &&
-                  assignedTo && (
-                    <>
-                      <Typography
-                        level='body-xs'
-                        sx={{ color: 'text.tertiary' }}
-                      >
-                        →
-                      </Typography>
-                      <Chip
-                        size='sm'
-                        variant='soft'
-                        color='neutral'
-                        startDecorator={<CheckCircle />}
-                      >
-                        {assignedTo.displayName}
-                      </Chip>
-                    </>
+              {/* Second Row/Column: Completion Status (right side on desktop) */}
+              <Grid xs={12} sm={4}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: { xs: 'flex-start', sm: 'flex-end' },
+                    alignItems: 'center',
+                    gap: 1,
+                  }}
+                >
+                  {historyEntry.dueDate && (
+                    <Chip size='sm' startDecorator={<CalendarMonth />}>
+                      {moment(historyEntry.dueDate).format('MMM DD h:mm A')}
+                    </Chip>
                   )}
+                </Box>
+              </Grid>
 
-                {historyEntry.notes && (
+              {/* Third Row: Performer and Assignment Info */}
+              <Grid xs={12}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    flexWrap: 'wrap',
+                    mt: 0.5,
+                  }}
+                >
                   <Chip
                     size='sm'
-                    variant='plain'
-                    color='neutral'
-                    startDecorator={<EventNote />}
-                    sx={{ maxWidth: '120px', overflow: 'hidden' }}
+                    variant='outlined'
+                    startDecorator={<Person />}
                   >
-                    Note
+                    {performer?.displayName || 'Unknown'}
                   </Chip>
-                )}
-                {/* add a duration chip if we have duration */}
-                {historyEntry?.duration > 0 && (
-                  <Chip
-                    size='sm'
-                    variant='soft'
-                    color='primary'
-                    startDecorator={<AccessTime />}
-                  >
-                    {formatTime(historyEntry.duration)}
-                  </Chip>
-                )}
-                {historyEntry?.points > 0 && (
-                  <Chip
-                    size='sm'
-                    variant='solid'
-                    color='success'
-                    startDecorator={<Toll />}
-                  >
-                    {historyEntry.points} pt
-                    {historyEntry.points > 1 ? 's' : ''}
-                  </Chip>
-                )}
-              </Box>
+
+                  {historyEntry.completedBy !== historyEntry.assignedTo &&
+                    assignedTo && (
+                      <>
+                        <Typography
+                          level='body-xs'
+                          sx={{ color: 'text.tertiary' }}
+                        >
+                          →
+                        </Typography>
+                        <Chip
+                          size='sm'
+                          variant='soft'
+                          color='neutral'
+                          startDecorator={<CheckCircle />}
+                        >
+                          {assignedTo.displayName}
+                        </Chip>
+                      </>
+                    )}
+
+                  {historyEntry.notes && (
+                    <Chip
+                      size='sm'
+                      variant='plain'
+                      color='neutral'
+                      startDecorator={<EventNote />}
+                      sx={{ maxWidth: '120px', overflow: 'hidden' }}
+                    >
+                      Note
+                    </Chip>
+                  )}
+                  {/* add a duration chip if we have duration */}
+                  {historyEntry?.duration > 0 && (
+                    <Chip
+                      size='sm'
+                      variant='soft'
+                      color='primary'
+                      startDecorator={<AccessTime />}
+                    >
+                      {formatTime(historyEntry.duration)}
+                    </Chip>
+                  )}
+                  {historyEntry?.points > 0 && (
+                    <Chip
+                      size='sm'
+                      variant='solid'
+                      color='success'
+                      startDecorator={<Toll />}
+                    >
+                      {historyEntry.points} pt
+                      {historyEntry.points > 1 ? 's' : ''}
+                    </Chip>
+                  )}
+                </Box>
+              </Grid>
             </Grid>
-          </Grid>
-        </ListItemContent>
+          </ListItemContent>
 
-        {/* Right drag area - only triggers reveal on hover */}
-        {(onEditClick || onDeleteClick) && (
-          <Box
-          sx={{
-            position: 'absolute',
-            right: 0,
-            top: 0,
-            bottom: 0,
-            width: '20px',
-            cursor: 'grab',
-            zIndex: 2,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: isSwipeRevealed ? 0 : 0.3, // Hide when action area is revealed
-            transition: 'opacity 0.2s ease',
-            pointerEvents: isSwipeRevealed ? 'none' : 'auto', // Disable pointer events when revealed
-            '&:hover': {
-              opacity: isSwipeRevealed ? 0 : 0.7,
-            },
-            '&:active': {
-              cursor: 'grabbing',
-            },
-          }}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-        >
-          {/* Drag indicator dots */}
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 0.25,
-            }}
-          >
-            {[...Array(3)].map((_, i) => (
+          {/* Right drag area - only triggers reveal on hover */}
+          {(onEditClick || onDeleteClick) && (
+            <Box
+              sx={{
+                position: 'absolute',
+                right: 0,
+                top: 0,
+                bottom: 0,
+                width: '20px',
+                cursor: 'grab',
+                zIndex: 2,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: isSwipeRevealed ? 0 : 0.3, // Hide when action area is revealed
+                transition: 'opacity 0.2s ease',
+                pointerEvents: isSwipeRevealed ? 'none' : 'auto', // Disable pointer events when revealed
+                '&:hover': {
+                  opacity: isSwipeRevealed ? 0 : 0.7,
+                },
+                '&:active': {
+                  cursor: 'grabbing',
+                },
+              }}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+            >
+              {/* Drag indicator dots */}
               <Box
-                key={i}
                 sx={{
-                  width: 3,
-                  height: 3,
-                  borderRadius: '50%',
-                  backgroundColor: 'text.tertiary',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 0.25,
                 }}
-              />
-            ))}
-          </Box>
-        </Box>
-        )}
-      </ListItem>
+              >
+                {[...Array(3)].map((_, i) => (
+                  <Box
+                    key={i}
+                    sx={{
+                      width: 3,
+                      height: 3,
+                      borderRadius: '50%',
+                      backgroundColor: 'text.tertiary',
+                    }}
+                  />
+                ))}
+              </Box>
+            </Box>
+          )}
+        </ListItem>
 
-      {/* Compact Divider with Time Difference */}
-      {index < allHistory.length - 1 && allHistory[index + 1].performedAt && (
-        <ListDivider
-          component='li'
-          sx={{
-            my: 0.5,
-          }}
-        >
-          <Typography
-            level='body-xs'
+        {/* Compact Divider with Time Difference */}
+        {index < allHistory.length - 1 && allHistory[index + 1].performedAt && (
+          <ListDivider
+            component='li'
             sx={{
-              color: 'text.tertiary',
-              backgroundColor: 'background.surface',
-              px: 1,
-              fontSize: '0.75rem',
+              my: 0.5,
             }}
           >
-            {formatTimeDifference(
-              historyEntry.performedAt || historyEntry.updatedAt,
-              allHistory[index + 1].performedAt,
-            )}{' '}
-            before
-          </Typography>
-        </ListDivider>
-      )}
+            <Typography
+              level='body-xs'
+              sx={{
+                color: 'text.tertiary',
+                backgroundColor: 'background.surface',
+                px: 1,
+                fontSize: '0.75rem',
+              }}
+            >
+              {formatTimeDifference(
+                historyEntry.performedAt || historyEntry.updatedAt,
+                allHistory[index + 1].performedAt,
+              )}{' '}
+              before
+            </Typography>
+          </ListDivider>
+        )}
       </Box>
     </>
   )
