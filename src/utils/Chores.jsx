@@ -327,21 +327,21 @@ export const notInCompletionWindow = chore => {
     moment().add(chore.completionWindow, 'hours') < moment(chore.nextDueDate)
   )
 }
-export const ChoreFilters = userProfile => ({
+export const ChoreFilters = userId => ({
   anyone: () => true,
   assigned_to_me: chore => {
-    return chore.assignedTo && chore.assignedTo === userProfile?.id
+    return chore.assignedTo && chore.assignedTo === userId
   },
   assigned_to_others: chore => {
-    return chore.assignedTo && chore.assignedTo !== userProfile?.id
+    return chore.assignedTo && chore.assignedTo !== userId
   },
   assigned_to_me_tasks: chore => {
     return (
       chore.assignees &&
-      chore.assignees.some(assignee => assignee.userId === userProfile?.id)
+      chore.assignees.some(assignee => assignee.userId === userId)
     )
   },
   created_by_me: chore => {
-    return chore.createdBy && chore.createdBy === userProfile?.id
+    return chore.createdBy && chore.createdBy === userId
   },
 })

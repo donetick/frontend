@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { networkManager } from '../hooks/NetworkManager'
+import { FEATURES, isFeatureEnabled } from '../utils/FeatureToggle'
 import {
   CreateChore,
   GetChoreByID,
@@ -16,6 +17,11 @@ export const useChores = includeArchive => {
     queryKey: ['chores', includeArchive],
     queryFn: async () => {
       const onlineChores = await GetChoresNew(includeArchive)
+
+      // Only handle offline tasks if experimental offline mode is enabled
+      if (!isFeatureEnabled(FEATURES.OFFLINE_MODE)) {
+        return onlineChores
+      }
 
       const offlineTasks = (await localStore.getFromCache('offlineTasks')) || []
       // go throught each and if there is two chores with same id in offline and online, prefer the offline one:
@@ -58,7 +64,7 @@ export const useCreateChore = () => {
   return useMutation({
     mutationFn: CreateChore,
     onMutate: async newTask => {
-      if (!networkManager.isOnline) {
+      if (!networkManager.isOnline && isFeatureEnabled(FEATURES.OFFLINE_MODE)) {
         const tempId = crypto.randomUUID() // Generate temp ID
         const offlineTasks =
           (await localStore.getFromCache('offlineTasks')) || []
@@ -95,7 +101,7 @@ export const useUpdateChore = () => {
 
   return useMutation({
     mutationFn: async updatedChore => {
-      if (!networkManager.isOnline) {
+      if (!networkManager.isOnline && isFeatureEnabled(FEATURES.OFFLINE_MODE)) {
         updatedChore['updatedAt'] = new Date().toISOString()
         if (!updatedChore['nextDueDate']) {
           updatedChore['nextDueDate'] = updatedChore['dueDate']
@@ -150,7 +156,7 @@ export const useUpdateChore = () => {
       queryClient.invalidateQueries(['chores'])
     },
     onMutate: async updatedChore => {
-      if (!networkManager.isOnline) {
+      if (!networkManager.isOnline && isFeatureEnabled(FEATURES.OFFLINE_MODE)) {
         // Handle offline case here if needed
         return
       }
@@ -192,6 +198,11 @@ export const useChoreDetails = choreId => {
         console.error('Error fetching chore detail:', error)
       }
 
+      // Only check offline tasks if experimental offline mode is enabled
+      if (!isFeatureEnabled(FEATURES.OFFLINE_MODE)) {
+        return onlineChore
+      }
+
       const offlineTasks = (await localStore.getFromCache('offlineTasks')) || []
       const offline = offlineTasks.find(task => {
         // Match by tempId or id if it was created offline
@@ -222,6 +233,11 @@ export const useChore = choreId => {
         }
       } catch (error) {
         console.error('Error fetching chore detail:', error)
+      }
+
+      // Only check offline tasks if experimental offline mode is enabled
+      if (!isFeatureEnabled(FEATURES.OFFLINE_MODE)) {
+        return onlineChore
       }
 
       const offlineTasks = (await localStore.getFromCache('offlineTasks')) || []

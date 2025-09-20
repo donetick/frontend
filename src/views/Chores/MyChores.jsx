@@ -146,7 +146,9 @@ const MyChores = () => {
         const sections = ChoresGrouper(
           selectedChoreSection,
           sortedChores,
-          ChoreFilters(userProfile)[selectedChoreFilter],
+          ChoreFilters(impersonatedUser?.userId || userProfile?.id)[
+            selectedChoreFilter
+          ],
         )
         setChoreSections(sections)
         if (localStorage.getItem('openChoreSections') === null) {
@@ -537,7 +539,11 @@ const MyChores = () => {
       )
     }
 
-    return choresToFilter.filter(ChoreFilters(userProfile)[selectedChoreFilter])
+    return choresToFilter.filter(
+      ChoreFilters(impersonatedUser?.userId || userProfile?.id)[
+        selectedChoreFilter
+      ],
+    )
   }
 
   // Helper function to get chores for a specific date
@@ -567,7 +573,9 @@ const MyChores = () => {
       ChoresGrouper(
         selectedChoreSection,
         newChores,
-        ChoreFilters(userProfile)[selectedChoreFilter],
+        ChoreFilters(impersonatedUser?.userId || userProfile?.id)[
+          selectedChoreFilter
+        ],
       ),
     )
     setSearchFilter('All')
@@ -641,7 +649,9 @@ const MyChores = () => {
       ChoresGrouper(
         selectedChoreSection,
         newChores,
-        ChoreFilters(userProfile)[selectedChoreFilter],
+        ChoreFilters(impersonatedUser?.userId || userProfile?.id)[
+          selectedChoreFilter
+        ],
       ),
     )
 
@@ -715,7 +725,9 @@ const MyChores = () => {
       ChoresGrouper(
         selectedChoreSection,
         newChores,
-        ChoreFilters(userProfile)[selectedChoreFilter],
+        ChoreFilters(impersonatedUser?.userId || userProfile?.id)[
+          selectedChoreFilter
+        ],
       ),
     )
   }
@@ -982,7 +994,9 @@ const MyChores = () => {
                 ChoresGrouper(
                   selectedChoreSection,
                   newChores,
-                  ChoreFilters(userProfile)[selectedChoreFilter],
+                  ChoreFilters(impersonatedUser?.userId || userProfile?.id)[
+                    selectedChoreFilter
+                  ],
                 ),
               )
             }
@@ -1155,7 +1169,9 @@ const MyChores = () => {
               const section = ChoresGrouper(
                 selectedChoreSection,
                 chores,
-                ChoreFilters(impersonatedUser | userProfile)[filter],
+                ChoreFilters(impersonatedUser?.userId || userProfile?.id)[
+                  filter
+                ],
               )
               setChoreSections(section)
               setOpenChoreSectionsWithCache(
@@ -1170,7 +1186,9 @@ const MyChores = () => {
               const section = ChoresGrouper(
                 selected.value,
                 chores,
-                ChoreFilters(userProfile)[selectedChoreFilter],
+                ChoreFilters(impersonatedUser?.userId || userProfile?.id)[
+                  selectedChoreFilter
+                ],
               )
               setChoreSections(section)
               setSelectedChoreSectionWithCache(selected.value)
