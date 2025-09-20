@@ -4,7 +4,6 @@ import Error from '@/views/Error'
 import AccountSettings from '@/views/Settings/AccountSettings'
 import AdvancedSettings from '@/views/Settings/AdvancedSettings'
 import CircleSettings from '@/views/Settings/CircleSettings'
-import NotificationSettings from '@/views/Settings/NotificationSettings'
 import Settings from '@/views/Settings/Settings'
 import SettingsOverview from '@/views/Settings/SettingsOverview'
 import SettingsRoutes from '@/views/Settings/SettingsRoutes'
@@ -30,6 +29,7 @@ import PaymentSuccessView from '../views/Payments/PaymentSuccessView'
 import PrivacyPolicyView from '../views/PrivacyPolicy/PrivacyPolicyView'
 import APITokenSettings from '../views/Settings/APITokenSettings'
 import MFASettings from '../views/Settings/MFASettings'
+import NotificationSetting from '../views/Settings/NotificationSetting'
 import ProfileSettings from '../views/Settings/ProfileSettings'
 import SidepanelSettings from '../views/Settings/SidepanelSettings'
 import StorageSettings from '../views/Settings/StorageSettings'
@@ -85,7 +85,7 @@ const Router = createBrowserRouter([
           },
           {
             path: 'notifications',
-            element: <NotificationSettings />,
+            element: <NotificationSetting />,
           },
           {
             path: 'mfa',
