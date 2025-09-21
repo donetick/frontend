@@ -2,6 +2,7 @@ import { Preferences } from '@capacitor/preferences'
 import Cookies from 'js-cookie'
 import murmurhash from 'murmurhash'
 import { API_URL } from '../Config'
+import { FEATURES, isFeatureEnabled } from '../utils/FeatureToggle'
 import { networkManager } from '../hooks/NetworkManager'
 import { RefreshToken } from './Fetcher'
 import { localStore } from './LocalStore'
@@ -105,11 +106,14 @@ export async function Fetch(url, options) {
     const response = await fetch(fullURL, options)
 
     if (response.ok) {
-      const data = await response.clone().json()
-      const optionWithoutToken = { ...options }
-      delete optionWithoutToken.headers.Authorization
-      const optionsHash = murmurhash.v3(JSON.stringify(optionWithoutToken))
-      await localStore.saveToCache(fullURL + optionsHash, data)
+      // Only cache data if offline mode is enabled
+      if (isFeatureEnabled(FEATURES.OFFLINE_MODE)) {
+        const data = await response.clone().json()
+        const optionWithoutToken = { ...options }
+        delete optionWithoutToken.headers.Authorization
+        const optionsHash = murmurhash.v3(JSON.stringify(optionWithoutToken))
+        await localStore.saveToCache(fullURL + optionsHash, data)
+      }
       networkManager.setOnline()
     } else if (response.status === 401) {
       // Handle 401 Unauthorized
@@ -124,15 +128,24 @@ export async function Fetch(url, options) {
       response.status === 0
     ) {
       networkManager.setOffline()
-      return handleOfflineRequest(fullURL, options)
+      // Only handle offline requests if offline mode is enabled
+      if (isFeatureEnabled(FEATURES.OFFLINE_MODE)) {
+        return handleOfflineRequest(fullURL, options)
+      }
+      // If offline mode is disabled, just throw the error
+      throw new Error(`Request failed with status ${response.status}`)
     }
     // return promise that resolves to response object:
     return Promise.resolve(response)
   } catch (error) {
     networkManager.setOffline()
     console.error('Fetch error:', error)
-    // throw error
-    return handleOfflineRequest(fullURL, options)
+    // Only handle offline requests if offline mode is enabled
+    if (isFeatureEnabled(FEATURES.OFFLINE_MODE)) {
+      return handleOfflineRequest(fullURL, options)
+    }
+    // If offline mode is disabled, just throw the error
+    throw error
   }
 }
 
@@ -184,6 +197,11 @@ export const refreshAccessToken = () => {
 }
 
 async function handleOfflineRequest(url, options) {
+  // Only handle offline requests if offline mode is enabled
+  if (!isFeatureEnabled(FEATURES.OFFLINE_MODE)) {
+    throw new Error('Network request failed and offline mode is disabled')
+  }
+
   // if get request then attempt to fetch from cache otherewise queue it :
   if (options.method === 'GET') {
     return attemptFetchFromCache(url, options)
@@ -200,6 +218,11 @@ async function handleOfflineRequest(url, options) {
   }
 }
 async function attemptFetchFromCache(url, options) {
+  // Only attempt cache fetch if offline mode is enabled
+  if (!isFeatureEnabled(FEATURES.OFFLINE_MODE)) {
+    throw new Error('Cache access disabled - offline mode is not enabled')
+  }
+
   const optionsHash = murmurhash.v3(JSON.stringify(options))
   const cachedData = await localStore.getFromCache(url + optionsHash)
   networkManager.setOffline()

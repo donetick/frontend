@@ -3,12 +3,21 @@ import { useState } from 'react'
 import { networkManager } from '../hooks/NetworkManager'
 import { FEATURES, isFeatureEnabled } from '../utils/FeatureToggle'
 import {
+  ApproveChore,
+  ArchiveChore,
   CreateChore,
+  DeleteChoreHistory,
   GetChoreByID,
   GetChoreDetailById,
+  GetChoreHistory,
   GetChoresHistory,
   GetChoresNew,
+  MarkChoreComplete,
+  RejectChore,
   SaveChore,
+  SkipChore,
+  UnArchiveChore,
+  UpdateChoreHistory,
 } from '../utils/Fetcher'
 import { localStore } from '../utils/LocalStore'
 
@@ -154,6 +163,8 @@ export const useUpdateChore = () => {
     onSuccess: (data, variables) => {
       // Invalidate the chores query to refresh the data
       queryClient.invalidateQueries(['chores'])
+      // Invalidate history for the specific chore
+      queryClient.invalidateQueries(['choreHistory', variables.id])
     },
     onMutate: async updatedChore => {
       if (!networkManager.isOnline && isFeatureEnabled(FEATURES.OFFLINE_MODE)) {
@@ -252,6 +263,126 @@ export const useChore = choreId => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['chores'])
+    },
+  })
+}
+
+export const useArchiveChore = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ArchiveChore,
+    onSuccess: () => {
+      queryClient.invalidateQueries(['chores'])
+    },
+  })
+}
+
+export const useUnArchiveChore = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: UnArchiveChore,
+    onSuccess: () => {
+      queryClient.invalidateQueries(['chores'])
+    },
+  })
+}
+
+export const useChoreHistory = choreId => {
+  return useQuery({
+    queryKey: ['choreHistory', choreId],
+    queryFn: async () => {
+      if (!choreId) {
+        throw new Error('Chore ID is required to fetch history')
+      }
+      const response = await GetChoreHistory(choreId)
+      if (response && response.ok) {
+        return await response.json()
+      }
+      throw new Error('Failed to fetch chore history')
+    },
+    enabled: !!choreId,
+    staleTime: 0, // Always consider data stale
+    cacheTime: 0, // Don't cache the data
+    refetchOnMount: true, // Always refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window gains focus
+  })
+}
+
+export const useUpdateChoreHistory = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ choreId, historyId, historyData }) =>
+      UpdateChoreHistory(choreId, historyId, historyData),
+    onSuccess: (data, { choreId }) => {
+      queryClient.invalidateQueries(['choreHistory', choreId])
+    },
+  })
+}
+
+export const useDeleteChoreHistory = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ choreId, historyId }) =>
+      DeleteChoreHistory(choreId, historyId),
+    onSuccess: (data, { choreId }) => {
+      queryClient.invalidateQueries(['choreHistory', choreId])
+    },
+  })
+}
+
+export const useMarkChoreComplete = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ choreId, body, completedDate, performer }) =>
+      MarkChoreComplete(choreId, body, completedDate, performer),
+    onSuccess: (data, { choreId }) => {
+      queryClient.invalidateQueries(['chores'])
+      queryClient.invalidateQueries(['choreHistory', choreId])
+      queryClient.invalidateQueries(['choreDetails', choreId])
+    },
+  })
+}
+
+export const useSkipChore = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: SkipChore,
+    onSuccess: (data, choreId) => {
+      queryClient.invalidateQueries(['chores'])
+      queryClient.invalidateQueries(['choreHistory', choreId])
+      queryClient.invalidateQueries(['choreDetails', choreId])
+    },
+  })
+}
+
+export const useApproveChore = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ApproveChore,
+    onSuccess: (data, choreId) => {
+      queryClient.invalidateQueries(['chores'])
+      queryClient.invalidateQueries(['choreHistory', choreId])
+      queryClient.invalidateQueries(['choreDetails', choreId])
+    },
+  })
+}
+
+export const useRejectChore = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: RejectChore,
+    onSuccess: (data, choreId) => {
+      queryClient.invalidateQueries(['chores'])
+      queryClient.invalidateQueries(['choreHistory', choreId])
+      queryClient.invalidateQueries(['choreDetails', choreId])
     },
   })
 }

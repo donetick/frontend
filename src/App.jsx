@@ -10,6 +10,8 @@ import { ImpersonateUserProvider } from './contexts/ImpersonateUserContext'
 import { AuthenticationProvider } from './service/AuthenticationService'
 import { useNotification } from './service/NotificationProvider'
 import { apiManager } from './utils/TokenManager'
+
+import { getSafeBottomPadding } from './utils/SafeAreaUtils'
 import NetworkBanner from './views/components/NetworkBanner'
 
 const add = className => {
@@ -87,21 +89,21 @@ const AppContent = () => {
   }, [needRefresh, showNotification, updateServiceWorker, setNeedRefresh])
 
   return (
-    <>
+    <div style={{ paddingBottom: getSafeBottomPadding(2) }}>
       <ImpersonateUserProvider>
         <NavBar />
         <PageTransition>
           <Outlet />
         </PageTransition>
       </ImpersonateUserProvider>
-    </>
+    </div>
   )
 }
 
 function App() {
   const navigate = useNavigate()
   startApiManager(navigate)
-  startOpenReplay()
+  // startOpenReplay()
 
   const { mode, systemMode } = useColorScheme()
 
@@ -131,7 +133,7 @@ function App() {
   }, [])
 
   return (
-    <div className='min-h-screen'>
+    <div style={{ paddingBottom: getSafeBottomPadding(2) }}>
       <NetworkBanner />
 
       <AuthenticationProvider>

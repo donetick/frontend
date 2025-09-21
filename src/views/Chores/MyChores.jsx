@@ -39,10 +39,9 @@ import {
 import Fuse from 'fuse.js'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useChores } from '../../queries/ChoreQueries'
+import { useChores, useArchiveChore } from '../../queries/ChoreQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { TASK_COLOR } from '../../utils/Colors'
-import { ArchiveChore } from '../../utils/Fetcher'
 import Priorities from '../../utils/Priorities'
 import LoadingComponent from '../components/Loading'
 import { useLabels } from '../Labels/LabelQueries'
@@ -76,6 +75,7 @@ const MyChores = () => {
   const isLargeScreen = useMediaQuery(theme => theme.breakpoints.up('md'))
   const { showSuccess, showError, showWarning } = useNotification()
   const { impersonatedUser } = useImpersonateUser()
+  const archiveChore = useArchiveChore()
   const [chores, setChores] = useState([])
   const [filteredChores, setFilteredChores] = useState([])
   const [searchFilter, setSearchFilter] = useState('All')
@@ -920,13 +920,23 @@ const MyChores = () => {
             const failedTasks = []
             for (const chore of selectedData) {
               try {
-                const archivedChore = await ArchiveChore(chore.id)
-                archivedTasks.push(archivedChore)
-                // Remove from chores and filteredChores
-                setChores(chores.filter(c => c.id !== chore.id))
-                setFilteredChores(filteredChores.filter(c => c.id !== chore.id))
+                await new Promise((resolve, reject) => {
+                  archiveChore.mutate(chore.id, {
+                    onSuccess: (data) => {
+                      archivedTasks.push(data)
+                      // Remove from chores and filteredChores
+                      setChores(prev => prev.filter(c => c.id !== chore.id))
+                      setFilteredChores(prev => prev.filter(c => c.id !== chore.id))
+                      resolve(data)
+                    },
+                    onError: (error) => {
+                      failedTasks.push(chore)
+                      reject(error)
+                    }
+                  })
+                })
               } catch (error) {
-                failedTasks.push(chore)
+                // Error already handled in onError callback
               }
             }
             if (archivedTasks.length > 0) {

@@ -15,10 +15,10 @@ import { useEffect, useState } from 'react'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { useNotification } from '../../../service/NotificationProvider'
 import {
-  DeleteTimeSession,
-  GetChoreTimer,
-  UpdateTimeSession,
-} from '../../../utils/Fetcher'
+  useChoreTimer,
+  useDeleteTimeSession,
+  useUpdateTimeSession,
+} from '../../../queries/TimeQueries'
 import ConfirmationModal from './ConfirmationModal'
 
 const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
@@ -31,13 +31,17 @@ const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
   const [currentTime, setCurrentTime] = useState(new Date())
   const { showError, showSuccess } = useNotification()
 
-  // Fetch timer data when modal opens
+  // Timer hooks
+  const { data: choreTimer, refetch: refetchTimer } = useChoreTimer(choreId)
+  const updateTimeSession = useUpdateTimeSession()
+  const deleteTimeSession = useDeleteTimeSession()
+
+  // Update timerData when choreTimer data changes
   useEffect(() => {
-    if (isOpen && choreId) {
-      fetchTimerData()
+    if (choreTimer?.res) {
+      setTimerData(choreTimer.res)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, choreId])
+  }, [choreTimer])
 
   // Real-time update interval for active timers
   useEffect(() => {
@@ -53,28 +57,6 @@ const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
     }
   }, [isOpen, timerData])
 
-  const fetchTimerData = async () => {
-    setLoading(true)
-    try {
-      const response = await GetChoreTimer(choreId)
-      if (response.ok) {
-        const data = await response.json()
-        setTimerData(data.res) // data.res is the timer session object
-      } else {
-        showError({
-          title: 'Failed to fetch timer data',
-          message: 'Please try again.',
-        })
-      }
-    } catch (error) {
-      showError({
-        title: 'Error fetching timer data',
-        message: error.message,
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const formatTime = seconds => {
     const hours = Math.floor(seconds / 3600)
@@ -192,21 +174,26 @@ const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
         pauseLog: editingData.pauseLog,
       }
 
-      const response = await UpdateTimeSession(choreId, sessionId, updateData)
-      if (response.ok) {
-        showSuccess({
-          title: 'Session updated',
-          message: 'Timer session has been updated successfully.',
-        })
-        await fetchTimerData()
-        cancelEditingSession(sessionId)
-        onTimerUpdate?.()
-      } else {
-        showError({
-          title: 'Failed to update session',
-          message: 'Please try again.',
-        })
-      }
+      updateTimeSession.mutate(
+        { choreId, sessionId, sessionData: updateData },
+        {
+          onSuccess: () => {
+            showSuccess({
+              title: 'Session updated',
+              message: 'Timer session has been updated successfully.',
+            })
+            refetchTimer()
+            cancelEditingSession(sessionId)
+            onTimerUpdate?.()
+          },
+          onError: () => {
+            showError({
+              title: 'Failed to update session',
+              message: 'Please try again.',
+            })
+          },
+        },
+      )
     } catch (error) {
       showError({
         title: 'Error updating session',
@@ -219,29 +206,28 @@ const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
 
   const deleteSession = async sessionId => {
     setLoading(true)
-    try {
-      const response = await DeleteTimeSession(choreId, sessionId)
-      if (response.ok) {
-        showSuccess({
-          title: 'Session deleted',
-          message: 'Timer session has been deleted successfully.',
-        })
-        await fetchTimerData()
-        onTimerUpdate?.()
-      } else {
-        showError({
-          title: 'Failed to delete session',
-          message: 'Please try again.',
-        })
-      }
-    } catch (error) {
-      showError({
-        title: 'Error deleting session',
-        message: error.message,
-      })
-    } finally {
-      setLoading(false)
-    }
+    deleteTimeSession.mutate(
+      { choreId, sessionId },
+      {
+        onSuccess: () => {
+          showSuccess({
+            title: 'Session deleted',
+            message: 'Timer session has been deleted successfully.',
+          })
+          refetchTimer()
+          onTimerUpdate?.()
+        },
+        onError: error => {
+          showError({
+            title: 'Error deleting session',
+            message: error.message,
+          })
+        },
+        onSettled: () => {
+          setLoading(false)
+        },
+      },
+    )
   }
 
   const confirmDeleteSession = sessionId => {

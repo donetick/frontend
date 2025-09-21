@@ -26,12 +26,11 @@ import { useNavigate } from 'react-router-dom'
 import { useNotification } from '../../service/NotificationProvider'
 import { isOfficialDonetickInstanceSync } from '../../utils/FeatureToggle'
 import {
-  ArchiveChore,
   DeleteChore,
   SkipChore,
-  UnArchiveChore,
   UpdateDueDate,
 } from '../../utils/Fetcher'
+import { useArchiveChore, useUnArchiveChore } from '../../queries/ChoreQueries'
 
 const ChoreActionMenu = ({
   chore,
@@ -55,6 +54,8 @@ const ChoreActionMenu = ({
   const menuRef = React.useRef(null)
   const navigate = useNavigate()
   const { showError } = useNotification()
+  const archiveChore = useArchiveChore()
+  const unArchiveChore = useUnArchiveChore()
 
   // Check if this is the official donetick.com instance
   useEffect(() => {
@@ -126,22 +127,18 @@ const ChoreActionMenu = ({
 
   const handleArchive = () => {
     if (chore.isActive) {
-      ArchiveChore(chore.id).then(response => {
-        if (response.ok) {
-          response.json().then(() => {
-            const newChore = { ...chore, isActive: false }
-            onChoreUpdate?.(newChore, 'archive')
-          })
-        }
+      archiveChore.mutate(chore.id, {
+        onSuccess: () => {
+          const newChore = { ...chore, isActive: false }
+          onChoreUpdate?.(newChore, 'archive')
+        },
       })
     } else {
-      UnArchiveChore(chore.id).then(response => {
-        if (response.ok) {
-          response.json().then(() => {
-            const newChore = { ...chore, isActive: true }
-            onChoreUpdate?.(newChore, 'unarchive')
-          })
-        }
+      unArchiveChore.mutate(chore.id, {
+        onSuccess: () => {
+          const newChore = { ...chore, isActive: true }
+          onChoreUpdate?.(newChore, 'unarchive')
+        },
       })
     }
     handleMenuClose()

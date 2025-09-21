@@ -24,39 +24,41 @@ import { Link, useParams } from 'react-router-dom'
 import useConfirmationModal from '../../hooks/useConfirmationModal'
 import { ChoreHistoryStatus } from '../../utils/Chores'
 import {
-  DeleteChoreHistory,
-  GetAllCircleMembers,
-  GetChoreHistory,
-  UpdateChoreHistory,
-} from '../../utils/Fetcher'
+  useChoreHistory,
+  useDeleteChoreHistory,
+  useUpdateChoreHistory,
+} from '../../queries/ChoreQueries'
+import { useCircleMembers } from '../../queries/UserQueries'
 import LoadingComponent from '../components/Loading'
 import EditHistoryModal from '../Modals/EditHistoryModal'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import HistoryCard from './HistoryCard'
 
 const ChoreHistory = () => {
-  const [choreHistory, setChoresHistory] = useState([])
   const [userHistory, setUserHistory] = useState([])
-  const [performers, setPerformers] = useState([])
   const [historyInfo, setHistoryInfo] = useState([])
-
-  const [isLoading, setIsLoading] = useState(true) // Add loading state
   const { choreId } = useParams()
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [editHistory, setEditHistory] = useState({})
   const { confirmModalConfig, showConfirmation } = useConfirmationModal()
+
+  // React Query hooks
+  const { data: choreHistoryData, isLoading } = useChoreHistory(choreId)
+  const { data: circleMembersData } = useCircleMembers()
+  const updateChoreHistory = useUpdateChoreHistory()
+  const deleteChoreHistory = useDeleteChoreHistory()
+
+  const choreHistory = choreHistoryData?.res || []
+  const performers = circleMembersData?.res || []
 
   const handleDelete = historyEntry => {
     showConfirmation(
       `Are you sure you want to delete this history record?`,
       'Delete History Record',
       () => {
-        DeleteChoreHistory(choreId, historyEntry.id).then(() => {
-          const newHistory = choreHistory.filter(
-            record => record.id !== historyEntry.id,
-          )
-          setChoresHistory(newHistory)
-          updateHistoryInfo(newHistory, userHistory, performers)
+        deleteChoreHistory.mutate({
+          choreId,
+          historyId: historyEntry.id,
         })
       },
       'Delete',
@@ -71,33 +73,16 @@ const ChoreHistory = () => {
   }
 
   useEffect(() => {
-    setIsLoading(true) // Start loading
-
-    Promise.all([
-      GetChoreHistory(choreId).then(res => res.json()),
-      GetAllCircleMembers(),
-    ])
-      .then(([historyData, usersData]) => {
-        setChoresHistory(historyData.res)
-
-        const newUserChoreHistory = {}
-        historyData.res.forEach(choreHistory => {
-          const userId = choreHistory.completedBy
-          newUserChoreHistory[userId] = (newUserChoreHistory[userId] || 0) + 1
-        })
-        setUserHistory(newUserChoreHistory)
-
-        setPerformers(usersData.res)
-        updateHistoryInfo(historyData.res, newUserChoreHistory, usersData.res)
+    if (choreHistory.length > 0 && performers.length > 0) {
+      const newUserChoreHistory = {}
+      choreHistory.forEach(historyEntry => {
+        const userId = historyEntry.completedBy
+        newUserChoreHistory[userId] = (newUserChoreHistory[userId] || 0) + 1
       })
-      .catch(error => {
-        console.error('Error fetching data:', error)
-        // Handle errors, e.g., show an error message to the user
-      })
-      .finally(() => {
-        setIsLoading(false) // Finish loading
-      })
-  }, [choreId])
+      setUserHistory(newUserChoreHistory)
+      updateHistoryInfo(choreHistory, newUserChoreHistory, performers)
+    }
+  }, [choreHistory, performers])
 
   const updateHistoryInfo = (histories, userHistories, performers) => {
     // average delay for task completaion from due date:
@@ -327,35 +312,39 @@ const ChoreHistory = () => {
             setIsEditModalOpen(false)
           },
           onSave: updated => {
-            UpdateChoreHistory(choreId, editHistory.id, {
-              performedAt: updated.performedAt,
-              dueDate: updated.dueDate,
-              notes: updated.notes,
-            }).then(res => {
-              if (!res.ok) {
-                console.error('Failed to update chore history:', res)
-                return
-              }
-
-              const newRecord = res.json().then(data => {
-                const newRecord = data.res
-                const newHistory = choreHistory.map(record =>
-                  record.id === newRecord.id ? newRecord : record,
-                )
-                setChoresHistory(newHistory)
-                setEditHistory(newRecord)
-                setIsEditModalOpen(false)
-              })
-            })
+            updateChoreHistory.mutate(
+              {
+                choreId,
+                historyId: editHistory.id,
+                historyData: {
+                  performedAt: updated.performedAt,
+                  dueDate: updated.dueDate,
+                  notes: updated.notes,
+                },
+              },
+              {
+                onSuccess: data => {
+                  setEditHistory(data.res)
+                  setIsEditModalOpen(false)
+                },
+                onError: error => {
+                  console.error('Failed to update chore history:', error)
+                },
+              },
+            )
           },
           onDelete: () => {
-            DeleteChoreHistory(choreId, editHistory.id).then(() => {
-              const newHistory = choreHistory.filter(
-                record => record.id !== editHistory.id,
-              )
-              setChoresHistory(newHistory)
-              setIsEditModalOpen(false)
-            })
+            deleteChoreHistory.mutate(
+              {
+                choreId,
+                historyId: editHistory.id,
+              },
+              {
+                onSuccess: () => {
+                  setIsEditModalOpen(false)
+                },
+              },
+            )
           },
         }}
         historyRecord={editHistory}

@@ -3,7 +3,7 @@ import { GetResource } from '../utils/Fetcher'
 
 export const useResource = () => {
   const { data, isLoading, error } = useQuery({
-    queryKey: [],
+    queryKey: ['resource'],
     queryFn: async () => {
       const response = await GetResource()
       return response

@@ -25,14 +25,11 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
+import { useUnArchiveChore } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { ChoreSorter } from '../../utils/Chores'
-import {
-  DeleteChore,
-  GetArchivedChores,
-  UnArchiveChore,
-} from '../../utils/Fetcher'
+import { DeleteChore, GetArchivedChores } from '../../utils/Fetcher'
 import LoadingComponent from '../components/Loading'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import ChoreCard from './ChoreCard'
@@ -44,6 +41,7 @@ const ArchivedTasks = () => {
     useUserProfile()
   const { showSuccess, showError } = useNotification()
   const { impersonatedUser } = useImpersonateUser()
+  const unArchiveChore = useUnArchiveChore()
   const [archivedChores, setArchivedChores] = useState([])
   const [filteredChores, setFilteredChores] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
@@ -317,10 +315,20 @@ const ArchivedTasks = () => {
 
             for (const chore of selectedData) {
               try {
-                await UnArchiveChore(chore.id)
-                restoredTasks.push(chore)
+                await new Promise((resolve, reject) => {
+                  unArchiveChore.mutate(chore.id, {
+                    onSuccess: data => {
+                      restoredTasks.push(chore)
+                      resolve(data)
+                    },
+                    onError: error => {
+                      failedTasks.push(chore)
+                      reject(error)
+                    },
+                  })
+                })
               } catch (error) {
-                failedTasks.push(chore)
+                // Error already handled in onError callback
               }
             }
 

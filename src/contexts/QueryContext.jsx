@@ -4,10 +4,10 @@ const QueryContext = ({ children }) => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 60000, // 60 seconds
-        gcTime: 300000, // 5 minutes
+        staleTime: 300000, // 5 minutes
+        gcTime: 600000, // 10 minutes
         refetchOnWindowFocus: false,
-        retry: 0,
+        retry: 1,
       },
     },
   })

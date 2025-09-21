@@ -27,6 +27,7 @@ import {
   SaveThing,
   UpdateThingState,
 } from '../../utils/Fetcher'
+import { getSafeBottomStyles } from '../../utils/SafeAreaUtils'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import CreateThingModal from '../Modals/Inputs/CreateThingModal'
 import EditThingStateModal from '../Modals/Inputs/EditThingState'
@@ -724,14 +725,11 @@ const ThingsView = () => {
       <Box
         // variant='outlined'
         sx={{
-          position: 'fixed',
-          bottom: 0,
+          ...getSafeBottomStyles({ bottom: 0, padding: 16 }),
           left: 10,
-          p: 2, // padding
           display: 'flex',
           justifyContent: 'flex-end',
           gap: 2,
-
           'z-index': 1000,
         }}
       >

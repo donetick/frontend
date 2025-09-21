@@ -41,12 +41,11 @@ import {
   DeleteChore,
   MarkChoreComplete,
   NudgeChore,
-  PauseChore,
   RejectChore,
-  StartChore,
   UpdateChoreAssignee,
   UpdateDueDate,
 } from '../../utils/Fetcher'
+import { usePauseChore, useStartChore } from '../../queries/TimeQueries'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import DateModal from '../Modals/Inputs/DateModal'
 import NudgeModal from '../Modals/Inputs/NudgeModal'
@@ -81,6 +80,8 @@ const CompactChoreCard = ({
   const [isNudgeModalOpen, setIsNudgeModalOpen] = React.useState(false)
   const [isOfficialInstance, setIsOfficialInstance] = React.useState(false)
   const navigate = useNavigate()
+  const startChore = useStartChore()
+  const pauseChore = usePauseChore()
 
   const [isPendingCompletion, setIsPendingCompletion] = React.useState(false)
   const [secondsLeftToCancel, setSecondsLeftToCancel] = React.useState(null)
@@ -656,29 +657,25 @@ const CompactChoreCard = ({
   }
 
   const handleChorePause = () => {
-    PauseChore(chore.id).then(response => {
-      if (response.ok) {
-        response.json().then(data => {
-          const newChore = {
-            ...chore,
-            ...data.res,
-          }
-          onChoreUpdate(newChore, 'paused')
-        })
-      }
+    pauseChore.mutate(chore.id, {
+      onSuccess: data => {
+        const newChore = {
+          ...chore,
+          ...data.res,
+        }
+        onChoreUpdate(newChore, 'paused')
+      },
     })
   }
   const handleChoreStart = () => {
-    StartChore(chore.id).then(response => {
-      if (response.ok) {
-        response.json().then(data => {
-          const newChore = {
-            ...chore,
-            ...data.res,
-          }
-          onChoreUpdate(newChore, 'started')
-        })
-      }
+    startChore.mutate(chore.id, {
+      onSuccess: data => {
+        const newChore = {
+          ...chore,
+          ...data.res,
+        }
+        onChoreUpdate(newChore, 'started')
+      },
     })
   }
 

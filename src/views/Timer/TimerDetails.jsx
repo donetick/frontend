@@ -30,11 +30,11 @@ import { useParams } from 'react-router-dom'
 import { useCircleMembers } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import {
-  GetChoreTimer,
-  PauseChore,
-  StartChore,
-  UpdateTimeSession,
-} from '../../utils/Fetcher'
+  useChoreTimer,
+  usePauseChore,
+  useStartChore,
+  useUpdateTimeSession,
+} from '../../queries/TimeQueries'
 import { resolvePhotoURL } from '../../utils/Helpers'
 import { getSafeBottom } from '../../utils/SafeAreaUtils'
 import LoadingComponent from '../components/Loading'
@@ -60,6 +60,12 @@ const TimerDetails = () => {
   const { data: circleMembersData, isLoading: isCircleMembersLoading } =
     useCircleMembers()
 
+  // Timer hooks
+  const { data: choreTimer, refetch: refetchTimer } = useChoreTimer(choreId)
+  const startChore = useStartChore()
+  const pauseChore = usePauseChore()
+  const updateTimeSession = useUpdateTimeSession()
+
   const members = circleMembersData?.res || []
 
   // Helper function to find member by user ID
@@ -75,13 +81,12 @@ const TimerDetails = () => {
     checkTouchDevice()
   }, [])
 
-  // Fetch timer data when component mounts
+  // Update timerData when choreTimer data changes
   useEffect(() => {
-    if (choreId) {
-      fetchTimerData()
+    if (choreTimer?.res) {
+      setTimerData(choreTimer.res)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [choreId])
+  }, [choreTimer])
 
   // Real-time update interval for active timers
   useEffect(() => {
@@ -97,28 +102,6 @@ const TimerDetails = () => {
     }
   }, [timerData])
 
-  const fetchTimerData = async () => {
-    setLoading(true)
-    try {
-      const response = await GetChoreTimer(choreId)
-      if (response.ok) {
-        const data = await response.json()
-        setTimerData(data.res)
-      } else {
-        showError({
-          title: 'Failed to fetch timer data',
-          message: 'Please try again.',
-        })
-      }
-    } catch (error) {
-      showError({
-        title: 'Error fetching timer data',
-        message: error.message,
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const formatTime = seconds => {
     const hours = Math.floor(seconds / 3600)
@@ -236,20 +219,25 @@ const TimerDetails = () => {
         pauseLog: editingData.pauseLog,
       }
 
-      const response = await UpdateTimeSession(choreId, sessionId, updateData)
-      if (response.ok) {
-        showSuccess({
-          title: 'Session updated',
-          message: 'Timer session has been updated successfully.',
-        })
-        await fetchTimerData()
-        cancelEditingSession(sessionId)
-      } else {
-        showError({
-          title: 'Failed to update session',
-          message: 'Please try again.',
-        })
-      }
+      updateTimeSession.mutate(
+        { choreId, sessionId, sessionData: updateData },
+        {
+          onSuccess: () => {
+            showSuccess({
+              title: 'Session updated',
+              message: 'Timer session has been updated successfully.',
+            })
+            refetchTimer()
+            cancelEditingSession(sessionId)
+          },
+          onError: () => {
+            showError({
+              title: 'Failed to update session',
+              message: 'Please try again.',
+            })
+          },
+        },
+      )
     } catch (error) {
       showError({
         title: 'Error updating session',
@@ -261,56 +249,48 @@ const TimerDetails = () => {
   }
 
   // Timer control functions
-  const handleStartTimer = async () => {
+  const handleStartTimer = () => {
     setTimerActionLoading(true)
-    try {
-      const response = await StartChore(choreId)
-      if (response.ok) {
+    startChore.mutate(choreId, {
+      onSuccess: () => {
         showSuccess({
           title: 'Timer Started',
           message: 'Work session has been started successfully.',
         })
-        await fetchTimerData()
-      } else {
+        refetchTimer()
+      },
+      onError: () => {
         showError({
           title: 'Failed to start timer',
           message: 'Please try again.',
         })
-      }
-    } catch (error) {
-      showError({
-        title: 'Error starting timer',
-        message: error.message,
-      })
-    } finally {
-      setTimerActionLoading(false)
-    }
+      },
+      onSettled: () => {
+        setTimerActionLoading(false)
+      },
+    })
   }
 
-  const handlePauseTimer = async () => {
+  const handlePauseTimer = () => {
     setTimerActionLoading(true)
-    try {
-      const response = await PauseChore(choreId)
-      if (response.ok) {
+    pauseChore.mutate(choreId, {
+      onSuccess: () => {
         showSuccess({
           title: 'Timer Paused',
           message: 'Work session has been paused.',
         })
-        await fetchTimerData()
-      } else {
+        refetchTimer()
+      },
+      onError: () => {
         showError({
           title: 'Failed to pause timer',
           message: 'Please try again.',
         })
-      }
-    } catch (error) {
-      showError({
-        title: 'Error pausing timer',
-        message: error.message,
-      })
-    } finally {
-      setTimerActionLoading(false)
-    }
+      },
+      onSettled: () => {
+        setTimerActionLoading(false)
+      },
+    })
   }
 
   // Determine if timer is currently running

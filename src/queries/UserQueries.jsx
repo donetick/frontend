@@ -67,7 +67,7 @@ export const useDeviceTokens = () => {
       const result = await resp.json()
       return result.res || []
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 0, // Always fetch fresh data
     gcTime: 10 * 60 * 1000, // 10 minutes
   })
 

@@ -502,30 +502,23 @@ const HistoryCard = ({
                 >
                   <Chip
                     size='sm'
-                    variant='outlined'
-                    startDecorator={<Person />}
+                    variant='solid'
+                    color='success'
+                    startDecorator={<CheckCircle />}
                   >
-                    {performer?.displayName || 'Unknown'}
+                    Done by {performer?.displayName || 'Unknown'}
                   </Chip>
 
                   {historyEntry.completedBy !== historyEntry.assignedTo &&
                     assignedTo && (
-                      <>
-                        <Typography
-                          level='body-xs'
-                          sx={{ color: 'text.tertiary' }}
-                        >
-                          →
-                        </Typography>
-                        <Chip
-                          size='sm'
-                          variant='soft'
-                          color='neutral'
-                          startDecorator={<CheckCircle />}
-                        >
-                          {assignedTo.displayName}
-                        </Chip>
-                      </>
+                      <Chip
+                        size='sm'
+                        variant='outlined'
+                        color='neutral'
+                        startDecorator={<Person />}
+                      >
+                        Assigned to {assignedTo.displayName}
+                      </Chip>
                     )}
 
                   {historyEntry.notes && (

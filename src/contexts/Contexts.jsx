@@ -6,7 +6,7 @@ import SSEProvider from './SSEContext'
 import ThemeContext from './ThemeContext'
 import WebSocketProvider from './WebSocketContext'
 
-const Contexts = () => {
+const Contexts = ({ children }) => {
   const contexts = [
     AlertsProvider,
     ThemeContext,
@@ -19,7 +19,7 @@ const Contexts = () => {
 
   return contexts.reduceRight((acc, Context) => {
     return <Context>{acc}</Context>
-  }, {})
+  }, children)
 }
 
 export default Contexts

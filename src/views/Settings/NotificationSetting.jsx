@@ -1,4 +1,5 @@
 import { Capacitor } from '@capacitor/core'
+import { Device } from '@capacitor/device'
 import { LocalNotifications } from '@capacitor/local-notifications'
 import { Preferences } from '@capacitor/preferences'
 import { Android, Apple } from '@mui/icons-material'
@@ -72,6 +73,9 @@ const NotificationSetting = () => {
   const [naggingNotification, setNaggingNotification] = useState(false)
   const [pushNotification, setPushNotification] = useState(false)
   const [isOfficialInstance, setIsOfficialInstance] = useState(false)
+  const [currentDevice, setCurrentDevice] = useState(null)
+  const [isCurrentDeviceRegistered, setIsCurrentDeviceRegistered] =
+    useState(true)
 
   useEffect(() => {
     getNotificationPreferences().then(resp => {
@@ -95,6 +99,28 @@ const NotificationSetting = () => {
       console.warn('Error checking instance type:', error)
       setIsOfficialInstance(false)
     }
+
+    // Get current device info if on native platform
+    if (Capacitor.isNativePlatform()) {
+      const getCurrentDeviceInfo = async () => {
+        try {
+          const deviceInfo = await Device.getInfo()
+          const deviceId = await Device.getId()
+          const platform =
+            Capacitor.getPlatform() === 'android' ? 'android' : 'ios'
+
+          setCurrentDevice({
+            id: deviceId.identifier,
+            platform,
+            model: deviceInfo.model,
+            appVersion: deviceInfo.appVersion,
+          })
+        } catch (error) {
+          console.error('Error getting device info:', error)
+        }
+      }
+      getCurrentDeviceInfo()
+    }
   }, [])
 
   const [notificationTarget, setNotificationTarget] = useState(
@@ -107,6 +133,64 @@ const NotificationSetting = () => {
     userProfile?.notification_target?.target_id ?? 0,
   )
   const [error, setError] = useState('')
+
+  // Check if current device is registered whenever deviceTokens or currentDevice changes
+  useEffect(() => {
+    if (currentDevice && deviceTokens && isOfficialInstance) {
+      const isRegistered = deviceTokens.some(
+        device => device.deviceId === currentDevice.id,
+      )
+      setIsCurrentDeviceRegistered(isRegistered)
+    }
+  }, [currentDevice, deviceTokens, isOfficialInstance])
+
+  // Listen for device registration events from CapacitorListener
+  useEffect(() => {
+    const handleDeviceRegistered = () => {
+      refetchDevices()
+      showWarning({
+        title: 'Success',
+        message: 'Device registered successfully for push notifications.',
+      })
+    }
+
+    const handleDeviceRegistrationFailed = event => {
+      const { status, error } = event.detail || {}
+
+      if (status === 409) {
+        showWarning({
+          title: 'Device Limit Reached',
+          message:
+            'You have reached the maximum limit of 5 registered devices. Please remove a device before registering this one.',
+        })
+      } else {
+        showWarning({
+          title: 'Registration Failed',
+          message:
+            error ||
+            'Failed to register device automatically. Please try again.',
+        })
+      }
+    }
+
+    // Listen for the custom events that CapacitorListener might emit
+    window.addEventListener('deviceTokenRegistered', handleDeviceRegistered)
+    window.addEventListener(
+      'deviceTokenRegistrationFailed',
+      handleDeviceRegistrationFailed,
+    )
+
+    return () => {
+      window.removeEventListener(
+        'deviceTokenRegistered',
+        handleDeviceRegistered,
+      )
+      window.removeEventListener(
+        'deviceTokenRegistrationFailed',
+        handleDeviceRegistrationFailed,
+      )
+    }
+  }, [refetchDevices, showWarning])
   const SaveValidation = () => {
     switch (notificationTarget) {
       case '1':
@@ -145,6 +229,55 @@ const NotificationSetting = () => {
       refetchUserProfile()
       alert('Notification target updated')
     })
+  }
+
+  const handleRegisterCurrentDevice = async () => {
+    if (!currentDevice) return
+
+    // Check device limit before attempting registration
+    const currentDeviceCount = deviceTokens ? deviceTokens.length : 0
+    if (currentDeviceCount >= 5) {
+      showWarning({
+        title: 'Device Limit Reached',
+        message:
+          'You have reached the maximum limit of 5 registered devices. Please remove a device before registering this one.',
+      })
+      return
+    }
+
+    try {
+      // First request push notification permission
+      const permStatus = await PushNotifications.requestPermissions()
+
+      if (permStatus.receive !== 'granted') {
+        showWarning({
+          title: 'Permission Required',
+          message:
+            'Push notification permission is required to register this device.',
+        })
+        return
+      }
+
+      // Ensure push notification listeners are set up before registration
+
+      await registerPushNotifications()
+
+      // Store registration preferences immediately since permission was granted
+      await setPushNotificationPreferences({ granted: true })
+      setPushNotification(true)
+
+      showWarning({
+        title: 'Registration Initiated',
+        message:
+          'Push notification registration has been initiated. The device will be registered automatically.',
+      })
+    } catch (error) {
+      console.error('Error registering device:', error)
+      showWarning({
+        title: 'Error',
+        message: 'Failed to register device. Please try again.',
+      })
+    }
   }
   return (
     <SettingsLayout title='Notification Settings'>
@@ -344,12 +477,59 @@ const NotificationSetting = () => {
         {isOfficialInstance && (
           <>
             <Typography level='h4' sx={{ mt: 2 }}>
-              Registered Devices
+              Registered Devices ({deviceTokens ? deviceTokens.length : 0}/5)
             </Typography>
             <Divider />
             <Typography level='body-md' sx={{ mb: 2 }}>
               Devices registered to receive push notifications for your account
             </Typography>
+
+            {/* Show register current device option if not registered */}
+            {Capacitor.isNativePlatform() &&
+              currentDevice &&
+              !isCurrentDeviceRegistered && (
+                <Card
+                  variant='outlined'
+                  sx={{ p: 2, mb: 2, bgcolor: 'background.level1' }}
+                >
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      {currentDevice.platform === 'ios' ? (
+                        <Apple sx={{ fontSize: 24, color: '#007AFF' }} />
+                      ) : (
+                        <Android sx={{ fontSize: 24, color: '#3DDC84' }} />
+                      )}
+                      <Box>
+                        <Typography level='body-md' sx={{ fontWeight: 'bold' }}>
+                          Current Device:{' '}
+                          {currentDevice.platform === 'ios' ? 'iOS' : 'Android'}{' '}
+                          {currentDevice.model}
+                        </Typography>
+                        <Typography level='body-sm' color='neutral'>
+                          This device is not registered for push notifications
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <Button
+                      variant='solid'
+                      color='primary'
+                      size='sm'
+                      disabled={deviceTokens && deviceTokens.length >= 5}
+                      onClick={handleRegisterCurrentDevice}
+                    >
+                      {deviceTokens && deviceTokens.length >= 5
+                        ? 'Limit Reached'
+                        : 'Register Device'}
+                    </Button>
+                  </Box>
+                </Card>
+              )}
 
             {deviceTokens && deviceTokens.length > 0 ? (
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>

@@ -32,6 +32,7 @@ import moment from 'moment'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
+import { usePauseChore, useStartChore } from '../../queries/TimeQueries'
 import { useUserProfile } from '../../queries/UserQueries.jsx'
 import { useNotification } from '../../service/NotificationProvider'
 import { notInCompletionWindow } from '../../utils/Chores.jsx'
@@ -42,9 +43,7 @@ import {
   DeleteChore,
   MarkChoreComplete,
   NudgeChore,
-  PauseChore,
   RejectChore,
-  StartChore,
   UpdateChoreAssignee,
   UpdateDueDate,
 } from '../../utils/Fetcher'
@@ -91,6 +90,8 @@ const ChoreCard = ({
   const { impersonatedUser } = useImpersonateUser()
 
   const { showError, showNotification } = useNotification()
+  const startChore = useStartChore()
+  const pauseChore = usePauseChore()
 
   // Swipe functionality state
   const [swipeTranslateX, setSwipeTranslateX] = React.useState(0)
@@ -109,7 +110,7 @@ const ChoreCard = ({
       setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0)
     }
     checkTouchDevice()
-    
+
     // Check if this is the official donetick.com instance
     try {
       setIsOfficialInstance(isOfficialDonetickInstanceSync())
@@ -277,7 +278,10 @@ const ChoreCard = ({
 
   const handleNudge = async ({ choreId, message, notifyAllAssignees }) => {
     try {
-      const response = await NudgeChore(choreId, { message, notifyAllAssignees })
+      const response = await NudgeChore(choreId, {
+        message,
+        notifyAllAssignees,
+      })
       if (response.ok) {
         const data = await response.json()
         showNotification({
@@ -490,30 +494,26 @@ const ChoreCard = ({
 
   // Handlers for start/pause/complete functionality
   const handleChorePause = () => {
-    PauseChore(chore.id).then(response => {
-      if (response.ok) {
-        response.json().then(data => {
-          const newChore = {
-            ...chore,
-            status: data.res.status,
-          }
-          onChoreUpdate(newChore, 'paused')
-        })
-      }
+    pauseChore.mutate(chore.id, {
+      onSuccess: data => {
+        const newChore = {
+          ...chore,
+          status: data.res.status,
+        }
+        onChoreUpdate(newChore, 'paused')
+      },
     })
   }
 
   const handleChoreStart = () => {
-    StartChore(chore.id).then(response => {
-      if (response.ok) {
-        response.json().then(data => {
-          const newChore = {
-            ...chore,
-            status: data.res.status,
-          }
-          onChoreUpdate(newChore, 'started')
-        })
-      }
+    startChore.mutate(chore.id, {
+      onSuccess: data => {
+        const newChore = {
+          ...chore,
+          status: data.res.status,
+        }
+        onChoreUpdate(newChore, 'started')
+      },
     })
   }
 
@@ -836,7 +836,7 @@ const ChoreCard = ({
             <Edit sx={{ fontSize: 20 }} />
           </IconButton>
 
-{isOfficialInstance && (
+          {isOfficialInstance && (
             <IconButton
               variant='soft'
               color='warning'

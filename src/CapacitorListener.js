@@ -23,8 +23,8 @@ const localNotificationListenerRegistration = () => {
 
 const registerTokenIfNeeded = async (token, deviceInfo, deviceId, platform) => {
   try {
-    const stored = await Preferences.get({ key: 'deviceRegistration' })
-    const lastReg = stored.value ? JSON.parse(stored.value) : null
+    // const stored = await Preferences.get({ key: 'deviceRegistration' })
+    // const lastReg = stored.value ? JSON.parse(stored.value) : null
 
     const current = {
       token: token.value,
@@ -34,53 +34,86 @@ const registerTokenIfNeeded = async (token, deviceInfo, deviceId, platform) => {
       registeredAt: Date.now(),
     }
 
-    const shouldRegister =
-      !lastReg ||
-      lastReg.token !== current.token ||
-      lastReg.appVersion !== current.appVersion ||
-      Date.now() - lastReg.registeredAt > 7 * 24 * 60 * 60 * 1000
+    // const shouldRegister =
+    //   !lastReg ||
+    //   lastReg.token !== current.token ||
+    //   lastReg.appVersion !== current.appVersion ||
+    //   Date.now() - lastReg.registeredAt > 7 * 24 * 60 * 60 * 1000
 
-    if (shouldRegister) {
-      console.log('Registering device token:', {
-        reason: !lastReg
-          ? 'first_time'
-          : lastReg.token !== current.token
-            ? 'token_changed'
-            : lastReg.appVersion !== current.appVersion
-              ? 'app_updated'
-              : 'periodic_refresh',
-      })
+    // console.log('Registering device token:', {
+    //   reason: !lastReg
+    //     ? 'first_time'
+    //     : lastReg.token !== current.token
+    //       ? 'token_changed'
+    //       : lastReg.appVersion !== current.appVersion
+    //         ? 'app_updated'
+    //         : 'periodic_refresh',
+    // })
 
-      const result = await RegisterDeviceToken(
-        token.value,
-        deviceId.identifier,
-        platform,
-        deviceInfo.appVersion,
-        deviceInfo.model,
-      )
-
-      if (result && !result.error) {
-        await Preferences.set({
-          key: 'deviceRegistration',
-          value: JSON.stringify(current),
-        })
-        console.log('Device token registered successfully')
-      }
-    } else {
-      console.log('Device token already registered, skipping')
-    }
-  } catch (error) {
-    console.error(
-      'Error in token registration check, registering anyway:',
-      error,
-    )
-    await RegisterDeviceToken(
+    const result = await RegisterDeviceToken(
       token.value,
       deviceId.identifier,
       platform,
       deviceInfo.appVersion,
       deviceInfo.model,
     )
+
+    if (result && result.ok) {
+      await Preferences.set({
+        key: 'deviceRegistration',
+        value: JSON.stringify(current),
+      })
+      console.log('Device token registered successfully')
+
+      // Emit event to notify UI components of successful registration
+      window.dispatchEvent(new CustomEvent('deviceTokenRegistered'))
+    } else if (result) {
+      // Handle registration errors
+      console.error('Device registration failed:', result.status)
+
+      // Emit event with error details for UI to handle
+      window.dispatchEvent(
+        new CustomEvent('deviceTokenRegistrationFailed', {
+          detail: {
+            status: result.status,
+            error: await result.text().catch(() => 'Unknown error'),
+          },
+        }),
+      )
+    }
+  } catch (error) {
+    console.error(
+      'Error in token registration check, registering anyway:',
+      error,
+    )
+    const fallbackResult = await RegisterDeviceToken(
+      token.value,
+      deviceId.identifier,
+      platform,
+      deviceInfo.appVersion,
+      deviceInfo.model,
+    )
+
+    if (fallbackResult && fallbackResult.ok) {
+      // Emit event to notify UI components of successful registration
+      window.dispatchEvent(new CustomEvent('deviceTokenRegistered'))
+    } else if (fallbackResult) {
+      // Handle registration errors
+      console.error(
+        'Fallback device registration failed:',
+        fallbackResult.status,
+      )
+
+      // Emit event with error details for UI to handle
+      window.dispatchEvent(
+        new CustomEvent('deviceTokenRegistrationFailed', {
+          detail: {
+            status: fallbackResult.status,
+            error: await fallbackResult.text().catch(() => 'Unknown error'),
+          },
+        }),
+      )
+    }
   }
 }
 

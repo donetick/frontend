@@ -49,18 +49,21 @@ import { ChoreStatus, notInCompletionWindow } from '../../utils/Chores.jsx'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import {
   ApproveChore,
-  DeleteTimeSession,
   GetChoreDetailById,
-  GetChoreTimer,
   MarkChoreComplete,
-  PauseChore,
   RejectChore,
-  ResetChoreTimer,
   SkipChore,
-  StartChore,
   UpdateChorePriority,
 } from '../../utils/Fetcher'
+import {
+  useChoreTimer,
+  useDeleteTimeSession,
+  usePauseChore,
+  useResetChoreTimer,
+  useStartChore,
+} from '../../queries/TimeQueries'
 import Priorities from '../../utils/Priorities'
+import { getSafeBottomPadding } from '../../utils/SafeAreaUtils.js'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import LoadingComponent from '../components/Loading.jsx'
 import RichTextEditor from '../components/RichTextEditor.jsx'
@@ -94,6 +97,12 @@ const ChoreView = () => {
 
   const { data: choreData, isLoading: isChoreLoading } =
     useChoreDetails(choreId)
+
+  const startChore = useStartChore()
+  const pauseChore = usePauseChore()
+  const deleteTimeSession = useDeleteTimeSession()
+  const resetChoreTimer = useResetChoreTimer()
+  const { data: choreTimer } = useChoreTimer(choreId)
 
   useEffect(() => {
     if (!choreData || !choreData.res || !circleMembersData) {
@@ -241,30 +250,26 @@ const ChoreView = () => {
     })
   }
   const handleChoreStart = () => {
-    StartChore(choreId).then(response => {
-      if (response.ok) {
-        response.json().then(data => {
-          const newChore = {
-            ...chore,
-            ...data.res,
-          }
-          setChore(newChore)
-        })
-      }
+    startChore.mutate(choreId, {
+      onSuccess: data => {
+        const newChore = {
+          ...chore,
+          ...data.res,
+        }
+        setChore(newChore)
+      },
     })
   }
 
   const handleChorePause = () => {
-    PauseChore(choreId).then(response => {
-      if (response.ok) {
-        response.json().then(data => {
-          const newChore = {
-            ...chore,
-            ...data.res,
-          }
-          setChore(newChore)
-        })
-      }
+    pauseChore.mutate(choreId, {
+      onSuccess: data => {
+        const newChore = {
+          ...chore,
+          ...data.res,
+        }
+        setChore(newChore)
+      },
     })
   }
 
@@ -278,17 +283,14 @@ const ChoreView = () => {
       cancelText: 'Cancel',
       onClose: confirmed => {
         if (confirmed) {
-          ResetChoreTimer(choreId).then(response => {
-            if (response.ok) {
-              response.json().then(data => {
-                const newChore = {
-                  ...chore,
-                  ...data.res,
-                }
-                setChore(newChore)
-                queryClient.invalidateQueries(['chores'])
-              })
-            }
+          resetChoreTimer.mutate(choreId, {
+            onSuccess: data => {
+              const newChore = {
+                ...chore,
+                ...data.res,
+              }
+              setChore(newChore)
+            },
           })
         }
         setTimerActionConfig({})
@@ -306,22 +308,19 @@ const ChoreView = () => {
       cancelText: 'Cancel',
       onClose: async confirmed => {
         if (confirmed) {
-          const resp = await GetChoreTimer(choreId)
-          if (resp.ok) {
-            const data = await resp.json()
-            const sessionId = data?.res?.id
-            DeleteTimeSession(choreId, sessionId).then(response => {
-              if (response.ok) {
-                response.json().then(data => {
+          if (choreTimer?.res?.id) {
+            deleteTimeSession.mutate(
+              { choreId, sessionId: choreTimer.res.id },
+              {
+                onSuccess: data => {
                   const newChore = {
                     ...chore,
                     ...data.res,
                   }
                   setChore(newChore)
-                  queryClient.invalidateQueries(['chores'])
-                })
-              }
-            })
+                },
+              },
+            )
           }
         }
         setTimerActionConfig({})
@@ -712,6 +711,7 @@ const ChoreView = () => {
           p: 2,
           borderRadius: 'md',
           boxShadow: 'sm',
+          paddingBottom: getSafeBottomPadding(2, '8px'),
         }}
         variant='soft'
       >
