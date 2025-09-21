@@ -36,6 +36,8 @@ import {
   UpdateTimeSession,
 } from '../../utils/Fetcher'
 import { resolvePhotoURL } from '../../utils/Helpers'
+import { getSafeBottom } from '../../utils/SafeAreaUtils'
+import LoadingComponent from '../components/Loading'
 
 const TimerDetails = () => {
   const { choreId } = useParams()
@@ -515,6 +517,10 @@ const TimerDetails = () => {
   useEffect(() => {
     resetAllSwipes()
   }, [editingSessions])
+
+  if (loading || isCircleMembersLoading) {
+    return <LoadingComponent />
+  }
 
   return (
     <Container maxWidth='lg' sx={{ py: 2 }}>
@@ -1126,7 +1132,7 @@ const TimerDetails = () => {
                                   position: 'absolute',
                                   right: 0,
                                   top: 0,
-                                  bottom: 0,
+                                  bottom: getSafeBottom(),
                                   width: maxSwipeDistance,
                                   display: 'flex',
                                   alignItems: 'center',
@@ -1560,7 +1566,7 @@ const TimerDetails = () => {
           disabled={loading}
           sx={{
             position: 'fixed',
-            bottom: 16,
+            bottom: getSafeBottom(16, 16),
             left: 16,
             width: 56,
             height: 56,

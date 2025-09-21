@@ -72,7 +72,6 @@ export const TASK_COLOR = {
   PENDING_REVIEW: '#8B6CE1',
 
   // For the calendar
-  OVERDUE: '#F03A47',
   TODAY: '#ffc107',
   TOMORROW: '#4ec1a2',
   NEXT_7_DAYS: '#00bcd4',

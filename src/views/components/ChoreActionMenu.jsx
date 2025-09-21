@@ -21,9 +21,10 @@ import {
   Weekend,
 } from '@mui/icons-material'
 import { Divider, IconButton, Menu, MenuItem, Tooltip } from '@mui/joy'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useNotification } from '../../service/NotificationProvider'
+import { isOfficialDonetickInstanceSync } from '../../utils/FeatureToggle'
 import {
   ArchiveChore,
   DeleteChore,
@@ -50,9 +51,20 @@ const ChoreActionMenu = ({
   variant = 'soft',
 }) => {
   const [anchorEl, setAnchorEl] = React.useState(null)
+  const [isOfficialInstance, setIsOfficialInstance] = useState(false)
   const menuRef = React.useRef(null)
   const navigate = useNavigate()
   const { showError } = useNotification()
+
+  // Check if this is the official donetick.com instance
+  useEffect(() => {
+    try {
+      setIsOfficialInstance(isOfficialDonetickInstanceSync())
+    } catch (error) {
+      console.warn('Error checking instance type:', error)
+      setIsOfficialInstance(false)
+    }
+  }, [])
 
   useEffect(() => {
     const handleMenuOutsideClick = event => {
@@ -317,16 +329,18 @@ const ChoreActionMenu = ({
           <RecordVoiceOver />
           Delegate to someone else
         </MenuItem>
-        <MenuItem
-          onClick={e => {
-            e.stopPropagation()
-            onNudge?.()
-            handleMenuClose()
-          }}
-        >
-          <Notifications />
-          Send nudge
-        </MenuItem>
+{isOfficialInstance && (
+          <MenuItem
+            onClick={e => {
+              e.stopPropagation()
+              onNudge?.()
+              handleMenuClose()
+            }}
+          >
+            <Notifications />
+            Send nudge
+          </MenuItem>
+        )}
         <Divider />
         <MenuItem
           onClick={e => {

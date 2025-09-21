@@ -58,6 +58,7 @@ import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { ChoreFilters, ChoresGrouper, ChoreSorter } from '../../utils/Chores'
 import { DeleteChore, MarkChoreComplete, SkipChore } from '../../utils/Fetcher'
+import { getSafeBottom } from '../../utils/SafeAreaUtils.js'
 import TaskInput from '../components/AddTaskModal'
 import CalendarDual from '../components/CalendarDual'
 import CalendarMonthly from '../components/CalendarMonthly.jsx'
@@ -2023,9 +2024,8 @@ const MyChores = () => {
           // variant='outlined'
           sx={{
             position: 'fixed',
-            bottom: 0,
+            bottom: getSafeBottom(10, 10),
             left: 10,
-            p: 2, // padding
             display: 'flex',
             justifyContent: 'flex-end',
             gap: 2,

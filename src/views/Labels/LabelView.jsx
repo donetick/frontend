@@ -21,6 +21,7 @@ import LABEL_COLORS, {
   getTextColorFromBackgroundColor,
 } from '../../utils/Colors'
 import { DeleteLabel } from '../../utils/Fetcher'
+import { getSafeBottom, getSafeBottomStyles } from '../../utils/SafeAreaUtils'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import { useLabels } from './LabelQueries'
 
@@ -221,7 +222,7 @@ const LabelCard = ({ label, onEditClick, onDeleteClick, currentUserId }) => {
             position: 'absolute',
             right: 0,
             top: 0,
-            bottom: 0,
+            bottom: getSafeBottom(),
             width: maxSwipeDistance,
             display: 'flex',
             alignItems: 'center',
@@ -605,10 +606,8 @@ const LabelView = () => {
 
       <Box
         sx={{
-          position: 'fixed',
-          bottom: 0,
+          ...getSafeBottomStyles({ bottom: 0, padding: 16 }),
           left: 10,
-          p: 2,
           display: 'flex',
           justifyContent: 'flex-end',
           gap: 2,

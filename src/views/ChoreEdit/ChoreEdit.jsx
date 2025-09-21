@@ -40,6 +40,7 @@ import {
 } from '../../utils/Fetcher'
 import { isPlusAccount } from '../../utils/Helpers'
 import Priorities from '../../utils/Priorities.jsx'
+import { getSafeBottomPadding } from '../../utils/SafeAreaUtils.js'
 import LoadingComponent from '../components/Loading.jsx'
 import RichTextEditor from '../components/RichTextEditor.jsx'
 import SubTasks from '../components/SubTask.jsx'
@@ -1210,6 +1211,7 @@ const ChoreEdit = () => {
           left: 0,
           right: 0,
           p: 2, // padding
+          paddingBottom: getSafeBottomPadding(2), // safe area padding for iOS
           display: 'flex',
           justifyContent: 'flex-end',
           gap: 2,

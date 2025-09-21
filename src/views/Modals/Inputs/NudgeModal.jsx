@@ -1,4 +1,5 @@
 import {
+  Alert,
   Box,
   Button,
   FormControl,
@@ -10,17 +11,23 @@ import {
 import { useCallback, useEffect, useState } from 'react'
 import KeyboardShortcutHint from '../../../components/common/KeyboardShortcutHint'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
+import { isOfficialDonetickInstanceSync } from '../../../utils/FeatureToggle'
 
 function NudgeModal({ config }) {
   const { ResponsiveModal } = useResponsiveModal()
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
   const [message, setMessage] = useState('')
   const [notifyAllAssignees, setNotifyAllAssignees] = useState(false)
+  const [isOfficialInstance, setIsOfficialInstance] = useState(false)
 
   const handleAction = useCallback(
     isConfirmed => {
       if (isConfirmed) {
-        config.onConfirm({ choreId: config.choreId, message, notifyAllAssignees })
+        config.onConfirm({
+          choreId: config.choreId,
+          message,
+          notifyAllAssignees,
+        })
       } else {
         config.onClose()
       }
@@ -33,6 +40,14 @@ function NudgeModal({ config }) {
     if (config?.isOpen) {
       setMessage('')
       setNotifyAllAssignees(false)
+
+      // Check if this is the official donetick.com instance
+      try {
+        setIsOfficialInstance(isOfficialDonetickInstanceSync())
+      } catch (error) {
+        console.warn('Error checking instance type:', error)
+        setIsOfficialInstance(false)
+      }
     }
   }, [config?.isOpen])
 
@@ -101,6 +116,20 @@ function NudgeModal({ config }) {
         customize the message and choose who gets notified.
       </Typography>
 
+      {!isOfficialInstance && (
+        <Alert color='warning' sx={{ mb: 2 }}>
+          <Typography level='body-sm'>
+            <strong>Heads up!</strong>This feature avaiable on Donetick Cloud!
+            Since you're using a self-hosted instance, nudges will requires you
+            to setup Google cloud account and Firebase Cloud Messaging (FCM).
+            and build the Android or the iOS app by yourself.
+            <br />
+            Will update if we come up with a solution to make this easier for to
+            configure. for selfhosters
+          </Typography>
+        </Alert>
+      )}
+
       <FormControl mb={2}>
         <FormLabel>Custom Message (optional)</FormLabel>
         <Textarea
@@ -130,6 +159,7 @@ function NudgeModal({ config }) {
         <Button
           size='lg'
           onClick={() => handleAction(true)}
+          disabled={!isOfficialInstance}
           fullWidth
           color='primary'
           endDecorator={

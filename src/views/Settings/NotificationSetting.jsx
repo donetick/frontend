@@ -1,6 +1,7 @@
 import { Capacitor } from '@capacitor/core'
 import { LocalNotifications } from '@capacitor/local-notifications'
 import { Preferences } from '@capacitor/preferences'
+import { Android, Apple } from '@mui/icons-material'
 import {
   Box,
   Button,
@@ -19,17 +20,19 @@ import { useEffect, useState } from 'react'
 
 import { PushNotifications } from '@capacitor/push-notifications'
 import { registerPushNotifications } from '../../CapacitorListener'
-import { useUserProfile } from '../../queries/UserQueries'
+import { useDeviceTokens, useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
+import { isOfficialDonetickInstanceSync } from '../../utils/FeatureToggle'
 import {
+  UnregisterDeviceToken,
   UpdateNotificationTarget,
-  UpdateUserDetails,
 } from '../../utils/Fetcher'
 import SettingsLayout from './SettingsLayout'
 
 const NotificationSetting = () => {
   const { showWarning } = useNotification()
   const { data: userProfile, refetch: refetchUserProfile } = useUserProfile()
+  const { data: deviceTokens, refetch: refetchDevices } = useDeviceTokens()
 
   const getNotificationPreferences = async () => {
     const ret = await Preferences.get({ key: 'notificationPreferences' })
@@ -68,6 +71,7 @@ const NotificationSetting = () => {
   const [preDueNotification, setPreDueNotification] = useState(false)
   const [naggingNotification, setNaggingNotification] = useState(false)
   const [pushNotification, setPushNotification] = useState(false)
+  const [isOfficialInstance, setIsOfficialInstance] = useState(false)
 
   useEffect(() => {
     getNotificationPreferences().then(resp => {
@@ -83,6 +87,14 @@ const NotificationSetting = () => {
         setPushNotification(Boolean(resp.granted))
       }
     })
+
+    // Check if this is the official donetick.com instance
+    try {
+      setIsOfficialInstance(isOfficialDonetickInstanceSync())
+    } catch (error) {
+      console.warn('Error checking instance type:', error)
+      setIsOfficialInstance(false)
+    }
   }, [])
 
   const [notificationTarget, setNotificationTarget] = useState(
@@ -186,6 +198,34 @@ const NotificationSetting = () => {
             </FormHelperText>
           </div>
         </FormControl>
+        <Button
+          variant='soft'
+          color='primary'
+          disabled={!deviceNotification}
+          sx={{
+            width: '210px',
+            mb: 1,
+          }}
+          onClick={() => {
+            // schedule a local notification in 5 seconds
+            LocalNotifications.schedule({
+              notifications: [
+                {
+                  title: 'Test Notification',
+                  body: 'You have a task due soon',
+                  id: 1,
+                  schedule: { at: new Date(Date.now() + 2000) },
+                  sound: null,
+                  attachments: null,
+                  actionTypeId: '',
+                  extra: null,
+                },
+              ],
+            })
+          }}
+        >
+          Test Notification{' '}
+        </Button>
         {deviceNotification && (
           <Card>
             {[
@@ -242,90 +282,151 @@ const NotificationSetting = () => {
             ))}
           </Card>
         )}
-        <FormControl
-          orientation='horizontal'
-          sx={{ width: 400, justifyContent: 'space-between' }}
-        >
-          <div>
-            <FormLabel>Push Notifications</FormLabel>
-            <FormHelperText sx={{ mt: 0 }}>
-              {Capacitor.isNativePlatform()
-                ? 'Receive Nudges, Announcements, and Chore Assignments via Push Notifications'
-                : 'This feature is only available on mobile devices'}{' '}
-            </FormHelperText>
-          </div>
-          <Switch
-            disabled={!Capacitor.isNativePlatform()}
-            checked={pushNotification}
-            onClick={async event => {
-              event.preventDefault()
-              if (pushNotification === false) {
-                try {
-                  const resp = await PushNotifications.requestPermissions()
-                  console.log('user PushNotifications permission', resp)
-                  if (resp.receive === 'granted') {
-                    setPushNotification(true)
-                    setPushNotificationPreferences({ granted: true })
-                    // Register push notifications after permission is granted
-                    await registerPushNotifications()
+        {isOfficialInstance && (
+          <FormControl
+            orientation='horizontal'
+            sx={{ width: 400, justifyContent: 'space-between' }}
+          >
+            <div>
+              <FormLabel>Push Notifications</FormLabel>
+              <FormHelperText sx={{ mt: 0 }}>
+                {Capacitor.isNativePlatform()
+                  ? 'Receive Nudges, Announcements, and Chore Assignments via Push Notifications'
+                  : 'This feature is only available on mobile devices'}{' '}
+              </FormHelperText>
+            </div>
+            <Switch
+              disabled={!Capacitor.isNativePlatform()}
+              checked={pushNotification}
+              onClick={async event => {
+                event.preventDefault()
+                if (pushNotification === false) {
+                  try {
+                    const resp = await PushNotifications.requestPermissions()
+                    console.log('user PushNotifications permission', resp)
+                    if (resp.receive === 'granted') {
+                      setPushNotification(true)
+                      setPushNotificationPreferences({ granted: true })
+                      // Register push notifications after permission is granted
+                      await registerPushNotifications()
+                    }
+                    if (resp.receive !== 'granted') {
+                      showWarning({
+                        title: 'Push Notification Permission Denied',
+                        message:
+                          'Push notifications have been disabled. You can enable them in your device settings if needed.',
+                      })
+                      setPushNotification(false)
+                      setPushNotificationPreferences({ granted: false })
+                      console.log('User denied permission', resp)
+                    }
+                  } catch (error) {
+                    console.error('Error setting up push notifications:', error)
                   }
-                  if (resp.receive !== 'granted') {
-                    showWarning({
-                      title: 'Push Notification Permission Denied',
-                      message:
-                        'Push notifications have been disabled. You can enable them in your device settings if needed.',
-                    })
-                    setPushNotification(false)
-                    setPushNotificationPreferences({ granted: false })
-                    console.log('User denied permission', resp)
-                  }
-                } catch (error) {
-                  console.error('Error setting up push notifications:', error)
+                } else {
+                  setPushNotification(false)
                 }
-              } else {
-                setPushNotification(false)
-              }
-            }}
-            color={pushNotification ? 'success' : 'neutral'}
-            variant={pushNotification ? 'solid' : 'outlined'}
-            endDecorator={pushNotification ? 'On' : 'Off'}
-            slotProps={{
-              endDecorator: {
-                sx: {
-                  minWidth: 24,
+              }}
+              color={pushNotification ? 'success' : 'neutral'}
+              variant={pushNotification ? 'solid' : 'outlined'}
+              endDecorator={pushNotification ? 'On' : 'Off'}
+              slotProps={{
+                endDecorator: {
+                  sx: {
+                    minWidth: 24,
+                  },
                 },
-              },
-            }}
-          />
-        </FormControl>
+              }}
+            />
+          </FormControl>
+        )}
 
-        <Button
-          variant='soft'
-          color='primary'
-          sx={{
-            width: '210px',
-            mb: 1,
-          }}
-          onClick={() => {
-            // schedule a local notification in 5 seconds
-            LocalNotifications.schedule({
-              notifications: [
-                {
-                  title: 'Task Reminder',
-                  body: 'You have a task due soon',
-                  id: 1,
-                  schedule: { at: new Date(Date.now() + 3000) },
-                  sound: null,
-                  attachments: null,
-                  actionTypeId: '',
-                  extra: null,
-                },
-              ],
-            })
-          }}
-        >
-          Test Notification{' '}
-        </Button>
+        {isOfficialInstance && (
+          <>
+            <Typography level='h4' sx={{ mt: 2 }}>
+              Registered Devices
+            </Typography>
+            <Divider />
+            <Typography level='body-md' sx={{ mb: 2 }}>
+              Devices registered to receive push notifications for your account
+            </Typography>
+
+            {deviceTokens && deviceTokens.length > 0 ? (
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                {deviceTokens.map(device => (
+                  <Card key={device.id} variant='outlined' sx={{ p: 2 }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <Box
+                        sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
+                      >
+                        {device.platform === 'ios' ? (
+                          <Apple sx={{ fontSize: 24, color: '#007AFF' }} />
+                        ) : (
+                          <Android sx={{ fontSize: 24, color: '#3DDC84' }} />
+                        )}
+                        <Box>
+                          <Typography
+                            level='body-md'
+                            sx={{ fontWeight: 'bold' }}
+                          >
+                            {device.platform === 'ios' ? 'iOS' : 'Android'}{' '}
+                            {device.deviceModel || 'Unknown Device'}
+                          </Typography>
+
+                          {device.createdAt && (
+                            <Typography level='body-sm' color='neutral'>
+                              Created At:{' '}
+                              {new Date(device.createdAt).toLocaleDateString()}
+                            </Typography>
+                          )}
+                        </Box>
+                      </Box>
+                      <Button
+                        variant='outlined'
+                        color='danger'
+                        size='sm'
+                        onClick={async () => {
+                          try {
+                            const resp = await UnregisterDeviceToken(
+                              device.deviceId,
+                              null,
+                            )
+                            if (resp.ok) {
+                              refetchDevices()
+                            } else {
+                              showWarning({
+                                title: 'Error',
+                                message: 'Failed to unregister device',
+                              })
+                            }
+                          } catch (error) {
+                            showWarning({
+                              title: 'Error',
+                              message: 'Failed to unregister device',
+                            })
+                          }
+                        }}
+                      >
+                        Remove
+                      </Button>
+                    </Box>
+                  </Card>
+                ))}
+              </Box>
+            ) : (
+              <Typography level='body-md' color='neutral'>
+                No devices registered for push notifications
+              </Typography>
+            )}
+          </>
+        )}
+
         <Typography level='h3'>Custom Notification</Typography>
         <Divider />
         <Typography level='body-md'>
@@ -338,19 +439,22 @@ const NotificationSetting = () => {
             onClick={event => {
               event.preventDefault()
               if (chatID !== 0) {
+                // Turning off custom notification - call API to disable
                 setChatID(0)
-              } else {
-                setChatID('')
-                UpdateUserDetails({
-                  chatID: Number(0),
+                setNotificationTarget('0')
+                UpdateNotificationTarget({
+                  target: '',
+                  type: 0,
                 }).then(resp => {
-                  resp.json().then(data => {
+                  if (resp.status === 200) {
                     refetchUserProfile()
-                  })
+                  }
                 })
+              } else {
+                // Turning on custom notification - just set state, user will use Save button
+                setChatID('')
+                setNotificationTarget('1') // Default to Telegram
               }
-              setNotificationTarget('0')
-              handleSave()
             }}
             color={chatID !== 0 ? 'success' : 'neutral'}
             variant={chatID !== 0 ? 'solid' : 'outlined'}

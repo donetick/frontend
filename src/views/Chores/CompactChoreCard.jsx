@@ -35,6 +35,7 @@ import {
   getPriorityColor,
   getTextColorFromBackgroundColor,
 } from '../../utils/Colors.jsx'
+import { isOfficialDonetickInstanceSync } from '../../utils/FeatureToggle'
 import {
   ApproveChore,
   DeleteChore,
@@ -78,6 +79,7 @@ const CompactChoreCard = ({
   const [confirmModelConfig, setConfirmModelConfig] = React.useState({})
   const [isNFCModalOpen, setIsNFCModalOpen] = React.useState(false)
   const [isNudgeModalOpen, setIsNudgeModalOpen] = React.useState(false)
+  const [isOfficialInstance, setIsOfficialInstance] = React.useState(false)
   const navigate = useNavigate()
 
   const [isPendingCompletion, setIsPendingCompletion] = React.useState(false)
@@ -107,6 +109,14 @@ const CompactChoreCard = ({
       setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0)
     }
     checkTouchDevice()
+    
+    // Check if this is the official donetick.com instance
+    try {
+      setIsOfficialInstance(isOfficialDonetickInstanceSync())
+    } catch (error) {
+      console.warn('Error checking instance type:', error)
+      setIsOfficialInstance(false)
+    }
   }, [])
 
   // Swipe gesture handlers
@@ -441,7 +451,10 @@ const CompactChoreCard = ({
 
   const handleNudge = async ({ choreId, message, notifyAllAssignees }) => {
     try {
-      const response = await NudgeChore(choreId, { message, notifyAllAssignees })
+      const response = await NudgeChore(choreId, {
+        message,
+        notifyAllAssignees,
+      })
       if (response.ok) {
         const data = await response.json()
         showNotification({
@@ -823,23 +836,25 @@ const CompactChoreCard = ({
             <Edit sx={{ fontSize: 16 }} />
           </IconButton>
 
-          <IconButton
-            variant='soft'
-            color='warning'
-            size='sm'
-            onClick={e => {
-              e.stopPropagation()
-              resetSwipe()
-              setIsNudgeModalOpen(true)
-            }}
-            sx={{
-              width: 40,
-              height: 40,
-              mx: 1,
-            }}
-          >
-            <Notifications sx={{ fontSize: 16 }} />
-          </IconButton>
+{isOfficialInstance && (
+            <IconButton
+              variant='soft'
+              color='warning'
+              size='sm'
+              onClick={e => {
+                e.stopPropagation()
+                resetSwipe()
+                setIsNudgeModalOpen(true)
+              }}
+              sx={{
+                width: 40,
+                height: 40,
+                mx: 1,
+              }}
+            >
+              <Notifications sx={{ fontSize: 16 }} />
+            </IconButton>
+          )}
 
           <IconButton
             variant='soft'

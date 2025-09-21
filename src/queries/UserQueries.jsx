@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   GetAllCircleMembers,
   GetAllUsers,
+  GetDeviceTokens,
   GetUserProfile,
 } from '../utils/Fetcher'
 import { isTokenValid } from '../utils/TokenManager'
@@ -50,5 +51,30 @@ export const useUserProfile = () => {
     error,
     isLoading,
     refetch: () => queryClient.invalidateQueries(['userProfile']),
+  }
+}
+
+export const useDeviceTokens = () => {
+  const queryClient = useQueryClient()
+
+  const { data, error, isLoading } = useQuery({
+    queryKey: ['deviceTokens'],
+    queryFn: async () => {
+      if (!isTokenValid()) {
+        return null
+      }
+      const resp = await GetDeviceTokens(true) // Only get active devices
+      const result = await resp.json()
+      return result.res || []
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+  })
+
+  return {
+    data,
+    error,
+    isLoading,
+    refetch: () => queryClient.invalidateQueries(['deviceTokens']),
   }
 }
