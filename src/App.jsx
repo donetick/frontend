@@ -11,7 +11,6 @@ import { AuthenticationProvider } from './service/AuthenticationService'
 import { useNotification } from './service/NotificationProvider'
 import { apiManager } from './utils/TokenManager'
 
-import { getSafeBottomPadding } from './utils/SafeAreaUtils'
 import NetworkBanner from './views/components/NetworkBanner'
 
 const add = className => {
@@ -89,7 +88,7 @@ const AppContent = () => {
   }, [needRefresh, showNotification, updateServiceWorker, setNeedRefresh])
 
   return (
-    <div style={{ paddingBottom: getSafeBottomPadding(2) }}>
+    <div>
       <ImpersonateUserProvider>
         <NavBar />
         <PageTransition>
@@ -133,13 +132,13 @@ function App() {
   }, [])
 
   return (
-    <div style={{ paddingBottom: getSafeBottomPadding(2) }}>
+    <>
       <NetworkBanner />
 
       <AuthenticationProvider>
         <AppContent />
       </AuthenticationProvider>
-    </div>
+    </>
   )
 }
 
