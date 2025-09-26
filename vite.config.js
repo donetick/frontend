@@ -1,4 +1,4 @@
-import react from '@vitejs/plugin-react'
+import react from '@vitejs/plugin-react-swc'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 // https://vitejs.dev/config/
@@ -14,6 +14,10 @@ export default defineConfig({
         'safari-pinned-tab.svg',
         'mstile-150x150.png',
       ],
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html,png,svg}'],
+        globIgnores: ['index.html'],
+      },
       manifest: {
         name: 'Donetick: Simplify Tasks & Chores, Together.',
         short_name: 'Donetick',
