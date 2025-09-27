@@ -81,12 +81,11 @@ const PageTransition = ({ children }) => {
         key={location.pathname}
         classNames={getTransitionClasses()}
         timeout={{
-          enter: 300,
-          exit: 200,
+          enter: 50,
+          exit: 50,
         }}
-        unmountOnExit
       >
-        <div 
+        <div
           className='page-wrapper'
           style={{
             paddingBottom: `var(--safe-area-inset-bottom, 0px)`,

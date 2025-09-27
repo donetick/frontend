@@ -87,6 +87,7 @@ export const TASK_COLOR = {
   // FOR ASSIGNEE:
   ASSIGNED_TO_ME: '#4ec1a2',
   ASSIGNED_TO_OTHER: '#b39ddb',
+  UNASSIGNED: '#ffc107',
 
   // FOR PRIORITY:
   // PRIORITY_1: '#F03A47',

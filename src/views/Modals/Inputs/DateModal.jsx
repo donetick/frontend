@@ -6,7 +6,7 @@ function DateModal({ isOpen, onClose, onSave, current, title }) {
   const { ResponsiveModal } = useResponsiveModal()
 
   const [date, setDate] = useState(
-    current ? new Date(current).toISOString().split('T')[0] : null,
+    current ? new Date(current).toISOString().split('T')[0] : '',
   )
 
   const handleSave = () => {
