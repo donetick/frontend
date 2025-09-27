@@ -14,6 +14,8 @@ const FadeModal = ({
   backdropBlur = true,
   ...props
 }) => {
+  // Filter out props that shouldn't be passed to Modal
+  const { unmountDelay: _unmountDelay, ...modalProps } = props
   return (
     <Modal
       open={open}
@@ -34,7 +36,7 @@ const FadeModal = ({
           exit: 'cubic-bezier(0.4, 0, 0.2, 1)', // Standard ease out
         },
       }}
-      {...props}
+      {...modalProps}
     >
       <ModalOverflow>
         <ModalDialog

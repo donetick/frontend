@@ -78,6 +78,9 @@ const BottomSheetModal = forwardRef(
     // Calculate current height
     const currentHeight = isExpanded ? expandedHeight : height
 
+    // Filter out DOM props that shouldn't be passed to Modal
+    const { fullWidth: _fullWidth, unmountDelay: _unmountDelay, ...modalProps } = props
+
     return (
       <Modal
         open={internalOpen}
@@ -92,7 +95,7 @@ const BottomSheetModal = forwardRef(
           justifyContent: 'center',
         }}
         keepMounted
-        {...props}
+        {...modalProps}
       >
         <Sheet
           ref={ref}

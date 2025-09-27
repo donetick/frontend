@@ -26,8 +26,10 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import NotificationTemplate from '../../components/NotificationTemplate.jsx'
 import {
+  useArchiveChore,
   useChore,
   useCreateChore,
+  useUnArchiveChore,
   useUpdateChore,
 } from '../../queries/ChoreQueries.jsx'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
@@ -56,6 +58,7 @@ const ASSIGN_STRATEGIES = [
   'keep_last_assigned',
   'random_except_last_assigned',
   'round_robin',
+  'no_assignee',
 ]
 const REPEAT_ON_TYPE = ['interval', 'days_of_the_week', 'day_of_the_month']
 
@@ -111,6 +114,8 @@ const ChoreEdit = () => {
   const { data: userLabelsRaw, isLoading: isUserLabelsLoading } = useLabels()
   const updateChoreMutation = useUpdateChore()
   const createChoreMutation = useCreateChore()
+  const archiveChore = useArchiveChore()
+  const unarchiveChore = useUnArchiveChore()
   const {
     data: choreData,
     isLoading: isChoreLoading,
@@ -136,11 +141,13 @@ const ChoreEdit = () => {
     if (name.trim() === '') {
       errors.name = 'Name is required'
     }
-    if (assignees.length === 0) {
-      errors.assignees = 'At least 1 assignees is required'
-    }
-    if (assignedTo < 0) {
-      errors.assignedTo = 'Assigned to is required'
+    if (assignStrategy !== 'no_assignee') {
+      if (assignees.length === 0) {
+        errors.assignees = 'At least 1 assignees is required'
+      }
+      if (assignedTo === null || assignedTo < 0) {
+        errors.assignedTo = 'Assigned to is required'
+      }
     }
     if (frequencyType === 'interval' && !frequency > 0) {
       errors.frequency = `Invalid frequency, the ${frequencyMetadata.unit} should be > 0`
@@ -228,7 +235,7 @@ const ChoreEdit = () => {
       frequencyType: frequencyType,
       frequency: Number(frequency),
       frequencyMetadata: frequencyMetadata,
-      assignedTo: assignedTo,
+      assignedTo: assignStrategy === 'no_assignee' ? null : assignedTo,
       assignStrategy: assignStrategy,
       isRolling: isRolling,
       isActive: isActive,
@@ -379,20 +386,26 @@ const ChoreEdit = () => {
   }, [frequencyType])
 
   useEffect(() => {
-    if (assignees.length === 1) {
+    if (assignees.length === 0) {
+      setAssignStrategy('no_assignee')
+      setAssignedTo(null)
+    } else if (assignees.length === 1) {
       setAssignedTo(assignees[0].userId)
+      if (assignStrategy === 'no_assignee') {
+        setAssignStrategy(ASSIGN_STRATEGIES[2]) // default to least_completed
+      }
     }
-  }, [assignees])
+  }, [assignees, assignStrategy])
 
-  useEffect(() => {
-    if (performers.length > 0 && assignees.length === 0 && userProfile) {
-      setAssignees([
-        {
-          userId: userProfile?.id,
-        },
-      ])
-    }
-  }, [performers, userProfile])
+  // useEffect(() => {
+  //   if (performers.length > 0 && assignees.length === 0 && userProfile) {
+  //     setAssignees([
+  //       {
+  //         userId: userProfile?.id,
+  //       },
+  //     ])
+  //   }
+  // }, [performers, userProfile])
 
   // if user resolve the error trigger validation to remove the error message from the respective field
   useEffect(() => {
@@ -1221,16 +1234,39 @@ const ChoreEdit = () => {
         }}
       >
         {choreId > 0 && (
-          <Button
-            color='danger'
-            variant='solid'
-            onClick={() => {
-              // confirm before deleting:
-              handleDelete()
-            }}
-          >
-            Delete
-          </Button>
+          <>
+            {isActive ? (
+              <Button
+                color='danger'
+                variant='outlined'
+                onClick={() => {
+                  archiveChore.mutate(choreId)
+                }}
+              >
+                Archive
+              </Button>
+            ) : (
+              <Button
+                color='neutral'
+                variant='outlined'
+                onClick={() => {
+                  unarchiveChore.mutate(choreId)
+                }}
+              >
+                Unarchive
+              </Button>
+            )}
+            <Button
+              color='danger'
+              variant='solid'
+              onClick={() => {
+                // confirm before deleting:
+                handleDelete()
+              }}
+            >
+              Delete
+            </Button>
+          </>
         )}
         <Button
           color='neutral'

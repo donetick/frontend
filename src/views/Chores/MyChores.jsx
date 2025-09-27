@@ -39,24 +39,41 @@ import {
 import Fuse from 'fuse.js'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useArchiveChore, useChores } from '../../queries/ChoreQueries'
+import {
+  useArchiveChore,
+  useChores,
+  useDeleteChores,
+  useUnArchiveChore,
+} from '../../queries/ChoreQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { TASK_COLOR } from '../../utils/Colors'
 import Priorities from '../../utils/Priorities'
 import LoadingComponent from '../components/Loading'
 import { useLabels } from '../Labels/LabelQueries'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
+import DateModal from '../Modals/Inputs/DateModal'
+import NudgeModal from '../Modals/Inputs/NudgeModal'
+import SelectModal from '../Modals/Inputs/SelectModal'
+import TextModal from '../Modals/Inputs/TextModal'
+import WriteNFCModal from '../Modals/Inputs/WriteNFCModal'
 import ChoreCard from './ChoreCard'
 import CompactChoreCard from './CompactChoreCard'
 import IconButtonWithMenu from './IconButtonWithMenu'
-import MultiSelectHelp from './MultiSelectHelp'
 
 import { useMediaQuery } from '@mui/material'
+import { useQueryClient } from '@tanstack/react-query'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { ChoreFilters, ChoresGrouper, ChoreSorter } from '../../utils/Chores'
-import { DeleteChore, MarkChoreComplete, SkipChore } from '../../utils/Fetcher'
+import {
+  DeleteChore,
+  MarkChoreComplete,
+  NudgeChore,
+  SkipChore,
+  UpdateChoreAssignee,
+  UpdateDueDate,
+} from '../../utils/Fetcher'
 import { getSafeBottom } from '../../utils/SafeAreaUtils.js'
 import TaskInput from '../components/AddTaskModal'
 import CalendarDual from '../components/CalendarDual'
@@ -74,8 +91,11 @@ const MyChores = () => {
     useUserProfile()
   const isLargeScreen = useMediaQuery(theme => theme.breakpoints.up('md'))
   const { showSuccess, showError, showWarning } = useNotification()
+  const queryClient = useQueryClient()
   const { impersonatedUser } = useImpersonateUser()
   const archiveChore = useArchiveChore()
+  const unarchiveChore = useUnArchiveChore()
+  const deleteChores = useDeleteChores()
   const [chores, setChores] = useState([])
   const [filteredChores, setFilteredChores] = useState([])
   const [searchFilter, setSearchFilter] = useState('All')
@@ -121,12 +141,14 @@ const MyChores = () => {
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false)
   const [selectedChores, setSelectedChores] = useState(new Set())
   const [confirmModelConfig, setConfirmModelConfig] = useState({})
+
+  // Centralized modal state
+  const [activeModal, setActiveModal] = useState(null)
+  const [modalData, setModalData] = useState({})
+  const [modalChore, setModalChore] = useState(null)
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
   const processedChores = useMemo(() => {
-    console.time('🏁 processedChores calculation')
-
     if (!choresData?.res) {
-      console.timeEnd('🏁 processedChores calculation')
       return []
     }
 
@@ -141,15 +163,11 @@ const MyChores = () => {
       )
     }
 
-    console.timeEnd('🏁 processedChores calculation')
     return sortedChores
   }, [choresData?.res, impersonatedUser])
 
   const processedSections = useMemo(() => {
-    console.time('🏁 processedSections calculation')
-
     if (!processedChores.length || !userProfile?.id) {
-      console.timeEnd('🏁 processedSections calculation')
       return []
     }
 
@@ -161,7 +179,6 @@ const MyChores = () => {
       ],
     )
 
-    console.timeEnd('🏁 processedSections calculation')
     return sections
   }, [
     processedChores,
@@ -179,8 +196,6 @@ const MyChores = () => {
       membersData?.res &&
       choresData?.res
     ) {
-      console.time('🏁 Main useEffect processing')
-
       const processEffectAsync = async () => {
         setPerformers(membersData.res)
         setChores(processedChores)
@@ -216,8 +231,6 @@ const MyChores = () => {
             membersData.res,
           )
         }
-
-        console.timeEnd('🏁 Main useEffect processing')
       }
 
       processEffectAsync()
@@ -236,7 +249,6 @@ const MyChores = () => {
   // Auto-update sections when processedSections changes
   useEffect(() => {
     if (processedSections.length > 0) {
-      console.time('🏁 Auto-update sections')
       setChoreSections(processedSections)
 
       // Auto-open sections if needed - only check localStorage once
@@ -251,7 +263,6 @@ const MyChores = () => {
         )
         setOpenChoreSections(openSections)
       }
-      console.timeEnd('🏁 Auto-update sections')
     }
   }, [processedSections])
 
@@ -484,6 +495,108 @@ const MyChores = () => {
     }
   }, [isMultiSelectMode, selectedChores.size, addTaskModalOpen])
 
+  // Centralized modal handlers
+  const handleChoreAction = (action, chore, extraData = {}) => {
+    setModalChore(chore)
+    setModalData(extraData)
+    setActiveModal(action)
+  }
+
+  const closeModal = () => {
+    setActiveModal(null)
+    setModalChore(null)
+    setModalData({})
+  }
+
+  const handleChangeDueDate = newDate => {
+    if (!modalChore) return
+    UpdateDueDate(modalChore.id, newDate).then(response => {
+      if (response.ok) {
+        response.json().then(data => {
+          const newChore = data.res
+          handleChoreUpdated(newChore, 'rescheduled')
+        })
+      }
+    })
+    closeModal()
+  }
+
+  const handleCompleteWithPastDate = newDate => {
+    if (!modalChore) return
+    MarkChoreComplete(
+      modalChore.id,
+      impersonatedUser ? { completedBy: impersonatedUser.userId } : null,
+      new Date(newDate).toISOString(),
+      null,
+    ).then(response => {
+      if (response.ok) {
+        response.json().then(data => {
+          const newChore = data.res
+          handleChoreUpdated(newChore, 'completed')
+        })
+      }
+    })
+    closeModal()
+  }
+
+  const handleAssigneeChange = assigneeId => {
+    if (!modalChore) return
+    UpdateChoreAssignee(modalChore.id, assigneeId).then(response => {
+      if (response.ok) {
+        response.json().then(data => {
+          const newChore = data.res
+          handleChoreUpdated(newChore, 'assigned')
+        })
+      }
+    })
+    closeModal()
+  }
+
+  const handleCompleteWithNote = note => {
+    if (!modalChore) return
+    MarkChoreComplete(
+      modalChore.id,
+      impersonatedUser
+        ? { note, completedBy: impersonatedUser.userId }
+        : { note },
+      null,
+      null,
+    ).then(response => {
+      if (response.ok) {
+        response.json().then(data => {
+          const newChore = data.res
+          handleChoreUpdated(newChore, 'completed')
+        })
+      }
+    })
+    closeModal()
+  }
+
+  const handleNudge = async ({ choreId, message, notifyAllAssignees }) => {
+    try {
+      const response = await NudgeChore(choreId, {
+        message,
+        notifyAllAssignees,
+      })
+      if (response.ok) {
+        const data = await response.json()
+        showSuccess({
+          title: 'Nudge Sent!',
+          message: data.message || 'Nudge sent successfully',
+        })
+      } else {
+        throw new Error('Failed to send nudge')
+      }
+    } catch (error) {
+      showError({
+        title: 'Failed to Send Nudge',
+        message: error.message || 'Unable to send nudge at this time',
+      })
+    } finally {
+      closeModal()
+    }
+  }
+
   // Auto-update selected calendar date when day changes (large screen only)
   useEffect(() => {
     if (!isLargeScreen || viewMode !== 'calendar' || !selectedCalendarDate) {
@@ -580,8 +693,9 @@ const MyChores = () => {
 
   // Helper function to render the appropriate card component
   const renderChoreCard = (chore, key) => {
+    performance.mark(`chore-render-start-${chore.id}`)
     const CardComponent = viewMode === 'compact' ? CompactChoreCard : ChoreCard
-    return (
+    const result = (
       <CardComponent
         key={key || chore.id}
         chore={chore}
@@ -590,16 +704,23 @@ const MyChores = () => {
         performers={performers}
         userLabels={userLabels}
         onChipClick={handleLabelFiltering}
+        onAction={handleChoreAction}
         // Multi-select props
         isMultiSelectMode={isMultiSelectMode}
         isSelected={selectedChores.has(chore.id)}
         onSelectionToggle={() => toggleChoreSelection(chore.id)}
       />
     )
+    performance.mark(`chore-render-end-${chore.id}`)
+    performance.measure(
+      `chore-render-${chore.id}`,
+      `chore-render-start-${chore.id}`,
+      `chore-render-end-${chore.id}`,
+    )
+    return result
   }
 
   const getFilteredChores = useMemo(() => {
-    console.time('🏁 getFilteredChores')
     let result = []
 
     if (searchTerm?.length > 0 || searchFilter !== 'All') {
@@ -620,7 +741,6 @@ const MyChores = () => {
       )
     }
 
-    console.timeEnd('🏁 getFilteredChores')
     return result
   }, [
     searchTerm,
@@ -634,7 +754,6 @@ const MyChores = () => {
 
   const getChoresForDate = useCallback(
     date => {
-      console.time('🏁 getChoresForDate')
       const filteredChoresData = getFilteredChores
       const result = filteredChoresData.filter(chore => {
         if (!chore.nextDueDate) return false
@@ -642,30 +761,35 @@ const MyChores = () => {
         const selectedDate = date.toLocaleDateString()
         return choreDate === selectedDate
       })
-      console.timeEnd('🏁 getChoresForDate')
+
       return result
     },
     [getFilteredChores],
   )
 
-  const updateChores = useCallback(
-    newChore => {
-      console.time('🏁 updateChores')
-      let newChores = [...chores, newChore]
+  const updateChores = newChore => {
+    let newChores = [...chores, newChore]
 
-      if (impersonatedUser) {
-        newChores = newChores.filter(
-          chore => chore.assignedTo === impersonatedUser.userId,
-        )
-      }
+    // Filter chores based on impersonated user
+    if (impersonatedUser) {
+      newChores = newChores.filter(
+        chore => chore.assignedTo === impersonatedUser.userId,
+      )
+    }
 
-      setChores(newChores)
-      setFilteredChores(newChores)
-      setSearchFilter('All')
-      console.timeEnd('🏁 updateChores')
-    },
-    [chores, impersonatedUser],
-  )
+    setChores(newChores)
+    setFilteredChores(newChores)
+    setChoreSections(
+      ChoresGrouper(
+        selectedChoreSection,
+        newChores,
+        ChoreFilters(impersonatedUser?.userId || userProfile?.id)[
+          selectedChoreFilter
+        ],
+      ),
+    )
+    setSearchFilter('All')
+  }
   const handleMenuOutsideClick = event => {
     if (
       anchorEl &&
@@ -706,109 +830,118 @@ const MyChores = () => {
     setSelectedCalendarDate(null)
   }
 
-  const handleChoreUpdated = useCallback(
-    (updatedChore, event) => {
-      console.time('🏁 handleChoreUpdated')
-      var newChores = chores.map(chore => {
-        if (chore.id === updatedChore.id) {
-          return updatedChore
-        }
-        return chore
-      })
-
-      var newFilteredChores = filteredChores.map(chore => {
-        if (chore.id === updatedChore.id) {
-          return updatedChore
-        }
-        return chore
-      })
-      if (
-        event === 'archive' ||
-        (event === 'completed' && updatedChore.frequencyType === 'once')
-      ) {
-        newChores = newChores.filter(chore => chore.id !== updatedChore.id)
-        newFilteredChores = newFilteredChores.filter(
-          chore => chore.id !== updatedChore.id,
-        )
+  const handleChoreUpdated = (updatedChore, event) => {
+    var newChores = chores.map(chore => {
+      if (chore.id === updatedChore.id) {
+        return updatedChore
       }
-      setChores(newChores)
-      setFilteredChores(newFilteredChores)
-      console.timeEnd('🏁 handleChoreUpdated')
+      return chore
+    })
 
-      switch (event) {
-        case 'completed':
-          showSuccess({
-            title: 'Task Completed',
-            message: 'Great job! The task has been marked as completed.',
-          })
-          break
-        case 'skipped':
-          showSuccess({
-            title: 'Task Skipped',
-            message: 'The task has been moved to the next due date.',
-          })
-          break
-        case 'rescheduled':
-          showSuccess({
-            title: 'Task Rescheduled',
-            message: 'The task due date has been updated successfully.',
-          })
-          break
-        case 'due-date-removed':
-          showSuccess({
-            title: 'Task Unplanned',
-            message: 'The task is now unplanned and has no due date.',
-          })
-          break
-        case 'unarchive':
-          showSuccess({
-            title: 'Task Restored',
-            message: 'The task has been restored and is now active.',
-          })
-          break
-        case 'archive':
-          showSuccess({
-            title: 'Task Archived',
-            message:
-              'The task has been archived and hidden from the active list.',
-          })
-          break
-        case 'started':
-          showSuccess({
-            title: 'Task Started',
-            message: 'The task has been marked as started.',
-          })
-          break
-        case 'paused':
-          showWarning({
-            title: 'Task Paused',
-            message: 'The task has been paused.',
-          })
-          break
-        case 'deleted':
-        default:
-          showSuccess({
-            title: 'Task Updated',
-            message: 'Your changes have been saved successfully.',
-          })
+    var newFilteredChores = filteredChores.map(chore => {
+      if (chore.id === updatedChore.id) {
+        return updatedChore
       }
-    },
-    [chores, filteredChores, showSuccess, showWarning],
-  )
-
-  const handleChoreDeleted = useCallback(
-    deletedChore => {
-      console.time('🏁 handleChoreDeleted')
-      const newChores = chores.filter(chore => chore.id !== deletedChore.id)
-      const newFilteredChores = filteredChores.filter(
-        chore => chore.id !== deletedChore.id,
+      return chore
+    })
+    if (
+      event === 'archive' ||
+      (event === 'completed' && updatedChore.frequencyType === 'once') ||
+      updatedChore.frequencyType === 'trigger'
+    ) {
+      newChores = newChores.filter(chore => chore.id !== updatedChore.id)
+      newFilteredChores = newFilteredChores.filter(
+        chore => chore.id !== updatedChore.id,
       )
-      setChores(newChores)
-      setFilteredChores(newFilteredChores)
-      console.timeEnd('🏁 handleChoreDeleted')
-    },
-    [chores, filteredChores],
-  )
+    }
+
+    setChores(newChores)
+    setFilteredChores(newFilteredChores)
+    setChoreSections(
+      ChoresGrouper(
+        selectedChoreSection,
+        newChores,
+        ChoreFilters(impersonatedUser?.userId || userProfile?.id)[
+          selectedChoreFilter
+        ],
+      ),
+    )
+
+    switch (event) {
+      case 'completed':
+        showSuccess({
+          title: 'Task Completed',
+          message: 'Great job! The task has been marked as completed.',
+        })
+        break
+      case 'skipped':
+        showSuccess({
+          title: 'Task Skipped',
+          message: 'The task has been moved to the next due date.',
+        })
+        break
+      case 'rescheduled':
+        showSuccess({
+          title: 'Task Rescheduled',
+          message: 'The task due date has been updated successfully.',
+        })
+        break
+      case 'due-date-removed':
+        showSuccess({
+          title: 'Task Unplanned',
+          message: 'The task is now unplanned and has no due date.',
+        })
+        break
+      case 'unarchive':
+        showSuccess({
+          title: 'Task Restored',
+          message: 'The task has been restored and is now active.',
+        })
+        break
+      case 'archive':
+        showSuccess({
+          title: 'Task Archived',
+          message:
+            'The task has been archived and hidden from the active list.',
+        })
+        break
+      case 'started':
+        showSuccess({
+          title: 'Task Started',
+          message: 'The task has been marked as started.',
+        })
+        break
+      case 'paused':
+        showWarning({
+          title: 'Task Paused',
+          message: 'The task has been paused.',
+        })
+        break
+      case 'deleted':
+      default:
+        showSuccess({
+          title: 'Task Updated',
+          message: 'Your changes have been saved successfully.',
+        })
+    }
+  }
+  const handleChoreDeleted = deletedChore => {
+    const newChores = chores.filter(chore => chore.id !== deletedChore.id)
+    const newFilteredChores = filteredChores.filter(
+      chore => chore.id !== deletedChore.id,
+    )
+    setChores(newChores)
+    setFilteredChores(newFilteredChores)
+    setChoreSections(
+      ChoresGrouper(
+        selectedChoreSection,
+        newChores,
+        ChoreFilters(impersonatedUser?.userId || userProfile?.id)[
+          selectedChoreFilter
+        ],
+      ),
+    )
+  }
 
   const searchOptions = useMemo(
     () => ({
@@ -1038,6 +1171,7 @@ const MyChores = () => {
                 message: `${failedTasks.length} task${failedTasks.length > 1 ? 's' : ''} could not be archived.`,
               })
             }
+            refetchChores()
             clearSelection()
           } catch (error) {
             showError({
@@ -1081,7 +1215,6 @@ const MyChores = () => {
                 message: `Successfully deleted ${deletedTasks.length} task${deletedTasks.length > 1 ? 's' : ''}.`,
               })
 
-              console.time('🏁 Bulk delete update')
               const deletedIds = new Set(deletedTasks.map(c => c.id))
               const newChores = chores.filter(c => !deletedIds.has(c.id))
               const newFilteredChores = filteredChores.filter(
@@ -1089,7 +1222,6 @@ const MyChores = () => {
               )
               setChores(newChores)
               setFilteredChores(newFilteredChores)
-              console.timeEnd('🏁 Bulk delete update')
             }
 
             if (failedTasks.length > 0) {
@@ -1098,7 +1230,7 @@ const MyChores = () => {
                 message: `${failedTasks.length} task${failedTasks.length > 1 ? 's' : ''} could not be deleted.`,
               })
             }
-
+            refetchChores()
             clearSelection()
           } catch (error) {
             showError({
@@ -1256,16 +1388,12 @@ const MyChores = () => {
             selectedItem={selectedChoreSection}
             selectedFilter={selectedChoreFilter}
             setFilter={filter => {
-              console.time('🏁 Filter change')
               setSelectedChoreFilterWithCache(filter)
-              console.timeEnd('🏁 Filter change')
             }}
             onItemSelect={selected => {
-              console.time('🏁 Group by change')
               setSelectedChoreSectionWithCache(selected.value)
               setFilteredChores(chores)
               setSearchFilter('All')
-              console.timeEnd('🏁 Group by change')
             }}
             mouseClickHandler={handleMenuOutsideClick}
           />
@@ -1825,7 +1953,7 @@ const MyChores = () => {
                 flexWrap: 'wrap',
               }}
             >
-              {FILTERS['Overdue'](getFilteredChores()).length > 0 && (
+              {FILTERS['Overdue'](getFilteredChores).length > 0 && (
                 <Chip
                   variant='soft'
                   color='danger'
@@ -1837,8 +1965,7 @@ const MyChores = () => {
                     })
 
                     // Also update state directly for immediate smooth transition
-                    const overdueChores =
-                      FILTERS['Overdue'](getFilteredChores())
+                    const overdueChores = FILTERS['Overdue'](getFilteredChores)
                     setFilteredChores(overdueChores)
                     setSearchFilter('Overdue')
                     setViewMode('default')
@@ -1852,7 +1979,7 @@ const MyChores = () => {
                   }}
                   startDecorator={
                     <Chip size='md' variant='solid' color='danger'>
-                      {FILTERS['Overdue'](getFilteredChores()).length}
+                      {FILTERS['Overdue'](getFilteredChores).length}
                     </Chip>
                   }
                 >
@@ -1860,7 +1987,7 @@ const MyChores = () => {
                 </Chip>
               )}
 
-              {FILTERS['No Due Date'](getFilteredChores()).length > 0 && (
+              {FILTERS['No Due Date'](getFilteredChores).length > 0 && (
                 <Chip
                   variant='soft'
                   color='neutral'
@@ -1873,7 +2000,7 @@ const MyChores = () => {
 
                     // Also update state directly for immediate smooth transition
                     const unplannedChores =
-                      FILTERS['No Due Date'](getFilteredChores())
+                      FILTERS['No Due Date'](getFilteredChores)
                     setFilteredChores(unplannedChores)
                     setSearchFilter('No Due Date')
                     setViewMode('default')
@@ -1887,7 +2014,7 @@ const MyChores = () => {
                   }}
                   startDecorator={
                     <Chip size='md' variant='solid' color='neutral'>
-                      {FILTERS['No Due Date'](getFilteredChores()).length}
+                      {FILTERS['No Due Date'](getFilteredChores).length}
                     </Chip>
                   }
                 >
@@ -1895,7 +2022,7 @@ const MyChores = () => {
                 </Chip>
               )}
 
-              {FILTERS['Pending Approval'](getFilteredChores()).length > 0 && (
+              {FILTERS['Pending Approval'](getFilteredChores).length > 0 && (
                 <Chip
                   variant='soft'
                   size='lg'
@@ -1907,7 +2034,7 @@ const MyChores = () => {
 
                     // Also update state directly for immediate smooth transition
                     const pendingApprovalChores =
-                      FILTERS['Pending Approval'](getFilteredChores())
+                      FILTERS['Pending Approval'](getFilteredChores)
                     setFilteredChores(pendingApprovalChores)
                     setSearchFilter('Pending Approval')
                     setViewMode('default')
@@ -1928,7 +2055,7 @@ const MyChores = () => {
                         color: 'white',
                       }}
                     >
-                      {FILTERS['Pending Approval'](getFilteredChores()).length}
+                      {FILTERS['Pending Approval'](getFilteredChores).length}
                     </Chip>
                   }
                 >
@@ -1940,7 +2067,7 @@ const MyChores = () => {
             <Box sx={{ mb: 2 }}>
               {isLargeScreen ? (
                 <CalendarDual
-                  chores={getFilteredChores()}
+                  chores={getFilteredChores}
                   onDateChange={date => {
                     setSelectedCalendarDate(date)
                   }}
@@ -1948,7 +2075,7 @@ const MyChores = () => {
               ) : (
                 <div className='calendar-dual'>
                   <CalendarMonthly
-                    chores={getFilteredChores()}
+                    chores={getFilteredChores}
                     onDateChange={date => {
                       setSelectedCalendarDate(date)
                     }}
@@ -2170,11 +2297,77 @@ const MyChores = () => {
       <Sidepanel chores={chores} performers={performers} />
 
       {/* Multi-select Help - only show when in multi-select mode */}
-      <MultiSelectHelp isVisible={isMultiSelectMode} />
+      {/* <MultiSelectHelp isVisible={isMultiSelectMode} /> */}
 
       {/* Confirmation Modal for bulk operations */}
       {confirmModelConfig?.isOpen && (
         <ConfirmationModal config={confirmModelConfig} />
+      )}
+
+      {/* Centralized Modals */}
+      {activeModal === 'changeDueDate' && modalChore && (
+        <DateModal
+          isOpen={true}
+          key={'changeDueDate' + modalChore.id}
+          current={modalChore.nextDueDate}
+          title={`Change due date`}
+          onClose={closeModal}
+          onSave={handleChangeDueDate}
+        />
+      )}
+
+      {activeModal === 'completeWithPastDate' && modalChore && (
+        <DateModal
+          isOpen={true}
+          key={'completedInPast' + modalChore.id}
+          current={modalChore.nextDueDate}
+          title={`Save Chore that you completed in the past`}
+          onClose={closeModal}
+          onSave={handleCompleteWithPastDate}
+        />
+      )}
+
+      {activeModal === 'changeAssignee' && modalChore && (
+        <SelectModal
+          isOpen={true}
+          options={performers}
+          displayKey='displayName'
+          title={`Delegate to someone else`}
+          placeholder={'Select a performer'}
+          onClose={closeModal}
+          onSave={selected => handleAssigneeChange(selected.id)}
+        />
+      )}
+
+      {activeModal === 'completeWithNote' && modalChore && (
+        <TextModal
+          isOpen={true}
+          title='Add note to attach to this completion:'
+          onClose={closeModal}
+          okText={'Complete'}
+          onSave={handleCompleteWithNote}
+        />
+      )}
+
+      {activeModal === 'writeNFC' && modalChore && (
+        <WriteNFCModal
+          config={{
+            isOpen: true,
+            url: `${window.location.origin}/chores/${modalChore.id}`,
+            onClose: closeModal,
+          }}
+        />
+      )}
+
+      {activeModal === 'nudge' && modalChore && (
+        <NudgeModal
+          config={{
+            isOpen: true,
+            choreId: modalChore.id,
+            onClose: closeModal,
+            onConfirm: handleNudge,
+          }}
+        />
       )}
     </div>
   )

@@ -40,18 +40,10 @@ import {
   ApproveChore,
   DeleteChore,
   MarkChoreComplete,
-  NudgeChore,
   RejectChore,
-  UpdateChoreAssignee,
-  UpdateDueDate,
 } from '../../utils/Fetcher'
 import { usePauseChore, useStartChore } from '../../queries/TimeQueries'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
-import DateModal from '../Modals/Inputs/DateModal'
-import NudgeModal from '../Modals/Inputs/NudgeModal'
-import SelectModal from '../Modals/Inputs/SelectModal'
-import TextModal from '../Modals/Inputs/TextModal'
-import WriteNFCModal from '../Modals/Inputs/WriteNFCModal'
 import ChoreActionMenu from '../components/ChoreActionMenu'
 
 const CompactChoreCard = ({
@@ -62,22 +54,13 @@ const CompactChoreCard = ({
   sx,
   viewOnly,
   onChipClick,
+  onAction,
   // Multi-select props
   isMultiSelectMode = false,
   isSelected = false,
   onSelectionToggle,
 }) => {
-  const [isChangeDueDateModalOpen, setIsChangeDueDateModalOpen] =
-    React.useState(false)
-  const [isCompleteWithPastDateModalOpen, setIsCompleteWithPastDateModalOpen] =
-    React.useState(false)
-  const [isChangeAssigneeModalOpen, setIsChangeAssigneeModalOpen] =
-    React.useState(false)
-  const [isCompleteWithNoteModalOpen, setIsCompleteWithNoteModalOpen] =
-    React.useState(false)
   const [confirmModelConfig, setConfirmModelConfig] = React.useState({})
-  const [isNFCModalOpen, setIsNFCModalOpen] = React.useState(false)
-  const [isNudgeModalOpen, setIsNudgeModalOpen] = React.useState(false)
   const [isOfficialInstance, setIsOfficialInstance] = React.useState(false)
   const navigate = useNavigate()
   const startChore = useStartChore()
@@ -91,7 +74,7 @@ const CompactChoreCard = ({
 
   const { impersonatedUser } = useImpersonateUser()
 
-  const { showError, showNotification } = useNotification()
+  const { showError } = useNotification()
 
   // Swipe functionality state
   const [swipeTranslateX, setSwipeTranslateX] = React.useState(0)
@@ -372,61 +355,6 @@ const CompactChoreCard = ({
     setTimeoutId(id)
   }
 
-  const handleChangeDueDate = newDate => {
-    UpdateDueDate(chore.id, newDate).then(response => {
-      if (response.ok) {
-        response.json().then(data => {
-          const newChore = data.res
-          onChoreUpdate(newChore, 'rescheduled')
-        })
-      }
-    })
-  }
-
-  const handleCompleteWithPastDate = newDate => {
-    MarkChoreComplete(
-      chore.id,
-      impersonatedUser ? { completedBy: impersonatedUser.userId } : null,
-      new Date(newDate).toISOString(),
-      null,
-    ).then(response => {
-      if (response.ok) {
-        response.json().then(data => {
-          const newChore = data.res
-          onChoreUpdate(newChore, 'completed')
-        })
-      }
-    })
-  }
-
-  const handleAssigneChange = assigneeId => {
-    UpdateChoreAssignee(chore.id, assigneeId).then(response => {
-      if (response.ok) {
-        response.json().then(data => {
-          const newChore = data.res
-          onChoreUpdate(newChore, 'assigned')
-        })
-      }
-    })
-  }
-
-  const handleCompleteWithNote = note => {
-    MarkChoreComplete(
-      chore.id,
-      impersonatedUser
-        ? { note, completedBy: impersonatedUser.userId }
-        : { note },
-      null,
-      null,
-    ).then(response => {
-      if (response.ok) {
-        response.json().then(data => {
-          const newChore = data.res
-          onChoreUpdate(newChore, 'completed')
-        })
-      }
-    })
-  }
 
   const handleApproveChore = () => {
     resetSwipe()
@@ -450,32 +378,6 @@ const CompactChoreCard = ({
     })
   }
 
-  const handleNudge = async ({ choreId, message, notifyAllAssignees }) => {
-    try {
-      const response = await NudgeChore(choreId, {
-        message,
-        notifyAllAssignees,
-      })
-      if (response.ok) {
-        const data = await response.json()
-        showNotification({
-          type: 'success',
-          title: 'Nudge Sent!',
-          message: data.message || 'Nudge sent successfully',
-        })
-      } else {
-        throw new Error('Failed to send nudge')
-      }
-    } catch (error) {
-      showError({
-        title: 'Failed to Send Nudge',
-        message: error.message || 'Unable to send nudge at this time',
-      })
-    } finally {
-      setIsNudgeModalOpen(false)
-      resetSwipe()
-    }
-  }
 
   // Check if the current user can approve/reject (admin, manager, or task owner)
   const canApproveReject = () => {
@@ -794,7 +696,7 @@ const CompactChoreCard = ({
             onClick={e => {
               e.stopPropagation()
               resetSwipe()
-              setIsChangeDueDateModalOpen(true)
+              onAction('changeDueDate', chore)
             }}
             sx={{
               width: 40,
@@ -841,7 +743,7 @@ const CompactChoreCard = ({
               onClick={e => {
                 e.stopPropagation()
                 resetSwipe()
-                setIsNudgeModalOpen(true)
+                onAction('nudge', chore)
               }}
               sx={{
                 width: 40,
@@ -1271,14 +1173,12 @@ const CompactChoreCard = ({
               chore={chore}
               onChoreUpdate={onChoreUpdate}
               onChoreRemove={onChoreRemove}
-              onCompleteWithNote={() => setIsCompleteWithNoteModalOpen(true)}
-              onCompleteWithPastDate={() =>
-                setIsCompleteWithPastDateModalOpen(true)
-              }
-              onChangeAssignee={() => setIsChangeAssigneeModalOpen(true)}
-              onChangeDueDate={() => setIsChangeDueDateModalOpen(true)}
-              onWriteNFC={() => setIsNFCModalOpen(true)}
-              onNudge={() => setIsNudgeModalOpen(true)}
+              onCompleteWithNote={() => onAction('completeWithNote', chore)}
+              onCompleteWithPastDate={() => onAction('completeWithPastDate', chore)}
+              onChangeAssignee={() => onAction('changeAssignee', chore)}
+              onChangeDueDate={() => onAction('changeDueDate', chore)}
+              onWriteNFC={() => onAction('writeNFC', chore)}
+              onNudge={() => onAction('nudge', chore)}
               onDelete={handleDelete}
               onMouseEnter={handleMouseEnter}
               // onMouseLeave={handleMouseLeave}
@@ -1300,63 +1200,9 @@ const CompactChoreCard = ({
         </Box>
       </Box>
 
-      {/* All modals (same as original) */}
-      <DateModal
-        isOpen={isChangeDueDateModalOpen}
-        key={'changeDueDate' + chore.id}
-        current={chore.nextDueDate}
-        title={`Change due date`}
-        onClose={() => setIsChangeDueDateModalOpen(false)}
-        onSave={handleChangeDueDate}
-      />
-
-      <DateModal
-        isOpen={isCompleteWithPastDateModalOpen}
-        key={'completedInPast' + chore.id}
-        current={chore.nextDueDate}
-        title={`Save Chore that you completed in the past`}
-        onClose={() => setIsCompleteWithPastDateModalOpen(false)}
-        onSave={handleCompleteWithPastDate}
-      />
-
-      <SelectModal
-        isOpen={isChangeAssigneeModalOpen}
-        options={performers}
-        displayKey='displayName'
-        title={`Delegate to someone else`}
-        placeholder={'Select a performer'}
-        onClose={() => setIsChangeAssigneeModalOpen(false)}
-        onSave={selected => handleAssigneChange(selected.id)}
-      />
-
       {confirmModelConfig?.isOpen && (
         <ConfirmationModal config={confirmModelConfig} />
       )}
-
-      <TextModal
-        isOpen={isCompleteWithNoteModalOpen}
-        title='Add note to attach to this completion:'
-        onClose={() => setIsCompleteWithNoteModalOpen(false)}
-        okText={'Complete'}
-        onSave={handleCompleteWithNote}
-      />
-
-      <WriteNFCModal
-        config={{
-          isOpen: isNFCModalOpen,
-          url: `${window.location.origin}/chores/${chore.id}`,
-          onClose: () => setIsNFCModalOpen(false),
-        }}
-      />
-
-      <NudgeModal
-        config={{
-          isOpen: isNudgeModalOpen,
-          choreId: chore.id,
-          onClose: () => setIsNudgeModalOpen(false),
-          onConfirm: handleNudge,
-        }}
-      />
 
       {/* Snackbar for pending completion */}
       <Snackbar
