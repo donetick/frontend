@@ -4,7 +4,6 @@ import QueryContext from './QueryContext'
 import RouterContext from './RouterContext'
 import SSEProvider from './SSEContext'
 import ThemeContext from './ThemeContext'
-import WebSocketProvider from './WebSocketContext'
 
 const Contexts = ({ children }) => {
   const contexts = [
@@ -13,7 +12,6 @@ const Contexts = ({ children }) => {
     QueryContext,
     NotificationProvider,
     SSEProvider,
-    WebSocketProvider,
     RouterContext,
   ]
 
