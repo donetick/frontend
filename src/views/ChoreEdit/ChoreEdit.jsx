@@ -110,6 +110,7 @@ const ChoreEdit = () => {
   const [privacySaved, setPrivacySaved] = useState(false)
   const [showSaveNotificationDefault, setShowSaveNotificationDefault] =
     useState(false)
+  const [showSaveAssigneeDefault, setShowSaveAssigneeDefault] = useState(false)
 
   const { data: userLabelsRaw, isLoading: isUserLabelsLoading } = useLabels()
   const updateChoreMutation = useUpdateChore()
@@ -299,6 +300,14 @@ const ChoreEdit = () => {
       )
       if (defaultNotificationSetting !== null) {
         setIsNotificable(JSON.parse(defaultNotificationSetting))
+      }
+
+      const defaultAssigneeSetting = localStorage.getItem(
+        'defaultAssigneeSetting',
+      )
+      if (defaultAssigneeSetting !== null) {
+        const savedAssignees = JSON.parse(defaultAssigneeSetting)
+        setAssignees(savedAssignees)
       }
     }
   }, [])
@@ -665,6 +674,7 @@ const ChoreEdit = () => {
                       } else {
                         setAssignees([...assignees, { userId: item.userId }])
                       }
+                      setShowSaveAssigneeDefault(true)
                     }}
                     overlay
                     disableIcon
@@ -678,6 +688,33 @@ const ChoreEdit = () => {
           <FormControl error={Boolean(errors.assignee)}>
             <FormHelperText error>{Boolean(errors.assignee)}</FormHelperText>
           </FormControl>
+
+          {showSaveAssigneeDefault && (
+            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'start' }}>
+              <Button
+                variant='outlined'
+                size='sm'
+                color='neutral'
+                startDecorator={<Save />}
+                sx={{
+                  borderRadius: 6,
+                  fontWeight: 500,
+                  '&:hover': {
+                    background: 'neutral.softHoverBg',
+                  },
+                }}
+                onClick={() => {
+                  localStorage.setItem(
+                    'defaultAssigneeSetting',
+                    JSON.stringify(assignees),
+                  )
+                  setShowSaveAssigneeDefault(false)
+                }}
+              >
+                Save Assignee Preference
+              </Button>
+            </Box>
+          )}
         </Box>
 
         {assignees.length > 1 && (

@@ -59,13 +59,15 @@ export const useSSE = () => {
         if (eventData.type === 'heartbeat') {
           lastHeartbeatRef.current = Date.now()
         }
-        console.log('SSE Message received:', eventData)
+
+        console.debug('SSE Message received:', eventData)
 
         // Handle different event types and update React Query cache accordingly
         switch (eventData.type) {
           case 'chore.created':
           case 'chore.updated':
           case 'chore.completed':
+          case 'chore.status':
           case 'chore.skipped': {
             if (eventData?.data?.user?.id !== userProfile?.id) {
               showNotification({
@@ -83,18 +85,24 @@ export const useSSE = () => {
               return { res: { ...oldData.res, ...updatedChore } }
             })
 
+            // If chore update then also refetch chore details:
+            if (
+              eventData.type === 'chore.updated' ||
+              eventData.type === 'chore.status'
+            ) {
+              queryClient.invalidateQueries(['choreDetails', updatedChore.id])
+              queryClient.refetchQueries({
+                queryKey: ['choreDetails', updatedChore.id],
+              })
+            }
+
             // Update chores list cache - add debugging
-            queryClient.setQueryData(['chores'], oldData => {
+            queryClient.setQueryData(['chores', false], oldData => {
               if (!oldData) return { res: [updatedChore] }
 
               if (!oldData.res || !Array.isArray(oldData.res)) {
                 return { res: [updatedChore] }
               }
-
-              // Check if the chore exists in the cache
-              const choreExists = oldData.res.some(
-                chore => chore.id === updatedChore.id,
-              )
 
               // If it's a one-time chore that's completed, we might need to remove it
               if (
@@ -108,25 +116,15 @@ export const useSSE = () => {
                 }
               }
 
-              // If chore update then also refetch chore details:
-              if (eventData.type === 'chore.updated') {
-                queryClient.invalidateQueries(['choreDetails', updatedChore.id])
-                queryClient.refetchQueries({
-                  queryKey: ['choreDetails', updatedChore.id],
-                })
-              }
-
               // Otherwise update the existing chore or add if it doesn't exist
-              return {
-                res: choreExists
-                  ? oldData.res.map(chore => {
-                      if (chore.id === updatedChore.id) {
-                        return { ...chore, ...updatedChore }
-                      }
-                      return chore
-                    })
-                  : [...oldData.res, updatedChore],
-              }
+              const newData = oldData.res.map(chore => {
+                if (chore.id === updatedChore.id) {
+                  return { ...updatedChore }
+                }
+                return chore
+              })
+
+              return { res: newData }
             })
 
             break
@@ -134,7 +132,16 @@ export const useSSE = () => {
 
           case 'chore.deleted':
             // update chores list cache
-            queryClient.setQueryData(['chores'], oldData => {
+            queryClient.setQueryData(['chores', false], oldData => {
+              if (!oldData || !oldData.res) return oldData
+              return {
+                res: oldData.res.filter(
+                  chore => chore.id !== eventData.data.choreId,
+                ),
+              }
+            })
+            // same logic for archived chores view:
+            queryClient.setQueryData(['chores', true], oldData => {
               if (!oldData || !oldData.res) return oldData
               return {
                 res: oldData.res.filter(
@@ -147,9 +154,27 @@ export const useSSE = () => {
 
           case 'subtask.updated':
           case 'subtask.completed':
-            queryClient.refetchQueries({
-              queryKey: ['choreDetails', eventData.data.choreId],
-            })
+            queryClient.setQueryData(
+              ['choreDetails', String(eventData.data.choreId)], // this should be string to match the query key type which is param in the url in choreView
+              oldData => {
+                if (!oldData) return oldData
+                console.log('Old choreDetails data:', oldData)
+
+                // Update the specific subtask within the chore details
+                const newChoreData = { ...oldData.res }
+                newChoreData.subTasks = newChoreData.subTasks.map(subtask => {
+                  if (subtask.id === eventData.data.subtaskId) {
+                    return {
+                      ...subtask,
+                      completedAt: eventData.data.completedAt,
+                      completedBy: eventData.data.user.id,
+                    }
+                  }
+                  return subtask
+                })
+                return { res: newChoreData }
+              },
+            )
 
             // Invalidate the specific chore that contains this subtask
             // if (eventData.data.choreId) {
@@ -162,10 +187,7 @@ export const useSSE = () => {
             // Also invalidate general chores list
             // queryClient.invalidateQueries(['chores'])
             break
-          case 'chore.status':
-            console.log('SSE chore.status event received:', eventData.data)
 
-            break
           case 'heartbeat':
             // Heartbeat events don't need cache invalidation
             console.debug('SSE Heartbeat received at', new Date().toISOString())

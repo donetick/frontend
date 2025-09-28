@@ -44,6 +44,13 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useChoreDetails } from '../../queries/ChoreQueries.jsx'
+import {
+  useChoreTimer,
+  useDeleteTimeSession,
+  usePauseChore,
+  useResetChoreTimer,
+  useStartChore,
+} from '../../queries/TimeQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import { ChoreStatus, notInCompletionWindow } from '../../utils/Chores.jsx'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
@@ -55,13 +62,6 @@ import {
   SkipChore,
   UpdateChorePriority,
 } from '../../utils/Fetcher'
-import {
-  useChoreTimer,
-  useDeleteTimeSession,
-  usePauseChore,
-  useResetChoreTimer,
-  useStartChore,
-} from '../../queries/TimeQueries'
 import Priorities from '../../utils/Priorities'
 import { getSafeBottomPadding } from '../../utils/SafeAreaUtils.js'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'

@@ -9,6 +9,7 @@ import {
 } from '@mui/joy'
 import Modal from '@mui/joy/Modal'
 import ModalDialog from '@mui/joy/ModalDialog'
+import { useQueryClient } from '@tanstack/react-query'
 import imageCompression from 'browser-image-compression'
 import { useRef, useState } from 'react'
 import Cropper from 'react-easy-crop'
@@ -21,6 +22,7 @@ import { UploadFile } from '../../utils/TokenManager'
 import SettingsLayout from './SettingsLayout'
 
 const ProfileSettings = () => {
+  const queryClient = useQueryClient()
   const { data: userProfile } = useUserProfile()
   const { showSuccess, showError } = useNotification()
   const [displayName, setDisplayName] = useState(userProfile?.displayName || '')
@@ -113,6 +115,9 @@ const ProfileSettings = () => {
     try {
       const userDetails = { displayName, timezone }
       const response = await UpdateUserDetails(userDetails)
+      // invalidate user profile cache here if using react-query or similar:
+      queryClient.invalidateQueries(['userProfile'])
+      queryClient.refetchQueries(['userProfile'])
 
       if (response.ok) {
         showSuccess({
@@ -123,6 +128,8 @@ const ProfileSettings = () => {
         throw new Error('Failed to update profile')
       }
     } catch (err) {
+      console.log(err)
+
       showError({
         title: 'Update Failed',
         message:
