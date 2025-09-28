@@ -32,6 +32,7 @@ import {
   Typography,
 } from '@mui/joy'
 import { useState } from 'react'
+import { useImpersonateUser } from '../../contexts/ImpersonateUserContext'
 import { useUserProfile } from '../../queries/UserQueries'
 import { CompleteSubTask } from '../../utils/Fetcher'
 
@@ -312,6 +313,7 @@ const SubTasks = ({
 }) => {
   const [newTask, setNewTask] = useState('')
   const { data: userProfile } = useUserProfile()
+  const { impersonatedUser } = useImpersonateUser()
 
   const topLevelTasks = tasks.filter(task => task.parentId === null)
 
@@ -338,7 +340,7 @@ const SubTasks = ({
         ? {
             ...task,
             completedAt: newCompletedAt,
-            completedBy: userProfile?.id,
+            completedBy: impersonatedUser?.userId || userProfile?.id,
           }
         : task,
     )
