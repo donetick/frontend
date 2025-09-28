@@ -668,7 +668,13 @@ const RestoreBackup = (encryptionKey, backupData) => {
   })
 }
 
-const RegisterDeviceToken = (token, deviceId, platform, appVersion, deviceModel) => {
+const RegisterDeviceToken = (
+  token,
+  deviceId,
+  platform,
+  appVersion,
+  deviceModel,
+) => {
   return Fetch(`/devices/tokens`, {
     method: 'POST',
     headers: HEADERS(),
@@ -700,6 +706,44 @@ const GetDeviceTokens = (active = true) => {
   })
 }
 
+// Child User Management Functions
+const CreateChildUser = (childName, displayName, password) => {
+  return Fetch(`/users/subaccounts`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify({
+      childName,
+      displayName,
+      password,
+    }),
+  })
+}
+
+const GetChildUsers = () => {
+  return Fetch(`/users/subaccounts`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+}
+
+const UpdateChildPassword = (childUserId, password) => {
+  return Fetch(`/users/subaccounts/password`, {
+    method: 'PUT',
+    headers: HEADERS(),
+    body: JSON.stringify({
+      childUserId,
+      password,
+    }),
+  })
+}
+
+const DeleteChildUser = childUserId => {
+  return Fetch(`/users/subaccounts/${childUserId}`, {
+    method: 'DELETE',
+    headers: HEADERS(),
+  })
+}
+
 export {
   AcceptCircleMemberRequest,
   ApproveChore,
@@ -711,10 +755,12 @@ export {
   CompleteSubTask,
   ConfirmMFA,
   CreateBackup,
+  CreateChildUser,
   CreateChore,
   CreateLabel,
   CreateLongLiveToken,
   CreateThing,
+  DeleteChildUser,
   DeleteChore,
   DeleteChoreHistory,
   DeleteCircleMember,
@@ -727,6 +773,7 @@ export {
   GetAllCircleMembers,
   GetAllUsers,
   GetArchivedChores,
+  GetChildUsers,
   GetChoreByID,
   GetChoreDetailById,
   GetChoreHistory,
@@ -768,6 +815,7 @@ export {
   StartChore,
   UnArchiveChore,
   UnregisterDeviceToken,
+  UpdateChildPassword,
   UpdateChoreAssignee,
   UpdateChoreHistory,
   UpdateChorePriority,
