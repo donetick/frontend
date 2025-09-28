@@ -88,9 +88,12 @@ const links = [
 
 import { SafeArea } from 'capacitor-plugin-safe-area'
 import Z_INDEX from '../../constants/zIndex'
+import { useResource } from '../../queries/ResourceQueries'
 
 const publicPages = ['/landing', '/privacy', '/terms']
 const NavBar = () => {
+  const { data: resource } = useResource()
+
   const navigate = useNavigate()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [openDrawer, closeDrawer] = [
@@ -287,7 +290,7 @@ const NavBar = () => {
                 // mb: -2,
               }}
             >
-              V{version}
+              V{version} (API: {resource?.api_version || 'unavailable'})
             </Typography>
           </List>
         </div>
