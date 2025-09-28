@@ -368,7 +368,7 @@ const USER_FILTER = (history, userId) => {
 const UserActivites = () => {
   const { data: userProfile } = useUserProfile()
 
-  const [tabValue, setTabValue] = React.useState(30)
+  const [tabValue, setTabValue] = React.useState(7)
   const [selectedHistory, setSelectedHistory] = React.useState([])
   const [enrichedHistory, setEnrichedHistory] = React.useState([])
   const [selectedChart, setSelectedChart] = React.useState('history')
@@ -840,102 +840,53 @@ const UserActivites = () => {
           </Typography>
         </Stack>
       </Box>
-      {/* Main Content Area - Mobile: Stack vertically, Desktop: Side by side */}
-      <Box
+
+      {/* Filter Controls - Always visible */}
+      <Card
+        variant='outlined'
         sx={{
-          display: 'flex',
-          flexDirection: { xs: 'column', lg: 'row' },
-          gap: 3,
-          alignItems: 'flex-start',
+          width: '100%',
+          p: 2,
+          mb: 3,
+          borderRadius: 12,
+          background:
+            'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+          backdropFilter: 'blur(10px)',
         }}
       >
-        {/* Left Side - Timeline with Filters (Mobile: Full width, Desktop: Flexible) */}
-        <Box sx={{ flex: 1, minWidth: 0, width: '100%' }}>
-          {/* Improved Filter Bar - Now above timeline */}
-          <Card
-            variant='outlined'
-            sx={{
-              width: '100%',
-              p: 2,
-              mb: 3,
-              borderRadius: 12,
-              background:
-                'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
-              backdropFilter: 'blur(10px)',
-            }}
-          >
-            <Stack spacing={2}>
-              <Typography level='title-sm' sx={{ color: 'text.secondary' }}>
-                Filter Activities
-              </Typography>
+        <Stack spacing={2}>
+          <Typography level='title-sm' sx={{ color: 'text.secondary' }}>
+            Filter Activities
+          </Typography>
 
-              <Stack
-                direction={{ xs: 'column', sm: 'row' }}
-                spacing={2}
-                alignItems={{ xs: 'stretch', sm: 'center' }}
-              >
-                {/* User Filter */}
-                <Box sx={{ flex: 1, minWidth: 200 }}>
-                  <Typography level='body-sm' sx={{ mb: 1, fontWeight: 500 }}>
-                    Show activities for:
-                  </Typography>
-                  <Select
-                    sx={{
-                      width: '100%',
-                    }}
-                    variant='outlined'
-                    value={selectedUser}
-                    onChange={(e, selected) => {
-                      setSelectedUser(selected)
-                      setSelectedHistory(
-                        enrichedHistory.filter(h => USER_FILTER(h, selected)),
-                      )
-                    }}
-                    renderValue={() => {
-                      if (
-                        selectedUser === undefined ||
-                        selectedUser === 'all'
-                      ) {
-                        return (
-                          <Typography
-                            startDecorator={
-                              <Avatar color='primary' size='sm'>
-                                <Group />
-                              </Avatar>
-                            }
-                          >
-                            All Users
-                          </Typography>
-                        )
-                      }
-                      return (
-                        <Typography
-                          startDecorator={
-                            <Avatar
-                              color='primary'
-                              size='sm'
-                              src={resolvePhotoURL(
-                                circleUsers.find(
-                                  user => user.userId === selectedUser,
-                                )?.image,
-                              )}
-                            >
-                              {circleUsers
-                                .find(user => user.userId === selectedUser)
-                                ?.displayName?.charAt(0)}
-                            </Avatar>
-                          }
-                        >
-                          {
-                            circleUsers.find(
-                              user => user.userId === selectedUser,
-                            )?.displayName
-                          }
-                        </Typography>
-                      )
-                    }}
-                  >
-                    <Option value='all'>
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={2}
+            alignItems={{ xs: 'stretch', sm: 'center' }}
+          >
+            {/* User Filter */}
+            <Box sx={{ flex: 1, minWidth: 200 }}>
+              <Typography level='body-sm' sx={{ mb: 1, fontWeight: 500 }}>
+                Show activities for:
+              </Typography>
+              <Select
+                sx={{
+                  width: '100%',
+                }}
+                variant='outlined'
+                value={selectedUser}
+                onChange={(e, selected) => {
+                  setSelectedUser(selected)
+                  setSelectedHistory(
+                    enrichedHistory.filter(h => USER_FILTER(h, selected)),
+                  )
+                }}
+                renderValue={() => {
+                  if (
+                    selectedUser === undefined ||
+                    selectedUser === 'all'
+                  ) {
+                    return (
                       <Typography
                         startDecorator={
                           <Avatar color='primary' size='sm'>
@@ -945,262 +896,366 @@ const UserActivites = () => {
                       >
                         All Users
                       </Typography>
-                    </Option>
-                    {circleUsers.map(user => (
-                      <Option key={user.userId} value={user.userId}>
+                    )
+                  }
+                  return (
+                    <Typography
+                      startDecorator={
                         <Avatar
                           color='primary'
                           size='sm'
-                          src={resolvePhotoURL(user.image)}
+                          src={resolvePhotoURL(
+                            circleUsers.find(
+                              user => user.userId === selectedUser,
+                            )?.image,
+                          )}
                         >
-                          {user.displayName?.charAt(0)}
+                          {circleUsers
+                            .find(user => user.userId === selectedUser)
+                            ?.displayName?.charAt(0)}
                         </Avatar>
-                        <Typography>{user.displayName}</Typography>
-                        <Chip
-                          color='success'
-                          size='sm'
-                          variant='soft'
-                          startDecorator={<Toll />}
-                        >
-                          {user.points - user.pointsRedeemed}
-                        </Chip>
-                      </Option>
-                    ))}
-                  </Select>
-                </Box>
-
-                {/* Time Period Filter */}
-                <Box sx={{ flex: 1, minWidth: 200 }}>
-                  <Typography level='body-sm' sx={{ mb: 1, fontWeight: 500 }}>
-                    Time period:
-                  </Typography>
-                  <Tabs
-                    onChange={(e, tabValue) => {
-                      setTabValue(tabValue)
-                      refetchHistory(tabValue)
-                    }}
-                    value={tabValue}
-                    sx={{
-                      borderRadius: 8,
-                      backgroundColor: 'background.surface',
-                      border: '1px solid',
-                      borderColor: 'divider',
-                    }}
-                  >
-                    <TabList
-                      disableUnderline
-                      sx={{
-                        borderRadius: 8,
-                        backgroundColor: 'transparent',
-                        p: 0.5,
-                        gap: 0.5,
-                      }}
+                      }
                     >
-                      {[
-                        { label: '7 Days', value: 7 },
-                        { label: '30 Days', value: 30 },
-                        { label: '90 Days', value: 90 },
-                        { label: 'All Time', value: 365 },
-                      ].map((tab, index) => (
-                        <Tab
-                          key={index}
-                          sx={{
-                            borderRadius: 6,
-                            minWidth: 'auto',
-                            px: 2,
-                            py: 1,
-                            fontSize: 'sm',
-                            fontWeight: 500,
-                            color: 'text.secondary',
-                            '&.Mui-selected': {
-                              color: 'primary.plainColor',
-                              backgroundColor: 'primary.softBg',
-                              fontWeight: 600,
-                            },
-                            '&:hover': {
-                              backgroundColor: 'neutral.softHoverBg',
-                            },
-                          }}
-                          disableIndicator
-                          value={tab.value}
-                        >
-                          {tab.label}
-                        </Tab>
-                      ))}
-                    </TabList>
-                  </Tabs>
-                </Box>
-              </Stack>
-            </Stack>
-          </Card>
+                      {
+                        circleUsers.find(
+                          user => user.userId === selectedUser,
+                        )?.displayName
+                      }
+                    </Typography>
+                  )
+                }}
+              >
+                <Option value='all'>
+                  <Typography
+                    startDecorator={
+                      <Avatar color='primary' size='sm'>
+                        <Group />
+                      </Avatar>
+                    }
+                  >
+                    All Users
+                  </Typography>
+                </Option>
+                {circleUsers.map(user => (
+                  <Option key={user.userId} value={user.userId}>
+                    <Avatar
+                      color='primary'
+                      size='sm'
+                      src={resolvePhotoURL(user.image)}
+                    >
+                      {user.displayName?.charAt(0)}
+                    </Avatar>
+                    <Typography>{user.displayName}</Typography>
+                    <Chip
+                      color='success'
+                      size='sm'
+                      variant='soft'
+                      startDecorator={<Toll />}
+                    >
+                      {user.points - user.pointsRedeemed}
+                    </Chip>
+                  </Option>
+                ))}
+              </Select>
+            </Box>
 
-          {/* Current Filter Summary */}
-          <Box sx={{ mb: 3, textAlign: 'center' }}>
-            <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-              Showing activities for{' '}
-              <Typography
-                component='span'
-                sx={{ fontWeight: 600, color: 'primary.500' }}
-              >
-                {selectedUser === undefined || selectedUser === 'all'
-                  ? 'All Users'
-                  : circleUsers.find(user => user.userId === selectedUser)
-                      ?.displayName || 'Unknown User'}
-              </Typography>{' '}
-              over the{' '}
-              <Typography
-                component='span'
-                sx={{ fontWeight: 600, color: 'primary.500' }}
-              >
-                {tabValue === 365 ? 'All Time' : `Last ${tabValue} Days`}
+            {/* Time Period Filter */}
+            <Box sx={{ flex: 1, minWidth: 200 }}>
+              <Typography level='body-sm' sx={{ mb: 1, fontWeight: 500 }}>
+                Time period:
               </Typography>
-            </Typography>
-          </Box>
+              <Tabs
+                onChange={(e, tabValue) => {
+                  setTabValue(tabValue)
+                  refetchHistory(tabValue)
+                }}
+                value={tabValue}
+                sx={{
+                  borderRadius: 8,
+                  backgroundColor: 'background.surface',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                }}
+              >
+                <TabList
+                  disableUnderline
+                  sx={{
+                    borderRadius: 8,
+                    backgroundColor: 'transparent',
+                    p: 0.5,
+                    gap: 0.5,
+                  }}
+                >
+                  {[
+                    { label: '7 Days', value: 7 },
+                    { label: '30 Days', value: 30 },
+                    { label: '90 Days', value: 90 },
+                    { label: 'All Time', value: 365 },
+                  ].map((tab, index) => (
+                    <Tab
+                      key={index}
+                      sx={{
+                        borderRadius: 6,
+                        minWidth: 'auto',
+                        px: 2,
+                        py: 1,
+                        fontSize: 'sm',
+                        fontWeight: 500,
+                        color: 'text.secondary',
+                        '&.Mui-selected': {
+                          color: 'primary.plainColor',
+                          backgroundColor: 'primary.softBg',
+                          fontWeight: 600,
+                        },
+                        '&:hover': {
+                          backgroundColor: 'neutral.softHoverBg',
+                        },
+                      }}
+                      disableIndicator
+                      value={tab.value}
+                    >
+                      {tab.label}
+                    </Tab>
+                  ))}
+                </TabList>
+              </Tabs>
+            </Box>
+          </Stack>
+        </Stack>
+      </Card>
 
-          <ChoreHistoryTimeline history={selectedHistory} />
-        </Box>
+      {/* Current Filter Summary */}
+      <Box sx={{ mb: 3, textAlign: 'center' }}>
+        <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+          Showing activities for{' '}
+          <Typography
+            component='span'
+            sx={{ fontWeight: 600, color: 'primary.500' }}
+          >
+            {selectedUser === undefined || selectedUser === 'all'
+              ? 'All Users'
+              : circleUsers.find(user => user.userId === selectedUser)
+                  ?.displayName || 'Unknown User'}
+          </Typography>{' '}
+          over the{' '}
+          <Typography
+            component='span'
+            sx={{ fontWeight: 600, color: 'primary.500' }}
+          >
+            {tabValue === 365 ? 'All Time' : `Last ${tabValue} Days`}
+          </Typography>
+        </Typography>
+      </Box>
 
-        {/* Right Sidebar - Charts (Mobile: Full width, Desktop: Fixed width + sticky) */}
-        <Box
+      {/* Conditional Content Based on Data Availability */}
+      {(!choresData.res?.length > 0 || !choresHistory?.length > 0) ? (
+        <Container
+          maxWidth='md'
           sx={{
-            width: { xs: '100%', lg: '350px' },
-            position: { xs: 'static', lg: 'sticky' },
-            top: { lg: '60px' },
-            alignSelf: { lg: 'flex-start' },
-            maxHeight: { lg: 'calc(100vh - 40px)' },
-            overflowY: { lg: 'auto' },
-            order: { xs: -1, lg: 1 }, // Show charts first on mobile, last on desktop
+            textAlign: 'center',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            height: '50vh',
           }}
         >
-          {/* Charts Container */}
-          <Card
-            variant='plain'
+          <EventBusy
             sx={{
-              p: 2,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              boxShadow: 'sm',
-              borderRadius: 20,
-              width: { xs: '100%', lg: '315px' },
-              mr: { xs: 0, lg: 10 },
+              fontSize: '6rem',
               mb: 1,
             }}
+          />
+
+          <Typography level='h3' gutterBottom>
+            No activities found
+          </Typography>
+          <Typography level='body1' sx={{ mb: 1 }}>
+            No activities found for{' '}
+            <Typography
+              component='span'
+              sx={{ fontWeight: 600, color: 'primary.500' }}
+            >
+              {selectedUser === undefined || selectedUser === 'all'
+                ? 'All Users'
+                : circleUsers.find(user => user.userId === selectedUser)
+                    ?.displayName || 'Unknown User'}
+            </Typography>{' '}
+            in the{' '}
+            <Typography
+              component='span'
+              sx={{ fontWeight: 600, color: 'primary.500' }}
+            >
+              {tabValue === 365 ? 'All Time' : `Last ${tabValue} Days`}
+            </Typography>
+            .
+          </Typography>
+          <Typography level='body-sm' sx={{ color: 'text.secondary', mb: 2 }}>
+            Try selecting a different time period or user filter above.
+          </Typography>
+          <Button variant='soft' sx={{ mt: 2 }}>
+            <Link to='/chores'>Go back to chores</Link>
+          </Button>
+        </Container>
+      ) : (
+        <>
+          {/* Main Content Area - Mobile: Stack vertically, Desktop: Side by side */}
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: { xs: 'column', lg: 'row' },
+              gap: 3,
+              alignItems: 'flex-start',
+            }}
           >
-            <Stack spacing={3}>
-              {/* Main Chart */}
-              <Box
+            {/* Left Side - Timeline (Mobile: Full width, Desktop: Flexible) */}
+            <Box sx={{ flex: 1, minWidth: 0, width: '100%' }}>
+              <ChoreHistoryTimeline history={selectedHistory} />
+            </Box>
+
+            {/* Right Sidebar - Charts (Mobile: Full width, Desktop: Fixed width + sticky) */}
+            <Box
+              sx={{
+                width: { xs: '100%', lg: '350px' },
+                position: { xs: 'static', lg: 'sticky' },
+                top: { lg: '60px' },
+                alignSelf: { lg: 'flex-start' },
+                maxHeight: { lg: 'calc(100vh - 40px)' },
+                overflowY: { lg: 'auto' },
+                order: { xs: -1, lg: 1 }, // Show charts first on mobile, last on desktop
+              }}
+            >
+              {/* Charts Container */}
+              <Card
+                variant='plain'
                 sx={{
+                  p: 2,
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  justifyContent: 'flex-start',
-                  textAlign: 'center',
-                  minHeight: {
-                    lg:
-                      chartData[selectedChart].data.length <= 3
-                        ? '350px'
-                        : '450px',
-                  }, // Dynamic height based on legend needs
-                  maxHeight: {
-                    lg:
-                      chartData[selectedChart].data.length <= 3
-                        ? '400px'
-                        : '500px',
-                  },
+                  justifyContent: 'space-between',
+                  boxShadow: 'sm',
+                  borderRadius: 20,
+                  width: { xs: '100%', lg: '315px' },
+                  mr: { xs: 0, lg: 10 },
+                  mb: 1,
                 }}
               >
-                <Typography level='h4' textAlign='center' sx={{ mb: 1 }}>
-                  {chartData[selectedChart].title}
-                </Typography>
-                <Typography level='body-xs' textAlign='center' sx={{ mb: 2 }}>
-                  {chartData[selectedChart].description}
-                </Typography>
-                <Box
-                  sx={{
-                    flex: 1,
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'flex-start',
-                    width: '100%',
-                  }}
-                >
-                  {renderPieChart(
-                    chartData[selectedChart].data,
-                    300, // Increased size for better chart container
-                    true,
-                    selectedChart,
-                  )}
-                </Box>
-              </Box>
+                <Stack spacing={3}>
+                  {/* Main Chart */}
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'flex-start',
+                      textAlign: 'center',
+                      minHeight: {
+                        lg:
+                          chartData[selectedChart].data.length <= 3
+                            ? '350px'
+                            : '450px',
+                      }, // Dynamic height based on legend needs
+                      maxHeight: {
+                        lg:
+                          chartData[selectedChart].data.length <= 3
+                            ? '400px'
+                            : '500px',
+                      },
+                    }}
+                  >
+                    <Typography level='h4' textAlign='center' sx={{ mb: 1 }}>
+                      {chartData[selectedChart].title}
+                    </Typography>
+                    <Typography level='body-xs' textAlign='center' sx={{ mb: 2 }}>
+                      {chartData[selectedChart].description}
+                    </Typography>
+                    <Box
+                      sx={{
+                        flex: 1,
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'flex-start',
+                        width: '100%',
+                      }}
+                    >
+                      {renderPieChart(
+                        chartData[selectedChart].data,
+                        300, // Increased size for better chart container
+                        true,
+                        selectedChart,
+                      )}
+                    </Box>
+                  </Box>
 
-              <Divider />
+                  <Divider />
 
-              {/* Chart Selection Grid */}
-              <Box>
-                <Grid container spacing={1}>
-                  {Object.entries(chartData)
-                    .filter(([key]) => key !== selectedChart)
-                    .map(([key, { data, title }]) => (
-                      <Grid
-                        item
-                        key={key}
-                        xs={4}
-                        sx={{
-                          display: 'flex',
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                        }}
-                      >
-                        <Card
-                          onClick={() => setSelectedChart(key)}
-                          variant='plain'
-                          sx={{
-                            cursor: 'pointer',
-                            p: 1,
-                            transition: 'all 0.2s ease-in-out',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            minHeight: 80,
-                            maxWidth: 90,
-                            '&:hover': {
-                              transform: 'scale(1.02)',
-                              boxShadow: 'sm',
-                            },
-                          }}
-                        >
-                          <Typography
-                            textAlign='center'
-                            level='body-xs'
-                            sx={{
-                              mb: 0.5,
-                              fontSize: '0.65rem',
-                              lineHeight: 1.2,
-                            }}
-                          >
-                            {title}
-                          </Typography>
-                          <Box
+                  {/* Chart Selection Grid */}
+                  <Box>
+                    <Grid container spacing={1}>
+                      {Object.entries(chartData)
+                        .filter(([key]) => key !== selectedChart)
+                        .map(([key, { data, title }]) => (
+                          <Grid
+                            item
+                            key={key}
+                            xs={4}
                             sx={{
                               display: 'flex',
                               justifyContent: 'center',
                               alignItems: 'center',
                             }}
                           >
-                            {renderPieChart(data, 70, false)}
-                          </Box>
-                        </Card>
-                      </Grid>
-                    ))}
-                </Grid>
-              </Box>
-            </Stack>
-          </Card>
-        </Box>
-      </Box>
+                            <Card
+                              onClick={() => setSelectedChart(key)}
+                              variant='plain'
+                              sx={{
+                                cursor: 'pointer',
+                                p: 1,
+                                transition: 'all 0.2s ease-in-out',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                minHeight: 80,
+                                maxWidth: 90,
+                                '&:hover': {
+                                  transform: 'scale(1.02)',
+                                  boxShadow: 'sm',
+                                },
+                              }}
+                            >
+                              <Typography
+                                textAlign='center'
+                                level='body-xs'
+                                sx={{
+                                  mb: 0.5,
+                                  fontSize: '0.65rem',
+                                  lineHeight: 1.2,
+                                }}
+                              >
+                                {title}
+                              </Typography>
+                              <Box
+                                sx={{
+                                  display: 'flex',
+                                  justifyContent: 'center',
+                                  alignItems: 'center',
+                                }}
+                              >
+                                {renderPieChart(data, 70, false)}
+                              </Box>
+                            </Card>
+                          </Grid>
+                        ))}
+                    </Grid>
+                  </Box>
+                </Stack>
+              </Card>
+            </Box>
+          </Box>
+        </>
+      )}
     </Container>
   )
 }
