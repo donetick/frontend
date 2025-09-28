@@ -3,6 +3,7 @@ import {
   Api,
   ChevronRight,
   Circle,
+  FamilyRestroom,
   Notifications,
   Palette,
   Person,
@@ -30,6 +31,7 @@ import {
 import { useNavigate } from 'react-router-dom'
 import { useUserProfile } from '../../queries/UserQueries'
 import { isPlusAccount } from '../../utils/Helpers'
+import { isParentUser } from '../../utils/UserHelpers'
 
 const SettingsOverview = () => {
   const navigate = useNavigate()
@@ -56,6 +58,13 @@ const SettingsOverview = () => {
       description:
         'Manage your subscription, change password, and account deletion options.',
       icon: <AccountCircle />,
+    },
+    {
+      id: 'subaccounts',
+      title: 'Managed Accounts',
+      description:
+        'Create and manage sub accounts to log in and complete assigned tasks.',
+      icon: <FamilyRestroom />,
     },
     {
       id: 'notifications',
@@ -110,6 +119,27 @@ const SettingsOverview = () => {
 
   const handleCardClick = settingId => {
     navigate(`/settings/${settingId}`)
+  }
+
+  // Filter settings based on user type
+  const getAvailableSettings = () => {
+    const parentOnlySettings = [
+      'children',
+      'mfa',
+      'apitokens',
+      'circle',
+      'account',
+    ]
+
+    if (isParentUser(userProfile)) {
+      // Parent users can access all settings
+      return settingsCards
+    } else {
+      // Child users can only access basic settings
+      return settingsCards.filter(
+        setting => !parentOnlySettings.includes(setting.id),
+      )
+    }
   }
 
   return (
@@ -257,7 +287,7 @@ const SettingsOverview = () => {
             '--ListItem-paddingX': '20px',
           }}
         >
-          {settingsCards.map((setting, index) => (
+          {getAvailableSettings().map((setting, index) => (
             <ListItem key={setting.id} sx={{ p: 0 }}>
               <ListItemButton
                 onClick={() => handleCardClick(setting.id)}

@@ -15,6 +15,10 @@ import {
   IconButton,
   Input,
   Sheet,
+  Tab,
+  TabList,
+  TabPanel,
+  Tabs,
   Typography,
 } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
@@ -28,6 +32,7 @@ import { useResource } from '../../queries/ResourceQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { GetUserProfile, login } from '../../utils/Fetcher'
 import { apiManager, isTokenValid } from '../../utils/TokenManager'
+import { buildChildUsername, getUserDisplayInfo } from '../../utils/UserHelpers'
 import MFAVerificationModal from './MFAVerificationModal'
 
 const LoginView = () => {
@@ -39,6 +44,20 @@ const LoginView = () => {
   const [mfaModalOpen, setMfaModalOpen] = useState(false)
   const [mfaSessionToken, setMfaSessionToken] = useState('')
   const [isAppleSignInSupported, setIsAppleSignInSupported] = useState(false)
+
+  // Child login state
+  const [loginType, setLoginType] = useState('primary')
+  const [parentUsername, setParentUsername] = useState('')
+  const [childName, setChildName] = useState('')
+
+  // Clear fields when switching login modes
+  const handleLoginModeChange = (event, newValue) => {
+    setLoginType(newValue)
+    setUsername('')
+    setParentUsername('')
+    setChildName('')
+    setPassword('')
+  }
   const { data: resource } = useResource()
   const { showError } = useNotification()
   const Navigate = useNavigate()
@@ -84,7 +103,48 @@ const LoginView = () => {
   }, [])
   const handleSubmit = async e => {
     e.preventDefault()
-    login(username, password)
+
+    // Validation for child login
+    if (loginType === 'sub') {
+      if (!parentUsername.trim()) {
+        showError({
+          title: 'Validation Error',
+          message: 'Primary username is required for sub account login',
+        })
+        return
+      }
+      if (!childName.trim()) {
+        showError({
+          title: 'Validation Error',
+          message: 'Sub account name is required for sub account login',
+        })
+        return
+      }
+    } else {
+      if (!username.trim()) {
+        showError({
+          title: 'Validation Error',
+          message: 'Username is required',
+        })
+        return
+      }
+    }
+
+    if (!password) {
+      showError({
+        title: 'Validation Error',
+        message: 'Password is required',
+      })
+      return
+    }
+
+    // Determine the actual username to send
+    const actualUsername =
+      loginType === 'sub'
+        ? buildChildUsername(parentUsername, childName)
+        : username
+
+    login(actualUsername, password)
       .then(response => {
         if (response.status === 200) {
           return response.json().then(data => {
@@ -358,6 +418,16 @@ const LoginView = () => {
               <Typography level='body-md' alignSelf={'center'}>
                 Welcome back,{' '}
                 {userProfile?.displayName || userProfile?.username}
+                {getUserDisplayInfo(userProfile).userType === 'child' && (
+                  <Typography
+                    component='span'
+                    level='body-xs'
+                    color='neutral'
+                    sx={{ ml: 1 }}
+                  >
+                    (Sub Account)
+                  </Typography>
+                )}
               </Typography>
 
               <Button
@@ -394,27 +464,109 @@ const LoginView = () => {
           )}
           {!userProfile && (
             <>
-              <Typography level='body2'>
+              <Typography level='body2' sx={{ mb: 3 }}>
                 Sign in to your account to continue
               </Typography>
-              <Typography level='body2' alignSelf={'start'} mt={4}>
-                Username
-              </Typography>
-              <Input
-                margin='normal'
-                required
-                fullWidth
-                id='email'
-                label='Email Address'
-                name='email'
-                autoComplete='email'
-                autoFocus
-                value={username}
-                onChange={e => {
-                  setUsername(e.target.value)
-                }}
-              />
-              <Typography level='body2' alignSelf={'start'}>
+
+              {/* Login Type Tabs */}
+              <Tabs
+                value={loginType}
+                onChange={handleLoginModeChange}
+                sx={{ width: '100%', mb: 3 }}
+              >
+                <TabList
+                  sx={{
+                    width: '100%',
+                    p: 0.5,
+                    borderBottom: 'none',
+                    boxShadow: 'none',
+                    '&::after': {
+                      display: 'none',
+                    },
+                  }}
+                >
+                  <Tab
+                    value='primary'
+                    variant='plain'
+                    sx={{
+                      flex: 1,
+                      borderRadius: '6px',
+                      fontSize: '0.875rem',
+                      fontWeight: 500,
+                    }}
+                  >
+                    Primary Account
+                  </Tab>
+                  <Tab
+                    value='sub'
+                    variant='plain'
+                    sx={{
+                      flex: 1,
+                      borderRadius: '6px',
+                      fontSize: '0.875rem',
+                      fontWeight: 500,
+                    }}
+                  >
+                    Sub Account
+                  </Tab>
+                </TabList>
+
+                <TabPanel value='primary' sx={{ p: 0, mt: 2 }}>
+                  <Typography level='body2' alignSelf={'start'} mb={1}>
+                    Username
+                  </Typography>
+                  <Input
+                    margin='normal'
+                    required
+                    fullWidth
+                    id='email'
+                    label='Email Address'
+                    name='email'
+                    autoComplete='email'
+                    autoFocus
+                    value={username}
+                    onChange={e => {
+                      setUsername(e.target.value)
+                    }}
+                  />
+                </TabPanel>
+
+                <TabPanel value='sub' sx={{ p: 0, mt: 2 }}>
+                  <Typography level='body2' alignSelf={'start'} mb={1}>
+                    Primary Account Username
+                  </Typography>
+                  <Input
+                    margin='normal'
+                    required
+                    fullWidth
+                    id='parentUsername'
+                    name='parentUsername'
+                    placeholder='Enter primary account username'
+                    autoFocus
+                    value={parentUsername}
+                    onChange={e => {
+                      setParentUsername(e.target.value)
+                    }}
+                  />
+                  <Typography level='body2' alignSelf={'start'} mt={1} mb={1}>
+                    Sub Account Username
+                  </Typography>
+                  <Input
+                    margin='normal'
+                    required
+                    fullWidth
+                    id='childName'
+                    name='childName'
+                    placeholder='Enter sub account name'
+                    value={childName}
+                    onChange={e => {
+                      setChildName(e.target.value)
+                    }}
+                  />
+                </TabPanel>
+              </Tabs>
+
+              <Typography level='body2' alignSelf={'start'} mb={1}>
                 Password:
               </Typography>
               <Input
@@ -446,7 +598,7 @@ const LoginView = () => {
                 }}
                 onClick={handleSubmit}
               >
-                Sign In
+                {loginType === 'sub' ? 'Sign In as Sub Account' : 'Sign In'}
               </Button>
               <Button
                 type='submit'

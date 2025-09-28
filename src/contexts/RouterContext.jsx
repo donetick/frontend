@@ -3,6 +3,7 @@ import ChoreEdit from '@/views/ChoreEdit/ChoreEdit'
 import Error from '@/views/Error'
 import AccountSettings from '@/views/Settings/AccountSettings'
 import AdvancedSettings from '@/views/Settings/AdvancedSettings'
+import ChildUserSettings from '@/views/Settings/ChildUserSettings'
 import CircleSettings from '@/views/Settings/CircleSettings'
 import Settings from '@/views/Settings/Settings'
 import SettingsOverview from '@/views/Settings/SettingsOverview'
@@ -82,6 +83,10 @@ const Router = createBrowserRouter([
           {
             path: 'account',
             element: <AccountSettings />,
+          },
+          {
+            path: 'subaccounts',
+            element: <ChildUserSettings />,
           },
           {
             path: 'notifications',
