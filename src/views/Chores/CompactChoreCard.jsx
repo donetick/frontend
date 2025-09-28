@@ -1,5 +1,4 @@
 import {
-  CancelScheduleSend,
   Check,
   Delete,
   Edit,
@@ -14,43 +13,23 @@ import {
   TimesOneMobiledata,
   Webhook,
 } from '@mui/icons-material'
-import {
-  Box,
-  Button,
-  Checkbox,
-  Chip,
-  CircularProgress,
-  IconButton,
-  Snackbar,
-  Typography,
-} from '@mui/joy'
+import { Box, Checkbox, Chip, IconButton, Typography } from '@mui/joy'
 import moment from 'moment'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
-import { useNotification } from '../../service/NotificationProvider'
 import { notInCompletionWindow } from '../../utils/Chores.jsx'
 import {
   getPriorityColor,
   getTextColorFromBackgroundColor,
 } from '../../utils/Colors.jsx'
 import { isOfficialDonetickInstanceSync } from '../../utils/FeatureToggle'
-import {
-  ApproveChore,
-  DeleteChore,
-  MarkChoreComplete,
-  RejectChore,
-} from '../../utils/Fetcher'
-import { usePauseChore, useStartChore } from '../../queries/TimeQueries'
-import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import ChoreActionMenu from '../components/ChoreActionMenu'
 
 const CompactChoreCard = ({
   chore,
   performers,
-  onChoreUpdate,
-  onChoreRemove,
   sx,
   viewOnly,
   onChipClick,
@@ -60,21 +39,13 @@ const CompactChoreCard = ({
   isSelected = false,
   onSelectionToggle,
 }) => {
-  const [confirmModelConfig, setConfirmModelConfig] = React.useState({})
   const [isOfficialInstance, setIsOfficialInstance] = React.useState(false)
   const navigate = useNavigate()
-  const startChore = useStartChore()
-  const pauseChore = usePauseChore()
 
-  const [isPendingCompletion, setIsPendingCompletion] = React.useState(false)
-  const [secondsLeftToCancel, setSecondsLeftToCancel] = React.useState(null)
-  const [timeoutId, setTimeoutId] = React.useState(null)
   const { data: userProfile } = useUserProfile()
   const { data: circleMembersData } = useCircleMembers()
 
   const { impersonatedUser } = useImpersonateUser()
-
-  const { showError } = useNotification()
 
   // Swipe functionality state
   const [swipeTranslateX, setSwipeTranslateX] = React.useState(0)
@@ -93,7 +64,7 @@ const CompactChoreCard = ({
       setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0)
     }
     checkTouchDevice()
-    
+
     // Check if this is the official donetick.com instance
     try {
       setIsOfficialInstance(isOfficialDonetickInstanceSync())
@@ -274,111 +245,6 @@ const CompactChoreCard = ({
     }
   }, [hoverTimer])
 
-  // All the existing handler methods (same as original ChoreCard)
-  const handleDelete = () => {
-    setConfirmModelConfig({
-      isOpen: true,
-      title: 'Delete Chore',
-      confirmText: 'Delete',
-      cancelText: 'Cancel',
-      message: 'Are you sure you want to delete this chore?',
-      onClose: isConfirmed => {
-        if (isConfirmed === true) {
-          DeleteChore(chore.id).then(response => {
-            if (response.ok) {
-              onChoreRemove(chore)
-            }
-          })
-        }
-        setConfirmModelConfig({})
-      },
-    })
-  }
-
-  const handleTaskCompletion = () => {
-    setIsPendingCompletion(true)
-    let seconds = 3
-    setSecondsLeftToCancel(seconds)
-
-    const countdownInterval = setInterval(() => {
-      seconds -= 1
-      setSecondsLeftToCancel(seconds)
-
-      if (seconds <= 0) {
-        clearInterval(countdownInterval)
-        setIsPendingCompletion(false)
-      }
-    }, 1000)
-
-    const id = setTimeout(() => {
-      MarkChoreComplete(
-        chore.id,
-        impersonatedUser ? { completedBy: impersonatedUser.userId } : null,
-        null,
-        null,
-      )
-        .then(resp => {
-          if (resp.ok) {
-            return resp.json().then(data => {
-              onChoreUpdate(data.res, 'completed')
-            })
-          }
-        })
-        .then(() => {
-          setIsPendingCompletion(false)
-          clearTimeout(id)
-          clearInterval(countdownInterval)
-          setTimeoutId(null)
-          setSecondsLeftToCancel(null)
-        })
-        .catch(error => {
-          if (error?.queued) {
-            showError({
-              title: 'Update Failed',
-              message: 'Request will be reattempt when you are online',
-            })
-          } else {
-            showError({
-              title: 'Failed to update',
-              message: error,
-            })
-          }
-
-          setIsPendingCompletion(false)
-          clearTimeout(id)
-          clearInterval(countdownInterval)
-          setTimeoutId(null)
-          setSecondsLeftToCancel(null)
-        })
-    }, 2000)
-
-    setTimeoutId(id)
-  }
-
-
-  const handleApproveChore = () => {
-    resetSwipe()
-    ApproveChore(chore.id).then(response => {
-      if (response.ok) {
-        response.json().then(data => {
-          onChoreUpdate(data.res, 'approved')
-        })
-      }
-    })
-  }
-
-  const handleRejectChore = () => {
-    resetSwipe()
-    RejectChore(chore.id).then(response => {
-      if (response.ok) {
-        response.json().then(data => {
-          onChoreUpdate(data.res, 'rejected')
-        })
-      }
-    })
-  }
-
-
   // Check if the current user can approve/reject (admin, manager, or task owner)
   const canApproveReject = () => {
     if (!circleMembersData?.res || !chore) return false
@@ -543,11 +409,14 @@ const CompactChoreCard = ({
     parts.push(getRecurrentText(chore))
 
     // Assignee (if not current user)
-    if (userProfile && chore.assignedTo !== userProfile.id) {
+    if (chore.assignedTo && chore.assignedTo !== userProfile.id) {
       const assignee = performers.find(
         p => p.id === chore.assignedTo,
       )?.displayName
       if (assignee) parts.push(assignee)
+    }
+    if (chore.assignedTo === null) {
+      parts.push('Anyone')
     }
 
     // Points
@@ -556,29 +425,6 @@ const CompactChoreCard = ({
     }
 
     return parts.join(' • ')
-  }
-
-  const handleChorePause = () => {
-    pauseChore.mutate(chore.id, {
-      onSuccess: data => {
-        const newChore = {
-          ...chore,
-          ...data.res,
-        }
-        onChoreUpdate(newChore, 'paused')
-      },
-    })
-  }
-  const handleChoreStart = () => {
-    startChore.mutate(chore.id, {
-      onSuccess: data => {
-        const newChore = {
-          ...chore,
-          ...data.res,
-        }
-        onChoreUpdate(newChore, 'started')
-      },
-    })
   }
 
   return (
@@ -634,7 +480,11 @@ const CompactChoreCard = ({
                   variant='soft'
                   color='danger'
                   size='sm'
-                  onClick={handleRejectChore}
+                  onClick={e => {
+                    e.stopPropagation()
+                    resetSwipe()
+                    onAction('reject', chore)
+                  }}
                   sx={{
                     width: 40,
                     height: 40,
@@ -669,10 +519,9 @@ const CompactChoreCard = ({
                 resetSwipe()
 
                 if (chore.status === 0 || chore.status === 2) {
-                  handleChoreStart()
+                  onAction('start', chore)
                 } else {
-                  // handleChorePause()
-                  handleTaskCompletion()
+                  onAction('complete', chore)
                 }
               }}
               sx={{
@@ -735,7 +584,7 @@ const CompactChoreCard = ({
             <Edit sx={{ fontSize: 16 }} />
           </IconButton>
 
-{isOfficialInstance && (
+          {isOfficialInstance && (
             <IconButton
               variant='soft'
               color='warning'
@@ -762,7 +611,7 @@ const CompactChoreCard = ({
             onClick={e => {
               e.stopPropagation()
               resetSwipe()
-              handleDelete()
+              onAction('delete', chore)
             }}
             sx={{
               width: 40,
@@ -888,7 +737,7 @@ const CompactChoreCard = ({
                       size='sm'
                       onClick={e => {
                         e.stopPropagation()
-                        handleApproveChore()
+                        onAction('approve', chore)
                       }}
                       sx={{
                         width: 24,
@@ -911,7 +760,7 @@ const CompactChoreCard = ({
                       size='sm'
                       onClick={e => {
                         e.stopPropagation()
-                        handleRejectChore()
+                        onAction('reject', chore)
                       }}
                       sx={{
                         width: 24,
@@ -953,14 +802,14 @@ const CompactChoreCard = ({
                   onClick={e => {
                     e.stopPropagation()
                     if (chore.status === 0) {
-                      handleTaskCompletion()
+                      onAction('complete', chore)
                     } else if (chore.status === 1) {
-                      handleChorePause()
+                      onAction('pause', chore)
                     } else {
-                      handleChoreStart()
+                      onAction('start', chore)
                     }
                   }}
-                  disabled={isPendingCompletion || notInCompletionWindow(chore)}
+                  disabled={notInCompletionWindow(chore)}
                   sx={{
                     width: 32,
                     height: 32,
@@ -979,9 +828,7 @@ const CompactChoreCard = ({
                     },
                   }}
                 >
-                  {isPendingCompletion ? (
-                    <CircularProgress size='sm' />
-                  ) : chore.status === 0 ? (
+                  {chore.status === 0 ? (
                     <Check sx={{ fontSize: 16 }} />
                   ) : chore.status === 1 ? (
                     <Pause sx={{ fontSize: 16 }} />
@@ -1171,15 +1018,16 @@ const CompactChoreCard = ({
             <ChoreActionMenu
               variant='plain'
               chore={chore}
-              onChoreUpdate={onChoreUpdate}
-              onChoreRemove={onChoreRemove}
+              onAction={onAction}
               onCompleteWithNote={() => onAction('completeWithNote', chore)}
-              onCompleteWithPastDate={() => onAction('completeWithPastDate', chore)}
+              onCompleteWithPastDate={() =>
+                onAction('completeWithPastDate', chore)
+              }
               onChangeAssignee={() => onAction('changeAssignee', chore)}
               onChangeDueDate={() => onAction('changeDueDate', chore)}
               onWriteNFC={() => onAction('writeNFC', chore)}
               onNudge={() => onAction('nudge', chore)}
-              onDelete={handleDelete}
+              onDelete={() => onAction('delete', chore)}
               onMouseEnter={handleMouseEnter}
               // onMouseLeave={handleMouseLeave}
               sx={{
@@ -1199,37 +1047,6 @@ const CompactChoreCard = ({
           </Box>
         </Box>
       </Box>
-
-      {confirmModelConfig?.isOpen && (
-        <ConfirmationModal config={confirmModelConfig} />
-      )}
-
-      {/* Snackbar for pending completion */}
-      <Snackbar
-        open={isPendingCompletion}
-        endDecorator={
-          <Button
-            onClick={() => {
-              if (timeoutId) {
-                clearTimeout(timeoutId)
-                setIsPendingCompletion(false)
-                setTimeoutId(null)
-                setSecondsLeftToCancel(null)
-              }
-            }}
-            size='sm'
-            variant='outlined'
-            color='primary'
-            startDecorator={<CancelScheduleSend />}
-          >
-            Cancel
-          </Button>
-        }
-      >
-        <Typography level='body-xs' textAlign={'center'}>
-          Task will be marked as completed in {secondsLeftToCancel} seconds
-        </Typography>
-      </Snackbar>
     </Box>
   )
 }

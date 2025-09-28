@@ -23,19 +23,11 @@ import {
 import { Divider, IconButton, Menu, MenuItem, Tooltip } from '@mui/joy'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useNotification } from '../../service/NotificationProvider'
 import { isOfficialDonetickInstanceSync } from '../../utils/FeatureToggle'
-import {
-  DeleteChore,
-  SkipChore,
-  UpdateDueDate,
-} from '../../utils/Fetcher'
-import { useArchiveChore, useUnArchiveChore } from '../../queries/ChoreQueries'
 
 const ChoreActionMenu = ({
   chore,
-  onChoreUpdate,
-  onChoreRemove,
+  onAction,
   onCompleteWithNote,
   onCompleteWithPastDate,
   onChangeAssignee,
@@ -53,9 +45,6 @@ const ChoreActionMenu = ({
   const [isOfficialInstance, setIsOfficialInstance] = useState(false)
   const menuRef = React.useRef(null)
   const navigate = useNavigate()
-  const { showError } = useNotification()
-  const archiveChore = useArchiveChore()
-  const unArchiveChore = useUnArchiveChore()
 
   // Check if this is the official donetick.com instance
   useEffect(() => {
@@ -79,13 +68,13 @@ const ChoreActionMenu = ({
     }
 
     document.addEventListener('mousedown', handleMenuOutsideClick)
-    if (anchorEl) {
+    if (anchorEl && onOpen) {
       onOpen()
     }
     return () => {
       document.removeEventListener('mousedown', handleMenuOutsideClick)
     }
-  }, [anchorEl])
+  }, [anchorEl, onOpen])
 
   const handleMenuOpen = event => {
     event.stopPropagation()
@@ -115,59 +104,23 @@ const ChoreActionMenu = ({
     if (onDelete) {
       onDelete()
     } else {
-      // Default delete behavior
-      DeleteChore(chore.id).then(response => {
-        if (response.ok) {
-          onChoreRemove?.(chore)
-        }
-      })
+      onAction?.('delete', chore)
     }
     handleMenuClose()
   }
 
   const handleArchive = () => {
     if (chore.isActive) {
-      archiveChore.mutate(chore.id, {
-        onSuccess: () => {
-          const newChore = { ...chore, isActive: false }
-          onChoreUpdate?.(newChore, 'archive')
-        },
-      })
+      onAction?.('archive', chore)
     } else {
-      unArchiveChore.mutate(chore.id, {
-        onSuccess: () => {
-          const newChore = { ...chore, isActive: true }
-          onChoreUpdate?.(newChore, 'unarchive')
-        },
-      })
+      onAction?.('unarchive', chore)
     }
     handleMenuClose()
   }
 
   const handleSkip = () => {
-    SkipChore(chore.id)
-      .then(response => {
-        if (response.ok) {
-          response.json().then(data => {
-            const newChore = data.res
-            onChoreUpdate?.(newChore, 'skipped')
-            handleMenuClose()
-          })
-        }
-      })
-      .catch(error => {
-        if (error?.queued) {
-          showError({
-            title: 'Failed to update',
-            message: 'Request will be processed when you are online',
-          })
-        } else {
-          showError({
-            title: 'Failed to update',
-            message: error,
-          })
-        }
-      })
+    onAction?.('skip', chore)
+    handleMenuClose()
   }
 
   const handleHistory = () => {
@@ -238,20 +191,7 @@ const ChoreActionMenu = ({
 
   const handleQuickSchedule = option => {
     const date = option === 'remove' ? null : getQuickScheduleDate(option)
-    UpdateDueDate(chore.id, date).then(response => {
-      if (response.ok) {
-        response.json().then(data => {
-          const newChore = {
-            ...chore,
-            nextDueDate: date ? date.toISOString() : null,
-          }
-          onChoreUpdate(
-            newChore,
-            option === 'remove' ? 'due-date-removed' : 'rescheduled',
-          )
-        })
-      }
-    })
+    onAction?.('changeDueDate', chore, { date })
     handleMenuClose()
   }
 
@@ -326,7 +266,7 @@ const ChoreActionMenu = ({
           <RecordVoiceOver />
           Delegate to someone else
         </MenuItem>
-{isOfficialInstance && (
+        {isOfficialInstance && (
           <MenuItem
             onClick={e => {
               e.stopPropagation()

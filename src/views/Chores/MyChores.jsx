@@ -64,12 +64,15 @@ import { useMediaQuery } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
+import { usePauseChore, useStartChore } from '../../queries/TimeQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { ChoreFilters, ChoresGrouper, ChoreSorter } from '../../utils/Chores'
 import {
+  ApproveChore,
   DeleteChore,
   MarkChoreComplete,
   NudgeChore,
+  RejectChore,
   SkipChore,
   UpdateChoreAssignee,
   UpdateDueDate,
@@ -96,6 +99,8 @@ const MyChores = () => {
   const archiveChore = useArchiveChore()
   const unarchiveChore = useUnArchiveChore()
   const deleteChores = useDeleteChores()
+  const startChore = useStartChore()
+  const pauseChore = usePauseChore()
   const [chores, setChores] = useState([])
   const [filteredChores, setFilteredChores] = useState([])
   const [searchFilter, setSearchFilter] = useState('All')
@@ -495,11 +500,328 @@ const MyChores = () => {
     }
   }, [isMultiSelectMode, selectedChores.size, addTaskModalOpen])
 
-  // Centralized modal handlers
-  const handleChoreAction = (action, chore, extraData = {}) => {
-    setModalChore(chore)
-    setModalData(extraData)
-    setActiveModal(action)
+  // Helper function to update local state and show notifications
+  const updateChoreInState = (updatedChore, event) => {
+    let newChores = chores.map(c =>
+      c.id === updatedChore.id ? updatedChore : c,
+    )
+    let newFilteredChores = filteredChores.map(c =>
+      c.id === updatedChore.id ? updatedChore : c,
+    )
+
+    // Remove from lists if archived or completed (once/trigger types)
+    if (
+      event === 'archive' ||
+      (event === 'completed' && updatedChore.frequencyType === 'once') ||
+      updatedChore.frequencyType === 'trigger'
+    ) {
+      newChores = newChores.filter(c => c.id !== updatedChore.id)
+      newFilteredChores = newFilteredChores.filter(
+        c => c.id !== updatedChore.id,
+      )
+    }
+
+    setChores(newChores)
+    setFilteredChores(newFilteredChores)
+    setChoreSections(
+      ChoresGrouper(
+        selectedChoreSection,
+        newChores,
+        ChoreFilters(impersonatedUser?.userId || userProfile?.id)[
+          selectedChoreFilter
+        ],
+      ),
+    )
+
+    // Show notification based on event type
+    const notifications = {
+      completed: {
+        type: 'success',
+        title: 'Task Completed',
+        message: 'Great job! The task has been marked as completed.',
+      },
+      skipped: {
+        type: 'success',
+        title: 'Task Skipped',
+        message: 'The task has been moved to the next due date.',
+      },
+      rescheduled: {
+        type: 'success',
+        title: 'Task Rescheduled',
+        message: 'The task due date has been updated successfully.',
+      },
+      'due-date-removed': {
+        type: 'success',
+        title: 'Task Unplanned',
+        message: 'The task is now unplanned and has no due date.',
+      },
+      unarchive: {
+        type: 'success',
+        title: 'Task Restored',
+        message: 'The task has been restored and is now active.',
+      },
+      archive: {
+        type: 'success',
+        title: 'Task Archived',
+        message: 'The task has been archived and hidden from the active list.',
+      },
+      started: {
+        type: 'success',
+        title: 'Task Started',
+        message: 'The task has been marked as started.',
+      },
+      paused: {
+        type: 'warning',
+        title: 'Task Paused',
+        message: 'The task has been paused.',
+      },
+      approved: {
+        type: 'success',
+        title: 'Task Approved',
+        message: 'The task has been approved.',
+      },
+      rejected: {
+        type: 'warning',
+        title: 'Task Rejected',
+        message: 'The task has been rejected.',
+      },
+      deleted: {
+        type: 'success',
+        title: 'Task Deleted',
+        message: 'The task has been deleted.',
+      },
+    }
+
+    const notification = notifications[event]
+    if (notification) {
+      const notifyFn =
+        notification.type === 'warning' ? showWarning : showSuccess
+      notifyFn({ title: notification.title, message: notification.message })
+    }
+  }
+
+  // Centralized action handler for all chore operations
+  const handleChoreAction = async (action, chore, extraData = {}) => {
+    switch (action) {
+      case 'complete':
+        try {
+          const response = await MarkChoreComplete(
+            chore.id,
+            impersonatedUser ? { completedBy: impersonatedUser.userId } : null,
+            null,
+            null,
+          )
+          if (response.ok) {
+            const data = await response.json()
+            updateChoreInState(data.res, 'completed')
+          }
+        } catch (error) {
+          if (error?.queued) {
+            showError({
+              title: 'Update Failed',
+              message: 'Request will be reattempt when you are online',
+            })
+          } else {
+            showError({
+              title: 'Failed to update',
+              message: error,
+            })
+          }
+        }
+        break
+
+      case 'start':
+        startChore.mutate(chore.id, {
+          onSuccess: async res => {
+            const data = await res.json()
+            const newChore = { ...chore, status: data.res.status }
+            updateChoreInState(newChore, 'started')
+          },
+          onError: error => {
+            showError({
+              title: 'Failed to start',
+              message: error.message || 'Unable to start chore',
+            })
+          },
+        })
+        break
+
+      case 'pause':
+        pauseChore.mutate(chore.id, {
+          onSuccess: async res => {
+            const data = await res.json()
+            const newChore = { ...chore, status: data.res.status }
+            updateChoreInState(newChore, 'paused')
+          },
+          onError: error => {
+            showError({
+              title: 'Failed to pause',
+              message: error.message || 'Unable to pause chore',
+            })
+          },
+        })
+        break
+
+      case 'approve':
+        try {
+          const response = await ApproveChore(chore.id)
+          if (response.ok) {
+            const data = await response.json()
+            updateChoreInState(data.res, 'approved')
+          }
+        } catch (error) {
+          showError({
+            title: 'Failed to approve',
+            message: error.message || 'Unable to approve chore',
+          })
+        }
+        break
+
+      case 'reject':
+        try {
+          const response = await RejectChore(chore.id)
+          if (response.ok) {
+            const data = await response.json()
+            updateChoreInState(data.res, 'rejected')
+          }
+        } catch (error) {
+          showError({
+            title: 'Failed to reject',
+            message: error.message || 'Unable to reject chore',
+          })
+        }
+        break
+
+      case 'delete':
+        setConfirmModelConfig({
+          isOpen: true,
+          title: 'Delete Chore',
+          confirmText: 'Delete',
+          cancelText: 'Cancel',
+          message: 'Are you sure you want to delete this chore?',
+          onClose: async isConfirmed => {
+            if (isConfirmed === true) {
+              try {
+                const response = await DeleteChore(chore.id)
+                if (response.ok) {
+                  // Remove from state and show notification
+                  const newChores = chores.filter(c => c.id !== chore.id)
+                  const newFilteredChores = filteredChores.filter(
+                    c => c.id !== chore.id,
+                  )
+                  setChores(newChores)
+                  setFilteredChores(newFilteredChores)
+                  setChoreSections(
+                    ChoresGrouper(
+                      selectedChoreSection,
+                      newChores,
+                      ChoreFilters(impersonatedUser?.userId || userProfile?.id)[
+                        selectedChoreFilter
+                      ],
+                    ),
+                  )
+                  showSuccess({
+                    title: 'Task Deleted',
+                    message: 'The task has been deleted successfully.',
+                  })
+                }
+              } catch (error) {
+                showError({
+                  title: 'Failed to delete',
+                  message: error,
+                })
+              }
+            }
+            setConfirmModelConfig({})
+          },
+        })
+        break
+
+      case 'archive':
+        try {
+          await new Promise((resolve, reject) => {
+            archiveChore.mutate(chore.id, {
+              onSuccess: data => {
+                updateChoreInState(data, 'archive')
+                resolve(data)
+              },
+              onError: error => {
+                showError({
+                  title: 'Failed to archive',
+                  message: error.message || 'Unable to archive chore',
+                })
+                reject(error)
+              },
+            })
+          })
+        } catch (error) {
+          // Error already handled in onError callback
+        }
+        break
+
+      case 'skip':
+        try {
+          const response = await SkipChore(chore.id)
+          if (response.ok) {
+            const data = await response.json()
+            updateChoreInState(data.res, 'skipped')
+          }
+        } catch (error) {
+          showError({
+            title: 'Failed to skip',
+            message: error,
+          })
+        }
+        break
+
+      // Quick reschedule actions (with date provided)
+      case 'changeDueDate':
+        console.log('Reschedule response data111:', chore, extraData)
+
+        if (extraData && 'date' in extraData) {
+          // Quick reschedule with specific date (including null for remove)
+          try {
+            const response = await UpdateDueDate(chore.id, extraData.date)
+            if (response.ok) {
+              const data = await response.json()
+              console.log('Reschedule response data:', data, chore, extraData)
+
+              chore.nextDueDate = extraData.date
+              const eventType =
+                extraData.date === null ? 'due-date-removed' : 'rescheduled'
+              updateChoreInState(chore, eventType)
+            }
+          } catch (error) {
+            showError({
+              title:
+                extraData.date === null
+                  ? 'Failed to remove due date'
+                  : 'Failed to reschedule',
+              message: error.message || 'Unable to update due date',
+            })
+          }
+        } else {
+          // Open modal for custom date selection
+          setModalChore(chore)
+          setModalData(extraData)
+          setActiveModal(action)
+        }
+        break
+
+      // Modal-based actions
+      case 'completeWithNote':
+      case 'completeWithPastDate':
+      case 'changeAssignee':
+      case 'writeNFC':
+      case 'nudge':
+        setModalChore(chore)
+        setModalData(extraData)
+        setActiveModal(action)
+        break
+
+      default:
+        console.warn('Unknown action:', action)
+    }
   }
 
   const closeModal = () => {
@@ -513,8 +835,9 @@ const MyChores = () => {
     UpdateDueDate(modalChore.id, newDate).then(response => {
       if (response.ok) {
         response.json().then(data => {
-          const newChore = data.res
-          handleChoreUpdated(newChore, 'rescheduled')
+          const newChore = modalChore
+          newChore.nextDueDate = newDate
+          updateChoreInState(newChore, 'rescheduled')
         })
       }
     })
@@ -532,7 +855,7 @@ const MyChores = () => {
       if (response.ok) {
         response.json().then(data => {
           const newChore = data.res
-          handleChoreUpdated(newChore, 'completed')
+          updateChoreInState(newChore, 'completed')
         })
       }
     })
@@ -545,7 +868,7 @@ const MyChores = () => {
       if (response.ok) {
         response.json().then(data => {
           const newChore = data.res
-          handleChoreUpdated(newChore, 'assigned')
+          updateChoreInState(newChore, 'assigned')
         })
       }
     })
@@ -565,7 +888,7 @@ const MyChores = () => {
       if (response.ok) {
         response.json().then(data => {
           const newChore = data.res
-          handleChoreUpdated(newChore, 'completed')
+          updateChoreInState(newChore, 'completed')
         })
       }
     })
@@ -699,8 +1022,6 @@ const MyChores = () => {
       <CardComponent
         key={key || chore.id}
         chore={chore}
-        onChoreUpdate={handleChoreUpdated}
-        onChoreRemove={handleChoreDeleted}
         performers={performers}
         userLabels={userLabels}
         onChipClick={handleLabelFiltering}
@@ -828,119 +1149,6 @@ const MyChores = () => {
     }
     // Clear selected calendar date when filters change
     setSelectedCalendarDate(null)
-  }
-
-  const handleChoreUpdated = (updatedChore, event) => {
-    var newChores = chores.map(chore => {
-      if (chore.id === updatedChore.id) {
-        return updatedChore
-      }
-      return chore
-    })
-
-    var newFilteredChores = filteredChores.map(chore => {
-      if (chore.id === updatedChore.id) {
-        return updatedChore
-      }
-      return chore
-    })
-    if (
-      event === 'archive' ||
-      (event === 'completed' && updatedChore.frequencyType === 'once') ||
-      updatedChore.frequencyType === 'trigger'
-    ) {
-      newChores = newChores.filter(chore => chore.id !== updatedChore.id)
-      newFilteredChores = newFilteredChores.filter(
-        chore => chore.id !== updatedChore.id,
-      )
-    }
-
-    setChores(newChores)
-    setFilteredChores(newFilteredChores)
-    setChoreSections(
-      ChoresGrouper(
-        selectedChoreSection,
-        newChores,
-        ChoreFilters(impersonatedUser?.userId || userProfile?.id)[
-          selectedChoreFilter
-        ],
-      ),
-    )
-
-    switch (event) {
-      case 'completed':
-        showSuccess({
-          title: 'Task Completed',
-          message: 'Great job! The task has been marked as completed.',
-        })
-        break
-      case 'skipped':
-        showSuccess({
-          title: 'Task Skipped',
-          message: 'The task has been moved to the next due date.',
-        })
-        break
-      case 'rescheduled':
-        showSuccess({
-          title: 'Task Rescheduled',
-          message: 'The task due date has been updated successfully.',
-        })
-        break
-      case 'due-date-removed':
-        showSuccess({
-          title: 'Task Unplanned',
-          message: 'The task is now unplanned and has no due date.',
-        })
-        break
-      case 'unarchive':
-        showSuccess({
-          title: 'Task Restored',
-          message: 'The task has been restored and is now active.',
-        })
-        break
-      case 'archive':
-        showSuccess({
-          title: 'Task Archived',
-          message:
-            'The task has been archived and hidden from the active list.',
-        })
-        break
-      case 'started':
-        showSuccess({
-          title: 'Task Started',
-          message: 'The task has been marked as started.',
-        })
-        break
-      case 'paused':
-        showWarning({
-          title: 'Task Paused',
-          message: 'The task has been paused.',
-        })
-        break
-      case 'deleted':
-      default:
-        showSuccess({
-          title: 'Task Updated',
-          message: 'Your changes have been saved successfully.',
-        })
-    }
-  }
-  const handleChoreDeleted = deletedChore => {
-    const newChores = chores.filter(chore => chore.id !== deletedChore.id)
-    const newFilteredChores = filteredChores.filter(
-      chore => chore.id !== deletedChore.id,
-    )
-    setChores(newChores)
-    setFilteredChores(newFilteredChores)
-    setChoreSections(
-      ChoresGrouper(
-        selectedChoreSection,
-        newChores,
-        ChoreFilters(impersonatedUser?.userId || userProfile?.id)[
-          selectedChoreFilter
-        ],
-      ),
-    )
   }
 
   const searchOptions = useMemo(
@@ -2115,11 +2323,10 @@ const MyChores = () => {
                       <CompactChoreCard
                         key={`calendar-${chore.id}`}
                         chore={chore}
-                        onChoreUpdate={handleChoreUpdated}
-                        onChoreRemove={handleChoreDeleted}
                         performers={performers}
                         userLabels={userLabels}
                         onChipClick={handleLabelFiltering}
+                        onAction={handleChoreAction}
                         // Multi-select props
                         isMultiSelectMode={isMultiSelectMode}
                         isSelected={selectedChores.has(chore.id)}

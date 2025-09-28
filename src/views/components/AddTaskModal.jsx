@@ -460,6 +460,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
           handleCloseModal(true)
         }
       })
+    handleCloseModal(false)
   }
   if (userLabelsLoading || isCircleMembersLoading) {
     return <></>
