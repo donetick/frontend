@@ -659,6 +659,22 @@ const ChoreEdit = () => {
                 '--ListItem-radius': '20px',
               }}
             >
+              {/* add one for Anyone if no specific assignee is selected */}
+
+              <ListItem key={'anyone'}>
+                <Checkbox
+                  checked={assignees.length === 0}
+                  onClick={() => {
+                    setAssignees([])
+                    setIsPrivate(false)
+                  }}
+                  overlay
+                  disableIcon
+                  variant='soft'
+                  label='Anyone'
+                />
+              </ListItem>
+
               {performers?.map((item, index) => (
                 <ListItem key={item.id}>
                   <Checkbox
@@ -1176,9 +1192,17 @@ const ChoreEdit = () => {
               <FormHelperText>Everyone in your circle</FormHelperText>
             </FormControl>
             <FormControl>
-              <Radio overlay value={true} label='Limited' />
+              <Radio
+                overlay
+                disabled={assignees.length === 0}
+                value={true}
+                label='Limited'
+              />
               <FormHelperText>
                 You and others that are assigned to the task
+                {assignees.length === 0
+                  ? ' (No assignees selected, Limited option is disabled)'
+                  : ''}
               </FormHelperText>
             </FormControl>
           </RadioGroup>
