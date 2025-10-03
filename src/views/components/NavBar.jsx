@@ -115,9 +115,13 @@ const NavBar = () => {
     })
   }, [])
   if (
-    ['/signup', '/login', '/forgot-password', '/login/settings'].includes(
-      location.pathname,
-    )
+    [
+      '/signup',
+      '/login',
+      '/auth/oauth2',
+      '/forgot-password',
+      '/login/settings',
+    ].includes(location.pathname)
   ) {
     return (
       // no navbar but show the safe area padding
