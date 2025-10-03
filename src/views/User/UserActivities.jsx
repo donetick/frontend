@@ -882,10 +882,7 @@ const UserActivites = () => {
                   )
                 }}
                 renderValue={() => {
-                  if (
-                    selectedUser === undefined ||
-                    selectedUser === 'all'
-                  ) {
+                  if (selectedUser === undefined || selectedUser === 'all') {
                     return (
                       <Typography
                         startDecorator={
@@ -917,9 +914,8 @@ const UserActivites = () => {
                       }
                     >
                       {
-                        circleUsers.find(
-                          user => user.userId === selectedUser,
-                        )?.displayName
+                        circleUsers.find(user => user.userId === selectedUser)
+                          ?.displayName
                       }
                     </Typography>
                   )
@@ -1048,7 +1044,7 @@ const UserActivites = () => {
       </Box>
 
       {/* Conditional Content Based on Data Availability */}
-      {(!choresData.res?.length > 0 || !choresHistory?.length > 0) ? (
+      {!choresData.res?.length > 0 || !choresHistory?.length > 0 ? (
         <Container
           maxWidth='md'
           sx={{
@@ -1167,7 +1163,11 @@ const UserActivites = () => {
                     <Typography level='h4' textAlign='center' sx={{ mb: 1 }}>
                       {chartData[selectedChart].title}
                     </Typography>
-                    <Typography level='body-xs' textAlign='center' sx={{ mb: 2 }}>
+                    <Typography
+                      level='body-xs'
+                      textAlign='center'
+                      sx={{ mb: 2 }}
+                    >
                       {chartData[selectedChart].description}
                     </Typography>
                     <Box

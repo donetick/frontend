@@ -29,17 +29,14 @@ import {
   useArchiveChore,
   useChore,
   useCreateChore,
+  useDeleteChores,
   useUnArchiveChore,
   useUpdateChore,
 } from '../../queries/ChoreQueries.jsx'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import { useNotification } from '../../service/NotificationProvider'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
-import {
-  DeleteChore,
-  GetAllCircleMembers,
-  GetThings,
-} from '../../utils/Fetcher'
+import { GetAllCircleMembers, GetThings } from '../../utils/Fetcher'
 import { isPlusAccount } from '../../utils/Helpers'
 import Priorities from '../../utils/Priorities.jsx'
 import { getSafeBottomPadding } from '../../utils/SafeAreaUtils.js'
@@ -117,6 +114,7 @@ const ChoreEdit = () => {
   const createChoreMutation = useCreateChore()
   const archiveChore = useArchiveChore()
   const unarchiveChore = useUnArchiveChore()
+  const deleteChores = useDeleteChores()
   const {
     data: choreData,
     isLoading: isChoreLoading,
@@ -432,12 +430,16 @@ const ChoreEdit = () => {
       message: 'Are you sure you want to delete this chore?',
       onClose: isConfirmed => {
         if (isConfirmed === true) {
-          DeleteChore(choreId).then(response => {
-            if (response.status === 200) {
+          deleteChores.mutate([choreId], {
+            onSuccess: () => {
               Navigate('/chores')
-            } else {
-              alert('Failed to delete chore')
-            }
+            },
+            onError: error => {
+              showError({
+                title: 'Delete Failed',
+                message: `Failed to delete chore: ${error.message}`,
+              })
+            },
           })
         }
         setConfirmModelConfig({})
@@ -727,7 +729,7 @@ const ChoreEdit = () => {
                   setShowSaveAssigneeDefault(false)
                 }}
               >
-                Save Assignee Preference
+                Remember for Future Tasks
               </Button>
             </Box>
           )}
@@ -1229,7 +1231,7 @@ const ChoreEdit = () => {
                   setShowSavePrivacyDefault(false)
                 }}
               >
-                Save Preference
+                Remember for Future Tasks
               </Button>
             </Box>
           )}

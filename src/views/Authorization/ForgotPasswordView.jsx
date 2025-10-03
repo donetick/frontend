@@ -1,5 +1,4 @@
 // create boilerplate for ResetPasswordView:
-import Logo from '../../Logo'
 import {
   Box,
   Button,
@@ -12,6 +11,7 @@ import {
 } from '@mui/joy'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import Logo from '../../Logo'
 import { useNotification } from '../../service/NotificationProvider'
 import { ResetPassword } from '../../utils/Fetcher'
 
@@ -77,10 +77,7 @@ const ForgotPasswordView = () => {
   }
 
   return (
-    <Container
-      component='main'
-      maxWidth='xs'
-    >
+    <Container component='main' maxWidth='xs'>
       <Box
         sx={{
           marginTop: 4,
@@ -110,17 +107,28 @@ const ForgotPasswordView = () => {
           </Typography>
           {resetStatusOk === null && (
             <>
-              <Typography level='body2' sx={{ textAlign: 'center', mt: 2, mb: 3 }}>
+              <Typography level='body2' sx={{ mb: 3 }}>
                 Enter your email, and we'll send you a link to get into your
                 account.
               </Typography>
-              <FormControl error={emailError !== null} sx={{ width: '100%', mb: 2 }}>
+
+              <Typography level='body2' alignSelf={'start'} mb={1}>
+                Email Address
+              </Typography>
+              <FormControl
+                error={emailError !== null}
+                sx={{ width: '100%', mb: 2 }}
+              >
                 <Input
-                  placeholder='Email'
-                  type='email'
-                  variant='soft'
+                  margin='normal'
+                  required
                   fullWidth
-                  size='lg'
+                  id='email'
+                  placeholder='Enter your email address'
+                  type='email'
+                  name='email'
+                  autoComplete='email'
+                  autoFocus
                   value={email}
                   onChange={handleEmailChange}
                   error={emailError !== null}
@@ -135,21 +143,30 @@ const ForgotPasswordView = () => {
               </FormControl>
 
               <Button
-                variant='solid'
-                size='lg'
+                type='submit'
                 fullWidth
-                sx={{ mb: 2 }}
+                size='lg'
+                variant='solid'
+                sx={{
+                  width: '100%',
+                  mt: 3,
+                  mb: 2,
+                  border: 'moccasin',
+                  borderRadius: '8px',
+                }}
                 onClick={handleSubmit}
               >
                 Reset Password
               </Button>
 
               <Button
+                type='submit'
                 fullWidth
                 size='lg'
                 variant='plain'
                 sx={{
                   width: '100%',
+                  mb: 2,
                   border: 'moccasin',
                   borderRadius: '8px',
                 }}
@@ -164,12 +181,15 @@ const ForgotPasswordView = () => {
           )}
           {resetStatusOk != null && (
             <>
-              <Typography level='body-md' sx={{ textAlign: 'center', mt: 2, mb: 3 }}>
+              <Typography
+                level='body-md'
+                sx={{ textAlign: 'center', mt: 2, mb: 3 }}
+              >
                 If there is an account associated with the email you entered,
-                you will receive an email with instructions on how to reset
-                your password.
+                you will receive an email with instructions on how to reset your
+                password.
               </Typography>
-              
+
               <Button
                 variant='solid'
                 size='lg'

@@ -259,6 +259,7 @@ export const useChoresHistory = (initialLimit, includeMembers) => {
       const resp = await GetChoresHistory(limit, includeMembers)
       return resp?.res || []
     },
+    staleTime: 0,
   })
 
   const handleLimitChange = newLimit => {

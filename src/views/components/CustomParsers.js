@@ -85,35 +85,63 @@ export const parsePriority = inputSentence => {
 export const parseLabels = (inputSentence, userLabels) => {
   let sentence = inputSentence.toLowerCase()
   const currentLabels = []
-  // label will always be prefixed #:
+  const newLabels = []
+  const allHighlights = []
 
-  for (const label of userLabels) {
-    if (sentence.includes(`#${label.name.toLowerCase()}`)) {
-      currentLabels.push(label)
-      sentence = sentence.replace(`#${label.name.toLowerCase()}`, '')
+  // Find all #label patterns in the sentence
+  const labelPattern = /#(\w+)/gi
+  const matches = [...inputSentence.matchAll(labelPattern)]
+
+  for (const match of matches) {
+    const labelName = match[1]
+    const fullMatch = match[0]
+    const startIndex = match.index
+
+    // Check if this label already exists
+    const existingLabel = userLabels.find(
+      label => label.name.toLowerCase() === labelName.toLowerCase(),
+    )
+
+    if (existingLabel) {
+      currentLabels.push(existingLabel)
+    } else {
+      // Create a new label object for new labels
+      newLabels.push({
+        name: labelName,
+        color: '#3b82f6', // Default blue color
+        isNew: true,
+      })
     }
+
+    allHighlights.push({
+      text: fullMatch,
+      start: startIndex,
+      end: startIndex + fullMatch.length,
+    })
+
+    // Remove the label from the sentence
+    sentence = sentence.replace(fullMatch.toLowerCase(), '')
   }
-  if (currentLabels.length > 0) {
+
+  const allLabels = [...currentLabels, ...newLabels]
+
+  if (allLabels.length > 0) {
     return {
-      result: currentLabels,
-      highlight: currentLabels.map(label => {
-        const index = inputSentence
-          .toLowerCase()
-          .indexOf(`#${label.name.toLowerCase()}`)
-        return {
-          text: `#${label.name}`,
-          start: index,
-          end: index + label.name.length + 1,
-        }
-      }),
-
-      cleanedSentence: sentence.replace(
-        new RegExp(`#(${userLabels.map(l => l.name).join('|')})`, 'g'),
-        '',
-      ),
+      result: allLabels,
+      newLabels: newLabels,
+      highlight: allHighlights,
+      cleanedSentence: inputSentence
+        .replace(labelPattern, '')
+        .replace(/\s+/g, ' ')
+        .trim(),
     }
   }
-  return { result: null, cleanedSentence: sentence }
+
+  return {
+    result: null,
+    newLabels: [],
+    cleanedSentence: inputSentence,
+  }
 }
 
 export const parseRepeatV2 = inputSentence => {
@@ -498,37 +526,135 @@ export const parseAssignees = (inputSentence, users) => {
   const sentence = inputSentence.toLowerCase()
   const result = []
   const highlight = []
-  // sort users by the longest so we remove first the full match:
-  for (const user of users.sort(
-    (a, b) => b.displayName.length - a.displayName.length,
-  )) {
-    if (sentence.includes(`@${user.displayName.toLowerCase()}`)) {
+  const matchedTexts = []
+
+  // Check for @Anyone first (special case)
+  const anyoneRegex = /@anyone(?=\s|$)/i
+  const anyoneMatch = inputSentence.match(anyoneRegex)
+
+  if (anyoneMatch) {
+    const index = inputSentence.search(anyoneRegex)
+    highlight.push({
+      text: anyoneMatch[0],
+      start: index,
+      end: index + anyoneMatch[0].length,
+    })
+    matchedTexts.push({ pattern: '@anyone', original: anyoneMatch[0] })
+
+    // For @Anyone, return empty result (no specific assignees)
+    let cleanedSentence = inputSentence
+    for (const matchedText of matchedTexts) {
+      cleanedSentence = cleanedSentence.replace(
+        new RegExp(
+          matchedText.original.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
+          'gi',
+        ),
+        '',
+      )
+    }
+
+    return {
+      result: [], // Empty assignees for @Anyone
+      isAnyone: true, // Flag to indicate @Anyone was used
+      highlight,
+      cleanedSentence: cleanedSentence.replace(/\s+/g, ' ').trim(),
+    }
+  }
+
+  // Sort users by longest displayName first to avoid partial matches
+  const sortedUsers = users.sort(
+    (a, b) => (b.displayName?.length || 0) - (a.displayName?.length || 0),
+  )
+
+  for (const user of sortedUsers) {
+    if (!user.displayName) continue
+
+    // Only match on display name - use word boundaries for exact matching
+    const displayNamePattern = `@${user.displayName.toLowerCase()}`
+    // Use word boundary or space/end to ensure exact match, not partial
+    const exactMatchRegex = new RegExp(
+      `@${user.displayName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?=\\s|$)`,
+      'i',
+    )
+    const exactMatch = inputSentence.match(exactMatchRegex)
+
+    if (exactMatch && !result.some(r => r.userId === user.userId)) {
       result.push(user)
-      const index = inputSentence
-        .toLowerCase()
-        .indexOf(`@${user.displayName.toLowerCase()}`)
+      const index = inputSentence.search(exactMatchRegex)
+
       highlight.push({
-        text: `@${user.displayName}`,
+        text: exactMatch[0],
         start: index,
-        end: index + user.displayName.length + 1,
+        end: index + exactMatch[0].length,
+      })
+      matchedTexts.push({
+        pattern: displayNamePattern,
+        original: exactMatch[0],
       })
     }
   }
 
   if (result.length > 0) {
-    return {
-      result,
-      highlight,
-      cleanedSentence: sentence.replace(
+    let cleanedSentence = inputSentence
+    // Remove all matched assignee patterns using the original matched text
+    for (const matchedText of matchedTexts) {
+      cleanedSentence = cleanedSentence.replace(
         new RegExp(
-          `@(${result.map(u => u.displayName.toLowerCase()).join('|')})`,
-          'g',
+          matchedText.original.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
+          'gi',
         ),
         '',
-      ),
+      )
+    }
+
+    return {
+      result,
+      isAnyone: false,
+      highlight,
+      cleanedSentence: cleanedSentence.replace(/\s+/g, ' ').trim(),
     }
   }
-  return { result: null, cleanedSentence: sentence }
+
+  return { result: null, isAnyone: false, cleanedSentence: inputSentence }
+}
+
+export const parsePoints = inputSentence => {
+  let sentence = inputSentence.toLowerCase()
+  const pointsPattern = /\*(\d+)\s*(?:points?)?/gi
+  const match = sentence.match(pointsPattern)
+
+  if (!match) {
+    return {
+      result: null,
+      highlight: [],
+      cleanedSentence: inputSentence,
+    }
+  }
+
+  // Extract the first points match
+  const pointsMatch = match[0]
+  const pointsValue = parseInt(pointsMatch.replace(/\D/g, ''), 10)
+  const startIndex = inputSentence
+    .toLowerCase()
+    .indexOf(pointsMatch.toLowerCase())
+
+  return {
+    result: pointsValue,
+    highlight: [
+      {
+        text: pointsMatch,
+        start: startIndex,
+        end: startIndex + pointsMatch.length,
+      },
+    ],
+    cleanedSentence: inputSentence
+      .replace(
+        new RegExp(pointsMatch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'),
+        '',
+      )
+      .replace(/\s+/g, ' ')
+      .trim(),
+  }
 }
 
 export const parseDueDate = (inputSentence, chrono) => {

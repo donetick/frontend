@@ -731,7 +731,7 @@ const NotificationTemplate = ({
               setShowSaveDefault(false)
             }}
           >
-            Save Preference
+            Remember for Future Tasks
           </Button>
         </Box>
       )}

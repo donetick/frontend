@@ -85,10 +85,10 @@ const SignupView = () => {
       isValid = false
     }
 
-    // username should only contain letters , numbers , dot and dash:
-    if (!/^[a-zA-Z0-9.-]+$/.test(username)) {
+    // username should only contain lowercase letters, dot and dash:
+    if (!/^[a-z.-]+$/.test(username)) {
       setUsernameError(
-        'Username can only contain letters, numbers, dot and dash',
+        'Username can only contain lowercase letters, dot and dash',
       )
       isValid = false
     }

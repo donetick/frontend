@@ -13,6 +13,7 @@ import {
   parseAssignees,
   parseDueDate,
   parseLabels,
+  parsePoints,
   parsePriority,
   parseRepeatV2,
 } from './CustomParsers'
@@ -68,6 +69,8 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
   })
   const [frequencyHumanReadable, setFrequencyHumanReadable] = useState(null)
   const [subTasks, setSubTasks] = useState(null)
+  const [points, setPoints] = useState(-1)
+  const [isAnyoneTask, setIsAnyoneTask] = useState(false)
   const [hasDescription, setHasDescription] = useState(false)
   const [hasSubTasks, setHasSubTasks] = useState(false)
   const [hasNotifications, setHasNotifications] = useState(false)
@@ -170,6 +173,8 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
       priorityHighlight,
       labelsHighlight,
       dueDateHighlight,
+      pointsHighlight,
+      assigneesHighlight,
     ) => {
       const parts = []
       let lastIndex = 0
@@ -179,24 +184,34 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
       const allHighlights = []
       if (repeatHighlight) {
         repeatHighlight.forEach(h =>
-          allHighlights.push({ ...h, type: 'repeat', priority: 40 }),
+          allHighlights.push({ ...h, type: 'repeat', priority: 60 }),
         )
       }
       if (priorityHighlight) {
         priorityHighlight.forEach(h =>
-          allHighlights.push({ ...h, type: 'priority', priority: 30 }),
+          allHighlights.push({ ...h, type: 'priority', priority: 50 }),
+        )
+      }
+      if (pointsHighlight) {
+        pointsHighlight.forEach(h =>
+          allHighlights.push({ ...h, type: 'points', priority: 45 }),
+        )
+      }
+      if (assigneesHighlight) {
+        assigneesHighlight.forEach(h =>
+          allHighlights.push({ ...h, type: 'assignee', priority: 40 }),
         )
       }
       if (labelsHighlight) {
         labelsHighlight.forEach(h =>
-          allHighlights.push({ ...h, type: 'label', priority: 20 }),
+          allHighlights.push({ ...h, type: 'label', priority: 30 }),
         )
       }
       if (dueDateHighlight) {
         allHighlights.push({
           ...dueDateHighlight,
           type: 'dueDate',
-          priority: 10,
+          priority: 20,
         })
       }
 
@@ -233,6 +248,12 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
             break
           case 'priority':
             className = 'highlight-priority'
+            break
+          case 'points':
+            className = 'highlight-points'
+            break
+          case 'assignee':
+            className = 'highlight-assignee'
             break
           case 'label':
             className = 'highlight-label'
@@ -286,22 +307,11 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
 
   const processText = useCallback(
     sentence => {
-      let cleanedSentence = sentence
+      // Parse everything from the original sentence to get correct highlight positions
       const priority = parsePriority(sentence)
-      if (priority.result) setPriority(priority.result)
-      cleanedSentence = priority.cleanedSentence
-      const labels = parseLabels(sentence, userLabels)
-      if (labels.result) {
-        cleanedSentence = labels.cleanedSentence
-        setLabelsV2(labels.result)
-      }
+      const pointsParsed = parsePoints(sentence)
+      const labels = parseLabels(sentence, userLabels || [])
 
-      const repeat = parseRepeatV2(sentence)
-      if (repeat.result) {
-        setFrequency(repeat.result)
-        setFrequencyHumanReadable(repeat.name)
-        cleanedSentence = repeat.cleanedSentence
-      }
       // Parse assignees using circle members
       const circleMembersList = circleMembers?.res || []
       const assigneesForParsing = circleMembersList.map(member => ({
@@ -315,28 +325,44 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
       }))
 
       const assigneesResult = parseAssignees(sentence, assigneesForParsing)
-      if (assigneesResult.result) {
-        cleanedSentence = assigneesResult.cleanedSentence
-        console.log('CLEANED', cleanedSentence)
-
-        setAssignees(
-          assigneesResult.result.map(assignee => ({
-            userId: assignee.userId,
-          })),
-        )
-      } else {
-        setAssignees([
-          {
-            userId: userProfile.id,
-          },
-        ])
-      }
-      // Parse due date
+      const repeat = parseRepeatV2(sentence)
       const dueDateParsed = parseDueDate(sentence, chrono)
+
+      // Set all the parsed values
+      if (priority.result) setPriority(priority.result)
+      if (pointsParsed.result) setPoints(pointsParsed.result)
+      if (labels.result) setLabelsV2(labels.result)
+
+      if (assigneesResult.isAnyone) {
+        // @Anyone was used - set empty assignees (anyone can do the task)
+        setIsAnyoneTask(true)
+        setAssignees([])
+      } else if (assigneesResult.result && assigneesResult.result.length > 0) {
+        setIsAnyoneTask(false)
+        const parsedAssignees = assigneesResult.result.map(assignee => ({
+          userId: assignee.userId,
+        }))
+        setAssignees(parsedAssignees)
+      } else {
+        // Only assign to current user if no @ mentions found and userProfile exists
+        setIsAnyoneTask(false)
+        if (userProfile?.id) {
+          setAssignees([
+            {
+              userId: userProfile.id,
+            },
+          ])
+        }
+      }
+
+      if (repeat.result) {
+        setFrequency(repeat.result)
+        setFrequencyHumanReadable(repeat.name)
+      }
+
       let dueDateHighlight = null
       if (dueDateParsed.result) {
         setDueDate(moment(dueDateParsed.result).format('YYYY-MM-DDTHH:mm:ss'))
-        cleanedSentence = dueDateParsed.cleanedSentence
         dueDateHighlight = dueDateParsed.highlight[0]
       }
 
@@ -351,24 +377,69 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
         }
       }
 
+      // Create the cleaned sentence by sequentially applying all cleanups
+      let cleanedSentence = sentence
+      if (priority.result) cleanedSentence = priority.cleanedSentence
+      if (pointsParsed.result) {
+        // Apply points cleaning to the current cleaned sentence
+        const pointsReparse = parsePoints(cleanedSentence)
+        if (pointsReparse.result)
+          cleanedSentence = pointsReparse.cleanedSentence
+      }
+      if (labels.result) {
+        // Apply labels cleaning to the current cleaned sentence
+        const labelsReparse = parseLabels(cleanedSentence, userLabels || [])
+        if (labelsReparse.result)
+          cleanedSentence = labelsReparse.cleanedSentence
+      }
+      if (assigneesResult.result) {
+        // Apply assignees cleaning to the current cleaned sentence
+        const assigneesReparse = parseAssignees(
+          cleanedSentence,
+          assigneesForParsing,
+        )
+        if (assigneesReparse.result)
+          cleanedSentence = assigneesReparse.cleanedSentence
+      }
+      if (repeat.result) {
+        // Apply repeat cleaning to the current cleaned sentence
+        const repeatReparse = parseRepeatV2(cleanedSentence)
+        if (repeatReparse.result)
+          cleanedSentence = repeatReparse.cleanedSentence
+      }
+      if (dueDateParsed.result) {
+        // Apply date cleaning to the current cleaned sentence
+        const dueDateReparse = parseDueDate(cleanedSentence, chrono)
+        if (dueDateReparse.result)
+          cleanedSentence = dueDateReparse.cleanedSentence
+      }
+
       setTaskText(sentence)
       setTaskTitle(cleanedSentence.trim())
-      const { parts, plainText } = renderHighlightedSentence(
+
+      // Generate highlights for rendering using original sentence positions
+      const { parts } = renderHighlightedSentence(
         sentence,
         repeat.highlight,
         priority.highlight,
         labels.highlight,
         dueDateHighlight,
+        pointsParsed.highlight,
+        assigneesResult.highlight,
       )
 
       setRenderedParts(parts)
-      setTaskTitle(plainText)
     },
-    [userLabels, renderHighlightedSentence],
+    [userLabels, renderHighlightedSentence, circleMembers, userProfile],
   )
 
   useEffect(() => {
-    if (!isModalOpen || userLabelsLoading || isCircleMembersLoading) {
+    if (
+      !isModalOpen ||
+      userLabelsLoading ||
+      isCircleMembersLoading ||
+      !userProfile
+    ) {
       return
     }
 
@@ -378,6 +449,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
     userLabelsLoading,
     isCircleMembersLoading,
     isModalOpen,
+    userProfile,
     processText,
   ])
 
@@ -393,6 +465,8 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
     setFrequency(null)
     setFrequencyHumanReadable(null)
     setPriority(0)
+    setPoints(-1)
+    setIsAnyoneTask(false)
     setHasDescription(false)
     setDescription(null)
     setSubTasks(null)
@@ -402,17 +476,41 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
   }
 
   const createChore = () => {
+    // Handle different assignee scenarios
+    let finalAssignees = assignees
+    let finalAssignedTo = null
+    let finalAssignStrategy = 'random'
+
+    if (isAnyoneTask) {
+      // @Anyone was explicitly used - anyone can do the task
+      finalAssignees = []
+      finalAssignedTo = null
+      finalAssignStrategy = 'no_assignee'
+    } else if (assignees.length === 0) {
+      // No assignees and no @Anyone - fallback to current user
+      finalAssignees = [{ userId: userProfile?.id }]
+      finalAssignedTo = userProfile?.id
+      finalAssignStrategy = 'keep_last_assigned'
+    } else if (assignees.length === 1) {
+      // Single assignee
+      finalAssignedTo = assignees[0].userId
+      finalAssignStrategy = 'keep_last_assigned'
+    } else {
+      // Multiple assignees
+      finalAssignedTo = null
+      finalAssignStrategy = 'random'
+    }
+
     const chore = {
       name: taskTitle,
-      assignees:
-        assignees.length > 0 ? assignees : [{ userId: userProfile.id }],
+      assignees: finalAssignees,
       dueDate: dueDate ? new Date(dueDate).toISOString() : null,
-      assignedTo: assignees.length > 0 ? assignees[0].userId : userProfile.id,
-      assignStrategy: 'random',
+      assignedTo: finalAssignedTo,
+      assignStrategy: finalAssignStrategy,
       isRolling: false,
-
       labelsV2: labelsV2,
       priority: priority ? Number(priority) : 0,
+      points: points > -1 ? points : null,
       status: 0,
       frequencyType: 'once',
       frequencyMetadata: {},
@@ -552,7 +650,22 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
             '@': {
               value: 'userId',
               display: 'displayName',
-              options: circleMembers?.res || [],
+              options: [
+                { userId: 'anyone', displayName: 'Anyone' },
+                ...(circleMembers?.res || []),
+              ],
+            },
+            '*': {
+              value: 'id',
+              display: 'name',
+              options: [
+                { id: '1', name: '1 point' },
+                { id: '5', name: '5 points' },
+                { id: '10', name: '10 points' },
+                { id: '25', name: '25 points' },
+                { id: '50', name: '50 points' },
+                { id: '100', name: '100 points' },
+              ],
             },
           }}
         />

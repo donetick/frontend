@@ -6,7 +6,7 @@ import {
   Input,
   Typography,
 } from '@mui/joy'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
 function CreateChildUserModal({ isOpen, onClose, onSuccess }) {
@@ -30,9 +30,9 @@ function CreateChildUserModal({ isOpen, onClose, onSuccess }) {
         newErrors.childName = 'Sub account name must be at least 2 characters'
       } else if (childName.length > 20) {
         newErrors.childName = 'Sub account name must be less than 20 characters'
-      } else if (!/^[a-zA-Z0-9_]+$/.test(childName)) {
+      } else if (!/^[a-z.-]+$/.test(childName)) {
         newErrors.childName =
-          'Sub account name can only contain letters, numbers, and underscores'
+          'Sub account name can only contain lowercase letters, dot and dash'
       }
     }
 
@@ -133,9 +133,6 @@ function CreateChildUserModal({ isOpen, onClose, onSuccess }) {
         {errors.childName && (
           <FormHelperText>{errors.childName}</FormHelperText>
         )}
-        <FormHelperText>
-          This will create a username like: primaryname_subaccountname
-        </FormHelperText>
       </FormControl>
 
       <FormControl error={!!errors.displayName} sx={{ mb: 2 }}>
