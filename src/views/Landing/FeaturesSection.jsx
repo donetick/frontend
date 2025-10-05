@@ -7,6 +7,7 @@ import {
   EmojiEvents,
   Groups,
   Notifications,
+  NotificationsActive,
   Psychology,
   Schedule,
   Security,
@@ -62,6 +63,12 @@ const FeaturesSection = () => {
         'Track work sessions with a timer, review detailed logs, and analyze productivity patterns for every task.',
     },
     {
+      icon: <NotificationsActive />,
+      title: 'Gentle Nudges',
+      description:
+        'Manually send friendly reminders to assignees about pending tasks. Customize messages and choose who gets notified.',
+    },
+    {
       icon: <AutoAwesome />,
       title: 'Advanced Organization',
       description:
@@ -85,6 +92,7 @@ const FeaturesSection = () => {
       description:
         'Get timely reminders via Donetick app or other way like Telegram, push, or webhooks.',
     },
+
     {
       icon: <Api />,
       title: 'Seamless Integrations',
