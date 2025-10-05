@@ -51,6 +51,7 @@ const PageTransition = ({ children }) => {
   const location = useLocation()
   const prevLocation = useRef(location)
   const isNavigatingBack = useRef(false)
+  const nodeRef = useRef(null)
 
   useEffect(() => {
     const currentLevel = getRouteLevel(location.pathname)
@@ -84,8 +85,10 @@ const PageTransition = ({ children }) => {
           enter: 50,
           exit: 50,
         }}
+        nodeRef={nodeRef}
       >
         <div
+          ref={nodeRef}
           className='page-wrapper'
           style={{
             paddingBottom: `var(--safe-area-inset-bottom, 0px)`,

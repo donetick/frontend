@@ -86,10 +86,12 @@ const ChoreView = () => {
   const [timeoutId, setTimeoutId] = useState(null)
   const [secondsLeftToCancel, setSecondsLeftToCancel] = useState(null)
   const [completedDate, setCompletedDate] = useState(null)
-  const [confirmModelConfig, setConfirmModelConfig] = useState({})
+  const [confirmModelConfig, setConfirmModelConfig] = useState({
+    isOpen: false,
+  })
   const [chorePriority, setChorePriority] = useState(null)
   const [isDescriptionOpen, setIsDescriptionOpen] = useState(false)
-  const [timerActionConfig, setTimerActionConfig] = useState({})
+  const [timerActionConfig, setTimerActionConfig] = useState({ isOpen: false })
   const { data: circleMembersData, isLoading: isCircleMembersLoading } =
     useCircleMembers()
   const { data: userProfile } = useUserProfile()
@@ -447,7 +449,7 @@ const ChoreView = () => {
           }}
         >
           {[ChoreStatus.ACTIVE, ChoreStatus.PAUSED].includes(chore.status) && (
-            <Grid item xs={12}>
+            <Grid xs={12}>
               <TimePassedCard
                 chore={chore}
                 handleAction={action => {
@@ -462,7 +464,7 @@ const ChoreView = () => {
             </Grid>
           )}
           {infoCards.map((card, index) => (
-            <Grid item xs={6} sm={6} key={index}>
+            <Grid xs={6} sm={6} key={index}>
               <Card
                 variant='soft'
                 sx={{
@@ -541,8 +543,8 @@ const ChoreView = () => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 p: 1,
+                width: '100%',
               }}
-              fullWidth
               variant='plain'
             >
               {chorePriority ? chorePriority.icon : <LowPriority />}

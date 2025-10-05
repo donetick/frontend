@@ -10,6 +10,7 @@ function KeyboardShortcutHint({
   shortcut,
   show = true,
   withCmd = true,
+  withCtrl, // Legacy prop for backward compatibility
   withShift = false,
   sx = {},
   ...props
@@ -21,7 +22,9 @@ function KeyboardShortcutHint({
 
   // Build the shortcut display string
   let displayShortcut = ''
-  if (withCmd) {
+  // Support both withCmd and withCtrl for backward compatibility
+  const shouldShowModifier = withCmd || withCtrl
+  if (shouldShowModifier) {
     displayShortcut += modifierKey
   }
   if (withShift) {
@@ -64,6 +67,7 @@ KeyboardShortcutHint.propTypes = {
   shortcut: PropTypes.string.isRequired,
   show: PropTypes.bool,
   withCmd: PropTypes.bool,
+  withCtrl: PropTypes.bool, // Legacy prop for backward compatibility
   withShift: PropTypes.bool,
   sx: PropTypes.object,
 }
