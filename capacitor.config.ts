@@ -4,7 +4,9 @@ const config: CapacitorConfig = {
   appId: 'com.donetick.app',
   appName: 'Donetick',
   webDir: 'dist',
-  
+  android: {
+    allowMixedContent: true,
+  },
   plugins: {
     PushNotifications: {
       presentationOptions: ['badge', 'sound', 'alert'],
