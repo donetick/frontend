@@ -52,7 +52,7 @@ const DemoAssignee = () => {
           data-aos-anchor='[data-aos-create-chore-assignee]'
           data-aos='fade-right'
         >
-          <Typography level='h4'>Assignees :</Typography>
+          <Typography level='h4'>Assignees:</Typography>
           <Typography level='h5'>Who can do this chore?</Typography>
           <Card>
             <List
@@ -93,7 +93,7 @@ const DemoAssignee = () => {
           data-aos-anchor='[data-aos-create-chore-assignee]'
           data-aos='fade-right'
         >
-          <Typography level='h4'>Assigned :</Typography>
+          <Typography level='h4'>Assigned:</Typography>
           <Typography level='h5'>
             Who is assigned the next due chore?
           </Typography>
@@ -128,7 +128,7 @@ const DemoAssignee = () => {
           data-aos-anchor='[data-aos-create-chore-assignee]'
           data-aos='fade-right'
         >
-          <Typography level='h4'>Picking Mode :</Typography>
+          <Typography level='h4'>Picking Mode:</Typography>
           <Typography level='h5'>
             How to pick the next assignee for the following chore?
           </Typography>

@@ -542,7 +542,7 @@ const RepeatSection = ({
 
   return (
     <Box mt={2}>
-      <Typography level='h4'>Repeat :</Typography>
+      <Typography level='h4'>Repeat:</Typography>
       <FormControl sx={{ mt: 1 }}>
         <Checkbox
           onChange={e => {

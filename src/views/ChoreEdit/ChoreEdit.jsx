@@ -856,7 +856,7 @@ const ChoreEdit = () => {
                 label='Give this task a due date'
               />
               <FormHelperText>
-                task needs to be completed by a specific time.
+                Task needs to be completed by a specific time
               </FormHelperText>
             </FormControl>
           )}
