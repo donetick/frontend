@@ -430,7 +430,7 @@ export const parseRepeatV2 = inputSentence => {
 
         result.frequencyType = 'days_of_the_week'
         result.frequencyMetadata.days = [VALID_DAYS[dayName].toLowerCase()]
-        result.frequencyMetadata.weekPattern = 'nth_day_of_month'
+        result.frequencyMetadata.weekPattern = 'week_of_month'
         result.frequencyMetadata.occurrences = [occurrence]
 
         const startIndex = inputSentence
@@ -489,7 +489,7 @@ export const parseRepeatV2 = inputSentence => {
 
         result.frequencyType = 'days_of_the_week'
         result.frequencyMetadata.days = [VALID_DAYS[dayName2].toLowerCase()]
-        result.frequencyMetadata.weekPattern = 'nth_day_of_month'
+        result.frequencyMetadata.weekPattern = 'week_of_month'
         result.frequencyMetadata.occurrences = occurrences
 
         const startIndex2 = inputSentence
