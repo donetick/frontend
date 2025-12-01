@@ -89,7 +89,8 @@ export const parseLabels = (inputSentence, userLabels) => {
   const allHighlights = []
 
   // Find all #label patterns in the sentence
-  const labelPattern = /#(\w+)/gi
+  // Use [\p{L}\p{N}_]+ to support Unicode letters (including umlauts) and numbers
+  const labelPattern = /#([\p{L}\p{N}_]+)/giu
   const matches = [...inputSentence.matchAll(labelPattern)]
 
   for (const match of matches) {
