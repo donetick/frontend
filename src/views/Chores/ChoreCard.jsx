@@ -995,7 +995,9 @@ const ChoreCard = ({
                   onCompleteWithPastDate={() =>
                     onAction('completeWithPastDate', chore)
                   }
-                  onAction={type => onAction(type, chore)}
+                  onAction={(type, chore, extraData) =>
+                    onAction(type, chore, extraData)
+                  }
                   onChangeAssignee={() => onAction('changeAssignee', chore)}
                   onChangeDueDate={() => onAction('changeDueDate', chore)}
                   onWriteNFC={() => onAction('writeNFC', chore)}
