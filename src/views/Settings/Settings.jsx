@@ -712,7 +712,10 @@ const Settings = () => {
                 userProfile?.subscription !== 'cancelled')
             }
             onClick={async () => {
-              if (Capacitor.isNativePlatform()) {
+              if (
+                Capacitor.isNativePlatform() &&
+                Capacitor.getPlatform() === 'ios'
+              ) {
                 try {
                   const { RevenueCatUI } = await import(
                     '@revenuecat/purchases-capacitor-ui'

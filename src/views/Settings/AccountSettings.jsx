@@ -1,5 +1,5 @@
 import { Capacitor } from '@capacitor/core'
-import { Box, Button, Container, Divider, Typography } from '@mui/joy'
+import { Box, Button, Typography } from '@mui/joy'
 import { Purchases } from '@revenuecat/purchases-capacitor'
 import { useQueryClient } from '@tanstack/react-query'
 import moment from 'moment'
@@ -48,7 +48,7 @@ const AccountSettings = () => {
       return `You are currently on the Free plan. Upgrade to the Plus plan to unlock more features.`
     }
   }
-  
+
   const getSubscriptionStatus = () => {
     if (userProfile?.subscription === 'active') {
       return `Plus`
@@ -66,14 +66,14 @@ const AccountSettings = () => {
 
   if (!userProfile) {
     return (
-      <SettingsLayout title="Account Settings">
+      <SettingsLayout title='Account Settings'>
         <div>Loading...</div>
       </SettingsLayout>
     )
   }
 
   return (
-    <SettingsLayout title="Account Settings">
+    <SettingsLayout title='Account Settings'>
       <div className='grid gap-4'>
         <Typography level='body-md'>
           Change your account settings, type or update your password
@@ -94,7 +94,10 @@ const AccountSettings = () => {
                 userProfile?.subscription !== 'cancelled')
             }
             onClick={async () => {
-              if (Capacitor.isNativePlatform()) {
+              if (
+                Capacitor.isNativePlatform() &&
+                Capacitor.getPlatform() === 'ios'
+              ) {
                 try {
                   const { RevenueCatUI } = await import(
                     '@revenuecat/purchases-capacitor-ui'
