@@ -443,6 +443,8 @@ const ArchivedTasks = () => {
         onChoreRemove={handleChoreDeleted}
         performers={performers}
         viewOnly={false}
+        showActions={false}
+        // onAction={handleChoreAction}
         // Multi-select props
         isMultiSelectMode={isMultiSelectMode}
         isSelected={selectedChores.has(chore.id)}

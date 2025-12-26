@@ -32,6 +32,7 @@ const CompactChoreCard = ({
   performers,
   sx,
   viewOnly,
+  showActions = true,
   onChipClick,
   onAction,
   // Multi-select props
@@ -708,53 +709,54 @@ const CompactChoreCard = ({
             }}
           >
             {/* Complete Button */}
-            <Box
-              sx={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition:
-                  'opacity 0.3s ease-in-out, transform 0.3s ease-in-out',
-                opacity: isMultiSelectMode ? 0 : 1,
-                transform: isMultiSelectMode
-                  ? 'scale(0.8) rotate(45deg)'
-                  : 'scale(1) rotate(0deg)',
-                pointerEvents: isMultiSelectMode ? 'none' : 'auto',
-              }}
-            >
-              {chore.status === 3 ? (
-                // Pending approval: Show approve/reject for admins/managers/owners, grayed out for others
-                canApproveReject() ? (
-                  <Box sx={{ display: 'flex', gap: 0.25 }}>
-                    <IconButton
-                      variant='soft'
-                      color='success'
-                      size='sm'
-                      onClick={e => {
-                        e.stopPropagation()
-                        onAction('approve', chore)
-                      }}
-                      sx={{
-                        width: 24,
-                        height: 24,
-                        borderRadius: '50%',
-                        transition: 'all 0.2s ease',
-                        '&:hover': {
-                          transform: 'scale(1.05)',
-                        },
-                        '&:active': {
-                          transform: 'scale(0.95)',
-                        },
-                      }}
-                    >
-                      <ThumbUp sx={{ fontSize: 12 }} />
-                    </IconButton>
-                    {/* <IconButton
+            {showActions && (
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition:
+                    'opacity 0.3s ease-in-out, transform 0.3s ease-in-out',
+                  opacity: isMultiSelectMode ? 0 : 1,
+                  transform: isMultiSelectMode
+                    ? 'scale(0.8) rotate(45deg)'
+                    : 'scale(1) rotate(0deg)',
+                  pointerEvents: isMultiSelectMode ? 'none' : 'auto',
+                }}
+              >
+                {chore.status === 3 ? (
+                  // Pending approval: Show approve/reject for admins/managers/owners, grayed out for others
+                  canApproveReject() ? (
+                    <Box sx={{ display: 'flex', gap: 0.25 }}>
+                      <IconButton
+                        variant='soft'
+                        color='success'
+                        size='sm'
+                        onClick={e => {
+                          e.stopPropagation()
+                          onAction('approve', chore)
+                        }}
+                        sx={{
+                          width: 24,
+                          height: 24,
+                          borderRadius: '50%',
+                          transition: 'all 0.2s ease',
+                          '&:hover': {
+                            transform: 'scale(1.05)',
+                          },
+                          '&:active': {
+                            transform: 'scale(0.95)',
+                          },
+                        }}
+                      >
+                        <ThumbUp sx={{ fontSize: 12 }} />
+                      </IconButton>
+                      {/* <IconButton
                       variant='soft'
                       color='danger'
                       size='sm'
@@ -777,68 +779,68 @@ const CompactChoreCard = ({
                     >
                       <ThumbDown sx={{ fontSize: 12 }} />
                     </IconButton> */}
-                  </Box>
+                    </Box>
+                  ) : (
+                    <IconButton
+                      variant='soft'
+                      color='neutral'
+                      size='sm'
+                      disabled={true}
+                      sx={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: '50%',
+                        opacity: 0.5,
+                      }}
+                    >
+                      <HourglassEmpty sx={{ fontSize: 16 }} />
+                    </IconButton>
+                  )
                 ) : (
                   <IconButton
                     variant='soft'
-                    color='neutral'
+                    color={chore.status === 0 ? 'success' : 'warning'}
                     size='sm'
-                    disabled={true}
+                    onClick={e => {
+                      e.stopPropagation()
+                      if (chore.status === 0) {
+                        onAction('complete', chore)
+                      } else if (chore.status === 1) {
+                        onAction('pause', chore)
+                      } else {
+                        onAction('start', chore)
+                      }
+                    }}
+                    disabled={notInCompletionWindow(chore)}
                     sx={{
                       width: 32,
                       height: 32,
                       borderRadius: '50%',
-                      opacity: 0.5,
+                      transition: 'all 0.2s ease',
+                      '&:hover': {
+                        transform: 'scale(1.05)',
+                      },
+
+                      '&:active': {
+                        transform: 'scale(0.95)',
+                      },
+                      '&:disabled': {
+                        opacity: 0.5,
+                        transform: 'none',
+                      },
                     }}
                   >
-                    <HourglassEmpty sx={{ fontSize: 16 }} />
+                    {chore.status === 0 ? (
+                      <Check sx={{ fontSize: 16 }} />
+                    ) : chore.status === 1 ? (
+                      <Pause sx={{ fontSize: 16 }} />
+                    ) : (
+                      <PlayArrow sx={{ fontSize: 16 }} />
+                    )}
                   </IconButton>
-                )
-              ) : (
-                <IconButton
-                  variant='soft'
-                  color={chore.status === 0 ? 'success' : 'warning'}
-                  size='sm'
-                  onClick={e => {
-                    e.stopPropagation()
-                    if (chore.status === 0) {
-                      onAction('complete', chore)
-                    } else if (chore.status === 1) {
-                      onAction('pause', chore)
-                    } else {
-                      onAction('start', chore)
-                    }
-                  }}
-                  disabled={notInCompletionWindow(chore)}
-                  sx={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: '50%',
-                    transition: 'all 0.2s ease',
-                    '&:hover': {
-                      transform: 'scale(1.05)',
-                    },
-
-                    '&:active': {
-                      transform: 'scale(0.95)',
-                    },
-                    '&:disabled': {
-                      opacity: 0.5,
-                      transform: 'none',
-                    },
-                  }}
-                >
-                  {chore.status === 0 ? (
-                    <Check sx={{ fontSize: 16 }} />
-                  ) : chore.status === 1 ? (
-                    <Pause sx={{ fontSize: 16 }} />
-                  ) : (
-                    <PlayArrow sx={{ fontSize: 16 }} />
-                  )}
-                </IconButton>
-              )}
-            </Box>
-
+                )}
+              </Box>
+            )}
             {/* Multi-select Checkbox */}
             <Box
               sx={{
@@ -1015,35 +1017,37 @@ const CompactChoreCard = ({
               pointerEvents: isMultiSelectMode ? 'none' : 'auto',
             }}
           >
-            <ChoreActionMenu
-              variant='plain'
-              chore={chore}
-              onAction={onAction}
-              onCompleteWithNote={() => onAction('completeWithNote', chore)}
-              onCompleteWithPastDate={() =>
-                onAction('completeWithPastDate', chore)
-              }
-              onChangeAssignee={() => onAction('changeAssignee', chore)}
-              onChangeDueDate={() => onAction('changeDueDate', chore)}
-              onWriteNFC={() => onAction('writeNFC', chore)}
-              onNudge={() => onAction('nudge', chore)}
-              onDelete={() => onAction('delete', chore)}
-              onMouseEnter={handleMouseEnter}
-              // onMouseLeave={handleMouseLeave}
-              sx={{
-                width: 32,
-                height: 32,
-                color: 'text.tertiary',
-                flexShrink: 0,
-                '&:hover': {
-                  color: 'text.secondary',
-                  bgcolor: 'background.level1',
-                },
-              }}
-              onOpen={() => {
-                handleMouseLeave()
-              }}
-            />
+            {showActions && (
+              <ChoreActionMenu
+                variant='plain'
+                chore={chore}
+                onAction={onAction}
+                onCompleteWithNote={() => onAction('completeWithNote', chore)}
+                onCompleteWithPastDate={() =>
+                  onAction('completeWithPastDate', chore)
+                }
+                onChangeAssignee={() => onAction('changeAssignee', chore)}
+                onChangeDueDate={() => onAction('changeDueDate', chore)}
+                onWriteNFC={() => onAction('writeNFC', chore)}
+                onNudge={() => onAction('nudge', chore)}
+                onDelete={() => onAction('delete', chore)}
+                onMouseEnter={handleMouseEnter}
+                // onMouseLeave={handleMouseLeave}
+                sx={{
+                  width: 32,
+                  height: 32,
+                  color: 'text.tertiary',
+                  flexShrink: 0,
+                  '&:hover': {
+                    color: 'text.secondary',
+                    bgcolor: 'background.level1',
+                  },
+                }}
+                onOpen={() => {
+                  handleMouseLeave()
+                }}
+              />
+            )}
           </Box>
         </Box>
       </Box>

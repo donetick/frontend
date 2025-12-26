@@ -40,6 +40,7 @@ const ChoreCard = ({
   performers,
   sx,
   viewOnly,
+  showActions = true,
   onChipClick,
   onAction,
   // Multi-select props
@@ -862,44 +863,45 @@ const ChoreCard = ({
                 justifyContent: 'center',
               }}
             >
-              <Box
-                display='flex'
-                justifyContent='flex-end'
-                alignItems='flex-end'
-              >
-                {/* <ButtonGroup> */}
-                {chore.status === 3 ? (
-                  // Pending approval: Show approve/reject for admins/managers/owners, grayed out for others
-                  canApproveReject() ? (
-                    <Box sx={{ display: 'flex', gap: 0.5 }}>
-                      <IconButton
-                        variant='soft'
-                        color='success'
-                        onClick={e => {
-                          e.stopPropagation()
-                          onAction('approve', chore)
-                        }}
-                        sx={{
-                          borderRadius: '50%',
-                          minWidth: 50,
-                          height: 50,
-                          zIndex: 1,
-                          transition: 'all 0.2s ease',
-                          '&:hover': {
-                            transform: 'scale(1.05)',
-                          },
-                          '&:active': {
-                            transform: 'scale(0.95)',
-                          },
-                          '&:disabled': {
-                            opacity: 0.5,
-                            transform: 'none',
-                          },
-                        }}
-                      >
-                        <ThumbUp sx={{ fontSize: 18 }} />
-                      </IconButton>
-                      {/* <IconButton
+              {showActions && (
+                <Box
+                  display='flex'
+                  justifyContent='flex-end'
+                  alignItems='flex-end'
+                >
+                  {/* <ButtonGroup> */}
+                  {chore.status === 3 ? (
+                    // Pending approval: Show approve/reject for admins/managers/owners, grayed out for others
+                    canApproveReject() ? (
+                      <Box sx={{ display: 'flex', gap: 0.5 }}>
+                        <IconButton
+                          variant='soft'
+                          color='success'
+                          onClick={e => {
+                            e.stopPropagation()
+                            onAction('approve', chore)
+                          }}
+                          sx={{
+                            borderRadius: '50%',
+                            minWidth: 50,
+                            height: 50,
+                            zIndex: 1,
+                            transition: 'all 0.2s ease',
+                            '&:hover': {
+                              transform: 'scale(1.05)',
+                            },
+                            '&:active': {
+                              transform: 'scale(0.95)',
+                            },
+                            '&:disabled': {
+                              opacity: 0.5,
+                              transform: 'none',
+                            },
+                          }}
+                        >
+                          <ThumbUp sx={{ fontSize: 18 }} />
+                        </IconButton>
+                        {/* <IconButton
                         variant='soft'
                         color='danger'
                         onClick={e => {
@@ -922,97 +924,100 @@ const ChoreCard = ({
                       >
                         <ThumbDown sx={{ fontSize: 18 }} />
                       </IconButton> */}
-                    </Box>
+                      </Box>
+                    ) : (
+                      <IconButton
+                        variant='soft'
+                        color='neutral'
+                        disabled={true}
+                        sx={{
+                          borderRadius: '50%',
+                          minWidth: 50,
+                          height: 50,
+                          zIndex: 1,
+                          opacity: 0.5,
+                        }}
+                      >
+                        <HourglassEmpty />
+                      </IconButton>
+                    )
                   ) : (
                     <IconButton
-                      variant='soft'
-                      color='neutral'
-                      disabled={true}
+                      variant={chore.status === 0 ? 'solid' : 'soft'}
+                      color={chore.status === 0 ? 'success' : 'warning'}
+                      onClick={e => {
+                        e.stopPropagation()
+                        switch (chore.status) {
+                          case 0: // Not started
+                            onAction('complete', chore)
+                            break
+                          case 1: // In progress
+                            onAction('pause', chore)
+                            break
+                          case 2: // Paused
+                            onAction('start', chore)
+                            break
+                          default:
+                            break
+                        }
+                      }}
+                      disabled={notInCompletionWindow(chore)}
                       sx={{
                         borderRadius: '50%',
                         minWidth: 50,
                         height: 50,
                         zIndex: 1,
-                        opacity: 0.5,
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          transform: 'scale(1.05)',
+                        },
+                        '&:active': {
+                          transform: 'scale(0.95)',
+                        },
+                        '&:disabled': {
+                          opacity: 0.5,
+                          transform: 'none',
+                        },
                       }}
                     >
-                      <HourglassEmpty />
+                      <div className='relative grid place-items-center'>
+                        {chore.status === 0 ? (
+                          <Check />
+                        ) : chore.status === 1 ? (
+                          <Pause />
+                        ) : (
+                          <PlayArrow />
+                        )}
+                      </div>
                     </IconButton>
-                  )
-                ) : (
-                  <IconButton
-                    variant={chore.status === 0 ? 'solid' : 'soft'}
-                    color={chore.status === 0 ? 'success' : 'warning'}
-                    onClick={e => {
-                      e.stopPropagation()
-                      switch (chore.status) {
-                        case 0: // Not started
-                          onAction('complete', chore)
-                          break
-                        case 1: // In progress
-                          onAction('pause', chore)
-                          break
-                        case 2: // Paused
-                          onAction('start', chore)
-                          break
-                        default:
-                          break
+                  )}
+                  <ChoreActionMenu
+                    chore={chore}
+                    onCompleteWithNote={() =>
+                      onAction('completeWithNote', chore)
+                    }
+                    onCompleteWithPastDate={() =>
+                      onAction('completeWithPastDate', chore)
+                    }
+                    onAction={(type, chore, extraData) =>
+                      onAction(type, chore, extraData)
+                    }
+                    onChangeAssignee={() => onAction('changeAssignee', chore)}
+                    onChangeDueDate={() => onAction('changeDueDate', chore)}
+                    onWriteNFC={() => onAction('writeNFC', chore)}
+                    onNudge={() => onAction('nudge', chore)}
+                    onDelete={() => onAction('delete', chore)}
+                    onMouseEnter={handleMouseEnter}
+                    onOpen={() => {
+                      // Clear any pending hide timer when menu opens
+                      if (hoverTimer) {
+                        clearTimeout(hoverTimer)
+                        setHoverTimer(null)
                       }
                     }}
-                    disabled={notInCompletionWindow(chore)}
-                    sx={{
-                      borderRadius: '50%',
-                      minWidth: 50,
-                      height: 50,
-                      zIndex: 1,
-                      transition: 'all 0.2s ease',
-                      '&:hover': {
-                        transform: 'scale(1.05)',
-                      },
-                      '&:active': {
-                        transform: 'scale(0.95)',
-                      },
-                      '&:disabled': {
-                        opacity: 0.5,
-                        transform: 'none',
-                      },
-                    }}
-                  >
-                    <div className='relative grid place-items-center'>
-                      {chore.status === 0 ? (
-                        <Check />
-                      ) : chore.status === 1 ? (
-                        <Pause />
-                      ) : (
-                        <PlayArrow />
-                      )}
-                    </div>
-                  </IconButton>
-                )}
-                <ChoreActionMenu
-                  chore={chore}
-                  onCompleteWithNote={() => onAction('completeWithNote', chore)}
-                  onCompleteWithPastDate={() =>
-                    onAction('completeWithPastDate', chore)
-                  }
-                  onAction={(type, chore, extraData) =>
-                    onAction(type, chore, extraData)
-                  }
-                  onChangeAssignee={() => onAction('changeAssignee', chore)}
-                  onChangeDueDate={() => onAction('changeDueDate', chore)}
-                  onWriteNFC={() => onAction('writeNFC', chore)}
-                  onNudge={() => onAction('nudge', chore)}
-                  onDelete={() => onAction('delete', chore)}
-                  onMouseEnter={handleMouseEnter}
-                  onOpen={() => {
-                    // Clear any pending hide timer when menu opens
-                    if (hoverTimer) {
-                      clearTimeout(hoverTimer)
-                      setHoverTimer(null)
-                    }
-                  }}
-                />
-              </Box>
+                  />
+                </Box>
+              )}
             </Grid>
           </Grid>
         </Card>
