@@ -12,7 +12,7 @@ import {
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { isPlusAccount, resolvePhotoURL } from '../../utils/Helpers'
-import { UploadFile } from '../../utils/TokenManager'
+import { apiClient } from '../../utils/apiClient'
 import './RichTextEditor.css'
 
 const RichTextEditor = forwardRef(
@@ -106,10 +106,7 @@ const RichTextEditor = forwardRef(
           formData.append('entityId', entityId)
           formData.append('entityType', entityType)
 
-          const response = await UploadFile('/assets/chore', {
-            method: 'POST',
-            body: formData,
-          })
+          const response = await apiClient.upload('/assets/chore', formData)
 
           if (response.status === 507) {
             showError({

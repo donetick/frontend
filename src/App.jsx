@@ -6,10 +6,10 @@ import { Outlet, useNavigate } from 'react-router-dom'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 import { registerCapacitorListeners } from './CapacitorListener'
 import PageTransition from './components/animations/PageTransition'
+import { AuthProvider } from './hooks/useAuth.jsx'
 import { ImpersonateUserProvider } from './contexts/ImpersonateUserContext'
-import { AuthenticationProvider } from './service/AuthenticationService'
+import SSEProvider from './contexts/SSEContext'
 import { useNotification } from './service/NotificationProvider'
-import { apiManager } from './utils/TokenManager'
 
 import NetworkBanner from './views/components/NetworkBanner'
 
@@ -32,12 +32,6 @@ const startOpenReplay = () => {
   tracker.start()
 }
 
-const startApiManager = async navigate => {
-  await apiManager.init()
-  apiManager.setNavigateToLogin(() => {
-    navigate('/login')
-  })
-}
 
 const AppContent = () => {
   const { showNotification } = useNotification()
@@ -100,8 +94,6 @@ const AppContent = () => {
 }
 
 function App() {
-  const navigate = useNavigate()
-  startApiManager(navigate)
   // startOpenReplay()
 
   const { mode, systemMode } = useColorScheme()
@@ -135,9 +127,11 @@ function App() {
     <>
       <NetworkBanner />
 
-      <AuthenticationProvider>
-        <AppContent />
-      </AuthenticationProvider>
+      <AuthProvider>
+        <SSEProvider>
+          <AppContent />
+        </SSEProvider>
+      </AuthProvider>
     </>
   )
 }

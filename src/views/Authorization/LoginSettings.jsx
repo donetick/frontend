@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { API_URL } from '../../Config'
 import Logo from '../../Logo'
 import { useNotification } from '../../service/NotificationProvider'
-import { apiManager } from '../../utils/TokenManager'
+import { apiClient } from '../../utils/apiClient'
 const LoginSettings = () => {
   const Navigate = useNavigate()
   const [serverURL, setServerURL] = React.useState('')
@@ -115,7 +115,7 @@ const LoginSettings = () => {
                 key: 'customServerUrl',
                 value: serverURL,
               }).then(() => {
-                apiManager.updateApiURL(serverURL + '/api/v1')
+                apiClient.baseURL = serverURL + '/api/v1'
                 Navigate('/login')
               })
             }}

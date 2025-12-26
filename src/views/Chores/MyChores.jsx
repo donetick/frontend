@@ -125,7 +125,7 @@ const MyChores = () => {
     localStorage.getItem('selectedChoreFilter') || 'anyone',
   )
   const [searchTerm, setSearchTerm] = useState('')
-  const [performers, setPerformers] = useState([])
+
   const [anchorEl, setAnchorEl] = useState(null)
   const [viewMode, setViewMode] = useState(
     localStorage.getItem('choreCardViewMode') || 'default',
@@ -202,7 +202,6 @@ const MyChores = () => {
       choresData?.res
     ) {
       const processEffectAsync = async () => {
-        setPerformers(membersData.res)
         setChores(processedChores)
         setFilteredChores(processedChores)
 
@@ -1022,7 +1021,7 @@ const MyChores = () => {
       <CardComponent
         key={key || chore.id}
         chore={chore}
-        performers={performers}
+        performers={membersData?.res}
         userLabels={userLabels}
         onChipClick={handleLabelFiltering}
         onAction={handleChoreAction}
@@ -1508,7 +1507,7 @@ const MyChores = () => {
   if (
     isUserProfileLoading ||
     userLabelsLoading ||
-    performers.length === 0 ||
+    membersLoading ||
     choresLoading
   ) {
     return (
@@ -1745,7 +1744,7 @@ const MyChores = () => {
                         const filterFunction = FILTERS[filter]
                         const filteredChores =
                           filterFunction.length === 2
-                            ? filterFunction(chores, userProfile.id)
+                            ? filterFunction(chores, userProfile?.id)
                             : filterFunction(chores)
                         setFilteredChores(filteredChores)
                         setSearchFilter(filter)
@@ -1757,7 +1756,7 @@ const MyChores = () => {
                         color={searchFilter === filter ? 'primary' : 'neutral'}
                       >
                         {FILTERS[filter].length === 2
-                          ? FILTERS[filter](chores, userProfile.id).length
+                          ? FILTERS[filter](chores, userProfile?.id).length
                           : FILTERS[filter](chores).length}
                       </Chip>
                     </MenuItem>
@@ -2323,7 +2322,7 @@ const MyChores = () => {
                       <CompactChoreCard
                         key={`calendar-${chore.id}`}
                         chore={chore}
-                        performers={performers}
+                        performers={membersData?.res || []}
                         userLabels={userLabels}
                         onChipClick={handleLabelFiltering}
                         onAction={handleChoreAction}
@@ -2501,7 +2500,7 @@ const MyChores = () => {
         )}
       </Container>
 
-      <Sidepanel chores={chores} performers={performers} />
+      <Sidepanel chores={chores} performers={membersData?.res || []} />
 
       {/* Multi-select Help - only show when in multi-select mode */}
       {/* <MultiSelectHelp isVisible={isMultiSelectMode} /> */}
@@ -2537,7 +2536,7 @@ const MyChores = () => {
       {activeModal === 'changeAssignee' && modalChore && (
         <SelectModal
           isOpen={true}
-          options={performers}
+          options={membersData?.res || []}
           displayKey='displayName'
           title={`Delegate to someone else`}
           placeholder={'Select a performer'}

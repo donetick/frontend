@@ -18,7 +18,7 @@ import { useNotification } from '../../service/NotificationProvider'
 import { UpdateUserDetails } from '../../utils/Fetcher'
 import { resolvePhotoURL } from '../../utils/Helpers'
 import { getCroppedImg } from '../../utils/imageCropUtils'
-import { UploadFile } from '../../utils/TokenManager'
+import { apiClient } from '../../utils/apiClient'
 import SettingsLayout from './SettingsLayout'
 
 const ProfileSettings = () => {
@@ -85,10 +85,7 @@ const ProfileSettings = () => {
 
       const formData = new FormData()
       formData.append('file', compressedFile, 'profile.jpg')
-      const response = await UploadFile('/users/profile_photo', {
-        method: 'POST',
-        body: formData,
-      })
+      const response = await apiClient.upload('/users/profile_photo', formData)
       if (!response.ok) throw new Error('Upload failed')
       const data = await response.json()
       const url = resolvePhotoURL(data.url || data.sign)

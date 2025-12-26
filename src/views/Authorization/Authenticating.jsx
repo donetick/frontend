@@ -1,7 +1,7 @@
 import { Box, Button, CircularProgress, Container, Typography } from '@mui/joy'
 import { useEffect, useState } from 'react'
 import Logo from '../../Logo'
-import { apiManager } from '../../utils/TokenManager'
+import { apiClient } from '../../utils/apiClient'
 
 import Cookies from 'js-cookie'
 import { useRef } from 'react'
@@ -58,7 +58,7 @@ const AuthenticationLoading = () => {
     }
 
     if (code) {
-      const baseURL = apiManager.getApiURL()
+      const baseURL = apiClient.baseURL
       fetch(`${baseURL}/auth/${provider}/callback`, {
         method: 'POST',
         headers: {
@@ -71,7 +71,7 @@ const AuthenticationLoading = () => {
       }).then(response => {
         if (response.status === 200) {
           return response.json().then(data => {
-            localStorage.setItem('ca_token', data.token)
+            localStorage.setItem('token', data.token)
             localStorage.setItem('ca_expiration', data.expire)
 
             const redirectUrl = Cookies.get('ca_redirect')

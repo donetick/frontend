@@ -30,8 +30,8 @@ import { GOOGLE_CLIENT_ID, REDIRECT_URL } from '../../Config'
 import Logo from '../../Logo'
 import { useResource } from '../../queries/ResourceQueries'
 import { useNotification } from '../../service/NotificationProvider'
-import { GetUserProfile, login } from '../../utils/Fetcher'
-import { apiManager, isTokenValid } from '../../utils/TokenManager'
+import { useAuth } from '../../hooks/useAuth.jsx'
+import { apiClient } from '../../utils/apiClient'
 import { buildChildUsername, getUserDisplayInfo } from '../../utils/UserHelpers'
 import MFAVerificationModal from './MFAVerificationModal'
 
@@ -60,6 +60,7 @@ const LoginView = () => {
   }
   const { data: resource } = useResource()
   const { showError } = useNotification()
+  const { isAuthenticated, login: authLogin, user } = useAuth()
   const Navigate = useNavigate()
   useEffect(() => {
     const initializeSocialLogin = async () => {
@@ -89,18 +90,11 @@ const LoginView = () => {
     initializeSocialLogin()
   }, [])
   useEffect(() => {
-    if (isTokenValid()) {
-      GetUserProfile().then(response => {
-        if (response.status === 200) {
-          return response.json().then(data => {
-            setUserProfile(data.res)
-          })
-        } else {
-          console.log('Failed to fetch user profile')
-        }
-      })
+    if (isAuthenticated && user) {
+      setUserProfile(user)
+      Navigate('/chores')
     }
-  }, [])
+  }, [isAuthenticated, user, Navigate])
   const handleSubmit = async e => {
     e.preventDefault()
 
@@ -144,98 +138,72 @@ const LoginView = () => {
         ? buildChildUsername(parentUsername, childName)
         : username
 
-    login(actualUsername, password)
-      .then(response => {
-        if (response.status === 200) {
-          return response.json().then(data => {
-            // Check if MFA is required
-            if (data.mfaRequired) {
-              setMfaSessionToken(data.sessionToken)
-              setMfaModalOpen(true)
-              return
-            }
+    const result = await authLogin({ username: actualUsername, password })
 
-            // Normal login without MFA
-            localStorage.setItem('ca_token', data.token)
-            localStorage.setItem('ca_expiration', data.expire)
+    if (result.success) {
+      if (result.data?.mfaRequired) {
+        setMfaSessionToken(result.data.sessionToken)
+        setMfaModalOpen(true)
+        return
+      }
 
-            // Refetch user profile after successful login
-            queryClient.refetchQueries(['userProfile'])
+      // Refetch user profile after successful login
+      queryClient.refetchQueries(['userProfile'])
 
-            const redirectUrl = Cookies.get('ca_redirect')
-
-            if (redirectUrl && redirectUrl !== '/') {
-              console.log('Redirecting to', redirectUrl)
-
-              Cookies.remove('ca_redirect')
-              Navigate(redirectUrl)
-            } else {
-              Cookies.remove('ca_redirect')
-              Navigate('/chores')
-            }
-          })
-        } else if (response.status === 401) {
-          showError({
-            title: 'Login Failed',
-            message: 'Wrong username or password',
-          })
-        } else {
-          showError({
-            title: 'Login Failed',
-            message: 'An error occurred, please try again',
-          })
-          console.log('Login failed')
-        }
+      const redirectUrl = Cookies.get('ca_redirect')
+      if (redirectUrl && redirectUrl !== '/') {
+        Cookies.remove('ca_redirect')
+        Navigate(redirectUrl)
+      } else {
+        Navigate('/chores')
+      }
+    } else {
+      showError({
+        title: 'Login Failed',
+        message: result.error || 'An error occurred, please try again',
       })
-      .catch(err => {
-        showError({
-          title: 'Connection Error',
-          message: 'Unable to communicate with server, please try again',
-        })
-        console.log('Login failed', err)
-      })
+    }
   }
 
-  const loggedWithProvider = function (provider, data) {
-    const baseURL = apiManager.getApiURL()
-
+  const loggedWithProvider = async function (provider, data) {
     const getAccessToken = data => {
       if (data['access_token']) {
-        // data["access_token"] is for Google
         return data['access_token']
       } else if (data['accessToken']) {
-        // data["accessToken"] is for Google Capacitor
         return data['accessToken']['token']
       } else if (data['response'] && data['response']['id_token']) {
-        // Apple Sign In returns id_token in response
         return data['response']['id_token']
       } else if (data['id_token']) {
-        // Direct id_token for Apple (fallback)
         return data['id_token']
       }
     }
 
-    return fetch(`${baseURL}/auth/${provider}/callback`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    try {
+      const response = await apiClient.post(`/auth/${provider}/callback`, {
         provider: provider,
         token: getAccessToken(data),
         data: data,
-      }),
-    }).then(response => {
-      if (response.status === 200) {
-        return response.json().then(data => {
-          // Check if MFA is required for OAuth login
-          if (data.mfaRequired) {
-            setMfaSessionToken(data.sessionToken)
-            setMfaModalOpen(true)
-            return
-          }
+      })
 
-          // Normal OAuth login without MFA
-          localStorage.setItem('ca_token', data.token)
-          localStorage.setItem('ca_expiration', data.expire)
+      if (response.ok) {
+        const responseData = await response.json()
+
+        // Check if MFA is required for OAuth login
+        if (responseData.mfaRequired) {
+          setMfaSessionToken(responseData.sessionToken)
+          setMfaModalOpen(true)
+          return
+        }
+
+        // Use new auth system to handle token storage
+        if (responseData.token || responseData.access_token) {
+          const token = responseData.token || responseData.access_token
+          const expiry = responseData.expire || responseData.access_token_expiry
+
+          localStorage.setItem('token', token)
+          if (expiry) {
+            localStorage.setItem('token_expiry', expiry)
+          }
 
           // Refetch user profile after successful OAuth login
           queryClient.invalidateQueries(['userProfile'])
@@ -247,16 +215,21 @@ const LoginView = () => {
           } else {
             getUserProfileAndNavigateToHome()
           }
-        })
-      }
-      return response.json().then(() => {
+        }
+      } else {
         const providerName = provider === 'apple' ? 'Apple' : 'Google'
         showError({
           title: `${providerName} Login Failed`,
           message: `Couldn't log in with ${providerName}, please try again`,
         })
+      }
+    } catch (error) {
+      const providerName = provider === 'apple' ? 'Apple' : 'Google'
+      showError({
+        title: `${providerName} Login Error`,
+        message: 'Network error occurred, please try again',
       })
-    })
+    }
   }
   const getUserProfileAndNavigateToHome = () => {
     // Refetch user profile after login using React Query
@@ -273,8 +246,8 @@ const LoginView = () => {
   }
 
   const handleMFASuccess = data => {
-    localStorage.setItem('ca_token', data.token)
-    localStorage.setItem('ca_expiration', data.expire)
+    localStorage.setItem('token', data.token)
+    localStorage.setItem('token_expiry', data.expire)
     setMfaModalOpen(false)
     setMfaSessionToken('')
 

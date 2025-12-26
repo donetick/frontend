@@ -242,7 +242,7 @@ const ActivitiesCard = ({ title = 'Recent Activities' }) => {
 
   // Refresh function to refetch all data
   const handleRefresh = async () => {
-    await Promise.all([refetchChores(), refetchHistory(), refetchMembers()])
+    await Promise.all([refetchChores(), refetchHistory, refetchMembers])
   }
 
   // Show loading state

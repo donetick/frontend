@@ -4,7 +4,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useUserProfile } from '../queries/UserQueries'
 import { useAlerts } from '../service/AlertsProvider'
 import { useNotification } from '../service/NotificationProvider'
-import { apiManager, isTokenValid } from '../utils/TokenManager'
+import { apiClient } from '../utils/apiClient'
+import { useAuth } from './useAuth.jsx'
 const SSE_STATES = {
   CONNECTING: 0,
   OPEN: 1,
@@ -17,6 +18,7 @@ const CIRCUIT_BREAKER_RESET_TIME = 600000 // 10 minutes
 
 export const useSSE = () => {
   const { data: userProfile } = useUserProfile()
+  const { isAuthenticated, token } = useAuth()
   const [connectionState, setConnectionState] = useState(SSE_STATES.CLOSED)
   const [lastEvent, setLastEvent] = useState(null)
   const [error, setError] = useState(null)
@@ -34,14 +36,14 @@ export const useSSE = () => {
   const { showAlert } = useAlerts()
 
   const getSSEUrl = useCallback(() => {
-    const token = localStorage.getItem('ca_token')
-    if (!token || !isTokenValid()) {
+    const authToken = token
+    if (!authToken || !isAuthenticated) {
       console.log('SSE: No valid authentication token')
       return null
     }
 
     // Get the API URL from apiManager
-    const apiUrl = apiManager.getApiURL() // e.g., "http://localhost:8080/api/v1"
+    const apiUrl = apiClient.baseURL // e.g., "http://localhost:8080/api/v1"
 
     // Build SSE URL - let backend determine circle from authenticated user
     const sseUrl = `${apiUrl}/realtime/sse`
@@ -302,6 +304,7 @@ export const useSSE = () => {
           'Cache-Control': 'no-cache',
           Accept: 'text/event-stream',
         },
+        withCredentials: true,
         // Increase timeout to prevent premature disconnections
         // Default is 45000ms (45s), increasing to 2 minutes
         // TODO: send this in the resource object so it can be configured per instance
@@ -447,10 +450,10 @@ export const useSSE = () => {
     enabled => {
       console.log('SSE toggleSSEEnabled called:', {
         enabled,
-        isTokenValid: isTokenValid(),
+        isTokenValid: isAuthenticated,
       })
       localStorage.setItem('sse_enabled', enabled.toString())
-      if (enabled && isTokenValid()) {
+      if (enabled && isAuthenticated) {
         console.log('SSE toggleSSEEnabled: Calling connect()')
         connect()
       } else {
@@ -468,13 +471,13 @@ export const useSSE = () => {
   // Auto-connect when SSE is enabled and token is valid
   useEffect(() => {
     console.log('SSE auto-connect effect triggered')
-    console.log('Token valid:', isTokenValid())
+    console.log('Token valid:', isAuthenticated)
 
     // Check if SSE is enabled in settings
     const isSSEEnabledSetting = localStorage.getItem('sse_enabled') === 'true'
     console.log('SSE enabled in settings:', isSSEEnabledSetting)
 
-    if (isTokenValid() && isSSEEnabledSetting) {
+    if (isAuthenticated && isSSEEnabledSetting) {
       console.log('SSE: Conditions met, attempting to connect')
       connect()
     } else {
@@ -514,7 +517,7 @@ export const useSSE = () => {
         const isSSEEnabledSetting =
           localStorage.getItem('sse_enabled') === 'true'
         if (
-          isTokenValid() &&
+          isAuthenticated &&
           isSSEEnabledSetting &&
           connectionState !== SSE_STATES.OPEN
         ) {

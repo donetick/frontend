@@ -76,7 +76,7 @@ const UserProfileAvatar = () => {
   }
 
   const handleLogout = () => {
-    localStorage.removeItem('ca_token')
+    localStorage.removeItem('access_token')
     localStorage.removeItem('ca_expiration')
     window.location.href = '/login'
   }

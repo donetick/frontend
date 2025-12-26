@@ -1,4 +1,18 @@
-import { Fetch, HEADERS, apiManager } from './TokenManager'
+import { apiClient } from './apiClient'
+
+// Migration helpers to maintain compatibility with existing code
+const Fetch = async (endpoint, options = {}) => {
+  const response = await apiClient.request(endpoint, options)
+  return response
+}
+
+const HEADERS = () => {
+  return apiClient.getHeaders()
+}
+
+const apiManager = {
+  getApiURL: () => apiClient.baseURL,
+}
 
 const createChore = userID => {
   return Fetch(`/chores/`, {
@@ -547,12 +561,36 @@ const RedeemPoints = (userId, points, circleID) => {
     body: JSON.stringify({ points, userId }),
   })
 }
-const RefreshToken = () => {
+const RefreshToken = async () => {
   const basedURL = apiManager.getApiURL()
-  return fetch(`${basedURL}/auth/refresh`, {
-    method: 'GET',
-    headers: HEADERS(),
-  })
+
+  // Check if running on native platform
+  const isNative = typeof window !== 'undefined' && window.Capacitor?.isNativePlatform?.()
+
+  if (isNative) {
+    // For native platforms, send refresh token in request body
+    const { Preferences } = await import('@capacitor/preferences')
+    const { value: refreshToken } = await Preferences.get({ key: 'refresh_token' })
+
+    if (!refreshToken) {
+      throw new Error('No refresh token available')
+    }
+
+    return fetch(`${basedURL}/auth/refresh`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ refresh_token: refreshToken }),
+    })
+  } else {
+    // For web, continue using cookies
+    return fetch(`${basedURL}/auth/refresh`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: HEADERS(),
+    })
+  }
 }
 const GetChoresHistory = async (limit, includeMembers) => {
   var url = `/chores/history`
@@ -757,6 +795,7 @@ export {
   CreateBackup,
   CreateChildUser,
   CreateChore,
+  createChore,
   CreateLabel,
   CreateLongLiveToken,
   CreateThing,
@@ -777,10 +816,10 @@ export {
   GetChoreByID,
   GetChoreDetailById,
   GetChoreHistory,
-  GetChoreTimer,
   GetChores,
   GetChoresHistory,
   GetChoresNew,
+  GetChoreTimer,
   GetCircleMemberRequests,
   GetDeviceTokens,
   GetLabels,
@@ -795,6 +834,7 @@ export {
   GetUserProfile,
   JoinCircle,
   LeaveCircle,
+  login,
   MarkChoreComplete,
   NudgeChore,
   PauseChore,
@@ -811,6 +851,7 @@ export {
   SaveChore,
   SaveThing,
   SetupMFA,
+  signUp,
   SkipChore,
   StartChore,
   UnArchiveChore,
@@ -828,7 +869,4 @@ export {
   UpdateTimeSession,
   UpdateUserDetails,
   VerifyMFA,
-  createChore,
-  login,
-  signUp,
 }

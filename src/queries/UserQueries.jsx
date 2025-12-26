@@ -6,7 +6,17 @@ import {
   GetDeviceTokens,
   GetUserProfile,
 } from '../utils/Fetcher'
-import { isTokenValid } from '../utils/TokenManager'
+
+// Helper to check if we have a valid token
+const isTokenValid = () => {
+  const token = localStorage.getItem('token')
+  if (!token) return false
+
+  const expiry = localStorage.getItem('token_expiry')
+  if (!expiry) return true // No expiry set, assume valid
+
+  return new Date() < new Date(expiry)
+}
 
 export const useAllUsers = () => {
   return useQuery({
@@ -37,16 +47,16 @@ export const useUserProfile = () => {
     queryKey: ['userProfile'],
     queryFn: async () => {
       if (!isTokenValid()) {
-        return null // Token is invalid, return null to indicate no profile
+        throw new Error('Invalid or expired token, cannot fetch user profile')
       }
       const resp = await GetUserProfile()
       const result = await resp.json()
       // if we got 403 then user probably deleted their account and token is still valid. navigate to login
       if (resp.status === 403) {
-        localStorage.removeItem('ca_token')
+        localStorage.removeItem('access_token')
         localStorage.removeItem('ca_expiration')
         window.location.href = '/login'
-        return null
+        throw new Error('User account deleted or access forbidden')
       }
 
       return result.res // Return the actual user profile data
