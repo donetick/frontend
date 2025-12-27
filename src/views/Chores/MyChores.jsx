@@ -197,7 +197,7 @@ const MyChores = () => {
     if (
       !choresLoading &&
       !membersLoading &&
-      userProfile &&
+      userProfile?.id &&
       membersData?.res &&
       choresData?.res
     ) {
@@ -245,7 +245,7 @@ const MyChores = () => {
     isUserProfileLoading,
     choresData?.res,
     membersData?.res,
-    userProfile?.id,
+    // userProfile?.id, NOT HERE
     impersonatedUser?.userId,
     selectedChoreSection,
   ])
@@ -1506,6 +1506,7 @@ const MyChores = () => {
 
   if (
     isUserProfileLoading ||
+    userProfile === null ||
     userLabelsLoading ||
     membersLoading ||
     choresLoading
@@ -1569,25 +1570,6 @@ const MyChores = () => {
             }
           />
 
-          {/* {activeTextField != 'search' && (
-            <IconButton
-              variant='outlined'
-              color='neutral'
-              size='sm'
-              sx={{
-                height: 24,
-                borderRadius: 24,
-              }}
-              onClick={() => {
-                setActiveTextFieldWithCache('search')
-                setSearchInputFocus(searchInputFocus + 1)
-
-                searchInputRef?.current?.focus()
-              }}
-            >
-              <Search />
-            </IconButton>
-          )} */}
           <SortAndGrouping
             title='Group by'
             k={'icon-menu-group-by'}

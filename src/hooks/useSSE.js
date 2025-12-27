@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useUserProfile } from '../queries/UserQueries'
 import { useAlerts } from '../service/AlertsProvider'
 import { useNotification } from '../service/NotificationProvider'
-import { apiClient } from '../utils/apiClient'
+import { apiClient } from '../utils/apiClient.js'
 import { useAuth } from './useAuth.jsx'
 const SSE_STATES = {
   CONNECTING: 0,
@@ -38,7 +38,11 @@ export const useSSE = () => {
   const getSSEUrl = useCallback(() => {
     const authToken = token
     if (!authToken || !isAuthenticated) {
-      console.log('SSE: No valid authentication token')
+      console.log(
+        'SSE: No valid authentication token',
+        authToken,
+        isAuthenticated,
+      )
       return null
     }
 
@@ -67,6 +71,27 @@ export const useSSE = () => {
         // Handle different event types and update React Query cache accordingly
         switch (eventData.type) {
           case 'chore.created':
+            showNotification({
+              type: 'info',
+              title: 'New Task Created',
+              message: `${eventData.data.user.displayName} created "${eventData.data.chore.name}"`,
+              duration: 5000,
+            })
+            const newChore = eventData.data.chore
+
+            // Update individual chore cache
+            queryClient.setQueryData(['chore', newChore.id], {
+              res: newChore,
+            })
+
+            // Update chores list cache
+            queryClient.setQueryData(['chores', false], oldData => {
+              if (!oldData || !oldData.res) {
+                return { res: [newChore] }
+              }
+              return { res: [newChore, ...oldData.res] }
+            })
+            break
           case 'chore.updated':
           case 'chore.completed':
           case 'chore.status':
@@ -300,7 +325,7 @@ export const useSSE = () => {
       // TODO: use cookie-based once/if at all i move from local storage to httpOnly cookies.
       eventSourceRef.current = new EventSourcePolyfill(sseConfig.url, {
         headers: {
-          Authorization: `Bearer ${sseConfig.token}`,
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
           'Cache-Control': 'no-cache',
           Accept: 'text/event-stream',
         },
@@ -371,25 +396,68 @@ export const useSSE = () => {
 
       eventSourceRef.current.onmessage = handleSSEMessage
 
-      eventSourceRef.current.onerror = error => {
+      eventSourceRef.current.onerror = async error => {
         console.error('SSE error:', error)
         setConnectionState(SSE_STATES.CLOSED)
         stopHeartbeatMonitor()
 
         if (!isManuallyClosedRef.current) {
+          // Check if this is a 401 unauthorized error
+          const is401Error =
+            error.status === 401 ||
+            error.error?.message?.includes('401') ||
+            error.error?.message?.includes('Unauthorized')
+
           // Check if this is a timeout error specifically
           const isTimeoutError =
             error.error?.message?.includes('No activity within') ||
             error.error?.message?.includes('timeout')
 
-          if (isTimeoutError) {
+          if (is401Error) {
+            console.log('SSE 401 error detected, attempting token refresh...')
+            setError('Authentication expired - refreshing token...')
+
+            try {
+              const refreshResult = await apiClient.refreshToken()
+
+              if (refreshResult.success) {
+                console.log(
+                  'Token refreshed successfully, retrying SSE connection...',
+                )
+                setError('Token refreshed - reconnecting...')
+
+                // Reset reconnect attempts since we have a fresh token
+                reconnectAttemptsRef.current = 0
+
+                // Schedule immediate reconnect with fresh token
+                if (reconnectTimeoutRef.current) {
+                  clearTimeout(reconnectTimeoutRef.current)
+                }
+
+                reconnectTimeoutRef.current = setTimeout(() => {
+                  connect()
+                }, 1000) // Short delay to avoid rapid reconnection
+
+                return // Exit early, don't use exponential backoff for 401 errors
+              } else {
+                console.error('Token refresh failed:', refreshResult.error)
+                setError('Authentication failed - please log in again')
+                // Don't attempt reconnection if token refresh failed
+                return
+              }
+            } catch (refreshError) {
+              console.error('Token refresh error:', refreshError)
+              setError('Authentication error - please log in again')
+              return
+            }
+          } else if (isTimeoutError) {
             console.log('SSE timeout detected, attempting reconnection...')
             setError('Connection timeout - reconnecting...')
           } else {
             setError('Connection error occurred')
           }
 
-          // Schedule reconnect
+          // Schedule reconnect for non-401 errors
           if (reconnectTimeoutRef.current) {
             clearTimeout(reconnectTimeoutRef.current)
           }

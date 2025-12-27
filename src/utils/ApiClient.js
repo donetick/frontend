@@ -6,6 +6,51 @@ class ApiClient {
     this.baseURL = `${API_URL}/api/v1`
     this.isRefreshing = false
     this.failedQueue = []
+    this.lastRefreshTime = 0
+    this.refreshCooldown = 3 * 1000 // 3 seconds in milliseconds
+  }
+
+  async refreshToken() {
+    if (this.isRefreshing) {
+      return { success: false, error: 'Already refreshing' }
+    }
+
+    // Check cooldown
+    const now = Date.now()
+    if (now - this.lastRefreshTime < this.refreshCooldown) {
+      return { success: false, error: 'Refresh cooldown active' }
+    }
+
+    this.isRefreshing = true
+
+    try {
+      const refreshReq = await RefreshToken()
+
+      if (refreshReq.ok) {
+        const data = await refreshReq.json()
+        const newToken = data.token || data.access_token
+
+        // Update Local Storage
+        localStorage.setItem('token', newToken)
+        if (data.expire || data.access_token_expiry) {
+          localStorage.setItem(
+            'token_expiry',
+            data.expire || data.access_token_expiry,
+          )
+        }
+
+        // Update last refresh time
+        this.lastRefreshTime = Date.now()
+
+        return { success: true, token: newToken }
+      } else {
+        return { success: false, error: 'Refresh failed' }
+      }
+    } catch (error) {
+      return { success: false, error: error.message }
+    } finally {
+      this.isRefreshing = false
+    }
   }
 
   getToken() {
@@ -64,69 +109,58 @@ class ApiClient {
 
       // 2. Check for 401 (Unauthorized)
       if (response.status === 401) {
-        if (!this.isRefreshing) {
-          this.isRefreshing = true
-
-          try {
-            // Attempt to refresh token
-            const refreshReq = await RefreshToken()
-
-            if (refreshReq.ok) {
-              const data = await refreshReq.json()
-              const newToken = data.token || data.access_token
-
-              // Update Local Storage
-              localStorage.setItem('token', newToken)
-              if (data.expire || data.access_token_expiry) {
-                localStorage.setItem(
-                  'token_expiry',
-                  data.expire || data.access_token_expiry,
-                )
+        // Always queue this request first
+        const queuedPromise = new Promise((resolve, reject) => {
+          this.failedQueue.push({
+            resolve: async token => {
+              if (!token) {
+                reject(new Error('Token refresh failed'))
+                return
               }
-
-              // Process queue with success
-              this.processQueue(null, newToken)
-
-              // Retry the original request with new token
-              const newHeaders = this.getHeaders(options?.headers)
-              const retryConfig = {
-                ...config,
-                headers: newHeaders,
-              }
-
-              response = await fetch(url, retryConfig)
-
-              // If it fails again with 401, force logout
-              if (response.status === 401) {
-                this.handleLogout()
-                return null
-              }
-            } else {
-              // Refresh failed (e.g., refresh token expired)
-              this.processQueue(new Error('Token refresh failed'), null)
-              this.handleLogout()
-              return null
-            }
-          } finally {
-            this.isRefreshing = false
-          }
-        } else {
-          // Token is currently being refreshed, queue this request
-          return new Promise((resolve, reject) => {
-            this.failedQueue.push({
-              resolve: (token) => {
-                // Retry the original request with new token
+              try {
                 const newHeaders = this.getHeaders(options?.headers)
                 const retryConfig = {
                   ...config,
                   headers: newHeaders,
                 }
-                resolve(fetch(url, retryConfig))
-              },
-              reject
-            })
+                const retryResponse = await fetch(url, retryConfig)
+                resolve(retryResponse)
+              } catch (error) {
+                reject(error)
+              }
+            },
+            reject,
           })
+        })
+
+        // If already refreshing, just return the queued promise
+        if (this.isRefreshing) {
+          return queuedPromise
         }
+
+        // Check if we're within the refresh cooldown period
+        const now = Date.now()
+        if (now - this.lastRefreshTime < this.refreshCooldown) {
+          console.warn('Token refresh attempted too soon, forcing logout')
+          this.processQueue(new Error('Refresh cooldown active'), null)
+          this.handleLogout()
+          return null
+        }
+
+        const refreshResult = await this.refreshToken()
+
+        if (refreshResult.success) {
+          // Process queue with success - this will retry all queued requests
+          this.processQueue(null, refreshResult.token)
+        } else {
+          // Refresh failed
+          this.processQueue(new Error(refreshResult.error), null)
+          this.handleLogout()
+          return null
+        }
+
+        // Return the queued promise for this request
+        return queuedPromise
       }
 
       return response
