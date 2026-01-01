@@ -66,7 +66,12 @@ import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { usePauseChore, useStartChore } from '../../queries/TimeQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
-import { ChoreFilters, ChoresGrouper, ChoreSorter } from '../../utils/Chores'
+import {
+  ChoreFilters,
+  ChoresGrouper,
+  ChoreSorter,
+  filterByProject,
+} from '../../utils/Chores'
 import {
   ApproveChore,
   DeleteChore,
@@ -81,6 +86,7 @@ import { getSafeBottom } from '../../utils/SafeAreaUtils.js'
 import TaskInput from '../components/AddTaskModal'
 import CalendarDual from '../components/CalendarDual'
 import CalendarMonthly from '../components/CalendarMonthly.jsx'
+import { useProjects } from '../Projects/ProjectQueries.js'
 import {
   canScheduleNotification,
   scheduleChoreNotification,
@@ -135,6 +141,7 @@ const MyChores = () => {
   const Navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { data: userLabels, isLoading: userLabelsLoading } = useLabels()
+  const { data: projects = [], isLoading: projectsLoading } = useProjects()
   const {
     data: choresData,
     isLoading: choresLoading,
@@ -950,10 +957,26 @@ const MyChores = () => {
   useEffect(() => {
     const filter = searchParams.get('filter')
     const view = searchParams.get('view')
+    const projectId = searchParams.get('project')
 
     if (view === 'calendar') {
       setViewMode('calendar')
       setSearchFilter('All')
+      setSelectedCalendarDate(null)
+      return
+    }
+
+    if (projectId && chores.length > 0) {
+      const decodedProject = Number(projectId ? projectId : '')
+      // get the project name :
+      const project = projects.find(p => p.id === decodedProject)
+
+      const projectFiltered = filterByProject(chores, decodedProject)
+      console.log('Filtered chores:', projectFiltered.length)
+
+      setFilteredChores(projectFiltered)
+      setSearchFilter(`Project: ${project ? project.name : 'default'}`)
+      setViewMode('default')
       setSelectedCalendarDate(null)
       return
     }
@@ -1509,7 +1532,8 @@ const MyChores = () => {
     userProfile === null ||
     userLabelsLoading ||
     membersLoading ||
-    choresLoading
+    choresLoading ||
+    projectsLoading
   ) {
     return (
       <>
