@@ -18,6 +18,7 @@ const CIRCUIT_BREAKER_RESET_TIME = 600000 // 10 minutes
 
 export const useSSE = () => {
   const { data: userProfile } = useUserProfile()
+
   const { isAuthenticated, token } = useAuth()
   const [connectionState, setConnectionState] = useState(SSE_STATES.CLOSED)
   const [lastEvent, setLastEvent] = useState(null)
@@ -96,6 +97,8 @@ export const useSSE = () => {
           case 'chore.completed':
           case 'chore.status':
           case 'chore.skipped': {
+            console.log('userProfile: ', userProfile, eventData.data.user)
+
             if (eventData?.data?.user?.id !== userProfile?.id) {
               showNotification({
                 type: 'info',
@@ -253,7 +256,7 @@ export const useSSE = () => {
         return // Stop processing if JSON parsing fails
       }
     },
-    [queryClient, showNotification, showError],
+    [queryClient, showNotification, showError, userProfile],
   )
 
   const stopHeartbeatMonitor = useCallback(() => {
@@ -569,6 +572,14 @@ export const useSSE = () => {
       stopHeartbeatMonitor()
     }
   }, [stopHeartbeatMonitor])
+
+  // Update EventSource message handler when handleSSEMessage changes (e.g., when userProfile loads)
+  useEffect(() => {
+    if (eventSourceRef.current && eventSourceRef.current.readyState === SSE_STATES.OPEN) {
+      console.log('SSE: Updating message handler with latest userProfile')
+      eventSourceRef.current.onmessage = handleSSEMessage
+    }
+  }, [handleSSEMessage])
 
   // Handle visibility changes for better performance
   useEffect(() => {
