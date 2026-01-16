@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { useLocation } from 'react-router-dom'
-import { CSSTransition, TransitionGroup } from 'react-transition-group'
 import './PageTransition.css'
 
 // Route hierarchy for determining navigation direction
@@ -14,9 +14,11 @@ const routeHierarchy = {
   '/activities': 1,
   '/points': 1,
   '/labels': 1,
+  '/projects': 1,
   '/login': 0,
   '/signup': 1,
   '/landing': 0,
+  '/archived': 1,
 }
 
 const getRouteLevel = pathname => {
@@ -32,14 +34,21 @@ const getRouteLevel = pathname => {
   if (pathname.includes('/chores/') && pathname.includes('/history')) {
     return 3
   }
+  if (pathname.includes('/chores/') && pathname.includes('/timer')) {
+    return 3
+  }
   if (
     pathname.includes('/chores/') &&
     !pathname.includes('/edit') &&
-    !pathname.includes('/history')
+    !pathname.includes('/history') &&
+    !pathname.includes('/timer')
   ) {
     return 2
   }
   if (pathname.includes('/things/')) {
+    return 2
+  }
+  if (pathname.includes('/settings/')) {
     return 2
   }
 
@@ -49,55 +58,72 @@ const getRouteLevel = pathname => {
 
 const PageTransition = ({ children }) => {
   const location = useLocation()
-  const prevLocation = useRef(location)
-  const isNavigatingBack = useRef(false)
-  const nodeRef = useRef(null)
+  const prevLevel = useRef(0)
+  const [displayLocation, setDisplayLocation] = useState(location)
+  const isFirstRender = useRef(true)
 
-  useEffect(() => {
-    const currentLevel = getRouteLevel(location.pathname)
-    const previousLevel = getRouteLevel(prevLocation.current.pathname)
-
-    // Determine if we're navigating back (to a higher level in hierarchy)
-    // isNavigatingBack.current = currentLevel < previousLevel
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
-
-    prevLocation.current = location
-  }, [location])
-
-  const getTransitionClasses = () => {
-    if (
-      location.pathname.includes('/login') ||
-      location.pathname.includes('/signup') ||
-      location.pathname.includes('/landing')
-    ) {
-      return 'fade' // Use fade for auth pages
+  useLayoutEffect(() => {
+    // Skip transition on first render
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      setDisplayLocation(location)
+      prevLevel.current = getRouteLevel(location.pathname)
+      return
     }
 
-    return isNavigatingBack.current ? 'page-back' : 'page'
-  }
+    // Don't transition if location hasn't actually changed
+    if (location.pathname === displayLocation.pathname) {
+      return
+    }
+
+    const currentLevel = getRouteLevel(location.pathname)
+    const previousLevel = prevLevel.current
+
+    // Determine navigation direction
+    const isBack = currentLevel < previousLevel
+    const isFade =
+      location.pathname.includes('/login') ||
+      location.pathname.includes('/signup') ||
+      location.pathname.includes('/landing') ||
+      location.pathname.includes('/auth/')
+
+    // Apply transition type as data attribute for CSS
+    document.documentElement.dataset.transition = isFade
+      ? 'fade'
+      : isBack
+        ? 'back'
+        : 'forward'
+
+    // Trigger View Transition if supported
+    if (document.startViewTransition) {
+      document.startViewTransition(() => {
+        // flushSync forces React to update the DOM synchronously
+        // This ensures the View Transition captures the actual DOM change
+        flushSync(() => {
+          setDisplayLocation(location)
+        })
+        // Scroll to top after DOM update
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+      })
+    } else {
+      // Fallback for browsers without View Transitions API
+      setDisplayLocation(location)
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+    }
+
+    // Update refs
+    prevLevel.current = currentLevel
+  }, [location, displayLocation.pathname])
 
   return (
-    <TransitionGroup component={null}>
-      <CSSTransition
-        key={location.pathname}
-        classNames={getTransitionClasses()}
-        timeout={{
-          enter: 50,
-          exit: 50,
-        }}
-        nodeRef={nodeRef}
-      >
-        <div
-          ref={nodeRef}
-          className='page-wrapper'
-          style={{
-            paddingBottom: `var(--safe-area-inset-bottom, 0px)`,
-          }}
-        >
-          {children}
-        </div>
-      </CSSTransition>
-    </TransitionGroup>
+    <div
+      className='page-wrapper'
+      style={{
+        paddingBottom: `var(--safe-area-inset-bottom, 0px)`,
+      }}
+    >
+      {displayLocation.pathname === location.pathname ? children : null}
+    </div>
   )
 }
 
