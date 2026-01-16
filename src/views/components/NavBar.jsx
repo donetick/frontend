@@ -2,6 +2,7 @@ import { Capacitor } from '@capacitor/core'
 import {
   Archive,
   ArrowBack,
+  FolderOpen,
   History,
   Inbox,
   ListAlt,
@@ -55,6 +56,11 @@ const links = [
     icon: <ListAlt />,
   },
   {
+    to: 'projects',
+    label: 'Projects',
+    icon: <FolderOpen />,
+  },
+  {
     to: 'activities',
     label: 'Activities',
     icon: <History />,
@@ -87,8 +93,8 @@ const links = [
 ]
 
 import { SafeArea } from 'capacitor-plugin-safe-area'
-import { useAuth } from '../../hooks/useAuth.jsx'
 import Z_INDEX from '../../constants/zIndex'
+import { useAuth } from '../../hooks/useAuth.jsx'
 import { useResource } from '../../queries/ResourceQueries'
 
 const publicPages = ['/landing', '/privacy', '/terms']

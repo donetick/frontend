@@ -186,6 +186,14 @@ const RejectChore = id => {
   })
 }
 
+const UndoChoreAction = id => {
+  return Fetch(`/chores/${id}/undo`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify({}),
+  })
+}
+
 const NudgeChore = (id, { message, notifyAllAssignees }) => {
   return Fetch(`/chores/${id}/nudge`, {
     method: 'POST',
@@ -565,12 +573,15 @@ const RefreshToken = async () => {
   const basedURL = apiManager.getApiURL()
 
   // Check if running on native platform
-  const isNative = typeof window !== 'undefined' && window.Capacitor?.isNativePlatform?.()
+  const isNative =
+    typeof window !== 'undefined' && window.Capacitor?.isNativePlatform?.()
 
   if (isNative) {
     // For native platforms, send refresh token in request body
     const { Preferences } = await import('@capacitor/preferences')
-    const { value: refreshToken } = await Preferences.get({ key: 'refresh_token' })
+    const { value: refreshToken } = await Preferences.get({
+      key: 'refresh_token',
+    })
 
     if (!refreshToken) {
       throw new Error('No refresh token available')
@@ -782,6 +793,44 @@ const DeleteChildUser = childUserId => {
   })
 }
 
+// Project-related API functions
+const GetProjects = () => {
+  return Fetch(`/projects`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+}
+
+const GetProjectById = id => {
+  return Fetch(`/projects/${id}`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+}
+
+const CreateProject = project => {
+  return Fetch(`/projects`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify(project),
+  })
+}
+
+const UpdateProject = (id, project) => {
+  return Fetch(`/projects/${id}`, {
+    method: 'PUT',
+    headers: HEADERS(),
+    body: JSON.stringify(project),
+  })
+}
+
+const DeleteProject = id => {
+  return Fetch(`/projects/${id}`, {
+    method: 'DELETE',
+    headers: HEADERS(),
+  })
+}
+
 export {
   AcceptCircleMemberRequest,
   ApproveChore,
@@ -798,6 +847,7 @@ export {
   createChore,
   CreateLabel,
   CreateLongLiveToken,
+  CreateProject,
   CreateThing,
   DeleteChildUser,
   DeleteChore,
@@ -805,6 +855,7 @@ export {
   DeleteCircleMember,
   DeleteLabel,
   DeleteLongLiveToken,
+  DeleteProject,
   DeleteThing,
   DeleteTimeSession,
   DeleteUser,
@@ -825,6 +876,8 @@ export {
   GetLabels,
   GetLongLiveTokens,
   GetMFAStatus,
+  GetProjectById,
+  GetProjects,
   GetResource,
   GetStorageUsage,
   GetSubscriptionSession,
@@ -855,6 +908,7 @@ export {
   SkipChore,
   StartChore,
   UnArchiveChore,
+  UndoChoreAction,
   UnregisterDeviceToken,
   UpdateChildPassword,
   UpdateChoreAssignee,
@@ -865,6 +919,7 @@ export {
   UpdateMemberRole,
   UpdateNotificationTarget,
   UpdatePassword,
+  UpdateProject,
   UpdateThingState,
   UpdateTimeSession,
   UpdateUserDetails,

@@ -46,6 +46,10 @@ export const useUserProfile = () => {
   const { data, error, isLoading } = useQuery({
     queryKey: ['userProfile'],
     queryFn: async () => {
+      // the below code deleted because it cause issue when token expire and screen is off
+      // and then user comes back to the app after long time. the user profile fetch would fail
+      // and there is no retry for some reason. remove this seem to fix the issue.
+
       if (!isTokenValid()) {
         throw new Error('Invalid or expired token, cannot fetch user profile')
       }

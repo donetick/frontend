@@ -345,3 +345,25 @@ export const ChoreFilters = userId => ({
     return chore.createdBy && chore.createdBy === userId
   },
 })
+
+// Project filter function - separate from ChoreFilters since it's independent
+export const filterByProject = (chores, selectedProject) => {
+  if (
+    !selectedProject ||
+    selectedProject === 'Default Project' ||
+    selectedProject === 'default'
+  ) {
+    // Default project should show tasks without a project (projectId is null/undefined/empty)
+    // Based on ChoreEdit.jsx, default projects save projectId as null
+    return chores.filter(
+      chore =>
+        !chore.projectId || chore.projectId === null || chore.projectId === '',
+    )
+  }
+
+  // For custom projects, match by project ID
+  return chores.filter(chore => {
+    // Match by project ID (this should be the primary way chores are linked to projects)
+    return chore.projectId === selectedProject
+  })
+}
