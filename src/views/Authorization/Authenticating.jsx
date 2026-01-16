@@ -72,7 +72,7 @@ const AuthenticationLoading = () => {
         if (response.status === 200) {
           return response.json().then(data => {
             localStorage.setItem('token', data.token)
-            localStorage.setItem('ca_expiration', data.expire)
+            localStorage.setItem('token_expiry', data.expire)
 
             const redirectUrl = Cookies.get('ca_redirect')
             if (redirectUrl) {

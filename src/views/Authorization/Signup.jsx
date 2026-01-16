@@ -9,9 +9,9 @@ import {
   Sheet,
   Typography,
 } from '@mui/joy'
+import { useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useQueryClient } from '@tanstack/react-query'
 import Logo from '../../Logo'
 import { useNotification } from '../../service/NotificationProvider'
 import { login, signUp } from '../../utils/Fetcher'
@@ -32,12 +32,12 @@ const SignupView = () => {
     login(username, password).then(response => {
       if (response.status === 200) {
         response.json().then(res => {
-          localStorage.setItem('ca_token', res.token)
-          localStorage.setItem('ca_expiration', res.expire)
-          
+          localStorage.setItem('token', res.token)
+          localStorage.setItem('token_expiry', res.expire)
+
           // Invalidate user profile queries to ensure fresh data
           queryClient.invalidateQueries(['userProfile'])
-          
+
           Navigate('/chores')
         })
       } else {
@@ -246,7 +246,10 @@ const SignupView = () => {
           <FormControl error={displayNameError}>
             <FormHelperText>{displayNameError}</FormHelperText>
           </FormControl>
-          <Typography level='body2' sx={{ mt: 2, mb: 1, textAlign: 'center', color: 'text.secondary' }}>
+          <Typography
+            level='body2'
+            sx={{ mt: 2, mb: 1, textAlign: 'center', color: 'text.secondary' }}
+          >
             By signing up, you agree to our Terms of Service and Privacy Policy
           </Typography>
           <Button
@@ -272,7 +275,9 @@ const SignupView = () => {
             Login
           </Button>
 
-          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}>
+          <Box
+            sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}
+          >
             <Button
               variant='plain'
               size='sm'

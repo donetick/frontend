@@ -27,10 +27,11 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { LoginSocialGoogle } from 'reactjs-social-login'
 import { GOOGLE_CLIENT_ID, REDIRECT_URL } from '../../Config'
+import { useAuth } from '../../hooks/useAuth.jsx'
 import Logo from '../../Logo'
 import { useResource } from '../../queries/ResourceQueries'
+import { useUserProfile } from '../../queries/UserQueries.jsx'
 import { useNotification } from '../../service/NotificationProvider'
-import { useAuth } from '../../hooks/useAuth.jsx'
 import { apiClient } from '../../utils/apiClient'
 import { buildChildUsername, getUserDisplayInfo } from '../../utils/UserHelpers'
 import MFAVerificationModal from './MFAVerificationModal'
@@ -38,7 +39,8 @@ import MFAVerificationModal from './MFAVerificationModal'
 const LoginView = () => {
   // Use React Query client directly to invalidate the user profile query
   const queryClient = useQueryClient()
-  const [userProfile, setUserProfile] = useState(null)
+  // const [userProfile, setUserProfile] = useState(null)
+  const { data: userProfile } = useUserProfile()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [mfaModalOpen, setMfaModalOpen] = useState(false)
