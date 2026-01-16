@@ -28,6 +28,7 @@ import Landing from '../views/Landing/Landing'
 import PaymentCancelledView from '../views/Payments/PaymentFailView'
 import PaymentSuccessView from '../views/Payments/PaymentSuccessView'
 import PrivacyPolicyView from '../views/PrivacyPolicy/PrivacyPolicyView'
+import ProjectView from '../views/Projects/ProjectView'
 import APITokenSettings from '../views/Settings/APITokenSettings'
 import MFASettings from '../views/Settings/MFASettings'
 import NotificationSetting from '../views/Settings/NotificationSetting'
@@ -223,7 +224,10 @@ const Router = createBrowserRouter([
         path: 'labels/',
         element: <LabelView />,
       },
-
+      {
+        path: 'projects/',
+        element: <ProjectView />,
+      },
       {
         path: '*',
         element: <NotFound />,

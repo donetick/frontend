@@ -47,6 +47,8 @@ import { useLabels } from '../Labels/LabelQueries'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import LabelModal from '../Modals/Inputs/LabelModal'
 import RepeatSection from './RepeatSection'
+import { useProjects } from '../Projects/ProjectQueries'
+import { getIconComponent } from '../../utils/ProjectIcons'
 
 const ASSIGN_STRATEGIES = [
   'random',
@@ -89,9 +91,13 @@ const ChoreEdit = () => {
   const [isPrivate, setIsPrivate] = useState(false)
   const [subTasks, setSubTasks] = useState(null)
   const [completionWindow, setCompletionWindow] = useState(-1)
+  const [deadline, setDeadline] = useState(null)
+  const [deadlineOffset, setDeadlineOffset] = useState(-1)
+  const [deadlineUnit, setDeadlineUnit] = useState('hours')
   const [allUserThings, setAllUserThings] = useState([])
   const [thingTrigger, setThingTrigger] = useState(null)
   const [isThingValid, setIsThingValid] = useState(false)
+  const [projectId, setProjectId] = useState('default')
 
   const [notificationMetadata, setNotificationMetadata] = useState({})
 
@@ -110,6 +116,7 @@ const ChoreEdit = () => {
   const [showSaveAssigneeDefault, setShowSaveAssigneeDefault] = useState(false)
 
   const { data: userLabelsRaw, isLoading: isUserLabelsLoading } = useLabels()
+  const { data: projects = [], isLoading: isProjectsLoading } = useProjects()
   const updateChoreMutation = useUpdateChore()
   const createChoreMutation = useCreateChore()
   const archiveChore = useArchiveChore()
@@ -251,6 +258,7 @@ const ChoreEdit = () => {
         // if completionWindow is -1 then set it to null or dueDate is null
         completionWindow < 0 || dueDate === null ? null : completionWindow,
       priority: priority,
+      projectId: projectId === 'default' ? null : projectId,
     }
     let SaveFunction = createChoreMutation.mutateAsync
     if (newChoreId > 0) {
@@ -345,6 +353,7 @@ const ChoreEdit = () => {
       setIsRolling(data.res.isRolling)
       setIsActive(data.res.isActive)
       setSubTasks(data.res.subTasks ? data.res.subTasks : [])
+      setProjectId(data.res.projectId || 'default')
 
       if (isCloneMode) {
         if (data.res.subTasks) {
@@ -450,7 +459,8 @@ const ChoreEdit = () => {
     (isChoreLoading && choreId) ||
     isUserLabelsLoading ||
     isUserProfileLoading ||
-    isMemberDataLoading
+    isMemberDataLoading ||
+    isProjectsLoading
   ) {
     return <LoadingComponent />
   }
@@ -543,6 +553,52 @@ const ChoreEdit = () => {
             </Chip>
           </Box>
         </Box>
+
+        {/* Project Selection - Show only if there are multiple projects */}
+        {projects.length > 1 && (
+          <Box mb={3}>
+            <Typography level='h4'>Project</Typography>
+            <Typography level='body-md'>
+              Which project does this task belong to?
+            </Typography>
+            <Select
+              value={projectId}
+              onChange={(event, newValue) => setProjectId(newValue)}
+              sx={{ minWidth: '15rem' }}
+            >
+              {projects.map(project => (
+                <Option key={project.id} value={project.id}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    {project.icon &&
+                      (() => {
+                        const IconComponent = getIconComponent(project.icon)
+                        return (
+                          <IconComponent
+                            sx={{
+                              fontSize: 16,
+                              color: getTextColorFromBackgroundColor(
+                                project.color || '#1976d2',
+                              ),
+                            }}
+                          />
+                        )
+                      })()}
+                    <Box
+                      sx={{
+                        width: 12,
+                        height: 12,
+                        borderRadius: '50%',
+                        backgroundColor: project.color || '#1976d2',
+                        mr: 1,
+                      }}
+                    />
+                    {project.name}
+                  </Box>
+                </Option>
+              ))}
+            </Select>
+          </Box>
+        )}
 
         <Box mb={3}>
           <Typography level='h4'>Labels</Typography>
@@ -930,6 +986,113 @@ const ChoreEdit = () => {
                       setCompletionWindow(parseInt(e.target.value))
                     }}
                   />
+                </Box>
+              </Card>
+            )}
+          </Box>
+        )}
+
+        {dueDate && (
+          <Box mb={3}>
+            <Typography level='h4'>Deadline</Typography>
+            <Typography level='body-md'>
+              When should this task be considered expired?
+            </Typography>
+
+            {/* One-time tasks: Date picker */}
+            {['once', 'no_repeat'].includes(frequencyType) ? (
+              <FormControl sx={{ mt: 1 }}>
+                <Checkbox
+                  onChange={e => {
+                    if (e.target.checked) {
+                      // Set deadline to 24 hours after due date by default
+                      const deadlineDate = moment(dueDate).add(1, 'day').format('YYYY-MM-DDTHH:mm:00')
+                      setDeadline(deadlineDate)
+                    } else {
+                      setDeadline(null)
+                    }
+                  }}
+                  checked={deadline !== null}
+                  overlay
+                  label='Set a deadline for this task'
+                />
+                <FormHelperText>
+                  Task will be considered expired after this date
+                </FormHelperText>
+              </FormControl>
+            ) : (
+              /* Recurring tasks: Offset input */
+              <FormControl sx={{ mt: 1 }}>
+                <Checkbox
+                  onChange={e => {
+                    if (e.target.checked) {
+                      setDeadlineOffset(24) // Default to 24 hours
+                    } else {
+                      setDeadlineOffset(-1)
+                    }
+                  }}
+                  checked={deadlineOffset !== -1}
+                  overlay
+                  label='Set a deadline for this task'
+                />
+                <FormHelperText>
+                  Task will be considered expired after the specified time from due date
+                </FormHelperText>
+              </FormControl>
+            )}
+
+            {/* Date picker for one-time tasks */}
+            {deadline && ['once', 'no_repeat'].includes(frequencyType) && (
+              <Card variant='outlined' sx={{ mt: 2 }}>
+                <Box sx={{ p: 2 }}>
+                  <Typography level='body-sm' mb={1}>Deadline Date:</Typography>
+                  <Input
+                    type='datetime-local'
+                    value={deadline}
+                    onChange={e => setDeadline(e.target.value)}
+                    slotProps={{
+                      input: {
+                        min: dueDate, // Deadline cannot be before due date
+                      },
+                    }}
+                  />
+                </Box>
+              </Card>
+            )}
+
+            {/* Offset input for recurring tasks */}
+            {deadlineOffset !== -1 && !['once', 'no_repeat'].includes(frequencyType) && (
+              <Card variant='outlined' sx={{ mt: 2 }}>
+                <Box sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'end' }}>
+                  <Box>
+                    <Typography level='body-sm' mb={1}>Time after due date:</Typography>
+                    <Input
+                      type='number'
+                      value={deadlineOffset}
+                      sx={{ maxWidth: 100 }}
+                      slotProps={{
+                        input: {
+                          min: 1,
+                          max: 720, // Max 30 days in hours
+                        },
+                      }}
+                      placeholder='Time'
+                      onChange={e => {
+                        setDeadlineOffset(parseInt(e.target.value) || 1)
+                      }}
+                    />
+                  </Box>
+                  <Box>
+                    <Typography level='body-sm' mb={1}>Unit:</Typography>
+                    <Select
+                      value={deadlineUnit}
+                      onChange={(event, newValue) => setDeadlineUnit(newValue)}
+                      sx={{ minWidth: 100 }}
+                    >
+                      <Option value='hours'>Hours</Option>
+                      <Option value='days'>Days</Option>
+                    </Select>
+                  </Box>
                 </Box>
               </Card>
             )}

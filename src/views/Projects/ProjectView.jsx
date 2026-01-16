@@ -11,10 +11,12 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import ProjectModal from '../Modals/Inputs/ProjectModal'
 
 import { Add, FolderOpen, Task } from '@mui/icons-material'
 import { useQueryClient } from '@tanstack/react-query'
+import { useChores } from '../../queries/ChoreQueries'
 import { useUserProfile } from '../../queries/UserQueries'
 import LABEL_COLORS, {
   getTextColorFromBackgroundColor,
@@ -25,7 +27,15 @@ import { getSafeBottomStyles } from '../../utils/SafeAreaUtils'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import { useProjects } from './ProjectQueries'
 
-const ProjectCard = ({ project, onEditClick, onDeleteClick, currentUserId, taskCounts = {} }) => {
+const ProjectCard = ({
+  project,
+  onEditClick,
+  onDeleteClick,
+  isEditable = true,
+  currentUserId,
+  taskCounts = {},
+}) => {
+  const navigate = useNavigate()
   // Helper function to get color name from hex value
   const getColorName = hexValue => {
     const colorObj = LABEL_COLORS.find(
@@ -213,49 +223,30 @@ const ProjectCard = ({ project, onEditClick, onDeleteClick, currentUserId, taskC
         }}
       >
         {/* Action buttons underneath (revealed on swipe) */}
-        <Box
-          sx={{
-            position: 'absolute',
-            right: 0,
-            top: 0,
-            bottom: 0,
-            width: maxSwipeDistance,
-            display: 'flex',
-            alignItems: 'center',
-            boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.06)',
-            zIndex: 0,
-          }}
-          onMouseEnter={handleActionAreaMouseEnter}
-          onMouseLeave={handleActionAreaMouseLeave}
-        >
-          <IconButton
-            variant='soft'
-            color='neutral'
-            size='sm'
-            onClick={e => {
-              e.stopPropagation()
-              resetSwipe()
-              onEditClick(project)
-            }}
+        {isEditable && (
+          <Box
             sx={{
-              width: 40,
-              height: 40,
-              mx: 1,
+              position: 'absolute',
+              right: 0,
+              top: 0,
+              bottom: 0,
+              width: maxSwipeDistance,
+              display: 'flex',
+              alignItems: 'center',
+              boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.06)',
+              zIndex: 0,
             }}
+            onMouseEnter={handleActionAreaMouseEnter}
+            onMouseLeave={handleActionAreaMouseLeave}
           >
-            <EditIcon sx={{ fontSize: 16 }} />
-          </IconButton>
-
-          {/* Only show delete for non-default projects */}
-          {!isDefaultProject && (
             <IconButton
               variant='soft'
-              color='danger'
+              color='neutral'
               size='sm'
               onClick={e => {
                 e.stopPropagation()
                 resetSwipe()
-                onDeleteClick(project.id)
+                onEditClick(project)
               }}
               sx={{
                 width: 40,
@@ -263,10 +254,31 @@ const ProjectCard = ({ project, onEditClick, onDeleteClick, currentUserId, taskC
                 mx: 1,
               }}
             >
-              <DeleteIcon sx={{ fontSize: 16 }} />
+              <EditIcon sx={{ fontSize: 16 }} />
             </IconButton>
-          )}
-        </Box>
+
+            {/* Only show delete for non-default projects */}
+            {!isDefaultProject && (
+              <IconButton
+                variant='soft'
+                color='danger'
+                size='sm'
+                onClick={e => {
+                  e.stopPropagation()
+                  resetSwipe()
+                  onDeleteClick(project.id)
+                }}
+                sx={{
+                  width: 40,
+                  height: 40,
+                  mx: 1,
+                }}
+              >
+                <DeleteIcon sx={{ fontSize: 16 }} />
+              </IconButton>
+            )}
+          </Box>
+        )}
 
         {/* Main card content */}
         <Box
@@ -295,62 +307,68 @@ const ProjectCard = ({ project, onEditClick, onDeleteClick, currentUserId, taskC
               resetSwipe()
               return
             }
-            onEditClick(project)
+            // Always navigate to MyChores with project filter when clicking on the card
+            // For default project, use 'default', for others use project ID
+            const projectIdentifier =
+              project.id === 'default' ? 'default' : project.id
+            navigate(`/chores?project=${encodeURIComponent(projectIdentifier)}`)
           }}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
+          onTouchStart={isEditable ? handleTouchStart : undefined}
+          onTouchMove={isEditable ? handleTouchMove : undefined}
+          onTouchEnd={isEditable ? handleTouchEnd : undefined}
+          onMouseDown={isEditable ? handleMouseDown : undefined}
+          onMouseMove={isEditable ? handleMouseMove : undefined}
+          onMouseUp={isEditable ? handleMouseUp : undefined}
         >
           {/* Right drag area */}
-          <Box
-            sx={{
-              position: 'absolute',
-              right: 0,
-              top: 0,
-              bottom: 0,
-              width: '20px',
-              cursor: 'grab',
-              zIndex: 2,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              opacity: isSwipeRevealed ? 0 : 0.3,
-              transition: 'opacity 0.2s ease',
-              pointerEvents: isSwipeRevealed ? 'none' : 'auto',
-              '&:hover': {
-                opacity: isSwipeRevealed ? 0 : 0.7,
-              },
-              '&:active': {
-                cursor: 'grabbing',
-              },
-            }}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-          >
-            {/* Drag indicator dots */}
+          {isEditable && (
             <Box
               sx={{
+                position: 'absolute',
+                right: 0,
+                top: 0,
+                bottom: 0,
+                width: '20px',
+                cursor: 'grab',
+                zIndex: 2,
                 display: 'flex',
-                flexDirection: 'column',
-                gap: 0.25,
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: isSwipeRevealed ? 0 : 0.3,
+                transition: 'opacity 0.2s ease',
+                pointerEvents: isSwipeRevealed ? 'none' : 'auto',
+                '&:hover': {
+                  opacity: isSwipeRevealed ? 0 : 0.7,
+                },
+                '&:active': {
+                  cursor: 'grabbing',
+                },
               }}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
             >
-              {[...Array(3)].map((_, i) => (
-                <Box
-                  key={i}
-                  sx={{
-                    width: 3,
-                    height: 3,
-                    borderRadius: '50%',
-                    bgcolor: 'text.tertiary',
-                  }}
-                />
-              ))}
+              {/* Drag indicator dots */}
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 0.25,
+                }}
+              >
+                {[...Array(3)].map((_, i) => (
+                  <Box
+                    key={i}
+                    sx={{
+                      width: 3,
+                      height: 3,
+                      borderRadius: '50%',
+                      bgcolor: 'text.tertiary',
+                    }}
+                  />
+                ))}
+              </Box>
             </Box>
-          </Box>
+          )}
 
           {/* Project Avatar */}
           <Box
@@ -387,7 +405,9 @@ const ProjectCard = ({ project, onEditClick, onDeleteClick, currentUserId, taskC
                     <IconComponent
                       sx={{
                         fontSize: 16,
-                        color: getTextColorFromBackgroundColor(project.color || '#1976d2'),
+                        color: getTextColorFromBackgroundColor(
+                          project.color || '#1976d2',
+                        ),
                       }}
                     />
                   )
@@ -396,7 +416,9 @@ const ProjectCard = ({ project, onEditClick, onDeleteClick, currentUserId, taskC
                 <Typography
                   level='body-xs'
                   sx={{
-                    color: getTextColorFromBackgroundColor(project.color || '#1976d2'),
+                    color: getTextColorFromBackgroundColor(
+                      project.color || '#1976d2',
+                    ),
                     fontWeight: 'bold',
                     fontSize: 10,
                   }}
@@ -523,6 +545,7 @@ const ProjectCard = ({ project, onEditClick, onDeleteClick, currentUserId, taskC
 const ProjectView = () => {
   const { data: projects, isProjectsLoading, isError } = useProjects()
   const { data: userProfile } = useUserProfile()
+  const { data: chores = [] } = useChores(false) // false to exclude archived
 
   const [userProjects, setUserProjects] = useState([])
   const [modalOpen, setModalOpen] = useState(false)
@@ -567,20 +590,8 @@ const ProjectView = () => {
     })
   }
 
-  const handleSaveProject = newOrUpdatedProject => {
-    queryClient.invalidateQueries('projects')
+  const handleSaveProject = () => {
     setModalOpen(false)
-
-    if (currentProject) {
-      // Update existing project
-      const updatedProjects = userProjects.map(project =>
-        project.id === newOrUpdatedProject.id ? newOrUpdatedProject : project,
-      )
-      setUserProjects(updatedProjects)
-    } else {
-      // Add new project
-      setUserProjects([...userProjects, newOrUpdatedProject])
-    }
   }
 
   useEffect(() => {
@@ -589,15 +600,33 @@ const ProjectView = () => {
     }
   }, [projects])
 
-  // TODO: Get actual task counts from API
+  // Calculate real task counts from chores data
   useEffect(() => {
-    // Mock task counts for now
-    const mockCounts = {}
-    userProjects.forEach(project => {
-      mockCounts[project.id] = Math.floor(Math.random() * 20)
-    })
-    setTaskCounts(mockCounts)
-  }, [userProjects])
+    if (chores && chores.res && userProjects.length > 0) {
+      const choresList = chores.res
+      const realCounts = {}
+
+      userProjects.forEach(project => {
+        // Count chores for this project
+        const choreCount = choresList.filter(chore => {
+          // Handle default project (projectId is null, undefined, empty string, or 'default')
+          if (project.id === 'default') {
+            return (
+              !chore.projectId ||
+              chore.projectId === '' ||
+              chore.projectId === 'default'
+            )
+          }
+          // Handle custom projects - exact match with project ID
+          return chore.projectId === project.id
+        }).length
+
+        realCounts[project.id] = choreCount
+      })
+
+      setTaskCounts(realCounts)
+    }
+  }, [chores, userProjects])
 
   if (isProjectsLoading) {
     return (
@@ -642,21 +671,22 @@ const ProjectView = () => {
           overflow: 'hidden',
         }}
       >
-        {userProjects.length === 0 && (
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              flexDirection: 'column',
-              height: '50vh',
-            }}
-          >
-            <Typography level='title-md' gutterBottom>
-              No projects available. Add a new project to get started.
-            </Typography>
-          </Box>
-        )}
+        {/*  default project:  */}
+        <ProjectCard
+          key='default-project-card'
+          project={{
+            id: 'default',
+            name: 'Default Project',
+            description: 'All uncategorized tasks',
+            color: '#1976d2',
+            icon: 'FolderOpen',
+            created_by: userProfile?.id,
+          }}
+          isEditable={false}
+          currentUserId={userProfile?.id}
+          onEditClick={() => {}}
+          taskCounts={{ default: taskCounts.default || 0 }}
+        />
         {userProjects.map(project => (
           <ProjectCard
             key={project.id}
@@ -665,6 +695,7 @@ const ProjectView = () => {
             onDeleteClick={handleDeleteClicked}
             currentUserId={userProfile?.id}
             taskCounts={taskCounts}
+            isEditable={true}
           />
         ))}
       </Box>

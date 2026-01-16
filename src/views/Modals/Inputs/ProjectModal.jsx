@@ -4,8 +4,9 @@ import {
   Button,
   FormControl,
   FormLabel,
-  Grid,
   Input,
+  Option,
+  Select,
   Stack,
   Textarea,
   Typography,
@@ -15,8 +16,12 @@ import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import LABEL_COLORS, {
   getTextColorFromBackgroundColor,
 } from '../../../utils/Colors'
-import { CreateProject, UpdateProject } from '../../../utils/Fetcher'
 import PROJECT_ICONS, { getIconComponent } from '../../../utils/ProjectIcons'
+import {
+  useCreateProject,
+  useUpdateProject,
+} from '../../Projects/ProjectQueries'
+import IconPickerModal from './IconPickerModal'
 
 const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
   const { ResponsiveModal } = useResponsiveModal()
@@ -24,8 +29,11 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
   const [projectDescription, setProjectDescription] = useState('')
   const [projectColor, setProjectColor] = useState(LABEL_COLORS[0].value)
   const [projectIcon, setProjectIcon] = useState(PROJECT_ICONS[0].value)
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [isIconPickerOpen, setIsIconPickerOpen] = useState(false)
+
+  const createProjectMutation = useCreateProject()
+  const updateProjectMutation = useUpdateProject()
 
   // Initialize form when modal opens or project changes
   useEffect(() => {
@@ -44,11 +52,10 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
         setProjectIcon(PROJECT_ICONS[0].value)
       }
       setError('')
-      setIsSubmitting(false)
     }
   }, [isOpen, project])
 
-  const handleSubmit = async e => {
+  const handleSubmit = e => {
     e.preventDefault()
 
     if (!projectName.trim()) {
@@ -56,46 +63,59 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
       return
     }
 
-    setIsSubmitting(true)
     setError('')
 
-    try {
-      const projectData = {
-        name: projectName.trim(),
-        description: projectDescription.trim(),
-        color: projectColor,
-        icon: projectIcon,
-      }
+    const projectData = {
+      name: projectName.trim(),
+      description: projectDescription.trim(),
+      color: projectColor,
+      icon: projectIcon,
+    }
 
-      let response
-      if (project) {
-        // Update existing project
-        response = await UpdateProject(project.id, projectData)
-      } else {
-        // Create new project
-        response = await CreateProject(projectData)
-      }
-
-      if (response.ok) {
-        const savedProject = await response.json()
-        onSave(savedProject.res || savedProject)
-        onClose()
-      } else {
-        const errorData = await response.json()
-        setError(errorData.message || 'Failed to save project')
-      }
-    } catch (error) {
-      console.error('Error saving project:', error)
-      setError('An unexpected error occurred')
-    } finally {
-      setIsSubmitting(false)
+    if (project) {
+      // Update existing project
+      updateProjectMutation.mutate(
+        { projectId: project.id, projectData },
+        {
+          onSuccess: updatedProject => {
+            onSave(updatedProject)
+            onClose()
+          },
+          onError: error => {
+            console.error('Error updating project:', error)
+            setError('Failed to update project')
+          },
+        },
+      )
+    } else {
+      // Create new project
+      createProjectMutation.mutate(projectData, {
+        onSuccess: newProject => {
+          onSave(newProject)
+          onClose()
+        },
+        onError: error => {
+          console.error('Error creating project:', error)
+          setError('Failed to create project')
+        },
+      })
     }
   }
 
   const handleClose = () => {
-    if (!isSubmitting) {
+    const isLoading =
+      createProjectMutation.isPending || updateProjectMutation.isPending
+    if (!isLoading) {
       onClose()
     }
+  }
+
+  const isSubmitting =
+    createProjectMutation.isPending || updateProjectMutation.isPending
+
+  const handleIconSelect = iconValue => {
+    setProjectIcon(iconValue)
+    setIsIconPickerOpen(false)
   }
 
   return (
@@ -104,6 +124,7 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
       onClose={handleClose}
       size='md'
       unmountDelay={250}
+      fullWidth={true}
     >
       <Typography level='h4' mb={2}>
         {project ? 'Edit Project' : 'Create New Project'}
@@ -139,148 +160,82 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
           {/* Icon Selection */}
           <FormControl>
             <FormLabel>Project Icon</FormLabel>
-            <Typography level='body-sm' sx={{ mb: 1, color: 'text.tertiary' }}>
-              Choose an icon to represent your project
-            </Typography>
-            <Grid
-              container
-              spacing={1}
-              sx={{ maxHeight: '200px', overflowY: 'auto', mb: 2 }}
+            <Button
+              variant='outlined'
+              onClick={() => setIsIconPickerOpen(true)}
+              startDecorator={
+                <Avatar
+                  size='sm'
+                  sx={{
+                    width: 24,
+                    height: 24,
+                    bgcolor: projectColor,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    '& svg': {
+                      display: 'block',
+                      margin: '0 auto',
+                    },
+                  }}
+                >
+                  {(() => {
+                    const IconComponent = getIconComponent(projectIcon)
+                    return (
+                      <IconComponent
+                        sx={{
+                          fontSize: 14,
+                          color: getTextColorFromBackgroundColor(projectColor),
+                          display: 'block',
+                        }}
+                      />
+                    )
+                  })()}
+                </Avatar>
+              }
+              sx={{ justifyContent: 'flex-start' }}
             >
-              {PROJECT_ICONS.map(iconData => {
-                const IconComponent = iconData.icon
-                return (
-                  <Grid key={iconData.value} xs={3} sm={2}>
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        cursor: 'pointer',
-                        p: 1,
-                        borderRadius: 'sm',
-                        border: '2px solid',
-                        borderColor:
-                          projectIcon === iconData.value
-                            ? 'primary.500'
-                            : 'transparent',
-                        '&:hover': {
-                          borderColor:
-                            projectIcon === iconData.value
-                              ? 'primary.600'
-                              : 'neutral.300',
-                        },
-                        transition: 'border-color 0.2s',
-                      }}
-                      onClick={() => setProjectIcon(iconData.value)}
-                    >
-                      <Avatar
-                        size='sm'
-                        sx={{
-                          width: 24,
-                          height: 24,
-                          bgcolor: projectColor,
-                          mb: 0.5,
-                        }}
-                      >
-                        <IconComponent
-                          sx={{
-                            fontSize: 12,
-                            color:
-                              getTextColorFromBackgroundColor(projectColor),
-                          }}
-                        />
-                      </Avatar>
-                      <Typography
-                        level='body-xs'
-                        sx={{
-                          textAlign: 'center',
-                          fontSize: 9,
-                          lineHeight: 1,
-                        }}
-                      >
-                        {iconData.name}
-                      </Typography>
-                    </Box>
-                  </Grid>
-                )
-              })}
-            </Grid>
+              {PROJECT_ICONS.find(icon => icon.value === projectIcon)?.name ||
+                'Select Icon'}
+            </Button>
           </FormControl>
 
           {/* Color Selection */}
           <FormControl>
             <FormLabel>Project Color</FormLabel>
-            <Typography level='body-sm' sx={{ mb: 1, color: 'text.tertiary' }}>
-              Choose a color to help identify your project
-            </Typography>
-            <Grid
-              container
-              spacing={1}
-              sx={{ maxHeight: '200px', overflowY: 'auto' }}
+            <Select
+              value={projectColor}
+              onChange={(e, value) => value && setProjectColor(value)}
+              renderValue={selected => (
+                <Typography
+                  startDecorator={
+                    <Box
+                      className='size-4'
+                      borderRadius={10}
+                      sx={{ background: selected.value }}
+                    />
+                  }
+                >
+                  {selected.label}
+                </Typography>
+              )}
             >
               {LABEL_COLORS.map(color => (
-                <Grid key={color.value} xs={3} sm={2}>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      cursor: 'pointer',
-                      p: 1,
-                      borderRadius: 'sm',
-                      border: '2px solid',
-                      borderColor:
-                        projectColor === color.value
-                          ? 'primary.500'
-                          : 'transparent',
-                      '&:hover': {
-                        borderColor:
-                          projectColor === color.value
-                            ? 'primary.600'
-                            : 'neutral.300',
-                      },
-                      transition: 'border-color 0.2s',
-                    }}
-                    onClick={() => setProjectColor(color.value)}
-                  >
-                    <Avatar
-                      size='sm'
-                      sx={{
-                        width: 24,
-                        height: 24,
-                        bgcolor: color.value,
-                        mb: 0.5,
-                      }}
-                    >
-                      {(() => {
-                        const IconComponent = getIconComponent(projectIcon)
-                        return (
-                          <IconComponent
-                            sx={{
-                              fontSize: 12,
-                              color: getTextColorFromBackgroundColor(
-                                color.value,
-                              ),
-                            }}
-                          />
-                        )
-                      })()}
-                    </Avatar>
-                    <Typography
-                      level='body-xs'
-                      sx={{
-                        textAlign: 'center',
-                        fontSize: 9,
-                        lineHeight: 1,
-                      }}
-                    >
+                <Option key={color.value} value={color.value}>
+                  <Box className='flex items-center justify-between'>
+                    <Box
+                      width={20}
+                      height={20}
+                      borderRadius={10}
+                      sx={{ background: color.value }}
+                    />
+                    <Typography sx={{ ml: 1 }} variant='caption'>
                       {color.name}
                     </Typography>
                   </Box>
-                </Grid>
+                </Option>
               ))}
-            </Grid>
+            </Select>
           </FormControl>
 
           {/* Project Preview */}
@@ -304,6 +259,13 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
                   width: 32,
                   height: 32,
                   bgcolor: projectColor,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  '& svg': {
+                    display: 'block',
+                    margin: '0 auto',
+                  },
                 }}
               >
                 {(() => {
@@ -313,6 +275,7 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
                       sx={{
                         fontSize: 16,
                         color: getTextColorFromBackgroundColor(projectColor),
+                        display: 'block',
                       }}
                     />
                   )
@@ -360,6 +323,14 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
           </Button>
         </Box>
       </form>
+
+      <IconPickerModal
+        isOpen={isIconPickerOpen}
+        onClose={() => setIsIconPickerOpen(false)}
+        onSelect={handleIconSelect}
+        currentIcon={projectIcon}
+        projectColor={projectColor}
+      />
     </ResponsiveModal>
   )
 }

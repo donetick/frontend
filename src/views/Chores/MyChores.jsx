@@ -79,6 +79,7 @@ import {
   NudgeChore,
   RejectChore,
   SkipChore,
+  UndoChoreAction,
   UpdateChoreAssignee,
   UpdateDueDate,
 } from '../../utils/Fetcher'
@@ -86,6 +87,7 @@ import { getSafeBottom } from '../../utils/SafeAreaUtils.js'
 import TaskInput from '../components/AddTaskModal'
 import CalendarDual from '../components/CalendarDual'
 import CalendarMonthly from '../components/CalendarMonthly.jsx'
+import ProjectSelector from '../components/ProjectSelector'
 import { useProjects } from '../Projects/ProjectQueries.js'
 import {
   canScheduleNotification,
@@ -99,7 +101,7 @@ const MyChores = () => {
   const { data: userProfile, isLoading: isUserProfileLoading } =
     useUserProfile()
   const isLargeScreen = useMediaQuery(theme => theme.breakpoints.up('md'))
-  const { showSuccess, showError, showWarning } = useNotification()
+  const { showSuccess, showError, showWarning, showUndo } = useNotification()
   const queryClient = useQueryClient()
   const { impersonatedUser } = useImpersonateUser()
   const archiveChore = useArchiveChore()
@@ -110,6 +112,11 @@ const MyChores = () => {
   const [chores, setChores] = useState([])
   const [filteredChores, setFilteredChores] = useState([])
   const [searchFilter, setSearchFilter] = useState('All')
+  const [selectedProject, setSelectedProject] = useState(() => {
+    // Get saved project from localStorage, default to null
+    const saved = localStorage.getItem('selectedProject')
+    return saved ? JSON.parse(saved) : null
+  })
   const [choreSections, setChoreSections] = useState([])
 
   const [showSearchFilter, setShowSearchFilter] = useState(false)
@@ -142,6 +149,24 @@ const MyChores = () => {
   const [searchParams] = useSearchParams()
   const { data: userLabels, isLoading: userLabelsLoading } = useLabels()
   const { data: projects = [], isLoading: projectsLoading } = useProjects()
+
+  // Create a projects list that includes the default project for the ProjectSelector
+  const projectsWithDefault = useMemo(() => {
+    const defaultProject = {
+      id: 'default',
+      name: 'Default Project',
+      description: 'Your default project workspace',
+      color: '#1976d2',
+      icon: 'FolderOpen',
+    }
+
+    // Check if default project already exists in the list
+    const hasDefault = projects.some(
+      p => p.id === 'default' || p.name === 'Default Project',
+    )
+
+    return hasDefault ? projects : [defaultProject, ...projects]
+  }, [projects])
   const {
     data: choresData,
     isLoading: choresLoading,
@@ -179,13 +204,18 @@ const MyChores = () => {
   }, [choresData?.res, impersonatedUser])
 
   const processedSections = useMemo(() => {
-    if (!processedChores.length || !userProfile?.id) {
+    if (!chores.length || !userProfile?.id) {
       return []
     }
 
+    // Use project-filtered chores for section grouping
+    const choresToGroup = selectedProject
+      ? filterByProject(chores, selectedProject.id)
+      : chores
+
     const sections = ChoresGrouper(
       selectedChoreSection,
-      processedChores,
+      choresToGroup,
       ChoreFilters(impersonatedUser?.userId || userProfile?.id)[
         selectedChoreFilter
       ],
@@ -193,9 +223,10 @@ const MyChores = () => {
 
     return sections
   }, [
-    processedChores,
+    chores,
     selectedChoreSection,
     selectedChoreFilter,
+    selectedProject,
     impersonatedUser?.userId,
     userProfile?.id,
   ])
@@ -209,18 +240,12 @@ const MyChores = () => {
       choresData?.res
     ) {
       const processEffectAsync = async () => {
+        // Sync local state with query data to ensure updates are reflected
         setChores(processedChores)
         setFilteredChores(processedChores)
 
-        // Only update sections if they've actually changed
-        setChoreSections(prevSections => {
-          if (
-            JSON.stringify(prevSections) === JSON.stringify(processedSections)
-          ) {
-            return prevSections
-          }
-          return processedSections
-        })
+        // Don't set choreSections here - let the dedicated effect handle it
+        // This prevents caching issues when switching between projects
 
         if (localStorage.getItem('openChoreSections') === null) {
           setSelectedChoreSectionWithCache(selectedChoreSection)
@@ -252,17 +277,20 @@ const MyChores = () => {
     isUserProfileLoading,
     choresData?.res,
     membersData?.res,
-    // userProfile?.id, NOT HERE
+    processedChores, // Added to ensure local state syncs when query data updates
+    processedSections,
+    userProfile,
     impersonatedUser?.userId,
     selectedChoreSection,
   ])
 
   // Auto-update sections when processedSections changes
   useEffect(() => {
-    if (processedSections.length > 0) {
-      setChoreSections(processedSections)
+    // Always update choreSections to match processedSections, even if empty
+    setChoreSections(processedSections)
 
-      // Auto-open sections if needed - only check localStorage once
+    // Auto-open sections if needed - only check localStorage once
+    if (processedSections.length > 0) {
       const storedSections = localStorage.getItem('openChoreSections')
       if (storedSections === null) {
         const openSections = processedSections.reduce(
@@ -539,18 +567,57 @@ const MyChores = () => {
       ),
     )
 
-    // Show notification based on event type
+    // Invalidate query to ensure sync with server data
+    // This prevents data from getting stale after token refresh or background updates
+    queryClient.invalidateQueries({ queryKey: ['chores'] })
+
+    // Show notifications - handle undoable actions with undo button (only for single actions)
+    if (!isMultiSelectMode) {
+      const undoableActions = {
+        completed: 'Task completed',
+        approved: 'Task approved',
+        rejected: 'Task rejected',
+        skipped: 'Task skipped',
+      }
+
+      if (undoableActions[event]) {
+        showSuccess({
+          message: undoableActions[event],
+          undoAction: async () => {
+            try {
+              const undoResponse = await UndoChoreAction(updatedChore.id)
+              if (undoResponse.ok) {
+                refetchChores()
+                const undoMessages = {
+                  completed: 'Task completion has been undone.',
+                  approved: 'Task approval has been undone.',
+                  rejected: 'Task rejection has been undone.',
+                  skipped: 'Task skip has been undone.',
+                }
+                showUndo({
+                  title: 'Undo Successful',
+                  message: undoMessages[event],
+                })
+              } else {
+                console.log('Failed to undo', undoResponse)
+
+                throw new Error('Failed to undo')
+              }
+            } catch (error) {
+              showError({
+                title: 'Undo Failed',
+                message: 'Unable to undo the action. Please try again.',
+              })
+              console.log('Undo error:', error)
+            }
+          },
+        })
+        return // Exit early for undoable actions
+      }
+    }
+
+    // Regular notifications for non-undoable actions
     const notifications = {
-      completed: {
-        type: 'success',
-        title: 'Task Completed',
-        message: 'Great job! The task has been marked as completed.',
-      },
-      skipped: {
-        type: 'success',
-        title: 'Task Skipped',
-        message: 'The task has been moved to the next due date.',
-      },
       rescheduled: {
         type: 'success',
         title: 'Task Rescheduled',
@@ -580,16 +647,6 @@ const MyChores = () => {
         type: 'warning',
         title: 'Task Paused',
         message: 'The task has been paused.',
-      },
-      approved: {
-        type: 'success',
-        title: 'Task Approved',
-        message: 'The task has been approved.',
-      },
-      rejected: {
-        type: 'warning',
-        title: 'Task Rejected',
-        message: 'The task has been rejected.',
       },
       deleted: {
         type: 'success',
@@ -966,18 +1023,22 @@ const MyChores = () => {
       return
     }
 
-    if (projectId && chores.length > 0) {
-      const decodedProject = Number(projectId ? projectId : '')
-      // get the project name :
-      const project = projects.find(p => p.id === decodedProject)
+    if (projectId && chores.length > 0 && projectsWithDefault.length > 0) {
+      const decodedProjectId = decodeURIComponent(projectId)
+      let project = null
 
-      const projectFiltered = filterByProject(chores, decodedProject)
-      console.log('Filtered chores:', projectFiltered.length)
+      // Try to find project by ID first, then by name for backward compatibility
+      if (decodedProjectId === 'default') {
+        project = { id: 'default', name: 'Default Project' }
+      } else {
+        project = projectsWithDefault.find(
+          p => p.id === decodedProjectId || p.id === Number(decodedProjectId),
+        )
+      }
 
-      setFilteredChores(projectFiltered)
-      setSearchFilter(`Project: ${project ? project.name : 'default'}`)
-      setViewMode('default')
-      setSelectedCalendarDate(null)
+      if (project) {
+        setSelectedProjectWithCache(project)
+      }
       return
     }
 
@@ -1006,7 +1067,7 @@ const MyChores = () => {
       setSearchFilter(filterKey)
       setViewMode('default')
     }
-  }, [searchParams, chores])
+  }, [searchParams, chores, projectsWithDefault])
   const setSelectedChoreSectionWithCache = value => {
     setSelectedChoreSection(value)
     localStorage.setItem('selectedChoreSection', value)
@@ -1020,6 +1081,32 @@ const MyChores = () => {
     localStorage.setItem('selectedChoreFilter', value)
     // Clear selected calendar date when filters change
     setSelectedCalendarDate(null)
+  }
+
+  const setSelectedProjectWithCache = project => {
+    // Handle the case where project might be null (clearing selection)
+    const finalProject = project?.id === 'default' || !project ? null : project
+
+    setSelectedProject(finalProject)
+    console.log('final project', finalProject)
+
+    localStorage.setItem('selectedProject', JSON.stringify(finalProject))
+    setViewMode('default')
+    setSelectedCalendarDate(null)
+    // Clear other filters when project changes
+    setSearchFilter('All')
+
+    // Don't manually set filteredChores - let the memo handle it
+    // This ensures consistency between filteredChores and choreSections
+
+    // Update URL to reflect project selection
+    const newUrl = new URL(window.location)
+    if (finalProject && finalProject.id !== 'default') {
+      newUrl.searchParams.set('project', encodeURIComponent(finalProject.id))
+    } else {
+      newUrl.searchParams.delete('project')
+    }
+    window.history.replaceState({}, '', newUrl)
   }
 
   const toggleViewMode = () => {
@@ -1063,13 +1150,47 @@ const MyChores = () => {
     return result
   }
 
+  // First layer: Apply project filter to get base chores
+  // IMPORTANT: Use local 'chores' state instead of 'processedChores' to ensure
+  // updates via updateChoreInState are reflected in filtered results
+  const projectFilteredChores = useMemo(() => {
+    if (!selectedProject) {
+      return chores
+    }
+    return filterByProject(chores, selectedProject.id)
+  }, [chores, selectedProject])
+
+  // Second layer: Apply additional filters on top of project-filtered chores
   const getFilteredChores = useMemo(() => {
     let result = []
+    let baseChores = projectFilteredChores // Start with project-filtered chores
 
     if (searchTerm?.length > 0 || searchFilter !== 'All') {
-      result = filteredChores
+      // Apply search/label/priority filters to project-filtered chores
+      if (searchTerm?.length > 0) {
+        // For search, use fuse search on project-filtered chores
+        const projectFilteredForSearch = baseChores.map(c => ({
+          ...c,
+          raw_label: c.labelsV2?.map(l => l.name).join(' '),
+        }))
+        const fuse = new Fuse(projectFilteredForSearch, {
+          keys: ['name', 'raw_label'],
+          includeScore: true,
+          isCaseSensitive: false,
+          findAllMatches: true,
+        })
+        result = fuse
+          .search(searchTerm.toLowerCase())
+          .map(result => result.item)
+      } else {
+        result = filteredChores.filter(
+          chore =>
+            !selectedProject ||
+            filterByProject([chore], selectedProject).length > 0,
+        )
+      }
     } else {
-      let choresToFilter = chores
+      let choresToFilter = baseChores
 
       if (impersonatedUser) {
         choresToFilter = choresToFilter.filter(
@@ -1089,7 +1210,8 @@ const MyChores = () => {
     searchTerm,
     searchFilter,
     filteredChores,
-    chores,
+    projectFilteredChores,
+    selectedProject,
     impersonatedUser,
     userProfile?.id,
     selectedChoreFilter,
@@ -1152,9 +1274,12 @@ const MyChores = () => {
   }
 
   const handleLabelFiltering = chipClicked => {
+    // Start with project-filtered chores as base
+    const baseChores = selectedProject ? projectFilteredChores : chores
+
     if (chipClicked.label) {
       const label = chipClicked.label
-      const labelFiltered = [...chores].filter(chore =>
+      const labelFiltered = baseChores.filter(chore =>
         chore.labelsV2.some(
           l => l.id === label.id && l.created_by === label.created_by,
         ),
@@ -1163,7 +1288,7 @@ const MyChores = () => {
       setSearchFilter('Label: ' + label.name)
     } else if (chipClicked.priority) {
       const priority = chipClicked.priority
-      const priorityFiltered = chores.filter(
+      const priorityFiltered = baseChores.filter(
         chore => chore.priority === priority,
       )
       setFilteredChores(priorityFiltered)
@@ -1203,7 +1328,7 @@ const MyChores = () => {
     }
     const search = e.target.value
     if (search === '') {
-      setFilteredChores(chores)
+      setFilteredChores(selectedProject ? projectFilteredChores : chores)
       setSearchTerm('')
       // Clear selected calendar date when search changes
       setSelectedCalendarDate(null)
@@ -1212,13 +1337,28 @@ const MyChores = () => {
 
     const term = search.toLowerCase()
     setSearchTerm(term)
+
+    // Use project-filtered chores as base for search
+    const baseChores = selectedProject ? projectFilteredChores : chores
+    const searchableChores = baseChores.map(c => ({
+      ...c,
+      raw_label: c.labelsV2?.map(l => l.name).join(' '),
+    }))
+
+    const fuse = new Fuse(searchableChores, {
+      keys: ['name', 'raw_label'],
+      includeScore: true,
+      isCaseSensitive: false,
+      findAllMatches: true,
+    })
+
     setFilteredChores(fuse.search(term).map(result => result.item))
     // Clear selected calendar date when search changes
     setSelectedCalendarDate(null)
   }
   const handleSearchClose = () => {
     setSearchTerm('')
-    setFilteredChores(chores)
+    setFilteredChores(selectedProject ? projectFilteredChores : chores)
     // remove the focus from the search input:
     setSearchInputFocus(0)
     // Clear selected calendar date when search closes
@@ -1611,6 +1751,19 @@ const MyChores = () => {
             mouseClickHandler={handleMenuOutsideClick}
           />
 
+          {/* Project Selector - Show only if there are multiple projects */}
+          {projectsWithDefault.length > 1 && (
+            <ProjectSelector
+              selectedProject={selectedProject?.name || 'Default Project'}
+              onProjectSelect={project => {
+                setSelectedProjectWithCache(project)
+                // setFilteredChores(chores)
+                // setSearchFilter('All')
+              }}
+              showKeyboardShortcuts={showKeyboardShortcuts}
+            />
+          )}
+
           {/* View Mode Toggle Button */}
           <IconButton
             variant='outlined'
@@ -1748,10 +1901,13 @@ const MyChores = () => {
                       key={`filter-list-${filter}-${index}`}
                       onClick={() => {
                         const filterFunction = FILTERS[filter]
+                        const baseChores = selectedProject
+                          ? projectFilteredChores
+                          : chores
                         const filteredChores =
                           filterFunction.length === 2
-                            ? filterFunction(chores, userProfile?.id)
-                            : filterFunction(chores)
+                            ? filterFunction(baseChores, userProfile?.id)
+                            : filterFunction(baseChores)
                         setFilteredChores(filteredChores)
                         setSearchFilter(filter)
                         handleFilterMenuClose()
@@ -1761,9 +1917,15 @@ const MyChores = () => {
                       <Chip
                         color={searchFilter === filter ? 'primary' : 'neutral'}
                       >
-                        {FILTERS[filter].length === 2
-                          ? FILTERS[filter](chores, userProfile?.id).length
-                          : FILTERS[filter](chores).length}
+                        {(() => {
+                          const baseChores = selectedProject
+                            ? projectFilteredChores
+                            : chores
+                          return FILTERS[filter].length === 2
+                            ? FILTERS[filter](baseChores, userProfile?.id)
+                                .length
+                            : FILTERS[filter](baseChores).length
+                        })()}
                       </Chip>
                     </MenuItem>
                   ))}
@@ -1773,7 +1935,9 @@ const MyChores = () => {
                       <MenuItem
                         key={`filter-list-cancel-all-filters`}
                         onClick={() => {
-                          setFilteredChores(chores)
+                          setFilteredChores(
+                            selectedProject ? projectFilteredChores : chores,
+                          )
                           setSearchFilter('All')
                         }}
                       >
@@ -2091,6 +2255,7 @@ const MyChores = () => {
           </Box>
         </Box>
 
+        {/* Additional Filters Display */}
         {searchFilter !== 'All' && (
           <Chip
             level='title-md'
@@ -2098,19 +2263,26 @@ const MyChores = () => {
             color='warning'
             label={searchFilter}
             onDelete={() => {
-              setFilteredChores(chores)
+              setFilteredChores(
+                selectedProject ? projectFilteredChores : chores,
+              )
               setSearchFilter('All')
             }}
             endDecorator={<CancelRounded />}
             onClick={() => {
-              setFilteredChores(chores)
+              setFilteredChores(
+                selectedProject ? projectFilteredChores : chores,
+              )
               setSearchFilter('All')
             }}
           >
-            Current Filter: {searchFilter}
+            Additional Filter: {searchFilter}
           </Chip>
         )}
-        {filteredChores.length === 0 &&
+        {/* Show "Nothing scheduled" when appropriate based on current view mode */}
+        {(searchTerm?.length > 0 || searchFilter !== 'All'
+          ? filteredChores.length === 0
+          : projectFilteredChores.length === 0) &&
           // only if not in calendar view:
           viewMode !== 'calendar' && (
             <Box
@@ -2136,8 +2308,10 @@ const MyChores = () => {
                 <>
                   <Button
                     onClick={() => {
-                      setFilteredChores(chores)
+                      // Reset search and filters to show all chores in current project
+                      setSearchFilter('All')
                       setSearchTerm('')
+                      // Clear any manual filteredChores and let the memo handle it
                     }}
                     variant='outlined'
                     color='neutral'
@@ -2150,7 +2324,7 @@ const MyChores = () => {
           )}
         {(searchTerm?.length > 0 || searchFilter !== 'All') &&
           viewMode !== 'calendar' &&
-          filteredChores.map(chore =>
+          getFilteredChores.map(chore =>
             renderChoreCard(chore, `filtered-${chore.id}`),
           )}
         {viewMode === 'calendar' && (
