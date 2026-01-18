@@ -3,6 +3,7 @@ import {
   Api,
   ChevronRight,
   Circle,
+  Code,
   FamilyRestroom,
   Notifications,
   Palette,
@@ -114,6 +115,13 @@ const SettingsOverview = () => {
       description:
         'Configure webhooks, real-time updates, and other advanced features for enhanced productivity.',
       icon: <Settings />,
+    },
+    {
+      id: 'developer',
+      title: 'Developer Settings',
+      description:
+        'View technical information about authentication tokens, SSE connections, and debug data.',
+      icon: <Code />,
     },
   ]
 

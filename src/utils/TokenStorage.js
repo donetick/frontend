@@ -1,3 +1,4 @@
+import { Capacitor } from '@capacitor/core'
 import { Preferences } from '@capacitor/preferences'
 
 // Token storage keys
@@ -16,8 +17,7 @@ const isNativePlatform = () => {
   if (_isNativePlatform === null) {
     try {
       _isNativePlatform =
-        typeof window !== 'undefined' &&
-        window.Capacitor?.isNativePlatform?.()
+        typeof window !== 'undefined' && window.Capacitor?.isNativePlatform?.()
     } catch (error) {
       console.warn('Platform detection failed, defaulting to web:', error)
       _isNativePlatform = false
@@ -48,9 +48,11 @@ export const saveTokens = async ({
     if (accessTokenExpiry) {
       localStorage.setItem(TOKEN_KEYS.ACCESS_TOKEN_EXPIRY, accessTokenExpiry)
     }
-
-    // On native platforms, also save refresh tokens to Capacitor Preferences
-    if (isNativePlatform()) {
+    if (refreshTokenExpiry) {
+      localStorage.setItem(TOKEN_KEYS.REFRESH_TOKEN_EXPIRY, refreshTokenExpiry)
+    }
+    if (Capacitor.isNativePlatform()) {
+      // On native platforms, also save refresh tokens to Capacitor Preferences
       try {
         if (refreshToken) {
           await Preferences.set({

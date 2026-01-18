@@ -11,7 +11,7 @@ const HEADERS = () => {
 }
 
 const apiManager = {
-  getApiURL: () => apiClient.baseURL,
+  getApiURL: () => apiClient.getApiURL(),
 }
 
 const createChore = userID => {

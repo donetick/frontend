@@ -1,3 +1,4 @@
+import { Preferences } from '@capacitor/preferences'
 import { API_URL } from '../Config'
 import { logout, RefreshToken } from './Fetcher'
 import {
@@ -8,11 +9,36 @@ import {
 
 class ApiClient {
   constructor() {
-    this.baseURL = `${API_URL}/api/v1`
+    this.customServerURL = `${API_URL}/api/v1`
     this.isRefreshing = false
     this.failedQueue = []
     this.lastRefreshTime = 0
     this.refreshCooldown = 3 * 1000 // 3 seconds in milliseconds
+  }
+
+  async init() {
+    if (this.initPromise) {
+      return this.initPromise
+    }
+
+    if (this.initialized) {
+      return Promise.resolve()
+    }
+
+    this.initPromise = this._doInit()
+    return this.initPromise
+  }
+
+  async _doInit() {
+    const { value: serverURL } = await Preferences.get({
+      key: 'customServerUrl',
+    })
+
+    this.customServerURL = `${serverURL || API_URL}/api/v1`
+    this.initialized = true
+  }
+  getApiURL() {
+    return this.customServerURL
   }
 
   async refreshToken() {
@@ -106,13 +132,19 @@ class ApiClient {
 
   // Helper to avoid repeating cleanup code
   async handleLogout() {
-    logout().then(async () => {
-      await clearAllTokens()
-      if (window.location.pathname !== '/login') window.location.href = '/login'
-    }) // fire and forget
+    await clearAllTokens()
+    try {
+      await logout()
+    } catch (e) {
+      console.error('Error during logout', e)
+    }
+
+    if (window.location.pathname !== '/login') window.location.href = '/login'
+    // fire and forget
   }
   async request(endpoint, options = {}) {
-    const url = `${this.baseURL}${endpoint}`
+    await this.init()
+    const url = `${this.customServerURL}${endpoint}`
     const config = {
       // credentials: 'include',
       ...options,
@@ -151,25 +183,33 @@ class ApiClient {
 
         // If already refreshing, just return the queued promise
         if (this.isRefreshing) {
+          console.log('Token refresh already in progress, queueing request')
           return queuedPromise
         }
 
-        // Check if we're within the refresh cooldown period
-        const now = Date.now()
-        if (now - this.lastRefreshTime < this.refreshCooldown) {
-          console.warn('Token refresh attempted too soon, forcing logout')
-          this.processQueue(new Error('Refresh cooldown active'), null)
-          this.handleLogout()
-          return null
-        }
-
+        // Attempt to refresh the token
         const refreshResult = await this.refreshToken()
 
         if (refreshResult.success) {
           // Process queue with success - this will retry all queued requests
           this.processQueue(null, refreshResult.token)
+        } else if (refreshResult.error === 'Refresh cooldown active') {
+          // We're in cooldown - token was just refreshed, retry with current token
+          console.log('Refresh cooldown - retrying with current token')
+          const currentToken = this.getToken()
+          if (currentToken) {
+            this.processQueue(null, currentToken)
+          } else {
+            this.processQueue(new Error('No token available'), null)
+            this.handleLogout()
+            return null
+          }
+        } else if (refreshResult.error === 'Already refreshing') {
+          // This shouldn't happen since we check isRefreshing above, but handle it anyway
+          console.log('Already refreshing - waiting for refresh to complete')
+          return queuedPromise
         } else {
-          // Refresh failed
+          // Actual refresh failure - logout
           this.processQueue(new Error(refreshResult.error), null)
           this.handleLogout()
           return null
@@ -223,7 +263,7 @@ class ApiClient {
   }
 
   getAssetURL(path) {
-    return `${this.baseURL}/assets/${path}`
+    return `${this.customServerURL}/assets/${path}`
   }
 }
 

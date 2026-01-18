@@ -5,6 +5,7 @@ import AccountSettings from '@/views/Settings/AccountSettings'
 import AdvancedSettings from '@/views/Settings/AdvancedSettings'
 import ChildUserSettings from '@/views/Settings/ChildUserSettings'
 import CircleSettings from '@/views/Settings/CircleSettings'
+import DeveloperSettings from '@/views/Settings/DeveloperSettings'
 import Settings from '@/views/Settings/Settings'
 import SettingsOverview from '@/views/Settings/SettingsOverview'
 import SettingsRoutes from '@/views/Settings/SettingsRoutes'
@@ -116,6 +117,10 @@ const Router = createBrowserRouter([
           {
             path: 'advanced',
             element: <AdvancedSettings />,
+          },
+          {
+            path: 'developer',
+            element: <DeveloperSettings />,
           },
         ],
       },
