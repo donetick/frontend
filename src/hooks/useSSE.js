@@ -443,6 +443,13 @@ export const useSSE = () => {
 
                 return // Exit early, don't use exponential backoff for 401 errors
               } else {
+                // Check if refresh token expired
+                if (refreshResult.error === 'Refresh token expired') {
+                  console.error('Refresh token expired, user must login again')
+                  setError('Session expired - please log in again')
+                  return // Don't attempt reconnection
+                }
+
                 console.error('Token refresh failed:', refreshResult.error)
                 setError('Authentication failed - please log in again')
                 // Don't attempt reconnection if token refresh failed

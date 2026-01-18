@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { API_URL } from '../Config'
 import { apiClient } from '../utils/ApiClient'
+import { saveTokens, clearAllTokens } from '../utils/TokenStorage'
 
 const AuthContext = createContext(null)
 
@@ -28,14 +29,10 @@ export const AuthProvider = ({ children }) => {
     return new Date() >= new Date(expiry)
   }
 
-  const clearAuth = () => {
+  const clearAuth = async () => {
     setToken(null)
     setUser(null)
-    localStorage.removeItem('token')
-    localStorage.removeItem('token_expiry')
-    localStorage.removeItem('ca_token')
-    localStorage.removeItem('ca_expiration')
-    localStorage.removeItem('access_token')
+    await clearAllTokens()
   }
 
   const login = async credentials => {
@@ -58,14 +55,14 @@ export const AuthProvider = ({ children }) => {
 
       if (userToken) {
         setToken(userToken)
-        localStorage.setItem('token', userToken)
 
-        if (data.expire || data.access_token_expiry) {
-          localStorage.setItem(
-            'token_expiry',
-            data.expire || data.access_token_expiry,
-          )
-        }
+        // Use centralized token storage
+        await saveTokens({
+          accessToken: userToken,
+          accessTokenExpiry: data.expire || data.access_token_expiry,
+          refreshToken: data.refresh_token,
+          refreshTokenExpiry: data.refresh_token_expiry,
+        })
       }
 
       setIsLoading(false)
@@ -86,7 +83,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.warn('Logout API call failed:', error)
     } finally {
-      clearAuth()
+      await clearAuth()
       setIsLoading(false)
       navigate('/login')
     }
@@ -112,22 +109,21 @@ export const AuthProvider = ({ children }) => {
   }
 
   useEffect(() => {
-    const initAuth = async () => {
-      if (token && !isTokenExpired()) {
-        await fetchUser()
-      } else if (token && isTokenExpired()) {
-        // Token is expired, but don't refresh here
-        // Let the first API call handle refresh via ApiClient
-        // Just try to fetch user - if it fails, ApiClient will handle refresh
-        await fetchUser()
-      } else {
-        clearAuth()
-        navigate('/login')
-      }
-      setIsLoading(false)
-    }
-
-    initAuth()
+    // const initAuth = async () => {
+    //   if (token && !isTokenExpired()) {
+    //     await fetchUser()
+    //   } else if (token && isTokenExpired()) {
+    //     // Token is expired, but don't refresh here
+    //     // Let the first API call handle refresh via ApiClient
+    //     // Just try to fetch user - if it fails, ApiClient will handle refresh
+    //     await fetchUser()
+    //   } else {
+    //     clearAuth()
+    //     navigate('/login')
+    //   }
+    //   setIsLoading(false)
+    // }
+    // initAuth()
   }, [token, navigate])
 
   const value = {

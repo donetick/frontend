@@ -1,4 +1,5 @@
 import {
+  Archive,
   CalendarMonth,
   CancelScheduleSend,
   Check,
@@ -15,6 +16,7 @@ import {
   SwitchAccessShortcut,
   ThumbDown,
   ThumbUp,
+  Unarchive,
 } from '@mui/icons-material'
 import {
   Box,
@@ -60,6 +62,7 @@ import {
   MarkChoreComplete,
   RejectChore,
   SkipChore,
+  UnArchiveChore,
   UpdateChorePriority,
 } from '../../utils/Fetcher'
 import Priorities from '../../utils/Priorities'
@@ -354,6 +357,18 @@ const ChoreView = () => {
     })
   }
 
+  const handleUnarchiveChore = () => {
+    UnArchiveChore(choreId).then(response => {
+      if (response.ok) {
+        response.json().then(data => {
+          setChore({ ...chore, isActive: true })
+          // Invalidate chores cache to refetch data
+          queryClient.invalidateQueries(['chores'])
+        })
+      }
+    })
+  }
+
   // Check if the current user can approve/reject (admin, manager, or task owner)
   const canApproveReject = () => {
     if (!circleMembersData?.res || !chore) return false
@@ -408,6 +423,16 @@ const ChoreView = () => {
         >
           {chore.name}
         </Typography>
+        {chore.isActive === false && (
+          <Chip
+            startDecorator={<Archive />}
+            size='md'
+            color='warning'
+            sx={{ mb: 1 }}
+          >
+            Archived
+          </Chip>
+        )}
         <Chip startDecorator={<CalendarMonth />} size='md' sx={{ mb: 1 }}>
           {chore.nextDueDate
             ? `Due at ${moment(chore.nextDueDate).format('MM/DD/YYYY hh:mm A')}`
@@ -531,6 +556,7 @@ const ChoreView = () => {
         >
           <Dropdown>
             <MenuButton
+              disabled={chore.isActive === false}
               color={
                 chorePriority?.name === 'P1'
                   ? 'danger'
@@ -591,6 +617,7 @@ const ChoreView = () => {
             color='neutral'
             variant='plain'
             fullWidth
+            disabled={chore.isActive === false}
             onClick={() => {
               navigate(`/chores/${choreId}/history`)
             }}
@@ -609,6 +636,7 @@ const ChoreView = () => {
             color='neutral'
             variant='plain'
             fullWidth
+            disabled={chore.isActive === false}
             sx={{
               // top right of the card:
               flexDirection: 'column',
@@ -725,6 +753,7 @@ const ChoreView = () => {
           <Checkbox
             checked={note !== null}
             size='lg'
+            disabled={chore.isActive === false}
             onChange={e => {
               if (e.target.checked) {
                 setNote('')
@@ -764,6 +793,7 @@ const ChoreView = () => {
           <Checkbox
             checked={completedDate !== null}
             size='lg'
+            disabled={chore.isActive === false}
             onChange={e => {
               if (e.target.checked) {
                 setCompletedDate(
@@ -804,164 +834,188 @@ const ChoreView = () => {
           />
         )}
 
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 1,
-            alignContent: 'center',
-            justifyContent: 'center',
-          }}
-        >
+        {chore.isActive === false ? (
+          // Archived chore - only show unarchive button
           <Box
             sx={{
               display: 'flex',
-              flexDirection: 'row',
+              flexDirection: 'column',
               gap: 1,
               alignContent: 'center',
               justifyContent: 'center',
-              mb: 1,
             }}
           >
-            {chore.status === 3 ? (
-              // Pending approval: Show approve/reject for admins/managers/owners, grayed out button for others
-              canApproveReject() ? (
+            <Button
+              fullWidth
+              size='lg'
+              onClick={handleUnarchiveChore}
+              color='primary'
+              startDecorator={<Unarchive />}
+            >
+              Unarchive
+            </Button>
+          </Box>
+        ) : (
+          // Active chore - show all normal actions
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 1,
+              alignContent: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'row',
+                gap: 1,
+                alignContent: 'center',
+                justifyContent: 'center',
+                mb: 1,
+              }}
+            >
+              {chore.status === 3 ? (
+                // Pending approval: Show approve/reject for admins/managers/owners, grayed out button for others
+                canApproveReject() ? (
+                  <>
+                    <Button
+                      fullWidth
+                      size='lg'
+                      onClick={handleApproveChore}
+                      color='success'
+                      startDecorator={<ThumbUp />}
+                      sx={{
+                        flex: 1,
+                      }}
+                    >
+                      Approve
+                    </Button>
+                    <Button
+                      fullWidth
+                      size='lg'
+                      onClick={handleRejectChore}
+                      color='danger'
+                      startDecorator={<ThumbDown />}
+                      sx={{
+                        flex: 1,
+                      }}
+                    >
+                      <Box>Reject</Box>
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    fullWidth
+                    size='lg'
+                    disabled={true}
+                    color='neutral'
+                    startDecorator={<HourglassEmpty />}
+                  >
+                    <Box>Pending Approval</Box>
+                  </Button>
+                )
+              ) : (
+                // Normal completion flow
                 <>
                   <Button
                     fullWidth
                     size='lg'
-                    onClick={handleApproveChore}
-                    color='success'
-                    startDecorator={<ThumbUp />}
+                    onClick={handleTaskCompletion}
+                    disabled={
+                      isPendingCompletion ||
+                      notInCompletionWindow(chore) ||
+                      (chore.lastCompletedDate !== null &&
+                        chore.frequencyType === 'once')
+                    }
+                    color={isPendingCompletion ? 'danger' : 'success'}
+                    startDecorator={<Check />}
                     sx={{
-                      flex: 1,
+                      flex: 4,
                     }}
                   >
-                    Approve
+                    <Box>Mark as done</Box>
                   </Button>
+
                   <Button
                     fullWidth
                     size='lg'
-                    onClick={handleRejectChore}
-                    color='danger'
-                    startDecorator={<ThumbDown />}
+                    onClick={() => {
+                      setConfirmModelConfig({
+                        isOpen: true,
+                        title: 'Skip Task',
+
+                        message: 'Are you sure you want to skip this task?',
+
+                        confirmText: 'Skip',
+                        cancelText: 'Cancel',
+                        onClose: confirmed => {
+                          if (confirmed) {
+                            handleSkippingTask()
+                          }
+                          setConfirmModelConfig({})
+                        },
+                      })
+                    }}
+                    disabled={
+                      chore.lastCompletedDate !== null &&
+                      chore.frequencyType === 'once'
+                    }
+                    startDecorator={<SwitchAccessShortcut />}
                     sx={{
                       flex: 1,
                     }}
                   >
-                    <Box>Reject</Box>
+                    <Box>Skip</Box>
                   </Button>
                 </>
-              ) : (
-                <Button
-                  fullWidth
-                  size='lg'
-                  disabled={true}
-                  color='neutral'
-                  startDecorator={<HourglassEmpty />}
-                >
-                  <Box>Pending Approval</Box>
-                </Button>
-              )
+              )}
+            </Box>
+            {/* Timer Button - Show split button when timer is active, regular button otherwise */}
+            {[ChoreStatus.ACTIVE, ChoreStatus.PAUSED].includes(chore.status) ? (
+              <TimerSplitButton
+                disabled={
+                  chore.lastCompletedDate !== null &&
+                  chore.frequencyType === 'once'
+                }
+                chore={chore}
+                onAction={action => {
+                  if (action === 'pause') {
+                    handleChorePause()
+                  } else if (action === 'resume') {
+                    handleChoreStart()
+                  }
+                }}
+                onShowDetails={() => navigate(`/chores/${choreId}/timer`)}
+                onResetTimer={handleResetTimer}
+                onClearAllTime={handleClearAllTime}
+                fullWidth
+              />
+            ) : chore.status === ChoreStatus.PENDING_APPROVAL ? (
+              <></>
             ) : (
-              // Normal completion flow
-              <>
-                <Button
-                  fullWidth
-                  size='lg'
-                  onClick={handleTaskCompletion}
-                  disabled={
-                    isPendingCompletion ||
-                    notInCompletionWindow(chore) ||
-                    (chore.lastCompletedDate !== null &&
-                      chore.frequencyType === 'once')
-                  }
-                  color={isPendingCompletion ? 'danger' : 'success'}
-                  startDecorator={<Check />}
-                  sx={{
-                    flex: 4,
-                  }}
-                >
-                  <Box>Mark as done</Box>
-                </Button>
-
-                <Button
-                  fullWidth
-                  size='lg'
-                  onClick={() => {
-                    setConfirmModelConfig({
-                      isOpen: true,
-                      title: 'Skip Task',
-
-                      message: 'Are you sure you want to skip this task?',
-
-                      confirmText: 'Skip',
-                      cancelText: 'Cancel',
-                      onClose: confirmed => {
-                        if (confirmed) {
-                          handleSkippingTask()
-                        }
-                        setConfirmModelConfig({})
-                      },
-                    })
-                  }}
-                  disabled={
-                    chore.lastCompletedDate !== null &&
-                    chore.frequencyType === 'once'
-                  }
-                  startDecorator={<SwitchAccessShortcut />}
-                  sx={{
-                    flex: 1,
-                  }}
-                >
-                  <Box>Skip</Box>
-                </Button>
-              </>
+              <Button
+                size='lg'
+                onClick={() => {
+                  handleChoreStart()
+                }}
+                variant='soft'
+                color='success'
+                disabled={
+                  chore.lastCompletedDate !== null &&
+                  chore.frequencyType === 'once'
+                }
+                startDecorator={<PlayArrow />}
+                sx={{
+                  flex: 1,
+                }}
+              >
+                Start
+              </Button>
             )}
           </Box>
-          {/* Timer Button - Show split button when timer is active, regular button otherwise */}
-          {[ChoreStatus.ACTIVE, ChoreStatus.PAUSED].includes(chore.status) ? (
-            <TimerSplitButton
-              disabled={
-                chore.lastCompletedDate !== null &&
-                chore.frequencyType === 'once'
-              }
-              chore={chore}
-              onAction={action => {
-                if (action === 'pause') {
-                  handleChorePause()
-                } else if (action === 'resume') {
-                  handleChoreStart()
-                }
-              }}
-              onShowDetails={() => navigate(`/chores/${choreId}/timer`)}
-              onResetTimer={handleResetTimer}
-              onClearAllTime={handleClearAllTime}
-              fullWidth
-            />
-          ) : chore.status === ChoreStatus.PENDING_APPROVAL ? (
-            <></>
-          ) : (
-            <Button
-              size='lg'
-              onClick={() => {
-                handleChoreStart()
-              }}
-              variant='soft'
-              color='success'
-              disabled={
-                chore.lastCompletedDate !== null &&
-                chore.frequencyType === 'once'
-              }
-              startDecorator={<PlayArrow />}
-              sx={{
-                flex: 1,
-              }}
-            >
-              Start
-            </Button>
-          )}
-        </Box>
+        )}
 
         <Snackbar
           open={isPendingCompletion}

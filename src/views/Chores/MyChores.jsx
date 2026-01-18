@@ -209,9 +209,16 @@ const MyChores = () => {
     }
 
     // Use project-filtered chores for section grouping
-    const choresToGroup = selectedProject
-      ? filterByProject(chores, selectedProject.id)
-      : chores
+    let choresToGroup = chores
+    if (selectedProject) {
+      if (selectedProject.id === 'default') {
+        // Default project: only show tasks without a projectId
+        choresToGroup = chores.filter(chore => !chore.projectId)
+      } else {
+        // Other projects: use the existing filter function
+        choresToGroup = filterByProject(chores, selectedProject.id)
+      }
+    }
 
     const sections = ChoresGrouper(
       selectedChoreSection,
@@ -1084,8 +1091,8 @@ const MyChores = () => {
   }
 
   const setSelectedProjectWithCache = project => {
-    // Handle the case where project might be null (clearing selection)
-    const finalProject = project?.id === 'default' || !project ? null : project
+    // Keep the project as-is, including the default project object
+    const finalProject = project || null
 
     setSelectedProject(finalProject)
     console.log('final project', finalProject)
@@ -1157,6 +1164,13 @@ const MyChores = () => {
     if (!selectedProject) {
       return chores
     }
+
+    // Special case: Default project shows only tasks without a projectId
+    if (selectedProject.id === 'default') {
+      return chores.filter(chore => !chore.projectId)
+    }
+
+    // Other projects: use the existing filter function
     return filterByProject(chores, selectedProject.id)
   }, [chores, selectedProject])
 
@@ -1183,11 +1197,17 @@ const MyChores = () => {
           .search(searchTerm.toLowerCase())
           .map(result => result.item)
       } else {
-        result = filteredChores.filter(
-          chore =>
-            !selectedProject ||
-            filterByProject([chore], selectedProject).length > 0,
-        )
+        result = filteredChores.filter(chore => {
+          if (!selectedProject) return true
+
+          // Default project: only show tasks without projectId
+          if (selectedProject.id === 'default') {
+            return !chore.projectId
+          }
+
+          // Other projects: use existing filter
+          return filterByProject([chore], selectedProject.id).length > 0
+        })
       }
     } else {
       let choresToFilter = baseChores

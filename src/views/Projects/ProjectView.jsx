@@ -413,18 +413,7 @@ const ProjectCard = ({
                   )
                 })()
               ) : (
-                <Typography
-                  level='body-xs'
-                  sx={{
-                    color: getTextColorFromBackgroundColor(
-                      project.color || '#1976d2',
-                    ),
-                    fontWeight: 'bold',
-                    fontSize: 10,
-                  }}
-                >
-                  {project.name.charAt(0).toUpperCase()}
-                </Typography>
+                <></>
               )}
             </Avatar>
           </Box>
@@ -545,7 +534,7 @@ const ProjectCard = ({
 const ProjectView = () => {
   const { data: projects, isProjectsLoading, isError } = useProjects()
   const { data: userProfile } = useUserProfile()
-  const { data: chores = [] } = useChores(false) // false to exclude archived
+  const { data: chores = { res: [] } } = useChores(false) // false to exclude archived
 
   const [userProjects, setUserProjects] = useState([])
   const [modalOpen, setModalOpen] = useState(false)
@@ -602,23 +591,27 @@ const ProjectView = () => {
 
   // Calculate real task counts from chores data
   useEffect(() => {
-    if (chores && chores.res && userProjects.length > 0) {
+    if (chores && chores.res) {
       const choresList = chores.res
       const realCounts = {}
 
+      // First, count tasks for the default project (tasks without a projectId)
+      const defaultProjectCount = choresList.filter(chore => {
+        const choreProjectId = chore.projectId || chore.project_id
+        return (
+          !choreProjectId ||
+          choreProjectId === '' ||
+          choreProjectId === 'default' ||
+          choreProjectId === null
+        )
+      }).length
+      realCounts['default'] = defaultProjectCount
+
+      // Then count tasks for each user project
       userProjects.forEach(project => {
-        // Count chores for this project
         const choreCount = choresList.filter(chore => {
-          // Handle default project (projectId is null, undefined, empty string, or 'default')
-          if (project.id === 'default') {
-            return (
-              !chore.projectId ||
-              chore.projectId === '' ||
-              chore.projectId === 'default'
-            )
-          }
-          // Handle custom projects - exact match with project ID
-          return chore.projectId === project.id
+          const choreProjectId = chore.projectId || chore.project_id
+          return choreProjectId === project.id
         }).length
 
         realCounts[project.id] = choreCount

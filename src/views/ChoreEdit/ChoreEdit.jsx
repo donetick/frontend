@@ -1,5 +1,6 @@
 import { Add, HorizontalRule, Save } from '@mui/icons-material'
 import {
+  Avatar,
   Box,
   Button,
   Card,
@@ -24,6 +25,7 @@ import {
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import NotificationTemplate from '../../components/NotificationTemplate.jsx'
 import {
   useArchiveChore,
@@ -39,6 +41,7 @@ import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import { GetAllCircleMembers, GetThings } from '../../utils/Fetcher'
 import { isPlusAccount } from '../../utils/Helpers'
 import Priorities from '../../utils/Priorities.jsx'
+import { getIconComponent } from '../../utils/ProjectIcons'
 import { getSafeBottomPadding } from '../../utils/SafeAreaUtils.js'
 import LoadingComponent from '../components/Loading.jsx'
 import RichTextEditor from '../components/RichTextEditor.jsx'
@@ -46,9 +49,8 @@ import SubTasks from '../components/SubTask.jsx'
 import { useLabels } from '../Labels/LabelQueries'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import LabelModal from '../Modals/Inputs/LabelModal'
-import RepeatSection from './RepeatSection'
 import { useProjects } from '../Projects/ProjectQueries'
-import { getIconComponent } from '../../utils/ProjectIcons'
+import RepeatSection from './RepeatSection'
 
 const ASSIGN_STRATEGIES = [
   'random',
@@ -79,6 +81,9 @@ const ChoreEdit = () => {
   const [performers, setPerformers] = useState([])
   const [assignStrategy, setAssignStrategy] = useState(ASSIGN_STRATEGIES[2])
   const [dueDate, setDueDate] = useState(null)
+  const [dueDateOnly, setDueDateOnly] = useState(null)
+  const [dueTime, setDueTime] = useState(null)
+  const [useCustomTime, setUseCustomTime] = useState(false)
   const [assignedTo, setAssignedTo] = useState(-1)
   const [frequencyType, setFrequencyType] = useState('once')
   const [frequency, setFrequency] = useState(1)
@@ -114,6 +119,7 @@ const ChoreEdit = () => {
   const [showSaveNotificationDefault, setShowSaveNotificationDefault] =
     useState(false)
   const [showSaveAssigneeDefault, setShowSaveAssigneeDefault] = useState(false)
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
 
   const { data: userLabelsRaw, isLoading: isUserLabelsLoading } = useLabels()
   const { data: projects = [], isLoading: isProjectsLoading } = useProjects()
@@ -219,7 +225,88 @@ const ChoreEdit = () => {
   }
 
   const handleDueDateChange = e => {
-    setDueDate(e.target.value)
+    const dateValue = e.target.value // YYYY-MM-DD format
+    setDueDateOnly(dateValue)
+
+    // Combine date with time or end of day
+    if (useCustomTime && dueTime) {
+      // Use the custom time
+      const combinedDateTime = moment(`${dateValue}T${dueTime}`).format(
+        'YYYY-MM-DDTHH:mm:00',
+      )
+      setDueDate(combinedDateTime)
+
+      // Update frequencyMetadata.time for REPEAT_ON_TYPE frequencies
+      if (REPEAT_ON_TYPE.includes(frequencyType)) {
+        setFrequencyMetadata({
+          ...frequencyMetadata,
+          time: moment(`${dateValue}T${dueTime}`).format(),
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        })
+      }
+    } else {
+      // Default to end of day (23:59:59) in user's timezone
+      const endOfDay = moment(dateValue)
+        .endOf('day')
+        .format('YYYY-MM-DDTHH:mm:00')
+      setDueDate(endOfDay)
+    }
+  }
+
+  const handleDueTimeChange = e => {
+    const timeValue = e.target.value // HH:mm format
+    setDueTime(timeValue)
+
+    if (dueDateOnly) {
+      // Combine date with the selected time
+      const combinedDateTime = moment(`${dueDateOnly}T${timeValue}`).format(
+        'YYYY-MM-DDTHH:mm:00',
+      )
+      setDueDate(combinedDateTime)
+
+      // Update frequencyMetadata.time for REPEAT_ON_TYPE frequencies
+      if (REPEAT_ON_TYPE.includes(frequencyType)) {
+        setFrequencyMetadata({
+          ...frequencyMetadata,
+          time: moment(`${dueDateOnly}T${timeValue}`).format(),
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        })
+      }
+    }
+  }
+
+  const handleUseCustomTimeChange = checked => {
+    setUseCustomTime(checked)
+
+    if (checked) {
+      // Initialize with current time or default to 18:00
+      const defaultTime = dueTime || '18:00'
+      setDueTime(defaultTime)
+
+      if (dueDateOnly) {
+        const combinedDateTime = moment(`${dueDateOnly}T${defaultTime}`).format(
+          'YYYY-MM-DDTHH:mm:00',
+        )
+        setDueDate(combinedDateTime)
+
+        // Update frequencyMetadata.time for REPEAT_ON_TYPE frequencies
+        if (REPEAT_ON_TYPE.includes(frequencyType)) {
+          setFrequencyMetadata({
+            ...frequencyMetadata,
+            time: moment(`${dueDateOnly}T${defaultTime}`).format(),
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          })
+        }
+      }
+    } else {
+      // Revert to end of day
+      if (dueDateOnly) {
+        const endOfDay = moment(dueDateOnly)
+          .endOf('day')
+          .format('YYYY-MM-DDTHH:mm:00')
+        setDueDate(endOfDay)
+      }
+    }
   }
   const HandleSaveChore = () => {
     setAttemptToSave(true)
@@ -317,6 +404,47 @@ const ChoreEdit = () => {
       }
     }
   }, [])
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = event => {
+      const isHoldingCmd = event.ctrlKey || event.metaKey
+
+      // Show keyboard shortcuts when holding Cmd/Ctrl
+      if (isHoldingCmd) {
+        setShowKeyboardShortcuts(true)
+      }
+
+      // Cmd/Ctrl + Enter to save
+      if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+        event.preventDefault()
+        HandleSaveChore()
+        return
+      }
+
+      // Cmd/Ctrl + Escape key to cancel
+      if (event.key === 'Escape' && (event.ctrlKey || event.metaKey)) {
+        event.preventDefault()
+        window.history.back()
+        return
+      }
+    }
+
+    const handleKeyUp = event => {
+      if (event.key === 'Control' || event.key === 'Meta') {
+        setShowKeyboardShortcuts(false)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('keyup', handleKeyUp)
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('keyup', handleKeyUp)
+    }
+  }, [HandleSaveChore])
+
   useEffect(() => {
     if (isChoreLoading === false && choreData && choreId) {
       const data = choreData
@@ -373,11 +501,32 @@ const ChoreEdit = () => {
 
       setIsNotificable(data.res.notification)
       setThingTrigger(data.res.thingChore)
-      setDueDate(
-        data.res.nextDueDate
-          ? moment(data.res.nextDueDate).format('YYYY-MM-DDTHH:mm:00')
-          : null,
-      )
+
+      // Parse existing due date into date and time components
+      if (data.res.nextDueDate) {
+        const dueDateMoment = moment(data.res.nextDueDate)
+        const dateOnly = dueDateMoment.format('YYYY-MM-DD')
+        const timeOnly = dueDateMoment.format('HH:mm')
+        const endOfDayTime = '23:59'
+
+        setDueDateOnly(dateOnly)
+        setDueDate(dueDateMoment.format('YYYY-MM-DDTHH:mm:00'))
+
+        // Check if it's a custom time (not end of day)
+        if (timeOnly !== endOfDayTime) {
+          setUseCustomTime(true)
+          setDueTime(timeOnly)
+        } else {
+          setUseCustomTime(false)
+          setDueTime(null)
+        }
+      } else {
+        setDueDateOnly(null)
+        setDueDate(null)
+        setUseCustomTime(false)
+        setDueTime(null)
+      }
+
       setCreatedBy(data.res.createdBy)
       setUpdatedBy(data.res.updatedBy)
     }
@@ -392,12 +541,20 @@ const ChoreEdit = () => {
   // }, [userLabels, labelsV2])
 
   useEffect(() => {
-    // if frequency type change to somthing need a due date then set it to the current date:
+    // if frequency type change to something need a due date then set it to the current date:
     if (!NO_DUE_DATE_REQUIRED_TYPE.includes(frequencyType) && !dueDate) {
-      setDueDate(moment(new Date()).format('YYYY-MM-DDTHH:mm:00'))
+      const today = moment(new Date()).format('YYYY-MM-DD')
+      setDueDateOnly(today)
+      // Default to end of day
+      setDueDate(moment(today).endOf('day').format('YYYY-MM-DDTHH:mm:00'))
+      setUseCustomTime(false)
+      setDueTime(null)
     }
     if (NO_DUE_DATE_ALLOWED_TYPE.includes(frequencyType)) {
       setDueDate(null)
+      setDueDateOnly(null)
+      setUseCustomTime(false)
+      setDueTime(null)
     }
   }, [frequencyType])
 
@@ -555,7 +712,7 @@ const ChoreEdit = () => {
         </Box>
 
         {/* Project Selection - Show only if there are multiple projects */}
-        {projects.length > 1 && (
+        {projects.length >= 1 && (
           <Box mb={3}>
             <Typography level='h4'>Project</Typography>
             <Typography level='body-md'>
@@ -564,34 +721,68 @@ const ChoreEdit = () => {
             <Select
               value={projectId}
               onChange={(event, newValue) => setProjectId(newValue)}
+              defaultValue='default'
               sx={{ minWidth: '15rem' }}
             >
+              {/*               id: 'default',
+              name: 'Default Project',
+              color: LABEL_COLORS[0].value,
+              icon: 'FolderOpen',
+               */}
+              <Option key='default' value='default'>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Avatar
+                    size='sm'
+                    sx={{
+                      width: 24,
+                      height: 24,
+                      bgcolor: '#1976d2',
+                    }}
+                  >
+                    {(() => {
+                      const IconComponent = getIconComponent('FolderOpen')
+                      return (
+                        <IconComponent
+                          sx={{
+                            fontSize: 14,
+                            color: getTextColorFromBackgroundColor('#1976d2'),
+                          }}
+                        />
+                      )
+                    })()}
+                  </Avatar>
+                  Default Project
+                </Box>
+              </Option>
               {projects.map(project => (
                 <Option key={project.id} value={project.id}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    {project.icon &&
-                      (() => {
-                        const IconComponent = getIconComponent(project.icon)
-                        return (
-                          <IconComponent
-                            sx={{
-                              fontSize: 16,
-                              color: getTextColorFromBackgroundColor(
-                                project.color || '#1976d2',
-                              ),
-                            }}
-                          />
-                        )
-                      })()}
-                    <Box
+                    <Avatar
+                      size='sm'
                       sx={{
-                        width: 12,
-                        height: 12,
-                        borderRadius: '50%',
-                        backgroundColor: project.color || '#1976d2',
-                        mr: 1,
+                        width: 24,
+                        height: 24,
+                        bgcolor: project.color || '#1976d2',
                       }}
-                    />
+                    >
+                      {project.icon ? (
+                        (() => {
+                          const IconComponent = getIconComponent(project.icon)
+                          return (
+                            <IconComponent
+                              sx={{
+                                fontSize: 14,
+                                color: getTextColorFromBackgroundColor(
+                                  project.color || '#1976d2',
+                                ),
+                              }}
+                            />
+                          )
+                        })()
+                      ) : (
+                        <></>
+                      )}
+                    </Avatar>
                     {project.name}
                   </Box>
                 </Option>
@@ -901,9 +1092,18 @@ const ChoreEdit = () => {
               <Checkbox
                 onChange={e => {
                   if (e.target.checked) {
-                    setDueDate(moment(new Date()).format('YYYY-MM-DDTHH:mm:00'))
+                    const today = moment(new Date()).format('YYYY-MM-DD')
+                    setDueDateOnly(today)
+                    setDueDate(
+                      moment(today).endOf('day').format('YYYY-MM-DDTHH:mm:00'),
+                    )
+                    setUseCustomTime(false)
+                    setDueTime(null)
                   } else {
                     setDueDate(null)
+                    setDueDateOnly(null)
+                    setUseCustomTime(false)
+                    setDueTime(null)
                   }
                 }}
                 defaultChecked={dueDate !== null}
@@ -917,19 +1117,50 @@ const ChoreEdit = () => {
             </FormControl>
           )}
           {dueDate && (
-            <FormControl error={Boolean(errors.dueDate)}>
-              <Typography level='body-md'>
-                {REPEAT_ON_TYPE.includes(frequencyType)
-                  ? 'When does this task start?'
-                  : 'When is the next first time this task is due?'}
-              </Typography>
-              <Input
-                type='datetime-local'
-                value={dueDate}
-                onChange={handleDueDateChange}
-              />
-              <FormHelperText>{errors.dueDate}</FormHelperText>
-            </FormControl>
+            <>
+              <FormControl error={Boolean(errors.dueDate)} sx={{ mt: 2 }}>
+                <Typography level='body-md'>
+                  {REPEAT_ON_TYPE.includes(frequencyType)
+                    ? 'When does this task start?'
+                    : 'When is the next first time this task is due?'}
+                </Typography>
+                <Input
+                  type='date'
+                  value={dueDateOnly || ''}
+                  onChange={handleDueDateChange}
+                />
+                <FormHelperText>{errors.dueDate}</FormHelperText>
+              </FormControl>
+
+              {/* Optional time picker */}
+              <FormControl sx={{ mt: 2 }}>
+                <Checkbox
+                  checked={useCustomTime}
+                  onChange={e => handleUseCustomTimeChange(e.target.checked)}
+                  overlay
+                  label='Set a specific time'
+                />
+                <FormHelperText>
+                  {useCustomTime
+                    ? 'Task will be due at the specified time'
+                    : 'Task will be due at the end of the day (11:59 PM)'}
+                </FormHelperText>
+              </FormControl>
+
+              {useCustomTime && (
+                <Box sx={{ mt: 2, ml: 4 }}>
+                  <Typography level='body-sm' mb={1}>
+                    Time:
+                  </Typography>
+                  <Input
+                    type='time'
+                    value={dueTime || '18:00'}
+                    onChange={handleDueTimeChange}
+                    sx={{ maxWidth: 200 }}
+                  />
+                </Box>
+              )}
+            </>
           )}
         </Box>
 
@@ -1006,7 +1237,9 @@ const ChoreEdit = () => {
                   onChange={e => {
                     if (e.target.checked) {
                       // Set deadline to 24 hours after due date by default
-                      const deadlineDate = moment(dueDate).add(1, 'day').format('YYYY-MM-DDTHH:mm:00')
+                      const deadlineDate = moment(dueDate)
+                        .add(1, 'day')
+                        .format('YYYY-MM-DDTHH:mm:00')
                       setDeadline(deadlineDate)
                     } else {
                       setDeadline(null)
@@ -1036,7 +1269,8 @@ const ChoreEdit = () => {
                   label='Set a deadline for this task'
                 />
                 <FormHelperText>
-                  Task will be considered expired after the specified time from due date
+                  Task will be considered expired after the specified time from
+                  due date
                 </FormHelperText>
               </FormControl>
             )}
@@ -1045,7 +1279,9 @@ const ChoreEdit = () => {
             {deadline && ['once', 'no_repeat'].includes(frequencyType) && (
               <Card variant='outlined' sx={{ mt: 2 }}>
                 <Box sx={{ p: 2 }}>
-                  <Typography level='body-sm' mb={1}>Deadline Date:</Typography>
+                  <Typography level='body-sm' mb={1}>
+                    Deadline Date:
+                  </Typography>
                   <Input
                     type='datetime-local'
                     value={deadline}
@@ -1061,41 +1297,50 @@ const ChoreEdit = () => {
             )}
 
             {/* Offset input for recurring tasks */}
-            {deadlineOffset !== -1 && !['once', 'no_repeat'].includes(frequencyType) && (
-              <Card variant='outlined' sx={{ mt: 2 }}>
-                <Box sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'end' }}>
-                  <Box>
-                    <Typography level='body-sm' mb={1}>Time after due date:</Typography>
-                    <Input
-                      type='number'
-                      value={deadlineOffset}
-                      sx={{ maxWidth: 100 }}
-                      slotProps={{
-                        input: {
-                          min: 1,
-                          max: 720, // Max 30 days in hours
-                        },
-                      }}
-                      placeholder='Time'
-                      onChange={e => {
-                        setDeadlineOffset(parseInt(e.target.value) || 1)
-                      }}
-                    />
+            {deadlineOffset !== -1 &&
+              !['once', 'no_repeat'].includes(frequencyType) && (
+                <Card variant='outlined' sx={{ mt: 2 }}>
+                  <Box
+                    sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'end' }}
+                  >
+                    <Box>
+                      <Typography level='body-sm' mb={1}>
+                        Time after due date:
+                      </Typography>
+                      <Input
+                        type='number'
+                        value={deadlineOffset}
+                        sx={{ maxWidth: 100 }}
+                        slotProps={{
+                          input: {
+                            min: 1,
+                            max: 720, // Max 30 days in hours
+                          },
+                        }}
+                        placeholder='Time'
+                        onChange={e => {
+                          setDeadlineOffset(parseInt(e.target.value) || 1)
+                        }}
+                      />
+                    </Box>
+                    <Box>
+                      <Typography level='body-sm' mb={1}>
+                        Unit:
+                      </Typography>
+                      <Select
+                        value={deadlineUnit}
+                        onChange={(event, newValue) =>
+                          setDeadlineUnit(newValue)
+                        }
+                        sx={{ minWidth: 100 }}
+                      >
+                        <Option value='hours'>Hours</Option>
+                        <Option value='days'>Days</Option>
+                      </Select>
+                    </Box>
                   </Box>
-                  <Box>
-                    <Typography level='body-sm' mb={1}>Unit:</Typography>
-                    <Select
-                      value={deadlineUnit}
-                      onChange={(event, newValue) => setDeadlineUnit(newValue)}
-                      sx={{ minWidth: 100 }}
-                    >
-                      <Option value='hours'>Hours</Option>
-                      <Option value='days'>Days</Option>
-                    </Select>
-                  </Box>
-                </Box>
-              </Card>
-            )}
+                </Card>
+              )}
           </Box>
         )}
 
@@ -1502,9 +1747,15 @@ const ChoreEdit = () => {
           }}
         >
           Cancel
+          {showKeyboardShortcuts && (
+            <KeyboardShortcutHint shortcut='Esc' sx={{ ml: 1 }} />
+          )}
         </Button>
         <Button color='primary' variant='solid' onClick={HandleSaveChore}>
           {choreId > 0 ? 'Save' : 'Create'}
+          {showKeyboardShortcuts && (
+            <KeyboardShortcutHint shortcut='Enter' sx={{ ml: 1 }} />
+          )}
         </Button>
       </Sheet>
       <ConfirmationModal config={confirmModelConfig} />

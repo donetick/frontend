@@ -33,6 +33,7 @@ import { useResource } from '../../queries/ResourceQueries'
 import { useUserProfile } from '../../queries/UserQueries.jsx'
 import { useNotification } from '../../service/NotificationProvider'
 import { apiClient } from '../../utils/apiClient'
+import { saveTokens } from '../../utils/TokenStorage'
 import { buildChildUsername, getUserDisplayInfo } from '../../utils/UserHelpers'
 import MFAVerificationModal from './MFAVerificationModal'
 
@@ -202,10 +203,13 @@ const LoginView = () => {
           const token = responseData.token || responseData.access_token
           const expiry = responseData.expire || responseData.access_token_expiry
 
-          localStorage.setItem('token', token)
-          if (expiry) {
-            localStorage.setItem('token_expiry', expiry)
-          }
+          // Save all tokens including refresh tokens
+          await saveTokens({
+            accessToken: token,
+            accessTokenExpiry: expiry,
+            refreshToken: responseData.refresh_token,
+            refreshTokenExpiry: responseData.refresh_token_expiry,
+          })
 
           // Refetch user profile after successful OAuth login
           queryClient.invalidateQueries(['userProfile'])
@@ -247,9 +251,15 @@ const LoginView = () => {
     })
   }
 
-  const handleMFASuccess = data => {
-    localStorage.setItem('token', data.token)
-    localStorage.setItem('token_expiry', data.expire)
+  const handleMFASuccess = async data => {
+    // Save all tokens including refresh tokens
+    await saveTokens({
+      accessToken: data.token,
+      accessTokenExpiry: data.expire,
+      refreshToken: data.refresh_token,
+      refreshTokenExpiry: data.refresh_token_expiry,
+    })
+
     setMfaModalOpen(false)
     setMfaSessionToken('')
 
@@ -427,10 +437,7 @@ const LoginView = () => {
                   borderRadius: '8px',
                 }}
                 onClick={() => {
-                  localStorage.removeItem('ca_token')
-                  localStorage.removeItem('ca_expiration')
-                  // go to login page:
-                  window.location.href = '/login'
+                  apiClient.handleLogout()
                 }}
               >
                 Logout

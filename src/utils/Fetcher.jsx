@@ -55,6 +55,14 @@ const login = (username, password) => {
   })
 }
 
+const logout = () => {
+  const baseURL = apiManager.getApiURL()
+  return fetch(`${baseURL}/auth/logout`, {
+    method: 'POST',
+    credentials: 'include',
+  })
+}
+
 const GetAllUsers = () => {
   return Fetch(`/users/`, {
     method: 'GET',
@@ -888,6 +896,7 @@ export {
   JoinCircle,
   LeaveCircle,
   login,
+  logout,
   MarkChoreComplete,
   NudgeChore,
   PauseChore,

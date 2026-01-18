@@ -94,13 +94,12 @@ const links = [
 
 import { SafeArea } from 'capacitor-plugin-safe-area'
 import Z_INDEX from '../../constants/zIndex'
-import { useAuth } from '../../hooks/useAuth.jsx'
 import { useResource } from '../../queries/ResourceQueries'
+import { apiClient } from '../../utils/apiClient'
 
 const publicPages = ['/landing', '/privacy', '/terms']
 const NavBar = () => {
   const { data: resource } = useResource()
-  const { logout } = useAuth()
 
   const navigate = useNavigate()
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -272,7 +271,9 @@ const NavBar = () => {
               <ListItemContent>Upgrade to Plus</ListItemContent>
             </ListItemButton> */}
             <ListItemButton
-              onClick={logout}
+              onClick={() => {
+                apiClient.handleLogout()
+              }}
               sx={{
                 py: 1.2,
               }}

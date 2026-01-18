@@ -1,4 +1,4 @@
-import { Add, Check, FolderOpen } from '@mui/icons-material'
+import { Add, Check, FolderOpen, Settings } from '@mui/icons-material'
 import {
   Avatar,
   Box,
@@ -11,6 +11,7 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import LABEL_COLORS, {
   getTextColorFromBackgroundColor,
@@ -25,9 +26,11 @@ const ProjectSelector = ({
   showKeyboardShortcuts = false,
 }) => {
   const { data: projects = [], isLoading } = useProjects()
+  const navigate = useNavigate()
 
   const [anchorEl, setAnchorEl] = useState(null)
   const [selectedIndex, setSelectedIndex] = useState(0)
+  const [isKeyboardNavigating, setIsKeyboardNavigating] = useState(false)
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false)
   const menuRef = useRef(null)
   const buttonRef = useRef(null)
@@ -56,6 +59,7 @@ const ProjectSelector = ({
 
   const handleMenuOpen = event => {
     setAnchorEl(event.currentTarget)
+    setIsKeyboardNavigating(false)
   }
 
   const handleMenuClose = () => {
@@ -74,6 +78,11 @@ const ProjectSelector = ({
 
   const handleProjectModalSave = project => {
     handleProjectSelect(project)
+  }
+
+  const handleManageProjects = () => {
+    navigate('/projects')
+    handleMenuClose()
   }
 
   useEffect(() => {
@@ -100,6 +109,7 @@ const ProjectSelector = ({
         if (!anchorEl) {
           setAnchorEl(buttonRef.current)
           setSelectedIndex(0)
+          setIsKeyboardNavigating(true)
         } else {
           handleMenuClose()
         }
@@ -112,20 +122,33 @@ const ProjectSelector = ({
       switch (event.key) {
         case 'ArrowDown':
           event.preventDefault()
+          setIsKeyboardNavigating(true)
           setSelectedIndex(prev =>
-            prev < defaultProjects.length ? prev + 1 : prev,
+            prev < defaultProjects.length + 2 ? prev + 1 : prev,
           )
           break
         case 'ArrowUp':
           event.preventDefault()
+          setIsKeyboardNavigating(true)
           setSelectedIndex(prev => (prev > 0 ? prev - 1 : prev))
           break
         case 'Enter':
           event.preventDefault()
-          if (selectedIndex < defaultProjects.length) {
-            handleProjectSelect(defaultProjects[selectedIndex])
-          } else {
+          if (selectedIndex === 0) {
+            // Hardcoded Default Project
+            handleProjectSelect({
+              id: 'default',
+              name: 'Default Project',
+              color: LABEL_COLORS[0].value,
+              icon: 'FolderOpen',
+            })
+          } else if (selectedIndex <= defaultProjects.length) {
+            // Projects from the array (offset by 1)
+            handleProjectSelect(defaultProjects[selectedIndex - 1])
+          } else if (selectedIndex === defaultProjects.length + 1) {
             handleAddProjectClick()
+          } else {
+            handleManageProjects()
           }
           break
         case 'Escape':
@@ -139,7 +162,7 @@ const ProjectSelector = ({
     return () => {
       document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [anchorEl, selectedIndex, defaultProjects])
+  }, [anchorEl, selectedIndex, defaultProjects, isKeyboardNavigating])
 
   // Reset selected index when menu opens
   useEffect(() => {
@@ -233,7 +256,6 @@ const ProjectSelector = ({
           disabled
           sx={{
             borderRadius: 'var(--joy-radius-sm)',
-            mb: 1,
             cursor: 'default',
             opacity: 1,
           }}
@@ -243,13 +265,7 @@ const ProjectSelector = ({
           </ListItemDecorator>
           <ListItemContent>
             <Typography level='title-sm' sx={{ fontWeight: 600 }}>
-              Select Project
-            </Typography>
-            <Typography
-              level='body-xs'
-              sx={{ color: 'var(--joy-palette-text-tertiary)' }}
-            >
-              Choose or create a project workspace
+              Projects
             </Typography>
           </ListItemContent>
         </MenuItem>
@@ -266,12 +282,13 @@ const ProjectSelector = ({
               icon: 'FolderOpen',
             })
           }
+          onMouseEnter={() => setIsKeyboardNavigating(false)}
           sx={{
             borderRadius: 'var(--joy-radius-sm)',
             backgroundColor:
               effectiveSelectedProject === 'Default Project'
                 ? 'var(--joy-palette-primary-softBg)'
-                : selectedIndex === 0 && anchorEl
+                : selectedIndex === 0 && anchorEl && isKeyboardNavigating
                   ? 'var(--joy-palette-neutral-softHoverBg)'
                   : 'transparent',
             '&:hover': {
@@ -345,12 +362,13 @@ const ProjectSelector = ({
           <MenuItem
             key={project.id}
             onClick={() => handleProjectSelect(project)}
+            onMouseEnter={() => setIsKeyboardNavigating(false)}
             sx={{
               borderRadius: 'var(--joy-radius-sm)',
               backgroundColor:
                 effectiveSelectedProject === project.name
                   ? 'var(--joy-palette-primary-softBg)'
-                  : selectedIndex === index && anchorEl
+                  : selectedIndex === index + 1 && anchorEl && isKeyboardNavigating
                     ? 'var(--joy-palette-neutral-softHoverBg)'
                     : 'transparent',
               '&:hover': {
@@ -437,10 +455,11 @@ const ProjectSelector = ({
 
         <MenuItem
           onClick={handleAddProjectClick}
+          onMouseEnter={() => setIsKeyboardNavigating(false)}
           sx={{
             borderRadius: 'var(--joy-radius-sm)',
             backgroundColor:
-              selectedIndex === defaultProjects.length && anchorEl
+              selectedIndex === defaultProjects.length + 1 && anchorEl && isKeyboardNavigating
                 ? 'var(--joy-palette-success-softHoverBg)'
                 : 'transparent',
             '&:hover': {
@@ -456,7 +475,6 @@ const ProjectSelector = ({
               level='body-sm'
               sx={{
                 fontWeight: 500,
-                color: 'var(--joy-palette-success-600)',
               }}
             >
               Create New Project
@@ -466,6 +484,41 @@ const ProjectSelector = ({
               sx={{ color: 'var(--joy-palette-text-tertiary)' }}
             >
               Add a custom project workspace
+            </Typography>
+          </ListItemContent>
+        </MenuItem>
+
+        <MenuItem
+          onClick={handleManageProjects}
+          onMouseEnter={() => setIsKeyboardNavigating(false)}
+          sx={{
+            borderRadius: 'var(--joy-radius-sm)',
+            backgroundColor:
+              selectedIndex === defaultProjects.length + 2 && anchorEl && isKeyboardNavigating
+                ? 'var(--joy-palette-neutral-softHoverBg)'
+                : 'transparent',
+            '&:hover': {
+              backgroundColor: 'var(--joy-palette-neutral-softHoverBg)',
+            },
+          }}
+        >
+          <ListItemDecorator sx={{ color: 'var(--joy-palette-neutral-500)' }}>
+            <Settings />
+          </ListItemDecorator>
+          <ListItemContent>
+            <Typography
+              level='body-sm'
+              sx={{
+                fontWeight: 500,
+              }}
+            >
+              Manage Projects
+            </Typography>
+            <Typography
+              level='body-xs'
+              sx={{ color: 'var(--joy-palette-text-tertiary)' }}
+            >
+              View, edit, and organize all projects
             </Typography>
           </ListItemContent>
         </MenuItem>

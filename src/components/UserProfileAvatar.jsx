@@ -31,6 +31,7 @@ import { useNavigate } from 'react-router-dom'
 import { useImpersonateUser } from '../contexts/ImpersonateUserContext'
 import useStickyState from '../hooks/useStickyState'
 import { useCircleMembers, useUserProfile } from '../queries/UserQueries'
+import { apiClient } from '../utils/apiClient'
 import { isPlusAccount } from '../utils/Helpers'
 import UserModal from '../views/Modals/Inputs/UserModal'
 import SubscriptionModal from './SubscriptionModal'
@@ -76,9 +77,7 @@ const UserProfileAvatar = () => {
   }
 
   const handleLogout = () => {
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('ca_expiration')
-    window.location.href = '/login'
+    apiClient.handleLogout()
   }
 
   const handleSupportEmail = () => {

@@ -1,4 +1,4 @@
-import { CheckCircle, Error, Info, Warning } from '@mui/icons-material'
+import { CheckCircle, Error, Info, Undo, Warning } from '@mui/icons-material'
 import { Box, Button, Snackbar, Typography } from '@mui/joy'
 import React, { createContext, useContext, useState } from 'react'
 
@@ -24,9 +24,16 @@ const NOTIFICATION_TYPES = {
   success: {
     color: 'success',
     icon: <CheckCircle color='success' />,
-    autoHideDuration: 3000,
+    autoHideDuration: 5000,
     showDismissButton: false,
     defaultTitle: 'Success',
+  },
+  undo: {
+    color: 'success',
+    icon: <Undo color='success' />,
+    autoHideDuration: null,
+    showDismissButton: false,
+    defaultTitle: 'Undone Successfully',
   },
   warning: {
     color: 'warning',
@@ -134,6 +141,10 @@ export const NotificationProvider = ({ children }) => {
     return addNotification(normalizeNotification(error, 'error'))
   }
 
+  const showUndo = message => {
+    return addNotification(normalizeNotification(message, 'undo'))
+  }
+
   const showSuccess = message => {
     return addNotification(normalizeNotification(message, 'success'))
   }
@@ -189,7 +200,18 @@ export const NotificationProvider = ({ children }) => {
         onClose={() => removeNotification(notification.id)}
         startDecorator={notificationIcon}
         endDecorator={
-          config.showDismissButton ? (
+          notification.undoAction ? (
+            <Button
+              variant='outlined'
+              color={config.color}
+              onClick={() => {
+                notification.undoAction()
+                removeNotification(notification.id)
+              }}
+            >
+              Undo
+            </Button>
+          ) : config.showDismissButton ? (
             <Button
               variant='outlined'
               color={config.color}
@@ -232,6 +254,7 @@ export const NotificationProvider = ({ children }) => {
         showNotification,
         showError,
         showSuccess,
+        showUndo,
         showWarning,
         showInfo,
         removeNotification,

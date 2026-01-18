@@ -125,12 +125,32 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
       size='md'
       unmountDelay={250}
       fullWidth={true}
+      title={project ? 'Edit Project' : 'Create New Project'}
+      footer={
+        <Box display='flex' justifyContent='space-around' gap={1}>
+          <Button
+            type='submit'
+            form='project-form'
+            loading={isSubmitting}
+            disabled={!projectName.trim() || isSubmitting}
+            fullWidth
+            size='lg'
+          >
+            {project ? 'Update' : 'Create'}
+          </Button>
+          <Button
+            variant='outlined'
+            onClick={handleClose}
+            disabled={isSubmitting}
+            fullWidth
+            size='lg'
+          >
+            Cancel
+          </Button>
+        </Box>
+      }
     >
-      <Typography level='h4' mb={2}>
-        {project ? 'Edit Project' : 'Create New Project'}
-      </Typography>
-
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} id='project-form'>
         <Stack spacing={3}>
           {/* Project Name */}
           <FormControl required>
@@ -238,62 +258,6 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
             </Select>
           </FormControl>
 
-          {/* Project Preview */}
-          <FormControl>
-            <FormLabel>Preview</FormLabel>
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1.5,
-                p: 2,
-                borderRadius: 'sm',
-                border: '1px solid',
-                borderColor: 'divider',
-                bgcolor: 'background.level1',
-              }}
-            >
-              <Avatar
-                size='sm'
-                sx={{
-                  width: 32,
-                  height: 32,
-                  bgcolor: projectColor,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  '& svg': {
-                    display: 'block',
-                    margin: '0 auto',
-                  },
-                }}
-              >
-                {(() => {
-                  const IconComponent = getIconComponent(projectIcon)
-                  return (
-                    <IconComponent
-                      sx={{
-                        fontSize: 16,
-                        color: getTextColorFromBackgroundColor(projectColor),
-                        display: 'block',
-                      }}
-                    />
-                  )
-                })()}
-              </Avatar>
-              <Box>
-                <Typography level='title-sm' sx={{ fontWeight: 600 }}>
-                  {projectName || 'Project Name'}
-                </Typography>
-                {projectDescription && (
-                  <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                    {projectDescription}
-                  </Typography>
-                )}
-              </Box>
-            </Box>
-          </FormControl>
-
           {/* Error Message */}
           {error && (
             <Typography color='danger' level='body-sm'>
@@ -301,29 +265,7 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
             </Typography>
           )}
         </Stack>
-
-        <Box display='flex' justifyContent='space-around' gap={1} mt={3}>
-          <Button
-            type='submit'
-            loading={isSubmitting}
-            disabled={!projectName.trim() || isSubmitting}
-            fullWidth
-            size='lg'
-          >
-            {project ? 'Update' : 'Create'}
-          </Button>
-          <Button
-            variant='outlined'
-            onClick={handleClose}
-            disabled={isSubmitting}
-            fullWidth
-            size='lg'
-          >
-            Cancel
-          </Button>
-        </Box>
       </form>
-
       <IconPickerModal
         isOpen={isIconPickerOpen}
         onClose={() => setIsIconPickerOpen(false)}

@@ -1,5 +1,10 @@
 import { API_URL } from '../Config'
-import { RefreshToken } from './Fetcher'
+import { logout, RefreshToken } from './Fetcher'
+import {
+  clearAllTokens,
+  isRefreshTokenExpired,
+  saveTokens,
+} from './TokenStorage'
 
 class ApiClient {
   constructor() {
@@ -11,6 +16,17 @@ class ApiClient {
   }
 
   async refreshToken() {
+    // Check if refresh token is expired BEFORE attempting refresh
+    const refreshExpired = await isRefreshTokenExpired()
+    if (refreshExpired) {
+      console.log('Refresh token expired, forcing logout')
+      await clearAllTokens()
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login'
+      }
+      return { success: false, error: 'Refresh token expired' }
+    }
+
     if (this.isRefreshing) {
       return { success: false, error: 'Already refreshing' }
     }
@@ -30,14 +46,13 @@ class ApiClient {
         const data = await refreshReq.json()
         const newToken = data.token || data.access_token
 
-        // Update Local Storage
-        localStorage.setItem('token', newToken)
-        if (data.expire || data.access_token_expiry) {
-          localStorage.setItem(
-            'token_expiry',
-            data.expire || data.access_token_expiry,
-          )
-        }
+        // Save all tokens including rotated refresh token
+        await saveTokens({
+          accessToken: newToken,
+          accessTokenExpiry: data.expire || data.access_token_expiry,
+          refreshToken: data.refresh_token,
+          refreshTokenExpiry: data.refresh_token_expiry,
+        })
 
         // Update last refresh time
         this.lastRefreshTime = Date.now()
@@ -90,10 +105,11 @@ class ApiClient {
   }
 
   // Helper to avoid repeating cleanup code
-  handleLogout() {
-    localStorage.removeItem('token')
-    localStorage.removeItem('token_expiry')
-    window.location.href = '/login'
+  async handleLogout() {
+    logout().then(async () => {
+      await clearAllTokens()
+      if (window.location.pathname !== '/login') window.location.href = '/login'
+    }) // fire and forget
   }
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`

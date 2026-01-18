@@ -1,5 +1,13 @@
 import { Add, EditNotifications } from '@mui/icons-material'
-import { Box, Button, Input, Option, Select, Typography } from '@mui/joy'
+import {
+  Avatar,
+  Box,
+  Button,
+  Input,
+  Option,
+  Select,
+  Typography,
+} from '@mui/joy'
 import { FormControl } from '@mui/material'
 import * as chrono from 'chrono-node'
 import moment from 'moment'
@@ -7,8 +15,11 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import { useCreateChore } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
+import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import { isPlusAccount } from '../../utils/Helpers'
+import { getIconComponent } from '../../utils/ProjectIcons'
 import { useLabels } from '../Labels/LabelQueries'
+import { useProjects } from '../Projects/ProjectQueries'
 import {
   parseAssignees,
   parseDueDate,
@@ -47,9 +58,24 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
   const { data: userLabels, isLoading: userLabelsLoading } = useLabels()
   const { data: circleMembers, isLoading: isCircleMembersLoading } =
     useCircleMembers()
+  const { data: projects = [], isLoading: isProjectsLoading } = useProjects()
   const createChoreMutation = useCreateChore()
 
   const { data: userProfile } = useUserProfile()
+
+  // Get initial project from localStorage (current active project)
+  const getInitialProject = () => {
+    const saved = localStorage.getItem('selectedProject')
+    if (saved) {
+      try {
+        const project = JSON.parse(saved)
+        return project?.id || 'default'
+      } catch {
+        return 'default'
+      }
+    }
+    return 'default'
+  }
 
   const [taskText, setTaskText] = useState('')
   const [taskTitle, setTaskTitle] = useState('')
@@ -75,6 +101,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
   const [hasSubTasks, setHasSubTasks] = useState(false)
   const [hasNotifications, setHasNotifications] = useState(false)
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
+  const [projectId, setProjectId] = useState(getInitialProject())
 
   // set showKeyboardShortcuts true as soon as the user hold ctrl or cmd key:
   useEffect(() => {
@@ -473,6 +500,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
     setHasSubTasks(false)
     setLabelsV2([])
     setAssignees([])
+    setProjectId(getInitialProject())
   }
 
   const createChore = () => {
@@ -516,6 +544,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
       frequencyMetadata: {},
       notificationMetadata: {},
       subTasks: subTasks?.length > 0 ? subTasks : null,
+      projectId: projectId === 'default' ? null : projectId,
     }
 
     if (frequency) {
@@ -560,7 +589,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
       })
     handleCloseModal(false)
   }
-  if (userLabelsLoading || isCircleMembersLoading) {
+  if (userLabelsLoading || isCircleMembersLoading || isProjectsLoading) {
     return <></>
   }
 
@@ -571,6 +600,44 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
       size='lg'
       fullWidth={true}
       title='Create new task'
+      footer={
+        <Box
+          sx={{
+            marginTop: 2,
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'end',
+            gap: 1,
+          }}
+        >
+          <Button
+            size='lg'
+            variant='outlined'
+            color='neutral'
+            onClick={handleCloseModal}
+          >
+            Cancel
+            {showKeyboardShortcuts && (
+              <KeyboardShortcutHint
+                shortcut='Esc'
+                sx={{ ml: 1 }}
+                withCtrl={false}
+              />
+            )}
+          </Button>
+          <Button
+            size='lg'
+            variant='solid'
+            color='primary'
+            onClick={createChore}
+          >
+            Create
+            {showKeyboardShortcuts && (
+              <KeyboardShortcutHint shortcut='Enter' sx={{ ml: 1 }} />
+            )}
+          </Button>
+        </Box>
+      }
     >
       <Box>
         <Box
@@ -803,6 +870,75 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
           </FormControl>
         )}
       </Box>
+      {projects.length >= 1 && (
+        <FormControl>
+          <Typography level='body-sm'>Project</Typography>
+          <Select
+            value={projectId}
+            onChange={(event, newValue) => setProjectId(newValue)}
+            sx={{ minWidth: '15rem' }}
+          >
+            <Option key='default' value='default'>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Avatar
+                  size='sm'
+                  sx={{
+                    width: 24,
+                    height: 24,
+                    bgcolor: '#1976d2',
+                  }}
+                >
+                  {(() => {
+                    const IconComponent = getIconComponent('FolderOpen')
+                    return (
+                      <IconComponent
+                        sx={{
+                          fontSize: 14,
+                          color: getTextColorFromBackgroundColor('#1976d2'),
+                        }}
+                      />
+                    )
+                  })()}
+                </Avatar>
+                Default Project
+              </Box>
+            </Option>
+            {projects.map(project => (
+              <Option key={project.id} value={project.id}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Avatar
+                    size='sm'
+                    sx={{
+                      width: 24,
+                      height: 24,
+                      bgcolor: project.color || '#1976d2',
+                    }}
+                  >
+                    {project.icon ? (
+                      (() => {
+                        const IconComponent = getIconComponent(project.icon)
+                        return (
+                          <IconComponent
+                            sx={{
+                              fontSize: 14,
+                              color: getTextColorFromBackgroundColor(
+                                project.color || '#1976d2',
+                              ),
+                            }}
+                          />
+                        )
+                      })()
+                    ) : (
+                      <></>
+                    )}
+                  </Avatar>
+                  {project.name}
+                </Box>
+              </Option>
+            ))}
+          </Select>
+        </FormControl>
+      )}
       <Box
         sx={{
           marginTop: 2,
@@ -860,37 +996,6 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
             </Box>
           </Box>
         )}
-      </Box>
-      <Box
-        sx={{
-          marginTop: 2,
-          display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'end',
-          gap: 1,
-        }}
-      >
-        <Button
-          size='lg'
-          variant='outlined'
-          color='neutral'
-          onClick={handleCloseModal}
-        >
-          Cancel
-          {showKeyboardShortcuts && (
-            <KeyboardShortcutHint
-              shortcut='Esc'
-              sx={{ ml: 1 }}
-              withCtrl={false}
-            />
-          )}
-        </Button>
-        <Button size='lg' variant='solid' color='primary' onClick={createChore}>
-          Create
-          {showKeyboardShortcuts && (
-            <KeyboardShortcutHint shortcut='Enter' sx={{ ml: 1 }} />
-          )}
-        </Button>
       </Box>
     </ResponsiveModal>
   )

@@ -1,5 +1,5 @@
 import { Close } from '@mui/icons-material'
-import { IconButton, Modal, Sheet, Typography } from '@mui/joy'
+import { Divider, IconButton, Modal, Sheet, Typography } from '@mui/joy'
 import { forwardRef, useEffect, useState } from 'react'
 import { Z_INDEX } from '../../constants/zIndex'
 
@@ -10,6 +10,7 @@ const BottomSheetModal = forwardRef(
       onClose,
       children,
       title,
+      footer,
       height = 'auto',
       maxHeight = '90vh',
       expandedHeight = '95vh',
@@ -79,7 +80,11 @@ const BottomSheetModal = forwardRef(
     const currentHeight = isExpanded ? expandedHeight : height
 
     // Filter out DOM props that shouldn't be passed to Modal
-    const { fullWidth: _fullWidth, unmountDelay: _unmountDelay, ...modalProps } = props
+    const {
+      fullWidth: _fullWidth,
+      unmountDelay: _unmountDelay,
+      ...modalProps
+    } = props
 
     return (
       <Modal
@@ -223,6 +228,21 @@ const BottomSheetModal = forwardRef(
           >
             {children}
           </div>
+
+          {footer && (
+            <>
+              <Divider />
+              <footer
+                style={{
+                  flexShrink: 0,
+                  // borderTop: '1px solid var(--joy-palette-divider)',
+                  padding: '16px 20px',
+                }}
+              >
+                {footer}
+              </footer>
+            </>
+          )}
         </Sheet>
       </Modal>
     )
