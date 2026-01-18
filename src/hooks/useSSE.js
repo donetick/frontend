@@ -6,13 +6,14 @@ import { useAlerts } from '../service/AlertsProvider'
 import { useNotification } from '../service/NotificationProvider'
 import { apiClient } from '../utils/apiClient.js'
 import { useAuth } from './useAuth.jsx'
+
 const SSE_STATES = {
   CONNECTING: 0,
   OPEN: 1,
   CLOSED: 2,
 }
 
-const RECONNECT_INTERVALS = [2000, 5000, 10000, 30000, 360000, 600000, 900000] //  2s, 5s, 10s, 30s, 6m, 10m, 15m
+const RECONNECT_INTERVALS = [10000, 30000, 360000, 600000, 900000, 6000000] //  10s, 30s, 6m, 10m, 15m , 1h
 const MAX_RECONNECT_ATTEMPTS = 10 // Circuit breaker limit
 const CIRCUIT_BREAKER_RESET_TIME = 600000 // 10 minutes
 
@@ -31,6 +32,9 @@ export const useSSE = () => {
   const isManuallyClosedRef = useRef(false)
   const lastHeartbeatRef = useRef(Date.now())
   const heartbeatMonitorRef = useRef(null)
+  const nextReconnectTimeRef = useRef(null)
+  // Track if reconnect is already scheduled to prevent duplicates
+  const isReconnectScheduledRef = useRef(false)
 
   const queryClient = useQueryClient()
   const { showError, showNotification } = useNotification()
@@ -48,13 +52,13 @@ export const useSSE = () => {
     }
 
     // Get the API URL from apiManager
-    const apiUrl = apiClient.baseURL // e.g., "http://localhost:8080/api/v1"
+    const apiUrl = apiClient.getApiURL() // e.g., "http://localhost:8080/api/v1"
 
     // Build SSE URL - let backend determine circle from authenticated user
     const sseUrl = `${apiUrl}/realtime/sse`
 
     return { url: sseUrl, token }
-  }, [])
+  }, [token, isAuthenticated]) // Fixed: Added missing dependencies
 
   const handleSSEMessage = useCallback(
     event => {
@@ -205,17 +209,6 @@ export const useSSE = () => {
                 return { res: newChoreData }
               },
             )
-
-            // Invalidate the specific chore that contains this subtask
-            // if (eventData.data.choreId) {
-            //   queryClient.invalidateQueries(['chore', eventData.data.choreId])
-            //   queryClient.invalidateQueries([
-            //     'choreDetails',
-            //     eventData.data.choreId,
-            //   ])
-            // }
-            // Also invalidate general chores list
-            // queryClient.invalidateQueries(['chores'])
             break
 
           case 'heartbeat':
@@ -256,7 +249,7 @@ export const useSSE = () => {
         return // Stop processing if JSON parsing fails
       }
     },
-    [queryClient, showNotification, showError, userProfile],
+    [queryClient, showNotification, showError, userProfile, showAlert],
   )
 
   const stopHeartbeatMonitor = useCallback(() => {
@@ -266,8 +259,40 @@ export const useSSE = () => {
     }
   }, [])
 
+  // Centralized reconnect scheduling function to prevent duplicate scheduling
+  const scheduleReconnect = useCallback((delay, reason) => {
+    // Prevent duplicate scheduling
+    if (isReconnectScheduledRef.current) {
+      console.log('SSE: Reconnect already scheduled, skipping duplicate')
+      return
+    }
+
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current)
+    }
+
+    console.log(
+      `SSE: Scheduling reconnect in ${delay}ms (attempt ${reconnectAttemptsRef.current + 1}, reason: ${reason})`,
+    )
+
+    isReconnectScheduledRef.current = true
+    nextReconnectTimeRef.current = Date.now() + delay
+
+    reconnectTimeoutRef.current = setTimeout(() => {
+      isReconnectScheduledRef.current = false
+      reconnectAttemptsRef.current++
+      nextReconnectTimeRef.current = null
+      // Note: connect will be called by the caller after this returns
+      // We need to trigger it here
+      window.dispatchEvent(new CustomEvent('sse-reconnect'))
+    }, delay)
+  }, [])
+
   // Create connect function that can be called from anywhere
   const connect = useCallback(() => {
+    // Clear the scheduled flag when actually connecting
+    isReconnectScheduledRef.current = false
+
     if (isCircuitBreakerOpen) {
       console.log('SSE: Circuit breaker is open, preventing connection attempt')
       showError({
@@ -323,9 +348,6 @@ export const useSSE = () => {
       setConnectionState(SSE_STATES.CONNECTING)
       isManuallyClosedRef.current = false
 
-      // here use EventSource polyfill with Authorization header as the native EventSource does not support headers
-      // the other option was to pass via query param which is less secure and also there.
-      // TODO: use cookie-based once/if at all i move from local storage to httpOnly cookies.
       eventSourceRef.current = new EventSourcePolyfill(sseConfig.url, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -333,11 +355,7 @@ export const useSSE = () => {
           Accept: 'text/event-stream',
         },
         withCredentials: true,
-        // Increase timeout to prevent premature disconnections
-        // Default is 45000ms (45s), increasing to 2 minutes
-        // TODO: send this in the resource object so it can be configured per instance
         heartbeatTimeout: 120000,
-        // Enable silentTimeoutRetry to handle temporary network issues
         silentTimeoutRetry: true,
       })
 
@@ -346,15 +364,19 @@ export const useSSE = () => {
         setConnectionState(SSE_STATES.OPEN)
         setError(null)
         reconnectAttemptsRef.current = 0
+        nextReconnectTimeRef.current = null
+        isReconnectScheduledRef.current = false
         lastHeartbeatRef.current = Date.now()
 
         // Start heartbeat monitor
-        if (heartbeatMonitorRef.current) {
-          clearInterval(heartbeatMonitorRef.current)
-        }
+        stopHeartbeatMonitor()
         heartbeatMonitorRef.current = setInterval(() => {
           const timeSinceLastHeartbeat = Date.now() - lastHeartbeatRef.current
-          const heartbeatTimeout = 150000 // 2.5 minutes - should be longer than server heartbeat interval
+          const heartbeatTimeout = 150000 // 2.5 minutes
+
+          console.debug(
+            `SSE: Heartbeat check - ${Math.round(timeSinceLastHeartbeat / 1000)}s since last heartbeat`,
+          )
 
           if (timeSinceLastHeartbeat > heartbeatTimeout) {
             console.warn(
@@ -371,25 +393,28 @@ export const useSSE = () => {
               }
               setConnectionState(SSE_STATES.CLOSED)
 
-              // Schedule reconnect
-              if (reconnectTimeoutRef.current) {
-                clearTimeout(reconnectTimeoutRef.current)
-              }
-
+              // Calculate delay based on current attempt
               const attemptIndex = Math.min(
                 reconnectAttemptsRef.current,
                 RECONNECT_INTERVALS.length - 1,
               )
               const delay = RECONNECT_INTERVALS[attemptIndex]
 
+              // Schedule reconnect
+              if (reconnectTimeoutRef.current) {
+                clearTimeout(reconnectTimeoutRef.current)
+              }
+
               console.log(
-                `Scheduling SSE reconnect in ${delay}ms (attempt ${
-                  reconnectAttemptsRef.current + 1
-                })`,
+                `SSE: Scheduling heartbeat-triggered reconnect in ${delay}ms (attempt ${reconnectAttemptsRef.current + 1})`,
               )
 
+              isReconnectScheduledRef.current = true
+              nextReconnectTimeRef.current = Date.now() + delay
               reconnectTimeoutRef.current = setTimeout(() => {
+                isReconnectScheduledRef.current = false
                 reconnectAttemptsRef.current++
+                nextReconnectTimeRef.current = null
                 connect()
               }, delay)
             }
@@ -404,91 +429,139 @@ export const useSSE = () => {
         setConnectionState(SSE_STATES.CLOSED)
         stopHeartbeatMonitor()
 
-        if (!isManuallyClosedRef.current) {
-          // Check if this is a 401 unauthorized error
-          const is401Error =
-            error.status === 401 ||
-            error.error?.message?.includes('401') ||
-            error.error?.message?.includes('Unauthorized')
+        // Close the EventSource to prevent it from retrying on its own
+        if (eventSourceRef.current) {
+          eventSourceRef.current.close()
+          eventSourceRef.current = null
+        }
 
-          // Check if this is a timeout error specifically
-          const isTimeoutError =
-            error.error?.message?.includes('No activity within') ||
-            error.error?.message?.includes('timeout')
+        if (isManuallyClosedRef.current) {
+          console.log('SSE: Manually closed, not reconnecting')
+          return
+        }
 
-          if (is401Error) {
-            console.log('SSE 401 error detected, attempting token refresh...')
-            setError('Authentication expired - refreshing token...')
+        // Check if reconnect is already scheduled
+        if (isReconnectScheduledRef.current) {
+          console.log('SSE: Reconnect already scheduled, skipping')
+          return
+        }
 
-            try {
-              const refreshResult = await apiClient.refreshToken()
+        // Check if this is a 401 unauthorized error
+        const is401Error =
+          error.status === 401 ||
+          error.error?.message?.includes('401') ||
+          error.error?.message?.includes('Unauthorized')
 
-              if (refreshResult.success) {
+        // Check if this is a timeout error specifically
+        const isTimeoutError =
+          error.error?.message?.includes('No activity within') ||
+          error.error?.message?.includes('timeout')
+
+        if (is401Error) {
+          console.log('SSE 401 error detected, attempting token refresh...')
+          setError('Authentication expired - refreshing token...')
+
+          try {
+            const refreshResult = await apiClient.refreshToken()
+
+            if (refreshResult.success) {
+              console.log(
+                'Token refreshed successfully, retrying SSE connection...',
+              )
+              setError('Token refreshed - reconnecting...')
+
+              if (apiClient.failedQueue && apiClient.failedQueue.length > 0) {
                 console.log(
-                  'Token refreshed successfully, retrying SSE connection...',
+                  `Processing ${apiClient.failedQueue.length} queued requests after SSE token refresh`,
                 )
-                setError('Token refreshed - reconnecting...')
-
-                // Reset reconnect attempts since we have a fresh token
-                reconnectAttemptsRef.current = 0
-
-                // Schedule immediate reconnect with fresh token
-                if (reconnectTimeoutRef.current) {
-                  clearTimeout(reconnectTimeoutRef.current)
-                }
-
-                reconnectTimeoutRef.current = setTimeout(() => {
-                  connect()
-                }, 1000) // Short delay to avoid rapid reconnection
-
-                return // Exit early, don't use exponential backoff for 401 errors
-              } else {
-                // Check if refresh token expired
-                if (refreshResult.error === 'Refresh token expired') {
-                  console.error('Refresh token expired, user must login again')
-                  setError('Session expired - please log in again')
-                  return // Don't attempt reconnection
-                }
-
-                console.error('Token refresh failed:', refreshResult.error)
-                setError('Authentication failed - please log in again')
-                // Don't attempt reconnection if token refresh failed
-                return
+                apiClient.processQueue(null, refreshResult.token)
               }
-            } catch (refreshError) {
-              console.error('Token refresh error:', refreshError)
-              setError('Authentication error - please log in again')
+
+              // Reset reconnect attempts since we have a fresh token
+              reconnectAttemptsRef.current = 0
+
+              // Schedule immediate reconnect with fresh token
+              if (reconnectTimeoutRef.current) {
+                clearTimeout(reconnectTimeoutRef.current)
+              }
+
+              isReconnectScheduledRef.current = true
+              nextReconnectTimeRef.current = Date.now() + 1000
+              reconnectTimeoutRef.current = setTimeout(() => {
+                isReconnectScheduledRef.current = false
+                nextReconnectTimeRef.current = null
+                connect()
+              }, 1000)
+
+              return
+            } else if (
+              refreshResult.error === 'Already refreshing' ||
+              refreshResult.error === 'Refresh cooldown active'
+            ) {
+              console.log(
+                'SSE: Token refresh in progress by another request, waiting...',
+              )
+              setError('Token refresh in progress - reconnecting soon...')
+
+              reconnectAttemptsRef.current = 0
+
+              if (reconnectTimeoutRef.current) {
+                clearTimeout(reconnectTimeoutRef.current)
+              }
+
+              isReconnectScheduledRef.current = true
+              nextReconnectTimeRef.current = Date.now() + 1500
+              reconnectTimeoutRef.current = setTimeout(() => {
+                isReconnectScheduledRef.current = false
+                nextReconnectTimeRef.current = null
+                connect()
+              }, 1500)
+
+              return
+            } else if (refreshResult.error === 'Refresh token expired') {
+              console.error('Refresh token expired, user must login again')
+              setError('Session expired - please log in again')
+              return
+            } else {
+              console.error('Token refresh failed:', refreshResult.error)
+              setError('Authentication failed - please log in again')
               return
             }
-          } else if (isTimeoutError) {
-            console.log('SSE timeout detected, attempting reconnection...')
-            setError('Connection timeout - reconnecting...')
-          } else {
-            setError('Connection error occurred')
+          } catch (refreshError) {
+            console.error('Token refresh error:', refreshError)
+            setError('Authentication error - please log in again')
+            return
           }
-
-          // Schedule reconnect for non-401 errors
-          if (reconnectTimeoutRef.current) {
-            clearTimeout(reconnectTimeoutRef.current)
-          }
-
-          const attemptIndex = Math.min(
-            reconnectAttemptsRef.current,
-            RECONNECT_INTERVALS.length - 1,
-          )
-          const delay = RECONNECT_INTERVALS[attemptIndex]
-
-          console.log(
-            `Scheduling SSE reconnect in ${delay}ms (attempt ${
-              reconnectAttemptsRef.current + 1
-            })`,
-          )
-
-          reconnectTimeoutRef.current = setTimeout(() => {
-            reconnectAttemptsRef.current++
-            connect()
-          }, delay)
+        } else if (isTimeoutError) {
+          console.log('SSE timeout detected, attempting reconnection...')
+          setError('Connection timeout - reconnecting...')
+        } else {
+          setError('Connection error occurred')
         }
+
+        // Schedule reconnect for non-401 errors
+        const attemptIndex = Math.min(
+          reconnectAttemptsRef.current,
+          RECONNECT_INTERVALS.length - 1,
+        )
+        const delay = RECONNECT_INTERVALS[attemptIndex]
+
+        console.log(
+          `SSE: Scheduling error-triggered reconnect in ${delay}ms (attempt ${reconnectAttemptsRef.current + 1})`,
+        )
+
+        if (reconnectTimeoutRef.current) {
+          clearTimeout(reconnectTimeoutRef.current)
+        }
+
+        isReconnectScheduledRef.current = true
+        nextReconnectTimeRef.current = Date.now() + delay
+        reconnectTimeoutRef.current = setTimeout(() => {
+          isReconnectScheduledRef.current = false
+          reconnectAttemptsRef.current++
+          nextReconnectTimeRef.current = null
+          connect()
+        }, delay)
       }
     } catch (err) {
       console.error('Failed to create SSE connection:', err)
@@ -508,12 +581,14 @@ export const useSSE = () => {
 
   const disconnect = useCallback(() => {
     isManuallyClosedRef.current = true
+    isReconnectScheduledRef.current = false
 
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current)
       reconnectTimeoutRef.current = null
     }
 
+    nextReconnectTimeRef.current = null
     stopHeartbeatMonitor()
 
     if (eventSourceRef.current) {
@@ -539,7 +614,7 @@ export const useSSE = () => {
         disconnect()
       }
     },
-    [connect, disconnect],
+    [connect, disconnect, isAuthenticated],
   )
 
   const isSSEEnabled = useCallback(() => {
@@ -551,7 +626,6 @@ export const useSSE = () => {
     console.log('SSE auto-connect effect triggered')
     console.log('Token valid:', isAuthenticated)
 
-    // Check if SSE is enabled in settings
     const isSSEEnabledSetting = localStorage.getItem('sse_enabled') === 'true'
     console.log('SSE enabled in settings:', isSSEEnabledSetting)
 
@@ -563,12 +637,10 @@ export const useSSE = () => {
       disconnect()
     }
 
-    // Cleanup on unmount
     return () => {
       disconnect()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []) // Only run once on mount
+  }, [isAuthenticated]) // Fixed: Added isAuthenticated dependency
 
   // Cleanup timeouts on unmount
   useEffect(() => {
@@ -580,9 +652,12 @@ export const useSSE = () => {
     }
   }, [stopHeartbeatMonitor])
 
-  // Update EventSource message handler when handleSSEMessage changes (e.g., when userProfile loads)
+  // Update EventSource message handler when handleSSEMessage changes
   useEffect(() => {
-    if (eventSourceRef.current && eventSourceRef.current.readyState === SSE_STATES.OPEN) {
+    if (
+      eventSourceRef.current &&
+      eventSourceRef.current.readyState === SSE_STATES.OPEN
+    ) {
       console.log('SSE: Updating message handler with latest userProfile')
       eventSourceRef.current.onmessage = handleSSEMessage
     }
@@ -592,21 +667,29 @@ export const useSSE = () => {
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        // App went to background, maintain connection but log the state
         console.log(
           'SSE: App backgrounded, maintaining connection but reducing activity',
         )
       } else {
-        // App came to foreground, ensure connection is active
         console.log('SSE: App foregrounded, ensuring connection is active')
 
         const isSSEEnabledSetting =
           localStorage.getItem('sse_enabled') === 'true'
+
+        // Check actual EventSource state, not React state
+        const isCurrentlyConnected =
+          eventSourceRef.current?.readyState === SSE_STATES.OPEN
+        const isCurrentlyConnecting =
+          eventSourceRef.current?.readyState === SSE_STATES.CONNECTING
+
         if (
           isAuthenticated &&
           isSSEEnabledSetting &&
-          connectionState !== SSE_STATES.OPEN
+          !isCurrentlyConnected &&
+          !isCurrentlyConnecting &&
+          !isReconnectScheduledRef.current
         ) {
+          console.log('SSE: Reconnecting after visibility change')
           connect()
         }
       }
@@ -617,7 +700,7 @@ export const useSSE = () => {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
-  }, [connectionState, connect])
+  }, [connect, isAuthenticated])
 
   return {
     connectionState,
@@ -629,7 +712,6 @@ export const useSSE = () => {
     disconnect,
     toggleSSEEnabled,
     isSSEEnabled,
-    // Helper function to check connection status
     getConnectionStatus: () => {
       switch (connectionState) {
         case SSE_STATES.CONNECTING:
@@ -641,14 +723,28 @@ export const useSSE = () => {
           return 'disconnected'
       }
     },
-    // Additional debugging information
     getDebugInfo: () => ({
       connectionState,
       reconnectAttempts: reconnectAttemptsRef.current,
       isCircuitBreakerOpen,
+      isReconnectScheduled: isReconnectScheduledRef.current,
       lastHeartbeat: lastHeartbeatRef.current,
       timeSinceLastHeartbeat: Date.now() - lastHeartbeatRef.current,
       isManuallyCloseRef: isManuallyClosedRef.current,
+      nextReconnectTime: nextReconnectTimeRef.current,
+      timeUntilReconnect: nextReconnectTimeRef.current
+        ? nextReconnectTimeRef.current - Date.now()
+        : null,
+      reconnectIntervals: RECONNECT_INTERVALS,
+      currentReconnectDelay:
+        reconnectAttemptsRef.current < RECONNECT_INTERVALS.length
+          ? RECONNECT_INTERVALS[reconnectAttemptsRef.current]
+          : RECONNECT_INTERVALS[RECONNECT_INTERVALS.length - 1],
+      maxReconnectAttempts: MAX_RECONNECT_ATTEMPTS,
+      circuitBreakerResetTime: CIRCUIT_BREAKER_RESET_TIME,
+      heartbeatTimeout: 120000,
+      heartbeatMonitorInterval: 60000,
+      heartbeatMonitorTimeout: 150000,
     }),
   }
 }

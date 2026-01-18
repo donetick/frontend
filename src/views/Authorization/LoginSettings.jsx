@@ -115,7 +115,7 @@ const LoginSettings = () => {
                 key: 'customServerUrl',
                 value: serverURL,
               }).then(() => {
-                apiClient.baseURL = serverURL + '/api/v1'
+                apiClient.customServerURL = serverURL + '/api/v1'
                 Navigate('/login')
               })
             }}
