@@ -65,7 +65,7 @@ const DAYS = [
 
 const WEEK_PATTERNS = {
   every_week: 'Every week',
-  nth_day_of_month: 'Specific occurrences in the month',
+  week_of_month: 'Specific occurrences in the month',
 }
 
 const DAY_OCCURRENCE_OPTIONS = [
@@ -92,7 +92,7 @@ const generateSchedulePreview = metadata => {
   }
 
   if (
-    metadata.weekPattern === 'nth_day_of_month' &&
+    metadata.weekPattern === 'week_of_month' &&
     metadata.occurrences?.length
   ) {
     const occurrenceStr = metadata.occurrences
@@ -299,7 +299,7 @@ const RepeatOnSections = ({
                         Task repeats every week on selected days
                       </FormHelperText>
                     )}
-                    {value === 'nth_day_of_month' && (
+                    {value === 'week_of_month' && (
                       <FormHelperText>
                         Task repeats on specific day occurrences each month
                         (e.g., 1st Monday, 3rd Friday)
@@ -309,7 +309,7 @@ const RepeatOnSections = ({
                 ))}
               </RadioGroup>
 
-              {frequencyMetadata?.weekPattern === 'nth_day_of_month' && (
+              {frequencyMetadata?.weekPattern === 'week_of_month' && (
                 <Box mt={2}>
                   <Typography level='body-sm' mb={1}>
                     Select which occurrences of the selected days:

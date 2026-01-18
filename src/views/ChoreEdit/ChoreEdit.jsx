@@ -174,7 +174,7 @@ const ChoreEdit = () => {
     // Validate advanced scheduling patterns
     if (
       frequencyType === 'days_of_the_week' &&
-      frequencyMetadata?.weekPattern === 'nth_day_of_month' &&
+      frequencyMetadata?.weekPattern === 'week_of_month' &&
       (!frequencyMetadata?.occurrences ||
         frequencyMetadata.occurrences.length === 0)
     ) {
