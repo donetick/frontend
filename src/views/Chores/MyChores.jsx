@@ -379,6 +379,7 @@ const MyChores = () => {
       // Ctrl/Cmd + A to select all - works both in and out of multi-select mode
       else if (
         isHoldingCmdOrCtrl &&
+        !event.shiftKey &&
         event.key === 'a' &&
         !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)
       ) {

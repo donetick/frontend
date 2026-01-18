@@ -110,6 +110,7 @@ const ArchivedTasks = () => {
       // Ctrl/Cmd + A to select all
       if (
         isHoldingCmdOrCtrl &&
+        !event.shiftKey &&
         event.key === 'a' &&
         !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)
       ) {
