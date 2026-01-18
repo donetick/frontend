@@ -286,8 +286,7 @@ const DeveloperSettings = () => {
               </>
             ) : (
               <Typography level='body-sm' color='neutral'>
-                Refresh tokens are managed via HTTP-only cookies on web
-                platform
+                Refresh tokens are managed via HTTP-only cookies on web platform
               </Typography>
             )}
           </Box>
@@ -327,11 +326,7 @@ const DeveloperSettings = () => {
             >
               <Chip
                 color={
-                  isConnected
-                    ? 'success'
-                    : isConnecting
-                      ? 'warning'
-                      : 'neutral'
+                  isConnected ? 'success' : isConnecting ? 'warning' : 'neutral'
                 }
                 variant='soft'
               >
@@ -411,6 +406,88 @@ const DeveloperSettings = () => {
 
           <Box>
             <Typography level='title-sm' mb={1}>
+              Reconnection Schedule
+            </Typography>
+            {sseDebugInfo ? (
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                {sseDebugInfo.nextReconnectTime ? (
+                  <>
+                    <Typography level='body-sm'>
+                      Next Reconnect:{' '}
+                      {new Date(
+                        sseDebugInfo.nextReconnectTime,
+                      ).toLocaleString()}
+                    </Typography>
+                    <Typography level='body-sm'>
+                      Time Until Reconnect:{' '}
+                      <Chip variant='soft' size='sm' color='warning'>
+                        {formatTimeLeft(sseDebugInfo.timeUntilReconnect)}
+                      </Chip>
+                    </Typography>
+                    <Typography level='body-sm'>
+                      Current Delay:{' '}
+                      <Chip variant='soft' size='sm'>
+                        {formatTimeLeft(sseDebugInfo.currentReconnectDelay)}
+                      </Chip>
+                    </Typography>
+                  </>
+                ) : (
+                  <Typography level='body-sm' color='neutral'>
+                    No reconnection scheduled
+                  </Typography>
+                )}
+              </Box>
+            ) : (
+              <Typography level='body-sm' color='neutral'>
+                No reconnection information available
+              </Typography>
+            )}
+          </Box>
+
+          <Divider />
+
+          <Box>
+            <Typography level='title-sm' mb={1}>
+              Timeout Configuration
+            </Typography>
+            {sseDebugInfo ? (
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                <Typography level='body-sm'>
+                  Heartbeat Timeout:{' '}
+                  <Chip variant='soft' size='sm'>
+                    {formatTimeLeft(sseDebugInfo.heartbeatTimeout)}
+                  </Chip>
+                </Typography>
+                <Typography level='body-sm'>
+                  Monitor Interval:{' '}
+                  <Chip variant='soft' size='sm'>
+                    {formatTimeLeft(sseDebugInfo.heartbeatMonitorInterval)}
+                  </Chip>
+                </Typography>
+                <Typography level='body-sm'>
+                  Monitor Timeout:{' '}
+                  <Chip variant='soft' size='sm'>
+                    {formatTimeLeft(sseDebugInfo.heartbeatMonitorTimeout)}
+                  </Chip>
+                </Typography>
+                <Typography level='body-sm'>
+                  Circuit Breaker Reset:{' '}
+                  <Chip variant='soft' size='sm'>
+                    {formatTimeLeft(sseDebugInfo.circuitBreakerResetTime)}
+                  </Chip>
+                </Typography>
+              </Box>
+            ) : (
+              <Typography level='body-sm' color='neutral'>
+                No timeout information available
+              </Typography>
+            )}
+          </Box>
+
+          <Divider />
+
+          <Box>
+            <Typography level='title-sm' mb={1}>
               Debug Information
             </Typography>
             {sseDebugInfo ? (
@@ -418,7 +495,8 @@ const DeveloperSettings = () => {
                 <Typography level='body-sm'>
                   Reconnect Attempts:{' '}
                   <Chip variant='soft' size='sm'>
-                    {sseDebugInfo.reconnectAttempts}
+                    {sseDebugInfo.reconnectAttempts} /{' '}
+                    {sseDebugInfo.maxReconnectAttempts}
                   </Chip>
                 </Typography>
                 <Typography level='body-sm'>
@@ -426,7 +504,9 @@ const DeveloperSettings = () => {
                   <Chip
                     variant='soft'
                     size='sm'
-                    color={sseDebugInfo.isCircuitBreakerOpen ? 'danger' : 'success'}
+                    color={
+                      sseDebugInfo.isCircuitBreakerOpen ? 'danger' : 'success'
+                    }
                   >
                     {sseDebugInfo.isCircuitBreakerOpen ? 'OPEN' : 'CLOSED'}
                   </Chip>
