@@ -1,7 +1,7 @@
 import { Box, Button, CircularProgress, Container, Typography } from '@mui/joy'
 import { useEffect, useState } from 'react'
 import Logo from '../../Logo'
-import { apiClient } from '../../utils/apiClient'
+import { apiClient } from '../../utils/ApiClient'
 
 import Cookies from 'js-cookie'
 import { useRef } from 'react'

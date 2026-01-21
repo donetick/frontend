@@ -95,7 +95,7 @@ const links = [
 import { SafeArea } from 'capacitor-plugin-safe-area'
 import Z_INDEX from '../../constants/zIndex'
 import { useResource } from '../../queries/ResourceQueries'
-import { apiClient } from '../../utils/apiClient'
+import { apiClient } from '../../utils/ApiClient'
 
 const publicPages = ['/landing', '/privacy', '/terms']
 const NavBar = () => {

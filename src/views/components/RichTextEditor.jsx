@@ -11,8 +11,8 @@ import {
 } from 'react'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
+import { apiClient } from '../../utils/ApiClient'
 import { isPlusAccount, resolvePhotoURL } from '../../utils/Helpers'
-import { apiClient } from '../../utils/apiClient'
 import './RichTextEditor.css'
 
 const RichTextEditor = forwardRef(

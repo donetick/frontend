@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { API_URL } from '../../Config'
 import Logo from '../../Logo'
 import { useNotification } from '../../service/NotificationProvider'
-import { apiClient } from '../../utils/apiClient'
+import { apiClient } from '../../utils/ApiClient'
 const LoginSettings = () => {
   const Navigate = useNavigate()
   const [serverURL, setServerURL] = React.useState('')
