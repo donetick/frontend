@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { clearAllTokens, saveTokens } from '../utils/TokenStorage'
-import { apiClient } from '../utils/apiClient'
+import { apiClient } from '../utils/ApiClient'
 
 const AuthContext = createContext(null)
 
