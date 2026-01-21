@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useUserProfile } from '../queries/UserQueries'
 import { useAlerts } from '../service/AlertsProvider'
 import { useNotification } from '../service/NotificationProvider'
-import { apiClient } from '../utils/apiClient.js'
+import { apiClient } from '../utils/ApiClient'
 import { useAuth } from './useAuth.jsx'
 
 const SSE_STATES = {
