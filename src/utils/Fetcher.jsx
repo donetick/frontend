@@ -1,4 +1,4 @@
-import { apiClient } from './apiClient'
+`import { apiClient } from './ApiClient'
 
 // Migration helpers to maintain compatibility with existing code
 const Fetch = async (endpoint, options = {}) => {

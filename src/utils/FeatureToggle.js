@@ -100,15 +100,20 @@ export const isOfficialDonetickInstance = async () => {
 export const isOfficialDonetickInstanceSync = () => {
   try {
     // Dynamic import to avoid circular dependencies
-    return import('./apiClient').then(({ apiClient }) => {
-      const currentApiUrl = apiClient.baseURL
-      // Check if the API URL contains donetick.com
-      return currentApiUrl.toLowerCase().includes('donetick.com')
-    }).catch(error => {
-      console.warn('FeatureToggle: Error checking server instance (sync):', error)
-      // Default to false for safety (self-hosted assumption)
-      return false
-    })
+    return import('./ApiClient')
+      .then(({ apiClient }) => {
+        const currentApiUrl = apiClient.baseURL
+        // Check if the API URL contains donetick.com
+        return currentApiUrl.toLowerCase().includes('donetick.com')
+      })
+      .catch(error => {
+        console.warn(
+          'FeatureToggle: Error checking server instance (sync):',
+          error,
+        )
+        // Default to false for safety (self-hosted assumption)
+        return false
+      })
   } catch (error) {
     console.warn('FeatureToggle: Error checking server instance (sync):', error)
     // Default to false for safety (self-hosted assumption)
