@@ -1,5 +1,5 @@
 import moment from 'moment'
-import { apiClient } from './apiClient'
+import { apiClient } from './ApiClient'
 
 const isPlusAccount = userProfile => {
   return userProfile?.expiration && moment(userProfile?.expiration).isAfter()
