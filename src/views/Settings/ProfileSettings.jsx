@@ -15,10 +15,10 @@ import { useRef, useState } from 'react'
 import Cropper from 'react-easy-crop'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
+import { apiClient } from '../../utils/ApiClient'
 import { UpdateUserDetails } from '../../utils/Fetcher'
 import { resolvePhotoURL } from '../../utils/Helpers'
 import { getCroppedImg } from '../../utils/imageCropUtils'
-import { apiClient } from '../../utils/apiClient'
 import SettingsLayout from './SettingsLayout'
 
 const ProfileSettings = () => {
