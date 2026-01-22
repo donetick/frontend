@@ -129,7 +129,7 @@ const ChoreActionMenu = ({
   }
 
   const getQuickScheduleDate = option => {
-    const now = new Date()
+    const now = new Date(Date.now())
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
 
     switch (option) {
