@@ -62,6 +62,12 @@ export default defineConfig({
         skipWaiting: true, // Force the waiting service worker to become the active service worker
         clientsClaim: true, // Take control of uncontrolled clients as soon as the service worker becomes active
         maximumFileSizeToCacheInBytes: 6000000, // 6MB
+        //Exclude API and Swagger routes from service worker navigation fallback
+        navigateFallback: '/index.html',
+        navigateFallbackDenylist: [
+          /^\/api\//,     // Exclude all API routes
+          /^\/swagger/,   // Exclude all Swagger routes
+        ]
       },
     }),
   ],
