@@ -123,6 +123,11 @@ function App() {
     registerCapacitorListeners()
   }, [])
 
+  // Set document title
+  useEffect(() => {
+    document.title = 'Donetick';
+  }, [])
+
   return (
     <>
       <NetworkBanner />
