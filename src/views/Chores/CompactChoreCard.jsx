@@ -410,7 +410,7 @@ const CompactChoreCard = ({
     parts.push(getRecurrentText(chore))
 
     // Assignee (if not current user)
-    if (chore.assignedTo && chore.assignedTo !== userProfile.id) {
+    if (chore.assignedTo) {
       const assignee = performers.find(
         p => p.userId === chore.assignedTo,
       )?.displayName
