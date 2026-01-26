@@ -1,6 +1,6 @@
-import { useState, useMemo, useCallback } from 'react'
 import Fuse from 'fuse.js'
-import { filterByProject, ChoreFilters } from '../../../utils/Chores'
+import { useCallback, useMemo, useState } from 'react'
+import { ChoreFilters, filterByProject } from '../../../utils/Chores'
 
 export const useChoreFilters = ({
   chores,

@@ -52,6 +52,8 @@ export const saveFilter = (filter) => {
     const newFilter = {
       id: generateFilterId(),
       name: filter.name,
+      description: filter.description || '',
+      color: filter.color || null,
       icon: filter.icon || null,
       conditions: filter.conditions,
       operator: filter.operator || 'AND',

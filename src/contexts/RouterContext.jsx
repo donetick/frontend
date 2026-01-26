@@ -30,6 +30,7 @@ import PaymentCancelledView from '../views/Payments/PaymentFailView'
 import PaymentSuccessView from '../views/Payments/PaymentSuccessView'
 import PrivacyPolicyView from '../views/PrivacyPolicy/PrivacyPolicyView'
 import ProjectView from '../views/Projects/ProjectView'
+import FilterView from '../views/Filters/FilterView'
 import APITokenSettings from '../views/Settings/APITokenSettings'
 import MFASettings from '../views/Settings/MFASettings'
 import NotificationSetting from '../views/Settings/NotificationSetting'
@@ -232,6 +233,10 @@ const Router = createBrowserRouter([
       {
         path: 'projects/',
         element: <ProjectView />,
+      },
+      {
+        path: 'filters/',
+        element: <FilterView />,
       },
       {
         path: '*',

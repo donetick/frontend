@@ -1,20 +1,19 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useUserProfile } from '../../../queries/UserQueries'
 import {
-  applyFilter,
-  getFilterCount,
-  getFilterOverdueCount,
-  validateFilter,
-} from '../../../utils/FilterEngine'
-import {
   deleteFilter as deleteFilterStorage,
-  getFilterById,
   getSavedFilters,
   saveFilter as saveFilterStorage,
   toggleFilterPin,
   trackFilterUsage,
   updateFilter as updateFilterStorage,
 } from '../../../utils/CustomFilterStorage'
+import {
+  applyFilter,
+  getFilterCount,
+  getFilterOverdueCount,
+  validateFilter,
+} from '../../../utils/FilterEngine'
 
 export const useCustomFilters = (chores, membersData, labels, projects) => {
   const { data: userProfile } = useUserProfile()
@@ -52,13 +51,15 @@ export const useCustomFilters = (chores, membersData, labels, projects) => {
         ? getFilterOverdueCount(chores, filter, context)
         : 0
 
-      return {
+      const result = {
         ...filter,
         count,
         overdueCount,
         isValid: validation.isValid,
         validationIssues: validation.issues,
       }
+
+      return result
     })
   }, [savedFilters, chores, context])
 

@@ -23,6 +23,7 @@ const SortAndGrouping = ({
   isActive,
   useChips,
   title,
+  onCreateNewFilter,
 }) => {
   const [anchorEl, setAnchorEl] = useState(null)
   const menuRef = useRef(null)
@@ -201,6 +202,22 @@ const SortAndGrouping = ({
           />
           <Typography level='body-sm'>Assigned to others</Typography>
         </MenuItem>
+
+        <Divider />
+
+        <MenuItem
+          key={`${k}-custom-filter`}
+          onClick={() => {
+            onCreateNewFilter()
+            handleMenuClose()
+            // TODO: Open advanced filter builder
+          }}
+        >
+          <Typography level='body-sm' fontWeight='md' color='primary'>
+            Create Custom Filter...
+          </Typography>
+        </MenuItem>
+
         {/* 
 // i need this but i think it have a bad UX and confusing so commenting it for now
         <MenuItem

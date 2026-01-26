@@ -2,6 +2,7 @@ import { Capacitor } from '@capacitor/core'
 import {
   Archive,
   ArrowBack,
+  FilterAlt,
   FolderOpen,
   History,
   Inbox,
@@ -59,6 +60,11 @@ const links = [
     to: 'projects',
     label: 'Projects',
     icon: <FolderOpen />,
+  },
+  {
+    to: 'filters',
+    label: 'Filters',
+    icon: <FilterAlt />,
   },
   {
     to: 'activities',

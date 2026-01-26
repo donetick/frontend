@@ -9,10 +9,12 @@ import {
   ListItem,
   Option,
   Select,
+  Textarea,
   Typography,
 } from '@mui/joy'
 import { useEffect, useMemo, useState } from 'react'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
+import { FILTER_COLORS } from '../../../utils/Colors'
 import { filterNameExists } from '../../../utils/CustomFilterStorage'
 import { applyFilter } from '../../../utils/FilterEngine'
 import Priorities from '../../../utils/Priorities'
@@ -30,19 +32,36 @@ const AdvancedFilterBuilder = ({
 }) => {
   const { ResponsiveModal } = useResponsiveModal()
   const [filterName, setFilterName] = useState('')
+  const [filterDescription, setFilterDescription] = useState('')
+  const [filterColor, setFilterColor] = useState(FILTER_COLORS[0].value)
   const [conditions, setConditions] = useState([
     { type: 'assignee', operator: 'is', value: [] },
   ])
   const [error, setError] = useState('')
+  const [existedFilters] = useState(() => {
+    const storedFilters = localStorage.getItem('customFilters')
+    return storedFilters ? JSON.parse(storedFilters) : []
+  })
 
   // Initialize state when editing a filter
   useEffect(() => {
     if (editingFilter) {
       setFilterName(editingFilter.name)
+      setFilterDescription(editingFilter.description || '')
+      setFilterColor(editingFilter.color || FILTER_COLORS[0].value)
       setConditions(editingFilter.conditions || [])
       setError('')
     } else {
       setFilterName('')
+      setFilterDescription('')
+      // find color no filter has it :
+      const potentialColor = FILTER_COLORS.find(
+        color => !existedFilters.some(filter => filter.color === color.value),
+      )
+
+      setFilterColor(
+        potentialColor ? potentialColor.value : FILTER_COLORS[0].value,
+      )
       setConditions([{ type: 'assignee', operator: 'is', value: [] }])
       setError('')
     }
@@ -127,6 +146,8 @@ const AdvancedFilterBuilder = ({
 
     const filterData = {
       name: filterName.trim(),
+      description: filterDescription.trim(),
+      color: filterColor,
       conditions: validConditions,
       operator: 'AND',
     }
@@ -375,11 +396,27 @@ const AdvancedFilterBuilder = ({
   }
 
   return (
-    <ResponsiveModal open={isOpen} onClose={onClose} size='md'>
-      <Typography level='h4' sx={{ mb: 2 }}>
-        {editingFilter ? 'Edit Filter' : 'Create Advanced Filter'}
-      </Typography>
-
+    <ResponsiveModal
+      open={isOpen}
+      onClose={onClose}
+      size='lg'
+      title={editingFilter ? 'Edit Filter' : 'Create Advanced Filter'}
+      footer={
+        <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+          <Button variant='outlined' color='neutral' onClick={onClose}>
+            Cancel
+          </Button>
+          <Button
+            variant='solid'
+            color='primary'
+            onClick={handleSave}
+            startDecorator={<Save />}
+          >
+            {editingFilter ? 'Update Filter' : 'Save Filter'}
+          </Button>
+        </Box>
+      }
+    >
       <Box
         sx={{
           display: 'flex',
@@ -407,6 +444,61 @@ const AdvancedFilterBuilder = ({
               {error}
             </Typography>
           )}
+        </Box>
+
+        <Box>
+          <Typography level='body-sm' sx={{ mb: 1 }}>
+            Description (Optional)
+          </Typography>
+          <Textarea
+            placeholder='Optional description for this filter...'
+            value={filterDescription}
+            onChange={e => setFilterDescription(e.target.value)}
+            minRows={2}
+            maxRows={3}
+          />
+        </Box>
+
+        <Box>
+          <Typography level='body-sm' sx={{ mb: 1 }}>
+            Color
+          </Typography>
+          <Select
+            value={filterColor}
+            onChange={(_, value) => value && setFilterColor(value)}
+            renderValue={selected => (
+              <Typography
+                startDecorator={
+                  <Box
+                    sx={{
+                      width: 16,
+                      height: 16,
+                      borderRadius: '50%',
+                      background: selected.value,
+                    }}
+                  />
+                }
+              >
+                {selected.label}
+              </Typography>
+            )}
+          >
+            {FILTER_COLORS.map(color => (
+              <Option key={color.value} value={color.value}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box
+                    sx={{
+                      width: 20,
+                      height: 20,
+                      borderRadius: '50%',
+                      background: color.value,
+                    }}
+                  />
+                  <Typography>{color.name}</Typography>
+                </Box>
+              </Option>
+            ))}
+          </Select>
         </Box>
 
         <Box
@@ -571,20 +663,6 @@ const AdvancedFilterBuilder = ({
               </Box>
             )}
           </Box>
-        </Box>
-
-        <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
-          <Button variant='outlined' color='neutral' onClick={onClose}>
-            Cancel
-          </Button>
-          <Button
-            variant='solid'
-            color='primary'
-            onClick={handleSave}
-            startDecorator={<Save />}
-          >
-            {editingFilter ? 'Update Filter' : 'Save Filter'}
-          </Button>
         </Box>
       </Box>
     </ResponsiveModal>

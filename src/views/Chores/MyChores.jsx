@@ -34,7 +34,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useChores } from '../../queries/ChoreQueries'
 import { useNotification } from '../../service/NotificationProvider'
-import { TASK_COLOR } from '../../utils/Colors'
 import Priorities from '../../utils/Priorities'
 import LoadingComponent from '../components/Loading'
 import { useLabels } from '../Labels/LabelQueries'
@@ -60,7 +59,6 @@ import CalendarDual from '../components/CalendarDual'
 import CalendarMonthly from '../components/CalendarMonthly.jsx'
 import ProjectSelector from '../components/ProjectSelector'
 import AdvancedFilterBuilder from '../Modals/Inputs/AdvancedFilterBuilder'
-import SaveFilterModal from '../Modals/Inputs/SaveFilterModal'
 import { useProjects } from '../Projects/ProjectQueries.js'
 import ChoreModals from './components/ChoreModals'
 import FilterSection from './components/FilterSection'
@@ -179,7 +177,6 @@ const MyChores = () => {
     projectsWithDefault,
   )
 
-  const [showSaveFilterModal, setShowSaveFilterModal] = useState(false)
   const [showAdvancedFilterBuilder, setShowAdvancedFilterBuilder] =
     useState(false)
   const [editingFilter, setEditingFilter] = useState(null)
@@ -736,6 +733,10 @@ const MyChores = () => {
               setFilteredChores(chores)
               setSearchFilter('All')
             }}
+            onCreateNewFilter={() => {
+              setShowAdvancedFilterBuilder(true)
+              setEditingFilter(null)
+            }}
             mouseClickHandler={handleMenuOutsideClick}
           />
 
@@ -1100,7 +1101,7 @@ const MyChores = () => {
         {viewMode === 'calendar' && (
           <>
             {/* Summary Chips when no date selected */}
-            <Box
+            {/* <Box
               sx={{
                 mt: 1,
                 mb: 1,
@@ -1213,7 +1214,7 @@ const MyChores = () => {
                   Pending Approval
                 </Chip>
               )}
-            </Box>
+            </Box> */}
             {/* Calendar Monthly View */}
             <Box sx={{ mb: 2 }}>
               {isLargeScreen ? (
@@ -1467,38 +1468,6 @@ const MyChores = () => {
         onClose={closeModal}
       />
 
-      {/* Save Filter Modal */}
-      <SaveFilterModal
-        isOpen={showSaveFilterModal}
-        onClose={() => setShowSaveFilterModal(false)}
-        onSave={filter => {
-          saveFilter(filter)
-          showSuccess({
-            title: 'Filter Saved',
-            message: `"${filter.name}" has been saved successfully`,
-          })
-        }}
-        filterData={createFilterFromCurrentState({
-          selectedProject,
-          selectedChoreFilter,
-          searchFilter,
-        })}
-        previewChores={
-          activeFilterId ? customFilteredChores : searchFilteredChores
-        }
-        previewCount={
-          activeFilterId
-            ? customFilteredChores.length
-            : searchFilteredChores.length
-        }
-        previewOverdueCount={
-          (activeFilterId ? customFilteredChores : searchFilteredChores).filter(
-            chore =>
-              chore.nextDueDate && new Date(chore.nextDueDate) < new Date(),
-          ).length
-        }
-      />
-
       {/* Advanced Filter Builder */}
       <AdvancedFilterBuilder
         isOpen={showAdvancedFilterBuilder}
@@ -1511,6 +1480,8 @@ const MyChores = () => {
             // Update existing filter
             updateFilter(filter.id, {
               name: filter.name,
+              description: filter.description,
+              color: filter.color,
               conditions: filter.conditions,
               operator: filter.operator,
             })
