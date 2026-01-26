@@ -1,68 +1,88 @@
-import { Checklist, EventBusy, Group, Timelapse } from '@mui/icons-material'
 import {
-  Avatar,
+  Analytics,
+  Checklist,
+  EventBusy,
+  Group,
+  History,
+  Star,
+  Timelapse,
+  TrendingUp,
+} from '@mui/icons-material'
+import {
+  Box,
   Button,
-  Chip,
+  Card,
   Container,
   Grid,
   List,
-  ListItem,
-  ListItemContent,
   Sheet,
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import useConfirmationModal from '../../hooks/useConfirmationModal'
+import { ChoreHistoryStatus } from '../../utils/Chores'
 import {
-  DeleteChoreHistory,
-  GetAllCircleMembers,
-  GetChoreHistory,
-  UpdateChoreHistory,
-} from '../../utils/Fetcher'
+  useChoreHistory,
+  useDeleteChoreHistory,
+  useUpdateChoreHistory,
+} from '../../queries/ChoreQueries'
+import { useCircleMembers } from '../../queries/UserQueries'
 import LoadingComponent from '../components/Loading'
 import EditHistoryModal from '../Modals/EditHistoryModal'
+import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import HistoryCard from './HistoryCard'
 
 const ChoreHistory = () => {
-  const [choreHistory, setChoresHistory] = useState([])
   const [userHistory, setUserHistory] = useState([])
-  const [performers, setPerformers] = useState([])
   const [historyInfo, setHistoryInfo] = useState([])
-
-  const [isLoading, setIsLoading] = useState(true) // Add loading state
   const { choreId } = useParams()
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [editHistory, setEditHistory] = useState({})
+  const { confirmModalConfig, showConfirmation } = useConfirmationModal()
+
+  // React Query hooks
+  const { data: choreHistoryData, isLoading } = useChoreHistory(choreId)
+  const { data: circleMembersData } = useCircleMembers()
+  const updateChoreHistory = useUpdateChoreHistory()
+  const deleteChoreHistory = useDeleteChoreHistory()
+
+  const choreHistory = choreHistoryData?.res || []
+  const performers = circleMembersData?.res || []
+
+  const handleDelete = historyEntry => {
+    showConfirmation(
+      `Are you sure you want to delete this history record?`,
+      'Delete History Record',
+      () => {
+        deleteChoreHistory.mutate({
+          choreId,
+          historyId: historyEntry.id,
+        })
+      },
+      'Delete',
+      'Cancel',
+      'danger',
+    )
+  }
+
+  const handleEdit = historyEntry => {
+    setIsEditModalOpen(true)
+    setEditHistory(historyEntry)
+  }
 
   useEffect(() => {
-    setIsLoading(true) // Start loading
-
-    Promise.all([
-      GetChoreHistory(choreId).then(res => res.json()),
-      GetAllCircleMembers(),
-    ])
-      .then(([historyData, usersData]) => {
-        setChoresHistory(historyData.res)
-
-        const newUserChoreHistory = {}
-        historyData.res.forEach(choreHistory => {
-          const userId = choreHistory.completedBy
-          newUserChoreHistory[userId] = (newUserChoreHistory[userId] || 0) + 1
-        })
-        setUserHistory(newUserChoreHistory)
-
-        setPerformers(usersData.res)
-        updateHistoryInfo(historyData.res, newUserChoreHistory, usersData.res)
+    if (choreHistory.length > 0 && performers.length > 0) {
+      const newUserChoreHistory = {}
+      choreHistory.forEach(historyEntry => {
+        const userId = historyEntry.completedBy
+        newUserChoreHistory[userId] = (newUserChoreHistory[userId] || 0) + 1
       })
-      .catch(error => {
-        console.error('Error fetching data:', error)
-        // Handle errors, e.g., show an error message to the user
-      })
-      .finally(() => {
-        setIsLoading(false) // Finish loading
-      })
-  }, [choreId])
+      setUserHistory(newUserChoreHistory)
+      updateHistoryInfo(choreHistory, newUserChoreHistory, performers)
+    }
+  }, [choreHistory, performers])
 
   const updateHistoryInfo = (histories, userHistories, performers) => {
     // average delay for task completaion from due date:
@@ -91,46 +111,46 @@ const ChoreHistory = () => {
     const userCompletedByMost = Object.keys(userHistories).reduce((a, b) =>
       userHistories[a] > userHistories[b] ? a : b,
     )
-    const userCompletedByLeast = Object.keys(userHistories).reduce((a, b) =>
-      userHistories[a] < userHistories[b] ? a : b,
-    )
 
     const historyInfo = [
       {
         icon: <Checklist />,
-        text: 'Total Completed',
-        subtext: `${histories.length} times`,
+        text: 'All Completed',
+        subtext: `${histories.filter(h => h.status === ChoreHistoryStatus.COMPLETED).length} times`,
+      },
+      {
+        icon: <TrendingUp />,
+        text: 'Average Timing',
+        subtext: moment.duration(averageDelayMoment).isValid()
+          ? moment.duration(averageDelayMoment).humanize()
+          : 'On time',
       },
       {
         icon: <Timelapse />,
-        text: 'Usually Within',
-        subtext: moment.duration(averageDelayMoment).humanize(),
+        text: 'Longest Delay',
+        subtext: moment.duration(maxDelayMoment).isValid()
+          ? moment.duration(maxDelayMoment).humanize()
+          : 'Never late',
       },
       {
-        icon: <Timelapse />,
-        text: 'Maximum Delay',
-        subtext: moment.duration(maxDelayMoment).humanize(),
-      },
-      {
-        icon: <Avatar />,
-        text: ' Completed Most',
+        icon: <Star />,
+        text: 'Completed Most',
         subtext: `${
           performers.find(p => p.userId === Number(userCompletedByMost))
-            ?.displayName
-        } `,
+            ?.displayName || 'Unknown'
+        }`,
       },
-      //  contributes:
       {
         icon: <Group />,
-        text: 'Total Performers',
-        subtext: `${Object.keys(userHistories).length} users`,
+        text: 'Members Involved',
+        subtext: `${Object.keys(userHistories).length} members`,
       },
       {
-        icon: <Avatar />,
+        icon: <Analytics />,
         text: 'Last Completed',
         subtext: `${
           performers.find(p => p.userId === Number(histories[0].completedBy))
-            ?.displayName
+            ?.displayName || 'Unknown'
         }`,
       },
     ]
@@ -171,7 +191,7 @@ const ChoreHistory = () => {
           they'll show up here.
         </Typography>
         <Button variant='soft' sx={{ mt: 2 }}>
-          <Link to='/my/chores'>Go back to chores</Link>
+          <Link to='/chores'>Go back to chores</Link>
         </Button>
       </Container>
     )
@@ -179,52 +199,103 @@ const ChoreHistory = () => {
 
   return (
     <Container maxWidth='md'>
-      <Typography level='title-md' mb={1.5}>
-        Summary:
-      </Typography>
-      <Sheet
-        // sx={{
-        //   mb: 1,
-        //   borderRadius: 'lg',
-        //   p: 2,
-        // }}
-        sx={{ borderRadius: 'sm', p: 2 }}
-        variant='outlined'
-      >
-        <Grid container spacing={1}>
+      {/* Enhanced Header Section */}
+      <Box sx={{ mb: 4 }}>
+        {/* Statistics Cards Grid - Compact Design */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+          <History sx={{ fontSize: '1.5rem' }} />
+          <Typography
+            level='title-md'
+            sx={{ fontWeight: 'lg', color: 'text.primary' }}
+          >
+            Task Summary
+          </Typography>
+        </Box>
+        <Grid container spacing={0.5} sx={{ mb: 2 }}>
           {historyInfo.map((info, index) => (
-            <Grid item xs={4} key={index}>
-              {/* divider between the list items: */}
-
-              <ListItem key={index}>
-                <ListItemContent>
-                  <Typography level='body-xs' sx={{ fontWeight: 'md' }}>
+            <Grid item xs={4} sm={2} key={index}>
+              <Card
+                variant='soft'
+                sx={{
+                  borderRadius: 'sm',
+                  p: 1,
+                  height: 85,
+                  textAlign: 'center',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  overflow: 'hidden',
+                }}
+              >
+                <Box sx={{ opacity: 0.8, flexShrink: 0 }}>{info.icon}</Box>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: 0.25,
+                    flex: 1,
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Typography
+                    level='body-xs'
+                    sx={{
+                      fontWeight: '600',
+                      color: 'text.primary',
+                      textAlign: 'center',
+                      lineHeight: 1.1,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      width: '100%',
+                      fontSize: '0.75rem',
+                    }}
+                  >
                     {info.text}
                   </Typography>
-                  <Chip color='primary' size='md' startDecorator={info.icon}>
-                    {info.subtext ? info.subtext : '--'}
-                  </Chip>
-                </ListItemContent>
-              </ListItem>
+                  <Typography
+                    level='body-xs'
+                    sx={{
+                      color: 'text.secondary',
+                      textAlign: 'center',
+                      lineHeight: 1.1,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      width: '100%',
+                      fontSize: '0.7rem',
+                    }}
+                  >
+                    {info.subtext || '--'}
+                  </Typography>
+                </Box>
+              </Card>
             </Grid>
           ))}
         </Grid>
-      </Sheet>
+      </Box>
 
-      {/* User History Cards */}
-      <Typography level='title-md' my={1.5}>
-        History:
-      </Typography>
-      <Sheet sx={{ borderRadius: 'sm', p: 2, boxShadow: 'md' }}>
+      {/* History Section Header */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+        <Analytics sx={{ fontSize: '1.5rem' }} />
+        <Typography
+          level='title-md'
+          sx={{ fontWeight: 'lg', color: 'text.primary' }}
+        >
+          Task Activity
+        </Typography>
+      </Box>
+      <Sheet variant='plain' sx={{ borderRadius: 'sm', boxShadow: 'md' }}>
         {/* Chore History List (Updated Style) */}
 
         <List sx={{ p: 0 }}>
           {choreHistory.map((historyEntry, index) => (
             <HistoryCard
-              onClick={() => {
-                setIsEditModalOpen(true)
-                setEditHistory(historyEntry)
-              }}
+              onClick={() => handleEdit(historyEntry)}
+              onEditClick={handleEdit}
+              onDeleteClick={handleDelete}
               historyEntry={historyEntry}
               performers={performers}
               allHistory={choreHistory}
@@ -241,39 +312,44 @@ const ChoreHistory = () => {
             setIsEditModalOpen(false)
           },
           onSave: updated => {
-            UpdateChoreHistory(choreId, editHistory.id, {
-              performedAt: updated.performedAt,
-              dueDate: updated.dueDate,
-              notes: updated.notes,
-            }).then(res => {
-              if (!res.ok) {
-                console.error('Failed to update chore history:', res)
-                return
-              }
-
-              const newRecord = res.json().then(data => {
-                const newRecord = data.res
-                const newHistory = choreHistory.map(record =>
-                  record.id === newRecord.id ? newRecord : record,
-                )
-                setChoresHistory(newHistory)
-                setEditHistory(newRecord)
-                setIsEditModalOpen(false)
-              })
-            })
+            updateChoreHistory.mutate(
+              {
+                choreId,
+                historyId: editHistory.id,
+                historyData: {
+                  performedAt: updated.performedAt,
+                  dueDate: updated.dueDate,
+                  notes: updated.notes,
+                },
+              },
+              {
+                onSuccess: data => {
+                  setEditHistory(data.res)
+                  setIsEditModalOpen(false)
+                },
+                onError: error => {
+                  console.error('Failed to update chore history:', error)
+                },
+              },
+            )
           },
           onDelete: () => {
-            DeleteChoreHistory(choreId, editHistory.id).then(() => {
-              const newHistory = choreHistory.filter(
-                record => record.id !== editHistory.id,
-              )
-              setChoresHistory(newHistory)
-              setIsEditModalOpen(false)
-            })
+            deleteChoreHistory.mutate(
+              {
+                choreId,
+                historyId: editHistory.id,
+              },
+              {
+                onSuccess: () => {
+                  setIsEditModalOpen(false)
+                },
+              },
+            )
           },
         }}
         historyRecord={editHistory}
       />
+      <ConfirmationModal config={confirmModalConfig} />
     </Container>
   )
 }

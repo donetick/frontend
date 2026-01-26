@@ -2,12 +2,20 @@ import { Box, Container, Input, Sheet, Typography } from '@mui/joy'
 import Logo from '../../Logo'
 
 import { Button } from '@mui/joy'
-import { useContext } from 'react'
+import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { UserContext } from '../../contexts/UserContext'
+import useAcknowledgmentModal from '../../hooks/useAcknowledgmentModal'
+import { useUserProfile } from '../../queries/UserQueries'
+import { useNotification } from '../../service/NotificationProvider'
 import { JoinCircle } from '../../utils/Fetcher'
+import AcknowledgmentModal from '../Modals/Inputs/AcknowledgmentModal'
+
 const JoinCircleView = () => {
-  const { userProfile, setUserProfile } = useContext(UserContext)
+  const { data: userProfile } = useUserProfile()
+  const { showError } = useNotification()
+  const { ackModalConfig, showAcknowledgment } = useAcknowledgmentModal()
+  const [isJoining, setIsJoining] = useState(false)
+
   let [searchParams, setSearchParams] = useSearchParams()
   const navigate = useNavigate()
   const code = searchParams.get('code')
@@ -79,25 +87,31 @@ const JoinCircleView = () => {
                 fullWidth
                 size='lg'
                 sx={{ mt: 3, mb: 2 }}
+                disabled={isJoining}
                 onClick={() => {
+                  setIsJoining(true)
                   JoinCircle(code).then(resp => {
                     if (resp.ok) {
-                      alert(
-                        'Joined circle successfully, wait for the circle owner to accept your request.',
+                      showAcknowledgment(
+                        'Your join request has been sent successfully! The circle admin will need to approve your request before you can access the circle and its chores. You will receive a notification once your request is approved.',
+                        'Join Request Sent!',
+                        () => navigate('/'),
+                        'Got it',
+                        'success',
                       )
-                      navigate('/my/chores')
                     } else {
+                      setIsJoining(false)
                       if (resp.status === 409) {
-                        alert('You are already a member of this circle')
+                        showError('You are already a member of this circle')
                       } else {
-                        alert('Failed to join circle')
+                        showError('Failed to join circle')
                       }
-                      navigate('/my/chores')
+                      navigate('/')
                     }
                   })
                 }}
               >
-                Join Circle
+                {isJoining ? 'Joining...' : 'Join Circle'}
               </Button>
               <Button
                 fullWidth
@@ -111,7 +125,7 @@ const JoinCircleView = () => {
                   borderRadius: '8px',
                 }}
                 onClick={() => {
-                  navigate('/my/chores')
+                  navigate('/chores')
                 }}
               >
                 Cancel
@@ -141,6 +155,7 @@ const JoinCircleView = () => {
             ))}
         </Sheet>
       </Box>
+      <AcknowledgmentModal config={ackModalConfig} />
     </Container>
   )
 }

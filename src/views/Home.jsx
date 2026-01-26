@@ -33,7 +33,7 @@ const Home = () => {
         <Button
           sx={{ mt: 1 }}
           onClick={() => {
-            Navigate('/my/chores')
+            Navigate('/chores')
           }}
         >
           Get Started!

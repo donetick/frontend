@@ -17,8 +17,9 @@ import {
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
-import { useContext, useEffect, useState } from 'react'
-import { UserContext } from '../../contexts/UserContext'
+import { useEffect } from 'react'
+
+import { useUserProfile } from '../../queries/UserQueries'
 import { isPlusAccount } from '../../utils/Helpers'
 import ThingTriggerSection from './ThingTriggerSection'
 
@@ -61,6 +62,51 @@ const DAYS = [
   'saturday',
   'sunday',
 ]
+
+const WEEK_PATTERNS = {
+  every_week: 'Every week',
+  week_of_month: 'Specific occurrences in the month',
+}
+
+const DAY_OCCURRENCE_OPTIONS = [
+  { value: 1, label: '1st occurrence' },
+  { value: 2, label: '2nd occurrence' },
+  { value: 3, label: '3rd occurrence' },
+  { value: 4, label: '4th occurrence' },
+  { value: -1, label: 'Last occurrence' },
+]
+// Helper function to generate schedule preview text
+const generateSchedulePreview = metadata => {
+  if (!metadata?.days?.length) return ''
+
+  const dayNames = metadata.days
+    .map(day => day.charAt(0).toUpperCase() + day.slice(1, 3))
+    .join(', ')
+
+  const timeStr = metadata.time
+    ? moment(metadata.time).format('h:mm A')
+    : '6:00 PM'
+
+  if (metadata.weekPattern === 'every_week' || !metadata.weekPattern) {
+    return `Every ${dayNames} at ${timeStr}`
+  }
+
+  if (
+    metadata.weekPattern === 'week_of_month' &&
+    metadata.occurrences?.length
+  ) {
+    const occurrenceStr = metadata.occurrences
+      .map(w => {
+        if (w === -1) return 'last'
+        return `${w}${w === 1 ? 'st' : w === 2 ? 'nd' : w === 3 ? 'rd' : 'th'}`
+      })
+      .join(', ')
+    return `Every ${occurrenceStr} ${dayNames} of the month at ${timeStr}`
+  }
+
+  return `Every ${dayNames} at ${timeStr}`
+}
+
 const RepeatOnSections = ({
   frequencyType,
   frequency,
@@ -68,7 +114,6 @@ const RepeatOnSections = ({
   frequencyMetadata,
   onFrequencyMetadataUpdate,
 }) => {
-  const [intervalUnit, setIntervalUnit] = useState('days')
   // if time on frequencyMetadata is not set, try to set it to the nextDueDate if available,
   // otherwise set it to 18:00 of the current day
   useEffect(() => {
@@ -77,13 +122,30 @@ const RepeatOnSections = ({
         moment(new Date()).format('YYYY-MM-DD') + 'T' + '18:00',
       ).format()
     }
-  }, [frequencyMetadata])
+    // Initialize weekPattern if not set
+    if (!frequencyMetadata?.weekPattern) {
+      onFrequencyMetadataUpdate({
+        ...frequencyMetadata,
+        weekPattern: 'every_week',
+        occurrences: [],
+      })
+    }
+  }, [frequencyMetadata, onFrequencyMetadataUpdate])
 
   const timePickerComponent = (
-    <Grid item sm={12} sx={{ display: 'flex', alignItems: 'center' }}>
-      <Typography level='h5'>At: </Typography>
+    <Grid
+      item
+      sm={12}
+      sx={{
+        display: 'flex',
+        direction: 'column',
+        flexDirection: 'column',
+      }}
+    >
+      <Typography level='h5'>Time of day: </Typography>
       <Input
         type='time'
+        sx={{ width: '150px' }}
         defaultValue={moment(frequencyMetadata?.time).format('HH:mm')}
         onChange={e => {
           onFrequencyMetadataUpdate({
@@ -117,13 +179,16 @@ const RepeatOnSections = ({
                 onFrequencyUpdate(e.target.value)
               }}
             />
-            <Select placeholder='Unit' value={intervalUnit}>
+            <Select
+              placeholder='Unit'
+              value={frequencyMetadata?.unit || 'days'}
+              sx={{ ml: 1 }}
+            >
               {['hours', 'days', 'weeks', 'months', 'years'].map(item => (
                 <Option
                   key={item}
                   value={item}
                   onClick={() => {
-                    setIntervalUnit(item)
                     onFrequencyMetadataUpdate({
                       ...frequencyMetadata,
                       unit: item,
@@ -189,6 +254,8 @@ const RepeatOnSections = ({
                     onFrequencyMetadataUpdate({
                       ...frequencyMetadata,
                       days: [],
+                      weekPattern: 'every_week',
+                      occurrences: [],
                     })
                   } else {
                     onFrequencyMetadataUpdate({
@@ -206,6 +273,140 @@ const RepeatOnSections = ({
               </Button>
             </Card>
           </Grid>
+
+          <Grid item sm={12} sx={{ display: 'flex', alignItems: 'center' }}>
+            <Box>
+              <RadioGroup
+                value={frequencyMetadata?.weekPattern || 'every_week'}
+                onChange={event => {
+                  const newPattern = event.target.value
+                  onFrequencyMetadataUpdate({
+                    ...frequencyMetadata,
+                    weekPattern: newPattern,
+                    occurrences:
+                      newPattern === 'every_week'
+                        ? []
+                        : frequencyMetadata?.occurrences || [],
+                  })
+                }}
+                sx={{ gap: 1, '& > div': { p: 1 } }}
+              >
+                {Object.entries(WEEK_PATTERNS).map(([value, label]) => (
+                  <FormControl key={value}>
+                    <Radio value={value} label={label} variant='soft' />
+                    {value === 'every_week' && (
+                      <FormHelperText>
+                        Task repeats every week on selected days
+                      </FormHelperText>
+                    )}
+                    {value === 'week_of_month' && (
+                      <FormHelperText>
+                        Task repeats on specific day occurrences each month
+                        (e.g., 1st Monday, 3rd Friday)
+                      </FormHelperText>
+                    )}
+                  </FormControl>
+                ))}
+              </RadioGroup>
+
+              {frequencyMetadata?.weekPattern === 'week_of_month' && (
+                <Box mt={2}>
+                  <Typography level='body-sm' mb={1}>
+                    Select which occurrences of the selected days:
+                  </Typography>
+                  <Typography level='body-xs' color='neutral' mb={2}>
+                    Example: "1st Monday" means the first Monday of each month
+                  </Typography>
+                  <Card>
+                    <List
+                      orientation='horizontal'
+                      wrap
+                      sx={{
+                        '--List-gap': '8px',
+                        '--ListItem-radius': '20px',
+                      }}
+                    >
+                      {DAY_OCCURRENCE_OPTIONS.map(option => (
+                        <ListItem key={option.value}>
+                          <Checkbox
+                            checked={
+                              frequencyMetadata?.occurrences?.includes(
+                                option.value,
+                              ) || false
+                            }
+                            onChange={() => {
+                              const currentOccurrences =
+                                frequencyMetadata?.occurrences || []
+                              const newOccurrences =
+                                currentOccurrences.includes(option.value)
+                                  ? currentOccurrences.filter(
+                                      w => w !== option.value,
+                                    )
+                                  : [...currentOccurrences, option.value]
+                              onFrequencyMetadataUpdate({
+                                ...frequencyMetadata,
+                                occurrences: newOccurrences.sort((a, b) => {
+                                  if (a === -1) return 1 // Last occurrence goes to end
+                                  if (b === -1) return -1
+                                  return a - b
+                                }),
+                              })
+                            }}
+                            overlay
+                            disableIcon
+                            variant='soft'
+                            label={option.label}
+                          />
+                        </ListItem>
+                      ))}
+                    </List>
+                    <Button
+                      size='sm'
+                      variant='soft'
+                      color='neutral'
+                      onClick={() => {
+                        if (
+                          frequencyMetadata?.occurrences?.length ===
+                          DAY_OCCURRENCE_OPTIONS.length
+                        ) {
+                          onFrequencyMetadataUpdate({
+                            ...frequencyMetadata,
+                            occurrences: [],
+                          })
+                        } else {
+                          onFrequencyMetadataUpdate({
+                            ...frequencyMetadata,
+                            occurrences: DAY_OCCURRENCE_OPTIONS.map(
+                              option => option.value,
+                            ),
+                          })
+                        }
+                      }}
+                      overlay
+                      disableIcon
+                    >
+                      {frequencyMetadata?.occurrences?.length ===
+                      DAY_OCCURRENCE_OPTIONS.length
+                        ? 'Unselect All'
+                        : 'Select All'}
+                    </Button>
+                  </Card>
+                </Box>
+              )}
+
+              {/* Quarter week pattern removed - doesn't make sense with Nth day approach */}
+
+              {/* Live Preview */}
+              {frequencyMetadata?.days?.length > 0 && (
+                <Card mt={2} p={2}>
+                  <Typography level='body-sm' color='primary'>
+                    {generateSchedulePreview(frequencyMetadata)}
+                  </Typography>
+                </Card>
+              )}
+            </Box>
+          </Grid>
+
           {timePickerComponent}
         </>
       )
@@ -337,10 +538,11 @@ const RepeatSection = ({
   isAttemptToSave,
   selectedThing,
 }) => {
-  const { userProfile } = useContext(UserContext)
+  const { data: userProfile } = useUserProfile()
+
   return (
     <Box mt={2}>
-      <Typography level='h4'>Repeat :</Typography>
+      <Typography level='h4'>Repeat:</Typography>
       <FormControl sx={{ mt: 1 }}>
         <Checkbox
           onChange={e => {
@@ -457,6 +659,8 @@ const RepeatSection = ({
                                   onFrequencyMetadataUpdate({
                                     ...frequencyMetadata,
                                     days: [],
+                                    weekPattern: 'every_week',
+                                    weekNumbers: [],
                                   })
                                 } else if (item === 'day_of_the_month') {
                                   onFrequencyMetadataUpdate({

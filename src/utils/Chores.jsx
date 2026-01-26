@@ -2,7 +2,27 @@ import moment from 'moment'
 import { TASK_COLOR } from './Colors.jsx'
 
 const priorityOrder = [1, 2, 3, 4, 0]
+// ChoreGrouperOptions enum:
+export const GROUPING_OPTIONS = Object.freeze({
+  SMART: 'default',
+  DUE_DATE: 'due_date',
+  PRIORITY: 'priority',
+  LABELS: 'labels',
+})
 
+export const ChoreHistoryStatus = Object.freeze({
+  STARTED: 0,
+  COMPLETED: 1,
+  SKIPPED: 2,
+  PENDING_APPROVAL: 3,
+  REJECTED: 4,
+})
+export const ChoreStatus = Object.freeze({
+  INACTIVE: 0,
+  ACTIVE: 1,
+  PAUSED: 2,
+  PENDING_APPROVAL: 3,
+})
 export const ChoresGrouper = (groupBy, chores, filter) => {
   if (filter) {
     chores = chores.filter(chore => filter(chore))
@@ -12,12 +32,127 @@ export const ChoresGrouper = (groupBy, chores, filter) => {
   chores.sort(ChoreSorter)
   var groups = []
   switch (groupBy) {
+    case 'default':
+      // same as due_date but hide empty groups: and if status is 1 or 2 have seperated catigory as Started:
+      var groupRaw = {
+        PendingApproval: [],
+        Started: [],
+        Today: [],
+        Tomorrow: [],
+        'Next 7 Days': [],
+        'Later This Month': [],
+        Future: [],
+        Overdue: [],
+        Anytime: [],
+      }
+      chores.forEach(chore => {
+        if (chore.status === 1 || chore.status === 2) {
+          groupRaw['Started'].push(chore)
+        } else if (chore.status === 3) {
+          groupRaw['PendingApproval'].push(chore)
+        } else if (chore.nextDueDate === null) {
+          groupRaw['Anytime'].push(chore)
+        } else if (new Date(chore.nextDueDate) < new Date()) {
+          groupRaw['Overdue'].push(chore)
+        } else if (
+          new Date(chore.nextDueDate).toDateString() ===
+          new Date().toDateString()
+        ) {
+          groupRaw['Today'].push(chore)
+        } else if (
+          new Date(chore.nextDueDate).toDateString() ===
+          new Date(Date.now() + 24 * 60 * 60 * 1000).toDateString()
+        ) {
+          groupRaw['Tomorrow'].push(chore)
+        } else if (
+          new Date(chore.nextDueDate) <
+            new Date(Date.now() + 8 * 24 * 60 * 60 * 1000) &&
+          new Date(chore.nextDueDate) >
+            new Date(Date.now() + 24 * 60 * 60 * 1000)
+        ) {
+          groupRaw['Next 7 Days'].push(chore)
+        } else if (
+          new Date(chore.nextDueDate).getMonth() === new Date().getMonth() &&
+          new Date(chore.nextDueDate).getFullYear() === new Date().getFullYear()
+        ) {
+          groupRaw['Later This Month'].push(chore)
+        } else {
+          groupRaw['Future'].push(chore)
+        }
+      })
+      groups = []
+      if (groupRaw['Started'].length > 0) {
+        groups.push({
+          name: 'Started',
+          content: groupRaw['Started'],
+          color: TASK_COLOR.STARTED,
+        })
+      }
+      if (groupRaw['PendingApproval'].length > 0) {
+        groups.push({
+          name: 'Pending Approval',
+          content: groupRaw['PendingApproval'],
+          color: TASK_COLOR.LATE,
+        })
+      }
+      if (groupRaw['Overdue'].length > 0) {
+        groups.push({
+          name: 'Overdue',
+          content: groupRaw['Overdue'],
+          color: TASK_COLOR.OVERDUE,
+        })
+      }
+      if (groupRaw['Today'].length > 0) {
+        groups.push({
+          name: 'Today',
+          content: groupRaw['Today'],
+          color: TASK_COLOR.TODAY,
+        })
+      }
+      if (groupRaw['Tomorrow'].length > 0) {
+        groups.push({
+          name: 'Tomorrow',
+          content: groupRaw['Tomorrow'],
+          color: TASK_COLOR.TOMORROW,
+        })
+      }
+      if (groupRaw['Next 7 Days'].length > 0) {
+        groups.push({
+          name: 'Next 7 Days',
+          content: groupRaw['Next 7 Days'],
+          color: TASK_COLOR.NEXT_7_DAYS,
+        })
+      }
+      if (groupRaw['Later This Month'].length > 0) {
+        groups.push({
+          name: 'Later This Month',
+          content: groupRaw['Later This Month'],
+          color: TASK_COLOR.LATER_THIS_MONTH,
+        })
+      }
+      if (groupRaw['Future'].length > 0) {
+        groups.push({
+          name: 'Future',
+          content: groupRaw['Future'],
+          color: TASK_COLOR.FUTURE,
+        })
+      }
+      if (groupRaw['Anytime'].length > 0) {
+        groups.push({
+          name: 'Anytime',
+          content: groupRaw['Anytime'],
+          color: TASK_COLOR.ANYTIME,
+        })
+      }
+      break
+
     case 'due_date':
       var groupRaw = {
         Today: [],
-        'In a week': [],
-        'This month': [],
-        Later: [],
+        Tomorrow: [],
+        'Next 7 Days': [],
+        'Later This Month': [],
+        Future: [],
         Overdue: [],
         Anytime: [],
       }
@@ -32,17 +167,24 @@ export const ChoresGrouper = (groupBy, chores, filter) => {
         ) {
           groupRaw['Today'].push(chore)
         } else if (
-          new Date(chore.nextDueDate) <
-            new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) &&
-          new Date(chore.nextDueDate) > new Date()
+          new Date(chore.nextDueDate).toDateString() ===
+          new Date(Date.now() + 24 * 60 * 60 * 1000).toDateString()
         ) {
-          groupRaw['In a week'].push(chore)
+          groupRaw['Tomorrow'].push(chore)
         } else if (
-          new Date(chore.nextDueDate).getMonth() === new Date().getMonth()
+          new Date(chore.nextDueDate) <
+            new Date(Date.now() + 8 * 24 * 60 * 60 * 1000) &&
+          new Date(chore.nextDueDate) >
+            new Date(Date.now() + 24 * 60 * 60 * 1000)
         ) {
-          groupRaw['This month'].push(chore)
+          groupRaw['Next 7 Days'].push(chore)
+        } else if (
+          new Date(chore.nextDueDate).getMonth() === new Date().getMonth() &&
+          new Date(chore.nextDueDate).getFullYear() === new Date().getFullYear()
+        ) {
+          groupRaw['Later This Month'].push(chore)
         } else {
-          groupRaw['Later'].push(chore)
+          groupRaw['Future'].push(chore)
         }
       })
       groups = [
@@ -53,16 +195,25 @@ export const ChoresGrouper = (groupBy, chores, filter) => {
         },
         { name: 'Today', content: groupRaw['Today'], color: TASK_COLOR.TODAY },
         {
-          name: 'In a week',
-          content: groupRaw['In a week'],
-          color: TASK_COLOR.IN_A_WEEK,
+          name: 'Tomorrow',
+          content: groupRaw['Tomorrow'],
+          color: TASK_COLOR.TOMORROW,
         },
         {
-          name: 'This month',
-          content: groupRaw['This month'],
-          color: TASK_COLOR.THIS_MONTH,
+          name: 'Next 7 Days',
+          content: groupRaw['Next 7 Days'],
+          color: TASK_COLOR.NEXT_7_DAYS,
         },
-        { name: 'Later', content: groupRaw['Later'], color: TASK_COLOR.LATER },
+        {
+          name: 'Later This Month',
+          content: groupRaw['Later This Month'],
+          color: TASK_COLOR.LATER_THIS_MONTH,
+        },
+        {
+          name: 'Future',
+          content: groupRaw['Future'],
+          color: TASK_COLOR.FUTURE,
+        },
         {
           name: 'Anytime',
           content: groupRaw['Anytime'],
@@ -176,12 +327,43 @@ export const notInCompletionWindow = chore => {
     moment().add(chore.completionWindow, 'hours') < moment(chore.nextDueDate)
   )
 }
-export const ChoreFilters = userProfile => ({
+export const ChoreFilters = userId => ({
   anyone: () => true,
   assigned_to_me: chore => {
-    return chore.assignedTo && chore.assignedTo === userProfile?.id
+    return chore.assignedTo && chore.assignedTo === userId
   },
   assigned_to_others: chore => {
-    return chore.assignedTo && chore.assignedTo !== userProfile?.id
+    return chore.assignedTo && chore.assignedTo !== userId
+  },
+  assigned_to_me_tasks: chore => {
+    return (
+      chore.assignees &&
+      chore.assignees.some(assignee => assignee.userId === userId)
+    )
+  },
+  created_by_me: chore => {
+    return chore.createdBy && chore.createdBy === userId
   },
 })
+
+// Project filter function - separate from ChoreFilters since it's independent
+export const filterByProject = (chores, selectedProject) => {
+  if (
+    !selectedProject ||
+    selectedProject === 'Default Project' ||
+    selectedProject === 'default'
+  ) {
+    // Default project should show tasks without a project (projectId is null/undefined/empty)
+    // Based on ChoreEdit.jsx, default projects save projectId as null
+    return chores.filter(
+      chore =>
+        !chore.projectId || chore.projectId === null || chore.projectId === '',
+    )
+  }
+
+  // For custom projects, match by project ID
+  return chores.filter(chore => {
+    // Match by project ID (this should be the primary way chores are linked to projects)
+    return chore.projectId === selectedProject
+  })
+}

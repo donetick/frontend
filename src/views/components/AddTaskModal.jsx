@@ -1,12 +1,9 @@
-import { Add } from '@mui/icons-material'
+import { Add, EditNotifications } from '@mui/icons-material'
 import {
+  Avatar,
   Box,
   Button,
-  Chip,
   Input,
-  Modal,
-  ModalDialog,
-  ModalOverflow,
   Option,
   Select,
   Typography,
@@ -14,42 +11,171 @@ import {
 import { FormControl } from '@mui/material'
 import * as chrono from 'chrono-node'
 import moment from 'moment'
-import { useCallback, useContext, useEffect, useRef, useState } from 'react'
-import { UserContext } from '../../contexts/UserContext'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import { useCreateChore } from '../../queries/ChoreQueries'
-import { useCircleMembers } from '../../queries/UserQueries'
+import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
+import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import { isPlusAccount } from '../../utils/Helpers'
+import { getIconComponent } from '../../utils/ProjectIcons'
 import { useLabels } from '../Labels/LabelQueries'
-import { parseLabels, parsePriority, parseRepeatV2 } from './CustomParsers'
+import { useProjects } from '../Projects/ProjectQueries'
+import {
+  parseAssignees,
+  parseDueDate,
+  parseLabels,
+  parsePoints,
+  parsePriority,
+  parseRepeatV2,
+} from './CustomParsers'
 import SmartTaskTitleInput from './SmartTaskTitleInput'
 
+import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
+import NotificationTemplate from '../../components/NotificationTemplate'
 import LearnMoreButton from './LearnMore'
 import RichTextEditor from './RichTextEditor'
 import SubTasks from './SubTask'
+const getDefaultNotification = () => {
+  const storedDefault = localStorage.getItem('defaultNotificationTemplate')
+  if (storedDefault) {
+    return JSON.parse(storedDefault)
+  }
+  const defaultNotification = [
+    { value: 1, unit: 'days', type: 'before' },
+    { value: 0, unit: 'minutes', type: 'ondue' },
+    { value: 1, unit: 'days', type: 'after' },
+  ]
+
+  localStorage.setItem(
+    'defaultNotification',
+    JSON.stringify(defaultNotification),
+  )
+  return defaultNotification
+}
 
 const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
+  const { ResponsiveModal } = useResponsiveModal()
   const { data: userLabels, isLoading: userLabelsLoading } = useLabels()
   const { data: circleMembers, isLoading: isCircleMembersLoading } =
     useCircleMembers()
+  const { data: projects = [], isLoading: isProjectsLoading } = useProjects()
   const createChoreMutation = useCreateChore()
 
-  const { userProfile } = useContext(UserContext)
+  const { data: userProfile } = useUserProfile()
+
+  // Get initial project from localStorage (current active project)
+  const getInitialProject = () => {
+    const saved = localStorage.getItem('selectedProject')
+    if (saved) {
+      try {
+        const project = JSON.parse(saved)
+        return project?.id || 'default'
+      } catch {
+        return 'default'
+      }
+    }
+    return 'default'
+  }
+
   const [taskText, setTaskText] = useState('')
   const [taskTitle, setTaskTitle] = useState('')
   const [renderedParts, setRenderedParts] = useState([])
 
   const textareaRef = useRef(null)
   const mainInputRef = useRef(null)
+  const richTextEditorRef = useRef(null)
   const [priority, setPriority] = useState(0)
   const [dueDate, setDueDate] = useState(null)
   const [description, setDescription] = useState(null)
   const [assignees, setAssignees] = useState([])
   const [labelsV2, setLabelsV2] = useState([])
   const [frequency, setFrequency] = useState(null)
+  const [notificationMetadata, setNotificationMetadata] = useState({
+    templates: getDefaultNotification(),
+  })
   const [frequencyHumanReadable, setFrequencyHumanReadable] = useState(null)
   const [subTasks, setSubTasks] = useState(null)
+  const [points, setPoints] = useState(-1)
+  const [isAnyoneTask, setIsAnyoneTask] = useState(false)
   const [hasDescription, setHasDescription] = useState(false)
   const [hasSubTasks, setHasSubTasks] = useState(false)
+  const [hasNotifications, setHasNotifications] = useState(false)
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
+  const [projectId, setProjectId] = useState(getInitialProject())
+
+  // set showKeyboardShortcuts true as soon as the user hold ctrl or cmd key:
+  useEffect(() => {
+    if (hasDescription && richTextEditorRef.current) {
+      // Small delay to ensure the component is fully rendered
+      setTimeout(() => {
+        richTextEditorRef.current.focus()
+      }, 100)
+    }
+  }, [hasDescription])
+
+  // set showKeyboardShortcuts true as soon as the user hold ctrl or cmd key:
+  useEffect(() => {
+    const handleKeyDown = event => {
+      const isHoldingCmd = event.ctrlKey || event.metaKey
+      if (isHoldingCmd) {
+        // event.preventDefault()
+        setShowKeyboardShortcuts(true)
+      }
+      if (
+        isHoldingCmd &&
+        event.key.toLowerCase() === 'e' &&
+        isModalOpen &&
+        !hasDescription
+      ) {
+        setHasDescription(true)
+        setShowKeyboardShortcuts(false)
+      }
+      if (isHoldingCmd && event.key.toLowerCase() === 'j' && isModalOpen) {
+        // add subtask:
+        setHasSubTasks(true)
+        setShowKeyboardShortcuts(false)
+        // set focus on the first subtask input:
+      }
+      if (
+        isHoldingCmd &&
+        event.key.toLowerCase() === 'b' &&
+        isModalOpen &&
+        !dueDate
+      ) {
+        // add due date:
+        setDueDate(moment().add(1, 'day').format('YYYY-MM-DDTHH:00:00'))
+        setShowKeyboardShortcuts(false)
+      }
+      // Enter key to create task
+      if (
+        event.key === 'Enter' &&
+        (event.ctrlKey || event.metaKey) &&
+        isModalOpen
+      ) {
+        event.preventDefault()
+        createChore()
+        return
+      }
+      // Escape key to cancel/close modal
+      if (event.key === 'Escape' && isModalOpen) {
+        event.preventDefault()
+        handleCloseModal()
+        return
+      }
+    }
+
+    const handleKeyUp = event => {
+      if (event.key === 'Control' || event.key === 'Meta') {
+        setShowKeyboardShortcuts(false)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('keyup', handleKeyUp)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('keyup', handleKeyUp)
+    }
+  }, [])
 
   useEffect(() => {
     if (isModalOpen && textareaRef.current) {
@@ -74,6 +200,8 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
       priorityHighlight,
       labelsHighlight,
       dueDateHighlight,
+      pointsHighlight,
+      assigneesHighlight,
     ) => {
       const parts = []
       let lastIndex = 0
@@ -83,24 +211,34 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
       const allHighlights = []
       if (repeatHighlight) {
         repeatHighlight.forEach(h =>
-          allHighlights.push({ ...h, type: 'repeat', priority: 40 }),
+          allHighlights.push({ ...h, type: 'repeat', priority: 60 }),
         )
       }
       if (priorityHighlight) {
         priorityHighlight.forEach(h =>
-          allHighlights.push({ ...h, type: 'priority', priority: 30 }),
+          allHighlights.push({ ...h, type: 'priority', priority: 50 }),
+        )
+      }
+      if (pointsHighlight) {
+        pointsHighlight.forEach(h =>
+          allHighlights.push({ ...h, type: 'points', priority: 45 }),
+        )
+      }
+      if (assigneesHighlight) {
+        assigneesHighlight.forEach(h =>
+          allHighlights.push({ ...h, type: 'assignee', priority: 40 }),
         )
       }
       if (labelsHighlight) {
         labelsHighlight.forEach(h =>
-          allHighlights.push({ ...h, type: 'label', priority: 20 }),
+          allHighlights.push({ ...h, type: 'label', priority: 30 }),
         )
       }
       if (dueDateHighlight) {
         allHighlights.push({
           ...dueDateHighlight,
           type: 'dueDate',
-          priority: 10,
+          priority: 20,
         })
       }
 
@@ -137,6 +275,12 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
             break
           case 'priority':
             className = 'highlight-priority'
+            break
+          case 'points':
+            className = 'highlight-points'
+            break
+          case 'assignee':
+            className = 'highlight-assignee'
             break
           case 'label':
             className = 'highlight-label'
@@ -190,96 +334,139 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
 
   const processText = useCallback(
     sentence => {
-      let cleanedSentence = sentence
+      // Parse everything from the original sentence to get correct highlight positions
       const priority = parsePriority(sentence)
+      const pointsParsed = parsePoints(sentence)
+      const labels = parseLabels(sentence, userLabels || [])
+
+      // Parse assignees using circle members
+      const circleMembersList = circleMembers?.res || []
+      const assigneesForParsing = circleMembersList.map(member => ({
+        userId: member.userId,
+        username:
+          member.username ||
+          member.displayName?.toLowerCase().replace(/\s+/g, ''),
+        displayName: member.displayName,
+        name: member.displayName,
+        id: member.userId,
+      }))
+
+      const assigneesResult = parseAssignees(sentence, assigneesForParsing)
+      const repeat = parseRepeatV2(sentence)
+      const dueDateParsed = parseDueDate(sentence, chrono)
+
+      // Set all the parsed values
       if (priority.result) setPriority(priority.result)
-      cleanedSentence = priority.cleanedSentence
-      const labels = parseLabels(sentence, userLabels)
-      if (labels.result) {
-        cleanedSentence = labels.cleanedSentence
-        setLabelsV2(labels.result)
+      if (pointsParsed.result) setPoints(pointsParsed.result)
+      if (labels.result) setLabelsV2(labels.result)
+
+      if (assigneesResult.isAnyone) {
+        // @Anyone was used - set empty assignees (anyone can do the task)
+        setIsAnyoneTask(true)
+        setAssignees([])
+      } else if (assigneesResult.result && assigneesResult.result.length > 0) {
+        setIsAnyoneTask(false)
+        const parsedAssignees = assigneesResult.result.map(assignee => ({
+          userId: assignee.userId,
+        }))
+        setAssignees(parsedAssignees)
+      } else {
+        // Only assign to current user if no @ mentions found and userProfile exists
+        setIsAnyoneTask(false)
+        if (userProfile?.id) {
+          setAssignees([
+            {
+              userId: userProfile.id,
+            },
+          ])
+        }
       }
 
-      const repeat = parseRepeatV2(sentence)
       if (repeat.result) {
         setFrequency(repeat.result)
         setFrequencyHumanReadable(repeat.name)
-        cleanedSentence = repeat.cleanedSentence
       }
-      // Parse assignees using circle members
-      // const circleMembersList = circleMembers?.res || []
-      // const assigneesForParsing = circleMembersList.map(member => ({
-      //   userId: member.userId,
-      //   username:
-      //     member.username ||
-      //     member.displayName?.toLowerCase().replace(/\s+/g, ''),
-      //   displayName: member.displayName,
-      //   name: member.displayName,
-      //   id: member.userId,
-      // }))
 
-      // const assigneesResult = parseAssignees(sentence, assigneesForParsing)
-      // if (assigneesResult.result) {
-      //   cleanedSentence = assigneesResult.cleanedSentence
-      //   setAssignees(
-      //     assigneesResult.result.map(assignee => ({
-      //       userId: assignee.userId,
-      //     })),
-      //   )
-      // } else {
-      //   setAssignees([
-      //     {
-      //       userId: userProfile.id,
-      //     },
-      //   ])
-      // }
-      const parsedDueDate = chrono.parse(sentence, new Date(), {
-        forwardDate: true,
-      })
-      if (parsedDueDate[0]?.index > -1) {
-        setDueDate(
-          moment(parsedDueDate[0].start.date()).format('YYYY-MM-DDTHH:mm:ss'),
-        )
-        cleanedSentence = cleanedSentence.replace(parsedDueDate[0].text, '')
+      let dueDateHighlight = null
+      if (dueDateParsed.result) {
+        setDueDate(moment(dueDateParsed.result).format('YYYY-MM-DDTHH:mm:ss'))
+        dueDateHighlight = dueDateParsed.highlight[0]
       }
 
       if (repeat.result) {
         // if repeat has result the cleaned sentence will remove the date related info which mean
         // we need to reparse the date again to get the correct due date:
-        const parsedDueDate = chrono.parse(sentence, new Date(), {
-          forwardDate: true,
-        })
-        if (parsedDueDate[0]?.index > -1) {
+        const dueDateParsedAgain = parseDueDate(sentence, chrono)
+        if (dueDateParsedAgain.result) {
           setDueDate(
-            moment(parsedDueDate[0].start.date()).format('YYYY-MM-DDTHH:mm:ss'),
+            moment(dueDateParsedAgain.result).format('YYYY-MM-DDTHH:mm:ss'),
           )
         }
       }
 
+      // Create the cleaned sentence by sequentially applying all cleanups
+      let cleanedSentence = sentence
+      if (priority.result) cleanedSentence = priority.cleanedSentence
+      if (pointsParsed.result) {
+        // Apply points cleaning to the current cleaned sentence
+        const pointsReparse = parsePoints(cleanedSentence)
+        if (pointsReparse.result)
+          cleanedSentence = pointsReparse.cleanedSentence
+      }
+      if (labels.result) {
+        // Apply labels cleaning to the current cleaned sentence
+        const labelsReparse = parseLabels(cleanedSentence, userLabels || [])
+        if (labelsReparse.result)
+          cleanedSentence = labelsReparse.cleanedSentence
+      }
+      if (assigneesResult.result) {
+        // Apply assignees cleaning to the current cleaned sentence
+        const assigneesReparse = parseAssignees(
+          cleanedSentence,
+          assigneesForParsing,
+        )
+        if (assigneesReparse.result)
+          cleanedSentence = assigneesReparse.cleanedSentence
+      }
+      if (repeat.result) {
+        // Apply repeat cleaning to the current cleaned sentence
+        const repeatReparse = parseRepeatV2(cleanedSentence)
+        if (repeatReparse.result)
+          cleanedSentence = repeatReparse.cleanedSentence
+      }
+      if (dueDateParsed.result) {
+        // Apply date cleaning to the current cleaned sentence
+        const dueDateReparse = parseDueDate(cleanedSentence, chrono)
+        if (dueDateReparse.result)
+          cleanedSentence = dueDateReparse.cleanedSentence
+      }
+
       setTaskText(sentence)
       setTaskTitle(cleanedSentence.trim())
-      const { parts, plainText } = renderHighlightedSentence(
+
+      // Generate highlights for rendering using original sentence positions
+      const { parts } = renderHighlightedSentence(
         sentence,
         repeat.highlight,
         priority.highlight,
         labels.highlight,
-        parsedDueDate && parsedDueDate[0]
-          ? {
-              start: parsedDueDate[0].index,
-              end: parsedDueDate[0].index + parsedDueDate[0].text.length,
-              text: parsedDueDate[0].text,
-            }
-          : null,
+        dueDateHighlight,
+        pointsParsed.highlight,
+        assigneesResult.highlight,
       )
 
       setRenderedParts(parts)
-      setTaskTitle(plainText)
     },
-    [circleMembers, userLabels, userProfile, renderHighlightedSentence],
+    [userLabels, renderHighlightedSentence, circleMembers, userProfile],
   )
 
   useEffect(() => {
-    if (!isModalOpen || userLabelsLoading || isCircleMembersLoading) {
+    if (
+      !isModalOpen ||
+      userLabelsLoading ||
+      isCircleMembersLoading ||
+      !userProfile
+    ) {
       return
     }
 
@@ -289,6 +476,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
     userLabelsLoading,
     isCircleMembersLoading,
     isModalOpen,
+    userProfile,
     processText,
   ])
 
@@ -304,52 +492,74 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
     setFrequency(null)
     setFrequencyHumanReadable(null)
     setPriority(0)
+    setPoints(-1)
+    setIsAnyoneTask(false)
     setHasDescription(false)
     setDescription(null)
     setSubTasks(null)
     setHasSubTasks(false)
     setLabelsV2([])
     setAssignees([])
-  }
-
-  const handleSubmit = () => {
-    createChore()
-    handleCloseModal()
-    setTaskText('')
+    setProjectId(getInitialProject())
   }
 
   const createChore = () => {
+    // Handle different assignee scenarios
+    let finalAssignees = assignees
+    let finalAssignedTo = null
+    let finalAssignStrategy = 'random'
+
+    if (isAnyoneTask) {
+      // @Anyone was explicitly used - anyone can do the task
+      finalAssignees = []
+      finalAssignedTo = null
+      finalAssignStrategy = 'no_assignee'
+    } else if (assignees.length === 0) {
+      // No assignees and no @Anyone - fallback to current user
+      finalAssignees = [{ userId: userProfile?.id }]
+      finalAssignedTo = userProfile?.id
+      finalAssignStrategy = 'keep_last_assigned'
+    } else if (assignees.length === 1) {
+      // Single assignee
+      finalAssignedTo = assignees[0].userId
+      finalAssignStrategy = 'keep_last_assigned'
+    } else {
+      // Multiple assignees
+      finalAssignedTo = null
+      finalAssignStrategy = 'random'
+    }
+
     const chore = {
       name: taskTitle,
-      assignees:
-        assignees.length > 0 ? assignees : [{ userId: userProfile.id }],
+      assignees: finalAssignees,
       dueDate: dueDate ? new Date(dueDate).toISOString() : null,
-      assignedTo: assignees.length > 0 ? assignees[0].userId : userProfile.id,
-      assignStrategy: 'random',
+      assignedTo: finalAssignedTo,
+      assignStrategy: finalAssignStrategy,
       isRolling: false,
-      notification: false,
-      description: description || null,
       labelsV2: labelsV2,
       priority: priority ? Number(priority) : 0,
+      points: points > -1 ? points : null,
       status: 0,
       frequencyType: 'once',
       frequencyMetadata: {},
       notificationMetadata: {},
       subTasks: subTasks?.length > 0 ? subTasks : null,
+      projectId: projectId === 'default' ? null : projectId,
     }
 
     if (frequency) {
       chore.frequencyType = frequency.frequencyType
       chore.frequencyMetadata = frequency.frequencyMetadata
       chore.frequency = frequency.frequency
-      if (isPlusAccount()) {
+      if (isPlusAccount(userProfile)) {
         chore.notification = true
-        chore.notificationMetadata = { dueDate: true }
+        chore.notificationMetadata = notificationMetadata
       }
     }
     if (!frequency && dueDate) {
       // use dueDate converted to UTC:
       chore.nextDueDate = new Date(dueDate).toUTCString()
+      chore.notificationMetadata = notificationMetadata
     }
 
     createChoreMutation
@@ -368,6 +578,8 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
 
             handleCloseModal(false)
           }
+          handleCloseModal()
+          setTaskText('')
         })
       })
       .catch(error => {
@@ -375,107 +587,157 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
           handleCloseModal(true)
         }
       })
+    handleCloseModal(false)
   }
-  if (userLabelsLoading || isCircleMembersLoading) {
+  if (userLabelsLoading || isCircleMembersLoading || isProjectsLoading) {
     return <></>
   }
 
   return (
-    <Modal open={isModalOpen} onClose={handleCloseModal}>
-      <ModalOverflow>
-        <ModalDialog size='lg' sx={{ minWidth: '80%' }}>
-          <Typography level='h4'>Create new task</Typography>
-          <Chip startDecorator='🚧' variant='soft' color='warning' size='sm'>
-            Experimental Feature
-          </Chip>
-          <Box>
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-              }}
-            >
-              <Typography level='body-sm'>Task in a sentence:</Typography>
-              <LearnMoreButton
-                content={
-                  <>
-                    <Typography level='body-sm' sx={{ mb: 1 }}>
-                      This feature lets you create a task simply by typing a
-                      sentence. It attempt parses the sentence to identify the
-                      task&apos;s due date, priority, and frequency.
-                    </Typography>
-
-                    <Typography
-                      level='body-sm'
-                      sx={{ fontWeight: 'bold', mt: 2 }}
-                    >
-                      Examples:
-                    </Typography>
-
-                    <Typography
-                      level='body-sm'
-                      component='ul'
-                      sx={{ pl: 2, mt: 1, listStyle: 'disc' }}
-                    >
-                      <li>
-                        <strong>Priority:</strong>For highest priority any of
-                        the following keyword <em>P1</em>, <em>Urgent</em>,{' '}
-                        <em>Important</em>, or <em>ASAP</em>. For lower
-                        priorities, use <em>P2</em>, <em>P3</em>, or <em>P4</em>
-                        .
-                      </li>
-                      <li>
-                        <strong>Due date:</strong> Specify dates with phrases
-                        like <em>tomorrow</em>, <em>next week</em>,{' '}
-                        <em>Monday</em>, or <em>August 1st at 12pm</em>.
-                      </li>
-                      <li>
-                        <strong>Frequency:</strong> Set recurring tasks with
-                        terms like <em>daily</em>, <em>weekly</em>,{' '}
-                        <em>monthly</em>, <em>yearly</em>, or patterns such as{' '}
-                        <em>every Tuesday and Thursday</em>.
-                      </li>
-                    </Typography>
-                  </>
-                }
+    <ResponsiveModal
+      open={isModalOpen}
+      onClose={handleCloseModal}
+      size='lg'
+      fullWidth={true}
+      title='Create new task'
+      footer={
+        <Box
+          sx={{
+            marginTop: 2,
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'end',
+            gap: 1,
+          }}
+        >
+          <Button
+            size='lg'
+            variant='outlined'
+            color='neutral'
+            onClick={handleCloseModal}
+          >
+            Cancel
+            {showKeyboardShortcuts && (
+              <KeyboardShortcutHint
+                shortcut='Esc'
+                sx={{ ml: 1 }}
+                withCtrl={false}
               />
-            </Box>
+            )}
+          </Button>
+          <Button
+            size='lg'
+            variant='solid'
+            color='primary'
+            onClick={createChore}
+          >
+            Create
+            {showKeyboardShortcuts && (
+              <KeyboardShortcutHint shortcut='Enter' sx={{ ml: 1 }} />
+            )}
+          </Button>
+        </Box>
+      }
+    >
+      <Box>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}
+        >
+          <Typography level='body-sm'>Task in a sentence:</Typography>
+          <LearnMoreButton
+            content={
+              <>
+                <Typography level='body-sm' sx={{ mb: 1 }}>
+                  This feature lets you create a task simply by typing a
+                  sentence. It attempt parses the sentence to identify the
+                  task&apos;s due date, priority, and frequency.
+                </Typography>
 
-            <SmartTaskTitleInput
-              autoFocus
-              value={taskText}
-              placeholder='Type your full text here...'
-              onChange={text => {
-                setTaskText(text)
-              }}
-              customRenderer={renderedParts}
-              onEnterPressed={handleEnterPressed}
-              suggestions={{
-                '#': {
-                  value: 'id',
-                  display: 'name',
-                  options: userLabels ? userLabels : [],
-                },
-                '!': {
-                  value: 'id',
-                  display: 'name',
-                  options: [
-                    { id: '1', name: 'P1' },
-                    { id: '2', name: 'P2' },
-                    { id: '3', name: 'P3' },
-                    { id: '4', name: 'P4' },
-                  ],
-                },
-                '@': {
-                  value: 'userId',
-                  display: 'displayName',
-                  options: circleMembers?.res || [],
-                },
-              }}
-            />
-          </Box>
-          {/* <Box>
+                <Typography level='body-sm' sx={{ fontWeight: 'bold', mt: 2 }}>
+                  Examples:
+                </Typography>
+
+                <Typography
+                  level='body-sm'
+                  component='ul'
+                  sx={{ pl: 2, mt: 1, listStyle: 'disc' }}
+                >
+                  <li>
+                    <strong>Priority:</strong>For highest priority any of the
+                    following keyword <em>P1</em>, <em>Urgent</em>,{' '}
+                    <em>Important</em>, or <em>ASAP</em>. For lower priorities,
+                    use <em>P2</em>, <em>P3</em>, or <em>P4</em>.
+                  </li>
+                  <li>
+                    <strong>Due date:</strong> Specify dates with phrases like{' '}
+                    <em>tomorrow</em>, <em>next week</em>, <em>Monday</em>, or{' '}
+                    <em>August 1st at 12pm</em>.
+                  </li>
+                  <li>
+                    <strong>Frequency:</strong> Set recurring tasks with terms
+                    like <em>daily</em>, <em>weekly</em>, <em>monthly</em>,{' '}
+                    <em>yearly</em>, or patterns such as{' '}
+                    <em>every Tuesday and Thursday</em>.
+                  </li>
+                </Typography>
+              </>
+            }
+          />
+        </Box>
+
+        <SmartTaskTitleInput
+          autoFocus
+          value={taskText}
+          placeholder='Type your full text here...'
+          onChange={text => {
+            setTaskText(text)
+          }}
+          customRenderer={renderedParts}
+          onEnterPressed={handleEnterPressed}
+          suggestions={{
+            '#': {
+              value: 'id',
+              display: 'name',
+              options: userLabels ? userLabels : [],
+            },
+            '!': {
+              value: 'id',
+              display: 'name',
+              options: [
+                { id: '1', name: 'P1' },
+                { id: '2', name: 'P2' },
+                { id: '3', name: 'P3' },
+                { id: '4', name: 'P4' },
+              ],
+            },
+            '@': {
+              value: 'userId',
+              display: 'displayName',
+              options: [
+                { userId: 'anyone', displayName: 'Anyone' },
+                ...(circleMembers?.res || []),
+              ],
+            },
+            '*': {
+              value: 'id',
+              display: 'name',
+              options: [
+                { id: '1', name: '1 point' },
+                { id: '5', name: '5 points' },
+                { id: '10', name: '10 points' },
+                { id: '25', name: '25 points' },
+                { id: '50', name: '50 points' },
+                { id: '100', name: '100 points' },
+              ],
+            },
+          }}
+        />
+      </Box>
+      {/* <Box>
               <Typography level='body-sm'>Title:</Typography>
               <Input
                 value={taskTitle}
@@ -483,109 +745,210 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
                 sx={{ width: '100%', fontSize: '16px' }}
               />
             </Box> */}
-          <Box>
-            {!hasDescription && (
-              <Button
-                startDecorator={<Add />}
-                variant='plain'
-                size='sm'
-                onClick={() => setHasDescription(true)}
-              >
-                Description
-              </Button>
-            )}
-            {!hasSubTasks && (
-              <Button
-                startDecorator={<Add />}
-                variant='plain'
-                size='sm'
-                onClick={() => setHasSubTasks(true)}
-              >
-                Subtasks
-              </Button>
-            )}
-            {!dueDate && (
-              <Button
-                startDecorator={<Add />}
-                variant='plain'
-                size='sm'
-                onClick={() => {
-                  setDueDate(
-                    moment().add(1, 'day').format('YYYY-MM-DDTHH:00:00'),
-                  )
-                }}
-              >
-                Due Date
-              </Button>
-            )}
-          </Box>
 
-          {hasDescription && (
-            <Box>
-              <Typography level='body-sm'>Description:</Typography>
-              <div>
-                <RichTextEditor
-                  onChange={setDescription}
-                  entityType={'chore_description'}
-                />
-              </div>
-            </Box>
-          )}
-          {hasSubTasks && (
-            <Box>
-              <Typography level='body-sm'>Subtasks:</Typography>
-              <SubTasks
-                editMode={true}
-                tasks={subTasks ? subTasks : []}
-                setTasks={setSubTasks}
-              />
-            </Box>
-          )}
+      <Box>
+        {!hasDescription && (
+          <Button
+            startDecorator={<Add />}
+            variant='plain'
+            size='sm'
+            onClick={() => {
+              setHasDescription(true)
+              // Focus will be handled by the useEffect hook
+            }}
+            endDecorator={
+              showKeyboardShortcuts && <KeyboardShortcutHint shortcut='E' />
+            }
+          >
+            Description
+          </Button>
+        )}
 
-          <Box
-            sx={{
-              marginTop: 2,
-              display: 'flex',
-              flexDirection: 'row',
-              gap: 2,
+        {!hasSubTasks && (
+          <Button
+            startDecorator={<Add />}
+            variant='plain'
+            size='sm'
+            onClick={() => {
+              setHasSubTasks(true)
+            }}
+            endDecorator={
+              showKeyboardShortcuts && <KeyboardShortcutHint shortcut='J' />
+            }
+          >
+            Subtasks
+          </Button>
+        )}
+        {!dueDate && (
+          <Button
+            startDecorator={<Add />}
+            variant='plain'
+            size='sm'
+            onClick={() => {
+              setDueDate(moment().add(1, 'day').format('YYYY-MM-DDTHH:00:00'))
+            }}
+            endDecorator={
+              showKeyboardShortcuts && <KeyboardShortcutHint shortcut='B' />
+            }
+          >
+            Due Date
+          </Button>
+        )}
+        {!hasNotifications && dueDate && (
+          <Button
+            startDecorator={<EditNotifications />}
+            variant='plain'
+            size='sm'
+            onClick={() => {
+              setHasNotifications(true)
+              setFrequencyHumanReadable('Once')
+              setFrequency(null)
             }}
           >
-            <FormControl>
-              <Typography level='body-sm'>Priority</Typography>
-              <Select
-                defaultValue={0}
-                value={priority}
-                onChange={(e, value) => setPriority(value)}
-              >
-                <Option value='0'>No Priority</Option>
-                <Option value='1'>P1</Option>
-                <Option value='2'>P2</Option>
-                <Option value='3'>P3</Option>
-                <Option value='4'>P4</Option>
-              </Select>
-            </FormControl>
-            {dueDate && (
-              <FormControl>
-                <Typography level='body-sm'>Due Date</Typography>
-                <Input
-                  type='datetime-local'
-                  value={dueDate}
-                  onChange={e => setDueDate(e.target.value)}
-                  sx={{ width: '100%', fontSize: '16px' }}
-                />
-              </FormControl>
-            )}
-          </Box>
-          <Box
-            sx={{
-              marginTop: 2,
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'start',
-              gap: 2,
-            }}
+            Edit Notifications
+          </Button>
+        )}
+      </Box>
+
+      {hasDescription && (
+        <Box>
+          <Typography level='body-sm'>Description:</Typography>
+          <div>
+            <RichTextEditor
+              ref={richTextEditorRef}
+              onChange={setDescription}
+              entityType={'chore_description'}
+            />
+          </div>
+        </Box>
+      )}
+      {hasSubTasks && (
+        <Box>
+          <Typography level='body-sm'>Subtasks:</Typography>
+          <SubTasks
+            editMode={true}
+            tasks={subTasks ? subTasks : []}
+            setTasks={setSubTasks}
+            shouldFocus={true}
+          />
+        </Box>
+      )}
+
+      <Box
+        sx={{
+          marginTop: 2,
+          display: 'flex',
+          flexDirection: 'row',
+          gap: 2,
+        }}
+      >
+        {priority > 0 && (
+          <FormControl>
+            <Typography level='body-sm'>Priority</Typography>
+            <Select
+              defaultValue={0}
+              value={priority}
+              onChange={(e, value) => setPriority(value)}
+            >
+              <Option value='0'>No Priority</Option>
+              <Option value='1'>P1</Option>
+              <Option value='2'>P2</Option>
+              <Option value='3'>P3</Option>
+              <Option value='4'>P4</Option>
+            </Select>
+          </FormControl>
+        )}
+        {dueDate && (
+          <FormControl>
+            <Typography level='body-sm'>Due Date</Typography>
+            <Input
+              type='datetime-local'
+              value={dueDate}
+              onChange={e => setDueDate(e.target.value)}
+              sx={{ width: '100%', fontSize: '16px' }}
+            />
+          </FormControl>
+        )}
+      </Box>
+      {projects.length >= 1 && (
+        <FormControl>
+          <Typography level='body-sm'>Project</Typography>
+          <Select
+            value={projectId}
+            onChange={(event, newValue) => setProjectId(newValue)}
+            sx={{ minWidth: '15rem' }}
           >
-            {/* <FormControl>
+            <Option key='default' value='default'>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Avatar
+                  size='sm'
+                  sx={{
+                    width: 24,
+                    height: 24,
+                    bgcolor: '#1976d2',
+                  }}
+                >
+                  {(() => {
+                    const IconComponent = getIconComponent('FolderOpen')
+                    return (
+                      <IconComponent
+                        sx={{
+                          fontSize: 14,
+                          color: getTextColorFromBackgroundColor('#1976d2'),
+                        }}
+                      />
+                    )
+                  })()}
+                </Avatar>
+                Default Project
+              </Box>
+            </Option>
+            {projects.map(project => (
+              <Option key={project.id} value={project.id}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Avatar
+                    size='sm'
+                    sx={{
+                      width: 24,
+                      height: 24,
+                      bgcolor: project.color || '#1976d2',
+                    }}
+                  >
+                    {project.icon ? (
+                      (() => {
+                        const IconComponent = getIconComponent(project.icon)
+                        return (
+                          <IconComponent
+                            sx={{
+                              fontSize: 14,
+                              color: getTextColorFromBackgroundColor(
+                                project.color || '#1976d2',
+                              ),
+                            }}
+                          />
+                        )
+                      })()
+                    ) : (
+                      <></>
+                    )}
+                  </Avatar>
+                  {project.name}
+                </Box>
+              </Option>
+            ))}
+          </Select>
+        </FormControl>
+      )}
+      <Box
+        sx={{
+          marginTop: 2,
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'start',
+          gap: 2,
+        }}
+      >
+        {/* <FormControl>
               <Typography level='body-sm'>Assignees</Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                 {assignees.length > 0 ? (
@@ -606,34 +969,35 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
                 )}
               </Box>
             </FormControl> */}
-            <FormControl>
-              <Typography level='body-sm'>Frequency</Typography>
-              <Input value={frequencyHumanReadable || 'Once'} variant='plain' />
-            </FormControl>
-          </Box>
+        {hasNotifications && dueDate && (
           <Box
             sx={{
-              marginTop: 2,
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'end',
-              gap: 1,
+              flexDirection: 'column',
+              alignItems: 'center',
             }}
           >
-            <Button
-              variant='outlined'
-              color='neutral'
-              onClick={handleCloseModal}
-            >
-              Cancel
-            </Button>
-            <Button variant='solid' color='primary' onClick={handleSubmit}>
-              Create
-            </Button>
+            <Typography level='body-sm'>Notification Schedule</Typography>
+            <Box sx={{ p: 0.5 }}>
+              <NotificationTemplate
+                onChange={metadata => {
+                  if (
+                    metadata.notifications !== notificationMetadata.templates
+                  ) {
+                    const newNotificaitonMetadata = {
+                      ...notificationMetadata,
+                      templates: metadata.notifications,
+                    }
+                    setNotificationMetadata(newNotificaitonMetadata)
+                  }
+                }}
+                value={notificationMetadata}
+                showTimeline={false}
+              />
+            </Box>
           </Box>
-        </ModalDialog>
-      </ModalOverflow>
-    </Modal>
+        )}
+      </Box>
+    </ResponsiveModal>
   )
 }
 

@@ -1,3 +1,5 @@
+import { Capacitor } from '@capacitor/core'
+import { Delete, Refresh } from '@mui/icons-material'
 import {
   Box,
   Button,
@@ -10,24 +12,27 @@ import {
   FormControl,
   FormHelperText,
   Input,
-  ListItem,
   Option,
   Select,
   Typography,
 } from '@mui/joy'
+import { Purchases } from '@revenuecat/purchases-capacitor'
+import { useQueryClient } from '@tanstack/react-query'
 import moment from 'moment'
-import { useContext, useEffect, useState } from 'react'
-import { UserContext } from '../../contexts/UserContext'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import RealTimeSettings from '../../components/RealTimeSettings'
+import SubscriptionModal from '../../components/SubscriptionModal'
 import Logo from '../../Logo'
+import { useUserProfile } from '../../queries/UserQueries'
+import { useNotification } from '../../service/NotificationProvider'
 import {
   AcceptCircleMemberRequest,
   CancelSubscription,
   DeleteCircleMember,
   GetAllCircleMembers,
   GetCircleMemberRequests,
-  GetSubscriptionSession,
   GetUserCircle,
-  GetUserProfile,
   JoinCircle,
   LeaveCircle,
   PutWebhookURL,
@@ -35,16 +40,25 @@ import {
   UpdatePassword,
 } from '../../utils/Fetcher'
 import { isPlusAccount } from '../../utils/Helpers'
+import LoadingComponent from '../components/Loading'
+import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
+import NativeCancelSubscriptionModal from '../Modals/Inputs/NativeCancelSubscriptionModal'
 import PassowrdChangeModal from '../Modals/Inputs/PasswordChangeModal'
+import UserDeletionModal from '../Modals/Inputs/UserDeletionModal'
 import APITokenSettings from './APITokenSettings'
 import MFASettings from './MFASettings'
 import NotificationSetting from './NotificationSetting'
 import ProfileSettings from './ProfileSettings'
+import SidepanelSettings from './SidepanelSettings'
 import StorageSettings from './StorageSettings'
 import ThemeToggle from './ThemeToggle'
 
 const Settings = () => {
-  const { userProfile, setUserProfile } = useContext(UserContext)
+  const { data: userProfile } = useUserProfile()
+  const queryClient = useQueryClient()
+  const { showNotification } = useNotification()
+  const navigate = useNavigate()
+
   const [userCircles, setUserCircles] = useState([])
   const [circleMemberRequests, setCircleMemberRequests] = useState([])
   const [circleInviteCode, setCircleInviteCode] = useState('')
@@ -52,14 +66,56 @@ const Settings = () => {
   const [webhookURL, setWebhookURL] = useState(null)
   const [webhookError, setWebhookError] = useState(null)
   const [isAdmin, setIsAdmin] = useState(false)
+  const [lastRefresh, setLastRefresh] = useState(null)
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   const [changePasswordModal, setChangePasswordModal] = useState(false)
-  useEffect(() => {
-    GetUserProfile().then(resp => {
-      resp.json().then(data => {
-        setUserProfile(data.res)
-      })
+  const [subscriptionModal, setSubscriptionModal] = useState(false)
+  const [userDeletionModal, setUserDeletionModal] = useState(false)
+  const [nativeCancelModal, setNativeCancelModal] = useState(false)
+  const [confirmModalConfig, setConfirmModalConfig] = useState({})
+
+  const showConfirmation = (
+    message,
+    title,
+    onConfirm,
+    confirmText = 'Confirm',
+    cancelText = 'Cancel',
+    color = 'primary',
+  ) => {
+    setConfirmModalConfig({
+      isOpen: true,
+      message,
+      title,
+      confirmText,
+      cancelText,
+      color,
+      onClose: isConfirmed => {
+        if (isConfirmed) {
+          onConfirm()
+        }
+        setConfirmModalConfig({})
+      },
     })
+  }
+  const refreshMemberRequests = async () => {
+    setIsRefreshing(true)
+    try {
+      const resp = await GetCircleMemberRequests()
+      const data = await resp.json()
+      setCircleMemberRequests(data.res ? data.res : [])
+      setLastRefresh(new Date())
+    } catch (error) {
+      showNotification({
+        type: 'error',
+        message: 'Failed to refresh member requests',
+      })
+    } finally {
+      setIsRefreshing(false)
+    }
+  }
+
+  useEffect(() => {
     GetUserCircle().then(resp => {
       resp.json().then(data => {
         setUserCircles(data.res ? data.res : [])
@@ -69,12 +125,24 @@ const Settings = () => {
     GetCircleMemberRequests().then(resp => {
       resp.json().then(data => {
         setCircleMemberRequests(data.res ? data.res : [])
+        setLastRefresh(new Date())
       })
     })
     GetAllCircleMembers().then(data => {
       setCircleMembers(data.res ? data.res : [])
     })
   }, [])
+  useEffect(() => {
+    async function configurePurchases() {
+      if (Capacitor.isNativePlatform() && userProfile) {
+        await Purchases.configure({
+          apiKey: import.meta.env.VITE_REACT_APP_REVENUECAT_API_KEY,
+          appUserID: String(userProfile?.id),
+        })
+      }
+    }
+    configurePurchases()
+  }, [userProfile])
 
   // useEffect when circleMembers and userprofile:
   useEffect(() => {
@@ -87,14 +155,34 @@ const Settings = () => {
   }, [circleMembers, userProfile])
 
   useEffect(() => {
-    const hash = window.location.hash
-    if (hash) {
-      const sharingSection = document.getElementById(
-        window.location.hash.slice(1),
-      )
-      if (sharingSection) {
-        sharingSection.scrollIntoView({ behavior: 'smooth' })
+    const handleHashChange = () => {
+      const hash = window.location.hash
+      if (hash) {
+        // Small delay to ensure the component is fully rendered before scrolling
+        setTimeout(() => {
+          const section = document.getElementById(hash.slice(1))
+          if (section) {
+            // Get the element position and scroll with some offset for the title
+            const elementPosition = section.offsetTop
+            const offsetPosition = elementPosition - 20 // 20px padding above the title
+
+            window.scrollTo({
+              top: offsetPosition,
+              behavior: 'instant', // Use 'smooth' for smooth scrolling
+            })
+          }
+        }, 500)
       }
+    }
+
+    // Handle initial hash on mount
+    handleHashChange()
+
+    // Listen for hash changes
+    window.addEventListener('hashchange', handleHashChange)
+
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange)
     }
   }, [])
 
@@ -103,7 +191,7 @@ const Settings = () => {
       return `You are currently subscribed to the Plus plan. Your subscription will renew on ${moment(
         userProfile?.expiration,
       ).format('MMM DD, YYYY')}.`
-    } else if (userProfile?.subscription === 'canceled') {
+    } else if (userProfile?.subscription === 'cancelled') {
       return `You have cancelled your subscription. Your account will be downgraded to the Free plan on ${moment(
         userProfile?.expiration,
       ).format('MMM DD, YYYY')}.`
@@ -114,7 +202,7 @@ const Settings = () => {
   const getSubscriptionStatus = () => {
     if (userProfile?.subscription === 'active') {
       return `Plus`
-    } else if (userProfile?.subscription === 'canceled') {
+    } else if (userProfile?.subscription === 'cancelled') {
       if (moment().isBefore(userProfile?.expiration)) {
         return `Plus(until ${moment(userProfile?.expiration).format(
           'MMM DD, YYYY',
@@ -140,10 +228,14 @@ const Settings = () => {
       </Container>
     )
   }
+  if (!userProfile) {
+    return <LoadingComponent />
+  }
+
   return (
     <Container>
       <ProfileSettings />
-      <div className='grid gap-4 py-4' id='sharing'>
+      <div className='grid gap-4 py-4' id='circle'>
         <Typography level='h3'>Circle settings</Typography>
         <Divider />
         <Typography level='body-md'>
@@ -170,7 +262,10 @@ const Settings = () => {
             variant='soft'
             onClick={() => {
               navigator.clipboard.writeText(userCircles[0]?.invite_code)
-              alert('Code Copied to clipboard')
+              showNotification({
+                type: 'success',
+                message: 'Code copied to clipboard',
+              })
             }}
           >
             Copy Code
@@ -185,27 +280,42 @@ const Settings = () => {
                   window.location.host +
                   `/circle/join?code=${userCircles[0]?.invite_code}`,
               )
-              alert('Link Copied to clipboard')
+              showNotification({
+                type: 'success',
+                message: 'Link copied to clipboard',
+              })
             }}
           >
             Copy Link
           </Button>
           {userCircles.length > 0 && userCircles[0]?.userRole === 'member' && (
             <Button
+              color='danger'
+              variant='outlined'
               sx={{ ml: 1 }}
               onClick={() => {
-                const confirmed = confirm(
-                  `Are you sure you want to leave your circle?`,
+                showConfirmation(
+                  'Are you sure you want to leave your circle?',
+                  'Leave Circle',
+                  () => {
+                    LeaveCircle(userCircles[0]?.id).then(resp => {
+                      if (resp.ok) {
+                        showNotification({
+                          type: 'success',
+                          message: 'Left circle successfully',
+                        })
+                      } else {
+                        showNotification({
+                          type: 'error',
+                          message: 'Failed to leave circle',
+                        })
+                      }
+                    })
+                  },
+                  'Leave',
+                  'Cancel',
+                  'danger',
                 )
-                if (confirmed) {
-                  LeaveCircle(userCircles[0]?.id).then(resp => {
-                    if (resp.ok) {
-                      alert('Left circle successfully.')
-                    } else {
-                      alert('Failed to leave circle.')
-                    }
-                  })
-                }
               }}
             >
               Leave Circle
@@ -262,7 +372,10 @@ const Settings = () => {
                           })
                           setCircleMembers(newCircleMembers)
                         } else {
-                          alert('Failed to update role')
+                          showNotification({
+                            type: 'error',
+                            message: 'Failed to update role',
+                          })
                         }
                       })
                     }}
@@ -283,7 +396,7 @@ const Settings = () => {
                       },
                     ].map((option, index) => (
                       <Option value={option.value} key={index}>
-                        <ListItem
+                        <Box
                           sx={{
                             display: 'flex',
                             flexDirection: 'column',
@@ -306,39 +419,53 @@ const Settings = () => {
                           >
                             {option.description}
                           </Typography>
-                        </ListItem>
+                        </Box>
                       </Option>
                     ))}
                   </Select>
                 )}
-                {userProfile.role === 'admin' &&
+                {isAdmin &&
                   member.userId !== userProfile.id &&
                   member.isActive && (
                     <Button
-                      disabled={
-                        circleMembers.find(m => userProfile.id == m.userId)
-                          .role !== 'admin'
-                      }
                       variant='outlined'
                       color='danger'
                       size='sm'
                       onClick={() => {
-                        const confirmed = confirm(
+                        showConfirmation(
                           `Are you sure you want to remove ${member.displayName} from your circle?`,
+                          'Remove Member',
+                          () => {
+                            DeleteCircleMember(
+                              member.circleId,
+                              member.userId,
+                            ).then(resp => {
+                              if (resp.ok) {
+                                showNotification({
+                                  type: 'success',
+                                  message: 'Removed member successfully',
+                                })
+                                // Invalidate and refetch circle-related queries
+                                queryClient.invalidateQueries(['circleMembers'])
+                                queryClient.invalidateQueries(['userCircle'])
+                                queryClient.refetchQueries(['circleMembers'])
+                                queryClient.refetchQueries(['userCircle'])
+                                // Update local state immediately
+                                setCircleMembers(prevMembers =>
+                                  prevMembers.filter(
+                                    m => m.userId !== member.userId,
+                                  ),
+                                )
+                              }
+                            })
+                          },
+                          'Remove',
+                          'Cancel',
+                          'danger',
                         )
-                        if (confirmed) {
-                          DeleteCircleMember(
-                            member.circleId,
-                            member.userId,
-                          ).then(resp => {
-                            if (resp.ok) {
-                              alert('Removed member successfully.')
-                            }
-                          })
-                        }
                       }}
                     >
-                      Remove
+                      <Delete />
                     </Button>
                   )}
               </Box>
@@ -346,9 +473,35 @@ const Settings = () => {
           </Card>
         ))}
 
-        {circleMemberRequests.length > 0 && (
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            mb: 1,
+          }}
+        >
           <Typography level='title-md'>Circle Member Requests</Typography>
-        )}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {lastRefresh && (
+              <Typography level='body-sm' color='neutral'>
+                Last updated: {moment(lastRefresh).format('MMM DD, HH:mm')}
+              </Typography>
+            )}
+            <Button
+              size='sm'
+              variant='soft'
+              onClick={refreshMemberRequests}
+              disabled={isRefreshing}
+              startDecorator={
+                isRefreshing ? <CircularProgress size='sm' /> : <Refresh />
+              }
+            >
+              {isRefreshing ? 'Refreshing...' : 'Refresh'}
+            </Button>
+          </Box>
+        </Box>
+
         {circleMemberRequests.map(request => (
           <Card key={request.id} className='p-4'>
             <Typography level='body-md'>
@@ -358,18 +511,34 @@ const Settings = () => {
               variant='soft'
               color='success'
               onClick={() => {
-                const confirmed = confirm(
-                  `Are you sure you want to accept ${request.displayName}(username:${request.username}) to join your circle?`,
+                showConfirmation(
+                  `Are you sure you want to accept ${request.displayName} (username: ${request.username}) to join your circle?`,
+                  'Accept Member Request',
+                  () => {
+                    AcceptCircleMemberRequest(request.id).then(resp => {
+                      if (resp.ok) {
+                        showNotification({
+                          type: 'success',
+                          message: 'Accepted request successfully',
+                        })
+                        // Invalidate and refetch circle-related queries
+                        queryClient.invalidateQueries(['circleMembers'])
+                        queryClient.invalidateQueries(['circleMemberRequests'])
+                        queryClient.invalidateQueries(['userCircle'])
+                        queryClient.refetchQueries(['circleMembers'])
+                        queryClient.refetchQueries(['circleMemberRequests'])
+                        queryClient.refetchQueries(['userCircle'])
+                        // Refresh local state
+                        refreshMemberRequests()
+                        GetAllCircleMembers().then(data => {
+                          setCircleMembers(data.res ? data.res : [])
+                        })
+                      }
+                    })
+                  },
+                  'Accept',
+                  'Cancel',
                 )
-                if (confirmed) {
-                  AcceptCircleMemberRequest(request.id).then(resp => {
-                    if (resp.ok) {
-                      alert('Accepted request successfully.')
-                      // reload the page
-                      window.location.reload()
-                    }
-                  })
-                }
               }}
             >
               Accept
@@ -398,18 +567,29 @@ const Settings = () => {
           <Button
             variant='soft'
             onClick={() => {
-              const confirmed = confirm(
-                `Are you sure you want to leave you circle and join '${circleInviteCode}'?`,
-              )
-              if (confirmed) {
-                JoinCircle(circleInviteCode).then(resp => {
-                  if (resp.ok) {
-                    alert(
+              JoinCircle(circleInviteCode).then(resp => {
+                if (resp.ok) {
+                  showNotification({
+                    type: 'success',
+                    message:
                       'Joined circle successfully, wait for the circle owner to accept your request.',
-                    )
+                  })
+                  setTimeout(() => navigate('/'), 3000)
+                } else {
+                  if (resp.status === 409) {
+                    showNotification({
+                      type: 'error',
+                      message: 'You are already a member of this circle',
+                    })
+                  } else {
+                    showNotification({
+                      type: 'error',
+                      message: 'Failed to join circle',
+                    })
                   }
-                })
-              }
+                  setTimeout(() => navigate('/'), 3000)
+                }
+              })
             }}
           >
             Join Circle
@@ -484,9 +664,15 @@ const Settings = () => {
                   onClick={() => {
                     PutWebhookURL(webhookURL).then(resp => {
                       if (resp.ok) {
-                        alert('Webhook URL updated successfully.')
+                        showNotification({
+                          type: 'success',
+                          message: 'Webhook URL updated successfully',
+                        })
                       } else {
-                        alert('Failed to update webhook URL.')
+                        showNotification({
+                          type: 'error',
+                          message: 'Failed to update webhook URL',
+                        })
                       }
                     })
                   }}
@@ -498,6 +684,10 @@ const Settings = () => {
             )}
           </>
         )}
+
+        {/* WebSocket Settings */}
+        {/* <WebSocketSettings /> */}
+        <RealTimeSettings />
       </div>
 
       <div className='grid gap-4 py-4' id='account'>
@@ -518,17 +708,113 @@ const Settings = () => {
             }}
             disabled={
               userProfile?.subscription === 'active' ||
-              moment(userProfile?.expiration).isAfter(moment())
+              (moment(userProfile?.expiration).isAfter(moment()) &&
+                userProfile?.subscription !== 'cancelled')
             }
-            onClick={() => {
-              GetSubscriptionSession().then(data => {
-                data.json().then(data => {
-                  console.log(data)
-                  window.location.href = data.sessionURL
-                  // open in new window:
-                  // window.open(data.sessionURL, '_blank')
-                })
-              })
+            onClick={async () => {
+              if (
+                Capacitor.isNativePlatform() &&
+                Capacitor.getPlatform() === 'ios'
+              ) {
+                try {
+                  const { RevenueCatUI } = await import(
+                    '@revenuecat/purchases-capacitor-ui'
+                  )
+
+                  const offering = await Purchases.getOfferings()
+                  await RevenueCatUI.presentPaywall({
+                    offering: offering.current,
+                  })
+
+                  // Check if user now has entitlement after paywall interaction
+                  const { customerInfo } = await Purchases.getCustomerInfo()
+                  if (customerInfo.entitlements.active['Donetick Plus']) {
+                    queryClient.invalidateQueries(['userProfile'])
+                    queryClient.refetchQueries(['userProfile'])
+                    showNotification({
+                      type: 'success',
+                      message:
+                        'Purchase successful! Please restart the app to access Plus features.',
+                    })
+                    // invalidate user profile to get new subscription status:
+                  }
+                } catch (error) {
+                  console.log('Purchase error:', error)
+
+                  // Handle different error types
+                  if (error.code === '1') {
+                    // User cancelled - don't show error
+                    return
+                  } else if (error.code === '2') {
+                    // Store problem
+                    showNotification({
+                      type: 'error',
+                      message:
+                        'Store connection issue. Please check your network and try again.',
+                    })
+                  } else if (error.code === '3') {
+                    // Purchase not allowed
+                    showNotification({
+                      type: 'error',
+                      message:
+                        'Purchases are not allowed on this device. Please check your device restrictions.',
+                    })
+                  } else if (error.code === '4') {
+                    // Product not available
+                    showNotification({
+                      type: 'error',
+                      message:
+                        'This subscription is not available. Please try again later.',
+                    })
+                  } else if (error.code === '5') {
+                    // Receipt already in use
+                    showNotification({
+                      type: 'error',
+                      message:
+                        'This purchase has already been processed. If you believe this is an error, please contact support.',
+                    })
+                  } else if (error.code === '6') {
+                    // Missing receipt file
+                    showNotification({
+                      type: 'error',
+                      message:
+                        'Purchase receipt missing. Please try purchasing again.',
+                    })
+                  } else if (error.code === '7') {
+                    // Network error
+                    showNotification({
+                      type: 'error',
+                      message:
+                        'Network error. Please check your connection and try again.',
+                    })
+                  } else if (error.code === '8') {
+                    // Invalid receipt
+                    showNotification({
+                      type: 'error',
+                      message:
+                        'Invalid purchase receipt. Please contact support if this persists.',
+                    })
+                  } else if (error.code === '9') {
+                    // Payment pending
+                    showNotification({
+                      type: 'warning',
+                      message:
+                        'Payment is pending approval. You will receive access once approved.',
+                    })
+                  } else {
+                    // Generic error
+                    // log on what part of the code the error happened
+                    console.error('Unexpected purchase error:', error)
+                    console.error('Error occurred in purchase flow')
+                    showNotification({
+                      type: 'error',
+                      message: `Purchase failed: ${error.message || 'Unknown error'}. Please try again or contact support.`,
+                    })
+                  }
+                }
+              } else {
+                setSubscriptionModal(true)
+              }
             }}
           >
             Upgrade
@@ -542,13 +828,9 @@ const Settings = () => {
                 ml: 1,
               }}
               variant='outlined'
+              color='danger'
               onClick={() => {
-                CancelSubscription().then(resp => {
-                  if (resp.ok) {
-                    alert('Subscription cancelled.')
-                    window.location.reload()
-                  }
-                })
+                setNativeCancelModal(true)
               }}
             >
               Cancel
@@ -576,9 +858,15 @@ const Settings = () => {
                   if (password) {
                     UpdatePassword(password).then(resp => {
                       if (resp.ok) {
-                        alert('Password changed successfully')
+                        showNotification({
+                          type: 'success',
+                          message: 'Password changed successfully',
+                        })
                       } else {
-                        alert('Password change failed')
+                        showNotification({
+                          type: 'error',
+                          message: 'Password change failed',
+                        })
                       }
                     })
                   }
@@ -588,12 +876,40 @@ const Settings = () => {
             ) : null}
           </Box>
         )}
+
+        <Box>
+          <Typography level='title-md' mb={1} color='danger'>
+            Danger Zone
+          </Typography>
+          <Typography level='body-sm' mb={2} color='neutral'>
+            Once you delete your account, there is no going back. Please be
+            certain.
+          </Typography>
+          <Button
+            variant='outlined'
+            color='danger'
+            onClick={() => setUserDeletionModal(true)}
+          >
+            Delete Account
+          </Button>
+        </Box>
       </div>
       <NotificationSetting />
       <MFASettings />
       <APITokenSettings />
       <StorageSettings />
-      <div className='grid gap-4 py-4'>
+      <div className='grid gap-4 py-4' id='sidepanel'>
+        <Typography level='h3'>Sidepanel Customization</Typography>
+        <Divider />
+        <Typography level='body-md'>
+          Customize the layout and visibility of cards in the sidepanel. the
+          section only available on large screen devices such as tablets and
+          desktops..
+        </Typography>
+        <SidepanelSettings />
+      </div>
+
+      <div className='grid gap-4 py-4' id='theme'>
         <Typography level='h3'>Theme preferences</Typography>
         <Divider />
         <Typography level='body-md'>
@@ -602,6 +918,53 @@ const Settings = () => {
         </Typography>
         <ThemeToggle />
       </div>
+
+      {/* Modals */}
+      {confirmModalConfig?.isOpen && (
+        <ConfirmationModal config={confirmModalConfig} />
+      )}
+
+      <SubscriptionModal
+        open={subscriptionModal}
+        onClose={() => setSubscriptionModal(false)}
+      />
+
+      <UserDeletionModal
+        isOpen={userDeletionModal}
+        onClose={success => {
+          setUserDeletionModal(false)
+          if (success) {
+            showNotification({
+              type: 'success',
+              message: 'Account deleted successfully',
+            })
+          }
+        }}
+        userProfile={userProfile}
+      />
+
+      <NativeCancelSubscriptionModal
+        isOpen={nativeCancelModal}
+        onClose={action => {
+          setNativeCancelModal(false)
+          if (action === 'desktop') {
+            CancelSubscription().then(resp => {
+              if (resp.ok) {
+                showNotification({
+                  type: 'success',
+                  message: 'Subscription cancelled',
+                })
+                window.location.reload()
+              } else {
+                showNotification({
+                  type: 'error',
+                  message: 'Failed to cancel subscription',
+                })
+              }
+            })
+          }
+        }}
+      />
     </Container>
   )
 }

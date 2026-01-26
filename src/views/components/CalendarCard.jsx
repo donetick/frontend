@@ -1,29 +1,54 @@
 import { CalendarMonth } from '@mui/icons-material'
 import { Avatar, Box, Chip, Grid, Typography } from '@mui/joy'
 import moment from 'moment'
-import React, { useState } from 'react'
-import Calendar from 'react-calendar'
-import 'react-calendar/dist/Calendar.css'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { UserContext } from '../../contexts/UserContext'
-import { useCircleMembers } from '../../queries/UserQueries'
-import { TASK_COLOR } from '../../utils/Colors'
-import './Calendar.css'
+import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
+import { getPriorityColor, TASK_COLOR } from '../../utils/Colors'
+
+import CalendarMonthly from './CalendarMonthly'
 
 const getAssigneeColor = (assignee, userProfile) => {
   return assignee === userProfile.id
     ? TASK_COLOR.ASSIGNED_TO_ME
     : TASK_COLOR.ASSIGNED_TO_OTHER
 }
+const CalendarCard = ({ chores }) => {
+  const { data: userProfile } = useUserProfile()
 
-const CalendarView = ({ chores }) => {
-  const { userProfile } = React.useContext(UserContext)
   const [selectedDate, setSeletedDate] = useState(null)
   const Navigate = useNavigate()
 
   // Fetch circle members data to get assignee names
   const { data: circleMembersData } = useCircleMembers()
   const circleMembers = circleMembersData?.res || []
+
+  // Auto-update selected calendar date when day changes
+  useEffect(() => {
+    if (!selectedDate) {
+      return
+    }
+
+    const now = new Date()
+    const tomorrow = new Date(now)
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    tomorrow.setHours(0, 0, 0, 0) // Set to start of tomorrow
+    
+    const msUntilTomorrow = tomorrow.getTime() - now.getTime()
+
+    const timeout = setTimeout(() => {
+      const today = new Date()
+      const yesterday = new Date(today)
+      yesterday.setDate(yesterday.getDate() - 1)
+      
+      // Check if selected date is now yesterday and update to today
+      if (selectedDate.toDateString() === yesterday.toDateString()) {
+        setSeletedDate(today)
+      }
+    }, msUntilTomorrow)
+
+    return () => clearTimeout(timeout)
+  }, [selectedDate])
 
   // Helper function to get assignee display name
   const getAssigneeName = assignedTo => {
@@ -32,58 +57,6 @@ const CalendarView = ({ chores }) => {
     }
     const assignee = circleMembers.find(member => member.userId === assignedTo)
     return assignee ? `${assignee.displayName}` : 'Assigned to other'
-  }
-
-  const tileContent = ({ date, view }) => {
-    if (view === 'month') {
-      const dayChores = chores.filter(chore => {
-        const choreDate = new Date(chore.nextDueDate).toLocaleDateString()
-        const tileDate = date.toLocaleDateString()
-        return choreDate === tileDate
-      })
-      if (dayChores.length === 0) {
-        return (
-          <div className='dot-container'>
-            <span className='dot-empty'></span>
-          </div>
-        )
-      }
-      if (dayChores.length > 3) {
-        return (
-          <div className='dot-container'>
-            <span
-              className='dot-with-line'
-              style={{
-                backgroundColor: getAssigneeColor(
-                  dayChores[0].assignedTo,
-                  userProfile,
-                ),
-              }}
-            ></span>
-          </div>
-        )
-      }
-
-      return (
-        <div className='dot-container'>
-          {dayChores.map((chore, index) => {
-            return (
-              <span
-                key={index}
-                className='dot'
-                style={{
-                  backgroundColor: getAssigneeColor(
-                    chore.assignedTo,
-                    userProfile,
-                  ),
-                }}
-              ></span>
-            )
-          })}
-        </div>
-      )
-    }
-    return null
   }
 
   return (
@@ -103,7 +76,7 @@ const CalendarView = ({ chores }) => {
           alignItems: 'center',
           justifyContent: 'flex-start',
           gap: 1,
-          width: '100%',
+          maxWidth: '250px',
           mb: 2,
         }}
       >
@@ -111,16 +84,16 @@ const CalendarView = ({ chores }) => {
         <Typography level='title-md'>Calendar Overview</Typography>
       </Box>
 
-      <Calendar
-        tileContent={tileContent}
-        onChange={d => {
-          setSeletedDate(new Date(d))
-        }}
-        // format the days from MON, TUE, WED, THU, FRI, SAT, SUN to first three letters:
-        formatShortWeekday={(locale, date) =>
-          ['S', 'M', 'T', 'W', 'T', 'F', 'S'][date.getDay()]
-        }
-      />
+      <div>
+        <CalendarMonthly
+          // className={styled.reactCalendar}
+          chores={chores}
+          onDateChange={date => {
+            setSeletedDate(date)
+          }}
+        />
+      </div>
+
       {!selectedDate && (
         <Grid
           container
@@ -134,39 +107,54 @@ const CalendarView = ({ chores }) => {
             justifyContent: 'start',
           }}
         >
-          {/* Show legend with current user first, then other circle members who have assignments */}
+          {/* Show legend with priority colors */}
           {(() => {
-            const assignedUserIds = new Set(
-              chores.map(chore => chore.assignedTo).filter(Boolean),
+            const priorityLevels = new Set(
+              chores.map(chore => chore.priority).filter(p => p !== undefined),
             )
             const legendItems = []
 
-            // Add current user if they have assignments
-            if (assignedUserIds.has(userProfile.id)) {
+            // Add priority levels that exist in the chores
+            if (priorityLevels.has(1)) {
               legendItems.push({
-                name: 'Assigned to me',
-                color: TASK_COLOR.ASSIGNED_TO_ME,
+                name: 'High Priority',
+                color: TASK_COLOR.PRIORITY_1,
               })
             }
-
-            // Add other circle members who have assignments
-            circleMembers.forEach(member => {
-              if (
-                member.userId !== userProfile.id &&
-                assignedUserIds.has(member.userId)
-              ) {
-                legendItems.push({
-                  name: `Assigned to others`,
-                  color: TASK_COLOR.ASSIGNED_TO_OTHER,
-                })
-              }
-            })
+            if (priorityLevels.has(2)) {
+              legendItems.push({
+                name: 'Medium Priority',
+                color: TASK_COLOR.PRIORITY_2,
+              })
+            }
+            if (priorityLevels.has(3)) {
+              legendItems.push({
+                name: 'Low Priority',
+                color: TASK_COLOR.PRIORITY_3,
+              })
+            }
+            if (priorityLevels.has(4)) {
+              legendItems.push({
+                name: 'Lowest Priority',
+                color: TASK_COLOR.PRIORITY_4,
+              })
+            }
+            if (
+              chores.some(
+                chore =>
+                  chore.priority === undefined || chore.priority === null,
+              )
+            ) {
+              legendItems.push({
+                name: 'No Priority',
+                color: TASK_COLOR.NO_PRIORITY,
+              })
+            }
 
             return legendItems.map((item, index) => (
               <Grid
                 key={index}
-                item
-                xs={12}
+                xs={6}
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
@@ -273,10 +261,7 @@ const CalendarView = ({ chores }) => {
                       top: 0,
                       bottom: 0,
                       width: '3px',
-                      backgroundColor: getAssigneeColor(
-                        chore.assignedTo,
-                        userProfile,
-                      ),
+                      backgroundColor: getPriorityColor(chore.priority),
                       borderRadius: '2px',
                     },
                   }}
@@ -349,4 +334,4 @@ const CalendarView = ({ chores }) => {
   )
 }
 
-export default CalendarView
+export default CalendarCard

@@ -14,6 +14,7 @@ const DemoMyChore = () => {
       nextDueDate: moment().add(1, 'days').hour(8).minute(0).toISOString(),
       isRolling: false,
       assignedTo: 1,
+      status: 0,
     },
     {
       id: 9,
@@ -24,6 +25,7 @@ const DemoMyChore = () => {
       nextDueDate: moment().subtract(7, 'day').toISOString(),
       isRolling: false,
       assignedTo: 1,
+      status: 0,
     },
     {
       id: 6,
@@ -93,7 +95,7 @@ const DemoMyChore = () => {
     // },
   ]
 
-  const users = [{ displayName: 'Me', id: 1 }]
+  const users = [{ displayName: 'Me', id: 1, userId: 1 }]
   return (
     <>
       <Grid item xs={12} sm={5} data-aos-first-tasks-list>

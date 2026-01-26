@@ -6,7 +6,7 @@ const renderHighlightedText = (text, cursorPosition) => {
   const parts = []
   let lastIndex = 0
 
-  const regex = /(Tomorrow)|(#\w+)|(P\d)/gi
+  const regex = /(Tomorrow)|(Every\s+\d+\s+\w+s?)|(#\w+)|(P\d+)/gi
   let match
 
   while ((match = regex.exec(text)) !== null) {
@@ -20,6 +20,8 @@ const renderHighlightedText = (text, cursorPosition) => {
     let className = ''
     if (matchedText.toLowerCase() === 'tomorrow') {
       className = 'highlight-date'
+    } else if (matchedText.toLowerCase().startsWith('every')) {
+      className = 'highlight-repeat'
     } else if (matchedText.startsWith('#')) {
       className = 'highlight-label'
     } else if (matchedText.startsWith('P')) {

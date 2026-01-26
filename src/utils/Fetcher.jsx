@@ -1,4 +1,18 @@
-import { Fetch, HEADERS, apiManager } from './TokenManager'
+import { apiClient } from './ApiClient'
+
+// Migration helpers to maintain compatibility with existing code
+const Fetch = async (endpoint, options = {}) => {
+  const response = await apiClient.request(endpoint, options)
+  return response
+}
+
+const HEADERS = () => {
+  return apiClient.getHeaders()
+}
+
+const apiManager = {
+  getApiURL: () => apiClient.getApiURL(),
+}
 
 const createChore = userID => {
   return Fetch(`/chores/`, {
@@ -38,6 +52,14 @@ const login = (username, password) => {
     },
     method: 'POST',
     body: JSON.stringify({ username, password }),
+  })
+}
+
+const logout = () => {
+  const baseURL = apiManager.getApiURL()
+  return fetch(`${baseURL}/auth/logout`, {
+    method: 'POST',
+    credentials: 'include',
   })
 }
 
@@ -123,12 +145,26 @@ const MarkChoreComplete = (id, body, completedDate, performer) => {
   })
 }
 
-const CompleteSubTask = (id, choreId, performedAt) => {
+const StartChore = id => {
+  return Fetch(`/chores/${id}/start`, {
+    method: 'PUT',
+    headers: HEADERS(),
+  })
+}
+
+const PauseChore = id => {
+  return Fetch(`/chores/${id}/pause`, {
+    method: 'PUT',
+    headers: HEADERS(),
+  })
+}
+
+const CompleteSubTask = (id, choreId, completedAt) => {
   var markChoreURL = `/chores/${choreId}/subtask`
   return Fetch(markChoreURL, {
     method: 'PUT',
     headers: HEADERS(),
-    body: JSON.stringify({ performedAt, id, choreId }),
+    body: JSON.stringify({ completedAt, id, choreId }),
   })
 }
 
@@ -142,11 +178,49 @@ const SkipChore = id => {
   })
 }
 
+const ApproveChore = id => {
+  return Fetch(`/chores/${id}/approve`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify({}),
+  })
+}
+
+const RejectChore = id => {
+  return Fetch(`/chores/${id}/reject`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify({}),
+  })
+}
+
+const UndoChoreAction = id => {
+  return Fetch(`/chores/${id}/undo`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify({}),
+  })
+}
+
+const NudgeChore = (id, { message, notifyAllAssignees }) => {
+  return Fetch(`/chores/${id}/nudge`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify({
+      all_assignees: notifyAllAssignees,
+      message: message || '',
+    }),
+  })
+}
+
 const UpdateChoreAssignee = (id, assignee) => {
   return Fetch(`/chores/${id}/assignee`, {
     method: 'PUT',
     headers: HEADERS(),
-    body: JSON.stringify({ assignee: Number(assignee) }),
+    body: JSON.stringify({
+      assignee: Number(assignee),
+      updatedAt: new Date().toISOString(),
+    }),
   })
 }
 
@@ -198,14 +272,6 @@ const UpdateChoreHistory = (choreId, id, choreHistory) => {
     method: 'PUT',
     headers: HEADERS(),
     body: JSON.stringify(choreHistory),
-  })
-}
-
-const UpdateChoreStatus = (choreId, status) => {
-  return Fetch(`/chores/${choreId}/status`, {
-    method: 'PUT',
-    headers: HEADERS(),
-    body: JSON.stringify({ status }),
   })
 }
 
@@ -499,6 +565,7 @@ const UpdateDueDate = (id, dueDate) => {
     },
     body: JSON.stringify({
       dueDate: dueDate ? new Date(dueDate).toISOString() : null,
+      updatedAt: new Date().toISOString(),
     }),
   })
 }
@@ -510,12 +577,39 @@ const RedeemPoints = (userId, points, circleID) => {
     body: JSON.stringify({ points, userId }),
   })
 }
-const RefreshToken = () => {
+const RefreshToken = async () => {
   const basedURL = apiManager.getApiURL()
-  return fetch(`${basedURL}/auth/refresh`, {
-    method: 'GET',
-    headers: HEADERS(),
-  })
+
+  // Check if running on native platform
+  const isNative =
+    typeof window !== 'undefined' && window.Capacitor?.isNativePlatform?.()
+
+  if (isNative) {
+    // For native platforms, send refresh token in request body
+    const { Preferences } = await import('@capacitor/preferences')
+    const { value: refreshToken } = await Preferences.get({
+      key: 'refresh_token',
+    })
+
+    if (!refreshToken) {
+      throw new Error('No refresh token available')
+    }
+
+    return fetch(`${basedURL}/auth/refresh`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ refresh_token: refreshToken }),
+    })
+  } else {
+    // For web, continue using cookies
+    return fetch(`${basedURL}/auth/refresh`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: HEADERS(),
+    })
+  }
 }
 const GetChoresHistory = async (limit, includeMembers) => {
   var url = `/chores/history`
@@ -549,37 +643,249 @@ const GetStorageUsage = () => {
   })
 }
 
+// Timer/TimeSession API functions
+const GetChoreTimer = choreId => {
+  return Fetch(`/chores/${choreId}/timer`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+}
+
+const UpdateTimeSession = (choreId, sessionId, sessionData) => {
+  return Fetch(`/chores/${choreId}/timer/${sessionId}`, {
+    method: 'PUT',
+    headers: HEADERS(),
+    body: JSON.stringify(sessionData),
+  })
+}
+
+const DeleteTimeSession = (choreId, sessionId) => {
+  return Fetch(`/chores/${choreId}/timer/${sessionId}`, {
+    method: 'DELETE',
+    headers: HEADERS(),
+  })
+}
+
+const ResetChoreTimer = choreId => {
+  return Fetch(`/chores/${choreId}/timer/reset`, {
+    method: 'PUT',
+    headers: HEADERS(),
+  })
+}
+
+const ClearChoreTimer = choreId => {
+  return Fetch(`/chores/${choreId}/timer`, {
+    method: 'DELETE',
+    headers: HEADERS(),
+  })
+}
+
+const CheckUserDeletion = password => {
+  return Fetch(`/users/delete/check`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify({
+      password,
+    }),
+  })
+}
+
+const DeleteUser = (password, confirmation, transferOptions = []) => {
+  return Fetch(`/users/delete`, {
+    method: 'DELETE',
+    headers: HEADERS(),
+    body: JSON.stringify({
+      password,
+      confirmation,
+      transferOptions,
+    }),
+  })
+}
+
+const CreateBackup = (encryptionKey, includeAssets = true, backupName = '') => {
+  return Fetch(`/backup/create`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify({
+      encryption_key: encryptionKey,
+      include_assets: includeAssets,
+      backup_name: backupName,
+    }),
+  })
+}
+
+const RestoreBackup = (encryptionKey, backupData) => {
+  return Fetch(`/backup/restore`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify({
+      encryption_key: encryptionKey,
+      backup_data: backupData,
+    }),
+  })
+}
+
+const RegisterDeviceToken = (
+  token,
+  deviceId,
+  platform,
+  appVersion,
+  deviceModel,
+) => {
+  return Fetch(`/devices/tokens`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify({
+      token,
+      deviceId,
+      platform,
+      appVersion,
+      deviceModel,
+    }),
+  })
+}
+
+const UnregisterDeviceToken = (deviceId, token) => {
+  return Fetch(`/devices/tokens`, {
+    method: 'DELETE',
+    headers: HEADERS(),
+    body: JSON.stringify({
+      deviceId,
+      token,
+    }),
+  })
+}
+
+const GetDeviceTokens = (active = true) => {
+  return Fetch(`/devices/tokens?active=${active}`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+}
+
+// Child User Management Functions
+const CreateChildUser = (childName, displayName, password) => {
+  return Fetch(`/users/subaccounts`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify({
+      childName,
+      displayName,
+      password,
+    }),
+  })
+}
+
+const GetChildUsers = () => {
+  return Fetch(`/users/subaccounts`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+}
+
+const UpdateChildPassword = (childUserId, password) => {
+  return Fetch(`/users/subaccounts/password`, {
+    method: 'PUT',
+    headers: HEADERS(),
+    body: JSON.stringify({
+      childUserId,
+      password,
+    }),
+  })
+}
+
+const DeleteChildUser = childUserId => {
+  return Fetch(`/users/subaccounts/${childUserId}`, {
+    method: 'DELETE',
+    headers: HEADERS(),
+  })
+}
+
+// Project-related API functions
+const GetProjects = () => {
+  return Fetch(`/projects`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+}
+
+const GetProjectById = id => {
+  return Fetch(`/projects/${id}`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+}
+
+const CreateProject = project => {
+  return Fetch(`/projects`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify(project),
+  })
+}
+
+const UpdateProject = (id, project) => {
+  return Fetch(`/projects/${id}`, {
+    method: 'PUT',
+    headers: HEADERS(),
+    body: JSON.stringify(project),
+  })
+}
+
+const DeleteProject = id => {
+  return Fetch(`/projects/${id}`, {
+    method: 'DELETE',
+    headers: HEADERS(),
+  })
+}
+
 export {
   AcceptCircleMemberRequest,
+  ApproveChore,
   ArchiveChore,
   CancelSubscription,
   ChangePassword,
+  CheckUserDeletion,
+  ClearChoreTimer,
   CompleteSubTask,
   ConfirmMFA,
+  CreateBackup,
+  CreateChildUser,
   CreateChore,
+  createChore,
   CreateLabel,
   CreateLongLiveToken,
+  CreateProject,
   CreateThing,
+  DeleteChildUser,
   DeleteChore,
   DeleteChoreHistory,
   DeleteCircleMember,
   DeleteLabel,
   DeleteLongLiveToken,
+  DeleteProject,
   DeleteThing,
+  DeleteTimeSession,
+  DeleteUser,
   DisableMFA,
   GetAllCircleMembers,
   GetAllUsers,
   GetArchivedChores,
+  GetChildUsers,
   GetChoreByID,
   GetChoreDetailById,
   GetChoreHistory,
   GetChores,
   GetChoresHistory,
   GetChoresNew,
+  GetChoreTimer,
   GetCircleMemberRequests,
+  GetDeviceTokens,
   GetLabels,
   GetLongLiveTokens,
   GetMFAStatus,
+  GetProjectById,
+  GetProjects,
   GetResource,
   GetStorageUsage,
   GetSubscriptionSession,
@@ -589,31 +895,42 @@ export {
   GetUserProfile,
   JoinCircle,
   LeaveCircle,
+  login,
+  logout,
   MarkChoreComplete,
+  NudgeChore,
+  PauseChore,
   PutNotificationTarget,
   PutWebhookURL,
   RedeemPoints,
   RefreshToken,
   RegenerateBackupCodes,
+  RegisterDeviceToken,
+  RejectChore,
+  ResetChoreTimer,
   ResetPassword,
+  RestoreBackup,
   SaveChore,
   SaveThing,
   SetupMFA,
+  signUp,
   SkipChore,
+  StartChore,
   UnArchiveChore,
+  UndoChoreAction,
+  UnregisterDeviceToken,
+  UpdateChildPassword,
   UpdateChoreAssignee,
   UpdateChoreHistory,
   UpdateChorePriority,
-  UpdateChoreStatus,
   UpdateDueDate,
   UpdateLabel,
   UpdateMemberRole,
   UpdateNotificationTarget,
   UpdatePassword,
+  UpdateProject,
   UpdateThingState,
+  UpdateTimeSession,
   UpdateUserDetails,
   VerifyMFA,
-  createChore,
-  login,
-  signUp,
 }

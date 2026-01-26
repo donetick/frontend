@@ -1,9 +1,67 @@
 .react-calendar {
   width: 100%;
-  max-width: 600px;
+  max-width: min(600px, 95vw);
   font-family: 'Roboto', sans-serif;
   background-color: transparent;
   border: none;
+  margin: 0 auto;
+}
+
+/* Force proper 7-day grid layout */
+.react-calendar__month-view__days {
+  display: grid !important;
+  grid-template-columns: repeat(7, 1fr) !important;
+  gap: 2px;
+}
+
+.react-calendar__month-view__weekdays {
+  display: grid !important;
+  grid-template-columns: repeat(7, 1fr) !important;
+  gap: 2px;
+}
+
+/* Year view - force 3 columns layout */
+.react-calendar__year-view__months {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 8px;
+}
+
+/* Decade view - force 3 columns layout for years */
+.react-calendar__decade-view__years {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 8px;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 480px) {
+  .react-calendar {
+    max-width: 100%;
+    font-size: 0.875rem;
+  }
+
+  .react-calendar__tile {
+    min-height: 28px;
+    font-size: clamp(0.7rem, 3vw, 0.8rem);
+  }
+
+  .react-calendar__month-view__weekdays__weekday {
+    padding: 0.25em;
+    font-size: 0.75rem;
+  }
+
+  /* Ensure year view stays 3 columns on mobile */
+  .react-calendar__year-view__months {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 4px;
+  }
+
+  /* Ensure decade view stays 3 columns on mobile */
+  .react-calendar__decade-view__years {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 4px;
+  }
 }
 
 /* Add styles for weekday names */
@@ -28,14 +86,20 @@
 }
 
 .react-calendar__tile {
-  padding: 10px;
-  max-height: 40px;
-  min-width: 40px;
+  padding: 0;
+  width: 100%;
+  aspect-ratio: 1;
   text-align: center;
   border-radius: 50%;
   transition: all 0.2s ease-in-out;
   position: relative;
-  font-size: 0.875rem;
+  font-size: clamp(0.75rem, 2vw, 0.875rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  border: none;
+  background: transparent;
 }
 
 .react-calendar__tile:enabled:hover {
@@ -88,25 +152,28 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 16px;
+  height: 12px;
   flex-wrap: wrap;
-  position: relative;
-  min-height: 16px;
-  margin-top: -5px;
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  min-height: 12px;
+  width: 100%;
 }
 
 .dot {
-  width: 0.3em;
-  height: 0.3em;
+  width: clamp(3px, 0.25em, 5px);
+  height: clamp(3px, 0.25em, 5px);
   border-radius: 50%;
-  margin: 0 1px;
+  margin: 0 0.5px;
 }
 
 .dot-with-line {
-  width: 1.2em;
-  height: 0.3em;
-  border-radius: 0.15em;
-  margin: 0 1px;
+  width: clamp(12px, 1em, 16px);
+  height: clamp(3px, 0.25em, 5px);
+  border-radius: clamp(1.5px, 0.125em, 2.5px);
+  margin: 0 0.5px;
 }
 .dot-empty {
   background-color: transparent;

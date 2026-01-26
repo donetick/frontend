@@ -1,6 +1,7 @@
 import { WifiOff } from '@mui/icons-material'
 import { Alert, Box } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import Z_INDEX from '../../constants/zIndex'
 import { networkManager } from '../../hooks/NetworkManager'
 
 const NetworkBanner = () => {
@@ -14,17 +15,22 @@ const NetworkBanner = () => {
   }, [])
 
   return (
-    <Box sx={{ position: 'relative' }}>
+    <Box sx={{}}>
       {!isOnline && (
         <Alert
           variant='soft'
           color='warning'
           sx={{
-            zIndex: 1000,
+            padding: '4px',
+            position: 'fixed',
+            paddingTop: `calc(var(--safe-area-inset-top, 0px))`,
+            top: 0,
+            left: 0,
+            zIndex: Z_INDEX.NETWORK_BANNER,
+            pt: `calc( env(safe-area-inset-top, 0px))`,
             width: '100%',
             justifyContent: 'center',
             alignItems: 'center',
-            padding: '4px',
             fontSize: '10px',
             fontWeight: 'md',
           }}

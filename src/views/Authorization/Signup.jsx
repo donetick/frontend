@@ -7,38 +7,38 @@ import {
   FormHelperText,
   Input,
   Sheet,
-  Snackbar,
   Typography,
 } from '@mui/joy'
+import { useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import Logo from '../../Logo'
+import { useNotification } from '../../service/NotificationProvider'
 import { login, signUp } from '../../utils/Fetcher'
 
 const SignupView = () => {
   const [username, setUsername] = React.useState('')
   const [password, setPassword] = React.useState('')
   const Navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [displayName, setDisplayName] = React.useState('')
   const [email, setEmail] = React.useState('')
   const [usernameError, setUsernameError] = React.useState('')
   const [passwordError, setPasswordError] = React.useState('')
   const [emailError, setEmailError] = React.useState('')
   const [displayNameError, setDisplayNameError] = React.useState('')
-  const [error, setError] = React.useState(null)
-  const [snackbarOpen, setSnackbarOpen] = React.useState(false)
-  const [snackbarMessage, setSnackbarMessage] = React.useState('')
+  const { showError } = useNotification()
   const handleLogin = (username, password) => {
     login(username, password).then(response => {
       if (response.status === 200) {
         response.json().then(res => {
-          localStorage.setItem('ca_token', res.token)
-          localStorage.setItem('ca_expiration', res.expire)
-          setTimeout(() => {
-            // TODO: not sure if there is a race condition here
-            // but on first sign up it renavigates to login.
-            Navigate('/my/chores')
-          }, 500)
+          localStorage.setItem('token', res.token)
+          localStorage.setItem('token_expiry', res.expire)
+
+          // Invalidate user profile queries to ensure fresh data
+          queryClient.invalidateQueries(['userProfile'])
+
+          Navigate('/chores')
         })
       } else {
         console.log('Login failed', response)
@@ -85,10 +85,10 @@ const SignupView = () => {
       isValid = false
     }
 
-    // username should only contain letters , numbers , dot and dash:
-    if (!/^[a-zA-Z0-9.-]+$/.test(username)) {
+    // username should only contain lowercase letters, dot and dash:
+    if (!/^[a-z.-]+$/.test(username)) {
       setUsernameError(
-        'Username can only contain letters, numbers, dot and dash',
+        'Username can only contain lowercase letters, dot and dash',
       )
       isValid = false
     }
@@ -104,11 +104,17 @@ const SignupView = () => {
       if (response.status === 201) {
         handleLogin(username, password)
       } else if (response.status === 403) {
-        setError('Signup disabled, please contact admin')
+        showError({
+          title: 'Signup Failed',
+          message: 'Signup disabled, please contact admin',
+        })
       } else {
         console.log('Signup failed')
         response.json().then(res => {
-          setError(res.error)
+          showError({
+            title: 'Signup Failed',
+            message: res.error || 'An error occurred during signup',
+          })
         })
       }
     })
@@ -240,12 +246,18 @@ const SignupView = () => {
           <FormControl error={displayNameError}>
             <FormHelperText>{displayNameError}</FormHelperText>
           </FormControl>
+          <Typography
+            level='body2'
+            sx={{ mt: 2, mb: 1, textAlign: 'center', color: 'text.secondary' }}
+          >
+            By signing up, you agree to our Terms of Service and Privacy Policy
+          </Typography>
           <Button
             // type='submit'
             size='lg'
             fullWidth
             variant='solid'
-            sx={{ mt: 3, mb: 1 }}
+            sx={{ mt: 1, mb: 1 }}
             onClick={handleSubmit}
           >
             Sign Up
@@ -262,16 +274,31 @@ const SignupView = () => {
           >
             Login
           </Button>
+
+          <Box
+            sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}
+          >
+            <Button
+              variant='plain'
+              size='sm'
+              onClick={() => {
+                window.open('https://donetick.com/privacy-policy', '_blank')
+              }}
+            >
+              Privacy Policy
+            </Button>
+            <Button
+              variant='plain'
+              size='sm'
+              onClick={() => {
+                window.open('https://donetick.com/terms', '_blank')
+              }}
+            >
+              Terms of Use
+            </Button>
+          </Box>
         </Sheet>
       </Box>
-      <Snackbar
-        open={error !== null}
-        onClose={() => setError(null)}
-        autoHideDuration={5000}
-        message={error}
-      >
-        {error}
-      </Snackbar>
     </Container>
   )
 }

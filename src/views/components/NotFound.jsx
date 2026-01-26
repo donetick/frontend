@@ -35,7 +35,7 @@ const NotFound = () => {
         </Typography>
         <Button
           component={Link}
-          to='/my/chores'
+          to='/chores'
           variant='outlined'
           color='primary'
           sx={{ mt: 4 }}

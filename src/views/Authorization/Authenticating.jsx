@@ -1,16 +1,16 @@
 import { Box, Button, CircularProgress, Container, Typography } from '@mui/joy'
-import { useContext, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Logo from '../../Logo'
-import { apiManager } from '../../utils/TokenManager'
+import { apiClient } from '../../utils/ApiClient'
 
 import Cookies from 'js-cookie'
 import { useRef } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { UserContext } from '../../contexts/UserContext'
+import { useUserProfile } from '../../queries/UserQueries'
 import { GetUserProfile } from '../../utils/Fetcher'
 
 const AuthenticationLoading = () => {
-  const { userProfile, setUserProfile } = useContext(UserContext)
+  const { data: userProfile, refetch: refetchUserProfile } = useUserProfile()
   const Navigate = useNavigate()
   const hasCalledHandleOAuth2 = useRef(false)
   const [message, setMessage] = useState('Authenticating')
@@ -29,15 +29,16 @@ const AuthenticationLoading = () => {
   const getUserProfileAndNavigateToHome = () => {
     GetUserProfile().then(data => {
       data.json().then(data => {
-        setUserProfile(data.res)
-        // check if redirect url is set in cookie:
-        const redirectUrl = Cookies.get('ca_redirect')
-        if (redirectUrl) {
-          Cookies.remove('ca_redirect')
-          Navigate(redirectUrl)
-        } else {
-          Navigate('/my/chores')
-        }
+        refetchUserProfile().then(() => {
+          // check if redirect url is set in cookie:
+          const redirectUrl = Cookies.get('ca_redirect')
+          if (redirectUrl) {
+            Cookies.remove('ca_redirect')
+            Navigate(redirectUrl)
+          } else {
+            Navigate('/chores')
+          }
+        })
       })
     })
   }
@@ -57,7 +58,7 @@ const AuthenticationLoading = () => {
     }
 
     if (code) {
-      const baseURL = apiManager.getApiURL()
+      const baseURL = apiClient.baseURL
       fetch(`${baseURL}/auth/${provider}/callback`, {
         method: 'POST',
         headers: {
@@ -70,8 +71,8 @@ const AuthenticationLoading = () => {
       }).then(response => {
         if (response.status === 200) {
           return response.json().then(data => {
-            localStorage.setItem('ca_token', data.token)
-            localStorage.setItem('ca_expiration', data.expire)
+            localStorage.setItem('token', data.token)
+            localStorage.setItem('token_expiry', data.expire)
 
             const redirectUrl = Cookies.get('ca_redirect')
             if (redirectUrl) {

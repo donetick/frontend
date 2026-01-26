@@ -27,7 +27,6 @@ const LABEL_COLORS = [
 ]
 
 export const COLORS = {
-  white: '#FFFFFF',
   salmon: '#ff7961',
   teal: '#26a69a',
   skyBlue: '#80d8ff',
@@ -52,6 +51,12 @@ export const COLORS = {
   blush: '#f8bbd0',
   ash: '#90a4ae',
   sand: '#d7ccc8',
+  white: '#FFFFFF',
+}
+export const NOTIFICATION_TYPE = {
+  PREDUE: '#4ec1a2',
+  DUE_DATE: '#f6ad55',
+  POSTDUE: '#F03A47',
 }
 
 export const TASK_COLOR = {
@@ -60,25 +65,47 @@ export const TASK_COLOR = {
   MISSED: '#F03A47',
   UPCOMING: '#AF5B5B',
   SKIPPED: '#E2C2FF',
+  IN_PROGRESS: '#00bcd4',
+  // PENDING_REVIEW: '#b39ddb',
+  OVERDUE: '#F03A47',
+  SCHEDULED: '#10B982',
+  PENDING_REVIEW: '#8B6CE1',
 
   // For the calendar
-  OVERDUE: '#F03A47',
   TODAY: '#ffc107',
+  TOMORROW: '#4ec1a2',
+  NEXT_7_DAYS: '#00bcd4',
+  LATER_THIS_MONTH: '#b39ddb',
+  FUTURE: '#d7ccc8',
+  ANYTIME: '#90a4ae',
+
+  // Legacy colors for backward compatibility
   IN_A_WEEK: '#4ec1a2',
   THIS_MONTH: '#00bcd4',
   LATER: '#d7ccc8',
-  ANYTIME: '#90a4ae',
 
   // FOR ASSIGNEE:
   ASSIGNED_TO_ME: '#4ec1a2',
   ASSIGNED_TO_OTHER: '#b39ddb',
+  UNASSIGNED: '#ffc107',
 
   // FOR PRIORITY:
-  PRIORITY_1: '#F03A47',
-  PRIORITY_2: '#ffc107',
-  PRIORITY_3: '#00bcd4',
-  PRIORITY_4: '#7e57c2',
-  NO_PRIORITY: '#90a4ae',
+  // PRIORITY_1: '#F03A47',
+  // PRIORITY_2: '#ffc107',
+  // PRIORITY_3: '#00bcd4',
+  // PRIORITY_4: '#7e57c2',
+  // NO_PRIORITY: '#90a4ae',
+  // FOR PRIORITY:
+  // PRIORITY_1: '#F03A4780',
+  // PRIORITY_2: '#ffc10780',
+  // PRIORITY_3: '#00bcd480',
+  // PRIORITY_4: '#7e57c280',
+  PRIORITY_1: '#d32f2f',
+  PRIORITY_2: '#ed6c02',
+  PRIORITY_3: '#0288d1',
+  // PRIORITY_4: '#388e3c',
+  PRIORITY_4: '#90a4ae',
+  NO_PRIORITY: '#90a4ae80',
 }
 export default LABEL_COLORS
 
@@ -89,4 +116,19 @@ export const getTextColorFromBackgroundColor = bgColor => {
   const g = parseInt(hex.substring(2, 4), 16)
   const b = parseInt(hex.substring(4, 6), 16)
   return r * 0.299 + g * 0.587 + b * 0.114 > 186 ? '#000000' : '#ffffff'
+}
+
+export const getPriorityColor = priority => {
+  switch (priority) {
+    case 1:
+      return TASK_COLOR.PRIORITY_1
+    case 2:
+      return TASK_COLOR.PRIORITY_2
+    case 3:
+      return TASK_COLOR.PRIORITY_3
+    case 4:
+      return TASK_COLOR.PRIORITY_4
+    default:
+      return TASK_COLOR.NO_PRIORITY
+  }
 }

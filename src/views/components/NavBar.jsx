@@ -1,14 +1,14 @@
-import Logo from '@/assets/logo.svg'
+import { Capacitor } from '@capacitor/core'
 import {
-  AccountBox,
+  Archive,
+  ArrowBack,
+  FolderOpen,
   History,
-  HomeOutlined,
+  Inbox,
   ListAlt,
   Logout,
   MenuRounded,
-  Message,
   SettingsOutlined,
-  ShareOutlined,
   Toll,
   Widgets,
 } from '@mui/icons-material'
@@ -22,16 +22,22 @@ import {
   ListItemDecorator,
   Typography,
 } from '@mui/joy'
-import { useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+
+import { useEffect, useState } from 'react'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { version } from '../../../package.json'
-import ThemeToggleButton from '../Settings/ThemeToggleButton'
+import UserProfileAvatar from '../../components/UserProfileAvatar'
 import NavBarLink from './NavBarLink'
 const links = [
   {
-    to: '/my/chores',
-    label: 'Home',
-    icon: <HomeOutlined />,
+    to: '/chores',
+    label: 'All Tasks',
+    icon: <Inbox />,
+  },
+  {
+    to: '/archived',
+    label: 'Archived',
+    icon: <Archive />,
   },
 
   // {
@@ -50,6 +56,11 @@ const links = [
     icon: <ListAlt />,
   },
   {
+    to: 'projects',
+    label: 'Projects',
+    icon: <FolderOpen />,
+  },
+  {
     to: 'activities',
     label: 'Activities',
     icon: <History />,
@@ -59,21 +70,21 @@ const links = [
     label: 'Points',
     icon: <Toll />,
   },
-  {
-    to: '/settings#sharing',
-    label: 'Sharing',
-    icon: <ShareOutlined />,
-  },
-  {
-    to: '/settings#notifications',
-    label: 'Notifications',
-    icon: <Message />,
-  },
-  {
-    to: '/settings#account',
-    label: 'Account',
-    icon: <AccountBox />,
-  },
+  // {
+  //   to: '/settings#sharing',
+  //   label: 'Sharing',
+  //   icon: <ShareOutlined />,
+  // },
+  // {
+  //   to: '/settings#notifications',
+  //   label: 'Notifications',
+  //   icon: <Message />,
+  // },
+  // {
+  //   to: '/settings#account',
+  //   label: 'Account',
+  //   icon: <AccountBox />,
+  // },
   {
     to: '/settings',
     label: 'Settings',
@@ -81,7 +92,15 @@ const links = [
   },
 ]
 
+import { SafeArea } from 'capacitor-plugin-safe-area'
+import Z_INDEX from '../../constants/zIndex'
+import { useResource } from '../../queries/ResourceQueries'
+import { apiClient } from '../../utils/ApiClient'
+
+const publicPages = ['/landing', '/privacy', '/terms']
 const NavBar = () => {
+  const { data: resource } = useResource()
+
   const navigate = useNavigate()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [openDrawer, closeDrawer] = [
@@ -89,12 +108,40 @@ const NavBar = () => {
     () => setDrawerOpen(false),
   ]
   const location = useLocation()
-  // if url has /landing then remove the navbar:
+  const [searchParams] = useSearchParams()
+  useEffect(() => {
+    SafeArea.getSafeAreaInsets().then(data => {
+      const { insets } = data
+      const drawerContent = document.querySelector('.drawer-content')
+      if (drawerContent) {
+        drawerContent.style.paddingTop = `${insets.top}px`
+        drawerContent.style.paddingRight = `${insets.right}px`
+        drawerContent.style.paddingBottom = `${insets.bottom}px`
+        drawerContent.style.paddingLeft = `${insets.left}px`
+      }
+    })
+  }, [])
   if (
-    ['/signup', '/login', '/landing', '/forgot-password'].includes(
-      location.pathname,
-    )
+    [
+      '/signup',
+      '/login',
+      '/auth/oauth2',
+      '/forgot-password',
+      '/login/settings',
+    ].includes(location.pathname)
   ) {
+    return (
+      // no navbar but show the safe area padding
+      <div
+        style={{
+          paddingTop: `calc(var(--safe-area-inset-top, 0px))`,
+          top: 0,
+        }}
+      />
+    )
+  }
+  // if url has /landing then remove the navbar:
+  if (publicPages.includes(location.pathname)) {
     return null
   }
   if (
@@ -105,47 +152,73 @@ const NavBar = () => {
   }
 
   return (
-    <nav className='flex gap-2 p-3'>
-      <IconButton size='md' variant='plain' onClick={() => setDrawerOpen(true)}>
-        <MenuRounded />
-      </IconButton>
-      <Box
-        className='flex items-center gap-2'
-        onClick={() => {
-          navigate('/my/chores')
-        }}
-      >
-        <img component='img' src={Logo} width='25' />
-        <Typography
-          level='title-lg'
-          sx={{
-            fontWeight: 700,
-            fontSize: 20,
-            cursor: 'pointer',
-          }}
+    <nav
+      className='flex gap-2 p-3'
+      style={{
+        paddingTop:
+          Capacitor.getPlatform() === 'android'
+            ? `calc(var(--safe-area-inset-top, 0px))`
+            : '',
+        position: 'sticky',
+        zIndex: Z_INDEX.NAVBAR,
+        top: 0,
+        minHeight: '35px',
+        backgroundColor: 'var(--joy-palette-background-body)',
+      }}
+    >
+      {['/chores', '/'].includes(location.pathname) &&
+      !searchParams.get('filter') ? (
+        <IconButton
+          size='md'
+          variant='plain'
+          onClick={() => setDrawerOpen(true)}
         >
-          Done
-          <span
-            style={{
-              color: '#06b6d4',
-              fontWeight: 600,
-            }}
-          >
-            tick✓
-          </span>
-        </Typography>
-        <ThemeToggleButton
-          sx={{
-            position: 'absolute',
-            right: 10,
+          <MenuRounded />
+        </IconButton>
+      ) : (
+        <IconButton
+          size='md'
+          variant='plain'
+          onClick={() => {
+            if (location.pathname === '/chores') {
+              // Navigate back to calendar view
+              navigate('/')
+            } else {
+              // Default back navigation
+              navigate(-1)
+            }
           }}
-        />
+          title={
+            searchParams.get('from') === 'calendar'
+              ? 'Back to Calendar'
+              : 'Back'
+          }
+        >
+          <ArrowBack />
+        </IconButton>
+      )}
+      <Box className='flex-1' />
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <UserProfileAvatar />
+        {/* <ThemeToggleButton /> */}
       </Box>
       <Drawer
         open={drawerOpen}
         onClose={closeDrawer}
         size='sm'
         onClick={closeDrawer}
+        sx={{
+          '& .MuiDrawer-content': {
+            position: 'fixed',
+            // pt: 'calc(var(--safe-area-inset-top, 0px))',
+            left: 0,
+            // pb: 'calc(var(--safe-area-inset-bottom, 0px))',
+            // height:
+            //   'calc(100vh - var(--safe-area-inset-top, 0px) - var(--safe-area-inset-bottom, 0px))',
+            overflow: 'auto',
+            zIndex: Z_INDEX.DRAWER,
+          },
+        }}
       >
         <div>
           {/* <div className='align-center flex px-5 pt-4'>
@@ -153,9 +226,18 @@ const NavBar = () => {
           </div> */}
           <List
             // sx={{ p: 2, height: 'min-content' }}
+
             size='md'
             onClick={openDrawer}
-            sx={{ borderRadius: 4, width: '100%', padding: 1 }}
+            sx={{
+              borderRadius: 4,
+              width: '100%',
+              padding: 1,
+              paddingTop:
+                Capacitor.getPlatform() === 'android'
+                  ? `calc(var(--safe-area-inset-top, 0px))`
+                  : '',
+            }}
           >
             {links.map((link, index) => (
               <NavBarLink key={index} link={link} />
@@ -176,12 +258,21 @@ const NavBar = () => {
             size='md'
             onClick={openDrawer}
           >
+            {/*  Add List item to invite the user to upgrade to Plus: */}
+            {/* <ListItemButton
+              onClick={() => navigate('/settings#subscription')}
+              sx={{
+                py: 1.2,
+              }}
+            >
+              <ListItemDecorator>
+                <SwitchAccessShortcutAdd />
+              </ListItemDecorator>
+              <ListItemContent>Upgrade to Plus</ListItemContent>
+            </ListItemButton> */}
             <ListItemButton
               onClick={() => {
-                localStorage.removeItem('ca_token')
-                localStorage.removeItem('ca_expiration')
-                // go to login page:
-                window.location.href = '/login'
+                apiClient.handleLogout()
               }}
               sx={{
                 py: 1.2,
@@ -203,11 +294,11 @@ const NavBar = () => {
                 p: 1,
                 color: 'text.tertiary',
                 textAlign: 'center',
-                bottom: 0,
+                mb: 'calc(var(--safe-area-inset-bottom, 0px) )',
                 // mb: -2,
               }}
             >
-              V{version}
+              V{version} (API: {resource?.api_version || 'unavailable'})
             </Typography>
           </List>
         </div>

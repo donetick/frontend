@@ -1,35 +1,29 @@
-import { Person } from '@mui/icons-material'
+import { SupervisorAccount } from '@mui/icons-material'
 import { Avatar, Box, Button, Sheet, Typography } from '@mui/joy'
 
-import { useContext, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext'
-import { UserContext } from '../../contexts/UserContext'
-import { useCircleMembers } from '../../queries/UserQueries'
+import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import UserModal from '../Modals/Inputs/UserModal'
-const WelcomeCard = () => {
-  const { impersonatedUser, setImpersonatedUser } = useImpersonateUser()
-  const [isAdmin, setIsAdmin] = useState(false)
-  const { userProfile } = useContext(UserContext)
+const UserSwitcher = () => {
+  const { 
+    impersonatedUser, 
+    isImpersonating,
+    startImpersonation, 
+    stopImpersonation,
+    canImpersonate 
+  } = useImpersonateUser()
+  const { data: userProfile } = useUserProfile()
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const { data: circleMembersData, isLoading: isCircleMembersLoading } =
     useCircleMembers()
 
-  useEffect(() => {
-    if (userProfile && userProfile?.id) {
-      const members = circleMembersData?.res || []
-      const isUserAdmin = members.some(
-        member =>
-          member.userId === userProfile?.id &&
-          (member.role === 'admin' || member.role === 'manager'),
-      )
-
-      setIsAdmin(isUserAdmin)
-    }
-  }, [userProfile, circleMembersData])
+  // Check if current user can impersonate
+  const isAdmin = canImpersonate(userProfile, circleMembersData?.res)
   if (!isAdmin) {
     return null
-  } else if (isCircleMembersLoading || impersonatedUser === null) {
+  } else if (isCircleMembersLoading || !isImpersonating) {
     return (
       <Sheet
         variant='plain'
@@ -57,13 +51,16 @@ const WelcomeCard = () => {
                 gap: 1,
               }}
             >
-              <Person color='' />
-              <Typography level='title-md'>Current User</Typography>
+              <SupervisorAccount color='' />
+              <Typography level='title-md'>View tasks as</Typography>
             </Box>
           </Box>
           <Box sx={{ mb: 2 }}>
             <Typography level='title-md' sx={{ mb: 0.5 }}>
-              Who&apos;s checking in?
+              Switch to user view
+            </Typography>
+            <Typography level='body-sm' sx={{ mb: 1, color: 'text.secondary' }}>
+              Tasks will be filtered to show only assignments for selected user
             </Typography>
           </Box>
           <Button
@@ -72,13 +69,13 @@ const WelcomeCard = () => {
             onClick={() => setIsModalOpen(true)}
             size='sm'
           >
-            Select User
+            Choose User
           </Button>
           <UserModal
             isOpen={isModalOpen}
             performers={circleMembersData?.res}
             onSelect={user => {
-              setImpersonatedUser(user)
+              startImpersonation(user, userProfile)
               setIsModalOpen(false)
             }}
             onClose={() => setIsModalOpen(false)}
@@ -122,8 +119,8 @@ const WelcomeCard = () => {
               gap: 1,
             }}
           >
-            <Person color='' />
-            <Typography level='title-md'>Current User</Typography>
+            <SupervisorAccount color='' />
+            <Typography level='title-md'>View tasks as</Typography>
           </Box>
         </Box>
 
@@ -164,7 +161,7 @@ const WelcomeCard = () => {
                 size='sm'
                 sx={{ ml: 0.5 }}
                 onClick={() => {
-                  setImpersonatedUser(null)
+                  stopImpersonation()
                 }}
               >
                 Cancel
@@ -177,7 +174,7 @@ const WelcomeCard = () => {
         isOpen={isModalOpen}
         performers={circleMembersData?.res}
         onSelect={user => {
-          setImpersonatedUser(user)
+          startImpersonation(user, userProfile)
           setIsModalOpen(false)
         }}
         onClose={() => {
@@ -187,4 +184,4 @@ const WelcomeCard = () => {
     </Sheet>
   )
 }
-export default WelcomeCard
+export default UserSwitcher

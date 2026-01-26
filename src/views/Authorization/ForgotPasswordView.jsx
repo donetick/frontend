@@ -1,5 +1,4 @@
 // create boilerplate for ResetPasswordView:
-import LogoSVG from '@/assets/logo.svg'
 import {
   Box,
   Button,
@@ -8,21 +7,20 @@ import {
   FormHelperText,
   Input,
   Sheet,
-  Snackbar,
   Typography,
 } from '@mui/joy'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { API_URL } from './../../Config'
-import {  ResetPassword } from '../../utils/Fetcher'
+import Logo from '../../Logo'
+import { useNotification } from '../../service/NotificationProvider'
+import { ResetPassword } from '../../utils/Fetcher'
 
 const ForgotPasswordView = () => {
   const navigate = useNavigate()
-  // const [showLoginSnackbar, setShowLoginSnackbar] = useState(false)
-  // const [snackbarMessage, setSnackbarMessage] = useState('')
   const [resetStatusOk, setResetStatusOk] = useState(null)
   const [email, setEmail] = useState('')
   const [emailError, setEmailError] = useState(null)
+  const { showError, showNotification } = useNotification()
 
   const validateEmail = email => {
     return !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email)
@@ -48,12 +46,24 @@ const ForgotPasswordView = () => {
 
       if (response.ok) {
         setResetStatusOk(true)
-        //  wait 3 seconds and then redirect to login:
+        showNotification({
+          type: 'success',
+          title: 'Reset Email Sent',
+          message: 'Check your email for password reset instructions',
+        })
       } else {
         setResetStatusOk(false)
+        showError({
+          title: 'Reset Failed',
+          message: 'Failed to send reset email, please try again later',
+        })
       }
     } catch (error) {
       setResetStatusOk(false)
+      showError({
+        title: 'Reset Failed',
+        message: 'Failed to send reset email, please try again later',
+      })
     }
   }
 
@@ -67,19 +77,12 @@ const ForgotPasswordView = () => {
   }
 
   return (
-    <Container
-      component='main'
-      maxWidth='xs'
-
-      // make content center in the middle of the page:
-    >
+    <Container component='main' maxWidth='xs'>
       <Box
         sx={{
           marginTop: 4,
           display: 'flex',
           flexDirection: 'column',
-
-          justifyContent: 'space-between',
           alignItems: 'center',
         }}
       >
@@ -94,120 +97,111 @@ const ForgotPasswordView = () => {
             padding: 2,
             borderRadius: '8px',
             boxShadow: 'md',
-            minHeight: '70vh',
-            justifyContent: 'space-between',
-            justifyItems: 'center',
           }}
         >
-          <Box>
-            <img src={LogoSVG} alt='logo' width='128px' height='128px' />
-            {/* <Logo /> */}
-            <Typography level='h2'>
-              Done
-              <span
-                style={{
-                  color: '#06b6d4',
-                }}
-              >
-                tick
-              </span>
-            </Typography>
-          </Box>
-          {/* HERE */}
-          <Box sx={{ textAlign: 'center' }}></Box>
+          <Logo />
+
+          <Typography level='h2'>
+            Done
+            <span style={{ color: '#06b6d4' }}>tick</span>
+          </Typography>
           {resetStatusOk === null && (
-            <form onSubmit={handleSubmit}>
-              <div className='grid gap-6'>
-                <Typography level='body2' gutterBottom>
-                  Enter your email, and we'll send you a link to get into your
-                  account.
-                </Typography>
-                <FormControl error={emailError !== null}>
-                  <Input
-                    placeholder='Email'
-                    type='email'
-                    variant='soft'
-                    fullWidth
-                    size='lg'
-                    value={email}
-                    onChange={handleEmailChange}
-                    error={emailError !== null}
-                    onKeyDown={e => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault()
-                        handleSubmit()
-                      }
-                    }}
-                  />
-                  <FormHelperText>{emailError}</FormHelperText>
-                </FormControl>
-                <Box>
-                  <Button
-                    variant='solid'
-                    size='lg'
-                    fullWidth
-                    sx={{
-                      mb: 1,
-                    }}
-                    onClick={handleSubmit}
-                  >
-                    Reset Password
-                  </Button>
-                  <Button
-                    fullWidth
-                    size='lg'
-                    variant='soft'
-                    sx={{
-                      width: '100%',
-                      border: 'moccasin',
-                      borderRadius: '8px',
-                    }}
-                    onClick={() => {
-                      navigate('/login')
-                    }}
-                    color='neutral'
-                  >
-                    Back to Login
-                  </Button>
-                </Box>
-              </div>
-            </form>
-          )}
-          {resetStatusOk != null && (
             <>
-              <Box mt={-30}>
-                <Typography level='body-md'>
-                  if there is an account associated with the email you entered,
-                  you will receive an email with instructions on how to reset
-                  your
-                </Typography>
-              </Box>
+              <Typography level='body2' sx={{ mb: 3 }}>
+                Enter your email, and we'll send you a link to get into your
+                account.
+              </Typography>
+
+              <Typography level='body2' alignSelf={'start'} mb={1}>
+                Email Address
+              </Typography>
+              <FormControl
+                error={emailError !== null}
+                sx={{ width: '100%', mb: 2 }}
+              >
+                <Input
+                  margin='normal'
+                  required
+                  fullWidth
+                  id='email'
+                  placeholder='Enter your email address'
+                  type='email'
+                  name='email'
+                  autoComplete='email'
+                  autoFocus
+                  value={email}
+                  onChange={handleEmailChange}
+                  error={emailError !== null}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      handleSubmit()
+                    }
+                  }}
+                />
+                <FormHelperText>{emailError}</FormHelperText>
+              </FormControl>
+
               <Button
-                variant='soft'
+                type='submit'
+                fullWidth
                 size='lg'
-                sx={{ position: 'relative', bottom: '0' }}
+                variant='solid'
+                sx={{
+                  width: '100%',
+                  mt: 3,
+                  mb: 2,
+                  border: 'moccasin',
+                  borderRadius: '8px',
+                }}
+                onClick={handleSubmit}
+              >
+                Reset Password
+              </Button>
+
+              <Button
+                type='submit'
+                fullWidth
+                size='lg'
+                variant='plain'
+                sx={{
+                  width: '100%',
+                  mb: 2,
+                  border: 'moccasin',
+                  borderRadius: '8px',
+                }}
                 onClick={() => {
                   navigate('/login')
                 }}
+                color='neutral'
+              >
+                Back to Login
+              </Button>
+            </>
+          )}
+          {resetStatusOk != null && (
+            <>
+              <Typography
+                level='body-md'
+                sx={{ textAlign: 'center', mt: 2, mb: 3 }}
+              >
+                If there is an account associated with the email you entered,
+                you will receive an email with instructions on how to reset your
+                password.
+              </Typography>
+
+              <Button
+                variant='solid'
+                size='lg'
                 fullWidth
+                onClick={() => {
+                  navigate('/login')
+                }}
               >
                 Go to Login
               </Button>
             </>
           )}
-          <Snackbar
-            open={resetStatusOk ? resetStatusOk : resetStatusOk === false}
-            autoHideDuration={5000}
-            onClose={() => {
-              if (resetStatusOk) {
-                navigate('/login')
-              }
-            }}
-          >
-            {resetStatusOk
-              ? 'Reset email sent, check your email'
-              : 'Reset email failed, try again later'}
-          </Snackbar>
         </Sheet>
       </Box>
     </Container>

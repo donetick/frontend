@@ -4,13 +4,14 @@ import {
   FormControl,
   FormHelperText,
   Input,
-  Modal,
-  ModalDialog,
   Typography,
 } from '@mui/joy'
 import { useState } from 'react'
+import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
 function EditThingStateModal({ isOpen, onClose, onSave, currentThing }) {
+  const { ResponsiveModal } = useResponsiveModal()
+
   const [state, setState] = useState(currentThing?.state || '')
   const [errors, setErrors] = useState({})
 
@@ -39,31 +40,29 @@ function EditThingStateModal({ isOpen, onClose, onSave, currentThing }) {
   }
 
   return (
-    <Modal open={isOpen} onClose={onClose}>
-      <ModalDialog>
-        <Typography level='h4'>Update state</Typography>
+    <ResponsiveModal open={isOpen} onClose={onClose}>
+      <Typography level='h4'>Update state</Typography>
 
-        <FormControl>
-          <Typography>Value</Typography>
-          <Input
-            placeholder='Thing value'
-            value={state || ''}
-            onChange={e => setState(e.target.value)}
-            sx={{ minWidth: 300 }}
-          />
-          <FormHelperText color='danger'>{errors.state}</FormHelperText>
-        </FormControl>
+      <FormControl>
+        <Typography>Value</Typography>
+        <Input
+          placeholder='Thing value'
+          value={state || ''}
+          onChange={e => setState(e.target.value)}
+          sx={{ minWidth: 300 }}
+        />
+        <FormHelperText color='danger'>{errors.state}</FormHelperText>
+      </FormControl>
 
-        <Box display={'flex'} justifyContent={'space-around'} mt={1}>
-          <Button onClick={handleSave} fullWidth sx={{ mr: 1 }}>
-            {currentThing?.id ? 'Update' : 'Create'}
-          </Button>
-          <Button onClick={onClose} variant='outlined'>
-            {currentThing?.id ? 'Cancel' : 'Close'}
-          </Button>
-        </Box>
-      </ModalDialog>
-    </Modal>
+      <Box display={'flex'} justifyContent={'space-around'} mt={1}>
+        <Button size='lg' onClick={handleSave} fullWidth sx={{ mr: 1 }}>
+          {currentThing?.id ? 'Update' : 'Create'}
+        </Button>
+        <Button size='lg' onClick={onClose} variant='outlined'>
+          {currentThing?.id ? 'Cancel' : 'Close'}
+        </Button>
+      </Box>
+    </ResponsiveModal>
   )
 }
 export default EditThingStateModal

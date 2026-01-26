@@ -1,6 +1,6 @@
 /* eslint-disable tailwindcss/no-custom-classname */
 // import { StyledButton } from '@/components/styled-button'
-import { Button } from '@mui/joy'
+import { Button, IconButton, useColorScheme } from '@mui/joy'
 import Typography from '@mui/joy/Typography'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
@@ -8,18 +8,19 @@ import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import Logo from '@/assets/logo.svg'
+import screenShotMyChoreDark from '@/assets/screenshot-my-chore-dark.png'
 import screenShotMyChore from '@/assets/screenshot-my-chore.png'
-import { GitHub } from '@mui/icons-material'
+import { DarkMode, GitHub, LightMode } from '@mui/icons-material'
 import useWindowWidth from '../../hooks/useWindowWidth'
 
 const HomeHero = () => {
   const navigate = useNavigate()
   const windowWidth = useWindowWidth()
   const windowThreshold = 600
+  const { mode, setMode } = useColorScheme()
   const HERO_TEXT_THAT = [
-    // 'Donetick simplifies the entire process, from scheduling and reminders to automatic task assignment and progress tracking.',
-    // 'Donetick is the intuitive task and chore management app designed for groups. Take charge of shared responsibilities, automate your workflow, and achieve more together.',
-    'An open-source, user-friendly app for managing tasks and chores, featuring customizable options to help you and others stay organized',
+    // 'The collaborative task manager that makes household management fair, fun, and effortless.',
+    'The smart task manager that keeps individuals and families organized with intelligent scheduling and fair task distribution.',
   ]
 
   const [heroTextIndex, setHeroTextIndex] = React.useState(0)
@@ -97,12 +98,12 @@ const HomeHero = () => {
       }}
       className='hover:scale-105'
       onClick={() => {
-        // if the url is donetick.com then navigate to app.donetick.com/my/chores
-        // else navigate to /my/chores
+        // if the url is donetick.com then navigate to app.donetick.com/chores
+        // else navigate to /chores
         if (window.location.hostname === 'donetick.com') {
-          window.location.href = 'https://app.donetick.com/my/chores'
+          window.location.href = 'https://app.donetick.com/chores'
         } else {
-          navigate('/my/chores')
+          navigate('/chores')
         }
       }}
     >
@@ -169,20 +170,60 @@ const HomeHero = () => {
         <Grid item xs={12} md={5}>
           <div className='flex justify-center'>
             <img
-              src={screenShotMyChore}
+              src={mode === 'dark' ? screenShotMyChoreDark : screenShotMyChore}
               width={'100%'}
-              style={{
-                maxWidth: 300,
-              }}
               height={'auto'}
               alt='Hero img'
               data-aos-delay={100 * 2}
               data-aos-anchor='[data-aos-id-hero]'
               data-aos='fade-left'
+              style={{
+                width: '100%',
+                maxWidth: 300,
+              }}
+              onMouseEnter={e => {
+                e.target.style.transform = 'rotate(0deg) scale(1.05)'
+              }}
+              onMouseLeave={e => {
+                e.target.style.transform = 'rotate(5deg) scale(1)'
+              }}
             />
           </div>
         </Grid>
       )}
+      <Grid
+        item
+        xs={12}
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          position: 'absolute',
+          top: -90,
+          right: 16,
+        }}
+      >
+        <IconButton
+          onClick={() => {
+            setMode(mode === 'dark' ? 'light' : 'dark')
+          }}
+          sx={{
+            backgroundColor: 'rgba(255, 255, 255, 0.8)',
+            borderRadius: '50%',
+            boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
+            transition: 'background-color 0.3s',
+          }}
+        >
+          {mode === 'dark' ? (
+            <LightMode sx={{ color: '#333' }} />
+          ) : (
+            <DarkMode
+              sx={{
+                color: '#333',
+              }}
+            />
+          )}
+        </IconButton>
+      </Grid>
     </Grid>
   )
 }

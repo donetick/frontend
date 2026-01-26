@@ -1,5 +1,6 @@
-import { Box, Button, Modal, ModalDialog, Textarea, Typography } from '@mui/joy'
+import { Box, Button, Textarea, Typography } from '@mui/joy'
 import { useState } from 'react'
+import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
 function TextModal({
   isOpen,
@@ -10,6 +11,8 @@ function TextModal({
   okText,
   cancelText,
 }) {
+  const { ResponsiveModal } = useResponsiveModal()
+
   const [text, setText] = useState(current)
 
   const handleSave = () => {
@@ -18,29 +21,26 @@ function TextModal({
   }
 
   return (
-    <Modal open={isOpen} onClose={onClose}>
-      <ModalDialog>
-        {/* <ModalClose /> */}
-        <Typography variant='h4'>{title}</Typography>
-        <Textarea
-          placeholder='Type in here…'
-          value={text}
-          onChange={e => setText(e.target.value)}
-          minRows={2}
-          maxRows={4}
-          sx={{ minWidth: 300 }}
-        />
+    <ResponsiveModal open={isOpen} onClose={onClose}>
+      <Typography variant='h4'>{title}</Typography>
+      <Textarea
+        placeholder='Type in here…'
+        value={text}
+        onChange={e => setText(e.target.value)}
+        minRows={2}
+        maxRows={4}
+        sx={{ minWidth: 300 }}
+      />
 
-        <Box display={'flex'} justifyContent={'space-around'} mt={1}>
-          <Button onClick={handleSave} fullWidth sx={{ mr: 1 }}>
-            {okText ? okText : 'Save'}
-          </Button>
-          <Button onClick={onClose} variant='outlined'>
-            {cancelText ? cancelText : 'Cancel'}
-          </Button>
-        </Box>
-      </ModalDialog>
-    </Modal>
+      <Box display={'flex'} justifyContent={'space-around'} mt={1}>
+        <Button size='lg' onClick={handleSave} fullWidth sx={{ mr: 1 }}>
+          {okText ? okText : 'Save'}
+        </Button>
+        <Button size='lg' onClick={onClose} variant='outlined'>
+          {cancelText ? cancelText : 'Cancel'}
+        </Button>
+      </Box>
+    </ResponsiveModal>
   )
 }
 export default TextModal

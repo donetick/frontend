@@ -1,12 +1,5 @@
 import { HomeRounded, Login } from '@mui/icons-material'
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Container,
-  Textarea,
-  Typography,
-} from '@mui/joy'
+import { Box, Button, CircularProgress, Container, Typography } from '@mui/joy'
 import { Link } from 'react-router-dom'
 import Logo from '../Logo' // Adjust the import path as necessary
 
@@ -50,7 +43,7 @@ const Error = () => {
 
         <Button
           component={Link}
-          to='/my/chores'
+          to='/chores'
           variant='outlined'
           color='primary'
           sx={{ mt: 4 }}

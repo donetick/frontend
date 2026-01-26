@@ -1,5 +1,5 @@
 import moment from 'moment'
-import { getAssetURL } from './TokenManager'
+import { apiClient } from './ApiClient'
 
 const isPlusAccount = userProfile => {
   return userProfile?.expiration && moment(userProfile?.expiration).isAfter()
@@ -11,7 +11,7 @@ const resolvePhotoURL = url => {
     return url
   }
   if (url.startsWith('assets')) {
-    return getAssetURL(url)
+    return apiClient.getAssetURL(url)
   }
   return url
 }

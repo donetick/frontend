@@ -1,17 +1,30 @@
-import { EventBusy } from '@mui/icons-material'
 import {
+  Analytics,
+  BarChart,
+  CallReceived,
+  EventBusy,
+  Schedule,
+  Speed,
+  Timeline,
+  TrendingUp,
+  Update,
+} from '@mui/icons-material'
+import {
+  Avatar,
   Box,
   Button,
+  Card,
   Chip,
   Container,
+  Grid,
   List,
   ListDivider,
   ListItem,
   ListItemContent,
   Typography,
 } from '@mui/joy'
+import { useTheme } from '@mui/joy/styles'
 import moment from 'moment'
-import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
   Line,
@@ -21,40 +34,94 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { GetThingHistory } from '../../utils/Fetcher'
+import { useThingHistory } from '../../queries/ThingQueries'
 import LoadingComponent from '../components/Loading'
 
 const ThingsHistory = () => {
   const { id } = useParams()
-  const [thingsHistory, setThingsHistory] = useState([])
-  const [noMoreHistory, setNoMoreHistory] = useState(false)
-  const [errLoading, setErrLoading] = useState(false)
-  useEffect(() => {
-    GetThingHistory(id, 0, 10).then(resp => {
-      if (resp.ok) {
-        resp.json().then(data => {
-          setThingsHistory(data.res)
-          if (data.res.length < 10) {
-            setNoMoreHistory(true)
-          }
-        })
-      } else {
-        setErrLoading(true)
-      }
-    })
-  }, [])
+  const theme = useTheme()
+  const {
+    data,
+    error,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useThingHistory(id)
+
+  // Flatten all pages of history data
+  const thingsHistory = data?.pages.flatMap(page => page.res) || []
+
+  // Calculate analytics data
+  const calculateAnalytics = () => {
+    if (!thingsHistory.length) return []
+
+    // Calculate average update frequency
+    let avgUpdateFrequency = '--'
+    if (thingsHistory.length > 1) {
+      const oldestUpdate = moment(
+        thingsHistory[thingsHistory.length - 1].createdAt,
+      )
+      const newestUpdate = moment(thingsHistory[0].createdAt)
+      const totalDuration = newestUpdate.diff(oldestUpdate, 'hours')
+      const frequency = totalDuration / (thingsHistory.length - 1)
+      avgUpdateFrequency =
+        frequency < 1
+          ? `${Math.round(frequency * 60)} minutes`
+          : frequency < 24
+            ? `${Math.round(frequency)} hours`
+            : `${Math.round(frequency / 24)} days`
+    }
+
+    const lastUpdated = thingsHistory[0]
+      ? moment(thingsHistory[0].updatedAt).fromNow()
+      : '--'
+
+    // Calculate update trend value
+    let updateTrend = '--'
+    if (thingsHistory.length >= 3) {
+      const diffs = thingsHistory
+        .map((h, i, arr) =>
+          i < arr.length - 1
+            ? moment(h.createdAt).diff(arr[i + 1].createdAt, 'minutes')
+            : null,
+        )
+        .filter(d => d !== null)
+      const last = diffs[0]
+      const prev = diffs[1]
+      if (last > prev) updateTrend = 'Interval increasing'
+      else if (last < prev) updateTrend = 'Interval decreasing'
+      else updateTrend = 'Interval stable'
+    }
+
+    return [
+      {
+        icon: <Speed />,
+        text: 'Update Frequency',
+        subtext: `Every ${avgUpdateFrequency}`,
+      },
+      {
+        icon: <Update />,
+        text: 'Last Updated',
+        subtext: lastUpdated,
+      },
+      {
+        icon: <CallReceived />,
+        text: 'Last Value',
+        subtext: thingsHistory[0]?.state ?? '--',
+      },
+      {
+        icon: <TrendingUp />,
+        text: 'Update Trend',
+        subtext: updateTrend,
+      },
+    ]
+  }
+
+  const analyticsData = calculateAnalytics()
 
   const handleLoadMore = () => {
-    GetThingHistory(id, thingsHistory.length).then(resp => {
-      if (resp.ok) {
-        resp.json().then(data => {
-          setThingsHistory([...thingsHistory, ...data.res])
-          if (data.res.length < 10) {
-            setNoMoreHistory(true)
-          }
-        })
-      }
-    })
+    fetchNextPage()
   }
 
   const formatTimeDifference = (startDate, endDate) => {
@@ -77,11 +144,11 @@ const ThingsHistory = () => {
     return `${timeValue} ${unit}${timeValue !== 1 ? 's' : ''}`
   }
   // if loading show loading spinner:
-  if (thingsHistory.length === 0) {
+  if (isLoading) {
     return <LoadingComponent />
   }
 
-  if (errLoading || !thingsHistory || thingsHistory.length === 0) {
+  if (error || !thingsHistory || thingsHistory.length === 0) {
     return (
       <Container
         maxWidth='md'
@@ -107,7 +174,7 @@ const ThingsHistory = () => {
           No history found
         </Typography>
         <Typography level='body1'>
-          It's look like there is no history for this thing yet.
+          It looks like there is no history for this thing yet.
         </Typography>
         <Button variant='soft' sx={{ mt: 2 }}>
           <Link to='/things'>Go back to things</Link>
@@ -118,103 +185,275 @@ const ThingsHistory = () => {
 
   return (
     <Container maxWidth='md'>
-      <Typography level='h3' mb={1.5}>
-        History:
-      </Typography>
+      {/* Enhanced Analytics Header Section */}
+      <Box sx={{ mb: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+          <BarChart sx={{ fontSize: '1.5rem' }} />
+          <Typography
+            level='title-md'
+            sx={{ fontWeight: 'lg', color: 'text.primary' }}
+          >
+            Things Overview
+          </Typography>
+        </Box>
+
+        {/* Statistics Cards Grid - Compact Design */}
+        <Grid container spacing={0.5} sx={{ mb: 2 }}>
+          {analyticsData.map((info, index) => (
+            <Grid xs={6} sm={3} key={index}>
+              <Card
+                variant='soft'
+                sx={{
+                  borderRadius: 'sm',
+                  p: 1,
+                  height: 85,
+                  textAlign: 'center',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  overflow: 'hidden',
+                }}
+              >
+                <Box sx={{ opacity: 0.8, flexShrink: 0 }}>{info.icon}</Box>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: 0.25,
+                    flex: 1,
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Typography
+                    level='body-xs'
+                    sx={{
+                      fontWeight: '600',
+                      color: 'text.primary',
+                      textAlign: 'center',
+                      lineHeight: 1.1,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      width: '100%',
+                      fontSize: '0.75rem',
+                    }}
+                  >
+                    {info.text}
+                  </Typography>
+                  <Typography
+                    level='body-xs'
+                    sx={{
+                      color: 'text.secondary',
+                      textAlign: 'center',
+                      lineHeight: 1.1,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      width: '100%',
+                      fontSize: '0.7rem',
+                    }}
+                  >
+                    {info.subtext || '--'}
+                  </Typography>
+                </Box>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+
+      {/* Chart Section Header */}
+      {thingsHistory.every(history => !isNaN(history.state)) &&
+        thingsHistory.length > 1 && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+            <Analytics sx={{ fontSize: '1.5rem' }} />
+            <Typography
+              level='title-md'
+              sx={{ fontWeight: 'lg', color: 'text.primary' }}
+            >
+              Data Visualization
+            </Typography>
+          </Box>
+        )}
       {/* check if all the states are number the show it: */}
       {thingsHistory.every(history => !isNaN(history.state)) &&
         thingsHistory.length > 1 && (
-          <>
-            <Typography level='h4' gutterBottom>
-              Chart:
-            </Typography>
+          <Box sx={{ borderRadius: 'sm', p: 2, boxShadow: 'md', mb: 4 }}>
+            <ResponsiveContainer width='100%' height={200}>
+              <LineChart
+                width={500}
+                height={300}
+                data={thingsHistory.toReversed()}
+              >
+                {/* <CartesianGrid strokeDasharray='3 3' /> */}
+                <XAxis
+                  dataKey='updatedAt'
+                  hide='true'
+                  tick='false'
+                  tickLine='false'
+                  axisLine='false'
+                  tickFormatter={tick =>
+                    moment(tick).format('ddd MM/DD/yyyy HH:mm:ss')
+                  }
+                />
+                <YAxis
+                  hide='true'
+                  dataKey='state'
+                  tick='false'
+                  tickLine='true'
+                  axisLine='false'
+                />
+                <Tooltip
+                  labelFormatter={label =>
+                    moment(label).format('ddd MM/DD/yyyy HH:mm:ss')
+                  }
+                />
 
-            <Box sx={{ borderRadius: 'sm', p: 2, boxShadow: 'md', mb: 2 }}>
-              <ResponsiveContainer width='100%' height={200}>
-                <LineChart
-                  width={500}
-                  height={300}
-                  data={thingsHistory.toReversed()}
-                >
-                  {/* <CartesianGrid strokeDasharray='3 3' /> */}
-                  <XAxis
-                    dataKey='updatedAt'
-                    hide='true'
-                    tick='false'
-                    tickLine='false'
-                    axisLine='false'
-                    tickFormatter={tick =>
-                      moment(tick).format('ddd MM/DD/yyyy HH:mm:ss')
-                    }
-                  />
-                  <YAxis
-                    hide='true'
-                    dataKey='state'
-                    tick='false'
-                    tickLine='true'
-                    axisLine='false'
-                  />
-                  <Tooltip
-                    labelFormatter={label =>
-                      moment(label).format('ddd MM/DD/yyyy HH:mm:ss')
-                    }
-                  />
-
-                  <Line
-                    type='monotone'
-                    dataKey='state'
-                    stroke='#8884d8'
-                    activeDot={{ r: 8 }}
-                    dot={{ r: 4 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </Box>
-          </>
+                <Line
+                  type='monotone'
+                  dataKey='state'
+                  stroke={theme.palette.primary[500]}
+                  activeDot={{
+                    r: 8,
+                    fill: theme.palette.primary[600],
+                    stroke: theme.palette.primary[300],
+                  }}
+                  dot={{
+                    r: 4,
+                    fill: theme.palette.primary[500],
+                    stroke: theme.palette.primary[300],
+                  }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </Box>
         )}
-      <Typography level='h4' gutterBottom>
-        Change log:
-      </Typography>
-      <Box sx={{ borderRadius: 'sm', p: 2, boxShadow: 'md' }}>
+
+      {/* History Section Header */}
+
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+        <Timeline sx={{ fontSize: '1.5rem' }} />
+        <Typography
+          level='title-md'
+          sx={{ fontWeight: 'lg', color: 'text.primary' }}
+        >
+          Change History
+        </Typography>
+      </Box>
+      <Box sx={{ borderRadius: 'sm', p: 1, boxShadow: 'md' }}>
         <List sx={{ p: 0 }}>
           {thingsHistory.map((history, index) => (
-            <>
-              <ListItem sx={{ gap: 1.5, alignItems: 'flex-start' }}>
-                <ListItemContent sx={{ my: 0 }}>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <Typography level='body1' sx={{ fontWeight: 'md' }}>
-                      {moment(history.updatedAt).format(
-                        'ddd MM/DD/yyyy HH:mm:ss',
-                      )}
-                    </Typography>
-                    <Chip>{history.state}</Chip>
-                  </Box>
+            <Box key={index}>
+              <ListItem
+                sx={{
+                  py: 1.5,
+                  px: 2,
+                  borderRadius: 'sm',
+                  transition: 'background-color 0.2s',
+                  '&:hover': {
+                    backgroundColor: 'background.level1',
+                  },
+                }}
+              >
+                <ListItemContent>
+                  <Grid container spacing={1} alignItems='center'>
+                    {/* First Row: Status and Time Info */}
+                    <Grid xs={12} sm={8}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                          flexWrap: 'wrap',
+                        }}
+                      >
+                        <Avatar
+                          size='sm'
+                          color='primary'
+                          variant='solid'
+                          sx={{
+                            width: 24,
+                            height: 24,
+                            '& svg': { fontSize: '14px' },
+                          }}
+                        >
+                          <TrendingUp />
+                        </Avatar>
+
+                        <Typography
+                          level='body-sm'
+                          sx={{
+                            color: 'text.secondary',
+                            fontWeight: 'md',
+                            display: { xs: 'none', sm: 'block' },
+                          }}
+                        >
+                          Updated
+                        </Typography>
+
+                        <Chip
+                          size='sm'
+                          variant='soft'
+                          color='primary'
+                          startDecorator={<Schedule />}
+                        >
+                          {moment(history.updatedAt).format('MMM DD, h:mm A')}
+                        </Chip>
+                      </Box>
+                    </Grid>
+
+                    {/* Second Row: State Value */}
+                    <Grid xs={12} sm={4}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: { xs: 'flex-start', sm: 'flex-end' },
+                          alignItems: 'center',
+                          gap: 1,
+                        }}
+                      >
+                        <Chip
+                          size='md'
+                          variant='solid'
+                          color='success'
+                          sx={{ fontWeight: 'bold' }}
+                        >
+                          {history.state}
+                        </Chip>
+                      </Box>
+                    </Grid>
+                  </Grid>
                 </ListItemContent>
               </ListItem>
+
+              {/* Divider with time difference */}
               {index < thingsHistory.length - 1 && (
-                <>
-                  <ListDivider component='li'>
-                    {/* time between two completion: */}
-                    {index < thingsHistory.length - 1 &&
-                      thingsHistory[index + 1].createdAt && (
-                        <Typography level='body3' color='text.tertiary'>
-                          {formatTimeDifference(
-                            history.createdAt,
-                            thingsHistory[index + 1].createdAt,
-                          )}{' '}
-                          before
-                        </Typography>
-                      )}
-                  </ListDivider>
-                </>
+                <ListDivider
+                  component='li'
+                  sx={{
+                    my: 0.5,
+                  }}
+                >
+                  <Typography
+                    level='body-xs'
+                    sx={{
+                      color: 'text.tertiary',
+                      backgroundColor: 'background.surface',
+                      px: 1,
+                      fontSize: '0.75rem',
+                    }}
+                  >
+                    {formatTimeDifference(
+                      history.createdAt,
+                      thingsHistory[index + 1].createdAt,
+                    )}{' '}
+                    before
+                  </Typography>
+                </ListDivider>
               )}
-            </>
+            </Box>
           ))}
         </List>
       </Box>
@@ -231,9 +470,13 @@ const ThingsHistory = () => {
           fullWidth
           color='primary'
           onClick={handleLoadMore}
-          disabled={noMoreHistory}
+          disabled={!hasNextPage || isFetchingNextPage}
         >
-          {noMoreHistory ? 'No more history' : 'Load more'}
+          {isFetchingNextPage
+            ? 'Loading...'
+            : !hasNextPage
+              ? 'No more history'
+              : 'Load more'}
         </Button>
       </Box>
     </Container>
