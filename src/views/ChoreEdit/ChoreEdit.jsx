@@ -87,7 +87,9 @@ const ChoreEdit = () => {
   const [assignedTo, setAssignedTo] = useState(-1)
   const [frequencyType, setFrequencyType] = useState('once')
   const [frequency, setFrequency] = useState(1)
-  const [frequencyMetadata, setFrequencyMetadata] = useState({})
+  const [frequencyMetadata, setFrequencyMetadata] = useState({
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  })
   const [labels, setLabels] = useState([])
   const [labelsV2, setLabelsV2] = useState([])
   const [priority, setPriority] = useState(0)
@@ -457,7 +459,8 @@ const ChoreEdit = () => {
       setAssignedTo(data.res.assignedTo)
       setFrequencyType(data.res.frequencyType ? data.res.frequencyType : 'once')
 
-      setFrequencyMetadata(data.res.frequencyMetadata)
+      // Ensure timezone is included in frequencyMetadata when loading existing chore
+      setFrequencyMetadata(data.res.frequencyMetadata || {timezone: Intl.DateTimeFormat().resolvedOptions().timeZone})
       setFrequency(data.res.frequency)
 
       setNotificationMetadata(data.res.notificationMetadata)
