@@ -99,23 +99,36 @@ class ApiClient {
   }
 
   getHeaders(customHeaders = {}) {
-    const headers = {
-      'Content-Type': 'application/json',
-      ...customHeaders,
-    }
+  const headers = {}
 
-    const token = this.getToken()
-    if (token) {
-      headers.Authorization = `Bearer ${token}`
-    }
-
-    const impersonateUserId = localStorage.getItem('impersonatedUserId')
-    if (impersonateUserId) {
-      headers['X-Impersonate-User-ID'] = impersonateUserId
-    }
-
-    return headers
+  // Only add Content-Type if not explicitly removed
+  if (!('Content-Type' in customHeaders)) {
+    headers['Content-Type'] = 'application/json'
+  } else if (customHeaders['Content-Type'] !== undefined) {
+    // If Content-Type is present and NOT undefined, include it
+    headers['Content-Type'] = customHeaders['Content-Type']
   }
+  // If it's undefined, don't add it at all
+
+  const token = this.getToken()
+  if (token) {
+    headers.Authorization = `Bearer ${token}`
+  }
+
+  const impersonateUserId = localStorage.getItem('impersonatedUserId')
+  if (impersonateUserId) {
+    headers['X-Impersonate-User-ID'] = impersonateUserId
+  }
+
+  // Add other custom headers (except Content-Type which we already handled)
+  Object.keys(customHeaders).forEach(key => {
+    if (key !== 'Content-Type' && customHeaders[key] !== undefined) {
+      headers[key] = customHeaders[key]
+    }
+  })
+
+  return headers
+}
 
   // Process queued requests after refresh attempt
   processQueue(error, token = null) {
@@ -250,17 +263,18 @@ class ApiClient {
     return this.request(endpoint, { ...options, method: 'DELETE' })
   }
 
-  async upload(endpoint, formData, options = {}) {
-    const headers = options.headers || {}
-    delete headers['Content-Type']
+async upload(endpoint, formData, options = {}) {
+  return this.request(endpoint, {
+    ...options,
+    method: 'POST',
+    body: formData,
+    headers: {
+      ...options.headers,
+      'Content-Type': undefined,  // Explicitly mark as removed
+    },
+  })
+}
 
-    return this.request(endpoint, {
-      ...options,
-      method: 'POST',
-      body: formData,
-      headers,
-    })
-  }
 
   getAssetURL(path) {
     return `${this.customServerURL}/assets/${path}`
