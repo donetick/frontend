@@ -23,7 +23,7 @@ const timeUnits = [
 
 const timingOptions = [
   { label: 'Before', value: 'before' },
-  { label: 'On Due', value: 'ondue' },
+  { label: 'Due', value: 'ondue' },
   { label: 'After', value: 'after' },
 ]
 
@@ -490,145 +490,125 @@ const NotificationTemplate = ({
           const colors = getNotificationColors(n.value)
 
           return (
-            <Box
-              key={idx}
-              sx={{
-                mb: 1.5,
-                p: 2,
-                borderRadius: 8,
-                border: '1px solid',
-                borderColor: 'neutral.outlinedBorder',
-                background: 'background.surface',
-                transition: 'all 0.2s ease',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1.5,
-              }}
-            >
-              <Box
-                className='notification-icon'
+            <>
+              <Badge
+                badgeContent={badgeNumber}
+                size={'sm'}
                 sx={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: 32,
-                  height: 32,
-                  borderRadius: 6,
-                  background: `${colors.bgColor}15`,
-                  color: colors.textColor,
-                  position: 'relative',
-                  flexShrink: 0,
-                  '& svg': {
-                    fontSize: 16,
+                  '--Badge-minHeight': '16px',
+                  '--Badge-fontSize': '0.7rem',
+                  '--Badge-paddingX': '5px',
+
+                  top: 10,
+                  '& .MuiBadge-badge': {
+                    background: colors.bgColor,
+                    color: 'white',
                   },
                 }}
-              >
-                <Badge
-                  badgeContent={badgeNumber}
-                  size={'sm'}
-                  sx={{
-                    '--Badge-minHeight': '16px',
-                    '--Badge-fontSize': '0.7rem',
-                    '--Badge-paddingX': '5px',
-                    position: 'absolute',
-                    top: -6,
-                    right: -6,
-                    '& .MuiBadge-badge': {
-                      background: colors.bgColor,
-                      color: 'white',
-                    },
-                  }}
-                />
-                <NotificationsIcon />
-              </Box>
-
+              />
               <Box
+                key={idx}
                 sx={{
-                  minWidth: 0,
-                  flex: '1',
-                  display: { xs: 'none', md: 'flex' }, // Show only on md and up
-                }}
-              >
-                <Typography
-                  level='body-sm'
-                  sx={{
-                    fontWeight: 600,
-                    color: 'text.primary',
-                    fontSize: 14,
-                  }}
-                >
-                  {getRelativeLabel(n)}
-                </Typography>
-              </Box>
-
-              <Box
-                sx={{
+                  mb: 1.5,
+                  p: 2,
+                  borderRadius: 8,
+                  border: '1px solid',
+                  borderColor: 'neutral.outlinedBorder',
+                  background: 'background.surface',
+                  transition: 'all 0.2s ease',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 1,
-                  flexShrink: 0,
+                  gap: 1.5,
                 }}
               >
-                <Select
-                  value={uiRep.timing}
-                  onChange={(_, value) => handleChange(idx, 'timing', value)}
-                  sx={{ minWidth: 80 }}
-                  size={'sm'}
-                >
-                  {timingOptions.map(opt => (
-                    <Option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </Option>
-                  ))}
-                </Select>
-                <Input
-                  type={'number'}
-                  min={0}
-                  value={uiRep.displayValue}
-                  disabled={uiRep.timing === 'ondue'}
-                  onChange={e =>
-                    handleChange(idx, 'displayValue', e.target.value)
-                  }
+                <Box
                   sx={{
-                    width: 60,
-                    opacity: uiRep.timing === 'ondue' ? 0.6 : 1,
-                  }}
-                  size={'sm'}
-                  placeholder='0'
-                />
-                <Select
-                  value={n.unit}
-                  disabled={uiRep.timing === 'ondue'}
-                  onChange={(_, value) => handleChange(idx, 'unit', value)}
-                  sx={{
-                    minWidth: 70,
-                    opacity: uiRep.timing === 'ondue' ? 0.6 : 1,
-                  }}
-                  size={'sm'}
-                >
-                  {timeUnits.map(opt => (
-                    <Option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </Option>
-                  ))}
-                </Select>
-                <IconButton
-                  onClick={() => removeNotification(idx)}
-                  disabled={notifications.length === 1}
-                  color={'danger'}
-                  size={'sm'}
-                  variant={'soft'}
-                  sx={{
-                    transition: 'all 0.2s ease',
-                    '&:hover': {
-                      transform: 'scale(1.1)',
-                    },
+                    minWidth: 0,
+                    flex: '1',
+                    display: { xs: 'none', md: 'flex' }, // Show only on md and up
                   }}
                 >
-                  <DeleteIcon fontSize={'small'} />
-                </IconButton>
+                  <Typography
+                    level='body-sm'
+                    sx={{
+                      fontWeight: 600,
+                      color: 'text.primary',
+                      fontSize: 14,
+                    }}
+                  >
+                    {getRelativeLabel(n)}
+                  </Typography>
+                </Box>
+
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    flexShrink: 0,
+                  }}
+                >
+                  <Select
+                    value={uiRep.timing}
+                    onChange={(_, value) => handleChange(idx, 'timing', value)}
+                    sx={{ minWidth: 80 }}
+                    size={'sm'}
+                  >
+                    {timingOptions.map(opt => (
+                      <Option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </Option>
+                    ))}
+                  </Select>
+                  <Input
+                    type={'number'}
+                    min={0}
+                    value={uiRep.displayValue}
+                    disabled={uiRep.timing === 'ondue'}
+                    onChange={e =>
+                      handleChange(idx, 'displayValue', e.target.value)
+                    }
+                    sx={{
+                      width: 60,
+                      opacity: uiRep.timing === 'ondue' ? 0.6 : 1,
+                    }}
+                    size={'sm'}
+                    placeholder='0'
+                  />
+                  <Select
+                    value={n.unit}
+                    disabled={uiRep.timing === 'ondue'}
+                    onChange={(_, value) => handleChange(idx, 'unit', value)}
+                    sx={{
+                      minWidth: 70,
+                      opacity: uiRep.timing === 'ondue' ? 0.6 : 1,
+                    }}
+                    size={'sm'}
+                  >
+                    {timeUnits.map(opt => (
+                      <Option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </Option>
+                    ))}
+                  </Select>
+                  <IconButton
+                    onClick={() => removeNotification(idx)}
+                    disabled={notifications.length === 1}
+                    color={'danger'}
+                    size={'sm'}
+                    variant={'soft'}
+                    sx={{
+                      transition: 'all 0.2s ease',
+                      '&:hover': {
+                        transform: 'scale(1.1)',
+                      },
+                    }}
+                  >
+                    <DeleteIcon fontSize={'small'} />
+                  </IconButton>
+                </Box>
               </Box>
-            </Box>
+            </>
           )
         })}
       <Box
