@@ -100,7 +100,6 @@ class ApiClient {
 
   getHeaders(customHeaders = {}) {
     const headers = {
-      'Content-Type': 'application/json',
       ...customHeaders,
     }
 
@@ -231,6 +230,10 @@ class ApiClient {
   }
 
   async post(endpoint, data, options = {}) {
+    options.headers = options.headers || {}
+    if (!options.headers['Content-Type']) {
+      options.headers['Content-Type'] = 'application/json'
+    }
     return this.request(endpoint, {
       ...options,
       method: 'POST',
@@ -239,6 +242,10 @@ class ApiClient {
   }
 
   async put(endpoint, data, options = {}) {
+    options.headers = options.headers || {}
+    if (!options.headers['Content-Type']) {
+      options.headers['Content-Type'] = 'application/json'
+    }
     return this.request(endpoint, {
       ...options,
       method: 'PUT',
@@ -247,6 +254,10 @@ class ApiClient {
   }
 
   async delete(endpoint, options = {}) {
+    options.headers = options.headers || {}
+    if (!options.headers['Content-Type']) {
+      options.headers['Content-Type'] = 'application/json'
+    }
     return this.request(endpoint, { ...options, method: 'DELETE' })
   }
 
