@@ -1,4 +1,4 @@
-import { Modal, ModalDialog, ModalOverflow } from '@mui/joy'
+import { Modal, ModalDialog, ModalOverflow, Typography } from '@mui/joy'
 import { Z_INDEX } from '../../constants/zIndex'
 
 /**
@@ -10,8 +10,10 @@ const FadeModal = ({
   onClose,
   children,
   size = 'md',
-  fullWidth = false,
+  fullWidth = true,
   backdropBlur = true,
+  title,
+  footer,
   ...props
 }) => {
   // Filter out props that shouldn't be passed to Modal
@@ -76,7 +78,13 @@ const FadeModal = ({
             },
           }}
         >
-          {children}
+          {title && (
+            <Typography level='title-lg' sx={{ fontWeight: 600, mb: 2 }}>
+              {title}
+            </Typography>
+          )}
+          <div style={{ flex: 1, overflow: 'auto' }}>{children}</div>
+          {footer && <div style={{ marginTop: 16 }}>{footer}</div>}
         </ModalDialog>
       </ModalOverflow>
     </Modal>

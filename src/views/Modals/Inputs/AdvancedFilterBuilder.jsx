@@ -400,6 +400,7 @@ const AdvancedFilterBuilder = ({
       open={isOpen}
       onClose={onClose}
       size='lg'
+      fullWidth={true}
       title={editingFilter ? 'Edit Filter' : 'Create Advanced Filter'}
       footer={
         <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
