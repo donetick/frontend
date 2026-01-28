@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { useLocation } from 'react-router-dom'
 import './PageTransition.css'

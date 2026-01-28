@@ -173,6 +173,12 @@ const AdvancedFilterBuilder = ({
             }
             placeholder='Select assignees'
             sx={{ width: '100%' }}
+            slotProps={{
+              listbox: {
+                placement: 'bottom-start',
+                disablePortal: false,
+              },
+            }}
             renderValue={selected => (
               <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
                 {selected.map((selectedElement, idx) => {
@@ -210,6 +216,12 @@ const AdvancedFilterBuilder = ({
             }
             placeholder='Select creators'
             sx={{ width: '100%' }}
+            slotProps={{
+              listbox: {
+                placement: 'bottom-start',
+                disablePortal: false,
+              },
+            }}
             renderValue={selected => (
               <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
                 {selected.map((selectedElement, idx) => {
@@ -255,13 +267,23 @@ const AdvancedFilterBuilder = ({
             }
             placeholder='Select priorities'
             sx={{ width: '100%' }}
+            slotProps={{
+              listbox: {
+                placement: 'bottom-start',
+                disablePortal: false,
+              },
+            }}
             renderValue={selected => (
               <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-                {selected.map((value, idx) => (
-                  <Chip key={`priority-${value}-${idx}`} size='sm'>
-                    Priority {value}
-                  </Chip>
-                ))}
+                {selected.map((selectedElement, idx) => {
+                  const value = selectedElement.value
+                  const priority = Priorities.find(p => p.value === value)
+                  return (
+                    <Chip key={`priority-${value}-${idx}`} size='sm'>
+                      {priority?.name || `Priority ${value}`}
+                    </Chip>
+                  )
+                })}
               </Box>
             )}
           >
@@ -286,6 +308,12 @@ const AdvancedFilterBuilder = ({
             }
             placeholder='Select labels'
             sx={{ width: '100%' }}
+            slotProps={{
+              listbox: {
+                placement: 'bottom-start',
+                disablePortal: false,
+              },
+            }}
             renderValue={selected => (
               <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
                 {selected.map((selectedElement, idx) => {
@@ -319,6 +347,12 @@ const AdvancedFilterBuilder = ({
             }
             placeholder='Select projects'
             sx={{ width: '100%' }}
+            slotProps={{
+              listbox: {
+                placement: 'bottom-start',
+                disablePortal: false,
+              },
+            }}
             renderValue={selected => (
               <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
                 {selected.map((event, idx) => {
@@ -363,6 +397,12 @@ const AdvancedFilterBuilder = ({
               updateCondition(index, 'value', [newValue])
             }
             sx={{ width: '100%' }}
+            slotProps={{
+              listbox: {
+                placement: 'bottom-start',
+                disablePortal: false,
+              },
+            }}
           >
             <Option value={0}>Active</Option>
             <Option value={1}>Started</Option>
@@ -379,6 +419,12 @@ const AdvancedFilterBuilder = ({
               updateCondition(index, 'operator', newValue)
             }
             sx={{ width: '100%' }}
+            slotProps={{
+              listbox: {
+                placement: 'bottom-start',
+                disablePortal: false,
+              },
+            }}
           >
             <Option value='isOverdue'>Is Overdue</Option>
             <Option value='isDueToday'>Is Due Today</Option>
@@ -467,6 +513,12 @@ const AdvancedFilterBuilder = ({
           <Select
             value={filterColor}
             onChange={(_, value) => value && setFilterColor(value)}
+            slotProps={{
+              listbox: {
+                placement: 'bottom-start',
+                disablePortal: false,
+              },
+            }}
             renderValue={selected => (
               <Typography
                 startDecorator={
@@ -518,8 +570,10 @@ const AdvancedFilterBuilder = ({
             sx={{
               gap: 1,
               overflowY: 'auto',
+              overflowX: 'hidden',
               maxHeight: { xs: '40vh', sm: '50vh' },
               pr: 0.5,
+              position: 'relative',
             }}
           >
             {conditions.map((condition, index) => (
@@ -567,6 +621,12 @@ const AdvancedFilterBuilder = ({
                       updateCondition(index, 'type', newValue)
                     }
                     sx={{ width: '100%' }}
+                    slotProps={{
+                      listbox: {
+                        placement: 'bottom-start',
+                        disablePortal: false,
+                      },
+                    }}
                   >
                     <Option value='assignee'>Assignee</Option>
                     <Option value='createdBy'>Created By</Option>
@@ -625,9 +685,11 @@ const AdvancedFilterBuilder = ({
             sx={{
               maxHeight: 150,
               overflowY: 'auto',
+              overflowX: 'hidden',
               bgcolor: 'background.level1',
               p: 1,
               borderRadius: 'sm',
+              position: 'relative',
             }}
           >
             {previewCount === 0 ? (

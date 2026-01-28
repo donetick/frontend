@@ -1,7 +1,10 @@
+import { Add, Check } from '@mui/icons-material'
 import {
+  Box,
   Button,
-  Chip,
   Divider,
+  ListItemContent,
+  ListItemDecorator,
   Menu,
   MenuItem,
   Radio,
@@ -9,7 +12,7 @@ import {
 } from '@mui/joy'
 import IconButton from '@mui/joy/IconButton'
 import { useEffect, useRef, useState } from 'react'
-import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
+import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 
 const SortAndGrouping = ({
   label,
@@ -26,10 +29,15 @@ const SortAndGrouping = ({
   onCreateNewFilter,
 }) => {
   const [anchorEl, setAnchorEl] = useState(null)
+  const [selectedIndex, setSelectedIndex] = useState(0)
+  const [isKeyboardNavigating, setIsKeyboardNavigating] = useState(false)
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
   const menuRef = useRef(null)
+  const buttonRef = useRef(null)
 
   const handleMenuOpen = event => {
     setAnchorEl(event.currentTarget)
+    setIsKeyboardNavigating(false)
   }
 
   const handleMenuClose = () => {
@@ -49,37 +57,177 @@ const SortAndGrouping = ({
     }
   }, [])
 
+  // Keyboard shortcut handler
+  useEffect(() => {
+    const handleKeyDown = event => {
+      const isHoldingCmdOrCtrl = event.ctrlKey || event.metaKey
+
+      // Cmd/Ctrl + G to open sort menu
+      if (isHoldingCmdOrCtrl && event.key === 'g') {
+        event.preventDefault()
+        if (!anchorEl) {
+          setAnchorEl(buttonRef.current)
+          setSelectedIndex(0)
+          setIsKeyboardNavigating(true)
+        } else {
+          handleMenuClose()
+        }
+        return
+      }
+
+      // Only handle navigation keys when menu is open
+      if (!anchorEl) return
+
+      const groupByItems = [
+        { name: 'Smart', value: 'default' },
+        { name: 'Due Date', value: 'due_date' },
+        { name: 'Priority', value: 'priority' },
+        { name: 'Labels', value: 'labels' },
+      ]
+
+      const filterItems = ['anyone', 'assigned_to_me', 'assigned_to_others']
+
+      // Total selectable items: 4 (group by) + 3 (filters) + 1 (create custom filter) = 8
+      const totalItems = groupByItems.length + filterItems.length + 1
+
+      switch (event.key) {
+        case 'ArrowDown':
+          event.preventDefault()
+          setIsKeyboardNavigating(true)
+          setSelectedIndex(prev => (prev < totalItems - 1 ? prev + 1 : prev))
+          break
+        case 'ArrowUp':
+          event.preventDefault()
+          setIsKeyboardNavigating(true)
+          setSelectedIndex(prev => (prev > 0 ? prev - 1 : prev))
+          break
+        case 'Enter':
+          event.preventDefault()
+          if (selectedIndex < groupByItems.length) {
+            // Group by items (0-3)
+            const item = groupByItems[selectedIndex]
+            onItemSelect(item)
+            setSelectedItem?.(item.name)
+            handleMenuClose()
+          } else if (selectedIndex < groupByItems.length + filterItems.length) {
+            // Filter items (4-6)
+            const filterIndex = selectedIndex - groupByItems.length
+            setFilter(filterItems[filterIndex])
+            handleMenuClose()
+          } else {
+            // Create custom filter (7)
+            onCreateNewFilter()
+            handleMenuClose()
+          }
+          break
+        case 'Escape':
+          event.preventDefault()
+          handleMenuClose()
+          break
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [
+    anchorEl,
+    selectedIndex,
+    onItemSelect,
+    setSelectedItem,
+    setFilter,
+    onCreateNewFilter,
+  ])
+
+  // Reset selected index when menu opens
+  useEffect(() => {
+    if (anchorEl) {
+      setSelectedIndex(0)
+    }
+  }, [anchorEl])
+
+  // Keyboard shortcut hint handler
+  useEffect(() => {
+    const handleKeyDown = event => {
+      if (event.ctrlKey || event.metaKey) {
+        setShowKeyboardShortcuts(true)
+      }
+    }
+
+    const handleKeyUp = event => {
+      if (!event.ctrlKey && !event.metaKey) {
+        setShowKeyboardShortcuts(false)
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    document.addEventListener('keyup', handleKeyUp)
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      document.removeEventListener('keyup', handleKeyUp)
+    }
+  }, [])
+
   return (
     <>
       {!label && (
-        <IconButton
-          onClick={handleMenuOpen}
-          variant='outlined'
-          color={isActive ? 'primary' : 'neutral'}
-          size='sm'
-          sx={{
-            height: 24,
-            borderRadius: 24,
-          }}
-        >
-          {icon}
-          {label ? label : null}
-        </IconButton>
+        <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+          <IconButton
+            ref={buttonRef}
+            onClick={handleMenuOpen}
+            variant='outlined'
+            color={isActive ? 'primary' : 'neutral'}
+            size='sm'
+            sx={{
+              height: 24,
+              borderRadius: 24,
+            }}
+            title='Sort and Group (Ctrl+G)'
+          >
+            {icon}
+            {label ? label : null}
+          </IconButton>
+          <KeyboardShortcutHint
+            shortcut='G'
+            show={showKeyboardShortcuts}
+            sx={{
+              position: 'absolute',
+              top: -8,
+              right: -8,
+              zIndex: 1000,
+            }}
+          />
+        </Box>
       )}
       {label && (
-        <Button
-          onClick={handleMenuOpen}
-          variant='outlined'
-          color={isActive ? 'primary' : 'neutral'}
-          size='sm'
-          startDecorator={icon}
-          sx={{
-            height: 24,
-            borderRadius: 24,
-          }}
-        >
-          {label}
-        </Button>
+        <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+          <Button
+            ref={buttonRef}
+            onClick={handleMenuOpen}
+            variant='outlined'
+            color={isActive ? 'primary' : 'neutral'}
+            size='sm'
+            startDecorator={icon}
+            sx={{
+              height: 24,
+              borderRadius: 24,
+            }}
+            title='Sort and Group (Ctrl+G)'
+          >
+            {label}
+          </Button>
+          <KeyboardShortcutHint
+            shortcut='G'
+            show={showKeyboardShortcuts}
+            sx={{
+              position: 'absolute',
+              top: -8,
+              right: -8,
+              zIndex: 1000,
+            }}
+          />
+        </Box>
       )}
 
       <Menu
@@ -88,24 +236,39 @@ const SortAndGrouping = ({
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
+        placement='bottom-start'
         sx={{
-          '& .MuiMenuItem-root': {
-            padding: '8px 16px', // Consistent padding for menu items
-          },
+          minWidth: 280,
+          p: 1,
+          '--List-gap': '4px',
+          boxShadow: 'var(--joy-shadow-lg)',
+          border: '1px solid var(--joy-palette-divider)',
+          borderRadius: 'var(--joy-radius-md)',
         }}
       >
-        <MenuItem key={`${k}-title`} disabled>
-          <Typography level='body-sm' fontWeight='lg'>
-            Group By
-          </Typography>
+        <MenuItem
+          disabled
+          sx={{
+            borderRadius: 'var(--joy-radius-sm)',
+            cursor: 'default',
+            opacity: 1,
+          }}
+        >
+          <ListItemContent>
+            <Typography level='title-sm' sx={{ fontWeight: 600 }}>
+              {title || 'Group By'}
+            </Typography>
+          </ListItemContent>
         </MenuItem>
+
+        <Divider sx={{ my: 1 }} />
 
         {[
           { name: 'Smart', value: 'default' },
           { name: 'Due Date', value: 'due_date' },
           { name: 'Priority', value: 'priority' },
           { name: 'Labels', value: 'labels' },
-        ].map(item => (
+        ].map((item, index) => (
           <MenuItem
             key={`${k}-${item?.value}`}
             onClick={() => {
@@ -113,41 +276,87 @@ const SortAndGrouping = ({
               setSelectedItem?.(item.name)
               handleMenuClose()
             }}
+            onMouseEnter={() => setIsKeyboardNavigating(false)}
+            sx={{
+              borderRadius: 'var(--joy-radius-sm)',
+              backgroundColor:
+                selectedItem === item.name
+                  ? 'var(--joy-palette-primary-softBg)'
+                  : selectedIndex === index && anchorEl && isKeyboardNavigating
+                    ? 'var(--joy-palette-neutral-softHoverBg)'
+                    : 'transparent',
+              '&:hover': {
+                backgroundColor:
+                  selectedItem === item.name
+                    ? 'var(--joy-palette-primary-softBg)'
+                    : 'var(--joy-palette-neutral-softHoverBg)',
+              },
+            }}
           >
-            {useChips ? (
-              <Chip
-                size='sm'
+            <ListItemContent>
+              <Box
                 sx={{
-                  backgroundColor: item.color ? item.color : null,
-                  color: getTextColorFromBackgroundColor(item.color),
-                  fontWeight: 'md',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
                 }}
               >
-                {item.name}
-              </Chip>
-            ) : (
-              <>
-                {item?.icon}
-                <Typography level='body-sm' sx={{ ml: 1 }}>
+                <Typography
+                  level='body-sm'
+                  sx={{
+                    fontWeight: selectedItem === item.name ? 600 : 400,
+                    color:
+                      selectedItem === item.name
+                        ? 'var(--joy-palette-primary-600)'
+                        : 'var(--joy-palette-text-primary)',
+                  }}
+                >
                   {item.name}
                 </Typography>
-              </>
-            )}
+                {selectedItem === item.name && (
+                  <Check
+                    sx={{
+                      fontSize: '16px',
+                      color: 'var(--joy-palette-primary-500)',
+                    }}
+                  />
+                )}
+              </Box>
+            </ListItemContent>
           </MenuItem>
         ))}
 
-        <Divider />
+        <Divider sx={{ my: 1 }} />
 
-        <MenuItem key={`${k}-quick-filter`} disabled>
-          <Typography level='body-sm' fontWeight='lg'>
-            Quick Filters
-          </Typography>
+        <MenuItem
+          disabled
+          sx={{
+            borderRadius: 'var(--joy-radius-sm)',
+            cursor: 'default',
+            opacity: 1,
+          }}
+        >
+          <ListItemContent>
+            <Typography level='title-sm' sx={{ fontWeight: 600 }}>
+              Quick Filters
+            </Typography>
+          </ListItemContent>
         </MenuItem>
 
-        <MenuItem key={`${k}-assignee-title`} disabled>
-          <Typography level='body-xs' fontWeight='md'>
-            Assigned to :
-          </Typography>
+        <MenuItem
+          disabled
+          sx={{
+            borderRadius: 'var(--joy-radius-sm)',
+            cursor: 'default',
+            opacity: 1,
+            paddingY: '4px',
+          }}
+        >
+          <ListItemContent>
+            <Typography level='body-xs' sx={{ fontWeight: 600 }}>
+              Assigned to:
+            </Typography>
+          </ListItemContent>
         </MenuItem>
 
         <MenuItem
@@ -156,9 +365,48 @@ const SortAndGrouping = ({
             setFilter('anyone')
             handleMenuClose()
           }}
+          onMouseEnter={() => setIsKeyboardNavigating(false)}
+          sx={{
+            borderRadius: 'var(--joy-radius-sm)',
+            backgroundColor:
+              selectedFilter === 'anyone'
+                ? 'var(--joy-palette-primary-softBg)'
+                : selectedIndex === 4 && anchorEl && isKeyboardNavigating
+                  ? 'var(--joy-palette-neutral-softHoverBg)'
+                  : 'transparent',
+            '&:hover': {
+              backgroundColor:
+                selectedFilter === 'anyone'
+                  ? 'var(--joy-palette-primary-softBg)'
+                  : 'var(--joy-palette-neutral-softHoverBg)',
+            },
+          }}
         >
-          <Radio checked={selectedFilter === 'anyone'} variant='outlined' />
-          <Typography level='body-sm'>Anyone</Typography>
+          <ListItemDecorator>
+            <Radio checked={selectedFilter === 'anyone'} variant='outlined' />
+          </ListItemDecorator>
+          <ListItemContent>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
+              <Typography
+                level='body-sm'
+                sx={{
+                  fontWeight: selectedFilter === 'anyone' ? 600 : 400,
+                  color:
+                    selectedFilter === 'anyone'
+                      ? 'var(--joy-palette-primary-600)'
+                      : 'var(--joy-palette-text-primary)',
+                }}
+              >
+                Anyone
+              </Typography>
+            </Box>
+          </ListItemContent>
         </MenuItem>
 
         <MenuItem
@@ -167,27 +415,52 @@ const SortAndGrouping = ({
             setFilter('assigned_to_me')
             handleMenuClose()
           }}
-        >
-          <Radio
-            checked={selectedFilter === 'assigned_to_me'}
-            variant='outlined'
-          />
-          <Typography level='body-sm'>Assigned to me</Typography>
-        </MenuItem>
-
-        {/* <MenuItem
-          key={`${k}-assignee-assignable-to-me`}
-          onClick={() => {
-            setFilter('assignable_to_me')
-            handleMenuClose()
+          onMouseEnter={() => setIsKeyboardNavigating(false)}
+          sx={{
+            borderRadius: 'var(--joy-radius-sm)',
+            backgroundColor:
+              selectedFilter === 'assigned_to_me'
+                ? 'var(--joy-palette-primary-softBg)'
+                : selectedIndex === 5 && anchorEl && isKeyboardNavigating
+                  ? 'var(--joy-palette-neutral-softHoverBg)'
+                  : 'transparent',
+            '&:hover': {
+              backgroundColor:
+                selectedFilter === 'assigned_to_me'
+                  ? 'var(--joy-palette-primary-softBg)'
+                  : 'var(--joy-palette-neutral-softHoverBg)',
+            },
           }}
         >
-          <Radio
-            checked={selectedFilter === 'assignable_to_me'}
-            variant='outlined'
-          />
-          <Typography level='body-sm'>Available for me</Typography>
-        </MenuItem> */}
+          <ListItemDecorator>
+            <Radio
+              checked={selectedFilter === 'assigned_to_me'}
+              variant='outlined'
+            />
+          </ListItemDecorator>
+          <ListItemContent>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
+              <Typography
+                level='body-sm'
+                sx={{
+                  fontWeight: selectedFilter === 'assigned_to_me' ? 600 : 400,
+                  color:
+                    selectedFilter === 'assigned_to_me'
+                      ? 'var(--joy-palette-primary-600)'
+                      : 'var(--joy-palette-text-primary)',
+                }}
+              >
+                Assigned to me
+              </Typography>
+            </Box>
+          </ListItemContent>
+        </MenuItem>
 
         <MenuItem
           key={`${k}-assignee-assigned-to-others`}
@@ -195,44 +468,94 @@ const SortAndGrouping = ({
             setFilter('assigned_to_others')
             handleMenuClose()
           }}
+          onMouseEnter={() => setIsKeyboardNavigating(false)}
+          sx={{
+            borderRadius: 'var(--joy-radius-sm)',
+            backgroundColor:
+              selectedFilter === 'assigned_to_others'
+                ? 'var(--joy-palette-primary-softBg)'
+                : selectedIndex === 6 && anchorEl && isKeyboardNavigating
+                  ? 'var(--joy-palette-neutral-softHoverBg)'
+                  : 'transparent',
+            '&:hover': {
+              backgroundColor:
+                selectedFilter === 'assigned_to_others'
+                  ? 'var(--joy-palette-primary-softBg)'
+                  : 'var(--joy-palette-neutral-softHoverBg)',
+            },
+          }}
         >
-          <Radio
-            checked={selectedFilter === 'assigned_to_others'}
-            variant='outlined'
-          />
-          <Typography level='body-sm'>Assigned to others</Typography>
+          <ListItemDecorator>
+            <Radio
+              checked={selectedFilter === 'assigned_to_others'}
+              variant='outlined'
+            />
+          </ListItemDecorator>
+          <ListItemContent>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
+              <Typography
+                level='body-sm'
+                sx={{
+                  fontWeight:
+                    selectedFilter === 'assigned_to_others' ? 600 : 400,
+                  color:
+                    selectedFilter === 'assigned_to_others'
+                      ? 'var(--joy-palette-primary-600)'
+                      : 'var(--joy-palette-text-primary)',
+                }}
+              >
+                Assigned to others
+              </Typography>
+            </Box>
+          </ListItemContent>
         </MenuItem>
 
-        <Divider />
+        <Divider sx={{ my: 1 }} />
 
         <MenuItem
           key={`${k}-custom-filter`}
           onClick={() => {
             onCreateNewFilter()
             handleMenuClose()
-            // TODO: Open advanced filter builder
+          }}
+          onMouseEnter={() => setIsKeyboardNavigating(false)}
+          sx={{
+            borderRadius: 'var(--joy-radius-sm)',
+            backgroundColor:
+              selectedIndex === 7 && anchorEl && isKeyboardNavigating
+                ? 'var(--joy-palette-success-softHoverBg)'
+                : 'transparent',
+            '&:hover': {
+              backgroundColor: 'var(--joy-palette-success-softHoverBg)',
+            },
           }}
         >
-          <Typography level='body-sm' fontWeight='md' color='primary'>
-            Create Custom Filter...
-          </Typography>
+          <ListItemDecorator sx={{ color: 'var(--joy-palette-success-500)' }}>
+            <Add />
+          </ListItemDecorator>
+          <ListItemContent>
+            <Typography
+              level='body-sm'
+              sx={{
+                fontWeight: 500,
+              }}
+            >
+              Create Custom Filter
+            </Typography>
+            <Typography
+              level='body-xs'
+              sx={{ color: 'var(--joy-palette-text-tertiary)' }}
+            >
+              Build advanced filter rules
+            </Typography>
+          </ListItemContent>
         </MenuItem>
-
-        {/* 
-// i need this but i think it have a bad UX and confusing so commenting it for now
-        <MenuItem
-          key={`${k}-assignee-created-by-me`}
-          onClick={() => {
-            setFilter('created_by_me')
-            handleMenuClose()
-          }}
-        >
-          <Radio
-            checked={selectedFilter === 'created_by_me'}
-            variant='outlined'
-          />
-          <Typography level='body-sm'>Created by me</Typography>
-        </MenuItem> */}
       </Menu>
     </>
   )

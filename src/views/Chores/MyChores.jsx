@@ -161,15 +161,19 @@ const MyChores = () => {
     savedFilters,
     activeFilter,
     activeFilterId,
+    tempFilter,
     filteredChores: customFilteredChores,
     applyCustomFilter,
     clearActiveFilter,
+    applyTempFilter,
+    clearTempFilter,
     saveFilter,
     updateFilter,
     deleteFilter,
     pinFilter,
     createFilterFromCurrentState,
     hasProjectConditions,
+    hasFilterApplied,
   } = useCustomFilters(
     nonProjectFilteredChores,
     membersData?.res,
@@ -205,9 +209,12 @@ const MyChores = () => {
       return []
     }
 
-    // Use project-filtered chores for section grouping
+    // If a custom filter (temp or saved) is active, use customFilteredChores
     let choresToGroup = chores
-    if (selectedProject) {
+    if (tempFilter || activeFilterId) {
+      choresToGroup = customFilteredChores
+    } else if (selectedProject) {
+      // Otherwise, use project-filtered chores for section grouping
       if (selectedProject.id === 'default') {
         // Default project: only show tasks without a projectId
         choresToGroup = chores.filter(chore => !chore.projectId)
@@ -228,6 +235,9 @@ const MyChores = () => {
     return sections
   }, [
     chores,
+    customFilteredChores,
+    tempFilter,
+    activeFilterId,
     selectedChoreSection,
     selectedChoreFilter,
     selectedProject,
@@ -325,6 +335,32 @@ const MyChores = () => {
     }
   }, [searchInputFocus])
 
+  // Read and apply project from URL parameters
+  useEffect(() => {
+    if (!projects.length) return
+
+    const projectIdFromUrl = searchParams.get('project')
+
+    if (projectIdFromUrl && projectIdFromUrl !== selectedProject?.id) {
+      const project = projectsWithDefault.find(p => p.id === projectIdFromUrl)
+      if (project) {
+        setSelectedProjectWithCache(project)
+      }
+    }
+  }, [
+    searchParams,
+    projects,
+    projectsWithDefault,
+    selectedProject,
+    setSelectedProjectWithCache,
+
+    searchParams,
+    projects,
+    projectsWithDefault,
+    selectedProject,
+    setSelectedProjectWithCache,
+  ])
+
   // Read and apply filters from URL parameters
   useEffect(() => {
     if (!chores.length || !savedFilters.length) return
@@ -332,6 +368,7 @@ const MyChores = () => {
     // Check for filterId (camelCase) or filter_id (snake_case) for advanced filters
     const filterId =
       searchParams.get('filterId') || searchParams.get('filter_id')
+
     const oldFilter = searchParams.get('filter')
 
     // Handle advanced filter parameter
@@ -505,10 +542,7 @@ const MyChores = () => {
     }
 
     // Always navigate with params (preserves project param)
-    const paramString = params.toString()
-    Navigate(paramString ? `/chores?${paramString}` : '/chores', {
-      replace: true,
-    })
+    Navigate({ pathname: '/chores', search: params.toString() })
   }
 
   const searchOptions = useMemo(
@@ -617,7 +651,7 @@ const MyChores = () => {
   }
 
   const getFilteredChores = useMemo(() => {
-    if (activeFilterId) {
+    if (activeFilterId || tempFilter) {
       return customFilteredChores
     }
 
@@ -644,6 +678,7 @@ const MyChores = () => {
     return baseChores
   }, [
     activeFilterId,
+    tempFilter,
     customFilteredChores,
     projectFilteredChores,
     searchTerm,
@@ -741,16 +776,18 @@ const MyChores = () => {
           />
 
           {/* Project Selector - Hidden when active filter has project conditions */}
-          {projectsWithDefault.length > 1 && !hasProjectConditions && (
-            <ProjectSelector
-              selectedProject={selectedProject?.name || 'Default Project'}
-              onProjectSelect={project => {
-                setSelectedProjectWithCache(project)
-                clearActiveFilter()
-              }}
-              showKeyboardShortcuts={showKeyboardShortcuts}
-            />
-          )}
+          {projectsWithDefault.length > 1 &&
+            !hasProjectConditions &&
+            !hasFilterApplied && (
+              <ProjectSelector
+                selectedProject={selectedProject?.name || 'Default Project'}
+                onProjectSelect={project => {
+                  setSelectedProjectWithCache(project)
+                  clearActiveFilter()
+                }}
+                showKeyboardShortcuts={showKeyboardShortcuts}
+              />
+            )}
 
           {/* View Mode Toggle Button */}
           <IconButton
@@ -1446,7 +1483,14 @@ const MyChores = () => {
         )}
       </Container>
 
-      <Sidepanel chores={chores} performers={membersData?.res || []} />
+      <Sidepanel
+        chores={customFilteredChores}
+        allChores={chores}
+        performers={membersData?.res || []}
+        applyTempFilter={applyTempFilter}
+        clearTempFilter={clearTempFilter}
+        tempFilter={tempFilter}
+      />
 
       {/* Multi-select Help - only show when in multi-select mode */}
       {/* <MultiSelectHelp isVisible={isMultiSelectMode} /> */}

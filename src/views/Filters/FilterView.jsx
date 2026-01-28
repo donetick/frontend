@@ -13,7 +13,14 @@ import {
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { Add, FilterAlt, Star, StarBorder, Task } from '@mui/icons-material'
+import {
+  Add,
+  FilterAlt,
+  MoreVert,
+  Star,
+  StarBorder,
+  Task,
+} from '@mui/icons-material'
 import { useChores } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import {
@@ -328,7 +335,7 @@ const FilterCard = ({
               return
             }
             // Navigate to MyChores with filter applied via URL param
-            navigate(`/chores?filterId=${encodeURIComponent(filter.id)}`)
+            navigate(`/filters/${encodeURIComponent(filter.id)}`)
           }}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
@@ -362,6 +369,11 @@ const FilterCard = ({
             }}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
+            onClick={e => {
+              e.stopPropagation()
+              const clampedDelta = isSwipeRevealed ? 0 : -maxSwipeDistance
+              setSwipeTranslateX(clampedDelta)
+            }}
           >
             {/* Drag indicator dots */}
             <Box
@@ -371,17 +383,7 @@ const FilterCard = ({
                 gap: 0.25,
               }}
             >
-              {[...Array(3)].map((_, i) => (
-                <Box
-                  key={i}
-                  sx={{
-                    width: 3,
-                    height: 3,
-                    borderRadius: '50%',
-                    bgcolor: 'text.tertiary',
-                  }}
-                />
-              ))}
+              <MoreVert sx={{ fontSize: 20 }} />
             </Box>
           </Box>
 

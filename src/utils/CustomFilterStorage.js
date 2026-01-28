@@ -8,17 +8,10 @@
 const STORAGE_KEY = 'customFilters'
 const MAX_FILTERS = 20 // Limit to prevent localStorage overflow
 
-/**
- * Generate a unique filter ID
- */
 const generateFilterId = () => {
-  return `filter_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+  return `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 }
 
-/**
- * Get all saved filters
- * @returns {Array} - Array of filter objects
- */
 export const getSavedFilters = () => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY)
@@ -26,7 +19,6 @@ export const getSavedFilters = () => {
 
     const filters = JSON.parse(stored)
 
-    // Ensure filters have required fields
     return filters.filter(f => f.id && f.name && f.conditions)
   } catch (error) {
     console.error('Error loading saved filters:', error)
@@ -34,18 +26,15 @@ export const getSavedFilters = () => {
   }
 }
 
-/**
- * Save a new filter
- * @param {Object} filter - The filter to save
- * @returns {Object} - The saved filter with generated ID and metadata
- */
-export const saveFilter = (filter) => {
+export const saveFilter = filter => {
   try {
     const filters = getSavedFilters()
 
     // Check limit
     if (filters.length >= MAX_FILTERS) {
-      throw new Error(`Maximum of ${MAX_FILTERS} filters allowed. Please delete some filters first.`)
+      throw new Error(
+        `Maximum of ${MAX_FILTERS} filters allowed. Please delete some filters first.`,
+      )
     }
 
     // Create new filter with metadata
@@ -61,7 +50,7 @@ export const saveFilter = (filter) => {
       updatedAt: new Date().toISOString(),
       isPinned: filter.isPinned || false,
       usageCount: 0,
-      lastUsedAt: null
+      lastUsedAt: null,
     }
 
     // Add to filters array
@@ -77,12 +66,7 @@ export const saveFilter = (filter) => {
   }
 }
 
-/**
- * Update an existing filter
- * @param {string} filterId - The ID of the filter to update
- * @param {Object} updates - The fields to update
- * @returns {Object} - The updated filter
- */
+
 export const updateFilter = (filterId, updates) => {
   try {
     const filters = getSavedFilters()
@@ -96,7 +80,7 @@ export const updateFilter = (filterId, updates) => {
     const updatedFilter = {
       ...filters[filterIndex],
       ...updates,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     }
 
     filters[filterIndex] = updatedFilter
@@ -111,12 +95,7 @@ export const updateFilter = (filterId, updates) => {
   }
 }
 
-/**
- * Delete a filter
- * @param {string} filterId - The ID of the filter to delete
- * @returns {boolean} - Success status
- */
-export const deleteFilter = (filterId) => {
+export const deleteFilter = filterId => {
   try {
     const filters = getSavedFilters()
     const updatedFilters = filters.filter(f => f.id !== filterId)
@@ -130,27 +109,20 @@ export const deleteFilter = (filterId) => {
   }
 }
 
-/**
- * Get a single filter by ID
- * @param {string} filterId - The ID of the filter
- * @returns {Object|null} - The filter object or null if not found
- */
-export const getFilterById = (filterId) => {
+
+export const getFilterById = filterId => {
   const filters = getSavedFilters()
   return filters.find(f => f.id === filterId) || null
 }
 
-/**
- * Increment usage count for a filter
- * @param {string} filterId - The ID of the filter
- */
-export const trackFilterUsage = (filterId) => {
+export const trackFilterUsage = filterId => {
   try {
     const filters = getSavedFilters()
     const filterIndex = filters.findIndex(f => f.id === filterId)
 
     if (filterIndex !== -1) {
-      filters[filterIndex].usageCount = (filters[filterIndex].usageCount || 0) + 1
+      filters[filterIndex].usageCount =
+        (filters[filterIndex].usageCount || 0) + 1
       filters[filterIndex].lastUsedAt = new Date().toISOString()
 
       localStorage.setItem(STORAGE_KEY, JSON.stringify(filters))
@@ -160,12 +132,8 @@ export const trackFilterUsage = (filterId) => {
   }
 }
 
-/**
- * Toggle pin status of a filter
- * @param {string} filterId - The ID of the filter
- * @returns {boolean} - New pin status
- */
-export const toggleFilterPin = (filterId) => {
+
+export const toggleFilterPin = filterId => {
   try {
     const filters = getSavedFilters()
     const filterIndex = filters.findIndex(f => f.id === filterId)
@@ -186,53 +154,31 @@ export const toggleFilterPin = (filterId) => {
   }
 }
 
-/**
- * Get filters sorted by usage (most used first)
- * @returns {Array} - Sorted filters
- */
+
 export const getFiltersByUsage = () => {
   const filters = getSavedFilters()
   return filters.sort((a, b) => (b.usageCount || 0) - (a.usageCount || 0))
 }
 
-/**
- * Get pinned filters
- * @returns {Array} - Pinned filters
- */
+
 export const getPinnedFilters = () => {
   const filters = getSavedFilters()
   return filters.filter(f => f.isPinned)
 }
 
-/**
- * Check if filter name already exists
- * @param {string} name - The filter name to check
- * @param {string} excludeId - Optional ID to exclude from check (for updates)
- * @returns {boolean} - Whether the name exists
- */
 export const filterNameExists = (name, excludeId = null) => {
   const filters = getSavedFilters()
-  return filters.some(f =>
-    f.name.toLowerCase() === name.toLowerCase() &&
-    f.id !== excludeId
+  return filters.some(
+    f => f.name.toLowerCase() === name.toLowerCase() && f.id !== excludeId,
   )
 }
 
-/**
- * Export filters as JSON (for backup/sharing)
- * @returns {string} - JSON string of all filters
- */
 export const exportFilters = () => {
   const filters = getSavedFilters()
   return JSON.stringify(filters, null, 2)
 }
 
-/**
- * Import filters from JSON
- * @param {string} jsonString - JSON string of filters
- * @returns {number} - Number of filters imported
- */
-export const importFilters = (jsonString) => {
+export const importFilters = jsonString => {
   try {
     const importedFilters = JSON.parse(jsonString)
 
@@ -249,7 +195,7 @@ export const importFilters = (jsonString) => {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       usageCount: 0,
-      lastUsedAt: null
+      lastUsedAt: null,,
     }))
 
     const allFilters = [...existingFilters, ...newFilters]
@@ -268,10 +214,7 @@ export const importFilters = (jsonString) => {
   }
 }
 
-/**
- * Clear all filters (use with caution!)
- * @returns {boolean} - Success status
- */
+
 export const clearAllFilters = () => {
   try {
     localStorage.removeItem(STORAGE_KEY)

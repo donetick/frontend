@@ -1,4 +1,5 @@
 import {
+  Check,
   Delete,
   Edit,
   Settings,
@@ -129,33 +130,40 @@ const CustomFilterChips = ({
                         }}
                       />
                     )}
-                    <Chip
-                      size='sm'
-                      variant='solid'
-                      sx={{
-                        ...(hasCustomColor
-                          ? {
-                              bgcolor:
-                                textColor === '#FFFFFF'
-                                  ? '#00000040'
-                                  : '#FFFFFF40',
-                              color: textColor,
-                              border: `1px solid ${textColor}30`,
-                            }
-                          : {}),
-                      }}
-                      color={
-                        hasCustomColor
-                          ? undefined
-                          : hasWarning
-                            ? 'warning'
-                            : isActive
-                              ? 'primary'
+                    {isActive ? (
+                      <Check
+                        sx={{
+                          fontSize: '1rem',
+                          color: hasCustomColor ? textColor : 'primary.500',
+                        }}
+                      />
+                    ) : (
+                      <Chip
+                        size='sm'
+                        variant='solid'
+                        sx={{
+                          ...(hasCustomColor
+                            ? {
+                                bgcolor:
+                                  textColor === '#FFFFFF'
+                                    ? '#00000040'
+                                    : '#FFFFFF40',
+                                color: textColor,
+                                border: `1px solid ${textColor}30`,
+                              }
+                            : {}),
+                        }}
+                        color={
+                          hasCustomColor
+                            ? undefined
+                            : hasWarning
+                              ? 'warning'
                               : 'neutral'
-                      }
-                    >
-                      {filter.count}
-                    </Chip>
+                        }
+                      >
+                        {filter.count}
+                      </Chip>
+                    )}
                   </Box>
                 }
                 endDecorator={
@@ -206,15 +214,14 @@ const CustomFilterChips = ({
       <Chip
         variant='outlined'
         size='lg'
-        startDecorator={<Settings />}
-        sx={{ cursor: 'pointer' }}
+        sx={{ cursor: 'pointer', minWidth: 'auto', px: 0.8 }}
         onClick={e => {
           e.preventDefault()
           e.stopPropagation()
           navigate('/filters')
         }}
       >
-        Manage Filters
+        <Settings />
       </Chip>
 
       <Menu

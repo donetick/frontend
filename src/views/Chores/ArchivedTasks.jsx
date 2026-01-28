@@ -28,7 +28,6 @@ import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useUnArchiveChore } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
-import { ChoreSorter } from '../../utils/Chores'
 import { DeleteChore, GetArchivedChores } from '../../utils/Fetcher'
 import LoadingComponent from '../components/Loading'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
@@ -68,7 +67,12 @@ const ArchivedTasks = () => {
         try {
           const response = await GetArchivedChores()
           const data = await response.json()
-          const sortedChores = data.res.sort(ChoreSorter)
+          // Sort by updatedAt (most recent first)
+          const sortedChores = data.res.sort((a, b) => {
+            const dateA = new Date(a.updatedAt || 0)
+            const dateB = new Date(b.updatedAt || 0)
+            return dateB - dateA
+          })
           setArchivedChores(sortedChores)
           setFilteredChores(sortedChores)
         } catch (error) {

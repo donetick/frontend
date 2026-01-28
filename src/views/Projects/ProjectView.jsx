@@ -24,9 +24,9 @@ import LABEL_COLORS, {
 import { DeleteProject } from '../../utils/Fetcher'
 import { getIconComponent } from '../../utils/ProjectIcons'
 import { getSafeBottomStyles } from '../../utils/SafeAreaUtils'
+import { useProjectFilter } from '../Chores/hooks/useProjectFilter'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import { useProjects } from './ProjectQueries'
-
 const ProjectCard = ({
   project,
   onEditClick,
@@ -36,7 +36,9 @@ const ProjectCard = ({
   taskCounts = {},
 }) => {
   const navigate = useNavigate()
+  const { data: projects = [], isLoading: projectsLoading } = useProjects()
   // Helper function to get color name from hex value
+  const { setSelectedProjectWithCache } = useProjectFilter(projects)
   const getColorName = hexValue => {
     const colorObj = LABEL_COLORS.find(
       color => color.value.toLowerCase() === hexValue.toLowerCase(),
@@ -311,6 +313,7 @@ const ProjectCard = ({
             // For default project, use 'default', for others use project ID
             const projectIdentifier =
               project.id === 'default' ? 'default' : project.id
+            setSelectedProjectWithCache(project)
             navigate(`/chores?project=${encodeURIComponent(projectIdentifier)}`)
           }}
           onTouchStart={isEditable ? handleTouchStart : undefined}

@@ -19,6 +19,7 @@ export const useCustomFilters = (chores, membersData, labels, projects) => {
   const { data: userProfile } = useUserProfile()
   const [savedFilters, setSavedFilters] = useState([])
   const [activeFilterId, setActiveFilterId] = useState(null)
+  const [tempFilter, setTempFilter] = useState(null)
 
   const loadFilters = useCallback(() => {
     const filters = getSavedFilters()
@@ -74,12 +75,21 @@ export const useCustomFilters = (chores, membersData, labels, projects) => {
     return activeFilter.conditions.some(c => c.type === 'project')
   }, [activeFilter])
 
+  // check if has any filter applied:
+  const hasFilterApplied = useMemo(() => {
+    return activeFilterId !== null || tempFilter !== null
+  }, [activeFilterId, tempFilter])
+
   const filteredChores = useMemo(() => {
+    // Temporary filter takes precedence over saved filters
+    if (tempFilter) {
+      return applyFilter(chores, tempFilter, context)
+    }
     if (!activeFilter || !activeFilter.isValid) {
       return chores
     }
     return applyFilter(chores, activeFilter, context)
-  }, [chores, activeFilter, context])
+  }, [chores, activeFilter, tempFilter, context])
 
   const applyCustomFilter = useCallback(
     filterId => {
@@ -92,6 +102,16 @@ export const useCustomFilters = (chores, membersData, labels, projects) => {
 
   const clearActiveFilter = useCallback(() => {
     setActiveFilterId(null)
+    setTempFilter(null)
+  }, [])
+
+  const applyTempFilter = useCallback(filter => {
+    setTempFilter(filter)
+    setActiveFilterId(null)
+  }, [])
+
+  const clearTempFilter = useCallback(() => {
+    setTempFilter(null)
   }, [])
 
   const saveFilter = useCallback(
@@ -228,14 +248,18 @@ export const useCustomFilters = (chores, membersData, labels, projects) => {
     savedFilters: filtersWithCounts,
     activeFilter,
     activeFilterId,
+    tempFilter,
     filteredChores,
     applyCustomFilter,
     clearActiveFilter,
+    applyTempFilter,
+    clearTempFilter,
     saveFilter,
     updateFilter,
     deleteFilter,
     pinFilter,
     createFilterFromCurrentState,
     hasProjectConditions,
+    hasFilterApplied,
   }
 }
