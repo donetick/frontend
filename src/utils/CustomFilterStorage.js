@@ -66,7 +66,6 @@ export const saveFilter = filter => {
   }
 }
 
-
 export const updateFilter = (filterId, updates) => {
   try {
     const filters = getSavedFilters()
@@ -109,7 +108,6 @@ export const deleteFilter = filterId => {
   }
 }
 
-
 export const getFilterById = filterId => {
   const filters = getSavedFilters()
   return filters.find(f => f.id === filterId) || null
@@ -132,7 +130,6 @@ export const trackFilterUsage = filterId => {
   }
 }
 
-
 export const toggleFilterPin = filterId => {
   try {
     const filters = getSavedFilters()
@@ -154,12 +151,10 @@ export const toggleFilterPin = filterId => {
   }
 }
 
-
 export const getFiltersByUsage = () => {
   const filters = getSavedFilters()
   return filters.sort((a, b) => (b.usageCount || 0) - (a.usageCount || 0))
 }
-
 
 export const getPinnedFilters = () => {
   const filters = getSavedFilters()
@@ -195,7 +190,7 @@ export const importFilters = jsonString => {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       usageCount: 0,
-      lastUsedAt: null,,
+      lastUsedAt: null,
     }))
 
     const allFilters = [...existingFilters, ...newFilters]
@@ -213,7 +208,6 @@ export const importFilters = jsonString => {
     throw error
   }
 }
-
 
 export const clearAllFilters = () => {
   try {
