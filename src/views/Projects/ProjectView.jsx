@@ -673,8 +673,7 @@ const ProjectView = () => {
           project={{
             id: 'default',
             name: 'Default Project',
-            description: 'All uncategorized tasks',
-            color: '#1976d2',
+            description: 'All tasks without a specific project',
             icon: 'FolderOpen',
             created_by: userProfile?.id,
           }}
