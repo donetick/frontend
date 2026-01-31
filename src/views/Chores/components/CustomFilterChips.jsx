@@ -73,12 +73,10 @@ const CustomFilterChips = ({
         overflowX: 'auto',
         py: 1,
         '&::-webkit-scrollbar': {
-          height: 6,
+          display: 'none',
         },
-        '&::-webkit-scrollbar-thumb': {
-          backgroundColor: 'neutral.400',
-          borderRadius: 3,
-        },
+        scrollbarWidth: 'none', // Firefox
+        msOverflowStyle: 'none', // IE and Edge
       }}
     >
       {sortedFilters.map(filter => {
@@ -170,20 +168,7 @@ const CustomFilterChips = ({
                   <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
                     {hasWarning && <Warning sx={{ fontSize: '1rem' }} />}
                     {!hasWarning && filter.overdueCount > 0 && (
-                      <Chip
-                        size='sm'
-                        variant='solid'
-                        sx={{
-                          ...(hasCustomColor
-                            ? {
-                                bgcolor: '#ff4444',
-                                color: '#FFFFFF',
-                                border: `1px solid ${textColor}30`,
-                              }
-                            : {}),
-                        }}
-                        color={hasCustomColor ? undefined : 'danger'}
-                      >
+                      <Chip size='sm' color='danger' variant='solid'>
                         {filter.overdueCount}
                       </Chip>
                     )}
