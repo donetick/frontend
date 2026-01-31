@@ -762,6 +762,11 @@ const MyChores = () => {
             selectedFilter={selectedChoreFilter}
             setFilter={filter => {
               setSelectedChoreFilterWithCache(filter)
+              // Clear active custom filter when quick filter is applied
+              if (activeFilterId) {
+                clearActiveFilter()
+                updateFilterUrl(null, null)
+              }
             }}
             onItemSelect={selected => {
               setSelectedChoreSectionWithCache(selected.value)
@@ -1022,6 +1027,11 @@ const MyChores = () => {
               setSearchFilter('All')
               setSearchTerm('')
               setFilteredChores([])
+
+              // Reset quick filter to 'anyone' when custom filter is applied
+              if (selectedChoreFilter !== 'anyone') {
+                setSelectedChoreFilterWithCache('anyone')
+              }
 
               // Clear project selection if the filter has project conditions
               const filter = savedFilters.find(f => f.id === filterId)
