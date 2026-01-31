@@ -12,7 +12,7 @@ import {
   Textarea,
   Typography,
 } from '@mui/joy'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { FILTER_COLORS } from '../../../utils/Colors'
 import { filterNameExists } from '../../../utils/CustomFilterStorage'
@@ -31,6 +31,8 @@ const AdvancedFilterBuilder = ({
   editingFilter = null,
 }) => {
   const { ResponsiveModal } = useResponsiveModal()
+  const listContainerRef = useRef(null)
+  const conditionRefs = useRef([])
   const [filterName, setFilterName] = useState('')
   const [filterDescription, setFilterDescription] = useState('')
   const [filterColor, setFilterColor] = useState(FILTER_COLORS[0].value)
@@ -42,6 +44,11 @@ const AdvancedFilterBuilder = ({
     const storedFilters = localStorage.getItem('customFilters')
     return storedFilters ? JSON.parse(storedFilters) : []
   })
+
+  // Initialize refs array when conditions change
+  useEffect(() => {
+    conditionRefs.current = conditionRefs.current.slice(0, conditions.length)
+  }, [conditions.length])
 
   // Initialize state when editing a filter
   useEffect(() => {
@@ -99,6 +106,18 @@ const AdvancedFilterBuilder = ({
       ...conditions,
       { type: 'assignee', operator: 'is', value: [] },
     ])
+
+    // Scroll to the new condition after it's rendered
+    setTimeout(() => {
+      const newIndex = conditions.length
+      const newConditionElement = conditionRefs.current[newIndex]
+      if (newConditionElement && listContainerRef.current) {
+        newConditionElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+        })
+      }
+    }, 100)
   }
 
   const removeCondition = index => {
@@ -227,12 +246,6 @@ const AdvancedFilterBuilder = ({
                 {selected.map((selectedElement, idx) => {
                   const value = selectedElement.value
 
-                  if (value === 'me')
-                    return (
-                      <Chip key={`${value}-${idx}`} size='sm'>
-                        Me
-                      </Chip>
-                    )
                   const member = members.find(
                     m => String(m.userId) === String(value),
                   )
@@ -245,7 +258,6 @@ const AdvancedFilterBuilder = ({
               </Box>
             )}
           >
-            <Option value='me'>Me</Option>
             {members.map((member, idx) => (
               <Option
                 key={`creator-${member.userId}-${idx}`}
@@ -567,6 +579,7 @@ const AdvancedFilterBuilder = ({
           </Typography>
 
           <List
+            ref={listContainerRef}
             sx={{
               gap: 1,
               overflowY: 'auto',
@@ -579,6 +592,7 @@ const AdvancedFilterBuilder = ({
             {conditions.map((condition, index) => (
               <ListItem
                 key={index}
+                ref={el => (conditionRefs.current[index] = el)}
                 sx={{
                   display: 'flex',
                   flexDirection: 'column',
