@@ -335,7 +335,7 @@ const FilterCard = ({
               return
             }
             // Navigate to MyChores with filter applied via URL param
-            navigate(`/filters/${encodeURIComponent(filter.id)}`)
+            navigate(`/chores?filterId=${encodeURIComponent(filter.id)}`)
           }}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
