@@ -284,9 +284,11 @@ const GetAllCircleMembers = async () => {
 }
 
 const UpdateMemberRole = async (memberId, role) => {
+  var memberHeaders = HEADERS()
+  memberHeaders[`Content-Type`] = `application/json`
   return Fetch(`/circles/members/role`, {
     method: 'PUT',
-    headers: HEADERS(),
+    headers: memberHeaders,
     body: JSON.stringify({ role, memberId }),
   })
 }
