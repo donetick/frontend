@@ -411,12 +411,7 @@ const FilterCard = ({
                   : 'sm',
               }}
             >
-              <FilterAlt
-                sx={{
-                  fontSize: 16,
-                  color: 'white',
-                }}
-              />
+              {''}
             </Avatar>
           </Box>
 
