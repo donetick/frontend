@@ -43,6 +43,7 @@ import { isPlusAccount } from '../../utils/Helpers'
 import Priorities from '../../utils/Priorities.jsx'
 import { getIconComponent } from '../../utils/ProjectIcons'
 import { getSafeBottomPadding } from '../../utils/SafeAreaUtils.js'
+import { useProjectFilter } from '../Chores/hooks/useProjectFilter.js'
 import LoadingComponent from '../components/Loading.jsx'
 import RichTextEditor from '../components/RichTextEditor.jsx'
 import SubTasks from '../components/SubTask.jsx'
@@ -102,7 +103,6 @@ const ChoreEdit = () => {
   const [allUserThings, setAllUserThings] = useState([])
   const [thingTrigger, setThingTrigger] = useState(null)
   const [isThingValid, setIsThingValid] = useState(false)
-  const [projectId, setProjectId] = useState('default')
 
   const [notificationMetadata, setNotificationMetadata] = useState({})
 
@@ -123,6 +123,14 @@ const ChoreEdit = () => {
 
   const { data: userLabelsRaw, isLoading: isUserLabelsLoading } = useLabels()
   const { data: projects = [], isLoading: isProjectsLoading } = useProjects()
+
+  const { selectedProject, projectsWithDefault, setSelectedProjectWithCache } =
+    useProjectFilter(projects)
+
+  const [projectId, setProjectId] = useState(
+    selectedProject ? selectedProject.id : 'default',
+  )
+
   const updateChoreMutation = useUpdateChore()
   const createChoreMutation = useCreateChore()
   const archiveChore = useArchiveChore()
