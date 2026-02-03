@@ -13,7 +13,7 @@ import {
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
-import LABEL_COLORS, {
+import PROJECT_COLORS, {
   getTextColorFromBackgroundColor,
 } from '../../../utils/Colors'
 import PROJECT_ICONS, { getIconComponent } from '../../../utils/ProjectIcons'
@@ -27,7 +27,7 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
   const { ResponsiveModal } = useResponsiveModal()
   const [projectName, setProjectName] = useState('')
   const [projectDescription, setProjectDescription] = useState('')
-  const [projectColor, setProjectColor] = useState(LABEL_COLORS[0].value)
+  const [projectColor, setProjectColor] = useState(PROJECT_COLORS[0].value)
   const [projectIcon, setProjectIcon] = useState(PROJECT_ICONS[0].value)
   const [error, setError] = useState('')
   const [isIconPickerOpen, setIsIconPickerOpen] = useState(false)
@@ -42,13 +42,13 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
         // Editing existing project
         setProjectName(project.name || '')
         setProjectDescription(project.description || '')
-        setProjectColor(project.color || LABEL_COLORS[0].value)
+        setProjectColor(project.color || PROJECT_COLORS[0].value)
         setProjectIcon(project.icon || PROJECT_ICONS[0].value)
       } else {
         // Creating new project
         setProjectName('')
         setProjectDescription('')
-        setProjectColor(LABEL_COLORS[0].value)
+        setProjectColor(PROJECT_COLORS[0].value)
         setProjectIcon(PROJECT_ICONS[0].value)
       }
       setError('')
@@ -240,7 +240,7 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
                 </Typography>
               )}
             >
-              {LABEL_COLORS.map(color => (
+              {PROJECT_COLORS.map(color => (
                 <Option key={color.value} value={color.value}>
                   <Box className='flex items-center justify-between'>
                     <Box

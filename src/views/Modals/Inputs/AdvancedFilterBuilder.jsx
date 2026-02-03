@@ -489,7 +489,7 @@ const AdvancedFilterBuilder = ({
             Filter Name
           </Typography>
           <Input
-            placeholder='e.g., High Priority Tasks for Team'
+            placeholder='e.g. Important Tasks due soon, Tasks for John, etc.'
             value={filterName}
             onChange={e => {
               setFilterName(e.target.value)

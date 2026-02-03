@@ -1,13 +1,5 @@
 import { Add, EditNotifications } from '@mui/icons-material'
-import {
-  Avatar,
-  Box,
-  Button,
-  Input,
-  Option,
-  Select,
-  Typography,
-} from '@mui/joy'
+import { Box, Button, Input, Option, Select, Typography } from '@mui/joy'
 import { FormControl } from '@mui/material'
 import * as chrono from 'chrono-node'
 import moment from 'moment'
@@ -15,9 +7,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import { useCreateChore } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
-import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import { isPlusAccount } from '../../utils/Helpers'
-import { getIconComponent } from '../../utils/ProjectIcons'
 import { useLabels } from '../Labels/LabelQueries'
 import { useProjects } from '../Projects/ProjectQueries'
 import {
@@ -870,7 +860,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
           </FormControl>
         )}
       </Box>
-      {projects.length >= 1 && (
+      {/* {projects.length >= 1 && (
         <FormControl>
           <Typography level='body-sm'>Project</Typography>
           <Select
@@ -938,7 +928,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
             ))}
           </Select>
         </FormControl>
-      )}
+      )} */}
       <Box
         sx={{
           marginTop: 2,
