@@ -30,6 +30,10 @@ export const FILTER_COLORS = [
   ...LABEL_COLORS.filter(color => color.name !== 'Default'),
 ]
 
+export const PROJECT_COLORS = [
+  ...LABEL_COLORS.filter(color => color.name !== 'Default'),
+]
+
 export const COLORS = {
   salmon: '#ff7961',
   teal: '#26a69a',

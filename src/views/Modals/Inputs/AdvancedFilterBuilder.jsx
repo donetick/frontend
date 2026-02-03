@@ -1,4 +1,4 @@
-import { Add, Delete, Save } from '@mui/icons-material'
+import { Add, Delete } from '@mui/icons-material'
 import {
   Box,
   Button,
@@ -76,7 +76,7 @@ const AdvancedFilterBuilder = ({
 
   const previewChores = useMemo(() => {
     const validConditions = conditions.filter(c => {
-      if (c.type === 'dueDate') return true
+      if (c.type === 'dueDate' || c.type === 'points') return true
       return c.value && (Array.isArray(c.value) ? c.value.length > 0 : true)
     })
 
@@ -135,6 +135,9 @@ const AdvancedFilterBuilder = ({
         updated[index].value = null
       } else if (value === 'status') {
         updated[index].value = [3]
+      } else if (value === 'points') {
+        updated[index].operator = 'greaterThan'
+        updated[index].value = 0
       }
     }
 
@@ -154,7 +157,7 @@ const AdvancedFilterBuilder = ({
     }
 
     const validConditions = conditions.filter(c => {
-      if (c.type === 'dueDate') return true
+      if (c.type === 'dueDate' || c.type === 'points') return true
       return c.value && (Array.isArray(c.value) ? c.value.length > 0 : true)
     })
 
@@ -404,7 +407,7 @@ const AdvancedFilterBuilder = ({
       case 'status':
         return (
           <Select
-            value={condition.value?.[0] || 3}
+            value={condition.value?.[0] ?? 3}
             onChange={(_, newValue) =>
               updateCondition(index, 'value', [newValue])
             }
@@ -448,6 +451,44 @@ const AdvancedFilterBuilder = ({
           </Select>
         )
 
+      case 'points':
+        return (
+          <Box sx={{ display: 'flex', gap: 1, width: '100%' }}>
+            <Select
+              value={condition.operator}
+              onChange={(_, newValue) =>
+                updateCondition(index, 'operator', newValue)
+              }
+              sx={{ flex: 1 }}
+              slotProps={{
+                listbox: {
+                  placement: 'bottom-start',
+                  disablePortal: false,
+                },
+              }}
+            >
+              <Option value='equals'>Equals</Option>
+              <Option value='greaterThan'>Greater Than</Option>
+              <Option value='lessThan'>Less Than</Option>
+              <Option value='greaterThanOrEqual'>Greater Than or Equal</Option>
+              <Option value='lessThanOrEqual'>Less Than or Equal</Option>
+            </Select>
+            <Input
+              type='number'
+              value={condition.value ?? 0}
+              onChange={e =>
+                updateCondition(index, 'value', parseInt(e.target.value) || 0)
+              }
+              sx={{ flex: 1 }}
+              slotProps={{
+                input: {
+                  min: 0,
+                },
+              }}
+            />
+          </Box>
+        )
+
       default:
         return null
     }
@@ -465,13 +506,8 @@ const AdvancedFilterBuilder = ({
           <Button variant='outlined' color='neutral' onClick={onClose}>
             Cancel
           </Button>
-          <Button
-            variant='solid'
-            color='primary'
-            onClick={handleSave}
-            startDecorator={<Save />}
-          >
-            {editingFilter ? 'Update Filter' : 'Save Filter'}
+          <Button variant='solid' color='primary' onClick={handleSave}>
+            Save
           </Button>
         </Box>
       }
@@ -649,12 +685,15 @@ const AdvancedFilterBuilder = ({
                     <Option value='project'>Project</Option>
                     <Option value='status'>Status</Option>
                     <Option value='dueDate'>Due Date</Option>
+                    <Option value='points'>Points</Option>
                   </Select>
                 </Box>
 
                 <Box sx={{ width: '100%' }}>
                   <Typography level='body-xs' sx={{ mb: 0.5 }}>
-                    {condition.type === 'dueDate' ? 'Condition' : 'Value'}
+                    {condition.type === 'dueDate' || condition.type === 'points'
+                      ? 'Condition'
+                      : 'Value'}
                   </Typography>
                   {renderValueSelector(condition, index)}
                 </Box>

@@ -37,6 +37,9 @@ export const evaluateCondition = (chore, condition, context = {}) => {
     case 'project':
       return evaluateProject(chore, operator, value)
 
+    case 'points':
+      return evaluatePoints(chore, operator, value)
+
     default:
       console.warn(`Unknown condition type: ${type}`)
       return true
@@ -252,6 +255,29 @@ const evaluateProject = (chore, operator, value) => {
   const isInProject = (includesDefault && choreIsDefault) || matchesOtherProject
 
   return operator === 'is' ? isInProject : !isInProject
+}
+
+/**
+ * Evaluate points condition
+ */
+const evaluatePoints = (chore, operator, value) => {
+  const chorePoints = chore.points || 0
+  const targetValue = Number(value)
+
+  switch (operator) {
+    case 'equals':
+      return Number(chorePoints) === targetValue
+    case 'greaterThan':
+      return Number(chorePoints) > targetValue
+    case 'lessThan':
+      return Number(chorePoints) < targetValue
+    case 'greaterThanOrEqual':
+      return Number(chorePoints) >= targetValue
+    case 'lessThanOrEqual':
+      return Number(chorePoints) <= targetValue
+    default:
+      return false
+  }
 }
 
 /**
