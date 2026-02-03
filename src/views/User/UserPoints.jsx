@@ -787,28 +787,28 @@ const UserPoints = () => {
 
           const pointsCards = [
             {
-              icon: <AccountBalanceWallet />,
-              title: 'Total',
-              text: `${totalPoints} points`,
-              subtext: 'All time earned',
-            },
-            {
               icon: <Toll />,
               title: 'Available',
               text: `${availablePoints} points`,
               subtext: 'Ready to redeem',
             },
             {
-              icon: <TrendingUp />,
-              title: 'Period Points',
-              text: `${periodPoints} points`,
-              subtext: `${tabValue === 24 * 30 ? 'All time' : tabValue === 6 * 30 ? 'Last 6 months' : `Last ${tabValue} days`}`,
-            },
-            {
               icon: <Redeem />,
               title: 'Redeemed',
               text: `${redeemedPoints} points`,
               subtext: 'Previously used',
+            },
+            {
+              icon: <AccountBalanceWallet />,
+              title: 'Total',
+              text: `${totalPoints} points`,
+              subtext: 'All time earned',
+            },
+            {
+              icon: <TrendingUp />,
+              title: 'Period Points',
+              text: `${periodPoints} points`,
+              subtext: `${tabValue === 24 * 30 ? 'All time' : tabValue === 6 * 30 ? 'Last 6 months' : `Last ${tabValue} days`}`,
             },
           ]
 
@@ -934,25 +934,31 @@ const UserPoints = () => {
       </Box>
 
       <RedeemPointsModal
-        config={{
-          onClose: () => {
-            setIsRedeemModalOpen(false)
-          },
-          isOpen: isRedeemModalOpen,
-          available: circleUsers.find(user => user.userId === selectedUser)
-            ?.points,
-          user: circleUsers.find(user => user.userId === selectedUser),
-          onSave: ({ userId, points }) => {
-            RedeemPoints(userId, points, userProfile.circleID)
-              .then(() => {
-                setIsRedeemModalOpen(false)
-                handleCircleMembersRefetch()
-              })
-              .catch(err => {
-                console.log(err)
-              })
-          },
-        }}
+        config={(() => {
+          const user = circleUsers.find(u => u.userId === selectedUser)
+          const availablePoints = user
+            ? (user.points || 0) - (user.pointsRedeemed || 0)
+            : 0
+
+          return {
+            onClose: () => {
+              setIsRedeemModalOpen(false)
+            },
+            isOpen: isRedeemModalOpen,
+            available: availablePoints,
+            user: user,
+            onSave: ({ userId, points }) => {
+              RedeemPoints(userId, points, userProfile.circleID)
+                .then(() => {
+                  setIsRedeemModalOpen(false)
+                  handleCircleMembersRefetch()
+                })
+                .catch(err => {
+                  console.log(err)
+                })
+            },
+          }
+        })()}
       />
     </Container>
   )
