@@ -1,14 +1,13 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
-  GetFilters,
-  GetFilterById,
-  GetPinnedFilters,
-  GetFiltersByUsage,
   CreateFilter,
-  UpdateFilter,
   DeleteFilter,
+  GetFilterById,
+  GetFilters,
+  GetFiltersByUsage,
+  GetPinnedFilters,
   ToggleFilterPin,
-  TrackFilterUsage,
+  UpdateFilter,
 } from '../../utils/Fetcher'
 
 // Query hook for fetching all filters
@@ -249,46 +248,6 @@ export const useToggleFilterPin = () => {
     },
     onError: error => {
       console.error('Toggle filter pin mutation failed:', error)
-    },
-  })
-}
-
-// Mutation hook for tracking filter usage
-export const useTrackFilterUsage = () => {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: async filterId => {
-      try {
-        const response = await TrackFilterUsage(filterId)
-        if (response.ok) {
-          const data = await response.json()
-          return data.res || data
-        }
-        // Silently fail for tracking - not critical
-        return null
-      } catch (error) {
-        console.error('Error tracking filter usage:', error)
-        // Silently fail for tracking
-        return null
-      }
-    },
-    onSuccess: updatedFilter => {
-      if (!updatedFilter) return
-
-      // Update the filters cache
-      queryClient.setQueryData(['filters'], oldFilters => {
-        if (!oldFilters) return [updatedFilter]
-        return oldFilters.map(filter =>
-          filter.id === updatedFilter.id ? updatedFilter : filter,
-        )
-      })
-
-      // Update specific filter cache
-      queryClient.setQueryData(['filters', updatedFilter.id], updatedFilter)
-
-      // Invalidate usage-related queries
-      queryClient.invalidateQueries(['filters', 'by-usage'])
     },
   })
 }

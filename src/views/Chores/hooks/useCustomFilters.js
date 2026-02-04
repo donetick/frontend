@@ -7,12 +7,11 @@ import {
   validateFilter,
 } from '../../../utils/FilterEngine'
 import {
-  useFilters,
   useCreateFilter,
-  useUpdateFilter,
   useDeleteFilter,
+  useFilters,
   useToggleFilterPin,
-  useTrackFilterUsage,
+  useUpdateFilter,
 } from '../../Filters/FilterQueries'
 
 export const useCustomFilters = (chores, membersData, labels, projects) => {
@@ -24,7 +23,6 @@ export const useCustomFilters = (chores, membersData, labels, projects) => {
   const updateFilterMutation = useUpdateFilter()
   const deleteFilterMutation = useDeleteFilter()
   const togglePinMutation = useToggleFilterPin()
-  const trackUsageMutation = useTrackFilterUsage()
 
   const [activeFilterId, setActiveFilterId] = useState(null)
   const [tempFilter, setTempFilter] = useState(null)
@@ -90,13 +88,9 @@ export const useCustomFilters = (chores, membersData, labels, projects) => {
     return applyFilter(chores, activeFilter, context)
   }, [chores, activeFilter, tempFilter, context])
 
-  const applyCustomFilter = useCallback(
-    filterId => {
-      setActiveFilterId(filterId)
-      trackUsageMutation.mutate(filterId)
-    },
-    [trackUsageMutation],
-  )
+  const applyCustomFilter = useCallback(filterId => {
+    setActiveFilterId(filterId)
+  }, [])
 
   const clearActiveFilter = useCallback(() => {
     setActiveFilterId(null)
