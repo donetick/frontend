@@ -15,9 +15,9 @@ import {
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { FILTER_COLORS } from '../../../utils/Colors'
-import { filterNameExists } from '../../../utils/CustomFilterStorage'
 import { applyFilter } from '../../../utils/FilterEngine'
 import Priorities from '../../../utils/Priorities'
+import { useFilters } from '../../Filters/FilterQueries'
 
 const AdvancedFilterBuilder = ({
   isOpen,
@@ -40,10 +40,15 @@ const AdvancedFilterBuilder = ({
     { type: 'assignee', operator: 'is', value: [] },
   ])
   const [error, setError] = useState('')
-  const [existedFilters] = useState(() => {
-    const storedFilters = localStorage.getItem('customFilters')
-    return storedFilters ? JSON.parse(storedFilters) : []
-  })
+  const { data: existedFilters = [] } = useFilters()
+
+  const filterNameExists = (name, excludeId = null) => {
+    return existedFilters.some(
+      filter =>
+        filter.name.toLowerCase() === name.toLowerCase() &&
+        filter.id !== excludeId,
+    )
+  }
 
   // Initialize refs array when conditions change
   useEffect(() => {

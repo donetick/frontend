@@ -10,7 +10,7 @@ import {
   Stack,
   Typography,
 } from '@mui/joy'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import {
@@ -565,18 +565,20 @@ const FilterView = () => {
   const [confirmationModel, setConfirmationModel] = useState({})
 
   // Sort filters: pinned first, then by usage count, then by last used
-  const savedFilters = [...filtersData].sort((a, b) => {
-    if (a.isPinned !== b.isPinned) {
-      return a.isPinned ? -1 : 1
-    }
-    if ((b.usageCount || 0) !== (a.usageCount || 0)) {
-      return (b.usageCount || 0) - (a.usageCount || 0)
-    }
-    if (a.lastUsedAt && b.lastUsedAt) {
-      return new Date(b.lastUsedAt) - new Date(a.lastUsedAt)
-    }
-    return new Date(b.createdAt) - new Date(a.createdAt)
-  })
+  const savedFilters = useMemo(() => {
+    return [...filtersData].sort((a, b) => {
+      if (a.isPinned !== b.isPinned) {
+        return a.isPinned ? -1 : 1
+      }
+      if ((b.usageCount || 0) !== (a.usageCount || 0)) {
+        return (b.usageCount || 0) - (a.usageCount || 0)
+      }
+      if (a.lastUsedAt && b.lastUsedAt) {
+        return new Date(b.lastUsedAt) - new Date(a.lastUsedAt)
+      }
+      return new Date(b.createdAt) - new Date(a.createdAt)
+    })
+  }, [filtersData])
 
   // Calculate task counts for each filter
   useEffect(() => {
@@ -613,7 +615,7 @@ const FilterView = () => {
     }
   }, [
     chores,
-    savedFilters,
+    filtersData,
     userProfile?.id,
     labels,
     projects,
