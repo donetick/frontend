@@ -839,6 +839,72 @@ const DeleteProject = id => {
   })
 }
 
+// Filter-related API functions
+const GetFilters = () => {
+  return Fetch(`/filters`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+}
+
+const GetPinnedFilters = () => {
+  return Fetch(`/filters/pinned`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+}
+
+const GetFiltersByUsage = () => {
+  return Fetch(`/filters/by-usage`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+}
+
+const GetFilterById = id => {
+  return Fetch(`/filters/${id}`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+}
+
+const CreateFilter = filter => {
+  return Fetch(`/filters`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify(filter),
+  })
+}
+
+const UpdateFilter = (id, filter) => {
+  return Fetch(`/filters/${id}`, {
+    method: 'PUT',
+    headers: HEADERS(),
+    body: JSON.stringify(filter),
+  })
+}
+
+const DeleteFilter = id => {
+  return Fetch(`/filters/${id}`, {
+    method: 'DELETE',
+    headers: HEADERS(),
+  })
+}
+
+const ToggleFilterPin = id => {
+  return Fetch(`/filters/${id}/toggle-pin`, {
+    method: 'POST',
+    headers: HEADERS(),
+  })
+}
+
+const TrackFilterUsage = id => {
+  return Fetch(`/filters/${id}/track-usage`, {
+    method: 'POST',
+    headers: HEADERS(),
+  })
+}
+
 export {
   AcceptCircleMemberRequest,
   ApproveChore,
@@ -853,6 +919,7 @@ export {
   CreateChildUser,
   CreateChore,
   createChore,
+  CreateFilter,
   CreateLabel,
   CreateLongLiveToken,
   CreateProject,
@@ -861,6 +928,7 @@ export {
   DeleteChore,
   DeleteChoreHistory,
   DeleteCircleMember,
+  DeleteFilter,
   DeleteLabel,
   DeleteLongLiveToken,
   DeleteProject,
@@ -881,9 +949,13 @@ export {
   GetChoreTimer,
   GetCircleMemberRequests,
   GetDeviceTokens,
+  GetFilterById,
+  GetFilters,
+  GetFiltersByUsage,
   GetLabels,
   GetLongLiveTokens,
   GetMFAStatus,
+  GetPinnedFilters,
   GetProjectById,
   GetProjects,
   GetResource,
@@ -916,6 +988,8 @@ export {
   signUp,
   SkipChore,
   StartChore,
+  ToggleFilterPin,
+  TrackFilterUsage,
   UnArchiveChore,
   UndoChoreAction,
   UnregisterDeviceToken,
@@ -924,6 +998,7 @@ export {
   UpdateChoreHistory,
   UpdateChorePriority,
   UpdateDueDate,
+  UpdateFilter,
   UpdateLabel,
   UpdateMemberRole,
   UpdateNotificationTarget,

@@ -23,13 +23,6 @@ import {
 } from '@mui/icons-material'
 import { useChores } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
-import {
-  deleteFilter,
-  getSavedFilters,
-  saveFilter,
-  toggleFilterPin,
-  updateFilter,
-} from '../../utils/CustomFilterStorage'
 import { getFilterCount, getFilterOverdueCount } from '../../utils/FilterEngine'
 import { getSafeBottomStyles } from '../../utils/SafeAreaUtils'
 
@@ -37,6 +30,13 @@ import { useLabels } from '../Labels/LabelQueries'
 import AdvancedFilterBuilder from '../Modals/Inputs/AdvancedFilterBuilder'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import { useProjects } from '../Projects/ProjectQueries'
+import {
+  useFilters,
+  useCreateFilter,
+  useUpdateFilter,
+  useDeleteFilter,
+  useToggleFilterPin,
+} from './FilterQueries'
 
 const FilterCard = ({
   filter,
@@ -551,42 +551,32 @@ const FilterView = () => {
   const { data: projects = [] } = useProjects()
   const { data: membersData } = useCircleMembers()
 
-  const [savedFilters, setSavedFilters] = useState([])
+  // React Query hooks
+  const { data: filtersData = [], isLoading } = useFilters()
+  const createFilterMutation = useCreateFilter()
+  const updateFilterMutation = useUpdateFilter()
+  const deleteFilterMutation = useDeleteFilter()
+  const togglePinMutation = useToggleFilterPin()
+
   const [filterCounts, setFilterCounts] = useState({})
   const [showAdvancedFilterBuilder, setShowAdvancedFilterBuilder] =
     useState(false)
   const [editingFilter, setEditingFilter] = useState(null)
   const [confirmationModel, setConfirmationModel] = useState({})
-  const [isLoading, setIsLoading] = useState(true)
 
-  // Load filters
-  const loadFilters = () => {
-    try {
-      const filters = getSavedFilters()
-      // Sort: pinned first, then by usage count, then by last used
-      const sortedFilters = filters.sort((a, b) => {
-        if (a.isPinned !== b.isPinned) {
-          return a.isPinned ? -1 : 1
-        }
-        if ((b.usageCount || 0) !== (a.usageCount || 0)) {
-          return (b.usageCount || 0) - (a.usageCount || 0)
-        }
-        if (a.lastUsedAt && b.lastUsedAt) {
-          return new Date(b.lastUsedAt) - new Date(a.lastUsedAt)
-        }
-        return new Date(b.createdAt) - new Date(a.createdAt)
-      })
-      setSavedFilters(sortedFilters)
-    } catch (error) {
-      console.error('Error loading filters:', error)
-    } finally {
-      setIsLoading(false)
+  // Sort filters: pinned first, then by usage count, then by last used
+  const savedFilters = [...filtersData].sort((a, b) => {
+    if (a.isPinned !== b.isPinned) {
+      return a.isPinned ? -1 : 1
     }
-  }
-
-  useEffect(() => {
-    loadFilters()
-  }, [])
+    if ((b.usageCount || 0) !== (a.usageCount || 0)) {
+      return (b.usageCount || 0) - (a.usageCount || 0)
+    }
+    if (a.lastUsedAt && b.lastUsedAt) {
+      return new Date(b.lastUsedAt) - new Date(a.lastUsedAt)
+    }
+    return new Date(b.createdAt) - new Date(a.createdAt)
+  })
 
   // Calculate task counts for each filter
   useEffect(() => {
@@ -659,41 +649,40 @@ const FilterView = () => {
   }
 
   const handleDeleteFilter = id => {
-    try {
-      deleteFilter(id)
-      // if it's the selected filter, we might want to clear it
-      localStorage.getItem('selectedChoreFilter') === id &&
-        localStorage.removeItem('selectedChoreFilter')
-
-      loadFilters()
-    } catch (error) {
-      console.error('Error deleting filter:', error)
-    }
+    deleteFilterMutation.mutate(id, {
+      onSuccess: () => {
+        // if it's the selected filter, we might want to clear it
+        if (localStorage.getItem('selectedChoreFilter') === id) {
+          localStorage.removeItem('selectedChoreFilter')
+        }
+      },
+    })
   }
 
   const handlePinFilter = id => {
-    try {
-      toggleFilterPin(id)
-      loadFilters()
-    } catch (error) {
-      console.error('Error pinning filter:', error)
-    }
+    togglePinMutation.mutate(id)
   }
 
   const handleSaveFilter = filterData => {
-    try {
-      if (editingFilter) {
-        // Update existing filter
-        updateFilter(editingFilter.id, filterData)
-      } else {
-        // Save new filter
-        saveFilter(filterData)
-      }
-      setShowAdvancedFilterBuilder(false)
-      setEditingFilter(null)
-      loadFilters()
-    } catch (error) {
-      console.error('Error saving filter:', error)
+    if (editingFilter) {
+      // Update existing filter
+      updateFilterMutation.mutate(
+        { filterId: editingFilter.id, filterData },
+        {
+          onSuccess: () => {
+            setShowAdvancedFilterBuilder(false)
+            setEditingFilter(null)
+          },
+        },
+      )
+    } else {
+      // Save new filter
+      createFilterMutation.mutate(filterData, {
+        onSuccess: () => {
+          setShowAdvancedFilterBuilder(false)
+          setEditingFilter(null)
+        },
+      })
     }
   }
 

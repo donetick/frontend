@@ -1,34 +1,33 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useUserProfile } from '../../../queries/UserQueries'
-import {
-  deleteFilter as deleteFilterStorage,
-  getSavedFilters,
-  saveFilter as saveFilterStorage,
-  toggleFilterPin,
-  trackFilterUsage,
-  updateFilter as updateFilterStorage,
-} from '../../../utils/CustomFilterStorage'
 import {
   applyFilter,
   getFilterCount,
   getFilterOverdueCount,
   validateFilter,
 } from '../../../utils/FilterEngine'
+import {
+  useFilters,
+  useCreateFilter,
+  useUpdateFilter,
+  useDeleteFilter,
+  useToggleFilterPin,
+  useTrackFilterUsage,
+} from '../../Filters/FilterQueries'
 
 export const useCustomFilters = (chores, membersData, labels, projects) => {
   const { data: userProfile } = useUserProfile()
-  const [savedFilters, setSavedFilters] = useState([])
+
+  // React Query hooks
+  const { data: filtersData = [] } = useFilters()
+  const createFilterMutation = useCreateFilter()
+  const updateFilterMutation = useUpdateFilter()
+  const deleteFilterMutation = useDeleteFilter()
+  const togglePinMutation = useToggleFilterPin()
+  const trackUsageMutation = useTrackFilterUsage()
+
   const [activeFilterId, setActiveFilterId] = useState(null)
   const [tempFilter, setTempFilter] = useState(null)
-
-  const loadFilters = useCallback(() => {
-    const filters = getSavedFilters()
-    setSavedFilters(filters)
-  }, [])
-
-  useEffect(() => {
-    loadFilters()
-  }, [loadFilters])
 
   const context = useMemo(
     () => ({
@@ -43,7 +42,7 @@ export const useCustomFilters = (chores, membersData, labels, projects) => {
   const filtersWithCounts = useMemo(() => {
     if (!chores || !Array.isArray(chores)) return []
 
-    return savedFilters.map(filter => {
+    return filtersData.map(filter => {
       const validation = validateFilter(filter, context)
       const count = validation.isValid
         ? getFilterCount(chores, filter, context)
@@ -62,7 +61,7 @@ export const useCustomFilters = (chores, membersData, labels, projects) => {
 
       return result
     })
-  }, [savedFilters, chores, context])
+  }, [filtersData, chores, context])
 
   const activeFilter = useMemo(() => {
     if (!activeFilterId) return null
@@ -94,10 +93,9 @@ export const useCustomFilters = (chores, membersData, labels, projects) => {
   const applyCustomFilter = useCallback(
     filterId => {
       setActiveFilterId(filterId)
-      trackFilterUsage(filterId)
-      loadFilters()
+      trackUsageMutation.mutate(filterId)
     },
-    [loadFilters],
+    [trackUsageMutation],
   )
 
   const clearActiveFilter = useCallback(() => {
@@ -116,20 +114,37 @@ export const useCustomFilters = (chores, membersData, labels, projects) => {
 
   const saveFilter = useCallback(
     filter => {
-      const savedFilter = saveFilterStorage(filter)
-      loadFilters()
-      return savedFilter
+      return new Promise((resolve, reject) => {
+        createFilterMutation.mutate(filter, {
+          onSuccess: savedFilter => {
+            resolve(savedFilter)
+          },
+          onError: error => {
+            reject(error)
+          },
+        })
+      })
     },
-    [loadFilters],
+    [createFilterMutation],
   )
 
   const updateFilter = useCallback(
     (filterId, updates) => {
-      const updated = updateFilterStorage(filterId, updates)
-      loadFilters()
-      return updated
+      return new Promise((resolve, reject) => {
+        updateFilterMutation.mutate(
+          { filterId, filterData: updates },
+          {
+            onSuccess: updated => {
+              resolve(updated)
+            },
+            onError: error => {
+              reject(error)
+            },
+          },
+        )
+      })
     },
-    [loadFilters],
+    [updateFilterMutation],
   )
 
   const deleteFilter = useCallback(
@@ -137,18 +152,16 @@ export const useCustomFilters = (chores, membersData, labels, projects) => {
       if (activeFilterId === filterId) {
         setActiveFilterId(null)
       }
-      deleteFilterStorage(filterId)
-      loadFilters()
+      deleteFilterMutation.mutate(filterId)
     },
-    [activeFilterId, loadFilters],
+    [activeFilterId, deleteFilterMutation],
   )
 
   const pinFilter = useCallback(
     filterId => {
-      toggleFilterPin(filterId)
-      loadFilters()
+      togglePinMutation.mutate(filterId)
     },
-    [loadFilters],
+    [togglePinMutation],
   )
 
   const createFilterFromCurrentState = useCallback(

@@ -63,6 +63,7 @@ const CustomFilterChips = ({
     if (!a.isPinned && b.isPinned) return 1
     return (b.usageCount || 0) - (a.usageCount || 0)
   })
+  if (sortedFilters.filter(f => f.isPinned).length === 0) return null
 
   return (
     <Box
@@ -78,118 +79,115 @@ const CustomFilterChips = ({
         msOverflowStyle: 'none', // IE and Edge
       }}
     >
-      {sortedFilters
-        .filter(f => f.isPinned)
-        .map(filter => {
-          const isActive = activeFilterId === filter.id
-          const hasWarning = !filter.isValid
-          const hasCustomColor = !!filter.color && !hasWarning
-          const textColor = hasCustomColor
-            ? getTextColorFromBackgroundColor(filter.color)
-            : undefined
+      {sortedFilters.map(filter => {
+        const isActive = activeFilterId === filter.id
+        const hasWarning = !filter.isValid
+        const hasCustomColor = !!filter.color && !hasWarning
+        const textColor = hasCustomColor
+          ? getTextColorFromBackgroundColor(filter.color)
+          : undefined
 
-          return (
-            <Tooltip
-              key={filter.id}
-              title={
-                hasWarning
-                  ? `Filter has issues: ${filter.validationIssues?.join(', ')}`
-                  : `${filter.description ? filter.description + ' - ' : ''}${filter.count} tasks${filter.overdueCount > 0 ? ` (${filter.overdueCount} overdue)` : ''}`
-              }
-              placement='bottom'
-            >
-              <div onClick={() => !hasWarning && onFilterClick(filter.id)}>
-                <Chip
-                  variant='solid'
-                  size='md'
-                  onContextMenu={e => handleContextMenu(e, filter)}
-                  sx={{
-                    cursor: hasWarning ? 'not-allowed' : 'pointer',
-                    transition: 'all 0.2s ease',
-                    px: 1.0,
+        return (
+          <Tooltip
+            key={filter.id}
+            title={
+              hasWarning
+                ? `Filter has issues: ${filter.validationIssues?.join(', ')}`
+                : `${filter.description ? filter.description + ' - ' : ''}${filter.count} tasks${filter.overdueCount > 0 ? ` (${filter.overdueCount} overdue)` : ''}`
+            }
+            placement='bottom'
+          >
+            <div onClick={() => !hasWarning && onFilterClick(filter.id)}>
+              <Chip
+                variant='solid'
+                size='md'
+                onContextMenu={e => handleContextMenu(e, filter)}
+                sx={{
+                  cursor: hasWarning ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s ease',
+                  px: 1.0,
+                  py: 0.5,
 
-                    opacity: hasWarning ? 0.7 : isActive ? 1 : 0.85,
-                    ...(hasCustomColor && {
+                  opacity: hasWarning ? 0.7 : isActive ? 1 : 0.85,
+                  ...(hasCustomColor && {
+                    backgroundColor: `${filter.color} !important`,
+                    color: `${textColor} !important`,
+                    '&:hover': {
                       backgroundColor: `${filter.color} !important`,
-                      color: `${textColor} !important`,
-                      '&:hover': {
-                        backgroundColor: `${filter.color} !important`,
-                        filter: 'brightness(0.95)',
-                        opacity: 1,
-                      },
+                      filter: 'brightness(0.95)',
+                      opacity: 1,
+                    },
+                  }),
+                }}
+                startDecorator={
+                  <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+                    {isActive ? (
+                      <Check
+                        sx={{
+                          fontSize: '1rem',
+                          color: hasCustomColor ? textColor : 'primary.500',
+                        }}
+                      />
+                    ) : (
+                      <Chip
+                        size='sm'
+                        variant='solid'
+                        sx={{
+                          ...(hasCustomColor
+                            ? {
+                                bgcolor:
+                                  textColor === '#FFFFFF'
+                                    ? '#00000040'
+                                    : '#FFFFFF40',
+                                color: textColor,
+                                border: `1px solid ${textColor}30`,
+                              }
+                            : {}),
+                        }}
+                        color={
+                          hasCustomColor
+                            ? undefined
+                            : hasWarning
+                              ? 'warning'
+                              : 'neutral'
+                        }
+                      >
+                        {filter.count}
+                      </Chip>
+                    )}
+                  </Box>
+                }
+                // endDecorator={
+                //   <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+                //     {hasWarning && <Warning sx={{ fontSize: '1rem' }} />}
+                //     {!hasWarning && filter.overdueCount > 0 && (
+                //       <Chip size='sm' color='danger' variant='solid'>
+                //         {filter.overdueCount}
+                //       </Chip>
+                //     )}
+                //   </Box>
+                // }
+              >
+                <Typography
+                  level='body-sm'
+                  fontWeight={isActive ? 'md' : 'normal'}
+                  sx={{
+                    whiteSpace: 'nowrap',
+                    maxWidth: 100,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    ...(hasCustomColor && {
+                      color: textColor,
                     }),
                   }}
-                  startDecorator={
-                    <Box
-                      sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}
-                    >
-                      {isActive ? (
-                        <Check
-                          sx={{
-                            fontSize: '1rem',
-                            color: hasCustomColor ? textColor : 'primary.500',
-                          }}
-                        />
-                      ) : (
-                        <Chip
-                          size='sm'
-                          variant='solid'
-                          sx={{
-                            ...(hasCustomColor
-                              ? {
-                                  bgcolor:
-                                    textColor === '#FFFFFF'
-                                      ? '#00000040'
-                                      : '#FFFFFF40',
-                                  color: textColor,
-                                  border: `1px solid ${textColor}30`,
-                                }
-                              : {}),
-                          }}
-                          color={
-                            hasCustomColor
-                              ? undefined
-                              : hasWarning
-                                ? 'warning'
-                                : 'neutral'
-                          }
-                        >
-                          {filter.count}
-                        </Chip>
-                      )}
-                    </Box>
-                  }
-                  // endDecorator={
-                  //   <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
-                  //     {hasWarning && <Warning sx={{ fontSize: '1rem' }} />}
-                  //     {!hasWarning && filter.overdueCount > 0 && (
-                  //       <Chip size='sm' color='danger' variant='solid'>
-                  //         {filter.overdueCount}
-                  //       </Chip>
-                  //     )}
-                  //   </Box>
-                  // }
                 >
-                  <Typography
-                    level='body-sm'
-                    fontWeight={isActive ? 'md' : 'normal'}
-                    sx={{
-                      whiteSpace: 'nowrap',
-                      maxWidth: 100,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      ...(hasCustomColor && {
-                        color: textColor,
-                      }),
-                    }}
-                  >
-                    {filter.name}
-                  </Typography>
-                </Chip>
-              </div>
-            </Tooltip>
-          )
-        })}
+                  {filter.name}
+                </Typography>
+              </Chip>
+            </div>
+          </Tooltip>
+        )
+      })}
 
       <Chip
         variant='outlined'
