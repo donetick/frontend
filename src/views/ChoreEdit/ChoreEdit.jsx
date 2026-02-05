@@ -81,6 +81,7 @@ const ChoreEdit = () => {
   const [assignees, setAssignees] = useState([])
   const [performers, setPerformers] = useState([])
   const [assignStrategy, setAssignStrategy] = useState(ASSIGN_STRATEGIES[2])
+  const [rotateEvery, setRotateEvery] = useState(null)
   const [dueDate, setDueDate] = useState(null)
   const [dueDateOnly, setDueDateOnly] = useState(null)
   const [dueTime, setDueTime] = useState(null)
@@ -338,6 +339,7 @@ const ChoreEdit = () => {
       frequencyMetadata: frequencyMetadata,
       assignedTo: assignStrategy === 'no_assignee' ? null : assignedTo,
       assignStrategy: assignStrategy,
+      rotateEvery: rotateEvery > 0 ? rotateEvery : null,
       isRolling: isRolling,
       isActive: isActive,
       notification: isNotificable,
@@ -486,6 +488,7 @@ const ChoreEdit = () => {
           ? data.res.assignStrategy
           : ASSIGN_STRATEGIES[2],
       )
+      setRotateEvery(data.res.rotateEvery || null)
       setIsRolling(data.res.isRolling)
       setIsActive(data.res.isActive)
       setSubTasks(data.res.subTasks ? data.res.subTasks : [])
@@ -1053,6 +1056,55 @@ const ChoreEdit = () => {
                   ))}
                 </List>
               </Card>
+
+              {/* Rotate Every - only show for rotation strategies with multiple assignees */}
+              {assignees.length > 1 &&
+                !['keep_last_assigned', 'no_assignee'].includes(assignStrategy) && (
+                  <Box mt={2}>
+                    <FormControl>
+                      <Checkbox
+                        checked={rotateEvery !== null && rotateEvery > 0}
+                        onChange={e => {
+                          if (e.target.checked) {
+                            setRotateEvery(1)
+                          } else {
+                            setRotateEvery(null)
+                          }
+                        }}
+                        label='Rotate after a set number of completions'
+                      />
+                      <FormHelperText>
+                        By default, assignee rotates on every completion
+                      </FormHelperText>
+                    </FormControl>
+                    {rotateEvery !== null && rotateEvery > 0 && (
+                      <Box mt={1} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Typography level='body-md'>Rotate every</Typography>
+                        <Input
+                          type='number'
+                          value={rotateEvery}
+                          onChange={e => {
+                            const val = e.target.value
+                            if (val === '' || val === null) {
+                              setRotateEvery(1)
+                            } else {
+                              const parsed = parseInt(val, 10)
+                              setRotateEvery(parsed > 0 ? parsed : 1)
+                            }
+                          }}
+                          slotProps={{
+                            input: {
+                              min: 1,
+                              max: 365,
+                            },
+                          }}
+                          sx={{ width: '80px' }}
+                        />
+                        <Typography level='body-md'>completion(s)</Typography>
+                      </Box>
+                    )}
+                  </Box>
+                )}
             </Box>
           </>
         )}
