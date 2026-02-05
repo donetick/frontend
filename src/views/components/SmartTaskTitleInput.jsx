@@ -183,7 +183,10 @@ const SmartTaskTitleInput = ({
 
   return (
     <div>
-      <div className='task-input overflow-auto rounded border'>
+      <div
+        className='task-input overflow-auto rounded border'
+        style={{ minHeight: '2.4em' }}
+      >
         <textarea
           ref={titleInputRef}
           autoFocus={autoFocus}
@@ -220,7 +223,7 @@ const SmartTaskTitleInput = ({
           style={{
             position: 'relative',
             zIndex: 1,
-            minHeight: '100%',
+            minHeight: '1.2em',
             padding: '0.5rem',
             whiteSpace: 'pre-wrap',
             wordBreak: 'break-word',
@@ -238,6 +241,8 @@ const SmartTaskTitleInput = ({
           {customRenderer
             ? customRenderer
             : renderHighlightedText(value, cursorPosition)}
+          {/* Zero-width space to maintain consistent height */}
+          &#8203;
         </div>
       </div>
       {showSuggestions && (
