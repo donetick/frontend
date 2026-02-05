@@ -139,7 +139,7 @@ const AdvancedFilterBuilder = ({
         updated[index].operator = 'isOverdue'
         updated[index].value = null
       } else if (value === 'status') {
-        updated[index].value = [3]
+        updated[index].value = []
       } else if (value === 'points') {
         updated[index].operator = 'greaterThan'
         updated[index].value = 0
@@ -412,10 +412,12 @@ const AdvancedFilterBuilder = ({
       case 'status':
         return (
           <Select
-            value={condition.value?.[0] ?? 3}
+            multiple
+            value={condition.value || []}
             onChange={(_, newValue) =>
-              updateCondition(index, 'value', [newValue])
+              updateCondition(index, 'value', newValue)
             }
+            placeholder='Select statuses'
             sx={{ width: '100%' }}
             slotProps={{
               listbox: {
@@ -423,6 +425,24 @@ const AdvancedFilterBuilder = ({
                 disablePortal: false,
               },
             }}
+            renderValue={selected => (
+              <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                {selected.map((selectedElement, idx) => {
+                  const value = selectedElement.value
+                  const statusLabels = {
+                    0: 'Active',
+                    1: 'Started',
+                    2: 'In Progress',
+                    3: 'Pending Approval',
+                  }
+                  return (
+                    <Chip key={`status-chip-${value}-${idx}`} size='sm'>
+                      {statusLabels[value] || 'Unknown'}
+                    </Chip>
+                  )
+                })}
+              </Box>
+            )}
           >
             <Option value={0}>Active</Option>
             <Option value={1}>Started</Option>
