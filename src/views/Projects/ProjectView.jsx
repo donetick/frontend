@@ -14,7 +14,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ProjectModal from '../Modals/Inputs/ProjectModal'
 
-import { Add, FolderOpen, Task } from '@mui/icons-material'
+import { Add, Task } from '@mui/icons-material'
 import { useQueryClient } from '@tanstack/react-query'
 import { useChores } from '../../queries/ChoreQueries'
 import { useUserProfile } from '../../queries/UserQueries'
@@ -492,24 +492,6 @@ const ProjectCard = ({
               >
                 {taskCount} tasks
               </Chip>
-
-              {project.color && (
-                <Chip
-                  size='sm'
-                  variant='soft'
-                  startDecorator={<FolderOpen />}
-                  sx={{
-                    fontSize: 10,
-                    height: 18,
-                    px: 0.75,
-                    bgcolor: `${project.color}20`,
-                    color: project.color,
-                    border: `1px solid ${project.color}30`,
-                  }}
-                >
-                  {getColorName(project.color)}
-                </Chip>
-              )}
 
               {!isOwnedByCurrentUser && !isDefaultProject && (
                 <Chip

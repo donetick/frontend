@@ -14,7 +14,7 @@ import { useEffect, useRef, useState } from 'react'
 import LabelModal from '../Modals/Inputs/LabelModal'
 
 // import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Add, ColorLens } from '@mui/icons-material'
+import { Add } from '@mui/icons-material'
 import { useQueryClient } from '@tanstack/react-query'
 import { useUserProfile } from '../../queries/UserQueries'
 import LABEL_COLORS, {
@@ -416,23 +416,6 @@ const LabelCard = ({ label, onEditClick, onDeleteClick, currentUserId }) => {
 
             {/* Color Info */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              {label.color && (
-                <Chip
-                  size='sm'
-                  variant='soft'
-                  startDecorator={<ColorLens />}
-                  sx={{
-                    fontSize: 10,
-                    height: 18,
-                    px: 0.75,
-                    bgcolor: `${label.color}20`,
-                    color: label.color,
-                    border: `1px solid ${label.color}30`,
-                  }}
-                >
-                  {getColorName(label.color)}
-                </Chip>
-              )}
               {!isOwnedByCurrentUser && (
                 <Chip
                   size='sm'
