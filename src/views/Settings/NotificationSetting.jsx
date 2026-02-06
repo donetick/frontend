@@ -208,6 +208,12 @@ const NotificationSetting = () => {
           return false
         }
         break
+      case '6':
+        if (chatID === '') {
+          setError('Access Token is required')
+          return false
+        }
+        break
       default:
         break
     }
@@ -672,6 +678,7 @@ const NotificationSetting = () => {
               <Option value='1'>Telegram</Option>
               <Option value='2'>Pushover</Option>
               <Option value='3'>Webhooks</Option>
+              <Option value='6'>Pushbullet</Option>
             </Select>
             {notificationTarget === '1' && (
               <>
@@ -727,6 +734,31 @@ const NotificationSetting = () => {
                     width: '200px',
                   }}
                 />
+              </>
+            )}
+            {notificationTarget === '6' && (
+              <>
+                <Typography level='body-sm'>Access Token</Typography>
+                <Input
+                  value={chatID}
+                  onChange={e => setChatID(e.target.value)}
+                  placeholder='Access Token'
+                  sx={{
+                    width: '200px',
+                  }}
+                />
+                <Typography level='body-xs'>
+                  You can get your Access Token from{' '}
+                  <a
+                    style={{
+                      textDecoration: 'underline',
+                      color: '#0891b2',
+                    }}
+                    href='https://www.pushbullet.com/#settings/account'
+                  >
+                    Pushbullet Settings
+                  </a>
+                </Typography>
               </>
             )}
             {error && (
