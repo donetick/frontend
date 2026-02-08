@@ -103,8 +103,19 @@ import Z_INDEX from '../../constants/zIndex'
 import { useResource } from '../../queries/ResourceQueries'
 import { apiClient } from '../../utils/ApiClient'
 
-const publicPages = ['/landing', '/privacy', '/terms']
-const NavBar = () => {
+const publicPages = [
+  '/landing',
+  '/privacy',
+  '/terms',
+  'login',
+  '/signup',
+  '/auth/oauth2',
+  '/forgot-password',
+  '/login/settings',
+  '/',
+]
+
+const AppNavBar = () => {
   const { data: resource } = useResource()
 
   const navigate = useNavigate()
@@ -165,15 +176,7 @@ const NavBar = () => {
     )
   }
 
-  if (
-    [
-      '/signup',
-      '/login',
-      '/auth/oauth2',
-      '/forgot-password',
-      '/login/settings',
-    ].includes(location.pathname)
-  ) {
+  if (publicPages.includes(location.pathname)) {
     return (
       // no navbar but show the safe area padding
       <div
@@ -319,6 +322,21 @@ const NavBar = () => {
       </Drawer>
     </nav>
   )
+}
+
+const LandingNavBar = () => {
+  return null
+}
+
+const NavBar = () => {
+  // if capacitor app then show AppNavBar, else show LandingNavBar
+  if (Capacitor.isNativePlatform()) {
+    return <AppNavBar />
+  }
+  if (publicPages.includes(window.location.pathname)) {
+    return <LandingNavBar />
+  }
+  return <AppNavBar />
 }
 
 export default NavBar
