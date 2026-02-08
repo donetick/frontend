@@ -438,7 +438,7 @@ const FilterView = () => {
                             alignItems: 'center',
                             justifyContent: 'center',
                             bgcolor: 'warning.softBg',
-                            color: 'warning.600',
+                            color: 'warning.700',
                             px: 3,
                             height: '100%',
                           }}
@@ -460,7 +460,8 @@ const FilterView = () => {
                             flexDirection: 'column',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            bgcolor: 'var(--joy-palette-neutral-100)',
+                            bgcolor: 'neutral.softBg',
+                            color: 'neutral.700',
                             px: 3,
                             height: '100%',
                           }}
@@ -481,7 +482,7 @@ const FilterView = () => {
                             alignItems: 'center',
                             justifyContent: 'center',
                             bgcolor: 'danger.softBg',
-                            color: 'danger.600',
+                            color: 'danger.700',
                             px: 3,
                             height: '100%',
                           }}

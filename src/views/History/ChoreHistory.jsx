@@ -1,12 +1,12 @@
 import {
-  Analytics,
-  Checklist,
-  EventBusy,
-  Group,
-  History,
-  Star,
-  Timelapse,
-  TrendingUp,
+    Analytics,
+    Checklist,
+    EventBusy,
+    Group,
+    History,
+    Star,
+    Timelapse,
+    TrendingUp,
 } from '@mui/icons-material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
@@ -15,18 +15,18 @@ import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
-  Type as ListType,
-  SwipeableList,
-  SwipeableListItem,
-  SwipeAction,
-  TrailingActions,
+    Type as ListType,
+    SwipeableList,
+    SwipeableListItem,
+    SwipeAction,
+    TrailingActions,
 } from 'react-swipeable-list'
 import 'react-swipeable-list/dist/styles.css'
 import useConfirmationModal from '../../hooks/useConfirmationModal'
 import {
-  useChoreHistory,
-  useDeleteChoreHistory,
-  useUpdateChoreHistory,
+    useChoreHistory,
+    useDeleteChoreHistory,
+    useUpdateChoreHistory,
 } from '../../queries/ChoreQueries'
 import { useCircleMembers } from '../../queries/UserQueries'
 import { ChoreHistoryStatus } from '../../utils/Chores'
@@ -314,7 +314,8 @@ const ChoreHistory = () => {
                           flexDirection: 'column',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          bgcolor: 'var(--joy-palette-neutral-100)',
+                          bgcolor: 'neutral.softBg',
+                          color: 'neutral.700',
                           px: 3,
                           height: '100%',
                           width: '100%',
@@ -334,7 +335,7 @@ const ChoreHistory = () => {
                           alignItems: 'center',
                           justifyContent: 'center',
                           bgcolor: 'danger.softBg',
-                          color: 'danger.600',
+                          color: 'danger.700',
                           px: 3,
                           height: '100%',
                         }}

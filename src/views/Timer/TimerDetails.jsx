@@ -1,47 +1,47 @@
 import {
-  AccessTime,
-  Add,
-  BrowseGallery,
-  Delete,
-  Edit,
-  PauseCircle,
-  Person,
-  PlayArrow,
+    AccessTime,
+    Add,
+    BrowseGallery,
+    Delete,
+    Edit,
+    PauseCircle,
+    Person,
+    PlayArrow,
 } from '@mui/icons-material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import {
-  Alert,
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Container,
-  FormControl,
-  FormHelperText,
-  Grid,
-  IconButton,
-  Input,
-  Typography,
+    Alert,
+    Avatar,
+    Box,
+    Button,
+    Card,
+    CardContent,
+    Chip,
+    Container,
+    FormControl,
+    FormHelperText,
+    Grid,
+    IconButton,
+    Input,
+    Typography,
 } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
-  Type as ListType,
-  SwipeableList,
-  SwipeableListItem,
-  SwipeAction,
-  TrailingActions,
+    Type as ListType,
+    SwipeableList,
+    SwipeableListItem,
+    SwipeAction,
+    TrailingActions,
 } from 'react-swipeable-list'
 import 'react-swipeable-list/dist/styles.css'
 import {
-  useChoreTimer,
-  usePauseChore,
-  useStartChore,
-  useUpdateTimeSession,
+    useChoreTimer,
+    usePauseChore,
+    useStartChore,
+    useUpdateTimeSession,
 } from '../../queries/TimeQueries'
 import { useCircleMembers } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
@@ -959,8 +959,8 @@ const TimerDetails = () => {
                                           flexDirection: 'column',
                                           alignItems: 'center',
                                           justifyContent: 'center',
-                                          bgcolor:
-                                            'var(--joy-palette-neutral-100)',
+                                          bgcolor: 'neutral.softBg',
+                                          color: 'neutral.700',
                                           px: 3,
                                           height: '100%',
                                         }}
@@ -986,7 +986,7 @@ const TimerDetails = () => {
                                           alignItems: 'center',
                                           justifyContent: 'center',
                                           bgcolor: 'danger.softBg',
-                                          color: 'danger.600',
+                                          color: 'danger.700',
                                           px: 3,
                                           height: '100%',
                                         }}

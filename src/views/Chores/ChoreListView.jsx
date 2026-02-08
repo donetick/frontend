@@ -89,7 +89,7 @@ const ChoreListView = ({
                     alignItems: 'center',
                     justifyContent: 'center',
                     bgcolor: 'danger.softBg',
-                    color: 'danger.600',
+                    color: 'danger.700',
                     px: 3,
                     height: '100%',
                   }}
@@ -108,7 +108,8 @@ const ChoreListView = ({
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    bgcolor: 'var(--joy-palette-neutral-100)',
+                    bgcolor: 'neutral.softBg',
+                    color: 'neutral.700',
                     px: 3,
                     height: '100%',
                     opacity: 0.5,
@@ -138,7 +139,7 @@ const ChoreListView = ({
                   alignItems: 'center',
                   justifyContent: 'center',
                   bgcolor: 'success.softBg',
-                  color: 'success.600',
+                  color: 'success.700',
                   px: 3,
                   height: '100%',
                 }}
@@ -165,7 +166,7 @@ const ChoreListView = ({
                 alignItems: 'center',
                 justifyContent: 'center',
                 bgcolor: 'warning.softBg',
-                color: 'warning.600',
+                color: 'warning.700',
                 px: 3,
                 height: '100%',
               }}
@@ -184,7 +185,8 @@ const ChoreListView = ({
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                bgcolor: 'var(--joy-palette-neutral-100)',
+                bgcolor: 'neutral.softBg',
+                color: 'neutral.700',
                 px: 3,
                 height: '100%',
               }}
@@ -205,7 +207,7 @@ const ChoreListView = ({
                   alignItems: 'center',
                   justifyContent: 'center',
                   bgcolor: 'warning.softBg',
-                  color: 'warning.600',
+                  color: 'warning.700',
                   px: 3,
                   height: '100%',
                 }}
@@ -226,7 +228,7 @@ const ChoreListView = ({
                 alignItems: 'center',
                 justifyContent: 'center',
                 bgcolor: 'danger.softBg',
-                color: 'danger.600',
+                color: 'danger.700',
                 px: 3,
                 height: '100%',
               }}
