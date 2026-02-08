@@ -2,8 +2,19 @@ import { apiClient } from './ApiClient'
 
 // Migration helpers to maintain compatibility with existing code
 const Fetch = async (endpoint, options = {}) => {
-  const response = await apiClient.request(endpoint, options)
-  return response
+  // base on options.method, call the appropriate method on apiClient:
+  switch (options.method) {
+    case 'GET':
+      return apiClient.get(endpoint, options)
+    case 'POST':
+      return apiClient.post(endpoint, options.body, options)
+    case 'PUT':
+      return apiClient.put(endpoint, options.body, options)
+    case 'DELETE':
+      return apiClient.delete(endpoint, options)
+    default:
+      return apiClient.request(endpoint, options)
+  }
 }
 
 const HEADERS = () => {
@@ -1007,5 +1018,6 @@ export {
   UpdateThingState,
   UpdateTimeSession,
   UpdateUserDetails,
-  VerifyMFA,
+  VerifyMFA
 }
+
