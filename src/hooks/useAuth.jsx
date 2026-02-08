@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { clearAllTokens, saveTokens } from '../utils/TokenStorage'
 import { apiClient } from '../utils/ApiClient'
+import { clearAllTokens, saveTokens } from '../utils/TokenStorage'
 
 const AuthContext = createContext(null)
 
@@ -36,12 +36,21 @@ export const AuthProvider = ({ children }) => {
   const login = async credentials => {
     setIsLoading(true)
     try {
-      const response = await fetch(`${baseURL}/auth/login`, {
+      const isNative =
+        typeof window !== 'undefined' && window.Capacitor?.isNativePlatform?.()
+
+      const config = {
         method: 'POST',
-        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(credentials),
-      })
+      }
+
+      // Only use credentials for web, not for native apps
+      if (!isNative) {
+        config.credentials = 'include'
+      }
+
+      const response = await fetch(`${baseURL}/auth/login`, config)
 
       if (!response.ok) {
         const error = await response.json()
