@@ -1,14 +1,14 @@
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import {
-  Avatar,
-  Box,
-  Chip,
-  CircularProgress,
-  Container,
-  IconButton,
-  Stack,
-  Typography,
+    Avatar,
+    Box,
+    Chip,
+    CircularProgress,
+    Container,
+    IconButton,
+    Stack,
+    Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -17,11 +17,11 @@ import ProjectModal from '../Modals/Inputs/ProjectModal'
 import { Add, Task } from '@mui/icons-material'
 import { useQueryClient } from '@tanstack/react-query'
 import {
-  Type as ListType,
-  SwipeableList,
-  SwipeableListItem,
-  SwipeAction,
-  TrailingActions,
+    Type as ListType,
+    SwipeableList,
+    SwipeableListItem,
+    SwipeAction,
+    TrailingActions,
 } from 'react-swipeable-list'
 import 'react-swipeable-list/dist/styles.css'
 import { useChores } from '../../queries/ChoreQueries'
@@ -389,7 +389,8 @@ const ProjectView = () => {
                           flexDirection: 'column',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          bgcolor: 'var(--joy-palette-neutral-100)',
+                          bgcolor: 'neutral.softBg',
+                          color: 'neutral.700',
                           px: 3,
                           height: '100%',
                         }}
@@ -410,7 +411,7 @@ const ProjectView = () => {
                           alignItems: 'center',
                           justifyContent: 'center',
                           bgcolor: 'danger.softBg',
-                          color: 'danger.600',
+                          color: 'danger.700',
                           px: 3,
                           height: '100%',
                         }}

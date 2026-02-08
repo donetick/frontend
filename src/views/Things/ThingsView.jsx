@@ -1,39 +1,39 @@
 import {
-  Add,
-  Delete,
-  Edit,
-  Flip,
-  PlusOne,
-  ToggleOff,
-  ToggleOn,
-  Widgets,
+    Add,
+    Delete,
+    Edit,
+    Flip,
+    PlusOne,
+    ToggleOff,
+    ToggleOn,
+    Widgets,
 } from '@mui/icons-material'
 import {
-  Avatar,
-  Box,
-  Chip,
-  Container,
-  IconButton,
-  Stack,
-  Typography,
+    Avatar,
+    Box,
+    Chip,
+    Container,
+    IconButton,
+    Stack,
+    Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  Type as ListType,
-  SwipeableList,
-  SwipeableListItem,
-  SwipeAction,
-  TrailingActions,
+    Type as ListType,
+    SwipeableList,
+    SwipeableListItem,
+    SwipeAction,
+    TrailingActions,
 } from 'react-swipeable-list'
 import 'react-swipeable-list/dist/styles.css'
 import { useNotification } from '../../service/NotificationProvider'
 import {
-  CreateThing,
-  DeleteThing,
-  GetThings,
-  SaveThing,
-  UpdateThingState,
+    CreateThing,
+    DeleteThing,
+    GetThings,
+    SaveThing,
+    UpdateThingState,
 } from '../../utils/Fetcher'
 import { getSafeBottomStyles } from '../../utils/SafeAreaUtils'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
@@ -413,7 +413,7 @@ const ThingsView = () => {
                           alignItems: 'center',
                           justifyContent: 'center',
                           bgcolor: 'success.softBg',
-                          color: 'success.600',
+                          color: 'success.700',
                           px: 3,
                           height: '100%',
                         }}
@@ -439,7 +439,8 @@ const ThingsView = () => {
                           flexDirection: 'column',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          bgcolor: 'var(--joy-palette-neutral-100)',
+                          bgcolor: 'neutral.softBg',
+                          color: 'neutral.700',
                           px: 3,
                           height: '100%',
                         }}
@@ -458,7 +459,7 @@ const ThingsView = () => {
                           alignItems: 'center',
                           justifyContent: 'center',
                           bgcolor: 'danger.softBg',
-                          color: 'danger.600',
+                          color: 'danger.700',
                           px: 3,
                           height: '100%',
                         }}
