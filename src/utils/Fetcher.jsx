@@ -68,10 +68,19 @@ const login = (username, password) => {
 
 const logout = () => {
   const baseURL = apiManager.getApiURL()
-  return fetch(`${baseURL}/auth/logout`, {
+  const isNative =
+    typeof window !== 'undefined' && window.Capacitor?.isNativePlatform?.()
+
+  const config = {
     method: 'POST',
-    credentials: 'include',
-  })
+  }
+
+  // Only use credentials for web, not for native apps
+  if (!isNative) {
+    config.credentials = 'include'
+  }
+
+  return fetch(`${baseURL}/auth/logout`, config)
 }
 
 const GetAllUsers = () => {
