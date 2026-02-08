@@ -115,7 +115,7 @@ const publicPages = [
   '/',
 ]
 
-const AppNavBar = () => {
+const NavBar = () => {
   const { data: resource } = useResource()
 
   const navigate = useNavigate()
@@ -323,20 +323,4 @@ const AppNavBar = () => {
     </nav>
   )
 }
-
-const LandingNavBar = () => {
-  return null
-}
-
-const NavBar = () => {
-  // if capacitor app then show AppNavBar, else show LandingNavBar
-  if (Capacitor.isNativePlatform()) {
-    return <AppNavBar />
-  }
-  if (publicPages.includes(window.location.pathname)) {
-    return <LandingNavBar />
-  }
-  return <AppNavBar />
-}
-
 export default NavBar

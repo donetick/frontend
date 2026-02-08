@@ -2,13 +2,13 @@ import NavBar from '@/views/components/NavBar'
 import { Button, Typography, useColorScheme } from '@mui/joy'
 import Tracker from '@openreplay/tracker'
 import { useCallback, useEffect } from 'react'
-import { Outlet, useNavigate } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 import { registerCapacitorListeners } from './CapacitorListener'
 import PageTransition from './components/animations/PageTransition'
-import { AuthProvider } from './hooks/useAuth.jsx'
 import { ImpersonateUserProvider } from './contexts/ImpersonateUserContext'
 import SSEProvider from './contexts/SSEContext'
+import { AuthProvider } from './hooks/useAuth.jsx'
 import { useNotification } from './service/NotificationProvider'
 
 import NetworkBanner from './views/components/NetworkBanner'
@@ -31,7 +31,6 @@ const startOpenReplay = () => {
   })
   tracker.start()
 }
-
 
 const AppContent = () => {
   const { showNotification } = useNotification()
