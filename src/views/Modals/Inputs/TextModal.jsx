@@ -1,4 +1,4 @@
-import { Box, Button, Textarea, Typography } from '@mui/joy'
+import { Box, Button, Textarea } from '@mui/joy'
 import { useState } from 'react'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 

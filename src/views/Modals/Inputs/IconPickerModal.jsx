@@ -1,11 +1,11 @@
 import {
-  Avatar,
-  Box,
-  Button,
-  FormControl,
-  FormLabel,
-  Grid,
-  Typography,
+    Avatar,
+    Box,
+    Button,
+    FormControl,
+    FormLabel,
+    Grid,
+    Typography,
 } from '@mui/joy'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { getTextColorFromBackgroundColor } from '../../../utils/Colors'

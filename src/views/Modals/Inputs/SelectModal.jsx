@@ -1,4 +1,4 @@
-import { Box, Button, Option, Select, Typography } from '@mui/joy'
+import { Box, Button, Option, Select } from '@mui/joy'
 import React from 'react'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
