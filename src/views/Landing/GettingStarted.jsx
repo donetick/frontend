@@ -352,7 +352,7 @@ const GettingStarted = () => {
             <Box
               onClick={() => {
                 window.open(
-                  'https://github.com/donetick/donetick/releases',
+                  'https://play.google.com/store/apps/details?id=com.donetick.app',
                   '_blank',
                 )
               }}
