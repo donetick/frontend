@@ -29,12 +29,11 @@ const IconPickerModal = ({
     <ResponsiveModal
       open={isOpen}
       onClose={onClose}
-      size='sm'
+      size='lg'
+      fullWidth={true}
       unmountDelay={250}
+      title='Choose Project Icon'
     >
-      <Typography level='h4' mb={2}>
-        Choose Project Icon
-      </Typography>
 
       <FormControl>
         <FormLabel>Available Icons</FormLabel>

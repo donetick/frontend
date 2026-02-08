@@ -64,15 +64,14 @@ function AcknowledgmentModal({ config }) {
     <ResponsiveModal
       open={config?.isOpen}
       onClose={config?.onClose}
-      size='md'
+      size='lg'
+      fullWidth={true}
       unmountDelay={250}
+      title={config?.title}
     >
       <Box
         sx={{ p: 2, minWidth: { xs: '100%', sm: '400px' }, maxWidth: '500px' }}
       >
-        <Typography level='h4' mb={2} textAlign='center'>
-          {config?.title}
-        </Typography>
 
         <Typography
           level='body-md'

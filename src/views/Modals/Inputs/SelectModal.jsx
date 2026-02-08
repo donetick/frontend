@@ -20,8 +20,13 @@ function SelectModal({
   }
 
   return (
-    <ResponsiveModal open={isOpen} onClose={onClose}>
-      <Typography variant='h4'>{title}</Typography>
+    <ResponsiveModal
+      open={isOpen}
+      onClose={onClose}
+      size='lg'
+      fullWidth={true}
+      title={title}
+    >
       <Select placeholder={placeholder}>
         {options.map((item, index) => (
           <Option

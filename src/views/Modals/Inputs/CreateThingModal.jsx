@@ -60,10 +60,13 @@ function CreateThingModal({ isOpen, onClose, onSave, currentThing }) {
   }
 
   return (
-    <ResponsiveModal open={isOpen} onClose={onClose}>
-      <Typography level='h4'>
-        {currentThing?.id ? 'Edit' : 'Create'} Thing
-      </Typography>
+    <ResponsiveModal
+      open={isOpen}
+      onClose={onClose}
+      size='lg'
+      fullWidth={true}
+      title={`${currentThing?.id ? 'Edit' : 'Create'} Thing`}
+    >
       <FormControl>
         <Typography>Name</Typography>
         <Textarea

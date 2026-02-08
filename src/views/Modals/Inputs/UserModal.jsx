@@ -5,10 +5,13 @@ const UserModal = ({ isOpen, performers = [], onSelect, onClose }) => {
   const { ResponsiveModal } = useResponsiveModal()
 
   return (
-    <ResponsiveModal open={isOpen} onClose={onClose} size='md' fullWidth>
-      <Typography level='h4' sx={{ mb: 2 }}>
-        Select User
-      </Typography>
+    <ResponsiveModal
+      open={isOpen}
+      onClose={onClose}
+      size='lg'
+      fullWidth={true}
+      title='Select User'
+    >
       <List sx={{ mb: 2 }}>
         {performers.map(user => (
           <ListItem

@@ -344,7 +344,8 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
     <ResponsiveModal
       open={isOpen}
       onClose={() => handleClose(false)}
-      size='md'
+      size='lg'
+      fullWidth={true}
       title='Delete Account'
     >
       {loading && step === 1 ? (

@@ -41,11 +41,13 @@ function PassowrdChangeModal({ isOpen, onClose }) {
   }
 
   return (
-    <ResponsiveModal open={isOpen} onClose={onClose}>
-      <Typography level='h4' mb={1}>
-        Change Password
-      </Typography>
-
+    <ResponsiveModal
+      open={isOpen}
+      onClose={onClose}
+      size='lg'
+      fullWidth={true}
+      title='Change Password'
+    >
       <Typography level='body-md' gutterBottom>
         Please enter your new password.
       </Typography>

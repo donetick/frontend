@@ -21,8 +21,13 @@ function TextModal({
   }
 
   return (
-    <ResponsiveModal open={isOpen} onClose={onClose}>
-      <Typography variant='h4'>{title}</Typography>
+    <ResponsiveModal
+      open={isOpen}
+      onClose={onClose}
+      size='lg'
+      fullWidth={true}
+      title={title}
+    >
       <Textarea
         placeholder='Type in here…'
         value={text}

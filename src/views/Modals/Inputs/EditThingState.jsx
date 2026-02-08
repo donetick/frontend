@@ -40,9 +40,13 @@ function EditThingStateModal({ isOpen, onClose, onSave, currentThing }) {
   }
 
   return (
-    <ResponsiveModal open={isOpen} onClose={onClose}>
-      <Typography level='h4'>Update state</Typography>
-
+    <ResponsiveModal
+      open={isOpen}
+      onClose={onClose}
+      size='lg'
+      fullWidth={true}
+      title='Update state'
+    >
       <FormControl>
         <Typography>Value</Typography>
         <Input
