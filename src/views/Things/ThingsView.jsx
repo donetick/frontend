@@ -17,8 +17,16 @@ import {
   Stack,
   Typography,
 } from '@mui/joy'
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import {
+  Type as ListType,
+  SwipeableList,
+  SwipeableListItem,
+  SwipeAction,
+  TrailingActions,
+} from 'react-swipeable-list'
+import 'react-swipeable-list/dist/styles.css'
 import { useNotification } from '../../service/NotificationProvider'
 import {
   CreateThing,
@@ -31,25 +39,8 @@ import { getSafeBottomStyles } from '../../utils/SafeAreaUtils'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import CreateThingModal from '../Modals/Inputs/CreateThingModal'
 import EditThingStateModal from '../Modals/Inputs/EditThingState'
-const ThingCard = ({
-  thing,
-  onEditClick,
-  onStateChangeRequest,
-  onDeleteClick,
-}) => {
-  const [isDisabled, setIsDisabled] = useState(false)
-  const Navigate = useNavigate()
 
-  // Swipe functionality state
-  const [swipeTranslateX, setSwipeTranslateX] = useState(0)
-  const [isDragging, setIsDragging] = useState(false)
-  const [isSwipeRevealed, setIsSwipeRevealed] = useState(false)
-  const [hoverTimer, setHoverTimer] = useState(null)
-  const swipeThreshold = 80
-  const maxSwipeDistance = 200
-  const dragStartX = useRef(0)
-  const cardRef = useRef(null)
-
+const ThingCardContent = ({ thing, onCardClick }) => {
   const getThingIcon = type => {
     if (type === 'text') {
       return <Flip />
@@ -93,425 +84,103 @@ const ThingCard = ({
     )
   }
 
-  const handleRequestChange = thing => {
-    setIsDisabled(true)
-    resetSwipe()
-    onStateChangeRequest(thing)
-    setTimeout(() => {
-      setIsDisabled(false)
-    }, 2000)
-  }
-
-  // Swipe gesture handlers
-  const handleTouchStart = e => {
-    dragStartX.current = e.touches[0].clientX
-    setIsDragging(true)
-  }
-
-  const handleTouchMove = e => {
-    if (!isDragging) return
-
-    const currentX = e.touches[0].clientX
-    const deltaX = currentX - dragStartX.current
-
-    if (isSwipeRevealed) {
-      if (deltaX > 0) {
-        const clampedDelta = Math.min(deltaX - maxSwipeDistance, 0)
-        setSwipeTranslateX(clampedDelta)
-      }
-    } else {
-      if (deltaX < 0) {
-        const clampedDelta = Math.max(deltaX, -maxSwipeDistance)
-        setSwipeTranslateX(clampedDelta)
-      }
-    }
-  }
-
-  const handleTouchEnd = () => {
-    if (!isDragging) return
-    setIsDragging(false)
-
-    if (isSwipeRevealed) {
-      if (swipeTranslateX > -swipeThreshold) {
-        setSwipeTranslateX(0)
-        setIsSwipeRevealed(false)
-      } else {
-        setSwipeTranslateX(-maxSwipeDistance)
-      }
-    } else {
-      if (Math.abs(swipeTranslateX) > swipeThreshold) {
-        setSwipeTranslateX(-maxSwipeDistance)
-        setIsSwipeRevealed(true)
-      } else {
-        setSwipeTranslateX(0)
-        setIsSwipeRevealed(false)
-      }
-    }
-  }
-
-  const handleMouseDown = e => {
-    dragStartX.current = e.clientX
-    setIsDragging(true)
-  }
-
-  const handleMouseMove = e => {
-    if (!isDragging) return
-
-    const currentX = e.clientX
-    const deltaX = currentX - dragStartX.current
-
-    if (isSwipeRevealed) {
-      if (deltaX > 0) {
-        const clampedDelta = Math.min(deltaX - maxSwipeDistance, 0)
-        setSwipeTranslateX(clampedDelta)
-      }
-    } else {
-      if (deltaX < 0) {
-        const clampedDelta = Math.max(deltaX, -maxSwipeDistance)
-        setSwipeTranslateX(clampedDelta)
-      }
-    }
-  }
-
-  const handleMouseUp = () => {
-    if (!isDragging) return
-    setIsDragging(false)
-
-    if (isSwipeRevealed) {
-      if (swipeTranslateX > -swipeThreshold) {
-        setSwipeTranslateX(0)
-        setIsSwipeRevealed(false)
-      } else {
-        setSwipeTranslateX(-maxSwipeDistance)
-      }
-    } else {
-      if (Math.abs(swipeTranslateX) > swipeThreshold) {
-        setSwipeTranslateX(-maxSwipeDistance)
-        setIsSwipeRevealed(true)
-      } else {
-        setSwipeTranslateX(0)
-        setIsSwipeRevealed(false)
-      }
-    }
-  }
-
-  const resetSwipe = () => {
-    setSwipeTranslateX(0)
-    setIsSwipeRevealed(false)
-  }
-
-  // Hover functionality for desktop - only trigger from drag area
-  const handleMouseEnter = () => {
-    if (isSwipeRevealed) return
-    const timer = setTimeout(() => {
-      setSwipeTranslateX(-maxSwipeDistance)
-      setIsSwipeRevealed(true)
-      setHoverTimer(null)
-    }, 800) // Shorter delay for drag area
-    setHoverTimer(timer)
-  }
-
-  const handleMouseLeave = () => {
-    if (hoverTimer) {
-      clearTimeout(hoverTimer)
-      setHoverTimer(null)
-    }
-    // Only add hide timer if we're leaving the drag area and actions are NOT revealed
-    // If actions are revealed, let the action area handle the hiding
-    if (!isSwipeRevealed) {
-      // Actions are not revealed, so we can safely hide after delay
-      const hideTimer = setTimeout(() => {
-        resetSwipe()
-      }, 300)
-      setHoverTimer(hideTimer)
-    }
-  }
-
-  const handleActionAreaMouseEnter = () => {
-    // Clear any pending timer when entering action area
-    if (hoverTimer) {
-      clearTimeout(hoverTimer)
-      setHoverTimer(null)
-    }
-  }
-
-  const handleActionAreaMouseLeave = () => {
-    // Hide immediately when leaving action area
-    if (isSwipeRevealed) {
-      resetSwipe()
-    }
-  }
-
-  // Clean up timer on unmount
-  React.useEffect(() => {
-    return () => {
-      if (hoverTimer) {
-        clearTimeout(hoverTimer)
-      }
-    }
-  }, [hoverTimer])
-
   return (
-    <Box key={thing.id + '-compact-box'}>
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        minHeight: 64,
+        width: '100%',
+        px: 2,
+        py: 1.5,
+        bgcolor: 'background.body',
+        borderBottom: '1px solid',
+        borderColor: 'divider',
+        cursor: 'pointer',
+      }}
+      onClick={onCardClick}
+    >
+      {/* Avatar and Primary Action */}
       <Box
         sx={{
-          position: 'relative',
-          overflow: 'hidden',
-          borderBottom: '1px solid',
-          borderColor: 'divider',
-          '&:last-child': {
-            borderBottom: 'none',
-          },
-        }}
-        onMouseLeave={() => {
-          // Only clear timers, don't auto-hide
-          if (hoverTimer) {
-            clearTimeout(hoverTimer)
-            setHoverTimer(null)
-          }
+          display: 'flex',
+          alignItems: 'center',
+          mr: 2,
+          flexShrink: 0,
         }}
       >
-        {/* Action buttons underneath (revealed on swipe) */}
+        {getThingAvatar()}
+      </Box>
+
+      {/* Content - Center */}
+      <Box
+        sx={{
+          flex: 1,
+          minWidth: 0,
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        {/* Line 1: Name + State */}
         <Box
-          sx={{
-            position: 'absolute',
-            right: 0,
-            top: 0,
-            bottom: 0,
-            width: maxSwipeDistance,
-            display: 'flex',
-            alignItems: 'center',
-            boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.06)',
-            zIndex: 0,
-          }}
-          onMouseEnter={handleActionAreaMouseEnter}
-          onMouseLeave={handleActionAreaMouseLeave}
-        >
-          <IconButton
-            variant='soft'
-            color='success'
-            size='sm'
-            onClick={e => {
-              e.stopPropagation()
-              if (thing?.type === 'text') {
-                onEditClick(thing)
-              } else {
-                handleRequestChange(thing)
-              }
-            }}
-            disabled={isDisabled}
-            sx={{
-              width: 40,
-              height: 40,
-              mx: 1,
-            }}
-          >
-            {getThingIcon(thing?.type)}
-          </IconButton>
-
-          <IconButton
-            variant='soft'
-            color='neutral'
-            size='sm'
-            onClick={e => {
-              e.stopPropagation()
-              resetSwipe()
-              onEditClick(thing)
-            }}
-            sx={{
-              width: 40,
-              height: 40,
-              mx: 1,
-            }}
-          >
-            <Edit sx={{ fontSize: 16 }} />
-          </IconButton>
-
-          <IconButton
-            variant='soft'
-            color='danger'
-            size='sm'
-            onClick={e => {
-              e.stopPropagation()
-              resetSwipe()
-              onDeleteClick(thing)
-            }}
-            sx={{
-              width: 40,
-              height: 40,
-              mx: 1,
-            }}
-          >
-            <Delete sx={{ fontSize: 16 }} />
-          </IconButton>
-        </Box>
-
-        {/* Main card content */}
-        <Box
-          ref={cardRef}
           sx={{
             display: 'flex',
             alignItems: 'center',
-            minHeight: 64,
-            cursor: 'pointer',
-            position: 'relative',
-            px: 2,
-            py: 1.5,
-            bgcolor: 'background.body',
-            transform: `translateX(${swipeTranslateX}px)`,
-            transition: isDragging ? 'none' : 'transform 0.3s ease-out',
-            zIndex: 1,
-            '&:hover': {
-              bgcolor: isSwipeRevealed
-                ? 'background.surface'
-                : 'background.level1',
-              boxShadow: isSwipeRevealed ? 'none' : 'sm',
-            },
+            justifyContent: 'space-between',
+            mb: 0.5,
           }}
-          onClick={() => {
-            if (isSwipeRevealed) {
-              resetSwipe()
-              return
-            }
-            Navigate(`/things/${thing?.id}`)
-          }}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
         >
-          {/* Right drag area - only triggers reveal on hover */}
-          <Box
+          <Typography
+            level='title-sm'
             sx={{
-              position: 'absolute',
-              right: 0,
-              top: 0,
-              bottom: 0,
-              width: '20px',
-              cursor: 'grab',
-              zIndex: 2,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              opacity: isSwipeRevealed ? 0 : 0.3, // Hide when action area is revealed
-              transition: 'opacity 0.2s ease',
-              pointerEvents: isSwipeRevealed ? 'none' : 'auto', // Disable pointer events when revealed
-              '&:hover': {
-                opacity: isSwipeRevealed ? 0 : 0.7,
-              },
-              '&:active': {
-                cursor: 'grabbing',
-              },
-            }}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-          >
-            {/* Drag indicator dots */}
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 0.25,
-              }}
-            >
-              {[...Array(3)].map((_, i) => (
-                <Box
-                  key={i}
-                  sx={{
-                    width: 3,
-                    height: 3,
-                    borderRadius: '50%',
-                    bgcolor: 'text.tertiary',
-                  }}
-                />
-              ))}
-            </Box>
-          </Box>
-          {/* Avatar and Primary Action */}
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              mr: 2,
-              flexShrink: 0,
-            }}
-          >
-            {getThingAvatar()}
-          </Box>
-
-          {/* Content - Center */}
-          <Box
-            sx={{
+              fontWeight: 600,
+              fontSize: 14,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              mr: 1,
               flex: 1,
               minWidth: 0,
-              display: 'flex',
-              flexDirection: 'column',
             }}
           >
-            {/* Line 1: Name + State */}
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                mb: 0.5,
-              }}
-            >
-              <Typography
-                level='title-sm'
-                sx={{
-                  fontWeight: 600,
-                  fontSize: 14,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                  mr: 1,
-                  flex: 1,
-                  minWidth: 0,
-                }}
-              >
-                {thing?.name}
-              </Typography>
+            {thing?.name}
+          </Typography>
 
-              <Chip
-                size='sm'
-                variant='solid'
-                color={
-                  thing?.type === 'boolean' && thing?.state === 'true'
-                    ? 'success'
-                    : 'primary'
-                }
-                sx={{
-                  fontSize: 11,
-                  height: 20,
-                  px: 1,
-                  fontWeight: 'md',
-                  flexShrink: 0,
-                  ml: 1,
-                }}
-              >
-                {thing?.state}
-              </Chip>
-            </Box>
+          <Chip
+            size='sm'
+            variant='solid'
+            color={
+              thing?.type === 'boolean' && thing?.state === 'true'
+                ? 'success'
+                : 'primary'
+            }
+            sx={{
+              fontSize: 11,
+              height: 20,
+              px: 1,
+              fontWeight: 'md',
+              flexShrink: 0,
+              ml: 1,
+            }}
+          >
+            {thing?.state}
+          </Chip>
+        </Box>
 
-            {/* Line 2: Type */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Chip
-                size='sm'
-                variant='soft'
-                color='neutral'
-                sx={{
-                  fontSize: 10,
-                  height: 18,
-                  px: 0.75,
-                }}
-              >
-                {thing?.type}
-              </Chip>
-            </Box>
-          </Box>
+        {/* Line 2: Type */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <Chip
+            size='sm'
+            variant='soft'
+            color='neutral'
+            sx={{
+              fontSize: 10,
+              height: 18,
+              px: 0.75,
+            }}
+          >
+            {thing?.type}
+          </Chip>
         </Box>
       </Box>
     </Box>
@@ -519,6 +188,7 @@ const ThingCard = ({
 }
 
 const ThingsView = () => {
+  const navigate = useNavigate()
   const [things, setThings] = useState([])
   const [isShowCreateThingModal, setIsShowCreateThingModal] = useState(false)
   const [isShowEditThingStateModal, setIsShowEditStateModal] = useState(false)
@@ -626,22 +296,23 @@ const ThingsView = () => {
   }
 
   const handleStateChangeRequest = thing => {
-    if (thing?.type === 'number') {
-      thing.state = Number(thing.state) + 1
-    } else if (thing?.type === 'boolean') {
-      if (thing.state === 'true') {
-        thing.state = 'false'
+    const updatedThing = { ...thing }
+    if (updatedThing?.type === 'number') {
+      updatedThing.state = Number(updatedThing.state) + 1
+    } else if (updatedThing?.type === 'boolean') {
+      if (updatedThing.state === 'true') {
+        updatedThing.state = 'false'
       } else {
-        thing.state = 'true'
+        updatedThing.state = 'true'
       }
     }
 
-    UpdateThingState(thing)
+    UpdateThingState(updatedThing)
       .then(result => {
         result.json().then(data => {
           const currentThings = [...things]
           const thingIndex = currentThings.findIndex(
-            currentThing => currentThing.id === thing.id,
+            currentThing => currentThing.id === updatedThing.id,
           )
           currentThings[thingIndex] = data.res
           setThings(currentThings)
@@ -712,15 +383,100 @@ const ThingsView = () => {
             </Typography>
           </Box>
         )}
-        {things.map(thing => (
-          <ThingCard
-            key={thing?.id}
-            thing={thing}
-            onEditClick={handleEditClick}
-            onDeleteClick={handleDeleteClick}
-            onStateChangeRequest={handleStateChangeRequest}
-          />
-        ))}
+        <SwipeableList type={ListType.IOS} fullSwipe={false}>
+          {things.map(thing => (
+            <SwipeableListItem
+              onClick={() => navigate(`/things/${thing?.id}`)}
+              key={thing.id}
+              trailingActions={
+                <TrailingActions>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.06)',
+                      zIndex: 0,
+                    }}
+                  >
+                    <SwipeAction
+                      onClick={() => {
+                        if (thing?.type === 'text') {
+                          handleEditClick(thing)
+                        } else {
+                          handleStateChangeRequest(thing)
+                        }
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          bgcolor: 'success.softBg',
+                          color: 'success.600',
+                          px: 3,
+                          height: '100%',
+                        }}
+                      >
+                        {thing?.type === 'text' ? (
+                          <Flip sx={{ fontSize: 20 }} />
+                        ) : thing?.type === 'number' ? (
+                          <PlusOne sx={{ fontSize: 20 }} />
+                        ) : thing.state === 'true' ? (
+                          <ToggleOn sx={{ fontSize: 20 }} />
+                        ) : (
+                          <ToggleOff sx={{ fontSize: 20 }} />
+                        )}
+                        <Typography level='body-xs' sx={{ mt: 0.5 }}>
+                          {thing?.type === 'text' ? 'Edit' : 'Toggle'}
+                        </Typography>
+                      </Box>
+                    </SwipeAction>
+                    <SwipeAction onClick={() => handleEditClick(thing)}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          bgcolor: 'var(--joy-palette-neutral-100)',
+                          px: 3,
+                          height: '100%',
+                        }}
+                      >
+                        <Edit sx={{ fontSize: 20 }} />
+                        <Typography level='body-xs' sx={{ mt: 0.5 }}>
+                          Edit
+                        </Typography>
+                      </Box>
+                    </SwipeAction>
+                    <SwipeAction onClick={() => handleDeleteClick(thing)}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          bgcolor: 'danger.softBg',
+                          color: 'danger.600',
+                          px: 3,
+                          height: '100%',
+                        }}
+                      >
+                        <Delete sx={{ fontSize: 20 }} />
+                        <Typography level='body-xs' sx={{ mt: 0.5 }}>
+                          Delete
+                        </Typography>
+                      </Box>
+                    </SwipeAction>
+                  </Box>
+                </TrailingActions>
+              }
+            >
+              <ThingCardContent thing={thing} />
+            </SwipeableListItem>
+          ))}
+        </SwipeableList>
       </Box>
       <Box
         // variant='outlined'

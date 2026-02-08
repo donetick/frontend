@@ -10,506 +10,191 @@ import {
   Stack,
   Typography,
 } from '@mui/joy'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ProjectModal from '../Modals/Inputs/ProjectModal'
 
 import { Add, Task } from '@mui/icons-material'
 import { useQueryClient } from '@tanstack/react-query'
+import {
+  Type as ListType,
+  SwipeableList,
+  SwipeableListItem,
+  SwipeAction,
+  TrailingActions,
+} from 'react-swipeable-list'
+import 'react-swipeable-list/dist/styles.css'
 import { useChores } from '../../queries/ChoreQueries'
 import { useUserProfile } from '../../queries/UserQueries'
-import LABEL_COLORS, {
-  getTextColorFromBackgroundColor,
-} from '../../utils/Colors'
+import { getTextColorFromBackgroundColor } from '../../utils/Colors'
 import { DeleteProject } from '../../utils/Fetcher'
 import { getIconComponent } from '../../utils/ProjectIcons'
 import { getSafeBottomStyles } from '../../utils/SafeAreaUtils'
 import { useProjectFilter } from '../Chores/hooks/useProjectFilter'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import { useProjects } from './ProjectQueries'
-const ProjectCard = ({
+const ProjectCardContent = ({
   project,
-  onEditClick,
-  onDeleteClick,
-  isEditable = true,
   currentUserId,
   taskCounts = {},
+  onCardClick,
 }) => {
-  const navigate = useNavigate()
-  const { data: projects = [], isLoading: projectsLoading } = useProjects()
-  // Helper function to get color name from hex value
-  const { setSelectedProjectWithCache } = useProjectFilter(projects)
-  const getColorName = hexValue => {
-    const colorObj = LABEL_COLORS.find(
-      color => color.value.toLowerCase() === hexValue.toLowerCase(),
-    )
-    return colorObj ? colorObj.name : hexValue
-  }
-
   // Check if current user owns this project
   const isOwnedByCurrentUser = project.created_by === currentUserId
   const isDefaultProject = project.id === 'default'
   const taskCount = taskCounts[project.id] || 0
 
-  // Swipe functionality state
-  const [swipeTranslateX, setSwipeTranslateX] = useState(0)
-  const [isDragging, setIsDragging] = useState(false)
-  const [isSwipeRevealed, setIsSwipeRevealed] = useState(false)
-  const [hoverTimer, setHoverTimer] = useState(null)
-  const swipeThreshold = 80
-  const maxSwipeDistance = 160
-  const dragStartX = useRef(0)
-  const cardRef = useRef(null)
-
-  // Swipe gesture handlers (same as LabelView)
-  const handleTouchStart = e => {
-    dragStartX.current = e.touches[0].clientX
-    setIsDragging(true)
-  }
-
-  const handleTouchMove = e => {
-    if (!isDragging) return
-
-    const currentX = e.touches[0].clientX
-    const deltaX = currentX - dragStartX.current
-
-    if (isSwipeRevealed) {
-      if (deltaX > 0) {
-        const clampedDelta = Math.min(deltaX - maxSwipeDistance, 0)
-        setSwipeTranslateX(clampedDelta)
-      }
-    } else {
-      if (deltaX < 0) {
-        const clampedDelta = Math.max(deltaX, -maxSwipeDistance)
-        setSwipeTranslateX(clampedDelta)
-      }
-    }
-  }
-
-  const handleTouchEnd = () => {
-    if (!isDragging) return
-    setIsDragging(false)
-
-    if (isSwipeRevealed) {
-      if (swipeTranslateX > -swipeThreshold) {
-        setSwipeTranslateX(0)
-        setIsSwipeRevealed(false)
-      } else {
-        setSwipeTranslateX(-maxSwipeDistance)
-      }
-    } else {
-      if (Math.abs(swipeTranslateX) > swipeThreshold) {
-        setSwipeTranslateX(-maxSwipeDistance)
-        setIsSwipeRevealed(true)
-      } else {
-        setSwipeTranslateX(0)
-        setIsSwipeRevealed(false)
-      }
-    }
-  }
-
-  const handleMouseDown = e => {
-    dragStartX.current = e.clientX
-    setIsDragging(true)
-  }
-
-  const handleMouseMove = e => {
-    if (!isDragging) return
-
-    const currentX = e.clientX
-    const deltaX = currentX - dragStartX.current
-
-    if (isSwipeRevealed) {
-      if (deltaX > 0) {
-        const clampedDelta = Math.min(deltaX - maxSwipeDistance, 0)
-        setSwipeTranslateX(clampedDelta)
-      }
-    } else {
-      if (deltaX < 0) {
-        const clampedDelta = Math.max(deltaX, -maxSwipeDistance)
-        setSwipeTranslateX(clampedDelta)
-      }
-    }
-  }
-
-  const handleMouseUp = () => {
-    if (!isDragging) return
-    setIsDragging(false)
-
-    if (isSwipeRevealed) {
-      if (swipeTranslateX > -swipeThreshold) {
-        setSwipeTranslateX(0)
-        setIsSwipeRevealed(false)
-      } else {
-        setSwipeTranslateX(-maxSwipeDistance)
-      }
-    } else {
-      if (Math.abs(swipeTranslateX) > swipeThreshold) {
-        setSwipeTranslateX(-maxSwipeDistance)
-        setIsSwipeRevealed(true)
-      } else {
-        setSwipeTranslateX(0)
-        setIsSwipeRevealed(false)
-      }
-    }
-  }
-
-  const resetSwipe = () => {
-    setSwipeTranslateX(0)
-    setIsSwipeRevealed(false)
-  }
-
-  // Hover functionality for desktop
-  const handleMouseEnter = () => {
-    if (isSwipeRevealed) return
-    const timer = setTimeout(() => {
-      setSwipeTranslateX(-maxSwipeDistance)
-      setIsSwipeRevealed(true)
-      setHoverTimer(null)
-    }, 800)
-    setHoverTimer(timer)
-  }
-
-  const handleMouseLeave = () => {
-    if (hoverTimer) {
-      clearTimeout(hoverTimer)
-      setHoverTimer(null)
-    }
-    if (!isSwipeRevealed) {
-      const hideTimer = setTimeout(() => {
-        resetSwipe()
-      }, 300)
-      setHoverTimer(hideTimer)
-    }
-  }
-
-  const handleActionAreaMouseEnter = () => {
-    if (hoverTimer) {
-      clearTimeout(hoverTimer)
-      setHoverTimer(null)
-    }
-  }
-
-  const handleActionAreaMouseLeave = () => {
-    if (isSwipeRevealed) {
-      resetSwipe()
-    }
-  }
-
-  // Clean up timer on unmount
-  useEffect(() => {
-    return () => {
-      if (hoverTimer) {
-        clearTimeout(hoverTimer)
-      }
-    }
-  }, [hoverTimer])
-
   return (
-    <Box key={project.id + '-project-box'}>
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        minHeight: 64,
+        width: '100%',
+        px: 2,
+        py: 1.5,
+        bgcolor: 'background.body',
+        borderBottom: '1px solid',
+        borderColor: 'divider',
+        cursor: 'pointer',
+      }}
+      onClick={onCardClick}
+    >
+      {/* Project Avatar */}
       <Box
         sx={{
-          position: 'relative',
-          overflow: 'hidden',
-          borderBottom: '1px solid',
-          borderColor: 'divider',
-          '&:last-child': {
-            borderBottom: 'none',
-          },
-        }}
-        onMouseLeave={() => {
-          if (hoverTimer) {
-            clearTimeout(hoverTimer)
-            setHoverTimer(null)
-          }
+          display: 'flex',
+          alignItems: 'center',
+          mr: 2,
+          flexShrink: 0,
         }}
       >
-        {/* Action buttons underneath (revealed on swipe) */}
-        {isEditable && (
-          <Box
-            sx={{
-              position: 'absolute',
-              right: 0,
-              top: 0,
-              bottom: 0,
-              width: maxSwipeDistance,
-              display: 'flex',
-              alignItems: 'center',
-              boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.06)',
-              zIndex: 0,
-            }}
-            onMouseEnter={handleActionAreaMouseEnter}
-            onMouseLeave={handleActionAreaMouseLeave}
-          >
-            <IconButton
-              variant='soft'
-              color='neutral'
-              size='sm'
-              onClick={e => {
-                e.stopPropagation()
-                resetSwipe()
-                onEditClick(project)
-              }}
-              sx={{
-                width: 40,
-                height: 40,
-                mx: 1,
-              }}
-            >
-              <EditIcon sx={{ fontSize: 16 }} />
-            </IconButton>
-
-            {/* Only show delete for non-default projects */}
-            {!isDefaultProject && (
-              <IconButton
-                variant='soft'
-                color='danger'
-                size='sm'
-                onClick={e => {
-                  e.stopPropagation()
-                  resetSwipe()
-                  onDeleteClick(project.id)
-                }}
-                sx={{
-                  width: 40,
-                  height: 40,
-                  mx: 1,
-                }}
-              >
-                <DeleteIcon sx={{ fontSize: 16 }} />
-              </IconButton>
-            )}
-          </Box>
-        )}
-
-        {/* Main card content */}
-        <Box
-          ref={cardRef}
+        <Avatar
+          size='sm'
           sx={{
-            display: 'flex',
-            alignItems: 'center',
-            minHeight: 64,
-            cursor: 'pointer',
-            position: 'relative',
-            px: 2,
-            py: 1.5,
-            bgcolor: 'background.body',
-            transform: `translateX(${swipeTranslateX}px)`,
-            transition: isDragging ? 'none' : 'transform 0.3s ease-out',
-            zIndex: 1,
-            '&:hover': {
-              bgcolor: isSwipeRevealed
+            width: 32,
+            height: 32,
+            bgcolor: project.color || 'primary.500',
+            border: '2px solid',
+            borderColor: isDefaultProject
+              ? 'primary.300'
+              : isOwnedByCurrentUser
                 ? 'background.surface'
-                : 'background.level1',
-              boxShadow: isSwipeRevealed ? 'none' : 'sm',
-            },
+                : 'warning.300',
+            boxShadow: isDefaultProject
+              ? '0 0 0 1px var(--joy-palette-primary-300)'
+              : isOwnedByCurrentUser
+                ? 'sm'
+                : '0 0 0 1px var(--joy-palette-warning-300)',
           }}
-          onClick={() => {
-            if (isSwipeRevealed) {
-              resetSwipe()
-              return
-            }
-            // Always navigate to MyChores with project filter when clicking on the card
-            // For default project, use 'default', for others use project ID
-            const projectIdentifier =
-              project.id === 'default' ? 'default' : project.id
-            setSelectedProjectWithCache(project)
-            navigate(`/chores?project=${encodeURIComponent(projectIdentifier)}`)
-          }}
-          onTouchStart={isEditable ? handleTouchStart : undefined}
-          onTouchMove={isEditable ? handleTouchMove : undefined}
-          onTouchEnd={isEditable ? handleTouchEnd : undefined}
-          onMouseDown={isEditable ? handleMouseDown : undefined}
-          onMouseMove={isEditable ? handleMouseMove : undefined}
-          onMouseUp={isEditable ? handleMouseUp : undefined}
         >
-          {/* Right drag area */}
-          {isEditable && (
-            <Box
-              sx={{
-                position: 'absolute',
-                right: 0,
-                top: 0,
-                bottom: 0,
-                width: '20px',
-                cursor: 'grab',
-                zIndex: 2,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                opacity: isSwipeRevealed ? 0 : 0.3,
-                transition: 'opacity 0.2s ease',
-                pointerEvents: isSwipeRevealed ? 'none' : 'auto',
-                '&:hover': {
-                  opacity: isSwipeRevealed ? 0 : 0.7,
-                },
-                '&:active': {
-                  cursor: 'grabbing',
-                },
-              }}
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-            >
-              {/* Drag indicator dots */}
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 0.25,
-                }}
-              >
-                {[...Array(3)].map((_, i) => (
-                  <Box
-                    key={i}
-                    sx={{
-                      width: 3,
-                      height: 3,
-                      borderRadius: '50%',
-                      bgcolor: 'text.tertiary',
-                    }}
-                  />
-                ))}
-              </Box>
-            </Box>
+          {project.icon ? (
+            (() => {
+              const IconComponent = getIconComponent(project.icon)
+              return (
+                <IconComponent
+                  sx={{
+                    fontSize: 16,
+                    color: getTextColorFromBackgroundColor(
+                      project.color || '#1976d2',
+                    ),
+                  }}
+                />
+              )
+            })()
+          ) : (
+            <></>
           )}
+        </Avatar>
+      </Box>
 
-          {/* Project Avatar */}
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              mr: 2,
-              flexShrink: 0,
-            }}
-          >
-            <Avatar
+      {/* Content - Center */}
+      <Box
+        sx={{
+          flex: 1,
+          minWidth: 0,
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        {/* Project Name */}
+        <Typography
+          level='title-sm'
+          sx={{
+            fontWeight: 600,
+            fontSize: 14,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            mb: 0.25,
+          }}
+        >
+          {project.name}
+          {isDefaultProject && (
+            <Chip
               size='sm'
+              variant='soft'
+              color='primary'
               sx={{
-                width: 32,
-                height: 32,
-                bgcolor: project.color || 'primary.500',
-                border: '2px solid',
-                borderColor: isDefaultProject
-                  ? 'primary.300'
-                  : isOwnedByCurrentUser
-                    ? 'background.surface'
-                    : 'warning.300',
-                boxShadow: isDefaultProject
-                  ? '0 0 0 1px var(--joy-palette-primary-300)'
-                  : isOwnedByCurrentUser
-                    ? 'sm'
-                    : '0 0 0 1px var(--joy-palette-warning-300)',
+                fontSize: 9,
+                height: 16,
+                px: 0.5,
+                ml: 1,
+                fontWeight: 'md',
               }}
             >
-              {project.icon ? (
-                (() => {
-                  const IconComponent = getIconComponent(project.icon)
-                  return (
-                    <IconComponent
-                      sx={{
-                        fontSize: 16,
-                        color: getTextColorFromBackgroundColor(
-                          project.color || '#1976d2',
-                        ),
-                      }}
-                    />
-                  )
-                })()
-              ) : (
-                <></>
-              )}
-            </Avatar>
-          </Box>
+              Default
+            </Chip>
+          )}
+        </Typography>
 
-          {/* Content - Center */}
-          <Box
-            sx={{
-              flex: 1,
-              minWidth: 0,
-              display: 'flex',
-              flexDirection: 'column',
-            }}
-          >
-            {/* Project Name */}
+        {/* Project Info */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          {project.description && (
             <Typography
-              level='title-sm'
+              level='body-xs'
               sx={{
-                fontWeight: 600,
-                fontSize: 14,
+                color: 'text.tertiary',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',
-                mb: 0.25,
+                maxWidth: '200px',
               }}
             >
-              {project.name}
-              {isDefaultProject && (
-                <Chip
-                  size='sm'
-                  variant='soft'
-                  color='primary'
-                  sx={{
-                    fontSize: 9,
-                    height: 16,
-                    px: 0.5,
-                    ml: 1,
-                    fontWeight: 'md',
-                  }}
-                >
-                  Default
-                </Chip>
-              )}
+              {project.description}
             </Typography>
+          )}
 
-            {/* Project Info */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              {project.description && (
-                <Typography
-                  level='body-xs'
-                  sx={{
-                    color: 'text.tertiary',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    maxWidth: '200px',
-                  }}
-                >
-                  {project.description}
-                </Typography>
-              )}
+          <Chip
+            size='sm'
+            variant='soft'
+            startDecorator={<Task />}
+            sx={{
+              fontSize: 10,
+              height: 18,
+              px: 0.75,
+              bgcolor: 'primary.softBg',
+              color: 'primary.500',
+            }}
+          >
+            {taskCount} tasks
+          </Chip>
 
-              <Chip
-                size='sm'
-                variant='soft'
-                startDecorator={<Task />}
-                sx={{
-                  fontSize: 10,
-                  height: 18,
-                  px: 0.75,
-                  bgcolor: 'primary.softBg',
-                  color: 'primary.500',
-                }}
-              >
-                {taskCount} tasks
-              </Chip>
-
-              {!isOwnedByCurrentUser && !isDefaultProject && (
-                <Chip
-                  size='sm'
-                  variant='soft'
-                  color='warning'
-                  sx={{
-                    fontSize: 9,
-                    height: 16,
-                    px: 0.5,
-                    fontWeight: 'md',
-                  }}
-                >
-                  Shared
-                </Chip>
-              )}
-            </Box>
-          </Box>
+          {!isOwnedByCurrentUser && !isDefaultProject && (
+            <Chip
+              size='sm'
+              variant='soft'
+              color='warning'
+              sx={{
+                fontSize: 9,
+                height: 16,
+                px: 0.5,
+                fontWeight: 'md',
+              }}
+            >
+              Shared
+            </Chip>
+          )}
         </Box>
       </Box>
     </Box>
@@ -520,6 +205,9 @@ const ProjectView = () => {
   const { data: projects, isProjectsLoading, isError } = useProjects()
   const { data: userProfile } = useUserProfile()
   const { data: chores = { res: [] } } = useChores(false) // false to exclude archived
+  const { data: projectsData = [], isLoading: projectsLoading } = useProjects()
+  const { setSelectedProjectWithCache } = useProjectFilter(projectsData)
+  const navigate = useNavigate()
 
   const [userProjects, setUserProjects] = useState([])
   const [modalOpen, setModalOpen] = useState(false)
@@ -566,6 +254,14 @@ const ProjectView = () => {
 
   const handleSaveProject = () => {
     setModalOpen(false)
+  }
+
+  const handleCardClick = project => {
+    // Always navigate to MyChores with project filter when clicking on the card
+    // For default project, use 'default', for others use project ID
+    const projectIdentifier = project.id === 'default' ? 'default' : project.id
+    setSelectedProjectWithCache(project)
+    navigate(`/chores?project=${encodeURIComponent(projectIdentifier)}`)
   }
 
   useEffect(() => {
@@ -649,32 +345,95 @@ const ProjectView = () => {
           overflow: 'hidden',
         }}
       >
-        {/*  default project:  */}
-        <ProjectCard
-          key='default-project-card'
+        {/* Default project - not swipeable */}
+        <ProjectCardContent
           project={{
             id: 'default',
             name: 'Default Project',
             description: 'All tasks without a specific project',
             icon: 'FolderOpen',
+            color: '#1976d2',
             created_by: userProfile?.id,
           }}
-          isEditable={false}
           currentUserId={userProfile?.id}
-          onEditClick={() => {}}
           taskCounts={{ default: taskCounts.default || 0 }}
+          onCardClick={() =>
+            handleCardClick({
+              id: 'default',
+              name: 'Default Project',
+              icon: 'FolderOpen',
+              color: '#1976d2',
+            })
+          }
         />
-        {userProjects.map(project => (
-          <ProjectCard
-            key={project.id}
-            project={project}
-            onEditClick={handleEditProject}
-            onDeleteClick={handleDeleteClicked}
-            currentUserId={userProfile?.id}
-            taskCounts={taskCounts}
-            isEditable={true}
-          />
-        ))}
+
+        {/* User projects - swipeable */}
+        <SwipeableList type={ListType.IOS} fullSwipe={false}>
+          {userProjects.map(project => (
+            <SwipeableListItem
+              onClick={() => handleCardClick(project)}
+              key={project.id}
+              trailingActions={
+                <TrailingActions>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.06)',
+                      zIndex: 0,
+                    }}
+                  >
+                    <SwipeAction onClick={() => handleEditProject(project)}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          bgcolor: 'var(--joy-palette-neutral-100)',
+                          px: 3,
+                          height: '100%',
+                        }}
+                      >
+                        <EditIcon sx={{ fontSize: 20 }} />
+                        <Typography level='body-xs' sx={{ mt: 0.5 }}>
+                          Edit
+                        </Typography>
+                      </Box>
+                    </SwipeAction>
+                    <SwipeAction
+                      onClick={() => handleDeleteClicked(project.id)}
+                    >
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          bgcolor: 'danger.softBg',
+                          color: 'danger.600',
+                          px: 3,
+                          height: '100%',
+                        }}
+                      >
+                        <DeleteIcon sx={{ fontSize: 20 }} />
+                        <Typography level='body-xs' sx={{ mt: 0.5 }}>
+                          Delete
+                        </Typography>
+                      </Box>
+                    </SwipeAction>
+                  </Box>
+                </TrailingActions>
+              }
+            >
+              <ProjectCardContent
+                project={project}
+                currentUserId={userProfile?.id}
+                taskCounts={taskCounts}
+                // onCardClick={}
+              />
+            </SwipeableListItem>
+          ))}
+        </SwipeableList>
       </Box>
 
       {modalOpen && (

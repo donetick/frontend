@@ -38,8 +38,6 @@ import Priorities from '../../utils/Priorities'
 import LoadingComponent from '../components/Loading'
 import { useLabels } from '../Labels/LabelQueries'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
-import ChoreCard from './ChoreCard'
-import CompactChoreCard from './CompactChoreCard'
 import IconButtonWithMenu from './IconButtonWithMenu'
 
 import { useMediaQuery } from '@mui/material'
@@ -60,6 +58,7 @@ import CalendarMonthly from '../components/CalendarMonthly.jsx'
 import ProjectSelector from '../components/ProjectSelector'
 import AdvancedFilterBuilder from '../Modals/Inputs/AdvancedFilterBuilder'
 import { useProjects } from '../Projects/ProjectQueries.js'
+import ChoreListView from './ChoreListView.jsx'
 import ChoreModals from './components/ChoreModals'
 import FilterSection from './components/FilterSection'
 import MultiSelectToolbar from './components/MultiSelectToolbar'
@@ -633,22 +632,60 @@ const MyChores = () => {
     }
   }
 
-  const renderChoreCard = (chore, key) => {
-    const CardComponent = viewMode === 'compact' ? CompactChoreCard : ChoreCard
-    return (
-      <CardComponent
-        key={key || chore.id}
-        chore={chore}
-        performers={membersData?.res}
-        userLabels={userLabels}
-        onChipClick={handleLabelFiltering}
-        onAction={handleChoreAction}
-        isMultiSelectMode={isMultiSelectMode}
-        isSelected={selectedChores.has(chore.id)}
-        onSelectionToggle={() => toggleChoreSelection(chore.id)}
-      />
-    )
-  }
+  // const renderChoreCard = (chore, key) => {
+  //   const CardComponent = viewMode === 'compact' ? CompactChoreCard : ChoreCard
+  //   return (
+  //     <CardComponent
+  //       key={key || chore.id}
+  //       chore={chore}
+  //       performers={membersData?.res}
+  //       userLabels={userLabels}
+  //       onChipClick={handleLabelFiltering}
+  //       onAction={handleChoreAction}
+  //       isMultiSelectMode={isMultiSelectMode}
+  //       isSelected={selectedChores.has(chore.id)}
+  //       onSelectionToggle={() => toggleChoreSelection(chore.id)}
+  //     />
+  //   )
+  // }
+  // const renderChores = chores => {
+  //   return (
+  //     <SwipeableList>
+  //       {chores.map(chore => (
+  //         <SwipeableListItem
+  //           key={chore.id}
+  //           trailingActions={
+  //             <TrailingActions>
+  //               <SwipeAction>
+  //                 <Button
+  //                   variant='solid'
+  //                   color='primary'
+  //                   size='sm'
+  //                   startIcon={<Add />}
+  //                   onClick={() => setAddTaskModalOpen(true)}
+  //                 >
+  //                   Add Task
+  //                 </Button>
+  //               </SwipeAction>
+  //             </TrailingActions>
+  //           }
+  //         >
+  //           {/* <Button
+  //             variant='outlined'
+  //             color='neutral'
+  //             size='sm'
+  //             startIcon={<EditCalendar />}
+  //             onClick={() => setViewMode('calendar')}
+  //           >
+  //             View Calendar
+  //           </Button> */}
+  //           {renderChoreCard(chore)}
+  //           {/* {chores.map(chore => renderChoreCard(chore))} */}
+  //         </SwipeableListItem>
+  //       ))}
+  //     </SwipeableList>
+  //   )
+  // }
 
   const getFilteredChores = useMemo(() => {
     if (activeFilterId || tempFilter) {
@@ -1141,9 +1178,18 @@ const MyChores = () => {
             </Box>
           )}
         {(searchTerm?.length > 0 || searchFilter !== 'All' || activeFilterId) &&
-          viewMode !== 'calendar' &&
-          getFilteredChores.map(chore =>
-            renderChoreCard(chore, `filtered-${chore.id}`),
+          viewMode !== 'calendar' && (
+            <ChoreListView
+              chores={getFilteredChores}
+              viewMode={viewMode}
+              membersData={membersData}
+              userLabels={userLabels}
+              handleLabelFiltering={handleLabelFiltering}
+              handleChoreAction={handleChoreAction}
+              isMultiSelectMode={isMultiSelectMode}
+              selectedChores={selectedChores}
+              toggleChoreSelection={toggleChoreSelection}
+            />
           )}
         {viewMode === 'calendar' && (
           <>
@@ -1310,20 +1356,17 @@ const MyChores = () => {
                       No tasks scheduled for this date
                     </Typography>
                   ) : (
-                    getChoresForDate(selectedCalendarDate).map(chore => (
-                      <CompactChoreCard
-                        key={`calendar-${chore.id}`}
-                        chore={chore}
-                        performers={membersData?.res || []}
-                        userLabels={userLabels}
-                        onChipClick={handleLabelFiltering}
-                        onAction={handleChoreAction}
-                        // Multi-select props
-                        isMultiSelectMode={isMultiSelectMode}
-                        isSelected={selectedChores.has(chore.id)}
-                        onSelectionToggle={() => toggleChoreSelection(chore.id)}
-                      />
-                    ))
+                    <ChoreListView
+                      chores={getChoresForDate(selectedCalendarDate)}
+                      viewMode={'compact'}
+                      membersData={membersData}
+                      userLabels={userLabels}
+                      handleLabelFiltering={handleLabelFiltering}
+                      handleChoreAction={handleChoreAction}
+                      isMultiSelectMode={isMultiSelectMode}
+                      selectedChores={selectedChores}
+                      toggleChoreSelection={toggleChoreSelection}
+                    />
                   )}
                 </Box>
               </Box>
@@ -1396,7 +1439,17 @@ const MyChores = () => {
                         },
                       }}
                     >
-                      {section.content?.map(chore => renderChoreCard(chore))}
+                      <ChoreListView
+                        chores={section.content}
+                        viewMode={viewMode}
+                        membersData={membersData}
+                        userLabels={userLabels}
+                        handleLabelFiltering={handleLabelFiltering}
+                        handleChoreAction={handleChoreAction}
+                        isMultiSelectMode={isMultiSelectMode}
+                        selectedChores={selectedChores}
+                        toggleChoreSelection={toggleChoreSelection}
+                      />
                     </AccordionDetails>
                   </Accordion>
                 )

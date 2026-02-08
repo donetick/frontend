@@ -8,6 +8,8 @@ import {
   Person,
   PlayArrow,
 } from '@mui/icons-material'
+import DeleteIcon from '@mui/icons-material/Delete'
+import EditIcon from '@mui/icons-material/Edit'
 import {
   Alert,
   Avatar,
@@ -25,16 +27,24 @@ import {
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { useCircleMembers } from '../../queries/UserQueries'
-import { useNotification } from '../../service/NotificationProvider'
+import {
+  Type as ListType,
+  SwipeableList,
+  SwipeableListItem,
+  SwipeAction,
+  TrailingActions,
+} from 'react-swipeable-list'
+import 'react-swipeable-list/dist/styles.css'
 import {
   useChoreTimer,
   usePauseChore,
   useStartChore,
   useUpdateTimeSession,
 } from '../../queries/TimeQueries'
+import { useCircleMembers } from '../../queries/UserQueries'
+import { useNotification } from '../../service/NotificationProvider'
 import { resolvePhotoURL } from '../../utils/Helpers'
 import { getSafeBottom } from '../../utils/SafeAreaUtils'
 import LoadingComponent from '../components/Loading'
@@ -47,14 +57,6 @@ const TimerDetails = () => {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [timerActionLoading, setTimerActionLoading] = useState(false)
   const { showError, showSuccess } = useNotification()
-
-  // Swipe functionality state for session cards
-  const [sessionSwipeStates, setSessionSwipeStates] = useState({})
-  const swipeThreshold = 80
-  const maxSwipeDistance = 160
-  const dragStartX = useRef(0)
-  const [isDragging, setIsDragging] = useState(false)
-  const [isTouchDevice, setIsTouchDevice] = useState(false)
 
   // Fetch circle members data
   const { data: circleMembersData, isLoading: isCircleMembersLoading } =
@@ -72,14 +74,6 @@ const TimerDetails = () => {
   const getMemberById = userId => {
     return members?.find(member => member.userId === userId)
   }
-
-  // Detect if device supports touch
-  useEffect(() => {
-    const checkTouchDevice = () => {
-      setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0)
-    }
-    checkTouchDevice()
-  }, [])
 
   // Update timerData when choreTimer data changes
   useEffect(() => {
@@ -101,7 +95,6 @@ const TimerDetails = () => {
       if (interval) clearInterval(interval)
     }
   }, [timerData])
-
 
   const formatTime = seconds => {
     const hours = Math.floor(seconds / 3600)
@@ -341,162 +334,17 @@ const TimerDetails = () => {
     return Math.max(0, totalDuration - activeDuration)
   }
 
-  // Swipe functionality methods
-  const getSessionSwipeState = sessionIndex => {
-    return (
-      sessionSwipeStates[sessionIndex] || {
-        translateX: 0,
-        isRevealed: false,
-      }
-    )
-  }
-
-  const updateSessionSwipeState = (sessionIndex, newState) => {
-    setSessionSwipeStates(prev => ({
-      ...prev,
-      [sessionIndex]: {
-        ...prev[sessionIndex],
-        ...newState,
-      },
-    }))
-  }
-
-  const resetSessionSwipe = sessionIndex => {
-    updateSessionSwipeState(sessionIndex, {
-      translateX: 0,
-      isRevealed: false,
-    })
-  }
-
-  const resetAllSwipes = () => {
-    setSessionSwipeStates({})
-  }
-
-  // Touch handlers for swipe
-  const handleSessionTouchStart = e => {
-    dragStartX.current = e.touches[0].clientX
-    setIsDragging(true)
-  }
-
-  const handleSessionTouchMove = (e, sessionIndex) => {
-    if (!isDragging) return
-
-    const currentX = e.touches[0].clientX
-    const deltaX = currentX - dragStartX.current
-    const currentState = getSessionSwipeState(sessionIndex)
-
-    if (currentState.isRevealed) {
-      if (deltaX > 0) {
-        const clampedDelta = Math.min(deltaX - maxSwipeDistance, 0)
-        updateSessionSwipeState(sessionIndex, { translateX: clampedDelta })
-      }
-    } else {
-      if (deltaX < 0) {
-        const clampedDelta = Math.max(deltaX, -maxSwipeDistance)
-        updateSessionSwipeState(sessionIndex, { translateX: clampedDelta })
-      }
-    }
-  }
-
-  const handleSessionTouchEnd = (e, sessionIndex) => {
-    if (!isDragging) return
-    setIsDragging(false)
-
-    const currentState = getSessionSwipeState(sessionIndex)
-
-    if (currentState.isRevealed) {
-      if (currentState.translateX > -swipeThreshold) {
-        resetSessionSwipe(sessionIndex)
-      } else {
-        updateSessionSwipeState(sessionIndex, {
-          translateX: -maxSwipeDistance,
-          isRevealed: true,
-        })
-      }
-    } else {
-      if (Math.abs(currentState.translateX) > swipeThreshold) {
-        updateSessionSwipeState(sessionIndex, {
-          translateX: -maxSwipeDistance,
-          isRevealed: true,
-        })
-      } else {
-        resetSessionSwipe(sessionIndex)
-      }
-    }
-  }
-
-  // Mouse handlers for swipe (desktop)
-  const handleSessionMouseDown = e => {
-    dragStartX.current = e.clientX
-    setIsDragging(true)
-  }
-
-  const handleSessionMouseMove = (e, sessionIndex) => {
-    if (!isDragging) return
-
-    const currentX = e.clientX
-    const deltaX = currentX - dragStartX.current
-    const currentState = getSessionSwipeState(sessionIndex)
-
-    if (currentState.isRevealed) {
-      if (deltaX > 0) {
-        const clampedDelta = Math.min(deltaX - maxSwipeDistance, 0)
-        updateSessionSwipeState(sessionIndex, { translateX: clampedDelta })
-      }
-    } else {
-      if (deltaX < 0) {
-        const clampedDelta = Math.max(deltaX, -maxSwipeDistance)
-        updateSessionSwipeState(sessionIndex, { translateX: clampedDelta })
-      }
-    }
-  }
-
-  const handleSessionMouseUp = (e, sessionIndex) => {
-    if (!isDragging) return
-    setIsDragging(false)
-
-    const currentState = getSessionSwipeState(sessionIndex)
-
-    if (currentState.isRevealed) {
-      if (currentState.translateX > -swipeThreshold) {
-        resetSessionSwipe(sessionIndex)
-      } else {
-        updateSessionSwipeState(sessionIndex, {
-          translateX: -maxSwipeDistance,
-          isRevealed: true,
-        })
-      }
-    } else {
-      if (Math.abs(currentState.translateX) > swipeThreshold) {
-        updateSessionSwipeState(sessionIndex, {
-          translateX: -maxSwipeDistance,
-          isRevealed: true,
-        })
-      } else {
-        resetSessionSwipe(sessionIndex)
-      }
-    }
-  }
-
   const handleEditSession = () => {
-    resetAllSwipes()
-    // Trigger the existing edit functionality
     startEditingSession()
   }
 
   const handleDeleteSession = sessionIndex => {
-    resetAllSwipes()
     // For now, just show an alert since we'd need to implement session deletion API
     showError({
       title: 'Delete Session',
       message: `Session #${sessionIndex + 1} deletion would be implemented here`,
     })
   }
-
-  // Reset swipes when editing mode changes
-  useEffect(() => {
-    resetAllSwipes()
-  }, [editingSessions])
 
   if (loading || isCircleMembersLoading) {
     return <LoadingComponent />
@@ -1067,13 +915,7 @@ const TimerDetails = () => {
                       Work Sessions ({timerData.pauseLog.length})
                     </Typography>
 
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: 1.5,
-                      }}
-                    >
+                    <SwipeableList type={ListType.IOS} fullSwipe={false}>
                       {timerData.pauseLog
                         .sort((a, b) => moment(b.start) - moment(a.start))
                         .map((pause, pauseIndex) => {
@@ -1095,67 +937,74 @@ const TimerDetails = () => {
                               )
                             : pause.duration
 
-                          const swipeState = getSessionSwipeState(pauseIndex)
-
                           return (
-                            <Box
+                            <SwipeableListItem
                               key={pauseIndex}
-                              sx={{
-                                position: 'relative',
-                                overflow: 'hidden',
-                                borderRadius: 'md',
-                              }}
+                              trailingActions={
+                                <TrailingActions>
+                                  <Box
+                                    sx={{
+                                      display: 'flex',
+                                      boxShadow:
+                                        'inset 2px 0 4px rgba(0,0,0,0.06)',
+                                      zIndex: 0,
+                                    }}
+                                  >
+                                    <SwipeAction
+                                      onClick={() => handleEditSession()}
+                                    >
+                                      <Box
+                                        sx={{
+                                          display: 'flex',
+                                          flexDirection: 'column',
+                                          alignItems: 'center',
+                                          justifyContent: 'center',
+                                          bgcolor:
+                                            'var(--joy-palette-neutral-100)',
+                                          px: 3,
+                                          height: '100%',
+                                        }}
+                                      >
+                                        <EditIcon sx={{ fontSize: 20 }} />
+                                        <Typography
+                                          level='body-xs'
+                                          sx={{ mt: 0.5 }}
+                                        >
+                                          Edit
+                                        </Typography>
+                                      </Box>
+                                    </SwipeAction>
+                                    <SwipeAction
+                                      onClick={() =>
+                                        handleDeleteSession(pauseIndex)
+                                      }
+                                    >
+                                      <Box
+                                        sx={{
+                                          display: 'flex',
+                                          flexDirection: 'column',
+                                          alignItems: 'center',
+                                          justifyContent: 'center',
+                                          bgcolor: 'danger.softBg',
+                                          color: 'danger.600',
+                                          px: 3,
+                                          height: '100%',
+                                        }}
+                                      >
+                                        <DeleteIcon sx={{ fontSize: 20 }} />
+                                        <Typography
+                                          level='body-xs'
+                                          sx={{ mt: 0.5 }}
+                                        >
+                                          Delete
+                                        </Typography>
+                                      </Box>
+                                    </SwipeAction>
+                                  </Box>
+                                </TrailingActions>
+                              }
                             >
-                              {/* Action buttons underneath (revealed on swipe) */}
-                              <Box
-                                sx={{
-                                  position: 'absolute',
-                                  right: 0,
-                                  top: 0,
-                                  bottom: getSafeBottom(),
-                                  width: maxSwipeDistance,
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.06)',
-                                  zIndex: 0,
-                                }}
-                              >
-                                <IconButton
-                                  variant='soft'
-                                  color='primary'
-                                  size='sm'
-                                  onClick={e => {
-                                    e.stopPropagation()
-                                    handleEditSession()
-                                  }}
-                                  sx={{
-                                    width: 40,
-                                    height: 40,
-                                    mx: 1,
-                                  }}
-                                >
-                                  <Edit sx={{ fontSize: 16 }} />
-                                </IconButton>
-
-                                <IconButton
-                                  variant='soft'
-                                  color='danger'
-                                  size='sm'
-                                  onClick={e => {
-                                    e.stopPropagation()
-                                    handleDeleteSession(pauseIndex)
-                                  }}
-                                  sx={{
-                                    width: 40,
-                                    height: 40,
-                                    mx: 1,
-                                  }}
-                                >
-                                  <Delete sx={{ fontSize: 16 }} />
-                                </IconButton>
-                              </Box>
-
-                              {/* Session Card */}
+                              {/* Session Card Content */}
                               <Card
                                 variant='soft'
                                 sx={{
@@ -1168,40 +1017,10 @@ const TimerDetails = () => {
                                   borderColor: isOngoing
                                     ? 'success.300'
                                     : 'divider',
-                                  position: 'relative',
-                                  transform: `translateX(${swipeState.translateX}px)`,
-                                  transition: isDragging
-                                    ? 'none'
-                                    : 'transform 0.3s ease-out',
-                                  zIndex: 1,
-                                  cursor: 'pointer',
-                                  '&:hover': {
-                                    bgcolor: swipeState.isRevealed
-                                      ? 'background.surface'
-                                      : 'background.level1',
-                                  },
+                                  borderRadius: 0,
+                                  borderBottom: '1px solid',
+                                  minWidth: '100%',
                                 }}
-                                onClick={() => {
-                                  if (swipeState.isRevealed) {
-                                    resetSessionSwipe(pauseIndex)
-                                    return
-                                  }
-                                  // Optional: Navigate to session details
-                                }}
-                                onTouchStart={handleSessionTouchStart}
-                                onTouchMove={e =>
-                                  handleSessionTouchMove(e, pauseIndex)
-                                }
-                                onTouchEnd={e =>
-                                  handleSessionTouchEnd(e, pauseIndex)
-                                }
-                                onMouseDown={handleSessionMouseDown}
-                                onMouseMove={e =>
-                                  handleSessionMouseMove(e, pauseIndex)
-                                }
-                                onMouseUp={e =>
-                                  handleSessionMouseUp(e, pauseIndex)
-                                }
                               >
                                 {/* Session indicator */}
                                 <Box
@@ -1312,59 +1131,11 @@ const TimerDetails = () => {
                                     {endTime ? `→ ${endTime}` : '→ ongoing'}
                                   </Typography>
                                 </Box>
-
-                                {/* Right drag indicator (desktop only) */}
-                                {!isTouchDevice && (
-                                  <Box
-                                    sx={{
-                                      position: 'absolute',
-                                      right: 8,
-                                      top: '50%',
-                                      transform: 'translateY(-50%)',
-                                      width: '20px',
-                                      height: '20px',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'center',
-                                      opacity: swipeState.isRevealed ? 0 : 0.3,
-                                      transition: 'opacity 0.2s ease',
-                                      pointerEvents: swipeState.isRevealed
-                                        ? 'none'
-                                        : 'auto',
-                                      '&:hover': {
-                                        opacity: swipeState.isRevealed
-                                          ? 0
-                                          : 0.7,
-                                      },
-                                    }}
-                                  >
-                                    {/* Drag indicator dots */}
-                                    <Box
-                                      sx={{
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        gap: 0.25,
-                                      }}
-                                    >
-                                      {[...Array(3)].map((_, i) => (
-                                        <Box
-                                          key={i}
-                                          sx={{
-                                            width: 3,
-                                            height: 3,
-                                            borderRadius: '50%',
-                                            bgcolor: 'text.tertiary',
-                                          }}
-                                        />
-                                      ))}
-                                    </Box>
-                                  </Box>
-                                )}
                               </Card>
-                            </Box>
+                            </SwipeableListItem>
                           )
                         })}
-                    </Box>
+                    </SwipeableList>
                   </Box>
                 )}
 

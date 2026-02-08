@@ -1,15 +1,10 @@
 import {
   Check,
-  Delete,
-  Edit,
   Group,
   HourglassEmpty,
-  Notifications,
   Pause,
   PlayArrow,
   Repeat,
-  Schedule,
-  ThumbDown,
   ThumbUp,
   TimesOneMobiledata,
   Toll,
@@ -26,13 +21,10 @@ import {
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
-import React from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useUserProfile } from '../../queries/UserQueries.jsx'
 import { notInCompletionWindow } from '../../utils/Chores.jsx'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
-import { isOfficialDonetickInstanceSync } from '../../utils/FeatureToggle'
 import Priorities from '../../utils/Priorities'
 import ChoreActionMenu from '../components/ChoreActionMenu'
 const ChoreCard = ({
@@ -48,39 +40,9 @@ const ChoreCard = ({
   isSelected = false,
   onSelectionToggle,
 }) => {
-  const [isOfficialInstance, setIsOfficialInstance] = React.useState(false)
-  const navigate = useNavigate()
-
   const { data: userProfile } = useUserProfile()
 
   const { impersonatedUser } = useImpersonateUser()
-
-  // Swipe functionality state
-  const [swipeTranslateX, setSwipeTranslateX] = React.useState(0)
-  const [isDragging, setIsDragging] = React.useState(false)
-  const [isSwipeRevealed, setIsSwipeRevealed] = React.useState(false)
-  const [hoverTimer, setHoverTimer] = React.useState(null)
-  const [isTouchDevice, setIsTouchDevice] = React.useState(false)
-  const swipeThreshold = 80 // Minimum swipe distance to reveal actions
-  const maxSwipeDistance = 260 // Maximum swipe distance
-  const dragStartX = React.useRef(0)
-  const cardRef = React.useRef(null)
-
-  // Detect if device supports touch
-  React.useEffect(() => {
-    const checkTouchDevice = () => {
-      setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0)
-    }
-    checkTouchDevice()
-
-    // Check if this is the official donetick.com instance
-    try {
-      setIsOfficialInstance(isOfficialDonetickInstanceSync())
-    } catch (error) {
-      console.warn('Error checking instance type:', error)
-      setIsOfficialInstance(false)
-    }
-  }, [])
 
   // Check if the current user can approve/reject (admin, manager, or task owner)
   const canApproveReject = () => {
@@ -99,177 +61,6 @@ const ChoreCard = ({
       chore.createdBy === (impersonatedUser?.userId || userProfile?.id)
     )
   }
-
-  // Swipe gesture handlers
-  const handleTouchStart = e => {
-    if (isMultiSelectMode || viewOnly) return
-
-    dragStartX.current = e.touches[0].clientX
-    setIsDragging(true)
-  }
-
-  const handleTouchMove = e => {
-    if (isMultiSelectMode || viewOnly || !isDragging) return
-
-    const currentX = e.touches[0].clientX
-    const deltaX = currentX - dragStartX.current
-
-    if (isSwipeRevealed) {
-      // When actions are revealed, allow right swipe to hide
-      if (deltaX > 0) {
-        const clampedDelta = Math.min(deltaX - maxSwipeDistance, 0)
-        setSwipeTranslateX(clampedDelta)
-      }
-    } else {
-      // When actions are hidden, allow left swipe to reveal
-      if (deltaX < 0) {
-        const clampedDelta = Math.max(deltaX, -maxSwipeDistance)
-        setSwipeTranslateX(clampedDelta)
-      }
-    }
-  }
-
-  const handleTouchEnd = () => {
-    if (isMultiSelectMode || viewOnly || !isDragging) return
-
-    setIsDragging(false)
-
-    if (isSwipeRevealed) {
-      // When actions are revealed, check if user swiped right enough to hide
-      if (swipeTranslateX > -swipeThreshold) {
-        setSwipeTranslateX(0)
-        setIsSwipeRevealed(false)
-      } else {
-        // Snap back to revealed position
-        setSwipeTranslateX(-maxSwipeDistance)
-      }
-    } else {
-      // When actions are hidden, check if user swiped left enough to reveal
-      if (Math.abs(swipeTranslateX) > swipeThreshold) {
-        setSwipeTranslateX(-maxSwipeDistance)
-        setIsSwipeRevealed(true)
-      } else {
-        setSwipeTranslateX(0)
-        setIsSwipeRevealed(false)
-      }
-    }
-  }
-
-  const handleMouseDown = e => {
-    if (isMultiSelectMode || viewOnly) return
-
-    dragStartX.current = e.clientX
-    setIsDragging(true)
-  }
-
-  const handleMouseMove = e => {
-    if (isMultiSelectMode || viewOnly || !isDragging) return
-
-    const currentX = e.clientX
-    const deltaX = currentX - dragStartX.current
-
-    if (isSwipeRevealed) {
-      // When actions are revealed, allow right swipe to hide
-      if (deltaX > 0) {
-        const clampedDelta = Math.min(deltaX - maxSwipeDistance, 0)
-        setSwipeTranslateX(clampedDelta)
-      }
-    } else {
-      // When actions are hidden, allow left swipe to reveal
-      if (deltaX < 0) {
-        const clampedDelta = Math.max(deltaX, -maxSwipeDistance)
-        setSwipeTranslateX(clampedDelta)
-      }
-    }
-  }
-
-  const handleMouseUp = () => {
-    if (isMultiSelectMode || viewOnly || !isDragging) return
-
-    setIsDragging(false)
-
-    if (isSwipeRevealed) {
-      // When actions are revealed, check if user swiped right enough to hide
-      if (swipeTranslateX > -swipeThreshold) {
-        setSwipeTranslateX(0)
-        setIsSwipeRevealed(false)
-      } else {
-        // Snap back to revealed position
-        setSwipeTranslateX(-maxSwipeDistance)
-      }
-    } else {
-      // When actions are hidden, check if user swiped left enough to reveal
-      if (Math.abs(swipeTranslateX) > swipeThreshold) {
-        setSwipeTranslateX(-maxSwipeDistance)
-        setIsSwipeRevealed(true)
-      } else {
-        setSwipeTranslateX(0)
-        setIsSwipeRevealed(false)
-      }
-    }
-  }
-
-  const resetSwipe = () => {
-    setSwipeTranslateX(0)
-    setIsSwipeRevealed(false)
-  }
-
-  // Hover functionality for desktop - only trigger from action menu
-  const handleMouseEnter = () => {
-    if (isMultiSelectMode || viewOnly || isSwipeRevealed || isTouchDevice)
-      return
-    const timer = setTimeout(() => {
-      setSwipeTranslateX(-maxSwipeDistance)
-      setIsSwipeRevealed(true)
-      setHoverTimer(null)
-    }, 1500) // Match CompactChoreCard delay
-    setHoverTimer(timer)
-  }
-
-  const handleMouseLeave = () => {
-    if (isTouchDevice) return
-
-    if (hoverTimer) {
-      clearTimeout(hoverTimer)
-      setHoverTimer(null)
-    }
-
-    // Add a small delay before hiding to allow moving to action area
-    if (isSwipeRevealed) {
-      const hideTimer = setTimeout(() => {
-        resetSwipe()
-      }, 300) // Match CompactChoreCard delay
-      setHoverTimer(hideTimer)
-    }
-  }
-
-  const handleActionAreaMouseEnter = () => {
-    if (isTouchDevice) return
-
-    // Clear any pending timer when entering action area (both show and hide timers)
-    if (hoverTimer) {
-      clearTimeout(hoverTimer)
-      setHoverTimer(null)
-    }
-  }
-
-  const handleActionAreaMouseLeave = () => {
-    if (isTouchDevice) return
-
-    // Hide immediately when leaving action area (like CompactChoreCard)
-    if (isSwipeRevealed) {
-      resetSwipe()
-    }
-  }
-
-  // Clean up timer on unmount
-  React.useEffect(() => {
-    return () => {
-      if (hoverTimer) {
-        clearTimeout(hoverTimer)
-      }
-    }
-  }, [hoverTimer])
 
   const getDueDateChipText = nextDueDate => {
     if (chore.nextDueDate === null) return 'No Due Date'
@@ -416,7 +207,7 @@ const ChoreCard = ({
     return name
   }
   return (
-    <Box key={chore.id + '-box'}>
+    <Box key={chore.id + '-box'} minWidth={'100%'}>
       <Chip
         variant='soft'
         sx={{
@@ -458,187 +249,8 @@ const ChoreCard = ({
           overflow: 'hidden',
           borderRadius: 20,
         }}
-        onMouseLeave={handleMouseLeave}
       >
-        {/* Action buttons underneath (revealed on swipe) */}
-        <Box
-          sx={{
-            position: 'absolute',
-            right: 0,
-            top: 0,
-            bottom: 0,
-            width: maxSwipeDistance,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.06)',
-            zIndex: 0,
-            borderTopRightRadius: 20,
-            borderBottomRightRadius: 20,
-          }}
-          onMouseEnter={handleActionAreaMouseEnter}
-          onMouseLeave={handleActionAreaMouseLeave}
-        >
-          {chore.status === 3 ? (
-            // Pending approval: Show approve/reject for admins/managers/owners
-            canApproveReject() ? (
-              <>
-                {/* <IconButton
-                  variant='soft'
-                  color='success'
-                  size='md'
-                  onClick={e => {
-                    e.stopPropagation()
-                    resetSwipe()
-                    onAction('approve', chore)
-                  }}
-                  sx={{
-                    width: 40,
-                    height: 40,
-                    mx: 1,
-                  }}
-                >
-                  <ThumbUp sx={{ fontSize: 20 }} />
-                </IconButton> */}
-                <IconButton
-                  variant='soft'
-                  color='danger'
-                  size='md'
-                  onClick={e => {
-                    e.stopPropagation()
-                    resetSwipe()
-                    onAction('reject', chore)
-                  }}
-                  sx={{
-                    width: 40,
-                    height: 40,
-                    mx: 1,
-                  }}
-                >
-                  <ThumbDown sx={{ fontSize: 20 }} />
-                </IconButton>
-              </>
-            ) : (
-              <IconButton
-                variant='soft'
-                color='neutral'
-                size='md'
-                disabled={true}
-                sx={{
-                  width: 40,
-                  height: 40,
-                  mx: 1,
-                }}
-              >
-                <HourglassEmpty sx={{ fontSize: 20 }} />
-              </IconButton>
-            )
-          ) : (
-            <IconButton
-              variant='soft'
-              color='success'
-              size='md'
-              onClick={e => {
-                e.stopPropagation()
-                resetSwipe()
-
-                if (chore.status !== 0) {
-                  onAction('complete', chore)
-                } else {
-                  onAction('start', chore)
-                }
-              }}
-              sx={{
-                width: 40,
-                height: 40,
-                mx: 1,
-              }}
-            >
-              {chore.status !== 0 ? (
-                <Check sx={{ fontSize: 20 }} />
-              ) : (
-                <PlayArrow sx={{ fontSize: 20 }} />
-              )}
-            </IconButton>
-          )}
-
-          <IconButton
-            variant='soft'
-            color='warning'
-            size='md'
-            onClick={e => {
-              e.stopPropagation()
-              resetSwipe()
-              onAction('changeDueDate', chore)
-            }}
-            sx={{
-              width: 40,
-              height: 40,
-              mx: 1,
-            }}
-          >
-            <Schedule sx={{ fontSize: 20 }} />
-          </IconButton>
-
-          <IconButton
-            variant='soft'
-            color='neutral'
-            size='md'
-            onClick={e => {
-              e.stopPropagation()
-              resetSwipe()
-              navigate(`/chores/${chore.id}/edit`)
-            }}
-            sx={{
-              width: 40,
-              height: 40,
-              mx: 1,
-            }}
-          >
-            <Edit sx={{ fontSize: 20 }} />
-          </IconButton>
-
-          {isOfficialInstance && (
-            <IconButton
-              variant='soft'
-              color='warning'
-              size='md'
-              onClick={e => {
-                e.stopPropagation()
-                resetSwipe()
-                onAction('nudge', chore)
-              }}
-              sx={{
-                width: 40,
-                height: 40,
-                mx: 1,
-              }}
-            >
-              <Notifications sx={{ fontSize: 20 }} />
-            </IconButton>
-          )}
-
-          <IconButton
-            variant='soft'
-            color='danger'
-            size='md'
-            onClick={e => {
-              e.stopPropagation()
-              resetSwipe()
-              onAction('delete', chore)
-            }}
-            sx={{
-              width: 40,
-              height: 40,
-              mx: 1,
-            }}
-          >
-            <Delete sx={{ fontSize: 20 }} />
-          </IconButton>
-        </Box>
-
         <Card
-          ref={cardRef}
           style={viewOnly ? { pointerEvents: 'none' } : {}}
           variant='plain'
           sx={{
@@ -654,12 +266,9 @@ const ChoreCard = ({
             backgroundColor: 'background.surface',
             border: '1px solid',
             borderColor: 'divider',
-            transform: `translateX(${swipeTranslateX}px)`,
-            transition: isDragging ? 'none' : 'transform 0.3s ease-out',
-            zIndex: 1,
             cursor: isMultiSelectMode ? 'pointer' : 'default',
             '&:hover': {
-              boxShadow: isSwipeRevealed ? 'sm' : 'md',
+              boxShadow: 'md',
               borderColor: isMultiSelectMode ? 'primary.500' : 'primary.300',
             },
             // Add padding when in multi-select mode to account for checkbox
@@ -672,12 +281,6 @@ const ChoreCard = ({
                 boxShadow: 'sm',
               }),
           }}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
         >
           {/* Multi-select checkbox */}
           {isMultiSelectMode && (
@@ -714,13 +317,13 @@ const ChoreCard = ({
             <Grid
               xs={9}
               sx={{ cursor: 'pointer' }}
-              onClick={() => {
-                if (isMultiSelectMode) {
-                  onSelectionToggle()
-                } else {
-                  navigate(`/chores/${chore.id}`)
-                }
-              }}
+              // onClick={() => {
+              //   if (isMultiSelectMode) {
+              //     onSelectionToggle()
+              //   } else {
+              //     navigate(`/chores/${chore.id}`)
+              //   }
+              // }}
             >
               {/* Box in top right with Chip showing next due date  */}
               <Box display='flex' justifyContent='start' alignItems='center'>
@@ -1007,14 +610,6 @@ const ChoreCard = ({
                     onWriteNFC={() => onAction('writeNFC', chore)}
                     onNudge={() => onAction('nudge', chore)}
                     onDelete={() => onAction('delete', chore)}
-                    onMouseEnter={handleMouseEnter}
-                    onOpen={() => {
-                      // Clear any pending hide timer when menu opens
-                      if (hoverTimer) {
-                        clearTimeout(hoverTimer)
-                        setHoverTimer(null)
-                      }
-                    }}
                   />
                 </Box>
               )}

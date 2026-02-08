@@ -8,27 +8,28 @@ import {
   Timelapse,
   TrendingUp,
 } from '@mui/icons-material'
-import {
-  Box,
-  Button,
-  Card,
-  Container,
-  Grid,
-  List,
-  Sheet,
-  Typography,
-} from '@mui/joy'
+import DeleteIcon from '@mui/icons-material/Delete'
+import EditIcon from '@mui/icons-material/Edit'
+import { Box, Button, Card, Container, Grid, Sheet, Typography } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import {
+  Type as ListType,
+  SwipeableList,
+  SwipeableListItem,
+  SwipeAction,
+  TrailingActions,
+} from 'react-swipeable-list'
+import 'react-swipeable-list/dist/styles.css'
 import useConfirmationModal from '../../hooks/useConfirmationModal'
-import { ChoreHistoryStatus } from '../../utils/Chores'
 import {
   useChoreHistory,
   useDeleteChoreHistory,
   useUpdateChoreHistory,
 } from '../../queries/ChoreQueries'
 import { useCircleMembers } from '../../queries/UserQueries'
+import { ChoreHistoryStatus } from '../../utils/Chores'
 import LoadingComponent from '../components/Loading'
 import EditHistoryModal from '../Modals/EditHistoryModal'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
@@ -287,23 +288,76 @@ const ChoreHistory = () => {
           Task Activity
         </Typography>
       </Box>
-      <Sheet variant='plain' sx={{ borderRadius: 'sm', boxShadow: 'md' }}>
+      <Sheet
+        variant='plain'
+        sx={{ borderRadius: 'sm', boxShadow: 'md', overflow: 'hidden' }}
+      >
         {/* Chore History List (Updated Style) */}
 
-        <List sx={{ p: 0 }}>
+        <SwipeableList type={ListType.IOS} fullSwipe={false}>
           {choreHistory.map((historyEntry, index) => (
-            <HistoryCard
-              onClick={() => handleEdit(historyEntry)}
-              onEditClick={handleEdit}
-              onDeleteClick={handleDelete}
-              historyEntry={historyEntry}
-              performers={performers}
-              allHistory={choreHistory}
-              key={index}
-              index={index}
-            />
+            <SwipeableListItem
+              key={historyEntry.id || index}
+              trailingActions={
+                <TrailingActions>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.06)',
+                      zIndex: 0,
+                    }}
+                  >
+                    <SwipeAction onClick={() => handleEdit(historyEntry)}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          bgcolor: 'var(--joy-palette-neutral-100)',
+                          px: 3,
+                          height: '100%',
+                          width: '100%',
+                        }}
+                      >
+                        <EditIcon sx={{ fontSize: 20 }} />
+                        <Typography level='body-xs' sx={{ mt: 0.5 }}>
+                          Edit
+                        </Typography>
+                      </Box>
+                    </SwipeAction>
+                    <SwipeAction onClick={() => handleDelete(historyEntry)}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          bgcolor: 'danger.softBg',
+                          color: 'danger.600',
+                          px: 3,
+                          height: '100%',
+                        }}
+                      >
+                        <DeleteIcon sx={{ fontSize: 20 }} />
+                        <Typography level='body-xs' sx={{ mt: 0.5 }}>
+                          Delete
+                        </Typography>
+                      </Box>
+                    </SwipeAction>
+                  </Box>
+                </TrailingActions>
+              }
+            >
+              <HistoryCard
+                historyEntry={historyEntry}
+                performers={performers}
+                allHistory={choreHistory}
+                index={index}
+              />
+            </SwipeableListItem>
           ))}
-        </List>
+        </SwipeableList>
       </Sheet>
       <EditHistoryModal
         config={{

@@ -32,6 +32,7 @@ import { DeleteChore, GetArchivedChores } from '../../utils/Fetcher'
 import LoadingComponent from '../components/Loading'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import ChoreCard from './ChoreCard'
+import ChoreListView from './ChoreListView.jsx'
 import CompactChoreCard from './CompactChoreCard'
 import MultiSelectHelp from './MultiSelectHelp'
 
@@ -851,9 +852,15 @@ const ArchivedTasks = () => {
           </Typography>
 
           <List sx={{ gap: viewMode === 'compact' ? 0 : 1 }}>
-            {filteredChores.map(chore =>
-              renderChoreCard(chore, `archived-${chore.id}`),
-            )}
+            <ChoreListView
+              chores={filteredChores}
+              // viewOnly={true}
+              showActions={false}
+              viewMode={viewMode}
+              membersData={membersData}
+              isMultiSelectMode={isMultiSelectMode}
+              selectedChores={selectedChores}
+            />
           </List>
         </Box>
       )}

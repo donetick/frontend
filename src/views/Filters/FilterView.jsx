@@ -10,17 +10,18 @@ import {
   Stack,
   Typography,
 } from '@mui/joy'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-
 import {
-  Add,
-  FilterAlt,
-  MoreVert,
-  Star,
-  StarBorder,
-  Task,
-} from '@mui/icons-material'
+  Type as ListType,
+  SwipeableList,
+  SwipeableListItem,
+  SwipeAction,
+  TrailingActions,
+} from 'react-swipeable-list'
+import 'react-swipeable-list/dist/styles.css'
+
+import { Add, FilterAlt, Star, StarBorder, Task } from '@mui/icons-material'
 import { useChores } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { getFilterCount, getFilterOverdueCount } from '../../utils/FilterEngine'
@@ -31,177 +32,14 @@ import AdvancedFilterBuilder from '../Modals/Inputs/AdvancedFilterBuilder'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import { useProjects } from '../Projects/ProjectQueries'
 import {
-  useFilters,
   useCreateFilter,
-  useUpdateFilter,
   useDeleteFilter,
+  useFilters,
   useToggleFilterPin,
+  useUpdateFilter,
 } from './FilterQueries'
 
-const FilterCard = ({
-  filter,
-  onEditClick,
-  onDeleteClick,
-  onPinClick,
-  taskCount = 0,
-  overdueCount = 0,
-}) => {
-  const navigate = useNavigate()
-
-  // Swipe functionality state
-  const [swipeTranslateX, setSwipeTranslateX] = useState(0)
-  const [isDragging, setIsDragging] = useState(false)
-  const [isSwipeRevealed, setIsSwipeRevealed] = useState(false)
-  const [hoverTimer, setHoverTimer] = useState(null)
-  const swipeThreshold = 80
-  const maxSwipeDistance = 200 // Increased to fit pin + edit + delete
-  const dragStartX = useRef(0)
-  const cardRef = useRef(null)
-
-  // Swipe gesture handlers
-  const handleTouchStart = e => {
-    dragStartX.current = e.touches[0].clientX
-    setIsDragging(true)
-  }
-
-  const handleTouchMove = e => {
-    if (!isDragging) return
-
-    const currentX = e.touches[0].clientX
-    const deltaX = currentX - dragStartX.current
-
-    if (isSwipeRevealed) {
-      if (deltaX > 0) {
-        const clampedDelta = Math.min(deltaX - maxSwipeDistance, 0)
-        setSwipeTranslateX(clampedDelta)
-      }
-    } else {
-      if (deltaX < 0) {
-        const clampedDelta = Math.max(deltaX, -maxSwipeDistance)
-        setSwipeTranslateX(clampedDelta)
-      }
-    }
-  }
-
-  const handleTouchEnd = () => {
-    if (!isDragging) return
-    setIsDragging(false)
-
-    if (isSwipeRevealed) {
-      if (swipeTranslateX > -swipeThreshold) {
-        setSwipeTranslateX(0)
-        setIsSwipeRevealed(false)
-      } else {
-        setSwipeTranslateX(-maxSwipeDistance)
-      }
-    } else {
-      if (Math.abs(swipeTranslateX) > swipeThreshold) {
-        setSwipeTranslateX(-maxSwipeDistance)
-        setIsSwipeRevealed(true)
-      } else {
-        setSwipeTranslateX(0)
-        setIsSwipeRevealed(false)
-      }
-    }
-  }
-
-  const handleMouseDown = e => {
-    dragStartX.current = e.clientX
-    setIsDragging(true)
-  }
-
-  const handleMouseMove = e => {
-    if (!isDragging) return
-
-    const currentX = e.clientX
-    const deltaX = currentX - dragStartX.current
-
-    if (isSwipeRevealed) {
-      if (deltaX > 0) {
-        const clampedDelta = Math.min(deltaX - maxSwipeDistance, 0)
-        setSwipeTranslateX(clampedDelta)
-      }
-    } else {
-      if (deltaX < 0) {
-        const clampedDelta = Math.max(deltaX, -maxSwipeDistance)
-        setSwipeTranslateX(clampedDelta)
-      }
-    }
-  }
-
-  const handleMouseUp = () => {
-    if (!isDragging) return
-    setIsDragging(false)
-
-    if (isSwipeRevealed) {
-      if (swipeTranslateX > -swipeThreshold) {
-        setSwipeTranslateX(0)
-        setIsSwipeRevealed(false)
-      } else {
-        setSwipeTranslateX(-maxSwipeDistance)
-      }
-    } else {
-      if (Math.abs(swipeTranslateX) > swipeThreshold) {
-        setSwipeTranslateX(-maxSwipeDistance)
-        setIsSwipeRevealed(true)
-      } else {
-        setSwipeTranslateX(0)
-        setIsSwipeRevealed(false)
-      }
-    }
-  }
-
-  const resetSwipe = () => {
-    setSwipeTranslateX(0)
-    setIsSwipeRevealed(false)
-  }
-
-  // Hover functionality for desktop
-  const handleMouseEnter = () => {
-    if (isSwipeRevealed) return
-    const timer = setTimeout(() => {
-      setSwipeTranslateX(-maxSwipeDistance)
-      setIsSwipeRevealed(true)
-      setHoverTimer(null)
-    }, 800)
-    setHoverTimer(timer)
-  }
-
-  const handleMouseLeave = () => {
-    if (hoverTimer) {
-      clearTimeout(hoverTimer)
-      setHoverTimer(null)
-    }
-    if (!isSwipeRevealed) {
-      const hideTimer = setTimeout(() => {
-        resetSwipe()
-      }, 300)
-      setHoverTimer(hideTimer)
-    }
-  }
-
-  const handleActionAreaMouseEnter = () => {
-    if (hoverTimer) {
-      clearTimeout(hoverTimer)
-      setHoverTimer(null)
-    }
-  }
-
-  const handleActionAreaMouseLeave = () => {
-    if (isSwipeRevealed) {
-      resetSwipe()
-    }
-  }
-
-  // Clean up timer on unmount
-  useEffect(() => {
-    return () => {
-      if (hoverTimer) {
-        clearTimeout(hoverTimer)
-      }
-    }
-  }, [hoverTimer])
-
+const FilterCardContent = ({ filter, taskCount = 0, overdueCount = 0 }) => {
   // Get condition labels for display
   const getConditionSummary = () => {
     if (!filter.conditions || filter.conditions.length === 0) {
@@ -214,330 +52,164 @@ const FilterCard = ({
   }
 
   return (
-    <Box key={filter.id + '-filter-box'}>
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        minHeight: 64,
+        width: '100%',
+        px: 2,
+        py: 1.5,
+        bgcolor: 'background.body',
+        borderBottom: '1px solid',
+        borderColor: 'divider',
+        cursor: 'pointer',
+      }}
+    >
+      {/* Filter Icon */}
       <Box
         sx={{
-          position: 'relative',
-          overflow: 'hidden',
-          borderBottom: '1px solid',
-          borderColor: 'divider',
-          '&:last-child': {
-            borderBottom: 'none',
-          },
-        }}
-        onMouseLeave={() => {
-          if (hoverTimer) {
-            clearTimeout(hoverTimer)
-            setHoverTimer(null)
-          }
+          display: 'flex',
+          alignItems: 'center',
+          mr: 2,
+          flexShrink: 0,
         }}
       >
-        {/* Action buttons underneath (revealed on swipe) */}
-        <Box
+        <Avatar
+          size='sm'
           sx={{
-            position: 'absolute',
-            right: 0,
-            top: 0,
-            bottom: 0,
-            width: maxSwipeDistance,
-            display: 'flex',
-            alignItems: 'center',
-            boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.06)',
-            zIndex: 0,
+            width: 32,
+            height: 32,
+            bgcolor: filter.color || 'neutral.500',
+            border: '2px solid',
+            borderColor: filter.isPinned ? 'warning.300' : 'background.surface',
+            boxShadow: filter.isPinned
+              ? '0 0 0 1px var(--joy-palette-warning-300)'
+              : 'sm',
           }}
-          onMouseEnter={handleActionAreaMouseEnter}
-          onMouseLeave={handleActionAreaMouseLeave}
         >
-          <IconButton
-            variant='soft'
-            color='warning'
-            size='sm'
-            onClick={e => {
-              e.stopPropagation()
-              resetSwipe()
-              onPinClick(filter.id)
-            }}
-            sx={{
-              width: 40,
-              height: 40,
-              mx: 0.5,
-            }}
-          >
-            {filter.isPinned ? (
-              <Star sx={{ fontSize: 16 }} />
-            ) : (
-              <StarBorder sx={{ fontSize: 16 }} />
-            )}
-          </IconButton>
+          {''}
+        </Avatar>
+      </Box>
 
-          <IconButton
-            variant='soft'
-            color='neutral'
-            size='sm'
-            onClick={e => {
-              e.stopPropagation()
-              resetSwipe()
-              onEditClick(filter)
-            }}
+      {/* Content - Center */}
+      <Box
+        sx={{
+          flex: 1,
+          minWidth: 0,
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        {/* Filter Name */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.25 }}>
+          <Typography
+            level='title-sm'
             sx={{
-              width: 40,
-              height: 40,
-              mx: 0.5,
+              fontWeight: 600,
+              fontSize: 14,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
             }}
           >
-            <EditIcon sx={{ fontSize: 16 }} />
-          </IconButton>
-
-          <IconButton
-            variant='soft'
-            color='danger'
-            size='sm'
-            onClick={e => {
-              e.stopPropagation()
-              resetSwipe()
-              onDeleteClick(filter.id)
-            }}
-            sx={{
-              width: 40,
-              height: 40,
-              mx: 0.5,
-            }}
-          >
-            <DeleteIcon sx={{ fontSize: 16 }} />
-          </IconButton>
+            {filter.name}
+          </Typography>
+          {filter.isPinned && (
+            <Star
+              sx={{
+                fontSize: 14,
+                color: 'warning.500',
+              }}
+            />
+          )}
         </Box>
 
-        {/* Main card content */}
+        {/* Filter Info */}
         <Box
-          ref={cardRef}
           sx={{
             display: 'flex',
             alignItems: 'center',
-            minHeight: 64,
-            cursor: 'pointer',
-            position: 'relative',
-            px: 2,
-            py: 1.5,
-            bgcolor: 'background.body',
-            transform: `translateX(${swipeTranslateX}px)`,
-            transition: isDragging ? 'none' : 'transform 0.3s ease-out',
-            zIndex: 1,
-            '&:hover': {
-              bgcolor: isSwipeRevealed
-                ? 'background.surface'
-                : 'background.level1',
-              boxShadow: isSwipeRevealed ? 'none' : 'sm',
-            },
+            gap: 0.5,
+            flexWrap: 'wrap',
           }}
-          onClick={() => {
-            if (isSwipeRevealed) {
-              resetSwipe()
-              return
-            }
-            // Navigate to MyChores with filter applied via URL param
-            navigate(`/chores?filterId=${encodeURIComponent(filter.id)}`)
-          }}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
         >
-          {/* Right drag area */}
-          <Box
-            sx={{
-              position: 'absolute',
-              right: 0,
-              top: 0,
-              bottom: 0,
-              width: '20px',
-              cursor: 'grab',
-              zIndex: 2,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              opacity: isSwipeRevealed ? 0 : 0.3,
-              transition: 'opacity 0.2s ease',
-              pointerEvents: isSwipeRevealed ? 'none' : 'auto',
-              '&:hover': {
-                opacity: isSwipeRevealed ? 0 : 0.7,
-              },
-              '&:active': {
-                cursor: 'grabbing',
-              },
-            }}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-            onClick={e => {
-              e.stopPropagation()
-              const clampedDelta = isSwipeRevealed ? 0 : -maxSwipeDistance
-              setSwipeTranslateX(clampedDelta)
-            }}
-          >
-            {/* Drag indicator dots */}
-            <Box
+          {filter.description && (
+            <Typography
+              level='body-xs'
               sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 0.25,
+                color: 'text.tertiary',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                maxWidth: '150px',
               }}
             >
-              <MoreVert sx={{ fontSize: 20 }} />
-            </Box>
-          </Box>
+              {filter.description}
+            </Typography>
+          )}
 
-          {/* Filter Icon */}
-          <Box
+          <Chip
+            size='sm'
+            variant='soft'
+            startDecorator={<Task />}
+            color={overdueCount > 0 ? 'danger' : 'primary'}
             sx={{
-              display: 'flex',
-              alignItems: 'center',
-              mr: 2,
-              flexShrink: 0,
+              fontSize: 10,
+              height: 18,
+              px: 0.75,
+              bgcolor: overdueCount > 0 ? 'danger.softBg' : 'primary.softBg',
+              color: overdueCount > 0 ? 'danger.500' : 'primary.500',
             }}
           >
-            <Avatar
+            {taskCount} tasks
+          </Chip>
+
+          {overdueCount > 0 && (
+            <Chip
               size='sm'
+              variant='solid'
+              color='danger'
               sx={{
-                width: 32,
-                height: 32,
-                bgcolor: filter.color || 'neutral.500',
-                border: '2px solid',
-                borderColor: filter.isPinned
-                  ? 'warning.300'
-                  : 'background.surface',
-                boxShadow: filter.isPinned
-                  ? '0 0 0 1px var(--joy-palette-warning-300)'
-                  : 'sm',
+                fontSize: 10,
+                height: 18,
+                px: 0.75,
               }}
             >
-              {''}
-            </Avatar>
-          </Box>
+              {overdueCount} overdue
+            </Chip>
+          )}
 
-          {/* Content - Center */}
-          <Box
+          <Chip
+            size='sm'
+            variant='soft'
+            startDecorator={<FilterAlt />}
             sx={{
-              flex: 1,
-              minWidth: 0,
-              display: 'flex',
-              flexDirection: 'column',
+              fontSize: 10,
+              height: 18,
+              px: 0.75,
+              bgcolor: 'neutral.softBg',
+              color: 'neutral.600',
             }}
           >
-            {/* Filter Name */}
-            <Box
-              sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.25 }}
-            >
-              <Typography
-                level='title-sm'
-                sx={{
-                  fontWeight: 600,
-                  fontSize: 14,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {filter.name}
-              </Typography>
-              {filter.isPinned && (
-                <Star
-                  sx={{
-                    fontSize: 14,
-                    color: 'warning.500',
-                  }}
-                />
-              )}
-            </Box>
+            {getConditionSummary()}
+          </Chip>
 
-            {/* Filter Info */}
-            <Box
+          {filter.usageCount > 0 && (
+            <Chip
+              size='sm'
+              variant='soft'
               sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 0.5,
-                flexWrap: 'wrap',
+                fontSize: 10,
+                height: 18,
+                px: 0.75,
+                bgcolor: 'success.softBg',
+                color: 'success.600',
               }}
             >
-              {filter.description && (
-                <Typography
-                  level='body-xs'
-                  sx={{
-                    color: 'text.tertiary',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    maxWidth: '150px',
-                  }}
-                >
-                  {filter.description}
-                </Typography>
-              )}
-
-              <Chip
-                size='sm'
-                variant='soft'
-                startDecorator={<Task />}
-                color={overdueCount > 0 ? 'danger' : 'primary'}
-                sx={{
-                  fontSize: 10,
-                  height: 18,
-                  px: 0.75,
-                  bgcolor:
-                    overdueCount > 0 ? 'danger.softBg' : 'primary.softBg',
-                  color: overdueCount > 0 ? 'danger.500' : 'primary.500',
-                }}
-              >
-                {taskCount} tasks
-              </Chip>
-
-              {overdueCount > 0 && (
-                <Chip
-                  size='sm'
-                  variant='solid'
-                  color='danger'
-                  sx={{
-                    fontSize: 10,
-                    height: 18,
-                    px: 0.75,
-                  }}
-                >
-                  {overdueCount} overdue
-                </Chip>
-              )}
-
-              <Chip
-                size='sm'
-                variant='soft'
-                startDecorator={<FilterAlt />}
-                sx={{
-                  fontSize: 10,
-                  height: 18,
-                  px: 0.75,
-                  bgcolor: 'neutral.softBg',
-                  color: 'neutral.600',
-                }}
-              >
-                {getConditionSummary()}
-              </Chip>
-
-              {filter.usageCount > 0 && (
-                <Chip
-                  size='sm'
-                  variant='soft'
-                  sx={{
-                    fontSize: 10,
-                    height: 18,
-                    px: 0.75,
-                    bgcolor: 'success.softBg',
-                    color: 'success.600',
-                  }}
-                >
-                  Used {filter.usageCount}x
-                </Chip>
-              )}
-            </Box>
-          </Box>
+              Used {filter.usageCount}x
+            </Chip>
+          )}
         </Box>
       </Box>
     </Box>
@@ -545,6 +217,7 @@ const FilterCard = ({
 }
 
 const FilterView = () => {
+  const navigate = useNavigate()
   const { data: userProfile } = useUserProfile()
   const { data: chores = { res: [] } } = useChores(false)
   const { data: labels = [] } = useLabels()
@@ -613,14 +286,7 @@ const FilterView = () => {
 
       setFilterCounts(counts)
     }
-  }, [
-    chores,
-    filtersData,
-    userProfile?.id,
-    labels,
-    projects,
-    membersData?.res,
-  ])
+  }, [chores, filtersData, userProfile?.id, labels, projects, membersData?.res])
 
   const handleAddFilter = () => {
     setEditingFilter(null)
@@ -748,17 +414,100 @@ const FilterView = () => {
             </Typography>
           </Box>
         ) : (
-          savedFilters.map(filter => (
-            <FilterCard
-              key={filter.id}
-              filter={filter}
-              onEditClick={handleEditFilter}
-              onDeleteClick={handleDeleteClicked}
-              onPinClick={handlePinFilter}
-              taskCount={filterCounts[filter.id]?.count || 0}
-              overdueCount={filterCounts[filter.id]?.overdueCount || 0}
-            />
-          ))
+          <SwipeableList type={ListType.IOS} fullSwipe={false}>
+            {savedFilters.map(filter => (
+              <SwipeableListItem
+                onClick={() =>
+                  navigate(`/chores?filterId=${encodeURIComponent(filter.id)}`)
+                }
+                key={filter.id}
+                trailingActions={
+                  <TrailingActions>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.06)',
+                        zIndex: 0,
+                      }}
+                    >
+                      <SwipeAction onClick={() => handlePinFilter(filter.id)}>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            bgcolor: 'warning.softBg',
+                            color: 'warning.600',
+                            px: 3,
+                            height: '100%',
+                          }}
+                        >
+                          {filter.isPinned ? (
+                            <Star sx={{ fontSize: 20 }} />
+                          ) : (
+                            <StarBorder sx={{ fontSize: 20 }} />
+                          )}
+                          <Typography level='body-xs' sx={{ mt: 0.5 }}>
+                            {filter.isPinned ? 'Unpin' : 'Pin'}
+                          </Typography>
+                        </Box>
+                      </SwipeAction>
+                      <SwipeAction onClick={() => handleEditFilter(filter)}>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            bgcolor: 'var(--joy-palette-neutral-100)',
+                            px: 3,
+                            height: '100%',
+                          }}
+                        >
+                          <EditIcon sx={{ fontSize: 20 }} />
+                          <Typography level='body-xs' sx={{ mt: 0.5 }}>
+                            Edit
+                          </Typography>
+                        </Box>
+                      </SwipeAction>
+                      <SwipeAction
+                        onClick={() => handleDeleteClicked(filter.id)}
+                      >
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            bgcolor: 'danger.softBg',
+                            color: 'danger.600',
+                            px: 3,
+                            height: '100%',
+                          }}
+                        >
+                          <DeleteIcon sx={{ fontSize: 20 }} color='danger' />
+                          <Typography
+                            level='body-xs'
+                            sx={{ mt: 0.5 }}
+                            color='danger'
+                          >
+                            Delete
+                          </Typography>
+                        </Box>
+                      </SwipeAction>
+                    </Box>
+                  </TrailingActions>
+                }
+              >
+                <FilterCardContent
+                  filter={filter}
+                  taskCount={filterCounts[filter.id]?.count || 0}
+                  overdueCount={filterCounts[filter.id]?.overdueCount || 0}
+                />
+              </SwipeableListItem>
+            ))}
+          </SwipeableList>
         )}
       </Box>
 
