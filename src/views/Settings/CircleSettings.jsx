@@ -5,12 +5,11 @@ import {
   Card,
   Chip,
   CircularProgress,
-  Container,
   Divider,
   Input,
   Option,
   Select,
-  Typography,
+  Typography
 } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import moment from 'moment'
@@ -28,6 +27,7 @@ import {
   LeaveCircle,
   UpdateMemberRole,
 } from '../../utils/Fetcher'
+import LoadingComponent from '../components/Loading'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import SettingsLayout from './SettingsLayout'
 
@@ -114,15 +114,11 @@ const CircleSettings = () => {
   }, [circleMembers, userProfile])
 
   if (!userProfile) {
-    return (
-      <SettingsLayout title="Circle Settings">
-        <CircularProgress />
-      </SettingsLayout>
-    )
+    return <LoadingComponent />
   }
 
   return (
-    <SettingsLayout title="Circle Settings">
+    <SettingsLayout title='Circle Settings'>
       <div className='grid gap-4'>
         <Typography level='body-md'>
           Your account is automatically connected to a Circle when you create or
