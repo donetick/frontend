@@ -54,6 +54,7 @@ export const useUserProfile = () => {
     },
     staleTime: 30 * 60 * 1000, // 30 minutes in milliseconds
     gcTime: 30 * 60 * 1000, // 30 minutes in milliseconds
+    enabled: isTokenValid(), // Only run query when we have a valid token
   })
   return {
     data,

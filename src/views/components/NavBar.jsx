@@ -103,7 +103,18 @@ import Z_INDEX from '../../constants/zIndex'
 import { useResource } from '../../queries/ResourceQueries'
 import { apiClient } from '../../utils/ApiClient'
 
-const publicPages = ['/landing', '/privacy', '/terms']
+const publicPages = [
+  '/landing',
+  '/privacy',
+  '/terms',
+  'login',
+  '/signup',
+  '/auth/oauth2',
+  '/forgot-password',
+  '/login/settings',
+  '/',
+]
+
 const NavBar = () => {
   const { data: resource } = useResource()
 
@@ -165,15 +176,7 @@ const NavBar = () => {
     )
   }
 
-  if (
-    [
-      '/signup',
-      '/login',
-      '/auth/oauth2',
-      '/forgot-password',
-      '/login/settings',
-    ].includes(location.pathname)
-  ) {
+  if (publicPages.includes(location.pathname)) {
     return (
       // no navbar but show the safe area padding
       <div
@@ -320,5 +323,4 @@ const NavBar = () => {
     </nav>
   )
 }
-
 export default NavBar

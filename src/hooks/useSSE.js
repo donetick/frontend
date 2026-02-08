@@ -18,9 +18,9 @@ const MAX_RECONNECT_ATTEMPTS = 10 // Circuit breaker limit
 const CIRCUIT_BREAKER_RESET_TIME = 600000 // 10 minutes
 
 export const useSSE = () => {
-  const { data: userProfile } = useUserProfile()
-
   const { isAuthenticated, token } = useAuth()
+  // Only fetch user profile if authenticated - prevents unnecessary API calls on landing page
+  const { data: userProfile } = useUserProfile()
   const [connectionState, setConnectionState] = useState(SSE_STATES.CLOSED)
   const [lastEvent, setLastEvent] = useState(null)
   const [error, setError] = useState(null)
