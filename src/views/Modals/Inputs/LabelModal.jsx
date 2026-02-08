@@ -91,75 +91,80 @@ function LabelModal({ isOpen, onClose, label }) {
   }
 
   return (
-    <ResponsiveModal open={isOpen} onClose={onClose}>
-      <Typography level='title-md' mb={1}>
-        {label ? 'Edit Label' : 'Add Label'}
-      </Typography>
+    <ResponsiveModal
+      open={isOpen}
+      onClose={onClose}
+      size='lg'
+      fullWidth={true}
+      title={label ? 'Edit Label' : 'Add Label'}
+      footer={
+        <Box display='flex' justifyContent='space-around' mt={1}>
+          <Button size='lg' onClick={handleSave} fullWidth sx={{ mr: 1 }}>
+            {label ? 'Save Changes' : 'Add Label'}
+          </Button>
+          <Button size='lg' onClick={onClose} variant='outlined'>
+            Cancel
+          </Button>
+        </Box>
+      }
+    >
+      <Box>
+        <FormControl>
+          <Typography gutterBottom level='body-sm' alignSelf='start'>
+            Name
+          </Typography>
+          <Input
+            fullWidth
+            id='labelName'
+            value={labelName}
+            onChange={e => setLabelName(e.target.value)}
+          />
+        </FormControl>
 
-      <FormControl>
-        <Typography gutterBottom level='body-sm' alignSelf='start'>
-          Name
-        </Typography>
-        <Input
-          fullWidth
-          id='labelName'
-          value={labelName}
-          onChange={e => setLabelName(e.target.value)}
-        />
-      </FormControl>
+        <FormControl>
+          <Typography gutterBottom level='body-sm' alignSelf='start'>
+            Color
+          </Typography>
+          <Select
+            value={color}
+            onChange={(e, value) => value && setColor(value)}
+            renderValue={selected => (
+              <Typography
+                startDecorator={
+                  <Box
+                    className='size-4'
+                    borderRadius={10}
+                    sx={{ background: selected.value }}
+                  />
+                }
+              >
+                {selected.label}
+              </Typography>
+            )}
+          >
+            {LABEL_COLORS.map(val => (
+              <Option key={val.value} value={val.value}>
+                <Box className='flex items-center justify-between'>
+                  <Box
+                    width={20}
+                    height={20}
+                    borderRadius={10}
+                    sx={{ background: val.value }}
+                  />
+                  <Typography sx={{ ml: 1 }} variant='caption'>
+                    {val.name}
+                  </Typography>
+                </Box>
+              </Option>
+            ))}
+          </Select>
+        </FormControl>
 
-      <FormControl>
-        <Typography gutterBottom level='body-sm' alignSelf='start'>
-          Color
-        </Typography>
-        <Select
-          value={color}
-          onChange={(e, value) => value && setColor(value)}
-          renderValue={selected => (
-            <Typography
-              startDecorator={
-                <Box
-                  className='size-4'
-                  borderRadius={10}
-                  sx={{ background: selected.value }}
-                />
-              }
-            >
-              {selected.label}
-            </Typography>
-          )}
-        >
-          {LABEL_COLORS.map(val => (
-            <Option key={val.value} value={val.value}>
-              <Box className='flex items-center justify-between'>
-                <Box
-                  width={20}
-                  height={20}
-                  borderRadius={10}
-                  sx={{ background: val.value }}
-                />
-                <Typography sx={{ ml: 1 }} variant='caption'>
-                  {val.name}
-                </Typography>
-              </Box>
-            </Option>
-          ))}
-        </Select>
-      </FormControl>
-
-      {error && (
-        <Typography color='warning' level='body-sm'>
-          {error}
-        </Typography>
-      )}
-
-      <Box display='flex' justifyContent='space-around' mt={1}>
-        <Button size='lg' onClick={handleSave} fullWidth sx={{ mr: 1 }}>
-          {label ? 'Save Changes' : 'Add Label'}
-        </Button>
-        <Button size='lg' onClick={onClose} variant='outlined'>
-          Cancel
-        </Button>
+        {error && (
+          <Typography color='warning' level='body-sm'>
+            {error}
+          </Typography>
+        )}
       </Box>
     </ResponsiveModal>
   )

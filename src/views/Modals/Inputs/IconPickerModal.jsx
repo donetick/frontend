@@ -1,11 +1,11 @@
 import {
-  Avatar,
-  Box,
-  Button,
-  FormControl,
-  FormLabel,
-  Grid,
-  Typography,
+    Avatar,
+    Box,
+    Button,
+    FormControl,
+    FormLabel,
+    Grid,
+    Typography,
 } from '@mui/joy'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { getTextColorFromBackgroundColor } from '../../../utils/Colors'
@@ -29,12 +29,11 @@ const IconPickerModal = ({
     <ResponsiveModal
       open={isOpen}
       onClose={onClose}
-      size='sm'
+      size='lg'
+      fullWidth={true}
       unmountDelay={250}
+      title='Choose Project Icon'
     >
-      <Typography level='h4' mb={2}>
-        Choose Project Icon
-      </Typography>
 
       <FormControl>
         <FormLabel>Available Icons</FormLabel>

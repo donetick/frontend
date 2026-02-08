@@ -317,8 +317,10 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
     <ResponsiveModal
       open={isOpen}
       onClose={handleClose}
-      size='md'
+      size='lg'
+      fullWidth={true}
       unmountDelay={250}
+      title='🔄 Backup & Restore'
     >
       {loading ? (
         <Box
@@ -333,25 +335,19 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
           </Typography>
         </Box>
       ) : (
-        <>
-          <Typography level='h4' mb={3}>
-            🔄 Backup & Restore
-          </Typography>
+        <Tabs
+          value={activeTab}
+          onChange={(event, newValue) => setActiveTab(newValue)}
+        >
+          <TabList>
+            <Tab>Create Backup</Tab>
+            <Tab>Restore Backup</Tab>
+          </TabList>
 
-          <Tabs
-            value={activeTab}
-            onChange={(event, newValue) => setActiveTab(newValue)}
-          >
-            <TabList>
-              <Tab>Create Backup</Tab>
-              <Tab>Restore Backup</Tab>
-            </TabList>
+          <TabPanel value={0}>{renderBackupTab()}</TabPanel>
 
-            <TabPanel value={0}>{renderBackupTab()}</TabPanel>
-
-            <TabPanel value={1}>{renderRestoreTab()}</TabPanel>
-          </Tabs>
-        </>
+          <TabPanel value={1}>{renderRestoreTab()}</TabPanel>
+        </Tabs>
       )}
     </ResponsiveModal>
   )

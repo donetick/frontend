@@ -72,8 +72,13 @@ function DateModal({ isOpen, onClose, onSave, current, title }) {
   }
 
   return (
-    <ResponsiveModal open={isOpen} onClose={onClose}>
-      <Typography variant='h4'>{title}</Typography>
+    <ResponsiveModal
+      open={isOpen}
+      onClose={onClose}
+      size='lg'
+      fullWidth={true}
+      title={title}
+    >
       <Input
         sx={{ mt: 3 }}
         type='date'

@@ -1,13 +1,13 @@
 import {
-  Box,
-  Button,
-  FormControl,
-  FormHelperText,
-  Input,
-  Option,
-  Select,
-  Textarea,
-  Typography,
+    Box,
+    Button,
+    FormControl,
+    FormHelperText,
+    Input,
+    Option,
+    Select,
+    Textarea,
+    Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
@@ -60,10 +60,13 @@ function CreateThingModal({ isOpen, onClose, onSave, currentThing }) {
   }
 
   return (
-    <ResponsiveModal open={isOpen} onClose={onClose}>
-      <Typography level='h4'>
-        {currentThing?.id ? 'Edit' : 'Create'} Thing
-      </Typography>
+    <ResponsiveModal
+      open={isOpen}
+      onClose={onClose}
+      size='lg'
+      fullWidth={true}
+      title={`${currentThing?.id ? 'Edit' : 'Create'} Thing`}
+    >
       <FormControl>
         <Typography>Name</Typography>
         <Textarea

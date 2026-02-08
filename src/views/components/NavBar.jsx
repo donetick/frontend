@@ -127,6 +127,44 @@ const NavBar = () => {
       }
     })
   }, [])
+
+  const getMenuIcon = () => {
+    const menuRounded = (
+      <IconButton size='md' variant='plain' onClick={() => setDrawerOpen(true)}>
+        <MenuRounded />
+      </IconButton>
+    )
+    if (!Capacitor.isNativePlatform()) {
+      return menuRounded
+    }
+    if (
+      ['/chores', '/'].includes(location.pathname) &&
+      !searchParams.get('filter')
+    ) {
+      return menuRounded
+    }
+    return (
+      <IconButton
+        size='md'
+        variant='plain'
+        onClick={() => {
+          if (location.pathname === '/chores') {
+            // Navigate back to calendar view
+            navigate('/')
+          } else {
+            // Default back navigation
+            navigate(-1)
+          }
+        }}
+        title={
+          searchParams.get('from') === 'calendar' ? 'Back to Calendar' : 'Back'
+        }
+      >
+        <ArrowBack />
+      </IconButton>
+    )
+  }
+
   if (
     [
       '/signup',
@@ -172,37 +210,7 @@ const NavBar = () => {
         backgroundColor: 'var(--joy-palette-background-body)',
       }}
     >
-      {['/chores', '/'].includes(location.pathname) &&
-      !searchParams.get('filter') ? (
-        <IconButton
-          size='md'
-          variant='plain'
-          onClick={() => setDrawerOpen(true)}
-        >
-          <MenuRounded />
-        </IconButton>
-      ) : (
-        <IconButton
-          size='md'
-          variant='plain'
-          onClick={() => {
-            if (location.pathname === '/chores') {
-              // Navigate back to calendar view
-              navigate('/')
-            } else {
-              // Default back navigation
-              navigate(-1)
-            }
-          }}
-          title={
-            searchParams.get('from') === 'calendar'
-              ? 'Back to Calendar'
-              : 'Back'
-          }
-        >
-          <ArrowBack />
-        </IconButton>
-      )}
+      {getMenuIcon()}
       <Box className='flex-1' />
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <UserProfileAvatar />

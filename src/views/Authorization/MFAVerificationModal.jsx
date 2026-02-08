@@ -70,14 +70,17 @@ const MFAVerificationModal = ({
   }
 
   return (
-    <ResponsiveModal open={open} onClose={handleClose} size='sm'>
+    <ResponsiveModal
+      open={open}
+      onClose={handleClose}
+      size='lg'
+      fullWidth={true}
+      title='Two-Factor Authentication'
+    >
       <ModalClose />
 
       <Box className='mb-4 text-center'>
         <Security sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
-        <Typography level='h4' sx={{ mb: 1 }}>
-          Two-Factor Authentication
-        </Typography>
         <Typography level='body-md' sx={{ color: 'text.secondary' }}>
           Enter the verification code from your authenticator app
         </Typography>

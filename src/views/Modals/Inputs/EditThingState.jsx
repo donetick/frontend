@@ -1,10 +1,10 @@
 import {
-  Box,
-  Button,
-  FormControl,
-  FormHelperText,
-  Input,
-  Typography,
+    Box,
+    Button,
+    FormControl,
+    FormHelperText,
+    Input,
+    Typography,
 } from '@mui/joy'
 import { useState } from 'react'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
@@ -40,9 +40,13 @@ function EditThingStateModal({ isOpen, onClose, onSave, currentThing }) {
   }
 
   return (
-    <ResponsiveModal open={isOpen} onClose={onClose}>
-      <Typography level='h4'>Update state</Typography>
-
+    <ResponsiveModal
+      open={isOpen}
+      onClose={onClose}
+      size='lg'
+      fullWidth={true}
+      title='Update state'
+    >
       <FormControl>
         <Typography>Value</Typography>
         <Input

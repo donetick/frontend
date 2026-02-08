@@ -1,4 +1,4 @@
-import { Box, Button, Textarea, Typography } from '@mui/joy'
+import { Box, Button, Textarea } from '@mui/joy'
 import { useState } from 'react'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
@@ -21,8 +21,13 @@ function TextModal({
   }
 
   return (
-    <ResponsiveModal open={isOpen} onClose={onClose}>
-      <Typography variant='h4'>{title}</Typography>
+    <ResponsiveModal
+      open={isOpen}
+      onClose={onClose}
+      size='lg'
+      fullWidth={true}
+      title={title}
+    >
       <Textarea
         placeholder='Type in here…'
         value={text}

@@ -1,12 +1,12 @@
 import {
-  Alert,
-  Box,
-  Button,
-  FormControl,
-  FormLabel,
-  Switch,
-  Textarea,
-  Typography,
+    Alert,
+    Box,
+    Button,
+    FormControl,
+    FormLabel,
+    Switch,
+    Textarea,
+    Typography,
 } from '@mui/joy'
 import { useCallback, useEffect, useState } from 'react'
 import KeyboardShortcutHint from '../../../components/common/KeyboardShortcutHint'
@@ -104,13 +104,11 @@ function NudgeModal({ config }) {
     <ResponsiveModal
       open={config?.isOpen}
       onClose={config?.onClose}
-      size='md'
+      size='lg'
+      fullWidth={true}
       unmountDelay={250}
+      title='Send Nudge'
     >
-      <Typography level='h4' mb={2}>
-        Send Nudge
-      </Typography>
-
       <Typography level='body-md' mb={2}>
         Send a gentle reminder to the assignee about this task. You can
         customize the message and choose who gets notified.

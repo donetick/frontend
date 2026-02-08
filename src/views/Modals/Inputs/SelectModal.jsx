@@ -1,4 +1,4 @@
-import { Box, Button, Option, Select, Typography } from '@mui/joy'
+import { Box, Button, Option, Select } from '@mui/joy'
 import React from 'react'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
@@ -20,8 +20,13 @@ function SelectModal({
   }
 
   return (
-    <ResponsiveModal open={isOpen} onClose={onClose}>
-      <Typography variant='h4'>{title}</Typography>
+    <ResponsiveModal
+      open={isOpen}
+      onClose={onClose}
+      size='lg'
+      fullWidth={true}
+      title={title}
+    >
       <Select placeholder={placeholder}>
         {options.map((item, index) => (
           <Option

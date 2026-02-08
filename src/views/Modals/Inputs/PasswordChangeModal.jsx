@@ -1,10 +1,10 @@
 import {
-  Box,
-  Button,
-  FormControl,
-  FormHelperText,
-  Input,
-  Typography,
+    Box,
+    Button,
+    FormControl,
+    FormHelperText,
+    Input,
+    Typography,
 } from '@mui/joy'
 import React, { useEffect } from 'react'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
@@ -41,11 +41,13 @@ function PassowrdChangeModal({ isOpen, onClose }) {
   }
 
   return (
-    <ResponsiveModal open={isOpen} onClose={onClose}>
-      <Typography level='h4' mb={1}>
-        Change Password
-      </Typography>
-
+    <ResponsiveModal
+      open={isOpen}
+      onClose={onClose}
+      size='lg'
+      fullWidth={true}
+      title='Change Password'
+    >
       <Typography level='body-md' gutterBottom>
         Please enter your new password.
       </Typography>
