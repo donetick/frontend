@@ -234,10 +234,11 @@ class ApiClient {
     if (!options.headers['Content-Type']) {
       options.headers['Content-Type'] = 'application/json'
     }
+
     return this.request(endpoint, {
-      ...options,
+      options: { ...options },
       method: 'POST',
-      body: data ? JSON.stringify(data) : undefined,
+      body: data ? data : undefined,
     })
   }
 
@@ -249,7 +250,7 @@ class ApiClient {
     return this.request(endpoint, {
       ...options,
       method: 'PUT',
-      body: data ? JSON.stringify(data) : undefined,
+      body: data ? data : undefined,
     })
   }
 
