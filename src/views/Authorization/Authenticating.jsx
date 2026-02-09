@@ -1,12 +1,12 @@
 import { Box, Button, CircularProgress, Container, Typography } from '@mui/joy'
 import { useEffect, useState } from 'react'
 import Logo from '../../Logo'
-import { apiClient } from '../../utils/ApiClient'
 
 import Cookies from 'js-cookie'
 import { useRef } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useUserProfile } from '../../queries/UserQueries'
+import { apiClient } from '../../utils/ApiClient'
 import { GetUserProfile } from '../../utils/Fetcher'
 
 const AuthenticationLoading = () => {
@@ -58,7 +58,12 @@ const AuthenticationLoading = () => {
     }
 
     if (code) {
-      const baseURL = apiClient.baseURL
+      const baseURL = apiClient.getApiURL()
+
+      console.log(
+        '{baseURL}/auth/oauth2/callback',
+        `${baseURL}/auth/oauth2/callback`,
+      )
       fetch(`${baseURL}/auth/${provider}/callback`, {
         method: 'POST',
         headers: {
