@@ -182,11 +182,19 @@ const LoginView = () => {
     }
 
     try {
-      const response = await apiClient.post(`/auth/${provider}/callback`, {
-        provider: provider,
-        token: getAccessToken(data),
-        data: data,
-      })
+      const response = await apiClient.post(
+        `/auth/${provider}/callback`,
+        JSON.stringify({
+          provider: provider,
+          token: getAccessToken(data),
+          data: data,
+        }),
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      )
 
       if (response.ok) {
         const responseData = await response.json()
