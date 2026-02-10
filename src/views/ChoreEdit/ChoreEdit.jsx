@@ -256,7 +256,7 @@ const ChoreEdit = () => {
       // Default to end of day (23:59:59) in user's timezone
       const endOfDay = moment(dateValue)
         .endOf('day')
-        .format('YYYY-MM-DDTHH:mm:00')
+        .format('YYYY-MM-DDTHH:mm:59')
       setDueDate(endOfDay)
     }
   }

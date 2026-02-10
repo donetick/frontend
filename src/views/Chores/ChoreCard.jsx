@@ -23,6 +23,10 @@ import {
 import moment from 'moment'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useUserProfile } from '../../queries/UserQueries.jsx'
+import {
+  getDueDateChipColor,
+  getDueDateChipText,
+} from '../../utils/ChoreCardHelpers.jsx'
 import { notInCompletionWindow } from '../../utils/Chores.jsx'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import Priorities from '../../utils/Priorities'
@@ -60,28 +64,6 @@ const ChoreCard = ({
       currentUser?.role === 'manager' ||
       chore.createdBy === (impersonatedUser?.userId || userProfile?.id)
     )
-  }
-
-  const getDueDateChipText = nextDueDate => {
-    if (chore.nextDueDate === null) return 'No Due Date'
-    // if due in next 48 hours, we should it in this format : Tomorrow 11:00 AM
-    const diff = moment(nextDueDate).diff(moment(), 'hours')
-    if (diff < 48 && diff > 0) {
-      return moment(nextDueDate).calendar().replace(' at', '')
-    }
-    return 'Due ' + moment(nextDueDate).fromNow()
-  }
-  const getDueDateChipColor = nextDueDate => {
-    if (chore.nextDueDate === null) return 'neutral'
-    const diff = moment(nextDueDate).diff(moment(), 'hours')
-    if (diff < 48 && diff > 0) {
-      return 'warning'
-    }
-    if (diff < 0) {
-      return 'danger'
-    }
-
-    return 'neutral'
   }
 
   const getRecurrentChipText = chore => {
@@ -216,9 +198,9 @@ const ChoreCard = ({
           zIndex: 3,
           left: 10,
         }}
-        color={getDueDateChipColor(chore.nextDueDate)}
+        color={getDueDateChipColor(chore.nextDueDate, chore)}
       >
-        {getDueDateChipText(chore.nextDueDate)}
+        {getDueDateChipText(chore.nextDueDate, chore)}
       </Chip>
 
       <Chip

@@ -13,6 +13,10 @@ import moment from 'moment'
 import { useNavigate } from 'react-router-dom'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
+import {
+  getDueDateChipColor,
+  getDueDateChipText,
+} from '../../utils/ChoreCardHelpers.jsx'
 import { notInCompletionWindow } from '../../utils/Chores.jsx'
 import {
   getPriorityColor,
@@ -60,28 +64,6 @@ const CompactChoreCard = ({
   }
 
   // Utility functions
-  const getDueDateText = nextDueDate => {
-    if (chore.nextDueDate === null) return 'No Due Date'
-    // if due in next 48 hours, we should it in this format : Tomorrow 11:00 AM
-    const diff = moment(nextDueDate).diff(moment(), 'hours')
-    if (diff < 48 && diff > 0) {
-      return moment(nextDueDate).calendar().replace(' at', '')
-    }
-
-    return moment(nextDueDate).fromNow()
-  }
-
-  const getDueDateColor = nextDueDate => {
-    if (chore.nextDueDate === null) return 'neutral'
-    const diff = moment(nextDueDate).diff(moment(), 'hours')
-    if (diff < 48 && diff > 0) {
-      return 'warning'
-    }
-    if (diff < 0) {
-      return 'danger'
-    }
-    return 'neutral'
-  }
 
   const getRecurrentText = chore => {
     // if chore.frequencyMetadata is type string then parse it otherwise assigned to the metadata:
@@ -509,7 +491,7 @@ const CompactChoreCard = ({
           <Chip
             variant='soft'
             size='sm'
-            color={getDueDateColor(chore.nextDueDate)}
+            color={getDueDateChipColor(chore.nextDueDate, chore)}
             sx={{
               fontSize: 10,
               height: 18,
@@ -518,7 +500,7 @@ const CompactChoreCard = ({
               ml: 1,
             }}
           >
-            {getDueDateText(chore.nextDueDate)}
+            {getDueDateChipText(chore.nextDueDate, chore)}
           </Chip>
         </Box>
 

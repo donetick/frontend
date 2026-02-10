@@ -2,6 +2,7 @@ import { Box, Button, CircularProgress, Container, Typography } from '@mui/joy'
 import { useEffect, useState } from 'react'
 import Logo from '../../Logo'
 
+import { Capacitor } from '@capacitor/core'
 import Cookies from 'js-cookie'
 import { useRef } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
@@ -42,7 +43,7 @@ const AuthenticationLoading = () => {
       })
     })
   }
-  const handleOAuth2 = () => {
+  const handleOAuth2 = async () => {
     // get provider from params:
     const urlParams = new URLSearchParams(window.location.search)
     const code = urlParams.get('code')
@@ -58,8 +59,11 @@ const AuthenticationLoading = () => {
     }
 
     if (code) {
+      await apiClient.init()
       const baseURL = apiClient.getApiURL()
-
+      const redirectURI = Capacitor.isNativePlatform()
+        ? 'donetick://auth/oauth2'
+        : `${window.location.origin}/auth/oauth2`
       fetch(`${baseURL}/auth/oauth2/callback`, {
         method: 'POST',
         headers: {
@@ -68,7 +72,7 @@ const AuthenticationLoading = () => {
         body: JSON.stringify({
           code,
           state: returnedState,
-          redirect_uri: `${window.location.origin}/auth/oauth2`,
+          redirect_uri: redirectURI,
         }),
       }).then(response => {
         if (response.status === 200) {

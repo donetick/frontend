@@ -36,6 +36,10 @@ export const AuthProvider = ({ children }) => {
   const login = async credentials => {
     setIsLoading(true)
     try {
+      // Ensure apiClient is initialized with the correct URL
+      await apiClient.init()
+      const currentBaseURL = apiClient.getApiURL()
+      
       const isNative =
         typeof window !== 'undefined' && window.Capacitor?.isNativePlatform?.()
 
@@ -50,7 +54,7 @@ export const AuthProvider = ({ children }) => {
         config.credentials = 'include'
       }
 
-      const response = await fetch(`${baseURL}/auth/login`, config)
+      const response = await fetch(`${currentBaseURL}/auth/login`, config)
 
       if (!response.ok) {
         const error = await response.json()

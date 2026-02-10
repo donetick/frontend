@@ -35,7 +35,8 @@ const createChore = userID => {
   }).then(response => response.json())
 }
 
-const signUp = (username, password, displayName, email) => {
+const signUp = async (username, password, displayName, email) => {
+  await apiClient.init(true)
   const baseURL = apiManager.getApiURL()
   return fetch(`${baseURL}/auth/`, {
     method: 'POST',
@@ -46,7 +47,8 @@ const signUp = (username, password, displayName, email) => {
   })
 }
 
-const UpdatePassword = newPassword => {
+const UpdatePassword = async newPassword => {
+  await apiClient.init(true)
   const baseURL = apiManager.getApiURL()
   return fetch(`${baseURL}/users/change_password`, {
     method: 'PUT',
@@ -55,7 +57,8 @@ const UpdatePassword = newPassword => {
   })
 }
 
-const login = (username, password) => {
+const login = async (username, password) => {
+  await apiClient.init(true)
   const baseURL = apiManager.getApiURL()
   return fetch(`${baseURL}/auth/login`, {
     headers: {
@@ -66,7 +69,8 @@ const login = (username, password) => {
   })
 }
 
-const logout = () => {
+const logout = async () => {
+  await apiClient.init(true)
   const baseURL = apiManager.getApiURL()
   const isNative =
     typeof window !== 'undefined' && window.Capacitor?.isNativePlatform?.()
@@ -476,6 +480,7 @@ const GetLabels = async () => {
 }
 
 const GetResource = async () => {
+  await apiClient.init()
   const basedURL = apiManager.getApiURL()
   const resp = await fetch(`${basedURL}/resource`, {
     method: 'GET',

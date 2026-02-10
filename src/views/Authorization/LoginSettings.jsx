@@ -4,10 +4,12 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { API_URL } from '../../Config'
 import Logo from '../../Logo'
+import { useResource } from '../../queries/ResourceQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { apiClient } from '../../utils/ApiClient'
 const LoginSettings = () => {
   const Navigate = useNavigate()
+  const { refetch: refetchResource } = useResource()
   const [serverURL, setServerURL] = React.useState('')
   const { showError } = useNotification()
 
@@ -114,8 +116,12 @@ const LoginSettings = () => {
               Preferences.set({
                 key: 'customServerUrl',
                 value: serverURL,
-              }).then(() => {
-                apiClient.customServerURL = serverURL + '/api/v1'
+              }).then(async () => {
+                // apiClient.customServerURL = serverURL + '/api/v1's
+                // Force re-initialization to reload from Preferences
+                await apiClient.init(true)
+                // refetch resource queries to update the API URL
+                refetchResource()
                 Navigate('/login')
               })
             }}

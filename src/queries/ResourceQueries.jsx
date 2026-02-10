@@ -13,7 +13,7 @@ const isTokenValid = () => {
 }
 
 export const useResource = () => {
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['resource'],
     queryFn: async () => {
       const response = await GetResource()
@@ -22,7 +22,6 @@ export const useResource = () => {
     staleTime: 6 * 60 * 60 * 1000, // 6 hours in milliseconds
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
-    enabled: isTokenValid(), // Only run query when we have a valid token
   })
-  return { data, isLoading, error }
+  return { data, isLoading, error, refetch }
 }
