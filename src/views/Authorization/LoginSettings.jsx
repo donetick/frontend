@@ -143,6 +143,7 @@ const LoginSettings = () => {
             onClick={() => {
               Preferences.set({ key: 'customServerUrl', value: API_URL }).then(
                 () => {
+                  refetchResource()
                   Navigate('/login')
                 },
               )
