@@ -10,7 +10,6 @@ import Settings from '@/views/Settings/Settings'
 import SettingsOverview from '@/views/Settings/SettingsOverview'
 import SettingsRoutes from '@/views/Settings/SettingsRoutes'
 import ThemeSettings from '@/views/Settings/ThemeSettings'
-import { Capacitor } from '@capacitor/core'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import AuthenticationLoading from '../views/Authorization/Authenticating'
 import ForgotPasswordView from '../views/Authorization/ForgotPasswordView'
@@ -46,8 +45,9 @@ import UserActivities from '../views/User/UserActivities'
 import UserPoints from '../views/User/UserPoints'
 const getMainRoute = () => {
   if (
-    import.meta.env.VITE_IS_LANDING_DEFAULT === 'true' &&
-    !Capacitor.isNativePlatform()
+    // if domain is www.donetick.com or donetick.com  then show landing page:
+    window.location.hostname === 'www.donetick.com' ||
+    window.location.hostname === 'donetick.com'
   ) {
     return <Landing />
   }
@@ -183,7 +183,7 @@ const Router = createBrowserRouter([
         element: <AuthenticationLoading />,
       },
       {
-        path: '/landing',
+        path: '/welcome',
         element: <Landing />,
       },
       {

@@ -1,7 +1,6 @@
 import {
   Archive,
   CalendarMonth,
-  CancelScheduleSend,
   Check,
   Checklist,
   CloseFullscreen,
@@ -35,7 +34,6 @@ import {
   MenuButton,
   MenuItem,
   Sheet,
-  Snackbar,
   Typography,
 } from '@mui/joy'
 import { Divider } from '@mui/material'
@@ -54,6 +52,7 @@ import {
   useStartChore,
 } from '../../queries/TimeQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
+import { useNotification } from '../../service/NotificationProvider'
 import { ChoreStatus, notInCompletionWindow } from '../../utils/Chores.jsx'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import {
@@ -63,6 +62,7 @@ import {
   RejectChore,
   SkipChore,
   UnArchiveChore,
+  UndoChoreAction,
   UpdateChorePriority,
 } from '../../utils/Fetcher'
 import Priorities from '../../utils/Priorities'
@@ -82,12 +82,11 @@ const ChoreView = () => {
   const { choreId } = useParams()
   const [note, setNote] = useState(null)
   const queryClient = useQueryClient()
+  const { showSuccess, showError, showUndo } = useNotification()
 
   const [searchParams] = useSearchParams()
 
-  const [isPendingCompletion, setIsPendingCompletion] = useState(false)
   const [timeoutId, setTimeoutId] = useState(null)
-  const [secondsLeftToCancel, setSecondsLeftToCancel] = useState(null)
   const [completedDate, setCompletedDate] = useState(null)
   const [confirmModelConfig, setConfirmModelConfig] = useState({
     isOpen: false,
@@ -189,20 +188,7 @@ const ChoreView = () => {
     setInfoCards(cards)
   }
   const handleTaskCompletion = () => {
-    setIsPendingCompletion(true)
-    let seconds = 3 // Starting countdown from 3 seconds
-    setSecondsLeftToCancel(seconds)
-
-    const countdownInterval = setInterval(() => {
-      seconds -= 1
-      setSecondsLeftToCancel(seconds)
-
-      if (seconds <= 0) {
-        clearInterval(countdownInterval) // Stop the countdown when it reaches 0
-      }
-    }, 1000)
-
-    const id = setTimeout(() => {
+    let id = setTimeout(() => {
       MarkChoreComplete(
         choreId,
         impersonatedUser
@@ -220,11 +206,8 @@ const ChoreView = () => {
           }
         })
         .then(() => {
-          setIsPendingCompletion(false)
           clearTimeout(id)
-          clearInterval(countdownInterval) // Ensure to clear this interval as well
           setTimeoutId(null)
-          setSecondsLeftToCancel(null)
           // Invalidate chores cache to refetch data
           queryClient.invalidateQueries(['chores'])
         })
@@ -241,6 +224,16 @@ const ChoreView = () => {
     }, 3000)
 
     setTimeoutId(id)
+
+    // Show undo notification
+    showSuccess({
+      title: 'Task Completed',
+      message: 'Your task has been marked as complete',
+      undoAction: () => {
+        clearTimeout(id)
+        setTimeoutId(null)
+      },
+    })
   }
   const handleSkippingTask = () => {
     SkipChore(choreId).then(response => {
@@ -250,6 +243,36 @@ const ChoreView = () => {
           setChore(newChore)
           // Invalidate chores cache to refetch data
           queryClient.invalidateQueries(['chores'])
+
+          // Show undo notification
+          showSuccess({
+            message: 'Task skipped',
+            undoAction: async () => {
+              try {
+                const undoResponse = await UndoChoreAction(choreId)
+                if (undoResponse.ok) {
+                  // Refetch chore details after undo
+                  const detailResponse = await GetChoreDetailById(choreId)
+                  if (detailResponse.ok) {
+                    const detailData = await detailResponse.json()
+                    setChore(detailData.res)
+                    queryClient.invalidateQueries(['chores'])
+                  }
+                  showUndo({
+                    title: 'Undo Successful',
+                    message: 'Task skip has been undone.',
+                  })
+                } else {
+                  throw new Error('Failed to undo')
+                }
+              } catch (error) {
+                showError({
+                  title: 'Undo Failed',
+                  message: 'Unable to undo the action. Please try again.',
+                })
+              }
+            },
+          })
         })
       }
     })
@@ -924,12 +947,11 @@ const ChoreView = () => {
                     size='lg'
                     onClick={handleTaskCompletion}
                     disabled={
-                      isPendingCompletion ||
                       notInCompletionWindow(chore) ||
                       (chore.lastCompletedDate !== null &&
                         chore.frequencyType === 'once')
                     }
-                    color={isPendingCompletion ? 'danger' : 'success'}
+                    color='success'
                     startDecorator={<Check />}
                     sx={{
                       flex: 4,
@@ -1017,31 +1039,6 @@ const ChoreView = () => {
           </Box>
         )}
 
-        <Snackbar
-          open={isPendingCompletion}
-          endDecorator={
-            <Button
-              onClick={() => {
-                if (timeoutId) {
-                  clearTimeout(timeoutId)
-                  setIsPendingCompletion(false)
-                  setTimeoutId(null)
-                  setSecondsLeftToCancel(null) // Reset or adjust as needed
-                }
-              }}
-              size='lg'
-              variant='outlined'
-              color='danger'
-              startDecorator={<CancelScheduleSend />}
-            >
-              Cancel
-            </Button>
-          }
-        >
-          <Typography level='body-md' textAlign={'center'}>
-            Task will be marked as completed in {secondsLeftToCancel} seconds
-          </Typography>
-        </Snackbar>
         <ConfirmationModal config={confirmModelConfig} />
         <ConfirmationModal config={timerActionConfig} />
       </Card>

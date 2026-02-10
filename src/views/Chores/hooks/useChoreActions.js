@@ -1,17 +1,17 @@
-import { useCallback } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { useArchiveChore, useDeleteChores } from '../../../queries/ChoreQueries'
+import { useCallback } from 'react'
+import { useArchiveChore } from '../../../queries/ChoreQueries'
 import { usePauseChore, useStartChore } from '../../../queries/TimeQueries'
 import {
-  ApproveChore,
-  DeleteChore,
-  MarkChoreComplete,
-  NudgeChore,
-  RejectChore,
-  SkipChore,
-  UndoChoreAction,
-  UpdateChoreAssignee,
-  UpdateDueDate,
+    ApproveChore,
+    DeleteChore,
+    MarkChoreComplete,
+    NudgeChore,
+    RejectChore,
+    SkipChore,
+    UndoChoreAction,
+    UpdateChoreAssignee,
+    UpdateDueDate,
 } from '../../../utils/Fetcher'
 
 export const useChoreActions = ({
@@ -682,6 +682,23 @@ export const useChoreActions = ({
               showSuccess({
                 title: '⏭️ Tasks Skipped',
                 message: `Successfully skipped ${skippedTasks.length} task${skippedTasks.length > 1 ? 's' : ''}.`,
+                undoAction: async () => {
+                  try {
+                    for (const chore of skippedTasks) {
+                      await UndoChoreAction(chore.id)
+                    }
+                    refetchChores()
+                    showUndo({
+                      title: 'Undo Successful',
+                      message: `Undo skip for ${skippedTasks.length} task${skippedTasks.length > 1 ? 's' : ''}.`,
+                    })
+                  } catch (error) {
+                    showError({
+                      title: 'Undo Failed',
+                      message: 'Unable to undo the action. Please try again.',
+                    })
+                  }
+                },
               })
             }
 
@@ -704,7 +721,7 @@ export const useChoreActions = ({
         setConfirmModelConfig({})
       },
     })
-  }, [getSelectedChoresData, showSuccess, showError, refetchChores, clearSelection, setConfirmModelConfig])
+  }, [getSelectedChoresData, showSuccess, showError, showUndo, refetchChores, clearSelection, setConfirmModelConfig])
 
   return {
     handleChoreAction,

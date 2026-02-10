@@ -1,10 +1,44 @@
 import { App as mobileApp } from '@capacitor/app'
+import { Browser } from '@capacitor/browser'
 import { Capacitor } from '@capacitor/core'
 import { Device } from '@capacitor/device'
 import { LocalNotifications } from '@capacitor/local-notifications'
 import { Preferences } from '@capacitor/preferences'
 import { PushNotifications } from '@capacitor/push-notifications'
 import { RegisterDeviceToken } from './utils/Fetcher'
+
+// OAuth callback handler for deep links
+const handleOAuthDeepLink = async url => {
+  console.log('OAuth deep link received:', url)
+
+  try {
+    // Parse the URL to extract code and state
+    const urlObj = new URL(url)
+    const code = urlObj.searchParams.get('code')
+    const state = urlObj.searchParams.get('state')
+
+    if (code && state) {
+      // Store the OAuth params for the app to pick up
+      await Preferences.set({
+        key: 'oauth_callback',
+        value: JSON.stringify({ code, state, timestamp: Date.now() }),
+      })
+
+      // Close the browser if it's still open
+      try {
+        await Browser.close()
+      } catch (e) {
+        // Browser might already be closed
+      }
+
+      // Navigate to the OAuth handler page
+      window.location.href = `/auth/oauth2?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`
+    }
+  } catch (error) {
+    console.error('Error handling OAuth deep link:', error)
+  }
+}
+
 const localNotificationListenerRegistration = () => {
   LocalNotifications.addListener('localNotificationReceived', notification => {
     console.log('Notification received', notification)
@@ -180,6 +214,17 @@ const registerCapacitorListeners = () => {
     return
   }
   localNotificationListenerRegistration()
+  
+  // Register deep link handler for OAuth and other deep links
+  mobileApp.addListener('appUrlOpen', event => {
+    console.log('App URL opened:', event.url)
+    
+    // Handle OAuth callback
+    if (event.url.startsWith('donetick://auth/')) {
+      handleOAuthDeepLink(event.url)
+    }
+  })
+  
   mobileApp.addListener('backButton', ({ canGoBack }) => {
     if (canGoBack) {
       window.history.back()
