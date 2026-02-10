@@ -60,11 +60,7 @@ const AuthenticationLoading = () => {
     if (code) {
       const baseURL = apiClient.getApiURL()
 
-      console.log(
-        '{baseURL}/auth/oauth2/callback',
-        `${baseURL}/auth/oauth2/callback`,
-      )
-      fetch(`${baseURL}/auth/${provider}/callback`, {
+      fetch(`${baseURL}/auth/oauth2/callback`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -72,6 +68,7 @@ const AuthenticationLoading = () => {
         body: JSON.stringify({
           code,
           state: returnedState,
+          redirect_uri: `${window.location.origin}/auth/oauth2`,
         }),
       }).then(response => {
         if (response.status === 200) {
