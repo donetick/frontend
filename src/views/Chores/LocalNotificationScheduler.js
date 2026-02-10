@@ -3,6 +3,8 @@ import { LocalNotifications } from '@capacitor/local-notifications'
 import { Preferences } from '@capacitor/preferences'
 import murmurhash from 'murmurhash'
 
+const MAX_LOCAL_NOTIFICATIONS = 64
+
 const getNotificationPreferences = async () => {
   const ret = await Preferences.get({ key: 'notificationPreferences' })
   return JSON.parse(ret.value)
@@ -205,6 +207,13 @@ const scheduleChoreNotification = async (
       )
       continue
     }
+  }
+  // sort from soonest to latest:
+  notifications.sort((a, b) => a.schedule.at - b.schedule.at)
+
+  // cap it for 64 notifications for Android:
+  if (notifications.length > MAX_LOCAL_NOTIFICATIONS) {
+    notifications.splice(MAX_LOCAL_NOTIFICATIONS)
   }
 
   LocalNotifications.schedule({
