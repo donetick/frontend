@@ -190,8 +190,8 @@ const NavBar = () => {
     return null
   }
   if (
-    location.pathname === '/' &&
-    import.meta.env.VITE_IS_LANDING_DEFAULT === 'true'
+    window.location.hostname === 'www.donetick.com' ||
+    window.location.hostname === 'donetick.com'
   ) {
     return null
   }
