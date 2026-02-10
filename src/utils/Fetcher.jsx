@@ -514,7 +514,8 @@ const ChangePassword = (verifiticationCode, password) => {
   })
 }
 
-const ResetPassword = email => {
+const ResetPassword = async email => {
+  await apiClient.init()
   const basedURL = apiManager.getApiURL()
   return fetch(`${basedURL}/auth/reset`, {
     method: 'POST',

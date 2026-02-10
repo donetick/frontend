@@ -143,7 +143,6 @@ const ForgotPasswordView = () => {
               </FormControl>
 
               <Button
-                type='submit'
                 fullWidth
                 size='lg'
                 variant='solid'
