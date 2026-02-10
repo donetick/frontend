@@ -92,9 +92,15 @@ const MyChores = () => {
   const {
     data: choresData,
     isLoading: choresLoading,
+    isError: choresError,
+    error: choresErrorDetails,
     refetch: refetchChores,
   } = useChores(false)
-  const { data: membersData, isLoading: membersLoading } = useCircleMembers()
+  const {
+    data: membersData,
+    isLoading: membersLoading,
+    isError: membersError,
+  } = useCircleMembers()
 
   const [chores, setChores] = useState([])
   const [filteredChores, setFilteredChores] = useState([])
@@ -748,6 +754,48 @@ const MyChores = () => {
     setChores(newChores)
     setFilteredChores(newChores)
     setSearchFilter('All')
+  }
+
+  // Show error state when API is unreachable
+  if (choresError || membersError) {
+    return (
+      <Container maxWidth='md'>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexDirection: 'column',
+            height: '70vh',
+            gap: 2,
+          }}
+        >
+          <Box sx={{ mb: 2, opacity: 0.7 }}>
+            <Logo />
+          </Box>
+          <Typography level='h4' color='danger'>
+            Unable to communicate with server
+          </Typography>
+          <Typography
+            level='body-md'
+            sx={{ textAlign: 'center', maxWidth: 400 }}
+          >
+            {choresErrorDetails?.message ||
+              'The server is currently unavailable. Please check your connection and try again.'}
+          </Typography>
+          <Button
+            variant='solid'
+            color='primary'
+            onClick={() => {
+              refetchChores()
+              queryClient.invalidateQueries(['circleMembers'])
+            }}
+          >
+            Retry Connection
+          </Button>
+        </Box>
+      </Container>
+    )
   }
 
   if (
