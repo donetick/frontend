@@ -16,12 +16,12 @@ class ApiClient {
     this.refreshCooldown = 3 * 1000 // 3 seconds in milliseconds
   }
 
-  async init() {
+  async init(force = false) {
     if (this.initPromise) {
       return this.initPromise
     }
 
-    if (this.initialized) {
+    if (this.initialized && !force) {
       return Promise.resolve()
     }
 
