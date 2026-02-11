@@ -1,5 +1,4 @@
-import { NextWeek, Today, WbSunny, Weekend } from '@mui/icons-material'
-import { Box, Button, Chip, Input, Stack, Typography } from '@mui/joy'
+import { Box, Button, Input } from '@mui/joy'
 import { useState } from 'react'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
@@ -9,62 +8,6 @@ function DateModal({ isOpen, onClose, onSave, current, title }) {
   const [date, setDate] = useState(
     current ? new Date(current).toISOString().split('T')[0] : '',
   )
-
-  const getQuickScheduleDate = option => {
-    const now = new Date()
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-
-    switch (option) {
-      case 'today': {
-        const nowHour = now.getHours()
-        const scheduled = new Date(today)
-        if (nowHour < 9) {
-          scheduled.setHours(9, 0, 0, 0)
-        } else if (nowHour < 12) {
-          scheduled.setHours(12, 0, 0, 0)
-        } else if (nowHour < 17) {
-          scheduled.setHours(17, 0, 0, 0)
-        } else {
-          scheduled.setHours(
-            now.getHours(),
-            now.getMinutes(),
-            now.getSeconds(),
-            now.getMilliseconds(),
-          )
-        }
-        return scheduled
-      }
-      case 'tomorrow': {
-        const tomorrow = new Date(today)
-        tomorrow.setDate(today.getDate() + 1)
-        tomorrow.setHours(12, 0, 0, 0)
-        return tomorrow
-      }
-      case 'weekend': {
-        const weekend = new Date(today)
-        const daysUntilSaturday = (6 - today.getDay() + 7) % 7 || 7
-        weekend.setDate(today.getDate() + daysUntilSaturday)
-        return weekend
-      }
-      case 'next-week': {
-        const nextWeek = new Date(today)
-        const daysUntilMonday = (1 - today.getDay() + 7) % 7 || 7
-        nextWeek.setDate(today.getDate() + daysUntilMonday)
-        return nextWeek
-      }
-      default:
-        return today
-    }
-  }
-
-  const handleQuickSchedule = option => {
-    if (option === 'remove') {
-      setDate('')
-    } else {
-      const selectedDate = getQuickScheduleDate(option)
-      setDate(selectedDate.toISOString().split('T')[0])
-    }
-  }
 
   const handleSave = () => {
     onSave(date)
@@ -86,7 +29,7 @@ function DateModal({ isOpen, onClose, onSave, current, title }) {
         onChange={e => setDate(e.target.value)}
       />
 
-      <Box sx={{ mt: 3 }}>
+      {/* <Box sx={{ mt: 3 }}>
         <Typography level='body-sm' sx={{ mb: 1.5, fontWeight: 500 }}>
           Quick select:
         </Typography>
@@ -132,7 +75,7 @@ function DateModal({ isOpen, onClose, onSave, current, title }) {
             Next week
           </Chip>
         </Stack>
-      </Box>
+      </Box> */}
 
       <Box display={'flex'} justifyContent={'space-around'} mt={4}>
         <Button size='lg' onClick={handleSave} fullWidth sx={{ mr: 1 }}>
