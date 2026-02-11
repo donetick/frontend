@@ -94,10 +94,7 @@ const AccountSettings = () => {
                 userProfile?.subscription !== 'cancelled')
             }
             onClick={async () => {
-              if (
-                Capacitor.isNativePlatform() &&
-                Capacitor.getPlatform() === 'ios'
-              ) {
+              if (Capacitor.isNativePlatform()) {
                 try {
                   const { RevenueCatUI } = await import(
                     '@revenuecat/purchases-capacitor-ui'
