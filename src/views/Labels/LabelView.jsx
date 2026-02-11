@@ -1,14 +1,14 @@
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import {
-    Avatar,
-    Box,
-    Chip,
-    CircularProgress,
-    Container,
-    IconButton,
-    Stack,
-    Typography,
+  Avatar,
+  Box,
+  Chip,
+  CircularProgress,
+  Container,
+  IconButton,
+  Stack,
+  Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
 import LabelModal from '../Modals/Inputs/LabelModal'
@@ -16,11 +16,11 @@ import LabelModal from '../Modals/Inputs/LabelModal'
 import { Add } from '@mui/icons-material'
 import { useQueryClient } from '@tanstack/react-query'
 import {
-    Type as ListType,
-    SwipeableList,
-    SwipeableListItem,
-    SwipeAction,
-    TrailingActions,
+  Type as ListType,
+  SwipeableList,
+  SwipeableListItem,
+  SwipeAction,
+  TrailingActions,
 } from 'react-swipeable-list'
 import 'react-swipeable-list/dist/styles.css'
 import { useUserProfile } from '../../queries/UserQueries'

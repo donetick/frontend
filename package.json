@@ -1,7 +1,7 @@
 {
   "name": "donetick",
   "private": true,
-  "version": "0.1.145",
+  "version": "0.4.0",
   "type": "module",
   "engines": {
     "node": ">=20.0.0",
@@ -29,7 +29,10 @@
     "merge": "git checkout main && git merge develop && git push origin main && git checkout develop",
     "ionic:build": "npm run build",
     "ionic:serve": "npm run start",
-    "android": "npm run build && npx cap sync android"
+    "android": "npm run build && npx cap sync android",
+    "bump": "node bump-version.js",
+    "bump:minor": "node bump-version.js minor",
+    "bump:major": "node bump-version.js major"
   },
   "dependencies": {
     "@capacitor-community/sqlite": "^7.0.0",
