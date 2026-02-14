@@ -78,7 +78,8 @@ const AppContent = () => {
         },
       })
     }
-  }, [needRefresh, showNotification, updateServiceWorker, setNeedRefresh])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [needRefresh])
 
   return (
     <div>
