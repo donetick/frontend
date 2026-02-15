@@ -440,7 +440,7 @@ const UserProfileAvatar = () => {
 
           {!isPlusUser && (
             <MenuItem
-              onClick={() => setIsSubscriptionModalOpen(true)}
+              onClick={() => navigate('/settings/account')}
               sx={{
                 borderRadius: 'var(--joy-radius-sm)',
                 '&:hover': {
