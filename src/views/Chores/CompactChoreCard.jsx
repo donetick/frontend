@@ -9,13 +9,13 @@ import {
   Webhook,
 } from '@mui/icons-material'
 import { Box, Checkbox, Chip, IconButton, Typography } from '@mui/joy'
-import moment from 'moment'
 import { useNavigate } from 'react-router-dom'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import {
   getDueDateChipColor,
   getDueDateChipText,
+  getRecurrentChipText,
 } from '../../utils/ChoreCardHelpers.jsx'
 import { notInCompletionWindow } from '../../utils/Chores.jsx'
 import {
@@ -65,111 +65,6 @@ const CompactChoreCard = ({
 
   // Utility functions
 
-  const getRecurrentText = chore => {
-    // if chore.frequencyMetadata is type string then parse it otherwise assigned to the metadata:
-    const metadata =
-      typeof chore.frequencyMetadata === 'string'
-        ? JSON.parse(chore.frequencyMetadata)
-        : chore.frequencyMetadata
-
-    const dayOfMonthSuffix = n => {
-      if (n >= 11 && n <= 13) {
-        return 'th'
-      }
-      switch (n % 10) {
-        case 1:
-          return 'st'
-        case 2:
-          return 'nd'
-        case 3:
-          return 'rd'
-        default:
-          return 'th'
-      }
-    }
-    if (chore.frequencyType === 'once') {
-      return 'Once'
-    } else if (chore.frequencyType === 'trigger') {
-      return 'Trigger'
-    } else if (chore.frequencyType === 'daily') {
-      return 'Daily'
-    } else if (chore.frequencyType === 'adaptive') {
-      return 'Adaptive'
-    } else if (chore.frequencyType === 'weekly') {
-      return 'Weekly'
-    } else if (chore.frequencyType === 'monthly') {
-      return 'Monthly'
-    } else if (chore.frequencyType === 'yearly') {
-      return 'Yearly'
-    } else if (chore.frequencyType === 'days_of_the_week') {
-      let days = metadata.days
-      if (days.length > 4) {
-        const allDays = [
-          'Sunday',
-          'Monday',
-          'Tuesday',
-          'Wednesday',
-          'Thursday',
-          'Friday',
-          'Saturday',
-        ]
-        const selectedDays = days.map(d => moment().day(d).format('dddd'))
-        const notSelectedDay = allDays.filter(
-          day => !selectedDays.includes(day),
-        )
-        const notSelectedShortdays = notSelectedDay.map(d =>
-          moment().day(d).format('ddd'),
-        )
-        return `Daily except ${notSelectedShortdays.join(', ')}`
-      } else {
-        days = days.map(d => moment().day(d).format('ddd'))
-        return days.join(', ')
-      }
-    } else if (chore.frequencyType === 'day_of_the_month') {
-      let months = metadata.months
-      if (months.length > 6) {
-        const allMonths = [
-          'January',
-          'February',
-          'March',
-          'April',
-          'May',
-          'June',
-          'July',
-          'August',
-          'September',
-          'October',
-          'November',
-          'December',
-        ]
-        const selectedMonths = months.map(m => moment().month(m).format('MMMM'))
-        const notSelectedMonth = allMonths.filter(
-          month => !selectedMonths.includes(month),
-        )
-        const notSelectedShortMonths = notSelectedMonth.map(m =>
-          moment().month(m).format('MMM'),
-        )
-        let result = `Monthly ${chore.frequency}${dayOfMonthSuffix(
-          chore.frequency,
-        )}`
-        if (notSelectedShortMonths.length > 0)
-          result += `
-        except ${notSelectedShortMonths.join(', ')}`
-        return result
-      } else {
-        let freqData = metadata
-        const months = freqData.months.map(m => moment().month(m).format('MMM'))
-        return `${chore.frequency}${dayOfMonthSuffix(
-          chore.frequency,
-        )} of ${months.join(', ')}`
-      }
-    } else if (chore.frequencyType === 'interval') {
-      return `Every ${chore.frequency} ${metadata.unit}`
-    } else {
-      return chore.frequencyType
-    }
-  }
-
   const getFrequencyIcon = chore => {
     if (['once', 'no_repeat'].includes(chore.frequencyType)) {
       return <TimesOneMobiledata sx={{ fontSize: 14 }} />
@@ -184,7 +79,7 @@ const CompactChoreCard = ({
     const parts = []
 
     // Frequency
-    parts.push(getRecurrentText(chore))
+    parts.push(getRecurrentChipText(chore))
 
     // Assignee (if not current user)
     if (chore.assignedTo && chore.assignedTo !== userProfile.id) {
