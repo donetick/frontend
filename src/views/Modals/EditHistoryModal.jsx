@@ -8,22 +8,31 @@ import ConfirmationModal from './Inputs/ConfirmationModal'
 function EditHistoryModal({ config, historyRecord }) {
   const { ResponsiveModal } = useResponsiveModal()
 
-  useEffect(() => {
-    setCompletedDate(
-      moment(historyRecord.performedAt).format('YYYY-MM-DDTHH:mm'),
-    )
-    setDueDate(moment(historyRecord.dueDate).format('YYYY-MM-DDTHH:mm'))
-    setNotes(historyRecord.notes)
-  }, [historyRecord])
-
-  const [completedDate, setCompletedDate] = useState(
-    moment(historyRecord.completedDate).format('YYYY-MM-DDTHH:mm'),
-  )
-  const [dueDate, setDueDate] = useState(
-    moment(historyRecord.dueDate).format('YYYY-MM-DDTHH:mm'),
-  )
-  const [notes, setNotes] = useState(historyRecord.notes)
+  const [completedDate, setCompletedDate] = useState('')
+  const [dueDate, setDueDate] = useState('')
+  const [notes, setNotes] = useState('')
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+
+  // Reset form when modal opens with new data
+  useEffect(() => {
+    if (config?.isOpen && historyRecord?.performedAt) {
+      setCompletedDate(
+        moment(historyRecord.performedAt).format('YYYY-MM-DDTHH:mm'),
+      )
+      setDueDate(
+        historyRecord.dueDate
+          ? moment(historyRecord.dueDate).format('YYYY-MM-DDTHH:mm')
+          : '',
+      )
+      setNotes(historyRecord.notes || '')
+    }
+  }, [config?.isOpen, historyRecord])
+
+  // Don't render modal content if no valid historyRecord
+  if (!historyRecord?.performedAt) {
+    return null
+  }
+
   return (
     <ResponsiveModal
       open={config?.isOpen}

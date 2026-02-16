@@ -14,19 +14,11 @@ import {
   History,
   Star,
   Timelapse,
-  TrendingUp
+  TrendingUp,
 } from '@mui/icons-material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
-import {
-  Box,
-  Button,
-  Card,
-  Container,
-  Grid,
-  Sheet,
-  Typography
-} from '@mui/joy'
+import { Box, Button, Card, Container, Grid, Sheet, Typography } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
@@ -37,6 +29,7 @@ import {
   useUpdateChoreHistory,
 } from '../../queries/ChoreQueries'
 import { useCircleMembers } from '../../queries/UserQueries'
+import { useNotification } from '../../service/NotificationProvider'
 import { ChoreHistoryStatus } from '../../utils/Chores'
 import LoadingComponent from '../components/Loading'
 import EditHistoryModal from '../Modals/EditHistoryModal'
@@ -48,10 +41,10 @@ const ChoreHistory = () => {
   const [historyInfo, setHistoryInfo] = useState([])
   const { choreId } = useParams()
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [editHistory, setEditHistory] = useState({})
+  const [editHistory, setEditHistory] = useState(null)
   const { confirmModalConfig, showConfirmation } = useConfirmationModal()
   const [showMoreInfoId, setShowMoreInfoId] = useState(null)
-
+  const { showSuccess, showError } = useNotification()
   // React Query hooks
   const { data: choreHistoryData, isLoading } = useChoreHistory(choreId)
   const { data: circleMembersData } = useCircleMembers()
@@ -387,8 +380,10 @@ const ChoreHistory = () => {
           isOpen: isEditModalOpen,
           onClose: () => {
             setIsEditModalOpen(false)
+            setEditHistory(null)
           },
           onSave: updated => {
+            if (!editHistory?.id) return
             updateChoreHistory.mutate(
               {
                 choreId,
@@ -400,9 +395,13 @@ const ChoreHistory = () => {
                 },
               },
               {
-                onSuccess: data => {
-                  setEditHistory(data.res)
+                onSuccess: () => {
                   setIsEditModalOpen(false)
+                  setEditHistory(null)
+                  showSuccess({
+                    title: 'History Updated',
+                    message: `The history record has been updated successfully.`,
+                  })
                 },
                 onError: error => {
                   console.error('Failed to update chore history:', error)
@@ -411,6 +410,7 @@ const ChoreHistory = () => {
             )
           },
           onDelete: () => {
+            if (!editHistory?.id) return
             deleteChoreHistory.mutate(
               {
                 choreId,
@@ -419,6 +419,11 @@ const ChoreHistory = () => {
               {
                 onSuccess: () => {
                   setIsEditModalOpen(false)
+                  setEditHistory(null)
+                  showSuccess({
+                    title: 'History Deleted',
+                    message: `The history record has been deleted successfully.`,
+                  })
                 },
               },
             )
