@@ -266,6 +266,15 @@ const ProjectView = () => {
       const updatedProjects = userProjects.filter(project => project.id !== id)
       setUserProjects(updatedProjects)
       queryClient.invalidateQueries('projects')
+
+      // If the deleted project was the active project, clear it
+      const saved = localStorage.getItem('selectedProject')
+      if (saved) {
+        const savedProject = JSON.parse(saved)
+        if (savedProject && savedProject.id === id) {
+          setSelectedProjectWithCache(null)
+        }
+      }
     })
   }
 
