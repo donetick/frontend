@@ -546,7 +546,7 @@ const SortAndGrouping = ({
                 fontWeight: 500,
               }}
             >
-              Create Custom Filter
+              Create Filter
             </Typography>
             <Typography
               level='body-xs'
