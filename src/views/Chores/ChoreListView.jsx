@@ -1,4 +1,12 @@
 import {
+  Type as ListType,
+  SwipeableList,
+  SwipeableListItem,
+  SwipeAction,
+  TrailingActions,
+} from '@meauxt/react-swipeable-list'
+import '@meauxt/react-swipeable-list/dist/styles.css'
+import {
   Check,
   Delete,
   Edit,
@@ -10,14 +18,6 @@ import {
 } from '@mui/icons-material'
 import { Box, Typography } from '@mui/joy'
 import { useNavigate } from 'react-router-dom'
-import {
-  Type as ListType,
-  SwipeableList,
-  SwipeableListItem,
-  SwipeAction,
-  TrailingActions,
-} from 'react-swipeable-list'
-import 'react-swipeable-list/dist/styles.css'
 import ChoreCard from './ChoreCard'
 import CompactChoreCard from './CompactChoreCard'
 

@@ -1,3 +1,11 @@
+import {
+  Type as ListType,
+  SwipeableList,
+  SwipeableListItem,
+  SwipeAction,
+  TrailingActions,
+} from '@meauxt/react-swipeable-list'
+import '@meauxt/react-swipeable-list/dist/styles.css'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import {
@@ -12,16 +20,15 @@ import {
 } from '@mui/joy'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import {
-  Type as ListType,
-  SwipeableList,
-  SwipeableListItem,
-  SwipeAction,
-  TrailingActions,
-} from 'react-swipeable-list'
-import 'react-swipeable-list/dist/styles.css'
 
-import { Add, FilterAlt, Star, StarBorder, Task } from '@mui/icons-material'
+import {
+  Add,
+  FilterAlt,
+  MoreVert,
+  Star,
+  StarBorder,
+  Task,
+} from '@mui/icons-material'
 import { useChores } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { getFilterCount, getFilterOverdueCount } from '../../utils/FilterEngine'
@@ -39,7 +46,12 @@ import {
   useUpdateFilter,
 } from './FilterQueries'
 
-const FilterCardContent = ({ filter, taskCount = 0, overdueCount = 0 }) => {
+const FilterCardContent = ({
+  filter,
+  taskCount = 0,
+  overdueCount = 0,
+  onToggleActions,
+}) => {
   // Get condition labels for display
   const getConditionSummary = () => {
     if (!filter.conditions || filter.conditions.length === 0) {
@@ -212,6 +224,21 @@ const FilterCardContent = ({ filter, taskCount = 0, overdueCount = 0 }) => {
           )}
         </Box>
       </Box>
+      <Box>
+        {onToggleActions && (
+          <IconButton
+            color='neutral'
+            variant='plain'
+            size='sm'
+            onClick={e => {
+              e.stopPropagation()
+              onToggleActions()
+            }}
+          >
+            <MoreVert sx={{ fontSize: 18 }} />
+          </IconButton>
+        )}
+      </Box>
     </Box>
   )
 }
@@ -236,7 +263,7 @@ const FilterView = () => {
     useState(false)
   const [editingFilter, setEditingFilter] = useState(null)
   const [confirmationModel, setConfirmationModel] = useState({})
-
+  const [showMoreInfoId, setShowMoreInfoId] = useState(null)
   // Sort filters: pinned first, then by usage count, then by last used
   const savedFilters = useMemo(() => {
     return [...filtersData].sort((a, b) => {
@@ -415,99 +442,119 @@ const FilterView = () => {
           </Box>
         ) : (
           <SwipeableList type={ListType.IOS} fullSwipe={false}>
-            {savedFilters.map(filter => (
-              <SwipeableListItem
-                onClick={() =>
-                  navigate(`/chores?filterId=${encodeURIComponent(filter.id)}`)
-                }
-                key={filter.id}
-                trailingActions={
-                  <TrailingActions>
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.06)',
-                        zIndex: 0,
-                      }}
-                    >
-                      <SwipeAction onClick={() => handlePinFilter(filter.id)}>
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            bgcolor: 'warning.softBg',
-                            color: 'warning.700',
-                            px: 3,
-                            height: '100%',
-                          }}
-                        >
-                          {filter.isPinned ? (
-                            <Star sx={{ fontSize: 20 }} />
-                          ) : (
-                            <StarBorder sx={{ fontSize: 20 }} />
-                          )}
-                          <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                            {filter.isPinned ? 'Unpin' : 'Pin'}
-                          </Typography>
-                        </Box>
-                      </SwipeAction>
-                      <SwipeAction onClick={() => handleEditFilter(filter)}>
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            bgcolor: 'neutral.softBg',
-                            color: 'neutral.700',
-                            px: 3,
-                            height: '100%',
-                          }}
-                        >
-                          <EditIcon sx={{ fontSize: 20 }} />
-                          <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                            Edit
-                          </Typography>
-                        </Box>
-                      </SwipeAction>
-                      <SwipeAction
-                        onClick={() => handleDeleteClicked(filter.id)}
+            {savedFilters.map(filter => {
+              return (
+                <SwipeableListItem
+                  swipeActionOpen={
+                    showMoreInfoId === filter.id ? 'trailing' : null
+                  }
+                  onClick={() =>
+                    navigate(
+                      `/chores?filterId=${encodeURIComponent(filter.id)}`,
+                    )
+                  }
+                  key={filter.id}
+                  trailingActions={
+                    <TrailingActions>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.06)',
+                          zIndex: 0,
+                        }}
                       >
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            bgcolor: 'danger.softBg',
-                            color: 'danger.700',
-                            px: 3,
-                            height: '100%',
-                          }}
-                        >
-                          <DeleteIcon sx={{ fontSize: 20 }} color='danger' />
-                          <Typography
-                            level='body-xs'
-                            sx={{ mt: 0.5 }}
-                            color='danger'
+                        <SwipeAction onClick={() => handlePinFilter(filter.id)}>
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              bgcolor: 'warning.softBg',
+                              color: 'warning.700',
+                              px: 3,
+                              height: '100%',
+                            }}
                           >
-                            Delete
-                          </Typography>
-                        </Box>
-                      </SwipeAction>
-                    </Box>
-                  </TrailingActions>
-                }
-              >
-                <FilterCardContent
-                  filter={filter}
-                  taskCount={filterCounts[filter.id]?.count || 0}
-                  overdueCount={filterCounts[filter.id]?.overdueCount || 0}
-                />
-              </SwipeableListItem>
-            ))}
+                            {filter.isPinned ? (
+                              <Star sx={{ fontSize: 20 }} />
+                            ) : (
+                              <StarBorder sx={{ fontSize: 20 }} />
+                            )}
+                            <Typography level='body-xs' sx={{ mt: 0.5 }}>
+                              {filter.isPinned ? 'Unpin' : 'Pin'}
+                            </Typography>
+                          </Box>
+                        </SwipeAction>
+                        <SwipeAction onClick={() => handleEditFilter(filter)}>
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              bgcolor: 'neutral.softBg',
+                              color: 'neutral.700',
+                              px: 3,
+                              height: '100%',
+                            }}
+                          >
+                            <EditIcon sx={{ fontSize: 20 }} />
+                            <Typography level='body-xs' sx={{ mt: 0.5 }}>
+                              Edit
+                            </Typography>
+                          </Box>
+                        </SwipeAction>
+                        <SwipeAction
+                          onClick={() => handleDeleteClicked(filter.id)}
+                        >
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              bgcolor: 'danger.softBg',
+                              color: 'danger.700',
+                              px: 3,
+                              height: '100%',
+                            }}
+                          >
+                            <DeleteIcon sx={{ fontSize: 20 }} color='danger' />
+                            <Typography
+                              level='body-xs'
+                              sx={{ mt: 0.5 }}
+                              color='danger'
+                            >
+                              Delete
+                            </Typography>
+                          </Box>
+                        </SwipeAction>
+                      </Box>
+                    </TrailingActions>
+                  }
+                >
+                  <FilterCardContent
+                    onToggleActions={() => {
+                      console.log(
+                        'Toggling actions for filter:',
+                        filter.id,
+                        showMoreInfoId,
+                      )
+
+                      if (showMoreInfoId === filter.id) {
+                        setShowMoreInfoId(null)
+                      } else {
+                        setShowMoreInfoId(filter.id)
+                      }
+                    }}
+                    filter={filter}
+                    taskCount={filterCounts[filter.id]?.count || 0}
+                    overdueCount={filterCounts[filter.id]?.overdueCount || 0}
+                  />
+                </SwipeableListItem>
+              )
+            })}
           </SwipeableList>
         )}
       </Box>

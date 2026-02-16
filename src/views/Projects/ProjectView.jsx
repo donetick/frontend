@@ -1,29 +1,29 @@
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import {
-    Avatar,
-    Box,
-    Chip,
-    CircularProgress,
-    Container,
-    IconButton,
-    Stack,
-    Typography,
+  Avatar,
+  Box,
+  Chip,
+  CircularProgress,
+  Container,
+  IconButton,
+  Stack,
+  Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ProjectModal from '../Modals/Inputs/ProjectModal'
 
+import {
+  Type as ListType,
+  SwipeableList,
+  SwipeableListItem,
+  SwipeAction,
+  TrailingActions,
+} from '@meauxt/react-swipeable-list'
+import '@meauxt/react-swipeable-list/dist/styles.css'
 import { Add, Task } from '@mui/icons-material'
 import { useQueryClient } from '@tanstack/react-query'
-import {
-    Type as ListType,
-    SwipeableList,
-    SwipeableListItem,
-    SwipeAction,
-    TrailingActions,
-} from 'react-swipeable-list'
-import 'react-swipeable-list/dist/styles.css'
 import { useChores } from '../../queries/ChoreQueries'
 import { useUserProfile } from '../../queries/UserQueries'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors'

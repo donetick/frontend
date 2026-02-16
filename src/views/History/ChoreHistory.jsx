@@ -1,12 +1,20 @@
 import {
-    Analytics,
-    Checklist,
-    EventBusy,
-    Group,
-    History,
-    Star,
-    Timelapse,
-    TrendingUp,
+  Type as ListType,
+  SwipeableList,
+  SwipeableListItem,
+  SwipeAction,
+  TrailingActions,
+} from '@meauxt/react-swipeable-list'
+import '@meauxt/react-swipeable-list/dist/styles.css'
+import {
+  Analytics,
+  Checklist,
+  EventBusy,
+  Group,
+  History,
+  Star,
+  Timelapse,
+  TrendingUp,
 } from '@mui/icons-material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
@@ -14,19 +22,11 @@ import { Box, Button, Card, Container, Grid, Sheet, Typography } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import {
-    Type as ListType,
-    SwipeableList,
-    SwipeableListItem,
-    SwipeAction,
-    TrailingActions,
-} from 'react-swipeable-list'
-import 'react-swipeable-list/dist/styles.css'
 import useConfirmationModal from '../../hooks/useConfirmationModal'
 import {
-    useChoreHistory,
-    useDeleteChoreHistory,
-    useUpdateChoreHistory,
+  useChoreHistory,
+  useDeleteChoreHistory,
+  useUpdateChoreHistory,
 } from '../../queries/ChoreQueries'
 import { useCircleMembers } from '../../queries/UserQueries'
 import { ChoreHistoryStatus } from '../../utils/Chores'

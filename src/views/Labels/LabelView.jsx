@@ -13,16 +13,16 @@ import {
 import { useEffect, useState } from 'react'
 import LabelModal from '../Modals/Inputs/LabelModal'
 
-import { Add } from '@mui/icons-material'
-import { useQueryClient } from '@tanstack/react-query'
 import {
   Type as ListType,
   SwipeableList,
   SwipeableListItem,
   SwipeAction,
   TrailingActions,
-} from 'react-swipeable-list'
-import 'react-swipeable-list/dist/styles.css'
+} from '@meauxt/react-swipeable-list'
+import '@meauxt/react-swipeable-list/dist/styles.css'
+import { Add } from '@mui/icons-material'
+import { useQueryClient } from '@tanstack/react-query'
 import { useUserProfile } from '../../queries/UserQueries'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors'
 import { DeleteLabel } from '../../utils/Fetcher'
