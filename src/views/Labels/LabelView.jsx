@@ -21,7 +21,7 @@ import {
   TrailingActions,
 } from '@meauxt/react-swipeable-list'
 import '@meauxt/react-swipeable-list/dist/styles.css'
-import { Add } from '@mui/icons-material'
+import { Add, MoreVert } from '@mui/icons-material'
 import { useQueryClient } from '@tanstack/react-query'
 import { useUserProfile } from '../../queries/UserQueries'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors'
@@ -30,7 +30,7 @@ import { getSafeBottomStyles } from '../../utils/SafeAreaUtils'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import { useLabels } from './LabelQueries'
 
-const LabelCardContent = ({ label, currentUserId }) => {
+const LabelCardContent = ({ label, currentUserId, onToggleActions }) => {
   // Check if current user owns this label
   const isOwnedByCurrentUser = label.created_by === currentUserId
 
@@ -128,6 +128,21 @@ const LabelCardContent = ({ label, currentUserId }) => {
           )}
         </Box>
       </Box>
+      <Box>
+        {onToggleActions && (
+          <IconButton
+            color='neutral'
+            variant='plain'
+            size='sm'
+            onClick={e => {
+              e.stopPropagation()
+              onToggleActions()
+            }}
+          >
+            <MoreVert sx={{ fontSize: 18 }} />
+          </IconButton>
+        )}
+      </Box>
     </Box>
   )
 }
@@ -142,6 +157,7 @@ const LabelView = () => {
   const [currentLabel, setCurrentLabel] = useState(null)
   const queryClient = useQueryClient()
   const [confirmationModel, setConfirmationModel] = useState({})
+  const [showMoreInfoId, setShowMoreInfoId] = useState(null)
 
   const handleAddLabel = () => {
     setCurrentLabel(null)
@@ -260,6 +276,7 @@ const LabelView = () => {
           {userLabels.map(label => (
             <SwipeableListItem
               key={label.id}
+              swipeActionOpen={showMoreInfoId === label.id ? 'trailing' : null}
               trailingActions={
                 <TrailingActions>
                   <Box
@@ -311,7 +328,17 @@ const LabelView = () => {
                 </TrailingActions>
               }
             >
-              <LabelCardContent label={label} currentUserId={userProfile?.id} />
+              <LabelCardContent
+                label={label}
+                currentUserId={userProfile?.id}
+                onToggleActions={() => {
+                  if (showMoreInfoId === label.id) {
+                    setShowMoreInfoId(null)
+                  } else {
+                    setShowMoreInfoId(label.id)
+                  }
+                }}
+              />
             </SwipeableListItem>
           ))}
         </SwipeableList>

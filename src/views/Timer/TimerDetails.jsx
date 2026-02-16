@@ -12,6 +12,7 @@ import {
   BrowseGallery,
   Delete,
   Edit,
+  MoreVert,
   PauseCircle,
   Person,
   PlayArrow,
@@ -56,6 +57,7 @@ const TimerDetails = () => {
   const [editingSessions, setEditingSessions] = useState({})
   const [currentTime, setCurrentTime] = useState(new Date())
   const [timerActionLoading, setTimerActionLoading] = useState(false)
+  const [showMoreInfoId, setShowMoreInfoId] = useState(null)
   const { showError, showSuccess } = useNotification()
 
   // Fetch circle members data
@@ -940,6 +942,11 @@ const TimerDetails = () => {
                           return (
                             <SwipeableListItem
                               key={pauseIndex}
+                              swipeActionOpen={
+                                showMoreInfoId === pauseIndex
+                                  ? 'trailing'
+                                  : null
+                              }
                               trailingActions={
                                 <TrailingActions>
                                   <Box
@@ -1131,6 +1138,22 @@ const TimerDetails = () => {
                                     {endTime ? `→ ${endTime}` : '→ ongoing'}
                                   </Typography>
                                 </Box>
+
+                                <IconButton
+                                  color='neutral'
+                                  variant='plain'
+                                  size='sm'
+                                  onClick={e => {
+                                    e.stopPropagation()
+                                    if (showMoreInfoId === pauseIndex) {
+                                      setShowMoreInfoId(null)
+                                    } else {
+                                      setShowMoreInfoId(pauseIndex)
+                                    }
+                                  }}
+                                >
+                                  <MoreVert sx={{ fontSize: 18 }} />
+                                </IconButton>
                               </Card>
                             </SwipeableListItem>
                           )

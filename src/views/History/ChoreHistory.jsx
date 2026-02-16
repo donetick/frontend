@@ -14,11 +14,19 @@ import {
   History,
   Star,
   Timelapse,
-  TrendingUp,
+  TrendingUp
 } from '@mui/icons-material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
-import { Box, Button, Card, Container, Grid, Sheet, Typography } from '@mui/joy'
+import {
+  Box,
+  Button,
+  Card,
+  Container,
+  Grid,
+  Sheet,
+  Typography
+} from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
@@ -42,6 +50,7 @@ const ChoreHistory = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [editHistory, setEditHistory] = useState({})
   const { confirmModalConfig, showConfirmation } = useConfirmationModal()
+  const [showMoreInfoId, setShowMoreInfoId] = useState(null)
 
   // React Query hooks
   const { data: choreHistoryData, isLoading } = useChoreHistory(choreId)
@@ -298,6 +307,11 @@ const ChoreHistory = () => {
           {choreHistory.map((historyEntry, index) => (
             <SwipeableListItem
               key={historyEntry.id || index}
+              swipeActionOpen={
+                showMoreInfoId === (historyEntry.id || index)
+                  ? 'trailing'
+                  : null
+              }
               trailingActions={
                 <TrailingActions>
                   <Box
@@ -355,6 +369,14 @@ const ChoreHistory = () => {
                 performers={performers}
                 allHistory={choreHistory}
                 index={index}
+                onToggleActions={() => {
+                  const id = historyEntry.id || index
+                  if (showMoreInfoId === id) {
+                    setShowMoreInfoId(null)
+                  } else {
+                    setShowMoreInfoId(id)
+                  }
+                }}
               />
             </SwipeableListItem>
           ))}

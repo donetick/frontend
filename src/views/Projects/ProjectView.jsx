@@ -22,7 +22,7 @@ import {
   TrailingActions,
 } from '@meauxt/react-swipeable-list'
 import '@meauxt/react-swipeable-list/dist/styles.css'
-import { Add, Task } from '@mui/icons-material'
+import { Add, MoreVert, Task } from '@mui/icons-material'
 import { useQueryClient } from '@tanstack/react-query'
 import { useChores } from '../../queries/ChoreQueries'
 import { useUserProfile } from '../../queries/UserQueries'
@@ -38,6 +38,7 @@ const ProjectCardContent = ({
   currentUserId,
   taskCounts = {},
   onCardClick,
+  onToggleActions,
 }) => {
   // Check if current user owns this project
   const isOwnedByCurrentUser = project.created_by === currentUserId
@@ -197,6 +198,21 @@ const ProjectCardContent = ({
           )}
         </Box>
       </Box>
+      <Box>
+        {onToggleActions && (
+          <IconButton
+            color='neutral'
+            variant='plain'
+            size='sm'
+            onClick={e => {
+              e.stopPropagation()
+              onToggleActions()
+            }}
+          >
+            <MoreVert sx={{ fontSize: 18 }} />
+          </IconButton>
+        )}
+      </Box>
     </Box>
   )
 }
@@ -215,6 +231,7 @@ const ProjectView = () => {
   const [taskCounts, setTaskCounts] = useState({})
   const queryClient = useQueryClient()
   const [confirmationModel, setConfirmationModel] = useState({})
+  const [showMoreInfoId, setShowMoreInfoId] = useState(null)
 
   const handleAddProject = () => {
     setCurrentProject(null)
@@ -373,6 +390,9 @@ const ProjectView = () => {
             <SwipeableListItem
               onClick={() => handleCardClick(project)}
               key={project.id}
+              swipeActionOpen={
+                showMoreInfoId === project.id ? 'trailing' : null
+              }
               trailingActions={
                 <TrailingActions>
                   <Box
@@ -430,7 +450,13 @@ const ProjectView = () => {
                 project={project}
                 currentUserId={userProfile?.id}
                 taskCounts={taskCounts}
-                // onCardClick={}
+                onToggleActions={() => {
+                  if (showMoreInfoId === project.id) {
+                    setShowMoreInfoId(null)
+                  } else {
+                    setShowMoreInfoId(project.id)
+                  }
+                }}
               />
             </SwipeableListItem>
           ))}

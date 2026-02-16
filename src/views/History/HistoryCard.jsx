@@ -5,13 +5,14 @@ import {
   CheckCircle,
   EventNote,
   HourglassEmpty,
+  MoreVert,
   Person,
   Redo,
   ThumbDown,
   Timelapse,
   Toll,
 } from '@mui/icons-material'
-import { Avatar, Box, Chip, Grid, Typography } from '@mui/joy'
+import { Avatar, Box, Chip, Grid, IconButton, Typography } from '@mui/joy'
 import moment from 'moment'
 import { TASK_COLOR } from '../../utils/Colors.jsx'
 
@@ -85,7 +86,13 @@ const formatTime = seconds => {
 /**
  * Compact HistoryCard component - content only
  */
-const HistoryCard = ({ allHistory, performers, historyEntry, index }) => {
+const HistoryCard = ({
+  allHistory,
+  performers,
+  historyEntry,
+  index,
+  onToggleActions,
+}) => {
   const performer = performers.find(p => p.userId === historyEntry.completedBy)
   const assignedTo = performers.find(p => p.userId === historyEntry.assignedTo)
 
@@ -149,7 +156,7 @@ const HistoryCard = ({ allHistory, performers, historyEntry, index }) => {
         borderColor: 'divider',
       }}
     >
-      <Box sx={{ flex: 1 }}>
+      <Box sx={{ flex: 1, minWidth: 0 }}>
         <Grid container spacing={1} alignItems='center'>
           {/* First Row/Column: Status and Time Info */}
           <Grid xs={12} sm={8}>
@@ -281,6 +288,21 @@ const HistoryCard = ({ allHistory, performers, historyEntry, index }) => {
             </Box>
           </Grid>
         </Grid>
+      </Box>
+      <Box>
+        {onToggleActions && (
+          <IconButton
+            color='neutral'
+            variant='plain'
+            size='sm'
+            onClick={e => {
+              e.stopPropagation()
+              onToggleActions()
+            }}
+          >
+            <MoreVert sx={{ fontSize: 18 }} />
+          </IconButton>
+        )}
       </Box>
     </Box>
   )

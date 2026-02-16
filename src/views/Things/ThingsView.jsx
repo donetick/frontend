@@ -11,6 +11,7 @@ import {
   Delete,
   Edit,
   Flip,
+  MoreVert,
   PlusOne,
   ToggleOff,
   ToggleOn,
@@ -40,7 +41,7 @@ import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import CreateThingModal from '../Modals/Inputs/CreateThingModal'
 import EditThingStateModal from '../Modals/Inputs/EditThingState'
 
-const ThingCardContent = ({ thing, onCardClick }) => {
+const ThingCardContent = ({ thing, onCardClick, onToggleActions }) => {
   const getThingIcon = type => {
     if (type === 'text') {
       return <Flip />
@@ -183,6 +184,21 @@ const ThingCardContent = ({ thing, onCardClick }) => {
           </Chip>
         </Box>
       </Box>
+      <Box>
+        {onToggleActions && (
+          <IconButton
+            color='neutral'
+            variant='plain'
+            size='sm'
+            onClick={e => {
+              e.stopPropagation()
+              onToggleActions()
+            }}
+          >
+            <MoreVert sx={{ fontSize: 18 }} />
+          </IconButton>
+        )}
+      </Box>
     </Box>
   )
 }
@@ -194,6 +210,7 @@ const ThingsView = () => {
   const [isShowEditThingStateModal, setIsShowEditStateModal] = useState(false)
   const [createModalThing, setCreateModalThing] = useState(null)
   const [confirmModelConfig, setConfirmModelConfig] = useState({})
+  const [showMoreInfoId, setShowMoreInfoId] = useState(null)
   const { showError, showNotification } = useNotification()
 
   useEffect(() => {
@@ -388,6 +405,7 @@ const ThingsView = () => {
             <SwipeableListItem
               onClick={() => navigate(`/things/${thing?.id}`)}
               key={thing.id}
+              swipeActionOpen={showMoreInfoId === thing.id ? 'trailing' : null}
               trailingActions={
                 <TrailingActions>
                   <Box
@@ -474,7 +492,16 @@ const ThingsView = () => {
                 </TrailingActions>
               }
             >
-              <ThingCardContent thing={thing} />
+              <ThingCardContent
+                thing={thing}
+                onToggleActions={() => {
+                  if (showMoreInfoId === thing.id) {
+                    setShowMoreInfoId(null)
+                  } else {
+                    setShowMoreInfoId(thing.id)
+                  }
+                }}
+              />
             </SwipeableListItem>
           ))}
         </SwipeableList>
