@@ -783,40 +783,6 @@ const UserActivites = () => {
   if (!userProfile) {
     return <LoadingComponent />
   }
-  if (!choresData.res?.length > 0 || !choresHistory?.length > 0) {
-    return (
-      <Container
-        maxWidth='md'
-        sx={{
-          textAlign: 'center',
-          display: 'flex',
-          // make sure the content is centered vertically:
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexDirection: 'column',
-          height: '50vh',
-        }}
-      >
-        <EventBusy
-          sx={{
-            fontSize: '6rem',
-            mb: 1,
-          }}
-        />
-
-        <Typography level='h3' gutterBottom>
-          No activities
-        </Typography>
-        <Typography level='body1'>
-          You have no activities for the selected period.
-        </Typography>
-        <Button variant='soft' sx={{ mt: 2 }}>
-          <Link to='/chores'>Go back to chores</Link>
-        </Button>
-      </Container>
-    )
-  }
-
   // Calculate activities analytics
   return (
     <Container
