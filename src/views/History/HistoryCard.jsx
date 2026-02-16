@@ -2,7 +2,6 @@ import {
   AccessTime,
   CalendarMonth,
   Check,
-  CheckCircle,
   EventNote,
   HourglassEmpty,
   MoreVert,
@@ -235,9 +234,11 @@ const HistoryCard = ({
                 size='sm'
                 variant='solid'
                 color='success'
-                startDecorator={<CheckCircle />}
+                startDecorator={
+                  <Avatar src={performer?.image} alt={performer?.displayName} />
+                }
               >
-                Done by {performer?.displayName || 'Unknown'}
+                {performer?.displayName || 'Unknown'}
               </Chip>
 
               {historyEntry.completedBy !== historyEntry.assignedTo &&
