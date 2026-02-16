@@ -371,8 +371,10 @@ const MyChores = () => {
     if (!chores.length || !savedFilters.length) return
 
     // Check for filterId (camelCase) or filter_id (snake_case) for advanced filters
-    const filterId =
+    const rawFilterId =
       searchParams.get('filterId') || searchParams.get('filter_id')
+    // Parse as number since filter IDs from the API are numeric
+    const filterId = rawFilterId ? Number(rawFilterId) || rawFilterId : null
 
     const oldFilter = searchParams.get('filter')
 
