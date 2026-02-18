@@ -86,7 +86,6 @@ const ChoreView = () => {
 
   const [searchParams] = useSearchParams()
 
-  const [timeoutId, setTimeoutId] = useState(null)
   const [completedDate, setCompletedDate] = useState(null)
   const [confirmModelConfig, setConfirmModelConfig] = useState({
     isOpen: false,
@@ -188,52 +187,68 @@ const ChoreView = () => {
     setInfoCards(cards)
   }
   const handleTaskCompletion = () => {
-    let id = setTimeout(() => {
-      MarkChoreComplete(
-        choreId,
-        impersonatedUser
-          ? { completedBy: impersonatedUser.userId, note }
-          : { note },
-        completedDate,
-        null,
-      )
-        .then(resp => {
+    MarkChoreComplete(
+      choreId,
+      impersonatedUser
+        ? { completedBy: impersonatedUser.userId, note }
+        : { note },
+      completedDate,
+      null,
+    )
+      .then(resp => {
+        if (resp.ok) {
+          return resp.json().then(data => {
+            setNote(null)
+            setChore(data.res)
+          })
+        }
+      })
+      .then(() => {
+        // Invalidate chores cache to refetch data
+        queryClient.invalidateQueries(['chores'])
+      })
+      .then(() => {
+        // refetch the chore details
+        GetChoreDetailById(choreId).then(resp => {
           if (resp.ok) {
             return resp.json().then(data => {
-              setNote(null)
               setChore(data.res)
             })
           }
         })
-        .then(() => {
-          clearTimeout(id)
-          setTimeoutId(null)
-          // Invalidate chores cache to refetch data
-          queryClient.invalidateQueries(['chores'])
-        })
-        .then(() => {
-          // refetch the chore details
-          GetChoreDetailById(choreId).then(resp => {
-            if (resp.ok) {
-              return resp.json().then(data => {
-                setChore(data.res)
+      })
+      .then(() => {
+        // Show undo notification
+        showSuccess({
+          title: 'Task Completed',
+          message: 'Your task has been marked as complete',
+          undoAction: async () => {
+            try {
+              const undoResponse = await UndoChoreAction(choreId)
+              if (undoResponse.ok) {
+                // Refetch chore details after undo
+                const detailResponse = await GetChoreDetailById(choreId)
+                if (detailResponse.ok) {
+                  const detailData = await detailResponse.json()
+                  setChore(detailData.res)
+                  queryClient.invalidateQueries(['chores'])
+                }
+                showUndo({
+                  title: 'Undo Successful',
+                  message: 'Task completion has been undone.',
+                })
+              } else {
+                throw new Error('Failed to undo')
+              }
+            } catch (error) {
+              showError({
+                title: 'Undo Failed',
+                message: 'Unable to undo the action. Please try again.',
               })
             }
-          })
+          },
         })
-    }, 3000)
-
-    setTimeoutId(id)
-
-    // Show undo notification
-    showSuccess({
-      title: 'Task Completed',
-      message: 'Your task has been marked as complete',
-      undoAction: () => {
-        clearTimeout(id)
-        setTimeoutId(null)
-      },
-    })
+      })
   }
   const handleSkippingTask = () => {
     SkipChore(choreId).then(response => {
