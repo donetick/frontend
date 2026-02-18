@@ -3,7 +3,6 @@ import {
   CalendarMonth,
   Check,
   Checklist,
-  CloseFullscreen,
   Edit,
   History,
   HourglassEmpty,
@@ -68,6 +67,7 @@ import {
 import Priorities from '../../utils/Priorities'
 import { getSafeBottomPadding } from '../../utils/SafeAreaUtils.js'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
+import NoteViewerModal from '../Modals/Inputs/NoteViewerModal'
 import LoadingComponent from '../components/Loading.jsx'
 import RichTextEditor from '../components/RichTextEditor.jsx'
 import SubTasks from '../components/SubTask.jsx'
@@ -92,7 +92,7 @@ const ChoreView = () => {
     isOpen: false,
   })
   const [chorePriority, setChorePriority] = useState(null)
-  const [isDescriptionOpen, setIsDescriptionOpen] = useState(false)
+  const [noteViewerConfig, setNoteViewerConfig] = useState({ isOpen: false })
   const [timerActionConfig, setTimerActionConfig] = useState({ isOpen: false })
   const { data: circleMembersData, isLoading: isCircleMembersLoading } =
     useCircleMembers()
@@ -688,13 +688,19 @@ const ChoreView = () => {
                 p: 2,
                 borderRadius: 'lg',
                 mb: 1,
+                cursor: 'pointer',
+              }}
+              onClick={() => {
+                setNoteViewerConfig({
+                  isOpen: true,
+                  title: 'Description',
+                  content: chore.description,
+                  onClose: () => setNoteViewerConfig({ isOpen: false }),
+                })
               }}
             >
               <IconButton
                 variant='plain'
-                onClick={() => {
-                  setIsDescriptionOpen(!isDescriptionOpen)
-                }}
                 size='sm'
                 sx={{
                   position: 'absolute',
@@ -702,12 +708,12 @@ const ChoreView = () => {
                   right: 5,
                 }}
               >
-                {isDescriptionOpen ? <CloseFullscreen /> : <OpenInFull />}
+                <OpenInFull />
               </IconButton>
               <Box
                 sx={{
-                  maxHeight: isDescriptionOpen ? 'none' : '100px',
-                  overflowY: 'auto',
+                  maxHeight: '100px',
+                  overflow: 'hidden',
                 }}
               >
                 <RichTextEditor value={chore.description} isEditable={false} />
@@ -721,10 +727,42 @@ const ChoreView = () => {
             <Typography level='title-md' sx={{ mb: 1 }}>
               Previous note:
             </Typography>
-            <Sheet variant='plain' sx={{ p: 2, borderRadius: 'lg', mb: 1 }}>
-              <Typography level='body-md' sx={{ mb: 1 }}>
-                {chore.notes || '--'}
-              </Typography>
+            <Sheet
+              variant='plain'
+              sx={{
+                p: 2,
+                borderRadius: 'lg',
+                mb: 1,
+                cursor: 'pointer',
+              }}
+              onClick={() => {
+                setNoteViewerConfig({
+                  isOpen: true,
+                  title: 'Previous Note',
+                  content: chore.notes,
+                  onClose: () => setNoteViewerConfig({ isOpen: false }),
+                })
+              }}
+            >
+              <IconButton
+                variant='plain'
+                size='sm'
+                sx={{
+                  position: 'absolute',
+                  bottom: 5,
+                  right: 5,
+                }}
+              >
+                <OpenInFull />
+              </IconButton>
+              <Box
+                sx={{
+                  maxHeight: '100px',
+                  overflow: 'hidden',
+                }}
+              >
+                <RichTextEditor value={chore.notes} isEditable={false} />
+              </Box>
             </Sheet>
           </>
         )}
@@ -1041,6 +1079,7 @@ const ChoreView = () => {
 
         <ConfirmationModal config={confirmModelConfig} />
         <ConfirmationModal config={timerActionConfig} />
+        <NoteViewerModal config={noteViewerConfig} />
       </Card>
     </Container>
   )
