@@ -91,6 +91,7 @@ const HistoryCard = ({
   historyEntry,
   index,
   onToggleActions,
+  onViewNote,
 }) => {
   const performer = performers.find(p => p.userId === historyEntry.completedBy)
   const assignedTo = performers.find(p => p.userId === historyEntry.assignedTo)
@@ -259,7 +260,11 @@ const HistoryCard = ({
                   variant='plain'
                   color='neutral'
                   startDecorator={<EventNote />}
-                  sx={{ maxWidth: '120px', overflow: 'hidden' }}
+                  sx={{ maxWidth: '120px', overflow: 'hidden', cursor: 'pointer' }}
+                  onClick={e => {
+                    e.stopPropagation()
+                    onViewNote?.(historyEntry.notes)
+                  }}
                 >
                   Note
                 </Chip>

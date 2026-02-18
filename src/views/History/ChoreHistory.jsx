@@ -34,6 +34,7 @@ import { ChoreHistoryStatus } from '../../utils/Chores'
 import LoadingComponent from '../components/Loading'
 import EditHistoryModal from '../Modals/EditHistoryModal'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
+import NoteViewerModal from '../Modals/Inputs/NoteViewerModal'
 import HistoryCard from './HistoryCard'
 
 const ChoreHistory = () => {
@@ -44,6 +45,7 @@ const ChoreHistory = () => {
   const [editHistory, setEditHistory] = useState(null)
   const { confirmModalConfig, showConfirmation } = useConfirmationModal()
   const [showMoreInfoId, setShowMoreInfoId] = useState(null)
+  const [noteViewerConfig, setNoteViewerConfig] = useState({ isOpen: false })
   const { showSuccess, showError } = useNotification()
   // React Query hooks
   const { data: choreHistoryData, isLoading } = useChoreHistory(choreId)
@@ -362,6 +364,14 @@ const ChoreHistory = () => {
                 performers={performers}
                 allHistory={choreHistory}
                 index={index}
+                onViewNote={notes => {
+                  setNoteViewerConfig({
+                    isOpen: true,
+                    title: `Updated at ${moment(historyEntry.updatedAt).format('LLLL')}`,
+                    content: notes,
+                    onClose: () => setNoteViewerConfig({ isOpen: false }),
+                  })
+                }}
                 onToggleActions={() => {
                   const id = historyEntry.id || index
                   if (showMoreInfoId === id) {
@@ -432,6 +442,7 @@ const ChoreHistory = () => {
         historyRecord={editHistory}
       />
       <ConfirmationModal config={confirmModalConfig} />
+      <NoteViewerModal config={noteViewerConfig} />
     </Container>
   )
 }
