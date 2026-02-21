@@ -332,6 +332,9 @@ export const ChoreFilters = userId => ({
   assigned_to_me: chore => {
     return chore.assignedTo && chore.assignedTo === userId
   },
+  available_for_me: chore => {
+    return chore.assignedTo === null || chore.assignedTo === userId
+  },
   assigned_to_others: chore => {
     return chore.assignedTo && chore.assignedTo !== userId
   },
