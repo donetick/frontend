@@ -211,7 +211,7 @@ const ChoreCard = ({
                   <Typography level='title-md'>
                     {getName(chore.name)}
                   </Typography>
-                  {chore.assignedTo && chore.assignedTo !== userProfile?.id && (
+                  {chore.assignedTo && (
                     <Box display='flex' alignItems='center' gap={0.5}>
                       <Chip
                         variant='outlined'
