@@ -40,9 +40,9 @@ function CreateChildUserModal({ isOpen, onClose, onSuccess }) {
       if (!password) {
         newErrors.password = 'Password is required'
       } else if (password.length < 8) {
-        newErrors.password = 'Password must be at least 8 characters'
-      } else if (password.length > 45) {
-        newErrors.password = 'Password must be less than 45 characters'
+        newErrors.password = 'Password must be between 8 and 64 characters'
+      } else if (password.length > 64) {
+        newErrors.password = 'Password must be between 8 and 64 characters'
       }
     }
 
@@ -165,7 +165,7 @@ function CreateChildUserModal({ isOpen, onClose, onSuccess }) {
           name='password'
           type='password'
           id='password'
-          placeholder='Enter password (8-45 characters)'
+          placeholder='Enter password (8-64 characters)'
           value={password}
           onChange={e => {
             setPassword(e.target.value)
