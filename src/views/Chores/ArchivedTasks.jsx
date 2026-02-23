@@ -860,6 +860,7 @@ const ArchivedTasks = () => {
               membersData={membersData}
               isMultiSelectMode={isMultiSelectMode}
               selectedChores={selectedChores}
+              toggleChoreSelection={toggleChoreSelection}
             />
           </List>
         </Box>
