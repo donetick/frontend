@@ -368,8 +368,6 @@ const MyChores = () => {
 
   // Read and apply filters from URL parameters
   useEffect(() => {
-    if (!chores.length || !savedFilters.length) return
-
     // Check for filterId (camelCase) or filter_id (snake_case) for advanced filters
     const rawFilterId =
       searchParams.get('filterId') || searchParams.get('filter_id')
@@ -377,6 +375,14 @@ const MyChores = () => {
     const filterId = rawFilterId ? Number(rawFilterId) || rawFilterId : null
 
     const oldFilter = searchParams.get('filter')
+
+    // If filterId is no longer in URL but filter is still active in state, clear it
+    if (!filterId && !oldFilter && activeFilterId) {
+      clearActiveFilter()
+      return
+    }
+
+    if (!chores.length || !savedFilters.length) return
 
     // Handle advanced filter parameter
     if (filterId && !activeFilterId) {
@@ -416,6 +422,7 @@ const MyChores = () => {
     activeFilterId,
     savedFilters,
     applyCustomFilter,
+    clearActiveFilter,
     selectedProject,
     projectFilteredChores,
     setSearchFilter,
