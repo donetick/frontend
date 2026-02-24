@@ -23,6 +23,8 @@ PODS:
   - CapacitorCordova (7.4.3)
   - CapacitorDevice (7.0.2):
     - Capacitor
+  - CapacitorKeyboard (7.0.4):
+    - Capacitor
   - CapacitorLocalNotifications (7.0.2):
     - Capacitor
   - CapacitorNetwork (7.0.2):
@@ -139,6 +141,7 @@ DEPENDENCIES:
   - "CapacitorCommunitySqlite (from `../../node_modules/@capacitor-community/sqlite`)"
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorDevice (from `../../node_modules/@capacitor/device`)"
+  - "CapacitorKeyboard (from `../../node_modules/@capacitor/keyboard`)"
   - "CapacitorLocalNotifications (from `../../node_modules/@capacitor/local-notifications`)"
   - "CapacitorNetwork (from `../../node_modules/@capacitor/network`)"
   - CapacitorPluginSafeArea (from `../../node_modules/capacitor-plugin-safe-area`)
@@ -190,6 +193,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/ios"
   CapacitorDevice:
     :path: "../../node_modules/@capacitor/device"
+  CapacitorKeyboard:
+    :path: "../../node_modules/@capacitor/keyboard"
   CapacitorLocalNotifications:
     :path: "../../node_modules/@capacitor/local-notifications"
   CapacitorNetwork:
@@ -219,6 +224,7 @@ SPEC CHECKSUMS:
   CapacitorCommunitySqlite: 8b2c6bab33e3519280811d481f8bd0fa90343e1b
   CapacitorCordova: 435121e81a2df4d0034f0fb11fcefab5104cfdb5
   CapacitorDevice: 81ae78d5d1942707caad79276badd458bf6ec603
+  CapacitorKeyboard: 5660c760113bfa48962817a785879373cf5339c3
   CapacitorLocalNotifications: 665188ae8accd40806129073896fb2b39322d858
   CapacitorNetwork: 695069886b3c5ed514db69aa3d026b8dc3c03a6b
   CapacitorPluginSafeArea: 22031c3436269ca80fac90ec2c94bc7c1e59a81d
@@ -250,6 +256,6 @@ SPEC CHECKSUMS:
   SQLCipher: eb79c64049cb002b4e9fcb30edb7979bf4706dfc
   ZIPFoundation: b8c29ea7ae353b309bc810586181fd073cb3312c
 
-PODFILE CHECKSUM: bb6dcef70c8edc058fe3ba311f08a223fd7dbc66
+PODFILE CHECKSUM: 12bc727e3a3f1811956ae85f3bd3b49c4fa77d61
 
 COCOAPODS: 1.16.2
