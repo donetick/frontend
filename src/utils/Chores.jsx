@@ -330,7 +330,7 @@ export const notInCompletionWindow = chore => {
 export const ChoreFilters = userId => ({
   anyone: () => true,
   assigned_to_me: chore => {
-    return chore.assignedTo && chore.assignedTo === userId
+    return !chore.assignedTo || chore.assignedTo === userId
   },
   assigned_to_others: chore => {
     return chore.assignedTo && chore.assignedTo !== userId
