@@ -259,6 +259,7 @@ export const useChoreActions = ({
                       c => c.id !== chore.id,
                     )
                     setChores(newChores)
+                    updateChoreInState(chore.id, 'deleted')
                     setFilteredChores(newFilteredChores)
                     showSuccess({
                       title: 'Task Deleted',
