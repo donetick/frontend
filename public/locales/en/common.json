@@ -1,0 +1,18 @@
+{
+  "save": "Save",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "edit": "Edit",
+  "close": "Close",
+  "confirm": "Confirm",
+  "loading": "Loading...",
+  "error": "Error",
+  "success": "Success",
+  "warning": "Warning",
+  "refresh": "Refresh",
+  "copy": "Copy",
+  "copied": "Copied!",
+  "settings": "Settings",
+  "yes": "Yes",
+  "no": "No"
+}

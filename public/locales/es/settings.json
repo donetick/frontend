@@ -1,0 +1,85 @@
+{
+  "title": "Configuración",
+  "circleSettings": {
+    "title": "Configuración del círculo",
+    "description": "Tu cuenta se conecta automáticamente a un Círculo cuando creas o te unes a uno. Invita fácilmente a amigos compartiendo el código único del Círculo o el enlace a continuación.",
+    "circleCode": "Código del Círculo",
+    "copyCode": "Copiar Código",
+    "copyLink": "Copiar Enlace",
+    "codeCopied": "¡Código del círculo copiado!",
+    "linkCopied": "¡Enlace copiado!",
+    "joinCircle": "Unirse a un Círculo",
+    "joinCirclePlaceholder": "Ingresa el Código del Círculo",
+    "join": "Unirse",
+    "leave": "Salir del Círculo",
+    "leaveConfirmTitle": "Salir del Círculo",
+    "leaveConfirmMessage": "¿Estás seguro de que quieres salir de este círculo?",
+    "circleMembers": "Miembros del Círculo",
+    "circleMemberRequests": "Solicitudes de Miembros del Círculo",
+    "admin": "Administrador",
+    "member": "Miembro",
+    "pending": "Pendiente",
+    "accept": "Aceptar",
+    "reject": "Rechazar",
+    "makeAdmin": "Hacer Administrador",
+    "makeMember": "Hacer Miembro",
+    "remove": "Eliminar",
+    "webhookURL": "URL del Webhook",
+    "webhookDescription": "Ingresa una URL de webhook para recibir notificaciones de eventos del círculo",
+    "webhookPlaceholder": "https://tu-url-webhook.com"
+  },
+  "accountSettings": {
+    "title": "Configuración de la Cuenta",
+    "subscription": "Suscripción",
+    "subscriptionStatus": "Plan Actual",
+    "free": "Gratis",
+    "plus": "Plus",
+    "upgrade": "Actualizar",
+    "cancel": "Cancelar",
+    "changePassword": "Cambiar Contraseña",
+    "password": "Contraseña",
+    "dangerZone": "Zona de Peligro",
+    "dangerZoneDescription": "Una vez que elimines tu cuenta, no hay vuelta atrás. Por favor, está seguro.",
+    "deleteAccount": "Eliminar Cuenta"
+  },
+  "localization": {
+    "title": "Localización",
+    "description": "Personaliza el idioma, formato de fecha y preferencias regionales para tu cuenta.",
+    "language": "Idioma",
+    "languageDescription": "Selecciona tu idioma preferido",
+    "dateFormat": "Formato de Fecha",
+    "dateFormatDescription": "Elige cómo se deben mostrar las fechas en toda la aplicación",
+    "timeFormat": "Formato de Hora",
+    "timeFormatDescription": "Selecciona formato de 12 o 24 horas",
+    "12hour": "12 horas (AM/PM)",
+    "24hour": "24 horas",
+    "firstDayOfWeek": "Primer Día de la Semana",
+    "firstDayOfWeekDescription": "Selecciona qué día comienza tu semana",
+    "sunday": "Domingo",
+    "monday": "Lunes",
+    "formats": {
+      "mdy": "MM/DD/AAAA (EE.UU.)",
+      "dmy": "DD/MM/AAAA (Europa)",
+      "ymd": "AAAA-MM-DD (ISO)",
+      "long": "Formato largo (ej., 1 de enero de 2024)",
+      "short": "Formato corto (ej., 1 ene 2024)"
+    }
+  },
+  "sidepanel": {
+    "title": "Personalización del Panel Lateral",
+    "description": "Personaliza el diseño y la visibilidad de las tarjetas en el panel lateral. Esta sección solo está disponible en dispositivos de pantalla grande como tabletas y computadoras de escritorio."
+  },
+  "theme": {
+    "title": "Preferencias de tema",
+    "description": "Elige cómo se ve el sitio para ti. Selecciona un solo tema o sincronízalo con tu sistema y cambia automáticamente entre temas de día y noche.",
+    "themeMode": "Modo de tema",
+    "light": "Claro",
+    "dark": "Oscuro",
+    "system": "Sistema"
+  },
+  "notifications": {
+    "settingsSaved": "Configuración guardada con éxito",
+    "settingsSaveFailed": "Error al guardar la configuración",
+    "invalidWebhook": "URL de webhook no válida"
+  }
+}

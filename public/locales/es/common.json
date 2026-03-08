@@ -1,0 +1,18 @@
+{
+  "save": "Guardar",
+  "cancel": "Cancelar",
+  "delete": "Eliminar",
+  "edit": "Editar",
+  "close": "Cerrar",
+  "confirm": "Confirmar",
+  "loading": "Cargando...",
+  "error": "Error",
+  "success": "Éxito",
+  "warning": "Advertencia",
+  "refresh": "Actualizar",
+  "copy": "Copiar",
+  "copied": "¡Copiado!",
+  "settings": "Configuración",
+  "yes": "Sí",
+  "no": "No"
+}

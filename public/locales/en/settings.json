@@ -1,0 +1,85 @@
+{
+  "title": "Settings",
+  "circleSettings": {
+    "title": "Circle settings",
+    "description": "Your account is automatically connected to a Circle when you create or join one. Easily invite friends by sharing the unique Circle code or link below. You'll receive a notification below when someone requests to join your Circle. If you'd like to leave, simply hit the 'Leave Circle' button.",
+    "circleCode": "Circle Code",
+    "copyCode": "Copy Code",
+    "copyLink": "Copy Link",
+    "codeCopied": "Circle code copied!",
+    "linkCopied": "Circle link copied!",
+    "joinCircle": "Join a Circle",
+    "joinCirclePlaceholder": "Enter Circle Code",
+    "join": "Join",
+    "leave": "Leave Circle",
+    "leaveConfirmTitle": "Leave Circle",
+    "leaveConfirmMessage": "Are you sure you want to leave this circle?",
+    "circleMembers": "Circle Members",
+    "circleMemberRequests": "Circle Member Requests",
+    "admin": "Admin",
+    "member": "Member",
+    "pending": "Pending",
+    "accept": "Accept",
+    "reject": "Reject",
+    "makeAdmin": "Make Admin",
+    "makeMember": "Make Member",
+    "remove": "Remove",
+    "webhookURL": "Webhook URL",
+    "webhookDescription": "Enter a webhook URL to receive notifications for circle events",
+    "webhookPlaceholder": "https://your-webhook-url.com"
+  },
+  "accountSettings": {
+    "title": "Account Settings",
+    "subscription": "Subscription",
+    "subscriptionStatus": "Current Plan",
+    "free": "Free",
+    "plus": "Plus",
+    "upgrade": "Upgrade",
+    "cancel": "Cancel",
+    "changePassword": "Change Password",
+    "password": "Password",
+    "dangerZone": "Danger Zone",
+    "dangerZoneDescription": "Once you delete your account, there is no going back. Please be certain.",
+    "deleteAccount": "Delete Account"
+  },
+  "localization": {
+    "title": "Localization",
+    "description": "Customize language, date format, and regional preferences for your account.",
+    "language": "Language",
+    "languageDescription": "Select your preferred language",
+    "dateFormat": "Date Format",
+    "dateFormatDescription": "Choose how dates should be displayed throughout the application",
+    "timeFormat": "Time Format",
+    "timeFormatDescription": "Select 12-hour or 24-hour time format",
+    "12hour": "12-hour (AM/PM)",
+    "24hour": "24-hour",
+    "firstDayOfWeek": "First Day of Week",
+    "firstDayOfWeekDescription": "Select which day starts your week",
+    "sunday": "Sunday",
+    "monday": "Monday",
+    "formats": {
+      "mdy": "MM/DD/YYYY (US)",
+      "dmy": "DD/MM/YYYY (Europe)",
+      "ymd": "YYYY-MM-DD (ISO)",
+      "long": "Long format (e.g., January 1, 2024)",
+      "short": "Short format (e.g., Jan 1, 2024)"
+    }
+  },
+  "sidepanel": {
+    "title": "Sidepanel Customization",
+    "description": "Customize the layout and visibility of cards in the sidepanel. This section is only available on large screen devices such as tablets and desktops."
+  },
+  "theme": {
+    "title": "Theme preferences",
+    "description": "Choose how the site looks to you. Select a single theme, or sync with your system and automatically switch between day and night themes.",
+    "themeMode": "Theme mode",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "notifications": {
+    "settingsSaved": "Settings saved successfully",
+    "settingsSaveFailed": "Failed to save settings",
+    "invalidWebhook": "Invalid webhook URL"
+  }
+}

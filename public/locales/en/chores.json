@@ -1,0 +1,14 @@
+{
+  "title": "Chores",
+  "myChores": "My Chores",
+  "allChores": "All Chores",
+  "addChore": "Add Chore",
+  "editChore": "Edit Chore",
+  "deleteChore": "Delete Chore",
+  "completeChore": "Complete Chore",
+  "dueDate": "Due Date",
+  "assignedTo": "Assigned To",
+  "priority": "Priority",
+  "status": "Status",
+  "description": "Description"
+}

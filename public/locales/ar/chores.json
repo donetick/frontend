@@ -1,0 +1,14 @@
+{
+  "title": "المهام",
+  "myChores": "مهامي",
+  "allChores": "جميع المهام",
+  "addChore": "إضافة مهمة",
+  "editChore": "تعديل مهمة",
+  "deleteChore": "حذف مهمة",
+  "completeChore": "إكمال مهمة",
+  "dueDate": "تاريخ الاستحقاق",
+  "assignedTo": "مُسند إلى",
+  "priority": "الأولوية",
+  "status": "الحالة",
+  "description": "الوصف"
+}

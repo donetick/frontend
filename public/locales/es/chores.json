@@ -1,0 +1,14 @@
+{
+  "title": "Tareas",
+  "myChores": "Mis Tareas",
+  "allChores": "Todas las Tareas",
+  "addChore": "Agregar Tarea",
+  "editChore": "Editar Tarea",
+  "deleteChore": "Eliminar Tarea",
+  "completeChore": "Completar Tarea",
+  "dueDate": "Fecha de Vencimiento",
+  "assignedTo": "Asignado a",
+  "priority": "Prioridad",
+  "status": "Estado",
+  "description": "Descripción"
+}
