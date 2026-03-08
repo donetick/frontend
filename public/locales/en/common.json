@@ -14,5 +14,20 @@
   "copied": "Copied!",
   "settings": "Settings",
   "yes": "Yes",
-  "no": "No"
+  "no": "No",
+  "back": "Back",
+  "backToCalendar": "Back to Calendar",
+  "logout": "Logout",
+  "version": "Version",
+  "navigation": {
+    "allTasks": "All Tasks",
+    "archived": "Archived",
+    "things": "Things",
+    "labels": "Labels",
+    "projects": "Projects",
+    "filters": "Filters",
+    "activities": "Activities",
+    "points": "Points",
+    "settings": "Settings"
+  }
 }

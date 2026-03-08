@@ -86,3 +86,29 @@ html {
 [dir='rtl'] .rounded-r-none {
   border-radius: 0.375rem 0 0 0.375rem;
 }
+
+/* Fix flex alignment for RTL */
+[dir='rtl'] .flex {
+  direction: rtl;
+}
+
+/* Ensure cards and containers align properly in RTL */
+[dir='rtl'] .MuiCard-root,
+[dir='rtl'] .MuiBox-root,
+[dir='rtl'] .MuiStack-root {
+  text-align: right;
+}
+
+/* Fix list item alignment in RTL */
+[dir='rtl'] .MuiListItem-root,
+[dir='rtl'] .MuiListItemButton-root {
+  flex-direction: row-reverse;
+}
+
+/* Fix gap alignment in RTL */
+[dir='rtl'] .gap-1,
+[dir='rtl'] .gap-2,
+[dir='rtl'] .gap-3,
+[dir='rtl'] .gap-4 {
+  direction: rtl;
+}

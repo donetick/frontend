@@ -81,5 +81,74 @@
     "settingsSaved": "Settings saved successfully",
     "settingsSaveFailed": "Failed to save settings",
     "invalidWebhook": "Invalid webhook URL"
+  },
+  "overview": {
+    "title": "Settings",
+    "subtitle": "Customize your experience and manage your account preferences",
+    "upgrade": {
+      "title": "Upgrade to Plus",
+      "description": "Unlock powerful features to enhance your productivity",
+      "button": "Upgrade Now",
+      "features": {
+        "richText": "Rich text descriptions",
+        "notifications": "Task notifications",
+        "apiIntegrations": "API integrations",
+        "advancedAutomation": "Advanced automation"
+      }
+    },
+    "sections": {
+      "profile": {
+        "title": "Profile Settings",
+        "description": "Update your profile information, photo, display name, and timezone preferences."
+      },
+      "circle": {
+        "title": "Circle Settings",
+        "description": "Manage your circle, invite members, and handle join requests."
+      },
+      "account": {
+        "title": "Account Settings",
+        "description": "Manage your subscription, change password, and account deletion options."
+      },
+      "subaccounts": {
+        "title": "Managed Accounts",
+        "description": "Create and manage sub accounts to log in and complete assigned tasks."
+      },
+      "notifications": {
+        "title": "Notifications",
+        "description": "Configure push notifications, email alerts, and notification targets for tasks."
+      },
+      "mfa": {
+        "title": "Multi-Factor Authentication",
+        "description": "Add an extra layer of security with MFA using authenticator apps."
+      },
+      "apitokens": {
+        "title": "API Tokens",
+        "description": "Generate and manage access tokens for third-party integrations and API access."
+      },
+      "storage": {
+        "title": "Storage Settings",
+        "description": "Backup and restore your data, manage local storage and sync preferences."
+      },
+      "sidepanel": {
+        "title": "Sidepanel Customization",
+        "description": "Customize the layout and visibility of cards in the sidepanel interface."
+      },
+      "theme": {
+        "title": "Theme Preferences",
+        "description": "Choose your preferred theme and configure dark/light mode settings."
+      },
+      "localization": {
+        "title": "Localization",
+        "description": "Customize language, date format, time format, and regional preferences."
+      },
+      "advanced": {
+        "title": "Advanced Settings",
+        "description": "Configure webhooks, real-time updates, and other advanced features for enhanced productivity."
+      },
+      "developer": {
+        "title": "Developer Settings",
+        "description": "View technical information about authentication tokens, SSE connections, and debug data."
+      }
+    }
   }
 }

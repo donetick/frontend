@@ -30,105 +30,94 @@ import {
   Stack,
   Typography,
 } from '@mui/joy'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useUserProfile } from '../../queries/UserQueries'
 import { isPlusAccount } from '../../utils/Helpers'
 import { isParentUser } from '../../utils/UserHelpers'
 
 const SettingsOverview = () => {
+  const { t } = useTranslation('settings')
   const navigate = useNavigate()
   const { data: userProfile } = useUserProfile()
 
   const settingsCards = [
     {
       id: 'profile',
-      title: 'Profile Settings',
-      description:
-        'Update your profile information, photo, display name, and timezone preferences.',
+      title: t('overview.sections.profile.title'),
+      description: t('overview.sections.profile.description'),
       icon: <Person />,
     },
     {
       id: 'circle',
-      title: 'Circle Settings',
-      description:
-        'Manage your circle, invite members, and handle join requests.',
+      title: t('overview.sections.circle.title'),
+      description: t('overview.sections.circle.description'),
       icon: <Circle />,
     },
     {
       id: 'account',
-      title: 'Account Settings',
-      description:
-        'Manage your subscription, change password, and account deletion options.',
+      title: t('overview.sections.account.title'),
+      description: t('overview.sections.account.description'),
       icon: <AccountCircle />,
     },
     {
       id: 'subaccounts',
-      title: 'Managed Accounts',
-      description:
-        'Create and manage sub accounts to log in and complete assigned tasks.',
+      title: t('overview.sections.subaccounts.title'),
+      description: t('overview.sections.subaccounts.description'),
       icon: <FamilyRestroom />,
     },
     {
       id: 'notifications',
-      title: 'Notifications',
-      description:
-        'Configure push notifications, email alerts, and notification targets for tasks.',
+      title: t('overview.sections.notifications.title'),
+      description: t('overview.sections.notifications.description'),
       icon: <Notifications />,
     },
     {
       id: 'mfa',
-      title: 'Multi-Factor Authentication',
-      description:
-        'Add an extra layer of security with MFA using authenticator apps.',
+      title: t('overview.sections.mfa.title'),
+      description: t('overview.sections.mfa.description'),
       icon: <Security />,
     },
     {
       id: 'apitokens',
-      title: 'API Tokens',
-      description:
-        'Generate and manage access tokens for third-party integrations and API access.',
+      title: t('overview.sections.apitokens.title'),
+      description: t('overview.sections.apitokens.description'),
       icon: <Api />,
     },
     {
       id: 'storage',
-      title: 'Storage Settings',
-      description:
-        'Backup and restore your data, manage local storage and sync preferences.',
+      title: t('overview.sections.storage.title'),
+      description: t('overview.sections.storage.description'),
       icon: <Storage />,
     },
     {
       id: 'sidepanel',
-      title: 'Sidepanel Customization',
-      description:
-        'Customize the layout and visibility of cards in the sidepanel interface.',
+      title: t('overview.sections.sidepanel.title'),
+      description: t('overview.sections.sidepanel.description'),
       icon: <ViewSidebar />,
     },
     {
       id: 'theme',
-      title: 'Theme Preferences',
-      description:
-        'Choose your preferred theme and configure dark/light mode settings.',
+      title: t('overview.sections.theme.title'),
+      description: t('overview.sections.theme.description'),
       icon: <Palette />,
     },
     {
       id: 'localization',
-      title: 'Localization',
-      description:
-        'Customize language, date format, time format, and regional preferences.',
+      title: t('overview.sections.localization.title'),
+      description: t('overview.sections.localization.description'),
       icon: <Language />,
     },
     {
       id: 'advanced',
-      title: 'Advanced Settings',
-      description:
-        'Configure webhooks, real-time updates, and other advanced features for enhanced productivity.',
+      title: t('overview.sections.advanced.title'),
+      description: t('overview.sections.advanced.description'),
       icon: <Settings />,
     },
     {
       id: 'developer',
-      title: 'Developer Settings',
-      description:
-        'View technical information about authentication tokens, SSE connections, and debug data.',
+      title: t('overview.sections.developer.title'),
+      description: t('overview.sections.developer.description'),
       icon: <Code />,
     },
   ]
@@ -167,10 +156,10 @@ const SettingsOverview = () => {
             level='h3'
             sx={{ fontWeight: 'lg', color: 'text.primary' }}
           >
-            Settings
+            {t('overview.title')}
           </Typography>
           <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            Customize your experience and manage your account preferences
+            {t('overview.subtitle')}
           </Typography>
         </Stack>
       </Box>
@@ -234,7 +223,7 @@ const SettingsOverview = () => {
                         fontSize: { xs: '0.95rem', md: '1.25rem' },
                       }}
                     >
-                      Upgrade to Plus
+                      {t('overview.upgrade.title')}
                     </Typography>
                     <Typography
                       level='body-md'
@@ -245,7 +234,7 @@ const SettingsOverview = () => {
                         lineHeight: { xs: 1.3, md: 1.5 },
                       }}
                     >
-                      Unlock powerful features to enhance your productivity
+                      {t('overview.upgrade.description')}
                     </Typography>
                     <Box
                       sx={{
@@ -256,10 +245,10 @@ const SettingsOverview = () => {
                         color: 'rgba(255, 255, 255, 0.8)',
                       }}
                     >
-                      <span>• Rich text descriptions</span>
-                      <span>• Task notifications</span>
-                      <span>• API integrations</span>
-                      <span>• Advanced automation</span>
+                      <span>• {t('overview.upgrade.features.richText')}</span>
+                      <span>• {t('overview.upgrade.features.notifications')}</span>
+                      <span>• {t('overview.upgrade.features.apiIntegrations')}</span>
+                      <span>• {t('overview.upgrade.features.advancedAutomation')}</span>
                     </Box>
                   </Box>
                 </Box>
@@ -287,7 +276,7 @@ const SettingsOverview = () => {
                     navigate('/settings/account')
                   }}
                 >
-                  Upgrade Now
+                  {t('overview.upgrade.button')}
                 </Button>
               </Box>
             </CardContent>

@@ -25,78 +25,11 @@ import {
 } from '@mui/joy'
 
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { version } from '../../../package.json'
 import UserProfileAvatar from '../../components/UserProfileAvatar'
 import NavBarLink from './NavBarLink'
-const links = [
-  {
-    to: '/chores',
-    label: 'All Tasks',
-    icon: <Inbox />,
-  },
-  {
-    to: '/archived',
-    label: 'Archived',
-    icon: <Archive />,
-  },
-
-  // {
-  //   to: '/chores',
-  //   label: 'Desktop View',
-  //   icon: <ListAltRounded />,
-  // },
-  {
-    to: '/things',
-    label: 'Things',
-    icon: <Widgets />,
-  },
-  {
-    to: 'labels',
-    label: 'Labels',
-    icon: <ListAlt />,
-  },
-  {
-    to: 'projects',
-    label: 'Projects',
-    icon: <FolderOpen />,
-  },
-  {
-    to: 'filters',
-    label: 'Filters',
-    icon: <FilterAlt />,
-  },
-  {
-    to: 'activities',
-    label: 'Activities',
-    icon: <History />,
-  },
-  {
-    to: 'points',
-    label: 'Points',
-    icon: <Toll />,
-  },
-  // {
-  //   to: '/settings#sharing',
-  //   label: 'Sharing',
-  //   icon: <ShareOutlined />,
-  // },
-  // {
-  //   to: '/settings#notifications',
-  //   label: 'Notifications',
-  //   icon: <Message />,
-  // },
-  // {
-  //   to: '/settings#account',
-  //   label: 'Account',
-  //   icon: <AccountBox />,
-  // },
-  {
-    to: '/settings',
-    label: 'Settings',
-    icon: <SettingsOutlined />,
-  },
-]
 
 import { SafeArea } from 'capacitor-plugin-safe-area'
 import Z_INDEX from '../../constants/zIndex'
@@ -105,10 +38,59 @@ import { apiClient } from '../../utils/ApiClient'
 
 const publicPages = ['/landing', '/privacy', '/terms']
 const NavBar = () => {
+  const { t } = useTranslation('common')
   const { data: resource } = useResource()
 
   const navigate = useNavigate()
   const [drawerOpen, setDrawerOpen] = useState(false)
+  
+  const links = [
+    {
+      to: '/chores',
+      label: t('navigation.allTasks'),
+      icon: <Inbox />,
+    },
+    {
+      to: '/archived',
+      label: t('navigation.archived'),
+      icon: <Archive />,
+    },
+    {
+      to: '/things',
+      label: t('navigation.things'),
+      icon: <Widgets />,
+    },
+    {
+      to: 'labels',
+      label: t('navigation.labels'),
+      icon: <ListAlt />,
+    },
+    {
+      to: 'projects',
+      label: t('navigation.projects'),
+      icon: <FolderOpen />,
+    },
+    {
+      to: 'filters',
+      label: t('navigation.filters'),
+      icon: <FilterAlt />,
+    },
+    {
+      to: 'activities',
+      label: t('navigation.activities'),
+      icon: <History />,
+    },
+    {
+      to: 'points',
+      label: t('navigation.points'),
+      icon: <Toll />,
+    },
+    {
+      to: '/settings',
+      label: t('navigation.settings'),
+      icon: <SettingsOutlined />,
+    },
+  ]
   const [openDrawer, closeDrawer] = [
     () => setDrawerOpen(true),
     () => setDrawerOpen(false),
@@ -157,7 +139,7 @@ const NavBar = () => {
           }
         }}
         title={
-          searchParams.get('from') === 'calendar' ? 'Back to Calendar' : 'Back'
+          searchParams.get('from') === 'calendar' ? t('backToCalendar') : t('back')
         }
       >
         <ArrowBack />
@@ -296,7 +278,7 @@ const NavBar = () => {
               <ListItemDecorator>
                 <Logout />
               </ListItemDecorator>
-              <ListItemContent>Logout</ListItemContent>
+              <ListItemContent>{t('logout')}</ListItemContent>
             </ListItemButton>
             <Typography
               onClick={
