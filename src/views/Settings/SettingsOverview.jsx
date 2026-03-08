@@ -5,6 +5,7 @@ import {
   Circle,
   Code,
   FamilyRestroom,
+  Language,
   Notifications,
   Palette,
   Person,
@@ -108,6 +109,13 @@ const SettingsOverview = () => {
       description:
         'Choose your preferred theme and configure dark/light mode settings.',
       icon: <Palette />,
+    },
+    {
+      id: 'localization',
+      title: 'Localization',
+      description:
+        'Customize language, date format, time format, and regional preferences.',
+      icon: <Language />,
     },
     {
       id: 'advanced',

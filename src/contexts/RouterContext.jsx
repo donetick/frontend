@@ -31,6 +31,7 @@ import PaymentSuccessView from '../views/Payments/PaymentSuccessView'
 import PrivacyPolicyView from '../views/PrivacyPolicy/PrivacyPolicyView'
 import ProjectView from '../views/Projects/ProjectView'
 import APITokenSettings from '../views/Settings/APITokenSettings'
+import LocalizationSettings from '../views/Settings/LocalizationSettings'
 import MFASettings from '../views/Settings/MFASettings'
 import NotificationSetting from '../views/Settings/NotificationSetting'
 import ProfileSettings from '../views/Settings/ProfileSettings'
@@ -114,6 +115,10 @@ const Router = createBrowserRouter([
           {
             path: 'theme',
             element: <ThemeSettings />,
+          },
+          {
+            path: 'localization',
+            element: <LocalizationSettings />,
           },
           {
             path: 'advanced',
