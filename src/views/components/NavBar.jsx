@@ -29,6 +29,7 @@ import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { version } from '../../../package.json'
 import UserProfileAvatar from '../../components/UserProfileAvatar'
+import { useLocalization } from '../../contexts/LocalizationContext'
 import NavBarLink from './NavBarLink'
 
 import { SafeArea } from 'capacitor-plugin-safe-area'
@@ -39,6 +40,7 @@ import { apiClient } from '../../utils/ApiClient'
 const publicPages = ['/landing', '/privacy', '/terms']
 const NavBar = () => {
   const { t } = useTranslation('common')
+  const { isRTL } = useLocalization()
   const { data: resource } = useResource()
 
   const navigate = useNavigate()
@@ -202,13 +204,14 @@ const NavBar = () => {
       <Drawer
         open={drawerOpen}
         onClose={closeDrawer}
+        anchor={isRTL ? 'right' : 'left'}
         size='sm'
         onClick={closeDrawer}
         sx={{
           '& .MuiDrawer-content': {
             position: 'fixed',
             // pt: 'calc(var(--safe-area-inset-top, 0px))',
-            left: 0,
+            ...(isRTL ? { right: 0 } : { left: 0 }),
             // pb: 'calc(var(--safe-area-inset-bottom, 0px))',
             // height:
             //   'calc(100vh - var(--safe-area-inset-top, 0px) - var(--safe-area-inset-bottom, 0px))',

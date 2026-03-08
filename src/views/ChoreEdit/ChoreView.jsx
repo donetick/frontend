@@ -39,9 +39,11 @@ import { Divider } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
+import { useLocalization } from '../../contexts/LocalizationContext'
 import { useChoreDetails } from '../../queries/ChoreQueries.jsx'
 import {
   useChoreTimer,
@@ -75,6 +77,8 @@ import TimePassedCard from './TimePassedCard.jsx'
 import TimerSplitButton from './TimerSplitButton.jsx'
 
 const ChoreView = () => {
+  const { t } = useTranslation('chores')
+  const { formatDate } = useLocalization()
   const [chore, setChore] = useState({})
   const navigate = useNavigate()
   const [performers, setPerformers] = useState([])
@@ -143,12 +147,12 @@ const ChoreView = () => {
       {
         size: 6,
         icon: <PeopleAlt />,
-        title: 'Assignment',
-        text: `Assigned: ${
+        title: t('choreView.assignment'),
+        text: `${t('choreView.assigned')}: ${
           performers.find(p => p.userId === chore.assignedTo)?.displayName ||
-          'N/A'
+          t('choreView.na')
         }`,
-        subtext: ` Last: ${
+        subtext: ` ${t('choreView.last')}: ${
           chore.lastCompletedDate
             ? performers.find(p => p.userId === chore.lastCompletedBy)
                 ?.displayName
@@ -158,29 +162,29 @@ const ChoreView = () => {
       {
         size: 6,
         icon: <CalendarMonth />,
-        title: 'Schedule',
-        text: `Due: ${
-          chore.nextDueDate ? moment(chore.nextDueDate).fromNow() : 'N/A'
+        title: t('choreView.schedule'),
+        text: `${t('choreView.due')}: ${
+          chore.nextDueDate ? moment(chore.nextDueDate).fromNow() : t('choreView.na')
         }`,
-        subtext: `Last: ${
+        subtext: `${t('choreView.last')}: ${
           chore.lastCompletedDate
             ? moment(chore.lastCompletedDate).fromNow()
-            : 'N/A'
+            : t('choreView.na')
         }`,
       },
       {
         size: 6,
         icon: <Checklist />,
-        title: 'Statistics',
-        text: `Completed: ${chore.totalCompletedCount || 0} times`,
+        title: t('choreView.statistics'),
+        text: `${t('choreView.completed')}: ${chore.totalCompletedCount || 0} ${t('choreView.times')}`,
       },
       {
         size: 6,
         icon: <Person />,
-        title: 'Details',
-        subtext: `Created By: ${
+        title: t('choreView.details'),
+        subtext: `${t('choreView.createdBy')}: ${
           performers.find(p => p.userId === chore.createdBy)?.displayName ||
-          'N/A'
+          t('choreView.na')
         }`,
       },
     ]
@@ -220,7 +224,7 @@ const ChoreView = () => {
       .then(() => {
         // Show undo notification
         showSuccess({
-          title: 'Task Completed',
+          title: t('choreView.taskCompleted'),
           message: 'Your task has been marked as complete',
           undoAction: async () => {
             try {
@@ -234,7 +238,7 @@ const ChoreView = () => {
                   queryClient.invalidateQueries(['chores'])
                 }
                 showUndo({
-                  title: 'Undo Successful',
+                  title: t('choreView.undoSuccessful'),
                   message: 'Task completion has been undone.',
                 })
               } else {
@@ -242,7 +246,7 @@ const ChoreView = () => {
               }
             } catch (error) {
               showError({
-                title: 'Undo Failed',
+                title: t('choreView.undoFailed'),
                 message: 'Unable to undo the action. Please try again.',
               })
             }
@@ -261,7 +265,7 @@ const ChoreView = () => {
 
           // Show undo notification
           showSuccess({
-            message: 'Task skipped',
+            message: t('choreView.skipTask'),
             undoAction: async () => {
               try {
                 const undoResponse = await UndoChoreAction(choreId)
@@ -274,7 +278,7 @@ const ChoreView = () => {
                     queryClient.invalidateQueries(['chores'])
                   }
                   showUndo({
-                    title: 'Undo Successful',
+                    title: t('choreView.undoSuccessful'),
                     message: 'Task skip has been undone.',
                   })
                 } else {
@@ -282,7 +286,7 @@ const ChoreView = () => {
                 }
               } catch (error) {
                 showError({
-                  title: 'Undo Failed',
+                  title: t('choreView.undoFailed'),
                   message: 'Unable to undo the action. Please try again.',
                 })
               }
@@ -319,11 +323,11 @@ const ChoreView = () => {
   const handleResetTimer = () => {
     setTimerActionConfig({
       isOpen: true,
-      title: 'Reset Timer',
+      title: t('choreView.resetTimer'),
       message:
         'Are you sure you want to reset the timer? This will clear all time records since you started the task.',
-      confirmText: 'Reset Timer',
-      cancelText: 'Cancel',
+      confirmText: t('choreView.resetTimer'),
+      cancelText: t('common:cancel'),
       onClose: confirmed => {
         if (confirmed) {
           resetChoreTimer.mutate(choreId, {
@@ -344,11 +348,11 @@ const ChoreView = () => {
   const handleClearAllTime = () => {
     setTimerActionConfig({
       isOpen: true,
-      title: 'Clear All Time Records',
+      title: t('choreView.clearAllTimeRecords'),
       message:
         'This will permanently delete all timers for this task and set it back to "not started".',
-      confirmText: 'Clear All Time',
-      cancelText: 'Cancel',
+      confirmText: t('choreView.clearAllTimeRecords'),
+      cancelText: t('common:cancel'),
       onClose: async confirmed => {
         if (confirmed) {
           if (choreTimer?.res?.id) {
@@ -468,13 +472,13 @@ const ChoreView = () => {
             color='warning'
             sx={{ mb: 1 }}
           >
-            Archived
+            {t('choreView.archive')}
           </Chip>
         )}
         <Chip startDecorator={<CalendarMonth />} size='md' sx={{ mb: 1 }}>
           {chore.nextDueDate
-            ? `Due at ${moment(chore.nextDueDate).format('MM/DD/YYYY hh:mm A')}`
-            : 'N/A'}
+            ? `${t('choreView.due')} ${formatDate(chore.nextDueDate, true)}`
+            : t('choreView.na')}
         </Chip>
         <Box
           sx={{
