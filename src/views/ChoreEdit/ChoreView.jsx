@@ -78,7 +78,7 @@ import TimerSplitButton from './TimerSplitButton.jsx'
 
 const ChoreView = () => {
   const { t } = useTranslation('chores')
-  const { formatDate } = useLocalization()
+  const { formatDate, formatDateTime } = useLocalization()
   const [chore, setChore] = useState({})
   const navigate = useNavigate()
   const [performers, setPerformers] = useState([])
@@ -477,7 +477,7 @@ const ChoreView = () => {
         )}
         <Chip startDecorator={<CalendarMonth />} size='md' sx={{ mb: 1 }}>
           {chore.nextDueDate
-            ? `${t('choreView.due')} ${formatDate(chore.nextDueDate, true)}`
+            ? `${t('choreView.due')} ${formatDateTime(chore.nextDueDate)}`
             : t('choreView.na')}
         </Chip>
         <Box
