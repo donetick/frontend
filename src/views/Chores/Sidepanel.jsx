@@ -6,10 +6,17 @@ import { ChoresGrouper } from '../../utils/Chores'
 import { getSidepanelConfig } from '../../utils/SidepanelConfig'
 import CalendarCard from '../components/CalendarCard'
 import ActivitiesCard from './ActivitesCard'
+import SmartInsightsCard from './SmartInsightsCard'
 import TasksByAssigneeCard from './TasksByAssigneeCard'
 import UserSwitcher from './UserSwitcher'
 
-const Sidepanel = ({ chores }) => {
+const Sidepanel = ({
+  chores,
+  allChores,
+  applyTempFilter,
+  clearTempFilter,
+  tempFilter,
+}) => {
   const isLargeScreen = useMediaQuery(theme => theme.breakpoints.up('lg'))
   const [dueDatePieChartData, setDueDatePieChartData] = useState([])
   const [sidepanelConfig, setSidepanelConfig] = useState([])
@@ -55,6 +62,16 @@ const Sidepanel = ({ chores }) => {
     switch (cardConfig.id) {
       case 'welcome':
         return <UserSwitcher key='welcome' chores={chores} />
+      case 'smartInsights':
+        return (
+          <SmartInsightsCard
+            key='smartInsights'
+            chores={allChores || chores}
+            applyTempFilter={applyTempFilter}
+            clearTempFilter={clearTempFilter}
+            tempFilter={tempFilter}
+          />
+        )
       case 'assignees':
         return <TasksByAssigneeCard key='assignees' chores={chores} />
       case 'calendar':
