@@ -20,6 +20,7 @@ import {
 } from './CustomParsers'
 import SmartTaskTitleInput from './SmartTaskTitleInput'
 
+import DurationInput from '../../components/common/DurationInput'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import NotificationTemplate from '../../components/NotificationTemplate'
 import LearnMoreButton from './LearnMore'
@@ -90,6 +91,8 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
   const [hasDescription, setHasDescription] = useState(false)
   const [hasSubTasks, setHasSubTasks] = useState(false)
   const [hasNotifications, setHasNotifications] = useState(false)
+  const [hasDeadline, setHasDeadline] = useState(false)
+  const [deadlineOffset, setDeadlineOffset] = useState(-1)
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
   const [projectId, setProjectId] = useState(getInitialProject())
 
@@ -491,6 +494,8 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
     setLabelsV2([])
     setAssignees([])
     setProjectId(getInitialProject())
+    setHasDeadline(false)
+    setDeadlineOffset(-1)
   }
 
   const createChore = () => {
@@ -529,6 +534,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
       labelsV2: labelsV2,
       priority: priority ? Number(priority) : 0,
       points: points > -1 ? points : null,
+      deadlineOffset: deadlineOffset < 0 ? null : deadlineOffset,
       status: 0,
       frequencyType: 'once',
       frequencyMetadata: {},
@@ -798,6 +804,19 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
             Edit Notifications
           </Button>
         )}
+        {!hasDeadline && dueDate && (
+          <Button
+            startDecorator={<Add />}
+            variant='plain'
+            size='sm'
+            onClick={() => {
+              setHasDeadline(true)
+              setDeadlineOffset(86400)
+            }}
+          >
+            Set Deadline
+          </Button>
+        )}
       </Box>
 
       {hasDescription && (
@@ -959,6 +978,27 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
                 )}
               </Box>
             </FormControl> */}
+        {hasDeadline && dueDate && (
+          <Box
+            sx={{
+              flexDirection: 'column',
+              alignItems: 'start',
+            }}
+          >
+            <Typography level='body-sm'>Deadline</Typography>
+            <Box
+              sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}
+            >
+              <DurationInput
+                value={deadlineOffset}
+                onChange={setDeadlineOffset}
+                size='sm'
+                minValue={0}
+              />
+              <Typography level='body-sm'>after due date</Typography>
+            </Box>
+          </Box>
+        )}
         {hasNotifications && dueDate && (
           <Box
             sx={{

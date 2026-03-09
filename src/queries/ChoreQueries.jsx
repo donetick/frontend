@@ -25,6 +25,7 @@ import { localStore } from '../utils/LocalStore'
 export const useChores = includeArchive => {
   return useQuery({
     queryKey: ['chores', includeArchive],
+    refetchOnWindowFocus: true,
     queryFn: async () => {
       const onlineChores = await GetChoresNew(includeArchive)
 
@@ -272,6 +273,7 @@ export const useChoresHistory = (initialLimit, includeMembers) => {
 export const useChoreDetails = choreId => {
   return useQuery({
     queryKey: ['choreDetails', choreId],
+    refetchOnWindowFocus: true,
     queryFn: async () => {
       var onlineChore = null
 

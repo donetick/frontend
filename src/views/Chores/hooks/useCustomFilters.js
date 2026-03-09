@@ -26,6 +26,7 @@ export const useCustomFilters = (chores, membersData, labels, projects) => {
 
   const [activeFilterId, setActiveFilterId] = useState(null)
   const [tempFilter, setTempFilter] = useState(null)
+  const [tempFilterMeta, setTempFilterMeta] = useState(null)
 
   const context = useMemo(
     () => ({
@@ -95,15 +96,18 @@ export const useCustomFilters = (chores, membersData, labels, projects) => {
   const clearActiveFilter = useCallback(() => {
     setActiveFilterId(null)
     setTempFilter(null)
+    setTempFilterMeta(null)
   }, [])
 
-  const applyTempFilter = useCallback(filter => {
+  const applyTempFilter = useCallback((filter, meta = null) => {
     setTempFilter(filter)
+    setTempFilterMeta(meta)
     setActiveFilterId(null)
   }, [])
 
   const clearTempFilter = useCallback(() => {
     setTempFilter(null)
+    setTempFilterMeta(null)
   }, [])
 
   const saveFilter = useCallback(
@@ -256,6 +260,7 @@ export const useCustomFilters = (chores, membersData, labels, projects) => {
     activeFilter,
     activeFilterId,
     tempFilter,
+    tempFilterMeta,
     filteredChores,
     applyCustomFilter,
     clearActiveFilter,

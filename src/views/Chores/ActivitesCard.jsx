@@ -17,6 +17,7 @@ import {
   Chip,
   Divider,
   IconButton,
+  Link,
   List,
   ListItem,
   ListItemContent,
@@ -25,15 +26,30 @@ import {
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
+import { useState } from 'react'
 import { useChores, useChoresHistory } from '../../queries/ChoreQueries'
 import { useCircleMembers } from '../../queries/UserQueries'
 import { resolvePhotoURL } from '../../utils/Helpers'
+import NoteViewerModal from '../Modals/Inputs/NoteViewerModal'
 
-const ActivityItem = ({ activity, members }) => {
+const ActivityItem = ({ activity, members, onViewNote }) => {
   // Find the member who completed the activity
   const completedByMember = members?.find(
     member => member.userId === activity.completedBy,
   )
+
+  // Strip HTML tags from notes for plain text display
+  const stripHtmlTags = html => {
+    if (!html) return ''
+    const div = document.createElement('div')
+    div.innerHTML = html
+    return div.textContent || div.innerText || ''
+  }
+
+  const plainTextNotes = activity.notes ? stripHtmlTags(activity.notes) : ''
+
+  // Calculate if notes should be truncated (more than 2 lines in the UI, which is roughly 100 characters)
+  const shouldTruncate = plainTextNotes && plainTextNotes.length > 80
 
   const getTimeDisplay = dateToDisplay => {
     const now = moment()
@@ -177,7 +193,7 @@ const ActivityItem = ({ activity, members }) => {
           ></Box>
 
           {/* Notes */}
-          {activity.notes && (
+          {plainTextNotes && (
             <Box sx={{ mt: 0.5, ml: 2.5 }}>
               <Typography
                 level='body-xs'
@@ -189,8 +205,36 @@ const ActivityItem = ({ activity, members }) => {
                   color: 'text.secondary',
                 }}
               >
-                <Notes sx={{ fontSize: 14, mt: 0.1 }} />
-                {activity.notes}
+                <Notes sx={{ fontSize: 14, mt: 0.1, flexShrink: 0 }} />
+                <Box sx={{ flex: 1 }}>
+                  <Typography
+                    level='body-xs'
+                    sx={{
+                      fontStyle: 'italic',
+                      color: 'text.secondary',
+                      overflow: 'hidden',
+                      display: '-webkit-box',
+                      WebkitLineClamp: shouldTruncate ? 2 : 'unset',
+                      WebkitBoxOrient: 'vertical',
+                      wordBreak: 'break-word',
+                    }}
+                  >
+                    {plainTextNotes}
+                  </Typography>
+                  {shouldTruncate && (
+                    <Link
+                      level='body-xs'
+                      onClick={() => onViewNote(activity.notes)}
+                      sx={{
+                        cursor: 'pointer',
+                        mt: 0.25,
+                        display: 'inline-block',
+                      }}
+                    >
+                      Show more
+                    </Link>
+                  )}
+                </Box>
               </Typography>
             </Box>
           )}
@@ -217,6 +261,8 @@ const groupActivitiesByDate = activities => {
 }
 
 const ActivitiesCard = ({ title = 'Recent Activities' }) => {
+  const [noteViewerConfig, setNoteViewerConfig] = useState({ isOpen: false })
+
   // Use hooks to fetch data
   const {
     data: choresData,
@@ -430,6 +476,14 @@ const ActivitiesCard = ({ title = 'Recent Activities' }) => {
                     key={activity.id}
                     activity={activity}
                     members={members}
+                    onViewNote={notes => {
+                      setNoteViewerConfig({
+                        isOpen: true,
+                        title: `Note - ${activity.choreName}`,
+                        content: notes,
+                        onClose: () => setNoteViewerConfig({ isOpen: false }),
+                      })
+                    }}
                   />
                 ))}
               </List>
@@ -437,6 +491,8 @@ const ActivitiesCard = ({ title = 'Recent Activities' }) => {
           )
         })}
       </Box>
+
+      <NoteViewerModal config={noteViewerConfig} />
     </Sheet>
   )
 }

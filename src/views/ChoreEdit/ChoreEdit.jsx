@@ -19,12 +19,12 @@ import {
   RadioGroup,
   Select,
   Sheet,
-  Switch,
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import DurationInput from '../../components/common/DurationInput'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import NotificationTemplate from '../../components/NotificationTemplate.jsx'
 import {
@@ -97,9 +97,7 @@ const ChoreEdit = () => {
   const [isPrivate, setIsPrivate] = useState(false)
   const [subTasks, setSubTasks] = useState(null)
   const [completionWindow, setCompletionWindow] = useState(-1)
-  const [deadline, setDeadline] = useState(null)
   const [deadlineOffset, setDeadlineOffset] = useState(-1)
-  const [deadlineUnit, setDeadlineUnit] = useState('hours')
   const [allUserThings, setAllUserThings] = useState([])
   const [thingTrigger, setThingTrigger] = useState(null)
   const [isThingValid, setIsThingValid] = useState(false)
@@ -352,6 +350,7 @@ const ChoreEdit = () => {
       completionWindow:
         // if completionWindow is -1 then set it to null or dueDate is null
         completionWindow < 0 || dueDate === null ? null : completionWindow,
+      deadlineOffset: deadlineOffset < 0 ? null : deadlineOffset,
       priority: priority,
       projectId: projectId === 'default' ? null : projectId,
     }
@@ -475,6 +474,11 @@ const ChoreEdit = () => {
       setCompletionWindow(
         data.res.completionWindow && data.res.completionWindow > -1
           ? data.res.completionWindow
+          : -1,
+      )
+      setDeadlineOffset(
+        data.res.deadlineOffset && data.res.deadlineOffset > -1
+          ? data.res.deadlineOffset
           : -1,
       )
 
@@ -1174,181 +1178,88 @@ const ChoreEdit = () => {
 
         {dueDate && (
           <Box mb={3}>
-            <Typography level='h4'>Completion Window</Typography>
-            <FormControl orientation='horizontal'>
-              <Switch
-                checked={completionWindow != -1}
-                onClick={event => {
-                  event.preventDefault()
-                  if (completionWindow != -1) {
-                    setCompletionWindow(-1)
-                  } else {
-                    setCompletionWindow(1)
-                  }
-                }}
-                color={completionWindow !== -1 ? 'success' : 'neutral'}
-                variant={completionWindow !== -1 ? 'solid' : 'outlined'}
-                sx={{
-                  mr: 2,
-                }}
-              />
-              <div>
-                <Typography level='body-md'>
-                  Completion window (hours)
-                </Typography>
-                <FormHelperText sx={{ mt: 0 }}>
-                  {"Set a time window that task can't be completed before"}
-                </FormHelperText>
-              </div>
-            </FormControl>
-            {completionWindow != -1 && (
-              <Card variant='outlined'>
-                <Box
-                  sx={{
-                    mt: 0,
-                    ml: 4,
-                  }}
-                >
-                  <Typography level='body-sm'>Hours:</Typography>
-                  <Input
-                    type='number'
-                    value={completionWindow}
-                    sx={{ maxWidth: 100 }}
-                    slotProps={{
-                      input: {
-                        min: 0,
-                        max: 24 * 7,
-                      },
-                    }}
-                    placeholder='Hours'
-                    onChange={e => {
-                      setCompletionWindow(parseInt(e.target.value))
-                    }}
-                  />
-                </Box>
-              </Card>
-            )}
-          </Box>
-        )}
-
-        {dueDate && (
-          <Box mb={3}>
-            <Typography level='h4'>Deadline</Typography>
+            <Typography level='h4'>Task Window</Typography>
             <Typography level='body-md'>
-              When should this task be considered expired?
+              Define when this task can be completed and when it expires
             </Typography>
 
-            {/* One-time tasks: Date picker */}
-            {['once', 'no_repeat'].includes(frequencyType) ? (
-              <FormControl sx={{ mt: 1 }}>
-                <Checkbox
-                  onChange={e => {
-                    if (e.target.checked) {
-                      // Set deadline to 24 hours after due date by default
-                      const deadlineDate = moment(dueDate)
-                        .add(1, 'day')
-                        .format('YYYY-MM-DDTHH:mm:00')
-                      setDeadline(deadlineDate)
-                    } else {
-                      setDeadline(null)
-                    }
-                  }}
-                  checked={deadline !== null}
-                  overlay
-                  label='Set a deadline for this task'
+            {/* Available From (Completion Window) */}
+            <FormControl sx={{ mt: 1 }}>
+              <Checkbox
+                checked={completionWindow !== -1}
+                onChange={e => {
+                  if (e.target.checked) {
+                    setCompletionWindow(3600) // default 1 hour in seconds
+                  } else {
+                    setCompletionWindow(-1)
+                  }
+                }}
+                overlay
+                label='Set earliest completion time'
+              />
+              <FormHelperText>
+                Task becomes available to complete X hours before the due date
+              </FormHelperText>
+            </FormControl>
+
+            {completionWindow !== -1 && (
+              <Box
+                sx={{
+                  mt: 1,
+                  ml: 4,
+                  display: 'flex',
+                  gap: 1,
+                  alignItems: 'center',
+                }}
+              >
+                <DurationInput
+                  value={completionWindow}
+                  onChange={setCompletionWindow}
+                  size='sm'
+                  minValue={0}
                 />
-                <FormHelperText>
-                  Task will be considered expired after this date
-                </FormHelperText>
-              </FormControl>
-            ) : (
-              /* Recurring tasks: Offset input */
-              <FormControl sx={{ mt: 1 }}>
-                <Checkbox
-                  onChange={e => {
-                    if (e.target.checked) {
-                      setDeadlineOffset(24) // Default to 24 hours
-                    } else {
-                      setDeadlineOffset(-1)
-                    }
-                  }}
-                  checked={deadlineOffset !== -1}
-                  overlay
-                  label='Set a deadline for this task'
-                />
-                <FormHelperText>
-                  Task will be considered expired after the specified time from
-                  due date
-                </FormHelperText>
-              </FormControl>
+                <Typography level='body-sm'>before due date</Typography>
+              </Box>
             )}
 
-            {/* Date picker for one-time tasks */}
-            {deadline && ['once', 'no_repeat'].includes(frequencyType) && (
-              <Card variant='outlined' sx={{ mt: 2 }}>
-                <Box sx={{ p: 2 }}>
-                  <Typography level='body-sm' mb={1}>
-                    Deadline Date:
-                  </Typography>
-                  <Input
-                    type='datetime-local'
-                    value={deadline}
-                    onChange={e => setDeadline(e.target.value)}
-                    slotProps={{
-                      input: {
-                        min: dueDate, // Deadline cannot be before due date
-                      },
-                    }}
-                  />
-                </Box>
-              </Card>
-            )}
+            {/* Expires After (Deadline) */}
+            <FormControl sx={{ mt: 2 }}>
+              <Checkbox
+                checked={deadlineOffset !== -1}
+                onChange={e => {
+                  if (e.target.checked) {
+                    setDeadlineOffset(86400) // default 1 day in seconds
+                  } else {
+                    setDeadlineOffset(-1)
+                  }
+                }}
+                overlay
+                label='Set a deadline'
+              />
+              <FormHelperText>
+                Task will be considered expired after the due date
+              </FormHelperText>
+            </FormControl>
 
-            {/* Offset input for recurring tasks */}
-            {deadlineOffset !== -1 &&
-              !['once', 'no_repeat'].includes(frequencyType) && (
-                <Card variant='outlined' sx={{ mt: 2 }}>
-                  <Box
-                    sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'end' }}
-                  >
-                    <Box>
-                      <Typography level='body-sm' mb={1}>
-                        Time after due date:
-                      </Typography>
-                      <Input
-                        type='number'
-                        value={deadlineOffset}
-                        sx={{ maxWidth: 100 }}
-                        slotProps={{
-                          input: {
-                            min: 1,
-                            max: 720, // Max 30 days in hours
-                          },
-                        }}
-                        placeholder='Time'
-                        onChange={e => {
-                          setDeadlineOffset(parseInt(e.target.value) || 1)
-                        }}
-                      />
-                    </Box>
-                    <Box>
-                      <Typography level='body-sm' mb={1}>
-                        Unit:
-                      </Typography>
-                      <Select
-                        value={deadlineUnit}
-                        onChange={(event, newValue) =>
-                          setDeadlineUnit(newValue)
-                        }
-                        sx={{ minWidth: 100 }}
-                      >
-                        <Option value='hours'>Hours</Option>
-                        <Option value='days'>Days</Option>
-                      </Select>
-                    </Box>
-                  </Box>
-                </Card>
-              )}
+            {deadlineOffset !== -1 && (
+              <Box
+                sx={{
+                  mt: 1,
+                  ml: 4,
+                  display: 'flex',
+                  gap: 1,
+                  alignItems: 'center',
+                }}
+              >
+                <DurationInput
+                  value={deadlineOffset}
+                  onChange={setDeadlineOffset}
+                  size='sm'
+                  minValue={0}
+                />
+                <Typography level='body-sm'>after due date</Typography>
+              </Box>
+            )}
           </Box>
         )}
 

@@ -149,10 +149,10 @@ const ChoreView = () => {
           'N/A'
         }`,
         subtext: ` Last: ${
-          chore.lastCompletedDate
+          chore.lastCompletedDate && chore.lastCompletedBy
             ? performers.find(p => p.userId === chore.lastCompletedBy)
                 ?.displayName
-            : '--'
+            : 'N/A'
         }`,
       },
       {
@@ -167,6 +167,11 @@ const ChoreView = () => {
             ? moment(chore.lastCompletedDate).fromNow()
             : 'N/A'
         }`,
+
+        subtext2:
+          chore.deadlineOffset > 0 && chore.nextDueDate
+            ? `Deadline: ${moment(chore.nextDueDate).add(chore.deadlineOffset, 'seconds').fromNow()}`
+            : null,
       },
       {
         size: 6,
@@ -518,7 +523,10 @@ const ChoreView = () => {
                 handleAction={action => {
                   if (action === 'pause') {
                     handleChorePause()
-                  } else if (action === 'resume') {
+                  } else if (
+                    action === 'resume' &&
+                    !notInCompletionWindow(chore)
+                  ) {
                     handleChoreStart()
                   }
                 }}
@@ -576,6 +584,14 @@ const ChoreView = () => {
                     >
                       {card.subtext}
                     </Typography>
+                    {card.subtext2 && (
+                      <Typography
+                        level='body-sm'
+                        sx={{ color: 'danger.plainColor', lineHeight: 1.5 }}
+                      >
+                        {card.subtext2}
+                      </Typography>
+                    )}
                   </Box>
                 </CardContent>
               </Card>
@@ -1034,8 +1050,9 @@ const ChoreView = () => {
                       })
                     }}
                     disabled={
-                      chore.lastCompletedDate !== null &&
-                      chore.frequencyType === 'once'
+                      notInCompletionWindow(chore) ||
+                      (chore.lastCompletedDate !== null &&
+                        chore.frequencyType === 'once')
                     }
                     startDecorator={<SwitchAccessShortcut />}
                     sx={{
@@ -1047,12 +1064,25 @@ const ChoreView = () => {
                 </>
               )}
             </Box>
+            {notInCompletionWindow(chore) && (
+              <Typography
+                level='body-sm'
+                sx={{ color: 'warning.plainColor', textAlign: 'center', mb: 1 }}
+              >
+                Available to complete starting{' '}
+                {moment(chore.nextDueDate)
+                  .subtract(chore.completionWindow, 'seconds')
+                  .format('MM/DD/YYYY hh:mm A')}
+              </Typography>
+            )}
             {/* Timer Button - Show split button when timer is active, regular button otherwise */}
             {[ChoreStatus.ACTIVE, ChoreStatus.PAUSED].includes(chore.status) ? (
               <TimerSplitButton
                 disabled={
-                  chore.lastCompletedDate !== null &&
-                  chore.frequencyType === 'once'
+                  (chore.status === ChoreStatus.PAUSED &&
+                    notInCompletionWindow(chore)) ||
+                  (chore.lastCompletedDate !== null &&
+                    chore.frequencyType === 'once')
                 }
                 chore={chore}
                 onAction={action => {
@@ -1078,8 +1108,9 @@ const ChoreView = () => {
                 variant='soft'
                 color='success'
                 disabled={
-                  chore.lastCompletedDate !== null &&
-                  chore.frequencyType === 'once'
+                  notInCompletionWindow(chore) ||
+                  (chore.lastCompletedDate !== null &&
+                    chore.frequencyType === 'once')
                 }
                 startDecorator={<PlayArrow />}
                 sx={{
