@@ -42,6 +42,7 @@
     "@capacitor/core": "^7.0.0",
     "@capacitor/device": "^7.0.0",
     "@capacitor/ios": "^7.0.0",
+    "@capacitor/keyboard": "^7.0.4",
     "@capacitor/local-notifications": "^7.0.0",
     "@capacitor/network": "^7.0.1",
     "@capacitor/preferences": "^7.0.0",
