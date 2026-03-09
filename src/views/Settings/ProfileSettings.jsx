@@ -13,6 +13,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import imageCompression from 'browser-image-compression'
 import { useRef, useState } from 'react'
 import Cropper from 'react-easy-crop'
+import { useTranslation } from 'react-i18next'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { apiClient } from '../../utils/ApiClient'
@@ -22,6 +23,7 @@ import { getCroppedImg } from '../../utils/imageCropUtils'
 import SettingsLayout from './SettingsLayout'
 
 const ProfileSettings = () => {
+  const { t } = useTranslation('settings')
   const queryClient = useQueryClient()
   const { data: userProfile } = useUserProfile()
   const { showSuccess, showError } = useNotification()
@@ -92,13 +94,13 @@ const ProfileSettings = () => {
 
       setPhotoURL(url)
       showSuccess({
-        title: 'Photo Updated',
-        message: 'Your profile photo has been updated successfully!',
+        title: t('profile.photoUpdated'),
+        message: t('profile.photoUpdatedMessage'),
       })
     } catch (err) {
       showError({
-        title: 'Upload Failed',
-        message: 'Failed to upload your photo. Please try again.',
+        title: t('profile.uploadFailed'),
+        message: t('profile.uploadFailedMessage'),
       })
     } finally {
       setIsUploading(false)
@@ -118,8 +120,8 @@ const ProfileSettings = () => {
 
       if (response.ok) {
         showSuccess({
-          title: 'Profile Updated',
-          message: 'Your profile information has been saved successfully!',
+          title: t('profile.profileUpdated'),
+          message: t('profile.profileUpdatedMessage'),
         })
       } else {
         throw new Error('Failed to update profile')
@@ -128,9 +130,8 @@ const ProfileSettings = () => {
       console.log(err)
 
       showError({
-        title: 'Update Failed',
-        message:
-          'Unable to update your profile. Please check your connection and try again.',
+        title: t('profile.updateFailed'),
+        message: t('profile.updateFailedMessage'),
       })
     } finally {
       setIsSaving(false)
@@ -140,10 +141,10 @@ const ProfileSettings = () => {
   // Helper to resolve photoURL with baseURL if needed
 
   return (
-    <SettingsLayout title='Profile Settings'>
+    <SettingsLayout title={t('profile.title')}>
       <div className='grid gap-4 py-4' id='profile'>
         <Typography level='body-md'>
-          Update your display name and profile photo.
+          {t('profile.description')}
         </Typography>
         <Card
           sx={{
@@ -163,7 +164,7 @@ const ProfileSettings = () => {
               loading={isUploading}
               sx={{ mb: 1 }}
             >
-              Change Photo
+              {t('profile.changePhoto')}
             </Button>
             <input
               ref={fileInputRef}
@@ -227,7 +228,7 @@ const ProfileSettings = () => {
                 size='md'
                 sx={{ mr: 1 }}
               >
-                Save
+                {t('profile.save')}
               </Button>
               <Button
                 onClick={() => {
@@ -237,24 +238,24 @@ const ProfileSettings = () => {
                 variant='soft'
                 color='neutral'
               >
-                Cancel
+                {t('profile.cancel')}
               </Button>
             </Box>
           </ModalDialog>
         </Modal>
         <Box sx={{ maxWidth: 400, mt: 3 }}>
           <Typography level='body-sm' sx={{ mb: 0.5 }}>
-            Display Name
+            {t('profile.displayName')}
           </Typography>
           <Input
             value={displayName}
             onChange={e => setDisplayName(e.target.value)}
-            placeholder='Enter your display name'
+            placeholder={t('profile.displayNamePlaceholder')}
             sx={{ mb: 2 }}
           />
 
           <Typography level='body-sm' sx={{ mb: 0.5 }}>
-            Timezone
+            {t('profile.timezone')}
           </Typography>
           <Autocomplete
             value={timezone}
@@ -283,7 +284,7 @@ const ProfileSettings = () => {
                 )
               })
             }}
-            placeholder='Select your timezone'
+            placeholder={t('profile.timezonePlaceholder')}
             sx={{ mb: 2 }}
           />
 
@@ -294,7 +295,7 @@ const ProfileSettings = () => {
             loading={isSaving}
             sx={{ width: 120 }}
           >
-            Save
+            {t('profile.save')}
           </Button>
         </Box>
       </div>

@@ -82,6 +82,25 @@
     "settingsSaveFailed": "Failed to save settings",
     "invalidWebhook": "Invalid webhook URL"
   },
+  "profile": {
+    "title": "Profile Settings",
+    "description": "Update your display name and profile photo.",
+    "photoUpdated": "Photo Updated",
+    "photoUpdatedMessage": "Your profile photo has been updated successfully!",
+    "uploadFailed": "Upload Failed",
+    "uploadFailedMessage": "Failed to upload your photo. Please try again.",
+    "profileUpdated": "Profile Updated",
+    "profileUpdatedMessage": "Your profile information has been saved successfully!",
+    "updateFailed": "Update Failed",
+    "updateFailedMessage": "Unable to update your profile. Please check your connection and try again.",
+    "changePhoto": "Change Photo",
+    "displayName": "Display Name",
+    "displayNamePlaceholder": "Enter your display name",
+    "timezone": "Timezone",
+    "timezonePlaceholder": "Select your timezone",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
   "overview": {
     "title": "Settings",
     "subtitle": "Customize your experience and manage your account preferences",

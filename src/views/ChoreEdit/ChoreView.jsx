@@ -225,7 +225,7 @@ const ChoreView = () => {
         // Show undo notification
         showSuccess({
           title: t('choreView.taskCompleted'),
-          message: 'Your task has been marked as complete',
+          message: t('choreView.taskCompletedMessage'),
           undoAction: async () => {
             try {
               const undoResponse = await UndoChoreAction(choreId)
@@ -239,7 +239,7 @@ const ChoreView = () => {
                 }
                 showUndo({
                   title: t('choreView.undoSuccessful'),
-                  message: 'Task completion has been undone.',
+                  message: t('choreView.taskCompletionUndone'),
                 })
               } else {
                 throw new Error('Failed to undo')
@@ -247,7 +247,7 @@ const ChoreView = () => {
             } catch (error) {
               showError({
                 title: t('choreView.undoFailed'),
-                message: 'Unable to undo the action. Please try again.',
+                message: t('choreView.undoFailedMessage'),
               })
             }
           },
@@ -279,7 +279,7 @@ const ChoreView = () => {
                   }
                   showUndo({
                     title: t('choreView.undoSuccessful'),
-                    message: 'Task skip has been undone.',
+                    message: t('choreView.taskSkipUndone'),
                   })
                 } else {
                   throw new Error('Failed to undo')
@@ -287,7 +287,7 @@ const ChoreView = () => {
               } catch (error) {
                 showError({
                   title: t('choreView.undoFailed'),
-                  message: 'Unable to undo the action. Please try again.',
+                  message: t('choreView.undoFailedMessage'),
                 })
               }
             },
@@ -324,8 +324,7 @@ const ChoreView = () => {
     setTimerActionConfig({
       isOpen: true,
       title: t('choreView.resetTimer'),
-      message:
-        'Are you sure you want to reset the timer? This will clear all time records since you started the task.',
+      message: t('choreView.resetTimerConfirmation'),
       confirmText: t('choreView.resetTimer'),
       cancelText: t('common:cancel'),
       onClose: confirmed => {
@@ -349,8 +348,7 @@ const ChoreView = () => {
     setTimerActionConfig({
       isOpen: true,
       title: t('choreView.clearAllTimeRecords'),
-      message:
-        'This will permanently delete all timers for this task and set it back to "not started".',
+      message: t('choreView.clearAllTimeConfirmation'),
       confirmText: t('choreView.clearAllTimeRecords'),
       cancelText: t('common:cancel'),
       onClose: async confirmed => {
@@ -616,7 +614,7 @@ const ChoreView = () => {
               variant='plain'
             >
               {chorePriority ? chorePriority.icon : <LowPriority />}
-              {chorePriority ? chorePriority.name : 'No Priority'}
+              {chorePriority ? chorePriority.name : t('choreView.noPriority')}
             </MenuButton>
             <Menu>
               {Priorities.map((priority, index) => (
@@ -643,13 +641,13 @@ const ChoreView = () => {
                 }}
                 onClick={() => {
                   handleUpdatePriority({
-                    name: 'No Priority',
+                    name: t('choreView.noPriority'),
                     value: 0,
                   })
                   setChorePriority(null)
                 }}
               >
-                No Priority
+                {t('choreView.noPriority')}
               </MenuItem>
             </Menu>
           </Dropdown>
@@ -671,7 +669,7 @@ const ChoreView = () => {
             }}
           >
             <History />
-            History
+            {t('choreView.history')}
           </Button>
           <Button
             size='sm'
@@ -698,7 +696,7 @@ const ChoreView = () => {
         {chore.description && (
           <>
             <Typography level='title-md' sx={{ mb: 1 }}>
-              Description :
+              {t('choreView.description')}
             </Typography>
 
             <Sheet
@@ -712,7 +710,7 @@ const ChoreView = () => {
               onClick={() => {
                 setNoteViewerConfig({
                   isOpen: true,
-                  title: 'Description',
+                  title: t('choreView.descriptionTitle'),
                   content: chore.description,
                   onClose: () => setNoteViewerConfig({ isOpen: false }),
                 })
@@ -744,7 +742,7 @@ const ChoreView = () => {
         {chore.notes && (
           <>
             <Typography level='title-md' sx={{ mb: 1 }}>
-              Previous note:
+              {t('choreView.previousNoteLabel')}
             </Typography>
             <Sheet
               variant='plain'
@@ -757,7 +755,7 @@ const ChoreView = () => {
               onClick={() => {
                 setNoteViewerConfig({
                   isOpen: true,
-                  title: 'Previous Note',
+                  title: t('choreView.previousNote'),
                   content: chore.notes,
                   onClose: () => setNoteViewerConfig({ isOpen: false }),
                 })
@@ -788,7 +786,7 @@ const ChoreView = () => {
         {chore.subTasks && chore.subTasks.length > 0 && (
           <Box sx={{ p: 0, m: 0, mb: 2 }}>
             <Typography level='title-md' sx={{ mb: 1 }}>
-              Subtasks :
+              {t('choreView.subtasksLabel')}
             </Typography>
             <Sheet
               variant='plain'
@@ -826,7 +824,7 @@ const ChoreView = () => {
         variant='soft'
       >
         <Typography level='body-md' sx={{ mb: 1 }}>
-          Task Actions
+          {t('choreView.taskActions')}
         </Typography>
 
         <FormControl size='sm'>
@@ -850,7 +848,7 @@ const ChoreView = () => {
                   alignItems: 'center',
                 }}
               >
-                Add a note
+                {t('choreView.addNote')}
               </Typography>
             }
           />
@@ -858,13 +856,13 @@ const ChoreView = () => {
         {note !== null && (
           <Box sx={{ mb: 1 }}>
             <Typography level='body-sm' sx={{ mb: 1 }}>
-              Additional Notes:
+              {t('choreView.additionalNotes')}
             </Typography>
             <RichTextEditor
               value={note || ''}
               onChange={setNote}
               entityType={'chore_completion_note'}
-              placeholder='Add a note about the completion...'
+              placeholder={t('choreView.notePlaceholder')}
             />
           </Box>
         )}
@@ -898,7 +896,7 @@ const ChoreView = () => {
                   alignItems: 'center',
                 }}
               >
-                Set custom completion time
+                {t('choreView.setCustomCompletionTime')}
               </Typography>
             }
           />
@@ -932,7 +930,7 @@ const ChoreView = () => {
               color='primary'
               startDecorator={<Unarchive />}
             >
-              Unarchive
+              {t('choreView.unarchive')}
             </Button>
           </Box>
         ) : (
@@ -970,7 +968,7 @@ const ChoreView = () => {
                         flex: 1,
                       }}
                     >
-                      Approve
+                      {t('choreView.approve')}
                     </Button>
                     <Button
                       fullWidth
@@ -982,7 +980,7 @@ const ChoreView = () => {
                         flex: 1,
                       }}
                     >
-                      <Box>Reject</Box>
+                      <Box>{t('choreView.reject')}</Box>
                     </Button>
                   </>
                 ) : (
@@ -993,7 +991,7 @@ const ChoreView = () => {
                     color='neutral'
                     startDecorator={<HourglassEmpty />}
                   >
-                    <Box>Pending Approval</Box>
+                    <Box>{t('choreView.pendingApproval')}</Box>
                   </Button>
                 )
               ) : (
@@ -1014,7 +1012,7 @@ const ChoreView = () => {
                       flex: 4,
                     }}
                   >
-                    <Box>Mark as done</Box>
+                    <Box>{t('choreView.markAsDone')}</Box>
                   </Button>
 
                   <Button
@@ -1023,12 +1021,10 @@ const ChoreView = () => {
                     onClick={() => {
                       setConfirmModelConfig({
                         isOpen: true,
-                        title: 'Skip Task',
-
-                        message: 'Are you sure you want to skip this task?',
-
-                        confirmText: 'Skip',
-                        cancelText: 'Cancel',
+                        title: t('choreView.skipTask'),
+                        message: t('choreView.skipTaskConfirmation'),
+                        confirmText: t('choreView.skip'),
+                        cancelText: t('choreView.cancel'),
                         onClose: confirmed => {
                           if (confirmed) {
                             handleSkippingTask()
@@ -1046,7 +1042,7 @@ const ChoreView = () => {
                       flex: 1,
                     }}
                   >
-                    <Box>Skip</Box>
+                    <Box>{t('choreView.skip')}</Box>
                   </Button>
                 </>
               )}
@@ -1090,7 +1086,7 @@ const ChoreView = () => {
                   flex: 1,
                 }}
               >
-                Start
+                {t('choreView.start')}
               </Button>
             )}
           </Box>

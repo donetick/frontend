@@ -81,5 +81,93 @@
     "settingsSaved": "Configuración guardada con éxito",
     "settingsSaveFailed": "Error al guardar la configuración",
     "invalidWebhook": "URL de webhook no válida"
+  },
+  "profile": {
+    "title": "Configuración del Perfil",
+    "description": "Actualiza tu nombre para mostrar y foto de perfil.",
+    "photoUpdated": "Foto Actualizada",
+    "photoUpdatedMessage": "¡Tu foto de perfil ha sido actualizada con éxito!",
+    "uploadFailed": "Error al Subir",
+    "uploadFailedMessage": "Error al subir tu foto. Por favor, inténtalo de nuevo.",
+    "profileUpdated": "Perfil Actualizado",
+    "profileUpdatedMessage": "¡Tu información de perfil ha sido guardada con éxito!",
+    "updateFailed": "Error al Actualizar",
+    "updateFailedMessage": "No se pudo actualizar tu perfil. Por favor, verifica tu conexión e inténtalo de nuevo.",
+    "changePhoto": "Cambiar Foto",
+    "displayName": "Nombre para Mostrar",
+    "displayNamePlaceholder": "Ingresa tu nombre para mostrar",
+    "timezone": "Zona Horaria",
+    "timezonePlaceholder": "Selecciona tu zona horaria",
+    "save": "Guardar",
+    "cancel": "Cancelar"
+  },
+  "overview": {
+    "title": "Configuración",
+    "subtitle": "Personaliza tu experiencia y administra las preferencias de tu cuenta",
+    "upgrade": {
+      "title": "Actualizar a Plus",
+      "description": "Desbloquea funciones potentes para mejorar tu productividad",
+      "button": "Actualizar Ahora",
+      "features": {
+        "richText": "Descripciones en texto enriquecido",
+        "notifications": "Notificaciones de tareas",
+        "apiIntegrations": "Integraciones API",
+        "advancedAutomation": "Automatización avanzada"
+      }
+    },
+    "sections": {
+      "profile": {
+        "title": "Configuración del Perfil",
+        "description": "Actualiza tu información de perfil, foto, nombre para mostrar y preferencias de zona horaria."
+      },
+      "circle": {
+        "title": "Configuración del Círculo",
+        "description": "Administra tu círculo, invita miembros y gestiona solicitudes de unión."
+      },
+      "account": {
+        "title": "Configuración de la Cuenta",
+        "description": "Administra tu suscripción, cambia la contraseña y opciones de eliminación de cuenta."
+      },
+      "subaccounts": {
+        "title": "Cuentas Administradas",
+        "description": "Crea y administra subcuentas para iniciar sesión y completar tareas asignadas."
+      },
+      "notifications": {
+        "title": "Notificaciones",
+        "description": "Configura notificaciones push, alertas por correo electrónico y destinos de notificación para tareas."
+      },
+      "mfa": {
+        "title": "Autenticación Multifactor",
+        "description": "Agrega una capa adicional de seguridad con MFA usando aplicaciones de autenticación."
+      },
+      "apitokens": {
+        "title": "Tokens API",
+        "description": "Genera y administra tokens de acceso para integraciones de terceros y acceso a la API."
+      },
+      "storage": {
+        "title": "Configuración de Almacenamiento",
+        "description": "Respalda y restaura tus datos, administra el almacenamiento local y las preferencias de sincronización."
+      },
+      "sidepanel": {
+        "title": "Personalización del Panel Lateral",
+        "description": "Personaliza el diseño y la visibilidad de las tarjetas en la interfaz del panel lateral."
+      },
+      "theme": {
+        "title": "Preferencias de Tema",
+        "description": "Elige tu tema preferido y configura los ajustes de modo oscuro/claro."
+      },
+      "localization": {
+        "title": "Localización",
+        "description": "Personaliza el idioma, formato de fecha, formato de hora y preferencias regionales."
+      },
+      "advanced": {
+        "title": "Configuración Avanzada",
+        "description": "Configura webhooks, actualizaciones en tiempo real y otras funciones avanzadas para mejorar la productividad."
+      },
+      "developer": {
+        "title": "Configuración de Desarrollador",
+        "description": "Ver información técnica sobre tokens de autenticación, conexiones SSE y datos de depuración."
+      }
+    }
   }
 }
