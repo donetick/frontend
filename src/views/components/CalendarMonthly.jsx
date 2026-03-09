@@ -1,7 +1,11 @@
 import Calendar from 'react-calendar'
+import { useLocalization } from '../../contexts/LocalizationContext'
 import { getPriorityColor } from '../../utils/Colors'
 import styles from './Calendar.module.css'
 const CalendarMonthly = ({ chores, onDateChange }) => {
+  const { firstDayOfWeek } = useLocalization()
+  const calendarType =
+    firstDayOfWeek === 1 ? 'iso8601' : firstDayOfWeek === 6 ? 'islamic' : 'gregory'
   const tileContent = ({ date, view }) => {
     if (view === 'month') {
       const dayChores = chores.filter(chore => {
@@ -51,6 +55,7 @@ const CalendarMonthly = ({ chores, onDateChange }) => {
     <div className={styles.reactCalendar}>
       <Calendar
         tileContent={tileContent}
+        calendarType={calendarType}
         onChange={d => {
           onDateChange(new Date(d))
         }}

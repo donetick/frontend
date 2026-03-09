@@ -57,6 +57,7 @@
     "firstDayOfWeekDescription": "Selecciona qué día comienza tu semana",
     "sunday": "Domingo",
     "monday": "Lunes",
+    "saturday": "Sábado",
     "formats": {
       "mdy": "MM/DD/AAAA (EE.UU.)",
       "dmy": "DD/MM/AAAA (Europa)",

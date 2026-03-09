@@ -57,6 +57,7 @@
     "firstDayOfWeekDescription": "اختر اليوم الذي يبدأ به أسبوعك",
     "sunday": "الأحد",
     "monday": "الاثنين",
+    "saturday": "السبت",
     "formats": {
       "mdy": "MM/DD/YYYY (الولايات المتحدة)",
       "dmy": "DD/MM/YYYY (أوروبا)",

@@ -167,7 +167,7 @@ const LocalizationSettings = () => {
               {t('localization.firstDayOfWeekDescription')}
             </Typography>
             <FormControl>
-              <Box sx={{ display: 'flex', gap: 2 }}>
+              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                 <Button
                   variant={firstDayOfWeek === 0 ? 'solid' : 'outlined'}
                   onClick={() => setFirstDayOfWeek(0)}
@@ -179,6 +179,12 @@ const LocalizationSettings = () => {
                   onClick={() => setFirstDayOfWeek(1)}
                 >
                   {t('localization.monday')}
+                </Button>
+                <Button
+                  variant={firstDayOfWeek === 6 ? 'solid' : 'outlined'}
+                  onClick={() => setFirstDayOfWeek(6)}
+                >
+                  {t('localization.saturday')}
                 </Button>
               </Box>
             </FormControl>
