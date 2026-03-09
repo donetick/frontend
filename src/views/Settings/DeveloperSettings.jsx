@@ -1,6 +1,7 @@
 import { Refresh, Token } from '@mui/icons-material'
 import { Box, Button, Card, Chip, Divider, Typography } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import { LocalNotifications } from '@capacitor/local-notifications'
 import { useSSEContext } from '../../hooks/useSSEContext'
 import { useNotification } from '../../service/NotificationProvider'
 import { apiClient } from '../../utils/ApiClient'
@@ -28,6 +29,8 @@ const DeveloperSettings = () => {
   const [timeSinceLastHeartbeat, setTimeSinceLastHeartbeat] = useState(null)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [isRefreshingDirect, setIsRefreshingDirect] = useState(false)
+  const [scheduledNotifications, setScheduledNotifications] = useState([])
+  const [isLoadingNotifications, setIsLoadingNotifications] = useState(false)
 
   const { showNotification } = useNotification()
 
@@ -44,7 +47,32 @@ const DeveloperSettings = () => {
       }
     }
 
+    const loadScheduledNotifications = async () => {
+      if (isNative()) {
+        setIsLoadingNotifications(true)
+        try {
+          const pending = await LocalNotifications.getPending()
+          // Sort by schedule time (earliest first)
+          const sorted = pending.notifications.sort((a, b) => {
+            const timeA = a.schedule?.at
+              ? new Date(a.schedule.at).getTime()
+              : 0
+            const timeB = b.schedule?.at
+              ? new Date(b.schedule.at).getTime()
+              : 0
+            return timeA - timeB
+          })
+          setScheduledNotifications(sorted)
+        } catch (error) {
+          console.error('Error loading scheduled notifications:', error)
+        } finally {
+          setIsLoadingNotifications(false)
+        }
+      }
+    }
+
     loadTokenData()
+    loadScheduledNotifications()
   }, [])
 
   useEffect(() => {
@@ -183,6 +211,47 @@ const DeveloperSettings = () => {
     }
   }
 
+  const handleRefreshNotifications = async () => {
+    if (!isNativePlatform) return
+
+    setIsLoadingNotifications(true)
+    try {
+      const pending = await LocalNotifications.getPending()
+      // Sort by schedule time (earliest first)
+      const sorted = pending.notifications.sort((a, b) => {
+        const timeA = a.schedule?.at ? new Date(a.schedule.at).getTime() : 0
+        const timeB = b.schedule?.at ? new Date(b.schedule.at).getTime() : 0
+        return timeA - timeB
+      })
+      setScheduledNotifications(sorted)
+      showNotification({
+        type: 'success',
+        message: `Loaded ${sorted.length} scheduled notifications`,
+      })
+    } catch (error) {
+      console.error('Error loading scheduled notifications:', error)
+      showNotification({
+        type: 'error',
+        message: `Error loading notifications: ${error.message}`,
+      })
+    } finally {
+      setIsLoadingNotifications(false)
+    }
+  }
+
+  const getNotificationStatusColor = scheduleTime => {
+    if (!scheduleTime) return 'neutral'
+
+    const now = new Date()
+    const scheduledDate = new Date(scheduleTime)
+    const diffMs = scheduledDate - now
+
+    if (diffMs < 0) return 'danger' // Past due
+    if (diffMs < 5 * 60 * 1000) return 'warning' // Less than 5 minutes
+    if (diffMs < 60 * 60 * 1000) return 'primary' // Less than 1 hour
+    return 'success' // More than 1 hour
+  }
+
   return (
     <div className='grid gap-4 py-4' id='developer'>
       <Typography level='h3'>Developer Settings</Typography>
@@ -307,6 +376,133 @@ const DeveloperSettings = () => {
           </Box>
         </Box>
       </Card>
+
+      {isNativePlatform && (
+        <Card variant='outlined'>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: 1,
+              }}
+            >
+              <Typography level='title-lg'>
+                Scheduled Local Notifications
+              </Typography>
+              <Button
+                size='sm'
+                variant='soft'
+                startDecorator={<Refresh />}
+                onClick={handleRefreshNotifications}
+                loading={isLoadingNotifications}
+                disabled={isLoadingNotifications}
+              >
+                Refresh
+              </Button>
+            </Box>
+
+            <Divider />
+
+            {scheduledNotifications.length === 0 ? (
+              <Typography level='body-sm' color='neutral'>
+                No scheduled notifications
+              </Typography>
+            ) : (
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Typography level='body-sm'>
+                  Total scheduled:{' '}
+                  <Chip variant='soft' size='sm'>
+                    {scheduledNotifications.length}
+                  </Chip>
+                </Typography>
+
+                <Divider />
+
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 1.5,
+                    maxHeight: '400px',
+                    overflowY: 'auto',
+                  }}
+                >
+                  {scheduledNotifications.map((notification, index) => {
+                    const scheduleTime = notification.schedule?.at
+                    const scheduledDate = scheduleTime
+                      ? new Date(scheduleTime)
+                      : null
+                    const now = new Date()
+                    const timeUntil = scheduledDate
+                      ? scheduledDate - now
+                      : null
+
+                    return (
+                      <Card
+                        key={notification.id || index}
+                        variant='soft'
+                        size='sm'
+                      >
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 0.5,
+                          }}
+                        >
+                          <Typography level='title-sm'>
+                            {notification.title || 'No title'}
+                          </Typography>
+                          <Typography level='body-xs' color='neutral'>
+                            {notification.body || 'No body'}
+                          </Typography>
+
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              gap: 1,
+                              alignItems: 'center',
+                              flexWrap: 'wrap',
+                              mt: 0.5,
+                            }}
+                          >
+                            {scheduledDate && (
+                              <>
+                                <Chip
+                                  size='sm'
+                                  variant='soft'
+                                  color={getNotificationStatusColor(
+                                    scheduleTime,
+                                  )}
+                                >
+                                  {timeUntil && timeUntil > 0
+                                    ? formatTimeLeft(timeUntil)
+                                    : 'Past due'}
+                                </Chip>
+                                <Typography level='body-xs' color='neutral'>
+                                  {scheduledDate.toLocaleString()}
+                                </Typography>
+                              </>
+                            )}
+                            {notification.extra?.choreId && (
+                              <Chip size='sm' variant='outlined'>
+                                Chore ID: {notification.extra.choreId}
+                              </Chip>
+                            )}
+                          </Box>
+                        </Box>
+                      </Card>
+                    )
+                  })}
+                </Box>
+              </Box>
+            )}
+          </Box>
+        </Card>
+      )}
 
       <Card variant='outlined'>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
