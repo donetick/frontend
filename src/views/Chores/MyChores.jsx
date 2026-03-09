@@ -62,6 +62,7 @@ import ChoreListView from './ChoreListView.jsx'
 import ChoreModals from './components/ChoreModals'
 import FilterSection from './components/FilterSection'
 import MultiSelectToolbar from './components/MultiSelectToolbar'
+import MyChoreHeader from './components/MyChoreHeader'
 import SearchBar from './components/SearchBar'
 import { useChoreActions } from './hooks/useChoreActions'
 import { useChoreFilters } from './hooks/useChoreFilters'
@@ -76,6 +77,7 @@ import {
 } from './LocalNotificationScheduler'
 import NotificationAccessSnackbar from './NotificationAccessSnackbar'
 import Sidepanel from './Sidepanel'
+import { INSIGHT_FILTER_DEFS } from './SmartInsightsCard'
 import SortAndGrouping from './SortAndGrouping'
 
 const MyChores = () => {
@@ -167,6 +169,7 @@ const MyChores = () => {
     activeFilter,
     activeFilterId,
     tempFilter,
+    tempFilterMeta,
     filteredChores: customFilteredChores,
     applyCustomFilter,
     clearActiveFilter,
@@ -368,8 +371,6 @@ const MyChores = () => {
 
   // Read and apply filters from URL parameters
   useEffect(() => {
-    if (!chores.length || !savedFilters.length) return
-
     // Check for filterId (camelCase) or filter_id (snake_case) for advanced filters
     const rawFilterId =
       searchParams.get('filterId') || searchParams.get('filter_id')
@@ -377,6 +378,26 @@ const MyChores = () => {
     const filterId = rawFilterId ? Number(rawFilterId) || rawFilterId : null
 
     const oldFilter = searchParams.get('filter')
+
+    // Restore smart insight temp filter from URL (e.g. on page reload)
+    // Insight IDs are strings (e.g. 'overdue'), saved filter IDs are numeric
+    if (
+      filterId &&
+      INSIGHT_FILTER_DEFS[filterId] &&
+      tempFilterMeta?.id !== filterId
+    ) {
+      const def = INSIGHT_FILTER_DEFS[filterId]
+      applyTempFilter(def.filter, { id: filterId, name: def.name })
+      return
+    }
+
+    // If filterId is no longer in URL but filter is still active in state, clear it
+    if (!filterId && !oldFilter && activeFilterId) {
+      clearActiveFilter()
+      return
+    }
+
+    if (!chores.length || !savedFilters.length) return
 
     // Handle advanced filter parameter
     if (filterId && !activeFilterId) {
@@ -416,6 +437,8 @@ const MyChores = () => {
     activeFilterId,
     savedFilters,
     applyCustomFilter,
+    applyTempFilter,
+    clearActiveFilter,
     selectedProject,
     projectFilteredChores,
     setSearchFilter,
@@ -423,6 +446,35 @@ const MyChores = () => {
     setViewMode,
     setSelectedCalendarDate,
   ])
+
+  // Sync tempFilterMeta (smart insight) → URL using filterId param
+  // Insight IDs are strings (e.g. 'overdue') so they don't conflict with numeric saved filter IDs
+  useEffect(() => {
+    const insightId = tempFilterMeta?.id
+    const params = new URLSearchParams(searchParams)
+    const currentFilterId = params.get('filterId')
+
+    if (insightId && currentFilterId !== insightId) {
+      params.delete('filter_id')
+      params.delete('filter')
+      params.set('filterId', insightId)
+      Navigate(
+        { pathname: '/chores', search: params.toString() },
+        { replace: true },
+      )
+    } else if (
+      !insightId &&
+      currentFilterId &&
+      INSIGHT_FILTER_DEFS[currentFilterId]
+    ) {
+      // Only clear filterId if it was set by an insight (not a numeric saved filter)
+      params.delete('filterId')
+      Navigate(
+        { pathname: '/chores', search: params.toString() },
+        { replace: true },
+      )
+    }
+  }, [tempFilterMeta?.id, searchParams])
 
   const {
     handleChoreAction,
@@ -823,6 +875,13 @@ const MyChores = () => {
       }}
     >
       <Container maxWidth='md'>
+        <MyChoreHeader
+          activeFilterId={activeFilterId}
+          activeFilter={activeFilter}
+          selectedProject={selectedProject}
+          tempFilter={tempFilter}
+          tempFilterMeta={tempFilterMeta}
+        />
         <Box
           sx={{
             display: 'flex',

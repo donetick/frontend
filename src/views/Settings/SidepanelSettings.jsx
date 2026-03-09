@@ -2,8 +2,11 @@ import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd'
 import {
   CalendarMonth,
   DragIndicator,
+  EmojiEvents,
   History,
   Person,
+  SupervisorAccount,
+  TrendingUp,
   Visibility,
   VisibilityOff,
   WavingHand,
@@ -23,48 +26,22 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import {
+  DEFAULT_SIDEPANEL_CONFIG,
+  getSidepanelConfig,
+  saveSidepanelConfig,
+} from '../../utils/SidepanelConfig'
 import SettingsLayout from './SettingsLayout'
 
-const DEFAULT_SIDEPANEL_CONFIG = [
-  {
-    id: 'welcome',
-    name: 'Welcome Card',
-    description: 'Shows greeting and quick stats',
-    iconName: 'WavingHand',
-    enabled: true,
-    order: 0,
-  },
-  {
-    id: 'assignees',
-    name: 'Tasks by Assignee',
-    description: 'Groups tasks by who they are assigned to',
-    iconName: 'Person',
-    enabled: true,
-    order: 1,
-  },
-  {
-    id: 'calendar',
-    name: 'Calendar View',
-    description: 'Shows tasks in a calendar format',
-    iconName: 'CalendarMonth',
-    enabled: true,
-    order: 2,
-  },
-  {
-    id: 'activities',
-    name: 'Recent Activities',
-    description: 'Shows recent task completions and activities',
-    iconName: 'History',
-    enabled: true,
-    order: 3,
-  },
-]
-
 const SidepanelSettings = () => {
-  const [config, setConfig] = useState(DEFAULT_SIDEPANEL_CONFIG)
+  const [config, setConfig] = useState(getSidepanelConfig())
 
   const getIcon = iconName => {
     switch (iconName) {
+      case 'SupervisorAccount':
+        return <SupervisorAccount />
+      case 'TrendingUp':
+        return <TrendingUp />
       case 'WavingHand':
         return <WavingHand />
       case 'Person':
@@ -73,27 +50,20 @@ const SidepanelSettings = () => {
         return <CalendarMonth />
       case 'History':
         return <History />
+      case 'EmojiEvents':
+        return <EmojiEvents />
       default:
         return <Person />
     }
   }
 
   useEffect(() => {
-    const saved = localStorage.getItem('sidepanelConfig')
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved)
-        setConfig(parsed)
-      } catch (error) {
-        console.error('Error parsing sidepanel config:', error)
-      }
-    }
+    setConfig(getSidepanelConfig())
   }, [])
 
   const saveConfig = newConfig => {
     setConfig(newConfig)
-    localStorage.setItem('sidepanelConfig', JSON.stringify(newConfig))
-    window.dispatchEvent(new Event('sidepanelConfigChanged'))
+    saveSidepanelConfig(newConfig)
   }
 
   const handleToggleEnabled = (id, enabled) => {

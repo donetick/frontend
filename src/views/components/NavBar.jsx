@@ -139,7 +139,7 @@ const NavBar = () => {
     }
     if (
       ['/chores', '/'].includes(location.pathname) &&
-      !searchParams.get('filter')
+      !searchParams.get('filterId')
     ) {
       return menuRounded
     }
