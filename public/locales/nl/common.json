@@ -1,0 +1,33 @@
+{
+  "save": "Opslaan",
+  "cancel": "Annuleren",
+  "delete": "Verwijderen",
+  "edit": "Bewerken",
+  "close": "Sluiten",
+  "confirm": "Bevestigen",
+  "loading": "Laden...",
+  "error": "Fout",
+  "success": "Succes",
+  "warning": "Waarschuwing",
+  "refresh": "Vernieuwen",
+  "copy": "Kopiëren",
+  "copied": "Gekopieerd!",
+  "settings": "Instellingen",
+  "yes": "Ja",
+  "no": "Nee",
+  "back": "Terug",
+  "backToCalendar": "Terug naar Kalender",
+  "logout": "Uitloggen",
+  "version": "Versie",
+  "navigation": {
+    "allTasks": "Alle Taken",
+    "archived": "Gearchiveerd",
+    "things": "Dingen",
+    "labels": "Labels",
+    "projects": "Projecten",
+    "filters": "Filters",
+    "activities": "Activiteiten",
+    "points": "Punten",
+    "settings": "Instellingen"
+  }
+}
