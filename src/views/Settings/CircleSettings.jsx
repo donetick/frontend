@@ -15,6 +15,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useLocalization } from '../../contexts/LocalizationContext'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import {
@@ -36,6 +37,7 @@ const CircleSettings = () => {
   const queryClient = useQueryClient()
   const { showNotification } = useNotification()
   const navigate = useNavigate()
+  const { fmt } = useLocalization()
 
   const [userCircles, setUserCircles] = useState([])
   const [circleMemberRequests, setCircleMemberRequests] = useState([])
@@ -221,12 +223,12 @@ const CircleSettings = () => {
                 </Typography>
                 {member.isActive ? (
                   <Typography level='body-sm'>
-                    Joined on {moment(member.createdAt).format('MMM DD, YYYY')}
+                    Joined on {fmt.date(member.createdAt)}
                   </Typography>
                 ) : (
                   <Typography level='body-sm' color='danger'>
                     Request to join{' '}
-                    {moment(member.updatedAt).format('MMM DD, YYYY')}
+                    {fmt.date(member.updatedAt)}
                   </Typography>
                 )}
               </Box>
@@ -365,7 +367,7 @@ const CircleSettings = () => {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {lastRefresh && (
               <Typography level='body-sm' color='neutral'>
-                Last updated: {moment(lastRefresh).format('MMM DD, HH:mm')}
+                Last updated: {fmt.dateTime(lastRefresh)}
               </Typography>
             )}
             <Button

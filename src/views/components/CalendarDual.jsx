@@ -14,7 +14,7 @@ const getAssigneeColor = (assignee, userProfile) => {
 }
 const CalendarDual = ({ chores, onDateChange }) => {
   const { data: userProfile } = useUserProfile()
-  const { firstDayOfWeek } = useLocalization()
+  const { firstDayOfWeek, fmt } = useLocalization()
   const calendarType =
     firstDayOfWeek === 1 ? 'iso8601' : firstDayOfWeek === 6 ? 'islamic' : 'gregory'
 
@@ -100,10 +100,7 @@ const CalendarDual = ({ chores, onDateChange }) => {
       {isSecondary && (
         <div className={styles.secondaryCalendarHeader}>
           <Typography level='title-md' sx={{ textAlign: 'center', mb: 1 }}>
-            {date.toLocaleDateString('en-US', {
-              month: 'long',
-              year: 'numeric',
-            })}
+            {fmt.date(date, 'MMMM YYYY')}
           </Typography>
         </div>
       )}

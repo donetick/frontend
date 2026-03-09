@@ -1,0 +1,174 @@
+{
+  "title": "Instellingen",
+  "circleSettings": {
+    "title": "Cirkelinstellingen",
+    "description": "Uw account wordt automatisch verbonden met een Cirkel wanneer u er een aanmaakt of lid wordt. Nodig eenvoudig vrienden uit door de unieke Cirkelcode of onderstaande link te delen.",
+    "circleCode": "Cirkelcode",
+    "copyCode": "Code Kopiëren",
+    "copyLink": "Link Kopiëren",
+    "codeCopied": "Cirkelcode gekopieerd!",
+    "linkCopied": "Link gekopieerd!",
+    "joinCircle": "Lid Worden van een Cirkel",
+    "joinCirclePlaceholder": "Voer Cirkelcode in",
+    "join": "Lid Worden",
+    "leave": "Cirkel Verlaten",
+    "leaveConfirmTitle": "Cirkel Verlaten",
+    "leaveConfirmMessage": "Weet u zeker dat u deze cirkel wilt verlaten?",
+    "circleMembers": "Cirkelleden",
+    "circleMemberRequests": "Aanvragen voor Cirkellidmaatschap",
+    "admin": "Beheerder",
+    "member": "Lid",
+    "pending": "In behandeling",
+    "accept": "Accepteren",
+    "reject": "Afwijzen",
+    "makeAdmin": "Beheerder Maken",
+    "makeMember": "Lid Maken",
+    "remove": "Verwijderen",
+    "webhookURL": "Webhook URL",
+    "webhookDescription": "Voer een webhook URL in om meldingen te ontvangen voor cirkelgebeurtenissen",
+    "webhookPlaceholder": "https://uw-webhook-url.com"
+  },
+  "accountSettings": {
+    "title": "Accountinstellingen",
+    "subscription": "Abonnement",
+    "subscriptionStatus": "Huidig Plan",
+    "free": "Gratis",
+    "plus": "Plus",
+    "upgrade": "Upgraden",
+    "cancel": "Annuleren",
+    "changePassword": "Wachtwoord Wijzigen",
+    "password": "Wachtwoord",
+    "dangerZone": "Gevarenzone",
+    "dangerZoneDescription": "Zodra u uw account verwijdert, is er geen weg terug. Wees zeker van uw beslissing.",
+    "deleteAccount": "Account Verwijderen"
+  },
+  "localization": {
+    "title": "Lokalisatie",
+    "description": "Pas de taal, datumnotatie en regionale voorkeuren voor uw account aan.",
+    "language": "Taal",
+    "languageDescription": "Selecteer uw voorkeurstaal",
+    "dateFormat": "Datumnotatie",
+    "dateFormatDescription": "Kies hoe datums in de applicatie worden weergegeven",
+    "timeFormat": "Tijdnotatie",
+    "timeFormatDescription": "Selecteer 12-uurs of 24-uurs tijdnotatie",
+    "12hour": "12-uurs (AM/PM)",
+    "24hour": "24-uurs",
+    "firstDayOfWeek": "Eerste Dag van de Week",
+    "firstDayOfWeekDescription": "Selecteer welke dag uw week begint",
+    "sunday": "Zondag",
+    "monday": "Maandag",
+    "saturday": "Zaterdag",
+    "formats": {
+      "mdy": "MM/DD/JJJJ (VS)",
+      "dmy": "DD/MM/JJJJ (Europa)",
+      "ymd": "JJJJ-MM-DD (ISO)",
+      "long": "Lang formaat (bijv. 1 januari 2024)",
+      "short": "Kort formaat (bijv. 1 jan 2024)"
+    }
+  },
+  "sidepanel": {
+    "title": "Zijpaneel Aanpassen",
+    "description": "Pas de indeling en zichtbaarheid van kaarten in het zijpaneel aan. Deze sectie is alleen beschikbaar op grote schermapparaten zoals tablets en desktops."
+  },
+  "theme": {
+    "title": "Themavoorkeuren",
+    "description": "Kies hoe de site er voor u uitziet. Selecteer een enkel thema of synchroniseer met uw systeem en schakel automatisch tussen dag- en nachtthema's.",
+    "themeMode": "Thamamodus",
+    "light": "Licht",
+    "dark": "Donker",
+    "system": "Systeem"
+  },
+  "notifications": {
+    "settingsSaved": "Instellingen succesvol opgeslagen",
+    "settingsSaveFailed": "Opslaan van instellingen mislukt",
+    "invalidWebhook": "Ongeldige webhook URL"
+  },
+  "profile": {
+    "title": "Profielinstellingen",
+    "description": "Werk uw weergavenaam en profielfoto bij.",
+    "photoUpdated": "Foto Bijgewerkt",
+    "photoUpdatedMessage": "Uw profielfoto is succesvol bijgewerkt!",
+    "uploadFailed": "Uploaden Mislukt",
+    "uploadFailedMessage": "Het uploaden van uw foto is mislukt. Probeer het opnieuw.",
+    "profileUpdated": "Profiel Bijgewerkt",
+    "profileUpdatedMessage": "Uw profielgegevens zijn succesvol opgeslagen!",
+    "updateFailed": "Bijwerken Mislukt",
+    "updateFailedMessage": "Kan uw profiel niet bijwerken. Controleer uw verbinding en probeer het opnieuw.",
+    "changePhoto": "Foto Wijzigen",
+    "displayName": "Weergavenaam",
+    "displayNamePlaceholder": "Voer uw weergavenaam in",
+    "timezone": "Tijdzone",
+    "timezonePlaceholder": "Selecteer uw tijdzone",
+    "save": "Opslaan",
+    "cancel": "Annuleren"
+  },
+  "overview": {
+    "title": "Instellingen",
+    "subtitle": "Pas uw ervaring aan en beheer uw accountvoorkeuren",
+    "upgrade": {
+      "title": "Upgraden naar Plus",
+      "description": "Ontgrendel krachtige functies om uw productiviteit te verbeteren",
+      "button": "Nu Upgraden",
+      "features": {
+        "richText": "Rijke tekstbeschrijvingen",
+        "notifications": "Taakmeldingen",
+        "apiIntegrations": "API-integraties",
+        "advancedAutomation": "Geavanceerde automatisering"
+      }
+    },
+    "sections": {
+      "profile": {
+        "title": "Profielinstellingen",
+        "description": "Werk uw profielgegevens, foto, weergavenaam en tijdzonevoorkeuren bij."
+      },
+      "circle": {
+        "title": "Cirkelinstellingen",
+        "description": "Beheer uw cirkel, nodig leden uit en behandel lidmaatschapsverzoeken."
+      },
+      "account": {
+        "title": "Accountinstellingen",
+        "description": "Beheer uw abonnement, wijzig het wachtwoord en opties voor accountverwijdering."
+      },
+      "subaccounts": {
+        "title": "Beheerde Accounts",
+        "description": "Maak subaccounts aan en beheer ze om in te loggen en toegewezen taken te voltooien."
+      },
+      "notifications": {
+        "title": "Meldingen",
+        "description": "Configureer pushmeldingen, e-mailwaarschuwingen en meldingsdoelen voor taken."
+      },
+      "mfa": {
+        "title": "Multi-Factor Authenticatie",
+        "description": "Voeg een extra beveiligingslaag toe met MFA via authenticatie-apps."
+      },
+      "apitokens": {
+        "title": "API-tokens",
+        "description": "Genereer en beheer toegangstokens voor integraties van derden en API-toegang."
+      },
+      "storage": {
+        "title": "Opslaginstellingen",
+        "description": "Maak een back-up van uw gegevens en herstel ze, beheer lokale opslag en synchronisatievoorkeuren."
+      },
+      "sidepanel": {
+        "title": "Zijpaneel Aanpassen",
+        "description": "Pas de indeling en zichtbaarheid van kaarten in de zijpaneelinterface aan."
+      },
+      "theme": {
+        "title": "Themavoorkeuren",
+        "description": "Kies uw voorkeursthema en configureer de instellingen voor donker/licht modus."
+      },
+      "localization": {
+        "title": "Lokalisatie",
+        "description": "Pas de taal, datumnotatie, tijdnotatie en regionale voorkeuren aan."
+      },
+      "advanced": {
+        "title": "Geavanceerde Instellingen",
+        "description": "Configureer webhooks, real-time updates en andere geavanceerde functies voor verbeterde productiviteit."
+      },
+      "developer": {
+        "title": "Ontwikkelaarsinstellingen",
+        "description": "Bekijk technische informatie over authenticatietokens, SSE-verbindingen en foutopsporingsgegevens."
+      }
+    }
+  }
+}

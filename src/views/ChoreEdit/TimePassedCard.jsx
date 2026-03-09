@@ -8,9 +8,11 @@ import {
 import { Box, Card, Chip, Typography } from '@mui/joy'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useLocalization } from '../../contexts/LocalizationContext'
 
 const TimePassedCard = ({ chore, handleAction, onShowDetails }) => {
   const navigate = useNavigate()
+  const { fmt } = useLocalization()
   const [time, setTime] = useState(0)
   const [shouldAnimate, setShouldAnimate] = useState(false)
   const [prevStatus, setPrevStatus] = useState(null) // Initialize as null
@@ -187,10 +189,7 @@ const TimePassedCard = ({ chore, handleAction, onShowDetails }) => {
                 size='md'
                 startDecorator={<Flag sx={{ fontSize: 14 }} />}
               >
-                {new Date(chore.startTime).toLocaleTimeString([], {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
+                {fmt.time(chore.startTime)}
               </Chip>
             )}
 
@@ -202,10 +201,7 @@ const TimePassedCard = ({ chore, handleAction, onShowDetails }) => {
                 size='md'
                 startDecorator={<Schedule sx={{ fontSize: 14 }} />}
               >
-                {new Date(chore.timerUpdatedAt).toLocaleTimeString([], {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
+                {fmt.time(chore.timerUpdatedAt)}
               </Chip>
             )}
           </>
@@ -219,10 +215,7 @@ const TimePassedCard = ({ chore, handleAction, onShowDetails }) => {
             size='md'
             startDecorator={<Schedule sx={{ fontSize: 14 }} />}
           >
-            {new Date(chore.timerUpdatedAt).toLocaleTimeString([], {
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
+            {fmt.time(chore.timerUpdatedAt)}
           </Chip>
         )}
       </Box>

@@ -60,7 +60,7 @@ const Settings = () => {
   const queryClient = useQueryClient()
   const { showNotification } = useNotification()
   const navigate = useNavigate()
-  const { formatDate } = useLocalization()
+  const { fmt } = useLocalization()
 
   const [userCircles, setUserCircles] = useState([])
   const [circleMemberRequests, setCircleMemberRequests] = useState([])
@@ -191,11 +191,11 @@ const Settings = () => {
 
   const getSubscriptionDetails = () => {
     if (userProfile?.subscription === 'active') {
-      return `You are currently subscribed to the Plus plan. Your subscription will renew on ${formatDate(
+      return `You are currently subscribed to the Plus plan. Your subscription will renew on ${fmt.date(
         userProfile?.expiration,
       )}.`
     } else if (userProfile?.subscription === 'cancelled') {
-      return `You have cancelled your subscription. Your account will be downgraded to the Free plan on ${formatDate(
+      return `You have cancelled your subscription. Your account will be downgraded to the Free plan on ${fmt.date(
         userProfile?.expiration,
       )}.`
     } else {
@@ -207,7 +207,7 @@ const Settings = () => {
       return `Plus`
     } else if (userProfile?.subscription === 'cancelled') {
       if (moment().isBefore(userProfile?.expiration)) {
-        return `Plus(until ${formatDate(userProfile?.expiration)})`
+        return `Plus(until ${fmt.date(userProfile?.expiration)})`
       }
       return `Free`
     } else {
@@ -340,12 +340,12 @@ const Settings = () => {
                 </Typography>
                 {member.isActive ? (
                   <Typography level='body-sm'>
-                    Joined on {moment(member.createdAt).format('MMM DD, YYYY')}
+                    Joined on {fmt.date(member.createdAt)}
                   </Typography>
                 ) : (
                   <Typography level='body-sm' color='danger'>
                     Request to join{' '}
-                    {moment(member.updatedAt).format('MMM DD, YYYY')}
+                    {fmt.date(member.updatedAt)}
                   </Typography>
                 )}
               </Box>
@@ -486,7 +486,7 @@ const Settings = () => {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {lastRefresh && (
               <Typography level='body-sm' color='neutral'>
-                Last updated: {moment(lastRefresh).format('MMM DD, HH:mm')}
+                Last updated: {fmt.dateTime(lastRefresh)}
               </Typography>
             )}
             <Button

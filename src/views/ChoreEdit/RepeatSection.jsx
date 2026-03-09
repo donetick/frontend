@@ -19,6 +19,7 @@ import {
 import moment from 'moment'
 import { useEffect } from 'react'
 
+import { useLocalization } from '../../contexts/LocalizationContext'
 import { useUserProfile } from '../../queries/UserQueries'
 import { isPlusAccount } from '../../utils/Helpers'
 import ThingTriggerSection from './ThingTriggerSection'
@@ -76,7 +77,7 @@ const DAY_OCCURRENCE_OPTIONS = [
   { value: -1, label: 'Last occurrence' },
 ]
 // Helper function to generate schedule preview text
-const generateSchedulePreview = metadata => {
+const generateSchedulePreview = (metadata, formatTimeFn) => {
   if (!metadata?.days?.length) return ''
 
   const dayNames = metadata.days
@@ -84,7 +85,7 @@ const generateSchedulePreview = metadata => {
     .join(', ')
 
   const timeStr = metadata.time
-    ? moment(metadata.time).format('h:mm A')
+    ? formatTimeFn(metadata.time)
     : '6:00 PM'
 
   if (metadata.weekPattern === 'every_week' || !metadata.weekPattern) {
@@ -114,6 +115,7 @@ const RepeatOnSections = ({
   frequencyMetadata,
   onFrequencyMetadataUpdate,
 }) => {
+  const { fmt } = useLocalization()
   // if time on frequencyMetadata is not set, try to set it to the nextDueDate if available,
   // otherwise set it to 18:00 of the current day
   useEffect(() => {
@@ -400,7 +402,7 @@ const RepeatOnSections = ({
               {frequencyMetadata?.days?.length > 0 && (
                 <Card mt={2} p={2}>
                   <Typography level='body-sm' color='primary'>
-                    {generateSchedulePreview(frequencyMetadata)}
+                    {generateSchedulePreview(frequencyMetadata, fmt.time)}
                   </Typography>
                 </Card>
               )}

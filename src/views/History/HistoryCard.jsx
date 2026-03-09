@@ -13,6 +13,7 @@ import {
 } from '@mui/icons-material'
 import { Avatar, Box, Chip, Grid, IconButton, Typography } from '@mui/joy'
 import moment from 'moment'
+import { useLocalization } from '../../contexts/LocalizationContext'
 import { TASK_COLOR } from '../../utils/Colors.jsx'
 
 const getCompletedChip = historyEntry => {
@@ -93,6 +94,7 @@ const HistoryCard = ({
   onToggleActions,
   onViewNote,
 }) => {
+  const { fmt } = useLocalization()
   const performer = performers.find(p => p.userId === historyEntry.completedBy)
   const assignedTo = performers.find(p => p.userId === historyEntry.assignedTo)
 
@@ -191,9 +193,9 @@ const HistoryCard = ({
               </Typography>
 
               <Chip size='sm' startDecorator={<EventNote />}>
-                {moment(
+                {fmt.dateTime(
                   historyEntry.performedAt || historyEntry.updatedAt,
-                ).format('MMM DD, h:mm A')}
+                )}
               </Chip>
 
               <Box sx={{ display: 'flex', gap: 0.5 }}>
@@ -214,7 +216,7 @@ const HistoryCard = ({
             >
               {historyEntry.dueDate && (
                 <Chip size='sm' startDecorator={<CalendarMonth />}>
-                  {moment(historyEntry.dueDate).format('MMM DD h:mm A')}
+                  {fmt.dateTime(historyEntry.dueDate)}
                 </Chip>
               )}
             </Box>

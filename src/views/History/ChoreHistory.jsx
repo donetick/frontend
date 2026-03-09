@@ -22,6 +22,7 @@ import { Box, Button, Card, Container, Grid, Sheet, Typography } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { useLocalization } from '../../contexts/LocalizationContext'
 import useConfirmationModal from '../../hooks/useConfirmationModal'
 import {
   useChoreHistory,
@@ -44,6 +45,7 @@ const ChoreHistory = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [editHistory, setEditHistory] = useState(null)
   const { confirmModalConfig, showConfirmation } = useConfirmationModal()
+  const { fmt } = useLocalization()
   const [showMoreInfoId, setShowMoreInfoId] = useState(null)
   const [noteViewerConfig, setNoteViewerConfig] = useState({ isOpen: false })
   const { showSuccess, showError } = useNotification()
@@ -367,7 +369,7 @@ const ChoreHistory = () => {
                 onViewNote={notes => {
                   setNoteViewerConfig({
                     isOpen: true,
-                    title: `Updated at ${moment(historyEntry.updatedAt).format('LLLL')}`,
+                    title: `Updated at ${fmt.dateTime(historyEntry.updatedAt)}`,
                     content: notes,
                     onClose: () => setNoteViewerConfig({ isOpen: false }),
                   })

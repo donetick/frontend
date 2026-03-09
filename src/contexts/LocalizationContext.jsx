@@ -24,13 +24,7 @@ export const AVAILABLE_LANGUAGES = [
   { code: 'en', name: 'English', nativeName: 'English' },
   { code: 'es', name: 'Spanish', nativeName: 'Español' },
   { code: 'fr', name: 'French', nativeName: 'Français' },
-  { code: 'de', name: 'German', nativeName: 'Deutsch' },
-  { code: 'ar', name: 'Arabic', nativeName: 'العربية' },
-  { code: 'he', name: 'Hebrew', nativeName: 'עברית' },
-  { code: 'zh', name: 'Chinese', nativeName: '中文' },
-  { code: 'ja', name: 'Japanese', nativeName: '日本語' },
-  { code: 'pt', name: 'Portuguese', nativeName: 'Português' },
-  { code: 'ru', name: 'Russian', nativeName: 'Русский' },
+  { code: 'nl', name: 'Dutch', nativeName: 'Nederlands' },
 ]
 
 export const LocalizationProvider = ({ children }) => {
@@ -43,7 +37,10 @@ export const LocalizationProvider = ({ children }) => {
     TIME_FORMATS.HOUR_12,
     'timeFormat',
   )
-  const [firstDayOfWeek, setFirstDayOfWeek] = useStickyState(0, 'firstDayOfWeek') // 0 = Sunday, 1 = Monday
+  const [firstDayOfWeek, setFirstDayOfWeek] = useStickyState(
+    0,
+    'firstDayOfWeek',
+  ) // 0 = Sunday, 1 = Monday
   const [language, setLanguage] = useStickyState('en', 'language')
 
   useEffect(() => {
@@ -80,10 +77,25 @@ export const LocalizationProvider = ({ children }) => {
 
   const formatCalendar = date => {
     if (!date) return ''
-    return moment(date).calendar()
+    return moment(date).calendar(null, {
+      sameDay: `[Today] ${timeFormat}`,
+      nextDay: `[Tomorrow] ${timeFormat}`,
+      nextWeek: `dddd ${timeFormat}`,
+      lastDay: `[Yesterday] ${timeFormat}`,
+      lastWeek: `[Last] dddd ${timeFormat}`,
+      sameElse: `${dateFormat} ${timeFormat}`,
+    })
   }
 
   const isRTL = RTL_LANGUAGES.includes(language)
+
+  const fmt = {
+    date: formatDate,
+    dateTime: formatDateTime,
+    time: formatTime,
+    relative: formatRelative,
+    calendar: formatCalendar,
+  }
 
   const value = {
     dateFormat,
@@ -95,11 +107,7 @@ export const LocalizationProvider = ({ children }) => {
     language,
     setLanguage,
     isRTL,
-    formatDate,
-    formatDateTime,
-    formatTime,
-    formatRelative,
-    formatCalendar,
+    fmt,
     availableLanguages: AVAILABLE_LANGUAGES,
   }
 

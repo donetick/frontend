@@ -21,6 +21,7 @@ import {
   Button,
   Card,
   CardContent,
+  Chip,
   Container,
   List,
   ListItem,
@@ -107,6 +108,7 @@ const SettingsOverview = () => {
       title: t('overview.sections.localization.title'),
       description: t('overview.sections.localization.description'),
       icon: <Language />,
+      isBeta: true,
     },
     {
       id: 'advanced',
@@ -246,9 +248,15 @@ const SettingsOverview = () => {
                       }}
                     >
                       <span>• {t('overview.upgrade.features.richText')}</span>
-                      <span>• {t('overview.upgrade.features.notifications')}</span>
-                      <span>• {t('overview.upgrade.features.apiIntegrations')}</span>
-                      <span>• {t('overview.upgrade.features.advancedAutomation')}</span>
+                      <span>
+                        • {t('overview.upgrade.features.notifications')}
+                      </span>
+                      <span>
+                        • {t('overview.upgrade.features.apiIntegrations')}
+                      </span>
+                      <span>
+                        • {t('overview.upgrade.features.advancedAutomation')}
+                      </span>
                     </Box>
                   </Box>
                 </Box>
@@ -316,12 +324,33 @@ const SettingsOverview = () => {
                   </Avatar>
                 </ListItemDecorator>
                 <ListItemContent sx={{ ml: 2 }}>
-                  <Typography
-                    level='title-md'
-                    sx={{ mb: 0.5, fontWeight: 'lg' }}
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1,
+                      mb: 0.5,
+                    }}
                   >
-                    {setting.title}
-                  </Typography>
+                    <Typography level='title-md' sx={{ fontWeight: 'lg' }}>
+                      {setting.title}
+                    </Typography>
+                    {setting.isBeta && (
+                      <Chip
+                        variant='outlined'
+                        size='sm'
+                        sx={{
+                          height: '20px',
+                          fontSize: '0.65rem',
+                          fontWeight: 'bold',
+                          color: 'warning.main',
+                          borderColor: 'warning.main',
+                        }}
+                      >
+                        Early Access
+                      </Chip>
+                    )}
+                  </Box>
                   <Typography
                     level='body-sm'
                     color='neutral'

@@ -21,6 +21,7 @@ import {
   Typography,
 } from '@mui/joy'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
+import { useLocalization } from '../../contexts/LocalizationContext'
 import { useUserProfile } from '../../queries/UserQueries.jsx'
 import {
   getDueDateChipColor,
@@ -45,6 +46,7 @@ const ChoreCard = ({
   onSelectionToggle,
 }) => {
   const { data: userProfile } = useUserProfile()
+  const { timeFormat } = useLocalization()
 
   const { impersonatedUser } = useImpersonateUser()
 
@@ -95,7 +97,7 @@ const ChoreCard = ({
         }}
         color={getDueDateChipColor(chore.nextDueDate, chore)}
       >
-        {getDueDateChipText(chore.nextDueDate, chore)}
+        {getDueDateChipText(chore.nextDueDate, chore, timeFormat)}
       </Chip>
 
       <Chip

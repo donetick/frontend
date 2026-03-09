@@ -38,6 +38,7 @@ import {
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { useLocalization } from '../../contexts/LocalizationContext'
 import {
   useChoreTimer,
   usePauseChore,
@@ -52,6 +53,7 @@ import LoadingComponent from '../components/Loading'
 
 const TimerDetails = () => {
   const { choreId } = useParams()
+  const { fmt } = useLocalization()
   const [timerData, setTimerData] = useState(null)
   const [loading, setLoading] = useState(false)
   const [editingSessions, setEditingSessions] = useState({})
@@ -819,14 +821,14 @@ const TimerDetails = () => {
                           level='body-xs'
                           sx={{ color: 'text.tertiary' }}
                         >
-                          Started: {moment(timerData.startTime).format('HH:mm')}
+                          Started: {fmt.time(timerData.startTime)}
                         </Typography>
                         {timerData.endTime && (
                           <Typography
                             level='body-xs'
                             sx={{ color: 'text.tertiary' }}
                           >
-                            Ended: {moment(timerData.endTime).format('HH:mm')}
+                            Ended: {fmt.time(timerData.endTime)}
                           </Typography>
                         )}
                         {!timerData.endTime && (
@@ -834,7 +836,7 @@ const TimerDetails = () => {
                             level='body-xs'
                             sx={{ color: 'success.500' }}
                           >
-                            Now: {moment(currentTime).format('HH:mm')}
+                            Now: {fmt.time(currentTime)}
                           </Typography>
                         )}
                         <Typography
@@ -925,9 +927,9 @@ const TimerDetails = () => {
                           const sessionDate = moment(pause.start).format(
                             'MMM DD',
                           )
-                          const startTime = moment(pause.start).format('HH:mm')
+                          const startTime = fmt.time(pause.start)
                           const endTime = pause.end
-                            ? moment(pause.end).format('HH:mm')
+                            ? fmt.time(pause.end)
                             : null
 
                           const realTimeDuration = isOngoing

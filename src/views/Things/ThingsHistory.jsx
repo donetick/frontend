@@ -26,6 +26,7 @@ import {
 import { useTheme } from '@mui/joy/styles'
 import moment from 'moment'
 import { Link, useParams } from 'react-router-dom'
+import { useLocalization } from '../../contexts/LocalizationContext'
 import {
   Line,
   LineChart,
@@ -40,6 +41,7 @@ import LoadingComponent from '../components/Loading'
 const ThingsHistory = () => {
   const { id } = useParams()
   const theme = useTheme()
+  const { fmt } = useLocalization()
   const {
     data,
     error,
@@ -294,9 +296,7 @@ const ThingsHistory = () => {
                   tick='false'
                   tickLine='false'
                   axisLine='false'
-                  tickFormatter={tick =>
-                    moment(tick).format('ddd MM/DD/yyyy HH:mm:ss')
-                  }
+                  tickFormatter={tick => fmt.dateTime(tick)}
                 />
                 <YAxis
                   hide='true'
@@ -306,9 +306,7 @@ const ThingsHistory = () => {
                   axisLine='false'
                 />
                 <Tooltip
-                  labelFormatter={label =>
-                    moment(label).format('ddd MM/DD/yyyy HH:mm:ss')
-                  }
+                  labelFormatter={label => fmt.dateTime(label)}
                 />
 
                 <Line
@@ -399,7 +397,7 @@ const ThingsHistory = () => {
                           color='primary'
                           startDecorator={<Schedule />}
                         >
-                          {moment(history.updatedAt).format('MMM DD, h:mm A')}
+                          {fmt.dateTime(history.updatedAt)}
                         </Chip>
                       </Box>
                     </Grid>

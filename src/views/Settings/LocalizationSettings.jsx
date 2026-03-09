@@ -1,13 +1,12 @@
 import {
-  useLocalization,
   DATE_FORMATS,
   TIME_FORMATS,
+  useLocalization,
 } from '@/contexts/LocalizationContext'
-import { LanguageOutlined } from '@mui/icons-material'
 import {
   Box,
   Button,
-  Card,
+  ButtonGroup,
   Divider,
   FormControl,
   FormHelperText,
@@ -45,151 +44,150 @@ const LocalizationSettings = () => {
   ]
 
   return (
-    <SettingsLayout title="Localization">
-      <div className='grid gap-4'>
+    <SettingsLayout title='Localization'>
+      <div className='grid gap-4 py-4'>
+        <Typography level='body-md'>{t('localization.description')}</Typography>
+
+        <Typography level='h3'>{t('localization.language')}</Typography>
+        <Divider />
         <Typography level='body-md'>
-          {t('localization.description')}
+          {t('localization.languageDescription')}
         </Typography>
-
-        <Card variant='outlined' sx={{ p: 3, mb: 2 }}>
-          <Box sx={{ mb: 3 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-              <LanguageOutlined />
-              <Typography level='title-md'>
-                {t('localization.language')}
-              </Typography>
-            </Box>
-            <Typography level='body-sm' sx={{ mb: 2 }}>
-              {t('localization.languageDescription')}
-            </Typography>
-            <FormControl>
-              <Select
-                value={language}
-                onChange={(_, value) => setLanguage(value)}
-                sx={{ minWidth: 250 }}
-              >
-                {availableLanguages.map(lang => (
-                  <Option key={lang.code} value={lang.code}>
-                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                      <Typography>{lang.nativeName}</Typography>
-                      <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-                        ({lang.name})
-                      </Typography>
-                    </Box>
-                  </Option>
-                ))}
-              </Select>
-              {isRTL && (
-                <FormHelperText>
-                  This language uses right-to-left (RTL) text direction
-                </FormHelperText>
+        <FormControl>
+          <Select
+            value={language}
+            onChange={(_, value) => setLanguage(value)}
+            sx={{ maxWidth: '300px' }}
+          >
+            {availableLanguages.map(lang => (
+              <Option key={lang.code} value={lang.code}>
+                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                  <Typography>{lang.nativeName}</Typography>
+                  <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+                    ({lang.name})
+                  </Typography>
+                </Box>
+              </Option>
+            ))}
+          </Select>
+          {isRTL && (
+            <FormHelperText>
+              {t(
+                'localization.rtlNotice',
+                'This language uses right-to-left (RTL) text direction',
               )}
-            </FormControl>
-          </Box>
+            </FormHelperText>
+          )}
+        </FormControl>
 
-          <Divider sx={{ my: 3 }} />
+        <Typography level='h3'>{t('localization.dateFormat')}</Typography>
+        <Divider />
+        <Typography level='body-md'>
+          {t('localization.dateFormatDescription')}
+        </Typography>
+        <FormControl>
+          <Select
+            value={dateFormat}
+            onChange={(_, value) => setDateFormat(value)}
+            sx={{ maxWidth: '300px' }}
+          >
+            {dateFormatOptions.map(option => (
+              <Option key={option.value} value={option.value}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    width: '100%',
+                    gap: 2,
+                  }}
+                >
+                  <Typography>{option.label}</Typography>
+                  <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+                    {sampleDate.format(option.value)}
+                  </Typography>
+                </Box>
+              </Option>
+            ))}
+          </Select>
+          <FormHelperText>
+            Preview: {sampleDate.format(dateFormat)}
+          </FormHelperText>
+        </FormControl>
 
-          <Box sx={{ mb: 3 }}>
-            <Typography level='title-md' sx={{ mb: 1 }}>
-              {t('localization.dateFormat')}
-            </Typography>
-            <Typography level='body-sm' sx={{ mb: 2 }}>
-              {t('localization.dateFormatDescription')}
-            </Typography>
-            <FormControl>
-              <Select
-                value={dateFormat}
-                onChange={(_, value) => setDateFormat(value)}
-                sx={{ minWidth: 250 }}
+        <Typography level='h3'>{t('localization.timeFormat')}</Typography>
+        <Divider />
+        <Typography level='body-md'>
+          {t('localization.timeFormatDescription')}
+        </Typography>
+        <FormControl>
+          <Select
+            value={timeFormat}
+            onChange={(_, value) => setTimeFormat(value)}
+            sx={{ maxWidth: '300px' }}
+          >
+            <Option value={TIME_FORMATS.HOUR_12}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  width: '100%',
+                  gap: 2,
+                }}
               >
-                {dateFormatOptions.map(option => (
-                  <Option key={option.value} value={option.value}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', gap: 2 }}>
-                      <Typography>{option.label}</Typography>
-                      <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-                        {sampleDate.format(option.value)}
-                      </Typography>
-                    </Box>
-                  </Option>
-                ))}
-              </Select>
-              <FormHelperText>
-                Preview: {sampleDate.format(dateFormat)}
-              </FormHelperText>
-            </FormControl>
-          </Box>
-
-          <Divider sx={{ my: 3 }} />
-
-          <Box sx={{ mb: 3 }}>
-            <Typography level='title-md' sx={{ mb: 1 }}>
-              {t('localization.timeFormat')}
-            </Typography>
-            <Typography level='body-sm' sx={{ mb: 2 }}>
-              {t('localization.timeFormatDescription')}
-            </Typography>
-            <FormControl>
-              <Select
-                value={timeFormat}
-                onChange={(_, value) => setTimeFormat(value)}
-                sx={{ minWidth: 250 }}
-              >
-                <Option value={TIME_FORMATS.HOUR_12}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', gap: 2 }}>
-                    <Typography>{t('localization.12hour')}</Typography>
-                    <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-                      {sampleDate.format(TIME_FORMATS.HOUR_12)}
-                    </Typography>
-                  </Box>
-                </Option>
-                <Option value={TIME_FORMATS.HOUR_24}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', gap: 2 }}>
-                    <Typography>{t('localization.24hour')}</Typography>
-                    <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-                      {sampleDate.format(TIME_FORMATS.HOUR_24)}
-                    </Typography>
-                  </Box>
-                </Option>
-              </Select>
-              <FormHelperText>
-                Preview: {sampleDate.format(timeFormat)}
-              </FormHelperText>
-            </FormControl>
-          </Box>
-
-          <Divider sx={{ my: 3 }} />
-
-          <Box>
-            <Typography level='title-md' sx={{ mb: 1 }}>
-              {t('localization.firstDayOfWeek')}
-            </Typography>
-            <Typography level='body-sm' sx={{ mb: 2 }}>
-              {t('localization.firstDayOfWeekDescription')}
-            </Typography>
-            <FormControl>
-              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                <Button
-                  variant={firstDayOfWeek === 0 ? 'solid' : 'outlined'}
-                  onClick={() => setFirstDayOfWeek(0)}
-                >
-                  {t('localization.sunday')}
-                </Button>
-                <Button
-                  variant={firstDayOfWeek === 1 ? 'solid' : 'outlined'}
-                  onClick={() => setFirstDayOfWeek(1)}
-                >
-                  {t('localization.monday')}
-                </Button>
-                <Button
-                  variant={firstDayOfWeek === 6 ? 'solid' : 'outlined'}
-                  onClick={() => setFirstDayOfWeek(6)}
-                >
-                  {t('localization.saturday')}
-                </Button>
+                <Typography>{t('localization.12hour')}</Typography>
+                <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+                  {sampleDate.format(TIME_FORMATS.HOUR_12)}
+                </Typography>
               </Box>
-            </FormControl>
-          </Box>
-        </Card>
+            </Option>
+            <Option value={TIME_FORMATS.HOUR_24}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  width: '100%',
+                  gap: 2,
+                }}
+              >
+                <Typography>{t('localization.24hour')}</Typography>
+                <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+                  {sampleDate.format(TIME_FORMATS.HOUR_24)}
+                </Typography>
+              </Box>
+            </Option>
+          </Select>
+          <FormHelperText>
+            Preview: {sampleDate.format(timeFormat)}
+          </FormHelperText>
+        </FormControl>
+
+        <Typography level='h3'>{t('localization.firstDayOfWeek')}</Typography>
+        <Divider />
+        <Typography level='body-md'>
+          {t('localization.firstDayOfWeekDescription')}
+        </Typography>
+        <FormControl>
+          <ButtonGroup variant='outlined'>
+            <Button
+              variant={firstDayOfWeek === 0 ? 'solid' : 'outlined'}
+              onClick={() => setFirstDayOfWeek(0)}
+            >
+              {t('localization.sunday')}
+            </Button>
+            <Button
+              variant={firstDayOfWeek === 1 ? 'solid' : 'outlined'}
+              onClick={() => setFirstDayOfWeek(1)}
+            >
+              {t('localization.monday')}
+            </Button>
+            <Button
+              variant={firstDayOfWeek === 6 ? 'solid' : 'outlined'}
+              onClick={() => setFirstDayOfWeek(6)}
+            >
+              {t('localization.saturday')}
+            </Button>
+          </ButtonGroup>
+        </FormControl>
       </div>
     </SettingsLayout>
   )

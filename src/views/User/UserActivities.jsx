@@ -32,6 +32,7 @@ import {
 } from '@mui/joy'
 import React, { useEffect, useState } from 'react'
 
+import { useLocalization } from '../../contexts/LocalizationContext'
 import { useChores, useChoresHistory } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import { ChoresGrouper } from '../../utils/Chores'
@@ -119,6 +120,7 @@ const ChoreHistoryItem = ({ time, name, points, status, performer }) => {
 }
 
 const ChoreHistoryTimeline = ({ history }) => {
+  const { fmt } = useLocalization()
   const groupedHistory = groupByDate(history)
 
   return (
@@ -133,12 +135,7 @@ const ChoreHistoryTimeline = ({ history }) => {
       {Object.entries(groupedHistory).map(([date, items]) => (
         <Box key={date} sx={{ mb: 4 }}>
           <Typography level='title-sm' sx={{ mb: 0.5 }}>
-            {new Date(date).toLocaleDateString([], {
-              weekday: 'long',
-              month: 'long',
-              day: 'numeric',
-              year: 'numeric',
-            })}
+            {fmt.date(date)}
           </Typography>
           <Divider />
           <Stack spacing={1}>
@@ -146,10 +143,7 @@ const ChoreHistoryTimeline = ({ history }) => {
               <>
                 <ChoreHistoryItem
                   key={record.id}
-                  time={new Date(record.performedAt).toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
+                  time={fmt.time(record.performedAt)}
                   name={record.choreName}
                   points={record.points}
                   status={record.status}
