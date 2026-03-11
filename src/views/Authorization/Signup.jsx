@@ -70,7 +70,12 @@ const SignupView = () => {
     }
 
     if (password.length < 8) {
-      setPasswordError('Password must be at least 8 characters')
+      setPasswordError('Password must be between 8 and 64 characters')
+      isValid = false
+    }
+
+    if (password.length > 64) {
+      setPasswordError('Password must be between 8 and 64 characters')
       isValid = false
     }
 
@@ -218,6 +223,7 @@ const SignupView = () => {
             label='Password'
             type='password'
             id='password'
+            placeholder='Enter password (8-64 characters)'
             value={password}
             onChange={e => {
               setPasswordError(null)
@@ -237,6 +243,7 @@ const SignupView = () => {
             name='displayName'
             label='Display Name'
             id='displayName'
+            placeholder='Confirm password'
             value={displayName}
             onChange={e => {
               setDisplayNameError(null)

@@ -31,8 +31,8 @@ const UpdatePasswordView = () => {
   const handlePasswordChange = e => {
     const password = e.target.value
     setPassword(password)
-    if (password.length < 8) {
-      setPasswordError('Password must be at least 8 characters')
+    if (password.length < 8 || password.length > 64) {
+      setPasswordError('Password must be between 8 and 64 characters')
     } else {
       setPasswordError(null)
     }

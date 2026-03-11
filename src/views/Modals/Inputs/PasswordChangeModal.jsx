@@ -25,8 +25,8 @@ function PassowrdChangeModal({ isOpen, onClose }) {
       setPasswordError('Passwords do not match')
     } else if (password.length < 8) {
       setPasswordError('Password must be at least 8 characters')
-    } else if (password.length > 50) {
-      setPasswordError('Password must be less than 50 characters')
+    } else if (password.length > 64) {
+      setPasswordError('Password must be less than 64 characters')
     } else {
       setPasswordError(null)
     }
@@ -63,6 +63,7 @@ function PassowrdChangeModal({ isOpen, onClose }) {
           label='Password'
           type='password'
           id='password'
+          placeholder='Enter password (8-64 characters)'
           value={password}
           onChange={e => {
             setPasswordTouched(true)

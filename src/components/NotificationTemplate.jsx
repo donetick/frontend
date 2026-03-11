@@ -14,12 +14,9 @@ import Select from '@mui/joy/Select'
 import Typography from '@mui/joy/Typography'
 import { useCallback, useEffect, useState } from 'react'
 import { NOTIFICATION_TYPE, TASK_COLOR } from '../utils/Colors'
+import { TIME_UNITS } from '../utils/DurationUtils'
 
-const timeUnits = [
-  { label: 'Mins', value: 'm' },
-  { label: 'Hours', value: 'h' },
-  { label: 'Days', value: 'd' },
-]
+const timeUnits = TIME_UNITS
 
 const timingOptions = [
   { label: 'Before', value: 'before' },

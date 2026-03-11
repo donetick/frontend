@@ -7,6 +7,7 @@ import {
   MoreVert,
   Person,
   Redo,
+  RunningWithErrors,
   ThumbDown,
   Timelapse,
   Toll,
@@ -17,9 +18,10 @@ import { useLocalization } from '../../contexts/LocalizationContext'
 import { TASK_COLOR } from '../../utils/Colors.jsx'
 
 const getCompletedChip = historyEntry => {
-  if (historyEntry.status === 0) {
+  if (historyEntry.status === 0 || historyEntry.status === 5) {
     return null
   }
+
   if (!historyEntry.dueDate) {
     return null
     // <Chip
@@ -125,6 +127,7 @@ const HistoryCard = ({
       2: { icon: <Redo />, color: 'warning' }, // Skipped
       3: { icon: <HourglassEmpty />, color: 'neutral' }, // Pending Approval
       4: { icon: <ThumbDown />, color: 'danger' }, // Rejected
+      5: { icon: <RunningWithErrors />, color: 'danger' }, // Missed
     }
 
     const config = statusMap[historyEntry.status] || statusMap[1]
@@ -189,7 +192,9 @@ const HistoryCard = ({
                         ? 'Pending Approval'
                         : historyEntry.status === 4
                           ? 'Rejected'
-                          : 'Completed'}
+                          : historyEntry.status === 5
+                            ? 'Missed'
+                            : 'Completed'}
               </Typography>
 
               <Chip size='sm' startDecorator={<EventNote />}>
@@ -233,16 +238,21 @@ const HistoryCard = ({
                 mt: 0.5,
               }}
             >
-              <Chip
-                size='sm'
-                variant='solid'
-                color='success'
-                startDecorator={
-                  <Avatar src={performer?.image} alt={performer?.displayName} />
-                }
-              >
-                {performer?.displayName || 'Unknown'}
-              </Chip>
+              {performer && (
+                <Chip
+                  size='sm'
+                  variant='solid'
+                  color='success'
+                  startDecorator={
+                    <Avatar
+                      src={performer?.image}
+                      alt={performer?.displayName}
+                    />
+                  }
+                >
+                  {performer?.displayName || 'Unknown'}
+                </Chip>
+              )}
 
               {historyEntry.completedBy !== historyEntry.assignedTo &&
                 assignedTo && (
@@ -262,7 +272,11 @@ const HistoryCard = ({
                   variant='plain'
                   color='neutral'
                   startDecorator={<EventNote />}
-                  sx={{ maxWidth: '120px', overflow: 'hidden', cursor: 'pointer' }}
+                  sx={{
+                    maxWidth: '120px',
+                    overflow: 'hidden',
+                    cursor: 'pointer',
+                  }}
                   onClick={e => {
                     e.stopPropagation()
                     onViewNote?.(historyEntry.notes)
