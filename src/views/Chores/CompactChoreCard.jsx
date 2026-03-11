@@ -11,6 +11,7 @@ import {
 import { Box, Checkbox, Chip, IconButton, Typography } from '@mui/joy'
 import { useNavigate } from 'react-router-dom'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
+import { useLocalization } from '../../contexts/LocalizationContext'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import {
   getDueDateChipColor,
@@ -41,6 +42,7 @@ const CompactChoreCard = ({
   const navigate = useNavigate()
 
   const { data: userProfile } = useUserProfile()
+  const { timeFormat } = useLocalization()
   const { data: circleMembersData } = useCircleMembers()
 
   const { impersonatedUser } = useImpersonateUser()
@@ -395,7 +397,7 @@ const CompactChoreCard = ({
               ml: 1,
             }}
           >
-            {getDueDateChipText(chore.nextDueDate, chore)}
+            {getDueDateChipText(chore.nextDueDate, chore, timeFormat)}
           </Chip>
         </Box>
 

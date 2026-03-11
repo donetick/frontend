@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import SubscriptionModal from '../../components/SubscriptionModal'
+import { useLocalization } from '../../contexts/LocalizationContext'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { CancelSubscription, UpdatePassword } from '../../utils/Fetcher'
@@ -17,6 +18,7 @@ const AccountSettings = () => {
   const { data: userProfile } = useUserProfile()
   const queryClient = useQueryClient()
   const { showNotification } = useNotification()
+  const { fmt } = useLocalization()
 
   const [changePasswordModal, setChangePasswordModal] = useState(false)
   const [subscriptionModal, setSubscriptionModal] = useState(false)
@@ -37,13 +39,9 @@ const AccountSettings = () => {
 
   const getSubscriptionDetails = () => {
     if (userProfile?.subscription === 'active') {
-      return `You are currently subscribed to the Plus plan. Your subscription will renew on ${moment(
-        userProfile?.expiration,
-      ).format('MMM DD, YYYY')}.`
+      return `You are currently subscribed to the Plus plan. Your subscription will renew on ${fmt.date(userProfile?.expiration)}.`
     } else if (userProfile?.subscription === 'cancelled') {
-      return `You have cancelled your subscription. Your account will be downgraded to the Free plan on ${moment(
-        userProfile?.expiration,
-      ).format('MMM DD, YYYY')}.`
+      return `You have cancelled your subscription. Your account will be downgraded to the Free plan on ${fmt.date(userProfile?.expiration)}.`
     } else {
       return `You are currently on the Free plan. Upgrade to the Plus plan to unlock more features.`
     }
@@ -54,9 +52,7 @@ const AccountSettings = () => {
       return `Plus`
     } else if (userProfile?.subscription === 'cancelled') {
       if (moment().isBefore(userProfile?.expiration)) {
-        return `Plus(until ${moment(userProfile?.expiration).format(
-          'MMM DD, YYYY',
-        )})`
+        return `Plus(until ${fmt.date(userProfile?.expiration)})`
       }
       return `Free`
     } else {

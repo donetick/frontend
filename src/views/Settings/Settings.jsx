@@ -23,6 +23,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import RealTimeSettings from '../../components/RealTimeSettings'
 import SubscriptionModal from '../../components/SubscriptionModal'
+import { useLocalization } from '../../contexts/LocalizationContext'
 import Logo from '../../Logo'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
@@ -46,6 +47,7 @@ import NativeCancelSubscriptionModal from '../Modals/Inputs/NativeCancelSubscrip
 import PassowrdChangeModal from '../Modals/Inputs/PasswordChangeModal'
 import UserDeletionModal from '../Modals/Inputs/UserDeletionModal'
 import APITokenSettings from './APITokenSettings'
+import LocalizationSettings from './LocalizationSettings'
 import MFASettings from './MFASettings'
 import NotificationSetting from './NotificationSetting'
 import ProfileSettings from './ProfileSettings'
@@ -58,6 +60,7 @@ const Settings = () => {
   const queryClient = useQueryClient()
   const { showNotification } = useNotification()
   const navigate = useNavigate()
+  const { fmt } = useLocalization()
 
   const [userCircles, setUserCircles] = useState([])
   const [circleMemberRequests, setCircleMemberRequests] = useState([])
@@ -188,13 +191,13 @@ const Settings = () => {
 
   const getSubscriptionDetails = () => {
     if (userProfile?.subscription === 'active') {
-      return `You are currently subscribed to the Plus plan. Your subscription will renew on ${moment(
+      return `You are currently subscribed to the Plus plan. Your subscription will renew on ${fmt.date(
         userProfile?.expiration,
-      ).format('MMM DD, YYYY')}.`
+      )}.`
     } else if (userProfile?.subscription === 'cancelled') {
-      return `You have cancelled your subscription. Your account will be downgraded to the Free plan on ${moment(
+      return `You have cancelled your subscription. Your account will be downgraded to the Free plan on ${fmt.date(
         userProfile?.expiration,
-      ).format('MMM DD, YYYY')}.`
+      )}.`
     } else {
       return `You are currently on the Free plan. Upgrade to the Plus plan to unlock more features.`
     }
@@ -204,9 +207,7 @@ const Settings = () => {
       return `Plus`
     } else if (userProfile?.subscription === 'cancelled') {
       if (moment().isBefore(userProfile?.expiration)) {
-        return `Plus(until ${moment(userProfile?.expiration).format(
-          'MMM DD, YYYY',
-        )})`
+        return `Plus(until ${fmt.date(userProfile?.expiration)})`
       }
       return `Free`
     } else {
@@ -339,12 +340,12 @@ const Settings = () => {
                 </Typography>
                 {member.isActive ? (
                   <Typography level='body-sm'>
-                    Joined on {moment(member.createdAt).format('MMM DD, YYYY')}
+                    Joined on {fmt.date(member.createdAt)}
                   </Typography>
                 ) : (
                   <Typography level='body-sm' color='danger'>
                     Request to join{' '}
-                    {moment(member.updatedAt).format('MMM DD, YYYY')}
+                    {fmt.date(member.updatedAt)}
                   </Typography>
                 )}
               </Box>
@@ -485,7 +486,7 @@ const Settings = () => {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {lastRefresh && (
               <Typography level='body-sm' color='neutral'>
-                Last updated: {moment(lastRefresh).format('MMM DD, HH:mm')}
+                Last updated: {fmt.dateTime(lastRefresh)}
               </Typography>
             )}
             <Button
@@ -914,6 +915,16 @@ const Settings = () => {
           your system and automatically switch between day and night themes.
         </Typography>
         <ThemeToggle />
+      </div>
+
+      <div className='grid gap-4 py-4' id='localization'>
+        <Typography level='h3'>Localization</Typography>
+        <Divider />
+        <Typography level='body-md'>
+          Customize language, date format, and regional preferences for your
+          account. These settings will apply throughout the application.
+        </Typography>
+        <LocalizationSettings />
       </div>
 
       {/* Modals */}

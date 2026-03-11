@@ -32,6 +32,7 @@ import {
   Typography,
 } from '@mui/joy'
 import { useState } from 'react'
+import { useLocalization } from '../../contexts/LocalizationContext'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext'
 import { useUserProfile } from '../../queries/UserQueries'
 import { CompleteSubTask } from '../../utils/Fetcher'
@@ -48,6 +49,7 @@ function SortableItem({
   editMode,
   performers = [],
 }) {
+  const { fmt } = useLocalization()
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({
       id: task.id,
@@ -210,7 +212,7 @@ function SortableItem({
                   fontSize: 'sm',
                 }}
               >
-                {new Date(task.completedAt).toLocaleString()}
+                {fmt.dateTime(task.completedAt)}
                 {performers.find(p => p.userId === task.completedBy) ? (
                   <Chip>
                     {

@@ -3,6 +3,7 @@ import { Avatar, Box, Chip, Grid, Typography } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useLocalization } from '../../contexts/LocalizationContext'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { getPriorityColor, TASK_COLOR } from '../../utils/Colors'
 
@@ -15,6 +16,7 @@ const getAssigneeColor = (assignee, userProfile) => {
 }
 const CalendarCard = ({ chores }) => {
   const { data: userProfile } = useUserProfile()
+  const { fmt } = useLocalization()
 
   const [selectedDate, setSeletedDate] = useState(null)
   const Navigate = useNavigate()
@@ -197,7 +199,7 @@ const CalendarCard = ({ chores }) => {
             }}
           >
             <Typography level='title-md'>
-              {moment(selectedDate).format('MMMM D, YYYY')}
+              {fmt.date(selectedDate)}
             </Typography>
             <Chip variant='soft' color='primary' size='md'>
               {(() => {
@@ -291,7 +293,7 @@ const CalendarCard = ({ chores }) => {
                         color: 'neutral.500',
                       }}
                     >
-                      {moment(chore.nextDueDate).format('h:mm A')}
+                      {fmt.time(chore.nextDueDate)}
                     </Typography>
                     {/* <Typography
                       level='body-xs'

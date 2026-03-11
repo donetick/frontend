@@ -1,3 +1,11 @@
+# Crowdin configuration for Donetick
+# See: https://support.crowdin.com/configuration-file/
+
+project_id: "donetick"
+api_token_env: CROWDIN_API_TOKEN
+preserve_hierarchy: true
+
 files:
-  - source: /public/local/en/main.json
-    translation: /public/local/%two_letters_code%/%original_file_name%
+  - source: /public/locales/en/**/*.json
+    translation: /public/locales/%two_letters_code%/**/%original_file_name%
+    update_option: update_as_unapproved

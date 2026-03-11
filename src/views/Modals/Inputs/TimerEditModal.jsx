@@ -12,6 +12,7 @@ import {
 } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
+import { useLocalization } from '../../../contexts/LocalizationContext'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { useNotification } from '../../../service/NotificationProvider'
 import {
@@ -23,6 +24,7 @@ import ConfirmationModal from './ConfirmationModal'
 
 const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
   const { ResponsiveModal } = useResponsiveModal()
+  const { fmt } = useLocalization()
 
   const [timerData, setTimerData] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -632,11 +634,9 @@ const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
                               const sessionDate = moment(pause.start).format(
                                 'MMM DD',
                               )
-                              const startTime = moment(pause.start).format(
-                                'HH:mm',
-                              )
+                              const startTime = fmt.time(pause.start)
                               const endTime = pause.end
-                                ? moment(pause.end).format('HH:mm')
+                                ? fmt.time(pause.end)
                                 : null
 
                               const realTimeDuration = isOngoing

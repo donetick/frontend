@@ -12,6 +12,7 @@ import {
 import moment from 'moment'
 
 import { useEffect, useState } from 'react'
+import { useLocalization } from '../../contexts/LocalizationContext'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import {
@@ -27,6 +28,7 @@ import SettingsLayout from './SettingsLayout'
 const APITokenSettings = () => {
   const { data: userProfile } = useUserProfile()
   const { showNotification } = useNotification()
+  const { fmt } = useLocalization()
   const [tokens, setTokens] = useState([])
   const [isGetTokenNameModalOpen, setIsGetTokenNameModalOpen] = useState(false)
   const [showTokenId, setShowTokenId] = useState(null)
@@ -106,7 +108,7 @@ const APITokenSettings = () => {
                 <Typography level='body-md'>{token.name}</Typography>
                 <Typography level='body-xs'>
                   {moment(token.createdAt).fromNow()}(
-                  {moment(token.createdAt).format('lll')})
+                  {fmt.dateTime(token.createdAt)})
                 </Typography>
               </Box>
               <Box>

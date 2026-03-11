@@ -11,10 +11,12 @@ import {
   ToggleButtonGroup,
   useColorScheme,
 } from '@mui/joy'
+import { useTranslation } from 'react-i18next'
 
 const ELEMENTID = 'select-theme-mode'
 
 const ThemeToggle = () => {
+  const { t } = useTranslation('settings')
   const { mode, setMode } = useColorScheme()
   const [themeMode, setThemeMode] = useStickyState(mode, 'themeMode')
 
@@ -30,7 +32,7 @@ const ThemeToggle = () => {
       id={`${ELEMENTID}-label`}
       htmlFor='select-theme-mode'
     >
-      Theme mode
+      {t('theme.themeMode')}
     </FormLabel>
   )
 
@@ -45,13 +47,13 @@ const ThemeToggle = () => {
           onChange={handleThemeModeChange}
         >
           <Button startDecorator={<LightModeOutlined />} value='light'>
-            Light
+            {t('theme.light')}
           </Button>
           <Button startDecorator={<DarkModeOutlined />} value='dark'>
-            Dark
+            {t('theme.dark')}
           </Button>
           <Button startDecorator={<LaptopOutlined />} value='system'>
-            System
+            {t('theme.system')}
           </Button>
         </ToggleButtonGroup>
       </div>
