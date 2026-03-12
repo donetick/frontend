@@ -32,6 +32,15 @@ html {
 
 
 
+/* Prevent iOS Safari from auto-zooming on input focus (triggered when font-size < 16px) */
+@supports (-webkit-touch-callout: none) {
+  input,
+  textarea,
+  select {
+    font-size: max(16px, 1em);
+  }
+}
+
 /* Ensure smooth transitions for dynamic content */
 * {
   box-sizing: border-box;
