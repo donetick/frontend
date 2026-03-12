@@ -167,6 +167,13 @@
   line-height: 1.5;
 }
 
+/* Prevent iOS Safari from auto-zooming on focus (triggered when font-size < 16px) */
+@supports (-webkit-touch-callout: none) {
+  .quill-root .ql-editor {
+    font-size: 16px;
+  }
+}
+
 /* Custom focus styles */
 .quill-root:focus-within .ql-toolbar.ql-snow {
   border-color: var(--joy-palette-primary-outlinedBorder, #1976d2);
