@@ -1189,7 +1189,7 @@ const ChoreEdit = () => {
                 checked={completionWindow !== -1}
                 onChange={e => {
                   if (e.target.checked) {
-                    setCompletionWindow(3600) // default 1 hour in seconds
+                    setCompletionWindow(1) // default 1 hour in seconds
                   } else {
                     setCompletionWindow(-1)
                   }
@@ -1203,23 +1203,31 @@ const ChoreEdit = () => {
             </FormControl>
 
             {completionWindow !== -1 && (
-              <Box
-                sx={{
-                  mt: 1,
-                  ml: 4,
-                  display: 'flex',
-                  gap: 1,
-                  alignItems: 'center',
-                }}
-              >
-                <DurationInput
-                  value={completionWindow}
-                  onChange={setCompletionWindow}
-                  size='sm'
-                  minValue={0}
-                />
-                <Typography level='body-sm'>before due date</Typography>
-              </Box>
+              <Card variant='outlined'>
+                <Box
+                  sx={{
+                    mt: 0,
+                    ml: 4,
+                  }}
+                >
+                  <Typography level='body-sm'>Hours:</Typography>
+                  <Input
+                    type='number'
+                    value={completionWindow}
+                    sx={{ maxWidth: 100 }}
+                    slotProps={{
+                      input: {
+                        min: 0,
+                        max: 24 * 7,
+                      },
+                    }}
+                    placeholder='Hours'
+                    onChange={e => {
+                      setCompletionWindow(parseInt(e.target.value))
+                    }}
+                  />
+                </Box>
+              </Card>
             )}
 
             {/* Expires After (Deadline) */}
