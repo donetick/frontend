@@ -1223,9 +1223,10 @@ const ChoreEdit = () => {
             )}
 
             {/* Expires After (Deadline) */}
-            <FormControl sx={{ mt: 2 }}>
+            {/* <FormControl sx={{ mt: 2 }}>
               <Checkbox
                 checked={deadlineOffset !== -1}
+                disabled={isRolling}
                 onChange={e => {
                   if (e.target.checked) {
                     setDeadlineOffset(86400) // default 1 day in seconds
@@ -1237,9 +1238,11 @@ const ChoreEdit = () => {
                 label='Set a deadline'
               />
               <FormHelperText>
-                Task will be considered expired after the due date
+                {isRolling && !['once', 'no_repeat'].includes(frequencyType)
+                  ? 'Deadline is not available when scheduling from completion date'
+                  : 'Task will be considered expired after the due date'}
               </FormHelperText>
-            </FormControl>
+            </FormControl> */}
 
             {deadlineOffset !== -1 && (
               <Box
@@ -1286,7 +1289,10 @@ const ChoreEdit = () => {
                 <Radio
                   overlay
                   checked={isRolling}
-                  onClick={() => setIsRolling(true)}
+                  onClick={() => {
+                    setIsRolling(true)
+                    setDeadlineOffset(-1)
+                  }}
                   label='Reschedule from completion date'
                 />
                 <FormHelperText>

@@ -20,7 +20,6 @@ import {
 } from './CustomParsers'
 import SmartTaskTitleInput from './SmartTaskTitleInput'
 
-import DurationInput from '../../components/common/DurationInput'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import NotificationTemplate from '../../components/NotificationTemplate'
 import LearnMoreButton from './LearnMore'
@@ -804,7 +803,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
             Edit Notifications
           </Button>
         )}
-        {!hasDeadline && dueDate && (
+        {/* {!hasDeadline && dueDate && (
           <Button
             startDecorator={<Add />}
             variant='plain'
@@ -816,7 +815,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
           >
             Set Deadline
           </Button>
-        )}
+        )} */}
       </Box>
 
       {hasDescription && (
@@ -978,7 +977,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
                 )}
               </Box>
             </FormControl> */}
-        {hasDeadline && dueDate && (
+        {/* {hasDeadline && dueDate && (
           <Box
             sx={{
               flexDirection: 'column',
@@ -998,7 +997,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
               <Typography level='body-sm'>after due date</Typography>
             </Box>
           </Box>
-        )}
+        )} */}
         {hasNotifications && dueDate && (
           <Box
             sx={{
