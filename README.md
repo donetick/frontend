@@ -20,12 +20,9 @@ As an avid for open-source, I was eager to create a solution that could benefit 
 - Recurring Tasks: Schedule tasks to repeat daily, weekly, monthly, or yearly, with flexible customization options.
 - Progress Tracking: Track the completion status of tasks and view historical data.
 
-## Installation
+## Development Environment
 
-1. Clone the repository:
-2. Navigate to the project directory: `cd frontend`
-3. Download dependency `npm install`
-4. Run locally `npm start`
+Follow the full instructions here: https://github.com/donetick/donetick?tab=readme-ov-file#development-environment
 
 ## Contributing
 
@@ -41,7 +38,7 @@ Contributions are welcome! If you would like to contribute to Donetick, please f
 
 Donetick is a work in progress and has been a fantastic learning experience for me as I've honed my React skills,I'm looking for collaborators to help improve and refine the Donetick. Feel free to open PR or suggest changes.
 
-## Plans :
+## Plans:
 
 My goal is to expand Donetick by offering a hosted infrastructure option. This will make it even easier for users to access and utilize Donetick's features without the need for self-hosting.
 
