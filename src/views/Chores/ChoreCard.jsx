@@ -78,7 +78,7 @@ const ChoreCard = ({
   const getName = name => {
     const split = Array.from(chore.name)
     // if the first character is emoji then remove it from the name
-    if (/\p{Emoji}/u.test(split[0])) {
+    if (isNaN(Number(split[0])) && /\p{Emoji}/u.test(split[0])) {
       return split.slice(1).join('').trim()
     }
     return name
