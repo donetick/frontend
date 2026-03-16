@@ -1071,7 +1071,7 @@ const ChoreView = () => {
               >
                 Available to complete starting{' '}
                 {moment(chore.nextDueDate)
-                  .subtract(chore.completionWindow, 'seconds')
+                  .subtract(chore.completionWindow, 'hours')
                   .format('MM/DD/YYYY hh:mm A')}
               </Typography>
             )}

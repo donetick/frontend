@@ -324,7 +324,7 @@ export const notInCompletionWindow = chore => {
     chore.completionWindow &&
     chore.completionWindow > -1 &&
     chore.nextDueDate &&
-    moment() < moment(chore.nextDueDate).add(-chore.completionWindow, 'seconds')
+    moment() < moment(chore.nextDueDate).add(-chore.completionWindow, 'hours')
   )
 }
 export const ChoreFilters = userId => ({

@@ -1276,6 +1276,9 @@ const MyChores = () => {
                       setSearchFilter('All')
                       setSearchTerm('')
                       clearActiveFilter()
+                      // reset project and filters :
+                      setSelectedProjectWithCache(null)
+                      updateFilterUrl(null, null)
                     }}
                     variant='outlined'
                     color='neutral'
