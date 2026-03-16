@@ -1,4 +1,5 @@
 import type { CapacitorConfig } from '@capacitor/cli';
+import { KeyboardResize } from '@capacitor/keyboard';
 
 const config: CapacitorConfig = {
   appId: 'com.donetick.app',
@@ -8,6 +9,10 @@ const config: CapacitorConfig = {
     allowMixedContent: true,
   },
   plugins: {
+    Keyboard: {
+      resize: KeyboardResize.Native,
+      resizeOnFullScreen: true,
+    },
     PushNotifications: {
       presentationOptions: ['badge', 'sound', 'alert'],
     },
@@ -21,8 +26,8 @@ const config: CapacitorConfig = {
       clientId: process.env.VITE_APP_GOOGLE_CLIENT_ID,
       androidClientId: process.env.VITE_APP_ANDRIOD_CLIENT_ID,
       iosClientId: process.env.VITE_APP_IOS_CLIENT_ID,
-  },
-}
+    },
+  }
 };
 
 export default config;
