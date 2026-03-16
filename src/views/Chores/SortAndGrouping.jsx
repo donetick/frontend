@@ -85,7 +85,12 @@ const SortAndGrouping = ({
         { name: 'Labels', value: 'labels' },
       ]
 
-      const filterItems = ['anyone', 'assigned_to_me', 'assigned_to_others']
+      const filterItems = [
+        'anyone',
+        'assigned_to_me',
+        'available_for_me',
+        'assigned_to_others',
+      ]
 
       // Total selectable items: 4 (group by) + 3 (filters) + 1 (create custom filter) = 8
       const totalItems = groupByItems.length + filterItems.length + 1
@@ -168,6 +173,65 @@ const SortAndGrouping = ({
       document.removeEventListener('keyup', handleKeyUp)
     }
   }, [])
+
+  const MenuItem_QuickFilter = props => {
+    return (
+      <MenuItem
+        key={props.key}
+        onClick={() => {
+          setFilter(props.filterKey)
+          handleMenuClose()
+        }}
+        onMouseEnter={() => setIsKeyboardNavigating(false)}
+        sx={{
+          borderRadius: 'var(--joy-radius-sm)',
+          backgroundColor:
+            selectedFilter === props.filterKey
+              ? 'var(--joy-palette-primary-softBg)'
+              : selectedIndex === props.index &&
+                  anchorEl &&
+                  isKeyboardNavigating
+                ? 'var(--joy-palette-neutral-softHoverBg)'
+                : 'transparent',
+          '&:hover': {
+            backgroundColor:
+              selectedFilter === props.filterKey
+                ? 'var(--joy-palette-primary-softBg)'
+                : 'var(--joy-palette-neutral-softHoverBg)',
+          },
+        }}
+      >
+        <ListItemDecorator>
+          <Radio
+            checked={selectedFilter === props.filterKey}
+            variant='outlined'
+          />
+        </ListItemDecorator>
+        <ListItemContent>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <Typography
+              level='body-sm'
+              sx={{
+                fontWeight: selectedFilter === props.filterKey ? 600 : 400,
+                color:
+                  selectedFilter === props.filterKey
+                    ? 'var(--joy-palette-primary-600)'
+                    : 'var(--joy-palette-text-primary)',
+              }}
+            >
+              {props.label}
+            </Typography>
+          </Box>
+        </ListItemContent>
+      </MenuItem>
+    )
+  }
 
   return (
     <>
@@ -359,162 +423,33 @@ const SortAndGrouping = ({
           </ListItemContent>
         </MenuItem>
 
-        <MenuItem
+        <MenuItem_QuickFilter
           key={`${k}-assignee-anyone`}
-          onClick={() => {
-            setFilter('anyone')
-            handleMenuClose()
-          }}
-          onMouseEnter={() => setIsKeyboardNavigating(false)}
-          sx={{
-            borderRadius: 'var(--joy-radius-sm)',
-            backgroundColor:
-              selectedFilter === 'anyone'
-                ? 'var(--joy-palette-primary-softBg)'
-                : selectedIndex === 4 && anchorEl && isKeyboardNavigating
-                  ? 'var(--joy-palette-neutral-softHoverBg)'
-                  : 'transparent',
-            '&:hover': {
-              backgroundColor:
-                selectedFilter === 'anyone'
-                  ? 'var(--joy-palette-primary-softBg)'
-                  : 'var(--joy-palette-neutral-softHoverBg)',
-            },
-          }}
-        >
-          <ListItemDecorator>
-            <Radio checked={selectedFilter === 'anyone'} variant='outlined' />
-          </ListItemDecorator>
-          <ListItemContent>
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}
-            >
-              <Typography
-                level='body-sm'
-                sx={{
-                  fontWeight: selectedFilter === 'anyone' ? 600 : 400,
-                  color:
-                    selectedFilter === 'anyone'
-                      ? 'var(--joy-palette-primary-600)'
-                      : 'var(--joy-palette-text-primary)',
-                }}
-              >
-                Anyone
-              </Typography>
-            </Box>
-          </ListItemContent>
-        </MenuItem>
+          index={4}
+          filterKey='anyone'
+          label='Anyone'
+        />
 
-        <MenuItem
+        <MenuItem_QuickFilter
           key={`${k}-assignee-assigned-to-me`}
-          onClick={() => {
-            setFilter('assigned_to_me')
-            handleMenuClose()
-          }}
-          onMouseEnter={() => setIsKeyboardNavigating(false)}
-          sx={{
-            borderRadius: 'var(--joy-radius-sm)',
-            backgroundColor:
-              selectedFilter === 'assigned_to_me'
-                ? 'var(--joy-palette-primary-softBg)'
-                : selectedIndex === 5 && anchorEl && isKeyboardNavigating
-                  ? 'var(--joy-palette-neutral-softHoverBg)'
-                  : 'transparent',
-            '&:hover': {
-              backgroundColor:
-                selectedFilter === 'assigned_to_me'
-                  ? 'var(--joy-palette-primary-softBg)'
-                  : 'var(--joy-palette-neutral-softHoverBg)',
-            },
-          }}
-        >
-          <ListItemDecorator>
-            <Radio
-              checked={selectedFilter === 'assigned_to_me'}
-              variant='outlined'
-            />
-          </ListItemDecorator>
-          <ListItemContent>
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}
-            >
-              <Typography
-                level='body-sm'
-                sx={{
-                  fontWeight: selectedFilter === 'assigned_to_me' ? 600 : 400,
-                  color:
-                    selectedFilter === 'assigned_to_me'
-                      ? 'var(--joy-palette-primary-600)'
-                      : 'var(--joy-palette-text-primary)',
-                }}
-              >
-                Assigned to me
-              </Typography>
-            </Box>
-          </ListItemContent>
-        </MenuItem>
+          index={5}
+          filterKey='assigned_to_me'
+          label='Assigned to me'
+        />
 
-        <MenuItem
+        <MenuItem_QuickFilter
+          key={`${k}-assignee-available-for-me`}
+          index={6}
+          filterKey='available_for_me'
+          label='Assigned to me or not assigned'
+        />
+
+        <MenuItem_QuickFilter
           key={`${k}-assignee-assigned-to-others`}
-          onClick={() => {
-            setFilter('assigned_to_others')
-            handleMenuClose()
-          }}
-          onMouseEnter={() => setIsKeyboardNavigating(false)}
-          sx={{
-            borderRadius: 'var(--joy-radius-sm)',
-            backgroundColor:
-              selectedFilter === 'assigned_to_others'
-                ? 'var(--joy-palette-primary-softBg)'
-                : selectedIndex === 6 && anchorEl && isKeyboardNavigating
-                  ? 'var(--joy-palette-neutral-softHoverBg)'
-                  : 'transparent',
-            '&:hover': {
-              backgroundColor:
-                selectedFilter === 'assigned_to_others'
-                  ? 'var(--joy-palette-primary-softBg)'
-                  : 'var(--joy-palette-neutral-softHoverBg)',
-            },
-          }}
-        >
-          <ListItemDecorator>
-            <Radio
-              checked={selectedFilter === 'assigned_to_others'}
-              variant='outlined'
-            />
-          </ListItemDecorator>
-          <ListItemContent>
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}
-            >
-              <Typography
-                level='body-sm'
-                sx={{
-                  fontWeight:
-                    selectedFilter === 'assigned_to_others' ? 600 : 400,
-                  color:
-                    selectedFilter === 'assigned_to_others'
-                      ? 'var(--joy-palette-primary-600)'
-                      : 'var(--joy-palette-text-primary)',
-                }}
-              >
-                Assigned to others
-              </Typography>
-            </Box>
-          </ListItemContent>
-        </MenuItem>
+          index={7}
+          filterKey='assigned_to_others'
+          label='Assigned to others'
+        />
 
         <Divider sx={{ my: 1 }} />
 
@@ -528,7 +463,7 @@ const SortAndGrouping = ({
           sx={{
             borderRadius: 'var(--joy-radius-sm)',
             backgroundColor:
-              selectedIndex === 7 && anchorEl && isKeyboardNavigating
+              selectedIndex === 8 && anchorEl && isKeyboardNavigating
                 ? 'var(--joy-palette-success-softHoverBg)'
                 : 'transparent',
             '&:hover': {
