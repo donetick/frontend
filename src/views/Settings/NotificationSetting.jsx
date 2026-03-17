@@ -611,7 +611,7 @@ const NotificationSetting = () => {
         <Typography level='h3'>Custom Notification</Typography>
         <Divider />
         <Typography level='body-md'>
-          Notificaiton through other platform like Telegram or Pushover
+          Notification through other platform like Telegram or Pushover
         </Typography>
 
         <FormControl orientation='horizontal'>
