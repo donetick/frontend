@@ -1012,11 +1012,11 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
                   if (
                     metadata.notifications !== notificationMetadata.templates
                   ) {
-                    const newNotificaitonMetadata = {
+                    const newNotificationMetadata = {
                       ...notificationMetadata,
                       templates: metadata.notifications,
                     }
-                    setNotificationMetadata(newNotificaitonMetadata)
+                    setNotificationMetadata(newNotificationMetadata)
                   }
                 }}
                 value={notificationMetadata}
