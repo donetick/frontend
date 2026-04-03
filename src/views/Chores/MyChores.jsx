@@ -225,7 +225,7 @@ const MyChores = () => {
       // Otherwise, use project-filtered chores for section grouping
       if (selectedProject.id === 'default') {
         // Default project: only show tasks without a projectId
-        choresToGroup = chores.filter(chore => !chore.projectId)
+        choresToGroup = chores
       } else {
         // Other projects: use the existing filter function
         choresToGroup = filterByProject(chores, selectedProject.id)
