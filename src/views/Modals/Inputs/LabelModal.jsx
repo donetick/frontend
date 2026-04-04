@@ -8,6 +8,7 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { useQueryClient } from '@tanstack/react-query'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal.js'
@@ -17,6 +18,7 @@ import { CreateLabel, UpdateLabel } from '../../../utils/Fetcher'
 import { useLabels } from '../../Labels/LabelQueries'
 
 function LabelModal({ isOpen, onClose, label }) {
+  const { t } = useTranslation(['common', 'navigation'])
   const { ResponsiveModal } = useResponsiveModal()
 
   const [labelName, setLabelName] = useState('')
@@ -41,7 +43,7 @@ function LabelModal({ isOpen, onClose, label }) {
   // Validation logic
   const validateLabel = () => {
     if (!labelName.trim()) {
-      setError('Name cannot be empty')
+      setError(t('common:errors.nameCannotBeEmpty'))
       return false
     }
     if (
@@ -49,11 +51,11 @@ function LabelModal({ isOpen, onClose, label }) {
         userLabel => userLabel.name === labelName && userLabel.id !== label?.id,
       )
     ) {
-      setError('Label with this name already exists')
+      setError(t('common:errors.duplicateLabel'))
       return false
     }
     if (!color) {
-      setError('Please select a color')
+      setError(t('common:errors.selectColor'))
       return false
     }
     return true
@@ -78,13 +80,13 @@ function LabelModal({ isOpen, onClose, label }) {
       .catch(err => {
         if (err.queued) {
           showError({
-            title: 'Failed to save label',
-            message: 'Unable to save label. Please try again.',
+            title: t('common:notifications.titles.error'),
+            message: t('common:errors.unableToSaveLabel'),
           })
         } else {
           showError({
-            title: 'Failed to save label',
-            message: 'Unable to save label. Please try again.',
+            title: t('common:notifications.titles.error'),
+            message: t('common:errors.unableToSaveLabel'),
           })
         }
       })
@@ -96,14 +98,18 @@ function LabelModal({ isOpen, onClose, label }) {
       onClose={onClose}
       size='lg'
       fullWidth={true}
-      title={label ? 'Edit Label' : 'Add Label'}
+      title={
+        label
+          ? `${t('common:actions.edit')} ${t('navigation:labels')}`
+          : `${t('common:actions.create')} ${t('navigation:labels')}`
+      }
       footer={
         <Box display='flex' justifyContent='space-around' mt={1}>
           <Button size='lg' onClick={handleSave} fullWidth sx={{ mr: 1 }}>
-            {label ? 'Save Changes' : 'Add Label'}
+            {label ? t('common:actions.save') : t('common:actions.create')}
           </Button>
           <Button size='lg' onClick={onClose} variant='outlined'>
-            Cancel
+            {t('common:actions.cancel')}
           </Button>
         </Box>
       }
@@ -111,7 +117,7 @@ function LabelModal({ isOpen, onClose, label }) {
       <Box>
         <FormControl>
           <Typography gutterBottom level='body-sm' alignSelf='start'>
-            Name
+            {t('common:labels.name')}
           </Typography>
           <Input
             fullWidth
@@ -123,7 +129,7 @@ function LabelModal({ isOpen, onClose, label }) {
 
         <FormControl>
           <Typography gutterBottom level='body-sm' alignSelf='start'>
-            Color
+            {t('common:labels.color')}
           </Typography>
           <Select
             value={color}

@@ -13,10 +13,12 @@ import {
   Typography,
 } from '@mui/joy'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { CreateBackup, RestoreBackup } from '../../../utils/Fetcher'
 
 function BackupRestoreModal({ isOpen, onClose, showNotification }) {
+  const { t } = useTranslation(['settings', 'common'])
   const { ResponsiveModal } = useResponsiveModal()
 
   const [activeTab, setActiveTab] = useState(0)
@@ -66,7 +68,7 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
 
   const handleCreateBackup = async () => {
     if (!encryptionKey.trim()) {
-      setError('Encryption key is required')
+      setError(t('settings:backup.encryptionKeyRequired'))
       return
     }
 
@@ -95,16 +97,16 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
 
         showNotification({
           type: 'success',
-          message: 'Backup created and downloaded successfully',
+          message: t('settings:backup.created'),
         })
 
         handleClose()
       } else {
         const errorData = await response.json()
-        setError(errorData.message || 'Failed to create backup')
+        setError(errorData.message || t('settings:backup.createFailed'))
       }
     } catch (err) {
-      setError('Failed to create backup')
+      setError(t('settings:backup.createFailed'))
     } finally {
       setLoading(false)
     }
@@ -120,12 +122,12 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
 
   const handleRestore = async () => {
     if (!restoreEncryptionKey.trim()) {
-      setError('Encryption key is required')
+      setError(t('settings:backup.encryptionKeyRequired'))
       return
     }
 
     if (!backupFile) {
-      setError('Please select a backup file')
+      setError(t('settings:backup.selectFile'))
       return
     }
 
@@ -143,7 +145,7 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
             const data = await response.json()
             showNotification({
               type: 'success',
-              message: 'Backup restored successfully. Please refresh the page.',
+              message: t('settings:backup.restored'),
             })
 
             // Refresh the page after a short delay to allow user to see the message
@@ -154,23 +156,23 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
             handleClose()
           } else {
             const errorData = await response.json()
-            setError(errorData.message || 'Failed to restore backup')
+            setError(errorData.message || t('settings:backup.restoreFailed'))
           }
         } catch (err) {
-          setError('Failed to restore backup')
+          setError(t('settings:backup.restoreFailed'))
         } finally {
           setLoading(false)
         }
       }
 
       reader.onerror = () => {
-        setError('Failed to read backup file')
+        setError(t('settings:backup.readFailed'))
         setLoading(false)
       }
 
       reader.readAsText(backupFile)
     } catch (err) {
-      setError('Failed to restore backup')
+      setError(t('settings:backup.restoreFailed'))
       setLoading(false)
     }
   }
@@ -199,29 +201,28 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
   const renderBackupTab = () => (
     <Box>
       <Typography level='body-md' mb={3}>
-        Create an encrypted backup of your data. This backup will include all
-        your chores, history, settings, and optionally your uploaded files.
+        {t('settings:backup.createDescription')}
       </Typography>
 
       <FormControl sx={{ mb: 2 }}>
-        <FormLabel>Encryption Key *</FormLabel>
+        <FormLabel>{t('settings:backup.encryptionKeyLabel')}</FormLabel>
         <Input
           type='password'
           value={encryptionKey}
           onChange={e => setEncryptionKey(e.target.value)}
-          placeholder='Enter a strong encryption key'
+          placeholder={t('settings:backup.encryptionKeyPlaceholder')}
         />
         <Typography level='body-xs' sx={{ mt: 0.5 }}>
-          Keep this key safe - you'll need it to restore your backup
+          {t('settings:backup.encryptionKeyHint')}
         </Typography>
       </FormControl>
 
       <FormControl sx={{ mb: 2 }}>
-        <FormLabel>Backup Name (Optional)</FormLabel>
+        <FormLabel>{t('settings:backup.nameLabel')}</FormLabel>
         <Input
           value={backupName}
           onChange={e => setBackupName(e.target.value)}
-          placeholder='e.g., weekly-backup'
+          placeholder={t('settings:backup.namePlaceholder')}
         />
       </FormControl>
 
@@ -229,7 +230,7 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
         <Checkbox
           checked={includeAssets}
           onChange={e => setIncludeAssets(e.target.checked)}
-          label='Include uploaded files and assets'
+          label={t('settings:backup.includeAssets')}
         />
       </FormControl>
 
@@ -241,7 +242,7 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
 
       <Box display='flex' justifyContent='space-between' gap={2}>
         <Button size='lg' variant='outlined' onClick={handleClose} fullWidth>
-          Cancel
+          {t('common:actions.cancel')}
         </Button>
         <Button
           size='lg'
@@ -251,7 +252,7 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
           disabled={!encryptionKey.trim()}
           fullWidth
         >
-          Create Backup
+          {t('settings:backup.createAction')}
         </Button>
       </Box>
     </Box>
@@ -260,12 +261,12 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
   const renderRestoreTab = () => (
     <Box>
       <Typography level='body-md' mb={3} color='warning'>
-        <strong>Warning:</strong> Restoring a backup will replace all your
-        current data. This action cannot be undone.
+        <strong>{t('common:notifications.titles.warning')}:</strong>{' '}
+        {t('settings:backup.restoreWarning')}
       </Typography>
 
       <FormControl sx={{ mb: 2 }}>
-        <FormLabel>Backup File *</FormLabel>
+        <FormLabel>{t('settings:backup.fileLabel')}</FormLabel>
         <Input
           type='file'
           accept='.backup'
@@ -274,18 +275,18 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
         />
         {backupFile && (
           <Typography level='body-xs' sx={{ mt: 0.5 }}>
-            Selected: {backupFile.name}
+            {t('settings:backup.selectedFile', { name: backupFile.name })}
           </Typography>
         )}
       </FormControl>
 
       <FormControl sx={{ mb: 3 }}>
-        <FormLabel>Encryption Key *</FormLabel>
+        <FormLabel>{t('settings:backup.encryptionKeyLabel')}</FormLabel>
         <Input
           type='password'
           value={restoreEncryptionKey}
           onChange={e => setRestoreEncryptionKey(e.target.value)}
-          placeholder='Enter the encryption key used for this backup'
+          placeholder={t('settings:backup.restoreKeyPlaceholder')}
         />
       </FormControl>
 
@@ -297,7 +298,7 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
 
       <Box display='flex' justifyContent='space-between' gap={2}>
         <Button size='lg' variant='outlined' onClick={handleClose} fullWidth>
-          Cancel
+          {t('common:actions.cancel')}
         </Button>
         <Button
           size='lg'
@@ -307,7 +308,7 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
           disabled={!restoreEncryptionKey.trim() || !backupFile}
           fullWidth
         >
-          Restore Backup
+          {t('settings:backup.restoreAction')}
         </Button>
       </Box>
     </Box>
@@ -320,7 +321,7 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
       size='lg'
       fullWidth={true}
       unmountDelay={250}
-      title='🔄 Backup & Restore'
+      title={t('settings:backup.title')}
     >
       {loading ? (
         <Box
@@ -331,7 +332,9 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
         >
           <CircularProgress />
           <Typography level='body-md' sx={{ ml: 2 }}>
-            {activeTab === 0 ? 'Creating backup...' : 'Restoring backup...'}
+            {activeTab === 0
+              ? t('settings:backup.creating')
+              : t('settings:backup.restoring')}
           </Typography>
         </Box>
       ) : (
@@ -340,8 +343,8 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
           onChange={(event, newValue) => setActiveTab(newValue)}
         >
           <TabList>
-            <Tab>Create Backup</Tab>
-            <Tab>Restore Backup</Tab>
+            <Tab>{t('settings:backup.createTab')}</Tab>
+            <Tab>{t('settings:backup.restoreTab')}</Tab>
           </TabList>
 
           <TabPanel value={0}>{renderBackupTab()}</TabPanel>

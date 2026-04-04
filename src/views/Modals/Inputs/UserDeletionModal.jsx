@@ -12,11 +12,13 @@ import {
 } from '@mui/joy'
 import { data } from 'autoprefixer'
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { CheckUserDeletion, DeleteUser } from '../../../utils/Fetcher'
 
 function UserDeletionModal({ isOpen, onClose, userProfile }) {
+  const { t } = useTranslation(['settings', 'common'])
   const { ResponsiveModal } = useResponsiveModal()
   const Navigate = useNavigate()
   const [step, setStep] = useState(1) // 1: Warning, 2: Transfer, 3: Confirm
@@ -48,7 +50,7 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
 
   const checkDeletionRequirements = async () => {
     if (password.trim() === '') {
-      setError('Please enter your password to continue')
+      setError(t('settings:modals.userDeletion.passwordPrompt'))
       return
     }
 
@@ -67,10 +69,10 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
           setStep(3)
         }
       } else {
-        setError(data.error || 'Failed to check deletion requirements')
+        setError(data.error || t('settings:modals.userDeletion.checkFailed'))
       }
     } catch (err) {
-      setError(data.error || 'Failed to check deletion requirements')
+      setError(t('settings:modals.userDeletion.checkFailed'))
     } finally {
       setLoading(false)
     }
@@ -97,7 +99,7 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
 
   const executeUserDeletion = async () => {
     if (password.trim() === '' || confirmation !== 'DELETE') {
-      setError('Please enter your password and type DELETE to confirm')
+      setError(t('settings:modals.userDeletion.confirmDelete'))
       return
     }
 
@@ -116,10 +118,10 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
         handleClose(true)
         // Redirect to login or home page after successful deletion
       } else {
-        setError(data.message || 'Failed to delete account')
+        setError(data.message || t('settings:modals.userDeletion.deleteFailed'))
       }
     } catch (err) {
-      setError('Failed to delete account')
+      setError(t('settings:modals.userDeletion.deleteFailed'))
     } finally {
       setLoading(false)
     }
@@ -149,42 +151,41 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
   const renderWarningStep = () => (
     <>
       <Typography level='h4' mb={2} color='danger'>
-        Delete Account
+        {t('settings:modals.userDeletion.warningTitle')}
       </Typography>
 
       <Typography level='body-md' mb={2}>
-        <strong>This action cannot be undone.</strong> Deleting your account
-        will permanently remove:
+        <strong>{t('settings:modals.userDeletion.warningIntro')}</strong>
       </Typography>
 
       <Box mb={3}>
         <Typography level='body-sm' mb={1}>
-          • Your user profile and authentication data
+          • {t('settings:modals.userDeletion.items.profile')}
         </Typography>
         <Typography level='body-sm' mb={1}>
-          • All your chores, chore history, and time tracking sessions
+          • {t('settings:modals.userDeletion.items.chores')}
         </Typography>
         <Typography level='body-sm' mb={1}>
-          • API tokens, MFA sessions, and password reset tokens
+          • {t('settings:modals.userDeletion.items.tokens')}
         </Typography>
         <Typography level='body-sm' mb={1}>
-          • Storage files and usage data
+          • {t('settings:modals.userDeletion.items.storage')}
         </Typography>
         <Typography level='body-sm' mb={1}>
-          • Points history and notifications
+          • {t('settings:modals.userDeletion.items.points')}
         </Typography>
         <Typography level='body-sm' mb={1}>
-          • Circle memberships and relationships
+          • {t('settings:modals.userDeletion.items.circles')}
         </Typography>
       </Box>
 
       <FormControl sx={{ mb: 2 }}>
-        <FormLabel>Enter your password to continue</FormLabel>
+        <FormLabel>{t('settings:modals.userDeletion.passwordPrompt')}</FormLabel>
         <Input
           type='password'
           value={password}
           onChange={e => setPassword(e.target.value)}
-          placeholder='Enter your password'
+          placeholder={t('auth:placeholders.passwordRange')}
         />
       </FormControl>
 
@@ -196,7 +197,7 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
 
       <Box display='flex' justifyContent='space-between' mt={3} gap={2}>
         <Button variant='outlined' onClick={() => handleClose(false)} fullWidth>
-          Cancel
+          {t('common:actions.cancel')}
         </Button>
         <Button
           color='danger'
@@ -205,7 +206,7 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
           disabled={!password}
           fullWidth
         >
-          Continue
+          {t('common:actions.continue')}
         </Button>
       </Box>
     </>
@@ -214,23 +215,22 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
   const renderTransferStep = () => (
     <>
       <Typography level='h4' mb={2} color='warning'>
-        Circle Ownership Transfer Required
+        {t('settings:modals.userDeletion.transferTitle')}
       </Typography>
 
       <Typography level='body-md' mb={3}>
-        You own circles that require ownership transfer before deletion. Please
-        select new owners:
+        {t('settings:modals.userDeletion.transferIntro')}
       </Typography>
 
       {circlesRequiringTransfer.map(circle => (
         <Card key={circle.id} sx={{ mb: 2, p: 2 }}>
           <Typography level='title-sm' mb={1}>
-            Circle: {circle.name}
+            {t('settings:modals.userDeletion.circleLabel', { name: circle.name })}
           </Typography>
           <FormControl>
-            <FormLabel>New Owner</FormLabel>
+            <FormLabel>{t('settings:circlePage.newOwner')}</FormLabel>
             <Select
-              placeholder='Select new owner'
+              placeholder={t('settings:circlePage.newOwner')}
               value={
                 transferOptions.find(t => t.circleId === circle.id)
                   ?.newOwnerId || ''
@@ -256,7 +256,7 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
 
       <Box display='flex' justifyContent='space-between' mt={3} gap={2}>
         <Button variant='outlined' onClick={() => handleClose(false)} fullWidth>
-          Cancel
+          {t('common:actions.cancel')}
         </Button>
         <Button
           color='primary'
@@ -264,7 +264,7 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
           disabled={circlesRequiringTransfer.length !== transferOptions.length}
           fullWidth
         >
-          Continue
+          {t('common:actions.continue')}
         </Button>
       </Box>
     </>
@@ -273,30 +273,28 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
   const renderConfirmationStep = () => (
     <>
       <Typography level='h4' mb={2} color='danger'>
-        Final Confirmation
+        {t('settings:modals.userDeletion.finalTitle')}
       </Typography>
 
       <Typography level='body-md' mb={3}>
-        Please enter your password and type <strong>DELETE</strong> to confirm
-        account deletion.
+        {t('settings:modals.userDeletion.finalPrompt')}
       </Typography>
       <Typography level='body-sm' mb={2}>
-        on successful deletion, you will be logged out and redirected to the
-        login page.
+        {t('settings:modals.userDeletion.finalHint')}
       </Typography>
 
       <FormControl sx={{ mb: 2 }}>
-        <FormLabel>Password</FormLabel>
+        <FormLabel>{t('common:labels.password')}</FormLabel>
         <Input
           type='password'
           value={password}
           onChange={e => setPassword(e.target.value)}
-          placeholder='Enter your password'
+          placeholder={t('auth:placeholders.passwordRange')}
         />
       </FormControl>
 
       <FormControl sx={{ mb: 3 }}>
-        <FormLabel>Type "DELETE" to confirm</FormLabel>
+        <FormLabel>{t('settings:modals.userDeletion.typeDelete')}</FormLabel>
         <Input
           value={confirmation}
           onChange={e => setConfirmation(e.target.value)}
@@ -312,7 +310,7 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
 
       <Box display='flex' justifyContent='space-between' gap={2}>
         <Button variant='outlined' onClick={() => handleClose(false)} fullWidth>
-          Cancel
+          {t('common:actions.cancel')}
         </Button>
         <Button
           color='danger'
@@ -321,7 +319,7 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
           disabled={!password || confirmation !== 'DELETE'}
           fullWidth
         >
-          Delete Account
+          {t('settings:account.deleteAccount')}
         </Button>
       </Box>
     </>
@@ -346,7 +344,7 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
       onClose={() => handleClose(false)}
       size='lg'
       fullWidth={true}
-      title='Delete Account'
+      title={t('settings:modals.userDeletion.title')}
     >
       {loading && step === 1 ? (
         <Box

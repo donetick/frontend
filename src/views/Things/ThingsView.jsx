@@ -27,6 +27,7 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useNotification } from '../../service/NotificationProvider'
 import {
@@ -41,23 +42,7 @@ import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import CreateThingModal from '../Modals/Inputs/CreateThingModal'
 import EditThingStateModal from '../Modals/Inputs/EditThingState'
 
-const ThingCardContent = ({ thing, onCardClick, onToggleActions }) => {
-  const getThingIcon = type => {
-    if (type === 'text') {
-      return <Flip />
-    } else if (type === 'number') {
-      return <PlusOne />
-    } else if (type === 'boolean') {
-      if (thing.state === 'true') {
-        return <ToggleOn />
-      } else {
-        return <ToggleOff />
-      }
-    } else {
-      return <ToggleOff />
-    }
-  }
-
+const ThingCardContent = ({ thing, onCardClick, onToggleActions, t }) => {
   const getThingAvatar = () => {
     const typeConfig = {
       text: { color: 'primary', icon: <Flip /> },
@@ -84,6 +69,14 @@ const ThingCardContent = ({ thing, onCardClick, onToggleActions }) => {
       </Avatar>
     )
   }
+
+  const getTranslatedType = type =>
+    t(`things:page.types.${type}`, { defaultValue: type })
+
+  const getTranslatedState = state =>
+    state === 'true' || state === 'false'
+      ? t(`things:page.states.${state}`)
+      : state
 
   return (
     <Box
@@ -164,7 +157,7 @@ const ThingCardContent = ({ thing, onCardClick, onToggleActions }) => {
               ml: 1,
             }}
           >
-            {thing?.state}
+            {getTranslatedState(thing?.state)}
           </Chip>
         </Box>
 
@@ -180,7 +173,7 @@ const ThingCardContent = ({ thing, onCardClick, onToggleActions }) => {
               px: 0.75,
             }}
           >
-            {thing?.type}
+            {getTranslatedType(thing?.type)}
           </Chip>
         </Box>
       </Box>
@@ -204,6 +197,7 @@ const ThingCardContent = ({ thing, onCardClick, onToggleActions }) => {
 }
 
 const ThingsView = () => {
+  const { t } = useTranslation(['things', 'common'])
   const navigate = useNavigate()
   const [things, setThings] = useState([])
   const [isShowCreateThingModal, setIsShowCreateThingModal] = useState(false)
@@ -244,21 +238,21 @@ const ThingsView = () => {
           }
           showNotification({
             type: 'success',
-            title: 'Saved',
-            message: 'Thing saved successfully',
+            title: t('things:page.savedTitle'),
+            message: t('things:page.savedMessage'),
           })
         })
       })
       .catch(error => {
         if (error?.queued) {
           showError({
-            title: 'Unable to save thing',
-            message: 'You are offline and the request has been queued',
+            title: t('things:page.saveFailedTitle'),
+            message: t('things:page.saveQueued'),
           })
         } else {
           showError({
-            title: 'Unable to save thing',
-            message: 'An error occurred while saving the thing',
+            title: t('things:page.saveFailedTitle'),
+            message: t('things:page.saveFailed'),
           })
         }
       })
@@ -270,10 +264,10 @@ const ThingsView = () => {
   const handleDeleteClick = thing => {
     setConfirmModelConfig({
       isOpen: true,
-      title: 'Delete Things',
-      confirmText: 'Delete',
-      cancelText: 'Cancel',
-      message: 'Are you sure you want to delete this Thing?',
+      title: t('things:page.deleteTitle'),
+      confirmText: t('common:actions.delete'),
+      cancelText: t('common:actions.cancel'),
+      message: t('things:page.deleteConfirm'),
       onClose: isConfirmed => {
         if (isConfirmed === true) {
           DeleteThing(thing.id)
@@ -287,8 +281,8 @@ const ThingsView = () => {
                 setThings(currentThings)
               } else if (response.status === 405) {
                 showError({
-                  title: 'Unable to Delete Thing',
-                  message: 'Unable to delete thing with associated tasks',
+                  title: t('things:page.deleteFailedTitle'),
+                  message: t('things:page.deleteFailedAssociated'),
                 })
               }
               // if method not allwo show snackbar:
@@ -296,13 +290,13 @@ const ThingsView = () => {
             .catch(error => {
               if (error?.queued) {
                 showError({
-                  title: 'Unable to delete thing',
-                  message: 'You are offline and the request has been queued',
+                  title: t('things:page.deleteFailedTitle'),
+                  message: t('things:page.deleteQueued'),
                 })
               } else {
                 showError({
-                  title: 'Unable to delete thing',
-                  message: 'An error occurred while deleting the thing',
+                  title: t('things:page.deleteFailedTitle'),
+                  message: t('things:page.deleteFailed'),
                 })
               }
             })
@@ -335,21 +329,21 @@ const ThingsView = () => {
           setThings(currentThings)
           showNotification({
             type: 'success',
-            title: 'Updated',
-            message: 'Thing state updated successfully',
+            title: t('things:page.updatedTitle'),
+            message: t('things:page.updatedMessage'),
           })
         })
       })
       .catch(error => {
         if (error?.queued) {
           showError({
-            title: 'Unable to update thing state',
-            message: 'You are offline and the request has been queued',
+            title: t('things:page.updateFailedTitle'),
+            message: t('things:page.updateQueued'),
           })
         } else {
           showError({
-            title: 'Unable to update thing state',
-            message: 'An error occurred while updating the thing state',
+            title: t('things:page.updateFailedTitle'),
+            message: t('things:page.updateFailed'),
           })
         }
       })
@@ -364,13 +358,10 @@ const ThingsView = () => {
             level='h3'
             sx={{ fontWeight: 'lg', color: 'text.primary' }}
           >
-            Things
+            {t('things:page.title')}
           </Typography>
           <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            Things are custom fields that can be attached to tasks to capture
-            additional information. They can be of type text, number, or
-            boolean. You can associate things with tasks and have the task due
-            once condition is met
+            {t('things:page.description')}
           </Typography>
         </Stack>
       </Box>
@@ -396,7 +387,7 @@ const ThingsView = () => {
               }}
             />
             <Typography level='title-md' gutterBottom>
-              No things has been created/found
+              {t('things:page.emptyTitle')}
             </Typography>
           </Box>
         )}
@@ -446,7 +437,9 @@ const ThingsView = () => {
                           <ToggleOff sx={{ fontSize: 20 }} />
                         )}
                         <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                          {thing?.type === 'text' ? 'Edit' : 'Toggle'}
+                          {thing?.type === 'text'
+                            ? t('things:page.swipeEdit')
+                            : t('things:page.swipeToggle')}
                         </Typography>
                       </Box>
                     </SwipeAction>
@@ -465,7 +458,7 @@ const ThingsView = () => {
                       >
                         <Edit sx={{ fontSize: 20 }} />
                         <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                          Edit
+                          {t('things:page.swipeEdit')}
                         </Typography>
                       </Box>
                     </SwipeAction>
@@ -484,7 +477,7 @@ const ThingsView = () => {
                       >
                         <Delete sx={{ fontSize: 20 }} />
                         <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                          Delete
+                          {t('things:page.swipeDelete')}
                         </Typography>
                       </Box>
                     </SwipeAction>
@@ -494,6 +487,7 @@ const ThingsView = () => {
             >
               <ThingCardContent
                 thing={thing}
+                t={t}
                 onToggleActions={() => {
                   if (showMoreInfoId === thing.id) {
                     setShowMoreInfoId(null)

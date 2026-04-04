@@ -1,5 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useArchiveChore } from '../../../queries/ChoreQueries'
 import { usePauseChore, useStartChore } from '../../../queries/TimeQueries'
 import {
@@ -33,6 +34,7 @@ export const useChoreActions = ({
   getSelectedChoresData,
   clearSelection,
 }) => {
+  const { t } = useTranslation(['chores', 'common'])
   const queryClient = useQueryClient()
   const archiveChore = useArchiveChore()
   const startChore = useStartChore()
@@ -64,10 +66,10 @@ export const useChoreActions = ({
       queryClient.invalidateQueries({ queryKey: ['chores'] })
 
       const undoableActions = {
-        completed: 'Task completed',
-        approved: 'Task approved',
-        rejected: 'Task rejected',
-        skipped: 'Task skipped',
+        completed: t('chores:actionFeedback.undoable.completed'),
+        approved: t('chores:actionFeedback.undoable.approved'),
+        rejected: t('chores:actionFeedback.undoable.rejected'),
+        skipped: t('chores:actionFeedback.undoable.skipped'),
       }
 
       if (undoableActions[event]) {
@@ -79,13 +81,13 @@ export const useChoreActions = ({
               if (undoResponse.ok) {
                 refetchChores()
                 const undoMessages = {
-                  completed: 'Task completion has been undone.',
-                  approved: 'Task approval has been undone.',
-                  rejected: 'Task rejection has been undone.',
-                  skipped: 'Task skip has been undone.',
+                  completed: t('chores:actionFeedback.undoDone.completed'),
+                  approved: t('chores:actionFeedback.undoDone.approved'),
+                  rejected: t('chores:actionFeedback.undoDone.rejected'),
+                  skipped: t('chores:actionFeedback.undoDone.skipped'),
                 }
                 showUndo({
-                  title: 'Undo Successful',
+                  title: t('chores:actionFeedback.undoSuccessTitle'),
                   message: undoMessages[event],
                 })
               } else {
@@ -93,8 +95,8 @@ export const useChoreActions = ({
               }
             } catch (error) {
               showError({
-                title: 'Undo Failed',
-                message: 'Unable to undo the action. Please try again.',
+                title: t('chores:actionFeedback.undoFailedTitle'),
+                message: t('chores:actionFeedback.undoFailedMessage'),
               })
             }
           },
@@ -105,38 +107,38 @@ export const useChoreActions = ({
       const notifications = {
         rescheduled: {
           type: 'success',
-          title: 'Task Rescheduled',
-          message: 'The task due date has been updated successfully.',
+          title: t('chores:actionFeedback.notifications.rescheduledTitle'),
+          message: t('chores:actionFeedback.notifications.rescheduledMessage'),
         },
         'due-date-removed': {
           type: 'success',
-          title: 'Task Unplanned',
-          message: 'The task is now unplanned and has no due date.',
+          title: t('chores:actionFeedback.notifications.dueDateRemovedTitle'),
+          message: t('chores:actionFeedback.notifications.dueDateRemovedMessage'),
         },
         unarchive: {
           type: 'success',
-          title: 'Task Restored',
-          message: 'The task has been restored and is now active.',
+          title: t('chores:actionFeedback.notifications.restoredTitle'),
+          message: t('chores:actionFeedback.notifications.restoredMessage'),
         },
         archive: {
           type: 'success',
-          title: 'Task Archived',
-          message: 'The task has been archived and hidden from the active list.',
+          title: t('chores:actionFeedback.notifications.archivedTitle'),
+          message: t('chores:actionFeedback.notifications.archivedMessage'),
         },
         started: {
           type: 'success',
-          title: 'Task Started',
-          message: 'The task has been marked as started.',
+          title: t('chores:actionFeedback.notifications.startedTitle'),
+          message: t('chores:actionFeedback.notifications.startedMessage'),
         },
         paused: {
           type: 'warning',
-          title: 'Task Paused',
-          message: 'The task has been paused.',
+          title: t('chores:actionFeedback.notifications.pausedTitle'),
+          message: t('chores:actionFeedback.notifications.pausedMessage'),
         },
         deleted: {
           type: 'success',
-          title: 'Task Deleted',
-          message: 'The task has been deleted.',
+          title: t('chores:actionFeedback.notifications.deletedTitle'),
+          message: t('chores:actionFeedback.notifications.deletedMessage'),
         },
       }
 
@@ -206,8 +208,8 @@ export const useChoreActions = ({
             refetchChores() // Network failed, revert to truth
             if (error?.queued) {
               showError({
-                title: 'Update Failed',
-                message: 'Request will be reattempt when you are online',
+                title: t('chores:actionFeedback.errors.failedToUpdate'),
+                message: t('chores:actionFeedback.errors.offlineRetry'),
               })
             } else {
               showError({
@@ -227,8 +229,9 @@ export const useChoreActions = ({
             },
             onError: error => {
               showError({
-                title: 'Failed to start',
-                message: error.message || 'Unable to start chore',
+                title: t('chores:actionFeedback.errors.failedToStart'),
+                message:
+                  error.message || t('chores:actionFeedback.errors.unableToStart'),
               })
             },
           })
@@ -243,8 +246,9 @@ export const useChoreActions = ({
             },
             onError: error => {
               showError({
-                title: 'Failed to pause',
-                message: error.message || 'Unable to pause chore',
+                title: t('chores:actionFeedback.errors.failedToPause'),
+                message:
+                  error.message || t('chores:actionFeedback.errors.unableToPause'),
               })
             },
           })
@@ -259,8 +263,10 @@ export const useChoreActions = ({
             }
           } catch (error) {
             showError({
-              title: 'Failed to approve',
-              message: error.message || 'Unable to approve chore',
+              title: t('chores:actionFeedback.errors.failedToApprove'),
+              message:
+                error.message ||
+                t('chores:actionFeedback.errors.unableToApprove'),
             })
           }
           break
@@ -274,8 +280,10 @@ export const useChoreActions = ({
             }
           } catch (error) {
             showError({
-              title: 'Failed to reject',
-              message: error.message || 'Unable to reject chore',
+              title: t('chores:actionFeedback.errors.failedToReject'),
+              message:
+                error.message ||
+                t('chores:actionFeedback.errors.unableToReject'),
             })
           }
           break
@@ -283,10 +291,10 @@ export const useChoreActions = ({
         case 'delete':
           setConfirmModelConfig({
             isOpen: true,
-            title: 'Delete Chore',
-            confirmText: 'Delete',
-            cancelText: 'Cancel',
-            message: 'Are you sure you want to delete this chore?',
+            title: t('chores:actionFeedback.errors.deleteTitle'),
+            confirmText: t('common:actions.delete'),
+            cancelText: t('common:actions.cancel'),
+            message: t('chores:actionFeedback.errors.deleteMessage'),
             onClose: async isConfirmed => {
               if (isConfirmed === true) {
                 try {
@@ -300,13 +308,13 @@ export const useChoreActions = ({
                     updateChoreInState(chore.id, 'deleted')
                     setFilteredChores(newFilteredChores)
                     showSuccess({
-                      title: 'Task Deleted',
-                      message: 'The task has been deleted successfully.',
+                      title: t('chores:actionFeedback.notifications.deletedTitle'),
+                      message: t('chores:actionFeedback.notifications.deletedMessage'),
                     })
                   }
                 } catch (error) {
                   showError({
-                    title: 'Failed to delete',
+                    title: t('chores:actionFeedback.errors.deleteFailed'),
                     message: error,
                   })
                 }
@@ -326,8 +334,10 @@ export const useChoreActions = ({
                 },
                 onError: error => {
                   showError({
-                    title: 'Failed to archive',
-                    message: error.message || 'Unable to archive chore',
+                    title: t('chores:actionFeedback.errors.failedToArchive'),
+                    message:
+                      error.message ||
+                      t('chores:actionFeedback.errors.unableToArchive'),
                   })
                   reject(error)
                 },
@@ -346,7 +356,7 @@ export const useChoreActions = ({
             }
           } catch (error) {
             showError({
-              title: 'Failed to skip',
+              title: t('chores:actionFeedback.errors.failedToSkip'),
               message: error,
             })
           }
@@ -366,9 +376,11 @@ export const useChoreActions = ({
               showError({
                 title:
                   extraData.date === null
-                    ? 'Failed to remove due date'
-                    : 'Failed to reschedule',
-                message: error.message || 'Unable to update due date',
+                    ? t('chores:actionFeedback.errors.failedRemoveDueDate')
+                    : t('chores:actionFeedback.errors.failedReschedule'),
+                message:
+                  error.message ||
+                  t('chores:actionFeedback.errors.unableUpdateDueDate'),
               })
             }
           } else {
@@ -492,16 +504,17 @@ export const useChoreActions = ({
         if (response.ok) {
           const data = await response.json()
           showSuccess({
-            title: 'Nudge Sent!',
-            message: data.message || 'Nudge sent successfully',
+            title: t('chores:actionFeedback.nudgeSentTitle'),
+            message: data.message || t('chores:actionFeedback.nudgeSentMessage'),
           })
         } else {
           throw new Error('Failed to send nudge')
         }
       } catch (error) {
         showError({
-          title: 'Failed to Send Nudge',
-          message: error.message || 'Unable to send nudge at this time',
+          title: t('chores:actionFeedback.errors.nudgeFailedTitle'),
+          message:
+            error.message || t('chores:actionFeedback.errors.nudgeFailedMessage'),
         })
       } finally {
         closeModal()
@@ -516,10 +529,12 @@ export const useChoreActions = ({
 
     setConfirmModelConfig({
       isOpen: true,
-      title: 'Complete Tasks',
-      confirmText: 'Complete',
-      cancelText: 'Cancel',
-      message: `Mark ${selectedData.length} task${selectedData.length > 1 ? 's' : ''} as completed?`,
+      title: t('chores:actionFeedback.bulk.completeTitle'),
+      confirmText: t('common:actions.complete', { defaultValue: 'Complete' }),
+      cancelText: t('common:actions.cancel'),
+      message: t('chores:actionFeedback.bulk.completeConfirm', {
+        count: selectedData.length,
+      }),
       onClose: async isConfirmed => {
         if (isConfirmed === true) {
           try {
@@ -544,15 +559,19 @@ export const useChoreActions = ({
 
             if (completedTasks.length > 0) {
               showSuccess({
-                title: '✅ Tasks Completed',
-                message: `Successfully completed ${completedTasks.length} task${completedTasks.length > 1 ? 's' : ''}.`,
+                title: t('chores:actionFeedback.bulk.completeSuccessTitle'),
+                message: t('chores:actionFeedback.bulk.completeSuccess', {
+                  count: completedTasks.length,
+                }),
               })
             }
 
             if (failedTasks.length > 0) {
               showError({
-                title: 'Some Tasks Failed',
-                message: `${failedTasks.length} task${failedTasks.length > 1 ? 's' : ''} could not be completed.`,
+                title: t('chores:actionFeedback.bulk.someFailedTitle'),
+                message: t('chores:actionFeedback.bulk.completeFailed', {
+                  count: failedTasks.length,
+                }),
               })
             }
 
@@ -560,8 +579,8 @@ export const useChoreActions = ({
             clearSelection()
           } catch (error) {
             showError({
-              title: 'Bulk Complete Failed',
-              message: 'An unexpected error occurred. Please try again.',
+              title: t('chores:actionFeedback.bulk.completeUnexpectedTitle'),
+              message: t('chores:main.unexpectedError'),
             })
           }
         }
@@ -576,10 +595,12 @@ export const useChoreActions = ({
 
     setConfirmModelConfig({
       isOpen: true,
-      title: 'Archive Tasks',
-      confirmText: 'Archive',
-      cancelText: 'Cancel',
-      message: `Archive ${selectedData.length} task${selectedData.length > 1 ? 's' : ''}?`,
+      title: t('chores:actionFeedback.bulk.archiveTitle'),
+      confirmText: t('common:actions.archive'),
+      cancelText: t('common:actions.cancel'),
+      message: t('chores:actionFeedback.bulk.archiveConfirm', {
+        count: selectedData.length,
+      }),
       onClose: async isConfirmed => {
         if (isConfirmed === true) {
           try {
@@ -608,22 +629,26 @@ export const useChoreActions = ({
             }
             if (archivedTasks.length > 0) {
               showSuccess({
-                title: '📦 Tasks Archived',
-                message: `Successfully archived ${archivedTasks.length} task${archivedTasks.length > 1 ? 's' : ''}.`,
+                title: t('chores:actionFeedback.bulk.archiveSuccessTitle'),
+                message: t('chores:actionFeedback.bulk.archiveSuccess', {
+                  count: archivedTasks.length,
+                }),
               })
             }
             if (failedTasks.length > 0) {
               showError({
-                title: 'Some Tasks Failed',
-                message: `${failedTasks.length} task${failedTasks.length > 1 ? 's' : ''} could not be archived.`,
+                title: t('chores:actionFeedback.bulk.someFailedTitle'),
+                message: t('chores:actionFeedback.bulk.archiveFailed', {
+                  count: failedTasks.length,
+                }),
               })
             }
             refetchChores()
             clearSelection()
           } catch (error) {
             showError({
-              title: 'Bulk Archive Failed',
-              message: 'An unexpected error occurred. Please try again.',
+              title: t('chores:actionFeedback.bulk.archiveUnexpectedTitle'),
+              message: t('chores:main.unexpectedError'),
             })
           }
         }
@@ -638,10 +663,12 @@ export const useChoreActions = ({
 
     setConfirmModelConfig({
       isOpen: true,
-      title: 'Delete Tasks',
-      confirmText: 'Delete',
-      cancelText: 'Cancel',
-      message: `Delete ${selectedData.length} task${selectedData.length > 1 ? 's' : ''}?\n\nThis action cannot be undone.`,
+      title: t('chores:actionFeedback.bulk.deleteTitle'),
+      confirmText: t('common:actions.delete'),
+      cancelText: t('common:actions.cancel'),
+      message: t('chores:actionFeedback.bulk.deleteConfirm', {
+        count: selectedData.length,
+      }),
       onClose: async isConfirmed => {
         if (isConfirmed === true) {
           try {
@@ -659,8 +686,10 @@ export const useChoreActions = ({
 
             if (deletedTasks.length > 0) {
               showSuccess({
-                title: '🗑️ Tasks Deleted',
-                message: `Successfully deleted ${deletedTasks.length} task${deletedTasks.length > 1 ? 's' : ''}.`,
+                title: t('chores:actionFeedback.bulk.deleteSuccessTitle'),
+                message: t('chores:actionFeedback.bulk.deleteSuccess', {
+                  count: deletedTasks.length,
+                }),
               })
 
               const deletedIds = new Set(deletedTasks.map(c => c.id))
@@ -674,16 +703,18 @@ export const useChoreActions = ({
 
             if (failedTasks.length > 0) {
               showError({
-                title: 'Some Tasks Failed',
-                message: `${failedTasks.length} task${failedTasks.length > 1 ? 's' : ''} could not be deleted.`,
+                title: t('chores:actionFeedback.bulk.someFailedTitle'),
+                message: t('chores:actionFeedback.bulk.deleteFailed', {
+                  count: failedTasks.length,
+                }),
               })
             }
             refetchChores()
             clearSelection()
           } catch (error) {
             showError({
-              title: 'Bulk Delete Failed',
-              message: 'An unexpected error occurred. Please try again.',
+              title: t('chores:actionFeedback.bulk.deleteUnexpectedTitle'),
+              message: t('chores:main.unexpectedError'),
             })
           }
         }
@@ -698,10 +729,10 @@ export const useChoreActions = ({
 
     setConfirmModelConfig({
       isOpen: true,
-      title: 'Skip Tasks',
-      confirmText: 'Skip',
-      cancelText: 'Cancel',
-      message: `Skip ${selectedData.length} task${selectedData.length > 1 ? 's' : ''} to next due date?`,
+      title: t('common:actions.skip'),
+      confirmText: t('common:actions.skip'),
+      cancelText: t('common:actions.cancel'),
+      message: t('chores:actions.skipToNextDueDate') + ` (${selectedData.length})`,
       onClose: async isConfirmed => {
         if (isConfirmed === true) {
           try {
@@ -719,8 +750,8 @@ export const useChoreActions = ({
 
             if (skippedTasks.length > 0) {
               showSuccess({
-                title: '⏭️ Tasks Skipped',
-                message: `Successfully skipped ${skippedTasks.length} task${skippedTasks.length > 1 ? 's' : ''}.`,
+                title: t('chores:actionFeedback.undoable.skipped'),
+                message: t('chores:actionFeedback.undoable.skipped'),
                 undoAction: async () => {
                   try {
                     for (const chore of skippedTasks) {
@@ -728,13 +759,13 @@ export const useChoreActions = ({
                     }
                     refetchChores()
                     showUndo({
-                      title: 'Undo Successful',
-                      message: `Undo skip for ${skippedTasks.length} task${skippedTasks.length > 1 ? 's' : ''}.`,
+                      title: t('chores:actionFeedback.undoSuccessTitle'),
+                      message: t('chores:actionFeedback.undoDone.skipped'),
                     })
                   } catch (error) {
                     showError({
-                      title: 'Undo Failed',
-                      message: 'Unable to undo the action. Please try again.',
+                      title: t('chores:actionFeedback.undoFailedTitle'),
+                      message: t('chores:actionFeedback.undoFailedMessage'),
                     })
                   }
                 },
@@ -743,8 +774,8 @@ export const useChoreActions = ({
 
             if (failedTasks.length > 0) {
               showError({
-                title: 'Some Tasks Failed',
-                message: `${failedTasks.length > 1 ? 's' : ''} could not be skipped.`,
+                title: t('chores:actionFeedback.bulk.someFailedTitle'),
+                message: t('chores:main.unexpectedError'),
               })
             }
 
@@ -752,8 +783,8 @@ export const useChoreActions = ({
             clearSelection()
           } catch (error) {
             showError({
-              title: 'Bulk Skip Failed',
-              message: 'An unexpected error occurred. Please try again.',
+              title: t('common:actions.skip'),
+              message: t('chores:main.unexpectedError'),
             })
           }
         }

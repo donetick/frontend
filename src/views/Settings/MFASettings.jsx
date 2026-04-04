@@ -13,6 +13,7 @@ import {
 } from '@mui/joy'
 import QRCode from 'qrcode'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   ConfirmMFA,
   DisableMFA,
@@ -24,6 +25,7 @@ import LoadingComponent from '../components/Loading'
 import SettingsLayout from './SettingsLayout'
 
 const MFASettings = () => {
+  const { t } = useTranslation(['settings', 'common', 'auth'])
   const [mfaEnabled, setMfaEnabled] = useState(false)
   const [loading, setLoading] = useState(true)
   const [setupModalOpen, setSetupModalOpen] = useState(false)
@@ -66,7 +68,7 @@ const MFASettings = () => {
       setQrCodeDataUrl(qrCodeDataUrl)
     } catch (error) {
       console.error('Error generating QR code:', error)
-      setError('Failed to generate QR code')
+      setError(t('settings:mfaPage.failedQr'))
     }
   }
 
@@ -89,7 +91,7 @@ const MFASettings = () => {
             hasQrCodeUrl: !!data.qrCodeUrl,
             hasSecret: !!data.secret,
           })
-          setError('Invalid response from server. Missing QR code or secret.')
+          setError(t('settings:mfaPage.invalidResponse'))
           return
         }
         if (data.backupCodes) {
@@ -108,24 +110,22 @@ const MFASettings = () => {
       } else {
         // Handle different error status codes
         if (response.status === 404) {
-          setError(
-            'MFA setup endpoint not found. This feature may not be available yet.',
-          )
+          setError(t('settings:mfaPage.endpointMissing'))
         } else if (response.status === 401) {
-          setError('Unauthorized. Please login again.')
+          setError(t('settings:mfaPage.unauthorized'))
         } else if (response.status === 500) {
-          setError('Server error. Please try again later.')
+          setError(t('settings:mfaPage.serverError'))
         } else {
           const errorData = await response.json().catch(() => ({}))
           setError(
             errorData.message ||
-              `Failed to setup MFA (${response.status}). Please try again.`,
+              t('settings:mfaPage.setupFailed', { status: response.status }),
           )
         }
       }
     } catch (error) {
       console.error('Error setting up MFA:', error)
-      setError('Network error. Please check your connection and try again.')
+      setError(t('settings:mfaPage.networkError'))
     }
   }
 
@@ -140,12 +140,12 @@ const MFASettings = () => {
       if (response.ok) {
         setSetupStep(3)
         setMfaEnabled(true)
-        setSuccess('MFA has been successfully enabled!')
+        setSuccess(t('settings:mfaPage.enabledToast'))
       } else {
-        setError('Invalid verification code. Please try again.')
+        setError(t('settings:mfaPage.invalidCode'))
       }
     } catch (error) {
-      setError('Failed to confirm MFA. Please try again.')
+      setError(t('settings:mfaPage.confirmFailed'))
       console.error('Error confirming MFA:', error)
     }
   }
@@ -158,12 +158,12 @@ const MFASettings = () => {
         setMfaEnabled(false)
         setDisableModalOpen(false)
         setDisableCode('')
-        setSuccess('MFA has been disabled successfully!')
+        setSuccess(t('settings:mfaPage.disabledToast'))
       } else {
-        setError('Invalid verification code. Please try again.')
+        setError(t('settings:mfaPage.invalidCode'))
       }
     } catch (error) {
-      setError('Failed to disable MFA. Please try again.')
+      setError(t('settings:mfaPage.disableFailed'))
       console.error('Error disabling MFA:', error)
     }
   }
@@ -176,12 +176,12 @@ const MFASettings = () => {
         const data = await response.json()
         setBackupCodes(data.backupCodes)
         setBackupCodesModalOpen(true)
-        setSuccess('New backup codes have been generated!')
+        setSuccess(t('settings:mfaPage.backupRegenerated'))
       } else {
-        setError('Failed to regenerate backup codes. Please try again.')
+        setError(t('settings:mfaPage.regenerateFailed'))
       }
     } catch (error) {
-      setError('Failed to regenerate backup codes. Please try again.')
+      setError(t('settings:mfaPage.regenerateFailed'))
       console.error('Error regenerating backup codes:', error)
     }
   }
@@ -206,13 +206,10 @@ const MFASettings = () => {
   }
 
   return (
-    <SettingsLayout title='Multi-Factor Authentication'>
+    <SettingsLayout title={t('settings:pages.mfa.title')}>
       <div className='grid gap-4 py-4' id='mfa'>
         <Typography level='body-md'>
-          Add an extra layer of security to your account with multi-factor
-          authentication (MFA). When enabled, you&apos;ll need to provide a
-          verification code from your authenticator app in addition to your
-          password when signing in.
+          {t('settings:mfaPage.description')}
         </Typography>
 
         {success && (
@@ -233,12 +230,12 @@ const MFASettings = () => {
               <Security color='primary' />
               <Box>
                 <Typography level='title-md'>
-                  Two-Factor Authentication
+                  {t('settings:mfaPage.title')}
                 </Typography>
                 <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
                   {mfaEnabled
-                    ? 'Your account is protected with 2FA'
-                    : 'Secure your account with an authenticator app'}
+                    ? t('settings:mfaPage.enabled')
+                    : t('settings:mfaPage.disabled')}
                 </Typography>
               </Box>
             </Box>
@@ -249,7 +246,7 @@ const MFASettings = () => {
                   variant='outlined'
                   onClick={() => setDisableModalOpen(true)}
                 >
-                  Disable
+                  {t('settings:mfaPage.disable')}
                 </Button>
               ) : (
                 <Button
@@ -257,7 +254,7 @@ const MFASettings = () => {
                   variant='solid'
                   onClick={handleSetupMFA}
                 >
-                  Enable
+                  {t('settings:mfaPage.enable')}
                 </Button>
               )}
             </Box>
@@ -294,14 +291,13 @@ const MFASettings = () => {
           <ModalDialog size='md' sx={{ maxWidth: 500 }}>
             <ModalClose />
             <Typography level='h4' sx={{ mb: 2 }}>
-              Set up Multi-Factor Authentication
+              {t('settings:mfaPage.setupTitle')}
             </Typography>
 
             {setupStep === 1 && setupData && (
               <Stack spacing={3}>
                 <Typography level='body-md'>
-                  <strong>Step 1:</strong> Scan the QR code below with your
-                  authenticator app (Google Authenticator, Authy, etc.)
+                  {t('settings:mfaPage.step1')}
                 </Typography>
 
                 <Box className='flex justify-center rounded bg-white p-4'>
@@ -316,8 +312,7 @@ const MFASettings = () => {
                     />
                   ) : (
                     <Alert color='danger'>
-                      QR code could not be generated. Please try again or use
-                      the manual entry key below.
+                      {t('settings:mfaPage.failedQr')}
                     </Alert>
                   )}
                 </Box>
@@ -332,7 +327,7 @@ const MFASettings = () => {
                   }}
                 >
                   <Typography level='title-sm'>
-                    <strong>Manual entry key:</strong>
+                    <strong>{t('settings:mfaPage.manualKey')}</strong>
                   </Typography>
                   <Typography
                     level='body-sm'
@@ -347,7 +342,7 @@ const MFASettings = () => {
                   onClick={() => setSetupStep(2)}
                   startDecorator={<Smartphone />}
                 >
-                  I've added the account to my app
+                  {t('settings:mfaPage.addedToApp')}
                 </Button>
               </Stack>
             )}
@@ -355,12 +350,11 @@ const MFASettings = () => {
             {setupStep === 2 && (
               <Stack spacing={3}>
                 <Typography level='body-md'>
-                  <strong>Step 2:</strong> Enter the 6-digit verification code
-                  from your authenticator app
+                  {t('settings:mfaPage.step2')}
                 </Typography>
 
                 <Input
-                  placeholder='Enter 6-digit code'
+                  placeholder={t('auth:placeholders.verificationCode')}
                   value={verificationCode}
                   size='lg'
                   //   send on enter:
@@ -391,7 +385,7 @@ const MFASettings = () => {
                     onClick={() => setSetupStep(1)}
                     sx={{ flex: 1 }}
                   >
-                    Back
+                    {t('navigation:back', { defaultValue: 'Back' })}
                   </Button>
                   <Button
                     color='primary'
@@ -399,7 +393,7 @@ const MFASettings = () => {
                     disabled={verificationCode.length !== 6}
                     sx={{ flex: 1 }}
                   >
-                    Verify & Enable
+                    {t('settings:mfaPage.verifyEnable')}
                   </Button>
                 </Box>
               </Stack>
@@ -410,17 +404,16 @@ const MFASettings = () => {
                 <Box className='text-center'>
                   <CheckCircle color='success' sx={{ fontSize: 48, mb: 2 }} />
                   <Typography level='h4' color='success'>
-                    MFA Successfully Enabled!
+                    {t('settings:mfaPage.enabledSuccess')}
                   </Typography>
                 </Box>
 
                 <Alert color='warning'>
                   <Typography level='title-sm' sx={{ mb: 1 }}>
-                    Save these backup codes in a safe place
+                    {t('settings:mfaPage.backupSaveTitle')}
                   </Typography>
                   <Typography level='body-sm'>
-                    You can use these codes to access your account if you lose
-                    your authenticator device. Each code can only be used once.
+                    {t('settings:mfaPage.backupSaveDescription')}
                   </Typography>
                 </Alert>
 
@@ -439,7 +432,7 @@ const MFASettings = () => {
                 </Card>
 
                 <Button color='primary' onClick={closeSetupModal}>
-                  I've saved my backup codes
+                  {t('settings:mfaPage.savedBackupCodes')}
                 </Button>
               </Stack>
             )}
@@ -451,24 +444,22 @@ const MFASettings = () => {
           <ModalDialog size='sm'>
             <ModalClose />
             <Typography level='h4' sx={{ mb: 2 }}>
-              Disable Multi-Factor Authentication
+              {t('settings:mfaPage.disableTitle')}
             </Typography>
 
             <Stack spacing={3}>
               <Alert color='warning'>
                 <Typography level='body-sm'>
-                  Disabling MFA will make your account less secure. Are you sure
-                  you want to continue?
+                  {t('settings:mfaPage.disableWarning')}
                 </Typography>
               </Alert>
 
               <Typography level='body-md'>
-                Enter a verification code from your authenticator app to
-                confirm:
+                {t('settings:mfaPage.disablePrompt')}
               </Typography>
 
               <Input
-                placeholder='Enter 6-digit code'
+                placeholder={t('auth:placeholders.verificationCode')}
                 value={disableCode}
                 size='lg'
                 onKeyDown={e => {
@@ -498,7 +489,7 @@ const MFASettings = () => {
                   onClick={closeDisableModal}
                   sx={{ flex: 1 }}
                 >
-                  Cancel
+                  {t('common:actions.cancel')}
                 </Button>
                 <Button
                   color='danger'
@@ -506,7 +497,7 @@ const MFASettings = () => {
                   disabled={disableCode.length !== 6}
                   sx={{ flex: 1 }}
                 >
-                  Disable MFA
+                  {t('settings:mfaPage.disableTitle')}
                 </Button>
               </Box>
             </Stack>
@@ -521,14 +512,13 @@ const MFASettings = () => {
           <ModalDialog size='sm'>
             <ModalClose />
             <Typography level='h4' sx={{ mb: 2 }}>
-              New Backup Codes
+              {t('settings:mfaPage.backupCodesTitle')}
             </Typography>
 
             <Stack spacing={3}>
               <Alert color='warning'>
                 <Typography level='body-sm'>
-                  Your previous backup codes are now invalid. Save these new
-                  codes in a safe place. Each code can only be used once.
+                  {t('settings:mfaPage.backupCodesWarning')}
                 </Typography>
               </Alert>
 
@@ -550,7 +540,7 @@ const MFASettings = () => {
                 color='primary'
                 onClick={() => setBackupCodesModalOpen(false)}
               >
-                I've saved my backup codes
+                {t('settings:mfaPage.savedBackupCodes')}
               </Button>
             </Stack>
           </ModalDialog>

@@ -13,24 +13,26 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+
 const isValidTrigger = (thing, condition, triggerState) => {
   const newErrors = {}
   if (!thing || !triggerState) {
-    newErrors.thing = 'Please select a thing and trigger state'
+    newErrors.thing = true
     return false
   }
   if (thing.type === 'boolean') {
     if (['true', 'false'].includes(triggerState)) {
       return true
     } else {
-      newErrors.type = 'Boolean type does not require a condition'
+      newErrors.type = true
       return false
     }
   }
   if (thing.type === 'number') {
     if (isNaN(triggerState)) {
-      newErrors.triggerState = 'Trigger state must be a number'
+      newErrors.triggerState = true
       return false
     }
     if (['eq', 'neq', 'gt', 'gte', 'lt', 'lte'].includes(condition)) {
@@ -42,7 +44,7 @@ const isValidTrigger = (thing, condition, triggerState) => {
       return true
     }
   }
-  newErrors.triggerState = 'Trigger state must be a number'
+  newErrors.triggerState = true
 
   return false
 }
@@ -54,6 +56,7 @@ const ThingTriggerSection = ({
   selected,
   isAttepmtingToSave,
 }) => {
+  const { t } = useTranslation(['things', 'common'])
   const [selectedThing, setSelectedThing] = useState(null)
   const [condition, setCondition] = useState(null)
   const [triggerState, setTriggerState] = useState(null)
@@ -84,13 +87,10 @@ const ThingTriggerSection = ({
 
   return (
     <Card sx={{ mt: 1 }}>
-      <Typography level='h5'>
-        Trigger a task when a thing state changes to a desired state
-      </Typography>
+      <Typography level='h5'>{t('things:trigger.title')}</Typography>
       {things?.length === 0 && (
         <Typography level='body-sm'>
-          it's look like you don't have any things yet, create a thing to
-          trigger a task when the state changes.
+          {t('things:trigger.noThings')}{' '}
           <Button
             startDecorator={<Widgets />}
             size='sm'
@@ -98,9 +98,9 @@ const ThingTriggerSection = ({
               navigate('/things')
             }}
           >
-            Go to Things
+            {t('things:trigger.goToThings')}
           </Button>{' '}
-          to create a thing
+          {t('things:trigger.createThingSuffix')}
         </Typography>
       )}
       <FormControl error={isAttepmtingToSave && !selectedThing}>
@@ -127,27 +127,27 @@ const ThingTriggerSection = ({
                 </Box>
                 <Box>
                   <Typography level='body2' textColor='text.secondary'>
-                    <Chip>type: {option.type}</Chip>{' '}
-                    <Chip>state: {option.state}</Chip>
+                    <Chip>
+                      {t('things:trigger.type')}: {option.type}
+                    </Chip>{' '}
+                    <Chip>
+                      {t('things:trigger.state')}: {option.state}
+                    </Chip>
                   </Typography>
                 </Box>
               </Box>
             </Box>
           )}
           renderInput={params => (
-            <TextField {...params} label='Select a thing' />
+            <TextField {...params} label={t('things:trigger.selectThing')} />
           )}
         />
       </FormControl>
-      <Typography level='body-sm'>
-        Create a condition to trigger a task when the thing state changes to
-        desired state
-      </Typography>
+      <Typography level='body-sm'>{t('things:trigger.conditionHelp')}</Typography>
       {selectedThing?.type == 'boolean' && (
         <Box>
           <Typography level='body-sm'>
-            When the state of {selectedThing.name} changes as specified below,
-            the task will become due.
+            {t('things:trigger.dueWhenChanged', { name: selectedThing.name })}
           </Typography>
           <Select
             value={triggerState}
@@ -163,7 +163,7 @@ const ThingTriggerSection = ({
                 value={state}
                 onClick={() => setTriggerState(state)}
               >
-                {state.charAt(0).toUpperCase() + state.slice(1)}
+                {t(`things:trigger.${state}`)}
               </Option>
             ))}
           </Select>
@@ -172,20 +172,19 @@ const ThingTriggerSection = ({
       {selectedThing?.type == 'number' && (
         <Box>
           <Typography level='body-sm'>
-            When the state of {selectedThing.name} changes as specified below,
-            the task will become due.
+            {t('things:trigger.dueWhenChanged', { name: selectedThing.name })}
           </Typography>
 
           <Box sx={{ display: 'flex', gap: 1, direction: 'row' }}>
-            <Typography level='body-sm'>State is</Typography>
+            <Typography level='body-sm'>{t('common:labels.stateIs')}</Typography>
             <Select value={condition} sx={{ width: '50%' }}>
               {[
-                { name: 'Equal', value: 'eq' },
-                { name: 'Not equal', value: 'neq' },
-                { name: 'Greater than', value: 'gt' },
-                { name: 'Greater than or equal', value: 'gte' },
-                { name: 'Less than', value: 'lt' },
-                { name: 'Less than or equal', value: 'lte' },
+                { name: t('things:trigger.equal'), value: 'eq' },
+                { name: t('things:trigger.notEqual'), value: 'neq' },
+                { name: t('things:trigger.greaterThan'), value: 'gt' },
+                { name: t('things:trigger.greaterThanOrEqual'), value: 'gte' },
+                { name: t('things:trigger.lessThan'), value: 'lt' },
+                { name: t('things:trigger.lessThanOrEqual'), value: 'lte' },
               ].map(condition => (
                 <Option
                   key={condition.value}
@@ -208,14 +207,13 @@ const ThingTriggerSection = ({
       {selectedThing?.type == 'text' && (
         <Box>
           <Typography level='body-sm'>
-            When the state of {selectedThing.name} changes as specified below,
-            the task will become due.
+            {t('things:trigger.dueWhenChanged', { name: selectedThing.name })}
           </Typography>
 
           <Input
             value={triggerState}
             onChange={e => setTriggerState(e.target.value)}
-            label='Enter the text to trigger the task'
+            label={t('things:trigger.textTriggerLabel')}
           />
         </Box>
       )}

@@ -10,9 +10,11 @@ import {
     Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
 function CreateThingModal({ isOpen, onClose, onSave, currentThing }) {
+  const { t } = useTranslation(['things', 'common'])
   const { ResponsiveModal } = useResponsiveModal()
 
   const [name, setName] = useState(currentThing?.name || '')
@@ -34,17 +36,17 @@ function CreateThingModal({ isOpen, onClose, onSave, currentThing }) {
   const isValid = () => {
     const newErrors = {}
     if (!name || name.trim() === '') {
-      newErrors.name = 'Name is required'
+      newErrors.name = t('things:modal.nameRequired')
     }
 
     if (type === 'number' && isNaN(state)) {
-      newErrors.state = 'State must be a number'
+      newErrors.state = t('things:modal.stateMustBeNumber')
     }
     if (type === 'boolean' && !['true', 'false'].includes(state)) {
-      newErrors.state = 'State must be true or false'
+      newErrors.state = t('things:modal.stateMustBeBoolean')
     }
     if ((type === 'text' && !state) || state.trim() === '') {
-      newErrors.state = 'State is required'
+      newErrors.state = t('things:modal.stateRequired')
     }
 
     setErrors(newErrors)
@@ -65,12 +67,12 @@ function CreateThingModal({ isOpen, onClose, onSave, currentThing }) {
       onClose={onClose}
       size='lg'
       fullWidth={true}
-      title={`${currentThing?.id ? 'Edit' : 'Create'} Thing`}
+      title={currentThing?.id ? t('things:modal.editTitle') : t('things:modal.createTitle')}
     >
       <FormControl>
-        <Typography>Name</Typography>
+        <Typography>{t('common:labels.name')}</Typography>
         <Textarea
-          placeholder='Thing name'
+          placeholder={t('things:modal.namePlaceholder')}
           value={name}
           onChange={e => setName(e.target.value)}
           sx={{ minWidth: 300 }}
@@ -78,7 +80,7 @@ function CreateThingModal({ isOpen, onClose, onSave, currentThing }) {
         <FormHelperText color='danger'>{errors.name}</FormHelperText>
       </FormControl>
       <FormControl>
-        <Typography>Type</Typography>
+        <Typography>{t('things:modal.type')}</Typography>
         <Select value={type} sx={{ minWidth: 300 }}>
           {['text', 'number', 'boolean'].map(type => (
             <Option value={type} key={type} onClick={() => setType(type)}>
@@ -91,9 +93,9 @@ function CreateThingModal({ isOpen, onClose, onSave, currentThing }) {
       </FormControl>
       {type === 'text' && (
         <FormControl>
-          <Typography>Value</Typography>
+          <Typography>{t('common:labels.value')}</Typography>
           <Input
-            placeholder='Thing value'
+            placeholder={t('things:modal.valuePlaceholder')}
             value={state || ''}
             onChange={e => setState(e.target.value)}
             sx={{ minWidth: 300 }}
@@ -103,9 +105,9 @@ function CreateThingModal({ isOpen, onClose, onSave, currentThing }) {
       )}
       {type === 'number' && (
         <FormControl>
-          <Typography>Value</Typography>
+          <Typography>{t('common:labels.value')}</Typography>
           <Input
-            placeholder='Thing value'
+            placeholder={t('things:modal.valuePlaceholder')}
             type='number'
             value={state || ''}
             onChange={e => {
@@ -117,7 +119,7 @@ function CreateThingModal({ isOpen, onClose, onSave, currentThing }) {
       )}
       {type === 'boolean' && (
         <FormControl>
-          <Typography>Value</Typography>
+          <Typography>{t('common:labels.value')}</Typography>
           <Select sx={{ minWidth: 300 }} value={state}>
             {['true', 'false'].map(value => (
               <Option value={value} key={value} onClick={() => setState(value)}>
@@ -130,10 +132,10 @@ function CreateThingModal({ isOpen, onClose, onSave, currentThing }) {
 
       <Box display={'flex'} justifyContent={'space-around'} mt={1}>
         <Button size='lg' onClick={handleSave} fullWidth sx={{ mr: 1 }}>
-          {currentThing?.id ? 'Update' : 'Create'}
+          {currentThing?.id ? t('common:actions.save') : t('common:actions.create')}
         </Button>
         <Button size='lg' onClick={onClose} variant='outlined'>
-          {currentThing?.id ? 'Cancel' : 'Close'}
+          {currentThing?.id ? t('common:actions.cancel') : t('common:actions.close')}
         </Button>
       </Box>
     </ResponsiveModal>

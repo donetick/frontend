@@ -510,7 +510,7 @@ const LoginView = () => {
                     required
                     fullWidth
                     id='email'
-                    label='Email Address'
+                    label={t('common:labels.emailAddress')}
                     name='email'
                     autoComplete='email'
                     autoFocus
@@ -564,7 +564,7 @@ const LoginView = () => {
                 required
                 fullWidth
                 name='password'
-                label='Password'
+                label={t('common:labels.password')}
                 type='password'
                 id='password'
                 autoComplete='password'
@@ -607,7 +607,7 @@ const LoginView = () => {
               </Button>
             </>
           )}
-          <Divider> or </Divider>
+          <Divider>{t('common:actions.or')}</Divider>
           {import.meta.env.VITE_IS_SELF_HOSTED !== 'true' && (
             <>
               {!Capacitor.isNativePlatform() && (

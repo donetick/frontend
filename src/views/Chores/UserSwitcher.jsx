@@ -2,16 +2,18 @@ import { SupervisorAccount } from '@mui/icons-material'
 import { Avatar, Box, Button, Sheet, Typography } from '@mui/joy'
 
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import UserModal from '../Modals/Inputs/UserModal'
 const UserSwitcher = () => {
-  const { 
-    impersonatedUser, 
+  const { t } = useTranslation(['chores', 'common'])
+  const {
+    impersonatedUser,
     isImpersonating,
-    startImpersonation, 
+    startImpersonation,
     stopImpersonation,
-    canImpersonate 
+    canImpersonate,
   } = useImpersonateUser()
   const { data: userProfile } = useUserProfile()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -50,17 +52,19 @@ const UserSwitcher = () => {
                 justifyContent: 'flex-start',
                 gap: 1,
               }}
-            >
+              >
               <SupervisorAccount color='' />
-              <Typography level='title-md'>View tasks as</Typography>
+              <Typography level='title-md'>
+                {t('chores:sidepanel.userSwitcher.title')}
+              </Typography>
             </Box>
           </Box>
           <Box sx={{ mb: 2 }}>
             <Typography level='title-md' sx={{ mb: 0.5 }}>
-              Switch to user view
+              {t('chores:sidepanel.userSwitcher.switchTitle')}
             </Typography>
             <Typography level='body-sm' sx={{ mb: 1, color: 'text.secondary' }}>
-              Tasks will be filtered to show only assignments for selected user
+              {t('chores:sidepanel.userSwitcher.switchDescription')}
             </Typography>
           </Box>
           <Button
@@ -69,7 +73,7 @@ const UserSwitcher = () => {
             onClick={() => setIsModalOpen(true)}
             size='sm'
           >
-            Choose User
+            {t('chores:sidepanel.userSwitcher.chooseUser')}
           </Button>
           <UserModal
             isOpen={isModalOpen}
@@ -120,7 +124,9 @@ const UserSwitcher = () => {
             }}
           >
             <SupervisorAccount color='' />
-            <Typography level='title-md'>View tasks as</Typography>
+            <Typography level='title-md'>
+              {t('chores:sidepanel.userSwitcher.title')}
+            </Typography>
           </Box>
         </Box>
 
@@ -153,7 +159,7 @@ const UserSwitcher = () => {
                   setIsModalOpen(true)
                 }}
               >
-                Change User
+                {t('chores:sidepanel.userSwitcher.changeUser')}
               </Button>
               <Button
                 variant='plain'
@@ -164,7 +170,7 @@ const UserSwitcher = () => {
                   stopImpersonation()
                 }}
               >
-                Cancel
+                {t('common:actions.cancel')}
               </Button>
             </Box>
           </Box>

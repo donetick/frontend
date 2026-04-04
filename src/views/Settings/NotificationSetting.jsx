@@ -18,6 +18,7 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { PushNotifications } from '@capacitor/push-notifications'
 import { registerPushNotifications } from '../../CapacitorListener'
@@ -31,6 +32,7 @@ import {
 import SettingsLayout from './SettingsLayout'
 
 const NotificationSetting = () => {
+  const { t } = useTranslation(['settingsExtras', 'common'])
   const { showWarning } = useNotification()
   const { data: userProfile, refetch: refetchUserProfile } = useUserProfile()
   const { data: deviceTokens, refetch: refetchDevices } = useDeviceTokens()
@@ -149,8 +151,8 @@ const NotificationSetting = () => {
     const handleDeviceRegistered = () => {
       refetchDevices()
       showWarning({
-        title: 'Success',
-        message: 'Device registered successfully for push notifications.',
+        title: t('common:notifications.titles.success'),
+        message: t('settingsExtras:notifications.deviceRegisteredMessage'),
       })
     }
 
@@ -159,16 +161,15 @@ const NotificationSetting = () => {
 
       if (status === 409) {
         showWarning({
-          title: 'Device Limit Reached',
-          message:
-            'You have reached the maximum limit of 5 registered devices. Please remove a device before registering this one.',
+          title: t('settingsExtras:notifications.deviceLimitReached'),
+          message: t('settingsExtras:notifications.deviceLimitReachedMessage'),
         })
       } else {
         showWarning({
-          title: 'Registration Failed',
+          title: t('settingsExtras:notifications.registrationFailed'),
           message:
             error ||
-            'Failed to register device automatically. Please try again.',
+            t('settingsExtras:notifications.registrationFailedMessage'),
         })
       }
     }
@@ -195,16 +196,16 @@ const NotificationSetting = () => {
     switch (notificationTarget) {
       case '1':
         if (chatID === '') {
-          setError('Chat ID is required')
+          setError(t('settingsExtras:notifications.chatIdRequired'))
           return false
         } else if (isNaN(chatID) || chatID === '0') {
-          setError('Invalid Chat ID')
+          setError(t('settingsExtras:notifications.invalidChatId'))
           return false
         }
         break
       case '2':
         if (chatID === '') {
-          setError('User key is required')
+          setError(t('settingsExtras:notifications.userKeyRequired'))
           return false
         }
         break
@@ -222,12 +223,16 @@ const NotificationSetting = () => {
       type: Number(notificationTarget),
     }).then(resp => {
       if (resp.status != 200) {
-        alert(`Error while updating notification target: ${resp.statusText}`)
+        alert(
+          t('settingsExtras:notifications.updateFailed', {
+            status: resp.statusText,
+          }),
+        )
         return
       }
 
       refetchUserProfile()
-      alert('Notification target updated')
+      alert(t('settingsExtras:notifications.targetUpdated'))
     })
   }
 
@@ -238,9 +243,8 @@ const NotificationSetting = () => {
     const currentDeviceCount = deviceTokens ? deviceTokens.length : 0
     if (currentDeviceCount >= 5) {
       showWarning({
-        title: 'Device Limit Reached',
-        message:
-          'You have reached the maximum limit of 5 registered devices. Please remove a device before registering this one.',
+        title: t('settingsExtras:notifications.deviceLimitReached'),
+        message: t('settingsExtras:notifications.deviceLimitReachedMessage'),
       })
       return
     }
@@ -251,9 +255,8 @@ const NotificationSetting = () => {
 
       if (permStatus.receive !== 'granted') {
         showWarning({
-          title: 'Permission Required',
-          message:
-            'Push notification permission is required to register this device.',
+          title: t('settingsExtras:notifications.permissionRequired'),
+          message: t('settingsExtras:notifications.permissionRequiredMessage'),
         })
         return
       }
@@ -267,15 +270,14 @@ const NotificationSetting = () => {
       setPushNotification(true)
 
       showWarning({
-        title: 'Registration Initiated',
-        message:
-          'Push notification registration has been initiated. The device will be registered automatically.',
+        title: t('settingsExtras:notifications.registrationInitiated'),
+        message: t('settingsExtras:notifications.registrationInitiatedMessage'),
       })
     } catch (error) {
       console.error('Error registering device:', error)
       showWarning({
-        title: 'Error',
-        message: 'Failed to register device. Please try again.',
+        title: t('common:notifications.titles.error'),
+        message: t('settingsExtras:notifications.registrationFailedMessage'),
       })
     }
   }
@@ -283,9 +285,11 @@ const NotificationSetting = () => {
 
     <SettingsLayout title='Notification Settings'>
       <div className='grid gap-4 py-4' id='notifications'>
-        <Typography level='h3'>Device Notification</Typography>
+        <Typography level='h3'>{t('settingsExtras:notifications.deviceTitle')}</Typography>
         <Divider />
-        <Typography level='body-md'>Manage your Device Notification</Typography>
+        <Typography level='body-md'>
+          {t('settingsExtras:notifications.deviceDescription')}
+        </Typography>
 
         <FormControl orientation='horizontal'>
           <Switch
@@ -300,9 +304,12 @@ const NotificationSetting = () => {
                     setNotificationPreferences({ granted: true })
                   } else if (resp.display === 'denied') {
                     showWarning({
-                      title: 'Notification Permission Denied',
-                      message:
-                        'You have denied notification permissions. You can enable them later in your device settings.',
+                      title: t(
+                        'settingsExtras:notifications.notificationPermissionDenied',
+                      ),
+                      message: t(
+                        'settingsExtras:notifications.notificationPermissionDeniedMessage',
+                      ),
                     })
                     setDeviceNotification(false)
                     setNotificationPreferences({ granted: false })
@@ -324,11 +331,11 @@ const NotificationSetting = () => {
             sx={{ mr: 2 }}
           />
           <div>
-            <FormLabel>Device Notification</FormLabel>
+            <FormLabel>{t('settingsExtras:notifications.deviceLabel')}</FormLabel>
             <FormHelperText sx={{ mt: 0 }}>
               {Capacitor.isNativePlatform()
-                ? 'Receive notification on your device when a task is due'
-                : 'This feature is only available on mobile devices'}{' '}
+                ? t('settingsExtras:notifications.deviceNativeHelper')
+                : t('settingsExtras:notifications.mobileOnlyHelper')}{' '}
             </FormHelperText>
           </div>
         </FormControl>
@@ -345,8 +352,8 @@ const NotificationSetting = () => {
             LocalNotifications.schedule({
               notifications: [
                 {
-                  title: 'Test Notification',
-                  body: 'You have a task due soon',
+                  title: t('settingsExtras:notifications.testTitle'),
+                  body: t('settingsExtras:notifications.testBody'),
                   id: 1,
                   schedule: { at: new Date(Date.now() + 2000) },
                   sound: null,
@@ -358,32 +365,32 @@ const NotificationSetting = () => {
             })
           }}
         >
-          Test Notification{' '}
+          {t('settingsExtras:notifications.testNotification')}{' '}
         </Button>
         {deviceNotification && (
           <Card>
             {[
               {
-                title: 'Due Date Notification',
+                title: t('settingsExtras:notifications.dueDateNotification'),
                 checked: dueNotification,
                 set: setDueNotification,
-                label: 'Notification when the task is due',
+                label: t('settingsExtras:notifications.dueDateNotificationHelper'),
                 property: 'dueNotification',
                 disabled: false,
               },
               {
-                title: 'Pre-Due Date Notification',
+                title: t('settingsExtras:notifications.preDueNotification'),
                 checked: preDueNotification,
                 set: setPreDueNotification,
-                label: 'Notification a few hours before the task is due',
+                label: t('settingsExtras:notifications.preDueNotificationHelper'),
                 property: 'preDueNotification',
                 disabled: false,
               },
               {
-                title: 'Overdue Notification',
+                title: t('settingsExtras:notifications.overdueNotification'),
                 checked: naggingNotification,
                 set: setNaggingNotification,
-                label: 'Notification when the task is overdue',
+                label: t('settingsExtras:notifications.overdueNotificationHelper'),
                 property: 'naggingNotification',
                 disabled: false,
               },
@@ -409,7 +416,11 @@ const NotificationSetting = () => {
                   }}
                   color={item.checked ? 'success' : ''}
                   variant='solid'
-                  endDecorator={item.checked ? 'On' : 'Off'}
+                  endDecorator={
+                    item.checked
+                      ? t('settingsExtras:notifications.on')
+                      : t('settingsExtras:notifications.off')
+                  }
                   slotProps={{ endDecorator: { sx: { minWidth: 24 } } }}
                 />
               </FormControl>
@@ -422,11 +433,11 @@ const NotificationSetting = () => {
             sx={{ width: 400, justifyContent: 'space-between' }}
           >
             <div>
-              <FormLabel>Push Notifications</FormLabel>
+              <FormLabel>{t('settingsExtras:notifications.pushNotifications')}</FormLabel>
               <FormHelperText sx={{ mt: 0 }}>
                 {Capacitor.isNativePlatform()
-                  ? 'Receive Nudges, Announcements, and Chore Assignments via Push Notifications'
-                  : 'This feature is only available on mobile devices'}{' '}
+                  ? t('settingsExtras:notifications.pushNotificationsHelper')
+                  : t('settingsExtras:notifications.mobileOnlyHelper')}{' '}
               </FormHelperText>
             </div>
             <Switch
@@ -446,9 +457,12 @@ const NotificationSetting = () => {
                     }
                     if (resp.receive !== 'granted') {
                       showWarning({
-                        title: 'Push Notification Permission Denied',
-                        message:
-                          'Push notifications have been disabled. You can enable them in your device settings if needed.',
+                        title: t(
+                          'settingsExtras:notifications.pushPermissionDenied',
+                        ),
+                        message: t(
+                          'settingsExtras:notifications.pushPermissionDeniedMessage',
+                        ),
                       })
                       setPushNotification(false)
                       setPushNotificationPreferences({ granted: false })
@@ -463,7 +477,11 @@ const NotificationSetting = () => {
               }}
               color={pushNotification ? 'success' : 'neutral'}
               variant={pushNotification ? 'solid' : 'outlined'}
-              endDecorator={pushNotification ? 'On' : 'Off'}
+              endDecorator={
+                pushNotification
+                  ? t('settingsExtras:notifications.on')
+                  : t('settingsExtras:notifications.off')
+              }
               slotProps={{
                 endDecorator: {
                   sx: {
@@ -478,11 +496,13 @@ const NotificationSetting = () => {
         {isOfficialInstance && (
           <>
             <Typography level='h4' sx={{ mt: 2 }}>
-              Registered Devices ({deviceTokens ? deviceTokens.length : 0}/5)
+              {t('settingsExtras:notifications.registeredDevices', {
+                count: deviceTokens ? deviceTokens.length : 0,
+              })}
             </Typography>
             <Divider />
             <Typography level='body-md' sx={{ mb: 2 }}>
-              Devices registered to receive push notifications for your account
+              {t('settingsExtras:notifications.registeredDevicesDescription')}
             </Typography>
 
             {/* Show register current device option if not registered */}
@@ -508,12 +528,12 @@ const NotificationSetting = () => {
                       )}
                       <Box>
                         <Typography level='body-md' sx={{ fontWeight: 'bold' }}>
-                          Current Device:{' '}
+                          {t('common:labels.currentDevice')}:{' '}
                           {currentDevice.platform === 'ios' ? 'iOS' : 'Android'}{' '}
                           {currentDevice.model}
                         </Typography>
                         <Typography level='body-sm' color='neutral'>
-                          This device is not registered for push notifications
+                          {t('settingsExtras:notifications.currentDeviceUnregistered')}
                         </Typography>
                       </Box>
                     </Box>
@@ -525,8 +545,8 @@ const NotificationSetting = () => {
                       onClick={handleRegisterCurrentDevice}
                     >
                       {deviceTokens && deviceTokens.length >= 5
-                        ? 'Limit Reached'
-                        : 'Register Device'}
+                        ? t('settingsExtras:notifications.limitReached')
+                        : t('common:actions.registerDevice')}
                     </Button>
                   </Box>
                 </Card>
@@ -562,7 +582,7 @@ const NotificationSetting = () => {
 
                           {device.createdAt && (
                             <Typography level='body-sm' color='neutral'>
-                              Created At:{' '}
+                              {t('settingsExtras:notifications.createdAt')}:{' '}
                               {new Date(device.createdAt).toLocaleDateString()}
                             </Typography>
                           )}
@@ -582,19 +602,23 @@ const NotificationSetting = () => {
                               refetchDevices()
                             } else {
                               showWarning({
-                                title: 'Error',
-                                message: 'Failed to unregister device',
+                                title: t('common:notifications.titles.error'),
+                                message: t(
+                                  'settingsExtras:notifications.removeDeviceFailed',
+                                ),
                               })
                             }
                           } catch (error) {
                             showWarning({
-                              title: 'Error',
-                              message: 'Failed to unregister device',
+                              title: t('common:notifications.titles.error'),
+                              message: t(
+                                'settingsExtras:notifications.removeDeviceFailed',
+                              ),
                             })
                           }
                         }}
                       >
-                        Remove
+                        {t('common:actions.remove')}
                       </Button>
                     </Box>
                   </Card>
@@ -602,16 +626,16 @@ const NotificationSetting = () => {
               </Box>
             ) : (
               <Typography level='body-md' color='neutral'>
-                No devices registered for push notifications
+                {t('settingsExtras:notifications.noRegisteredDevices')}
               </Typography>
             )}
           </>
         )}
 
-        <Typography level='h3'>Custom Notification</Typography>
+        <Typography level='h3'>{t('settingsExtras:notifications.customTitle')}</Typography>
         <Divider />
         <Typography level='body-md'>
-          Notification through other platform like Telegram or Pushover
+          {t('settingsExtras:notifications.customDescription')}
         </Typography>
 
         <FormControl orientation='horizontal'>
@@ -649,9 +673,9 @@ const NotificationSetting = () => {
             sx={{ mr: 2 }}
           />
           <div>
-            <FormLabel>Custom Notification</FormLabel>
+            <FormLabel>{t('settingsExtras:notifications.customLabel')}</FormLabel>
             <FormHelperText sx={{ mt: 0 }}>
-              Receive notification on other platform
+              {t('settingsExtras:notifications.customHelper')}
             </FormHelperText>
           </div>
         </FormControl>
@@ -668,16 +692,17 @@ const NotificationSetting = () => {
               sx={{ maxWidth: '200px' }}
               onChange={(e, selected) => setNotificationTarget(selected)}
             >
-              <Option value='0'>None</Option>
+              <Option value='0'>{t('settingsExtras:notifications.none')}</Option>
               <Option value='1'>Telegram</Option>
               <Option value='2'>Pushover</Option>
-              <Option value='3'>Webhooks</Option>
+              <Option value='3'>
+                {t('settingsExtras:notifications.webhooks')}
+              </Option>
             </Select>
             {notificationTarget === '1' && (
               <>
                 <Typography level='body-xs'>
-                  You need to initiate a message to the bot in order for the
-                  Telegram notification to work{' '}
+                  {t('settingsExtras:notifications.telegramSetup')}{' '}
                   <a
                     style={{
                       textDecoration: 'underline',
@@ -685,12 +710,12 @@ const NotificationSetting = () => {
                     }}
                     href='https://t.me/DonetickBot'
                   >
-                    Click here
+                    {t('settingsExtras:notifications.clickHere')}
                   </a>{' '}
-                  to start a chat
+                  {t('settingsExtras:notifications.startChat')}
                 </Typography>
 
-                <Typography level='body-sm'>Chat ID</Typography>
+                <Typography level='body-sm'>{t('common:labels.chatId')}</Typography>
 
                 <Input
                   value={chatID}
@@ -701,8 +726,7 @@ const NotificationSetting = () => {
                   }}
                 />
                 <Typography mt={0} level='body-xs'>
-                  If you don't know your Chat ID, start chat with userinfobot
-                  and it will send you your Chat ID.{' '}
+                  {t('settingsExtras:notifications.chatIdHelp')}{' '}
                   <a
                     style={{
                       textDecoration: 'underline',
@@ -710,15 +734,15 @@ const NotificationSetting = () => {
                     }}
                     href='https://t.me/userinfobot'
                   >
-                    Click here
+                    {t('settingsExtras:notifications.clickHere')}
                   </a>{' '}
-                  to start chat with userinfobot{' '}
+                  {t('settingsExtras:notifications.userInfoBot')}{' '}
                 </Typography>
               </>
             )}
             {notificationTarget === '2' && (
               <>
-                <Typography level='body-sm'>User key</Typography>
+                <Typography level='body-sm'>{t('common:labels.userKey')}</Typography>
                 <Input
                   value={chatID}
                   onChange={e => setChatID(e.target.value)}
@@ -742,7 +766,7 @@ const NotificationSetting = () => {
               }}
               onClick={handleSave}
             >
-              Save
+              {t('common:actions.save')}
             </Button>
           </Box>
         )}

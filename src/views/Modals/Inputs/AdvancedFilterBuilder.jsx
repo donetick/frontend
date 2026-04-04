@@ -13,6 +13,7 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { FILTER_COLORS } from '../../../utils/Colors'
 import { applyFilter } from '../../../utils/FilterEngine'
@@ -30,6 +31,7 @@ const AdvancedFilterBuilder = ({
   userProfile = null,
   editingFilter = null,
 }) => {
+  const { t } = useTranslation(['filters', 'common'])
   const { ResponsiveModal } = useResponsiveModal()
   const listContainerRef = useRef(null)
   const conditionRefs = useRef([])
@@ -151,13 +153,13 @@ const AdvancedFilterBuilder = ({
 
   const handleSave = () => {
     if (!filterName.trim()) {
-      setError('Please enter a filter name')
+      setError(t('filters:advanced.enterFilterName'))
       return
     }
 
     // Check for duplicate name, excluding current filter if editing
     if (filterNameExists(filterName.trim(), editingFilter?.id)) {
-      setError('A filter with this name already exists')
+      setError(t('filters:advanced.duplicateFilterName'))
       return
     }
 
@@ -167,7 +169,7 @@ const AdvancedFilterBuilder = ({
     })
 
     if (conditions.length === 0 || validConditions.length === 0) {
-      setError('Please add at least one filter condition')
+      setError(t('filters:advanced.addAtLeastOneCondition'))
       return
     }
 
@@ -198,7 +200,7 @@ const AdvancedFilterBuilder = ({
             onChange={(_, newValue) =>
               updateCondition(index, 'value', newValue)
             }
-            placeholder='Select assignees'
+            placeholder={t('filters:advanced.selectAssignees')}
             sx={{ width: '100%' }}
             slotProps={{
               listbox: {
@@ -215,7 +217,9 @@ const AdvancedFilterBuilder = ({
                   )
                   return (
                     <Chip key={`${value}-${idx}`} size='sm'>
-                      {member?.displayName || member?.username || 'Unknown'}
+                      {member?.displayName ||
+                        member?.username ||
+                        t('filters:advanced.unknown')}
                     </Chip>
                   )
                 })}
@@ -241,7 +245,7 @@ const AdvancedFilterBuilder = ({
             onChange={(_, newValue) =>
               updateCondition(index, 'value', newValue)
             }
-            placeholder='Select creators'
+            placeholder={t('filters:advanced.selectCreators')}
             sx={{ width: '100%' }}
             slotProps={{
               listbox: {
@@ -285,7 +289,7 @@ const AdvancedFilterBuilder = ({
             onChange={(_, newValue) =>
               updateCondition(index, 'value', newValue)
             }
-            placeholder='Select priorities'
+            placeholder={t('filters:advanced.selectPriorities')}
             sx={{ width: '100%' }}
             slotProps={{
               listbox: {
@@ -326,7 +330,7 @@ const AdvancedFilterBuilder = ({
             onChange={(_, newValue) =>
               updateCondition(index, 'value', newValue)
             }
-            placeholder='Select labels'
+            placeholder={t('filters:advanced.selectLabels')}
             sx={{ width: '100%' }}
             slotProps={{
               listbox: {
@@ -342,7 +346,7 @@ const AdvancedFilterBuilder = ({
                   const label = labels.find(l => String(l.id) === String(value))
                   return (
                     <Chip key={`label-chip-${value}-${idx}`} size='sm'>
-                      {label?.name || 'Unknown'}
+                      {label?.name || t('filters:advanced.unknown')}
                     </Chip>
                   )
                 })}
@@ -365,7 +369,7 @@ const AdvancedFilterBuilder = ({
             onChange={(_, newValue) =>
               updateCondition(index, 'value', newValue)
             }
-            placeholder='Select projects'
+            placeholder={t('filters:advanced.selectProjects')}
             sx={{ width: '100%' }}
             slotProps={{
               listbox: {
@@ -380,7 +384,7 @@ const AdvancedFilterBuilder = ({
                   if (value === 'default')
                     return (
                       <Chip key={`default-${idx}`} size='sm'>
-                        Default
+                        {t('filters:advanced.defaultProject')}
                       </Chip>
                     )
                   const project = projects.find(
@@ -388,14 +392,14 @@ const AdvancedFilterBuilder = ({
                   )
                   return (
                     <Chip key={`project-chip-${value}-${idx}`} size='sm'>
-                      {project?.name || 'Unknown'}
+                      {project?.name || t('filters:advanced.unknown')}
                     </Chip>
                   )
                 })}
               </Box>
             )}
           >
-            <Option value='default'>Default Project</Option>
+            <Option value='default'>{t('filters:advanced.defaultProject')}</Option>
             {projects
               .filter(p => p.id !== 'default')
               .map((project, idx) => (
@@ -417,7 +421,7 @@ const AdvancedFilterBuilder = ({
             onChange={(_, newValue) =>
               updateCondition(index, 'value', newValue)
             }
-            placeholder='Select statuses'
+            placeholder={t('filters:advanced.selectStatuses')}
             sx={{ width: '100%' }}
             slotProps={{
               listbox: {
@@ -430,24 +434,24 @@ const AdvancedFilterBuilder = ({
                 {selected.map((selectedElement, idx) => {
                   const value = selectedElement.value
                   const statusLabels = {
-                    0: 'Active',
-                    1: 'Started',
-                    2: 'In Progress',
-                    3: 'Pending Approval',
+                    0: t('filters:advanced.active'),
+                    1: t('filters:advanced.started'),
+                    2: t('filters:advanced.inProgress'),
+                    3: t('filters:advanced.pendingApproval'),
                   }
                   return (
                     <Chip key={`status-chip-${value}-${idx}`} size='sm'>
-                      {statusLabels[value] || 'Unknown'}
+                      {statusLabels[value] || t('filters:advanced.unknown')}
                     </Chip>
                   )
                 })}
               </Box>
             )}
           >
-            <Option value={0}>Active</Option>
-            <Option value={1}>Started</Option>
-            <Option value={2}>In Progress</Option>
-            <Option value={3}>Pending Approval</Option>
+            <Option value={0}>{t('filters:advanced.active')}</Option>
+            <Option value={1}>{t('filters:advanced.started')}</Option>
+            <Option value={2}>{t('filters:advanced.inProgress')}</Option>
+            <Option value={3}>{t('filters:advanced.pendingApproval')}</Option>
           </Select>
         )
 
@@ -466,13 +470,13 @@ const AdvancedFilterBuilder = ({
               },
             }}
           >
-            <Option value='isOverdue'>Is Overdue</Option>
-            <Option value='isDueToday'>Is Due Today</Option>
-            <Option value='isDueTomorrow'>Is Due Tomorrow</Option>
-            <Option value='isDueThisWeek'>Is Due This Week</Option>
-            <Option value='isDueThisMonth'>Is Due This Month</Option>
-            <Option value='hasNoDueDate'>Has No Due Date</Option>
-            <Option value='hasDueDate'>Has Due Date</Option>
+            <Option value='isOverdue'>{t('filters:advanced.isOverdue')}</Option>
+            <Option value='isDueToday'>{t('filters:advanced.isDueToday')}</Option>
+            <Option value='isDueTomorrow'>{t('filters:advanced.isDueTomorrow')}</Option>
+            <Option value='isDueThisWeek'>{t('filters:advanced.isDueThisWeek')}</Option>
+            <Option value='isDueThisMonth'>{t('filters:advanced.isDueThisMonth')}</Option>
+            <Option value='hasNoDueDate'>{t('filters:advanced.hasNoDueDate')}</Option>
+            <Option value='hasDueDate'>{t('filters:advanced.hasDueDate')}</Option>
           </Select>
         )
 
@@ -492,11 +496,15 @@ const AdvancedFilterBuilder = ({
                 },
               }}
             >
-              <Option value='equals'>Equals</Option>
-              <Option value='greaterThan'>Greater Than</Option>
-              <Option value='lessThan'>Less Than</Option>
-              <Option value='greaterThanOrEqual'>Greater Than or Equal</Option>
-              <Option value='lessThanOrEqual'>Less Than or Equal</Option>
+              <Option value='equals'>{t('filters:advanced.equals')}</Option>
+              <Option value='greaterThan'>{t('filters:advanced.greaterThan')}</Option>
+              <Option value='lessThan'>{t('filters:advanced.lessThan')}</Option>
+              <Option value='greaterThanOrEqual'>
+                {t('filters:advanced.greaterThanOrEqual')}
+              </Option>
+              <Option value='lessThanOrEqual'>
+                {t('filters:advanced.lessThanOrEqual')}
+              </Option>
             </Select>
             <Input
               type='number'
@@ -525,14 +533,18 @@ const AdvancedFilterBuilder = ({
       onClose={onClose}
       size='lg'
       fullWidth={true}
-      title={editingFilter ? 'Edit Filter' : 'Create Advanced Filter'}
+      title={
+        editingFilter
+          ? t('filters:advanced.editTitle')
+          : t('filters:advanced.createTitle')
+      }
       footer={
         <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
           <Button variant='outlined' color='neutral' onClick={onClose}>
-            Cancel
+            {t('common:actions.cancel')}
           </Button>
           <Button variant='solid' color='primary' onClick={handleSave}>
-            Save
+            {t('common:actions.save')}
           </Button>
         </Box>
       }
@@ -547,10 +559,10 @@ const AdvancedFilterBuilder = ({
       >
         <Box>
           <Typography level='body-sm' sx={{ mb: 1 }}>
-            Filter Name
+            {t('filters:advanced.filterName')}
           </Typography>
           <Input
-            placeholder='e.g. Important Tasks due soon, Tasks for John, etc.'
+            placeholder={t('filters:advanced.filterNamePlaceholder')}
             value={filterName}
             onChange={e => {
               setFilterName(e.target.value)
@@ -568,10 +580,10 @@ const AdvancedFilterBuilder = ({
 
         <Box>
           <Typography level='body-sm' sx={{ mb: 1 }}>
-            Description (Optional)
+            {t('filters:advanced.descriptionOptional')}
           </Typography>
           <Textarea
-            placeholder='Optional description for this filter...'
+            placeholder={t('filters:advanced.descriptionPlaceholder')}
             value={filterDescription}
             onChange={e => setFilterDescription(e.target.value)}
             minRows={2}
@@ -581,7 +593,7 @@ const AdvancedFilterBuilder = ({
 
         <Box>
           <Typography level='body-sm' sx={{ mb: 1 }}>
-            Color
+            {t('common:labels.color')}
           </Typography>
           <Select
             value={filterColor}
@@ -636,7 +648,7 @@ const AdvancedFilterBuilder = ({
           }}
         >
           <Typography level='body-sm' sx={{ mb: 1 }}>
-            Filter Conditions (All must match)
+            {t('filters:advanced.conditions')}
           </Typography>
 
           <List
@@ -673,7 +685,9 @@ const AdvancedFilterBuilder = ({
                   }}
                 >
                   <Typography level='body-xs' color='neutral'>
-                    Condition {index + 1}
+                    {t('filters:advanced.conditionNumber', {
+                      index: index + 1,
+                    })}
                   </Typography>
                   <IconButton
                     size='sm'
@@ -688,7 +702,7 @@ const AdvancedFilterBuilder = ({
 
                 <Box sx={{ width: '100%' }}>
                   <Typography level='body-xs' sx={{ mb: 0.5 }}>
-                    Field
+                    {t('common:labels.field')}
                   </Typography>
                   <Select
                     value={condition.type}
@@ -703,22 +717,22 @@ const AdvancedFilterBuilder = ({
                       },
                     }}
                   >
-                    <Option value='assignee'>Assignee</Option>
-                    <Option value='createdBy'>Created By</Option>
-                    <Option value='priority'>Priority</Option>
-                    <Option value='label'>Label</Option>
-                    <Option value='project'>Project</Option>
-                    <Option value='status'>Status</Option>
-                    <Option value='dueDate'>Due Date</Option>
-                    <Option value='points'>Points</Option>
+                    <Option value='assignee'>{t('filters:advanced.assignee')}</Option>
+                    <Option value='createdBy'>{t('filters:advanced.createdBy')}</Option>
+                    <Option value='priority'>{t('common:labels.priority')}</Option>
+                    <Option value='label'>{t('filters:advanced.label')}</Option>
+                    <Option value='project'>{t('common:labels.project')}</Option>
+                    <Option value='status'>{t('filters:advanced.status')}</Option>
+                    <Option value='dueDate'>{t('common:labels.dueDate')}</Option>
+                    <Option value='points'>{t('filters:advanced.points')}</Option>
                   </Select>
                 </Box>
 
                 <Box sx={{ width: '100%' }}>
                   <Typography level='body-xs' sx={{ mb: 0.5 }}>
                     {condition.type === 'dueDate' || condition.type === 'points'
-                      ? 'Condition'
-                      : 'Value'}
+                      ? t('common:labels.condition')
+                      : t('common:labels.value')}
                   </Typography>
                   {renderValueSelector(condition, index)}
                 </Box>
@@ -733,7 +747,7 @@ const AdvancedFilterBuilder = ({
             onClick={addCondition}
             sx={{ mt: 1 }}
           >
-            Add Condition
+            {t('filters:advanced.addCondition')}
           </Button>
         </Box>
 
@@ -746,14 +760,14 @@ const AdvancedFilterBuilder = ({
               mb: 1,
             }}
           >
-            <Typography level='body-sm'>Preview</Typography>
+            <Typography level='body-sm'>{t('filters:advanced.preview')}</Typography>
             <Box sx={{ display: 'flex', gap: 1 }}>
               <Chip size='sm' variant='soft' color='neutral'>
-                {previewCount} tasks
+                {previewCount} {t('common:labels.tasks').toLowerCase()}
               </Chip>
               {previewOverdueCount > 0 && (
                 <Chip size='sm' variant='solid' color='danger'>
-                  {previewOverdueCount} overdue
+                  {previewOverdueCount} {t('common:labels.overdue')}
                 </Chip>
               )}
             </Box>
@@ -776,7 +790,7 @@ const AdvancedFilterBuilder = ({
                 color='neutral'
                 sx={{ textAlign: 'center', py: 2 }}
               >
-                No tasks match these filters
+                {t('filters:advanced.noMatches')}
               </Typography>
             ) : (
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -798,7 +812,9 @@ const AdvancedFilterBuilder = ({
                     color='neutral'
                     sx={{ textAlign: 'center', mt: 0.5 }}
                   >
-                    ...and {previewCount - 3} more
+                    {t('filters:advanced.andMore', {
+                      count: previewCount - 3,
+                    })}
                   </Typography>
                 )}
               </Box>

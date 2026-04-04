@@ -19,6 +19,7 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
 import {
@@ -51,16 +52,17 @@ const FilterCardContent = ({
   taskCount = 0,
   overdueCount = 0,
   onToggleActions,
+  t,
 }) => {
   // Get condition labels for display
   const getConditionSummary = () => {
     if (!filter.conditions || filter.conditions.length === 0) {
-      return 'No conditions'
+      return t('filters:view.noConditions')
     }
     if (filter.conditions.length === 1) {
-      return '1 condition'
+      return t('filters:view.oneCondition')
     }
-    return `${filter.conditions.length} conditions`
+    return t('filters:view.manyConditions', { count: filter.conditions.length })
   }
 
   return (
@@ -174,7 +176,7 @@ const FilterCardContent = ({
               color: overdueCount > 0 ? 'danger.500' : 'primary.500',
             }}
           >
-            {taskCount} tasks
+            {t('filters:view.tasksCount', { count: taskCount })}
           </Chip>
 
           {overdueCount > 0 && (
@@ -188,7 +190,7 @@ const FilterCardContent = ({
                 px: 0.75,
               }}
             >
-              {overdueCount} overdue
+              {t('filters:view.overdueCount', { count: overdueCount })}
             </Chip>
           )}
 
@@ -219,7 +221,7 @@ const FilterCardContent = ({
                 color: 'success.600',
               }}
             >
-              Used {filter.usageCount}x
+              {t('filters:view.usedCount', { count: filter.usageCount })}
             </Chip>
           )}
         </Box>
@@ -244,6 +246,7 @@ const FilterCardContent = ({
 }
 
 const FilterView = () => {
+  const { t } = useTranslation(['filters', 'common'])
   const navigate = useNavigate()
   const { data: userProfile } = useUserProfile()
   const { data: chores = { res: [] } } = useChores(false)
@@ -329,11 +332,11 @@ const FilterView = () => {
     const filter = savedFilters.find(f => f.id === id)
     setConfirmationModel({
       isOpen: true,
-      title: 'Delete Filter',
-      message: `Are you sure you want to delete "${filter?.name}"? This cannot be undone.`,
-      confirmText: 'Delete',
+      title: t('filters:view.deleteTitle'),
+      message: t('filters:view.deleteMessage', { name: filter?.name }),
+      confirmText: t('common:actions.delete'),
       color: 'danger',
-      cancelText: 'Cancel',
+      cancelText: t('common:actions.cancel'),
       onClose: confirmed => {
         if (confirmed === true) {
           handleDeleteFilter(id)
@@ -402,11 +405,10 @@ const FilterView = () => {
             level='h3'
             sx={{ fontWeight: 'lg', color: 'text.primary' }}
           >
-            Filters
+            {t('filters:view.title')}
           </Typography>
           <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            Save your favorite filter combinations for quick access. Create
-            custom views to organize and find tasks faster.
+            {t('filters:view.description')}
           </Typography>
         </Stack>
       </Box>
@@ -434,10 +436,10 @@ const FilterView = () => {
               level='title-lg'
               sx={{ mb: 1, color: 'text.secondary' }}
             >
-              No saved filters yet
+              {t('filters:view.emptyTitle')}
             </Typography>
             <Typography level='body-sm' sx={{ color: 'text.tertiary', mb: 2 }}>
-              Create custom filters to quickly access your most used chore
+              {t('filters:view.emptyDescription')}
             </Typography>
           </Box>
         ) : (
@@ -483,6 +485,9 @@ const FilterView = () => {
                             )}
                             <Typography level='body-xs' sx={{ mt: 0.5 }}>
                               {filter.isPinned ? 'Unpin' : 'Pin'}
+                              {filter.isPinned
+                                ? t('filters:view.unpin')
+                                : t('filters:view.pin')}
                             </Typography>
                           </Box>
                         </SwipeAction>
@@ -501,7 +506,7 @@ const FilterView = () => {
                           >
                             <EditIcon sx={{ fontSize: 20 }} />
                             <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                              Edit
+                              {t('common:actions.edit')}
                             </Typography>
                           </Box>
                         </SwipeAction>
@@ -526,7 +531,7 @@ const FilterView = () => {
                               sx={{ mt: 0.5 }}
                               color='danger'
                             >
-                              Delete
+                              {t('common:actions.delete')}
                             </Typography>
                           </Box>
                         </SwipeAction>
@@ -535,6 +540,7 @@ const FilterView = () => {
                   }
                 >
                   <FilterCardContent
+                    t={t}
                     onToggleActions={() => {
                       console.log(
                         'Toggling actions for filter:',

@@ -4,8 +4,10 @@ import Card from '@mui/joy/Card'
 import CardContent from '@mui/joy/CardContent'
 import Typography from '@mui/joy/Typography'
 import * as React from 'react'
+import { useTranslation } from 'react-i18next'
 
 function InfoCard() {
+  const { t } = useTranslation('history')
   return (
     <Card sx={{ minWidth: 200, maxWidth: 200 }}>
       <CardContent>
@@ -16,8 +18,8 @@ function InfoCard() {
             }}
           />
         </Box>
-        <Typography level='title-md'>You've completed</Typography>
-        <Typography level='body-sm'>12345 Chores</Typography>
+        <Typography level='title-md'>{t('info.completedTitle')}</Typography>
+        <Typography level='body-sm'>{t('info.completedValue')}</Typography>
       </CardContent>
     </Card>
   )

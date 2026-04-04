@@ -22,6 +22,7 @@ import {
 } from '@mui/joy'
 import Fuse from 'fuse.js'
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
@@ -37,6 +38,7 @@ import CompactChoreCard from './CompactChoreCard'
 import MultiSelectHelp from './MultiSelectHelp'
 
 const ArchivedTasks = () => {
+  const { t } = useTranslation(['chores', 'common'])
   const { data: userProfile, isLoading: isUserProfileLoading } =
     useUserProfile()
   const { showSuccess, showError } = useNotification()
@@ -78,8 +80,8 @@ const ArchivedTasks = () => {
           setFilteredChores(sortedChores)
         } catch (error) {
           showError({
-            title: 'Failed to load archived tasks',
-            message: 'Please try again later.',
+            title: t('chores:main.archivedLoadFailed'),
+            message: t('chores:main.tryAgainLater'),
           })
         } finally {
           setIsLoading(false)
@@ -238,7 +240,7 @@ const ArchivedTasks = () => {
 
       showSuccess({
         title: 'Task Restored',
-        message: 'The task has been restored and is now active.',
+        message: t('chores:main.archivedRestoreMessage'),
       })
     }
   }
@@ -255,7 +257,7 @@ const ArchivedTasks = () => {
 
     showSuccess({
       title: 'Task Deleted',
-      message: 'The archived task has been permanently deleted.',
+      message: t('chores:main.archivedDeleteMessage'),
     })
   }
 
@@ -340,8 +342,10 @@ const ArchivedTasks = () => {
 
             if (restoredTasks.length > 0) {
               showSuccess({
-                title: '📤 Tasks Restored',
-                message: `Successfully restored ${restoredTasks.length} task${restoredTasks.length > 1 ? 's' : ''}.`,
+                title: t('chores:main.restoredTasksTitle'),
+                message: t('chores:main.restoredTasks', {
+                  count: restoredTasks.length,
+                }),
               })
 
               // Remove restored tasks from archived list
@@ -358,16 +362,18 @@ const ArchivedTasks = () => {
 
             if (failedTasks.length > 0) {
               showError({
-                title: 'Some Tasks Failed',
-                message: `${failedTasks.length} task${failedTasks.length > 1 ? 's' : ''} could not be restored.`,
+                title: t('chores:actionFeedback.bulk.someFailedTitle'),
+                message: t('chores:main.restoredFailed', {
+                  count: failedTasks.length,
+                }),
               })
             }
 
             clearSelection()
           } catch (error) {
             showError({
-              title: 'Bulk Restore Failed',
-              message: 'An unexpected error occurred. Please try again.',
+              title: t('chores:main.bulkRestoreFailed'),
+              message: t('chores:main.unexpectedError'),
             })
           }
         }
@@ -382,10 +388,12 @@ const ArchivedTasks = () => {
 
     setConfirmModelConfig({
       isOpen: true,
-      title: 'Delete Archived Tasks',
-      confirmText: 'Delete',
-      cancelText: 'Cancel',
-      message: `Permanently delete ${selectedData.length} archived task${selectedData.length > 1 ? 's' : ''}?\n\nThis action cannot be undone.`,
+      title: t('chores:main.deleteArchivedTitle'),
+      confirmText: t('common:actions.delete'),
+      cancelText: t('common:actions.cancel'),
+      message: t('chores:main.deleteArchivedConfirm', {
+        count: selectedData.length,
+      }),
       onClose: async isConfirmed => {
         if (isConfirmed === true) {
           try {
@@ -403,8 +411,10 @@ const ArchivedTasks = () => {
 
             if (deletedTasks.length > 0) {
               showSuccess({
-                title: '🗑️ Tasks Deleted',
-                message: `Successfully deleted ${deletedTasks.length} task${deletedTasks.length > 1 ? 's' : ''}.`,
+                title: t('chores:actionFeedback.bulk.deleteSuccessTitle'),
+                message: t('chores:actionFeedback.bulk.deleteSuccess', {
+                  count: deletedTasks.length,
+                }),
               })
 
               const deletedIds = new Set(deletedTasks.map(c => c.id))
@@ -420,16 +430,18 @@ const ArchivedTasks = () => {
 
             if (failedTasks.length > 0) {
               showError({
-                title: 'Some Tasks Failed',
-                message: `${failedTasks.length} task${failedTasks.length > 1 ? 's' : ''} could not be deleted.`,
+                title: t('chores:actionFeedback.bulk.someFailedTitle'),
+                message: t('chores:actionFeedback.bulk.deleteFailed', {
+                  count: failedTasks.length,
+                }),
               })
             }
 
             clearSelection()
           } catch (error) {
             showError({
-              title: 'Bulk Delete Failed',
-              message: 'An unexpected error occurred. Please try again.',
+              title: t('chores:actionFeedback.bulk.deleteUnexpectedTitle'),
+              message: t('chores:main.unexpectedError'),
             })
           }
         }
@@ -471,10 +483,10 @@ const ArchivedTasks = () => {
             level='h3'
             sx={{ fontWeight: 'lg', color: 'text.primary' }}
           >
-            Archived Tasks
+            {t('chores:main.archivedTitle')}
           </Typography>
           <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            View and manage tasks that have been archived or completed.
+            {t('chores:main.archivedDescription')}
           </Typography>
         </Stack>
       </Box>
@@ -519,7 +531,7 @@ const ArchivedTasks = () => {
       >
         <Input
           slotProps={{ input: { ref: searchInputRef } }}
-          placeholder='Search archived tasks'
+          placeholder={t('chores:main.archivedSearch')}
           value={searchTerm}
           fullWidth
           sx={{
@@ -565,8 +577,8 @@ const ArchivedTasks = () => {
           onClick={toggleViewMode}
           title={
             viewMode === 'default'
-              ? 'Switch to Compact View'
-              : 'Switch to Card View'
+              ? t('chores:main.viewCompact')
+              : t('chores:main.viewCard')
           }
         >
           {viewMode === 'default' ? <ViewAgenda /> : <ViewModule />}
@@ -586,8 +598,8 @@ const ArchivedTasks = () => {
             onClick={toggleMultiSelectMode}
             title={
               isMultiSelectMode
-                ? 'Exit Multi-select Mode (Ctrl+S)'
-                : 'Enable Multi-select Mode (Ctrl+S)'
+                ? t('chores:main.exitMultiSelect')
+                : t('chores:main.enableMultiSelect')
             }
           >
             {isMultiSelectMode ? <CheckBox /> : <CheckBoxOutlineBlank />}
@@ -683,9 +695,9 @@ const ArchivedTasks = () => {
                     '--Button-paddingInline': '0.75rem',
                     position: 'relative',
                   }}
-                  title='Select all visible tasks (Ctrl+A)'
+                  title={t('chores:main.shortcuts.selectAllVisible')}
                 >
-                  All
+                  {t('chores:main.all')}
                   {showKeyboardShortcuts && (
                     <KeyboardShortcutHint
                       shortcut='A'
@@ -714,9 +726,15 @@ const ArchivedTasks = () => {
                     '--Button-paddingInline': '0.75rem',
                     position: 'relative',
                   }}
-                  title={`${selectedChores.size === 0 ? 'Close' : 'Clear'} multi-select (Esc)`}
+                  title={
+                    selectedChores.size === 0
+                      ? t('chores:main.shortcuts.closeMultiSelect')
+                      : t('chores:main.shortcuts.clearMultiSelect')
+                  }
                 >
-                  {selectedChores.size === 0 ? 'Close' : 'Clear'}
+                  {selectedChores.size === 0
+                    ? t('common:actions.close')
+                    : t('chores:main.clear')}
                   {showKeyboardShortcuts && (
                     <KeyboardShortcutHint
                       withCtrl={false}
@@ -760,9 +778,9 @@ const ArchivedTasks = () => {
                   '--Button-paddingInline': { xs: '0.75rem', sm: '1rem' },
                   position: 'relative',
                 }}
-                title='Restore selected tasks (R)'
+                title={t('chores:main.shortcuts.restoreSelected')}
               >
-                Restore
+                {t('chores:main.restore')}
                 {showKeyboardShortcuts && selectedChores.size > 0 && (
                   <KeyboardShortcutHint
                     shortcut='R'
@@ -787,9 +805,9 @@ const ArchivedTasks = () => {
                   '--Button-paddingInline': { xs: '0.75rem', sm: '1rem' },
                   position: 'relative',
                 }}
-                title='Delete selected tasks (E)'
+                title={t('chores:main.shortcuts.deleteSelected')}
               >
-                Delete
+                {t('common:actions.delete')}
                 {showKeyboardShortcuts && selectedChores.size > 0 && (
                   <KeyboardShortcutHint
                     shortcut='E'
@@ -826,12 +844,14 @@ const ArchivedTasks = () => {
             }}
           />
           <Typography level='title-md' gutterBottom>
-            {searchTerm ? 'No archived tasks found' : 'No archived tasks'}
+            {searchTerm
+              ? t('chores:main.noArchivedFound')
+              : t('chores:main.noArchived')}
           </Typography>
           <Typography level='body-sm' color='text.secondary' sx={{ mb: 2 }}>
             {searchTerm
-              ? 'Try adjusting your search terms'
-              : 'Archived tasks will appear here when you archive them from the main task list'}
+              ? t('chores:main.adjustSearch')
+              : t('chores:main.archivedWillAppear')}
           </Typography>
           {searchTerm && (
             <Button
@@ -839,16 +859,15 @@ const ArchivedTasks = () => {
               variant='outlined'
               color='neutral'
             >
-              Clear search
+              {t('chores:main.clearSearch')}
             </Button>
           )}
         </Box>
       ) : (
         <Box>
           <Typography level='body-sm' color='text.secondary' sx={{ mb: 2 }}>
-            {filteredChores.length} archived task
-            {filteredChores.length !== 1 ? 's' : ''}
-            {searchTerm && ` matching "${searchTerm}"`}
+            {t('chores:main.archivedCount', { count: filteredChores.length })}
+            {searchTerm && t('chores:main.matchingSearch', { term: searchTerm })}
           </Typography>
 
           <List sx={{ gap: viewMode === 'compact' ? 0 : 1 }}>

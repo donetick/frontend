@@ -395,6 +395,7 @@ const USER_FILTER = (history, userId) => {
 }
 
 const UserActivites = () => {
+  const { t } = useTranslation(['user', 'common'])
   const { data: userProfile } = useUserProfile()
 
   const [tabValue, setTabValue] = React.useState(7)
@@ -771,13 +772,13 @@ const UserActivites = () => {
   const chartData = {
     history: {
       data: historyPieChartData || [],
-      title: 'Status',
-      description: 'Completed tasks status',
+      title: t('user:activities.charts.statusTitle'),
+      description: t('user:activities.charts.statusDescription'),
     },
     due: {
       data: choreDuePieChartData || [],
-      title: 'Due Date',
-      description: 'Current tasks due date',
+      title: t('user:activities.charts.dueDateTitle'),
+      description: t('user:activities.charts.dueDateDescription'),
     },
     // assigned: {
     //   data: choresAssignedChartData,
@@ -786,28 +787,28 @@ const UserActivites = () => {
     // },
     priority: {
       data: choresPriorityChartData || [],
-      title: 'Priority',
-      description: 'Tasks by priority',
+      title: t('user:activities.charts.priorityTitle'),
+      description: t('user:activities.charts.priorityDescription'),
     },
     labels: {
       data: choresLabelsChartData || [],
-      title: 'Labels',
-      description: 'Tasks by labels',
+      title: t('user:activities.charts.labelsTitle'),
+      description: t('user:activities.charts.labelsDescription'),
     },
     labelsDuration: {
       data: choresLabelsDurationChartData || [],
-      title: 'Labels (time)',
-      description: 'Time spent by labels (hours)',
+      title: t('user:activities.charts.labelsTimeTitle'),
+      description: t('user:activities.charts.labelsTimeDescription'),
     },
     tasksTime: {
       data: tasksTimeChartData || [],
-      title: 'Tasks (time)',
-      description: 'Time spent by individual tasks (hours)',
+      title: t('user:activities.charts.tasksTimeTitle'),
+      description: t('user:activities.charts.tasksTimeDescription'),
     },
     assigneeBreakdown: {
       data: choresAssigneeBreakdownChartData || [],
-      title: 'by Assignee',
-      description: 'Tasks grouped by assignee',
+      title: t('user:activities.byAssignee'),
+      description: t('user:activities.tasksGroupedByAssignee'),
     },
   }
   if (!userProfile) {
@@ -829,10 +830,10 @@ const UserActivites = () => {
             level='h3'
             sx={{ fontWeight: 'lg', color: 'text.primary' }}
           >
-            User Activities
+            {t('user:activities.title')}
           </Typography>
           <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            Overview of user activities and task statistics
+            {t('user:activities.subtitle')}
           </Typography>
         </Stack>
       </Box>
@@ -852,7 +853,7 @@ const UserActivites = () => {
       >
         <Stack spacing={2}>
           <Typography level='title-sm' sx={{ color: 'text.secondary' }}>
-            Filter Activities
+            {t('user:activities.filterTitle')}
           </Typography>
 
           <Stack
@@ -863,7 +864,7 @@ const UserActivites = () => {
             {/* User Filter */}
             <Box sx={{ flex: 1, minWidth: 200 }}>
               <Typography level='body-sm' sx={{ mb: 1, fontWeight: 500 }}>
-                Show activities for:
+                {t('user:activities.showFor')}
               </Typography>
               <Select
                 sx={{
@@ -887,7 +888,7 @@ const UserActivites = () => {
                           </Avatar>
                         }
                       >
-                        All Users
+                        {t('user:activities.allUsers')}
                       </Typography>
                     )
                   }
@@ -925,7 +926,7 @@ const UserActivites = () => {
                       </Avatar>
                     }
                   >
-                    All Users
+                    {t('user:activities.allUsers')}
                   </Typography>
                 </Option>
                 {circleUsers.map(user => (
@@ -954,7 +955,7 @@ const UserActivites = () => {
             {/* Time Period Filter */}
             <Box sx={{ flex: 1, minWidth: 200 }}>
               <Typography level='body-sm' sx={{ mb: 1, fontWeight: 500 }}>
-                Time period:
+                {t('user:activities.timePeriod')}
               </Typography>
               <Tabs
                 onChange={(e, tabValue) => {
@@ -979,10 +980,10 @@ const UserActivites = () => {
                   }}
                 >
                   {[
-                    { label: '7 Days', value: 7 },
-                    { label: '30 Days', value: 30 },
-                    { label: '90 Days', value: 90 },
-                    { label: 'All Time', value: 365 },
+                    { label: t('user:activities.days7'), value: 7 },
+                    { label: t('user:activities.days30'), value: 30 },
+                    { label: t('user:activities.days90'), value: 90 },
+                    { label: t('user:activities.allTime'), value: 365 },
                   ].map((tab, index) => (
                     <Tab
                       key={index}
@@ -1019,23 +1020,17 @@ const UserActivites = () => {
       {/* Current Filter Summary */}
       <Box sx={{ mb: 3, textAlign: 'center' }}>
         <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-          Showing activities for{' '}
-          <Typography
-            component='span'
-            sx={{ fontWeight: 600, color: 'primary.500' }}
-          >
-            {selectedUser === undefined || selectedUser === 'all'
-              ? 'All Users'
-              : circleUsers.find(user => user.userId === selectedUser)
-                  ?.displayName || 'Unknown User'}
-          </Typography>{' '}
-          over the{' '}
-          <Typography
-            component='span'
-            sx={{ fontWeight: 600, color: 'primary.500' }}
-          >
-            {tabValue === 365 ? 'All Time' : `Last ${tabValue} Days`}
-          </Typography>
+          {t('user:activities.showingFor', {
+            user:
+              selectedUser === undefined || selectedUser === 'all'
+                ? t('user:activities.allUsers')
+                : circleUsers.find(user => user.userId === selectedUser)
+                    ?.displayName || t('user:activities.unknownUser'),
+            period:
+              tabValue === 365
+                ? t('user:activities.allTime')
+                : t(`user:activities.days${tabValue}`),
+          })}
         </Typography>
       </Box>
 
@@ -1060,33 +1055,26 @@ const UserActivites = () => {
           />
 
           <Typography level='h3' gutterBottom>
-            No activities found
+            {t('user:activities.noActivitiesTitle')}
           </Typography>
           <Typography level='body1' sx={{ mb: 1 }}>
-            No activities found for{' '}
-            <Typography
-              component='span'
-              sx={{ fontWeight: 600, color: 'primary.500' }}
-            >
-              {selectedUser === undefined || selectedUser === 'all'
-                ? 'All Users'
-                : circleUsers.find(user => user.userId === selectedUser)
-                    ?.displayName || 'Unknown User'}
-            </Typography>{' '}
-            in the{' '}
-            <Typography
-              component='span'
-              sx={{ fontWeight: 600, color: 'primary.500' }}
-            >
-              {tabValue === 365 ? 'All Time' : `Last ${tabValue} Days`}
-            </Typography>
-            .
+            {t('user:activities.noActivitiesDescription', {
+              user:
+                selectedUser === undefined || selectedUser === 'all'
+                  ? t('user:activities.allUsers')
+                  : circleUsers.find(user => user.userId === selectedUser)
+                      ?.displayName || t('user:activities.unknownUser'),
+              period:
+                tabValue === 365
+                  ? t('user:activities.allTime')
+                  : t(`user:activities.days${tabValue}`),
+            })}
           </Typography>
           <Typography level='body-sm' sx={{ color: 'text.secondary', mb: 2 }}>
-            Try selecting a different time period or user filter above.
+            {t('user:activities.noActivitiesHelp')}
           </Typography>
           <Button variant='soft' sx={{ mt: 2 }}>
-            <Link to='/chores'>Go back to chores</Link>
+            <Link to='/chores'>{t('user:activities.backToChores')}</Link>
           </Button>
         </Container>
       ) : (
