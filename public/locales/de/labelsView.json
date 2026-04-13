@@ -1,0 +1,9 @@
+{
+  "title": "Labels",
+  "description": "Verwalte deine Labels und organisiere deine Aufgaben effektiv. Labels werden automatisch mit deinem Kreis geteilt, wenn sie in einer geteilten Aufgabe verwendet werden.",
+  "shared": "Geteilt",
+  "deleteTitle": "Label löschen",
+  "deleteMessage": "Möchtest du dieses Label wirklich löschen? Es wird dann von allen Aufgaben entfernt.",
+  "loadFailed": "Labels konnten nicht geladen werden. Bitte versuche es erneut.",
+  "empty": "Keine Labels vorhanden. Füge ein neues Label hinzu, um zu starten."
+}

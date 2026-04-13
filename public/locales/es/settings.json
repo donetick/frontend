@@ -1,110 +1,61 @@
 {
-  "title": "Configuración",
-  "circleSettings": {
-    "title": "Configuración del círculo",
-    "description": "Tu cuenta se conecta automáticamente a un Círculo cuando creas o te unes a uno. Invita fácilmente a amigos compartiendo el código único del Círculo o el enlace a continuación.",
-    "circleCode": "Código del Círculo",
-    "copyCode": "Copiar Código",
-    "copyLink": "Copiar Enlace",
-    "codeCopied": "¡Código del círculo copiado!",
-    "linkCopied": "¡Enlace copiado!",
-    "joinCircle": "Unirse a un Círculo",
-    "joinCirclePlaceholder": "Ingresa el Código del Círculo",
-    "join": "Unirse",
-    "leave": "Salir del Círculo",
-    "leaveConfirmTitle": "Salir del Círculo",
-    "leaveConfirmMessage": "¿Estás seguro de que quieres salir de este círculo?",
-    "circleMembers": "Miembros del Círculo",
-    "circleMemberRequests": "Solicitudes de Miembros del Círculo",
-    "admin": "Administrador",
-    "member": "Miembro",
-    "pending": "Pendiente",
-    "accept": "Aceptar",
-    "reject": "Rechazar",
-    "makeAdmin": "Hacer Administrador",
-    "makeMember": "Hacer Miembro",
-    "remove": "Eliminar",
-    "webhookURL": "URL del Webhook",
-    "webhookDescription": "Ingresa una URL de webhook para recibir notificaciones de eventos del círculo",
-    "webhookPlaceholder": "https://tu-url-webhook.com"
-  },
-  "accountSettings": {
-    "title": "Configuración de la Cuenta",
-    "subscription": "Suscripción",
-    "subscriptionStatus": "Plan Actual",
-    "free": "Gratis",
-    "plus": "Plus",
-    "upgrade": "Actualizar",
-    "cancel": "Cancelar",
-    "changePassword": "Cambiar Contraseña",
-    "password": "Contraseña",
-    "dangerZone": "Zona de Peligro",
-    "dangerZoneDescription": "Una vez que elimines tu cuenta, no hay vuelta atrás. Por favor, está seguro.",
-    "deleteAccount": "Eliminar Cuenta"
-  },
-  "localization": {
-    "title": "Localización",
-    "description": "Personaliza el idioma, formato de fecha y preferencias regionales para tu cuenta.",
-    "language": "Idioma",
-    "languageDescription": "Selecciona tu idioma preferido",
-    "dateFormat": "Formato de Fecha",
-    "dateFormatDescription": "Elige cómo se deben mostrar las fechas en toda la aplicación",
-    "timeFormat": "Formato de Hora",
-    "timeFormatDescription": "Selecciona formato de 12 o 24 horas",
-    "12hour": "12 horas (AM/PM)",
-    "24hour": "24 horas",
-    "firstDayOfWeek": "Primer Día de la Semana",
-    "firstDayOfWeekDescription": "Selecciona qué día comienza tu semana",
-    "sunday": "Domingo",
-    "monday": "Lunes",
-    "saturday": "Sábado",
-    "formats": {
-      "mdy": "MM/DD/AAAA (EE.UU.)",
-      "dmy": "DD/MM/AAAA (Europa)",
-      "ymd": "AAAA-MM-DD (ISO)",
-      "long": "Formato largo (ej., 1 de enero de 2024)",
-      "short": "Formato corto (ej., 1 ene 2024)"
-    }
-  },
-  "sidepanel": {
-    "title": "Personalización del Panel Lateral",
-    "description": "Personaliza el diseño y la visibilidad de las tarjetas en el panel lateral. Esta sección solo está disponible en dispositivos de pantalla grande como tabletas y computadoras de escritorio."
-  },
-  "theme": {
-    "title": "Preferencias de tema",
-    "description": "Elige cómo se ve el sitio para ti. Selecciona un solo tema o sincronízalo con tu sistema y cambia automáticamente entre temas de día y noche.",
-    "themeMode": "Modo de tema",
-    "light": "Claro",
-    "dark": "Oscuro",
-    "system": "Sistema"
-  },
-  "notifications": {
-    "settingsSaved": "Configuración guardada con éxito",
-    "settingsSaveFailed": "Error al guardar la configuración",
-    "invalidWebhook": "URL de webhook no válida"
-  },
-  "profile": {
-    "title": "Configuración del Perfil",
-    "description": "Actualiza tu nombre para mostrar y foto de perfil.",
-    "photoUpdated": "Foto Actualizada",
-    "photoUpdatedMessage": "¡Tu foto de perfil ha sido actualizada con éxito!",
-    "uploadFailed": "Error al Subir",
-    "uploadFailedMessage": "Error al subir tu foto. Por favor, inténtalo de nuevo.",
-    "profileUpdated": "Perfil Actualizado",
-    "profileUpdatedMessage": "¡Tu información de perfil ha sido guardada con éxito!",
-    "updateFailed": "Error al Actualizar",
-    "updateFailedMessage": "No se pudo actualizar tu perfil. Por favor, verifica tu conexión e inténtalo de nuevo.",
-    "changePhoto": "Cambiar Foto",
-    "displayName": "Nombre para Mostrar",
-    "displayNamePlaceholder": "Ingresa tu nombre para mostrar",
-    "timezone": "Zona Horaria",
-    "timezonePlaceholder": "Selecciona tu zona horaria",
-    "save": "Guardar",
-    "cancel": "Cancelar"
-  },
   "overview": {
     "title": "Configuración",
     "subtitle": "Personaliza tu experiencia y administra las preferencias de tu cuenta",
+    "cards": {
+      "profile": {
+        "title": "Configuración del perfil",
+        "description": "Actualiza la información de tu perfil, la foto, el nombre visible y las preferencias de zona horaria."
+      },
+      "circle": {
+        "title": "Configuración del círculo",
+        "description": "Gestiona tu círculo, invita a miembros y gestiona las solicitudes para unirse."
+      },
+      "account": {
+        "title": "Configuración de la cuenta",
+        "description": "Gestiona tu suscripción, cambia la contraseña y las opciones de eliminación de la cuenta."
+      },
+      "subaccounts": {
+        "title": "Cuentas gestionadas",
+        "description": "Crea y gestiona subcuentas para iniciar sesión y completar las tareas asignadas."
+      },
+      "notifications": {
+        "title": "notificaciones",
+        "description": "Configura notificaciones push, alertas por correo y destinos de notificación para tareas."
+      },
+      "mfa": {
+        "title": "Autenticación de dos factores",
+        "description": "Añade una capa extra de seguridad con MFA usando aplicaciones de autenticación."
+      },
+      "apitokens": {
+        "title": "Tokens de API",
+        "description": "Genera y gestiona tokens de acceso para integraciones de terceros y acceso a la API."
+      },
+      "storage": {
+        "title": "Configuración de almacenamiento",
+        "description": "Haz copias de seguridad y restaura tus datos, gestiona el almacenamiento local y las preferencias de sincronización."
+      },
+      "sidepanel": {
+        "title": "Personalización del panel lateral",
+        "description": "Personaliza el diseño y la visibilidad de las tarjetas en el panel lateral."
+      },
+      "theme": {
+        "title": "Preferencias del tema",
+        "description": "Elige tu tema preferido y configura el modo claro/oscuro."
+      },
+      "language": {
+        "title": "Idioma",
+        "description": "Elige el idioma usado en toda la aplicación en este dispositivo."
+      },
+      "advanced": {
+        "title": "Configuración avanzada",
+        "description": "Configura webhooks, actualizaciones en tiempo real y otras funciones avanzadas para mejorar la productividad."
+      },
+      "developer": {
+        "title": "Configuración de desarrollador",
+        "description": "Consulta información técnica sobre los tokens de autenticación, las conexiones SSE y los datos de depuración."
+      }
+    },
     "upgrade": {
       "title": "Actualizar a Plus",
       "description": "Desbloquea funciones potentes para mejorar tu productividad",
@@ -170,5 +121,595 @@
         "description": "Ver información técnica sobre tokens de autenticación, conexiones SSE y datos de depuración."
       }
     }
+  },
+  "pages": {
+    "profile": {
+      "title": "Configuración del perfil"
+    },
+    "circle": {
+      "title": "Configuración del círculo"
+    },
+    "account": {
+      "title": "Configuración de la cuenta"
+    },
+    "managedAccounts": {
+      "title": "Cuentas gestionadas"
+    },
+    "subAccountManagement": {
+      "title": "Gestión de subcuentas"
+    },
+    "notifications": {
+      "title": "Configuración de notificaciones"
+    },
+    "mfa": {
+      "title": "Autenticación de dos factores"
+    },
+    "apiTokens": {
+      "title": "Tokens de API"
+    },
+    "storage": {
+      "title": "Configuración de almacenamiento"
+    },
+    "sidepanel": {
+      "title": "Personalización del panel lateral"
+    },
+    "theme": {
+      "title": "Preferencias del tema"
+    },
+    "language": {
+      "title": "Idioma"
+    },
+    "advanced": {
+      "title": "Configuración avanzada"
+    },
+    "developer": {
+      "title": "Configuración de desarrollador"
+    }
+  },
+  "sidepanel": {
+    "heading": "Personalizar tarjetas del panel lateral",
+    "description": "Personaliza el diseño y la visibilidad de las tarjetas en el panel lateral. Esta sección solo está disponible en dispositivos de pantalla grande como tabletas y computadoras de escritorio.",
+    "reset": "Restablecer valores predeterminados",
+    "resetHelp": "Restaura el orden y la visibilidad recomendados de las tarjetas.",
+    "cards": {
+      "welcome": {
+        "title": "Selector de usuario",
+        "description": "Permite a administradores y gestores ver tareas como otros usuarios."
+      },
+      "smartInsights": {
+        "title": "Información inteligente",
+        "description": "Muestra acciones rápidas según tus tareas actuales."
+      },
+      "assignees": {
+        "title": "Tareas por asignado",
+        "description": "Agrupa las tareas por la persona a la que están asignadas."
+      },
+      "calendar": {
+        "title": "Vista de calendario",
+        "description": "Muestra las tareas en un diseño de calendario."
+      },
+      "activities": {
+        "title": "Actividades recientes",
+        "description": "Muestra finalizaciones recientes de tareas y otra actividad."
+      },
+      "weeklyGoals": {
+        "title": "Objetivos semanales",
+        "description": "Muestra el progreso semanal y las estadísticas de finalización de tu círculo."
+      }
+    },
+    "title": "Personalización del Panel Lateral"
+  },
+  "theme": {
+    "description": "Elige cómo se ve el sitio para ti. Selecciona un solo tema o sincronízalo con tu sistema y cambia automáticamente entre temas de día y noche.",
+    "modeLabel": "Modo de tema",
+    "light": "Claro",
+    "dark": "Oscuro",
+    "system": "Sistema",
+    "title": "Preferencias de tema",
+    "themeMode": "Modo de tema"
+  },
+  "profile": {
+    "description": "Actualiza tu nombre para mostrar y foto de perfil.",
+    "photoUpdatedTitle": "Foto actualizada",
+    "photoUpdatedMessage": "¡Tu foto de perfil ha sido actualizada con éxito!",
+    "uploadFailedTitle": "Error de subida",
+    "uploadFailedMessage": "Error al subir tu foto. Por favor, inténtalo de nuevo.",
+    "profileUpdatedTitle": "Perfil actualizado",
+    "profileUpdatedMessage": "¡Tu información de perfil ha sido guardada con éxito!",
+    "updateFailedTitle": "Error al actualizar",
+    "updateFailedMessage": "No se pudo actualizar tu perfil. Por favor, verifica tu conexión e inténtalo de nuevo.",
+    "title": "Configuración del Perfil",
+    "photoUpdated": "Foto Actualizada",
+    "uploadFailed": "Error al Subir",
+    "profileUpdated": "Perfil Actualizado",
+    "updateFailed": "Error al Actualizar",
+    "changePhoto": "Cambiar Foto",
+    "displayName": "Nombre para Mostrar",
+    "displayNamePlaceholder": "Ingresa tu nombre para mostrar",
+    "timezone": "Zona Horaria",
+    "timezonePlaceholder": "Selecciona tu zona horaria",
+    "save": "Guardar",
+    "cancel": "Cancelar"
+  },
+  "language": {
+    "title": "Idioma",
+    "description": "elige the language used throughout the app. This preference is saved on this device.",
+    "fieldLabel": "Idioma de la aplicación",
+    "options": {
+      "en": "Inglés",
+      "de": "Alemán",
+      "es": "Español",
+      "pt": "Portugués"
+    }
+  },
+  "childAccounts": {
+    "title": "Cuentas gestionadas",
+    "accessDeniedTitle": "Gestión de subcuentas",
+    "parentOnly": "Solo los usuarios principales pueden gestionar subcuentas.",
+    "description": "Gestiona subcuentas. Los usuarios de subcuentas pueden iniciar sesión y completar las tareas asignadas.",
+    "planWarning": "Las subcuentas están limitadas a 1 en el plan Gratis. Pásate a Plus para tener hasta 5 subcuentas.",
+    "sectionTitle": "Subcuentas ({{count}})",
+    "add": "Añadir subcuenta",
+    "loading": "Cargando subcuentas...",
+    "emptyTitle": "No hay subcuentas",
+    "emptyDescription": "Crea subcuentas para que los miembros del equipo puedan iniciar sesión y completar las tareas que se les asignen.",
+    "addFirst": "Añade tu primera subcuenta",
+    "username": "Nombre de usuario: {{username}}",
+    "created": "Creado: {{date}}",
+    "changePasswordTitle": "Cambiar contraseña",
+    "deleteAccountTitle": "Eliminar cuenta",
+    "howItWorksTitle": "Cómo funcionan las cuentas gestionadas",
+    "bulletOne": "Las cuentas gestionadas son creadas por el usuario principal y ese usuario puede eliminarlas o restablecer su contraseña.",
+    "bulletTwo": "Las subcuentas pueden iniciar sesión con su propio nombre de usuario y contraseña.",
+    "bulletThree": "Las cuentas gestionadas pueden completar tareas, pero tienen permisos administrativos limitados.",
+    "bulletFour": "Las cuentas gestionadas se añaden automáticamente a tu círculo.",
+    "createSuccess": "La subcuenta \"{{name}}\" se ha creado correctamente.",
+    "createFailed": "No se pudo crear la subcuenta: {{message}}",
+    "updatePasswordSuccess": "La contraseña de la subcuenta se actualizó correctamente",
+    "updatePasswordFailed": "No se pudo actualizar la contraseña: {{message}}",
+    "deleteConfirmTitle": "Eliminar subcuenta",
+    "deleteConfirmMessage": "¿Seguro que quieres eliminar la subcuenta \"{{name}}\"? Esta acción no se puede deshacer.",
+    "deleteSuccess": "La subcuenta \"{{name}}\" se ha eliminado correctamente",
+    "deleteFailed": "No se pudo eliminar la subcuenta: {{message}}"
+  },
+  "advanced": {
+    "title": "Configuración avanzada",
+    "loading": "Cargando...",
+    "description": "Configura funciones avanzadas como webhooks y actualizaciones en tiempo real para mejorar la productividad.",
+    "webhookTitle": "Webhook",
+    "webhookDescription": "Los webhooks te permiten enviar notificaciones en tiempo real a otros servicios cuando ocurren eventos en tu círculo. Configura una URL de webhook para recibir actualizaciones.",
+    "webhookPlanWarning": "Las notificaciones por webhook no están disponibles en el plan Básico. Pásate a Plus para recibir actualizaciones en tiempo real mediante webhooks.",
+    "enableWebhook": "Activar webhook",
+    "enableWebhookHelper": "Activa las notificaciones por webhook para actualizaciones de tareas y cosas.",
+    "webhookUrl": "URL del webhook",
+    "webhookSaved": "La URL del webhook se actualizó correctamente",
+    "webhookSaveFailed": "No se pudo actualizar la URL del webhook",
+    "realtimeTitle": "Actualizaciones en tiempo real",
+    "realtimeSummary": "Recibe notificaciones instantáneas cuando se actualicen las tareas",
+    "enableRealtime": "Activar actualizaciones en tiempo real",
+    "realtimeUnavailable": "Las actualizaciones en tiempo real no están disponibles en el plan Básico. Pásate a Plus para recibir notificaciones instantáneas cuando se actualicen las tareas.",
+    "realtimeDisabled": "Las actualizaciones en tiempo real están desactivadas. Actívalas para ver cambios en vivo cuando tú u otros miembros del círculo completen, omitan o modifiquen tareas.",
+    "realtimeConnected": "Las actualizaciones en tiempo real están funcionando. Verás cambios en vivo cuando tú u otros miembros del círculo completen, omitan o modifiquen tareas.",
+    "realtimeConnecting": "Conectando con actualizaciones en tiempo real...",
+    "realtimeError": "Las actualizaciones en tiempo real están activadas pero no funcionan: {{error}}",
+    "realtimeEnabledNotConnected": "Las actualizaciones en tiempo real están activadas, pero no conectadas actualmente.",
+    "sseTitle": "Actualizaciones en tiempo real (SSE)",
+    "sseSummary": "Recibe notificaciones instantáneas mediante eventos enviados por el servidor",
+    "enableSse": "Activar actualizaciones en tiempo real (SSE)",
+    "sseUnavailable": "Las actualizaciones en tiempo real (SSE) no están disponibles en el plan Básico. Pásate a Plus para recibir notificaciones instantáneas cuando se actualicen las tareas.",
+    "sseDisabled": "Las actualizaciones en tiempo real (SSE) están desactivadas. Actívalas para ver cambios en vivo cuando tú u otros miembros del círculo completen, omitan o modifiquen tareas.",
+    "sseConnected": "Las actualizaciones en tiempo real (SSE) están funcionando. Verás cambios en vivo cuando tú u otros miembros del círculo completen, omitan o modifiquen tareas.",
+    "sseConnecting": "Conectando con actualizaciones en tiempo real (SSE)...",
+    "sseError": "Las actualizaciones en tiempo real (SSE) están activadas pero no funcionan: {{error}}",
+    "sseEnabledNotConnected": "Las actualizaciones en tiempo real (SSE) están activadas, pero no conectadas actualmente.",
+    "status": "Estado:",
+    "connection": {
+      "connected": "Conectado",
+      "connecting": "Conectando...",
+      "disconnected": "Desconectado",
+      "tooltipBase": "Actualizaciones en tiempo real (SSE): {{status}}",
+      "tooltipError": "Actualizaciones en tiempo real (SSE): {{status}} - {{error}}",
+      "tooltipJoinCircle": "Actualizaciones en tiempo real (SSE): {{status}} - Únete a un círculo para activar las actualizaciones en tiempo real"
+    },
+    "on": "Activado",
+    "off": "Desactivado",
+    "webhookIntegration": "Integración de webhook",
+    "realtimeSectionDescription": "Configura cómo recibes actualizaciones en vivo cuando cambian las tareas y actividades de tu círculo."
+  },
+  "account": {
+    "description": "Cambia la configuración de tu cuenta, el estado de tu suscripción o tu contraseña.",
+    "accountType": "Tipo de cuenta",
+    "loading": "Cargando...",
+    "plus": "Plus",
+    "free": "Gratis",
+    "activePlan": "Actualmente estás suscrito al plan Plus. Tu suscripción se renovará el {{date}}.",
+    "cancelledPlan": "Has cancelado tu suscripción. Tu cuenta se cambiará al plan Gratis el {{date}}.",
+    "freePlan": "Actualmente estás en el plan Gratis. Pásate al plan Plus para desbloquear más funciones.",
+    "upgrade": "Mejorar",
+    "password": "Contraseña",
+    "changePassword": "cambiar contraseña",
+    "dangerZone": "Zona de peligro",
+    "dangerDescription": "Una vez que elimines tu cuenta, no habrá vuelta atrás. Asegúrate bien.",
+    "deleteAccount": "eliminar cuenta",
+    "purchaseSuccess": "¡Compra realizada correctamente! Reinicia la aplicación para acceder a las funciones Plus.",
+    "purchaseNetwork": "Problema de conexión con la tienda. Comprueba tu red e inténtalo de nuevo.",
+    "purchaseNotAllowed": "No se permiten compras en este dispositivo. Comprueba las restricciones del dispositivo.",
+    "purchaseUnavailable": "Esta suscripción no está disponible. Inténtalo de nuevo más tarde.",
+    "purchaseProcessed": "Esta compra ya se ha procesado. Si crees que se trata de un error, ponte en contacto con soporte.",
+    "purchaseReceiptMissing": "Falta el recibo de compra. Intenta comprar de nuevo.",
+    "purchasePending": "El pago está pendiente de aprobación. Recibirás acceso cuando se apruebe.",
+    "purchaseFailed": "La compra ha fallado: {{message}}. Inténtalo de nuevo o contacta con soporte.",
+    "passwordChanged": "La contraseña se ha cambiado correctamente",
+    "passwordChangeFailed": "El cambio de contraseña ha fallado",
+    "subscriptionCancelled": "Suscripción cancelada",
+    "subscriptionCancelFailed": "No se pudo cancelar la suscripción"
+  },
+  "backup": {
+    "title": "Copia de seguridad y restauración",
+    "createTab": "Crear copia de seguridad",
+    "restoreTab": "Restaurar copia de seguridad",
+    "createDescription": "Crea una copia de seguridad cifrada de tus datos. Esto incluye tus tareas, historial, ajustes y, opcionalmente, los archivos subidos.",
+    "encryptionKeyLabel": "Clave de cifrado *",
+    "encryptionKeyPlaceholder": "Introduce una clave de cifrado segura",
+    "encryptionKeyHint": "Guarda esta clave en un lugar seguro. La necesitarás para restaurar tu copia.",
+    "encryptionKeyRequired": "La clave de cifrado es obligatoria",
+    "nameLabel": "Nombre de la copia de seguridad (opcional)",
+    "namePlaceholder": "p. ej., respaldo-semanal",
+    "includeAssets": "Incluir archivos y recursos subidos",
+    "createAction": "Crear copia de seguridad",
+    "restoreAction": "Restaurar copia de seguridad",
+    "createFailed": "No se pudo crear la copia de seguridad",
+    "created": "La copia de seguridad se ha creado y descargado correctamente",
+    "restoreFailed": "No se pudo restaurar la copia de seguridad",
+    "restored": "La copia de seguridad se ha restaurado correctamente. Actualiza la página.",
+    "readFailed": "No se pudo leer el archivo de copia de seguridad",
+    "fileLabel": "Archivo de copia de seguridad *",
+    "selectFile": "Selecciona un archivo de copia de seguridad",
+    "selectedFile": "Seleccionado: {{name}}",
+    "restoreWarning": "Restaurar una copia de seguridad reemplazará todos tus datos actuales. Esta acción no se puede deshacer.",
+    "restoreKeyPlaceholder": "Introduce la clave de cifrado utilizada para esta copia de seguridad",
+    "creating": "Creando copia de seguridad...",
+    "restoring": "Restaurando copia de seguridad..."
+  },
+  "subscription": {
+    "title": "Mejorar a Plus",
+    "included": "Qué incluye:",
+    "subscribe": "Suscribirse",
+    "footer": "Cancela cuando quieras. Sin comisiones ocultas. Pago seguro con Stripe.",
+    "unlockFeatures": "Desbloquea funciones premium",
+    "errorTitle": "Error de suscripción",
+    "errorMessage": "No se pudo iniciar el proceso de suscripción. Inténtalo de nuevo.",
+    "features": {
+      "notifications": "Notificaciones y recordatorios de tareas",
+      "richText": "Descripciones de texto enriquecido con subida de imágenes",
+      "thingTriggers": "Disparadores de tareas basados en cosas",
+      "apiTokens": "Tokens de API para integraciones",
+      "imageUploads": "Subidas de imágenes en las descripciones",
+      "automation": "Automatización avanzada de tareas"
+    }
+  },
+  "menu": {
+    "impersonateUser": "Suplantar usuario",
+    "switchUser": "Cambiar usuario",
+    "actAsAnotherUser": "Actuar como otro usuario",
+    "stopImpersonating": "Dejar de suplantar",
+    "returnToYourAccount": "Volver a tu cuenta",
+    "settings": "Configuración",
+    "accountAndPreferences": "Cuenta y preferencias",
+    "invitePeople": "Invitar a personas",
+    "addMembersToYourCircle": "Añadir miembros a tu círculo",
+    "sidePanelSettings": "Configuración del panel lateral",
+    "customizeLayoutAndCards": "Personaliza el diseño y las tarjetas",
+    "switchToLight": "Cambiar a claro",
+    "switchToDark": "Cambiar a oscuro",
+    "toggleThemeAppearance": "Cambiar apariencia del tema",
+    "impersonating": "Suplantando"
+  },
+  "nativeCancel": {
+    "title": "Cancelar suscripción",
+    "description": "Para cancelar tu suscripción, sigue las instrucciones de tu plataforma. Debes cancelar desde la misma plataforma que usaste para suscribirte.",
+    "iosTitle": "Para iOS (iPhone/iPad):",
+    "iosSteps": {
+      "1": "1. Abre la aplicación Ajustes en tu dispositivo",
+      "2": "2. Toca tu nombre en la parte superior de la pantalla",
+      "3": "3. Toca Suscripciones",
+      "4": "4. Busca y toca Donetick",
+      "5": "5. Toca Cancelar suscripción"
+    },
+    "iosNote": "Si te suscribiste a través de iOS y usas la versión web o de escritorio, debes cancelar desde los ajustes de iOS como se describe arriba.",
+    "androidTitle": "Para Android:",
+    "androidSteps": {
+      "1": "1. Abre la aplicación Google Play Store",
+      "2": "2. Toca el icono de perfil en la parte superior derecha",
+      "3": "3. Toca Pagos y suscripciones",
+      "4": "4. Toca Suscripciones",
+      "5": "5. Busca y toca Donetick",
+      "6": "6. Toca Cancelar suscripción"
+    },
+    "androidNote": "Si te suscribiste a través de Google Play y estás usando la versión web o de escritorio, debes cancelar a través de Google Play como se describe arriba.",
+    "webTitle": "Para suscripciones web/de escritorio:",
+    "webDescription": "Si te suscribiste originalmente a través de nuestro sitio web o de la aplicación de escritorio, puedes cancelar tu suscripción desde la sección de ajustes de la cuenta en nuestro sitio web usando un navegador.",
+    "webImportant": "Debes cancelar tu suscripción a través de la misma plataforma en la que te suscribiste originalmente. Si te suscribiste a través del App Store de iOS o de Google Play Store, debes cancelarla desde esa plataforma original.",
+    "billingPeriod": "Tu suscripción seguirá activa hasta el final del periodo de facturación actual.",
+    "cancelFromStore": "La cancelaré desde mi tienda de aplicaciones",
+    "cancelDesktopNow": "Me suscribí en escritorio: cancelar ahora"
+  },
+  "apiTokensPage": {
+    "heading": "Token de acceso",
+    "description": "Crea tokens para usar con la API y actualizar cosas o tareas.",
+    "plusFeature": "Función Plus",
+    "plusDescription": "Los tokens de API no están disponibles en el plan Básico. Pásate a Plus para generar tokens de API para integraciones y automatización.",
+    "hideToken": "Ocultar token",
+    "showToken": "Mostrar token",
+    "removeToken": "Eliminar token",
+    "removeTokenConfirm": "¿Seguro que quieres eliminar {{name}}?",
+    "removed": "Eliminado",
+    "removedMessage": "El token de API ha sido eliminado",
+    "copied": "Token copiado al portapapeles",
+    "generateNew": "Generar nuevo token",
+    "namePrompt": "Pon un nombre a tu nuevo token, algo que te ayude a recordarlo.",
+    "generateAction": "Generar token"
+  },
+  "mfaPage": {
+    "description": "Añade una capa extra de seguridad a tu cuenta con la autenticación multifactor (MFA). Cuando esté activada, necesitarás un código de verificación de tu aplicación de autenticación además de tu contraseña al iniciar sesión.",
+    "title": "Autenticación de dos factores",
+    "enabled": "Tu cuenta está protegida con 2FA",
+    "disabled": "Protege tu cuenta con una aplicación de autenticación",
+    "enable": "Activar",
+    "disable": "Desactivar",
+    "setupTitle": "Configurar autenticación de dos factores",
+    "step1": "Paso 1: Escanea el código QR de abajo con tu aplicación de autenticación (Google Authenticator, Authy, etc.)",
+    "manualKey": "Clave manual:",
+    "addedToApp": "He añadido la cuenta a mi aplicación",
+    "step2": "Paso 2: introduce el código de verificación de 6 dígitos de tu aplicación de autenticación",
+    "verifyEnable": "Verificar y activar",
+    "enabledSuccess": "¡MFA activado correctamente!",
+    "backupSaveTitle": "Guarda estos códigos de respaldo en un lugar seguro",
+    "backupSaveDescription": "Puedes usar estos códigos para acceder a tu cuenta si pierdes tu dispositivo de autenticación. Cada código solo puede usarse una vez.",
+    "savedBackupCodes": "He guardado mis códigos de respaldo",
+    "disableTitle": "Desactivar autenticación multifactor",
+    "disableWarning": "Desactivar MFA hará que tu cuenta sea menos segura. ¿Seguro que quieres continuar?",
+    "disablePrompt": "Introduce un código de verificación de tu aplicación de autenticación para confirmar:",
+    "backupCodesTitle": "Nuevos códigos de respaldo",
+    "backupCodesWarning": "Tus códigos de respaldo anteriores ya no son válidos. Guarda estos nuevos códigos en un lugar seguro. Cada código solo puede usarse una vez.",
+    "failedQr": "No se pudo generar el código QR",
+    "invalidResponse": "Respuesta no válida del servidor. Falta el código QR o el secreto.",
+    "endpointMissing": "No se encontró el endpoint de configuración de MFA. Puede que esta función aún no esté disponible.",
+    "unauthorized": "No autorizado. Vuelve a iniciar sesión.",
+    "serverError": "Error del servidor. Inténtalo de nuevo más tarde.",
+    "setupFailed": "No se pudo configurar MFA ({{status}}). Inténtalo de nuevo.",
+    "networkError": "Error de red. Comprueba tu conexión e inténtalo de nuevo.",
+    "enabledToast": "¡MFA se ha activado correctamente!",
+    "invalidCode": "Código de verificación no válido. Inténtalo de nuevo.",
+    "confirmFailed": "No se pudo confirmar MFA. Inténtalo de nuevo.",
+    "disabledToast": "MFA se ha desactivado correctamente.",
+    "disableFailed": "No se pudo desactivar MFA. Inténtalo de nuevo.",
+    "backupRegenerated": "¡Se han generado nuevos códigos de respaldo!",
+    "regenerateFailed": "No se pudieron regenerar los códigos de respaldo. Inténtalo de nuevo."
+  },
+  "developer": {
+    "title": "Configuración de desarrollador",
+    "description": "Consulta información técnica sobre tus tokens de autenticación, notificaciones y estado de sesión para depuración.",
+    "tokenRefreshed": "El token se ha actualizado correctamente",
+    "tokenRefreshFailed": "La actualización del token ha fallado: {{message}}",
+    "tokenRefreshError": "Error al actualizar el token: {{message}}",
+    "refreshEndpointSuccess": "El endpoint del token de actualización se llamó correctamente",
+    "refreshEndpointFailed": "El endpoint del token de actualización falló: {{status}} {{message}}",
+    "refreshEndpointError": "Error del endpoint del token de actualización: {{message}}",
+    "notificationsLoaded": "Se cargaron {{count}} notificaciones programadas",
+    "notificationsLoadError": "Error al cargar las notificaciones: {{message}}",
+    "authTokens": "Tokens de autenticación",
+    "refreshTokenAction": "Actualizar token",
+    "callRefreshEndpoint": "Llamar al endpoint de actualización",
+    "accessToken": "Token de acceso",
+    "refreshToken": "Token de actualización",
+    "timeLeft": "Tiempo restante:",
+    "expires": "Caduca: {{date}}",
+    "refreshTokenCookie": "Los tokens de actualización se gestionan mediante cookies HTTP-only en la plataforma web.",
+    "platformInfo": "Información de la plataforma",
+    "platform": "Plataforma:",
+    "native": "Nativo",
+    "web": "Web",
+    "scheduledNotifications": "Scheduled Local notificaciones",
+    "refresh": "Actualizar",
+    "noScheduledNotifications": "No hay notificaciones programadas",
+    "totalScheduled": "Total programadas:",
+    "noTitle": "Sin título",
+    "noBody": "Sin contenido",
+    "pastDue": "Fuera de plazo",
+    "choreId": "tarea ID: {{id}}",
+    "sseTitle": "Eventos enviados por el servidor (SSE)",
+    "connectionStatus": "Estado de la conexión",
+    "unknown": "Desconocido",
+    "error": "error: {{error}}",
+    "lastEventReceived": "Último evento recibido",
+    "type": "Tipo:",
+    "received": "Recibido: {{date}}",
+    "notAvailable": "N/D",
+    "timeExpired": "Caducado"
+  },
+  "storage": {
+    "title": "Configuración de almacenamiento",
+    "serverUsageTitle": "Server almacenamiento Usage",
+    "plusFeature": "Función Plus",
+    "serverUsageDescription": "Este es el almacenamiento usado por tu cuenta en nuestros servidores, como archivos, imágenes y datos subidos.",
+    "basicPlanUnavailable": "El almacenamiento del servidor no está disponible en el plan Básico. Pásate a Plus para controlar tu uso de almacenamiento del servidor.",
+    "loading": "Cargando...",
+    "usedOfTotal": "{{used}} MB usados / {{total}} MB totales ({{percent}}%)",
+    "experimentalTitle": "Funciones experimentales",
+    "comingSoon": "Próximamente",
+    "offlineModeTitle": "activar sin conexión Mode",
+    "offlineModeDescription": "Permite que la aplicación funcione sin conexión almacenando datos localmente. Esto es experimental y puede causar lentitud. Si tienes problemas de rendimiento, desactívalo.",
+    "offlineModeWarning": "sin conexión mode is enabled. If you experience slowness, disable this setting.",
+    "localStorageTitle": "{{platform}} Local almacenamiento & Cache",
+    "appPlatform": "aplicación",
+    "browserPlatform": "Navegador",
+    "localStorageDescription": "Estos son datos almacenados localmente para acceso más rápido y uso sin conexión. Borrarlos no afectará a tus datos del servidor, pero puede cerrar tu sesión o eliminar tareas sin conexión.",
+    "clearAllTitle": "borrar All Local almacenamiento",
+    "clearAllMessage": "¿Seguro que quieres clear your local storage and cache? This will remove all your data from this browser and require login.",
+    "clearAllAction": "Borrar todo",
+    "clearAllButton": "borrar All Local almacenamiento and Cache",
+    "clearOfflineTitle": "borrar sin conexión Cache",
+    "clearOfflineMessage": "¿Seguro que quieres clear only the offline cache and tasks?",
+    "clearOfflineAction": "borrar Cache",
+    "clearOfflineButton": "borrar sin conexión Cache and sin conexión tareas",
+    "appPreferencesTitle": "Preferencias de la aplicación",
+    "deviceOnly": "Solo en este dispositivo",
+    "appPreferencesDescription": "Estas preferencias se almacenan localmente en tu dispositivo. Borrarlas restablecerá ajustes específicos de la aplicación y puede cerrar tu sesión, pero no afectará a tus datos del servidor.",
+    "clearPreferencesTitle": "borrar aplicación Preferences",
+    "clearPreferencesMessage": "¿Seguro que quieres clear all app preferences? This will reset your app settings and may require you to log in again.",
+    "clearPreferencesAction": "borrar Preferences",
+    "clearPreferencesButton": "borrar aplicación Preferences"
+  },
+  "circlePage": {
+    "description": "Your account is automatically connected to a círculo when you create or join one. Invite friends with the círculo code or join link below. You'll see join requests here as well.",
+    "partOf": "Formas parte de {{name}}",
+    "codeIs": "Tu código de círculo es:",
+    "copyCode": "Copiar código",
+    "copyLink": "Copiar enlace",
+    "leaveCircle": "Leave círculo",
+    "members": "círculo miembros",
+    "requests": "círculo miembro Requests",
+    "refresh": "Actualizar",
+    "refreshing": "Actualizando...",
+    "lastUpdated": "Última actualización: {{date}}",
+    "wantsToJoin": "{{name}} quiere unirse a tu círculo.",
+    "accept": "Aceptar",
+    "joinPrompt": "Want to join someone else's círculo? Ask them for their unique círculo code or join link. introduce the code below to join their círculo.",
+    "enterCode": "introduce círculo code:",
+    "joinCircle": "Join círculo",
+    "copyCodeSuccess": "Código copiado al portapapeles",
+    "copyLinkSuccess": "Enlace copiado al portapapeles",
+    "leaveConfirm": "¿Seguro que quieres leave your circle?",
+    "leaveTitle": "Leave círculo",
+    "leaveSuccess": "Has salido del círculo correctamente",
+    "leaveFailed": "falló to leave circle",
+    "roleUpdateFailed": "falló to update role",
+    "removeMemberTitle": "quitar miembro",
+    "removeMemberConfirm": "¿Seguro que quieres remove {{name}} from your circle?",
+    "removeMemberSuccess": "Miembro eliminado correctamente",
+    "acceptTitle": "aceptar miembro Request",
+    "acceptConfirm": "¿Seguro que quieres accept {{name}} (username: {{username}}) into your circle?",
+    "acceptSuccess": "Solicitud aceptada correctamente",
+    "joinSuccess": "Te has unido al círculo correctamente. Espera a que el propietario del círculo acepte tu solicitud.",
+    "alreadyMember": "Ya eres miembro de este círculo",
+    "joinFailed": "falló to join circle",
+    "pendingApproval": "Pendiente de aprobación",
+    "joinedOn": "Se unió el {{date}}",
+    "requestedOn": "Solicitó unirse el {{date}}",
+    "roleDescriptions": {
+      "member": "Solo un miembro normal del círculo",
+      "manager": "Puede suplantar usuarios y realizar acciones en su nombre",
+      "admin": "Acceso completo al círculo"
+    },
+    "newOwner": "Nuevo propietario"
+  },
+  "modals": {
+    "passwordChange": {
+      "title": "cambiar contraseña",
+      "intro": "Introduce tu nueva contraseña.",
+      "newPassword": "New contraseña",
+      "confirmPassword": "Confirm contraseña",
+      "mismatch": "Las contraseñas no coinciden",
+      "min": "contraseña must be at least 8 characters",
+      "max": "contraseña must be less than 64 characters"
+    },
+    "userDeletion": {
+      "title": "eliminar cuenta",
+      "warningTitle": "eliminar cuenta",
+      "warningIntro": "Esta acción no se puede deshacer. Deleting your account will permanently remove:",
+      "items": {
+        "profile": "Tu perfil de usuario y datos de autenticación",
+        "chores": "Todas tus tareas, historial de tareas y sesiones de seguimiento de tiempo",
+        "tokens": "Tokens de API, sesiones MFA y tokens de restablecimiento de contraseña",
+        "storage": "almacenamiento files and usage data",
+        "points": "puntos history and notifications",
+        "circles": "círculo memberships and relationships"
+      },
+      "passwordPrompt": "introduce your password para continuar",
+      "transferTitle": "círculo Ownership Transfer obligatorio",
+      "transferIntro": "Posees círculos que requieren transferir la propiedad antes de la eliminación. Selecciona nuevos propietarios:",
+      "circleLabel": "círculo: {{name}}",
+      "finalTitle": "Confirmación final",
+      "finalPrompt": "Introduce tu contraseña y escribe DELETE para confirmar la eliminación de la cuenta.",
+      "finalHint": "Tras eliminarla con éxito, se cerrará tu sesión y serás redirigido a la página de inicio de sesión.",
+      "typeDelete": "Escribe \"DELETE\" para confirmar",
+      "checkFailed": "falló to check deletion requirements",
+      "confirmDelete": "Introduce tu contraseña y escribe DELETE para confirmar",
+      "deleteFailed": "falló to delete account"
+    }
+  },
+  "localization": {
+    "rtlNotice": "Este idioma usa dirección de texto de derecha a izquierda (RTL)",
+    "title": "Localización",
+    "description": "Personaliza el idioma, formato de fecha y preferencias regionales para tu cuenta.",
+    "language": "Idioma",
+    "languageDescription": "Selecciona tu idioma preferido",
+    "dateFormat": "Formato de Fecha",
+    "dateFormatDescription": "Elige cómo se deben mostrar las fechas en toda la aplicación",
+    "timeFormat": "Formato de Hora",
+    "timeFormatDescription": "Selecciona formato de 12 o 24 horas",
+    "12hour": "12 horas (AM/PM)",
+    "24hour": "24 horas",
+    "firstDayOfWeek": "Primer Día de la Semana",
+    "firstDayOfWeekDescription": "Selecciona qué día comienza tu semana",
+    "sunday": "Domingo",
+    "monday": "Lunes",
+    "saturday": "Sábado",
+    "formats": {
+      "mdy": "MM/DD/AAAA (EE.UU.)",
+      "dmy": "DD/MM/AAAA (Europa)",
+      "ymd": "AAAA-MM-DD (ISO)",
+      "long": "Formato largo (ej., 1 de enero de 2024)",
+      "short": "Formato corto (ej., 1 ene 2024)"
+    }
+  },
+  "title": "Configuración",
+  "circleSettings": {
+    "title": "Configuración del círculo",
+    "description": "Tu cuenta se conecta automáticamente a un Círculo cuando creas o te unes a uno. Invita fácilmente a amigos compartiendo el código único del Círculo o el enlace a continuación.",
+    "circleCode": "Código del Círculo",
+    "copyCode": "Copiar Código",
+    "copyLink": "Copiar Enlace",
+    "codeCopied": "¡Código del círculo copiado!",
+    "linkCopied": "¡Enlace copiado!",
+    "joinCircle": "Unirse a un Círculo",
+    "joinCirclePlaceholder": "Ingresa el Código del Círculo",
+    "join": "Unirse",
+    "leave": "Salir del Círculo",
+    "leaveConfirmTitle": "Salir del Círculo",
+    "leaveConfirmMessage": "¿Estás seguro de que quieres salir de este círculo?",
+    "circleMembers": "Miembros del Círculo",
+    "circleMemberRequests": "Solicitudes de Miembros del Círculo",
+    "admin": "Administrador",
+    "member": "Miembro",
+    "pending": "Pendiente",
+    "accept": "Aceptar",
+    "reject": "Rechazar",
+    "makeAdmin": "Hacer Administrador",
+    "makeMember": "Hacer Miembro",
+    "remove": "Eliminar",
+    "webhookURL": "URL del Webhook",
+    "webhookDescription": "Ingresa una URL de webhook para recibir notificaciones de eventos del círculo",
+    "webhookPlaceholder": "https://tu-url-webhook.com"
+  },
+  "accountSettings": {
+    "title": "Configuración de la Cuenta",
+    "subscription": "Suscripción",
+    "subscriptionStatus": "Plan Actual",
+    "free": "Gratis",
+    "plus": "Plus",
+    "upgrade": "Actualizar",
+    "cancel": "Cancelar",
+    "changePassword": "Cambiar Contraseña",
+    "password": "Contraseña",
+    "dangerZone": "Zona de Peligro",
+    "dangerZoneDescription": "Una vez que elimines tu cuenta, no hay vuelta atrás. Por favor, está seguro.",
+    "deleteAccount": "Eliminar Cuenta"
+  },
+  "notifications": {
+    "settingsSaved": "Configuración guardada con éxito",
+    "settingsSaveFailed": "Error al guardar la configuración",
+    "invalidWebhook": "URL de webhook no válida"
   }
 }

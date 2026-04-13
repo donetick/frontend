@@ -1,15 +1,15 @@
 import { Typography } from '@mui/joy'
+import { useTranslation } from 'react-i18next'
 import SettingsLayout from './SettingsLayout'
 import ThemeToggle from './ThemeToggle'
 
 const ThemeSettings = () => {
+  const { t } = useTranslation('settings')
+
   return (
-    <SettingsLayout title="Theme Preferences">
+    <SettingsLayout title={t('pages.theme.title')}>
       <div className='grid gap-4'>
-        <Typography level='body-md'>
-          Choose how the site looks to you. Select a single theme, or sync with
-          your system and automatically switch between day and night themes.
-        </Typography>
+        <Typography level='body-md'>{t('theme.description')}</Typography>
         <ThemeToggle />
       </div>
     </SettingsLayout>

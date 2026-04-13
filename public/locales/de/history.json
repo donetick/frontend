@@ -1,0 +1,37 @@
+{
+  "summaryTitle": "Aufgabenübersicht",
+  "delete": {
+    "title": "Verlaufseintrag löschen",
+    "confirm": "Möchtest du diesen Verlaufseintrag wirklich löschen?"
+  },
+  "empty": {
+    "title": "Noch kein Verlauf",
+    "description": "Du hast noch keine Aufgaben erledigt. Sobald du Aufgaben abschließt, erscheinen sie hier.",
+    "backToChores": "Zurück zu den Aufgaben"
+  },
+  "info": {
+    "completedTitle": "Du hast abgeschlossen",
+    "completedValue": "12345 Aufgaben"
+  },
+  "edit": {
+    "title": "Verlauf bearbeiten",
+    "completedDate": "Abschlussdatum",
+    "note": "Notiz",
+    "additionalNotes": "Zusätzliche Notizen",
+    "deleteConfirm": "Möchtest du diesen Verlauf wirklich löschen?"
+  },
+  "stats": {
+    "allCompleted": "Alles abgeschlossen",
+    "averageTiming": "Durchschnittliches Timing",
+    "longestDelay": "Längste Verzögerung",
+    "completedMost": "Am häufigsten erledigt",
+    "membersInvolved": "Beteiligte Mitglieder",
+    "lastCompleted": "Zuletzt erledigt",
+    "onTime": "Pünktlich",
+    "neverLate": "Nie verspätet",
+    "times_one": "{{count}} Mal",
+    "times_other": "{{count}} Mal",
+    "membersCount_one": "{{count}} Mitglied",
+    "membersCount_other": "{{count}} Mitglieder"
+  }
+}

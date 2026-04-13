@@ -31,6 +31,7 @@ import {
 } from '@mui/joy'
 import Fuse from 'fuse.js'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useChores } from '../../queries/ChoreQueries'
 import { useNotification } from '../../service/NotificationProvider'
@@ -81,6 +82,7 @@ import { INSIGHT_FILTER_DEFS } from './SmartInsightsCard'
 import SortAndGrouping from './SortAndGrouping'
 
 const MyChores = () => {
+  const { t } = useTranslation(['chores'])
   const { data: userProfile, isLoading: isUserProfileLoading } =
     useUserProfile()
   const isLargeScreen = useMediaQuery(theme => theme.breakpoints.up('md'))

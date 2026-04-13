@@ -11,12 +11,14 @@ import {
 } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import Logo from '../../Logo'
 import { useNotification } from '../../service/NotificationProvider'
 import { login, signUp } from '../../utils/Fetcher'
 
 const SignupView = () => {
+  const { t } = useTranslation(['common'])
   const [username, setUsername] = React.useState('')
   const [password, setPassword] = React.useState('')
   const Navigate = useNavigate()

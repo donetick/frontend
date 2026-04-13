@@ -24,6 +24,7 @@ import {
 import { useQueryClient } from '@tanstack/react-query'
 import Cookies from 'js-cookie'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { LoginSocialGoogle } from 'reactjs-social-login'
 import { GOOGLE_CLIENT_ID, REDIRECT_URL } from '../../Config'
@@ -38,6 +39,7 @@ import { buildChildUsername, getUserDisplayInfo } from '../../utils/UserHelpers'
 import MFAVerificationModal from './MFAVerificationModal'
 
 const LoginView = () => {
+  const { t } = useTranslation(['common'])
   // Use React Query client directly to invalidate the user profile query
   const queryClient = useQueryClient()
   // const [userProfile, setUserProfile] = useState(null)

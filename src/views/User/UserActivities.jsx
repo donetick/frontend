@@ -33,6 +33,7 @@ import {
   Typography,
 } from '@mui/joy'
 import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useChores, useChoresHistory } from '../../queries/ChoreQueries'

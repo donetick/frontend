@@ -1,110 +1,61 @@
 {
-  "title": "Instellingen",
-  "circleSettings": {
-    "title": "Cirkelinstellingen",
-    "description": "Uw account wordt automatisch verbonden met een Cirkel wanneer u er een aanmaakt of lid wordt. Nodig eenvoudig vrienden uit door de unieke Cirkelcode of onderstaande link te delen.",
-    "circleCode": "Cirkelcode",
-    "copyCode": "Code Kopiëren",
-    "copyLink": "Link Kopiëren",
-    "codeCopied": "Cirkelcode gekopieerd!",
-    "linkCopied": "Link gekopieerd!",
-    "joinCircle": "Lid Worden van een Cirkel",
-    "joinCirclePlaceholder": "Voer Cirkelcode in",
-    "join": "Lid Worden",
-    "leave": "Cirkel Verlaten",
-    "leaveConfirmTitle": "Cirkel Verlaten",
-    "leaveConfirmMessage": "Weet u zeker dat u deze cirkel wilt verlaten?",
-    "circleMembers": "Cirkelleden",
-    "circleMemberRequests": "Aanvragen voor Cirkellidmaatschap",
-    "admin": "Beheerder",
-    "member": "Lid",
-    "pending": "In behandeling",
-    "accept": "Accepteren",
-    "reject": "Afwijzen",
-    "makeAdmin": "Beheerder Maken",
-    "makeMember": "Lid Maken",
-    "remove": "Verwijderen",
-    "webhookURL": "Webhook URL",
-    "webhookDescription": "Voer een webhook URL in om meldingen te ontvangen voor cirkelgebeurtenissen",
-    "webhookPlaceholder": "https://uw-webhook-url.com"
-  },
-  "accountSettings": {
-    "title": "Accountinstellingen",
-    "subscription": "Abonnement",
-    "subscriptionStatus": "Huidig Plan",
-    "free": "Gratis",
-    "plus": "Plus",
-    "upgrade": "Upgraden",
-    "cancel": "Annuleren",
-    "changePassword": "Wachtwoord Wijzigen",
-    "password": "Wachtwoord",
-    "dangerZone": "Gevarenzone",
-    "dangerZoneDescription": "Zodra u uw account verwijdert, is er geen weg terug. Wees zeker van uw beslissing.",
-    "deleteAccount": "Account Verwijderen"
-  },
-  "localization": {
-    "title": "Lokalisatie",
-    "description": "Pas de taal, datumnotatie en regionale voorkeuren voor uw account aan.",
-    "language": "Taal",
-    "languageDescription": "Selecteer uw voorkeurstaal",
-    "dateFormat": "Datumnotatie",
-    "dateFormatDescription": "Kies hoe datums in de applicatie worden weergegeven",
-    "timeFormat": "Tijdnotatie",
-    "timeFormatDescription": "Selecteer 12-uurs of 24-uurs tijdnotatie",
-    "12hour": "12-uurs (AM/PM)",
-    "24hour": "24-uurs",
-    "firstDayOfWeek": "Eerste Dag van de Week",
-    "firstDayOfWeekDescription": "Selecteer welke dag uw week begint",
-    "sunday": "Zondag",
-    "monday": "Maandag",
-    "saturday": "Zaterdag",
-    "formats": {
-      "mdy": "MM/DD/JJJJ (VS)",
-      "dmy": "DD/MM/JJJJ (Europa)",
-      "ymd": "JJJJ-MM-DD (ISO)",
-      "long": "Lang formaat (bijv. 1 januari 2024)",
-      "short": "Kort formaat (bijv. 1 jan 2024)"
-    }
-  },
-  "sidepanel": {
-    "title": "Zijpaneel Aanpassen",
-    "description": "Pas de indeling en zichtbaarheid van kaarten in het zijpaneel aan. Deze sectie is alleen beschikbaar op grote schermapparaten zoals tablets en desktops."
-  },
-  "theme": {
-    "title": "Themavoorkeuren",
-    "description": "Kies hoe de site er voor u uitziet. Selecteer een enkel thema of synchroniseer met uw systeem en schakel automatisch tussen dag- en nachtthema's.",
-    "themeMode": "Thamamodus",
-    "light": "Licht",
-    "dark": "Donker",
-    "system": "Systeem"
-  },
-  "notifications": {
-    "settingsSaved": "Instellingen succesvol opgeslagen",
-    "settingsSaveFailed": "Opslaan van instellingen mislukt",
-    "invalidWebhook": "Ongeldige webhook URL"
-  },
-  "profile": {
-    "title": "Profielinstellingen",
-    "description": "Werk uw weergavenaam en profielfoto bij.",
-    "photoUpdated": "Foto Bijgewerkt",
-    "photoUpdatedMessage": "Uw profielfoto is succesvol bijgewerkt!",
-    "uploadFailed": "Uploaden Mislukt",
-    "uploadFailedMessage": "Het uploaden van uw foto is mislukt. Probeer het opnieuw.",
-    "profileUpdated": "Profiel Bijgewerkt",
-    "profileUpdatedMessage": "Uw profielgegevens zijn succesvol opgeslagen!",
-    "updateFailed": "Bijwerken Mislukt",
-    "updateFailedMessage": "Kan uw profiel niet bijwerken. Controleer uw verbinding en probeer het opnieuw.",
-    "changePhoto": "Foto Wijzigen",
-    "displayName": "Weergavenaam",
-    "displayNamePlaceholder": "Voer uw weergavenaam in",
-    "timezone": "Tijdzone",
-    "timezonePlaceholder": "Selecteer uw tijdzone",
-    "save": "Opslaan",
-    "cancel": "Annuleren"
-  },
   "overview": {
     "title": "Instellingen",
     "subtitle": "Pas uw ervaring aan en beheer uw accountvoorkeuren",
+    "cards": {
+      "profile": {
+        "title": "Profile Settings",
+        "description": "Update your profile information, photo, display name, and timezone preferences."
+      },
+      "circle": {
+        "title": "Circle Settings",
+        "description": "Manage your circle, invite members, and handle join requests."
+      },
+      "account": {
+        "title": "Account Settings",
+        "description": "Manage your subscription, change password, and account deletion options."
+      },
+      "subaccounts": {
+        "title": "Managed Accounts",
+        "description": "Create and manage sub accounts to log in and complete assigned tasks."
+      },
+      "notifications": {
+        "title": "Notifications",
+        "description": "Configure push notifications, email alerts, and notification targets for tasks."
+      },
+      "mfa": {
+        "title": "Multi-Factor Authentication",
+        "description": "Add an extra layer of security with MFA using authenticator apps."
+      },
+      "apitokens": {
+        "title": "API Tokens",
+        "description": "Generate and manage access tokens for third-party integrations and API access."
+      },
+      "storage": {
+        "title": "Storage Settings",
+        "description": "Backup and restore your data, manage local storage and sync preferences."
+      },
+      "sidepanel": {
+        "title": "Sidepanel Customization",
+        "description": "Customize the layout and visibility of cards in the sidepanel interface."
+      },
+      "theme": {
+        "title": "Theme Preferences",
+        "description": "Choose your preferred theme and configure dark/light mode settings."
+      },
+      "language": {
+        "title": "Language",
+        "description": "Choose the language used across the app on this device."
+      },
+      "advanced": {
+        "title": "Advanced Settings",
+        "description": "Configure webhooks, real-time updates, and other advanced features for enhanced productivity."
+      },
+      "developer": {
+        "title": "Developer Settings",
+        "description": "View technical information about authentication tokens, SSE connections, and debug data."
+      }
+    },
     "upgrade": {
       "title": "Upgraden naar Plus",
       "description": "Ontgrendel krachtige functies om uw productiviteit te verbeteren",
@@ -170,5 +121,595 @@
         "description": "Bekijk technische informatie over authenticatietokens, SSE-verbindingen en foutopsporingsgegevens."
       }
     }
+  },
+  "pages": {
+    "profile": {
+      "title": "Profile Settings"
+    },
+    "circle": {
+      "title": "Circle Settings"
+    },
+    "account": {
+      "title": "Account Settings"
+    },
+    "managedAccounts": {
+      "title": "Managed Accounts"
+    },
+    "subAccountManagement": {
+      "title": "Sub Account Management"
+    },
+    "notifications": {
+      "title": "Notification Settings"
+    },
+    "mfa": {
+      "title": "Multi-Factor Authentication"
+    },
+    "apiTokens": {
+      "title": "API Tokens"
+    },
+    "storage": {
+      "title": "Storage Settings"
+    },
+    "sidepanel": {
+      "title": "Sidepanel Customization"
+    },
+    "theme": {
+      "title": "Theme Preferences"
+    },
+    "language": {
+      "title": "Language"
+    },
+    "advanced": {
+      "title": "Advanced Settings"
+    },
+    "developer": {
+      "title": "Developer Settings"
+    }
+  },
+  "sidepanel": {
+    "heading": "Customize sidepanel cards",
+    "description": "Pas de indeling en zichtbaarheid van kaarten in het zijpaneel aan. Deze sectie is alleen beschikbaar op grote schermapparaten zoals tablets en desktops.",
+    "reset": "Reset to defaults",
+    "resetHelp": "Restore the recommended card order and visibility.",
+    "cards": {
+      "welcome": {
+        "title": "User Switcher",
+        "description": "Allows admins and managers to view tasks as different users."
+      },
+      "smartInsights": {
+        "title": "Smart Insights",
+        "description": "Shows quick actions based on your current tasks."
+      },
+      "assignees": {
+        "title": "Tasks by Assignee",
+        "description": "Groups tasks by the person they are assigned to."
+      },
+      "calendar": {
+        "title": "Calendar View",
+        "description": "Shows tasks in a calendar layout."
+      },
+      "activities": {
+        "title": "Recent Activities",
+        "description": "Shows recent task completions and other activity."
+      },
+      "weeklyGoals": {
+        "title": "Weekly Goals",
+        "description": "Shows weekly progress and completion statistics for your circle."
+      }
+    },
+    "title": "Zijpaneel Aanpassen"
+  },
+  "theme": {
+    "description": "Kies hoe de site er voor u uitziet. Selecteer een enkel thema of synchroniseer met uw systeem en schakel automatisch tussen dag- en nachtthema's.",
+    "modeLabel": "Theme mode",
+    "light": "Licht",
+    "dark": "Donker",
+    "system": "Systeem",
+    "title": "Themavoorkeuren",
+    "themeMode": "Thamamodus"
+  },
+  "profile": {
+    "description": "Werk uw weergavenaam en profielfoto bij.",
+    "photoUpdatedTitle": "Photo Updated",
+    "photoUpdatedMessage": "Uw profielfoto is succesvol bijgewerkt!",
+    "uploadFailedTitle": "Upload Failed",
+    "uploadFailedMessage": "Het uploaden van uw foto is mislukt. Probeer het opnieuw.",
+    "profileUpdatedTitle": "Profile Updated",
+    "profileUpdatedMessage": "Uw profielgegevens zijn succesvol opgeslagen!",
+    "updateFailedTitle": "Update Failed",
+    "updateFailedMessage": "Kan uw profiel niet bijwerken. Controleer uw verbinding en probeer het opnieuw.",
+    "title": "Profielinstellingen",
+    "photoUpdated": "Foto Bijgewerkt",
+    "uploadFailed": "Uploaden Mislukt",
+    "profileUpdated": "Profiel Bijgewerkt",
+    "updateFailed": "Bijwerken Mislukt",
+    "changePhoto": "Foto Wijzigen",
+    "displayName": "Weergavenaam",
+    "displayNamePlaceholder": "Voer uw weergavenaam in",
+    "timezone": "Tijdzone",
+    "timezonePlaceholder": "Selecteer uw tijdzone",
+    "save": "Opslaan",
+    "cancel": "Annuleren"
+  },
+  "language": {
+    "title": "Language",
+    "description": "Choose the language used throughout the app. This preference is saved on this device.",
+    "fieldLabel": "App language",
+    "options": {
+      "en": "English",
+      "de": "German",
+      "es": "Spanish",
+      "pt": "Portuguese"
+    }
+  },
+  "childAccounts": {
+    "title": "Managed Accounts",
+    "accessDeniedTitle": "Sub Account Management",
+    "parentOnly": "Only primary users can manage sub accounts.",
+    "description": "Manage sub accounts. Sub account users can log in and complete assigned tasks.",
+    "planWarning": "Sub accounts are limited to 1 on the Free plan. Upgrade to Plus to have up to 5 sub accounts.",
+    "sectionTitle": "Sub Accounts ({{count}})",
+    "add": "Add Sub Account",
+    "loading": "Loading sub accounts...",
+    "emptyTitle": "No Sub Accounts",
+    "emptyDescription": "Create sub accounts so team members can log in and complete their assigned tasks.",
+    "addFirst": "Add Your First Sub Account",
+    "username": "Username: {{username}}",
+    "created": "Created: {{date}}",
+    "changePasswordTitle": "Change Password",
+    "deleteAccountTitle": "Delete Account",
+    "howItWorksTitle": "How Managed Accounts Work",
+    "bulletOne": "Managed accounts are created by the primary user and can be deleted or have their password reset by that user.",
+    "bulletTwo": "Sub accounts can log in with their own username and password.",
+    "bulletThree": "Managed accounts can complete tasks but have limited administrative permissions.",
+    "bulletFour": "Managed accounts are automatically added to your circle.",
+    "createSuccess": "Child account \"{{name}}\" created successfully!",
+    "createFailed": "Failed to create child account: {{message}}",
+    "updatePasswordSuccess": "Child password updated successfully",
+    "updatePasswordFailed": "Failed to update password: {{message}}",
+    "deleteConfirmTitle": "Delete Sub Account",
+    "deleteConfirmMessage": "Are you sure you want to delete the child account \"{{name}}\"? This action cannot be undone.",
+    "deleteSuccess": "Sub account \"{{name}}\" deleted successfully",
+    "deleteFailed": "Failed to delete sub account: {{message}}"
+  },
+  "advanced": {
+    "title": "Advanced Settings",
+    "loading": "Loading...",
+    "description": "Configure advanced features like webhooks and real-time updates for enhanced productivity.",
+    "webhookTitle": "Webhook",
+    "webhookDescription": "Webhooks let you send real-time notifications to other services when events happen in your Circle. Configure a webhook URL to receive updates.",
+    "webhookPlanWarning": "Webhook notifications are not available in the Basic plan. Upgrade to Plus to receive real-time updates via webhooks.",
+    "enableWebhook": "Enable Webhook",
+    "enableWebhookHelper": "Enable webhook notifications for tasks and things updates.",
+    "webhookUrl": "Webhook URL",
+    "webhookSaved": "Webhook URL updated successfully",
+    "webhookSaveFailed": "Failed to update webhook URL",
+    "realtimeTitle": "Real-time Updates",
+    "realtimeSummary": "Get instant notifications when tasks are updated",
+    "enableRealtime": "Enable Real-time Updates",
+    "realtimeUnavailable": "Real-time updates are not available in the Basic plan. Upgrade to Plus to receive instant notifications when tasks are updated.",
+    "realtimeDisabled": "Real-time updates are disabled. Enable them to see live changes when you or other circle members complete, skip, or modify tasks.",
+    "realtimeConnected": "Real-time updates are working. You'll see live changes when you or other circle members complete, skip, or modify tasks.",
+    "realtimeConnecting": "Connecting to real-time updates...",
+    "realtimeError": "Real-time updates are enabled but not working: {{error}}",
+    "realtimeEnabledNotConnected": "Real-time updates are enabled but not currently connected.",
+    "sseTitle": "Real-time Updates (SSE)",
+    "sseSummary": "Get instant notifications via Server-Sent Events",
+    "enableSse": "Enable Real-time Updates (SSE)",
+    "sseUnavailable": "Real-time updates (SSE) are not available in the Basic plan. Upgrade to Plus to receive instant notifications when chores are updated.",
+    "sseDisabled": "Real-time updates (SSE) are disabled. Enable to see live changes when you or other circle members complete, skip, or modify chores.",
+    "sseConnected": "Real-time updates (SSE) are working. You'll see live changes when you or other circle members complete, skip, or modify chores.",
+    "sseConnecting": "Connecting to real-time updates (SSE)...",
+    "sseError": "Real-time updates (SSE) are enabled but not working: {{error}}",
+    "sseEnabledNotConnected": "Real-time updates (SSE) are enabled but not currently connected.",
+    "status": "Status:",
+    "connection": {
+      "connected": "Connected",
+      "connecting": "Connecting...",
+      "disconnected": "Disconnected",
+      "tooltipBase": "Real-time updates (SSE): {{status}}",
+      "tooltipError": "Real-time updates (SSE): {{status}} - {{error}}",
+      "tooltipJoinCircle": "Real-time updates (SSE): {{status}} - Join a circle to enable real-time updates"
+    },
+    "on": "On",
+    "off": "Off",
+    "webhookIntegration": "Webhook Integration",
+    "realtimeSectionDescription": "Configure how you receive live updates when tasks and activities change in your circle."
+  },
+  "account": {
+    "description": "Change your account settings, subscription status, or password.",
+    "accountType": "Account Type",
+    "loading": "Loading...",
+    "plus": "Plus",
+    "free": "Free",
+    "activePlan": "You are currently subscribed to the Plus plan. Your subscription will renew on {{date}}.",
+    "cancelledPlan": "You have cancelled your subscription. Your account will be downgraded to the Free plan on {{date}}.",
+    "freePlan": "You are currently on the Free plan. Upgrade to the Plus plan to unlock more features.",
+    "upgrade": "Upgrade",
+    "password": "Password",
+    "changePassword": "Change Password",
+    "dangerZone": "Danger Zone",
+    "dangerDescription": "Once you delete your account, there is no going back. Please be certain.",
+    "deleteAccount": "Delete Account",
+    "purchaseSuccess": "Purchase successful! Please restart the app to access Plus features.",
+    "purchaseNetwork": "Store connection issue. Please check your network and try again.",
+    "purchaseNotAllowed": "Purchases are not allowed on this device. Please check your device restrictions.",
+    "purchaseUnavailable": "This subscription is not available. Please try again later.",
+    "purchaseProcessed": "This purchase has already been processed. If you believe this is an error, please contact support.",
+    "purchaseReceiptMissing": "Purchase receipt missing. Please try purchasing again.",
+    "purchasePending": "Payment is pending approval. You will receive access once approved.",
+    "purchaseFailed": "Purchase failed: {{message}}. Please try again or contact support.",
+    "passwordChanged": "Password changed successfully",
+    "passwordChangeFailed": "Password change failed",
+    "subscriptionCancelled": "Subscription cancelled",
+    "subscriptionCancelFailed": "Failed to cancel subscription"
+  },
+  "backup": {
+    "title": "Backup & Restore",
+    "createTab": "Create Backup",
+    "restoreTab": "Restore Backup",
+    "createDescription": "Create an encrypted backup of your data. This includes your chores, history, settings, and optionally uploaded files.",
+    "encryptionKeyLabel": "Encryption Key *",
+    "encryptionKeyPlaceholder": "Enter a strong encryption key",
+    "encryptionKeyHint": "Keep this key safe. You'll need it to restore your backup.",
+    "encryptionKeyRequired": "Encryption key is required",
+    "nameLabel": "Backup Name (Optional)",
+    "namePlaceholder": "e.g., weekly-backup",
+    "includeAssets": "Include uploaded files and assets",
+    "createAction": "Create Backup",
+    "restoreAction": "Restore Backup",
+    "createFailed": "Failed to create backup",
+    "created": "Backup created and downloaded successfully",
+    "restoreFailed": "Failed to restore backup",
+    "restored": "Backup restored successfully. Please refresh the page.",
+    "readFailed": "Failed to read backup file",
+    "fileLabel": "Backup File *",
+    "selectFile": "Please select a backup file",
+    "selectedFile": "Selected: {{name}}",
+    "restoreWarning": "Restoring a backup will replace all your current data. This action cannot be undone.",
+    "restoreKeyPlaceholder": "Enter the encryption key used for this backup",
+    "creating": "Creating backup...",
+    "restoring": "Restoring backup..."
+  },
+  "subscription": {
+    "title": "Upgrade to Plus",
+    "included": "What's included:",
+    "subscribe": "Subscribe",
+    "footer": "Cancel anytime. No hidden fees. Secure payment powered by Stripe.",
+    "unlockFeatures": "Unlock premium features",
+    "errorTitle": "Subscription Error",
+    "errorMessage": "Failed to start subscription process. Please try again.",
+    "features": {
+      "notifications": "Task notifications and reminders",
+      "richText": "Rich text descriptions with image uploads",
+      "thingTriggers": "Thing-based task triggers",
+      "apiTokens": "API tokens for integrations",
+      "imageUploads": "Image uploads in descriptions",
+      "automation": "Advanced task automation"
+    }
+  },
+  "menu": {
+    "impersonateUser": "Impersonate User",
+    "switchUser": "Switch User",
+    "actAsAnotherUser": "Act as another user",
+    "stopImpersonating": "Stop Impersonating",
+    "returnToYourAccount": "Return to your account",
+    "settings": "Settings",
+    "accountAndPreferences": "Account & preferences",
+    "invitePeople": "Invite People",
+    "addMembersToYourCircle": "Add members to your circle",
+    "sidePanelSettings": "Side Panel Settings",
+    "customizeLayoutAndCards": "Customize layout & cards",
+    "switchToLight": "Switch to Light",
+    "switchToDark": "Switch to Dark",
+    "toggleThemeAppearance": "Toggle theme appearance",
+    "impersonating": "Impersonating"
+  },
+  "nativeCancel": {
+    "title": "Cancel Subscription",
+    "description": "To cancel your subscription, follow the instructions for your platform. You should cancel through the same platform you used to subscribe.",
+    "iosTitle": "For iOS (iPhone/iPad):",
+    "iosSteps": {
+      "1": "1. Open the Settings app on your device",
+      "2": "2. Tap your name at the top of the screen",
+      "3": "3. Tap Subscriptions",
+      "4": "4. Find and tap Donetick",
+      "5": "5. Tap Cancel Subscription"
+    },
+    "iosNote": "If you subscribed through iOS and are using the web or desktop version, you must cancel through iOS Settings as described above.",
+    "androidTitle": "For Android:",
+    "androidSteps": {
+      "1": "1. Open the Google Play Store app",
+      "2": "2. Tap the profile icon in the top right",
+      "3": "3. Tap Payments & subscriptions",
+      "4": "4. Tap Subscriptions",
+      "5": "5. Find and tap Donetick",
+      "6": "6. Tap Cancel subscription"
+    },
+    "androidNote": "If you subscribed through Google Play and are using the web or desktop version, you must cancel through Google Play as described above.",
+    "webTitle": "For Web/Desktop Subscriptions:",
+    "webDescription": "If you originally subscribed through our website or desktop app, you can cancel your subscription from the Account Settings section on our website using a web browser.",
+    "webImportant": "You must cancel your subscription through the same platform where you originally subscribed. If you subscribed through the iOS App Store or Google Play Store, you must cancel through that original platform.",
+    "billingPeriod": "Your subscription will remain active until the end of your current billing period.",
+    "cancelFromStore": "I'll cancel from my app store",
+    "cancelDesktopNow": "I subscribed via desktop - Cancel now"
+  },
+  "apiTokensPage": {
+    "heading": "Access Token",
+    "description": "Create tokens to use with the API for updating things, tasks, or chores.",
+    "plusFeature": "Plus Feature",
+    "plusDescription": "API tokens are not available in the Basic plan. Upgrade to Plus to generate API tokens for integrations and automation.",
+    "hideToken": "Hide Token",
+    "showToken": "Show Token",
+    "removeToken": "Remove Token",
+    "removeTokenConfirm": "Are you sure you want to remove {{name}}?",
+    "removed": "Removed",
+    "removedMessage": "API token has been removed",
+    "copied": "Token copied to clipboard",
+    "generateNew": "Generate New Token",
+    "namePrompt": "Give a name for your new token, something to remember it by.",
+    "generateAction": "Generate Token"
+  },
+  "mfaPage": {
+    "description": "Add an extra layer of security to your account with multi-factor authentication (MFA). When enabled, you'll need a verification code from your authenticator app in addition to your password when signing in.",
+    "title": "Two-Factor Authentication",
+    "enabled": "Your account is protected with 2FA",
+    "disabled": "Secure your account with an authenticator app",
+    "enable": "Enable",
+    "disable": "Disable",
+    "setupTitle": "Set up Multi-Factor Authentication",
+    "step1": "Step 1: Scan the QR code below with your authenticator app (Google Authenticator, Authy, etc.)",
+    "manualKey": "Manual entry key:",
+    "addedToApp": "I've added the account to my app",
+    "step2": "Step 2: Enter the 6-digit verification code from your authenticator app",
+    "verifyEnable": "Verify & Enable",
+    "enabledSuccess": "MFA Successfully Enabled!",
+    "backupSaveTitle": "Save these backup codes in a safe place",
+    "backupSaveDescription": "You can use these codes to access your account if you lose your authenticator device. Each code can only be used once.",
+    "savedBackupCodes": "I've saved my backup codes",
+    "disableTitle": "Disable Multi-Factor Authentication",
+    "disableWarning": "Disabling MFA will make your account less secure. Are you sure you want to continue?",
+    "disablePrompt": "Enter a verification code from your authenticator app to confirm:",
+    "backupCodesTitle": "New Backup Codes",
+    "backupCodesWarning": "Your previous backup codes are now invalid. Save these new codes in a safe place. Each code can only be used once.",
+    "failedQr": "Failed to generate QR code",
+    "invalidResponse": "Invalid response from server. Missing QR code or secret.",
+    "endpointMissing": "MFA setup endpoint not found. This feature may not be available yet.",
+    "unauthorized": "Unauthorized. Please login again.",
+    "serverError": "Server error. Please try again later.",
+    "setupFailed": "Failed to set up MFA ({{status}}). Please try again.",
+    "networkError": "Network error. Please check your connection and try again.",
+    "enabledToast": "MFA has been successfully enabled!",
+    "invalidCode": "Invalid verification code. Please try again.",
+    "confirmFailed": "Failed to confirm MFA. Please try again.",
+    "disabledToast": "MFA has been disabled successfully!",
+    "disableFailed": "Failed to disable MFA. Please try again.",
+    "backupRegenerated": "New backup codes have been generated!",
+    "regenerateFailed": "Failed to regenerate backup codes. Please try again."
+  },
+  "developer": {
+    "title": "Developer Settings",
+    "description": "View technical information about your authentication tokens, notifications, and session state for debugging.",
+    "tokenRefreshed": "Token refreshed successfully",
+    "tokenRefreshFailed": "Token refresh failed: {{message}}",
+    "tokenRefreshError": "Token refresh error: {{message}}",
+    "refreshEndpointSuccess": "Refresh token endpoint called successfully",
+    "refreshEndpointFailed": "Refresh token endpoint failed: {{status}} {{message}}",
+    "refreshEndpointError": "Refresh token endpoint error: {{message}}",
+    "notificationsLoaded": "Loaded {{count}} scheduled notifications",
+    "notificationsLoadError": "Error loading notifications: {{message}}",
+    "authTokens": "Authentication Tokens",
+    "refreshTokenAction": "Refresh Token",
+    "callRefreshEndpoint": "Call Refresh Endpoint",
+    "accessToken": "Access Token",
+    "refreshToken": "Refresh Token",
+    "timeLeft": "Time Left:",
+    "expires": "Expires: {{date}}",
+    "refreshTokenCookie": "Refresh tokens are managed via HTTP-only cookies on web platform.",
+    "platformInfo": "Platform Information",
+    "platform": "Platform:",
+    "native": "Native",
+    "web": "Web",
+    "scheduledNotifications": "Scheduled Local Notifications",
+    "refresh": "Refresh",
+    "noScheduledNotifications": "No scheduled notifications",
+    "totalScheduled": "Total scheduled:",
+    "noTitle": "No title",
+    "noBody": "No body",
+    "pastDue": "Past due",
+    "choreId": "Chore ID: {{id}}",
+    "sseTitle": "Server-Sent Events (SSE)",
+    "connectionStatus": "Connection Status",
+    "unknown": "Unknown",
+    "error": "Error: {{error}}",
+    "lastEventReceived": "Last Event Received",
+    "type": "Type:",
+    "received": "Received: {{date}}",
+    "notAvailable": "N/A",
+    "timeExpired": "Expired"
+  },
+  "storage": {
+    "title": "Storage Settings",
+    "serverUsageTitle": "Server Storage Usage",
+    "plusFeature": "Plus Feature",
+    "serverUsageDescription": "This is the storage used by your account on our servers, such as files, images, and uploaded data.",
+    "basicPlanUnavailable": "Server storage is not available in the Basic plan. Upgrade to Plus to track your server storage usage.",
+    "loading": "Loading...",
+    "usedOfTotal": "{{used}} MB used / {{total}} MB total ({{percent}}%)",
+    "experimentalTitle": "Experimental Features",
+    "comingSoon": "Coming Soon",
+    "offlineModeTitle": "Enable Offline Mode",
+    "offlineModeDescription": "Allows the app to work offline by caching data locally. This is experimental and may cause slowness. If you experience performance issues, turn this off.",
+    "offlineModeWarning": "Offline mode is enabled. If you experience slowness, disable this setting.",
+    "localStorageTitle": "{{platform}} Local Storage & Cache",
+    "appPlatform": "App",
+    "browserPlatform": "Browser",
+    "localStorageDescription": "This is data stored locally for faster access and offline use. Clearing it will not affect your server data, but may log you out or remove offline tasks.",
+    "clearAllTitle": "Clear All Local Storage",
+    "clearAllMessage": "Are you sure you want to clear your local storage and cache? This will remove all your data from this browser and require login.",
+    "clearAllAction": "Clear All",
+    "clearAllButton": "Clear All Local Storage and Cache",
+    "clearOfflineTitle": "Clear Offline Cache",
+    "clearOfflineMessage": "Are you sure you want to clear only the offline cache and tasks?",
+    "clearOfflineAction": "Clear Cache",
+    "clearOfflineButton": "Clear Offline Cache and Offline Tasks",
+    "appPreferencesTitle": "App Preferences",
+    "deviceOnly": "Device Only",
+    "appPreferencesDescription": "These preferences are stored locally on your device. Clearing them will reset app-specific settings and may log you out, but will not affect your server data.",
+    "clearPreferencesTitle": "Clear App Preferences",
+    "clearPreferencesMessage": "Are you sure you want to clear all app preferences? This will reset your app settings and may require you to log in again.",
+    "clearPreferencesAction": "Clear Preferences",
+    "clearPreferencesButton": "Clear App Preferences"
+  },
+  "circlePage": {
+    "description": "Your account is automatically connected to a Circle when you create or join one. Invite friends with the Circle code or join link below. You'll see join requests here as well.",
+    "partOf": "You are part of {{name}}",
+    "codeIs": "Your circle code is:",
+    "copyCode": "Copy Code",
+    "copyLink": "Copy Link",
+    "leaveCircle": "Leave Circle",
+    "members": "Circle Members",
+    "requests": "Circle Member Requests",
+    "refresh": "Refresh",
+    "refreshing": "Refreshing...",
+    "lastUpdated": "Last updated: {{date}}",
+    "wantsToJoin": "{{name}} wants to join your circle.",
+    "accept": "Accept",
+    "joinPrompt": "Want to join someone else's Circle? Ask them for their unique Circle code or join link. Enter the code below to join their Circle.",
+    "enterCode": "Enter Circle code:",
+    "joinCircle": "Join Circle",
+    "copyCodeSuccess": "Code copied to clipboard",
+    "copyLinkSuccess": "Link copied to clipboard",
+    "leaveConfirm": "Are you sure you want to leave your circle?",
+    "leaveTitle": "Leave Circle",
+    "leaveSuccess": "Left circle successfully",
+    "leaveFailed": "Failed to leave circle",
+    "roleUpdateFailed": "Failed to update role",
+    "removeMemberTitle": "Remove Member",
+    "removeMemberConfirm": "Are you sure you want to remove {{name}} from your circle?",
+    "removeMemberSuccess": "Removed member successfully",
+    "acceptTitle": "Accept Member Request",
+    "acceptConfirm": "Are you sure you want to accept {{name}} (username: {{username}}) into your circle?",
+    "acceptSuccess": "Accepted request successfully",
+    "joinSuccess": "Joined circle successfully, wait for the circle owner to accept your request.",
+    "alreadyMember": "You are already a member of this circle",
+    "joinFailed": "Failed to join circle",
+    "pendingApproval": "Pending Approval",
+    "joinedOn": "Joined on {{date}}",
+    "requestedOn": "Requested to join {{date}}",
+    "roleDescriptions": {
+      "member": "Just a regular member of the circle",
+      "manager": "Can impersonate users and perform actions on their behalf",
+      "admin": "Full access to the circle"
+    },
+    "newOwner": "New Owner"
+  },
+  "modals": {
+    "passwordChange": {
+      "title": "Change Password",
+      "intro": "Please enter your new password.",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm Password",
+      "mismatch": "Passwords do not match",
+      "min": "Password must be at least 8 characters",
+      "max": "Password must be less than 64 characters"
+    },
+    "userDeletion": {
+      "title": "Delete Account",
+      "warningTitle": "Delete Account",
+      "warningIntro": "This action cannot be undone. Deleting your account will permanently remove:",
+      "items": {
+        "profile": "Your user profile and authentication data",
+        "chores": "All your chores, chore history, and time tracking sessions",
+        "tokens": "API tokens, MFA sessions, and password reset tokens",
+        "storage": "Storage files and usage data",
+        "points": "Points history and notifications",
+        "circles": "Circle memberships and relationships"
+      },
+      "passwordPrompt": "Enter your password to continue",
+      "transferTitle": "Circle Ownership Transfer Required",
+      "transferIntro": "You own circles that require ownership transfer before deletion. Please select new owners:",
+      "circleLabel": "Circle: {{name}}",
+      "finalTitle": "Final Confirmation",
+      "finalPrompt": "Please enter your password and type DELETE to confirm account deletion.",
+      "finalHint": "On successful deletion, you will be logged out and redirected to the login page.",
+      "typeDelete": "Type \"DELETE\" to confirm",
+      "checkFailed": "Failed to check deletion requirements",
+      "confirmDelete": "Please enter your password and type DELETE to confirm",
+      "deleteFailed": "Failed to delete account"
+    }
+  },
+  "localization": {
+    "rtlNotice": "This language uses right-to-left (RTL) text direction",
+    "title": "Lokalisatie",
+    "description": "Pas de taal, datumnotatie en regionale voorkeuren voor uw account aan.",
+    "language": "Taal",
+    "languageDescription": "Selecteer uw voorkeurstaal",
+    "dateFormat": "Datumnotatie",
+    "dateFormatDescription": "Kies hoe datums in de applicatie worden weergegeven",
+    "timeFormat": "Tijdnotatie",
+    "timeFormatDescription": "Selecteer 12-uurs of 24-uurs tijdnotatie",
+    "12hour": "12-uurs (AM/PM)",
+    "24hour": "24-uurs",
+    "firstDayOfWeek": "Eerste Dag van de Week",
+    "firstDayOfWeekDescription": "Selecteer welke dag uw week begint",
+    "sunday": "Zondag",
+    "monday": "Maandag",
+    "saturday": "Zaterdag",
+    "formats": {
+      "mdy": "MM/DD/JJJJ (VS)",
+      "dmy": "DD/MM/JJJJ (Europa)",
+      "ymd": "JJJJ-MM-DD (ISO)",
+      "long": "Lang formaat (bijv. 1 januari 2024)",
+      "short": "Kort formaat (bijv. 1 jan 2024)"
+    }
+  },
+  "title": "Instellingen",
+  "circleSettings": {
+    "title": "Cirkelinstellingen",
+    "description": "Uw account wordt automatisch verbonden met een Cirkel wanneer u er een aanmaakt of lid wordt. Nodig eenvoudig vrienden uit door de unieke Cirkelcode of onderstaande link te delen.",
+    "circleCode": "Cirkelcode",
+    "copyCode": "Code Kopiëren",
+    "copyLink": "Link Kopiëren",
+    "codeCopied": "Cirkelcode gekopieerd!",
+    "linkCopied": "Link gekopieerd!",
+    "joinCircle": "Lid Worden van een Cirkel",
+    "joinCirclePlaceholder": "Voer Cirkelcode in",
+    "join": "Lid Worden",
+    "leave": "Cirkel Verlaten",
+    "leaveConfirmTitle": "Cirkel Verlaten",
+    "leaveConfirmMessage": "Weet u zeker dat u deze cirkel wilt verlaten?",
+    "circleMembers": "Cirkelleden",
+    "circleMemberRequests": "Aanvragen voor Cirkellidmaatschap",
+    "admin": "Beheerder",
+    "member": "Lid",
+    "pending": "In behandeling",
+    "accept": "Accepteren",
+    "reject": "Afwijzen",
+    "makeAdmin": "Beheerder Maken",
+    "makeMember": "Lid Maken",
+    "remove": "Verwijderen",
+    "webhookURL": "Webhook URL",
+    "webhookDescription": "Voer een webhook URL in om meldingen te ontvangen voor cirkelgebeurtenissen",
+    "webhookPlaceholder": "https://uw-webhook-url.com"
+  },
+  "accountSettings": {
+    "title": "Accountinstellingen",
+    "subscription": "Abonnement",
+    "subscriptionStatus": "Huidig Plan",
+    "free": "Gratis",
+    "plus": "Plus",
+    "upgrade": "Upgraden",
+    "cancel": "Annuleren",
+    "changePassword": "Wachtwoord Wijzigen",
+    "password": "Wachtwoord",
+    "dangerZone": "Gevarenzone",
+    "dangerZoneDescription": "Zodra u uw account verwijdert, is er geen weg terug. Wees zeker van uw beslissing.",
+    "deleteAccount": "Account Verwijderen"
+  },
+  "notifications": {
+    "settingsSaved": "Instellingen succesvol opgeslagen",
+    "settingsSaveFailed": "Opslaan van instellingen mislukt",
+    "invalidWebhook": "Ongeldige webhook URL"
   }
 }

@@ -1,0 +1,37 @@
+{
+  "summaryTitle": "Task Summary",
+  "delete": {
+    "title": "Delete History Record",
+    "confirm": "Are you sure you want to delete this history record?"
+  },
+  "empty": {
+    "title": "No History Yet",
+    "description": "You haven't completed any tasks. Once you start finishing tasks, they'll show up here.",
+    "backToChores": "Go back to chores"
+  },
+  "info": {
+    "completedTitle": "You've completed",
+    "completedValue": "12345 Chores"
+  },
+  "edit": {
+    "title": "Edit History",
+    "completedDate": "Completed Date",
+    "note": "Note",
+    "additionalNotes": "Additional Notes",
+    "deleteConfirm": "Are you sure you want to delete this history?"
+  },
+  "stats": {
+    "allCompleted": "All Completed",
+    "averageTiming": "Average Timing",
+    "longestDelay": "Longest Delay",
+    "completedMost": "Completed Most",
+    "membersInvolved": "Members Involved",
+    "lastCompleted": "Last Completed",
+    "onTime": "On time",
+    "neverLate": "Never late",
+    "times_one": "{{count}} time",
+    "times_other": "{{count}} times",
+    "membersCount_one": "{{count}} member",
+    "membersCount_other": "{{count}} members"
+  }
+}

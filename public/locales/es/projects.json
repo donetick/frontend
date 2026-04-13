@@ -1,0 +1,29 @@
+{
+  "view": {
+    "title": "Proyectos",
+    "description": "Organize your tasks into projects. crear custom workspaces to keep your tasks organized and easy to access.",
+    "default": "predeterminado",
+    "defaultProjectName": "Proyecto predeterminado",
+    "defaultProjectDescription": "Todas las tareas sin un proyecto específico",
+    "tasksCount": "{{count}} tareas",
+    "shared": "Compartido",
+    "loadFailed": "falló to load projects. inténtalo de nuevo.",
+    "deleteTitle": "eliminar proyecto",
+    "deleteMessage": "¿Seguro que quieres delete \"{{name}}\"? This will remove the project but keep all tasks, which will move to the predeterminado proyecto."
+  },
+  "modal": {
+    "createTitle": "crear New proyecto",
+    "editTitle": "editar proyecto",
+    "name": "proyecto nombre",
+    "namePlaceholder": "introduce project name...",
+    "nameRequired": "proyecto name is required",
+    "descriptionPlaceholder": "opcional project description...",
+    "icon": "proyecto Icon",
+    "chooseIconTitle": "Elegir icono del proyecto",
+    "availableIcons": "Iconos disponibles",
+    "selectIcon": "selecciona Icon",
+    "color": "proyecto color",
+    "createFailed": "falló to create project",
+    "updateFailed": "falló to update project"
+  }
+}

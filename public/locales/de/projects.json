@@ -1,0 +1,29 @@
+{
+  "view": {
+    "title": "Projekte",
+    "description": "Organisiere deine Aufgaben in Projekten. Erstelle eigene Arbeitsbereiche, damit deine Aufgaben strukturiert und leicht zugänglich bleiben.",
+    "default": "Standard",
+    "defaultProjectName": "Standardprojekt",
+    "defaultProjectDescription": "Alle Aufgaben ohne spezifisches Projekt",
+    "tasksCount": "{{count}} Aufgaben",
+    "shared": "Geteilt",
+    "loadFailed": "Projekte konnten nicht geladen werden. Bitte versuche es erneut.",
+    "deleteTitle": "Projekt löschen",
+    "deleteMessage": "Möchtest du \"{{name}}\" wirklich löschen? Das Projekt wird entfernt, aber alle Aufgaben bleiben erhalten und werden ins Standardprojekt verschoben."
+  },
+  "modal": {
+    "createTitle": "Neues Projekt erstellen",
+    "editTitle": "Projekt bearbeiten",
+    "name": "Projektname",
+    "namePlaceholder": "Projektnamen eingeben...",
+    "nameRequired": "Projektname ist erforderlich",
+    "descriptionPlaceholder": "Optionale Projektbeschreibung...",
+    "icon": "Projekticon",
+    "chooseIconTitle": "Projekticon auswählen",
+    "availableIcons": "Verfügbare Icons",
+    "selectIcon": "Icon auswählen",
+    "color": "Projektfarbe",
+    "createFailed": "Projekt konnte nicht erstellt werden",
+    "updateFailed": "Projekt konnte nicht aktualisiert werden"
+  }
+}
