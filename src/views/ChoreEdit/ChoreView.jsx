@@ -73,6 +73,7 @@ import NoteViewerModal from '../Modals/Inputs/NoteViewerModal'
 import LoadingComponent from '../components/Loading.jsx'
 import RichTextEditor from '../components/RichTextEditor.jsx'
 import SubTasks from '../components/SubTask.jsx'
+import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import TimePassedCard from './TimePassedCard.jsx'
 import TimerSplitButton from './TimerSplitButton.jsx'
 
@@ -85,6 +86,7 @@ const ChoreView = () => {
   const [infoCards, setInfoCards] = useState([])
   const { choreId } = useParams()
   const [note, setNote] = useState(null)
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
   const queryClient = useQueryClient()
   const { showSuccess, showError, showUndo } = useNotification()
 
@@ -125,6 +127,38 @@ const ChoreView = () => {
       handleTaskCompletion()
     }
   }, [choreData, circleMembersData])
+
+  useEffect(() => {
+    const handleKeyDown = event => {
+      const isHoldingCmd = event.ctrlKey || event.metaKey
+
+      // Show keyboard shortcuts when holding Cmd/Ctrl
+      if (isHoldingCmd) {
+        setShowKeyboardShortcuts(true)
+      }
+
+      // Cmd/Ctrl + Escape key to cancel
+      if (event.key === 'Escape' && (event.ctrlKey || event.metaKey)) {
+        event.preventDefault()
+        window.history.back()
+        return
+      }
+    }
+
+    const handleKeyUp = event => {
+      if (event.key === 'Control' || event.key === 'Meta') {
+        setShowKeyboardShortcuts(false)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('keyup', handleKeyUp)
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('keyup', handleKeyUp)
+    }
+  }, [])
 
   useEffect(() => {
     if (chore && performers?.length > 0) {
@@ -1118,6 +1152,36 @@ const ChoreView = () => {
         <ConfirmationModal config={timerActionConfig} />
         <NoteViewerModal config={noteViewerConfig} />
       </Card>
+      <Sheet
+        variant='outlined'
+        sx={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          p: 2, // padding
+          paddingBottom: getSafeBottomPadding(2), // safe area padding for iOS
+          display: 'flex',
+          justifyContent: 'flex-end',
+          gap: 2,
+          'z-index': 1000,
+          bgcolor: 'background.body',
+          boxShadow: 'md', // Add a subtle shadow
+        }}
+      >
+        <Button
+          color='neutral'
+          variant='outlined'
+          onClick={() => {
+            window.history.back()
+          }}
+        >
+          Close
+          {showKeyboardShortcuts && (
+            <KeyboardShortcutHint shortcut='Esc' sx={{ ml: 1 }} />
+          )}
+        </Button>
+      </Sheet>
     </Container>
   )
 }
