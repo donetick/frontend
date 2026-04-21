@@ -790,12 +790,15 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
               value: 'id',
               display: 'name',
               options: [
-                { id: '1', name: '1 point' },
-                { id: '5', name: '5 points' },
-                { id: '10', name: '10 points' },
-                { id: '25', name: '25 points' },
-                { id: '50', name: '50 points' },
-                { id: '100', name: '100 points' },
+                { id: '1', name: t('chores:addTask.points', { count: 1 }) },
+                { id: '5', name: t('chores:addTask.points', { count: 5 }) },
+                { id: '10', name: t('chores:addTask.points', { count: 10 }) },
+                { id: '25', name: t('chores:addTask.points', { count: 25 }) },
+                { id: '50', name: t('chores:addTask.points', { count: 50 }) },
+                {
+                  id: '100',
+                  name: t('chores:addTask.points', { count: 100 }),
+                },
               ],
             },
           }}
@@ -951,13 +954,13 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
               size='sm'
               checked={useCustomTime}
               onChange={e => handleUseCustomTimeChange(e.target.checked)}
-              label='Set a specific time'
+              label={t('chores:edit.setSpecificTime')}
               sx={{ mt: 1 }}
             />
             <FormHelperText>
               {useCustomTime
-                ? 'Task will be due at the specified time'
-                : 'Task will be due at the end of the day (11:59 PM)'}
+                ? t('chores:edit.specificTimeHelper')
+                : t('chores:edit.endOfDayHelper')}
             </FormHelperText>
             {useCustomTime && (
               <Input

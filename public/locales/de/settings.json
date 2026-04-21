@@ -625,6 +625,28 @@
     }
   },
   "localization": {
-    "rtlNotice": "Diese Sprache verwendet eine Schreibrichtung von rechts nach links (RTL)"
+    "rtlNotice": "Diese Sprache verwendet eine Schreibrichtung von rechts nach links (RTL)",
+    "title": "Lokalisierung",
+    "description": "Passe Sprache, Datumsformat und regionale Einstellungen für dein Konto an.",
+    "language": "Sprache",
+    "languageDescription": "Wähle deine bevorzugte Sprache aus",
+    "dateFormat": "Datumsformat",
+    "dateFormatDescription": "Lege fest, wie Datumsangaben in der gesamten Anwendung angezeigt werden",
+    "timeFormat": "Zeitformat",
+    "timeFormatDescription": "Wähle zwischen 12-Stunden- und 24-Stunden-Format",
+    "12hour": "12-Stunden (AM/PM)",
+    "24hour": "24-Stunden",
+    "firstDayOfWeek": "Erster Tag der Woche",
+    "firstDayOfWeekDescription": "Wähle, mit welchem Tag deine Woche beginnen soll",
+    "sunday": "Sonntag",
+    "monday": "Montag",
+    "saturday": "Samstag",
+    "formats": {
+      "mdy": "MM/DD/YYYY (USA)",
+      "dmy": "DD/MM/YYYY (Europa)",
+      "ymd": "YYYY-MM-DD (ISO)",
+      "long": "Langes Format (z. B. 1. Januar 2024)",
+      "short": "Kurzes Format (z. B. 1. Jan. 2024)"
+    }
   }
 }

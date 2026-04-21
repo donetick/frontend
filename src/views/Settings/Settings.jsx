@@ -921,11 +921,10 @@ const Settings = () => {
       </div>
 
       <div className='grid gap-4 py-4' id='localization'>
-        <Typography level='h3'>Localization</Typography>
+        <Typography level='h3'>{t('settings:localization.title')}</Typography>
         <Divider />
         <Typography level='body-md'>
-          Customize language, date format, and regional preferences for your
-          account. These settings will apply throughout the application.
+          {t('settings:localization.description')}
         </Typography>
         <LocalizationSettings />
       </div>
