@@ -18,6 +18,9 @@
     "noActivitiesHelp": "Try selecting a different time period or user filter above.",
     "backToChores": "Go back to chores",
     "unknownUser": "Unknown User",
+    "noLabels": "No Labels",
+    "unassigned": "Unassigned",
+    "unknownTask": "Unknown Task",
     "byAssignee": "by Assignee",
     "tasksGroupedByAssignee": "Tasks grouped by assignee",
     "charts": {

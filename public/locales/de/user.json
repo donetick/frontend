@@ -18,6 +18,9 @@
     "noActivitiesHelp": "Wähle oben einen anderen Zeitraum oder Benutzerfilter aus.",
     "backToChores": "Zurück zu den Aufgaben",
     "unknownUser": "Unbekannter Benutzer",
+    "noLabels": "Keine Labels",
+    "unassigned": "Nicht zugewiesen",
+    "unknownTask": "Unbekannte Aufgabe",
     "byAssignee": "nach Zuständigkeit",
     "tasksGroupedByAssignee": "Aufgaben nach Zuständigen gruppiert",
     "charts": {

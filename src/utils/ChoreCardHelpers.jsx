@@ -1,4 +1,5 @@
 import moment from 'moment'
+import i18n from '../i18n/config'
 const allMonths = [
   'January',
   'February',
@@ -20,7 +21,9 @@ const allMonths = [
  * @returns {string} The formatted due date text
  */
 export const getDueDateChipText = (nextDueDate, chore, timeFormat = 'h:mm A') => {
-  if (chore?.nextDueDate === null || nextDueDate === null) return 'No Due Date'
+  if (chore?.nextDueDate === null || nextDueDate === null) {
+    return i18n.t('chores:due.noDueDate')
+  }
 
   const dueDate = moment(nextDueDate)
   const diff = moment(nextDueDate).diff(moment(), 'hours')
@@ -107,19 +110,19 @@ export const getRecurrentChipText = chore => {
     }
   }
   if (chore.frequencyType === 'once') {
-    return 'Once'
+    return i18n.t('chores:frequency.once')
   } else if (chore.frequencyType === 'trigger') {
-    return 'Trigger'
+    return i18n.t('chores:frequency.trigger')
   } else if (chore.frequencyType === 'daily') {
-    return 'Daily'
+    return i18n.t('chores:frequency.daily')
   } else if (chore.frequencyType === 'adaptive') {
-    return 'Adaptive'
+    return i18n.t('chores:frequency.adaptive')
   } else if (chore.frequencyType === 'weekly') {
-    return 'Weekly'
+    return i18n.t('chores:frequency.weekly')
   } else if (chore.frequencyType === 'monthly') {
-    return 'Monthly'
+    return i18n.t('chores:frequency.monthly')
   } else if (chore.frequencyType === 'yearly') {
-    return 'Yearly'
+    return i18n.t('chores:frequency.yearly')
   } else if (chore.frequencyType === 'days_of_the_week') {
     let days = metadata.days
     if (days.length > 4) {

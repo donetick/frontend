@@ -1,5 +1,14 @@
 {
   "summaryTitle": "Task Summary",
+  "activityTitle": "Task Activity",
+  "common": {
+    "unknown": "Unknown",
+    "updatedAt": "Updated at {{date}}"
+  },
+  "assignedTo": "Assigned to {{name}}",
+  "note": "Note",
+  "points_one": "{{count}} pt",
+  "points_other": "{{count}} pts",
   "delete": {
     "title": "Delete History Record",
     "confirm": "Are you sure you want to delete this history record?"
@@ -33,5 +42,23 @@
     "times_other": "{{count}} times",
     "membersCount_one": "{{count}} member",
     "membersCount_other": "{{count}} members"
+  },
+  "status": {
+    "inProgress": "In Progress",
+    "completed": "Completed",
+    "skipped": "Skipped",
+    "pendingApproval": "Pending Approval",
+    "rejected": "Rejected",
+    "missed": "Missed",
+    "rescheduled": "Rescheduled",
+    "onTime": "On Time",
+    "early": "Early",
+    "late": "Late"
+  },
+  "messages": {
+    "updatedTitle": "History Updated",
+    "updatedMessage": "The history record has been updated successfully.",
+    "deletedTitle": "History Deleted",
+    "deletedMessage": "The history record has been deleted successfully."
   }
 }

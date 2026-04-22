@@ -1,5 +1,14 @@
 {
   "summaryTitle": "Aufgabenübersicht",
+  "activityTitle": "Aufgabenaktivität",
+  "common": {
+    "unknown": "Unbekannt",
+    "updatedAt": "Aktualisiert am {{date}}"
+  },
+  "assignedTo": "Zugewiesen an {{name}}",
+  "note": "Notiz",
+  "points_one": "{{count}} Punkt",
+  "points_other": "{{count}} Punkte",
   "delete": {
     "title": "Verlaufseintrag löschen",
     "confirm": "Möchtest du diesen Verlaufseintrag wirklich löschen?"
@@ -33,5 +42,23 @@
     "times_other": "{{count}} Mal",
     "membersCount_one": "{{count}} Mitglied",
     "membersCount_other": "{{count}} Mitglieder"
+  },
+  "status": {
+    "inProgress": "In Arbeit",
+    "completed": "Abgeschlossen",
+    "skipped": "Übersprungen",
+    "pendingApproval": "Wartet auf Freigabe",
+    "rejected": "Abgelehnt",
+    "missed": "Verpasst",
+    "rescheduled": "Neu geplant",
+    "onTime": "Pünktlich",
+    "early": "Früh",
+    "late": "Spät"
+  },
+  "messages": {
+    "updatedTitle": "Verlauf aktualisiert",
+    "updatedMessage": "Der Verlaufseintrag wurde erfolgreich aktualisiert.",
+    "deletedTitle": "Verlauf gelöscht",
+    "deletedMessage": "Der Verlaufseintrag wurde erfolgreich gelöscht."
   }
 }

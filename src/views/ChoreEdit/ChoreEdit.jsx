@@ -28,6 +28,7 @@ import {
 } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import DurationInput from '../../components/common/DurationInput'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
@@ -72,6 +73,7 @@ const REPEAT_ON_TYPE = ['interval', 'days_of_the_week', 'day_of_the_month']
 const NO_DUE_DATE_REQUIRED_TYPE = ['no_repeat', 'once']
 const NO_DUE_DATE_ALLOWED_TYPE = ['trigger']
 const ChoreEdit = () => {
+  const { t } = useTranslation(['chores', 'common'])
   const { data: userProfile, isLoading: isUserProfileLoading } =
     useUserProfile()
 
@@ -162,24 +164,26 @@ const ChoreEdit = () => {
     const errors = {}
 
     if (name.trim() === '') {
-      errors.name = 'Name is required'
+      errors.name = t('chores:edit.validation.nameRequired')
     }
     if (assignStrategy !== 'no_assignee') {
       if (assignees.length === 0) {
-        errors.assignees = 'At least 1 assignees is required'
+        errors.assignees = t('chores:edit.validation.assigneesRequired')
       }
       if (assignedTo === null || assignedTo < 0) {
-        errors.assignedTo = 'Assigned to is required'
+        errors.assignedTo = t('chores:edit.validation.assignedToRequired')
       }
     }
     if (frequencyType === 'interval' && !frequency > 0) {
-      errors.frequency = `Invalid frequency, the ${frequencyMetadata.unit} should be > 0`
+      errors.frequency = t('chores:edit.validation.invalidFrequency', {
+        unit: frequencyMetadata.unit,
+      })
     }
     if (
       frequencyType === 'days_of_the_week' &&
       frequencyMetadata['days']?.length === 0
     ) {
-      errors.frequency = 'Please select at least one day of the week'
+      errors.frequency = t('chores:edit.validation.selectDayOfWeek')
     }
 
     // Validate advanced scheduling patterns
@@ -189,14 +193,13 @@ const ChoreEdit = () => {
       (!frequencyMetadata?.occurrences ||
         frequencyMetadata.occurrences.length === 0)
     ) {
-      errors.frequency =
-        'Please select at least one day occurrence for the month'
+      errors.frequency = t('chores:edit.validation.selectDayOccurrence')
     }
     if (
       frequencyType === 'day_of_the_month' &&
       frequencyMetadata['months']?.length === 0
     ) {
-      errors.frequency = 'Please select at least one month'
+      errors.frequency = t('chores:edit.validation.selectMonth')
     }
     if (
       dueDate === null &&
@@ -206,14 +209,14 @@ const ChoreEdit = () => {
       if (REPEAT_ON_TYPE.includes(frequencyType)) {
         console.log('VALIDATION:', dueDate, frequencyType)
 
-        errors.dueDate = 'Start date is required'
+        errors.dueDate = t('chores:edit.validation.startDateRequired')
       } else {
-        errors.dueDate = 'Due date is required'
+        errors.dueDate = t('chores:edit.validation.dueDateRequired')
       }
     }
     if (frequencyType === 'trigger') {
       if (!isThingValid) {
-        errors.thingTrigger = 'Thing trigger is invalid'
+        errors.thingTrigger = t('chores:edit.validation.thingTriggerInvalid')
       }
     }
 
@@ -226,7 +229,7 @@ const ChoreEdit = () => {
         <ListItem key={key}>{errors[key]}</ListItem>
       ))
       showError({
-        title: 'Please resolve the following errors:',
+        title: t('chores:edit.validation.resolveErrors'),
         message: <List>{errorList}</List>,
       })
       return false
@@ -367,16 +370,16 @@ const ChoreEdit = () => {
     SaveFunction(chore)
       .then(() => {
         showSuccess({
-          title: 'Chore Saved',
-          message: 'Your task has been saved successfully!',
+          title: t('chores:edit.saveSuccessTitle'),
+          message: t('chores:edit.saveSuccessMessage'),
         })
         Navigate('/chores')
       })
       .catch(error => {
         console.error('Failed to save chore:', error)
         showError({
-          title: 'Save Failed',
-          message: 'Failed to save chore, please try again.',
+          title: t('chores:edit.saveFailedTitle'),
+          message: t('chores:edit.saveFailedMessage'),
         })
       })
   }
@@ -607,10 +610,10 @@ const ChoreEdit = () => {
   const handleDelete = () => {
     setConfirmModelConfig({
       isOpen: true,
-      title: 'Delete Chore',
-      confirmText: 'Delete',
-      cancelText: 'Cancel',
-      message: 'Are you sure you want to delete this chore?',
+      title: t('chores:edit.deleteTitle'),
+      confirmText: t('common:actions.delete'),
+      cancelText: t('common:actions.cancel'),
+      message: t('chores:edit.deleteMessage'),
       onClose: isConfirmed => {
         if (isConfirmed === true) {
           deleteChores.mutate([choreId], {
@@ -619,7 +622,7 @@ const ChoreEdit = () => {
             },
             onError: error => {
               showError({
-                title: 'Delete Failed',
+                title: t('chores:edit.deleteFailedTitle'),
                 message: `Failed to delete chore: ${error.message}`,
               })
             },
@@ -652,10 +655,8 @@ const ChoreEdit = () => {
 
         <Box mb={3}>
           <FormControl error={errors.name}>
-            <Typography level='h4'>Name</Typography>
-            <Typography level='body-md'>
-              What is the name of this task?
-            </Typography>
+            <Typography level='h4'>{t('common:labels.name')}</Typography>
+            <Typography level='body-md'>{t('chores:edit.nameQuestion')}</Typography>
             <Input value={name} onChange={e => setName(e.target.value)} />
             <FormHelperText error>{errors.name}</FormHelperText>
           </FormControl>
@@ -663,8 +664,8 @@ const ChoreEdit = () => {
 
         <Box mb={3}>
           <FormControl error={errors.description}>
-            <Typography level='h4'>Description</Typography>
-            <Typography level='body-md'>What is this task about?</Typography>
+            <Typography level='h4'>{t('common:labels.description')}</Typography>
+            <Typography level='body-md'>{t('chores:edit.descriptionQuestion')}</Typography>
             <RichTextEditor
               value={description}
               onChange={setDescription}
@@ -676,8 +677,8 @@ const ChoreEdit = () => {
         </Box>
 
         <Box mb={3}>
-          <Typography level='h4'>Priority</Typography>
-          <Typography level='body-md'>How important is this task?</Typography>
+          <Typography level='h4'>{t('common:labels.priority')}</Typography>
+          <Typography level='body-md'>{t('chores:edit.priorityQuestion')}</Typography>
 
           {/* Priority Chip Selection */}
           <Box
@@ -723,7 +724,7 @@ const ChoreEdit = () => {
                 minHeight: 34,
               }}
             >
-              No Priority
+              {t('chores:labels.noPriority')}
             </Chip>
           </Box>
         </Box>
@@ -731,10 +732,8 @@ const ChoreEdit = () => {
         {/* Project Selection - Show only if there are multiple projects */}
         {projects.length >= 1 && (
           <Box mb={3}>
-            <Typography level='h4'>Project</Typography>
-            <Typography level='body-md'>
-              Which project does this task belong to?
-            </Typography>
+            <Typography level='h4'>{t('common:labels.project')}</Typography>
+            <Typography level='body-md'>{t('chores:edit.projectQuestion')}</Typography>
             <Select
               value={projectId}
               onChange={(event, newValue) => setProjectId(newValue)}
@@ -768,7 +767,7 @@ const ChoreEdit = () => {
                       )
                     })()}
                   </Avatar>
-                  Default Project
+                  {t('common:labels.defaultProject')}
                 </Box>
               </Option>
               {projects.map(project => (
@@ -809,10 +808,8 @@ const ChoreEdit = () => {
         )}
 
         <Box mb={3}>
-          <Typography level='h4'>Labels</Typography>
-          <Typography level='body-md'>
-            Things to remember about this task or to tag it
-          </Typography>
+          <Typography level='h4'>{t('common:labels.labelsLabel')}</Typography>
+          <Typography level='body-md'>{t('chores:edit.labelsQuestion')}</Typography>
           <Select
             multiple
             onChange={(event, newValue) => {
@@ -872,13 +869,13 @@ const ChoreEdit = () => {
               }}
             >
               <Add />
-              Add New Label
+              {t('chores:edit.addNewLabel')}
             </MenuItem>
           </Select>
         </Box>
 
         <Box>
-          <Typography level='h4'>Sub Tasks</Typography>
+          <Typography level='h4'>{t('common:labels.subtasks')}</Typography>
           {/* <FormControl sx={{ mt: 1 }}>
             <Checkbox
               onChange={e => {
@@ -914,8 +911,8 @@ const ChoreEdit = () => {
       {/* Section 2: Assignment & Responsibility */}
       <Box mb={4}>
         <Box mb={3}>
-          <Typography level='h4'>Assignees</Typography>
-          <Typography level='body-md'>Who can do this task?</Typography>
+          <Typography level='h4'>{t('common:labels.assignees')}</Typography>
+          <Typography level='body-md'>{t('chores:edit.whoCanDoTask')}</Typography>
           <Card>
             <List
               orientation='horizontal'
@@ -937,7 +934,7 @@ const ChoreEdit = () => {
                   overlay
                   disableIcon
                   variant='soft'
-                  label='Anyone'
+                  label={t('common:status.anyone')}
                 />
               </ListItem>
 
@@ -993,7 +990,7 @@ const ChoreEdit = () => {
                   setShowSaveAssigneeDefault(false)
                 }}
               >
-                Remember for Future Tasks
+                {t('common:actions.rememberForFutureTasks')}
               </Button>
             </Box>
           )}
@@ -1002,15 +999,13 @@ const ChoreEdit = () => {
         {assignees.length > 1 && (
           <>
             <Box mb={3}>
-              <Typography level='h4'>Currently Assigned To</Typography>
-              <Typography level='body-md'>
-                Who is assigned the next due?
-              </Typography>
+              <Typography level='h4'>{t('chores:edit.whoIsAssignedNext')}</Typography>
+              <Typography level='body-md'>{t('chores:edit.whoIsAssignedNext')}</Typography>
               <Select
                 placeholder={
                   assignees.length === 0
-                    ? 'No Assignees yet can perform this task'
-                    : 'Select an assignee for this task'
+                    ? t('chores:edit.noAssigneesAvailable')
+                    : t('chores:edit.selectAssignee')
                 }
                 disabled={assignees.length === 0}
                 value={assignedTo > -1 ? assignedTo : null}
@@ -1032,10 +1027,8 @@ const ChoreEdit = () => {
             </Box>
 
             <Box>
-              <Typography level='h4'>Assignment Strategy</Typography>
-              <Typography level='body-md'>
-                How to pick the next assignee for the following task?
-              </Typography>
+              <Typography level='h4'>{t('common:labels.assignmentStrategy')}</Typography>
+              <Typography level='body-md'>{t('chores:edit.assignmentStrategyQuestion')}</Typography>
               <Card>
                 <List
                   orientation='horizontal'
@@ -1053,10 +1046,7 @@ const ChoreEdit = () => {
                         overlay
                         disableIcon
                         variant='soft'
-                        label={item
-                          .split('_')
-                          .map(x => x.charAt(0).toUpperCase() + x.slice(1))
-                          .join(' ')}
+                        label={t(`chores:edit.assignStrategies.${item}`)}
                       />
                     </ListItem>
                   ))}
@@ -1096,11 +1086,13 @@ const ChoreEdit = () => {
 
         <Box mt={3} mb={3}>
           <Typography level='h4'>
-            {REPEAT_ON_TYPE.includes(frequencyType) ? 'Start Date' : 'Due Date'}
+            {REPEAT_ON_TYPE.includes(frequencyType)
+              ? t('common:labels.startDate')
+              : t('common:labels.dueDate')}
           </Typography>
           {frequencyType === 'trigger' && !dueDate && (
             <Typography level='body-sm'>
-              Due Date will be set when the trigger of the thing is met
+              {t('chores:edit.triggerDueDateHint')}
             </Typography>
           )}
 
@@ -1126,10 +1118,10 @@ const ChoreEdit = () => {
                 defaultChecked={dueDate !== null}
                 checked={dueDate !== null}
                 overlay
-                label='Give this task a due date'
+                label={t('chores:edit.giveTaskDueDate')}
               />
               <FormHelperText>
-                Task needs to be completed by a specific time
+                {t('chores:edit.dueDateHelper')}
               </FormHelperText>
             </FormControl>
           )}
@@ -1138,8 +1130,8 @@ const ChoreEdit = () => {
               <FormControl error={Boolean(errors.dueDate)} sx={{ mt: 2 }}>
                 <Typography level='body-md'>
                   {REPEAT_ON_TYPE.includes(frequencyType)
-                    ? 'When does this task start?'
-                    : 'When is the next first time this task is due?'}
+                    ? t('chores:edit.startDateQuestion')
+                    : t('chores:edit.nextDueQuestion')}
                 </Typography>
                 <Input
                   type='date'
@@ -1155,19 +1147,19 @@ const ChoreEdit = () => {
                   checked={useCustomTime}
                   onChange={e => handleUseCustomTimeChange(e.target.checked)}
                   overlay
-                  label='Set a specific time'
+                  label={t('chores:edit.setSpecificTime')}
                 />
                 <FormHelperText>
                   {useCustomTime
-                    ? 'Task will be due at the specified time'
-                    : 'Task will be due at the end of the day (11:59 PM)'}
+                    ? t('chores:edit.specificTimeHelper')
+                    : t('chores:edit.endOfDayHelper')}
                 </FormHelperText>
               </FormControl>
 
               {useCustomTime && (
                 <Box sx={{ mt: 2, ml: 4 }}>
                   <Typography level='body-sm' mb={1}>
-                    Time:
+                    {t('common:labels.time')}:
                   </Typography>
                   <Input
                     type='time'
@@ -1183,10 +1175,8 @@ const ChoreEdit = () => {
 
         {dueDate && (
           <Box mb={3}>
-            <Typography level='h4'>Task Window</Typography>
-            <Typography level='body-md'>
-              Define when this task can be completed and when it expires
-            </Typography>
+            <Typography level='h4'>{t('common:labels.taskWindow')}</Typography>
+            <Typography level='body-md'>{t('chores:edit.taskWindowDescription')}</Typography>
 
             {/* Available From (Completion Window) */}
             <FormControl sx={{ mt: 1 }}>
@@ -1200,10 +1190,10 @@ const ChoreEdit = () => {
                   }
                 }}
                 overlay
-                label='Set earliest completion time'
+                label={t('chores:edit.setEarliestCompletionTime')}
               />
               <FormHelperText>
-                Task becomes available to complete X hours before the due date
+                {t('chores:edit.completionWindowHelper')}
               </FormHelperText>
             </FormControl>
 
@@ -1215,7 +1205,7 @@ const ChoreEdit = () => {
                     ml: 4,
                   }}
                 >
-                  <Typography level='body-sm'>Hours:</Typography>
+                  <Typography level='body-sm'>{t('common:labels.hours')}:</Typography>
                   <Input
                     type='number'
                     value={completionWindow}
@@ -1226,7 +1216,7 @@ const ChoreEdit = () => {
                         max: 24 * 7,
                       },
                     }}
-                    placeholder='Hours'
+                    placeholder={t('common:placeholders.hours')}
                     onChange={e => {
                       setCompletionWindow(parseInt(e.target.value))
                     }}
@@ -1273,7 +1263,7 @@ const ChoreEdit = () => {
                   size='sm'
                   minValue={0}
                 />
-                <Typography level='body-sm'>after due date</Typography>
+                <Typography level='body-sm'>{t('chores:edit.afterDueDate')}</Typography>
               </Box>
             )}
           </Box>
@@ -1281,21 +1271,18 @@ const ChoreEdit = () => {
 
         {!['once', 'no_repeat'].includes(frequencyType) && (
           <Box>
-            <Typography level='h4'>Scheduling Preferences</Typography>
-            <Typography level='body-md'>
-              How to reschedule the next due date?
-            </Typography>
+            <Typography level='h4'>{t('chores:edit.schedulingPreferences')}</Typography>
+            <Typography level='body-md'>{t('chores:edit.schedulingPreferencesQuestion')}</Typography>
             <RadioGroup name='tiers' sx={{ gap: 1, '& > div': { p: 1 } }}>
               <FormControl>
                 <Radio
                   overlay
                   checked={!isRolling}
                   onClick={() => setIsRolling(false)}
-                  label='Reschedule from due date'
+                  label={t('chores:edit.rescheduleFromDueDate')}
                 />
                 <FormHelperText>
-                  the next task will be scheduled from the original due date,
-                  even if the previous task was completed late
+                  {t('chores:edit.rescheduleFromDueDateHelper')}
                 </FormHelperText>
               </FormControl>
               <FormControl>
@@ -1306,11 +1293,10 @@ const ChoreEdit = () => {
                     setIsRolling(true)
                     setDeadlineOffset(-1)
                   }}
-                  label='Reschedule from completion date'
+                  label={t('chores:edit.rescheduleFromCompletionDate')}
                 />
                 <FormHelperText>
-                  the next task will be scheduled from the actual completion
-                  date of the previous task
+                  {t('chores:edit.rescheduleFromCompletionDateHelper')}
                 </FormHelperText>
               </FormControl>
             </RadioGroup>
@@ -1319,11 +1305,10 @@ const ChoreEdit = () => {
         {/* Section 3.1: Notifications */}
 
         <Box mb={3}>
-          <Typography level='h4'>Notifications</Typography>
+          <Typography level='h4'>{t('common:labels.notifications')}</Typography>
           {!isPlusAccount(userProfile) && (
             <Typography level='body-sm' color='warning' sx={{ mb: 1 }}>
-              Task notifications are not available in the Basic plan. Upgrade to
-              Plus to receive reminders when tasks are due or completed.
+              {t('chores:edit.notificationsBasicPlan')}
             </Typography>
           )}
 
@@ -1339,14 +1324,14 @@ const ChoreEdit = () => {
               checked={isNotificable}
               disabled={!isPlusAccount(userProfile)}
               overlay
-              label='Notify for this task'
+              label={t('chores:edit.notifyForTask')}
             />
             <FormHelperText
               sx={{
                 opacity: !isPlusAccount(userProfile) ? 0.5 : 1,
               }}
             >
-              When should receive notifications for this task
+              {t('chores:edit.notifyForTaskHelper')}
             </FormHelperText>
           </FormControl>
         </Box>
@@ -1361,7 +1346,7 @@ const ChoreEdit = () => {
           >
             <Card variant='outlined'>
               <Typography level='h4' mb={2}>
-                Notification Schedule
+                {t('chores:edit.notificationSchedule')}
               </Typography>
               <Box sx={{ p: 0.5 }}>
                 <NotificationTemplate
@@ -1379,16 +1364,16 @@ const ChoreEdit = () => {
               </Box>
 
               <Typography level='h4' mt={3} mb={2}>
-                Who to Notify
+                {t('chores:edit.whoToNotify')}
               </Typography>
               <FormControl>
                 <Checkbox
                   overlay
                   disabled={true}
                   checked={true}
-                  label='All Assignees'
+                  label={t('common:labels.allAssignees')}
                 />
-                <FormHelperText>Notify all assignees</FormHelperText>
+                <FormHelperText>{t('chores:edit.notifyAllAssignees')}</FormHelperText>
               </FormControl>
 
               <FormControl>
@@ -1409,9 +1394,9 @@ const ChoreEdit = () => {
                       ? notificationMetadata?.circleGroup
                       : false
                   }
-                  label='Specific Group'
+                  label={t('common:labels.specificGroup')}
                 />
-                <FormHelperText>Notify a specific group</FormHelperText>
+                <FormHelperText>{t('chores:edit.notifySpecificGroup')}</FormHelperText>
               </FormControl>
 
               {notificationMetadata?.circleGroup && (
@@ -1421,11 +1406,11 @@ const ChoreEdit = () => {
                     ml: 4,
                   }}
                 >
-                  <Typography level='body-sm'>Telegram Group ID:</Typography>
+                  <Typography level='body-sm'>{t('common:labels.telegramGroupId')}:</Typography>
                   <Input
                     type='number'
                     value={notificationMetadata?.circleGroupID}
-                    placeholder='Telegram Group ID'
+                    placeholder={t('common:placeholders.telegramGroupId')}
                     onChange={e => {
                       setNotificationMetadata({
                         ...notificationMetadata,
@@ -1450,11 +1435,11 @@ const ChoreEdit = () => {
             pb: 1,
           }}
         >
-          Task Settings:
+          {t('chores:edit.taskSettings')}
         </Typography>
 
         <Box mb={3}>
-          <Typography level='h4'>Points System</Typography>
+          <Typography level='h4'>{t('common:labels.pointsLabel')}</Typography>
           <FormControl sx={{ mt: 1 }}>
             <Checkbox
               onChange={e => {
@@ -1466,11 +1451,10 @@ const ChoreEdit = () => {
               }}
               checked={points > -1}
               overlay
-              label='Assign points for completion'
+              label={t('chores:edit.assignPoints')}
             />
             <FormHelperText>
-              Assign points to this task and user will earn points when they
-              completed it
+              {t('chores:edit.pointsHelper')}
             </FormHelperText>
           </FormControl>
           {points != -1 && (
@@ -1481,7 +1465,7 @@ const ChoreEdit = () => {
                   ml: 4,
                 }}
               >
-                <Typography level='body-sm'>Points:</Typography>
+                <Typography level='body-sm'>{t('common:labels.pointsLabel')}:</Typography>
                 <Input
                   type='number'
                   value={points}
@@ -1492,7 +1476,7 @@ const ChoreEdit = () => {
                       max: 1000,
                     },
                   }}
-                  placeholder='Points'
+                  placeholder={t('common:labels.pointsLabel')}
                   onChange={e => {
                     setPoints(parseInt(e.target.value))
                   }}
@@ -1503,7 +1487,7 @@ const ChoreEdit = () => {
         </Box>
 
         <Box mb={3}>
-          <Typography level='h4'>Approval Requirement</Typography>
+          <Typography level='h4'>{t('chores:edit.approvalRequirement')}</Typography>
           <FormControl sx={{ mt: 1 }}>
             <Checkbox
               onChange={e => {
@@ -1511,18 +1495,17 @@ const ChoreEdit = () => {
               }}
               checked={requireApproval}
               overlay
-              label='Require admin approval'
+              label={t('chores:edit.requireAdminApproval')}
             />
             <FormHelperText>
-              This task will need approval from an admin before being marked as
-              complete
+              {t('chores:edit.requireAdminApprovalHelper')}
             </FormHelperText>
           </FormControl>
         </Box>
 
         <Box>
-          <Typography level='h4'>Privacy Settings</Typography>
-          <Typography level='body-md'>Who can see this task?</Typography>
+          <Typography level='h4'>{t('common:labels.privacySettings')}</Typography>
+          <Typography level='body-md'>{t('chores:edit.privacyQuestion')}</Typography>
           <RadioGroup
             name='isPrivate'
             value={isPrivate}
@@ -1536,20 +1519,20 @@ const ChoreEdit = () => {
             }}
           >
             <FormControl>
-              <Radio overlay value={false} label='Public' />
-              <FormHelperText>Everyone in your circle</FormHelperText>
+              <Radio overlay value={false} label={t('common:labels.public')} />
+              <FormHelperText>{t('chores:edit.privacyPublicHelper')}</FormHelperText>
             </FormControl>
             <FormControl>
               <Radio
                 overlay
                 disabled={assignees.length === 0}
                 value={true}
-                label='Limited'
+                label={t('common:labels.limited')}
               />
               <FormHelperText>
-                You and others that are assigned to the task
+                {t('chores:edit.privacyLimitedHelper')}
                 {assignees.length === 0
-                  ? ' (No assignees selected, Limited option is disabled)'
+                  ? ` (${t('chores:edit.privacyLimitedDisabled')})`
                   : ''}
               </FormHelperText>
             </FormControl>
@@ -1577,7 +1560,7 @@ const ChoreEdit = () => {
                   setShowSavePrivacyDefault(false)
                 }}
               >
-                Remember for Future Tasks
+                {t('common:actions.rememberForFutureTasks')}
               </Button>
             </Box>
           )}
@@ -1594,7 +1577,7 @@ const ChoreEdit = () => {
             }}
           >
             <Typography level='body1'>
-              Created by{' '}
+              {t('chores:edit.createdBy')}{' '}
               <Chip variant='solid'>
                 {membersData.res.find(f => f.userId === createdBy)?.displayName}
               </Chip>{' '}
@@ -1605,7 +1588,7 @@ const ChoreEdit = () => {
                 <Divider sx={{ my: 1 }} />
 
                 <Typography level='body1'>
-                  Updated by{' '}
+                  {t('chores:edit.updatedBy')}{' '}
                   <Chip variant='solid'>
                     {
                       membersData.res.find(f => f.userId === updatedBy)
@@ -1655,7 +1638,9 @@ const ChoreEdit = () => {
                     : unarchiveChore.mutate(choreId)
                 }}
               >
-                {isActive ? 'Archive' : 'Unarchive'}
+                {isActive
+                  ? t('common:actions.archive')
+                  : t('common:actions.unarchive')}
               </Button>
               <MenuButton
                 slots={{ root: IconButton }}
@@ -1671,7 +1656,7 @@ const ChoreEdit = () => {
             </ButtonGroup>
             <Menu placement='top-end'>
               <MenuItem color='danger' onClick={handleDelete}>
-                Delete
+                {t('common:actions.delete')}
               </MenuItem>
             </Menu>
           </Dropdown>
@@ -1683,13 +1668,13 @@ const ChoreEdit = () => {
             window.history.back()
           }}
         >
-          Cancel
+          {t('common:actions.cancel')}
           {showKeyboardShortcuts && (
             <KeyboardShortcutHint shortcut='Esc' sx={{ ml: 1 }} />
           )}
         </Button>
         <Button color='primary' variant='solid' onClick={HandleSaveChore}>
-          {choreId > 0 ? 'Save' : 'Create'}
+          {choreId > 0 ? t('common:actions.save') : t('common:actions.create')}
           {showKeyboardShortcuts && (
             <KeyboardShortcutHint shortcut='Enter' sx={{ ml: 1 }} />
           )}

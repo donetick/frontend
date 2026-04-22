@@ -77,7 +77,7 @@ import TimePassedCard from './TimePassedCard.jsx'
 import TimerSplitButton from './TimerSplitButton.jsx'
 
 const ChoreView = () => {
-  const { t } = useTranslation('chores')
+  const { t } = useTranslation(['chores', 'common'])
   const { fmt } = useLocalization()
   const [chore, setChore] = useState({})
   const navigate = useNavigate()
@@ -156,7 +156,7 @@ const ChoreView = () => {
           chore.lastCompletedDate
             ? performers.find(p => p.userId === chore.lastCompletedBy)
                 ?.displayName
-            : 'N/A'
+            : t('choreView.na')
         }`,
       },
       {
@@ -174,7 +174,7 @@ const ChoreView = () => {
 
         subtext2:
           chore.deadlineOffset > 0 && chore.nextDueDate
-            ? `Deadline: ${moment(chore.nextDueDate).add(chore.deadlineOffset, 'seconds').fromNow()}`
+            ? `${t('choreView.deadline')}: ${moment(chore.nextDueDate).add(chore.deadlineOffset, 'seconds').fromNow()}`
             : null,
       },
       {
@@ -331,7 +331,7 @@ const ChoreView = () => {
       title: t('choreView.resetTimer'),
       message: t('choreView.resetTimerConfirmation'),
       confirmText: t('choreView.resetTimer'),
-      cancelText: t('common:cancel'),
+      cancelText: t('common:actions.cancel'),
       onClose: confirmed => {
         if (confirmed) {
           resetChoreTimer.mutate(choreId, {
@@ -355,7 +355,7 @@ const ChoreView = () => {
       title: t('choreView.clearAllTimeRecords'),
       message: t('choreView.clearAllTimeConfirmation'),
       confirmText: t('choreView.clearAllTimeRecords'),
-      cancelText: t('common:cancel'),
+      cancelText: t('common:actions.cancel'),
       onClose: async confirmed => {
         if (confirmed) {
           if (choreTimer?.res?.id) {
@@ -703,7 +703,7 @@ const ChoreView = () => {
             }}
           >
             <Edit />
-            Edit
+            {t('choreView.edit')}
           </Button>
         </Box>
 

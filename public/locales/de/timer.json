@@ -1,5 +1,6 @@
 {
   "details": {
+    "title": "Timer-Details",
     "updatedTitle": "Sitzung aktualisiert",
     "updatedMessage": "Timer-Sitzung wurde erfolgreich aktualisiert.",
     "updateFailedTitle": "Sitzung konnte nicht aktualisiert werden",
@@ -46,6 +47,7 @@
     "leaveEmptyOngoing": "Leer lassen, wenn die Sitzung noch läuft",
     "durationAuto": "Dauer (automatisch berechnet)",
     "pauseButton": "Timer pausieren",
+    "resumeButton": "Fortsetzen",
     "startButton": "Timer starten"
   },
   "edit": {

@@ -1,9 +1,0 @@
-{
-  "title": "Labels",
-  "description": "Manage your labels and organize your tasks effectively. Labels are automatically shared with your circle when they are used on a shared task.",
-  "shared": "Shared",
-  "deleteTitle": "Delete Label",
-  "deleteMessage": "Are you sure you want to delete this label? This will remove the label from all tasks.",
-  "loadFailed": "Failed to load labels. Please try again.",
-  "empty": "No labels available. Add a new label to get started."
-}

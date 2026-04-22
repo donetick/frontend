@@ -1,9 +1,0 @@
-{
-  "title": "Etiquetas",
-  "description": "gestiona your labels and organize your tasks effectively. etiquetas are automatically shared with your circle when they are used on a shared task.",
-  "shared": "Compartida",
-  "deleteTitle": "eliminar etiqueta",
-  "deleteMessage": "¿Seguro que quieres delete this label? This will remove the label from all tasks.",
-  "loadFailed": "falló to load labels. inténtalo de nuevo.",
-  "empty": "No labels available. añadir a new label to get started."
-}

@@ -151,6 +151,17 @@
     "changeDueDate": "Change due date",
     "writeToNfc": "Write to NFC"
   },
+  "groups": {
+    "started": "Started",
+    "pendingApproval": "Pending Approval",
+    "overdue": "Overdue",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "next7Days": "Next 7 Days",
+    "laterThisMonth": "Later This Month",
+    "future": "Future",
+    "anytime": "Anytime"
+  },
   "labels": {
     "calendarOverview": "Calendar Overview",
     "highPriority": "High Priority",
@@ -360,11 +371,16 @@
     "unexpectedError": "An unexpected error occurred. Please try again.",
     "shortcuts": {
       "selectAllVisible": "Select all visible tasks (Ctrl+A)",
+      "completeSelected": "Complete selected tasks (Enter)",
+      "skipSelected": "Skip selected tasks (/)",
+      "archiveSelected": "Archive selected tasks (X)",
       "restoreSelected": "Restore selected tasks (R)",
       "deleteSelected": "Delete selected tasks (E)",
       "clearMultiSelect": "Clear multi-select (Esc)",
       "closeMultiSelect": "Close multi-select (Esc)"
     },
+    "selectedSingle": "{{count}} task selected",
+    "selectedMultiple": "{{count}} tasks selected",
     "viewCompact": "Switch to Compact View",
     "viewCalendar": "Switch to Calendar View",
     "viewCard": "Switch to Card View",
@@ -401,7 +417,28 @@
       "assignedToMe": "Assigned to me",
       "availableForMe": "Available for me",
       "assignedToOthers": "Assigned to others"
+    },
+    "otherFilters": {
+      "title": "Other",
+      "dueToday": "Due today",
+      "dueInWeek": "Due in week",
+      "dueLater": "Due later",
+      "createdByMe": "Created by me",
+      "assignedToMe": "Assigned to me",
+      "noDueDate": "No due date"
     }
+  },
+  "nfc": {
+    "successTitle": "Success!",
+    "successMessage": "URL written to NFC tag successfully!",
+    "instructions": "Press the button below to write to NFC.",
+    "writeButton": "Write NFC",
+    "requestAccess": "Request Access",
+    "autoCompleteWhenScanned": "Auto-complete when scanned",
+    "urlCopied": "URL copied to clipboard!",
+    "unsupportedAlert": "NFC is not supported by this browser.",
+    "unsupportedMessage": "NFC is not supported by this browser. You can still copy the URL and write it to an NFC tag using a compatible device.",
+    "writeError": "Error writing to NFC tag. Please try again."
   },
   "actionFeedback": {
     "undoable": {
@@ -521,6 +558,7 @@
     "completed": "Completed",
     "times": "times",
     "details": "Details",
+    "deadline": "Deadline",
     "createdBy": "Created By",
     "na": "N/A",
     "taskCompleted": "Task Completed",

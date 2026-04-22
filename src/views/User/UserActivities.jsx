@@ -59,7 +59,16 @@ const groupByDate = history => {
   return aggregated
 }
 
-const ChoreHistoryItem = ({ time, name, points, status, performer, notes, onViewNote }) => {
+const ChoreHistoryItem = ({
+  time,
+  name,
+  points,
+  status,
+  performer,
+  notes,
+  onViewNote,
+}) => {
+  const { t } = useTranslation(['user', 'history'])
   const getStatusIcon = status => {
     switch (status) {
       case 0:
@@ -121,7 +130,7 @@ const ChoreHistoryItem = ({ time, name, points, status, performer, notes, onView
         </Typography>
         {points && (
           <Chip size='sm' color='success' startDecorator={<Toll />}>
-            {`${points} points`}
+            {t('user:pointsWithCount', { count: points })}
           </Chip>
         )}
         {notes && (
@@ -136,7 +145,7 @@ const ChoreHistoryItem = ({ time, name, points, status, performer, notes, onView
               onViewNote?.(notes)
             }}
           >
-            Note
+            {t('history:note')}
           </Chip>
         )}
       </Box>
@@ -146,6 +155,7 @@ const ChoreHistoryItem = ({ time, name, points, status, performer, notes, onView
 
 
 const ChoreHistoryTimeline = ({ history, onViewNote }) => {
+  const { t } = useTranslation(['user', 'common', 'history'])
   const { fmt } = useLocalization()
 
   const groupedHistory = groupByDate(history)
@@ -159,7 +169,7 @@ const ChoreHistoryTimeline = ({ history, onViewNote }) => {
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
         <Timeline sx={{ fontSize: '1.5rem', color: 'primary.500' }} />
         <Typography level='h4' sx={{ fontWeight: 'lg', color: 'text.primary' }}>
-          Activities Timeline
+          {t('user:activitiesTimeline')}
         </Typography>
       </Box>
 
@@ -193,7 +203,7 @@ const ChoreHistoryTimeline = ({ history, onViewNote }) => {
   )
 }
 
-const renderPieChart = (data, size, isPrimary, chartType = null) => {
+const renderPieChart = (data, size, isPrimary, chartType = null, t) => {
   // Filter out items with zero or negative values
   const validData = data.filter(item => item.value > 0)
 
@@ -212,7 +222,7 @@ const renderPieChart = (data, size, isPrimary, chartType = null) => {
         }}
       >
         <Typography level='body-sm' color='neutral'>
-          No data available
+          {t('common:status.noDataAvailable')}
         </Typography>
       </Box>
     )
@@ -540,7 +550,7 @@ const UserActivites = () => {
         // Add unlabeled tasks if there are any
         if (unlabeledCount > 0) {
           result.push({
-            label: 'No Labels',
+            label: t('user:activities.noLabels'),
             value: unlabeledCount,
             color: TASK_COLOR.ANYTIME,
             id: 'unlabeled',
@@ -563,7 +573,9 @@ const UserActivites = () => {
           const assignee = circleUsers.find(
             user => user.userId === chore.assignedTo,
           )
-          const assigneeName = assignee ? assignee.displayName : 'Unassigned'
+          const assigneeName = assignee
+            ? assignee.displayName
+            : t('user:activities.unassigned')
           const assigneeId = chore.assignedTo || 'unassigned'
 
           if (assigneeCounts[assigneeId]) {
@@ -656,7 +668,7 @@ const UserActivites = () => {
     // Add unlabeled tasks duration if there is any
     if (unlabeledDuration > 0) {
       result.push({
-        label: 'No Labels',
+        label: t('user:activities.noLabels'),
         value: Math.round((unlabeledDuration / 3600) * 10) / 10, // Convert to hours and round to 1 decimal
         color: TASK_COLOR.ANYTIME,
         id: 'unlabeled',
@@ -677,7 +689,7 @@ const UserActivites = () => {
     // Iterate through ChoreHistory to get actual time spent per task
     history.forEach(historyItem => {
       const duration = historyItem.duration || 0 // duration in seconds from ChoreHistory
-      const taskName = historyItem.choreName || 'Unknown Task'
+      const taskName = historyItem.choreName || t('user:activities.unknownTask')
 
       if (taskDurations[taskName]) {
         taskDurations[taskName].duration += duration
@@ -740,7 +752,7 @@ const UserActivites = () => {
 
     if (totalCompleted > 0) {
       result.push({
-        label: `On time`,
+        label: t('history:status.onTime'),
         value: totalCompleted,
         color: TASK_COLOR.COMPLETED,
         id: 1,
@@ -749,7 +761,7 @@ const UserActivites = () => {
 
     if (totalLate > 0) {
       result.push({
-        label: `Late`,
+        label: t('history:status.late'),
         value: totalLate,
         color: TASK_COLOR.LATE,
         id: 2,
@@ -758,7 +770,7 @@ const UserActivites = () => {
 
     if (totalNoDueDate > 0) {
       result.push({
-        label: `Completed`,
+        label: t('history:status.completed'),
         value: totalNoDueDate,
         color: TASK_COLOR.ANYTIME,
         id: 3,
@@ -1179,6 +1191,7 @@ const UserActivites = () => {
                         300, // Increased size for better chart container
                         true,
                         selectedChart,
+                        t,
                       )}
                     </Box>
                   </Box>
@@ -1238,7 +1251,7 @@ const UserActivites = () => {
                                   alignItems: 'center',
                                 }}
                               >
-                                {renderPieChart(data, 70, false)}
+                                {renderPieChart(data, 70, false, null, t)}
                               </Box>
                             </Card>
                           </Grid>
