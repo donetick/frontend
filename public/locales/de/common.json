@@ -113,6 +113,7 @@
   },
   "placeholders": {
     "search": "Suchen",
+    "typeHere": "Hier eingeben...",
     "enterDisplayName": "Anzeigename eingeben",
     "selectTimezone": "Zeitzone auswählen",
     "hours": "Stunden",

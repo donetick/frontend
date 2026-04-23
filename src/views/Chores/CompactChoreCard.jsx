@@ -9,6 +9,7 @@ import {
   Webhook,
 } from '@mui/icons-material'
 import { Box, Checkbox, Chip, IconButton, Typography } from '@mui/joy'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useLocalization } from '../../contexts/LocalizationContext'
@@ -40,6 +41,7 @@ const CompactChoreCard = ({
   onlyClickable = false,
 }) => {
   const navigate = useNavigate()
+  const { t } = useTranslation(['common'])
 
   const { data: userProfile } = useUserProfile()
   const { timeFormat } = useLocalization()
@@ -91,7 +93,7 @@ const CompactChoreCard = ({
       if (assignee) parts.push(assignee)
     }
     if (chore.assignedTo === null) {
-      parts.push('Anyone')
+      parts.push(t('common:status.anyone'))
     }
 
     // Points

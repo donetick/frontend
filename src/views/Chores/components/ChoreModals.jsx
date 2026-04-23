@@ -3,6 +3,7 @@ import NudgeModal from '../../Modals/Inputs/NudgeModal'
 import SelectModal from '../../Modals/Inputs/SelectModal'
 import TextModal from '../../Modals/Inputs/TextModal'
 import WriteNFCModal from '../../Modals/Inputs/WriteNFCModal'
+import { useTranslation } from 'react-i18next'
 
 const ChoreModals = ({
   activeModal,
@@ -15,6 +16,7 @@ const ChoreModals = ({
   onNudge,
   onClose,
 }) => {
+  const { t } = useTranslation(['chores', 'common'])
   return (
     <>
       {activeModal === 'changeDueDate' && modalChore && (
@@ -22,7 +24,7 @@ const ChoreModals = ({
           isOpen={true}
           key={'changeDueDate' + modalChore.id}
           current={modalChore.nextDueDate}
-          title='Change due date'
+          title={t('chores:actions.changeDueDate')}
           onClose={onClose}
           onSave={onChangeDueDate}
         />
@@ -33,7 +35,7 @@ const ChoreModals = ({
           isOpen={true}
           key={'completedInPast' + modalChore.id}
           current={modalChore.nextDueDate}
-          title='Save Chore that you completed in the past'
+          title={t('chores:actions.completeInPast')}
           onClose={onClose}
           onSave={onCompleteWithPastDate}
         />
@@ -44,8 +46,8 @@ const ChoreModals = ({
           isOpen={true}
           options={membersData?.res || []}
           displayKey='displayName'
-          title='Delegate to someone else'
-          placeholder='Select a performer'
+          title={t('chores:actions.delegate')}
+          placeholder={t('chores:actions.selectPerformer')}
           onClose={onClose}
           onSave={selected => onAssigneeChange(selected.id)}
         />
@@ -54,9 +56,9 @@ const ChoreModals = ({
       {activeModal === 'completeWithNote' && modalChore && (
         <TextModal
           isOpen={true}
-          title='Add note to attach to this completion:'
+          title={t('chores:actions.addCompletionNote')}
           onClose={onClose}
-          okText='Complete'
+          okText={t('common:actions.complete')}
           onSave={onCompleteWithNote}
         />
       )}

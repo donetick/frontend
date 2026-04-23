@@ -1,5 +1,6 @@
 import { Box, Button, Option, Select } from '@mui/joy'
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
 function SelectModal({
@@ -11,6 +12,7 @@ function SelectModal({
   displayKey,
   placeholder,
 }) {
+  const { t } = useTranslation(['common'])
   const { ResponsiveModal } = useResponsiveModal()
 
   const [selected, setSelected] = React.useState(null)
@@ -43,10 +45,10 @@ function SelectModal({
 
       <Box display={'flex'} justifyContent={'space-around'} mt={1}>
         <Button size='lg' onClick={handleSave} fullWidth sx={{ mr: 1 }}>
-          Save
+          {t('common:actions.save')}
         </Button>
         <Button size='lg' onClick={onClose} variant='outlined'>
-          Cancel
+          {t('common:actions.cancel')}
         </Button>
       </Box>
     </ResponsiveModal>

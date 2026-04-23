@@ -270,7 +270,25 @@
     "deleteConfirmTitle": "Delete Sub Account",
     "deleteConfirmMessage": "Are you sure you want to delete the child account \"{{name}}\"? This action cannot be undone.",
     "deleteSuccess": "Sub account \"{{name}}\" deleted successfully",
-    "deleteFailed": "Failed to delete sub account: {{message}}"
+    "deleteFailed": "Failed to delete sub account: {{message}}",
+    "modal": {
+      "title": "Create Sub Account",
+      "description": "Create a new sub account. The user will be able to log in using their combined username and complete tasks assigned to them.",
+      "nameLabel": "Sub Account Name",
+      "namePlaceholder": "Enter sub account name (e.g., sarah)",
+      "displayNamePlaceholder": "Display name (optional, defaults to sub account name)",
+      "confirmPasswordLabel": "Confirm Password",
+      "confirmPasswordPlaceholder": "Confirm password",
+      "createAction": "Create Account"
+    },
+    "validation": {
+      "nameRequired": "Sub account name is required",
+      "nameMin": "Sub account name must be at least 2 characters",
+      "nameMax": "Sub account name must be less than 20 characters",
+      "namePattern": "Sub account name can only contain lowercase letters, dot and dash",
+      "displayNameMax": "Display name must be less than 50 characters",
+      "passwordMismatch": "Passwords do not match"
+    }
   },
   "advanced": {
     "title": "Advanced Settings",

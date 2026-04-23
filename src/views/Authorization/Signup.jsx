@@ -18,7 +18,7 @@ import { useNotification } from '../../service/NotificationProvider'
 import { login, signUp } from '../../utils/Fetcher'
 
 const SignupView = () => {
-  const { t } = useTranslation(['common'])
+  const { t } = useTranslation(['common', 'auth'])
   const [username, setUsername] = React.useState('')
   const [password, setPassword] = React.useState('')
   const Navigate = useNavigate()
@@ -59,44 +59,42 @@ const SignupView = () => {
     let isValid = true
 
     if (!username.trim()) {
-      setUsernameError('Username is required')
+      setUsernameError(t('auth:errors.usernameRequired'))
       isValid = false
     }
     if (username.length < 4) {
-      setUsernameError('Username must be at least 4 characters')
+      setUsernameError(t('auth:errors.usernameMin'))
       isValid = false
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setEmailError('Invalid email address')
+      setEmailError(t('auth:errors.invalidEmail'))
       isValid = false
     }
 
     if (password.length < 8) {
-      setPasswordError('Password must be between 8 and 64 characters')
+      setPasswordError(t('auth:errors.passwordLength'))
       isValid = false
     }
 
     if (password.length > 64) {
-      setPasswordError('Password must be between 8 and 64 characters')
+      setPasswordError(t('auth:errors.passwordLength'))
       isValid = false
     }
 
     if (!displayName.trim()) {
-      setDisplayNameError('Display name is required')
+      setDisplayNameError(t('auth:errors.displayNameRequired'))
       isValid = false
     }
 
     // display name should only contain letters and spaces and numbers:
     if (!/^[a-zA-Z0-9 ]+$/.test(displayName)) {
-      setDisplayNameError('Display name can only contain letters and numbers')
+      setDisplayNameError(t('auth:errors.displayNamePattern'))
       isValid = false
     }
 
     // username should only contain lowercase letters, dot and dash:
     if (!/^[a-z.-]+$/.test(username)) {
-      setUsernameError(
-        'Username can only contain lowercase letters, dot and dash',
-      )
+      setUsernameError(t('auth:errors.usernamePattern'))
       isValid = false
     }
 
@@ -112,15 +110,15 @@ const SignupView = () => {
         handleLogin(username, password)
       } else if (response.status === 403) {
         showError({
-          title: 'Signup Failed',
-          message: 'Signup disabled, please contact admin',
+          title: t('auth:errors.signupFailedTitle'),
+          message: t('auth:errors.signupDisabled'),
         })
       } else {
         console.log('Signup failed')
         response.json().then(res => {
           showError({
-            title: 'Signup Failed',
-            message: res.error || 'An error occurred during signup',
+            title: t('auth:errors.signupFailedTitle'),
+            message: res.error || t('auth:errors.signupGeneric'),
           })
         })
       }
@@ -169,11 +167,11 @@ const SignupView = () => {
               </span>
             </Typography>
             <Typography level='body2'>
-              Create an account to get started!
+              {t('auth:signupSubtitle')}
             </Typography>
           </Box>
           <Typography level='body2' alignSelf={'start'} mt={4}>
-            Username
+            {t('common:labels.username')}
           </Typography>
           <Input
             margin='normal'
@@ -195,7 +193,7 @@ const SignupView = () => {
           </FormControl>
           {/* Error message display */}
           <Typography level='body2' alignSelf={'start'}>
-            Email
+            {t('common:labels.email')}
           </Typography>
           <Input
             margin='normal'
@@ -215,7 +213,7 @@ const SignupView = () => {
             <FormHelperText c>{emailError}</FormHelperText>
           </FormControl>
           <Typography level='body2' alignSelf={'start'}>
-            Password:
+            {t('common:labels.password')}:
           </Typography>
           <Input
             margin='normal'
@@ -225,7 +223,7 @@ const SignupView = () => {
             label={t('common:labels.password')}
             type='password'
             id='password'
-            placeholder='Enter password (8-64 characters)'
+            placeholder={t('auth:placeholders.passwordRange')}
             value={password}
             onChange={e => {
               setPasswordError(null)
@@ -236,7 +234,7 @@ const SignupView = () => {
             <FormHelperText>{passwordError}</FormHelperText>
           </FormControl>
           <Typography level='body2' alignSelf={'start'}>
-            Display Name:
+            {t('common:labels.displayName')}:
           </Typography>
           <Input
             margin='normal'
@@ -245,7 +243,7 @@ const SignupView = () => {
             name='displayName'
             label={t('common:labels.displayName')}
             id='displayName'
-            placeholder='How others see your name'
+            placeholder={t('common:placeholders.enterDisplayName')}
             value={displayName}
             onChange={e => {
               setDisplayNameError(null)
@@ -259,7 +257,7 @@ const SignupView = () => {
             level='body2'
             sx={{ mt: 2, mb: 1, textAlign: 'center', color: 'text.secondary' }}
           >
-            By signing up, you agree to our Terms of Service and Privacy Policy
+            {t('auth:messages.agreement')}
           </Typography>
           <Button
             // type='submit'
@@ -269,7 +267,7 @@ const SignupView = () => {
             sx={{ mt: 1, mb: 1 }}
             onClick={handleSubmit}
           >
-            Sign Up
+            {t('common:actions.signup')}
           </Button>
           <Divider>{t('common:actions.or')}</Divider>
           <Button
@@ -281,7 +279,7 @@ const SignupView = () => {
             variant='soft'
             // sx={{ mt: 3, mb: 2 }}
           >
-            Login
+            {t('common:actions.login')}
           </Button>
 
           <Box
@@ -294,7 +292,7 @@ const SignupView = () => {
                 window.open('https://donetick.com/privacy-policy', '_blank')
               }}
             >
-              Privacy Policy
+              {t('common:legal.privacyPolicy')}
             </Button>
             <Button
               variant='plain'
@@ -303,7 +301,7 @@ const SignupView = () => {
                 window.open('https://donetick.com/terms', '_blank')
               }}
             >
-              Terms of Use
+              {t('common:legal.termsOfUse')}
             </Button>
           </Box>
         </Sheet>

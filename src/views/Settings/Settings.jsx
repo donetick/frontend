@@ -507,7 +507,9 @@ const Settings = () => {
                 isRefreshing ? <CircularProgress size='sm' /> : <Refresh />
               }
             >
-              {isRefreshing ? 'Refreshing...' : 'Refresh'}
+              {isRefreshing
+                ? t('settings:circlePage.refreshing')
+                : t('settings:circlePage.refresh')}
             </Button>
           </Box>
         </Box>
@@ -515,21 +517,26 @@ const Settings = () => {
         {circleMemberRequests.map(request => (
           <Card key={request.id} className='p-4'>
             <Typography level='body-md'>
-              {request.displayName} wants to join your circle.
+              {t('settings:circlePage.wantsToJoin', {
+                name: request.displayName,
+              })}
             </Typography>
             <Button
               variant='soft'
               color='success'
               onClick={() => {
                 showConfirmation(
-                  `Are you sure you want to accept ${request.displayName} (username: ${request.username}) to join your circle?`,
-                  'Accept Member Request',
+                  t('settings:circlePage.acceptConfirm', {
+                    name: request.displayName,
+                    username: request.username,
+                  }),
+                  t('settings:circlePage.acceptTitle'),
                   () => {
                     AcceptCircleMemberRequest(request.id).then(resp => {
                       if (resp.ok) {
                         showNotification({
                           type: 'success',
-                          message: 'Accepted request successfully',
+                          message: t('settings:circlePage.acceptSuccess'),
                         })
                         // Invalidate and refetch circle-related queries
                         queryClient.invalidateQueries(['circleMembers'])
@@ -546,26 +553,25 @@ const Settings = () => {
                       }
                     })
                   },
-                  'Accept',
-                  'Cancel',
+                  t('settings:circlePage.accept'),
+                  t('common:actions.cancel'),
                 )
               }}
             >
-              Accept
+              {t('settings:circlePage.accept')}
             </Button>
           </Card>
         ))}
-        <Divider> or </Divider>
+        <Divider>{t('common:actions.or')}</Divider>
 
         <Typography level='body-md'>
-          if want to join someone else's Circle? Ask them for their unique
-          Circle code or join link. Enter the code below to join their Circle.
+          {t('settings:circlePage.joinPrompt')}
         </Typography>
 
         <Typography level='title-sm' mb={-1}>
-          Enter Circle code:
+          {t('settings:circlePage.enterCode')}
           <Input
-            placeholder='Enter code'
+            placeholder={t('settings:circleSettings.joinCirclePlaceholder')}
             value={circleInviteCode}
             onChange={e => setCircleInviteCode(e.target.value)}
             size='lg'
@@ -581,20 +587,19 @@ const Settings = () => {
                 if (resp.ok) {
                   showNotification({
                     type: 'success',
-                    message:
-                      'Joined circle successfully, wait for the circle owner to accept your request.',
+                    message: t('settings:circlePage.joinSuccess'),
                   })
                   setTimeout(() => navigate('/'), 3000)
                 } else {
                   if (resp.status === 409) {
                     showNotification({
                       type: 'error',
-                      message: 'You are already a member of this circle',
+                      message: t('settings:circlePage.alreadyMember'),
                     })
                   } else {
                     showNotification({
                       type: 'error',
-                      message: 'Failed to join circle',
+                      message: t('settings:circlePage.joinFailed'),
                     })
                   }
                   setTimeout(() => navigate('/'), 3000)

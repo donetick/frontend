@@ -27,6 +27,7 @@
     "clickHere": "Hier klicken",
     "startChat": "um einen Chat zu starten",
     "chatIdHelp": "Wenn du deine Chat-ID nicht kennst, starte einen Chat mit userinfobot. Der Bot sendet dir dann deine Chat-ID.",
+    "chatIdPlaceholder": "Benutzer-ID / Chat-ID",
     "userInfoBot": "um einen Chat mit userinfobot zu starten",
     "removeDeviceFailed": "Gerät konnte nicht deregistriert werden",
     "targetUpdated": "Benachrichtigungsziel aktualisiert",
@@ -51,6 +52,7 @@
     "off": "Aus",
     "chatIdRequired": "Chat-ID ist erforderlich",
     "invalidChatId": "Ungültige Chat-ID",
-    "userKeyRequired": "Benutzerschlüssel ist erforderlich"
+    "userKeyRequired": "Benutzerschlüssel ist erforderlich",
+    "userKeyPlaceholder": "Benutzer-ID"
   }
 }

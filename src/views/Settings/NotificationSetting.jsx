@@ -32,7 +32,7 @@ import {
 import SettingsLayout from './SettingsLayout'
 
 const NotificationSetting = () => {
-  const { t } = useTranslation(['settingsExtras', 'common'])
+  const { t } = useTranslation(['settingsExtras', 'common', 'settings'])
   const { showWarning } = useNotification()
   const { data: userProfile, refetch: refetchUserProfile } = useUserProfile()
   const { data: deviceTokens, refetch: refetchDevices } = useDeviceTokens()
@@ -283,7 +283,7 @@ const NotificationSetting = () => {
   }
   return (
 
-    <SettingsLayout title='Notification Settings'>
+    <SettingsLayout title={t('settings:pages.notifications.title')}>
       <div className='grid gap-4 py-4' id='notifications'>
         <Typography level='h3'>{t('settingsExtras:notifications.deviceTitle')}</Typography>
         <Divider />
@@ -577,7 +577,7 @@ const NotificationSetting = () => {
                             sx={{ fontWeight: 'bold' }}
                           >
                             {device.platform === 'ios' ? 'iOS' : 'Android'}{' '}
-                            {device.deviceModel || 'Unknown Device'}
+                            {device.deviceModel || t('common:status.unknown')}
                           </Typography>
 
                           {device.createdAt && (
@@ -720,7 +720,9 @@ const NotificationSetting = () => {
                 <Input
                   value={chatID}
                   onChange={e => setChatID(e.target.value)}
-                  placeholder='User ID / Chat ID'
+                  placeholder={t(
+                    'settingsExtras:notifications.chatIdPlaceholder',
+                  )}
                   sx={{
                     width: '200px',
                   }}
@@ -746,7 +748,9 @@ const NotificationSetting = () => {
                 <Input
                   value={chatID}
                   onChange={e => setChatID(e.target.value)}
-                  placeholder='User ID'
+                  placeholder={t(
+                    'settingsExtras:notifications.userKeyPlaceholder',
+                  )}
                   sx={{
                     width: '200px',
                   }}

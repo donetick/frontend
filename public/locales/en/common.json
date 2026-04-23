@@ -93,6 +93,7 @@
   },
   "placeholders": {
     "search": "Search",
+    "typeHere": "Type here...",
     "enterDisplayName": "Enter your display name",
     "selectTimezone": "Select your timezone",
     "hours": "Hours",

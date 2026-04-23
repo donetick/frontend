@@ -782,7 +782,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
               value: 'userId',
               display: 'displayName',
             options: [
-                { userId: 'anyone', displayName: t('common:status.anyone') },
+                { userId: 'anyone', displayName: t('chores:addTask.anyone') },
                 ...(circleMembers?.res || []),
               ],
             },

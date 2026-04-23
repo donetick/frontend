@@ -7,9 +7,11 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
 function CreateChildUserModal({ isOpen, onClose, onSuccess }) {
+  const { t } = useTranslation(['settings', 'common', 'auth'])
   const { ResponsiveModal } = useResponsiveModal()
 
   const [childName, setChildName] = useState('')
@@ -25,35 +27,40 @@ function CreateChildUserModal({ isOpen, onClose, onSuccess }) {
 
     if (touched.childName) {
       if (!childName.trim()) {
-        newErrors.childName = 'Sub account name is required'
+        newErrors.childName = t('settings:childAccounts.validation.nameRequired')
       } else if (childName.length < 2) {
-        newErrors.childName = 'Sub account name must be at least 2 characters'
+        newErrors.childName = t('settings:childAccounts.validation.nameMin')
       } else if (childName.length > 20) {
-        newErrors.childName = 'Sub account name must be less than 20 characters'
+        newErrors.childName = t('settings:childAccounts.validation.nameMax')
       } else if (!/^[a-z.-]+$/.test(childName)) {
-        newErrors.childName =
-          'Sub account name can only contain lowercase letters, dot and dash'
+        newErrors.childName = t(
+          'settings:childAccounts.validation.namePattern',
+        )
       }
     }
 
     if (touched.password) {
       if (!password) {
-        newErrors.password = 'Password is required'
+        newErrors.password = t('auth:errors.passwordRequired')
       } else if (password.length < 8) {
-        newErrors.password = 'Password must be between 8 and 64 characters'
+        newErrors.password = t('auth:errors.passwordLength')
       } else if (password.length > 64) {
-        newErrors.password = 'Password must be between 8 and 64 characters'
+        newErrors.password = t('auth:errors.passwordLength')
       }
     }
 
     if (touched.confirmPassword) {
       if (password !== confirmPassword) {
-        newErrors.confirmPassword = 'Passwords do not match'
+        newErrors.confirmPassword = t(
+          'settings:childAccounts.validation.passwordMismatch',
+        )
       }
     }
 
     if (touched.displayName && displayName.length > 50) {
-      newErrors.displayName = 'Display name must be less than 50 characters'
+      newErrors.displayName = t(
+        'settings:childAccounts.validation.displayNameMax',
+      )
     }
 
     setErrors(newErrors)
@@ -106,24 +113,23 @@ function CreateChildUserModal({ isOpen, onClose, onSuccess }) {
   return (
     <ResponsiveModal open={isOpen} onClose={handleClose}>
       <Typography level='h4' mb={2}>
-        Create Sub Account
+        {t('settings:childAccounts.modal.title')}
       </Typography>
 
       <Typography level='body-md' mb={3}>
-        Create a new sub account. The user will be able to log in using their
-        combined username and complete tasks assigned to them.
+        {t('settings:childAccounts.modal.description')}
       </Typography>
 
       <FormControl error={!!errors.childName} sx={{ mb: 2 }}>
         <Typography level='body2' mb={1}>
-          Sub Account Name *
+          {t('settings:childAccounts.modal.nameLabel')} *
         </Typography>
         <Input
           required
           fullWidth
           id='childName'
           name='childName'
-          placeholder='Enter sub account name (e.g., sarah)'
+          placeholder={t('settings:childAccounts.modal.namePlaceholder')}
           value={childName}
           onChange={e => {
             setChildName(e.target.value)
@@ -137,13 +143,13 @@ function CreateChildUserModal({ isOpen, onClose, onSuccess }) {
 
       <FormControl error={!!errors.displayName} sx={{ mb: 2 }}>
         <Typography level='body2' mb={1}>
-          Display Name
+          {t('common:labels.displayName')}
         </Typography>
         <Input
           fullWidth
           id='displayName'
           name='displayName'
-          placeholder='Display name (optional, defaults to sub account name)'
+          placeholder={t('settings:childAccounts.modal.displayNamePlaceholder')}
           value={displayName}
           onChange={e => {
             setDisplayName(e.target.value)
@@ -157,7 +163,7 @@ function CreateChildUserModal({ isOpen, onClose, onSuccess }) {
 
       <FormControl error={!!errors.password} sx={{ mb: 2 }}>
         <Typography level='body2' mb={1}>
-          Password *
+          {t('common:labels.password')} *
         </Typography>
         <Input
           required
@@ -165,7 +171,7 @@ function CreateChildUserModal({ isOpen, onClose, onSuccess }) {
           name='password'
           type='password'
           id='password'
-          placeholder='Enter password (8-64 characters)'
+          placeholder={t('auth:placeholders.passwordRange')}
           value={password}
           onChange={e => {
             setPassword(e.target.value)
@@ -177,7 +183,7 @@ function CreateChildUserModal({ isOpen, onClose, onSuccess }) {
 
       <FormControl error={!!errors.confirmPassword} sx={{ mb: 3 }}>
         <Typography level='body2' mb={1}>
-          Confirm Password *
+          {t('settings:childAccounts.modal.confirmPasswordLabel')} *
         </Typography>
         <Input
           required
@@ -185,7 +191,7 @@ function CreateChildUserModal({ isOpen, onClose, onSuccess }) {
           name='confirmPassword'
           type='password'
           id='confirmPassword'
-          placeholder='Confirm password'
+          placeholder={t('settings:childAccounts.modal.confirmPasswordPlaceholder')}
           value={confirmPassword}
           onChange={e => {
             setConfirmPassword(e.target.value)
@@ -205,7 +211,7 @@ function CreateChildUserModal({ isOpen, onClose, onSuccess }) {
           disabled={isSubmitting}
           sx={{ flex: 1 }}
         >
-          Cancel
+          {t('common:actions.cancel')}
         </Button>
         <Button
           size='lg'
@@ -214,7 +220,7 @@ function CreateChildUserModal({ isOpen, onClose, onSuccess }) {
           loading={isSubmitting}
           sx={{ flex: 1 }}
         >
-          Create Account
+          {t('settings:childAccounts.modal.createAction')}
         </Button>
       </Box>
     </ResponsiveModal>

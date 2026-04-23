@@ -207,14 +207,26 @@
   },
   "profile": {
     "description": "Aktualisiere deinen Anzeigenamen und dein Profilfoto.",
+    "title": "Profileinstellungen",
     "photoUpdatedTitle": "Foto aktualisiert",
+    "photoUpdated": "Foto aktualisiert",
     "photoUpdatedMessage": "Dein Profilfoto wurde erfolgreich aktualisiert.",
     "uploadFailedTitle": "Upload fehlgeschlagen",
+    "uploadFailed": "Upload fehlgeschlagen",
     "uploadFailedMessage": "Dein Foto konnte nicht hochgeladen werden. Bitte versuche es erneut.",
     "profileUpdatedTitle": "Profil aktualisiert",
+    "profileUpdated": "Profil aktualisiert",
     "profileUpdatedMessage": "Deine Profilinformationen wurden erfolgreich gespeichert.",
     "updateFailedTitle": "Aktualisierung fehlgeschlagen",
-    "updateFailedMessage": "Dein Profil konnte nicht aktualisiert werden. Bitte prüfe deine Verbindung und versuche es erneut."
+    "updateFailed": "Aktualisierung fehlgeschlagen",
+    "updateFailedMessage": "Dein Profil konnte nicht aktualisiert werden. Bitte prüfe deine Verbindung und versuche es erneut.",
+    "changePhoto": "Foto ändern",
+    "displayName": "Anzeigename",
+    "displayNamePlaceholder": "Anzeigename eingeben",
+    "timezone": "Zeitzone",
+    "timezonePlaceholder": "Zeitzone auswählen",
+    "save": "Speichern",
+    "cancel": "Abbrechen"
   },
   "language": {
     "title": "Sprache",
@@ -255,7 +267,25 @@
     "deleteConfirmTitle": "Unterkonto löschen",
     "deleteConfirmMessage": "Möchtest du das Unterkonto \"{{name}}\" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
     "deleteSuccess": "Unterkonto \"{{name}}\" wurde erfolgreich gelöscht",
-    "deleteFailed": "Unterkonto konnte nicht gelöscht werden: {{message}}"
+    "deleteFailed": "Unterkonto konnte nicht gelöscht werden: {{message}}",
+    "modal": {
+      "title": "Unterkonto erstellen",
+      "description": "Erstelle ein neues Unterkonto. Die Person kann sich mit dem kombinierten Benutzernamen anmelden und ihr zugewiesene Aufgaben erledigen.",
+      "nameLabel": "Name des Unterkontos",
+      "namePlaceholder": "Name des Unterkontos eingeben (z. B. sarah)",
+      "displayNamePlaceholder": "Anzeigename (optional, standardmäßig der Name des Unterkontos)",
+      "confirmPasswordLabel": "Passwort bestätigen",
+      "confirmPasswordPlaceholder": "Passwort bestätigen",
+      "createAction": "Konto erstellen"
+    },
+    "validation": {
+      "nameRequired": "Name des Unterkontos ist erforderlich",
+      "nameMin": "Name des Unterkontos muss mindestens 2 Zeichen lang sein",
+      "nameMax": "Name des Unterkontos muss kürzer als 20 Zeichen sein",
+      "namePattern": "Name des Unterkontos darf nur Kleinbuchstaben, Punkt und Bindestrich enthalten",
+      "displayNameMax": "Anzeigename muss kürzer als 50 Zeichen sein",
+      "passwordMismatch": "Passwörter stimmen nicht überein"
+    }
   },
   "advanced": {
     "title": "Erweiterte Einstellungen",

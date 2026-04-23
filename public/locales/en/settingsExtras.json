@@ -27,6 +27,7 @@
     "clickHere": "Click here",
     "startChat": "to start a chat",
     "chatIdHelp": "If you do not know your chat ID, start a chat with userinfobot and it will send you your chat ID.",
+    "chatIdPlaceholder": "User ID / Chat ID",
     "userInfoBot": "to start a chat with userinfobot",
     "removeDeviceFailed": "Failed to unregister device",
     "targetUpdated": "Notification target updated",
@@ -52,6 +53,7 @@
     "chatIdRequired": "Chat ID is required",
     "invalidChatId": "Invalid chat ID",
     "userKeyRequired": "User key is required",
+    "userKeyPlaceholder": "User ID",
     "none": "None",
     "webhooks": "Webhooks"
   }

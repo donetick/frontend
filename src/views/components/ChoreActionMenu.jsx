@@ -337,7 +337,7 @@ const ChoreActionMenu = ({
               <WbTwilight />
             </IconButton>
           </Tooltip> */}
-          <Tooltip title={t('common:labels.weekend')} placement='top'>
+          <Tooltip title={t('common:calendar.weekend')} placement='top'>
             <IconButton
               size='sm'
               onClick={e => {
@@ -348,7 +348,7 @@ const ChoreActionMenu = ({
               <Weekend />
             </IconButton>
           </Tooltip>
-          <Tooltip title={t('common:labels.nextWeek')} placement='top'>
+          <Tooltip title={t('common:calendar.nextWeek')} placement='top'>
             <IconButton
               size='sm'
               onClick={e => {
@@ -359,7 +359,7 @@ const ChoreActionMenu = ({
               <NextWeek />
             </IconButton>
           </Tooltip>
-          <Tooltip title={t('common:labels.removeDueDate')} placement='top'>
+          <Tooltip title={t('common:calendar.removeDueDate')} placement='top'>
             <IconButton
               size='sm'
               color='neutral'

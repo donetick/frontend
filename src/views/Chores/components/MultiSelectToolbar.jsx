@@ -83,10 +83,10 @@ const MultiSelectToolbar = ({
             <CheckBox sx={{ color: 'primary.500' }} />
             <Typography level='body-sm' fontWeight='md'>
               {selectedCount === 1
-                ? t('chores:main.multiSelect.selectedSingle', {
+                ? t('chores:main.selectedSingle', {
                     count: selectedCount,
                   })
-                : t('chores:main.multiSelect.selectedMultiple', {
+                : t('chores:main.selectedMultiple', {
                     count: selectedCount,
                   })}
             </Typography>
@@ -111,9 +111,9 @@ const MultiSelectToolbar = ({
                 '--Button-paddingInline': '0.75rem',
                 position: 'relative',
               }}
-              title={t('chores:main.multiSelect.shortcuts.selectAllVisible')}
+              title={t('chores:main.shortcuts.selectAllVisible')}
             >
-              {t('chores:archived.all')}
+              {t('chores:main.all')}
               {showKeyboardShortcuts && (
                 <KeyboardShortcutHint
                   shortcut='A'
@@ -140,13 +140,13 @@ const MultiSelectToolbar = ({
               }}
               title={
                 selectedCount === 0
-                  ? t('chores:main.multiSelect.shortcuts.closeMultiSelect')
-                  : t('chores:main.multiSelect.shortcuts.clearMultiSelect')
+                  ? t('chores:main.shortcuts.closeMultiSelect')
+                  : t('chores:main.shortcuts.clearMultiSelect')
               }
             >
               {selectedCount === 0
                 ? t('common:actions.close')
-                : t('chores:archived.clear')}
+                : t('chores:main.clear')}
               {showKeyboardShortcuts && (
                 <KeyboardShortcutHint
                   withCtrl={false}
@@ -189,7 +189,7 @@ const MultiSelectToolbar = ({
               '--Button-paddingInline': { xs: '0.75rem', sm: '1rem' },
               position: 'relative',
             }}
-            title={t('chores:main.multiSelect.shortcuts.completeSelected')}
+            title={t('chores:main.shortcuts.completeSelected')}
           >
             {t('common:actions.complete')}
             {showKeyboardShortcuts && selectedCount > 0 && (
@@ -215,7 +215,7 @@ const MultiSelectToolbar = ({
               '--Button-paddingInline': { xs: '0.75rem', sm: '1rem' },
               position: 'relative',
             }}
-            title={t('chores:main.multiSelect.shortcuts.skipSelected')}
+            title={t('chores:main.shortcuts.skipSelected')}
           >
             {t('common:actions.skip')}
             {showKeyboardShortcuts && selectedCount > 0 && (
@@ -241,7 +241,7 @@ const MultiSelectToolbar = ({
               '--Button-paddingInline': { xs: '0.75rem', sm: '1rem' },
               position: 'relative',
             }}
-            title={t('chores:main.multiSelect.shortcuts.archiveSelected')}
+            title={t('chores:main.shortcuts.archiveSelected')}
           >
             {t('common:actions.archive')}
             {showKeyboardShortcuts && selectedCount > 0 && (
@@ -268,7 +268,7 @@ const MultiSelectToolbar = ({
               '--Button-paddingInline': { xs: '0.75rem', sm: '1rem' },
               position: 'relative',
             }}
-            title={t('chores:main.multiSelect.shortcuts.deleteSelected')}
+            title={t('chores:main.shortcuts.deleteSelected')}
           >
             {t('common:actions.delete')}
             {showKeyboardShortcuts && selectedCount > 0 && (

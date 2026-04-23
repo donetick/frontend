@@ -131,6 +131,7 @@
     "dayOfMonths": "{{day}} von {{months}}",
     "everyUnit": "Alle {{count}} {{unit}}",
     "units": {
+      "hours": "Stunden",
       "day": "Tag",
       "days": "Tage",
       "week": "Woche",
@@ -146,6 +147,8 @@
     "completeInPast": "In der Vergangenheit abschließen",
     "skipToNextDueDate": "Zum nächsten Fälligkeitsdatum überspringen",
     "delegate": "An jemand anderen delegieren",
+    "selectPerformer": "Ausführende Person auswählen",
+    "addCompletionNote": "Notiz zu diesem Abschluss hinzufügen",
     "sendNudge": "Erinnerung senden",
     "history": "Verlauf",
     "changeDueDate": "Fälligkeitsdatum ändern",
@@ -275,6 +278,8 @@
     "occurrenceExample": "Beispiel: \"1. Montag\" bedeutet den ersten Montag jedes Monats",
     "onThe": "am",
     "ofSelectedMonths": "der ausgewählten Monate",
+    "ofMonth": "des Monats",
+    "at": "um",
     "triggerTask": "Diese Aufgabe anhand eines Gerätezustands auslösen",
     "triggerHelper": "Soll diese Aufgabe erledigt werden, wenn sich der Zustand eines Dings ändert?",
     "plusFeature": "Plus-Funktion",
@@ -288,6 +293,45 @@
       "interval": "Intervall",
       "days_of_the_week": "Wochentage",
       "day_of_the_month": "Tag des Monats"
+    },
+    "days": {
+      "monday": "Montag",
+      "tuesday": "Dienstag",
+      "wednesday": "Mittwoch",
+      "thursday": "Donnerstag",
+      "friday": "Freitag",
+      "saturday": "Samstag",
+      "sunday": "Sonntag"
+    },
+    "dayAbbreviations": {
+      "monday": "Mo.",
+      "tuesday": "Di.",
+      "wednesday": "Mi.",
+      "thursday": "Do.",
+      "friday": "Fr.",
+      "saturday": "Sa.",
+      "sunday": "So."
+    },
+    "months": {
+      "january": "Januar",
+      "february": "Februar",
+      "march": "März",
+      "april": "April",
+      "may": "Mai",
+      "june": "Juni",
+      "july": "Juli",
+      "august": "August",
+      "september": "September",
+      "october": "Oktober",
+      "november": "November",
+      "december": "Dezember"
+    },
+    "occurrences": {
+      "1": "1. Vorkommen",
+      "2": "2. Vorkommen",
+      "3": "3. Vorkommen",
+      "4": "4. Vorkommen",
+      "-1": "Letztes Vorkommen"
     }
   },
   "view": {
@@ -318,6 +362,7 @@
     "editNotifications": "Benachrichtigungen bearbeiten",
     "noPriority": "Keine Priorität",
     "create": "Erstellen",
+    "anyone": "Jede Person",
     "points": {
       "one": "1 Punkt",
       "other": "{{count}} Punkte"
@@ -376,7 +421,7 @@
       "archiveSelected": "Ausgewählte Aufgaben archivieren (X)",
       "restoreSelected": "Ausgewählte Aufgaben wiederherstellen (R)",
       "deleteSelected": "Ausgewählte Aufgaben löschen (E)",
-      "clearMultiSelect": "Mehrfachauswahl leeren (Esc)",
+      "clearMultiSelect": "Auswahl abwählen (Esc)",
       "closeMultiSelect": "Mehrfachauswahl schließen (Esc)"
     },
     "selectedSingle": "{{count}} Aufgabe ausgewählt",
@@ -402,7 +447,7 @@
     "archivedTitle": "Archivierte Aufgaben",
     "archivedDescription": "Archivierte oder abgeschlossene Aufgaben ansehen und verwalten.",
     "all": "Alle",
-    "clear": "Leeren",
+    "clear": "Abwählen",
     "restore": "Wiederherstellen",
     "noArchivedFound": "Keine archivierten Aufgaben gefunden",
     "noArchived": "Keine archivierten Aufgaben",
@@ -413,7 +458,7 @@
     "archivedCount_plural": "{{count}} archivierte Aufgaben",
     "matchingSearch": " passend zu \"{{term}}\"",
     "filters": {
-      "anyone": "Alle",
+      "anyone": "Jede Person",
       "assignedToMe": "Mir zugewiesen",
       "availableForMe": "Für mich verfügbar",
       "assignedToOthers": "Anderen zugewiesen"

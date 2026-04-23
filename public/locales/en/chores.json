@@ -131,6 +131,7 @@
     "dayOfMonths": "{{day}} of {{months}}",
     "everyUnit": "Every {{count}} {{unit}}",
     "units": {
+      "hours": "Hours",
       "day": "day",
       "days": "days",
       "week": "week",
@@ -146,6 +147,8 @@
     "completeInPast": "Complete in past",
     "skipToNextDueDate": "Skip to next due date",
     "delegate": "Delegate to someone else",
+    "selectPerformer": "Select a performer",
+    "addCompletionNote": "Add note to attach to this completion",
     "sendNudge": "Send nudge",
     "history": "History",
     "changeDueDate": "Change due date",
@@ -275,6 +278,8 @@
     "occurrenceExample": "Example: \"1st Monday\" means the first Monday of each month",
     "onThe": "on the",
     "ofSelectedMonths": "of the selected months",
+    "ofMonth": "of the month",
+    "at": "at",
     "triggerTask": "Trigger this task based on a thing state",
     "triggerHelper": "Is this something that should be done when a thing state changes?",
     "plusFeature": "Plus Feature",
@@ -288,6 +293,45 @@
       "interval": "Interval",
       "days_of_the_week": "Days of the Week",
       "day_of_the_month": "Day of the Month"
+    },
+    "days": {
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday",
+      "sunday": "Sunday"
+    },
+    "dayAbbreviations": {
+      "monday": "Mon",
+      "tuesday": "Tue",
+      "wednesday": "Wed",
+      "thursday": "Thu",
+      "friday": "Fri",
+      "saturday": "Sat",
+      "sunday": "Sun"
+    },
+    "months": {
+      "january": "January",
+      "february": "February",
+      "march": "March",
+      "april": "April",
+      "may": "May",
+      "june": "June",
+      "july": "July",
+      "august": "August",
+      "september": "September",
+      "october": "October",
+      "november": "November",
+      "december": "December"
+    },
+    "occurrences": {
+      "1": "1st occurrence",
+      "2": "2nd occurrence",
+      "3": "3rd occurrence",
+      "4": "4th occurrence",
+      "-1": "Last occurrence"
     }
   },
   "view": {
@@ -318,6 +362,7 @@
     "editNotifications": "Edit Notifications",
     "noPriority": "No Priority",
     "create": "Create",
+    "anyone": "Anyone",
     "points": {
       "one": "1 point",
       "other": "{{count}} points"
