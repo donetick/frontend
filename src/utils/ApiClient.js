@@ -17,11 +17,16 @@ class ApiClient {
   }
 
   async init(force = false) {
+    if (force) {
+      this.initPromise = null
+      this.initialized = false
+    }
+
     if (this.initPromise) {
       return this.initPromise
     }
 
-    if (this.initialized && !force) {
+    if (this.initialized) {
       return Promise.resolve()
     }
 
