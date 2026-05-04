@@ -23,6 +23,9 @@ import {
   getPriorityColor,
   getTextColorFromBackgroundColor,
 } from '../../utils/Colors.jsx'
+import AssigneeAvatarGroup, {
+  getChoreAssigneeNames,
+} from '../components/AssigneeAvatarGroup'
 import ChoreActionMenu from '../components/ChoreActionMenu'
 
 const CompactChoreCard = ({
@@ -84,15 +87,7 @@ const CompactChoreCard = ({
     parts.push(getRecurrentChipText(chore))
 
     // Assignee
-    if (chore.assignedTo) {
-      const assignee = performers.find(
-        p => p.userId === chore.assignedTo,
-      )?.displayName
-      if (assignee) parts.push(assignee)
-    }
-    if (chore.assignedTo === null) {
-      parts.push('Anyone')
-    }
+    parts.push(getChoreAssigneeNames(chore, performers).join(', '))
 
     // Points
     if (chore.points > 0) {
@@ -403,6 +398,7 @@ const CompactChoreCard = ({
 
         {/* Line 2: Metadata */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
+          <AssigneeAvatarGroup chore={chore} performers={performers} size={20} />
           {getFrequencyIcon(chore)}
           <Typography
             level='body-xs'

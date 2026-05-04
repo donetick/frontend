@@ -2,6 +2,7 @@ import {
   Add,
   Bolt,
   CalendarMonth,
+  CalendarViewWeek,
   CancelRounded,
   CheckBox,
   CheckBoxOutlineBlank,
@@ -44,6 +45,7 @@ import { useMediaQuery } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
+import Logo from '../../Logo'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import {
   ChoreFilters,
@@ -55,6 +57,7 @@ import { getSafeBottom } from '../../utils/SafeAreaUtils.js'
 import TaskInput from '../components/AddTaskModal'
 import CalendarDual from '../components/CalendarDual'
 import CalendarMonthly from '../components/CalendarMonthly.jsx'
+import CalendarWeekly from '../components/CalendarWeekly.jsx'
 import ProjectSelector from '../components/ProjectSelector'
 import AdvancedFilterBuilder from '../Modals/Inputs/AdvancedFilterBuilder'
 import { useProjects } from '../Projects/ProjectQueries.js'
@@ -687,14 +690,14 @@ const MyChores = () => {
   }
 
   const toggleViewMode = () => {
-    const modes = ['default', 'compact', 'calendar']
+    const modes = ['default', 'compact', 'weekly', 'calendar']
     const currentIndex = modes.indexOf(viewMode)
     const nextIndex = (currentIndex + 1) % modes.length
     const newMode = modes[nextIndex]
     setViewMode(newMode)
     localStorage.setItem('choreCardViewMode', newMode)
 
-    if (newMode !== 'calendar') {
+    if (newMode !== 'calendar' && newMode !== 'weekly') {
       setSelectedCalendarDate(null)
     }
   }
@@ -816,6 +819,8 @@ const MyChores = () => {
     setFilteredChores(newChores)
     setSearchFilter('All')
   }
+
+  const isCalendarView = viewMode === 'calendar' || viewMode === 'weekly'
 
   // Show error state when API is unreachable
   if (choresError || membersError) {
@@ -962,13 +967,17 @@ const MyChores = () => {
               viewMode === 'default'
                 ? 'Switch to Compact View'
                 : viewMode === 'compact'
-                  ? 'Switch to Calendar View'
-                  : 'Switch to Card View'
+                  ? 'Switch to Weekly View'
+                  : viewMode === 'weekly'
+                    ? 'Switch to Monthly View'
+                    : 'Switch to Card View'
             }
           >
             {viewMode === 'default' ? (
               <ViewAgenda />
             ) : viewMode === 'compact' ? (
+              <CalendarViewWeek />
+            ) : viewMode === 'weekly' ? (
               <CalendarMonth />
             ) : (
               <ViewModule />
@@ -1256,7 +1265,7 @@ const MyChores = () => {
           ? getFilteredChores.length === 0
           : projectFilteredChores.length === 0) &&
           // only if not in calendar view:
-          viewMode !== 'calendar' && (
+          !isCalendarView && (
             <Box
               sx={{
                 display: 'flex',
@@ -1297,7 +1306,7 @@ const MyChores = () => {
             </Box>
           )}
         {searchTerm?.length > 0 &&
-          viewMode !== 'calendar' && (
+          !isCalendarView && (
             <ChoreListView
               chores={getFilteredChores}
               viewMode={viewMode}
@@ -1310,7 +1319,7 @@ const MyChores = () => {
               toggleChoreSelection={toggleChoreSelection}
             />
           )}
-        {viewMode === 'calendar' && (
+        {isCalendarView && (
           <>
             {/* Summary Chips when no date selected */}
             {/* <Box
@@ -1429,7 +1438,16 @@ const MyChores = () => {
             </Box> */}
             {/* Calendar Monthly View */}
             <Box sx={{ mb: 2 }}>
-              {isLargeScreen ? (
+              {viewMode === 'weekly' ? (
+                <CalendarWeekly
+                  chores={getFilteredChores}
+                  performers={membersData?.res}
+                  selectedDate={selectedCalendarDate}
+                  onDateChange={date => {
+                    setSelectedCalendarDate(date)
+                  }}
+                />
+              ) : isLargeScreen ? (
                 <CalendarDual
                   chores={getFilteredChores}
                   onDateChange={date => {
@@ -1493,7 +1511,7 @@ const MyChores = () => {
           </>
         )}
         {searchTerm.length === 0 &&
-          viewMode !== 'calendar' && (
+          !isCalendarView && (
             <AccordionGroup transition='0.2s ease' disableDivider>
               {choreSections.map((section, index) => {
                 if (section.content.length === 0) return null

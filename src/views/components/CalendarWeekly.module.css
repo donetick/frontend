@@ -1,0 +1,119 @@
+.weekCalendar {
+  width: 100%;
+}
+
+.weekHeader {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.weekGrid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.dayColumn {
+  min-height: 180px;
+  border: 1px solid var(--joy-palette-divider);
+  border-radius: 8px;
+  background: var(--joy-palette-background-surface);
+  color: inherit;
+  font: inherit;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.dayColumn:hover {
+  border-color: var(--joy-palette-primary-outlinedBorder);
+  background: var(--joy-palette-primary-softBg);
+}
+
+.selectedDay {
+  border-color: var(--joy-palette-primary-solidBg);
+  box-shadow: 0 0 0 1px var(--joy-palette-primary-solidBg);
+}
+
+.today {
+  border-color: var(--joy-palette-primary-outlinedBorder);
+}
+
+.dayHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 6px;
+  min-height: 44px;
+}
+
+.dayName {
+  text-transform: uppercase;
+  color: var(--joy-palette-text-tertiary);
+  font-size: 0.7rem;
+  line-height: 1;
+}
+
+.dayNumber {
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.taskList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 0;
+}
+
+.taskPill {
+  border-left: 3px solid;
+  border-radius: 6px;
+  background: var(--joy-palette-background-body);
+  padding: 5px 6px;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.taskName {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.78rem;
+  line-height: 1.2;
+}
+
+.moreTasks {
+  color: var(--joy-palette-text-tertiary);
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+
+.emptyDay {
+  color: var(--joy-palette-text-tertiary);
+  font-size: 0.75rem;
+  margin-top: auto;
+}
+
+@media (max-width: 700px) {
+  .weekHeader {
+    grid-template-columns: 1fr;
+  }
+
+  .weekGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .dayColumn {
+    min-height: 96px;
+  }
+}
