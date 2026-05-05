@@ -1,4 +1,4 @@
-import { ArrowBackIosNew, ArrowForwardIos, Today } from '@mui/icons-material'
+import { ArrowBackIosNew, ArrowForwardIos, CheckCircle, Today } from '@mui/icons-material'
 import { Box, Chip, IconButton, Typography } from '@mui/joy'
 import { useMemo, useState } from 'react'
 import { useLocalization } from '../../contexts/LocalizationContext'
@@ -28,6 +28,7 @@ const startOfWeek = (date, firstDayOfWeek) => {
 const CalendarWeekly = ({ chores, performers = [], selectedDate, onDateChange }) => {
   const { firstDayOfWeek, fmt } = useLocalization()
   const [anchorDate, setAnchorDate] = useState(selectedDate || new Date())
+  const [expandedDate, setExpandedDate] = useState(null)
 
   const weekStart = useMemo(
     () => startOfWeek(anchorDate, firstDayOfWeek),
@@ -53,12 +54,16 @@ const CalendarWeekly = ({ chores, performers = [], selectedDate, onDateChange })
   const handleSelectDate = date => {
     const nextDate = new Date(date)
     setAnchorDate(nextDate)
+    setExpandedDate(
+      expandedDate && isSameDate(expandedDate, nextDate) ? null : nextDate,
+    )
     onDateChange(nextDate)
   }
 
   const goToCurrentWeek = () => {
     const today = new Date()
     setAnchorDate(today)
+    setExpandedDate(today)
     onDateChange(today)
   }
 
@@ -116,6 +121,7 @@ const CalendarWeekly = ({ chores, performers = [], selectedDate, onDateChange })
         {weekDays.map((day, index) => {
           const dayChores = choresByDay[index]
           const isSelected = selectedDate && isSameDate(day, selectedDate)
+          const isExpanded = expandedDate && isSameDate(day, expandedDate)
           const isToday = isSameDate(day, new Date())
 
           return (
@@ -124,7 +130,8 @@ const CalendarWeekly = ({ chores, performers = [], selectedDate, onDateChange })
               key={day.toISOString()}
               className={[
                 styles.dayColumn,
-                isSelected ? styles.selectedDay : '',
+                isSelected ? styles.activeDay : '',
+                isExpanded ? styles.expandedDay : '',
                 isToday ? styles.today : '',
               ].join(' ')}
               onClick={() => handleSelectDate(day)}
@@ -145,7 +152,10 @@ const CalendarWeekly = ({ chores, performers = [], selectedDate, onDateChange })
                 {dayChores.slice(0, 4).map(chore => (
                   <div
                     key={chore.id}
-                    className={styles.taskPill}
+                    className={[
+                      styles.taskPill,
+                      chore.frontendCompleted ? styles.completedTaskPill : '',
+                    ].join(' ')}
                     style={{
                       borderLeftColor: getPriorityColor(chore.priority),
                     }}
@@ -158,6 +168,9 @@ const CalendarWeekly = ({ chores, performers = [], selectedDate, onDateChange })
                       max={2}
                     />
                     <div className={styles.taskName}>{chore.name}</div>
+                    {chore.frontendCompleted && (
+                      <CheckCircle className={styles.completedIcon} />
+                    )}
                   </div>
                 ))}
                 {dayChores.length > 4 && (

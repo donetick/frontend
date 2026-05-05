@@ -29,6 +29,13 @@
   gap: 8px;
   cursor: pointer;
   text-align: left;
+  position: relative;
+  transition:
+    flex-grow 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .dayColumn:hover {
@@ -36,7 +43,7 @@
   background: var(--joy-palette-primary-softBg);
 }
 
-.selectedDay {
+.activeDay {
   border-color: var(--joy-palette-primary-solidBg);
   box-shadow: 0 0 0 1px var(--joy-palette-primary-solidBg);
 }
@@ -83,6 +90,11 @@
   gap: 5px;
 }
 
+.completedTaskPill {
+  opacity: 0.72;
+  background: var(--joy-palette-success-softBg);
+}
+
 .taskName {
   min-width: 0;
   overflow: hidden;
@@ -90,6 +102,18 @@
   white-space: nowrap;
   font-size: 0.78rem;
   line-height: 1.2;
+}
+
+.completedTaskPill .taskName {
+  text-decoration: line-through;
+  color: var(--joy-palette-text-tertiary);
+}
+
+.completedIcon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--joy-palette-success-600);
 }
 
 .moreTasks {
@@ -115,5 +139,39 @@
 
   .dayColumn {
     min-height: 96px;
+  }
+}
+
+@media (min-width: 701px) and (max-width: 900px) and (orientation: portrait) {
+  .weekGrid {
+    display: flex;
+    gap: 0;
+    align-items: stretch;
+    overflow: visible;
+    padding: 4px 0 8px;
+  }
+
+  .dayColumn {
+    flex: 1 1 0;
+    min-height: 210px;
+    min-width: 0;
+    margin-left: -22px;
+    box-shadow: var(--joy-shadow-sm);
+  }
+
+  .dayColumn:first-child {
+    margin-left: 0;
+  }
+
+  .expandedDay {
+    flex-grow: 2.1;
+    z-index: 20;
+    transform: translateY(-3px);
+    box-shadow: var(--joy-shadow-md);
+  }
+
+  .dayColumn:not(.expandedDay):hover {
+    z-index: 10;
+    transform: translateY(-2px);
   }
 }

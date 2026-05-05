@@ -119,6 +119,10 @@ const CompactChoreCard = ({
           bgcolor: 'background.level1',
           boxShadow: 'sm',
         },
+        ...(chore.frontendCompleted && {
+          opacity: 0.72,
+          bgcolor: 'success.softBg',
+        }),
         '&::before': {
           content: '""',
           position: 'absolute',
@@ -368,6 +372,10 @@ const CompactChoreCard = ({
             sx={{
               fontWeight: 600,
               fontSize: 14,
+              textDecoration: chore.frontendCompleted ? 'line-through' : 'none',
+              color: chore.frontendCompleted
+                ? 'text.tertiary'
+                : 'text.primary',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',

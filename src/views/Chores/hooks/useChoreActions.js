@@ -150,21 +150,39 @@ export const useChoreActions = ({
     [chores, filteredChores, setChores, setFilteredChores, queryClient, showSuccess, showError, showWarning, showUndo, refetchChores],
   )
 
+  const markChoreCompletedInState = useCallback(
+    chore => {
+      const completedChore = {
+        ...chore,
+        frontendCompleted: true,
+        frontendCompletedAt: new Date().toISOString(),
+      }
+
+      setChores(prev =>
+        prev.map(c => (c.id === chore.id ? completedChore : c)),
+      )
+      setFilteredChores(prev =>
+        prev.map(c => (c.id === chore.id ? completedChore : c)),
+      )
+
+      queryClient.setQueriesData({ queryKey: ['chores'] }, oldData => {
+        if (!oldData || !oldData.res) return oldData
+        return {
+          ...oldData,
+          res: oldData.res.map(c => (c.id === chore.id ? completedChore : c)),
+        }
+      })
+
+      return completedChore
+    },
+    [queryClient, setChores, setFilteredChores],
+  )
+
   const handleChoreAction = useCallback(
     async (action, chore, extraData = {}) => {
       switch (action) {
         case 'complete':
-          // 1. Instantly hide the chore from the UI and Cache
-          setChores(prev => prev.filter(c => c.id !== chore.id))
-          setFilteredChores(prev => prev.filter(c => c.id !== chore.id))
-
-          queryClient.setQueriesData({ queryKey: ['chores'] }, oldData => {
-            if (!oldData || !oldData.res) return oldData;
-            return {
-              ...oldData,
-              res: oldData.res.filter(c => c.id !== chore.id),
-            }
-          });
+          markChoreCompletedInState(chore)
 
           try {
             const response = await MarkChoreComplete(
@@ -196,9 +214,8 @@ export const useChoreActions = ({
                 },
               })
 
-              // 3. Fetch the fresh active list from the server silently
-              // (This brings in the next occurrence if recurring, without showing the completed one)
-              queryClient.invalidateQueries({ queryKey: ['chores'] })
+              // Keep the completed occurrence visible in the current view.
+              // A later refetch/navigation will pick up the server's next occurrence.
             } else {
               refetchChores() // Network failed, revert to truth
             }
@@ -402,6 +419,7 @@ export const useChoreActions = ({
       archiveChore,
       startChore,
       pauseChore,
+      markChoreCompletedInState,
     ],
   )
 
