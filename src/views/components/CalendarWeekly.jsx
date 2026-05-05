@@ -1,9 +1,12 @@
-import { ArrowBackIosNew, ArrowForwardIos, CheckCircle, Today } from '@mui/icons-material'
+import { ArrowBackIosNew, ArrowForwardIos, CheckCircle, LocationOn, Today } from '@mui/icons-material'
 import { Box, Chip, IconButton, Typography } from '@mui/joy'
 import { useMemo, useState } from 'react'
+import { useGeolocation } from '../../hooks/useGeolocation'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { getPriorityColor } from '../../utils/Colors'
 import AssigneeAvatarGroup from './AssigneeAvatarGroup'
+import LocationOverrideDialog from './LocationOverrideDialog'
+import WeatherDisplay from './WeatherDisplay'
 import styles from './CalendarWeekly.module.css'
 
 const isSameDate = (left, right) =>
@@ -29,6 +32,8 @@ const CalendarWeekly = ({ chores, performers = [], selectedDate, onDateChange })
   const { firstDayOfWeek, fmt } = useLocalization()
   const [anchorDate, setAnchorDate] = useState(selectedDate || new Date())
   const [expandedDate, setExpandedDate] = useState(null)
+  const [locationDialogOpen, setLocationDialogOpen] = useState(false)
+  const { coords, isManualOverride, setManualLocation } = useGeolocation()
 
   const weekStart = useMemo(
     () => startOfWeek(anchorDate, firstDayOfWeek),
@@ -100,6 +105,17 @@ const CalendarWeekly = ({ chores, performers = [], selectedDate, onDateChange })
           >
             <ArrowForwardIos />
           </IconButton>
+          {isManualOverride && (
+            <IconButton
+              variant='soft'
+              color='primary'
+              size='sm'
+              onClick={() => setLocationDialogOpen(true)}
+              title='Change weather location'
+            >
+              <LocationOn />
+            </IconButton>
+          )}
         </Box>
 
         <Typography level='title-md' sx={{ textAlign: 'center' }}>
@@ -137,15 +153,30 @@ const CalendarWeekly = ({ chores, performers = [], selectedDate, onDateChange })
               onClick={() => handleSelectDate(day)}
             >
               <div className={styles.dayHeader}>
-                <div>
-                  <div className={styles.dayName}>{fmt.date(day, 'ddd')}</div>
-                  <div className={styles.dayNumber}>{fmt.date(day, 'D')}</div>
+                <div className={styles.dateBlock}>
+                  <div className={styles.dateText}>
+                    <div className={styles.dayName}>{fmt.date(day, 'ddd')}</div>
+                    <div className={styles.dayNumber}>{fmt.date(day, 'D')}</div>
+                  </div>
+                  {coords && (
+                    <WeatherDisplay
+                      className={styles.weatherDisplay}
+                      date={day}
+                      latitude={coords.latitude}
+                      longitude={coords.longitude}
+                    />
+                  )}
                 </div>
-                {dayChores.length > 0 && (
-                  <Chip size='sm' variant='soft' color='primary'>
-                    {dayChores.length}
-                  </Chip>
-                )}
+                <Box
+                  className={styles.dayBadges}
+                  sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
+                >
+                  {dayChores.length > 0 && (
+                    <Chip size='sm' variant='soft' color='primary'>
+                      {dayChores.length}
+                    </Chip>
+                  )}
+                </Box>
               </div>
 
               <div className={styles.taskList}>
@@ -187,6 +218,12 @@ const CalendarWeekly = ({ chores, performers = [], selectedDate, onDateChange })
           )
         })}
       </div>
+
+      <LocationOverrideDialog
+        open={locationDialogOpen}
+        onClose={() => setLocationDialogOpen(false)}
+        onSetLocation={setManualLocation}
+      />
     </div>
   )
 }
