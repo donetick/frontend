@@ -163,6 +163,7 @@ export const clearAllTokens = async () => {
     // Clear localStorage
     localStorage.removeItem(TOKEN_KEYS.ACCESS_TOKEN)
     localStorage.removeItem(TOKEN_KEYS.ACCESS_TOKEN_EXPIRY)
+    localStorage.removeItem(TOKEN_KEYS.REFRESH_TOKEN_EXPIRY)
     // Clean up legacy keys
     localStorage.removeItem('ca_token')
     localStorage.removeItem('ca_expiration')

@@ -4,17 +4,11 @@ import {
   Card,
   Chip,
   LinearProgress,
-  Switch,
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useUserProfile } from '../../queries/UserQueries'
-import {
-  FEATURES,
-  isFeatureEnabled,
-  setFeatureEnabled,
-} from '../../utils/FeatureToggle'
 import { GetStorageUsage } from '../../utils/Fetcher'
 import { isPlusAccount } from '../../utils/Helpers'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
@@ -26,9 +20,6 @@ const StorageSettings = () => {
   const [usage, setUsage] = useState({ used: 0, total: 0 })
   const [loading, setLoading] = useState(true)
   const [confirmModalConfig, setConfirmModalConfig] = useState({})
-  const [offlineModeEnabled, setOfflineModeEnabledState] = useState(
-    isFeatureEnabled(FEATURES.OFFLINE_MODE),
-  )
 
   const showConfirmation = (
     message,
@@ -52,11 +43,6 @@ const StorageSettings = () => {
         setConfirmModalConfig({})
       },
     })
-  }
-
-  const handleOfflineModeToggle = enabled => {
-    setOfflineModeEnabledState(enabled)
-    setFeatureEnabled(FEATURES.OFFLINE_MODE, enabled)
   }
 
   useEffect(() => {
@@ -129,46 +115,12 @@ const StorageSettings = () => {
 
         <Card className='p-4' sx={{ maxWidth: 500, mb: 2 }}>
           <Typography level='title-md' sx={{ mb: 1 }}>
-            Experimental Features
-            <Chip variant='soft' color='warning' sx={{ ml: 1 }}>
-              Coming Soon
-            </Chip>
-          </Typography>
-          <div className='mb-2 flex items-center justify-between'>
-            <div className='flex-1'>
-              <Typography level='body-md' sx={{ mb: 0.5 }}>
-                Enable Offline Mode
-              </Typography>
-              <Typography level='body-sm' color='neutral'>
-                Allows the app to work offline by caching data locally. This is
-                experimental and may cause some slowness. If you experience
-                performance issues, we recommend turning this off.
-              </Typography>
-            </div>
-            <Switch
-              checked={offlineModeEnabled}
-              disabled={true}
-              onChange={event => handleOfflineModeToggle(event.target.checked)}
-              sx={{ ml: 2 }}
-            />
-          </div>
-          {offlineModeEnabled && (
-            <Typography level='body-xs' color='warning' sx={{ mt: 1 }}>
-              ⚠️ Offline mode is enabled. If you experience slowness, disable
-              this setting.
-            </Typography>
-          )}
-        </Card>
-
-        <Card className='p-4' sx={{ maxWidth: 500, mb: 2 }}>
-          <Typography level='title-md' sx={{ mb: 1 }}>
             {Capacitor.isNativePlatform() ? 'App' : 'Browser'} Local Storage &
             Cache
           </Typography>
           <Typography level='body-sm' sx={{ mb: 1 }}>
-            This is data stored locally in your browser for faster access and
-            offline use. Clearing this will not affect your server data, but may
-            log you out or remove offline tasks.
+            This is data stored locally in your browser for faster access.
+            Clearing this will not affect your server data, but may log you out.
           </Typography>
           <Button
             variant='soft'
@@ -188,27 +140,6 @@ const StorageSettings = () => {
             }}
           >
             Clear All Local Storage and Cache
-          </Button>
-          <Button
-            variant='outlined'
-            color='danger'
-            onClick={() => {
-              showConfirmation(
-                'Are you sure you want to clear only the offline cache and tasks?',
-                'Clear Offline Cache',
-                () => {
-                  localStorage.removeItem('offline_cache')
-                  localStorage.removeItem('offline_request_queue')
-                  localStorage.removeItem('offlineTasks')
-                },
-                'Clear Cache',
-                'Cancel',
-                'danger',
-              )
-            }}
-            sx={{ mt: 1 }}
-          >
-            Clear Offline Cache and Offline Tasks
           </Button>
         </Card>
 

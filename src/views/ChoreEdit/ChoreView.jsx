@@ -44,6 +44,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useLocalization } from '../../contexts/LocalizationContext'
+import { usePendingCommands } from '../../hooks/usePendingCommands'
 import { useChoreDetails } from '../../queries/ChoreQueries.jsx'
 import {
   useChoreTimer,
@@ -56,6 +57,7 @@ import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import { useNotification } from '../../service/NotificationProvider'
 import { ChoreStatus, notInCompletionWindow } from '../../utils/Chores.jsx'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
+import { commandQueue, CommandType } from '../../utils/CommandQueue'
 import {
   ApproveChore,
   GetChoreDetailById,
@@ -71,10 +73,27 @@ import { getSafeBottomPadding } from '../../utils/SafeAreaUtils.js'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import NoteViewerModal from '../Modals/Inputs/NoteViewerModal'
 import LoadingComponent from '../components/Loading.jsx'
+import PendingBadge from '../components/PendingBadge'
 import RichTextEditor from '../components/RichTextEditor.jsx'
 import SubTasks from '../components/SubTask.jsx'
 import TimePassedCard from './TimePassedCard.jsx'
 import TimerSplitButton from './TimerSplitButton.jsx'
+
+const isNetworkError = err =>
+  err instanceof TypeError && err.message === 'Failed to fetch'
+
+const decodeHtmlEntities = value => {
+  if (typeof value !== 'string') return ''
+
+  return value
+    .replaceAll('&lt;', '<')
+    .replaceAll('&gt;', '>')
+    .replaceAll('&quot;', '"')
+    .replaceAll('&#39;', "'")
+    .replaceAll('&amp;', '&')
+}
+
+const hasHtmlTags = value => /<\/?[a-z][\s\S]*>/i.test(value)
 
 const ChoreView = () => {
   const { t } = useTranslation('chores')
@@ -104,6 +123,7 @@ const ChoreView = () => {
 
   const { data: choreData, isLoading: isChoreLoading } =
     useChoreDetails(choreId)
+  const { data: pendingCmds } = usePendingCommands(choreId)
 
   const startChore = useStartChore()
   const pauseChore = usePauseChore()
@@ -136,7 +156,6 @@ const ChoreView = () => {
       if (response.ok) {
         response.json().then(() => {
           setChorePriority(priority)
-          // Invalidate chores cache to refetch data
           queryClient.invalidateQueries(['chores'])
         })
       }
@@ -164,7 +183,9 @@ const ChoreView = () => {
         icon: <CalendarMonth />,
         title: t('choreView.schedule'),
         text: `${t('choreView.due')}: ${
-          chore.nextDueDate ? moment(chore.nextDueDate).fromNow() : t('choreView.na')
+          chore.nextDueDate
+            ? moment(chore.nextDueDate).fromNow()
+            : t('choreView.na')
         }`,
         subtext: `${t('choreView.last')}: ${
           chore.lastCompletedDate
@@ -195,39 +216,26 @@ const ChoreView = () => {
     ]
     setInfoCards(cards)
   }
-  const handleTaskCompletion = () => {
-    MarkChoreComplete(
-      choreId,
-      impersonatedUser
-        ? { completedBy: impersonatedUser.userId, note }
-        : { note },
-      completedDate,
-      null,
-    )
-      .then(resp => {
-        if (resp.ok) {
-          return resp.json().then(data => {
-            setNote(null)
-            setChore(data.res)
-          })
-        }
-      })
-      .then(() => {
-        // Invalidate chores cache to refetch data
+  const handleTaskCompletion = async () => {
+    try {
+      const resp = await MarkChoreComplete(
+        choreId,
+        impersonatedUser
+          ? { completedBy: impersonatedUser.userId, note }
+          : { note },
+        completedDate,
+        null,
+      )
+      if (resp.ok) {
+        const data = await resp.json()
+        setNote(null)
+        setChore(data.res)
         queryClient.invalidateQueries(['chores'])
-      })
-      .then(() => {
-        // refetch the chore details
-        GetChoreDetailById(choreId).then(resp => {
-          if (resp.ok) {
-            return resp.json().then(data => {
-              setChore(data.res)
-            })
-          }
-        })
-      })
-      .then(() => {
-        // Show undo notification
+        const detailResp = await GetChoreDetailById(choreId)
+        if (detailResp.ok) {
+          const detailData = await detailResp.json()
+          setChore(detailData.res)
+        }
         showSuccess({
           title: t('choreView.taskCompleted'),
           message: t('choreView.taskCompletedMessage'),
@@ -235,7 +243,6 @@ const ChoreView = () => {
             try {
               const undoResponse = await UndoChoreAction(choreId)
               if (undoResponse.ok) {
-                // Refetch chore details after undo
                 const detailResponse = await GetChoreDetailById(choreId)
                 if (detailResponse.ok) {
                   const detailData = await detailResponse.json()
@@ -257,49 +264,94 @@ const ChoreView = () => {
             }
           },
         })
-      })
-  }
-  const handleSkippingTask = () => {
-    SkipChore(choreId).then(response => {
-      if (response.ok) {
-        response.json().then(data => {
-          const newChore = data.res
-          setChore(newChore)
-          // Invalidate chores cache to refetch data
-          queryClient.invalidateQueries(['chores'])
-
-          // Show undo notification
-          showSuccess({
-            message: t('choreView.skipTask'),
-            undoAction: async () => {
-              try {
-                const undoResponse = await UndoChoreAction(choreId)
-                if (undoResponse.ok) {
-                  // Refetch chore details after undo
-                  const detailResponse = await GetChoreDetailById(choreId)
-                  if (detailResponse.ok) {
-                    const detailData = await detailResponse.json()
-                    setChore(detailData.res)
-                    queryClient.invalidateQueries(['chores'])
-                  }
-                  showUndo({
-                    title: t('choreView.undoSuccessful'),
-                    message: t('choreView.taskSkipUndone'),
-                  })
-                } else {
-                  throw new Error('Failed to undo')
-                }
-              } catch (error) {
-                showError({
-                  title: t('choreView.undoFailed'),
-                  message: t('choreView.undoFailedMessage'),
-                })
-              }
-            },
-          })
+      }
+    } catch (error) {
+      if (isNetworkError(error)) {
+        const cmdId = await commandQueue.enqueue(
+          CommandType.COMPLETE_CHORE,
+          choreId,
+          {
+            id: choreId,
+            body: impersonatedUser
+              ? { completedBy: impersonatedUser.userId, note }
+              : { note },
+            completedDate: completedDate || null,
+            performer: null,
+          },
+        )
+        queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
+        showSuccess({
+          message: "You're offline — completion will sync when back online",
+          undoAction: async () => {
+            await commandQueue.cancel(cmdId)
+            queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
+          },
+        })
+      } else {
+        showError({
+          title: t('choreView.undoFailed'),
+          message: error?.message || 'Unable to complete task',
         })
       }
-    })
+    }
+  }
+  const handleSkippingTask = async () => {
+    try {
+      const response = await SkipChore(choreId)
+      if (response.ok) {
+        const data = await response.json()
+        setChore(data.res)
+        queryClient.invalidateQueries(['chores'])
+        showSuccess({
+          message: t('choreView.skipTask'),
+          undoAction: async () => {
+            try {
+              const undoResponse = await UndoChoreAction(choreId)
+              if (undoResponse.ok) {
+                const detailResponse = await GetChoreDetailById(choreId)
+                if (detailResponse.ok) {
+                  const detailData = await detailResponse.json()
+                  setChore(detailData.res)
+                  queryClient.invalidateQueries(['chores'])
+                }
+                showUndo({
+                  title: t('choreView.undoSuccessful'),
+                  message: t('choreView.taskSkipUndone'),
+                })
+              } else {
+                throw new Error('Failed to undo')
+              }
+            } catch (error) {
+              showError({
+                title: t('choreView.undoFailed'),
+                message: t('choreView.undoFailedMessage'),
+              })
+            }
+          },
+        })
+      }
+    } catch (error) {
+      if (isNetworkError(error)) {
+        const cmdId = await commandQueue.enqueue(
+          CommandType.SKIP_CHORE,
+          choreId,
+          { id: choreId },
+        )
+        queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
+        showSuccess({
+          message: "You're offline — skip will sync when back online",
+          undoAction: async () => {
+            await commandQueue.cancel(cmdId)
+            queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
+          },
+        })
+      } else {
+        showError({
+          title: t('choreView.undoFailed'),
+          message: error?.message || 'Unable to skip task',
+        })
+      }
+    }
   }
   const handleChoreStart = () => {
     startChore.mutate(choreId, {
@@ -383,7 +435,6 @@ const ChoreView = () => {
       if (response.ok) {
         response.json().then(data => {
           setChore(data.res)
-          // Invalidate chores cache to refetch data
           queryClient.invalidateQueries(['chores'])
         })
       }
@@ -395,23 +446,45 @@ const ChoreView = () => {
       if (response.ok) {
         response.json().then(data => {
           setChore(data.res)
-          // Invalidate chores cache to refetch data
           queryClient.invalidateQueries(['chores'])
         })
       }
     })
   }
 
-  const handleUnarchiveChore = () => {
-    UnArchiveChore(choreId).then(response => {
+  const handleUnarchiveChore = async () => {
+    try {
+      const response = await UnArchiveChore(choreId)
       if (response.ok) {
-        response.json().then(data => {
-          setChore({ ...chore, isActive: true })
-          // Invalidate chores cache to refetch data
-          queryClient.invalidateQueries(['chores'])
+        setChore({ ...chore, isActive: true })
+        queryClient.invalidateQueries(['chores'])
+      }
+    } catch (error) {
+      const isNetworkError = err =>
+        err instanceof TypeError && err.message === 'Failed to fetch'
+      if (isNetworkError(error)) {
+        const cmdId = await commandQueue.enqueue(
+          CommandType.UNARCHIVE_CHORE,
+          choreId,
+          { id: choreId },
+        )
+        setChore({ ...chore, isActive: true })
+        queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
+        showSuccess({
+          message: "You're offline — restore will sync when back online",
+          undoAction: async () => {
+            await commandQueue.cancel(cmdId)
+            setChore({ ...chore, isActive: false })
+            queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
+          },
+        })
+      } else {
+        showError({
+          title: 'Failed to restore',
+          message: error.message || 'Unable to restore task',
         })
       }
-    })
+    }
   }
 
   // Check if the current user can approve/reject (admin, manager, or task owner)
@@ -458,16 +531,19 @@ const ChoreView = () => {
           mb: 1,
         }}
       >
-        <Typography
-          level='h3'
-          // textAlign={'center'}
+        <Box
           sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 1,
             mt: 1,
             mb: 0.5,
           }}
         >
-          {chore.name}
-        </Typography>
+          <Typography level='h3'>{chore.name}</Typography>
+          <PendingBadge commands={pendingCmds} />
+        </Box>
         {chore.isActive === false && (
           <Chip
             startDecorator={<Archive />}
@@ -747,7 +823,30 @@ const ChoreView = () => {
                   overflow: 'hidden',
                 }}
               >
-                <RichTextEditor value={chore.description} isEditable={false} />
+                {(() => {
+                  const content = decodeHtmlEntities(chore.description || '')
+                  const shouldRenderHtml = hasHtmlTags(content)
+
+                  return shouldRenderHtml ? (
+                    <Box
+                      sx={{
+                        whiteSpace: 'pre-wrap',
+                        wordBreak: 'break-word',
+                      }}
+                      dangerouslySetInnerHTML={{ __html: content }}
+                    />
+                  ) : (
+                    <Typography
+                      level='body-md'
+                      sx={{
+                        whiteSpace: 'pre-wrap',
+                        wordBreak: 'break-word',
+                      }}
+                    >
+                      {content}
+                    </Typography>
+                  )
+                })()}
               </Box>
             </Sheet>
           </>
@@ -792,7 +891,30 @@ const ChoreView = () => {
                   overflow: 'hidden',
                 }}
               >
-                <RichTextEditor value={chore.notes} isEditable={false} />
+                {(() => {
+                  const content = decodeHtmlEntities(chore.notes || '')
+                  const shouldRenderHtml = hasHtmlTags(content)
+
+                  return shouldRenderHtml ? (
+                    <Box
+                      sx={{
+                        whiteSpace: 'pre-wrap',
+                        wordBreak: 'break-word',
+                      }}
+                      dangerouslySetInnerHTML={{ __html: content }}
+                    />
+                  ) : (
+                    <Typography
+                      level='body-md'
+                      sx={{
+                        whiteSpace: 'pre-wrap',
+                        wordBreak: 'break-word',
+                      }}
+                    >
+                      {content}
+                    </Typography>
+                  )
+                })()}
               </Box>
             </Sheet>
           </>

@@ -15,6 +15,7 @@ import './styles/safe-area.css'
 import SSEProvider from './contexts/SSEContext'
 import { useNotification } from './service/NotificationProvider'
 
+import { useSyncOnReconnect } from './hooks/useSyncOnReconnect'
 import NetworkBanner from './views/components/NetworkBanner'
 
 const add = className => {
@@ -30,6 +31,7 @@ const intervalMS = 5 * 60 * 1000 // 5 minutes
 
 const AppContent = () => {
   const { showNotification } = useNotification()
+  useSyncOnReconnect()
 
   // Initialize status bar with theme-aware configuration
   useStatusBar()
