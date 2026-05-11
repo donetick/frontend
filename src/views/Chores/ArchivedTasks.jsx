@@ -20,6 +20,7 @@ import {
   Stack,
   Typography,
 } from '@mui/joy'
+import { useQueryClient } from '@tanstack/react-query'
 import Fuse from 'fuse.js'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -28,6 +29,7 @@ import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useUnArchiveChore } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
+import { commandQueue, CommandType } from '../../utils/CommandQueue'
 import { DeleteChore, GetArchivedChores } from '../../utils/Fetcher'
 import LoadingComponent from '../components/Loading'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
@@ -41,6 +43,7 @@ const ArchivedTasks = () => {
     useUserProfile()
   const { showSuccess, showError } = useNotification()
   const { impersonatedUser } = useImpersonateUser()
+  const queryClient = useQueryClient()
   const unArchiveChore = useUnArchiveChore()
   const [archivedChores, setArchivedChores] = useState([])
   const [filteredChores, setFilteredChores] = useState([])
@@ -319,6 +322,10 @@ const ArchivedTasks = () => {
             const restoredTasks = []
             const failedTasks = []
 
+            const isNetworkError = err =>
+              err instanceof TypeError && err.message === 'Failed to fetch'
+            const queuedTasks = []
+
             for (const chore of selectedData) {
               try {
                 await new Promise((resolve, reject) => {
@@ -327,9 +334,15 @@ const ArchivedTasks = () => {
                       restoredTasks.push(chore)
                       resolve(data)
                     },
-                    onError: error => {
-                      failedTasks.push(chore)
-                      reject(error)
+                    onError: async error => {
+                      if (isNetworkError(error)) {
+                        await commandQueue.enqueue(CommandType.UNARCHIVE_CHORE, chore.id, { id: chore.id })
+                        queuedTasks.push(chore)
+                        resolve()
+                      } else {
+                        failedTasks.push(chore)
+                        reject(error)
+                      }
                     },
                   })
                 })
@@ -338,22 +351,22 @@ const ArchivedTasks = () => {
               }
             }
 
-            if (restoredTasks.length > 0) {
-              showSuccess({
-                title: '📤 Tasks Restored',
-                message: `Successfully restored ${restoredTasks.length} task${restoredTasks.length > 1 ? 's' : ''}.`,
-              })
-
-              // Remove restored tasks from archived list
-              const restoredIds = new Set(restoredTasks.map(c => c.id))
-              const newArchivedChores = archivedChores.filter(
-                c => !restoredIds.has(c.id),
-              )
-              const newFilteredChores = filteredChores.filter(
-                c => !restoredIds.has(c.id),
-              )
+            const allRestored = [...restoredTasks, ...queuedTasks]
+            if (allRestored.length > 0) {
+              const offlineNote = queuedTasks.length > 0 ? " (queued — will sync when back online)" : ''
+              // Remove from archived view optimistically for both online and queued
+              const restoredIds = new Set(allRestored.map(c => c.id))
+              const newArchivedChores = archivedChores.filter(c => !restoredIds.has(c.id))
+              const newFilteredChores = filteredChores.filter(c => !restoredIds.has(c.id))
               setArchivedChores(newArchivedChores)
               setFilteredChores(newFilteredChores)
+              if (queuedTasks.length > 0) {
+                queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
+              }
+              showSuccess({
+                title: '📤 Tasks Restored',
+                message: `Restored ${allRestored.length} task${allRestored.length > 1 ? 's' : ''}${offlineNote}.`,
+              })
             }
 
             if (failedTasks.length > 0) {

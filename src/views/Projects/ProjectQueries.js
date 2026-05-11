@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { GetProjects, CreateProject, UpdateProject, DeleteProject } from '../../utils/Fetcher'
+import { offlineDB } from '../../utils/OfflineDB'
 
 // Query hook for fetching all projects
 export const useProjects = () => {
@@ -10,22 +11,15 @@ export const useProjects = () => {
         const response = await GetProjects()
         if (response.ok) {
           const data = await response.json()
-          return data.res || data
+          const projects = data.res || data
+          offlineDB.saveKV('projects', projects)
+          return projects
         }
         throw new Error('Failed to fetch projects')
-      } catch (error) {
-        console.error('Error fetching projects:', error)
-        // Return default project if API fails
-        return [
-          {
-            id: 'default',
-            name: 'Default Project',
-            description: 'Your default project workspace',
-            color: '#1976d2',
-            created_by: 'system',
-            created_at: new Date().toISOString(),
-          }
-        ]
+      } catch {
+        const cached = await offlineDB.getKV('projects')
+        if (cached) return cached
+        return []
       }
     },
     staleTime: 5 * 60 * 1000, // 5 minutes

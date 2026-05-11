@@ -633,32 +633,27 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
 
     createChoreMutation
       .mutateAsync(chore)
-      .then(resp => {
-        resp.json().then(data => {
-          if (resp.status !== 200) {
-            console.error('Error creating chore:', data)
-            return
-          } else {
-            onChoreUpdate({
-              ...chore,
-              id: data.res,
-              nextDueDate: chore.dueDate,
-            })
-
-            handleCloseModal(false)
-          }
-          handleCloseModal()
-          setTaskText('')
-        })
+      .then(result => {
+        const choreData = result?.res
+        if (choreData?._pendingCreate) {
+          // Offline: task queued, add temp chore to UI immediately
+          onChoreUpdate(choreData)
+        } else {
+          // Online: choreData is the server's parsed response ({ res: id })
+          onChoreUpdate({
+            ...chore,
+            id: choreData?.res || choreData?.id,
+            nextDueDate: chore.dueDate,
+          })
+        }
+        setTaskText('')
       })
       .catch(error => {
-        if (error?.queued) {
-          handleCloseModal(true)
-        }
+        console.error('Error creating chore:', error)
       })
     handleCloseModal(false)
   }
-  if (userLabelsLoading || isCircleMembersLoading || isProjectsLoading) {
+  if (isCircleMembersLoading || isProjectsLoading) {
     return <></>
   }
 

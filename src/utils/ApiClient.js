@@ -17,7 +17,7 @@ class ApiClient {
   }
 
   async init(force = false) {
-    if (this.initPromise) {
+    if (!force && this.initPromise) {
       return this.initPromise
     }
 

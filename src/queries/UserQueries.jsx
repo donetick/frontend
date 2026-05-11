@@ -6,6 +6,7 @@ import {
   GetDeviceTokens,
   GetUserProfile,
 } from '../utils/Fetcher'
+import { offlineDB } from '../utils/OfflineDB'
 
 // Helper to check if we have a valid token
 const isTokenValid = () => {
@@ -30,7 +31,20 @@ export const useCircleMembers = () => {
 
   const { data, error, isLoading } = useQuery({
     queryKey: ['allCircleMembers'],
-    queryFn: GetAllCircleMembers,
+    queryFn: async () => {
+      try {
+        const result = await GetAllCircleMembers()
+        // Cache for offline use
+        if (result?.res) {
+          offlineDB.saveKV('circle_members', result.res)
+        }
+        return result
+      } catch {
+        const cached = await offlineDB.getKV('circle_members')
+        if (cached) return { res: cached }
+        return { res: [] }
+      }
+    },
   })
 
   const handleRefetch = () => {
@@ -42,19 +56,31 @@ export const useCircleMembers = () => {
 
 export const useUserProfile = () => {
   const queryClient = useQueryClient()
+  const token = localStorage.getItem('token')
 
   const { data, error, isLoading } = useQuery({
-    queryKey: ['userProfile'],
+    queryKey: ['userProfile', token],
     queryFn: async () => {
-      const resp = await GetUserProfile()
-      const result = await resp.json()
-      // if we got 403 then user probably deleted their account and token is still valid. navigate to login
+      if (!token) {
+        return null
+      }
 
-      return result.res || null
+      try {
+        const resp = await GetUserProfile()
+        const result = await resp.json()
+        // if we got 403 then user probably deleted their account and token is still valid. navigate to login
+        if (result?.res) {
+          await offlineDB.saveKV('user_profile', result.res)
+        }
+        return result.res || null
+      } catch {
+        // API unreachable — only serve cached profile for authenticated sessions
+        return await offlineDB.getKV('user_profile')
+      }
     },
-    staleTime: 30 * 60 * 1000, // 30 minutes in milliseconds
-    gcTime: 30 * 60 * 1000, // 30 minutes in milliseconds
-    enabled: isTokenValid(), // Only run query when we have a valid token
+    staleTime: 30 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    enabled: !!token,
   })
   return {
     data,
