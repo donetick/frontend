@@ -157,9 +157,7 @@ export const useChoreActions = ({
           try {
             const response = await MarkChoreComplete(
               chore.id,
-              impersonatedUser
-                ? { completedBy: impersonatedUser.userId }
-                : null,
+              impersonatedUser ? impersonatedUser.userId : null,
               null,
               null,
             )
