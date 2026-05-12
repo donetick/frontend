@@ -1,5 +1,6 @@
 import {
   CheckCircleOutline,
+  ClearAll,
   CloudDone,
   CloudQueue,
   CloudSync,
@@ -34,12 +35,26 @@ import { syncEngine } from '../../utils/SyncEngine'
 const COMMAND_LABELS = {
   create_chore: 'Create chore',
   update_chore: 'Update chore',
+  update_chore_history: 'Edit history',
   complete_chore: 'Complete chore',
   skip_chore: 'Skip chore',
+  start_chore: 'Start chore',
+  pause_chore: 'Pause chore',
   delete_chore: 'Delete chore',
+  delete_chore_history: 'Delete history',
   reschedule_chore: 'Reschedule chore',
   archive_chore: 'Archive chore',
   unarchive_chore: 'Restore chore',
+}
+
+const formatCommandLabel = commandType => {
+  return (
+    COMMAND_LABELS[commandType] ||
+    commandType
+      ?.replace(/_/g, ' ')
+      ?.replace(/\b\w/g, letter => letter.toUpperCase()) ||
+    'Pending action'
+  )
 }
 
 const RETRY_INTERVAL = 30
@@ -128,6 +143,16 @@ function SyncStatusIndicator() {
 
   const handleDismissFailed = async id => {
     await commandQueue.cancel(id)
+    await refreshCommands()
+  }
+
+  const handleCancelAll = async () => {
+    const [pending, failed] = await Promise.all([
+      commandQueue.getPending(),
+      commandQueue.getFailed(),
+    ])
+    const allCommands = [...pending, ...failed]
+    await Promise.all(allCommands.map(cmd => commandQueue.cancel(cmd.id)))
     await refreshCommands()
   }
 
@@ -323,7 +348,7 @@ function SyncStatusIndicator() {
                 }}
               >
                 <Typography level='body-sm'>
-                  {COMMAND_LABELS[type] || type}
+                  {formatCommandLabel(type)}
                 </Typography>
                 <Chip size='sm' color='warning' variant='soft'>
                   {count}
@@ -375,7 +400,7 @@ function SyncStatusIndicator() {
                       fontWeight: 500,
                     }}
                   >
-                    {COMMAND_LABELS[cmd.commandType] || cmd.commandType}
+                    {formatCommandLabel(cmd.commandType)}
                   </Typography>
                   <Button
                     size='sm'
@@ -447,6 +472,24 @@ function SyncStatusIndicator() {
         )}
 
         <Divider sx={{ my: 0.5 }} />
+
+        <MenuItem
+          disabled={syncState.syncing || totalBadge === 0}
+          onClick={handleCancelAll}
+          sx={{
+            borderRadius: 'var(--joy-radius-sm)',
+            '&:hover': {
+              backgroundColor: 'var(--joy-palette-neutral-softHoverBg)',
+            },
+          }}
+        >
+          <ListItemDecorator>
+            <ClearAll sx={{ fontSize: 18 }} />
+          </ListItemDecorator>
+          <Typography level='body-sm' sx={{ fontWeight: 500 }}>
+            Cancel All
+          </Typography>
+        </MenuItem>
 
         {/* Sync Now — must be a MenuItem so Menu doesn't swallow the click */}
         <MenuItem

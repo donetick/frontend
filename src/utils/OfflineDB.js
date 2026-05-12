@@ -3,9 +3,9 @@ import { Capacitor } from '@capacitor/core'
 import { isOfflineFeatureEnabled } from './OfflineFeatureToggle'
 
 const DB_NAME = 'donetick_offline'
-const DB_VERSION = 1
+const DB_VERSION = 2
 const IDB_NAME = 'donetick_offline'
-const IDB_VERSION = 1
+const IDB_VERSION = 2
 
 // Cache platform detection
 let _isNative = null
@@ -63,6 +63,19 @@ class SQLiteBackend {
           key TEXT PRIMARY KEY,
           value TEXT NOT NULL
         );
+
+        CREATE TABLE IF NOT EXISTS cached_history (
+          id INTEGER PRIMARY KEY,
+          chore_id INTEGER NOT NULL,
+          data TEXT NOT NULL,
+          performed_at INTEGER NOT NULL,
+          pending INTEGER NOT NULL DEFAULT 0,
+          cached_at INTEGER NOT NULL
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_history_chore_id ON cached_history(chore_id);
+        CREATE INDEX IF NOT EXISTS idx_history_performed_at ON cached_history(performed_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_history_pending ON cached_history(pending);
       `,
     })
 
@@ -131,6 +144,131 @@ class SQLiteBackend {
     await CapacitorSQLite.execute({
       database: DB_NAME,
       statements: 'DELETE FROM cached_chores',
+    })
+  }
+
+  // ── History cache ──
+
+  async saveHistory(entries) {
+    if (!entries.length) return
+    // Delete pending entries for the affected chore IDs first
+    const choreIds = [...new Set(entries.map(e => Number(e.choreId)))]
+    if (choreIds.length) {
+      const placeholders = choreIds.map(() => '?').join(', ')
+      await CapacitorSQLite.run({
+        database: DB_NAME,
+        statement: `DELETE FROM cached_history WHERE pending = 1 AND chore_id IN (${placeholders})`,
+        values: choreIds,
+      })
+    }
+    const statements = entries.map(entry => ({
+      statement:
+        'INSERT OR REPLACE INTO cached_history (id, chore_id, data, performed_at, pending, cached_at) VALUES (?, ?, ?, ?, ?, ?)',
+      values: [
+        entry.id,
+        Number(entry.choreId),
+        JSON.stringify(entry),
+        new Date(entry.performedAt).getTime(),
+        0,
+        Date.now(),
+      ],
+    }))
+    await CapacitorSQLite.executeSet({ database: DB_NAME, set: statements })
+  }
+
+  async savePendingHistory(entry) {
+    await CapacitorSQLite.run({
+      database: DB_NAME,
+      statement:
+        'INSERT OR REPLACE INTO cached_history (id, chore_id, data, performed_at, pending, cached_at) VALUES (?, ?, ?, ?, ?, ?)',
+      values: [
+        entry.id,
+        Number(entry.choreId),
+        JSON.stringify(entry),
+        new Date(entry.performedAt).getTime(),
+        1,
+        Date.now(),
+      ],
+    })
+  }
+
+  async getHistoryByChore(choreId) {
+    const result = await CapacitorSQLite.query({
+      database: DB_NAME,
+      statement:
+        'SELECT data FROM cached_history WHERE chore_id = ? ORDER BY performed_at DESC',
+      values: [Number(choreId)],
+    })
+    return (result.values || []).map(row => JSON.parse(row.data))
+  }
+
+  async getHistoryByDays(days) {
+    const since = days >= 365 ? 0 : Date.now() - days * 24 * 60 * 60 * 1000
+    const result = await CapacitorSQLite.query({
+      database: DB_NAME,
+      statement:
+        since === 0
+          ? 'SELECT data FROM cached_history ORDER BY performed_at DESC'
+          : 'SELECT data FROM cached_history WHERE performed_at >= ? ORDER BY performed_at DESC',
+      values: since === 0 ? [] : [since],
+    })
+    return (result.values || []).map(row => JSON.parse(row.data))
+  }
+
+  async deleteHistory(ids) {
+    if (!ids.length) return
+    const statements = ids.map(id => ({
+      statement: 'DELETE FROM cached_history WHERE id = ?',
+      values: [id],
+    }))
+    await CapacitorSQLite.executeSet({ database: DB_NAME, set: statements })
+  }
+
+  async updateHistoryEntry(choreId, historyId, updates) {
+    const existing = await CapacitorSQLite.query({
+      database: DB_NAME,
+      statement: 'SELECT data, pending FROM cached_history WHERE id = ?',
+      values: [historyId],
+    })
+
+    if (!existing.values?.length) return
+
+    const row = existing.values[0]
+    const current = JSON.parse(row.data)
+    const merged = {
+      ...current,
+      ...updates,
+      id: historyId,
+      choreId: Number(choreId),
+    }
+
+    await CapacitorSQLite.run({
+      database: DB_NAME,
+      statement:
+        'INSERT OR REPLACE INTO cached_history (id, chore_id, data, performed_at, pending, cached_at) VALUES (?, ?, ?, ?, ?, ?)',
+      values: [
+        historyId,
+        Number(choreId),
+        JSON.stringify(merged),
+        new Date(merged.performedAt).getTime(),
+        row.pending || 0,
+        Date.now(),
+      ],
+    })
+  }
+
+  async deleteHistoryEntry(historyId) {
+    await CapacitorSQLite.run({
+      database: DB_NAME,
+      statement: 'DELETE FROM cached_history WHERE id = ?',
+      values: [historyId],
+    })
+  }
+
+  async clearHistory() {
+    await CapacitorSQLite.execute({
+      database: DB_NAME,
+      statements: 'DELETE FROM cached_history',
     })
   }
 
@@ -286,6 +424,7 @@ class SQLiteBackend {
         DELETE FROM cached_chores;
         DELETE FROM command_queue;
         DELETE FROM sync_meta;
+        DELETE FROM cached_history;
       `,
     })
   }
@@ -322,6 +461,17 @@ class IndexedDBBackend {
 
         if (!db.objectStoreNames.contains('sync_meta')) {
           db.createObjectStore('sync_meta', { keyPath: 'key' })
+        }
+
+        if (!db.objectStoreNames.contains('cached_history')) {
+          const histStore = db.createObjectStore('cached_history', {
+            keyPath: 'id',
+          })
+          histStore.createIndex('chore_id', 'choreId', { unique: false })
+          histStore.createIndex('performed_at', 'performedAt', {
+            unique: false,
+          })
+          histStore.createIndex('pending', 'pending', { unique: false })
         }
       }
 
@@ -428,6 +578,135 @@ class IndexedDBBackend {
     await this._request(store.clear())
   }
 
+  // ── History cache ──
+
+  async saveHistory(entries) {
+    if (!entries.length) return
+    // Delete pending entries for the affected chore IDs first
+    const choreIds = [...new Set(entries.map(e => Number(e.choreId)))]
+    await this._deletePendingHistoryByChoreIds(choreIds)
+    // Upsert real entries
+    const { tx, store } = await this._tx('cached_history', 'readwrite')
+    for (const entry of entries) {
+      store.put({
+        id: entry.id,
+        choreId: Number(entry.choreId),
+        data: entry,
+        performedAt: new Date(entry.performedAt).getTime(),
+        pending: 0,
+        cachedAt: Date.now(),
+      })
+    }
+    return new Promise((resolve, reject) => {
+      tx.oncomplete = () => resolve()
+      tx.onerror = () => reject(tx.error)
+    })
+  }
+
+  async savePendingHistory(entry) {
+    const { store } = await this._tx('cached_history', 'readwrite')
+    await this._request(
+      store.put({
+        id: entry.id,
+        choreId: Number(entry.choreId),
+        data: entry,
+        performedAt: new Date(entry.performedAt).getTime(),
+        pending: 1,
+        cachedAt: Date.now(),
+      }),
+    )
+  }
+
+  async _deletePendingHistoryByChoreIds(choreIds) {
+    if (!choreIds.length) return
+    const choreIdSet = new Set(choreIds)
+    // Tx 1: read all pending entries
+    const { store: readStore } = await this._tx('cached_history')
+    const index = readStore.index('pending')
+    const rows = await this._request(index.getAll(1))
+    const toDelete = rows
+      .filter(row => choreIdSet.has(Number(row.choreId)))
+      .map(row => row.id)
+    if (!toDelete.length) return
+    // Tx 2: delete them
+    const { tx, store: writeStore } = await this._tx(
+      'cached_history',
+      'readwrite',
+    )
+    for (const id of toDelete) {
+      writeStore.delete(id)
+    }
+    return new Promise((resolve, reject) => {
+      tx.oncomplete = () => resolve()
+      tx.onerror = () => reject(tx.error)
+    })
+  }
+
+  async getHistoryByChore(choreId) {
+    const { store } = await this._tx('cached_history')
+    const index = store.index('chore_id')
+    const rows = await this._request(index.getAll(Number(choreId)))
+    return rows
+      .map(row => row.data)
+      .sort((a, b) => new Date(b.performedAt) - new Date(a.performedAt))
+  }
+
+  async getHistoryByDays(days) {
+    const since = days >= 365 ? 0 : Date.now() - days * 24 * 60 * 60 * 1000
+    const { store } = await this._tx('cached_history')
+    const rows = await this._request(store.getAll())
+    return rows
+      .map(row => row.data)
+      .filter(entry =>
+        since === 0 ? true : new Date(entry.performedAt).getTime() >= since,
+      )
+      .sort((a, b) => new Date(b.performedAt) - new Date(a.performedAt))
+  }
+
+  async deleteHistory(ids) {
+    if (!ids.length) return
+    const { tx, store } = await this._tx('cached_history', 'readwrite')
+    for (const id of ids) {
+      store.delete(id)
+    }
+    return new Promise((resolve, reject) => {
+      tx.oncomplete = () => resolve()
+      tx.onerror = () => reject(tx.error)
+    })
+  }
+
+  async updateHistoryEntry(choreId, historyId, updates) {
+    const { store } = await this._tx('cached_history')
+    const existing = await this._request(store.get(historyId))
+    if (!existing) return
+
+    const merged = {
+      ...existing,
+      choreId: Number(choreId),
+      data: {
+        ...existing.data,
+        ...updates,
+        id: historyId,
+        choreId: Number(choreId),
+      },
+    }
+    merged.performedAt = new Date(merged.data.performedAt).getTime()
+    merged.cachedAt = Date.now()
+
+    const { store: writeStore } = await this._tx('cached_history', 'readwrite')
+    await this._request(writeStore.put(merged))
+  }
+
+  async deleteHistoryEntry(historyId) {
+    const { store } = await this._tx('cached_history', 'readwrite')
+    await this._request(store.delete(historyId))
+  }
+
+  async clearHistory() {
+    const { store } = await this._tx('cached_history', 'readwrite')
+    await this._request(store.clear())
+  }
+
   // ── Command queue ──
 
   async enqueueCommand(command) {
@@ -526,7 +805,12 @@ class IndexedDBBackend {
   }
 
   async clearAll() {
-    const storeNames = ['cached_chores', 'command_queue', 'sync_meta']
+    const storeNames = [
+      'cached_chores',
+      'command_queue',
+      'sync_meta',
+      'cached_history',
+    ]
     for (const storeName of storeNames) {
       const { store } = await this._tx(storeName, 'readwrite')
       await this._request(store.clear())
@@ -664,6 +948,56 @@ class OfflineDB {
     if (!isOfflineFeatureEnabled()) return
     await this._ensureInit()
     return this.backend.setLastSyncTime(time)
+  }
+
+  // History cache
+  async saveHistory(entries) {
+    if (!isOfflineFeatureEnabled()) return
+    await this._ensureInit()
+    return this.backend.saveHistory(entries)
+  }
+
+  async savePendingHistory(entry) {
+    if (!isOfflineFeatureEnabled()) return
+    await this._ensureInit()
+    return this.backend.savePendingHistory(entry)
+  }
+
+  async getHistoryByChore(choreId) {
+    if (!isOfflineFeatureEnabled()) return []
+    await this._ensureInit()
+    console.log('MO: Fetching history for chore', choreId)
+    return this.backend.getHistoryByChore(choreId)
+  }
+
+  async getHistoryByDays(days) {
+    if (!isOfflineFeatureEnabled()) return []
+    await this._ensureInit()
+    return this.backend.getHistoryByDays(days)
+  }
+
+  async deleteHistory(ids) {
+    if (!isOfflineFeatureEnabled()) return
+    await this._ensureInit()
+    return this.backend.deleteHistory(ids)
+  }
+
+  async updateHistoryEntry(choreId, historyId, updates) {
+    if (!isOfflineFeatureEnabled()) return
+    await this._ensureInit()
+    return this.backend.updateHistoryEntry(choreId, historyId, updates)
+  }
+
+  async deleteHistoryEntry(historyId) {
+    if (!isOfflineFeatureEnabled()) return
+    await this._ensureInit()
+    return this.backend.deleteHistoryEntry(historyId)
+  }
+
+  async clearHistory() {
+    if (!isOfflineFeatureEnabled()) return
+    await this._ensureInit()
+    return this.backend.clearHistory()
   }
 
   // General key-value cache (uses sync_meta store)

@@ -1,14 +1,23 @@
+import { LocalNotifications } from '@capacitor/local-notifications'
 import { Refresh, Token } from '@mui/icons-material'
 import { Box, Button, Card, Chip, Divider, Typography } from '@mui/joy'
-import { useEffect, useState } from 'react'
-import { LocalNotifications } from '@capacitor/local-notifications'
+import { useQueryClient } from '@tanstack/react-query'
+import { useCallback, useEffect, useState } from 'react'
+import { networkManager } from '../../hooks/NetworkManager'
+import useConfirmationModal from '../../hooks/useConfirmationModal'
 import { useSSEContext } from '../../hooks/useSSEContext'
 import { useNotification } from '../../service/NotificationProvider'
 import { apiClient } from '../../utils/ApiClient'
+import { commandQueue } from '../../utils/CommandQueue'
 import { RefreshToken } from '../../utils/Fetcher'
+import { offlineDB } from '../../utils/OfflineDB'
+import { syncEngine } from '../../utils/SyncEngine'
 import { getRefreshTokenExpiry, isNative } from '../../utils/TokenStorage'
+import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 
 const DeveloperSettings = () => {
+  const queryClient = useQueryClient()
+  const { confirmModalConfig, showConfirmation } = useConfirmationModal()
   const {
     isConnected,
     isConnecting,
@@ -31,8 +40,47 @@ const DeveloperSettings = () => {
   const [isRefreshingDirect, setIsRefreshingDirect] = useState(false)
   const [scheduledNotifications, setScheduledNotifications] = useState([])
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(false)
+  const [isResettingSync, setIsResettingSync] = useState(false)
+  const [syncDiagnostics, setSyncDiagnostics] = useState({
+    cursor: null,
+    lastSync: null,
+    pendingCount: 0,
+    failedCount: 0,
+    syncing: false,
+    syncError: null,
+    isOnline: networkManager.isOnline,
+    isNetworkOn: networkManager.isNetworkOn,
+    offlineSince: networkManager.offlineSince,
+    lastChecked: networkManager.lastChecked,
+  })
 
   const { showNotification } = useNotification()
+
+  const refreshSyncDiagnostics = useCallback(async () => {
+    try {
+      const [cursor, lastSync, pendingCommands, failedCommands] =
+        await Promise.all([
+          offlineDB.getSyncCursor(),
+          offlineDB.getLastSyncTime(),
+          commandQueue.getPending(),
+          commandQueue.getFailed(),
+        ])
+
+      setSyncDiagnostics(prev => ({
+        ...prev,
+        cursor,
+        lastSync,
+        pendingCount: pendingCommands.length,
+        failedCount: failedCommands.length,
+        isOnline: networkManager.isOnline,
+        isNetworkOn: networkManager.isNetworkOn,
+        offlineSince: networkManager.offlineSince,
+        lastChecked: networkManager.lastChecked,
+      }))
+    } catch (error) {
+      console.error('Failed to load sync diagnostics:', error)
+    }
+  }, [])
 
   useEffect(() => {
     setIsNativePlatform(isNative())
@@ -54,12 +102,8 @@ const DeveloperSettings = () => {
           const pending = await LocalNotifications.getPending()
           // Sort by schedule time (earliest first)
           const sorted = pending.notifications.sort((a, b) => {
-            const timeA = a.schedule?.at
-              ? new Date(a.schedule.at).getTime()
-              : 0
-            const timeB = b.schedule?.at
-              ? new Date(b.schedule.at).getTime()
-              : 0
+            const timeA = a.schedule?.at ? new Date(a.schedule.at).getTime() : 0
+            const timeB = b.schedule?.at ? new Date(b.schedule.at).getTime() : 0
             return timeA - timeB
           })
           setScheduledNotifications(sorted)
@@ -73,7 +117,39 @@ const DeveloperSettings = () => {
 
     loadTokenData()
     loadScheduledNotifications()
-  }, [])
+    refreshSyncDiagnostics()
+  }, [refreshSyncDiagnostics])
+
+  useEffect(() => {
+    const unsubscribeSync = syncEngine.onSyncStateChange(state => {
+      setSyncDiagnostics(prev => ({
+        ...prev,
+        syncing:
+          typeof state.syncing === 'boolean' ? state.syncing : prev.syncing,
+        syncError: state.error ?? prev.syncError,
+        lastSync: state.lastSync ?? prev.lastSync,
+      }))
+    })
+
+    networkManager.registerNetworkListener(() => {
+      setSyncDiagnostics(prev => ({
+        ...prev,
+        isOnline: networkManager.isOnline,
+        isNetworkOn: networkManager.isNetworkOn,
+        offlineSince: networkManager.offlineSince,
+        lastChecked: networkManager.lastChecked,
+      }))
+    })
+
+    const interval = setInterval(() => {
+      refreshSyncDiagnostics()
+    }, 5000)
+
+    return () => {
+      unsubscribeSync()
+      clearInterval(interval)
+    }
+  }, [refreshSyncDiagnostics])
 
   useEffect(() => {
     const calculateTimeLeft = () => {
@@ -239,6 +315,51 @@ const DeveloperSettings = () => {
     }
   }
 
+  const handleResetDatabaseAndResync = async () => {
+    showConfirmation(
+      'This will clear local offline data and pending commands, then start a full sync from the beginning. Continue?',
+      'Clear Local DB & Re-Sync',
+      async () => {
+        setIsResettingSync(true)
+        try {
+          await offlineDB.clearAll()
+
+          showNotification({
+            type: 'success',
+            message: 'Local offline database cleared. Starting full sync...',
+          })
+
+          const didSync = await syncEngine.sync()
+          if (didSync) {
+            await queryClient.invalidateQueries()
+            showNotification({
+              type: 'success',
+              message: 'Full sync completed from the beginning',
+            })
+          } else {
+            showNotification({
+              type: 'warning',
+              message:
+                'Database cleared. Full sync did not run (likely offline or already syncing).',
+            })
+          }
+        } catch (error) {
+          console.error('Failed to reset database and resync:', error)
+          showNotification({
+            type: 'error',
+            message: `Reset/resync failed: ${error.message}`,
+          })
+        } finally {
+          await refreshSyncDiagnostics()
+          setIsResettingSync(false)
+        }
+      },
+      'Clear & Re-Sync',
+      'Cancel',
+      'danger',
+    )
+  }
+
   const getNotificationStatusColor = scheduleTime => {
     if (!scheduleTime) return 'neutral'
 
@@ -250,6 +371,11 @@ const DeveloperSettings = () => {
     if (diffMs < 5 * 60 * 1000) return 'warning' // Less than 5 minutes
     if (diffMs < 60 * 60 * 1000) return 'primary' // Less than 1 hour
     return 'success' // More than 1 hour
+  }
+
+  const formatDateTime = timestamp => {
+    if (!timestamp) return 'N/A'
+    return new Date(timestamp).toLocaleString()
   }
 
   return (
@@ -377,6 +503,143 @@ const DeveloperSettings = () => {
         </Box>
       </Card>
 
+      <Card variant='outlined'>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 1,
+            }}
+          >
+            <Typography level='title-lg'>Sync & Network Diagnostics</Typography>
+            <Button
+              size='sm'
+              variant='soft'
+              startDecorator={<Refresh />}
+              onClick={refreshSyncDiagnostics}
+            >
+              Refresh
+            </Button>
+          </Box>
+
+          <Divider />
+
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Typography level='title-sm'>Network Status</Typography>
+            <Typography level='body-sm'>
+              Connection:{' '}
+              <Chip
+                size='sm'
+                variant='soft'
+                color={syncDiagnostics.isOnline ? 'success' : 'danger'}
+              >
+                {syncDiagnostics.isOnline ? 'Online' : 'Offline'}
+              </Chip>
+            </Typography>
+            <Typography level='body-sm'>
+              Device Network:{' '}
+              <Chip
+                size='sm'
+                variant='soft'
+                color={
+                  syncDiagnostics.isNetworkOn === false
+                    ? 'danger'
+                    : syncDiagnostics.isNetworkOn === true
+                      ? 'success'
+                      : 'neutral'
+                }
+              >
+                {syncDiagnostics.isNetworkOn === false
+                  ? 'Disconnected'
+                  : syncDiagnostics.isNetworkOn === true
+                    ? 'Connected'
+                    : 'Unknown'}
+              </Chip>
+            </Typography>
+            <Typography level='body-xs' color='neutral'>
+              Offline Since: {formatDateTime(syncDiagnostics.offlineSince)}
+            </Typography>
+            <Typography level='body-xs' color='neutral'>
+              Last Network Check: {formatDateTime(syncDiagnostics.lastChecked)}
+            </Typography>
+          </Box>
+
+          <Divider />
+
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Typography level='title-sm'>Sync Offset Information</Typography>
+            <Typography level='body-sm'>
+              Sync Cursor:{' '}
+              <Chip size='sm' variant='soft'>
+                {syncDiagnostics.cursor ?? 'N/A'}
+              </Chip>
+            </Typography>
+            <Typography level='body-sm'>
+              Last Sync:{' '}
+              <Chip size='sm' variant='soft' color='primary'>
+                {formatDateTime(syncDiagnostics.lastSync)}
+              </Chip>
+            </Typography>
+            <Typography level='body-sm'>
+              Sync State:{' '}
+              <Chip
+                size='sm'
+                variant='soft'
+                color={syncDiagnostics.syncing ? 'warning' : 'success'}
+              >
+                {syncDiagnostics.syncing ? 'Syncing' : 'Idle'}
+              </Chip>
+            </Typography>
+            <Typography level='body-sm'>
+              Pending Commands:{' '}
+              <Chip size='sm' variant='soft' color='warning'>
+                {syncDiagnostics.pendingCount}
+              </Chip>
+            </Typography>
+            <Typography level='body-sm'>
+              Failed Commands:{' '}
+              <Chip
+                size='sm'
+                variant='soft'
+                color={syncDiagnostics.failedCount > 0 ? 'danger' : 'success'}
+              >
+                {syncDiagnostics.failedCount}
+              </Chip>
+            </Typography>
+            {syncDiagnostics.syncError && (
+              <Typography level='body-sm' color='danger'>
+                Sync Error: {syncDiagnostics.syncError}
+              </Typography>
+            )}
+          </Box>
+
+          <Divider />
+
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Typography level='title-sm'>Recovery Actions</Typography>
+            <Typography level='body-xs' color='warning'>
+              Clears local offline cache, sync cursor, and queued commands, then
+              re-syncs from the beginning.
+            </Typography>
+            <Box>
+              <Button
+                size='sm'
+                color='danger'
+                variant='soft'
+                onClick={handleResetDatabaseAndResync}
+                loading={isResettingSync}
+                disabled={isResettingSync || syncDiagnostics.syncing}
+              >
+                Clear DB & Full Re-Sync
+              </Button>
+            </Box>
+          </Box>
+        </Box>
+      </Card>
+
       {isNativePlatform && (
         <Card variant='outlined'>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -436,9 +699,7 @@ const DeveloperSettings = () => {
                       ? new Date(scheduleTime)
                       : null
                     const now = new Date()
-                    const timeUntil = scheduledDate
-                      ? scheduledDate - now
-                      : null
+                    const timeUntil = scheduledDate ? scheduledDate - now : null
 
                     return (
                       <Card
@@ -726,6 +987,8 @@ const DeveloperSettings = () => {
           </Box>
         </Box>
       </Card>
+
+      <ConfirmationModal config={confirmModalConfig} />
     </div>
   )
 }

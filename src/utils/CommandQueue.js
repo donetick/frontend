@@ -5,9 +5,13 @@ import { isOfflineFeatureEnabled } from './OfflineFeatureToggle'
 export const CommandType = {
   CREATE_CHORE: 'create_chore',
   UPDATE_CHORE: 'update_chore',
+  UPDATE_CHORE_HISTORY: 'update_chore_history',
   COMPLETE_CHORE: 'complete_chore',
   SKIP_CHORE: 'skip_chore',
+  START_CHORE: 'start_chore',
+  PAUSE_CHORE: 'pause_chore',
   DELETE_CHORE: 'delete_chore',
+  DELETE_CHORE_HISTORY: 'delete_chore_history',
   RESCHEDULE_CHORE: 'reschedule_chore',
   ARCHIVE_CHORE: 'archive_chore',
   UNARCHIVE_CHORE: 'unarchive_chore',
@@ -52,9 +56,17 @@ class CommandQueue {
   // Get pending commands for a specific entity (for undo/UI)
   async getPendingForEntity(entityId) {
     if (!isOfflineFeatureEnabled()) return []
-    const commands = await offlineDB.getCommandsByEntity(String(entityId))
+    const allCommands = await offlineDB.getCommands()
+    const key = String(entityId)
+    const commands = allCommands
+      .filter(
+        c =>
+          c.entityId === key ||
+          (typeof c.entityId === 'string' && c.entityId.startsWith(`${key}:`)),
+      )
+      .sort((a, b) => a.createdAt - b.createdAt)
     return commands
-      .filter(c => c.status === 'pending')
+      .filter(c => c.status === 'pending' || c.status === 'syncing')
       .map(c => ({ ...c, payload: JSON.parse(c.payload) }))
   }
 
