@@ -389,13 +389,9 @@ export const useChoreActions = ({
       if (!modalChore) return
       MarkChoreComplete(
         modalChore.id,
-        impersonatedUser
-          ? {
-              completedBy: impersonatedUser.userId,
-              completedDate: new Date(newDate).toISOString(),
-            }: null,
-            null,
-            null
+        impersonatedUser ? impersonatedUser.userId : null,
+        null,
+        new Date(newDate).toISOString(),
       ).then(response => {
         if (response.ok) {
           response.json().then(data => {
@@ -495,9 +491,7 @@ export const useChoreActions = ({
               try {
                 await MarkChoreComplete(
                   chore.id,
-                  impersonatedUser
-                    ? { completedBy: impersonatedUser.userId }
-                    : null,
+                  impersonatedUser ? impersonatedUser.userId : null,
                 )
                 completedTasks.push(chore)
               } catch (error) {
