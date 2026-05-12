@@ -20,11 +20,23 @@ const LABELS = {
   update_chore: 'Update pending',
   create_chore: 'Create pending',
   delete_chore: 'Delete pending',
+  update_chore_history: 'Edit history pending',
+  delete_chore_history: 'Delete history pending',
   reschedule_chore: 'Reschedule pending',
   archive_chore: 'Archive pending',
   unarchive_chore: 'Restore pending',
   start_chore: 'Start pending',
   pause_chore: 'Pause pending',
+}
+
+const formatCommandLabel = commandType => {
+  return (
+    LABELS[commandType] ||
+    commandType
+      ?.replace(/_/g, ' ')
+      ?.replace(/\b\w/g, letter => letter.toUpperCase()) ||
+    'Pending action'
+  )
 }
 
 function PendingBadge({ commands, size = 'sm', sx = {} }) {
@@ -45,6 +57,7 @@ function PendingBadge({ commands, size = 'sm', sx = {} }) {
   const invalidatePending = async () => {
     await queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
     await queryClient.invalidateQueries({ queryKey: ['chores'] })
+    await queryClient.invalidateQueries({ queryKey: ['choreHistory'] })
   }
 
   const handleUndo = async (e, cmdId) => {
@@ -150,7 +163,7 @@ function PendingBadge({ commands, size = 'sm', sx = {} }) {
             >
               <ListItemContent>
                 <Typography level='body-sm' sx={{ fontWeight: 600 }}>
-                  {LABELS[cmd.commandType] || 'Pending action'}
+                  {formatCommandLabel(cmd.commandType)}
                 </Typography>
                 <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
                   {new Date(cmd.createdAt).toLocaleString()}

@@ -17,6 +17,7 @@ import {
   UpdateChoreAssignee,
   UpdateDueDate,
 } from '../../../utils/Fetcher'
+import { offlineDB } from '../../../utils/OfflineDB'
 
 const isNetworkError = err =>
   err instanceof TypeError && err.message === 'Failed to fetch'
@@ -234,6 +235,17 @@ export const useChoreActions = ({
                   performer: null,
                 },
               )
+              await offlineDB.savePendingHistory({
+                id: -Date.now(),
+                choreId: chore.id,
+                completedBy: impersonatedUser?.userId || userProfile?.id || 0,
+                performedAt: new Date().toISOString(),
+                dueDate: chore.nextDueDate || null,
+                notes: null,
+                status: 1,
+                points: chore.points || 0,
+                pending: true,
+              })
               queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
               showSuccess({
                 title: 'Task completion pending',
@@ -257,57 +269,107 @@ export const useChoreActions = ({
 
         case 'start': {
           const startedChore = { ...chore, status: 1 }
-          startChore.mutate(chore.id, {
-            onSuccess: () => {
-              queryClient.cancelQueries(['chores'])
-              queryClient.setQueryData(['chores', false], oldData => {
-                if (!oldData?.res) return oldData
-                return {
-                  ...oldData,
-                  res: oldData.res.map(c =>
-                    c.id === chore.id ? startedChore : c,
-                  ),
-                }
-              })
+          try {
+            await startChore.mutateAsync(chore.id)
+            queryClient.cancelQueries(['chores'])
+            queryClient.setQueryData(['chores', false], oldData => {
+              if (!oldData?.res) return oldData
+              return {
+                ...oldData,
+                res: oldData.res.map(c =>
+                  c.id === chore.id ? startedChore : c,
+                ),
+              }
+            })
+            updateChoreInState(startedChore, 'started', {
+              skipInvalidation: true,
+            })
+          } catch (error) {
+            if (isNetworkError(error)) {
+              const previousStatus = chore.status
+              const cmdId = await commandQueue.enqueue(
+                CommandType.START_CHORE,
+                chore.id,
+                { id: chore.id },
+              )
               updateChoreInState(startedChore, 'started', {
                 skipInvalidation: true,
               })
-            },
-            onError: error => {
+              queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
+              showSuccess({
+                message: "You're offline — start will sync when back online",
+                undoAction: async () => {
+                  await commandQueue.cancel(cmdId)
+                  queryClient.invalidateQueries({
+                    queryKey: ['pendingCommands'],
+                  })
+                  updateChoreInState(
+                    { ...chore, status: previousStatus },
+                    previousStatus === 2 ? 'paused' : 'started',
+                    { skipInvalidation: true },
+                  )
+                },
+              })
+            } else {
               showError({
                 title: 'Failed to start',
-                message: error.message || 'Unable to start chore',
+                message: error?.message || 'Unable to start chore',
               })
-            },
-          })
+            }
+          }
           break
         }
 
         case 'pause': {
           const pausedChore = { ...chore, status: 2 }
-          pauseChore.mutate(chore.id, {
-            onSuccess: () => {
-              queryClient.cancelQueries(['chores'])
-              queryClient.setQueryData(['chores', false], oldData => {
-                if (!oldData?.res) return oldData
-                return {
-                  ...oldData,
-                  res: oldData.res.map(c =>
-                    c.id === chore.id ? pausedChore : c,
-                  ),
-                }
-              })
+          try {
+            await pauseChore.mutateAsync(chore.id)
+            queryClient.cancelQueries(['chores'])
+            queryClient.setQueryData(['chores', false], oldData => {
+              if (!oldData?.res) return oldData
+              return {
+                ...oldData,
+                res: oldData.res.map(c =>
+                  c.id === chore.id ? pausedChore : c,
+                ),
+              }
+            })
+            updateChoreInState(pausedChore, 'paused', {
+              skipInvalidation: true,
+            })
+          } catch (error) {
+            if (isNetworkError(error)) {
+              const previousStatus = chore.status
+              const cmdId = await commandQueue.enqueue(
+                CommandType.PAUSE_CHORE,
+                chore.id,
+                { id: chore.id },
+              )
               updateChoreInState(pausedChore, 'paused', {
                 skipInvalidation: true,
               })
-            },
-            onError: error => {
+              queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
+              showSuccess({
+                message: "You're offline — pause will sync when back online",
+                undoAction: async () => {
+                  await commandQueue.cancel(cmdId)
+                  queryClient.invalidateQueries({
+                    queryKey: ['pendingCommands'],
+                  })
+                  updateChoreInState(
+                    { ...chore, status: previousStatus },
+                    previousStatus === 2 ? 'paused' : 'started',
+                    { skipInvalidation: true },
+                  )
+                },
+              })
+            } else {
               showError({
                 title: 'Failed to pause',
-                message: error.message || 'Unable to pause chore',
+                message: error?.message || 'Unable to pause chore',
               })
-            },
-          })
+            }
+          }
           break
         }
 

@@ -17,9 +17,14 @@ import { Avatar, Box, Chip, Grid, IconButton, Typography } from '@mui/joy'
 import moment from 'moment'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { TASK_COLOR } from '../../utils/Colors.jsx'
+import PendingBadge from '../components/PendingBadge'
 
 const getCompletedChip = historyEntry => {
-  if (historyEntry.status === 0 || historyEntry.status === 5 || historyEntry.status === 6) {
+  if (
+    historyEntry.status === 0 ||
+    historyEntry.status === 5 ||
+    historyEntry.status === 6
+  ) {
     return null
   }
 
@@ -94,6 +99,7 @@ const HistoryCard = ({
   performers,
   historyEntry,
   index,
+  pendingCommands,
   onToggleActions,
   onViewNote,
 }) => {
@@ -330,6 +336,18 @@ const HistoryCard = ({
           </IconButton>
         )}
       </Box>
+      {pendingCommands?.length > 0 && (
+        <PendingBadge
+          commands={pendingCommands}
+          size='s'
+          sx={{
+            mr: 0.5,
+            position: 'absolute',
+            right: -3,
+            top: -3,
+          }}
+        />
+      )}
     </Box>
   )
 }

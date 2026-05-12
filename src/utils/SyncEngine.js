@@ -5,10 +5,14 @@ import {
   ArchiveChore,
   CreateChore,
   DeleteChore,
+  DeleteChoreHistory,
   MarkChoreComplete,
+  PauseChore,
   SaveChore,
   SkipChore,
+  StartChore,
   UnArchiveChore,
+  UpdateChoreHistory,
   UpdateDueDate,
 } from './Fetcher'
 import { offlineDB } from './OfflineDB'
@@ -121,9 +125,29 @@ class SyncEngine {
         response = await SkipChore(cmd.payload.id || cmd.entityId)
         break
 
+      case CommandType.START_CHORE:
+        response = await StartChore(cmd.payload.id || cmd.entityId)
+        break
+
+      case CommandType.PAUSE_CHORE:
+        response = await PauseChore(cmd.payload.id || cmd.entityId)
+        break
+
       case CommandType.DELETE_CHORE:
         response = await DeleteChore(cmd.payload.id || cmd.entityId)
         break
+
+      case CommandType.UPDATE_CHORE_HISTORY: {
+        const { choreId, historyId, historyData } = cmd.payload
+        response = await UpdateChoreHistory(choreId, historyId, historyData)
+        break
+      }
+
+      case CommandType.DELETE_CHORE_HISTORY: {
+        const { choreId, historyId } = cmd.payload
+        response = await DeleteChoreHistory(choreId, historyId)
+        break
+      }
 
       case CommandType.RESCHEDULE_CHORE: {
         const { id, dueDate } = cmd.payload
@@ -153,7 +177,7 @@ class SyncEngine {
   }
 
   async _deltaSync() {
-    const cursor = (await offlineDB.getSyncCursor()) || 0
+    const cursor = (await offlineDB.getSyncCursor()) || -1
 
     let hasMore = true
     let currentCursor = cursor
@@ -182,10 +206,21 @@ class SyncEngine {
         await offlineDB.saveChores(changedChores)
       }
 
+      // Upsert changed history entries (also clears any pending entries for the same chore IDs)
+      const changedHistory = data.changes?.choreHistories ?? []
+      if (changedHistory.length > 0) {
+        await offlineDB.saveHistory(changedHistory)
+      }
+
       // Hard-delete removed IDs after inserts (safe if the same ID somehow appears in both)
       const deletedIds = data.deletions?.chores ?? []
       if (deletedIds.length > 0) {
         await offlineDB.deleteChores(deletedIds)
+      }
+
+      const deletedHistoryIds = data.deletions?.choreHistories ?? []
+      if (deletedHistoryIds.length > 0) {
+        await offlineDB.deleteHistory(deletedHistoryIds)
       }
 
       // Always advance the cursor, even when there are no changes

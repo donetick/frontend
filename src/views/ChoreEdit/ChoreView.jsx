@@ -45,7 +45,10 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { usePendingCommands } from '../../hooks/usePendingCommands'
-import { useChoreDetails } from '../../queries/ChoreQueries.jsx'
+import {
+  useChoreDetails,
+  useChoreHistory,
+} from '../../queries/ChoreQueries.jsx'
 import {
   useChoreTimer,
   useDeleteTimeSession,
@@ -55,7 +58,11 @@ import {
 } from '../../queries/TimeQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import { useNotification } from '../../service/NotificationProvider'
-import { ChoreStatus, notInCompletionWindow } from '../../utils/Chores.jsx'
+import {
+  ChoreHistoryStatus,
+  ChoreStatus,
+  notInCompletionWindow,
+} from '../../utils/Chores.jsx'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import { commandQueue, CommandType } from '../../utils/CommandQueue'
 import {
@@ -68,6 +75,7 @@ import {
   UndoChoreAction,
   UpdateChorePriority,
 } from '../../utils/Fetcher'
+import { offlineDB } from '../../utils/OfflineDB'
 import Priorities from '../../utils/Priorities'
 import { getSafeBottomPadding } from '../../utils/SafeAreaUtils.js'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
@@ -123,7 +131,20 @@ const ChoreView = () => {
 
   const { data: choreData, isLoading: isChoreLoading } =
     useChoreDetails(choreId)
+  const { data: choreHistoryData } = useChoreHistory(choreId)
   const { data: pendingCmds } = usePendingCommands(choreId)
+
+  const choreHistory = choreHistoryData?.res || []
+  const historyCompletionCount = choreHistory.filter(historyEntry => {
+    const status = Number(historyEntry?.status)
+    return (
+      status === ChoreHistoryStatus.COMPLETED ||
+      status === ChoreHistoryStatus.SKIPPED
+    )
+  }).length
+  const completionCount = choreHistoryData
+    ? historyCompletionCount
+    : chore.totalCompletedCount || 0
 
   const startChore = useStartChore()
   const pauseChore = usePauseChore()
@@ -148,9 +169,61 @@ const ChoreView = () => {
 
   useEffect(() => {
     if (chore && performers?.length > 0) {
-      generateInfoCards(chore)
+      const cards = [
+        {
+          size: 6,
+          icon: <PeopleAlt />,
+          title: t('choreView.assignment'),
+          text: `${t('choreView.assigned')}: ${
+            performers.find(p => p.userId === chore.assignedTo)?.displayName ||
+            t('choreView.na')
+          }`,
+          subtext: ` ${t('choreView.last')}: ${
+            chore.lastCompletedDate
+              ? performers.find(p => p.userId === chore.lastCompletedBy)
+                  ?.displayName
+              : 'N/A'
+          }`,
+        },
+        {
+          size: 6,
+          icon: <CalendarMonth />,
+          title: t('choreView.schedule'),
+          text: `${t('choreView.due')}: ${
+            chore.nextDueDate
+              ? moment(chore.nextDueDate).fromNow()
+              : t('choreView.na')
+          }`,
+          subtext: `${t('choreView.last')}: ${
+            chore.lastCompletedDate
+              ? moment(chore.lastCompletedDate).fromNow()
+              : t('choreView.na')
+          }`,
+
+          subtext2:
+            chore.deadlineOffset > 0 && chore.nextDueDate
+              ? `Deadline: ${moment(chore.nextDueDate).add(chore.deadlineOffset, 'seconds').fromNow()}`
+              : null,
+        },
+        {
+          size: 6,
+          icon: <Checklist />,
+          title: t('choreView.statistics'),
+          text: `${t('choreView.completed')}: ${completionCount} ${t('choreView.times')}`,
+        },
+        {
+          size: 6,
+          icon: <Person />,
+          title: t('choreView.details'),
+          subtext: `${t('choreView.createdBy')}: ${
+            performers.find(p => p.userId === chore.createdBy)?.displayName ||
+            t('choreView.na')
+          }`,
+        },
+      ]
+      setInfoCards(cards)
     }
-  }, [chore, performers])
+  }, [chore, performers, completionCount, t])
   const handleUpdatePriority = priority => {
     UpdateChorePriority(choreId, priority.value).then(response => {
       if (response.ok) {
@@ -160,61 +233,6 @@ const ChoreView = () => {
         })
       }
     })
-  }
-  const generateInfoCards = chore => {
-    const cards = [
-      {
-        size: 6,
-        icon: <PeopleAlt />,
-        title: t('choreView.assignment'),
-        text: `${t('choreView.assigned')}: ${
-          performers.find(p => p.userId === chore.assignedTo)?.displayName ||
-          t('choreView.na')
-        }`,
-        subtext: ` ${t('choreView.last')}: ${
-          chore.lastCompletedDate
-            ? performers.find(p => p.userId === chore.lastCompletedBy)
-                ?.displayName
-            : 'N/A'
-        }`,
-      },
-      {
-        size: 6,
-        icon: <CalendarMonth />,
-        title: t('choreView.schedule'),
-        text: `${t('choreView.due')}: ${
-          chore.nextDueDate
-            ? moment(chore.nextDueDate).fromNow()
-            : t('choreView.na')
-        }`,
-        subtext: `${t('choreView.last')}: ${
-          chore.lastCompletedDate
-            ? moment(chore.lastCompletedDate).fromNow()
-            : t('choreView.na')
-        }`,
-
-        subtext2:
-          chore.deadlineOffset > 0 && chore.nextDueDate
-            ? `Deadline: ${moment(chore.nextDueDate).add(chore.deadlineOffset, 'seconds').fromNow()}`
-            : null,
-      },
-      {
-        size: 6,
-        icon: <Checklist />,
-        title: t('choreView.statistics'),
-        text: `${t('choreView.completed')}: ${chore.totalCompletedCount || 0} ${t('choreView.times')}`,
-      },
-      {
-        size: 6,
-        icon: <Person />,
-        title: t('choreView.details'),
-        subtext: `${t('choreView.createdBy')}: ${
-          performers.find(p => p.userId === chore.createdBy)?.displayName ||
-          t('choreView.na')
-        }`,
-      },
-    ]
-    setInfoCards(cards)
   }
   const handleTaskCompletion = async () => {
     try {
@@ -279,6 +297,17 @@ const ChoreView = () => {
             performer: null,
           },
         )
+        await offlineDB.savePendingHistory({
+          id: -Date.now(),
+          choreId: Number(choreId),
+          completedBy: impersonatedUser?.userId || userProfile?.id || 0,
+          performedAt: completedDate || new Date().toISOString(),
+          dueDate: chore.nextDueDate || null,
+          notes: note || null,
+          status: 1,
+          points: chore.points || 0,
+          pending: true,
+        })
         queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
         showSuccess({
           message: "You're offline — completion will sync when back online",
@@ -354,6 +383,7 @@ const ChoreView = () => {
     }
   }
   const handleChoreStart = () => {
+    const startedChore = { ...chore, status: ChoreStatus.ACTIVE }
     startChore.mutate(choreId, {
       onSuccess: data => {
         const newChore = {
@@ -362,10 +392,37 @@ const ChoreView = () => {
         }
         setChore(newChore)
       },
+      onError: async error => {
+        if (isNetworkError(error)) {
+          const previousStatus = chore.status
+          const cmdId = await commandQueue.enqueue(
+            CommandType.START_CHORE,
+            choreId,
+            { id: choreId },
+          )
+          setChore(startedChore)
+          queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
+          showSuccess({
+            message: "You're offline — start will sync when back online",
+            undoAction: async () => {
+              await commandQueue.cancel(cmdId)
+              queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
+              setChore({ ...chore, status: previousStatus })
+            },
+          })
+          return
+        }
+
+        showError({
+          title: t('choreView.undoFailed'),
+          message: error?.message || 'Unable to start task',
+        })
+      },
     })
   }
 
   const handleChorePause = () => {
+    const pausedChore = { ...chore, status: ChoreStatus.PAUSED }
     pauseChore.mutate(choreId, {
       onSuccess: data => {
         const newChore = {
@@ -373,6 +430,32 @@ const ChoreView = () => {
           ...data.res,
         }
         setChore(newChore)
+      },
+      onError: async error => {
+        if (isNetworkError(error)) {
+          const previousStatus = chore.status
+          const cmdId = await commandQueue.enqueue(
+            CommandType.PAUSE_CHORE,
+            choreId,
+            { id: choreId },
+          )
+          setChore(pausedChore)
+          queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
+          showSuccess({
+            message: "You're offline — pause will sync when back online",
+            undoAction: async () => {
+              await commandQueue.cancel(cmdId)
+              queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
+              setChore({ ...chore, status: previousStatus })
+            },
+          })
+          return
+        }
+
+        showError({
+          title: t('choreView.undoFailed'),
+          message: error?.message || 'Unable to pause task',
+        })
       },
     })
   }
