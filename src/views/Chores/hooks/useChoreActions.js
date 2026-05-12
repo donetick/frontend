@@ -426,10 +426,9 @@ export const useChoreActions = ({
       if (!modalChore) return
       MarkChoreComplete(
         modalChore.id,
-        impersonatedUser
-          ? { notes: note, completedBy: impersonatedUser.userId }
-          : { notes: note },
+        impersonatedUser ? impersonatedUser.userId : null,
         null,
+        note,
       ).then(response => {
         if (response.ok) {
           response.json().then(data => {
