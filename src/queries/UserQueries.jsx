@@ -36,7 +36,7 @@ export const useCircleMembers = () => {
         const result = await GetAllCircleMembers()
         // Cache for offline use
         if (result?.res) {
-          offlineDB.saveKV('circle_members', result.res)
+          offlineDB.saveKV('circle_members', result.res).catch(() => {})
         }
         return result
       } catch {

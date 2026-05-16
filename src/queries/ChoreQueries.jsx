@@ -150,7 +150,7 @@ export const useCreateChore = () => {
       return { ...oldData, res: [...oldData.res, offlineChore] }
     })
 
-    return { res: offlineChore }
+    return offlineChore
   }
 
   return useMutation({
@@ -170,11 +170,11 @@ export const useCreateChore = () => {
         }
         // Successfully created the chore on the server, return the created chore
         // update the local chores cache with the new chore:
-        queryClient.setQueryData(['chores'], oldData => {
+        queryClient.setQueryData(['chores', false], oldData => {
           if (!oldData) return { res: [createdChore.res] }
           return { res: [...oldData.res, createdChore.res] }
         })
-        return { res: createdChore }
+        return createdChore.res
       } catch (error) {
         if (isNetworkError(error)) {
           return queueOfflineCreate(newTask)
