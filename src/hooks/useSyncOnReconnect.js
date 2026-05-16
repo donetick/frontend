@@ -1,3 +1,5 @@
+import { App as capacitorApp } from '@capacitor/app'
+import { Capacitor } from '@capacitor/core'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef } from 'react'
 import { commandQueue } from '../utils/CommandQueue'
@@ -14,6 +16,18 @@ export function useSyncOnReconnect() {
   const initialized = useRef(false)
 
   useEffect(() => {
+    let pendingPollInterval
+    let cacheRefreshInterval
+    let resumeListener
+    let networkListener
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        runSync()
+      }
+    }
+
+    const handleOnline = () => runSync()
+
     const init = async () => {
       if (initialized.current) return
       initialized.current = true
@@ -23,24 +37,36 @@ export function useSyncOnReconnect() {
       }
 
       // 1. Device network change (works on native + real network drops)
-      networkManager.registerNetworkListener(async isOnline => {
+      networkListener = async isOnline => {
         if (isOnline) {
           await runSync()
         }
-      })
+      }
+      networkManager.registerNetworkListener(networkListener)
 
       // 2. Tab becomes visible (user switches back to the tab after reconnecting backend)
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') {
-          runSync()
-        }
-      })
+      document.addEventListener('visibilitychange', handleVisibilityChange)
 
       // 3. Browser online event (fires when device network is restored)
-      window.addEventListener('online', () => runSync())
+      window.addEventListener('online', handleOnline)
+
+      // 3.5 Native app resume (fires when returning to the foreground)
+      if (Capacitor.isNativePlatform()) {
+        resumeListener = await capacitorApp.addListener(
+          'appStateChange',
+          ({ isActive }) => {
+            if (isActive) {
+              console.log(
+                'App resumed, checking connectivity and syncing if online...',
+              )
+              runSync()
+            }
+          },
+        )
+      }
 
       // 4. Retry pending commands every 30s (catches backend restart)
-      setInterval(async () => {
+      pendingPollInterval = setInterval(async () => {
         const pending = await commandQueue.getPending()
         if (pending.length > 0) {
           runSync()
@@ -48,7 +74,7 @@ export function useSyncOnReconnect() {
       }, PENDING_POLL_MS)
 
       // 5. Keep IDB cache fresh every 5 min while online (so offline reads are current)
-      setInterval(() => {
+      cacheRefreshInterval = setInterval(() => {
         runSync()
       }, CACHE_REFRESH_MS)
     }
@@ -62,5 +88,22 @@ export function useSyncOnReconnect() {
     }
 
     init()
+
+    return () => {
+      if (pendingPollInterval) {
+        clearInterval(pendingPollInterval)
+      }
+
+      if (cacheRefreshInterval) {
+        clearInterval(cacheRefreshInterval)
+      }
+
+      if (networkListener) {
+        networkManager.unregisterNetworkListener(networkListener)
+      }
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('online', handleOnline)
+      resumeListener?.remove()
+    }
   }, [queryClient])
 }

@@ -966,7 +966,6 @@ class OfflineDB {
   async getHistoryByChore(choreId) {
     if (!isOfflineFeatureEnabled()) return []
     await this._ensureInit()
-    console.log('MO: Fetching history for chore', choreId)
     return this.backend.getHistoryByChore(choreId)
   }
 

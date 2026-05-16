@@ -367,7 +367,11 @@ const ChoreEdit = () => {
 
     SaveFunction(chore)
       .then(result => {
-        if (result?._pendingUpdate || result?._pendingCreate) {
+        if (
+          result?._pendingUpdate ||
+          result?._pendingCreate ||
+          result?.res?._pendingCreate
+        ) {
           showSuccess({
             title: 'Saved Offline',
             message: 'Your changes will sync when you are back online.',

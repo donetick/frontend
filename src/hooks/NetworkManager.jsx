@@ -57,6 +57,11 @@ class NetworkManager {
   registerNetworkListener(callback) {
     this.connectionStatusListeners.push(callback)
   }
+  unregisterNetworkListener(callback) {
+    this.connectionStatusListeners = this.connectionStatusListeners.filter(
+      cb => cb !== callback,
+    )
+  }
   registerBackendSyncListener(callback) {
     // if callback is not in the list already, add it
     if (!this.queueSyncListeners.includes(callback)) {

@@ -907,8 +907,8 @@ const ChoreView = () => {
                 }}
               >
                 {(() => {
-                  const content = decodeHtmlEntities(chore.description || '')
-                  const shouldRenderHtml = hasHtmlTags(content)
+                  const raw = chore.description || ''
+                  const shouldRenderHtml = hasHtmlTags(raw)
 
                   return shouldRenderHtml ? (
                     <Box
@@ -916,7 +916,7 @@ const ChoreView = () => {
                         whiteSpace: 'pre-wrap',
                         wordBreak: 'break-word',
                       }}
-                      dangerouslySetInnerHTML={{ __html: content }}
+                      dangerouslySetInnerHTML={{ __html: raw }}
                     />
                   ) : (
                     <Typography
@@ -926,7 +926,7 @@ const ChoreView = () => {
                         wordBreak: 'break-word',
                       }}
                     >
-                      {content}
+                      {decodeHtmlEntities(raw)}
                     </Typography>
                   )
                 })()}
@@ -975,8 +975,8 @@ const ChoreView = () => {
                 }}
               >
                 {(() => {
-                  const content = decodeHtmlEntities(chore.notes || '')
-                  const shouldRenderHtml = hasHtmlTags(content)
+                  const raw = chore.notes || ''
+                  const shouldRenderHtml = hasHtmlTags(raw)
 
                   return shouldRenderHtml ? (
                     <Box
@@ -984,7 +984,7 @@ const ChoreView = () => {
                         whiteSpace: 'pre-wrap',
                         wordBreak: 'break-word',
                       }}
-                      dangerouslySetInnerHTML={{ __html: content }}
+                      dangerouslySetInnerHTML={{ __html: raw }}
                     />
                   ) : (
                     <Typography
@@ -994,7 +994,7 @@ const ChoreView = () => {
                         wordBreak: 'break-word',
                       }}
                     >
-                      {content}
+                      {decodeHtmlEntities(raw)}
                     </Typography>
                   )
                 })()}
