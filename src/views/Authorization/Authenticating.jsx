@@ -9,6 +9,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useUserProfile } from '../../queries/UserQueries'
 import { apiClient } from '../../utils/ApiClient'
 import { GetUserProfile } from '../../utils/Fetcher'
+import { saveTokens } from '../../utils/TokenStorage'
 
 const AuthenticationLoading = () => {
   const { data: userProfile, refetch: refetchUserProfile } = useUserProfile()
@@ -76,9 +77,13 @@ const AuthenticationLoading = () => {
         }),
       }).then(response => {
         if (response.status === 200) {
-          return response.json().then(data => {
-            localStorage.setItem('token', data.token)
-            localStorage.setItem('token_expiry', data.expire)
+          return response.json().then(async data => {
+            await saveTokens({
+              accessToken: data.token,
+              accessTokenExpiry: data.expire,
+              refreshToken: data.refresh_token,
+              refreshTokenExpiry: data.refresh_token_expiry
+            })
 
             const redirectUrl = Cookies.get('ca_redirect')
             if (redirectUrl) {
