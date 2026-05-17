@@ -11,6 +11,7 @@ const LoginSettings = () => {
   const Navigate = useNavigate()
   const { refetch: refetchResource } = useResource()
   const [serverURL, setServerURL] = React.useState('')
+  const [isValidating, setIsValidating] = React.useState(false)
   const { showError } = useNotification()
 
   React.useEffect(() => {
@@ -88,6 +89,7 @@ const LoginSettings = () => {
             fullWidth
             size='lg'
             variant='solid'
+            loading={isValidating}
             sx={{
               width: '100%',
               mt: 3,
@@ -95,7 +97,7 @@ const LoginSettings = () => {
               border: 'moccasin',
               borderRadius: '8px',
             }}
-            onClick={() => {
+            onClick={async () => {
               if (serverURL === '') {
                 Preferences.set({
                   key: 'customServerUrl',
@@ -113,17 +115,43 @@ const LoginSettings = () => {
                 })
                 return
               }
-              Preferences.set({
+
+              setIsValidating(true)
+              try {
+                const controller = new AbortController()
+                const timeout = setTimeout(() => controller.abort(), 8000)
+                const resp = await fetch(
+                  `${serverURL.replace(/\/$/, '')}/api/v1/resource`,
+                  { method: 'GET', signal: controller.signal },
+                ).finally(() => clearTimeout(timeout))
+
+                if (!resp.ok && resp.status !== 401) {
+                  showError({
+                    title: 'Server Unreachable',
+                    message: `Could not connect to the server (status ${resp.status}). Please check the URL and try again.`,
+                  })
+                  return
+                }
+              } catch {
+                showError({
+                  title: 'Server Unreachable',
+                  message:
+                    'Could not connect to the server. Please check the URL and try again.',
+                })
+                return
+              } finally {
+                setIsValidating(false)
+              }
+
+              await Preferences.set({
                 key: 'customServerUrl',
                 value: serverURL,
-              }).then(async () => {
-                // apiClient.customServerURL = serverURL + '/api/v1's
-                // Force re-initialization to reload from Preferences
-                await apiClient.init(true)
-                // refetch resource queries to update the API URL
-                refetchResource()
-                Navigate('/login')
               })
+              // Force re-initialization to reload from Preferences
+              await apiClient.init(true)
+              // refetch resource queries to update the API URL
+              refetchResource()
+              Navigate('/login')
             }}
           >
             Save
