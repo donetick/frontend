@@ -47,6 +47,7 @@ const ChoreHistory = () => {
   const { confirmModalConfig, showConfirmation } = useConfirmationModal()
   const { fmt } = useLocalization()
   const [showMoreInfoId, setShowMoreInfoId] = useState(null)
+  const [visibleCount, setVisibleCount] = useState(20)
   const [noteViewerConfig, setNoteViewerConfig] = useState({ isOpen: false })
   const { showSuccess, showError } = useNotification()
   // React Query hooks
@@ -301,7 +302,7 @@ const ChoreHistory = () => {
         {/* Chore History List (Updated Style) */}
 
         <SwipeableList type={ListType.IOS} fullSwipe={false}>
-          {choreHistory.map((historyEntry, index) => (
+          {choreHistory.slice(0, visibleCount).map((historyEntry, index) => (
             <SwipeableListItem
               key={historyEntry.id || index}
               swipeActionOpen={
@@ -387,6 +388,17 @@ const ChoreHistory = () => {
           ))}
         </SwipeableList>
       </Sheet>
+      {visibleCount < choreHistory.length && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+          <Button
+            variant='outlined'
+            color='neutral'
+            onClick={() => setVisibleCount(prev => prev + 20)}
+          >
+            Load More ({choreHistory.length - visibleCount} remaining)
+          </Button>
+        </Box>
+      )}
       <EditHistoryModal
         config={{
           isOpen: isEditModalOpen,
