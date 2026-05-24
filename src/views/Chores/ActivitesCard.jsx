@@ -111,6 +111,18 @@ const ActivityItem = ({ activity, members, onViewNote }) => {
         text: 'Rejected',
         icon: <ThumbDown />,
       }
+    } else if (activity.status === 5) {
+      return {
+        color: 'danger',
+        text: 'Missed',
+        icon: <EventNote />,
+      }
+    } else if (activity.status === 6) {
+      return {
+        color: 'neutral',
+        text: 'Rescheduled',
+        icon: <Refresh />,
+      }
     }
 
     // Fallback for completed status
