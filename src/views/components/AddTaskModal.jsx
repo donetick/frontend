@@ -416,15 +416,6 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
         dueDateHighlight = dueDateParsed.highlight[0]
       }
 
-      if (repeat.result) {
-        // if repeat has result the cleaned sentence will remove the date related info which mean
-        // we need to reparse the date again to get the correct due date:
-        const dueDateParsedAgain = parseDueDate(sentence, chrono)
-        if (dueDateParsedAgain.result) {
-          syncDueDateStates(dueDateParsedAgain.result)
-        }
-      }
-
       // Create the cleaned sentence by sequentially applying all cleanups
       let cleanedSentence = sentence
       if (priority.result) cleanedSentence = priority.cleanedSentence
