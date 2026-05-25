@@ -18,6 +18,14 @@ export const CommandType = {
 }
 
 class CommandQueue {
+  _sanitizeCreatePayload(payload = {}) {
+    const sanitized = { ...payload }
+    delete sanitized.id
+    delete sanitized._pendingCreate
+    delete sanitized._pendingUpdate
+    return sanitized
+  }
+
   // Enqueue a domain command
   async enqueue(type, entityId, payload) {
     if (!isOfflineFeatureEnabled()) {
@@ -121,17 +129,82 @@ class CommandQueue {
     const toRemove = []
 
     for (const cmd of pending) {
+      const prev = seen.get(cmd.entityId)
+
+      if (prev?.commandType === CommandType.CREATE_CHORE) {
+        if (cmd.commandType === CommandType.UPDATE_CHORE) {
+          const mergedPayload = this._sanitizeCreatePayload({
+            ...prev.payload,
+            ...cmd.payload,
+          })
+          await offlineDB.updateCommand(prev.id, {
+            payload: JSON.stringify(mergedPayload),
+          })
+          toRemove.push(cmd.id)
+          continue
+        }
+
+        if (cmd.commandType === CommandType.RESCHEDULE_CHORE) {
+          const mergedPayload = this._sanitizeCreatePayload({
+            ...prev.payload,
+            dueDate: cmd.payload?.dueDate ?? prev.payload?.dueDate,
+            nextDueDate: cmd.payload?.dueDate ?? prev.payload?.nextDueDate,
+          })
+          await offlineDB.updateCommand(prev.id, {
+            payload: JSON.stringify(mergedPayload),
+          })
+          toRemove.push(cmd.id)
+          continue
+        }
+
+        if (cmd.commandType === CommandType.ARCHIVE_CHORE) {
+          const mergedPayload = this._sanitizeCreatePayload({
+            ...prev.payload,
+            isActive: false,
+          })
+          await offlineDB.updateCommand(prev.id, {
+            payload: JSON.stringify(mergedPayload),
+          })
+          toRemove.push(cmd.id)
+          continue
+        }
+
+        if (cmd.commandType === CommandType.UNARCHIVE_CHORE) {
+          const mergedPayload = this._sanitizeCreatePayload({
+            ...prev.payload,
+            isActive: true,
+          })
+          await offlineDB.updateCommand(prev.id, {
+            payload: JSON.stringify(mergedPayload),
+          })
+          toRemove.push(cmd.id)
+          continue
+        }
+
+        if (cmd.commandType === CommandType.DELETE_CHORE) {
+          toRemove.push(prev.id, cmd.id)
+          seen.delete(cmd.entityId)
+          continue
+        }
+      }
+
       if (cmd.commandType === CommandType.UPDATE_CHORE) {
-        const prev = seen.get(cmd.entityId)
         if (prev && prev.commandType === CommandType.UPDATE_CHORE) {
           // Merge: keep latest payload, remove older
           toRemove.push(prev.id)
         }
       }
+
+      if (cmd.commandType === CommandType.DELETE_CHORE) {
+        if (prev?.commandType === CommandType.UPDATE_CHORE) {
+          toRemove.push(prev.id)
+        }
+      }
+
       seen.set(cmd.entityId, cmd)
     }
 
-    for (const id of toRemove) {
+    for (const id of [...new Set(toRemove)]) {
       await offlineDB.removeCommand(id)
     }
   }

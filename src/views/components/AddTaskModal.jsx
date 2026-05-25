@@ -634,15 +634,16 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
     createChoreMutation
       .mutateAsync(chore)
       .then(result => {
-        const choreData = result?.res
+        const choreData = result
         if (choreData?._pendingCreate) {
           // Offline: task queued, add temp chore to UI immediately
           onChoreUpdate(choreData)
         } else {
-          // Online: choreData is the server's parsed response ({ res: id })
+          // Online: choreData is the created chore object returned by the mutation
           onChoreUpdate({
             ...chore,
-            id: choreData?.res || choreData?.id,
+            ...choreData,
+            id: choreData?.id,
             nextDueDate: chore.dueDate,
           })
         }

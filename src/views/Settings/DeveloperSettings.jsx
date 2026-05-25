@@ -126,7 +126,9 @@ const DeveloperSettings = () => {
         ...prev,
         syncing:
           typeof state.syncing === 'boolean' ? state.syncing : prev.syncing,
-        syncError: state.error ?? prev.syncError,
+        syncError: Object.prototype.hasOwnProperty.call(state, 'error')
+          ? state.error
+          : prev.syncError,
         lastSync: state.lastSync ?? prev.lastSync,
       }))
     })

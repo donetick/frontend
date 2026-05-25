@@ -29,12 +29,21 @@ const mergePendingCreates = async chores => {
   const pendingCreates = pending.filter(
     cmd => cmd.commandType === CommandType.CREATE_CHORE,
   )
+  const deletedIds = new Set(
+    pending
+      .filter(cmd => cmd.commandType === CommandType.DELETE_CHORE)
+      .map(cmd => String(cmd.entityId)),
+  )
 
   if (pendingCreates.length === 0) return chores
 
   const existingIds = new Set((chores || []).map(chore => String(chore.id)))
   const createdFromQueue = pendingCreates
-    .filter(cmd => !existingIds.has(String(cmd.entityId)))
+    .filter(
+      cmd =>
+        !existingIds.has(String(cmd.entityId)) &&
+        !deletedIds.has(String(cmd.entityId)),
+    )
     .map(cmd => {
       const payload = cmd.payload || {}
       return {
@@ -70,7 +79,7 @@ export const useChores = (includeArchive = false) => {
         }
         const cursor = await offlineDB.getSyncCursor()
         if (cursor > 0) {
-          const cached = await offlineDB.getChores()
+          const cached = await offlineDB.getChores(includeArchive)
           const merged = await mergePendingCreates(cached || [])
           return { res: merged }
         }
@@ -86,7 +95,7 @@ export const useChores = (includeArchive = false) => {
         return { ...data, res: merged }
       } catch {
         // API failed — fall back to whatever is in the cache
-        const cached = await offlineDB.getChores()
+        const cached = await offlineDB.getChores(includeArchive)
         const merged = await mergePendingCreates(cached || [])
         if (merged && merged.length > 0) {
           return { res: merged }
@@ -104,11 +113,25 @@ export const useDeleteChores = () => {
   return useMutation({
     mutationFn: async choreIds => {
       if (!networkManager.isOnline) {
+        await offlineDB.deleteChores(choreIds)
         await Promise.all(
           choreIds.map(async id => {
             await commandQueue.enqueue(CommandType.DELETE_CHORE, id, { id })
           }),
         )
+
+        const removeDeletedChores = oldData => {
+          if (!oldData?.res) return oldData
+
+          const deletedIds = new Set(choreIds.map(id => String(id)))
+          return {
+            ...oldData,
+            res: oldData.res.filter(chore => !deletedIds.has(String(chore.id))),
+          }
+        }
+
+        queryClient.setQueryData(['chores', false], removeDeletedChores)
+        queryClient.setQueryData(['chores', true], removeDeletedChores)
         return
       }
       await Promise.all(

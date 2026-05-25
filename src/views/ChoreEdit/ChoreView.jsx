@@ -137,10 +137,7 @@ const ChoreView = () => {
   const choreHistory = choreHistoryData?.res || []
   const historyCompletionCount = choreHistory.filter(historyEntry => {
     const status = Number(historyEntry?.status)
-    return (
-      status === ChoreHistoryStatus.COMPLETED ||
-      status === ChoreHistoryStatus.SKIPPED
-    )
+    return status === ChoreHistoryStatus.COMPLETED
   }).length
   const completionCount = choreHistoryData
     ? historyCompletionCount
