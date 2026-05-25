@@ -104,15 +104,17 @@ class SQLiteBackend {
     })
   }
 
-  async getChores() {
+  async getChores(includeArchive = false) {
     const result = await CapacitorSQLite.query({
       database: DB_NAME,
       statement: 'SELECT data FROM cached_chores',
       values: [],
     })
-    return (result.values || [])
-      .map(row => JSON.parse(row.data))
-      .filter(chore => chore.isActive !== false)
+    const chores = (result.values || []).map(row => JSON.parse(row.data))
+    if (includeArchive) {
+      return chores
+    }
+    return chores.filter(chore => chore.isActive !== false)
   }
 
   async getChore(id) {
@@ -334,6 +336,35 @@ class SQLiteBackend {
     })
   }
 
+  async updateCommand(id, updates) {
+    const result = await CapacitorSQLite.query({
+      database: DB_NAME,
+      statement: 'SELECT * FROM command_queue WHERE id = ?',
+      values: [id],
+    })
+
+    if (!result.values?.length) return
+
+    const row = result.values[0]
+    await CapacitorSQLite.run({
+      database: DB_NAME,
+      statement: `UPDATE command_queue
+                  SET command_type = ?, entity_id = ?, payload = ?, created_at = ?, status = ?, error = ?
+                  WHERE id = ?`,
+      values: [
+        updates.commandType ?? row.command_type,
+        updates.entityId ?? row.entity_id,
+        updates.payload ?? row.payload,
+        updates.createdAt ?? row.created_at,
+        updates.status ?? row.status,
+        Object.prototype.hasOwnProperty.call(updates, 'error')
+          ? updates.error
+          : row.error,
+        id,
+      ],
+    })
+  }
+
   async removeCommand(id) {
     await CapacitorSQLite.run({
       database: DB_NAME,
@@ -544,10 +575,14 @@ class IndexedDBBackend {
     })
   }
 
-  async getChores() {
+  async getChores(includeArchive = false) {
     const { store } = await this._tx('cached_chores')
     const rows = await this._request(store.getAll())
-    return rows.map(row => row.data).filter(chore => chore.isActive !== false)
+    const chores = rows.map(row => row.data)
+    if (includeArchive) {
+      return chores
+    }
+    return chores.filter(chore => chore.isActive !== false)
   }
 
   async getChore(id) {
@@ -748,6 +783,19 @@ class IndexedDBBackend {
     }
   }
 
+  async updateCommand(id, updates) {
+    const { store } = await this._tx('command_queue', 'readwrite')
+    const row = await this._request(store.get(id))
+    if (row) {
+      await this._request(
+        store.put({
+          ...row,
+          ...updates,
+        }),
+      )
+    }
+  }
+
   async removeCommand(id) {
     const { store } = await this._tx('command_queue', 'readwrite')
     await this._request(store.delete(id))
@@ -864,10 +912,10 @@ class OfflineDB {
     return this.backend.saveChores(chores)
   }
 
-  async getChores() {
+  async getChores(includeArchive = false) {
     if (!isOfflineFeatureEnabled()) return []
     await this._ensureInit()
-    return this.backend.getChores()
+    return this.backend.getChores(includeArchive)
   }
 
   async getChore(id) {
@@ -911,6 +959,12 @@ class OfflineDB {
     if (!isOfflineFeatureEnabled()) return
     await this._ensureInit()
     return this.backend.updateCommandStatus(id, status, error)
+  }
+
+  async updateCommand(id, updates) {
+    if (!isOfflineFeatureEnabled()) return
+    await this._ensureInit()
+    return this.backend.updateCommand(id, updates)
   }
 
   async removeCommand(id) {

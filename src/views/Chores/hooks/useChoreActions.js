@@ -729,7 +729,14 @@ export const useChoreActions = ({
         }
       }
     },
-    [modalChore, updateChoreInState, closeModal, showSuccess, showError],
+    [
+      modalChore,
+      updateChoreInState,
+      closeModal,
+      showSuccess,
+      showError,
+      queryClient,
+    ],
   )
 
   const handleCompleteWithPastDate = useCallback(

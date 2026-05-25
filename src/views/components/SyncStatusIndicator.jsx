@@ -201,6 +201,7 @@ function SyncStatusIndicator() {
   return (
     <Dropdown>
       <MenuButton
+        aria-label='Open sync and network status'
         variant='plain'
         sx={{
           p: 0.5,

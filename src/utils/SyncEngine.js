@@ -92,7 +92,7 @@ class SyncEngine {
         } else {
           // Transient network/server error - reset to pending so it retries
           await commandQueue.resetPending(cmd.id)
-          break
+          throw err
         }
       }
     }

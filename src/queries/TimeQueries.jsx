@@ -33,6 +33,7 @@ export const useStartChore = () => {
     mutationFn: StartChore,
     onSuccess: (_, choreId) => {
       queryClient.invalidateQueries(['choreTimer', choreId])
+      queryClient.invalidateQueries(['chores'])
       queryClient.invalidateQueries(['choreHistory', choreId])
     },
   })
@@ -45,6 +46,7 @@ export const usePauseChore = () => {
     mutationFn: PauseChore,
     onSuccess: (_, choreId) => {
       queryClient.invalidateQueries(['choreTimer', choreId])
+      queryClient.invalidateQueries(['chores'])
       queryClient.invalidateQueries(['choreHistory', choreId])
     },
   })
