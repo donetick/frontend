@@ -1,24 +1,24 @@
 import {
-  Archive,
-  CheckBox,
-  CheckBoxOutlineBlank,
-  Close,
-  Delete,
-  SelectAll,
-  Unarchive,
-  ViewAgenda,
-  ViewModule,
+    Archive,
+    CheckBox,
+    CheckBoxOutlineBlank,
+    Close,
+    Delete,
+    SelectAll,
+    Unarchive,
+    ViewAgenda,
+    ViewModule,
 } from '@mui/icons-material'
 import {
-  Box,
-  Button,
-  Container,
-  Divider,
-  IconButton,
-  Input,
-  List,
-  Stack,
-  Typography,
+    Box,
+    Button,
+    Container,
+    Divider,
+    IconButton,
+    Input,
+    List,
+    Stack,
+    Typography,
 } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import Fuse from 'fuse.js'
@@ -31,12 +31,55 @@ import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { commandQueue, CommandType } from '../../utils/CommandQueue'
 import { DeleteChore, GetArchivedChores } from '../../utils/Fetcher'
+import { offlineDB } from '../../utils/OfflineDB'
 import LoadingComponent from '../components/Loading'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import ChoreCard from './ChoreCard'
 import ChoreListView from './ChoreListView.jsx'
 import CompactChoreCard from './CompactChoreCard'
 import MultiSelectHelp from './MultiSelectHelp'
+
+const sortByUpdatedAtDesc = chores =>
+  (chores || []).sort((a, b) => {
+    const dateA = new Date(a.updatedAt || 0)
+    const dateB = new Date(b.updatedAt || 0)
+    return dateB - dateA
+  })
+
+const applyPendingArchivedState = async chores => {
+  const pending = await commandQueue.getPending()
+
+  const pendingArchiveIds = new Set(
+    pending
+      .filter(cmd => cmd.commandType === CommandType.ARCHIVE_CHORE)
+      .map(cmd => String(cmd.entityId)),
+  )
+  const pendingUnarchiveIds = new Set(
+    pending
+      .filter(cmd => cmd.commandType === CommandType.UNARCHIVE_CHORE)
+      .map(cmd => String(cmd.entityId)),
+  )
+  const pendingDeleteIds = new Set(
+    pending
+      .filter(cmd => cmd.commandType === CommandType.DELETE_CHORE)
+      .map(cmd => String(cmd.entityId)),
+  )
+
+  return (chores || [])
+    .filter(chore => !pendingDeleteIds.has(String(chore.id)))
+    .filter(chore => {
+      const id = String(chore.id)
+      if (pendingUnarchiveIds.has(id)) return false
+      return chore.isActive === false || pendingArchiveIds.has(id)
+    })
+    .map(chore => {
+      const id = String(chore.id)
+      if (pendingArchiveIds.has(id)) {
+        return { ...chore, isActive: false, _pending: 'archive' }
+      }
+      return chore
+    })
+}
 
 const ArchivedTasks = () => {
   const { data: userProfile, isLoading: isUserProfileLoading } =
@@ -71,19 +114,28 @@ const ArchivedTasks = () => {
         try {
           const response = await GetArchivedChores()
           const data = await response.json()
-          // Sort by updatedAt (most recent first)
-          const sortedChores = data.res.sort((a, b) => {
-            const dateA = new Date(a.updatedAt || 0)
-            const dateB = new Date(b.updatedAt || 0)
-            return dateB - dateA
-          })
+          if (data?.res?.length) {
+            await offlineDB.saveChores(data.res)
+          }
+          const archivedWithPending = await applyPendingArchivedState(
+            data?.res || [],
+          )
+          const sortedChores = sortByUpdatedAtDesc(archivedWithPending)
           setArchivedChores(sortedChores)
           setFilteredChores(sortedChores)
         } catch (error) {
-          showError({
-            title: 'Failed to load archived tasks',
-            message: 'Please try again later.',
-          })
+          try {
+            const cached = await offlineDB.getChores(true)
+            const archivedWithPending = await applyPendingArchivedState(cached)
+            const sortedChores = sortByUpdatedAtDesc(archivedWithPending)
+            setArchivedChores(sortedChores)
+            setFilteredChores(sortedChores)
+          } catch {
+            showError({
+              title: 'Failed to load archived tasks',
+              message: 'Please try again later.',
+            })
+          }
         } finally {
           setIsLoading(false)
         }
@@ -337,6 +389,9 @@ const ArchivedTasks = () => {
                     onError: async error => {
                       if (isNetworkError(error)) {
                         await commandQueue.enqueue(CommandType.UNARCHIVE_CHORE, chore.id, { id: chore.id })
+                        await offlineDB.saveChores([
+                          { ...chore, isActive: true, _pending: 'unarchive' },
+                        ])
                         queuedTasks.push(chore)
                         resolve()
                       } else {

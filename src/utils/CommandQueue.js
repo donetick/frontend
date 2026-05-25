@@ -26,6 +26,34 @@ class CommandQueue {
     return sanitized
   }
 
+  _clearPendingFlags(chore = {}) {
+    const next = { ...chore }
+    delete next._pending
+    delete next._pendingUpdate
+    return next
+  }
+
+  async _rollbackCancelledCommand(command) {
+    if (!command) return
+
+    if (
+      command.commandType !== CommandType.ARCHIVE_CHORE &&
+      command.commandType !== CommandType.UNARCHIVE_CHORE
+    ) {
+      return
+    }
+
+    const cachedChore = await offlineDB.getChore(command.entityId)
+    if (!cachedChore) return
+
+    const restoredChore = this._clearPendingFlags({
+      ...cachedChore,
+      isActive: command.commandType === CommandType.ARCHIVE_CHORE,
+    })
+
+    await offlineDB.saveChores([restoredChore])
+  }
+
   // Enqueue a domain command
   async enqueue(type, entityId, payload) {
     if (!isOfflineFeatureEnabled()) {
@@ -81,6 +109,11 @@ class CommandQueue {
   // Cancel/undo a pending command
   async cancel(commandId) {
     if (!isOfflineFeatureEnabled()) return
+
+    const allCommands = await offlineDB.getCommands()
+    const command = allCommands.find(c => String(c.id) === String(commandId))
+
+    await this._rollbackCancelledCommand(command)
     return offlineDB.removeCommand(commandId)
   }
 
