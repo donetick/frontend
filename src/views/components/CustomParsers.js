@@ -672,7 +672,29 @@ export const parseDueDate = (inputSentence, chrono) => {
     }
   }
 
-  const dueDateMatch = parsedDueDate[0]
+  let dueDateMatch = parsedDueDate[0]
+
+  // Validate word boundaries for the matched date text
+  // This prevents matching partial words like "wed" in "wedding", fri in "friend", etc.
+  const matchStart = dueDateMatch.index
+  const matchEnd = matchStart + dueDateMatch.text.length
+
+  const charBefore = matchStart > 0 ? inputSentence[matchStart - 1] : ' '
+  const charAfter =
+    matchEnd < inputSentence.length ? inputSentence[matchEnd] : ' '
+
+  // Check if the match is part of a larger word
+  // If alphanumeric characters exist before/after, it's not a word boundary
+  const isValidWordBoundary =
+    !/[a-zA-Z0-9]/.test(charBefore) && !/[a-zA-Z0-9]/.test(charAfter)
+
+  if (!isValidWordBoundary) {
+    return {
+      result: null,
+      highlight: [],
+      cleanedSentence: inputSentence,
+    }
+  }
   const dueDateText = dueDateMatch.text
   const dueDateStartIndex = dueDateMatch.index
   const dueDateEndIndex = dueDateStartIndex + dueDateText.length
