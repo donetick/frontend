@@ -11,6 +11,7 @@ import SSEProvider from './contexts/SSEContext'
 import { AuthProvider } from './hooks/useAuth.jsx'
 import { useNotification } from './service/NotificationProvider'
 
+import { useSyncOnReconnect } from './hooks/useSyncOnReconnect'
 import NetworkBanner from './views/components/NetworkBanner'
 
 const add = className => {
@@ -34,6 +35,7 @@ const startOpenReplay = () => {
 
 const AppContent = () => {
   const { showNotification } = useNotification()
+  useSyncOnReconnect()
 
   const {
     needRefresh: [needRefresh, setNeedRefresh],

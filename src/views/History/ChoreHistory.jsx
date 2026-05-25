@@ -20,10 +20,11 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import { Box, Button, Card, Container, Grid, Sheet, Typography } from '@mui/joy'
 import moment from 'moment'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import useConfirmationModal from '../../hooks/useConfirmationModal'
+import { usePendingCommands } from '../../hooks/usePendingCommands'
 import {
   useChoreHistory,
   useDeleteChoreHistory,
@@ -48,15 +49,33 @@ const ChoreHistory = () => {
   const { fmt } = useLocalization()
   const [showMoreInfoId, setShowMoreInfoId] = useState(null)
   const [noteViewerConfig, setNoteViewerConfig] = useState({ isOpen: false })
-  const { showSuccess, showError } = useNotification()
+  const { showSuccess } = useNotification()
   // React Query hooks
   const { data: choreHistoryData, isLoading } = useChoreHistory(choreId)
   const { data: circleMembersData } = useCircleMembers()
   const updateChoreHistory = useUpdateChoreHistory()
   const deleteChoreHistory = useDeleteChoreHistory()
+  const { data: pendingCmds } = usePendingCommands(choreId)
 
   const choreHistory = choreHistoryData?.res || []
   const performers = circleMembersData?.res || []
+  const pendingByHistoryId = useMemo(() => {
+    if (!pendingCmds?.length) return {}
+    return pendingCmds.reduce((acc, cmd) => {
+      if (
+        cmd.commandType !== 'update_chore_history' &&
+        cmd.commandType !== 'delete_chore_history'
+      ) {
+        return acc
+      }
+      const historyId =
+        cmd?.payload?.historyId ?? Number(String(cmd.entityId).split(':')[1])
+      if (!historyId) return acc
+      if (!acc[historyId]) acc[historyId] = []
+      acc[historyId].push(cmd)
+      return acc
+    }, {})
+  }, [pendingCmds])
 
   const handleDelete = historyEntry => {
     showConfirmation(
@@ -366,6 +385,7 @@ const ChoreHistory = () => {
                 performers={performers}
                 allHistory={choreHistory}
                 index={index}
+                pendingCommands={pendingByHistoryId[historyEntry.id] || []}
                 onViewNote={notes => {
                   setNoteViewerConfig({
                     isOpen: true,
@@ -407,13 +427,21 @@ const ChoreHistory = () => {
                 },
               },
               {
-                onSuccess: () => {
+                onSuccess: data => {
                   setIsEditModalOpen(false)
                   setEditHistory(null)
-                  showSuccess({
-                    title: 'History Updated',
-                    message: `The history record has been updated successfully.`,
-                  })
+                  if (data?.queued) {
+                    showSuccess({
+                      title: 'History Update Queued',
+                      message:
+                        'You are offline. The history update will sync when connection is restored.',
+                    })
+                  } else {
+                    showSuccess({
+                      title: 'History Updated',
+                      message: `The history record has been updated successfully.`,
+                    })
+                  }
                 },
                 onError: error => {
                   console.error('Failed to update chore history:', error)
@@ -429,13 +457,21 @@ const ChoreHistory = () => {
                 historyId: editHistory.id,
               },
               {
-                onSuccess: () => {
+                onSuccess: data => {
                   setIsEditModalOpen(false)
                   setEditHistory(null)
-                  showSuccess({
-                    title: 'History Deleted',
-                    message: `The history record has been deleted successfully.`,
-                  })
+                  if (data?.queued) {
+                    showSuccess({
+                      title: 'History Delete Queued',
+                      message:
+                        'You are offline. The history delete will sync when connection is restored.',
+                    })
+                  } else {
+                    showSuccess({
+                      title: 'History Deleted',
+                      message: `The history record has been deleted successfully.`,
+                    })
+                  }
                 },
               },
             )

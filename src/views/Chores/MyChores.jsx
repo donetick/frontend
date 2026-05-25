@@ -272,18 +272,6 @@ const MyChores = () => {
         // Don't set choreSections here - let the dedicated effect handle it
         // This prevents caching issues when switching between projects
 
-        if (localStorage.getItem('openChoreSections') === null) {
-          setSelectedChoreSectionWithCache(selectedChoreSection)
-          const openSections = processedSections.reduce(
-            (acc, _section, index) => {
-              acc[index] = true
-              return acc
-            },
-            {},
-          )
-          setOpenChoreSections(openSections)
-        }
-
         if (await canScheduleNotification()) {
           console.log('Scheduling chore notifications...')
           scheduleChoreNotification(
@@ -303,10 +291,8 @@ const MyChores = () => {
     choresData?.res,
     membersData?.res,
     processedChores, // Added to ensure local state syncs when query data updates
-    processedSections,
     userProfile,
     impersonatedUser?.userId,
-    selectedChoreSection,
   ])
 
   // Auto-update sections when processedSections changes
@@ -1296,20 +1282,19 @@ const MyChores = () => {
               )}
             </Box>
           )}
-        {searchTerm?.length > 0 &&
-          viewMode !== 'calendar' && (
-            <ChoreListView
-              chores={getFilteredChores}
-              viewMode={viewMode}
-              membersData={membersData}
-              userLabels={userLabels}
-              handleLabelFiltering={handleLabelFiltering}
-              handleChoreAction={handleChoreAction}
-              isMultiSelectMode={isMultiSelectMode}
-              selectedChores={selectedChores}
-              toggleChoreSelection={toggleChoreSelection}
-            />
-          )}
+        {searchTerm?.length > 0 && viewMode !== 'calendar' && (
+          <ChoreListView
+            chores={getFilteredChores}
+            viewMode={viewMode}
+            membersData={membersData}
+            userLabels={userLabels}
+            handleLabelFiltering={handleLabelFiltering}
+            handleChoreAction={handleChoreAction}
+            isMultiSelectMode={isMultiSelectMode}
+            selectedChores={selectedChores}
+            toggleChoreSelection={toggleChoreSelection}
+          />
+        )}
         {viewMode === 'calendar' && (
           <>
             {/* Summary Chips when no date selected */}
@@ -1492,87 +1477,86 @@ const MyChores = () => {
             )}
           </>
         )}
-        {searchTerm.length === 0 &&
-          viewMode !== 'calendar' && (
-            <AccordionGroup transition='0.2s ease' disableDivider>
-              {choreSections.map((section, index) => {
-                if (section.content.length === 0) return null
-                return (
-                  <Accordion
-                    key={section.name + index}
-                    sx={{
-                      my: 0,
-                      px: 0,
-                    }}
-                    expanded={Boolean(openChoreSections[index])}
-                  >
-                    <Divider orientation='horizontal'>
-                      <Chip
-                        variant='soft'
-                        color='neutral'
-                        size='md'
-                        onClick={() => {
-                          if (openChoreSections[index]) {
-                            const newOpenChoreSections = {
-                              ...openChoreSections,
-                            }
-                            delete newOpenChoreSections[index]
-                            setOpenChoreSectionsWithCache(newOpenChoreSections)
-                          } else {
-                            setOpenChoreSectionsWithCache({
-                              ...openChoreSections,
-                              [index]: true,
-                            })
+        {searchTerm.length === 0 && viewMode !== 'calendar' && (
+          <AccordionGroup transition='0.2s ease' disableDivider>
+            {choreSections.map((section, index) => {
+              if (section.content.length === 0) return null
+              return (
+                <Accordion
+                  key={section.name + index}
+                  sx={{
+                    my: 0,
+                    px: 0,
+                  }}
+                  expanded={Boolean(openChoreSections[index])}
+                >
+                  <Divider orientation='horizontal'>
+                    <Chip
+                      variant='soft'
+                      color='neutral'
+                      size='md'
+                      onClick={() => {
+                        if (openChoreSections[index]) {
+                          const newOpenChoreSections = {
+                            ...openChoreSections,
                           }
-                        }}
-                        endDecorator={
-                          openChoreSections[index] ? (
-                            <ExpandCircleDown
-                              color='primary'
-                              sx={{ transform: 'rotate(180deg)' }}
-                            />
-                          ) : (
-                            <ExpandCircleDown color='primary' />
-                          )
+                          delete newOpenChoreSections[index]
+                          setOpenChoreSectionsWithCache(newOpenChoreSections)
+                        } else {
+                          setOpenChoreSectionsWithCache({
+                            ...openChoreSections,
+                            [index]: true,
+                          })
                         }
-                        startDecorator={
-                          <>
-                            <Chip color='primary' size='sm' variant='soft'>
-                              {section?.content?.length}
-                            </Chip>
-                          </>
-                        }
-                      >
-                        {section.name}
-                      </Chip>
-                    </Divider>
-                    <AccordionDetails
-                      sx={{
-                        flexDirection: 'column',
-                        ['& > *']: {
-                          // px: 0.5,
-                          px: 0.5,
-                          // pr: 0,
-                        },
                       }}
+                      endDecorator={
+                        openChoreSections[index] ? (
+                          <ExpandCircleDown
+                            color='primary'
+                            sx={{ transform: 'rotate(180deg)' }}
+                          />
+                        ) : (
+                          <ExpandCircleDown color='primary' />
+                        )
+                      }
+                      startDecorator={
+                        <>
+                          <Chip color='primary' size='sm' variant='soft'>
+                            {section?.content?.length}
+                          </Chip>
+                        </>
+                      }
                     >
-                      <ChoreListView
-                        chores={section.content}
-                        viewMode={viewMode}
-                        membersData={membersData}
-                        userLabels={userLabels}
-                        handleLabelFiltering={handleLabelFiltering}
-                        handleChoreAction={handleChoreAction}
-                        isMultiSelectMode={isMultiSelectMode}
-                        selectedChores={selectedChores}
-                        toggleChoreSelection={toggleChoreSelection}
-                      />
-                    </AccordionDetails>
-                  </Accordion>
-                )
-              })}
-            </AccordionGroup>
-          )}
+                      {section.name}
+                    </Chip>
+                  </Divider>
+                  <AccordionDetails
+                    sx={{
+                      flexDirection: 'column',
+                      ['& > *']: {
+                        // px: 0.5,
+                        px: 0.5,
+                        // pr: 0,
+                      },
+                    }}
+                  >
+                    <ChoreListView
+                      chores={section.content}
+                      viewMode={viewMode}
+                      membersData={membersData}
+                      userLabels={userLabels}
+                      handleLabelFiltering={handleLabelFiltering}
+                      handleChoreAction={handleChoreAction}
+                      isMultiSelectMode={isMultiSelectMode}
+                      selectedChores={selectedChores}
+                      toggleChoreSelection={toggleChoreSelection}
+                    />
+                  </AccordionDetails>
+                </Accordion>
+              )
+            })}
+          </AccordionGroup>
+        )}
         <Box
           sx={{
             // center the button

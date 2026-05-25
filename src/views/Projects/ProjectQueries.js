@@ -1,5 +1,11 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { GetProjects, CreateProject, UpdateProject, DeleteProject } from '../../utils/Fetcher'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+  CreateProject,
+  DeleteProject,
+  GetProjects,
+  UpdateProject,
+} from '../../utils/Fetcher'
+import { offlineDB } from '../../utils/OfflineDB'
 
 // Query hook for fetching all projects
 export const useProjects = () => {
@@ -10,22 +16,15 @@ export const useProjects = () => {
         const response = await GetProjects()
         if (response.ok) {
           const data = await response.json()
-          return data.res || data
+          const projects = data.res || data
+          offlineDB.saveKV('projects', projects)
+          return projects
         }
         throw new Error('Failed to fetch projects')
-      } catch (error) {
-        console.error('Error fetching projects:', error)
-        // Return default project if API fails
-        return [
-          {
-            id: 'default',
-            name: 'Default Project',
-            description: 'Your default project workspace',
-            color: '#1976d2',
-            created_by: 'system',
-            created_at: new Date().toISOString(),
-          }
-        ]
+      } catch {
+        const cached = await offlineDB.getKV('projects')
+        if (cached) return cached
+        return []
       }
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -39,7 +38,7 @@ export const useCreateProject = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (projectData) => {
+    mutationFn: async projectData => {
       try {
         const response = await CreateProject(projectData)
         if (response.ok) {
@@ -59,7 +58,7 @@ export const useCreateProject = () => {
         return localProject
       }
     },
-    onSuccess: (newProject) => {
+    onSuccess: newProject => {
       // Update the projects cache
       queryClient.setQueryData(['projects'], (oldProjects = []) => {
         const updatedProjects = [...oldProjects, newProject]
@@ -69,7 +68,7 @@ export const useCreateProject = () => {
       // Invalidate and refetch
       queryClient.invalidateQueries(['projects'])
     },
-    onError: (error) => {
+    onError: error => {
       console.error('Create project mutation failed:', error)
     },
   })
@@ -98,18 +97,18 @@ export const useUpdateProject = () => {
         }
       }
     },
-    onSuccess: (updatedProject) => {
+    onSuccess: updatedProject => {
       // Update the projects cache
       queryClient.setQueryData(['projects'], (oldProjects = []) => {
         return oldProjects.map(project =>
-          project.id === updatedProject.id ? updatedProject : project
+          project.id === updatedProject.id ? updatedProject : project,
         )
       })
 
       // Invalidate and refetch
       queryClient.invalidateQueries(['projects'])
     },
-    onError: (error) => {
+    onError: error => {
       console.error('Update project mutation failed:', error)
     },
   })
@@ -120,7 +119,7 @@ export const useDeleteProject = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (projectId) => {
+    mutationFn: async projectId => {
       try {
         // Prevent deletion of default project
         if (projectId === 'default') {
@@ -147,14 +146,14 @@ export const useDeleteProject = () => {
       // Invalidate and refetch
       queryClient.invalidateQueries(['projects'])
     },
-    onError: (error) => {
+    onError: error => {
       console.error('Delete project mutation failed:', error)
     },
   })
 }
 
 // Hook to get a specific project by ID
-export const useProject = (projectId) => {
+export const useProject = projectId => {
   return useQuery({
     queryKey: ['projects', projectId],
     queryFn: async () => {

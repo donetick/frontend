@@ -336,6 +336,7 @@ const ChoreEdit = () => {
       description: description,
       assignees: assignees,
       dueDate: dueDate ? new Date(dueDate).toISOString() : null,
+      nextDueDate: dueDate ? new Date(dueDate).toISOString() : null,
       frequencyType: frequencyType,
       frequency: Number(frequency),
       frequencyMetadata: frequencyMetadata,
@@ -365,11 +366,22 @@ const ChoreEdit = () => {
     }
 
     SaveFunction(chore)
-      .then(() => {
-        showSuccess({
-          title: 'Chore Saved',
-          message: 'Your task has been saved successfully!',
-        })
+      .then(result => {
+        if (
+          result?._pendingUpdate ||
+          result?._pendingCreate ||
+          result?.res?._pendingCreate
+        ) {
+          showSuccess({
+            title: 'Saved Offline',
+            message: 'Your changes will sync when you are back online.',
+          })
+        } else {
+          showSuccess({
+            title: 'Chore Saved',
+            message: 'Your task has been saved successfully!',
+          })
+        }
         Navigate('/chores')
       })
       .catch(error => {
