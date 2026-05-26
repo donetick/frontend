@@ -73,7 +73,7 @@ const AdvancedSettings = () => {
       queryClient.invalidateQueries()
       showNotification({
         type: 'success',
-        message: 'Offline support disabled and local offline data cleared',
+        message: 'Offline mode turned off and local data was cleared',
       })
     } catch {
       setOfflineFeatureEnabled(false)
@@ -83,7 +83,7 @@ const AdvancedSettings = () => {
       showNotification({
         type: 'warning',
         message:
-          'Offline support disabled, but some local cache items may not have been cleared',
+          'Offline mode was turned off, but some local data may still be stored',
       })
     } finally {
       setOfflineLoading(false)
@@ -93,10 +93,10 @@ const AdvancedSettings = () => {
   const showDisableOfflineConfirmation = () => {
     setConfirmModalConfig({
       isOpen: true,
-      title: 'Disable Offline Support',
+      title: 'Turn Off Offline Mode',
       message:
-        'Disabling offline support will remove queued offline actions and local cached offline data on this device/browser. Do you want to continue?',
-      confirmText: 'Disable & Clear',
+        'Turning off offline mode will remove unsynced offline changes and saved offline data on this device/browser. Do you want to continue?',
+      confirmText: 'Turn Off & Clear Data',
       cancelText: 'Cancel',
       color: 'danger',
       onClose: isConfirmed => {
@@ -117,7 +117,7 @@ const AdvancedSettings = () => {
       queryClient.invalidateQueries()
       showNotification({
         type: 'success',
-        message: 'Offline support enabled for this device/browser',
+        message: 'Offline mode turned on for this device/browser',
       })
       return
     }
@@ -158,8 +158,8 @@ const AdvancedSettings = () => {
           </Chip>
         </Box>
         <Typography level='body-md' mt={-1}>
-          Enable offline queue and local cache for this device/browser.
-          Disabling removes pending offline actions and cached offline data.
+          Keep using Donetick when you're offline on this device/browser. Your
+          changes are saved locally and synced when you're back online.
         </Typography>
         <FormControl sx={{ mt: 1 }}>
           <Checkbox
@@ -171,8 +171,8 @@ const AdvancedSettings = () => {
             overlay
           />
           <FormHelperText>
-            When disabled, queued changes and offline cache are cleared from
-            this device/browser.
+            Turning this off removes unsynced offline changes and saved offline
+            data from this device/browser.
           </FormHelperText>
         </FormControl>
 
