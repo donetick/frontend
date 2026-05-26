@@ -27,6 +27,7 @@ export const AVAILABLE_LANGUAGES = [
   { code: 'fr', name: 'French', nativeName: 'Français' },
   { code: 'nl', name: 'Dutch', nativeName: 'Nederlands' },
   { code: 'pt', name: 'Portuguese (Brazil)', nativeName: 'Português (Brasil)' },
+  { code: 'ja', name: 'Japanese', nativeName: '日本語' },
 ]
 
 export const LocalizationProvider = ({ children }) => {
