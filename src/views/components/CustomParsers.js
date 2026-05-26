@@ -45,6 +45,20 @@ const ALL_MONTHS = Object.values(VALID_MONTHS).filter(
   (v, i, a) => a.indexOf(v) === i,
 )
 
+// Helper function to validate word boundaries for date/time matches
+// Prevents matching partial words like 'wed' in 'wedding', 'fri' in 'friend', etc.
+const isValidWordBoundary = (text, matchIndex, matchLength) => {
+  const charBefore = matchIndex > 0 ? text[matchIndex - 1] : ' '
+  const charAfter =
+    matchIndex + matchLength < text.length
+      ? text[matchIndex + matchLength]
+      : ' '
+  // Valid boundaries: spaces, punctuation, but NOT alphanumeric or word-forming characters
+  return !(
+    /[\p{L}\p{N}_]/u.test(charBefore) || /[\p{L}\p{N}_]/u.test(charAfter)
+  )
+}
+
 export const parsePriority = inputSentence => {
   let sentence = inputSentence.toLowerCase()
   const priorityMap = {
@@ -292,7 +306,22 @@ export const parseRepeatV2 = inputSentence => {
           .toLowerCase()
           .split(/ and |,|\s/)
           .map(day => day.trim())
-          .filter(day => VALID_DAYS[day])
+          .filter(day => {
+            // Validate that the day abbreviation is at proper word boundaries
+            // This prevents matches like 'wed' in 'wedding', 'fri' in 'friend'
+            if (!VALID_DAYS[day]) return false
+            // For short abbreviations (3 chars or less), validate word boundaries
+            if (day.length <= 3) {
+              const dayIndex = sentence.toLowerCase().indexOf(day)
+              if (dayIndex === -1) return false
+              return isValidWordBoundary(
+                sentence.toLowerCase(),
+                dayIndex,
+                day.length,
+              )
+            }
+            return true
+          })
           .map(day => VALID_DAYS[day])
         if (!result.frequencyMetadata.days.length)
           return { result: null, name: null, cleanedSentence: inputSentence }
@@ -318,7 +347,20 @@ export const parseRepeatV2 = inputSentence => {
           .toLowerCase()
           .split(/ and |,|\s/)
           .map(month => month.trim())
-          .filter(month => VALID_MONTHS[month])
+          .filter(month => {
+            if (!VALID_MONTHS[month]) return false
+            // For short abbreviations (3 chars or less), validate word boundaries
+            if (month.length <= 3) {
+              const monthIndex = sentence.toLowerCase().indexOf(month)
+              if (monthIndex === -1) return false
+              return isValidWordBoundary(
+                sentence.toLowerCase(),
+                monthIndex,
+                month.length,
+              )
+            }
+            return true
+          })
           .map(month => VALID_MONTHS[month])
         result.frequencyMetadata.unit = 'days'
         return {
@@ -664,7 +706,7 @@ export const parseDueDate = (inputSentence, chrono) => {
     forwardDate: true,
   })
 
-  if (!parsedDueDate[0] || parsedDueDate[0].index === -1) {
+  if (!parsedDueDate.length) {
     return {
       result: null,
       highlight: [],
@@ -672,7 +714,21 @@ export const parseDueDate = (inputSentence, chrono) => {
     }
   }
 
-  const dueDateMatch = parsedDueDate[0]
+  // Select the first valid word-bounded date match
+  // Prevents false positives like "wed" in "wedding" while still allowing later valid matches
+  const dueDateMatch = parsedDueDate.find(
+    match =>
+      match.index !== -1 &&
+      isValidWordBoundary(inputSentence, match.index, match.text.length),
+  )
+
+  if (!dueDateMatch) {
+    return {
+      result: null,
+      highlight: [],
+      cleanedSentence: inputSentence,
+    }
+  }
   const dueDateText = dueDateMatch.text
   const dueDateStartIndex = dueDateMatch.index
   const dueDateEndIndex = dueDateStartIndex + dueDateText.length
