@@ -481,6 +481,9 @@ export const useChoreActions = ({
                       chore.id,
                       { id: chore.id },
                     )
+                    await offlineDB.saveChores([
+                      { ...chore, isActive: false, _pending: 'archive' },
+                    ])
                     setChores(prev => prev.filter(c => c.id !== chore.id))
                     setFilteredChores(prev =>
                       prev.filter(c => c.id !== chore.id),
@@ -493,6 +496,9 @@ export const useChoreActions = ({
                         "You're offline — archive will sync when back online",
                       undoAction: async () => {
                         await commandQueue.cancel(cmdId)
+                        await offlineDB.saveChores([
+                          { ...chore, isActive: true },
+                        ])
                         queryClient.invalidateQueries({
                           queryKey: ['pendingCommands'],
                         })
@@ -529,6 +535,9 @@ export const useChoreActions = ({
                       chore.id,
                       { id: chore.id },
                     )
+                    await offlineDB.saveChores([
+                      { ...chore, isActive: true, _pending: 'unarchive' },
+                    ])
                     queryClient.invalidateQueries({
                       queryKey: ['pendingCommands'],
                     })
@@ -537,6 +546,9 @@ export const useChoreActions = ({
                         "You're offline — restore will sync when back online",
                       undoAction: async () => {
                         await commandQueue.cancel(cmdId)
+                        await offlineDB.saveChores([
+                          { ...chore, isActive: false },
+                        ])
                         queryClient.invalidateQueries({
                           queryKey: ['pendingCommands'],
                         })

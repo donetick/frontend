@@ -536,6 +536,7 @@ const ChoreView = () => {
     try {
       const response = await UnArchiveChore(choreId)
       if (response.ok) {
+        await offlineDB.saveChores([{ ...chore, isActive: true }])
         setChore({ ...chore, isActive: true })
         queryClient.invalidateQueries(['chores'])
       }
@@ -548,12 +549,16 @@ const ChoreView = () => {
           choreId,
           { id: choreId },
         )
+        await offlineDB.saveChores([
+          { ...chore, isActive: true, _pending: 'unarchive' },
+        ])
         setChore({ ...chore, isActive: true })
         queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
         showSuccess({
           message: "You're offline — restore will sync when back online",
           undoAction: async () => {
             await commandQueue.cancel(cmdId)
+            await offlineDB.saveChores([{ ...chore, isActive: false }])
             setChore({ ...chore, isActive: false })
             queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
           },
