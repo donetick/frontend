@@ -121,6 +121,7 @@ const ChoreEdit = () => {
   const [privacySaved, setPrivacySaved] = useState(false)
   const [showSaveNotificationDefault, setShowSaveNotificationDefault] =
     useState(false)
+  const [showSavePointsDefault, setShowSavePointsDefault] = useState(false)
   const [showSaveAssigneeDefault, setShowSaveAssigneeDefault] = useState(false)
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
 
@@ -417,6 +418,18 @@ const ChoreEdit = () => {
       )
       if (defaultNotificationSetting !== null) {
         setIsNotificable(JSON.parse(defaultNotificationSetting))
+      }
+
+      const defaultNotificationMetadata = localStorage.getItem(
+        'defaultNotificationMetadata',
+      )
+      if (defaultNotificationMetadata !== null) {
+        setNotificationMetadata(JSON.parse(defaultNotificationMetadata))
+      }
+
+      const defaultPointsSetting = localStorage.getItem('defaultPointsSetting')
+      if (defaultPointsSetting !== null) {
+        setPoints(JSON.parse(defaultPointsSetting))
       }
 
       const defaultAssigneeSetting = localStorage.getItem(
@@ -1346,6 +1359,7 @@ const ChoreEdit = () => {
                 if (!e.target.checked) {
                   setNotificationMetadata({})
                 }
+                setShowSaveNotificationDefault(true)
               }}
               defaultChecked={isNotificable}
               checked={isNotificable}
@@ -1361,6 +1375,34 @@ const ChoreEdit = () => {
               When should receive notifications for this task
             </FormHelperText>
           </FormControl>
+
+          {showSaveNotificationDefault && !isNotificable && (
+            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'start' }}>
+              <Button
+                variant='outlined'
+                size='sm'
+                color='neutral'
+                startDecorator={<Save />}
+                sx={{
+                  borderRadius: 6,
+                  fontWeight: 500,
+                  '&:hover': {
+                    background: 'neutral.softHoverBg',
+                  },
+                }}
+                onClick={() => {
+                  localStorage.setItem(
+                    'defaultNotificationSetting',
+                    JSON.stringify(isNotificable),
+                  )
+                  localStorage.removeItem('defaultNotificationMetadata')
+                  setShowSaveNotificationDefault(false)
+                }}
+              >
+                Remember Notification Settings
+              </Button>
+            </Box>
+          )}
         </Box>
 
         {isNotificable && (
@@ -1384,6 +1426,7 @@ const ChoreEdit = () => {
                         ...notificationMetadata,
                         templates: newTemplates,
                       })
+                      setShowSaveNotificationDefault(true)
                     }
                   }}
                   value={notificationMetadata}
@@ -1415,6 +1458,7 @@ const ChoreEdit = () => {
                       ...notificationMetadata,
                       circleGroup: !notificationMetadata?.circleGroup,
                     })
+                    setShowSaveNotificationDefault(true)
                   }}
                   checked={
                     notificationMetadata
@@ -1443,11 +1487,43 @@ const ChoreEdit = () => {
                         ...notificationMetadata,
                         circleGroupID: parseInt(e.target.value),
                       })
+                      setShowSaveNotificationDefault(true)
                     }}
                   />
                 </Box>
               )}
             </Card>
+
+            {showSaveNotificationDefault && (
+              <Box sx={{ display: 'flex', justifyContent: 'start' }}>
+                <Button
+                  variant='outlined'
+                  size='sm'
+                  color='neutral'
+                  startDecorator={<Save />}
+                  sx={{
+                    borderRadius: 6,
+                    fontWeight: 500,
+                    '&:hover': {
+                      background: 'neutral.softHoverBg',
+                    },
+                  }}
+                  onClick={() => {
+                    localStorage.setItem(
+                      'defaultNotificationSetting',
+                      JSON.stringify(isNotificable),
+                    )
+                    localStorage.setItem(
+                      'defaultNotificationMetadata',
+                      JSON.stringify(notificationMetadata),
+                    )
+                    setShowSaveNotificationDefault(false)
+                  }}
+                >
+                  Remember Notification Settings
+                </Button>
+              </Box>
+            )}
           </Box>
         )}
       </Box>
@@ -1475,6 +1551,7 @@ const ChoreEdit = () => {
                 } else {
                   setPoints(-1)
                 }
+                setShowSavePointsDefault(true)
               }}
               checked={points > -1}
               overlay
@@ -1507,10 +1584,37 @@ const ChoreEdit = () => {
                   placeholder='Points'
                   onChange={e => {
                     setPoints(parseInt(e.target.value))
+                    setShowSavePointsDefault(true)
                   }}
                 />
               </Box>
             </Card>
+          )}
+          {showSavePointsDefault && (
+            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'start' }}>
+              <Button
+                variant='outlined'
+                size='sm'
+                color='neutral'
+                startDecorator={<Save />}
+                sx={{
+                  borderRadius: 6,
+                  fontWeight: 500,
+                  '&:hover': {
+                    background: 'neutral.softHoverBg',
+                  },
+                }}
+                onClick={() => {
+                  localStorage.setItem(
+                    'defaultPointsSetting',
+                    JSON.stringify(points),
+                  )
+                  setShowSavePointsDefault(false)
+                }}
+              >
+                Remember for Future Tasks
+              </Button>
+            </Box>
           )}
         </Box>
 
