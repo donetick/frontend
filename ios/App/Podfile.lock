@@ -130,7 +130,7 @@ PODS:
   - SQLCipher/common (4.10.0)
   - SQLCipher/standard (4.10.0):
     - SQLCipher/common
-  - ZIPFoundation (0.9.19)
+  - ZIPFoundation (0.9.20)
 
 DEPENDENCIES:
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
@@ -248,7 +248,7 @@ SPEC CHECKSUMS:
   RevenuecatPurchasesCapacitorUi: 267758d61aba42a0a3f035e6ba3c4630112357e4
   RevenueCatUI: 3c72ef61b54c3f4787afab6a3b0f00cbec192063
   SQLCipher: eb79c64049cb002b4e9fcb30edb7979bf4706dfc
-  ZIPFoundation: b8c29ea7ae353b309bc810586181fd073cb3312c
+  ZIPFoundation: dfd3d681c4053ff7e2f7350bc4e53b5dba3f5351
 
 PODFILE CHECKSUM: bb6dcef70c8edc058fe3ba311f08a223fd7dbc66
 

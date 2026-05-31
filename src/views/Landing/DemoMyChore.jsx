@@ -1,14 +1,18 @@
 import { Card, Grid, Typography } from '@mui/joy'
 import moment from 'moment'
+import { useState } from 'react'
 import ChoreCard from '../Chores/ChoreCard'
 
 const DemoMyChore = () => {
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState(null)
+
   const cards = [
     {
       id: 12,
       name: '♻️ Take out recycle ',
       frequencyType: 'days_of_the_week',
       frequency: 1,
+      priority: 1,
       frequencyMetadata:
         '{"days":["thursday"],"time":"2024-07-07T22:00:00-04:00"}',
       nextDueDate: moment().add(1, 'days').hour(8).minute(0).toISOString(),
@@ -96,6 +100,17 @@ const DemoMyChore = () => {
   ]
 
   const users = [{ displayName: 'Me', id: 1, userId: 1 }]
+
+  // Helper function to get chores for a specific date
+  const getChoresForDate = date => {
+    return cards.filter(chore => {
+      if (!chore.nextDueDate) return false
+      const choreDate = new Date(chore.nextDueDate).toLocaleDateString()
+      const selectedDate = date.toLocaleDateString()
+      return choreDate === selectedDate
+    })
+  }
+
   return (
     <>
       <Grid item xs={12} sm={5} data-aos-first-tasks-list>
