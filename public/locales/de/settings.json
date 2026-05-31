@@ -1,0 +1,174 @@
+{
+  "title": "Einstellungen",
+  "circleSettings": {
+    "title": "Kreis-Einstellungen",
+    "description": "Dein Account wird automatisch mit einem Kreis verbunden, wenn du einen erstellst oder beitrittst. Lade einfach Freunde ein, indem du den einzigartigen Kreis-Code oder Link unten teilst. Du erhältst eine Benachrichtigung, wenn jemand deinem Kreis beitreten möchte. Wenn du gehen möchtest, klicke einfach auf 'Kreis verlassen'.",
+    "circleCode": "Kreis-Code",
+    "copyCode": "Code kopieren",
+    "copyLink": "Link kopieren",
+    "codeCopied": "Kreis-Code kopiert!",
+    "linkCopied": "Kreis-Link kopiert!",
+    "joinCircle": "Einem Kreis beitreten",
+    "joinCirclePlaceholder": "Kreis-Code eingeben",
+    "join": "Beitreten",
+    "leave": "Kreis verlassen",
+    "leaveConfirmTitle": "Kreis verlassen",
+    "leaveConfirmMessage": "Bist du sicher, dass du diesen Kreis verlassen möchtest?",
+    "circleMembers": "Kreis-Mitglieder",
+    "circleMemberRequests": "Kreis-Beitrittsanfragen",
+    "admin": "Administrator",
+    "member": "Mitglied",
+    "pending": "Ausstehend",
+    "accept": "Akzeptieren",
+    "reject": "Ablehnen",
+    "makeAdmin": "Zum Administrator machen",
+    "makeMember": "Zum Mitglied machen",
+    "remove": "Entfernen",
+    "webhookURL": "Webhook-URL",
+    "webhookDescription": "Gib eine Webhook-URL ein, um Benachrichtigungen für Kreis-Ereignisse zu erhalten",
+    "webhookPlaceholder": "https://deine-webhook-url.com"
+  },
+  "accountSettings": {
+    "title": "Account-Einstellungen",
+    "subscription": "Abonnement",
+    "subscriptionStatus": "Aktueller Plan",
+    "free": "Kostenlos",
+    "plus": "Plus",
+    "upgrade": "Upgraden",
+    "cancel": "Kündigen",
+    "changePassword": "Passwort ändern",
+    "password": "Passwort",
+    "dangerZone": "Gefahrenbereich",
+    "dangerZoneDescription": "Sobald du dein Konto löschst, gibt es kein Zurück mehr. Bitte sei dir sicher.",
+    "deleteAccount": "Account löschen"
+  },
+  "localization": {
+    "title": "Sprach- und Formateinstellungen",
+    "description": "Passe Sprache, Datumsformat und regionale Einstellungen für dein Konto an.",
+    "language": "Sprache",
+    "languageDescription": "Wähle deine bevorzugte Sprache",
+    "dateFormat": "Datumsformat",
+    "dateFormatDescription": "Wähle, wie Daten in der gesamten Anwendung angezeigt werden sollen",
+    "timeFormat": "Zeitformat",
+    "timeFormatDescription": "Wähle 12-Stunden- oder 24-Stunden-Zeitformat",
+    "12hour": "12-Stunden (AM/PM)",
+    "24hour": "24-Stunden",
+    "firstDayOfWeek": "Erster Tag der Woche",
+    "firstDayOfWeekDescription": "Wähle, welcher Tag deine Woche beginnt",
+    "sunday": "Sonntag",
+    "monday": "Montag",
+    "saturday": "Samstag",
+    "formats": {
+      "mdy": "MM/TT/JJJJ (USA)",
+      "dmy": "TT/MM/JJJJ (Europa)",
+      "ymd": "JJJJ-MM-TT (ISO)",
+      "long": "Langes Format (z.B. 1. Januar 2024)",
+      "short": "Kurzes Format (z.B. 1. Jan 2024)"
+    }
+  },
+  "sidepanel": {
+    "title": "Seitenleisten-Anpassung",
+    "description": "Passe das Layout und die Sichtbarkeit von Karten in der Seitenleiste an. Dieser Bereich ist nur auf großen Bildschirmgeräten wie Tablets und Desktops verfügbar."
+  },
+  "theme": {
+    "title": "Theme-Einstellungen",
+    "description": "Wähle, wie die Seite für dich aussieht. Wähle ein einzelnes Theme oder synchronisiere mit deinem System und wechsle automatisch zwischen Tag- und Nacht-Themes.",
+    "themeMode": "Theme-Modus",
+    "light": "Hell",
+    "dark": "Dunkel",
+    "system": "System"
+  },
+  "notifications": {
+    "settingsSaved": "Einstellungen erfolgreich gespeichert",
+    "settingsSaveFailed": "Speichern der Einstellungen fehlgeschlagen",
+    "invalidWebhook": "Ungültige Webhook-URL"
+  },
+  "profile": {
+    "title": "Profil-Einstellungen",
+    "description": "Aktualisiere deinen Anzeigenamen und dein Profilbild.",
+    "photoUpdated": "Foto aktualisiert",
+    "photoUpdatedMessage": "Dein Profilbild wurde erfolgreich aktualisiert!",
+    "uploadFailed": "Upload fehlgeschlagen",
+    "uploadFailedMessage": "Das Hochladen deines Fotos ist fehlgeschlagen. Bitte versuche es erneut.",
+    "profileUpdated": "Profil aktualisiert",
+    "profileUpdatedMessage": "Deine Profilinformationen wurden erfolgreich gespeichert!",
+    "updateFailed": "Update fehlgeschlagen",
+    "updateFailedMessage": "Dein Profil konnte nicht aktualisiert werden. Bitte überprüfe deine Verbindung und versuche es erneut.",
+    "changePhoto": "Foto ändern",
+    "displayName": "Anzeigename",
+    "displayNamePlaceholder": "Gib deinen Anzeigenamen ein",
+    "timezone": "Zeitzone",
+    "timezonePlaceholder": "Wähle deine Zeitzone",
+    "save": "Speichern",
+    "cancel": "Abbrechen"
+  },
+  "overview": {
+    "title": "Einstellungen",
+    "subtitle": "Passe deine Erfahrung an und verwalte deine Account-Einstellungen",
+    "upgrade": {
+      "title": "Auf Plus upgraden",
+      "description": "Schalte mächtige Funktionen frei, um deine Produktivität zu steigern",
+      "button": "Jetzt upgraden",
+      "features": {
+        "richText": "Rich-Text-Beschreibungen",
+        "notifications": "Aufgaben-Benachrichtigungen",
+        "apiIntegrations": "API-Integrationen",
+        "advancedAutomation": "Erweiterte Automatisierung"
+      }
+    },
+    "sections": {
+      "profile": {
+        "title": "Profil-Einstellungen",
+        "description": "Aktualisiere deine Profilinformationen, Foto, Anzeigenamen und Zeitzonen-Einstellungen."
+      },
+      "circle": {
+        "title": "Kreis-Einstellungen",
+        "description": "Verwalte deinen Kreis, lade Mitglieder ein und bearbeite Beitrittsanfragen."
+      },
+      "account": {
+        "title": "Account-Einstellungen",
+        "description": "Verwalte dein Abonnement, ändere dein Passwort und Account-Löschoptionen."
+      },
+      "subaccounts": {
+        "title": "Verwaltete Accounts",
+        "description": "Erstelle und verwalte Unter-Accounts zum Anmelden und Erledigen zugewiesener Aufgaben."
+      },
+      "notifications": {
+        "title": "Benachrichtigungen",
+        "description": "Konfiguriere Push-Benachrichtigungen, E-Mail-Benachrichtigungen und Benachrichtigungsziele für Aufgaben."
+      },
+      "mfa": {
+        "title": "Multi-Faktor-Authentifizierung",
+        "description": "Füge eine zusätzliche Sicherheitsebene mit MFA über Authenticator-Apps hinzu."
+      },
+      "apitokens": {
+        "title": "API-Token",
+        "description": "Generiere und verwalte Zugriffstoken für Drittanbieter-Integrationen und API-Zugang."
+      },
+      "storage": {
+        "title": "Speicher-Einstellungen",
+        "description": "Sichere und stelle deine Daten wieder her, verwalte lokalen Speicher und Synchronisierungseinstellungen."
+      },
+      "sidepanel": {
+        "title": "Seitenleisten-Anpassung",
+        "description": "Passe das Layout und die Sichtbarkeit von Karten in der Seitenleisten-Oberfläche an."
+      },
+      "theme": {
+        "title": "Theme-Einstellungen",
+        "description": "Wähle dein bevorzugtes Theme und konfiguriere Dunkel-/Hell-Modus-Einstellungen."
+      },
+      "localization": {
+        "title": "Sprach- und Formateinstellungen",
+        "description": "Passe Sprache, Datumsformat, Zeitformat und regionale Einstellungen an."
+      },
+      "advanced": {
+        "title": "Erweiterte Einstellungen",
+        "description": "Konfiguriere Webhooks, Echtzeit-Updates und andere erweiterte Funktionen für erhöhte Produktivität."
+      },
+      "developer": {
+        "title": "Entwickler-Einstellungen",
+        "description": "Zeige technische Informationen über Authentifizierungs-Token, SSE-Verbindungen und Debug-Daten an."
+      }
+    }
+  }
+}

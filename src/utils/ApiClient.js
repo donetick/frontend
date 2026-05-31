@@ -17,7 +17,7 @@ class ApiClient {
   }
 
   async init(force = false) {
-    if (!force && this.initPromise) {
+    if (this.initPromise && !force) {
       return this.initPromise
     }
 
@@ -25,7 +25,9 @@ class ApiClient {
       return Promise.resolve()
     }
 
-    this.initPromise = this._doInit()
+    this.initPromise = this._doInit().finally(() => {
+      this.initPromise = null
+    })
     return this.initPromise
   }
 

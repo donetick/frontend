@@ -1,0 +1,174 @@
+{
+  "title": "Configurações",
+  "circleSettings": {
+    "title": "Configurações do círculo",
+    "description": "Sua conta é conectada automaticamente a um círculo quando você cria ou entra em um. Convide amigos facilmente compartilhando o código ou link exclusivo do círculo abaixo. Você receberá uma notificação abaixo quando alguém solicitar entrar no seu círculo. Se quiser sair, basta clicar no botão \"Sair do círculo\".",
+    "circleCode": "Código do círculo",
+    "copyCode": "Copiar código",
+    "copyLink": "Copiar link",
+    "codeCopied": "Código do círculo copiado!",
+    "linkCopied": "Link do círculo copiado!",
+    "joinCircle": "Entrar em um círculo",
+    "joinCirclePlaceholder": "Digite o código do círculo",
+    "join": "Entrar",
+    "leave": "Sair do círculo",
+    "leaveConfirmTitle": "Sair do círculo",
+    "leaveConfirmMessage": "Tem certeza de que deseja sair deste círculo?",
+    "circleMembers": "Membros do círculo",
+    "circleMemberRequests": "Solicitações de entrada no círculo",
+    "admin": "Administrador",
+    "member": "Membro",
+    "pending": "Pendente",
+    "accept": "Aceitar",
+    "reject": "Rejeitar",
+    "makeAdmin": "Tornar administrador",
+    "makeMember": "Tornar membro",
+    "remove": "Remover",
+    "webhookURL": "URL do webhook",
+    "webhookDescription": "Digite uma URL de webhook para receber notificações de eventos do círculo",
+    "webhookPlaceholder": "https://sua-url-de-webhook.com"
+  },
+  "accountSettings": {
+    "title": "Configurações da conta",
+    "subscription": "Assinatura",
+    "subscriptionStatus": "Plano atual",
+    "free": "Gratuito",
+    "plus": "Plus",
+    "upgrade": "Fazer upgrade",
+    "cancel": "Cancelar",
+    "changePassword": "Alterar senha",
+    "password": "Senha",
+    "dangerZone": "Zona de perigo",
+    "dangerZoneDescription": "Após excluir sua conta, não há como voltar atrás. Tenha certeza antes de confirmar.",
+    "deleteAccount": "Excluir conta"
+  },
+  "localization": {
+    "title": "Localização",
+    "description": "Personalize idioma, formato de data e preferências regionais da sua conta.",
+    "language": "Idioma",
+    "languageDescription": "Selecione seu idioma preferido",
+    "dateFormat": "Formato de data",
+    "dateFormatDescription": "Escolha como as datas devem ser exibidas no aplicativo",
+    "timeFormat": "Formato de hora",
+    "timeFormatDescription": "Selecione o formato de 12 ou 24 horas",
+    "12hour": "12 horas (AM/PM)",
+    "24hour": "24 horas",
+    "firstDayOfWeek": "Primeiro dia da semana",
+    "firstDayOfWeekDescription": "Selecione com qual dia sua semana começa",
+    "sunday": "Domingo",
+    "monday": "Segunda-feira",
+    "saturday": "Sábado",
+    "formats": {
+      "mdy": "MM/DD/AAAA (EUA)",
+      "dmy": "DD/MM/AAAA (Europa)",
+      "ymd": "AAAA-MM-DD (ISO)",
+      "long": "Formato longo (ex.: 1 de janeiro de 2024)",
+      "short": "Formato curto (ex.: 1 de jan de 2024)"
+    }
+  },
+  "sidepanel": {
+    "title": "Personalização do painel lateral",
+    "description": "Personalize o layout e a visibilidade dos cartões no painel lateral. Esta seção está disponível apenas em dispositivos com telas grandes, como tablets e computadores."
+  },
+  "theme": {
+    "title": "Preferências de tema",
+    "description": "Escolha a aparência do site. Selecione um único tema ou sincronize com o sistema para alternar automaticamente entre os temas claro e escuro.",
+    "themeMode": "Modo do tema",
+    "light": "Claro",
+    "dark": "Escuro",
+    "system": "Sistema"
+  },
+  "notifications": {
+    "settingsSaved": "Configurações salvas com sucesso",
+    "settingsSaveFailed": "Falha ao salvar as configurações",
+    "invalidWebhook": "URL de webhook inválida"
+  },
+  "profile": {
+    "title": "Configurações do perfil",
+    "description": "Atualize seu nome de exibição e foto de perfil.",
+    "photoUpdated": "Foto atualizada",
+    "photoUpdatedMessage": "Sua foto de perfil foi atualizada com sucesso!",
+    "uploadFailed": "Falha no envio",
+    "uploadFailedMessage": "Falha ao enviar sua foto. Tente novamente.",
+    "profileUpdated": "Perfil atualizado",
+    "profileUpdatedMessage": "As informações do seu perfil foram salvas com sucesso!",
+    "updateFailed": "Falha na atualização",
+    "updateFailedMessage": "Não foi possível atualizar seu perfil. Verifique sua conexão e tente novamente.",
+    "changePhoto": "Alterar foto",
+    "displayName": "Nome de exibição",
+    "displayNamePlaceholder": "Digite seu nome de exibição",
+    "timezone": "Fuso horário",
+    "timezonePlaceholder": "Selecione seu fuso horário",
+    "save": "Salvar",
+    "cancel": "Cancelar"
+  },
+  "overview": {
+    "title": "Configurações",
+    "subtitle": "Personalize sua experiência e gerencie as preferências da sua conta",
+    "upgrade": {
+      "title": "Faça upgrade para o Plus",
+      "description": "Desbloqueie recursos poderosos para aumentar sua produtividade",
+      "button": "Fazer upgrade agora",
+      "features": {
+        "richText": "Descrições com texto formatado",
+        "notifications": "Notificações de tarefas",
+        "apiIntegrations": "Integrações de API",
+        "advancedAutomation": "Automação avançada"
+      }
+    },
+    "sections": {
+      "profile": {
+        "title": "Configurações do perfil",
+        "description": "Atualize as informações do seu perfil, foto, nome de exibição e preferências de fuso horário."
+      },
+      "circle": {
+        "title": "Configurações do círculo",
+        "description": "Gerencie seu círculo, convide membros e cuide das solicitações de entrada."
+      },
+      "account": {
+        "title": "Configurações da conta",
+        "description": "Gerencie sua assinatura, altere a senha e as opções de exclusão de conta."
+      },
+      "subaccounts": {
+        "title": "Contas gerenciadas",
+        "description": "Crie e gerencie subcontas para fazer login e concluir tarefas atribuídas."
+      },
+      "notifications": {
+        "title": "Notificações",
+        "description": "Configure notificações push, alertas por e-mail e destinos de notificação para tarefas."
+      },
+      "mfa": {
+        "title": "Autenticação multifator",
+        "description": "Adicione uma camada extra de segurança com MFA usando aplicativos autenticadores."
+      },
+      "apitokens": {
+        "title": "Tokens de API",
+        "description": "Gere e gerencie tokens de acesso para integrações de terceiros e acesso à API."
+      },
+      "storage": {
+        "title": "Configurações de armazenamento",
+        "description": "Faça backup e restauração dos seus dados, gerencie o armazenamento local e as preferências de sincronização."
+      },
+      "sidepanel": {
+        "title": "Personalização do painel lateral",
+        "description": "Personalize o layout e a visibilidade dos cartões na interface do painel lateral."
+      },
+      "theme": {
+        "title": "Preferências de tema",
+        "description": "Escolha seu tema preferido e configure o modo claro/escuro."
+      },
+      "localization": {
+        "title": "Localização",
+        "description": "Personalize idioma, formato de data, formato de hora e preferências regionais."
+      },
+      "advanced": {
+        "title": "Configurações avançadas",
+        "description": "Configure webhooks, atualizações em tempo real e outros recursos avançados para mais produtividade."
+      },
+      "developer": {
+        "title": "Configurações de desenvolvedor",
+        "description": "Veja informações técnicas sobre tokens de autenticação, conexões SSE e dados de depuração."
+      }
+    }
+  }
+}

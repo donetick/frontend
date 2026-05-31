@@ -1,14 +1,18 @@
 import NavBar from '@/views/components/NavBar'
 import { Button, Typography, useColorScheme } from '@mui/joy'
-import Tracker from '@openreplay/tracker'
 import { useCallback, useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 import { registerCapacitorListeners } from './CapacitorListener'
 import PageTransition from './components/animations/PageTransition'
 import { ImpersonateUserProvider } from './contexts/ImpersonateUserContext'
-import SSEProvider from './contexts/SSEContext'
 import { AuthProvider } from './hooks/useAuth.jsx'
+
+import useStatusBar from './hooks/useStatusBar'
+import { useResource } from './queries/ResourceQueries'
+import './styles/safe-area.css'
+
+import SSEProvider from './contexts/SSEContext'
 import { useNotification } from './service/NotificationProvider'
 
 import { useSyncOnReconnect } from './hooks/useSyncOnReconnect'
@@ -25,19 +29,16 @@ const remove = className => {
 // TODO: Update the interval to at 60 minutes
 const intervalMS = 5 * 60 * 1000 // 5 minutes
 
-const startOpenReplay = () => {
-  if (!import.meta.env.VITE_OPENREPLAY_PROJECT_KEY) return
-  const tracker = new Tracker({
-    projectKey: import.meta.env.VITE_OPENREPLAY_PROJECT_KEY,
-  })
-  tracker.start()
-}
-
 const AppContent = () => {
   const { showNotification } = useNotification()
   useSyncOnReconnect()
 
+  // Initialize status bar with theme-aware configuration
+  useStatusBar()
+
+
   const {
+    offlineReady: [offlineReady, setOfflineReady], // eslint-disable-line no-unused-vars
     needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
   } = useRegisterSW({
@@ -96,9 +97,10 @@ const AppContent = () => {
 }
 
 function App() {
-  // startOpenReplay()
-
+  const resource = useResource() // eslint-disable-line no-unused-vars
   const { mode, systemMode } = useColorScheme()
+
+  // startOpenReplay()
 
   const setThemeClass = useCallback(() => {
     const value = JSON.parse(localStorage.getItem('themeMode')) || mode
@@ -126,7 +128,7 @@ function App() {
   }, [])
 
   return (
-    <>
+    <div>
       <NetworkBanner />
 
       <AuthProvider>
@@ -134,7 +136,7 @@ function App() {
           <AppContent />
         </SSEProvider>
       </AuthProvider>
-    </>
+    </div>
   )
 }
 

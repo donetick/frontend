@@ -30,6 +30,7 @@
     "ionic:build": "npm run build",
     "ionic:serve": "npm run start",
     "android": "npm run build && npx cap sync android",
+    "cap": "npm run build && npx cap sync",
     "bump": "node bump-version.js",
     "bump:minor": "node bump-version.js minor",
     "bump:major": "node bump-version.js major"
@@ -104,6 +105,7 @@
     "@vitejs/plugin-react-swc": "^3.5.0",
     "autoprefixer": "^10.4.16",
     "baseline-browser-mapping": "^2.9.19",
+    "capacitor-set-version": "^2.2.0",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.2",

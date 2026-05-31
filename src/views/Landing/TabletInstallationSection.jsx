@@ -1,5 +1,6 @@
 import ipad_screenshot from '@/assets/ipad_dashbard_calendar.png'
 import { Box, Container, Typography } from '@mui/joy'
+
 const TabletInstallationSection = () => {
   return (
     <Container maxWidth='xl' sx={{ py: { xs: 6, sm: 8, md: 12 } }}>
