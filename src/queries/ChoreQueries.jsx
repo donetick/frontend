@@ -191,13 +191,7 @@ export const useCreateChore = () => {
         if (!createdChore) {
           throw new Error('Failed to get created chore data')
         }
-        // Successfully created the chore on the server, return the created chore
-        // update the local chores cache with the new chore:
-        queryClient.setQueryData(['chores', false], oldData => {
-          if (!oldData) return { res: [createdChore.res] }
-          return { res: [...oldData.res, createdChore.res] }
-        })
-        return createdChore.res
+        return { ...newTask, id: createdChore.res }
       } catch (error) {
         if (isNetworkError(error)) {
           return queueOfflineCreate(newTask)
@@ -258,7 +252,7 @@ export const useUpdateChore = () => {
             ),
           }
         })
-        return updatedChoreRes?.res || updatedChoreRes
+        return updatedChoreRes?.res || updatedChore
       } catch (error) {
         if (isNetworkError(error)) {
           return queueOfflineUpdate()
