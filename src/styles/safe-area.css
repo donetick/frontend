@@ -1,0 +1,127 @@
+/* 
+ * Safe Area CSS Utilities
+ * These utilities provide consistent safe area handling across the app
+ * using CSS custom properties set by StatusBarManager
+ */
+
+:root {
+  /* Fallback values for safe area insets when not on native platforms */
+  --safe-area-inset-top: 0px;
+  --safe-area-inset-right: 0px;
+  --safe-area-inset-bottom: 0px;
+  --safe-area-inset-left: 0px;
+}
+
+/* Utility classes for safe area handling */
+.safe-area-top {
+  padding-top: var(--safe-area-inset-top);
+}
+
+.safe-area-right {
+  padding-right: var(--safe-area-inset-right);
+}
+
+.safe-area-bottom {
+  padding-bottom: var(--safe-area-inset-bottom);
+}
+
+.safe-area-left {
+  padding-left: var(--safe-area-inset-left);
+}
+
+.safe-area-x {
+  padding-left: var(--safe-area-inset-left);
+  padding-right: var(--safe-area-inset-right);
+}
+
+.safe-area-y {
+  padding-top: var(--safe-area-inset-top);
+  padding-bottom: var(--safe-area-inset-bottom);
+}
+
+.safe-area-all {
+  padding-top: var(--safe-area-inset-top);
+  padding-right: var(--safe-area-inset-right);
+  padding-bottom: var(--safe-area-inset-bottom);
+  padding-left: var(--safe-area-inset-left);
+}
+
+/* Margin variants */
+.safe-margin-top {
+  margin-top: var(--safe-area-inset-top);
+}
+
+.safe-margin-right {
+  margin-right: var(--safe-area-inset-right);
+}
+
+.safe-margin-bottom {
+  margin-bottom: var(--safe-area-inset-bottom);
+}
+
+.safe-margin-left {
+  margin-left: var(--safe-area-inset-left);
+}
+
+.safe-margin-x {
+  margin-left: var(--safe-area-inset-left);
+  margin-right: var(--safe-area-inset-right);
+}
+
+.safe-margin-y {
+  margin-top: var(--safe-area-inset-top);
+  margin-bottom: var(--safe-area-inset-bottom);
+}
+
+.safe-margin-all {
+  margin-top: var(--safe-area-inset-top);
+  margin-right: var(--safe-area-inset-right);
+  margin-bottom: var(--safe-area-inset-bottom);
+  margin-left: var(--safe-area-inset-left);
+}
+
+/* Height utilities that account for safe areas */
+.min-h-screen-safe {
+  min-height: calc(100vh - var(--safe-area-inset-top) - var(--safe-area-inset-bottom));
+}
+
+.h-screen-safe {
+  height: calc(100vh - var(--safe-area-inset-top) - var(--safe-area-inset-bottom));
+}
+
+/* Top positioning that accounts for safe area */
+.top-safe {
+  top: var(--safe-area-inset-top);
+}
+
+/* Bottom positioning that accounts for safe area */
+.bottom-safe {
+  bottom: var(--safe-area-inset-bottom);
+}
+
+/* Fixed positioning utilities that respect safe areas */
+.fixed-top-safe {
+  position: fixed;
+  top: var(--safe-area-inset-top);
+  left: 0;
+  right: 0;
+  z-index: 1030;
+}
+
+.fixed-bottom-safe {
+  position: fixed;
+  bottom: var(--safe-area-inset-bottom);
+  left: 0;
+  right: 0;
+  z-index: 1030;
+}
+
+/* Container that provides full safe area coverage */
+.container-safe {
+  padding-top: var(--safe-area-inset-top);
+  padding-right: var(--safe-area-inset-right);
+  padding-bottom: var(--safe-area-inset-bottom);
+  padding-left: var(--safe-area-inset-left);
+  min-height: 100vh;
+  box-sizing: border-box;
+}

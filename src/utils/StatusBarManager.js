@@ -26,7 +26,7 @@ class StatusBarManager {
     }
 
     try {
-      // Configure basic status bar settings - use overlay: true for precise control
+      // Configure basic status bar settings
       await StatusBar.setOverlaysWebView({ overlay: false })
       await StatusBar.show()
 
