@@ -36,6 +36,7 @@ const AppContent = () => {
   // Initialize status bar with theme-aware configuration
   useStatusBar()
 
+
   const {
     offlineReady: [offlineReady, setOfflineReady], // eslint-disable-line no-unused-vars
     needRefresh: [needRefresh, setNeedRefresh],
