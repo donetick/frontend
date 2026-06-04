@@ -530,7 +530,7 @@ export const useChoreActions = ({
     setConfirmModelConfig({
       isOpen: true,
       title: t('chores:actionFeedback.bulk.completeTitle'),
-      confirmText: t('common:actions.complete', { defaultValue: 'Complete' }),
+      confirmText: t('common:actions.complete'),
       cancelText: t('common:actions.cancel'),
       message: t('chores:actionFeedback.bulk.completeConfirm', {
         count: selectedData.length,

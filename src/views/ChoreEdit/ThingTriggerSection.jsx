@@ -85,6 +85,14 @@ const ThingTriggerSection = ({
     }
   }, [selectedThing, condition, triggerState])
 
+  const getTranslatedType = type =>
+    t(`things:page.types.${type}`, { defaultValue: type })
+
+  const getTranslatedState = state =>
+    state === 'true' || state === 'false'
+      ? t(`things:page.states.${state}`)
+      : state
+
   return (
     <Card sx={{ mt: 1 }}>
       <Typography level='h5'>{t('things:trigger.title')}</Typography>
@@ -128,10 +136,10 @@ const ThingTriggerSection = ({
                 <Box>
                   <Typography level='body2' textColor='text.secondary'>
                     <Chip>
-                      {t('things:trigger.type')}: {option.type}
+                      {t('things:trigger.type')}: {getTranslatedType(option.type)}
                     </Chip>{' '}
                     <Chip>
-                      {t('things:trigger.state')}: {option.state}
+                      {t('things:trigger.state')}: {getTranslatedState(option.state)}
                     </Chip>
                   </Typography>
                 </Box>

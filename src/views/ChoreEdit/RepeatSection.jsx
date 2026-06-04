@@ -301,7 +301,9 @@ const RepeatOnSections = ({
                       label={
                         value === 'every_week'
                           ? t('chores:repeat.everyWeek')
-                          : t('chores:repeat.weekOfMonth')
+                          : value === 'week_of_month'
+                            ? t('chores:repeat.weekOfMonth')
+                            : label
                       }
                       variant='soft'
                     />
