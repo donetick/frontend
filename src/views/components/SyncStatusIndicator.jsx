@@ -70,6 +70,7 @@ function SyncStatusIndicator() {
   })
   const [isOnline, setIsOnline] = useState(networkManager.isOnline)
   const [offlineSince, setOfflineSince] = useState(networkManager.offlineSince)
+  const [offlineReason, setOfflineReason] = useState(networkManager.offlineReason)
   const [retryIn, setRetryIn] = useState(RETRY_INTERVAL)
   const [offlineFeatureEnabled, setOfflineFeatureEnabled] = useState(
     isOfflineFeatureEnabled(),
@@ -96,17 +97,21 @@ function SyncStatusIndicator() {
   useEffect(() => {
     networkManager.registerNetworkListener(online => {
       setIsOnline(online)
+      setOfflineReason(networkManager.offlineReason)
       if (!online) setOfflineSince(networkManager.offlineSince)
     })
   }, [])
 
   useEffect(() => {
-    if (!isOnline || syncState.syncing) return
+    // Run countdown both when online (pending commands) and when server-unreachable (probe interval)
+    if (syncState.syncing) return
+    if (isOnline && pendingCommands.length === 0) return
+    if (!isOnline && offlineReason === 'device') return
     const interval = setInterval(() => {
       setRetryIn(prev => (prev <= 1 ? RETRY_INTERVAL : prev - 1))
     }, 1000)
     return () => clearInterval(interval)
-  }, [isOnline, syncState.syncing, syncState.lastSync])
+  }, [isOnline, offlineReason, syncState.syncing, syncState.lastSync, pendingCommands.length])
 
   useEffect(() => {
     const update = async () => {
@@ -461,7 +466,19 @@ function SyncStatusIndicator() {
             </Typography>
           </Box>
         )}
-        {!isOnline && (
+        {!isOnline && offlineReason === 'server' && (
+          <Box sx={{ px: 1, pb: 0.5 }}>
+            <Typography
+              level='body-xs'
+              sx={{ color: 'var(--joy-palette-text-tertiary)' }}
+            >
+              {syncState.syncing
+                ? 'Checking server...'
+                : `Retrying in ${retryIn}s`}
+            </Typography>
+          </Box>
+        )}
+        {!isOnline && offlineReason !== 'server' && (
           <Box sx={{ px: 1, pb: 0.5 }}>
             <Typography
               level='body-xs'

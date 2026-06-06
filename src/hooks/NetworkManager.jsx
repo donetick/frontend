@@ -1,45 +1,81 @@
 import { Network } from '@capacitor/network'
+import { isOfflineFeatureEnabled } from '../utils/OfflineFeatureToggle'
 
 class NetworkManager {
   constructor() {
-    this.isOnline = true
-    this.isNetworkOn = null
-    this.init()
+    this.deviceOnline = true
+    this.serverReachable = true
+    this.offlineReason = null // 'device' | 'server' | null
     this.connectionStatusListeners = []
     this.queueSyncListeners = []
     this.lastChecked = null
     this.offlineSince = null
+    this.init()
   }
+
+  // Effective online status: both device network AND server must be reachable
+  get isOnline() {
+    return this.deviceOnline && this.serverReachable
+  }
+
+  // Alias for backward compatibility (DeveloperSettings uses this)
+  get isNetworkOn() {
+    return this.deviceOnline
+  }
+
   async init() {
     const status = await Network.getStatus()
-    this.isNetworkOn = status.connected
+    this.deviceOnline = status.connected
     this.lastChecked = Date.now()
+    if (!status.connected) {
+      this.offlineReason = 'device'
+      this.offlineSince = Date.now()
+    }
 
     Network.addListener('networkStatusChange', status => {
-      if (this.isNetworkOn !== status.connected) {
-        this.isNetworkOn = status.connected
+      if (this.deviceOnline !== status.connected) {
+        this.deviceOnline = status.connected
         this.lastChecked = Date.now()
-        this.isOnline = status.connected
+
         if (!status.connected) {
+          this.offlineReason = 'device'
           this.offlineSince = Date.now()
+        } else {
+          // Device came back online — update reason based on server state
+          this.offlineReason = this.serverReachable ? null : 'server'
         }
         this.notifyConnectionStatus()
       }
     })
   }
 
-  setOffline() {
-    if (this.isOnline === true) {
-      this.isOnline = false
+  // Called when a fetch() response is received (any HTTP status = server is up)
+  setServerReachable() {
+    if (!this.serverReachable) {
+      this.serverReachable = true
+      this.offlineReason = this.deviceOnline ? null : 'device'
       this.notifyConnectionStatus()
-      this.offlineSince = Date.now() // Record the time when we went offline
     }
   }
-  setOnline() {
-    if (this.isOnline === false) {
-      this.isOnline = true
+
+  // Called when fetch() throws a network error (server unreachable)
+  // Only takes effect when offline mode is enabled
+  setServerUnreachable() {
+    if (!isOfflineFeatureEnabled()) return
+    if (this.serverReachable) {
+      this.serverReachable = false
+      this.offlineReason = 'server'
+      this.offlineSince = Date.now()
       this.notifyConnectionStatus()
     }
+  }
+
+  // Legacy methods kept for compatibility
+  setOffline() {
+    this.setServerUnreachable()
+  }
+  setOnline() {
+    this.setServerReachable()
   }
 
   notifyConnectionStatus() {
@@ -63,7 +99,6 @@ class NetworkManager {
     )
   }
   registerBackendSyncListener(callback) {
-    // if callback is not in the list already, add it
     if (!this.queueSyncListeners.includes(callback)) {
       this.queueSyncListeners.push(callback)
     }

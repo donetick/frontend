@@ -55,6 +55,8 @@ class SyncEngine {
       // Step 3: Delta sync from server
       await this._deltaSync()
 
+      // Sync succeeded — server is reachable (only sync success restores online status)
+      networkManager.setServerReachable()
       this._notify({ syncing: false, lastSync: Date.now() })
       return true
     } catch (err) {
@@ -182,7 +184,7 @@ class SyncEngine {
     let hasMore = true
     let currentCursor = cursor
 
-    while (hasMore && networkManager.isOnline) {
+    while (hasMore && networkManager.deviceOnline) {
       // Use apiClient.get which handles auth and returns a fetch Response
       const response = await apiClient.get(
         `/sync/changes?since=${currentCursor}`,
