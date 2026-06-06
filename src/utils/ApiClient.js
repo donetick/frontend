@@ -11,6 +11,7 @@ class ApiClient {
   constructor() {
     this.customServerURL = `${API_URL}/api/v1`
     this.isRefreshing = false
+    this.refreshPromise = null
     this.failedQueue = []
     this.lastRefreshTime = 0
     this.refreshCooldown = 3 * 1000 // 3 seconds in milliseconds
@@ -44,6 +45,20 @@ class ApiClient {
   }
 
   async refreshToken() {
+    if (this.refreshPromise) {
+      return this.refreshPromise
+    }
+
+    this.isRefreshing = true
+    this.refreshPromise = this._refreshToken().finally(() => {
+      this.isRefreshing = false
+      this.refreshPromise = null
+    })
+
+    return this.refreshPromise
+  }
+
+  async _refreshToken() {
     // Check if refresh token is expired BEFORE attempting refresh
     const refreshExpired = await isRefreshTokenExpired()
     if (refreshExpired) {
@@ -55,17 +70,15 @@ class ApiClient {
       return { success: false, error: 'Refresh token expired' }
     }
 
-    if (this.isRefreshing) {
-      return { success: false, error: 'Already refreshing' }
-    }
-
     // Check cooldown
     const now = Date.now()
     if (now - this.lastRefreshTime < this.refreshCooldown) {
-      return { success: false, error: 'Refresh cooldown active' }
+      const currentToken = this.getToken()
+      if (currentToken) {
+        return { success: true, token: currentToken }
+      }
+      return { success: false, error: 'No token available' }
     }
-
-    this.isRefreshing = true
 
     try {
       const refreshReq = await RefreshToken()
@@ -91,8 +104,6 @@ class ApiClient {
       }
     } catch (error) {
       return { success: false, error: error.message }
-    } finally {
-      this.isRefreshing = false
     }
   }
 
@@ -182,33 +193,12 @@ class ApiClient {
           })
         })
 
-        // If already refreshing, just return the queued promise
-        if (this.isRefreshing) {
-          console.log('Token refresh already in progress, queueing request')
-          return queuedPromise
-        }
-
         // Attempt to refresh the token
         const refreshResult = await this.refreshToken()
 
         if (refreshResult.success) {
           // Process queue with success - this will retry all queued requests
           this.processQueue(null, refreshResult.token)
-        } else if (refreshResult.error === 'Refresh cooldown active') {
-          // We're in cooldown - token was just refreshed, retry with current token
-          console.log('Refresh cooldown - retrying with current token')
-          const currentToken = this.getToken()
-          if (currentToken) {
-            this.processQueue(null, currentToken)
-          } else {
-            this.processQueue(new Error('No token available'), null)
-            this.handleLogout()
-            return null
-          }
-        } else if (refreshResult.error === 'Already refreshing') {
-          // This shouldn't happen since we check isRefreshing above, but handle it anyway
-          console.log('Already refreshing - waiting for refresh to complete')
-          return queuedPromise
         } else {
           // Actual refresh failure - logout
           this.processQueue(new Error(refreshResult.error), null)
