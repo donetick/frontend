@@ -26,17 +26,32 @@ class SQLiteBackend {
   constructor() {
     this.db = null
     this.initialized = false
+    this._initPromise = null
   }
 
   async init() {
     if (this.initialized) return
+    // Return the in-flight promise if init is already underway (prevents double createConnection)
+    if (this._initPromise) return this._initPromise
 
-    this.db = await CapacitorSQLite.createConnection({
-      database: DB_NAME,
-      version: DB_VERSION,
-      encrypted: false,
-      mode: 'no-encryption',
+    this._initPromise = this._doInit().finally(() => {
+      this._initPromise = null
     })
+    return this._initPromise
+  }
+
+  async _doInit() {
+    try {
+      this.db = await CapacitorSQLite.createConnection({
+        database: DB_NAME,
+        version: DB_VERSION,
+        encrypted: false,
+        mode: 'no-encryption',
+      })
+    } catch (err) {
+      // Connection already open (e.g. React StrictMode double-mount) — reuse it
+      if (!err?.message?.includes('already exists')) throw err
+    }
     await CapacitorSQLite.open({ database: DB_NAME })
 
     await CapacitorSQLite.execute({

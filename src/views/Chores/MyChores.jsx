@@ -14,6 +14,7 @@ import {
   ViewAgenda,
   ViewModule,
 } from '@mui/icons-material'
+import Logo from '../../Logo'
 import {
   Accordion,
   AccordionDetails,
@@ -1604,6 +1605,7 @@ const MyChores = () => {
             />
           </IconButton>
           <IconButton
+            data-testid='open-add-task-modal'
             color='primary'
             variant='soft'
             sx={{

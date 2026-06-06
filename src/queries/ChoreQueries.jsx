@@ -58,7 +58,8 @@ const mergePendingCreates = async chores => {
 }
 
 const isNetworkError = error =>
-  error instanceof TypeError && error.message === 'Failed to fetch'
+  (error instanceof TypeError && error.message === 'Failed to fetch') ||
+  error?.name === 'AbortError'
 
 const buildOfflineChore = task => ({
   ...task,
@@ -571,7 +572,45 @@ export const useMarkChoreComplete = () => {
         })
         return { res: { _pending: 'complete' } }
       }
-      return MarkChoreComplete(choreId, body, completedDate, performer)
+
+      const queueOfflineComplete = async () => {
+        await commandQueue.enqueue(CommandType.COMPLETE_CHORE, choreId, {
+          id: choreId,
+          body,
+          completedDate,
+          performer,
+        })
+        await offlineDB.savePendingHistory({
+          id: -Date.now(),
+          choreId: Number(choreId),
+          completedBy: body?.completedBy || 0,
+          performedAt: completedDate || new Date().toISOString(),
+          notes: body?.note || null,
+          status: 1,
+          points: 0,
+          pending: true,
+        })
+        queryClient.setQueryData(['chores'], oldData => {
+          if (!oldData) return oldData
+          return {
+            res: oldData.res.map(chore =>
+              chore.id === choreId
+                ? { ...chore, _pending: 'complete' }
+                : chore,
+            ),
+          }
+        })
+        return { res: { _pending: 'complete' } }
+      }
+
+      try {
+        return await MarkChoreComplete(choreId, body, completedDate, performer)
+      } catch (error) {
+        if (isNetworkError(error)) {
+          return queueOfflineComplete()
+        }
+        throw error
+      }
     },
     onSuccess: (_, { choreId }) => {
       queryClient.invalidateQueries(['chores'])
@@ -602,7 +641,26 @@ export const useSkipChore = () => {
         })
         return { res: { _pending: 'skip' } }
       }
-      return SkipChore(choreId)
+
+      try {
+        return await SkipChore(choreId)
+      } catch (error) {
+        if (isNetworkError(error)) {
+          await commandQueue.enqueue(CommandType.SKIP_CHORE, choreId, {
+            id: choreId,
+          })
+          queryClient.setQueryData(['chores'], oldData => {
+            if (!oldData) return oldData
+            return {
+              res: oldData.res.map(chore =>
+                chore.id === choreId ? { ...chore, _pending: 'skip' } : chore,
+              ),
+            }
+          })
+          return { res: { _pending: 'skip' } }
+        }
+        throw error
+      }
     },
     onSuccess: (_, choreId) => {
       queryClient.invalidateQueries(['chores'])
