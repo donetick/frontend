@@ -11,7 +11,7 @@ import Modal from '@mui/joy/Modal'
 import ModalDialog from '@mui/joy/ModalDialog'
 import { useQueryClient } from '@tanstack/react-query'
 import imageCompression from 'browser-image-compression'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Cropper from 'react-easy-crop'
 import { useTranslation } from 'react-i18next'
 import { useUserProfile } from '../../queries/UserQueries'
@@ -40,6 +40,16 @@ const ProfileSettings = () => {
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null)
   const [showCropper, setShowCropper] = useState(false)
   const [selectedFile, setSelectedFile] = useState(null)
+
+  useEffect(() => {
+    if (!userProfile) return
+
+    setDisplayName(userProfile.displayName || '')
+    setTimezone(
+      userProfile.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+    )
+    setPhotoURL(userProfile.image || '')
+  }, [userProfile])
 
   // Get available timezones
   const timezones = Intl.supportedValuesOf('timeZone')
