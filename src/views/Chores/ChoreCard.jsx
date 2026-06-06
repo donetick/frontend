@@ -77,11 +77,19 @@ const ChoreCard = ({
       return <Repeat />
     }
   }
+  const getFirstGrapheme = str => {
+    if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+      const segments = [...new Intl.Segmenter().segment(str)]
+      return segments[0]?.segment ?? ''
+    }
+    return Array.from(str)[0] ?? ''
+  }
+
   const getName = name => {
-    const split = Array.from(chore.name)
-    // if the first character is emoji then remove it from the name
-    if (isNaN(Number(split[0])) && /\p{Emoji}/u.test(split[0])) {
-      return split.slice(1).join('').trim()
+    const firstGrapheme = getFirstGrapheme(name)
+    // Strip leading emoji used as icon, but never strip plain digits
+    if (firstGrapheme && !/^\d+$/.test(firstGrapheme) && /\p{Emoji}/u.test(firstGrapheme)) {
+      return name.slice(firstGrapheme.length).trimStart()
     }
     return name
   }
@@ -207,7 +215,7 @@ const ChoreCard = ({
               {/* Box in top right with Chip showing next due date  */}
               <Box display='flex' justifyContent='start' alignItems='center'>
                 <Avatar sx={{ mr: 1, fontSize: 22 }}>
-                  {Array.from(chore.name)[0]}
+                  {getFirstGrapheme(chore.name)}
                 </Avatar>
                 <Box display='flex' flexDirection='column'>
                   <Typography level='title-md'>
