@@ -158,8 +158,8 @@ const ChoreView = () => {
     document.title = 'Donetick: ' + choreData.res.name
 
     setPerformers(circleMembersData.res)
-    const auto_complete = searchParams.get('auto_complete')
-    if (auto_complete === 'true') {
+    if (searchParams.get('auto_complete') === 'true') {
+      navigate({ search: '' }, { replace: true })
       handleTaskCompletion()
     }
   }, [choreData, circleMembersData])
