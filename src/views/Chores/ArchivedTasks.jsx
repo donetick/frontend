@@ -4,6 +4,9 @@ import {
   CheckBoxOutlineBlank,
   Close,
   Delete,
+  Label,
+  Person,
+  PriorityHigh,
   SelectAll,
   Unarchive,
   ViewAgenda,
@@ -21,14 +24,17 @@ import {
   Typography,
 } from '@mui/joy'
 import Fuse from 'fuse.js'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import FilterBar from '../../components/common/FilterBar'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
+import { useFilter } from '../../hooks/useFilter'
 import { useUnArchiveChore } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { DeleteChore, GetArchivedChores } from '../../utils/Fetcher'
+import Priorities from '../../utils/Priorities'
 import LoadingComponent from '../components/Loading'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import ChoreCard from './ChoreCard'
@@ -60,6 +66,95 @@ const ArchivedTasks = () => {
   const [confirmModelConfig, setConfirmModelConfig] = useState({})
 
   const { data: membersData, isLoading: membersLoading } = useCircleMembers()
+
+  // Unique labels present across all archived chores
+  const availableLabels = useMemo(() => {
+    const seen = {}
+    archivedChores.forEach(c => {
+      c.labelsV2?.forEach(l => { seen[l.id] = l })
+    })
+    return Object.values(seen)
+  }, [archivedChores])
+
+  const filterDefs = useMemo(
+    () => [
+      {
+        id: 'assignee',
+        label: 'Assignee',
+        type: 'multi-select',
+        icon: <Person />,
+        options: performers.map(p => ({
+          value: p.userId,
+          label: p.displayName,
+          avatar: p.image,
+        })),
+        filterFn: (item, values) => values.includes(item.assignedTo),
+      },
+      {
+        id: 'priority',
+        label: 'Priority',
+        type: 'multi-select',
+        icon: <PriorityHigh />,
+        options: Priorities.map(p => ({
+          value: p.value,
+          label: p.name,
+          color: p.color || 'neutral',
+          icon: p.icon,
+        })),
+        filterFn: (item, values) => values.includes(item.priority ?? 0),
+      },
+      ...(availableLabels.length > 0
+        ? [
+            {
+              id: 'label',
+              label: 'Labels',
+              type: 'multi-select',
+              icon: <Label />,
+              options: availableLabels.map(l => ({
+                value: l.id,
+                label: l.name,
+                icon: (
+                  <Box
+                    component='span'
+                    sx={{
+                      display: 'inline-block',
+                      width: 10,
+                      height: 10,
+                      borderRadius: '50%',
+                      bgcolor: l.color || '#90a4ae',
+                      flexShrink: 0,
+                    }}
+                  />
+                ),
+              })),
+              filterFn: (item, values) =>
+                item.labelsV2?.some(l => values.includes(l.id)) ?? false,
+            },
+          ]
+        : []),
+      {
+        id: 'archivedAt',
+        label: 'Archived Date',
+        type: 'date-range',
+        icon: <Archive />,
+        filterFn: (item, value) => {
+          const date = new Date(item.updatedAt)
+          if (value.from && date < new Date(value.from)) return false
+          if (value.to && date > new Date(value.to)) return false
+          return true
+        },
+      },
+    ],
+    [performers, availableLabels],
+  )
+
+  const {
+    filteredData: finalChores,
+    activeFilters,
+    setFilter,
+    clearAll,
+    hasActiveFilters,
+  } = useFilter(filteredChores, filterDefs)
 
   useEffect(() => {
     const loadArchivedChores = async () => {
@@ -280,11 +375,8 @@ const ArchivedTasks = () => {
   }
 
   const selectAllVisibleChores = () => {
-    const visibleChores =
-      searchTerm?.length > 0 ? filteredChores : archivedChores
-    if (visibleChores.length > 0) {
-      const allIds = new Set(visibleChores.map(chore => chore.id))
-      setSelectedChores(allIds)
+    if (finalChores.length > 0) {
+      setSelectedChores(new Set(finalChores.map(c => c.id)))
     }
   }
 
@@ -605,6 +697,15 @@ const ArchivedTasks = () => {
         </Box>
       </Box>
 
+      <FilterBar
+        filterDefs={filterDefs}
+        activeFilters={activeFilters}
+        onSetFilter={setFilter}
+        onClearAll={clearAll}
+        resultCount={finalChores.length}
+        totalCount={filteredChores.length}
+      />
+
       {/* Multi-select Toolbar */}
       {isMultiSelectMode && (
         <Box
@@ -677,7 +778,7 @@ const ArchivedTasks = () => {
                   variant='outlined'
                   onClick={selectAllVisibleChores}
                   startDecorator={<SelectAll />}
-                  disabled={selectedChores.size === filteredChores.length}
+                  disabled={selectedChores.size === finalChores.length}
                   sx={{
                     minWidth: 'auto',
                     '--Button-paddingInline': '0.75rem',
@@ -808,7 +909,7 @@ const ArchivedTasks = () => {
       )}
 
       {/* Content */}
-      {filteredChores.length === 0 ? (
+      {finalChores.length === 0 ? (
         <Box
           sx={{
             display: 'flex',
@@ -818,42 +919,43 @@ const ArchivedTasks = () => {
             height: '50vh',
           }}
         >
-          <Archive
-            sx={{
-              fontSize: '4rem',
-              mb: 1,
-              color: 'text.tertiary',
-            }}
-          />
+          <Archive sx={{ fontSize: '4rem', mb: 1, color: 'text.tertiary' }} />
           <Typography level='title-md' gutterBottom>
-            {searchTerm ? 'No archived tasks found' : 'No archived tasks'}
+            {searchTerm || hasActiveFilters
+              ? 'No archived tasks found'
+              : 'No archived tasks'}
           </Typography>
           <Typography level='body-sm' color='text.secondary' sx={{ mb: 2 }}>
-            {searchTerm
-              ? 'Try adjusting your search terms'
+            {searchTerm || hasActiveFilters
+              ? 'Try adjusting your search or filters'
               : 'Archived tasks will appear here when you archive them from the main task list'}
           </Typography>
-          {searchTerm && (
-            <Button
-              onClick={handleSearchClose}
-              variant='outlined'
-              color='neutral'
-            >
-              Clear search
-            </Button>
+          {(searchTerm || hasActiveFilters) && (
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              {searchTerm && (
+                <Button onClick={handleSearchClose} variant='outlined' color='neutral'>
+                  Clear search
+                </Button>
+              )}
+              {hasActiveFilters && (
+                <Button onClick={clearAll} variant='outlined' color='neutral'>
+                  Clear filters
+                </Button>
+              )}
+            </Box>
           )}
         </Box>
       ) : (
         <Box>
           <Typography level='body-sm' color='text.secondary' sx={{ mb: 2 }}>
-            {filteredChores.length} archived task
-            {filteredChores.length !== 1 ? 's' : ''}
+            {finalChores.length} archived task
+            {finalChores.length !== 1 ? 's' : ''}
             {searchTerm && ` matching "${searchTerm}"`}
           </Typography>
 
           <List sx={{ gap: viewMode === 'compact' ? 0 : 1 }}>
             <ChoreListView
-              chores={filteredChores}
+              chores={finalChores}
               // viewOnly={true}
               showActions={false}
               viewMode={viewMode}
