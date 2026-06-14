@@ -268,7 +268,6 @@ const MyChores = () => {
 
   const {
     filteredData: quickFilteredChores,
-    activeFilters: quickFilters,
     setFilter: setQuickFilter,
     clearAll: clearQuickFilters,
     hasActiveFilters: hasQuickFilters,
@@ -948,30 +947,37 @@ const MyChores = () => {
           tempFilterMeta={tempFilterMeta}
         />
         <ChoreToolbar
-          filterDefs={quickFilterDefs}
-          activeFilters={quickFilters}
-          onSetFilter={(id, value) => {
-            clearActiveFilter()
-            setQuickFilter(id, value)
-            setSelectedCalendarDate(null)
-          }}
+          members={membersData?.res || []}
+          labels={userLabels || []}
+          projects={projectsWithDefault}
+          tempFilter={tempFilter}
+          applyTempFilter={applyTempFilter}
+          clearTempFilter={clearTempFilter}
+          saveFilter={saveFilter}
+          onFilterSaved={name =>
+            showSuccess({
+              title: 'Filter Saved',
+              message: `"${name}" has been saved`,
+            })
+          }
           onClearAllFilters={() => {
             clearQuickFilters()
             clearActiveFilter()
             setSelectedChoreFilterWithCache('anyone')
-            setSelectedProjectWithCache(projectsWithDefault.find(p => p.id === 'default') || null)
+            setSelectedProjectWithCache(
+              projectsWithDefault.find(p => p.id === 'default') || null,
+            )
             updateFilterUrl(null, null)
           }}
           resultCount={
-            hasQuickFilters || !!activeFilterId ? getFilteredChores.length : undefined
+            hasQuickFilters || hasFilterApplied
+              ? getFilteredChores.length
+              : undefined
           }
           totalCount={
-            hasQuickFilters || !!activeFilterId ? projectFilteredChores.length : undefined
-          }
-          projects={
-            !hasProjectConditions && !hasFilterApplied
-              ? projectsWithDefault
-              : []
+            hasQuickFilters || hasFilterApplied
+              ? projectFilteredChores.length
+              : undefined
           }
           selectedProject={selectedProject}
           onProjectSelect={project => {
@@ -1013,10 +1019,6 @@ const MyChores = () => {
           }}
           onSavedFilterDelete={deleteFilter}
           onSavedFilterPin={pinFilter}
-          onCreateAdvancedFilter={() => {
-            setShowAdvancedFilterBuilder(true)
-            setEditingFilter(null)
-          }}
           selectedGroupBy={selectedChoreSection}
           onGroupBySelect={value => {
             setSelectedChoreSectionWithCache(value)
