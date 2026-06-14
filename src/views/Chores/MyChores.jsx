@@ -2,15 +2,10 @@ import {
   Add,
   Bolt,
   CalendarMonth,
-  CheckBox,
-  CheckBoxOutlineBlank,
   EditCalendar,
   ExpandCircleDown,
   PriorityHigh,
-  Sort,
   Style,
-  ViewAgenda,
-  ViewModule,
 } from '@mui/icons-material'
 import {
   Accordion,
@@ -37,7 +32,6 @@ import IconButtonWithMenu from './IconButtonWithMenu'
 
 import { useMediaQuery } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
-import FilterBar from '../../components/common/FilterBar'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import { useFilter } from '../../hooks/useFilter'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
@@ -52,15 +46,13 @@ import { getSafeBottom } from '../../utils/SafeAreaUtils.js'
 import TaskInput from '../components/AddTaskModal'
 import CalendarDual from '../components/CalendarDual'
 import CalendarMonthly from '../components/CalendarMonthly.jsx'
-import ProjectSelector from '../components/ProjectSelector'
 import AdvancedFilterBuilder from '../Modals/Inputs/AdvancedFilterBuilder'
 import { useProjects } from '../Projects/ProjectQueries.js'
 import ChoreListView from './ChoreListView.jsx'
+import ChoreToolbar from './components/ChoreToolbarPrototype'
 import ChoreModals from './components/ChoreModals'
-import FilterSection from './components/FilterSection'
 import MultiSelectToolbar from './components/MultiSelectToolbar'
 import MyChoreHeader from './components/MyChoreHeader'
-import SearchBar from './components/SearchBar'
 import { useChoreActions } from './hooks/useChoreActions'
 import { useChoreFilters } from './hooks/useChoreFilters'
 import { useChoreModals } from './hooks/useChoreModals'
@@ -75,7 +67,6 @@ import {
 import NotificationAccessSnackbar from './NotificationAccessSnackbar'
 import Sidepanel from './Sidepanel'
 import { INSIGHT_FILTER_DEFS } from './SmartInsightsCard'
-import SortAndGrouping from './SortAndGrouping'
 
 const MyChores = () => {
   const { data: userProfile, isLoading: isUserProfileLoading } =
@@ -790,14 +781,13 @@ const MyChores = () => {
     localStorage.setItem('openChoreSections', JSON.stringify(value))
   }
 
-  const toggleViewMode = () => {
-    const modes = ['default', 'compact', 'calendar']
-    const currentIndex = modes.indexOf(viewMode)
-    const nextIndex = (currentIndex + 1) % modes.length
-    const newMode = modes[nextIndex]
+  const toggleViewMode = value => {
+    const newMode = value ?? (() => {
+      const modes = ['default', 'compact', 'calendar']
+      return modes[(modes.indexOf(viewMode) + 1) % modes.length]
+    })()
     setViewMode(newMode)
     localStorage.setItem('choreCardViewMode', newMode)
-
     if (newMode !== 'calendar') {
       setSelectedCalendarDate(null)
     }
@@ -957,126 +947,7 @@ const MyChores = () => {
           tempFilter={tempFilter}
           tempFilterMeta={tempFilterMeta}
         />
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignContent: 'center',
-            alignItems: 'center',
-            gap: 0.5,
-          }}
-        >
-          <SearchBar
-            value={searchTerm}
-            onChange={handleSearchChange}
-            onClose={handleSearchClose}
-            showKeyboardShortcuts={showKeyboardShortcuts}
-            inputRef={searchInputRef}
-          />
-
-          <SortAndGrouping
-            title='Group by'
-            k={'icon-menu-group-by'}
-            icon={<Sort />}
-            selectedItem={selectedChoreSection}
-            selectedFilter={selectedChoreFilter}
-            setFilter={filter => {
-              setSelectedChoreFilterWithCache(filter)
-              // Clear active custom filter when quick filter is applied
-              if (activeFilterId) {
-                clearActiveFilter()
-                updateFilterUrl(null, null)
-              }
-            }}
-            onItemSelect={selected => {
-              setSelectedChoreSectionWithCache(selected.value)
-              setFilteredChores(chores)
-              clearQuickFilters()
-            }}
-            onCreateNewFilter={() => {
-              setShowAdvancedFilterBuilder(true)
-              setEditingFilter(null)
-            }}
-            mouseClickHandler={handleMenuOutsideClick}
-          />
-
-          {/* Project Selector - Hidden when active filter has project conditions */}
-          {projectsWithDefault.length > 1 &&
-            !hasProjectConditions &&
-            !hasFilterApplied && (
-              <ProjectSelector
-                selectedProject={selectedProject?.name || 'Default Project'}
-                onProjectSelect={project => {
-                  setSelectedProjectWithCache(project)
-                  clearActiveFilter()
-                }}
-                showKeyboardShortcuts={showKeyboardShortcuts}
-              />
-            )}
-
-          {/* View Mode Toggle Button */}
-          <IconButton
-            variant='outlined'
-            color='neutral'
-            size='sm'
-            sx={{
-              height: 32,
-              width: 32,
-              borderRadius: '50%',
-            }}
-            onClick={toggleViewMode}
-            title={
-              viewMode === 'default'
-                ? 'Switch to Compact View'
-                : viewMode === 'compact'
-                  ? 'Switch to Calendar View'
-                  : 'Switch to Card View'
-            }
-          >
-            {viewMode === 'default' ? (
-              <ViewAgenda />
-            ) : viewMode === 'compact' ? (
-              <CalendarMonth />
-            ) : (
-              <ViewModule />
-            )}
-          </IconButton>
-
-          {/* Multi-select Toggle Button */}
-          <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-            <IconButton
-              variant={isMultiSelectMode ? 'solid' : 'outlined'}
-              color={isMultiSelectMode ? 'primary' : 'neutral'}
-              size='sm'
-              sx={{
-                height: 32,
-                width: 32,
-                borderRadius: '50%',
-              }}
-              onClick={toggleMultiSelectMode}
-              title={
-                isMultiSelectMode
-                  ? 'Exit Multi-select Mode (Ctrl+S)'
-                  : 'Enable Multi-select Mode (Ctrl+S)'
-              }
-            >
-              {isMultiSelectMode ? <CheckBox /> : <CheckBoxOutlineBlank />}
-            </IconButton>
-            <KeyboardShortcutHint
-              shortcut='S'
-              show={showKeyboardShortcuts}
-              sx={{
-                position: 'absolute',
-                top: -8,
-                right: -8,
-                zIndex: 1000,
-              }}
-            />
-          </Box>
-        </Box>
-
-        {/* Quick Filters */}
-        <FilterBar
+        <ChoreToolbar
           filterDefs={quickFilterDefs}
           activeFilters={quickFilters}
           onSetFilter={(id, value) => {
@@ -1084,21 +955,40 @@ const MyChores = () => {
             setQuickFilter(id, value)
             setSelectedCalendarDate(null)
           }}
-          onClearAll={() => {
+          onClearAllFilters={() => {
             clearQuickFilters()
+            clearActiveFilter()
+            setSelectedChoreFilterWithCache('anyone')
+            setSelectedProjectWithCache(projectsWithDefault.find(p => p.id === 'default') || null)
             updateFilterUrl(null, null)
           }}
-          resultCount={hasQuickFilters ? getFilteredChores.length : undefined}
-          totalCount={hasQuickFilters ? projectFilteredChores.length : undefined}
-        />
-
-        {/* Custom Filters Section */}
-        <FilterSection
+          resultCount={
+            hasQuickFilters || !!activeFilterId ? getFilteredChores.length : undefined
+          }
+          totalCount={
+            hasQuickFilters || !!activeFilterId ? projectFilteredChores.length : undefined
+          }
+          projects={
+            !hasProjectConditions && !hasFilterApplied
+              ? projectsWithDefault
+              : []
+          }
+          selectedProject={selectedProject}
+          onProjectSelect={project => {
+            setSelectedProjectWithCache(project)
+            clearActiveFilter()
+          }}
+          selectedAssigneeFilter={selectedChoreFilter}
+          onAssigneeFilterChange={filter => {
+            setSelectedChoreFilterWithCache(filter)
+            if (activeFilterId) {
+              clearActiveFilter()
+              updateFilterUrl(null, null)
+            }
+          }}
           savedFilters={savedFilters}
           activeFilterId={activeFilterId}
-          activeFilter={activeFilter}
-          hasProjectConditions={hasProjectConditions}
-          onFilterClick={filterId => {
+          onSavedFilterClick={filterId => {
             if (activeFilterId === filterId) {
               clearActiveFilter()
               updateFilterUrl(null, null)
@@ -1106,31 +996,42 @@ const MyChores = () => {
               clearQuickFilters()
               setSearchTerm('')
               setFilteredChores([])
-
-              // Reset quick filter to 'anyone' when custom filter is applied
               if (selectedChoreFilter !== 'anyone') {
                 setSelectedChoreFilterWithCache('anyone')
               }
-
-              // Clear project selection if the filter has project conditions
               const filter = savedFilters.find(f => f.id === filterId)
               if (filter?.conditions?.some(c => c.type === 'project')) {
                 setSelectedProjectWithCache(null)
               }
-
               applyCustomFilter(filterId)
               updateFilterUrl('filterId', filterId)
             }
           }}
-          onFilterDelete={deleteFilter}
-          onFilterPin={pinFilter}
-          onFilterEdit={filter => {
+          onSavedFilterEdit={filter => {
             setEditingFilter(filter)
             setShowAdvancedFilterBuilder(true)
           }}
-          onClearActiveFilter={clearActiveFilter}
-          onCreateAdvancedFilter={() => setShowAdvancedFilterBuilder(true)}
-          updateFilterUrl={updateFilterUrl}
+          onSavedFilterDelete={deleteFilter}
+          onSavedFilterPin={pinFilter}
+          onCreateAdvancedFilter={() => {
+            setShowAdvancedFilterBuilder(true)
+            setEditingFilter(null)
+          }}
+          selectedGroupBy={selectedChoreSection}
+          onGroupBySelect={value => {
+            setSelectedChoreSectionWithCache(value)
+            setFilteredChores(chores)
+            clearQuickFilters()
+          }}
+          viewMode={viewMode}
+          onToggleViewMode={toggleViewMode}
+          isMultiSelectMode={isMultiSelectMode}
+          onToggleMultiSelect={toggleMultiSelectMode}
+          searchTerm={searchTerm}
+          onSearchChange={handleSearchChange}
+          onSearchClose={handleSearchClose}
+          searchInputRef={searchInputRef}
+          showKeyboardShortcuts={showKeyboardShortcuts}
         />
 
         <MultiSelectToolbar
