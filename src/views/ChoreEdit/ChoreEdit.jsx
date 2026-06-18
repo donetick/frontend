@@ -976,6 +976,7 @@ const ChoreEdit = () => {
                         const newAssignees = assignees.filter(
                           a => a.userId !== item.userId,
                         )
+                        setAnyone(newAssignees.length === 0)
                         setAssignees(newAssignees)
                       } else {
                         setAssignees([...assignees, { userId: item.userId }])
