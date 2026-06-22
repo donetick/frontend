@@ -1,6 +1,5 @@
 import {
   Box,
-  Button,
   Card,
   Checkbox,
   Chip,
@@ -10,10 +9,8 @@ import {
   Input,
   List,
   ListItem,
-  Option,
   Radio,
   RadioGroup,
-  Select,
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
@@ -24,21 +21,41 @@ import { useUserProfile } from '../../queries/UserQueries'
 import { isPlusAccount } from '../../utils/Helpers'
 import ThingTriggerSection from './ThingTriggerSection'
 
-const FREQUENCY_TYPES_RADIOS = [
+// FREQUENCY_TYPES are the RRULE FREQ values selectable in the UI. `adaptive` is a
+// Donetick-specific dynamic schedule; the rest map directly onto the backend.
+const FREQUENCY_TYPES = [
+  'hourly',
   'daily',
   'weekly',
   'monthly',
   'yearly',
   'adaptive',
-  'custom',
 ]
+
+// Singular unit label per frequency, used for the "Every N …" control.
+const UNIT_LABEL = {
+  hourly: 'hour',
+  daily: 'day',
+  weekly: 'week',
+  monthly: 'month',
+  yearly: 'year',
+}
 
 const FREQUENCY_TYPE_MESSAGE = {
   adaptive:
     'This chore will be scheduled dynamically based on previous completion dates.',
-  custom: 'This chore will be scheduled based on a custom frequency.',
 }
-const REPEAT_ON_TYPE = ['interval', 'days_of_the_week', 'day_of_the_month']
+
+const DAYS = [
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+  'sunday',
+]
+
 const MONTHS = [
   'january',
   'february',
@@ -54,58 +71,168 @@ const MONTHS = [
   'december',
 ]
 
-const DAYS = [
-  'monday',
-  'tuesday',
-  'wednesday',
-  'thursday',
-  'friday',
-  'saturday',
-  'sunday',
+// Ordinal positions for an "On the …" rule. Maps to RRULE BYSETPOS.
+const ORDINALS = [
+  { value: 1, label: 'First' },
+  { value: 2, label: 'Second' },
+  { value: 3, label: 'Third' },
+  { value: 4, label: 'Fourth' },
+  { value: 5, label: 'Fifth' },
+  { value: -2, label: 'Next to last' },
+  { value: -1, label: 'Last' },
 ]
 
-const WEEK_PATTERNS = {
-  every_week: 'Every week',
-  week_of_month: 'Specific occurrences in the month',
+// Day-token options for an "On the …" rule (beyond specific weekdays).
+const DAY_TOKENS = [
+  { value: 'day', label: 'Day' },
+  { value: 'weekday', label: 'Weekday' },
+  { value: 'weekend', label: 'Weekend day' },
+]
+
+const ordinalLabel = value => {
+  const found = ORDINALS.find(o => o.value === value)
+  return found ? found.label.toLowerCase() : `${value}`
 }
 
-const DAY_OCCURRENCE_OPTIONS = [
-  { value: 1, label: '1st occurrence' },
-  { value: 2, label: '2nd occurrence' },
-  { value: 3, label: '3rd occurrence' },
-  { value: 4, label: '4th occurrence' },
-  { value: -1, label: 'Last occurrence' },
-]
-// Helper function to generate schedule preview text
-const generateSchedulePreview = (metadata, formatTimeFn) => {
-  if (!metadata?.days?.length) return ''
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1)
+const shortDay = d => cap(d.slice(0, 3))
 
-  const dayNames = metadata.days
-    .map(day => day.charAt(0).toUpperCase() + day.slice(1, 3))
-    .join(', ')
+// generateSchedulePreview renders a human-readable summary of the recurrence.
+const generateSchedulePreview = (
+  frequencyType,
+  frequency,
+  metadata,
+  formatTimeFn,
+) => {
+  const n = Number(frequency) || 1
+  const unit = UNIT_LABEL[frequencyType]
+  const every = n > 1 ? `every ${n} ${unit}s` : `every ${unit}`
+  const timeStr = metadata?.time ? formatTimeFn(metadata.time) : '6:00 PM'
 
-  const timeStr = metadata.time
-    ? formatTimeFn(metadata.time)
-    : '6:00 PM'
+  if (frequencyType === 'hourly') {
+    return n > 1 ? `Every ${n} hours` : 'Every hour'
+  }
+  if (frequencyType === 'daily') {
+    return n > 1 ? `Every ${n} days at ${timeStr}` : `Every day at ${timeStr}`
+  }
+  if (frequencyType === 'weekly') {
+    const days = (metadata?.days || []).map(shortDay).join(', ') || '…'
+    return `${cap(every)} on ${days} at ${timeStr}`
+  }
+  if (frequencyType === 'monthly') {
+    if (metadata?.monthDays?.length) {
+      const days = [...metadata.monthDays].sort((a, b) => a - b).join(', ')
+      return `${cap(every)} on day ${days} at ${timeStr}`
+    }
+    if (metadata?.setPos?.length) {
+      return `${cap(every)} on the ${describeOnThe(metadata)} at ${timeStr}`
+    }
+    return `${cap(every)} at ${timeStr}`
+  }
+  if (frequencyType === 'yearly') {
+    const monthNames = (metadata?.months || []).map(cap).join(', ') || '…'
+    if (metadata?.setPos?.length) {
+      return `${cap(every)} on the ${describeOnThe(metadata)} of ${monthNames} at ${timeStr}`
+    }
+    return `${cap(every)} in ${monthNames} at ${timeStr}`
+  }
+  return ''
+}
 
-  if (metadata.weekPattern === 'every_week' || !metadata.weekPattern) {
-    return `Every ${dayNames} at ${timeStr}`
+// describeOnThe renders the ordinal + weekday/token portion of an "On the" rule.
+const describeOnThe = metadata => {
+  const pos = (metadata?.setPos || []).map(ordinalLabel).join(', ') || '…'
+  const token = metadata?.dayToken || 'specific'
+  let dayPart = '…'
+  if (token === 'specific') {
+    dayPart = (metadata?.days || []).map(cap).join(', ') || '…'
+  } else if (token === 'day') {
+    dayPart = 'day'
+  } else if (token === 'weekday') {
+    dayPart = 'weekday'
+  } else if (token === 'weekend') {
+    dayPart = 'weekend day'
+  }
+  return `${pos} ${dayPart}`
+}
+
+// ChipToggle renders a selectable chip used across the selectors.
+const ChipToggle = ({ selected, label, onClick }) => (
+  <Chip
+    variant={selected ? 'solid' : 'soft'}
+    color={selected ? 'primary' : 'neutral'}
+    onClick={onClick}
+    sx={{ mb: 0.5 }}
+  >
+    {label}
+  </Chip>
+)
+
+// OnTheSelector is the shared "On the [ordinal] [weekday/token]" control used by
+// both monthly and yearly frequencies.
+const OnTheSelector = ({ metadata, onUpdate }) => {
+  const setPos = metadata?.setPos || []
+  const token = metadata?.dayToken || 'specific'
+  const days = metadata?.days || []
+
+  const toggleSetPos = value => {
+    const next = setPos.includes(value)
+      ? setPos.filter(v => v !== value)
+      : [...setPos, value]
+    onUpdate({ ...metadata, setPos: next })
   }
 
-  if (
-    metadata.weekPattern === 'week_of_month' &&
-    metadata.occurrences?.length
-  ) {
-    const occurrenceStr = metadata.occurrences
-      .map(w => {
-        if (w === -1) return 'last'
-        return `${w}${w === 1 ? 'st' : w === 2 ? 'nd' : w === 3 ? 'rd' : 'th'}`
-      })
-      .join(', ')
-    return `Every ${occurrenceStr} ${dayNames} of the month at ${timeStr}`
+  const selectToken = value => {
+    if (value === 'specific') {
+      onUpdate({ ...metadata, dayToken: 'specific' })
+    } else {
+      // Day/Weekday/Weekend tokens don't use an explicit weekday list.
+      onUpdate({ ...metadata, dayToken: value, days: [] })
+    }
   }
 
-  return `Every ${dayNames} at ${timeStr}`
+  const toggleDay = day => {
+    const next = days.includes(day)
+      ? days.filter(d => d !== day)
+      : [...days, day]
+    onUpdate({ ...metadata, dayToken: 'specific', days: next })
+  }
+
+  return (
+    <Box sx={{ mt: 1 }}>
+      <Typography level='body-sm' sx={{ mb: 0.5 }}>
+        On the:
+      </Typography>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1 }}>
+        {ORDINALS.map(o => (
+          <ChipToggle
+            key={o.value}
+            selected={setPos.includes(o.value)}
+            label={o.label}
+            onClick={() => toggleSetPos(o.value)}
+          />
+        ))}
+      </Box>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+        {DAYS.map(d => (
+          <ChipToggle
+            key={d}
+            selected={token === 'specific' && days.includes(d)}
+            label={shortDay(d)}
+            onClick={() => toggleDay(d)}
+          />
+        ))}
+        {DAY_TOKENS.map(t => (
+          <ChipToggle
+            key={t.value}
+            selected={token === t.value}
+            label={t.label}
+            onClick={() => selectToken(t.value)}
+          />
+        ))}
+      </Box>
+    </Box>
+  )
 }
 
 const RepeatOnSections = ({
@@ -116,415 +243,255 @@ const RepeatOnSections = ({
   onFrequencyMetadataUpdate,
 }) => {
   const { fmt } = useLocalization()
-  // if time on frequencyMetadata is not set, try to set it to the nextDueDate if available,
-  // otherwise set it to 18:00 of the current day
+
+  // Ensure a default time-of-day exists for time-bearing frequencies.
   useEffect(() => {
-    if (!frequencyMetadata?.time) {
-      frequencyMetadata.time = moment(
-        moment(new Date()).format('YYYY-MM-DD') + 'T' + '18:00',
-      ).format()
-    }
-    // Initialize weekPattern if not set
-    if (!frequencyMetadata?.weekPattern) {
+    if (frequencyType !== 'hourly' && !frequencyMetadata?.time) {
       onFrequencyMetadataUpdate({
         ...frequencyMetadata,
-        weekPattern: 'every_week',
-        occurrences: [],
+        time: moment(
+          moment(new Date()).format('YYYY-MM-DD') + 'T' + '18:00',
+        ).format(),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       })
     }
-  }, [frequencyMetadata, onFrequencyMetadataUpdate])
+  }, [frequencyType, frequencyMetadata, onFrequencyMetadataUpdate])
 
-  const timePickerComponent = (
-    <Grid
-      item
-      sm={12}
-      sx={{
-        display: 'flex',
-        direction: 'column',
-        flexDirection: 'column',
-      }}
-    >
-      <Typography level='h5'>Time of day: </Typography>
+  if (frequencyType === 'adaptive') {
+    return null
+  }
+
+  const intervalRow = (
+    <Grid item sm={12} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      <Typography level='h5'>Every</Typography>
       <Input
-        type='time'
-        sx={{ width: '150px' }}
-        defaultValue={moment(frequencyMetadata?.time).format('HH:mm')}
+        slotProps={{ input: { min: 1, max: 1000 } }}
+        type='number'
+        value={frequency}
+        sx={{ width: '90px' }}
         onChange={e => {
-          onFrequencyMetadataUpdate({
-            ...frequencyMetadata,
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-            time: moment(
-              moment(new Date()).format('YYYY-MM-DD') + 'T' + e.target.value,
-            ).format(),
-          })
+          let v = Number(e.target.value)
+          if (!v || v < 1) v = 1
+          onFrequencyUpdate(v)
         }}
       />
+      <Typography level='h5'>
+        {UNIT_LABEL[frequencyType]}
+        {Number(frequency) > 1 ? 's' : ''}
+      </Typography>
     </Grid>
   )
 
-  switch (frequencyType) {
-    case 'interval':
-      return (
-        <>
-          <Grid item sm={12} sx={{ display: 'flex', alignItems: 'center' }}>
-            <Typography level='h5'>Every: </Typography>
-            <Input
-              slotProps={{
-                input: {
-                  min: 1,
-                  max: 1000,
-                },
-              }}
-              type='number'
-              value={frequency}
-              onChange={e => {
-                onFrequencyUpdate(e.target.value)
-              }}
-            />
-            <Select
-              placeholder='Unit'
-              value={frequencyMetadata?.unit || 'days'}
-              sx={{ ml: 1 }}
-            >
-              {['hours', 'days', 'weeks', 'months', 'years'].map(item => (
-                <Option
-                  key={item}
-                  value={item}
-                  onClick={() => {
-                    onFrequencyMetadataUpdate({
-                      ...frequencyMetadata,
-                      unit: item,
-                    })
-                  }}
-                >
-                  {item.charAt(0).toUpperCase() + item.slice(1)}
-                </Option>
-              ))}
-            </Select>
-          </Grid>
-          {timePickerComponent}
-        </>
-      )
-    case 'days_of_the_week':
-      return (
-        <>
-          <Grid item sm={12} sx={{ display: 'flex', alignItems: 'center' }}>
-            <Card>
-              <List
-                orientation='horizontal'
-                wrap
-                sx={{
-                  '--List-gap': '8px',
-                  '--ListItem-radius': '20px',
-                }}
-              >
-                {DAYS.map(item => (
-                  <ListItem key={item}>
-                    <Checkbox
-                      checked={frequencyMetadata?.days?.includes(item) || false}
-                      onClick={() => {
-                        const newDaysOfTheWeek = frequencyMetadata['days'] || []
-                        if (newDaysOfTheWeek.includes(item)) {
-                          newDaysOfTheWeek.splice(
-                            newDaysOfTheWeek.indexOf(item),
-                            1,
-                          )
-                        } else {
-                          newDaysOfTheWeek.push(item)
-                        }
+  const timePicker =
+    frequencyType === 'hourly' ? null : (
+      <Grid item sm={12} sx={{ display: 'flex', flexDirection: 'column' }}>
+        <Typography level='h5'>Time of day:</Typography>
+        <Input
+          type='time'
+          sx={{ width: '150px' }}
+          defaultValue={moment(frequencyMetadata?.time).format('HH:mm')}
+          onChange={e => {
+            onFrequencyMetadataUpdate({
+              ...frequencyMetadata,
+              timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+              time: moment(
+                moment(new Date()).format('YYYY-MM-DD') + 'T' + e.target.value,
+              ).format(),
+            })
+          }}
+        />
+      </Grid>
+    )
 
-                        onFrequencyMetadataUpdate({
-                          ...frequencyMetadata,
-                          days: newDaysOfTheWeek.sort(),
-                        })
-                      }}
-                      overlay
-                      disableIcon
-                      variant='soft'
-                      label={item.charAt(0).toUpperCase() + item.slice(1)}
-                    />
-                  </ListItem>
-                ))}
-              </List>
-              <Button
-                size='sm'
-                variant='soft'
-                color='neutral'
-                checked={frequencyMetadata?.days?.length === 7}
+  const preview = (
+    <Grid item sm={12}>
+      <Card variant='soft' sx={{ mt: 1, p: 1.5 }}>
+        <Typography level='body-sm' color='primary'>
+          {generateSchedulePreview(
+            frequencyType,
+            frequency,
+            frequencyMetadata,
+            fmt.time,
+          )}
+        </Typography>
+      </Card>
+    </Grid>
+  )
+
+  // weekly: weekday multi-select
+  const weeklySelector =
+    frequencyType === 'weekly' ? (
+      <Grid item sm={12}>
+        <Typography level='body-sm' sx={{ mb: 0.5 }}>
+          On these days:
+        </Typography>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+          {DAYS.map(day => {
+            const selected = frequencyMetadata?.days?.includes(day) || false
+            return (
+              <ChipToggle
+                key={day}
+                selected={selected}
+                label={cap(day)}
                 onClick={() => {
-                  if (frequencyMetadata?.days?.length === 7) {
-                    onFrequencyMetadataUpdate({
-                      ...frequencyMetadata,
-                      days: [],
-                      weekPattern: 'every_week',
-                      occurrences: [],
-                    })
-                  } else {
-                    onFrequencyMetadataUpdate({
-                      ...frequencyMetadata,
-                      days: DAYS.map(item => item),
-                    })
-                  }
-                }}
-                overlay
-                disableIcon
-              >
-                {frequencyMetadata?.days?.length === 7
-                  ? 'Unselect All'
-                  : 'Select All'}
-              </Button>
-            </Card>
-          </Grid>
-
-          <Grid item sm={12} sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box>
-              <RadioGroup
-                value={frequencyMetadata?.weekPattern || 'every_week'}
-                onChange={event => {
-                  const newPattern = event.target.value
+                  const days = frequencyMetadata?.days || []
+                  const next = days.includes(day)
+                    ? days.filter(d => d !== day)
+                    : [...days, day]
                   onFrequencyMetadataUpdate({
                     ...frequencyMetadata,
-                    weekPattern: newPattern,
-                    occurrences:
-                      newPattern === 'every_week'
-                        ? []
-                        : frequencyMetadata?.occurrences || [],
+                    days: next,
                   })
                 }}
-                sx={{ gap: 1, '& > div': { p: 1 } }}
-              >
-                {Object.entries(WEEK_PATTERNS).map(([value, label]) => (
-                  <FormControl key={value}>
-                    <Radio value={value} label={label} variant='soft' />
-                    {value === 'every_week' && (
-                      <FormHelperText>
-                        Task repeats every week on selected days
-                      </FormHelperText>
-                    )}
-                    {value === 'week_of_month' && (
-                      <FormHelperText>
-                        Task repeats on specific day occurrences each month
-                        (e.g., 1st Monday, 3rd Friday)
-                      </FormHelperText>
-                    )}
-                  </FormControl>
-                ))}
-              </RadioGroup>
+              />
+            )
+          })}
+        </Box>
+      </Grid>
+    ) : null
 
-              {frequencyMetadata?.weekPattern === 'week_of_month' && (
-                <Box mt={2}>
-                  <Typography level='body-sm' mb={1}>
-                    Select which occurrences of the selected days:
-                  </Typography>
-                  <Typography level='body-xs' color='neutral' mb={2}>
-                    Example: "1st Monday" means the first Monday of each month
-                  </Typography>
-                  <Card>
-                    <List
-                      orientation='horizontal'
-                      wrap
-                      sx={{
-                        '--List-gap': '8px',
-                        '--ListItem-radius': '20px',
-                      }}
-                    >
-                      {DAY_OCCURRENCE_OPTIONS.map(option => (
-                        <ListItem key={option.value}>
-                          <Checkbox
-                            checked={
-                              frequencyMetadata?.occurrences?.includes(
-                                option.value,
-                              ) || false
-                            }
-                            onChange={() => {
-                              const currentOccurrences =
-                                frequencyMetadata?.occurrences || []
-                              const newOccurrences =
-                                currentOccurrences.includes(option.value)
-                                  ? currentOccurrences.filter(
-                                      w => w !== option.value,
-                                    )
-                                  : [...currentOccurrences, option.value]
-                              onFrequencyMetadataUpdate({
-                                ...frequencyMetadata,
-                                occurrences: newOccurrences.sort((a, b) => {
-                                  if (a === -1) return 1 // Last occurrence goes to end
-                                  if (b === -1) return -1
-                                  return a - b
-                                }),
-                              })
-                            }}
-                            overlay
-                            disableIcon
-                            variant='soft'
-                            label={option.label}
-                          />
-                        </ListItem>
-                      ))}
-                    </List>
-                    <Button
-                      size='sm'
-                      variant='soft'
-                      color='neutral'
-                      onClick={() => {
-                        if (
-                          frequencyMetadata?.occurrences?.length ===
-                          DAY_OCCURRENCE_OPTIONS.length
-                        ) {
-                          onFrequencyMetadataUpdate({
-                            ...frequencyMetadata,
-                            occurrences: [],
-                          })
-                        } else {
-                          onFrequencyMetadataUpdate({
-                            ...frequencyMetadata,
-                            occurrences: DAY_OCCURRENCE_OPTIONS.map(
-                              option => option.value,
-                            ),
-                          })
-                        }
-                      }}
-                      overlay
-                      disableIcon
-                    >
-                      {frequencyMetadata?.occurrences?.length ===
-                      DAY_OCCURRENCE_OPTIONS.length
-                        ? 'Unselect All'
-                        : 'Select All'}
-                    </Button>
-                  </Card>
-                </Box>
-              )}
+  // monthly: Each (day numbers) vs On the (ordinal weekday)
+  const monthlyMode = frequencyMetadata?.setPos?.length ? 'on_the' : 'each'
+  const monthlySelector =
+    frequencyType === 'monthly' ? (
+      <Grid item sm={12}>
+        <RadioGroup
+          orientation='horizontal'
+          value={monthlyMode}
+          onChange={e => {
+            if (e.target.value === 'each') {
+              onFrequencyMetadataUpdate({
+                ...frequencyMetadata,
+                setPos: [],
+                dayToken: undefined,
+                days: [],
+              })
+            } else {
+              onFrequencyMetadataUpdate({
+                ...frequencyMetadata,
+                monthDays: [],
+                setPos: frequencyMetadata?.setPos?.length
+                  ? frequencyMetadata.setPos
+                  : [1],
+                dayToken: 'specific',
+              })
+            }
+          }}
+          sx={{ mb: 1 }}
+        >
+          <Radio value='each' label='Each' />
+          <Radio value='on_the' label='On the' />
+        </RadioGroup>
 
-              {/* Quarter week pattern removed - doesn't make sense with Nth day approach */}
-
-              {/* Live Preview */}
-              {frequencyMetadata?.days?.length > 0 && (
-                <Card mt={2} p={2}>
-                  <Typography level='body-sm' color='primary'>
-                    {generateSchedulePreview(frequencyMetadata, fmt.time)}
-                  </Typography>
-                </Card>
-              )}
-            </Box>
-          </Grid>
-
-          {timePickerComponent}
-        </>
-      )
-    case 'day_of_the_month':
-      return (
-        <>
-          <Grid
-            item
-            sm={12}
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-            }}
-          >
-            <Card>
-              <List
-                orientation='horizontal'
-                wrap
-                sx={{
-                  '--List-gap': '8px',
-                  '--ListItem-radius': '20px',
-                }}
-              >
-                {MONTHS.map(item => (
-                  <ListItem key={item}>
-                    <Checkbox
-                      checked={frequencyMetadata?.months?.includes(item)}
-                      onClick={() => {
-                        const newMonthsOfTheYear =
-                          frequencyMetadata['months'] || []
-                        if (newMonthsOfTheYear.includes(item)) {
-                          newMonthsOfTheYear.splice(
-                            newMonthsOfTheYear.indexOf(item),
-                            1,
-                          )
-                        } else {
-                          newMonthsOfTheYear.push(item)
-                        }
-
-                        onFrequencyMetadataUpdate({
-                          ...frequencyMetadata,
-                          months: newMonthsOfTheYear.sort(),
-                        })
-                        console.log('newMonthsOfTheYear', newMonthsOfTheYear)
-                        // setDaysOfTheWeek(newDaysOfTheWeek)
-                      }}
-                      overlay
-                      disableIcon
-                      variant='soft'
-                      label={item.charAt(0).toUpperCase() + item.slice(1)}
-                    />
-                  </ListItem>
-                ))}
-              </List>
-              <Button
-                size='sm'
-                variant='soft'
-                color='neutral'
-                checked={frequencyMetadata?.months?.length === 12}
-                onClick={() => {
-                  if (frequencyMetadata?.months?.length === 12) {
+        {monthlyMode === 'each' ? (
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+            {Array.from({ length: 31 }, (_, i) => i + 1).map(day => {
+              const selected =
+                frequencyMetadata?.monthDays?.includes(day) || false
+              return (
+                <ChipToggle
+                  key={day}
+                  selected={selected}
+                  label={`${day}`}
+                  onClick={() => {
+                    const md = frequencyMetadata?.monthDays || []
+                    const next = md.includes(day)
+                      ? md.filter(d => d !== day)
+                      : [...md, day]
                     onFrequencyMetadataUpdate({
                       ...frequencyMetadata,
-                      months: [],
+                      monthDays: next,
                     })
-                  } else {
-                    onFrequencyMetadataUpdate({
-                      ...frequencyMetadata,
-                      months: MONTHS.map(item => item),
-                    })
-                  }
-                }}
-                overlay
-                disableIcon
-              >
-                {frequencyMetadata?.months?.length === 12
-                  ? 'Unselect All'
-                  : 'Select All'}
-              </Button>
-            </Card>
-          </Grid>
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              mb: 1.5,
-            }}
-          >
-            <Typography>on the </Typography>
-            <Input
-              sx={{ width: '80px' }}
-              type='number'
-              value={frequency}
-              onChange={e => {
-                if (e.target.value < 1) {
-                  e.target.value = 1
-                } else if (e.target.value > 31) {
-                  e.target.value = 31
-                }
-                // setDayOftheMonth(e.target.value)
-
-                onFrequencyUpdate(e.target.value)
-              }}
-            />
-            <Typography>of the above month/s</Typography>
+                  }}
+                />
+              )
+            })}
           </Box>
-          {timePickerComponent}
-        </>
-      )
+        ) : (
+          <OnTheSelector
+            metadata={frequencyMetadata}
+            onUpdate={onFrequencyMetadataUpdate}
+          />
+        )}
+      </Grid>
+    ) : null
 
-    default:
-      return <></>
-  }
+  // yearly: months multi-select + optional On the
+  const yearlySelector =
+    frequencyType === 'yearly' ? (
+      <Grid item sm={12}>
+        <Typography level='body-sm' sx={{ mb: 0.5 }}>
+          In these months:
+        </Typography>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1 }}>
+          {MONTHS.map(month => {
+            const selected = frequencyMetadata?.months?.includes(month) || false
+            return (
+              <ChipToggle
+                key={month}
+                selected={selected}
+                label={cap(month).slice(0, 3)}
+                onClick={() => {
+                  const months = frequencyMetadata?.months || []
+                  const next = months.includes(month)
+                    ? months.filter(m => m !== month)
+                    : [...months, month]
+                  onFrequencyMetadataUpdate({
+                    ...frequencyMetadata,
+                    months: next,
+                  })
+                }}
+              />
+            )
+          })}
+        </Box>
+        <Checkbox
+          label='On a specific weekday'
+          checked={Boolean(frequencyMetadata?.setPos?.length)}
+          onChange={e => {
+            if (e.target.checked) {
+              onFrequencyMetadataUpdate({
+                ...frequencyMetadata,
+                setPos: [1],
+                dayToken: 'specific',
+              })
+            } else {
+              onFrequencyMetadataUpdate({
+                ...frequencyMetadata,
+                setPos: [],
+                dayToken: undefined,
+                days: [],
+              })
+            }
+          }}
+        />
+        {Boolean(frequencyMetadata?.setPos?.length) && (
+          <OnTheSelector
+            metadata={frequencyMetadata}
+            onUpdate={onFrequencyMetadataUpdate}
+          />
+        )}
+      </Grid>
+    ) : null
+
+  return (
+    <>
+      {intervalRow}
+      {weeklySelector}
+      {monthlySelector}
+      {yearlySelector}
+      {timePicker}
+      {preview}
+    </>
+  )
 }
+
+// resetMetadataForType returns a clean metadata object when switching frequency,
+// preserving only the time-of-day and timezone.
+const resetMetadataForType = metadata => ({
+  time: metadata?.time,
+  timezone: metadata?.timezone,
+})
 
 const RepeatSection = ({
   frequencyType,
@@ -541,6 +508,7 @@ const RepeatSection = ({
   selectedThing,
 }) => {
   const { data: userProfile } = useUserProfile()
+  const isRepeating = !['once', 'trigger'].includes(frequencyType)
 
   return (
     <Box mt={2}>
@@ -553,9 +521,7 @@ const RepeatSection = ({
               onTriggerUpdate(null)
             }
           }}
-          defaultChecked={!['once', 'trigger'].includes(frequencyType)}
-          checked={!['once', 'trigger'].includes(frequencyType)}
-          value={!['once', 'trigger'].includes(frequencyType)}
+          checked={isRepeating}
           overlay
           label='Repeat this task'
         />
@@ -563,200 +529,72 @@ const RepeatSection = ({
           Is this something needed to be done regularly?
         </FormHelperText>
       </FormControl>
-      {!['once', 'trigger'].includes(frequencyType) && (
-        <>
-          <Card sx={{ mt: 1 }}>
-            <Typography level='h5'>How often should it be repeated?</Typography>
 
-            <List
-              orientation='horizontal'
-              wrap
-              sx={{
-                '--List-gap': '8px',
-                '--ListItem-radius': '20px',
-              }}
-            >
-              {FREQUENCY_TYPES_RADIOS.map(item => (
-                <ListItem key={item}>
-                  <Checkbox
-                    // disabled={index === 0}
-                    checked={
-                      item === frequencyType ||
-                      (item === 'custom' &&
-                        REPEAT_ON_TYPE.includes(frequencyType))
-                    }
-                    // defaultChecked={item === frequencyType}
-                    onClick={() => {
-                      if (item === 'custom') {
-                        onFrequencyTypeUpdate(REPEAT_ON_TYPE[0])
-                        onFrequencyUpdate(1)
-                        onFrequencyMetadataUpdate({
-                          unit: 'days',
-                          time: frequencyMetadata?.time
-                            ? frequencyMetadata?.time
-                            : moment(
-                                moment(new Date()).format('YYYY-MM-DD') +
-                                  'T' +
-                                  '18:00',
-                              ).format(),
-                          timezone:
-                            Intl.DateTimeFormat().resolvedOptions().timeZone,
-                        })
+      {isRepeating && (
+        <Card sx={{ mt: 1 }}>
+          <Typography level='h5'>How often should it be repeated?</Typography>
 
-                        return
-                      }
+          <List
+            orientation='horizontal'
+            wrap
+            sx={{ '--List-gap': '8px', '--ListItem-radius': '20px' }}
+          >
+            {FREQUENCY_TYPES.map(item => (
+              <ListItem key={item}>
+                <Checkbox
+                  checked={item === frequencyType}
+                  onClick={() => {
+                    onFrequencyUpdate(1)
+                    if (item === 'adaptive') {
                       onFrequencyTypeUpdate(item)
-                    }}
-                    overlay
-                    disableIcon
-                    variant='soft'
-                    label={
-                      item.charAt(0).toUpperCase() +
-                      item.slice(1).replace('_', ' ')
+                      return
                     }
-                  />
-                </ListItem>
-              ))}
-            </List>
-            <Typography>{FREQUENCY_TYPE_MESSAGE[frequencyType]}</Typography>
-            {frequencyType === 'custom' ||
-              (REPEAT_ON_TYPE.includes(frequencyType) && (
-                <>
-                  <Grid container spacing={1} mt={2}>
-                    <Grid item>
-                      <Typography>Repeat on:</Typography>
-                      <Box
-                        sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
-                      >
-                        <RadioGroup
-                          orientation='horizontal'
-                          aria-labelledby='segmented-controls-example'
-                          name='justify'
-                          // value={justify}
-                          // onChange={event => setJustify(event.target.value)}
-                          sx={{
-                            minHeight: 48,
-                            padding: '4px',
-                            borderRadius: '12px',
-                            bgcolor: 'neutral.softBg',
-                            '--RadioGroup-gap': '4px',
-                            '--Radio-actionRadius': '8px',
-                            mb: 1,
-                          }}
-                        >
-                          {REPEAT_ON_TYPE.map(item => (
-                            <Radio
-                              key={item}
-                              color='neutral'
-                              checked={item === frequencyType}
-                              onClick={() => {
-                                if (
-                                  item === 'day_of_the_month' ||
-                                  item === 'interval'
-                                ) {
-                                  onFrequencyUpdate(1)
-                                }
-                                onFrequencyTypeUpdate(item)
-                                if (item === 'days_of_the_week') {
-                                  onFrequencyMetadataUpdate({
-                                    ...frequencyMetadata,
-                                    days: [],
-                                    weekPattern: 'every_week',
-                                    weekNumbers: [],
-                                  })
-                                } else if (item === 'day_of_the_month') {
-                                  onFrequencyMetadataUpdate({
-                                    ...frequencyMetadata,
-                                    months: [],
-                                  })
-                                } else if (item === 'interval') {
-                                  onFrequencyMetadataUpdate({
-                                    ...frequencyMetadata,
-                                    unit: 'days',
-                                  })
-                                }
-                                // setRepeatOn(item)
-                              }}
-                              value={item}
-                              disableIcon
-                              label={item
-                                .split('_')
-                                .map((i, idx) => {
-                                  // first or last word
-                                  if (
-                                    idx === 0 ||
-                                    idx === item.split('_').length - 1
-                                  ) {
-                                    return (
-                                      i.charAt(0).toUpperCase() + i.slice(1)
-                                    )
-                                  }
-                                  return i
-                                })
-                                .join(' ')}
-                              variant='plain'
-                              sx={{
-                                px: 2,
-                                alignItems: 'center',
-                              }}
-                              slotProps={{
-                                action: ({ checked }) => ({
-                                  sx: {
-                                    ...(checked && {
-                                      bgcolor: 'background.surface',
-                                      boxShadow: 'sm',
-                                      '&:hover': {
-                                        bgcolor: 'background.surface',
-                                      },
-                                    }),
-                                  },
-                                }),
-                              }}
-                            />
-                          ))}
-                        </RadioGroup>
-                      </Box>
-                    </Grid>
+                    // Reset selectors when switching frequency.
+                    onFrequencyMetadataUpdate(
+                      resetMetadataForType(frequencyMetadata),
+                    )
+                    onFrequencyTypeUpdate(item)
+                  }}
+                  overlay
+                  disableIcon
+                  variant='soft'
+                  label={cap(item)}
+                />
+              </ListItem>
+            ))}
+          </List>
+          <Typography>{FREQUENCY_TYPE_MESSAGE[frequencyType]}</Typography>
 
-                    <RepeatOnSections
-                      frequency={frequency}
-                      onFrequencyUpdate={onFrequencyUpdate}
-                      frequencyType={frequencyType}
-                      onFrequencyTypeUpdate={onFrequencyTypeUpdate}
-                      frequencyMetadata={frequencyMetadata || {}}
-                      onFrequencyMetadataUpdate={onFrequencyMetadataUpdate}
-                      things={allUserThings}
-                    />
-                  </Grid>
-                </>
-              ))}
-            <FormControl error={Boolean(frequencyError)}>
-              <FormHelperText error>{frequencyError}</FormHelperText>
-            </FormControl>
-          </Card>
-        </>
+          <Grid container spacing={1} mt={1}>
+            <RepeatOnSections
+              frequency={frequency}
+              onFrequencyUpdate={onFrequencyUpdate}
+              frequencyType={frequencyType}
+              onFrequencyMetadataUpdate={onFrequencyMetadataUpdate}
+              frequencyMetadata={frequencyMetadata || {}}
+            />
+          </Grid>
+
+          <FormControl error={Boolean(frequencyError)}>
+            <FormHelperText error>{frequencyError}</FormHelperText>
+          </FormControl>
+        </Card>
       )}
+
       <FormControl sx={{ mt: 1 }}>
         <Checkbox
           onChange={e => {
             onFrequencyTypeUpdate(e.target.checked ? 'trigger' : 'once')
-            //  if unchecked, set selectedThing to null:
             if (!e.target.checked) {
               onTriggerUpdate(null)
             }
           }}
-          defaultChecked={frequencyType === 'trigger'}
           checked={frequencyType === 'trigger'}
-          value={frequencyType === 'trigger'}
           disabled={!isPlusAccount(userProfile)}
           overlay
           label='Trigger this task based on a thing state'
         />
-        <FormHelperText
-          sx={{
-            opacity: !isPlusAccount(userProfile) ? 0.5 : 1,
-          }}
-        >
+        <FormHelperText sx={{ opacity: !isPlusAccount(userProfile) ? 0.5 : 1 }}>
           Is this something that should be done when a thing state changes?{' '}
           {userProfile && !isPlusAccount(userProfile) && (
             <Chip variant='soft' color='warning'>
@@ -771,6 +609,7 @@ const RepeatSection = ({
           </Typography>
         )}
       </FormControl>
+
       {frequencyType === 'trigger' && (
         <ThingTriggerSection
           things={allUserThings}

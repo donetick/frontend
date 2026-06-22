@@ -159,7 +159,62 @@ export const parseLabels = (inputSentence, userLabels) => {
   }
 }
 
-export const parseRepeatV2 = inputSentence => {
+// normalizeToUnifiedFrequency rewrites the parser's legacy frequency output
+// (interval / days_of_the_week / day_of_the_month) into the unified RRULE model
+// the backend now expects (hourly/daily/weekly/monthly/yearly + setPos/monthDays).
+const normalizeToUnifiedFrequency = parsed => {
+  if (!parsed || !parsed.result) return parsed
+  const r = parsed.result
+  const m = r.frequencyMetadata || (r.frequencyMetadata = {})
+
+  const intervalUnitToType = {
+    hours: 'hourly',
+    days: 'daily',
+    weeks: 'weekly',
+    months: 'monthly',
+    years: 'yearly',
+  }
+
+  if (r.frequencyType === 'interval') {
+    r.frequencyType = intervalUnitToType[m.unit] || 'daily'
+    delete m.unit
+  } else if (r.frequencyType === 'days_of_the_week') {
+    if (m.weekPattern === 'week_of_month' && m.occurrences?.length) {
+      r.frequencyType = 'monthly'
+      r.frequency = 1
+      m.setPos = m.occurrences
+      m.dayToken = 'specific'
+    } else {
+      r.frequencyType = 'weekly'
+    }
+    delete m.weekPattern
+    delete m.occurrences
+    delete m.weekNumbers
+  } else if (r.frequencyType === 'day_of_the_month') {
+    const day = r.frequency
+    m.monthDays = day >= 1 && day <= 31 ? [day] : []
+    r.frequency = 1
+    if ((m.months?.length || 0) >= 12) {
+      r.frequencyType = 'monthly'
+      delete m.months
+    } else {
+      r.frequencyType = 'yearly'
+    }
+    delete m.unit
+  }
+
+  // Drop the now-unused legacy unit on otherwise-clean frequencies.
+  if (m && m.unit && intervalUnitToType[m.unit]) {
+    // keep only when meaningful; daily/weekly/... don't use unit
+    delete m.unit
+  }
+  return parsed
+}
+
+export const parseRepeatV2 = inputSentence =>
+  normalizeToUnifiedFrequency(parseRepeatV2Internal(inputSentence))
+
+const parseRepeatV2Internal = inputSentence => {
   const sentence = inputSentence.toLowerCase()
   const lowerInputSentence = inputSentence.toLowerCase()
   const result = {

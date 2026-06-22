@@ -67,7 +67,9 @@ const ASSIGN_STRATEGIES = [
   'round_robin',
   'no_assignee',
 ]
-const REPEAT_ON_TYPE = ['interval', 'days_of_the_week', 'day_of_the_month']
+// Repeating frequencies that carry a time-of-day in frequencyMetadata and use a
+// "Start Date" (rather than "Due Date") label.
+const REPEAT_ON_TYPE = ['hourly', 'daily', 'weekly', 'monthly', 'yearly']
 
 const NO_DUE_DATE_REQUIRED_TYPE = ['no_repeat', 'once']
 const NO_DUE_DATE_ALLOWED_TYPE = ['trigger']
@@ -172,31 +174,34 @@ const ChoreEdit = () => {
         errors.assignedTo = 'Assigned to is required'
       }
     }
-    if (frequencyType === 'interval' && !frequency > 0) {
-      errors.frequency = `Invalid frequency, the ${frequencyMetadata.unit} should be > 0`
+    if (REPEAT_ON_TYPE.includes(frequencyType) && !(Number(frequency) > 0)) {
+      errors.frequency = 'Interval must be greater than 0'
     }
-    if (
-      frequencyType === 'days_of_the_week' &&
-      frequencyMetadata['days']?.length === 0
-    ) {
+    if (frequencyType === 'weekly' && !frequencyMetadata?.days?.length) {
       errors.frequency = 'Please select at least one day of the week'
     }
-
-    // Validate advanced scheduling patterns
     if (
-      frequencyType === 'days_of_the_week' &&
-      frequencyMetadata?.weekPattern === 'week_of_month' &&
-      (!frequencyMetadata?.occurrences ||
-        frequencyMetadata.occurrences.length === 0)
+      frequencyType === 'monthly' &&
+      !frequencyMetadata?.monthDays?.length &&
+      !frequencyMetadata?.setPos?.length
     ) {
       errors.frequency =
-        'Please select at least one day occurrence for the month'
+        'Please pick days of the month, or an "On the" weekday rule'
     }
     if (
-      frequencyType === 'day_of_the_month' &&
-      frequencyMetadata['months']?.length === 0
+      frequencyType === 'yearly' &&
+      !frequencyMetadata?.months?.length
     ) {
       errors.frequency = 'Please select at least one month'
+    }
+    // "On the" ordinal rules with specific weekdays need at least one weekday.
+    if (
+      ['monthly', 'yearly'].includes(frequencyType) &&
+      frequencyMetadata?.setPos?.length &&
+      (frequencyMetadata?.dayToken ?? 'specific') === 'specific' &&
+      !frequencyMetadata?.days?.length
+    ) {
+      errors.frequency = 'Please select at least one weekday for the "On the" rule'
     }
     if (
       dueDate === null &&

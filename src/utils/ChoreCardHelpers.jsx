@@ -110,67 +110,62 @@ export const getRecurrentChipText = chore => {
     return 'Once'
   } else if (chore.frequencyType === 'trigger') {
     return 'Trigger'
-  } else if (chore.frequencyType === 'daily') {
-    return 'Daily'
   } else if (chore.frequencyType === 'adaptive') {
     return 'Adaptive'
-  } else if (chore.frequencyType === 'weekly') {
-    return 'Weekly'
-  } else if (chore.frequencyType === 'monthly') {
-    return 'Monthly'
-  } else if (chore.frequencyType === 'yearly') {
-    return 'Yearly'
-  } else if (chore.frequencyType === 'days_of_the_week') {
-    let days = metadata.days
-    if (days.length > 4) {
-      const allDays = [
-        'Sunday',
-        'Monday',
-        'Tuesday',
-        'Wednesday',
-        'Thursday',
-        'Friday',
-        'Saturday',
-      ]
-      const selectedDays = days.map(d => moment().day(d).format('dddd'))
-      const notSelectedDay = allDays.filter(day => !selectedDays.includes(day))
-      const notSelectedShortdays = notSelectedDay.map(d =>
-        moment().day(d).format('ddd'),
-      )
-      return `Daily except ${notSelectedShortdays.join(', ')}`
-    } else {
-      days = days.map(d => moment().day(d).format('ddd'))
-      return days.join(', ')
-    }
-  } else if (chore.frequencyType === 'day_of_the_month') {
-    let months = metadata?.months ? metadata.months : allMonths
-    if (months.length > 6) {
-      const selectedMonths = months.map(m => moment().month(m).format('MMMM'))
-      const notSelectedMonth = allMonths.filter(
-        month => !selectedMonths.includes(month),
-      )
-      const notSelectedShortMonths = notSelectedMonth.map(m =>
-        moment().month(m).format('MMM'),
-      )
-      let result = `Monthly ${chore.frequency}${dayOfMonthSuffix(
-        chore.frequency,
-      )}`
-      if (notSelectedShortMonths.length > 0)
-        result += `
-        except ${notSelectedShortMonths.join(', ')}`
-      return result
-    } else {
-      let freqData = metadata
-      const months = [...freqData.months]
-        .sort((a, b) => allMonths.indexOf(a) - allMonths.indexOf(b))
-        .map(m => moment().month(m).format('MMM'))
-      return `${chore.frequency}${dayOfMonthSuffix(
-        chore.frequency,
-      )} of ${months.join(', ')}`
-    }
-  } else if (chore.frequencyType === 'interval') {
-    return `Every ${chore.frequency} ${metadata.unit}`
-  } else {
-    return chore.frequencyType
   }
+
+  const freq = chore.frequency || 1
+  const ordinalText = pos => {
+    if (pos === -1) return 'last'
+    if (pos === -2) return 'next-to-last'
+    return `${pos}${dayOfMonthSuffix(pos)}`
+  }
+  const tokenText = m => {
+    switch (m?.dayToken) {
+      case 'day':
+        return 'day'
+      case 'weekday':
+        return 'weekday'
+      case 'weekend':
+        return 'weekend day'
+      default:
+        return (m?.days || []).map(d => moment().day(d).format('ddd')).join(', ')
+    }
+  }
+  const onThe = m =>
+    `${(m.setPos || []).map(ordinalText).join(', ')} ${tokenText(m)}`
+
+  if (chore.frequencyType === 'hourly') {
+    return freq > 1 ? `Every ${freq} hours` : 'Hourly'
+  } else if (chore.frequencyType === 'daily') {
+    return freq > 1 ? `Every ${freq} days` : 'Daily'
+  } else if (chore.frequencyType === 'weekly') {
+    const prefix = freq > 1 ? `Every ${freq}w` : ''
+    if (metadata?.days?.length) {
+      const days = metadata.days.map(d => moment().day(d).format('ddd'))
+      return prefix ? `${prefix}: ${days.join(', ')}` : days.join(', ')
+    }
+    return freq > 1 ? `Every ${freq} weeks` : 'Weekly'
+  } else if (chore.frequencyType === 'monthly') {
+    const prefix = freq > 1 ? `Every ${freq}mo` : 'Monthly'
+    if (metadata?.monthDays?.length) {
+      const days = [...metadata.monthDays].sort((a, b) => a - b).join(', ')
+      return `${prefix} on ${days}`
+    }
+    if (metadata?.setPos?.length) {
+      return `${prefix}: ${onThe(metadata)}`
+    }
+    return prefix
+  } else if (chore.frequencyType === 'yearly') {
+    const prefix = freq > 1 ? `Every ${freq}y` : 'Yearly'
+    const months = (metadata?.months || [])
+      .slice()
+      .sort((a, b) => allMonths.indexOf(a) - allMonths.indexOf(b))
+      .map(m => moment().month(m).format('MMM'))
+    if (metadata?.setPos?.length) {
+      return `${prefix}: ${onThe(metadata)} of ${months.join(', ')}`
+    }
+    return months.length ? `${prefix} in ${months.join(', ')}` : prefix
+  }
+  return chore.frequencyType
 }

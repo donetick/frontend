@@ -10,7 +10,7 @@ const DemoMyChore = () => {
     {
       id: 12,
       name: '♻️ Take out recycle ',
-      frequencyType: 'days_of_the_week',
+      frequencyType: 'weekly',
       frequency: 1,
       priority: 1,
       frequencyMetadata:
@@ -23,9 +23,9 @@ const DemoMyChore = () => {
     {
       id: 9,
       name: '🐜 Spray Pesticide',
-      frequencyType: 'interval',
+      frequencyType: 'monthly',
       frequency: 3,
-      frequencyMetadata: '{"unit":"months"}',
+      frequencyMetadata: '{}',
       nextDueDate: moment().subtract(7, 'day').toISOString(),
       isRolling: false,
       assignedTo: 1,
@@ -34,9 +34,9 @@ const DemoMyChore = () => {
     {
       id: 6,
       name: '🍂 Gutter Cleaning',
-      frequencyType: 'day_of_the_month',
+      frequencyType: 'yearly',
       frequency: 1,
-      frequencyMetadata: '{"months":["may"]}',
+      frequencyMetadata: '{"months":["may"],"monthDays":[1]}',
       nextDueDate: moment()
         .month('may')
         .year(moment().year() + 1)
