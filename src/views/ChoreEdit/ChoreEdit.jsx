@@ -609,8 +609,10 @@ const ChoreEdit = () => {
     if (assignees.length === 0) {
       setAssignStrategy('no_assignee')
       setAssignedTo(null)
-    } else if (assignees.length === 1) {
-      setAssignedTo(assignees[0].userId)
+    } else {
+      if (!assignees.some(a => a.userId === assignedTo)) {
+        setAssignedTo(assignees[0].userId)
+      }
       if (assignStrategy === 'no_assignee') {
         setAssignStrategy(ASSIGN_STRATEGIES[2]) // default to least_completed
       }
@@ -1054,17 +1056,12 @@ const ChoreEdit = () => {
                 }
                 disabled={assignees.length === 0}
                 value={assignedTo > -1 ? assignedTo : null}
+                onChange={(_, selectedUserId) => setAssignedTo(selectedUserId)}
               >
                 {performers
-                  ?.filter(p => assignees.find(a => a.userId == p.userId))
+                  ?.filter(p => assignees.some(a => a.userId == p.userId))
                   .map((item, index) => (
-                    <Option
-                      value={item.userId}
-                      key={item.displayName}
-                      onClick={() => {
-                        setAssignedTo(item.userId)
-                      }}
-                    >
+                    <Option value={item.userId} key={item.displayName}>
                       {item.displayName}
                     </Option>
                   ))}
