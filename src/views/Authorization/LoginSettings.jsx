@@ -95,14 +95,10 @@ const LoginSettings = () => {
               border: 'moccasin',
               borderRadius: '8px',
             }}
-            onClick={() => {
+            onClick={async () => {
               if (serverURL === '') {
-                Preferences.set({
-                  key: 'customServerUrl',
-                  value: API_URL,
-                }).then(() => {
-                  Navigate('/login')
-                })
+                await apiClient.setServerURL(API_URL)
+                Navigate('/login')
                 return
               }
               if (!isValidServerURL()) {
@@ -113,17 +109,9 @@ const LoginSettings = () => {
                 })
                 return
               }
-              Preferences.set({
-                key: 'customServerUrl',
-                value: serverURL,
-              }).then(async () => {
-                // apiClient.customServerURL = serverURL + '/api/v1's
-                // Force re-initialization to reload from Preferences
-                await apiClient.init(true)
-                // refetch resource queries to update the API URL
-                refetchResource()
-                Navigate('/login')
-              })
+              await apiClient.setServerURL(serverURL)
+              refetchResource()
+              Navigate('/login')
             }}
           >
             Save
@@ -140,13 +128,10 @@ const LoginSettings = () => {
               border: 'moccasin',
               borderRadius: '8px',
             }}
-            onClick={() => {
-              Preferences.set({ key: 'customServerUrl', value: API_URL }).then(
-                () => {
-                  refetchResource()
-                  Navigate('/login')
-                },
-              )
+            onClick={async () => {
+              await apiClient.setServerURL(API_URL)
+              refetchResource()
+              Navigate('/login')
             }}
           >
             Cancel and Reset

@@ -44,6 +44,16 @@ class ApiClient {
     return this.customServerURL
   }
 
+  async setServerURL(url) {
+    const trimmedURL = url ? url.replace(/\/+$/, '') : url
+    await Preferences.set({
+      key: 'customServerUrl',
+      value: trimmedURL,
+    })
+    this.customServerURL = `${trimmedURL || API_URL}/api/v1`
+    this.initialized = true
+  }
+
   async refreshToken() {
     // Check if refresh token is expired BEFORE attempting refresh
     const refreshExpired = await isRefreshTokenExpired()
