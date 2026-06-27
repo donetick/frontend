@@ -49,10 +49,10 @@
     "markComplete": "Mark Complete",
     "markAsDone": "Mark as done",
     "edit": "Edit",
-    "archive": "Archive",
-    "unarchive": "Unarchive",
-    "viewHistory": "View History",
-    "history": "History",
+    "archive": "Archivar",
+    "unarchive": "Restaurar",
+    "viewHistory": "Ver historial",
+    "history": "Historial",
     "startTimer": "Start Timer",
     "start": "Start",
     "pauseTimer": "Pause Timer",
@@ -69,7 +69,7 @@
       "active": "Timer Active",
       "paused": "Timer Paused",
       "reset": "Reset Timer",
-      "delete": "Delete Session"
+      "delete": "Eliminar sesión"
     }
   }
 }
