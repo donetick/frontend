@@ -7,7 +7,7 @@
   "confirm": "Confirm",
   "loading": "Loading...",
   "error": "Error",
-  "success": "Success",
+  "success": "Listo",
   "warning": "Warning",
   "refresh": "Refresh",
   "copy": "Copy",
@@ -22,12 +22,12 @@
   "navigation": {
     "allTasks": "All Tasks",
     "archived": "Archived",
-    "things": "Things",
+    "things": "Elementos",
     "labels": "Labels",
     "projects": "Projects",
     "filters": "Filters",
     "activities": "Activities",
     "points": "Points",
-    "settings": "Settings"
+    "settings": "Ajustes"
   }
 }
