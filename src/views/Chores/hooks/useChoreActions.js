@@ -420,8 +420,8 @@ export const useChoreActions = ({
                       c => c.id !== chore.id,
                     )
                     setChores(newChores)
-                    updateChoreInState(chore.id, 'deleted')
                     setFilteredChores(newFilteredChores)
+                    queryClient.invalidateQueries(['chores'])
                     showSuccess({
                       title: 'Task Deleted',
                       message: 'The task has been deleted successfully.',
@@ -471,7 +471,7 @@ export const useChoreActions = ({
             await new Promise((resolve, reject) => {
               archiveChore.mutate(chore.id, {
                 onSuccess: data => {
-                  updateChoreInState(data, 'archive')
+                  updateChoreInState(chore, 'archive')
                   resolve(data)
                 },
                 onError: async error => {

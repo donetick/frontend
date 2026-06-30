@@ -8,9 +8,9 @@ import { isOfflineFeatureEnabled } from '../utils/OfflineFeatureToggle'
 import { syncEngine } from '../utils/SyncEngine'
 import { networkManager } from './NetworkManager'
 
-const PENDING_POLL_MS = 30_000 // retry pending commands every 30s
+export const PENDING_POLL_MS = 30_000 // retry pending commands every 30s
+export const SERVER_PROBE_MS = 15_000 // probe server when marked unreachable but device has network
 const CACHE_REFRESH_MS = 5 * 60_000 // refresh IDB cache every 5 min while online
-const SERVER_PROBE_MS = 15_000 // probe server when marked unreachable but device has network
 
 export function useSyncOnReconnect() {
   const queryClient = useQueryClient()
