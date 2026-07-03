@@ -37,6 +37,7 @@ import { useFilter } from '../../hooks/useFilter'
 
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useChores, useChoresHistory } from '../../queries/ChoreQueries'
+import HistoryDetailModal from '../Modals/HistoryDetailModal'
 import NoteViewerModal from '../Modals/Inputs/NoteViewerModal'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import { useLabels } from '../Labels/LabelQueries'
@@ -69,11 +70,31 @@ const statusConfig = {
   6: { color: 'warning', icon: <Schedule /> },
 }
 
-const ChoreHistoryItem = ({ time, name, points, status, performer, notes, onViewNote }) => {
+const ChoreHistoryItem = ({
+  time,
+  name,
+  points,
+  status,
+  notes,
+  onViewNote,
+  onViewDetails,
+}) => {
   const cfg = statusConfig[status] ?? statusConfig[1]
 
   return (
-    <Stack direction='row' alignItems='center' spacing={2}>
+    <Stack
+      direction='row'
+      alignItems='center'
+      spacing={2}
+      onClick={onViewDetails}
+      sx={{
+        cursor: onViewDetails ? 'pointer' : 'default',
+        borderRadius: 'sm',
+        '&:hover': onViewDetails
+          ? { backgroundColor: 'background.level1' }
+          : {},
+      }}
+    >
       <Typography level='body-md' sx={{ minWidth: 80 }}>
         {time}
       </Typography>
@@ -134,15 +155,15 @@ const ChoreHistoryItem = ({ time, name, points, status, performer, notes, onView
   )
 }
 
-
-const ChoreHistoryTimeline = ({ history, onViewNote }) => {
+const ChoreHistoryTimeline = ({
+  history,
+  performers,
+  onViewNote,
+  onViewDetails,
+}) => {
   const { fmt } = useLocalization()
 
   const groupedHistory = groupByDate(history)
-
-  const sortedEntries = Object.entries(groupedHistory).sort(
-    ([a], [b]) => new Date(b) - new Date(a),
-  )
 
   return (
     <Container sx={{ p: 2 }}>
@@ -164,20 +185,16 @@ const ChoreHistoryTimeline = ({ history, onViewNote }) => {
           <Divider />
           <Stack spacing={1}>
             {items.map(record => (
-              <>
-                <ChoreHistoryItem
-                  key={record.id}
-
-                  time={fmt.time(
-                    record.performedAt || record.updatedAt,
-                  )}
-                  name={record.choreName}
-                  points={record.points}
-                  status={record.status}
-                  notes={record.notes}
-                  onViewNote={onViewNote}
-                />
-              </>
+              <ChoreHistoryItem
+                key={record.id}
+                time={fmt.time(record.performedAt || record.updatedAt)}
+                name={record.choreName}
+                points={record.points}
+                status={record.status}
+                notes={record.notes}
+                onViewNote={onViewNote}
+                onViewDetails={() => onViewDetails?.(record, performers)}
+              />
             ))}
           </Stack>
         </Box>
@@ -396,6 +413,7 @@ const UserActivites = () => {
   const [enrichedHistory, setEnrichedHistory] = React.useState([])
   const [selectedChart, setSelectedChart] = React.useState('history')
   const [noteViewerConfig, setNoteViewerConfig] = useState({ isOpen: false })
+  const [detailModalConfig, setDetailModalConfig] = useState({ isOpen: false })
 
   const [historyPieChartData, setHistoryPieChartData] = React.useState([])
   const [choreDuePieChartData, setChoreDuePieChartData] = React.useState([])
@@ -1038,12 +1056,21 @@ const UserActivites = () => {
             <Box sx={{ flex: 1, minWidth: 0, width: '100%' }}>
               <ChoreHistoryTimeline
                 history={filteredTimeline}
+                performers={circleUsers}
                 onViewNote={notes => {
                   setNoteViewerConfig({
                     isOpen: true,
                     title: 'Note',
                     content: notes,
                     onClose: () => setNoteViewerConfig({ isOpen: false }),
+                  })
+                }}
+                onViewDetails={(entry, performers) => {
+                  setDetailModalConfig({
+                    isOpen: true,
+                    entry,
+                    performers,
+                    onClose: () => setDetailModalConfig({ isOpen: false }),
                   })
                 }}
               />
@@ -1197,6 +1224,7 @@ const UserActivites = () => {
         </>
       )}
       <NoteViewerModal config={noteViewerConfig} />
+      <HistoryDetailModal config={detailModalConfig} />
     </Container>
   )
 }
