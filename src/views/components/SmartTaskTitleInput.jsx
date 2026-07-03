@@ -183,10 +183,7 @@ const SmartTaskTitleInput = ({
 
   return (
     <div>
-      <div
-        className='task-input overflow-auto rounded border'
-        style={{ minHeight: '2.4em' }}
-      >
+      <div className='task-input' style={{ minHeight: '2.4em' }}>
         <textarea
           ref={titleInputRef}
           autoFocus={autoFocus}
