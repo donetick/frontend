@@ -59,47 +59,37 @@ const groupByDate = history => {
   return aggregated
 }
 
+const statusConfig = {
+  0: { color: 'primary', icon: <AccessTime /> },
+  1: { color: 'success', icon: <Check /> },
+  2: { color: 'warning', icon: <Redo /> },
+  3: { color: 'neutral', icon: <HourglassEmpty /> },
+  4: { color: 'danger', icon: <ThumbDown /> },
+  5: { color: 'danger', icon: <RunningWithErrors /> },
+  6: { color: 'warning', icon: <Schedule /> },
+}
+
 const ChoreHistoryItem = ({ time, name, points, status, performer, notes, onViewNote }) => {
-  const getStatusIcon = status => {
-    switch (status) {
-      case 0:
-        return <AccessTime color='primary' />
-      case 1:
-        return <Check color='success' />
-      case 2:
-        return <Redo color='warning' />
-      case 3:
-        return <HourglassEmpty color='neutral' />
-      case 4:
-        return <ThumbDown color='error' />
-      case 5:
-        return <RunningWithErrors color='error' />
-      case 6:
-        return <Schedule color='warning' />
-      default:
-        return <Check color='success' />
-    }
-  }
+  const cfg = statusConfig[status] ?? statusConfig[1]
 
   return (
     <Stack direction='row' alignItems='center' spacing={2}>
       <Typography level='body-md' sx={{ minWidth: 80 }}>
         {time}
       </Typography>
-      <Box
+      <Avatar
+        size='sm'
+        color={cfg.color}
+        variant='soft'
         sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minWidth: 32,
-          minHeight: 32,
-          borderRadius: '50%',
-          backgroundColor: 'background.level2',
-          boxShadow: 'sm',
+          width: 32,
+          height: 32,
+          flexShrink: 0,
+          '& svg': { fontSize: '16px' },
         }}
       >
-        {getStatusIcon(status)}
-      </Box>
+        {cfg.icon}
+      </Avatar>
       <Box
         sx={{
           display: 'flex',
@@ -157,8 +147,11 @@ const ChoreHistoryTimeline = ({ history, onViewNote }) => {
   return (
     <Container sx={{ p: 2 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-        <Timeline sx={{ fontSize: '1.5rem', color: 'primary.500' }} />
-        <Typography level='h4' sx={{ fontWeight: 'lg', color: 'text.primary' }}>
+        <Timeline sx={{ fontSize: '1.5rem' }} />
+        <Typography
+          level='title-md'
+          sx={{ fontWeight: 'lg', color: 'text.primary' }}
+        >
           Activities Timeline
         </Typography>
       </Box>
@@ -962,18 +955,13 @@ const UserActivites = () => {
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-        {/* <EmojiEvents sx={{ fontSize: '2rem', color: '#FFD700' }} /> */}
-        <Stack sx={{ flex: 1 }}>
-          <Typography
-            level='h3'
-            sx={{ fontWeight: 'lg', color: 'text.primary' }}
-          >
-            User Activities
-          </Typography>
-          <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            Overview of user activities and task statistics
-          </Typography>
-        </Stack>
+        <Group sx={{ fontSize: '1.5rem' }} />
+        <Typography
+          level='title-md'
+          sx={{ fontWeight: 'lg', color: 'text.primary' }}
+        >
+          User Activities
+        </Typography>
       </Box>
 
       <FilterBar
