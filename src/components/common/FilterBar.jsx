@@ -1,4 +1,4 @@
-import { Check, Close, FilterList, Tune } from '@mui/icons-material'
+import { Check, FilterList, Tune } from '@mui/icons-material'
 import {
   Avatar,
   Badge,
@@ -11,6 +11,7 @@ import {
 } from '@mui/joy'
 import { useState } from 'react'
 import BottomSheetModal from './BottomSheetModal'
+import ActiveFilterChips from './filter/ActiveFilterChips'
 
 /**
  * Reusable filter bar component.
@@ -134,6 +135,47 @@ const FilterBar = ({
 
   const hasActive = activeFilterCount > 0
 
+  const selectableChipSx = {
+    cursor: 'pointer',
+    transition: 'all 0.15s ease',
+    userSelect: 'none',
+    alignItems: 'center',
+    '& .MuiChip-startDecorator': {
+      display: 'flex',
+      alignItems: 'center',
+      mr: 0.5,
+    },
+    '& .MuiChip-label': {
+      lineHeight: 1.2,
+    },
+    '&:hover': { opacity: 0.85 },
+  }
+
+  const sectionBadgeChipSx = {
+    ml: 'auto',
+    fontSize: '0.7rem',
+    minHeight: 22,
+    py: 0.25,
+    px: 0.75,
+    alignItems: 'center',
+    '& .MuiChip-label': {
+      lineHeight: 1.2,
+      px: 0,
+    },
+  }
+
+  const modalCountChipSx = {
+    ml: 0.5,
+    minHeight: 22,
+    py: 0.25,
+    px: 0.75,
+    alignItems: 'center',
+    '& .MuiChip-label': {
+      lineHeight: 1.2,
+      px: 0,
+    },
+  }
+
   // ── Chip labels for inline bar ─────────────────────────────────────────────
 
   const getActiveChipLabel = def => {
@@ -223,85 +265,47 @@ const FilterBar = ({
           color='primary'
           size='sm'
           anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+          sx={{ display: 'flex', alignItems: 'center' }}
         >
           <Button
-            size='sm'
+            size='md'
             variant={hasActive ? 'solid' : 'outlined'}
             color={hasActive ? 'primary' : 'neutral'}
             startDecorator={<FilterList sx={{ fontSize: 16 }} />}
             onClick={() => setIsOpen(true)}
-            sx={{ borderRadius: 'xl', gap: 0.5 }}
+            sx={{
+              borderRadius: 'xl',
+              py: 0.5,
+              px: 1,
+              gap: 0.5,
+              alignItems: 'center',
+              '& .MuiButton-startDecorator': {
+                display: 'flex',
+                alignItems: 'center',
+                mr: 0.5,
+              },
+            }}
           >
             Filters
           </Button>
         </Badge>
 
-        {(() => {
-          const activeChips = filterDefs
+        <ActiveFilterChips
+          chips={filterDefs
             .map(def => ({ def, label: getActiveChipLabel(def) }))
             .filter(({ label }) => !!label)
-          const MAX_VISIBLE = 2
-          const visible = activeChips.slice(0, MAX_VISIBLE)
-          const overflow = activeChips.length - MAX_VISIBLE
-
-          return (
-            <>
-              {visible.map(({ def, label }) => (
-                <Chip
-                  key={def.id}
-                  size='md'
-                  variant='soft'
-                  color='primary'
-                  endDecorator={
-                    <Close
-                      sx={{ cursor: 'pointer' }}
-                      onClick={e => {
-                        e.stopPropagation()
-                        onSetFilter(def.id, null)
-                      }}
-                    />
-                  }
-                  onClick={() => setIsOpen(true)}
-                  sx={{ 
-                    py: 0.64,
-                    cursor: 'pointer', transition: 'all 0.15s ease', '&:hover': { opacity: 0.85 } }}
-                >
-                  {label}
-                </Chip>
-              ))}
-
-              {overflow > 0 && (
-                <Chip
-                  size='md'
-                  variant='soft'
-                  color='neutral'
-                  onClick={() => setIsOpen(true)}
-                  sx={{ py: 0.64, cursor: 'pointer', transition: 'all 0.15s ease', '&:hover': { opacity: 0.85 } }}
-                >
-                  +{overflow} more
-                </Chip>
-              )}
-            </>
-          )
-        })()}
-
-        {hasActive && (
-          <Button
-            size='sm'
-            variant='plain'
-            color='neutral'
-            sx={{ px: 0.5, fontSize: '0.75rem', color: 'text.secondary', minHeight: 0 }}
-            onClick={onClearAll}
-          >
-            Clear all
-          </Button>
-        )}
-
-        {hasActive && resultCount !== undefined && totalCount !== undefined && (
-          <Typography level='body-xs' sx={{ color: 'text.tertiary', ml: 'auto', flexShrink: 0 }}>
-            {resultCount} / {totalCount}
-          </Typography>
-        )}
+            .map(({ def, label }) => ({
+              key: def.id,
+              label,
+              onClear: () => onSetFilter(def.id, null),
+            }))}
+          onOpen={() => setIsOpen(true)}
+          onClearAll={hasActive ? onClearAll : undefined}
+          resultCount={hasActive ? resultCount : undefined}
+          totalCount={hasActive ? totalCount : undefined}
+          maxVisible={2}
+          chipSize='md'
+        />
       </Box>
 
       {/* ── Bottom sheet ────────────────────────────────────── */}
@@ -313,7 +317,7 @@ const FilterBar = ({
             <Tune sx={{ fontSize: 20 }} />
             Filters
             {hasActive && (
-              <Chip size='sm' variant='solid' color='primary' sx={{ ml: 0.5 }}>
+              <Chip size='sm' variant='solid' color='primary' sx={modalCountChipSx}>
                 {activeFilterCount}
               </Chip>
             )}
@@ -356,20 +360,20 @@ const FilterBar = ({
 
                 {/* active badge in header */}
                 {def.type === 'multi-select' && (activeFilters[def.id]?.length ?? 0) > 0 && (
-                  <Chip size='sm' variant='solid' color='primary' sx={{ ml: 'auto', fontSize: '0.7rem', height: 20 }}>
+                  <Chip size='sm' variant='solid' color='primary' sx={sectionBadgeChipSx}>
                     {activeFilters[def.id].length} selected
                   </Chip>
                 )}
                 {def.type === 'single-select' && activeFilters[def.id] != null && (() => {
                   const opt = def.options?.find(o => o.value === activeFilters[def.id])
                   return opt ? (
-                    <Chip size='sm' variant='solid' color='primary' sx={{ ml: 'auto', fontSize: '0.7rem', height: 20 }}>
+                    <Chip size='sm' variant='solid' color='primary' sx={sectionBadgeChipSx}>
                       {opt.label}
                     </Chip>
                   ) : null
                 })()}
                 {def.type === 'date-range' && getActiveChipLabel(def) && (
-                  <Chip size='sm' variant='solid' color='primary' sx={{ ml: 'auto', fontSize: '0.7rem', height: 20 }}>
+                  <Chip size='sm' variant='solid' color='primary' sx={sectionBadgeChipSx}>
                     {getActiveChipLabel(def)}
                   </Chip>
                 )}
@@ -393,7 +397,7 @@ const FilterBar = ({
                           ) : (opt.icon ?? null)
                         }
                         onClick={() => handleMultiToggle(def.id, opt.value)}
-                        sx={{ cursor: 'pointer', transition: 'all 0.15s ease', userSelect: 'none', '&:hover': { opacity: 0.85 } }}
+                        sx={selectableChipSx}
                       >
                         {opt.label}
                       </Chip>
@@ -420,7 +424,7 @@ const FilterBar = ({
                           ) : (opt.icon ?? null)
                         }
                         onClick={() => handleSingleToggle(def.id, opt.value)}
-                        sx={{ cursor: 'pointer', transition: 'all 0.15s ease', userSelect: 'none', '&:hover': { opacity: 0.85 } }}
+                        sx={selectableChipSx}
                       >
                         {opt.label}
                       </Chip>
@@ -436,7 +440,7 @@ const FilterBar = ({
                   color={activeFilters[def.id] ? 'primary' : 'neutral'}
                   startDecorator={activeFilters[def.id] ? <Check sx={{ fontSize: 14 }} /> : null}
                   onClick={() => handleBoolToggle(def.id)}
-                  sx={{ cursor: 'pointer', transition: 'all 0.15s ease', userSelect: 'none', '&:hover': { opacity: 0.85 } }}
+                  sx={selectableChipSx}
                 >
                   {def.label}
                 </Chip>
@@ -458,7 +462,7 @@ const FilterBar = ({
                             color={isSelected ? 'primary' : 'neutral'}
                             startDecorator={isSelected ? <Check sx={{ fontSize: 14 }} /> : null}
                             onClick={() => handleDateRangePreset(def.id, preset.value)}
-                            sx={{ cursor: 'pointer', transition: 'all 0.15s ease', userSelect: 'none', '&:hover': { opacity: 0.85 } }}
+                            sx={selectableChipSx}
                           >
                             {preset.label}
                           </Chip>

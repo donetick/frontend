@@ -951,9 +951,11 @@ const MyChores = () => {
           labels={userLabels || []}
           projects={projectsWithDefault}
           tempFilter={tempFilter}
+          tempFilterMeta={tempFilterMeta}
           applyTempFilter={applyTempFilter}
           clearTempFilter={clearTempFilter}
           saveFilter={saveFilter}
+          updateFilter={updateFilter}
           onFilterSaved={name =>
             showSuccess({
               title: 'Filter Saved',

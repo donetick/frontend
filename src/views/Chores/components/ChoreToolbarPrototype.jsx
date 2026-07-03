@@ -23,9 +23,7 @@ import {
   Check,
   CheckBox,
   CheckBoxOutlineBlank,
-  Close,
   FilterList,
-  FolderOpen,
   Save,
   Sort,
   Tune,
@@ -46,17 +44,23 @@ import {
   MenuItem,
   Typography,
 } from '@mui/joy'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import BottomSheetModal from '../../../components/common/BottomSheetModal'
+import ActiveFilterChips from '../../../components/common/filter/ActiveFilterChips'
 import { Z_INDEX } from '../../../constants/zIndex'
 import KeyboardShortcutHint from '../../../components/common/KeyboardShortcutHint'
 import { FILTER_COLORS } from '../../../utils/Colors'
+import Priorities from '../../../utils/Priorities'
 import FilterBuilderContent, {
+  CHORE_STATUSES,
+  DUE_DATE_OPTIONS,
+  POINTS_OPERATORS,
   conditionsToSelections,
   defaultSelections,
   selectionsToConditions,
 } from './FilterBuilderContent'
 import SearchBar from './SearchBar'
+import ProjectSelector from '../../components/ProjectSelector'
 
 // ─── sub-components for the Display sheet ────────────────────────────────────
 
@@ -133,9 +137,11 @@ const OptionChips = ({ options, selected, multi, onToggle }) => (
  *  labels            – user labels for Labels section
  *  projects          – projects list (projectsWithDefault) for Projects section + Display sheet
  *  tempFilter        – current temp filter object { conditions, operator } or null
+ *  tempFilterMeta    – metadata for temp filter, including saved-filter edit source when applicable
  *  applyTempFilter   – (filter) => void  — called immediately as selections change
  *  clearTempFilter   – () => void
  *  saveFilter        – (filterData) => Promise  — saves as a named filter
+ *  updateFilter      – (filterId, filterData) => Promise  — updates an existing saved filter
  *  onFilterSaved     – (name) => void  — called after successful save (for notifications)
  *
  *  -- Result counts --
@@ -176,9 +182,11 @@ const ChoreToolbar = ({
   labels = [],
   projects = [],
   tempFilter,
+  tempFilterMeta,
   applyTempFilter,
   clearTempFilter,
   saveFilter,
+  updateFilter,
   onFilterSaved,
   // result counts
   resultCount,
@@ -219,7 +227,9 @@ const ChoreToolbar = ({
   const [savingFilter, setSavingFilter] = useState(false)
   const [saveFilterName, setSaveFilterName] = useState('')
   const [saveMenuAnchorEl, setSaveMenuAnchorEl] = useState(null)
+  const [editingSavedFilter, setEditingSavedFilter] = useState(null)
   const saveMenuRef = useRef(null)
+  const activeConditions = selectionsToConditions(localSelections)
 
   // ── badge counts ─────────────────────────────────────────────────────────────
 
@@ -232,45 +242,165 @@ const ChoreToolbar = ({
 
   const inlineChips = []
 
-  if (savedFilterActive) {
-    const sf = savedFilters.find(f => f.id === activeFilterId)
-    if (sf) {
-      inlineChips.push({
-        key: '__saved',
-        label: sf.name,
-        onClear: () => onSavedFilterClick?.(activeFilterId),
-      })
+  const getConditionChipLabel = condition => {
+    if (!condition?.type) return 'Filter'
+
+    const typeLabels = {
+      assignee: 'Assignee',
+      createdBy: 'Created By',
+      status: 'Status',
+      priority: 'Priority',
+      label: 'Labels',
+      project: 'Project',
+      dueDate: 'Due Date',
+      points: 'Points',
     }
-  } else if (tempConditionCount > 0) {
+
+    const typeLabel = typeLabels[condition.type] || 'Filter'
+    const prefix = condition.operator === 'isNot' ? 'Not ' : ''
+
+    if (condition.type === 'dueDate') {
+      const dueDateLabel =
+        DUE_DATE_OPTIONS.find(o => o.value === condition.operator)?.label ||
+        'Custom'
+      return `${typeLabel}: ${dueDateLabel}`
+    }
+
+    if (condition.type === 'points') {
+      const pointsOp =
+        POINTS_OPERATORS.find(o => o.value === condition.operator)?.label ||
+        condition.operator ||
+        ''
+      return `${typeLabel} ${pointsOp} ${condition.value ?? 0}`
+    }
+
+    const rawValues = Array.isArray(condition.value)
+      ? condition.value
+      : condition.value != null
+        ? [condition.value]
+        : []
+
+    const resolveLabel = value => {
+      if (condition.type === 'assignee' || condition.type === 'createdBy') {
+        const member = members.find(m => m.userId === value)
+        return member?.displayName || member?.username || String(value)
+      }
+      if (condition.type === 'status') {
+        return CHORE_STATUSES.find(s => s.value === value)?.label || String(value)
+      }
+      if (condition.type === 'priority') {
+        return Priorities.find(p => p.value === value)?.name || String(value)
+      }
+      if (condition.type === 'label') {
+        return labels.find(l => l.id === value)?.name || String(value)
+      }
+      if (condition.type === 'project') {
+        if (value === 'default') return 'Default Project'
+        return projects.find(p => p.id === value)?.name || String(value)
+      }
+      return String(value)
+    }
+
+    if (rawValues.length === 0) {
+      return `${prefix}${typeLabel}`
+    }
+
+    if (rawValues.length === 1) {
+      return `${prefix}${typeLabel}: ${resolveLabel(rawValues[0])}`
+    }
+
+    return `${prefix}${typeLabel} (${rawValues.length})`
+  }
+
+  const clearConditionAtIndex = index => {
+    const nextConditions = (tempFilter?.conditions || []).filter(
+      (_condition, conditionIndex) => conditionIndex !== index,
+    )
+
+    if (nextConditions.length === 0) {
+      setLocalSelections(defaultSelections())
+      clearTempFilter?.()
+      return
+    }
+
+    const nextFilter = {
+      ...tempFilter,
+      operator: tempFilter?.operator || 'AND',
+      conditions: nextConditions,
+    }
+
+    setLocalSelections(conditionsToSelections(nextConditions))
+    applyTempFilter?.(nextFilter)
+  }
+
+  const activeSavedFilter = savedFilterActive
+    ? savedFilters.find(f => f.id === activeFilterId)
+    : null
+
+  const activeChipConditions = savedFilterActive
+    ? activeSavedFilter?.conditions || []
+    : tempFilter?.conditions || []
+
+  activeChipConditions.forEach((condition, index) => {
     inlineChips.push({
-      key: '__temp',
-      label: `${tempConditionCount} condition${tempConditionCount !== 1 ? 's' : ''}`,
+      key: `${savedFilterActive ? '__saved' : '__temp'}_${index}`,
+      label: getConditionChipLabel(condition),
       onClear: () => {
-        setLocalSelections(defaultSelections())
-        clearTempFilter?.()
+        if (savedFilterActive) {
+          onSavedFilterClick?.(activeFilterId)
+          return
+        }
+        clearConditionAtIndex(index)
       },
     })
-  }
+  })
 
   // ── open filter sheet ────────────────────────────────────────────────────────
 
   const openFilterSheet = () => {
     if (tempFilter?.conditions?.length > 0) {
       setLocalSelections(conditionsToSelections(tempFilter.conditions))
+      if (tempFilterMeta?.sourceFilterId) {
+        const sourceFilter =
+          savedFilters.find(f => f.id === tempFilterMeta.sourceFilterId) ||
+          null
+        setEditingSavedFilter(
+          sourceFilter ||
+            (tempFilterMeta.sourceFilterId
+              ? {
+                  id: tempFilterMeta.sourceFilterId,
+                  name: tempFilterMeta.sourceFilterName,
+                  description: tempFilterMeta.sourceFilterDescription,
+                  color: tempFilterMeta.sourceFilterColor,
+                }
+              : null),
+        )
+      } else {
+        setEditingSavedFilter(null)
+      }
     } else if (activeFilterId) {
       const sf = savedFilters.find(f => f.id === activeFilterId)
+      setEditingSavedFilter(sf || null)
       setLocalSelections(
         sf?.conditions
           ? conditionsToSelections(sf.conditions)
           : defaultSelections(),
       )
     } else {
+      setEditingSavedFilter(null)
       setLocalSelections(defaultSelections())
     }
     setSavingFilter(false)
     setSaveFilterName('')
+    setSaveMenuAnchorEl(null)
     setFilterSheetOpen(true)
   }
+
+  useEffect(() => {
+    if (!filterSheetOpen || savingFilter || activeConditions.length === 0) {
+      setSaveMenuAnchorEl(null)
+    }
+  }, [filterSheetOpen, savingFilter, activeConditions.length])
 
   // ── selection changes → apply temp filter immediately ────────────────────────
 
@@ -279,7 +409,20 @@ const ChoreToolbar = ({
       const next = typeof updater === 'function' ? updater(prev) : updater
       const conditions = selectionsToConditions(next)
       if (conditions.length > 0) {
-        applyTempFilter?.({ conditions, operator: 'AND' })
+        applyTempFilter?.(
+          { conditions, operator: 'AND' },
+          editingSavedFilter
+            ? {
+                name: editingSavedFilter.name,
+                description: editingSavedFilter.description,
+                sourceFilterId: editingSavedFilter.id,
+                sourceFilterName: editingSavedFilter.name,
+                sourceFilterDescription: editingSavedFilter.description,
+                sourceFilterColor: editingSavedFilter.color,
+                isEditingSavedFilter: true,
+              }
+            : null,
+        )
       } else {
         clearTempFilter?.()
       }
@@ -307,6 +450,31 @@ const ChoreToolbar = ({
 
     setSavingFilter(false)
     setSaveFilterName('')
+    setFilterSheetOpen(false)
+  }
+
+  const handleUpdateFilter = () => {
+    if (!editingSavedFilter?.id || !updateFilter) return
+
+    const conditions = selectionsToConditions(localSelections)
+    if (conditions.length === 0) return
+
+    updateFilter(
+      editingSavedFilter.id,
+      {
+        name: editingSavedFilter.name,
+        description: editingSavedFilter.description || '',
+        color: editingSavedFilter.color,
+        conditions,
+        operator: 'AND',
+      },
+    )?.then?.(() => {
+      clearTempFilter?.()
+      onSavedFilterClick?.(editingSavedFilter.id)
+      onFilterSaved?.(editingSavedFilter.name)
+    })
+
+    setSaveMenuAnchorEl(null)
     setFilterSheetOpen(false)
   }
 
@@ -340,13 +508,6 @@ const ChoreToolbar = ({
     { value: 'compact', label: 'Compact', icon: <ViewComfy sx={{ fontSize: 16 }} /> },
     { value: 'calendar', label: 'Calendar', icon: <CalendarMonth sx={{ fontSize: 16 }} /> },
   ]
-
-  // Only show project in Display sheet when no advanced filter is active
-  const showProjectInDisplay =
-    !filterActive &&
-    projects.filter(p => p.id !== 'default').length > 0
-
-  const activeConditions = selectionsToConditions(localSelections)
 
   return (
     <>
@@ -386,6 +547,15 @@ const ChoreToolbar = ({
             <FilterList />
           </IconButton>
         </Badge>
+
+        {/* Project selector */}
+        {!filterActive && projects.filter(p => p.id !== 'default').length > 0 && (
+          <ProjectSelector
+            selectedProject={selectedProject?.name || 'Default Project'}
+            onProjectSelect={onProjectSelect}
+            showKeyboardShortcuts={showKeyboardShortcuts}
+          />
+        )}
 
         {/* Display button — View + Group combined */}
         <IconButton
@@ -431,74 +601,29 @@ const ChoreToolbar = ({
 
       {/* ── Row 2: active filter chips ──────────────────────────────────────── */}
       {hasAnyActive && (
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1,
-            flexWrap: 'nowrap',
-            overflowX: 'auto',
-            py: 0.5,
-            '&::-webkit-scrollbar': { display: 'none' },
-            scrollbarWidth: 'none',
+        <ActiveFilterChips
+          chips={inlineChips}
+          onOpen={openFilterSheet}
+          onClearAll={() => {
+            setLocalSelections(defaultSelections())
+            onClearAllFilters?.()
           }}
-        >
-          {inlineChips.map(({ key, label, onClear }) => (
-            <Chip
-              key={key}
-              size='sm'
-              variant='soft'
-              color='primary'
-              endDecorator={
-                <Close
-                  sx={{ fontSize: 12, cursor: 'pointer' }}
-                  onClick={e => {
-                    e.stopPropagation()
-                    onClear()
-                  }}
-                />
-              }
-              onClick={openFilterSheet}
-              sx={{ cursor: 'pointer', flexShrink: 0 }}
-            >
-              {label}
-            </Chip>
-          ))}
-
-          {resultCount != null && totalCount != null && (
-            <Typography
-              level='body-xs'
-              sx={{ color: 'text.tertiary', ml: 'auto', flexShrink: 0 }}
-            >
-              {resultCount} / {totalCount}
-            </Typography>
-          )}
-
-          <Button
-            size='sm'
-            variant='plain'
-            color='neutral'
-            sx={{
-              px: 0.5,
-              fontSize: '0.72rem',
-              color: 'text.tertiary',
-              minHeight: 0,
-              flexShrink: 0,
-            }}
-            onClick={() => {
-              setLocalSelections(defaultSelections())
-              onClearAllFilters?.()
-            }}
-          >
-            Clear all
-          </Button>
-        </Box>
+          resultCount={resultCount}
+          totalCount={totalCount}
+          maxVisible={2}
+          chipSize='md'
+          clearButtonSize='sm'
+          clearButtonSx={{ color: 'text.secondary' }}
+        />
       )}
 
       {/* ── Unified Filter bottom sheet ─────────────────────────────────────── */}
       <BottomSheetModal
         open={filterSheetOpen}
-        onClose={() => setFilterSheetOpen(false)}
+        onClose={() => {
+          setSaveMenuAnchorEl(null)
+          setFilterSheetOpen(false)
+        }}
         maxHeight='92vh'
         title={
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -557,6 +682,7 @@ const ChoreToolbar = ({
                 disabled={!hasAnyActive && activeConditions.length === 0}
                 onClick={() => {
                   setLocalSelections(defaultSelections())
+                  setSaveMenuAnchorEl(null)
                   onClearAllFilters?.()
                   setFilterSheetOpen(false)
                 }}
@@ -568,7 +694,10 @@ const ChoreToolbar = ({
                 <>
                   <ButtonGroup variant='solid' color='primary'>
                     <Button
-                      onClick={() => setFilterSheetOpen(false)}
+                      onClick={() => {
+                        setSaveMenuAnchorEl(null)
+                        setFilterSheetOpen(false)
+                      }}
                       sx={{ minWidth: 140 }}
                     >
                       {resultCount != null
@@ -591,13 +720,25 @@ const ChoreToolbar = ({
                     sx={{ zIndex: Z_INDEX.MODAL_CONTENT + 10 }}
                   >
                     <MenuItem
+                      onClick={handleUpdateFilter}
+                      disabled={!editingSavedFilter}
+                    >
+                      <Save sx={{ fontSize: 16, mr: 1 }} />
+                      Save Filter
+                    </MenuItem>
+                    <MenuItem
                       onClick={() => {
                         setSaveMenuAnchorEl(null)
+                        setSaveFilterName(
+                          editingSavedFilter
+                            ? `${editingSavedFilter.name} Copy`
+                            : '',
+                        )
                         setSavingFilter(true)
                       }}
                     >
                       <Save sx={{ fontSize: 16, mr: 1 }} />
-                      Save as Filter
+                      Save as New Filter
                     </MenuItem>
                   </Menu>
                 </>
@@ -605,7 +746,10 @@ const ChoreToolbar = ({
                 <Button
                   variant='solid'
                   color='primary'
-                  onClick={() => setFilterSheetOpen(false)}
+                  onClick={() => {
+                    setSaveMenuAnchorEl(null)
+                    setFilterSheetOpen(false)
+                  }}
                   sx={{ minWidth: 140 }}
                 >
                   Done
@@ -767,26 +911,6 @@ const ChoreToolbar = ({
             onToggle={v => onAssigneeFilterChange?.(v)}
           />
 
-          {/* Project section — only when no advanced filter is active */}
-          {showProjectInDisplay && (
-            <>
-              <Divider sx={{ my: 2.5 }} />
-              <SectionHeader
-                icon={<FolderOpen />}
-                label='Project'
-                badge={projectActive ? selectedProject.name : null}
-              />
-              <OptionChips
-                options={projects.map(p => ({ value: p.id, label: p.name }))}
-                selected={selectedProject?.id ?? 'default'}
-                multi={false}
-                onToggle={id => {
-                  const p = projects.find(x => x.id === id)
-                  if (p) onProjectSelect?.(p)
-                }}
-              />
-            </>
-          )}
         </Box>
       </BottomSheetModal>
     </>

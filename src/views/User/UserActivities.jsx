@@ -2,14 +2,18 @@ import { Cell, Pie, PieChart, Tooltip } from 'recharts'
 
 import {
   AccessTime,
+  CalendarMonth,
   Check,
+  Checklist,
   EventBusy,
   EventNote,
   Group,
   HourglassEmpty,
+  Person,
   Redo,
   RunningWithErrors,
   Schedule,
+  Style,
   ThumbDown,
   Timeline,
   Toll,
@@ -24,23 +28,20 @@ import {
   Divider,
   Grid,
   Link,
-  Option,
-  Select,
   Stack,
-  Tab,
-  TabList,
-  Tabs,
   Typography,
 } from '@mui/joy'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
+import FilterBar from '../../components/common/FilterBar'
+import { useFilter } from '../../hooks/useFilter'
 
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useChores, useChoresHistory } from '../../queries/ChoreQueries'
 import NoteViewerModal from '../Modals/Inputs/NoteViewerModal'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
+import { useLabels } from '../Labels/LabelQueries'
 import { ChoresGrouper } from '../../utils/Chores'
 import { COLORS, TASK_COLOR } from '../../utils/Colors.jsx'
-import { resolvePhotoURL } from '../../utils/Helpers.jsx'
 import LoadingComponent from '../components/Loading'
 
 const groupByDate = history => {
@@ -416,6 +417,7 @@ const UserActivites = () => {
     choresAssigneeBreakdownChartData,
     setChoresAssigneeBreakdownChartData,
   ] = React.useState([])
+  const { data: userLabels } = useLabels()
   const { data: choresData, isLoading: isChoresLoading } = useChores(true)
   const {
     data: choresHistory,
@@ -432,6 +434,142 @@ const UserActivites = () => {
     }
   }, [circleMembersData])
 
+  // Client-side filters applied on top of the user+time-window slice
+  const clientFilterDefs = useMemo(
+    () => [
+      {
+        id: 'status',
+        label: 'Status',
+        type: 'multi-select',
+        icon: <Checklist />,
+        options: [
+          { value: 1, label: 'Completed', color: 'success', icon: <Check sx={{ fontSize: 14 }} /> },
+          { value: 2, label: 'Skipped', color: 'warning', icon: <Redo sx={{ fontSize: 14 }} /> },
+          { value: 3, label: 'Pending', color: 'neutral', icon: <HourglassEmpty sx={{ fontSize: 14 }} /> },
+          { value: 4, label: 'Rejected', color: 'danger', icon: <ThumbDown sx={{ fontSize: 14 }} /> },
+          { value: 5, label: 'Missed', color: 'danger', icon: <RunningWithErrors sx={{ fontSize: 14 }} /> },
+          { value: 6, label: 'Rescheduled', color: 'warning', icon: <Schedule sx={{ fontSize: 14 }} /> },
+        ],
+        filterFn: (item, values) => values.includes(item.status),
+      },
+      ...(userLabels?.length > 0
+        ? [
+            {
+              id: 'label',
+              label: 'Labels',
+              type: 'multi-select',
+              icon: <Style />,
+              options: userLabels.map(l => ({
+                value: l.id,
+                label: l.name,
+                icon: (
+                  <Box
+                    component='span'
+                    sx={{
+                      display: 'inline-block',
+                      width: 10,
+                      height: 10,
+                      borderRadius: '50%',
+                      bgcolor: l.color || '#90a4ae',
+                      flexShrink: 0,
+                    }}
+                  />
+                ),
+              })),
+              filterFn: (item, values) =>
+                item.labelsV2?.some(l => values.includes(l.id)) ?? false,
+            },
+          ]
+        : []),
+      {
+        id: 'hasNotes',
+        label: 'Has Notes',
+        type: 'boolean',
+        icon: <EventNote />,
+        filterFn: item => !!item.notes,
+      },
+      {
+        id: 'hasPoints',
+        label: 'Has Points',
+        type: 'boolean',
+        icon: <Toll />,
+        filterFn: item => (item.points ?? 0) > 0,
+      },
+    ],
+    [userLabels],
+  )
+
+  const {
+    filteredData: filteredTimeline,
+    activeFilters: clientActiveFilters,
+    setFilter: setClientFilter,
+    clearAll: clearClientFilters,
+  } = useFilter(selectedHistory, clientFilterDefs)
+
+  // All filter defs merged for FilterBar display
+  const filterDefs = useMemo(
+    () => [
+      {
+        id: 'timePeriod',
+        label: 'Time Period',
+        type: 'single-select',
+        icon: <CalendarMonth />,
+        defaultValue: 7,
+        options: [
+          { value: 7, label: '7 Days' },
+          { value: 30, label: '30 Days' },
+          { value: 90, label: '90 Days' },
+          { value: 365, label: 'All Time' },
+        ],
+      },
+      {
+        id: 'completedBy',
+        label: 'User',
+        type: 'single-select',
+        icon: <Person />,
+        options: circleUsers.map(u => ({
+          value: u.userId,
+          label: u.displayName,
+          avatar: u.image,
+        })),
+      },
+      ...clientFilterDefs,
+    ],
+    [circleUsers, clientFilterDefs],
+  )
+
+  // Merge server-driven and client-driven active filter states for the bar
+  const activeFilters = useMemo(
+    () => ({
+      timePeriod: tabValue,
+      ...(selectedUser !== 'all' ? { completedBy: selectedUser } : {}),
+      ...clientActiveFilters,
+    }),
+    [tabValue, selectedUser, clientActiveFilters],
+  )
+
+  const handleSetFilter = (id, value) => {
+    if (id === 'completedBy') {
+      const userId = value ?? 'all'
+      setSelectedUser(userId)
+      setSelectedHistory(enrichedHistory.filter(h => USER_FILTER(h, userId)))
+    } else if (id === 'timePeriod') {
+      const days = value ?? 7
+      setTabValue(days)
+      refetchHistory(days)
+    } else {
+      setClientFilter(id, value)
+    }
+  }
+
+  const handleClearAll = () => {
+    setSelectedUser('all')
+    setSelectedHistory(enrichedHistory)
+    setTabValue(7)
+    refetchHistory(7)
+    clearClientFilters()
+  }
+
   useEffect(() => {
     if (
       !isChoresHistoryLoading &&
@@ -444,6 +582,7 @@ const UserActivites = () => {
         return {
           ...item,
           choreName: chore?.name,
+          labelsV2: chore?.labelsV2,
         }
       })
       setEnrichedHistory(enrichedHistory)
@@ -837,207 +976,14 @@ const UserActivites = () => {
         </Stack>
       </Box>
 
-      {/* Filter Controls - Always visible */}
-      <Card
-        variant='outlined'
-        sx={{
-          width: '100%',
-          p: 2,
-          mb: 3,
-          borderRadius: 12,
-          background:
-            'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
-          backdropFilter: 'blur(10px)',
-        }}
-      >
-        <Stack spacing={2}>
-          <Typography level='title-sm' sx={{ color: 'text.secondary' }}>
-            Filter Activities
-          </Typography>
-
-          <Stack
-            direction={{ xs: 'column', sm: 'row' }}
-            spacing={2}
-            alignItems={{ xs: 'stretch', sm: 'center' }}
-          >
-            {/* User Filter */}
-            <Box sx={{ flex: 1, minWidth: 200 }}>
-              <Typography level='body-sm' sx={{ mb: 1, fontWeight: 500 }}>
-                Show activities for:
-              </Typography>
-              <Select
-                sx={{
-                  width: '100%',
-                }}
-                variant='outlined'
-                value={selectedUser}
-                onChange={(e, selected) => {
-                  setSelectedUser(selected)
-                  setSelectedHistory(
-                    enrichedHistory.filter(h => USER_FILTER(h, selected)),
-                  )
-                }}
-                renderValue={() => {
-                  if (selectedUser === undefined || selectedUser === 'all') {
-                    return (
-                      <Typography
-                        startDecorator={
-                          <Avatar color='primary' size='sm'>
-                            <Group />
-                          </Avatar>
-                        }
-                      >
-                        All Users
-                      </Typography>
-                    )
-                  }
-                  return (
-                    <Typography
-                      startDecorator={
-                        <Avatar
-                          color='primary'
-                          size='sm'
-                          src={resolvePhotoURL(
-                            circleUsers.find(
-                              user => user.userId === selectedUser,
-                            )?.image,
-                          )}
-                        >
-                          {circleUsers
-                            .find(user => user.userId === selectedUser)
-                            ?.displayName?.charAt(0)}
-                        </Avatar>
-                      }
-                    >
-                      {
-                        circleUsers.find(user => user.userId === selectedUser)
-                          ?.displayName
-                      }
-                    </Typography>
-                  )
-                }}
-              >
-                <Option value='all'>
-                  <Typography
-                    startDecorator={
-                      <Avatar color='primary' size='sm'>
-                        <Group />
-                      </Avatar>
-                    }
-                  >
-                    All Users
-                  </Typography>
-                </Option>
-                {circleUsers.map(user => (
-                  <Option key={user.userId} value={user.userId}>
-                    <Avatar
-                      color='primary'
-                      size='sm'
-                      src={resolvePhotoURL(user.image)}
-                    >
-                      {user.displayName?.charAt(0)}
-                    </Avatar>
-                    <Typography>{user.displayName}</Typography>
-                    <Chip
-                      color='success'
-                      size='sm'
-                      variant='soft'
-                      startDecorator={<Toll />}
-                    >
-                      {user.points - user.pointsRedeemed}
-                    </Chip>
-                  </Option>
-                ))}
-              </Select>
-            </Box>
-
-            {/* Time Period Filter */}
-            <Box sx={{ flex: 1, minWidth: 200 }}>
-              <Typography level='body-sm' sx={{ mb: 1, fontWeight: 500 }}>
-                Time period:
-              </Typography>
-              <Tabs
-                onChange={(e, tabValue) => {
-                  setTabValue(tabValue)
-                  refetchHistory(tabValue)
-                }}
-                value={tabValue}
-                sx={{
-                  borderRadius: 8,
-                  backgroundColor: 'background.surface',
-                  border: '1px solid',
-                  borderColor: 'divider',
-                }}
-              >
-                <TabList
-                  disableUnderline
-                  sx={{
-                    borderRadius: 8,
-                    backgroundColor: 'transparent',
-                    p: 0.5,
-                    gap: 0.5,
-                  }}
-                >
-                  {[
-                    { label: '7 Days', value: 7 },
-                    { label: '30 Days', value: 30 },
-                    { label: '90 Days', value: 90 },
-                    { label: 'All Time', value: 365 },
-                  ].map((tab, index) => (
-                    <Tab
-                      key={index}
-                      sx={{
-                        borderRadius: 6,
-                        minWidth: 'auto',
-                        px: 2,
-                        py: 1,
-                        fontSize: 'sm',
-                        fontWeight: 500,
-                        color: 'text.secondary',
-                        '&.Mui-selected': {
-                          color: 'primary.plainColor',
-                          backgroundColor: 'primary.softBg',
-                          fontWeight: 600,
-                        },
-                        '&:hover': {
-                          backgroundColor: 'neutral.softHoverBg',
-                        },
-                      }}
-                      disableIndicator
-                      value={tab.value}
-                    >
-                      {tab.label}
-                    </Tab>
-                  ))}
-                </TabList>
-              </Tabs>
-            </Box>
-          </Stack>
-        </Stack>
-      </Card>
-
-      {/* Current Filter Summary */}
-      <Box sx={{ mb: 3, textAlign: 'center' }}>
-        <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-          Showing activities for{' '}
-          <Typography
-            component='span'
-            sx={{ fontWeight: 600, color: 'primary.500' }}
-          >
-            {selectedUser === undefined || selectedUser === 'all'
-              ? 'All Users'
-              : circleUsers.find(user => user.userId === selectedUser)
-                  ?.displayName || 'Unknown User'}
-          </Typography>{' '}
-          over the{' '}
-          <Typography
-            component='span'
-            sx={{ fontWeight: 600, color: 'primary.500' }}
-          >
-            {tabValue === 365 ? 'All Time' : `Last ${tabValue} Days`}
-          </Typography>
-        </Typography>
-      </Box>
+      <FilterBar
+        filterDefs={filterDefs}
+        activeFilters={activeFilters}
+        onSetFilter={handleSetFilter}
+        onClearAll={handleClearAll}
+        resultCount={filteredTimeline.length}
+        totalCount={selectedHistory.length}
+      />
 
       {/* Conditional Content Based on Data Availability */}
       {!choresData.res?.length > 0 || !choresHistory?.length > 0 ? (
@@ -1103,7 +1049,7 @@ const UserActivites = () => {
             {/* Left Side - Timeline (Mobile: Full width, Desktop: Flexible) */}
             <Box sx={{ flex: 1, minWidth: 0, width: '100%' }}>
               <ChoreHistoryTimeline
-                history={selectedHistory}
+                history={filteredTimeline}
                 onViewNote={notes => {
                   setNoteViewerConfig({
                     isOpen: true,
