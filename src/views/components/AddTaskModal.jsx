@@ -44,20 +44,20 @@ const getDefaultNotification = () => {
   ]
 
   localStorage.setItem(
-    'defaultNotification',
+    'defaultNotificationTemplate',
     JSON.stringify(defaultNotification),
   )
   return defaultNotification
 }
 
-const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
+const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
   const { ResponsiveModal } = useResponsiveModal()
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
   const pickerEmptyDisplay = isMobile ? 'icon' : 'icon-text'
   const { data: userLabels, isLoading: userLabelsLoading } = useLabels()
   const { data: circleMembers, isLoading: isCircleMembersLoading } =
     useCircleMembers()
-  const { data: projects = [], isLoading: isProjectsLoading } = useProjects()
+  const { isLoading: isProjectsLoading } = useProjects()
   const createChoreMutation = useCreateChore()
 
   const { data: userProfile } = useUserProfile()
@@ -80,9 +80,8 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
   const [taskTitle, setTaskTitle] = useState('')
   const [renderedParts, setRenderedParts] = useState([])
 
-  const textareaRef = useRef(null)
-  const mainInputRef = useRef(null)
   const richTextEditorRef = useRef(null)
+  const latestRef = useRef({})
   const [priority, setPriority] = useState(0)
   const [dueDate, setDueDate] = useState(null)
   const [description, setDescription] = useState(null)
@@ -92,13 +91,11 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
   const [notificationMetadata, setNotificationMetadata] = useState({
     templates: getDefaultNotification(),
   })
-  const [frequencyHumanReadable, setFrequencyHumanReadable] = useState(null)
   const [subTasks, setSubTasks] = useState(null)
   const [points, setPoints] = useState(-1)
   const [isAnyoneTask, setIsAnyoneTask] = useState(false)
   const [hasDescription, setHasDescription] = useState(false)
   const [hasSubTasks, setHasSubTasks] = useState(false)
-  const [hasDeadline, setHasDeadline] = useState(false)
   const [deadlineOffset, setDeadlineOffset] = useState(-1)
   const [dueDateOnly, setDueDateOnly] = useState(null)
   const [dueTime, setDueTime] = useState(null)
@@ -134,12 +131,17 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
     }
   }, [hasDescription])
 
-  // set showKeyboardShortcuts true as soon as the user hold ctrl or cmd key:
   useEffect(() => {
     const handleKeyDown = event => {
+      const {
+        isModalOpen,
+        hasDescription,
+        dueDate,
+        createChore,
+        handleCloseModal,
+      } = latestRef.current
       const isHoldingCmd = event.ctrlKey || event.metaKey
       if (isHoldingCmd) {
-        // event.preventDefault()
         setShowKeyboardShortcuts(true)
       }
       if (
@@ -152,10 +154,8 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
         setShowKeyboardShortcuts(false)
       }
       if (isHoldingCmd && event.key.toLowerCase() === 'j' && isModalOpen) {
-        // add subtask:
         setHasSubTasks(true)
         setShowKeyboardShortcuts(false)
-        // set focus on the first subtask input:
       }
       if (
         isHoldingCmd &&
@@ -163,7 +163,6 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
         isModalOpen &&
         !dueDate
       ) {
-        // add due date:
         const tomorrow = moment().add(1, 'day')
         setDueDateOnly(tomorrow.format('YYYY-MM-DD'))
         setDueDate(tomorrow.endOf('day').format('YYYY-MM-DDTHH:mm:59'))
@@ -171,7 +170,6 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
         setDueTime(null)
         setShowKeyboardShortcuts(false)
       }
-      // Enter key to create task
       if (
         event.key === 'Enter' &&
         (event.ctrlKey || event.metaKey) &&
@@ -181,7 +179,6 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
         createChore()
         return
       }
-      // Escape key to cancel/close modal
       if (event.key === 'Escape' && isModalOpen) {
         event.preventDefault()
         handleCloseModal()
@@ -201,22 +198,6 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
       window.removeEventListener('keyup', handleKeyUp)
     }
   }, [])
-
-  useEffect(() => {
-    if (isModalOpen && textareaRef.current) {
-      textareaRef.current.focus()
-      textareaRef.current.selectionStart = textareaRef.current.value?.length
-      textareaRef.current.selectionEnd = textareaRef.current.value?.length
-    }
-  }, [isModalOpen])
-
-  useEffect(() => {
-    if (autoFocus > 0 && mainInputRef.current) {
-      mainInputRef.current.focus()
-      mainInputRef.current.selectionStart = mainInputRef.current.value?.length
-      mainInputRef.current.selectionEnd = mainInputRef.current.value?.length
-    }
-  }, [autoFocus])
 
   const renderHighlightedSentence = useCallback(
     (
@@ -405,7 +386,6 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
 
       if (repeat.result) {
         setFrequency(repeat.result)
-        setFrequencyHumanReadable(repeat.name)
       }
 
       const syncDueDateStates = parsedDate => {
@@ -569,7 +549,6 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
     setTaskTitle('')
     setDueDate(null)
     setFrequency(null)
-    setFrequencyHumanReadable(null)
     setPriority(0)
     setPoints(-1)
     setIsAnyoneTask(false)
@@ -580,7 +559,6 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
     setLabelsV2([])
     setAssignees([])
     setProjectId(getInitialProject())
-    setHasDeadline(false)
     setDeadlineOffset(-1)
     setDueDateOnly(null)
     setDueTime(null)
@@ -644,8 +622,8 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
       }
     }
     if (!frequency && dueDate) {
-      // use dueDate converted to UTC:
-      chore.nextDueDate = new Date(dueDate).toUTCString()
+      // Use RFC3339/ISO-8601 format expected by backend.
+      chore.nextDueDate = new Date(dueDate).toISOString()
       chore.notificationMetadata = notificationMetadata
     }
 
@@ -672,6 +650,15 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
       })
     handleCloseModal(false)
   }
+
+  latestRef.current = {
+    isModalOpen,
+    hasDescription,
+    dueDate,
+    createChore,
+    handleCloseModal,
+  }
+
   if (isCircleMembersLoading || isProjectsLoading) {
     return <></>
   }
@@ -712,6 +699,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
             size='lg'
             variant='solid'
             color='primary'
+            disabled={!taskTitle.trim()}
             onClick={createChore}
           >
             Create
@@ -775,7 +763,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
         <SmartTaskTitleInput
           autoFocus
           value={taskText}
-          placeholder='Type your full text here...'
+          placeholder='Type your task...'
           onChange={text => {
             setTaskText(text)
           }}
@@ -823,15 +811,18 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
       <Box
         sx={{
           paddingTop: 2,
+          paddingBottom: 1,
           display: 'flex',
           flexDirection: 'row',
-          gap: 2,
+          gap: 1.5,
 
           // scrollable horizontally but hide the scrollbar:
           overflowX: 'auto',
           '&::-webkit-scrollbar': {
             display: 'none',
           },
+          // if not mobile then go to next line if not enough space( show chip on next line):
+          flexWrap: isMobile ? 'nowrap' : 'wrap',
         }}
       >
         <DueDatePickerField
@@ -884,15 +875,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
           onChange={setLabelsV2}
           onClear={() => setLabelsV2([])}
           labels={userLabels || []}
-          // emptyDisplay='icon-text'
         />
-        {/* <ProjectPickerField
-          value={projectId}
-          onChange={setProjectId}
-          // onClear={() => setProjectId(getInitialProject())} there should be no option to unselect a project, so we don't need an onClear handler
-          projects={projects || []}
-          emptyDisplay={pickerEmptyDisplay}
-        /> */}
         <AttachmentPickerField
           attachments={attachments}
           onChange={setAttachments}
@@ -907,14 +890,6 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
           emptyDisplay={pickerEmptyDisplay}
         />
       </Box>
-      {/* <Box>
-              <Typography level='body-sm'>Title:</Typography>
-              <Input
-                value={taskTitle}
-                onChange={e => setTaskTitle(e.target.value)}
-                sx={{ width: '100%', fontSize: '16px' }}
-              />
-            </Box> */}
 
       <Box mt={2} sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
         {!hasDescription && (
@@ -951,20 +926,6 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
             Subtasks
           </Button>
         )}
-
-        {/* {!hasDeadline && dueDate && (
-          <Button
-            startDecorator={<Add />}
-            variant='plain'
-            size='sm'
-            onClick={() => {
-              setHasDeadline(true)
-              setDeadlineOffset(86400)
-            }}
-          >
-            Set Deadline
-          </Button>
-        )} */}
       </Box>
 
       {hasDescription && (
@@ -990,128 +951,6 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
           />
         </Box>
       )}
-
-      {/* {projects.length >= 1 && (
-        <FormControl>
-          <Typography level='body-sm'>Project</Typography>
-          <Select
-            value={projectId}
-            onChange={(event, newValue) => setProjectId(newValue)}
-            sx={{ minWidth: '15rem' }}
-          >
-            <Option key='default' value='default'>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Avatar
-                  size='sm'
-                  sx={{
-                    width: 24,
-                    height: 24,
-                    bgcolor: '#1976d2',
-                  }}
-                >
-                  {(() => {
-                    const IconComponent = getIconComponent('FolderOpen')
-                    return (
-                      <IconComponent
-                        sx={{
-                          fontSize: 14,
-                          color: getTextColorFromBackgroundColor('#1976d2'),
-                        }}
-                      />
-                    )
-                  })()}
-                </Avatar>
-                Default Project
-              </Box>
-            </Option>
-            {projects.map(project => (
-              <Option key={project.id} value={project.id}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Avatar
-                    size='sm'
-                    sx={{
-                      width: 24,
-                      height: 24,
-                      bgcolor: project.color || '#1976d2',
-                    }}
-                  >
-                    {project.icon ? (
-                      (() => {
-                        const IconComponent = getIconComponent(project.icon)
-                        return (
-                          <IconComponent
-                            sx={{
-                              fontSize: 14,
-                              color: getTextColorFromBackgroundColor(
-                                project.color || '#1976d2',
-                              ),
-                            }}
-                          />
-                        )
-                      })()
-                    ) : (
-                      <></>
-                    )}
-                  </Avatar>
-                  {project.name}
-                </Box>
-              </Option>
-            ))}
-          </Select>
-        </FormControl>
-      )} */}
-      <Box
-        sx={{
-          marginTop: 2,
-          display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'start',
-          gap: 2,
-        }}
-      >
-        {/* <FormControl>
-              <Typography level='body-sm'>Assignees</Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                {assignees.length > 0 ? (
-                  assignees.map((assignee, index) => (
-                    <Chip
-                      key={assignee.userId || index}
-                      variant='soft'
-                      size='lg'
-                      color='primary'
-                    >
-                      {assignee.displayName || assignee.username}
-                    </Chip>
-                  ))
-                ) : (
-                  <Chip variant='soft' size='sm' color='neutral'>
-                    {userProfile.displayName}
-                  </Chip>
-                )}
-              </Box>
-            </FormControl> */}
-        {/* {hasDeadline && dueDate && (
-          <Box
-            sx={{
-              flexDirection: 'column',
-              alignItems: 'start',
-            }}
-          >
-            <Typography level='body-sm'>Deadline</Typography>
-            <Box
-              sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}
-            >
-              <DurationInput
-                value={deadlineOffset}
-                onChange={setDeadlineOffset}
-                size='sm'
-                minValue={0}
-              />
-              <Typography level='body-sm'>after due date</Typography>
-            </Box>
-          </Box>
-        )} */}
-      </Box>
     </ResponsiveModal>
   )
 }
