@@ -480,6 +480,11 @@ const ChoreHistory = () => {
                     entry: historyEntry,
                     performers,
                     onClose: () => setDetailModalConfig({ isOpen: false }),
+                    onEdit: record => {
+                      setDetailModalConfig({ isOpen: false })
+                      setEditHistory(record)
+                      setIsEditModalOpen(true)
+                    },
                   })
                 }}
                 onViewNote={notes => {

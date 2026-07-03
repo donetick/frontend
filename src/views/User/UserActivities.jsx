@@ -7,7 +7,6 @@ import {
   Checklist,
   EventBusy,
   EventNote,
-  Group,
   HourglassEmpty,
   Person,
   Redo,
@@ -36,7 +35,13 @@ import FilterBar from '../../components/common/FilterBar'
 import { useFilter } from '../../hooks/useFilter'
 
 import { useLocalization } from '../../contexts/LocalizationContext'
-import { useChores, useChoresHistory } from '../../queries/ChoreQueries'
+import {
+  useChores,
+  useChoresHistory,
+  useDeleteChoreHistory,
+  useUpdateChoreHistory,
+} from '../../queries/ChoreQueries'
+import EditHistoryModal from '../Modals/EditHistoryModal'
 import HistoryDetailModal from '../Modals/HistoryDetailModal'
 import NoteViewerModal from '../Modals/Inputs/NoteViewerModal'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
@@ -85,7 +90,7 @@ const ChoreHistoryItem = ({
     <Stack
       direction='row'
       alignItems='center'
-      spacing={2}
+      spacing={1}
       onClick={onViewDetails}
       sx={{
         cursor: onViewDetails ? 'pointer' : 'default',
@@ -166,17 +171,7 @@ const ChoreHistoryTimeline = ({
   const groupedHistory = groupByDate(history)
 
   return (
-    <Container sx={{ p: 2 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-        <Timeline sx={{ fontSize: '1.5rem' }} />
-        <Typography
-          level='title-md'
-          sx={{ fontWeight: 'lg', color: 'text.primary' }}
-        >
-          Activities Timeline
-        </Typography>
-      </Box>
-
+    <Box sx={{ py: 2, width: '100%' }}>
       {Object.entries(groupedHistory).map(([date, items]) => (
         <Box key={date} sx={{ mb: 4 }}>
           <Typography level='title-sm' sx={{ mb: 0.5 }}>
@@ -199,7 +194,7 @@ const ChoreHistoryTimeline = ({
           </Stack>
         </Box>
       ))}
-    </Container>
+    </Box>
   )
 }
 
@@ -414,6 +409,10 @@ const UserActivites = () => {
   const [selectedChart, setSelectedChart] = React.useState('history')
   const [noteViewerConfig, setNoteViewerConfig] = useState({ isOpen: false })
   const [detailModalConfig, setDetailModalConfig] = useState({ isOpen: false })
+  const [editModalConfig, setEditModalConfig] = useState({ isOpen: false })
+  const [editHistoryRecord, setEditHistoryRecord] = useState(null)
+  const updateChoreHistory = useUpdateChoreHistory()
+  const deleteChoreHistory = useDeleteChoreHistory()
 
   const [historyPieChartData, setHistoryPieChartData] = React.useState([])
   const [choreDuePieChartData, setChoreDuePieChartData] = React.useState([])
@@ -973,12 +972,12 @@ const UserActivites = () => {
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-        <Group sx={{ fontSize: '1.5rem' }} />
+        <Timeline sx={{ fontSize: '1.5rem' }} />
         <Typography
           level='title-md'
           sx={{ fontWeight: 'lg', color: 'text.primary' }}
         >
-          User Activities
+          Activities
         </Typography>
       </Box>
 
@@ -1071,21 +1070,62 @@ const UserActivites = () => {
                     entry,
                     performers,
                     onClose: () => setDetailModalConfig({ isOpen: false }),
+                    onEdit: record => {
+                      setDetailModalConfig(prev => ({ ...prev, isOpen: false }))
+                      setEditHistoryRecord(record)
+                      setEditModalConfig({
+                        isOpen: true,
+                        onClose: () => {
+                          setEditModalConfig({ isOpen: false })
+                          setEditHistoryRecord(null)
+                        },
+                        onSave: updated => {
+                          updateChoreHistory.mutate(
+                            {
+                              choreId: record.choreId,
+                              historyId: record.id,
+                              historyData: {
+                                performedAt: updated.performedAt,
+                                dueDate: updated.dueDate,
+                                notes: updated.notes,
+                              },
+                            },
+                            {
+                              onSuccess: () => {
+                                setEditModalConfig({ isOpen: false })
+                                setEditHistoryRecord(null)
+                              },
+                            },
+                          )
+                        },
+                        onDelete: () => {
+                          deleteChoreHistory.mutate(
+                            { choreId: record.choreId, historyId: record.id },
+                            {
+                              onSuccess: () => {
+                                setEditModalConfig({ isOpen: false })
+                                setEditHistoryRecord(null)
+                              },
+                            },
+                          )
+                        },
+                      })
+                    },
                   })
                 }}
               />
             </Box>
 
-            {/* Right Sidebar - Charts (Mobile: Full width, Desktop: Fixed width + sticky) */}
+            {/* Right Sidebar - Charts (Desktop only, hidden on mobile) */}
             <Box
               sx={{
-                width: { xs: '100%', lg: '350px' },
-                position: { xs: 'static', lg: 'sticky' },
-                top: { lg: '60px' },
-                alignSelf: { lg: 'flex-start' },
-                maxHeight: { lg: 'calc(100vh - 40px)' },
-                overflowY: { lg: 'auto' },
-                order: { xs: -1, lg: 1 }, // Show charts first on mobile, last on desktop
+                display: { xs: 'none', lg: 'block' },
+                width: '350px',
+                position: 'sticky',
+                top: '60px',
+                alignSelf: 'flex-start',
+                maxHeight: 'calc(100vh - 40px)',
+                overflowY: 'auto',
               }}
             >
               {/* Charts Container */}
@@ -1225,6 +1265,10 @@ const UserActivites = () => {
       )}
       <NoteViewerModal config={noteViewerConfig} />
       <HistoryDetailModal config={detailModalConfig} />
+      <EditHistoryModal
+        config={editModalConfig}
+        historyRecord={editHistoryRecord}
+      />
     </Container>
   )
 }

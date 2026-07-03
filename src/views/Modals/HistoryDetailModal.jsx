@@ -2,7 +2,9 @@ import {
   AccessTime,
   CalendarMonth,
   Check,
+  Edit,
   HourglassEmpty,
+  OpenInNew,
   Person,
   Redo,
   RunningWithErrors,
@@ -10,8 +12,9 @@ import {
   ThumbDown,
   Update,
 } from '@mui/icons-material'
-import { Avatar, Box, Chip, Divider, Stack, Typography } from '@mui/joy'
+import { Avatar, Box, Button, Chip, Divider, Stack, Typography } from '@mui/joy'
 import moment from 'moment'
+import { useNavigate } from 'react-router-dom'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import { TASK_COLOR } from '../../utils/Colors.jsx'
@@ -64,6 +67,7 @@ const TimingBadge = ({ historyEntry }) => {
 function HistoryDetailModal({ config }) {
   const { ResponsiveModal } = useResponsiveModal()
   const { fmt } = useLocalization()
+  const navigate = useNavigate()
 
   const entry = config?.entry
   const performers = config?.performers ?? []
@@ -190,6 +194,35 @@ function HistoryDetailModal({ config }) {
           </>
         )}
       </Stack>
+
+      {/* Action buttons */}
+      <Box sx={{ display: 'flex', gap: 1, mt: 2, justifyContent: 'flex-end' }}>
+        {entry.choreId && (
+          <Button
+            variant='soft'
+            color='neutral'
+            size='sm'
+            startDecorator={<OpenInNew sx={{ fontSize: 16 }} />}
+            onClick={() => {
+              config?.onClose?.()
+              navigate(`/chores/${entry.choreId}`)
+            }}
+          >
+            Open Task
+          </Button>
+        )}
+        {config?.onEdit && (
+          <Button
+            variant='soft'
+            color='neutral'
+            size='md'
+            startDecorator={<Edit sx={{ fontSize: 16 }} />}
+            onClick={() => config.onEdit(entry)}
+          >
+            Edit Entry
+          </Button>
+        )}
+      </Box>
     </ResponsiveModal>
   )
 }
