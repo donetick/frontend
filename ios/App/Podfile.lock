@@ -35,6 +35,8 @@ PODS:
     - Capacitor
   - CapacitorStatusBar (7.0.2):
     - Capacitor
+  - CapgoCapacitorNfc (7.2.0):
+    - Capacitor
   - CapgoCapacitorSocialLogin (7.11.2):
     - Alamofire (~> 5.10.2)
     - Capacitor
@@ -145,6 +147,7 @@ DEPENDENCIES:
   - "CapacitorPreferences (from `../../node_modules/@capacitor/preferences`)"
   - "CapacitorPushNotifications (from `../../node_modules/@capacitor/push-notifications`)"
   - "CapacitorStatusBar (from `../../node_modules/@capacitor/status-bar`)"
+  - "CapgoCapacitorNfc (from `../../node_modules/@capgo/capacitor-nfc`)"
   - "CapgoCapacitorSocialLogin (from `../../node_modules/@capgo/capacitor-social-login`)"
   - FirebaseMessaging
   - "RevenuecatPurchasesCapacitor (from `../../node_modules/@revenuecat/purchases-capacitor`)"
@@ -202,6 +205,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/push-notifications"
   CapacitorStatusBar:
     :path: "../../node_modules/@capacitor/status-bar"
+  CapgoCapacitorNfc:
+    :path: "../../node_modules/@capgo/capacitor-nfc"
   CapgoCapacitorSocialLogin:
     :path: "../../node_modules/@capgo/capacitor-social-login"
   RevenuecatPurchasesCapacitor:
@@ -225,6 +230,7 @@ SPEC CHECKSUMS:
   CapacitorPreferences: 65107ed7437d96ee72583df5763985e3c0ff2bc2
   CapacitorPushNotifications: 7c0659b349b149ee3936a682da31a9d269de9582
   CapacitorStatusBar: e04d05e121d5a5979c29eb4249186a4e4a84cacb
+  CapgoCapacitorNfc: 3306447e38359522e6c1ea233aa6e84a54632534
   CapgoCapacitorSocialLogin: a320106e1d032da88576cf8b31a336e971f5acad
   FBAEMKit: e34530df538b8eb8aeb53c35867715ba6c63ef0c
   FBSDKCoreKit: d3f479a69127acebb1c6aad91c1a33907bcf6c2f
@@ -250,6 +256,6 @@ SPEC CHECKSUMS:
   SQLCipher: eb79c64049cb002b4e9fcb30edb7979bf4706dfc
   ZIPFoundation: dfd3d681c4053ff7e2f7350bc4e53b5dba3f5351
 
-PODFILE CHECKSUM: bb6dcef70c8edc058fe3ba311f08a223fd7dbc66
+PODFILE CHECKSUM: 17f02615fe2b1c9437b2cd884eec64bc1229846c
 
 COCOAPODS: 1.16.2

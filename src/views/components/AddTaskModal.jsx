@@ -1,15 +1,6 @@
-import { Add, EditNotifications } from '@mui/icons-material'
-import {
-  Box,
-  Button,
-  Checkbox,
-  FormHelperText,
-  Input,
-  Option,
-  Select,
-  Typography,
-} from '@mui/joy'
-import { FormControl } from '@mui/material'
+import { Add } from '@mui/icons-material'
+import { Box, Button, Typography } from '@mui/joy'
+import { useMediaQuery } from '@mui/material'
 import * as chrono from 'chrono-node'
 import moment from 'moment'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -30,8 +21,15 @@ import {
 import SmartTaskTitleInput from './SmartTaskTitleInput'
 
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
-import NotificationTemplate from '../../components/NotificationTemplate'
+import { TASK_COLOR } from '../../utils/Colors'
+import AssigneePickerField from './AssigneePickerField'
+import AttachmentPickerField from './AttachmentPickerField'
+import DueDatePickerField from './DueDatePickerField'
+import LabelsPickerField from './LabelsPickerField'
 import LearnMoreButton from './LearnMore'
+import NotificationPickerField from './NotificationPickerField'
+import PriorityPickerField from './PriorityPickerField'
+import RepeatPickerField from './RepeatPickerField'
 import RichTextEditor from './RichTextEditor'
 import SubTasks from './SubTask'
 const getDefaultNotification = () => {
@@ -46,18 +44,20 @@ const getDefaultNotification = () => {
   ]
 
   localStorage.setItem(
-    'defaultNotification',
+    'defaultNotificationTemplate',
     JSON.stringify(defaultNotification),
   )
   return defaultNotification
 }
 
-const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
+const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
   const { ResponsiveModal } = useResponsiveModal()
+  const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
+  const pickerEmptyDisplay = isMobile ? 'icon' : 'icon-text'
   const { data: userLabels, isLoading: userLabelsLoading } = useLabels()
   const { data: circleMembers, isLoading: isCircleMembersLoading } =
     useCircleMembers()
-  const { data: projects = [], isLoading: isProjectsLoading } = useProjects()
+  const { isLoading: isProjectsLoading } = useProjects()
   const createChoreMutation = useCreateChore()
 
   const { data: userProfile } = useUserProfile()
@@ -80,9 +80,8 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
   const [taskTitle, setTaskTitle] = useState('')
   const [renderedParts, setRenderedParts] = useState([])
 
-  const textareaRef = useRef(null)
-  const mainInputRef = useRef(null)
   const richTextEditorRef = useRef(null)
+  const latestRef = useRef({})
   const [priority, setPriority] = useState(0)
   const [dueDate, setDueDate] = useState(null)
   const [description, setDescription] = useState(null)
@@ -92,20 +91,35 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
   const [notificationMetadata, setNotificationMetadata] = useState({
     templates: getDefaultNotification(),
   })
-  const [frequencyHumanReadable, setFrequencyHumanReadable] = useState(null)
   const [subTasks, setSubTasks] = useState(null)
   const [points, setPoints] = useState(-1)
   const [isAnyoneTask, setIsAnyoneTask] = useState(false)
   const [hasDescription, setHasDescription] = useState(false)
   const [hasSubTasks, setHasSubTasks] = useState(false)
-  const [hasNotifications, setHasNotifications] = useState(false)
-  const [hasDeadline, setHasDeadline] = useState(false)
   const [deadlineOffset, setDeadlineOffset] = useState(-1)
   const [dueDateOnly, setDueDateOnly] = useState(null)
   const [dueTime, setDueTime] = useState(null)
   const [useCustomTime, setUseCustomTime] = useState(false)
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
   const [projectId, setProjectId] = useState(getInitialProject())
+  const [attachments, setAttachments] = useState([])
+
+  // Priority colors
+  const priorityColors = {
+    0: TASK_COLOR.NO_PRIORITY,
+    1: TASK_COLOR.PRIORITY_1,
+    2: TASK_COLOR.PRIORITY_2,
+    3: TASK_COLOR.PRIORITY_3,
+    4: TASK_COLOR.PRIORITY_4,
+  }
+
+  const priorityLabels = {
+    0: '--',
+    1: 'P1',
+    2: 'P2',
+    3: 'P3',
+    4: 'P4',
+  }
 
   // set showKeyboardShortcuts true as soon as the user hold ctrl or cmd key:
   useEffect(() => {
@@ -117,12 +131,17 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
     }
   }, [hasDescription])
 
-  // set showKeyboardShortcuts true as soon as the user hold ctrl or cmd key:
   useEffect(() => {
     const handleKeyDown = event => {
+      const {
+        isModalOpen,
+        hasDescription,
+        dueDate,
+        createChore,
+        handleCloseModal,
+      } = latestRef.current
       const isHoldingCmd = event.ctrlKey || event.metaKey
       if (isHoldingCmd) {
-        // event.preventDefault()
         setShowKeyboardShortcuts(true)
       }
       if (
@@ -135,10 +154,8 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
         setShowKeyboardShortcuts(false)
       }
       if (isHoldingCmd && event.key.toLowerCase() === 'j' && isModalOpen) {
-        // add subtask:
         setHasSubTasks(true)
         setShowKeyboardShortcuts(false)
-        // set focus on the first subtask input:
       }
       if (
         isHoldingCmd &&
@@ -146,7 +163,6 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
         isModalOpen &&
         !dueDate
       ) {
-        // add due date:
         const tomorrow = moment().add(1, 'day')
         setDueDateOnly(tomorrow.format('YYYY-MM-DD'))
         setDueDate(tomorrow.endOf('day').format('YYYY-MM-DDTHH:mm:59'))
@@ -154,7 +170,6 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
         setDueTime(null)
         setShowKeyboardShortcuts(false)
       }
-      // Enter key to create task
       if (
         event.key === 'Enter' &&
         (event.ctrlKey || event.metaKey) &&
@@ -164,7 +179,6 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
         createChore()
         return
       }
-      // Escape key to cancel/close modal
       if (event.key === 'Escape' && isModalOpen) {
         event.preventDefault()
         handleCloseModal()
@@ -184,22 +198,6 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
       window.removeEventListener('keyup', handleKeyUp)
     }
   }, [])
-
-  useEffect(() => {
-    if (isModalOpen && textareaRef.current) {
-      textareaRef.current.focus()
-      textareaRef.current.selectionStart = textareaRef.current.value?.length
-      textareaRef.current.selectionEnd = textareaRef.current.value?.length
-    }
-  }, [isModalOpen])
-
-  useEffect(() => {
-    if (autoFocus > 0 && mainInputRef.current) {
-      mainInputRef.current.focus()
-      mainInputRef.current.selectionStart = mainInputRef.current.value?.length
-      mainInputRef.current.selectionEnd = mainInputRef.current.value?.length
-    }
-  }, [autoFocus])
 
   const renderHighlightedSentence = useCallback(
     (
@@ -262,20 +260,17 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
             resolvedHighlights.push(current)
           }
         } else {
-          // No overlap, add the current highlight
           resolvedHighlights.push(current)
         }
       }
 
       for (const highlight of resolvedHighlights) {
-        // Add the text before the highlight
         if (highlight.start > lastIndex) {
           const textBefore = sentence.substring(lastIndex, highlight.start)
           parts.push(textBefore)
           plainText += textBefore
         }
 
-        // Determine the class name based on the highlight type
         let className = ''
         switch (highlight.type) {
           case 'repeat':
@@ -300,7 +295,6 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
             break
         }
 
-        // Add the highlighted span
         const highlightedText = sentence.substring(
           highlight.start,
           highlight.end,
@@ -310,9 +304,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
             key={highlight.start}
             className={className}
             style={{
-              // text underline:
               textDecoration: 'underline',
-              // textDecorationColor: 'red',
               textDecorationThickness: '2px',
               textDecorationStyle: 'dashed',
             }}
@@ -321,11 +313,9 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
           </span>,
         )
 
-        // Update the last index to the end of the current highlight
         lastIndex = highlight.end
       }
 
-      // Add any remaining text after the last highlight
       if (lastIndex < sentence.length) {
         const remainingText = sentence.substring(lastIndex)
         parts.push(remainingText)
@@ -342,12 +332,10 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
 
   const processText = useCallback(
     sentence => {
-      // Parse everything from the original sentence to get correct highlight positions
       const priority = parsePriority(sentence)
       const pointsParsed = parsePoints(sentence)
       const labels = parseLabels(sentence, userLabels || [])
 
-      // Parse assignees using circle members
       const circleMembersList = circleMembers?.res || []
       const assigneesForParsing = circleMembersList.map(member => ({
         userId: member.userId,
@@ -364,9 +352,15 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
       const dueDateParsed = parseDueDate(sentence, chrono)
 
       // Set all the parsed values
-      if (priority.result) setPriority(priority.result)
+      if (priority.result) setPriority(parseInt(priority.result, 10))
       if (pointsParsed.result) setPoints(pointsParsed.result)
-      if (labels.result) setLabelsV2(labels.result)
+      if (labels.result) {
+        // parseLabels returns array of label objects, extract their IDs
+        const labelIds = labels.result
+          .filter(label => label.id) // Only labels with IDs (existing labels)
+          .map(label => label.id)
+        setLabelsV2(labelIds)
+      }
 
       if (assigneesResult.isAnyone) {
         // @Anyone was used - set empty assignees (anyone can do the task)
@@ -392,7 +386,6 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
 
       if (repeat.result) {
         setFrequency(repeat.result)
-        setFrequencyHumanReadable(repeat.name)
       }
 
       const syncDueDateStates = parsedDate => {
@@ -414,15 +407,6 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
       if (dueDateParsed.result) {
         syncDueDateStates(dueDateParsed.result)
         dueDateHighlight = dueDateParsed.highlight[0]
-      }
-
-      if (repeat.result) {
-        // if repeat has result the cleaned sentence will remove the date related info which mean
-        // we need to reparse the date again to get the correct due date:
-        const dueDateParsedAgain = parseDueDate(sentence, chrono)
-        if (dueDateParsedAgain.result) {
-          syncDueDateStates(dueDateParsedAgain.result)
-        }
       }
 
       // Create the cleaned sentence by sequentially applying all cleanups
@@ -509,6 +493,8 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
         moment(`${dateValue}T${dueTime}`).format('YYYY-MM-DDTHH:mm:00'),
       )
     } else {
+      setUseCustomTime(false)
+      setDueTime(null)
       setDueDate(moment(dateValue).endOf('day').format('YYYY-MM-DDTHH:mm:ss'))
     }
   }
@@ -517,9 +503,17 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
     const timeValue = e.target.value
     setDueTime(timeValue)
     if (dueDateOnly) {
-      setDueDate(
-        moment(`${dueDateOnly}T${timeValue}`).format('YYYY-MM-DDTHH:mm:00'),
-      )
+      if (timeValue) {
+        setUseCustomTime(true)
+        setDueDate(
+          moment(`${dueDateOnly}T${timeValue}`).format('YYYY-MM-DDTHH:mm:00'),
+        )
+      } else {
+        setUseCustomTime(false)
+        setDueDate(
+          moment(dueDateOnly).endOf('day').format('YYYY-MM-DDTHH:mm:ss'),
+        )
+      }
     }
   }
 
@@ -527,13 +521,16 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
     setUseCustomTime(checked)
     if (checked) {
       const defaultTime = dueTime || '18:00'
-      setDueTime(defaultTime)
+      if (!dueTime) {
+        setDueTime(defaultTime)
+      }
       if (dueDateOnly) {
         setDueDate(
           moment(`${dueDateOnly}T${defaultTime}`).format('YYYY-MM-DDTHH:mm:00'),
         )
       }
     } else {
+      setDueTime(null)
       if (dueDateOnly) {
         setDueDate(
           moment(dueDateOnly).endOf('day').format('YYYY-MM-DDTHH:mm:ss'),
@@ -552,7 +549,6 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
     setTaskTitle('')
     setDueDate(null)
     setFrequency(null)
-    setFrequencyHumanReadable(null)
     setPriority(0)
     setPoints(-1)
     setIsAnyoneTask(false)
@@ -563,7 +559,6 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
     setLabelsV2([])
     setAssignees([])
     setProjectId(getInitialProject())
-    setHasDeadline(false)
     setDeadlineOffset(-1)
     setDueDateOnly(null)
     setDueTime(null)
@@ -614,6 +609,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
       notificationMetadata: {},
       subTasks: subTasks?.length > 0 ? subTasks : null,
       projectId: projectId === 'default' ? null : projectId,
+      attachments: attachments.length > 0 ? attachments : null,
     }
 
     if (frequency) {
@@ -626,39 +622,44 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
       }
     }
     if (!frequency && dueDate) {
-      // use dueDate converted to UTC:
-      chore.nextDueDate = new Date(dueDate).toUTCString()
+      // Use RFC3339/ISO-8601 format expected by backend.
+      chore.nextDueDate = new Date(dueDate).toISOString()
       chore.notificationMetadata = notificationMetadata
     }
 
     createChoreMutation
       .mutateAsync(chore)
-      .then(resp => {
-        resp.json().then(data => {
-          if (resp.status !== 200) {
-            console.error('Error creating chore:', data)
-            return
-          } else {
-            onChoreUpdate({
-              ...chore,
-              id: data.res,
-              nextDueDate: chore.dueDate,
-            })
-
-            handleCloseModal(false)
-          }
-          handleCloseModal()
-          setTaskText('')
-        })
+      .then(result => {
+        const choreData = result
+        if (choreData?._pendingCreate) {
+          // Offline: task queued, add temp chore to UI immediately
+          onChoreUpdate(choreData)
+        } else {
+          // Online: choreData is the created chore object returned by the mutation
+          onChoreUpdate({
+            ...chore,
+            ...choreData,
+            id: choreData?.id,
+            nextDueDate: chore.dueDate,
+          })
+        }
+        setTaskText('')
       })
       .catch(error => {
-        if (error?.queued) {
-          handleCloseModal(true)
-        }
+        console.error('Error creating chore:', error)
       })
     handleCloseModal(false)
   }
-  if (userLabelsLoading || isCircleMembersLoading || isProjectsLoading) {
+
+  latestRef.current = {
+    isModalOpen,
+    hasDescription,
+    dueDate,
+    createChore,
+    handleCloseModal,
+  }
+
+  if (isCircleMembersLoading || isProjectsLoading) {
     return <></>
   }
 
@@ -698,6 +699,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
             size='lg'
             variant='solid'
             color='primary'
+            disabled={!taskTitle.trim()}
             onClick={createChore}
           >
             Create
@@ -761,7 +763,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
         <SmartTaskTitleInput
           autoFocus
           value={taskText}
-          placeholder='Type your full text here...'
+          placeholder='Type your task...'
           onChange={text => {
             setTaskText(text)
           }}
@@ -806,21 +808,96 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
           }}
         />
       </Box>
-      {/* <Box>
-              <Typography level='body-sm'>Title:</Typography>
-              <Input
-                value={taskTitle}
-                onChange={e => setTaskTitle(e.target.value)}
-                sx={{ width: '100%', fontSize: '16px' }}
-              />
-            </Box> */}
+      <Box
+        sx={{
+          paddingTop: 2,
+          paddingBottom: 1,
+          display: 'flex',
+          flexDirection: 'row',
+          gap: 1.5,
 
-      <Box>
+          // scrollable horizontally but hide the scrollbar:
+          overflowX: 'auto',
+          '&::-webkit-scrollbar': {
+            display: 'none',
+          },
+          // if not mobile then go to next line if not enough space( show chip on next line):
+          flexWrap: isMobile ? 'nowrap' : 'wrap',
+        }}
+      >
+        <DueDatePickerField
+          emptyDisplay={pickerEmptyDisplay}
+          dueDateOnly={dueDateOnly}
+          dueTime={dueTime}
+          useCustomTime={useCustomTime}
+          onDueDateChange={handleDueDateChange}
+          onDueTimeChange={handleDueTimeChange}
+          onUseCustomTimeChange={handleUseCustomTimeChange}
+          onClear={() => {
+            setDueDate(null)
+            setDueDateOnly(null)
+            setDueTime(null)
+            setUseCustomTime(false)
+          }}
+        />
+        <RepeatPickerField
+          emptyDisplay={pickerEmptyDisplay}
+          value={frequency}
+          onChange={setFrequency}
+          onClear={() => setFrequency(null)}
+        />
+        <PriorityPickerField
+          value={priority}
+          onChange={setPriority}
+          onClear={() => setPriority(0)}
+          emptyDisplay={pickerEmptyDisplay}
+          priorityColors={priorityColors}
+          priorityLabels={priorityLabels}
+        />
+        <AssigneePickerField
+          emptyDisplay={pickerEmptyDisplay}
+          value={assignees?.[0]?.userId || null}
+          onChange={userId => {
+            if (!userId) {
+              setAssignees([])
+            } else {
+              setAssignees([{ userId }])
+            }
+          }}
+          onClear={() => setAssignees([])}
+          currentUserId={userProfile?.id}
+          members={circleMembers?.res || []}
+        />
+
+        <LabelsPickerField
+          emptyDisplay={pickerEmptyDisplay}
+          values={labelsV2 || []}
+          onChange={setLabelsV2}
+          onClear={() => setLabelsV2([])}
+          labels={userLabels || []}
+        />
+        <AttachmentPickerField
+          attachments={attachments}
+          onChange={setAttachments}
+          onClear={() => setAttachments([])}
+          emptyDisplay={pickerEmptyDisplay}
+          entityType='chore_attachment'
+        />
+        <NotificationPickerField
+          value={notificationMetadata}
+          onChange={setNotificationMetadata}
+          onClear={() => setNotificationMetadata({ templates: [] })}
+          emptyDisplay={pickerEmptyDisplay}
+        />
+      </Box>
+
+      <Box mt={2} sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
         {!hasDescription && (
           <Button
             startDecorator={<Add />}
-            variant='plain'
-            size='sm'
+            variant='outlined'
+            color='neutral'
+            size='md'
             onClick={() => {
               setHasDescription(true)
               // Focus will be handled by the useEffect hook
@@ -836,8 +913,9 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
         {!hasSubTasks && (
           <Button
             startDecorator={<Add />}
-            variant='plain'
-            size='sm'
+            variant='outlined'
+            color='neutral'
+            size='md'
             onClick={() => {
               setHasSubTasks(true)
             }}
@@ -848,52 +926,6 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
             Subtasks
           </Button>
         )}
-        {!dueDate && (
-          <Button
-            startDecorator={<Add />}
-            variant='plain'
-            size='sm'
-            onClick={() => {
-              const tomorrow = moment().add(1, 'day')
-              setDueDateOnly(tomorrow.format('YYYY-MM-DD'))
-              setDueDate(tomorrow.endOf('day').format('YYYY-MM-DDTHH:mm:ss'))
-              setUseCustomTime(false)
-              setDueTime(null)
-            }}
-            endDecorator={
-              showKeyboardShortcuts && <KeyboardShortcutHint shortcut='B' />
-            }
-          >
-            Due Date
-          </Button>
-        )}
-        {!hasNotifications && dueDate && (
-          <Button
-            startDecorator={<EditNotifications />}
-            variant='plain'
-            size='sm'
-            onClick={() => {
-              setHasNotifications(true)
-              setFrequencyHumanReadable('Once')
-              setFrequency(null)
-            }}
-          >
-            Edit Notifications
-          </Button>
-        )}
-        {/* {!hasDeadline && dueDate && (
-          <Button
-            startDecorator={<Add />}
-            variant='plain'
-            size='sm'
-            onClick={() => {
-              setHasDeadline(true)
-              setDeadlineOffset(86400)
-            }}
-          >
-            Set Deadline
-          </Button>
-        )} */}
       </Box>
 
       {hasDescription && (
@@ -919,210 +951,6 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
           />
         </Box>
       )}
-
-      <Box
-        sx={{
-          marginTop: 2,
-          display: 'flex',
-          flexDirection: 'row',
-          gap: 2,
-        }}
-      >
-        {priority > 0 && (
-          <FormControl>
-            <Typography level='body-sm'>Priority</Typography>
-            <Select
-              defaultValue={0}
-              value={priority}
-              onChange={(e, value) => setPriority(value)}
-            >
-              <Option value='0'>No Priority</Option>
-              <Option value='1'>P1</Option>
-              <Option value='2'>P2</Option>
-              <Option value='3'>P3</Option>
-              <Option value='4'>P4</Option>
-            </Select>
-          </FormControl>
-        )}
-        {dueDate && (
-          <FormControl>
-            <Typography level='body-sm'>Due Date</Typography>
-            <Input
-              type='date'
-              value={dueDateOnly || ''}
-              onChange={handleDueDateChange}
-            />
-            <Checkbox
-              size='sm'
-              checked={useCustomTime}
-              onChange={e => handleUseCustomTimeChange(e.target.checked)}
-              label='Set a specific time'
-              sx={{ mt: 1 }}
-            />
-            <FormHelperText>
-              {useCustomTime
-                ? 'Task will be due at the specified time'
-                : 'Task will be due at the end of the day (11:59 PM)'}
-            </FormHelperText>
-            {useCustomTime && (
-              <Input
-                type='time'
-                value={dueTime || '18:00'}
-                onChange={handleDueTimeChange}
-                sx={{ maxWidth: 200, mt: 1 }}
-              />
-            )}
-          </FormControl>
-        )}
-      </Box>
-      {/* {projects.length >= 1 && (
-        <FormControl>
-          <Typography level='body-sm'>Project</Typography>
-          <Select
-            value={projectId}
-            onChange={(event, newValue) => setProjectId(newValue)}
-            sx={{ minWidth: '15rem' }}
-          >
-            <Option key='default' value='default'>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Avatar
-                  size='sm'
-                  sx={{
-                    width: 24,
-                    height: 24,
-                    bgcolor: '#1976d2',
-                  }}
-                >
-                  {(() => {
-                    const IconComponent = getIconComponent('FolderOpen')
-                    return (
-                      <IconComponent
-                        sx={{
-                          fontSize: 14,
-                          color: getTextColorFromBackgroundColor('#1976d2'),
-                        }}
-                      />
-                    )
-                  })()}
-                </Avatar>
-                Default Project
-              </Box>
-            </Option>
-            {projects.map(project => (
-              <Option key={project.id} value={project.id}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Avatar
-                    size='sm'
-                    sx={{
-                      width: 24,
-                      height: 24,
-                      bgcolor: project.color || '#1976d2',
-                    }}
-                  >
-                    {project.icon ? (
-                      (() => {
-                        const IconComponent = getIconComponent(project.icon)
-                        return (
-                          <IconComponent
-                            sx={{
-                              fontSize: 14,
-                              color: getTextColorFromBackgroundColor(
-                                project.color || '#1976d2',
-                              ),
-                            }}
-                          />
-                        )
-                      })()
-                    ) : (
-                      <></>
-                    )}
-                  </Avatar>
-                  {project.name}
-                </Box>
-              </Option>
-            ))}
-          </Select>
-        </FormControl>
-      )} */}
-      <Box
-        sx={{
-          marginTop: 2,
-          display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'start',
-          gap: 2,
-        }}
-      >
-        {/* <FormControl>
-              <Typography level='body-sm'>Assignees</Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                {assignees.length > 0 ? (
-                  assignees.map((assignee, index) => (
-                    <Chip
-                      key={assignee.userId || index}
-                      variant='soft'
-                      size='lg'
-                      color='primary'
-                    >
-                      {assignee.displayName || assignee.username}
-                    </Chip>
-                  ))
-                ) : (
-                  <Chip variant='soft' size='sm' color='neutral'>
-                    {userProfile.displayName}
-                  </Chip>
-                )}
-              </Box>
-            </FormControl> */}
-        {/* {hasDeadline && dueDate && (
-          <Box
-            sx={{
-              flexDirection: 'column',
-              alignItems: 'start',
-            }}
-          >
-            <Typography level='body-sm'>Deadline</Typography>
-            <Box
-              sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}
-            >
-              <DurationInput
-                value={deadlineOffset}
-                onChange={setDeadlineOffset}
-                size='sm'
-                minValue={0}
-              />
-              <Typography level='body-sm'>after due date</Typography>
-            </Box>
-          </Box>
-        )} */}
-        {hasNotifications && dueDate && (
-          <Box
-            sx={{
-              flexDirection: 'column',
-              alignItems: 'center',
-            }}
-          >
-            <Typography level='body-sm'>Notification Schedule</Typography>
-            <Box sx={{ p: 0.5 }}>
-              <NotificationTemplate
-                onChange={metadata => {
-                  if (
-                    metadata.notifications !== notificationMetadata.templates
-                  ) {
-                    const newNotificationMetadata = {
-                      ...notificationMetadata,
-                      templates: metadata.notifications,
-                    }
-                    setNotificationMetadata(newNotificationMetadata)
-                  }
-                }}
-                value={notificationMetadata}
-                showTimeline={false}
-              />
-            </Box>
-          </Box>
-        )}
-      </Box>
     </ResponsiveModal>
   )
 }

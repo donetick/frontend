@@ -36,6 +36,7 @@ import FilterBar from '../../components/common/FilterBar'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import useConfirmationModal from '../../hooks/useConfirmationModal'
 import { useFilter } from '../../hooks/useFilter'
+import { usePendingCommands } from '../../hooks/usePendingCommands'
 import {
   useChoreHistory,
   useDeleteChoreHistory,
@@ -68,9 +69,27 @@ const ChoreHistory = () => {
   const { data: circleMembersData } = useCircleMembers()
   const updateChoreHistory = useUpdateChoreHistory()
   const deleteChoreHistory = useDeleteChoreHistory()
+  const { data: pendingCmds } = usePendingCommands(choreId)
 
   const choreHistory = choreHistoryData?.res || []
   const performers = circleMembersData?.res || []
+  const pendingByHistoryId = useMemo(() => {
+    if (!pendingCmds?.length) return {}
+    return pendingCmds.reduce((acc, cmd) => {
+      if (
+        cmd.commandType !== 'update_chore_history' &&
+        cmd.commandType !== 'delete_chore_history'
+      ) {
+        return acc
+      }
+      const historyId =
+        cmd?.payload?.historyId ?? Number(String(cmd.entityId).split(':')[1])
+      if (!historyId) return acc
+      if (!acc[historyId]) acc[historyId] = []
+      acc[historyId].push(cmd)
+      return acc
+    }, {})
+  }, [pendingCmds])
 
   const filterDefs = useMemo(
     () => [
@@ -487,6 +506,7 @@ const ChoreHistory = () => {
                     },
                   })
                 }}
+                pendingCommands={pendingByHistoryId[historyEntry.id] || []}
                 onViewNote={notes => {
                   setNoteViewerConfig({
                     isOpen: true,
@@ -529,13 +549,21 @@ const ChoreHistory = () => {
                 },
               },
               {
-                onSuccess: () => {
+                onSuccess: data => {
                   setIsEditModalOpen(false)
                   setEditHistory(null)
-                  showSuccess({
-                    title: 'History Updated',
-                    message: `The history record has been updated successfully.`,
-                  })
+                  if (data?.queued) {
+                    showSuccess({
+                      title: 'History Update Queued',
+                      message:
+                        'You are offline. The history update will sync when connection is restored.',
+                    })
+                  } else {
+                    showSuccess({
+                      title: 'History Updated',
+                      message: `The history record has been updated successfully.`,
+                    })
+                  }
                 },
                 onError: error => {
                   console.error('Failed to update chore history:', error)
@@ -551,13 +579,21 @@ const ChoreHistory = () => {
                 historyId: editHistory.id,
               },
               {
-                onSuccess: () => {
+                onSuccess: data => {
                   setIsEditModalOpen(false)
                   setEditHistory(null)
-                  showSuccess({
-                    title: 'History Deleted',
-                    message: `The history record has been deleted successfully.`,
-                  })
+                  if (data?.queued) {
+                    showSuccess({
+                      title: 'History Delete Queued',
+                      message:
+                        'You are offline. The history delete will sync when connection is restored.',
+                    })
+                  } else {
+                    showSuccess({
+                      title: 'History Deleted',
+                      message: `The history record has been deleted successfully.`,
+                    })
+                  }
                 },
               },
             )

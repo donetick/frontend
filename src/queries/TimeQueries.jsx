@@ -31,7 +31,7 @@ export const useStartChore = () => {
 
   return useMutation({
     mutationFn: StartChore,
-    onSuccess: (data, choreId) => {
+    onSuccess: (_, choreId) => {
       queryClient.invalidateQueries(['choreTimer', choreId])
       queryClient.invalidateQueries(['chores'])
       queryClient.invalidateQueries(['choreHistory', choreId])
@@ -44,7 +44,7 @@ export const usePauseChore = () => {
 
   return useMutation({
     mutationFn: PauseChore,
-    onSuccess: (data, choreId) => {
+    onSuccess: (_, choreId) => {
       queryClient.invalidateQueries(['choreTimer', choreId])
       queryClient.invalidateQueries(['chores'])
       queryClient.invalidateQueries(['choreHistory', choreId])
@@ -58,7 +58,7 @@ export const useUpdateTimeSession = () => {
   return useMutation({
     mutationFn: ({ choreId, sessionId, sessionData }) =>
       UpdateTimeSession(choreId, sessionId, sessionData),
-    onSuccess: (data, { choreId }) => {
+    onSuccess: (_, { choreId }) => {
       queryClient.invalidateQueries(['choreTimer', choreId])
       queryClient.invalidateQueries(['chores'])
       queryClient.invalidateQueries(['choreHistory', choreId])
@@ -72,7 +72,7 @@ export const useDeleteTimeSession = () => {
   return useMutation({
     mutationFn: ({ choreId, sessionId }) =>
       DeleteTimeSession(choreId, sessionId),
-    onSuccess: (data, { choreId }) => {
+    onSuccess: (_, { choreId }) => {
       queryClient.invalidateQueries(['choreTimer', choreId])
       queryClient.invalidateQueries(['chores'])
       queryClient.invalidateQueries(['choreHistory', choreId])
@@ -85,7 +85,7 @@ export const useResetChoreTimer = () => {
 
   return useMutation({
     mutationFn: ResetChoreTimer,
-    onSuccess: (data, choreId) => {
+    onSuccess: (_, choreId) => {
       queryClient.invalidateQueries(['choreTimer', choreId])
       queryClient.invalidateQueries(['chores'])
       queryClient.invalidateQueries(['choreHistory', choreId])
@@ -98,7 +98,7 @@ export const useClearChoreTimer = () => {
 
   return useMutation({
     mutationFn: ClearChoreTimer,
-    onSuccess: (data, choreId) => {
+    onSuccess: (_, choreId) => {
       queryClient.invalidateQueries(['choreTimer', choreId])
       queryClient.invalidateQueries(['chores'])
       queryClient.invalidateQueries(['choreHistory', choreId])

@@ -1,7 +1,7 @@
 {
   "name": "donetick",
   "private": true,
-  "version": "1.2.2",
+  "version": "1.2.3",
   "type": "module",
   "engines": {
     "node": ">=20.0.0",
@@ -33,7 +33,8 @@
     "cap": "npm run build && npx cap sync",
     "bump": "node bump-version.js",
     "bump:minor": "node bump-version.js minor",
-    "bump:major": "node bump-version.js major"
+    "bump:major": "node bump-version.js major",
+    "bump:patch": "node bump-version.js patch"
   },
   "dependencies": {
     "@capacitor-community/sqlite": "^7.0.0",
@@ -48,6 +49,7 @@
     "@capacitor/preferences": "^7.0.0",
     "@capacitor/push-notifications": "^7.0.0",
     "@capacitor/status-bar": "^7.0.0",
+    "@capgo/capacitor-nfc": "^7.2.0",
     "@capgo/capacitor-social-login": "^7.5.3",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",

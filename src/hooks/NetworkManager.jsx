@@ -1,69 +1,81 @@
 import { Network } from '@capacitor/network'
-import { localStore } from '../utils/LocalStore'
-import { syncManager } from '../utils/SyncManager.jsx' // Ensure you import syncManager if needed for syncing
+import { isOfflineFeatureEnabled } from '../utils/OfflineFeatureToggle'
+
 class NetworkManager {
   constructor() {
-    this.isOnline = true
-    this.isNetworkOn = null
-    this.init()
+    this.deviceOnline = true
+    this.serverReachable = true
+    this.offlineReason = null // 'device' | 'server' | null
     this.connectionStatusListeners = []
     this.queueSyncListeners = []
     this.lastChecked = null
     this.offlineSince = null
+    this.init()
   }
+
+  // Effective online status: both device network AND server must be reachable
+  get isOnline() {
+    return this.deviceOnline && this.serverReachable
+  }
+
+  // Alias for backward compatibility (DeveloperSettings uses this)
+  get isNetworkOn() {
+    return this.deviceOnline
+  }
+
   async init() {
     const status = await Network.getStatus()
-    this.isNetworkOn = status.connected
+    this.deviceOnline = status.connected
     this.lastChecked = Date.now()
+    if (!status.connected) {
+      this.offlineReason = 'device'
+      this.offlineSince = Date.now()
+    }
 
     Network.addListener('networkStatusChange', status => {
-      if (this.isNetworkOn !== status.connected) {
-        this.isNetworkOn = status.connected
+      if (this.deviceOnline !== status.connected) {
+        this.deviceOnline = status.connected
         this.lastChecked = Date.now()
-        this.isOnline = status.connected
-      }
-    })
-    const syncQueue = () => {
-      localStore
-        .syncQueuedRequests()
-        .then(hasMessages => {
-          console.log(
-            'Queued requests synced successfully. Queue has messaage is: ',
-            hasMessages,
-          )
-          if (hasMessages) {
-            this.notifyBackendSync()
-          }
-        })
-        .catch(error => {
-          console.error('Error syncing queued requests:', error)
-        })
-    }
-    this.registerNetworkListener(async isOnline => {
-      if (isOnline && this.isNetworkOn) {
-        // TODO: Delete when Sync manager Implemented
-        syncQueue()
-        console.log('NetworkManager: Network is back online. with SYNCMANAGER')
 
-        await syncManager.syncTasks()
-        console.log('Finished syncing queued requests.')
+        if (!status.connected) {
+          this.offlineReason = 'device'
+          this.offlineSince = Date.now()
+        } else {
+          // Device came back online — update reason based on server state
+          this.offlineReason = this.serverReachable ? null : 'server'
+        }
+        this.notifyConnectionStatus()
       }
     })
-    syncQueue()
   }
 
-  setOffline() {
-    if (this.isOnline === true) {
-      this.isOnline = false
+  // Called when a fetch() response is received (any HTTP status = server is up)
+  setServerReachable() {
+    if (!this.serverReachable) {
+      this.serverReachable = true
+      this.offlineReason = this.deviceOnline ? null : 'device'
       this.notifyConnectionStatus()
-      this.offlineSince = Date.now() // Record the time when we went offline
     }
+  }
+
+  // Called when fetch() throws a network error (server unreachable)
+  // Only takes effect when offline mode is enabled
+  setServerUnreachable() {
+    if (!isOfflineFeatureEnabled()) return
+    if (this.serverReachable) {
+      this.serverReachable = false
+      this.offlineReason = 'server'
+      this.offlineSince = Date.now()
+      this.notifyConnectionStatus()
+    }
+  }
+
+  // Legacy methods kept for compatibility
+  setOffline() {
+    this.setServerUnreachable()
   }
   setOnline() {
-    if (this.isOnline === false) {
-      this.isOnline = true
-      this.notifyConnectionStatus()
-    }
+    this.setServerReachable()
   }
 
   notifyConnectionStatus() {
@@ -81,8 +93,12 @@ class NetworkManager {
   registerNetworkListener(callback) {
     this.connectionStatusListeners.push(callback)
   }
+  unregisterNetworkListener(callback) {
+    this.connectionStatusListeners = this.connectionStatusListeners.filter(
+      cb => cb !== callback,
+    )
+  }
   registerBackendSyncListener(callback) {
-    // if callback is not in the list already, add it
     if (!this.queueSyncListeners.includes(callback)) {
       this.queueSyncListeners.push(callback)
     }

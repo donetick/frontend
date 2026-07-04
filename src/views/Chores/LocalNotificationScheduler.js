@@ -190,7 +190,11 @@ const scheduleChoreNotification = async (
   for (let i = 0; i < chores.length; i++) {
     const chore = chores[i]
     try {
-      if (chore.notification === false || chore.nextDueDate === null) {
+      if (
+        chore.notification === false ||
+        chore.nextDueDate === null ||
+        chore.isActive === false
+      ) {
         continue
       }
       scheduleNotificationFromTemplate(

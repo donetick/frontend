@@ -6,17 +6,47 @@ import { networkManager } from '../../hooks/NetworkManager'
 
 const NetworkBanner = () => {
   const [isOnline, setIsOnline] = useState(networkManager.isOnline)
+  const [offlineReason, setOfflineReason] = useState(
+    networkManager.offlineReason,
+  )
+  const [isBannerVisible, setIsBannerVisible] = useState(
+    !networkManager.isOnline,
+  )
+
   useEffect(() => {
     const handleNetworkChange = isOnline => {
       setIsOnline(isOnline)
+      setOfflineReason(networkManager.offlineReason)
+
+      if (!isOnline) {
+        setIsBannerVisible(true)
+      }
     }
 
     networkManager.registerNetworkListener(handleNetworkChange)
+    return () => networkManager.unregisterNetworkListener(handleNetworkChange)
   }, [])
+
+  useEffect(() => {
+    if (isOnline || !isBannerVisible) {
+      return
+    }
+
+    const timerId = setTimeout(() => {
+      setIsBannerVisible(false)
+    }, 5000)
+
+    return () => clearTimeout(timerId)
+  }, [isOnline, isBannerVisible])
+
+  const message =
+    offlineReason === 'server'
+      ? 'Server unreachable. Changes will sync when connection is restored.'
+      : 'No internet connection. Some features may not be available.'
 
   return (
     <Box sx={{}}>
-      {!isOnline && (
+      {!isOnline && isBannerVisible && (
         <Alert
           variant='soft'
           color='warning'
@@ -36,7 +66,7 @@ const NetworkBanner = () => {
           }}
           startDecorator={<WifiOff />}
         >
-          You are currently offline. Some features may not be available.
+          {message}
         </Alert>
       )}
     </Box>

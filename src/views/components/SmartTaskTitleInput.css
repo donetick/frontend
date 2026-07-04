@@ -1,3 +1,18 @@
+:root,
+[data-joy-color-scheme='light'] {
+  --highlight-date-color: #b45309;
+  --highlight-repeat-color: #15803d;
+  --highlight-label-color: #1d4ed8;
+  --highlight-priority-color: #be123c;
+}
+
+[data-joy-color-scheme='dark'] {
+  --highlight-date-color: #fca5a5;
+  --highlight-repeat-color: #86efac;
+  --highlight-label-color: #93c5fd;
+  --highlight-priority-color: #f9a8d4;
+}
+
 .smart-task-display {
   position: absolute;
   width: 100%;
@@ -11,27 +26,36 @@
   white-space: pre-wrap;
   box-sizing: border-box;
 }
+
 .smart-task-common {
   font-size: 1.2em;
   line-height: 1.2em;
   font-family: inherit;
-  caret-color: #f08080;
+  caret-color: var(--highlight-date-color);
 }
 
 .highlight-date {
-  color: #f08080;
+  color: var(--highlight-date-color);
 }
 
 .highlight-repeat {
-  color: #90ee90;
+  color: var(--highlight-repeat-color);
 }
 
 .highlight-label {
-  color: #add8e6;
+  color: var(--highlight-label-color);
 }
 
 .highlight-priority {
-  color: #ffb6c1;
+  color: var(--highlight-priority-color);
+}
+
+.highlight-assignee {
+  color: var(--highlight-repeat-color);
+}
+
+.highlight-points {
+  color: var(--highlight-label-color);
 }
 
 .task-input {
@@ -39,4 +63,6 @@
   width: 100%;
   border-radius: 8px;
   box-sizing: border-box;
+  border: 1px solid var(--joy-palette-neutral-outlinedBorder, #d0d5dd);
+  overflow: auto;
 }

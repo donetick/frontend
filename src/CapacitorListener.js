@@ -8,6 +8,35 @@ import { PushNotifications } from '@capacitor/push-notifications'
 import { focusManager } from '@tanstack/react-query'
 import { RegisterDeviceToken } from './utils/Fetcher'
 
+// NFC chore deep link: donetick://chores/123?auto_complete=true
+const handleNFCChoreDeepLink = url => {
+  try {
+    const urlObj = new URL(url)
+    // donetick://chores/123 → host='chores', pathname='/123'
+    const choreId = urlObj.pathname.slice(1)
+    const autoComplete = urlObj.searchParams.get('auto_complete')
+    const path = `/chores/${choreId}${autoComplete ? '?auto_complete=' + autoComplete : ''}`
+
+    // getLaunchUrl() persists across every WebView reload caused by window.location.href.
+    // If we're already on the target page, skip to avoid an infinite reload loop.
+    if (window.location.pathname + window.location.search === path) return
+
+    console.log('[NFC] navigating to', path)
+    window.location.href = path
+  } catch (error) {
+    console.error('[NFC] Error handling chore deep link:', error)
+  }
+}
+
+const handleUrlOpen = url => {
+  console.log('[NFC] handleUrlOpen:', url)
+  if (url.startsWith('donetick://chores/')) {
+    handleNFCChoreDeepLink(url)
+  } else if (url.startsWith('donetick://auth/')) {
+    handleOAuthDeepLink(url)
+  }
+}
+
 // OAuth callback handler for deep links
 const handleOAuthDeepLink = async url => {
   console.log('OAuth deep link received:', url)
@@ -215,15 +244,19 @@ const registerCapacitorListeners = () => {
     return
   }
   localNotificationListenerRegistration()
-  
-  // Register deep link handler for OAuth and other deep links
-  mobileApp.addListener('appUrlOpen', event => {
-    console.log('App URL opened:', event.url)
-    
-    // Handle OAuth callback
-    if (event.url.startsWith('donetick://auth/')) {
-      handleOAuthDeepLink(event.url)
+
+  // Cold-start: app was launched by tapping an NFC tag (or other deep link)
+  mobileApp.getLaunchUrl().then(result => {
+    if (result?.url) {
+      console.log('[NFC] getLaunchUrl:', result.url)
+      handleUrlOpen(result.url)
     }
+  })
+
+  // Foreground / singleTask resume: app was already running when the tag was tapped
+  mobileApp.addListener('appUrlOpen', event => {
+    console.log('[NFC] appUrlOpen:', event.url)
+    handleUrlOpen(event.url)
   })
   
   mobileApp.addListener('appStateChange', ({ isActive }) => {
@@ -233,6 +266,9 @@ const registerCapacitorListeners = () => {
   mobileApp.addListener('backButton', ({ canGoBack }) => {
     if (canGoBack) {
       window.history.back()
+    } else if (window.location.pathname !== '/') {
+      // No history (e.g. app launched directly to a chore via NFC) — go home
+      window.location.href = '/'
     } else {
       mobileApp.exitApp()
     }

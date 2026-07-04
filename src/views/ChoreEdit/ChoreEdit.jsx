@@ -83,7 +83,8 @@ const ChoreEdit = () => {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [confirmModelConfig, setConfirmModelConfig] = useState({})
-  const [assignees, setAssignees] = useState([])
+  const [anyone, setAnyone] = useState(false)
+  const [assignableTo, setAssignableTo] = useState([])
   const [performers, setPerformers] = useState([])
   const [assignStrategy, setAssignStrategy] = useState(ASSIGN_STRATEGIES[2])
   const [dueDate, setDueDate] = useState(null)
@@ -158,6 +159,7 @@ const ChoreEdit = () => {
 
   const Navigate = useNavigate()
 
+  const assignees = anyone ? performers : assignableTo
   const HandleValidateChore = () => {
     const errors = {}
 
@@ -330,12 +332,14 @@ const ChoreEdit = () => {
     if (searchParams.get('clone') === 'true') {
       newChoreId = null
     }
+    const assignees = anyone ? [] : assignableTo
     const chore = {
       id: Number(newChoreId),
       name: name,
       description: description,
       assignees: assignees,
       dueDate: dueDate ? new Date(dueDate).toISOString() : null,
+      nextDueDate: dueDate ? new Date(dueDate).toISOString() : null,
       frequencyType: frequencyType,
       frequency: Number(frequency),
       frequencyMetadata: frequencyMetadata,
@@ -365,11 +369,22 @@ const ChoreEdit = () => {
     }
 
     SaveFunction(chore)
-      .then(() => {
-        showSuccess({
-          title: 'Chore Saved',
-          message: 'Your task has been saved successfully!',
-        })
+      .then(result => {
+        if (
+          result?._pendingUpdate ||
+          result?._pendingCreate ||
+          result?.res?._pendingCreate
+        ) {
+          showSuccess({
+            title: 'Saved Offline',
+            message: 'Your changes will sync when you are back online.',
+          })
+        } else {
+          showSuccess({
+            title: 'Chore Saved',
+            message: 'Your task has been saved successfully!',
+          })
+        }
         Navigate('/chores')
       })
       .catch(error => {
@@ -407,15 +422,29 @@ const ChoreEdit = () => {
         setIsNotificable(JSON.parse(defaultNotificationSetting))
       }
 
+      const defaultAnyoneSetting = localStorage.getItem('defaultAnyoneSetting')
+      if (defaultAnyoneSetting != null) {
+        const savedAnyone = JSON.parse(defaultAnyoneSetting)
+        setAnyone(savedAnyone)
+      }
+
       const defaultAssigneeSetting = localStorage.getItem(
         'defaultAssigneeSetting',
       )
       if (defaultAssigneeSetting !== null) {
         const savedAssignees = JSON.parse(defaultAssigneeSetting)
-        setAssignees(savedAssignees)
+        setAssignableTo(savedAssignees)
       }
     }
   }, [])
+  useEffect(() => {
+    const anyoneSetting = localStorage.getItem('defaultAnyoneSetting')
+    const anyoneDirty = anyoneSetting !== JSON.stringify(anyone)
+    const assigneeSetting = localStorage.getItem('defaultAssigneeSetting')
+    const assigneeDirty = assigneeSetting !== JSON.stringify(assignableTo)
+    const dirty = anyoneDirty || (!anyone && assigneeDirty)
+    setShowSaveAssigneeDefault(dirty)
+  }, [anyone, assignableTo])
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -465,7 +494,8 @@ const ChoreEdit = () => {
       setChore(data.res)
       setName(data.res.name ? data.res.name : '')
       setDescription(data.res.description ? data.res.description : '')
-      setAssignees(data.res.assignees ? data.res.assignees : [])
+      setAssignableTo(data.res.assignees ? data.res.assignees : [])
+      setAnyone((data.res.assignees?.length || 0) === 0)
       setAssignedTo(data.res.assignedTo)
       setFrequencyType(data.res.frequencyType ? data.res.frequencyType : 'once')
 
@@ -579,13 +609,15 @@ const ChoreEdit = () => {
     if (assignees.length === 0) {
       setAssignStrategy('no_assignee')
       setAssignedTo(null)
-    } else if (assignees.length === 1) {
-      setAssignedTo(assignees[0].userId)
+    } else {
+      if (!assignees.some(a => a.userId === assignedTo)) {
+        setAssignedTo(assignees[0].userId)
+      }
       if (assignStrategy === 'no_assignee') {
         setAssignStrategy(ASSIGN_STRATEGIES[2]) // default to least_completed
       }
     }
-  }, [assignees, assignStrategy])
+  }, [assignStrategy, assignedTo, assignees])
 
   // useEffect(() => {
   //   if (performers.length > 0 && assignees.length === 0 && userProfile) {
@@ -602,7 +634,7 @@ const ChoreEdit = () => {
     if (attemptToSave) {
       HandleValidateChore()
     }
-  }, [assignees, name, frequencyMetadata, attemptToSave, dueDate])
+  }, [assignableTo, name, frequencyMetadata, attemptToSave, dueDate])
 
   const handleDelete = () => {
     setConfirmModelConfig({
@@ -929,9 +961,9 @@ const ChoreEdit = () => {
 
               <ListItem key={'anyone'}>
                 <Checkbox
-                  checked={assignees.length === 0}
+                  checked={anyone}
                   onClick={() => {
-                    setAssignees([])
+                    setAnyone(!anyone)
                     setIsPrivate(false)
                   }}
                   overlay
@@ -944,19 +976,25 @@ const ChoreEdit = () => {
               {performers?.map((item, index) => (
                 <ListItem key={item.id}>
                   <Checkbox
-                    checked={
-                      assignees.find(a => a.userId == item.userId) != null
-                    }
+                    checked={assignableTo.some(a => a.userId == item.userId)}
+                    disabled={anyone}
                     onClick={() => {
+                      if (anyone) {
+                        setAnyone(false)
+                        setAssignableTo([{ userId: item.userId }])
+                        return
+                      }
+                      const assignees = assignableTo
+                      const setAssignees = setAssignableTo
                       if (assignees.some(a => a.userId === item.userId)) {
                         const newAssignees = assignees.filter(
                           a => a.userId !== item.userId,
                         )
+                        setAnyone(newAssignees.length === 0)
                         setAssignees(newAssignees)
                       } else {
                         setAssignees([...assignees, { userId: item.userId }])
                       }
-                      setShowSaveAssigneeDefault(true)
                     }}
                     overlay
                     disableIcon
@@ -987,8 +1025,12 @@ const ChoreEdit = () => {
                 }}
                 onClick={() => {
                   localStorage.setItem(
+                    'defaultAnyoneSetting',
+                    JSON.stringify(anyone),
+                  )
+                  localStorage.setItem(
                     'defaultAssigneeSetting',
-                    JSON.stringify(assignees),
+                    JSON.stringify(assignableTo),
                   )
                   setShowSaveAssigneeDefault(false)
                 }}
@@ -1014,17 +1056,12 @@ const ChoreEdit = () => {
                 }
                 disabled={assignees.length === 0}
                 value={assignedTo > -1 ? assignedTo : null}
+                onChange={(_, selectedUserId) => setAssignedTo(selectedUserId)}
               >
                 {performers
-                  ?.filter(p => assignees.find(a => a.userId == p.userId))
+                  ?.filter(p => assignees.some(a => a.userId == p.userId))
                   .map((item, index) => (
-                    <Option
-                      value={item.userId}
-                      key={item.displayName}
-                      onClick={() => {
-                        setAssignedTo(item.userId)
-                      }}
-                    >
+                    <Option value={item.userId} key={item.displayName}>
                       {item.displayName}
                     </Option>
                   ))}
