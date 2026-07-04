@@ -2,17 +2,10 @@ import {
   Add,
   Bolt,
   CalendarMonth,
-  CancelRounded,
-  CheckBox,
-  CheckBoxOutlineBlank,
   EditCalendar,
   ExpandCircleDown,
-  Grain,
   PriorityHigh,
-  Sort,
   Style,
-  ViewAgenda,
-  ViewModule,
 } from '@mui/icons-material'
 import Logo from '../../Logo'
 import {
@@ -25,9 +18,6 @@ import {
   Container,
   Divider,
   IconButton,
-  List,
-  Menu,
-  MenuItem,
   Typography,
 } from '@mui/joy'
 import Fuse from 'fuse.js'
@@ -44,6 +34,7 @@ import IconButtonWithMenu from './IconButtonWithMenu'
 import { useMediaQuery } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
+import { useFilter } from '../../hooks/useFilter'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import {
@@ -56,15 +47,13 @@ import { getSafeBottom } from '../../utils/SafeAreaUtils.js'
 import TaskInput from '../components/AddTaskModal'
 import CalendarDual from '../components/CalendarDual'
 import CalendarMonthly from '../components/CalendarMonthly.jsx'
-import ProjectSelector from '../components/ProjectSelector'
 import AdvancedFilterBuilder from '../Modals/Inputs/AdvancedFilterBuilder'
 import { useProjects } from '../Projects/ProjectQueries.js'
 import ChoreListView from './ChoreListView.jsx'
+import ChoreToolbar from './components/ChoreToolbarPrototype'
 import ChoreModals from './components/ChoreModals'
-import FilterSection from './components/FilterSection'
 import MultiSelectToolbar from './components/MultiSelectToolbar'
 import MyChoreHeader from './components/MyChoreHeader'
-import SearchBar from './components/SearchBar'
 import { useChoreActions } from './hooks/useChoreActions'
 import { useChoreFilters } from './hooks/useChoreFilters'
 import { useChoreModals } from './hooks/useChoreModals'
@@ -79,7 +68,6 @@ import {
 import NotificationAccessSnackbar from './NotificationAccessSnackbar'
 import Sidepanel from './Sidepanel'
 import { INSIGHT_FILTER_DEFS } from './SmartInsightsCard'
-import SortAndGrouping from './SortAndGrouping'
 
 const MyChores = () => {
   const { data: userProfile, isLoading: isUserProfileLoading } =
@@ -108,7 +96,6 @@ const MyChores = () => {
   const [chores, setChores] = useState([])
   const [filteredChores, setFilteredChores] = useState([])
   const [choreSections, setChoreSections] = useState([])
-  const [showSearchFilter, setShowSearchFilter] = useState(false)
   const [addTaskModalOpen, setAddTaskModalOpen] = useState(false)
   const [taskInputFocus, setTaskInputFocus] = useState(0)
   const searchInputRef = useRef(null)
@@ -136,15 +123,12 @@ const MyChores = () => {
 
   const {
     searchTerm,
-    searchFilter,
     selectedChoreFilter,
     projectFilteredChores,
     searchFilteredChores,
     nonProjectFilteredChores,
     setSearchTerm,
-    setSearchFilter,
     setSelectedChoreFilterWithCache,
-    clearFilters,
   } = useChoreFilters({
     chores,
     selectedProject,
@@ -194,6 +178,102 @@ const MyChores = () => {
     useState(false)
   const [editingFilter, setEditingFilter] = useState(null)
 
+  const quickFilterDefs = useMemo(
+    () => [
+      {
+        id: 'status',
+        label: 'Due Date',
+        type: 'single-select',
+        icon: <CalendarMonth />,
+        options: [
+          { value: 'Overdue', label: 'Overdue', color: 'danger' },
+          { value: 'Due today', label: 'Due Today', color: 'warning' },
+          { value: 'Due in week', label: 'Due This Week' },
+          { value: 'Due Later', label: 'Due Later' },
+          { value: 'No Due Date', label: 'No Due Date' },
+          { value: 'Pending Approval', label: 'Pending Approval' },
+        ],
+        filterFn: (item, value) => {
+          const now = new Date()
+          const d = item.nextDueDate ? new Date(item.nextDueDate) : null
+          switch (value) {
+            case 'Overdue':
+              return d !== null && d < now
+            case 'Due today':
+              return d !== null && d.toDateString() === now.toDateString()
+            case 'Due in week':
+              return (
+                d !== null &&
+                d < new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000) &&
+                d > now
+              )
+            case 'Due Later':
+              return (
+                d !== null &&
+                d > new Date(now.getTime() + 24 * 60 * 60 * 1000)
+              )
+            case 'No Due Date':
+              return item.nextDueDate === null
+            case 'Pending Approval':
+              return item.status === 3
+            default:
+              return true
+          }
+        },
+      },
+      {
+        id: 'priority',
+        label: 'Priority',
+        type: 'multi-select',
+        icon: <PriorityHigh />,
+        options: Priorities.map(p => ({
+          value: p.value,
+          label: p.name,
+          color: p.color || 'neutral',
+          icon: p.icon,
+        })),
+        filterFn: (item, values) => values.includes(item.priority ?? 0),
+      },
+      ...(userLabels?.length > 0
+        ? [
+            {
+              id: 'label',
+              label: 'Labels',
+              type: 'multi-select',
+              icon: <Style />,
+              options: userLabels.map(l => ({
+                value: l.id,
+                label: l.name,
+                icon: (
+                  <Box
+                    component='span'
+                    sx={{
+                      display: 'inline-block',
+                      width: 10,
+                      height: 10,
+                      borderRadius: '50%',
+                      bgcolor: l.color || '#90a4ae',
+                      flexShrink: 0,
+                    }}
+                  />
+                ),
+              })),
+              filterFn: (item, values) =>
+                item.labelsV2?.some(l => values.includes(l.id)) ?? false,
+            },
+          ]
+        : []),
+    ],
+    [userLabels],
+  )
+
+  const {
+    filteredData: quickFilteredChores,
+    setFilter: setQuickFilter,
+    clearAll: clearQuickFilters,
+    hasActiveFilters: hasQuickFilters,
+  } = useFilter(projectFilteredChores, quickFilterDefs)
+
   const processedChores = useMemo(() => {
     if (!choresData?.res) {
       return []
@@ -223,9 +303,9 @@ const MyChores = () => {
     if (tempFilter || activeFilterId) {
       // Advanced/custom filter active
       choresToGroup = customFilteredChores
-    } else if (searchFilter !== 'All') {
-      // Quick filter active (Overdue, Due today, Label, Priority, etc.)
-      choresToGroup = filteredChores
+    } else if (hasQuickFilters) {
+      // Quick filter active (Due date, Priority, Labels)
+      choresToGroup = quickFilteredChores
     } else if (!selectedProject || selectedProject.id === 'default') {
       // No project selected or default project: only show tasks without a projectId
       choresToGroup = chores.filter(chore => !chore.projectId)
@@ -245,11 +325,11 @@ const MyChores = () => {
     return sections
   }, [
     chores,
-    filteredChores,
+    quickFilteredChores,
     customFilteredChores,
     tempFilter,
     activeFilterId,
-    searchFilter,
+    hasQuickFilters,
     selectedChoreSection,
     selectedChoreFilter,
     selectedProject,
@@ -399,7 +479,7 @@ const MyChores = () => {
     }
 
     // Handle legacy filter parameter (e.g., filter=unplanned)
-    if (oldFilter && searchFilter === 'All' && !activeFilterId) {
+    if (oldFilter && !hasQuickFilters && !activeFilterId) {
       const filterMap = {
         unplanned: 'No Due Date',
         overdue: 'Overdue',
@@ -410,12 +490,8 @@ const MyChores = () => {
       }
 
       const filterName = filterMap[oldFilter.toLowerCase()]
-      if (filterName && FILTERS[filterName]) {
-        const filtered = FILTERS[filterName](
-          selectedProject ? projectFilteredChores : chores,
-        )
-        setFilteredChores(filtered)
-        setSearchFilter(filterName)
+      if (filterName) {
+        setQuickFilter('status', filterName)
         setViewMode('default')
         setSelectedCalendarDate(null)
       }
@@ -423,7 +499,7 @@ const MyChores = () => {
   }, [
     searchParams,
     chores,
-    searchFilter,
+    hasQuickFilters,
     activeFilterId,
     savedFilters,
     applyCustomFilter,
@@ -431,8 +507,7 @@ const MyChores = () => {
     clearActiveFilter,
     selectedProject,
     projectFilteredChores,
-    setSearchFilter,
-    setFilteredChores,
+    setQuickFilter,
     setViewMode,
     setSelectedCalendarDate,
   ])
@@ -497,13 +572,47 @@ const MyChores = () => {
     clearSelection,
   })
 
+  const getFilteredChores = useMemo(() => {
+    if (activeFilterId || tempFilter) {
+      return customFilteredChores
+    }
+
+    const baseChores = hasQuickFilters
+      ? quickFilteredChores
+      : projectFilteredChores
+
+    if (searchTerm?.length > 0) {
+      const searchableChores = baseChores.map(c => ({
+        ...c,
+        raw_label: c.labelsV2?.map(l => l.name).join(' '),
+      }))
+      const fuse = new Fuse(searchableChores, {
+        keys: ['name', 'raw_label'],
+        includeScore: true,
+        isCaseSensitive: false,
+        findAllMatches: true,
+      })
+      return fuse.search(searchTerm).map(result => result.item)
+    }
+
+    return baseChores
+  }, [
+    activeFilterId,
+    tempFilter,
+    customFilteredChores,
+    hasQuickFilters,
+    quickFilteredChores,
+    projectFilteredChores,
+    searchTerm,
+  ])
+
   const { showKeyboardShortcuts } = useKeyboardShortcuts({
     isMultiSelectMode,
     selectedChores,
     addTaskModalOpen,
     searchTerm,
-    searchFilter,
-    filteredChores,
+    searchFilter: hasQuickFilters || searchTerm?.length > 0 ? 'filtered' : 'All',
+    filteredChores: getFilteredChores,
     choreSections,
     openChoreSections,
     handlers: {
@@ -554,25 +663,10 @@ const MyChores = () => {
 
   const handleLabelFiltering = chipClicked => {
     clearActiveFilter()
-
-    const baseChores = selectedProject ? projectFilteredChores : chores
-
     if (chipClicked.label) {
-      const label = chipClicked.label
-      const labelFiltered = baseChores.filter(chore =>
-        chore.labelsV2.some(
-          l => l.id === label.id && l.created_by === label.created_by,
-        ),
-      )
-      setFilteredChores(labelFiltered)
-      setSearchFilter('Label: ' + label.name)
+      setQuickFilter('label', [chipClicked.label.id])
     } else if (chipClicked.priority) {
-      const priority = chipClicked.priority
-      const priorityFiltered = baseChores.filter(
-        chore => chore.priority === priority,
-      )
-      setFilteredChores(priorityFiltered)
-      setSearchFilter('Priority: ' + priority)
+      setQuickFilter('priority', [chipClicked.priority])
     }
     setSelectedCalendarDate(null)
   }
@@ -624,8 +718,8 @@ const MyChores = () => {
 
   const handleSearchChange = e => {
     clearActiveFilter()
-    if (searchFilter !== 'All') {
-      setSearchFilter('All')
+    if (hasQuickFilters) {
+      clearQuickFilters()
     }
     const search = e.target.value
     if (search === '') {
@@ -673,14 +767,13 @@ const MyChores = () => {
     localStorage.setItem('openChoreSections', JSON.stringify(value))
   }
 
-  const toggleViewMode = () => {
-    const modes = ['default', 'compact', 'calendar']
-    const currentIndex = modes.indexOf(viewMode)
-    const nextIndex = (currentIndex + 1) % modes.length
-    const newMode = modes[nextIndex]
+  const toggleViewMode = value => {
+    const newMode = value ?? (() => {
+      const modes = ['default', 'compact', 'calendar']
+      return modes[(modes.indexOf(viewMode) + 1) % modes.length]
+    })()
     setViewMode(newMode)
     localStorage.setItem('choreCardViewMode', newMode)
-
     if (newMode !== 'calendar') {
       setSelectedCalendarDate(null)
     }
@@ -741,42 +834,6 @@ const MyChores = () => {
   //   )
   // }
 
-  const getFilteredChores = useMemo(() => {
-    if (activeFilterId || tempFilter) {
-      return customFilteredChores
-    }
-
-    let baseChores = projectFilteredChores
-
-    if (searchTerm?.length > 0 || searchFilter !== 'All') {
-      if (searchTerm?.length > 0) {
-        const projectFilteredForSearch = baseChores.map(c => ({
-          ...c,
-          raw_label: c.labelsV2?.map(l => l.name).join(' '),
-        }))
-        const fuse = new Fuse(projectFilteredForSearch, {
-          keys: ['name', 'raw_label'],
-          includeScore: true,
-          isCaseSensitive: false,
-          findAllMatches: true,
-        })
-        return fuse.search(searchTerm).map(result => result.item)
-      } else if (searchFilter !== 'All') {
-        return filteredChores
-      }
-    }
-
-    return baseChores
-  }, [
-    activeFilterId,
-    tempFilter,
-    customFilteredChores,
-    projectFilteredChores,
-    searchTerm,
-    searchFilter,
-    filteredChores,
-  ])
-
   const getChoresForDate = useCallback(
     date => {
       const filteredChoresData = getFilteredChores
@@ -801,7 +858,7 @@ const MyChores = () => {
 
     setChores(newChores)
     setFilteredChores(newChores)
-    setSearchFilter('All')
+    clearQuickFilters()
   }
 
   // Show error state when API is unreachable
@@ -876,322 +933,96 @@ const MyChores = () => {
           tempFilter={tempFilter}
           tempFilterMeta={tempFilterMeta}
         />
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignContent: 'center',
-            alignItems: 'center',
-            gap: 0.5,
+        <ChoreToolbar
+          members={membersData?.res || []}
+          labels={userLabels || []}
+          projects={projectsWithDefault}
+          tempFilter={tempFilter}
+          tempFilterMeta={tempFilterMeta}
+          applyTempFilter={applyTempFilter}
+          clearTempFilter={clearTempFilter}
+          saveFilter={saveFilter}
+          updateFilter={updateFilter}
+          onFilterSaved={name =>
+            showSuccess({
+              title: 'Filter Saved',
+              message: `"${name}" has been saved`,
+            })
+          }
+          onClearAllFilters={() => {
+            clearQuickFilters()
+            clearActiveFilter()
+            setSelectedChoreFilterWithCache('anyone')
+            setSelectedProjectWithCache(
+              projectsWithDefault.find(p => p.id === 'default') || null,
+            )
+            updateFilterUrl(null, null)
           }}
-        >
-          <SearchBar
-            value={searchTerm}
-            onChange={handleSearchChange}
-            onClose={handleSearchClose}
-            onFocus={() => setShowSearchFilter(true)}
-            showKeyboardShortcuts={showKeyboardShortcuts}
-            inputRef={searchInputRef}
-          />
-
-          <SortAndGrouping
-            title='Group by'
-            k={'icon-menu-group-by'}
-            icon={<Sort />}
-            selectedItem={selectedChoreSection}
-            selectedFilter={selectedChoreFilter}
-            setFilter={filter => {
-              setSelectedChoreFilterWithCache(filter)
-              // Clear active custom filter when quick filter is applied
-              if (activeFilterId) {
-                clearActiveFilter()
-                updateFilterUrl(null, null)
-              }
-            }}
-            onItemSelect={selected => {
-              setSelectedChoreSectionWithCache(selected.value)
-              setFilteredChores(chores)
-              setSearchFilter('All')
-            }}
-            onCreateNewFilter={() => {
-              setShowAdvancedFilterBuilder(true)
-              setEditingFilter(null)
-            }}
-            mouseClickHandler={handleMenuOutsideClick}
-          />
-
-          {/* Project Selector - Hidden when active filter has project conditions */}
-          {projectsWithDefault.length > 1 &&
-            !hasProjectConditions &&
-            !hasFilterApplied && (
-              <ProjectSelector
-                selectedProject={selectedProject?.name || 'Default Project'}
-                onProjectSelect={project => {
-                  setSelectedProjectWithCache(project)
-                  clearActiveFilter()
-                }}
-                showKeyboardShortcuts={showKeyboardShortcuts}
-              />
-            )}
-
-          {/* View Mode Toggle Button */}
-          <IconButton
-            variant='outlined'
-            color='neutral'
-            size='sm'
-            sx={{
-              height: 32,
-              width: 32,
-              borderRadius: '50%',
-            }}
-            onClick={toggleViewMode}
-            title={
-              viewMode === 'default'
-                ? 'Switch to Compact View'
-                : viewMode === 'compact'
-                  ? 'Switch to Calendar View'
-                  : 'Switch to Card View'
+          resultCount={
+            hasQuickFilters || hasFilterApplied
+              ? getFilteredChores.length
+              : undefined
+          }
+          totalCount={
+            hasQuickFilters || hasFilterApplied
+              ? projectFilteredChores.length
+              : undefined
+          }
+          selectedProject={selectedProject}
+          onProjectSelect={project => {
+            setSelectedProjectWithCache(project)
+            clearActiveFilter()
+          }}
+          selectedAssigneeFilter={selectedChoreFilter}
+          onAssigneeFilterChange={filter => {
+            setSelectedChoreFilterWithCache(filter)
+            if (activeFilterId) {
+              clearActiveFilter()
+              updateFilterUrl(null, null)
             }
-          >
-            {viewMode === 'default' ? (
-              <ViewAgenda />
-            ) : viewMode === 'compact' ? (
-              <CalendarMonth />
-            ) : (
-              <ViewModule />
-            )}
-          </IconButton>
-
-          {/* Multi-select Toggle Button */}
-          <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-            <IconButton
-              variant={isMultiSelectMode ? 'solid' : 'outlined'}
-              color={isMultiSelectMode ? 'primary' : 'neutral'}
-              size='sm'
-              sx={{
-                height: 32,
-                width: 32,
-                borderRadius: '50%',
-              }}
-              onClick={toggleMultiSelectMode}
-              title={
-                isMultiSelectMode
-                  ? 'Exit Multi-select Mode (Ctrl+S)'
-                  : 'Enable Multi-select Mode (Ctrl+S)'
-              }
-            >
-              {isMultiSelectMode ? <CheckBox /> : <CheckBoxOutlineBlank />}
-            </IconButton>
-            <KeyboardShortcutHint
-              shortcut='S'
-              show={showKeyboardShortcuts}
-              sx={{
-                position: 'absolute',
-                top: -8,
-                right: -8,
-                zIndex: 1000,
-              }}
-            />
-          </Box>
-        </Box>
-
-        {/* Search Filter with animation */}
-        <Box
-          sx={{
-            overflow: 'hidden',
-            transition: 'all 0.3s ease-in-out',
-            maxHeight: showSearchFilter ? '150px' : '0',
-            opacity: showSearchFilter ? 1 : 0,
-            transform: showSearchFilter ? 'translateY(0)' : 'translateY(-10px)',
-            marginBottom: showSearchFilter ? 1 : 0,
           }}
-        >
-          <div className='flex gap-4'>
-            <div className='grid flex-1 grid-cols-3 gap-4'>
-              <IconButtonWithMenu
-                label={' Priority'}
-                k={'icon-menu-priority-filter'}
-                icon={<PriorityHigh />}
-                options={Priorities}
-                selectedItem={searchFilter}
-                onItemSelect={selected => {
-                  handleLabelFiltering({ priority: selected.value })
-                }}
-                mouseClickHandler={handleMenuOutsideClick}
-                isActive={searchFilter.startsWith('Priority: ')}
-              />
-
-              <IconButtonWithMenu
-                k={'icon-menu-labels-filter'}
-                label={' Labels'}
-                icon={<Style />}
-                options={userLabels}
-                selectedItem={searchFilter}
-                onItemSelect={selected => {
-                  handleLabelFiltering({ label: selected })
-                }}
-                isActive={searchFilter.startsWith('Label: ')}
-                mouseClickHandler={handleMenuOutsideClick}
-                useChips
-              />
-
-              <Button
-                onClick={handleFilterMenuOpen}
-                variant='outlined'
-                startDecorator={<Grain />}
-                color={
-                  searchFilter && FILTERS[searchFilter] && searchFilter != 'All'
-                    ? 'primary'
-                    : 'neutral'
-                }
-                size='sm'
-                sx={{
-                  height: 24,
-                  borderRadius: 24,
-                }}
-              >
-                {' Other'}
-              </Button>
-
-              <List
-                orientation='horizontal'
-                wrap
-                sx={{
-                  mt: 0.2,
-                }}
-              >
-                <Menu
-                  ref={menuRef}
-                  anchorEl={anchorEl}
-                  open={Boolean(anchorEl)}
-                  onClose={handleFilterMenuClose}
-                >
-                  {Object.keys(FILTERS).map((filter, index) => (
-                    <MenuItem
-                      key={`filter-list-${filter}-${index}`}
-                      onClick={() => {
-                        const filterFunction = FILTERS[filter]
-                        const baseChores = selectedProject
-                          ? projectFilteredChores
-                          : chores
-                        const filteredChores =
-                          filterFunction.length === 2
-                            ? filterFunction(baseChores, userProfile?.id)
-                            : filterFunction(baseChores)
-                        setFilteredChores(filteredChores)
-                        setSearchFilter(filter)
-                        handleFilterMenuClose()
-
-                        // Update URL with legacy filter parameter
-                        const filterMap = {
-                          'No Due Date': 'unplanned',
-                          Overdue: 'overdue',
-                          'Due today': 'today',
-                          'Due in week': 'week',
-                          'Due Later': 'later',
-                          'Pending Approval': 'pending',
-                        }
-                        const urlFilter = filterMap[filter]
-                        if (urlFilter) {
-                          updateFilterUrl('filter', urlFilter)
-                        }
-                      }}
-                    >
-                      {filter}
-                      <Chip
-                        color={searchFilter === filter ? 'primary' : 'neutral'}
-                      >
-                        {(() => {
-                          const baseChores = selectedProject
-                            ? projectFilteredChores
-                            : chores
-                          return FILTERS[filter].length === 2
-                            ? FILTERS[filter](baseChores, userProfile?.id)
-                                .length
-                            : FILTERS[filter](baseChores).length
-                        })()}
-                      </Chip>
-                    </MenuItem>
-                  ))}
-
-                  {searchFilter.startsWith('Label: ') ||
-                    (searchFilter.startsWith('Priority: ') && (
-                      <MenuItem
-                        key={`filter-list-cancel-all-filters`}
-                        onClick={() => {
-                          setFilteredChores(
-                            selectedProject ? projectFilteredChores : chores,
-                          )
-                          setSearchFilter('All')
-                          updateFilterUrl(null, null)
-                        }}
-                      >
-                        Cancel All Filters
-                      </MenuItem>
-                    ))}
-                </Menu>
-              </List>
-            </div>
-            <IconButton
-              variant='outlined'
-              color='neutral'
-              size='sm'
-              sx={{
-                height: 24,
-                borderRadius: 24,
-              }}
-              onClick={() => {
-                setShowSearchFilter(false)
-                setSearchTerm('')
-                setFilteredChores(chores)
-                setSearchFilter('All')
-                updateFilterUrl(null, null)
-              }}
-            >
-              <CancelRounded />
-            </IconButton>
-          </div>
-        </Box>
-
-        {/* Custom Filters Section */}
-        <FilterSection
           savedFilters={savedFilters}
           activeFilterId={activeFilterId}
-          activeFilter={activeFilter}
-          hasProjectConditions={hasProjectConditions}
-          onFilterClick={filterId => {
+          onSavedFilterClick={filterId => {
             if (activeFilterId === filterId) {
               clearActiveFilter()
               updateFilterUrl(null, null)
             } else {
-              setSearchFilter('All')
+              clearQuickFilters()
               setSearchTerm('')
               setFilteredChores([])
-
-              // Reset quick filter to 'anyone' when custom filter is applied
               if (selectedChoreFilter !== 'anyone') {
                 setSelectedChoreFilterWithCache('anyone')
               }
-
-              // Clear project selection if the filter has project conditions
               const filter = savedFilters.find(f => f.id === filterId)
               if (filter?.conditions?.some(c => c.type === 'project')) {
                 setSelectedProjectWithCache(null)
               }
-
               applyCustomFilter(filterId)
               updateFilterUrl('filterId', filterId)
             }
           }}
-          onFilterDelete={deleteFilter}
-          onFilterPin={pinFilter}
-          onFilterEdit={filter => {
+          onSavedFilterEdit={filter => {
             setEditingFilter(filter)
             setShowAdvancedFilterBuilder(true)
           }}
-          onClearActiveFilter={clearActiveFilter}
-          onCreateAdvancedFilter={() => setShowAdvancedFilterBuilder(true)}
-          updateFilterUrl={updateFilterUrl}
+          onSavedFilterDelete={deleteFilter}
+          onSavedFilterPin={pinFilter}
+          selectedGroupBy={selectedChoreSection}
+          onGroupBySelect={value => {
+            setSelectedChoreSectionWithCache(value)
+            setFilteredChores(chores)
+            clearQuickFilters()
+          }}
+          viewMode={viewMode}
+          onToggleViewMode={toggleViewMode}
+          isMultiSelectMode={isMultiSelectMode}
+          onToggleMultiSelect={toggleMultiSelectMode}
+          searchTerm={searchTerm}
+          onSearchChange={handleSearchChange}
+          onSearchClose={handleSearchClose}
+          searchInputRef={searchInputRef}
+          showKeyboardShortcuts={showKeyboardShortcuts}
         />
 
         <MultiSelectToolbar
@@ -1205,41 +1036,15 @@ const MyChores = () => {
           onDelete={handleBulkDelete}
           showKeyboardShortcuts={showKeyboardShortcuts}
           selectAllDisabled={
-            searchTerm?.length > 0 || searchFilter !== 'All'
-              ? selectedChores.size === filteredChores.length
+            searchTerm?.length > 0 || hasQuickFilters
+              ? selectedChores.size === getFilteredChores.length
               : selectedChores.size ===
                 choreSections.flatMap(s => s.content || []).length
           }
         />
 
-        {/* Additional Filters Display */}
-        {searchFilter !== 'All' && (
-          <Chip
-            level='title-md'
-            gutterBottom
-            color='warning'
-            label={searchFilter}
-            onDelete={() => {
-              setFilteredChores(
-                selectedProject ? projectFilteredChores : chores,
-              )
-              setSearchFilter('All')
-              updateFilterUrl(null, null)
-            }}
-            endDecorator={<CancelRounded />}
-            onClick={() => {
-              setFilteredChores(
-                selectedProject ? projectFilteredChores : chores,
-              )
-              setSearchFilter('All')
-              updateFilterUrl(null, null)
-            }}
-          >
-            Additional Filter: {searchFilter}
-          </Chip>
-        )}
         {/* Show "Nothing scheduled" when appropriate based on current view mode */}
-        {(searchTerm?.length > 0 || searchFilter !== 'All' || activeFilterId
+        {(searchTerm?.length > 0 || hasQuickFilters || activeFilterId
           ? getFilteredChores.length === 0
           : projectFilteredChores.length === 0) &&
           // only if not in calendar view:
@@ -1267,10 +1072,9 @@ const MyChores = () => {
                 <>
                   <Button
                     onClick={() => {
-                      setSearchFilter('All')
+                      clearQuickFilters()
                       setSearchTerm('')
                       clearActiveFilter()
-                      // reset project and filters :
                       setSelectedProjectWithCache(null)
                       updateFilterUrl(null, null)
                     }}
@@ -1719,61 +1523,6 @@ const MyChores = () => {
       />
     </div>
   )
-}
-
-const FILTERS = {
-  All: function (chores) {
-    return chores
-  },
-  Overdue: function (chores) {
-    return chores.filter(chore => {
-      if (chore.nextDueDate === null) return false
-      return new Date(chore.nextDueDate) < new Date()
-    })
-  },
-  'Due today': function (chores) {
-    return chores.filter(chore => {
-      return (
-        new Date(chore.nextDueDate).toDateString() === new Date().toDateString()
-      )
-    })
-  },
-  'Due in week': function (chores) {
-    return chores.filter(chore => {
-      return (
-        new Date(chore.nextDueDate) <
-          new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) &&
-        new Date(chore.nextDueDate) > new Date()
-      )
-    })
-  },
-  'Due Later': function (chores) {
-    return chores.filter(chore => {
-      return (
-        new Date(chore.nextDueDate) > new Date(Date.now() + 24 * 60 * 60 * 1000)
-      )
-    })
-  },
-  'Created By Me': function (chores, userID) {
-    return chores.filter(chore => {
-      return chore.createdBy === userID
-    })
-  },
-  'Assigned To Me': function (chores, userID) {
-    return chores.filter(chore => {
-      return chore.assignedTo === userID
-    })
-  },
-  'No Due Date': function (chores) {
-    return chores.filter(chore => {
-      return chore.nextDueDate === null
-    })
-  },
-  'Pending Approval': function (chores) {
-    return chores.filter(chore => {
-      return chore.status === 3
-    })
-  },
 }
 
 export default MyChores

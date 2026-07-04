@@ -90,6 +90,8 @@ export const useCustomFilters = (chores, membersData, labels, projects) => {
   }, [chores, activeFilter, tempFilter, context])
 
   const applyCustomFilter = useCallback(filterId => {
+    setTempFilter(null)
+    setTempFilterMeta(null)
     setActiveFilterId(filterId)
   }, [])
 
