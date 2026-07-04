@@ -1,4 +1,4 @@
-import { Add } from '@mui/icons-material'
+import { Add, CameraAlt } from '@mui/icons-material'
 import { Box, Button, Typography } from '@mui/joy'
 import { useMediaQuery } from '@mui/material'
 import * as chrono from 'chrono-node'
@@ -28,6 +28,7 @@ import DueDatePickerField from './DueDatePickerField'
 import LabelsPickerField from './LabelsPickerField'
 import LearnMoreButton from './LearnMore'
 import NotificationPickerField from './NotificationPickerField'
+import PhotoTaskModal from './PhotoTaskModal'
 import PriorityPickerField from './PriorityPickerField'
 import RepeatPickerField from './RepeatPickerField'
 import RichTextEditor from './RichTextEditor'
@@ -103,6 +104,7 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
   const [projectId, setProjectId] = useState(getInitialProject())
   const [attachments, setAttachments] = useState([])
+  const [photoModalOpen, setPhotoModalOpen] = useState(false)
 
   // Priority colors
   const priorityColors = {
@@ -543,6 +545,23 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
     createChore()
   }
 
+  const handleTaskExtracted = ({ taskName, description: extractedDesc, dueDate: extractedDue }) => {
+    if (taskName) {
+      processText(taskName)
+    }
+    if (extractedDesc) {
+      setDescription(extractedDesc)
+      setHasDescription(true)
+    }
+    if (extractedDue) {
+      const m = moment(new Date(extractedDue))
+      if (m.isValid()) {
+        setDueDateOnly(m.format('YYYY-MM-DD'))
+        setDueDate(m.endOf('day').format('YYYY-MM-DDTHH:mm:ss'))
+      }
+    }
+  }
+
   const handleCloseModal = forceRefetch => {
     onClose(forceRefetch)
     setTaskText('')
@@ -664,6 +683,7 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
   }
 
   return (
+    <>
     <ResponsiveModal
       open={isModalOpen}
       onClose={handleCloseModal}
@@ -766,6 +786,7 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
           placeholder='Type your task...'
           onChange={text => {
             setTaskText(text)
+            if (!text) setTaskTitle('')
           }}
           customRenderer={renderedParts}
           onEnterPressed={handleEnterPressed}
@@ -909,6 +930,14 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
             Description
           </Button>
         )}
+        <Button
+          startDecorator={<CameraAlt />}
+          variant='plain'
+          size='sm'
+          onClick={() => setPhotoModalOpen(true)}
+        >
+          Scan Photo
+        </Button>
 
         {!hasSubTasks && (
           <Button
@@ -935,6 +964,7 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
             <RichTextEditor
               ref={richTextEditorRef}
               onChange={setDescription}
+              value={description || ''}
               entityType={'chore_description'}
             />
           </div>
@@ -952,6 +982,12 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
         </Box>
       )}
     </ResponsiveModal>
+    <PhotoTaskModal
+      open={photoModalOpen}
+      onClose={() => setPhotoModalOpen(false)}
+      onTaskExtracted={handleTaskExtracted}
+    />
+    </>
   )
 }
 

@@ -44,11 +44,13 @@
     "@capacitor/core": "^7.0.0",
     "@capacitor/device": "^7.0.0",
     "@capacitor/ios": "^7.0.0",
+    "@capacitor/local-llm": "^1.0.0",
     "@capacitor/local-notifications": "^7.0.0",
     "@capacitor/network": "^7.0.1",
     "@capacitor/preferences": "^7.0.0",
     "@capacitor/push-notifications": "^7.0.0",
     "@capacitor/status-bar": "^7.0.0",
+    "@capgo/capacitor-document-scanner": "^8.4.0",
     "@capgo/capacitor-nfc": "^7.2.0",
     "@capgo/capacitor-social-login": "^7.5.3",
     "@dnd-kit/core": "^6.3.1",
@@ -57,6 +59,7 @@
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
     "@hello-pangea/dnd": "^18.0.1",
+    "@jcesarmobile/capacitor-ocr": "^0.3.0",
     "@meauxt/react-swipeable-list": "^1.0.0",
     "@mui/icons-material": "^5.16.13",
     "@mui/joy": "^5.0.0-beta.20",
@@ -95,6 +98,7 @@
     "reactjs-social-login": "^2.6.3",
     "recharts": "^2.15.0",
     "reusify": "^1.0.4",
+    "tesseract.js": "^7.0.0",
     "vite-plugin-pwa": "^0.20.0"
   },
   "devDependencies": {
@@ -124,5 +128,8 @@
     "prettier-plugin-tailwindcss": "^0.5.10",
     "tailwindcss": "^3.4.0",
     "vite": "^5.2.13"
+  },
+  "allowScripts": {
+    "tesseract.js@7.0.0": true
   }
 }
