@@ -7,22 +7,12 @@ import {
   RunningWithErrors,
   Schedule,
   ThumbDown,
-  Timelapse,
 } from '@mui/icons-material'
 import { Avatar, Box, Card, Chip, IconButton, Typography } from '@mui/joy'
 import moment from 'moment'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { TASK_COLOR } from '../../utils/Colors.jsx'
 import PendingBadge from '../components/PendingBadge'
-
-const getCompletedChip = historyEntry => {
-  if (
-    historyEntry.status === 0 ||
-    historyEntry.status === 5 ||
-    historyEntry.status === 6
-  ) {
-    return null
-  }
 
 const formatTime = seconds => {
   if (typeof seconds !== 'number' || isNaN(seconds) || seconds < 0) return null
