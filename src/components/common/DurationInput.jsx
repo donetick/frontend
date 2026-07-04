@@ -56,6 +56,7 @@ const DurationInput = ({ value, onChange, size = 'md', minValue = 1 }) => {
         color='neutral'
         onClick={handleDecrement}
         disabled={displayValue <= minValue}
+        aria-label='Decrease duration'
       >
         <Remove fontSize='small' />
       </IconButton>
@@ -64,7 +65,7 @@ const DurationInput = ({ value, onChange, size = 'md', minValue = 1 }) => {
         type='number'
         value={displayValue}
         size={size}
-        slotProps={{ input: { min: minValue } }}
+        slotProps={{ input: { min: minValue, 'aria-label': 'Duration value' } }}
         sx={{ maxWidth: 70, textAlign: 'center' }}
         onChange={e => {
           const v = Math.max(minValue, parseInt(e.target.value) || minValue)
@@ -78,6 +79,7 @@ const DurationInput = ({ value, onChange, size = 'md', minValue = 1 }) => {
         variant='outlined'
         color='neutral'
         onClick={handleIncrement}
+        aria-label='Increase duration'
       >
         <Add fontSize='small' />
       </IconButton>
@@ -86,6 +88,7 @@ const DurationInput = ({ value, onChange, size = 'md', minValue = 1 }) => {
         value={unit}
         size={size}
         sx={{ minWidth: 90, ml: 0.5 }}
+        slotProps={{ button: { 'aria-label': 'Duration unit' } }}
         onChange={(_, newUnit) => {
           setUnit(newUnit)
           emit(displayValue, newUnit)

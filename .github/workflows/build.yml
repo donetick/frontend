@@ -23,6 +23,21 @@ jobs:
       run: npm i
     - run: npm run build
 
+  # Blocking: fast + reliable. See TESTING.md.
+  test:
+    name: 🔬 Test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Use Node.js 22
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+        cache: 'npm'
+    - name: Install dependencies
+      run: npm i
+    - run: npm run test:run
+
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -34,5 +49,7 @@ jobs:
         cache: 'npm'
     - name: Install dependencies
       run: npm i
-    # Lint currently reporting lots of preexisting issues
-    # - run: npm run lint
+    # Advisory (warn, non-blocking) until the preexisting issues are burned down.
+    # Ratchet to blocking once clean. See TESTING.md ("block vs. warn").
+    - run: npm run lint
+      continue-on-error: true

@@ -25,3 +25,11 @@ dist-ssr
 
 resources/android/**/*
 resources/ios/**/*
+
+# Test artifacts
+coverage
+test-results
+playwright-report
+.playwright
+lighthouse-report
+.lighthouseci

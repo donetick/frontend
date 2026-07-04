@@ -1,0 +1,39 @@
+name: Lighthouse
+
+# Advisory only: PWA / accessibility / performance signal on the public pages.
+# Never blocks a merge (assertions are warnings); the report is uploaded as an
+# artifact. See be/TESTING.md ("warn only"). PR-to-develop only to avoid noise.
+on:
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  lighthouse:
+    name: 🔦 Lighthouse (advisory)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Run Lighthouse CI
+        run: npx lhci autorun
+        continue-on-error: true
+
+      - name: Upload Lighthouse report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report
+          path: lighthouse-report/
+          retention-days: 7
