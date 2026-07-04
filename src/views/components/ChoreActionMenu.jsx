@@ -1,8 +1,10 @@
 import {
   Archive,
+  ArrowBack,
   Cancel,
   CopyAll,
   Delete,
+  DriveFileMove,
   Edit,
   ManageSearch,
   MoreTime,
@@ -20,10 +22,25 @@ import {
   WbSunny,
   Weekend,
 } from '@mui/icons-material'
-import { Divider, IconButton, Menu, MenuItem, Tooltip } from '@mui/joy'
+import {
+  Avatar,
+  Divider,
+  IconButton,
+  ListItemContent,
+  ListItemDecorator,
+  Menu,
+  MenuItem,
+  Tooltip,
+  Typography,
+} from '@mui/joy'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import LABEL_COLORS, {
+  getTextColorFromBackgroundColor,
+} from '../../utils/Colors'
 import { isOfficialDonetickInstanceSync } from '../../utils/FeatureToggle'
+import { getIconComponent } from '../../utils/ProjectIcons'
+import { useProjects } from '../Projects/ProjectQueries'
 
 const ChoreActionMenu = ({
   chore,
@@ -43,10 +60,11 @@ const ChoreActionMenu = ({
 }) => {
   const [anchorEl, setAnchorEl] = React.useState(null)
   const [isOfficialInstance, setIsOfficialInstance] = useState(false)
+  const [showProjectPicker, setShowProjectPicker] = useState(false)
   const menuRef = React.useRef(null)
   const navigate = useNavigate()
+  const { data: projects = [] } = useProjects()
 
-  // Check if this is the official donetick.com instance
   useEffect(() => {
     try {
       setIsOfficialInstance(isOfficialDonetickInstanceSync())
@@ -83,6 +101,12 @@ const ChoreActionMenu = ({
 
   const handleMenuClose = () => {
     setAnchorEl(null)
+    setShowProjectPicker(false)
+  }
+
+  const handleMoveToProject = project => {
+    onAction?.('moveToProject', chore, { project })
+    handleMenuClose()
   }
 
   const handleEdit = () => {
@@ -134,7 +158,6 @@ const ChoreActionMenu = ({
 
     switch (option) {
       case 'today': {
-        // Schedule for today at the next available slot: 9am, 12pm, 5pm, or now if after 5pm
         const nowHour = now.getHours()
         const scheduled = new Date(today)
         if (nowHour < 9) {
@@ -144,7 +167,6 @@ const ChoreActionMenu = ({
         } else if (nowHour < 17) {
           scheduled.setHours(17, 0, 0, 0)
         } else {
-          // After 5pm, use current time
           scheduled.setHours(
             now.getHours(),
             now.getMinutes(),
@@ -163,7 +185,7 @@ const ChoreActionMenu = ({
       case 'tomorrow': {
         const tomorrow = new Date(today)
         tomorrow.setDate(today.getDate() + 1)
-        tomorrow.setHours(12, 0, 0, 0) // Set to noon
+        tomorrow.setHours(12, 0, 0, 0)
         return tomorrow
       }
       case 'tomorrow-afternoon': {
@@ -193,6 +215,18 @@ const ChoreActionMenu = ({
     const date = option === 'remove' ? null : getQuickScheduleDate(option)
     onAction?.('changeDueDate', chore, { date })
     handleMenuClose()
+  }
+
+  const renderProjectAvatar = (color, icon) => {
+    const bg = color || LABEL_COLORS[0].value
+    const IconComponent = getIconComponent(icon || 'FolderOpen')
+    return (
+      <Avatar size='sm' sx={{ width: 22, height: 22, backgroundColor: bg }}>
+        <IconComponent
+          sx={{ fontSize: 13, color: getTextColorFromBackgroundColor(bg) }}
+        />
+      </Avatar>
+    )
   }
 
   return (
@@ -227,218 +261,267 @@ const ChoreActionMenu = ({
           left: '50%',
         }}
       >
-        <MenuItem
-          onClick={e => {
-            e.stopPropagation()
-            onCompleteWithNote?.()
-            handleMenuClose()
-          }}
-        >
-          <NoteAdd />
-          Complete with note
-        </MenuItem>
-        <MenuItem
-          onClick={e => {
-            e.stopPropagation()
-            onCompleteWithPastDate?.()
-            handleMenuClose()
-          }}
-        >
-          <Update />
-          Complete in past
-        </MenuItem>
-        <MenuItem
-          onClick={e => {
-            e.stopPropagation()
-            handleSkip()
-          }}
-        >
-          <SwitchAccessShortcut />
-          Skip to next due date
-        </MenuItem>
-        <MenuItem
-          onClick={e => {
-            e.stopPropagation()
-            onChangeAssignee?.()
-            handleMenuClose()
-          }}
-        >
-          <RecordVoiceOver />
-          Delegate to someone else
-        </MenuItem>
-        {isOfficialInstance && (
-          <MenuItem
-            onClick={e => {
-              e.stopPropagation()
-              onNudge?.()
-              handleMenuClose()
-            }}
-          >
-            <Notifications />
-            Send nudge
-          </MenuItem>
-        )}
-        <Divider />
-        <MenuItem
-          onClick={e => {
-            e.stopPropagation()
-            handleHistory()
-          }}
-        >
-          <ManageSearch />
-          History
-        </MenuItem>
-        <Divider />
-        <MenuItem
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-around',
-            alignItems: 'center',
-            gap: 1,
-            cursor: 'default',
-            '&:hover': {
-              backgroundColor: 'transparent',
-            },
-          }}
-          onClick={e => e.stopPropagation()}
-        >
-          <Tooltip title='Today' placement='top'>
-            <IconButton
-              size='sm'
+        {showProjectPicker ? (
+          <>
+            <MenuItem
               onClick={e => {
                 e.stopPropagation()
-                handleQuickSchedule('today')
+                setShowProjectPicker(false)
               }}
+              sx={{ gap: 1 }}
             >
-              <Today />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title='Tomorrow' placement='top'>
-            <IconButton
-              size='sm'
+              <ArrowBack fontSize='small' />
+              <Typography level='body-sm' fontWeight={600}>
+                Move to project
+              </Typography>
+            </MenuItem>
+            <Divider />
+            <MenuItem
               onClick={e => {
                 e.stopPropagation()
-                handleQuickSchedule('tomorrow')
+                handleMoveToProject({ id: null, name: 'Default Project' })
               }}
             >
-              <WbSunny />
-            </IconButton>
-          </Tooltip>
-          {/* <Tooltip title='Tomorrow afternoon' placement='top'>
-            <IconButton
-              size='sm'
+              <ListItemDecorator>
+                {renderProjectAvatar(LABEL_COLORS[0].value, 'FolderOpen')}
+              </ListItemDecorator>
+              <ListItemContent>
+                <Typography level='body-sm'>Default Project</Typography>
+              </ListItemContent>
+            </MenuItem>
+            {projects.map(project => (
+              <MenuItem
+                key={project.id}
+                onClick={e => {
+                  e.stopPropagation()
+                  handleMoveToProject(project)
+                }}
+              >
+                <ListItemDecorator>
+                  {renderProjectAvatar(project.color, project.icon)}
+                </ListItemDecorator>
+                <ListItemContent>
+                  <Typography level='body-sm'>{project.name}</Typography>
+                </ListItemContent>
+              </MenuItem>
+            ))}
+          </>
+        ) : (
+          <>
+            <MenuItem
               onClick={e => {
                 e.stopPropagation()
-                handleQuickSchedule('tomorrow-afternoon')
+                onCompleteWithNote?.()
+                handleMenuClose()
               }}
             >
-              <WbTwilight />
-            </IconButton>
-          </Tooltip> */}
-          <Tooltip title='Weekend' placement='top'>
-            <IconButton
-              size='sm'
+              <NoteAdd />
+              Complete with note
+            </MenuItem>
+            <MenuItem
               onClick={e => {
                 e.stopPropagation()
-                handleQuickSchedule('weekend')
+                onCompleteWithPastDate?.()
+                handleMenuClose()
               }}
             >
-              <Weekend />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title='Next week' placement='top'>
-            <IconButton
-              size='sm'
+              <Update />
+              Complete in past
+            </MenuItem>
+            <MenuItem
               onClick={e => {
                 e.stopPropagation()
-                handleQuickSchedule('next-week')
+                handleSkip()
               }}
             >
-              <NextWeek />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title='Remove due date' placement='top'>
-            <IconButton
-              size='sm'
+              <SwitchAccessShortcut />
+              Skip to next due date
+            </MenuItem>
+            <MenuItem
+              onClick={e => {
+                e.stopPropagation()
+                onChangeAssignee?.()
+                handleMenuClose()
+              }}
+            >
+              <RecordVoiceOver />
+              Delegate to someone else
+            </MenuItem>
+            {isOfficialInstance && (
+              <MenuItem
+                onClick={e => {
+                  e.stopPropagation()
+                  onNudge?.()
+                  handleMenuClose()
+                }}
+              >
+                <Notifications />
+                Send nudge
+              </MenuItem>
+            )}
+            <Divider />
+            <MenuItem
+              onClick={e => {
+                e.stopPropagation()
+                handleHistory()
+              }}
+            >
+              <ManageSearch />
+              History
+            </MenuItem>
+            <Divider />
+            <MenuItem
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-around',
+                alignItems: 'center',
+                gap: 1,
+                cursor: 'default',
+                '&:hover': {
+                  backgroundColor: 'transparent',
+                },
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              <Tooltip title='Today' placement='top'>
+                <IconButton
+                  size='sm'
+                  onClick={e => {
+                    e.stopPropagation()
+                    handleQuickSchedule('today')
+                  }}
+                >
+                  <Today />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title='Tomorrow' placement='top'>
+                <IconButton
+                  size='sm'
+                  onClick={e => {
+                    e.stopPropagation()
+                    handleQuickSchedule('tomorrow')
+                  }}
+                >
+                  <WbSunny />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title='Weekend' placement='top'>
+                <IconButton
+                  size='sm'
+                  onClick={e => {
+                    e.stopPropagation()
+                    handleQuickSchedule('weekend')
+                  }}
+                >
+                  <Weekend />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title='Next week' placement='top'>
+                <IconButton
+                  size='sm'
+                  onClick={e => {
+                    e.stopPropagation()
+                    handleQuickSchedule('next-week')
+                  }}
+                >
+                  <NextWeek />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title='Remove due date' placement='top'>
+                <IconButton
+                  size='sm'
+                  color='neutral'
+                  onClick={e => {
+                    e.stopPropagation()
+                    handleQuickSchedule('remove')
+                  }}
+                >
+                  <Cancel />
+                </IconButton>
+              </Tooltip>
+            </MenuItem>
+            <Divider />
+            <MenuItem
+              onClick={e => {
+                e.stopPropagation()
+                onChangeDueDate?.()
+                handleMenuClose()
+              }}
+            >
+              <MoreTime />
+              Change due date
+            </MenuItem>
+            <MenuItem
+              onClick={e => {
+                e.stopPropagation()
+                onWriteNFC?.()
+                handleMenuClose()
+              }}
+            >
+              <Nfc />
+              Write to NFC
+            </MenuItem>
+            <MenuItem
+              onClick={e => {
+                e.stopPropagation()
+                handleEdit()
+              }}
+            >
+              <Edit />
+              Edit
+            </MenuItem>
+            <MenuItem
+              onClick={e => {
+                e.stopPropagation()
+                handleClone()
+              }}
+            >
+              <CopyAll />
+              Clone
+            </MenuItem>
+            <MenuItem
+              onClick={e => {
+                e.stopPropagation()
+                handleView()
+              }}
+            >
+              <ViewCarousel />
+              View
+            </MenuItem>
+            <MenuItem
+              onClick={e => {
+                e.stopPropagation()
+                handleArchive()
+              }}
               color='neutral'
+            >
+              {chore.isActive ? <Archive /> : <Unarchive />}
+              {chore.isActive ? 'Archive' : 'Unarchive'}
+            </MenuItem>
+            {projects.length > 0 && (
+              <MenuItem
+                onClick={e => {
+                  e.stopPropagation()
+                  setShowProjectPicker(true)
+                }}
+              >
+                <DriveFileMove />
+                Move to project
+              </MenuItem>
+            )}
+            <Divider />
+            <MenuItem
               onClick={e => {
                 e.stopPropagation()
-                handleQuickSchedule('remove')
+                handleDelete()
               }}
+              color='danger'
             >
-              <Cancel />
-            </IconButton>
-          </Tooltip>
-        </MenuItem>
-        <Divider />
-        <MenuItem
-          onClick={e => {
-            e.stopPropagation()
-            onChangeDueDate?.()
-            handleMenuClose()
-          }}
-        >
-          <MoreTime />
-          Change due date
-        </MenuItem>
-        <MenuItem
-          onClick={e => {
-            e.stopPropagation()
-            onWriteNFC?.()
-            handleMenuClose()
-          }}
-        >
-          <Nfc />
-          Write to NFC
-        </MenuItem>
-        <MenuItem
-          onClick={e => {
-            e.stopPropagation()
-            handleEdit()
-          }}
-        >
-          <Edit />
-          Edit
-        </MenuItem>
-        <MenuItem
-          onClick={e => {
-            e.stopPropagation()
-            handleClone()
-          }}
-        >
-          <CopyAll />
-          Clone
-        </MenuItem>
-        <MenuItem
-          onClick={e => {
-            e.stopPropagation()
-            handleView()
-          }}
-        >
-          <ViewCarousel />
-          View
-        </MenuItem>
-        <MenuItem
-          onClick={e => {
-            e.stopPropagation()
-            handleArchive()
-          }}
-          color='neutral'
-        >
-          {chore.isActive ? <Archive /> : <Unarchive />}
-          {chore.isActive ? 'Archive' : 'Unarchive'}
-        </MenuItem>
-        <Divider />
-        <MenuItem
-          onClick={e => {
-            e.stopPropagation()
-            handleDelete()
-          }}
-          color='danger'
-        >
-          <Delete />
-          Delete
-        </MenuItem>
+              <Delete />
+              Delete
+            </MenuItem>
+          </>
+        )}
       </Menu>
     </>
   )
