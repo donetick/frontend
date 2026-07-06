@@ -69,7 +69,7 @@
 }
 
 .task-input:focus-within {
-  box-shadow: 0 0 0 1px var(--joy-palette-primary-outlinedBorder, rgba(11, 107, 203, 0.15));
+  box-shadow: 0 0 0 2px var(--joy-palette-primary-outlinedBorder, rgba(11, 107, 203, 0.15));
 }
 
 .task-input:hover:not(:focus-within) {

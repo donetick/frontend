@@ -63,6 +63,7 @@ const RichTextEditor = forwardRef(
     const { data: userProfile } = useUserProfile()
     const quillRef = useRef(null)
     const editorRef = useRef(null)
+    const initialContentSet = useRef(false)
 
     // Expose focus method to parent components
     useImperativeHandle(
@@ -238,7 +239,11 @@ const RichTextEditor = forwardRef(
     useEffect(() => {
       if (editorRef.current && isEditable) {
         if (editorRef.current.root.innerHTML !== value) {
-          editorRef.current.root.innerHTML = value || ''
+          const html = !initialContentSet.current
+            ? refreshSignedUrlsInHtml(value || '')
+            : value || ''
+          initialContentSet.current = true
+          editorRef.current.root.innerHTML = html
         }
       }
     }, [value, isEditable])

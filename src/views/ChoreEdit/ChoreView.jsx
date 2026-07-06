@@ -1,5 +1,6 @@
 import {
   Archive,
+  AttachFile,
   CalendarMonth,
   Check,
   Checklist,
@@ -78,6 +79,7 @@ import {
 import { offlineDB } from '../../utils/OfflineDB'
 import Priorities from '../../utils/Priorities'
 import { getSafeBottomPadding } from '../../utils/SafeAreaUtils.js'
+import AttachmentBrowserModal from '../Modals/Inputs/AttachmentBrowserModal'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import NoteViewerModal from '../Modals/Inputs/NoteViewerModal'
 import LoadingComponent from '../components/Loading.jsx'
@@ -86,6 +88,7 @@ import RichTextEditor from '../components/RichTextEditor.jsx'
 import SubTasks from '../components/SubTask.jsx'
 import TimePassedCard from './TimePassedCard.jsx'
 import TimerSplitButton from './TimerSplitButton.jsx'
+import { refreshSignedUrlsInHtml } from '../../utils/Helpers.jsx'
 
 const isNetworkError = err =>
   err instanceof TypeError && err.message === 'Failed to fetch'
@@ -124,6 +127,7 @@ const ChoreView = () => {
   const [chorePriority, setChorePriority] = useState(null)
   const [noteViewerConfig, setNoteViewerConfig] = useState({ isOpen: false })
   const [timerActionConfig, setTimerActionConfig] = useState({ isOpen: false })
+  const [attachmentBrowserOpen, setAttachmentBrowserOpen] = useState(false)
   const { data: circleMembersData, isLoading: isCircleMembersLoading } =
     useCircleMembers()
   const { data: userProfile } = useUserProfile()
@@ -132,6 +136,7 @@ const ChoreView = () => {
   const { data: choreData, isLoading: isChoreLoading } =
     useChoreDetails(choreId)
   const { data: choreHistoryData } = useChoreHistory(choreId)
+
   const { data: pendingCmds } = usePendingCommands(choreId)
 
   const choreHistory = choreHistoryData?.res || []
@@ -626,7 +631,7 @@ const ChoreView = () => {
             mb: 0.5,
           }}
         >
-          <Typography level='h3'>{chore.name}</Typography>
+          <Typography level='h3'>asde{chore.name}</Typography>
           <PendingBadge commands={pendingCmds} />
         </Box>
         {chore.isActive === false && (
@@ -651,16 +656,14 @@ const ChoreView = () => {
             justifyContent: 'center',
             alignItems: 'center',
             mb: 1,
+            flexWrap: 'wrap',
+            gap: 0.5,
           }}
         >
           {chore?.labelsV2?.map((label, index) => (
             <Chip
               key={index}
               sx={{
-                position: 'relative',
-                ml: index === 0 ? 0 : 0.5,
-                top: 2,
-                zIndex: 1,
                 backgroundColor: label?.color,
                 color: getTextColorFromBackgroundColor(label?.color),
               }}
@@ -668,6 +671,20 @@ const ChoreView = () => {
               {label?.name}
             </Chip>
           ))}
+
+          {chore?.attachments?.length > 0 && (
+            <Chip
+              startDecorator={<AttachFile />}
+              size='md'
+              variant='soft'
+              color='neutral'
+              onClick={() => setAttachmentBrowserOpen(true)}
+              sx={{ cursor: 'pointer' }}
+            >
+              {chore.attachments.length}{' '}
+              {chore.attachments.length === 1 ? 'attachment' : 'attachments'}
+            </Chip>
+          )}
         </Box>
       </Box>
 
@@ -1324,6 +1341,11 @@ const ChoreView = () => {
         <ConfirmationModal config={confirmModelConfig} />
         <ConfirmationModal config={timerActionConfig} />
         <NoteViewerModal config={noteViewerConfig} />
+        <AttachmentBrowserModal
+          choreId={choreId}
+          isOpen={attachmentBrowserOpen}
+          onClose={() => setAttachmentBrowserOpen(false)}
+        />
       </Card>
     </Container>
   )

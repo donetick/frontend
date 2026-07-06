@@ -8,6 +8,7 @@ import {
   CreateChore,
   DeleteChore,
   DeleteChoreHistory,
+  GetChoreAttachments,
   GetChoreByID,
   GetChoreDetailById,
   GetChoreHistory,
@@ -694,5 +695,21 @@ export const useRejectChore = () => {
       queryClient.invalidateQueries(['choreHistory', choreId])
       queryClient.invalidateQueries(['choreDetails', choreId])
     },
+  })
+}
+
+export const useChoreAttachments = (choreId, hasAttachments = true) => {
+  return useQuery({
+    queryKey: ['choreAttachments', choreId],
+    queryFn: async () => {
+      const response = await GetChoreAttachments(choreId)
+      if (response && response.ok) {
+        return await response.json()
+      }
+      throw new Error('Failed to fetch attachments')
+    },
+    enabled: !!choreId && hasAttachments,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
   })
 }

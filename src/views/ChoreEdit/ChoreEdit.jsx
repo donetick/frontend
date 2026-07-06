@@ -54,11 +54,10 @@ import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import {
   DeleteChoreAttachment,
   GetAllCircleMembers,
-  GetChoreAttachments,
   GetThings,
   UploadChoreAttachment,
 } from '../../utils/Fetcher'
-import { isPlusAccount } from '../../utils/Helpers'
+import { isPlusAccount, resolvePhotoURL } from '../../utils/Helpers'
 import Priorities from '../../utils/Priorities.jsx'
 import { getIconComponent } from '../../utils/ProjectIcons'
 import { getSafeBottomPadding } from '../../utils/SafeAreaUtils.js'
@@ -67,6 +66,7 @@ import LoadingComponent from '../components/Loading.jsx'
 import RichTextEditor from '../components/RichTextEditor.jsx'
 import SubTasks from '../components/SubTask.jsx'
 import { useLabels } from '../Labels/LabelQueries'
+import AttachmentViewerModal from '../Modals/Inputs/AttachmentViewerModal'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import LabelModal from '../Modals/Inputs/LabelModal'
 import { useProjects } from '../Projects/ProjectQueries'
@@ -135,6 +135,9 @@ const ChoreEdit = () => {
   const [attachments, setAttachments] = useState([])
   const [isUploadingAttachment, setIsUploadingAttachment] = useState(false)
   const [addLabelModalOpen, setAddLabelModalOpen] = useState(false)
+  const [attachmentViewerConfig, setAttachmentViewerConfig] = useState({
+    isOpen: false,
+  })
   const [showSavePrivacyDefault, setShowSavePrivacyDefault] = useState(false)
   const [privacySaved, setPrivacySaved] = useState(false)
   const [showSaveNotificationDefault, setShowSaveNotificationDefault] =
@@ -423,14 +426,6 @@ const ChoreEdit = () => {
         setAllUserThings(data.res)
       })
     })
-    if (choreId) {
-      GetChoreAttachments(choreId)
-        .then(r => r.json())
-        .then(data => {
-          if (data.res) setAttachments(data.res)
-        })
-        .catch(() => {})
-    }
 
     // Load default privacy setting for new chores
     if (!choreId) {
@@ -602,6 +597,7 @@ const ChoreEdit = () => {
 
       setCreatedBy(data.res.createdBy)
       setUpdatedBy(data.res.updatedBy)
+      setAttachments(data.res.attachments || [])
     }
   }, [choreData, isChoreLoading, searchParams])
 
@@ -977,6 +973,35 @@ const ChoreEdit = () => {
                 {attachments.map((att, idx) => (
                   <Box
                     key={att.file_path || idx}
+                    onClick={() => {
+                      const url = resolvePhotoURL(att.sign || att.file_path)
+                      const ext = att.file_name?.split('.').pop().toLowerCase()
+                      const isImage = [
+                        'jpg',
+                        'jpeg',
+                        'png',
+                        'gif',
+                        'webp',
+                        'bmp',
+                        'svg',
+                      ].includes(ext)
+                      if (isImage) {
+                        setAttachmentViewerConfig({
+                          isOpen: true,
+                          url,
+                          fileName: att.file_name,
+                          onClose: () =>
+                            setAttachmentViewerConfig({ isOpen: false }),
+                        })
+                      } else {
+                        const a = document.createElement('a')
+                        a.href = url
+                        a.download = att.file_name || 'attachment'
+                        document.body.appendChild(a)
+                        a.click()
+                        document.body.removeChild(a)
+                      }
+                    }}
                     sx={{
                       display: 'flex',
                       alignItems: 'center',
@@ -985,6 +1010,8 @@ const ChoreEdit = () => {
                       borderRadius: 'sm',
                       border: '1px solid',
                       borderColor: 'neutral.outlinedBorder',
+                      cursor: 'pointer',
+                      '&:hover': { bgcolor: 'neutral.softHoverBg' },
                     }}
                   >
                     <AttachFile sx={{ fontSize: 18, color: 'neutral.500' }} />
@@ -1891,6 +1918,7 @@ const ChoreEdit = () => {
           )}
         </Button>
       </Sheet>
+      <AttachmentViewerModal config={attachmentViewerConfig} />
       <ConfirmationModal config={confirmModelConfig} />
       {addLabelModalOpen && (
         <LabelModal

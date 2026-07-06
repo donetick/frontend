@@ -17,14 +17,13 @@ const resolvePhotoURL = url => {
 const isCloudSignedUrl = url => {
   if (!url) return false
   try {
-    const u = new URL(url)
     return (
-      u.searchParams.has('X-Amz-Signature') ||
-      u.searchParams.has('X-Amz-Expires') ||
-      u.searchParams.has('X-Goog-Signature') ||
-      u.searchParams.has('sig') // Azure Blob SAS
+      url.includes('X-Amz-Signature') ||
+      url.includes('X-Amz-Expires') ||
+      url.includes('X-Goog-Expires') ||
+      url.includes('expires')
     )
-  } catch {
+  } catch(e) {
     return false
   }
 }
@@ -86,32 +85,35 @@ const extractStorageKey = url => {
 // replace them with backend proxy URLs (which generate fresh signed URLs on
 // each request). Returns the patched HTML, or the original if nothing changed.
 const refreshSignedUrlsInHtml = html => {
+  console.debug('1. refreshSignedUrlsInHtml', { html })
   if (!html) return html
   if (
     !html.includes('X-Amz-') &&
     !html.includes('X-Goog-') &&
+    !html.includes('sig') &&
     !html.includes('.blob.core.windows.net')
   ) {
     return html
   }
-
+  console.debug('2. refreshSignedUrlsInHtml: found potential signed URLs, parsing HTML...')
   const parser = new DOMParser()
   const doc = parser.parseFromString(html, 'text/html')
   const imgs = doc.querySelectorAll('img[src]')
   let changed = false
 
-  imgs.forEach(img => {
+  imgs.forEach(async img => {
+
+    if (!img.getAttribute('dt-data-path')) {
+    // not custom tag, skipping:
+      return
+    }
     const src = img.getAttribute('src')
-    if (!isCloudSignedUrl(src)) return
 
-    const key = extractStorageKey(src)
-    if (!key) return
-
-    img.setAttribute('src', apiClient.getAssetURL(key))
+    img.setAttribute('src', resolvePhotoURL(src))
     changed = true
   })
 
   return changed ? doc.body.innerHTML : html
 }
 
-export { extractStorageKey, isPlusAccount, refreshSignedUrlsInHtml, resolvePhotoURL }
+export { isPlusAccount, refreshSignedUrlsInHtml, resolvePhotoURL }
