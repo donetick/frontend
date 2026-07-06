@@ -21,7 +21,7 @@ import { useScanToTask } from './useScanToTask'
  * Flow: capture → (auto) processing → done [calls onTaskExtracted + onClose]
  *                                   → error  [retake or cancel]
  */
-const ScanPanel = ({ open, onTaskExtracted, onClose, initialImageUrl }) => {
+const ScanPanel = ({ open, onTaskExtracted, onClose }) => {
   const {
     isNativeScanner,
     phase,
@@ -36,8 +36,6 @@ const ScanPanel = ({ open, onTaskExtracted, onClose, initialImageUrl }) => {
     startCamera,
     stopCamera,
     capture,
-    processImage,
-    setCapturedImage,
     handleFileSelect,
     handleNativeScan,
     retake,
@@ -48,23 +46,14 @@ const ScanPanel = ({ open, onTaskExtracted, onClose, initialImageUrl }) => {
   // Start/stop based on open state
   useEffect(() => {
     if (open) {
-      if (initialImageUrl) {
-        setCapturedImage(initialImageUrl)
-        processImage(initialImageUrl, 'browser')
-      } else if (isNativeScanner) {
-        handleNativeScan().then(result => {
-          if (result?.cancelled) onClose()
-        })
-      } else {
-        activate()
-      }
+      activate()
     } else {
       reset()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
 
-  // Start/stop web camera based on capture phase
+  // Start camera when entering capture phase on web
   useEffect(() => {
     if (phase === 'capture' && !isNativeScanner) {
       startCamera()

@@ -5,7 +5,7 @@ import { useNotification } from '../service/NotificationProvider'
 import { apiClient } from '../utils/ApiClient'
 import { isPlusAccount, resolvePhotoURL } from '../utils/Helpers'
 
-export const useFileUpload = ({ entityType = 'chore_attachment', entityId } = {}) => {
+export const useFileUpload = ({ entityType = 'chore_attachment', entityId, draftId } = {}) => {
   const { showError } = useNotification()
   const { data: userProfile } = useUserProfile()
 
@@ -38,7 +38,8 @@ export const useFileUpload = ({ entityType = 'chore_attachment', entityId } = {}
         const formData = new FormData()
         formData.append('file', compressedJpegFile)
         formData.append('entityType', entityType)
-        if (entityId) formData.append('entityId', entityId)
+        if (entityId) formData.append('entityId', String(entityId))
+        if (draftId) formData.append('draftId', draftId)
 
         const response = await apiClient.upload('/assets/chore', formData)
 
@@ -84,7 +85,7 @@ export const useFileUpload = ({ entityType = 'chore_attachment', entityId } = {}
         return null
       }
     },
-    [entityType, entityId, showError, userProfile],
+    [entityType, entityId, draftId, showError, userProfile],
   )
 
   return { uploadFile, isPlus: isPlusAccount(userProfile) }

@@ -918,7 +918,7 @@ const ChoreView = () => {
                         whiteSpace: 'pre-wrap',
                         wordBreak: 'break-word',
                       }}
-                      dangerouslySetInnerHTML={{ __html: raw }}
+                      dangerouslySetInnerHTML={{ __html: refreshSignedUrlsInHtml(raw) }}
                     />
                   ) : (
                     <Typography
@@ -986,7 +986,7 @@ const ChoreView = () => {
                         whiteSpace: 'pre-wrap',
                         wordBreak: 'break-word',
                       }}
-                      dangerouslySetInnerHTML={{ __html: raw }}
+                      dangerouslySetInnerHTML={{ __html: refreshSignedUrlsInHtml(raw) }}
                     />
                   ) : (
                     <Typography

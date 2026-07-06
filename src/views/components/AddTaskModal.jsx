@@ -105,6 +105,7 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
   const [projectId, setProjectId] = useState(getInitialProject())
   const [attachments, setAttachments] = useState([])
+  const [draftId, setDraftId] = useState(() => crypto.randomUUID())
   const [showScan, setShowScan] = useState(false)
   const [pendingPhotoUrl, setPendingPhotoUrl] = useState(null)
   const { isNativeScanner } = useDocumentScanner()
@@ -586,6 +587,8 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
     setDueDateOnly(null)
     setDueTime(null)
     setUseCustomTime(false)
+    setAttachments([])
+    setDraftId(crypto.randomUUID())
   }
 
   const createChore = () => {
@@ -632,7 +635,7 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
       notificationMetadata: {},
       subTasks: subTasks?.length > 0 ? subTasks : null,
       projectId: projectId === 'default' ? null : projectId,
-      attachments: attachments.length > 0 ? attachments : null,
+      draftId: draftId,
     }
 
     if (frequency) {
@@ -909,7 +912,8 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
               onChange={setAttachments}
               onClear={() => setAttachments([])}
               emptyDisplay={pickerEmptyDisplay}
-              entityType='chore_attachment'
+              entityType='chore_attachment_draft'
+              draftId={draftId}
             />
             <NotificationPickerField
               value={notificationMetadata}

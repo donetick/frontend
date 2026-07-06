@@ -189,15 +189,14 @@ export function useScanToTask() {
 
   const handleNativeScan = useCallback(async () => {
     const { image, cancelled, error } = await scanDocument()
-    if (cancelled) return { cancelled: true }
+    if (cancelled) return
     if (error || !image) {
       setErrorMsg(error ? `Scanner error: ${error}` : 'Scan failed.')
       setPhase('error')
-      return { cancelled: false }
+      return
     }
     setCapturedImage(image)
     processImage(image, 'native')
-    return { cancelled: false }
   }, [scanDocument, processImage])
 
   const retake = useCallback(() => {
@@ -229,7 +228,6 @@ export function useScanToTask() {
     isNativeScanner,
     phase,
     capturedImage,
-    setCapturedImage,
     ocrProgress,
     taskResult,
     errorMsg,
@@ -240,7 +238,6 @@ export function useScanToTask() {
     startCamera,
     stopCamera,
     capture,
-    processImage,
     handleFileSelect,
     handleNativeScan,
     retake,
