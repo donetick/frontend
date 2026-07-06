@@ -25,13 +25,12 @@ import SettingsLayout from './SettingsLayout'
 const ProfileSettings = () => {
   const { t } = useTranslation('settings')
   const queryClient = useQueryClient()
-  const { data: userProfile } = useUserProfile()
+  const { data: userProfile, refetch: refetchUserProfile } = useUserProfile()
   const { showSuccess, showError } = useNotification()
   const [displayName, setDisplayName] = useState(userProfile?.displayName || '')
   const [timezone, setTimezone] = useState(
     userProfile?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
   )
-  const [photoURL, setPhotoURL] = useState(userProfile?.image || '')
   const [isUploading, setIsUploading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const fileInputRef = useRef()
@@ -90,9 +89,9 @@ const ProfileSettings = () => {
       const response = await apiClient.upload('/users/profile_photo', formData)
       if (!response.ok) throw new Error('Upload failed')
       const data = await response.json()
-      const url = resolvePhotoURL(data.url || data.sign)
+      // const url = resolvePhotoURL(data.url || data.sign)
 
-      setPhotoURL(url)
+      refetchUserProfile() // Refresh user profile to get the new photoURL
       showSuccess({
         title: t('profile.photoUpdated'),
         message: t('profile.photoUpdatedMessage'),
@@ -155,7 +154,7 @@ const ProfileSettings = () => {
             maxWidth: 400,
           }}
         >
-          <Avatar src={photoURL} sx={{ width: 64, height: 64 }} />
+          <Avatar src={resolvePhotoURL(userProfile?.image)} sx={{ width: 64, height: 64 }} />
           <Box sx={{ flex: 1 }}>
             <Button
               variant='soft'
