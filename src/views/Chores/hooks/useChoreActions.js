@@ -12,6 +12,7 @@ import {
   MarkChoreComplete,
   NudgeChore,
   RejectChore,
+  SaveChore,
   SkipChore,
   UndoChoreAction,
   UpdateChoreAssignee,
@@ -663,6 +664,28 @@ export const useChoreActions = ({
             openModal(action, chore, extraData)
           }
           break
+
+        case 'moveToProject': {
+          const project = extraData?.project
+          const projectId = project?.id === null ? null : project?.id
+          const updatedChore = { ...chore, projectId }
+          try {
+            const response = await SaveChore(updatedChore)
+            if (response.ok) {
+              updateChoreInState(updatedChore, 'moved-to-project')
+              showSuccess({
+                title: 'Task Moved',
+                message: `Task moved to ${project?.name || 'Default Project'}.`,
+              })
+            }
+          } catch (error) {
+            showError({
+              title: 'Failed to move task',
+              message: error?.message || 'Unable to move task to project',
+            })
+          }
+          break
+        }
 
         case 'completeWithNote':
         case 'completeWithPastDate':

@@ -25,6 +25,67 @@ export const ChoreStatus = Object.freeze({
   PAUSED: 2,
   PENDING_APPROVAL: 3,
 })
+
+const getDateGroupKey = dueDate =>
+  moment(dueDate).startOf('day').format('YYYY-MM-DD')
+
+const getDateGroupName = dateKey =>
+  moment(dateKey, 'YYYY-MM-DD').format('dddd, MMM D')
+
+const getDateGroupColor = dateKey => {
+  const today = moment().startOf('day')
+  const tomorrow = moment().add(1, 'day').startOf('day')
+  const groupDate = moment(dateKey, 'YYYY-MM-DD')
+
+  if (groupDate.isBefore(today)) {
+    return TASK_COLOR.OVERDUE
+  }
+  if (groupDate.isSame(today)) {
+    return TASK_COLOR.TODAY
+  }
+  if (groupDate.isSame(tomorrow)) {
+    return TASK_COLOR.TOMORROW
+  }
+  if (groupDate.isBefore(moment(today).add(8, 'days'))) {
+    return TASK_COLOR.NEXT_7_DAYS
+  }
+  if (groupDate.isSame(today, 'month')) {
+    return TASK_COLOR.LATER_THIS_MONTH
+  }
+  return TASK_COLOR.FUTURE
+}
+
+const buildActualDateGroups = chores => {
+  const groupedByDate = {}
+  const anytime = []
+
+  chores.forEach(chore => {
+    if (!chore.nextDueDate) {
+      anytime.push(chore)
+      return
+    }
+
+    const dateKey = getDateGroupKey(chore.nextDueDate)
+    if (!groupedByDate[dateKey]) {
+      groupedByDate[dateKey] = []
+    }
+    groupedByDate[dateKey].push(chore)
+  })
+
+  const dateGroups = Object.keys(groupedByDate)
+    .sort(
+      (a, b) =>
+        moment(a, 'YYYY-MM-DD').valueOf() - moment(b, 'YYYY-MM-DD').valueOf(),
+    )
+    .map(dateKey => ({
+      name: getDateGroupName(dateKey),
+      content: groupedByDate[dateKey],
+      color: getDateGroupColor(dateKey),
+    }))
+
+  return { dateGroups, anytime }
+}
+
 export const ChoresGrouper = (groupBy, chores, filter) => {
   if (filter) {
     chores = chores.filter(chore => filter(chore))
@@ -34,7 +95,7 @@ export const ChoresGrouper = (groupBy, chores, filter) => {
   chores.sort(ChoreSorter)
   var groups = []
   switch (groupBy) {
-    case 'default':
+    case 'default': {
       // same as due_date but hide empty groups: and if status is 1 or 2 have seperated catigory as Started:
       var groupRaw = {
         PendingApproval: [],
@@ -147,82 +208,21 @@ export const ChoresGrouper = (groupBy, chores, filter) => {
         })
       }
       break
+    }
 
-    case 'due_date':
-      var groupRaw = {
-        Today: [],
-        Tomorrow: [],
-        'Next 7 Days': [],
-        'Later This Month': [],
-        Future: [],
-        Overdue: [],
-        Anytime: [],
-      }
-      chores.forEach(chore => {
-        if (chore.nextDueDate === null) {
-          groupRaw['Anytime'].push(chore)
-        } else if (new Date(chore.nextDueDate) < new Date()) {
-          groupRaw['Overdue'].push(chore)
-        } else if (
-          new Date(chore.nextDueDate).toDateString() ===
-          new Date().toDateString()
-        ) {
-          groupRaw['Today'].push(chore)
-        } else if (
-          new Date(chore.nextDueDate).toDateString() ===
-          new Date(Date.now() + 24 * 60 * 60 * 1000).toDateString()
-        ) {
-          groupRaw['Tomorrow'].push(chore)
-        } else if (
-          new Date(chore.nextDueDate) <
-            new Date(Date.now() + 8 * 24 * 60 * 60 * 1000) &&
-          new Date(chore.nextDueDate) >
-            new Date(Date.now() + 24 * 60 * 60 * 1000)
-        ) {
-          groupRaw['Next 7 Days'].push(chore)
-        } else if (
-          new Date(chore.nextDueDate).getMonth() === new Date().getMonth() &&
-          new Date(chore.nextDueDate).getFullYear() === new Date().getFullYear()
-        ) {
-          groupRaw['Later This Month'].push(chore)
-        } else {
-          groupRaw['Future'].push(chore)
-        }
-      })
-      groups = [
-        {
-          name: 'Overdue',
-          content: groupRaw['Overdue'],
-          color: TASK_COLOR.OVERDUE,
-        },
-        { name: 'Today', content: groupRaw['Today'], color: TASK_COLOR.TODAY },
-        {
-          name: 'Tomorrow',
-          content: groupRaw['Tomorrow'],
-          color: TASK_COLOR.TOMORROW,
-        },
-        {
-          name: 'Next 7 Days',
-          content: groupRaw['Next 7 Days'],
-          color: TASK_COLOR.NEXT_7_DAYS,
-        },
-        {
-          name: 'Later This Month',
-          content: groupRaw['Later This Month'],
-          color: TASK_COLOR.LATER_THIS_MONTH,
-        },
-        {
-          name: 'Future',
-          content: groupRaw['Future'],
-          color: TASK_COLOR.FUTURE,
-        },
-        {
+    case 'due_date': {
+      var { dateGroups: dueDateGroups, anytime: dueAnytime } =
+        buildActualDateGroups(chores)
+      groups = [...dueDateGroups]
+      if (dueAnytime.length > 0) {
+        groups.push({
           name: 'Anytime',
-          content: groupRaw['Anytime'],
+          content: dueAnytime,
           color: TASK_COLOR.ANYTIME,
-        },
-      ]
+        })
+      }
       break
+    }
     case 'priority':
       groupRaw = {
         p1: [],

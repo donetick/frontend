@@ -9,12 +9,10 @@ const MyChoreHeader = ({
   tempFilter,
   tempFilterMeta,
 }) => {
-  if (
-    !activeFilterId &&
-    !tempFilter &&
-    (!selectedProject || selectedProject.id === 'default')
-  )
-    return null
+  const isVisible =
+    !!activeFilterId ||
+    !!tempFilter ||
+    (!!selectedProject && selectedProject.id !== 'default')
 
   const renderIcon = () => {
     if (tempFilter) {
@@ -53,18 +51,41 @@ const MyChoreHeader = ({
     : activeFilter?.description || selectedProject?.description
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-      {renderIcon()}
-      <Stack sx={{ flex: 1 }}>
-        <Typography level='h3' sx={{ fontWeight: 'lg', color: 'text.primary' }}>
-          {name}
-        </Typography>
-        {description && (
-          <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            {description}
+    <Box
+      sx={{
+        overflow: 'hidden',
+        maxHeight: isVisible ? '120px' : '0',
+        opacity: isVisible ? 1 : 0,
+        transform: isVisible ? 'translateY(0)' : 'translateY(-8px)',
+        transition:
+          'max-height 0.3s ease-in-out, opacity 0.3s ease-in-out, transform 0.3s ease-in-out',
+        marginBottom: isVisible ? 2 : 0,
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        {renderIcon()}
+        <Stack sx={{ flex: 1 }}>
+          <Typography
+            level='h3'
+            sx={{ fontWeight: 'lg', color: 'text.primary' }}
+          >
+            {name}
           </Typography>
-        )}
-      </Stack>
+          <Box
+            sx={{
+              overflow: 'hidden',
+              maxHeight: description ? '40px' : '0',
+              opacity: description ? 1 : 0,
+              transition:
+                'max-height 0.3s ease-in-out, opacity 0.3s ease-in-out',
+            }}
+          >
+            <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+              {description}
+            </Typography>
+          </Box>
+        </Stack>
+      </Box>
     </Box>
   )
 }
