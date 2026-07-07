@@ -975,7 +975,10 @@ const ChoreEdit = () => {
                     key={att.file_path || idx}
                     onClick={() => {
                       const url = resolvePhotoURL(att.sign || att.file_path)
-                      const ext = att.file_name?.split('.').pop().toLowerCase()
+                      const ext = (att.file_name || '')
+                        .split('.')
+                        .pop()
+                        .toLowerCase()
                       const isImage = [
                         'jpg',
                         'jpeg',
@@ -1031,7 +1034,8 @@ const ChoreEdit = () => {
                         size='sm'
                         variant='plain'
                         color='danger'
-                        onClick={() => {
+                        onClick={event => {
+                          event.stopPropagation()
                           DeleteChoreAttachment(choreId, att.file_path)
                             .then(() => {
                               setAttachments(prev =>
@@ -1054,7 +1058,8 @@ const ChoreEdit = () => {
                         size='sm'
                         variant='plain'
                         color='danger'
-                        onClick={() => {
+                        onClick={event => {
+                          event.stopPropagation()
                           setAttachments(prev =>
                             prev.filter((_, i) => i !== idx),
                           )

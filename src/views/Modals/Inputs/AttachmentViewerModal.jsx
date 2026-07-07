@@ -92,12 +92,14 @@ function AttachmentViewerModal({ config }) {
             component='img'
             src={url}
             alt={fileName}
+            onClick={() => url && openUrl(url)}
             onLoad={() => setImgLoaded(true)}
             onError={() => {
               setImgLoaded(true)
               setImgError(true)
             }}
             sx={{
+              cursor: url ? 'zoom-in' : 'default',
               maxWidth: '100%',
               maxHeight: '65vh',
               borderRadius: 'md',

@@ -631,7 +631,7 @@ const ChoreView = () => {
             mb: 0.5,
           }}
         >
-          <Typography level='h3'>asde{chore.name}</Typography>
+          <Typography level='h3'>{chore.name}</Typography>
           <PendingBadge commands={pendingCmds} />
         </Box>
         {chore.isActive === false && (

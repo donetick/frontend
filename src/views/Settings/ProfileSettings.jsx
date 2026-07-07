@@ -88,8 +88,7 @@ const ProfileSettings = () => {
       formData.append('file', compressedFile, 'profile.jpg')
       const response = await apiClient.upload('/users/profile_photo', formData)
       if (!response.ok) throw new Error('Upload failed')
-      const data = await response.json()
-      // const url = resolvePhotoURL(data.url || data.sign)
+      await response.json()
 
       refetchUserProfile() // Refresh user profile to get the new photoURL
       showSuccess({

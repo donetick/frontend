@@ -85,9 +85,9 @@ const extractStorageKey = url => {
 // replace them with backend proxy URLs (which generate fresh signed URLs on
 // each request). Returns the patched HTML, or the original if nothing changed.
 const refreshSignedUrlsInHtml = html => {
-  console.debug('1. refreshSignedUrlsInHtml', { html })
   if (!html) return html
   if (
+    !html.includes('dt-data-path') &&
     !html.includes('X-Amz-') &&
     !html.includes('X-Goog-') &&
     !html.includes('sig') &&
@@ -95,22 +95,26 @@ const refreshSignedUrlsInHtml = html => {
   ) {
     return html
   }
-  console.debug('2. refreshSignedUrlsInHtml: found potential signed URLs, parsing HTML...')
   const parser = new DOMParser()
   const doc = parser.parseFromString(html, 'text/html')
   const imgs = doc.querySelectorAll('img[src]')
   let changed = false
 
-  imgs.forEach(async img => {
-
-    if (!img.getAttribute('dt-data-path')) {
-    // not custom tag, skipping:
-      return
-    }
+  imgs.forEach(img => {
+    const stablePath = img.getAttribute('dt-data-path')
     const src = img.getAttribute('src')
+    let nextSrc = src
 
-    img.setAttribute('src', resolvePhotoURL(src))
-    changed = true
+    if (stablePath) {
+      nextSrc = resolvePhotoURL(stablePath)
+    } else if (isCloudSignedUrl(src)) {
+      nextSrc = resolvePhotoURL(extractStorageKey(src))
+    }
+
+    if (nextSrc && nextSrc !== src) {
+      img.setAttribute('src', nextSrc)
+      changed = true
+    }
   })
 
   return changed ? doc.body.innerHTML : html

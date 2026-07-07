@@ -207,13 +207,22 @@ export function useScanToTask() {
     setPhase('capture')
   }, [])
 
-  const activate = useCallback(() => {
-    setCapturedImage(null)
-    setTaskResult(null)
-    setErrorMsg('')
-    setOcrProgress(0)
-    setPhase('capture')
-  }, [])
+  const activate = useCallback(
+    (initialImageUrl = null) => {
+      setCapturedImage(initialImageUrl)
+      setTaskResult(null)
+      setErrorMsg('')
+      setOcrProgress(0)
+
+      if (initialImageUrl) {
+        processImage(initialImageUrl, 'browser')
+        return
+      }
+
+      setPhase('capture')
+    },
+    [processImage],
+  )
 
   const reset = useCallback(() => {
     stopCamera()

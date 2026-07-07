@@ -21,7 +21,7 @@ import { useScanToTask } from './useScanToTask'
  * Flow: capture → (auto) processing → done [calls onTaskExtracted + onClose]
  *                                   → error  [retake or cancel]
  */
-const ScanPanel = ({ open, onTaskExtracted, onClose }) => {
+const ScanPanel = ({ open, onTaskExtracted, onClose, initialImageUrl }) => {
   const {
     isNativeScanner,
     phase,
@@ -46,12 +46,12 @@ const ScanPanel = ({ open, onTaskExtracted, onClose }) => {
   // Start/stop based on open state
   useEffect(() => {
     if (open) {
-      activate()
+      activate(initialImageUrl)
     } else {
       reset()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open])
+  }, [open, initialImageUrl])
 
   // Start camera when entering capture phase on web
   useEffect(() => {

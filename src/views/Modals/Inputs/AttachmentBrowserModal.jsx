@@ -34,8 +34,12 @@ function AttachmentBrowserModal({ choreId, isOpen, onClose }) {
     if (!isOpen || !choreId) return
     setIsLoading(true)
     GetChoreAttachments(choreId)
-      .then(res => res.json())
+      .then(async res => {
+        if (!res.ok) throw new Error('Failed to fetch attachments')
+        return res.json()
+      })
       .then(data => setAttachments(Array.isArray(data) ? data : []))
+      .catch(() => setAttachments([]))
       .finally(() => setIsLoading(false))
   }, [isOpen, choreId])
 
@@ -91,7 +95,16 @@ function AttachmentBrowserModal({ choreId, isOpen, onClose }) {
         ) : (
           <List sx={{ '--ListItem-paddingX': '0px' }}>
             {attachments.map((attachment, index) => (
-              <ListItem key={index} sx={{ p: 0 }}>
+              <ListItem
+                key={
+                  attachment.id ||
+                  attachment.file_path ||
+                  attachment.sign ||
+                  attachment.file_name ||
+                  index
+                }
+                sx={{ p: 0 }}
+              >
                 <ListItemButton
                   onClick={() => handleAttachmentClick(attachment)}
                   sx={{ borderRadius: 'sm', gap: 1.5, py: 1 }}

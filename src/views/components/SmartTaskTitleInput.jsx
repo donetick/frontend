@@ -235,8 +235,6 @@ const SmartTaskTitleInput = ({
             caretColor: mode === 'dark' ? '#fff' : '#000',
             border: 'none',
             outline: 'none',
-            border: 'none',
-            outline: 'none',
           }}
         />
         <div
