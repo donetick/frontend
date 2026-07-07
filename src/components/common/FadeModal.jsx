@@ -1,4 +1,4 @@
-import { Modal, ModalDialog, ModalOverflow, Typography } from '@mui/joy'
+import { Modal, ModalClose, ModalDialog, ModalOverflow, Typography } from '@mui/joy'
 import { Z_INDEX } from '../../constants/zIndex'
 
 /**
@@ -78,6 +78,7 @@ const FadeModal = ({
             },
           }}
         >
+          <ModalClose />
           {title && (
             <Typography level='title-lg' sx={{ fontWeight: 600, mb: 2 }}>
               {title}

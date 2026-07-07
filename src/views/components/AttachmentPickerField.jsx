@@ -19,11 +19,12 @@ const AttachmentPickerField = ({
   emptyDisplay = 'icon-text',
   entityType = 'chore_attachment',
   entityId,
+  draftId,
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const buttonRef = useRef(null)
-  const { uploadFile } = useFileUpload({ entityType, entityId })
+  const { uploadFile } = useFileUpload({ entityType, entityId, draftId })
 
   useEffect(() => {
     if (!isOpen) return

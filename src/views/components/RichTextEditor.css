@@ -53,20 +53,33 @@
 }
 
 /* Material-UI style customizations for Quill toolbar */
+.quill-root {
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: var(--joy-palette-neutral-softBg, #f0f4f8);
+  transition: box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.quill-root:focus-within {
+  box-shadow: 0 0 0 1px var(--joy-palette-primary-outlinedBorder, rgba(11, 107, 203, 0.15));
+}
+
+.quill-root:hover:not(:focus-within) {
+  background-color: var(--joy-palette-neutral-softHoverBg, #dde7ee);
+}
+
 .quill-root .ql-toolbar.ql-snow {
-  border: 1px solid var(--joy-palette-neutral-outlinedBorder, #dde7ee);
-  border-bottom: none;
-  border-radius: 8px 8px 0 0;
-  background: var(--joy-palette-background-surface, #fff);
-  box-shadow: var(--joy-shadow-xs, 0px 1px 2px 0px rgba(16, 24, 40, 0.05));
-  padding: 12px 16px;
+  border: none;
+  border-bottom: 1px solid var(--joy-palette-neutral-softActiveBg, rgba(99, 107, 116, 0.16));
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 8px 12px;
 }
 
 .quill-root .ql-container.ql-snow {
-  border: 1px solid var(--joy-palette-neutral-outlinedBorder, #dde7ee);
-  border-top: none;
-  border-radius: 0 0 8px 8px;
-  background: var(--joy-palette-background-surface, #fff);
+  border: none;
+  background: transparent;
 }
 
 /* Style toolbar buttons with Material-UI look */
