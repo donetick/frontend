@@ -171,7 +171,7 @@ export const useChoreActions = ({
           try {
             const response = await MarkChoreComplete(
               chore.id,
-              impersonatedUser ? { completedBy: impersonatedUser.userId } : null,
+              impersonatedUser ? impersonatedUser.userId : null,
               null,
               null,
             )
@@ -273,7 +273,7 @@ export const useChoreActions = ({
 
         case 'reject':
           try {
-            const response = await RejectChore(chore.id)
+            const response = await RejectChore(chore.id, null)
             if (response.ok) {
               const data = await response.json()
               updateChoreInState(data.res, 'rejected')
@@ -439,9 +439,9 @@ export const useChoreActions = ({
       if (!modalChore) return
       MarkChoreComplete(
         modalChore.id,
-        impersonatedUser ? { completedBy: impersonatedUser.userId } : null,
-        new Date(newDate).toISOString(),
+        impersonatedUser ? impersonatedUser.userId : null,
         null,
+        new Date(newDate).toISOString(),
       ).then(response => {
         if (response.ok) {
           response.json().then(data => {
@@ -476,11 +476,9 @@ export const useChoreActions = ({
       if (!modalChore) return
       MarkChoreComplete(
         modalChore.id,
-        impersonatedUser
-          ? { note, completedBy: impersonatedUser.userId }
-          : { note },
+        impersonatedUser ? impersonatedUser.userId : null,
         null,
-        null,
+        note,
       ).then(response => {
         if (response.ok) {
           response.json().then(data => {
@@ -545,11 +543,7 @@ export const useChoreActions = ({
               try {
                 await MarkChoreComplete(
                   chore.id,
-                  impersonatedUser
-                    ? { completedBy: impersonatedUser.userId }
-                    : null,
-                  null,
-                  null,
+                  impersonatedUser ? impersonatedUser.userId : null,
                 )
                 completedTasks.push(chore)
               } catch (error) {

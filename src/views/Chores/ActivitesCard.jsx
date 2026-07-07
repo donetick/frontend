@@ -28,6 +28,7 @@ import {
 import moment from 'moment'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import { useChores, useChoresHistory } from '../../queries/ChoreQueries'
 import { useCircleMembers } from '../../queries/UserQueries'
 import { resolvePhotoURL } from '../../utils/Helpers'
@@ -35,6 +36,7 @@ import NoteViewerModal from '../Modals/Inputs/NoteViewerModal'
 
 const ActivityItem = ({ activity, members, onViewNote }) => {
   const { t } = useTranslation(['chores', 'common'])
+  const Navigate = useNavigate()
   // Find the member who completed the activity
   const completedByMember = members?.find(
     member => member.userId === activity.completedBy,
@@ -124,7 +126,12 @@ const ActivityItem = ({ activity, members, onViewNote }) => {
   }
 
   return (
-    <ListItem sx={{ alignItems: 'flex-start', py: 0.5 }}>
+    <ListItem
+      sx={{ alignItems: 'flex-start', cursor: 'pointer', py: 0.5 }}
+      onClick={function () {
+        Navigate('/chores/' + activity.choreId)
+      }}
+    >
       <ListItemDecorator sx={{ mt: 0.5 }}>
         <Avatar
           size='sm'
