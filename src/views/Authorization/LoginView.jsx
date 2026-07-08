@@ -310,7 +310,6 @@ const LoginView = () => {
     const state = generateRandomState()
 
     if (Capacitor.isNativePlatform()) {
-      // For mobile devices, use a custom URL scheme for the redirect
       const redirectUri = 'donetick://auth/oauth2'
 
       const params = new URLSearchParams({

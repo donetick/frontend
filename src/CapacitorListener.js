@@ -48,6 +48,16 @@ const handleOAuthDeepLink = async url => {
     const state = urlObj.searchParams.get('state')
 
     if (code && state) {
+      // getLaunchUrl() persists across every WebView reload caused by
+      // window.location.href. If we're already on the OAuth handler page with
+      // the same code, skip re-navigating to avoid an infinite reload loop.
+      const currentCode = new URLSearchParams(window.location.search).get(
+        'code',
+      )
+      if (window.location.pathname === '/auth/oauth2' && currentCode === code) {
+        return
+      }
+
       // Store the OAuth params for the app to pick up
       await Preferences.set({
         key: 'oauth_callback',
@@ -258,7 +268,7 @@ const registerCapacitorListeners = () => {
     console.log('[NFC] appUrlOpen:', event.url)
     handleUrlOpen(event.url)
   })
-  
+
   mobileApp.addListener('appStateChange', ({ isActive }) => {
     focusManager.setFocused(isActive)
   })
@@ -277,5 +287,6 @@ const registerCapacitorListeners = () => {
 
 export {
   registerCapacitorListeners,
-  pushNotificationListenerRegistration as registerPushNotifications,
+  pushNotificationListenerRegistration as registerPushNotifications
 }
+
