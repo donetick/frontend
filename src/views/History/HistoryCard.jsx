@@ -15,10 +15,11 @@ import {
 } from '@mui/icons-material'
 import { Avatar, Box, Chip, Grid, IconButton, Typography } from '@mui/joy'
 import moment from 'moment'
+import { useTranslation } from 'react-i18next'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { TASK_COLOR } from '../../utils/Colors.jsx'
 
-const getCompletedChip = historyEntry => {
+const getCompletedChip = (historyEntry, t) => {
   if (historyEntry.status === 0 || historyEntry.status === 5 || historyEntry.status === 6) {
     return null
   }
@@ -48,7 +49,7 @@ const getCompletedChip = historyEntry => {
         sx={{ backgroundColor: TASK_COLOR.COMPLETED, color: 'white' }}
         startDecorator={<Check />}
       >
-        On Time
+        {t ? t('history:status.onTime') : 'On Time'}
       </Chip>
     )
   } else if (performedAt.isBefore(dueDate)) {
@@ -59,7 +60,7 @@ const getCompletedChip = historyEntry => {
         sx={{ backgroundColor: TASK_COLOR.SCHEDULED, color: 'white' }}
         startDecorator={<Check />}
       >
-        Early
+        {t ? t('history:status.early') : 'Early'}
       </Chip>
     )
   } else {
@@ -70,7 +71,7 @@ const getCompletedChip = historyEntry => {
         sx={{ backgroundColor: TASK_COLOR.LATE, color: 'white' }}
         startDecorator={<Timelapse />}
       >
-        Late
+        {t ? t('history:status.late') : 'Late'}
       </Chip>
     )
   }
@@ -97,6 +98,7 @@ const HistoryCard = ({
   onToggleActions,
   onViewNote,
 }) => {
+  const { t } = useTranslation('history')
   const { fmt } = useLocalization()
   const performer = performers.find(p => p.userId === historyEntry.completedBy)
   const assignedTo = performers.find(p => p.userId === historyEntry.assignedTo)
@@ -185,20 +187,20 @@ const HistoryCard = ({
                 }}
               >
                 {historyEntry.status === 0
-                  ? 'In Progress'
+                  ? t('status.inProgress')
                   : historyEntry.status === 1
-                    ? 'Completed'
+                    ? t('status.completed')
                     : historyEntry.status === 2
-                      ? 'Skipped'
+                      ? t('status.skipped')
                       : historyEntry.status === 3
-                        ? 'Pending Approval'
+                        ? t('status.pendingApproval')
                         : historyEntry.status === 4
-                          ? 'Rejected'
+                          ? t('status.rejected')
                           : historyEntry.status === 5
-                            ? 'Missed'
+                            ? t('status.missed')
                             : historyEntry.status === 6
-                              ? 'Rescheduled'
-                              : 'Completed'}
+                              ? t('status.rescheduled')
+                              : t('status.completed')}
               </Typography>
 
               <Chip size='sm' startDecorator={<EventNote />}>
@@ -208,7 +210,7 @@ const HistoryCard = ({
               </Chip>
 
               <Box sx={{ display: 'flex', gap: 0.5 }}>
-                {getCompletedChip(historyEntry)}
+                {getCompletedChip(historyEntry, t)}
               </Box>
             </Box>
           </Grid>
@@ -254,7 +256,7 @@ const HistoryCard = ({
                     />
                   }
                 >
-                  {performer?.displayName || 'Unknown'}
+                  {performer?.displayName || t('common.unknown')}
                 </Chip>
               )}
 
@@ -263,10 +265,10 @@ const HistoryCard = ({
                   <Chip
                     size='sm'
                     variant='outlined'
-                    color='neutral'
-                    startDecorator={<Person />}
-                  >
-                    Assigned to {assignedTo.displayName}
+                  color='neutral'
+                  startDecorator={<Person />}
+                >
+                    {t('assignedTo', { name: assignedTo.displayName })}
                   </Chip>
                 )}
 
@@ -286,7 +288,7 @@ const HistoryCard = ({
                     onViewNote?.(historyEntry.notes)
                   }}
                 >
-                  Note
+                  {t('note')}
                 </Chip>
               )}
               {/* add a duration chip if we have duration */}
@@ -307,8 +309,7 @@ const HistoryCard = ({
                   color='success'
                   startDecorator={<Toll />}
                 >
-                  {historyEntry.points} pt
-                  {historyEntry.points > 1 ? 's' : ''}
+                  {t('points', { count: historyEntry.points })}
                 </Chip>
               )}
             </Box>

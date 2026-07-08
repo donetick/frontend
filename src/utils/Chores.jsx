@@ -1,4 +1,5 @@
 import moment from 'moment'
+import i18n from '../i18n/config'
 import { TASK_COLOR } from './Colors.jsx'
 
 const priorityOrder = [1, 2, 3, 4, 0]
@@ -25,6 +26,7 @@ export const ChoreStatus = Object.freeze({
   PAUSED: 2,
   PENDING_APPROVAL: 3,
 })
+
 export const ChoresGrouper = (groupBy, chores, filter) => {
   if (filter) {
     chores = chores.filter(chore => filter(chore))
@@ -85,63 +87,63 @@ export const ChoresGrouper = (groupBy, chores, filter) => {
       groups = []
       if (groupRaw['Started'].length > 0) {
         groups.push({
-          name: 'Started',
+          name: i18n.t('chores:groups.started'),
           content: groupRaw['Started'],
           color: TASK_COLOR.STARTED,
         })
       }
       if (groupRaw['PendingApproval'].length > 0) {
         groups.push({
-          name: 'Pending Approval',
+          name: i18n.t('chores:groups.pendingApproval'),
           content: groupRaw['PendingApproval'],
           color: TASK_COLOR.LATE,
         })
       }
       if (groupRaw['Overdue'].length > 0) {
         groups.push({
-          name: 'Overdue',
+          name: i18n.t('chores:groups.overdue'),
           content: groupRaw['Overdue'],
           color: TASK_COLOR.OVERDUE,
         })
       }
       if (groupRaw['Today'].length > 0) {
         groups.push({
-          name: 'Today',
+          name: i18n.t('chores:groups.today'),
           content: groupRaw['Today'],
           color: TASK_COLOR.TODAY,
         })
       }
       if (groupRaw['Tomorrow'].length > 0) {
         groups.push({
-          name: 'Tomorrow',
+          name: i18n.t('chores:groups.tomorrow'),
           content: groupRaw['Tomorrow'],
           color: TASK_COLOR.TOMORROW,
         })
       }
       if (groupRaw['Next 7 Days'].length > 0) {
         groups.push({
-          name: 'Next 7 Days',
+          name: i18n.t('chores:groups.next7Days'),
           content: groupRaw['Next 7 Days'],
           color: TASK_COLOR.NEXT_7_DAYS,
         })
       }
       if (groupRaw['Later This Month'].length > 0) {
         groups.push({
-          name: 'Later This Month',
+          name: i18n.t('chores:groups.laterThisMonth'),
           content: groupRaw['Later This Month'],
           color: TASK_COLOR.LATER_THIS_MONTH,
         })
       }
       if (groupRaw['Future'].length > 0) {
         groups.push({
-          name: 'Future',
+          name: i18n.t('chores:groups.future'),
           content: groupRaw['Future'],
           color: TASK_COLOR.FUTURE,
         })
       }
       if (groupRaw['Anytime'].length > 0) {
         groups.push({
-          name: 'Anytime',
+          name: i18n.t('chores:groups.anytime'),
           content: groupRaw['Anytime'],
           color: TASK_COLOR.ANYTIME,
         })
@@ -191,33 +193,37 @@ export const ChoresGrouper = (groupBy, chores, filter) => {
       })
       groups = [
         {
-          name: 'Overdue',
+          name: i18n.t('chores:groups.overdue'),
           content: groupRaw['Overdue'],
           color: TASK_COLOR.OVERDUE,
         },
-        { name: 'Today', content: groupRaw['Today'], color: TASK_COLOR.TODAY },
         {
-          name: 'Tomorrow',
+          name: i18n.t('chores:groups.today'),
+          content: groupRaw['Today'],
+          color: TASK_COLOR.TODAY,
+        },
+        {
+          name: i18n.t('chores:groups.tomorrow'),
           content: groupRaw['Tomorrow'],
           color: TASK_COLOR.TOMORROW,
         },
         {
-          name: 'Next 7 Days',
+          name: i18n.t('chores:groups.next7Days'),
           content: groupRaw['Next 7 Days'],
           color: TASK_COLOR.NEXT_7_DAYS,
         },
         {
-          name: 'Later This Month',
+          name: i18n.t('chores:groups.laterThisMonth'),
           content: groupRaw['Later This Month'],
           color: TASK_COLOR.LATER_THIS_MONTH,
         },
         {
-          name: 'Future',
+          name: i18n.t('chores:groups.future'),
           content: groupRaw['Future'],
           color: TASK_COLOR.FUTURE,
         },
         {
-          name: 'Anytime',
+          name: i18n.t('chores:groups.anytime'),
           content: groupRaw['Anytime'],
           color: TASK_COLOR.ANYTIME,
         },

@@ -19,7 +19,20 @@ i18n
       loadPath: '/locales/{{lng}}/{{ns}}.json',
     },
 
-    ns: ['common', 'settings', 'chores'],
+    ns: [
+      'common',
+      'settings',
+      'settingsExtras',
+      'chores',
+      'auth',
+      'things',
+      'projects',
+      'filters',
+      'history',
+      'user',
+      'labelsView',
+      'timer',
+    ],
     defaultNS: 'common',
 
     detection: {
@@ -29,7 +42,7 @@ i18n
     },
 
     react: {
-      useSuspense: true,
+      useSuspense: false,
     },
   })
 

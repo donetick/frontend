@@ -21,6 +21,7 @@ import EditIcon from '@mui/icons-material/Edit'
 import { Box, Button, Card, Container, Grid, Sheet, Typography } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router-dom'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import useConfirmationModal from '../../hooks/useConfirmationModal'
@@ -39,6 +40,7 @@ import NoteViewerModal from '../Modals/Inputs/NoteViewerModal'
 import HistoryCard from './HistoryCard'
 
 const ChoreHistory = () => {
+  const { t } = useTranslation(['history', 'common'])
   const [userHistory, setUserHistory] = useState([])
   const [historyInfo, setHistoryInfo] = useState([])
   const { choreId } = useParams()
@@ -60,16 +62,16 @@ const ChoreHistory = () => {
 
   const handleDelete = historyEntry => {
     showConfirmation(
-      `Are you sure you want to delete this history record?`,
-      'Delete History Record',
+      t('history:delete.confirm'),
+      t('history:delete.title'),
       () => {
         deleteChoreHistory.mutate({
           choreId,
           historyId: historyEntry.id,
         })
       },
-      'Delete',
-      'Cancel',
+      t('common:actions.delete'),
+      t('common:actions.cancel'),
       'danger',
     )
   }
@@ -122,42 +124,50 @@ const ChoreHistory = () => {
     const historyInfo = [
       {
         icon: <Checklist />,
-        text: 'All Completed',
-        subtext: `${histories.filter(h => h.status === ChoreHistoryStatus.COMPLETED || h.status === ChoreHistoryStatus.SKIPPED).length} times`,
+        text: t('history:stats.allCompleted'),
+        subtext: t('history:stats.times', {
+          count: histories.filter(
+            h =>
+              h.status === ChoreHistoryStatus.COMPLETED ||
+              h.status === ChoreHistoryStatus.SKIPPED,
+          ).length,
+        }),
       },
       {
         icon: <TrendingUp />,
-        text: 'Average Timing',
+        text: t('history:stats.averageTiming'),
         subtext: moment.duration(averageDelayMoment).isValid()
           ? moment.duration(averageDelayMoment).humanize()
-          : 'On time',
+          : t('history:stats.onTime'),
       },
       {
         icon: <Timelapse />,
-        text: 'Longest Delay',
+        text: t('history:stats.longestDelay'),
         subtext: moment.duration(maxDelayMoment).isValid()
           ? moment.duration(maxDelayMoment).humanize()
-          : 'Never late',
+          : t('history:stats.neverLate'),
       },
       {
         icon: <Star />,
-        text: 'Completed Most',
+        text: t('history:stats.completedMost'),
         subtext: `${
           performers.find(p => p.userId === Number(userCompletedByMost))
-            ?.displayName || 'Unknown'
+            ?.displayName || t('history:common.unknown')
         }`,
       },
       {
         icon: <Group />,
-        text: 'Members Involved',
-        subtext: `${Object.keys(userHistories).length} members`,
+        text: t('history:stats.membersInvolved'),
+        subtext: t('history:stats.membersCount', {
+          count: Object.keys(userHistories).length,
+        }),
       },
       {
         icon: <Analytics />,
-        text: 'Last Completed',
+        text: t('history:stats.lastCompleted'),
         subtext: `${
           performers.find(p => p.userId === Number(histories[0].completedBy))
-            ?.displayName || 'Unknown'
+            ?.displayName || t('history:common.unknown')
         }`,
       },
     ]
@@ -191,14 +201,13 @@ const ChoreHistory = () => {
         />
 
         <Typography level='h3' gutterBottom>
-          No History Yet
+          {t('history:empty.title')}
         </Typography>
         <Typography level='body1'>
-          You haven't completed any tasks. Once you start finishing tasks,
-          they'll show up here.
+          {t('history:empty.description')}
         </Typography>
         <Button variant='soft' sx={{ mt: 2 }}>
-          <Link to='/chores'>Go back to chores</Link>
+          <Link to='/chores'>{t('history:empty.backToChores')}</Link>
         </Button>
       </Container>
     )
@@ -214,8 +223,8 @@ const ChoreHistory = () => {
           <Typography
             level='title-md'
             sx={{ fontWeight: 'lg', color: 'text.primary' }}
-          >
-            Task Summary
+        >
+            {t('history:summaryTitle')}
           </Typography>
         </Box>
         <Grid container spacing={0.5} sx={{ mb: 2 }}>
@@ -291,7 +300,7 @@ const ChoreHistory = () => {
           level='title-md'
           sx={{ fontWeight: 'lg', color: 'text.primary' }}
         >
-          Task Activity
+          {t('history:activityTitle')}
         </Typography>
       </Box>
       <Sheet
@@ -334,7 +343,7 @@ const ChoreHistory = () => {
                       >
                         <EditIcon sx={{ fontSize: 20 }} />
                         <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                          Edit
+                          {t('common:actions.edit')}
                         </Typography>
                       </Box>
                     </SwipeAction>
@@ -353,7 +362,7 @@ const ChoreHistory = () => {
                       >
                         <DeleteIcon sx={{ fontSize: 20 }} />
                         <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                          Delete
+                          {t('common:actions.delete')}
                         </Typography>
                       </Box>
                     </SwipeAction>
@@ -369,7 +378,9 @@ const ChoreHistory = () => {
                 onViewNote={notes => {
                   setNoteViewerConfig({
                     isOpen: true,
-                    title: `Updated at ${fmt.dateTime(historyEntry.updatedAt)}`,
+                    title: t('history:common.updatedAt', {
+                      date: fmt.dateTime(historyEntry.updatedAt),
+                    }),
                     content: notes,
                     onClose: () => setNoteViewerConfig({ isOpen: false }),
                   })
@@ -411,8 +422,8 @@ const ChoreHistory = () => {
                   setIsEditModalOpen(false)
                   setEditHistory(null)
                   showSuccess({
-                    title: 'History Updated',
-                    message: `The history record has been updated successfully.`,
+                    title: t('history:messages.updatedTitle'),
+                    message: t('history:messages.updatedMessage'),
                   })
                 },
                 onError: error => {
@@ -433,8 +444,8 @@ const ChoreHistory = () => {
                   setIsEditModalOpen(false)
                   setEditHistory(null)
                   showSuccess({
-                    title: 'History Deleted',
-                    message: `The history record has been deleted successfully.`,
+                    title: t('history:messages.deletedTitle'),
+                    message: t('history:messages.deletedMessage'),
                   })
                 },
               },

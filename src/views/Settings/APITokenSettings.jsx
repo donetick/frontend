@@ -10,6 +10,7 @@ import {
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
+import { useTranslation } from 'react-i18next'
 
 import { useEffect, useState } from 'react'
 import { useLocalization } from '../../contexts/LocalizationContext'
@@ -26,6 +27,7 @@ import TextModal from '../Modals/Inputs/TextModal'
 import SettingsLayout from './SettingsLayout'
 
 const APITokenSettings = () => {
+  const { t } = useTranslation(['settings', 'common'])
   const { data: userProfile } = useUserProfile()
   const { showNotification } = useNotification()
   const { fmt } = useLocalization()
@@ -38,8 +40,8 @@ const APITokenSettings = () => {
     message,
     title,
     onConfirm,
-    confirmText = 'Confirm',
-    cancelText = 'Cancel',
+    confirmText = t('common:actions.continue'),
+    cancelText = t('common:actions.cancel'),
     color = 'primary',
   ) => {
     setConfirmModalConfig({
@@ -80,23 +82,20 @@ const APITokenSettings = () => {
   }
 
   return (
-    <SettingsLayout title='API Tokens'>
+    <SettingsLayout title={t('settings:pages.apiTokens.title')}>
       <div className='grid gap-4 py-4' id='apitokens'>
-        <Typography level='h3'>Access Token</Typography>
+        <Typography level='h3'>{t('settings:apiTokensPage.heading')}</Typography>
         <Divider />
         <Typography level='body-sm'>
-          Create token to use with the API to update things that trigger task or
-          chores
+          {t('settings:apiTokensPage.description')}
         </Typography>
         {!isPlusAccount(userProfile) && (
           <>
             <Chip variant='soft' color='warning'>
-              Plus Feature
+              {t('common:labels.plusFeature')}
             </Chip>
             <Typography level='body-sm' color='warning' sx={{ mt: 1 }}>
-              API tokens are not available in the Basic plan. Upgrade to Plus to
-              generate API tokens for integrating with external systems and
-              automating your tasks.
+              {t('settings:apiTokensPage.plusDescription')}
             </Typography>
           </>
         )}
@@ -125,7 +124,9 @@ const APITokenSettings = () => {
                     setShowTokenId(token.id)
                   }}
                 >
-                  {showTokenId === token?.id ? 'Hide' : 'Show'} Token
+                  {showTokenId === token?.id
+                    ? t('settings:apiTokensPage.hideToken')
+                    : t('settings:apiTokensPage.showToken')}
                 </Button>
 
                 <Button
@@ -133,15 +134,19 @@ const APITokenSettings = () => {
                   color='danger'
                   onClick={() => {
                     showConfirmation(
-                      `Are you sure you want to remove ${token.name}?`,
-                      'Remove Token',
+                      t('settings:apiTokensPage.removeTokenConfirm', {
+                        name: token.name,
+                      }),
+                      t('settings:apiTokensPage.removeToken'),
                       () => {
                         DeleteLongLiveToken(token.id).then(resp => {
                           if (resp.ok) {
                             showNotification({
                               type: 'success',
-                              title: 'Removed',
-                              message: 'API token has been removed',
+                              title: t('settings:apiTokensPage.removed'),
+                              message: t(
+                                'settings:apiTokensPage.removedMessage',
+                              ),
                             })
                             const newTokens = tokens.filter(
                               t => t.id !== token.id,
@@ -150,13 +155,13 @@ const APITokenSettings = () => {
                           }
                         })
                       },
-                      'Remove',
-                      'Cancel',
+                      t('common:actions.remove'),
+                      t('common:actions.cancel'),
                       'danger',
                     )
                   }}
                 >
-                  Remove
+                  {t('settings:apiTokensPage.removeToken')}
                 </Button>
               </Box>
             </Box>
@@ -174,7 +179,7 @@ const APITokenSettings = () => {
                         navigator.clipboard.writeText(token.token)
                         showNotification({
                           type: 'success',
-                          message: 'Token copied to clipboard',
+                          message: t('settings:apiTokensPage.copied'),
                         })
                         setShowTokenId(null)
                       }}
@@ -200,15 +205,15 @@ const APITokenSettings = () => {
             setIsGetTokenNameModalOpen(true)
           }}
         >
-          Generate New Token
+          {t('settings:apiTokensPage.generateNew')}
         </Button>
         <TextModal
           isOpen={isGetTokenNameModalOpen}
-          title='Give a name for your new token, something to remember it by.'
+          title={t('settings:apiTokensPage.namePrompt')}
           onClose={() => {
             setIsGetTokenNameModalOpen(false)
           }}
-          okText={'Generate Token'}
+          okText={t('settings:apiTokensPage.generateAction')}
           onSave={handleSaveToken}
         />
 

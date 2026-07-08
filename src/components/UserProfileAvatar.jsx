@@ -27,6 +27,7 @@ import {
 import { useMediaQuery } from '@mui/material'
 import moment from 'moment'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useImpersonateUser } from '../contexts/ImpersonateUserContext'
 import useStickyState from '../hooks/useStickyState'
@@ -38,6 +39,7 @@ import SubscriptionModal from './SubscriptionModal'
 
 const UserProfileAvatar = () => {
   const navigate = useNavigate()
+  const { t } = useTranslation(['common', 'settings'])
   const { mode, setMode } = useColorScheme()
   const { data: userProfile } = useUserProfile()
   const {
@@ -60,20 +62,22 @@ const UserProfileAvatar = () => {
   const isPlusUser = isPlusAccount(userProfile)
 
   const getSubscriptionStatus = () => {
-    if (!userProfile) return 'Free'
+    if (!userProfile) return t('settings:account.free')
 
     if (userProfile.subscription === 'active') {
-      return 'Plus'
+      return t('settings:account.plus')
     }
 
     if (
       userProfile.subscription === 'cancelled' &&
       moment().isBefore(userProfile.expiration)
     ) {
-      return 'Plus (expires soon)'
+      return `${t('settings:account.plus')} (${moment(
+        userProfile.expiration,
+      ).format('MMM DD, YYYY')})`
     }
 
-    return 'Free'
+    return t('settings:account.free')
   }
 
   const handleLogout = () => {
@@ -265,7 +269,7 @@ const UserProfileAvatar = () => {
                         fontWeight: 500,
                       }}
                     >
-                      Impersonating
+                      {t('settings:menu.impersonating')}
                     </Typography>
                   </Box>
                 )}
@@ -291,13 +295,15 @@ const UserProfileAvatar = () => {
                 </ListItemDecorator>
                 <ListItemContent>
                   <Typography level='body-sm' sx={{ fontWeight: 500 }}>
-                    {isImpersonating ? 'Switch User' : 'Impersonate User'}
+                    {isImpersonating
+                      ? t('settings:menu.switchUser')
+                      : t('settings:menu.impersonateUser')}
                   </Typography>
                   <Typography
                     level='body-xs'
                     sx={{ color: 'var(--joy-palette-text-tertiary)' }}
                   >
-                    Act as another user
+                    {t('settings:menu.actAsAnotherUser')}
                   </Typography>
                 </ListItemContent>
               </MenuItem>
@@ -319,13 +325,13 @@ const UserProfileAvatar = () => {
                   </ListItemDecorator>
                   <ListItemContent>
                     <Typography level='body-sm' sx={{ fontWeight: 500 }}>
-                      Stop Impersonating
+                      {t('settings:menu.stopImpersonating')}
                     </Typography>
                     <Typography
                       level='body-xs'
                       sx={{ color: 'var(--joy-palette-text-tertiary)' }}
                     >
-                      Return to your account
+                      {t('settings:menu.returnToYourAccount')}
                     </Typography>
                   </ListItemContent>
                 </MenuItem>
@@ -349,13 +355,13 @@ const UserProfileAvatar = () => {
             </ListItemDecorator>
             <ListItemContent>
               <Typography level='body-sm' sx={{ fontWeight: 500 }}>
-                Settings
+                {t('settings:menu.settings')}
               </Typography>
               <Typography
                 level='body-xs'
                 sx={{ color: 'var(--joy-palette-text-tertiary)' }}
               >
-                Account & preferences
+                {t('settings:menu.accountAndPreferences')}
               </Typography>
             </ListItemContent>
           </MenuItem>
@@ -374,13 +380,13 @@ const UserProfileAvatar = () => {
             </ListItemDecorator>
             <ListItemContent>
               <Typography level='body-sm' sx={{ fontWeight: 500 }}>
-                Invite People
+                {t('settings:menu.invitePeople')}
               </Typography>
               <Typography
                 level='body-xs'
                 sx={{ color: 'var(--joy-palette-text-tertiary)' }}
               >
-                Add members to your circle
+                {t('settings:menu.addMembersToYourCircle')}
               </Typography>
             </ListItemContent>
           </MenuItem>
@@ -401,13 +407,13 @@ const UserProfileAvatar = () => {
               </ListItemDecorator>
               <ListItemContent>
                 <Typography level='body-sm' sx={{ fontWeight: 500 }}>
-                  Side Panel Settings
+                  {t('settings:menu.sidePanelSettings')}
                 </Typography>
                 <Typography
                   level='body-xs'
                   sx={{ color: 'var(--joy-palette-text-tertiary)' }}
                 >
-                  Customize layout & cards
+                  {t('settings:menu.customizeLayoutAndCards')}
                 </Typography>
               </ListItemContent>
             </MenuItem>
@@ -427,13 +433,15 @@ const UserProfileAvatar = () => {
             </ListItemDecorator>
             <ListItemContent>
               <Typography level='body-sm' sx={{ fontWeight: 500 }}>
-                {isDarkMode ? 'Switch to Light' : 'Switch to Dark'}
+                {isDarkMode
+                  ? t('settings:menu.switchToLight')
+                  : t('settings:menu.switchToDark')}
               </Typography>
               <Typography
                 level='body-xs'
                 sx={{ color: 'var(--joy-palette-text-tertiary)' }}
               >
-                Toggle theme appearance
+                {t('settings:menu.toggleThemeAppearance')}
               </Typography>
             </ListItemContent>
           </MenuItem>
@@ -460,9 +468,11 @@ const UserProfileAvatar = () => {
                     fontWeight: 500,
                   }}
                 >
-                  Upgrade to Plus
+                  {t('settings:account.upgrade')}
                 </Typography>
-                <Typography level='body-xs'>Unlock premium features</Typography>
+                <Typography level='body-xs'>
+                  {t('settings:subscription.unlockFeatures')}
+                </Typography>
               </ListItemContent>
             </MenuItem>
           )}
@@ -511,7 +521,7 @@ const UserProfileAvatar = () => {
                 level='body-sm'
                 sx={{ fontWeight: 500, color: 'var(--joy-palette-danger-500)' }}
               >
-                Logout
+                {t('common:actions.logout')}
               </Typography>
             </ListItemContent>
           </MenuItem>

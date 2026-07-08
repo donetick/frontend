@@ -1,0 +1,94 @@
+{
+  "page": {
+    "title": "Dinge",
+    "description": "Dinge sind benutzerdefinierte Felder, die an Aufgaben angehängt werden können, um zusätzliche Informationen zu erfassen. Sie können Text-, Zahlen- oder Boolean-Werte enthalten.",
+    "emptyTitle": "Keine Dinge erstellt oder gefunden",
+    "savedTitle": "Gespeichert",
+    "savedMessage": "Ding wurde erfolgreich gespeichert",
+    "saveFailedTitle": "Ding konnte nicht gespeichert werden",
+    "saveQueued": "Du bist offline und die Anfrage wurde in die Warteschlange gestellt.",
+    "saveFailed": "Beim Speichern des Dings ist ein Fehler aufgetreten.",
+    "deleteTitle": "Ding löschen",
+    "deleteConfirm": "Möchtest du dieses Ding wirklich löschen?",
+    "deleteFailedAssociated": "Ein Ding mit zugehörigen Aufgaben kann nicht gelöscht werden.",
+    "deleteFailedTitle": "Ding konnte nicht gelöscht werden",
+    "deleteQueued": "Du bist offline und die Anfrage wurde in die Warteschlange gestellt.",
+    "deleteFailed": "Beim Löschen des Dings ist ein Fehler aufgetreten.",
+    "updatedTitle": "Aktualisiert",
+    "updatedMessage": "Ding-Status erfolgreich aktualisiert",
+    "updateFailedTitle": "Ding-Status konnte nicht aktualisiert werden",
+    "updateQueued": "Du bist offline und die Anfrage wurde in die Warteschlange gestellt.",
+    "updateFailed": "Beim Aktualisieren des Ding-Status ist ein Fehler aufgetreten.",
+    "swipeEdit": "Bearbeiten",
+    "swipeToggle": "Umschalten",
+    "swipeDelete": "Löschen",
+    "types": {
+      "text": "Text",
+      "number": "Zahl",
+      "boolean": "Boolean"
+    },
+    "states": {
+      "true": "Wahr",
+      "false": "Falsch"
+    }
+  },
+  "modal": {
+    "createTitle": "Ding erstellen",
+    "editTitle": "Ding bearbeiten",
+    "namePlaceholder": "Ding-Name",
+    "valuePlaceholder": "Ding-Wert",
+    "type": "Typ",
+    "nameRequired": "Name ist erforderlich",
+    "stateMustBeNumber": "Status muss eine Zahl sein",
+    "stateMustBeBoolean": "Status muss wahr oder falsch sein",
+    "stateRequired": "Status ist erforderlich",
+    "updateStateTitle": "Status aktualisieren"
+  },
+  "history": {
+    "overviewTitle": "Ding-Übersicht",
+    "empty": {
+      "title": "Kein Verlauf gefunden",
+      "description": "Für dieses Ding gibt es noch keinen Verlauf.",
+      "backToThings": "Zurück zu den Dingen"
+    },
+    "analytics": {
+      "updateFrequency": "Aktualisierungsfrequenz",
+      "lastUpdated": "Zuletzt aktualisiert",
+      "lastValue": "Letzter Wert",
+      "updateTrend": "Aktualisierungstrend",
+      "every": "Alle {{value}}",
+      "minutes_one": "{{count}} Minute",
+      "minutes_other": "{{count}} Minuten",
+      "hours_one": "{{count}} Stunde",
+      "hours_other": "{{count}} Stunden",
+      "days_one": "{{count}} Tag",
+      "days_other": "{{count}} Tage",
+      "intervalIncreasing": "Intervall wird größer",
+      "intervalDecreasing": "Intervall wird kleiner",
+      "intervalStable": "Intervall bleibt stabil"
+    }
+  },
+  "trigger": {
+    "validationMissing": "Bitte wähle ein Ding und einen Auslösezustand aus",
+    "booleanNoCondition": "Der boolesche Typ benötigt keine Bedingung",
+    "triggerStateNumber": "Der Auslösezustand muss eine Zahl sein",
+    "title": "Löse eine Aufgabe aus, wenn sich der Zustand eines Dings in einen gewünschten Zustand ändert",
+    "noThings": "Es sieht so aus, als hättest du noch keine Dinge. Erstelle eines, um eine Aufgabe auszulösen, wenn sich dessen Zustand ändert.",
+    "goToThings": "Zu den Dingen",
+    "createThingSuffix": "um ein Ding zu erstellen",
+    "selectThing": "Ein Ding auswählen",
+    "conditionHelp": "Erstelle eine Bedingung, um eine Aufgabe auszulösen, wenn sich der Zustand des Dings in den gewünschten Zustand ändert",
+    "dueWhenChanged": "Wenn sich der Zustand von {{name}} wie unten angegeben ändert, wird die Aufgabe fällig.",
+    "true": "Wahr",
+    "false": "Falsch",
+    "equal": "Gleich",
+    "notEqual": "Ungleich",
+    "greaterThan": "Größer als",
+    "greaterThanOrEqual": "Größer oder gleich",
+    "lessThan": "Kleiner als",
+    "lessThanOrEqual": "Kleiner oder gleich",
+    "textTriggerLabel": "Gib den Text ein, der die Aufgabe auslösen soll",
+    "type": "Typ",
+    "state": "Status"
+  }
+}

@@ -25,6 +25,7 @@ import {
 } from '@mui/joy'
 import { useTheme } from '@mui/joy/styles'
 import moment from 'moment'
+import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router-dom'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import {
@@ -39,6 +40,7 @@ import { useThingHistory } from '../../queries/ThingQueries'
 import LoadingComponent from '../components/Loading'
 
 const ThingsHistory = () => {
+  const { t } = useTranslation('things')
   const { id } = useParams()
   const theme = useTheme()
   const { fmt } = useLocalization()
@@ -69,10 +71,14 @@ const ThingsHistory = () => {
       const frequency = totalDuration / (thingsHistory.length - 1)
       avgUpdateFrequency =
         frequency < 1
-          ? `${Math.round(frequency * 60)} minutes`
+          ? t('history.analytics.minutes', {
+              count: Math.round(frequency * 60),
+            })
           : frequency < 24
-            ? `${Math.round(frequency)} hours`
-            : `${Math.round(frequency / 24)} days`
+            ? t('history.analytics.hours', { count: Math.round(frequency) })
+            : t('history.analytics.days', {
+                count: Math.round(frequency / 24),
+              })
     }
 
     const lastUpdated = thingsHistory[0]
@@ -91,30 +97,31 @@ const ThingsHistory = () => {
         .filter(d => d !== null)
       const last = diffs[0]
       const prev = diffs[1]
-      if (last > prev) updateTrend = 'Interval increasing'
-      else if (last < prev) updateTrend = 'Interval decreasing'
-      else updateTrend = 'Interval stable'
+      if (last > prev) updateTrend = t('history.analytics.intervalIncreasing')
+      else if (last < prev)
+        updateTrend = t('history.analytics.intervalDecreasing')
+      else updateTrend = t('history.analytics.intervalStable')
     }
 
     return [
       {
         icon: <Speed />,
-        text: 'Update Frequency',
-        subtext: `Every ${avgUpdateFrequency}`,
+        text: t('history.analytics.updateFrequency'),
+        subtext: t('history.analytics.every', { value: avgUpdateFrequency }),
       },
       {
         icon: <Update />,
-        text: 'Last Updated',
+        text: t('history.analytics.lastUpdated'),
         subtext: lastUpdated,
       },
       {
         icon: <CallReceived />,
-        text: 'Last Value',
+        text: t('history.analytics.lastValue'),
         subtext: thingsHistory[0]?.state ?? '--',
       },
       {
         icon: <TrendingUp />,
-        text: 'Update Trend',
+        text: t('history.analytics.updateTrend'),
         subtext: updateTrend,
       },
     ]
@@ -173,13 +180,13 @@ const ThingsHistory = () => {
         />
 
         <Typography level='h3' gutterBottom>
-          No history found
+          {t('history.empty.title')}
         </Typography>
         <Typography level='body1'>
-          It looks like there is no history for this thing yet.
+          {t('history.empty.description')}
         </Typography>
         <Button variant='soft' sx={{ mt: 2 }}>
-          <Link to='/things'>Go back to things</Link>
+          <Link to='/things'>{t('history.empty.backToThings')}</Link>
         </Button>
       </Container>
     )
@@ -195,7 +202,7 @@ const ThingsHistory = () => {
             level='title-md'
             sx={{ fontWeight: 'lg', color: 'text.primary' }}
           >
-            Things Overview
+            {t('history.overviewTitle')}
           </Typography>
         </Box>
 

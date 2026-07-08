@@ -1,5 +1,6 @@
 import { Box, Button, Textarea } from '@mui/joy'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
 function TextModal({
@@ -11,6 +12,7 @@ function TextModal({
   okText,
   cancelText,
 }) {
+  const { t } = useTranslation(['common'])
   const { ResponsiveModal } = useResponsiveModal()
 
   const [text, setText] = useState(current)
@@ -29,7 +31,7 @@ function TextModal({
       title={title}
     >
       <Textarea
-        placeholder='Type in here…'
+        placeholder={t('common:placeholders.typeHere')}
         value={text}
         onChange={e => setText(e.target.value)}
         minRows={2}
@@ -39,10 +41,10 @@ function TextModal({
 
       <Box display={'flex'} justifyContent={'space-around'} mt={1}>
         <Button size='lg' onClick={handleSave} fullWidth sx={{ mr: 1 }}>
-          {okText ? okText : 'Save'}
+          {okText ? okText : t('common:actions.save')}
         </Button>
         <Button size='lg' onClick={onClose} variant='outlined'>
-          {cancelText ? cancelText : 'Cancel'}
+          {cancelText ? cancelText : t('common:actions.cancel')}
         </Button>
       </Box>
     </ResponsiveModal>

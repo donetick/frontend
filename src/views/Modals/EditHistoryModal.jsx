@@ -1,11 +1,13 @@
 import { Box, Button, FormLabel, Input } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import ConfirmationModal from './Inputs/ConfirmationModal'
 
 function EditHistoryModal({ config, historyRecord }) {
+  const { t } = useTranslation(['history', 'common'])
   const { ResponsiveModal } = useResponsiveModal()
 
   const [completedDate, setCompletedDate] = useState('')
@@ -39,7 +41,7 @@ function EditHistoryModal({ config, historyRecord }) {
       onClose={config?.onClose}
       size='lg'
       // fullWidth={true}
-      title='Edit History'
+      title={t('history:edit.title')}
       footer={
         <Box display={'flex'} justifyContent={'space-around'} mt={1}>
           <Button
@@ -55,7 +57,7 @@ function EditHistoryModal({ config, historyRecord }) {
             fullWidth
             sx={{ mr: 1 }}
           >
-            Save
+            {t('common:actions.save')}
           </Button>
           <Button
             fullWidth
@@ -63,12 +65,12 @@ function EditHistoryModal({ config, historyRecord }) {
             onClick={config.onClose}
             variant='outlined'
           >
-            Cancel
+            {t('common:actions.cancel')}
           </Button>
         </Box>
       }
     >
-      <FormLabel>Due Date</FormLabel>
+      <FormLabel>{t('common:labels.dueDate')}</FormLabel>
       <Input
         type='datetime-local'
         value={dueDate}
@@ -77,7 +79,7 @@ function EditHistoryModal({ config, historyRecord }) {
         }}
         sx={{ mb: 2 }}
       />
-      <FormLabel>Completed Date</FormLabel>
+      <FormLabel>{t('history:edit.completedDate')}</FormLabel>
       <Input
         type='datetime-local'
         value={completedDate}
@@ -86,12 +88,12 @@ function EditHistoryModal({ config, historyRecord }) {
         }}
         sx={{ mb: 2 }}
       />
-      <FormLabel>Note</FormLabel>
+      <FormLabel>{t('history:edit.note')}</FormLabel>
       <Input
         fullWidth
         multiline
-        label='Additional Notes'
-        placeholder='Additional Notes'
+        label={t('history:edit.additionalNotes')}
+        placeholder={t('history:edit.additionalNotes')}
         value={notes}
         onChange={e => {
           if (e.target.value.trim() === '') {
@@ -115,10 +117,10 @@ function EditHistoryModal({ config, historyRecord }) {
             }
             setIsDeleteModalOpen(false)
           },
-          title: 'Delete History',
-          message: 'Are you sure you want to delete this history?',
-          confirmText: 'Delete',
-          cancelText: 'Cancel',
+          title: t('history:delete.title'),
+          message: t('history:edit.deleteConfirm'),
+          confirmText: t('common:actions.delete'),
+          cancelText: t('common:actions.cancel'),
         }}
       />
     </ResponsiveModal>

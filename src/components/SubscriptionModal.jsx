@@ -11,10 +11,12 @@ import {
   Typography,
 } from '@mui/joy'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNotification } from '../service/NotificationProvider'
 import { GetSubscriptionSession } from '../utils/Fetcher'
 
 const SubscriptionModal = ({ open, onClose }) => {
+  const { t } = useTranslation(['settings', 'common'])
   const [selectedPlan, setSelectedPlan] = useState('yearly')
   const [isLoading, setIsLoading] = useState(false)
   const { showError } = useNotification()
@@ -36,12 +38,12 @@ const SubscriptionModal = ({ open, onClose }) => {
   }
 
   const features = [
-    'Task notifications and reminders',
-    'Rich text descriptions with images uploads',
-    'Thing-based task triggers',
-    'API tokens for integrations',
-    'Image uploads in descriptions',
-    'Advanced task automation',
+    t('settings:subscription.features.notifications'),
+    t('settings:subscription.features.richText'),
+    t('settings:subscription.features.thingTriggers'),
+    t('settings:subscription.features.apiTokens'),
+    t('settings:subscription.features.imageUploads'),
+    t('settings:subscription.features.automation'),
     // 'Unlimited task history',
     // 'Unlimited things history',
   ]
@@ -67,8 +69,8 @@ const SubscriptionModal = ({ open, onClose }) => {
     } catch (error) {
       console.error('Subscription error:', error)
       showError({
-        title: 'Subscription Error',
-        message: 'Failed to start subscription process. Please try again.',
+        title: t('settings:subscription.errorTitle'),
+        message: t('settings:subscription.errorMessage'),
       })
     } finally {
       setIsLoading(false)
@@ -91,14 +93,14 @@ const SubscriptionModal = ({ open, onClose }) => {
           {/* Header */}
           <Box sx={{ textAlign: 'center', mb: 4 }}>
             <Typography level='h3' sx={{ mb: 1 }}>
-              Upgrade to Plus
+              {t('settings:subscription.title')}
             </Typography>
           </Box>
 
           {/* Features List */}
           <Box sx={{ mb: 2 }}>
             <Typography level='title-lg' sx={{ mb: 2 }}>
-              What&apos;s included:
+              {t('settings:subscription.included')}
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
               {features.map((feature, index) => (
@@ -230,7 +232,7 @@ const SubscriptionModal = ({ open, onClose }) => {
               size='lg'
               sx={{ mb: 1 }}
             >
-              Subscribe
+              {t('settings:subscription.subscribe')}
             </Button>
             <Button
               variant='plain'
@@ -238,7 +240,7 @@ const SubscriptionModal = ({ open, onClose }) => {
               disabled={isLoading}
               fullWidth
             >
-              Cancel
+              {t('common:actions.cancel')}
             </Button>
           </Box>
 
@@ -248,7 +250,7 @@ const SubscriptionModal = ({ open, onClose }) => {
             color='neutral'
             sx={{ textAlign: 'center', mt: 3 }}
           >
-            Cancel anytime. No hidden fees. Secure payment powered by Stripe.
+            {t('settings:subscription.footer')}
           </Typography>
         </Box>
       </ModalDialog>

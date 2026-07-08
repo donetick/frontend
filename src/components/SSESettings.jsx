@@ -9,12 +9,14 @@ import {
   Switch,
   Typography,
 } from '@mui/joy'
+import { useTranslation } from 'react-i18next'
 import { useSSEContext } from '../hooks/useSSEContext'
 import { useUserProfile } from '../queries/UserQueries'
 import { isPlusAccount } from '../utils/Helpers'
 import SSEConnectionStatus from './SSEConnectionStatus'
 
 const SSESettings = () => {
+  const { t } = useTranslation(['settings', 'common'])
   const { data: userProfile } = useUserProfile()
   const {
     isConnected,
@@ -43,26 +45,26 @@ const SSESettings = () => {
 
   const getStatusDescription = () => {
     if (!isPlusAccount(userProfile)) {
-      return 'Real-time updates (SSE) are not available in the Basic plan. Upgrade to Plus to receive instant notifications when chores are updated.'
+      return t('settings:advanced.sseUnavailable')
     }
 
     if (!isSSEEnabled()) {
-      return 'Real-time updates (SSE) are disabled. Enable to see live changes when you or other circle members complete, skip, or modify chores.'
+      return t('settings:advanced.sseDisabled')
     }
 
     if (isConnected) {
-      return "Real-time updates (SSE) are working. You'll see live changes when you or other circle members complete, skip, or modify chores."
+      return t('settings:advanced.sseConnected')
     }
 
     if (isConnecting) {
-      return 'Connecting to real-time updates (SSE)...'
+      return t('settings:advanced.sseConnecting')
     }
 
     if (error) {
-      return `Real-time updates (SSE) are enabled but not working: ${error}`
+      return t('settings:advanced.sseError', { error })
     }
 
-    return 'Real-time updates (SSE) are enabled but not currently connected.'
+    return t('settings:advanced.sseEnabledNotConnected')
   }
 
   return (
@@ -75,15 +77,15 @@ const SSESettings = () => {
         )}
         <Box sx={{ flex: 1 }}>
           <Typography level='title-md'>
-            Real-time Updates (SSE)
+            {t('settings:advanced.sseTitle')}
             {!isPlusAccount(userProfile) && (
               <Chip variant='soft' color='warning' sx={{ ml: 1 }}>
-                Plus Feature
+                {t('common:labels.plusFeature')}
               </Chip>
             )}
           </Typography>
           <Typography level='body-sm' color='neutral'>
-            Get instant notifications via Server-Sent Events
+            {t('settings:advanced.sseSummary')}
           </Typography>
         </Box>
         {isSSEEnabled() && isPlusAccount(userProfile) && (
@@ -93,7 +95,7 @@ const SSESettings = () => {
 
       <FormControl orientation='horizontal' sx={{ mb: 2 }}>
         <Box sx={{ flex: 1 }}>
-          <FormLabel>Enable Real-time Updates (SSE)</FormLabel>
+          <FormLabel>{t('settings:advanced.enableSse')}</FormLabel>
           <FormHelperText sx={{ mt: 0 }}>
             {getStatusDescription()}
           </FormHelperText>
@@ -107,7 +109,9 @@ const SSESettings = () => {
           }
           variant='solid'
           endDecorator={
-            isSSEEnabled() && isPlusAccount(userProfile) ? 'On' : 'Off'
+            isSSEEnabled() && isPlusAccount(userProfile)
+              ? t('settings:advanced.on')
+              : t('settings:advanced.off')
           }
           slotProps={{ endDecorator: { sx: { minWidth: 24 } } }}
         />
@@ -116,7 +120,7 @@ const SSESettings = () => {
       {isSSEEnabled() && isPlusAccount(userProfile) && (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
           <Typography level='body-xs' color='neutral'>
-            Status:
+            {t('settings:advanced.status')}
           </Typography>
           <Chip
             size='sm'
@@ -137,9 +141,7 @@ const SSESettings = () => {
 
       {!isPlusAccount(userProfile) && (
         <Typography level='body-sm' color='warning' sx={{ mt: 1 }}>
-          Real-time updates (SSE) are not available in the Basic plan. Upgrade
-          to Plus to receive instant notifications when you or other circle
-          members complete, skip, or modify chores.
+          {t('settings:advanced.sseUnavailable')}
         </Typography>
       )}
     </Card>

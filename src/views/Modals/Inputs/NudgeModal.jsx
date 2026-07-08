@@ -9,11 +9,13 @@ import {
     Typography,
 } from '@mui/joy'
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import KeyboardShortcutHint from '../../../components/common/KeyboardShortcutHint'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { isOfficialDonetickInstanceSync } from '../../../utils/FeatureToggle'
 
 function NudgeModal({ config }) {
+  const { t } = useTranslation(['chores', 'common'])
   const { ResponsiveModal } = useResponsiveModal()
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
   const [message, setMessage] = useState('')
@@ -107,31 +109,25 @@ function NudgeModal({ config }) {
       size='lg'
       fullWidth={true}
       unmountDelay={250}
-      title='Send Nudge'
+      title={t('chores:actions.sendNudge')}
     >
       <Typography level='body-md' mb={2}>
-        Send a gentle reminder to the assignee about this task. You can
-        customize the message and choose who gets notified.
+        {t('chores:nudge.description')}
       </Typography>
 
       {!isOfficialInstance && (
         <Alert color='warning' sx={{ mb: 2 }}>
           <Typography level='body-sm'>
-            <strong>Heads up!</strong>This feature avaiable on Donetick Cloud!
-            Since you're using a self-hosted instance, nudges will requires you
-            to setup Google cloud account and Firebase Cloud Messaging (FCM).
-            and build the Android or the iOS app by yourself.
-            <br />
-            Will update if we come up with a solution to make this easier for to
-            configure. for selfhosters
+            <strong>{t('chores:nudge.headsUp')}</strong>{' '}
+            {t('chores:nudge.selfHostedWarning')}
           </Typography>
         </Alert>
       )}
 
       <FormControl mb={2}>
-        <FormLabel>Custom Message (optional)</FormLabel>
+        <FormLabel>{t('chores:nudge.customMessage')}</FormLabel>
         <Textarea
-          placeholder='Add a personal message with your nudge...'
+          placeholder={t('chores:nudge.customMessagePlaceholder')}
           value={message}
           onChange={e => setMessage(e.target.value)}
           minRows={3}
@@ -141,10 +137,9 @@ function NudgeModal({ config }) {
 
       <FormControl orientation='horizontal' sx={{ mb: 3 }}>
         <Box sx={{ flex: 1 }}>
-          <FormLabel>Notify All Assignees</FormLabel>
+          <FormLabel>{t('chores:edit.notifyAllAssignees')}</FormLabel>
           <Typography level='body-sm' color='text.secondary'>
-            If enabled, all members who can see this task will be notified.
-            Otherwise, only the assigned person will receive the nudge.
+            {t('chores:nudge.notifyAllDescription')}
           </Typography>
         </Box>
         <Switch
@@ -164,7 +159,7 @@ function NudgeModal({ config }) {
             <KeyboardShortcutHint shortcut='Y' show={showKeyboardShortcuts} />
           }
         >
-          Send Nudge
+          {t('chores:actions.sendNudge')}
         </Button>
 
         <Button
@@ -176,7 +171,7 @@ function NudgeModal({ config }) {
             <KeyboardShortcutHint shortcut='X' show={showKeyboardShortcuts} />
           }
         >
-          Cancel
+          {t('common:actions.cancel')}
         </Button>
       </Box>
     </ResponsiveModal>

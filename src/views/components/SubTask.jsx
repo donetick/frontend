@@ -32,6 +32,7 @@ import {
   Typography,
 } from '@mui/joy'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext'
 import { useUserProfile } from '../../queries/UserQueries'
@@ -49,6 +50,7 @@ function SortableItem({
   editMode,
   performers = [],
 }) {
+  const { t } = useTranslation(['common'])
   const { fmt } = useLocalization()
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({
@@ -234,7 +236,7 @@ function SortableItem({
                 color='primary'
                 size='sm'
                 onClick={handleAddSubtaskClick}
-                title='Add subtask'
+                title={t('common:subtasks.addSubtask')}
               >
                 <PlaylistAdd />
               </IconButton>
@@ -265,7 +267,7 @@ function SortableItem({
         >
           <Box sx={{ display: 'flex', width: '100%', gap: 1 }}>
             <Input
-              placeholder='Add new subtask...'
+              placeholder={t('common:subtasks.addNewSubtask')}
               value={newSubtask}
               onChange={e => setNewSubtask(e.target.value)}
               onKeyPress={handleKeyPress}
@@ -313,6 +315,7 @@ const SubTasks = ({
   performers,
   shouldFocus = false,
 }) => {
+  const { t } = useTranslation(['common'])
   const [newTask, setNewTask] = useState('')
   const { data: userProfile } = useUserProfile()
   const { impersonatedUser } = useImpersonateUser()
@@ -507,7 +510,7 @@ const SubTasks = ({
               <ListItem sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Input
                   autoFocus={shouldFocus}
-                  placeholder='Add new task...'
+                  placeholder={t('common:subtasks.addNewTask')}
                   value={newTask}
                   onChange={e => setNewTask(e.target.value)}
                   onKeyPress={handleKeyPress}
