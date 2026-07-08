@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }) => {
       // Ensure apiClient is initialized with the correct URL
       await apiClient.init()
       const currentBaseURL = apiClient.getApiURL()
-      
+
       const isNative =
         typeof window !== 'undefined' && window.Capacitor?.isNativePlatform?.()
 
@@ -57,8 +57,8 @@ export const AuthProvider = ({ children }) => {
       const response = await fetch(`${currentBaseURL}/auth/login`, config)
 
       if (!response.ok) {
-        const error = await response.json()
-        return { success: false, error: error.message || 'Login failed' }
+        const res = await response.json()
+        return { success: false, error: res?.error || 'Login failed' }
       }
 
       const data = await response.json()

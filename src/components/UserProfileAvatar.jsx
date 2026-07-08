@@ -32,7 +32,7 @@ import { useImpersonateUser } from '../contexts/ImpersonateUserContext'
 import useStickyState from '../hooks/useStickyState'
 import { useCircleMembers, useUserProfile } from '../queries/UserQueries'
 import { apiClient } from '../utils/ApiClient'
-import { isPlusAccount } from '../utils/Helpers'
+import { isPlusAccount, resolvePhotoURL } from '../utils/Helpers'
 import UserModal from '../views/Modals/Inputs/UserModal'
 import SubscriptionModal from './SubscriptionModal'
 
@@ -116,7 +116,7 @@ const UserProfileAvatar = () => {
             {isImpersonating ? (
               <Box sx={{ position: 'relative' }}>
                 <Avatar
-                  src={currentUser?.image || currentUser?.avatar}
+                  src={resolvePhotoURL(currentUser?.image)}
                   alt={currentUser?.displayName || currentUser?.name}
                   size='md'
                   sx={{
@@ -127,7 +127,7 @@ const UserProfileAvatar = () => {
                   }}
                 />
                 <Avatar
-                  src={userProfile?.image || userProfile?.avatar}
+                  src={resolvePhotoURL(userProfile?.image || userProfile?.avatar)}
                   alt={userProfile?.displayName || userProfile?.name}
                   size='sm'
                   sx={{
@@ -162,7 +162,7 @@ const UserProfileAvatar = () => {
               </Box>
             ) : (
               <Avatar
-                src={currentUser?.image || currentUser?.avatar}
+                src={resolvePhotoURL(currentUser?.image || currentUser?.avatar)}
                 alt={currentUser?.displayName || currentUser?.name}
                 size='md'
                 sx={{
@@ -189,7 +189,7 @@ const UserProfileAvatar = () => {
           <Sheet sx={{ p: 2, borderRadius: 'var(--joy-radius-sm)', mb: 1 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <Avatar
-                src={currentUser?.image || currentUser?.avatar}
+                src={resolvePhotoURL(currentUser?.image || currentUser?.avatar)}
                 alt={currentUser?.displayName || currentUser?.name}
                 size='lg'
                 sx={{

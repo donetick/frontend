@@ -108,7 +108,7 @@ const generateSchedulePreview = (metadata, formatTimeFn) => {
   return `Every ${dayNames} at ${timeStr}`
 }
 
-const RepeatOnSections = ({
+export const RepeatOnSections = ({
   frequencyType,
   frequency,
   onFrequencyUpdate,

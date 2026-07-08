@@ -29,7 +29,10 @@ const AccountSettings = () => {
     async function configurePurchases() {
       if (Capacitor.isNativePlatform() && userProfile) {
         await Purchases.configure({
-          apiKey: import.meta.env.VITE_REACT_APP_REVENUECAT_API_KEY,
+          apiKey:
+            Capacitor.getPlatform() === 'ios'
+              ? import.meta.env.VITE_REACT_APP_REVENUECAT_API_KEY_IOS
+              : import.meta.env.VITE_REACT_APP_REVENUECAT_API_KEY_ANDROID,
           appUserID: String(userProfile?.id),
         })
       }

@@ -1,68 +1,76 @@
 PODS:
   - Alamofire (5.10.2)
-  - AppAuth (2.0.0):
-    - AppAuth/Core (= 2.0.0)
-    - AppAuth/ExternalUserAgent (= 2.0.0)
-  - AppAuth/Core (2.0.0)
-  - AppAuth/ExternalUserAgent (2.0.0):
+  - AppAuth (2.1.0):
+    - AppAuth/Core (= 2.1.0)
+    - AppAuth/ExternalUserAgent (= 2.1.0)
+  - AppAuth/Core (2.1.0)
+  - AppAuth/ExternalUserAgent (2.1.0):
     - AppAuth/Core
-  - AppCheckCore (11.2.0):
+  - AppCheckCore (11.3.0):
     - GoogleUtilities/Environment (~> 8.0)
     - GoogleUtilities/UserDefaults (~> 8.0)
     - PromisesObjC (~> 2.4)
-  - Capacitor (7.4.3):
+    - PromisesSwift (~> 2.4)
+    - RecaptchaInterop (~> 101.0)
+  - Capacitor (8.4.1):
     - CapacitorCordova
-  - CapacitorApp (7.0.2):
+  - CapacitorApp (8.1.0):
     - Capacitor
-  - CapacitorBrowser (7.0.2):
+  - CapacitorBrowser (8.0.3):
     - Capacitor
-  - CapacitorCommunitySqlite (7.0.1):
+  - CapacitorCommunitySqlite (8.1.0):
     - Capacitor
     - SQLCipher
     - ZIPFoundation
-  - CapacitorCordova (7.4.3)
-  - CapacitorDevice (7.0.2):
+  - CapacitorCordova (8.4.1)
+  - CapacitorDevice (8.0.2):
     - Capacitor
-  - CapacitorLocalNotifications (7.0.2):
+  - CapacitorLocalLlm (1.0.0):
     - Capacitor
-  - CapacitorNetwork (7.0.2):
+  - CapacitorLocalNotifications (8.2.0):
     - Capacitor
-  - CapacitorPluginSafeArea (4.0.0):
+  - CapacitorNetwork (8.0.1):
     - Capacitor
-  - CapacitorPreferences (7.0.2):
+  - CapacitorPluginSafeArea (5.0.0):
     - Capacitor
-  - CapacitorPushNotifications (7.0.2):
+  - CapacitorPreferences (8.0.1):
     - Capacitor
-  - CapacitorStatusBar (7.0.2):
+  - CapacitorPushNotifications (8.1.1):
     - Capacitor
-  - CapgoCapacitorSocialLogin (7.11.2):
+  - CapacitorStatusBar (8.0.2):
+    - Capacitor
+  - CapgoCapacitorDocumentScanner (8.4.0):
+    - Capacitor
+  - CapgoCapacitorNfc (8.1.7):
+    - Capacitor
+  - CapgoCapacitorSocialLogin (8.3.34):
     - Alamofire (~> 5.10.2)
     - Capacitor
-    - FBSDKCoreKit (= 18.0.0)
-    - FBSDKLoginKit (= 18.0.0)
+    - FBSDKCoreKit (~> 18.0)
+    - FBSDKLoginKit (~> 18.0)
     - GoogleSignIn (~> 9.0.0)
-  - FBAEMKit (18.0.0):
-    - FBSDKCoreKit_Basics (= 18.0.0)
-  - FBSDKCoreKit (18.0.0):
-    - FBAEMKit (= 18.0.0)
-    - FBSDKCoreKit_Basics (= 18.0.0)
-  - FBSDKCoreKit_Basics (18.0.0)
-  - FBSDKLoginKit (18.0.0):
-    - FBSDKCoreKit (= 18.0.0)
-  - FirebaseCore (12.3.0):
-    - FirebaseCoreInternal (~> 12.3.0)
+  - FBAEMKit (18.1.0):
+    - FBSDKCoreKit_Basics (= 18.1.0)
+  - FBSDKCoreKit (18.1.0):
+    - FBAEMKit (= 18.1.0)
+    - FBSDKCoreKit_Basics (= 18.1.0)
+  - FBSDKCoreKit_Basics (18.1.0)
+  - FBSDKLoginKit (18.1.0):
+    - FBSDKCoreKit (= 18.1.0)
+  - FirebaseCore (12.15.0):
+    - FirebaseCoreInternal (~> 12.15.0)
     - GoogleUtilities/Environment (~> 8.1)
     - GoogleUtilities/Logger (~> 8.1)
-  - FirebaseCoreInternal (12.3.0):
+  - FirebaseCoreInternal (12.15.0):
     - "GoogleUtilities/NSData+zlib (~> 8.1)"
-  - FirebaseInstallations (12.3.0):
-    - FirebaseCore (~> 12.3.0)
+  - FirebaseInstallations (12.15.0):
+    - FirebaseCore (~> 12.15.0)
     - GoogleUtilities/Environment (~> 8.1)
     - GoogleUtilities/UserDefaults (~> 8.1)
     - PromisesObjC (~> 2.4)
-  - FirebaseMessaging (12.3.0):
-    - FirebaseCore (~> 12.3.0)
-    - FirebaseInstallations (~> 12.3.0)
+  - FirebaseMessaging (12.15.0):
+    - FirebaseCore (~> 12.15.0)
+    - FirebaseInstallations (~> 12.15.0)
     - GoogleDataTransport (~> 10.1)
     - GoogleUtilities/AppDelegateSwizzler (~> 8.1)
     - GoogleUtilities/Environment (~> 8.1)
@@ -77,60 +85,65 @@ PODS:
     - AppCheckCore (~> 11.0)
     - GTMAppAuth (~> 5.0)
     - GTMSessionFetcher/Core (~> 3.3)
-  - GoogleUtilities/AppDelegateSwizzler (8.1.0):
+  - GoogleUtilities/AppDelegateSwizzler (8.1.2):
     - GoogleUtilities/Environment
     - GoogleUtilities/Logger
     - GoogleUtilities/Network
     - GoogleUtilities/Privacy
-  - GoogleUtilities/Environment (8.1.0):
+  - GoogleUtilities/Environment (8.1.2):
     - GoogleUtilities/Privacy
-  - GoogleUtilities/Logger (8.1.0):
+  - GoogleUtilities/Logger (8.1.2):
     - GoogleUtilities/Environment
     - GoogleUtilities/Privacy
-  - GoogleUtilities/Network (8.1.0):
+  - GoogleUtilities/Network (8.1.2):
     - GoogleUtilities/Logger
     - "GoogleUtilities/NSData+zlib"
     - GoogleUtilities/Privacy
     - GoogleUtilities/Reachability
-  - "GoogleUtilities/NSData+zlib (8.1.0)":
+  - "GoogleUtilities/NSData+zlib (8.1.2)":
     - GoogleUtilities/Privacy
-  - GoogleUtilities/Privacy (8.1.0)
-  - GoogleUtilities/Reachability (8.1.0):
+  - GoogleUtilities/Privacy (8.1.2)
+  - GoogleUtilities/Reachability (8.1.2):
     - GoogleUtilities/Logger
     - GoogleUtilities/Privacy
-  - GoogleUtilities/UserDefaults (8.1.0):
+  - GoogleUtilities/UserDefaults (8.1.2):
     - GoogleUtilities/Logger
     - GoogleUtilities/Privacy
   - GTMAppAuth (5.0.0):
     - AppAuth/Core (~> 2.0)
     - GTMSessionFetcher/Core (< 4.0, >= 3.3)
   - GTMSessionFetcher/Core (3.5.0)
+  - JcesarmobileCapacitorOcr (0.3.0):
+    - Capacitor
   - nanopb (3.30910.0):
     - nanopb/decode (= 3.30910.0)
     - nanopb/encode (= 3.30910.0)
   - nanopb/decode (3.30910.0)
   - nanopb/encode (3.30910.0)
-  - PromisesObjC (2.4.0)
-  - PurchasesHybridCommon (17.0.0):
-    - RevenueCat (= 5.35.1)
-  - PurchasesHybridCommonUI (17.0.0):
-    - PurchasesHybridCommon (= 17.0.0)
-    - RevenueCatUI (= 5.35.1)
-  - RevenueCat (5.35.1)
-  - RevenuecatPurchasesCapacitor (11.1.2):
+  - PromisesObjC (2.4.1)
+  - PromisesSwift (2.4.1):
+    - PromisesObjC (= 2.4.1)
+  - PurchasesHybridCommon (17.55.1):
+    - RevenueCat (= 5.67.1)
+  - PurchasesHybridCommonUI (17.55.1):
+    - PurchasesHybridCommon (= 17.55.1)
+    - RevenueCatUI (= 5.67.1)
+  - RecaptchaInterop (101.0.0)
+  - RevenueCat (5.67.1)
+  - RevenuecatPurchasesCapacitor (12.3.2):
     - Capacitor
-    - PurchasesHybridCommon (= 17.0.0)
-  - RevenuecatPurchasesCapacitorUi (11.1.2):
+    - PurchasesHybridCommon (= 17.55.1)
+  - RevenuecatPurchasesCapacitorUi (12.3.2):
     - Capacitor
-    - PurchasesHybridCommonUI (= 17.0.0)
-  - RevenueCatUI (5.35.1):
-    - RevenueCat (= 5.35.1)
+    - PurchasesHybridCommonUI (= 17.55.1)
+  - RevenueCatUI (5.67.1):
+    - RevenueCat (= 5.67.1)
   - SQLCipher (4.10.0):
     - SQLCipher/standard (= 4.10.0)
   - SQLCipher/common (4.10.0)
   - SQLCipher/standard (4.10.0):
     - SQLCipher/common
-  - ZIPFoundation (0.9.19)
+  - ZIPFoundation (0.9.20)
 
 DEPENDENCIES:
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
@@ -139,14 +152,18 @@ DEPENDENCIES:
   - "CapacitorCommunitySqlite (from `../../node_modules/@capacitor-community/sqlite`)"
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorDevice (from `../../node_modules/@capacitor/device`)"
+  - "CapacitorLocalLlm (from `../../node_modules/@capacitor/local-llm`)"
   - "CapacitorLocalNotifications (from `../../node_modules/@capacitor/local-notifications`)"
   - "CapacitorNetwork (from `../../node_modules/@capacitor/network`)"
   - CapacitorPluginSafeArea (from `../../node_modules/capacitor-plugin-safe-area`)
   - "CapacitorPreferences (from `../../node_modules/@capacitor/preferences`)"
   - "CapacitorPushNotifications (from `../../node_modules/@capacitor/push-notifications`)"
   - "CapacitorStatusBar (from `../../node_modules/@capacitor/status-bar`)"
+  - "CapgoCapacitorDocumentScanner (from `../../node_modules/@capgo/capacitor-document-scanner`)"
+  - "CapgoCapacitorNfc (from `../../node_modules/@capgo/capacitor-nfc`)"
   - "CapgoCapacitorSocialLogin (from `../../node_modules/@capgo/capacitor-social-login`)"
   - FirebaseMessaging
+  - "JcesarmobileCapacitorOcr (from `../../node_modules/@jcesarmobile/capacitor-ocr`)"
   - "RevenuecatPurchasesCapacitor (from `../../node_modules/@revenuecat/purchases-capacitor`)"
   - "RevenuecatPurchasesCapacitorUi (from `../../node_modules/@revenuecat/purchases-capacitor-ui`)"
 
@@ -170,8 +187,10 @@ SPEC REPOS:
     - GTMSessionFetcher
     - nanopb
     - PromisesObjC
+    - PromisesSwift
     - PurchasesHybridCommon
     - PurchasesHybridCommonUI
+    - RecaptchaInterop
     - RevenueCat
     - RevenueCatUI
     - SQLCipher
@@ -190,6 +209,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/ios"
   CapacitorDevice:
     :path: "../../node_modules/@capacitor/device"
+  CapacitorLocalLlm:
+    :path: "../../node_modules/@capacitor/local-llm"
   CapacitorLocalNotifications:
     :path: "../../node_modules/@capacitor/local-notifications"
   CapacitorNetwork:
@@ -202,8 +223,14 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/push-notifications"
   CapacitorStatusBar:
     :path: "../../node_modules/@capacitor/status-bar"
+  CapgoCapacitorDocumentScanner:
+    :path: "../../node_modules/@capgo/capacitor-document-scanner"
+  CapgoCapacitorNfc:
+    :path: "../../node_modules/@capgo/capacitor-nfc"
   CapgoCapacitorSocialLogin:
     :path: "../../node_modules/@capgo/capacitor-social-login"
+  JcesarmobileCapacitorOcr:
+    :path: "../../node_modules/@jcesarmobile/capacitor-ocr"
   RevenuecatPurchasesCapacitor:
     :path: "../../node_modules/@revenuecat/purchases-capacitor"
   RevenuecatPurchasesCapacitorUi:
@@ -211,45 +238,51 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Alamofire: 7193b3b92c74a07f85569e1a6c4f4237291e7496
-  AppAuth: 1c1a8afa7e12f2ec3a294d9882dfa5ab7d3cb063
-  AppCheckCore: cc8fd0a3a230ddd401f326489c99990b013f0c4f
-  Capacitor: 28d6c01026a9a3f7156529498ec1f389a2a28dbc
-  CapacitorApp: 1f6922c9c5c8b1c538d7fbe92ebe44a81b34bed3
-  CapacitorBrowser: 22541e48442de44dc629c214388290d6eecc6ae9
-  CapacitorCommunitySqlite: 8b2c6bab33e3519280811d481f8bd0fa90343e1b
-  CapacitorCordova: 435121e81a2df4d0034f0fb11fcefab5104cfdb5
-  CapacitorDevice: 81ae78d5d1942707caad79276badd458bf6ec603
-  CapacitorLocalNotifications: 665188ae8accd40806129073896fb2b39322d858
-  CapacitorNetwork: 695069886b3c5ed514db69aa3d026b8dc3c03a6b
-  CapacitorPluginSafeArea: 22031c3436269ca80fac90ec2c94bc7c1e59a81d
-  CapacitorPreferences: 65107ed7437d96ee72583df5763985e3c0ff2bc2
-  CapacitorPushNotifications: 7c0659b349b149ee3936a682da31a9d269de9582
-  CapacitorStatusBar: e04d05e121d5a5979c29eb4249186a4e4a84cacb
-  CapgoCapacitorSocialLogin: a320106e1d032da88576cf8b31a336e971f5acad
-  FBAEMKit: e34530df538b8eb8aeb53c35867715ba6c63ef0c
-  FBSDKCoreKit: d3f479a69127acebb1c6aad91c1a33907bcf6c2f
-  FBSDKCoreKit_Basics: 017b6dc2a1862024815a8229e75661e627ac1e29
-  FBSDKLoginKit: 5875762d1fe09ddcb05d03365d4f5dc34413843d
-  FirebaseCore: ff47fe1ad3ab9ef66edd3e8bc4647b493d2067f8
-  FirebaseCoreInternal: a9e1ff270f217489d9258563b693d11a312903bf
-  FirebaseInstallations: ca48ec60ea51b66b9f214a91847ea3720cde97f5
-  FirebaseMessaging: 919ce76cb353f0c36d463f5461d8ab584e6ed765
+  AppAuth: ef4da5a3fc2e10b90c09a0a94a9baeaedc0341d5
+  AppCheckCore: 214137f5c378d1dec88a68425c467fe65aaff637
+  Capacitor: 35242afe195b1e53c58ca1b827d1b444c5e6602b
+  CapacitorApp: 449ffe26375e96f8aaaee625ac6e01e5c57c8650
+  CapacitorBrowser: c987c73d09d8bd3b5ec13f06338b1e14d5d2be69
+  CapacitorCommunitySqlite: eac6acfb852f46e7988fc59604d7f900498d354e
+  CapacitorCordova: eebe6bcf807b1b06f3f48237650f96bbcd0eef09
+  CapacitorDevice: 14cba6f88d1c3074cbf825fea977c8c526453ff8
+  CapacitorLocalLlm: a05516151a02923a9e7dae9949d3817e85e321f0
+  CapacitorLocalNotifications: 2615aa008f608b95d3921a778ee1988abf1e6148
+  CapacitorNetwork: 8812ce60d11fb63d8f2e4ba51a49b2e59892ebe2
+  CapacitorPluginSafeArea: 9d0682951c011bf0b36e513a89103c5fbff7ac49
+  CapacitorPreferences: cca2021f386efb75947c850334447d9ff22b14f1
+  CapacitorPushNotifications: ec08d589c226a2c0db7c032ec1bf5b044ec85f8e
+  CapacitorStatusBar: 01d5763b4ed720de5ce2edbc938de6a98f4c8f32
+  CapgoCapacitorDocumentScanner: 7ad9e8ed9c054d551bfc948660d995b9545723d8
+  CapgoCapacitorNfc: 5bf5a951ca231d7c40f1ac20549d2abcd1b8f939
+  CapgoCapacitorSocialLogin: b0e67630b9d9b5f14fff774c825c1b8fa85eff7b
+  FBAEMKit: 64088ff0380f50e4a56e2ee07d984f7f1aef7595
+  FBSDKCoreKit: 8390ea3a8fac186f444275f31d7512e760b47cba
+  FBSDKCoreKit_Basics: 3a0005c78b355388bf2df5c6dbe6381b77ea4be3
+  FBSDKLoginKit: d8e2711a3a03b0026703735c8d28a2b5a0e1f4fd
+  FirebaseCore: 2e86a4ea1684d4381707069e4a6d89ac808e901e
+  FirebaseCoreInternal: 6ab6a02c94446c026d2cf35cf5383842ebaa4992
+  FirebaseInstallations: eb29ccbf64eaedf86fd5b2ccc7fabde567660b52
+  FirebaseMessaging: 40017d7bc8457ee295b0f41d480a80fdabc9994e
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
   GoogleSignIn: c7f09cfbc85a1abf69187be091997c317cc33b77
-  GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
+  GoogleUtilities: 766ace00c6b10d8148408f329d10c4f051931850
   GTMAppAuth: 217a876b249c3c585a54fd6f73e6b58c4f5c4238
   GTMSessionFetcher: 5aea5ba6bd522a239e236100971f10cb71b96ab6
+  JcesarmobileCapacitorOcr: d3668e104d7ad8968a9d00fd4766e18fea0fe305
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
-  PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
-  PurchasesHybridCommon: 34d2f73712f4c02f2963fcfb62d43757a9136860
-  PurchasesHybridCommonUI: 16e162423c0010f9a6f2c1d6505dcc075f49dcbe
-  RevenueCat: 47d52620419dcf3dce4e724eade9d390e16ab4b0
-  RevenuecatPurchasesCapacitor: 51cd81cec7db693a2552b45c36261d849e1cf574
-  RevenuecatPurchasesCapacitorUi: 267758d61aba42a0a3f035e6ba3c4630112357e4
-  RevenueCatUI: 3c72ef61b54c3f4787afab6a3b0f00cbec192063
+  PromisesObjC: 752c3227f599e3467650e47ea36f433eeb10c273
+  PromisesSwift: 217dea0fd5d2ad65222a109c48698add13cc1c5b
+  PurchasesHybridCommon: ecd9d7c586287625f1225b8de5e24c1021502270
+  PurchasesHybridCommonUI: 3056a3d261529f6adb8f74ecc3ab7f1cc0d3fab4
+  RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
+  RevenueCat: 9357239a9f0978285e68983637b8a602e65c94f0
+  RevenuecatPurchasesCapacitor: c299be01b1a5c1d5eb118c30eadc84160944ecf2
+  RevenuecatPurchasesCapacitorUi: dc2ec0d97638ebe4ac0078452f5c212b1525ea1c
+  RevenueCatUI: 6f9291da540f98baf405b5bdfc46b2d5547b704a
   SQLCipher: eb79c64049cb002b4e9fcb30edb7979bf4706dfc
-  ZIPFoundation: b8c29ea7ae353b309bc810586181fd073cb3312c
+  ZIPFoundation: dfd3d681c4053ff7e2f7350bc4e53b5dba3f5351
 
-PODFILE CHECKSUM: bb6dcef70c8edc058fe3ba311f08a223fd7dbc66
+PODFILE CHECKSUM: 21b805bdbbb6ac4b8a3527ee8ef346ba0a55ef65
 
 COCOAPODS: 1.16.2

@@ -8,6 +8,7 @@ import {
   CreateChore,
   DeleteChore,
   DeleteChoreHistory,
+  GetChoreAttachments,
   GetChoreByID,
   GetChoreDetailById,
   GetChoreHistory,
@@ -58,7 +59,8 @@ const mergePendingCreates = async chores => {
 }
 
 const isNetworkError = error =>
-  error instanceof TypeError && error.message === 'Failed to fetch'
+  (error instanceof TypeError && error.message === 'Failed to fetch') ||
+  error?.name === 'AbortError'
 
 const buildOfflineChore = task => ({
   ...task,
@@ -191,13 +193,7 @@ export const useCreateChore = () => {
         if (!createdChore) {
           throw new Error('Failed to get created chore data')
         }
-        // Successfully created the chore on the server, return the created chore
-        // update the local chores cache with the new chore:
-        queryClient.setQueryData(['chores', false], oldData => {
-          if (!oldData) return { res: [createdChore.res] }
-          return { res: [...oldData.res, createdChore.res] }
-        })
-        return createdChore.res
+        return { ...newTask, id: createdChore.res }
       } catch (error) {
         if (isNetworkError(error)) {
           return queueOfflineCreate(newTask)
@@ -258,7 +254,7 @@ export const useUpdateChore = () => {
             ),
           }
         })
-        return updatedChoreRes?.res || updatedChoreRes
+        return updatedChoreRes?.res || updatedChore
       } catch (error) {
         if (isNetworkError(error)) {
           return queueOfflineUpdate()
@@ -577,7 +573,45 @@ export const useMarkChoreComplete = () => {
         })
         return { res: { _pending: 'complete' } }
       }
-      return MarkChoreComplete(choreId, body, completedDate, performer)
+
+      const queueOfflineComplete = async () => {
+        await commandQueue.enqueue(CommandType.COMPLETE_CHORE, choreId, {
+          id: choreId,
+          body,
+          completedDate,
+          performer,
+        })
+        await offlineDB.savePendingHistory({
+          id: -Date.now(),
+          choreId: Number(choreId),
+          completedBy: body?.completedBy || 0,
+          performedAt: completedDate || new Date().toISOString(),
+          notes: body?.note || null,
+          status: 1,
+          points: 0,
+          pending: true,
+        })
+        queryClient.setQueryData(['chores'], oldData => {
+          if (!oldData) return oldData
+          return {
+            res: oldData.res.map(chore =>
+              chore.id === choreId
+                ? { ...chore, _pending: 'complete' }
+                : chore,
+            ),
+          }
+        })
+        return { res: { _pending: 'complete' } }
+      }
+
+      try {
+        return await MarkChoreComplete(choreId, body, completedDate, performer)
+      } catch (error) {
+        if (isNetworkError(error)) {
+          return queueOfflineComplete()
+        }
+        throw error
+      }
     },
     onSuccess: (_, { choreId }) => {
       queryClient.invalidateQueries(['chores'])
@@ -608,7 +642,26 @@ export const useSkipChore = () => {
         })
         return { res: { _pending: 'skip' } }
       }
-      return SkipChore(choreId)
+
+      try {
+        return await SkipChore(choreId)
+      } catch (error) {
+        if (isNetworkError(error)) {
+          await commandQueue.enqueue(CommandType.SKIP_CHORE, choreId, {
+            id: choreId,
+          })
+          queryClient.setQueryData(['chores'], oldData => {
+            if (!oldData) return oldData
+            return {
+              res: oldData.res.map(chore =>
+                chore.id === choreId ? { ...chore, _pending: 'skip' } : chore,
+              ),
+            }
+          })
+          return { res: { _pending: 'skip' } }
+        }
+        throw error
+      }
     },
     onSuccess: (_, choreId) => {
       queryClient.invalidateQueries(['chores'])
@@ -642,5 +695,21 @@ export const useRejectChore = () => {
       queryClient.invalidateQueries(['choreHistory', choreId])
       queryClient.invalidateQueries(['choreDetails', choreId])
     },
+  })
+}
+
+export const useChoreAttachments = (choreId, hasAttachments = true) => {
+  return useQuery({
+    queryKey: ['choreAttachments', choreId],
+    queryFn: async () => {
+      const response = await GetChoreAttachments(choreId)
+      if (response && response.ok) {
+        return await response.json()
+      }
+      throw new Error('Failed to fetch attachments')
+    },
+    enabled: !!choreId && hasAttachments,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
   })
 }

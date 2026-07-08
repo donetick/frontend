@@ -1,4 +1,5 @@
-import { useColorScheme } from '@mui/joy'
+import { CameraEnhance, PhotoFilter } from '@mui/icons-material'
+import { IconButton, Tooltip, useColorScheme } from '@mui/joy'
 import { useEffect, useRef, useState } from 'react'
 import AutocompleteDropdown from '../TestView/AutocompleteDropdown'
 import './SmartTaskTitleInput.css'
@@ -52,9 +53,13 @@ const SmartTaskTitleInput = ({
   suggestions,
   onEnterPressed,
   customRenderer,
+  isNativeScanner,
+  onScanClick,
+  onPhotoSelected,
 }) => {
   const { mode, setMode } = useColorScheme()
   const titleInputRef = useRef(null)
+  const photoInputRef = useRef(null)
   const [cursorPosition, setCursorPosition] = useState(value?.length)
   const dropdownRef = useRef(null)
   const [lastWord, setLastWord] = useState('')
@@ -181,12 +186,26 @@ const SmartTaskTitleInput = ({
     }
   }
 
+  const handlePhotoInputChange = e => {
+    const file = e.target.files?.[0]
+    if (!file || !onPhotoSelected) return
+    const reader = new FileReader()
+    reader.onload = ev => onPhotoSelected(ev.target.result)
+    reader.readAsDataURL(file)
+    e.target.value = ''
+  }
+
+  const showNativeButtons = isNativeScanner && !value
+  const MIC_BUTTON_WIDTH =
+    showNativeButtons && onPhotoSelected && onScanClick
+      ? '5rem'
+      : showNativeButtons
+        ? '2.5rem'
+        : '0rem'
+
   return (
     <div>
-      <div
-        className='task-input overflow-auto rounded border'
-        style={{ minHeight: '2.4em' }}
-      >
+      <div className='task-input' style={{ minHeight: '2.8em' }}>
         <textarea
           ref={titleInputRef}
           autoFocus={autoFocus}
@@ -199,13 +218,12 @@ const SmartTaskTitleInput = ({
             position: 'absolute',
             top: 0,
             left: 0,
-            width: '100%',
+            width: `calc(100% - ${MIC_BUTTON_WIDTH})`,
             height: '100%',
-            // opacity: 100,
             zIndex: 1,
             resize: 'none',
             overflow: 'hidden',
-            padding: '0.5rem',
+            padding: '0.6rem 0.75rem',
             boxSizing: 'border-box',
             whiteSpace: 'pre-wrap',
             wordBreak: 'break-word',
@@ -215,6 +233,8 @@ const SmartTaskTitleInput = ({
             backgroundColor: 'transparent',
             color: 'transparent',
             caretColor: mode === 'dark' ? '#fff' : '#000',
+            border: 'none',
+            outline: 'none',
           }}
         />
         <div
@@ -224,7 +244,7 @@ const SmartTaskTitleInput = ({
             position: 'relative',
             zIndex: 1,
             minHeight: '1.2em',
-            padding: '0.5rem',
+            padding: '0.6rem 0.75rem',
             whiteSpace: 'pre-wrap',
             wordBreak: 'break-word',
             fontFamily: 'inherit',
@@ -234,7 +254,12 @@ const SmartTaskTitleInput = ({
           onClick={handleDisplayClick}
         >
           {placeholder && !value && (
-            <span className='pointer-events-none  text-gray-400'>
+            <span
+              style={{
+                pointerEvents: 'none',
+                color: 'var(--joy-palette-text-tertiary, #9fa6ad)',
+              }}
+            >
               {placeholder}
             </span>
           )}
@@ -244,6 +269,55 @@ const SmartTaskTitleInput = ({
           {/* Zero-width space to maintain consistent height */}
           &#8203;
         </div>
+        {showNativeButtons && (
+          <span
+            style={{
+              position: 'absolute',
+              top: '50%',
+              right: '0.3rem',
+              transform: 'translateY(-50%)',
+              zIndex: 2,
+              display: 'flex',
+              gap: '0.1rem',
+            }}
+          >
+            {onPhotoSelected && (
+              <>
+                <Tooltip title='Select photo' placement='top' size='sm'>
+                  <IconButton
+                    size='sm'
+                    variant='plain'
+                    color='neutral'
+                    onClick={() => photoInputRef.current?.click()}
+                    sx={{ borderRadius: 'xl' }}
+                  >
+                    <PhotoFilter fontSize='small' />
+                  </IconButton>
+                </Tooltip>
+                <input
+                  ref={photoInputRef}
+                  type='file'
+                  accept='image/*'
+                  style={{ display: 'none' }}
+                  onChange={handlePhotoInputChange}
+                />
+              </>
+            )}
+            {onScanClick && (
+              <Tooltip title='Scan to create task' placement='top' size='sm'>
+                <IconButton
+                  size='sm'
+                  variant='plain'
+                  color='neutral'
+                  onClick={onScanClick}
+                  sx={{ borderRadius: 'xl' }}
+                >
+                  <CameraEnhance fontSize='small' />
+                </IconButton>
+              </Tooltip>
+            )}
+          </span>
+        )}
       </div>
       {showSuggestions && (
         <AutocompleteDropdown

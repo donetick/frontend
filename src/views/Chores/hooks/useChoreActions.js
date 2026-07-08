@@ -12,6 +12,7 @@ import {
   MarkChoreComplete,
   NudgeChore,
   RejectChore,
+  SaveChore,
   SkipChore,
   UndoChoreAction,
   UpdateChoreAssignee,
@@ -420,8 +421,8 @@ export const useChoreActions = ({
                       c => c.id !== chore.id,
                     )
                     setChores(newChores)
-                    updateChoreInState(chore.id, 'deleted')
                     setFilteredChores(newFilteredChores)
+                    queryClient.invalidateQueries(['chores'])
                     showSuccess({
                       title: 'Task Deleted',
                       message: 'The task has been deleted successfully.',
@@ -471,7 +472,7 @@ export const useChoreActions = ({
             await new Promise((resolve, reject) => {
               archiveChore.mutate(chore.id, {
                 onSuccess: data => {
-                  updateChoreInState(data, 'archive')
+                  updateChoreInState(chore, 'archive')
                   resolve(data)
                 },
                 onError: async error => {
@@ -663,6 +664,28 @@ export const useChoreActions = ({
             openModal(action, chore, extraData)
           }
           break
+
+        case 'moveToProject': {
+          const project = extraData?.project
+          const projectId = project?.id === null ? null : project?.id
+          const updatedChore = { ...chore, projectId }
+          try {
+            const response = await SaveChore(updatedChore)
+            if (response.ok) {
+              updateChoreInState(updatedChore, 'moved-to-project')
+              showSuccess({
+                title: 'Task Moved',
+                message: `Task moved to ${project?.name || 'Default Project'}.`,
+              })
+            }
+          } catch (error) {
+            showError({
+              title: 'Failed to move task',
+              message: error?.message || 'Unable to move task to project',
+            })
+          }
+          break
+        }
 
         case 'completeWithNote':
         case 'completeWithPastDate':

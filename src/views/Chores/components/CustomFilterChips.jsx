@@ -9,11 +9,11 @@ import {
 import {
   Box,
   Chip,
+  IconButton,
   Menu,
   MenuItem,
   Tooltip,
   Typography,
-  IconButton,
 } from '@mui/joy'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -116,6 +116,8 @@ const CustomFilterChips = ({
                   px: 1.0,
                   py: 0.5,
                   height: 32,
+                  display: 'flex',
+                  alignItems: 'center',
 
                   opacity: hasWarning ? 0.7 : isActive ? 1 : 0.85,
                   ...(hasCustomColor && {
@@ -185,6 +187,10 @@ const CustomFilterChips = ({
                     maxWidth: 100,
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
+                    display: 'flex',
+                    alignItems: 'center',
+                    height: '100%',
+                    lineHeight: 1,
                     ...(hasCustomColor && {
                       color: textColor,
                     }),

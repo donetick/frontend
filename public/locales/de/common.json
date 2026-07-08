@@ -1,0 +1,33 @@
+{
+  "save": "Speichern",
+  "cancel": "Abbrechen",
+  "delete": "Löschen",
+  "edit": "Bearbeiten",
+  "close": "Schließen",
+  "confirm": "Bestätigen",
+  "loading": "Laden...",
+  "error": "Fehler",
+  "success": "Erfolg",
+  "warning": "Warnung",
+  "refresh": "Aktualisieren",
+  "copy": "Kopieren",
+  "copied": "Kopiert!",
+  "settings": "Einstellungen",
+  "yes": "Ja",
+  "no": "Nein",
+  "back": "Zurück",
+  "backToCalendar": "Zurück zum Kalender",
+  "logout": "Abmelden",
+  "version": "Version",
+  "navigation": {
+    "allTasks": "Alle Aufgaben",
+    "archived": "Archiviert",
+    "things": "Things",
+    "labels": "Beschriftungen",
+    "projects": "Projekte",
+    "filters": "Filter",
+    "activities": "Aktivitäten",
+    "points": "Punkte",
+    "settings": "Einstellungen"
+  }
+}

@@ -1,5 +1,6 @@
 import { Preferences } from '@capacitor/preferences'
 import { API_URL } from '../Config'
+import { networkManager } from '../hooks/NetworkManager'
 import { logout, RefreshToken } from './Fetcher'
 import {
   clearAllTokens,
@@ -17,7 +18,7 @@ class ApiClient {
   }
 
   async init(force = false) {
-    if (!force && this.initPromise) {
+    if (this.initPromise && !force) {
       return this.initPromise
     }
 
@@ -25,7 +26,9 @@ class ApiClient {
       return Promise.resolve()
     }
 
-    this.initPromise = this._doInit()
+    this.initPromise = this._doInit().finally(() => {
+      this.initPromise = null
+    })
     return this.initPromise
   }
 
@@ -144,15 +147,22 @@ class ApiClient {
   async request(endpoint, options = {}) {
     await this.init()
     const url = `${this.customServerURL}${endpoint}`
+
+    // Abort after 10s so a dead/unreachable server doesn't hang the UI
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 10_000)
+
     const config = {
       // credentials: 'include',
       ...options,
       headers: this.getHeaders(options.headers),
+      signal: options.signal ?? controller.signal,
     }
 
     try {
       // 1. Initial Request
       let response = await fetch(url, config)
+      clearTimeout(timeoutId)
 
       // 2. Check for 401 (Unauthorized)
       if (response.status === 401) {
@@ -220,6 +230,9 @@ class ApiClient {
 
       return response
     } catch (error) {
+      clearTimeout(timeoutId)
+      // fetch() threw = network-level failure or timeout — mark server unreachable
+      networkManager.setServerUnreachable()
       console.error('Request failed', error)
       throw error
     }

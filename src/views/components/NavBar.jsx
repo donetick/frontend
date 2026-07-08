@@ -223,7 +223,7 @@ const NavBar = () => {
           },
         }}
       >
-        <div>
+        <div className='drawer-content'>
           {/* <div className='align-center flex px-5 pt-4'>
             <ModalClose size='sm' sx={{ top: 'unset', right: 20 }} />
           </div> */}

@@ -23,8 +23,12 @@ import {
   Typography,
 } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { networkManager } from '../../hooks/NetworkManager'
+import {
+  PENDING_POLL_MS,
+  SERVER_PROBE_MS,
+} from '../../hooks/useSyncOnReconnect'
 import { commandQueue } from '../../utils/CommandQueue'
 import {
   isOfflineFeatureEnabled,
@@ -57,8 +61,6 @@ const formatCommandLabel = commandType => {
   )
 }
 
-const RETRY_INTERVAL = 30
-
 function SyncStatusIndicator() {
   const queryClient = useQueryClient()
   const [pendingCommands, setPendingCommands] = useState([])
@@ -70,7 +72,18 @@ function SyncStatusIndicator() {
   })
   const [isOnline, setIsOnline] = useState(networkManager.isOnline)
   const [offlineSince, setOfflineSince] = useState(networkManager.offlineSince)
-  const [retryIn, setRetryIn] = useState(RETRY_INTERVAL)
+  const [offlineReason, setOfflineReason] = useState(networkManager.offlineReason)
+
+  // Mirror the actual intervals used by useSyncOnReconnect so the countdown is accurate
+  const retryInterval = useMemo(
+    () =>
+      !isOnline && offlineReason === 'server'
+        ? SERVER_PROBE_MS / 1000
+        : PENDING_POLL_MS / 1000,
+    [isOnline, offlineReason],
+  )
+
+  const [retryIn, setRetryIn] = useState(retryInterval)
   const [offlineFeatureEnabled, setOfflineFeatureEnabled] = useState(
     isOfflineFeatureEnabled(),
   )
@@ -89,24 +102,49 @@ function SyncStatusIndicator() {
 
   useEffect(() => {
     if (!syncState.syncing) {
-      setRetryIn(RETRY_INTERVAL)
+      setRetryIn(retryInterval)
     }
-  }, [syncState.syncing, syncState.lastSync])
+  }, [syncState.syncing, syncState.lastSync, retryInterval])
 
   useEffect(() => {
     networkManager.registerNetworkListener(online => {
       setIsOnline(online)
+      setOfflineReason(networkManager.offlineReason)
       if (!online) setOfflineSince(networkManager.offlineSince)
     })
   }, [])
 
   useEffect(() => {
-    if (!isOnline || syncState.syncing) return
+    // Run countdown both when online (pending commands) and when server-unreachable (probe interval)
+    if (syncState.syncing) return
+    if (isOnline && pendingCommands.length === 0) return
+    if (!isOnline && offlineReason === 'device') return
     const interval = setInterval(() => {
-      setRetryIn(prev => (prev <= 1 ? RETRY_INTERVAL : prev - 1))
+      setRetryIn(prev => {
+        if (prev <= 1) {
+          console.debug('[SyncStatusIndicator] Retry timer fired', {
+            isOnline,
+            offlineReason,
+            syncing: syncState.syncing,
+            lastSync: syncState.lastSync,
+            error: syncState.error,
+            pendingCommands: pendingCommands.length,
+          })
+          return retryInterval
+        }
+        return prev - 1
+      })
     }, 1000)
     return () => clearInterval(interval)
-  }, [isOnline, syncState.syncing, syncState.lastSync])
+  }, [
+    isOnline,
+    offlineReason,
+    syncState.syncing,
+    syncState.lastSync,
+    syncState.error,
+    pendingCommands.length,
+    retryInterval,
+  ])
 
   useEffect(() => {
     const update = async () => {
@@ -461,7 +499,19 @@ function SyncStatusIndicator() {
             </Typography>
           </Box>
         )}
-        {!isOnline && (
+        {!isOnline && offlineReason === 'server' && (
+          <Box sx={{ px: 1, pb: 0.5 }}>
+            <Typography
+              level='body-xs'
+              sx={{ color: 'var(--joy-palette-text-tertiary)' }}
+            >
+              {syncState.syncing
+                ? 'Checking server...'
+                : `Retrying in ${retryIn}s`}
+            </Typography>
+          </Box>
+        )}
+        {!isOnline && offlineReason !== 'server' && (
           <Box sx={{ px: 1, pb: 0.5 }}>
             <Typography
               level='body-xs'

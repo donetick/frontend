@@ -21,11 +21,13 @@ export const TIME_FORMATS = {
 export const RTL_LANGUAGES = ['ar', 'he', 'fa', 'ur']
 
 export const AVAILABLE_LANGUAGES = [
+  { code: 'de', name: 'German', nativeName: 'Deutsch' },
   { code: 'en', name: 'English', nativeName: 'English' },
   { code: 'es', name: 'Spanish', nativeName: 'Español' },
   { code: 'fr', name: 'French', nativeName: 'Français' },
   { code: 'nl', name: 'Dutch', nativeName: 'Nederlands' },
   { code: 'ja', name: 'Japanese', nativeName: '日本語' },
+  { code: 'pt', name: 'Portuguese (Brazil)', nativeName: 'Português (Brasil)' },
 ]
 
 export const LocalizationProvider = ({ children }) => {
