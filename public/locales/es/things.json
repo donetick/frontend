@@ -1,0 +1,94 @@
+{
+  "page": {
+    "title": "Things",
+    "description": "Things are custom fields that can be attached to tasks to capture additional information. They can be text, number, or boolean values.",
+    "emptyTitle": "No things have been created or found",
+    "savedTitle": "Saved",
+    "savedMessage": "Thing saved successfully",
+    "saveFailedTitle": "Unable to save thing",
+    "saveQueued": "You are offline and the request has been queued.",
+    "saveFailed": "An error occurred while saving the thing.",
+    "deleteTitle": "Delete Thing",
+    "deleteConfirm": "Are you sure you want to delete this thing?",
+    "deleteFailedAssociated": "Unable to delete a thing with associated tasks.",
+    "deleteFailedTitle": "Unable to delete thing",
+    "deleteQueued": "You are offline and the request has been queued.",
+    "deleteFailed": "An error occurred while deleting the thing.",
+    "updatedTitle": "Updated",
+    "updatedMessage": "Thing state updated successfully",
+    "updateFailedTitle": "Unable to update thing state",
+    "updateQueued": "You are offline and the request has been queued.",
+    "updateFailed": "An error occurred while updating the thing state.",
+    "swipeEdit": "Edit",
+    "swipeToggle": "Toggle",
+    "swipeDelete": "Delete",
+    "types": {
+      "text": "Text",
+      "number": "Number",
+      "boolean": "Boolean"
+    },
+    "states": {
+      "true": "True",
+      "false": "False"
+    }
+  },
+  "modal": {
+    "createTitle": "Create Thing",
+    "editTitle": "Edit Thing",
+    "namePlaceholder": "Thing name",
+    "valuePlaceholder": "Thing value",
+    "type": "Type",
+    "nameRequired": "Name is required",
+    "stateMustBeNumber": "State must be a number",
+    "stateMustBeBoolean": "State must be true or false",
+    "stateRequired": "State is required",
+    "updateStateTitle": "Update state"
+  },
+  "history": {
+    "overviewTitle": "Things Overview",
+    "empty": {
+      "title": "No history found",
+      "description": "It looks like there is no history for this thing yet.",
+      "backToThings": "Go back to things"
+    },
+    "analytics": {
+      "updateFrequency": "Update Frequency",
+      "lastUpdated": "Last Updated",
+      "lastValue": "Last Value",
+      "updateTrend": "Update Trend",
+      "every": "Every {{value}}",
+      "minutes_one": "{{count}} minute",
+      "minutes_other": "{{count}} minutes",
+      "hours_one": "{{count}} hour",
+      "hours_other": "{{count}} hours",
+      "days_one": "{{count}} day",
+      "days_other": "{{count}} days",
+      "intervalIncreasing": "Interval increasing",
+      "intervalDecreasing": "Interval decreasing",
+      "intervalStable": "Interval stable"
+    }
+  },
+  "trigger": {
+    "validationMissing": "Please select a thing and trigger state",
+    "booleanNoCondition": "Boolean type does not require a condition",
+    "triggerStateNumber": "Trigger state must be a number",
+    "title": "Trigger a task when a thing state changes to a desired state",
+    "noThings": "It looks like you don't have any things yet. Create one to trigger a task when its state changes.",
+    "goToThings": "Go to Things",
+    "createThingSuffix": "to create a thing",
+    "selectThing": "Select a thing",
+    "conditionHelp": "Create a condition to trigger a task when the thing state changes to the desired state",
+    "dueWhenChanged": "When the state of {{name}} changes as specified below, the task will become due.",
+    "true": "True",
+    "false": "False",
+    "equal": "Equal",
+    "notEqual": "Not equal",
+    "greaterThan": "Greater than",
+    "greaterThanOrEqual": "Greater than or equal",
+    "lessThan": "Less than",
+    "lessThanOrEqual": "Less than or equal",
+    "textTriggerLabel": "Enter the text to trigger the task",
+    "type": "type",
+    "state": "state"
+  }
+}
