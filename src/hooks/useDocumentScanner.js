@@ -25,7 +25,7 @@ function normalizeScannedImage(raw) {
 export function useDocumentScanner() {
   const isNativeScanner = Capacitor.isNativePlatform()
 
-  const scanDocument = async ({ maxDocuments = 1, quality = 90, letUserAdjustCrop = true } = {}) => {
+  const scanDocument = async ({ maxDocuments = 1, quality = 90, letUserAdjustCrop = false } = {}) => {
     if (!isNativeScanner) return { image: null, cancelled: false }
 
     try {

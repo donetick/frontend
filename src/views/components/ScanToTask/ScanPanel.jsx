@@ -21,7 +21,7 @@ import { useScanToTask } from './useScanToTask'
  * Flow: capture → (auto) processing → done [calls onTaskExtracted + onClose]
  *                                   → error  [retake or cancel]
  */
-const ScanPanel = ({ open, onTaskExtracted, onClose, initialImageUrl }) => {
+const ScanPanel = ({ open, onTaskExtracted, onClose, initialImageUrl, autoCapture }) => {
   const {
     isNativeScanner,
     phase,
@@ -47,6 +47,9 @@ const ScanPanel = ({ open, onTaskExtracted, onClose, initialImageUrl }) => {
   useEffect(() => {
     if (open) {
       activate(initialImageUrl)
+      if (autoCapture && isNativeScanner && !initialImageUrl) {
+        handleNativeScan()
+      }
     } else {
       reset()
     }

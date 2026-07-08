@@ -30,6 +30,7 @@ import LearnMoreButton from './LearnMore'
 import NotificationPickerField from './NotificationPickerField'
 import ScanPanel from './ScanToTask/ScanPanel'
 import { useDocumentScanner } from '../../hooks/useDocumentScanner'
+import { localAIService } from '../../service/LocalAIService'
 import PriorityPickerField from './PriorityPickerField'
 import RepeatPickerField from './RepeatPickerField'
 import RichTextEditor from './RichTextEditor'
@@ -107,8 +108,14 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
   const [attachments, setAttachments] = useState([])
   const [draftId, setDraftId] = useState(() => crypto.randomUUID())
   const [showScan, setShowScan] = useState(false)
+  const [scanAutoCapture, setScanAutoCapture] = useState(false)
   const [pendingPhotoUrl, setPendingPhotoUrl] = useState(null)
+  const [llmAvailable, setLlmAvailable] = useState(false)
   const { isNativeScanner } = useDocumentScanner()
+
+  useEffect(() => {
+    localAIService.isAvailable().then(setLlmAvailable)
+  }, [])
 
   // Priority colors
   const priorityColors = {
@@ -793,11 +800,15 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
               autoFocus
               value={taskText}
               isNativeScanner={isNativeScanner}
-              onScanClick={() => setShowScan(true)}
-              onPhotoSelected={dataUrl => {
+              onScanClick={llmAvailable ? () => {
+                setScanAutoCapture(true)
+                setShowScan(true)
+              } : undefined}
+              onPhotoSelected={llmAvailable ? dataUrl => {
+                setScanAutoCapture(false)
                 setPendingPhotoUrl(dataUrl)
                 setShowScan(true)
-              }}
+              } : undefined}
               placeholder='Type your task...'
               onChange={text => {
                 setTaskText(text)
@@ -984,10 +995,12 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
       {showScan && (
         <ScanPanel
           open
+          autoCapture={scanAutoCapture}
           onTaskExtracted={handleTaskExtracted}
           initialImageUrl={pendingPhotoUrl}
           onClose={() => {
             setShowScan(false)
+            setScanAutoCapture(false)
             setPendingPhotoUrl(null)
           }}
         />

@@ -1,7 +1,7 @@
 {
   "name": "donetick",
   "private": true,
-  "version": "1.2.3",
+  "version": "1.2.4",
   "type": "module",
   "engines": {
     "node": ">=20.0.0",
@@ -30,8 +30,9 @@
     "ionic:build": "npm run build",
     "ionic:serve": "npm run start",
     "android": "npm run build && npx cap sync android",
+    "android:dev": "npx cap run android --live-reload",
     "cap": "npm run build && npx cap sync",
-    "bump": "node bump-version.js",
+    "bump": "node bump-version.js patch",
     "bump:minor": "node bump-version.js minor",
     "bump:major": "node bump-version.js major",
     "bump:patch": "node bump-version.js patch"
