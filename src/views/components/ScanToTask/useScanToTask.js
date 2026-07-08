@@ -50,9 +50,13 @@ Output:
 
 async function runNativeOCR(imageSource) {
   const { Ocr } = await import('@jcesarmobile/capacitor-ocr')
-  const image = imageSource.includes('/_capacitor_file_/')
-    ? 'file://' + imageSource.replace(/^https?:\/\/localhost\/_capacitor_file_/, '')
-    : imageSource
+  let image = imageSource
+  if (imageSource.includes('/_capacitor_file_/')) {
+    image = 'file://' + imageSource.replace(/^https?:\/\/localhost\/_capacitor_file_/, '')
+  } else if (imageSource.startsWith('data:')) {
+    // iOS document scanner returns base64; strip the data URI prefix for the native plugin
+    image = imageSource.split(',')[1] || imageSource
+  }
   const result = await Ocr.process({ image })
   return result.results.map(r => r.text).join('\n').trim()
 }
@@ -196,7 +200,9 @@ export function useScanToTask() {
       return
     }
     setCapturedImage(image)
-    processImage(image, 'native')
+    // Native scanner already applied edge detection + crop; use browser OCR
+    // since the native OCR plugin requires a file path, not a base64 data URI
+    processImage(image, 'browser')
   }, [scanDocument, processImage])
 
   const retake = useCallback(() => {
