@@ -1,3 +1,4 @@
+import { Capacitor } from '@capacitor/core'
 import { useQueryClient } from '@tanstack/react-query'
 import { EventSourcePolyfill } from 'event-source-polyfill'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -59,6 +60,24 @@ export const useSSE = () => {
 
     return { url: sseUrl, token }
   }, [token, isAuthenticated]) // Fixed: Added missing dependencies
+
+  // Exchange the JWT (sent via Authorization header by apiClient) for a
+  // short-lived, single-use SSE ticket. Used by the native EventSource path,
+  // which cannot send custom headers.
+  const fetchSSETicket = useCallback(async () => {
+    try {
+      const response = await apiClient.get('/realtime/sse/ticket')
+      if (!response || !response.ok) {
+        console.error('SSE: Ticket request failed', response?.status)
+        return null
+      }
+      const data = await response.json()
+      return data.ticket || null
+    } catch (err) {
+      console.error('SSE: Ticket request error', err)
+      return null
+    }
+  }, [])
 
   const handleSSEMessage = useCallback(
     event => {
@@ -289,7 +308,7 @@ export const useSSE = () => {
   }, [])
 
   // Create connect function that can be called from anywhere
-  const connect = useCallback(() => {
+  const connect = useCallback(async () => {
     // Clear the scheduled flag when actually connecting
     isReconnectScheduledRef.current = false
 
@@ -348,16 +367,49 @@ export const useSSE = () => {
       setConnectionState(SSE_STATES.CONNECTING)
       isManuallyClosedRef.current = false
 
-      eventSourceRef.current = new EventSourcePolyfill(sseConfig.url, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-          'Cache-Control': 'no-cache',
-          Accept: 'text/event-stream',
-        },
-        withCredentials: true,
-        heartbeatTimeout: 120000,
-        silentTimeoutRetry: true,
-      })
+      if (Capacitor.isNativePlatform()) {
+        // Capacitor's native HTTP bridge does not support streaming responses,
+        // which breaks EventSourcePolyfill (fetch/XHR based). Use the native
+        // EventSource instead, which uses the WKWebView HTTP stack directly.
+        // Native EventSource cannot send custom headers, so we first exchange
+        // our JWT (sent in the Authorization header) for a short-lived,
+        // single-use ticket and pass that ticket as a query parameter. This
+        // keeps the long-lived token out of URLs and proxy access logs.
+        const ticket = await fetchSSETicket()
+        if (!ticket) {
+          console.error('SSE: Failed to obtain connection ticket')
+          setError('Connection error occurred')
+          setConnectionState(SSE_STATES.CLOSED)
+          scheduleReconnect(
+            RECONNECT_INTERVALS[
+              Math.min(
+                reconnectAttemptsRef.current,
+                RECONNECT_INTERVALS.length - 1,
+              )
+            ],
+            'ticket-fetch-failed',
+          )
+          return
+        }
+
+        const nativeUrl = new URL(sseConfig.url)
+        nativeUrl.searchParams.set('ticket', ticket)
+
+        eventSourceRef.current = new EventSource(nativeUrl.toString(), {
+          withCredentials: true,
+        })
+      } else {
+        eventSourceRef.current = new EventSourcePolyfill(sseConfig.url, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            'Cache-Control': 'no-cache',
+            Accept: 'text/event-stream',
+          },
+          withCredentials: true,
+          heartbeatTimeout: 120000,
+          silentTimeoutRetry: true,
+        })
+      }
 
       eventSourceRef.current.onopen = () => {
         console.log('SSE connection opened')
@@ -573,8 +625,10 @@ export const useSSE = () => {
     }
   }, [
     getSSEUrl,
+    fetchSSETicket,
     handleSSEMessage,
     stopHeartbeatMonitor,
+    scheduleReconnect,
     isCircuitBreakerOpen,
     showError,
   ])
