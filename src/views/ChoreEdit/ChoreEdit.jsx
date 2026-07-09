@@ -58,6 +58,7 @@ import {
   UploadChoreAttachment,
 } from '../../utils/Fetcher'
 import { isPlusAccount, resolvePhotoURL } from '../../utils/Helpers'
+import { generateUUID } from '../../utils/UUID'
 import Priorities from '../../utils/Priorities.jsx'
 import { getIconComponent } from '../../utils/ProjectIcons'
 import { getSafeBottomPadding } from '../../utils/SafeAreaUtils.js'
@@ -131,7 +132,7 @@ const ChoreEdit = () => {
   const [createdBy, setCreatedBy] = useState(0)
   const [errors, setErrors] = useState({})
   const [attemptToSave, setAttemptToSave] = useState(false)
-  const [draftId] = useState(() => crypto.randomUUID())
+  const [draftId] = useState(() => generateUUID())
   const [attachments, setAttachments] = useState([])
   const [isUploadingAttachment, setIsUploadingAttachment] = useState(false)
   const [addLabelModalOpen, setAddLabelModalOpen] = useState(false)
