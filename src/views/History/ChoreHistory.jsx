@@ -99,12 +99,42 @@ const ChoreHistory = () => {
         type: 'multi-select',
         icon: <FilterList />,
         options: [
-          { value: ChoreHistoryStatus.COMPLETED, label: 'Completed', color: 'success', icon: <Check sx={{ fontSize: 14 }} /> },
-          { value: ChoreHistoryStatus.SKIPPED, label: 'Skipped', color: 'warning', icon: <Redo sx={{ fontSize: 14 }} /> },
-          { value: ChoreHistoryStatus.PENDING_APPROVAL, label: 'Pending', color: 'neutral', icon: <HourglassEmpty sx={{ fontSize: 14 }} /> },
-          { value: ChoreHistoryStatus.REJECTED, label: 'Rejected', color: 'danger', icon: <ThumbDown sx={{ fontSize: 14 }} /> },
-          { value: 5, label: 'Missed', color: 'danger', icon: <RunningWithErrors sx={{ fontSize: 14 }} /> },
-          { value: 6, label: 'Rescheduled', color: 'warning', icon: <Schedule sx={{ fontSize: 14 }} /> },
+          {
+            value: ChoreHistoryStatus.COMPLETED,
+            label: 'Completed',
+            color: 'success',
+            icon: <Check sx={{ fontSize: 14 }} />,
+          },
+          {
+            value: ChoreHistoryStatus.SKIPPED,
+            label: 'Skipped',
+            color: 'warning',
+            icon: <Redo sx={{ fontSize: 14 }} />,
+          },
+          {
+            value: ChoreHistoryStatus.PENDING_APPROVAL,
+            label: 'Pending',
+            color: 'neutral',
+            icon: <HourglassEmpty sx={{ fontSize: 14 }} />,
+          },
+          {
+            value: ChoreHistoryStatus.REJECTED,
+            label: 'Rejected',
+            color: 'danger',
+            icon: <ThumbDown sx={{ fontSize: 14 }} />,
+          },
+          {
+            value: 5,
+            label: 'Missed',
+            color: 'danger',
+            icon: <RunningWithErrors sx={{ fontSize: 14 }} />,
+          },
+          {
+            value: 6,
+            label: 'Rescheduled',
+            color: 'warning',
+            icon: <Schedule sx={{ fontSize: 14 }} />,
+          },
         ],
         filterFn: (item, values) => values.includes(item.status),
       },
@@ -143,8 +173,23 @@ const ChoreHistory = () => {
     [performers],
   )
 
-  const { filteredData: filteredHistory, activeFilters, setFilter, clearAll, activeFilterCount } =
-    useFilter(choreHistory, filterDefs)
+  const {
+    filteredData: filteredHistory,
+    activeFilters,
+    setFilter,
+    clearAll,
+    activeFilterCount,
+  } = useFilter(choreHistory, filterDefs)
+
+  const sortedHistory = useMemo(
+    () =>
+      [...filteredHistory].sort(
+        (a, b) =>
+          new Date(b.performedAt || b.updatedAt) -
+          new Date(a.performedAt || a.updatedAt),
+      ),
+    [filteredHistory],
+  )
 
   const handleDelete = historyEntry => {
     showConfirmation(
@@ -296,7 +341,7 @@ const ChoreHistory = () => {
     <Container maxWidth='md' sx={{ px: 0 }}>
       {/* Enhanced Header Section */}
       <Box sx={{ gap: 2, p: 2 }}>
-              {/* <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, p: 2 }}> */}
+        {/* <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, p: 2 }}> */}
         {/* Statistics Cards Grid - Compact Design */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
           <History sx={{ fontSize: '1.5rem' }} />
@@ -374,9 +419,8 @@ const ChoreHistory = () => {
       </Box>
 
       {/* History Section Header */}
-      
+
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2 }}>
-            
         <Analytics sx={{ fontSize: '1.5rem' }} />
         <Typography
           level='title-md'
@@ -386,17 +430,17 @@ const ChoreHistory = () => {
         </Typography>
       </Box>
 
-<Box sx={{  px: 2 }}>
-      <FilterBar        
-        filterDefs={filterDefs}
-        activeFilters={activeFilters}
-        onSetFilter={setFilter}
-        onClearAll={clearAll}
-        resultCount={filteredHistory.length}
-        totalCount={choreHistory.length}
-      />
-    </Box>
-      {filteredHistory.length === 0 && activeFilterCount > 0 && (
+      <Box sx={{ px: 2 }}>
+        <FilterBar
+          filterDefs={filterDefs}
+          activeFilters={activeFilters}
+          onSetFilter={setFilter}
+          onClearAll={clearAll}
+          resultCount={filteredHistory.length}
+          totalCount={choreHistory.length}
+        />
+      </Box>
+      {sortedHistory.length === 0 && activeFilterCount > 0 && (
         <Box
           sx={{
             textAlign: 'center',
@@ -420,114 +464,111 @@ const ChoreHistory = () => {
         </Box>
       )}
 
-      {filteredHistory.length > 0 && (
-      <Sheet
-        variant='plain'
-        sx={{ borderRadius: 'sm', overflow: 'hidden' }}
-      >
-        {/* Chore History List (Updated Style) */}
+      {sortedHistory.length > 0 && (
+        <Sheet variant='plain' sx={{ borderRadius: 'sm', overflow: 'hidden' }}>
+          {/* Chore History List (Updated Style) */}
 
-        <SwipeableList type={ListType.IOS} fullSwipe={false}>
-          {filteredHistory.map((historyEntry, index) => (
-            <SwipeableListItem
-              key={historyEntry.id || index}
-              swipeActionOpen={
-                showMoreInfoId === (historyEntry.id || index)
-                  ? 'trailing'
-                  : null
-              }
-              trailingActions={
-                <TrailingActions>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.06)',
-                      zIndex: 0,
-                    }}
-                  >
-                    <SwipeAction onClick={() => handleEdit(historyEntry)}>
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          bgcolor: 'neutral.softBg',
-                          color: 'neutral.700',
-                          px: 3,
-                          height: '100%',
-                          width: '100%',
-                        }}
-                      >
-                        <EditIcon sx={{ fontSize: 20 }} />
-                        <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                          Edit
-                        </Typography>
-                      </Box>
-                    </SwipeAction>
-                    <SwipeAction onClick={() => handleDelete(historyEntry)}>
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          bgcolor: 'danger.softBg',
-                          color: 'danger.700',
-                          px: 3,
-                          height: '100%',
-                        }}
-                      >
-                        <DeleteIcon sx={{ fontSize: 20 }} />
-                        <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                          Delete
-                        </Typography>
-                      </Box>
-                    </SwipeAction>
-                  </Box>
-                </TrailingActions>
-              }
-            >
-              <HistoryCard
-                historyEntry={historyEntry}
-                performers={performers}
-                allHistory={choreHistory}
-                index={index}
-                onViewDetails={() => {
-                  setDetailModalConfig({
-                    isOpen: true,
-                    entry: historyEntry,
-                    performers,
-                    onClose: () => setDetailModalConfig({ isOpen: false }),
-                    onEdit: record => {
-                      setDetailModalConfig({ isOpen: false })
-                      setEditHistory(record)
-                      setIsEditModalOpen(true)
-                    },
-                  })
-                }}
-                pendingCommands={pendingByHistoryId[historyEntry.id] || []}
-                onViewNote={notes => {
-                  setNoteViewerConfig({
-                    isOpen: true,
-                    title: `Updated at ${fmt.dateTime(historyEntry.updatedAt)}`,
-                    content: notes,
-                    onClose: () => setNoteViewerConfig({ isOpen: false }),
-                  })
-                }}
-                onToggleActions={() => {
-                  const id = historyEntry.id || index
-                  if (showMoreInfoId === id) {
-                    setShowMoreInfoId(null)
-                  } else {
-                    setShowMoreInfoId(id)
-                  }
-                }}
-              />
-            </SwipeableListItem>
-          ))}
-        </SwipeableList>
-      </Sheet>
+          <SwipeableList type={ListType.IOS} fullSwipe={false}>
+            {sortedHistory.map((historyEntry, index) => (
+              <SwipeableListItem
+                key={historyEntry.id || index}
+                swipeActionOpen={
+                  showMoreInfoId === (historyEntry.id || index)
+                    ? 'trailing'
+                    : null
+                }
+                trailingActions={
+                  <TrailingActions>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.06)',
+                        zIndex: 0,
+                      }}
+                    >
+                      <SwipeAction onClick={() => handleEdit(historyEntry)}>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            bgcolor: 'neutral.softBg',
+                            color: 'neutral.700',
+                            px: 3,
+                            height: '100%',
+                            width: '100%',
+                          }}
+                        >
+                          <EditIcon sx={{ fontSize: 20 }} />
+                          <Typography level='body-xs' sx={{ mt: 0.5 }}>
+                            Edit
+                          </Typography>
+                        </Box>
+                      </SwipeAction>
+                      <SwipeAction onClick={() => handleDelete(historyEntry)}>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            bgcolor: 'danger.softBg',
+                            color: 'danger.700',
+                            px: 3,
+                            height: '100%',
+                          }}
+                        >
+                          <DeleteIcon sx={{ fontSize: 20 }} />
+                          <Typography level='body-xs' sx={{ mt: 0.5 }}>
+                            Delete
+                          </Typography>
+                        </Box>
+                      </SwipeAction>
+                    </Box>
+                  </TrailingActions>
+                }
+              >
+                <HistoryCard
+                  historyEntry={historyEntry}
+                  performers={performers}
+                  allHistory={choreHistory}
+                  index={index}
+                  onViewDetails={() => {
+                    setDetailModalConfig({
+                      isOpen: true,
+                      entry: historyEntry,
+                      performers,
+                      onClose: () => setDetailModalConfig({ isOpen: false }),
+                      onEdit: record => {
+                        setDetailModalConfig({ isOpen: false })
+                        setEditHistory(record)
+                        setIsEditModalOpen(true)
+                      },
+                    })
+                  }}
+                  pendingCommands={pendingByHistoryId[historyEntry.id] || []}
+                  onViewNote={notes => {
+                    setNoteViewerConfig({
+                      isOpen: true,
+                      title: `Updated at ${fmt.dateTime(historyEntry.updatedAt)}`,
+                      content: notes,
+                      onClose: () => setNoteViewerConfig({ isOpen: false }),
+                    })
+                  }}
+                  onToggleActions={() => {
+                    const id = historyEntry.id || index
+                    if (showMoreInfoId === id) {
+                      setShowMoreInfoId(null)
+                    } else {
+                      setShowMoreInfoId(id)
+                    }
+                  }}
+                />
+              </SwipeableListItem>
+            ))}
+          </SwipeableList>
+        </Sheet>
       )}
       <EditHistoryModal
         config={{
@@ -604,7 +645,7 @@ const ChoreHistory = () => {
       <ConfirmationModal config={confirmModalConfig} />
       <NoteViewerModal config={noteViewerConfig} />
       <HistoryDetailModal config={detailModalConfig} />
-</Container>
+    </Container>
   )
 }
 

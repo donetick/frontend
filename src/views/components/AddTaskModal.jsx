@@ -8,6 +8,7 @@ import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import { useCreateChore } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { isPlusAccount } from '../../utils/Helpers'
+import { generateUUID } from '../../utils/UUID'
 import { useLabels } from '../Labels/LabelQueries'
 import { useProjects } from '../Projects/ProjectQueries'
 import {
@@ -106,7 +107,8 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
   const [projectId, setProjectId] = useState(getInitialProject())
   const [attachments, setAttachments] = useState([])
-  const [draftId, setDraftId] = useState(() => crypto.randomUUID())
+
+  const [draftId, setDraftId] = useState(() => generateUUID())
   const [showScan, setShowScan] = useState(false)
   const [scanAutoCapture, setScanAutoCapture] = useState(false)
   const [pendingPhotoUrl, setPendingPhotoUrl] = useState(null)
@@ -595,7 +597,7 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
     setDueTime(null)
     setUseCustomTime(false)
     setAttachments([])
-    setDraftId(crypto.randomUUID())
+    setDraftId(generateUUID())
   }
 
   const createChore = () => {
