@@ -1,0 +1,33 @@
+{
+  "save": "保存",
+  "cancel": "取消",
+  "delete": "删除",
+  "edit": "编辑",
+  "close": "关闭",
+  "confirm": "确认",
+  "loading": "加载中...",
+  "error": "错误",
+  "success": "成功",
+  "warning": "警告",
+  "refresh": "刷新",
+  "copy": "复制",
+  "copied": "已复制！",
+  "settings": "设置",
+  "yes": "是",
+  "no": "否",
+  "back": "返回",
+  "backToCalendar": "返回日历",
+  "logout": "退出登录",
+  "version": "版本",
+  "navigation": {
+    "allTasks": "所有任务",
+    "archived": "已归档",
+    "things": "事项",
+    "labels": "标签",
+    "projects": "项目",
+    "filters": "筛选",
+    "activities": "活动",
+    "points": "积分",
+    "settings": "设置"
+  }
+}
