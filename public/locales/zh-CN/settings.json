@@ -1,0 +1,174 @@
+{
+  "title": "设置",
+  "circleSettings": {
+    "title": "圈子设置",
+    "description": "当您创建或加入圈子时，您的账户会自动连接到该圈子。通过分享下方的唯一圈子代码或链接，即可轻松邀请好友。当有人请求加入您的圈子时，您会在下方收到通知。如果您想离开，只需点击“离开圈子”按钮。",
+    "circleCode": "圈子代码",
+    "copyCode": "复制代码",
+    "copyLink": "复制链接",
+    "codeCopied": "圈子代码已复制！",
+    "linkCopied": "圈子链接已复制！",
+    "joinCircle": "加入圈子",
+    "joinCirclePlaceholder": "输入圈子代码",
+    "join": "加入",
+    "leave": "离开圈子",
+    "leaveConfirmTitle": "离开圈子",
+    "leaveConfirmMessage": "您确定要离开此圈子吗？",
+    "circleMembers": "圈子成员",
+    "circleMemberRequests": "圈子成员申请",
+    "admin": "管理员",
+    "member": "成员",
+    "pending": "待处理",
+    "accept": "接受",
+    "reject": "拒绝",
+    "makeAdmin": "设为管理员",
+    "makeMember": "设为成员",
+    "remove": "移除",
+    "webhookURL": "Webhook URL",
+    "webhookDescription": "输入 Webhook URL 以接收圈子事件通知",
+    "webhookPlaceholder": "https://your-webhook-url.com"
+  },
+  "accountSettings": {
+    "title": "账户设置",
+    "subscription": "订阅",
+    "subscriptionStatus": "当前方案",
+    "free": "免费版",
+    "plus": "Plus 版",
+    "upgrade": "升级",
+    "cancel": "取消",
+    "changePassword": "修改密码",
+    "password": "密码",
+    "dangerZone": "危险区域",
+    "dangerZoneDescription": "一旦删除账户，将无法恢复。请谨慎操作。",
+    "deleteAccount": "删除账户"
+  },
+  "localization": {
+    "title": "本地化",
+    "description": "自定义您账户的语言、日期格式和区域偏好。",
+    "language": "语言",
+    "languageDescription": "选择您的首选语言",
+    "dateFormat": "日期格式",
+    "dateFormatDescription": "选择整个应用中日期的显示方式",
+    "timeFormat": "时间格式",
+    "timeFormatDescription": "选择 12 小时制或 24 小时制",
+    "12hour": "12 小时制 (AM/PM)",
+    "24hour": "24 小时制",
+    "firstDayOfWeek": "每周起始日",
+    "firstDayOfWeekDescription": "选择每周的第一天",
+    "sunday": "星期日",
+    "monday": "星期一",
+    "saturday": "星期六",
+    "formats": {
+      "mdy": "MM/DD/YYYY (美国)",
+      "dmy": "DD/MM/YYYY (欧洲)",
+      "ymd": "YYYY-MM-DD (ISO)",
+      "long": "长格式 (例如：2024年1月1日)",
+      "short": "短格式 (例如：2024年1月1日)"
+    }
+  },
+  "sidepanel": {
+    "title": "侧边栏自定义",
+    "description": "自定义侧边栏中卡片的布局和可见性。此部分仅适用于平板电脑和台式机等大屏设备。"
+  },
+  "theme": {
+    "title": "主题偏好",
+    "description": "选择网站的显示外观。您可以选择单一主题，或与系统同步，自动切换日间和夜间主题。",
+    "themeMode": "主题模式",
+    "light": "浅色",
+    "dark": "深色",
+    "system": "跟随系统"
+  },
+  "notifications": {
+    "settingsSaved": "设置保存成功",
+    "settingsSaveFailed": "设置保存失败",
+    "invalidWebhook": "无效的 Webhook URL"
+  },
+  "profile": {
+    "title": "个人资料设置",
+    "description": "更新您的显示名称和个人头像。",
+    "photoUpdated": "头像已更新",
+    "photoUpdatedMessage": "您的个人头像已成功更新！",
+    "uploadFailed": "上传失败",
+    "uploadFailedMessage": "头像上传失败。请重试。",
+    "profileUpdated": "资料已更新",
+    "profileUpdatedMessage": "您的个人资料已成功保存！",
+    "updateFailed": "更新失败",
+    "updateFailedMessage": "无法更新您的个人资料。请检查网络连接后重试。",
+    "changePhoto": "更换头像",
+    "displayName": "显示名称",
+    "displayNamePlaceholder": "输入您的显示名称",
+    "timezone": "时区",
+    "timezonePlaceholder": "选择您的时区",
+    "save": "保存",
+    "cancel": "取消"
+  },
+  "overview": {
+    "title": "设置",
+    "subtitle": "自定义您的体验并管理账户偏好",
+    "upgrade": {
+      "title": "升级到 Plus",
+      "description": "解锁强大功能，提升您的效率",
+      "button": "立即升级",
+      "features": {
+        "richText": "富文本描述",
+        "notifications": "任务通知",
+        "apiIntegrations": "API 集成",
+        "advancedAutomation": "高级自动化"
+      }
+    },
+    "sections": {
+      "profile": {
+        "title": "个人资料设置",
+        "description": "更新您的个人资料信息、头像、显示名称和时区偏好。"
+      },
+      "circle": {
+        "title": "圈子设置",
+        "description": "管理您的圈子、邀请成员并处理加入申请。"
+      },
+      "account": {
+        "title": "账户设置",
+        "description": "管理订阅、修改密码及账户删除选项。"
+      },
+      "subaccounts": {
+        "title": "托管账户",
+        "description": "创建和管理子账户，以便登录并完成分配的任务。"
+      },
+      "notifications": {
+        "title": "通知",
+        "description": "配置推送通知、邮件提醒及任务通知目标。"
+      },
+      "mfa": {
+        "title": "多因素认证",
+        "description": "使用身份验证器应用启用 MFA，增加一层安全保障。"
+      },
+      "apitokens": {
+        "title": "API 令牌",
+        "description": "生成和管理用于第三方集成及 API 访问的访问令牌。"
+      },
+      "storage": {
+        "title": "存储设置",
+        "description": "备份和恢复数据，管理本地存储及同步偏好。"
+      },
+      "sidepanel": {
+        "title": "侧边栏自定义",
+        "description": "自定义侧边栏界面中卡片的布局和可见性。"
+      },
+      "theme": {
+        "title": "主题偏好",
+        "description": "选择您喜欢的主题并配置深色/浅色模式设置。"
+      },
+      "localization": {
+        "title": "本地化",
+        "description": "自定义语言、日期格式、时间格式及区域偏好。"
+      },
+      "advanced": {
+        "title": "高级设置",
+        "description": "配置 Webhook、实时更新及其他高级功能以提升效率。"
+      },
+      "developer": {
+        "title": "开发者设置",
+        "description": "查看有关身份验证令牌、SSE 连接及调试数据的技术信息。"
+      }
+    }
+  }
+}
