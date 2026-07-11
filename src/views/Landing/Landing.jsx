@@ -9,6 +9,7 @@ import DemoHistory from './DemoHistory'
 import DemoMyChore from './DemoMyChore'
 import DemoNotificationTemplate from './DemoNotificationTemplate'
 import DemoScheduler from './DemoScheduler'
+import DemoSmartTaskCreation from './DemoSmartTaskCreation'
 import FeaturesSection from './FeaturesSection'
 import Footer from './Footer'
 import GettingStarted from './GettingStarted'
@@ -29,6 +30,7 @@ const Landing = () => {
   return (
     <Container className='flex h-full items-center justify-center'>
       <HomeHero />
+      <DemoSmartTaskCreation />
       <Grid
         overflow={'hidden'}
         container
