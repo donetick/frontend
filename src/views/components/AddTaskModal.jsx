@@ -22,6 +22,8 @@ import {
 import SmartTaskTitleInput from './SmartTaskTitleInput'
 
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
+import { useDocumentScanner } from '../../hooks/useDocumentScanner'
+import { localAIService } from '../../service/LocalAIService'
 import { TASK_COLOR } from '../../utils/Colors'
 import AssigneePickerField from './AssigneePickerField'
 import AttachmentPickerField from './AttachmentPickerField'
@@ -29,12 +31,10 @@ import DueDatePickerField from './DueDatePickerField'
 import LabelsPickerField from './LabelsPickerField'
 import LearnMoreButton from './LearnMore'
 import NotificationPickerField from './NotificationPickerField'
-import ScanPanel from './ScanToTask/ScanPanel'
-import { useDocumentScanner } from '../../hooks/useDocumentScanner'
-import { localAIService } from '../../service/LocalAIService'
 import PriorityPickerField from './PriorityPickerField'
 import RepeatPickerField from './RepeatPickerField'
 import RichTextEditor from './RichTextEditor'
+import ScanPanel from './ScanToTask/ScanPanel'
 import SubTasks from './SubTask'
 const getDefaultNotification = () => {
   const storedDefault = localStorage.getItem('defaultNotificationTemplate')
@@ -558,7 +558,11 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
     createChore()
   }
 
-  const handleTaskExtracted = ({ taskName, description: extractedDesc, dueDate: extractedDue }) => {
+  const handleTaskExtracted = ({
+    taskName,
+    description: extractedDesc,
+    dueDate: extractedDue,
+  }) => {
     if (taskName) {
       processText(taskName)
     }
@@ -700,314 +704,330 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
 
   return (
     <>
-    <ResponsiveModal
-      open={isModalOpen}
-      onClose={handleCloseModal}
-      size='lg'
-      fullWidth={true}
-      title='Create new task'
-      footer={
-        <Box
-          sx={{
-            marginTop: 2,
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'end',
-            gap: 1,
-          }}
-        >
-          <Button
-            size='lg'
-            variant='outlined'
-            color='neutral'
-            onClick={handleCloseModal}
-          >
-            Cancel
-            {showKeyboardShortcuts && (
-              <KeyboardShortcutHint
-                shortcut='Esc'
-                sx={{ ml: 1 }}
-                withCtrl={false}
-              />
-            )}
-          </Button>
-          <Button
-            size='lg'
-            variant='solid'
-            color='primary'
-            disabled={!taskTitle.trim()}
-            onClick={createChore}
-          >
-            Create
-            {showKeyboardShortcuts && (
-              <KeyboardShortcutHint shortcut='Enter' sx={{ ml: 1 }} />
-            )}
-          </Button>
-        </Box>
-      }
-    >
-      {!showScan && (
-        <>
-          <Box>
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-              }}
-            >
-              <Typography level='body-sm'>Task in a sentence:</Typography>
-              <LearnMoreButton
-                content={
-                  <>
-                    <Typography level='body-sm' sx={{ mb: 1 }}>
-                      This feature lets you create a task simply by typing a
-                      sentence. It attempt parses the sentence to identify the
-                      task&apos;s due date, priority, and frequency.
-                    </Typography>
-
-                    <Typography level='body-sm' sx={{ fontWeight: 'bold', mt: 2 }}>
-                      Examples:
-                    </Typography>
-
-                    <Typography
-                      level='body-sm'
-                      component='ul'
-                      sx={{ pl: 2, mt: 1, listStyle: 'disc' }}
-                    >
-                      <li>
-                        <strong>Priority:</strong>For highest priority any of the
-                        following keyword <em>P1</em>, <em>Urgent</em>,{' '}
-                        <em>Important</em>, or <em>ASAP</em>. For lower
-                        priorities, use <em>P2</em>, <em>P3</em>, or <em>P4</em>.
-                      </li>
-                      <li>
-                        <strong>Due date:</strong> Specify dates with phrases
-                        like <em>tomorrow</em>, <em>next week</em>,{' '}
-                        <em>Monday</em>, or <em>August 1st at 12pm</em>.
-                      </li>
-                      <li>
-                        <strong>Frequency:</strong> Set recurring tasks with
-                        terms like <em>daily</em>, <em>weekly</em>,{' '}
-                        <em>monthly</em>, <em>yearly</em>, or patterns such as{' '}
-                        <em>every Tuesday and Thursday</em>.
-                      </li>
-                    </Typography>
-                  </>
-                }
-              />
-            </Box>
-
-            <SmartTaskTitleInput
-              autoFocus
-              value={taskText}
-              isNativeScanner={isNativeScanner}
-              onScanClick={llmAvailable ? () => {
-                setScanAutoCapture(true)
-                setShowScan(true)
-              } : undefined}
-              onPhotoSelected={llmAvailable ? dataUrl => {
-                setScanAutoCapture(false)
-                setPendingPhotoUrl(dataUrl)
-                setShowScan(true)
-              } : undefined}
-              placeholder='Type your task...'
-              onChange={text => {
-                setTaskText(text)
-                if (!text) setTaskTitle('')
-              }}
-              customRenderer={renderedParts}
-              onEnterPressed={handleEnterPressed}
-              suggestions={{
-                '#': {
-                  value: 'id',
-                  display: 'name',
-                  options: userLabels ? userLabels : [],
-                },
-                '!': {
-                  value: 'id',
-                  display: 'name',
-                  options: [
-                    { id: '1', name: 'P1' },
-                    { id: '2', name: 'P2' },
-                    { id: '3', name: 'P3' },
-                    { id: '4', name: 'P4' },
-                  ],
-                },
-                '@': {
-                  value: 'userId',
-                  display: 'displayName',
-                  options: [
-                    { userId: 'anyone', displayName: 'Anyone' },
-                    ...(circleMembers?.res || []),
-                  ],
-                },
-                '*': {
-                  value: 'id',
-                  display: 'name',
-                  options: [
-                    { id: '1', name: '1 point' },
-                    { id: '5', name: '5 points' },
-                    { id: '10', name: '10 points' },
-                    { id: '25', name: '25 points' },
-                    { id: '50', name: '50 points' },
-                    { id: '100', name: '100 points' },
-                  ],
-                },
-              }}
-            />
-          </Box>
-
+      <ResponsiveModal
+        open={isModalOpen}
+        onClose={handleCloseModal}
+        size='lg'
+        fullWidth={true}
+        title='Create new task'
+        footer={
           <Box
             sx={{
-              paddingTop: 2,
-              paddingBottom: 1,
+              marginTop: 2,
               display: 'flex',
               flexDirection: 'row',
-              gap: 1.5,
-              overflowX: 'auto',
-              '&::-webkit-scrollbar': { display: 'none' },
-              flexWrap: isMobile ? 'nowrap' : 'wrap',
+              justifyContent: 'end',
+              gap: 1,
             }}
           >
-            <DueDatePickerField
-              emptyDisplay={pickerEmptyDisplay}
-              dueDateOnly={dueDateOnly}
-              dueTime={dueTime}
-              useCustomTime={useCustomTime}
-              onDueDateChange={handleDueDateChange}
-              onDueTimeChange={handleDueTimeChange}
-              onUseCustomTimeChange={handleUseCustomTimeChange}
-              onClear={() => {
-                setDueDate(null)
-                setDueDateOnly(null)
-                setDueTime(null)
-                setUseCustomTime(false)
-              }}
-            />
-            <RepeatPickerField
-              emptyDisplay={pickerEmptyDisplay}
-              value={frequency}
-              onChange={setFrequency}
-              onClear={() => setFrequency(null)}
-            />
-            <PriorityPickerField
-              value={priority}
-              onChange={setPriority}
-              onClear={() => setPriority(0)}
-              emptyDisplay={pickerEmptyDisplay}
-              priorityColors={priorityColors}
-              priorityLabels={priorityLabels}
-            />
-            <AssigneePickerField
-              emptyDisplay={pickerEmptyDisplay}
-              value={assignees?.[0]?.userId || null}
-              onChange={userId => {
-                if (!userId) {
-                  setAssignees([])
-                } else {
-                  setAssignees([{ userId }])
-                }
-              }}
-              onClear={() => setAssignees([])}
-              currentUserId={userProfile?.id}
-              members={circleMembers?.res || []}
-            />
-            <LabelsPickerField
-              emptyDisplay={pickerEmptyDisplay}
-              values={labelsV2 || []}
-              onChange={setLabelsV2}
-              onClear={() => setLabelsV2([])}
-              labels={userLabels || []}
-            />
-            <AttachmentPickerField
-              attachments={attachments}
-              onChange={setAttachments}
-              onClear={() => setAttachments([])}
-              emptyDisplay={pickerEmptyDisplay}
-              entityType='chore_attachment_draft'
-              draftId={draftId}
-            />
-            <NotificationPickerField
-              value={notificationMetadata}
-              onChange={setNotificationMetadata}
-              onClear={() => setNotificationMetadata({ templates: [] })}
-              emptyDisplay={pickerEmptyDisplay}
-            />
-          </Box>
-
-          <Box mt={2} sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
-            {!hasDescription && (
-              <Button
-                startDecorator={<Add />}
-                variant='outlined'
-                color='neutral'
-                size='md'
-                onClick={() => setHasDescription(true)}
-                endDecorator={
-                  showKeyboardShortcuts && <KeyboardShortcutHint shortcut='E' />
-                }
-              >
-                Description
-              </Button>
-            )}
-            {!hasSubTasks && (
-              <Button
-                startDecorator={<Add />}
-                variant='outlined'
-                color='neutral'
-                size='md'
-                onClick={() => setHasSubTasks(true)}
-                endDecorator={
-                  showKeyboardShortcuts && <KeyboardShortcutHint shortcut='J' />
-                }
-              >
-                Subtasks
-              </Button>
-            )}
-          </Box>
-
-          {hasDescription && (
-            <Box>
-              <Typography level='body-sm'>Description:</Typography>
-              <div>
-                <RichTextEditor
-                  ref={richTextEditorRef}
-                  onChange={setDescription}
-                  value={description || ''}
-                  entityType={'chore_description'}
+            <Button
+              size='lg'
+              variant='outlined'
+              color='neutral'
+              onClick={handleCloseModal}
+            >
+              Cancel
+              {showKeyboardShortcuts && (
+                <KeyboardShortcutHint
+                  shortcut='Esc'
+                  sx={{ ml: 1 }}
+                  withCtrl={false}
                 />
-              </div>
-            </Box>
-          )}
-          {hasSubTasks && (
+              )}
+            </Button>
+            <Button
+              size='lg'
+              variant='solid'
+              color='primary'
+              disabled={!taskTitle.trim()}
+              onClick={createChore}
+            >
+              Create
+              {showKeyboardShortcuts && (
+                <KeyboardShortcutHint shortcut='Enter' sx={{ ml: 1 }} />
+              )}
+            </Button>
+          </Box>
+        }
+      >
+        {!showScan && (
+          <>
             <Box>
-              <Typography level='body-sm'>Subtasks:</Typography>
-              <SubTasks
-                editMode={true}
-                tasks={subTasks ? subTasks : []}
-                setTasks={setSubTasks}
-                shouldFocus={true}
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                }}
+              >
+                <Typography level='body-sm'>Task in a sentence:</Typography>
+                <LearnMoreButton
+                  content={
+                    <>
+                      <Typography level='body-sm' sx={{ mb: 1 }}>
+                        This feature lets you create a task simply by typing a
+                        sentence. It attempt parses the sentence to identify the
+                        task&apos;s due date, priority, and frequency.
+                      </Typography>
+
+                      <Typography
+                        level='body-sm'
+                        sx={{ fontWeight: 'bold', mt: 2 }}
+                      >
+                        Examples:
+                      </Typography>
+
+                      <Typography
+                        level='body-sm'
+                        component='ul'
+                        sx={{ pl: 2, mt: 1, listStyle: 'disc' }}
+                      >
+                        <li>
+                          <strong>Priority:</strong>For highest priority any of
+                          the following keyword <em>P1</em>, <em>Urgent</em>,{' '}
+                          <em>Important</em>, or <em>ASAP</em>. For lower
+                          priorities, use <em>P2</em>, <em>P3</em>, or{' '}
+                          <em>P4</em>.
+                        </li>
+                        <li>
+                          <strong>Due date:</strong> Specify dates with phrases
+                          like <em>tomorrow</em>, <em>next week</em>,{' '}
+                          <em>Monday</em>, or <em>August 1st at 12pm</em>.
+                        </li>
+                        <li>
+                          <strong>Frequency:</strong> Set recurring tasks with
+                          terms like <em>daily</em>, <em>weekly</em>,{' '}
+                          <em>monthly</em>, <em>yearly</em>, or patterns such as{' '}
+                          <em>every Tuesday and Thursday</em>.
+                        </li>
+                      </Typography>
+                    </>
+                  }
+                />
+              </Box>
+
+              <SmartTaskTitleInput
+                autoFocus
+                value={taskText}
+                isNativeScanner={isNativeScanner}
+                onScanClick={
+                  llmAvailable
+                    ? () => {
+                        setScanAutoCapture(true)
+                        setShowScan(true)
+                      }
+                    : undefined
+                }
+                onPhotoSelected={
+                  llmAvailable
+                    ? dataUrl => {
+                        setScanAutoCapture(false)
+                        setPendingPhotoUrl(dataUrl)
+                        setShowScan(true)
+                      }
+                    : undefined
+                }
+                placeholder='Type your task...'
+                onChange={text => {
+                  setTaskText(text)
+                  if (!text) setTaskTitle('')
+                }}
+                customRenderer={renderedParts}
+                onEnterPressed={handleEnterPressed}
+                suggestions={{
+                  '#': {
+                    value: 'id',
+                    display: 'name',
+                    options: userLabels ? userLabels : [],
+                  },
+                  '!': {
+                    value: 'id',
+                    display: 'name',
+                    options: [
+                      { id: '1', name: 'P1' },
+                      { id: '2', name: 'P2' },
+                      { id: '3', name: 'P3' },
+                      { id: '4', name: 'P4' },
+                    ],
+                  },
+                  '@': {
+                    value: 'userId',
+                    display: 'displayName',
+                    options: [
+                      { userId: 'anyone', displayName: 'Anyone' },
+                      ...(circleMembers?.res || []),
+                    ],
+                  },
+                  '*': {
+                    value: 'id',
+                    display: 'name',
+                    options: [
+                      { id: '1', name: '1 point' },
+                      { id: '5', name: '5 points' },
+                      { id: '10', name: '10 points' },
+                      { id: '25', name: '25 points' },
+                      { id: '50', name: '50 points' },
+                      { id: '100', name: '100 points' },
+                    ],
+                  },
+                }}
               />
             </Box>
-          )}
-        </>
-      )}
 
-      {showScan && (
-        <ScanPanel
-          open
-          autoCapture={scanAutoCapture}
-          onTaskExtracted={handleTaskExtracted}
-          initialImageUrl={pendingPhotoUrl}
-          onClose={() => {
-            setShowScan(false)
-            setScanAutoCapture(false)
-            setPendingPhotoUrl(null)
-          }}
-        />
-      )}
-    </ResponsiveModal>
+            <Box
+              sx={{
+                paddingTop: 2,
+                paddingBottom: 1,
+                display: 'flex',
+                flexDirection: 'row',
+                gap: 1.5,
+                overflowX: 'auto',
+                '&::-webkit-scrollbar': { display: 'none' },
+                flexWrap: isMobile ? 'nowrap' : 'wrap',
+              }}
+            >
+              <DueDatePickerField
+                emptyDisplay={pickerEmptyDisplay}
+                dueDateOnly={dueDateOnly}
+                dueTime={dueTime}
+                useCustomTime={useCustomTime}
+                onDueDateChange={handleDueDateChange}
+                onDueTimeChange={handleDueTimeChange}
+                onUseCustomTimeChange={handleUseCustomTimeChange}
+                onClear={() => {
+                  setDueDate(null)
+                  setDueDateOnly(null)
+                  setDueTime(null)
+                  setUseCustomTime(false)
+                }}
+              />
+              <RepeatPickerField
+                emptyDisplay={pickerEmptyDisplay}
+                value={frequency}
+                onChange={setFrequency}
+                onClear={() => setFrequency(null)}
+              />
+              <PriorityPickerField
+                value={priority}
+                onChange={setPriority}
+                onClear={() => setPriority(0)}
+                emptyDisplay={pickerEmptyDisplay}
+                priorityColors={priorityColors}
+                priorityLabels={priorityLabels}
+              />
+              <AssigneePickerField
+                emptyDisplay={pickerEmptyDisplay}
+                value={assignees?.[0]?.userId || null}
+                onChange={userId => {
+                  if (!userId) {
+                    setAssignees([])
+                  } else {
+                    setAssignees([{ userId }])
+                  }
+                }}
+                onClear={() => setAssignees([])}
+                currentUserId={userProfile?.id}
+                members={circleMembers?.res || []}
+              />
+              <LabelsPickerField
+                emptyDisplay={pickerEmptyDisplay}
+                values={labelsV2 || []}
+                onChange={setLabelsV2}
+                onClear={() => setLabelsV2([])}
+                labels={userLabels || []}
+              />
+              <AttachmentPickerField
+                attachments={attachments}
+                onChange={setAttachments}
+                onClear={() => setAttachments([])}
+                emptyDisplay={pickerEmptyDisplay}
+                entityType='chore_attachment_draft'
+                draftId={draftId}
+              />
+              <NotificationPickerField
+                value={notificationMetadata}
+                onChange={setNotificationMetadata}
+                onClear={() => setNotificationMetadata({ templates: [] })}
+                emptyDisplay={pickerEmptyDisplay}
+              />
+            </Box>
+
+            <Box mt={2} sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
+              {!hasDescription && (
+                <Button
+                  startDecorator={<Add />}
+                  variant='outlined'
+                  color='neutral'
+                  size='md'
+                  onClick={() => setHasDescription(true)}
+                  endDecorator={
+                    showKeyboardShortcuts && (
+                      <KeyboardShortcutHint shortcut='E' />
+                    )
+                  }
+                >
+                  Description
+                </Button>
+              )}
+              {!hasSubTasks && (
+                <Button
+                  startDecorator={<Add />}
+                  variant='outlined'
+                  color='neutral'
+                  size='md'
+                  onClick={() => setHasSubTasks(true)}
+                  endDecorator={
+                    showKeyboardShortcuts && (
+                      <KeyboardShortcutHint shortcut='J' />
+                    )
+                  }
+                >
+                  Subtasks
+                </Button>
+              )}
+            </Box>
+
+            {hasDescription && (
+              <Box>
+                <Typography level='body-sm'>Description:</Typography>
+                <div>
+                  <RichTextEditor
+                    ref={richTextEditorRef}
+                    onChange={setDescription}
+                    value={description || ''}
+                    entityType={'chore_description'}
+                  />
+                </div>
+              </Box>
+            )}
+            {hasSubTasks && (
+              <Box>
+                <Typography level='body-sm'>Subtasks:</Typography>
+                <SubTasks
+                  editMode={true}
+                  tasks={subTasks ? subTasks : []}
+                  setTasks={setSubTasks}
+                  shouldFocus={true}
+                />
+              </Box>
+            )}
+          </>
+        )}
+
+        {showScan && (
+          <ScanPanel
+            open
+            autoCapture={scanAutoCapture}
+            onTaskExtracted={handleTaskExtracted}
+            initialImageUrl={pendingPhotoUrl}
+            onClose={() => {
+              setShowScan(false)
+              setScanAutoCapture(false)
+              setPendingPhotoUrl(null)
+            }}
+          />
+        )}
+      </ResponsiveModal>
     </>
   )
 }
