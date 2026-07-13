@@ -1,7 +1,6 @@
 import {
   Box,
   Button,
-  Card,
   Checkbox,
   Chip,
   FormControl,
@@ -9,22 +8,43 @@ import {
   Input,
   Typography,
 } from '@mui/joy'
+import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import RealTimeSettings from '../../components/RealTimeSettings'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { GetUserCircle, PutWebhookURL } from '../../utils/Fetcher'
 import { isPlusAccount } from '../../utils/Helpers'
+import { offlineDB } from '../../utils/OfflineDB'
+import {
+  clearBrowserCacheStorage,
+  isOfflineFeatureEnabled,
+  setOfflineFeatureEnabled,
+  subscribeToOfflineFeature,
+} from '../../utils/OfflineFeatureToggle'
+import { syncEngine } from '../../utils/SyncEngine'
+import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import SettingsLayout from './SettingsLayout'
 
 const AdvancedSettings = () => {
   const { data: userProfile } = useUserProfile()
+  const queryClient = useQueryClient()
   const { showNotification } = useNotification()
 
   const [userCircles, setUserCircles] = useState([])
   const [webhookURL, setWebhookURL] = useState(null)
   const [webhookError, setWebhookError] = useState(null)
   const [isAdmin, setIsAdmin] = useState(false)
+  const [offlineEnabled, setOfflineEnabled] = useState(
+    isOfflineFeatureEnabled(),
+  )
+  const [offlineLoading, setOfflineLoading] = useState(false)
+  const [confirmModalConfig, setConfirmModalConfig] = useState({})
+
+  useEffect(() => {
+    const unsubscribe = subscribeToOfflineFeature(setOfflineEnabled)
+    return unsubscribe
+  }, [])
 
   useEffect(() => {
     GetUserCircle().then(resp => {
@@ -42,20 +62,119 @@ const AdvancedSettings = () => {
     }
   }, [userCircles])
 
-  if (!userProfile) {
-    return (
-      <SettingsLayout title="Advanced Settings">
-        <div>Loading...</div>
-      </SettingsLayout>
-    )
+  const disableOfflineSupport = async () => {
+    setOfflineLoading(true)
+    try {
+      await offlineDB.clearAll()
+      await clearBrowserCacheStorage()
+      setOfflineFeatureEnabled(false)
+      queryClient.removeQueries({ queryKey: ['pendingCommands'] })
+      queryClient.removeQueries({ queryKey: ['chores'] })
+      queryClient.invalidateQueries()
+      showNotification({
+        type: 'success',
+        message: 'Offline mode turned off and local data was cleared',
+      })
+    } catch {
+      setOfflineFeatureEnabled(false)
+      queryClient.removeQueries({ queryKey: ['pendingCommands'] })
+      queryClient.removeQueries({ queryKey: ['chores'] })
+      queryClient.invalidateQueries()
+      showNotification({
+        type: 'warning',
+        message:
+          'Offline mode was turned off, but some local data may still be stored',
+      })
+    } finally {
+      setOfflineLoading(false)
+    }
   }
 
+  const showDisableOfflineConfirmation = () => {
+    setConfirmModalConfig({
+      isOpen: true,
+      title: 'Turn Off Offline Mode',
+      message:
+        'Turning off offline mode will remove unsynced offline changes and saved offline data on this device/browser. Do you want to continue?',
+      confirmText: 'Turn Off & Clear Data',
+      cancelText: 'Cancel',
+      color: 'danger',
+      onClose: isConfirmed => {
+        setConfirmModalConfig({})
+        if (isConfirmed) {
+          disableOfflineSupport()
+        }
+      },
+    })
+  }
+
+  const handleOfflineToggle = async event => {
+    const nextEnabled = !!event.target.checked
+
+    if (nextEnabled) {
+      setOfflineFeatureEnabled(true)
+      await syncEngine.sync()
+      queryClient.invalidateQueries()
+      showNotification({
+        type: 'success',
+        message: 'Offline mode turned on for this device/browser',
+      })
+      return
+    }
+
+    showDisableOfflineConfirmation()
+  }
+
+  // if (!userProfile) {
+  //   return (
+  //     <SettingsLayout title="Advanced Settings">
+  //       <div>Loading...</div>
+  //     </SettingsLayout>
+  //   )
+  // }
+
   return (
-    <SettingsLayout title="Advanced Settings">
+    <SettingsLayout title='Advanced Settings'>
       <div className='grid gap-4'>
         <Typography level='body-md'>
-          Configure advanced features like webhooks and real-time updates for enhanced productivity.
+          Configure advanced features like webhooks and real-time updates for
+          enhanced productivity.
         </Typography>
+
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 2 }}>
+          <Typography level='title-lg'>Offline Support</Typography>
+          <Chip
+            variant='outlined'
+            size='sm'
+            sx={{
+              height: '20px',
+              fontSize: '0.65rem',
+              fontWeight: 'bold',
+              color: 'warning.main',
+              borderColor: 'warning.main',
+            }}
+          >
+            Early Access
+          </Chip>
+        </Box>
+        <Typography level='body-md' mt={-1}>
+          Keep using Donetick when you're offline on this device/browser. Your
+          changes are saved locally and synced when you're back online.
+        </Typography>
+        <FormControl sx={{ mt: 1 }}>
+          <Checkbox
+            checked={offlineEnabled}
+            onChange={handleOfflineToggle}
+            variant='soft'
+            label='Enable Offline Support'
+            disabled={offlineLoading}
+            overlay
+          />
+          <FormHelperText>
+            Turning this off removes unsynced offline changes and saved offline
+            data from this device/browser.
+          </FormHelperText>
+        </FormControl>
 
         {/* Webhook Settings - Only show for admins */}
         {isAdmin && (
@@ -152,9 +271,14 @@ const AdvancedSettings = () => {
           Real-time Updates
         </Typography>
         <Typography level='body-md' mt={-1}>
-          Configure how you receive live updates when tasks and activities change in your circle.
+          Configure how you receive live updates when tasks and activities
+          change in your circle.
         </Typography>
         <RealTimeSettings />
+
+        {confirmModalConfig?.isOpen && (
+          <ConfirmationModal config={confirmModalConfig} />
+        )}
       </div>
     </SettingsLayout>
   )

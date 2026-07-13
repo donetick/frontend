@@ -1,335 +1,203 @@
 import {
   AccessTime,
-  CalendarMonth,
   Check,
-  EventNote,
   HourglassEmpty,
   MoreVert,
-  Person,
   Redo,
   RunningWithErrors,
   Schedule,
   ThumbDown,
-  Timelapse,
-  Toll,
 } from '@mui/icons-material'
-import { Avatar, Box, Chip, Grid, IconButton, Typography } from '@mui/joy'
+import { Avatar, Box, Card, Chip, IconButton, Typography } from '@mui/joy'
 import moment from 'moment'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { TASK_COLOR } from '../../utils/Colors.jsx'
-
-const getCompletedChip = historyEntry => {
-  if (historyEntry.status === 0 || historyEntry.status === 5 || historyEntry.status === 6) {
-    return null
-  }
-
-  if (!historyEntry.dueDate) {
-    return null
-    // <Chip
-    //   size='sm'
-    //   variant='soft'
-    //   color='neutral'
-    //   startDecorator={<CalendarViewDay />}
-    // >
-    //   No Due Date
-    // </Chip>
-  }
-
-  const performedAt = moment(historyEntry.performedAt)
-  const dueDate = moment(historyEntry.dueDate)
-  // TODO: make this a config at some point
-  const gracePeriod = 6 * 60 * 60 * 1000 // 6 hours in milliseconds
-
-  if (Math.abs(performedAt - dueDate) <= gracePeriod) {
-    return (
-      <Chip
-        size='sm'
-        variant='solid'
-        sx={{ backgroundColor: TASK_COLOR.COMPLETED, color: 'white' }}
-        startDecorator={<Check />}
-      >
-        On Time
-      </Chip>
-    )
-  } else if (performedAt.isBefore(dueDate)) {
-    return (
-      <Chip
-        size='sm'
-        variant='soft'
-        sx={{ backgroundColor: TASK_COLOR.SCHEDULED, color: 'white' }}
-        startDecorator={<Check />}
-      >
-        Early
-      </Chip>
-    )
-  } else {
-    return (
-      <Chip
-        size='sm'
-        variant='solid'
-        sx={{ backgroundColor: TASK_COLOR.LATE, color: 'white' }}
-        startDecorator={<Timelapse />}
-      >
-        Late
-      </Chip>
-    )
-  }
-}
+import PendingBadge from '../components/PendingBadge'
 
 const formatTime = seconds => {
-  if (typeof seconds !== 'number' || isNaN(seconds) || seconds < 0) {
-    return null
-  }
-  const hours = Math.floor(seconds / 3600)
-  const minutes = Math.floor((seconds % 3600) / 60)
-  const secs = seconds % 60
-  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+  if (typeof seconds !== 'number' || isNaN(seconds) || seconds < 0) return null
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  const s = seconds % 60
+  return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
 }
 
-/**
- * Compact HistoryCard component - content only
- */
+const stripHtmlTags = html => {
+  if (!html) return ''
+  if (typeof document === 'undefined') {
+    return String(html).replace(/<[^>]*>/g, '')
+  }
+  const div = document.createElement('div')
+  div.innerHTML = html
+  return div.textContent || div.innerText || ''
+}
+
+const statusConfig = {
+  0: { label: 'In Progress',      color: 'primary', icon: <AccessTime /> },
+  1: { label: 'Completed',        color: 'success', icon: <Check /> },
+  2: { label: 'Skipped',          color: 'warning', icon: <Redo /> },
+  3: { label: 'Pending Approval', color: 'neutral', icon: <HourglassEmpty /> },
+  4: { label: 'Rejected',         color: 'danger',  icon: <ThumbDown /> },
+  5: { label: 'Missed',           color: 'danger',  icon: <RunningWithErrors /> },
+  6: { label: 'Rescheduled',      color: 'warning', icon: <Schedule /> },
+}
+
 const HistoryCard = ({
   allHistory,
   performers,
   historyEntry,
   index,
+  pendingCommands,
   onToggleActions,
   onViewNote,
+  onViewDetails,
 }) => {
   const { fmt } = useLocalization()
   const performer = performers.find(p => p.userId === historyEntry.completedBy)
   const assignedTo = performers.find(p => p.userId === historyEntry.assignedTo)
+  const config = statusConfig[historyEntry.status] ?? statusConfig[1]
+  const displayLabel =
+    historyEntry.status === 6 && !historyEntry.dueDate ? 'Scheduled' : config.label
+  const actionDate = historyEntry.performedAt || historyEntry.updatedAt
 
-  const formatTimeDifference = (startDate, endDate) => {
-    const diffInMinutes = moment(startDate).diff(endDate, 'minutes')
-    let timeValue = diffInMinutes
-    let unit = 'minute'
+  const getTimingLine = () => {
+    const { status, performedAt, dueDate } = historyEntry
+    if (!dueDate) return null
 
-    if (diffInMinutes >= 60) {
-      const diffInHours = moment(startDate).diff(endDate, 'hours')
-      timeValue = diffInHours
-      unit = 'hour'
-
-      if (diffInHours >= 24) {
-        const diffInDays = moment(startDate).diff(endDate, 'days')
-        timeValue = diffInDays
-        unit = 'day'
-      }
+    if (status === 6) {
+      return `Was due ${moment(dueDate).format('MMM D')}`
     }
-
-    return `${timeValue} ${unit}${timeValue !== 1 ? 's' : ''}`
+    if (status === 5) {
+      return `Was due ${moment(dueDate).format('MMM D')}`
+    }
+    if ((status === 1 || status === 2 || status === 0) && performedAt) {
+      const diffHours = moment(performedAt).diff(dueDate, 'hours')
+      const abs = Math.abs(diffHours)
+      if (abs <= 6) return null // chip already says "On Time"
+      if (diffHours < 0) return abs >= 48 ? `${Math.floor(abs / 24)}d before due date` : `${abs}h before due date`
+      return abs >= 48 ? `${Math.floor(abs / 24)}d after due date` : `${abs}h after due date`
+    }
+    return null
   }
 
-  const getStatusAvatar = () => {
-    const statusMap = {
-      0: { icon: <AccessTime />, color: 'primary' }, // Started
-      1: { icon: <Check />, color: 'success' }, // Completed
-      2: { icon: <Redo />, color: 'warning' }, // Skipped
-      3: { icon: <HourglassEmpty />, color: 'neutral' }, // Pending Approval
-      4: { icon: <ThumbDown />, color: 'danger' }, // Rejected
-      5: { icon: <RunningWithErrors />, color: 'danger' }, // Missed
-      6: { icon: <Schedule />, color: 'warning' }, // Rescheduled
-    }
+  const timingLine = getTimingLine()
+  const noteLabel = historyEntry.status === 2 || historyEntry.status === 4 ? 'Reason' : 'Note'
+  const plainTextNotes = historyEntry.notes ? stripHtmlTags(historyEntry.notes) : ''
 
-    const config = statusMap[historyEntry.status] || statusMap[1]
-    return (
-      <Avatar
-        size='sm'
-        color={config.color}
-        variant='soft'
-        sx={{
-          width: 24,
-          height: 24,
-          '& svg': { fontSize: '14px' },
-        }}
-      >
-        {config.icon}
-      </Avatar>
-    )
-  }
+  const metaTextParts = [
+    fmt.dateTime(actionDate),
+    historyEntry.completedBy !== historyEntry.assignedTo && assignedTo
+      ? `Assigned to ${assignedTo.displayName}`
+      : null,
+    historyEntry?.duration > 0 ? `⏱ ${formatTime(historyEntry.duration)}` : null,
+    historyEntry?.points > 0 ? `★ ${historyEntry.points} pt${historyEntry.points > 1 ? 's' : ''}` : null,
+  ].filter(Boolean)
 
   return (
     <Box
+      onClick={() => onViewDetails?.()}
       sx={{
         display: 'flex',
-        alignItems: 'center',
-        minHeight: 64,
         minWidth: '100%',
-        px: 2,
-        py: 1.5,
         bgcolor: 'background.body',
         borderBottom: '1px solid',
         borderColor: 'divider',
+        borderLeft: '3px solid',
+        borderLeftColor: `${config.color}.400`,
+        cursor: onViewDetails ? 'pointer' : 'default',
+        '&:hover': onViewDetails ? { bgcolor: 'background.level1' } : {},
       }}
     >
-      <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Grid container spacing={1} alignItems='center'>
-          {/* First Row/Column: Status and Time Info */}
-          <Grid xs={12} sm={8}>
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-                flexWrap: 'wrap',
-              }}
+      <Box sx={{ flex: 1, minWidth: 0, px: 2, py: 1.5 }}>
+        {/* Status + timing chip */}
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+            <Avatar
+              size='sm'
+              color={config.color}
+              variant='soft'
+              sx={{ width: 20, height: 20, '& svg': { fontSize: '11px' } }}
             >
-              {getStatusAvatar()}
+              {config.icon}
+            </Avatar>
+            <Typography level='title-sm' fontWeight='lg' sx={{ color: `${config.color}.plainColor` }}>
+              {displayLabel}
+            </Typography>
+          </Box>
+        </Box>
 
-              <Typography
-                level='body-sm'
-                sx={{
-                  color: 'text.secondary',
-                  fontWeight: 'md',
-                }}
-              >
-                {historyEntry.status === 0
-                  ? 'In Progress'
-                  : historyEntry.status === 1
-                    ? 'Completed'
-                    : historyEntry.status === 2
-                      ? 'Skipped'
-                      : historyEntry.status === 3
-                        ? 'Pending Approval'
-                        : historyEntry.status === 4
-                          ? 'Rejected'
-                          : historyEntry.status === 5
-                            ? 'Missed'
-                            : historyEntry.status === 6
-                              ? 'Rescheduled'
-                              : 'Completed'}
-              </Typography>
+        {/* Timing relationship line */}
+        {timingLine && (
+          <Typography level='body-xs' sx={{ color: 'text.tertiary', mb: 0.25 }}>
+            {timingLine}
+          </Typography>
+        )}
 
-              <Chip size='sm' startDecorator={<EventNote />}>
-                {fmt.dateTime(
-                  historyEntry.performedAt || historyEntry.updatedAt,
-                )}
-              </Chip>
+        {/* Notes inline */}
 
-              <Box sx={{ display: 'flex', gap: 0.5 }}>
-                {getCompletedChip(historyEntry)}
-              </Box>
-            </Box>
-          </Grid>
+        {plainTextNotes && (
+        <Card 
+          variant='soft'
+          color='neutral'
+          size='sm'
+          sx={{ mt: 0.5, whiteSpace: 'pre-wrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+        >
+          <Typography
+            level='body-xs'
+            sx={{ color: 'text.secondary', fontStyle: 'italic', mb: 0.25, cursor: 'pointer' }}
+            onClick={e => { e.stopPropagation(); onViewNote?.(historyEntry.notes) }}
+          >
+            {plainTextNotes.length > 80 ? `${plainTextNotes.slice(0, 80)}…` : plainTextNotes}
+          </Typography>
+        </Card>
+        )}
 
-          {/* Second Row/Column: Completion Status (right side on desktop) */}
-          <Grid xs={12} sm={4}>
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: { xs: 'flex-start', sm: 'flex-end' },
-                alignItems: 'center',
-                gap: 1,
-              }}
+        {/* Metadata strip: performer chip + date + extras */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 0.5, flexWrap: 'wrap' }}>
+          {performer && (
+            <Chip
+              size='sm'
+              variant='soft'
+              color='neutral'
+              startDecorator={
+                <Avatar src={performer.image} alt={performer.displayName} sx={{ width: 14, height: 14 }} />
+              }
             >
-              {historyEntry.dueDate && (
-                <Chip size='sm' startDecorator={<CalendarMonth />}>
-                  {fmt.dateTime(historyEntry.dueDate)}
-                </Chip>
-              )}
-            </Box>
-          </Grid>
-
-          {/* Third Row: Performer and Assignment Info */}
-          <Grid xs={12}>
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-                flexWrap: 'wrap',
-                mt: 0.5,
-              }}
-            >
-              {performer && (
-                <Chip
-                  size='sm'
-                  variant='solid'
-                  color='success'
-                  startDecorator={
-                    <Avatar
-                      src={performer?.image}
-                      alt={performer?.displayName}
-                    />
-                  }
-                >
-                  {performer?.displayName || 'Unknown'}
-                </Chip>
-              )}
-
-              {historyEntry.completedBy !== historyEntry.assignedTo &&
-                assignedTo && (
-                  <Chip
-                    size='sm'
-                    variant='outlined'
-                    color='neutral'
-                    startDecorator={<Person />}
-                  >
-                    Assigned to {assignedTo.displayName}
-                  </Chip>
-                )}
-
-              {historyEntry.notes && (
-                <Chip
-                  size='sm'
-                  variant='plain'
-                  color='neutral'
-                  startDecorator={<EventNote />}
-                  sx={{
-                    maxWidth: '120px',
-                    overflow: 'hidden',
-                    cursor: 'pointer',
-                  }}
-                  onClick={e => {
-                    e.stopPropagation()
-                    onViewNote?.(historyEntry.notes)
-                  }}
-                >
-                  Note
-                </Chip>
-              )}
-              {/* add a duration chip if we have duration */}
-              {historyEntry?.duration > 0 && (
-                <Chip
-                  size='sm'
-                  variant='soft'
-                  color='primary'
-                  startDecorator={<AccessTime />}
-                >
-                  {formatTime(historyEntry.duration)}
-                </Chip>
-              )}
-              {historyEntry?.points > 0 && (
-                <Chip
-                  size='sm'
-                  variant='solid'
-                  color='success'
-                  startDecorator={<Toll />}
-                >
-                  {historyEntry.points} pt
-                  {historyEntry.points > 1 ? 's' : ''}
-                </Chip>
-              )}
-            </Box>
-          </Grid>
-        </Grid>
+              {performer.displayName}
+            </Chip>
+          )}
+          {metaTextParts.length > 0 && (
+            <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+              {metaTextParts.join(' · ')}
+            </Typography>
+          )}
+        </Box>
       </Box>
-      <Box>
+
+      <Box sx={{ display: 'flex', alignItems: 'center', pr: 0.5 }} onClick={e => e.stopPropagation()}>
         {onToggleActions && (
           <IconButton
             color='neutral'
             variant='plain'
             size='sm'
-            onClick={e => {
-              e.stopPropagation()
-              onToggleActions()
-            }}
+            onClick={e => { e.stopPropagation(); onToggleActions() }}
           >
             <MoreVert sx={{ fontSize: 18 }} />
           </IconButton>
         )}
       </Box>
+      {pendingCommands?.length > 0 && (
+        <PendingBadge
+          commands={pendingCommands}
+          size='s'
+          sx={{
+            mr: 0.5,
+            position: 'absolute',
+            right: -3,
+            top: -3,
+          }}
+        />
+      )}
     </Box>
   )
 }

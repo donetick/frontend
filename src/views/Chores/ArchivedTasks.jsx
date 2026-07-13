@@ -4,31 +4,40 @@ import {
   CheckBoxOutlineBlank,
   Close,
   Delete,
+  Label,
+  Person,
+  PriorityHigh,
   SelectAll,
   Unarchive,
   ViewAgenda,
   ViewModule,
 } from '@mui/icons-material'
 import {
-  Box,
-  Button,
-  Container,
-  Divider,
-  IconButton,
-  Input,
-  List,
-  Stack,
-  Typography,
+    Box,
+    Button,
+    Container,
+    Divider,
+    IconButton,
+    Input,
+    List,
+    Stack,
+    Typography,
 } from '@mui/joy'
+import { useQueryClient } from '@tanstack/react-query'
 import Fuse from 'fuse.js'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import FilterBar from '../../components/common/FilterBar'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
+import { useFilter } from '../../hooks/useFilter'
 import { useUnArchiveChore } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
+import { commandQueue, CommandType } from '../../utils/CommandQueue'
 import { DeleteChore, GetArchivedChores } from '../../utils/Fetcher'
+import Priorities from '../../utils/Priorities'
+import { offlineDB } from '../../utils/OfflineDB'
 import LoadingComponent from '../components/Loading'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import ChoreCard from './ChoreCard'
@@ -36,11 +45,54 @@ import ChoreListView from './ChoreListView.jsx'
 import CompactChoreCard from './CompactChoreCard'
 import MultiSelectHelp from './MultiSelectHelp'
 
+const sortByUpdatedAtDesc = chores =>
+  (chores || []).sort((a, b) => {
+    const dateA = new Date(a.updatedAt || 0)
+    const dateB = new Date(b.updatedAt || 0)
+    return dateB - dateA
+  })
+
+const applyPendingArchivedState = async chores => {
+  const pending = await commandQueue.getPending()
+
+  const pendingArchiveIds = new Set(
+    pending
+      .filter(cmd => cmd.commandType === CommandType.ARCHIVE_CHORE)
+      .map(cmd => String(cmd.entityId)),
+  )
+  const pendingUnarchiveIds = new Set(
+    pending
+      .filter(cmd => cmd.commandType === CommandType.UNARCHIVE_CHORE)
+      .map(cmd => String(cmd.entityId)),
+  )
+  const pendingDeleteIds = new Set(
+    pending
+      .filter(cmd => cmd.commandType === CommandType.DELETE_CHORE)
+      .map(cmd => String(cmd.entityId)),
+  )
+
+  return (chores || [])
+    .filter(chore => !pendingDeleteIds.has(String(chore.id)))
+    .filter(chore => {
+      const id = String(chore.id)
+      if (pendingUnarchiveIds.has(id)) return false
+      return chore.isActive === false || pendingArchiveIds.has(id)
+    })
+    .map(chore => {
+      const id = String(chore.id)
+      if (pendingArchiveIds.has(id)) {
+        return { ...chore, isActive: false, _pending: 'archive' }
+      }
+      return chore
+    })
+}
+
 const ArchivedTasks = () => {
   const { data: userProfile, isLoading: isUserProfileLoading } =
     useUserProfile()
   const { showSuccess, showError } = useNotification()
   const { impersonatedUser } = useImpersonateUser()
+  const queryClient = useQueryClient()
   const unArchiveChore = useUnArchiveChore()
   const [archivedChores, setArchivedChores] = useState([])
   const [filteredChores, setFilteredChores] = useState([])
@@ -61,6 +113,95 @@ const ArchivedTasks = () => {
 
   const { data: membersData, isLoading: membersLoading } = useCircleMembers()
 
+  // Unique labels present across all archived chores
+  const availableLabels = useMemo(() => {
+    const seen = {}
+    archivedChores.forEach(c => {
+      c.labelsV2?.forEach(l => { seen[l.id] = l })
+    })
+    return Object.values(seen)
+  }, [archivedChores])
+
+  const filterDefs = useMemo(
+    () => [
+      {
+        id: 'assignee',
+        label: 'Assignee',
+        type: 'multi-select',
+        icon: <Person />,
+        options: performers.map(p => ({
+          value: p.userId,
+          label: p.displayName,
+          avatar: p.image,
+        })),
+        filterFn: (item, values) => values.includes(item.assignedTo),
+      },
+      {
+        id: 'priority',
+        label: 'Priority',
+        type: 'multi-select',
+        icon: <PriorityHigh />,
+        options: Priorities.map(p => ({
+          value: p.value,
+          label: p.name,
+          color: p.color || 'neutral',
+          icon: p.icon,
+        })),
+        filterFn: (item, values) => values.includes(item.priority ?? 0),
+      },
+      ...(availableLabels.length > 0
+        ? [
+            {
+              id: 'label',
+              label: 'Labels',
+              type: 'multi-select',
+              icon: <Label />,
+              options: availableLabels.map(l => ({
+                value: l.id,
+                label: l.name,
+                icon: (
+                  <Box
+                    component='span'
+                    sx={{
+                      display: 'inline-block',
+                      width: 10,
+                      height: 10,
+                      borderRadius: '50%',
+                      bgcolor: l.color || '#90a4ae',
+                      flexShrink: 0,
+                    }}
+                  />
+                ),
+              })),
+              filterFn: (item, values) =>
+                item.labelsV2?.some(l => values.includes(l.id)) ?? false,
+            },
+          ]
+        : []),
+      {
+        id: 'archivedAt',
+        label: 'Archived Date',
+        type: 'date-range',
+        icon: <Archive />,
+        filterFn: (item, value) => {
+          const date = new Date(item.updatedAt)
+          if (value.from && date < new Date(value.from)) return false
+          if (value.to && date > new Date(value.to)) return false
+          return true
+        },
+      },
+    ],
+    [performers, availableLabels],
+  )
+
+  const {
+    filteredData: finalChores,
+    activeFilters,
+    setFilter,
+    clearAll,
+    hasActiveFilters,
+  } = useFilter(filteredChores, filterDefs)
+
   useEffect(() => {
     const loadArchivedChores = async () => {
       if (!membersLoading && userProfile) {
@@ -68,19 +209,28 @@ const ArchivedTasks = () => {
         try {
           const response = await GetArchivedChores()
           const data = await response.json()
-          // Sort by updatedAt (most recent first)
-          const sortedChores = data.res.sort((a, b) => {
-            const dateA = new Date(a.updatedAt || 0)
-            const dateB = new Date(b.updatedAt || 0)
-            return dateB - dateA
-          })
+          if (data?.res?.length) {
+            await offlineDB.saveChores(data.res)
+          }
+          const archivedWithPending = await applyPendingArchivedState(
+            data?.res || [],
+          )
+          const sortedChores = sortByUpdatedAtDesc(archivedWithPending)
           setArchivedChores(sortedChores)
           setFilteredChores(sortedChores)
         } catch (error) {
-          showError({
-            title: 'Failed to load archived tasks',
-            message: 'Please try again later.',
-          })
+          try {
+            const cached = await offlineDB.getChores(true)
+            const archivedWithPending = await applyPendingArchivedState(cached)
+            const sortedChores = sortByUpdatedAtDesc(archivedWithPending)
+            setArchivedChores(sortedChores)
+            setFilteredChores(sortedChores)
+          } catch {
+            showError({
+              title: 'Failed to load archived tasks',
+              message: 'Please try again later.',
+            })
+          }
         } finally {
           setIsLoading(false)
         }
@@ -280,11 +430,8 @@ const ArchivedTasks = () => {
   }
 
   const selectAllVisibleChores = () => {
-    const visibleChores =
-      searchTerm?.length > 0 ? filteredChores : archivedChores
-    if (visibleChores.length > 0) {
-      const allIds = new Set(visibleChores.map(chore => chore.id))
-      setSelectedChores(allIds)
+    if (finalChores.length > 0) {
+      setSelectedChores(new Set(finalChores.map(c => c.id)))
     }
   }
 
@@ -319,6 +466,10 @@ const ArchivedTasks = () => {
             const restoredTasks = []
             const failedTasks = []
 
+            const isNetworkError = err =>
+              err instanceof TypeError && err.message === 'Failed to fetch'
+            const queuedTasks = []
+
             for (const chore of selectedData) {
               try {
                 await new Promise((resolve, reject) => {
@@ -327,9 +478,18 @@ const ArchivedTasks = () => {
                       restoredTasks.push(chore)
                       resolve(data)
                     },
-                    onError: error => {
-                      failedTasks.push(chore)
-                      reject(error)
+                    onError: async error => {
+                      if (isNetworkError(error)) {
+                        await commandQueue.enqueue(CommandType.UNARCHIVE_CHORE, chore.id, { id: chore.id })
+                        await offlineDB.saveChores([
+                          { ...chore, isActive: true, _pending: 'unarchive' },
+                        ])
+                        queuedTasks.push(chore)
+                        resolve()
+                      } else {
+                        failedTasks.push(chore)
+                        reject(error)
+                      }
                     },
                   })
                 })
@@ -338,22 +498,22 @@ const ArchivedTasks = () => {
               }
             }
 
-            if (restoredTasks.length > 0) {
-              showSuccess({
-                title: '📤 Tasks Restored',
-                message: `Successfully restored ${restoredTasks.length} task${restoredTasks.length > 1 ? 's' : ''}.`,
-              })
-
-              // Remove restored tasks from archived list
-              const restoredIds = new Set(restoredTasks.map(c => c.id))
-              const newArchivedChores = archivedChores.filter(
-                c => !restoredIds.has(c.id),
-              )
-              const newFilteredChores = filteredChores.filter(
-                c => !restoredIds.has(c.id),
-              )
+            const allRestored = [...restoredTasks, ...queuedTasks]
+            if (allRestored.length > 0) {
+              const offlineNote = queuedTasks.length > 0 ? " (queued — will sync when back online)" : ''
+              // Remove from archived view optimistically for both online and queued
+              const restoredIds = new Set(allRestored.map(c => c.id))
+              const newArchivedChores = archivedChores.filter(c => !restoredIds.has(c.id))
+              const newFilteredChores = filteredChores.filter(c => !restoredIds.has(c.id))
               setArchivedChores(newArchivedChores)
               setFilteredChores(newFilteredChores)
+              if (queuedTasks.length > 0) {
+                queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
+              }
+              showSuccess({
+                title: '📤 Tasks Restored',
+                message: `Restored ${allRestored.length} task${allRestored.length > 1 ? 's' : ''}${offlineNote}.`,
+              })
             }
 
             if (failedTasks.length > 0) {
@@ -605,6 +765,15 @@ const ArchivedTasks = () => {
         </Box>
       </Box>
 
+      <FilterBar
+        filterDefs={filterDefs}
+        activeFilters={activeFilters}
+        onSetFilter={setFilter}
+        onClearAll={clearAll}
+        resultCount={finalChores.length}
+        totalCount={filteredChores.length}
+      />
+
       {/* Multi-select Toolbar */}
       {isMultiSelectMode && (
         <Box
@@ -677,7 +846,7 @@ const ArchivedTasks = () => {
                   variant='outlined'
                   onClick={selectAllVisibleChores}
                   startDecorator={<SelectAll />}
-                  disabled={selectedChores.size === filteredChores.length}
+                  disabled={selectedChores.size === finalChores.length}
                   sx={{
                     minWidth: 'auto',
                     '--Button-paddingInline': '0.75rem',
@@ -808,7 +977,7 @@ const ArchivedTasks = () => {
       )}
 
       {/* Content */}
-      {filteredChores.length === 0 ? (
+      {finalChores.length === 0 ? (
         <Box
           sx={{
             display: 'flex',
@@ -818,42 +987,43 @@ const ArchivedTasks = () => {
             height: '50vh',
           }}
         >
-          <Archive
-            sx={{
-              fontSize: '4rem',
-              mb: 1,
-              color: 'text.tertiary',
-            }}
-          />
+          <Archive sx={{ fontSize: '4rem', mb: 1, color: 'text.tertiary' }} />
           <Typography level='title-md' gutterBottom>
-            {searchTerm ? 'No archived tasks found' : 'No archived tasks'}
+            {searchTerm || hasActiveFilters
+              ? 'No archived tasks found'
+              : 'No archived tasks'}
           </Typography>
           <Typography level='body-sm' color='text.secondary' sx={{ mb: 2 }}>
-            {searchTerm
-              ? 'Try adjusting your search terms'
+            {searchTerm || hasActiveFilters
+              ? 'Try adjusting your search or filters'
               : 'Archived tasks will appear here when you archive them from the main task list'}
           </Typography>
-          {searchTerm && (
-            <Button
-              onClick={handleSearchClose}
-              variant='outlined'
-              color='neutral'
-            >
-              Clear search
-            </Button>
+          {(searchTerm || hasActiveFilters) && (
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              {searchTerm && (
+                <Button onClick={handleSearchClose} variant='outlined' color='neutral'>
+                  Clear search
+                </Button>
+              )}
+              {hasActiveFilters && (
+                <Button onClick={clearAll} variant='outlined' color='neutral'>
+                  Clear filters
+                </Button>
+              )}
+            </Box>
           )}
         </Box>
       ) : (
         <Box>
           <Typography level='body-sm' color='text.secondary' sx={{ mb: 2 }}>
-            {filteredChores.length} archived task
-            {filteredChores.length !== 1 ? 's' : ''}
+            {finalChores.length} archived task
+            {finalChores.length !== 1 ? 's' : ''}
             {searchTerm && ` matching "${searchTerm}"`}
           </Typography>
 
           <List sx={{ gap: viewMode === 'compact' ? 0 : 1 }}>
             <ChoreListView
-              chores={filteredChores}
+              chores={finalChores}
               // viewOnly={true}
               showActions={false}
               viewMode={viewMode}

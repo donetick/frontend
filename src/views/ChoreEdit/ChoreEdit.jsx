@@ -1,4 +1,12 @@
-import { Add, ArrowDropDown, HorizontalRule, Save } from '@mui/icons-material'
+import {
+  Add,
+  ArrowDropDown,
+  AttachFile,
+  Delete,
+  HorizontalRule,
+  Save,
+  UploadFile,
+} from '@mui/icons-material'
 import {
   Avatar,
   Box,
@@ -43,8 +51,14 @@ import {
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import { useNotification } from '../../service/NotificationProvider'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
-import { GetAllCircleMembers, GetThings } from '../../utils/Fetcher'
-import { isPlusAccount } from '../../utils/Helpers'
+import {
+  DeleteChoreAttachment,
+  GetAllCircleMembers,
+  GetThings,
+  UploadChoreAttachment,
+} from '../../utils/Fetcher'
+import { isPlusAccount, resolvePhotoURL } from '../../utils/Helpers'
+import { generateUUID } from '../../utils/UUID'
 import Priorities from '../../utils/Priorities.jsx'
 import { getIconComponent } from '../../utils/ProjectIcons'
 import { getSafeBottomPadding } from '../../utils/SafeAreaUtils.js'
@@ -53,6 +67,7 @@ import LoadingComponent from '../components/Loading.jsx'
 import RichTextEditor from '../components/RichTextEditor.jsx'
 import SubTasks from '../components/SubTask.jsx'
 import { useLabels } from '../Labels/LabelQueries'
+import AttachmentViewerModal from '../Modals/Inputs/AttachmentViewerModal'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import LabelModal from '../Modals/Inputs/LabelModal'
 import { useProjects } from '../Projects/ProjectQueries'
@@ -83,7 +98,8 @@ const ChoreEdit = () => {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [confirmModelConfig, setConfirmModelConfig] = useState({})
-  const [assignees, setAssignees] = useState([])
+  const [anyone, setAnyone] = useState(false)
+  const [assignableTo, setAssignableTo] = useState([])
   const [performers, setPerformers] = useState([])
   const [assignStrategy, setAssignStrategy] = useState(ASSIGN_STRATEGIES[2])
   const [dueDate, setDueDate] = useState(null)
@@ -116,7 +132,13 @@ const ChoreEdit = () => {
   const [createdBy, setCreatedBy] = useState(0)
   const [errors, setErrors] = useState({})
   const [attemptToSave, setAttemptToSave] = useState(false)
+  const [draftId] = useState(() => generateUUID())
+  const [attachments, setAttachments] = useState([])
+  const [isUploadingAttachment, setIsUploadingAttachment] = useState(false)
   const [addLabelModalOpen, setAddLabelModalOpen] = useState(false)
+  const [attachmentViewerConfig, setAttachmentViewerConfig] = useState({
+    isOpen: false,
+  })
   const [showSavePrivacyDefault, setShowSavePrivacyDefault] = useState(false)
   const [privacySaved, setPrivacySaved] = useState(false)
   const [showSaveNotificationDefault, setShowSaveNotificationDefault] =
@@ -158,6 +180,7 @@ const ChoreEdit = () => {
 
   const Navigate = useNavigate()
 
+  const assignees = anyone ? performers : assignableTo
   const HandleValidateChore = () => {
     const errors = {}
 
@@ -330,12 +353,14 @@ const ChoreEdit = () => {
     if (searchParams.get('clone') === 'true') {
       newChoreId = null
     }
+    const assignees = anyone ? [] : assignableTo
     const chore = {
       id: Number(newChoreId),
       name: name,
       description: description,
       assignees: assignees,
       dueDate: dueDate ? new Date(dueDate).toISOString() : null,
+      nextDueDate: dueDate ? new Date(dueDate).toISOString() : null,
       frequencyType: frequencyType,
       frequency: Number(frequency),
       frequencyMetadata: frequencyMetadata,
@@ -358,6 +383,7 @@ const ChoreEdit = () => {
       deadlineOffset: deadlineOffset < 0 ? null : deadlineOffset,
       priority: priority,
       projectId: projectId === 'default' ? null : projectId,
+      draftId: newChoreId > 0 ? undefined : draftId,
     }
     let SaveFunction = createChoreMutation.mutateAsync
     if (newChoreId > 0) {
@@ -365,11 +391,22 @@ const ChoreEdit = () => {
     }
 
     SaveFunction(chore)
-      .then(() => {
-        showSuccess({
-          title: 'Chore Saved',
-          message: 'Your task has been saved successfully!',
-        })
+      .then(result => {
+        if (
+          result?._pendingUpdate ||
+          result?._pendingCreate ||
+          result?.res?._pendingCreate
+        ) {
+          showSuccess({
+            title: 'Saved Offline',
+            message: 'Your changes will sync when you are back online.',
+          })
+        } else {
+          showSuccess({
+            title: 'Chore Saved',
+            message: 'Your task has been saved successfully!',
+          })
+        }
         Navigate('/chores')
       })
       .catch(error => {
@@ -407,15 +444,29 @@ const ChoreEdit = () => {
         setIsNotificable(JSON.parse(defaultNotificationSetting))
       }
 
+      const defaultAnyoneSetting = localStorage.getItem('defaultAnyoneSetting')
+      if (defaultAnyoneSetting != null) {
+        const savedAnyone = JSON.parse(defaultAnyoneSetting)
+        setAnyone(savedAnyone)
+      }
+
       const defaultAssigneeSetting = localStorage.getItem(
         'defaultAssigneeSetting',
       )
       if (defaultAssigneeSetting !== null) {
         const savedAssignees = JSON.parse(defaultAssigneeSetting)
-        setAssignees(savedAssignees)
+        setAssignableTo(savedAssignees)
       }
     }
   }, [])
+  useEffect(() => {
+    const anyoneSetting = localStorage.getItem('defaultAnyoneSetting')
+    const anyoneDirty = anyoneSetting !== JSON.stringify(anyone)
+    const assigneeSetting = localStorage.getItem('defaultAssigneeSetting')
+    const assigneeDirty = assigneeSetting !== JSON.stringify(assignableTo)
+    const dirty = anyoneDirty || (!anyone && assigneeDirty)
+    setShowSaveAssigneeDefault(dirty)
+  }, [anyone, assignableTo])
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -465,7 +516,8 @@ const ChoreEdit = () => {
       setChore(data.res)
       setName(data.res.name ? data.res.name : '')
       setDescription(data.res.description ? data.res.description : '')
-      setAssignees(data.res.assignees ? data.res.assignees : [])
+      setAssignableTo(data.res.assignees ? data.res.assignees : [])
+      setAnyone((data.res.assignees?.length || 0) === 0)
       setAssignedTo(data.res.assignedTo)
       setFrequencyType(data.res.frequencyType ? data.res.frequencyType : 'once')
 
@@ -546,6 +598,7 @@ const ChoreEdit = () => {
 
       setCreatedBy(data.res.createdBy)
       setUpdatedBy(data.res.updatedBy)
+      setAttachments(data.res.attachments || [])
     }
   }, [choreData, isChoreLoading, searchParams])
 
@@ -579,13 +632,15 @@ const ChoreEdit = () => {
     if (assignees.length === 0) {
       setAssignStrategy('no_assignee')
       setAssignedTo(null)
-    } else if (assignees.length === 1) {
-      setAssignedTo(assignees[0].userId)
+    } else {
+      if (!assignees.some(a => a.userId === assignedTo)) {
+        setAssignedTo(assignees[0].userId)
+      }
       if (assignStrategy === 'no_assignee') {
         setAssignStrategy(ASSIGN_STRATEGIES[2]) // default to least_completed
       }
     }
-  }, [assignees, assignStrategy])
+  }, [assignStrategy, assignedTo, assignees])
 
   // useEffect(() => {
   //   if (performers.length > 0 && assignees.length === 0 && userProfile) {
@@ -602,7 +657,7 @@ const ChoreEdit = () => {
     if (attemptToSave) {
       HandleValidateChore()
     }
-  }, [assignees, name, frequencyMetadata, attemptToSave, dueDate])
+  }, [assignableTo, name, frequencyMetadata, attemptToSave, dueDate])
 
   const handleDelete = () => {
     setConfirmModelConfig({
@@ -909,6 +964,175 @@ const ChoreEdit = () => {
             />
           </Card>
         </Box>
+
+        <Box mt={3}>
+          <Typography level='h4'>Attachments</Typography>
+          <Typography level='body-md'>Files attached to this task</Typography>
+          <Card variant='outlined' sx={{ mt: 2, p: 1.5 }}>
+            {attachments.length > 0 && (
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 1.5 }}>
+                {attachments.map((att, idx) => (
+                  <Box
+                    key={att.file_path || idx}
+                    onClick={() => {
+                      const url = resolvePhotoURL(att.sign || att.file_path)
+                      const ext = (att.file_name || '')
+                        .split('.')
+                        .pop()
+                        .toLowerCase()
+                      const isImage = [
+                        'jpg',
+                        'jpeg',
+                        'png',
+                        'gif',
+                        'webp',
+                        'bmp',
+                        'svg',
+                      ].includes(ext)
+                      if (isImage) {
+                        setAttachmentViewerConfig({
+                          isOpen: true,
+                          url,
+                          fileName: att.file_name,
+                          onClose: () =>
+                            setAttachmentViewerConfig({ isOpen: false }),
+                        })
+                      } else {
+                        const a = document.createElement('a')
+                        a.href = url
+                        a.download = att.file_name || 'attachment'
+                        document.body.appendChild(a)
+                        a.click()
+                        document.body.removeChild(a)
+                      }
+                    }}
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1,
+                      p: 1,
+                      borderRadius: 'sm',
+                      border: '1px solid',
+                      borderColor: 'neutral.outlinedBorder',
+                      cursor: 'pointer',
+                      '&:hover': { bgcolor: 'neutral.softHoverBg' },
+                    }}
+                  >
+                    <AttachFile sx={{ fontSize: 18, color: 'neutral.500' }} />
+                    <Typography
+                      level='body-sm'
+                      sx={{ flex: 1, wordBreak: 'break-all' }}
+                    >
+                      {att.file_name}
+                    </Typography>
+                    {att.size_bytes && (
+                      <Typography level='body-xs' color='neutral'>
+                        {(att.size_bytes / 1024).toFixed(1)} KB
+                      </Typography>
+                    )}
+                    {choreId && (
+                      <IconButton
+                        size='sm'
+                        variant='plain'
+                        color='danger'
+                        onClick={event => {
+                          event.stopPropagation()
+                          DeleteChoreAttachment(choreId, att.file_path)
+                            .then(() => {
+                              setAttachments(prev =>
+                                prev.filter(a => a.file_path !== att.file_path),
+                              )
+                            })
+                            .catch(() => {
+                              showError({
+                                title: 'Delete Failed',
+                                message: 'Failed to delete attachment.',
+                              })
+                            })
+                        }}
+                      >
+                        <Delete sx={{ fontSize: 18 }} />
+                      </IconButton>
+                    )}
+                    {!choreId && (
+                      <IconButton
+                        size='sm'
+                        variant='plain'
+                        color='danger'
+                        onClick={event => {
+                          event.stopPropagation()
+                          setAttachments(prev =>
+                            prev.filter((_, i) => i !== idx),
+                          )
+                        }}
+                      >
+                        <Delete sx={{ fontSize: 18 }} />
+                      </IconButton>
+                    )}
+                  </Box>
+                ))}
+              </Box>
+            )}
+            <Button
+              component='label'
+              variant='outlined'
+              color='neutral'
+              size='sm'
+              startDecorator={
+                isUploadingAttachment ? null : <UploadFile />
+              }
+              loading={isUploadingAttachment}
+              sx={{ alignSelf: 'flex-start' }}
+            >
+              Upload File
+              <input
+                type='file'
+                hidden
+                onChange={async e => {
+                  const file = e.target.files[0]
+                  if (!file) return
+                  setIsUploadingAttachment(true)
+                  try {
+                    const response = choreId
+                      ? await UploadChoreAttachment(file, 'chore_attachment', {
+                          entityId: choreId,
+                        })
+                      : await UploadChoreAttachment(
+                          file,
+                          'chore_attachment_draft',
+                          { draftId },
+                        )
+                    if (!response.ok) {
+                      showError({
+                        title: 'Upload Failed',
+                        message: 'Failed to upload attachment.',
+                      })
+                      return
+                    }
+                    const data = await response.json()
+                    setAttachments(prev => [
+                      ...prev,
+                      {
+                        file_path: data.path,
+                        file_name: data.file_name,
+                        size_bytes: data.size_bytes,
+                        sign: data.sign,
+                      },
+                    ])
+                  } catch {
+                    showError({
+                      title: 'Upload Failed',
+                      message: 'Failed to upload attachment.',
+                    })
+                  } finally {
+                    setIsUploadingAttachment(false)
+                    e.target.value = ''
+                  }
+                }}
+              />
+            </Button>
+          </Card>
+        </Box>
       </Box>
 
       {/* Section 2: Assignment & Responsibility */}
@@ -929,9 +1153,9 @@ const ChoreEdit = () => {
 
               <ListItem key={'anyone'}>
                 <Checkbox
-                  checked={assignees.length === 0}
+                  checked={anyone}
                   onClick={() => {
-                    setAssignees([])
+                    setAnyone(!anyone)
                     setIsPrivate(false)
                   }}
                   overlay
@@ -944,19 +1168,25 @@ const ChoreEdit = () => {
               {performers?.map((item, index) => (
                 <ListItem key={item.id}>
                   <Checkbox
-                    checked={
-                      assignees.find(a => a.userId == item.userId) != null
-                    }
+                    checked={assignableTo.some(a => a.userId == item.userId)}
+                    disabled={anyone}
                     onClick={() => {
+                      if (anyone) {
+                        setAnyone(false)
+                        setAssignableTo([{ userId: item.userId }])
+                        return
+                      }
+                      const assignees = assignableTo
+                      const setAssignees = setAssignableTo
                       if (assignees.some(a => a.userId === item.userId)) {
                         const newAssignees = assignees.filter(
                           a => a.userId !== item.userId,
                         )
+                        setAnyone(newAssignees.length === 0)
                         setAssignees(newAssignees)
                       } else {
                         setAssignees([...assignees, { userId: item.userId }])
                       }
-                      setShowSaveAssigneeDefault(true)
                     }}
                     overlay
                     disableIcon
@@ -987,8 +1217,12 @@ const ChoreEdit = () => {
                 }}
                 onClick={() => {
                   localStorage.setItem(
+                    'defaultAnyoneSetting',
+                    JSON.stringify(anyone),
+                  )
+                  localStorage.setItem(
                     'defaultAssigneeSetting',
-                    JSON.stringify(assignees),
+                    JSON.stringify(assignableTo),
                   )
                   setShowSaveAssigneeDefault(false)
                 }}
@@ -1014,17 +1248,12 @@ const ChoreEdit = () => {
                 }
                 disabled={assignees.length === 0}
                 value={assignedTo > -1 ? assignedTo : null}
+                onChange={(_, selectedUserId) => setAssignedTo(selectedUserId)}
               >
                 {performers
-                  ?.filter(p => assignees.find(a => a.userId == p.userId))
+                  ?.filter(p => assignees.some(a => a.userId == p.userId))
                   .map((item, index) => (
-                    <Option
-                      value={item.userId}
-                      key={item.displayName}
-                      onClick={() => {
-                        setAssignedTo(item.userId)
-                      }}
-                    >
+                    <Option value={item.userId} key={item.displayName}>
                       {item.displayName}
                     </Option>
                   ))}
@@ -1695,6 +1924,7 @@ const ChoreEdit = () => {
           )}
         </Button>
       </Sheet>
+      <AttachmentViewerModal config={attachmentViewerConfig} />
       <ConfirmationModal config={confirmModelConfig} />
       {addLabelModalOpen && (
         <LabelModal

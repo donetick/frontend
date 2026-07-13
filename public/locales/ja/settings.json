@@ -1,0 +1,174 @@
+{
+  "title": "設定",
+  "circleSettings": {
+    "title": "サークル設定",
+    "description": "アカウントは、サークルを作成または参加すると自動的にそのサークルに接続されます。下記のユニークなサークルコードまたはリンクを共有することで、友達を簡単に招待できます。誰かがサークルへの参加をリクエストした際は、下に通知が表示されます。サークルから脱退したい場合は、「サークルを脱退」ボタンを押してください。",
+    "circleCode": "サークルコード",
+    "copyCode": "コードをコピー",
+    "copyLink": "リンクをコピー",
+    "codeCopied": "サークルコードをコピーしました！",
+    "linkCopied": "サークルリンクをコピーしました！",
+    "joinCircle": "サークルに参加",
+    "joinCirclePlaceholder": "サークルコードを入力",
+    "join": "参加",
+    "leave": "サークルを脱退",
+    "leaveConfirmTitle": "サークルを脱退",
+    "leaveConfirmMessage": "本当にこのサークルから脱退しますか？",
+    "circleMembers": "サークルメンバー",
+    "circleMemberRequests": "サークル参加リクエスト",
+    "admin": "管理者",
+    "member": "メンバー",
+    "pending": "保留中",
+    "accept": "承認",
+    "reject": "拒否",
+    "makeAdmin": "管理者にする",
+    "makeMember": "メンバーにする",
+    "remove": "削除",
+    "webhookURL": "Webhook URL",
+    "webhookDescription": "サークルイベントの通知を受け取るための Webhook URL を入力してください",
+    "webhookPlaceholder": "https://your-webhook-url.com"
+  },
+  "accountSettings": {
+    "title": "アカウント設定",
+    "subscription": "サブスクリプション",
+    "subscriptionStatus": "現在のプラン",
+    "free": "無料",
+    "plus": "Plus",
+    "upgrade": "アップグレード",
+    "cancel": "キャンセル",
+    "changePassword": "パスワードを変更",
+    "password": "パスワード",
+    "dangerZone": "危険な操作",
+    "dangerZoneDescription": "アカウントを削除すると元に戻すことはできません。十分にご確認ください。",
+    "deleteAccount": "アカウントを削除"
+  },
+  "localization": {
+    "title": "地域設定",
+    "description": "言語、日付形式、地域の設定をカスタマイズします。",
+    "language": "言語",
+    "languageDescription": "使用する言語を選択してください",
+    "dateFormat": "日付形式",
+    "dateFormatDescription": "アプリケーション全体で日付をどのように表示するかを選択します",
+    "timeFormat": "時刻形式",
+    "timeFormatDescription": "12時間表記または24時間表記を選択します",
+    "12hour": "12時間 (AM/PM)",
+    "24hour": "24時間",
+    "firstDayOfWeek": "週の開始曜日",
+    "firstDayOfWeekDescription": "週の最初の曜日を選択します",
+    "sunday": "日曜日",
+    "monday": "月曜日",
+    "saturday": "土曜日",
+    "formats": {
+      "mdy": "MM/DD/YYYY (米国)",
+      "dmy": "DD/MM/YYYY (欧州)",
+      "ymd": "YYYY-MM-DD (ISO)",
+      "long": "長い形式 (例: January 1, 2024)",
+      "short": "短い形式 (例: Jan 1, 2024)"
+    }
+  },
+  "sidepanel": {
+    "title": "サイドパネルのカスタマイズ",
+    "description": "サイドパネル内のカードのレイアウトと表示をカスタマイズします。この機能はタブレットやデスクトップなど大画面のデバイスでのみ利用できます。"
+  },
+  "theme": {
+    "title": "テーマ設定",
+    "description": "サイトの見た目を選択します。単一のテーマを選ぶか、システム設定に同期して昼夜のテーマを自動で切り替えることができます。",
+    "themeMode": "テーマモード",
+    "light": "ライト",
+    "dark": "ダーク",
+    "system": "システム"
+  },
+  "notifications": {
+    "settingsSaved": "設定を保存しました",
+    "settingsSaveFailed": "設定の保存に失敗しました",
+    "invalidWebhook": "Webhook URL が無効です"
+  },
+  "profile": {
+    "title": "プロフィール設定",
+    "description": "表示名とプロフィール写真を更新します。",
+    "photoUpdated": "写真を更新しました",
+    "photoUpdatedMessage": "プロフィール写真が正常に更新されました！",
+    "uploadFailed": "アップロード失敗",
+    "uploadFailedMessage": "写真のアップロードに失敗しました。もう一度お試しください。",
+    "profileUpdated": "プロフィールを更新しました",
+    "profileUpdatedMessage": "プロフィール情報が正常に保存されました！",
+    "updateFailed": "更新失敗",
+    "updateFailedMessage": "プロフィールを更新できませんでした。接続を確認してから再度お試しください。",
+    "changePhoto": "写真を変更",
+    "displayName": "表示名",
+    "displayNamePlaceholder": "表示名を入力してください",
+    "timezone": "タイムゾーン",
+    "timezonePlaceholder": "タイムゾーンを選択してください",
+    "save": "保存",
+    "cancel": "キャンセル"
+  },
+  "overview": {
+    "title": "設定",
+    "subtitle": "体験をカスタマイズし、アカウント設定を管理します",
+    "upgrade": {
+      "title": "Plus へアップグレード",
+      "description": "強力な機能を解放して、生産性を向上させましょう",
+      "button": "今すぐアップグレード",
+      "features": {
+        "richText": "リッチテキストの説明",
+        "notifications": "タスク通知",
+        "apiIntegrations": "API 連携",
+        "advancedAutomation": "高度な自動化"
+      }
+    },
+    "sections": {
+      "profile": {
+        "title": "プロフィール設定",
+        "description": "プロフィール情報、写真、表示名、タイムゾーンを更新します。"
+      },
+      "circle": {
+        "title": "サークル設定",
+        "description": "サークルの管理、メンバーの招待、参加リクエストへの対応を行います。"
+      },
+      "account": {
+        "title": "アカウント設定",
+        "description": "サブスクリプションの管理、パスワード変更、アカウント削除を行います。"
+      },
+      "subaccounts": {
+        "title": "管理アカウント",
+        "description": "サブアカウントを作成・管理し、ログインや割り当てられたタスクの完了を行えるようにします。"
+      },
+      "notifications": {
+        "title": "通知",
+        "description": "プッシュ通知、メール通知、タスクの通知先を設定します。"
+      },
+      "mfa": {
+        "title": "多要素認証",
+        "description": "認証アプリを使った MFA でセキュリティをさらに強化します。"
+      },
+      "apitokens": {
+        "title": "API トークン",
+        "description": "サードパーティ連携や API アクセス用のトークンを生成・管理します。"
+      },
+      "storage": {
+        "title": "ストレージ設定",
+        "description": "データのバックアップと復元、ローカルストレージと同期の設定を管理します。"
+      },
+      "sidepanel": {
+        "title": "サイドパネルのカスタマイズ",
+        "description": "サイドパネルのカードのレイアウトと表示をカスタマイズします。"
+      },
+      "theme": {
+        "title": "テーマ設定",
+        "description": "好みのテーマを選択し、ダーク／ライトモードの設定を行います。"
+      },
+      "localization": {
+        "title": "地域設定",
+        "description": "言語、日付形式、時刻形式、地域の設定をカスタマイズします。"
+      },
+      "advanced": {
+        "title": "詳細設定",
+        "description": "Webhook、リアルタイム更新、その他の高度な機能を設定して生産性を高めます。"
+      },
+      "developer": {
+        "title": "開発者設定",
+        "description": "認証トークン、SSE 接続、デバッグデータなどの技術情報を確認できます。"
+      }
+    }
+  }
+}

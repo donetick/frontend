@@ -1,5 +1,6 @@
 import {
   Archive,
+  AttachFile,
   CalendarMonth,
   Check,
   Checklist,
@@ -44,7 +45,11 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useLocalization } from '../../contexts/LocalizationContext'
-import { useChoreDetails } from '../../queries/ChoreQueries.jsx'
+import { usePendingCommands } from '../../hooks/usePendingCommands'
+import {
+  useChoreDetails,
+  useChoreHistory,
+} from '../../queries/ChoreQueries.jsx'
 import {
   useChoreTimer,
   useDeleteTimeSession,
@@ -54,8 +59,13 @@ import {
 } from '../../queries/TimeQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import { useNotification } from '../../service/NotificationProvider'
-import { ChoreStatus, notInCompletionWindow } from '../../utils/Chores.jsx'
+import {
+  ChoreHistoryStatus,
+  ChoreStatus,
+  notInCompletionWindow,
+} from '../../utils/Chores.jsx'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
+import { commandQueue, CommandType } from '../../utils/CommandQueue'
 import {
   ApproveChore,
   GetChoreDetailById,
@@ -66,15 +76,35 @@ import {
   UndoChoreAction,
   UpdateChorePriority,
 } from '../../utils/Fetcher'
+import { offlineDB } from '../../utils/OfflineDB'
 import Priorities from '../../utils/Priorities'
 import { getSafeBottomPadding } from '../../utils/SafeAreaUtils.js'
+import AttachmentBrowserModal from '../Modals/Inputs/AttachmentBrowserModal'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import NoteViewerModal from '../Modals/Inputs/NoteViewerModal'
 import LoadingComponent from '../components/Loading.jsx'
+import PendingBadge from '../components/PendingBadge'
 import RichTextEditor from '../components/RichTextEditor.jsx'
 import SubTasks from '../components/SubTask.jsx'
 import TimePassedCard from './TimePassedCard.jsx'
 import TimerSplitButton from './TimerSplitButton.jsx'
+import { refreshSignedUrlsInHtml } from '../../utils/Helpers.jsx'
+
+const isNetworkError = err =>
+  err instanceof TypeError && err.message === 'Failed to fetch'
+
+const decodeHtmlEntities = value => {
+  if (typeof value !== 'string') return ''
+
+  return value
+    .replaceAll('&lt;', '<')
+    .replaceAll('&gt;', '>')
+    .replaceAll('&quot;', '"')
+    .replaceAll('&#39;', "'")
+    .replaceAll('&amp;', '&')
+}
+
+const hasHtmlTags = value => /<\/?[a-z][\s\S]*>/i.test(value)
 
 const ChoreView = () => {
   const { t } = useTranslation('chores')
@@ -97,6 +127,7 @@ const ChoreView = () => {
   const [chorePriority, setChorePriority] = useState(null)
   const [noteViewerConfig, setNoteViewerConfig] = useState({ isOpen: false })
   const [timerActionConfig, setTimerActionConfig] = useState({ isOpen: false })
+  const [attachmentBrowserOpen, setAttachmentBrowserOpen] = useState(false)
   const { data: circleMembersData, isLoading: isCircleMembersLoading } =
     useCircleMembers()
   const { data: userProfile } = useUserProfile()
@@ -104,6 +135,18 @@ const ChoreView = () => {
 
   const { data: choreData, isLoading: isChoreLoading } =
     useChoreDetails(choreId)
+  const { data: choreHistoryData } = useChoreHistory(choreId)
+
+  const { data: pendingCmds } = usePendingCommands(choreId)
+
+  const choreHistory = choreHistoryData?.res || []
+  const historyCompletionCount = choreHistory.filter(historyEntry => {
+    const status = Number(historyEntry?.status)
+    return status === ChoreHistoryStatus.COMPLETED
+  }).length
+  const completionCount = choreHistoryData
+    ? historyCompletionCount
+    : chore.totalCompletedCount || 0
 
   const startChore = useStartChore()
   const pauseChore = usePauseChore()
@@ -120,114 +163,99 @@ const ChoreView = () => {
     document.title = 'Donetick: ' + choreData.res.name
 
     setPerformers(circleMembersData.res)
-    const auto_complete = searchParams.get('auto_complete')
-    if (auto_complete === 'true') {
+    if (searchParams.get('auto_complete') === 'true') {
+      navigate({ search: '' }, { replace: true })
       handleTaskCompletion()
     }
   }, [choreData, circleMembersData])
 
   useEffect(() => {
     if (chore && performers?.length > 0) {
-      generateInfoCards(chore)
+      const cards = [
+        {
+          size: 6,
+          icon: <PeopleAlt />,
+          title: t('choreView.assignment'),
+          text: `${t('choreView.assigned')}: ${
+            performers.find(p => p.userId === chore.assignedTo)?.displayName ||
+            t('choreView.na')
+          }`,
+          subtext: ` ${t('choreView.last')}: ${
+            chore.lastCompletedDate
+              ? performers.find(p => p.userId === chore.lastCompletedBy)
+                  ?.displayName
+              : 'N/A'
+          }`,
+        },
+        {
+          size: 6,
+          icon: <CalendarMonth />,
+          title: t('choreView.schedule'),
+          text: `${t('choreView.due')}: ${
+            chore.nextDueDate
+              ? moment(chore.nextDueDate).fromNow()
+              : t('choreView.na')
+          }`,
+          subtext: `${t('choreView.last')}: ${
+            chore.lastCompletedDate
+              ? moment(chore.lastCompletedDate).fromNow()
+              : t('choreView.na')
+          }`,
+
+          subtext2:
+            chore.deadlineOffset > 0 && chore.nextDueDate
+              ? `Deadline: ${moment(chore.nextDueDate).add(chore.deadlineOffset, 'seconds').fromNow()}`
+              : null,
+        },
+        {
+          size: 6,
+          icon: <Checklist />,
+          title: t('choreView.statistics'),
+          text: `${t('choreView.completed')}: ${completionCount} ${t('choreView.times')}`,
+        },
+        {
+          size: 6,
+          icon: <Person />,
+          title: t('choreView.details'),
+          subtext: `${t('choreView.createdBy')}: ${
+            performers.find(p => p.userId === chore.createdBy)?.displayName ||
+            t('choreView.na')
+          }`,
+        },
+      ]
+      setInfoCards(cards)
     }
-  }, [chore, performers])
+  }, [chore, performers, completionCount, t])
   const handleUpdatePriority = priority => {
     UpdateChorePriority(choreId, priority.value).then(response => {
       if (response.ok) {
         response.json().then(() => {
           setChorePriority(priority)
-          // Invalidate chores cache to refetch data
           queryClient.invalidateQueries(['chores'])
         })
       }
     })
   }
-  const generateInfoCards = chore => {
-    const cards = [
-      {
-        size: 6,
-        icon: <PeopleAlt />,
-        title: t('choreView.assignment'),
-        text: `${t('choreView.assigned')}: ${
-          performers.find(p => p.userId === chore.assignedTo)?.displayName ||
-          t('choreView.na')
-        }`,
-        subtext: ` ${t('choreView.last')}: ${
-          chore.lastCompletedDate
-            ? performers.find(p => p.userId === chore.lastCompletedBy)
-                ?.displayName
-            : 'N/A'
-        }`,
-      },
-      {
-        size: 6,
-        icon: <CalendarMonth />,
-        title: t('choreView.schedule'),
-        text: `${t('choreView.due')}: ${
-          chore.nextDueDate ? moment(chore.nextDueDate).fromNow() : t('choreView.na')
-        }`,
-        subtext: `${t('choreView.last')}: ${
-          chore.lastCompletedDate
-            ? moment(chore.lastCompletedDate).fromNow()
-            : t('choreView.na')
-        }`,
-
-        subtext2:
-          chore.deadlineOffset > 0 && chore.nextDueDate
-            ? `Deadline: ${moment(chore.nextDueDate).add(chore.deadlineOffset, 'seconds').fromNow()}`
-            : null,
-      },
-      {
-        size: 6,
-        icon: <Checklist />,
-        title: t('choreView.statistics'),
-        text: `${t('choreView.completed')}: ${chore.totalCompletedCount || 0} ${t('choreView.times')}`,
-      },
-      {
-        size: 6,
-        icon: <Person />,
-        title: t('choreView.details'),
-        subtext: `${t('choreView.createdBy')}: ${
-          performers.find(p => p.userId === chore.createdBy)?.displayName ||
-          t('choreView.na')
-        }`,
-      },
-    ]
-    setInfoCards(cards)
-  }
-  const handleTaskCompletion = () => {
-    MarkChoreComplete(
-      choreId,
-      impersonatedUser
-        ? { completedBy: impersonatedUser.userId, note }
-        : { note },
-      completedDate,
-      null,
-    )
-      .then(resp => {
-        if (resp.ok) {
-          return resp.json().then(data => {
-            setNote(null)
-            setChore(data.res)
-          })
-        }
-      })
-      .then(() => {
-        // Invalidate chores cache to refetch data
+  const handleTaskCompletion = async () => {
+    try {
+      const resp = await MarkChoreComplete(
+        choreId,
+        impersonatedUser
+          ? { completedBy: impersonatedUser.userId, note }
+          : { note },
+        completedDate,
+        null,
+      )
+      if (resp.ok) {
+        const data = await resp.json()
+        setNote(null)
+        setChore(data.res)
         queryClient.invalidateQueries(['chores'])
-      })
-      .then(() => {
-        // refetch the chore details
-        GetChoreDetailById(choreId).then(resp => {
-          if (resp.ok) {
-            return resp.json().then(data => {
-              setChore(data.res)
-            })
-          }
-        })
-      })
-      .then(() => {
-        // Show undo notification
+        const detailResp = await GetChoreDetailById(choreId)
+        if (detailResp.ok) {
+          const detailData = await detailResp.json()
+          setChore(detailData.res)
+        }
         showSuccess({
           title: t('choreView.taskCompleted'),
           message: t('choreView.taskCompletedMessage'),
@@ -235,7 +263,6 @@ const ChoreView = () => {
             try {
               const undoResponse = await UndoChoreAction(choreId)
               if (undoResponse.ok) {
-                // Refetch chore details after undo
                 const detailResponse = await GetChoreDetailById(choreId)
                 if (detailResponse.ok) {
                   const detailData = await detailResponse.json()
@@ -257,51 +284,108 @@ const ChoreView = () => {
             }
           },
         })
-      })
-  }
-  const handleSkippingTask = () => {
-    SkipChore(choreId).then(response => {
-      if (response.ok) {
-        response.json().then(data => {
-          const newChore = data.res
-          setChore(newChore)
-          // Invalidate chores cache to refetch data
-          queryClient.invalidateQueries(['chores'])
-
-          // Show undo notification
-          showSuccess({
-            message: t('choreView.skipTask'),
-            undoAction: async () => {
-              try {
-                const undoResponse = await UndoChoreAction(choreId)
-                if (undoResponse.ok) {
-                  // Refetch chore details after undo
-                  const detailResponse = await GetChoreDetailById(choreId)
-                  if (detailResponse.ok) {
-                    const detailData = await detailResponse.json()
-                    setChore(detailData.res)
-                    queryClient.invalidateQueries(['chores'])
-                  }
-                  showUndo({
-                    title: t('choreView.undoSuccessful'),
-                    message: t('choreView.taskSkipUndone'),
-                  })
-                } else {
-                  throw new Error('Failed to undo')
-                }
-              } catch (error) {
-                showError({
-                  title: t('choreView.undoFailed'),
-                  message: t('choreView.undoFailedMessage'),
-                })
-              }
-            },
-          })
+      }
+    } catch (error) {
+      if (isNetworkError(error)) {
+        const cmdId = await commandQueue.enqueue(
+          CommandType.COMPLETE_CHORE,
+          choreId,
+          {
+            id: choreId,
+            body: impersonatedUser
+              ? { completedBy: impersonatedUser.userId, note }
+              : { note },
+            completedDate: completedDate || null,
+            performer: null,
+          },
+        )
+        await offlineDB.savePendingHistory({
+          id: -Date.now(),
+          choreId: Number(choreId),
+          completedBy: impersonatedUser?.userId || userProfile?.id || 0,
+          performedAt: completedDate || new Date().toISOString(),
+          dueDate: chore.nextDueDate || null,
+          notes: note || null,
+          status: 1,
+          points: chore.points || 0,
+          pending: true,
+        })
+        queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
+        showSuccess({
+          message: "You're offline — completion will sync when back online",
+          undoAction: async () => {
+            await commandQueue.cancel(cmdId)
+            queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
+          },
+        })
+      } else {
+        showError({
+          title: t('choreView.undoFailed'),
+          message: error?.message || 'Unable to complete task',
         })
       }
-    })
+    }
+  }
+  const handleSkippingTask = async () => {
+    try {
+      const response = await SkipChore(choreId)
+      if (response.ok) {
+        const data = await response.json()
+        setChore(data.res)
+        queryClient.invalidateQueries(['chores'])
+        showSuccess({
+          message: t('choreView.skipTask'),
+          undoAction: async () => {
+            try {
+              const undoResponse = await UndoChoreAction(choreId)
+              if (undoResponse.ok) {
+                const detailResponse = await GetChoreDetailById(choreId)
+                if (detailResponse.ok) {
+                  const detailData = await detailResponse.json()
+                  setChore(detailData.res)
+                  queryClient.invalidateQueries(['chores'])
+                }
+                showUndo({
+                  title: t('choreView.undoSuccessful'),
+                  message: t('choreView.taskSkipUndone'),
+                })
+              } else {
+                throw new Error('Failed to undo')
+              }
+            } catch (error) {
+              showError({
+                title: t('choreView.undoFailed'),
+                message: t('choreView.undoFailedMessage'),
+              })
+            }
+          },
+        })
+      }
+    } catch (error) {
+      if (isNetworkError(error)) {
+        const cmdId = await commandQueue.enqueue(
+          CommandType.SKIP_CHORE,
+          choreId,
+          { id: choreId },
+        )
+        queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
+        showSuccess({
+          message: "You're offline — skip will sync when back online",
+          undoAction: async () => {
+            await commandQueue.cancel(cmdId)
+            queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
+          },
+        })
+      } else {
+        showError({
+          title: t('choreView.undoFailed'),
+          message: error?.message || 'Unable to skip task',
+        })
+      }
+    }
   }
   const handleChoreStart = () => {
+    const startedChore = { ...chore, status: ChoreStatus.ACTIVE }
     startChore.mutate(choreId, {
       onSuccess: data => {
         const newChore = {
@@ -310,10 +394,37 @@ const ChoreView = () => {
         }
         setChore(newChore)
       },
+      onError: async error => {
+        if (isNetworkError(error)) {
+          const previousStatus = chore.status
+          const cmdId = await commandQueue.enqueue(
+            CommandType.START_CHORE,
+            choreId,
+            { id: choreId },
+          )
+          setChore(startedChore)
+          queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
+          showSuccess({
+            message: "You're offline — start will sync when back online",
+            undoAction: async () => {
+              await commandQueue.cancel(cmdId)
+              queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
+              setChore({ ...chore, status: previousStatus })
+            },
+          })
+          return
+        }
+
+        showError({
+          title: t('choreView.undoFailed'),
+          message: error?.message || 'Unable to start task',
+        })
+      },
     })
   }
 
   const handleChorePause = () => {
+    const pausedChore = { ...chore, status: ChoreStatus.PAUSED }
     pauseChore.mutate(choreId, {
       onSuccess: data => {
         const newChore = {
@@ -321,6 +432,32 @@ const ChoreView = () => {
           ...data.res,
         }
         setChore(newChore)
+      },
+      onError: async error => {
+        if (isNetworkError(error)) {
+          const previousStatus = chore.status
+          const cmdId = await commandQueue.enqueue(
+            CommandType.PAUSE_CHORE,
+            choreId,
+            { id: choreId },
+          )
+          setChore(pausedChore)
+          queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
+          showSuccess({
+            message: "You're offline — pause will sync when back online",
+            undoAction: async () => {
+              await commandQueue.cancel(cmdId)
+              queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
+              setChore({ ...chore, status: previousStatus })
+            },
+          })
+          return
+        }
+
+        showError({
+          title: t('choreView.undoFailed'),
+          message: error?.message || 'Unable to pause task',
+        })
       },
     })
   }
@@ -383,7 +520,6 @@ const ChoreView = () => {
       if (response.ok) {
         response.json().then(data => {
           setChore(data.res)
-          // Invalidate chores cache to refetch data
           queryClient.invalidateQueries(['chores'])
         })
       }
@@ -395,23 +531,50 @@ const ChoreView = () => {
       if (response.ok) {
         response.json().then(data => {
           setChore(data.res)
-          // Invalidate chores cache to refetch data
           queryClient.invalidateQueries(['chores'])
         })
       }
     })
   }
 
-  const handleUnarchiveChore = () => {
-    UnArchiveChore(choreId).then(response => {
+  const handleUnarchiveChore = async () => {
+    try {
+      const response = await UnArchiveChore(choreId)
       if (response.ok) {
-        response.json().then(data => {
-          setChore({ ...chore, isActive: true })
-          // Invalidate chores cache to refetch data
-          queryClient.invalidateQueries(['chores'])
+        await offlineDB.saveChores([{ ...chore, isActive: true }])
+        setChore({ ...chore, isActive: true })
+        queryClient.invalidateQueries(['chores'])
+      }
+    } catch (error) {
+      const isNetworkError = err =>
+        err instanceof TypeError && err.message === 'Failed to fetch'
+      if (isNetworkError(error)) {
+        const cmdId = await commandQueue.enqueue(
+          CommandType.UNARCHIVE_CHORE,
+          choreId,
+          { id: choreId },
+        )
+        await offlineDB.saveChores([
+          { ...chore, isActive: true, _pending: 'unarchive' },
+        ])
+        setChore({ ...chore, isActive: true })
+        queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
+        showSuccess({
+          message: "You're offline — restore will sync when back online",
+          undoAction: async () => {
+            await commandQueue.cancel(cmdId)
+            await offlineDB.saveChores([{ ...chore, isActive: false }])
+            setChore({ ...chore, isActive: false })
+            queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
+          },
+        })
+      } else {
+        showError({
+          title: 'Failed to restore',
+          message: error.message || 'Unable to restore task',
         })
       }
-    })
+    }
   }
 
   // Check if the current user can approve/reject (admin, manager, or task owner)
@@ -458,16 +621,19 @@ const ChoreView = () => {
           mb: 1,
         }}
       >
-        <Typography
-          level='h3'
-          // textAlign={'center'}
+        <Box
           sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 1,
             mt: 1,
             mb: 0.5,
           }}
         >
-          {chore.name}
-        </Typography>
+          <Typography level='h3'>{chore.name}</Typography>
+          <PendingBadge commands={pendingCmds} />
+        </Box>
         {chore.isActive === false && (
           <Chip
             startDecorator={<Archive />}
@@ -490,16 +656,14 @@ const ChoreView = () => {
             justifyContent: 'center',
             alignItems: 'center',
             mb: 1,
+            flexWrap: 'wrap',
+            gap: 0.5,
           }}
         >
           {chore?.labelsV2?.map((label, index) => (
             <Chip
               key={index}
               sx={{
-                position: 'relative',
-                ml: index === 0 ? 0 : 0.5,
-                top: 2,
-                zIndex: 1,
                 backgroundColor: label?.color,
                 color: getTextColorFromBackgroundColor(label?.color),
               }}
@@ -507,6 +671,20 @@ const ChoreView = () => {
               {label?.name}
             </Chip>
           ))}
+
+          {chore?.attachments?.length > 0 && (
+            <Chip
+              startDecorator={<AttachFile />}
+              size='md'
+              variant='soft'
+              color='neutral'
+              onClick={() => setAttachmentBrowserOpen(true)}
+              sx={{ cursor: 'pointer' }}
+            >
+              {chore.attachments.length}{' '}
+              {chore.attachments.length === 1 ? 'attachment' : 'attachments'}
+            </Chip>
+          )}
         </Box>
       </Box>
 
@@ -747,7 +925,30 @@ const ChoreView = () => {
                   overflow: 'hidden',
                 }}
               >
-                <RichTextEditor value={chore.description} isEditable={false} />
+                {(() => {
+                  const raw = chore.description || ''
+                  const shouldRenderHtml = hasHtmlTags(raw)
+
+                  return shouldRenderHtml ? (
+                    <Box
+                      sx={{
+                        whiteSpace: 'pre-wrap',
+                        wordBreak: 'break-word',
+                      }}
+                      dangerouslySetInnerHTML={{ __html: refreshSignedUrlsInHtml(raw) }}
+                    />
+                  ) : (
+                    <Typography
+                      level='body-md'
+                      sx={{
+                        whiteSpace: 'pre-wrap',
+                        wordBreak: 'break-word',
+                      }}
+                    >
+                      {decodeHtmlEntities(raw)}
+                    </Typography>
+                  )
+                })()}
               </Box>
             </Sheet>
           </>
@@ -792,7 +993,30 @@ const ChoreView = () => {
                   overflow: 'hidden',
                 }}
               >
-                <RichTextEditor value={chore.notes} isEditable={false} />
+                {(() => {
+                  const raw = chore.notes || ''
+                  const shouldRenderHtml = hasHtmlTags(raw)
+
+                  return shouldRenderHtml ? (
+                    <Box
+                      sx={{
+                        whiteSpace: 'pre-wrap',
+                        wordBreak: 'break-word',
+                      }}
+                      dangerouslySetInnerHTML={{ __html: refreshSignedUrlsInHtml(raw) }}
+                    />
+                  ) : (
+                    <Typography
+                      level='body-md'
+                      sx={{
+                        whiteSpace: 'pre-wrap',
+                        wordBreak: 'break-word',
+                      }}
+                    >
+                      {decodeHtmlEntities(raw)}
+                    </Typography>
+                  )
+                })()}
               </Box>
             </Sheet>
           </>
@@ -1117,6 +1341,11 @@ const ChoreView = () => {
         <ConfirmationModal config={confirmModelConfig} />
         <ConfirmationModal config={timerActionConfig} />
         <NoteViewerModal config={noteViewerConfig} />
+        <AttachmentBrowserModal
+          choreId={choreId}
+          isOpen={attachmentBrowserOpen}
+          onClose={() => setAttachmentBrowserOpen(false)}
+        />
       </Card>
     </Container>
   )

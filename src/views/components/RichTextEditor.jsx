@@ -2,6 +2,33 @@ import imageCompression from 'browser-image-compression'
 import Quill from 'quill'
 import 'quill/dist/quill.snow.css'
 import QuillMarkdown from 'quilljs-markdown'
+
+// Extend the built-in Image blot to preserve dt-data-path
+const ImageBlot = Quill.import('formats/image')
+class DtImageBlot extends ImageBlot {
+  static create(value) {
+    const node = super.create(typeof value === 'string' ? value : value.src)
+    if (value?.path) node.setAttribute('dt-data-path', value.path)
+    return node
+  }
+  static value(node) {
+    return { src: node.getAttribute('src'), path: node.getAttribute('dt-data-path') }
+  }
+  static formats(node) {
+    return { 'dt-data-path': node.getAttribute('dt-data-path') }
+  }
+  format(name, value) {
+    if (name === 'dt-data-path') {
+      if (value) this.domNode.setAttribute('dt-data-path', value)
+      else this.domNode.removeAttribute('dt-data-path')
+    } else {
+      super.format(name, value)
+    }
+  }
+}
+DtImageBlot.blotName = 'image'
+DtImageBlot.tagName = 'img'
+Quill.register(DtImageBlot, true)
 import {
   forwardRef,
   useCallback,
@@ -12,7 +39,11 @@ import {
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { apiClient } from '../../utils/ApiClient'
-import { isPlusAccount, resolvePhotoURL } from '../../utils/Helpers'
+import {
+  isPlusAccount,
+  refreshSignedUrlsInHtml,
+  resolvePhotoURL,
+} from '../../utils/Helpers'
 import './RichTextEditor.css'
 
 const RichTextEditor = forwardRef(
@@ -32,6 +63,7 @@ const RichTextEditor = forwardRef(
     const { data: userProfile } = useUserProfile()
     const quillRef = useRef(null)
     const editorRef = useRef(null)
+    const initialContentSet = useRef(false)
 
     // Expose focus method to parent components
     useImperativeHandle(
@@ -141,11 +173,16 @@ const RichTextEditor = forwardRef(
             return
           }
           const data = await response.json()
-          const url = resolvePhotoURL(data.url || data.sign)
-          // Insert image into Quill
+          // Prefer the backend-proxied path (data.sign) over the direct cloud
+          // signed URL (data.url) — the proxy re-signs on every request so the
+          // embedded src never expires.
+          const path = data.path
+          const url = resolvePhotoURL(data.sign || data.url)
+          // Insert image into Quill with dt-data-path tracked by the custom blot
           const quill = editorRef.current
           const range = quill.getSelection()
-          quill.insertEmbed(range ? range.index : 0, 'image', url)
+          const insertIndex = range ? range.index : 0
+          quill.insertEmbed(insertIndex, 'image', { src: url, path })
         } catch (error) {
           console.error('Error during image processing or upload:', error)
           showError({
@@ -202,7 +239,11 @@ const RichTextEditor = forwardRef(
     useEffect(() => {
       if (editorRef.current && isEditable) {
         if (editorRef.current.root.innerHTML !== value) {
-          editorRef.current.root.innerHTML = value || ''
+          const html = !initialContentSet.current
+            ? refreshSignedUrlsInHtml(value || '')
+            : value || ''
+          initialContentSet.current = true
+          editorRef.current.root.innerHTML = html
         }
       }
     }, [value, isEditable])
@@ -227,7 +268,7 @@ const RichTextEditor = forwardRef(
             boxShadow:
               'var(--joy-shadow-xs, 0px 1px 2px 0px rgba(16, 24, 40, 0.05))',
           }}
-          dangerouslySetInnerHTML={{ __html: value }}
+          dangerouslySetInnerHTML={{ __html: refreshSignedUrlsInHtml(value) }}
         />
       )
     }

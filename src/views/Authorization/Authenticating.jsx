@@ -9,6 +9,8 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useUserProfile } from '../../queries/UserQueries'
 import { apiClient } from '../../utils/ApiClient'
 import { GetUserProfile } from '../../utils/Fetcher'
+import { saveTokens } from '../../utils/TokenStorage'
+import MFAVerificationModal from './MFAVerificationModal'
 
 const AuthenticationLoading = () => {
   const { data: userProfile, refetch: refetchUserProfile } = useUserProfile()
@@ -17,6 +19,8 @@ const AuthenticationLoading = () => {
   const [message, setMessage] = useState('Authenticating')
   const [subMessage, setSubMessage] = useState('Please wait')
   const [status, setStatus] = useState('pending')
+  const [mfaModalOpen, setMfaModalOpen] = useState(false)
+  const [mfaSessionToken, setMfaSessionToken] = useState('')
   const { provider } = useParams()
   useEffect(() => {
     if (provider === 'oauth2' && !hasCalledHandleOAuth2.current) {
@@ -43,6 +47,29 @@ const AuthenticationLoading = () => {
       })
     })
   }
+
+  const handleMFASuccess = async data => {
+    await saveTokens({
+      accessToken: data.token,
+      accessTokenExpiry: data.expire,
+      refreshToken: data.refresh_token,
+      refreshTokenExpiry: data.refresh_token_expiry,
+    })
+
+    setMfaModalOpen(false)
+    setMfaSessionToken('')
+
+    getUserProfileAndNavigateToHome()
+  }
+
+  const handleMFAClose = () => {
+    setMfaModalOpen(false)
+    setMfaSessionToken('')
+    setMessage('Authentication failed')
+    setSubMessage('Two-factor authentication was cancelled')
+    setStatus('error')
+  }
+
   const handleOAuth2 = async () => {
     // get provider from params:
     const urlParams = new URLSearchParams(window.location.search)
@@ -64,37 +91,71 @@ const AuthenticationLoading = () => {
       const redirectURI = Capacitor.isNativePlatform()
         ? 'donetick://auth/oauth2'
         : `${window.location.origin}/auth/oauth2`
-      fetch(`${baseURL}/auth/oauth2/callback`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          code,
-          state: returnedState,
-          redirect_uri: redirectURI,
-        }),
-      }).then(response => {
-        if (response.status === 200) {
-          return response.json().then(data => {
-            localStorage.setItem('token', data.token)
-            localStorage.setItem('token_expiry', data.expire)
+      try {
+        const response = await fetch(`${baseURL}/auth/oauth2/callback`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            code,
+            state: returnedState,
+            redirect_uri: redirectURI,
+          }),
+        })
 
-            const redirectUrl = Cookies.get('ca_redirect')
-            if (redirectUrl) {
-              Cookies.remove('ca_redirect')
-              Navigate(redirectUrl)
-            } else {
-              getUserProfileAndNavigateToHome()
-            }
-          })
-        } else {
+        if (!response.ok) {
           console.error('Authentication failed')
           setMessage('Authentication failed')
           setSubMessage('Please try again')
           setStatus('error')
+          return
         }
-      })
+
+        const data = await response.json()
+
+        if (data.mfaRequired) {
+          if (!data.sessionToken) {
+            setMessage('Authentication failed')
+            setSubMessage('MFA session is missing. Please try again')
+            setStatus('error')
+            return
+          }
+
+          setMfaSessionToken(data.sessionToken)
+          setMfaModalOpen(true)
+          setMessage('Two-Factor Authentication Required')
+          setSubMessage('Please verify your login to continue')
+          return
+        }
+
+        if (!data.token && !data.access_token) {
+          setMessage('Authentication failed')
+          setSubMessage('No valid authentication token returned')
+          setStatus('error')
+          return
+        }
+
+        await saveTokens({
+          accessToken: data.token || data.access_token,
+          accessTokenExpiry: data.expire || data.access_token_expiry,
+          refreshToken: data.refresh_token,
+          refreshTokenExpiry: data.refresh_token_expiry,
+        })
+
+        const redirectUrl = Cookies.get('ca_redirect')
+        if (redirectUrl) {
+          Cookies.remove('ca_redirect')
+          Navigate(redirectUrl)
+        } else {
+          getUserProfileAndNavigateToHome()
+        }
+      } catch (error) {
+        console.error('Authentication request failed', error)
+        setMessage('Authentication failed')
+        setSubMessage('Please try again')
+        setStatus('error')
+      }
     }
   }
 
@@ -138,6 +199,17 @@ const AuthenticationLoading = () => {
             <Link to='/login'>Go back Login</Link>
           </Button>
         )}
+
+        <MFAVerificationModal
+          open={mfaModalOpen}
+          onClose={handleMFAClose}
+          sessionToken={mfaSessionToken}
+          onSuccess={handleMFASuccess}
+          onError={() => {
+            setMessage('Authentication failed')
+            setSubMessage('Two-factor authentication failed. Please try again')
+          }}
+        />
       </Box>
     </Container>
   )

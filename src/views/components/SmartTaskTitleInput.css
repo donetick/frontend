@@ -1,3 +1,18 @@
+:root,
+[data-joy-color-scheme='light'] {
+  --highlight-date-color: #b45309;
+  --highlight-repeat-color: #15803d;
+  --highlight-label-color: #1d4ed8;
+  --highlight-priority-color: #be123c;
+}
+
+[data-joy-color-scheme='dark'] {
+  --highlight-date-color: #fca5a5;
+  --highlight-repeat-color: #86efac;
+  --highlight-label-color: #93c5fd;
+  --highlight-priority-color: #f9a8d4;
+}
+
 .smart-task-display {
   position: absolute;
   width: 100%;
@@ -11,32 +26,52 @@
   white-space: pre-wrap;
   box-sizing: border-box;
 }
+
 .smart-task-common {
   font-size: 1.2em;
   line-height: 1.2em;
   font-family: inherit;
-  caret-color: #f08080;
 }
 
 .highlight-date {
-  color: #f08080;
+  color: var(--highlight-date-color);
 }
 
 .highlight-repeat {
-  color: #90ee90;
+  color: var(--highlight-repeat-color);
 }
 
 .highlight-label {
-  color: #add8e6;
+  color: var(--highlight-label-color);
 }
 
 .highlight-priority {
-  color: #ffb6c1;
+  color: var(--highlight-priority-color);
+}
+
+.highlight-assignee {
+  color: var(--highlight-repeat-color);
+}
+
+.highlight-points {
+  color: var(--highlight-label-color);
 }
 
 .task-input {
   position: relative;
   width: 100%;
-  border-radius: 8px;
+  border-radius: 10px;
   box-sizing: border-box;
+  border: none;
+  background-color: var(--joy-palette-neutral-softBg, #f0f4f8);
+  overflow: auto;
+  transition: box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.task-input:focus-within {
+  box-shadow: 0 0 0 2px var(--joy-palette-primary-outlinedBorder, rgba(11, 107, 203, 0.15));
+}
+
+.task-input:hover:not(:focus-within) {
+  background-color: var(--joy-palette-neutral-softHoverBg, #dde7ee);
 }

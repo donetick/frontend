@@ -728,6 +728,30 @@ const DeleteUser = (password, confirmation, transferOptions = []) => {
   })
 }
 
+const UploadChoreAttachment = (file, entityType, { entityId, draftId } = {}) => {
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('entityType', entityType)
+  if (entityId != null) formData.append('entityId', String(entityId))
+  if (draftId != null) formData.append('draftId', draftId)
+  return apiClient.upload('/assets/chore', formData)
+}
+
+const GetChoreAttachments = choreId => {
+  return Fetch(`/chores/${choreId}/attachments`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+}
+
+const DeleteChoreAttachment = (choreId, filePath) => {
+  return Fetch(`/chores/${choreId}/attachments`, {
+    method: 'DELETE',
+    headers: HEADERS(),
+    body: JSON.stringify({ file_path: filePath }),
+  })
+}
+
 const CreateBackup = (encryptionKey, includeAssets = true, backupName = '') => {
   return Fetch(`/backup/create`, {
     method: 'POST',
@@ -933,6 +957,9 @@ const TrackFilterUsage = id => {
 
 export {
   AcceptCircleMemberRequest,
+  DeleteChoreAttachment,
+  GetChoreAttachments,
+  UploadChoreAttachment,
   ApproveChore,
   ArchiveChore,
   CancelSubscription,

@@ -2,14 +2,17 @@ import { Cell, Pie, PieChart, Tooltip } from 'recharts'
 
 import {
   AccessTime,
+  CalendarMonth,
   Check,
+  Checklist,
   EventBusy,
   EventNote,
-  Group,
   HourglassEmpty,
+  Person,
   Redo,
   RunningWithErrors,
   Schedule,
+  Style,
   ThumbDown,
   Timeline,
   Toll,
@@ -24,23 +27,27 @@ import {
   Divider,
   Grid,
   Link,
-  Option,
-  Select,
   Stack,
-  Tab,
-  TabList,
-  Tabs,
   Typography,
 } from '@mui/joy'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
+import FilterBar from '../../components/common/FilterBar'
+import { useFilter } from '../../hooks/useFilter'
 
 import { useLocalization } from '../../contexts/LocalizationContext'
-import { useChores, useChoresHistory } from '../../queries/ChoreQueries'
+import {
+  useChores,
+  useChoresHistory,
+  useDeleteChoreHistory,
+  useUpdateChoreHistory,
+} from '../../queries/ChoreQueries'
+import EditHistoryModal from '../Modals/EditHistoryModal'
+import HistoryDetailModal from '../Modals/HistoryDetailModal'
 import NoteViewerModal from '../Modals/Inputs/NoteViewerModal'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
+import { useLabels } from '../Labels/LabelQueries'
 import { ChoresGrouper } from '../../utils/Chores'
 import { COLORS, TASK_COLOR } from '../../utils/Colors.jsx'
-import { resolvePhotoURL } from '../../utils/Helpers.jsx'
 import LoadingComponent from '../components/Loading'
 
 const groupByDate = history => {
@@ -58,47 +65,57 @@ const groupByDate = history => {
   return aggregated
 }
 
-const ChoreHistoryItem = ({ time, name, points, status, performer, notes, onViewNote }) => {
-  const getStatusIcon = status => {
-    switch (status) {
-      case 0:
-        return <AccessTime color='primary' />
-      case 1:
-        return <Check color='success' />
-      case 2:
-        return <Redo color='warning' />
-      case 3:
-        return <HourglassEmpty color='neutral' />
-      case 4:
-        return <ThumbDown color='error' />
-      case 5:
-        return <RunningWithErrors color='error' />
-      case 6:
-        return <Schedule color='warning' />
-      default:
-        return <Check color='success' />
-    }
-  }
+const statusConfig = {
+  0: { color: 'primary', icon: <AccessTime /> },
+  1: { color: 'success', icon: <Check /> },
+  2: { color: 'warning', icon: <Redo /> },
+  3: { color: 'neutral', icon: <HourglassEmpty /> },
+  4: { color: 'danger', icon: <ThumbDown /> },
+  5: { color: 'danger', icon: <RunningWithErrors /> },
+  6: { color: 'warning', icon: <Schedule /> },
+}
+
+const ChoreHistoryItem = ({
+  time,
+  name,
+  points,
+  status,
+  notes,
+  onViewNote,
+  onViewDetails,
+}) => {
+  const cfg = statusConfig[status] ?? statusConfig[1]
 
   return (
-    <Stack direction='row' alignItems='center' spacing={2}>
+    <Stack
+      direction='row'
+      alignItems='center'
+      spacing={1}
+      onClick={onViewDetails}
+      sx={{
+        cursor: onViewDetails ? 'pointer' : 'default',
+        borderRadius: 'sm',
+        '&:hover': onViewDetails
+          ? { backgroundColor: 'background.level1' }
+          : {},
+      }}
+    >
       <Typography level='body-md' sx={{ minWidth: 80 }}>
         {time}
       </Typography>
-      <Box
+      <Avatar
+        size='sm'
+        color={cfg.color}
+        variant='soft'
         sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minWidth: 32,
-          minHeight: 32,
-          borderRadius: '50%',
-          backgroundColor: 'background.level2',
-          boxShadow: 'sm',
+          width: 32,
+          height: 32,
+          flexShrink: 0,
+          '& svg': { fontSize: '16px' },
         }}
       >
-        {getStatusIcon(status)}
-      </Box>
+        {cfg.icon}
+      </Avatar>
       <Box
         sx={{
           display: 'flex',
@@ -143,25 +160,18 @@ const ChoreHistoryItem = ({ time, name, points, status, performer, notes, onView
   )
 }
 
-
-const ChoreHistoryTimeline = ({ history, onViewNote }) => {
+const ChoreHistoryTimeline = ({
+  history,
+  performers,
+  onViewNote,
+  onViewDetails,
+}) => {
   const { fmt } = useLocalization()
 
   const groupedHistory = groupByDate(history)
 
-  const sortedEntries = Object.entries(groupedHistory).sort(
-    ([a], [b]) => new Date(b) - new Date(a),
-  )
-
   return (
-    <Container sx={{ p: 2 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-        <Timeline sx={{ fontSize: '1.5rem', color: 'primary.500' }} />
-        <Typography level='h4' sx={{ fontWeight: 'lg', color: 'text.primary' }}>
-          Activities Timeline
-        </Typography>
-      </Box>
-
+    <Box sx={{ py: 2, width: '100%' }}>
       {Object.entries(groupedHistory).map(([date, items]) => (
         <Box key={date} sx={{ mb: 4 }}>
           <Typography level='title-sm' sx={{ mb: 0.5 }}>
@@ -170,25 +180,21 @@ const ChoreHistoryTimeline = ({ history, onViewNote }) => {
           <Divider />
           <Stack spacing={1}>
             {items.map(record => (
-              <>
-                <ChoreHistoryItem
-                  key={record.id}
-
-                  time={fmt.time(
-                    record.performedAt || record.updatedAt,
-                  )}
-                  name={record.choreName}
-                  points={record.points}
-                  status={record.status}
-                  notes={record.notes}
-                  onViewNote={onViewNote}
-                />
-              </>
+              <ChoreHistoryItem
+                key={record.id}
+                time={fmt.time(record.performedAt || record.updatedAt)}
+                name={record.choreName}
+                points={record.points}
+                status={record.status}
+                notes={record.notes}
+                onViewNote={onViewNote}
+                onViewDetails={() => onViewDetails?.(record, performers)}
+              />
             ))}
           </Stack>
         </Box>
       ))}
-    </Container>
+    </Box>
   )
 }
 
@@ -402,6 +408,11 @@ const UserActivites = () => {
   const [enrichedHistory, setEnrichedHistory] = React.useState([])
   const [selectedChart, setSelectedChart] = React.useState('history')
   const [noteViewerConfig, setNoteViewerConfig] = useState({ isOpen: false })
+  const [detailModalConfig, setDetailModalConfig] = useState({ isOpen: false })
+  const [editModalConfig, setEditModalConfig] = useState({ isOpen: false })
+  const [editHistoryRecord, setEditHistoryRecord] = useState(null)
+  const updateChoreHistory = useUpdateChoreHistory()
+  const deleteChoreHistory = useDeleteChoreHistory()
 
   const [historyPieChartData, setHistoryPieChartData] = React.useState([])
   const [choreDuePieChartData, setChoreDuePieChartData] = React.useState([])
@@ -416,6 +427,7 @@ const UserActivites = () => {
     choresAssigneeBreakdownChartData,
     setChoresAssigneeBreakdownChartData,
   ] = React.useState([])
+  const { data: userLabels } = useLabels()
   const { data: choresData, isLoading: isChoresLoading } = useChores(true)
   const {
     data: choresHistory,
@@ -432,6 +444,142 @@ const UserActivites = () => {
     }
   }, [circleMembersData])
 
+  // Client-side filters applied on top of the user+time-window slice
+  const clientFilterDefs = useMemo(
+    () => [
+      {
+        id: 'status',
+        label: 'Status',
+        type: 'multi-select',
+        icon: <Checklist />,
+        options: [
+          { value: 1, label: 'Completed', color: 'success', icon: <Check sx={{ fontSize: 14 }} /> },
+          { value: 2, label: 'Skipped', color: 'warning', icon: <Redo sx={{ fontSize: 14 }} /> },
+          { value: 3, label: 'Pending', color: 'neutral', icon: <HourglassEmpty sx={{ fontSize: 14 }} /> },
+          { value: 4, label: 'Rejected', color: 'danger', icon: <ThumbDown sx={{ fontSize: 14 }} /> },
+          { value: 5, label: 'Missed', color: 'danger', icon: <RunningWithErrors sx={{ fontSize: 14 }} /> },
+          { value: 6, label: 'Rescheduled', color: 'warning', icon: <Schedule sx={{ fontSize: 14 }} /> },
+        ],
+        filterFn: (item, values) => values.includes(item.status),
+      },
+      ...(userLabels?.length > 0
+        ? [
+            {
+              id: 'label',
+              label: 'Labels',
+              type: 'multi-select',
+              icon: <Style />,
+              options: userLabels.map(l => ({
+                value: l.id,
+                label: l.name,
+                icon: (
+                  <Box
+                    component='span'
+                    sx={{
+                      display: 'inline-block',
+                      width: 10,
+                      height: 10,
+                      borderRadius: '50%',
+                      bgcolor: l.color || '#90a4ae',
+                      flexShrink: 0,
+                    }}
+                  />
+                ),
+              })),
+              filterFn: (item, values) =>
+                item.labelsV2?.some(l => values.includes(l.id)) ?? false,
+            },
+          ]
+        : []),
+      {
+        id: 'hasNotes',
+        label: 'Has Notes',
+        type: 'boolean',
+        icon: <EventNote />,
+        filterFn: item => !!item.notes,
+      },
+      {
+        id: 'hasPoints',
+        label: 'Has Points',
+        type: 'boolean',
+        icon: <Toll />,
+        filterFn: item => (item.points ?? 0) > 0,
+      },
+    ],
+    [userLabels],
+  )
+
+  const {
+    filteredData: filteredTimeline,
+    activeFilters: clientActiveFilters,
+    setFilter: setClientFilter,
+    clearAll: clearClientFilters,
+  } = useFilter(selectedHistory, clientFilterDefs)
+
+  // All filter defs merged for FilterBar display
+  const filterDefs = useMemo(
+    () => [
+      {
+        id: 'timePeriod',
+        label: 'Time Period',
+        type: 'single-select',
+        icon: <CalendarMonth />,
+        defaultValue: 7,
+        options: [
+          { value: 7, label: '7 Days' },
+          { value: 30, label: '30 Days' },
+          { value: 90, label: '90 Days' },
+          { value: 365, label: 'All Time' },
+        ],
+      },
+      {
+        id: 'completedBy',
+        label: 'User',
+        type: 'single-select',
+        icon: <Person />,
+        options: circleUsers.map(u => ({
+          value: u.userId,
+          label: u.displayName,
+          avatar: u.image,
+        })),
+      },
+      ...clientFilterDefs,
+    ],
+    [circleUsers, clientFilterDefs],
+  )
+
+  // Merge server-driven and client-driven active filter states for the bar
+  const activeFilters = useMemo(
+    () => ({
+      timePeriod: tabValue,
+      ...(selectedUser !== 'all' ? { completedBy: selectedUser } : {}),
+      ...clientActiveFilters,
+    }),
+    [tabValue, selectedUser, clientActiveFilters],
+  )
+
+  const handleSetFilter = (id, value) => {
+    if (id === 'completedBy') {
+      const userId = value ?? 'all'
+      setSelectedUser(userId)
+      setSelectedHistory(enrichedHistory.filter(h => USER_FILTER(h, userId)))
+    } else if (id === 'timePeriod') {
+      const days = value ?? 7
+      setTabValue(days)
+      refetchHistory(days)
+    } else {
+      setClientFilter(id, value)
+    }
+  }
+
+  const handleClearAll = () => {
+    setSelectedUser('all')
+    setSelectedHistory(enrichedHistory)
+    setTabValue(7)
+    refetchHistory(7)
+    clearClientFilters()
+  }
+
   useEffect(() => {
     if (
       !isChoresHistoryLoading &&
@@ -444,6 +592,7 @@ const UserActivites = () => {
         return {
           ...item,
           choreName: chore?.name,
+          labelsV2: chore?.labelsV2,
         }
       })
       setEnrichedHistory(enrichedHistory)
@@ -823,221 +972,23 @@ const UserActivites = () => {
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-        {/* <EmojiEvents sx={{ fontSize: '2rem', color: '#FFD700' }} /> */}
-        <Stack sx={{ flex: 1 }}>
-          <Typography
-            level='h3'
-            sx={{ fontWeight: 'lg', color: 'text.primary' }}
-          >
-            User Activities
-          </Typography>
-          <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            Overview of user activities and task statistics
-          </Typography>
-        </Stack>
-      </Box>
-
-      {/* Filter Controls - Always visible */}
-      <Card
-        variant='outlined'
-        sx={{
-          width: '100%',
-          p: 2,
-          mb: 3,
-          borderRadius: 12,
-          background:
-            'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
-          backdropFilter: 'blur(10px)',
-        }}
-      >
-        <Stack spacing={2}>
-          <Typography level='title-sm' sx={{ color: 'text.secondary' }}>
-            Filter Activities
-          </Typography>
-
-          <Stack
-            direction={{ xs: 'column', sm: 'row' }}
-            spacing={2}
-            alignItems={{ xs: 'stretch', sm: 'center' }}
-          >
-            {/* User Filter */}
-            <Box sx={{ flex: 1, minWidth: 200 }}>
-              <Typography level='body-sm' sx={{ mb: 1, fontWeight: 500 }}>
-                Show activities for:
-              </Typography>
-              <Select
-                sx={{
-                  width: '100%',
-                }}
-                variant='outlined'
-                value={selectedUser}
-                onChange={(e, selected) => {
-                  setSelectedUser(selected)
-                  setSelectedHistory(
-                    enrichedHistory.filter(h => USER_FILTER(h, selected)),
-                  )
-                }}
-                renderValue={() => {
-                  if (selectedUser === undefined || selectedUser === 'all') {
-                    return (
-                      <Typography
-                        startDecorator={
-                          <Avatar color='primary' size='sm'>
-                            <Group />
-                          </Avatar>
-                        }
-                      >
-                        All Users
-                      </Typography>
-                    )
-                  }
-                  return (
-                    <Typography
-                      startDecorator={
-                        <Avatar
-                          color='primary'
-                          size='sm'
-                          src={resolvePhotoURL(
-                            circleUsers.find(
-                              user => user.userId === selectedUser,
-                            )?.image,
-                          )}
-                        >
-                          {circleUsers
-                            .find(user => user.userId === selectedUser)
-                            ?.displayName?.charAt(0)}
-                        </Avatar>
-                      }
-                    >
-                      {
-                        circleUsers.find(user => user.userId === selectedUser)
-                          ?.displayName
-                      }
-                    </Typography>
-                  )
-                }}
-              >
-                <Option value='all'>
-                  <Typography
-                    startDecorator={
-                      <Avatar color='primary' size='sm'>
-                        <Group />
-                      </Avatar>
-                    }
-                  >
-                    All Users
-                  </Typography>
-                </Option>
-                {circleUsers.map(user => (
-                  <Option key={user.userId} value={user.userId}>
-                    <Avatar
-                      color='primary'
-                      size='sm'
-                      src={resolvePhotoURL(user.image)}
-                    >
-                      {user.displayName?.charAt(0)}
-                    </Avatar>
-                    <Typography>{user.displayName}</Typography>
-                    <Chip
-                      color='success'
-                      size='sm'
-                      variant='soft'
-                      startDecorator={<Toll />}
-                    >
-                      {user.points - user.pointsRedeemed}
-                    </Chip>
-                  </Option>
-                ))}
-              </Select>
-            </Box>
-
-            {/* Time Period Filter */}
-            <Box sx={{ flex: 1, minWidth: 200 }}>
-              <Typography level='body-sm' sx={{ mb: 1, fontWeight: 500 }}>
-                Time period:
-              </Typography>
-              <Tabs
-                onChange={(e, tabValue) => {
-                  setTabValue(tabValue)
-                  refetchHistory(tabValue)
-                }}
-                value={tabValue}
-                sx={{
-                  borderRadius: 8,
-                  backgroundColor: 'background.surface',
-                  border: '1px solid',
-                  borderColor: 'divider',
-                }}
-              >
-                <TabList
-                  disableUnderline
-                  sx={{
-                    borderRadius: 8,
-                    backgroundColor: 'transparent',
-                    p: 0.5,
-                    gap: 0.5,
-                  }}
-                >
-                  {[
-                    { label: '7 Days', value: 7 },
-                    { label: '30 Days', value: 30 },
-                    { label: '90 Days', value: 90 },
-                    { label: 'All Time', value: 365 },
-                  ].map((tab, index) => (
-                    <Tab
-                      key={index}
-                      sx={{
-                        borderRadius: 6,
-                        minWidth: 'auto',
-                        px: 2,
-                        py: 1,
-                        fontSize: 'sm',
-                        fontWeight: 500,
-                        color: 'text.secondary',
-                        '&.Mui-selected': {
-                          color: 'primary.plainColor',
-                          backgroundColor: 'primary.softBg',
-                          fontWeight: 600,
-                        },
-                        '&:hover': {
-                          backgroundColor: 'neutral.softHoverBg',
-                        },
-                      }}
-                      disableIndicator
-                      value={tab.value}
-                    >
-                      {tab.label}
-                    </Tab>
-                  ))}
-                </TabList>
-              </Tabs>
-            </Box>
-          </Stack>
-        </Stack>
-      </Card>
-
-      {/* Current Filter Summary */}
-      <Box sx={{ mb: 3, textAlign: 'center' }}>
-        <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-          Showing activities for{' '}
-          <Typography
-            component='span'
-            sx={{ fontWeight: 600, color: 'primary.500' }}
-          >
-            {selectedUser === undefined || selectedUser === 'all'
-              ? 'All Users'
-              : circleUsers.find(user => user.userId === selectedUser)
-                  ?.displayName || 'Unknown User'}
-          </Typography>{' '}
-          over the{' '}
-          <Typography
-            component='span'
-            sx={{ fontWeight: 600, color: 'primary.500' }}
-          >
-            {tabValue === 365 ? 'All Time' : `Last ${tabValue} Days`}
-          </Typography>
+        <Timeline sx={{ fontSize: '1.5rem' }} />
+        <Typography
+          level='title-md'
+          sx={{ fontWeight: 'lg', color: 'text.primary' }}
+        >
+          Activities
         </Typography>
       </Box>
+
+      <FilterBar
+        filterDefs={filterDefs}
+        activeFilters={activeFilters}
+        onSetFilter={handleSetFilter}
+        onClearAll={handleClearAll}
+        resultCount={filteredTimeline.length}
+        totalCount={selectedHistory.length}
+      />
 
       {/* Conditional Content Based on Data Availability */}
       {!choresData.res?.length > 0 || !choresHistory?.length > 0 ? (
@@ -1103,7 +1054,8 @@ const UserActivites = () => {
             {/* Left Side - Timeline (Mobile: Full width, Desktop: Flexible) */}
             <Box sx={{ flex: 1, minWidth: 0, width: '100%' }}>
               <ChoreHistoryTimeline
-                history={selectedHistory}
+                history={filteredTimeline}
+                performers={circleUsers}
                 onViewNote={notes => {
                   setNoteViewerConfig({
                     isOpen: true,
@@ -1112,19 +1064,68 @@ const UserActivites = () => {
                     onClose: () => setNoteViewerConfig({ isOpen: false }),
                   })
                 }}
+                onViewDetails={(entry, performers) => {
+                  setDetailModalConfig({
+                    isOpen: true,
+                    entry,
+                    performers,
+                    onClose: () => setDetailModalConfig({ isOpen: false }),
+                    onEdit: record => {
+                      setDetailModalConfig(prev => ({ ...prev, isOpen: false }))
+                      setEditHistoryRecord(record)
+                      setEditModalConfig({
+                        isOpen: true,
+                        onClose: () => {
+                          setEditModalConfig({ isOpen: false })
+                          setEditHistoryRecord(null)
+                        },
+                        onSave: updated => {
+                          updateChoreHistory.mutate(
+                            {
+                              choreId: record.choreId,
+                              historyId: record.id,
+                              historyData: {
+                                performedAt: updated.performedAt,
+                                dueDate: updated.dueDate,
+                                notes: updated.notes,
+                              },
+                            },
+                            {
+                              onSuccess: () => {
+                                setEditModalConfig({ isOpen: false })
+                                setEditHistoryRecord(null)
+                              },
+                            },
+                          )
+                        },
+                        onDelete: () => {
+                          deleteChoreHistory.mutate(
+                            { choreId: record.choreId, historyId: record.id },
+                            {
+                              onSuccess: () => {
+                                setEditModalConfig({ isOpen: false })
+                                setEditHistoryRecord(null)
+                              },
+                            },
+                          )
+                        },
+                      })
+                    },
+                  })
+                }}
               />
             </Box>
 
-            {/* Right Sidebar - Charts (Mobile: Full width, Desktop: Fixed width + sticky) */}
+            {/* Right Sidebar - Charts (Desktop only, hidden on mobile) */}
             <Box
               sx={{
-                width: { xs: '100%', lg: '350px' },
-                position: { xs: 'static', lg: 'sticky' },
-                top: { lg: '60px' },
-                alignSelf: { lg: 'flex-start' },
-                maxHeight: { lg: 'calc(100vh - 40px)' },
-                overflowY: { lg: 'auto' },
-                order: { xs: -1, lg: 1 }, // Show charts first on mobile, last on desktop
+                display: { xs: 'none', lg: 'block' },
+                width: '350px',
+                position: 'sticky',
+                top: '60px',
+                alignSelf: 'flex-start',
+                maxHeight: 'calc(100vh - 40px)',
+                overflowY: 'auto',
               }}
             >
               {/* Charts Container */}
@@ -1263,6 +1264,11 @@ const UserActivites = () => {
         </>
       )}
       <NoteViewerModal config={noteViewerConfig} />
+      <HistoryDetailModal config={detailModalConfig} />
+      <EditHistoryModal
+        config={editModalConfig}
+        historyRecord={editHistoryRecord}
+      />
     </Container>
   )
 }

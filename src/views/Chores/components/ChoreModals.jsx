@@ -1,8 +1,14 @@
+import { Capacitor } from '@capacitor/core'
 import DateModal from '../../Modals/Inputs/DateModal'
 import NudgeModal from '../../Modals/Inputs/NudgeModal'
 import SelectModal from '../../Modals/Inputs/SelectModal'
 import TextModal from '../../Modals/Inputs/TextModal'
 import WriteNFCModal from '../../Modals/Inputs/WriteNFCModal'
+
+const getNFCUrl = choreId =>
+  Capacitor.getPlatform() === 'android' || Capacitor.getPlatform() === 'ios'
+    ? `donetick://chores/${choreId}`
+    : `${window.location.origin}/chores/${choreId}`
 
 const ChoreModals = ({
   activeModal,
@@ -65,7 +71,7 @@ const ChoreModals = ({
         <WriteNFCModal
           config={{
             isOpen: true,
-            url: `${window.location.origin}/chores/${modalChore.id}`,
+            url: getNFCUrl(modalChore.id),
             onClose: onClose,
           }}
         />
