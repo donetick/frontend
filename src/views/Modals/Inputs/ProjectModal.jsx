@@ -5,8 +5,6 @@ import {
   FormControl,
   FormLabel,
   Input,
-  Option,
-  Select,
   Stack,
   Textarea,
   Typography,
@@ -223,39 +221,30 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
           {/* Color Selection */}
           <FormControl>
             <FormLabel>Project Color</FormLabel>
-            <Select
-              value={projectColor}
-              onChange={(e, value) => value && setProjectColor(value)}
-              renderValue={selected => (
-                <Typography
-                  startDecorator={
-                    <Box
-                      className='size-4'
-                      borderRadius={10}
-                      sx={{ background: selected.value }}
-                    />
-                  }
-                >
-                  {selected.label}
-                </Typography>
-              )}
-            >
-              {PROJECT_COLORS.map(color => (
-                <Option key={color.value} value={color.value}>
-                  <Box className='flex items-center justify-between'>
-                    <Box
-                      width={20}
-                      height={20}
-                      borderRadius={10}
-                      sx={{ background: color.value }}
-                    />
-                    <Typography sx={{ ml: 1 }} variant='caption'>
-                      {color.name}
-                    </Typography>
-                  </Box>
-                </Option>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+              {PROJECT_COLORS.map(colorOption => (
+                <Box
+                  key={colorOption.value}
+                  title={colorOption.name}
+                  onClick={() => setProjectColor(colorOption.value)}
+                  sx={{
+                    width: 26,
+                    height: 26,
+                    borderRadius: '50%',
+                    background: colorOption.value,
+                    cursor: 'pointer',
+                    outline:
+                      projectColor === colorOption.value
+                        ? '3px solid var(--joy-palette-primary-500)'
+                        : '2px solid transparent',
+                    outlineOffset: '2px',
+                    transition: 'all 0.15s ease',
+                    flexShrink: 0,
+                    '&:hover': { transform: 'scale(1.2)' },
+                  }}
+                />
               ))}
-            </Select>
+            </Box>
           </FormControl>
 
           {/* Error Message */}
