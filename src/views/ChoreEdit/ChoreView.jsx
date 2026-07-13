@@ -196,7 +196,14 @@ const ChoreView = () => {
     setInfoCards(cards)
   }
   const handleTaskCompletion = () => {
-    MarkChoreComplete(choreId, impersonatedUser?.userId, completedDate, note)
+    MarkChoreComplete(
+      choreId,
+      impersonatedUser
+        ? { completedBy: impersonatedUser.userId, note }
+        : { note },
+      completedDate,
+      null,
+    )
       .then(resp => {
         if (resp.ok) {
           return resp.json().then(data => {
@@ -384,7 +391,7 @@ const ChoreView = () => {
   }
 
   const handleRejectChore = () => {
-    RejectChore(choreId, null).then(response => {
+    RejectChore(choreId).then(response => {
       if (response.ok) {
         response.json().then(data => {
           setChore(data.res)

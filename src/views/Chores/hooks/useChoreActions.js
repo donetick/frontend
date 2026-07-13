@@ -169,7 +169,7 @@ export const useChoreActions = ({
           try {
             const response = await MarkChoreComplete(
               chore.id,
-              impersonatedUser ? impersonatedUser.userId : null,
+              impersonatedUser ? { completedBy: impersonatedUser.userId } : null,
               null,
               null,
             )
@@ -267,7 +267,7 @@ export const useChoreActions = ({
 
         case 'reject':
           try {
-            const response = await RejectChore(chore.id, null)
+            const response = await RejectChore(chore.id)
             if (response.ok) {
               const data = await response.json()
               updateChoreInState(data.res, 'rejected')
@@ -427,9 +427,9 @@ export const useChoreActions = ({
       if (!modalChore) return
       MarkChoreComplete(
         modalChore.id,
-        impersonatedUser ? impersonatedUser.userId : null,
-        null,
+        impersonatedUser ? { completedBy: impersonatedUser.userId } : null,
         new Date(newDate).toISOString(),
+        null,
       ).then(response => {
         if (response.ok) {
           response.json().then(data => {
@@ -464,9 +464,11 @@ export const useChoreActions = ({
       if (!modalChore) return
       MarkChoreComplete(
         modalChore.id,
-        impersonatedUser ? impersonatedUser.userId : null,
+        impersonatedUser
+          ? { note, completedBy: impersonatedUser.userId }
+          : { note },
         null,
-        note,
+        null,
       ).then(response => {
         if (response.ok) {
           response.json().then(data => {
@@ -528,7 +530,11 @@ export const useChoreActions = ({
               try {
                 await MarkChoreComplete(
                   chore.id,
-                  impersonatedUser ? impersonatedUser.userId : null,
+                  impersonatedUser
+                    ? { completedBy: impersonatedUser.userId }
+                    : null,
+                  null,
+                  null,
                 )
                 completedTasks.push(chore)
               } catch (error) {

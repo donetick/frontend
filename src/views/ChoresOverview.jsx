@@ -324,17 +324,16 @@ const ChoresOverview = () => {
             alert('Please select a performer')
             return
           }
-          MarkChoreComplete(choreId, activeUserId, date, null).then(
+          MarkChoreComplete(choreId, null, date, activeUserId).then(
             response => {
               if (response.ok) {
                 response.json().then(data => {
                   const newChore = data.res
                   const newChores = [...chores]
-                  const index = newChores.findIndex(c => c.id === choreId)
+                  const index = newChores.findIndex(c => c.id === chore.id)
                   newChores[index] = newChore
                   setChores(newChores)
                   setFilteredChores(newChores)
-                  setIsDateModalOpen(false)
                 })
               }
             },
