@@ -8,7 +8,6 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useUserProfile } from '../../queries/UserQueries'
 import {
@@ -22,7 +21,6 @@ import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import SettingsLayout from './SettingsLayout'
 
 const StorageSettings = () => {
-  const { t } = useTranslation(['settings', 'common'])
   const Navigate = useNavigate()
   const { data: userProfile } = useUserProfile()
   const [usage, setUsage] = useState({ used: 0, total: 0 })
@@ -36,8 +34,8 @@ const StorageSettings = () => {
     message,
     title,
     onConfirm,
-    confirmText = t('common:actions.continue'),
-    cancelText = t('common:actions.cancel'),
+    confirmText = 'Confirm',
+    cancelText = 'Cancel',
     color = 'primary',
   ) => {
     setConfirmModalConfig({
@@ -78,19 +76,20 @@ const StorageSettings = () => {
   const totalMB = (usage.total / (1024 * 1024)).toFixed(2)
 
   return (
-    <SettingsLayout title={t('settings:storage.title')}>
+    <SettingsLayout title='Storage Settings'>
       <div className='grid gap-4 py-4' id='storage'>
         <Card className='p-4' sx={{ maxWidth: 500, mb: 2 }}>
           <Typography level='title-md' sx={{ mb: 1 }}>
-            {t('settings:storage.serverUsageTitle')}
+            Server Storage Usage
             {!isPlusAccount(userProfile) && (
               <Chip variant='soft' color='warning' sx={{ ml: 1 }}>
-                {t('settings:storage.plusFeature')}
+                Plus Feature
               </Chip>
             )}
           </Typography>
           <Typography level='body-sm' sx={{ mb: 1 }}>
-            {t('settings:storage.serverUsageDescription')}
+            This is the storage used by your account on our servers (e.g. files,
+            images, and data you have uploaded).
           </Typography>
           {!isPlusAccount(userProfile) ? (
             <>
@@ -109,25 +108,20 @@ const StorageSettings = () => {
                 -- MB used / -- MB total (--)
               </Typography>
               <Typography level='body-sm' color='warning'>
-                {t('settings:storage.basicPlanUnavailable')}
+                Server storage is not available in the Basic plan. Upgrade to
+                Plus to track your server storage usage.
               </Typography>
             </>
           ) : loading ? (
             <>
               <LinearProgress sx={{ mb: 1 }} />
-              <Typography level='body-xs'>
-                {t('settings:storage.loading')}
-              </Typography>
+              <Typography level='body-xs'>Loading...</Typography>
             </>
           ) : (
             <>
               <LinearProgress determinate value={percent} sx={{ mb: 1 }} />
               <Typography level='body-xs'>
-                {t('settings:storage.usedOfTotal', {
-                  used: usedMB,
-                  total: totalMB,
-                  percent,
-                })}
+                {usedMB} MB used / {totalMB} MB total ({percent}%)
               </Typography>
             </>
           )}
@@ -135,18 +129,20 @@ const StorageSettings = () => {
 
         <Card className='p-4' sx={{ maxWidth: 500, mb: 2 }}>
           <Typography level='title-md' sx={{ mb: 1 }}>
-            {t('settings:storage.experimentalTitle')}
+            Experimental Features
             <Chip variant='soft' color='warning' sx={{ ml: 1 }}>
-              {t('settings:storage.comingSoon')}
+              Coming Soon
             </Chip>
           </Typography>
           <div className='mb-2 flex items-center justify-between'>
             <div className='flex-1'>
               <Typography level='body-md' sx={{ mb: 0.5 }}>
-                {t('settings:storage.offlineModeTitle')}
+                Enable Offline Mode
               </Typography>
               <Typography level='body-sm' color='neutral'>
-                {t('settings:storage.offlineModeDescription')}
+                Allows the app to work offline by caching data locally. This is
+                experimental and may cause some slowness. If you experience
+                performance issues, we recommend turning this off.
               </Typography>
             </div>
             <Switch
@@ -158,82 +154,84 @@ const StorageSettings = () => {
           </div>
           {offlineModeEnabled && (
             <Typography level='body-xs' color='warning' sx={{ mt: 1 }}>
-              {t('settings:storage.offlineModeWarning')}
+              ⚠️ Offline mode is enabled. If you experience slowness, disable
+              this setting.
             </Typography>
           )}
         </Card>
 
         <Card className='p-4' sx={{ maxWidth: 500, mb: 2 }}>
           <Typography level='title-md' sx={{ mb: 1 }}>
-            {t('settings:storage.localStorageTitle', {
-              platform: Capacitor.isNativePlatform()
-                ? t('settings:storage.appPlatform')
-                : t('settings:storage.browserPlatform'),
-            })}
+            {Capacitor.isNativePlatform() ? 'App' : 'Browser'} Local Storage &
+            Cache
           </Typography>
           <Typography level='body-sm' sx={{ mb: 1 }}>
-            {t('settings:storage.localStorageDescription')}
+            This is data stored locally in your browser for faster access and
+            offline use. Clearing this will not affect your server data, but may
+            log you out or remove offline tasks.
           </Typography>
           <Button
             variant='soft'
             color='danger'
             onClick={() => {
               showConfirmation(
-                t('settings:storage.clearAllMessage'),
-                t('settings:storage.clearAllTitle'),
+                'Are you sure you want to clear your local storage and cache? This will remove all your data from this browser and require login.',
+                'Clear All Local Storage',
                 () => {
                   localStorage.clear()
                   Navigate('/login')
                 },
-                t('settings:storage.clearAllAction'),
-                t('common:actions.cancel'),
+                'Clear All',
+                'Cancel',
                 'danger',
               )
             }}
           >
-            {t('settings:storage.clearAllButton')}
+            Clear All Local Storage and Cache
           </Button>
           <Button
             variant='outlined'
             color='danger'
             onClick={() => {
               showConfirmation(
-                t('settings:storage.clearOfflineMessage'),
-                t('settings:storage.clearOfflineTitle'),
+                'Are you sure you want to clear only the offline cache and tasks?',
+                'Clear Offline Cache',
                 () => {
                   localStorage.removeItem('offline_cache')
                   localStorage.removeItem('offline_request_queue')
                   localStorage.removeItem('offlineTasks')
                 },
-                t('settings:storage.clearOfflineAction'),
-                t('common:actions.cancel'),
+                'Clear Cache',
+                'Cancel',
                 'danger',
               )
             }}
             sx={{ mt: 1 }}
           >
-            {t('settings:storage.clearOfflineButton')}
+            Clear Offline Cache and Offline Tasks
           </Button>
         </Card>
 
         {Capacitor.isNativePlatform() && (
           <Card className='p-4' sx={{ maxWidth: 500, mb: 2 }}>
             <Typography level='title-md' sx={{ mb: 1 }}>
-              {t('settings:storage.appPreferencesTitle')}
+              App Preferences
               <Chip variant='soft' color='info' sx={{ ml: 1 }}>
-                {t('settings:storage.deviceOnly')}
+                Device Only
               </Chip>
             </Typography>
             <Typography level='body-sm' sx={{ mb: 1 }}>
-              {t('settings:storage.appPreferencesDescription')}
+              These are preferences and settings stored locally on your device
+              by the app. Clearing them will reset app-specific settings and may
+              log you out, but will not affect your server data.
             </Typography>
             <Button
               variant='soft'
               color='danger'
               onClick={() => {
                 showConfirmation(
-                  t('settings:storage.clearPreferencesMessage'),
-                  t('settings:storage.clearPreferencesTitle'),
+                  'Are you sure you want to clear all app preferences? This will reset your app settings and may require you to log in again.',
+                  'Clear App Preferences',
                   async () => {
                     try {
                       const { Preferences } = await import(
@@ -245,13 +243,13 @@ const StorageSettings = () => {
                       // Optionally show error feedback
                     }
                   },
-                  t('settings:storage.clearPreferencesAction'),
-                  t('common:actions.cancel'),
+                  'Clear Preferences',
+                  'Cancel',
                   'danger',
                 )
               }}
             >
-              {t('settings:storage.clearPreferencesButton')}
+              Clear App Preferences
             </Button>
           </Card>
         )}

@@ -20,7 +20,6 @@ import {
   IconButton,
   Typography,
 } from '@mui/joy'
-import { useTranslation } from 'react-i18next'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useUserProfile } from '../../queries/UserQueries.jsx'
@@ -48,7 +47,6 @@ const ChoreCard = ({
 }) => {
   const { data: userProfile } = useUserProfile()
   const { timeFormat } = useLocalization()
-  const { t } = useTranslation(['common'])
 
   const { impersonatedUser } = useImpersonateUser()
 
@@ -239,7 +237,7 @@ const ChoreCard = ({
                   {chore.assignedTo === null && (
                     <Box display='flex' alignItems='center' gap={0.5}>
                       <Chip variant='outlined' startDecorator={<Group />}>
-                        {t('common:status.anyone')}
+                        Anyone
                       </Chip>
                     </Box>
                   )}

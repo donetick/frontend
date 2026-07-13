@@ -282,7 +282,7 @@ const NavBar = () => {
               <ListItemDecorator>
                 <Logout />
               </ListItemDecorator>
-              <ListItemContent>{t('actions.logout')}</ListItemContent>
+              <ListItemContent>{t('logout')}</ListItemContent>
             </ListItemButton>
             <Typography
               onClick={

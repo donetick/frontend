@@ -2,7 +2,6 @@ import { Refresh, Token } from '@mui/icons-material'
 import { Box, Button, Card, Chip, Divider, Typography } from '@mui/joy'
 import { useEffect, useState } from 'react'
 import { LocalNotifications } from '@capacitor/local-notifications'
-import { useTranslation } from 'react-i18next'
 import { useSSEContext } from '../../hooks/useSSEContext'
 import { useNotification } from '../../service/NotificationProvider'
 import { apiClient } from '../../utils/ApiClient'
@@ -10,7 +9,6 @@ import { RefreshToken } from '../../utils/Fetcher'
 import { getRefreshTokenExpiry, isNative } from '../../utils/TokenStorage'
 
 const DeveloperSettings = () => {
-  const { t } = useTranslation(['settings'])
   const {
     isConnected,
     isConnecting,
@@ -114,8 +112,8 @@ const DeveloperSettings = () => {
   }, [accessTokenExpiry, refreshTokenExpiry, getDebugInfo])
 
   const formatTimeLeft = milliseconds => {
-    if (milliseconds === null) return t('settings:developer.notAvailable')
-    if (milliseconds === 0) return t('settings:developer.timeExpired')
+    if (milliseconds === null) return 'N/A'
+    if (milliseconds === 0) return 'Expired'
 
     const totalSeconds = Math.floor(milliseconds / 1000)
     const days = Math.floor(totalSeconds / 86400)
@@ -147,7 +145,7 @@ const DeveloperSettings = () => {
       if (result.success) {
         showNotification({
           type: 'success',
-          message: t('settings:developer.tokenRefreshed'),
+          message: 'Token refreshed successfully',
         })
 
         // Reload token expiry data
@@ -161,17 +159,13 @@ const DeveloperSettings = () => {
       } else {
         showNotification({
           type: 'error',
-          message: t('settings:developer.tokenRefreshFailed', {
-            message: result.error,
-          }),
+          message: `Token refresh failed: ${result.error}`,
         })
       }
     } catch (error) {
       showNotification({
         type: 'error',
-        message: t('settings:developer.tokenRefreshError', {
-          message: error.message,
-        }),
+        message: `Token refresh error: ${error.message}`,
       })
     } finally {
       setIsRefreshing(false)
@@ -187,7 +181,7 @@ const DeveloperSettings = () => {
         const data = await response.json()
         showNotification({
           type: 'success',
-          message: t('settings:developer.refreshEndpointSuccess'),
+          message: 'Refresh token endpoint called successfully',
         })
 
         // Reload token expiry data
@@ -204,18 +198,13 @@ const DeveloperSettings = () => {
         const error = await response.text()
         showNotification({
           type: 'error',
-          message: t('settings:developer.refreshEndpointFailed', {
-            status: response.status,
-            message: error,
-          }),
+          message: `Refresh token endpoint failed: ${response.status} ${error}`,
         })
       }
     } catch (error) {
       showNotification({
         type: 'error',
-        message: t('settings:developer.refreshEndpointError', {
-          message: error.message,
-        }),
+        message: `Refresh token endpoint error: ${error.message}`,
       })
     } finally {
       setIsRefreshingDirect(false)
@@ -237,17 +226,13 @@ const DeveloperSettings = () => {
       setScheduledNotifications(sorted)
       showNotification({
         type: 'success',
-        message: t('settings:developer.notificationsLoaded', {
-          count: sorted.length,
-        }),
+        message: `Loaded ${sorted.length} scheduled notifications`,
       })
     } catch (error) {
       console.error('Error loading scheduled notifications:', error)
       showNotification({
         type: 'error',
-        message: t('settings:developer.notificationsLoadError', {
-          message: error.message,
-        }),
+        message: `Error loading notifications: ${error.message}`,
       })
     } finally {
       setIsLoadingNotifications(false)
@@ -269,10 +254,12 @@ const DeveloperSettings = () => {
 
   return (
     <div className='grid gap-4 py-4' id='developer'>
-      <Typography level='h3'>{t('settings:developer.title')}</Typography>
+      <Typography level='h3'>Developer Settings</Typography>
       <Divider />
       <Typography level='body-md'>
-        {t('settings:developer.description')}
+        View technical information about your authentication tokens and session
+        state. This information is useful for debugging and development
+        purposes.
       </Typography>
 
       <Card variant='outlined'>
@@ -286,9 +273,7 @@ const DeveloperSettings = () => {
               gap: 1,
             }}
           >
-            <Typography level='title-lg'>
-              {t('settings:developer.authTokens')}
-            </Typography>
+            <Typography level='title-lg'>Authentication Tokens</Typography>
             <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
               <Button
                 size='sm'
@@ -298,7 +283,7 @@ const DeveloperSettings = () => {
                 loading={isRefreshing}
                 disabled={isRefreshing || isRefreshingDirect}
               >
-                {t('settings:developer.refreshTokenAction')}
+                Refresh Token
               </Button>
               <Button
                 size='sm'
@@ -309,14 +294,14 @@ const DeveloperSettings = () => {
                 loading={isRefreshingDirect}
                 disabled={isRefreshing || isRefreshingDirect}
               >
-                {t('settings:developer.callRefreshEndpoint')}
+                Call Refresh Endpoint
               </Button>
             </Box>
           </Box>
 
           <Box>
             <Typography level='title-sm' mb={1}>
-              {t('settings:developer.accessToken')}
+              Access Token
             </Typography>
             <Box
               sx={{
@@ -326,18 +311,14 @@ const DeveloperSettings = () => {
                 flexWrap: 'wrap',
               }}
             >
-              <Typography level='body-sm'>
-                {t('settings:developer.timeLeft')}
-              </Typography>
+              <Typography level='body-sm'>Time Left:</Typography>
               <Chip color={getExpiryStatus(timeLeft.access)} variant='soft'>
                 {formatTimeLeft(timeLeft.access)}
               </Chip>
             </Box>
             {accessTokenExpiry && (
               <Typography level='body-xs' sx={{ mt: 0.5 }} color='neutral'>
-                {t('settings:developer.expires', {
-                  date: new Date(accessTokenExpiry).toLocaleString(),
-                })}
+                Expires: {new Date(accessTokenExpiry).toLocaleString()}
               </Typography>
             )}
           </Box>
@@ -346,7 +327,7 @@ const DeveloperSettings = () => {
 
           <Box>
             <Typography level='title-sm' mb={1}>
-              {t('settings:developer.refreshToken')}
+              Refresh Token
             </Typography>
             {isNativePlatform ? (
               <>
@@ -358,9 +339,7 @@ const DeveloperSettings = () => {
                     flexWrap: 'wrap',
                   }}
                 >
-                  <Typography level='body-sm'>
-                    {t('settings:developer.timeLeft')}
-                  </Typography>
+                  <Typography level='body-sm'>Time Left:</Typography>
                   <Chip
                     color={getExpiryStatus(timeLeft.refresh)}
                     variant='soft'
@@ -370,15 +349,13 @@ const DeveloperSettings = () => {
                 </Box>
                 {refreshTokenExpiry && (
                   <Typography level='body-xs' sx={{ mt: 0.5 }} color='neutral'>
-                    {t('settings:developer.expires', {
-                      date: new Date(refreshTokenExpiry).toLocaleString(),
-                    })}
+                    Expires: {new Date(refreshTokenExpiry).toLocaleString()}
                   </Typography>
                 )}
               </>
             ) : (
               <Typography level='body-sm' color='neutral'>
-                {t('settings:developer.refreshTokenCookie')}
+                Refresh tokens are managed via HTTP-only cookies on web platform
               </Typography>
             )}
           </Box>
@@ -387,17 +364,13 @@ const DeveloperSettings = () => {
 
       <Card variant='outlined'>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <Typography level='title-lg'>
-            {t('settings:developer.platformInfo')}
-          </Typography>
+          <Typography level='title-lg'>Platform Information</Typography>
 
           <Box>
             <Typography level='body-sm'>
-              {t('settings:developer.platform')}{' '}
+              Platform:{' '}
               <Chip variant='soft' size='sm'>
-                {isNativePlatform
-                  ? t('settings:developer.native')
-                  : t('settings:developer.web')}
+                {isNativePlatform ? 'Native' : 'Web'}
               </Chip>
             </Typography>
           </Box>
@@ -417,7 +390,7 @@ const DeveloperSettings = () => {
               }}
             >
               <Typography level='title-lg'>
-                {t('settings:developer.scheduledNotifications')}
+                Scheduled Local Notifications
               </Typography>
               <Button
                 size='sm'
@@ -427,7 +400,7 @@ const DeveloperSettings = () => {
                 loading={isLoadingNotifications}
                 disabled={isLoadingNotifications}
               >
-                {t('settings:developer.refresh')}
+                Refresh
               </Button>
             </Box>
 
@@ -435,12 +408,12 @@ const DeveloperSettings = () => {
 
             {scheduledNotifications.length === 0 ? (
               <Typography level='body-sm' color='neutral'>
-                {t('settings:developer.noScheduledNotifications')}
+                No scheduled notifications
               </Typography>
             ) : (
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <Typography level='body-sm'>
-                  {t('settings:developer.totalScheduled')}{' '}
+                  Total scheduled:{' '}
                   <Chip variant='soft' size='sm'>
                     {scheduledNotifications.length}
                   </Chip>
@@ -481,12 +454,10 @@ const DeveloperSettings = () => {
                           }}
                         >
                           <Typography level='title-sm'>
-                            {notification.title ||
-                              t('settings:developer.noTitle')}
+                            {notification.title || 'No title'}
                           </Typography>
                           <Typography level='body-xs' color='neutral'>
-                            {notification.body ||
-                              t('settings:developer.noBody')}
+                            {notification.body || 'No body'}
                           </Typography>
 
                           <Box
@@ -509,7 +480,7 @@ const DeveloperSettings = () => {
                                 >
                                   {timeUntil && timeUntil > 0
                                     ? formatTimeLeft(timeUntil)
-                                    : t('settings:developer.pastDue')}
+                                    : 'Past due'}
                                 </Chip>
                                 <Typography level='body-xs' color='neutral'>
                                   {scheduledDate.toLocaleString()}
@@ -518,9 +489,7 @@ const DeveloperSettings = () => {
                             )}
                             {notification.extra?.choreId && (
                               <Chip size='sm' variant='outlined'>
-                                {t('settings:developer.choreId', {
-                                  id: notification.extra.choreId,
-                                })}
+                                Chore ID: {notification.extra.choreId}
                               </Chip>
                             )}
                           </Box>
@@ -537,13 +506,11 @@ const DeveloperSettings = () => {
 
       <Card variant='outlined'>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <Typography level='title-lg'>
-            {t('settings:developer.sseTitle')}
-          </Typography>
+          <Typography level='title-lg'>Server-Sent Events (SSE)</Typography>
 
           <Box>
             <Typography level='title-sm' mb={1}>
-              {t('settings:developer.connectionStatus')}
+              Connection Status
             </Typography>
             <Box
               sx={{
@@ -561,12 +528,12 @@ const DeveloperSettings = () => {
               >
                 {getConnectionStatus
                   ? getConnectionStatus().toUpperCase()
-                  : t('settings:developer.unknown')}
+                  : 'Unknown'}
               </Chip>
             </Box>
             {sseError && (
               <Typography level='body-sm' color='danger' sx={{ mt: 0.5 }}>
-                {t('settings:developer.error', { error: sseError })}
+                Error: {sseError}
               </Typography>
             )}
           </Box>
@@ -575,22 +542,21 @@ const DeveloperSettings = () => {
 
           <Box>
             <Typography level='title-sm' mb={1}>
-              {t('settings:developer.lastEventReceived')}
+              Last Event Received
             </Typography>
             {lastEvent ? (
               <>
                 <Typography level='body-sm'>
-                  {t('settings:developer.type')}{' '}
+                  Type:{' '}
                   <Chip variant='soft' size='sm'>
                     {lastEvent.type}
                   </Chip>
                 </Typography>
                 <Typography level='body-xs' color='neutral' sx={{ mt: 0.5 }}>
-                  {t('settings:developer.received', {
-                    date: lastEvent.timestamp
-                      ? new Date(lastEvent.timestamp).toLocaleString()
-                      : t('settings:developer.notAvailable'),
-                  })}
+                  Received:{' '}
+                  {lastEvent.timestamp
+                    ? new Date(lastEvent.timestamp).toLocaleString()
+                    : 'N/A'}
                 </Typography>
               </>
             ) : (

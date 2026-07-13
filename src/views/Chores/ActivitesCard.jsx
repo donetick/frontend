@@ -27,7 +27,6 @@ import {
 } from '@mui/joy'
 import moment from 'moment'
 import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useChores, useChoresHistory } from '../../queries/ChoreQueries'
 import { useCircleMembers } from '../../queries/UserQueries'
@@ -35,7 +34,6 @@ import { resolvePhotoURL } from '../../utils/Helpers'
 import NoteViewerModal from '../Modals/Inputs/NoteViewerModal'
 
 const ActivityItem = ({ activity, members, onViewNote }) => {
-  const { t } = useTranslation(['chores', 'common'])
   const Navigate = useNavigate()
   // Find the member who completed the activity
   const completedByMember = members?.find(
@@ -62,11 +60,11 @@ const ActivityItem = ({ activity, members, onViewNote }) => {
     const diffInDays = now.diff(completed, 'days')
 
     if (diffInHours < 1) {
-      return t('chores:sidepanel.activities.justNow')
+      return 'Just now'
     } else if (diffInHours < 24) {
-      return t('chores:sidepanel.activities.hoursAgo', { count: diffInHours })
+      return `${diffInHours}h ago`
     } else if (diffInDays < 7) {
-      return t('chores:sidepanel.activities.daysAgo', { count: diffInDays })
+      return `${diffInDays}d ago`
     } else {
       return completed.format('MMM DD')
     }
@@ -76,7 +74,7 @@ const ActivityItem = ({ activity, members, onViewNote }) => {
     if (activity.status === 0) {
       return {
         color: 'primary',
-        text: t('chores:sidepanel.activities.status.started'),
+        text: 'Started',
         icon: <Timelapse />,
       }
     } else if (activity.status === 1) {
@@ -87,32 +85,32 @@ const ActivityItem = ({ activity, members, onViewNote }) => {
       if (wasOnTime) {
         return {
           color: 'success',
-          text: t('chores:sidepanel.activities.status.done'),
+          text: 'Done',
           icon: <CheckCircle />,
         }
       } else {
         return {
           color: 'primary',
-          text: t('chores:sidepanel.activities.status.late'),
+          text: 'Late',
           icon: <WatchLater />,
         }
       }
     } else if (activity.status === 2) {
       return {
         color: 'warning',
-        text: t('chores:sidepanel.activities.status.skipped'),
+        text: 'Skipped',
         icon: <Redo />,
       }
     } else if (activity.status === 3) {
       return {
         color: 'neutral',
-        text: t('chores:sidepanel.activities.status.pendingApproval'),
+        text: 'Pending Approval',
         icon: <HourglassEmpty />,
       }
     } else if (activity.status === 4) {
       return {
         color: 'danger',
-        text: t('chores:sidepanel.activities.status.rejected'),
+        text: 'Rejected',
         icon: <ThumbDown />,
       }
     }
@@ -120,7 +118,7 @@ const ActivityItem = ({ activity, members, onViewNote }) => {
     // Fallback for completed status
     return {
       color: 'success',
-      text: t('chores:sidepanel.activities.status.completed'),
+      text: 'Completed',
       icon: <CheckCircle />,
     }
   }
@@ -172,10 +170,10 @@ const ActivityItem = ({ activity, members, onViewNote }) => {
               {getStatusInfo(activity).text}
             </Chip>
             <Typography level='body-xs' color='text.secondary' sx={{ ml: 0 }}>
-              {t('chores:sidepanel.activities.by')}{' '}
+              by{' '}
               {completedByMember?.displayName ||
                 completedByMember?.name ||
-                t('common:status.unknown')}
+                'Unknown'}
             </Typography>
             {/* Points chip */}
             {activity.points && activity.points > 0 && (
@@ -185,9 +183,7 @@ const ActivityItem = ({ activity, members, onViewNote }) => {
                 color='success'
                 startDecorator={<Toll />}
               >
-                {t('chores:sidepanel.activities.points', {
-                  count: activity.points,
-                })}
+                {activity.points} pts
               </Chip>
             )}
           </Box>
@@ -242,7 +238,7 @@ const ActivityItem = ({ activity, members, onViewNote }) => {
                         display: 'inline-block',
                       }}
                     >
-                      {t('chores:sidepanel.activities.showMore')}
+                      Show more
                     </Link>
                   )}
                 </Box>
@@ -271,10 +267,8 @@ const groupActivitiesByDate = activities => {
   return groups
 }
 
-const ActivitiesCard = ({ title }) => {
-  const { t } = useTranslation(['chores', 'common'])
+const ActivitiesCard = ({ title = 'Recent Activities' }) => {
   const [noteViewerConfig, setNoteViewerConfig] = useState({ isOpen: false })
-  const resolvedTitle = title || t('chores:sidepanel.activities.title')
 
   // Use hooks to fetch data
   const {
@@ -322,7 +316,7 @@ const ActivitiesCard = ({ title }) => {
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-          <Typography level='title-md'>{resolvedTitle}</Typography>
+          <Typography level='title-md'>{title}</Typography>
         </Box>
         <Box
           sx={{
@@ -333,7 +327,7 @@ const ActivitiesCard = ({ title }) => {
           }}
         >
           <Typography level='body-sm' color='neutral'>
-            {t('chores:sidepanel.activities.loading')}
+            Loading activities...
           </Typography>
         </Box>
       </Sheet>
@@ -346,8 +340,7 @@ const ActivitiesCard = ({ title }) => {
       const chore = chores?.find(c => c.id === history.choreId)
       return {
         ...history,
-        choreName:
-          chore?.name || t('chores:sidepanel.activities.unknownChore'),
+        choreName: chore?.name || 'Unknown Chore',
       }
     }) || []
 
@@ -380,7 +373,7 @@ const ActivitiesCard = ({ title }) => {
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
           <EventNote color='' />
-          <Typography level='title-md'>{resolvedTitle}</Typography>
+          <Typography level='title-md'>{title}</Typography>
         </Box>
         <Box
           sx={{
@@ -393,9 +386,7 @@ const ActivitiesCard = ({ title }) => {
           }}
         >
           <EventNote sx={{ fontSize: 48, opacity: 0.3, mb: 1 }} />
-          <Typography level='body-sm'>
-            {t('chores:sidepanel.activities.empty')}
-          </Typography>
+          <Typography level='body-sm'>No recent activities</Typography>
         </Box>
       </Sheet>
     )
@@ -427,7 +418,7 @@ const ActivitiesCard = ({ title }) => {
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <EventNote color='' />
-            <Typography level='title-md'>{resolvedTitle}</Typography>
+            <Typography level='title-md'>{title}</Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Chip size='sm' variant='soft' color='neutral'>
@@ -457,9 +448,9 @@ const ActivitiesCard = ({ title }) => {
 
           let dateLabel
           if (isToday) {
-            dateLabel = t('common:calendar.today')
+            dateLabel = 'Today'
           } else if (isYesterday) {
-            dateLabel = t('common:calendar.yesterday')
+            dateLabel = 'Yesterday'
           } else {
             dateLabel = moment(date).format('MMM DD')
           }
@@ -495,9 +486,7 @@ const ActivitiesCard = ({ title }) => {
                     onViewNote={notes => {
                       setNoteViewerConfig({
                         isOpen: true,
-                        title: t('chores:sidepanel.activities.noteTitle', {
-                          name: activity.choreName,
-                        }),
+                        title: `Note - ${activity.choreName}`,
                         content: notes,
                         onClose: () => setNoteViewerConfig({ isOpen: false }),
                       })

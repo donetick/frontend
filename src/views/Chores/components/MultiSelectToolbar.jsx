@@ -9,7 +9,6 @@ import {
   SkipNext,
 } from '@mui/icons-material'
 import { Box, Button, Divider, Typography } from '@mui/joy'
-import { useTranslation } from 'react-i18next'
 import KeyboardShortcutHint from '../../../components/common/KeyboardShortcutHint'
 
 const MultiSelectToolbar = ({
@@ -24,7 +23,6 @@ const MultiSelectToolbar = ({
   showKeyboardShortcuts,
   selectAllDisabled,
 }) => {
-  const { t } = useTranslation(['chores', 'common'])
   return (
     <Box
       sx={{
@@ -82,13 +80,7 @@ const MultiSelectToolbar = ({
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <CheckBox sx={{ color: 'primary.500' }} />
             <Typography level='body-sm' fontWeight='md'>
-              {selectedCount === 1
-                ? t('chores:main.selectedSingle', {
-                    count: selectedCount,
-                  })
-                : t('chores:main.selectedMultiple', {
-                    count: selectedCount,
-                  })}
+              {selectedCount} task{selectedCount !== 1 ? 's' : ''} selected
             </Typography>
           </Box>
 
@@ -111,9 +103,9 @@ const MultiSelectToolbar = ({
                 '--Button-paddingInline': '0.75rem',
                 position: 'relative',
               }}
-              title={t('chores:main.shortcuts.selectAllVisible')}
+              title='Select all visible tasks (Ctrl+A)'
             >
-              {t('chores:main.all')}
+              All
               {showKeyboardShortcuts && (
                 <KeyboardShortcutHint
                   shortcut='A'
@@ -138,15 +130,9 @@ const MultiSelectToolbar = ({
                 '--Button-paddingInline': '0.75rem',
                 position: 'relative',
               }}
-              title={
-                selectedCount === 0
-                  ? t('chores:main.shortcuts.closeMultiSelect')
-                  : t('chores:main.shortcuts.clearMultiSelect')
-              }
+              title={`${selectedCount === 0 ? 'Close' : 'Clear'} multi-select (Esc)`}
             >
-              {selectedCount === 0
-                ? t('common:actions.close')
-                : t('chores:main.clear')}
+              {selectedCount === 0 ? 'Close' : 'Clear'}
               {showKeyboardShortcuts && (
                 <KeyboardShortcutHint
                   withCtrl={false}
@@ -189,9 +175,9 @@ const MultiSelectToolbar = ({
               '--Button-paddingInline': { xs: '0.75rem', sm: '1rem' },
               position: 'relative',
             }}
-            title={t('chores:main.shortcuts.completeSelected')}
+            title='Complete selected tasks (Enter)'
           >
-            {t('common:actions.complete')}
+            Complete
             {showKeyboardShortcuts && selectedCount > 0 && (
               <KeyboardShortcutHint
                 shortcut='Enter'
@@ -215,9 +201,9 @@ const MultiSelectToolbar = ({
               '--Button-paddingInline': { xs: '0.75rem', sm: '1rem' },
               position: 'relative',
             }}
-            title={t('chores:main.shortcuts.skipSelected')}
+            title='Skip selected tasks (/)'
           >
-            {t('common:actions.skip')}
+            Skip
             {showKeyboardShortcuts && selectedCount > 0 && (
               <KeyboardShortcutHint
                 shortcut='/'
@@ -241,9 +227,9 @@ const MultiSelectToolbar = ({
               '--Button-paddingInline': { xs: '0.75rem', sm: '1rem' },
               position: 'relative',
             }}
-            title={t('chores:main.shortcuts.archiveSelected')}
+            title='Archive selected tasks (X)'
           >
-            {t('common:actions.archive')}
+            Archive
             {showKeyboardShortcuts && selectedCount > 0 && (
               <KeyboardShortcutHint
                 shortcut='X'
@@ -268,9 +254,9 @@ const MultiSelectToolbar = ({
               '--Button-paddingInline': { xs: '0.75rem', sm: '1rem' },
               position: 'relative',
             }}
-            title={t('chores:main.shortcuts.deleteSelected')}
+            title='Delete selected tasks (Shift+X)'
           >
-            {t('common:actions.delete')}
+            Delete
             {showKeyboardShortcuts && selectedCount > 0 && (
               <KeyboardShortcutHint
                 shortcut='E'

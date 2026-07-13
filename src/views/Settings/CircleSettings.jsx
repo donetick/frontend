@@ -14,7 +14,6 @@ import {
 import { useQueryClient } from '@tanstack/react-query'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useUserProfile } from '../../queries/UserQueries'
@@ -34,7 +33,6 @@ import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import SettingsLayout from './SettingsLayout'
 
 const CircleSettings = () => {
-  const { t } = useTranslation(['settings', 'common'])
   const { data: userProfile } = useUserProfile()
   const queryClient = useQueryClient()
   const { showNotification } = useNotification()
@@ -54,8 +52,8 @@ const CircleSettings = () => {
     message,
     title,
     onConfirm,
-    confirmText = t('common:actions.continue'),
-    cancelText = t('common:actions.cancel'),
+    confirmText = 'Confirm',
+    cancelText = 'Cancel',
     color = 'primary',
   ) => {
     setConfirmModalConfig({
@@ -84,7 +82,7 @@ const CircleSettings = () => {
     } catch (error) {
       showNotification({
         type: 'error',
-        message: t('settings:circlePage.roleUpdateFailed'),
+        message: 'Failed to refresh member requests',
       })
     } finally {
       setIsRefreshing(false)
@@ -122,15 +120,18 @@ const CircleSettings = () => {
   }
 
   return (
-    <SettingsLayout title={t('settings:pages.circle.title')}>
+    <SettingsLayout title='Circle Settings'>
       <div className='grid gap-4'>
         <Typography level='body-md'>
-          {t('settings:circlePage.description')}
+          Your account is automatically connected to a Circle when you create or
+          join one. Easily invite friends by sharing the unique Circle code or
+          link below. You'll receive a notification below when someone requests
+          to join your Circle.
         </Typography>
         <Typography level='title-sm' mb={-1}>
           {userCircles[0]?.userRole === 'member'
-            ? t('settings:circlePage.partOf', { name: userCircles[0]?.name })
-            : t('settings:circlePage.codeIs')}
+            ? `You part of ${userCircles[0]?.name} `
+            : `You circle code is:`}
 
           <Input
             value={userCircles[0]?.invite_code}
@@ -147,11 +148,11 @@ const CircleSettings = () => {
               navigator.clipboard.writeText(userCircles[0]?.invite_code)
               showNotification({
                 type: 'success',
-                message: t('settings:circlePage.copyCodeSuccess'),
+                message: 'Code copied to clipboard',
               })
             }}
           >
-            {t('settings:circlePage.copyCode')}
+            Copy Code
           </Button>
           <Button
             variant='soft'
@@ -165,11 +166,11 @@ const CircleSettings = () => {
               )
               showNotification({
                 type: 'success',
-                message: t('settings:circlePage.copyLinkSuccess'),
+                message: 'Link copied to clipboard',
               })
             }}
           >
-            {t('settings:circlePage.copyLink')}
+            Copy Link
           </Button>
           {userCircles.length > 0 && userCircles[0]?.userRole === 'member' && (
             <Button
@@ -178,35 +179,35 @@ const CircleSettings = () => {
               sx={{ ml: 1 }}
               onClick={() => {
                 showConfirmation(
-                  t('settings:circlePage.leaveConfirm'),
-                  t('settings:circlePage.leaveTitle'),
+                  'Are you sure you want to leave your circle?',
+                  'Leave Circle',
                   () => {
                     LeaveCircle(userCircles[0]?.id).then(resp => {
                       if (resp.ok) {
                         showNotification({
                           type: 'success',
-                          message: t('settings:circlePage.leaveSuccess'),
+                          message: 'Left circle successfully',
                         })
                       } else {
                         showNotification({
                           type: 'error',
-                          message: t('settings:circlePage.leaveFailed'),
+                          message: 'Failed to leave circle',
                         })
                       }
                     })
                   },
-                  t('settings:circlePage.leaveCircle'),
-                  t('common:actions.cancel'),
+                  'Leave',
+                  'Cancel',
                   'danger',
                 )
               }}
             >
-              {t('settings:circlePage.leaveCircle')}
+              Leave Circle
             </Button>
           )}
         </Typography>
 
-        <Typography level='title-md'>{t('settings:circlePage.members')}</Typography>
+        <Typography level='title-md'>Circle Members</Typography>
         {circleMembers.map(member => (
           <Card key={member.id} className='p-4'>
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -214,24 +215,20 @@ const CircleSettings = () => {
                 <Typography level='body-md'>
                   {member.displayName.charAt(0).toUpperCase() +
                     member.displayName.slice(1)}
-                  {member.userId === userProfile.id ? ' (Du)' : ''}{' '}
+                  {member.userId === userProfile.id ? '(You)' : ''}{' '}
                   <Chip>
-                    {member.isActive
-                      ? member.role
-                      : t('settings:circlePage.pendingApproval')}
+                    {' '}
+                    {member.isActive ? member.role : 'Pending Approval'}
                   </Chip>
                 </Typography>
                 {member.isActive ? (
                   <Typography level='body-sm'>
-                    {t('settings:circlePage.joinedOn', {
-                      date: fmt.date(member.createdAt),
-                    })}
+                    Joined on {fmt.date(member.createdAt)}
                   </Typography>
                 ) : (
                   <Typography level='body-sm' color='danger'>
-                    {t('settings:circlePage.requestedOn', {
-                      date: fmt.date(member.updatedAt),
-                    })}
+                    Request to join{' '}
+                    {fmt.date(member.updatedAt)}
                   </Typography>
                 )}
               </Box>
@@ -261,7 +258,7 @@ const CircleSettings = () => {
                         } else {
                           showNotification({
                             type: 'error',
-                            message: t('settings:circlePage.roleUpdateFailed'),
+                            message: 'Failed to update role',
                           })
                         }
                       })
@@ -270,21 +267,16 @@ const CircleSettings = () => {
                     {[
                       {
                         value: 'member',
-                        description: t(
-                          'settings:circlePage.roleDescriptions.member',
-                        ),
+                        description: 'Just a regular member of the circle',
                       },
                       {
                         value: 'manager',
-                        description: t(
-                          'settings:circlePage.roleDescriptions.manager',
-                        ),
+                        description:
+                          'Can impersonate users and perform actions on their behalf',
                       },
                       {
                         value: 'admin',
-                        description: t(
-                          'settings:circlePage.roleDescriptions.admin',
-                        ),
+                        description: 'Full access to the circle',
                       },
                     ].map((option, index) => (
                       <Option value={option.value} key={index}>
@@ -325,10 +317,8 @@ const CircleSettings = () => {
                       size='sm'
                       onClick={() => {
                         showConfirmation(
-                          t('settings:circlePage.removeMemberConfirm', {
-                            name: member.displayName,
-                          }),
-                          t('settings:circlePage.removeMemberTitle'),
+                          `Are you sure you want to remove ${member.displayName} from your circle?`,
+                          'Remove Member',
                           () => {
                             DeleteCircleMember(
                               member.circleId,
@@ -337,9 +327,7 @@ const CircleSettings = () => {
                               if (resp.ok) {
                                 showNotification({
                                   type: 'success',
-                                  message: t(
-                                    'settings:circlePage.removeMemberSuccess',
-                                  ),
+                                  message: 'Removed member successfully',
                                 })
                                 queryClient.invalidateQueries(['circleMembers'])
                                 queryClient.invalidateQueries(['userCircle'])
@@ -353,8 +341,8 @@ const CircleSettings = () => {
                               }
                             })
                           },
-                          t('common:actions.remove'),
-                          t('common:actions.cancel'),
+                          'Remove',
+                          'Cancel',
                           'danger',
                         )
                       }}
@@ -375,13 +363,11 @@ const CircleSettings = () => {
             mb: 1,
           }}
         >
-          <Typography level='title-md'>{t('settings:circlePage.requests')}</Typography>
+          <Typography level='title-md'>Circle Member Requests</Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {lastRefresh && (
               <Typography level='body-sm' color='neutral'>
-                {t('settings:circlePage.lastUpdated', {
-                  date: fmt.dateTime(lastRefresh),
-                })}
+                Last updated: {fmt.dateTime(lastRefresh)}
               </Typography>
             )}
             <Button
@@ -393,9 +379,7 @@ const CircleSettings = () => {
                 isRefreshing ? <CircularProgress size='sm' /> : <Refresh />
               }
             >
-              {isRefreshing
-                ? t('settings:circlePage.refreshing')
-                : t('settings:circlePage.refresh')}
+              {isRefreshing ? 'Refreshing...' : 'Refresh'}
             </Button>
           </Box>
         </Box>
@@ -403,26 +387,21 @@ const CircleSettings = () => {
         {circleMemberRequests.map(request => (
           <Card key={request.id} className='p-4'>
             <Typography level='body-md'>
-              {t('settings:circlePage.wantsToJoin', {
-                name: request.displayName,
-              })}
+              {request.displayName} wants to join your circle.
             </Typography>
             <Button
               variant='soft'
               color='success'
               onClick={() => {
                 showConfirmation(
-                  t('settings:circlePage.acceptConfirm', {
-                    name: request.displayName,
-                    username: request.username,
-                  }),
-                  t('settings:circlePage.acceptTitle'),
+                  `Are you sure you want to accept ${request.displayName} (username: ${request.username}) to join your circle?`,
+                  'Accept Member Request',
                   () => {
                     AcceptCircleMemberRequest(request.id).then(resp => {
                       if (resp.ok) {
                         showNotification({
                           type: 'success',
-                          message: t('settings:circlePage.acceptSuccess'),
+                          message: 'Accepted request successfully',
                         })
                         queryClient.invalidateQueries(['circleMembers'])
                         queryClient.invalidateQueries(['circleMemberRequests'])
@@ -437,25 +416,26 @@ const CircleSettings = () => {
                       }
                     })
                   },
-                  t('settings:circlePage.accept'),
-                  t('common:actions.cancel'),
+                  'Accept',
+                  'Cancel',
                 )
               }}
             >
-              {t('settings:circlePage.accept')}
+              Accept
             </Button>
           </Card>
         ))}
-        <Divider>{t('common:actions.or')}</Divider>
+        <Divider> or </Divider>
 
         <Typography level='body-md'>
-          {t('settings:circlePage.joinPrompt')}
+          if want to join someone else's Circle? Ask them for their unique
+          Circle code or join link. Enter the code below to join their Circle.
         </Typography>
 
         <Typography level='title-sm' mb={-1}>
-          {t('settings:circlePage.enterCode')}
+          Enter Circle code:
           <Input
-            placeholder={t('settings:circlePage.enterCode')}
+            placeholder='Enter code'
             value={circleInviteCode}
             onChange={e => setCircleInviteCode(e.target.value)}
             size='lg'
@@ -471,19 +451,20 @@ const CircleSettings = () => {
                 if (resp.ok) {
                   showNotification({
                     type: 'success',
-                    message: t('settings:circlePage.joinSuccess'),
+                    message:
+                      'Joined circle successfully, wait for the circle owner to accept your request.',
                   })
                   setTimeout(() => navigate('/'), 3000)
                 } else {
                   if (resp.status === 409) {
                     showNotification({
                       type: 'error',
-                      message: t('settings:circlePage.alreadyMember'),
+                      message: 'You are already a member of this circle',
                     })
                   } else {
                     showNotification({
                       type: 'error',
-                      message: t('settings:circlePage.joinFailed'),
+                      message: 'Failed to join circle',
                     })
                   }
                   setTimeout(() => navigate('/'), 3000)
@@ -491,7 +472,7 @@ const CircleSettings = () => {
               })
             }}
           >
-            {t('settings:circlePage.joinCircle')}
+            Join Circle
           </Button>
         </Typography>
       </div>

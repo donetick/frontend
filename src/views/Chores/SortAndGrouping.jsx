@@ -12,7 +12,6 @@ import {
 } from '@mui/joy'
 import IconButton from '@mui/joy/IconButton'
 import { useEffect, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 
 const SortAndGrouping = ({
@@ -29,7 +28,6 @@ const SortAndGrouping = ({
   title,
   onCreateNewFilter,
 }) => {
-  const { t } = useTranslation(['chores', 'common'])
   const [anchorEl, setAnchorEl] = useState(null)
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [isKeyboardNavigating, setIsKeyboardNavigating] = useState(false)
@@ -81,10 +79,10 @@ const SortAndGrouping = ({
       if (!anchorEl) return
 
       const groupByItems = [
-        { name: t('common:status.smartFilter'), value: 'default' },
-        { name: t('common:labels.dueDate'), value: 'due_date' },
-        { name: t('common:labels.priority'), value: 'priority' },
-        { name: t('common:labels.labelsLabel'), value: 'labels' },
+        { name: 'Smart', value: 'default' },
+        { name: 'Due Date', value: 'due_date' },
+        { name: 'Priority', value: 'priority' },
+        { name: 'Labels', value: 'labels' },
       ]
 
       const filterItems = [
@@ -145,7 +143,6 @@ const SortAndGrouping = ({
     setSelectedItem,
     setFilter,
     onCreateNewFilter,
-    t,
   ])
 
   // Reset selected index when menu opens
@@ -250,7 +247,7 @@ const SortAndGrouping = ({
               height: 24,
               borderRadius: 24,
             }}
-            title={`${t('chores:main.groupBy')} (Ctrl+G)`}
+            title='Sort and Group (Ctrl+G)'
           >
             {icon}
             {label ? label : null}
@@ -280,7 +277,7 @@ const SortAndGrouping = ({
               height: 24,
               borderRadius: 24,
             }}
-            title={`${t('chores:main.groupBy')} (Ctrl+G)`}
+            title='Sort and Group (Ctrl+G)'
           >
             {label}
           </Button>
@@ -323,7 +320,7 @@ const SortAndGrouping = ({
         >
           <ListItemContent>
             <Typography level='title-sm' sx={{ fontWeight: 600 }}>
-              {title || t('chores:main.groupBy')}
+              {title || 'Group By'}
             </Typography>
           </ListItemContent>
         </MenuItem>
@@ -331,10 +328,10 @@ const SortAndGrouping = ({
         <Divider sx={{ my: 1 }} />
 
         {[
-          { name: t('common:status.smartFilter'), value: 'default' },
-          { name: t('common:labels.dueDate'), value: 'due_date' },
-          { name: t('common:labels.priority'), value: 'priority' },
-          { name: t('common:labels.labelsLabel'), value: 'labels' },
+          { name: 'Smart', value: 'default' },
+          { name: 'Due Date', value: 'due_date' },
+          { name: 'Priority', value: 'priority' },
+          { name: 'Labels', value: 'labels' },
         ].map((item, index) => (
           <MenuItem
             key={`${k}-${item?.value}`}
@@ -405,7 +402,7 @@ const SortAndGrouping = ({
         >
           <ListItemContent>
             <Typography level='title-sm' sx={{ fontWeight: 600 }}>
-              {t('chores:main.quickFilters')}
+              Quick Filters
             </Typography>
           </ListItemContent>
         </MenuItem>
@@ -421,7 +418,7 @@ const SortAndGrouping = ({
         >
           <ListItemContent>
             <Typography level='body-xs' sx={{ fontWeight: 600 }}>
-              {t('chores:main.assignedTo')}
+              Assigned to:
             </Typography>
           </ListItemContent>
         </MenuItem>
@@ -430,28 +427,28 @@ const SortAndGrouping = ({
           key={`${k}-assignee-anyone`}
           index={4}
           filterKey='anyone'
-          label={t('chores:main.filters.anyone')}
+          label='Anyone'
         />
 
         <MenuItem_QuickFilter
           key={`${k}-assignee-assigned-to-me`}
           index={5}
           filterKey='assigned_to_me'
-          label={t('chores:main.filters.assignedToMe')}
+          label='Assigned to me'
         />
 
         <MenuItem_QuickFilter
           key={`${k}-assignee-available-for-me`}
           index={6}
           filterKey='available_for_me'
-          label={t('chores:main.filters.availableForMe')}
+          label='Available for me'
         />
 
         <MenuItem_QuickFilter
           key={`${k}-assignee-assigned-to-others`}
           index={7}
           filterKey='assigned_to_others'
-          label={t('chores:main.filters.assignedToOthers')}
+          label='Assigned to others'
         />
 
         <Divider sx={{ my: 1 }} />
@@ -484,13 +481,13 @@ const SortAndGrouping = ({
                 fontWeight: 500,
               }}
             >
-              {t('chores:main.createFilter')}
+              Create Filter
             </Typography>
             <Typography
               level='body-xs'
               sx={{ color: 'var(--joy-palette-text-tertiary)' }}
             >
-              {t('chores:main.createFilterDescription')}
+              Build advanced filter rules
             </Typography>
           </ListItemContent>
         </MenuItem>

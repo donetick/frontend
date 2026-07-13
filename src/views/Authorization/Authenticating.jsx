@@ -5,19 +5,17 @@ import Logo from '../../Logo'
 import { Capacitor } from '@capacitor/core'
 import Cookies from 'js-cookie'
 import { useRef } from 'react'
-import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useUserProfile } from '../../queries/UserQueries'
 import { apiClient } from '../../utils/ApiClient'
 import { GetUserProfile } from '../../utils/Fetcher'
 
 const AuthenticationLoading = () => {
-  const { t } = useTranslation(['auth', 'common'])
   const { data: userProfile, refetch: refetchUserProfile } = useUserProfile()
   const Navigate = useNavigate()
   const hasCalledHandleOAuth2 = useRef(false)
-  const [message, setMessage] = useState(t('auth:status.authenticating'))
-  const [subMessage, setSubMessage] = useState(t('auth:status.pleaseWait'))
+  const [message, setMessage] = useState('Authenticating')
+  const [subMessage, setSubMessage] = useState('Please wait')
   const [status, setStatus] = useState('pending')
   const { provider } = useParams()
   useEffect(() => {
@@ -25,10 +23,10 @@ const AuthenticationLoading = () => {
       hasCalledHandleOAuth2.current = true
       handleOAuth2()
     } else if (provider !== 'oauth2') {
-      setMessage(t('auth:status.unknownProvider'))
-      setSubMessage(t('auth:status.contactSupport'))
+      setMessage('Unknown Authentication Provider')
+      setSubMessage('Please contact support')
     }
-  }, [provider, t])
+  }, [provider])
   const getUserProfileAndNavigateToHome = () => {
     GetUserProfile().then(data => {
       data.json().then(data => {
@@ -54,8 +52,8 @@ const AuthenticationLoading = () => {
     const storedState = localStorage.getItem('authState')
 
     if (returnedState !== storedState) {
-      setMessage(t('auth:status.failed'))
-      setSubMessage(t('auth:status.stateMismatch'))
+      setMessage('Authentication failed')
+      setSubMessage('State does not match')
       setStatus('error')
       return
     }
@@ -92,8 +90,8 @@ const AuthenticationLoading = () => {
           })
         } else {
           console.error('Authentication failed')
-          setMessage(t('auth:status.failed'))
-          setSubMessage(t('auth:status.tryAgain'))
+          setMessage('Authentication failed')
+          setSubMessage('Please try again')
           setStatus('error')
         }
       })
@@ -137,7 +135,7 @@ const AuthenticationLoading = () => {
               mt: 4,
             }}
           >
-            <Link to='/login'>{t('common:actions.backToLogin')}</Link>
+            <Link to='/login'>Go back Login</Link>
           </Button>
         )}
       </Box>

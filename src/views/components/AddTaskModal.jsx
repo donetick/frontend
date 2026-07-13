@@ -13,7 +13,6 @@ import { FormControl } from '@mui/material'
 import * as chrono from 'chrono-node'
 import moment from 'moment'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import { useCreateChore } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
@@ -54,7 +53,6 @@ const getDefaultNotification = () => {
 }
 
 const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
-  const { t } = useTranslation(['chores', 'common'])
   const { ResponsiveModal } = useResponsiveModal()
   const { data: userLabels, isLoading: userLabelsLoading } = useLabels()
   const { data: circleMembers, isLoading: isCircleMembersLoading } =
@@ -670,7 +668,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
       onClose={handleCloseModal}
       size='lg'
       fullWidth={true}
-      title={t('chores:addTask.title')}
+      title='Create new task'
       footer={
         <Box
           sx={{
@@ -687,7 +685,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
             color='neutral'
             onClick={handleCloseModal}
           >
-            {t('common:actions.cancel')}
+            Cancel
             {showKeyboardShortcuts && (
               <KeyboardShortcutHint
                 shortcut='Esc'
@@ -702,7 +700,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
             color='primary'
             onClick={createChore}
           >
-            {t('chores:addTask.create')}
+            Create
             {showKeyboardShortcuts && (
               <KeyboardShortcutHint shortcut='Enter' sx={{ ml: 1 }} />
             )}
@@ -718,16 +716,18 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
             alignItems: 'center',
           }}
         >
-          <Typography level='body-sm'>{t('chores:addTask.taskInSentence')}:</Typography>
+          <Typography level='body-sm'>Task in a sentence:</Typography>
           <LearnMoreButton
             content={
               <>
                 <Typography level='body-sm' sx={{ mb: 1 }}>
-                  {t('chores:addTask.smartHelp')}
+                  This feature lets you create a task simply by typing a
+                  sentence. It attempt parses the sentence to identify the
+                  task&apos;s due date, priority, and frequency.
                 </Typography>
 
                 <Typography level='body-sm' sx={{ fontWeight: 'bold', mt: 2 }}>
-                  {t('chores:addTask.examples')}:
+                  Examples:
                 </Typography>
 
                 <Typography
@@ -736,16 +736,21 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
                   sx={{ pl: 2, mt: 1, listStyle: 'disc' }}
                 >
                   <li>
-                    <strong>{t('common:labels.priority')}:</strong>{' '}
-                    {t('chores:addTask.priorityExample')}
+                    <strong>Priority:</strong>For highest priority any of the
+                    following keyword <em>P1</em>, <em>Urgent</em>,{' '}
+                    <em>Important</em>, or <em>ASAP</em>. For lower priorities,
+                    use <em>P2</em>, <em>P3</em>, or <em>P4</em>.
                   </li>
                   <li>
-                    <strong>{t('common:labels.dueDate')}:</strong>{' '}
-                    {t('chores:addTask.dueDateExample')}
+                    <strong>Due date:</strong> Specify dates with phrases like{' '}
+                    <em>tomorrow</em>, <em>next week</em>, <em>Monday</em>, or{' '}
+                    <em>August 1st at 12pm</em>.
                   </li>
                   <li>
-                    <strong>{t('chores:repeat.repeat')}:</strong>{' '}
-                    {t('chores:addTask.frequencyExample')}
+                    <strong>Frequency:</strong> Set recurring tasks with terms
+                    like <em>daily</em>, <em>weekly</em>, <em>monthly</em>,{' '}
+                    <em>yearly</em>, or patterns such as{' '}
+                    <em>every Tuesday and Thursday</em>.
                   </li>
                 </Typography>
               </>
@@ -756,7 +761,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
         <SmartTaskTitleInput
           autoFocus
           value={taskText}
-          placeholder={t('chores:addTask.fullTextPlaceholder')}
+          placeholder='Type your full text here...'
           onChange={text => {
             setTaskText(text)
           }}
@@ -781,8 +786,8 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
             '@': {
               value: 'userId',
               display: 'displayName',
-            options: [
-                { userId: 'anyone', displayName: t('chores:addTask.anyone') },
+              options: [
+                { userId: 'anyone', displayName: 'Anyone' },
                 ...(circleMembers?.res || []),
               ],
             },
@@ -790,15 +795,12 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
               value: 'id',
               display: 'name',
               options: [
-                { id: '1', name: t('chores:addTask.points', { count: 1 }) },
-                { id: '5', name: t('chores:addTask.points', { count: 5 }) },
-                { id: '10', name: t('chores:addTask.points', { count: 10 }) },
-                { id: '25', name: t('chores:addTask.points', { count: 25 }) },
-                { id: '50', name: t('chores:addTask.points', { count: 50 }) },
-                {
-                  id: '100',
-                  name: t('chores:addTask.points', { count: 100 }),
-                },
+                { id: '1', name: '1 point' },
+                { id: '5', name: '5 points' },
+                { id: '10', name: '10 points' },
+                { id: '25', name: '25 points' },
+                { id: '50', name: '50 points' },
+                { id: '100', name: '100 points' },
               ],
             },
           }}
@@ -827,7 +829,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
               showKeyboardShortcuts && <KeyboardShortcutHint shortcut='E' />
             }
           >
-            {t('chores:addTask.description')}
+            Description
           </Button>
         )}
 
@@ -843,7 +845,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
               showKeyboardShortcuts && <KeyboardShortcutHint shortcut='J' />
             }
           >
-            {t('common:labels.subtasks')}
+            Subtasks
           </Button>
         )}
         {!dueDate && (
@@ -862,7 +864,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
               showKeyboardShortcuts && <KeyboardShortcutHint shortcut='B' />
             }
           >
-            {t('chores:addTask.dueDate')}
+            Due Date
           </Button>
         )}
         {!hasNotifications && dueDate && (
@@ -872,11 +874,11 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
             size='sm'
             onClick={() => {
               setHasNotifications(true)
-              setFrequencyHumanReadable(t('chores:frequency.once'))
+              setFrequencyHumanReadable('Once')
               setFrequency(null)
             }}
           >
-            {t('chores:addTask.editNotifications')}
+            Edit Notifications
           </Button>
         )}
         {/* {!hasDeadline && dueDate && (
@@ -896,7 +898,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
 
       {hasDescription && (
         <Box>
-          <Typography level='body-sm'>{t('chores:addTask.description')}:</Typography>
+          <Typography level='body-sm'>Description:</Typography>
           <div>
             <RichTextEditor
               ref={richTextEditorRef}
@@ -908,7 +910,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
       )}
       {hasSubTasks && (
         <Box>
-          <Typography level='body-sm'>{t('common:labels.subtasks')}:</Typography>
+          <Typography level='body-sm'>Subtasks:</Typography>
           <SubTasks
             editMode={true}
             tasks={subTasks ? subTasks : []}
@@ -928,13 +930,13 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
       >
         {priority > 0 && (
           <FormControl>
-            <Typography level='body-sm'>{t('common:labels.priority')}</Typography>
+            <Typography level='body-sm'>Priority</Typography>
             <Select
               defaultValue={0}
               value={priority}
               onChange={(e, value) => setPriority(value)}
             >
-              <Option value='0'>{t('chores:addTask.noPriority')}</Option>
+              <Option value='0'>No Priority</Option>
               <Option value='1'>P1</Option>
               <Option value='2'>P2</Option>
               <Option value='3'>P3</Option>
@@ -944,7 +946,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
         )}
         {dueDate && (
           <FormControl>
-            <Typography level='body-sm'>{t('common:labels.dueDate')}</Typography>
+            <Typography level='body-sm'>Due Date</Typography>
             <Input
               type='date'
               value={dueDateOnly || ''}
@@ -954,13 +956,13 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
               size='sm'
               checked={useCustomTime}
               onChange={e => handleUseCustomTimeChange(e.target.checked)}
-              label={t('chores:edit.setSpecificTime')}
+              label='Set a specific time'
               sx={{ mt: 1 }}
             />
             <FormHelperText>
               {useCustomTime
-                ? t('chores:edit.specificTimeHelper')
-                : t('chores:edit.endOfDayHelper')}
+                ? 'Task will be due at the specified time'
+                : 'Task will be due at the end of the day (11:59 PM)'}
             </FormHelperText>
             {useCustomTime && (
               <Input
@@ -1100,7 +1102,7 @@ const TaskInput = ({ autoFocus, onChoreUpdate, isModalOpen, onClose }) => {
               alignItems: 'center',
             }}
           >
-            <Typography level='body-sm'>{t('chores:edit.notificationSchedule')}</Typography>
+            <Typography level='body-sm'>Notification Schedule</Typography>
             <Box sx={{ p: 0.5 }}>
               <NotificationTemplate
                 onChange={metadata => {

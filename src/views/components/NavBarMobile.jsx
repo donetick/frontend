@@ -8,10 +8,8 @@ import HomeRoundedIcon from '@mui/icons-material/HomeRounded'
 import FavoriteBorder from '@mui/icons-material/FavoriteBorder'
 import Search from '@mui/icons-material/Search'
 import Person from '@mui/icons-material/Person'
-import { useTranslation } from 'react-i18next'
 
 export default function NavBarMobile() {
-  const { t } = useTranslation('common')
   const [index, setIndex] = React.useState(0)
   const colors = ['primary', 'danger', 'success', 'warning']
   return (
@@ -90,7 +88,7 @@ export default function NavBarMobile() {
             <ListItemDecorator>
               <Search />
             </ListItemDecorator>
-            {t('labels.search')}
+            Search
           </Tab>
           <Tab
             disableIndicator

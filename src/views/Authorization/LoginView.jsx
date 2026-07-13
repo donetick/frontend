@@ -24,7 +24,6 @@ import {
 import { useQueryClient } from '@tanstack/react-query'
 import Cookies from 'js-cookie'
 import { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { LoginSocialGoogle } from 'reactjs-social-login'
 import { GOOGLE_CLIENT_ID, REDIRECT_URL } from '../../Config'
@@ -39,7 +38,6 @@ import { buildChildUsername, getUserDisplayInfo } from '../../utils/UserHelpers'
 import MFAVerificationModal from './MFAVerificationModal'
 
 const LoginView = () => {
-  const { t } = useTranslation(['auth', 'common'])
   // Use React Query client directly to invalidate the user profile query
   const queryClient = useQueryClient()
   // const [userProfile, setUserProfile] = useState(null)
@@ -107,23 +105,23 @@ const LoginView = () => {
     if (loginType === 'sub') {
       if (!parentUsername.trim()) {
         showError({
-          title: t('auth:errors.validationTitle'),
-          message: t('auth:errors.primaryUsernameRequired'),
+          title: 'Validation Error',
+          message: 'Primary username is required for sub account login',
         })
         return
       }
       if (!childName.trim()) {
         showError({
-          title: t('auth:errors.validationTitle'),
-          message: t('auth:errors.subAccountNameRequired'),
+          title: 'Validation Error',
+          message: 'Sub account name is required for sub account login',
         })
         return
       }
     } else {
       if (!username.trim()) {
         showError({
-          title: t('auth:errors.validationTitle'),
-          message: t('auth:errors.usernameRequired'),
+          title: 'Validation Error',
+          message: 'Username is required',
         })
         return
       }
@@ -131,8 +129,8 @@ const LoginView = () => {
 
     if (!password) {
       showError({
-        title: t('auth:errors.validationTitle'),
-        message: t('auth:errors.passwordRequired'),
+        title: 'Validation Error',
+        message: 'Password is required',
       })
       return
     }
@@ -164,8 +162,8 @@ const LoginView = () => {
       }
     } else {
       showError({
-        title: t('auth:errors.loginFailedTitle'),
-        message: result.error || t('auth:errors.loginFailedMessage'),
+        title: 'Login Failed',
+        message: result.error || 'An error occurred, please try again',
       })
     }
   }
@@ -235,24 +233,15 @@ const LoginView = () => {
       } else {
         const providerName = provider === 'apple' ? 'Apple' : 'Google'
         showError({
-          title:
-            provider === 'apple'
-              ? t('auth:errors.appleLoginFailedTitle')
-              : t('auth:errors.googleLoginFailedTitle'),
-          message:
-            provider === 'apple'
-              ? t('auth:errors.appleLoginFailedMessage')
-              : t('auth:errors.googleLoginFailedMessage'),
+          title: `${providerName} Login Failed`,
+          message: `Couldn't log in with ${providerName}, please try again`,
         })
       }
     } catch (error) {
       const providerName = provider === 'apple' ? 'Apple' : 'Google'
       showError({
-        title:
-          provider === 'apple'
-            ? t('auth:errors.appleLoginFailedTitle')
-            : t('auth:errors.googleLoginFailedTitle'),
-        message: t('auth:errors.loginFailedMessage'),
+        title: `${providerName} Login Error`,
+        message: 'Network error occurred, please try again',
       })
     }
   }
@@ -296,7 +285,7 @@ const LoginView = () => {
 
   const handleMFAError = errorMessage => {
     showError({
-      title: t('auth:errors.twoFactorFailedTitle'),
+      title: 'Two-Factor Authentication Failed',
       message: errorMessage,
     })
   }
@@ -345,8 +334,8 @@ const LoginView = () => {
       } catch (error) {
         console.error('Failed to open OAuth browser:', error)
         showError({
-          title: t('auth:errors.oauthErrorTitle'),
-          message: t('auth:errors.oauthBrowserError'),
+          title: 'OAuth Error',
+          message: 'Failed to open authentication browser',
         })
       }
     } else {
@@ -420,9 +409,8 @@ const LoginView = () => {
                 sx={{ mt: 2, width: '96px', height: '96px', mb: 1 }}
               />
               <Typography level='body-md' alignSelf={'center'}>
-                {t('auth:welcomeBack', {
-                  name: userProfile?.displayName || userProfile?.username,
-                })}
+                Welcome back,{' '}
+                {userProfile?.displayName || userProfile?.username}
                 {getUserDisplayInfo(userProfile).userType === 'child' && (
                   <Typography
                     component='span'
@@ -430,7 +418,7 @@ const LoginView = () => {
                     color='neutral'
                     sx={{ ml: 1 }}
                   >
-                    {t('auth:subAccountBadge')}
+                    (Sub Account)
                   </Typography>
                 )}
               </Typography>
@@ -443,9 +431,7 @@ const LoginView = () => {
                   getUserProfileAndNavigateToHome()
                 }}
               >
-                {t('common:actions.continueAs', {
-                  name: userProfile.displayName || userProfile.username,
-                })}
+                Continue as {userProfile.displayName || userProfile.username}
               </Button>
               <Button
                 type='submit'
@@ -462,14 +448,14 @@ const LoginView = () => {
                   apiClient.handleLogout()
                 }}
               >
-                {t('common:actions.logout')}
+                Logout
               </Button>
             </>
           )}
           {!userProfile && (
             <>
               <Typography level='body2' sx={{ mb: 3 }}>
-                {t('auth:subtitle')}
+                Sign in to your account to continue
               </Typography>
 
               {/* Login Type Tabs */}
@@ -499,7 +485,7 @@ const LoginView = () => {
                       fontWeight: 500,
                     }}
                   >
-                    {t('auth:tabs.primary')}
+                    Primary Account
                   </Tab>
                   <Tab
                     value='sub'
@@ -511,20 +497,20 @@ const LoginView = () => {
                       fontWeight: 500,
                     }}
                   >
-                    {t('auth:tabs.sub')}
+                    Sub Account
                   </Tab>
                 </TabList>
 
                 <TabPanel value='primary' sx={{ p: 0, mt: 2 }}>
                   <Typography level='body2' alignSelf={'start'} mb={1}>
-                    {t('common:labels.username')}
+                    Username
                   </Typography>
                   <Input
                     margin='normal'
                     required
                     fullWidth
                     id='email'
-                    label={t('common:labels.emailAddress')}
+                    label='Email Address'
                     name='email'
                     autoComplete='email'
                     autoFocus
@@ -537,7 +523,7 @@ const LoginView = () => {
 
                 <TabPanel value='sub' sx={{ p: 0, mt: 2 }}>
                   <Typography level='body2' alignSelf={'start'} mb={1}>
-                    {t('auth:fields.primaryAccountUsername')}
+                    Primary Account Username
                   </Typography>
                   <Input
                     margin='normal'
@@ -545,7 +531,7 @@ const LoginView = () => {
                     fullWidth
                     id='parentUsername'
                     name='parentUsername'
-                    placeholder={t('auth:placeholders.primaryAccountUsername')}
+                    placeholder='Enter primary account username'
                     autoFocus
                     value={parentUsername}
                     onChange={e => {
@@ -553,7 +539,7 @@ const LoginView = () => {
                     }}
                   />
                   <Typography level='body2' alignSelf={'start'} mt={1} mb={1}>
-                    {t('auth:fields.subAccountUsername')}
+                    Sub Account Username
                   </Typography>
                   <Input
                     margin='normal'
@@ -561,7 +547,7 @@ const LoginView = () => {
                     fullWidth
                     id='childName'
                     name='childName'
-                    placeholder={t('auth:placeholders.subAccountUsername')}
+                    placeholder='Enter sub account name'
                     value={childName}
                     onChange={e => {
                       setChildName(e.target.value)
@@ -571,14 +557,14 @@ const LoginView = () => {
               </Tabs>
 
               <Typography level='body2' alignSelf={'start'} mb={1}>
-                {t('common:labels.password')}:
+                Password:
               </Typography>
               <Input
                 margin='normal'
                 required
                 fullWidth
                 name='password'
-                label={t('common:labels.password')}
+                label='Password'
                 type='password'
                 id='password'
                 autoComplete='password'
@@ -602,9 +588,7 @@ const LoginView = () => {
                 }}
                 onClick={handleSubmit}
               >
-                {loginType === 'sub'
-                  ? t('auth:actions.signInSubAccount')
-                  : t('auth:actions.signIn')}
+                {loginType === 'sub' ? 'Sign In as Sub Account' : 'Sign In'}
               </Button>
               <Button
                 type='submit'
@@ -619,11 +603,11 @@ const LoginView = () => {
                 }}
                 onClick={handleForgotPassword}
               >
-                {t('auth:actions.forgotPassword')}
+                Forgot password?
               </Button>
             </>
           )}
-          <Divider>{t('common:actions.or')}</Divider>
+          <Divider> or </Divider>
           {import.meta.env.VITE_IS_SELF_HOSTED !== 'true' && (
             <>
               {!Capacitor.isNativePlatform() && (
@@ -640,8 +624,9 @@ const LoginView = () => {
                     }}
                     onReject={() => {
                       showError({
-                        title: t('auth:errors.googleLoginFailedTitle'),
-                        message: t('auth:errors.googleLoginFailedMessage'),
+                        title: 'Google Login Failed',
+                        message:
+                          "Couldn't log in with Google, please try again",
                       })
                     }}
                   >
@@ -660,7 +645,7 @@ const LoginView = () => {
                     >
                       <div className='flex gap-2'>
                         <GoogleIcon />
-                        {t('auth:actions.continueWithGoogle')}
+                        Continue with Google
                       </div>
                     </Button>
                   </LoginSocialGoogle>
@@ -693,15 +678,16 @@ const LoginView = () => {
                         .catch(error => {
                           console.error('Apple login error:', error)
                           showError({
-                            title: t('auth:errors.appleLoginFailedTitle'),
-                            message: t('auth:errors.appleLoginFailedMessage'),
+                            title: 'Apple Login Failed',
+                            message:
+                              "Couldn't log in with Apple, please try again",
                           })
                         })
                     }}
                   >
                     <div className='flex gap-2'>
                       <AppleIcon />
-                      {t('auth:actions.continueWithApple')}
+                      Continue with Apple
                     </div>
                   </Button> */}
                 </Box>
@@ -726,7 +712,7 @@ const LoginView = () => {
                   >
                     <div className='flex gap-2'>
                       <GoogleIcon />
-                      {t('auth:actions.continueWithGoogle')}
+                      Continue with Google
                     </div>
                   </Button>
 
@@ -755,15 +741,16 @@ const LoginView = () => {
                           .catch(error => {
                             console.error('Apple login error:', error)
                             showError({
-                              title: t('auth:errors.appleLoginFailedTitle'),
-                              message: t('auth:errors.appleLoginFailedMessage'),
+                              title: 'Apple Login Failed',
+                              message:
+                                "Couldn't log in with Apple, please try again",
                             })
                           })
                       }}
                     >
                       <div className='flex gap-2'>
                         <AppleIcon />
-                        {t('auth:actions.continueWithApple')}
+                        Continue with Apple
                       </div>
                     </Button>
                   )}
@@ -780,9 +767,7 @@ const LoginView = () => {
               sx={{ mt: 3, mb: 2 }}
               onClick={handleAuthentikLogin}
             >
-              {t('auth:actions.continueWithProvider', {
-                provider: resource?.identity_provider?.name,
-              })}
+              Continue with {resource?.identity_provider?.name}
             </Button>
           )}
 
@@ -796,7 +781,7 @@ const LoginView = () => {
               size='lg'
               // sx={{ mt: 3, mb: 2 }}
             >
-              {t('auth:actions.createAccount')}
+              Create new account
             </Button>
           )}
 
@@ -810,7 +795,7 @@ const LoginView = () => {
                 window.open('https://donetick.com/privacy', '_blank')
               }}
             >
-              {t('common:legal.privacyPolicy')}
+              Privacy Policy
             </Button>
             <Button
               variant='plain'
@@ -819,7 +804,7 @@ const LoginView = () => {
                 window.open('https://donetick.com/terms', '_blank')
               }}
             >
-              {t('common:legal.termsOfUse')}
+              Terms of Use
             </Button>
           </Box>
         </Sheet>

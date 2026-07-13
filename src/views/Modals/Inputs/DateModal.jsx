@@ -1,10 +1,8 @@
 import { Box, Button, Input } from '@mui/joy'
 import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
 function DateModal({ isOpen, onClose, onSave, current, title }) {
-  const { t } = useTranslation(['common'])
   const { ResponsiveModal } = useResponsiveModal()
 
   const [date, setDate] = useState(
@@ -81,10 +79,10 @@ function DateModal({ isOpen, onClose, onSave, current, title }) {
 
       <Box display={'flex'} justifyContent={'space-around'} mt={4}>
         <Button size='lg' onClick={handleSave} fullWidth sx={{ mr: 1 }}>
-          {t('common:actions.save')}
+          Save
         </Button>
         <Button size='lg' onClick={onClose} variant='outlined'>
-          {t('common:actions.cancel')}
+          Cancel
         </Button>
       </Box>
     </ResponsiveModal>
