@@ -10,7 +10,6 @@ import {
   Typography,
 } from '@mui/joy'
 import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import Logo from '../../Logo'
@@ -18,7 +17,6 @@ import { useNotification } from '../../service/NotificationProvider'
 import { ChangePassword } from '../../utils/Fetcher'
 
 const UpdatePasswordView = () => {
-  const { t } = useTranslation(['auth', 'common'])
   const navigate = useNavigate()
   const [password, setPassword] = useState('')
   const [passwordConfirm, setPasswordConfirm] = useState('')
@@ -34,7 +32,7 @@ const UpdatePasswordView = () => {
     const password = e.target.value
     setPassword(password)
     if (password.length < 8 || password.length > 64) {
-      setPasswordError(t('auth:errors.passwordLength'))
+      setPasswordError('Password must be between 8 and 64 characters')
     } else {
       setPasswordError(null)
     }
@@ -42,7 +40,7 @@ const UpdatePasswordView = () => {
   const handlePasswordConfirmChange = e => {
     setPasswordConfirm(e.target.value)
     if (e.target.value !== password) {
-      setPasswordConfirmationError(t('settings:modals.passwordChange.mismatch'))
+      setPasswordConfirmationError('Passwords do not match')
     } else {
       setPasswordConfirmationError(null)
     }
@@ -58,8 +56,9 @@ const UpdatePasswordView = () => {
       if (response.ok) {
         showNotification({
           type: 'success',
-          title: t('settings:account.passwordChanged'),
-          message: t('auth:status.passwordUpdatedRedirect'),
+          title: 'Password Updated',
+          message:
+            'Your password has been updated successfully. Redirecting to login...',
         })
         //  wait 3 seconds and then redirect to login:
         setTimeout(() => {
@@ -67,14 +66,14 @@ const UpdatePasswordView = () => {
         }, 3000)
       } else {
         showError({
-          title: t('auth:status.passwordUpdateFailed'),
-          message: t('auth:status.passwordUpdateFailedMessage'),
+          title: 'Password Update Failed',
+          message: 'Failed to update password, please try again later',
         })
       }
     } catch (error) {
       showError({
-        title: t('auth:status.passwordUpdateFailed'),
-        message: t('auth:status.passwordUpdateFailedMessage'),
+        title: 'Password Update Failed',
+        message: 'Failed to update password, please try again later',
       })
     }
   }
@@ -120,13 +119,13 @@ const UpdatePasswordView = () => {
               </span>
             </Typography>
             <Typography level='body2' mb={4}>
-              {t('auth:status.enterNewPassword')}
+              Please enter your new password below
             </Typography>
           </Box>
 
           <FormControl error>
             <Input
-              placeholder={t('common:labels.password')}
+              placeholder='Password'
               type='password'
               value={password}
               onChange={handlePasswordChange}
@@ -142,7 +141,7 @@ const UpdatePasswordView = () => {
 
           <FormControl error>
             <Input
-              placeholder={t('settings:modals.passwordChange.confirmPassword')}
+              placeholder='Confirm Password'
               type='password'
               value={passwordConfirm}
               onChange={handlePasswordConfirmChange}
@@ -166,7 +165,7 @@ const UpdatePasswordView = () => {
             }}
             onClick={handleSubmit}
           >
-            {t('auth:status.savePassword')}
+            Save Password
           </Button>
           <Button
             fullWidth
@@ -176,7 +175,7 @@ const UpdatePasswordView = () => {
               navigate('/login')
             }}
           >
-            {t('common:actions.cancel')}
+            Cancel
           </Button>
         </Sheet>
       </Box>

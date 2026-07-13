@@ -1,7 +1,6 @@
 import { Sync, SyncDisabled } from '@mui/icons-material'
 import { Box, Card, Chip, FormHelperText, Switch, Typography } from '@mui/joy'
 import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { useSSEContext } from '../hooks/useSSEContext'
 import { useUserProfile } from '../queries/UserQueries'
 import { isPlusAccount } from '../utils/Helpers'
@@ -13,7 +12,6 @@ const REALTIME_TYPES = {
 }
 
 const RealTimeSettings = () => {
-  const { t } = useTranslation(['settings', 'common'])
   const { data: userProfile } = useUserProfile()
 
   // SSE context
@@ -65,26 +63,26 @@ const RealTimeSettings = () => {
 
   const getStatusDescription = () => {
     if (!isPlusAccount(userProfile)) {
-      return t('settings:advanced.realtimeUnavailable')
+      return 'Real-time updates are not available in the Basic plan. Upgrade to Plus to receive instant notifications when tasks are updated.'
     }
 
     if (realtimeType === REALTIME_TYPES.DISABLED) {
-      return t('settings:advanced.realtimeDisabled')
+      return 'Real-time updates are disabled. Enable them to see live changes when you or other circle members complete, skip, or modify tasks.'
     }
 
     if (context.isConnected) {
-      return t('settings:advanced.realtimeConnected')
+      return "Real-time updates are working. You'll see live changes when you or other circle members complete, skip, or modify tasks."
     }
 
     if (context.isConnecting) {
-      return t('settings:advanced.realtimeConnecting')
+      return 'Connecting to real-time updates...'
     }
 
     if (context.error) {
-      return t('settings:advanced.realtimeError', { error: context.error })
+      return `Real-time updates are enabled but not working: ${context.error}`
     }
 
-    return t('settings:advanced.realtimeEnabledNotConnected')
+    return 'Real-time updates are enabled but not currently connected.'
   }
 
   const getConnectionStatusComponent = () => {
@@ -111,7 +109,7 @@ const RealTimeSettings = () => {
             realtimeType !== REALTIME_TYPES.DISABLED ? 'success' : 'neutral'
           }
           disabled={!isPlusAccount(userProfile)}
-          inputProps={{ 'aria-label': t('settings:advanced.enableRealtime') }}
+          inputProps={{ 'aria-label': 'Enable Real-time Updates' }}
         />
         <Box sx={{ flex: 1 }}>
           <Box
@@ -123,10 +121,10 @@ const RealTimeSettings = () => {
             }}
           >
             <Typography level='title-md'>
-              {t('settings:advanced.realtimeTitle')}
+              Real-time Updates
               {!isPlusAccount(userProfile) && (
                 <Chip variant='soft' color='warning' sx={{ ml: 1 }}>
-                  {t('common:labels.plusFeature')}
+                  Plus Feature
                 </Chip>
               )}
             </Typography>
@@ -139,7 +137,7 @@ const RealTimeSettings = () => {
             )}
           </Box>
           <Typography level='body-sm' color='neutral'>
-            {t('settings:advanced.realtimeSummary')}
+            Get instant notifications when tasks are updated
           </Typography>
         </Box>
       </Box>
@@ -169,7 +167,7 @@ const RealTimeSettings = () => {
         isPlusAccount(userProfile) && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
             <Typography level='body-xs' color='neutral'>
-              {t('settings:advanced.status')}
+              Status:
             </Typography>
             {getConnectionStatusComponent()}
             {context.error && (
@@ -182,7 +180,9 @@ const RealTimeSettings = () => {
 
       {!isPlusAccount(userProfile) && (
         <Typography level='body-sm' color='warning' sx={{ mt: 1 }}>
-          {t('settings:advanced.realtimeUnavailable')}
+          Real-time updates are not available in the Basic plan. Upgrade to Plus
+          to receive instant notifications when you or other circle members
+          complete, skip, or modify tasks.
         </Typography>
       )}
     </Card>

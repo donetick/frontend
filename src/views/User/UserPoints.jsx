@@ -40,18 +40,14 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import LoadingComponent from '../components/Loading.jsx'
 
-import { useLocalization } from '../../contexts/LocalizationContext'
 import { useChoresHistory } from '../../queries/ChoreQueries.jsx'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import { RedeemPoints } from '../../utils/Fetcher.jsx'
 import { resolvePhotoURL } from '../../utils/Helpers.jsx'
 import RedeemPointsModal from '../Modals/RedeemPointsModal'
 const UserPoints = () => {
-  const { t, i18n } = useTranslation('user')
-  const { language } = useLocalization()
   const [tabValue, setTabValue] = useState(7)
   const [isRedeemModalOpen, setIsRedeemModalOpen] = useState(false)
   const [leaderboardMode, setLeaderboardMode] = useState('points') // 'points' or 'tasks'
@@ -102,32 +98,21 @@ const UserPoints = () => {
     setSelectedUser(userProfile?.id)
   }, [userProfile])
 
-  const formatPeriodLabel = value => {
-    if (value === 24 * 30) return t('points.allTime')
-    if (value === 6 * 30) return t('points.lastMonths6')
-    return t('points.lastDays', { count: value })
-  }
-
   const generateWeeklySummary = (history, userId) => {
     const daysAggregated = []
     for (let i = 6; i > -1; i--) {
       const currentDate = new Date()
       currentDate.setDate(currentDate.getDate() - i)
       daysAggregated.push({
-        label: currentDate.toLocaleString(language || i18n.language, {
-          weekday: 'short',
-        }),
+        label: currentDate.toLocaleString('en-US', { weekday: 'short' }),
         points: 0,
         tasks: 0,
       })
     }
     history.forEach(chore => {
-      const dayName = new Date(chore.performedAt).toLocaleString(
-        language || i18n.language,
-        {
-          weekday: 'short',
-        },
-      )
+      const dayName = new Date(chore.performedAt).toLocaleString('en-US', {
+        weekday: 'short',
+      })
 
       const dayIndex = daysAggregated.findIndex(dayData => {
         if (userId)
@@ -148,20 +133,15 @@ const UserPoints = () => {
       const currentDate = new Date()
       currentDate.setDate(currentDate.getDate() - i)
       daysAggregated.push({
-        label: currentDate.toLocaleString(language || i18n.language, {
-          day: 'numeric',
-        }),
+        label: currentDate.toLocaleString('en-US', { day: 'numeric' }),
         points: 0,
         tasks: 0,
       })
     }
     history.forEach(chore => {
-      const dayName = new Date(chore.performedAt).toLocaleString(
-        language || i18n.language,
-        {
-          day: 'numeric',
-        },
-      )
+      const dayName = new Date(chore.performedAt).toLocaleString('en-US', {
+        day: 'numeric',
+      })
 
       const dayIndex = daysAggregated.findIndex(dayData => {
         if (userId)
@@ -184,20 +164,15 @@ const UserPoints = () => {
       const currentMonth = new Date()
       currentMonth.setMonth(currentMonth.getMonth() - i)
       monthlyAggregated.push({
-        label: currentMonth.toLocaleString(language || i18n.language, {
-          month: 'short',
-        }),
+        label: currentMonth.toLocaleString('en-US', { month: 'short' }),
         points: 0,
         tasks: 0,
       })
     }
     history.forEach(chore => {
-      const monthName = new Date(chore.performedAt).toLocaleString(
-        language || i18n.language,
-        {
-          month: 'short',
-        },
-      )
+      const monthName = new Date(chore.performedAt).toLocaleString('en-US', {
+        month: 'short',
+      })
 
       const monthIndex = monthlyAggregated.findIndex(monthData => {
         if (userId)
@@ -220,20 +195,15 @@ const UserPoints = () => {
       const currentYear = new Date()
       currentYear.setFullYear(currentYear.getFullYear() - i)
       yearlyAggregated.push({
-        label: currentYear.toLocaleString(language || i18n.language, {
-          year: 'numeric',
-        }),
+        label: currentYear.toLocaleString('en-US', { year: 'numeric' }),
         points: 0,
         tasks: 0,
       })
     }
     history.forEach(chore => {
-      const yearName = new Date(chore.performedAt).toLocaleString(
-        language || i18n.language,
-        {
-          year: 'numeric',
-        },
-      )
+      const yearName = new Date(chore.performedAt).toLocaleString('en-US', {
+        year: 'numeric',
+      })
 
       const yearIndex = yearlyAggregated.findIndex(yearData => {
         if (userId)
@@ -335,14 +305,14 @@ const UserPoints = () => {
                 level='h3'
                 sx={{ fontWeight: 'lg', color: 'text.primary' }}
               >
-                {leaderboardMode === 'points'
-                  ? t('points.pointsLeaderboard')
-                  : t('points.tasksLeaderboard')}
+                {leaderboardMode === 'points' ? 'Points' : 'Tasks'} Leaderboard
               </Typography>
               <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+                Rankings based on{' '}
                 {leaderboardMode === 'points'
-                  ? t('points.rankingsPoints')
-                  : t('points.rankingsTasks')}
+                  ? 'points earned'
+                  : 'tasks completed'}{' '}
+                during the selected time period
               </Typography>
             </Stack>
           </Box>
@@ -388,9 +358,9 @@ const UserPoints = () => {
                   }}
                 >
                   {[
-                    { label: t('points.days7'), value: 7 },
-                    { label: t('points.months6'), value: 6 * 30 },
-                    { label: t('points.allTime'), value: 24 * 30 },
+                    { label: '7D', value: 7 },
+                    { label: '6M', value: 6 * 30 },
+                    { label: 'All', value: 24 * 30 },
                   ].map((tab, index) => (
                     <Tab
                       key={index}
@@ -438,7 +408,7 @@ const UserPoints = () => {
                 sx={{ cursor: 'pointer' }}
                 onClick={() => setLeaderboardMode('points')}
               >
-                {t('points.modePoints')}
+                Points
               </Chip>
               <SwapHoriz
                 sx={{ fontSize: '0.875rem', color: 'text.tertiary' }}
@@ -450,7 +420,7 @@ const UserPoints = () => {
                 sx={{ cursor: 'pointer' }}
                 onClick={() => setLeaderboardMode('tasks')}
               >
-                {t('points.modeTasks')}
+                Tasks
               </Chip>
             </Box>
           </Box>
@@ -542,7 +512,7 @@ const UserPoints = () => {
                             color='primary'
                             sx={{ ml: 1 }}
                           >
-                            {t('points.you')}
+                            You
                           </Chip>
                         )}
                       </Typography>
@@ -550,10 +520,8 @@ const UserPoints = () => {
                         level='body-xs'
                         sx={{ color: 'text.secondary' }}
                       >
-                        {t('points.tasksAvg', {
-                          tasks: user.periodTasks,
-                          avg: user.avgPointsPerTask,
-                        })}
+                        {user.periodTasks} tasks • {user.avgPointsPerTask} avg
+                        per task
                       </Typography>
                     </Stack>
                   </Box>
@@ -584,10 +552,8 @@ const UserPoints = () => {
                     </Box>
                     <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
                       {leaderboardMode === 'points'
-                        ? t('points.available', { count: user.availablePoints })
-                        : t('points.pointsLabel', {
-                            count: user.periodPoints,
-                          })}
+                        ? `${user.availablePoints} available`
+                        : `${user.periodPoints} points`}
                     </Typography>
                   </Stack>
 
@@ -625,7 +591,7 @@ const UserPoints = () => {
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
         <Analytics sx={{ fontSize: '1.5rem', color: 'primary.500' }} />
         <Typography level='h4' sx={{ fontWeight: 'lg', color: 'text.primary' }}>
-          {t('points.filterAndAnalysis')}
+          Filter & Analysis
         </Typography>
       </Box>
 
@@ -644,7 +610,7 @@ const UserPoints = () => {
       >
         <Stack spacing={2}>
           <Typography level='title-sm' sx={{ color: 'text.secondary' }}>
-            {t('points.filterTitle')}
+            Filter Points
           </Typography>
 
           <Stack
@@ -655,7 +621,7 @@ const UserPoints = () => {
             {/* User Filter */}
             <Box sx={{ flex: 1, minWidth: 200 }}>
               <Typography level='body-sm' sx={{ mb: 1, fontWeight: 500 }}>
-                {t('points.showFor')}
+                Show points for:
               </Typography>
               <Select
                 sx={{
@@ -722,7 +688,7 @@ const UserPoints = () => {
             {/* Time Period Filter */}
             <Box sx={{ flex: 1, minWidth: 200 }}>
               <Typography level='body-sm' sx={{ mb: 1, fontWeight: 500 }}>
-                {t('points.timePeriod')}
+                Time period:
               </Typography>
               <Tabs
                 onChange={(e, tabValue) => {
@@ -747,9 +713,9 @@ const UserPoints = () => {
                   }}
                 >
                   {[
-                    { label: t('points.days7'), value: 7 },
-                    { label: t('points.months6'), value: 6 * 30 },
-                    { label: t('points.allTime'), value: 24 * 30 },
+                    { label: '7 Days', value: 7 },
+                    { label: '6 Months', value: 6 * 30 },
+                    { label: 'All Time', value: 24 * 30 },
                   ].map((tab, index) => (
                     <Tab
                       key={index}
@@ -793,7 +759,7 @@ const UserPoints = () => {
                   }}
                   sx={{ mt: 'auto' }}
                 >
-                  {t('points.redeemPoints')}
+                  Redeem Points
                 </Button>
               </Box>
             )}
@@ -822,27 +788,27 @@ const UserPoints = () => {
           const pointsCards = [
             {
               icon: <Toll />,
-              title: t('points.cardAvailable'),
-              text: t('points.pointsLabel', { count: availablePoints }),
-              subtext: t('points.cardAvailableSubtext'),
+              title: 'Available',
+              text: `${availablePoints} points`,
+              subtext: 'Ready to redeem',
             },
             {
               icon: <Redeem />,
-              title: t('points.cardRedeemed'),
-              text: t('points.pointsLabel', { count: redeemedPoints }),
-              subtext: t('points.cardRedeemedSubtext'),
+              title: 'Redeemed',
+              text: `${redeemedPoints} points`,
+              subtext: 'Previously used',
             },
             {
               icon: <AccountBalanceWallet />,
-              title: t('points.cardTotal'),
-              text: t('points.pointsLabel', { count: totalPoints }),
-              subtext: t('points.cardTotalSubtext'),
+              title: 'Total',
+              text: `${totalPoints} points`,
+              subtext: 'All time earned',
             },
             {
               icon: <TrendingUp />,
-              title: t('points.cardPeriod'),
-              text: t('points.pointsLabel', { count: periodPoints }),
-              subtext: formatPeriodLabel(tabValue),
+              title: 'Period Points',
+              text: `${periodPoints} points`,
+              subtext: `${tabValue === 24 * 30 ? 'All time' : tabValue === 6 * 30 ? 'Last 6 months' : `Last ${tabValue} days`}`,
             },
           ]
 
@@ -905,12 +871,25 @@ const UserPoints = () => {
       {/* Current Filter Summary */}
       <Box sx={{ mb: 3, textAlign: 'center' }}>
         <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-          {t('points.showingFor', {
-            user:
-              circleUsers.find(user => user.userId === selectedUser)
-                ?.displayName || t('points.unknownUser'),
-            period: formatPeriodLabel(tabValue),
-          })}
+          Showing points for{' '}
+          <Typography
+            component='span'
+            sx={{ fontWeight: 600, color: 'primary.500' }}
+          >
+            {circleUsers.find(user => user.userId === selectedUser)
+              ?.displayName || 'Unknown User'}
+          </Typography>{' '}
+          over the{' '}
+          <Typography
+            component='span'
+            sx={{ fontWeight: 600, color: 'primary.500' }}
+          >
+            {tabValue === 24 * 30
+              ? 'All Time'
+              : tabValue === 6 * 30
+                ? 'Last 6 Months'
+                : `Last ${tabValue} Days`}
+          </Typography>
         </Typography>
       </Box>
 
@@ -929,7 +908,7 @@ const UserPoints = () => {
             level='h4'
             sx={{ fontWeight: 'lg', color: 'text.primary' }}
           >
-            {t('points.pointsTrend')}
+            Points Trend
           </Typography>
         </Box>
 

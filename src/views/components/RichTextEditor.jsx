@@ -9,7 +9,6 @@ import {
   useImperativeHandle,
   useRef,
 } from 'react'
-import { useTranslation } from 'react-i18next'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { apiClient } from '../../utils/ApiClient'
@@ -22,14 +21,13 @@ const RichTextEditor = forwardRef(
       value = '',
       onChange,
       isEditable = true,
-      placeholder = null,
+      placeholder = 'Enter description...',
       variant = 'outlined',
       entityId,
       entityType,
     },
     ref,
   ) => {
-    const { t } = useTranslation(['common'])
     const { showError } = useNotification()
     const { data: userProfile } = useUserProfile()
     const quillRef = useRef(null)
@@ -58,8 +56,9 @@ const RichTextEditor = forwardRef(
       // Check if user has plus account
       if (!isPlusAccount(userProfile)) {
         showError({
-          title: t('common:editor.plusFeature'),
-          message: t('common:editor.plusFeatureMessage'),
+          title: 'Plus Feature',
+          message:
+            'Image uploads are not available in the Basic plan. Upgrade to Plus to add images to your content.',
         })
         return
       }
@@ -111,32 +110,33 @@ const RichTextEditor = forwardRef(
 
           if (response.status === 507) {
             showError({
-              title: t('common:editor.storageQuotaExceeded'),
-              message: t('common:editor.storageQuotaExceededMessage'),
+              title: 'Storage Quota Exceeded',
+              message: 'You have exceeded your quota for uploading files.',
             })
             return
           } else if (response.status === 413) {
             showError({
-              title: t('common:editor.fileTooLarge'),
-              message: t('common:editor.fileTooLargeMessage'),
+              title: 'File Too Large',
+              message: 'The file you are trying to upload is too large.',
             })
             return
           } else if (response.status === 403 && !isPlusAccount()) {
             showError({
-              title: t('common:editor.upgradeRequired'),
-              message: t('common:editor.upgradeRequiredMessage'),
+              title: 'Upgrade Required',
+              message:
+                'Image uploads are only available for Plus accounts. Please ',
             })
             return
           } else if (response.status === 403) {
             showError({
-              title: t('common:editor.permissionDenied'),
-              message: t('common:editor.permissionDeniedMessage'),
+              title: 'Permission Denied',
+              message: 'You do not have permission to upload files.',
             })
             return
           } else if (!response.ok) {
             showError({
-              title: t('common:editor.uploadFailed'),
-              message: t('common:editor.uploadFailedMessage'),
+              title: 'Upload Failed',
+              message: 'Failed to upload image.',
             })
             return
           }
@@ -149,12 +149,12 @@ const RichTextEditor = forwardRef(
         } catch (error) {
           console.error('Error during image processing or upload:', error)
           showError({
-            title: t('common:editor.uploadFailed'),
-            message: t('common:editor.processingFailedMessage'),
+            title: 'Upload Failed',
+            message: 'An error occurred while processing the image.',
           })
         }
       }
-    }, [entityId, entityType, showError, t, userProfile]) // Dependencies for useCallback
+    }, [entityId, entityType, showError, userProfile]) // Dependencies for useCallback
 
     useEffect(() => {
       if (!quillRef.current) return
@@ -176,7 +176,7 @@ const RichTextEditor = forwardRef(
               },
             },
           },
-          placeholder: placeholder || t('common:editor.placeholder'),
+          placeholder: placeholder,
         })
         new QuillMarkdown(editorRef.current, {})
         editorRef.current.root.innerHTML = value

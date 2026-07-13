@@ -1,6 +1,5 @@
 import { Box, Typography } from '@mui/joy'
 import { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import Calendar from 'react-calendar'
 import { useNavigate } from 'react-router-dom'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
@@ -14,7 +13,6 @@ const getAssigneeColor = (assignee, userProfile) => {
     : TASK_COLOR.ASSIGNED_TO_OTHER
 }
 const CalendarDual = ({ chores, onDateChange }) => {
-  const { t } = useTranslation('common')
   const { data: userProfile } = useUserProfile()
   const { firstDayOfWeek, fmt } = useLocalization()
   const calendarType =
@@ -46,9 +44,7 @@ const CalendarDual = ({ chores, onDateChange }) => {
       return userProfile.displayName
     }
     const assignee = circleMembers.find(member => member.userId === assignedTo)
-    return assignee
-      ? `${assignee.displayName}`
-      : t('status.assignedToOther')
+    return assignee ? `${assignee.displayName}` : 'Assigned to other'
   }
 
   const tileContent = ({ date, view }) => {

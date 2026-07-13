@@ -19,7 +19,7 @@ import { useTranslation } from 'react-i18next'
 import SettingsLayout from './SettingsLayout'
 
 const LocalizationSettings = () => {
-  const { t } = useTranslation(['settings', 'common'])
+  const { t } = useTranslation('settings')
   const {
     language,
     setLanguage,
@@ -44,7 +44,7 @@ const LocalizationSettings = () => {
   ]
 
   return (
-    <SettingsLayout title={t('settings:localization.title')}>
+    <SettingsLayout title='Localization'>
       <div className='grid gap-4 py-4'>
         <Typography level='body-md'>{t('localization.description')}</Typography>
 
@@ -110,7 +110,7 @@ const LocalizationSettings = () => {
             ))}
           </Select>
           <FormHelperText>
-            {t('common:labels.preview')}: {sampleDate.format(dateFormat)}
+            Preview: {sampleDate.format(dateFormat)}
           </FormHelperText>
         </FormControl>
 
@@ -157,7 +157,7 @@ const LocalizationSettings = () => {
             </Option>
           </Select>
           <FormHelperText>
-            {t('common:labels.preview')}: {sampleDate.format(timeFormat)}
+            Preview: {sampleDate.format(timeFormat)}
           </FormHelperText>
         </FormControl>
 

@@ -1,6 +1,5 @@
 import { CancelRounded } from '@mui/icons-material'
 import { Box, Input } from '@mui/joy'
-import { useTranslation } from 'react-i18next'
 import KeyboardShortcutHint from '../../../components/common/KeyboardShortcutHint'
 
 const SearchBar = ({
@@ -11,11 +10,10 @@ const SearchBar = ({
   showKeyboardShortcuts,
   inputRef,
 }) => {
-  const { t } = useTranslation('common')
   return (
     <Input
       slotProps={{ input: { ref: inputRef } }}
-      placeholder={t('labels.search')}
+      placeholder='Search'
       value={value}
       onFocus={onFocus}
       fullWidth

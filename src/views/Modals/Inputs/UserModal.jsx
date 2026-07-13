@@ -1,9 +1,7 @@
 import { Avatar, Box, Button, List, ListItem, Typography } from '@mui/joy'
-import { useTranslation } from 'react-i18next'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
 const UserModal = ({ isOpen, performers = [], onSelect, onClose }) => {
-  const { t } = useTranslation(['common'])
   const { ResponsiveModal } = useResponsiveModal()
 
   return (
@@ -12,7 +10,7 @@ const UserModal = ({ isOpen, performers = [], onSelect, onClose }) => {
       onClose={onClose}
       size='lg'
       fullWidth={true}
-      title={t('common:modals.selectUser')}
+      title='Select User'
     >
       <List sx={{ mb: 2 }}>
         {performers.map(user => (
@@ -42,7 +40,7 @@ const UserModal = ({ isOpen, performers = [], onSelect, onClose }) => {
       </List>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
         <Button size='lg' variant='outlined' color='neutral' onClick={onClose}>
-          {t('common:actions.cancel')}
+          Cancel
         </Button>
       </Box>
     </ResponsiveModal>

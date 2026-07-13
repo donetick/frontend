@@ -9,14 +9,12 @@ import {
   Switch,
   Typography,
 } from '@mui/joy'
-import { useTranslation } from 'react-i18next'
 import { useSSEContext } from '../hooks/useSSEContext'
 import { useUserProfile } from '../queries/UserQueries'
 import { isPlusAccount } from '../utils/Helpers'
 import SSEConnectionStatus from './SSEConnectionStatus'
 
 const SSESettings = () => {
-  const { t } = useTranslation(['settings', 'common'])
   const { data: userProfile } = useUserProfile()
   const {
     isConnected,
@@ -45,26 +43,26 @@ const SSESettings = () => {
 
   const getStatusDescription = () => {
     if (!isPlusAccount(userProfile)) {
-      return t('settings:advanced.sseUnavailable')
+      return 'Real-time updates (SSE) are not available in the Basic plan. Upgrade to Plus to receive instant notifications when chores are updated.'
     }
 
     if (!isSSEEnabled()) {
-      return t('settings:advanced.sseDisabled')
+      return 'Real-time updates (SSE) are disabled. Enable to see live changes when you or other circle members complete, skip, or modify chores.'
     }
 
     if (isConnected) {
-      return t('settings:advanced.sseConnected')
+      return "Real-time updates (SSE) are working. You'll see live changes when you or other circle members complete, skip, or modify chores."
     }
 
     if (isConnecting) {
-      return t('settings:advanced.sseConnecting')
+      return 'Connecting to real-time updates (SSE)...'
     }
 
     if (error) {
-      return t('settings:advanced.sseError', { error })
+      return `Real-time updates (SSE) are enabled but not working: ${error}`
     }
 
-    return t('settings:advanced.sseEnabledNotConnected')
+    return 'Real-time updates (SSE) are enabled but not currently connected.'
   }
 
   return (
@@ -77,15 +75,15 @@ const SSESettings = () => {
         )}
         <Box sx={{ flex: 1 }}>
           <Typography level='title-md'>
-            {t('settings:advanced.sseTitle')}
+            Real-time Updates (SSE)
             {!isPlusAccount(userProfile) && (
               <Chip variant='soft' color='warning' sx={{ ml: 1 }}>
-                {t('common:labels.plusFeature')}
+                Plus Feature
               </Chip>
             )}
           </Typography>
           <Typography level='body-sm' color='neutral'>
-            {t('settings:advanced.sseSummary')}
+            Get instant notifications via Server-Sent Events
           </Typography>
         </Box>
         {isSSEEnabled() && isPlusAccount(userProfile) && (
@@ -95,7 +93,7 @@ const SSESettings = () => {
 
       <FormControl orientation='horizontal' sx={{ mb: 2 }}>
         <Box sx={{ flex: 1 }}>
-          <FormLabel>{t('settings:advanced.enableSse')}</FormLabel>
+          <FormLabel>Enable Real-time Updates (SSE)</FormLabel>
           <FormHelperText sx={{ mt: 0 }}>
             {getStatusDescription()}
           </FormHelperText>
@@ -109,9 +107,7 @@ const SSESettings = () => {
           }
           variant='solid'
           endDecorator={
-            isSSEEnabled() && isPlusAccount(userProfile)
-              ? t('settings:advanced.on')
-              : t('settings:advanced.off')
+            isSSEEnabled() && isPlusAccount(userProfile) ? 'On' : 'Off'
           }
           slotProps={{ endDecorator: { sx: { minWidth: 24 } } }}
         />
@@ -120,7 +116,7 @@ const SSESettings = () => {
       {isSSEEnabled() && isPlusAccount(userProfile) && (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
           <Typography level='body-xs' color='neutral'>
-            {t('settings:advanced.status')}
+            Status:
           </Typography>
           <Chip
             size='sm'
@@ -141,7 +137,9 @@ const SSESettings = () => {
 
       {!isPlusAccount(userProfile) && (
         <Typography level='body-sm' color='warning' sx={{ mt: 1 }}>
-          {t('settings:advanced.sseUnavailable')}
+          Real-time updates (SSE) are not available in the Basic plan. Upgrade
+          to Plus to receive instant notifications when you or other circle
+          members complete, skip, or modify chores.
         </Typography>
       )}
     </Card>

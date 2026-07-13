@@ -17,7 +17,6 @@ import {
   ThumbDown,
 } from '@mui/icons-material'
 import { Box, Typography } from '@mui/joy'
-import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import ChoreCard from './ChoreCard'
 import CompactChoreCard from './CompactChoreCard'
@@ -37,7 +36,6 @@ const ChoreListView = ({
   toggleMultiSelectMode,
   showActions = true,
 }) => {
-  const { t } = useTranslation(['chores', 'common'])
   const navigate = useNavigate()
   const renderChoreCard = (chore, key) => {
     const CardComponent = viewMode === 'compact' ? CompactChoreCard : ChoreCard
@@ -98,7 +96,7 @@ const ChoreListView = ({
                 >
                   <ThumbDown sx={{ fontSize: 20 }} />
                   <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                    {t('common:actions.reject')}
+                    Reject
                   </Typography>
                 </Box>
               </SwipeAction>
@@ -119,7 +117,7 @@ const ChoreListView = ({
                 >
                   <HourglassEmpty sx={{ fontSize: 20 }} />
                   <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                    {t('chores:groups.pendingApproval')}
+                    Pending
                   </Typography>
                 </Box>
               </SwipeAction>
@@ -152,9 +150,7 @@ const ChoreListView = ({
                   <Check sx={{ fontSize: 20 }} />
                 )}
                 <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                  {chore.status !== 1
-                    ? t('chores:choreView.start')
-                    : t('common:actions.complete')}
+                  {chore.status !== 1 ? 'Start' : 'Complete'}
                 </Typography>
               </Box>
             </SwipeAction>
@@ -177,7 +173,7 @@ const ChoreListView = ({
             >
               <Schedule sx={{ fontSize: 20 }} />
               <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                {t('common:labels.dueDate')}
+                Schedule
               </Typography>
             </Box>
           </SwipeAction>
@@ -197,7 +193,7 @@ const ChoreListView = ({
             >
               <Edit sx={{ fontSize: 20 }} />
               <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                {t('common:actions.edit')}
+                Edit
               </Typography>
             </Box>
           </SwipeAction>
@@ -218,7 +214,7 @@ const ChoreListView = ({
               >
                 <Notifications sx={{ fontSize: 20 }} />
                 <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                  {t('chores:actions.sendNudge')}
+                  Nudge
                 </Typography>
               </Box>
             </SwipeAction>
@@ -239,7 +235,7 @@ const ChoreListView = ({
             >
               <Delete sx={{ fontSize: 20 }} />
               <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                {t('common:actions.delete')}
+                Delete
               </Typography>
             </Box>
           </SwipeAction>

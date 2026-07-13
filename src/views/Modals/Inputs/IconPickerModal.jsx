@@ -7,7 +7,6 @@ import {
     Grid,
     Typography,
 } from '@mui/joy'
-import { useTranslation } from 'react-i18next'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { getTextColorFromBackgroundColor } from '../../../utils/Colors'
 import PROJECT_ICONS from '../../../utils/ProjectIcons'
@@ -19,7 +18,6 @@ const IconPickerModal = ({
   currentIcon,
   projectColor,
 }) => {
-  const { t } = useTranslation(['projects', 'common'])
   const { ResponsiveModal } = useResponsiveModal()
 
   const handleIconClick = iconValue => {
@@ -34,11 +32,11 @@ const IconPickerModal = ({
       size='lg'
       fullWidth={true}
       unmountDelay={250}
-      title={t('projects:modal.chooseIconTitle')}
+      title='Choose Project Icon'
     >
 
       <FormControl>
-        <FormLabel>{t('projects:modal.availableIcons')}</FormLabel>
+        <FormLabel>Available Icons</FormLabel>
         <Grid
           container
           spacing={1}
@@ -101,7 +99,7 @@ const IconPickerModal = ({
 
       <Box display='flex' justifyContent='center' mt={3}>
         <Button variant='outlined' onClick={onClose} fullWidth size='lg'>
-          {t('common:actions.cancel')}
+          Cancel
         </Button>
       </Box>
     </ResponsiveModal>

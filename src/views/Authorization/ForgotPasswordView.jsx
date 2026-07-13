@@ -10,14 +10,12 @@ import {
   Typography,
 } from '@mui/joy'
 import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import Logo from '../../Logo'
 import { useNotification } from '../../service/NotificationProvider'
 import { ResetPassword } from '../../utils/Fetcher'
 
 const ForgotPasswordView = () => {
-  const { t } = useTranslation(['auth', 'common'])
   const navigate = useNavigate()
   const [resetStatusOk, setResetStatusOk] = useState(null)
   const [email, setEmail] = useState('')
@@ -30,12 +28,12 @@ const ForgotPasswordView = () => {
 
   const handleSubmit = async () => {
     if (!email) {
-      return setEmailError(t('auth:errors.emailRequired'))
+      return setEmailError('Email is required')
     }
 
     // validate email:
     if (validateEmail(email)) {
-      setEmailError(t('auth:errors.validEmail'))
+      setEmailError('Please enter a valid email address')
       return
     }
 
@@ -50,21 +48,21 @@ const ForgotPasswordView = () => {
         setResetStatusOk(true)
         showNotification({
           type: 'success',
-          title: t('auth:errors.resetEmailSentTitle'),
-          message: t('auth:errors.resetEmailSentMessage'),
+          title: 'Reset Email Sent',
+          message: 'Check your email for password reset instructions',
         })
       } else {
         setResetStatusOk(false)
         showError({
-          title: t('auth:errors.resetFailedTitle'),
-          message: t('auth:errors.resetFailedMessage'),
+          title: 'Reset Failed',
+          message: 'Failed to send reset email, please try again later',
         })
       }
     } catch (error) {
       setResetStatusOk(false)
       showError({
-        title: t('auth:errors.resetFailedTitle'),
-        message: t('auth:errors.resetFailedMessage'),
+        title: 'Reset Failed',
+        message: 'Failed to send reset email, please try again later',
       })
     }
   }
@@ -72,7 +70,7 @@ const ForgotPasswordView = () => {
   const handleEmailChange = e => {
     setEmail(e.target.value)
     if (validateEmail(e.target.value)) {
-      setEmailError(t('auth:errors.validEmail'))
+      setEmailError('Please enter a valid email address')
     } else {
       setEmailError(null)
     }
@@ -110,11 +108,12 @@ const ForgotPasswordView = () => {
           {resetStatusOk === null && (
             <>
               <Typography level='body2' sx={{ mb: 3 }}>
-                {t('auth:forgotPasswordSubtitle')}
+                Enter your email, and we'll send you a link to get into your
+                account.
               </Typography>
 
               <Typography level='body2' alignSelf={'start'} mb={1}>
-                {t('common:labels.emailAddress')}
+                Email Address
               </Typography>
               <FormControl
                 error={emailError !== null}
@@ -125,7 +124,7 @@ const ForgotPasswordView = () => {
                   required
                   fullWidth
                   id='email'
-                  placeholder={t('auth:placeholders.enterEmailAddress')}
+                  placeholder='Enter your email address'
                   type='email'
                   name='email'
                   autoComplete='email'
@@ -156,7 +155,7 @@ const ForgotPasswordView = () => {
                 }}
                 onClick={handleSubmit}
               >
-                {t('auth:actions.resetPassword')}
+                Reset Password
               </Button>
 
               <Button
@@ -175,7 +174,7 @@ const ForgotPasswordView = () => {
                 }}
                 color='neutral'
               >
-                {t('common:actions.backToLogin')}
+                Back to Login
               </Button>
             </>
           )}
@@ -185,7 +184,9 @@ const ForgotPasswordView = () => {
                 level='body-md'
                 sx={{ textAlign: 'center', mt: 2, mb: 3 }}
               >
-                {t('auth:forgotPasswordConfirmation')}
+                If there is an account associated with the email you entered,
+                you will receive an email with instructions on how to reset your
+                password.
               </Typography>
 
               <Button
@@ -196,7 +197,7 @@ const ForgotPasswordView = () => {
                   navigate('/login')
                 }}
               >
-                {t('auth:actions.goToLogin')}
+                Go to Login
               </Button>
             </>
           )}

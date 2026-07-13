@@ -1,11 +1,9 @@
 import { Close, HelpOutline, Keyboard } from '@mui/icons-material'
 import { Box, Button, Card, Divider, IconButton, Typography } from '@mui/joy'
 import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 
 const MultiSelectHelp = ({ isVisible = true }) => {
-  const { t } = useTranslation('chores')
   const { ResponsiveModal } = useResponsiveModal()
 
   const [isHelpOpen, setIsHelpOpen] = useState(false)
@@ -30,7 +28,7 @@ const MultiSelectHelp = ({ isVisible = true }) => {
           borderRadius: '50%',
           boxShadow: 'lg',
         }}
-        title={t('sidepanel.multiSelect.showShortcuts')}
+        title='Show keyboard shortcuts'
       >
         <HelpOutline />
       </IconButton>
@@ -47,9 +45,7 @@ const MultiSelectHelp = ({ isVisible = true }) => {
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Keyboard color='primary' />
-            <Typography level='title-lg'>
-              {t('sidepanel.multiSelect.title')}
-            </Typography>
+            <Typography level='title-lg'>Multi-select Mode</Typography>
           </Box>
           <IconButton
             variant='plain'
@@ -60,24 +56,23 @@ const MultiSelectHelp = ({ isVisible = true }) => {
           </IconButton>
         </Box>
         <Typography level='body-md' sx={{ mb: 3, color: 'text.secondary' }}>
-          {t('sidepanel.multiSelect.description')}
+          Use these keyboard shortcuts to work more efficiently with multiple
+          tasks:
         </Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {/* Selection shortcuts */}
           <Card variant='soft' sx={{ p: 2 }}>
             <Typography level='title-sm' sx={{ mb: 1.5, color: 'primary.600' }}>
-              {t('sidepanel.multiSelect.sections.selection')}
+              Selection
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <ShortcutItem
                 keys={['Ctrl', 'A']}
-                description={t(
-                  'sidepanel.multiSelect.shortcuts.selectAllVisible',
-                )}
+                description='Select all visible tasks'
               />
               <ShortcutItem
                 keys={['Esc']}
-                description={t('sidepanel.multiSelect.shortcuts.clearOrExit')}
+                description='Clear selection or exit multi-select mode'
               />
             </Box>
           </Card>
@@ -85,18 +80,16 @@ const MultiSelectHelp = ({ isVisible = true }) => {
           {/* Action shortcuts */}
           <Card variant='soft' sx={{ p: 2 }}>
             <Typography level='title-sm' sx={{ mb: 1.5, color: 'success.600' }}>
-              {t('sidepanel.multiSelect.sections.actions')}
+              Actions
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <ShortcutItem
                 keys={['Enter']}
-                description={t(
-                  'sidepanel.multiSelect.shortcuts.markCompleted',
-                )}
+                description='Mark selected tasks as completed'
               />
               <ShortcutItem
                 keys={['Del', '⌫']}
-                description={t('sidepanel.multiSelect.shortcuts.deleteSelected')}
+                description='Delete selected tasks'
               />
             </Box>
           </Card>
@@ -104,12 +97,12 @@ const MultiSelectHelp = ({ isVisible = true }) => {
           {/* Interface shortcuts */}
           <Card variant='soft' sx={{ p: 2 }}>
             <Typography level='title-sm' sx={{ mb: 1.5, color: 'warning.600' }}>
-              {t('sidepanel.multiSelect.sections.interface')}
+              Interface
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <ShortcutItem
                 keys={['Ctrl', 'K']}
-                description={t('sidepanel.multiSelect.shortcuts.quickAdd')}
+                description='Quick add new task'
               />
             </Box>
           </Card>
@@ -121,7 +114,7 @@ const MultiSelectHelp = ({ isVisible = true }) => {
             onClick={() => setIsHelpOpen(false)}
             sx={{ minWidth: 120 }}
           >
-            {t('sidepanel.multiSelect.gotIt')}
+            Got it!
           </Button>
         </Box>
       </ResponsiveModal>

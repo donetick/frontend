@@ -1,13 +1,11 @@
 import { BarChart, Person } from '@mui/icons-material'
 import { Avatar, Box, Sheet, Typography } from '@mui/joy'
 import { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { useCircleMembers } from '../../queries/UserQueries'
 import { TASK_COLOR } from '../../utils/Colors'
 import { resolvePhotoURL } from '../../utils/Helpers'
 
 const TasksByAssigneeCard = ({ chores = [] }) => {
-  const { t } = useTranslation('chores')
   const [assigneeData, setAssigneeData] = useState([])
   const { data: circleMembersData, isLoading: isCircleMembersLoading } =
     useCircleMembers()
@@ -106,7 +104,7 @@ const TasksByAssigneeCard = ({ chores = [] }) => {
         }}
       >
         <Typography level='body-sm' color='neutral'>
-          {t('sidepanel.assignees.loading')}
+          Loading tasks by assignee...
         </Typography>
       </Sheet>
     )
@@ -131,7 +129,7 @@ const TasksByAssigneeCard = ({ chores = [] }) => {
       >
         <Person sx={{ fontSize: 48, opacity: 0.3, mb: 1 }} />
         <Typography level='body-sm' color='neutral'>
-          {t('sidepanel.assignees.empty')}
+          No assigned tasks found
         </Typography>
       </Sheet>
     )
@@ -162,9 +160,7 @@ const TasksByAssigneeCard = ({ chores = [] }) => {
           }}
         >
           <BarChart color='' />
-          <Typography level='title-md'>
-            {t('sidepanel.assignees.title')}
-          </Typography>
+          <Typography level='title-md'>Tasks by Assignee</Typography>
         </Box>
       </Box>
 
@@ -181,22 +177,22 @@ const TasksByAssigneeCard = ({ chores = [] }) => {
         {[
           {
             key: 'inProgress',
-            label: t('sidepanel.assignees.legend.inProgress'),
+            label: 'In Progress',
             color: getStatusColor('inProgress'),
           },
           {
             key: 'overdue',
-            label: t('sidepanel.assignees.legend.overdue'),
+            label: 'Overdue',
             color: getStatusColor('overdue'),
           },
           {
             key: 'scheduled',
-            label: t('sidepanel.assignees.legend.scheduled'),
+            label: 'Scheduled',
             color: getStatusColor('scheduled'),
           },
           {
             key: 'pendingReview',
-            label: t('sidepanel.assignees.legend.pendingReview'),
+            label: 'Pending Review',
             color: getStatusColor('pendingReview'),
           },
         ].map(status => (

@@ -11,7 +11,6 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import LabelModal from '../Modals/Inputs/LabelModal'
 
 import {
@@ -31,7 +30,7 @@ import { getSafeBottomStyles } from '../../utils/SafeAreaUtils'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import { useLabels } from './LabelQueries'
 
-const LabelCardContent = ({ label, currentUserId, onToggleActions, t }) => {
+const LabelCardContent = ({ label, currentUserId, onToggleActions }) => {
   // Check if current user owns this label
   const isOwnedByCurrentUser = label.created_by === currentUserId
 
@@ -124,7 +123,7 @@ const LabelCardContent = ({ label, currentUserId, onToggleActions, t }) => {
                 fontWeight: 'md',
               }}
             >
-              {t('labelsView:shared')}
+              Shared
             </Chip>
           )}
         </Box>
@@ -149,7 +148,6 @@ const LabelCardContent = ({ label, currentUserId, onToggleActions, t }) => {
 }
 
 const LabelView = () => {
-  const { t } = useTranslation(['labelsView', 'common'])
   const { data: labels, isLabelsLoading, isError } = useLabels()
   const { data: userProfile } = useUserProfile()
 
@@ -174,11 +172,14 @@ const LabelView = () => {
   const handleDeleteClicked = id => {
     setConfirmationModel({
       isOpen: true,
-      title: t('labelsView:deleteTitle'),
-      message: t('labelsView:deleteMessage'),
-      confirmText: t('common:actions.delete'),
+      title: 'Delete Label',
+
+      message:
+        'Are you sure you want to delete this label? This will remove the label from all tasks.',
+
+      confirmText: 'Delete',
       color: 'danger',
-      cancelText: t('common:actions.cancel'),
+      cancelText: 'Cancel',
       onClose: confirmed => {
         if (confirmed === true) {
           handleDeleteLabel(id)
@@ -228,7 +229,7 @@ const LabelView = () => {
   if (isError) {
     return (
       <Typography color='danger' textAlign='center'>
-        {t('labelsView:loadFailed')}
+        Failed to load labels. Please try again.
       </Typography>
     )
   }
@@ -242,10 +243,12 @@ const LabelView = () => {
             level='h3'
             sx={{ fontWeight: 'lg', color: 'text.primary' }}
           >
-            {t('labelsView:title')}
+            Labels
           </Typography>
           <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            {t('labelsView:description')}
+            Manage your labels and organize your tasks effectively. Labels will
+            be automatically shared with your circle if they are used on a
+            shared task.
           </Typography>
         </Stack>
       </Box>
@@ -265,7 +268,7 @@ const LabelView = () => {
             }}
           >
             <Typography level='title-md' gutterBottom>
-              {t('labelsView:empty')}
+              No labels available. Add a new label to get started.
             </Typography>
           </Box>
         )}
@@ -298,7 +301,7 @@ const LabelView = () => {
                       >
                         <EditIcon sx={{ fontSize: 20 }} />
                         <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                          {t('common:actions.edit')}
+                          Edit
                         </Typography>
                       </Box>
                     </SwipeAction>
@@ -317,7 +320,7 @@ const LabelView = () => {
                       >
                         <DeleteIcon sx={{ fontSize: 20 }} />
                         <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                          {t('common:actions.delete')}
+                          Delete
                         </Typography>
                       </Box>
                     </SwipeAction>
@@ -328,7 +331,6 @@ const LabelView = () => {
               <LabelCardContent
                 label={label}
                 currentUserId={userProfile?.id}
-                t={t}
                 onToggleActions={() => {
                   if (showMoreInfoId === label.id) {
                     setShowMoreInfoId(null)

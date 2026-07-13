@@ -11,14 +11,12 @@ import {
 } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import React from 'react'
-import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import Logo from '../../Logo'
 import { useNotification } from '../../service/NotificationProvider'
 import { login, signUp } from '../../utils/Fetcher'
 
 const SignupView = () => {
-  const { t } = useTranslation(['common', 'auth'])
   const [username, setUsername] = React.useState('')
   const [password, setPassword] = React.useState('')
   const Navigate = useNavigate()
@@ -59,42 +57,44 @@ const SignupView = () => {
     let isValid = true
 
     if (!username.trim()) {
-      setUsernameError(t('auth:errors.usernameRequired'))
+      setUsernameError('Username is required')
       isValid = false
     }
     if (username.length < 4) {
-      setUsernameError(t('auth:errors.usernameMin'))
+      setUsernameError('Username must be at least 4 characters')
       isValid = false
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setEmailError(t('auth:errors.invalidEmail'))
+      setEmailError('Invalid email address')
       isValid = false
     }
 
     if (password.length < 8) {
-      setPasswordError(t('auth:errors.passwordLength'))
+      setPasswordError('Password must be between 8 and 64 characters')
       isValid = false
     }
 
     if (password.length > 64) {
-      setPasswordError(t('auth:errors.passwordLength'))
+      setPasswordError('Password must be between 8 and 64 characters')
       isValid = false
     }
 
     if (!displayName.trim()) {
-      setDisplayNameError(t('auth:errors.displayNameRequired'))
+      setDisplayNameError('Display name is required')
       isValid = false
     }
 
     // display name should only contain letters and spaces and numbers:
     if (!/^[a-zA-Z0-9 ]+$/.test(displayName)) {
-      setDisplayNameError(t('auth:errors.displayNamePattern'))
+      setDisplayNameError('Display name can only contain letters and numbers')
       isValid = false
     }
 
     // username should only contain lowercase letters, dot and dash:
     if (!/^[a-z.-]+$/.test(username)) {
-      setUsernameError(t('auth:errors.usernamePattern'))
+      setUsernameError(
+        'Username can only contain lowercase letters, dot and dash',
+      )
       isValid = false
     }
 
@@ -110,15 +110,15 @@ const SignupView = () => {
         handleLogin(username, password)
       } else if (response.status === 403) {
         showError({
-          title: t('auth:errors.signupFailedTitle'),
-          message: t('auth:errors.signupDisabled'),
+          title: 'Signup Failed',
+          message: 'Signup disabled, please contact admin',
         })
       } else {
         console.log('Signup failed')
         response.json().then(res => {
           showError({
-            title: t('auth:errors.signupFailedTitle'),
-            message: res.error || t('auth:errors.signupGeneric'),
+            title: 'Signup Failed',
+            message: res.error || 'An error occurred during signup',
           })
         })
       }
@@ -167,18 +167,18 @@ const SignupView = () => {
               </span>
             </Typography>
             <Typography level='body2'>
-              {t('auth:signupSubtitle')}
+              Create an account to get started!
             </Typography>
           </Box>
           <Typography level='body2' alignSelf={'start'} mt={4}>
-            {t('common:labels.username')}
+            Username
           </Typography>
           <Input
             margin='normal'
             required
             fullWidth
             id='username'
-            label={t('common:labels.username')}
+            label='Username'
             name='username'
             autoComplete='username'
             autoFocus
@@ -193,14 +193,14 @@ const SignupView = () => {
           </FormControl>
           {/* Error message display */}
           <Typography level='body2' alignSelf={'start'}>
-            {t('common:labels.email')}
+            Email
           </Typography>
           <Input
             margin='normal'
             required
             fullWidth
             id='email'
-            label={t('common:labels.email')}
+            label='email'
             name='email'
             autoComplete='email'
             value={email}
@@ -213,17 +213,17 @@ const SignupView = () => {
             <FormHelperText c>{emailError}</FormHelperText>
           </FormControl>
           <Typography level='body2' alignSelf={'start'}>
-            {t('common:labels.password')}:
+            Password:
           </Typography>
           <Input
             margin='normal'
             required
             fullWidth
             name='password'
-            label={t('common:labels.password')}
+            label='Password'
             type='password'
             id='password'
-            placeholder={t('auth:placeholders.passwordRange')}
+            placeholder='Enter password (8-64 characters)'
             value={password}
             onChange={e => {
               setPasswordError(null)
@@ -234,16 +234,16 @@ const SignupView = () => {
             <FormHelperText>{passwordError}</FormHelperText>
           </FormControl>
           <Typography level='body2' alignSelf={'start'}>
-            {t('common:labels.displayName')}:
+            Display Name:
           </Typography>
           <Input
             margin='normal'
             required
             fullWidth
             name='displayName'
-            label={t('common:labels.displayName')}
+            label='Display Name'
             id='displayName'
-            placeholder={t('common:placeholders.enterDisplayName')}
+            placeholder='How others see your name'
             value={displayName}
             onChange={e => {
               setDisplayNameError(null)
@@ -257,7 +257,7 @@ const SignupView = () => {
             level='body2'
             sx={{ mt: 2, mb: 1, textAlign: 'center', color: 'text.secondary' }}
           >
-            {t('auth:messages.agreement')}
+            By signing up, you agree to our Terms of Service and Privacy Policy
           </Typography>
           <Button
             // type='submit'
@@ -267,9 +267,9 @@ const SignupView = () => {
             sx={{ mt: 1, mb: 1 }}
             onClick={handleSubmit}
           >
-            {t('common:actions.signup')}
+            Sign Up
           </Button>
-          <Divider>{t('common:actions.or')}</Divider>
+          <Divider> or </Divider>
           <Button
             size='lg'
             onClick={() => {
@@ -279,7 +279,7 @@ const SignupView = () => {
             variant='soft'
             // sx={{ mt: 3, mb: 2 }}
           >
-            {t('common:actions.login')}
+            Login
           </Button>
 
           <Box
@@ -292,7 +292,7 @@ const SignupView = () => {
                 window.open('https://donetick.com/privacy-policy', '_blank')
               }}
             >
-              {t('common:legal.privacyPolicy')}
+              Privacy Policy
             </Button>
             <Button
               variant='plain'
@@ -301,7 +301,7 @@ const SignupView = () => {
                 window.open('https://donetick.com/terms', '_blank')
               }}
             >
-              {t('common:legal.termsOfUse')}
+              Terms of Use
             </Button>
           </Box>
         </Sheet>

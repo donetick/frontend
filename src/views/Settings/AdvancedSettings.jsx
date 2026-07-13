@@ -10,7 +10,6 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import RealTimeSettings from '../../components/RealTimeSettings'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
@@ -19,7 +18,6 @@ import { isPlusAccount } from '../../utils/Helpers'
 import SettingsLayout from './SettingsLayout'
 
 const AdvancedSettings = () => {
-  const { t } = useTranslation(['settings', 'common'])
   const { data: userProfile } = useUserProfile()
   const { showNotification } = useNotification()
 
@@ -46,31 +44,34 @@ const AdvancedSettings = () => {
 
   if (!userProfile) {
     return (
-      <SettingsLayout title={t('settings:advanced.title')}>
-        <div>{t('settings:advanced.loading')}</div>
+      <SettingsLayout title="Advanced Settings">
+        <div>Loading...</div>
       </SettingsLayout>
     )
   }
 
   return (
-    <SettingsLayout title={t('settings:advanced.title')}>
+    <SettingsLayout title="Advanced Settings">
       <div className='grid gap-4'>
         <Typography level='body-md'>
-          {t('settings:advanced.description')}
+          Configure advanced features like webhooks and real-time updates for enhanced productivity.
         </Typography>
 
         {/* Webhook Settings - Only show for admins */}
         {isAdmin && (
           <>
             <Typography level='title-lg' mt={2}>
-              {t('settings:advanced.webhookIntegration')}
+              Webhook Integration
             </Typography>
             <Typography level='body-md' mt={-1}>
-              {t('settings:advanced.webhookDescription')}
+              Webhooks allow you to send real-time notifications to other
+              services when events happen in your Circle. Configure a webhook
+              URL to receive real-time updates.
             </Typography>
             {!isPlusAccount(userProfile) && (
               <Typography level='body-sm' color='warning' sx={{ mt: 1 }}>
-                {t('settings:advanced.webhookPlanWarning')}
+                Webhook notifications are not available in the Basic plan.
+                Upgrade to Plus to receive real-time updates via webhooks.
               </Typography>
             )}
             <FormControl sx={{ mt: 1 }}>
@@ -84,7 +85,7 @@ const AdvancedSettings = () => {
                   }
                 }}
                 variant='soft'
-                label={t('settings:advanced.enableWebhook')}
+                label='Enable Webhook'
                 disabled={!isPlusAccount(userProfile)}
                 overlay
               />
@@ -93,10 +94,10 @@ const AdvancedSettings = () => {
                   opacity: !isPlusAccount(userProfile) ? 0.5 : 1,
                 }}
               >
-                {t('settings:advanced.enableWebhookHelper')}{' '}
+                Enable webhook notifications for tasks and things updates.{' '}
                 {userProfile && !isPlusAccount(userProfile) && (
                   <Chip variant='soft' color='warning'>
-                    {t('common:labels.plusFeature')}
+                    Plus Feature
                   </Chip>
                 )}
               </FormHelperText>
@@ -104,9 +105,7 @@ const AdvancedSettings = () => {
 
             {webhookURL !== null && (
               <Box>
-                <Typography level='title-sm'>
-                  {t('settings:advanced.webhookUrl')}
-                </Typography>
+                <Typography level='title-sm'>Webhook URL</Typography>
                 <Input
                   value={webhookURL ? webhookURL : ''}
                   onChange={e => setWebhookURL(e.target.value)}
@@ -129,19 +128,19 @@ const AdvancedSettings = () => {
                       if (resp.ok) {
                         showNotification({
                           type: 'success',
-                          message: t('settings:advanced.webhookSaved'),
+                          message: 'Webhook URL updated successfully',
                         })
                       } else {
                         showNotification({
                           type: 'error',
-                          message: t('settings:advanced.webhookSaveFailed'),
+                          message: 'Failed to update webhook URL',
                         })
                       }
                     })
                   }}
                   disabled={!isPlusAccount(userProfile)}
                 >
-                  {t('common:actions.save')}
+                  Save
                 </Button>
               </Box>
             )}
@@ -150,10 +149,10 @@ const AdvancedSettings = () => {
 
         {/* Real-time Settings */}
         <Typography level='title-lg' mt={2}>
-          {t('settings:advanced.realtimeTitle')}
+          Real-time Updates
         </Typography>
         <Typography level='body-md' mt={-1}>
-          {t('settings:advanced.realtimeSectionDescription')}
+          Configure how you receive live updates when tasks and activities change in your circle.
         </Typography>
         <RealTimeSettings />
       </div>

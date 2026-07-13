@@ -1,11 +1,9 @@
 import { CopyAll } from '@mui/icons-material'
 import { Box, Button, Checkbox, Input, ListItem, Typography } from '@mui/joy'
 import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
 function WriteNFCModal({ config }) {
-  const { t } = useTranslation(['chores', 'common'])
   const { ResponsiveModal } = useResponsiveModal()
 
   const [nfcStatus, setNfcStatus] = useState('idle') // 'idle', 'writing', 'success', 'error'
@@ -17,7 +15,7 @@ function WriteNFCModal({ config }) {
       // Assuming permission request is implicit in 'write' or 'scan' methods
       setNfcStatus('idle')
     } else {
-      alert(t('chores:nfc.unsupportedAlert'))
+      alert('NFC is not supported by this browser.')
     }
   }
 
@@ -32,11 +30,13 @@ function WriteNFCModal({ config }) {
       } catch (error) {
         console.error('Error writing to NFC tag:', error)
         setNfcStatus('error')
-        setErrorMessage(t('chores:nfc.writeError'))
+        setErrorMessage('Error writing to NFC tag. Please try again.')
       }
     } else {
       setNfcStatus('error')
-      setErrorMessage(t('chores:nfc.unsupportedMessage'))
+      setErrorMessage(
+        'NFC is not supported by this browser. You can still copy the URL and write it to an NFC tag using a compatible device.',
+      )
     }
   }
 
@@ -56,34 +56,32 @@ function WriteNFCModal({ config }) {
   return (
     <ResponsiveModal open={config?.isOpen} onClose={handleClose}>
       <Typography level='h4' mb={1}>
-        {nfcStatus === 'success'
-          ? t('chores:nfc.successTitle')
-          : t('chores:actions.writeToNfc')}
+        {nfcStatus === 'success' ? 'Success!' : 'Write to NFC'}
       </Typography>
 
       {nfcStatus === 'success' ? (
         <Typography level='body-md' gutterBottom>
-          {t('chores:nfc.successMessage')}
+          URL written to NFC tag successfully!
         </Typography>
       ) : (
         <>
           <Typography level='body-md' gutterBottom>
             {nfcStatus === 'error'
               ? errorMessage
-              : t('chores:nfc.instructions')}
+              : 'Press the button below to write to NFC.'}
           </Typography>
           <Input
             value={getURL()}
             fullWidth
             readOnly
-            label={t('common:labels.url')}
+            label='URL'
             sx={{ mt: 1 }}
             endDecorator={
               <CopyAll
                 sx={{ cursor: 'pointer' }}
                 onClick={() => {
                   navigator.clipboard.writeText(getURL())
-                  alert(t('chores:nfc.urlCopied'))
+                  alert('URL copied to clipboard!')
                 }}
               />
             }
@@ -92,7 +90,7 @@ function WriteNFCModal({ config }) {
             <Checkbox
               checked={isAutoCompleteWhenScan}
               onChange={e => setIsAutoCompleteWhenScan(e.target.checked)}
-              label={t('chores:nfc.autoCompleteWhenScanned')}
+              label='Auto-complete when scanned'
             />
           </ListItem>
           <Box display={'flex'} justifyContent={'space-around'} mt={1}>
@@ -103,10 +101,10 @@ function WriteNFCModal({ config }) {
               sx={{ mr: 1 }}
               disabled={nfcStatus === 'writing'}
             >
-              {t('chores:nfc.writeButton')}
+              Write NFC
             </Button>
             <Button size='lg' onClick={requestNFCAccess} variant='outlined'>
-              {t('chores:nfc.requestAccess')}
+              Request Access
             </Button>
           </Box>
         </>

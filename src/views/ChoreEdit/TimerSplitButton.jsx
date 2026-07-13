@@ -7,7 +7,6 @@ import {
 } from '@mui/icons-material'
 import { Box, ButtonGroup, IconButton, Menu, MenuItem } from '@mui/joy'
 import { useEffect, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 
 const TimerSplitButton = ({
   chore,
@@ -18,7 +17,6 @@ const TimerSplitButton = ({
   disabled = false,
   fullWidth = false,
 }) => {
-  const { t } = useTranslation(['timer', 'chores'])
   const [anchorEl, setAnchorEl] = useState(null)
   const isMenuOpen = Boolean(anchorEl)
   const menuRef = useRef(null)
@@ -111,9 +109,7 @@ const TimerSplitButton = ({
           }}
         >
           {chore.status === 1 ? <Pause /> : <PlayArrow />}
-          {chore.status === 1
-            ? t('timer:details.pauseButton')
-            : t('timer:details.resumeButton')}
+          {chore.status === 1 ? 'Pause' : 'Resume'}
         </IconButton>
 
         {/* Dropdown arrow button */}
@@ -147,7 +143,7 @@ const TimerSplitButton = ({
       >
         <MenuItem onClick={handleShowDetails}>
           <Info sx={{ mr: 1 }} />
-          {t('timer:details.title')}
+          Timer Details
         </MenuItem>
         {/* <MenuItem onClick={handleResetTimer}>
           <RestartAlt sx={{ mr: 1 }} />
@@ -155,7 +151,7 @@ const TimerSplitButton = ({
         </MenuItem> */}
         <MenuItem onClick={handleClearAllTime} color='danger'>
           <DeleteSweep sx={{ mr: 1 }} />
-          {t('chores:choreView.clearAllTimeRecords')}
+          Clear & Reset
         </MenuItem>
       </Menu>
     </Box>

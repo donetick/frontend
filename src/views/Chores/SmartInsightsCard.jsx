@@ -8,7 +8,6 @@ import {
 } from '@mui/icons-material'
 import { Box, Button, Chip, Sheet, Typography } from '@mui/joy'
 import { useMemo } from 'react'
-import { useTranslation } from 'react-i18next'
 import { TASK_COLOR } from '../../utils/Colors'
 
 // Static insight filter definitions – used for URL restoration
@@ -63,7 +62,6 @@ const SmartInsightsCard = ({
   clearTempFilter,
   tempFilter,
 }) => {
-  const { t } = useTranslation('chores')
   // Detect all possible insights from chores
   const insights = useMemo(() => {
     if (!chores || chores.length === 0) return []
@@ -86,10 +84,8 @@ const SmartInsightsCard = ({
         id: 'overdue',
         priority: 1,
         count: overdueTasks.length,
-        title: t('sidepanel.insights.items.overdue.title'),
-        description: t('sidepanel.insights.items.overdue.description', {
-          count: overdueTasks.length,
-        }),
+        title: 'Overdue',
+        description: `${overdueTasks.length} ${overdueTasks.length === 1 ? 'task is' : 'tasks are'} overdue`,
         color: 'danger',
         bgColor: TASK_COLOR.OVERDUE,
         icon: <WatchLater />,
@@ -117,10 +113,8 @@ const SmartInsightsCard = ({
         id: 'due-today',
         priority: 2,
         count: dueTodayTasks.length,
-        title: t('sidepanel.insights.items.dueToday.title'),
-        description: t('sidepanel.insights.items.dueToday.description', {
-          count: dueTodayTasks.length,
-        }),
+        title: 'Due Today',
+        description: `${dueTodayTasks.length} ${dueTodayTasks.length === 1 ? 'task' : 'tasks'} due by end of day`,
         color: 'warning',
         bgColor: '#FFA500',
         icon: <EventNote />,
@@ -144,13 +138,8 @@ const SmartInsightsCard = ({
         id: 'pending-approval',
         priority: 3,
         count: pendingApprovalTasks.length,
-        title: t('sidepanel.insights.items.pendingApproval.title'),
-        description: t(
-          'sidepanel.insights.items.pendingApproval.description',
-          {
-            count: pendingApprovalTasks.length,
-          },
-        ),
+        title: 'Pending Approval',
+        description: `${pendingApprovalTasks.length} ${pendingApprovalTasks.length === 1 ? 'task awaits' : 'tasks await'} approval`,
         color: 'neutral',
         bgColor: TASK_COLOR.PENDING_REVIEW,
         icon: <HourglassEmpty />,
@@ -178,10 +167,8 @@ const SmartInsightsCard = ({
         id: 'due-this-week',
         priority: 4,
         count: dueThisWeekTasks.length,
-        title: t('sidepanel.insights.items.dueThisWeek.title'),
-        description: t('sidepanel.insights.items.dueThisWeek.description', {
-          count: dueThisWeekTasks.length,
-        }),
+        title: 'Due This Week',
+        description: `${dueThisWeekTasks.length} ${dueThisWeekTasks.length === 1 ? 'task' : 'tasks'} due in the next 7 days`,
         color: 'primary',
         bgColor: TASK_COLOR.IN_PROGRESS,
         icon: <TrendingUp />,
@@ -207,10 +194,8 @@ const SmartInsightsCard = ({
         id: 'high-priority',
         priority: 5,
         count: highPriorityTasks.length,
-        title: t('sidepanel.insights.items.highPriority.title'),
-        description: t('sidepanel.insights.items.highPriority.description', {
-          count: highPriorityTasks.length,
-        }),
+        title: 'High Priority',
+        description: `${highPriorityTasks.length} ${highPriorityTasks.length === 1 ? 'task requires' : 'tasks require'} immediate attention`,
         color: 'warning',
         bgColor: '#FF6B6B',
         icon: <PriorityHigh />,
@@ -236,10 +221,8 @@ const SmartInsightsCard = ({
         id: 'no-due-date',
         priority: 6,
         count: noDueDateTasks.length,
-        title: t('sidepanel.insights.items.noDueDate.title'),
-        description: t('sidepanel.insights.items.noDueDate.description', {
-          count: noDueDateTasks.length,
-        }),
+        title: 'No Due Date',
+        description: `${noDueDateTasks.length} ${noDueDateTasks.length === 1 ? 'task needs' : 'tasks need'} a deadline`,
         color: 'neutral',
         bgColor: '#9E9E9E',
         icon: <EventBusy />,
@@ -258,7 +241,7 @@ const SmartInsightsCard = ({
 
     // Sort by priority and return top 3
     return detectedInsights.sort((a, b) => a.priority - b.priority).slice(0, 3)
-  }, [chores, t])
+  }, [chores])
 
   const handleInsightClick = insight => {
     // Toggle: if already active, clear it; otherwise apply it
@@ -312,20 +295,18 @@ const SmartInsightsCard = ({
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <TrendingUp color='' />
-            <Typography level='title-md'>
-              {t('sidepanel.insights.title')}
-            </Typography>
+            <Typography level='title-md'>Smart Insights</Typography>
           </Box>
           {tempFilter && (
             <Chip size='sm' variant='solid' color='primary'>
-              {t('sidepanel.insights.active')}
+              Active
             </Chip>
           )}
         </Box>
         <Typography level='body-xs' sx={{ mt: 0.5, color: 'text.secondary' }}>
           {tempFilter
-            ? t('sidepanel.insights.clearHint')
-            : t('sidepanel.insights.description')}
+            ? 'Click active filter to clear'
+            : 'Quick actions based on your tasks'}
         </Typography>
       </Box>
 

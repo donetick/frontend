@@ -7,11 +7,9 @@ import {
     Typography,
 } from '@mui/joy'
 import React, { useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
 function PassowrdChangeModal({ isOpen, onClose }) {
-  const { t } = useTranslation(['settings', 'auth', 'common'])
   const { ResponsiveModal } = useResponsiveModal()
 
   const [password, setPassword] = React.useState('')
@@ -24,15 +22,15 @@ function PassowrdChangeModal({ isOpen, onClose }) {
     if (!passwordTouched || !confirmPasswordTouched) {
       return
     } else if (password !== confirmPassword) {
-      setPasswordError(t('settings:modals.passwordChange.mismatch'))
+      setPasswordError('Passwords do not match')
     } else if (password.length < 8) {
-      setPasswordError(t('settings:modals.passwordChange.min'))
+      setPasswordError('Password must be at least 8 characters')
     } else if (password.length > 64) {
-      setPasswordError(t('settings:modals.passwordChange.max'))
+      setPasswordError('Password must be less than 64 characters')
     } else {
       setPasswordError(null)
     }
-  }, [password, confirmPassword, passwordTouched, confirmPasswordTouched, t])
+  }, [password, confirmPassword, passwordTouched, confirmPasswordTouched])
 
   const handleAction = isConfirmed => {
     if (!isConfirmed) {
@@ -48,24 +46,24 @@ function PassowrdChangeModal({ isOpen, onClose }) {
       onClose={onClose}
       size='lg'
       fullWidth={true}
-      title={t('settings:modals.passwordChange.title')}
+      title='Change Password'
     >
       <Typography level='body-md' gutterBottom>
-        {t('settings:modals.passwordChange.intro')}
+        Please enter your new password.
       </Typography>
       <FormControl>
         <Typography level='body2' alignSelf={'start'}>
-          {t('settings:modals.passwordChange.newPassword')}
+          New Password
         </Typography>
         <Input
           margin='normal'
           required
           fullWidth
           name='password'
-          label={t('common:labels.password')}
+          label='Password'
           type='password'
           id='password'
-          placeholder={t('auth:placeholders.passwordRange')}
+          placeholder='Enter password (8-64 characters)'
           value={password}
           onChange={e => {
             setPasswordTouched(true)
@@ -76,14 +74,14 @@ function PassowrdChangeModal({ isOpen, onClose }) {
 
       <FormControl>
         <Typography level='body2' alignSelf={'start'}>
-          {t('settings:modals.passwordChange.confirmPassword')}
+          Confirm Password
         </Typography>
         <Input
           margin='normal'
           required
           fullWidth
           name='confirmPassword'
-          label={t('settings:modals.passwordChange.confirmPassword')}
+          label='confirmPassword'
           type='password'
           id='confirmPassword'
           value={confirmPassword}
@@ -105,7 +103,7 @@ function PassowrdChangeModal({ isOpen, onClose }) {
           fullWidth
           sx={{ mr: 1 }}
         >
-          {t('settings:modals.passwordChange.title')}
+          Change Password
         </Button>
         <Button
           size='lg'
@@ -114,7 +112,7 @@ function PassowrdChangeModal({ isOpen, onClose }) {
           }}
           variant='outlined'
         >
-          {t('common:actions.cancel')}
+          Cancel
         </Button>
       </Box>
     </ResponsiveModal>

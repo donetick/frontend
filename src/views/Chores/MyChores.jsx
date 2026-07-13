@@ -31,7 +31,6 @@ import {
 } from '@mui/joy'
 import Fuse from 'fuse.js'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useChores } from '../../queries/ChoreQueries'
 import { useNotification } from '../../service/NotificationProvider'
@@ -82,7 +81,6 @@ import { INSIGHT_FILTER_DEFS } from './SmartInsightsCard'
 import SortAndGrouping from './SortAndGrouping'
 
 const MyChores = () => {
-  const { t } = useTranslation(['chores', 'common'])
   const { data: userProfile, isLoading: isUserProfileLoading } =
     useUserProfile()
   const isLargeScreen = useMediaQuery(theme => theme.breakpoints.up('md'))
@@ -114,29 +112,6 @@ const MyChores = () => {
   const [taskInputFocus, setTaskInputFocus] = useState(0)
   const searchInputRef = useRef(null)
   const [searchInputFocus, setSearchInputFocus] = useState(0)
-
-  const getFilterDisplayName = filter => {
-    const filterMap = {
-      All: t('chores:main.all'),
-      Overdue: t('chores:groups.overdue'),
-      'Due today': t('chores:main.otherFilters.dueToday'),
-      'Due in week': t('chores:main.otherFilters.dueInWeek'),
-      'Due Later': t('chores:main.otherFilters.dueLater'),
-      'Created By Me': t('chores:main.otherFilters.createdByMe'),
-      'Assigned To Me': t('chores:main.otherFilters.assignedToMe'),
-      'No Due Date': t('chores:main.otherFilters.noDueDate'),
-      'Pending Approval': t('chores:groups.pendingApproval'),
-    }
-
-    if (filter.startsWith('Priority: ')) {
-      return `${t('common:labels.priority')}: ${filter.replace('Priority: ', '')}`
-    }
-    if (filter.startsWith('Label: ')) {
-      return `${t('common:labels.labelsLabel')}: ${filter.replace('Label: ', '')}`
-    }
-
-    return filterMap[filter] || filter
-  }
   const [selectedChoreSection, setSelectedChoreSection] = useState(
     localStorage.getItem('selectedChoreSection') || 'due_date',
   )
@@ -933,7 +908,7 @@ const MyChores = () => {
           />
 
           <SortAndGrouping
-            title={t('chores:main.groupBy')}
+            title='Group by'
             k={'icon-menu-group-by'}
             icon={<Sort />}
             selectedItem={selectedChoreSection}
@@ -985,10 +960,10 @@ const MyChores = () => {
             onClick={toggleViewMode}
             title={
               viewMode === 'default'
-                ? t('chores:main.viewCompact')
+                ? 'Switch to Compact View'
                 : viewMode === 'compact'
-                  ? t('chores:main.viewCalendar')
-                  : t('chores:main.viewCard')
+                  ? 'Switch to Calendar View'
+                  : 'Switch to Card View'
             }
           >
             {viewMode === 'default' ? (
@@ -1014,8 +989,8 @@ const MyChores = () => {
               onClick={toggleMultiSelectMode}
               title={
                 isMultiSelectMode
-                  ? t('chores:main.exitMultiSelect')
-                  : t('chores:main.enableMultiSelect')
+                  ? 'Exit Multi-select Mode (Ctrl+S)'
+                  : 'Enable Multi-select Mode (Ctrl+S)'
               }
             >
               {isMultiSelectMode ? <CheckBox /> : <CheckBoxOutlineBlank />}
@@ -1047,7 +1022,7 @@ const MyChores = () => {
           <div className='flex gap-4'>
             <div className='grid flex-1 grid-cols-3 gap-4'>
               <IconButtonWithMenu
-                label={t('common:labels.priority')}
+                label={' Priority'}
                 k={'icon-menu-priority-filter'}
                 icon={<PriorityHigh />}
                 options={Priorities}
@@ -1061,7 +1036,7 @@ const MyChores = () => {
 
               <IconButtonWithMenu
                 k={'icon-menu-labels-filter'}
-                label={t('common:labels.labelsLabel')}
+                label={' Labels'}
                 icon={<Style />}
                 options={userLabels}
                 selectedItem={searchFilter}
@@ -1088,7 +1063,7 @@ const MyChores = () => {
                   borderRadius: 24,
                 }}
               >
-                {t('chores:main.otherFilters.title')}
+                {' Other'}
               </Button>
 
               <List
@@ -1135,7 +1110,7 @@ const MyChores = () => {
                         }
                       }}
                     >
-                      {getFilterDisplayName(filter)}
+                      {filter}
                       <Chip
                         color={searchFilter === filter ? 'primary' : 'neutral'}
                       >
@@ -1164,7 +1139,7 @@ const MyChores = () => {
                           updateFilterUrl(null, null)
                         }}
                       >
-                        {t('chores:main.cancelAllFilters')}
+                        Cancel All Filters
                       </MenuItem>
                     ))}
                 </Menu>
@@ -1273,9 +1248,7 @@ const MyChores = () => {
               updateFilterUrl(null, null)
             }}
           >
-            {t('chores:main.additionalFilter', {
-              filter: getFilterDisplayName(searchFilter),
-            })}
+            Additional Filter: {searchFilter}
           </Chip>
         )}
         {/* Show "Nothing scheduled" when appropriate based on current view mode */}
@@ -1301,7 +1274,7 @@ const MyChores = () => {
                 }}
               />
               <Typography level='title-md' gutterBottom>
-                {t('chores:main.nothingScheduled')}
+                Nothing scheduled
               </Typography>
               {chores.length > 0 && (
                 <>
@@ -1317,7 +1290,7 @@ const MyChores = () => {
                     variant='outlined'
                     color='neutral'
                   >
-                    {t('chores:main.resetFilters')}
+                    Reset filters
                   </Button>
                 </>
               )}
@@ -1479,9 +1452,7 @@ const MyChores = () => {
             {selectedCalendarDate && (
               <Box sx={{ mt: 2 }}>
                 <Typography level='title-md' gutterBottom>
-                  {t('common:calendar.tasksForDate', {
-                    date: selectedCalendarDate.toLocaleDateString(),
-                  })}
+                  Tasks for {selectedCalendarDate.toLocaleDateString()}
                 </Typography>
                 <Box
                   sx={{
@@ -1501,7 +1472,7 @@ const MyChores = () => {
                         color: 'text.tertiary',
                       }}
                     >
-                      {t('chores:labels.noTasksForDate')}
+                      No tasks scheduled for this date
                     </Typography>
                   ) : (
                     <ChoreListView
@@ -1634,7 +1605,7 @@ const MyChores = () => {
             onClick={() => {
               Navigate(`/chores/create`)
             }}
-            title={t('chores:main.createNewChoreShortcut')}
+            title='Create new chore (Cmd+C)'
           >
             <Add />
             <KeyboardShortcutHint

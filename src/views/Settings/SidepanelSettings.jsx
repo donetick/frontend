@@ -26,7 +26,6 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import {
   DEFAULT_SIDEPANEL_CONFIG,
   getSidepanelConfig,
@@ -35,17 +34,7 @@ import {
 import SettingsLayout from './SettingsLayout'
 
 const SidepanelSettings = () => {
-  const { t } = useTranslation(['settings'])
   const [config, setConfig] = useState(getSidepanelConfig())
-
-  const getItemText = item => ({
-    name: t(`settings:sidepanel.cards.${item.id}.title`, {
-      defaultValue: item.name,
-    }),
-    description: t(`settings:sidepanel.cards.${item.id}.description`, {
-      defaultValue: item.description,
-    }),
-  })
 
   const getIcon = iconName => {
     switch (iconName) {
@@ -104,14 +93,15 @@ const SidepanelSettings = () => {
   }
 
   return (
-    <SettingsLayout title={t('settings:sidepanel.title')}>
+    <SettingsLayout title='Sidepanel Customization'>
       <div className='grid gap-4'>
         <Box>
           <Typography level='h4' sx={{ mb: 2 }}>
-            {t('settings:sidepanel.heading')}
+            Sidepanel Settings
           </Typography>
           <Typography level='body-md' sx={{ mb: 3 }}>
-            {t('settings:sidepanel.description')}
+            Customize which cards appear in the sidepanel and their order. Drag
+            and drop to reorder, or toggle visibility for each card.
           </Typography>
 
           <DragDropContext onDragEnd={handleDragEnd}>
@@ -128,9 +118,7 @@ const SidepanelSettings = () => {
                       draggableId={item.id}
                       index={index}
                     >
-                      {(provided, snapshot) => {
-                        const itemText = getItemText(item)
-                        return (
+                      {(provided, snapshot) => (
                         <ListItem
                           ref={provided.innerRef}
                           {...provided.draggableProps}
@@ -188,7 +176,7 @@ const SidepanelSettings = () => {
                                   level='title-sm'
                                   sx={{ fontWeight: 600 }}
                                 >
-                                  {itemText.name}
+                                  {item.name}
                                 </Typography>
                                 <Typography
                                   level='body-xs'
@@ -196,7 +184,7 @@ const SidepanelSettings = () => {
                                     color: 'var(--joy-palette-text-tertiary)',
                                   }}
                                 >
-                                  - {itemText.description}
+                                  - {item.description}
                                 </Typography>
                               </Box>
                             </ListItemContent>
@@ -216,8 +204,7 @@ const SidepanelSettings = () => {
                             </FormControl>
                           </Card>
                         </ListItem>
-                        )
-                      }}
+                      )}
                     </Draggable>
                   ))}
                   {provided.placeholder}
@@ -239,10 +226,10 @@ const SidepanelSettings = () => {
               onClick={resetToDefaults}
               size='sm'
             >
-              {t('settings:sidepanel.reset')}
+              Reset to Defaults
             </Button>
             <FormHelperText sx={{ mt: 1 }}>
-              {t('settings:sidepanel.resetHelp')}
+              This will restore all cards to their default visibility and order.
             </FormHelperText>
           </Box>
         </Box>

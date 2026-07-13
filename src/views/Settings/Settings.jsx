@@ -20,7 +20,6 @@ import { Purchases } from '@revenuecat/purchases-capacitor'
 import { useQueryClient } from '@tanstack/react-query'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import RealTimeSettings from '../../components/RealTimeSettings'
 import SubscriptionModal from '../../components/SubscriptionModal'
@@ -57,7 +56,6 @@ import StorageSettings from './StorageSettings'
 import ThemeToggle from './ThemeToggle'
 
 const Settings = () => {
-  const { t } = useTranslation(['settings', 'common'])
   const { data: userProfile } = useUserProfile()
   const queryClient = useQueryClient()
   const { showNotification } = useNotification()
@@ -84,8 +82,8 @@ const Settings = () => {
     message,
     title,
     onConfirm,
-    confirmText = t('common:actions.continue'),
-    cancelText = t('common:actions.cancel'),
+    confirmText = 'Confirm',
+    cancelText = 'Cancel',
     color = 'primary',
   ) => {
     setConfirmModalConfig({
@@ -242,7 +240,7 @@ const Settings = () => {
     <Container>
       <ProfileSettings />
       <div className='grid gap-4 py-4' id='circle'>
-        <Typography level='h3'>{t('settings:pages.circle.title')}</Typography>
+        <Typography level='h3'>Circle settings</Typography>
         <Divider />
         <Typography level='body-md'>
           Your account is automatically connected to a Circle when you create or
@@ -329,9 +327,7 @@ const Settings = () => {
           )}
         </Typography>
 
-          <Typography level='title-md'>
-            {t('settings:circlePage.members')}
-          </Typography>
+        <Typography level='title-md'>Circle Members</Typography>
         {circleMembers.map(member => (
           <Card key={member.id} className='p-4'>
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -489,9 +485,7 @@ const Settings = () => {
             mb: 1,
           }}
         >
-          <Typography level='title-md'>
-            {t('settings:circlePage.requests')}
-          </Typography>
+          <Typography level='title-md'>Circle Member Requests</Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {lastRefresh && (
               <Typography level='body-sm' color='neutral'>
@@ -507,9 +501,7 @@ const Settings = () => {
                 isRefreshing ? <CircularProgress size='sm' /> : <Refresh />
               }
             >
-              {isRefreshing
-                ? t('settings:circlePage.refreshing')
-                : t('settings:circlePage.refresh')}
+              {isRefreshing ? 'Refreshing...' : 'Refresh'}
             </Button>
           </Box>
         </Box>
@@ -517,26 +509,21 @@ const Settings = () => {
         {circleMemberRequests.map(request => (
           <Card key={request.id} className='p-4'>
             <Typography level='body-md'>
-              {t('settings:circlePage.wantsToJoin', {
-                name: request.displayName,
-              })}
+              {request.displayName} wants to join your circle.
             </Typography>
             <Button
               variant='soft'
               color='success'
               onClick={() => {
                 showConfirmation(
-                  t('settings:circlePage.acceptConfirm', {
-                    name: request.displayName,
-                    username: request.username,
-                  }),
-                  t('settings:circlePage.acceptTitle'),
+                  `Are you sure you want to accept ${request.displayName} (username: ${request.username}) to join your circle?`,
+                  'Accept Member Request',
                   () => {
                     AcceptCircleMemberRequest(request.id).then(resp => {
                       if (resp.ok) {
                         showNotification({
                           type: 'success',
-                          message: t('settings:circlePage.acceptSuccess'),
+                          message: 'Accepted request successfully',
                         })
                         // Invalidate and refetch circle-related queries
                         queryClient.invalidateQueries(['circleMembers'])
@@ -553,25 +540,26 @@ const Settings = () => {
                       }
                     })
                   },
-                  t('settings:circlePage.accept'),
-                  t('common:actions.cancel'),
+                  'Accept',
+                  'Cancel',
                 )
               }}
             >
-              {t('settings:circlePage.accept')}
+              Accept
             </Button>
           </Card>
         ))}
-        <Divider>{t('common:actions.or')}</Divider>
+        <Divider> or </Divider>
 
         <Typography level='body-md'>
-          {t('settings:circlePage.joinPrompt')}
+          if want to join someone else's Circle? Ask them for their unique
+          Circle code or join link. Enter the code below to join their Circle.
         </Typography>
 
         <Typography level='title-sm' mb={-1}>
-          {t('settings:circlePage.enterCode')}
+          Enter Circle code:
           <Input
-            placeholder={t('settings:circleSettings.joinCirclePlaceholder')}
+            placeholder='Enter code'
             value={circleInviteCode}
             onChange={e => setCircleInviteCode(e.target.value)}
             size='lg'
@@ -587,19 +575,20 @@ const Settings = () => {
                 if (resp.ok) {
                   showNotification({
                     type: 'success',
-                    message: t('settings:circlePage.joinSuccess'),
+                    message:
+                      'Joined circle successfully, wait for the circle owner to accept your request.',
                   })
                   setTimeout(() => navigate('/'), 3000)
                 } else {
                   if (resp.status === 409) {
                     showNotification({
                       type: 'error',
-                      message: t('settings:circlePage.alreadyMember'),
+                      message: 'You are already a member of this circle',
                     })
                   } else {
                     showNotification({
                       type: 'error',
-                      message: t('settings:circlePage.joinFailed'),
+                      message: 'Failed to join circle',
                     })
                   }
                   setTimeout(() => navigate('/'), 3000)
@@ -607,21 +596,24 @@ const Settings = () => {
               })
             }}
           >
-            {t('settings:circlePage.joinCircle')}
+            Join Circle
           </Button>
         </Typography>
         {circleMembers.find(m => userProfile.id == m.userId)?.role ===
           'admin' && (
           <>
             <Typography level='title-lg' mt={2}>
-              {t('settings:advanced.webhookTitle')}
+              Webhook
             </Typography>
             <Typography level='body-md' mt={-1}>
-              {t('settings:advanced.webhookDescription')}
+              Webhooks allow you to send real-time notifications to other
+              services when events happen in your Circle. Configure a webhook
+              URL to receive real-time updates.
             </Typography>
             {!isPlusAccount(userProfile) && (
               <Typography level='body-sm' color='warning' sx={{ mt: 1 }}>
-                {t('settings:advanced.webhookPlanWarning')}
+                Webhook notifications are not available in the Basic plan.
+                Upgrade to Plus to receive real-time updates via webhooks.
               </Typography>
             )}
             <FormControl sx={{ mt: 1 }}>
@@ -635,7 +627,7 @@ const Settings = () => {
                   }
                 }}
                 variant='soft'
-                label={t('settings:advanced.enableWebhook')}
+                label='Enable Webhook'
                 disabled={!isPlusAccount(userProfile)}
                 overlay
               />
@@ -644,10 +636,10 @@ const Settings = () => {
                   opacity: !isPlusAccount(userProfile) ? 0.5 : 1,
                 }}
               >
-                {t('settings:advanced.enableWebhookHelper')}{' '}
+                Enable webhook notifications for tasks and things updates.{' '}
                 {userProfile && !isPlusAccount(userProfile) && (
                   <Chip variant='soft' color='warning'>
-                    {t('common:labels.plusFeature')}
+                    Plus Feature
                   </Chip>
                 )}
               </FormHelperText>
@@ -655,9 +647,7 @@ const Settings = () => {
 
             {webhookURL !== null && (
               <Box>
-                <Typography level='title-sm'>
-                  {t('settings:advanced.webhookUrl')}
-                </Typography>
+                <Typography level='title-sm'>Webhook URL</Typography>
                 <Input
                   value={webhookURL ? webhookURL : ''}
                   onChange={e => setWebhookURL(e.target.value)}
@@ -680,19 +670,19 @@ const Settings = () => {
                       if (resp.ok) {
                         showNotification({
                           type: 'success',
-                          message: t('settings:advanced.webhookSaved'),
+                          message: 'Webhook URL updated successfully',
                         })
                       } else {
                         showNotification({
                           type: 'error',
-                          message: t('settings:advanced.webhookSaveFailed'),
+                          message: 'Failed to update webhook URL',
                         })
                       }
                     })
                   }}
                   disabled={!isPlusAccount(userProfile)}
                 >
-                  {t('common:actions.save')}
+                  Save
                 </Button>
               </Box>
             )}
@@ -705,13 +695,13 @@ const Settings = () => {
       </div>
 
       <div className='grid gap-4 py-4' id='account'>
-        <Typography level='h3'>{t('settings:pages.account.title')}</Typography>
+        <Typography level='h3'>Account Settings</Typography>
         <Divider />
         <Typography level='body-md'>
-          {t('settings:account.description')}
+          Change your account settings, type or update your password
         </Typography>
         <Typography level='title-md' mb={-1}>
-          {t('settings:account.accountType')} : {getSubscriptionStatus()}
+          Account Type : {getSubscriptionStatus()}
         </Typography>
         <Typography level='body-sm'>{getSubscriptionDetails()}</Typography>
         <Box>
@@ -910,26 +900,32 @@ const Settings = () => {
       <APITokenSettings />
       <StorageSettings />
       <div className='grid gap-4 py-4' id='sidepanel'>
-        <Typography level='h3'>{t('settings:pages.sidepanel.title')}</Typography>
+        <Typography level='h3'>Sidepanel Customization</Typography>
         <Divider />
         <Typography level='body-md'>
-          {t('settings:overview.cards.sidepanel.description')}
+          Customize the layout and visibility of cards in the sidepanel. the
+          section only available on large screen devices such as tablets and
+          desktops..
         </Typography>
         <SidepanelSettings />
       </div>
 
       <div className='grid gap-4 py-4' id='theme'>
-        <Typography level='h3'>{t('settings:pages.theme.title')}</Typography>
+        <Typography level='h3'>Theme preferences</Typography>
         <Divider />
-        <Typography level='body-md'>{t('settings:theme.description')}</Typography>
+        <Typography level='body-md'>
+          Choose how the site looks to you. Select a single theme, or sync with
+          your system and automatically switch between day and night themes.
+        </Typography>
         <ThemeToggle />
       </div>
 
       <div className='grid gap-4 py-4' id='localization'>
-        <Typography level='h3'>{t('settings:localization.title')}</Typography>
+        <Typography level='h3'>Localization</Typography>
         <Divider />
         <Typography level='body-md'>
-          {t('settings:localization.description')}
+          Customize language, date format, and regional preferences for your
+          account. These settings will apply throughout the application.
         </Typography>
         <LocalizationSettings />
       </div>
