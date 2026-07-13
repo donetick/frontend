@@ -143,19 +143,23 @@ const GetChoreDetailById = id => {
     headers: HEADERS(),
   })
 }
-const MarkChoreComplete = (id, completedBy, completedDate, notes) => {
+const MarkChoreComplete = (id, body, completedDate, performer) => {
   var markChoreURL = `/chores/${id}/do`
-  const body = {}
+
+  let completedDateFormated = ''
   if (completedDate) {
-    body.completedDate = new Date(completedDate).toISOString()
+    completedDateFormated = `?completedDate=${new Date(
+      completedDate,
+    ).toISOString()}`
+    markChoreURL += completedDateFormated
   }
-
-  if (completedBy) {
-    body.completedBy = Number(completedBy)
-  }
-
-  if (notes) {
-    body.notes = notes
+  if (performer) {
+    body.performer = Number(performer)
+    if (completedDateFormated === '') {
+      markChoreURL += `&performer=${performer}`
+    } else {
+      markChoreURL += `?performer=${performer}`
+    }
   }
 
   return Fetch(markChoreURL, {
@@ -206,11 +210,11 @@ const ApproveChore = id => {
   })
 }
 
-const RejectChore = (id, notes) => {
+const RejectChore = id => {
   return Fetch(`/chores/${id}/reject`, {
     method: 'POST',
     headers: HEADERS(),
-    body: JSON.stringify({ notes }),
+    body: JSON.stringify({}),
   })
 }
 
