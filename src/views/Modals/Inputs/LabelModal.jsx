@@ -1,12 +1,4 @@
-import {
-  Box,
-  Button,
-  FormControl,
-  Input,
-  Option,
-  Select,
-  Typography,
-} from '@mui/joy'
+import { Box, Button, FormControl, Input, Typography } from '@mui/joy'
 import { useEffect, useState } from 'react'
 
 import { useQueryClient } from '@tanstack/react-query'
@@ -125,39 +117,30 @@ function LabelModal({ isOpen, onClose, label }) {
           <Typography gutterBottom level='body-sm' alignSelf='start'>
             Color
           </Typography>
-          <Select
-            value={color}
-            onChange={(e, value) => value && setColor(value)}
-            renderValue={selected => (
-              <Typography
-                startDecorator={
-                  <Box
-                    className='size-4'
-                    borderRadius={10}
-                    sx={{ background: selected.value }}
-                  />
-                }
-              >
-                {selected.label}
-              </Typography>
-            )}
-          >
-            {LABEL_COLORS.map(val => (
-              <Option key={val.value} value={val.value}>
-                <Box className='flex items-center justify-between'>
-                  <Box
-                    width={20}
-                    height={20}
-                    borderRadius={10}
-                    sx={{ background: val.value }}
-                  />
-                  <Typography sx={{ ml: 1 }} variant='caption'>
-                    {val.name}
-                  </Typography>
-                </Box>
-              </Option>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+            {LABEL_COLORS.map(colorOption => (
+              <Box
+                key={colorOption.value}
+                title={colorOption.name}
+                onClick={() => setColor(colorOption.value)}
+                sx={{
+                  width: 26,
+                  height: 26,
+                  borderRadius: '50%',
+                  background: colorOption.value,
+                  cursor: 'pointer',
+                  outline:
+                    color === colorOption.value
+                      ? '3px solid var(--joy-palette-primary-500)'
+                      : '2px solid transparent',
+                  outlineOffset: '2px',
+                  transition: 'all 0.15s ease',
+                  flexShrink: 0,
+                  '&:hover': { transform: 'scale(1.2)' },
+                }}
+              />
             ))}
-          </Select>
+          </Box>
         </FormControl>
 
         {error && (
