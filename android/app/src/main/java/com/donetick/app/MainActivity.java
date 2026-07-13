@@ -8,10 +8,22 @@ import ee.forgr.capacitor.social.login.ModifiedMainActivityForSocialLoginPlugin;
 import com.getcapacitor.PluginHandle;
 import com.getcapacitor.Plugin;
 import android.content.Intent;
+import android.nfc.NfcAdapter;
 import android.util.Log;
 
 
  public class MainActivity extends BridgeActivity implements ModifiedMainActivityForSocialLoginPlugin {
+
+     // Capacitor only forwards ACTION_VIEW deep links, so normalize Donetick NFC intents before dispatch.
+     @Override
+     protected void onNewIntent(Intent intent) {
+         if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(intent.getAction())
+                 && intent.getData() != null
+                 && "donetick".equals(intent.getData().getScheme())) {
+             intent.setAction(Intent.ACTION_VIEW);
+         }
+         super.onNewIntent(intent);
+     }
 
      @Override
      public void onActivityResult(int requestCode, int resultCode, Intent data) {
