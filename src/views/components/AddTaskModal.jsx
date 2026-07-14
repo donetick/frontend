@@ -633,11 +633,8 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
       finalAssignees = [{ userId: userProfile?.id }]
       finalAssignedTo = userProfile?.id
       finalAssignStrategy = assignStrategy
-    } else if (assignees.length === 1) {
-      finalAssignedTo = assignees[0].userId
-      finalAssignStrategy = assignStrategy
     } else {
-      finalAssignedTo = null
+      finalAssignedTo = assignees[0].userId
       finalAssignStrategy = assignStrategy
     }
 
@@ -937,15 +934,21 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
               />
               <AssigneePickerField
                 emptyDisplay={pickerEmptyDisplay}
-                value={assignees?.[0]?.userId || null}
-                onChange={userId => {
-                  if (!userId) {
+                values={assignees.map(a => a.userId)}
+                isAnyone={isAnyoneTask}
+                onChange={userIds => {
+                  if (userIds.includes('anyone')) {
+                    setIsAnyoneTask(true)
                     setAssignees([])
                   } else {
-                    setAssignees([{ userId }])
+                    setIsAnyoneTask(false)
+                    setAssignees(userIds.map(userId => ({ userId })))
                   }
                 }}
-                onClear={() => setAssignees([])}
+                onClear={() => {
+                  setIsAnyoneTask(false)
+                  setAssignees([])
+                }}
                 currentUserId={userProfile?.id}
                 members={circleMembers?.res || []}
               />
@@ -987,16 +990,24 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
                   size='sm'
                   variant='outlined'
                   color='neutral'
-                  startDecorator={<Add sx={{ fontSize: 18 }} />}
                   onClick={() => setHasDescription(true)}
                   endDecorator={
                     showKeyboardShortcuts && (
                       <KeyboardShortcutHint shortcut='E' />
                     )
                   }
-                  sx={{ borderRadius: '128px', minHeight: 40, px: 1.25 }}
+                  sx={{
+                    borderRadius: '128px',
+                    minHeight: 40,
+                    px: 1.25,
+                    gap: 1,
+                    transition: 'all 0.25s ease-in-out',
+                  }}
                 >
-                  Description
+                  <Add sx={{ fontSize: 20 }} />
+                  <Typography level='body-sm' sx={{ color: 'inherit' }}>
+                    Description
+                  </Typography>
                 </Button>
               )}
               {!hasSubTasks && (
@@ -1004,16 +1015,24 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
                   size='sm'
                   variant='outlined'
                   color='neutral'
-                  startDecorator={<Add sx={{ fontSize: 18 }} />}
                   onClick={() => setHasSubTasks(true)}
                   endDecorator={
                     showKeyboardShortcuts && (
                       <KeyboardShortcutHint shortcut='J' />
                     )
                   }
-                  sx={{ borderRadius: '128px', minHeight: 40, px: 1.25 }}
+                  sx={{
+                    borderRadius: '128px',
+                    minHeight: 40,
+                    px: 1.25,
+                    gap: 1,
+                    transition: 'all 0.25s ease-in-out',
+                  }}
                 >
-                  Subtasks
+                  <Add sx={{ fontSize: 20 }} />
+                  <Typography level='body-sm' sx={{ color: 'inherit' }}>
+                    Subtasks
+                  </Typography>
                 </Button>
               )}
               <AdvancedOptionsTrigger

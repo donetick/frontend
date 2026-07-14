@@ -10,6 +10,7 @@ import {
 } from '@mui/icons-material'
 import {
   Box,
+  Button,
   IconButton,
   Input,
   Option,
@@ -25,7 +26,7 @@ const STRATEGY_OPTIONS = [
   { value: 'round_robin', label: 'Round robin' },
 ]
 
-const FieldRow = ({ label, description, children }) => (
+const FieldRow = ({ label, description, children, onLabelClick }) => (
   <Box
     sx={{
       display: 'flex',
@@ -35,7 +36,15 @@ const FieldRow = ({ label, description, children }) => (
       py: 0.75,
     }}
   >
-    <Box sx={{ minWidth: 0, flex: '1 1 auto' }}>
+    <Box
+      sx={{
+        minWidth: 0,
+        flex: '1 1 auto',
+        cursor: onLabelClick ? 'pointer' : undefined,
+        userSelect: onLabelClick ? 'none' : undefined,
+      }}
+      onClick={onLabelClick}
+    >
       <Typography level='body-sm' fontWeight='md'>
         {label}
       </Typography>
@@ -64,37 +73,17 @@ export const AdvancedOptionsTrigger = ({
     <Box
       sx={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}
     >
-      <Box
-        component='button'
+      <Button
+        size='sm'
+        variant={open || activeCount > 0 ? 'soft' : 'outlined'}
+        color='neutral'
         onClick={onToggle}
         sx={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: showLabel ? 1 : 0,
-          border: '1px solid',
-          borderColor:
-            open || activeCount > 0
-              ? 'primary.outlinedBorder'
-              : 'neutral.outlinedBorder',
-          bgcolor:
-            open || activeCount > 0 ? 'primary.softBg' : 'transparent',
-          color:
-            open || activeCount > 0 ? 'primary.softColor' : 'text.secondary',
-          borderRadius: '128px',
           minHeight: 40,
-          px: showLabel ? 1.5 : 0.75,
-          cursor: 'pointer',
-          transition: 'all 0.2s ease-in-out',
-          '&:hover': {
-            bgcolor:
-              open || activeCount > 0
-                ? 'primary.softHoverBg'
-                : 'neutral.softHoverBg',
-            borderColor:
-              open || activeCount > 0
-                ? 'primary.outlinedHoverBorder'
-                : 'neutral.outlinedHoverBorder',
-          },
+          borderRadius: '128px',
+          px: showLabel ? 1.25 : 0.75,
+          gap: showLabel ? 1 : 0,
+          transition: 'all 0.25s ease-in-out',
         }}
       >
         <MoreHoriz sx={{ fontSize: 20 }} />
@@ -114,7 +103,7 @@ export const AdvancedOptionsTrigger = ({
         >
           More
         </Typography>
-      </Box>
+      </Button>
 
       {activeCount > 0 && (
         <Box
@@ -248,6 +237,7 @@ const AdvancedOptionsSection = ({
           <FieldRow
             label='Require approval'
             description='Task needs admin sign-off before it can be closed'
+            onLabelClick={() => onRequireApprovalChange(!requireApproval)}
           >
             <Switch
               size='sm'
@@ -263,6 +253,9 @@ const AdvancedOptionsSection = ({
               !hasAssignees
                 ? 'Assign someone to enable limited visibility'
                 : 'Only you and assignees can see this task'
+            }
+            onLabelClick={
+              hasAssignees ? () => onIsPrivateChange(!isPrivate) : undefined
             }
           >
             <Switch
