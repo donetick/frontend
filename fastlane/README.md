@@ -23,6 +23,14 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 Build a signed, App Store-ready .ipa
 
+### ios upload
+
+```sh
+[bundle exec] fastlane ios upload
+```
+
+Upload the built .ipa to TestFlight
+
 ----
 
 
@@ -43,6 +51,14 @@ Build a signed release .aab
 ```
 
 Build a signed release .apk (for sideloading/testing)
+
+### android upload
+
+```sh
+[bundle exec] fastlane android upload
+```
+
+Upload the built .aab to the Play Store (internal testing track by default)
 
 ----
 
