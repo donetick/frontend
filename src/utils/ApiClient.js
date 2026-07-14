@@ -2,6 +2,7 @@ import { Preferences } from '@capacitor/preferences'
 import { API_URL } from '../Config'
 import { networkManager } from '../hooks/NetworkManager'
 import { logout, RefreshToken } from './Fetcher'
+import { offlineDB } from './OfflineDB'
 import {
   clearAllTokens,
   isRefreshTokenExpired,
@@ -49,10 +50,7 @@ class ApiClient {
     const refreshExpired = await isRefreshTokenExpired()
     if (refreshExpired) {
       console.log('Refresh token expired, forcing logout')
-      await clearAllTokens()
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login'
-      }
+      await this.handleLogout()
       return { success: false, error: 'Refresh token expired' }
     }
 
@@ -135,6 +133,11 @@ class ApiClient {
   // Helper to avoid repeating cleanup code
   async handleLogout() {
     await clearAllTokens()
+    try {
+      await offlineDB.clearAll()
+    } catch (e) {
+      console.error('Error clearing offline data on logout', e)
+    }
     try {
       await logout()
     } catch (e) {

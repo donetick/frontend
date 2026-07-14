@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiClient } from '../utils/ApiClient'
+import { offlineDB } from '../utils/OfflineDB'
 import { clearAllTokens, saveTokens } from '../utils/TokenStorage'
 
 const AuthContext = createContext(null)
@@ -66,6 +67,12 @@ export const AuthProvider = ({ children }) => {
 
       if (userToken) {
         setToken(userToken)
+
+        try {
+          await offlineDB.clearAll()
+        } catch (e) {
+          console.error('Error clearing offline data on login', e)
+        }
 
         // Use centralized token storage
         await saveTokens({
