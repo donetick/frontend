@@ -836,6 +836,12 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
                 }}
                 customRenderer={renderedParts}
                 onEnterPressed={handleEnterPressed}
+                onShiftEnterPressed={() => {
+                  if (!hasDescription) {
+                    setHasDescription(true)
+                  }
+                  setTimeout(() => richTextEditorRef.current?.focus(), 50)
+                }}
                 suggestions={{
                   '#': {
                     value: 'id',
