@@ -422,6 +422,8 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
       if (dueDateParsed.result) {
         syncDueDateStates(dueDateParsed.result)
         dueDateHighlight = dueDateParsed.highlight[0]
+      } else if (repeat.dueDate) {
+        syncDueDateStates(repeat.dueDate)
       }
 
       // Create the cleaned sentence by sequentially applying all cleanups

@@ -412,14 +412,37 @@ export const parseRepeatV2 = inputSentence => {
         }
 
       case 'day_of_the_month:every':
-        result.frequency = parseInt(match[1], 10)
-        result.frequencyMetadata.months = ALL_MONTHS
-        result.frequencyMetadata.unit = 'days'
+        const dayOfMonth = parseInt(match[1], 10)
+        result.frequencyType = 'interval'
+        result.frequency = 1
+        result.frequencyMetadata.unit = 'months'
+
+        // Calculate the next occurrence of this day of the month
+        const todayEvery = new Date()
+        let suggestedDueDate = new Date(
+          todayEvery.getFullYear(),
+          todayEvery.getMonth(),
+          dayOfMonth,
+          23,
+          59,
+          0,
+        )
+        if (suggestedDueDate <= todayEvery) {
+          // Day has already passed this month, move to next month
+          suggestedDueDate = new Date(
+            todayEvery.getFullYear(),
+            todayEvery.getMonth() + 1,
+            dayOfMonth,
+            23,
+            59,
+            0,
+          )
+        }
+
         return {
           result,
-          name: pattern.name
-            .replace('{day}', result.frequency)
-            .replace('{months}', result.frequencyMetadata.months.join(', ')),
+          name: pattern.name.replace('{day}', dayOfMonth),
+          dueDate: suggestedDueDate.toISOString(),
           highlight: [
             {
               text: pattern.name,
