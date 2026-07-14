@@ -25,3 +25,21 @@ dist-ssr
 
 resources/android/**/*
 resources/ios/**/*
+
+# Secrets (pulled via scripts/pull-secrets.sh)
+.env.production
+android/app/google-services.json
+android/app/release/*.jks
+android/keystore.properties
+android/local.properties
+ios/App/App/GoogleService-Info.plist
+ios/*.p8
+
+# Release build outputs
+build/android
+build/ios
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/.env
+fastlane/*.log
+vendor/bundle

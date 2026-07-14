@@ -31,7 +31,7 @@ PODS:
     - Capacitor
   - CapacitorNetwork (8.0.1):
     - Capacitor
-  - CapacitorPluginSafeArea (5.0.0):
+  - CapacitorPluginSafeArea (5.0.1):
     - Capacitor
   - CapacitorPreferences (8.0.1):
     - Capacitor
@@ -41,9 +41,9 @@ PODS:
     - Capacitor
   - CapgoCapacitorDocumentScanner (8.4.0):
     - Capacitor
-  - CapgoCapacitorNfc (8.1.7):
+  - CapgoCapacitorNfc (8.2.2):
     - Capacitor
-  - CapgoCapacitorSocialLogin (8.3.34):
+  - CapgoCapacitorSocialLogin (8.3.36):
     - Alamofire (~> 5.10.2)
     - Capacitor
     - FBSDKCoreKit (~> 18.0)
@@ -249,13 +249,13 @@ SPEC CHECKSUMS:
   CapacitorLocalLlm: a05516151a02923a9e7dae9949d3817e85e321f0
   CapacitorLocalNotifications: 2615aa008f608b95d3921a778ee1988abf1e6148
   CapacitorNetwork: 8812ce60d11fb63d8f2e4ba51a49b2e59892ebe2
-  CapacitorPluginSafeArea: 9d0682951c011bf0b36e513a89103c5fbff7ac49
+  CapacitorPluginSafeArea: 874619c00586248f1694210e72038123d422c2d9
   CapacitorPreferences: cca2021f386efb75947c850334447d9ff22b14f1
   CapacitorPushNotifications: ec08d589c226a2c0db7c032ec1bf5b044ec85f8e
   CapacitorStatusBar: 01d5763b4ed720de5ce2edbc938de6a98f4c8f32
   CapgoCapacitorDocumentScanner: 7ad9e8ed9c054d551bfc948660d995b9545723d8
-  CapgoCapacitorNfc: 5bf5a951ca231d7c40f1ac20549d2abcd1b8f939
-  CapgoCapacitorSocialLogin: b0e67630b9d9b5f14fff774c825c1b8fa85eff7b
+  CapgoCapacitorNfc: 8ea158143c441e1cf6d231a971e375511558d027
+  CapgoCapacitorSocialLogin: adffda2bec52a765bdaebf3fa9a6083bd9341d60
   FBAEMKit: 64088ff0380f50e4a56e2ee07d984f7f1aef7595
   FBSDKCoreKit: 8390ea3a8fac186f444275f31d7512e760b47cba
   FBSDKCoreKit_Basics: 3a0005c78b355388bf2df5c6dbe6381b77ea4be3

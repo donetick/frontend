@@ -1,0 +1,66 @@
+require "shellwords"
+
+default_platform(:ios)
+
+IOS_KEY_PATH = File.expand_path("../ios/AuthKey_84F695CDQ3.p8")
+IOS_OUTPUT_DIR = File.expand_path("../build/ios")
+ANDROID_PROJECT_DIR = File.expand_path("../android")
+
+platform :ios do
+  desc "Build a signed, App Store-ready .ipa"
+  lane :release do
+    Dir.chdir(File.expand_path("../ios/App")) do
+      Bundler.with_clean_env do
+        sh("pod install --repo-update")
+      end
+    end
+
+    build_app(
+      workspace: "ios/App/App.xcworkspace",
+      scheme: "App",
+      export_method: "app-store",
+      output_directory: IOS_OUTPUT_DIR,
+      output_name: "Donetick.ipa",
+      export_options: {
+        signingStyle: "manual",
+        provisioningProfiles: {
+          "com.donetick.app" => "Donetick App Store(fastline)",
+        },
+      },
+    )
+
+    UI.success("Signed .ipa at #{IOS_OUTPUT_DIR}/Donetick.ipa")
+  end
+end
+
+platform :android do
+  desc "Build a signed release .aab"
+  lane :release do
+    keystore_properties = File.join(ANDROID_PROJECT_DIR, "keystore.properties")
+    UI.user_error!("Missing #{keystore_properties} — run scripts/pull-secrets.sh first") unless File.exist?(keystore_properties)
+
+    gradle(
+      task: "bundle",
+      build_type: "Release",
+      project_dir: "#{ANDROID_PROJECT_DIR}/",
+    )
+
+    aab_path = lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH]
+    UI.success("Signed .aab at #{aab_path}")
+  end
+
+  desc "Build a signed release .apk (for sideloading/testing)"
+  lane :apk do
+    keystore_properties = File.join(ANDROID_PROJECT_DIR, "keystore.properties")
+    UI.user_error!("Missing #{keystore_properties} — run scripts/pull-secrets.sh first") unless File.exist?(keystore_properties)
+
+    gradle(
+      task: "assemble",
+      build_type: "Release",
+      project_dir: "#{ANDROID_PROJECT_DIR}/",
+    )
+
+    apk_path = lane_context[SharedValues::GRADLE_APK_OUTPUT_PATH]
+    UI.success("Signed .apk at #{apk_path}")
+  end
+end
