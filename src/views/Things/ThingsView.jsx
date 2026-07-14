@@ -355,6 +355,31 @@ const ThingsView = () => {
       })
   }
 
+  const handleSetThingState = thing => {
+    UpdateThingState(thing)
+      .then(result => {
+        result.json().then(data => {
+          const currentThings = [...things]
+          const thingIndex = currentThings.findIndex(
+            currentThing => currentThing.id === thing.id,
+          )
+          currentThings[thingIndex] = data.res
+          setThings(currentThings)
+          showNotification({
+            type: 'success',
+            title: 'Updated',
+            message: 'Thing state updated successfully',
+          })
+        })
+      })
+      .catch(error => {
+        showError({
+          title: 'Unable to update thing state',
+          message: 'An error occurred while updating the thing state',
+        })
+      })
+  }
+
   return (
     <Container maxWidth='md' sx={{ px: 0 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, p: 2 }}>
@@ -550,7 +575,7 @@ const ThingsView = () => {
               setIsShowEditStateModal(false)
               setCreateModalThing(null)
             }}
-            onSave={handleStateChangeRequest}
+            onSave={handleSetThingState}
             currentThing={createModalThing}
           />
         )}
