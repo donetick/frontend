@@ -1,0 +1,33 @@
+{
+  "save": "Сохранить",
+  "cancel": "Отмена",
+  "delete": "Удалить",
+  "edit": "Изменить",
+  "close": "Закрыть",
+  "confirm": "Подтвердить",
+  "loading": "Загрузка...",
+  "error": "Ошибка",
+  "success": "Готово",
+  "warning": "Предупреждение",
+  "refresh": "Обновить",
+  "copy": "Копировать",
+  "copied": "Скопировано!",
+  "settings": "Настройки",
+  "yes": "Да",
+  "no": "Нет",
+  "back": "Назад",
+  "backToCalendar": "Назад к календарю",
+  "logout": "Выйти",
+  "version": "Версия",
+  "navigation": {
+    "allTasks": "Все дела",
+    "archived": "Архив",
+    "things": "Штуки",
+    "labels": "Метки",
+    "projects": "Проекты",
+    "filters": "Фильтры",
+    "activities": "Активность",
+    "points": "Очки",
+    "settings": "Настройки"
+  }
+}
