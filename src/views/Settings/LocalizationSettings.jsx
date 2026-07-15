@@ -44,7 +44,7 @@ const LocalizationSettings = () => {
   ]
 
   return (
-    <SettingsLayout title='Localization'>
+    <SettingsLayout title={t('localization.title')}>
       <div className='grid gap-4 py-4'>
         <Typography level='body-md'>{t('localization.description')}</Typography>
 
@@ -110,7 +110,7 @@ const LocalizationSettings = () => {
             ))}
           </Select>
           <FormHelperText>
-            Preview: {sampleDate.format(dateFormat)}
+            {t('localization.preview')}: {sampleDate.format(dateFormat)}
           </FormHelperText>
         </FormControl>
 
@@ -157,7 +157,7 @@ const LocalizationSettings = () => {
             </Option>
           </Select>
           <FormHelperText>
-            Preview: {sampleDate.format(timeFormat)}
+            {t('localization.preview')}: {sampleDate.format(timeFormat)}
           </FormHelperText>
         </FormControl>
 

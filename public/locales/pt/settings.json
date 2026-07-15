@@ -47,6 +47,7 @@
     "description": "Personalize idioma, formato de data e preferências regionais da sua conta.",
     "language": "Idioma",
     "languageDescription": "Selecione seu idioma preferido",
+    "preview": "Prévia",
     "dateFormat": "Formato de data",
     "dateFormatDescription": "Escolha como as datas devem ser exibidas no aplicativo",
     "timeFormat": "Formato de hora",

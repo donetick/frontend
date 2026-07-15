@@ -47,6 +47,7 @@
     "description": "Customize language, date format, and regional preferences for your account.",
     "language": "Language",
     "languageDescription": "Select your preferred language",
+    "preview": "Preview",
     "dateFormat": "Date Format",
     "dateFormatDescription": "Choose how dates should be displayed throughout the application",
     "timeFormat": "Time Format",

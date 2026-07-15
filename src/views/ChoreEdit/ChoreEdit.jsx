@@ -37,6 +37,7 @@ import {
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import DurationInput from '../../components/common/DurationInput'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import NotificationTemplate from '../../components/NotificationTemplate.jsx'
@@ -87,6 +88,7 @@ const REPEAT_ON_TYPE = ['interval', 'days_of_the_week', 'day_of_the_month']
 const NO_DUE_DATE_REQUIRED_TYPE = ['no_repeat', 'once']
 const NO_DUE_DATE_ALLOWED_TYPE = ['trigger']
 const ChoreEdit = () => {
+  const { t } = useTranslation('chores')
   const { data: userProfile, isLoading: isUserProfileLoading } =
     useUserProfile()
 
@@ -707,10 +709,8 @@ const ChoreEdit = () => {
 
         <Box mb={3}>
           <FormControl error={errors.name}>
-            <Typography level='h4'>Name</Typography>
-            <Typography level='body-md'>
-              What is the name of this task?
-            </Typography>
+            <Typography level='h4'>{t('edit.name')}</Typography>
+            <Typography level='body-md'>{t('edit.nameDescription')}</Typography>
             <Input value={name} onChange={e => setName(e.target.value)} />
             <FormHelperText error>{errors.name}</FormHelperText>
           </FormControl>
@@ -718,8 +718,8 @@ const ChoreEdit = () => {
 
         <Box mb={3}>
           <FormControl error={errors.description}>
-            <Typography level='h4'>Description</Typography>
-            <Typography level='body-md'>What is this task about?</Typography>
+            <Typography level='h4'>{t('edit.description')}</Typography>
+            <Typography level='body-md'>{t('edit.descriptionHelp')}</Typography>
             <RichTextEditor
               value={description}
               onChange={setDescription}
@@ -731,8 +731,8 @@ const ChoreEdit = () => {
         </Box>
 
         <Box mb={3}>
-          <Typography level='h4'>Priority</Typography>
-          <Typography level='body-md'>How important is this task?</Typography>
+          <Typography level='h4'>{t('edit.priority')}</Typography>
+          <Typography level='body-md'>{t('edit.priorityHelp')}</Typography>
 
           {/* Priority Chip Selection */}
           <Box
@@ -778,7 +778,7 @@ const ChoreEdit = () => {
                 minHeight: 34,
               }}
             >
-              No Priority
+              {t('edit.noPriority')}
             </Chip>
           </Box>
         </Box>
@@ -786,10 +786,8 @@ const ChoreEdit = () => {
         {/* Project Selection - Show only if there are multiple projects */}
         {projects.length >= 1 && (
           <Box mb={3}>
-            <Typography level='h4'>Project</Typography>
-            <Typography level='body-md'>
-              Which project does this task belong to?
-            </Typography>
+            <Typography level='h4'>{t('edit.project')}</Typography>
+            <Typography level='body-md'>{t('edit.projectHelp')}</Typography>
             <Select
               value={projectId}
               onChange={(event, newValue) => setProjectId(newValue)}
@@ -823,7 +821,7 @@ const ChoreEdit = () => {
                       )
                     })()}
                   </Avatar>
-                  Default Project
+                  {t('edit.defaultProject')}
                 </Box>
               </Option>
               {projects.map(project => (
@@ -864,10 +862,8 @@ const ChoreEdit = () => {
         )}
 
         <Box mb={3}>
-          <Typography level='h4'>Labels</Typography>
-          <Typography level='body-md'>
-            Things to remember about this task or to tag it
-          </Typography>
+          <Typography level='h4'>{t('edit.labels')}</Typography>
+          <Typography level='body-md'>{t('edit.labelsHelp')}</Typography>
           <Select
             multiple
             onChange={(event, newValue) => {
@@ -927,13 +923,13 @@ const ChoreEdit = () => {
               }}
             >
               <Add />
-              Add New Label
+              {t('edit.addNewLabel')}
             </MenuItem>
           </Select>
         </Box>
 
         <Box>
-          <Typography level='h4'>Sub Tasks</Typography>
+          <Typography level='h4'>{t('edit.subtasks')}</Typography>
           {/* <FormControl sx={{ mt: 1 }}>
             <Checkbox
               onChange={e => {
@@ -966,11 +962,18 @@ const ChoreEdit = () => {
         </Box>
 
         <Box mt={3}>
-          <Typography level='h4'>Attachments</Typography>
-          <Typography level='body-md'>Files attached to this task</Typography>
+          <Typography level='h4'>{t('edit.attachments')}</Typography>
+          <Typography level='body-md'>{t('edit.attachmentsHelp')}</Typography>
           <Card variant='outlined' sx={{ mt: 2, p: 1.5 }}>
             {attachments.length > 0 && (
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 1.5 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 1,
+                  mb: 1.5,
+                }}
+              >
                 {attachments.map((att, idx) => (
                   <Box
                     key={att.file_path || idx}
@@ -1078,13 +1081,11 @@ const ChoreEdit = () => {
               variant='outlined'
               color='neutral'
               size='sm'
-              startDecorator={
-                isUploadingAttachment ? null : <UploadFile />
-              }
+              startDecorator={isUploadingAttachment ? null : <UploadFile />}
               loading={isUploadingAttachment}
               sx={{ alignSelf: 'flex-start' }}
             >
-              Upload File
+              {t('edit.uploadFile')}
               <input
                 type='file'
                 hidden
@@ -1138,8 +1139,8 @@ const ChoreEdit = () => {
       {/* Section 2: Assignment & Responsibility */}
       <Box mb={4}>
         <Box mb={3}>
-          <Typography level='h4'>Assignees</Typography>
-          <Typography level='body-md'>Who can do this task?</Typography>
+          <Typography level='h4'>{t('edit.assignees')}</Typography>
+          <Typography level='body-md'>{t('edit.assigneesHelp')}</Typography>
           <Card>
             <List
               orientation='horizontal'
@@ -1161,7 +1162,7 @@ const ChoreEdit = () => {
                   overlay
                   disableIcon
                   variant='soft'
-                  label='Anyone'
+                  label={t('edit.anyone')}
                 />
               </ListItem>
 
@@ -1236,7 +1237,9 @@ const ChoreEdit = () => {
         {assignees.length > 1 && (
           <>
             <Box mb={3}>
-              <Typography level='h4'>Currently Assigned To</Typography>
+              <Typography level='h4'>
+                {t('edit.currentlyAssignedTo')}
+              </Typography>
               <Typography level='body-md'>
                 Who is assigned the next due?
               </Typography>
@@ -1261,7 +1264,7 @@ const ChoreEdit = () => {
             </Box>
 
             <Box>
-              <Typography level='h4'>Assignment Strategy</Typography>
+              <Typography level='h4'>{t('edit.assignmentStrategy')}</Typography>
               <Typography level='body-md'>
                 How to pick the next assignee for the following task?
               </Typography>
@@ -1355,7 +1358,7 @@ const ChoreEdit = () => {
                 defaultChecked={dueDate !== null}
                 checked={dueDate !== null}
                 overlay
-                label='Give this task a due date'
+                label={t('edit.giveDueDate')}
               />
               <FormHelperText>
                 Task needs to be completed by a specific time
@@ -1384,7 +1387,7 @@ const ChoreEdit = () => {
                   checked={useCustomTime}
                   onChange={e => handleUseCustomTimeChange(e.target.checked)}
                   overlay
-                  label='Set a specific time'
+                  label={t('edit.setSpecificTime')}
                 />
                 <FormHelperText>
                   {useCustomTime
@@ -1412,10 +1415,8 @@ const ChoreEdit = () => {
 
         {dueDate && (
           <Box mb={3}>
-            <Typography level='h4'>Task Window</Typography>
-            <Typography level='body-md'>
-              Define when this task can be completed and when it expires
-            </Typography>
+            <Typography level='h4'>{t('edit.taskWindow')}</Typography>
+            <Typography level='body-md'>{t('edit.taskWindowHelp')}</Typography>
 
             {/* Available From (Completion Window) */}
             <FormControl sx={{ mt: 1 }}>
@@ -1429,7 +1430,7 @@ const ChoreEdit = () => {
                   }
                 }}
                 overlay
-                label='Set earliest completion time'
+                label={t('edit.setEarliestCompletion')}
               />
               <FormHelperText>
                 Task becomes available to complete X hours before the due date
@@ -1444,7 +1445,7 @@ const ChoreEdit = () => {
                     ml: 4,
                   }}
                 >
-                  <Typography level='body-sm'>Hours:</Typography>
+                  <Typography level='body-sm'>{t('edit.hours')}:</Typography>
                   <Input
                     type='number'
                     value={completionWindow}
@@ -1455,7 +1456,7 @@ const ChoreEdit = () => {
                         max: 24 * 7,
                       },
                     }}
-                    placeholder='Hours'
+                    placeholder={t('edit.hours')}
                     onChange={e => {
                       setCompletionWindow(parseInt(e.target.value))
                     }}
@@ -1502,7 +1503,9 @@ const ChoreEdit = () => {
                   size='sm'
                   minValue={0}
                 />
-                <Typography level='body-sm'>after due date</Typography>
+                <Typography level='body-sm'>
+                  {t('edit.afterDueDate')}
+                </Typography>
               </Box>
             )}
           </Box>
@@ -1510,9 +1513,11 @@ const ChoreEdit = () => {
 
         {!['once', 'no_repeat'].includes(frequencyType) && (
           <Box>
-            <Typography level='h4'>Scheduling Preferences</Typography>
+            <Typography level='h4'>
+              {t('edit.schedulingPreferences')}
+            </Typography>
             <Typography level='body-md'>
-              How to reschedule the next due date?
+              {t('edit.schedulingPreferencesHelp')}
             </Typography>
             <RadioGroup name='tiers' sx={{ gap: 1, '& > div': { p: 1 } }}>
               <FormControl>
@@ -1520,7 +1525,7 @@ const ChoreEdit = () => {
                   overlay
                   checked={!isRolling}
                   onClick={() => setIsRolling(false)}
-                  label='Reschedule from due date'
+                  label={t('edit.rescheduleFromDueDate')}
                 />
                 <FormHelperText>
                   the next task will be scheduled from the original due date,
@@ -1535,7 +1540,7 @@ const ChoreEdit = () => {
                     setIsRolling(true)
                     setDeadlineOffset(-1)
                   }}
-                  label='Reschedule from completion date'
+                  label={t('edit.rescheduleFromCompletionDate')}
                 />
                 <FormHelperText>
                   the next task will be scheduled from the actual completion
@@ -1548,7 +1553,7 @@ const ChoreEdit = () => {
         {/* Section 3.1: Notifications */}
 
         <Box mb={3}>
-          <Typography level='h4'>Notifications</Typography>
+          <Typography level='h4'>{t('edit.notifications')}</Typography>
           {!isPlusAccount(userProfile) && (
             <Typography level='body-sm' color='warning' sx={{ mb: 1 }}>
               Task notifications are not available in the Basic plan. Upgrade to
@@ -1568,7 +1573,7 @@ const ChoreEdit = () => {
               checked={isNotificable}
               disabled={!isPlusAccount(userProfile)}
               overlay
-              label='Notify for this task'
+              label={t('edit.notifyForTask')}
             />
             <FormHelperText
               sx={{
@@ -1590,7 +1595,7 @@ const ChoreEdit = () => {
           >
             <Card variant='outlined'>
               <Typography level='h4' mb={2}>
-                Notification Schedule
+                {t('edit.notificationSchedule')}
               </Typography>
               <Box sx={{ p: 0.5 }}>
                 <NotificationTemplate
@@ -1608,16 +1613,16 @@ const ChoreEdit = () => {
               </Box>
 
               <Typography level='h4' mt={3} mb={2}>
-                Who to Notify
+                {t('edit.whoToNotify')}
               </Typography>
               <FormControl>
                 <Checkbox
                   overlay
                   disabled={true}
                   checked={true}
-                  label='All Assignees'
+                  label={t('edit.allAssignees')}
                 />
-                <FormHelperText>Notify all assignees</FormHelperText>
+                <FormHelperText>{t('edit.notifyAllAssignees')}</FormHelperText>
               </FormControl>
 
               <FormControl>
@@ -1638,9 +1643,9 @@ const ChoreEdit = () => {
                       ? notificationMetadata?.circleGroup
                       : false
                   }
-                  label='Specific Group'
+                  label={t('edit.specificGroup')}
                 />
-                <FormHelperText>Notify a specific group</FormHelperText>
+                <FormHelperText>{t('edit.notifySpecificGroup')}</FormHelperText>
               </FormControl>
 
               {notificationMetadata?.circleGroup && (
@@ -1679,11 +1684,11 @@ const ChoreEdit = () => {
             pb: 1,
           }}
         >
-          Task Settings:
+          {t('edit.taskSettings')}:
         </Typography>
 
         <Box mb={3}>
-          <Typography level='h4'>Points System</Typography>
+          <Typography level='h4'>{t('edit.pointsSystem')}</Typography>
           <FormControl sx={{ mt: 1 }}>
             <Checkbox
               onChange={e => {
@@ -1695,7 +1700,7 @@ const ChoreEdit = () => {
               }}
               checked={points > -1}
               overlay
-              label='Assign points for completion'
+              label={t('edit.assignPoints')}
             />
             <FormHelperText>
               Assign points to this task and user will earn points when they
@@ -1710,7 +1715,7 @@ const ChoreEdit = () => {
                   ml: 4,
                 }}
               >
-                <Typography level='body-sm'>Points:</Typography>
+                <Typography level='body-sm'>{t('edit.points')}:</Typography>
                 <Input
                   type='number'
                   value={points}
@@ -1721,7 +1726,7 @@ const ChoreEdit = () => {
                       max: 1000,
                     },
                   }}
-                  placeholder='Points'
+                  placeholder={t('edit.points')}
                   onChange={e => {
                     setPoints(parseInt(e.target.value))
                   }}
@@ -1732,7 +1737,7 @@ const ChoreEdit = () => {
         </Box>
 
         <Box mb={3}>
-          <Typography level='h4'>Approval Requirement</Typography>
+          <Typography level='h4'>{t('edit.approvalRequirement')}</Typography>
           <FormControl sx={{ mt: 1 }}>
             <Checkbox
               onChange={e => {
@@ -1740,7 +1745,7 @@ const ChoreEdit = () => {
               }}
               checked={requireApproval}
               overlay
-              label='Require admin approval'
+              label={t('edit.requireAdminApproval')}
             />
             <FormHelperText>
               This task will need approval from an admin before being marked as
@@ -1750,8 +1755,8 @@ const ChoreEdit = () => {
         </Box>
 
         <Box>
-          <Typography level='h4'>Privacy Settings</Typography>
-          <Typography level='body-md'>Who can see this task?</Typography>
+          <Typography level='h4'>{t('edit.privacySettings')}</Typography>
+          <Typography level='body-md'>{t('edit.privacyHelp')}</Typography>
           <RadioGroup
             name='isPrivate'
             value={isPrivate}
@@ -1765,15 +1770,15 @@ const ChoreEdit = () => {
             }}
           >
             <FormControl>
-              <Radio overlay value={false} label='Public' />
-              <FormHelperText>Everyone in your circle</FormHelperText>
+              <Radio overlay value={false} label={t('edit.public')} />
+              <FormHelperText>{t('edit.everyoneInCircle')}</FormHelperText>
             </FormControl>
             <FormControl>
               <Radio
                 overlay
                 disabled={assignees.length === 0}
                 value={true}
-                label='Limited'
+                label={t('edit.limited')}
               />
               <FormHelperText>
                 You and others that are assigned to the task
@@ -1806,7 +1811,7 @@ const ChoreEdit = () => {
                   setShowSavePrivacyDefault(false)
                 }}
               >
-                Remember for Future Tasks
+                {t('edit.rememberForFutureTasks')}
               </Button>
             </Box>
           )}

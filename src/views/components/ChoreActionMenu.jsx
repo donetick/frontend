@@ -35,6 +35,7 @@ import {
 } from '@mui/joy'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import LABEL_COLORS, {
   getTextColorFromBackgroundColor,
 } from '../../utils/Colors'
@@ -58,6 +59,7 @@ const ChoreActionMenu = ({
   sx = {},
   variant = 'soft',
 }) => {
+  const { t } = useTranslation('chores')
   const [anchorEl, setAnchorEl] = React.useState(null)
   const [isOfficialInstance, setIsOfficialInstance] = useState(false)
   const [showProjectPicker, setShowProjectPicker] = useState(false)
@@ -272,7 +274,7 @@ const ChoreActionMenu = ({
             >
               <ArrowBack fontSize='small' />
               <Typography level='body-sm' fontWeight={600}>
-                Move to project
+                {t('actions.moveToProject')}
               </Typography>
             </MenuItem>
             <Divider />
@@ -286,7 +288,9 @@ const ChoreActionMenu = ({
                 {renderProjectAvatar(LABEL_COLORS[0].value, 'FolderOpen')}
               </ListItemDecorator>
               <ListItemContent>
-                <Typography level='body-sm'>Default Project</Typography>
+                <Typography level='body-sm'>
+                  {t('edit.defaultProject')}
+                </Typography>
               </ListItemContent>
             </MenuItem>
             {projects.map(project => (
@@ -316,7 +320,7 @@ const ChoreActionMenu = ({
               }}
             >
               <NoteAdd />
-              Complete with note
+              {t('actions.completeWithNote')}
             </MenuItem>
             <MenuItem
               onClick={e => {
@@ -326,7 +330,7 @@ const ChoreActionMenu = ({
               }}
             >
               <Update />
-              Complete in past
+              {t('actions.completeInPast')}
             </MenuItem>
             <MenuItem
               onClick={e => {
@@ -335,7 +339,7 @@ const ChoreActionMenu = ({
               }}
             >
               <SwitchAccessShortcut />
-              Skip to next due date
+              {t('actions.skipToNextDueDate')}
             </MenuItem>
             <MenuItem
               onClick={e => {
@@ -345,7 +349,7 @@ const ChoreActionMenu = ({
               }}
             >
               <RecordVoiceOver />
-              Delegate to someone else
+              {t('actions.delegate')}
             </MenuItem>
             {isOfficialInstance && (
               <MenuItem
@@ -356,7 +360,7 @@ const ChoreActionMenu = ({
                 }}
               >
                 <Notifications />
-                Send nudge
+                {t('actions.sendNudge')}
               </MenuItem>
             )}
             <Divider />
@@ -367,7 +371,7 @@ const ChoreActionMenu = ({
               }}
             >
               <ManageSearch />
-              History
+              {t('actions.history')}
             </MenuItem>
             <Divider />
             <MenuItem
@@ -383,7 +387,7 @@ const ChoreActionMenu = ({
               }}
               onClick={e => e.stopPropagation()}
             >
-              <Tooltip title='Today' placement='top'>
+              <Tooltip title={t('actions.today')} placement='top'>
                 <IconButton
                   size='sm'
                   onClick={e => {
@@ -394,7 +398,7 @@ const ChoreActionMenu = ({
                   <Today />
                 </IconButton>
               </Tooltip>
-              <Tooltip title='Tomorrow' placement='top'>
+              <Tooltip title={t('actions.tomorrow')} placement='top'>
                 <IconButton
                   size='sm'
                   onClick={e => {
@@ -405,7 +409,7 @@ const ChoreActionMenu = ({
                   <WbSunny />
                 </IconButton>
               </Tooltip>
-              <Tooltip title='Weekend' placement='top'>
+              <Tooltip title={t('actions.weekend')} placement='top'>
                 <IconButton
                   size='sm'
                   onClick={e => {
@@ -416,7 +420,7 @@ const ChoreActionMenu = ({
                   <Weekend />
                 </IconButton>
               </Tooltip>
-              <Tooltip title='Next week' placement='top'>
+              <Tooltip title={t('actions.nextWeek')} placement='top'>
                 <IconButton
                   size='sm'
                   onClick={e => {
@@ -427,7 +431,7 @@ const ChoreActionMenu = ({
                   <NextWeek />
                 </IconButton>
               </Tooltip>
-              <Tooltip title='Remove due date' placement='top'>
+              <Tooltip title={t('actions.removeDueDate')} placement='top'>
                 <IconButton
                   size='sm'
                   color='neutral'
@@ -449,7 +453,7 @@ const ChoreActionMenu = ({
               }}
             >
               <MoreTime />
-              Change due date
+              {t('actions.changeDueDate')}
             </MenuItem>
             <MenuItem
               onClick={e => {
@@ -459,7 +463,7 @@ const ChoreActionMenu = ({
               }}
             >
               <Nfc />
-              Write to NFC
+              {t('actions.writeNfc')}
             </MenuItem>
             <MenuItem
               onClick={e => {
@@ -468,7 +472,7 @@ const ChoreActionMenu = ({
               }}
             >
               <Edit />
-              Edit
+              {t('actions.edit')}
             </MenuItem>
             <MenuItem
               onClick={e => {
@@ -477,7 +481,7 @@ const ChoreActionMenu = ({
               }}
             >
               <CopyAll />
-              Clone
+              {t('actions.clone')}
             </MenuItem>
             <MenuItem
               onClick={e => {
@@ -486,7 +490,7 @@ const ChoreActionMenu = ({
               }}
             >
               <ViewCarousel />
-              View
+              {t('actions.view')}
             </MenuItem>
             <MenuItem
               onClick={e => {
@@ -506,7 +510,7 @@ const ChoreActionMenu = ({
                 }}
               >
                 <DriveFileMove />
-                Move to project
+                {t('actions.moveToProject')}
               </MenuItem>
             )}
             <Divider />
@@ -518,7 +522,7 @@ const ChoreActionMenu = ({
               color='danger'
             >
               <Delete />
-              Delete
+              {t('actions.delete')}
             </MenuItem>
           </>
         )}

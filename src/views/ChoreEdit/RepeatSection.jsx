@@ -18,6 +18,7 @@ import {
 } from '@mui/joy'
 import moment from 'moment'
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useUserProfile } from '../../queries/UserQueries'
@@ -84,9 +85,7 @@ const generateSchedulePreview = (metadata, formatTimeFn) => {
     .map(day => day.charAt(0).toUpperCase() + day.slice(1, 3))
     .join(', ')
 
-  const timeStr = metadata.time
-    ? formatTimeFn(metadata.time)
-    : '6:00 PM'
+  const timeStr = metadata.time ? formatTimeFn(metadata.time) : '6:00 PM'
 
   if (metadata.weekPattern === 'every_week' || !metadata.weekPattern) {
     return `Every ${dayNames} at ${timeStr}`
@@ -115,6 +114,7 @@ export const RepeatOnSections = ({
   frequencyMetadata,
   onFrequencyMetadataUpdate,
 }) => {
+  const { t } = useTranslation('chores')
   const { fmt } = useLocalization()
   // if time on frequencyMetadata is not set, try to set it to the nextDueDate if available,
   // otherwise set it to 18:00 of the current day
@@ -144,7 +144,7 @@ export const RepeatOnSections = ({
         flexDirection: 'column',
       }}
     >
-      <Typography level='h5'>Time of day: </Typography>
+      <Typography level='h5'>{t('repeat.timeOfDay')}: </Typography>
       <Input
         type='time'
         sx={{ width: '150px' }}
@@ -167,7 +167,7 @@ export const RepeatOnSections = ({
       return (
         <>
           <Grid item sm={12} sx={{ display: 'flex', alignItems: 'center' }}>
-            <Typography level='h5'>Every: </Typography>
+            <Typography level='h5'>{t('repeat.every')}: </Typography>
             <Input
               slotProps={{
                 input: {
@@ -182,7 +182,7 @@ export const RepeatOnSections = ({
               }}
             />
             <Select
-              placeholder='Unit'
+              placeholder={t('repeat.unit')}
               value={frequencyMetadata?.unit || 'days'}
               sx={{ ml: 1 }}
             >
@@ -499,7 +499,7 @@ export const RepeatOnSections = ({
               mb: 1.5,
             }}
           >
-            <Typography>on the </Typography>
+            <Typography>{t('repeat.onThe')} </Typography>
             <Input
               sx={{ width: '80px' }}
               type='number'
@@ -515,7 +515,7 @@ export const RepeatOnSections = ({
                 onFrequencyUpdate(e.target.value)
               }}
             />
-            <Typography>of the above month/s</Typography>
+            <Typography>{t('repeat.ofSelectedMonths')}</Typography>
           </Box>
           {timePickerComponent}
         </>
@@ -540,11 +540,12 @@ const RepeatSection = ({
   isAttemptToSave,
   selectedThing,
 }) => {
+  const { t } = useTranslation('chores')
   const { data: userProfile } = useUserProfile()
 
   return (
     <Box mt={2}>
-      <Typography level='h4'>Repeat:</Typography>
+      <Typography level='h4'>{t('repeat.title')}:</Typography>
       <FormControl sx={{ mt: 1 }}>
         <Checkbox
           onChange={e => {
@@ -557,7 +558,7 @@ const RepeatSection = ({
           checked={!['once', 'trigger'].includes(frequencyType)}
           value={!['once', 'trigger'].includes(frequencyType)}
           overlay
-          label='Repeat this task'
+          label={t('repeat.repeatTask')}
         />
         <FormHelperText>
           Is this something needed to be done regularly?
@@ -566,7 +567,7 @@ const RepeatSection = ({
       {!['once', 'trigger'].includes(frequencyType) && (
         <>
           <Card sx={{ mt: 1 }}>
-            <Typography level='h5'>How often should it be repeated?</Typography>
+            <Typography level='h5'>{t('repeat.howOften')}</Typography>
 
             <List
               orientation='horizontal'
@@ -624,7 +625,7 @@ const RepeatSection = ({
                 <>
                   <Grid container spacing={1} mt={2}>
                     <Grid item>
-                      <Typography>Repeat on:</Typography>
+                      <Typography>{t('repeat.repeatOn')}:</Typography>
                       <Box
                         sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
                       >
@@ -750,7 +751,7 @@ const RepeatSection = ({
           value={frequencyType === 'trigger'}
           disabled={!isPlusAccount(userProfile)}
           overlay
-          label='Trigger this task based on a thing state'
+          label={t('repeat.triggerFromThing')}
         />
         <FormHelperText
           sx={{

@@ -4,6 +4,7 @@ import { useMediaQuery } from '@mui/material'
 import * as chrono from 'chrono-node'
 import moment from 'moment'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import { useCreateChore } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
@@ -58,6 +59,7 @@ const getDefaultNotification = () => {
 }
 
 const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
+  const { t } = useTranslation('chores')
   const { ResponsiveModal } = useResponsiveModal()
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
   const pickerEmptyDisplay = isMobile ? 'icon' : 'icon-text'
@@ -721,7 +723,7 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
         onClose={handleCloseModal}
         size='lg'
         fullWidth={true}
-        title='Create new task'
+        title={t('create.title')}
         footer={
           <Box
             sx={{
@@ -737,7 +739,7 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
               color='neutral'
               onClick={handleCloseModal}
             >
-              Cancel
+              {t('create.cancel')}
               {showKeyboardShortcuts && (
                 <KeyboardShortcutHint
                   shortcut='Esc'
@@ -753,7 +755,7 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
               disabled={!taskTitle.trim()}
               onClick={createChore}
             >
-              Create
+              {t('create.create')}
               {showKeyboardShortcuts && (
                 <KeyboardShortcutHint shortcut='Enter' sx={{ ml: 1 }} />
               )}
@@ -771,7 +773,9 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
                   alignItems: 'center',
                 }}
               >
-                <Typography level='body-sm'>Task in a sentence:</Typography>
+                <Typography level='body-sm'>
+                  {t('create.inSentence')}:
+                </Typography>
                 <LearnMoreButton
                   content={
                     <>
@@ -838,7 +842,7 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
                       }
                     : undefined
                 }
-                placeholder='Type your task...'
+                placeholder={t('create.placeholder')}
                 onChange={text => {
                   setTaskText(text)
                   if (!text) setTaskTitle('')
@@ -1071,7 +1075,9 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
 
             {hasDescription && (
               <Box>
-                <Typography level='body-sm'>Description:</Typography>
+                <Typography level='body-sm'>
+                  {t('create.description')}:
+                </Typography>
                 <div>
                   <RichTextEditor
                     ref={richTextEditorRef}
@@ -1084,7 +1090,7 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
             )}
             {hasSubTasks && (
               <Box>
-                <Typography level='body-sm'>Subtasks:</Typography>
+                <Typography level='body-sm'>{t('create.subtasks')}:</Typography>
                 <SubTasks
                   editMode={true}
                   tasks={subTasks ? subTasks : []}

@@ -23,6 +23,7 @@ import {
 import Fuse from 'fuse.js'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useChores } from '../../queries/ChoreQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import Priorities from '../../utils/Priorities'
@@ -70,6 +71,7 @@ import Sidepanel from './Sidepanel'
 import { INSIGHT_FILTER_DEFS } from './SmartInsightsCard'
 
 const MyChores = () => {
+  const { t } = useTranslation('chores')
   const { data: userProfile, isLoading: isUserProfileLoading } =
     useUserProfile()
   const isLargeScreen = useMediaQuery(theme => theme.breakpoints.up('md'))
@@ -209,8 +211,7 @@ const MyChores = () => {
               )
             case 'Due Later':
               return (
-                d !== null &&
-                d > new Date(now.getTime() + 24 * 60 * 60 * 1000)
+                d !== null && d > new Date(now.getTime() + 24 * 60 * 60 * 1000)
               )
             case 'No Due Date':
               return item.nextDueDate === null
@@ -611,7 +612,8 @@ const MyChores = () => {
     selectedChores,
     addTaskModalOpen,
     searchTerm,
-    searchFilter: hasQuickFilters || searchTerm?.length > 0 ? 'filtered' : 'All',
+    searchFilter:
+      hasQuickFilters || searchTerm?.length > 0 ? 'filtered' : 'All',
     filteredChores: getFilteredChores,
     choreSections,
     openChoreSections,
@@ -768,10 +770,12 @@ const MyChores = () => {
   }
 
   const toggleViewMode = value => {
-    const newMode = value ?? (() => {
-      const modes = ['default', 'compact', 'calendar']
-      return modes[(modes.indexOf(viewMode) + 1) % modes.length]
-    })()
+    const newMode =
+      value ??
+      (() => {
+        const modes = ['default', 'compact', 'calendar']
+        return modes[(modes.indexOf(viewMode) + 1) % modes.length]
+      })()
     setViewMode(newMode)
     localStorage.setItem('choreCardViewMode', newMode)
     if (newMode !== 'calendar') {
@@ -1066,7 +1070,7 @@ const MyChores = () => {
                 }}
               />
               <Typography level='title-md' gutterBottom>
-                Nothing scheduled
+                {t('dashboard.nothingScheduled')}
               </Typography>
               {chores.length > 0 && (
                 <>
@@ -1081,7 +1085,7 @@ const MyChores = () => {
                     variant='outlined'
                     color='neutral'
                   >
-                    Reset filters
+                    {t('dashboard.resetFilters')}
                   </Button>
                 </>
               )}

@@ -2,16 +2,18 @@ import { SupervisorAccount } from '@mui/icons-material'
 import { Avatar, Box, Button, Sheet, Typography } from '@mui/joy'
 
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import UserModal from '../Modals/Inputs/UserModal'
 const UserSwitcher = () => {
-  const { 
-    impersonatedUser, 
+  const { t } = useTranslation('chores')
+  const {
+    impersonatedUser,
     isImpersonating,
-    startImpersonation, 
+    startImpersonation,
     stopImpersonation,
-    canImpersonate 
+    canImpersonate,
   } = useImpersonateUser()
   const { data: userProfile } = useUserProfile()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -52,15 +54,17 @@ const UserSwitcher = () => {
               }}
             >
               <SupervisorAccount color='' />
-              <Typography level='title-md'>View tasks as</Typography>
+              <Typography level='title-md'>
+                {t('dashboard.viewTasksAs')}
+              </Typography>
             </Box>
           </Box>
           <Box sx={{ mb: 2 }}>
             <Typography level='title-md' sx={{ mb: 0.5 }}>
-              Switch to user view
+              {t('dashboard.switchToUserView')}
             </Typography>
             <Typography level='body-sm' sx={{ mb: 1, color: 'text.secondary' }}>
-              Tasks will be filtered to show only assignments for selected user
+              {t('dashboard.userViewDescription')}
             </Typography>
           </Box>
           <Button
@@ -69,7 +73,7 @@ const UserSwitcher = () => {
             onClick={() => setIsModalOpen(true)}
             size='sm'
           >
-            Choose User
+            {t('dashboard.chooseUser')}
           </Button>
           <UserModal
             isOpen={isModalOpen}
@@ -120,7 +124,9 @@ const UserSwitcher = () => {
             }}
           >
             <SupervisorAccount color='' />
-            <Typography level='title-md'>View tasks as</Typography>
+            <Typography level='title-md'>
+              {t('dashboard.viewTasksAs')}
+            </Typography>
           </Box>
         </Box>
 
@@ -153,7 +159,7 @@ const UserSwitcher = () => {
                   setIsModalOpen(true)
                 }}
               >
-                Change User
+                {t('dashboard.changeUser')}
               </Button>
               <Button
                 variant='plain'
@@ -164,7 +170,7 @@ const UserSwitcher = () => {
                   stopImpersonation()
                 }}
               >
-                Cancel
+                {t('dashboard.cancel')}
               </Button>
             </Box>
           </Box>

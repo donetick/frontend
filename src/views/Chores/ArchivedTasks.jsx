@@ -13,20 +13,21 @@ import {
   ViewModule,
 } from '@mui/icons-material'
 import {
-    Box,
-    Button,
-    Container,
-    Divider,
-    IconButton,
-    Input,
-    List,
-    Stack,
-    Typography,
+  Box,
+  Button,
+  Container,
+  Divider,
+  IconButton,
+  Input,
+  List,
+  Stack,
+  Typography,
 } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import Fuse from 'fuse.js'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import FilterBar from '../../components/common/FilterBar'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
@@ -88,6 +89,7 @@ const applyPendingArchivedState = async chores => {
 }
 
 const ArchivedTasks = () => {
+  const { t } = useTranslation('chores')
   const { data: userProfile, isLoading: isUserProfileLoading } =
     useUserProfile()
   const { showSuccess, showError } = useNotification()
@@ -117,7 +119,9 @@ const ArchivedTasks = () => {
   const availableLabels = useMemo(() => {
     const seen = {}
     archivedChores.forEach(c => {
-      c.labelsV2?.forEach(l => { seen[l.id] = l })
+      c.labelsV2?.forEach(l => {
+        seen[l.id] = l
+      })
     })
     return Object.values(seen)
   }, [archivedChores])
@@ -480,7 +484,11 @@ const ArchivedTasks = () => {
                     },
                     onError: async error => {
                       if (isNetworkError(error)) {
-                        await commandQueue.enqueue(CommandType.UNARCHIVE_CHORE, chore.id, { id: chore.id })
+                        await commandQueue.enqueue(
+                          CommandType.UNARCHIVE_CHORE,
+                          chore.id,
+                          { id: chore.id },
+                        )
                         await offlineDB.saveChores([
                           { ...chore, isActive: true, _pending: 'unarchive' },
                         ])
@@ -500,11 +508,18 @@ const ArchivedTasks = () => {
 
             const allRestored = [...restoredTasks, ...queuedTasks]
             if (allRestored.length > 0) {
-              const offlineNote = queuedTasks.length > 0 ? " (queued — will sync when back online)" : ''
+              const offlineNote =
+                queuedTasks.length > 0
+                  ? ' (queued — will sync when back online)'
+                  : ''
               // Remove from archived view optimistically for both online and queued
               const restoredIds = new Set(allRestored.map(c => c.id))
-              const newArchivedChores = archivedChores.filter(c => !restoredIds.has(c.id))
-              const newFilteredChores = filteredChores.filter(c => !restoredIds.has(c.id))
+              const newArchivedChores = archivedChores.filter(
+                c => !restoredIds.has(c.id),
+              )
+              const newFilteredChores = filteredChores.filter(
+                c => !restoredIds.has(c.id),
+              )
               setArchivedChores(newArchivedChores)
               setFilteredChores(newFilteredChores)
               if (queuedTasks.length > 0) {
@@ -631,10 +646,10 @@ const ArchivedTasks = () => {
             level='h3'
             sx={{ fontWeight: 'lg', color: 'text.primary' }}
           >
-            Archived Tasks
+            {t('archived.title')}
           </Typography>
           <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            View and manage tasks that have been archived or completed.
+            {t('archived.description')}
           </Typography>
         </Stack>
       </Box>
@@ -679,7 +694,7 @@ const ArchivedTasks = () => {
       >
         <Input
           slotProps={{ input: { ref: searchInputRef } }}
-          placeholder='Search archived tasks'
+          placeholder={t('archived.search')}
           value={searchTerm}
           fullWidth
           sx={{
@@ -828,8 +843,7 @@ const ArchivedTasks = () => {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <CheckBox sx={{ color: 'primary.500' }} />
                 <Typography level='body-sm' fontWeight='md'>
-                  {selectedChores.size} task
-                  {selectedChores.size !== 1 ? 's' : ''} selected
+                  {t('bulk.selected', { count: selectedChores.size })}
                 </Typography>
               </Box>
 
@@ -852,9 +866,9 @@ const ArchivedTasks = () => {
                     '--Button-paddingInline': '0.75rem',
                     position: 'relative',
                   }}
-                  title='Select all visible tasks (Ctrl+A)'
+                  title={t('bulk.selectAllTitle')}
                 >
-                  All
+                  {t('bulk.all')}
                   {showKeyboardShortcuts && (
                     <KeyboardShortcutHint
                       shortcut='A'
@@ -883,9 +897,13 @@ const ArchivedTasks = () => {
                     '--Button-paddingInline': '0.75rem',
                     position: 'relative',
                   }}
-                  title={`${selectedChores.size === 0 ? 'Close' : 'Clear'} multi-select (Esc)`}
+                  title={t(
+                    selectedChores.size === 0
+                      ? 'bulk.closeTitle'
+                      : 'bulk.clearTitle',
+                  )}
                 >
-                  {selectedChores.size === 0 ? 'Close' : 'Clear'}
+                  {t(selectedChores.size === 0 ? 'bulk.close' : 'bulk.clear')}
                   {showKeyboardShortcuts && (
                     <KeyboardShortcutHint
                       withCtrl={false}
@@ -929,9 +947,9 @@ const ArchivedTasks = () => {
                   '--Button-paddingInline': { xs: '0.75rem', sm: '1rem' },
                   position: 'relative',
                 }}
-                title='Restore selected tasks (R)'
+                title={t('archived.restoreTitle')}
               >
-                Restore
+                {t('archived.restore')}
                 {showKeyboardShortcuts && selectedChores.size > 0 && (
                   <KeyboardShortcutHint
                     shortcut='R'
@@ -956,9 +974,9 @@ const ArchivedTasks = () => {
                   '--Button-paddingInline': { xs: '0.75rem', sm: '1rem' },
                   position: 'relative',
                 }}
-                title='Delete selected tasks (E)'
+                title={t('archived.deleteTitle')}
               >
-                Delete
+                {t('bulk.delete')}
                 {showKeyboardShortcuts && selectedChores.size > 0 && (
                   <KeyboardShortcutHint
                     shortcut='E'
@@ -990,24 +1008,28 @@ const ArchivedTasks = () => {
           <Archive sx={{ fontSize: '4rem', mb: 1, color: 'text.tertiary' }} />
           <Typography level='title-md' gutterBottom>
             {searchTerm || hasActiveFilters
-              ? 'No archived tasks found'
-              : 'No archived tasks'}
+              ? t('archived.noneFound')
+              : t('archived.none')}
           </Typography>
           <Typography level='body-sm' color='text.secondary' sx={{ mb: 2 }}>
             {searchTerm || hasActiveFilters
-              ? 'Try adjusting your search or filters'
-              : 'Archived tasks will appear here when you archive them from the main task list'}
+              ? t('archived.adjustSearch')
+              : t('archived.emptyDescription')}
           </Typography>
           {(searchTerm || hasActiveFilters) && (
             <Box sx={{ display: 'flex', gap: 1 }}>
               {searchTerm && (
-                <Button onClick={handleSearchClose} variant='outlined' color='neutral'>
-                  Clear search
+                <Button
+                  onClick={handleSearchClose}
+                  variant='outlined'
+                  color='neutral'
+                >
+                  {t('archived.clearSearch')}
                 </Button>
               )}
               {hasActiveFilters && (
                 <Button onClick={clearAll} variant='outlined' color='neutral'>
-                  Clear filters
+                  {t('archived.clearFilters')}
                 </Button>
               )}
             </Box>
