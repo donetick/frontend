@@ -52,6 +52,7 @@ const SmartTaskTitleInput = ({
   onChange,
   suggestions,
   onEnterPressed,
+  onShiftEnterPressed,
   customRenderer,
   isNativeScanner,
   onScanClick,
@@ -158,7 +159,11 @@ const SmartTaskTitleInput = ({
     } else {
       if (e.key === 'Enter') {
         e.preventDefault()
-        if (onEnterPressed) {
+        if (e.shiftKey) {
+          if (onShiftEnterPressed) {
+            onShiftEnterPressed(value)
+          }
+        } else if (onEnterPressed) {
           onEnterPressed(value)
         }
       }

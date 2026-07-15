@@ -231,6 +231,7 @@ const DueDatePickerField = ({
         open={isOpen}
         onClose={() => setIsOpen(false)}
         title='Due Date'
+        fullWidth={false}
         footer={
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
             {hasDueDate && (
@@ -266,7 +267,7 @@ const DueDatePickerField = ({
           </Box>
         }
       >
-        <Box sx={{ fontFamily: 'var(--joy-fontFamily-body)' }}>
+        <Box sx={{ fontFamily: 'var(--joy-fontFamily-body)', maxWidth: 360 }}>
           {/* Date shortcuts */}
           <Typography
             level='body-xs'

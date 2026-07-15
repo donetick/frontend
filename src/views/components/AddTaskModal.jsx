@@ -25,6 +25,9 @@ import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import { useDocumentScanner } from '../../hooks/useDocumentScanner'
 import { localAIService } from '../../service/LocalAIService'
 import { TASK_COLOR } from '../../utils/Colors'
+import AdvancedOptionsSection, {
+  AdvancedOptionsTrigger,
+} from './AdvancedOptionsSection'
 import AssigneePickerField from './AssigneePickerField'
 import AttachmentPickerField from './AttachmentPickerField'
 import DueDatePickerField from './DueDatePickerField'
@@ -101,6 +104,11 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
   const [hasDescription, setHasDescription] = useState(false)
   const [hasSubTasks, setHasSubTasks] = useState(false)
   const [deadlineOffset, setDeadlineOffset] = useState(-1)
+  const [requireApproval, setRequireApproval] = useState(false)
+  const [completionWindow, setCompletionWindow] = useState(-1)
+  const [assignStrategy, setAssignStrategy] = useState('keep_last_assigned')
+  const [isPrivate, setIsPrivate] = useState(false)
+  const [showAdvanced, setShowAdvanced] = useState(false)
   const [dueDateOnly, setDueDateOnly] = useState(null)
   const [dueTime, setDueTime] = useState(null)
   const [useCustomTime, setUseCustomTime] = useState(false)
@@ -422,6 +430,8 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
       if (dueDateParsed.result) {
         syncDueDateStates(dueDateParsed.result)
         dueDateHighlight = dueDateParsed.highlight[0]
+      } else if (repeat.dueDate) {
+        syncDueDateStates(repeat.dueDate)
       }
 
       // Create the cleaned sentence by sequentially applying all cleanups
@@ -597,6 +607,11 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
     setAssignees([])
     setProjectId(getInitialProject())
     setDeadlineOffset(-1)
+    setRequireApproval(false)
+    setCompletionWindow(-1)
+    setAssignStrategy('keep_last_assigned')
+    setIsPrivate(false)
+    setShowAdvanced(false)
     setDueDateOnly(null)
     setDueTime(null)
     setUseCustomTime(false)
@@ -608,26 +623,19 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
     // Handle different assignee scenarios
     let finalAssignees = assignees
     let finalAssignedTo = null
-    let finalAssignStrategy = 'random'
+    let finalAssignStrategy = assignStrategy
 
     if (isAnyoneTask) {
-      // @Anyone was explicitly used - anyone can do the task
       finalAssignees = []
       finalAssignedTo = null
       finalAssignStrategy = 'no_assignee'
     } else if (assignees.length === 0) {
-      // No assignees and no @Anyone - fallback to current user
       finalAssignees = [{ userId: userProfile?.id }]
       finalAssignedTo = userProfile?.id
-      finalAssignStrategy = 'keep_last_assigned'
-    } else if (assignees.length === 1) {
-      // Single assignee
-      finalAssignedTo = assignees[0].userId
-      finalAssignStrategy = 'keep_last_assigned'
+      finalAssignStrategy = assignStrategy
     } else {
-      // Multiple assignees
-      finalAssignedTo = null
-      finalAssignStrategy = 'random'
+      finalAssignedTo = assignees[0].userId
+      finalAssignStrategy = assignStrategy
     }
 
     const chore = {
@@ -642,6 +650,10 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
       priority: priority ? Number(priority) : 0,
       points: points > -1 ? points : null,
       deadlineOffset: deadlineOffset < 0 ? null : deadlineOffset,
+      completionWindow:
+        completionWindow < 0 || !dueDate ? null : completionWindow,
+      requireApproval: requireApproval,
+      isPrivate: isPrivate,
       status: 0,
       frequencyType: 'once',
       frequencyMetadata: {},
@@ -713,7 +725,6 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
         footer={
           <Box
             sx={{
-              marginTop: 2,
               display: 'flex',
               flexDirection: 'row',
               justifyContent: 'end',
@@ -834,6 +845,12 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
                 }}
                 customRenderer={renderedParts}
                 onEnterPressed={handleEnterPressed}
+                onShiftEnterPressed={() => {
+                  if (!hasDescription) {
+                    setHasDescription(true)
+                  }
+                  setTimeout(() => richTextEditorRef.current?.focus(), 50)
+                }}
                 suggestions={{
                   '#': {
                     value: 'id',
@@ -917,15 +934,21 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
               />
               <AssigneePickerField
                 emptyDisplay={pickerEmptyDisplay}
-                value={assignees?.[0]?.userId || null}
-                onChange={userId => {
-                  if (!userId) {
+                values={assignees.map(a => a.userId)}
+                isAnyone={isAnyoneTask}
+                onChange={userIds => {
+                  if (userIds.includes('anyone')) {
+                    setIsAnyoneTask(true)
                     setAssignees([])
                   } else {
-                    setAssignees([{ userId }])
+                    setIsAnyoneTask(false)
+                    setAssignees(userIds.map(userId => ({ userId })))
                   }
                 }}
-                onClear={() => setAssignees([])}
+                onClear={() => {
+                  setIsAnyoneTask(false)
+                  setAssignees([])
+                }}
                 currentUserId={userProfile?.id}
                 members={circleMembers?.res || []}
               />
@@ -952,40 +975,99 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
               />
             </Box>
 
-            <Box mt={2} sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
+            <Box
+              sx={{
+                mt: 1,
+                display: 'flex',
+                flexDirection: 'row',
+                gap: 1.5,
+                flexWrap: 'wrap',
+                alignItems: 'center',
+              }}
+            >
               {!hasDescription && (
                 <Button
-                  startDecorator={<Add />}
+                  size='sm'
                   variant='outlined'
                   color='neutral'
-                  size='md'
                   onClick={() => setHasDescription(true)}
                   endDecorator={
                     showKeyboardShortcuts && (
                       <KeyboardShortcutHint shortcut='E' />
                     )
                   }
+                  sx={{
+                    borderRadius: '128px',
+                    minHeight: 40,
+                    px: 1.25,
+                    gap: 1,
+                    transition: 'all 0.25s ease-in-out',
+                  }}
                 >
-                  Description
+                  <Add sx={{ fontSize: 20 }} />
+                  <Typography level='body-sm' sx={{ color: 'inherit' }}>
+                    Description
+                  </Typography>
                 </Button>
               )}
               {!hasSubTasks && (
                 <Button
-                  startDecorator={<Add />}
+                  size='sm'
                   variant='outlined'
                   color='neutral'
-                  size='md'
                   onClick={() => setHasSubTasks(true)}
                   endDecorator={
                     showKeyboardShortcuts && (
                       <KeyboardShortcutHint shortcut='J' />
                     )
                   }
+                  sx={{
+                    borderRadius: '128px',
+                    minHeight: 40,
+                    px: 1.25,
+                    gap: 1,
+                    transition: 'all 0.25s ease-in-out',
+                  }}
                 >
-                  Subtasks
+                  <Add sx={{ fontSize: 20 }} />
+                  <Typography level='body-sm' sx={{ color: 'inherit' }}>
+                    Subtasks
+                  </Typography>
                 </Button>
               )}
+              <AdvancedOptionsTrigger
+                open={showAdvanced}
+                onToggle={() => setShowAdvanced(v => !v)}
+                activeCount={
+                  [
+                    points > -1,
+                    requireApproval,
+                    completionWindow > -1,
+                    deadlineOffset > -1,
+                  ].filter(Boolean).length
+                }
+                emptyDisplay={pickerEmptyDisplay}
+              />
             </Box>
+
+            <AdvancedOptionsSection
+              open={showAdvanced}
+              points={points}
+              onPointsChange={setPoints}
+              requireApproval={requireApproval}
+              onRequireApprovalChange={setRequireApproval}
+              completionWindow={completionWindow}
+              onCompletionWindowChange={setCompletionWindow}
+              deadlineOffset={deadlineOffset}
+              onDeadlineOffsetChange={setDeadlineOffset}
+              assignStrategy={assignStrategy}
+              onAssignStrategyChange={setAssignStrategy}
+              hasDueDate={!!dueDate}
+              hasMultipleAssignees={assignees.length > 1}
+              hasAssignees={assignees.length > 0}
+              isPrivate={isPrivate}
+              onIsPrivateChange={setIsPrivate}
+            />
 
             {hasDescription && (
               <Box>
