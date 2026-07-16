@@ -701,10 +701,7 @@ const LoginView = () => {
                     sx={{ mt: 3, mb: 2 }}
                     onClick={async () => {
                       try {
-                        // Clear any cached session so the account picker shows
-                        await SocialLogin.logout({ provider: 'google' }).catch(
-                          () => {},
-                        )
+                      
                         const user = await SocialLogin.login({
                           provider: 'google',
                           options: { scopes: ['profile', 'email', 'openid'] },
