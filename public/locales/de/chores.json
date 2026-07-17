@@ -33,7 +33,7 @@
     "resetTimer": "Timer zurücksetzen",
     "resetTimerConfirmation": "Bist du sicher, dass du den Timer zurücksetzen möchtest? Dies löscht alle Zeitaufzeichnungen seit du die Aufgabe gestartet hast.",
     "clearAllTimeRecords": "Alle Zeitaufzeichnungen löschen",
-    "clearAllTimeConfirmation": "Dies löscht dauerhaft alle Timer für diese Aufgabe und setzt sie zurück auf \"nicht gestartet\".",
+    "clearAllTimeConfirmation": "Dies löscht dauerhaft alle Timer für diese Aufgabe und setzt sie zurück auf „nicht gestartet“.",
     "descriptionTitle": "Beschreibung",
     "description": "Beschreibung:",
     "previousNote": "Vorherige Notiz",
