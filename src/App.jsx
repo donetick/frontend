@@ -1,7 +1,7 @@
 import NavBar from '@/views/components/NavBar'
 import { Button, Typography, useColorScheme } from '@mui/joy'
 import { useCallback, useEffect } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useNavigate } from 'react-router-dom'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 import { registerCapacitorListeners } from './CapacitorListener'
 import PageTransition from './components/animations/PageTransition'
@@ -35,7 +35,6 @@ const AppContent = () => {
 
   // Initialize status bar with theme-aware configuration
   useStatusBar()
-
 
   const {
     offlineReady: [offlineReady, setOfflineReady], // eslint-disable-line no-unused-vars
@@ -99,6 +98,7 @@ const AppContent = () => {
 function App() {
   const resource = useResource() // eslint-disable-line no-unused-vars
   const { mode, systemMode } = useColorScheme()
+  const navigate = useNavigate()
 
   // startOpenReplay()
 
@@ -124,8 +124,8 @@ function App() {
   }, [setThemeClass])
 
   useEffect(() => {
-    registerCapacitorListeners()
-  }, [])
+    registerCapacitorListeners(navigate)
+  }, [navigate])
 
   return (
     <div>
