@@ -1,0 +1,174 @@
+{
+  "title": "Paramètres",
+  "circleSettings": {
+    "title": "Paramètres du cercle",
+    "description": "Votre compte est automatiquement connecté à un Cercle lorsque vous en créez un ou en rejoignez un. Invitez facilement des amis en partageant le code unique du Cercle ou le lien ci-dessous.",
+    "circleCode": "Code du Cercle",
+    "copyCode": "Copier le Code",
+    "copyLink": "Copier le Lien",
+    "codeCopied": "Code du cercle copié !",
+    "linkCopied": "Lien copié !",
+    "joinCircle": "Rejoindre un Cercle",
+    "joinCirclePlaceholder": "Entrer le Code du Cercle",
+    "join": "Rejoindre",
+    "leave": "Quitter le Cercle",
+    "leaveConfirmTitle": "Quitter le Cercle",
+    "leaveConfirmMessage": "Êtes-vous sûr de vouloir quitter ce cercle ?",
+    "circleMembers": "Membres du Cercle",
+    "circleMemberRequests": "Demandes de Membres du Cercle",
+    "admin": "Administrateur",
+    "member": "Membre",
+    "pending": "En attente",
+    "accept": "Accepter",
+    "reject": "Rejeter",
+    "makeAdmin": "Nommer Administrateur",
+    "makeMember": "Nommer Membre",
+    "remove": "Supprimer",
+    "webhookURL": "URL du Webhook",
+    "webhookDescription": "Entrez une URL de webhook pour recevoir des notifications pour les événements du cercle",
+    "webhookPlaceholder": "https://votre-url-webhook.com"
+  },
+  "accountSettings": {
+    "title": "Paramètres du Compte",
+    "subscription": "Abonnement",
+    "subscriptionStatus": "Plan Actuel",
+    "free": "Gratuit",
+    "plus": "Plus",
+    "upgrade": "Mettre à Niveau",
+    "cancel": "Annuler",
+    "changePassword": "Changer le Mot de Passe",
+    "password": "Mot de passe",
+    "dangerZone": "Zone Dangereuse",
+    "dangerZoneDescription": "Une fois votre compte supprimé, il n'y a pas de retour en arrière. Veuillez être certain.",
+    "deleteAccount": "Supprimer le Compte"
+  },
+  "localization": {
+    "title": "Localisation",
+    "description": "Personnalisez la langue, le format de date et les préférences régionales pour votre compte.",
+    "language": "Langue",
+    "languageDescription": "Sélectionnez votre langue préférée",
+    "dateFormat": "Format de Date",
+    "dateFormatDescription": "Choisissez comment les dates doivent être affichées dans l'application",
+    "timeFormat": "Format de l'Heure",
+    "timeFormatDescription": "Sélectionnez le format 12 heures ou 24 heures",
+    "12hour": "12 heures (AM/PM)",
+    "24hour": "24 heures",
+    "firstDayOfWeek": "Premier Jour de la Semaine",
+    "firstDayOfWeekDescription": "Sélectionnez quel jour commence votre semaine",
+    "sunday": "Dimanche",
+    "monday": "Lundi",
+    "saturday": "Samedi",
+    "formats": {
+      "mdy": "MM/JJ/AAAA (États-Unis)",
+      "dmy": "JJ/MM/AAAA (Europe)",
+      "ymd": "AAAA-MM-JJ (ISO)",
+      "long": "Format long (ex., 1 janvier 2024)",
+      "short": "Format court (ex., 1 janv. 2024)"
+    }
+  },
+  "sidepanel": {
+    "title": "Personnalisation du Panneau Latéral",
+    "description": "Personnalisez la disposition et la visibilité des cartes dans le panneau latéral. Cette section n'est disponible que sur les grands écrans comme les tablettes et les ordinateurs de bureau."
+  },
+  "theme": {
+    "title": "Préférences de thème",
+    "description": "Choisissez comment le site vous apparaît. Sélectionnez un thème unique ou synchronisez avec votre système pour basculer automatiquement entre les thèmes jour et nuit.",
+    "themeMode": "Mode de thème",
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système"
+  },
+  "notifications": {
+    "settingsSaved": "Paramètres enregistrés avec succès",
+    "settingsSaveFailed": "Échec de l'enregistrement des paramètres",
+    "invalidWebhook": "URL de webhook invalide"
+  },
+  "profile": {
+    "title": "Paramètres du Profil",
+    "description": "Mettez à jour votre nom d'affichage et votre photo de profil.",
+    "photoUpdated": "Photo Mise à Jour",
+    "photoUpdatedMessage": "Votre photo de profil a été mise à jour avec succès !",
+    "uploadFailed": "Échec du Téléchargement",
+    "uploadFailedMessage": "Échec du téléchargement de votre photo. Veuillez réessayer.",
+    "profileUpdated": "Profil Mis à Jour",
+    "profileUpdatedMessage": "Vos informations de profil ont été enregistrées avec succès !",
+    "updateFailed": "Échec de la Mise à Jour",
+    "updateFailedMessage": "Impossible de mettre à jour votre profil. Veuillez vérifier votre connexion et réessayer.",
+    "changePhoto": "Changer la Photo",
+    "displayName": "Nom d'Affichage",
+    "displayNamePlaceholder": "Entrez votre nom d'affichage",
+    "timezone": "Fuseau Horaire",
+    "timezonePlaceholder": "Sélectionnez votre fuseau horaire",
+    "save": "Enregistrer",
+    "cancel": "Annuler"
+  },
+  "overview": {
+    "title": "Paramètres",
+    "subtitle": "Personnalisez votre expérience et gérez les préférences de votre compte",
+    "upgrade": {
+      "title": "Passer à Plus",
+      "description": "Débloquez des fonctionnalités puissantes pour améliorer votre productivité",
+      "button": "Mettre à Niveau Maintenant",
+      "features": {
+        "richText": "Descriptions en texte enrichi",
+        "notifications": "Notifications de tâches",
+        "apiIntegrations": "Intégrations API",
+        "advancedAutomation": "Automatisation avancée"
+      }
+    },
+    "sections": {
+      "profile": {
+        "title": "Paramètres du Profil",
+        "description": "Mettez à jour vos informations de profil, photo, nom d'affichage et préférences de fuseau horaire."
+      },
+      "circle": {
+        "title": "Paramètres du Cercle",
+        "description": "Gérez votre cercle, invitez des membres et gérez les demandes d'adhésion."
+      },
+      "account": {
+        "title": "Paramètres du Compte",
+        "description": "Gérez votre abonnement, changez le mot de passe et les options de suppression de compte."
+      },
+      "subaccounts": {
+        "title": "Comptes Gérés",
+        "description": "Créez et gérez des sous-comptes pour vous connecter et accomplir les tâches assignées."
+      },
+      "notifications": {
+        "title": "Notifications",
+        "description": "Configurez les notifications push, les alertes par e-mail et les cibles de notification pour les tâches."
+      },
+      "mfa": {
+        "title": "Authentification Multi-Facteurs",
+        "description": "Ajoutez une couche de sécurité supplémentaire avec MFA en utilisant des applications d'authentification."
+      },
+      "apitokens": {
+        "title": "Jetons API",
+        "description": "Générez et gérez des jetons d'accès pour les intégrations tierces et l'accès à l'API."
+      },
+      "storage": {
+        "title": "Paramètres de Stockage",
+        "description": "Sauvegardez et restaurez vos données, gérez le stockage local et les préférences de synchronisation."
+      },
+      "sidepanel": {
+        "title": "Personnalisation du Panneau Latéral",
+        "description": "Personnalisez la disposition et la visibilité des cartes dans l'interface du panneau latéral."
+      },
+      "theme": {
+        "title": "Préférences de Thème",
+        "description": "Choisissez votre thème préféré et configurez les paramètres de mode sombre/clair."
+      },
+      "localization": {
+        "title": "Localisation",
+        "description": "Personnalisez la langue, le format de date, le format de l'heure et les préférences régionales."
+      },
+      "advanced": {
+        "title": "Paramètres Avancés",
+        "description": "Configurez les webhooks, les mises à jour en temps réel et d'autres fonctionnalités avancées pour améliorer la productivité."
+      },
+      "developer": {
+        "title": "Paramètres Développeur",
+        "description": "Consultez les informations techniques sur les jetons d'authentification, les connexions SSE et les données de débogage."
+      }
+    }
+  }
+}
