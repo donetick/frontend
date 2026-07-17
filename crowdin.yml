@@ -5,7 +5,11 @@ project_id: "donetick"
 api_token_env: CROWDIN_API_TOKEN
 preserve_hierarchy: true
 
+languages_mapping:
+  two_letters_code:
+    zh-CN: zh-CN
+
 files:
   - source: /public/locales/en/*.json
-    translation: /public/locales/%locale%/%original_file_name%
+    translation: /public/locales/%two_letters_code%/%original_file_name%
     update_option: update_as_unapproved
