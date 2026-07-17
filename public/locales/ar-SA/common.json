@@ -1,0 +1,33 @@
+{
+  "save": "حفظ",
+  "cancel": "إلغاء",
+  "delete": "حذف",
+  "edit": "تعديل",
+  "close": "إغلاق",
+  "confirm": "تأكيد",
+  "loading": "جارٍ التحميل...",
+  "error": "خطأ",
+  "success": "نجح",
+  "warning": "تحذير",
+  "refresh": "تحديث",
+  "copy": "نسخ",
+  "copied": "تم النسخ!",
+  "settings": "الإعدادات",
+  "yes": "نعم",
+  "no": "لا",
+  "back": "رجوع",
+  "backToCalendar": "العودة إلى التقويم",
+  "logout": "تسجيل الخروج",
+  "version": "النسخة",
+  "navigation": {
+    "allTasks": "جميع المهام",
+    "archived": "المؤرشفة",
+    "things": "الأشياء",
+    "labels": "التسميات",
+    "projects": "المشاريع",
+    "filters": "الفلاتر",
+    "activities": "الأنشطة",
+    "points": "النقاط",
+    "settings": "الإعدادات"
+  }
+}
