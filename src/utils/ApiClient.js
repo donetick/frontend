@@ -241,8 +241,14 @@ class ApiClient {
       return response
     } catch (error) {
       clearTimeout(timeoutId)
-      // fetch() threw = network-level failure or timeout — mark server unreachable
-      networkManager.setServerUnreachable()
+      // fetch() threw = network-level failure or timeout — mark server
+      // unreachable. Caller-initiated aborts (component unmount, query
+      // cancellation) say nothing about server health, so skip those.
+      const externalAbort =
+        error?.name === 'AbortError' && options.signal?.aborted
+      if (!externalAbort) {
+        networkManager.setServerUnreachable()
+      }
       console.error('Request failed', error)
       throw error
     }

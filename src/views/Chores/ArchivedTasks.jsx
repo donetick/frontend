@@ -13,15 +13,15 @@ import {
   ViewModule,
 } from '@mui/icons-material'
 import {
-    Box,
-    Button,
-    Container,
-    Divider,
-    IconButton,
-    Input,
-    List,
-    Stack,
-    Typography,
+  Box,
+  Button,
+  Container,
+  Divider,
+  IconButton,
+  Input,
+  List,
+  Stack,
+  Typography,
 } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import Fuse from 'fuse.js'
@@ -38,6 +38,7 @@ import { commandQueue, CommandType } from '../../utils/CommandQueue'
 import { DeleteChore, GetArchivedChores } from '../../utils/Fetcher'
 import Priorities from '../../utils/Priorities'
 import { offlineDB } from '../../utils/OfflineDB'
+import { isOfflineFeatureEnabled } from '../../utils/OfflineFeatureToggle'
 import LoadingComponent from '../components/Loading'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import ChoreCard from './ChoreCard'
@@ -117,7 +118,9 @@ const ArchivedTasks = () => {
   const availableLabels = useMemo(() => {
     const seen = {}
     archivedChores.forEach(c => {
-      c.labelsV2?.forEach(l => { seen[l.id] = l })
+      c.labelsV2?.forEach(l => {
+        seen[l.id] = l
+      })
     })
     return Object.values(seen)
   }, [archivedChores])
@@ -467,7 +470,9 @@ const ArchivedTasks = () => {
             const failedTasks = []
 
             const isNetworkError = err =>
-              err instanceof TypeError && err.message === 'Failed to fetch'
+              isOfflineFeatureEnabled() &&
+              err instanceof TypeError &&
+              err.message === 'Failed to fetch'
             const queuedTasks = []
 
             for (const chore of selectedData) {
@@ -480,7 +485,11 @@ const ArchivedTasks = () => {
                     },
                     onError: async error => {
                       if (isNetworkError(error)) {
-                        await commandQueue.enqueue(CommandType.UNARCHIVE_CHORE, chore.id, { id: chore.id })
+                        await commandQueue.enqueue(
+                          CommandType.UNARCHIVE_CHORE,
+                          chore.id,
+                          { id: chore.id },
+                        )
                         await offlineDB.saveChores([
                           { ...chore, isActive: true, _pending: 'unarchive' },
                         ])
@@ -500,11 +509,18 @@ const ArchivedTasks = () => {
 
             const allRestored = [...restoredTasks, ...queuedTasks]
             if (allRestored.length > 0) {
-              const offlineNote = queuedTasks.length > 0 ? " (queued — will sync when back online)" : ''
+              const offlineNote =
+                queuedTasks.length > 0
+                  ? ' (queued — will sync when back online)'
+                  : ''
               // Remove from archived view optimistically for both online and queued
               const restoredIds = new Set(allRestored.map(c => c.id))
-              const newArchivedChores = archivedChores.filter(c => !restoredIds.has(c.id))
-              const newFilteredChores = filteredChores.filter(c => !restoredIds.has(c.id))
+              const newArchivedChores = archivedChores.filter(
+                c => !restoredIds.has(c.id),
+              )
+              const newFilteredChores = filteredChores.filter(
+                c => !restoredIds.has(c.id),
+              )
               setArchivedChores(newArchivedChores)
               setFilteredChores(newFilteredChores)
               if (queuedTasks.length > 0) {
@@ -1001,7 +1017,11 @@ const ArchivedTasks = () => {
           {(searchTerm || hasActiveFilters) && (
             <Box sx={{ display: 'flex', gap: 1 }}>
               {searchTerm && (
-                <Button onClick={handleSearchClose} variant='outlined' color='neutral'>
+                <Button
+                  onClick={handleSearchClose}
+                  variant='outlined'
+                  color='neutral'
+                >
                   Clear search
                 </Button>
               )}
