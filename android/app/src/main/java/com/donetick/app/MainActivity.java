@@ -9,10 +9,19 @@ import com.getcapacitor.PluginHandle;
 import com.getcapacitor.Plugin;
 import android.content.Intent;
 import android.nfc.NfcAdapter;
+import android.os.Bundle;
 import android.util.Log;
+
+import com.donetick.app.widget.WidgetBridgePlugin;
 
 
  public class MainActivity extends BridgeActivity implements ModifiedMainActivityForSocialLoginPlugin {
+
+     @Override
+     public void onCreate(Bundle savedInstanceState) {
+         registerPlugin(WidgetBridgePlugin.class);
+         super.onCreate(savedInstanceState);
+     }
 
      // Capacitor only forwards ACTION_VIEW deep links, so normalize Donetick NFC intents before dispatch.
      @Override

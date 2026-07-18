@@ -26,6 +26,7 @@ platform :ios do
         signingStyle: "manual",
         provisioningProfiles: {
           "com.donetick.app" => "Donetick App Store(fastline)",
+          "com.donetick.app.widget" => "Donetick Widget App Store(fastline)",
         },
       },
     )

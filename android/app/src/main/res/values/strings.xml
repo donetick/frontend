@@ -4,4 +4,32 @@
     <string name="title_activity_main">Donetick</string>
     <string name="package_name">com.donetick.app</string>
     <string name="custom_url_scheme">com.donetick.app</string>
+
+    <!-- Home-screen widgets -->
+    <string name="widget_today_label">Today</string>
+    <string name="widget_week_label">Next 7 Days</string>
+    <string name="widget_today_description">Your tasks due today, plus anything waiting on you.</string>
+    <string name="widget_week_description">Your tasks for the next 7 days, grouped by day.</string>
+    <string name="widget_today_title">Today</string>
+    <string name="widget_week_title">Next 7 days</string>
+    <string name="widget_empty_today">All caught up!\nNothing due today</string>
+    <string name="widget_empty_week">All caught up!\nNothing due this week</string>
+    <string name="widget_signed_out">Open Donetick and sign in\nto see your tasks</string>
+    <string name="widget_meta_overdue">Overdue</string>
+    <string name="widget_meta_approval">Approve</string>
+    <string name="widget_group_approval">Needs approval</string>
+    <string name="widget_group_overdue">Overdue</string>
+    <string name="widget_group_today">Today</string>
+    <string name="widget_group_tomorrow">Tomorrow</string>
+    <string name="widget_updated_at">Updated %s</string>
+    <string name="widget_add_task">Add task</string>
+    <string name="widget_people_label">People</string>
+    <string name="widget_people_description">Everyone in your circle with their tasks for today and the week ahead.</string>
+    <string name="widget_people_title">People</string>
+    <string name="widget_empty_people">No circle members yet</string>
+    <string name="widget_person_counts">%1$d today · %2$d this week</string>
+    <string name="widget_config_title">Widget options</string>
+    <string name="widget_config_include_others">Show everyone\'s tasks</string>
+    <string name="widget_config_include_others_hint">Include tasks assigned to other members of your circle. Their avatar appears next to their tasks.</string>
+    <string name="widget_config_save">Save</string>
 </resources>

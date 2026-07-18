@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/row_day"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:letterSpacing="0.08"
+    android:paddingTop="8dp"
+    android:paddingBottom="2dp"
+    android:textAllCaps="true"
+    android:textColor="@color/widget_text_secondary"
+    android:textSize="10sp"
+    android:textStyle="bold" />
