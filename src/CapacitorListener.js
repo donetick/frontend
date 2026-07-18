@@ -62,7 +62,11 @@ const handleNFCChoreDeepLink = (url, isColdStart) => {
 
 const handleUrlOpen = (url, isColdStart = false) => {
   console.log('[NFC] handleUrlOpen:', url)
-  if (url.startsWith('donetick://chores/')) {
+  if (url.startsWith('donetick://chores/add')) {
+    // Widget "+" button: land on the chore list with the quick-add modal open
+    // (MyChores watches for the add_task param and consumes it).
+    routerNavigate('/chores?add_task=1')
+  } else if (url.startsWith('donetick://chores/')) {
     handleNFCChoreDeepLink(url, isColdStart)
   } else if (url.startsWith('donetick://auth/')) {
     handleOAuthDeepLink(url)
