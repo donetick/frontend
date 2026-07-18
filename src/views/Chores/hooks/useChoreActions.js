@@ -19,9 +19,14 @@ import {
   UpdateDueDate,
 } from '../../../utils/Fetcher'
 import { offlineDB } from '../../../utils/OfflineDB'
+import { isOfflineFeatureEnabled } from '../../../utils/OfflineFeatureToggle'
 
+// Effectively "can this action be queued offline?" — requires the offline
+// feature, otherwise there is no command queue to replay it later.
 const isNetworkError = err =>
-  err instanceof TypeError && err.message === 'Failed to fetch'
+  isOfflineFeatureEnabled() &&
+  err instanceof TypeError &&
+  err.message === 'Failed to fetch'
 
 export const useChoreActions = ({
   chores,

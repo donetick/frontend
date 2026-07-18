@@ -48,12 +48,17 @@ import {
 import { useCircleMembers } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { commandQueue, CommandType } from '../../utils/CommandQueue'
+import { isOfflineFeatureEnabled } from '../../utils/OfflineFeatureToggle'
 import { resolvePhotoURL } from '../../utils/Helpers'
 import { getSafeBottom } from '../../utils/SafeAreaUtils'
 import LoadingComponent from '../components/Loading'
 
+// Effectively "can this action be queued offline?" — requires the offline
+// feature, otherwise there is no command queue to replay it later.
 const isNetworkError = err =>
-  err instanceof TypeError && err.message === 'Failed to fetch'
+  isOfflineFeatureEnabled() &&
+  err instanceof TypeError &&
+  err.message === 'Failed to fetch'
 
 const TimerDetails = () => {
   const { choreId } = useParams()

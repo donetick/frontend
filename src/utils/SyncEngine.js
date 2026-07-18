@@ -19,6 +19,11 @@ import { syncOfflineImages } from './ImageCache'
 import { offlineDB } from './OfflineDB'
 import { isOfflineFeatureEnabled } from './OfflineFeatureToggle'
 
+// Give up on a command after this many transient failures so one stuck
+// command can't starve the queue and delta sync forever. Failed commands
+// stay visible via commandQueue.getFailed().
+const MAX_COMMAND_RETRIES = 8
+
 class SyncEngine {
   constructor() {
     this.isSyncing = false
@@ -90,6 +95,12 @@ class SyncEngine {
         await commandQueue.markDone(cmd.id)
       } catch (err) {
         const status = err.status || err.statusCode
+        const isPermanentRejection =
+          status >= 400 &&
+          status < 500 &&
+          status !== 401 &&
+          status !== 408 &&
+          status !== 429
         if (status === 409) {
           // Conflict - mark for user attention but continue with other commands
           await commandQueue.markFailed(
@@ -99,8 +110,21 @@ class SyncEngine {
         } else if (status === 404) {
           // Entity no longer exists - discard command
           await commandQueue.markDone(cmd.id)
+        } else if (isPermanentRejection) {
+          // The server rejected the command outright — retrying can never
+          // succeed, so park it as failed instead of blocking the queue.
+          await commandQueue.markFailed(
+            cmd.id,
+            `Rejected by server (${status})`,
+          )
+        } else if ((cmd.retryCount ?? 0) + 1 >= MAX_COMMAND_RETRIES) {
+          await commandQueue.markFailed(
+            cmd.id,
+            `Gave up after ${MAX_COMMAND_RETRIES} attempts: ${err.message}`,
+          )
         } else {
           // Transient network/server error - reset to pending so it retries
+          await commandQueue.incrementRetry(cmd.id)
           await commandQueue.resetPending(cmd.id)
           throw err
         }
@@ -114,6 +138,23 @@ class SyncEngine {
     switch (cmd.commandType) {
       case CommandType.CREATE_CHORE:
         response = await CreateChore(cmd.payload)
+        // Offline-created chores are queued under a temp id. Once the server
+        // assigns the real id, rewrite queued follow-up commands (complete,
+        // skip, history edits, …) so they don't replay against the temp id.
+        // Never throw past this point: the chore WAS created, and a retry of
+        // this command would create a duplicate.
+        if (response?.ok && String(cmd.entityId).startsWith('temp_')) {
+          try {
+            const created = await response.json().catch(() => null)
+            const realId = created?.res
+            if (realId != null) {
+              await commandQueue.remapEntityId(cmd.entityId, realId)
+              await offlineDB.deleteChores([cmd.entityId])
+            }
+          } catch (err) {
+            console.error('Failed to remap temp chore id after create', err)
+          }
+        }
         break
 
       case CommandType.UPDATE_CHORE:
@@ -234,7 +275,7 @@ class SyncEngine {
       }
 
       // Always advance the cursor, even when there are no changes
-      if (data.cursor) {
+      if (data.cursor != null) {
         currentCursor = data.cursor
       }
 
@@ -245,11 +286,34 @@ class SyncEngine {
     await offlineDB.setLastSyncTime(Date.now())
   }
 
-  // Cache current chores (call after a successful online fetch)
-  async cacheChores(chores) {
+  // Cache current chores (call after a successful online fetch).
+  // Pass complete: true only when `chores` is the *full* list (including
+  // archived) — then cached rows missing from it are server-side deletions
+  // and get removed, so the offline cache doesn't keep ghost chores.
+  async cacheChores(chores, { complete = false } = {}) {
     if (!isOfflineFeatureEnabled()) return
     if (!chores || chores.length === 0) return
     await offlineDB.saveChores(chores)
+
+    if (complete) {
+      try {
+        const fetchedIds = new Set(chores.map(chore => String(chore.id)))
+        const cached = await offlineDB.getChores(true)
+        const staleIds = (cached || [])
+          .filter(
+            chore =>
+              chore?.id != null &&
+              !String(chore.id).startsWith('temp_') &&
+              !fetchedIds.has(String(chore.id)),
+          )
+          .map(chore => chore.id)
+        if (staleIds.length > 0) {
+          await offlineDB.deleteChores(staleIds)
+        }
+      } catch (err) {
+        console.error('Failed to reconcile cached chores', err)
+      }
+    }
     // Fire-and-forget: keep the offline image store in step with the data.
     // Reconcile against the *full* cached list — the passed list may exclude
     // archived chores, and eviction must only run against everything we have.

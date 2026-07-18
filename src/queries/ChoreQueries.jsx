@@ -59,9 +59,13 @@ const mergePendingCreates = async chores => {
   return [...(chores || []), ...createdFromQueue]
 }
 
+// Effectively "can this action be queued offline?" — the offline feature must
+// be enabled, otherwise there is no command queue to replay it later and the
+// failure should surface to the user instead.
 const isNetworkError = error =>
-  (error instanceof TypeError && error.message === 'Failed to fetch') ||
-  error?.name === 'AbortError'
+  isOfflineFeatureEnabled() &&
+  ((error instanceof TypeError && error.message === 'Failed to fetch') ||
+    error?.name === 'AbortError')
 
 const buildOfflineChore = task => ({
   ...task,
@@ -97,7 +101,11 @@ export const useChores = (includeArchive = false) => {
       try {
         const data = await GetChoresNew(includeArchive)
         if (data?.res) {
-          syncEngine.cacheChores(data.res)
+          // Only the archived-inclusive fetch is the complete list, which
+          // allows cacheChores to reconcile server-side deletions
+          syncEngine.cacheChores(data.res, {
+            complete: includeArchive === true,
+          })
         }
         const merged = await mergePendingCreates(data?.res || [])
         return { ...data, res: merged }
@@ -120,7 +128,7 @@ export const useDeleteChores = () => {
 
   return useMutation({
     mutationFn: async choreIds => {
-      if (!networkManager.isOnline) {
+      if (isOfflineFeatureEnabled() && !networkManager.isOnline) {
         await offlineDB.deleteChores(choreIds)
         await Promise.all(
           choreIds.map(async id => {
@@ -186,7 +194,7 @@ export const useCreateChore = () => {
 
   return useMutation({
     mutationFn: async newTask => {
-      if (!networkManager.isOnline) {
+      if (isOfflineFeatureEnabled() && !networkManager.isOnline) {
         return queueOfflineCreate(newTask)
       }
 
@@ -451,7 +459,7 @@ export const useUpdateChoreHistory = () => {
         return { queued: true }
       }
 
-      if (!networkManager.isOnline) {
+      if (isOfflineFeatureEnabled() && !networkManager.isOnline) {
         await commandQueue.enqueue(
           CommandType.UPDATE_CHORE_HISTORY,
           `${choreId}:${historyId}`,
@@ -514,7 +522,7 @@ export const useDeleteChoreHistory = () => {
         return { queued: true }
       }
 
-      if (!networkManager.isOnline) {
+      if (isOfflineFeatureEnabled() && !networkManager.isOnline) {
         await commandQueue.enqueue(
           CommandType.DELETE_CHORE_HISTORY,
           `${choreId}:${historyId}`,
@@ -555,7 +563,7 @@ export const useMarkChoreComplete = () => {
 
   return useMutation({
     mutationFn: async ({ choreId, body, completedDate, performer }) => {
-      if (!networkManager.isOnline) {
+      if (isOfflineFeatureEnabled() && !networkManager.isOnline) {
         await commandQueue.enqueue(CommandType.COMPLETE_CHORE, choreId, {
           id: choreId,
           body,
@@ -635,7 +643,7 @@ export const useSkipChore = () => {
 
   return useMutation({
     mutationFn: async choreId => {
-      if (!networkManager.isOnline) {
+      if (isOfflineFeatureEnabled() && !networkManager.isOnline) {
         await commandQueue.enqueue(CommandType.SKIP_CHORE, choreId, {
           id: choreId,
         })

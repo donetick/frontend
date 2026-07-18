@@ -94,7 +94,8 @@ class SQLiteBackend {
           payload TEXT NOT NULL,
           created_at INTEGER NOT NULL,
           status TEXT NOT NULL DEFAULT 'pending',
-          error TEXT
+          error TEXT,
+          retry_count INTEGER NOT NULL DEFAULT 0
         );
 
         CREATE TABLE IF NOT EXISTS sync_meta (
@@ -116,6 +117,18 @@ class SQLiteBackend {
         CREATE INDEX IF NOT EXISTS idx_history_pending ON cached_history(pending);
       `,
     })
+
+    // Migration for databases created before retry tracking existed.
+    // ALTER TABLE fails harmlessly when the column is already there.
+    try {
+      await CapacitorSQLite.execute({
+        database: DB_NAME,
+        statements:
+          'ALTER TABLE command_queue ADD COLUMN retry_count INTEGER NOT NULL DEFAULT 0;',
+      })
+    } catch {
+      // column already exists
+    }
 
     this.initialized = true
   }
@@ -348,6 +361,7 @@ class SQLiteBackend {
       createdAt: row.created_at,
       status: row.status,
       error: row.error,
+      retryCount: row.retry_count ?? 0,
     }))
   }
 
@@ -366,6 +380,7 @@ class SQLiteBackend {
       createdAt: row.created_at,
       status: row.status,
       error: row.error,
+      retryCount: row.retry_count ?? 0,
     }))
   }
 
@@ -391,7 +406,7 @@ class SQLiteBackend {
     await CapacitorSQLite.run({
       database: DB_NAME,
       statement: `UPDATE command_queue
-                  SET command_type = ?, entity_id = ?, payload = ?, created_at = ?, status = ?, error = ?
+                  SET command_type = ?, entity_id = ?, payload = ?, created_at = ?, status = ?, error = ?, retry_count = ?
                   WHERE id = ?`,
       values: [
         updates.commandType ?? row.command_type,
@@ -402,8 +417,18 @@ class SQLiteBackend {
         Object.prototype.hasOwnProperty.call(updates, 'error')
           ? updates.error
           : row.error,
+        updates.retryCount ?? row.retry_count ?? 0,
         id,
       ],
+    })
+  }
+
+  async incrementCommandRetry(id) {
+    await CapacitorSQLite.run({
+      database: DB_NAME,
+      statement:
+        'UPDATE command_queue SET retry_count = COALESCE(retry_count, 0) + 1 WHERE id = ?',
+      values: [id],
     })
   }
 
@@ -801,6 +826,7 @@ class IndexedDBBackend {
         createdAt: command.createdAt,
         status: command.status,
         error: command.error,
+        retryCount: 0,
       }),
     )
     return id
@@ -840,6 +866,15 @@ class IndexedDBBackend {
           ...updates,
         }),
       )
+    }
+  }
+
+  async incrementCommandRetry(id) {
+    const { store } = await this._tx('command_queue', 'readwrite')
+    const row = await this._request(store.get(id))
+    if (row) {
+      row.retryCount = (row.retryCount ?? 0) + 1
+      await this._request(store.put(row))
     }
   }
 
@@ -1012,6 +1047,12 @@ class OfflineDB {
     if (!isOfflineFeatureEnabled()) return
     await this._ensureInit()
     return this.backend.updateCommand(id, updates)
+  }
+
+  async incrementCommandRetry(id) {
+    if (!isOfflineFeatureEnabled()) return
+    await this._ensureInit()
+    return this.backend.incrementCommandRetry(id)
   }
 
   async removeCommand(id) {
