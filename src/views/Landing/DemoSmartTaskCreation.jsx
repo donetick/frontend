@@ -23,7 +23,10 @@ const DEMO_LABELS = [
   { id: 'car', name: 'Car', color: '#10b981' },
   { id: 'maintenance', name: 'Maintenance', color: '#8b5cf6' },
 ]
-const DEMO_MEMBERS = [{ userId: 'sarah', displayName: 'Sarah' }, { userId: 'ryan', displayName: 'Ryan' }]
+const DEMO_MEMBERS = [
+  { userId: 'sarah', displayName: 'Sarah' },
+  { userId: 'ryan', displayName: 'Ryan' },
+]
 
 const EXAMPLES = [
   '🗑️ Take out the trash every Tuesday and Thursday #house @anyone',
@@ -201,116 +204,165 @@ const DemoSmartTaskCreation = () => {
         className='opacity-70'
         sx={{ mb: 4, maxWidth: 640, mx: 'auto' }}
       >
-        Write a task like you&apos;d say it out loud — Donetick detects the
-        due date, repeat schedule, priority, labels, and who it&apos;s for.
+        Write a task like you&apos;d say it out loud — Donetick detects the due
+        date, repeat schedule, priority, labels, and who it&apos;s for.
       </Typography>
 
       <Card
         variant='outlined'
         sx={{
+          position: 'relative',
           maxWidth: 720,
           mx: 'auto',
           borderRadius: 'lg',
           boxShadow: 'md',
-          transition: 'opacity 0.35s ease, transform 0.35s ease',
-          opacity: phase === 'created' ? 0 : 1,
-          transform:
-            phase === 'created' ? 'scale(0.97) translateY(4px)' : 'none',
         }}
       >
         <Typography level='title-md' sx={{ mb: 1.5 }}>
           Create new task
         </Typography>
 
-        <Box sx={{ minHeight: 64 }}>
-          <Typography
-            component='div'
+        <Box
+          sx={{
+            position: 'relative',
+            opacity: phase === 'created' ? 0 : 1,
+            transition: 'opacity 0.25s ease',
+          }}
+        >
+          <Box sx={{ minHeight: 64 }}>
+            <Typography
+              component='div'
+              sx={{
+                fontSize: { xs: 16, sm: 20 },
+                lineHeight: 1.4,
+                wordBreak: 'break-word',
+              }}
+            >
+              {parts}
+              {phase === 'typing' && (
+                <Box
+                  component='span'
+                  sx={{
+                    display: 'inline-block',
+                    width: '2px',
+                    height: '1.1em',
+                    bgcolor: 'primary.500',
+                    ml: '2px',
+                    verticalAlign: 'text-bottom',
+                    animation: 'donetick-caret-blink 1s step-start infinite',
+                  }}
+                />
+              )}
+            </Typography>
+          </Box>
+
+          <Box
             sx={{
-              fontSize: { xs: 16, sm: 20 },
-              lineHeight: 1.4,
-              wordBreak: 'break-word',
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              gap: 1.5,
+              pt: 2,
             }}
           >
-            {parts}
-            {phase === 'typing' && (
-              <Box
-                component='span'
-                sx={{
-                  display: 'inline-block',
-                  width: '2px',
-                  height: '1.1em',
-                  bgcolor: 'primary.500',
-                  ml: '2px',
-                  verticalAlign: 'text-bottom',
-                  animation: 'donetick-caret-blink 1s step-start infinite',
-                }}
-              />
-            )}
-          </Typography>
+            <DueDatePickerField
+              emptyDisplay='icon'
+              dueDateOnly={dueDateOnly}
+              dueTime={null}
+              useCustomTime={false}
+              onDueDateChange={noop}
+              onDueTimeChange={noop}
+              onUseCustomTimeChange={noop}
+              onClear={noop}
+            />
+            <RepeatPickerField
+              emptyDisplay='icon'
+              value={repeat.result}
+              onChange={noop}
+              onClear={noop}
+            />
+            <PriorityPickerField
+              emptyDisplay='icon'
+              value={Number(priority.result) || 0}
+              onChange={noop}
+              onClear={noop}
+            />
+            <AssigneePickerField
+              emptyDisplay='icon'
+              value={
+                assignees.isAnyone
+                  ? 'anyone'
+                  : assignees.result?.[0]?.userId || null
+              }
+              onChange={noop}
+              onClear={noop}
+              members={DEMO_MEMBERS}
+            />
+            <LabelsPickerField
+              emptyDisplay='icon'
+              values={(labels.result || []).map(l => l.id).filter(Boolean)}
+              onChange={noop}
+              onClear={noop}
+              labels={DEMO_LABELS}
+            />
+
+            <Button
+              size='sm'
+              variant='solid'
+              color={
+                phase === 'submitting' || phase === 'created'
+                  ? 'success'
+                  : 'primary'
+              }
+              startDecorator={
+                isSubmitting ? <Check sx={{ fontSize: 18 }} /> : null
+              }
+              sx={{
+                ml: 'auto',
+                borderRadius: '128px',
+                minHeight: 40,
+                transition: 'all 0.2s ease',
+                transform: phase === 'submitting' ? 'scale(0.94)' : 'scale(1)',
+                pointerEvents: 'none',
+              }}
+            >
+              {isSubmitting ? 'Created' : 'Create'}
+            </Button>
+          </Box>
         </Box>
 
         <Box
           sx={{
+            position: 'absolute',
+            inset: 0,
             display: 'flex',
-            flexWrap: 'wrap',
+            flexDirection: 'column',
             alignItems: 'center',
-            gap: 1.5,
-            pt: 2,
+            justifyContent: 'center',
+            gap: 1,
+            opacity: phase === 'created' ? 1 : 0,
+            transition: 'opacity 0.3s ease',
+            pointerEvents: 'none',
           }}
         >
-          <DueDatePickerField
-            emptyDisplay='icon'
-            dueDateOnly={dueDateOnly}
-            dueTime={null}
-            useCustomTime={false}
-            onDueDateChange={noop}
-            onDueTimeChange={noop}
-            onUseCustomTimeChange={noop}
-            onClear={noop}
-          />
-          <RepeatPickerField
-            emptyDisplay='icon'
-            value={repeat.result}
-            onChange={noop}
-            onClear={noop}
-          />
-          <PriorityPickerField
-            emptyDisplay='icon'
-            value={Number(priority.result) || 0}
-            onChange={noop}
-            onClear={noop}
-          />
-          <AssigneePickerField
-            emptyDisplay='icon'
-            value={assignees.isAnyone ? 'anyone' : assignees.result?.[0]?.userId || null}
-            onChange={noop}
-            onClear={noop}
-            members={DEMO_MEMBERS}
-          />
-          <LabelsPickerField
-            emptyDisplay='icon'
-            values={(labels.result || []).map(l => l.id).filter(Boolean)}
-            onChange={noop}
-            onClear={noop}
-            labels={DEMO_LABELS}
-          />
-
-          <Button
-            size='sm'
-            variant='solid'
-            color={phase === 'submitting' || phase === 'created' ? 'success' : 'primary'}
-            startDecorator={isSubmitting ? <Check sx={{ fontSize: 18 }} /> : null}
+          <Box
             sx={{
-              ml: 'auto',
-              borderRadius: '128px',
-              minHeight: 40,
-              transition: 'all 0.2s ease',
-              transform: phase === 'submitting' ? 'scale(0.94)' : 'scale(1)',
-              pointerEvents: 'none',
+              width: 40,
+              height: 40,
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              bgcolor: 'success.500',
+              transform: phase === 'created' ? 'scale(1)' : 'scale(0.6)',
+              transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
             }}
           >
-            {isSubmitting ? 'Created' : 'Create'}
-          </Button>
+            <Check sx={{ color: '#fff', fontSize: 22 }} />
+          </Box>
+          <Typography level='body-sm' sx={{ fontWeight: 600 }}>
+            Task created
+          </Typography>
         </Box>
       </Card>
 
