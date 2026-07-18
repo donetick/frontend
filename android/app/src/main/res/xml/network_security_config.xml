@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!--
+        Trust both the system CA store and user-installed CA certificates.
+        This lets self-hosted Donetick instances that use custom or self-signed
+        certificates work once the user installs their CA on the device, without
+        having to modify/repackage the APK. See donetick/donetick#727.
+    -->
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>
