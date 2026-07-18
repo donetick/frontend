@@ -24,6 +24,13 @@ As an avid for open-source, I was eager to create a solution that could benefit 
 
 Follow the full instructions here: https://github.com/donetick/donetick?tab=readme-ov-file#development-environment
 
+## Analytics
+
+Donetick has an **optional**, privacy-first [PostHog](https://posthog.com)
+integration that is **disabled by default** — self-hosters get zero analytics and
+the library isn't even bundled unless a key is provided. To enable it (env vars,
+reverse proxy, mobile/Capacitor notes), see [docs/analytics.md](docs/analytics.md).
+
 ## Contributing
 
 Contributions are welcome! If you would like to contribute to Donetick, please follow these steps:
