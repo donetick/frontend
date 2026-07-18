@@ -1078,6 +1078,7 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
                     onChange={setDescription}
                     value={description || ''}
                     entityType={'chore_description'}
+                    draftId={draftId}
                   />
                 </div>
               </Box>

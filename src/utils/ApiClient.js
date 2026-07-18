@@ -139,6 +139,13 @@ class ApiClient {
       console.error('Error clearing offline data on logout', e)
     }
     try {
+      // Dynamic import sidesteps the ApiClient <-> ImageCache module cycle
+      const { clearImageCache } = await import('./ImageCache')
+      await clearImageCache()
+    } catch (e) {
+      console.error('Error clearing image cache on logout', e)
+    }
+    try {
       await logout()
     } catch (e) {
       console.error('Error during logout', e)
@@ -252,7 +259,7 @@ class ApiClient {
     }
 
     return this.request(endpoint, {
-      options: { ...options },
+      ...options,
       method: 'POST',
       body: data ? data : undefined,
     })

@@ -88,7 +88,7 @@ import RichTextEditor from '../components/RichTextEditor.jsx'
 import SubTasks from '../components/SubTask.jsx'
 import TimePassedCard from './TimePassedCard.jsx'
 import TimerSplitButton from './TimerSplitButton.jsx'
-import { refreshSignedUrlsInHtml } from '../../utils/Helpers.jsx'
+import { useDescriptionHtml } from '../../hooks/useDescriptionHtml'
 
 const isNetworkError = err =>
   err instanceof TypeError && err.message === 'Failed to fetch'
@@ -132,6 +132,12 @@ const ChoreView = () => {
     useCircleMembers()
   const { data: userProfile } = useUserProfile()
   const { impersonatedUser } = useImpersonateUser()
+  const descriptionHtml = useDescriptionHtml(chore?.description || '', {
+    choreId: chore?.id,
+  })
+  const notesHtml = useDescriptionHtml(chore?.notes || '', {
+    choreId: chore?.id,
+  })
 
   const { data: choreData, isLoading: isChoreLoading } =
     useChoreDetails(choreId)
@@ -935,7 +941,7 @@ const ChoreView = () => {
                         whiteSpace: 'pre-wrap',
                         wordBreak: 'break-word',
                       }}
-                      dangerouslySetInnerHTML={{ __html: refreshSignedUrlsInHtml(raw) }}
+                      dangerouslySetInnerHTML={{ __html: descriptionHtml }}
                     />
                   ) : (
                     <Typography
@@ -1003,7 +1009,7 @@ const ChoreView = () => {
                         whiteSpace: 'pre-wrap',
                         wordBreak: 'break-word',
                       }}
-                      dangerouslySetInnerHTML={{ __html: refreshSignedUrlsInHtml(raw) }}
+                      dangerouslySetInnerHTML={{ __html: notesHtml }}
                     />
                   ) : (
                     <Typography
@@ -1099,6 +1105,7 @@ const ChoreView = () => {
             <RichTextEditor
               value={note || ''}
               onChange={setNote}
+              entityId={chore?.id}
               entityType={'chore_completion_note'}
               placeholder={t('choreView.notePlaceholder')}
             />

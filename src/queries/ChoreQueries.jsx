@@ -21,6 +21,7 @@ import {
   UnArchiveChore,
   UpdateChoreHistory,
 } from '../utils/Fetcher'
+import { cacheChoreImages } from '../utils/ImageCache'
 import { offlineDB } from '../utils/OfflineDB'
 import { isOfflineFeatureEnabled } from '../utils/OfflineFeatureToggle'
 import { syncEngine } from '../utils/SyncEngine'
@@ -75,15 +76,20 @@ export const useChores = (includeArchive = false) => {
     refetchOnWindowFocus: true,
     queryFn: async () => {
       if (isOfflineFeatureEnabled()) {
-        // Sync from server first (no-op if already syncing or offline)
-        if (networkManager.isOnline) {
-          await syncEngine.sync()
-        }
-        const cursor = await offlineDB.getSyncCursor()
-        if (cursor > 0) {
-          const cached = await offlineDB.getChores(includeArchive)
-          const merged = await mergePendingCreates(cached || [])
-          return { res: merged }
+        try {
+          // Sync from server first (no-op if already syncing or offline)
+          if (networkManager.isOnline) {
+            await syncEngine.sync()
+          }
+          const cursor = await offlineDB.getSyncCursor()
+          if (cursor > 0) {
+            const cached = await offlineDB.getChores(includeArchive)
+            const merged = await mergePendingCreates(cached || [])
+            return { res: merged }
+          }
+        } catch (err) {
+          // A broken cache must not brick the app — fall through to the API
+          console.error('Offline cache read failed, falling back to API', err)
         }
       }
 
@@ -337,7 +343,11 @@ export const useChore = choreId => {
       try {
         const response = await GetChoreByID(choreId)
         if (response && response.ok) {
-          return await response.json()
+          const data = await response.json()
+          // Fire-and-forget: store this chore's images (incl. attachments,
+          // which only appear in detail responses) for offline use
+          if (data?.res) cacheChoreImages(data.res)
+          return data
         }
         throw new Error('Failed to fetch chore')
       } catch {
@@ -595,9 +605,7 @@ export const useMarkChoreComplete = () => {
           if (!oldData) return oldData
           return {
             res: oldData.res.map(chore =>
-              chore.id === choreId
-                ? { ...chore, _pending: 'complete' }
-                : chore,
+              chore.id === choreId ? { ...chore, _pending: 'complete' } : chore,
             ),
           }
         })
