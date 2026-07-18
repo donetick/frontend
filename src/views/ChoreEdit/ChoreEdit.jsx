@@ -53,11 +53,13 @@ import { useNotification } from '../../service/NotificationProvider'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import {
   DeleteChoreAttachment,
+  DeleteDraftAttachment,
   GetAllCircleMembers,
   GetThings,
   UploadChoreAttachment,
 } from '../../utils/Fetcher'
 import { isPlusAccount, resolvePhotoURL } from '../../utils/Helpers'
+import { getImageSrc, removeCachedImage } from '../../utils/ImageCache'
 import { generateUUID } from '../../utils/UUID'
 import Priorities from '../../utils/Priorities.jsx'
 import { getIconComponent } from '../../utils/ProjectIcons'
@@ -725,6 +727,7 @@ const ChoreEdit = () => {
               onChange={setDescription}
               entityId={choreId}
               entityType={'chore_description'}
+              draftId={draftId}
             />
             <FormHelperText error>{errors.description}</FormHelperText>
           </FormControl>
@@ -970,12 +973,23 @@ const ChoreEdit = () => {
           <Typography level='body-md'>Files attached to this task</Typography>
           <Card variant='outlined' sx={{ mt: 2, p: 1.5 }}>
             {attachments.length > 0 && (
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 1.5 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 1,
+                  mb: 1.5,
+                }}
+              >
                 {attachments.map((att, idx) => (
                   <Box
                     key={att.file_path || idx}
-                    onClick={() => {
-                      const url = resolvePhotoURL(att.sign || att.file_path)
+                    onClick={async () => {
+                      const url = await getImageSrc(
+                        att.file_path,
+                        att.sign ? resolvePhotoURL(att.sign) : null,
+                        { choreId, kind: 'attachment' },
+                      ).catch(() => resolvePhotoURL(att.sign || att.file_path))
                       const ext = (att.file_name || '')
                         .split('.')
                         .pop()
@@ -1039,6 +1053,7 @@ const ChoreEdit = () => {
                           event.stopPropagation()
                           DeleteChoreAttachment(choreId, att.file_path)
                             .then(() => {
+                              removeCachedImage(att.file_path)
                               setAttachments(prev =>
                                 prev.filter(a => a.file_path !== att.file_path),
                               )
@@ -1061,9 +1076,20 @@ const ChoreEdit = () => {
                         color='danger'
                         onClick={event => {
                           event.stopPropagation()
-                          setAttachments(prev =>
-                            prev.filter((_, i) => i !== idx),
-                          )
+                          // Draft uploads live server-side too — delete there
+                          // so they are not promoted onto the chore on save.
+                          DeleteDraftAttachment(att.file_path)
+                            .then(() => {
+                              setAttachments(prev =>
+                                prev.filter((_, i) => i !== idx),
+                              )
+                            })
+                            .catch(() => {
+                              showError({
+                                title: 'Delete Failed',
+                                message: 'Failed to delete attachment.',
+                              })
+                            })
                         }}
                       >
                         <Delete sx={{ fontSize: 18 }} />
@@ -1078,9 +1104,7 @@ const ChoreEdit = () => {
               variant='outlined'
               color='neutral'
               size='sm'
-              startDecorator={
-                isUploadingAttachment ? null : <UploadFile />
-              }
+              startDecorator={isUploadingAttachment ? null : <UploadFile />}
               loading={isUploadingAttachment}
               sx={{ alignSelf: 'flex-start' }}
             >

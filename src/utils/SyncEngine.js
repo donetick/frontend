@@ -15,6 +15,7 @@ import {
   UpdateChoreHistory,
   UpdateDueDate,
 } from './Fetcher'
+import { syncOfflineImages } from './ImageCache'
 import { offlineDB } from './OfflineDB'
 import { isOfflineFeatureEnabled } from './OfflineFeatureToggle'
 
@@ -58,6 +59,13 @@ class SyncEngine {
       // Sync succeeded — server is reachable (only sync success restores online status)
       networkManager.setServerReachable()
       this._notify({ syncing: false, lastSync: Date.now() })
+      // Reconcile the offline image store against the full cached chore list
+      // (prefetch referenced images, evict ones no longer referenced).
+      // Fire-and-forget: image downloads must not block or fail the sync.
+      offlineDB
+        .getChores(true)
+        .then(chores => syncOfflineImages(chores || []))
+        .catch(() => {})
       return true
     } catch (err) {
       await commandQueue.resetSyncing()
@@ -242,6 +250,13 @@ class SyncEngine {
     if (!isOfflineFeatureEnabled()) return
     if (!chores || chores.length === 0) return
     await offlineDB.saveChores(chores)
+    // Fire-and-forget: keep the offline image store in step with the data.
+    // Reconcile against the *full* cached list — the passed list may exclude
+    // archived chores, and eviction must only run against everything we have.
+    offlineDB
+      .getChores(true)
+      .then(all => syncOfflineImages(all || []))
+      .catch(() => {})
   }
 }
 

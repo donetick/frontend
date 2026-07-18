@@ -5,7 +5,11 @@ import { useNotification } from '../service/NotificationProvider'
 import { apiClient } from '../utils/ApiClient'
 import { isPlusAccount, resolvePhotoURL } from '../utils/Helpers'
 
-export const useFileUpload = ({ entityType = 'chore_attachment', entityId, draftId } = {}) => {
+export const useFileUpload = ({
+  entityType = 'chore_attachment',
+  entityId,
+  draftId,
+} = {}) => {
   const { showError } = useNotification()
   const { data: userProfile } = useUserProfile()
 
@@ -76,7 +80,14 @@ export const useFileUpload = ({ entityType = 'chore_attachment', entityId, draft
         }
 
         const data = await response.json()
-        return resolvePhotoURL(data.url || data.sign)
+        // url is fetchable now; path is the stable storage key used to
+        // re-sign, delete, and cache the file later.
+        return {
+          url: resolvePhotoURL(data.sign || data.url),
+          path: data.path,
+          fileName: data.file_name || file.name,
+          sizeBytes: data.size_bytes,
+        }
       } catch {
         showError({
           title: 'Upload Failed',

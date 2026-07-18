@@ -21,6 +21,7 @@ import {
   UnArchiveChore,
   UpdateChoreHistory,
 } from '../utils/Fetcher'
+import { cacheChoreImages } from '../utils/ImageCache'
 import { offlineDB } from '../utils/OfflineDB'
 import { isOfflineFeatureEnabled } from '../utils/OfflineFeatureToggle'
 import { syncEngine } from '../utils/SyncEngine'
@@ -337,7 +338,11 @@ export const useChore = choreId => {
       try {
         const response = await GetChoreByID(choreId)
         if (response && response.ok) {
-          return await response.json()
+          const data = await response.json()
+          // Fire-and-forget: store this chore's images (incl. attachments,
+          // which only appear in detail responses) for offline use
+          if (data?.res) cacheChoreImages(data.res)
+          return data
         }
         throw new Error('Failed to fetch chore')
       } catch {
@@ -595,9 +600,7 @@ export const useMarkChoreComplete = () => {
           if (!oldData) return oldData
           return {
             res: oldData.res.map(chore =>
-              chore.id === choreId
-                ? { ...chore, _pending: 'complete' }
-                : chore,
+              chore.id === choreId ? { ...chore, _pending: 'complete' } : chore,
             ),
           }
         })

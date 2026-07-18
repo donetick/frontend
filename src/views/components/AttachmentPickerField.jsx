@@ -11,6 +11,7 @@ import { ClickAwayListener, Popper } from '@mui/material'
 import { useEffect, useRef, useState } from 'react'
 import { Z_INDEX } from '../../constants/zIndex'
 import { useFileUpload } from '../../hooks/useFileUpload'
+import { DeleteDraftAttachment } from '../../utils/Fetcher'
 
 const AttachmentPickerField = ({
   attachments = [],
@@ -45,9 +46,12 @@ const AttachmentPickerField = ({
       if (!file) return
       setIsUploading(true)
       try {
-        const url = await uploadFile(file)
-        if (url) {
-          onChange([...attachments, { url, name: file.name }])
+        const uploaded = await uploadFile(file)
+        if (uploaded) {
+          onChange([
+            ...attachments,
+            { url: uploaded.url, path: uploaded.path, name: uploaded.fileName },
+          ])
         }
       } finally {
         setIsUploading(false)
@@ -55,7 +59,17 @@ const AttachmentPickerField = ({
     }
   }
 
-  const handleRemove = index => {
+  const handleRemove = async index => {
+    const attachment = attachments[index]
+    // Draft uploads exist server-side too — delete there so they are not
+    // promoted onto the chore when it is created.
+    if (attachment?.path) {
+      try {
+        await DeleteDraftAttachment(attachment.path)
+      } catch {
+        // file may already be gone; still drop it from the list
+      }
+    }
     const updated = attachments.filter((_, i) => i !== index)
     onChange(updated)
     if (updated.length === 0) setIsOpen(false)
@@ -91,7 +105,10 @@ const AttachmentPickerField = ({
           }}
         >
           {isUploading ? (
-            <CircularProgress size='sm' sx={{ '--CircularProgress-size': '16px' }} />
+            <CircularProgress
+              size='sm'
+              sx={{ '--CircularProgress-size': '16px' }}
+            />
           ) : (
             <AttachFile sx={{ fontSize: '20px' }} />
           )}
@@ -162,7 +179,14 @@ const AttachmentPickerField = ({
               }}
             >
               {attachments.length > 0 && (
-                <Box sx={{ mb: 1, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                <Box
+                  sx={{
+                    mb: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 0.5,
+                  }}
+                >
                   {attachments.map((attachment, index) => (
                     <Box
                       key={index}
@@ -238,7 +262,10 @@ const AttachmentPickerField = ({
                 color='neutral'
                 startDecorator={
                   isUploading ? (
-                    <CircularProgress size='sm' sx={{ '--CircularProgress-size': '14px' }} />
+                    <CircularProgress
+                      size='sm'
+                      sx={{ '--CircularProgress-size': '14px' }}
+                    />
                   ) : (
                     <AttachFile sx={{ fontSize: 16 }} />
                   )
