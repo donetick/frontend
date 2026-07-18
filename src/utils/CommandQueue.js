@@ -17,6 +17,17 @@ export const CommandType = {
   UNARCHIVE_CHORE: 'unarchive_chore',
 }
 
+// Parse a stored command payload; a corrupt payload must not take down every
+// consumer of the queue, so parse failures surface as null payloads.
+const parsePayload = command => {
+  try {
+    return { ...command, payload: JSON.parse(command.payload) }
+  } catch {
+    console.warn('Skipping corrupt command payload', command.id)
+    return null
+  }
+}
+
 class CommandQueue {
   _sanitizeCreatePayload(payload = {}) {
     const sanitized = { ...payload }
@@ -77,7 +88,8 @@ class CommandQueue {
     const commands = await offlineDB.getCommands()
     return commands
       .filter(c => c.status === 'pending' || c.status === 'syncing')
-      .map(c => ({ ...c, payload: JSON.parse(c.payload) }))
+      .map(parsePayload)
+      .filter(Boolean)
   }
 
   // Get all failed commands
@@ -86,7 +98,8 @@ class CommandQueue {
     const commands = await offlineDB.getCommands()
     return commands
       .filter(c => c.status === 'failed')
-      .map(c => ({ ...c, payload: JSON.parse(c.payload) }))
+      .map(parsePayload)
+      .filter(Boolean)
   }
 
   // Get pending commands for a specific entity (for undo/UI)
@@ -103,7 +116,8 @@ class CommandQueue {
       .sort((a, b) => a.createdAt - b.createdAt)
     return commands
       .filter(c => c.status === 'pending' || c.status === 'syncing')
-      .map(c => ({ ...c, payload: JSON.parse(c.payload) }))
+      .map(parsePayload)
+      .filter(Boolean)
   }
 
   // Cancel/undo a pending command

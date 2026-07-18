@@ -76,15 +76,20 @@ export const useChores = (includeArchive = false) => {
     refetchOnWindowFocus: true,
     queryFn: async () => {
       if (isOfflineFeatureEnabled()) {
-        // Sync from server first (no-op if already syncing or offline)
-        if (networkManager.isOnline) {
-          await syncEngine.sync()
-        }
-        const cursor = await offlineDB.getSyncCursor()
-        if (cursor > 0) {
-          const cached = await offlineDB.getChores(includeArchive)
-          const merged = await mergePendingCreates(cached || [])
-          return { res: merged }
+        try {
+          // Sync from server first (no-op if already syncing or offline)
+          if (networkManager.isOnline) {
+            await syncEngine.sync()
+          }
+          const cursor = await offlineDB.getSyncCursor()
+          if (cursor > 0) {
+            const cached = await offlineDB.getChores(includeArchive)
+            const merged = await mergePendingCreates(cached || [])
+            return { res: merged }
+          }
+        } catch (err) {
+          // A broken cache must not brick the app — fall through to the API
+          console.error('Offline cache read failed, falling back to API', err)
         }
       }
 
