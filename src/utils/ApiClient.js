@@ -2,6 +2,7 @@ import { Preferences } from '@capacitor/preferences'
 import { API_URL } from '../Config'
 import { networkManager } from '../hooks/NetworkManager'
 import { logout, RefreshToken } from './Fetcher'
+import { offlineDB } from './OfflineDB'
 import {
   clearAllTokens,
   isRefreshTokenExpired,
@@ -49,10 +50,7 @@ class ApiClient {
     const refreshExpired = await isRefreshTokenExpired()
     if (refreshExpired) {
       console.log('Refresh token expired, forcing logout')
-      await clearAllTokens()
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login'
-      }
+      await this.handleLogout()
       return { success: false, error: 'Refresh token expired' }
     }
 
@@ -135,6 +133,18 @@ class ApiClient {
   // Helper to avoid repeating cleanup code
   async handleLogout() {
     await clearAllTokens()
+    try {
+      await offlineDB.clearAll()
+    } catch (e) {
+      console.error('Error clearing offline data on logout', e)
+    }
+    try {
+      // Dynamic import sidesteps the ApiClient <-> ImageCache module cycle
+      const { clearImageCache } = await import('./ImageCache')
+      await clearImageCache()
+    } catch (e) {
+      console.error('Error clearing image cache on logout', e)
+    }
     try {
       await logout()
     } catch (e) {
@@ -231,8 +241,14 @@ class ApiClient {
       return response
     } catch (error) {
       clearTimeout(timeoutId)
-      // fetch() threw = network-level failure or timeout — mark server unreachable
-      networkManager.setServerUnreachable()
+      // fetch() threw = network-level failure or timeout — mark server
+      // unreachable. Caller-initiated aborts (component unmount, query
+      // cancellation) say nothing about server health, so skip those.
+      const externalAbort =
+        error?.name === 'AbortError' && options.signal?.aborted
+      if (!externalAbort) {
+        networkManager.setServerUnreachable()
+      }
       console.error('Request failed', error)
       throw error
     }
@@ -249,7 +265,7 @@ class ApiClient {
     }
 
     return this.request(endpoint, {
-      options: { ...options },
+      ...options,
       method: 'POST',
       body: data ? data : undefined,
     })

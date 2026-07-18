@@ -8,30 +8,62 @@ import { PushNotifications } from '@capacitor/push-notifications'
 import { focusManager } from '@tanstack/react-query'
 import { RegisterDeviceToken } from './utils/Fetcher'
 
+// React Router navigate(), injected by <App /> once the router is mounted.
+// Using client-side navigation (instead of window.location.href) avoids a full
+// document reload, which on a cold NFC launch re-boots the app from an
+// unauthenticated state (iOS "server/connection" error) and re-triggers the
+// sticky getLaunchUrl() (Android "back reloads the same page").
+let navigateFn = null
+const setNavigate = fn => {
+  navigateFn = fn
+}
+
+// Navigate client-side when the router is available, otherwise fall back to a
+// hard navigation (should only happen if a deep link arrives before mount).
+const routerNavigate = (path, { seedHome = false } = {}) => {
+  if (navigateFn) {
+    // On a cold deep-link launch there is no real screen behind the target, so
+    // seed the chore list as the back target before pushing the chore view.
+    if (seedHome && window.location.pathname === '/') {
+      navigateFn('/chores', { replace: true })
+    }
+    navigateFn(path)
+  } else {
+    window.location.href = path
+  }
+}
+
+// Navigate to a chore from a deep link / notification tap. Shared by NFC,
+// local and push notifications so they all get consistent cold-start handling.
+const navigateToChore = (choreId, { autoComplete, isColdStart } = {}) => {
+  if (choreId == null || choreId === '') return
+  const path = `/chores/${choreId}${autoComplete ? '?auto_complete=' + autoComplete : ''}`
+
+  // If we're already on the target page, skip (avoids redundant navigation).
+  if (window.location.pathname + window.location.search === path) return
+
+  console.log('[deeplink] navigating to', path)
+  routerNavigate(path, { seedHome: isColdStart })
+}
+
 // NFC chore deep link: donetick://chores/123?auto_complete=true
-const handleNFCChoreDeepLink = url => {
+const handleNFCChoreDeepLink = (url, isColdStart) => {
   try {
     const urlObj = new URL(url)
     // donetick://chores/123 → host='chores', pathname='/123'
-    const choreId = urlObj.pathname.slice(1)
-    const autoComplete = urlObj.searchParams.get('auto_complete')
-    const path = `/chores/${choreId}${autoComplete ? '?auto_complete=' + autoComplete : ''}`
-
-    // getLaunchUrl() persists across every WebView reload caused by window.location.href.
-    // If we're already on the target page, skip to avoid an infinite reload loop.
-    if (window.location.pathname + window.location.search === path) return
-
-    console.log('[NFC] navigating to', path)
-    window.location.href = path
+    navigateToChore(urlObj.pathname.slice(1), {
+      autoComplete: urlObj.searchParams.get('auto_complete'),
+      isColdStart,
+    })
   } catch (error) {
     console.error('[NFC] Error handling chore deep link:', error)
   }
 }
 
-const handleUrlOpen = url => {
+const handleUrlOpen = (url, isColdStart = false) => {
   console.log('[NFC] handleUrlOpen:', url)
   if (url.startsWith('donetick://chores/')) {
-    handleNFCChoreDeepLink(url)
+    handleNFCChoreDeepLink(url, isColdStart)
   } else if (url.startsWith('donetick://auth/')) {
     handleOAuthDeepLink(url)
   }
@@ -48,9 +80,8 @@ const handleOAuthDeepLink = async url => {
     const state = urlObj.searchParams.get('state')
 
     if (code && state) {
-      // getLaunchUrl() persists across every WebView reload caused by
-      // window.location.href. If we're already on the OAuth handler page with
-      // the same code, skip re-navigating to avoid an infinite reload loop.
+      // If we're already on the OAuth handler page with the same code, skip
+      // re-navigating (a stale getLaunchUrl() replay would otherwise re-fire it).
       const currentCode = new URLSearchParams(window.location.search).get(
         'code',
       )
@@ -72,7 +103,9 @@ const handleOAuthDeepLink = async url => {
       }
 
       // Navigate to the OAuth handler page
-      window.location.href = `/auth/oauth2?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`
+      routerNavigate(
+        `/auth/oauth2?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`,
+      )
     }
   } catch (error) {
     console.error('Error handling OAuth deep link:', error)
@@ -90,40 +123,13 @@ const localNotificationListenerRegistration = () => {
         'Notification opened, navigate to chore',
         event.notification.extra.choreId,
       )
-      window.location.href = `/chores/${event.notification.extra.choreId}`
+      navigateToChore(event.notification.extra.choreId, { isColdStart: true })
     }
   })
 }
 
 const registerTokenIfNeeded = async (token, deviceInfo, deviceId, platform) => {
   try {
-    // const stored = await Preferences.get({ key: 'deviceRegistration' })
-    // const lastReg = stored.value ? JSON.parse(stored.value) : null
-
-    const current = {
-      token: token.value,
-      deviceId: deviceId.identifier,
-      platform,
-      appVersion: deviceInfo.appVersion,
-      registeredAt: Date.now(),
-    }
-
-    // const shouldRegister =
-    //   !lastReg ||
-    //   lastReg.token !== current.token ||
-    //   lastReg.appVersion !== current.appVersion ||
-    //   Date.now() - lastReg.registeredAt > 7 * 24 * 60 * 60 * 1000
-
-    // console.log('Registering device token:', {
-    //   reason: !lastReg
-    //     ? 'first_time'
-    //     : lastReg.token !== current.token
-    //       ? 'token_changed'
-    //       : lastReg.appVersion !== current.appVersion
-    //         ? 'app_updated'
-    //         : 'periodic_refresh',
-    // })
-
     const result = await RegisterDeviceToken(
       token.value,
       deviceId.identifier,
@@ -132,20 +138,23 @@ const registerTokenIfNeeded = async (token, deviceInfo, deviceId, platform) => {
       deviceInfo.model,
     )
 
-    if (result && result.ok) {
+    if (!result) return
+
+    if (result.ok) {
       await Preferences.set({
         key: 'deviceRegistration',
-        value: JSON.stringify(current),
+        value: JSON.stringify({
+          token: token.value,
+          deviceId: deviceId.identifier,
+          platform,
+          appVersion: deviceInfo.appVersion,
+          registeredAt: Date.now(),
+        }),
       })
       console.log('Device token registered successfully')
-
-      // Emit event to notify UI components of successful registration
       window.dispatchEvent(new CustomEvent('deviceTokenRegistered'))
-    } else if (result) {
-      // Handle registration errors
+    } else {
       console.error('Device registration failed:', result.status)
-
-      // Emit event with error details for UI to handle
       window.dispatchEvent(
         new CustomEvent('deviceTokenRegistrationFailed', {
           detail: {
@@ -156,38 +165,12 @@ const registerTokenIfNeeded = async (token, deviceInfo, deviceId, platform) => {
       )
     }
   } catch (error) {
-    console.error(
-      'Error in token registration check, registering anyway:',
-      error,
+    console.error('Error registering device token:', error)
+    window.dispatchEvent(
+      new CustomEvent('deviceTokenRegistrationFailed', {
+        detail: { status: 0, error: error?.message ?? 'Unknown error' },
+      }),
     )
-    const fallbackResult = await RegisterDeviceToken(
-      token.value,
-      deviceId.identifier,
-      platform,
-      deviceInfo.appVersion,
-      deviceInfo.model,
-    )
-
-    if (fallbackResult && fallbackResult.ok) {
-      // Emit event to notify UI components of successful registration
-      window.dispatchEvent(new CustomEvent('deviceTokenRegistered'))
-    } else if (fallbackResult) {
-      // Handle registration errors
-      console.error(
-        'Fallback device registration failed:',
-        fallbackResult.status,
-      )
-
-      // Emit event with error details for UI to handle
-      window.dispatchEvent(
-        new CustomEvent('deviceTokenRegistrationFailed', {
-          detail: {
-            status: fallbackResult.status,
-            error: await fallbackResult.text().catch(() => 'Unknown error'),
-          },
-        }),
-      )
-    }
   }
 }
 
@@ -238,35 +221,51 @@ const pushNotificationListenerRegistration = async () => {
         fcmEvent.notification.data.type === 'chore_due' ||
         fcmEvent.notification.data.type === 'nudge'
       ) {
-        window.location.href = `/chores/${fcmEvent.notification.data.choreId}`
+        navigateToChore(fcmEvent.notification.data.choreId, {
+          isColdStart: true,
+        })
       } else {
-        window.location.href = `/chores`
+        routerNavigate('/chores')
       }
     }
   })
 }
 
-const registerCapacitorListeners = () => {
+let launchUrlHandled = false
+let listenersRegistered = false
+
+const registerCapacitorListeners = navigate => {
+  if (navigate) setNavigate(navigate)
+
   if (!Capacitor.isNativePlatform()) {
     console.log(
       'Not a native platform, skipping registration of native listeners',
     )
     return
   }
+
+  // registerCapacitorListeners runs from a React effect and may fire more than
+  // once; only wire up the native listeners a single time.
+  if (listenersRegistered) return
+  listenersRegistered = true
+
   localNotificationListenerRegistration()
 
-  // Cold-start: app was launched by tapping an NFC tag (or other deep link)
+  // Cold-start: app was launched by tapping an NFC tag (or other deep link).
+  // getLaunchUrl() is sticky and keeps returning the launch URL across reloads,
+  // so consume it exactly once to avoid re-triggering navigation on every boot.
   mobileApp.getLaunchUrl().then(result => {
-    if (result?.url) {
+    if (result?.url && !launchUrlHandled) {
+      launchUrlHandled = true
       console.log('[NFC] getLaunchUrl:', result.url)
-      handleUrlOpen(result.url)
+      handleUrlOpen(result.url, true /* isColdStart */)
     }
   })
 
   // Foreground / singleTask resume: app was already running when the tag was tapped
   mobileApp.addListener('appUrlOpen', event => {
     console.log('[NFC] appUrlOpen:', event.url)
-    handleUrlOpen(event.url)
+    handleUrlOpen(event.url, false /* isColdStart */)
   })
 
   mobileApp.addListener('appStateChange', ({ isActive }) => {
@@ -287,6 +286,5 @@ const registerCapacitorListeners = () => {
 
 export {
   registerCapacitorListeners,
-  pushNotificationListenerRegistration as registerPushNotifications
+  pushNotificationListenerRegistration as registerPushNotifications,
 }
-

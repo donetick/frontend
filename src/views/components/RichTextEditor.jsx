@@ -12,7 +12,10 @@ class DtImageBlot extends ImageBlot {
     return node
   }
   static value(node) {
-    return { src: node.getAttribute('src'), path: node.getAttribute('dt-data-path') }
+    return {
+      src: node.getAttribute('src'),
+      path: node.getAttribute('dt-data-path'),
+    }
   }
   static formats(node) {
     return { 'dt-data-path': node.getAttribute('dt-data-path') }
@@ -36,14 +39,12 @@ import {
   useImperativeHandle,
   useRef,
 } from 'react'
+import { useDescriptionHtml } from '../../hooks/useDescriptionHtml'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { apiClient } from '../../utils/ApiClient'
-import {
-  isPlusAccount,
-  refreshSignedUrlsInHtml,
-  resolvePhotoURL,
-} from '../../utils/Helpers'
+import { isPlusAccount, resolvePhotoURL } from '../../utils/Helpers'
+import { patchDescriptionHtml } from '../../utils/ImageCache'
 import './RichTextEditor.css'
 
 const RichTextEditor = forwardRef(
@@ -56,11 +57,14 @@ const RichTextEditor = forwardRef(
       variant = 'outlined',
       entityId,
       entityType,
+      draftId,
     },
     ref,
   ) => {
     const { showError } = useNotification()
     const { data: userProfile } = useUserProfile()
+    // Display-only HTML with expired image srcs swapped for cached/re-signed ones
+    const displayHtml = useDescriptionHtml(value)
     const quillRef = useRef(null)
     const editorRef = useRef(null)
     const initialContentSet = useRef(false)
@@ -132,11 +136,20 @@ const RichTextEditor = forwardRef(
             `Compressed size: ${(compressedJpegFile.size / 1024 / 1024).toFixed(2)} MB`,
           )
 
-          // Upload compressed image to backend
+          // Upload compressed image to backend. Without a saved entity yet,
+          // upload as a draft tied to draftId — the backend promotes drafts
+          // to the real entity when the chore is created.
           const formData = new FormData()
           formData.append('file', compressedJpegFile)
-          formData.append('entityId', entityId)
-          formData.append('entityType', entityType)
+          if (entityId) {
+            formData.append('entityId', String(entityId))
+            formData.append('entityType', entityType)
+          } else if (draftId) {
+            formData.append('entityType', `${entityType}_draft`)
+            formData.append('draftId', draftId)
+          } else {
+            formData.append('entityType', entityType)
+          }
 
           const response = await apiClient.upload('/assets/chore', formData)
 
@@ -152,7 +165,7 @@ const RichTextEditor = forwardRef(
               message: 'The file you are trying to upload is too large.',
             })
             return
-          } else if (response.status === 403 && !isPlusAccount()) {
+          } else if (response.status === 403 && !isPlusAccount(userProfile)) {
             showError({
               title: 'Upgrade Required',
               message:
@@ -173,9 +186,9 @@ const RichTextEditor = forwardRef(
             return
           }
           const data = await response.json()
-          // Prefer the backend-proxied path (data.sign) over the direct cloud
-          // signed URL (data.url) — the proxy re-signs on every request so the
-          // embedded src never expires.
+          // data.sign is a fetchable signed URL; data.path is the stable
+          // storage key kept in dt-data-path so the src can be re-signed
+          // after the URL expires.
           const path = data.path
           const url = resolvePhotoURL(data.sign || data.url)
           // Insert image into Quill with dt-data-path tracked by the custom blot
@@ -191,7 +204,7 @@ const RichTextEditor = forwardRef(
           })
         }
       }
-    }, [entityId, entityType, showError, userProfile]) // Dependencies for useCallback
+    }, [entityId, entityType, draftId, showError, userProfile]) // Dependencies for useCallback
 
     useEffect(() => {
       if (!quillRef.current) return
@@ -223,27 +236,25 @@ const RichTextEditor = forwardRef(
           }
         })
       }
-      // If switching to read-only mode, disable Quill instance
-      if (editorRef.current && !isEditable) {
-        // editorRef.current.disable()
-        editorRef.current.readOnly = true
-
-        // If switching back to editable, enable Quill
-        if (editorRef.current && isEditable) {
-          // editorRef.current.enable()
-          editorRef.current.readOnly = false
-        }
+      // Keep Quill's editing state in sync with the isEditable prop
+      if (editorRef.current) {
+        editorRef.current.enable(isEditable)
       }
     }, [onChange, value, isEditable, variant, handleImageUpload, userProfile]) // Added handleImageUpload and userProfile to dependency array
 
     useEffect(() => {
       if (editorRef.current && isEditable) {
         if (editorRef.current.root.innerHTML !== value) {
-          const html = !initialContentSet.current
-            ? refreshSignedUrlsInHtml(value || '')
-            : value || ''
+          editorRef.current.root.innerHTML = value || ''
+          // On first load, swap expired image srcs for cached/re-signed ones
+          if (!initialContentSet.current && value) {
+            patchDescriptionHtml(value).then(html => {
+              if (editorRef.current && html !== value) {
+                editorRef.current.root.innerHTML = html
+              }
+            })
+          }
           initialContentSet.current = true
-          editorRef.current.root.innerHTML = html
         }
       }
     }, [value, isEditable])
@@ -268,7 +279,7 @@ const RichTextEditor = forwardRef(
             boxShadow:
               'var(--joy-shadow-xs, 0px 1px 2px 0px rgba(16, 24, 40, 0.05))',
           }}
-          dangerouslySetInnerHTML={{ __html: refreshSignedUrlsInHtml(value) }}
+          dangerouslySetInnerHTML={{ __html: displayHtml }}
         />
       )
     }

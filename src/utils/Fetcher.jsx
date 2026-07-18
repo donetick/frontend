@@ -728,13 +728,33 @@ const DeleteUser = (password, confirmation, transferOptions = []) => {
   })
 }
 
-const UploadChoreAttachment = (file, entityType, { entityId, draftId } = {}) => {
+const UploadChoreAttachment = (
+  file,
+  entityType,
+  { entityId, draftId } = {},
+) => {
   const formData = new FormData()
   formData.append('file', file)
   formData.append('entityType', entityType)
   if (entityId != null) formData.append('entityId', String(entityId))
   if (draftId != null) formData.append('draftId', draftId)
   return apiClient.upload('/assets/chore', formData)
+}
+
+const DeleteDraftAttachment = filePath => {
+  return Fetch(`/assets/chore`, {
+    method: 'DELETE',
+    headers: HEADERS(),
+    body: JSON.stringify({ file_path: filePath }),
+  })
+}
+
+// Returns a fresh signed URL for a stored asset path the current user may access.
+const SignAssetURL = path => {
+  return Fetch(`/files/sign?path=${encodeURIComponent(path)}`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
 }
 
 const GetChoreAttachments = choreId => {
@@ -958,7 +978,9 @@ const TrackFilterUsage = id => {
 export {
   AcceptCircleMemberRequest,
   DeleteChoreAttachment,
+  DeleteDraftAttachment,
   GetChoreAttachments,
+  SignAssetURL,
   UploadChoreAttachment,
   ApproveChore,
   ArchiveChore,
@@ -1060,6 +1082,5 @@ export {
   UpdateThingState,
   UpdateTimeSession,
   UpdateUserDetails,
-  VerifyMFA
+  VerifyMFA,
 }
-

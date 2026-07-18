@@ -17,6 +17,17 @@ export const CommandType = {
   UNARCHIVE_CHORE: 'unarchive_chore',
 }
 
+// Parse a stored command payload; a corrupt payload must not take down every
+// consumer of the queue, so parse failures surface as null payloads.
+const parsePayload = command => {
+  try {
+    return { ...command, payload: JSON.parse(command.payload) }
+  } catch {
+    console.warn('Skipping corrupt command payload', command.id)
+    return null
+  }
+}
+
 class CommandQueue {
   _sanitizeCreatePayload(payload = {}) {
     const sanitized = { ...payload }
@@ -77,7 +88,8 @@ class CommandQueue {
     const commands = await offlineDB.getCommands()
     return commands
       .filter(c => c.status === 'pending' || c.status === 'syncing')
-      .map(c => ({ ...c, payload: JSON.parse(c.payload) }))
+      .map(parsePayload)
+      .filter(Boolean)
   }
 
   // Get all failed commands
@@ -86,7 +98,8 @@ class CommandQueue {
     const commands = await offlineDB.getCommands()
     return commands
       .filter(c => c.status === 'failed')
-      .map(c => ({ ...c, payload: JSON.parse(c.payload) }))
+      .map(parsePayload)
+      .filter(Boolean)
   }
 
   // Get pending commands for a specific entity (for undo/UI)
@@ -103,7 +116,8 @@ class CommandQueue {
       .sort((a, b) => a.createdAt - b.createdAt)
     return commands
       .filter(c => c.status === 'pending' || c.status === 'syncing')
-      .map(c => ({ ...c, payload: JSON.parse(c.payload) }))
+      .map(parsePayload)
+      .filter(Boolean)
   }
 
   // Cancel/undo a pending command
@@ -115,6 +129,50 @@ class CommandQueue {
 
     await this._rollbackCancelledCommand(command)
     return offlineDB.removeCommand(commandId)
+  }
+
+  // Rewrite queued commands after an offline-created entity gets its real
+  // server id: commands queued against the temp id (complete, skip, history
+  // edits, …) would otherwise replay against an id the server doesn't know.
+  async remapEntityId(tempId, realId) {
+    if (!isOfflineFeatureEnabled()) return
+    const tempKey = String(tempId)
+    const realKey = String(realId)
+    const commands = await offlineDB.getCommands()
+
+    for (const cmd of commands) {
+      const entityId = String(cmd.entityId)
+      const matches = entityId === tempKey || entityId.startsWith(`${tempKey}:`)
+      if (!matches) continue
+
+      const newEntityId =
+        entityId === tempKey
+          ? realKey
+          : `${realKey}:${entityId.slice(tempKey.length + 1)}`
+
+      let newPayload = cmd.payload
+      try {
+        const parsed = JSON.parse(cmd.payload)
+        if (parsed && typeof parsed === 'object') {
+          if (String(parsed.id) === tempKey) parsed.id = realId
+          if (String(parsed.choreId) === tempKey) parsed.choreId = realId
+          newPayload = JSON.stringify(parsed)
+        }
+      } catch {
+        // unparseable payload — remap the entity id only
+      }
+
+      await offlineDB.updateCommand(cmd.id, {
+        entityId: newEntityId,
+        payload: newPayload,
+      })
+    }
+  }
+
+  // Track a transient failure so replay can give up after repeated attempts
+  async incrementRetry(commandId) {
+    if (!isOfflineFeatureEnabled()) return
+    return offlineDB.incrementCommandRetry(commandId)
   }
 
   // Mark as syncing

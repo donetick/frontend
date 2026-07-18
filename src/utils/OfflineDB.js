@@ -20,6 +20,29 @@ const isNative = () => {
   return _isNative
 }
 
+// The raw CapacitorSQLite query API prepends a metadata row on iOS
+// (e.g. { ios_columns: ["data"] }). The plugin's SQLiteDBConnection wrapper
+// strips it, but we call the plugin directly, so filter it here — otherwise
+// the metadata row reaches JSON.parse(undefined) and crashes offline reads.
+const queryRows = result =>
+  (result?.values || []).filter(
+    row => row && typeof row === 'object' && !('ios_columns' in row),
+  )
+
+// Parse a JSON column across rows, skipping corrupt rows instead of letting
+// one bad row take down the whole offline cache.
+const parseJsonRows = (result, column) => {
+  const parsed = []
+  for (const row of queryRows(result)) {
+    try {
+      parsed.push(JSON.parse(row[column]))
+    } catch (err) {
+      console.warn('Skipping corrupt offline cache row', err)
+    }
+  }
+  return parsed
+}
+
 // ── SQLite backend (iOS/Android) ──
 
 class SQLiteBackend {
@@ -71,7 +94,8 @@ class SQLiteBackend {
           payload TEXT NOT NULL,
           created_at INTEGER NOT NULL,
           status TEXT NOT NULL DEFAULT 'pending',
-          error TEXT
+          error TEXT,
+          retry_count INTEGER NOT NULL DEFAULT 0
         );
 
         CREATE TABLE IF NOT EXISTS sync_meta (
@@ -93,6 +117,18 @@ class SQLiteBackend {
         CREATE INDEX IF NOT EXISTS idx_history_pending ON cached_history(pending);
       `,
     })
+
+    // Migration for databases created before retry tracking existed.
+    // ALTER TABLE fails harmlessly when the column is already there.
+    try {
+      await CapacitorSQLite.execute({
+        database: DB_NAME,
+        statements:
+          'ALTER TABLE command_queue ADD COLUMN retry_count INTEGER NOT NULL DEFAULT 0;',
+      })
+    } catch {
+      // column already exists
+    }
 
     this.initialized = true
   }
@@ -125,7 +161,7 @@ class SQLiteBackend {
       statement: 'SELECT data FROM cached_chores',
       values: [],
     })
-    const chores = (result.values || []).map(row => JSON.parse(row.data))
+    const chores = parseJsonRows(result, 'data')
     if (includeArchive) {
       return chores
     }
@@ -139,10 +175,7 @@ class SQLiteBackend {
       statement: 'SELECT data FROM cached_chores WHERE id = ?',
       values: [isNaN(numericId) ? id : numericId],
     })
-    if (result.values && result.values.length > 0) {
-      return JSON.parse(result.values[0].data)
-    }
-    return null
+    return parseJsonRows(result, 'data')[0] ?? null
   }
 
   async deleteChores(ids) {
@@ -216,7 +249,7 @@ class SQLiteBackend {
         'SELECT data FROM cached_history WHERE chore_id = ? ORDER BY performed_at DESC',
       values: [Number(choreId)],
     })
-    return (result.values || []).map(row => JSON.parse(row.data))
+    return parseJsonRows(result, 'data')
   }
 
   async getHistoryByDays(days) {
@@ -229,7 +262,7 @@ class SQLiteBackend {
           : 'SELECT data FROM cached_history WHERE performed_at >= ? ORDER BY performed_at DESC',
       values: since === 0 ? [] : [since],
     })
-    return (result.values || []).map(row => JSON.parse(row.data))
+    return parseJsonRows(result, 'data')
   }
 
   async deleteHistory(ids) {
@@ -248,10 +281,16 @@ class SQLiteBackend {
       values: [historyId],
     })
 
-    if (!existing.values?.length) return
+    const existingRows = queryRows(existing)
+    if (!existingRows.length) return
 
-    const row = existing.values[0]
-    const current = JSON.parse(row.data)
+    const row = existingRows[0]
+    let current
+    try {
+      current = JSON.parse(row.data)
+    } catch {
+      return
+    }
     const merged = {
       ...current,
       ...updates,
@@ -314,7 +353,7 @@ class SQLiteBackend {
       statement: 'SELECT * FROM command_queue ORDER BY created_at ASC',
       values: [],
     })
-    return (result.values || []).map(row => ({
+    return queryRows(result).map(row => ({
       id: row.id,
       commandType: row.command_type,
       entityId: row.entity_id,
@@ -322,6 +361,7 @@ class SQLiteBackend {
       createdAt: row.created_at,
       status: row.status,
       error: row.error,
+      retryCount: row.retry_count ?? 0,
     }))
   }
 
@@ -332,7 +372,7 @@ class SQLiteBackend {
         'SELECT * FROM command_queue WHERE entity_id = ? ORDER BY created_at ASC',
       values: [entityId],
     })
-    return (result.values || []).map(row => ({
+    return queryRows(result).map(row => ({
       id: row.id,
       commandType: row.command_type,
       entityId: row.entity_id,
@@ -340,6 +380,7 @@ class SQLiteBackend {
       createdAt: row.created_at,
       status: row.status,
       error: row.error,
+      retryCount: row.retry_count ?? 0,
     }))
   }
 
@@ -358,13 +399,14 @@ class SQLiteBackend {
       values: [id],
     })
 
-    if (!result.values?.length) return
+    const resultRows = queryRows(result)
+    if (!resultRows.length) return
 
-    const row = result.values[0]
+    const row = resultRows[0]
     await CapacitorSQLite.run({
       database: DB_NAME,
       statement: `UPDATE command_queue
-                  SET command_type = ?, entity_id = ?, payload = ?, created_at = ?, status = ?, error = ?
+                  SET command_type = ?, entity_id = ?, payload = ?, created_at = ?, status = ?, error = ?, retry_count = ?
                   WHERE id = ?`,
       values: [
         updates.commandType ?? row.command_type,
@@ -375,8 +417,18 @@ class SQLiteBackend {
         Object.prototype.hasOwnProperty.call(updates, 'error')
           ? updates.error
           : row.error,
+        updates.retryCount ?? row.retry_count ?? 0,
         id,
       ],
+    })
+  }
+
+  async incrementCommandRetry(id) {
+    await CapacitorSQLite.run({
+      database: DB_NAME,
+      statement:
+        'UPDATE command_queue SET retry_count = COALESCE(retry_count, 0) + 1 WHERE id = ?',
+      values: [id],
     })
   }
 
@@ -403,8 +455,10 @@ class SQLiteBackend {
       statement: "SELECT value FROM sync_meta WHERE key = 'sync_cursor'",
       values: [],
     })
-    if (result.values && result.values.length > 0) {
-      return Number(result.values[0].value)
+    const rows = queryRows(result)
+    if (rows.length > 0) {
+      const cursor = Number(rows[0].value)
+      return Number.isFinite(cursor) ? cursor : 0
     }
     return 0
   }
@@ -424,8 +478,10 @@ class SQLiteBackend {
       statement: "SELECT value FROM sync_meta WHERE key = 'last_sync_time'",
       values: [],
     })
-    if (result.values && result.values.length > 0) {
-      return Number(result.values[0].value)
+    const rows = queryRows(result)
+    if (rows.length > 0) {
+      const time = Number(rows[0].value)
+      return Number.isFinite(time) ? time : null
     }
     return null
   }
@@ -453,9 +509,10 @@ class SQLiteBackend {
       statement: 'SELECT value FROM sync_meta WHERE key = ?',
       values: [key],
     })
-    if (result.values && result.values.length > 0) {
+    const rows = queryRows(result)
+    if (rows.length > 0) {
       try {
-        return JSON.parse(result.values[0].value)
+        return JSON.parse(rows[0].value)
       } catch {
         return null
       }
@@ -769,6 +826,7 @@ class IndexedDBBackend {
         createdAt: command.createdAt,
         status: command.status,
         error: command.error,
+        retryCount: 0,
       }),
     )
     return id
@@ -808,6 +866,15 @@ class IndexedDBBackend {
           ...updates,
         }),
       )
+    }
+  }
+
+  async incrementCommandRetry(id) {
+    const { store } = await this._tx('command_queue', 'readwrite')
+    const row = await this._request(store.get(id))
+    if (row) {
+      row.retryCount = (row.retryCount ?? 0) + 1
+      await this._request(store.put(row))
     }
   }
 
@@ -980,6 +1047,12 @@ class OfflineDB {
     if (!isOfflineFeatureEnabled()) return
     await this._ensureInit()
     return this.backend.updateCommand(id, updates)
+  }
+
+  async incrementCommandRetry(id) {
+    if (!isOfflineFeatureEnabled()) return
+    await this._ensureInit()
+    return this.backend.incrementCommandRetry(id)
   }
 
   async removeCommand(id) {

@@ -20,15 +20,6 @@
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(MARKETING_VERSION)</string>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>com.googleusercontent.apps.682262497914-5dacpk46qcc1494lood6ch8ul9c83kop</string>
-			</array>
-		</dict>
-	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
@@ -76,6 +67,12 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>donetick</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.682262497914-5dacpk46qcc1494lood6ch8ul9c83kop</string>
 			</array>
 		</dict>
 	</array>

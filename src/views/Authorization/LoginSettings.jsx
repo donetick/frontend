@@ -18,6 +18,7 @@ import { API_URL } from '../../Config'
 import Logo from '../../Logo'
 import { useResource } from '../../queries/ResourceQueries'
 import { apiClient } from '../../utils/ApiClient'
+import { offlineDB } from '../../utils/OfflineDB'
 
 const CONNECTION_TIMEOUT_MS = 8000
 
@@ -166,6 +167,11 @@ const LoginSettings = () => {
     }
 
     await Preferences.set({ key: 'customServerUrl', value: trimmedURL })
+    try {
+      await offlineDB.clearAll()
+    } catch (e) {
+      console.error('Error clearing offline data on server change', e)
+    }
     await apiClient.init(true)
     refetchResource()
     setStatus('success')

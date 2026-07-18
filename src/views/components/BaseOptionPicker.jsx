@@ -23,6 +23,7 @@ const BaseOptionPicker = ({
   getItemColor,
   getTriggerText,
   onClear,
+  menuFooter,
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const buttonRef = useRef(null)
@@ -242,6 +243,9 @@ const BaseOptionPicker = ({
                   </Button>
                 )
               })}
+              {menuFooter && (
+                <Box sx={{ mt: items.length > 0 ? 0.5 : 0 }}>{menuFooter}</Box>
+              )}
             </Sheet>
           </ClickAwayListener>
         </Popper>

@@ -1,9 +1,18 @@
 import { AttachFile, Close, Image } from '@mui/icons-material'
-import { Box, Button, CircularProgress, List, ListItem, ListItemButton, Typography } from '@mui/joy'
+import {
+  Box,
+  Button,
+  CircularProgress,
+  List,
+  ListItem,
+  ListItemButton,
+  Typography,
+} from '@mui/joy'
 import { useEffect, useState } from 'react'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { GetChoreAttachments } from '../../../utils/Fetcher'
 import { resolvePhotoURL } from '../../../utils/Helpers'
+import { cacheChoreImages, getImageSrc } from '../../../utils/ImageCache'
 import AttachmentViewerModal from './AttachmentViewerModal'
 
 const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg']
@@ -38,7 +47,12 @@ function AttachmentBrowserModal({ choreId, isOpen, onClose }) {
         if (!res.ok) throw new Error('Failed to fetch attachments')
         return res.json()
       })
-      .then(data => setAttachments(Array.isArray(data) ? data : []))
+      .then(data => {
+        const list = Array.isArray(data) ? data : []
+        setAttachments(list)
+        // Fire-and-forget: store attachments so they open offline later
+        cacheChoreImages({ id: choreId, attachments: list })
+      })
       .catch(() => setAttachments([]))
       .finally(() => setIsLoading(false))
   }, [isOpen, choreId])
@@ -48,8 +62,12 @@ function AttachmentBrowserModal({ choreId, isOpen, onClose }) {
     onClose?.()
   }
 
-  const handleAttachmentClick = attachment => {
-    const url = resolvePhotoURL(attachment.sign)
+  const handleAttachmentClick = async attachment => {
+    const url = await getImageSrc(
+      attachment.file_path,
+      attachment.sign ? resolvePhotoURL(attachment.sign) : null,
+      { choreId: String(choreId), kind: 'attachment' },
+    ).catch(() => resolvePhotoURL(attachment.sign))
     if (isImageFile(attachment.file_name)) {
       setViewerConfig({
         isOpen: true,
@@ -119,7 +137,10 @@ function AttachmentBrowserModal({ choreId, isOpen, onClose }) {
                       {attachment.file_name || `File ${index + 1}`}
                     </Typography>
                     {attachment.size_bytes > 0 && (
-                      <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+                      <Typography
+                        level='body-xs'
+                        sx={{ color: 'text.tertiary' }}
+                      >
                         {(attachment.size_bytes / 1024).toFixed(1)} KB
                       </Typography>
                     )}
