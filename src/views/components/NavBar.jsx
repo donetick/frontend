@@ -38,7 +38,7 @@ import Z_INDEX from '../../constants/zIndex'
 import { useResource } from '../../queries/ResourceQueries'
 import { apiClient } from '../../utils/ApiClient'
 
-const publicPages = ['/landing', '/privacy', '/terms']
+const publicPages = ['/privacy', '/terms']
 const NavBar = () => {
   const { t } = useTranslation('common')
   const { isRTL } = useLocalization()
@@ -158,7 +158,6 @@ const NavBar = () => {
       '/forgot-password',
       '/password/update',
       '/login/settings',
-      '/welcome',
     ].includes(location.pathname)
   ) {
     return (
@@ -171,14 +170,8 @@ const NavBar = () => {
       />
     )
   }
-  // if url has /landing then remove the navbar:
+  // Hide the navbar on standalone public pages (privacy / terms).
   if (publicPages.includes(location.pathname)) {
-    return null
-  }
-  if (
-    window.location.hostname === 'www.donetick.com' ||
-    window.location.hostname === 'donetick.com'
-  ) {
     return null
   }
 

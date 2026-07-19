@@ -17,7 +17,6 @@ const routeHierarchy = {
   '/projects': 1,
   '/login': 0,
   '/signup': 1,
-  '/landing': 0,
   '/archived': 1,
 }
 
@@ -84,7 +83,6 @@ const PageTransition = ({ children }) => {
     const isFade =
       location.pathname.includes('/login') ||
       location.pathname.includes('/signup') ||
-      location.pathname.includes('/landing') ||
       location.pathname.includes('/auth/')
 
     // Apply transition type as data attribute for CSS
