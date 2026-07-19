@@ -25,7 +25,6 @@ import NotFound from '../views/components/NotFound'
 import FilterView from '../views/Filters/FilterView'
 import ChoreHistory from '../views/History/ChoreHistory'
 import LabelView from '../views/Labels/LabelView'
-import Landing from '../views/Landing/Landing'
 import PaymentCancelledView from '../views/Payments/PaymentFailView'
 import PaymentSuccessView from '../views/Payments/PaymentSuccessView'
 import PrivacyPolicyView from '../views/PrivacyPolicy/PrivacyPolicyView'
@@ -44,16 +43,9 @@ import ThingsView from '../views/Things/ThingsView'
 import TimerDetails from '../views/Timer/TimerDetails'
 import UserActivities from '../views/User/UserActivities'
 import UserPoints from '../views/User/UserPoints'
-const getMainRoute = () => {
-  if (
-    // if domain is www.donetick.com or donetick.com  then show landing page:
-    window.location.hostname === 'www.donetick.com' ||
-    window.location.hostname === 'donetick.com'
-  ) {
-    return <Landing />
-  }
-  return <MyChores />
-}
+// The marketing landing page now lives in its own repository (donetick-landing,
+// a static Astro site served at donetick.com). The app always renders the user's
+// chores at the root; app.donetick.com is the only host this SPA serves.
 const Router = createBrowserRouter([
   {
     path: '/',
@@ -62,7 +54,7 @@ const Router = createBrowserRouter([
     children: [
       {
         path: '/',
-        element: getMainRoute(),
+        element: <MyChores />,
       },
       {
         path: '/settings',
@@ -186,10 +178,6 @@ const Router = createBrowserRouter([
       {
         path: '/auth/:provider',
         element: <AuthenticationLoading />,
-      },
-      {
-        path: '/welcome',
-        element: <Landing />,
       },
       {
         path: '/test',
