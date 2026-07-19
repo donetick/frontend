@@ -4,6 +4,10 @@
 
 The Donetick Frontend is Frontend piece for Donetick written in javascript with React
 
+> **Note:** The marketing landing page lives in its own repository —
+> [**donetick-landing**](https://github.com/majicmaj/donetick-landing) (a static Astro site for `donetick.com`).
+> This app is app-only. See [`docs/landing-migration.md`](docs/landing-migration.md) for details.
+
 ## What is Donetick?
 
 An open-source, user-friendly app for managing tasks and chores, featuring customizable options to help you and others stay organized.
