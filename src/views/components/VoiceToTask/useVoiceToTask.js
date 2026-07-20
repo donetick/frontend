@@ -135,6 +135,13 @@ export function useVoiceToTask({ members = [] } = {}) {
     return true
   }, [commitSegment, stopListening])
 
+  // One-tap entry: start listening already locked into hands-free mode
+  const startHandsFree = useCallback(async () => {
+    if (phaseRef.current === 'listening') return
+    const ok = await startListening()
+    if (ok) setIsLocked(true)
+  }, [startListening])
+
   const micPressDown = useCallback(() => {
     pressStartedAtRef.current = Date.now()
     if (phaseRef.current === 'listening') {
@@ -180,6 +187,21 @@ export function useVoiceToTask({ members = [] } = {}) {
     [applySegments],
   )
 
+  // Picker edits on a card are stored as overrides that win over whatever a
+  // re-parse of the spoken text would produce
+  const patchSegment = useCallback(
+    (id, patch) => {
+      applySegments(
+        segmentsRef.current.map(s =>
+          s.id === id
+            ? { ...s, overrides: { ...(s.overrides || {}), ...patch } }
+            : s,
+        ),
+      )
+    },
+    [applySegments],
+  )
+
   const reset = useCallback(() => {
     voiceInputService.stop()
     if (watchdogRef.current) {
@@ -208,9 +230,11 @@ export function useVoiceToTask({ members = [] } = {}) {
     micPressDown,
     micPressUp,
     startListening,
+    startHandsFree,
     stopListening,
     removeSegment,
     updateSegment,
+    patchSegment,
     reset,
     isNative: voiceInputService.isNative,
   }

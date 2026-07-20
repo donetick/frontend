@@ -124,6 +124,7 @@ export const parseVoiceTask = (
     points: points.result ?? null,
     labelIds,
     labelNames: (labels.result || []).map(label => label.name),
+    newLabels: labels.newLabels || [],
     assignees,
     isAnyone,
     frequency: repeat.result,

@@ -61,28 +61,88 @@ const normalizeLabels = text =>
     '#$1',
   )
 
+// "assign to Sarah" / "assigned to Sarah" / "assign Sarah" / "for Sarah".
+// Speech engines spell names their own way ("Sara" for Sarah) and add
+// punctuation, so exact display-name matching alone misses real speech —
+// an edit-distance-1 fuzzy pass catches those, but only after an explicit
+// assign verb so ordinary words never convert.
+const ASSIGN_VERB = '(?:assign(?:ed|ee)?(?:\\s+(?:this|it))?(?:\\s+to)?|for)'
+const STRICT_ASSIGN_VERB = '(?:assign(?:ed|ee)?(?:\\s+(?:this|it))?(?:\\s+to)?)'
+
+const levenshtein = (a, b) => {
+  if (Math.abs(a.length - b.length) > 1) return 2
+  const prev = Array.from({ length: b.length + 1 }, (_, i) => i)
+  for (let i = 1; i <= a.length; i++) {
+    let diag = prev[0]
+    prev[0] = i
+    for (let j = 1; j <= b.length; j++) {
+      const tmp = prev[j]
+      prev[j] = Math.min(
+        prev[j] + 1,
+        prev[j - 1] + 1,
+        diag + (a[i - 1] === b[j - 1] ? 0 : 1),
+      )
+      diag = tmp
+    }
+  }
+  return prev[b.length]
+}
+
+const memberNameVariants = member =>
+  [
+    member.displayName,
+    member.displayName?.split(/\s+/)[0],
+    member.username,
+  ].filter(n => n && n.length > 1)
+
+const findMemberFuzzy = (candidate, members) => {
+  const c = candidate.toLowerCase()
+  let close = null
+  for (const member of members) {
+    for (const name of memberNameVariants(member)) {
+      const n = name.toLowerCase()
+      if (n === c) return member
+      if (!close && n.length >= 4 && c.length >= 4 && levenshtein(n, c) <= 1) {
+        close = member
+      }
+    }
+  }
+  return close
+}
+
 const normalizeAssignees = (text, members = []) => {
-  const assignVerb = '(?:assign(?:ed)?\\s+(?:this\\s+|it\\s+)?to|for)'
   let out = text.replace(
-    new RegExp(`\\b${assignVerb}\\s+(?:anyone|anybody|everyone)\\b`, 'gi'),
+    new RegExp(
+      `\\b${ASSIGN_VERB}\\s+(?:anyone|anybody|everyone)\\b[,.]?`,
+      'gi',
+    ),
     '@Anyone',
   )
 
+  // Exact pass — full display name first so "assign to Mo Tarbin" doesn't
+  // leave a dangling "Tarbin"
   for (const member of members) {
-    const displayName = member.displayName
-    if (!displayName) continue
-    const firstName = displayName.split(/\s+/)[0]
-    // Full display name first so "assign to Mo Tarbin" doesn't leave "Tarbin"
-    const names = [...new Set([displayName, firstName])].filter(
-      n => n.length > 1,
+    if (!member.displayName) continue
+    const names = [...new Set(memberNameVariants(member))].sort(
+      (a, b) => b.length - a.length,
     )
     for (const name of names) {
       out = out.replace(
-        new RegExp(`\\b${assignVerb}\\s+${escapeRegex(name)}\\b`, 'gi'),
-        `@${displayName}`,
+        new RegExp(`\\b${ASSIGN_VERB}\\s+${escapeRegex(name)}\\b[,.]?`, 'gi'),
+        `@${member.displayName}`,
       )
     }
   }
+
+  // Fuzzy pass — requires an assign verb (not bare "for") so only clearly
+  // intended names get corrected
+  out = out.replace(
+    new RegExp(`\\b${STRICT_ASSIGN_VERB}\\s+([\\p{L}][\\p{L}'-]*)[,.]?`, 'giu'),
+    (match, candidate) => {
+      const member = findMemberFuzzy(candidate, members)
+      return member ? `@${member.displayName}` : match
+    },
+  )
   return out
 }
 
