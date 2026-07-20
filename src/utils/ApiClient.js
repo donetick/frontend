@@ -1,4 +1,5 @@
 import { Preferences } from '@capacitor/preferences'
+import { resetAnalytics } from '../analytics/analytics'
 import { API_URL } from '../Config'
 import { networkManager } from '../hooks/NetworkManager'
 import { logout, RefreshToken } from './Fetcher'
@@ -132,6 +133,9 @@ class ApiClient {
 
   // Helper to avoid repeating cleanup code
   async handleLogout() {
+    // Clear the analytics identity so the next user on this device isn't
+    // merged into the previous account.
+    resetAnalytics()
     await clearAllTokens()
     try {
       await offlineDB.clearAll()

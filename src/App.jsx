@@ -15,6 +15,7 @@ import './styles/safe-area.css'
 import SSEProvider from './contexts/SSEContext'
 import { useNotification } from './service/NotificationProvider'
 
+import { useAnalyticsIdentity } from './hooks/useAnalyticsIdentity'
 import { useSyncOnReconnect } from './hooks/useSyncOnReconnect'
 import NetworkBanner from './views/components/NetworkBanner'
 
@@ -32,6 +33,9 @@ const intervalMS = 5 * 60 * 1000 // 5 minutes
 const AppContent = () => {
   const { showNotification } = useNotification()
   useSyncOnReconnect()
+
+  // Identify the authenticated user to analytics once their profile loads.
+  useAnalyticsIdentity()
 
   // Initialize status bar with theme-aware configuration
   useStatusBar()
@@ -99,8 +103,6 @@ function App() {
   const resource = useResource() // eslint-disable-line no-unused-vars
   const { mode, systemMode } = useColorScheme()
   const navigate = useNavigate()
-
-  // startOpenReplay()
 
   const setThemeClass = useCallback(() => {
     const value = JSON.parse(localStorage.getItem('themeMode')) || mode
