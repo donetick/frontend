@@ -24,6 +24,7 @@ import SmartTaskTitleInput from './SmartTaskTitleInput'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import { useDocumentScanner } from '../../hooks/useDocumentScanner'
 import { localAIService } from '../../service/LocalAIService'
+import { voiceInputService } from '../../service/VoiceInputService'
 import { TASK_COLOR } from '../../utils/Colors'
 import AdvancedOptionsSection, {
   AdvancedOptionsTrigger,
@@ -39,6 +40,8 @@ import RepeatPickerField from './RepeatPickerField'
 import RichTextEditor from './RichTextEditor'
 import ScanPanel from './ScanToTask/ScanPanel'
 import SubTasks from './SubTask'
+import { buildChorePayload } from './VoiceToTask/parseVoiceTask'
+import VoicePanel from './VoiceToTask/VoicePanel'
 const getDefaultNotification = () => {
   const storedDefault = localStorage.getItem('defaultNotificationTemplate')
   if (storedDefault) {
@@ -121,10 +124,13 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
   const [scanAutoCapture, setScanAutoCapture] = useState(false)
   const [pendingPhotoUrl, setPendingPhotoUrl] = useState(null)
   const [llmAvailable, setLlmAvailable] = useState(false)
+  const [showVoice, setShowVoice] = useState(false)
+  const [voiceAvailable, setVoiceAvailable] = useState(false)
   const { isNativeScanner } = useDocumentScanner()
 
   useEffect(() => {
     localAIService.isAvailable().then(setLlmAvailable)
+    voiceInputService.isSupported().then(setVoiceAvailable)
   }, [])
 
   // Priority colors
@@ -589,9 +595,46 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
     }
   }
 
+  // Single voice-captured task: land it in the smart input so the user
+  // reviews it with the normal pickers before creating.
+  const handleVoiceSingle = text => {
+    setShowVoice(false)
+    processText(text)
+  }
+
+  // Multiple voice-captured tasks: they were reviewed as cards in the panel,
+  // so create them all directly.
+  const handleVoiceCreateMany = async parsedTasks => {
+    const notificationTemplates = getDefaultNotification()
+    for (const parsed of parsedTasks) {
+      const chore = buildChorePayload(parsed, {
+        userProfile,
+        projectId,
+        notificationTemplates,
+      })
+      try {
+        const result = await createChoreMutation.mutateAsync(chore)
+        if (result?._pendingCreate) {
+          onChoreUpdate(result)
+        } else {
+          onChoreUpdate({
+            ...chore,
+            ...result,
+            id: result?.id,
+            nextDueDate: chore.dueDate,
+          })
+        }
+      } catch (error) {
+        console.error('Error creating voice task:', error)
+      }
+    }
+    handleCloseModal(false)
+  }
+
   const handleCloseModal = forceRefetch => {
     onClose(forceRefetch)
     setShowScan(false)
+    setShowVoice(false)
     setTaskText('')
     setTaskTitle('')
     setDueDate(null)
@@ -761,7 +804,7 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
           </Box>
         }
       >
-        {!showScan && (
+        {!showScan && !showVoice && (
           <>
             <Box>
               <Box
@@ -837,6 +880,9 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
                         setShowScan(true)
                       }
                     : undefined
+                }
+                onVoiceClick={
+                  voiceAvailable ? () => setShowVoice(true) : undefined
                 }
                 placeholder='Type your task...'
                 onChange={text => {
@@ -1095,6 +1141,18 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
               </Box>
             )}
           </>
+        )}
+
+        {showVoice && (
+          <VoicePanel
+            open
+            userLabels={userLabels || []}
+            members={circleMembers?.res || []}
+            userProfile={userProfile}
+            onClose={() => setShowVoice(false)}
+            onUseSingle={handleVoiceSingle}
+            onCreateMany={handleVoiceCreateMany}
+          />
         )}
 
         {showScan && (

@@ -18,12 +18,16 @@ PODS:
     - Capacitor
   - CapacitorBrowser (8.0.3):
     - Capacitor
+  - CapacitorCommunitySpeechRecognition (7.0.1):
+    - Capacitor
   - CapacitorCommunitySqlite (8.1.0):
     - Capacitor
     - SQLCipher
     - ZIPFoundation
   - CapacitorCordova (8.4.1)
   - CapacitorDevice (8.0.2):
+    - Capacitor
+  - CapacitorHaptics (8.0.2):
     - Capacitor
   - CapacitorLocalLlm (1.0.0):
     - Capacitor
@@ -149,9 +153,11 @@ DEPENDENCIES:
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorApp (from `../../node_modules/@capacitor/app`)"
   - "CapacitorBrowser (from `../../node_modules/@capacitor/browser`)"
+  - "CapacitorCommunitySpeechRecognition (from `../../node_modules/@capacitor-community/speech-recognition`)"
   - "CapacitorCommunitySqlite (from `../../node_modules/@capacitor-community/sqlite`)"
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorDevice (from `../../node_modules/@capacitor/device`)"
+  - "CapacitorHaptics (from `../../node_modules/@capacitor/haptics`)"
   - "CapacitorLocalLlm (from `../../node_modules/@capacitor/local-llm`)"
   - "CapacitorLocalNotifications (from `../../node_modules/@capacitor/local-notifications`)"
   - "CapacitorNetwork (from `../../node_modules/@capacitor/network`)"
@@ -203,12 +209,16 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/app"
   CapacitorBrowser:
     :path: "../../node_modules/@capacitor/browser"
+  CapacitorCommunitySpeechRecognition:
+    :path: "../../node_modules/@capacitor-community/speech-recognition"
   CapacitorCommunitySqlite:
     :path: "../../node_modules/@capacitor-community/sqlite"
   CapacitorCordova:
     :path: "../../node_modules/@capacitor/ios"
   CapacitorDevice:
     :path: "../../node_modules/@capacitor/device"
+  CapacitorHaptics:
+    :path: "../../node_modules/@capacitor/haptics"
   CapacitorLocalLlm:
     :path: "../../node_modules/@capacitor/local-llm"
   CapacitorLocalNotifications:
@@ -243,9 +253,11 @@ SPEC CHECKSUMS:
   Capacitor: 35242afe195b1e53c58ca1b827d1b444c5e6602b
   CapacitorApp: 449ffe26375e96f8aaaee625ac6e01e5c57c8650
   CapacitorBrowser: c987c73d09d8bd3b5ec13f06338b1e14d5d2be69
+  CapacitorCommunitySpeechRecognition: 3e03566c44c2bb3b52391a33d4518b1adbdeb38f
   CapacitorCommunitySqlite: eac6acfb852f46e7988fc59604d7f900498d354e
   CapacitorCordova: eebe6bcf807b1b06f3f48237650f96bbcd0eef09
   CapacitorDevice: 14cba6f88d1c3074cbf825fea977c8c526453ff8
+  CapacitorHaptics: 296f771ecd89c7a1bd92a7b6826a7d268e2e70f5
   CapacitorLocalLlm: a05516151a02923a9e7dae9949d3817e85e321f0
   CapacitorLocalNotifications: 2615aa008f608b95d3921a778ee1988abf1e6148
   CapacitorNetwork: 8812ce60d11fb63d8f2e4ba51a49b2e59892ebe2
@@ -283,6 +295,6 @@ SPEC CHECKSUMS:
   SQLCipher: eb79c64049cb002b4e9fcb30edb7979bf4706dfc
   ZIPFoundation: dfd3d681c4053ff7e2f7350bc4e53b5dba3f5351
 
-PODFILE CHECKSUM: 21b805bdbbb6ac4b8a3527ee8ef346ba0a55ef65
+PODFILE CHECKSUM: 1099083fe561f8852fcef1bfcff4051f45db9770
 
 COCOAPODS: 1.16.2

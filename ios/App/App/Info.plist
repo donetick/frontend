@@ -28,6 +28,10 @@
 	<string>This app needs access to camera to take photos to attach to task or use as profile photo</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This app needs access to photo library to select images to attach to task or use as profile photo</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app uses the microphone to let you create tasks by speaking</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>This app uses on-device speech recognition to turn your voice into tasks</string>
 	<key>UIBackgroundModes</key>
 	<array/>
 	<key>UILaunchStoryboardName</key>

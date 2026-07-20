@@ -1,4 +1,4 @@
-import { CameraEnhance, PhotoFilter } from '@mui/icons-material'
+import { CameraEnhance, Mic, PhotoFilter } from '@mui/icons-material'
 import { IconButton, Tooltip, useColorScheme } from '@mui/joy'
 import { useEffect, useRef, useState } from 'react'
 import AutocompleteDropdown from '../TestView/AutocompleteDropdown'
@@ -57,6 +57,7 @@ const SmartTaskTitleInput = ({
   isNativeScanner,
   onScanClick,
   onPhotoSelected,
+  onVoiceClick,
 }) => {
   const { mode, setMode } = useColorScheme()
   const titleInputRef = useRef(null)
@@ -200,13 +201,14 @@ const SmartTaskTitleInput = ({
     e.target.value = ''
   }
 
-  const showNativeButtons = isNativeScanner && !value
-  const MIC_BUTTON_WIDTH =
-    showNativeButtons && onPhotoSelected && onScanClick
-      ? '5rem'
-      : showNativeButtons
-        ? '2.5rem'
-        : '0rem'
+  const showPhotoButtons = isNativeScanner && !value
+  const showVoiceButton = !!onVoiceClick && !value
+  const visibleButtonCount =
+    (showPhotoButtons && onPhotoSelected ? 1 : 0) +
+    (showPhotoButtons && onScanClick ? 1 : 0) +
+    (showVoiceButton ? 1 : 0)
+  const showActionButtons = visibleButtonCount > 0
+  const ACTION_BUTTONS_WIDTH = `${visibleButtonCount * 2.5}rem`
 
   return (
     <div>
@@ -223,7 +225,7 @@ const SmartTaskTitleInput = ({
             position: 'absolute',
             top: 0,
             left: 0,
-            width: `calc(100% - ${MIC_BUTTON_WIDTH})`,
+            width: `calc(100% - ${ACTION_BUTTONS_WIDTH})`,
             height: '100%',
             zIndex: 1,
             resize: 'none',
@@ -274,7 +276,7 @@ const SmartTaskTitleInput = ({
           {/* Zero-width space to maintain consistent height */}
           &#8203;
         </div>
-        {showNativeButtons && (
+        {showActionButtons && (
           <span
             style={{
               position: 'absolute',
@@ -286,7 +288,7 @@ const SmartTaskTitleInput = ({
               gap: '0.1rem',
             }}
           >
-            {onPhotoSelected && (
+            {showPhotoButtons && onPhotoSelected && (
               <>
                 <Tooltip title='Select photo' placement='top' size='sm'>
                   <IconButton
@@ -308,7 +310,7 @@ const SmartTaskTitleInput = ({
                 />
               </>
             )}
-            {onScanClick && (
+            {showPhotoButtons && onScanClick && (
               <Tooltip title='Scan to create task' placement='top' size='sm'>
                 <IconButton
                   size='sm'
@@ -318,6 +320,19 @@ const SmartTaskTitleInput = ({
                   sx={{ borderRadius: 'xl' }}
                 >
                   <CameraEnhance fontSize='small' />
+                </IconButton>
+              </Tooltip>
+            )}
+            {showVoiceButton && (
+              <Tooltip title='Speak to create tasks' placement='top' size='sm'>
+                <IconButton
+                  size='sm'
+                  variant='plain'
+                  color='neutral'
+                  onClick={onVoiceClick}
+                  sx={{ borderRadius: 'xl' }}
+                >
+                  <Mic fontSize='small' />
                 </IconButton>
               </Tooltip>
             )}

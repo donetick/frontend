@@ -35,15 +35,18 @@
     "bump": "node bump-version.js patch",
     "bump:minor": "node bump-version.js minor",
     "bump:major": "node bump-version.js major",
-    "bump:patch": "node bump-version.js patch"
+    "bump:patch": "node bump-version.js patch",
+    "postinstall": "patch-package"
   },
   "dependencies": {
+    "@capacitor-community/speech-recognition": "^7.0.1",
     "@capacitor-community/sqlite": "^8.0.0",
     "@capacitor/android": "^8.0.0",
     "@capacitor/app": "^8.0.0",
     "@capacitor/browser": "^8.0.0",
     "@capacitor/core": "^8.0.0",
     "@capacitor/device": "^8.0.0",
+    "@capacitor/haptics": "^8.0.2",
     "@capacitor/ios": "^8.0.0",
     "@capacitor/local-llm": "^1.0.0",
     "@capacitor/local-notifications": "^8.0.0",
@@ -124,6 +127,7 @@
     "eslint-plugin-sort-keys-fix": "^1.1.2",
     "eslint-plugin-tailwindcss": "^3.13.1",
     "husky": "^8.0.3",
+    "patch-package": "^8.0.1",
     "postcss": "^8.4.32",
     "prettier": "^3.1.1",
     "prettier-plugin-tailwindcss": "^0.5.10",

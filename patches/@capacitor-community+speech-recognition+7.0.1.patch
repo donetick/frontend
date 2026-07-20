@@ -1,0 +1,26 @@
+diff --git a/node_modules/@capacitor-community/speech-recognition/android/src/main/java/com/getcapacitor/community/speechrecognition/SpeechRecognition.java b/node_modules/@capacitor-community/speech-recognition/android/src/main/java/com/getcapacitor/community/speechrecognition/SpeechRecognition.java
+index a99ea69..2bea32e 100644
+--- a/node_modules/@capacitor-community/speech-recognition/android/src/main/java/com/getcapacitor/community/speechrecognition/SpeechRecognition.java
++++ b/node_modules/@capacitor-community/speech-recognition/android/src/main/java/com/getcapacitor/community/speechrecognition/SpeechRecognition.java
+@@ -168,6 +168,7 @@ public class SpeechRecognition extends Plugin implements Constants {
+         intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, bridge.getActivity().getPackageName());
+         intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, partialResults);
+         intent.putExtra("android.speech.extra.DICTATION_MODE", partialResults);
++        intent.putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true);
+ 
+         if (prompt != null) {
+             intent.putExtra(RecognizerIntent.EXTRA_PROMPT, prompt);
+diff --git a/node_modules/@capacitor-community/speech-recognition/ios/Plugin/Plugin.swift b/node_modules/@capacitor-community/speech-recognition/ios/Plugin/Plugin.swift
+index 5d1b35b..810277d 100644
+--- a/node_modules/@capacitor-community/speech-recognition/ios/Plugin/Plugin.swift
++++ b/node_modules/@capacitor-community/speech-recognition/ios/Plugin/Plugin.swift
+@@ -79,6 +79,9 @@ public class SpeechRecognition: CAPPlugin {
+ 
+             self.recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
+             self.recognitionRequest?.shouldReportPartialResults = partialResults
++            if #available(iOS 13, *), self.speechRecognizer?.supportsOnDeviceRecognition == true {
++                self.recognitionRequest?.requiresOnDeviceRecognition = true
++            }
+ 
+             let inputNode: AVAudioInputNode = self.audioEngine!.inputNode
+             let format: AVAudioFormat = inputNode.outputFormat(forBus: 0)
