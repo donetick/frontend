@@ -309,6 +309,12 @@ const LoginView = () => {
     const authentikAuthorizeUrl = resource?.identity_provider?.auth_url
     const state = generateRandomState()
 
+    const scopes = resource?.identity_provider?.scopes ?? [
+      'openid',
+      'profile',
+      'email',
+    ]
+
     if (Capacitor.isNativePlatform()) {
       const redirectUri = 'donetick://auth/oauth2'
 
@@ -316,7 +322,7 @@ const LoginView = () => {
         response_type: 'code',
         client_id: resource?.identity_provider?.client_id,
         redirect_uri: redirectUri,
-        scope: 'openid profile email',
+        scope: scopes.join(' '),
         state: state,
       })
 
@@ -343,7 +349,7 @@ const LoginView = () => {
         response_type: 'code',
         client_id: resource?.identity_provider?.client_id,
         redirect_uri: `${window.location.origin}/auth/oauth2`,
-        scope: 'openid profile email',
+        scope: scopes.join(' '),
         state: state,
       })
 
