@@ -85,6 +85,8 @@ const AuthenticationLoading = () => {
       return
     }
 
+    const verifier = localStorage.getItem('authVerifier') ?? ''
+
     if (code) {
       await apiClient.init()
       const baseURL = apiClient.getApiURL()
@@ -99,6 +101,7 @@ const AuthenticationLoading = () => {
           },
           body: JSON.stringify({
             code,
+            verifier,
             state: returnedState,
             redirect_uri: redirectURI,
           }),

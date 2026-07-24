@@ -82,6 +82,7 @@ const handleOAuthDeepLink = async url => {
     const urlObj = new URL(url)
     const code = urlObj.searchParams.get('code')
     const state = urlObj.searchParams.get('state')
+    const verifier = localStorage.getItem('authVerifier') ?? ''
 
     if (code && state) {
       // If we're already on the OAuth handler page with the same code, skip
@@ -96,7 +97,7 @@ const handleOAuthDeepLink = async url => {
       // Store the OAuth params for the app to pick up
       await Preferences.set({
         key: 'oauth_callback',
-        value: JSON.stringify({ code, state, timestamp: Date.now() }),
+        value: JSON.stringify({ code, state, verifier, timestamp: Date.now() }),
       })
 
       // Close the browser if it's still open
