@@ -107,8 +107,16 @@ export const useChores = (includeArchive = false) => {
             complete: includeArchive === true,
           })
         }
-        const merged = await mergePendingCreates(data?.res || [])
-        return { ...data, res: merged }
+        // A failing offline cache (e.g. a dropped native SQLite connection)
+        // must not discard a good server response and surface as a bogus
+        // "unable to communicate with server" error.
+        try {
+          const merged = await mergePendingCreates(data?.res || [])
+          return { ...data, res: merged }
+        } catch (mergeErr) {
+          console.error('Failed to merge pending creates', mergeErr)
+          return { ...data, res: data?.res || [] }
+        }
       } catch {
         // API failed — fall back to whatever is in the cache
         const cached = await offlineDB.getChores(includeArchive)
