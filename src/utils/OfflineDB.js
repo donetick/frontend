@@ -50,6 +50,7 @@ class SQLiteBackend {
     this.db = null
     this.initialized = false
     this._initPromise = null
+    this._resetPromise = null
   }
 
   async init() {
@@ -136,7 +137,18 @@ class SQLiteBackend {
   // Rebuild a dropped native connection. iOS/Android may reclaim the SQLite
   // connection while the app is backgrounded; afterwards every call throws
   // "CapacitorSQLitePlugin: null" until the connection is re-established.
+  // Deduped like init(): concurrent failures (poller + queries + sync engine
+  // all hit the dead connection at once) must share one rebuild, otherwise a
+  // second reset can close the fresh connection the first one just opened.
   async reset() {
+    if (this._resetPromise) return this._resetPromise
+    this._resetPromise = this._doReset().finally(() => {
+      this._resetPromise = null
+    })
+    return this._resetPromise
+  }
+
+  async _doReset() {
     this.initialized = false
     this._initPromise = null
     this.db = null
