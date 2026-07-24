@@ -22,6 +22,13 @@ const config: CapacitorConfig = {
     //     androidClientId: process.env.VITE_APP_ANDRIOD_CLIENT_ID,
     //     iosClientId: process.env.VITE_APP_IOS_CLIENT_ID,
     // },
+     SocialLogin: {
+    providers: {
+      google: true,
+      facebook: false,   //  excludes Facebook SDK entirely
+      apple: true,
+    },
+  },
   },
 }
 

@@ -50,6 +50,7 @@ class SQLiteBackend {
     this.db = null
     this.initialized = false
     this._initPromise = null
+    this._resetPromise = null
   }
 
   async init() {
@@ -131,6 +132,32 @@ class SQLiteBackend {
     }
 
     this.initialized = true
+  }
+
+  // Rebuild a dropped native connection. iOS/Android may reclaim the SQLite
+  // connection while the app is backgrounded; afterwards every call throws
+  // "CapacitorSQLitePlugin: null" until the connection is re-established.
+  // Deduped like init(): concurrent failures (poller + queries + sync engine
+  // all hit the dead connection at once) must share one rebuild, otherwise a
+  // second reset can close the fresh connection the first one just opened.
+  async reset() {
+    if (this._resetPromise) return this._resetPromise
+    this._resetPromise = this._doReset().finally(() => {
+      this._resetPromise = null
+    })
+    return this._resetPromise
+  }
+
+  async _doReset() {
+    this.initialized = false
+    this._initPromise = null
+    this.db = null
+    try {
+      await CapacitorSQLite.closeConnection({ database: DB_NAME })
+    } catch {
+      // Connection may already be gone on the native side — ignore.
+    }
+    await this.init()
   }
 
   // ── Chore cache ──
@@ -987,176 +1014,181 @@ class OfflineDB {
     }
   }
 
+  // A dropped native SQLite connection surfaces as "CapacitorSQLitePlugin: null"
+  // (or a "not open" / "no available connection" variant). The IndexedDB backend
+  // self-heals in _tx; give the SQLite backend the same treatment.
+  _isConnectionLost(err) {
+    if (!(this.backend instanceof SQLiteBackend)) return false
+    const msg = err?.message || String(err || '')
+    return (
+      msg.includes('CapacitorSQLitePlugin: null') ||
+      msg.includes('not open') ||
+      msg.includes('No available connection') ||
+      msg.includes('no connection')
+    )
+  }
+
+  // Run a backend operation, transparently rebuilding a dropped native
+  // connection and retrying once. This prevents a stale SQLite connection from
+  // masquerading as a server outage in the UI.
+  async _call(method, ...args) {
+    await this._ensureInit()
+    try {
+      return await this.backend[method](...args)
+    } catch (err) {
+      if (!this._isConnectionLost(err)) throw err
+      try {
+        await this.backend.reset()
+      } catch (resetErr) {
+        console.error('Failed to rebuild offline SQLite connection', resetErr)
+        throw err
+      }
+      return this.backend[method](...args)
+    }
+  }
+
   // Chore cache
   async saveChores(chores) {
     if (!isOfflineFeatureEnabled()) return
-    await this._ensureInit()
-    return this.backend.saveChores(chores)
+    return this._call('saveChores', chores)
   }
 
   async getChores(includeArchive = false) {
     if (!isOfflineFeatureEnabled()) return []
-    await this._ensureInit()
-    return this.backend.getChores(includeArchive)
+    return this._call('getChores', includeArchive)
   }
 
   async getChore(id) {
     if (!isOfflineFeatureEnabled()) return null
-    await this._ensureInit()
-    return this.backend.getChore(id)
+    return this._call('getChore', id)
   }
 
   async deleteChores(ids) {
     if (!isOfflineFeatureEnabled()) return
-    await this._ensureInit()
-    return this.backend.deleteChores(ids)
+    return this._call('deleteChores', ids)
   }
 
   async clearChores() {
     if (!isOfflineFeatureEnabled()) return
-    await this._ensureInit()
-    return this.backend.clearChores()
+    return this._call('clearChores')
   }
 
   // Command queue
   async enqueueCommand(command) {
     if (!isOfflineFeatureEnabled()) return null
-    await this._ensureInit()
-    return this.backend.enqueueCommand(command)
+    return this._call('enqueueCommand', command)
   }
 
   async getCommands() {
     if (!isOfflineFeatureEnabled()) return []
-    await this._ensureInit()
-    return this.backend.getCommands()
+    return this._call('getCommands')
   }
 
   async getCommandsByEntity(entityId) {
     if (!isOfflineFeatureEnabled()) return []
-    await this._ensureInit()
-    return this.backend.getCommandsByEntity(entityId)
+    return this._call('getCommandsByEntity', entityId)
   }
 
   async updateCommandStatus(id, status, error) {
     if (!isOfflineFeatureEnabled()) return
-    await this._ensureInit()
-    return this.backend.updateCommandStatus(id, status, error)
+    return this._call('updateCommandStatus', id, status, error)
   }
 
   async updateCommand(id, updates) {
     if (!isOfflineFeatureEnabled()) return
-    await this._ensureInit()
-    return this.backend.updateCommand(id, updates)
+    return this._call('updateCommand', id, updates)
   }
 
   async incrementCommandRetry(id) {
     if (!isOfflineFeatureEnabled()) return
-    await this._ensureInit()
-    return this.backend.incrementCommandRetry(id)
+    return this._call('incrementCommandRetry', id)
   }
 
   async removeCommand(id) {
     if (!isOfflineFeatureEnabled()) return
-    await this._ensureInit()
-    return this.backend.removeCommand(id)
+    return this._call('removeCommand', id)
   }
 
   async clearCommands() {
     if (!isOfflineFeatureEnabled()) return
-    await this._ensureInit()
-    return this.backend.clearCommands()
+    return this._call('clearCommands')
   }
 
   // Sync metadata
   async getSyncCursor() {
     if (!isOfflineFeatureEnabled()) return 0
-    await this._ensureInit()
-    return this.backend.getSyncCursor()
+    return this._call('getSyncCursor')
   }
 
   async setSyncCursor(cursor) {
     if (!isOfflineFeatureEnabled()) return
-    await this._ensureInit()
-    return this.backend.setSyncCursor(cursor)
+    return this._call('setSyncCursor', cursor)
   }
 
   async getLastSyncTime() {
     if (!isOfflineFeatureEnabled()) return null
-    await this._ensureInit()
-    return this.backend.getLastSyncTime()
+    return this._call('getLastSyncTime')
   }
 
   async setLastSyncTime(time) {
     if (!isOfflineFeatureEnabled()) return
-    await this._ensureInit()
-    return this.backend.setLastSyncTime(time)
+    return this._call('setLastSyncTime', time)
   }
 
   // History cache
   async saveHistory(entries) {
     if (!isOfflineFeatureEnabled()) return
-    await this._ensureInit()
-    return this.backend.saveHistory(entries)
+    return this._call('saveHistory', entries)
   }
 
   async savePendingHistory(entry) {
     if (!isOfflineFeatureEnabled()) return
-    await this._ensureInit()
-    return this.backend.savePendingHistory(entry)
+    return this._call('savePendingHistory', entry)
   }
 
   async getHistoryByChore(choreId) {
     if (!isOfflineFeatureEnabled()) return []
-    await this._ensureInit()
-    return this.backend.getHistoryByChore(choreId)
+    return this._call('getHistoryByChore', choreId)
   }
 
   async getHistoryByDays(days) {
     if (!isOfflineFeatureEnabled()) return []
-    await this._ensureInit()
-    return this.backend.getHistoryByDays(days)
+    return this._call('getHistoryByDays', days)
   }
 
   async deleteHistory(ids) {
     if (!isOfflineFeatureEnabled()) return
-    await this._ensureInit()
-    return this.backend.deleteHistory(ids)
+    return this._call('deleteHistory', ids)
   }
 
   async updateHistoryEntry(choreId, historyId, updates) {
     if (!isOfflineFeatureEnabled()) return
-    await this._ensureInit()
-    return this.backend.updateHistoryEntry(choreId, historyId, updates)
+    return this._call('updateHistoryEntry', choreId, historyId, updates)
   }
 
   async deleteHistoryEntry(historyId) {
     if (!isOfflineFeatureEnabled()) return
-    await this._ensureInit()
-    return this.backend.deleteHistoryEntry(historyId)
+    return this._call('deleteHistoryEntry', historyId)
   }
 
   async clearHistory() {
     if (!isOfflineFeatureEnabled()) return
-    await this._ensureInit()
-    return this.backend.clearHistory()
+    return this._call('clearHistory')
   }
 
   // General key-value cache (uses sync_meta store)
   async saveKV(key, value) {
     if (!isOfflineFeatureEnabled()) return
-    await this._ensureInit()
-    return this.backend.saveKV(key, value)
+    return this._call('saveKV', key, value)
   }
 
   async getKV(key) {
     if (!isOfflineFeatureEnabled()) return null
-    await this._ensureInit()
-    return this.backend.getKV(key)
+    return this._call('getKV', key)
   }
 
   async clearAll() {
-    await this._ensureInit()
-    return this.backend.clearAll()
+    return this._call('clearAll')
   }
 }
 

@@ -73,9 +73,11 @@ class SyncEngine {
         .catch(() => {})
       return true
     } catch (err) {
-      await commandQueue.resetSyncing()
       console.error('Sync failed:', err)
+      // Notify BEFORE any awaits that can themselves throw (resetSyncing hits
+      // offlineDB) — otherwise the UI is stuck on "Syncing..." forever.
       this._notify({ syncing: false, error: err.message })
+      await commandQueue.resetSyncing().catch(() => {})
       return false
     } finally {
       this.isSyncing = false

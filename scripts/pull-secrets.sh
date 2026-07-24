@@ -18,13 +18,20 @@ if [ -z "${BW_SESSION:-}" ]; then
 
   if [ "$BW_LOGIN_STATUS" = "unauthenticated" ]; then
     if [ -n "${BW_CLIENTID:-}" ] && [ -n "${BW_CLIENTSECRET:-}" ]; then
+      # API-key login authenticates but leaves the vault locked.
       bw login --apikey
     else
-      bw login
+      # Interactive login prompts for the master password once and
+      # returns a session with the vault already unlocked.
+      export BW_SESSION=$(bw login --raw)
     fi
   fi
 
-  export BW_SESSION=$(bw unlock --passwordenv BW_PASSWORD --raw)
+  # Only unlock if we don't already have a session (i.e. API-key login
+  # or an existing authenticated-but-locked vault).
+  if [ -z "${BW_SESSION:-}" ]; then
+    export BW_SESSION=$(bw unlock --passwordenv BW_PASSWORD --raw)
+  fi
 fi
 
 bw sync --session "$BW_SESSION" > /dev/null
