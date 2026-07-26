@@ -146,6 +146,13 @@ class ApiClient {
       console.error('Error clearing image cache on logout', e)
     }
     try {
+      // Dynamic import sidesteps the ApiClient <-> WidgetService module cycle
+      const { clearWidgetData } = await import('../service/WidgetService')
+      await clearWidgetData()
+    } catch (e) {
+      console.error('Error clearing widget data on logout', e)
+    }
+    try {
       await logout()
     } catch (e) {
       console.error('Error during logout', e)

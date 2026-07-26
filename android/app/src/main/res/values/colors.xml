@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home-screen widget palette (values-night overrides for dark mode) -->
+    <color name="widget_bg">#FFFFFF</color>
+    <color name="widget_text_primary">#171A1C</color>
+    <color name="widget_text_secondary">#6B7681</color>
+    <color name="widget_accent">#0B6BCB</color>
+    <color name="widget_accent_soft">#E3EFFB</color>
+    <color name="widget_overdue">#C41C1C</color>
+    <color name="widget_warning">#B26A00</color>
+    <color name="widget_ring_neutral">#B8C0C9</color>
+    <color name="widget_divider">#EDF1F5</color>
+</resources>

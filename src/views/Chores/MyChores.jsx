@@ -77,7 +77,7 @@ const MyChores = () => {
   const queryClient = useQueryClient()
   const { impersonatedUser } = useImpersonateUser()
   const Navigate = useNavigate()
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { data: userLabels, isLoading: userLabelsLoading } = useLabels()
   const { data: projects = [], isLoading: projectsLoading } = useProjects()
   const {
@@ -438,6 +438,18 @@ const MyChores = () => {
     selectedProject,
     setSelectedProjectWithCache,
   ])
+
+  // Widget "+" deep link (donetick://chores/add → /chores?add_task=1):
+  // open the quick-add modal once and strip the param so back/refresh
+  // doesn't re-trigger it.
+  useEffect(() => {
+    if (searchParams.get('add_task') === '1') {
+      setAddTaskModalOpen(true)
+      const params = new URLSearchParams(searchParams)
+      params.delete('add_task')
+      setSearchParams(params, { replace: true })
+    }
+  }, [searchParams, setSearchParams])
 
   // Read and apply filters from URL parameters
   useEffect(() => {
