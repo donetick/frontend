@@ -146,6 +146,7 @@ const AdvancedOptionsSection = ({
   onAssignStrategyChange,
   isPrivate,
   onIsPrivateChange,
+  isPrivacyInherited,
   hasDueDate,
   hasMultipleAssignees,
   hasAssignees,
@@ -250,18 +251,22 @@ const AdvancedOptionsSection = ({
           <FieldRow
             label='Limited visibility'
             description={
-              !hasAssignees
-                ? 'Assign someone to enable limited visibility'
-                : 'Only you and assignees can see this task'
+              isPrivacyInherited
+                ? 'Inherited from the project: tasks in a private project are always private'
+                : !hasAssignees
+                  ? 'Assign someone to enable limited visibility'
+                  : 'Only you and assignees can see this task'
             }
             onLabelClick={
-              hasAssignees ? () => onIsPrivateChange(!isPrivate) : undefined
+              hasAssignees && !isPrivacyInherited
+                ? () => onIsPrivateChange(!isPrivate)
+                : undefined
             }
           >
             <Switch
               size='sm'
               checked={isPrivate}
-              disabled={!hasAssignees}
+              disabled={!hasAssignees || isPrivacyInherited}
               onChange={e => onIsPrivateChange(e.target.checked)}
             />
           </FieldRow>

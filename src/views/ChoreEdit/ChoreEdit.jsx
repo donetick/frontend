@@ -470,6 +470,17 @@ const ChoreEdit = () => {
     setShowSaveAssigneeDefault(dirty)
   }, [anyone, assignableTo])
 
+  // A task in a private project is always private: the project's privacy wins over
+  // the task's own setting, so keep the form in sync with the selected project.
+  const selectedProjectIsPrivate = Boolean(
+    projects.find(project => project.id === projectId)?.isPrivate,
+  )
+  useEffect(() => {
+    if (selectedProjectIsPrivate && !isPrivate) {
+      setIsPrivate(true)
+    }
+  }, [selectedProjectIsPrivate, isPrivate])
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = event => {
@@ -1789,26 +1800,38 @@ const ChoreEdit = () => {
             }}
           >
             <FormControl>
-              <Radio overlay value={false} label='Public' />
+              <Radio
+                overlay
+                disabled={selectedProjectIsPrivate}
+                value={false}
+                label='Public'
+              />
               <FormHelperText>Everyone in your circle</FormHelperText>
             </FormControl>
             <FormControl>
               <Radio
                 overlay
-                disabled={assignees.length === 0}
+                disabled={selectedProjectIsPrivate || assignees.length === 0}
                 value={true}
                 label='Limited'
               />
               <FormHelperText>
                 You and others that are assigned to the task
-                {assignees.length === 0
+                {assignees.length === 0 && !selectedProjectIsPrivate
                   ? ' (No assignees selected, Limited option is disabled)'
                   : ''}
               </FormHelperText>
             </FormControl>
           </RadioGroup>
 
-          {showSavePrivacyDefault && (
+          {selectedProjectIsPrivate && (
+            <Typography level='body-sm' color='neutral'>
+              Inherited from the project: tasks in a private project are always
+              private
+            </Typography>
+          )}
+
+          {showSavePrivacyDefault && !selectedProjectIsPrivate && (
             <Box sx={{ mt: 0, display: 'flex', justifyContent: 'start' }}>
               <Button
                 variant='outlined'

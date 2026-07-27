@@ -147,6 +147,22 @@ const ProjectCardContent = ({
               Default
             </Chip>
           )}
+          {project.isPrivate && (
+            <Chip
+              size='sm'
+              variant='soft'
+              color='neutral'
+              sx={{
+                fontSize: 9,
+                height: 16,
+                px: 0.5,
+                ml: 1,
+                fontWeight: 'md',
+              }}
+            >
+              Private
+            </Chip>
+          )}
         </Typography>
 
         {/* Project Info */}
