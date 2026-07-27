@@ -1,1 +1,34 @@
+{
+  "save": "Zapisz",
+  "cancel": "Anuluj",
+  "delete": "Usuń",
+  "edit": "Edytuj",
+  "close": "Zamknij",
+  "confirm": "Potwierdź",
+  "loading": "Ładowanie...",
+  "error": "Błąd",
+  "success": "Sukces",
+  "warning": "Ostrzeżenie",
+  "refresh": "Odśwież",
+  "copy": "Kopiuj",
+  "copied": "Skopiowano!",
+  "settings": "Ustawienia",
+  "yes": "Tak",
+  "no": "Nie",
+  "back": "Wstecz",
+  "backToCalendar": "Powrót do kalendarza",
+  "logout": "Wyloguj się",
+  "version": "Wersja",
+  "navigation": {
+    "allTasks": "Wszystkie zadania",
+    "archived": "Zarchiwizowane",
+    "things": "Rzeczy",
+    "labels": "Etykiety",
+    "projects": "Projekty",
+    "filters": "Filtry",
+    "activities": "Aktywności",
+    "points": "Punkty",
+    "settings": "Ustawienia"
+  }
+}
 
