@@ -1,1 +1,174 @@
-
+{
+  "title": "Ustawienia",
+  "circleSettings": {
+    "title": "Ustawienia grupy",
+    "description": "Twoje konto jest automatycznie połączone z Grupą, gdy ją utworzysz lub do niej dołączysz. Łatwo zapraszaj znajomych, udostępniając unikalny kod Grupy lub poniższy link. Otrzymasz powiadomienie poniżej, gdy ktoś poprosi o dołączenie do Twojej Grupy. Jeśli chcesz opuścić Grupę, po prostu kliknij przycisk „Opuść grupę”.",
+    "circleCode": "Kod grupy",
+    "copyCode": "Kopiuj kod",
+    "copyLink": "Kopiuj link",
+    "codeCopied": "Skopiowano kod grupy!",
+    "linkCopied": "Skopiowano link grupy!",
+    "joinCircle": "Dołącz do grupy",
+    "joinCirclePlaceholder": "Wprowadź kod grupy",
+    "join": "Dołącz",
+    "leave": "Opuść grupę",
+    "leaveConfirmTitle": "Opuść grupę",
+    "leaveConfirmMessage": "Czy na pewno chcesz opuścić tę grupę?",
+    "circleMembers": "Członkowie grupy",
+    "circleMemberRequests": "Prośby o dołączenie do grupy",
+    "admin": "Administrator",
+    "member": "Członek",
+    "pending": "Oczekujący",
+    "accept": "Zaakceptuj",
+    "reject": "Odrzuć",
+    "makeAdmin": "Mianuj administratorem",
+    "makeMember": "Mianuj członkiem",
+    "remove": "Usuń",
+    "webhookURL": "Adres URL webhooka",
+    "webhookDescription": "Wprowadź adres URL webhooka, aby otrzymywać powiadomienia o zdarzeniach w grupie",
+    "webhookPlaceholder": "https://twoj-adres-webhooka.com"
+  },
+  "accountSettings": {
+    "title": "Ustawienia konta",
+    "subscription": "Subskrypcja",
+    "subscriptionStatus": "Obecny plan",
+    "free": "Darmowy",
+    "plus": "Plus",
+    "upgrade": "Ulepsz plan",
+    "cancel": "Anuluj",
+    "changePassword": "Zmień hasło",
+    "password": "Hasło",
+    "dangerZone": "Strefa niebezpieczna",
+    "dangerZoneDescription": "Po usunięciu konta nie ma możliwości powrotu. Prosimy o rozwagę.",
+    "deleteAccount": "Usuń konto"
+  },
+  "localization": {
+    "title": "Lokalizacja",
+    "description": "Dostosuj język, format daty i preferencje regionalne dla swojego konta.",
+    "language": "Język",
+    "languageDescription": "Wybierz preferowany język",
+    "dateFormat": "Format daty",
+    "dateFormatDescription": "Wybierz sposób wyświetlania dat w całej aplikacji",
+    "timeFormat": "Format czasu",
+    "timeFormatDescription": "Wybierz 12-godzinny lub 24-godzinny format czasu",
+    "12hour": "12-godzinny (AM/PM)",
+    "24hour": "24-godzinny",
+    "firstDayOfWeek": "Pierwszy dzień tygodnia",
+    "firstDayOfWeekDescription": "Wybierz dzień, od którego rozpoczyna się Twój tydzień",
+    "sunday": "Niedziela",
+    "monday": "Poniedziałek",
+    "saturday": "Sobota",
+    "formats": {
+      "mdy": "MM/DD/YYYY (USA)",
+      "dmy": "DD/MM/YYYY (Europa)",
+      "ymd": "YYYY-MM-DD (ISO)",
+      "long": "Długi format (np. 1 stycznia 2024)",
+      "short": "Krótki format (np. 1 sty 2024)"
+    }
+  },
+  "sidepanel": {
+    "title": "Personalizacja panelu bocznego",
+    "description": "Dostosuj układ i widoczność kart w panelu bocznym. Ta sekcja jest dostępna tylko na urządzeniach z dużym ekranem, takich jak tablety i komputery stacjonarne."
+  },
+  "theme": {
+    "title": "Preferencje motywu",
+    "description": "Wybierz wygląd strony. Wybierz jeden motyw lub zsynchronizuj z systemem, aby automatycznie przełączać się między motywem jasnym i ciemnym.",
+    "themeMode": "Tryb motywu",
+    "light": "Jasny",
+    "dark": "Ciemny",
+    "system": "Systemowy"
+  },
+  "notifications": {
+    "settingsSaved": "Ustawienia zostały pomyślnie zapisane",
+    "settingsSaveFailed": "Nie udało się zapisać ustawień",
+    "invalidWebhook": "Nieprawidłowy adres URL webhooka"
+  },
+  "profile": {
+    "title": "Ustawienia profilu",
+    "description": "Zaktualizuj swoją nazwę wyświetlaną i zdjęcie profilowe.",
+    "photoUpdated": "Zdjęcie zaktualizowane",
+    "photoUpdatedMessage": "Twoje zdjęcie profilowe zostało pomyślnie zaktualizowane!",
+    "uploadFailed": "Przesyłanie nie powiodło się",
+    "uploadFailedMessage": "Nie udało się przesłać zdjęcia. Spróbuj ponownie.",
+    "profileUpdated": "Profil zaktualizowany",
+    "profileUpdatedMessage": "Informacje o Twoim profilu zostały pomyślnie zapisane!",
+    "updateFailed": "Aktualizacja nie powiodła się",
+    "updateFailedMessage": "Nie można zaktualizować profilu. Sprawdź połączenie z Internetem i spróbuj ponownie.",
+    "changePhoto": "Zmień zdjęcie",
+    "displayName": "Nazwa wyświetlana",
+    "displayNamePlaceholder": "Wprowadź swoją nazwę wyświetlaną",
+    "timezone": "Strefa czasowa",
+    "timezonePlaceholder": "Wybierz strefę czasową",
+    "save": "Zapisz",
+    "cancel": "Anuluj"
+  },
+  "overview": {
+    "title": "Ustawienia",
+    "subtitle": "Dostosuj swoje preferencje i zarządzaj ustawieniami konta",
+    "upgrade": {
+      "title": "Przejdź na plan Plus",
+      "description": "Odblokuj zaawansowane funkcje, aby zwiększyć swoją produktywność",
+      "button": "Ulepsz teraz",
+      "features": {
+        "richText": "Sformatowane opisy tekstowe (Rich Text)",
+        "notifications": "Powiadomienia o zadaniach",
+        "apiIntegrations": "Integracje API",
+        "advancedAutomation": "Zaawansowana automatyzacja"
+      }
+    },
+    "sections": {
+      "profile": {
+        "title": "Ustawienia profilu",
+        "description": "Zaktualizuj informacje o profilu, zdjęcie, nazwę wyświetlaną oraz preferencje strefy czasowej."
+      },
+      "circle": {
+        "title": "Ustawienia grupy",
+        "description": "Zarządzaj swoją grupą, zapraszaj członków i obsługuj prośby o dołączenie."
+      },
+      "account": {
+        "title": "Ustawienia konta",
+        "description": "Zarządzaj subskrypcją, zmieniaj hasło i opcje usuwania konta."
+      },
+      "subaccounts": {
+        "title": "Konta zarządzane",
+        "description": "Twórz subkonta i zarządzaj nimi, aby logować się i wykonywać przypisane zadania."
+      },
+      "notifications": {
+        "title": "Powiadomienia",
+        "description": "Konfiguruj powiadomienia push, alerty e-mail oraz cele powiadomień dla zadań."
+      },
+      "mfa": {
+        "title": "Uwierzytelnianie wieloskładnikowe (MFA)",
+        "description": "Dodaj dodatkową warstwę bezpieczeństwa dzięki MFA przy użyciu aplikacji weryfikacyjnych."
+      },
+      "apitokens": {
+        "title": "Tokeny API",
+        "description": "Generuj tokeny dostępu i zarządzaj nimi dla integracji zewnętrznych oraz dostępu do API."
+      },
+      "storage": {
+        "title": "Ustawienia pamięci",
+        "description": "Twórz kopie zapasowe i przywracaj dane, zarządzaj pamięcią lokalną oraz preferencjami synchronizacji."
+      },
+      "sidepanel": {
+        "title": "Personalizacja panelu bocznego",
+        "description": "Dostosuj układ i widoczność kart w interfejsie panelu bocznego."
+      },
+      "theme": {
+        "title": "Preferencje motywu",
+        "description": "Wybierz preferowany motyw i skonfiguruj ustawienia trybu ciemnego/jasnego."
+      },
+      "localization": {
+        "title": "Lokalizacja",
+        "description": "Dostosuj język, format daty, format czasu i preferencje regionalne."
+      },
+      "advanced": {
+        "title": "Ustawienia zaawansowane",
+        "description": "Konfiguruj webhooki, aktualizacje w czasie rzeczywistym i inne zaawansowane funkcje zwiększające wydajność."
+      },
+      "developer": {
+        "title": "Ustawienia programistyczne",
+        "description": "Wyświetlaj informacje techniczne o tokenach uwierzytelniających, połączeniach SSE oraz danych do debugowania."
+      }
+    }
+  }
+    
