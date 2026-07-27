@@ -54,9 +54,15 @@ const groupByDate = history => {
   const aggregated = {}
   for (let i = 0; i < history.length; i++) {
     const item = history[i]
-    const date = new Date(
-      item.performedAt || item.updatedAt,
-    ).toLocaleDateString()
+    // Key by a stable local ISO day (YYYY-MM-DD) so the render-time
+    // formatter (fmt.date) receives a parseable date instead of a
+    // locale-formatted string, which produced "Invalid date".
+    const d = new Date(item.performedAt || item.updatedAt || item.createdAt)
+    const date = isNaN(d.getTime())
+      ? 'unknown'
+      : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
+          d.getDate(),
+        ).padStart(2, '0')}`
     if (!aggregated[date]) {
       aggregated[date] = []
     }
@@ -175,7 +181,7 @@ const ChoreHistoryTimeline = ({
       {Object.entries(groupedHistory).map(([date, items]) => (
         <Box key={date} sx={{ mb: 4 }}>
           <Typography level='title-sm' sx={{ mb: 0.5 }}>
-            {fmt.date(date)}
+            {date === 'unknown' ? '—' : fmt.date(date)}
           </Typography>
           <Divider />
           <Stack spacing={1}>
