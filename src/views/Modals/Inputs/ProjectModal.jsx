@@ -2,7 +2,9 @@ import {
   Avatar,
   Box,
   Button,
+  Checkbox,
   FormControl,
+  FormHelperText,
   FormLabel,
   Input,
   Stack,
@@ -27,6 +29,7 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
   const [projectDescription, setProjectDescription] = useState('')
   const [projectColor, setProjectColor] = useState(PROJECT_COLORS[0].value)
   const [projectIcon, setProjectIcon] = useState(PROJECT_ICONS[0].value)
+  const [isPrivate, setIsPrivate] = useState(false)
   const [error, setError] = useState('')
   const [isIconPickerOpen, setIsIconPickerOpen] = useState(false)
 
@@ -42,12 +45,14 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
         setProjectDescription(project.description || '')
         setProjectColor(project.color || PROJECT_COLORS[0].value)
         setProjectIcon(project.icon || PROJECT_ICONS[0].value)
+        setIsPrivate(Boolean(project.isPrivate))
       } else {
         // Creating new project
         setProjectName('')
         setProjectDescription('')
         setProjectColor(PROJECT_COLORS[0].value)
         setProjectIcon(PROJECT_ICONS[0].value)
+        setIsPrivate(false)
       }
       setError('')
     }
@@ -68,6 +73,7 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
       description: projectDescription.trim(),
       color: projectColor,
       icon: projectIcon,
+      isPrivate,
     }
 
     if (project) {
@@ -245,6 +251,30 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
                 />
               ))}
             </Box>
+          </FormControl>
+
+          {/* Privacy */}
+          <FormControl>
+            <FormLabel>Privacy</FormLabel>
+            <Checkbox
+              checked={isPrivate}
+              onChange={e => setIsPrivate(e.target.checked)}
+              disabled={isSubmitting}
+              overlay
+              label='Private project'
+            />
+            <FormHelperText>
+              {isPrivate
+                ? 'Only you can see this project and its tasks'
+                : 'Everyone in your circle can see this project'}
+            </FormHelperText>
+            {project && isPrivate !== Boolean(project.isPrivate) && (
+              <FormHelperText sx={{ color: 'warning.plainColor' }}>
+                {isPrivate
+                  ? 'Every task in this project will become private'
+                  : 'Every task in this project will become visible to your circle'}
+              </FormHelperText>
+            )}
           </FormControl>
 
           {/* Error Message */}

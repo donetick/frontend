@@ -64,7 +64,7 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
   const { data: userLabels, isLoading: userLabelsLoading } = useLabels()
   const { data: circleMembers, isLoading: isCircleMembersLoading } =
     useCircleMembers()
-  const { isLoading: isProjectsLoading } = useProjects()
+  const { data: projects = [], isLoading: isProjectsLoading } = useProjects()
   const createChoreMutation = useCreateChore()
 
   const { data: userProfile } = useUserProfile()
@@ -126,6 +126,17 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
   useEffect(() => {
     localAIService.isAvailable().then(setLlmAvailable)
   }, [])
+
+  // A task in a private project is always private: the project's privacy wins over
+  // the task's own setting, so keep the form in sync with the selected project.
+  const selectedProjectIsPrivate = Boolean(
+    projects.find(project => project.id === projectId)?.isPrivate,
+  )
+  useEffect(() => {
+    if (selectedProjectIsPrivate && !isPrivate) {
+      setIsPrivate(true)
+    }
+  }, [selectedProjectIsPrivate, isPrivate])
 
   // Priority colors
   const priorityColors = {
@@ -1067,6 +1078,7 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
               hasAssignees={assignees.length > 0}
               isPrivate={isPrivate}
               onIsPrivateChange={setIsPrivate}
+              isPrivacyInherited={selectedProjectIsPrivate}
             />
 
             {hasDescription && (
