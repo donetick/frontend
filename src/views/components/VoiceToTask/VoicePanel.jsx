@@ -144,14 +144,6 @@ const buildChips = (effective, frequencyLabel, { members, currentUserId }) => {
       label: name,
     })
   })
-  effective.newLabels.forEach(label => {
-    chips.push({
-      key: `new-label-${label.name}`,
-      color: 'warning',
-      icon: <Sell sx={{ fontSize: 12 }} />,
-      label: `${label.name} · new`,
-    })
-  })
   if (effective.isAnyone) {
     chips.push({
       key: 'assignee',
@@ -436,9 +428,10 @@ const VoicePanel = ({
     patchSegment,
     reset,
     isNative,
-  } = useVoiceToTask({ members })
+  } = useVoiceToTask({ members, userLabels })
   const [creating, setCreating] = useState(false)
   const autoStartedRef = useRef(false)
+  const segmentsScrollRef = useRef(null)
 
   const parseCtx = useMemo(
     () => ({ userLabels, members, currentUserId: userProfile?.id }),
@@ -458,6 +451,12 @@ const VoicePanel = ({
       startHandsFree()
     }
   }, [open, startHandsFree])
+
+  // Keep the newest captured task visible as more are added
+  useEffect(() => {
+    const el = segmentsScrollRef.current
+    if (el) el.scrollTop = el.scrollHeight
+  }, [segments.length])
 
   if (!open) return null
 
@@ -552,6 +551,7 @@ const VoicePanel = ({
       {/* ── Captured task cards ── */}
       {segments.length > 0 && (
         <Box
+          ref={segmentsScrollRef}
           sx={{
             px: 1.5,
             pt: 1.25,

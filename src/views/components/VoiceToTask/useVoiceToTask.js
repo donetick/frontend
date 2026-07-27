@@ -32,8 +32,19 @@ const haptic = async kind => {
   }
 }
 
+// Vocabulary fed to the native recognizer as a biasing hint so unfamiliar
+// names/labels aren't auto-corrected to a dictionary word (e.g. "Moutaz" →
+// "Models"). Best-effort only — unsupported on iOS <13-without-on-device and
+// Android <13, which is why the normalizer also does fuzzy post-matching.
+const buildVocabulary = (members, userLabels) => [
+  ...members.flatMap(m =>
+    [m.displayName, m.displayName?.split(/\s+/)[0], m.username].filter(Boolean),
+  ),
+  ...userLabels.map(l => l.name).filter(Boolean),
+]
+
 // phases: idle | listening | review | denied
-export function useVoiceToTask({ members = [] } = {}) {
+export function useVoiceToTask({ members = [], userLabels = [] } = {}) {
   const [phase, setPhase] = useState('idle')
   const [isLocked, setIsLocked] = useState(false)
   const [partialText, setPartialText] = useState('')
@@ -44,6 +55,10 @@ export function useVoiceToTask({ members = [] } = {}) {
   const segmentsRef = useRef([])
   const membersRef = useRef(members)
   membersRef.current = members
+  const userLabelsRef = useRef(userLabels)
+  userLabelsRef.current = userLabels
+  const vocabularyRef = useRef(buildVocabulary(members, userLabels))
+  vocabularyRef.current = buildVocabulary(members, userLabels)
 
   const phaseRef = useRef(phase)
   phaseRef.current = phase
@@ -54,6 +69,12 @@ export function useVoiceToTask({ members = [] } = {}) {
   const pressStartedListeningRef = useRef(false)
   const lastActivityRef = useRef(0)
   const watchdogRef = useRef(null)
+  // While the mic is held (not locked), a mid-hold restart (Android session
+  // limits, forced silence boundary) shouldn't split into a new task — the
+  // user is still holding the button, so it's still one entry. This tracks
+  // which segment is the "active" one for the current hold to merge onto;
+  // reset to null on release so the *next* hold starts a fresh entry.
+  const activeHoldSegmentIdRef = useRef(null)
 
   const applySegments = useCallback(next => {
     segmentsRef.current = next
@@ -64,6 +85,7 @@ export function useVoiceToTask({ members = [] } = {}) {
     rawText => {
       const normalized = normalizeSpokenText(rawText, {
         members: membersRef.current,
+        userLabels: userLabelsRef.current,
       })
       const { text, dropPrevious } = applyScratchThat(normalized)
       const pieces = splitSpokenSegments(text)
@@ -71,14 +93,52 @@ export function useVoiceToTask({ members = [] } = {}) {
 
       let base = segmentsRef.current
       if (dropPrevious && base.length > 0) {
+        const dropped = base[base.length - 1]
         base = base.slice(0, -1)
+        if (activeHoldSegmentIdRef.current === dropped.id) {
+          activeHoldSegmentIdRef.current = null
+        }
         haptic('medium')
       }
-      if (pieces.length > 0) haptic('light')
-      applySegments([
-        ...base,
-        ...pieces.map(piece => ({ id: generateUUID(), text: piece })),
-      ])
+      if (pieces.length === 0) {
+        applySegments(base)
+        return
+      }
+      haptic('light')
+
+      if (!lockedRef.current) {
+        // Hold-to-talk: the first piece continues the entry already active
+        // for this hold (if any); only a spoken separator within the same
+        // commit starts additional new entries.
+        const activeIndex = base.findIndex(
+          s => s.id === activeHoldSegmentIdRef.current,
+        )
+        if (activeIndex !== -1) {
+          const merged = [...base]
+          merged[activeIndex] = {
+            ...merged[activeIndex],
+            text: `${merged[activeIndex].text} ${pieces[0]}`.trim(),
+          }
+          const rest = pieces.slice(1).map(piece => ({
+            id: generateUUID(),
+            text: piece,
+          }))
+          if (rest.length > 0) {
+            activeHoldSegmentIdRef.current = rest[rest.length - 1].id
+          }
+          applySegments([...merged, ...rest])
+          return
+        }
+      }
+
+      const newPieces = pieces.map(piece => ({
+        id: generateUUID(),
+        text: piece,
+      }))
+      if (!lockedRef.current) {
+        activeHoldSegmentIdRef.current = newPieces[newPieces.length - 1].id
+      }
+      applySegments([...base, ...newPieces])
     },
     [applySegments],
   )
@@ -91,6 +151,9 @@ export function useVoiceToTask({ members = [] } = {}) {
     await voiceInputService.stop()
     setPartialText('')
     setIsLocked(false)
+    // Release ends the current hold — the next hold-press starts a fresh
+    // entry rather than continuing to merge onto this one
+    activeHoldSegmentIdRef.current = null
     // stop() commits any buffered partial synchronously through onSegment,
     // so the ref is up to date by the time we read it
     setPhase(segmentsRef.current.length > 0 ? 'review' : 'idle')
@@ -104,19 +167,25 @@ export function useVoiceToTask({ members = [] } = {}) {
       return false
     }
     lastActivityRef.current = Date.now()
-    await voiceInputService.start({
-      onPartial: text => {
-        lastActivityRef.current = Date.now()
-        setPartialText(
-          normalizeSpokenText(text, { members: membersRef.current }),
-        )
+    await voiceInputService.start(
+      {
+        onPartial: text => {
+          lastActivityRef.current = Date.now()
+          setPartialText(
+            normalizeSpokenText(text, {
+              members: membersRef.current,
+              userLabels: userLabelsRef.current,
+            }),
+          )
+        },
+        onSegment: commitSegment,
+        onError: () => {
+          setPhase('denied')
+        },
+        onStateChange: () => {},
       },
-      onSegment: commitSegment,
-      onError: () => {
-        setPhase('denied')
-      },
-      onStateChange: () => {},
-    })
+      vocabularyRef.current,
+    )
     setPhase('listening')
     haptic('medium')
 
@@ -156,7 +225,9 @@ export function useVoiceToTask({ members = [] } = {}) {
     const held = Date.now() - pressStartedAtRef.current
     if (pressStartedListeningRef.current) {
       if (held < TAP_THRESHOLD_MS) {
-        // Quick tap → hands-free lock
+        // Quick tap → hands-free lock; from here on, silence boundaries
+        // should start new entries again, not merge onto the last one
+        activeHoldSegmentIdRef.current = null
         setIsLocked(true)
       } else {
         // Hold-to-talk → release ends the capture
@@ -211,6 +282,7 @@ export function useVoiceToTask({ members = [] } = {}) {
     applySegments([])
     setPartialText('')
     setIsLocked(false)
+    activeHoldSegmentIdRef.current = null
     setPhase('idle')
   }, [applySegments])
 

@@ -1,7 +1,6 @@
 import { Add } from '@mui/icons-material'
 import { Box, Button, Typography } from '@mui/joy'
 import { useMediaQuery } from '@mui/material'
-import { useQueryClient } from '@tanstack/react-query'
 import * as chrono from 'chrono-node'
 import moment from 'moment'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -26,7 +25,6 @@ import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import { useDocumentScanner } from '../../hooks/useDocumentScanner'
 import { localAIService } from '../../service/LocalAIService'
 import { voiceInputService } from '../../service/VoiceInputService'
-import { CreateLabel } from '../../utils/Fetcher'
 import { TASK_COLOR } from '../../utils/Colors'
 import AdvancedOptionsSection, {
   AdvancedOptionsTrigger,
@@ -71,7 +69,6 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
     useCircleMembers()
   const { isLoading: isProjectsLoading } = useProjects()
   const createChoreMutation = useCreateChore()
-  const queryClient = useQueryClient()
 
   const { data: userProfile } = useUserProfile()
 
@@ -623,73 +620,26 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
     }
   }
 
-  // Creates labels that were spoken but don't exist yet. Returns a Map of
-  // lowercase name → label id covering both created and already-existing ones.
-  const createMissingLabels = async newLabels => {
-    const resolved = new Map(
-      (userLabels || []).map(l => [l.name.toLowerCase(), l.id]),
-    )
-    let createdAny = false
-    for (const label of newLabels) {
-      const key = label.name.toLowerCase()
-      if (resolved.has(key)) continue
-      try {
-        const resp = await CreateLabel({
-          name: label.name,
-          color: label.color || '#3b82f6',
-        })
-        const data = await resp.json()
-        const created = data?.res ?? data
-        if (created?.id) {
-          resolved.set(key, created.id)
-          createdAny = true
-        }
-      } catch (error) {
-        console.error('Error creating label:', error)
-      }
-    }
-    if (createdAny) {
-      queryClient.invalidateQueries({ queryKey: ['labels'] })
-    }
-    return resolved
-  }
-
   // Single voice-captured task: land it in the smart input so the user
-  // reviews it with the normal pickers before creating. Setting taskText
-  // (rather than calling processText directly) lets the reparse effect run
-  // exactly once, consuming any picker overrides from the panel.
-  const handleVoiceSingle = async (text, overrides = {}) => {
+  // reviews it with the normal pickers before creating.
+  const handleVoiceSingle = (text, overrides = {}) => {
     setShowVoice(false)
     if (Object.keys(overrides).length > 0) {
       pendingVoiceOverridesRef.current = overrides
     }
     setTaskText(text)
-    const labels = parseLabels(text, userLabels || [])
-    if (labels.newLabels?.length) {
-      // Once the labels query refetches, the reparse links them automatically
-      await createMissingLabels(labels.newLabels)
-    }
   }
 
   // Multiple voice-captured tasks: they were reviewed as cards in the panel,
   // so create them all directly.
   const handleVoiceCreateMany = async parsedTasks => {
     const notificationTemplates = getDefaultNotification()
-    const allNewLabels = parsedTasks.flatMap(t => t.newLabels || [])
-    const labelIdsByName =
-      allNewLabels.length > 0 ? await createMissingLabels(allNewLabels) : null
     for (const parsed of parsedTasks) {
-      const extraLabelIds = (parsed.newLabels || [])
-        .map(nl => labelIdsByName?.get(nl.name.toLowerCase()))
-        .filter(id => id != null && !parsed.labelIds.includes(id))
-      const chore = buildChorePayload(
-        { ...parsed, labelIds: [...parsed.labelIds, ...extraLabelIds] },
-        {
-          userProfile,
-          projectId,
-          notificationTemplates,
-        },
-      )
+      const chore = buildChorePayload(parsed, {
+        userProfile,
+        projectId,
+        notificationTemplates,
+      })
       try {
         const result = await createChoreMutation.mutateAsync(chore)
         if (result?._pendingCreate) {

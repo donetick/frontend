@@ -1,7 +1,7 @@
 // Deterministic transforms that turn spoken language into the typed syntax
 // CustomParsers understands. No LLM — instant, predictable, fully offline.
 //
-// "label groceries"     → "#groceries"
+// "label groceries"     → "#groceries"   (only when it matches an existing label)
 // "assign to Sarah"     → "@Sarah"        (only when Sarah is a circle member)
 // "worth five points"   → "*5"
 // "p one" / "top priority" → "priority 1" (parsePriority already handles that)
@@ -55,22 +55,23 @@ const normalizePoints = text =>
     (_, n) => `*${NUMBER_WORDS[n.toLowerCase()] || n} points`,
   )
 
-const normalizeLabels = text =>
-  text.replace(
-    /\b(?:with\s+)?(?:hash\s?tag|labell?ed(?:\s+as)?|label|tagged(?:\s+as)?|tag)\s+([\p{L}\p{N}_]+)/giu,
-    '#$1',
-  )
-
 // "assign to Sarah" / "assigned to Sarah" / "assign Sarah" / "for Sarah".
-// Speech engines spell names their own way ("Sara" for Sarah) and add
-// punctuation, so exact display-name matching alone misses real speech —
-// an edit-distance-1 fuzzy pass catches those, but only after an explicit
-// assign verb so ordinary words never convert.
+// Speech engines spell names their own way — and worse, can auto-correct an
+// unfamiliar name to an unrelated dictionary word entirely ("Moutaz" heard as
+// "Models"), which plain edit-distance can't recover (too many edits apart).
+// But right after an assign verb, the next word has essentially no other
+// legitimate reading — it IS a name — so we take the *relative best* match
+// among circle members rather than requiring it to be objectively close.
+// A same-first-letter guard keeps this from firing on totally unrelated
+// words. Contextual-string biasing in VoiceInputService is the primary
+// defense (it can make the recognizer hear "Moutaz" correctly in the first
+// place); this is the fallback for when biasing isn't supported or still
+// mishears.
 const ASSIGN_VERB = '(?:assign(?:ed|ee)?(?:\\s+(?:this|it))?(?:\\s+to)?|for)'
 const STRICT_ASSIGN_VERB = '(?:assign(?:ed|ee)?(?:\\s+(?:this|it))?(?:\\s+to)?)'
+const MIN_MATCH_SCORE = 0.2
 
 const levenshtein = (a, b) => {
-  if (Math.abs(a.length - b.length) > 1) return 2
   const prev = Array.from({ length: b.length + 1 }, (_, i) => i)
   for (let i = 1; i <= a.length; i++) {
     let diag = prev[0]
@@ -88,6 +89,9 @@ const levenshtein = (a, b) => {
   return prev[b.length]
 }
 
+const similarity = (a, b) =>
+  1 - levenshtein(a, b) / Math.max(a.length, b.length)
+
 const memberNameVariants = member =>
   [
     member.displayName,
@@ -95,19 +99,75 @@ const memberNameVariants = member =>
     member.username,
   ].filter(n => n && n.length > 1)
 
-const findMemberFuzzy = (candidate, members) => {
+// Best-scoring item for `candidate` among `items`, requiring only that it
+// beats all others and shares a first letter — not an absolute closeness
+// threshold. `getVariants` returns the name strings to compare a given item
+// against (e.g. a member's display name/first name/username, or a label's
+// name). Shared by assignee and label matching since both face the same
+// problem: ASR is least confident on exactly the words that matter here.
+const findBestFuzzyMatch = (candidate, items, getVariants) => {
   const c = candidate.toLowerCase()
-  let close = null
-  for (const member of members) {
-    for (const name of memberNameVariants(member)) {
+  if (c.length < 3) return null
+  let best = null
+  let bestScore = MIN_MATCH_SCORE
+  for (const item of items) {
+    for (const name of getVariants(item)) {
       const n = name.toLowerCase()
-      if (n === c) return member
-      if (!close && n.length >= 4 && c.length >= 4 && levenshtein(n, c) <= 1) {
-        close = member
+      if (n === c) return item
+      if (n.length < 3 || n[0] !== c[0]) continue
+      const score = similarity(n, c)
+      if (score > bestScore) {
+        bestScore = score
+        best = item
       }
     }
   }
-  return close
+  return best
+}
+
+const findMemberFuzzy = (candidate, members) =>
+  findBestFuzzyMatch(candidate, members, memberNameVariants)
+
+// "label groceries" / "tag groceries" / "labeled as groceries" — only ever
+// converts to a label that already exists (matched exactly or as the closest
+// existing one), never invents a new one. Restricted to single-word label
+// names: CustomParsers' hashtag pattern (#([\p{L}\p{N}_]+)) can't span a
+// space, so a multi-word label like "Home Maintenance" could never be
+// represented as "#Home Maintenance" anyway — same limitation typing it by
+// hand would hit.
+const LABEL_VERB =
+  '(?:with\\s+)?(?:hash\\s?tag|labell?ed(?:\\s+as)?|label|tagged(?:\\s+as)?|tag)'
+
+const normalizeLabels = (text, userLabels = []) => {
+  const singleWordLabels = userLabels.filter(l => l.name && !/\s/.test(l.name))
+  let out = text
+
+  // Exact pass first so a clean spoken match always wins over the fuzzy pass
+  const byLengthDesc = [...singleWordLabels].sort(
+    (a, b) => b.name.length - a.name.length,
+  )
+  for (const label of byLengthDesc) {
+    out = out.replace(
+      new RegExp(
+        `\\b${LABEL_VERB}\\s+${escapeRegex(label.name)}\\b[,.]?`,
+        'gi',
+      ),
+      `#${label.name}`,
+    )
+  }
+
+  // Fuzzy pass — the spoken word after the verb, matched against the closest
+  // existing single-word label
+  out = out.replace(
+    new RegExp(`\\b${LABEL_VERB}\\s+([\\p{L}][\\p{L}'-]*)[,.]?`, 'giu'),
+    (match, candidate) => {
+      const label = findBestFuzzyMatch(candidate, singleWordLabels, l => [
+        l.name,
+      ])
+      return label ? `#${label.name}` : match
+    },
+  )
+  return out
 }
 
 const normalizeAssignees = (text, members = []) => {
@@ -146,11 +206,14 @@ const normalizeAssignees = (text, members = []) => {
   return out
 }
 
-export const normalizeSpokenText = (text, { members = [] } = {}) => {
+export const normalizeSpokenText = (
+  text,
+  { members = [], userLabels = [] } = {},
+) => {
   let out = stripFillers(text)
   out = normalizePriority(out)
   out = normalizePoints(out)
-  out = normalizeLabels(out)
+  out = normalizeLabels(out, userLabels)
   out = normalizeAssignees(out, members)
   return out.replace(/\s+/g, ' ').trim()
 }
