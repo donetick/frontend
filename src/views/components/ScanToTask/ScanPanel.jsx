@@ -171,9 +171,6 @@ const ScanPanel = ({ open, onTaskExtracted, onClose, initialImageUrl, autoCaptur
             />
 
             <Box sx={{ ml: 'auto', display: 'flex', gap: 1 }}>
-              <Button size='sm' variant='plain' color='neutral' onClick={onClose}>
-                Cancel
-              </Button>
               {isNativeScanner ? (
                 <Button
                   size='sm'
@@ -296,9 +293,6 @@ const ScanPanel = ({ open, onTaskExtracted, onClose, initialImageUrl, autoCaptur
               onClick={retake}
             >
               Retake
-            </Button>
-            <Button size='sm' variant='plain' color='neutral' onClick={onClose}>
-              Cancel
             </Button>
           </Box>
         </Box>

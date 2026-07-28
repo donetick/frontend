@@ -60,7 +60,7 @@ const getDefaultNotification = () => {
   return defaultNotification
 }
 
-const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
+const TaskInput = ({ onChoreUpdate, isModalOpen, onClose, initialMode }) => {
   const { ResponsiveModal } = useResponsiveModal()
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
   const pickerEmptyDisplay = isMobile ? 'icon' : 'icon-text'
@@ -135,6 +135,29 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
     localAIService.isAvailable().then(setLlmAvailable)
     voiceInputService.isSupported().then(setVoiceAvailable)
   }, [])
+
+  // Quick-capture widget entry points (donetick://chores/add?mode=voice|scan)
+  // land here: open straight into the requested panel, once per modal open so
+  // backing out of the panel doesn't bounce the user right back into it.
+  const appliedInitialModeRef = useRef(false)
+  useEffect(() => {
+    if (!isModalOpen) {
+      appliedInitialModeRef.current = false
+      return
+    }
+    if (appliedInitialModeRef.current) return
+
+    if (initialMode === 'voice') {
+      // isSupported() resolves async — wait for the answer before deciding.
+      if (!voiceAvailable) return
+      appliedInitialModeRef.current = true
+      setShowVoice(true)
+    } else if (initialMode === 'scan') {
+      appliedInitialModeRef.current = true
+      setScanAutoCapture(true)
+      setShowScan(true)
+    }
+  }, [isModalOpen, initialMode, voiceAvailable])
 
   // Priority colors
   const priorityColors = {
@@ -817,18 +840,21 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
                 />
               )}
             </Button>
-            <Button
-              size='lg'
-              variant='solid'
-              color='primary'
-              disabled={!taskTitle.trim()}
-              onClick={createChore}
-            >
-              Create
-              {showKeyboardShortcuts && (
-                <KeyboardShortcutHint shortcut='Enter' sx={{ ml: 1 }} />
-              )}
-            </Button>
+            {/* Sub-panels (voice/scan) own their own confirm action */}
+            {!showScan && !showVoice && (
+              <Button
+                size='lg'
+                variant='solid'
+                color='primary'
+                disabled={!taskTitle.trim()}
+                onClick={createChore}
+              >
+                Create
+                {showKeyboardShortcuts && (
+                  <KeyboardShortcutHint shortcut='Enter' sx={{ ml: 1 }} />
+                )}
+              </Button>
+            )}
           </Box>
         }
       >
@@ -1177,7 +1203,6 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
             userLabels={userLabels || []}
             members={circleMembers?.res || []}
             userProfile={userProfile}
-            onClose={() => setShowVoice(false)}
             onUseSingle={handleVoiceSingle}
             onCreateMany={handleVoiceCreateMany}
           />

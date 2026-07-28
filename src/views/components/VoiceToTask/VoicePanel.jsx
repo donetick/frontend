@@ -411,7 +411,6 @@ const VoicePanel = ({
   userLabels = [],
   members = [],
   userProfile,
-  onClose,
   onUseSingle,
   onCreateMany,
 }) => {
@@ -426,7 +425,6 @@ const VoicePanel = ({
     removeSegment,
     updateSegment,
     patchSegment,
-    reset,
     isNative,
   } = useVoiceToTask({ members, userLabels })
   const [creating, setCreating] = useState(false)
@@ -462,11 +460,6 @@ const VoicePanel = ({
 
   const isListening = phase === 'listening'
   const showActions = segments.length > 0 && !isListening && !creating
-
-  const handleCancel = () => {
-    reset()
-    onClose()
-  }
 
   const mergedTask = segment => ({
     ...parseVoiceTask(segment.text, parseCtx),
@@ -644,62 +637,52 @@ const VoicePanel = ({
             level='body-xs'
             sx={{ opacity: 0.5, px: 2, textAlign: 'center' }}
           >
-            Pause or say &ldquo;also&rdquo; between tasks &middot; say
-            &ldquo;scratch that&rdquo; to remove the last one
+            Pause between tasks &middot; say &ldquo;scratch that&rdquo; to
+            remove the last one
           </Typography>
         </Box>
       )}
 
-      {/* ── Footer ── */}
-      <Box
-        sx={{
-          px: 1.5,
-          py: 1,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1,
-          borderTop: '1px solid',
-          borderColor: 'divider',
-        }}
-      >
-        <Button
-          size='sm'
-          variant='plain'
-          color='neutral'
-          onClick={handleCancel}
+      {/* ── Footer — dismissing is the modal's Cancel; this owns confirm only ── */}
+      {(creating || showActions) && (
+        <Box
+          sx={{
+            px: 1.5,
+            py: 1,
+            display: 'flex',
+            justifyContent: 'flex-end',
+            gap: 1,
+            borderTop: '1px solid',
+            borderColor: 'divider',
+          }}
         >
-          Cancel
-        </Button>
-        <Box sx={{ ml: 'auto', display: 'flex', gap: 1 }}>
-          {creating && (
+          {creating ? (
             <Button size='sm' variant='solid' color='primary' loading>
               Creating…
             </Button>
+          ) : segments.length === 1 ? (
+            <Button
+              size='sm'
+              variant='solid'
+              color='primary'
+              onClick={() =>
+                onUseSingle(segments[0].text, segments[0].overrides || {})
+              }
+            >
+              Use Task
+            </Button>
+          ) : (
+            <Button
+              size='sm'
+              variant='solid'
+              color='primary'
+              onClick={handleCreateAll}
+            >
+              Create {segments.length} Tasks
+            </Button>
           )}
-          {showActions &&
-            (segments.length === 1 ? (
-              <Button
-                size='sm'
-                variant='solid'
-                color='primary'
-                onClick={() =>
-                  onUseSingle(segments[0].text, segments[0].overrides || {})
-                }
-              >
-                Use Task
-              </Button>
-            ) : (
-              <Button
-                size='sm'
-                variant='solid'
-                color='primary'
-                onClick={handleCreateAll}
-              >
-                Create {segments.length} Tasks
-              </Button>
-            ))}
         </Box>
-      </Box>
+      )}
     </Box>
   )
 }
