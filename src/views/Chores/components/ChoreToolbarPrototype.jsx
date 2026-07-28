@@ -601,7 +601,11 @@ const ChoreToolbar = ({
       </Box>
 
       {/* ── Row 2: pinned filters quick access ──────────────────────────────── */}
-      {!hasAnyActive && (
+      {/* Stays visible even while a saved filter is active (it self-highlights)
+          so switching between pinned filters never requires clearing first.
+          Only steps aside for an ad-hoc/temp condition set, which has no
+          matching pinned identity to show. */}
+      {tempConditionCount === 0 && (
         <CustomFilterChips
           filters={savedFilters}
           activeFilterId={activeFilterId}
@@ -612,8 +616,8 @@ const ChoreToolbar = ({
         />
       )}
 
-      {/* ── Row 3: active filter chips ──────────────────────────────────────── */}
-      {hasAnyActive && (
+      {/* ── Row 3: active (temp/ad-hoc) filter chips ──────────────────────────── */}
+      {tempConditionCount > 0 && (
         <ActiveFilterChips
           chips={inlineChips}
           onOpen={openFilterSheet}
