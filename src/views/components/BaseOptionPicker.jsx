@@ -24,8 +24,17 @@ const BaseOptionPicker = ({
   getTriggerText,
   onClear,
   menuFooter,
+  open: openProp,
+  onOpenChange,
 }) => {
-  const [isOpen, setIsOpen] = useState(false)
+  const [internalOpen, setInternalOpen] = useState(false)
+  const isControlled = openProp !== undefined
+  const isOpen = isControlled ? openProp : internalOpen
+  const setIsOpen = value => {
+    if (!isControlled) setInternalOpen(value)
+    const nextValue = typeof value === 'function' ? value(isOpen) : value
+    onOpenChange?.(nextValue)
+  }
   const buttonRef = useRef(null)
 
   useEffect(() => {

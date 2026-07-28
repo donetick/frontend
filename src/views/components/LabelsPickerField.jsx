@@ -12,6 +12,7 @@ const LabelsPickerField = ({
   emptyDisplay = 'icon-text',
 }) => {
   const [createOpen, setCreateOpen] = useState(false)
+  const [pickerOpen, setPickerOpen] = useState(false)
 
   const options = labels.map(label => ({
     id: label.id,
@@ -27,6 +28,8 @@ const LabelsPickerField = ({
         values={values}
         onValuesChange={onChange}
         onClear={onClear}
+        open={pickerOpen}
+        onOpenChange={setPickerOpen}
         emptyDisplay={emptyDisplay}
         emptyLabel='Labels'
         getItemValue={item => item.id}
@@ -55,6 +58,7 @@ const LabelsPickerField = ({
             startDecorator={<Add sx={{ fontSize: '16px' }} />}
             onClick={e => {
               e.stopPropagation()
+              setPickerOpen(false)
               setCreateOpen(true)
             }}
             sx={{ width: '100%', justifyContent: 'flex-start' }}
