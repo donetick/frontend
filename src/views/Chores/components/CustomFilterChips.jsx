@@ -2,6 +2,7 @@ import {
   Check,
   Delete,
   Edit,
+  MoreVert,
   Settings,
   Star,
   StarBorder,
@@ -66,158 +67,163 @@ const CustomFilterChips = ({
     handleMenuClose()
   }
 
-  const sortedFilters = [...filters].sort((a, b) => {
-    if (a.isPinned && !b.isPinned) return -1
-    if (!a.isPinned && b.isPinned) return 1
-    return (b.usageCount || 0) - (a.usageCount || 0)
-  })
-  if (sortedFilters.filter(f => f.isPinned).length === 0) return null
+  const pinnedFilters = filters
+    .filter(f => f.isPinned)
+    .sort((a, b) => (b.usageCount || 0) - (a.usageCount || 0))
+
+  if (pinnedFilters.length === 0) return null
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        gap: 1,
-        overflowX: 'auto',
-        py: 1,
-        '&::-webkit-scrollbar': {
-          display: 'none',
-        },
-        scrollbarWidth: 'none', // Firefox
-        msOverflowStyle: 'none', // IE and Edge
-      }}
-    >
-      {sortedFilters.map(filter => {
-        const isActive = activeFilterId === filter.id
-        const hasWarning = !filter.isValid
-        const hasCustomColor = !!filter.color && !hasWarning
-        const textColor = hasCustomColor
-          ? getTextColorFromBackgroundColor(filter.color)
-          : undefined
+    <Box sx={{ position: 'relative' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          gap: 0.75,
+          overflowX: 'auto',
+          py: 1,
+          pr: 2,
+          '&::-webkit-scrollbar': {
+            display: 'none',
+          },
+          scrollbarWidth: 'none', // Firefox
+          msOverflowStyle: 'none', // IE and Edge
+        }}
+      >
+        {pinnedFilters.map(filter => {
+          const isActive = activeFilterId === filter.id
+          const hasWarning = !filter.isValid
+          const badgeColor = filter.color || 'var(--joy-palette-neutral-400)'
+          const badgeTextColor = filter.color
+            ? getTextColorFromBackgroundColor(filter.color)
+            : '#ffffff'
+          const displayCount =
+            filter.count > 99 ? '99+' : (filter.count ?? 0)
 
-        return (
-          <Tooltip
-            key={filter.id}
-            title={
-              hasWarning
-                ? `Filter has issues: ${filter.validationIssues?.join(', ')}`
-                : `${filter.description ? filter.description + ' - ' : ''}${filter.count} tasks${filter.overdueCount > 0 ? ` (${filter.overdueCount} overdue)` : ''}`
-            }
-            placement='bottom'
-          >
-            <div onClick={() => !hasWarning && onFilterClick(filter.id)}>
+          return (
+            <Tooltip
+              key={filter.id}
+              title={
+                hasWarning
+                  ? `Filter has issues: ${filter.validationIssues?.join(', ')}`
+                  : `${filter.description ? filter.description + ' - ' : ''}${filter.count} tasks${filter.overdueCount > 0 ? ` (${filter.overdueCount} overdue)` : ''}`
+              }
+              placement='bottom'
+            >
               <Chip
-                variant='solid'
+                variant={isActive ? 'solid' : 'outlined'}
+                color={hasWarning ? 'warning' : isActive ? 'primary' : 'neutral'}
                 size='md'
-                onContextMenu={e => handleContextMenu(e, filter)}
+                onClick={() => !hasWarning && onFilterClick(filter.id)}
                 sx={{
                   cursor: hasWarning ? 'not-allowed' : 'pointer',
-                  transition: 'all 0.2s ease',
-                  px: 1.0,
-                  py: 0.5,
+                  transition: 'background-color 0.15s ease, color 0.15s ease',
+                  px: 1,
                   height: 32,
-                  display: 'flex',
-                  alignItems: 'center',
-
-                  opacity: hasWarning ? 0.7 : isActive ? 1 : 0.85,
-                  ...(hasCustomColor && {
-                    backgroundColor: `${filter.color} !important`,
-                    color: `${textColor} !important`,
-                    '&:hover': {
-                      backgroundColor: `${filter.color} !important`,
-                      filter: 'brightness(0.95)',
-                      opacity: 1,
-                    },
-                  }),
+                  flexShrink: 0,
+                  fontWeight: isActive ? 600 : 500,
+                  '&:hover': {
+                    backgroundColor: isActive ? undefined : 'neutral.softHoverBg',
+                  },
                 }}
                 startDecorator={
-                  <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
-                    {isActive ? (
-                      <Check
-                        sx={{
-                          fontSize: '1rem',
-                          color: hasCustomColor ? textColor : 'primary.500',
-                        }}
-                      />
-                    ) : (
-                      <Chip
-                        size='sm'
-                        variant='solid'
-                        sx={{
-                          ...(hasCustomColor
-                            ? {
-                                bgcolor:
-                                  textColor === '#FFFFFF'
-                                    ? '#00000040'
-                                    : '#FFFFFF40',
-                                color: textColor,
-                                border: `1px solid ${textColor}30`,
-                              }
-                            : {}),
-                        }}
-                        color={
-                          hasCustomColor
-                            ? undefined
-                            : hasWarning
-                              ? 'warning'
-                              : 'neutral'
-                        }
-                      >
-                        {filter.count}
-                      </Chip>
-                    )}
-                  </Box>
+                  !hasWarning && (
+                    <Box
+                      sx={{
+                        width: 20,
+                        height: 20,
+                        borderRadius: '50%',
+                        bgcolor: badgeColor,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                      }}
+                    >
+                      {isActive ? (
+                        <Check
+                          sx={{ fontSize: '0.85rem', color: badgeTextColor }}
+                        />
+                      ) : (
+                        <Typography
+                          level='body-xs'
+                          sx={{
+                            fontSize: '0.65rem',
+                            lineHeight: 1,
+                            color: badgeTextColor,
+                          }}
+                        >
+                          {displayCount}
+                        </Typography>
+                      )}
+                    </Box>
+                  )
                 }
-                // endDecorator={
-                //   <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
-                //     {hasWarning && <Warning sx={{ fontSize: '1rem' }} />}
-                //     {!hasWarning && filter.overdueCount > 0 && (
-                //       <Chip size='sm' color='danger' variant='solid'>
-                //         {filter.overdueCount}
-                //       </Chip>
-                //     )}
-                //   </Box>
-                // }
+                endDecorator={
+                  <IconButton
+                    size='sm'
+                    variant='plain'
+                    color='neutral'
+                    onClick={e => {
+                      e.stopPropagation()
+                      handleContextMenu(e, filter)
+                    }}
+                    sx={{
+                      '--IconButton-size': '20px',
+                      ml: 0.25,
+                      opacity: 0.6,
+                      '&:hover': { opacity: 1, backgroundColor: 'transparent' },
+                    }}
+                  >
+                    <MoreVert sx={{ fontSize: '0.95rem' }} />
+                  </IconButton>
+                }
               >
                 <Typography
                   level='body-sm'
-                  fontWeight={isActive ? 'md' : 'normal'}
+                  fontWeight='inherit'
                   sx={{
                     whiteSpace: 'nowrap',
                     maxWidth: 100,
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
-                    display: 'flex',
-                    alignItems: 'center',
-                    height: '100%',
-                    lineHeight: 1,
-                    ...(hasCustomColor && {
-                      color: textColor,
-                    }),
+                    color: 'inherit',
                   }}
                 >
                   {filter.name}
                 </Typography>
               </Chip>
-            </div>
-          </Tooltip>
-        )
-      })}
+            </Tooltip>
+          )
+        })}
 
-      <IconButton
-        variant='outlined'
-        size='sm'
+        <IconButton
+          variant='outlined'
+          color='neutral'
+          size='sm'
+          sx={{ borderRadius: 24, flexShrink: 0 }}
+          onClick={e => {
+            e.preventDefault()
+            e.stopPropagation()
+            navigate('/filters')
+          }}
+        >
+          <Settings sx={{ fontSize: '1.1rem' }} />
+        </IconButton>
+      </Box>
+
+      {/* Fade hint that more chips are scrollable off the trailing edge */}
+      <Box
         sx={{
-          borderRadius: 24,
+          pointerEvents: 'none',
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          bottom: 0,
+          width: 24,
+          background:
+            'linear-gradient(to right, transparent, var(--joy-palette-background-surface, #fff))',
         }}
-        onClick={e => {
-          e.preventDefault()
-          e.stopPropagation()
-          navigate('/filters')
-        }}
-      >
-        <Settings />
-      </IconButton>
+      />
 
       <Menu
         anchorEl={menuAnchor}

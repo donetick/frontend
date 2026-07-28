@@ -103,7 +103,7 @@ const MyChores = () => {
   const searchInputRef = useRef(null)
   const [searchInputFocus, setSearchInputFocus] = useState(0)
   const [selectedChoreSection, setSelectedChoreSection] = useState(
-    localStorage.getItem('selectedChoreSection') || 'due_date',
+    localStorage.getItem('selectedChoreSection') || 'default',
   )
   const [openChoreSections, setOpenChoreSections] = useState(() => {
     try {

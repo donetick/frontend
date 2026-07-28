@@ -1,4 +1,5 @@
 // AutocompleteDropdown.jsx
+import { Add } from '@mui/icons-material'
 import { Divider, Menu, MenuItem } from '@mui/joy'
 import React, { useEffect } from 'react'
 
@@ -8,6 +9,7 @@ const AutocompleteDropdown = ({
   selectedIndex,
   onSelectSuggestion,
   onMouseEnterSuggestion, // Added for hover selection
+  onCreateSuggestion, // Called when the "Create new" row is chosen
   parentRefer, // Ref to the dropdown element
 }) => {
   // Scroll selected item into view
@@ -26,9 +28,28 @@ const AutocompleteDropdown = ({
     return null // Don't render if no suggestions
   }
 
+  const filteredOptions = suggestions.options.filter(option => {
+    if (typeof option === 'string') {
+      return option.toLowerCase().includes(currentValue.toLowerCase())
+    }
+    return option[suggestions.display]
+      .toLowerCase()
+      .includes(currentValue.toLowerCase())
+  })
+
+  const trimmedValue = currentValue.trim()
+  const hasExactMatch = filteredOptions.some(option => {
+    const optionText = suggestions.display
+      ? option[suggestions.display]
+      : option
+    return optionText.toLowerCase() === trimmedValue.toLowerCase()
+  })
+  const showCreateOption =
+    suggestions.creatable && trimmedValue.length > 0 && !hasExactMatch
+
   return (
     <Menu
-      open={Boolean(suggestions?.options?.length)}
+      open={Boolean(suggestions?.options?.length) || showCreateOption}
       ref={dropdownMenuRef}
       anchorEl={parentRefer.current}
       onClose={() => {}}
@@ -42,45 +63,45 @@ const AutocompleteDropdown = ({
         zIndex: 1300,
       }}
     >
-      {suggestions?.options
-        .filter(option => {
-          if (typeof option === 'string') {
-            return option.toLowerCase().includes(currentValue.toLowerCase())
-          }
-          return option[suggestions.display]
-            .toLowerCase()
-            .includes(currentValue.toLowerCase())
-        })
-        .map((option, index) => (
+      {filteredOptions.map((option, index) => (
+        <MenuItem
+          key={suggestions.display ? option[suggestions.value] : option}
+          selected={selectedIndex === index}
+          onClick={() => onSelectSuggestion(option)}
+          onMouseEnter={() => onMouseEnterSuggestion(index)} // Update selected index on hover
+          className={selectedIndex === index ? 'selected' : ''} // Add class for selected item
+          sx={{
+            cursor: 'pointer',
+            backgroundColor: selectedIndex === index ? 'gray.800' : 'inherit',
+          }}
+        >
+          {suggestions.display ? option[suggestions.display] : option}
+        </MenuItem>
+      ))}
+      {showCreateOption && (
+        <>
+          {filteredOptions.length > 0 && <Divider orientation='horizontal' />}
           <MenuItem
-            key={suggestions.display ? option[suggestions.value] : option}
-            selected={selectedIndex === index}
-            onClick={() => onSelectSuggestion(option)}
-            onMouseEnter={() => onMouseEnterSuggestion(index)} // Update selected index on hover
-            className={selectedIndex === index ? 'selected' : ''} // Add class for selected item
+            selected={selectedIndex === filteredOptions.length}
+            onClick={() => onCreateSuggestion(trimmedValue)}
+            onMouseEnter={() => onMouseEnterSuggestion(filteredOptions.length)}
+            className={
+              selectedIndex === filteredOptions.length ? 'selected' : ''
+            }
             sx={{
               cursor: 'pointer',
-              backgroundColor: selectedIndex === index ? 'gray.800' : 'inherit',
+              backgroundColor:
+                selectedIndex === filteredOptions.length
+                  ? 'gray.800'
+                  : 'inherit',
+              gap: 0.5,
             }}
           >
-            {suggestions.display ? option[suggestions.display] : option}
+            <Add fontSize='small' />
+            Create &quot;{trimmedValue}&quot;
           </MenuItem>
-        ))}
-      <Divider orientation='horizontal' />
-      {/* 
-      <MenuItem
-        selected={selectedIndex === suggestions?.options?.length}
-        onClick={() => {
-          onSelectSuggestion(currentValue)
-        }}
-        sx={{
-          cursor: 'pointer',
-          backgroundColor: 'gray.800',
-        }}
-      >
-        <Add />
-        Add new Label
-      </MenuItem> */}
+        </>
+      )}
     </Menu>
   )
 }

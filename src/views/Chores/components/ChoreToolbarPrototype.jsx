@@ -61,6 +61,7 @@ import FilterBuilderContent, {
 } from './FilterBuilderContent'
 import SearchBar from './SearchBar'
 import ProjectSelector from '../../components/ProjectSelector'
+import CustomFilterChips from './CustomFilterChips'
 
 // ─── sub-components for the Display sheet ────────────────────────────────────
 
@@ -481,13 +482,6 @@ const ChoreToolbar = ({
   // ── display sheet helpers ────────────────────────────────────────────────────
 
   const filterActive = activeFilterId != null || tempConditionCount > 0
-  const projectActive = selectedProject && selectedProject.id !== 'default' ? 1 : 0
-  const assigneeActive = selectedAssigneeFilter !== 'anyone' ? 1 : 0
-  const displayActive =
-    selectedGroupBy !== 'default' ||
-    viewMode !== 'default' ||
-    projectActive > 0 ||
-    assigneeActive > 0
 
   const groupByOptions = [
     { value: 'default', label: 'Smart' },
@@ -559,8 +553,8 @@ const ChoreToolbar = ({
 
         {/* Display button — View + Group combined */}
         <IconButton
-          variant={displayActive ? 'solid' : 'outlined'}
-          color={displayActive ? 'primary' : 'neutral'}
+          variant='outlined'
+          color='neutral'
           size='sm'
           sx={{ height: 32, width: 32, borderRadius: '50%' }}
           onClick={() => setDisplaySheetOpen(true)}
@@ -599,8 +593,24 @@ const ChoreToolbar = ({
         </Box>
       </Box>
 
-      {/* ── Row 2: active filter chips ──────────────────────────────────────── */}
-      {hasAnyActive && (
+      {/* ── Row 2: pinned filters quick access ──────────────────────────────── */}
+      {/* Stays visible even while a saved filter is active (it self-highlights)
+          so switching between pinned filters never requires clearing first.
+          Only steps aside for an ad-hoc/temp condition set, which has no
+          matching pinned identity to show. */}
+      {tempConditionCount === 0 && (
+        <CustomFilterChips
+          filters={savedFilters}
+          activeFilterId={activeFilterId}
+          onFilterClick={onSavedFilterClick}
+          onFilterDelete={onSavedFilterDelete}
+          onFilterPin={onSavedFilterPin}
+          onFilterEdit={onSavedFilterEdit}
+        />
+      )}
+
+      {/* ── Row 3: active (temp/ad-hoc) filter chips ──────────────────────────── */}
+      {tempConditionCount > 0 && (
         <ActiveFilterChips
           chips={inlineChips}
           onOpen={openFilterSheet}
