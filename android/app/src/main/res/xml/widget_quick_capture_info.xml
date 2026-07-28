@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- The layout is fully static (no bound data), so it doubles as its own
+     API 31+ preview. -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:description="@string/widget_quick_description"
     android:initialLayout="@layout/widget_quick_capture"
+    android:previewLayout="@layout/widget_quick_capture"
+    android:previewImage="@drawable/widget_preview_quick"
     android:minWidth="180dp"
     android:minHeight="70dp"
     android:minResizeWidth="180dp"
