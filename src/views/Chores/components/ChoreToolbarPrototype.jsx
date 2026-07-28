@@ -61,6 +61,7 @@ import FilterBuilderContent, {
 } from './FilterBuilderContent'
 import SearchBar from './SearchBar'
 import ProjectSelector from '../../components/ProjectSelector'
+import CustomFilterChips from './CustomFilterChips'
 
 // ─── sub-components for the Display sheet ────────────────────────────────────
 
@@ -599,7 +600,19 @@ const ChoreToolbar = ({
         </Box>
       </Box>
 
-      {/* ── Row 2: active filter chips ──────────────────────────────────────── */}
+      {/* ── Row 2: pinned filters quick access ──────────────────────────────── */}
+      {!hasAnyActive && (
+        <CustomFilterChips
+          filters={savedFilters}
+          activeFilterId={activeFilterId}
+          onFilterClick={onSavedFilterClick}
+          onFilterDelete={onSavedFilterDelete}
+          onFilterPin={onSavedFilterPin}
+          onFilterEdit={onSavedFilterEdit}
+        />
+      )}
+
+      {/* ── Row 3: active filter chips ──────────────────────────────────────── */}
       {hasAnyActive && (
         <ActiveFilterChips
           chips={inlineChips}
