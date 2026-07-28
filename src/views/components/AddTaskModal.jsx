@@ -26,6 +26,7 @@ import SmartTaskTitleInput from './SmartTaskTitleInput'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import { useDocumentScanner } from '../../hooks/useDocumentScanner'
 import { localAIService } from '../../service/LocalAIService'
+import { voiceInputService } from '../../service/VoiceInputService'
 import LABEL_COLORS, { TASK_COLOR } from '../../utils/Colors'
 import AdvancedOptionsSection, {
   AdvancedOptionsTrigger,
@@ -41,6 +42,8 @@ import RepeatPickerField from './RepeatPickerField'
 import RichTextEditor from './RichTextEditor'
 import ScanPanel from './ScanToTask/ScanPanel'
 import SubTasks from './SubTask'
+import { buildChorePayload } from './VoiceToTask/parseVoiceTask'
+import VoicePanel from './VoiceToTask/VoicePanel'
 const getDefaultNotification = () => {
   const storedDefault = localStorage.getItem('defaultNotificationTemplate')
   if (storedDefault) {
@@ -59,7 +62,7 @@ const getDefaultNotification = () => {
   return defaultNotification
 }
 
-const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
+const TaskInput = ({ onChoreUpdate, isModalOpen, onClose, initialMode }) => {
   const { ResponsiveModal } = useResponsiveModal()
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
   const pickerEmptyDisplay = isMobile ? 'icon' : 'icon-text'
@@ -104,6 +107,9 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
 
   const richTextEditorRef = useRef(null)
   const latestRef = useRef({})
+  // Picker edits made on a voice task card, applied once after the reparse
+  // that follows landing the spoken text in the smart input
+  const pendingVoiceOverridesRef = useRef(null)
   const [priority, setPriority] = useState(0)
   const [dueDate, setDueDate] = useState(null)
   const [description, setDescription] = useState(null)
@@ -136,11 +142,39 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
   const [scanAutoCapture, setScanAutoCapture] = useState(false)
   const [pendingPhotoUrl, setPendingPhotoUrl] = useState(null)
   const [llmAvailable, setLlmAvailable] = useState(false)
+  const [showVoice, setShowVoice] = useState(false)
+  const [voiceAvailable, setVoiceAvailable] = useState(false)
   const { isNativeScanner } = useDocumentScanner()
 
   useEffect(() => {
     localAIService.isAvailable().then(setLlmAvailable)
+    voiceInputService.isSupported().then(setVoiceAvailable)
   }, [])
+
+  // Quick-capture widget entry points (donetick://chores/add?mode=voice|scan)
+  // land here: open straight into the requested panel, once per modal open so
+  // backing out of the panel doesn't bounce the user right back into it.
+  const appliedInitialModeRef = useRef(false)
+  useEffect(() => {
+    if (!isModalOpen) {
+      appliedInitialModeRef.current = false
+      return
+    }
+    if (appliedInitialModeRef.current) return
+
+    // Availability resolves async — wait for the answer before deciding; if it
+    // never turns true the modal simply stays in plain text mode.
+    if (initialMode === 'voice') {
+      if (!voiceAvailable) return
+      appliedInitialModeRef.current = true
+      setShowVoice(true)
+    } else if (initialMode === 'scan') {
+      if (!llmAvailable) return
+      appliedInitialModeRef.current = true
+      setScanAutoCapture(true)
+      setShowScan(true)
+    }
+  }, [isModalOpen, initialMode, voiceAvailable, llmAvailable])
 
   // Priority colors
   const priorityColors = {
@@ -498,6 +532,28 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
       )
 
       setRenderedParts(parts)
+
+      const overrides = pendingVoiceOverridesRef.current
+      if (overrides) {
+        pendingVoiceOverridesRef.current = null
+        if ('priority' in overrides) setPriority(overrides.priority || 0)
+        if ('frequency' in overrides) setFrequency(overrides.frequency)
+        if ('labelIds' in overrides) setLabelsV2(overrides.labelIds || [])
+        if ('assignees' in overrides || 'isAnyone' in overrides) {
+          setIsAnyoneTask(!!overrides.isAnyone)
+          setAssignees(overrides.assignees || [])
+        }
+        if ('dueDate' in overrides) {
+          if (overrides.dueDate) {
+            syncDueDateStates(overrides.dueDate)
+          } else {
+            setDueDate(null)
+            setDueDateOnly(null)
+            setDueTime(null)
+            setUseCustomTime(false)
+          }
+        }
+      }
     },
     [userLabels, renderHighlightedSentence, circleMembers, userProfile],
   )
@@ -601,9 +657,49 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
     }
   }
 
+  // Single voice-captured task: land it in the smart input so the user
+  // reviews it with the normal pickers before creating.
+  const handleVoiceSingle = (text, overrides = {}) => {
+    setShowVoice(false)
+    if (Object.keys(overrides).length > 0) {
+      pendingVoiceOverridesRef.current = overrides
+    }
+    setTaskText(text)
+  }
+
+  // Multiple voice-captured tasks: they were reviewed as cards in the panel,
+  // so create them all directly.
+  const handleVoiceCreateMany = async parsedTasks => {
+    const notificationTemplates = getDefaultNotification()
+    for (const parsed of parsedTasks) {
+      const chore = buildChorePayload(parsed, {
+        userProfile,
+        projectId,
+        notificationTemplates,
+      })
+      try {
+        const result = await createChoreMutation.mutateAsync(chore)
+        if (result?._pendingCreate) {
+          onChoreUpdate(result)
+        } else {
+          onChoreUpdate({
+            ...chore,
+            ...result,
+            id: result?.id,
+            nextDueDate: chore.dueDate,
+          })
+        }
+      } catch (error) {
+        console.error('Error creating voice task:', error)
+      }
+    }
+    handleCloseModal(false)
+  }
+
   const handleCloseModal = forceRefetch => {
     onClose(forceRefetch)
     setShowScan(false)
+    setShowVoice(false)
     setTaskText('')
     setTaskTitle('')
     setDueDate(null)
@@ -758,22 +854,25 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
                 />
               )}
             </Button>
-            <Button
-              size='lg'
-              variant='solid'
-              color='primary'
-              disabled={!taskTitle.trim()}
-              onClick={createChore}
-            >
-              Create
-              {showKeyboardShortcuts && (
-                <KeyboardShortcutHint shortcut='Enter' sx={{ ml: 1 }} />
-              )}
-            </Button>
+            {/* Sub-panels (voice/scan) own their own confirm action */}
+            {!showScan && !showVoice && (
+              <Button
+                size='lg'
+                variant='solid'
+                color='primary'
+                disabled={!taskTitle.trim()}
+                onClick={createChore}
+              >
+                Create
+                {showKeyboardShortcuts && (
+                  <KeyboardShortcutHint shortcut='Enter' sx={{ ml: 1 }} />
+                )}
+              </Button>
+            )}
           </Box>
         }
       >
-        {!showScan && (
+        {!showScan && !showVoice && (
           <>
             <Box>
               <Box
@@ -849,6 +948,9 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
                         setShowScan(true)
                       }
                     : undefined
+                }
+                onVoiceClick={
+                  voiceAvailable ? () => setShowVoice(true) : undefined
                 }
                 placeholder='Type your task...'
                 onChange={text => {
@@ -1113,6 +1215,17 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
               </Box>
             )}
           </>
+        )}
+
+        {showVoice && (
+          <VoicePanel
+            open
+            userLabels={userLabels || []}
+            members={circleMembers?.res || []}
+            userProfile={userProfile}
+            onUseSingle={handleVoiceSingle}
+            onCreateMany={handleVoiceCreateMany}
+          />
         )}
 
         {showScan && (

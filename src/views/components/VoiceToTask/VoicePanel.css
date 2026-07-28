@@ -1,0 +1,121 @@
+.voice-mic-btn {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: var(--joy-palette-primary-solidBg, #0b6bcb);
+  color: #fff;
+  transition:
+    transform 0.15s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.voice-mic-btn:active {
+  transform: scale(0.94);
+}
+
+.voice-mic-btn.listening {
+  background: var(--joy-palette-danger-solidBg, #c41c1c);
+  box-shadow: 0 4px 18px rgba(196, 28, 28, 0.35);
+}
+
+.voice-pulse-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.voice-mic-btn.listening .voice-pulse-ring {
+  opacity: 1;
+  animation: voice-pulse 1.8s ease-out infinite;
+}
+
+.voice-mic-btn.listening .voice-pulse-ring:nth-child(2) {
+  animation-delay: 0.6s;
+}
+
+@keyframes voice-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(196, 28, 28, 0.4);
+  }
+  100% {
+    box-shadow: 0 0 0 26px rgba(196, 28, 28, 0);
+  }
+}
+
+/* Faux equalizer shown while listening */
+.voice-eq {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+  height: 28px;
+}
+
+.voice-eq span {
+  width: 4px;
+  border-radius: 2px;
+  background: var(--joy-palette-danger-solidBg, #c41c1c);
+  animation: voice-eq-wave 1.1s ease-in-out infinite;
+}
+
+.voice-eq span:nth-child(1) {
+  animation-delay: 0s;
+}
+.voice-eq span:nth-child(2) {
+  animation-delay: 0.18s;
+}
+.voice-eq span:nth-child(3) {
+  animation-delay: 0.32s;
+}
+.voice-eq span:nth-child(4) {
+  animation-delay: 0.12s;
+}
+.voice-eq span:nth-child(5) {
+  animation-delay: 0.26s;
+}
+
+@keyframes voice-eq-wave {
+  0%,
+  100% {
+    height: 6px;
+  }
+  50% {
+    height: 24px;
+  }
+}
+
+/* Committed task cards slide in as segments are captured */
+.voice-task-card {
+  animation: voice-card-in 0.25s ease-out;
+}
+
+@keyframes voice-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .voice-mic-btn.listening .voice-pulse-ring,
+  .voice-eq span,
+  .voice-task-card {
+    animation: none;
+  }
+}

@@ -97,6 +97,8 @@ const MyChores = () => {
   const [filteredChores, setFilteredChores] = useState([])
   const [choreSections, setChoreSections] = useState([])
   const [addTaskModalOpen, setAddTaskModalOpen] = useState(false)
+  // 'voice' | 'scan' | null — set by the quick-capture widget deep links
+  const [addTaskInitialMode, setAddTaskInitialMode] = useState(null)
   const [taskInputFocus, setTaskInputFocus] = useState(0)
   const searchInputRef = useRef(null)
   const [searchInputFocus, setSearchInputFocus] = useState(0)
@@ -439,14 +441,18 @@ const MyChores = () => {
     setSelectedProjectWithCache,
   ])
 
-  // Widget "+" deep link (donetick://chores/add → /chores?add_task=1):
-  // open the quick-add modal once and strip the param so back/refresh
-  // doesn't re-trigger it.
+  // Widget deep links (donetick://chores/add[?mode=scan|voice] →
+  // /chores?add_task=1[&mode=…]): open the quick-add modal once, in the
+  // requested capture mode, and strip the params so back/refresh doesn't
+  // re-trigger it.
   useEffect(() => {
     if (searchParams.get('add_task') === '1') {
+      const mode = searchParams.get('mode')
+      setAddTaskInitialMode(mode === 'voice' || mode === 'scan' ? mode : null)
       setAddTaskModalOpen(true)
       const params = new URLSearchParams(searchParams)
       params.delete('add_task')
+      params.delete('mode')
       setSearchParams(params, { replace: true })
     }
   }, [searchParams, setSearchParams])
@@ -1455,8 +1461,10 @@ const MyChores = () => {
             autoFocus={taskInputFocus}
             onChoreUpdate={updateChores}
             isModalOpen={addTaskModalOpen}
+            initialMode={addTaskInitialMode}
             onClose={forceRefresh => {
               setAddTaskModalOpen(false)
+              setAddTaskInitialMode(null)
               if (forceRefresh) {
                 refetchChores()
               }
