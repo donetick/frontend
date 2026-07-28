@@ -147,17 +147,19 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose, initialMode }) => {
     }
     if (appliedInitialModeRef.current) return
 
+    // Availability resolves async — wait for the answer before deciding; if it
+    // never turns true the modal simply stays in plain text mode.
     if (initialMode === 'voice') {
-      // isSupported() resolves async — wait for the answer before deciding.
       if (!voiceAvailable) return
       appliedInitialModeRef.current = true
       setShowVoice(true)
     } else if (initialMode === 'scan') {
+      if (!llmAvailable) return
       appliedInitialModeRef.current = true
       setScanAutoCapture(true)
       setShowScan(true)
     }
-  }, [isModalOpen, initialMode, voiceAvailable])
+  }, [isModalOpen, initialMode, voiceAvailable, llmAvailable])
 
   // Priority colors
   const priorityColors = {

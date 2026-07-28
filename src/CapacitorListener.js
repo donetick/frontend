@@ -63,9 +63,20 @@ const handleNFCChoreDeepLink = (url, isColdStart) => {
 const handleUrlOpen = (url, isColdStart = false) => {
   console.log('[NFC] handleUrlOpen:', url)
   if (url.startsWith('donetick://chores/add')) {
-    // Widget "+" button: land on the chore list with the quick-add modal open
-    // (MyChores watches for the add_task param and consumes it).
-    routerNavigate('/chores?add_task=1')
+    // Widget "+" / quick-capture buttons: land on the chore list with the
+    // quick-add modal open (MyChores watches for the add_task param and
+    // consumes it). ?mode=scan|voice opens straight into that capture panel.
+    let mode = null
+    try {
+      mode = new URL(url).searchParams.get('mode')
+    } catch {
+      // malformed URL — fall back to plain text capture
+    }
+    routerNavigate(
+      mode === 'scan' || mode === 'voice'
+        ? `/chores?add_task=1&mode=${mode}`
+        : '/chores?add_task=1',
+    )
   } else if (url.startsWith('donetick://chores/')) {
     handleNFCChoreDeepLink(url, isColdStart)
   } else if (url.startsWith('donetick://auth/')) {

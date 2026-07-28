@@ -28,6 +28,11 @@
     <string name="widget_people_title">People</string>
     <string name="widget_empty_people">No circle members yet</string>
     <string name="widget_person_counts">%1$d today · %2$d this week</string>
+    <string name="widget_quick_label">Quick Capture</string>
+    <string name="widget_quick_description">Capture a task in one tap — type it, scan it, or say it.</string>
+    <string name="widget_quick_type">Type</string>
+    <string name="widget_quick_scan">Scan</string>
+    <string name="widget_quick_voice">Speak</string>
     <string name="widget_config_title">Widget options</string>
     <string name="widget_config_include_others">Show everyone\'s tasks</string>
     <string name="widget_config_include_others_hint">Include tasks assigned to other members of your circle. Their avatar appears next to their tasks.</string>
