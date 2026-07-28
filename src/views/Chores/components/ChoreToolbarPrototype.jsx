@@ -482,13 +482,6 @@ const ChoreToolbar = ({
   // ── display sheet helpers ────────────────────────────────────────────────────
 
   const filterActive = activeFilterId != null || tempConditionCount > 0
-  const projectActive = selectedProject && selectedProject.id !== 'default' ? 1 : 0
-  const assigneeActive = selectedAssigneeFilter !== 'anyone' ? 1 : 0
-  const displayActive =
-    selectedGroupBy !== 'default' ||
-    viewMode !== 'default' ||
-    projectActive > 0 ||
-    assigneeActive > 0
 
   const groupByOptions = [
     { value: 'default', label: 'Smart' },
@@ -560,8 +553,8 @@ const ChoreToolbar = ({
 
         {/* Display button — View + Group combined */}
         <IconButton
-          variant={displayActive ? 'solid' : 'outlined'}
-          color={displayActive ? 'primary' : 'neutral'}
+          variant='outlined'
+          color='neutral'
           size='sm'
           sx={{ height: 32, width: 32, borderRadius: '50%' }}
           onClick={() => setDisplaySheetOpen(true)}
