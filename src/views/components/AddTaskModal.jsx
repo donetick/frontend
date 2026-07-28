@@ -3,10 +3,12 @@ import { Box, Button, Typography } from '@mui/joy'
 import { useMediaQuery } from '@mui/material'
 import * as chrono from 'chrono-node'
 import moment from 'moment'
+import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import { useCreateChore } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
+import { CreateLabel } from '../../utils/Fetcher'
 import { isPlusAccount } from '../../utils/Helpers'
 import { generateUUID } from '../../utils/UUID'
 import { useLabels } from '../Labels/LabelQueries'
@@ -24,7 +26,7 @@ import SmartTaskTitleInput from './SmartTaskTitleInput'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import { useDocumentScanner } from '../../hooks/useDocumentScanner'
 import { localAIService } from '../../service/LocalAIService'
-import { TASK_COLOR } from '../../utils/Colors'
+import LABEL_COLORS, { TASK_COLOR } from '../../utils/Colors'
 import AdvancedOptionsSection, {
   AdvancedOptionsTrigger,
 } from './AdvancedOptionsSection'
@@ -66,8 +68,21 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
     useCircleMembers()
   const { isLoading: isProjectsLoading } = useProjects()
   const createChoreMutation = useCreateChore()
+  const queryClient = useQueryClient()
 
   const { data: userProfile } = useUserProfile()
+
+  const handleCreateLabel = useCallback(
+    name => {
+      const color =
+        LABEL_COLORS[1 + Math.floor(Math.random() * (LABEL_COLORS.length - 1))]
+          .value
+      CreateLabel({ name, color })
+        .then(() => queryClient.invalidateQueries(['labels']))
+        .catch(error => console.error('Error creating label:', error))
+    },
+    [queryClient],
+  )
 
   // Get initial project from localStorage (current active project)
   const getInitialProject = () => {
@@ -378,11 +393,8 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
       if (priority.result) setPriority(parseInt(priority.result, 10))
       if (pointsParsed.result) setPoints(pointsParsed.result)
       if (labels.result) {
-        // parseLabels returns array of label objects, extract their IDs
-        const labelIds = labels.result
-          .filter(label => label.id) // Only labels with IDs (existing labels)
-          .map(label => label.id)
-        setLabelsV2(labelIds)
+        // parseLabels only returns #mentions matched to an existing label
+        setLabelsV2(labels.result)
       }
 
       if (assigneesResult.isAnyone) {
@@ -856,6 +868,8 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
                     value: 'id',
                     display: 'name',
                     options: userLabels ? userLabels : [],
+                    creatable: true,
+                    onCreate: handleCreateLabel,
                   },
                   '!': {
                     value: 'id',
@@ -954,8 +968,12 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
               />
               <LabelsPickerField
                 emptyDisplay={pickerEmptyDisplay}
-                values={labelsV2 || []}
-                onChange={setLabelsV2}
+                values={(labelsV2 || []).map(label => label.id)}
+                onChange={ids =>
+                  setLabelsV2(
+                    (userLabels || []).filter(label => ids.includes(label.id)),
+                  )
+                }
                 onClear={() => setLabelsV2([])}
                 labels={userLabels || []}
               />

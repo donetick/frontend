@@ -111,46 +111,71 @@ const SmartTaskTitleInput = ({
     setCursorPosition(e.target.selectionStart)
   }
 
+  const selectSuggestionText = suggestionValue => {
+    const newValue = `${value.slice(0, cursorPosition - lastWord.length)}${suggestionValue} ${value.slice(cursorPosition)}`
+    onChange(newValue)
+    titleInputRef.current.value = newValue
+
+    setShowSuggestions(false)
+
+    const newCursorPosition =
+      cursorPosition - lastWord.length + suggestionValue.length + 1
+    titleInputRef.current.setSelectionRange(
+      newCursorPosition,
+      newCursorPosition,
+    )
+  }
+
   const handleTextareaKeyDown = e => {
     if (showSuggestions) {
-      const currentSuggestions = suggestions[suggestionTrigger].options.filter(
-        option => {
-          if (typeof option === 'string') {
-            return option.toLowerCase().includes(lastWord.toLowerCase())
-          }
-          return option[suggestions[suggestionTrigger].display]
-            .toLowerCase()
-            .includes(lastWord.toLowerCase())
-        },
-      )
+      const activeSuggestions = suggestions[suggestionTrigger]
+      const currentSuggestions = activeSuggestions.options.filter(option => {
+        if (typeof option === 'string') {
+          return option.toLowerCase().includes(lastWord.toLowerCase())
+        }
+        return option[activeSuggestions.display]
+          .toLowerCase()
+          .includes(lastWord.toLowerCase())
+      })
+
+      const trimmedWord = lastWord.trim()
+      const hasExactMatch = currentSuggestions.some(option => {
+        const optionText = activeSuggestions.display
+          ? option[activeSuggestions.display]
+          : option
+        return optionText.toLowerCase() === trimmedWord.toLowerCase()
+      })
+      const showCreateOption =
+        activeSuggestions.creatable && trimmedWord.length > 0 && !hasExactMatch
+      const optionCount = currentSuggestions.length + (showCreateOption ? 1 : 0)
 
       if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         e.preventDefault()
+        if (optionCount === 0) return
         const newIndex =
           e.key === 'ArrowDown'
-            ? (selectedSuggestionIndex + 1) % currentSuggestions.length
-            : (selectedSuggestionIndex - 1 + currentSuggestions.length) %
-              currentSuggestions.length
+            ? (selectedSuggestionIndex + 1) % optionCount
+            : (selectedSuggestionIndex - 1 + optionCount) % optionCount
         setSelectedSuggestionIndex(newIndex)
       } else if (e.key === 'Enter' || e.key === 'Tab') {
-        e.preventDefault()
+        if (
+          showCreateOption &&
+          selectedSuggestionIndex === currentSuggestions.length
+        ) {
+          e.preventDefault()
+          selectSuggestionText(trimmedWord)
+          activeSuggestions.onCreate?.(trimmedWord)
+          return
+        }
+
         const selectedSuggestion = currentSuggestions[selectedSuggestionIndex]
-        const suggestionValue = suggestions[suggestionTrigger].display
-          ? selectedSuggestion[suggestions[suggestionTrigger].display]
+        const suggestionValue = activeSuggestions.display
+          ? selectedSuggestion?.[activeSuggestions.display]
           : selectedSuggestion
 
         if (suggestionValue) {
-          const newValue = `${value.slice(0, cursorPosition - lastWord.length)}${suggestionValue} ${value.slice(cursorPosition)}`
-          onChange(newValue)
-          titleInputRef.current.value = newValue
-
-          setShowSuggestions(false)
-
-          const newCursorPosition = cursorPosition + suggestionValue.length + 1
-          titleInputRef.current.setSelectionRange(
-            newCursorPosition,
-            newCursorPosition,
-          )
+          e.preventDefault()
+          selectSuggestionText(suggestionValue)
         }
       } else if (e.key === 'Escape') {
         e.preventDefault()
@@ -348,6 +373,10 @@ const SmartTaskTitleInput = ({
               cursorPosition + suggestionValue.length,
             )
             setShowSuggestions(false)
+          }}
+          onCreateSuggestion={name => {
+            selectSuggestionText(name)
+            suggestions[suggestionTrigger].onCreate?.(name)
           }}
           parentRefer={dropdownRef}
         />
