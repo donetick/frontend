@@ -1,18 +1,8 @@
 import { CheckCircle, Security, Smartphone } from '@mui/icons-material'
-import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  Input,
-  Modal,
-  ModalClose,
-  ModalDialog,
-  Stack,
-  Typography,
-} from '@mui/joy'
+import { Alert, Box, Button, Card, Input, Stack, Typography } from '@mui/joy'
 import QRCode from 'qrcode'
 import { useEffect, useState } from 'react'
+import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import {
   ConfirmMFA,
   DisableMFA,
@@ -24,6 +14,7 @@ import LoadingComponent from '../components/Loading'
 import SettingsLayout from './SettingsLayout'
 
 const MFASettings = () => {
+  const { ResponsiveModal } = useResponsiveModal()
   const [mfaEnabled, setMfaEnabled] = useState(false)
   const [loading, setLoading] = useState(true)
   const [setupModalOpen, setSetupModalOpen] = useState(false)
@@ -290,193 +281,86 @@ const MFASettings = () => {
       )} */}
 
         {/* Setup MFA Modal */}
-        <Modal open={setupModalOpen} onClose={closeSetupModal}>
-          <ModalDialog size='md' sx={{ maxWidth: 500 }}>
-            <ModalClose />
-            <Typography level='h4' sx={{ mb: 2 }}>
-              Set up Multi-Factor Authentication
-            </Typography>
-
-            {setupStep === 1 && setupData && (
-              <Stack spacing={3}>
-                <Typography level='body-md'>
-                  <strong>Step 1:</strong> Scan the QR code below with your
-                  authenticator app (Google Authenticator, Authy, etc.)
-                </Typography>
-
-                <Box className='flex justify-center rounded bg-white p-4'>
-                  {qrCodeDataUrl || setupData.qrCode ? (
-                    <img
-                      src={
-                        qrCodeDataUrl ||
-                        `data:image/png;base64,${setupData.qrCode}`
-                      }
-                      alt='MFA QR Code'
-                      style={{ maxWidth: '200px', maxHeight: '200px' }}
-                    />
-                  ) : (
-                    <Alert color='danger'>
-                      QR code could not be generated. Please try again or use
-                      the manual entry key below.
-                    </Alert>
-                  )}
-                </Box>
-
-                <Alert
-                  color='neutral'
-                  variant='soft'
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'flex-start',
-                  }}
-                >
-                  <Typography level='title-sm'>
-                    <strong>Manual entry key:</strong>
-                  </Typography>
-                  <Typography
-                    level='body-sm'
-                    sx={{ wordBreak: 'break-all', whiteSpace: 'pre-wrap' }}
-                  >
-                    {setupData.secret}
-                  </Typography>
-                </Alert>
-
-                <Button
-                  color='primary'
-                  onClick={() => setSetupStep(2)}
-                  startDecorator={<Smartphone />}
-                >
-                  I've added the account to my app
-                </Button>
-              </Stack>
-            )}
-
-            {setupStep === 2 && (
-              <Stack spacing={3}>
-                <Typography level='body-md'>
-                  <strong>Step 2:</strong> Enter the 6-digit verification code
-                  from your authenticator app
-                </Typography>
-
-                <Input
-                  placeholder='Enter 6-digit code'
-                  value={verificationCode}
-                  size='lg'
-                  //   send on enter:
-                  onKeyDown={e => {
-                    if (e.key === 'Enter' && verificationCode.length === 6) {
-                      handleConfirmMFA()
-                    }
-                  }}
-                  onChange={e => setVerificationCode(e.target.value)}
-                  sx={{
-                    textAlign: 'center',
-                    fontSize: '1.2em',
-                    letterSpacing: verificationCode.length === 0 ? '' : '0.4em',
-                  }}
-                  slotProps={{
-                    input: {
-                      maxLength: 6,
-                      pattern: '[0-9]*',
-                    },
-                  }}
-                />
-
-                {error && <Alert color='danger'>{error}</Alert>}
-
-                <Box className='flex gap-2'>
-                  <Button
-                    variant='outlined'
-                    onClick={() => setSetupStep(1)}
-                    sx={{ flex: 1 }}
-                  >
-                    Back
-                  </Button>
-                  <Button
-                    color='primary'
-                    onClick={handleConfirmMFA}
-                    disabled={verificationCode.length !== 6}
-                    sx={{ flex: 1 }}
-                  >
-                    Verify & Enable
-                  </Button>
-                </Box>
-              </Stack>
-            )}
-
-            {setupStep === 3 && (
-              <Stack spacing={3}>
-                <Box className='text-center'>
-                  <CheckCircle color='success' sx={{ fontSize: 48, mb: 2 }} />
-                  <Typography level='h4' color='success'>
-                    MFA Successfully Enabled!
-                  </Typography>
-                </Box>
-
-                <Alert color='warning'>
-                  <Typography level='title-sm' sx={{ mb: 1 }}>
-                    Save these backup codes in a safe place
-                  </Typography>
-                  <Typography level='body-sm'>
-                    You can use these codes to access your account if you lose
-                    your authenticator device. Each code can only be used once.
-                  </Typography>
-                </Alert>
-
-                <Card variant='outlined' sx={{ p: 2 }}>
-                  <Box className='grid grid-cols-2 gap-2 font-mono text-sm'>
-                    {backupCodes?.map((code, index) => (
-                      <Typography
-                        key={index}
-                        level='body-sm'
-                        sx={{ fontFamily: 'monospace' }}
-                      >
-                        {code}
-                      </Typography>
-                    ))}
-                  </Box>
-                </Card>
-
-                <Button color='primary' onClick={closeSetupModal}>
-                  I've saved my backup codes
-                </Button>
-              </Stack>
-            )}
-          </ModalDialog>
-        </Modal>
-
-        {/* Disable MFA Modal */}
-        <Modal open={disableModalOpen} onClose={closeDisableModal}>
-          <ModalDialog size='sm'>
-            <ModalClose />
-            <Typography level='h4' sx={{ mb: 2 }}>
-              Disable Multi-Factor Authentication
-            </Typography>
-
+        <ResponsiveModal
+          open={setupModalOpen}
+          onClose={closeSetupModal}
+          size='md'
+          fullWidth={false}
+          title='Set up Multi-Factor Authentication'
+        >
+          {setupStep === 1 && setupData && (
             <Stack spacing={3}>
-              <Alert color='warning'>
-                <Typography level='body-sm'>
-                  Disabling MFA will make your account less secure. Are you sure
-                  you want to continue?
+              <Typography level='body-md'>
+                <strong>Step 1:</strong> Scan the QR code below with your
+                authenticator app (Google Authenticator, Authy, etc.)
+              </Typography>
+
+              <Box className='flex justify-center rounded bg-white p-4'>
+                {qrCodeDataUrl || setupData.qrCode ? (
+                  <img
+                    src={
+                      qrCodeDataUrl ||
+                      `data:image/png;base64,${setupData.qrCode}`
+                    }
+                    alt='MFA QR Code'
+                    style={{ maxWidth: '200px', maxHeight: '200px' }}
+                  />
+                ) : (
+                  <Alert color='danger'>
+                    QR code could not be generated. Please try again or use the
+                    manual entry key below.
+                  </Alert>
+                )}
+              </Box>
+
+              <Alert
+                color='neutral'
+                variant='soft'
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-start',
+                }}
+              >
+                <Typography level='title-sm'>
+                  <strong>Manual entry key:</strong>
+                </Typography>
+                <Typography
+                  level='body-sm'
+                  sx={{ wordBreak: 'break-all', whiteSpace: 'pre-wrap' }}
+                >
+                  {setupData.secret}
                 </Typography>
               </Alert>
 
+              <Button
+                color='primary'
+                onClick={() => setSetupStep(2)}
+                startDecorator={<Smartphone />}
+              >
+                I've added the account to my app
+              </Button>
+            </Stack>
+          )}
+
+          {setupStep === 2 && (
+            <Stack spacing={3}>
               <Typography level='body-md'>
-                Enter a verification code from your authenticator app to
-                confirm:
+                <strong>Step 2:</strong> Enter the 6-digit verification code
+                from your authenticator app
               </Typography>
 
               <Input
                 placeholder='Enter 6-digit code'
-                value={disableCode}
+                value={verificationCode}
                 size='lg'
+                //   send on enter:
                 onKeyDown={e => {
-                  if (e.key === 'Enter' && disableCode.length === 6) {
-                    handleDisableMFA()
+                  if (e.key === 'Enter' && verificationCode.length === 6) {
+                    handleConfirmMFA()
                   }
                 }}
-                onChange={e => setDisableCode(e.target.value)}
+                onChange={e => setVerificationCode(e.target.value)}
                 sx={{
                   textAlign: 'center',
                   fontSize: '1.2em',
@@ -495,40 +379,39 @@ const MFASettings = () => {
               <Box className='flex gap-2'>
                 <Button
                   variant='outlined'
-                  onClick={closeDisableModal}
+                  onClick={() => setSetupStep(1)}
                   sx={{ flex: 1 }}
                 >
-                  Cancel
+                  Back
                 </Button>
                 <Button
-                  color='danger'
-                  onClick={handleDisableMFA}
-                  disabled={disableCode.length !== 6}
+                  color='primary'
+                  onClick={handleConfirmMFA}
+                  disabled={verificationCode.length !== 6}
                   sx={{ flex: 1 }}
                 >
-                  Disable MFA
+                  Verify & Enable
                 </Button>
               </Box>
             </Stack>
-          </ModalDialog>
-        </Modal>
+          )}
 
-        {/* Backup Codes Modal */}
-        <Modal
-          open={backupCodesModalOpen}
-          onClose={() => setBackupCodesModalOpen(false)}
-        >
-          <ModalDialog size='sm'>
-            <ModalClose />
-            <Typography level='h4' sx={{ mb: 2 }}>
-              New Backup Codes
-            </Typography>
-
+          {setupStep === 3 && (
             <Stack spacing={3}>
+              <Box className='text-center'>
+                <CheckCircle color='success' sx={{ fontSize: 48, mb: 2 }} />
+                <Typography level='h4' color='success'>
+                  MFA Successfully Enabled!
+                </Typography>
+              </Box>
+
               <Alert color='warning'>
+                <Typography level='title-sm' sx={{ mb: 1 }}>
+                  Save these backup codes in a safe place
+                </Typography>
                 <Typography level='body-sm'>
-                  Your previous backup codes are now invalid. Save these new
-                  codes in a safe place. Each code can only be used once.
+                  You can use these codes to access your account if you lose
+                  your authenticator device. Each code can only be used once.
                 </Typography>
               </Alert>
 
@@ -546,15 +429,116 @@ const MFASettings = () => {
                 </Box>
               </Card>
 
-              <Button
-                color='primary'
-                onClick={() => setBackupCodesModalOpen(false)}
-              >
+              <Button color='primary' onClick={closeSetupModal}>
                 I've saved my backup codes
               </Button>
             </Stack>
-          </ModalDialog>
-        </Modal>
+          )}
+        </ResponsiveModal>
+
+        {/* Disable MFA Modal */}
+        <ResponsiveModal
+          open={disableModalOpen}
+          onClose={closeDisableModal}
+          size='sm'
+          fullWidth={false}
+          title='Disable Multi-Factor Authentication'
+        >
+          <Stack spacing={3}>
+            <Alert color='warning'>
+              <Typography level='body-sm'>
+                Disabling MFA will make your account less secure. Are you sure
+                you want to continue?
+              </Typography>
+            </Alert>
+
+            <Typography level='body-md'>
+              Enter a verification code from your authenticator app to confirm:
+            </Typography>
+
+            <Input
+              placeholder='Enter 6-digit code'
+              value={disableCode}
+              size='lg'
+              onKeyDown={e => {
+                if (e.key === 'Enter' && disableCode.length === 6) {
+                  handleDisableMFA()
+                }
+              }}
+              onChange={e => setDisableCode(e.target.value)}
+              sx={{
+                textAlign: 'center',
+                fontSize: '1.2em',
+                letterSpacing: verificationCode.length === 0 ? '' : '0.4em',
+              }}
+              slotProps={{
+                input: {
+                  maxLength: 6,
+                  pattern: '[0-9]*',
+                },
+              }}
+            />
+
+            {error && <Alert color='danger'>{error}</Alert>}
+
+            <Box className='flex gap-2'>
+              <Button
+                variant='outlined'
+                onClick={closeDisableModal}
+                sx={{ flex: 1 }}
+              >
+                Cancel
+              </Button>
+              <Button
+                color='danger'
+                onClick={handleDisableMFA}
+                disabled={disableCode.length !== 6}
+                sx={{ flex: 1 }}
+              >
+                Disable MFA
+              </Button>
+            </Box>
+          </Stack>
+        </ResponsiveModal>
+
+        {/* Backup Codes Modal */}
+        <ResponsiveModal
+          open={backupCodesModalOpen}
+          onClose={() => setBackupCodesModalOpen(false)}
+          size='sm'
+          fullWidth={false}
+          title='New Backup Codes'
+        >
+          <Stack spacing={3}>
+            <Alert color='warning'>
+              <Typography level='body-sm'>
+                Your previous backup codes are now invalid. Save these new codes
+                in a safe place. Each code can only be used once.
+              </Typography>
+            </Alert>
+
+            <Card variant='outlined' sx={{ p: 2 }}>
+              <Box className='grid grid-cols-2 gap-2 font-mono text-sm'>
+                {backupCodes?.map((code, index) => (
+                  <Typography
+                    key={index}
+                    level='body-sm'
+                    sx={{ fontFamily: 'monospace' }}
+                  >
+                    {code}
+                  </Typography>
+                ))}
+              </Box>
+            </Card>
+
+            <Button
+              color='primary'
+              onClick={() => setBackupCodesModalOpen(false)}
+            >
+              I've saved my backup codes
+            </Button>
+          </Stack>
+        </ResponsiveModal>
       </div>
     </SettingsLayout>
   )

@@ -1,8 +1,8 @@
 import LogoSVG from '@/assets/logo.svg'
-const Logo = () => {
+const Logo = ({ size = '128px' }) => {
   return (
     <div className='logo'>
-      <img src={LogoSVG} alt='logo' width='128px' height='128px' />
+      <img src={LogoSVG} alt='logo' width={size} height={size} />
     </div>
   )
 }

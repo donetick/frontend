@@ -24,7 +24,7 @@ import {
   Typography,
 } from '@mui/joy'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { version } from '../../../package.json'
@@ -33,7 +33,6 @@ import { useLocalization } from '../../contexts/LocalizationContext'
 import NavBarLink from './NavBarLink'
 import SyncStatusIndicator from './SyncStatusIndicator'
 
-import { SafeArea } from 'capacitor-plugin-safe-area'
 import Z_INDEX from '../../constants/zIndex'
 import { useResource } from '../../queries/ResourceQueries'
 import { apiClient } from '../../utils/ApiClient'
@@ -100,19 +99,6 @@ const NavBar = () => {
   ]
   const location = useLocation()
   const [searchParams] = useSearchParams()
-  useEffect(() => {
-    SafeArea.getSafeAreaInsets().then(data => {
-      const { insets } = data
-      const drawerContent = document.querySelector('.drawer-content')
-      if (drawerContent) {
-        drawerContent.style.paddingTop = `${insets.top}px`
-        drawerContent.style.paddingRight = `${insets.right}px`
-        drawerContent.style.paddingBottom = `${insets.bottom}px`
-        drawerContent.style.paddingLeft = `${insets.left}px`
-      }
-    })
-  }, [])
-
   const getMenuIcon = () => {
     const menuRounded = (
       <IconButton size='md' variant='plain' onClick={() => setDrawerOpen(true)}>
@@ -223,7 +209,10 @@ const NavBar = () => {
           },
         }}
       >
-        <div className='drawer-content'>
+        {/* Safe-area padding comes from the --safe-area-inset-* variables that
+            Capacitor's SystemBars keeps in sync with the live window insets.
+            Top inset is left to the inner List so it isn't applied twice. */}
+        <div className='drawer-content safe-area-x safe-area-bottom'>
           {/* <div className='align-center flex px-5 pt-4'>
             <ModalClose size='sm' sx={{ top: 'unset', right: 20 }} />
           </div> */}
