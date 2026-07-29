@@ -420,6 +420,7 @@ const LoginView = () => {
           ? 'Pick up right where you left off.'
           : 'Sign in to your account to continue.'
       }
+      logoSize={0}
       footer={<LegalLinks />}
       action={
         Capacitor.isNativePlatform() ? (
