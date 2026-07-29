@@ -3,11 +3,11 @@ export default {
   corePlugins: {
     preflight: false,
   },
+  darkMode: 'class',
+  plugins: [],
   theme: {
     extend: {
       colors: {},
     },
   },
-  darkMode: 'class',
-  plugins: [],
 }
