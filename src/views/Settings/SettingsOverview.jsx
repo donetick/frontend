@@ -5,6 +5,7 @@ import {
   Circle,
   Code,
   FamilyRestroom,
+  Feedback,
   Language,
   Notifications,
   Palette,
@@ -31,16 +32,19 @@ import {
   Stack,
   Typography,
 } from '@mui/joy'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useUserProfile } from '../../queries/UserQueries'
 import { isPlusAccount } from '../../utils/Helpers'
 import { isParentUser } from '../../utils/UserHelpers'
+import FeedbackModal from '../Modals/FeedbackModal'
 
 const SettingsOverview = () => {
   const { t } = useTranslation('settings')
   const navigate = useNavigate()
   const { data: userProfile } = useUserProfile()
+  const [feedbackOpen, setFeedbackOpen] = useState(false)
 
   const settingsCards = [
     {
@@ -122,10 +126,21 @@ const SettingsOverview = () => {
       description: t('overview.sections.developer.description'),
       icon: <Code />,
     },
+    {
+      id: 'feedback',
+      title: t('overview.sections.feedback.title'),
+      description: t('overview.sections.feedback.description'),
+      icon: <Feedback />,
+      onSelect: () => setFeedbackOpen(true),
+    },
   ]
 
-  const handleCardClick = settingId => {
-    navigate(`/settings/${settingId}`)
+  const handleCardClick = setting => {
+    if (setting.onSelect) {
+      setting.onSelect()
+      return
+    }
+    navigate(`/settings/${setting.id}`)
   }
 
   // Filter settings based on user type
@@ -303,7 +318,7 @@ const SettingsOverview = () => {
           {getAvailableSettings().map((setting, index) => (
             <ListItem key={setting.id} sx={{ p: 0 }}>
               <ListItemButton
-                onClick={() => handleCardClick(setting.id)}
+                onClick={() => handleCardClick(setting)}
                 sx={{
                   '&:hover': {
                     backgroundColor: 'background.level1',
@@ -367,6 +382,11 @@ const SettingsOverview = () => {
           ))}
         </List>
       </Box>
+
+      <FeedbackModal
+        open={feedbackOpen}
+        onClose={() => setFeedbackOpen(false)}
+      />
     </Container>
   )
 }
