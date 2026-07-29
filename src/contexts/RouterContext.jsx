@@ -28,6 +28,7 @@ import LabelView from '../views/Labels/LabelView'
 import Landing from '../views/Landing/Landing'
 import GetStartedView from '../views/Onboarding/GetStartedView'
 import OnboardingView from '../views/Onboarding/OnboardingView'
+import WorkspaceReadyView from '../views/Onboarding/WorkspaceReadyView'
 import PaymentCancelledView from '../views/Payments/PaymentFailView'
 import PaymentSuccessView from '../views/Payments/PaymentSuccessView'
 import PrivacyPolicyView from '../views/PrivacyPolicy/PrivacyPolicyView'
@@ -191,6 +192,10 @@ const Router = createBrowserRouter([
       {
         path: '/get-started',
         element: <GetStartedView />,
+      },
+      {
+        path: '/ready',
+        element: <WorkspaceReadyView />,
       },
 
       {

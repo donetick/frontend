@@ -149,6 +149,7 @@ const NavBar = () => {
       '/welcome',
       '/onboarding',
       '/get-started',
+      '/ready',
     ].includes(location.pathname)
   ) {
     return (

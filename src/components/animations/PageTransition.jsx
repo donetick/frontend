@@ -87,6 +87,7 @@ const PageTransition = ({ children }) => {
       location.pathname.includes('/landing') ||
       location.pathname.includes('/onboarding') ||
       location.pathname.includes('/get-started') ||
+      location.pathname.includes('/ready') ||
       location.pathname.includes('/auth/')
 
     // Apply transition type as data attribute for CSS
