@@ -14,6 +14,7 @@ import {
 } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
+import ModalActions from '../../components/common/ModalActions'
 import { getRecurrentChipText } from '../../utils/ChoreCardHelpers'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 
@@ -472,6 +473,7 @@ const RepeatPickerField = ({
 
         {hasRepeat && onClear && (
           <IconButton
+            aria-label='Clear repeat schedule'
             size='sm'
             variant='soft'
             color='danger'
@@ -481,11 +483,9 @@ const RepeatPickerField = ({
             }}
             sx={{
               position: 'absolute',
-              top: -12,
-              right: -16,
+              top: -18,
+              right: -18,
               zIndex: 10,
-              maxHeight: 18,
-              maxWidth: 18,
               borderRadius: '50%',
               '&:hover': { bgcolor: 'danger.softBg' },
             }}
@@ -500,38 +500,22 @@ const RepeatPickerField = ({
         onClose={() => setIsOpen(false)}
         title='Repeat Schedule'
         footer={
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-            {hasRepeat && (
-              <Button
-                variant='plain'
-                color='danger'
-                size='lg'
-                onClick={() => {
-                  onClear?.()
-                  setIsOpen(false)
-                }}
-                sx={{ mr: 'auto' }}
-              >
-                Remove
-              </Button>
-            )}
-            <Button
-              variant='outlined'
-              color='neutral'
-              size='lg'
-              onClick={() => setIsOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant='solid'
-              color='primary'
-              size='lg'
-              onClick={handleSave}
-            >
-              Apply
-            </Button>
-          </Box>
+          <ModalActions
+            tertiary={
+              hasRepeat
+                ? {
+                    label: 'Remove',
+                    color: 'danger',
+                    onClick: () => {
+                      onClear?.()
+                      setIsOpen(false)
+                    },
+                  }
+                : undefined
+            }
+            secondary={{ label: 'Cancel', onClick: () => setIsOpen(false) }}
+            primary={{ label: 'Apply', onClick: handleSave }}
+          />
         }
       >
         {/* Frequency type selector */}

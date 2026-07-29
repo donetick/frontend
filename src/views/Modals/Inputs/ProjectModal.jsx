@@ -10,6 +10,7 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import PROJECT_COLORS, {
   getTextColorFromBackgroundColor,
@@ -124,28 +125,23 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
       unmountDelay={250}
       fullWidth={true}
       title={project ? 'Edit Project' : 'Create New Project'}
+      closeOnBackdrop={!isSubmitting}
+      closeOnEscape={!isSubmitting}
       footer={
-        <Box display='flex' justifyContent='space-around' gap={1}>
-          <Button
-            type='submit'
-            form='project-form'
-            loading={isSubmitting}
-            disabled={!projectName.trim() || isSubmitting}
-            fullWidth
-            size='lg'
-          >
-            {project ? 'Update' : 'Create'}
-          </Button>
-          <Button
-            variant='outlined'
-            onClick={handleClose}
-            disabled={isSubmitting}
-            fullWidth
-            size='lg'
-          >
-            Cancel
-          </Button>
-        </Box>
+        <ModalActions
+          secondary={{
+            label: 'Cancel',
+            onClick: handleClose,
+            disabled: isSubmitting,
+          }}
+          primary={{
+            label: project ? 'Update' : 'Create',
+            type: 'submit',
+            form: 'project-form',
+            loading: isSubmitting,
+            disabled: !projectName.trim() || isSubmitting,
+          }}
+        />
       }
     >
       <form onSubmit={handleSubmit} id='project-form'>

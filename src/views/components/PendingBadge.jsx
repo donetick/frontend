@@ -1,8 +1,6 @@
 import { Close, CloudSync } from '@mui/icons-material'
 import {
   Box,
-  Button,
-  Divider,
   IconButton,
   List,
   ListItem,
@@ -11,6 +9,7 @@ import {
 } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import ModalActions from '../../components/common/ModalActions'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import { commandQueue } from '../../utils/CommandQueue'
 
@@ -139,10 +138,24 @@ function PendingBadge({ commands, size = 'sm', sx = {} }) {
         {/* </Badge> */}
       </IconButton>
 
-      <ResponsiveModal open={isOpen} onClose={handleClose} size='sm'>
-        <Typography level='title-lg' mb={0.5}>
-          Pending actions
-        </Typography>
+      <ResponsiveModal
+        open={isOpen}
+        onClose={handleClose}
+        size='sm'
+        title='Pending actions'
+        footer={
+          <ModalActions
+            secondary={{ label: 'Close', onClick: handleClose }}
+            primary={{
+              label: 'Cancel all',
+              color: 'danger',
+              onClick: handleCancelAll,
+              loading: isCancelingAll,
+              disabled: commands.length === 0,
+            }}
+          />
+        }
+      >
         <Typography level='body-sm' sx={{ color: 'text.tertiary', mb: 1.5 }}>
           {commands.length} action{commands.length > 1 ? 's' : ''} waiting to be
           synced.
@@ -171,6 +184,7 @@ function PendingBadge({ commands, size = 'sm', sx = {} }) {
               </ListItemContent>
 
               <IconButton
+                aria-label={`Cancel ${formatCommandLabel(cmd.commandType)}`}
                 variant='plain'
                 color='danger'
                 size='sm'
@@ -182,22 +196,6 @@ function PendingBadge({ commands, size = 'sm', sx = {} }) {
             </ListItem>
           ))}
         </List>
-
-        <Divider sx={{ mb: 1 }} />
-
-        <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
-          <Button variant='outlined' onClick={handleClose}>
-            Close
-          </Button>
-          <Button
-            color='danger'
-            onClick={handleCancelAll}
-            loading={isCancelingAll}
-            disabled={commands.length === 0}
-          >
-            Cancel all
-          </Button>
-        </Box>
       </ResponsiveModal>
     </Box>
   )

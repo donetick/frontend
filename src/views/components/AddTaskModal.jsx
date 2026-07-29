@@ -24,6 +24,7 @@ import {
 import SmartTaskTitleInput from './SmartTaskTitleInput'
 
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
+import ModalActions from '../../components/common/ModalActions'
 import { useDocumentScanner } from '../../hooks/useDocumentScanner'
 import { localAIService } from '../../service/LocalAIService'
 import { voiceInputService } from '../../service/VoiceInputService'
@@ -831,16 +832,8 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose, initialMode }) => {
         fullWidth={true}
         title='Create new task'
         footer={
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'end',
-              gap: 1,
-            }}
-          >
+          <ModalActions>
             <Button
-              size='lg'
               variant='outlined'
               color='neutral'
               onClick={handleCloseModal}
@@ -857,7 +850,6 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose, initialMode }) => {
             {/* Sub-panels (voice/scan) own their own confirm action */}
             {!showScan && !showVoice && (
               <Button
-                size='lg'
                 variant='solid'
                 color='primary'
                 disabled={!taskTitle.trim()}
@@ -869,7 +861,7 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose, initialMode }) => {
                 )}
               </Button>
             )}
-          </Box>
+          </ModalActions>
         }
       >
         {!showScan && !showVoice && (

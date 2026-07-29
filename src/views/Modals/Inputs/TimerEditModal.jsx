@@ -13,6 +13,7 @@ import {
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { useLocalization } from '../../../contexts/LocalizationContext'
+import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { useNotification } from '../../../service/NotificationProvider'
 import {
@@ -58,7 +59,6 @@ const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
       if (interval) clearInterval(interval)
     }
   }, [isOpen, timerData])
-
 
   const formatTime = seconds => {
     const hours = Math.floor(seconds / 3600)
@@ -304,10 +304,37 @@ const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
         open={isOpen}
         onClose={onClose}
         size='lg'
-        fullWidth={true}
+        title='Timer Details'
+        footer={
+          <ModalActions
+            tertiary={
+              !loading && timerData && !editingSessions[timerData.id]
+                ? {
+                    label: 'Delete',
+                    color: 'danger',
+                    onClick: () => confirmDeleteSession(timerData.id),
+                  }
+                : undefined
+            }
+            secondary={{ label: 'Close', onClick: handleClose }}
+            primary={
+              !loading && timerData
+                ? editingSessions[timerData.id]
+                  ? {
+                      label: 'Save',
+                      onClick: () => saveSession(timerData.id),
+                      loading,
+                    }
+                  : {
+                      label: 'Edit',
+                      startDecorator: <Edit />,
+                      onClick: () => startEditingSession(),
+                    }
+                : undefined
+            }
+          />
+        }
       >
-        <Typography level='h4'>Timer Details</Typography>
-
         {loading && (
           <Alert color='neutral' sx={{ mb: 2 }}>
             Loading timer data...
@@ -919,56 +946,6 @@ const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
             )}
           </Box>
         )}
-
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            gap: 1,
-          }}
-        >
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button variant='outlined' onClick={handleClose} color='neutral'>
-              Cancel
-            </Button>
-          </Box>
-
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            {/* Action buttons on the right */}
-            {!loading && timerData && !editingSessions[timerData.id] && (
-              <>
-                <Button
-                  size='sm'
-                  variant='outlined'
-                  color='danger'
-                  onClick={() => confirmDeleteSession(timerData.id)}
-                >
-                  Delete
-                </Button>
-                <Button
-                  variant='outlined'
-                  startDecorator={<Edit />}
-                  onClick={() => startEditingSession()}
-                >
-                  Edit
-                </Button>
-              </>
-            )}
-
-            {/* Save button when editing */}
-            {!loading && timerData && editingSessions[timerData.id] && (
-              <Button
-                variant='solid'
-                color='primary'
-                onClick={() => saveSession(timerData.id)}
-                loading={loading}
-              >
-                Save
-              </Button>
-            )}
-          </Box>
-        </Box>
       </ResponsiveModal>
 
       <ConfirmationModal config={confirmDeleteConfig} />

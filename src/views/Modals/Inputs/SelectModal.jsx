@@ -1,5 +1,6 @@
-import { Box, Button, Option, Select } from '@mui/joy'
-import React from 'react'
+import { Option, Select } from '@mui/joy'
+import { useState } from 'react'
+import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
 function SelectModal({
@@ -12,8 +13,8 @@ function SelectModal({
   placeholder,
 }) {
   const { ResponsiveModal } = useResponsiveModal()
+  const [selected, setSelected] = useState(null)
 
-  const [selected, setSelected] = React.useState(null)
   const handleSave = () => {
     onSave(options.find(item => item.id === selected))
     onClose()
@@ -23,33 +24,33 @@ function SelectModal({
     <ResponsiveModal
       open={isOpen}
       onClose={onClose}
-      size='lg'
-      fullWidth={true}
+      size='sm'
       title={title}
+      footer={
+        <ModalActions
+          secondary={{ label: 'Cancel', onClick: onClose }}
+          primary={{
+            label: 'Save',
+            onClick: handleSave,
+            disabled: selected == null,
+          }}
+        />
+      }
     >
-      <Select placeholder={placeholder}>
-        {options.map((item, index) => (
-          <Option
-            value={item.id}
-            key={item[displayKey]}
-            onClick={() => {
-              setSelected(item.id)
-            }}
-          >
+      <Select
+        autoFocus
+        placeholder={placeholder}
+        value={selected}
+        onChange={(_, value) => setSelected(value)}
+      >
+        {options.map(item => (
+          <Option value={item.id} key={item[displayKey]}>
             {item[displayKey]}
           </Option>
         ))}
       </Select>
-
-      <Box display={'flex'} justifyContent={'space-around'} mt={1}>
-        <Button size='lg' onClick={handleSave} fullWidth sx={{ mr: 1 }}>
-          Save
-        </Button>
-        <Button size='lg' onClick={onClose} variant='outlined'>
-          Cancel
-        </Button>
-      </Box>
     </ResponsiveModal>
   )
 }
+
 export default SelectModal

@@ -1,7 +1,6 @@
-import { AttachFile, Close, Image } from '@mui/icons-material'
+import { AttachFile, Image } from '@mui/icons-material'
 import {
   Box,
-  Button,
   CircularProgress,
   List,
   ListItem,
@@ -9,6 +8,7 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { GetChoreAttachments } from '../../../utils/Fetcher'
 import { resolvePhotoURL } from '../../../utils/Helpers'
@@ -87,16 +87,7 @@ function AttachmentBrowserModal({ choreId, isOpen, onClose }) {
         onClose={handleClose}
         title='Attachments'
         footer={
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Button
-              variant='plain'
-              color='neutral'
-              startDecorator={<Close />}
-              onClick={handleClose}
-            >
-              Close
-            </Button>
-          </Box>
+          <ModalActions primary={{ label: 'Done', onClick: handleClose }} />
         }
       >
         {isLoading ? (
