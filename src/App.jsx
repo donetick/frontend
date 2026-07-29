@@ -8,6 +8,7 @@ import PageTransition from './components/animations/PageTransition'
 import { ImpersonateUserProvider } from './contexts/ImpersonateUserContext'
 import { AuthProvider } from './hooks/useAuth.jsx'
 
+import useOnboardingGate from './hooks/useOnboardingGate'
 import useStatusBar from './hooks/useStatusBar'
 import { useResource } from './queries/ResourceQueries'
 import './styles/safe-area.css'
@@ -32,6 +33,9 @@ const intervalMS = 5 * 60 * 1000 // 5 minutes
 const AppContent = () => {
   const { showNotification } = useNotification()
   useSyncOnReconnect()
+
+  // First-launch native users see the onboarding flow before anything else.
+  useOnboardingGate()
 
   // Initialize status bar with theme-aware configuration
   useStatusBar()
