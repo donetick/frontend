@@ -47,6 +47,7 @@ import { getSafeBottom } from '../../utils/SafeAreaUtils.js'
 import TaskInput from '../components/AddTaskModal'
 import CalendarDual from '../components/CalendarDual'
 import CalendarMonthly from '../components/CalendarMonthly.jsx'
+import FeedbackPrompt from '../components/FeedbackPrompt.jsx'
 import AdvancedFilterBuilder from '../Modals/Inputs/AdvancedFilterBuilder'
 import { useProjects } from '../Projects/ProjectQueries.js'
 import ChoreListView from './ChoreListView.jsx'
@@ -1456,6 +1457,7 @@ const MyChores = () => {
           />
         </Box>
         <NotificationAccessSnackbar />
+        <FeedbackPrompt />
         {addTaskModalOpen && (
           <TaskInput
             autoFocus={taskInputFocus}

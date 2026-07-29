@@ -168,6 +168,10 @@
       "developer": {
         "title": "Developer Settings",
         "description": "View technical information about authentication tokens, SSE connections, and debug data."
+      },
+      "feedback": {
+        "title": "Send Feedback",
+        "description": "Tell us how Donetick is working for you, report a bug, or request a feature."
       }
     }
   }

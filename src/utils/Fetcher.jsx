@@ -166,6 +166,15 @@ const MarkChoreComplete = (id, body, completedDate, performer) => {
     method: 'POST',
     headers: HEADERS(),
     body: JSON.stringify(body),
+  }).then(response => {
+    if (response?.ok) {
+      // Single choke point for completions, so queued offline completions are
+      // counted once, when they sync.
+      import('../service/FeedbackService')
+        .then(({ recordTaskCompleted }) => recordTaskCompleted())
+        .catch(() => {})
+    }
+    return response
   })
 }
 
