@@ -26,6 +26,8 @@ import FilterView from '../views/Filters/FilterView'
 import ChoreHistory from '../views/History/ChoreHistory'
 import LabelView from '../views/Labels/LabelView'
 import Landing from '../views/Landing/Landing'
+import GetStartedView from '../views/Onboarding/GetStartedView'
+import OnboardingView from '../views/Onboarding/OnboardingView'
 import PaymentCancelledView from '../views/Payments/PaymentFailView'
 import PaymentSuccessView from '../views/Payments/PaymentSuccessView'
 import PrivacyPolicyView from '../views/PrivacyPolicy/PrivacyPolicyView'
@@ -181,6 +183,14 @@ const Router = createBrowserRouter([
       {
         path: '/signup',
         element: <SignupView />,
+      },
+      {
+        path: '/onboarding',
+        element: <OnboardingView />,
+      },
+      {
+        path: '/get-started',
+        element: <GetStartedView />,
       },
 
       {
