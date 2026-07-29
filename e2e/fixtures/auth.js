@@ -46,12 +46,12 @@ export async function loginViaUI(page, { password, username }) {
  * shared E2E user (via persisted storage state, no UI interaction required).
  */
 export const test = base.extend({
-  authenticatedPage: async ({ browser }, use) => {
+  authenticatedPage: async ({ browser }, callback) => {
     const ctx = await browser.newContext({
       storageState: path.join(__dirname, '..', '.auth', 'state.json'),
     })
     const page = await ctx.newPage()
-    await use(page)
+    await callback(page)
     await ctx.close()
   },
 })
