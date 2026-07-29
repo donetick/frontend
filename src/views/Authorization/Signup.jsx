@@ -130,6 +130,7 @@ const SignupView = () => {
       title='Create your account'
       subtitle='Track chores and tasks together, in one shared place.'
       footer={<LegalLinks />}
+           logoSize={0}
     >
       <Box
         component='form'

@@ -96,6 +96,7 @@ const UpdatePasswordView = () => {
         title='This link is not valid'
         subtitle='The password reset link is incomplete or has already been used. Request a new one to continue.'
         footer={<LegalLinks />}
+        showLogo
       >
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
           <Button
@@ -127,6 +128,9 @@ const UpdatePasswordView = () => {
       title='Set a new password'
       subtitle='Choose a password you have not used on this account before.'
       footer={<LegalLinks />}
+      // Reached from an emailed link, usually in a browser: an unbranded page
+      // asking for a new password is the exact shape of a phishing screen.
+      showLogo
     >
       <Box
         component='form'

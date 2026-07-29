@@ -1,17 +1,6 @@
+import { Capacitor } from '@capacitor/core'
 import { Box, Sheet, Typography } from '@mui/joy'
 import Logo from '../../Logo'
-
-const Wordmark = () => (
-  <Typography
-    level='h3'
-    sx={{ fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1 }}
-  >
-    Done
-    <Box component='span' sx={{ color: 'primary.500' }}>
-      tick
-    </Box>
-  </Typography>
-)
 
 /**
  * Full-height auth layout: edge-to-edge on phones, a centered surface card from
@@ -24,7 +13,13 @@ const AuthShell = ({
   action,
   children,
   footer,
-  logoSize = 64,
+  logoSize = 48,
+  // In the app the user already came through the app icon and the Get Started
+  // mark, so repeating it here is noise. On the web these routes are the first
+  // thing a visitor sees — often on a self-hosted domain, and with no navbar —
+  // so the mark is the only thing identifying the app. Views reached from an
+  // emailed link override this to always show it.
+  showLogo = !Capacitor.isNativePlatform(),
 }) => {
   return (
     <Box
@@ -67,18 +62,20 @@ const AuthShell = ({
             <Box sx={{ position: 'absolute', top: 0, right: 0 }}>{action}</Box>
           )}
 
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 1,
-              mb: 3,
-            }}
-          >
-            <Logo size={`${logoSize}px`} />
-            <Wordmark />
-          </Box>
+          {/* Mark only: the wordmark sat at nearly the same size and weight as
+              the title below it, so the two competed instead of forming a
+              hierarchy. */}
+          {showLogo && (
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                mb: 2,
+              }}
+            >
+              <Logo size={`${logoSize}px`} />
+            </Box>
+          )}
 
           {title && (
             <Typography
