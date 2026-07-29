@@ -15,51 +15,50 @@ import { authButtonSx } from '../Authorization/authStyles'
 import {
   CaptureVignette,
   CircleVignette,
-  NfcVignette,
-  NotificationsVignette,
+  ProblemVignette,
+  RemindersVignette,
   ScheduleVignette,
-  WidgetsVignette,
 } from './OnboardingVignettes'
 
 const EASE = 'cubic-bezier(0.22, 1, 0.36, 1)'
 const SWIPE_THRESHOLD = 56
 
+/**
+ * Five messages, in the order that sells: the problem first, then the two
+ * things Donetick does better than a reminders app, then the reasons to come
+ * back. Every title is an outcome — nobody buys "reschedule from completion
+ * date", they buy never arguing about trash day again.
+ */
 const SLIDES = [
   {
+    key: 'problem',
+    title: 'Stop forgetting the little things',
+    body: "Bills. Filters. Trash day. The dog's medicine. Whose turn it is to cook. Donetick remembers them so nobody in the house has to.",
+    Visual: ProblemVignette,
+  },
+  {
     key: 'capture',
-    title: 'Speak it, snap it, or type it',
-    body: 'Say a task out loud, photograph a bill or a school form, or just type. Photos are read right on your phone — no cloud AI.',
+    title: 'Add it before you forget it',
+    body: 'Say it out loud, snap the bill or the school form, or just type. The date, the labels and the points come with it — photos are read right on your phone.',
     Visual: CaptureVignette,
   },
   {
     key: 'schedule',
-    title: 'Repeats that match real life',
-    body: 'Finished two days late? Choose whether the next one is scheduled from the original due date or from when you actually got it done.',
+    title: 'It comes back exactly when it should',
+    body: "Every week, every 3 months, or a month after you actually did it. Finishing late doesn't throw the rest of the year off.",
     Visual: ScheduleVignette,
   },
   {
-    key: 'nfc',
-    title: 'Finish it with a tap',
-    body: 'Open the chore, complete it or stick an NFC tag where the chore happens. Tap it to open the task — mark it done, skip it, start the timer, or approve what someone else finished — and it lands in the history with your note.',
-    Visual: NfcVignette,
-  },
-  {
     key: 'circle',
-    title: 'Share the load',
-    body: 'Invite your circle, let assignments rotate automatically, and see what everyone has finished.',
+    title: 'Nobody has to be the nag',
+    body: 'Invite the family, let chores rotate on their own, and see who did what. Tap an NFC tag on the washer to finish one on the spot.',
     Visual: CircleVignette,
   },
   {
-    key: 'widgets',
-    title: 'Right on your home screen',
-    body: "Today, the next seven days and who's doing what — plus a quick-capture tile that opens straight into typing, scanning or speaking.",
-    Visual: WidgetsVignette,
-  },
-  {
-    key: 'notifications',
-    title: 'A nudge, not a nag',
-    body: 'Reminders before something is due, and a heads-up when your circle finishes theirs or needs your approval. Change any of it later in settings.',
-    Visual: NotificationsVignette,
+    key: 'reminders',
+    title: 'A nudge at the right moment',
+    body: "A reminder before something's due, a heads-up when someone else finishes theirs, and today's list right on your home screen.",
+    Visual: RemindersVignette,
     permission: true,
   },
 ]

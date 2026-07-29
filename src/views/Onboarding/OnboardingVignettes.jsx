@@ -1,17 +1,21 @@
 import {
   AddRounded,
+  AirOutlined,
   CheckRounded,
   ContactlessRounded,
-  DocumentScannerOutlined,
+  DeleteOutlineRounded,
   HourglassEmptyRounded,
   KeyboardRounded,
   MicNoneRounded,
   NotificationsActiveRounded,
   PeopleAltRounded,
+  PetsRounded,
   PhoneIphoneRounded,
   PhotoCameraOutlined,
   PlayArrowRounded,
+  ReceiptLongOutlined,
   Repeat,
+  RestaurantRounded,
   SwitchAccessShortcutRounded,
   ThumbDownRounded,
   ThumbUpRounded,
@@ -612,6 +616,9 @@ const ActionRow = ({ children }) => (
   <Box sx={{ display: 'flex', gap: 0.75 }}>{children}</Box>
 )
 
+// Off the deck as of the five-slide cut — NFC now rides along in the "nobody
+// has to be the nag" copy. Kept intact so it can be swapped back in as its own
+// slide without rebuilding it.
 export const NfcVignette = () => (
   <Stage>
     <Box
@@ -925,91 +932,41 @@ const WidgetTask = ({ name, time, done }) => (
   </Box>
 )
 
-const CAPTURE_TILES = [
-  { icon: <KeyboardRounded />, label: 'Type' },
-  { icon: <DocumentScannerOutlined />, label: 'Scan' },
-  { icon: <MicNoneRounded />, label: 'Speak' },
-]
-
-export const WidgetsVignette = () => (
-  <Stage>
-    <Box sx={{ ...widgetSx, ...float(3600, 0) }}>
+const TodayWidget = () => (
+  <Box sx={{ ...widgetSx, ...float(3600, 0) }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 1.25 }}>
+      <Typography
+        level='body-xs'
+        sx={{ flex: 1, fontWeight: 700, letterSpacing: '-0.01em' }}
+      >
+        Today
+      </Typography>
+      <Chip color='primary'>3 left</Chip>
       <Box
         sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 0.75,
-          mb: 1.25,
+          width: 20,
+          height: 20,
+          borderRadius: '50%',
+          display: 'grid',
+          placeItems: 'center',
+          bgcolor: 'primary.500',
+          color: 'common.white',
+          '& svg': { fontSize: '0.875rem' },
         }}
       >
-        <Typography
-          level='body-xs'
-          sx={{ flex: 1, fontWeight: 700, letterSpacing: '-0.01em' }}
-        >
-          Today
-        </Typography>
-        <Chip color='primary'>3 left</Chip>
-        <Box
-          sx={{
-            width: 20,
-            height: 20,
-            borderRadius: '50%',
-            display: 'grid',
-            placeItems: 'center',
-            bgcolor: 'primary.500',
-            color: 'common.white',
-            '& svg': { fontSize: '0.875rem' },
-          }}
-        >
-          <AddRounded />
-        </Box>
-      </Box>
-
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.875 }}>
-        <WidgetTask name='School forms' time='8:00' done />
-        <WidgetTask name='Take out the trash' time='18:00' />
-        <WidgetTask name='Water the plants' time='20:30' />
+        <AddRounded />
       </Box>
     </Box>
 
-    {/* Quick capture: the same three inputs as slide one, one tap from the
-        home screen. Offset so the two widgets read as separate objects. */}
-    <Box
-      sx={{
-        ...widgetSx,
-        mx: 2,
-        display: 'flex',
-        gap: 1,
-        ...float(4400, 600),
-      }}
-    >
-      {CAPTURE_TILES.map(tile => (
-        <Box
-          key={tile.label}
-          sx={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: 0.25,
-            py: 0.75,
-            borderRadius: '12px',
-            bgcolor: 'primary.softBg',
-            color: 'primary.plainColor',
-            fontSize: '0.625rem',
-            fontWeight: 600,
-            '& svg': { fontSize: '1.125rem' },
-          }}
-        >
-          {tile.icon}
-          {tile.label}
-        </Box>
-      ))}
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.875 }}>
+      <WidgetTask name='School forms' time='8:00' done />
+      <WidgetTask name='Take out the trash' time='18:00' />
+      <WidgetTask name='Water the plants' time='20:30' />
     </Box>
-  </Stage>
+  </Box>
 )
 
-/* ------------------------------------------------ slide 6: notifications */
+/* ------------------- notification banners, stacked over the Today widget */
 
 const NotificationBanner = ({
   icon,
@@ -1064,7 +1021,12 @@ const NotificationBanner = ({
   </Box>
 )
 
-export const NotificationsVignette = () => (
+/**
+ * Retention in one picture: the two nudges that bring people back (a reminder
+ * and a circle update) arriving over the home-screen widget they'll be glancing
+ * at all day.
+ */
+export const RemindersVignette = () => (
   <Stage>
     <NotificationBanner
       icon={<NotificationsActiveRounded />}
@@ -1079,12 +1041,80 @@ export const NotificationsVignette = () => (
       body='Your turn is next Saturday'
       delay={520}
     />
-    <NotificationBanner
-      color='warning'
-      icon={<HourglassEmptyRounded />}
-      title='Sam needs your approval'
-      body='Vacuum the stairs · marked done'
-      delay={880}
-    />
+    <TodayWidget />
+  </Stage>
+)
+
+/* -------------------------------------------- slide 1: the problem itself */
+
+// The mess in your head, in the order it usually arrives: each item flies in
+// from its own angle and lands in a tidy column. Base style is the landed
+// state, so with reduced motion it's simply a neat list.
+const LITTLE_THINGS = [
+  {
+    icon: <ReceiptLongOutlined />,
+    label: 'Water bill',
+    from: '-28px, 18px, -6deg',
+  },
+  { icon: <AirOutlined />, label: 'AC filter', from: '30px, 22px, 5deg' },
+  {
+    icon: <DeleteOutlineRounded />,
+    label: 'Trash day',
+    from: '-34px, 26px, -4deg',
+  },
+  { icon: <PetsRounded />, label: "Dog's medicine", from: '26px, 30px, 6deg' },
+  {
+    icon: <RestaurantRounded />,
+    label: 'Whose turn to cook',
+    from: '-22px, 34px, -5deg',
+  },
+]
+
+export const ProblemVignette = () => (
+  <Stage>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+      {LITTLE_THINGS.map((thing, index) => (
+        <Box
+          key={thing.label}
+          sx={{
+            ...cardSx,
+            borderRadius: '999px',
+            alignSelf: 'flex-start',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            pl: 1.25,
+            pr: 2,
+            py: 0.875,
+            fontSize: '0.8125rem',
+            fontWeight: 600,
+            animation: `thingLand 620ms ${EASE} ${index * 130}ms both`,
+            '@keyframes thingLand': {
+              from: {
+                opacity: 0,
+                transform: `translate3d(${thing.from.split(',').slice(0, 2).join(',')}, 0) rotate(${thing.from.split(',')[2]})`,
+              },
+              to: { opacity: 1, transform: 'none' },
+            },
+          }}
+        >
+          <Box
+            sx={{
+              width: 26,
+              height: 26,
+              borderRadius: '50%',
+              display: 'grid',
+              placeItems: 'center',
+              bgcolor: 'primary.softBg',
+              color: 'primary.plainColor',
+              '& svg': { fontSize: '1rem' },
+            }}
+          >
+            {thing.icon}
+          </Box>
+          {thing.label}
+        </Box>
+      ))}
+    </Box>
   </Stage>
 )

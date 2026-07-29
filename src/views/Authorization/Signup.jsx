@@ -35,7 +35,10 @@ const SignupView = () => {
           // Invalidate user profile queries to ensure fresh data
           queryClient.invalidateQueries(['userProfile'])
 
-          Navigate('/chores')
+          // New accounts land on the "you're all set" screen, which closes the
+          // loop from onboarding and shows the upgrade offer once. Returning
+          // users signing in go straight to their tasks.
+          Navigate('/ready', { replace: true })
         })
       } else {
         console.log('Login failed', response)
@@ -130,7 +133,7 @@ const SignupView = () => {
       title='Create your account'
       subtitle='Track chores and tasks together, in one shared place.'
       footer={<LegalLinks />}
-           logoSize={0}
+      logoSize={0}
     >
       <Box
         component='form'
