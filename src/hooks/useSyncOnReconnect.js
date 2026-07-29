@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef } from 'react'
 import { commandQueue } from '../utils/CommandQueue'
 import { offlineDB } from '../utils/OfflineDB'
+import { isOAuthExchangeInProgress } from '../utils/OAuthExchangeState'
 import { isOfflineFeatureEnabled } from '../utils/OfflineFeatureToggle'
 import { syncEngine } from '../utils/SyncEngine'
 import { networkManager } from './NetworkManager'
@@ -90,6 +91,11 @@ export function useSyncOnReconnect() {
 
     const runSync = async () => {
       if (!isOfflineFeatureEnabled()) return
+      // Skip while the OAuth code exchange is in flight — there's no session
+      // yet, so a sync here just 401s. Note the app-resume listener fires in
+      // the same tick as the deep link, before the route changes, so this has
+      // to test the shared flag rather than the pathname.
+      if (isOAuthExchangeInProgress()) return
       const wasOffline = !networkManager.isOnline
       const didSync = await syncEngine.sync()
       if (didSync) {

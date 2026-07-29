@@ -8,6 +8,7 @@ import { useRef } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useUserProfile } from '../../queries/UserQueries'
 import { apiClient } from '../../utils/ApiClient'
+import { endOAuthExchange } from '../../utils/OAuthExchangeState'
 import { GetUserProfile } from '../../utils/Fetcher'
 import { saveTokens } from '../../utils/TokenStorage'
 import MFAVerificationModal from './MFAVerificationModal'
@@ -25,11 +26,14 @@ const AuthenticationLoading = () => {
   useEffect(() => {
     if (provider === 'oauth2' && !hasCalledHandleOAuth2.current) {
       hasCalledHandleOAuth2.current = true
-      handleOAuth2()
+      // Release the guard once the exchange settles, so a stuck flag can never
+      // suppress a genuine session expiry later on.
+      handleOAuth2().finally(endOAuthExchange)
     } else if (provider !== 'oauth2') {
       setMessage('Unknown Authentication Provider')
       setSubMessage('Please contact support')
     }
+    return endOAuthExchange
   }, [provider])
   const getUserProfileAndNavigateToHome = () => {
     GetUserProfile().then(data => {

@@ -7,6 +7,7 @@ import { Preferences } from '@capacitor/preferences'
 import { PushNotifications } from '@capacitor/push-notifications'
 import { focusManager } from '@tanstack/react-query'
 import { RegisterDeviceToken } from './utils/Fetcher'
+import { beginOAuthExchange } from './utils/OAuthExchangeState'
 
 // React Router navigate(), injected by <App /> once the router is mounted.
 // Using client-side navigation (instead of window.location.href) avoids a full
@@ -103,6 +104,13 @@ const handleOAuthDeepLink = async url => {
       if (window.location.pathname === '/auth/oauth2' && currentCode === code) {
         return
       }
+
+      // Claim the exchange window synchronously, before the first await: the
+      // resume-driven background sync fires in the same tick as this deep link,
+      // and its 401 must not be mistaken for an expired session. Set after the
+      // early return above so the flag is only ever claimed by the navigation
+      // that Authenticating.jsx will clear.
+      beginOAuthExchange()
 
       // Store the OAuth params for the app to pick up
       await Preferences.set({
