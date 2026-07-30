@@ -2,10 +2,8 @@ import { CreditCard, Person, Toll } from '@mui/icons-material'
 import {
   Avatar,
   Box,
-  Button,
   Card,
   Chip,
-  Divider,
   FormControl,
   FormLabel,
   IconButton,
@@ -15,6 +13,7 @@ import {
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
 
+import ModalActions from '../../components/common/ModalActions.jsx'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal.js'
 import { resolvePhotoURL } from '../../utils/Helpers.jsx'
 
@@ -53,22 +52,28 @@ function RedeemPointsModal({ config }) {
   const canRedeem = points > 0 && points <= config.available
 
   return (
-    <ResponsiveModal open={config?.isOpen} onClose={config?.onClose} size='md'>
-      {/* Header Section */}
+    <ResponsiveModal
+      open={config?.isOpen}
+      onClose={config?.onClose}
+      size='md'
+      title='Redeem Points'
+      footer={
+        <ModalActions
+          secondary={{ label: 'Cancel', onClick: config?.onClose }}
+          primary={{
+            label: 'Redeem',
+            startDecorator: <CreditCard />,
+            disabled: !canRedeem,
+            onClick: () =>
+              config?.onSave({
+                points: Number(points),
+                userId: config?.user?.userId,
+              }),
+          }}
+        />
+      }
+    >
       <Stack spacing={2}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <CreditCard
-            sx={{
-              fontSize: '1.5rem',
-            }}
-          />
-          <Typography level='h4' sx={{ fontWeight: 600 }}>
-            Redeem Points
-          </Typography>
-        </Box>
-
-        <Divider />
-
         {/* User Info Card */}
         <Card
           variant='soft'
@@ -155,6 +160,7 @@ function RedeemPointsModal({ config }) {
             {predefinedPoints.map(point => (
               <IconButton
                 key={point}
+                aria-label={`Add ${point} points`}
                 variant='outlined'
                 disabled={points + point > config?.available}
                 onClick={() => addPredefinedPoints(point)}
@@ -209,43 +215,6 @@ function RedeemPointsModal({ config }) {
             </Typography>
           </Card>
         )}
-
-        <Divider />
-
-        {/* Action Buttons */}
-        <Stack direction='row' spacing={2}>
-          <Button
-            size='lg'
-            onClick={config?.onClose}
-            variant='outlined'
-            color='neutral'
-            fullWidth
-            sx={{
-              '&:hover': {
-                backgroundColor: 'neutral.50',
-              },
-            }}
-          >
-            Cancel
-          </Button>
-          <Button
-            size='lg'
-            onClick={() =>
-              config?.onSave({
-                points: Number(points),
-                userId: config?.user?.userId,
-              })
-            }
-            disabled={!canRedeem}
-            fullWidth
-            startDecorator={<CreditCard />}
-            sx={{
-              transition: 'all 0.2s ease',
-            }}
-          >
-            Redeem
-          </Button>
-        </Stack>
       </Stack>
     </ResponsiveModal>
   )

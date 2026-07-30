@@ -1,7 +1,8 @@
-import { Box, Button, FormLabel, Input } from '@mui/joy'
+import { FormLabel, Input } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 
+import ModalActions from '../../components/common/ModalActions'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import ConfirmationModal from './Inputs/ConfirmationModal'
 
@@ -41,31 +42,19 @@ function EditHistoryModal({ config, historyRecord }) {
       // fullWidth={true}
       title='Edit History'
       footer={
-        <Box display={'flex'} justifyContent={'space-around'} mt={1}>
-          <Button
-            size='lg'
-            onClick={() =>
+        <ModalActions
+          secondary={{ label: 'Cancel', onClick: config.onClose }}
+          primary={{
+            label: 'Save',
+            onClick: () =>
               config.onSave({
                 id: historyRecord.id,
                 performedAt: moment(completedDate).toISOString(),
                 dueDate: moment(dueDate).toISOString(),
                 notes,
-              })
-            }
-            fullWidth
-            sx={{ mr: 1 }}
-          >
-            Save
-          </Button>
-          <Button
-            fullWidth
-            size='lg'
-            onClick={config.onClose}
-            variant='outlined'
-          >
-            Cancel
-          </Button>
-        </Box>
+              }),
+          }}
+        />
       }
     >
       <FormLabel>Due Date</FormLabel>
@@ -119,6 +108,7 @@ function EditHistoryModal({ config, historyRecord }) {
           message: 'Are you sure you want to delete this history?',
           confirmText: 'Delete',
           cancelText: 'Cancel',
+          color: 'danger',
         }}
       />
     </ResponsiveModal>

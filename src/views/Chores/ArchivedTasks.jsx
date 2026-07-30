@@ -706,7 +706,7 @@ const ArchivedTasks = () => {
           }}
           onChange={handleSearchChange}
           startDecorator={
-            <KeyboardShortcutHint shortcut='F' show={showKeyboardShortcuts} />
+            showKeyboardShortcuts ? <KeyboardShortcutHint shortcut='F' /> : null
           }
           endDecorator={
             searchTerm && (

@@ -7,13 +7,13 @@ import {
   Input,
   Typography,
 } from '@mui/joy'
-import Modal from '@mui/joy/Modal'
-import ModalDialog from '@mui/joy/ModalDialog'
 import { useQueryClient } from '@tanstack/react-query'
 import imageCompression from 'browser-image-compression'
 import { useRef, useState } from 'react'
 import Cropper from 'react-easy-crop'
 import { useTranslation } from 'react-i18next'
+import AppModal from '../../components/common/AppModal'
+import ModalActions from '../../components/common/ModalActions'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { apiClient } from '../../utils/ApiClient'
@@ -141,9 +141,7 @@ const ProfileSettings = () => {
   return (
     <SettingsLayout title={t('profile.title')}>
       <div className='grid gap-4 py-4' id='profile'>
-        <Typography level='body-md'>
-          {t('profile.description')}
-        </Typography>
+        <Typography level='body-md'>{t('profile.description')}</Typography>
         <Card
           sx={{
             display: 'flex',
@@ -153,7 +151,10 @@ const ProfileSettings = () => {
             maxWidth: 400,
           }}
         >
-          <Avatar src={resolvePhotoURL(userProfile?.image)} sx={{ width: 64, height: 64 }} />
+          <Avatar
+            src={resolvePhotoURL(userProfile?.image)}
+            sx={{ width: 64, height: 64 }}
+          />
           <Box sx={{ flex: 1 }}>
             <Button
               variant='soft'
@@ -173,74 +174,56 @@ const ProfileSettings = () => {
             />
           </Box>
         </Card>
-        <Modal
+        <AppModal
           open={showCropper}
           onClose={() => {
             setShowCropper(false)
             setSelectedFile(null)
           }}
-        >
-          <ModalDialog
-            layout='center'
-            sx={{
-              width: 360,
-              maxWidth: '90vw',
-              bgcolor: '#fff',
-              borderRadius: 2,
-              boxShadow: 24,
-              p: 0,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              minHeight: 420,
-            }}
-          >
-            <Box sx={{ width: 320, height: 320, position: 'relative', mt: 2 }}>
-              <Cropper
-                image={selectedFile}
-                crop={crop}
-                zoom={zoom}
-                aspect={1}
-                cropShape='round'
-                showGrid={false}
-                onCropChange={setCrop}
-                onZoomChange={setZoom}
-                onCropComplete={onCropComplete}
-              />
-            </Box>
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                width: '100%',
-                p: 2,
-                mt: 2,
-              }}
-            >
-              <Button
-                onClick={handleCropSave}
-                loading={isUploading}
-                variant='solid'
-                color='primary'
-                size='md'
-                sx={{ mr: 1 }}
-              >
-                {t('profile.save')}
-              </Button>
-              <Button
-                onClick={() => {
+          title={t('profile.editPhoto', { defaultValue: 'Edit profile photo' })}
+          size='sm'
+          closeOnBackdrop={!isUploading}
+          closeOnEscape={!isUploading}
+          footer={
+            <ModalActions
+              secondary={{
+                label: t('profile.cancel'),
+                disabled: isUploading,
+                onClick: () => {
                   setShowCropper(false)
                   setSelectedFile(null)
-                }}
-                variant='soft'
-                color='neutral'
-              >
-                {t('profile.cancel')}
-              </Button>
-            </Box>
-          </ModalDialog>
-        </Modal>
+                },
+              }}
+              primary={{
+                label: t('profile.save'),
+                loading: isUploading,
+                onClick: handleCropSave,
+              }}
+            />
+          }
+        >
+          <Box
+            sx={{
+              width: '100%',
+              maxWidth: 320,
+              aspectRatio: '1',
+              position: 'relative',
+              mx: 'auto',
+            }}
+          >
+            <Cropper
+              image={selectedFile}
+              crop={crop}
+              zoom={zoom}
+              aspect={1}
+              cropShape='round'
+              showGrid={false}
+              onCropChange={setCrop}
+              onZoomChange={setZoom}
+              onCropComplete={onCropComplete}
+            />
+          </Box>
+        </AppModal>
         <Box sx={{ maxWidth: 400, mt: 3 }}>
           <Typography level='body-sm' sx={{ mb: 0.5 }}>
             {t('profile.displayName')}

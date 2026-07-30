@@ -1,15 +1,15 @@
 import {
-    Alert,
-    Box,
-    Button,
-    FormControl,
-    FormLabel,
-    Switch,
-    Textarea,
-    Typography,
+  Alert,
+  Box,
+  FormControl,
+  FormLabel,
+  Switch,
+  Textarea,
+  Typography,
 } from '@mui/joy'
 import { useCallback, useEffect, useState } from 'react'
 import KeyboardShortcutHint from '../../../components/common/KeyboardShortcutHint'
+import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { isOfficialDonetickInstanceSync } from '../../../utils/FeatureToggle'
 
@@ -108,19 +108,34 @@ function NudgeModal({ config }) {
       fullWidth={true}
       unmountDelay={250}
       title='Send Nudge'
+      description='Send a gentle reminder to the people assigned to this task.'
+      footer={
+        <ModalActions
+          secondary={{
+            label: 'Cancel',
+            onClick: () => handleAction(false),
+            endDecorator: showKeyboardShortcuts ? (
+              <KeyboardShortcutHint shortcut='X' />
+            ) : undefined,
+          }}
+          primary={{
+            label: 'Send Nudge',
+            onClick: () => handleAction(true),
+            disabled: !isOfficialInstance,
+            endDecorator: showKeyboardShortcuts ? (
+              <KeyboardShortcutHint shortcut='Y' />
+            ) : undefined,
+          }}
+        />
+      }
     >
-      <Typography level='body-md' mb={2}>
-        Send a gentle reminder to the assignee about this task. You can
-        customize the message and choose who gets notified.
-      </Typography>
-
       {!isOfficialInstance && (
         <Alert color='warning' sx={{ mb: 2 }}>
           <Typography level='body-sm'>
             <strong>Heads up!</strong>This feature avaiable on Donetick Cloud!
-            Since you're using a self-hosted instance, nudges will requires you
-            to setup Google cloud account and Firebase Cloud Messaging (FCM).
-            and build the Android or the iOS app by yourself.
+            Since you&apos;re using a self-hosted instance, nudges will requires
+            you to setup Google cloud account and Firebase Cloud Messaging
+            (FCM). and build the Android or the iOS app by yourself.
             <br />
             Will update if we come up with a solution to make this easier for to
             configure. for selfhosters
@@ -152,33 +167,6 @@ function NudgeModal({ config }) {
           onChange={e => setNotifyAllAssignees(e.target.checked)}
         />
       </FormControl>
-
-      <Box display={'flex'} justifyContent={'space-around'} gap={1}>
-        <Button
-          size='lg'
-          onClick={() => handleAction(true)}
-          disabled={!isOfficialInstance}
-          fullWidth
-          color='primary'
-          endDecorator={
-            <KeyboardShortcutHint shortcut='Y' show={showKeyboardShortcuts} />
-          }
-        >
-          Send Nudge
-        </Button>
-
-        <Button
-          size='lg'
-          onClick={() => handleAction(false)}
-          variant='outlined'
-          fullWidth
-          endDecorator={
-            <KeyboardShortcutHint shortcut='X' show={showKeyboardShortcuts} />
-          }
-        >
-          Cancel
-        </Button>
-      </Box>
     </ResponsiveModal>
   )
 }

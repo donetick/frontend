@@ -1,12 +1,6 @@
-import {
-  Box,
-  Button,
-  FormControl,
-  FormHelperText,
-  Input,
-  Typography,
-} from '@mui/joy'
+import { FormControl, FormHelperText, Input, Typography } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
 function CreateChildUserModal({ isOpen, onClose, onSuccess }) {
@@ -104,16 +98,30 @@ function CreateChildUserModal({ isOpen, onClose, onSuccess }) {
     password === confirmPassword
 
   return (
-    <ResponsiveModal open={isOpen} onClose={handleClose}>
-      <Typography level='h4' mb={2}>
-        Create Sub Account
-      </Typography>
-
-      <Typography level='body-md' mb={3}>
-        Create a new sub account. The user will be able to log in using their
-        combined username and complete tasks assigned to them.
-      </Typography>
-
+    <ResponsiveModal
+      open={isOpen}
+      onClose={handleClose}
+      title='Create Sub Account'
+      description='Create a login that can complete tasks assigned to this account.'
+      size='md'
+      closeOnBackdrop={!isSubmitting}
+      closeOnEscape={!isSubmitting}
+      footer={
+        <ModalActions
+          secondary={{
+            label: 'Cancel',
+            onClick: handleClose,
+            disabled: isSubmitting,
+          }}
+          primary={{
+            label: 'Create Account',
+            onClick: handleSubmit,
+            disabled: !isValid || isSubmitting,
+            loading: isSubmitting,
+          }}
+        />
+      }
+    >
       <FormControl error={!!errors.childName} sx={{ mb: 2 }}>
         <Typography level='body2' mb={1}>
           Sub Account Name *
@@ -196,27 +204,6 @@ function CreateChildUserModal({ isOpen, onClose, onSuccess }) {
           <FormHelperText>{errors.confirmPassword}</FormHelperText>
         )}
       </FormControl>
-
-      <Box display='flex' justifyContent='space-between' gap={2}>
-        <Button
-          size='lg'
-          variant='outlined'
-          onClick={handleClose}
-          disabled={isSubmitting}
-          sx={{ flex: 1 }}
-        >
-          Cancel
-        </Button>
-        <Button
-          size='lg'
-          onClick={handleSubmit}
-          disabled={!isValid || isSubmitting}
-          loading={isSubmitting}
-          sx={{ flex: 1 }}
-        >
-          Create Account
-        </Button>
-      </Box>
     </ResponsiveModal>
   )
 }

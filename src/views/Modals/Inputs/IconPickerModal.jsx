@@ -1,12 +1,5 @@
-import {
-    Avatar,
-    Box,
-    Button,
-    FormControl,
-    FormLabel,
-    Grid,
-    Typography,
-} from '@mui/joy'
+import { Avatar, Box, FormControl, FormLabel, Grid, Typography } from '@mui/joy'
+import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { getTextColorFromBackgroundColor } from '../../../utils/Colors'
 import PROJECT_ICONS from '../../../utils/ProjectIcons'
@@ -33,8 +26,10 @@ const IconPickerModal = ({
       fullWidth={true}
       unmountDelay={250}
       title='Choose Project Icon'
+      footer={
+        <ModalActions secondary={{ label: 'Cancel', onClick: onClose }} />
+      }
     >
-
       <FormControl>
         <FormLabel>Available Icons</FormLabel>
         <Grid
@@ -58,7 +53,9 @@ const IconPickerModal = ({
                     border: '2px solid',
                     borderColor: isCurrentIcon ? 'primary.500' : 'transparent',
                     '&:hover': {
-                      borderColor: isCurrentIcon ? 'primary.600' : 'neutral.300',
+                      borderColor: isCurrentIcon
+                        ? 'primary.600'
+                        : 'neutral.300',
                     },
                     transition: 'border-color 0.2s',
                   }}
@@ -96,12 +93,6 @@ const IconPickerModal = ({
           })}
         </Grid>
       </FormControl>
-
-      <Box display='flex' justifyContent='center' mt={3}>
-        <Button variant='outlined' onClick={onClose} fullWidth size='lg'>
-          Cancel
-        </Button>
-      </Box>
     </ResponsiveModal>
   )
 }

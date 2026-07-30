@@ -5,7 +5,7 @@ import {
   Pause,
   PlayArrow,
 } from '@mui/icons-material'
-import { Box, ButtonGroup, IconButton, Menu, MenuItem } from '@mui/joy'
+import { Box, Button, ButtonGroup, IconButton, Menu, MenuItem } from '@mui/joy'
 import { useEffect, useRef, useState } from 'react'
 
 const TimerSplitButton = ({
@@ -95,36 +95,25 @@ const TimerSplitButton = ({
         disabled={disabled}
       >
         {/* Main action button */}
-        <IconButton
+        <Button
           onClick={handleMainAction}
           disabled={disabled}
           size='md'
+          startDecorator={chore.status === 1 ? <Pause /> : <PlayArrow />}
           sx={{
-            px: 3,
-            py: 1,
-            borderTopRightRadius: 0,
-            borderBottomRightRadius: 0,
             minWidth: fullWidth ? 'auto' : 120,
             flex: fullWidth ? 1 : 'none',
           }}
         >
-          {chore.status === 1 ? <Pause /> : <PlayArrow />}
           {chore.status === 1 ? 'Pause' : 'Resume'}
-        </IconButton>
+        </Button>
 
         {/* Dropdown arrow button */}
         <IconButton
           onClick={handleMenuOpen}
           disabled={disabled}
-          size='lg'
-          sx={{
-            px: 1,
-            borderTopLeftRadius: 0,
-            borderBottomLeftRadius: 0,
-            borderLeft: '1px solid',
-            borderLeftColor: 'divider',
-            minWidth: 'auto',
-          }}
+          size='md'
+          sx={{ px: 1, minWidth: 'auto' }}
         >
           <ArrowDropDown />
         </IconButton>

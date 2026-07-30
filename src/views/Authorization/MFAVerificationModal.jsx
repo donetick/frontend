@@ -1,16 +1,8 @@
 import { Security, Smartphone } from '@mui/icons-material'
-import {
-  Alert,
-  Box,
-  Button,
-  Input,
-  Link,
-  ModalClose,
-  Stack,
-  Typography,
-} from '@mui/joy'
+import { Alert, Box, Input, Link, Stack, Typography } from '@mui/joy'
 import { useState } from 'react'
 
+import ModalActions from '../../components/common/ModalActions'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import { VerifyMFA } from '../../utils/Fetcher'
 
@@ -43,12 +35,15 @@ const MFAVerificationModal = ({
         onSuccess(data)
       } else {
         const errorData = await response.json()
-        setError(
-          errorData.message || 'Invalid verification code. Please try again.',
-        )
+        const message =
+          errorData.message || 'Invalid verification code. Please try again.'
+        setError(message)
+        onError?.(message)
       }
     } catch (error) {
-      setError('Failed to verify code. Please try again.')
+      const message = 'Failed to verify code. Please try again.'
+      setError(message)
+      onError?.(message)
       console.error('MFA verification error:', error)
     } finally {
       setLoading(false)
@@ -73,17 +68,29 @@ const MFAVerificationModal = ({
     <ResponsiveModal
       open={open}
       onClose={handleClose}
-      size='lg'
-      fullWidth={true}
+      size='md'
       title='Two-Factor Authentication'
+      description='Enter the verification code from your authenticator app.'
+      closeOnBackdrop={!loading}
+      closeOnEscape={!loading}
+      footer={
+        <ModalActions
+          secondary={{
+            label: 'Cancel',
+            onClick: handleClose,
+            disabled: loading,
+          }}
+          primary={{
+            label: 'Verify & Sign In',
+            onClick: handleVerify,
+            loading,
+            disabled: !verificationCode.trim(),
+          }}
+        />
+      }
     >
-      <ModalClose />
-
       <Box className='mb-4 text-center'>
         <Security sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
-        <Typography level='body-md' sx={{ color: 'text.secondary' }}>
-          Enter the verification code from your authenticator app
-        </Typography>
       </Box>
 
       <Stack spacing={3}>
@@ -119,16 +126,6 @@ const MFAVerificationModal = ({
             {error}
           </Alert>
         )}
-
-        <Button
-          color='primary'
-          loading={loading}
-          onClick={handleVerify}
-          disabled={!verificationCode.trim()}
-          size='lg'
-        >
-          Verify & Sign In
-        </Button>
 
         <Box className='text-center'>
           <Link

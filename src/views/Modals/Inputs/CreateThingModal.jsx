@@ -1,15 +1,14 @@
 import {
-    Box,
-    Button,
-    FormControl,
-    FormHelperText,
-    Input,
-    Option,
-    Select,
-    Textarea,
-    Typography,
+  FormControl,
+  FormHelperText,
+  Input,
+  Option,
+  Select,
+  Textarea,
+  Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
 function CreateThingModal({ isOpen, onClose, onSave, currentThing }) {
@@ -29,7 +28,7 @@ function CreateThingModal({ isOpen, onClose, onSave, currentThing }) {
         setState(0)
       }
     }
-  }, [type])
+  }, [type, state])
 
   const isValid = () => {
     const newErrors = {}
@@ -63,9 +62,20 @@ function CreateThingModal({ isOpen, onClose, onSave, currentThing }) {
     <ResponsiveModal
       open={isOpen}
       onClose={onClose}
-      size='lg'
-      fullWidth={true}
+      size='md'
       title={`${currentThing?.id ? 'Edit' : 'Create'} Thing`}
+      footer={
+        <ModalActions
+          secondary={{
+            label: 'Cancel',
+            onClick: onClose,
+          }}
+          primary={{
+            label: currentThing?.id ? 'Update' : 'Create',
+            onClick: handleSave,
+          }}
+        />
+      }
     >
       <FormControl>
         <Typography>Name</Typography>
@@ -79,9 +89,9 @@ function CreateThingModal({ isOpen, onClose, onSave, currentThing }) {
       </FormControl>
       <FormControl>
         <Typography>Type</Typography>
-        <Select value={type} sx={{ minWidth: 300 }}>
+        <Select value={type} onChange={(_, value) => setType(value)}>
           {['text', 'number', 'boolean'].map(type => (
-            <Option value={type} key={type} onClick={() => setType(type)}>
+            <Option value={type} key={type}>
               {type.charAt(0).toUpperCase() + type.slice(1)}
             </Option>
           ))}
@@ -118,24 +128,15 @@ function CreateThingModal({ isOpen, onClose, onSave, currentThing }) {
       {type === 'boolean' && (
         <FormControl>
           <Typography>Value</Typography>
-          <Select sx={{ minWidth: 300 }} value={state}>
+          <Select value={state} onChange={(_, value) => setState(value)}>
             {['true', 'false'].map(value => (
-              <Option value={value} key={value} onClick={() => setState(value)}>
+              <Option value={value} key={value}>
                 {value.charAt(0).toUpperCase() + value.slice(1)}
               </Option>
             ))}
           </Select>
         </FormControl>
       )}
-
-      <Box display={'flex'} justifyContent={'space-around'} mt={1}>
-        <Button size='lg' onClick={handleSave} fullWidth sx={{ mr: 1 }}>
-          {currentThing?.id ? 'Update' : 'Create'}
-        </Button>
-        <Button size='lg' onClick={onClose} variant='outlined'>
-          {currentThing?.id ? 'Cancel' : 'Close'}
-        </Button>
-      </Box>
     </ResponsiveModal>
   )
 }

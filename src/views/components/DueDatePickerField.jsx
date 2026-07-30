@@ -24,6 +24,7 @@ import {
 import moment from 'moment'
 import { useEffect, useMemo, useState } from 'react'
 import Calendar from 'react-calendar'
+import ModalActions from '../../components/common/ModalActions'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 
@@ -202,6 +203,7 @@ const DueDatePickerField = ({
         </Button>
         {hasDueDate && onClear && (
           <IconButton
+            aria-label='Clear due date'
             size='sm'
             variant='soft'
             color='danger'
@@ -211,11 +213,9 @@ const DueDatePickerField = ({
             }}
             sx={{
               position: 'absolute',
-              top: -12,
-              right: -16,
+              top: -18,
+              right: -18,
               zIndex: 10,
-              maxHeight: 18,
-              maxWidth: 18,
               borderRadius: '50%',
               '&:hover': {
                 bgcolor: 'danger.softBg',
@@ -233,38 +233,22 @@ const DueDatePickerField = ({
         title='Due Date'
         fullWidth={false}
         footer={
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-            {hasDueDate && (
-              <Button
-                variant='plain'
-                color='danger'
-                size='lg'
-                onClick={() => {
-                  onClear?.()
-                  setIsOpen(false)
-                }}
-                sx={{ mr: 'auto' }}
-              >
-                Remove
-              </Button>
-            )}
-            <Button
-              variant='outlined'
-              color='neutral'
-              size='lg'
-              onClick={() => setIsOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant='solid'
-              color='primary'
-              size='lg'
-              onClick={handleSave}
-            >
-              Apply
-            </Button>
-          </Box>
+          <ModalActions
+            tertiary={
+              hasDueDate
+                ? {
+                    label: 'Remove',
+                    color: 'danger',
+                    onClick: () => {
+                      onClear?.()
+                      setIsOpen(false)
+                    },
+                  }
+                : undefined
+            }
+            secondary={{ label: 'Cancel', onClick: () => setIsOpen(false) }}
+            primary={{ label: 'Apply', onClick: handleSave }}
+          />
         }
       >
         <Box sx={{ fontFamily: 'var(--joy-fontFamily-body)', maxWidth: 360 }}>
