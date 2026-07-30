@@ -26,7 +26,9 @@ import FilterView from '../views/Filters/FilterView'
 import ChoreHistory from '../views/History/ChoreHistory'
 import LabelView from '../views/Labels/LabelView'
 import Landing from '../views/Landing/Landing'
+import CircleSetupView from '../views/Onboarding/CircleSetupView'
 import GetStartedView from '../views/Onboarding/GetStartedView'
+import HeardAboutView from '../views/Onboarding/HeardAboutView'
 import OnboardingView from '../views/Onboarding/OnboardingView'
 import WorkspaceReadyView from '../views/Onboarding/WorkspaceReadyView'
 import PaymentCancelledView from '../views/Payments/PaymentFailView'
@@ -196,6 +198,14 @@ const Router = createBrowserRouter([
       {
         path: '/ready',
         element: <WorkspaceReadyView />,
+      },
+      {
+        path: '/circle-setup',
+        element: <CircleSetupView />,
+      },
+      {
+        path: '/heard-about',
+        element: <HeardAboutView />,
       },
 
       {

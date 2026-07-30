@@ -1,26 +1,25 @@
 import {
   AddRounded,
-  AirOutlined,
   CheckRounded,
   ContactlessRounded,
-  DeleteOutlineRounded,
   HourglassEmptyRounded,
   KeyboardRounded,
   MicNoneRounded,
   NotificationsActiveRounded,
   PeopleAltRounded,
-  PetsRounded,
   PhoneIphoneRounded,
   PhotoCameraOutlined,
   PlayArrowRounded,
-  ReceiptLongOutlined,
   Repeat,
-  RestaurantRounded,
   SwitchAccessShortcutRounded,
   ThumbDownRounded,
   ThumbUpRounded,
 } from '@mui/icons-material'
 import { Box, Typography } from '@mui/joy'
+import {
+  getPriorityColor,
+  getTextColorFromBackgroundColor,
+} from '../../utils/Colors.jsx'
 
 /**
  * Small living previews of the real product, one per onboarding slide.
@@ -41,7 +40,6 @@ const EASE = 'cubic-bezier(0.22, 1, 0.36, 1)'
 // One shared cycle length so the pills, the card and the caption of a vignette
 // all change on the same beat.
 const CYCLE_MS = 5400
-const STEP_MS = CYCLE_MS / 3
 
 const reducedMotion = {
   '@media (prefers-reduced-motion: reduce)': {
@@ -110,6 +108,39 @@ const Chip = ({ icon, children, color = 'primary', sx }) => (
   </Box>
 )
 
+// Mirrors CompactChoreCard's solid, label-coloured chip (not the soft-tinted
+// `Chip` above) so a MiniChoreCard can fake a real label instead of a generic tag.
+const LabelChip = ({ label, color, sx }) => (
+  <Box
+    sx={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      alignSelf: 'flex-start',
+      px: 0.75,
+      py: 0.125,
+      borderRadius: '999px',
+      fontSize: '0.625rem',
+      fontWeight: 700,
+      lineHeight: 1.6,
+      whiteSpace: 'nowrap',
+      bgcolor: color,
+      color: getTextColorFromBackgroundColor(color),
+      ...sx,
+    }}
+  >
+    {label}
+  </Box>
+)
+
+const getName = name => {
+  const split = Array.from(name)
+  // if the first character is emoji then remove it from the name
+  if (isNaN(Number(split[0])) && /\p{Emoji}/u.test(split[0])) {
+    return split.slice(1).join('').trim()
+  }
+  return name
+}
+
 /**
  * ChoreCard in miniature: the chips ride on top of the card's edge exactly as
  * they do in the task list.
@@ -119,6 +150,8 @@ const MiniChoreCard = ({
   due,
   dueColor = 'primary',
   repeat,
+  label,
+  labelColor = '#5c6bc0',
   footer,
 }) => (
   <Box>
@@ -150,8 +183,11 @@ const MiniChoreCard = ({
       </Box>
       <Box sx={{ minWidth: 0, display: 'flex', flexDirection: 'column' }}>
         <Typography level='title-sm' noWrap sx={{ fontWeight: 600 }}>
-          {title}
+          {getName(title)}
         </Typography>
+        {label && (
+          <LabelChip label={label} color={labelColor} sx={{ mt: 0.375 }} />
+        )}
         {footer}
       </Box>
     </Box>
@@ -201,10 +237,10 @@ const AssigneeChip = ({ name, color = 'primary', sx }) => (
 // container never resizes as the content changes. The keyframes are derived
 // from the child count so a two-up cycler holds each state twice as long
 // instead of leaving a third of the cycle blank.
-const Cycler = ({ children, sx }) => {
+const Cycler = ({ children, sx, cycleMs = CYCLE_MS }) => {
   const items = Array.isArray(children) ? children : [children]
   const count = items.length
-  const step = CYCLE_MS / count
+  const step = cycleMs / count
   const hold = 100 / count
   // Emotion emits inline @keyframes under the literal name, so each arity
   // needs its own or the two definitions collide.
@@ -218,7 +254,7 @@ const Cycler = ({ children, sx }) => {
           sx={{
             gridArea: '1 / 1',
             opacity: index === 0 ? 1 : 0,
-            animation: `${name} ${CYCLE_MS}ms ${EASE} ${index * step}ms infinite both`,
+            animation: `${name} ${cycleMs}ms ${EASE} ${index * step}ms infinite both`,
             [`@keyframes ${name}`]: {
               '0%': { opacity: 0, transform: 'translateY(6px)' },
               '4%': { opacity: 1, transform: 'none' },
@@ -237,6 +273,11 @@ const Cycler = ({ children, sx }) => {
 }
 
 /* ------------------------------------------- slide 1: three ways to capture */
+
+// This vignette runs slower than the shared CYCLE_MS: each capture method
+// gets a full 3s on screen so the input-to-task morph has room to read.
+const CAPTURE_STEP_MS = 3000
+const CAPTURE_CYCLE_MS = CAPTURE_STEP_MS * 3
 
 const SOURCES = [
   { icon: <MicNoneRounded />, label: 'Speak' },
@@ -264,7 +305,7 @@ const SourcePill = ({ icon, label, index }) => (
       color: index === 0 ? 'primary.plainColor' : 'text.secondary',
       // `forwards`, not `both`: a backwards fill would paint the lit 0%
       // keyframe during each pill's delay, lighting all three at once.
-      animation: `sourcePulse ${CYCLE_MS}ms ${EASE} ${index * STEP_MS}ms infinite forwards`,
+      animation: `sourcePulse ${CAPTURE_CYCLE_MS}ms ${EASE} ${index * CAPTURE_STEP_MS}ms infinite forwards`,
       '@keyframes sourcePulse': {
         '0%, 33%': {
           borderColor: 'var(--joy-palette-primary-500)',
@@ -302,6 +343,215 @@ const CaptureVariant = ({ card, caption, icon }) => (
   </Box>
 )
 
+// Crossfades a "capturing" moment into the task it produces. Both layers sit
+// in the same grid cell on one shared clock (delay = this variant's slot in
+// the outer Cycler) so the morph always lands while the variant is on screen:
+// ~0-38% holds the raw input, ~46-60% is the handoff, the rest holds the card.
+const CaptureMorph = ({ before, after, delay = 0 }) => (
+  <Box sx={{ display: 'grid' }}>
+    <Box
+      sx={{
+        gridArea: '1 / 1',
+        animation: `captureMorphOut ${CAPTURE_STEP_MS}ms ${EASE} ${delay}ms infinite both`,
+        '@keyframes captureMorphOut': {
+          '0%': { opacity: 0, transform: 'translateY(6px)' },
+          '10%': { opacity: 1, transform: 'none' },
+          '38%': { opacity: 1, transform: 'none' },
+          '48%': { opacity: 0, transform: 'translateY(-6px)' },
+          '100%': { opacity: 0, transform: 'translateY(-6px)' },
+        },
+      }}
+    >
+      {before}
+    </Box>
+    <Box
+      sx={{
+        gridArea: '1 / 1',
+        animation: `captureMorphIn ${CAPTURE_STEP_MS}ms ${EASE} ${delay}ms infinite both`,
+        '@keyframes captureMorphIn': {
+          '0%, 46%': { opacity: 0, transform: 'translateY(6px) scale(0.96)' },
+          '60%': { opacity: 1, transform: 'none' },
+          '100%': { opacity: 1, transform: 'none' },
+        },
+      }}
+    >
+      {after}
+    </Box>
+  </Box>
+)
+
+const WAVE_BARS = [10, 18, 24, 14, 20, 11, 16]
+
+/** The "before": a live waveform standing in for on-device speech capture. */
+const VoiceWave = ({ delay = 0 }) => (
+  <Box
+    sx={{
+      ...cardSx,
+      height: 68,
+      px: 1.5,
+      display: 'flex',
+      alignItems: 'center',
+      gap: 1.25,
+    }}
+  >
+    <Box
+      sx={{
+        flex: '0 0 auto',
+        width: 8,
+        height: 8,
+        borderRadius: '50%',
+        bgcolor: 'danger.500',
+        animation: `recDotPulse 1000ms ease-in-out ${delay}ms infinite`,
+        '@keyframes recDotPulse': {
+          '0%, 100%': { opacity: 1 },
+          '50%': { opacity: 0.35 },
+        },
+      }}
+    />
+    <Box
+      sx={{ display: 'flex', alignItems: 'flex-end', gap: '3px', height: 24 }}
+    >
+      {WAVE_BARS.map((height, index) => (
+        <Box
+          key={index}
+          sx={{
+            width: 3,
+            height,
+            borderRadius: '2px',
+            bgcolor: 'primary.500',
+            transformOrigin: 'bottom',
+            animation: `waveBounce 900ms ease-in-out ${delay + index * 90}ms infinite`,
+            '@keyframes waveBounce': {
+              '0%, 100%': { transform: 'scaleY(0.4)' },
+              '50%': { transform: 'scaleY(1)' },
+            },
+          }}
+        />
+      ))}
+    </Box>
+    <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+      Listening…
+    </Typography>
+  </Box>
+)
+
+const CORNER_MARKS = [
+  { top: 6, left: 6, borderWidth: '2px 0 0 2px' },
+  { top: 6, right: 6, borderWidth: '2px 2px 0 0' },
+  { bottom: 6, left: 6, borderWidth: '0 0 2px 2px' },
+  { bottom: 6, right: 6, borderWidth: '0 2px 2px 0' },
+]
+
+/** The "before": a viewfinder with a shutter flash timed to the handoff. */
+const CameraFrame = ({ delay = 0 }) => (
+  <Box
+    sx={{
+      ...cardSx,
+      height: 68,
+      position: 'relative',
+      overflow: 'hidden',
+      display: 'grid',
+      placeItems: 'center',
+    }}
+  >
+    {CORNER_MARKS.map((mark, index) => (
+      <Box
+        key={index}
+        sx={{
+          position: 'absolute',
+          width: 14,
+          height: 14,
+          borderStyle: 'solid',
+          borderColor: 'primary.500',
+          ...mark,
+        }}
+      />
+    ))}
+    <PhotoCameraOutlined sx={{ fontSize: 22, color: 'text.tertiary' }} />
+    <Box
+      aria-hidden='true'
+      sx={{
+        position: 'absolute',
+        inset: 0,
+        bgcolor: 'common.white',
+        animation: `shutterFlash ${CAPTURE_STEP_MS}ms ${EASE} ${delay}ms infinite`,
+        '@keyframes shutterFlash': {
+          '0%, 36%': { opacity: 0 },
+          '40%': { opacity: 0.9 },
+          '46%, 100%': { opacity: 0 },
+        },
+      }}
+    />
+  </Box>
+)
+
+const TYPE_TEXT = 'change ac filter friday @ryan'
+
+/** The "before": a live-typed line, revealed a character at a time. */
+const TypingField = ({ delay = 0 }) => (
+  <Box
+    sx={{
+      ...cardSx,
+      height: 68,
+      px: 1.5,
+      display: 'flex',
+      alignItems: 'center',
+      gap: 1,
+    }}
+  >
+    <KeyboardRounded
+      sx={{ fontSize: 18, color: 'text.tertiary', flex: '0 0 auto' }}
+    />
+    <Box sx={{ display: 'flex', alignItems: 'center', minWidth: 0 }}>
+      <Box
+        sx={{
+          overflow: 'hidden',
+          whiteSpace: 'nowrap',
+          width: 0,
+          // One pass per appearance, not a fast standalone loop: the reveal
+          // itself only takes the first 40% of the visible window (steps()
+          // applies to that first segment), then holds at full width for the
+          // rest so it doesn't replay mid-view before the morph hands off.
+          animation: `typeReveal ${CAPTURE_STEP_MS}ms ${EASE} ${delay}ms infinite`,
+          '@keyframes typeReveal': {
+            '0%': {
+              width: 0,
+              animationTimingFunction: `steps(${TYPE_TEXT.length}, end)`,
+            },
+            '40%': { width: `${TYPE_TEXT.length}ch` },
+            '100%': { width: `${TYPE_TEXT.length}ch` },
+          },
+        }}
+      >
+        <Typography
+          level='body-sm'
+          noWrap
+          sx={{
+            fontFamily:
+              'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
+            fontSize: '0.8125rem',
+          }}
+        >
+          {TYPE_TEXT}
+        </Typography>
+      </Box>
+      <Box
+        sx={{
+          width: '2px',
+          height: '1.1em',
+          ml: 0.25,
+          bgcolor: 'primary.500',
+          animation: 'caretBlink 500ms step-end infinite',
+          '@keyframes caretBlink': {
+            '0%, 100%': { opacity: 1 },
+            '50%': { opacity: 0 },
+          },
+        }}
+      />
+    </Box>
+  </Box>
+)
+
 export const CaptureVignette = () => (
   <Stage>
     <Box sx={{ display: 'flex', gap: 1 }}>
@@ -310,15 +560,23 @@ export const CaptureVignette = () => (
       ))}
     </Box>
 
-    <Cycler>
+    <Cycler cycleMs={CAPTURE_CYCLE_MS}>
       <CaptureVariant
         icon={<MicNoneRounded />}
         caption='Dates, labels and points from your words'
         card={
-          <MiniChoreCard
-            title='Take out the trash'
-            due='Due tomorrow'
-            repeat='Every Monday'
+          <CaptureMorph
+            delay={0}
+            before={<VoiceWave delay={0} />}
+            after={
+              <MiniChoreCard
+                title='♻️ Take out the trash'
+                due='Due tomorrow'
+                repeat='Every Monday'
+                label='Home'
+                labelColor='#26a69a'
+              />
+            }
           />
         }
       />
@@ -326,10 +584,21 @@ export const CaptureVignette = () => (
         icon={<PhoneIphoneRounded />}
         caption='Read on your device'
         card={
-          <MiniChoreCard
-            title='Pay the water bill'
-            due='Due Aug 3'
-            dueColor='warning'
+          <CaptureMorph
+            delay={CAPTURE_STEP_MS}
+            before={<CameraFrame delay={CAPTURE_STEP_MS} />}
+            after={
+              <MiniChoreCard
+                title='🚗 Vehicle Registration Renewal'
+                due='Due Aug 3'
+                dueColor='warning'
+                footer={
+                  <Cycler>
+                    <AssigneeChip key='amalie' name='Amalie' color='blue' />
+                  </Cycler>
+                }
+              />
+            }
           />
         }
       />
@@ -337,10 +606,21 @@ export const CaptureVignette = () => (
         icon={<KeyboardRounded />}
         caption='#labels @people *points as you type'
         card={
-          <MiniChoreCard
-            title='Change the AC filter'
-            due='Due Fri'
-            repeat='Every 3 months'
+          <CaptureMorph
+            delay={2 * CAPTURE_STEP_MS}
+            before={<TypingField delay={2 * CAPTURE_STEP_MS} />}
+            after={
+              <MiniChoreCard
+                title='💨 Change the AC filter'
+                due='Due Fri'
+                repeat='Every 3 months'
+                footer={
+                  <Cycler>
+                    <AssigneeChip key='ryan' name='Ryan' color='green' />
+                  </Cycler>
+                }
+              />
+            }
           />
         }
       />
@@ -482,13 +762,20 @@ export const ScheduleVignette = () => (
  * status avatar and label, the note as a soft inline card, then the performer
  * chip and meta strip.
  */
-const HistoryRow = ({ status, color, icon, note, meta, performer }) => (
+const HistoryRow = ({
+  status,
+  color,
+  icon,
+  note,
+  meta,
+  performer,
+  divider = true,
+}) => (
   <Box
     sx={{
       display: 'flex',
       bgcolor: 'background.body',
-      borderBottom: '1px solid',
-      borderColor: 'divider',
+      ...(divider && { borderBottom: '1px solid', borderColor: 'divider' }),
       borderLeft: '3px solid',
       borderLeftColor: `${color}.400`,
     }}
@@ -872,6 +1159,101 @@ export const CircleVignette = () => (
   </Stage>
 )
 
+// One member's turn on the task, and one at a time. Slower than the shared
+// CYCLE_MS so each hand-off has room to read.
+const NAG_STEP_MS = 3000
+const NAG_CYCLE_MS = NAG_STEP_MS * MEMBERS.length
+
+// The history entry shown during any given member's turn is the *previous*
+// member's completion — that's the hand-off that put the task on the current
+// person's plate — so this is MEMBERS rotated back by one.
+const NAG_HISTORY_ORDER = [MEMBERS[MEMBERS.length - 1], ...MEMBERS.slice(0, -1)]
+
+// Each entry cycles through the same three depths — front, middle, back —
+// then drops out just before its next lap re-enters at the front. With
+// exactly one entry per member, "back" doubles as the cap on how many stay
+// visible: a 4th completion would simply be this same motion continuing.
+const historyStackKeyframes = {
+  '0%': { opacity: 0, transform: 'translateY(-14px) scale(0.94)', zIndex: 3 },
+  '6%': { opacity: 1, transform: 'translateY(0) scale(1)', zIndex: 3 },
+  '27%': { opacity: 1, transform: 'translateY(0) scale(1)', zIndex: 3 },
+  '33%': {
+    opacity: 0.75,
+    transform: 'translateY(10px) scale(0.94)',
+    zIndex: 2,
+  },
+  '54%': {
+    opacity: 0.75,
+    transform: 'translateY(10px) scale(0.94)',
+    zIndex: 2,
+  },
+  '60%': {
+    opacity: 0.45,
+    transform: 'translateY(20px) scale(0.88)',
+    zIndex: 1,
+  },
+  '88%': {
+    opacity: 0.45,
+    transform: 'translateY(20px) scale(0.88)',
+    zIndex: 1,
+  },
+  '100%': { opacity: 0, transform: 'translateY(30px) scale(0.82)', zIndex: 1 },
+}
+
+/**
+ * A tighter cut of "share the load": just the task and whose turn it is.
+ * The assignee chip and the history stack ride the same clock, offset by one
+ * member, so each hand-off both moves the chip and drops that member's
+ * completion onto the top of the stack — pushing the older ones back and
+ * capping out at three before the oldest cycles away.
+ */
+export const TakesTurnsVignette = () => (
+  <Stage>
+    <MiniChoreCard
+      title='Kitchen deep clean'
+      due='Due Sat'
+      repeat='Every week'
+      footer={
+        <Cycler cycleMs={NAG_CYCLE_MS}>
+          {MEMBERS.map(member => (
+            <AssigneeChip
+              key={member.name}
+              name={member.name}
+              color={member.color}
+            />
+          ))}
+        </Cycler>
+      }
+    />
+
+    <Box sx={{ position: 'relative', height: 88 }}>
+      {NAG_HISTORY_ORDER.map((member, index) => (
+        <Box
+          key={member.name}
+          sx={{
+            ...cardSx,
+            position: 'absolute',
+            inset: 0,
+            borderRadius: 14,
+            overflow: 'hidden',
+            animation: `historyStack ${NAG_CYCLE_MS}ms ${EASE} ${index * NAG_STEP_MS}ms infinite both`,
+            '@keyframes historyStack': historyStackKeyframes,
+          }}
+        >
+          <HistoryRow
+            status='Completed'
+            color='success'
+            icon={<CheckRounded />}
+            performer={member.name}
+            meta='Just now · ★ 5 pts'
+            divider={false}
+          />
+        </Box>
+      ))}
+    </Box>
+  </Stage>
+)
+
 /* ------------------------------------- slide 5: widgets on the home screen */
 
 // Home-screen widgets read as a separate material from in-app cards: rounder
@@ -1050,22 +1432,50 @@ export const RemindersVignette = () => (
 // The mess in your head, in the order it usually arrives: each item flies in
 // from its own angle and lands in a tidy column. Base style is the landed
 // state, so with reduced motion it's simply a neat list.
+//
+// Each row now mirrors CompactChoreCard's own grammar: a priority bar on the
+// leading edge, an (unchecked, decorative) complete button, a frequency line,
+// and a trailing label chip — the same signals, just in a self-contained card
+// instead of a full-width list row.
 const LITTLE_THINGS = [
   {
-    icon: <ReceiptLongOutlined />,
     label: 'Water bill',
+    priority: 1,
+    frequency: 'Monthly',
+    tag: 'Bills',
+    tagColor: '#5c6bc0',
     from: '-28px, 18px, -6deg',
   },
-  { icon: <AirOutlined />, label: 'AC filter', from: '30px, 22px, 5deg' },
   {
-    icon: <DeleteOutlineRounded />,
+    label: 'AC filter',
+    priority: 2,
+    frequency: 'Every 3 months',
+    tag: 'Home',
+    tagColor: '#26a69a',
+    from: '30px, 22px, 5deg',
+  },
+  {
     label: 'Trash day',
+    priority: 2,
+    frequency: 'Every Monday',
+    tag: 'Home',
+    tagColor: '#26a69a',
     from: '-34px, 26px, -4deg',
   },
-  { icon: <PetsRounded />, label: "Dog's medicine", from: '26px, 30px, 6deg' },
   {
-    icon: <RestaurantRounded />,
+    label: "Dog's medicine",
+    priority: 1,
+    frequency: 'Daily',
+    tag: 'Pets',
+    tagColor: '#ec407a',
+    from: '26px, 30px, 6deg',
+  },
+  {
     label: 'Whose turn to cook',
+    priority: 3,
+    frequency: 'Weekly',
+    tag: 'Cooking',
+    tagColor: '#66bb6a',
     from: '-22px, 34px, -5deg',
   },
 ]
@@ -1078,16 +1488,14 @@ export const ProblemVignette = () => (
           key={thing.label}
           sx={{
             ...cardSx,
-            borderRadius: '999px',
-            alignSelf: 'flex-start',
+            position: 'relative',
+            overflow: 'hidden',
             display: 'flex',
             alignItems: 'center',
-            gap: 1,
-            pl: 1.25,
-            pr: 2,
-            py: 0.875,
-            fontSize: '0.8125rem',
-            fontWeight: 600,
+            gap: 1.25,
+            pl: 1.75,
+            pr: 1.25,
+            py: 1,
             animation: `thingLand 620ms ${EASE} ${index * 130}ms both`,
             '@keyframes thingLand': {
               from: {
@@ -1096,23 +1504,64 @@ export const ProblemVignette = () => (
               },
               to: { opacity: 1, transform: 'none' },
             },
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              left: 0,
+              top: 0,
+              bottom: 0,
+              width: '4px',
+              bgcolor: getPriorityColor(thing.priority),
+            },
           }}
         >
           <Box
+            aria-hidden='true'
             sx={{
-              width: 26,
-              height: 26,
+              flex: '0 0 auto',
+              width: 22,
+              height: 22,
               borderRadius: '50%',
-              display: 'grid',
-              placeItems: 'center',
-              bgcolor: 'primary.softBg',
-              color: 'primary.plainColor',
-              '& svg': { fontSize: '1rem' },
+              border: '2px solid',
+              borderColor: 'neutral.outlinedBorder',
+            }}
+          />
+
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography
+              level='title-sm'
+              noWrap
+              sx={{ fontWeight: 600, fontSize: '0.8125rem' }}
+            >
+              {thing.label}
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.375 }}>
+              <Repeat sx={{ fontSize: 12, color: 'text.tertiary' }} />
+              <Typography
+                level='body-xs'
+                sx={{ color: 'text.tertiary', fontSize: '0.6875rem' }}
+              >
+                {thing.frequency}
+              </Typography>
+            </Box>
+          </Box>
+
+          <Box
+            sx={{
+              flex: '0 0 auto',
+              px: 0.875,
+              py: 0.125,
+              borderRadius: '999px',
+              fontSize: '0.6875rem',
+              fontWeight: 700,
+              lineHeight: 1.6,
+              whiteSpace: 'nowrap',
+              bgcolor: thing.tagColor,
+              color: getTextColorFromBackgroundColor(thing.tagColor),
             }}
           >
-            {thing.icon}
+            {thing.tag}
           </Box>
-          {thing.label}
         </Box>
       ))}
     </Box>

@@ -37,6 +37,39 @@ export const resetOnboarding = () => {
   }
 }
 
+const ACQUISITION_SOURCE_KEY = 'acquisitionSource'
+
+/**
+ * Stashes the "where'd you hear about us" answer locally for now. No
+ * analytics pipeline is wired up yet — this is the single place that'll
+ * change once there is one, so the survey screen itself never has to.
+ */
+export const recordAcquisitionSource = source => {
+  try {
+    localStorage.setItem(ACQUISITION_SOURCE_KEY, source)
+  } catch {
+    // ignore, this is best-effort telemetry
+  }
+}
+
+const PRIVACY_PREFERENCES_KEY = 'privacyPreferences'
+
+/**
+ * Stashes the self-hosted privacy opt-ins locally, same stub-for-now
+ * treatment as recordAcquisitionSource: no crash reporter or PostHog is wired
+ * up yet, so this is just the one place that'll change once there is one.
+ */
+export const recordPrivacyPreferences = ({ crashReports, analytics }) => {
+  try {
+    localStorage.setItem(
+      PRIVACY_PREFERENCES_KEY,
+      JSON.stringify({ crashReports, analytics }),
+    )
+  } catch {
+    // ignore, this is best-effort telemetry
+  }
+}
+
 /**
  * Asks the OS for notification permission during onboarding and records the
  * answer under the same `notificationPreferences` key NotificationAccessSnackbar

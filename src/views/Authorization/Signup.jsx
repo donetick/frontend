@@ -35,10 +35,10 @@ const SignupView = () => {
           // Invalidate user profile queries to ensure fresh data
           queryClient.invalidateQueries(['userProfile'])
 
-          // New accounts land on the "you're all set" screen, which closes the
-          // loop from onboarding and shows the upgrade offer once. Returning
-          // users signing in go straight to their tasks.
-          Navigate('/ready', { replace: true })
+          // New accounts get asked how they found Donetick before circle
+          // setup, while it's still fresh. Returning users signing in go
+          // straight to their tasks.
+          Navigate('/heard-about', { replace: true })
         })
       } else {
         console.log('Login failed', response)
