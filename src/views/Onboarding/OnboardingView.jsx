@@ -14,10 +14,10 @@ import {
 import { authButtonSx } from '../Authorization/authStyles'
 import {
   CaptureVignette,
-  CircleVignette,
   ProblemVignette,
   RemindersVignette,
   ScheduleVignette,
+  TakesTurnsVignette,
 } from './OnboardingVignettes'
 
 const EASE = 'cubic-bezier(0.22, 1, 0.36, 1)'
@@ -52,7 +52,7 @@ const SLIDES = [
     key: 'circle',
     title: 'Nobody has to be the nag',
     body: 'Invite the family, let chores rotate on their own, and see who did what. Tap an NFC tag on the washer to finish one on the spot.',
-    Visual: CircleVignette,
+    Visual: TakesTurnsVignette,
   },
   {
     key: 'reminders',

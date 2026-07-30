@@ -3,9 +3,14 @@ import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import pkg from './package.json'
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   define: {
     'import.meta.env.VITE_APP_VERSION': JSON.stringify(pkg.version),
+  },
+  // Strip console.* / debugger from production bundles only, so dev logging
+  // is untouched. `command` is 'build' for `vite build`, 'serve' for the dev server.
+  esbuild: {
+    drop: command === 'build' ? ['console', 'debugger'] : [],
   },
   plugins: [
     react(),
@@ -84,4 +89,4 @@ export default defineConfig({
       },
     ],
   },
-})
+}))
