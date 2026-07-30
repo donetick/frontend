@@ -20,7 +20,7 @@ const primaryPalette = getPalette(primaryColor)
 // Fallbacks only. A parent that owns the radius (ButtonGroup, Input/Select
 // decorator slots, CardActions) sets --Button-radius / --IconButton-radius and
 // takes precedence, which is what keeps connected groups looking connected.
-const CONTROL_RADIUS = '24px'
+const CONTROL_RADIUS = '12px'
 const ICON_BUTTON_RADIUS = '10px'
 
 const theme = extendTheme({
