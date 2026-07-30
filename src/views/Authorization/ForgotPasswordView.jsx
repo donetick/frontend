@@ -1,46 +1,38 @@
-// create boilerplate for ResetPasswordView:
-import {
-  Box,
-  Button,
-  Container,
-  FormControl,
-  FormHelperText,
-  Input,
-  Sheet,
-  Typography,
-} from '@mui/joy'
+import MarkEmailReadOutlined from '@mui/icons-material/MarkEmailReadOutlined'
+import { Box, Button, Link, Typography } from '@mui/joy'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Logo from '../../Logo'
 import { useNotification } from '../../service/NotificationProvider'
 import { ResetPassword } from '../../utils/Fetcher'
+import { AuthSubmitButton, AuthTextField, LegalLinks } from './AuthFields'
+import AuthShell from './AuthShell'
+import { authButtonSx } from './authStyles'
+
+const isInvalidEmail = email =>
+  !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email)
 
 const ForgotPasswordView = () => {
   const navigate = useNavigate()
   const [resetStatusOk, setResetStatusOk] = useState(null)
   const [email, setEmail] = useState('')
   const [emailError, setEmailError] = useState(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const { showError, showNotification } = useNotification()
 
-  const validateEmail = email => {
-    return !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email)
-  }
+  const handleSubmit = async e => {
+    e?.preventDefault()
 
-  const handleSubmit = async () => {
     if (!email) {
-      return setEmailError('Email is required')
+      setEmailError('Email is required')
+      return
     }
 
-    // validate email:
-    if (validateEmail(email)) {
+    if (isInvalidEmail(email)) {
       setEmailError('Please enter a valid email address')
       return
     }
 
-    if (emailError) {
-      return
-    }
-
+    setIsSubmitting(true)
     try {
       const response = await ResetPassword(email)
 
@@ -64,146 +56,106 @@ const ForgotPasswordView = () => {
         title: 'Reset Failed',
         message: 'Failed to send reset email, please try again later',
       })
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
+  // Validate on blur/submit only; flagging a half-typed address as invalid on
+  // every keystroke reads as the form yelling at you mid-word.
   const handleEmailChange = e => {
     setEmail(e.target.value)
-    if (validateEmail(e.target.value)) {
-      setEmailError('Please enter a valid email address')
-    } else {
+    if (emailError) {
       setEmailError(null)
     }
   }
 
-  return (
-    <Container component='main' maxWidth='xs'>
-      <Box
-        sx={{
-          marginTop: 4,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
+  const handleEmailBlur = () => {
+    if (email && isInvalidEmail(email)) {
+      setEmailError('Please enter a valid email address')
+    }
+  }
+
+  if (resetStatusOk !== null) {
+    return (
+      <AuthShell
+        title='Check your email'
+        subtitle={`If an account exists for ${email}, we've sent instructions for resetting your password.`}
+        footer={<LegalLinks />}
+        logoSize={0}
       >
-        <Sheet
-          component='form'
+        <Box
           sx={{
-            mt: 1,
-            width: '100%',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            padding: 2,
-            borderRadius: '8px',
-            boxShadow: 'md',
           }}
         >
-          <Logo />
+          <MarkEmailReadOutlined
+            sx={{ fontSize: 40, color: 'primary.plainColor', mb: 2 }}
+          />
+          <Button
+            fullWidth
+            size='lg'
+            variant='solid'
+            sx={authButtonSx}
+            onClick={() => navigate('/login')}
+          >
+            Back to sign in
+          </Button>
+        </Box>
+      </AuthShell>
+    )
+  }
 
-          <Typography level='h2'>
-            Done
-            <span style={{ color: '#06b6d4' }}>tick</span>
-          </Typography>
-          {resetStatusOk === null && (
-            <>
-              <Typography level='body2' sx={{ mb: 3 }}>
-                Enter your email, and we'll send you a link to get into your
-                account.
-              </Typography>
+  return (
+    <AuthShell
+      title='Reset your password'
+      subtitle="Enter your email and we'll send you a link to get back into your account."
+      footer={<LegalLinks />}
+      logoSize={0}
+    >
+      <Box
+        component='form'
+        onSubmit={handleSubmit}
+        sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+      >
+        <AuthTextField
+          label='Email address'
+          id='email'
+          name='email'
+          type='email'
+          autoComplete='email'
+          placeholder='you@example.com'
+          autoFocus
+          value={email}
+          error={emailError}
+          onChange={handleEmailChange}
+          onBlur={handleEmailBlur}
+        />
 
-              <Typography level='body2' alignSelf={'start'} mb={1}>
-                Email Address
-              </Typography>
-              <FormControl
-                error={emailError !== null}
-                sx={{ width: '100%', mb: 2 }}
-              >
-                <Input
-                  margin='normal'
-                  required
-                  fullWidth
-                  id='email'
-                  placeholder='Enter your email address'
-                  type='email'
-                  name='email'
-                  autoComplete='email'
-                  autoFocus
-                  value={email}
-                  onChange={handleEmailChange}
-                  error={emailError !== null}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault()
-                      handleSubmit()
-                    }
-                  }}
-                />
-                <FormHelperText>{emailError}</FormHelperText>
-              </FormControl>
-
-              <Button
-                fullWidth
-                size='lg'
-                variant='solid'
-                sx={{
-                  width: '100%',
-                  mt: 3,
-                  mb: 2,
-                  border: 'moccasin',
-                  borderRadius: '8px',
-                }}
-                onClick={handleSubmit}
-              >
-                Reset Password
-              </Button>
-
-              <Button
-                type='submit'
-                fullWidth
-                size='lg'
-                variant='plain'
-                sx={{
-                  width: '100%',
-                  mb: 2,
-                  border: 'moccasin',
-                  borderRadius: '8px',
-                }}
-                onClick={() => {
-                  navigate('/login')
-                }}
-                color='neutral'
-              >
-                Back to Login
-              </Button>
-            </>
-          )}
-          {resetStatusOk != null && (
-            <>
-              <Typography
-                level='body-md'
-                sx={{ textAlign: 'center', mt: 2, mb: 3 }}
-              >
-                If there is an account associated with the email you entered,
-                you will receive an email with instructions on how to reset your
-                password.
-              </Typography>
-
-              <Button
-                variant='solid'
-                size='lg'
-                fullWidth
-                onClick={() => {
-                  navigate('/login')
-                }}
-              >
-                Go to Login
-              </Button>
-            </>
-          )}
-        </Sheet>
+        <AuthSubmitButton loading={isSubmitting} sx={{ mt: 1 }}>
+          Send reset link
+        </AuthSubmitButton>
       </Box>
-    </Container>
+
+      <Typography
+        level='body-sm'
+        sx={{ mt: 3, textAlign: 'center', color: 'text.secondary' }}
+      >
+        Remembered it?{' '}
+        <Link
+          component='button'
+          type='button'
+          level='body-sm'
+          fontWeight={600}
+          underline='hover'
+          onClick={() => navigate('/login')}
+        >
+          Back to sign in
+        </Link>
+      </Typography>
+    </AuthShell>
   )
 }
 
