@@ -87,10 +87,10 @@ const SignupView = () => {
       isValid = false
     }
 
-    // username should only contain lowercase letters, dot and dash:
-    if (!/^[a-z.-]+$/.test(username)) {
+    // username should only contain lowercase letters, numbers, dot and dash:
+    if (!/^[a-z0-9.-]+$/.test(username)) {
       setUsernameError(
-        'Username can only contain lowercase letters, dot and dash',
+        'Username can only contain lowercase letters, numbers, dot and dash',
       )
       isValid = false
     }
@@ -157,7 +157,7 @@ const SignupView = () => {
           id='username'
           name='username'
           autoComplete='username'
-          placeholder='lowercase letters, dot and dash'
+          placeholder='lowercase letters, numbers, dot and dash'
           value={username}
           error={usernameError}
           onChange={e => {
