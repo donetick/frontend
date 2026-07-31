@@ -150,6 +150,11 @@ const CustomFilterChips = ({
                             fontSize: '0.65rem',
                             lineHeight: 1,
                             color: badgeTextColor,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '100%',
+                            textAlign: 'center',
                           }}
                         >
                           {displayCount}
