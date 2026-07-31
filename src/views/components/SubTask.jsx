@@ -17,6 +17,7 @@ import {
   DragIndicator,
   ExpandMore,
   KeyboardReturn,
+  SubdirectoryArrowLeft,
 } from '@mui/icons-material'
 import {
   Box,
@@ -28,6 +29,8 @@ import {
   ListItem,
   Typography,
 } from '@mui/joy'
+import { Capacitor } from '@capacitor/core'
+import { useMediaQuery } from '@mui/material'
 import { useCallback, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { useLocalization } from '../../contexts/LocalizationContext'
@@ -69,6 +72,7 @@ function SortableItem({
   inputRefs,
   onKeyDown,
   performers,
+  showAddChildButton,
 }) {
   const { fmt } = useLocalization()
   const { attributes, listeners, setNodeRef, transform, transition } =
@@ -193,6 +197,26 @@ function SortableItem({
 
         {editMode && (
           <Box sx={{ display: 'flex', gap: 1 }}>
+            {showAddChildButton && (
+              <IconButton
+                variant='soft'
+                color='neutral'
+                size='sm'
+                title='Add subtask'
+                onClick={() =>
+                  onKeyDown(
+                    {
+                      key: 'Enter',
+                      shiftKey: true,
+                      preventDefault: () => {},
+                    },
+                    task,
+                  )
+                }
+              >
+                <SubdirectoryArrowLeft />
+              </IconButton>
+            )}
             <IconButton
               variant='soft'
               color='danger'
@@ -231,6 +255,7 @@ function SortableItem({
               inputRefs={inputRefs}
               onKeyDown={onKeyDown}
               performers={performers}
+              showAddChildButton={showAddChildButton}
             />
           ))}
         </Box>
@@ -252,6 +277,9 @@ const SubTasks = ({
   const { data: userProfile } = useUserProfile()
   const { impersonatedUser } = useImpersonateUser()
   const inputRefs = useRef({})
+  const isSmallScreen = useMediaQuery(theme => theme.breakpoints.down('sm'))
+  const isNative = Capacitor.isNativePlatform()
+  const showAddChildButton = isSmallScreen || isNative
 
   const focusId = id => {
     setTimeout(() => {
@@ -666,6 +694,7 @@ const SubTasks = ({
                 inputRefs={inputRefs}
                 onKeyDown={handleKeyDown}
                 performers={performers}
+                showAddChildButton={showAddChildButton}
               />
             ))}
 
