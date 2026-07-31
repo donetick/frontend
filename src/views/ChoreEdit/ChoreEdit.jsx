@@ -631,18 +631,18 @@ const ChoreEdit = () => {
   }, [frequencyType])
 
   useEffect(() => {
-    if (assignees.length === 0) {
+    if (anyone || assignableTo.length === 0) {
       setAssignStrategy('no_assignee')
       setAssignedTo(null)
     } else {
-      if (!assignees.some(a => a.userId === assignedTo)) {
-        setAssignedTo(assignees[0].userId)
+      if (!assignableTo.some(a => a.userId === assignedTo)) {
+        setAssignedTo(assignableTo[0].userId)
       }
       if (assignStrategy === 'no_assignee') {
         setAssignStrategy(ASSIGN_STRATEGIES[2]) // default to least_completed
       }
     }
-  }, [assignStrategy, assignedTo, assignees])
+  }, [assignStrategy, assignedTo, assignableTo, anyone])
 
   // useEffect(() => {
   //   if (performers.length > 0 && assignees.length === 0 && userProfile) {
@@ -1257,7 +1257,7 @@ const ChoreEdit = () => {
           )}
         </Box>
 
-        {assignees.length > 1 && (
+        {!anyone && assignableTo.length > 1 && (
           <>
             <Box mb={3}>
               <Typography level='h4'>Currently Assigned To</Typography>
@@ -1795,13 +1795,13 @@ const ChoreEdit = () => {
             <FormControl>
               <Radio
                 overlay
-                disabled={assignees.length === 0}
+                disabled={anyone || assignableTo.length === 0}
                 value={true}
                 label='Limited'
               />
               <FormHelperText>
                 You and others that are assigned to the task
-                {assignees.length === 0
+                {anyone || assignableTo.length === 0
                   ? ' (No assignees selected, Limited option is disabled)'
                   : ''}
               </FormHelperText>
