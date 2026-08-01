@@ -26,6 +26,20 @@ export const useMultiSelect = () => {
     [selectedChores],
   )
 
+  // Entry point for press-and-hold on a task card: turn multi-select on (if it
+  // isn't already) with that task selected.
+  const enterMultiSelectWithChore = useCallback(
+    choreId => {
+      if (!isMultiSelectMode) {
+        setIsMultiSelectMode(true)
+        setSelectedChores(new Set([choreId]))
+        return
+      }
+      toggleChoreSelection(choreId)
+    },
+    [isMultiSelectMode, toggleChoreSelection],
+  )
+
   const selectAllVisibleChores = useCallback(
     (visibleChores, choreSections = [], openChoreSections = {}) => {
       let choresToSelect = []
@@ -42,7 +56,9 @@ export const useMultiSelect = () => {
           expandedChores.every(chore => selectedChores.has(chore.id))
 
         if (allExpandedSelected) {
-          choresToSelect = choreSections.flatMap(section => section.content || [])
+          choresToSelect = choreSections.flatMap(
+            section => section.content || [],
+          )
         } else {
           choresToSelect = expandedChores
         }
@@ -80,6 +96,7 @@ export const useMultiSelect = () => {
     selectedChores,
     toggleMultiSelectMode,
     toggleChoreSelection,
+    enterMultiSelectWithChore,
     selectAllVisibleChores,
     clearSelection,
     getSelectedChoresData,

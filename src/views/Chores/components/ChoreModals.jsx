@@ -1,5 +1,9 @@
 import { Capacitor } from '@capacitor/core'
 import DateModal from '../../Modals/Inputs/DateModal'
+import DueDatePickerModal, {
+  combineDueDate,
+  splitDueDate,
+} from '../../components/DueDatePickerModal'
 import NudgeModal from '../../Modals/Inputs/NudgeModal'
 import SelectModal from '../../Modals/Inputs/SelectModal'
 import TextModal from '../../Modals/Inputs/TextModal'
@@ -24,13 +28,16 @@ const ChoreModals = ({
   return (
     <>
       {activeModal === 'changeDueDate' && modalChore && (
-        <DateModal
-          isOpen={true}
+        <DueDatePickerModal
+          open={true}
           key={'changeDueDate' + modalChore.id}
-          current={modalChore.nextDueDate}
           title='Change due date'
+          {...splitDueDate(modalChore.nextDueDate)}
           onClose={onClose}
-          onSave={onChangeDueDate}
+          onApply={parts =>
+            onChangeDueDate(combineDueDate(parts)?.toISOString() ?? null)
+          }
+          onRemove={() => onChangeDueDate(null)}
         />
       )}
 

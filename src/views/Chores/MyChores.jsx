@@ -143,6 +143,7 @@ const MyChores = () => {
     selectedChores,
     toggleMultiSelectMode,
     toggleChoreSelection,
+    enterMultiSelectWithChore,
     selectAllVisibleChores,
     clearSelection,
     getSelectedChoresData,
@@ -1116,6 +1117,7 @@ const MyChores = () => {
             isMultiSelectMode={isMultiSelectMode}
             selectedChores={selectedChores}
             toggleChoreSelection={toggleChoreSelection}
+            onLongPressChore={enterMultiSelectWithChore}
           />
         )}
         {viewMode === 'calendar' && (
@@ -1293,6 +1295,7 @@ const MyChores = () => {
                       isMultiSelectMode={isMultiSelectMode}
                       selectedChores={selectedChores}
                       toggleChoreSelection={toggleChoreSelection}
+                      onLongPressChore={enterMultiSelectWithChore}
                     />
                   )}
                 </Box>
@@ -1373,6 +1376,7 @@ const MyChores = () => {
                       isMultiSelectMode={isMultiSelectMode}
                       selectedChores={selectedChores}
                       toggleChoreSelection={toggleChoreSelection}
+                      onLongPressChore={enterMultiSelectWithChore}
                     />
                   </AccordionDetails>
                 </Accordion>

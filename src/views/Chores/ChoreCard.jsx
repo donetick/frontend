@@ -108,27 +108,29 @@ const ChoreCard = ({
         {getDueDateChipText(chore.nextDueDate, chore, timeFormat)}
       </Chip>
 
-      <Chip
-        variant='soft'
-        sx={{
-          position: 'relative',
-          top: 10,
-          zIndex: 3,
-          ml: 0.4,
-          left: 10,
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+      {!['once', 'no_repeat'].includes(chore.frequencyType) && (
+        <Chip
+          variant='soft'
+          sx={{
+            position: 'relative',
+            top: 10,
+            zIndex: 3,
+            ml: 0.4,
+            left: 10,
           }}
         >
-          {getFrequencyIcon(chore)}
-          {getRecurrentChipText(chore)}
-        </div>
-      </Chip>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            {getFrequencyIcon(chore)}
+            {getRecurrentChipText(chore)}
+          </div>
+        </Chip>
+      )}
 
       <Box sx={{ position: 'absolute', top: 10, right: 10, zIndex: 3 }}>
         <PendingBadge commands={pendingCmds} />
