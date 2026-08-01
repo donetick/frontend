@@ -38,6 +38,7 @@ import {
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import EmptyState from '../../components/common/EmptyState'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import {
   useChoreTimer,
@@ -1204,9 +1205,12 @@ const TimerDetails = () => {
                 )}
 
                 {(!timerData.pauseLog || timerData.pauseLog.length === 0) && (
-                  <Alert color='neutral'>
-                    No work sessions found for this timer.
-                  </Alert>
+                  <EmptyState
+                    size='sm'
+                    icon={<AccessTime />}
+                    title='No work sessions yet'
+                    description='Start the timer on this task and each session lands here.'
+                  />
                 )}
               </Box>
             ) : (

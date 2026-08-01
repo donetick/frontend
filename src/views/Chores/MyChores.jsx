@@ -2,18 +2,18 @@ import {
   Add,
   Bolt,
   CalendarMonth,
+  CloudOff,
   EditCalendar,
+  SearchOff,
   ExpandCircleDown,
   PriorityHigh,
   Style,
 } from '@mui/icons-material'
-import Logo from '../../Logo'
 import {
   Accordion,
   AccordionDetails,
   AccordionGroup,
   Box,
-  Button,
   Chip,
   Container,
   Divider,
@@ -33,6 +33,7 @@ import IconButtonWithMenu from './IconButtonWithMenu'
 
 import { useMediaQuery } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
+import EmptyState from '../../components/common/EmptyState'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import { useFilter } from '../../hooks/useFilter'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
@@ -211,8 +212,7 @@ const MyChores = () => {
               )
             case 'Due Later':
               return (
-                d !== null &&
-                d > new Date(now.getTime() + 24 * 60 * 60 * 1000)
+                d !== null && d > new Date(now.getTime() + 24 * 60 * 60 * 1000)
               )
             case 'No Due Date':
               return item.nextDueDate === null
@@ -629,7 +629,8 @@ const MyChores = () => {
     selectedChores,
     addTaskModalOpen,
     searchTerm,
-    searchFilter: hasQuickFilters || searchTerm?.length > 0 ? 'filtered' : 'All',
+    searchFilter:
+      hasQuickFilters || searchTerm?.length > 0 ? 'filtered' : 'All',
     filteredChores: getFilteredChores,
     choreSections,
     openChoreSections,
@@ -786,10 +787,12 @@ const MyChores = () => {
   }
 
   const toggleViewMode = value => {
-    const newMode = value ?? (() => {
-      const modes = ['default', 'compact', 'calendar']
-      return modes[(modes.indexOf(viewMode) + 1) % modes.length]
-    })()
+    const newMode =
+      value ??
+      (() => {
+        const modes = ['default', 'compact', 'calendar']
+        return modes[(modes.indexOf(viewMode) + 1) % modes.length]
+      })()
     setViewMode(newMode)
     localStorage.setItem('choreCardViewMode', newMode)
     if (newMode !== 'calendar') {
@@ -865,6 +868,23 @@ const MyChores = () => {
     [getFilteredChores],
   )
 
+  // "Narrowed" means the user actively cut the list down (search, quick
+  // filters, a saved filter). Picking a project is not narrowing: an empty
+  // project is an empty place, not a filtered-away result.
+  const isNarrowed = Boolean(
+    searchTerm?.length > 0 || hasQuickFilters || activeFilterId,
+  )
+  const isCustomProjectSelected = Boolean(
+    selectedProject && selectedProject.id !== 'default',
+  )
+
+  const clearNarrowing = () => {
+    clearQuickFilters()
+    setSearchTerm('')
+    clearActiveFilter()
+    updateFilterUrl(null, null)
+  }
+
   const updateChores = newChore => {
     let newChores = [...chores, newChore]
 
@@ -883,40 +903,23 @@ const MyChores = () => {
   if (choresError || membersError) {
     return (
       <Container maxWidth='md'>
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            flexDirection: 'column',
-            height: '70vh',
-            gap: 2,
-          }}
-        >
-          <Box sx={{ mb: 2, opacity: 0.7 }}>
-            <Logo />
-          </Box>
-          <Typography level='h4' color='danger'>
-            Unable to communicate with server
-          </Typography>
-          <Typography
-            level='body-md'
-            sx={{ textAlign: 'center', maxWidth: 400 }}
-          >
-            {choresErrorDetails?.message ||
-              'The server is currently unavailable. Please check your connection and try again.'}
-          </Typography>
-          <Button
-            variant='solid'
-            color='primary'
-            onClick={() => {
+        <EmptyState
+          variant='error'
+          fullHeight
+          icon={<CloudOff />}
+          title={"Can't reach Donetick"}
+          description={
+            choresErrorDetails?.message ||
+            'Your tasks are safe. We just could not load them right now, check your connection and try again.'
+          }
+          primaryAction={{
+            label: 'Try again',
+            onClick: () => {
               refetchChores()
               queryClient.invalidateQueries(['circleMembers'])
-            }}
-          >
-            Retry Connection
-          </Button>
-        </Box>
+            },
+          }}
+        />
       </Container>
     )
   }
@@ -1061,50 +1064,79 @@ const MyChores = () => {
           }
         />
 
-        {/* Show "Nothing scheduled" when appropriate based on current view mode */}
-        {(searchTerm?.length > 0 || hasQuickFilters || activeFilterId
+        {/* Empty state. Three different situations, three different messages:
+            nothing created yet, nothing left after narrowing, or an empty
+            project. Only the middle one is about filters. */}
+        {(isNarrowed
           ? getFilteredChores.length === 0
           : projectFilteredChores.length === 0) &&
           // only if not in calendar view:
-          viewMode !== 'calendar' && (
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                flexDirection: 'column',
-                height: '50vh',
+          viewMode !== 'calendar' &&
+          (chores.length === 0 ? (
+            <EmptyState
+              variant='empty'
+              fullHeight
+              icon={<EditCalendar />}
+              title='No tasks yet'
+              description='Create your first task and Donetick keeps track of when it is due, whose turn it is, and what comes next.'
+              primaryAction={{
+                label: 'Create a task',
+                startDecorator: <Add />,
+                onClick: () => setAddTaskModalOpen(true),
               }}
-            >
-              <EditCalendar
-                sx={{
-                  fontSize: '4rem',
-                  // color: 'text.disabled',
-                  mb: 1,
-                }}
-              />
-              <Typography level='title-md' gutterBottom>
-                Nothing scheduled
-              </Typography>
-              {chores.length > 0 && (
-                <>
-                  <Button
-                    onClick={() => {
-                      clearQuickFilters()
-                      setSearchTerm('')
-                      clearActiveFilter()
-                      setSelectedProjectWithCache(null)
-                      updateFilterUrl(null, null)
-                    }}
-                    variant='outlined'
-                    color='neutral'
-                  >
-                    Reset filters
-                  </Button>
-                </>
-              )}
-            </Box>
-          )}
+              secondaryAction={{
+                label: 'More options',
+                onClick: () => Navigate('/chores/create'),
+              }}
+            />
+          ) : isNarrowed ? (
+            <EmptyState
+              variant='no-results'
+              fullHeight
+              icon={<SearchOff />}
+              title='No tasks match this view'
+              description={
+                searchTerm?.length > 0
+                  ? `Nothing matches "${searchTerm}". Try a different search, or clear what is narrowing the list.`
+                  : 'You have tasks, but none of them fit the filters that are currently on.'
+              }
+              primaryAction={{
+                label:
+                  searchTerm?.length > 0 ? 'Clear search' : 'Clear filters',
+                onClick: clearNarrowing,
+              }}
+            />
+          ) : isCustomProjectSelected ? (
+            <EmptyState
+              variant='empty'
+              fullHeight
+              icon={<EditCalendar />}
+              title={`Nothing in ${selectedProject.name} yet`}
+              description='Tasks you add to this project show up here. Your other tasks are still where you left them.'
+              primaryAction={{
+                label: 'Add a task here',
+                startDecorator: <Add />,
+                onClick: () => setAddTaskModalOpen(true),
+              }}
+              secondaryAction={{
+                label: 'See tasks outside projects',
+                onClick: () => setSelectedProjectWithCache(null),
+              }}
+            />
+          ) : (
+            <EmptyState
+              variant='empty'
+              fullHeight
+              icon={<EditCalendar />}
+              title='No tasks here yet'
+              description='Tasks that do not belong to a project live here. Add one, or switch projects to see what is in them.'
+              primaryAction={{
+                label: 'Create a task',
+                startDecorator: <Add />,
+                onClick: () => setAddTaskModalOpen(true),
+              }}
+            />
+          ))}
         {searchTerm?.length > 0 && viewMode !== 'calendar' && (
           <ChoreListView
             chores={getFilteredChores}
@@ -1272,16 +1304,17 @@ const MyChores = () => {
                   }}
                 >
                   {getChoresForDate(selectedCalendarDate).length === 0 ? (
-                    <Typography
-                      level='body-sm'
-                      sx={{
-                        textAlign: 'center',
-                        py: 2,
-                        color: 'text.tertiary',
+                    <EmptyState
+                      size='sm'
+                      icon={<EditCalendar />}
+                      title='Nothing scheduled'
+                      description='This day is free. Add a task if you want something to land here.'
+                      primaryAction={{
+                        label: 'Add task',
+                        startDecorator: <Add />,
+                        onClick: () => setAddTaskModalOpen(true),
                       }}
-                    >
-                      No tasks scheduled for this date
-                    </Typography>
+                    />
                   ) : (
                     <ChoreListView
                       chores={getChoresForDate(selectedCalendarDate)}

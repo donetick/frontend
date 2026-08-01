@@ -7,6 +7,7 @@ import {
   Label,
   Person,
   PriorityHigh,
+  SearchOff,
   SelectAll,
   Unarchive,
   ViewAgenda,
@@ -27,6 +28,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import Fuse from 'fuse.js'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import EmptyState from '../../components/common/EmptyState'
 import FilterBar from '../../components/common/FilterBar'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
@@ -994,45 +996,37 @@ const ArchivedTasks = () => {
 
       {/* Content */}
       {finalChores.length === 0 ? (
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            flexDirection: 'column',
-            height: '50vh',
-          }}
-        >
-          <Archive sx={{ fontSize: '4rem', mb: 1, color: 'text.tertiary' }} />
-          <Typography level='title-md' gutterBottom>
-            {searchTerm || hasActiveFilters
-              ? 'No archived tasks found'
-              : 'No archived tasks'}
-          </Typography>
-          <Typography level='body-sm' color='text.secondary' sx={{ mb: 2 }}>
-            {searchTerm || hasActiveFilters
-              ? 'Try adjusting your search or filters'
-              : 'Archived tasks will appear here when you archive them from the main task list'}
-          </Typography>
-          {(searchTerm || hasActiveFilters) && (
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              {searchTerm && (
-                <Button
-                  onClick={handleSearchClose}
-                  variant='outlined'
-                  color='neutral'
-                >
-                  Clear search
-                </Button>
-              )}
-              {hasActiveFilters && (
-                <Button onClick={clearAll} variant='outlined' color='neutral'>
-                  Clear filters
-                </Button>
-              )}
-            </Box>
-          )}
-        </Box>
+        searchTerm || hasActiveFilters ? (
+          <EmptyState
+            variant='no-results'
+            fullHeight
+            icon={<SearchOff />}
+            title='No archived tasks match'
+            description={
+              searchTerm
+                ? `Nothing in the archive matches "${searchTerm}".`
+                : 'There are archived tasks, but none fit the filters that are currently on.'
+            }
+            primaryAction={
+              searchTerm
+                ? { label: 'Clear search', onClick: handleSearchClose }
+                : { label: 'Clear filters', onClick: clearAll }
+            }
+            secondaryAction={
+              searchTerm && hasActiveFilters
+                ? { label: 'Clear filters', onClick: clearAll }
+                : undefined
+            }
+          />
+        ) : (
+          <EmptyState
+            fullHeight
+            icon={<Archive />}
+            title='Nothing archived'
+            description='Archiving hides a task without deleting it. Anything you archive from your task list shows up here, ready to restore.'
+            primaryAction={{ label: 'Back to tasks', to: '/chores' }}
+          />
+        )
       ) : (
         <Box>
           <Typography level='body-sm' color='text.secondary' sx={{ mb: 2 }}>

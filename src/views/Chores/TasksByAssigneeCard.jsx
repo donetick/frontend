@@ -1,6 +1,7 @@
 import { BarChart, Person } from '@mui/icons-material'
 import { Avatar, Box, Sheet, Typography } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import EmptyState from '../../components/common/EmptyState'
 import { useCircleMembers } from '../../queries/UserQueries'
 import { TASK_COLOR } from '../../utils/Colors'
 import { resolvePhotoURL } from '../../utils/Helpers'
@@ -127,10 +128,13 @@ const TasksByAssigneeCard = ({ chores = [] }) => {
           mb: 1,
         }}
       >
-        <Person sx={{ fontSize: 48, opacity: 0.3, mb: 1 }} />
-        <Typography level='body-sm' color='neutral'>
-          No assigned tasks found
-        </Typography>
+        <EmptyState
+          variant='no-results'
+          size='sm'
+          icon={<Person />}
+          title='No one has tasks yet'
+          description='Assign a task to someone in your circle and their workload shows up here.'
+        />
       </Sheet>
     )
   }

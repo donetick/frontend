@@ -20,17 +20,16 @@ import {
 import {
   Avatar,
   Box,
-  Button,
   Card,
   Chip,
   Container,
   Divider,
   Grid,
-  Link,
   Stack,
   Typography,
 } from '@mui/joy'
 import React, { useEffect, useMemo, useState } from 'react'
+import EmptyState from '../../components/common/EmptyState'
 import FilterBar from '../../components/common/FilterBar'
 import { useFilter } from '../../hooks/useFilter'
 
@@ -992,54 +991,21 @@ const UserActivites = () => {
 
       {/* Conditional Content Based on Data Availability */}
       {!choresData.res?.length > 0 || !choresHistory?.length > 0 ? (
-        <Container
-          maxWidth='md'
-          sx={{
-            textAlign: 'center',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexDirection: 'column',
-            height: '50vh',
-          }}
-        >
-          <EventBusy
-            sx={{
-              fontSize: '6rem',
-              mb: 1,
-            }}
-          />
-
-          <Typography level='h3' gutterBottom>
-            No activities found
-          </Typography>
-          <Typography level='body1' sx={{ mb: 1 }}>
-            No activities found for{' '}
-            <Typography
-              component='span'
-              sx={{ fontWeight: 600, color: 'primary.500' }}
-            >
-              {selectedUser === undefined || selectedUser === 'all'
-                ? 'All Users'
-                : circleUsers.find(user => user.userId === selectedUser)
-                    ?.displayName || 'Unknown User'}
-            </Typography>{' '}
-            in the{' '}
-            <Typography
-              component='span'
-              sx={{ fontWeight: 600, color: 'primary.500' }}
-            >
-              {tabValue === 365 ? 'All Time' : `Last ${tabValue} Days`}
-            </Typography>
-            .
-          </Typography>
-          <Typography level='body-sm' sx={{ color: 'text.secondary', mb: 2 }}>
-            Try selecting a different time period or user filter above.
-          </Typography>
-          <Button variant='soft' sx={{ mt: 2 }}>
-            <Link to='/chores'>Go back to chores</Link>
-          </Button>
-        </Container>
+        <EmptyState
+          variant='no-results'
+          fullHeight
+          icon={<EventBusy />}
+          title='No activity in this range'
+          description={`Nothing was completed by ${
+            selectedUser === undefined || selectedUser === 'all'
+              ? 'anyone in your circle'
+              : circleUsers.find(user => user.userId === selectedUser)
+                  ?.displayName || 'this member'
+          } ${
+            tabValue === 365 ? 'so far' : `in the last ${tabValue} days`
+          }. Try a wider time range or a different member.`}
+          primaryAction={{ label: 'Back to tasks', to: '/chores' }}
+        />
       ) : (
         <>
           {/* Main Content Area - Mobile: Stack vertically, Desktop: Side by side */}

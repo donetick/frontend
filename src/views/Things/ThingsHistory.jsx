@@ -2,6 +2,7 @@ import {
   Analytics,
   BarChart,
   CallReceived,
+  CloudOff,
   EventBusy,
   Schedule,
   Speed,
@@ -25,7 +26,7 @@ import {
 } from '@mui/joy'
 import { useTheme } from '@mui/joy/styles'
 import moment from 'moment'
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import {
   Line,
@@ -35,6 +36,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
+import EmptyState from '../../components/common/EmptyState'
 import { useThingHistory } from '../../queries/ThingQueries'
 import LoadingComponent from '../components/Loading'
 
@@ -49,6 +51,7 @@ const ThingsHistory = () => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    refetch,
   } = useThingHistory(id)
 
   // Flatten all pages of history data
@@ -152,35 +155,23 @@ const ThingsHistory = () => {
 
   if (error || !thingsHistory || thingsHistory.length === 0) {
     return (
-      <Container
-        maxWidth='md'
-        sx={{
-          textAlign: 'center',
-          display: 'flex',
-          // make sure the content is centered vertically:
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexDirection: 'column',
-          height: '50vh',
-        }}
-      >
-        <EventBusy
-          sx={{
-            fontSize: '6rem',
-            // color: 'text.disabled',
-            mb: 1,
-          }}
+      <Container maxWidth='md'>
+        <EmptyState
+          variant={error ? 'error' : 'empty'}
+          fullHeight
+          icon={error ? <CloudOff /> : <EventBusy />}
+          title={error ? "Couldn't load this history" : 'No history yet'}
+          description={
+            error
+              ? 'We could not reach the server. Check your connection and try again.'
+              : "Each time this thing's value changes, the change is recorded here."
+          }
+          primaryAction={
+            error
+              ? { label: 'Try again', onClick: () => refetch() }
+              : { label: 'Back to things', to: '/things' }
+          }
         />
-
-        <Typography level='h3' gutterBottom>
-          No history found
-        </Typography>
-        <Typography level='body1'>
-          It looks like there is no history for this thing yet.
-        </Typography>
-        <Button variant='soft' sx={{ mt: 2 }}>
-          <Link to='/things'>Go back to things</Link>
-        </Button>
       </Container>
     )
   }
