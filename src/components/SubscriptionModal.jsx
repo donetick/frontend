@@ -1,16 +1,8 @@
 import { Check, Star } from '@mui/icons-material'
-import {
-  Box,
-  Button,
-  Card,
-  Chip,
-  Divider,
-  Modal,
-  ModalDialog,
-  Radio,
-  Typography,
-} from '@mui/joy'
+import { Box, Card, Chip, Divider, Radio, Typography } from '@mui/joy'
 import { useState } from 'react'
+import AppModal from './common/AppModal'
+import ModalActions from './common/ModalActions'
 import { useNotification } from '../service/NotificationProvider'
 import { GetSubscriptionSession } from '../utils/Fetcher'
 
@@ -76,183 +68,158 @@ const SubscriptionModal = ({ open, onClose }) => {
   }
 
   return (
-    <Modal open={open} onClose={onClose}>
-      <ModalDialog
-        layout='center'
-        sx={{
-          width: 600,
-          maxWidth: '95vw',
-          maxHeight: '95vh',
-          overflow: 'auto',
-          p: 0,
-        }}
-      >
-        <Box sx={{ p: 4 }}>
-          {/* Header */}
-          <Box sx={{ textAlign: 'center', mb: 4 }}>
-            <Typography level='h3' sx={{ mb: 1 }}>
-              Upgrade to Plus
-            </Typography>
-          </Box>
-
-          {/* Features List */}
-          <Box sx={{ mb: 2 }}>
-            <Typography level='title-lg' sx={{ mb: 2 }}>
-              What&apos;s included:
-            </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-              {features.map((feature, index) => (
-                <Box
-                  key={index}
-                  sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
-                >
-                  <Check color='success' sx={{ fontSize: 20 }} />
-                  <Typography level='body-md'>{feature}</Typography>
-                </Box>
-              ))}
+    <AppModal
+      open={open}
+      onClose={onClose}
+      title='Upgrade to Plus'
+      description='Unlock reminders, rich task details, and advanced automation.'
+      size='lg'
+      closeOnBackdrop={!isLoading}
+      closeOnEscape={!isLoading}
+      footer={
+        <ModalActions
+          stackOnMobile
+          secondary={{ label: 'Cancel', onClick: onClose, disabled: isLoading }}
+          primary={{
+            label: 'Subscribe',
+            onClick: handleSubscribe,
+            loading: isLoading,
+          }}
+        />
+      }
+    >
+      {/* Features List */}
+      <Box sx={{ mb: 2 }}>
+        <Typography level='title-lg' sx={{ mb: 2 }}>
+          What&apos;s included:
+        </Typography>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          {features.map((feature, index) => (
+            <Box
+              key={index}
+              sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
+            >
+              <Check color='success' sx={{ fontSize: 20 }} />
+              <Typography level='body-md'>{feature}</Typography>
             </Box>
-          </Box>
-          <Divider sx={{ my: 3 }} />
-
-          {/* Plan Selection */}
-          <Box
-            sx={{ display: 'flex', flexDirection: 'column', gap: 1.2, mb: 4 }}
-          >
-            {Object.entries(plans).map(([key, plan]) => (
-              <Card
-                key={key}
-                color={selectedPlan === key ? 'primary' : 'neutral'}
-                onClick={() => setSelectedPlan(key)}
-                sx={{
-                  width: '100%',
-                  minHeight: 48,
-                  maxHeight: 64,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  mb: 0.2,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  px: 2.5,
-                  py: 1.2,
-                  position: 'relative',
-                  overflow: 'visible',
-                }}
-              >
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 2,
-                    justifyContent: 'flex-start',
-                    width: '100%',
-                  }}
-                >
-                  <Radio
-                    checked={selectedPlan === key}
-                    onChange={() => setSelectedPlan(key)}
-                    value={key}
-                    name='subscription-plan'
-                    color='primary'
-                    sx={{ mr: 1 }}
-                  />
-                  <Typography level='body-md' sx={{ fontWeight: 600 }}>
-                    {key.charAt(0).toUpperCase() + key.slice(1)}
-                  </Typography>
-                  <Typography level='body-sm' sx={{ fontWeight: 500, ml: 1 }}>
-                    {plan.price}
-                    <span style={{ color: '#888', fontWeight: 400 }}>
-                      {' '}
-                      / {plan.period}
-                    </span>
-                  </Typography>
-                </Box>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 0.5,
-                    position: 'absolute',
-                    right: 16,
-                    top: -18,
-                  }}
-                >
-                  {plan.popular && (
-                    <Chip
-                      variant='solid'
-                      color='warning'
-                      size='sm'
-                      startDecorator={<Star />}
-                      sx={{
-                        fontWeight: 600,
-                        fontSize: 12,
-                        px: 1,
-                        py: 0.1,
-                        boxShadow: 2,
-                        mt: 0.8,
-                      }}
-                    >
-                      Most Popular
-                    </Chip>
-                  )}
-                  {plan.savings && (
-                    <Chip
-                      variant='soft'
-                      color='success'
-                      size='sm'
-                      sx={{
-                        fontWeight: 600,
-                        fontSize: 12,
-                        px: 1,
-                        py: 0.1,
-                        boxShadow: 2,
-                        mt: 0.8,
-                      }}
-                    >
-                      {plan.savings}
-                    </Chip>
-                  )}
-                </Box>
-              </Card>
-            ))}
-          </Box>
-
-          {/* Action Buttons */}
-          <Box
-            sx={{ display: 'flex', flexDirection: 'column', gap: 1.2, mt: 2 }}
-          >
-            <Button
-              variant='solid'
-              color='primary'
-              onClick={handleSubscribe}
-              loading={isLoading}
-              fullWidth
-              size='lg'
-              sx={{ mb: 1 }}
-            >
-              Subscribe
-            </Button>
-            <Button
-              variant='plain'
-              onClick={onClose}
-              disabled={isLoading}
-              fullWidth
-            >
-              Cancel
-            </Button>
-          </Box>
-
-          {/* Footer */}
-          <Typography
-            level='body-xs'
-            color='neutral'
-            sx={{ textAlign: 'center', mt: 3 }}
-          >
-            Cancel anytime. No hidden fees. Secure payment powered by Stripe.
-          </Typography>
+          ))}
         </Box>
-      </ModalDialog>
-    </Modal>
+      </Box>
+      <Divider sx={{ my: 3 }} />
+
+      {/* Plan Selection */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.2, mb: 4 }}>
+        {Object.entries(plans).map(([key, plan]) => (
+          <Card
+            component='label'
+            htmlFor={`subscription-plan-${key}`}
+            key={key}
+            color={selectedPlan === key ? 'primary' : 'neutral'}
+            onClick={() => setSelectedPlan(key)}
+            sx={{
+              width: '100%',
+              minHeight: 48,
+              maxHeight: 64,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              mb: 0.2,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              px: 2.5,
+              py: 1.2,
+              position: 'relative',
+              overflow: 'visible',
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 2,
+                justifyContent: 'flex-start',
+                width: '100%',
+              }}
+            >
+              <Radio
+                id={`subscription-plan-${key}`}
+                checked={selectedPlan === key}
+                onChange={() => setSelectedPlan(key)}
+                value={key}
+                name='subscription-plan'
+                color='primary'
+                sx={{ mr: 1 }}
+              />
+              <Typography level='body-md' sx={{ fontWeight: 600 }}>
+                {key.charAt(0).toUpperCase() + key.slice(1)}
+              </Typography>
+              <Typography level='body-sm' sx={{ fontWeight: 500, ml: 1 }}>
+                {plan.price}
+                <span style={{ color: '#888', fontWeight: 400 }}>
+                  {' '}
+                  / {plan.period}
+                </span>
+              </Typography>
+            </Box>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.5,
+                position: 'absolute',
+                right: 16,
+                top: -18,
+              }}
+            >
+              {plan.popular && (
+                <Chip
+                  variant='solid'
+                  color='warning'
+                  size='sm'
+                  startDecorator={<Star />}
+                  sx={{
+                    fontWeight: 600,
+                    fontSize: 12,
+                    px: 1,
+                    py: 0.1,
+                    boxShadow: 2,
+                    mt: 0.8,
+                  }}
+                >
+                  Most Popular
+                </Chip>
+              )}
+              {plan.savings && (
+                <Chip
+                  variant='soft'
+                  color='success'
+                  size='sm'
+                  sx={{
+                    fontWeight: 600,
+                    fontSize: 12,
+                    px: 1,
+                    py: 0.1,
+                    boxShadow: 2,
+                    mt: 0.8,
+                  }}
+                >
+                  {plan.savings}
+                </Chip>
+              )}
+            </Box>
+          </Card>
+        ))}
+      </Box>
+
+      {/* Footer */}
+      <Typography
+        level='body-xs'
+        color='neutral'
+        sx={{ textAlign: 'center', mt: 3 }}
+      >
+        Cancel anytime. No hidden fees. Secure payment powered by Stripe.
+      </Typography>
+    </AppModal>
   )
 }
 

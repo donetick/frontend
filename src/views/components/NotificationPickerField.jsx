@@ -1,6 +1,7 @@
 import { Close, NotificationsNone } from '@mui/icons-material'
 import { Box, Button, IconButton, Typography } from '@mui/joy'
 import { useEffect, useRef, useState } from 'react'
+import ModalActions from '../../components/common/ModalActions'
 import NotificationTemplate from '../../components/NotificationTemplate'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 
@@ -11,8 +12,7 @@ const getDisplayLabel = templates => {
     const n = templates[0]
     const numericValue = Number(n.value)
     if (numericValue === 0) return 'On due date'
-    const unitName =
-      n.unit === 'm' ? 'min' : n.unit === 'h' ? 'hr' : 'day'
+    const unitName = n.unit === 'm' ? 'min' : n.unit === 'h' ? 'hr' : 'day'
     const absValue = Math.abs(numericValue)
     const plural = absValue !== 1 ? 's' : ''
     return `${absValue} ${unitName}${plural} ${numericValue < 0 ? 'before' : 'after'}`
@@ -48,33 +48,22 @@ const NotificationPickerField = ({
   }
 
   const footer = (
-    <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-      {hasNotifications && (
-        <Button
-          variant='plain'
-          color='danger'
-          size='lg'
-          onClick={() => {
-            onClear?.()
-            setIsOpen(false)
-          }}
-          sx={{ mr: 'auto' }}
-        >
-          Remove all
-        </Button>
-      )}
-      <Button
-        variant='outlined'
-        color='neutral'
-        size='lg'
-        onClick={() => setIsOpen(false)}
-      >
-        Cancel
-      </Button>
-      <Button variant='solid' color='primary' size='lg' onClick={handleSave}>
-        Apply
-      </Button>
-    </Box>
+    <ModalActions
+      tertiary={
+        hasNotifications
+          ? {
+              label: 'Remove all',
+              color: 'danger',
+              onClick: () => {
+                onClear?.()
+                setIsOpen(false)
+              },
+            }
+          : undefined
+      }
+      secondary={{ label: 'Cancel', onClick: () => setIsOpen(false) }}
+      primary={{ label: 'Apply', onClick: handleSave }}
+    />
   )
 
   return (
@@ -116,6 +105,7 @@ const NotificationPickerField = ({
 
         {hasNotifications && onClear && (
           <IconButton
+            aria-label='Remove reminders'
             size='sm'
             variant='soft'
             color='danger'
@@ -125,11 +115,9 @@ const NotificationPickerField = ({
             }}
             sx={{
               position: 'absolute',
-              top: -12,
-              right: -16,
+              top: -18,
+              right: -18,
               zIndex: 10,
-              maxHeight: 18,
-              maxWidth: 18,
               borderRadius: '50%',
               '&:hover': { bgcolor: 'danger.softBg' },
             }}

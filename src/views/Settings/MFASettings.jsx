@@ -2,12 +2,12 @@ import { CheckCircle, Security, Smartphone } from '@mui/icons-material'
 import { Alert, Box, Button, Card, Input, Stack, Typography } from '@mui/joy'
 import QRCode from 'qrcode'
 import { useEffect, useState } from 'react'
-import { useResponsiveModal } from '../../hooks/useResponsiveModal'
+import AppModal from '../../components/common/AppModal'
+import ModalActions from '../../components/common/ModalActions'
 import {
   ConfirmMFA,
   DisableMFA,
   GetMFAStatus,
-  RegenerateBackupCodes,
   SetupMFA,
 } from '../../utils/Fetcher'
 import LoadingComponent from '../components/Loading'
@@ -159,24 +159,6 @@ const MFASettings = () => {
     }
   }
 
-  const handleRegenerateBackupCodes = async () => {
-    try {
-      setError('')
-      const response = await RegenerateBackupCodes()
-      if (response.ok) {
-        const data = await response.json()
-        setBackupCodes(data.backupCodes)
-        setBackupCodesModalOpen(true)
-        setSuccess('New backup codes have been generated!')
-      } else {
-        setError('Failed to regenerate backup codes. Please try again.')
-      }
-    } catch (error) {
-      setError('Failed to regenerate backup codes. Please try again.')
-      console.error('Error regenerating backup codes:', error)
-    }
-  }
-
   const closeSetupModal = () => {
     setSetupModalOpen(false)
     setSetupStep(1)
@@ -254,7 +236,7 @@ const MFASettings = () => {
             </Box>
           </Box>
         </Card>
-        {/* 
+        {/*
       {mfaEnabled && (
         <Card variant='outlined'>
           <Box className='flex items-center justify-between'>
@@ -281,12 +263,39 @@ const MFASettings = () => {
       )} */}
 
         {/* Setup MFA Modal */}
-        <ResponsiveModal
+        <AppModal
           open={setupModalOpen}
           onClose={closeSetupModal}
-          size='md'
-          fullWidth={false}
           title='Set up Multi-Factor Authentication'
+          size='md'
+          footer={
+            setupStep === 1 ? (
+              <ModalActions
+                secondary={{ label: 'Cancel', onClick: closeSetupModal }}
+                primary={{
+                  label: "I've added the account",
+                  onClick: () => setSetupStep(2),
+                  startDecorator: <Smartphone />,
+                }}
+              />
+            ) : setupStep === 2 ? (
+              <ModalActions
+                secondary={{ label: 'Back', onClick: () => setSetupStep(1) }}
+                primary={{
+                  label: 'Verify & Enable',
+                  onClick: handleConfirmMFA,
+                  disabled: verificationCode.length !== 6,
+                }}
+              />
+            ) : (
+              <ModalActions
+                primary={{
+                  label: "I've saved my backup codes",
+                  onClick: closeSetupModal,
+                }}
+              />
+            )
+          }
         >
           {setupStep === 1 && setupData && (
             <Stack spacing={3}>
@@ -332,14 +341,6 @@ const MFASettings = () => {
                   {setupData.secret}
                 </Typography>
               </Alert>
-
-              <Button
-                color='primary'
-                onClick={() => setSetupStep(2)}
-                startDecorator={<Smartphone />}
-              >
-                I've added the account to my app
-              </Button>
             </Stack>
           )}
 
@@ -375,24 +376,6 @@ const MFASettings = () => {
               />
 
               {error && <Alert color='danger'>{error}</Alert>}
-
-              <Box className='flex gap-2'>
-                <Button
-                  variant='outlined'
-                  onClick={() => setSetupStep(1)}
-                  sx={{ flex: 1 }}
-                >
-                  Back
-                </Button>
-                <Button
-                  color='primary'
-                  onClick={handleConfirmMFA}
-                  disabled={verificationCode.length !== 6}
-                  sx={{ flex: 1 }}
-                >
-                  Verify & Enable
-                </Button>
-              </Box>
             </Stack>
           )}
 
@@ -428,21 +411,29 @@ const MFASettings = () => {
                   ))}
                 </Box>
               </Card>
-
-              <Button color='primary' onClick={closeSetupModal}>
-                I've saved my backup codes
-              </Button>
             </Stack>
           )}
-        </ResponsiveModal>
+        </AppModal>
 
         {/* Disable MFA Modal */}
-        <ResponsiveModal
+        <AppModal
           open={disableModalOpen}
           onClose={closeDisableModal}
-          size='sm'
-          fullWidth={false}
           title='Disable Multi-Factor Authentication'
+          size='sm'
+          role='alertdialog'
+          closeOnBackdrop={false}
+          footer={
+            <ModalActions
+              secondary={{ label: 'Cancel', onClick: closeDisableModal }}
+              primary={{
+                label: 'Disable MFA',
+                color: 'danger',
+                onClick: handleDisableMFA,
+                disabled: disableCode.length !== 6,
+              }}
+            />
+          }
         >
           <Stack spacing={3}>
             <Alert color='warning'>
@@ -480,34 +471,23 @@ const MFASettings = () => {
             />
 
             {error && <Alert color='danger'>{error}</Alert>}
-
-            <Box className='flex gap-2'>
-              <Button
-                variant='outlined'
-                onClick={closeDisableModal}
-                sx={{ flex: 1 }}
-              >
-                Cancel
-              </Button>
-              <Button
-                color='danger'
-                onClick={handleDisableMFA}
-                disabled={disableCode.length !== 6}
-                sx={{ flex: 1 }}
-              >
-                Disable MFA
-              </Button>
-            </Box>
           </Stack>
-        </ResponsiveModal>
+        </AppModal>
 
         {/* Backup Codes Modal */}
-        <ResponsiveModal
+        <AppModal
           open={backupCodesModalOpen}
           onClose={() => setBackupCodesModalOpen(false)}
-          size='sm'
-          fullWidth={false}
           title='New Backup Codes'
+          size='sm'
+          footer={
+            <ModalActions
+              primary={{
+                label: "I've saved my backup codes",
+                onClick: () => setBackupCodesModalOpen(false),
+              }}
+            />
+          }
         >
           <Stack spacing={3}>
             <Alert color='warning'>
@@ -530,15 +510,8 @@ const MFASettings = () => {
                 ))}
               </Box>
             </Card>
-
-            <Button
-              color='primary'
-              onClick={() => setBackupCodesModalOpen(false)}
-            >
-              I've saved my backup codes
-            </Button>
           </Stack>
-        </ResponsiveModal>
+        </AppModal>
       </div>
     </SettingsLayout>
   )

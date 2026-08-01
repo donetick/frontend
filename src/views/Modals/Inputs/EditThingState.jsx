@@ -1,12 +1,6 @@
-import {
-    Box,
-    Button,
-    FormControl,
-    FormHelperText,
-    Input,
-    Typography,
-} from '@mui/joy'
+import { FormControl, FormHelperText, Input, Typography } from '@mui/joy'
 import { useState } from 'react'
+import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
 function EditThingStateModal({ isOpen, onClose, onSave, currentThing }) {
@@ -31,7 +25,7 @@ function EditThingStateModal({ isOpen, onClose, onSave, currentThing }) {
       return
     }
     onSave({
-      name,
+      name: currentThing?.name,
       type: currentThing?.type,
       id: currentThing?.id,
       state: state || null,
@@ -43,9 +37,14 @@ function EditThingStateModal({ isOpen, onClose, onSave, currentThing }) {
     <ResponsiveModal
       open={isOpen}
       onClose={onClose}
-      size='lg'
-      fullWidth={true}
+      size='sm'
       title='Update state'
+      footer={
+        <ModalActions
+          secondary={{ label: 'Cancel', onClick: onClose }}
+          primary={{ label: 'Update', onClick: handleSave }}
+        />
+      }
     >
       <FormControl>
         <Typography>Value</Typography>
@@ -57,15 +56,6 @@ function EditThingStateModal({ isOpen, onClose, onSave, currentThing }) {
         />
         <FormHelperText color='danger'>{errors.state}</FormHelperText>
       </FormControl>
-
-      <Box display={'flex'} justifyContent={'space-around'} mt={1}>
-        <Button size='lg' onClick={handleSave} fullWidth sx={{ mr: 1 }}>
-          {currentThing?.id ? 'Update' : 'Create'}
-        </Button>
-        <Button size='lg' onClick={onClose} variant='outlined'>
-          {currentThing?.id ? 'Cancel' : 'Close'}
-        </Button>
-      </Box>
     </ResponsiveModal>
   )
 }

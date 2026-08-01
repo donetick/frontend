@@ -1,6 +1,7 @@
-import { Close, HelpOutline, Keyboard } from '@mui/icons-material'
-import { Box, Button, Card, Divider, IconButton, Typography } from '@mui/joy'
+import { HelpOutline } from '@mui/icons-material'
+import { Box, Card, IconButton, Typography } from '@mui/joy'
 import { useState } from 'react'
+import ModalActions from '../../components/common/ModalActions'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 
 const MultiSelectHelp = ({ isVisible = true }) => {
@@ -28,37 +29,24 @@ const MultiSelectHelp = ({ isVisible = true }) => {
           borderRadius: '50%',
           boxShadow: 'lg',
         }}
+        aria-label='Show keyboard shortcuts'
         title='Show keyboard shortcuts'
       >
         <HelpOutline />
       </IconButton>
 
       {/* Help Modal */}
-      <ResponsiveModal open={isHelpOpen} onClose={() => setIsHelpOpen(false)}>
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            mb: 2,
-          }}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Keyboard color='primary' />
-            <Typography level='title-lg'>Multi-select Mode</Typography>
-          </Box>
-          <IconButton
-            variant='plain'
-            size='sm'
-            onClick={() => setIsHelpOpen(false)}
-          >
-            <Close />
-          </IconButton>
-        </Box>
-        <Typography level='body-md' sx={{ mb: 3, color: 'text.secondary' }}>
-          Use these keyboard shortcuts to work more efficiently with multiple
-          tasks:
-        </Typography>
+      <ResponsiveModal
+        open={isHelpOpen}
+        onClose={() => setIsHelpOpen(false)}
+        title='Multi-select Mode'
+        description='Use these keyboard shortcuts to work more efficiently.'
+        footer={
+          <ModalActions
+            primary={{ label: 'Got it', onClick: () => setIsHelpOpen(false) }}
+          />
+        }
+      >
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {/* Selection shortcuts */}
           <Card variant='soft' sx={{ p: 2 }}>
@@ -106,16 +94,6 @@ const MultiSelectHelp = ({ isVisible = true }) => {
               />
             </Box>
           </Card>
-        </Box>
-        <Divider sx={{ my: 3 }} />
-        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-          <Button
-            variant='soft'
-            onClick={() => setIsHelpOpen(false)}
-            sx={{ minWidth: 120 }}
-          >
-            Got it!
-          </Button>
         </Box>
       </ResponsiveModal>
     </>

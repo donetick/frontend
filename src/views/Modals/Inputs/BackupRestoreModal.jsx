@@ -1,6 +1,5 @@
 import {
   Box,
-  Button,
   Checkbox,
   CircularProgress,
   FormControl,
@@ -13,6 +12,7 @@ import {
   Typography,
 } from '@mui/joy'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { CreateBackup, RestoreBackup } from '../../../utils/Fetcher'
 
@@ -140,7 +140,6 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
           const response = await RestoreBackup(restoreEncryptionKey, backupData)
 
           if (response.ok) {
-            const data = await response.json()
             showNotification({
               type: 'success',
               message: 'Backup restored successfully. Please refresh the page.',
@@ -212,7 +211,7 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
           placeholder='Enter a strong encryption key'
         />
         <Typography level='body-xs' sx={{ mt: 0.5 }}>
-          Keep this key safe - you'll need it to restore your backup
+          Keep this key safe—you&apos;ll need it to restore your backup
         </Typography>
       </FormControl>
 
@@ -238,22 +237,6 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
           {error}
         </Typography>
       )}
-
-      <Box display='flex' justifyContent='space-between' gap={2}>
-        <Button size='lg' variant='outlined' onClick={handleClose} fullWidth>
-          Cancel
-        </Button>
-        <Button
-          size='lg'
-          color='primary'
-          onClick={handleCreateBackup}
-          loading={loading}
-          disabled={!encryptionKey.trim()}
-          fullWidth
-        >
-          Create Backup
-        </Button>
-      </Box>
     </Box>
   )
 
@@ -294,22 +277,6 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
           {error}
         </Typography>
       )}
-
-      <Box display='flex' justifyContent='space-between' gap={2}>
-        <Button size='lg' variant='outlined' onClick={handleClose} fullWidth>
-          Cancel
-        </Button>
-        <Button
-          size='lg'
-          color='warning'
-          onClick={handleRestore}
-          loading={loading}
-          disabled={!restoreEncryptionKey.trim() || !backupFile}
-          fullWidth
-        >
-          Restore Backup
-        </Button>
-      </Box>
     </Box>
   )
 
@@ -320,7 +287,28 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
       size='lg'
       fullWidth={true}
       unmountDelay={250}
-      title='🔄 Backup & Restore'
+      title='Backup & Restore'
+      closeOnBackdrop={!loading}
+      closeOnEscape={!loading}
+      footer={
+        <ModalActions
+          secondary={{
+            label: 'Cancel',
+            onClick: handleClose,
+            disabled: loading,
+          }}
+          primary={{
+            label: activeTab === 0 ? 'Create Backup' : 'Restore Backup',
+            color: activeTab === 0 ? 'primary' : 'warning',
+            onClick: activeTab === 0 ? handleCreateBackup : handleRestore,
+            loading,
+            disabled:
+              activeTab === 0
+                ? !encryptionKey.trim()
+                : !restoreEncryptionKey.trim() || !backupFile,
+          }}
+        />
+      }
     >
       {loading ? (
         <Box

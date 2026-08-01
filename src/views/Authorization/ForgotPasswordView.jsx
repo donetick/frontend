@@ -82,6 +82,7 @@ const ForgotPasswordView = () => {
         title='Check your email'
         subtitle={`If an account exists for ${email}, we've sent instructions for resetting your password.`}
         footer={<LegalLinks />}
+        logoSize={0}
       >
         <Box
           sx={{
@@ -112,6 +113,7 @@ const ForgotPasswordView = () => {
       title='Reset your password'
       subtitle="Enter your email and we'll send you a link to get back into your account."
       footer={<LegalLinks />}
+      logoSize={0}
     >
       <Box
         component='form'

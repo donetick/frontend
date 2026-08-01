@@ -1,6 +1,5 @@
 import {
   Box,
-  Button,
   Card,
   CircularProgress,
   FormControl,
@@ -10,13 +9,13 @@ import {
   Select,
   Typography,
 } from '@mui/joy'
-import { data } from 'autoprefixer'
 import { useCallback, useEffect, useState } from 'react'
+import ModalActions from '../../../components/common/ModalActions'
 import { useNavigate } from 'react-router-dom'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { CheckUserDeletion, DeleteUser } from '../../../utils/Fetcher'
 
-function UserDeletionModal({ isOpen, onClose, userProfile }) {
+function UserDeletionModal({ isOpen, onClose }) {
   const { ResponsiveModal } = useResponsiveModal()
   const Navigate = useNavigate()
   const [step, setStep] = useState(1) // 1: Warning, 2: Transfer, 3: Confirm
@@ -70,7 +69,8 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
         setError(data.error || 'Failed to check deletion requirements')
       }
     } catch (err) {
-      setError(data.error || 'Failed to check deletion requirements')
+      console.error('Failed to check deletion requirements:', err)
+      setError('Failed to check deletion requirements')
     } finally {
       setLoading(false)
     }
@@ -119,6 +119,7 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
         setError(data.message || 'Failed to delete account')
       }
     } catch (err) {
+      console.error('Failed to delete account:', err)
       setError('Failed to delete account')
     } finally {
       setLoading(false)
@@ -148,10 +149,6 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
 
   const renderWarningStep = () => (
     <>
-      <Typography level='h4' mb={2} color='danger'>
-        Delete Account
-      </Typography>
-
       <Typography level='body-md' mb={2}>
         <strong>This action cannot be undone.</strong> Deleting your account
         will permanently remove:
@@ -193,30 +190,11 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
           {error}
         </Typography>
       )}
-
-      <Box display='flex' justifyContent='space-between' mt={3} gap={2}>
-        <Button variant='outlined' onClick={() => handleClose(false)} fullWidth>
-          Cancel
-        </Button>
-        <Button
-          color='danger'
-          onClick={checkDeletionRequirements}
-          loading={loading}
-          disabled={!password}
-          fullWidth
-        >
-          Continue
-        </Button>
-      </Box>
     </>
   )
 
   const renderTransferStep = () => (
     <>
-      <Typography level='h4' mb={2} color='warning'>
-        Circle Ownership Transfer Required
-      </Typography>
-
       <Typography level='body-md' mb={3}>
         You own circles that require ownership transfer before deletion. Please
         select new owners:
@@ -253,29 +231,11 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
           </FormControl>
         </Card>
       ))}
-
-      <Box display='flex' justifyContent='space-between' mt={3} gap={2}>
-        <Button variant='outlined' onClick={() => handleClose(false)} fullWidth>
-          Cancel
-        </Button>
-        <Button
-          color='primary'
-          onClick={proceedToConfirmation}
-          disabled={circlesRequiringTransfer.length !== transferOptions.length}
-          fullWidth
-        >
-          Continue
-        </Button>
-      </Box>
     </>
   )
 
   const renderConfirmationStep = () => (
     <>
-      <Typography level='h4' mb={2} color='danger'>
-        Final Confirmation
-      </Typography>
-
       <Typography level='body-md' mb={3}>
         Please enter your password and type <strong>DELETE</strong> to confirm
         account deletion.
@@ -296,7 +256,7 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
       </FormControl>
 
       <FormControl sx={{ mb: 3 }}>
-        <FormLabel>Type "DELETE" to confirm</FormLabel>
+        <FormLabel>Type &quot;DELETE&quot; to confirm</FormLabel>
         <Input
           value={confirmation}
           onChange={e => setConfirmation(e.target.value)}
@@ -309,21 +269,6 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
           {error}
         </Typography>
       )}
-
-      <Box display='flex' justifyContent='space-between' gap={2}>
-        <Button variant='outlined' onClick={() => handleClose(false)} fullWidth>
-          Cancel
-        </Button>
-        <Button
-          color='danger'
-          onClick={executeUserDeletion}
-          loading={loading}
-          disabled={!password || confirmation !== 'DELETE'}
-          fullWidth
-        >
-          Delete Account
-        </Button>
-      </Box>
     </>
   )
 
@@ -345,8 +290,42 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
       open={isOpen}
       onClose={() => handleClose(false)}
       size='lg'
-      fullWidth={true}
-      title='Delete Account'
+      title={
+        step === 1
+          ? 'Delete Account'
+          : step === 2
+            ? 'Transfer Circle Ownership'
+            : 'Final Confirmation'
+      }
+      role={step === 3 ? 'alertdialog' : 'dialog'}
+      closeOnBackdrop={false}
+      footer={
+        !loading && (
+          <ModalActions
+            stackOnMobile
+            secondary={{
+              label: 'Cancel',
+              onClick: () => handleClose(false),
+            }}
+            primary={{
+              label: step === 3 ? 'Delete Account' : 'Continue',
+              color: step === 3 ? 'danger' : 'primary',
+              onClick:
+                step === 1
+                  ? checkDeletionRequirements
+                  : step === 2
+                    ? proceedToConfirmation
+                    : executeUserDeletion,
+              disabled:
+                step === 1
+                  ? !password
+                  : step === 2
+                    ? circlesRequiringTransfer.length !== transferOptions.length
+                    : !password || confirmation !== 'DELETE',
+            }}
+          />
+        )
+      }
     >
       {loading && step === 1 ? (
         <Box

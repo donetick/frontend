@@ -1,15 +1,33 @@
-import { Box, Button, Typography } from '@mui/joy'
+import { Box, Typography } from '@mui/joy'
+import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
 const NativeCancelSubscriptionModal = ({ isOpen, onClose }) => {
   const { ResponsiveModal } = useResponsiveModal()
 
   return (
-    <ResponsiveModal open={isOpen} onClose={onClose} size='md' fullWidth>
-      <Typography level='h4' sx={{ mb: 2 }}>
-        Cancel Subscription
-      </Typography>
-      <Box sx={{ p: 2 }}>
+    <ResponsiveModal
+      open={isOpen}
+      onClose={onClose}
+      size='lg'
+      title='Cancel Subscription'
+      footer={
+        <ModalActions
+          stackOnMobile
+          tertiary={{ label: 'Dismiss', onClick: onClose }}
+          secondary={{
+            label: "I'll cancel from my app store",
+            onClick: onClose,
+          }}
+          primary={{
+            label: 'Cancel desktop subscription',
+            color: 'danger',
+            onClick: () => onClose('desktop'),
+          }}
+        />
+      }
+    >
+      <Box>
         <Typography level='body-md' mb={3}>
           To cancel your subscription, please follow the instructions for your
           platform (you should cancel through the same platform you used to
@@ -84,8 +102,8 @@ const NativeCancelSubscriptionModal = ({ isOpen, onClose }) => {
             <strong>Important:</strong> You must cancel your subscription
             through the same platform where you originally subscribed. If you
             subscribed through the iOS App Store or Google Play Store (even if
-            you're now using the web/desktop version), you must cancel through
-            that original platform using the instructions above.
+            you&apos;re now using the web/desktop version), you must cancel
+            through that original platform using the instructions above.
           </Typography>
         </Box>
 
@@ -93,24 +111,6 @@ const NativeCancelSubscriptionModal = ({ isOpen, onClose }) => {
           Your subscription will remain active until the end of your current
           billing period.
         </Typography>
-
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <Button size='lg' onClick={onClose} variant='outlined' fullWidth>
-            I'll cancel from my app store
-          </Button>
-          <Button
-            size='lg'
-            onClick={() => onClose('desktop')}
-            variant='solid'
-            color='danger'
-            fullWidth
-          >
-            I subscribed via desktop - Cancel now
-          </Button>
-          <Button size='lg' onClick={onClose} fullWidth>
-            Dismiss
-          </Button>
-        </Box>
       </Box>
     </ResponsiveModal>
   )

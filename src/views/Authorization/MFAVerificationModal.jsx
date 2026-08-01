@@ -2,6 +2,7 @@ import { Security } from '@mui/icons-material'
 import { Alert, Box, Button, Input, Link, Stack, Typography } from '@mui/joy'
 import { useState } from 'react'
 
+import ModalActions from '../../components/common/ModalActions'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import { VerifyMFA } from '../../utils/Fetcher'
 import { authButtonSx, authInputSx } from './authStyles'
@@ -36,9 +37,10 @@ const MFAVerificationModal = ({
         onSuccess(data)
       } else {
         const errorData = await response.json()
-        setError(
-          errorData.message || 'Invalid verification code. Please try again.',
-        )
+        const message =
+          errorData.message || 'Invalid verification code. Please try again.'
+        setError(message)
+        onError?.(message)
       }
     } catch (error) {
       // A wrong code is shown inline; a failed request is escalated to the

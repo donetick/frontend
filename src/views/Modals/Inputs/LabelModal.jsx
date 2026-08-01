@@ -1,7 +1,8 @@
-import { Box, Button, FormControl, Input, Typography } from '@mui/joy'
+import { Box, FormControl, Input, Typography } from '@mui/joy'
 import { useEffect, useState } from 'react'
 
 import { useQueryClient } from '@tanstack/react-query'
+import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal.js'
 import { useNotification } from '../../../service/NotificationProvider.jsx'
 import LABEL_COLORS from '../../../utils/Colors.jsx'
@@ -90,14 +91,13 @@ function LabelModal({ isOpen, onClose, label }) {
       fullWidth={true}
       title={label ? 'Edit Label' : 'Add Label'}
       footer={
-        <Box display='flex' justifyContent='space-around' mt={1}>
-          <Button size='lg' onClick={handleSave} fullWidth sx={{ mr: 1 }}>
-            {label ? 'Save Changes' : 'Add Label'}
-          </Button>
-          <Button size='lg' onClick={onClose} variant='outlined'>
-            Cancel
-          </Button>
-        </Box>
+        <ModalActions
+          secondary={{ label: 'Cancel', onClick: onClose }}
+          primary={{
+            label: label ? 'Save Changes' : 'Add Label',
+            onClick: handleSave,
+          }}
+        />
       }
     >
       <Box>
@@ -120,12 +120,18 @@ function LabelModal({ isOpen, onClose, label }) {
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
             {LABEL_COLORS.map(colorOption => (
               <Box
+                component='button'
+                type='button'
                 key={colorOption.value}
+                aria-label={`Select ${colorOption.name}`}
+                aria-pressed={color === colorOption.value}
                 title={colorOption.name}
                 onClick={() => setColor(colorOption.value)}
                 sx={{
-                  width: 26,
-                  height: 26,
+                  width: 40,
+                  height: 40,
+                  border: 0,
+                  p: 0,
                   borderRadius: '50%',
                   background: colorOption.value,
                   cursor: 'pointer',
