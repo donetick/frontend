@@ -1210,8 +1210,8 @@ const historyStackKeyframes = {
 export const TakesTurnsVignette = () => (
   <Stage>
     <MiniChoreCard
-      title='Kitchen deep clean'
-      due='Due Sat'
+      title='🗑️ Take bins to the curb'
+      due='Due Tomorrow'
       repeat='Every week'
       footer={
         <Cycler cycleMs={NAG_CYCLE_MS}>

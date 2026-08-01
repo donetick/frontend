@@ -50,14 +50,14 @@ const SLIDES = [
   },
   {
     key: 'circle',
-    title: 'Nobody has to be the nag',
-    body: 'Invite the family, let chores rotate on their own, and see who did what. Tap an NFC tag on the washer to finish one on the spot.',
+    title: 'Everyone gets a turn, No more arguing',
+    body: 'Chores rotate in the order you pick, or randomly and it remembers who did it last, so turns stay fair.',
     Visual: TakesTurnsVignette,
   },
   {
     key: 'reminders',
-    title: 'A nudge at the right moment',
-    body: "A reminder before something's due, a heads-up when someone else finishes theirs, and today's list right on your home screen.",
+    title: 'Right when you need it and Widgets!',
+    body: "A reminder before it's due, or send heads-up when someone forgets their chores, and a widget on your home screen showing today's list",
     Visual: RemindersVignette,
     permission: true,
   },
