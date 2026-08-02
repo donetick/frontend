@@ -34,8 +34,8 @@ const AppContent = () => {
   const { showNotification } = useNotification()
   useSyncOnReconnect()
 
-  // First-launch native users see the onboarding flow before anything else.
-  useOnboardingGate()
+  // // First-launch native users see the onboarding flow before anything else.
+  // useOnboardingGate()
 
   // Initialize status bar with theme-aware configuration
   useStatusBar()

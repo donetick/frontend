@@ -35,10 +35,11 @@ const SignupView = () => {
           // Invalidate user profile queries to ensure fresh data
           queryClient.invalidateQueries(['userProfile'])
 
-          // New accounts get asked how they found Donetick before circle
-          // setup, while it's still fresh. Returning users signing in go
-          // straight to their tasks.
-          Navigate('/heard-about', { replace: true })
+          // The "how did you hear about us" step (/heard-about) is
+          // temporarily skipped; new accounts go straight to circle setup.
+          // Re-enable by navigating to '/heard-about' again — that view
+          // already forwards to '/circle-setup' when done.
+          Navigate('/circle-setup', { replace: true })
         })
       } else {
         console.log('Login failed', response)
