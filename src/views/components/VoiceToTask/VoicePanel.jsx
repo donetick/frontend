@@ -470,20 +470,11 @@ const VoicePanel = ({
       : 'Hold to speak · quick tap for hands-free'
 
   return (
-    <Box
-      sx={{
-        borderRadius: 'md',
-        border: '1px solid',
-        borderColor: 'primary.outlinedBorder',
-        overflow: 'hidden',
-        bgcolor: 'background.level1',
-      }}
-    >
+    <Box>
       {/* ── Header ── */}
       <Box
         sx={{
-          px: 1.5,
-          pt: 1.25,
+          pt: 0.5,
           display: 'flex',
           alignItems: 'center',
           gap: 1,
@@ -506,7 +497,7 @@ const VoicePanel = ({
 
       {/* ── Permission denied ── */}
       {phase === 'denied' && (
-        <Box sx={{ p: 2 }}>
+        <Box sx={{ py: 2 }}>
           <Box
             sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1.5 }}
           >
@@ -532,7 +523,6 @@ const VoicePanel = ({
         <Box
           ref={segmentsScrollRef}
           sx={{
-            px: 1.5,
             pt: 1.25,
             display: 'flex',
             flexDirection: 'column',
@@ -556,14 +546,13 @@ const VoicePanel = ({
 
       {/* ── Live transcript ── */}
       {isListening && (
-        <Box sx={{ px: 1.5, pt: 1.25 }}>
+        <Box sx={{ pt: 1.25 }}>
           <Box
             sx={{
               minHeight: 44,
               borderRadius: 'md',
               border: '1px dashed',
               borderColor: 'neutral.outlinedBorder',
-              bgcolor: 'background.surface',
               px: 1.25,
               py: 1,
             }}
