@@ -317,27 +317,6 @@ const ChoreToolbar = ({
     return `${prefix}${typeLabel} (${rawValues.length})`
   }
 
-  const clearConditionAtIndex = index => {
-    const nextConditions = (tempFilter?.conditions || []).filter(
-      (_condition, conditionIndex) => conditionIndex !== index,
-    )
-
-    if (nextConditions.length === 0) {
-      setLocalSelections(defaultSelections())
-      clearTempFilter?.()
-      return
-    }
-
-    const nextFilter = {
-      ...tempFilter,
-      operator: tempFilter?.operator || 'AND',
-      conditions: nextConditions,
-    }
-
-    setLocalSelections(conditionsToSelections(nextConditions))
-    applyTempFilter?.(nextFilter)
-  }
-
   const activeSavedFilter = savedFilterActive
     ? savedFilters.find(f => f.id === activeFilterId)
     : null
@@ -346,17 +325,61 @@ const ChoreToolbar = ({
     ? activeSavedFilter?.conditions || []
     : tempFilter?.conditions || []
 
+  const savedFilterEditMeta = activeSavedFilter
+    ? {
+        name: activeSavedFilter.name,
+        description: activeSavedFilter.description,
+        sourceFilterId: activeSavedFilter.id,
+        sourceFilterName: activeSavedFilter.name,
+        sourceFilterDescription: activeSavedFilter.description,
+        sourceFilterColor: activeSavedFilter.color,
+        isEditingSavedFilter: true,
+      }
+    : null
+
+  const clearConditionAtIndex = index => {
+    const nextConditions = activeChipConditions.filter(
+      (_condition, conditionIndex) => conditionIndex !== index,
+    )
+
+    if (nextConditions.length === 0) {
+      setLocalSelections(defaultSelections())
+      clearTempFilter?.()
+      // A saved filter still owns the view until it's toggled back off.
+      if (savedFilterActive) onSavedFilterClick?.(activeFilterId)
+      return
+    }
+
+    setLocalSelections(conditionsToSelections(nextConditions))
+
+    // Dropping a condition from a saved filter detaches it into a temp filter
+    // that remembers its source, rather than editing the saved filter itself.
+    if (savedFilterActive) {
+      applyTempFilter?.(
+        {
+          conditions: nextConditions,
+          operator: activeSavedFilter?.operator || 'AND',
+        },
+        savedFilterEditMeta,
+      )
+      return
+    }
+
+    applyTempFilter?.(
+      {
+        ...tempFilter,
+        operator: tempFilter?.operator || 'AND',
+        conditions: nextConditions,
+      },
+      tempFilterMeta,
+    )
+  }
+
   activeChipConditions.forEach((condition, index) => {
     inlineChips.push({
       key: `${savedFilterActive ? '__saved' : '__temp'}_${index}`,
       label: getConditionChipLabel(condition),
-      onClear: () => {
-        if (savedFilterActive) {
-          onSavedFilterClick?.(activeFilterId)
-          return
-        }
-        clearConditionAtIndex(index)
-      },
+      onClear: () => clearConditionAtIndex(index),
     })
   })
 
@@ -638,6 +661,8 @@ const ChoreToolbar = ({
         <ActiveFilterChips
           chips={inlineChips}
           onOpen={openFilterSheet}
+          showAddChip
+          onAdd={openFilterSheet}
           onClearAll={() => {
             setLocalSelections(defaultSelections())
             onClearAllFilters?.()

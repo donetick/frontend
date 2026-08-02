@@ -1,10 +1,12 @@
-import { Close } from '@mui/icons-material'
-import { Box, Button, Chip, Typography } from '@mui/joy'
+import { Add, Close } from '@mui/icons-material'
+import { Box, Button, Chip, ChipDelete, Typography } from '@mui/joy'
 
 const ActiveFilterChips = ({
   chips = [],
   onOpen,
   onClearAll,
+  onAdd,
+  showAddChip = false,
   resultCount,
   totalCount,
   maxVisible = 2,
@@ -44,13 +46,21 @@ const ActiveFilterChips = ({
           variant='soft'
           color={color}
           endDecorator={
-            <Close
-              sx={{ cursor: 'pointer', fontSize: chipSize === 'sm' ? 12 : 16 }}
-              onClick={e => {
-                e.stopPropagation()
-                onClear?.()
+            // ChipDelete rather than a bare icon: Joy's chip end decorator is
+            // `pointer-events: none`, so anything else here is swallowed by the
+            // chip's own click surface and can never clear the condition.
+            <ChipDelete
+              variant='plain'
+              color={color}
+              onDelete={() => onClear?.()}
+              aria-label={`Remove ${label} filter`}
+              sx={{
+                '--Chip-deleteSize': chipSize === 'sm' ? '1.1rem' : '1.4rem',
+                '--Icon-fontSize': chipSize === 'sm' ? '12px' : '16px',
               }}
-            />
+            >
+              <Close />
+            </ChipDelete>
           }
           onClick={onOpen}
           sx={{
@@ -74,7 +84,10 @@ const ActiveFilterChips = ({
         </Chip>
       ))}
 
-      {overflow > 0 && (
+      {/* Everything already visible → spend that slot on a "+" for appending
+          another condition instead. With overflow, the count chip opens the
+          same sheet anyway. */}
+      {overflow > 0 ? (
         <Chip
           size={chipSize}
           variant='soft'
@@ -90,6 +103,30 @@ const ActiveFilterChips = ({
         >
           +{overflow} more
         </Chip>
+      ) : (
+        showAddChip &&
+        (onAdd || onOpen) && (
+          <Chip
+            size={chipSize}
+            variant='outlined'
+            color='neutral'
+            onClick={onAdd || onOpen}
+            aria-label='Add filter condition'
+            title='Add filter condition'
+            sx={{
+              cursor: 'pointer',
+              flexShrink: 0,
+              px: 0.75,
+              transition: 'all 0.15s ease',
+              '&:hover': { opacity: 0.85 },
+              ...overflowChipSx,
+            }}
+          >
+            <Add
+              sx={{ fontSize: chipSize === 'sm' ? 12 : 16, display: 'block' }}
+            />
+          </Chip>
+        )
       )}
 
       {resultCount != null && totalCount != null && (
