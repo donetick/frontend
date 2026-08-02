@@ -401,18 +401,18 @@ const TaskPreviewCard = ({
 /**
  * Inline voice-to-task panel. Mounts inside AddTaskModal — no second modal.
  *
- * Opens straight into hands-free listening. Pauses and spoken separators
- * ("also") split the transcript into task cards; tapping a card opens inline
- * pickers whose edits override the parsed values. A single captured task
- * lands in the smart input for review; multiple are created directly.
+ * Mounted only while voice capture is active, and opens straight into
+ * hands-free listening. Pauses and spoken separators ("also") split the
+ * transcript into task cards; tapping a card opens inline pickers whose edits
+ * override the parsed values. The confirm action lives in the modal footer
+ * alongside Cancel — this panel only reports its state up through
+ * onStateChange so the modal can label and enable that button.
  */
 const VoicePanel = ({
-  open,
   userLabels = [],
   members = [],
   userProfile,
-  onUseSingle,
-  onCreateMany,
+  onStateChange,
 }) => {
   const {
     phase,
@@ -427,8 +427,6 @@ const VoicePanel = ({
     patchSegment,
     isNative,
   } = useVoiceToTask({ members, userLabels })
-  const [creating, setCreating] = useState(false)
-  const autoStartedRef = useRef(false)
   const segmentsScrollRef = useRef(null)
 
   const parseCtx = useMemo(
@@ -441,14 +439,12 @@ const VoicePanel = ({
     [partialText, parseCtx],
   )
 
-  // Start capturing the moment the panel opens — the mic tap that opened it
-  // is the only tap needed
+  // Start capturing the moment the panel mounts — the mic tap that opened it
+  // is the only tap needed. startHandsFree no-ops if already listening.
   useEffect(() => {
-    if (open && !autoStartedRef.current) {
-      autoStartedRef.current = true
-      startHandsFree()
-    }
-  }, [open, startHandsFree])
+    startHandsFree()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Keep the newest captured task visible as more are added
   useEffect(() => {
@@ -456,24 +452,14 @@ const VoicePanel = ({
     if (el) el.scrollTop = el.scrollHeight
   }, [segments.length])
 
-  if (!open) return null
-
   const isListening = phase === 'listening'
-  const showActions = segments.length > 0 && !isListening && !creating
 
-  const mergedTask = segment => ({
-    ...parseVoiceTask(segment.text, parseCtx),
-    ...(segment.overrides || {}),
-  })
-
-  const handleCreateAll = async () => {
-    setCreating(true)
-    try {
-      await onCreateMany(segments.map(mergedTask))
-    } finally {
-      setCreating(false)
-    }
-  }
+  // The confirm action lives in the modal footer, so report the raw segments
+  // and whether the mic is live — that's all it needs to label and enable the
+  // button. It parses the segments itself when the user confirms.
+  useEffect(() => {
+    onStateChange?.({ segments, isListening })
+  }, [segments, isListening, onStateChange])
 
   const micCaption = isListening
     ? isLocked
@@ -640,47 +626,6 @@ const VoicePanel = ({
             Pause between tasks &middot; say &ldquo;scratch that&rdquo; to
             remove the last one
           </Typography>
-        </Box>
-      )}
-
-      {/* ── Footer — dismissing is the modal's Cancel; this owns confirm only ── */}
-      {(creating || showActions) && (
-        <Box
-          sx={{
-            px: 1.5,
-            py: 1,
-            display: 'flex',
-            justifyContent: 'flex-end',
-            gap: 1,
-            borderTop: '1px solid',
-            borderColor: 'divider',
-          }}
-        >
-          {creating ? (
-            <Button size='sm' variant='solid' color='primary' loading>
-              Creating…
-            </Button>
-          ) : segments.length === 1 ? (
-            <Button
-              size='sm'
-              variant='solid'
-              color='primary'
-              onClick={() =>
-                onUseSingle(segments[0].text, segments[0].overrides || {})
-              }
-            >
-              Use Task
-            </Button>
-          ) : (
-            <Button
-              size='sm'
-              variant='solid'
-              color='primary'
-              onClick={handleCreateAll}
-            >
-              Create {segments.length} Tasks
-            </Button>
-          )}
         </Box>
       )}
     </Box>

@@ -1,6 +1,6 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
-export const useProjectFilter = projects => {
+export const useProjectFilter = (projects, projectsLoaded = false) => {
   const [selectedProject, setSelectedProject] = useState(() => {
     const saved = localStorage.getItem('selectedProject')
     return saved ? JSON.parse(saved) : null
@@ -36,6 +36,20 @@ export const useProjectFilter = projects => {
     }
     window.history.replaceState({}, '', newUrl)
   }, [])
+
+  // The cached selection is a whole project object, so a stale one keeps
+  // rendering its old name/color even though the project no longer belongs to
+  // this account (deleted project, or a different user signing in on a device
+  // where logout didn't get to clear storage). Once the real list has loaded,
+  // drop any selection that isn't in it.
+  useEffect(() => {
+    if (!projectsLoaded) return
+    if (!selectedProject || selectedProject.id === 'default') return
+
+    if (!projects.some(p => p.id === selectedProject.id)) {
+      setSelectedProjectWithCache(null)
+    }
+  }, [projectsLoaded, projects, selectedProject, setSelectedProjectWithCache])
 
   return {
     selectedProject,

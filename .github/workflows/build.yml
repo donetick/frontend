@@ -2,7 +2,6 @@ name: Build validation
 
 on:
   push:
-    branches: [main]
   pull_request:
 
 jobs:
@@ -19,3 +18,4 @@ jobs:
     - name: Install dependencies
       run: npm i
     - run: npm run build
+    - run: npm run lint:ci

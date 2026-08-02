@@ -434,6 +434,16 @@ const ArchivedTasks = () => {
     setSelectedChores(newSelection)
   }
 
+  // Press-and-hold on a task card enters multi-select with that task picked
+  const enterMultiSelectWithChore = choreId => {
+    if (!isMultiSelectMode) {
+      setIsMultiSelectMode(true)
+      setSelectedChores(new Set([choreId]))
+      return
+    }
+    toggleChoreSelection(choreId)
+  }
+
   const selectAllVisibleChores = () => {
     if (finalChores.length > 0) {
       setSelectedChores(new Set(finalChores.map(c => c.id)))
@@ -1045,6 +1055,7 @@ const ArchivedTasks = () => {
               isMultiSelectMode={isMultiSelectMode}
               selectedChores={selectedChores}
               toggleChoreSelection={toggleChoreSelection}
+              onLongPressChore={enterMultiSelectWithChore}
             />
           </List>
         </Box>

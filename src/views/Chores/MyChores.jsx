@@ -122,7 +122,7 @@ const MyChores = () => {
   const [confirmModelConfig, setConfirmModelConfig] = useState({})
 
   const { selectedProject, projectsWithDefault, setSelectedProjectWithCache } =
-    useProjectFilter(projects)
+    useProjectFilter(projects, !projectsLoading)
 
   const {
     searchTerm,
@@ -144,6 +144,7 @@ const MyChores = () => {
     selectedChores,
     toggleMultiSelectMode,
     toggleChoreSelection,
+    enterMultiSelectWithChore,
     selectAllVisibleChores,
     clearSelection,
     getSelectedChoresData,
@@ -366,6 +367,7 @@ const MyChores = () => {
       }
 
       processEffectAsync()
+      // throw new Error('Fake Error to test posthog')
     }
   }, [
     membersLoading,
@@ -570,6 +572,7 @@ const MyChores = () => {
     handleBulkArchive,
     handleBulkDelete,
     handleBulkSkip,
+    handleBulkMoveToProject,
   } = useChoreActions({
     chores,
     filteredChores,
@@ -868,6 +871,7 @@ const MyChores = () => {
     [getFilteredChores],
   )
 
+
   // "Narrowed" means the user actively cut the list down (search, quick
   // filters, a saved filter). Picking a project is not narrowing: an empty
   // project is an empty place, not a filtered-away result.
@@ -885,8 +889,9 @@ const MyChores = () => {
     updateFilterUrl(null, null)
   }
 
-  const updateChores = newChore => {
-    let newChores = [...chores, newChore]
+  const appendChore = (prev, newChore) => {
+    let newChores = [...prev, newChore]
+
 
     if (impersonatedUser) {
       newChores = newChores.filter(
@@ -894,8 +899,15 @@ const MyChores = () => {
       )
     }
 
-    setChores(newChores)
-    setFilteredChores(newChores)
+    return newChores
+  }
+
+  // Uses functional setState so back-to-back calls (e.g. creating several
+  // voice-captured tasks in a row) each build on the latest state instead of
+  // a closure snapshot taken before earlier calls landed.
+  const updateChores = newChore => {
+    setChores(prev => appendChore(prev, newChore))
+    setFilteredChores(prev => appendChore(prev, newChore))
     clearQuickFilters()
   }
 
@@ -1049,12 +1061,22 @@ const MyChores = () => {
         <MultiSelectToolbar
           isVisible={isMultiSelectMode}
           selectedCount={selectedChores.size}
-          onSelectAll={selectAllVisibleChores}
+          onSelectAll={() =>
+            selectAllVisibleChores(
+              searchTerm?.length > 0 || hasQuickFilters || activeFilterId
+                ? getFilteredChores
+                : null,
+              choreSections,
+              openChoreSections,
+            )
+          }
           onClear={clearSelection}
           onComplete={handleBulkComplete}
           onSkip={handleBulkSkip}
           onArchive={handleBulkArchive}
           onDelete={handleBulkDelete}
+          onMoveToProject={handleBulkMoveToProject}
+          projects={projects}
           showKeyboardShortcuts={showKeyboardShortcuts}
           selectAllDisabled={
             searchTerm?.length > 0 || hasQuickFilters
@@ -1148,6 +1170,7 @@ const MyChores = () => {
             isMultiSelectMode={isMultiSelectMode}
             selectedChores={selectedChores}
             toggleChoreSelection={toggleChoreSelection}
+            onLongPressChore={enterMultiSelectWithChore}
           />
         )}
         {viewMode === 'calendar' && (
@@ -1326,6 +1349,7 @@ const MyChores = () => {
                       isMultiSelectMode={isMultiSelectMode}
                       selectedChores={selectedChores}
                       toggleChoreSelection={toggleChoreSelection}
+                      onLongPressChore={enterMultiSelectWithChore}
                     />
                   )}
                 </Box>
@@ -1406,6 +1430,7 @@ const MyChores = () => {
                       isMultiSelectMode={isMultiSelectMode}
                       selectedChores={selectedChores}
                       toggleChoreSelection={toggleChoreSelection}
+                      onLongPressChore={enterMultiSelectWithChore}
                     />
                   </AccordionDetails>
                 </Accordion>

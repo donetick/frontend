@@ -84,7 +84,9 @@ const CompactChoreCard = ({
     const parts = []
 
     // Frequency
-    parts.push(getRecurrentChipText(chore))
+    if (!['once', 'no_repeat'].includes(chore.frequencyType)) {
+      parts.push(getRecurrentChipText(chore))
+    }
 
     // Assignee
     if (chore.assignedTo) {
@@ -408,7 +410,8 @@ const CompactChoreCard = ({
 
         {/* Line 2: Metadata */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
-          {getFrequencyIcon(chore)}
+          {!['once', 'no_repeat'].includes(chore.frequencyType) &&
+            getFrequencyIcon(chore)}
           <Typography
             level='body-xs'
             color='text.secondary'
