@@ -157,6 +157,12 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose, initialMode }) => {
     isListening: false,
   })
   const [creatingVoiceTasks, setCreatingVoiceTasks] = useState(false)
+  // Same arrangement for the scan panel: it reports the action for its
+  // current phase and the modal footer renders it
+  const [scanState, setScanState] = useState({
+    phase: 'idle',
+    primaryAction: null,
+  })
   const { isNativeScanner } = useDocumentScanner()
 
   useEffect(() => {
@@ -739,6 +745,7 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose, initialMode }) => {
     setShowScan(false)
     setShowVoice(false)
     setVoiceState({ segments: [], isListening: false })
+    setScanState({ phase: 'idle', primaryAction: null })
     setCreatingVoiceTasks(false)
     setTaskText('')
     setTaskTitle('')
@@ -903,7 +910,21 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose, initialMode }) => {
                     : 'Use Task'}
               </Button>
             )}
-            {/* The scan panel owns its own confirm action */}
+            {showScan && scanState.primaryAction && (
+              <Button
+                variant='solid'
+                color='primary'
+                startDecorator={scanState.primaryAction.icon}
+                onClick={scanState.primaryAction.onClick}
+              >
+                {scanState.primaryAction.label}
+              </Button>
+            )}
+            {showScan && scanState.phase === 'processing' && (
+              <Button variant='solid' color='primary' loading disabled>
+                Processing
+              </Button>
+            )}
             {!showScan && !showVoice && (
               <Button
                 variant='solid'
@@ -1280,10 +1301,12 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose, initialMode }) => {
             autoCapture={scanAutoCapture}
             onTaskExtracted={handleTaskExtracted}
             initialImageUrl={pendingPhotoUrl}
+            onStateChange={setScanState}
             onClose={() => {
               setShowScan(false)
               setScanAutoCapture(false)
               setPendingPhotoUrl(null)
+              setScanState({ phase: 'idle', primaryAction: null })
             }}
           />
         )}
