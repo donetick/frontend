@@ -105,8 +105,10 @@ const TermsView = () => {
       </ul>
 
       <h2>5. Acceptable Use Policy</h2>
-      <p><em>Applies to both Cloud and Self-Hosted Services</em></p>
-      
+      <p>
+        <em>Applies to both Cloud and Self-Hosted Services</em>
+      </p>
+
       <h3>You may not use our services to:</h3>
       <ul>
         <li>Violate any applicable laws or regulations</li>
