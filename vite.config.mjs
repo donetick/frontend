@@ -1,8 +1,12 @@
 import react from '@vitejs/plugin-react-swc'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
+import pkg from './package.json'
 // https://vitejs.dev/config/
 export default defineConfig({
+  define: {
+    'import.meta.env.VITE_APP_VERSION': JSON.stringify(pkg.version),
+  },
   plugins: [
     react(),
     VitePWA({
