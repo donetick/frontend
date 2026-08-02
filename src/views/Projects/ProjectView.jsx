@@ -222,7 +222,10 @@ const ProjectView = () => {
   const { data: userProfile } = useUserProfile()
   const { data: chores = { res: [] } } = useChores(false) // false to exclude archived
   const { data: projectsData = [], isLoading: projectsLoading } = useProjects()
-  const { setSelectedProjectWithCache } = useProjectFilter(projectsData)
+  const { setSelectedProjectWithCache } = useProjectFilter(
+    projectsData,
+    !projectsLoading,
+  )
   const navigate = useNavigate()
 
   const [userProjects, setUserProjects] = useState([])

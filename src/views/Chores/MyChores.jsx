@@ -121,7 +121,7 @@ const MyChores = () => {
   const [confirmModelConfig, setConfirmModelConfig] = useState({})
 
   const { selectedProject, projectsWithDefault, setSelectedProjectWithCache } =
-    useProjectFilter(projects)
+    useProjectFilter(projects, !projectsLoading)
 
   const {
     searchTerm,
@@ -367,6 +367,7 @@ const MyChores = () => {
       }
 
       processEffectAsync()
+      // throw new Error('Fake Error to test posthog')
     }
   }, [
     membersLoading,
