@@ -168,7 +168,29 @@
       "developer": {
         "title": "Developer Settings",
         "description": "View technical information about authentication tokens, SSE connections, and debug data."
+      },
+      "importBetidy": {
+        "title": "Import from BeTidy",
+        "description": "Migrate your tasks from the BeTidy app"
       }
     }
+  },
+  "betidyImport": {
+    "title": "Import from BeTidy",
+    "description": "Upload a data bundle exported from the BeTidy app with the community tool",
+    "fileLabel": "Export bundle (betidy_export.json)",
+    "chooseFile": "Choose file",
+    "taskCount": "{{count}} tasks",
+    "timezone": "Timezone",
+    "includeInactive": "Also import inactive / finished tasks",
+    "import": "Import",
+    "invalidFile": "Invalid file",
+    "invalidFileHint": "Please select a valid betidy_export.json file.",
+    "successTitle": "Import complete",
+    "successMessage": "Imported {{count}} chores.",
+    "errorTitle": "Import failed",
+    "resultTitle": "Import complete",
+    "resultSummary": "Imported {{imported}}, skipped {{skipped}}, labels created {{labels}}.",
+    "errorsSuffix": "task(s) could not be imported (see server logs)."
   }
 }

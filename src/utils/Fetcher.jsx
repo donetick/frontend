@@ -975,8 +975,18 @@ const TrackFilterUsage = id => {
   })
 }
 
+// Import a BeTidy export bundle (see github.com/mschabhuettl/betidy-export).
+const ImportBeTidy = bundle => {
+  return Fetch(`/chores/import/betidy`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify(bundle),
+  })
+}
+
 export {
   AcceptCircleMemberRequest,
+  ImportBeTidy,
   DeleteChoreAttachment,
   DeleteDraftAttachment,
   GetChoreAttachments,

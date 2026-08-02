@@ -4,6 +4,7 @@ import {
   ChevronRight,
   Circle,
   Code,
+  Download,
   FamilyRestroom,
   Language,
   Notifications,
@@ -121,6 +122,12 @@ const SettingsOverview = () => {
       title: t('overview.sections.developer.title'),
       description: t('overview.sections.developer.description'),
       icon: <Code />,
+    },
+    {
+      id: 'import-betidy',
+      title: t('overview.sections.importBetidy.title'),
+      description: t('overview.sections.importBetidy.description'),
+      icon: <Download />,
     },
   ]
 
