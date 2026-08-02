@@ -41,6 +41,7 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
+    "@capacitor-community/in-app-review": "^8.0.0",
     "@capacitor-community/speech-recognition": "^7.0.1",
     "@capacitor-community/sqlite": "^8.0.0",
     "@capacitor/android": "^8.0.0",
