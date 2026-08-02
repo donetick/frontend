@@ -1155,6 +1155,61 @@ export const useChoreActions = ({
     setConfirmModelConfig,
   ])
 
+  const handleBulkMoveToProject = useCallback(
+    async project => {
+      const selectedData = getSelectedChoresData(chores)
+      if (selectedData.length === 0) return
+
+      const projectId = project?.id ?? null
+      const movedTasks = []
+      const failedTasks = []
+
+      for (const chore of selectedData) {
+        try {
+          const response = await SaveChore({ ...chore, projectId })
+          if (response.ok) {
+            movedTasks.push(chore)
+          } else {
+            failedTasks.push(chore)
+          }
+        } catch (error) {
+          failedTasks.push(chore)
+        }
+      }
+
+      if (movedTasks.length > 0) {
+        const movedIds = new Set(movedTasks.map(c => c.id))
+        const applyMove = list =>
+          list.map(c => (movedIds.has(c.id) ? { ...c, projectId } : c))
+        setChores(applyMove)
+        setFilteredChores(applyMove)
+        showSuccess({
+          title: 'Tasks Moved',
+          message: `Moved ${movedTasks.length} task${movedTasks.length > 1 ? 's' : ''} to ${project?.name || 'Default Project'}.`,
+        })
+      }
+      if (failedTasks.length > 0) {
+        showError({
+          title: 'Some Tasks Failed',
+          message: `${failedTasks.length} task${failedTasks.length > 1 ? 's' : ''} could not be moved.`,
+        })
+      }
+
+      refetchChores()
+      clearSelection()
+    },
+    [
+      chores,
+      getSelectedChoresData,
+      setChores,
+      setFilteredChores,
+      showSuccess,
+      showError,
+      refetchChores,
+      clearSelection,
+    ],
+  )
+
   return {
     handleChoreAction,
     handleChangeDueDate,
@@ -1166,5 +1221,6 @@ export const useChoreActions = ({
     handleBulkArchive,
     handleBulkDelete,
     handleBulkSkip,
+    handleBulkMoveToProject,
   }
 }

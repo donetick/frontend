@@ -67,6 +67,24 @@ const isNetworkError = error =>
   ((error instanceof TypeError && error.message === 'Failed to fetch') ||
     error?.name === 'AbortError')
 
+// The backend returns { error: "..." } on failures. Surface that message when
+// it is there, flagged so callers can tell it apart from our generic fallback.
+const errorFromResponse = async (resp, fallbackMessage) => {
+  if (!resp) return new Error(fallbackMessage)
+  let serverMessage = null
+  try {
+    const body = await resp.json()
+    if (typeof body?.error === 'string' && body.error.trim() !== '') {
+      serverMessage = body.error
+    }
+  } catch {
+    // body was empty or not JSON, keep the fallback
+  }
+  const error = new Error(serverMessage || fallbackMessage)
+  error.isServerMessage = Boolean(serverMessage)
+  return error
+}
+
 const buildOfflineChore = task => ({
   ...task,
   id: 'temp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
@@ -201,7 +219,7 @@ export const useCreateChore = () => {
       try {
         const resp = await CreateChore(newTask)
         if (!resp || !resp.ok) {
-          throw new Error('Failed to create chore')
+          throw await errorFromResponse(resp, 'Failed to create chore')
         }
         const createdChore = await resp.json()
         if (!createdChore) {
@@ -254,7 +272,7 @@ export const useUpdateChore = () => {
       try {
         const resp = await SaveChore(updatedChore)
         if (!resp || !resp.ok) {
-          throw new Error('Failed to save chore')
+          throw await errorFromResponse(resp, 'Failed to save chore')
         }
         const updatedChoreRes = await resp.json()
         if (!updatedChoreRes) {

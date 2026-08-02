@@ -415,7 +415,9 @@ const ChoreEdit = () => {
         console.error('Failed to save chore:', error)
         showError({
           title: 'Save Failed',
-          message: 'Failed to save chore, please try again.',
+          message: error?.isServerMessage
+            ? error.message
+            : 'Failed to save chore, please try again.',
         })
       })
   }
@@ -634,13 +636,14 @@ const ChoreEdit = () => {
     if (anyone || assignableTo.length === 0) {
       setAssignStrategy('no_assignee')
       setAssignedTo(null)
-    } else {
-      if (!assignableTo.some(a => a.userId === assignedTo)) {
-        setAssignedTo(assignableTo[0].userId)
+    } else if (assignStrategy === 'no_assignee') {
+      // user explicitly picked no_assignee while having assignees, keep it
+      // but there is nobody currently assigned
+      if (assignedTo !== null) {
+        setAssignedTo(null)
       }
-      if (assignStrategy === 'no_assignee') {
-        setAssignStrategy(ASSIGN_STRATEGIES[2]) // default to least_completed
-      }
+    } else if (!assignableTo.some(a => a.userId === assignedTo)) {
+      setAssignedTo(assignableTo[0].userId)
     }
   }, [assignStrategy, assignedTo, assignableTo, anyone])
 
@@ -1259,7 +1262,12 @@ const ChoreEdit = () => {
 
         {!anyone && assignableTo.length > 1 && (
           <>
-            <Box mb={3}>
+            <Box
+              mb={3}
+              sx={{
+                display: assignStrategy === 'no_assignee' ? 'none' : 'block',
+              }}
+            >
               <Typography level='h4'>Currently Assigned To</Typography>
               <Typography level='body-md'>
                 Who is assigned the next due?

@@ -4,7 +4,7 @@ import { useMediaQuery } from '@mui/material'
 import * as chrono from 'chrono-node'
 import moment from 'moment'
 import { useQueryClient } from '@tanstack/react-query'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import { useCreateChore } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
@@ -43,7 +43,7 @@ import RepeatPickerField from './RepeatPickerField'
 import RichTextEditor from './RichTextEditor'
 import ScanPanel from './ScanToTask/ScanPanel'
 import SubTasks from './SubTask'
-import { buildChorePayload } from './VoiceToTask/parseVoiceTask'
+import { buildChorePayload, parseVoiceTask } from './VoiceToTask/parseVoiceTask'
 import VoicePanel from './VoiceToTask/VoicePanel'
 const getDefaultNotification = () => {
   const storedDefault = localStorage.getItem('defaultNotificationTemplate')
@@ -75,6 +75,11 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose, initialMode }) => {
   const queryClient = useQueryClient()
 
   const { data: userProfile } = useUserProfile()
+
+  // Stable identities for the voice panel: these queries are undefined while
+  // loading, and a fresh [] each render would churn the panel's parse context
+  const voiceLabels = useMemo(() => userLabels || [], [userLabels])
+  const voiceMembers = useMemo(() => circleMembers?.res || [], [circleMembers])
 
   const handleCreateLabel = useCallback(
     name => {
@@ -145,6 +150,19 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose, initialMode }) => {
   const [llmAvailable, setLlmAvailable] = useState(false)
   const [showVoice, setShowVoice] = useState(false)
   const [voiceAvailable, setVoiceAvailable] = useState(false)
+  // Voice capture state, reported up by VoicePanel so the modal footer owns
+  // the confirm action instead of the panel having its own button row
+  const [voiceState, setVoiceState] = useState({
+    segments: [],
+    isListening: false,
+  })
+  const [creatingVoiceTasks, setCreatingVoiceTasks] = useState(false)
+  // Same arrangement for the scan panel: it reports the action for its
+  // current phase and the modal footer renders it
+  const [scanState, setScanState] = useState({
+    phase: 'idle',
+    primaryAction: null,
+  })
   const { isNativeScanner } = useDocumentScanner()
 
   useEffect(() => {
@@ -671,6 +689,7 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose, initialMode }) => {
   // Multiple voice-captured tasks: they were reviewed as cards in the panel,
   // so create them all directly.
   const handleVoiceCreateMany = async parsedTasks => {
+    setCreatingVoiceTasks(true)
     const notificationTemplates = getDefaultNotification()
     for (const parsed of parsedTasks) {
       const chore = buildChorePayload(parsed, {
@@ -694,13 +713,40 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose, initialMode }) => {
         console.error('Error creating voice task:', error)
       }
     }
+    setCreatingVoiceTasks(false)
     handleCloseModal(false)
+  }
+
+  // Footer confirm while the voice panel is open: one task lands in the smart
+  // input for review, several are created straight away.
+  const handleVoiceConfirm = () => {
+    const { segments } = voiceState
+    if (segments.length === 1) {
+      handleVoiceSingle(segments[0].text, segments[0].overrides || {})
+    } else if (segments.length > 1) {
+      // Parse only at confirm time — the cards already parse for their own
+      // display, so there's no need to keep a parsed copy in modal state
+      const parseCtx = {
+        userLabels: voiceLabels,
+        members: voiceMembers,
+        currentUserId: userProfile?.id,
+      }
+      handleVoiceCreateMany(
+        segments.map(segment => ({
+          ...parseVoiceTask(segment.text, parseCtx),
+          ...(segment.overrides || {}),
+        })),
+      )
+    }
   }
 
   const handleCloseModal = forceRefetch => {
     onClose(forceRefetch)
     setShowScan(false)
     setShowVoice(false)
+    setVoiceState({ segments: [], isListening: false })
+    setScanState({ phase: 'idle', primaryAction: null })
+    setCreatingVoiceTasks(false)
     setTaskText('')
     setTaskTitle('')
     setDueDate(null)
@@ -847,7 +893,38 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose, initialMode }) => {
                 />
               )}
             </Button>
-            {/* Sub-panels (voice/scan) own their own confirm action */}
+            {showVoice && (
+              <Button
+                variant='solid'
+                color='primary'
+                loading={creatingVoiceTasks}
+                disabled={
+                  voiceState.segments.length === 0 || voiceState.isListening
+                }
+                onClick={handleVoiceConfirm}
+              >
+                {creatingVoiceTasks
+                  ? 'Creating…'
+                  : voiceState.segments.length > 1
+                    ? `Create ${voiceState.segments.length} Tasks`
+                    : 'Use Task'}
+              </Button>
+            )}
+            {showScan && scanState.primaryAction && (
+              <Button
+                variant='solid'
+                color='primary'
+                startDecorator={scanState.primaryAction.icon}
+                onClick={scanState.primaryAction.onClick}
+              >
+                {scanState.primaryAction.label}
+              </Button>
+            )}
+            {showScan && scanState.phase === 'processing' && (
+              <Button variant='solid' color='primary' loading disabled>
+                Processing
+              </Button>
+            )}
             {!showScan && !showVoice && (
               <Button
                 variant='solid'
@@ -1211,12 +1288,10 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose, initialMode }) => {
 
         {showVoice && (
           <VoicePanel
-            open
-            userLabels={userLabels || []}
-            members={circleMembers?.res || []}
+            userLabels={voiceLabels}
+            members={voiceMembers}
             userProfile={userProfile}
-            onUseSingle={handleVoiceSingle}
-            onCreateMany={handleVoiceCreateMany}
+            onStateChange={setVoiceState}
           />
         )}
 
@@ -1226,10 +1301,12 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose, initialMode }) => {
             autoCapture={scanAutoCapture}
             onTaskExtracted={handleTaskExtracted}
             initialImageUrl={pendingPhotoUrl}
+            onStateChange={setScanState}
             onClose={() => {
               setShowScan(false)
               setScanAutoCapture(false)
               setPendingPhotoUrl(null)
+              setScanState({ phase: 'idle', primaryAction: null })
             }}
           />
         )}

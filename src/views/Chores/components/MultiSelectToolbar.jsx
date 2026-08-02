@@ -5,11 +5,39 @@ import {
   Close,
   Delete,
   Done,
+  DriveFileMove,
   SelectAll,
   SkipNext,
 } from '@mui/icons-material'
-import { Box, Button, Divider, Typography } from '@mui/joy'
+import {
+  Avatar,
+  Box,
+  Button,
+  Divider,
+  ListItemContent,
+  ListItemDecorator,
+  Menu,
+  MenuItem,
+  Typography,
+} from '@mui/joy'
+import { useRef, useState } from 'react'
 import KeyboardShortcutHint from '../../../components/common/KeyboardShortcutHint'
+import LABEL_COLORS, {
+  getTextColorFromBackgroundColor,
+} from '../../../utils/Colors'
+import { getIconComponent } from '../../../utils/ProjectIcons'
+
+const renderProjectAvatar = (color, icon) => {
+  const bg = color || LABEL_COLORS[0].value
+  const IconComponent = getIconComponent(icon || 'FolderOpen')
+  return (
+    <Avatar size='sm' sx={{ width: 22, height: 22, backgroundColor: bg }}>
+      <IconComponent
+        sx={{ fontSize: 13, color: getTextColorFromBackgroundColor(bg) }}
+      />
+    </Avatar>
+  )
+}
 
 const MultiSelectToolbar = ({
   isVisible,
@@ -20,9 +48,21 @@ const MultiSelectToolbar = ({
   onSkip,
   onArchive,
   onDelete,
+  onMoveToProject,
+  projects = [],
   showKeyboardShortcuts,
   selectAllDisabled,
 }) => {
+  const [projectMenuAnchor, setProjectMenuAnchor] = useState(null)
+  const projectMenuRef = useRef(null)
+
+  const closeProjectMenu = () => setProjectMenuAnchor(null)
+
+  const handleMoveToProject = project => {
+    closeProjectMenu()
+    onMoveToProject?.(project)
+  }
+
   return (
     <Box
       sx={{
@@ -216,6 +256,63 @@ const MultiSelectToolbar = ({
               />
             )}
           </Button>
+          {onMoveToProject && (
+            <>
+              <Button
+                size='sm'
+                variant='soft'
+                color='neutral'
+                ref={projectMenuRef}
+                onClick={() =>
+                  setProjectMenuAnchor(prev =>
+                    prev ? null : projectMenuRef.current,
+                  )
+                }
+                startDecorator={<DriveFileMove />}
+                disabled={selectedCount === 0}
+                sx={{
+                  '--Button-paddingInline': { xs: '0.75rem', sm: '1rem' },
+                }}
+                title='Move selected tasks to a project'
+              >
+                Move
+              </Button>
+              <Menu
+                size='md'
+                anchorEl={projectMenuAnchor}
+                open={Boolean(projectMenuAnchor)}
+                onClose={closeProjectMenu}
+                placement='bottom-end'
+              >
+                <MenuItem
+                  onClick={() =>
+                    handleMoveToProject({ id: null, name: 'Default Project' })
+                  }
+                >
+                  <ListItemDecorator>
+                    {renderProjectAvatar(LABEL_COLORS[0].value, 'FolderOpen')}
+                  </ListItemDecorator>
+                  <ListItemContent>
+                    <Typography level='body-sm'>Default Project</Typography>
+                  </ListItemContent>
+                </MenuItem>
+                {projects.map(project => (
+                  <MenuItem
+                    key={project.id}
+                    onClick={() => handleMoveToProject(project)}
+                  >
+                    <ListItemDecorator>
+                      {renderProjectAvatar(project.color, project.icon)}
+                    </ListItemDecorator>
+                    <ListItemContent>
+                      <Typography level='body-sm'>{project.name}</Typography>
+                    </ListItemContent>
+                  </MenuItem>
+                ))}
+              </Menu>
+            </>
+          )}
+
           <Button
             size='sm'
             variant='soft'
