@@ -105,7 +105,7 @@ const LoginView = () => {
     setChildName('')
     setPassword('')
   }
-  const { data: resource } = useResource()
+  const { data: resource, isLoading: resourceLoading } = useResource()
   const { showError } = useNotification()
   const { isAuthenticated, login: authLogin, user } = useAuth()
   const Navigate = useNavigate()
@@ -411,6 +411,10 @@ const LoginView = () => {
   const showSocialLogin = import.meta.env.VITE_IS_SELF_HOSTED !== 'true'
   const hasSocialOptions =
     showSocialLogin || Boolean(resource?.identity_provider?.client_id)
+  // On SSO-only instances the password form, its divider and the signup link
+  // are hidden. Wait for the resource query to settle first so the form never
+  // flashes before being hidden.
+  const showPasswordAuth = !resourceLoading && !resource?.disable_password_auth
 
   return (
     <AuthShell
@@ -477,7 +481,7 @@ const LoginView = () => {
             Use a different account
           </Button>
         </Box>
-      ) : (
+      ) : showPasswordAuth ? (
         <Box
           component='form'
           onSubmit={handleSubmit}
@@ -554,9 +558,11 @@ const LoginView = () => {
             {loginType === 'sub' ? 'Sign in as sub account' : 'Sign in'}
           </AuthSubmitButton>
         </Box>
-      )}
+      ) : null}
 
-      {hasSocialOptions && <AuthDivider>or continue with</AuthDivider>}
+      {hasSocialOptions && (userProfile || showPasswordAuth) && (
+        <AuthDivider>or continue with</AuthDivider>
+      )}
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
         {showSocialLogin && !Capacitor.isNativePlatform() && (
@@ -644,24 +650,26 @@ const LoginView = () => {
         )}
       </Box>
 
-      {!userProfile && !resource?.is_user_creation_disabled && (
-        <Typography
-          level='body-sm'
-          sx={{ mt: 3, textAlign: 'center', color: 'text.secondary' }}
-        >
-          Don&apos;t have an account?{' '}
-          <Link
-            component='button'
-            type='button'
+      {!userProfile &&
+        showPasswordAuth &&
+        !resource?.is_user_creation_disabled && (
+          <Typography
             level='body-sm'
-            fontWeight={600}
-            underline='hover'
-            onClick={() => Navigate('/signup')}
+            sx={{ mt: 3, textAlign: 'center', color: 'text.secondary' }}
           >
-            Create one
-          </Link>
-        </Typography>
-      )}
+            Don&apos;t have an account?{' '}
+            <Link
+              component='button'
+              type='button'
+              level='body-sm'
+              fontWeight={600}
+              underline='hover'
+              onClick={() => Navigate('/signup')}
+            >
+              Create one
+            </Link>
+          </Typography>
+        )}
 
       <MFAVerificationModal
         open={mfaModalOpen}
