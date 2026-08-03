@@ -8,11 +8,12 @@ PLATFORM="both"
 BUMP="patch"
 SKIP_BUMP=false
 UPLOAD=false
+UPLOAD_ONLY=false
 ANDROID_TRACK="internal"
 
 usage() {
   cat <<EOF
-Usage: $(basename "$0") [--android|--ios] [--bump patch|minor|major] [--skip-bump] [--upload] [--track TRACK]
+Usage: $(basename "$0") [--android|--ios] [--bump patch|minor|major] [--skip-bump] [--upload|--upload-only] [--track TRACK]
 
 Builds signed release artifacts for Android (.aab) and/or iOS (.ipa).
 
@@ -21,6 +22,7 @@ Builds signed release artifacts for Android (.aab) and/or iOS (.ipa).
   --bump TYPE      Version bump type before building (default: patch)
   --skip-bump      Don't bump the version, build with the current one
   --upload         Also upload: Android to Play Store, iOS to TestFlight
+  --upload-only    Skip bump/build entirely, just upload the artifacts already built
   --track TRACK    Play Store track for --upload (default: internal)
   -h, --help       Show this help
 
@@ -38,6 +40,7 @@ while [[ $# -gt 0 ]]; do
     --bump) BUMP="$2"; shift 2 ;;
     --skip-bump) SKIP_BUMP=true; shift ;;
     --upload) UPLOAD=true; shift ;;
+    --upload-only) UPLOAD=true; UPLOAD_ONLY=true; shift ;;
     --track) ANDROID_TRACK="$2"; shift 2 ;;
     -h|--help) usage; exit 0 ;;
     *) echo "Unknown option: $1" >&2; usage; exit 1 ;;
@@ -51,16 +54,18 @@ if [ -f "$REPO_ROOT/.env.production" ]; then
   set +a
 fi
 
-if [ "$SKIP_BUMP" = false ]; then
-  echo "→ Bumping version ($BUMP)"
-  node bump-version.js "$BUMP"
+if [ "$UPLOAD_ONLY" = false ]; then
+  if [ "$SKIP_BUMP" = false ]; then
+    echo "→ Bumping version ($BUMP)"
+    node bump-version.js "$BUMP"
+  fi
+
+  echo "→ Building web assets"
+  npm run build
+
+  echo "→ Syncing Capacitor"
+  npx cap sync
 fi
-
-echo "→ Building web assets"
-npm run build
-
-echo "→ Syncing Capacitor"
-npx cap sync
 
 if [ -f Gemfile ] && command -v bundle >/dev/null 2>&1; then
   RUN="bundle exec fastlane"
@@ -69,8 +74,10 @@ else
 fi
 
 if [ "$PLATFORM" = "android" ] || [ "$PLATFORM" = "both" ]; then
-  echo "→ Building signed Android release (.aab)"
-  $RUN android release
+  if [ "$UPLOAD_ONLY" = false ]; then
+    echo "→ Building signed Android release (.aab)"
+    $RUN android release
+  fi
 
   if [ "$UPLOAD" = true ]; then
     echo "→ Uploading Android release to Play Store ($ANDROID_TRACK track)"
@@ -79,8 +86,10 @@ if [ "$PLATFORM" = "android" ] || [ "$PLATFORM" = "both" ]; then
 fi
 
 if [ "$PLATFORM" = "ios" ] || [ "$PLATFORM" = "both" ]; then
-  echo "→ Building signed iOS release (.ipa)"
-  $RUN ios release
+  if [ "$UPLOAD_ONLY" = false ]; then
+    echo "→ Building signed iOS release (.ipa)"
+    $RUN ios release
+  fi
 
   if [ "$UPLOAD" = true ]; then
     echo "→ Uploading iOS release to TestFlight"
