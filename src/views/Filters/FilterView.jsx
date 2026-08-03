@@ -29,6 +29,7 @@ import {
   StarBorder,
   Task,
 } from '@mui/icons-material'
+import EmptyState from '../../components/common/EmptyState'
 import { useChores } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { getFilterCount, getFilterOverdueCount } from '../../utils/FilterEngine'
@@ -417,29 +418,17 @@ const FilterView = () => {
         }}
       >
         {savedFilters.length === 0 ? (
-          <Box
-            sx={{
-              p: 4,
-              textAlign: 'center',
+          <EmptyState
+            fullHeight
+            icon={<FilterAlt />}
+            title='No saved filters yet'
+            description='Save a set of conditions once, like "overdue and assigned to me", and jump straight back to it from anywhere.'
+            primaryAction={{
+              label: 'Create a filter',
+              startDecorator: <Add />,
+              onClick: handleAddFilter,
             }}
-          >
-            <FilterAlt
-              sx={{
-                fontSize: 48,
-                color: 'neutral.300',
-                mb: 2,
-              }}
-            />
-            <Typography
-              level='title-lg'
-              sx={{ mb: 1, color: 'text.secondary' }}
-            >
-              No saved filters yet
-            </Typography>
-            <Typography level='body-sm' sx={{ color: 'text.tertiary', mb: 2 }}>
-              Create custom filters to quickly access your most used chore
-            </Typography>
-          </Box>
+          />
         ) : (
           <SwipeableList type={ListType.IOS} fullSwipe={false}>
             {savedFilters.map(filter => {

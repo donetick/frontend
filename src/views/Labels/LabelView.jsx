@@ -21,7 +21,8 @@ import {
   TrailingActions,
 } from '@meauxt/react-swipeable-list'
 import '@meauxt/react-swipeable-list/dist/styles.css'
-import { Add, MoreVert } from '@mui/icons-material'
+import { Add, MoreVert, Style } from '@mui/icons-material'
+import EmptyState from '../../components/common/EmptyState'
 import { useQueryClient } from '@tanstack/react-query'
 import { useUserProfile } from '../../queries/UserQueries'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors'
@@ -258,19 +259,17 @@ const LabelView = () => {
         }}
       >
         {userLabels.length === 0 && (
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              flexDirection: 'column',
-              height: '50vh',
+          <EmptyState
+            fullHeight
+            icon={<Style />}
+            title='No labels yet'
+            description='Labels group tasks across your circle, like "kitchen" or "bills", so you can filter down to them in one tap.'
+            primaryAction={{
+              label: 'Create a label',
+              startDecorator: <Add />,
+              onClick: handleAddLabel,
             }}
-          >
-            <Typography level='title-md' gutterBottom>
-              No labels available. Add a new label to get started.
-            </Typography>
-          </Box>
+          />
         )}
         <SwipeableList type={ListType.IOS} fullSwipe={false}>
           {userLabels.map(label => (

@@ -28,6 +28,7 @@ import {
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import EmptyState from '../../components/common/EmptyState'
 import { useNotification } from '../../service/NotificationProvider'
 import {
   CreateThing,
@@ -405,25 +406,20 @@ const ThingsView = () => {
         }}
       >
         {things.length === 0 && (
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              flexDirection: 'column',
-              height: '50vh',
+          <EmptyState
+            fullHeight
+            icon={<Widgets />}
+            title='No things yet'
+            description='A thing tracks a value, like a counter or a switch, that other tasks can react to. Create one to trigger tasks automatically.'
+            primaryAction={{
+              label: 'Create a thing',
+              startDecorator: <Add />,
+              onClick: () => {
+                setCreateModalThing(null)
+                setIsShowCreateThingModal(true)
+              },
             }}
-          >
-            <Widgets
-              sx={{
-                fontSize: '4rem',
-                mb: 1,
-              }}
-            />
-            <Typography level='title-md' gutterBottom>
-              No things has been created/found
-            </Typography>
-          </Box>
+          />
         )}
         <SwipeableList type={ListType.IOS} fullSwipe={false}>
           {things.map(thing => (

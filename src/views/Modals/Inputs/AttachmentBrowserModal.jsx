@@ -8,6 +8,7 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import EmptyState from '../../../components/common/EmptyState'
 import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { GetChoreAttachments } from '../../../utils/Fetcher'
@@ -95,12 +96,12 @@ function AttachmentBrowserModal({ choreId, isOpen, onClose }) {
             <CircularProgress size='md' />
           </Box>
         ) : attachments.length === 0 ? (
-          <Typography
-            level='body-sm'
-            sx={{ color: 'text.secondary', py: 2, textAlign: 'center' }}
-          >
-            No attachments found.
-          </Typography>
+          <EmptyState
+            size='sm'
+            icon={<AttachFile />}
+            title='No attachments'
+            description='Photos and files added to this task will show up here.'
+          />
         ) : (
           <List sx={{ '--ListItem-paddingX': '0px' }}>
             {attachments.map((attachment, index) => (

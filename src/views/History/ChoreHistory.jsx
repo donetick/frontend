@@ -28,10 +28,11 @@ import {
 } from '@mui/icons-material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
-import { Box, Button, Card, Container, Grid, Sheet, Typography } from '@mui/joy'
+import { Box, Card, Container, Grid, Sheet, Typography } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
+import EmptyState from '../../components/common/EmptyState'
 import FilterBar from '../../components/common/FilterBar'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import useConfirmationModal from '../../hooks/useConfirmationModal'
@@ -303,36 +304,14 @@ const ChoreHistory = () => {
   }
   if (!choreHistory.length) {
     return (
-      <Container
-        maxWidth='md'
-        sx={{
-          textAlign: 'center',
-          display: 'flex',
-          // make sure the content is centered vertically:
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexDirection: 'column',
-          height: '50vh',
-        }}
-      >
-        <EventBusy
-          sx={{
-            fontSize: '6rem',
-            // color: 'text.disabled',
-            mb: 1,
-          }}
+      <Container maxWidth='md'>
+        <EmptyState
+          fullHeight
+          icon={<EventBusy />}
+          title='No history yet'
+          description='Every time this task gets completed or skipped, it lands here with who did it and when. Nothing has happened yet.'
+          primaryAction={{ label: 'Back to tasks', to: '/chores' }}
         />
-
-        <Typography level='h3' gutterBottom>
-          No History Yet
-        </Typography>
-        <Typography level='body1'>
-          You haven't completed any tasks. Once you start finishing tasks,
-          they'll show up here.
-        </Typography>
-        <Button variant='soft' sx={{ mt: 2 }}>
-          <Link to='/chores'>Go back to chores</Link>
-        </Button>
       </Container>
     )
   }
@@ -441,27 +420,13 @@ const ChoreHistory = () => {
         />
       </Box>
       {sortedHistory.length === 0 && activeFilterCount > 0 && (
-        <Box
-          sx={{
-            textAlign: 'center',
-            py: 6,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: 1.5,
-          }}
-        >
-          <FilterList sx={{ fontSize: '3rem', color: 'text.tertiary' }} />
-          <Typography level='title-md' sx={{ color: 'text.secondary' }}>
-            No results match your filters
-          </Typography>
-          <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
-            Try adjusting or clearing the active filters.
-          </Typography>
-          <Button variant='soft' size='sm' onClick={clearAll} sx={{ mt: 0.5 }}>
-            Clear filters
-          </Button>
-        </Box>
+        <EmptyState
+          variant='no-results'
+          icon={<FilterList />}
+          title='No history matches these filters'
+          description='There is history here, but none of it fits the filters that are currently on.'
+          primaryAction={{ label: 'Clear filters', onClick: clearAll }}
+        />
       )}
 
       {sortedHistory.length > 0 && (
