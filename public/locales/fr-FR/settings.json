@@ -25,7 +25,7 @@
     "makeMember": "Nommer Membre",
     "remove": "Supprimer",
     "webhookURL": "URL du Webhook",
-    "webhookDescription": "Entrez une URL de Webhook pour recevoir des notifications pour les événements du cercle",
+    "webhookDescription": "Entrez une URL de webhook pour recevoir des notifications pour les événements du cercle",
     "webhookPlaceholder": "https://votre-url-webhook.com"
   },
   "accountSettings": {
