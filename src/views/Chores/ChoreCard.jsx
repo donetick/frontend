@@ -400,8 +400,10 @@ const ChoreCard = ({
                           }}
                           sx={{
                             borderRadius: '50%',
+                            width: 50,
                             minWidth: 50,
                             height: 50,
+                            flexShrink: 0,
                             zIndex: 1,
                             transition: 'all 0.2s ease',
                             '&:hover': {
@@ -449,8 +451,10 @@ const ChoreCard = ({
                         disabled={true}
                         sx={{
                           borderRadius: '50%',
+                          width: 50,
                           minWidth: 50,
                           height: 50,
+                          flexShrink: 0,
                           zIndex: 1,
                           opacity: 0.5,
                         }}
@@ -481,8 +485,10 @@ const ChoreCard = ({
                       disabled={notInCompletionWindow(chore)}
                       sx={{
                         borderRadius: '50%',
+                        width: 50,
                         minWidth: 50,
                         height: 50,
+                        flexShrink: 0,
                         zIndex: 1,
                         transition: 'all 0.2s ease',
                         '&:hover': {
