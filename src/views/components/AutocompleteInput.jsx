@@ -1,7 +1,7 @@
 import { Chip, List, ListItem, ListItemButton, Textarea } from '@mui/joy'
 import React, { useEffect, useRef, useState } from 'react'
 
-const AutocompleteInput = ({ options, ref, value, onChange, ...props }) => {
+const AutocompleteInput = ({ onChange, options, ref, value, ...props }) => {
   const [filteredOptions, setFilteredOptions] = useState([])
   const [menuVisible, setMenuVisible] = useState(false)
   const [highlightedIndex, setHighlightedIndex] = useState(-1)

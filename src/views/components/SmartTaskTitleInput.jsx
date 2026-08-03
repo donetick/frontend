@@ -1,8 +1,10 @@
+import './SmartTaskTitleInput.css'
+
 import { CameraEnhance, Mic, PhotoFilter } from '@mui/icons-material'
 import { IconButton, Tooltip, useColorScheme } from '@mui/joy'
 import { useEffect, useRef, useState } from 'react'
+
 import AutocompleteDropdown from '../TestView/AutocompleteDropdown'
-import './SmartTaskTitleInput.css'
 const renderHighlightedText = (text, cursorPosition) => {
   const parts = []
   let lastIndex = 0
@@ -46,18 +48,18 @@ const renderHighlightedText = (text, cursorPosition) => {
 }
 
 const SmartTaskTitleInput = ({
-  value,
-  placeholder,
   autoFocus,
-  onChange,
-  suggestions,
-  onEnterPressed,
-  onShiftEnterPressed,
   customRenderer,
   isNativeScanner,
-  onScanClick,
+  onChange,
+  onEnterPressed,
   onPhotoSelected,
+  onScanClick,
+  onShiftEnterPressed,
   onVoiceClick,
+  placeholder,
+  suggestions,
+  value,
 }) => {
   const { mode, setMode } = useColorScheme()
   const titleInputRef = useRef(null)

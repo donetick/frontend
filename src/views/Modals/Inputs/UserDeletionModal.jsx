@@ -10,8 +10,9 @@ import {
   Typography,
 } from '@mui/joy'
 import { useCallback, useEffect, useState } from 'react'
-import ModalActions from '../../../components/common/ModalActions'
 import { useNavigate } from 'react-router-dom'
+
+import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { CheckUserDeletion, DeleteUser } from '../../../utils/Fetcher'
 

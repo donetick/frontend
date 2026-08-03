@@ -9,18 +9,19 @@ import {
 } from '@mui/joy'
 import { ClickAwayListener, Popper } from '@mui/material'
 import { useEffect, useRef, useState } from 'react'
+
 import { Z_INDEX } from '../../constants/zIndex'
 import { useFileUpload } from '../../hooks/useFileUpload'
 import { DeleteDraftAttachment } from '../../utils/Fetcher'
 
 const AttachmentPickerField = ({
   attachments = [],
+  draftId,
+  emptyDisplay = 'icon-text',
+  entityId,
+  entityType = 'chore_attachment',
   onChange,
   onClear,
-  emptyDisplay = 'icon-text',
-  entityType = 'chore_attachment',
-  entityId,
-  draftId,
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [isUploading, setIsUploading] = useState(false)

@@ -3,6 +3,7 @@ import { LocalNotifications } from '@capacitor/local-notifications'
 import { Preferences } from '@capacitor/preferences'
 import { Button, Snackbar, Stack, Typography } from '@mui/joy'
 import { useEffect, useState } from 'react'
+
 import { registerPushNotifications } from '../../CapacitorListener'
 
 const NotificationAccessSnackbar = () => {

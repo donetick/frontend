@@ -1,6 +1,7 @@
+import 'quill/dist/quill.snow.css'
+
 import imageCompression from 'browser-image-compression'
 import Quill from 'quill'
-import 'quill/dist/quill.snow.css'
 import QuillMarkdown from 'quilljs-markdown'
 
 // Extend the built-in Image blot to preserve dt-data-path
@@ -32,6 +33,8 @@ class DtImageBlot extends ImageBlot {
 DtImageBlot.blotName = 'image'
 DtImageBlot.tagName = 'img'
 Quill.register(DtImageBlot, true)
+import './RichTextEditor.css'
+
 import {
   forwardRef,
   useCallback,
@@ -39,25 +42,25 @@ import {
   useImperativeHandle,
   useRef,
 } from 'react'
+
 import { useDescriptionHtml } from '../../hooks/useDescriptionHtml'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { apiClient } from '../../utils/ApiClient'
 import { isPlusAccount, resolvePhotoURL } from '../../utils/Helpers'
 import { patchDescriptionHtml } from '../../utils/ImageCache'
-import './RichTextEditor.css'
 
 const RichTextEditor = forwardRef(
   (
     {
-      value = '',
-      onChange,
-      isEditable = true,
-      placeholder = 'Enter description...',
-      variant = 'outlined',
+      draftId,
       entityId,
       entityType,
-      draftId,
+      isEditable = true,
+      onChange,
+      placeholder = 'Enter description...',
+      value = '',
+      variant = 'outlined',
     },
     ref,
   ) => {

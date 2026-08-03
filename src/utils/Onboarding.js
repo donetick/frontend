@@ -59,7 +59,7 @@ const PRIVACY_PREFERENCES_KEY = 'privacyPreferences'
  * treatment as recordAcquisitionSource: no crash reporter or PostHog is wired
  * up yet, so this is just the one place that'll change once there is one.
  */
-export const recordPrivacyPreferences = ({ crashReports, analytics }) => {
+export const recordPrivacyPreferences = ({ analytics, crashReports }) => {
   try {
     localStorage.setItem(
       PRIVACY_PREFERENCES_KEY,
@@ -81,9 +81,8 @@ export const recordPrivacyPreferences = ({ crashReports, analytics }) => {
 export const requestNotificationPermission = async () => {
   if (!isNativeApp()) return false
   try {
-    const { LocalNotifications } = await import(
-      '@capacitor/local-notifications'
-    )
+    const { LocalNotifications } =
+      await import('@capacitor/local-notifications')
     const { Preferences } = await import('@capacitor/preferences')
 
     const result = await LocalNotifications.requestPermissions()

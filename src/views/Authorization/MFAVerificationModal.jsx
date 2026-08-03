@@ -7,11 +7,11 @@ import { VerifyMFA } from '../../utils/Fetcher'
 import { authInputSx } from './authStyles'
 
 const MFAVerificationModal = ({
-  open,
   onClose,
-  sessionToken,
-  onSuccess,
   onError,
+  onSuccess,
+  open,
+  sessionToken,
 }) => {
   const [verificationCode, setVerificationCode] = useState('')
   const [isBackupCode, setIsBackupCode] = useState(false)

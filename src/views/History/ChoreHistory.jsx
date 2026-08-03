@@ -1,11 +1,12 @@
+import '@meauxt/react-swipeable-list/dist/styles.css'
+
 import {
-  Type as ListType,
   SwipeableList,
   SwipeableListItem,
   SwipeAction,
   TrailingActions,
+  Type as ListType,
 } from '@meauxt/react-swipeable-list'
-import '@meauxt/react-swipeable-list/dist/styles.css'
 import {
   Analytics,
   CalendarMonth,
@@ -32,6 +33,7 @@ import { Box, Button, Card, Container, Grid, Sheet, Typography } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+
 import FilterBar from '../../components/common/FilterBar'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import useConfirmationModal from '../../hooks/useConfirmationModal'
@@ -63,7 +65,7 @@ const ChoreHistory = () => {
   const [showMoreInfoId, setShowMoreInfoId] = useState(null)
   const [noteViewerConfig, setNoteViewerConfig] = useState({ isOpen: false })
   const [detailModalConfig, setDetailModalConfig] = useState({ isOpen: false })
-  const { showSuccess, showError } = useNotification()
+  const { showError, showSuccess } = useNotification()
   // React Query hooks
   const { data: choreHistoryData, isLoading } = useChoreHistory(choreId)
   const { data: circleMembersData } = useCircleMembers()
@@ -174,11 +176,11 @@ const ChoreHistory = () => {
   )
 
   const {
-    filteredData: filteredHistory,
-    activeFilters,
-    setFilter,
-    clearAll,
     activeFilterCount,
+    activeFilters,
+    clearAll,
+    filteredData: filteredHistory,
+    setFilter,
   } = useFilter(choreHistory, filterDefs)
 
   const sortedHistory = useMemo(

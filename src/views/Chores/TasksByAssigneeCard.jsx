@@ -1,6 +1,7 @@
 import { BarChart, Person } from '@mui/icons-material'
 import { Avatar, Box, Sheet, Typography } from '@mui/joy'
 import { useEffect, useState } from 'react'
+
 import { useCircleMembers } from '../../queries/UserQueries'
 import { TASK_COLOR } from '../../utils/Colors'
 import { resolvePhotoURL } from '../../utils/Helpers'

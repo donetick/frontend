@@ -21,6 +21,7 @@ import {
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import Calendar from 'react-calendar'
+
 import ModalActions from '../../components/common/ModalActions'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
@@ -92,15 +93,15 @@ const toDateKey = date => moment(date).format('YYYY-MM-DD')
  * reschedule a task — task cards, swipe actions, action menus.
  */
 const DueDatePickerModal = ({
-  open,
-  onClose,
-  title = 'Due Date',
+  applyLabel = 'Apply',
   dueDateOnly,
   dueTime,
-  useCustomTime,
   onApply,
+  onClose,
   onRemove,
-  applyLabel = 'Apply',
+  open,
+  title = 'Due Date',
+  useCustomTime,
 }) => {
   const { ResponsiveModal } = useResponsiveModal()
   const { firstDayOfWeek } = useLocalization()

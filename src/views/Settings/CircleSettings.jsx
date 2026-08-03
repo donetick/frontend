@@ -9,12 +9,13 @@ import {
   Input,
   Option,
   Select,
-  Typography
+  Typography,
 } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
@@ -227,8 +228,7 @@ const CircleSettings = () => {
                   </Typography>
                 ) : (
                   <Typography level='body-sm' color='danger'>
-                    Request to join{' '}
-                    {fmt.date(member.updatedAt)}
+                    Request to join {fmt.date(member.updatedAt)}
                   </Typography>
                 )}
               </Box>

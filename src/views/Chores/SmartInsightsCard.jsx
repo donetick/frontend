@@ -8,6 +8,7 @@ import {
 } from '@mui/icons-material'
 import { Box, Button, Chip, Sheet, Typography } from '@mui/joy'
 import { useMemo } from 'react'
+
 import { TASK_COLOR } from '../../utils/Colors'
 
 // Static insight filter definitions – used for URL restoration
@@ -57,8 +58,8 @@ export const INSIGHT_FILTER_DEFS = {
 }
 
 const SmartInsightsCard = ({
-  chores,
   applyTempFilter,
+  chores,
   clearTempFilter,
   tempFilter,
 }) => {

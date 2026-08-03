@@ -1,5 +1,6 @@
 import { useColorScheme } from '@mui/joy'
 import { useEffect } from 'react'
+
 import statusBarManager from '../utils/StatusBarManager'
 
 /**
@@ -35,10 +36,10 @@ export const useStatusBar = () => {
 
       // Update the status bar with the resolved theme
       await statusBarManager.updateResolvedTheme(resolvedTheme)
-      
+
       // Also update the base theme for future reference
       await statusBarManager.setTheme(mode)
-      
+
       // Notify any custom listeners
       statusBarManager.notifyThemeChange(resolvedTheme)
     }

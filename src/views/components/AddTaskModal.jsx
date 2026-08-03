@@ -1,18 +1,30 @@
 import { Add } from '@mui/icons-material'
 import { Box, Button, Typography } from '@mui/joy'
 import { useMediaQuery } from '@mui/material'
+import { useQueryClient } from '@tanstack/react-query'
 import * as chrono from 'chrono-node'
 import moment from 'moment'
-import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+
+import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
+import ModalActions from '../../components/common/ModalActions'
+import { useDocumentScanner } from '../../hooks/useDocumentScanner'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import { useCreateChore } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
+import { localAIService } from '../../service/LocalAIService'
+import { voiceInputService } from '../../service/VoiceInputService'
+import LABEL_COLORS, { TASK_COLOR } from '../../utils/Colors'
 import { CreateLabel } from '../../utils/Fetcher'
 import { isPlusAccount } from '../../utils/Helpers'
 import { generateUUID } from '../../utils/UUID'
 import { useLabels } from '../Labels/LabelQueries'
 import { useProjects } from '../Projects/ProjectQueries'
+import AdvancedOptionsSection, {
+  AdvancedOptionsTrigger,
+} from './AdvancedOptionsSection'
+import AssigneePickerField from './AssigneePickerField'
+import AttachmentPickerField from './AttachmentPickerField'
 import {
   parseAssignees,
   parseDueDate,
@@ -21,19 +33,6 @@ import {
   parsePriority,
   parseRepeatV2,
 } from './CustomParsers'
-import SmartTaskTitleInput from './SmartTaskTitleInput'
-
-import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
-import ModalActions from '../../components/common/ModalActions'
-import { useDocumentScanner } from '../../hooks/useDocumentScanner'
-import { localAIService } from '../../service/LocalAIService'
-import { voiceInputService } from '../../service/VoiceInputService'
-import LABEL_COLORS, { TASK_COLOR } from '../../utils/Colors'
-import AdvancedOptionsSection, {
-  AdvancedOptionsTrigger,
-} from './AdvancedOptionsSection'
-import AssigneePickerField from './AssigneePickerField'
-import AttachmentPickerField from './AttachmentPickerField'
 import DueDatePickerField from './DueDatePickerField'
 import LabelsPickerField from './LabelsPickerField'
 import LearnMoreButton from './LearnMore'
@@ -42,6 +41,7 @@ import PriorityPickerField from './PriorityPickerField'
 import RepeatPickerField from './RepeatPickerField'
 import RichTextEditor from './RichTextEditor'
 import ScanPanel from './ScanToTask/ScanPanel'
+import SmartTaskTitleInput from './SmartTaskTitleInput'
 import SubTasks from './SubTask'
 import { buildChorePayload, parseVoiceTask } from './VoiceToTask/parseVoiceTask'
 import VoicePanel from './VoiceToTask/VoicePanel'
@@ -63,7 +63,7 @@ const getDefaultNotification = () => {
   return defaultNotification
 }
 
-const TaskInput = ({ onChoreUpdate, isModalOpen, onClose, initialMode }) => {
+const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
   const { ResponsiveModal } = useResponsiveModal()
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
   const pickerEmptyDisplay = isMobile ? 'icon' : 'icon-text'
@@ -225,11 +225,11 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose, initialMode }) => {
   useEffect(() => {
     const handleKeyDown = event => {
       const {
-        isModalOpen,
-        hasDescription,
-        dueDate,
         createChore,
+        dueDate,
         handleCloseModal,
+        hasDescription,
+        isModalOpen,
       } = latestRef.current
       const isHoldingCmd = event.ctrlKey || event.metaKey
       if (isHoldingCmd) {
@@ -656,9 +656,9 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose, initialMode }) => {
   }
 
   const handleTaskExtracted = ({
-    taskName,
     description: extractedDesc,
     dueDate: extractedDue,
+    taskName,
   }) => {
     if (taskName) {
       processText(taskName)

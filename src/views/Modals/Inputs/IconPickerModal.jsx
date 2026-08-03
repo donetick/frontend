@@ -1,14 +1,15 @@
 import { Avatar, Box, FormControl, FormLabel, Grid, Typography } from '@mui/joy'
+
 import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { getTextColorFromBackgroundColor } from '../../../utils/Colors'
 import PROJECT_ICONS from '../../../utils/ProjectIcons'
 
 const IconPickerModal = ({
+  currentIcon,
   isOpen,
   onClose,
   onSelect,
-  currentIcon,
   projectColor,
 }) => {
   const { ResponsiveModal } = useResponsiveModal()

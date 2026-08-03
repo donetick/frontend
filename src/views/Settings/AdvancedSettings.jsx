@@ -10,6 +10,7 @@ import {
 } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
+
 import RealTimeSettings from '../../components/RealTimeSettings'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'

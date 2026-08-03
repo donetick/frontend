@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useCallback, useState } from 'react'
 
 export const useMultiSelect = () => {
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false)

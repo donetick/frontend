@@ -1,9 +1,10 @@
 import { FormControl, FormHelperText, Input, Typography } from '@mui/joy'
 import { useState } from 'react'
+
 import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
-function EditThingStateModal({ isOpen, onClose, onSave, currentThing }) {
+function EditThingStateModal({ currentThing, isOpen, onClose, onSave }) {
   const { ResponsiveModal } = useResponsiveModal()
 
   const [state, setState] = useState(currentThing?.state || '')

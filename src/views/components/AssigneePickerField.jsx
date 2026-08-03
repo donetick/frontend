@@ -1,14 +1,15 @@
 import { Person } from '@mui/icons-material'
+
 import BaseOptionPicker from './BaseOptionPicker'
 
 const AssigneePickerField = ({
-  value = null,
+  currentUserId = null,
+  emptyDisplay,
+  includeAnyone = true,
+  members = [],
   onChange,
   onClear,
-  members = [],
-  includeAnyone = true,
-  emptyDisplay,
-  currentUserId = null,
+  value = null,
 }) => {
   const options = [
     ...(includeAnyone ? [{ userId: 'anyone', displayName: 'Anyone' }] : []),
@@ -32,7 +33,7 @@ const AssigneePickerField = ({
       getItemLabel={item => item.displayName}
       renderTriggerIcon={() => <Person sx={{ fontSize: '20px' }} />}
       renderItemStart={() => <Person sx={{ fontSize: '18px' }} />}
-      getTriggerText={({ selectedItems, isEmpty }) =>
+      getTriggerText={({ isEmpty, selectedItems }) =>
         isEmpty ? 'Assignee' : selectedItems[0].displayName
       }
       menuMinWidth={220}

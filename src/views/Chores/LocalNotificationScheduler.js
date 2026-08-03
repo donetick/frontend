@@ -61,7 +61,7 @@ const scheduleNotificationFromTemplate = (
     const now = new Date()
     const time = getTimeFromTemplate(template, dueDate)
     const notificationId = getIdFromTemplate(chore.id, template)
-    const { title, body } = getNotificationText(chore.name, template)
+    const { body, title } = getNotificationText(chore.name, template)
     if (time > now) {
       notifications.push({
         title,
@@ -110,7 +110,7 @@ const getNotificationText = (choreName, template = {}) => {
       return 'soon'
     }
 
-    const { value, unit } = template
+    const { unit, value } = template
     const absValue = Math.abs(value)
 
     switch (unit) {

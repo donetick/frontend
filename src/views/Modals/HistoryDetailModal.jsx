@@ -15,6 +15,7 @@ import {
 import { Avatar, Box, Button, Chip, Divider, Stack, Typography } from '@mui/joy'
 import moment from 'moment'
 import { useNavigate } from 'react-router-dom'
+
 import ModalActions from '../../components/common/ModalActions'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
@@ -31,7 +32,7 @@ const STATUS_CONFIG = {
   6: { label: 'Rescheduled', color: 'warning', icon: <Schedule /> },
 }
 
-const DetailRow = ({ icon, label, value, children }) => (
+const DetailRow = ({ children, icon, label, value }) => (
   <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, py: 0.75 }}>
     <Box
       sx={{ color: 'text.tertiary', mt: 0.25, flexShrink: 0, display: 'flex' }}

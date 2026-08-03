@@ -1,11 +1,12 @@
 import Fuse from 'fuse.js'
 import { useCallback, useMemo, useState } from 'react'
+
 import { ChoreFilters, filterByProject } from '../../../utils/Chores'
 
 export const useChoreFilters = ({
   chores,
-  selectedProject,
   impersonatedUser,
+  selectedProject,
   userProfile,
 }) => {
   const [searchTerm, setSearchTerm] = useState('')

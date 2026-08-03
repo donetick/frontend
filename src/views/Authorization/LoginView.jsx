@@ -12,6 +12,7 @@ import Cookies from 'js-cookie'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { LoginSocialGoogle } from 'reactjs-social-login'
+
 import { GOOGLE_CLIENT_ID, REDIRECT_URL } from '../../Config'
 import { useAuth } from '../../hooks/useAuth.jsx'
 import { useResource } from '../../queries/ResourceQueries'
@@ -32,7 +33,7 @@ import AuthShell from './AuthShell'
 import { authButtonSx } from './authStyles'
 import MFAVerificationModal from './MFAVerificationModal'
 
-const SegmentedControl = ({ value, onChange, options }) => (
+const SegmentedControl = ({ onChange, options, value }) => (
   <Box
     role='tablist'
     sx={{
@@ -567,7 +568,7 @@ const LoginView = () => {
             discoveryDocs='claims_supported'
             access_type='online'
             isOnlyGetToken={true}
-            onResolve={({ provider, data }) => {
+            onResolve={({ data, provider }) => {
               loggedWithProvider(provider, data)
             }}
             onReject={() => {

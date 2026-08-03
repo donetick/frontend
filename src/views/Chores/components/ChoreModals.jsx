@@ -1,9 +1,10 @@
 import { Capacitor } from '@capacitor/core'
-import DateModal from '../../Modals/Inputs/DateModal'
+
 import DueDatePickerModal, {
   combineDueDate,
   splitDueDate,
 } from '../../components/DueDatePickerModal'
+import DateModal from '../../Modals/Inputs/DateModal'
 import NudgeModal from '../../Modals/Inputs/NudgeModal'
 import SelectModal from '../../Modals/Inputs/SelectModal'
 import TextModal from '../../Modals/Inputs/TextModal'
@@ -16,14 +17,14 @@ const getNFCUrl = choreId =>
 
 const ChoreModals = ({
   activeModal,
-  modalChore,
   membersData,
-  onChangeDueDate,
-  onCompleteWithPastDate,
+  modalChore,
   onAssigneeChange,
-  onCompleteWithNote,
-  onNudge,
+  onChangeDueDate,
   onClose,
+  onCompleteWithNote,
+  onCompleteWithPastDate,
+  onNudge,
 }) => {
   return (
     <>

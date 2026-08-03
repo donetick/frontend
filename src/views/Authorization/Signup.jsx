@@ -2,6 +2,7 @@ import { Box, Link, Typography } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+
 import { useNotification } from '../../service/NotificationProvider'
 import { login, signUp } from '../../utils/Fetcher'
 import {

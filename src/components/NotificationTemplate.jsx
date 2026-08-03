@@ -13,6 +13,7 @@ import Option from '@mui/joy/Option'
 import Select from '@mui/joy/Select'
 import Typography from '@mui/joy/Typography'
 import { useCallback, useEffect, useRef, useState } from 'react'
+
 import { NOTIFICATION_TYPE, TASK_COLOR } from '../utils/Colors'
 import { TIME_UNITS } from '../utils/DurationUtils'
 
@@ -25,7 +26,7 @@ const timingOptions = [
 ]
 
 function getRelativeLabel(notification) {
-  const { value, unit } = notification
+  const { unit, value } = notification
   const numericValue = Number(value)
   if (numericValue === 0) {
     return 'On due date'
@@ -64,8 +65,8 @@ function getInternalValue(timing, displayValue) {
 const NotificationTemplate = ({
   maxNotifications = 5,
   onChange,
-  value,
   showTimeline = true,
+  value,
 }) => {
   const [notifications, setNotifications] = useState(
     value?.templates ||

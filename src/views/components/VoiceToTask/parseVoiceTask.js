@@ -1,5 +1,6 @@
 import * as chrono from 'chrono-node'
 import moment from 'moment'
+
 import { isPlusAccount } from '../../../utils/Helpers'
 import { generateUUID } from '../../../utils/UUID'
 import {
@@ -28,12 +29,12 @@ const mapMembersForParsing = members =>
 // Merge overlapping highlight ranges, higher parser priority wins — same
 // resolution rules as AddTaskModal.renderHighlightedSentence.
 const resolveHighlights = ({
-  repeat,
-  priority,
-  points,
   assignees,
-  labels,
   dueDate,
+  labels,
+  points,
+  priority,
+  repeat,
 }) => {
   const all = []
   repeat?.forEach(h => all.push({ ...h, type: 'repeat', rank: 60 }))
@@ -61,7 +62,7 @@ const resolveHighlights = ({
 
 export const parseVoiceTask = (
   sentence,
-  { userLabels = [], members = [], currentUserId = null } = {},
+  { currentUserId = null, members = [], userLabels = [] } = {},
 ) => {
   const assigneesForParsing = mapMembersForParsing(members)
 
@@ -143,7 +144,7 @@ export const parseVoiceTask = (
 // Builds the same chore payload shape AddTaskModal.createChore submits.
 export const buildChorePayload = (
   parsed,
-  { userProfile, projectId, notificationTemplates },
+  { notificationTemplates, projectId, userProfile },
 ) => {
   let finalAssignees = parsed.assignees
   let finalAssignedTo = null

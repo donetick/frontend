@@ -1,7 +1,8 @@
-import { InAppReview } from '@capacitor-community/in-app-review'
 import { Capacitor } from '@capacitor/core'
 import { Device } from '@capacitor/device'
 import { Preferences } from '@capacitor/preferences'
+import { InAppReview } from '@capacitor-community/in-app-review'
+
 import { isOfficialDonetickInstance } from '../utils/FeatureToggle'
 
 const STATE_KEY = 'feedbackState'
@@ -348,10 +349,10 @@ export const SUBMIT_RESULT = {
  * see and edit it before anything is published.
  */
 export const buildGithubIssueUrl = ({
-  sentiment,
   category,
-  message,
   context,
+  message,
+  sentiment,
 }) => {
   const labelFor = {
     bugs: 'bug',
@@ -402,10 +403,10 @@ export const buildGithubIssueUrl = ({
  * pre-filled GitHub issue URL to send the user to instead.
  */
 export const submitFeedback = async ({
-  sentiment,
   category,
-  message,
   feature,
+  message,
+  sentiment,
   userProfile,
 }) => {
   const context = await collectFeedbackContext({ feature, userProfile })

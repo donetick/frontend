@@ -15,8 +15,9 @@ import {
   Typography,
 } from '@mui/joy'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useDocumentScanner } from '../../hooks/useDocumentScanner'
+
 import ModalActions from '../../components/common/ModalActions'
+import { useDocumentScanner } from '../../hooks/useDocumentScanner'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import { localAIService } from '../../service/LocalAIService'
 
@@ -120,7 +121,7 @@ async function extractTaskFromOCR(ocrText) {
   }
 }
 
-const PhotoTaskModal = ({ open, onClose, onTaskExtracted }) => {
+const PhotoTaskModal = ({ onClose, onTaskExtracted, open }) => {
   const { ResponsiveModal } = useResponsiveModal()
   const { isNativeScanner, scanDocument } = useDocumentScanner()
   const videoRef = useRef(null)
@@ -261,7 +262,7 @@ const PhotoTaskModal = ({ open, onClose, onTaskExtracted }) => {
   }
 
   const handleNativeScan = async () => {
-    const { image, cancelled, error } = await scanDocument()
+    const { cancelled, error, image } = await scanDocument()
     if (cancelled) return
     if (error || !image) {
       setErrorMsg(

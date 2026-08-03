@@ -2,6 +2,7 @@ import { CheckCircle, Security, Smartphone } from '@mui/icons-material'
 import { Alert, Box, Button, Card, Input, Stack, Typography } from '@mui/joy'
 import QRCode from 'qrcode'
 import { useEffect, useState } from 'react'
+
 import AppModal from '../../components/common/AppModal'
 import ModalActions from '../../components/common/ModalActions'
 import {

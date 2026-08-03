@@ -18,15 +18,16 @@ import {
 } from '@mui/joy'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+
 import { getTextColorFromBackgroundColor } from '../../../utils/Colors'
 
 const CustomFilterChips = ({
-  filters = [],
   activeFilterId,
+  filters = [],
   onFilterClick,
   onFilterDelete,
-  onFilterPin,
   onFilterEdit,
+  onFilterPin,
 }) => {
   const navigate = useNavigate()
   const [menuAnchor, setMenuAnchor] = useState(null)
@@ -96,8 +97,7 @@ const CustomFilterChips = ({
           const badgeTextColor = filter.color
             ? getTextColorFromBackgroundColor(filter.color)
             : '#ffffff'
-          const displayCount =
-            filter.count > 99 ? '99+' : (filter.count ?? 0)
+          const displayCount = filter.count > 99 ? '99+' : (filter.count ?? 0)
 
           return (
             <Tooltip
@@ -111,7 +111,9 @@ const CustomFilterChips = ({
             >
               <Chip
                 variant={isActive ? 'solid' : 'outlined'}
-                color={hasWarning ? 'warning' : isActive ? 'primary' : 'neutral'}
+                color={
+                  hasWarning ? 'warning' : isActive ? 'primary' : 'neutral'
+                }
                 size='md'
                 onClick={() => !hasWarning && onFilterClick(filter.id)}
                 sx={{
@@ -122,7 +124,9 @@ const CustomFilterChips = ({
                   flexShrink: 0,
                   fontWeight: isActive ? 600 : 500,
                   '&:hover': {
-                    backgroundColor: isActive ? undefined : 'neutral.softHoverBg',
+                    backgroundColor: isActive
+                      ? undefined
+                      : 'neutral.softHoverBg',
                   },
                 }}
                 startDecorator={

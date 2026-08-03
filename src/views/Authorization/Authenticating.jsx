@@ -1,14 +1,14 @@
-import { Box, Button, LinearProgress } from '@mui/joy'
-import { useEffect, useState } from 'react'
-
 import { Capacitor } from '@capacitor/core'
+import { Box, Button, LinearProgress } from '@mui/joy'
 import Cookies from 'js-cookie'
+import { useEffect, useState } from 'react'
 import { useRef } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+
 import { useUserProfile } from '../../queries/UserQueries'
 import { apiClient } from '../../utils/ApiClient'
-import { endOAuthExchange } from '../../utils/OAuthExchangeState'
 import { GetUserProfile } from '../../utils/Fetcher'
+import { endOAuthExchange } from '../../utils/OAuthExchangeState'
 import { saveTokens } from '../../utils/TokenStorage'
 import AuthShell from './AuthShell'
 import { authButtonSx } from './authStyles'

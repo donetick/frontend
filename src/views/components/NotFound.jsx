@@ -2,6 +2,7 @@ import { HomeRounded, Login } from '@mui/icons-material'
 import { Box, Button, CircularProgress, Container } from '@mui/joy'
 import { Typography } from '@mui/material'
 import { Link } from 'react-router-dom' // Assuming you are using React Router
+
 import Logo from '../../Logo'
 
 const NotFound = () => {

@@ -22,7 +22,9 @@ export function isCacheEnabled() {
 export function setCacheEnabled(enabled) {
   try {
     localStorage.setItem(ENABLED_KEY, String(enabled))
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 }
 
 export function hashContent(content) {
@@ -56,7 +58,9 @@ export function setCached(hash, value) {
       index.push(hash)
       localStorage.setItem(INDEX_KEY, JSON.stringify(index))
     }
-  } catch { /* storage full, ignore */ }
+  } catch {
+    /* storage full, ignore */
+  }
 }
 
 export function getCacheStats() {
@@ -66,7 +70,15 @@ export function getCacheStats() {
 export function clearCache() {
   const index = getIndex()
   index.forEach(h => {
-    try { localStorage.removeItem(ENTRY_PREFIX + h) } catch { /* ignore */ }
+    try {
+      localStorage.removeItem(ENTRY_PREFIX + h)
+    } catch {
+      /* ignore */
+    }
   })
-  try { localStorage.removeItem(INDEX_KEY) } catch { /* ignore */ }
+  try {
+    localStorage.removeItem(INDEX_KEY)
+  } catch {
+    /* ignore */
+  }
 }

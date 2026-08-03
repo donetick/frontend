@@ -1,4 +1,5 @@
 import { Preferences } from '@capacitor/preferences'
+
 import { API_URL } from '../Config'
 import { networkManager } from '../hooks/NetworkManager'
 import { logout, RefreshToken } from './Fetcher'
@@ -129,7 +130,7 @@ class ApiClient {
 
   // Process queued requests after refresh attempt
   processQueue(error, token = null) {
-    this.failedQueue.forEach(({ resolve, reject }) => {
+    this.failedQueue.forEach(({ reject, resolve }) => {
       if (error) {
         reject(error)
       } else {

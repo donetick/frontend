@@ -1,9 +1,4 @@
 import {
-  DATE_FORMATS,
-  TIME_FORMATS,
-  useLocalization,
-} from '@/contexts/LocalizationContext'
-import {
   Box,
   Button,
   ButtonGroup,
@@ -16,21 +11,28 @@ import {
 } from '@mui/joy'
 import moment from 'moment'
 import { useTranslation } from 'react-i18next'
+
+import {
+  DATE_FORMATS,
+  TIME_FORMATS,
+  useLocalization,
+} from '@/contexts/LocalizationContext'
+
 import SettingsLayout from './SettingsLayout'
 
 const LocalizationSettings = () => {
   const { t } = useTranslation('settings')
   const {
-    language,
-    setLanguage,
-    dateFormat,
-    setDateFormat,
-    timeFormat,
-    setTimeFormat,
-    firstDayOfWeek,
-    setFirstDayOfWeek,
     availableLanguages,
+    dateFormat,
+    firstDayOfWeek,
     isRTL,
+    language,
+    setDateFormat,
+    setFirstDayOfWeek,
+    setLanguage,
+    setTimeFormat,
+    timeFormat,
   } = useLocalization()
 
   const sampleDate = moment('2024-01-15 14:30:00')

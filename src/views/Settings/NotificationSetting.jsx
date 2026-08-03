@@ -2,6 +2,7 @@ import { Capacitor } from '@capacitor/core'
 import { Device } from '@capacitor/device'
 import { LocalNotifications } from '@capacitor/local-notifications'
 import { Preferences } from '@capacitor/preferences'
+import { PushNotifications } from '@capacitor/push-notifications'
 import { Android, Apple } from '@mui/icons-material'
 import {
   Box,
@@ -19,7 +20,6 @@ import {
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
 
-import { PushNotifications } from '@capacitor/push-notifications'
 import { registerPushNotifications } from '../../CapacitorListener'
 import { useDeviceTokens, useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
@@ -155,7 +155,7 @@ const NotificationSetting = () => {
     }
 
     const handleDeviceRegistrationFailed = event => {
-      const { status, error } = event.detail || {}
+      const { error, status } = event.detail || {}
 
       if (status === 409) {
         showWarning({
@@ -280,7 +280,6 @@ const NotificationSetting = () => {
     }
   }
   return (
-
     <SettingsLayout title='Notification Settings'>
       <div className='grid gap-4 py-4' id='notifications'>
         <Typography level='h3'>Device Notification</Typography>

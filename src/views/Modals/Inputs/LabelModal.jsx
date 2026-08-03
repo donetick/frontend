@@ -1,7 +1,7 @@
 import { Box, FormControl, Input, Typography } from '@mui/joy'
+import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 
-import { useQueryClient } from '@tanstack/react-query'
 import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal.js'
 import { useNotification } from '../../../service/NotificationProvider.jsx'
@@ -9,7 +9,7 @@ import LABEL_COLORS from '../../../utils/Colors.jsx'
 import { CreateLabel, UpdateLabel } from '../../../utils/Fetcher'
 import { useLabels } from '../../Labels/LabelQueries'
 
-function LabelModal({ isOpen, onClose, label }) {
+function LabelModal({ isOpen, label, onClose }) {
   const { ResponsiveModal } = useResponsiveModal()
 
   const [labelName, setLabelName] = useState('')

@@ -1,4 +1,5 @@
 import { Browser } from '@capacitor/browser'
+import { Capacitor } from '@capacitor/core'
 import { Android, Apple, Favorite, GitHub } from '@mui/icons-material'
 import {
   Box,
@@ -15,6 +16,7 @@ import {
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation } from 'react-router-dom'
+
 import { useResponsiveModal } from '../../hooks/useResponsiveModal.js'
 import { useUserProfile } from '../../queries/UserQueries'
 import {
@@ -24,10 +26,9 @@ import {
   requestStoreReview,
   SENTIMENTS,
   storeLinks,
-  submitFeedback,
   SUBMIT_RESULT,
+  submitFeedback,
 } from '../../service/FeedbackService'
-import { Capacitor } from '@capacitor/core'
 
 const STEP = {
   SENTIMENT: 'sentiment',
@@ -57,7 +58,7 @@ const SENTIMENT_OPTIONS = [
  * dialog (or star links on web); anything else collects structured feedback
  * and never asks for a review.
  */
-const FeedbackModal = ({ open, onClose, onDismiss }) => {
+const FeedbackModal = ({ onClose, onDismiss, open }) => {
   const { t } = useTranslation()
   const { ResponsiveModal } = useResponsiveModal()
   const { data: userProfile } = useUserProfile()
@@ -110,7 +111,7 @@ const FeedbackModal = ({ open, onClose, onDismiss }) => {
 
   const handleSubmit = async () => {
     setSubmitting(true)
-    const { result, githubUrl: url } = await submitFeedback({
+    const { githubUrl: url, result } = await submitFeedback({
       sentiment,
       category,
       message,

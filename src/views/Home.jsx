@@ -1,8 +1,8 @@
 import { Box, Button, Container, Typography } from '@mui/joy'
 import { useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { useState } from 'react'
 import Logo from '../Logo'
 const Home = () => {
   const Navigate = useNavigate()

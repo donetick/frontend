@@ -5,6 +5,7 @@ import {
 import { Box, Button, Typography } from '@mui/joy'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+
 import Logo from '../../Logo'
 import {
   haptic,
@@ -63,7 +64,7 @@ const SLIDES = [
   },
 ]
 
-const Dots = ({ count, activeIndex, onSelect }) => (
+const Dots = ({ activeIndex, count, onSelect }) => (
   <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
     {Array.from({ length: count }, (_, index) => {
       const active = index === activeIndex

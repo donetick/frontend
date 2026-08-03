@@ -9,6 +9,7 @@ import {
   Switch,
   Typography,
 } from '@mui/joy'
+
 import { useSSEContext } from '../hooks/useSSEContext'
 import { useUserProfile } from '../queries/UserQueries'
 import { isPlusAccount } from '../utils/Helpers'
@@ -17,12 +18,12 @@ import SSEConnectionStatus from './SSEConnectionStatus'
 const SSESettings = () => {
   const { data: userProfile } = useUserProfile()
   const {
-    isConnected,
-    isConnecting,
     error,
     getConnectionStatus,
-    toggleSSEEnabled,
+    isConnected,
+    isConnecting,
     isSSEEnabled,
+    toggleSSEEnabled,
   } = useSSEContext()
 
   const handleToggle = () => {

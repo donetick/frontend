@@ -14,9 +14,10 @@ import {
 } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
+
 import ModalActions from '../../components/common/ModalActions'
-import { getRecurrentChipText } from '../../utils/ChoreCardHelpers'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
+import { getRecurrentChipText } from '../../utils/ChoreCardHelpers'
 
 const FREQUENCY_TYPES = [
   'daily',
@@ -76,7 +77,7 @@ const initLocalState = value => {
     }
   }
 
-  let { frequencyType, frequency, frequencyMetadata } = value
+  let { frequency, frequencyMetadata, frequencyType } = value
 
   // Normalize parser output: interval/1/days → daily, etc.
   if (frequencyType === 'interval' && frequency === 1) {
@@ -148,8 +149,8 @@ const pillListSx = {
 const IntervalSection = ({
   frequency,
   frequencyMetadata,
-  onFrequencyUpdate,
   onFrequencyMetadataUpdate,
+  onFrequencyUpdate,
 }) => (
   <Box>
     <SectionLabel>Repeat every</SectionLabel>
@@ -313,8 +314,8 @@ const DaysOfWeekSection = ({
 const DayOfMonthSection = ({
   frequency,
   frequencyMetadata,
-  onFrequencyUpdate,
   onFrequencyMetadataUpdate,
+  onFrequencyUpdate,
 }) => {
   const selectedMonths = frequencyMetadata?.months || []
 
@@ -370,11 +371,11 @@ const DayOfMonthSection = ({
 }
 
 const RepeatPickerField = ({
-  value,
+  emptyDisplay = 'icon-text',
   onChange,
   onClear,
-  emptyDisplay = 'icon-text',
   size = 'sm',
+  value,
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [localFrequencyType, setLocalFrequencyType] = useState('daily')

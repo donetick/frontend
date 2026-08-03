@@ -1,8 +1,9 @@
 import { Avatar, Box, List, ListItem, Typography } from '@mui/joy'
+
 import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
-const UserModal = ({ isOpen, performers = [], onSelect, onClose }) => {
+const UserModal = ({ isOpen, onClose, onSelect, performers = [] }) => {
   const { ResponsiveModal } = useResponsiveModal()
 
   return (

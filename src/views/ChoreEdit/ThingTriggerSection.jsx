@@ -48,11 +48,11 @@ const isValidTrigger = (thing, condition, triggerState) => {
 }
 
 const ThingTriggerSection = ({
-  things,
+  isAttepmtingToSave,
   onTriggerUpdate,
   onValidate,
   selected,
-  isAttepmtingToSave,
+  things,
 }) => {
   const [selectedThing, setSelectedThing] = useState(null)
   const [condition, setCondition] = useState(null)

@@ -1,15 +1,16 @@
 import { Add, Label } from '@mui/icons-material'
 import { Button } from '@mui/joy'
 import { useState } from 'react'
+
 import LabelModal from '../Modals/Inputs/LabelModal'
 import BaseOptionPicker from './BaseOptionPicker'
 
 const LabelsPickerField = ({
-  values = [],
+  emptyDisplay = 'icon-text',
+  labels = [],
   onChange,
   onClear,
-  labels = [],
-  emptyDisplay = 'icon-text',
+  values = [],
 }) => {
   const [createOpen, setCreateOpen] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
@@ -44,7 +45,7 @@ const LabelsPickerField = ({
             }}
           />
         )}
-        getTriggerText={({ selectedItems, isEmpty }) => {
+        getTriggerText={({ isEmpty, selectedItems }) => {
           if (isEmpty) return 'Labels'
           if (selectedItems.length === 1) return selectedItems[0].name
           return `${selectedItems.length} labels`

@@ -1,5 +1,6 @@
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { createElement } from 'react'
+
 import AppModal from '../components/common/AppModal'
 
 const MobileAppModal = props =>

@@ -10,9 +10,10 @@ import {
   Typography,
 } from '@mui/joy'
 import { useState } from 'react'
+
 import AppModal from './AppModal'
-import ModalActions from './ModalActions'
 import ActiveFilterChips from './filter/ActiveFilterChips'
+import ModalActions from './ModalActions'
 
 /**
  * Reusable filter bar component.
@@ -141,10 +142,10 @@ const fmtDisplayDate = iso => {
 // ── Component ────────────────────────────────────────────────────────────────
 
 const FilterBar = ({
-  filterDefs,
   activeFilters,
-  onSetFilter,
+  filterDefs,
   onClearAll,
+  onSetFilter,
   resultCount,
   totalCount,
 }) => {

@@ -6,6 +6,7 @@ import { LocalNotifications } from '@capacitor/local-notifications'
 import { Preferences } from '@capacitor/preferences'
 import { PushNotifications } from '@capacitor/push-notifications'
 import { focusManager } from '@tanstack/react-query'
+
 import { RegisterDeviceToken } from './utils/Fetcher'
 import { beginOAuthExchange } from './utils/OAuthExchangeState'
 

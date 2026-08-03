@@ -4,6 +4,7 @@ import { Box, Button, Typography } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+
 import Logo from '../../Logo'
 import { useUserProfile } from '../../queries/UserQueries'
 import { haptic } from '../../utils/Onboarding'

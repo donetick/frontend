@@ -1,16 +1,17 @@
 import { Textarea } from '@mui/joy'
 import { useState } from 'react'
+
 import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
 function TextModal({
+  cancelText,
+  current,
   isOpen,
+  okText,
   onClose,
   onSave,
-  current,
   title,
-  okText,
-  cancelText,
 }) {
   const { ResponsiveModal } = useResponsiveModal()
   const [text, setText] = useState(current)

@@ -1,5 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
+
 import {
   useArchiveChore,
   useUnArchiveChore,
@@ -30,22 +31,22 @@ const isNetworkError = err =>
 
 export const useChoreActions = ({
   chores,
-  filteredChores,
-  setChores,
-  setFilteredChores,
-  userProfile,
-  impersonatedUser,
-  showSuccess,
-  showError,
-  showWarning,
-  showUndo,
-  refetchChores,
-  setConfirmModelConfig,
-  openModal,
-  closeModal,
-  modalChore,
-  getSelectedChoresData,
   clearSelection,
+  closeModal,
+  filteredChores,
+  getSelectedChoresData,
+  impersonatedUser,
+  modalChore,
+  openModal,
+  refetchChores,
+  setChores,
+  setConfirmModelConfig,
+  setFilteredChores,
+  showError,
+  showSuccess,
+  showUndo,
+  showWarning,
+  userProfile,
 }) => {
   const queryClient = useQueryClient()
   const archiveChore = useArchiveChore()

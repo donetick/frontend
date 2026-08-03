@@ -1,11 +1,12 @@
+import '@meauxt/react-swipeable-list/dist/styles.css'
+
 import {
-  Type as ListType,
   SwipeableList,
   SwipeableListItem,
   SwipeAction,
   TrailingActions,
+  Type as ListType,
 } from '@meauxt/react-swipeable-list'
-import '@meauxt/react-swipeable-list/dist/styles.css'
 import {
   AccessTime,
   Add,
@@ -38,6 +39,7 @@ import {
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
+
 import { useLocalization } from '../../contexts/LocalizationContext'
 import {
   useChoreTimer,
@@ -48,8 +50,8 @@ import {
 import { useCircleMembers } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { commandQueue, CommandType } from '../../utils/CommandQueue'
-import { isOfflineFeatureEnabled } from '../../utils/OfflineFeatureToggle'
 import { resolvePhotoURL } from '../../utils/Helpers'
+import { isOfflineFeatureEnabled } from '../../utils/OfflineFeatureToggle'
 import { getSafeBottom } from '../../utils/SafeAreaUtils'
 import LoadingComponent from '../components/Loading'
 
@@ -203,7 +205,6 @@ const TimerDetails = () => {
 
   const cancelEditingSession = sessionId => {
     setEditingSessions(prev => {
-      // eslint-disable-next-line no-unused-vars
       const { [sessionId]: removed, ...rest } = prev
       return rest
     })

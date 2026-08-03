@@ -2,6 +2,7 @@ import { Close } from '@mui/icons-material'
 import { Box, Divider, IconButton, Modal, Sheet, Typography } from '@mui/joy'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { forwardRef, useId } from 'react'
+
 import { Z_INDEX } from '../../constants/zIndex'
 
 const WIDTH_BY_SIZE = {
@@ -18,26 +19,26 @@ const WIDTH_BY_SIZE = {
 const AppModal = forwardRef(
   (
     {
-      open,
-      onClose,
+      backdropBlur = true,
       children,
-      title,
+      closeOnBackdrop = true,
+      closeOnEscape = true,
+      contentSx,
       description,
       footer,
-      size = 'md',
+      footerSx,
       fullWidth = true,
       isMobile: isMobileProp,
+      maxHeight = '90dvh',
       mobilePresentation = 'sheet',
+      onClose,
+      open,
       role = 'dialog',
       showCloseButton = true,
       showHandle = false,
-      closeOnBackdrop = true,
-      closeOnEscape = true,
-      backdropBlur = true,
-      maxHeight = '90dvh',
-      contentSx,
-      footerSx,
+      size = 'md',
       sx,
+      title,
       unmountDelay = 180,
       ...modalProps
     },

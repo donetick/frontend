@@ -8,10 +8,11 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
+
 import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
-function CreateThingModal({ isOpen, onClose, onSave, currentThing }) {
+function CreateThingModal({ currentThing, isOpen, onClose, onSave }) {
   const { ResponsiveModal } = useResponsiveModal()
 
   const [name, setName] = useState(currentThing?.name || '')

@@ -1,12 +1,13 @@
 import { Check, Star } from '@mui/icons-material'
 import { Box, Card, Chip, Divider, Radio, Typography } from '@mui/joy'
 import { useState } from 'react'
-import AppModal from './common/AppModal'
-import ModalActions from './common/ModalActions'
+
 import { useNotification } from '../service/NotificationProvider'
 import { GetSubscriptionSession } from '../utils/Fetcher'
+import AppModal from './common/AppModal'
+import ModalActions from './common/ModalActions'
 
-const SubscriptionModal = ({ open, onClose }) => {
+const SubscriptionModal = ({ onClose, open }) => {
   const [selectedPlan, setSelectedPlan] = useState('yearly')
   const [isLoading, setIsLoading] = useState(false)
   const { showError } = useNotification()

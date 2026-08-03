@@ -13,6 +13,7 @@ import {
   Typography,
 } from '@mui/joy'
 import { useCallback, useEffect, useMemo } from 'react'
+
 import { useScanToTask } from './useScanToTask'
 
 /**
@@ -27,32 +28,32 @@ import { useScanToTask } from './useScanToTask'
  * belongs to the capture surface and drives a hidden input in this subtree.
  */
 const ScanPanel = ({
-  open,
-  onTaskExtracted,
+  autoCapture,
+  initialImageUrl,
   onClose,
   onStateChange,
-  initialImageUrl,
-  autoCapture,
+  onTaskExtracted,
+  open,
 }) => {
   const {
-    isNativeScanner,
-    phase,
-    capturedImage,
-    ocrProgress,
-    taskResult,
-    errorMsg,
+    activate,
     cameraAvailable,
-    videoRef,
     canvasRef,
-    fileInputRef,
-    startCamera,
-    stopCamera,
     capture,
+    capturedImage,
+    errorMsg,
+    fileInputRef,
     handleFileSelect,
     handleNativeScan,
-    retake,
-    activate,
+    isNativeScanner,
+    ocrProgress,
+    phase,
     reset,
+    retake,
+    startCamera,
+    stopCamera,
+    taskResult,
+    videoRef,
   } = useScanToTask()
 
   // Start/stop based on open state

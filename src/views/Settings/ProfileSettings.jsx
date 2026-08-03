@@ -12,6 +12,7 @@ import imageCompression from 'browser-image-compression'
 import { useRef, useState } from 'react'
 import Cropper from 'react-easy-crop'
 import { useTranslation } from 'react-i18next'
+
 import AppModal from '../../components/common/AppModal'
 import ModalActions from '../../components/common/ModalActions'
 import { useUserProfile } from '../../queries/UserQueries'
@@ -26,7 +27,7 @@ const ProfileSettings = () => {
   const { t } = useTranslation('settings')
   const queryClient = useQueryClient()
   const { data: userProfile, refetch: refetchUserProfile } = useUserProfile()
-  const { showSuccess, showError } = useNotification()
+  const { showError, showSuccess } = useNotification()
   const [displayName, setDisplayName] = useState(userProfile?.displayName || '')
   const [timezone, setTimezone] = useState(
     userProfile?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,

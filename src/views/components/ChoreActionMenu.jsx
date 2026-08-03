@@ -39,6 +39,7 @@ import {
 import { useMediaQuery } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+
 import AppModal from '../../components/common/AppModal'
 import LABEL_COLORS, {
   getTextColorFromBackgroundColor,
@@ -50,16 +51,16 @@ import { useProjects } from '../Projects/ProjectQueries'
 const ChoreActionMenu = ({
   chore,
   onAction,
-  onCompleteWithNote,
-  onCompleteWithPastDate,
   onChangeAssignee,
   onChangeDueDate,
-  onWriteNFC,
-  onNudge,
+  onCompleteWithNote,
+  onCompleteWithPastDate,
   onDelete,
-  onOpen,
   onMouseEnter,
   onMouseLeave,
+  onNudge,
+  onOpen,
+  onWriteNFC,
   sx = {},
   variant = 'soft',
 }) => {

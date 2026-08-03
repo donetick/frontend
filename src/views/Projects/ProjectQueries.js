@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+
 import {
   CreateProject,
   DeleteProject,
@@ -79,7 +80,7 @@ export const useUpdateProject = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ projectId, projectData }) => {
+    mutationFn: async ({ projectData, projectId }) => {
       try {
         const response = await UpdateProject(projectId, projectData)
         if (response.ok) {

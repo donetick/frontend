@@ -1,17 +1,17 @@
 import { SupervisorAccount } from '@mui/icons-material'
 import { Avatar, Box, Button, Sheet, Typography } from '@mui/joy'
-
 import { useEffect, useState } from 'react'
+
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import UserModal from '../Modals/Inputs/UserModal'
 const UserSwitcher = () => {
-  const { 
-    impersonatedUser, 
+  const {
+    canImpersonate,
+    impersonatedUser,
     isImpersonating,
-    startImpersonation, 
+    startImpersonation,
     stopImpersonation,
-    canImpersonate 
   } = useImpersonateUser()
   const { data: userProfile } = useUserProfile()
   const [isModalOpen, setIsModalOpen] = useState(false)

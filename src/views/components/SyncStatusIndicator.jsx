@@ -24,6 +24,7 @@ import {
 } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useMemo, useState } from 'react'
+
 import { networkManager } from '../../hooks/NetworkManager'
 import {
   PENDING_POLL_MS,
@@ -72,7 +73,9 @@ function SyncStatusIndicator() {
   })
   const [isOnline, setIsOnline] = useState(networkManager.isOnline)
   const [offlineSince, setOfflineSince] = useState(networkManager.offlineSince)
-  const [offlineReason, setOfflineReason] = useState(networkManager.offlineReason)
+  const [offlineReason, setOfflineReason] = useState(
+    networkManager.offlineReason,
+  )
 
   // Mirror the actual intervals used by useSyncOnReconnect so the countdown is accurate
   const retryInterval = useMemo(

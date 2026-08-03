@@ -26,6 +26,7 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
+
 import {
   DEFAULT_SIDEPANEL_CONFIG,
   getSidepanelConfig,

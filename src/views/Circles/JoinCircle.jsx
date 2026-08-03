@@ -1,10 +1,10 @@
 import { Box, Container, Input, Sheet, Typography } from '@mui/joy'
-import Logo from '../../Logo'
-
 import { Button } from '@mui/joy'
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+
 import useAcknowledgmentModal from '../../hooks/useAcknowledgmentModal'
+import Logo from '../../Logo'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { JoinCircle } from '../../utils/Fetcher'

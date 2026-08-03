@@ -5,12 +5,12 @@ import React, { useEffect } from 'react'
 
 const AutocompleteDropdown = ({
   currentValue,
-  suggestions,
-  selectedIndex,
+  onCreateSuggestion,
+  onMouseEnterSuggestion,
   onSelectSuggestion,
-  onMouseEnterSuggestion, // Added for hover selection
-  onCreateSuggestion, // Called when the "Create new" row is chosen
-  parentRefer, // Ref to the dropdown element
+  parentRefer, // Added for hover selection
+  selectedIndex, // Called when the "Create new" row is chosen
+  suggestions, // Ref to the dropdown element
 }) => {
   // Scroll selected item into view
   const dropdownMenuRef = React.useRef(null)

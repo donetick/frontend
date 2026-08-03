@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+
 import { hasSeenOnboarding, isNativeApp } from '../utils/Onboarding'
 
 // Routes a first-run user may legitimately be on without having gone through

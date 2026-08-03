@@ -1,29 +1,30 @@
 import { Save } from '@mui/icons-material'
 import { Box, Button, Chip, Divider, Input, Typography } from '@mui/joy'
 import { useEffect, useMemo, useState } from 'react'
+
 import AppModal from '../../../components/common/AppModal'
 import ModalActions from '../../../components/common/ModalActions'
+import { FILTER_COLORS } from '../../../utils/Colors'
+import { applyFilter } from '../../../utils/FilterEngine'
 import FilterBuilderContent, {
   conditionsToSelections,
   defaultSelections,
   selectionsToConditions,
 } from '../../Chores/components/FilterBuilderContent'
-import { FILTER_COLORS } from '../../../utils/Colors'
-import { applyFilter } from '../../../utils/FilterEngine'
 import { useFilters } from '../../Filters/FilterQueries'
 
 const EMPTY_FILTERS = []
 
 const AdvancedFilterBuilder = ({
+  allChores = [],
+  editingFilter = null,
   isOpen,
+  labels = [],
+  members = [],
   onClose,
   onSave,
-  members = [],
-  labels = [],
   projects = [],
-  allChores = [],
   userProfile = null,
-  editingFilter = null,
 }) => {
   const [filterName, setFilterName] = useState('')
   const [filterColor, setFilterColor] = useState(FILTER_COLORS[0].value)

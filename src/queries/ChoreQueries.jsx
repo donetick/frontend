@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+
 import { networkManager } from '../hooks/NetworkManager'
 import { commandQueue, CommandType } from '../utils/CommandQueue'
 import {
@@ -457,7 +458,7 @@ export const useUpdateChoreHistory = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ choreId, historyId, historyData }) => {
+    mutationFn: async ({ choreId, historyData, historyId }) => {
       const applyOptimisticUpdate = async () => {
         queryClient.setQueryData(['choreHistory', choreId], oldData => {
           if (!oldData?.res) return oldData
@@ -580,7 +581,7 @@ export const useMarkChoreComplete = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ choreId, body, completedDate, performer }) => {
+    mutationFn: async ({ body, choreId, completedDate, performer }) => {
       if (isOfflineFeatureEnabled() && !networkManager.isOnline) {
         await commandQueue.enqueue(CommandType.COMPLETE_CHORE, choreId, {
           id: choreId,

@@ -1,15 +1,15 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 export const useKeyboardShortcuts = ({
-  isMultiSelectMode,
-  selectedChores,
   addTaskModalOpen,
-  searchTerm,
-  searchFilter,
-  filteredChores,
   choreSections,
-  openChoreSections,
+  filteredChores,
   handlers,
+  isMultiSelectMode,
+  openChoreSections,
+  searchFilter,
+  searchTerm,
+  selectedChores,
 }) => {
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
 

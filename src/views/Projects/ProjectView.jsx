@@ -1,3 +1,13 @@
+import '@meauxt/react-swipeable-list/dist/styles.css'
+
+import {
+  SwipeableList,
+  SwipeableListItem,
+  SwipeAction,
+  TrailingActions,
+  Type as ListType,
+} from '@meauxt/react-swipeable-list'
+import { Add, MoreVert, Task } from '@mui/icons-material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import {
@@ -10,20 +20,10 @@ import {
   Stack,
   Typography,
 } from '@mui/joy'
+import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import ProjectModal from '../Modals/Inputs/ProjectModal'
 
-import {
-  Type as ListType,
-  SwipeableList,
-  SwipeableListItem,
-  SwipeAction,
-  TrailingActions,
-} from '@meauxt/react-swipeable-list'
-import '@meauxt/react-swipeable-list/dist/styles.css'
-import { Add, MoreVert, Task } from '@mui/icons-material'
-import { useQueryClient } from '@tanstack/react-query'
 import { useChores } from '../../queries/ChoreQueries'
 import { useUserProfile } from '../../queries/UserQueries'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors'
@@ -32,13 +32,14 @@ import { getIconComponent } from '../../utils/ProjectIcons'
 import { getSafeBottomStyles } from '../../utils/SafeAreaUtils'
 import { useProjectFilter } from '../Chores/hooks/useProjectFilter'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
+import ProjectModal from '../Modals/Inputs/ProjectModal'
 import { useProjects } from './ProjectQueries'
 const ProjectCardContent = ({
-  project,
   currentUserId,
-  taskCounts = {},
   onCardClick,
   onToggleActions,
+  project,
+  taskCounts = {},
 }) => {
   // Check if current user owns this project
   const isOwnedByCurrentUser = project.created_by === currentUserId
@@ -218,7 +219,7 @@ const ProjectCardContent = ({
 }
 
 const ProjectView = () => {
-  const { data: projects, isProjectsLoading, isError } = useProjects()
+  const { data: projects, isError, isProjectsLoading } = useProjects()
   const { data: userProfile } = useUserProfile()
   const { data: chores = { res: [] } } = useChores(false) // false to exclude archived
   const { data: projectsData = [], isLoading: projectsLoading } = useProjects()

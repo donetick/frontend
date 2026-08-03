@@ -21,6 +21,7 @@ import {
   Typography,
 } from '@mui/joy'
 import { useRef, useState } from 'react'
+
 import KeyboardShortcutHint from '../../../components/common/KeyboardShortcutHint'
 import LABEL_COLORS, {
   getTextColorFromBackgroundColor,
@@ -41,17 +42,17 @@ const renderProjectAvatar = (color, icon) => {
 
 const MultiSelectToolbar = ({
   isVisible,
-  selectedCount,
-  onSelectAll,
+  onArchive,
   onClear,
   onComplete,
-  onSkip,
-  onArchive,
   onDelete,
   onMoveToProject,
+  onSelectAll,
+  onSkip,
   projects = [],
-  showKeyboardShortcuts,
   selectAllDisabled,
+  selectedCount,
+  showKeyboardShortcuts,
 }) => {
   const [projectMenuAnchor, setProjectMenuAnchor] = useState(null)
   const projectMenuRef = useRef(null)

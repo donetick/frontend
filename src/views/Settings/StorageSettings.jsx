@@ -1,13 +1,8 @@
 import { Capacitor } from '@capacitor/core'
-import {
-  Button,
-  Card,
-  Chip,
-  LinearProgress,
-  Typography,
-} from '@mui/joy'
+import { Button, Card, Chip, LinearProgress, Typography } from '@mui/joy'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+
 import { useUserProfile } from '../../queries/UserQueries'
 import { GetStorageUsage } from '../../utils/Fetcher'
 import { isPlusAccount } from '../../utils/Helpers'
@@ -165,9 +160,8 @@ const StorageSettings = () => {
                   'Clear App Preferences',
                   async () => {
                     try {
-                      const { Preferences } = await import(
-                        '@capacitor/preferences'
-                      )
+                      const { Preferences } =
+                        await import('@capacitor/preferences')
                       await Preferences.clear()
                       Navigate('/login')
                     } catch (e) {
