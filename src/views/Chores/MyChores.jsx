@@ -52,6 +52,10 @@ import AdvancedFilterBuilder from '../Modals/Inputs/AdvancedFilterBuilder'
 import { useProjects } from '../Projects/ProjectQueries.js'
 import ChoreListView from './ChoreListView.jsx'
 import ChoreToolbar from './components/ChoreToolbarPrototype'
+import {
+  conditionsToSelections,
+  selectionsToConditions,
+} from './components/FilterBuilderContent'
 import ChoreModals from './components/ChoreModals'
 import MultiSelectToolbar from './components/MultiSelectToolbar'
 import MyChoreHeader from './components/MyChoreHeader'
@@ -683,14 +687,46 @@ const MyChores = () => {
     setAnchorEl(null)
   }
 
+  // Clicking a label / priority chip on a task card feeds the advanced filter
+  // (as a temp filter) rather than the legacy quick filters. Clicking the same
+  // chip again removes that value, so chips toggle.
   const handleLabelFiltering = chipClicked => {
-    clearActiveFilter()
-    if (chipClicked.label) {
-      setQuickFilter('label', [chipClicked.label.id])
-    } else if (chipClicked.priority) {
-      setQuickFilter('priority', [chipClicked.priority])
+    const type = chipClicked.label ? 'label' : 'priority'
+    const value = chipClicked.label
+      ? chipClicked.label.id
+      : chipClicked.priority
+    if (value === undefined || value === null) return
+
+    const selections = conditionsToSelections(tempFilter?.conditions)
+    const currentValues = selections[type].values || []
+    const isActive = currentValues.some(v => String(v) === String(value))
+    selections[type] = {
+      operator: selections[type].operator || 'is',
+      values: isActive
+        ? currentValues.filter(v => String(v) !== String(value))
+        : [...currentValues, value],
     }
+
+    const conditions = selectionsToConditions(selections)
+
+    clearQuickFilters()
     setSelectedCalendarDate(null)
+
+    if (conditions.length === 0) {
+      clearTempFilter()
+      clearActiveFilter()
+      return
+    }
+
+    const chipName = chipClicked.label
+      ? chipClicked.label.name
+      : `P${chipClicked.priority}`
+    applyTempFilter(
+      { conditions, operator: 'AND' },
+      // Keep whatever the temp filter was already labelled as (e.g. an
+      // in-progress saved-filter edit); only name it when starting fresh.
+      tempFilterMeta ?? { name: chipName },
+    )
   }
 
   // Helper to update URL with filter parameters

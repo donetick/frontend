@@ -138,15 +138,7 @@ const ScanPanel = ({
   const isProcessing = phase === 'processing'
 
   return (
-    <Box
-      sx={{
-        borderRadius: 'md',
-        border: '1px solid',
-        borderColor: 'primary.outlinedBorder',
-        overflow: 'hidden',
-        bgcolor: 'background.level1',
-      }}
-    >
+    <Box>
       {/* ── Capture phase ── */}
       {phase === 'capture' && (
         <>
@@ -160,6 +152,8 @@ const ScanPanel = ({
               alignItems: 'center',
               justifyContent: 'center',
               bgcolor: 'neutral.900',
+              // The wrapper used to clip this; it owns its own corners now
+              borderRadius: 'md',
               overflow: 'hidden',
             }}
           >
@@ -211,7 +205,6 @@ const ScanPanel = ({
           {(isNativeScanner || cameraAvailable) && (
             <Box
               sx={{
-                px: 1.5,
                 py: 1,
                 display: 'flex',
                 alignItems: 'center',
@@ -240,7 +233,7 @@ const ScanPanel = ({
             flexDirection: 'column',
             alignItems: 'center',
             gap: 1.5,
-            p: 2.5,
+            py: 2.5,
           }}
         >
           {capturedImage && (
@@ -297,7 +290,7 @@ const ScanPanel = ({
 
       {/* ── Error phase ── */}
       {phase === 'error' && (
-        <Box sx={{ p: 2 }}>
+        <Box sx={{ py: 2 }}>
           {capturedImage && (
             <img
               src={capturedImage}
