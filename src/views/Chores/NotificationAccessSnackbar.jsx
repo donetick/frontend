@@ -17,9 +17,16 @@ const NotificationAccessSnackbar = () => {
   useEffect(() => {
     // Only run the effect on native platforms
     if (Capacitor.isNativePlatform()) {
-      getNotificationPreferences().then(data => {
+      getNotificationPreferences().then(async data => {
         // if optOut is true then don't show the snackbar
         if (data?.optOut === true || data?.granted === true) {
+          // Onboarding (and the system settings screen) can grant permission
+          // while no session exists, so the push token still needs registering.
+          if (data?.granted === true) {
+            await registerPushNotifications().catch(error =>
+              console.error('Error registering push notifications:', error),
+            )
+          }
           return
         }
         setOpen(true)
@@ -69,7 +76,7 @@ const NotificationAccessSnackbar = () => {
               } catch (error) {
                 console.error('Error setting up notifications:', error)
               }
-              
+
               await Preferences.set({
                 key: 'notificationPreferences',
                 value: JSON.stringify(notificationPreferences),

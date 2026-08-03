@@ -35,7 +35,11 @@ const SignupView = () => {
           // Invalidate user profile queries to ensure fresh data
           queryClient.invalidateQueries(['userProfile'])
 
-          Navigate('/chores')
+          // The "how did you hear about us" step (/heard-about) is
+          // temporarily skipped; new accounts go straight to circle setup.
+          // Re-enable by navigating to '/heard-about' again — that view
+          // already forwards to '/circle-setup' when done.
+          Navigate('/circle-setup', { replace: true })
         })
       } else {
         console.log('Login failed', response)
@@ -130,7 +134,7 @@ const SignupView = () => {
       title='Create your account'
       subtitle='Track chores and tasks together, in one shared place.'
       footer={<LegalLinks />}
-           logoSize={0}
+      logoSize={0}
     >
       <Box
         component='form'

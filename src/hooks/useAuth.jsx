@@ -59,7 +59,13 @@ export const AuthProvider = ({ children }) => {
 
       if (!response.ok) {
         const res = await response.json()
-        return { success: false, error: res?.error || 'Login failed' }
+        // `status` is passed back so callers can tell a rejected password from
+        // an unreachable or broken server without parsing the message.
+        return {
+          success: false,
+          status: response.status,
+          error: res?.error || 'Login failed',
+        }
       }
 
       const data = await response.json()

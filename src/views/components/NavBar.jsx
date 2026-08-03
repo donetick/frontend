@@ -45,7 +45,7 @@ const NavBar = () => {
 
   const navigate = useNavigate()
   const [drawerOpen, setDrawerOpen] = useState(false)
-  
+
   const links = [
     {
       to: '/chores',
@@ -128,7 +128,9 @@ const NavBar = () => {
           }
         }}
         title={
-          searchParams.get('from') === 'calendar' ? t('backToCalendar') : t('back')
+          searchParams.get('from') === 'calendar'
+            ? t('backToCalendar')
+            : t('back')
         }
       >
         <ArrowBack />
@@ -145,6 +147,9 @@ const NavBar = () => {
       '/password/update',
       '/login/settings',
       '/welcome',
+      '/onboarding',
+      '/get-started',
+      '/ready',
     ].includes(location.pathname)
   ) {
     return (
