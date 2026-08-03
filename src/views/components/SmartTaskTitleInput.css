@@ -65,11 +65,14 @@
   border: none;
   background-color: var(--joy-palette-neutral-softBg, #f0f4f8);
   overflow: auto;
-  transition: box-shadow 0.15s ease, background-color 0.15s ease;
+  transition:
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
 }
 
 .task-input:focus-within {
-  box-shadow: 0 0 0 2px var(--joy-palette-primary-outlinedBorder, rgba(11, 107, 203, 0.15));
+  box-shadow: 0 0 0 2px
+    var(--joy-palette-primary-outlinedBorder, rgba(11, 107, 203, 0.15));
 }
 
 .task-input:hover:not(:focus-within) {
