@@ -99,7 +99,8 @@ export const useChores = (includeArchive = false) => {
     queryFn: async () => {
       if (isOfflineFeatureEnabled()) {
         try {
-          // Sync from server first (no-op if already syncing or offline)
+          // Sync from server first (coalesced with any run already in flight,
+          // so a just-created chore can't be missed by a stale cursor)
           if (networkManager.isOnline) {
             await syncEngine.sync()
           }
