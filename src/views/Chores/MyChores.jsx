@@ -607,8 +607,17 @@ const MyChores = () => {
       ? quickFilteredChores
       : projectFilteredChores
 
+    // Apply impersonation filter: when viewing tasks as another user,
+    // only show chores assigned to that user
+    let result = baseChores
+    if (impersonatedUser) {
+      result = baseChores.filter(
+        chore => chore.assignedTo === impersonatedUser.userId,
+      )
+    }
+
     if (searchTerm?.length > 0) {
-      const searchableChores = baseChores.map(c => ({
+      const searchableChores = result.map(c => ({
         ...c,
         raw_label: c.labelsV2?.map(l => l.name).join(' '),
       }))
@@ -621,7 +630,7 @@ const MyChores = () => {
       return fuse.search(searchTerm).map(result => result.item)
     }
 
-    return baseChores
+    return result
   }, [
     activeFilterId,
     tempFilter,
@@ -630,6 +639,7 @@ const MyChores = () => {
     quickFilteredChores,
     projectFilteredChores,
     searchTerm,
+    impersonatedUser,
   ])
 
   const { showKeyboardShortcuts } = useKeyboardShortcuts({
