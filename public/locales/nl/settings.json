@@ -168,6 +168,10 @@
       "developer": {
         "title": "Ontwikkelaarsinstellingen",
         "description": "Bekijk technische informatie over authenticatietokens, SSE-verbindingen en foutopsporingsgegevens."
+      },
+      "feedback": {
+        "title": "Send Feedback",
+        "description": "Tell us how Donetick is working for you, report a bug, or request a feature."
       }
     }
   }
