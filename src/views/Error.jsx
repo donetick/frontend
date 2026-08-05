@@ -10,8 +10,14 @@ import {
   SearchOffRounded,
 } from '@mui/icons-material'
 import { Box, Button, IconButton, Snackbar, Typography } from '@mui/joy'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useRouteError } from 'react-router-dom'
+
+import {
+  collectErrorReport,
+  formatErrorReport,
+} from '../service/ErrorReportService'
+import ErrorReportModal from './Modals/ErrorReportModal'
 
 const getErrorKind = error => {
   if (!error)
@@ -48,27 +54,30 @@ const safeMessage = error => {
   return msg
 }
 
-const buildErrorText = (error, url) => {
-  const lines = [
-    `URL: ${url}`,
-    `Time: ${new Date().toISOString()}`,
-    `Error: ${safeMessage(error) ?? String(error)}`,
-  ]
-  if (error?.stack) lines.push(`\nStack:\n${error.stack}`)
-  return lines.join('\n')
-}
-
 const Error = () => {
   const error = useRouteError()
   const [showDetails, setShowDetails] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [reportOpen, setReportOpen] = useState(false)
+  const [reportText, setReportText] = useState('')
 
-  const { color, Icon } = getErrorKind(error)
+  const { Icon, color } = getErrorKind(error)
   const message = safeMessage(error)
-  const url = window.location.href
+
+  // The same bundle the report modal sends, so what the user copies and what
+  // we receive can never disagree.
+  useEffect(() => {
+    let active = true
+    collectErrorReport({ error }).then(report => {
+      if (active) setReportText(formatErrorReport(report))
+    })
+    return () => {
+      active = false
+    }
+  }, [error])
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(buildErrorText(error, url)).then(() => {
+    navigator.clipboard.writeText(reportText).then(() => {
       setCopied(true)
     })
   }
@@ -209,9 +218,22 @@ const Error = () => {
         size='lg'
         startDecorator={<RefreshRounded />}
         onClick={() => window.location.reload()}
-        sx={{ width: '100%', mb: 2 }}
+        sx={{ width: '100%', mb: 1.5 }}
       >
         Try again
+      </Button>
+
+      {/* Reporting is one tap from the failure, where the context is still
+          fresh — asking people to find it in Settings afterwards never works. */}
+      <Button
+        variant='outlined'
+        color='neutral'
+        size='lg'
+        startDecorator={<BugReportRounded />}
+        onClick={() => setReportOpen(true)}
+        sx={{ width: '100%', mb: 2 }}
+      >
+        Report this problem
       </Button>
 
       {/* Secondary actions */}
@@ -251,16 +273,7 @@ const Error = () => {
           textAlign='center'
           sx={{ color: 'text.tertiary', mb: 1.5 }}
         >
-          If this keeps happening,{' '}
-          <a
-            href='https://github.com/donetick/donetick/issues/new'
-            target='_blank'
-            rel='noopener noreferrer'
-            style={{ textDecoration: 'underline' }}
-          >
-            open an issue
-          </a>{' '}
-          and include the error details below.
+          If this keeps happening, send us a report please consider sending us report so we can take a look. 
         </Typography>
 
         {(error?.stack || message) && (
@@ -313,13 +326,19 @@ const Error = () => {
                     color: 'text.secondary',
                   }}
                 >
-                  {buildErrorText(error, url)}
+                  {reportText || 'Collecting error details…'}
                 </Typography>
               </Box>
             )}
           </>
         )}
       </Box>
+
+      <ErrorReportModal
+        open={reportOpen}
+        onClose={() => setReportOpen(false)}
+        error={error}
+      />
 
       <Snackbar
         open={copied}
