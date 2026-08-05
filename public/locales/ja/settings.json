@@ -168,6 +168,10 @@
       "developer": {
         "title": "開発者設定",
         "description": "認証トークン、SSE 接続、デバッグデータなどの技術情報を確認できます。"
+      },
+      "feedback": {
+        "title": "Send Feedback",
+        "description": "Tell us how Donetick is working for you, report a bug, or request a feature."
       }
     }
   }
