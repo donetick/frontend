@@ -177,24 +177,33 @@ export const buildChorePayload = (
     status: 0,
     frequencyType: 'once',
     frequencyMetadata: {},
+    notification: false,
     notificationMetadata: {},
     subTasks: null,
     projectId: projectId === 'default' ? null : projectId,
     draftId: generateUUID(),
   }
 
+  // A per-task override from the voice card wins over the account default;
+  // an override of [] is a deliberate "no reminders", not a missing value.
+  const templates =
+    parsed.notificationMetadata?.templates ?? notificationTemplates
+
+  // Reminders are a Plus feature; the flag is what makes the backend schedule
+  // them, so metadata alone is not enough.
+  const hasReminders = isPlusAccount(userProfile) && templates?.length > 0
+
   if (parsed.frequency) {
     chore.frequencyType = parsed.frequency.frequencyType
     chore.frequencyMetadata = parsed.frequency.frequencyMetadata
     chore.frequency = parsed.frequency.frequency
-    if (isPlusAccount(userProfile)) {
-      chore.notification = true
-      chore.notificationMetadata = { templates: notificationTemplates }
-    }
   }
   if (!parsed.frequency && parsed.dueDate) {
     chore.nextDueDate = new Date(parsed.dueDate).toISOString()
-    chore.notificationMetadata = { templates: notificationTemplates }
+  }
+  if (hasReminders && (parsed.frequency || parsed.dueDate)) {
+    chore.notification = true
+    chore.notificationMetadata = { templates }
   }
 
   return chore

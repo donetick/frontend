@@ -49,6 +49,23 @@ const getTimeFromTemplate = (template, relativeTime) => {
   }
   return time
 }
+// Decide whether this device's user should be notified about a chore:
+// - assignedTo set   -> only that user
+// - no assignedTo    -> everyone listed in assignees
+// - no assignees     -> "Anyone" mode, notify the whole circle
+const shouldNotifyUser = (chore, userId) => {
+  if (!userId) {
+    return false
+  }
+  if (chore.assignedTo > 0) {
+    return chore.assignedTo === userId
+  }
+  if (chore.assignees?.length > 0) {
+    return chore.assignees.some(assignee => assignee.userId === userId)
+  }
+  return true
+}
+
 const scheduleNotificationFromTemplate = (
   chore,
   userProfile,
@@ -193,7 +210,8 @@ const scheduleChoreNotification = async (
       if (
         chore.notification === false ||
         chore.nextDueDate === null ||
-        chore.isActive === false
+        chore.isActive === false ||
+        !shouldNotifyUser(chore, userProfile?.id)
       ) {
         continue
       }
