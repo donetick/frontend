@@ -168,6 +168,10 @@
       "developer": {
         "title": "Paramètres Développeur",
         "description": "Consultez les informations techniques sur les jetons d'authentification, les connexions SSE et les données de débogage."
+      },
+      "feedback": {
+        "title": "Send Feedback",
+        "description": "Tell us how Donetick is working for you, report a bug, or request a feature."
       }
     }
   }
