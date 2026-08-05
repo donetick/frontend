@@ -135,10 +135,11 @@ const NotificationPickerField = ({
       >
         <NotificationTemplate
           value={value}
+          minNotifications={0}
           onChange={({ notifications }) => {
             latestTemplatesRef.current = notifications
           }}
-          showTimeline
+          showTimeline={false}
         />
       </ResponsiveModal>
     </>

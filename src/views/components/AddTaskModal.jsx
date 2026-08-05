@@ -45,22 +45,65 @@ import ScanPanel from './ScanToTask/ScanPanel'
 import SubTasks from './SubTask'
 import { buildChorePayload, parseVoiceTask } from './VoiceToTask/parseVoiceTask'
 import VoicePanel from './VoiceToTask/VoicePanel'
+// Canonical reminder template shape, shared with NotificationTemplate and
+// LocalNotificationScheduler: a signed value plus 'm' | 'h' | 'd'. Negative is
+// before due, positive is after, zero is on due.
+const DEFAULT_NOTIFICATION_TEMPLATES = [
+  { value: -1, unit: 'd' },
+  { value: 0, unit: 'm' },
+  { value: 1, unit: 'd' },
+]
+
+const UNIT_ALIASES = {
+  minute: 'm',
+  minutes: 'm',
+  hour: 'h',
+  hours: 'h',
+  day: 'd',
+  days: 'd',
+}
+
+// Earlier builds stored {value: 1, unit: 'days', type: 'before'}. Nothing reads
+// `type`, and the scheduler's unit switch falls through on 'days', so those
+// entries fired at the due time (or collided on id) instead of offsetting.
+const normalizeTemplate = template => {
+  const unit = UNIT_ALIASES[template.unit] || template.unit
+  const value = Number(template.value) || 0
+  if (!template.type) return { value, unit }
+  if (template.type === 'ondue') return { value: 0, unit }
+  return {
+    value: template.type === 'before' ? -Math.abs(value) : Math.abs(value),
+    unit,
+  }
+}
+
 const getDefaultNotification = () => {
   const storedDefault = localStorage.getItem('defaultNotificationTemplate')
   if (storedDefault) {
-    return JSON.parse(storedDefault)
+    try {
+      const parsed = JSON.parse(storedDefault)
+      if (Array.isArray(parsed)) {
+        // An empty list is a deliberate "no reminders by default", not a
+        // missing value — respect it instead of re-seeding.
+        const normalized = parsed.map(normalizeTemplate)
+        if (JSON.stringify(normalized) !== storedDefault) {
+          localStorage.setItem(
+            'defaultNotificationTemplate',
+            JSON.stringify(normalized),
+          )
+        }
+        return normalized
+      }
+    } catch {
+      // fall through and reset to the defaults below
+    }
   }
-  const defaultNotification = [
-    { value: 1, unit: 'days', type: 'before' },
-    { value: 0, unit: 'minutes', type: 'ondue' },
-    { value: 1, unit: 'days', type: 'after' },
-  ]
 
   localStorage.setItem(
     'defaultNotificationTemplate',
-    JSON.stringify(defaultNotification),
+    JSON.stringify(DEFAULT_NOTIFICATION_TEMPLATES),
   )
-  return defaultNotification
+  return DEFAULT_NOTIFICATION_TEMPLATES
 }
 
 const TaskInput = ({ onChoreUpdate, isModalOpen, onClose, initialMode }) => {
@@ -157,6 +200,12 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose, initialMode }) => {
     isListening: false,
   })
   const [creatingVoiceTasks, setCreatingVoiceTasks] = useState(false)
+  // Reminder default the voice cards start from — read once so the array
+  // identity stays stable across renders of the panel
+  const voiceDefaultNotificationTemplates = useMemo(
+    () => getDefaultNotification(),
+    [],
+  )
   // Same arrangement for the scan panel: it reports the action for its
   // current phase and the modal footer renders it
   const [scanState, setScanState] = useState({
@@ -558,6 +607,11 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose, initialMode }) => {
         if ('priority' in overrides) setPriority(overrides.priority || 0)
         if ('frequency' in overrides) setFrequency(overrides.frequency)
         if ('labelIds' in overrides) setLabelsV2(overrides.labelIds || [])
+        if ('notificationMetadata' in overrides) {
+          setNotificationMetadata(
+            overrides.notificationMetadata || { templates: [] },
+          )
+        }
         if ('assignees' in overrides || 'isAnyone' in overrides) {
           setIsAnyoneTask(!!overrides.isAnyone)
           setAssignees(overrides.assignees || [])
@@ -812,24 +866,29 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose, initialMode }) => {
       status: 0,
       frequencyType: 'once',
       frequencyMetadata: {},
+      notification: false,
       notificationMetadata: {},
       subTasks: subTasks?.length > 0 ? subTasks : null,
       projectId: projectId === 'default' ? null : projectId,
       draftId: draftId,
     }
 
+    // Reminders are a Plus feature and only make sense when the user kept at
+    // least one template; without the flag the backend never schedules them.
+    const hasReminders =
+      isPlusAccount(userProfile) && notificationMetadata?.templates?.length > 0
+
     if (frequency) {
       chore.frequencyType = frequency.frequencyType
       chore.frequencyMetadata = frequency.frequencyMetadata
       chore.frequency = frequency.frequency
-      if (isPlusAccount(userProfile)) {
-        chore.notification = true
-        chore.notificationMetadata = notificationMetadata
-      }
     }
     if (!frequency && dueDate) {
       // Use RFC3339/ISO-8601 format expected by backend.
       chore.nextDueDate = new Date(dueDate).toISOString()
+    }
+    if (hasReminders && (frequency || dueDate)) {
+      chore.notification = true
       chore.notificationMetadata = notificationMetadata
     }
 
@@ -1291,6 +1350,7 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose, initialMode }) => {
             userLabels={voiceLabels}
             members={voiceMembers}
             userProfile={userProfile}
+            defaultNotificationTemplates={voiceDefaultNotificationTemplates}
             onStateChange={setVoiceState}
           />
         )}

@@ -6,6 +6,7 @@ import {
   GraphicEq,
   Lock,
   Mic,
+  NotificationsNone,
   Person,
   Repeat,
   Sell,
@@ -16,9 +17,11 @@ import { Box, Button, Chip, IconButton, Input, Typography } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { TASK_COLOR } from '../../../utils/Colors'
+import { isPlusAccount } from '../../../utils/Helpers'
 import AssigneePickerField from '../AssigneePickerField'
 import DueDatePickerField from '../DueDatePickerField'
 import LabelsPickerField from '../LabelsPickerField'
+import NotificationPickerField from '../NotificationPickerField'
 import PriorityPickerField from '../PriorityPickerField'
 import RepeatPickerField from '../RepeatPickerField'
 import { parseVoiceTask } from './parseVoiceTask'
@@ -102,7 +105,11 @@ const describeFrequency = f => {
   return names[f.frequencyType] || 'Repeats'
 }
 
-const buildChips = (effective, frequencyLabel, { members, currentUserId }) => {
+const buildChips = (
+  effective,
+  frequencyLabel,
+  { members, currentUserId, canRemind },
+) => {
   const chips = []
   if (effective.dueDate) {
     chips.push({
@@ -126,6 +133,21 @@ const buildChips = (effective, frequencyLabel, { members, currentUserId }) => {
       color: 'danger',
       icon: <Flag sx={{ fontSize: 12 }} />,
       label: `P${effective.priority}`,
+    })
+  }
+  // Mirrors buildChorePayload: reminders only reach the backend for Plus
+  // accounts on a task that has something to remind against
+  const reminderCount = effective.notificationMetadata?.templates?.length || 0
+  if (
+    canRemind &&
+    reminderCount > 0 &&
+    (effective.dueDate || effective.frequency)
+  ) {
+    chips.push({
+      key: 'reminders',
+      color: 'neutral',
+      icon: <NotificationsNone sx={{ fontSize: 12 }} />,
+      label: reminderCount > 1 ? `${reminderCount} reminders` : '1 reminder',
     })
   }
   if (effective.points != null) {
@@ -184,9 +206,17 @@ const TaskPreviewCard = ({
     [segment.text, parseCtx],
   )
   const overrides = useMemo(() => segment.overrides || {}, [segment.overrides])
+  // The parser has no notion of reminders, so the account default stands in
+  // until the card overrides it — same fallback buildChorePayload applies
   const effective = useMemo(
-    () => ({ ...parsed, ...overrides }),
-    [parsed, overrides],
+    () => ({
+      ...parsed,
+      notificationMetadata: {
+        templates: parseCtx.defaultNotificationTemplates || [],
+      },
+      ...overrides,
+    }),
+    [parsed, overrides, parseCtx.defaultNotificationTemplates],
   )
 
   const frequencyLabel =
@@ -329,6 +359,7 @@ const TaskPreviewCard = ({
       {expanded && (
         <Box
           sx={{
+            mt: 1,
             display: 'flex',
             flexDirection: 'row',
             gap: 1,
@@ -392,6 +423,16 @@ const TaskPreviewCard = ({
             onClear={() => onPatch({ labelIds: [] })}
             labels={parseCtx.userLabels}
           />
+          {parseCtx.canRemind && (
+            <NotificationPickerField
+              emptyDisplay='icon'
+              value={effective.notificationMetadata}
+              onChange={metadata => onPatch({ notificationMetadata: metadata })}
+              onClear={() =>
+                onPatch({ notificationMetadata: { templates: [] } })
+              }
+            />
+          )}
         </Box>
       )}
     </Box>
@@ -412,6 +453,7 @@ const VoicePanel = ({
   userLabels = [],
   members = [],
   userProfile,
+  defaultNotificationTemplates = [],
   onStateChange,
 }) => {
   const {
@@ -430,8 +472,14 @@ const VoicePanel = ({
   const segmentsScrollRef = useRef(null)
 
   const parseCtx = useMemo(
-    () => ({ userLabels, members, currentUserId: userProfile?.id }),
-    [userLabels, members, userProfile?.id],
+    () => ({
+      userLabels,
+      members,
+      currentUserId: userProfile?.id,
+      canRemind: isPlusAccount(userProfile),
+      defaultNotificationTemplates,
+    }),
+    [userLabels, members, userProfile, defaultNotificationTemplates],
   )
 
   const partialParsed = useMemo(

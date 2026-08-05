@@ -63,6 +63,10 @@ function getInternalValue(timing, displayValue) {
 
 const NotificationTemplate = ({
   maxNotifications = 5,
+  // ChoreEdit gates this editor behind its own on/off switch, so the last row
+  // must stay put — `notification: true` with no templates is not a valid task.
+  // Consumers that own an empty state themselves pass 0.
+  minNotifications = 1,
   onChange,
   value,
   showTimeline = true,
@@ -259,7 +263,8 @@ const NotificationTemplate = ({
       return next
     })
 
-    onChange && onChange(updated)
+    // No direct onChange here: consumers expect { notifications }, and the
+    // effect below already emits that shape once the state settles.
     setShowSaveDefault(true)
   }
 
@@ -307,9 +312,6 @@ const NotificationTemplate = ({
 
     return (
       <Box sx={{ mt: 3, mb: 2 }}>
-        <Typography level={'body-md'} sx={{ mb: 1 }}>
-          Notification Timeline
-        </Typography>
         <Box
           sx={{
             display: 'flex',
@@ -642,7 +644,7 @@ const NotificationTemplate = ({
                   </Select>
                   <IconButton
                     onClick={() => removeNotification(idx)}
-                    disabled={notifications.length === 1}
+                    disabled={notifications.length <= minNotifications}
                     color={'danger'}
                     size={'sm'}
                     variant={'soft'}
