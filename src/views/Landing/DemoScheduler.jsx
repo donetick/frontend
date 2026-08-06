@@ -1,5 +1,6 @@
 import { Box, Card, Grid, Typography } from '@mui/joy'
 import { useState } from 'react'
+
 import RepeatSection from '../ChoreEdit/RepeatSection'
 
 const DemoScheduler = () => {
@@ -32,6 +33,7 @@ const DemoScheduler = () => {
             OnTriggerValidate={() => {}}
             isAttemptToSave={false}
             selectedThing={null}
+            viewOnly
           />
         </Box>
       </Grid>
