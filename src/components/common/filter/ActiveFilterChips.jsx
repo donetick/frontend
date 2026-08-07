@@ -52,7 +52,10 @@ const ActiveFilterChips = ({
             <ChipDelete
               variant='plain'
               color={color}
-              onDelete={() => onClear?.()}
+              onDelete={event => {
+                event.stopPropagation()
+                onClear?.()
+              }}
               aria-label={`Remove ${label} filter`}
               sx={{
                 '--Chip-deleteSize': chipSize === 'sm' ? '1.1rem' : '1.4rem',

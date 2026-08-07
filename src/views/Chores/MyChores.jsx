@@ -733,6 +733,11 @@ const MyChores = () => {
     )
   }
 
+  const clearTempFilterAndUrl = () => {
+    clearTempFilter()
+    updateFilterUrl(null, null)
+  }
+
   const handleSearchChange = e => {
     clearActiveFilter()
     if (hasQuickFilters) {
@@ -947,7 +952,7 @@ const MyChores = () => {
           tempFilter={tempFilter}
           tempFilterMeta={tempFilterMeta}
           applyTempFilter={applyTempFilter}
-          clearTempFilter={clearTempFilter}
+          clearTempFilter={clearTempFilterAndUrl}
           saveFilter={saveFilter}
           updateFilter={updateFilter}
           onFilterSaved={name =>
@@ -1513,7 +1518,7 @@ const MyChores = () => {
         allChores={chores}
         performers={membersData?.res || []}
         applyTempFilter={applyTempFilter}
-        clearTempFilter={clearTempFilter}
+        clearTempFilter={clearTempFilterAndUrl}
         tempFilter={tempFilter}
       />
 
