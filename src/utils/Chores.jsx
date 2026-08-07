@@ -89,6 +89,8 @@ const buildActualDateGroups = chores => {
 export const ChoresGrouper = (groupBy, chores, filter) => {
   if (filter) {
     chores = chores.filter(chore => filter(chore))
+  } else {
+    chores = [...chores]
   }
 
   // sort by priority then due date:

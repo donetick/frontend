@@ -20,8 +20,7 @@ import {
   IconButton,
   Typography,
 } from '@mui/joy'
-import Fuse from 'fuse.js'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useChores } from '../../queries/ChoreQueries'
 import { useNotification } from '../../service/NotificationProvider'
@@ -101,7 +100,6 @@ const MyChores = () => {
 
   const [chores, setChores] = useState([])
   const [filteredChores, setFilteredChores] = useState([])
-  const [choreSections, setChoreSections] = useState([])
   const [addTaskModalOpen, setAddTaskModalOpen] = useState(false)
   // 'voice' | 'scan' | null — set by the quick-capture widget deep links
   const [addTaskInitialMode, setAddTaskInitialMode] = useState(null)
@@ -118,6 +116,9 @@ const MyChores = () => {
       return {}
     }
   })
+  const openSectionsInitializedRef = useRef(
+    localStorage.getItem('openChoreSections') !== null,
+  )
   const [anchorEl, setAnchorEl] = useState(null)
   const [viewMode, setViewMode] = useState(
     localStorage.getItem('choreCardViewMode') || 'default',
@@ -301,7 +302,7 @@ const MyChores = () => {
     return sortedChores
   }, [choresData?.res, impersonatedUser])
 
-  const processedSections = useMemo(() => {
+  const choreSections = useMemo(() => {
     if (!chores.length || !userProfile?.id) {
       return []
     }
@@ -385,26 +386,16 @@ const MyChores = () => {
     impersonatedUser?.userId,
   ])
 
-  // Auto-update sections when processedSections changes
   useEffect(() => {
-    // Always update choreSections to match processedSections, even if empty
-    setChoreSections(processedSections)
+    if (openSectionsInitializedRef.current || choreSections.length === 0) return
 
-    // Auto-open sections if needed - only check localStorage once
-    if (processedSections.length > 0) {
-      const storedSections = localStorage.getItem('openChoreSections')
-      if (storedSections === null) {
-        const openSections = processedSections.reduce(
-          (acc, _section, index) => {
-            acc[index] = true
-            return acc
-          },
-          {},
-        )
-        setOpenChoreSections(openSections)
-      }
-    }
-  }, [processedSections])
+    openSectionsInitializedRef.current = true
+    const openSections = choreSections.reduce((acc, _section, index) => {
+      acc[index] = true
+      return acc
+    }, {})
+    setOpenChoreSections(openSections)
+  }, [choreSections])
 
   useEffect(() => {
     document.addEventListener('mousedown', handleMenuOutsideClick)
@@ -603,23 +594,13 @@ const MyChores = () => {
       return customFilteredChores
     }
 
+    if (searchTerm?.length > 0) {
+      return searchFilteredChores
+    }
+
     const baseChores = hasQuickFilters
       ? quickFilteredChores
       : projectFilteredChores
-
-    if (searchTerm?.length > 0) {
-      const searchableChores = baseChores.map(c => ({
-        ...c,
-        raw_label: c.labelsV2?.map(l => l.name).join(' '),
-      }))
-      const fuse = new Fuse(searchableChores, {
-        keys: ['name', 'raw_label'],
-        includeScore: true,
-        isCaseSensitive: false,
-        findAllMatches: true,
-      })
-      return fuse.search(searchTerm).map(result => result.item)
-    }
 
     return baseChores
   }, [
@@ -629,6 +610,7 @@ const MyChores = () => {
     hasQuickFilters,
     quickFilteredChores,
     projectFilteredChores,
+    searchFilteredChores,
     searchTerm,
   ])
 
@@ -751,30 +733,6 @@ const MyChores = () => {
     )
   }
 
-  const searchOptions = useMemo(
-    () => ({
-      keys: ['name', 'raw_label'],
-      includeScore: true,
-      isCaseSensitive: false,
-      findAllMatches: true,
-    }),
-    [],
-  )
-
-  const processedChoresForSearch = useMemo(
-    () =>
-      chores.map(c => ({
-        ...c,
-        raw_label: c.labelsV2?.map(l => l.name).join(' '),
-      })),
-    [chores],
-  )
-
-  const fuse = useMemo(
-    () => new Fuse(processedChoresForSearch, searchOptions),
-    [processedChoresForSearch, searchOptions],
-  )
-
   const handleSearchChange = e => {
     clearActiveFilter()
     if (hasQuickFilters) {
@@ -790,22 +748,6 @@ const MyChores = () => {
 
     const term = search.toLowerCase()
     setSearchTerm(term)
-
-    // Use project-filtered chores as base for search
-    const baseChores = selectedProject ? projectFilteredChores : chores
-    const searchableChores = baseChores.map(c => ({
-      ...c,
-      raw_label: c.labelsV2?.map(l => l.name).join(' '),
-    }))
-
-    const fuse = new Fuse(searchableChores, {
-      keys: ['name', 'raw_label'],
-      includeScore: true,
-      isCaseSensitive: false,
-      findAllMatches: true,
-    })
-
-    setFilteredChores(fuse.search(term).map(result => result.item))
     // Clear selected calendar date when search changes
     setSelectedCalendarDate(null)
   }
@@ -895,19 +837,15 @@ const MyChores = () => {
   //   )
   // }
 
-  const getChoresForDate = useCallback(
-    date => {
-      const filteredChoresData = getFilteredChores
-      return filteredChoresData.filter(chore => {
-        if (!chore.nextDueDate) return false
-        const choreDate = new Date(chore.nextDueDate).toLocaleDateString()
-        const selectedDate = date.toLocaleDateString()
-        return choreDate === selectedDate
-      })
-    },
-    [getFilteredChores],
-  )
+  const selectedDateChores = useMemo(() => {
+    if (!selectedCalendarDate) return []
 
+    const selectedDate = selectedCalendarDate.toLocaleDateString()
+    return getFilteredChores.filter(chore => {
+      if (!chore.nextDueDate) return false
+      return new Date(chore.nextDueDate).toLocaleDateString() === selectedDate
+    })
+  }, [getFilteredChores, selectedCalendarDate])
 
   // "Narrowed" means the user actively cut the list down (search, quick
   // filters, a saved filter). Picking a project is not narrowing: an empty
@@ -928,7 +866,6 @@ const MyChores = () => {
 
   const appendChore = (prev, newChore) => {
     let newChores = [...prev, newChore]
-
 
     if (impersonatedUser) {
       newChores = newChores.filter(
@@ -1363,7 +1300,7 @@ const MyChores = () => {
                     overflowY: 'auto',
                   }}
                 >
-                  {getChoresForDate(selectedCalendarDate).length === 0 ? (
+                  {selectedDateChores.length === 0 ? (
                     <EmptyState
                       size='sm'
                       icon={<EditCalendar />}
@@ -1377,7 +1314,7 @@ const MyChores = () => {
                     />
                   ) : (
                     <ChoreListView
-                      chores={getChoresForDate(selectedCalendarDate)}
+                      chores={selectedDateChores}
                       viewMode={'compact'}
                       membersData={membersData}
                       userLabels={userLabels}
@@ -1457,18 +1394,20 @@ const MyChores = () => {
                       },
                     }}
                   >
-                    <ChoreListView
-                      chores={section.content}
-                      viewMode={viewMode}
-                      membersData={membersData}
-                      userLabels={userLabels}
-                      handleLabelFiltering={handleLabelFiltering}
-                      handleChoreAction={handleChoreAction}
-                      isMultiSelectMode={isMultiSelectMode}
-                      selectedChores={selectedChores}
-                      toggleChoreSelection={toggleChoreSelection}
-                      onLongPressChore={enterMultiSelectWithChore}
-                    />
+                    {openChoreSections[index] && (
+                      <ChoreListView
+                        chores={section.content}
+                        viewMode={viewMode}
+                        membersData={membersData}
+                        userLabels={userLabels}
+                        handleLabelFiltering={handleLabelFiltering}
+                        handleChoreAction={handleChoreAction}
+                        isMultiSelectMode={isMultiSelectMode}
+                        selectedChores={selectedChores}
+                        toggleChoreSelection={toggleChoreSelection}
+                        onLongPressChore={enterMultiSelectWithChore}
+                      />
+                    )}
                   </AccordionDetails>
                 </Accordion>
               )
