@@ -1,3 +1,4 @@
+import { getSessionDiagnostics } from './DiagnosticsSession'
 import { collectFeedbackContext } from './FeedbackService'
 
 const GITHUB_URL = 'https://github.com/donetick/donetick'
@@ -101,10 +102,13 @@ const cachedUser = () => {
  */
 export const collectErrorReport = async ({ error, errorInfo, reportId }) => {
   const user = cachedUser()
-  const context = await collectFeedbackContext({
-    feature: window.location.pathname,
-    userProfile: user,
-  }).catch(() => ({}))
+  const [context, session] = await Promise.all([
+    collectFeedbackContext({
+      feature: window.location.pathname,
+      userProfile: user,
+    }).catch(() => ({})),
+    getSessionDiagnostics().catch(() => ({})),
+  ])
 
   return {
     reportId: reportId ?? newReportId(),
@@ -112,13 +116,23 @@ export const collectErrorReport = async ({ error, errorInfo, reportId }) => {
     error: describeError(error, errorInfo),
     runtime: describeRuntime(),
     app: context,
+    session,
   }
 }
 
 /** The plain-text rendering used by the copy button and the details panel. */
+const formatDuration = ms => {
+  if (ms == null) return 'unknown'
+  if (ms < 1000) return `${ms}ms`
+  if (ms < 60_000) return `${Math.round(ms / 1000)}s`
+  const minutes = Math.floor(ms / 60_000)
+  if (minutes < 60) return `${minutes}m ${Math.round((ms % 60_000) / 1000)}s`
+  return `${Math.floor(minutes / 60)}h ${minutes % 60}m`
+}
+
 export const formatErrorReport = report => {
   if (!report) return ''
-  const { app, error, runtime } = report
+  const { app, error, runtime, session = {} } = report
   const lines = [
     `Report ID: ${report.reportId}`,
     `Time: ${report.occurredAt}`,
@@ -129,7 +143,13 @@ export const formatErrorReport = report => {
       : null,
     '',
     `URL: ${runtime.url}`,
+    session.previousRoute ? `Came from: ${session.previousRoute}` : null,
+    '',
     `App: ${app.appVersion} · ${app.platform}${app.isNative ? ' (native)' : ''}`,
+    `Server: ${session.serverVersion ?? 'not reported'}`,
+    `Session: ${formatDuration(session.sessionDurationMs)} active · ${
+      session.navigationType ?? 'unknown'
+    } start · backgrounded ${session.backgroundedCount ?? 0}×`,
     `Device: ${app.deviceModel} · ${app.osVersion}`,
     `Viewport: ${runtime.viewport} @${runtime.devicePixelRatio}x · ${runtime.colorScheme}`,
     `Locale: ${app.locale} · ${runtime.timezone}`,
@@ -138,8 +158,41 @@ export const formatErrorReport = report => {
     }`,
     `Hosting: ${app.hosting}`,
     app.userId ? `User: ${app.userId}` : null,
+    session.storage
+      ? `Storage: ${session.storage.usageMb}MB / ${session.storage.quotaMb}MB (${session.storage.pressure}%)`
+      : null,
+    session.heapUsedMb ? `Heap: ${session.heapUsedMb}MB` : null,
+    session.serviceWorker?.supported
+      ? `Service worker: ${
+          session.serviceWorker.controlled ? 'controlling' : 'not controlling'
+        }${session.serviceWorker.updateWaiting ? ' · UPDATE WAITING' : ''}`
+      : null,
   ].filter(Boolean)
 
+  if (session.routeTrail?.length) {
+    lines.push(
+      '',
+      'Route trail (oldest first):',
+      ...session.routeTrail.map(
+        entry =>
+          `- ${entry.path} · ${formatDuration(entry.dwellMs)} · ${formatDuration(
+            entry.msAgo,
+          )} ago`,
+      ),
+    )
+  }
+  if (session.apiFailures?.length) {
+    lines.push(
+      '',
+      'Recent API failures:',
+      ...session.apiFailures.map(
+        failure =>
+          `- ${failure.method} ${failure.endpoint} → ${
+            failure.status
+          } (${formatDuration(failure.msAgo)} ago)`,
+      ),
+    )
+  }
   if (app.recentErrors?.length) {
     lines.push('', 'Recent errors:', ...app.recentErrors.map(e => `- ${e}`))
   }

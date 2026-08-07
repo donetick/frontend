@@ -1,6 +1,11 @@
 import { Preferences } from '@capacitor/preferences'
+
 import { API_URL } from '../Config'
 import { networkManager } from '../hooks/NetworkManager'
+import {
+  recordApiFailure,
+  recordServerVersionFromResponse,
+} from '../service/DiagnosticsSession'
 import { logout, RefreshToken } from './Fetcher'
 import { isOAuthExchangeInProgress } from './OAuthExchangeState'
 import { offlineDB } from './OfflineDB'
@@ -129,7 +134,7 @@ class ApiClient {
 
   // Process queued requests after refresh attempt
   processQueue(error, token = null) {
-    this.failedQueue.forEach(({ resolve, reject }) => {
+    this.failedQueue.forEach(({ reject, resolve }) => {
       if (error) {
         reject(error)
       } else {
@@ -198,6 +203,17 @@ class ApiClient {
       // 1. Initial Request
       let response = await fetch(url, config)
       clearTimeout(timeoutId)
+
+      // Passive diagnostics: learn the server build from whatever it already
+      // answers, and keep the last few refusals for crash reports.
+      recordServerVersionFromResponse(response)
+      if (!response.ok) {
+        recordApiFailure({
+          endpoint,
+          method: config.method,
+          status: response.status,
+        })
+      }
 
       // 2. Check for 401 (Unauthorized)
       if (response.status === 401) {
@@ -280,6 +296,7 @@ class ApiClient {
         error?.name === 'AbortError' && options.signal?.aborted
       if (!externalAbort) {
         networkManager.setServerUnreachable()
+        recordApiFailure({ endpoint, method: config.method, status: 'network' })
       }
       console.error('Request failed', error)
       throw error
