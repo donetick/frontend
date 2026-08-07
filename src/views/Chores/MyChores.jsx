@@ -372,7 +372,6 @@ const MyChores = () => {
       }
 
       processEffectAsync()
-      // throw new Error('Fake Error to test posthog')
     }
   }, [
     membersLoading,
