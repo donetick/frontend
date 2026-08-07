@@ -37,6 +37,7 @@ import {
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+
 import DurationInput from '../../components/common/DurationInput'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import NotificationTemplate from '../../components/NotificationTemplate.jsx'
@@ -60,10 +61,10 @@ import {
 } from '../../utils/Fetcher'
 import { isPlusAccount, resolvePhotoURL } from '../../utils/Helpers'
 import { getImageSrc, removeCachedImage } from '../../utils/ImageCache'
-import { generateUUID } from '../../utils/UUID'
 import Priorities from '../../utils/Priorities.jsx'
 import { getIconComponent } from '../../utils/ProjectIcons'
 import { getSafeBottomPadding } from '../../utils/SafeAreaUtils.js'
+import { generateUUID } from '../../utils/UUID'
 import { useProjectFilter } from '../Chores/hooks/useProjectFilter.js'
 import LoadingComponent from '../components/Loading.jsx'
 import RichTextEditor from '../components/RichTextEditor.jsx'
@@ -84,6 +85,7 @@ const ASSIGN_STRATEGIES = [
   'round_robin',
   'no_assignee',
 ]
+const DEFAULT_ASSIGN_STRATEGY = ASSIGN_STRATEGIES[3] // keep_last_assigned
 const REPEAT_ON_TYPE = ['interval', 'days_of_the_week', 'day_of_the_month']
 
 const NO_DUE_DATE_REQUIRED_TYPE = ['no_repeat', 'once']
@@ -103,7 +105,7 @@ const ChoreEdit = () => {
   const [anyone, setAnyone] = useState(false)
   const [assignableTo, setAssignableTo] = useState([])
   const [performers, setPerformers] = useState([])
-  const [assignStrategy, setAssignStrategy] = useState(ASSIGN_STRATEGIES[2])
+  const [assignStrategy, setAssignStrategy] = useState(DEFAULT_ASSIGN_STRATEGY)
   const [dueDate, setDueDate] = useState(null)
   const [dueDateOnly, setDueDateOnly] = useState(null)
   const [dueTime, setDueTime] = useState(null)
@@ -151,7 +153,7 @@ const ChoreEdit = () => {
   const { data: userLabelsRaw, isLoading: isUserLabelsLoading } = useLabels()
   const { data: projects = [], isLoading: isProjectsLoading } = useProjects()
 
-  const { selectedProject, projectsWithDefault, setSelectedProjectWithCache } =
+  const { projectsWithDefault, selectedProject, setSelectedProjectWithCache } =
     useProjectFilter(projects)
 
   const [projectId, setProjectId] = useState(
@@ -170,7 +172,7 @@ const ChoreEdit = () => {
   } = useChore(choreId)
   const { data: membersData, isLoading: isMemberDataLoading } =
     useCircleMembers()
-  const { showSuccess, showError } = useNotification()
+  const { showError, showSuccess } = useNotification()
 
   const [userLabels, setUserLabels] = useState([])
 
@@ -183,19 +185,25 @@ const ChoreEdit = () => {
   const Navigate = useNavigate()
 
   const assignees = anyone ? performers : assignableTo
+  const hasSpecificAssignees = !anyone && assignableTo.length > 0
+  const canPickStrategy = hasSpecificAssignees && assignableTo.length > 1
+  const assignStrategyValue = !hasSpecificAssignees
+    ? 'no_assignee'
+    : canPickStrategy
+      ? assignStrategy
+      : DEFAULT_ASSIGN_STRATEGY
+  const assignedToValue =
+    !hasSpecificAssignees || assignStrategyValue === 'no_assignee'
+      ? null
+      : assignableTo.some(a => a.userId === assignedTo)
+        ? assignedTo
+        : assignableTo[0].userId
+
   const HandleValidateChore = () => {
     const errors = {}
 
     if (name.trim() === '') {
       errors.name = 'Name is required'
-    }
-    if (assignStrategy !== 'no_assignee') {
-      if (assignees.length === 0) {
-        errors.assignees = 'At least 1 assignees is required'
-      }
-      if (assignedTo === null || assignedTo < 0) {
-        errors.assignedTo = 'Assigned to is required'
-      }
     }
     if (frequencyType === 'interval' && !frequency > 0) {
       errors.frequency = `Invalid frequency, the ${frequencyMetadata.unit} should be > 0`
@@ -366,8 +374,8 @@ const ChoreEdit = () => {
       frequencyType: frequencyType,
       frequency: Number(frequency),
       frequencyMetadata: frequencyMetadata,
-      assignedTo: assignStrategy === 'no_assignee' ? null : assignedTo,
-      assignStrategy: assignStrategy,
+      assignedTo: assignedToValue,
+      assignStrategy: assignStrategyValue,
       isRolling: isRolling,
       isActive: isActive,
       notification: isNotificable,
@@ -464,6 +472,20 @@ const ChoreEdit = () => {
     }
   }, [])
   useEffect(() => {
+    if (choreId || !userProfile?.id) return
+
+    const defaultAnyoneSetting = localStorage.getItem('defaultAnyoneSetting')
+    const defaultAssigneeSetting = localStorage.getItem(
+      'defaultAssigneeSetting',
+    )
+
+    if (defaultAnyoneSetting === null && defaultAssigneeSetting === null) {
+      setAnyone(false)
+      setAssignableTo([{ userId: userProfile.id }])
+      setAssignedTo(userProfile.id)
+    }
+  }, [choreId, userProfile?.id])
+  useEffect(() => {
     const anyoneSetting = localStorage.getItem('defaultAnyoneSetting')
     const anyoneDirty = anyoneSetting !== JSON.stringify(anyone)
     const assigneeSetting = localStorage.getItem('defaultAssigneeSetting')
@@ -549,7 +571,7 @@ const ChoreEdit = () => {
       setAssignStrategy(
         data.res.assignStrategy
           ? data.res.assignStrategy
-          : ASSIGN_STRATEGIES[2],
+          : DEFAULT_ASSIGN_STRATEGY,
       )
       setIsRolling(data.res.isRolling)
       setIsActive(data.res.isActive)
@@ -631,21 +653,6 @@ const ChoreEdit = () => {
       setDueTime(null)
     }
   }, [frequencyType])
-
-  useEffect(() => {
-    if (anyone || assignableTo.length === 0) {
-      setAssignStrategy('no_assignee')
-      setAssignedTo(null)
-    } else if (assignStrategy === 'no_assignee') {
-      // user explicitly picked no_assignee while having assignees, keep it
-      // but there is nobody currently assigned
-      if (assignedTo !== null) {
-        setAssignedTo(null)
-      }
-    } else if (!assignableTo.some(a => a.userId === assignedTo)) {
-      setAssignedTo(assignableTo[0].userId)
-    }
-  }, [assignStrategy, assignedTo, assignableTo, anyone])
 
   // useEffect(() => {
   //   if (performers.length > 0 && assignees.length === 0 && userProfile) {
@@ -1260,12 +1267,13 @@ const ChoreEdit = () => {
           )}
         </Box>
 
-        {!anyone && assignableTo.length > 1 && (
+        {canPickStrategy && (
           <>
             <Box
               mb={3}
               sx={{
-                display: assignStrategy === 'no_assignee' ? 'none' : 'block',
+                display:
+                  assignStrategyValue === 'no_assignee' ? 'none' : 'block',
               }}
             >
               <Typography level='h4'>Currently Assigned To</Typography>
@@ -1279,7 +1287,7 @@ const ChoreEdit = () => {
                     : 'Select an assignee for this task'
                 }
                 disabled={assignees.length === 0}
-                value={assignedTo > -1 ? assignedTo : null}
+                value={assignedToValue}
                 onChange={(_, selectedUserId) => setAssignedTo(selectedUserId)}
               >
                 {performers
@@ -1309,7 +1317,7 @@ const ChoreEdit = () => {
                   {ASSIGN_STRATEGIES.map((item, idx) => (
                     <ListItem key={item}>
                       <Checkbox
-                        checked={assignStrategy === item}
+                        checked={assignStrategyValue === item}
                         onClick={() => setAssignStrategy(item)}
                         overlay
                         disableIcon
