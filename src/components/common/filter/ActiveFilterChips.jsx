@@ -2,21 +2,21 @@ import { Add, Close } from '@mui/icons-material'
 import { Box, Button, Chip, ChipDelete, Typography } from '@mui/joy'
 
 const ActiveFilterChips = ({
-  chips = [],
-  onOpen,
-  onClearAll,
-  onAdd,
-  showAddChip = false,
-  resultCount,
-  totalCount,
-  maxVisible = 2,
   chipSize = 'md',
+  chipSx,
+  chips = [],
   clearButtonSize = 'sm',
   clearButtonSx,
   containerSx,
-  chipSx,
+  maxVisible = 2,
+  onAdd,
+  onClearAll,
+  onOpen,
   overflowChipSx,
+  resultCount,
   resultSx,
+  showAddChip = false,
+  totalCount,
 }) => {
   if (!chips.length) {
     return null
@@ -39,7 +39,7 @@ const ActiveFilterChips = ({
         ...containerSx,
       }}
     >
-      {visible.map(({ key, label, onClear, color = 'primary' }) => (
+      {visible.map(({ color = 'primary', key, label, onClear }) => (
         <Chip
           key={key}
           size={chipSize}
@@ -52,7 +52,10 @@ const ActiveFilterChips = ({
             <ChipDelete
               variant='plain'
               color={color}
-              onDelete={() => onClear?.()}
+              onDelete={event => {
+                event.stopPropagation()
+                onClear?.()
+              }}
               aria-label={`Remove ${label} filter`}
               sx={{
                 '--Chip-deleteSize': chipSize === 'sm' ? '1.1rem' : '1.4rem',

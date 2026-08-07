@@ -22,23 +22,36 @@ export const useChoreFilters = ({
     return filterByProject(chores, selectedProject.id)
   }, [chores, selectedProject])
 
+  const hasSearchTerm = searchTerm.length > 0
+
+  const searchIndex = useMemo(() => {
+    if (!hasSearchTerm) return null
+
+    const searchableChores = chores.map(chore => ({
+      ...chore,
+      raw_label: chore.labelsV2?.map(label => label.name).join(' '),
+    }))
+    return new Fuse(searchableChores, {
+      keys: ['name', 'raw_label'],
+      includeScore: true,
+      isCaseSensitive: false,
+      findAllMatches: true,
+    })
+  }, [chores, hasSearchTerm])
+
+  const projectChoreIds = useMemo(
+    () => new Set(projectFilteredChores.map(chore => chore.id)),
+    [projectFilteredChores],
+  )
+
   const searchFilteredChores = useMemo(() => {
     let baseChores = projectFilteredChores
 
-    if (searchTerm?.length > 0) {
-      const searchableChores = baseChores.map(c => ({
-        ...c,
-        raw_label: c.labelsV2?.map(l => l.name).join(' '),
-      }))
-
-      const fuse = new Fuse(searchableChores, {
-        keys: ['name', 'raw_label'],
-        includeScore: true,
-        isCaseSensitive: false,
-        findAllMatches: true,
-      })
-
-      return fuse.search(searchTerm.toLowerCase()).map(result => result.item)
+    if (searchIndex) {
+      return searchIndex
+        .search(searchTerm.toLowerCase())
+        .map(result => result.item)
+        .filter(chore => projectChoreIds.has(chore.id))
     }
 
     if (impersonatedUser) {
@@ -55,6 +68,8 @@ export const useChoreFilters = ({
   }, [
     searchTerm,
     projectFilteredChores,
+    searchIndex,
+    projectChoreIds,
     impersonatedUser,
     userProfile?.id,
     selectedChoreFilter,
@@ -64,20 +79,10 @@ export const useChoreFilters = ({
   const nonProjectFilteredChores = useMemo(() => {
     let baseChores = chores
 
-    if (searchTerm?.length > 0) {
-      const searchableChores = baseChores.map(c => ({
-        ...c,
-        raw_label: c.labelsV2?.map(l => l.name).join(' '),
-      }))
-
-      const fuse = new Fuse(searchableChores, {
-        keys: ['name', 'raw_label'],
-        includeScore: true,
-        isCaseSensitive: false,
-        findAllMatches: true,
-      })
-
-      return fuse.search(searchTerm.toLowerCase()).map(result => result.item)
+    if (searchIndex) {
+      return searchIndex
+        .search(searchTerm.toLowerCase())
+        .map(result => result.item)
     }
 
     if (impersonatedUser) {
@@ -94,6 +99,7 @@ export const useChoreFilters = ({
   }, [
     searchTerm,
     chores,
+    searchIndex,
     impersonatedUser,
     userProfile?.id,
     selectedChoreFilter,
