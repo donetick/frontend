@@ -1,3 +1,5 @@
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+
 import App from '@/App'
 import ChoreEdit from '@/views/ChoreEdit/ChoreEdit'
 import Error from '@/views/Error'
@@ -10,7 +12,7 @@ import Settings from '@/views/Settings/Settings'
 import SettingsOverview from '@/views/Settings/SettingsOverview'
 import SettingsRoutes from '@/views/Settings/SettingsRoutes'
 import ThemeSettings from '@/views/Settings/ThemeSettings'
-import { RouterProvider, createBrowserRouter } from 'react-router-dom'
+
 import AuthenticationLoading from '../views/Authorization/Authenticating'
 import ForgotPasswordView from '../views/Authorization/ForgotPasswordView'
 import LoginSettings from '../views/Authorization/LoginSettings'
@@ -49,16 +51,6 @@ import ThingsView from '../views/Things/ThingsView'
 import TimerDetails from '../views/Timer/TimerDetails'
 import UserActivities from '../views/User/UserActivities'
 import UserPoints from '../views/User/UserPoints'
-const getMainRoute = () => {
-  if (
-    // if domain is www.donetick.com or donetick.com  then show landing page:
-    window.location.hostname === 'www.donetick.com' ||
-    window.location.hostname === 'donetick.com'
-  ) {
-    return <Landing />
-  }
-  return <MyChores />
-}
 const Router = createBrowserRouter([
   {
     path: '/',
@@ -67,7 +59,7 @@ const Router = createBrowserRouter([
     children: [
       {
         path: '/',
-        element: getMainRoute(),
+        element: <MyChores />,
       },
       {
         path: '/settings',

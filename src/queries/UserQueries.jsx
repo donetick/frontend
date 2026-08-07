@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+
 import {
   GetAllCircleMembers,
   GetAllUsers,
@@ -54,7 +55,7 @@ export const useCircleMembers = () => {
   return { data, error, isLoading, handleRefetch }
 }
 
-export const useUserProfile = () => {
+export const useUserProfile = ({ enabled = true } = {}) => {
   const queryClient = useQueryClient()
   const token = localStorage.getItem('token')
 
@@ -80,7 +81,7 @@ export const useUserProfile = () => {
     },
     staleTime: 30 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
-    enabled: !!token,
+    enabled: enabled && !!token,
   })
   return {
     data,

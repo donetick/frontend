@@ -49,7 +49,7 @@ const ChoreCard = ({
   sx,
   viewOnly,
 }) => {
-  const { data: userProfile } = useUserProfile()
+  const { data: userProfile } = useUserProfile({ enabled: !viewOnly })
   const { timeFormat } = useLocalization()
   const { data: pendingCmds } = usePendingCommands(chore.id)
 
