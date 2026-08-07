@@ -168,6 +168,10 @@
       "developer": {
         "title": "إعدادات المطور",
         "description": "عرض المعلومات الفنية حول رموز المصادقة واتصالات SSE وبيانات التصحيح."
+      },
+      "feedback": {
+        "title": "Send Feedback",
+        "description": "Tell us how Donetick is working for you, report a bug, or request a feature."
       }
     }
   }

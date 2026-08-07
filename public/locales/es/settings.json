@@ -168,6 +168,10 @@
       "developer": {
         "title": "Configuración de Desarrollador",
         "description": "Ver información técnica sobre tokens de autenticación, conexiones SSE y datos de depuración."
+      },
+      "feedback": {
+        "title": "Send Feedback",
+        "description": "Tell us how Donetick is working for you, report a bug, or request a feature."
       }
     }
   }

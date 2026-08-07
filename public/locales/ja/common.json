@@ -29,5 +29,51 @@
     "activities": "アクティビティ",
     "points": "ポイント",
     "settings": "設定"
+  },
+  "feedback": {
+    "later": "Maybe later",
+    "sentiment": {
+      "title": "How's Donetick working for you?",
+      "subtitle": "Your answer helps us decide what to build next.",
+      "options": {
+        "love": "Love it",
+        "okay": "It's okay",
+        "issues": "Having issues"
+      }
+    },
+    "categories": {
+      "bugs": "Bugs",
+      "missingFeature": "Missing feature",
+      "tooComplicated": "Too complicated",
+      "slow": "Slow",
+      "notifications": "Notifications",
+      "ai": "AI",
+      "other": "Other"
+    },
+    "details": {
+      "title": "What could we improve?",
+      "messageLabel": "Tell us more",
+      "messagePlaceholder": "What happened, or what would make this better?",
+      "contextNote": "We'll include your app version, device and platform so we can reproduce issues.",
+      "submit": "Send feedback",
+      "contextNoteSelfHosted": "You're on a self-hosted instance, so nothing is sent from your server — we'll open a pre-filled GitHub issue you can review and edit first.",
+      "submitSelfHosted": "Continue to GitHub"
+    },
+    "review": {
+      "title": "Glad you're enjoying it!",
+      "subtitle": "A rating or a star helps other people find Donetick.",
+      "github": "Star on GitHub",
+      "appStore": "Rate on the App Store",
+      "playStore": "Rate on Google Play"
+    },
+    "thanks": {
+      "title": "Thanks for the feedback",
+      "subtitle": "We read every response and it shapes what we work on next."
+    },
+    "github": {
+      "title": "Report it on GitHub",
+      "subtitle": "We've filled in an issue with your notes and version details. Nothing has been sent yet — review it and post when you're ready.",
+      "open": "Open the issue"
+    }
   }
 }
