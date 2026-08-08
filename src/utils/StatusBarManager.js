@@ -52,14 +52,12 @@ class StatusBarManager {
     this.currentTheme = theme
 
     try {
-      let style = Style.Light // Default to light content (dark status bar)
+      let style = Style.Light // Dark content for a light background
 
       if (theme === 'dark') {
-        style = Style.Dark // Dark content (light status bar)
+        style = Style.Dark // Light content for a dark background
       } else if (theme === 'system') {
-        // For system theme, we need to detect the actual system preference
-        // Joy UI's useColorScheme will handle this, but we default to light
-        style = Style.Light
+        style = Style.Default
       }
 
       await StatusBar.setStyle({ style })
