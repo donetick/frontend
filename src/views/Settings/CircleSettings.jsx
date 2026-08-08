@@ -1,4 +1,5 @@
-import { Delete, Refresh } from '@mui/icons-material'
+import { Share } from '@capacitor/share'
+import { Delete, IosShare, Refresh } from '@mui/icons-material'
 import {
   Box,
   Button,
@@ -9,15 +10,17 @@ import {
   Input,
   Option,
   Select,
-  Typography
+  Typography,
 } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
+import { apiClient } from '../../utils/ApiClient'
 import {
   AcceptCircleMemberRequest,
   DeleteCircleMember,
@@ -115,6 +118,36 @@ const CircleSettings = () => {
     }
   }, [circleMembers, userProfile])
 
+  const inviteCode = userCircles[0]?.invite_code
+  const apiURL = new URL(apiClient.getApiURL(), window.location.origin)
+  const inviteOrigin =
+    apiURL.hostname === 'api.donetick.com'
+      ? 'https://app.donetick.com'
+      : `${apiURL.origin}${apiURL.pathname.replace(/\/api\/v1\/?$/, '')}`
+  const inviteLink = inviteCode
+    ? `${inviteOrigin.replace(/\/$/, '')}/circle/join?code=${encodeURIComponent(inviteCode)}`
+    : ''
+
+  const shareInvite = async () => {
+    const circleName = userCircles[0]?.name || 'my Circle'
+
+    try {
+      await Share.share({
+        title: `Join ${circleName} on Donetick`,
+        text: `I'd like to invite you to join ${circleName} on Donetick.`,
+        url: inviteLink,
+        dialogTitle: 'Share Circle invite',
+      })
+    } catch (error) {
+      if (error?.message?.toLowerCase().includes('cancel')) return
+      await navigator.clipboard.writeText(inviteLink)
+      showNotification({
+        type: 'success',
+        message: 'Invite link copied to clipboard',
+      })
+    }
+  }
+
   if (!userProfile) {
     return <LoadingComponent />
   }
@@ -134,7 +167,7 @@ const CircleSettings = () => {
             : `You circle code is:`}
 
           <Input
-            value={userCircles[0]?.invite_code}
+            value={inviteCode}
             disabled
             size='lg'
             sx={{
@@ -156,14 +189,19 @@ const CircleSettings = () => {
           </Button>
           <Button
             variant='soft'
+            disabled={!inviteLink}
+            startDecorator={<IosShare />}
+            sx={{ ml: 1 }}
+            onClick={shareInvite}
+          >
+            Share Invite
+          </Button>
+          <Button
+            variant='soft'
+            disabled={!inviteLink}
             sx={{ ml: 1 }}
             onClick={() => {
-              navigator.clipboard.writeText(
-                window.location.protocol +
-                  '//' +
-                  window.location.host +
-                  `/circle/join?code=${userCircles[0]?.invite_code}`,
-              )
+              navigator.clipboard.writeText(inviteLink)
               showNotification({
                 type: 'success',
                 message: 'Link copied to clipboard',
@@ -227,8 +265,7 @@ const CircleSettings = () => {
                   </Typography>
                 ) : (
                   <Typography level='body-sm' color='danger'>
-                    Request to join{' '}
-                    {fmt.date(member.updatedAt)}
+                    Request to join {fmt.date(member.updatedAt)}
                   </Typography>
                 )}
               </Box>

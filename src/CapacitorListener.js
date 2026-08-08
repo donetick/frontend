@@ -6,6 +6,7 @@ import { LocalNotifications } from '@capacitor/local-notifications'
 import { Preferences } from '@capacitor/preferences'
 import { PushNotifications } from '@capacitor/push-notifications'
 import { focusManager } from '@tanstack/react-query'
+
 import { RegisterDeviceToken } from './utils/Fetcher'
 import { beginOAuthExchange } from './utils/OAuthExchangeState'
 
@@ -63,7 +64,22 @@ const handleNFCChoreDeepLink = (url, isColdStart) => {
 
 const handleUrlOpen = (url, isColdStart = false) => {
   console.log('[NFC] handleUrlOpen:', url)
-  if (url.startsWith('donetick://chores/add')) {
+  let parsedUrl
+  try {
+    parsedUrl = new URL(url)
+  } catch {
+    return
+  }
+
+  const isCircleInvite =
+    (parsedUrl.protocol === 'donetick:' &&
+      parsedUrl.host === 'circle' &&
+      parsedUrl.pathname === '/join') ||
+    (parsedUrl.protocol === 'https:' && parsedUrl.pathname === '/circle/join')
+
+  if (isCircleInvite) {
+    routerNavigate(`/circle/join${parsedUrl.search}`)
+  } else if (url.startsWith('donetick://chores/add')) {
     // Widget "+" / quick-capture buttons: land on the chore list with the
     // quick-add modal open (MyChores watches for the add_task param and
     // consumes it). ?mode=scan|voice opens straight into that capture panel.

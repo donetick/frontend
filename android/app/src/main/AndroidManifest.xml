@@ -30,6 +30,17 @@
                 <data android:scheme="donetick" />
             </intent-filter>
 
+            <!-- Verified App Link for Circle invites hosted by Donetick Cloud. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="app.donetick.com"
+                    android:pathPrefix="/circle/join" />
+            </intent-filter>
+
             <!-- NFC NDEF dispatch: open app directly when a donetick:// tag is scanned -->
             <intent-filter>
                 <action android:name="android.nfc.action.NDEF_DISCOVERED" />
