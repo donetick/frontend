@@ -155,6 +155,21 @@ class ApiClient {
       return
     }
 
+    // An expired session on an invite link would otherwise drop the code on the
+    // way to /login. Stash it first so sign-in returns to the join.
+    try {
+      const { pathname, search } = window.location
+      if (pathname === '/circle/join') {
+        const code = new URLSearchParams(search).get('code')
+        if (code) {
+          const { setPendingInvite } = await import('./PendingInvite')
+          setPendingInvite(code)
+        }
+      }
+    } catch (e) {
+      console.error('Error preserving pending invite on logout', e)
+    }
+
     await clearAllTokens()
     try {
       await offlineDB.clearAll()
