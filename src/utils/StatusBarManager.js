@@ -2,6 +2,8 @@ import { Capacitor } from '@capacitor/core'
 import { StatusBar, Style } from '@capacitor/status-bar'
 import { SafeArea } from 'capacitor-plugin-safe-area'
 
+import { THEME_BACKGROUND } from '@/constants/theme'
+
 /**
  * StatusBarManager - A utility class to handle status bar configuration
  * following Capacitor best practices and theme-aware styling
@@ -52,15 +54,18 @@ class StatusBarManager {
     this.currentTheme = theme
 
     try {
-      let style = Style.Light // Dark content for a light background
-
-      if (theme === 'dark') {
-        style = Style.Dark // Light content for a dark background
-      } else if (theme === 'system') {
-        style = Style.Default
-      }
+      const resolvedTheme =
+        theme === 'system'
+          ? window.matchMedia('(prefers-color-scheme: dark)').matches
+            ? 'dark'
+            : 'light'
+          : theme
+      const style = resolvedTheme === 'dark' ? Style.Dark : Style.Light
 
       await StatusBar.setStyle({ style })
+      await StatusBar.setBackgroundColor({
+        color: THEME_BACKGROUND[resolvedTheme],
+      })
       console.log(`StatusBarManager: Theme set to ${theme}, style: ${style}`)
     } catch (error) {
       console.error('StatusBarManager: Failed to set theme:', error)
@@ -160,15 +165,7 @@ class StatusBarManager {
   async updateResolvedTheme(resolvedTheme) {
     if (!this.isNativePlatform) return
 
-    try {
-      const style = resolvedTheme === 'dark' ? Style.Dark : Style.Light
-      await StatusBar.setStyle({ style })
-      console.log(
-        `StatusBarManager: Resolved theme updated to ${resolvedTheme}`,
-      )
-    } catch (error) {
-      console.error('StatusBarManager: Failed to update resolved theme:', error)
-    }
+    await this.setTheme(resolvedTheme)
   }
 
   /**

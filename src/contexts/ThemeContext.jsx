@@ -1,7 +1,8 @@
-import { COLORS } from '@/constants/theme'
 import { CssBaseline } from '@mui/joy'
 import { CssVarsProvider, extendTheme } from '@mui/joy/styles'
 import PropType from 'prop-types'
+
+import { COLORS, THEME_BACKGROUND } from '@/constants/theme'
 
 const primaryColor = 'cyan'
 const shades = [
@@ -34,6 +35,9 @@ const theme = extendTheme({
   colorSchemes: {
     light: {
       palette: {
+        background: {
+          body: THEME_BACKGROUND.light,
+        },
         primary: primaryPalette,
         success: {
           50: '#f3faf7',
@@ -75,6 +79,9 @@ const theme = extendTheme({
     },
     dark: {
       palette: {
+        background: {
+          body: THEME_BACKGROUND.dark,
+        },
         primary: primaryPalette,
       },
     },
