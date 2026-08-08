@@ -113,6 +113,9 @@ export const collectErrorReport = async ({ error, errorInfo, reportId }) => {
   return {
     reportId: reportId ?? newReportId(),
     occurredAt: new Date().toISOString(),
+    // No error means the user came here deliberately from settings rather than
+    // off the back of a crash — same diagnostics, different story to tell.
+    kind: error ? 'crash' : 'bug',
     error: describeError(error, errorInfo),
     runtime: describeRuntime(),
     app: context,
@@ -137,7 +140,11 @@ export const formatErrorReport = report => {
     `Report ID: ${report.reportId}`,
     `Time: ${report.occurredAt}`,
     '',
-    `Error: ${error.name}${error.message ? `: ${error.message}` : ''}`,
+    // A user-initiated report has no throw behind it; "Error: Unknown" would
+    // only be noise in the panel the user is being asked to read.
+    report.kind === 'bug'
+      ? 'Reported manually (no crash)'
+      : `Error: ${error.name}${error.message ? `: ${error.message}` : ''}`,
     error.status
       ? `HTTP: ${error.status} ${error.statusText ?? ''}`.trim()
       : null,
@@ -210,11 +217,14 @@ export const formatErrorReport = report => {
  * leaves infrastructure they control, and they see it before it is published.
  */
 export const buildErrorIssueUrl = ({ description, report }) => {
-  const title = `[crash] ${
-    report.error.message?.slice(0, 80) ||
-    report.error.name ||
-    'Unexpected error'
-  }`
+  const isBug = report.kind === 'bug'
+  const title = isBug
+    ? `[bug] ${description?.trim().slice(0, 80) || 'Reported from the app'}`
+    : `[crash] ${
+        report.error.message?.slice(0, 80) ||
+        report.error.name ||
+        'Unexpected error'
+      }`
   const body = [
     '### What happened',
     description?.trim() || '_no description provided_',
@@ -241,7 +251,7 @@ export const submitErrorReport = async ({
 }) => {
   const payload = {
     source: 'donetick-app',
-    kind: 'error-report',
+    kind: report.kind === 'bug' ? 'bug-report' : 'error-report',
     reportId: report.reportId,
     description: description?.trim() || null,
     contactEmail: contactEmail?.trim() || null,

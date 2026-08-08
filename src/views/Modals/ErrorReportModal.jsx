@@ -100,9 +100,13 @@ const IconHalo = ({ color = 'primary', icon }) => (
  * user, everything else gathered automatically. The diagnostics are shown
  * before sending rather than after — people are more willing to send a report
  * they can see, and this is the one moment they already distrust the app.
+ *
+ * Also reached deliberately from settings with no error attached, where the
+ * same diagnostics back a bug the user noticed but the app never threw on.
  */
 const ErrorReportModal = ({ error, errorInfo, onClose, open }) => {
   const { ResponsiveModal } = useResponsiveModal()
+  const isBugReport = !error
 
   const [report, setReport] = useState(null)
   const [description, setDescription] = useState('')
@@ -160,7 +164,10 @@ const ErrorReportModal = ({ error, errorInfo, onClose, open }) => {
       {step === STEP.FORM && (
         <Stack spacing={2}>
           <Box sx={{ ...enter(0) }}>
-            <IconHalo icon={<BugReportRounded />} color='danger' />
+            <IconHalo
+              icon={<BugReportRounded />}
+              color={isBugReport ? 'warning' : 'danger'}
+            />
           </Box>
 
           <Box sx={{ textAlign: 'center', ...enter(50) }}>
@@ -168,26 +175,33 @@ const ErrorReportModal = ({ error, errorInfo, onClose, open }) => {
               level='h4'
               sx={{ fontWeight: 700, letterSpacing: '-0.01em' }}
             >
-              Report this problem
+              {isBugReport ? 'Report a bug' : 'Report this problem'}
             </Typography>
             <Typography
               level='body-sm'
               sx={{ color: 'text.secondary', mt: 0.5, textWrap: 'pretty' }}
             >
-              A sentence about what you were doing turns this into something we
-              can actually fix.
+              {isBugReport
+                ? 'Tell us what went wrong and we’ll attach the technical details for you.'
+                : 'A sentence about what you were doing turns this into something we can actually fix.'}
             </Typography>
           </Box>
 
           <FormControl sx={{ ...enter(100) }}>
-            <FormLabel sx={{ fontWeight: 600 }}>What were you doing?</FormLabel>
+            <FormLabel sx={{ fontWeight: 600 }}>
+              {isBugReport ? 'What went wrong?' : 'What were you doing?'}
+            </FormLabel>
             <Textarea
               minRows={3}
               maxRows={6}
               autoFocus
               value={description}
               onChange={e => setDescription(e.target.value)}
-              placeholder='e.g. I tapped a chore in My Chores and the screen went blank'
+              placeholder={
+                isBugReport
+                  ? 'e.g. Completing a chore from the list doesn’t update the due date'
+                  : 'e.g. I tapped a chore in My Chores and the screen went blank'
+              }
             />
           </FormControl>
 
@@ -279,7 +293,9 @@ const ErrorReportModal = ({ error, errorInfo, onClose, open }) => {
               size='lg'
               fullWidth
               loading={submitting}
-              disabled={!report}
+              // A crash report stands on its own; a manual one is only the
+              // description, so there's nothing to send without it.
+              disabled={!report || (isBugReport && !description.trim())}
               onClick={handleSubmit}
             >
               Send report
@@ -293,7 +309,7 @@ const ErrorReportModal = ({ error, errorInfo, onClose, open }) => {
                 underline='hover'
                 onClick={onClose}
               >
-                Not now
+                {isBugReport ? 'Cancel' : 'Not now'}
               </Link>
             </Box>
           </Stack>
