@@ -7,9 +7,20 @@ import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { JoinCircle } from '../../utils/Fetcher'
 import { clearPendingInvite, setPendingInvite } from '../../utils/PendingInvite'
-import AuthShell from '../Authorization/AuthShell'
 import { authButtonSx } from '../Authorization/authStyles'
 import AcknowledgmentModal from '../Modals/Inputs/AcknowledgmentModal'
+import { CircleVignette } from '../Onboarding/OnboardingVignettes'
+
+const EASE = 'cubic-bezier(0.22, 1, 0.36, 1)'
+
+const enter = (delay = 0) => ({
+  animation: `joinCircleIn 520ms ${EASE} ${delay}ms both`,
+  '@keyframes joinCircleIn': {
+    from: { opacity: 0, transform: 'translateY(12px)' },
+    to: { opacity: 1, transform: 'none' },
+  },
+  '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
+})
 
 const JoinCircleView = () => {
   const { data: userProfile, isLoading: isProfileLoading } = useUserProfile()
@@ -38,8 +49,10 @@ const JoinCircleView = () => {
         clearPendingInvite()
         if (resp.ok) {
           showAcknowledgment(
-            'Your join request has been sent successfully! The circle admin will need to approve your request before you can access the circle and its chores. You will receive a notification once your request is approved.',
-            'Join Request Sent!',
+            'Your request has been sent. A circle admin will need to approve ' +
+              "it before you can access the circle and its chores. We'll " +
+              "notify you when it's approved.",
+            'Request sent',
             () => navigate('/chores'),
             'Got it',
             'success',
@@ -57,7 +70,7 @@ const JoinCircleView = () => {
       .catch(() => {
         setIsJoining(false)
         clearPendingInvite()
-        showError('Failed to join circle, please try again')
+        showError('Could not send your join request. Please try again.')
       })
   }, [code, navigate, showAcknowledgment, showError])
 
@@ -89,14 +102,14 @@ const JoinCircleView = () => {
     />
   )
 
-  let title = "You've been invited to a circle"
+  let title = "You're invited to join a circle"
   let subtitle = null
   let body = null
 
   if (!code) {
     title = 'Invite link is incomplete'
     subtitle =
-      "This link doesn't include an invite code. Ask whoever invited you to send the link again."
+      'This invite link is missing a code. Ask the person who invited you to send a new link.'
     body = (
       <Button
         fullWidth
@@ -111,7 +124,7 @@ const JoinCircleView = () => {
     // better to offer sign-in than to spin forever.
   } else if (!isAuthenticated || (!isProfileLoading && !userProfile)) {
     subtitle =
-      'You need a Donetick account to join. Sign in or create one — we’ll send your join request as soon as you’re in.'
+      "Sign in or create a Donetick account to continue. We'll send your join request once you're signed in."
     body = (
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
         {inviteCodeField}
@@ -136,7 +149,7 @@ const JoinCircleView = () => {
       </Box>
     )
   } else if (isProfileLoading || isJoining) {
-    title = 'Joining circle'
+    title = 'Sending your request'
     subtitle = 'Sending your request…'
     body = (
       <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
@@ -144,19 +157,19 @@ const JoinCircleView = () => {
       </Box>
     )
   } else {
-    subtitle = `Hi ${
-      userProfile?.displayName || userProfile?.username
-    }, joining gives you access to this circle's tasks and members.`
+    subtitle =
+      `Hi ${userProfile?.displayName || userProfile?.username}. ` +
+      "Send a request to share this circle's chores with its members."
     body = (
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
         <Typography
           level='body-sm'
           sx={{ textAlign: 'center', color: 'text.secondary' }}
         >
-          A circle admin approves your request before you get access.
+          A circle admin will review your request before you get access.
         </Typography>
         <Button fullWidth size='lg' sx={authButtonSx} onClick={submitJoin}>
-          Join circle
+          Send join request
         </Button>
         <Button
           fullWidth
@@ -176,10 +189,72 @@ const JoinCircleView = () => {
   }
 
   return (
-    <AuthShell title={title} subtitle={subtitle} showLogo>
-      {body}
+    <Box
+      component='main'
+      sx={{
+        minHeight: 'calc(100dvh - var(--safe-area-inset-top, 0px))',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        px: 3,
+        pb: 'calc(var(--safe-area-inset-bottom, 0px) + 24px)',
+        bgcolor: 'background.body',
+      }}
+    >
+      <Box
+        sx={{
+          width: '100%',
+          maxWidth: 420,
+          my: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        <Box sx={{ mb: 2, ...enter(0) }}>
+          <CircleVignette />
+        </Box>
+
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            textAlign: 'center',
+            gap: 1.5,
+            mb: 4,
+            ...enter(60),
+          }}
+        >
+          <Typography
+            level='h1'
+            sx={{
+              fontSize: '2rem',
+              fontWeight: 700,
+              letterSpacing: '-0.02em',
+              textWrap: 'balance',
+            }}
+          >
+            {title}
+          </Typography>
+          {subtitle && (
+            <Typography
+              level='body-md'
+              sx={{
+                color: 'text.secondary',
+                maxWidth: '34ch',
+                textWrap: 'pretty',
+              }}
+            >
+              {subtitle}
+            </Typography>
+          )}
+        </Box>
+
+        <Box sx={{ ...enter(120) }}>{body}</Box>
+      </Box>
+
       <AcknowledgmentModal config={ackModalConfig} />
-    </AuthShell>
+    </Box>
   )
 }
 
