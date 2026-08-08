@@ -13,6 +13,7 @@ import Option from '@mui/joy/Option'
 import Select from '@mui/joy/Select'
 import Typography from '@mui/joy/Typography'
 import { useCallback, useEffect, useRef, useState } from 'react'
+
 import { NOTIFICATION_TYPE, TASK_COLOR } from '../utils/Colors'
 import { TIME_UNITS } from '../utils/DurationUtils'
 
@@ -25,7 +26,7 @@ const timingOptions = [
 ]
 
 function getRelativeLabel(notification) {
-  const { value, unit } = notification
+  const { unit, value } = notification
   const numericValue = Number(value)
   if (numericValue === 0) {
     return 'On due date'
@@ -62,14 +63,15 @@ function getInternalValue(timing, displayValue) {
 }
 
 const NotificationTemplate = ({
+  listboxZIndex,
   maxNotifications = 5,
   // ChoreEdit gates this editor behind its own on/off switch, so the last row
   // must stay put — `notification: true` with no templates is not a valid task.
   // Consumers that own an empty state themselves pass 0.
   minNotifications = 1,
   onChange,
-  value,
   showTimeline = true,
+  value,
 }) => {
   const [notifications, setNotifications] = useState(
     value?.templates ||
@@ -568,6 +570,11 @@ const NotificationTemplate = ({
                     onBlur={() => handleBlur(idx)}
                     sx={{ minWidth: 80 }}
                     size={'sm'}
+                    slotProps={
+                      listboxZIndex !== undefined
+                        ? { listbox: { sx: { zIndex: listboxZIndex } } }
+                        : undefined
+                    }
                   >
                     {timingOptions.map(opt => (
                       <Option
@@ -635,6 +642,11 @@ const NotificationTemplate = ({
                       opacity: uiRep.timing === 'ondue' ? 0.6 : 1,
                     }}
                     size={'sm'}
+                    slotProps={
+                      listboxZIndex !== undefined
+                        ? { listbox: { sx: { zIndex: listboxZIndex } } }
+                        : undefined
+                    }
                   >
                     {timeUnits.map(opt => (
                       <Option key={opt.value} value={opt.value}>

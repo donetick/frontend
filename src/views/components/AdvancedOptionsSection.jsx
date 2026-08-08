@@ -19,6 +19,8 @@ import {
   Typography,
 } from '@mui/joy'
 
+import { Z_INDEX } from '../../constants/zIndex'
+
 const STRATEGY_OPTIONS = [
   { value: 'keep_last_assigned', label: 'Keep same assignee' },
   { value: 'random', label: 'Random' },
@@ -26,7 +28,7 @@ const STRATEGY_OPTIONS = [
   { value: 'round_robin', label: 'Round robin' },
 ]
 
-const FieldRow = ({ label, description, children, onLabelClick }) => (
+const FieldRow = ({ children, description, label, onLabelClick }) => (
   <Box
     sx={{
       display: 'flex',
@@ -62,16 +64,20 @@ const FieldRow = ({ label, description, children, onLabelClick }) => (
 
 // Trigger button — place this inside the chip/action row
 export const AdvancedOptionsTrigger = ({
-  open,
-  onToggle,
   activeCount = 0,
   emptyDisplay = 'icon-text',
+  onToggle,
+  open,
 }) => {
   const showLabel = emptyDisplay === 'icon-text' || open || activeCount > 0
 
   return (
     <Box
-      sx={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}
+      sx={{
+        position: 'relative',
+        display: 'inline-flex',
+        alignItems: 'center',
+      }}
     >
       <Button
         size='sm'
@@ -133,22 +139,22 @@ export const AdvancedOptionsTrigger = ({
 
 // Panel — place this as a sibling below the description/subtask sections
 const AdvancedOptionsSection = ({
-  open,
-  points,
-  onPointsChange,
-  requireApproval,
-  onRequireApprovalChange,
-  completionWindow,
-  onCompletionWindowChange,
-  deadlineOffset,
-  onDeadlineOffsetChange,
   assignStrategy,
-  onAssignStrategyChange,
-  isPrivate,
-  onIsPrivateChange,
+  completionWindow,
+  deadlineOffset,
+  hasAssignees,
   hasDueDate,
   hasMultipleAssignees,
-  hasAssignees,
+  isPrivate,
+  onAssignStrategyChange,
+  onCompletionWindowChange,
+  onDeadlineOffsetChange,
+  onIsPrivateChange,
+  onPointsChange,
+  onRequireApprovalChange,
+  open,
+  points,
+  requireApproval,
 }) => {
   const displayPoints = points <= 0 ? 0 : points
 
@@ -277,6 +283,9 @@ const AdvancedOptionsSection = ({
                 value={assignStrategy}
                 onChange={(_, v) => onAssignStrategyChange(v)}
                 sx={{ minWidth: 190 }}
+                slotProps={{
+                  listbox: { sx: { zIndex: Z_INDEX.MODAL_CONTENT + 1 } },
+                }}
               >
                 {STRATEGY_OPTIONS.map(opt => (
                   <Option key={opt.value} value={opt.value}>

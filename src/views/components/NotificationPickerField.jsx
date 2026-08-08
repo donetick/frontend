@@ -1,8 +1,10 @@
 import { Close, NotificationsNone } from '@mui/icons-material'
 import { Box, Button, IconButton, Typography } from '@mui/joy'
 import { useEffect, useRef, useState } from 'react'
+
 import ModalActions from '../../components/common/ModalActions'
 import NotificationTemplate from '../../components/NotificationTemplate'
+import { Z_INDEX } from '../../constants/zIndex'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 
 const getDisplayLabel = templates => {
@@ -21,11 +23,11 @@ const getDisplayLabel = templates => {
 }
 
 const NotificationPickerField = ({
-  value,
+  emptyDisplay = 'icon-text',
   onChange,
   onClear,
-  emptyDisplay = 'icon-text',
   size = 'sm',
+  value,
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const latestTemplatesRef = useRef(value?.templates || [])
@@ -135,6 +137,7 @@ const NotificationPickerField = ({
       >
         <NotificationTemplate
           value={value}
+          listboxZIndex={Z_INDEX.MODAL_CONTENT + 1}
           minNotifications={0}
           onChange={({ notifications }) => {
             latestTemplatesRef.current = notifications

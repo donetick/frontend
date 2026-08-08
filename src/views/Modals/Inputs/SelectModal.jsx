@@ -1,16 +1,18 @@
 import { Option, Select } from '@mui/joy'
 import { useState } from 'react'
+
 import ModalActions from '../../../components/common/ModalActions'
+import { Z_INDEX } from '../../../constants/zIndex'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
 function SelectModal({
+  displayKey,
   isOpen,
   onClose,
   onSave,
   options,
-  title,
-  displayKey,
   placeholder,
+  title,
 }) {
   const { ResponsiveModal } = useResponsiveModal()
   const [selected, setSelected] = useState(null)
@@ -42,6 +44,9 @@ function SelectModal({
         placeholder={placeholder}
         value={selected}
         onChange={(_, value) => setSelected(value)}
+        slotProps={{
+          listbox: { sx: { zIndex: Z_INDEX.MODAL_CONTENT + 1 } },
+        }}
       >
         {options.map(item => (
           <Option value={item.id} key={item[displayKey]}>

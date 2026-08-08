@@ -8,10 +8,12 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
+
 import ModalActions from '../../../components/common/ModalActions'
+import { Z_INDEX } from '../../../constants/zIndex'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
-function CreateThingModal({ isOpen, onClose, onSave, currentThing }) {
+function CreateThingModal({ currentThing, isOpen, onClose, onSave }) {
   const { ResponsiveModal } = useResponsiveModal()
 
   const [name, setName] = useState(currentThing?.name || '')
@@ -89,7 +91,13 @@ function CreateThingModal({ isOpen, onClose, onSave, currentThing }) {
       </FormControl>
       <FormControl>
         <Typography>Type</Typography>
-        <Select value={type} onChange={(_, value) => setType(value)}>
+        <Select
+          value={type}
+          onChange={(_, value) => setType(value)}
+          slotProps={{
+            listbox: { sx: { zIndex: Z_INDEX.MODAL_CONTENT + 1 } },
+          }}
+        >
           {['text', 'number', 'boolean'].map(type => (
             <Option value={type} key={type}>
               {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -128,7 +136,13 @@ function CreateThingModal({ isOpen, onClose, onSave, currentThing }) {
       {type === 'boolean' && (
         <FormControl>
           <Typography>Value</Typography>
-          <Select value={state} onChange={(_, value) => setState(value)}>
+          <Select
+            value={state}
+            onChange={(_, value) => setState(value)}
+            slotProps={{
+              listbox: { sx: { zIndex: Z_INDEX.MODAL_CONTENT + 1 } },
+            }}
+          >
             {['true', 'false'].map(value => (
               <Option value={value} key={value}>
                 {value.charAt(0).toUpperCase() + value.slice(1)}

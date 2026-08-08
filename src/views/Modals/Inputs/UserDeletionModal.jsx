@@ -10,8 +10,10 @@ import {
   Typography,
 } from '@mui/joy'
 import { useCallback, useEffect, useState } from 'react'
-import ModalActions from '../../../components/common/ModalActions'
 import { useNavigate } from 'react-router-dom'
+
+import ModalActions from '../../../components/common/ModalActions'
+import { Z_INDEX } from '../../../constants/zIndex'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { CheckUserDeletion, DeleteUser } from '../../../utils/Fetcher'
 
@@ -218,6 +220,9 @@ function UserDeletionModal({ isOpen, onClose }) {
                 if (member) {
                   handleTransferSelection(circle.id, value, member.displayName)
                 }
+              }}
+              slotProps={{
+                listbox: { sx: { zIndex: Z_INDEX.MODAL_CONTENT + 1 } },
               }}
             >
               {availableMembers
