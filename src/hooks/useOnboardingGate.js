@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 import { hasSeenOnboarding, isNativeApp } from '../utils/Onboarding'
+import { setPendingInvite } from '../utils/PendingInvite'
 
 // Routes a first-run user may legitimately be on without having gone through
 // onboarding: the flow itself, deep-link auth callbacks, and the legal pages
@@ -27,16 +28,24 @@ const isAllowed = pathname =>
  */
 const useOnboardingGate = () => {
   const navigate = useNavigate()
-  const { pathname } = useLocation()
+  const { pathname, search } = useLocation()
+  const isRedirecting =
+    isNativeApp() &&
+    !hasSeenOnboarding() &&
+    !localStorage.getItem('token') &&
+    !isAllowed(pathname)
 
   useEffect(() => {
-    if (!isNativeApp() || hasSeenOnboarding()) return
-    // A signed-in user upgrading from an older build has nothing to onboard to.
-    if (localStorage.getItem('token')) return
-    if (isAllowed(pathname)) return
+    if (!isRedirecting) return
+
+    if (pathname === '/circle/join') {
+      setPendingInvite(new URLSearchParams(search).get('code'))
+    }
 
     navigate('/onboarding', { replace: true })
-  }, [pathname, navigate])
+  }, [isRedirecting, pathname, search, navigate])
+
+  return isRedirecting
 }
 
 export default useOnboardingGate

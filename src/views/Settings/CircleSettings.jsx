@@ -1,5 +1,5 @@
 import { Share } from '@capacitor/share'
-import { Delete, IosShare, Refresh } from '@mui/icons-material'
+import { CopyAll, Delete, IosShare, Refresh } from '@mui/icons-material'
 import {
   Box,
   Button,
@@ -161,89 +161,85 @@ const CircleSettings = () => {
           link below. You'll receive a notification below when someone requests
           to join your Circle.
         </Typography>
-        <Typography level='title-sm' mb={-1}>
+        <Box>
+          <Typography level='title-sm' sx={{ mb: 1 }}>
           {userCircles[0]?.userRole === 'member'
             ? `You part of ${userCircles[0]?.name} `
             : `You circle code is:`}
-
+          </Typography>
           <Input
             value={inviteCode}
             disabled
             size='lg'
             sx={{
-              width: '220px',
+              width: { xs: '100%', sm: '220px' },
               mb: 1,
             }}
           />
-          <Button
-            variant='soft'
-            onClick={() => {
-              navigator.clipboard.writeText(userCircles[0]?.invite_code)
-              showNotification({
-                type: 'success',
-                message: 'Code copied to clipboard',
-              })
+          <Box
+            sx={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              gap: 1,
             }}
           >
-            Copy Code
-          </Button>
-          <Button
-            variant='soft'
-            disabled={!inviteLink}
-            startDecorator={<IosShare />}
-            sx={{ ml: 1 }}
-            onClick={shareInvite}
-          >
-            Share Invite
-          </Button>
-          <Button
-            variant='soft'
-            disabled={!inviteLink}
-            sx={{ ml: 1 }}
-            onClick={() => {
-              navigator.clipboard.writeText(inviteLink)
-              showNotification({
-                type: 'success',
-                message: 'Link copied to clipboard',
-              })
-            }}
-          >
-            Copy Link
-          </Button>
-          {userCircles.length > 0 && userCircles[0]?.userRole === 'member' && (
             <Button
-              color='danger'
-              variant='outlined'
-              sx={{ ml: 1 }}
+              variant='soft'
+              startDecorator={<CopyAll />}
               onClick={() => {
-                showConfirmation(
-                  'Are you sure you want to leave your circle?',
-                  'Leave Circle',
-                  () => {
-                    LeaveCircle(userCircles[0]?.id).then(resp => {
-                      if (resp.ok) {
-                        showNotification({
-                          type: 'success',
-                          message: 'Left circle successfully',
-                        })
-                      } else {
-                        showNotification({
-                          type: 'error',
-                          message: 'Failed to leave circle',
-                        })
-                      }
-                    })
-                  },
-                  'Leave',
-                  'Cancel',
-                  'danger',
-                )
+                navigator.clipboard.writeText(userCircles[0]?.invite_code)
+                showNotification({
+                  type: 'success',
+                  message: 'Code copied to clipboard',
+                })
               }}
             >
-              Leave Circle
+              Copy Code
             </Button>
-          )}
-        </Typography>
+            <Button
+              variant='soft'
+              disabled={!inviteLink}
+              startDecorator={<IosShare />}
+              onClick={shareInvite}
+            >
+              Share Invite
+            </Button>
+            {userCircles.length > 0 &&
+              userCircles[0]?.userRole === 'member' && (
+                <Button
+                  color='danger'
+                  variant='outlined'
+                  onClick={() => {
+                    showConfirmation(
+                      'Are you sure you want to leave your circle?',
+                      'Leave Circle',
+                      () => {
+                        LeaveCircle(userCircles[0]?.id).then(resp => {
+                          if (resp.ok) {
+                            showNotification({
+                              type: 'success',
+                              message: 'Left circle successfully',
+                            })
+                          } else {
+                            showNotification({
+                              type: 'error',
+                              message: 'Failed to leave circle',
+                            })
+                          }
+                        })
+                      },
+                      'Leave',
+                      'Cancel',
+                      'danger',
+                    )
+                  }}
+                >
+                  Leave Circle
+                </Button>
+              )}
+          </Box>
+        </Box>
 
         <Typography level='title-md'>Circle Members</Typography>
         {circleMembers.map(member => (

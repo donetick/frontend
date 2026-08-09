@@ -42,8 +42,8 @@ const AppContent = () => {
     recordRoute(location.pathname)
   }, [location.pathname])
 
-  // // First-launch native users see the onboarding flow before anything else.
-  useOnboardingGate()
+  // First-launch native users see the onboarding flow before anything else.
+  const isRedirectingToOnboarding = useOnboardingGate()
 
   // Initialize status bar with theme-aware configuration
   useStatusBar()
@@ -94,6 +94,8 @@ const AppContent = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [needRefresh])
+
+  if (isRedirectingToOnboarding) return null
 
   return (
     <div>

@@ -9,6 +9,8 @@ import { focusManager } from '@tanstack/react-query'
 
 import { RegisterDeviceToken } from './utils/Fetcher'
 import { beginOAuthExchange } from './utils/OAuthExchangeState'
+import { hasSeenOnboarding } from './utils/Onboarding'
+import { setPendingInvite } from './utils/PendingInvite'
 
 // React Router navigate(), injected by <App /> once the router is mounted.
 // Using client-side navigation (instead of window.location.href) avoids a full
@@ -78,7 +80,12 @@ const handleUrlOpen = (url, isColdStart = false) => {
     (parsedUrl.protocol === 'https:' && parsedUrl.pathname === '/circle/join')
 
   if (isCircleInvite) {
-    routerNavigate(`/circle/join${parsedUrl.search}`)
+    setPendingInvite(parsedUrl.searchParams.get('code'))
+    const needsOnboarding =
+      !hasSeenOnboarding() && !localStorage.getItem('token')
+    routerNavigate(
+      needsOnboarding ? '/onboarding' : `/circle/join${parsedUrl.search}`,
+    )
   } else if (url.startsWith('donetick://chores/add')) {
     // Widget "+" / quick-capture buttons: land on the chore list with the
     // quick-add modal open (MyChores watches for the add_task param and
