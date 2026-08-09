@@ -8,11 +8,13 @@ import {
 import {
   Box,
   Button,
+  Checkbox,
   CircularProgress,
   LinearProgress,
   Typography,
 } from '@mui/joy'
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+
 import { useScanToTask } from './useScanToTask'
 
 /**
@@ -27,33 +29,38 @@ import { useScanToTask } from './useScanToTask'
  * belongs to the capture surface and drives a hidden input in this subtree.
  */
 const ScanPanel = ({
-  open,
-  onTaskExtracted,
+  autoCapture,
+  canKeepImage = false,
+  initialImageUrl,
   onClose,
   onStateChange,
-  initialImageUrl,
-  autoCapture,
+  onTaskExtracted,
+  open,
 }) => {
   const {
-    isNativeScanner,
-    phase,
-    capturedImage,
-    ocrProgress,
-    taskResult,
-    errorMsg,
+    activate,
     cameraAvailable,
-    videoRef,
     canvasRef,
-    fileInputRef,
-    startCamera,
-    stopCamera,
     capture,
+    capturedImage,
+    errorMsg,
+    fileInputRef,
     handleFileSelect,
     handleNativeScan,
-    retake,
-    activate,
+    isNativeScanner,
+    ocrProgress,
+    phase,
     reset,
+    retake,
+    startCamera,
+    stopCamera,
+    taskResult,
+    videoRef,
   } = useScanToTask()
+
+  // The scanned page is usually the task's source of truth (the bill, the
+  // notice), so keeping it is the default — the OCR text alone loses it.
+  const [keepImage, setKeepImage] = useState(false)
 
   // Start/stop based on open state
   useEffect(() => {
@@ -82,7 +89,10 @@ const ScanPanel = ({
   // Auto-close and populate when done
   useEffect(() => {
     if (phase === 'done' && taskResult) {
-      onTaskExtracted(taskResult)
+      onTaskExtracted({
+        ...taskResult,
+        attachmentImage: canKeepImage && keepImage ? capturedImage : null,
+      })
       onClose()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -136,6 +146,18 @@ const ScanPanel = ({
   if (!open) return null
 
   const isProcessing = phase === 'processing'
+
+  // Attachments are a Plus feature; without it the upload would only ever
+  // surface an upgrade error, so the choice isn't offered at all.
+  const keepImageToggle = !canKeepImage ? null : (
+    <Checkbox
+      size='sm'
+      checked={keepImage}
+      onChange={e => setKeepImage(e.target.checked)}
+      label='Keep photo as attachment'
+      sx={{ '--Checkbox-size': '18px' }}
+    />
+  )
 
   return (
     <Box>
@@ -201,16 +223,18 @@ const ScanPanel = ({
             )}
           </Box>
 
-          {/* Hidden when Upload is already the footer's primary action */}
-          {(isNativeScanner || cameraAvailable) && (
-            <Box
-              sx={{
-                py: 1,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-              }}
-            >
+          <Box
+            sx={{
+              py: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: 1,
+            }}
+          >
+            {/* Hidden when Upload is already the footer's primary action */}
+            {(isNativeScanner || cameraAvailable) && (
               <Button
                 size='sm'
                 variant='plain'
@@ -220,8 +244,9 @@ const ScanPanel = ({
               >
                 Upload
               </Button>
-            </Box>
-          )}
+            )}
+            {keepImageToggle}
+          </Box>
         </>
       )}
 
@@ -285,6 +310,9 @@ const ScanPanel = ({
               sx={{ width: '100%' }}
             />
           )}
+
+          {/* Still editable here — the choice is only read once the task lands */}
+          {keepImageToggle}
         </Box>
       )}
 
