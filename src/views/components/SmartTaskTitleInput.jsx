@@ -118,6 +118,7 @@ const SmartTaskTitleInput = ({
 
     const newCursorPosition =
       cursorPosition - lastWord.length + suggestionValue.length + 1
+    setCursorPosition(newCursorPosition)
     titleInputRef.current.setSelectionRange(
       newCursorPosition,
       newCursorPosition,
@@ -373,18 +374,10 @@ const SmartTaskTitleInput = ({
             const suggestionValue = suggestions[suggestionTrigger].display
               ? suggestion[suggestions[suggestionTrigger].display]
               : suggestion
-            const newValue = `${value.slice(0, cursorPosition)}${suggestionValue}${value.slice(cursorPosition)}`
-
-            onChange(newValue)
+            // Same insertion path as keyboard selection: replace the partial
+            // word typed after the trigger instead of inserting alongside it
             titleInputRef?.current?.focus()
-
-            setCursorPosition(cursorPosition + suggestion.length)
-            titleInputRef.current.value = newValue
-            titleInputRef.current.setSelectionRange(
-              cursorPosition + suggestionValue.length,
-              cursorPosition + suggestionValue.length,
-            )
-            setShowSuggestions(false)
+            selectSuggestionText(suggestionValue)
           }}
           onCreateSuggestion={name => {
             selectSuggestionText(name)

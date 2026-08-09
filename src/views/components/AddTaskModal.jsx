@@ -161,6 +161,10 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
   // Picker edits made on a voice task card, applied once after the reparse
   // that follows landing the spoken text in the smart input
   const pendingVoiceOverridesRef = useRef(null)
+  // True while the current assignees came from an @mention in the text, so a
+  // reparse without mentions only resets what a mention set — never a
+  // selection made directly in the assignee picker
+  const assigneesFromMentionRef = useRef(false)
   const [priority, setPriority] = useState(0)
   const [dueDate, setDueDate] = useState(null)
   const [description, setDescription] = useState(null)
@@ -510,14 +514,18 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
         // @Anyone was used - set empty assignees (anyone can do the task)
         setIsAnyoneTask(true)
         setAssignees([])
+        assigneesFromMentionRef.current = true
       } else if (assigneesResult.result && assigneesResult.result.length > 0) {
         setIsAnyoneTask(false)
         const parsedAssignees = assigneesResult.result.map(assignee => ({
           userId: assignee.userId,
         }))
         setAssignees(parsedAssignees)
-      } else {
-        // Only assign to current user if no @ mentions found and userProfile exists
+        assigneesFromMentionRef.current = true
+      } else if (assigneesFromMentionRef.current) {
+        // The @mention that set the current assignees was deleted — fall back
+        // to the implicit self default. Picker selections stay untouched.
+        assigneesFromMentionRef.current = false
         setIsAnyoneTask(false)
         if (userProfile?.id) {
           setAssignees([
@@ -622,6 +630,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
         if ('assignees' in overrides || 'isAnyone' in overrides) {
           setIsAnyoneTask(!!overrides.isAnyone)
           setAssignees(overrides.assignees || [])
+          assigneesFromMentionRef.current = false
         }
         if ('dueDate' in overrides) {
           if (overrides.dueDate) {
@@ -849,6 +858,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
     setHasSubTasks(false)
     setLabelsV2([])
     setAssignees([])
+    assigneesFromMentionRef.current = false
     setProjectId(getInitialProject())
     setDeadlineOffset(-1)
     setRequireApproval(false)
@@ -1351,7 +1361,9 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
               onAssignStrategyChange={setAssignStrategy}
               hasDueDate={!!dueDate}
               hasMultipleAssignees={assignees.length > 1}
-              hasAssignees={assignees.length > 0}
+              // Empty assignees still implicitly assigns the current user at
+              // create time; only an "Anyone" task truly has no assignee
+              hasAssignees={!isAnyoneTask}
               isPrivate={isPrivate}
               onIsPrivateChange={setIsPrivate}
             />
