@@ -224,9 +224,34 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
 
   const [taskText, setTaskText] = useState('')
   const [taskTitle, setTaskTitle] = useState('')
-  // Highlight spans paired with the text they were computed from: the parse is
-  // debounced, so the input falls back to plain text whenever these are stale
+  // Highlight spans paired with the text they were computed from: the parse
+  // is debounced, so while typing these lag behind taskText
   const [renderedParts, setRenderedParts] = useState({ text: '', parts: [] })
+
+  // What the smart input overlay shows. While a parse is pending, keep every
+  // highlight span that precedes the edit point and render the rest as plain
+  // text — existing token styles must not flicker away on each keystroke.
+  const displayedParts = useMemo(() => {
+    const { parts, text } = renderedParts
+    if (text === taskText) return parts
+
+    let prefixLen = 0
+    const max = Math.min(text.length, taskText.length)
+    while (prefixLen < max && text[prefixLen] === taskText[prefixLen]) {
+      prefixLen++
+    }
+
+    const kept = []
+    let consumed = 0
+    for (const part of parts) {
+      const partText = typeof part === 'string' ? part : part.props.children
+      if (consumed + partText.length > prefixLen) break
+      kept.push(part)
+      consumed += partText.length
+    }
+    kept.push(taskText.slice(consumed))
+    return kept
+  }, [renderedParts, taskText])
 
   const richTextEditorRef = useRef(null)
   const latestRef = useRef({})
@@ -239,6 +264,9 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
   const assigneesFromMentionRef = useRef(false)
   // Pending debounced parse of the smart input text, if any
   const parseTimerRef = useRef(null)
+  // Identities (type + text) of the highlights from the previous parse, so
+  // the appear animation only plays for tokens detected just now
+  const prevHighlightKeysRef = useRef(new Set())
   const [priority, setPriority] = useState(0)
   const [dueDate, setDueDate] = useState(null)
   const [description, setDescription] = useState(null)
@@ -474,6 +502,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
         }
       }
 
+      const seenHighlightKeys = new Set()
       for (const highlight of resolvedHighlights) {
         if (highlight.start > lastIndex) {
           const textBefore = sentence.substring(lastIndex, highlight.start)
@@ -509,10 +538,13 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
           highlight.start,
           highlight.end,
         )
+        const highlightKey = `${highlight.type}:${highlightedText.toLowerCase()}`
+        const isNewHighlight = !prevHighlightKeysRef.current.has(highlightKey)
+        seenHighlightKeys.add(highlightKey)
         parts.push(
           <span
             key={highlight.start}
-            className={className}
+            className={`${className}${isNewHighlight ? ' highlight-appear' : ''}`}
             style={{
               textDecoration: 'underline',
               textDecorationThickness: '2px',
@@ -525,6 +557,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
 
         lastIndex = highlight.end
       }
+      prevHighlightKeysRef.current = seenHighlightKeys
 
       if (lastIndex < sentence.length) {
         const remainingText = sentence.substring(lastIndex)
@@ -940,6 +973,9 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
     setLabelsV2([])
     setAssignees([])
     assigneesFromMentionRef.current = false
+    // The modal closes without a final parse, so drop the highlight identities
+    // here or nothing would animate on the next open
+    prevHighlightKeysRef.current = new Set()
     setProjectId(getInitialProject())
     setDeadlineOffset(-1)
     setRequireApproval(false)
@@ -1230,11 +1266,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
                   setTaskText(text)
                   if (!text) setTaskTitle('')
                 }}
-                customRenderer={
-                  renderedParts.text === taskText
-                    ? renderedParts.parts
-                    : [taskText]
-                }
+                customRenderer={displayedParts}
                 onEnterPressed={handleEnterPressed}
                 onShiftEnterPressed={() => {
                   if (!hasDescription) {
