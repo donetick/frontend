@@ -89,17 +89,14 @@ const SmartTaskTitleInput = ({
     }
   }, [])
   const handleSuggestionChange = text => {
-    // if the last word start with '@' or '#' or 'P':
-    const lastWord = text.split(' ').pop()
-    if (
-      lastWord.startsWith('@') ||
-      lastWord.startsWith('#') ||
-      lastWord.startsWith('!')
-    ) {
+    // show the menu when the last word starts with a configured trigger
+    // character (e.g. '@', '#', '!', '*')
+    const lastWord = text.split(/\s+/).pop()
+    if (lastWord && suggestions?.[lastWord[0]]) {
       setSuggestionTrigger(lastWord[0])
       // last word without the first character:
       setLastWord(lastWord.slice(1))
-
+      setSelectedSuggestionIndex(0)
       setShowSuggestions(true)
     } else {
       setShowSuggestions(false)

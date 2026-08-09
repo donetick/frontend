@@ -22,6 +22,8 @@ export const Z_INDEX = {
   MODAL_BACKDROP: 2000,
   MODAL_CONTENT: 2001,
   MODAL_CLOSE_BUTTON: 2002,
+  // Popups that must float above open modals (portaled to document.body)
+  MODAL_POPOVER: 2100,
   TOAST: 3000,
 
   // Critical System UI (9000-9999)
