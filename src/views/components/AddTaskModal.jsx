@@ -636,7 +636,13 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
     let finalAssignedTo = null
     let finalAssignStrategy = assignStrategy
 
-    if (isAnyoneTask) {
+    if (selectedProjectIsPrivate) {
+      // Nobody else can see a private project, so its tasks stay with its owner —
+      // the user creating them, since that's who the project is visible to.
+      finalAssignees = [{ userId: userProfile?.id }]
+      finalAssignedTo = userProfile?.id
+      finalAssignStrategy = assignStrategy
+    } else if (isAnyoneTask) {
       finalAssignees = []
       finalAssignedTo = null
       finalAssignStrategy = 'no_assignee'

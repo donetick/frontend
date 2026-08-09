@@ -481,6 +481,32 @@ const ChoreEdit = () => {
     }
   }, [selectedProjectIsPrivate, isPrivate])
 
+  // Nobody else can see a private project, so its tasks can only be assigned to its
+  // owner — which is whoever is editing it, since that's who the project is visible
+  // to. The API rejects anything else.
+  useEffect(() => {
+    if (!selectedProjectIsPrivate || !userProfile?.id) {
+      return
+    }
+    const onlySelf =
+      assignableTo.length === 1 && assignableTo[0].userId === userProfile.id
+    if (!onlySelf) {
+      setAssignableTo([{ userId: userProfile.id }])
+    }
+    if (anyone) {
+      setAnyone(false)
+    }
+    if (assignedTo !== userProfile.id) {
+      setAssignedTo(userProfile.id)
+    }
+  }, [
+    selectedProjectIsPrivate,
+    userProfile?.id,
+    assignableTo,
+    anyone,
+    assignedTo,
+  ])
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = event => {
@@ -1189,6 +1215,7 @@ const ChoreEdit = () => {
               <ListItem key={'anyone'}>
                 <Checkbox
                   checked={anyone}
+                  disabled={selectedProjectIsPrivate}
                   onClick={() => {
                     setAnyone(!anyone)
                     setIsPrivate(false)
@@ -1204,7 +1231,7 @@ const ChoreEdit = () => {
                 <ListItem key={item.id}>
                   <Checkbox
                     checked={assignableTo.some(a => a.userId == item.userId)}
-                    disabled={anyone}
+                    disabled={anyone || selectedProjectIsPrivate}
                     onClick={() => {
                       if (anyone) {
                         setAnyone(false)
@@ -1232,6 +1259,12 @@ const ChoreEdit = () => {
               ))}
             </List>
           </Card>
+          {selectedProjectIsPrivate && (
+            <Typography level='body-sm' color='neutral' sx={{ mt: 0.5 }}>
+              Only you can see this project, so its tasks can only be assigned
+              to you
+            </Typography>
+          )}
           <FormControl error={Boolean(errors.assignee)}>
             <FormHelperText error>{Boolean(errors.assignee)}</FormHelperText>
           </FormControl>

@@ -2,12 +2,13 @@ import {
   Avatar,
   Box,
   Button,
-  Checkbox,
   FormControl,
   FormHelperText,
   FormLabel,
   Input,
+  Sheet,
   Stack,
+  Switch,
   Textarea,
   Typography,
 } from '@mui/joy'
@@ -256,22 +257,53 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
           {/* Privacy */}
           <FormControl>
             <FormLabel>Privacy</FormLabel>
-            <Checkbox
-              checked={isPrivate}
-              onChange={e => setIsPrivate(e.target.checked)}
-              disabled={isSubmitting}
-              overlay
-              label='Private project'
-            />
-            <FormHelperText>
-              {isPrivate
-                ? 'Only you can see this project and its tasks'
-                : 'Everyone in your circle can see this project'}
-            </FormHelperText>
+            <Sheet
+              variant='outlined'
+              sx={{
+                borderRadius: 'sm',
+                px: 1.5,
+                py: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 2,
+              }}
+            >
+              <Box
+                sx={{
+                  minWidth: 0,
+                  flex: '1 1 auto',
+                  cursor: isSubmitting ? undefined : 'pointer',
+                  userSelect: 'none',
+                }}
+                onClick={
+                  isSubmitting ? undefined : () => setIsPrivate(!isPrivate)
+                }
+              >
+                <Typography level='body-sm' fontWeight='md'>
+                  Private project
+                </Typography>
+                <Typography
+                  level='body-xs'
+                  textColor='text.tertiary'
+                  sx={{ mt: 0.25 }}
+                >
+                  {isPrivate
+                    ? 'Only you can see this project and its tasks'
+                    : 'Everyone in your circle can see this project'}
+                </Typography>
+              </Box>
+              <Switch
+                size='sm'
+                checked={isPrivate}
+                onChange={e => setIsPrivate(e.target.checked)}
+                disabled={isSubmitting}
+              />
+            </Sheet>
             {project && isPrivate !== Boolean(project.isPrivate) && (
               <FormHelperText sx={{ color: 'warning.plainColor' }}>
                 {isPrivate
-                  ? 'Every task in this project will become private'
+                  ? 'Every task in this project will become private and assigned only to you: other assignees are removed and are not restored if you make it public again'
                   : 'Every task in this project will become visible to your circle'}
               </FormHelperText>
             )}
