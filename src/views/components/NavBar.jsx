@@ -150,6 +150,9 @@ const NavBar = () => {
       '/onboarding',
       '/get-started',
       '/ready',
+      // Reached from an invite link, often signed out: it owns its own shell
+      // and must not mount the avatar's authenticated queries.
+      '/circle/join',
     ].includes(location.pathname)
   ) {
     return (

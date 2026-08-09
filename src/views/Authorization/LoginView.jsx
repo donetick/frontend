@@ -12,12 +12,14 @@ import Cookies from 'js-cookie'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { LoginSocialGoogle } from 'reactjs-social-login'
+
 import { GOOGLE_CLIENT_ID, REDIRECT_URL } from '../../Config'
 import { useAuth } from '../../hooks/useAuth.jsx'
 import { useResource } from '../../queries/ResourceQueries'
 import { useUserProfile } from '../../queries/UserQueries.jsx'
 import { useNotification } from '../../service/NotificationProvider'
 import { apiClient } from '../../utils/ApiClient'
+import { getPendingInvite } from '../../utils/PendingInvite'
 import { saveTokens } from '../../utils/TokenStorage'
 import { buildChildUsername, getUserDisplayInfo } from '../../utils/UserHelpers'
 import {
@@ -138,7 +140,15 @@ const LoginView = () => {
   }, [])
   useEffect(() => {
     if (isAuthenticated && user) {
-      Navigate('/chores')
+      // An already-signed-in visitor who lands here from a deep link (a circle
+      // invite, for example) still has to end up where they were headed.
+      const redirectUrl = Cookies.get('ca_redirect')
+      if (redirectUrl && redirectUrl !== '/') {
+        Cookies.remove('ca_redirect')
+        Navigate(redirectUrl)
+      } else {
+        Navigate('/chores')
+      }
     }
   }, [isAuthenticated, user, Navigate])
   const handleSubmit = async e => {
@@ -416,9 +426,11 @@ const LoginView = () => {
     <AuthShell
       title={userProfile ? 'Welcome back' : 'Sign in'}
       subtitle={
-        userProfile
-          ? 'Pick up right where you left off.'
-          : 'Sign in to your account to continue.'
+        getPendingInvite()
+          ? 'Sign in and we’ll send your circle join request right after.'
+          : userProfile
+            ? 'Pick up right where you left off.'
+            : 'Sign in to your account to continue.'
       }
       logoSize={0}
       footer={<LegalLinks />}

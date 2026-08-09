@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+
 import { hasSeenOnboarding, isNativeApp } from '../utils/Onboarding'
 
 // Routes a first-run user may legitimately be on without having gone through
@@ -11,6 +12,9 @@ const ALLOWED_PATHS = [
   '/login/settings',
   '/privacy',
   '/terms',
+  // An invite link is a legitimate first launch: the join view explains itself
+  // and routes to sign-in, so onboarding must not swallow the code.
+  '/circle/join',
 ]
 
 const isAllowed = pathname =>

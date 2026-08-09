@@ -2,8 +2,11 @@ import { Box, Link, Typography } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+
+import { useAuth } from '../../hooks/useAuth.jsx'
 import { useNotification } from '../../service/NotificationProvider'
-import { login, signUp } from '../../utils/Fetcher'
+import { signUp } from '../../utils/Fetcher'
+import { getPendingInvite, joinCirclePath } from '../../utils/PendingInvite'
 import {
   AuthPasswordField,
   AuthSubmitButton,
@@ -25,28 +28,39 @@ const SignupView = () => {
   const [displayNameError, setDisplayNameError] = React.useState('')
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const { showError } = useNotification()
-  const handleLogin = (username, password) => {
-    login(username, password).then(response => {
-      if (response.status === 200) {
-        response.json().then(res => {
-          localStorage.setItem('token', res.token)
-          localStorage.setItem('token_expiry', res.expire)
+  const { login: authLogin } = useAuth()
+  // Sign-in goes through the auth context, not a bare fetch: it stores the
+  // refresh token and updates the provider's own state, so the rest of the app
+  // sees the new session without a reload.
+  const handleLogin = async (username, password) => {
+    const result = await authLogin({ username, password })
+    if (!result.success) {
+      showError({
+        title: 'Almost there',
+        message:
+          'Your account was created, but signing in failed. Please sign in.',
+      })
+      Navigate('/login')
+      return
+    }
 
-          // Invalidate user profile queries to ensure fresh data
-          queryClient.invalidateQueries(['userProfile'])
+    // Invalidate user profile queries to ensure fresh data
+    queryClient.invalidateQueries(['userProfile'])
 
-          // The "how did you hear about us" step (/heard-about) is
-          // temporarily skipped; new accounts go straight to circle setup.
-          // Re-enable by navigating to '/heard-about' again — that view
-          // already forwards to '/circle-setup' when done.
-          Navigate('/circle-setup', { replace: true })
-        })
-      } else {
-        console.log('Login failed', response)
+    // Someone who signed up from a circle invite is joining an existing
+    // circle, so sending them through "name your circle" is both a dead
+    // end for the invite and the wrong question.
+    const pendingInvite = getPendingInvite()
+    if (pendingInvite) {
+      Navigate(joinCirclePath(pendingInvite), { replace: true })
+      return
+    }
 
-        // Navigate('/login')
-      }
-    })
+    // The "how did you hear about us" step (/heard-about) is
+    // temporarily skipped; new accounts go straight to circle setup.
+    // Re-enable by navigating to '/heard-about' again — that view
+    // already forwards to '/circle-setup' when done.
+    Navigate('/circle-setup', { replace: true })
   }
   const handleSignUpValidation = () => {
     // Reset errors before validation
@@ -132,7 +146,11 @@ const SignupView = () => {
   return (
     <AuthShell
       title='Create your account'
-      subtitle='Track chores and tasks together, in one shared place.'
+      subtitle={
+        getPendingInvite()
+          ? 'Create an account and we’ll send your circle join request right after.'
+          : 'Track chores and tasks together, in one shared place.'
+      }
       footer={<LegalLinks />}
       logoSize={0}
     >

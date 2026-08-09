@@ -1,6 +1,7 @@
 import {
   AccountCircle,
   Api,
+  BugReport,
   ChevronRight,
   Circle,
   Code,
@@ -35,9 +36,11 @@ import {
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+
 import { useUserProfile } from '../../queries/UserQueries'
 import { isPlusAccount } from '../../utils/Helpers'
 import { isParentUser } from '../../utils/UserHelpers'
+import ErrorReportModal from '../Modals/ErrorReportModal'
 import FeedbackModal from '../Modals/FeedbackModal'
 
 const SettingsOverview = () => {
@@ -45,6 +48,7 @@ const SettingsOverview = () => {
   const navigate = useNavigate()
   const { data: userProfile } = useUserProfile()
   const [feedbackOpen, setFeedbackOpen] = useState(false)
+  const [bugReportOpen, setBugReportOpen] = useState(false)
 
   const settingsCards = [
     {
@@ -132,6 +136,13 @@ const SettingsOverview = () => {
       description: t('overview.sections.feedback.description'),
       icon: <Feedback />,
       onSelect: () => setFeedbackOpen(true),
+    },
+    {
+      id: 'bugreport',
+      title: t('overview.sections.bugReport.title'),
+      description: t('overview.sections.bugReport.description'),
+      icon: <BugReport />,
+      onSelect: () => setBugReportOpen(true),
     },
   ]
 
@@ -386,6 +397,13 @@ const SettingsOverview = () => {
       <FeedbackModal
         open={feedbackOpen}
         onClose={() => setFeedbackOpen(false)}
+      />
+
+      {/* No error to pass: the report is about something the user saw, not
+          something the app threw, so the modal collects diagnostics only. */}
+      <ErrorReportModal
+        open={bugReportOpen}
+        onClose={() => setBugReportOpen(false)}
       />
     </Container>
   )

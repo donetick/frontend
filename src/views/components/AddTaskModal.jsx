@@ -1,18 +1,32 @@
 import { Add } from '@mui/icons-material'
 import { Box, Button, Typography } from '@mui/joy'
 import { useMediaQuery } from '@mui/material'
+import { useQueryClient } from '@tanstack/react-query'
 import * as chrono from 'chrono-node'
 import moment from 'moment'
-import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+
+import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
+import ModalActions from '../../components/common/ModalActions'
+import { useDocumentScanner } from '../../hooks/useDocumentScanner'
+import { useFileUpload } from '../../hooks/useFileUpload'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import { useCreateChore } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
+import { localAIService } from '../../service/LocalAIService'
+import { voiceInputService } from '../../service/VoiceInputService'
+import LABEL_COLORS, { TASK_COLOR } from '../../utils/Colors'
 import { CreateLabel } from '../../utils/Fetcher'
+import { imageSourceToFile } from '../../utils/FileConvert'
 import { isPlusAccount } from '../../utils/Helpers'
 import { generateUUID } from '../../utils/UUID'
 import { useLabels } from '../Labels/LabelQueries'
 import { useProjects } from '../Projects/ProjectQueries'
+import AdvancedOptionsSection, {
+  AdvancedOptionsTrigger,
+} from './AdvancedOptionsSection'
+import AssigneePickerField from './AssigneePickerField'
+import AttachmentPickerField from './AttachmentPickerField'
 import {
   parseAssignees,
   parseDueDate,
@@ -21,19 +35,6 @@ import {
   parsePriority,
   parseRepeatV2,
 } from './CustomParsers'
-import SmartTaskTitleInput from './SmartTaskTitleInput'
-
-import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
-import ModalActions from '../../components/common/ModalActions'
-import { useDocumentScanner } from '../../hooks/useDocumentScanner'
-import { localAIService } from '../../service/LocalAIService'
-import { voiceInputService } from '../../service/VoiceInputService'
-import LABEL_COLORS, { TASK_COLOR } from '../../utils/Colors'
-import AdvancedOptionsSection, {
-  AdvancedOptionsTrigger,
-} from './AdvancedOptionsSection'
-import AssigneePickerField from './AssigneePickerField'
-import AttachmentPickerField from './AttachmentPickerField'
 import DueDatePickerField from './DueDatePickerField'
 import LabelsPickerField from './LabelsPickerField'
 import LearnMoreButton from './LearnMore'
@@ -42,6 +43,7 @@ import PriorityPickerField from './PriorityPickerField'
 import RepeatPickerField from './RepeatPickerField'
 import RichTextEditor from './RichTextEditor'
 import ScanPanel from './ScanToTask/ScanPanel'
+import SmartTaskTitleInput from './SmartTaskTitleInput'
 import SubTasks from './SubTask'
 import { buildChorePayload, parseVoiceTask } from './VoiceToTask/parseVoiceTask'
 import VoicePanel from './VoiceToTask/VoicePanel'
@@ -106,7 +108,7 @@ const getDefaultNotification = () => {
   return DEFAULT_NOTIFICATION_TEMPLATES
 }
 
-const TaskInput = ({ onChoreUpdate, isModalOpen, onClose, initialMode }) => {
+const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
   const { ResponsiveModal } = useResponsiveModal()
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
   const pickerEmptyDisplay = isMobile ? 'icon' : 'icon-text'
@@ -190,6 +192,7 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose, initialMode }) => {
   const [showScan, setShowScan] = useState(false)
   const [scanAutoCapture, setScanAutoCapture] = useState(false)
   const [pendingPhotoUrl, setPendingPhotoUrl] = useState(null)
+  const [isAttachingScan, setIsAttachingScan] = useState(false)
   const [llmAvailable, setLlmAvailable] = useState(false)
   const [showVoice, setShowVoice] = useState(false)
   const [voiceAvailable, setVoiceAvailable] = useState(false)
@@ -213,6 +216,10 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose, initialMode }) => {
     primaryAction: null,
   })
   const { isNativeScanner } = useDocumentScanner()
+  const { uploadFile } = useFileUpload({
+    entityType: 'chore_attachment_draft',
+    draftId,
+  })
 
   useEffect(() => {
     localAIService.isAvailable().then(setLlmAvailable)
@@ -274,11 +281,11 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose, initialMode }) => {
   useEffect(() => {
     const handleKeyDown = event => {
       const {
-        isModalOpen,
-        hasDescription,
-        dueDate,
         createChore,
+        dueDate,
         handleCloseModal,
+        hasDescription,
+        isModalOpen,
       } = latestRef.current
       const isHoldingCmd = event.ctrlKey || event.metaKey
       if (isHoldingCmd) {
@@ -709,11 +716,38 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose, initialMode }) => {
     createChore()
   }
 
+  // The scan keeps its source image when asked: upload it against the draft so
+  // the server promotes it onto the chore the same way manual uploads are.
+  const attachScannedImage = async imageSource => {
+    // Creating the chore promotes whatever draft attachments exist at that
+    // moment, so Create waits on this upload rather than orphaning it.
+    setIsAttachingScan(true)
+    try {
+      const file = await imageSourceToFile(
+        imageSource,
+        `scan-${Date.now()}.jpg`,
+      )
+      if (!file) return
+      const uploaded = await uploadFile(file)
+      if (!uploaded) return
+      setAttachments(prev => [
+        ...prev,
+        { url: uploaded.url, path: uploaded.path, name: uploaded.fileName },
+      ])
+    } finally {
+      setIsAttachingScan(false)
+    }
+  }
+
   const handleTaskExtracted = ({
-    taskName,
+    attachmentImage,
     description: extractedDesc,
     dueDate: extractedDue,
+    taskName,
   }) => {
+    if (attachmentImage) {
+      attachScannedImage(attachmentImage)
+    }
     if (taskName) {
       processText(taskName)
     }
@@ -801,6 +835,7 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose, initialMode }) => {
     setVoiceState({ segments: [], isListening: false })
     setScanState({ phase: 'idle', primaryAction: null })
     setCreatingVoiceTasks(false)
+    setIsAttachingScan(false)
     setTaskText('')
     setTaskTitle('')
     setDueDate(null)
@@ -829,6 +864,9 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose, initialMode }) => {
   }
 
   const createChore = () => {
+    // A scanned attachment still uploading would be orphaned by the create
+    if (isAttachingScan) return
+
     // Handle different assignee scenarios
     let finalAssignees = assignees
     let finalAssignedTo = null
@@ -988,7 +1026,8 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose, initialMode }) => {
               <Button
                 variant='solid'
                 color='primary'
-                disabled={!taskTitle.trim()}
+                loading={isAttachingScan}
+                disabled={!taskTitle.trim() || isAttachingScan}
                 onClick={createChore}
               >
                 Create
@@ -1359,6 +1398,7 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose, initialMode }) => {
           <ScanPanel
             open
             autoCapture={scanAutoCapture}
+            canKeepImage={isPlusAccount(userProfile)}
             onTaskExtracted={handleTaskExtracted}
             initialImageUrl={pendingPhotoUrl}
             onStateChange={setScanState}

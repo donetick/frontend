@@ -3,6 +3,7 @@ import {
   ArrowDropDown,
   AttachFile,
   Delete,
+  DocumentScanner,
   HorizontalRule,
   Save,
   UploadFile,
@@ -41,6 +42,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import DurationInput from '../../components/common/DurationInput'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import NotificationTemplate from '../../components/NotificationTemplate.jsx'
+import { useDocumentScanner } from '../../hooks/useDocumentScanner'
 import {
   useArchiveChore,
   useChore,
@@ -59,6 +61,7 @@ import {
   GetThings,
   UploadChoreAttachment,
 } from '../../utils/Fetcher'
+import { imageSourceToFile } from '../../utils/FileConvert'
 import { isPlusAccount, resolvePhotoURL } from '../../utils/Helpers'
 import { getImageSrc, removeCachedImage } from '../../utils/ImageCache'
 import Priorities from '../../utils/Priorities.jsx'
@@ -173,6 +176,7 @@ const ChoreEdit = () => {
   const { data: membersData, isLoading: isMemberDataLoading } =
     useCircleMembers()
   const { showError, showSuccess } = useNotification()
+  const { isNativeScanner, scanDocument } = useDocumentScanner()
 
   const [userLabels, setUserLabels] = useState([])
 
@@ -671,6 +675,67 @@ const ChoreEdit = () => {
     }
   }, [assignableTo, name, frequencyMetadata, attemptToSave, dueDate])
 
+  const uploadAttachmentFile = async file => {
+    if (!file) return
+    setIsUploadingAttachment(true)
+    try {
+      const response = choreId
+        ? await UploadChoreAttachment(file, 'chore_attachment', {
+            entityId: choreId,
+          })
+        : await UploadChoreAttachment(file, 'chore_attachment_draft', {
+            draftId,
+          })
+      if (!response.ok) {
+        showError({
+          title: 'Upload Failed',
+          message: 'Failed to upload attachment.',
+        })
+        return
+      }
+      const data = await response.json()
+      setAttachments(prev => [
+        ...prev,
+        {
+          file_path: data.path,
+          file_name: data.file_name,
+          size_bytes: data.size_bytes,
+          sign: data.sign,
+        },
+      ])
+    } catch {
+      showError({
+        title: 'Upload Failed',
+        message: 'Failed to upload attachment.',
+      })
+    } finally {
+      setIsUploadingAttachment(false)
+    }
+  }
+
+  // Native only: the OS scanner returns a cropped, deskewed page which is a
+  // better attachment than a raw camera shot of the same document.
+  const handleScanAttachment = async () => {
+    const { cancelled, error, image } = await scanDocument()
+    if (cancelled) return
+    if (error || !image) {
+      showError({
+        title: 'Scan Failed',
+        message: error || 'Could not scan the document.',
+      })
+      return
+    }
+    const file = await imageSourceToFile(image, `scan-${Date.now()}.jpg`)
+    if (!file) {
+      showError({
+        title: 'Scan Failed',
+        message: 'Could not read the scanned image.',
+      })
+      return
+    }
+    await uploadAttachmentFile(file)
+  }
+
   const handleDelete = () => {
     setConfirmModelConfig({
       isOpen: true,
@@ -1109,62 +1174,39 @@ const ChoreEdit = () => {
                 ))}
               </Box>
             )}
-            <Button
-              component='label'
-              variant='outlined'
-              color='neutral'
-              size='sm'
-              startDecorator={isUploadingAttachment ? null : <UploadFile />}
-              loading={isUploadingAttachment}
-              sx={{ alignSelf: 'flex-start' }}
-            >
-              Upload File
-              <input
-                type='file'
-                hidden
-                onChange={async e => {
-                  const file = e.target.files[0]
-                  if (!file) return
-                  setIsUploadingAttachment(true)
-                  try {
-                    const response = choreId
-                      ? await UploadChoreAttachment(file, 'chore_attachment', {
-                          entityId: choreId,
-                        })
-                      : await UploadChoreAttachment(
-                          file,
-                          'chore_attachment_draft',
-                          { draftId },
-                        )
-                    if (!response.ok) {
-                      showError({
-                        title: 'Upload Failed',
-                        message: 'Failed to upload attachment.',
-                      })
-                      return
-                    }
-                    const data = await response.json()
-                    setAttachments(prev => [
-                      ...prev,
-                      {
-                        file_path: data.path,
-                        file_name: data.file_name,
-                        size_bytes: data.size_bytes,
-                        sign: data.sign,
-                      },
-                    ])
-                  } catch {
-                    showError({
-                      title: 'Upload Failed',
-                      message: 'Failed to upload attachment.',
-                    })
-                  } finally {
-                    setIsUploadingAttachment(false)
+            <Box sx={{ display: 'flex', gap: 1, alignSelf: 'flex-start' }}>
+              <Button
+                component='label'
+                variant='outlined'
+                color='neutral'
+                size='sm'
+                startDecorator={isUploadingAttachment ? null : <UploadFile />}
+                loading={isUploadingAttachment}
+              >
+                Upload File
+                <input
+                  type='file'
+                  hidden
+                  onChange={async e => {
+                    const file = e.target.files[0]
                     e.target.value = ''
-                  }
-                }}
-              />
-            </Button>
+                    await uploadAttachmentFile(file)
+                  }}
+                />
+              </Button>
+              {isNativeScanner && (
+                <Button
+                  variant='outlined'
+                  color='neutral'
+                  size='sm'
+                  startDecorator={<DocumentScanner />}
+                  disabled={isUploadingAttachment}
+                  onClick={handleScanAttachment}
+                >
+                  Scan
+                </Button>
+              )}
+            </Box>
           </Card>
         </Box>
       </Box>

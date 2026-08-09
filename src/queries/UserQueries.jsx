@@ -29,6 +29,7 @@ export const useAllUsers = () => {
 
 export const useCircleMembers = () => {
   const queryClient = useQueryClient()
+  const token = localStorage.getItem('token')
 
   const { data, error, isLoading } = useQuery({
     queryKey: ['allCircleMembers'],
@@ -46,6 +47,10 @@ export const useCircleMembers = () => {
         return { res: [] }
       }
     },
+    // NavBar's avatar mounts this on every route, including the signed-out
+    // ones. Without the gate the 401 tips ApiClient into a forced logout that
+    // hard-navigates to /login — which is what used to eat circle invites.
+    enabled: !!token,
   })
 
   const handleRefetch = () => {

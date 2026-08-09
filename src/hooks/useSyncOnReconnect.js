@@ -96,6 +96,9 @@ export function useSyncOnReconnect() {
       // the same tick as the deep link, before the route changes, so this has
       // to test the shared flag rather than the pathname.
       if (isOAuthExchangeInProgress()) return
+      // No session, nothing to sync — and a 401 here would force a logout that
+      // hard-navigates signed-out visitors (invite links) away to /login.
+      if (!localStorage.getItem('token')) return
       const wasOffline = !networkManager.isOnline
       const didSync = await syncEngine.sync()
       if (didSync) {
