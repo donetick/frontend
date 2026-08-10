@@ -38,7 +38,6 @@ import {
 } from './CustomParsers'
 import DueDatePickerField from './DueDatePickerField'
 import LabelsPickerField from './LabelsPickerField'
-import LearnMoreButton from './LearnMore'
 import NotificationPickerField from './NotificationPickerField'
 import PriorityPickerField from './PriorityPickerField'
 import RepeatPickerField from './RepeatPickerField'
@@ -1183,8 +1182,8 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
       >
         {!showScan && !showVoice && (
           <>
-            <Box>
-              <Box
+            <Box sx={{ mt: 1 }}>
+              {/* <Box
                 sx={{
                   display: 'flex',
                   flexDirection: 'row',
@@ -1235,7 +1234,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
                     </>
                   }
                 />
-              </Box>
+              </Box> */}
 
               <SmartTaskTitleInput
                 autoFocus
@@ -1396,9 +1395,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
                   }}
                 >
                   <Add sx={{ fontSize: 20 }} />
-                  <Typography level='body-sm' sx={{ color: 'inherit' }}>
-                    Description
-                  </Typography>
+                  <Typography level='body-sm'>Description</Typography>
                 </Button>
               )}
               {!hasSubTasks && (
@@ -1421,9 +1418,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
                   }}
                 >
                   <Add sx={{ fontSize: 20 }} />
-                  <Typography level='body-sm' sx={{ color: 'inherit' }}>
-                    Subtasks
-                  </Typography>
+                  <Typography level='body-sm'>Subtasks</Typography>
                 </Button>
               )}
               <AdvancedOptionsTrigger
