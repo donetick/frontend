@@ -20,6 +20,7 @@
   "logout": "Uitloggen",
   "version": "Versie",
   "navigation": {
+    "search": "Search",
     "allTasks": "Alle Taken",
     "archived": "Gearchiveerd",
     "things": "Dingen",
