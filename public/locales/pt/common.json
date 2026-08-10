@@ -20,6 +20,7 @@
   "logout": "Sair",
   "version": "Versão",
   "navigation": {
+    "search": "Search",
     "allTasks": "Todas as tarefas",
     "archived": "Arquivadas",
     "things": "Itens",
