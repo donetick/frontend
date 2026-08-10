@@ -411,14 +411,29 @@ const MyChores = () => {
     }
   }, [searchInputFocus])
 
+  // A global-search result can hand a query back to the task list as a scoped filter.
+  useEffect(() => {
+    const query = searchParams.get('search')
+    if (query !== null) {
+      setSearchTerm(query.toLowerCase())
+      setSelectedCalendarDate(null)
+      clearActiveFilter()
+      clearQuickFilters()
+    }
+    // The setters above are intentionally applied only when URL search params change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams])
+
   // Read and apply project from URL parameters
   useEffect(() => {
     if (!projects.length) return
 
     const projectIdFromUrl = searchParams.get('project')
 
-    if (projectIdFromUrl && projectIdFromUrl !== selectedProject?.id) {
-      const project = projectsWithDefault.find(p => p.id === projectIdFromUrl)
+    if (projectIdFromUrl && projectIdFromUrl !== String(selectedProject?.id)) {
+      const project = projectsWithDefault.find(
+        p => String(p.id) === projectIdFromUrl,
+      )
       if (project) {
         setSelectedProjectWithCache(project)
       }
@@ -759,6 +774,11 @@ const MyChores = () => {
     setFilteredChores(selectedProject ? projectFilteredChores : chores)
     setSearchInputFocus(0)
     setSelectedCalendarDate(null)
+    if (searchParams.has('search')) {
+      const params = new URLSearchParams(searchParams)
+      params.delete('search')
+      setSearchParams(params, { replace: true })
+    }
   }
 
   const setSelectedChoreSectionWithCache = value => {

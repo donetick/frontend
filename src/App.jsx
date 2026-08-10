@@ -16,6 +16,7 @@ import useOnboardingGate from './hooks/useOnboardingGate'
 import useStatusBar from './hooks/useStatusBar'
 import { useSyncOnReconnect } from './hooks/useSyncOnReconnect'
 import { useResource } from './queries/ResourceQueries'
+import { GlobalSearchProvider } from './search/GlobalSearchContext'
 import { recordRoute } from './service/DiagnosticsSession'
 import { useNotification } from './service/NotificationProvider'
 import NetworkBanner from './views/components/NetworkBanner'
@@ -145,7 +146,9 @@ function App() {
 
       <AuthProvider>
         <SSEProvider>
-          <AppContent />
+          <GlobalSearchProvider>
+            <AppContent />
+          </GlobalSearchProvider>
         </SSEProvider>
       </AuthProvider>
     </div>
