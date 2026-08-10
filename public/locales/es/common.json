@@ -20,6 +20,7 @@
   "logout": "Cerrar Sesión",
   "version": "Versión",
   "navigation": {
+    "search": "Search",
     "allTasks": "Todas las Tareas",
     "archived": "Archivadas",
     "things": "Cosas",
