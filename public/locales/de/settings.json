@@ -171,7 +171,11 @@
       },
       "feedback": {
         "title": "Send Feedback",
-        "description": "Tell us how Donetick is working for you, report a bug, or request a feature."
+        "description": "Tell us how Donetick is working for you or request a feature."
+      },
+      "bugReport": {
+        "title": "Report a Bug",
+        "description": "Something not working right? Send us the details along with a technical snapshot."
       }
     }
   }
