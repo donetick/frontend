@@ -20,6 +20,7 @@
   "logout": "Déconnexion",
   "version": "Version",
   "navigation": {
+    "search": "Search",
     "allTasks": "Toutes les Tâches",
     "archived": "Archivées",
     "things": "Objets",
