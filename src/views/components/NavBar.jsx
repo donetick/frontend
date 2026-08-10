@@ -9,6 +9,7 @@ import {
   ListAlt,
   Logout,
   MenuRounded,
+  SearchRounded,
   SettingsOutlined,
   Toll,
   Widgets,
@@ -23,30 +24,36 @@ import {
   ListItemDecorator,
   Typography,
 } from '@mui/joy'
-
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+
 import { version } from '../../../package.json'
 import UserProfileAvatar from '../../components/UserProfileAvatar'
+import Z_INDEX from '../../constants/zIndex'
 import { useLocalization } from '../../contexts/LocalizationContext'
+import { useResource } from '../../queries/ResourceQueries'
+import { useGlobalSearch } from '../../search/GlobalSearchContext'
+import { apiClient } from '../../utils/ApiClient'
 import NavBarLink from './NavBarLink'
 import SyncStatusIndicator from './SyncStatusIndicator'
-
-import Z_INDEX from '../../constants/zIndex'
-import { useResource } from '../../queries/ResourceQueries'
-import { apiClient } from '../../utils/ApiClient'
 
 const publicPages = ['/landing', '/privacy', '/terms']
 const NavBar = () => {
   const { t } = useTranslation('common')
   const { isRTL } = useLocalization()
   const { data: resource } = useResource()
+  const { openSearch } = useGlobalSearch()
 
   const navigate = useNavigate()
   const [drawerOpen, setDrawerOpen] = useState(false)
 
   const links = [
+    {
+      label: t('navigation.search'),
+      icon: <SearchRounded />,
+      onClick: () => openSearch(),
+    },
     {
       to: '/chores',
       label: t('navigation.allTasks'),
@@ -105,6 +112,22 @@ const NavBar = () => {
         <MenuRounded />
       </IconButton>
     )
+    if (location.pathname === '/search') {
+      return (
+        <IconButton
+          size='md'
+          variant='plain'
+          onClick={() => {
+            if (window.history.state?.idx > 0) navigate(-1)
+            else navigate('/chores', { replace: true })
+          }}
+          aria-label='Back from search'
+          title={t('back')}
+        >
+          <ArrowBack />
+        </IconButton>
+      )
+    }
     if (!Capacitor.isNativePlatform()) {
       return menuRounded
     }

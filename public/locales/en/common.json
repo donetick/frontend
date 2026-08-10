@@ -20,6 +20,7 @@
   "logout": "Logout",
   "version": "Version",
   "navigation": {
+    "search": "Search",
     "allTasks": "All Tasks",
     "archived": "Archived",
     "things": "Things",

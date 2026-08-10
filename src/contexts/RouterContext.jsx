@@ -13,6 +13,7 @@ import SettingsOverview from '@/views/Settings/SettingsOverview'
 import SettingsRoutes from '@/views/Settings/SettingsRoutes'
 import ThemeSettings from '@/views/Settings/ThemeSettings'
 
+import GlobalSearchPage from '../search/GlobalSearchPage'
 import AuthenticationLoading from '../views/Authorization/Authenticating'
 import ForgotPasswordView from '../views/Authorization/ForgotPasswordView'
 import LoginSettings from '../views/Authorization/LoginSettings'
@@ -130,6 +131,10 @@ const Router = createBrowserRouter([
       {
         path: '/chores',
         element: <MyChores />,
+      },
+      {
+        path: '/search',
+        element: <GlobalSearchPage />,
       },
       {
         path: '/archived',
