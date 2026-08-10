@@ -20,6 +20,7 @@
   "logout": "تسجيل الخروج",
   "version": "النسخة",
   "navigation": {
+    "search": "Search",
     "allTasks": "جميع المهام",
     "archived": "المؤرشفة",
     "things": "الأشياء",
