@@ -6,10 +6,12 @@ import {
 import { Box, Button, IconButton, Input, Link, Typography } from '@mui/joy'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+
 import useAcknowledgmentModal from '../../hooks/useAcknowledgmentModal'
 import { useNotification } from '../../service/NotificationProvider'
 import { GetUserCircle, JoinCircle } from '../../utils/Fetcher'
 import { haptic } from '../../utils/Onboarding'
+import { clearPendingInvite, getPendingInvite } from '../../utils/PendingInvite'
 import { authButtonSx } from '../Authorization/authStyles'
 import AcknowledgmentModal from '../Modals/Inputs/AcknowledgmentModal'
 import { CircleVignette } from './OnboardingVignettes'
@@ -81,10 +83,11 @@ const CircleSetupView = () => {
   const navigate = useNavigate()
   const { showNotification } = useNotification()
   const { ackModalConfig, showAcknowledgment } = useAcknowledgmentModal()
+  const pendingInvite = getPendingInvite()
 
-  const [mode, setMode] = useState('invite')
+  const [mode, setMode] = useState(pendingInvite ? 'join' : 'invite')
   const [inviteCode, setInviteCode] = useState(null)
-  const [joinCode, setJoinCode] = useState('')
+  const [joinCode, setJoinCode] = useState(pendingInvite ?? '')
   const [isJoining, setIsJoining] = useState(false)
 
   useEffect(() => {
@@ -115,6 +118,7 @@ const CircleSetupView = () => {
     try {
       const resp = await JoinCircle(joinCode.trim())
       if (resp.ok) {
+        clearPendingInvite()
         showAcknowledgment(
           "Your join request has been sent! The circle owner will need to approve it before you can see their chores. You'll get a notification once you're in.",
           'Request Sent',
@@ -308,7 +312,11 @@ const CircleSetupView = () => {
                 level='body-sm'
                 color='neutral'
                 underline='hover'
-                onClick={() => setMode('invite')}
+                onClick={() => {
+                  clearPendingInvite()
+                  setJoinCode('')
+                  setMode('invite')
+                }}
               >
                 Back
               </Link>

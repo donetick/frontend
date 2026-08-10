@@ -43,6 +43,8 @@ PODS:
     - Capacitor
   - CapacitorPushNotifications (8.1.2):
     - Capacitor
+  - CapacitorShare (8.0.1):
+    - Capacitor
   - CapacitorStatusBar (8.0.3):
     - Capacitor
   - CapgoCapacitorDocumentScanner (8.4.2):
@@ -157,6 +159,7 @@ DEPENDENCIES:
   - CapacitorPluginSafeArea (from `../../node_modules/capacitor-plugin-safe-area`)
   - "CapacitorPreferences (from `../../node_modules/@capacitor/preferences`)"
   - "CapacitorPushNotifications (from `../../node_modules/@capacitor/push-notifications`)"
+  - "CapacitorShare (from `../../node_modules/@capacitor/share`)"
   - "CapacitorStatusBar (from `../../node_modules/@capacitor/status-bar`)"
   - "CapgoCapacitorDocumentScanner (from `../../node_modules/@capgo/capacitor-document-scanner`)"
   - "CapgoCapacitorNfc (from `../../node_modules/@capgo/capacitor-nfc`)"
@@ -222,6 +225,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/preferences"
   CapacitorPushNotifications:
     :path: "../../node_modules/@capacitor/push-notifications"
+  CapacitorShare:
+    :path: "../../node_modules/@capacitor/share"
   CapacitorStatusBar:
     :path: "../../node_modules/@capacitor/status-bar"
   CapgoCapacitorDocumentScanner:
@@ -256,6 +261,7 @@ SPEC CHECKSUMS:
   CapacitorPluginSafeArea: 874619c00586248f1694210e72038123d422c2d9
   CapacitorPreferences: cca2021f386efb75947c850334447d9ff22b14f1
   CapacitorPushNotifications: 32a7f840815f319fd9ba1c1c9b0b914be9d95237
+  CapacitorShare: 0c58305114538568059bfc07111f22dcb9cb2a82
   CapacitorStatusBar: eca7bc2b58d9f886f1ef9edb66e57a9b29c121af
   CapgoCapacitorDocumentScanner: 262bb84b73707f9e2e59071ca58013e3f9acf942
   CapgoCapacitorNfc: 8ea158143c441e1cf6d231a971e375511558d027
@@ -283,6 +289,6 @@ SPEC CHECKSUMS:
   SQLCipher: eb79c64049cb002b4e9fcb30edb7979bf4706dfc
   ZIPFoundation: dfd3d681c4053ff7e2f7350bc4e53b5dba3f5351
 
-PODFILE CHECKSUM: 028fdeb50d56158db0a97459bd577ed700f03c0c
+PODFILE CHECKSUM: 0170e6b548e03117ef7d6814596b8b140a6acce4
 
 COCOAPODS: 1.16.2
