@@ -3,14 +3,16 @@ import { Add } from '@mui/icons-material'
 import { Divider, Menu, MenuItem } from '@mui/joy'
 import React, { useEffect } from 'react'
 
+import { Z_INDEX } from '../../constants/zIndex'
+
 const AutocompleteDropdown = ({
   currentValue,
-  suggestions,
-  selectedIndex,
-  onSelectSuggestion,
-  onMouseEnterSuggestion, // Added for hover selection
   onCreateSuggestion, // Called when the "Create new" row is chosen
+  onMouseEnterSuggestion, // Added for hover selection
+  onSelectSuggestion,
   parentRefer, // Ref to the dropdown element
+  selectedIndex,
+  suggestions,
 }) => {
   // Scroll selected item into view
   const dropdownMenuRef = React.useRef(null)
@@ -60,7 +62,7 @@ const AutocompleteDropdown = ({
         position: 'relative',
         bottom: 0,
         left: 0,
-        zIndex: 1300,
+        zIndex: Z_INDEX.MODAL_POPOVER,
       }}
     >
       {filteredOptions.map((option, index) => (
