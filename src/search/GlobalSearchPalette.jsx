@@ -40,7 +40,7 @@ const GROUPS = [
 ]
 const GROUP_LABELS = {
   tasks: 'Tasks',
-  history: 'Notes & activity',
+  history: 'Notes',
   projects: 'Projects',
   labels: 'Labels',
   people: 'People',
@@ -164,6 +164,7 @@ const SearchContainer = ({ children, onClose, presentation }) => {
     <AppModal
       open
       onClose={onClose}
+      disableRestoreFocus
       title='Search'
       size='lg'
       maxHeight='min(720px, calc(100dvh - 48px))'
@@ -196,20 +197,31 @@ const GlobalSearchPalette = ({
   const [recents] = useState(readRecents)
   const selectedResultRef = useRef(null)
 
-  const fuse = useMemo(
+  const searchIndexes = useMemo(
     () =>
-      new Fuse(documents, {
-        threshold: 0.38,
-        distance: 120,
-        ignoreLocation: true,
-        includeScore: true,
-        keys: [
-          { name: 'title', weight: 0.5 },
-          { name: 'keywords', weight: 0.25 },
-          { name: 'body', weight: 0.17 },
-          { name: 'subtitle', weight: 0.08 },
-        ],
-      }),
+      new Map(
+        GROUPS.filter(group => group !== 'actions').map(group => [
+          group,
+          new Fuse(
+            documents.filter(item => item.provider === group),
+            {
+              threshold: 0.38,
+              distance: 120,
+              ignoreLocation: true,
+              includeScore: true,
+              keys:
+                group === 'history'
+                  ? [{ name: 'body', weight: 1 }]
+                  : [
+                      { name: 'title', weight: 0.5 },
+                      { name: 'keywords', weight: 0.25 },
+                      { name: 'body', weight: 0.17 },
+                      { name: 'subtitle', weight: 0.08 },
+                    ],
+            },
+          ),
+        ]),
+      ),
     [documents],
   )
 
@@ -217,39 +229,32 @@ const GlobalSearchPalette = ({
     const normalized = query.trim().toLocaleLowerCase()
     if (!normalized) {
       const currentById = new Map(documents.map(item => [item.id, item]))
-      const recentResults = recents.map(
-        item => currentById.get(item.id) || item,
-      )
+      const recentResults = recents
+        .map(item => currentById.get(item.id) || item)
+        .filter(item => item.provider !== 'history' || currentById.has(item.id))
       return [...recentResults, ...QUICK_ACTIONS]
     }
 
-    const matches = fuse
-      .search(normalized, { limit: 60 })
-      .map(match => {
-        const title = match.item.title?.toLocaleLowerCase() ?? ''
-        let score = match.score ?? 1
+    const grouped = GROUPS.filter(group => group !== 'actions').flatMap(group =>
+      (searchIndexes.get(group)?.search(normalized, { limit: 7 }) || [])
+        .map(match => {
+          const title = match.item.title?.toLocaleLowerCase() ?? ''
+          let score = match.score ?? 1
 
-        if (title === normalized) {
-          score -= 1
-        } else if (title.startsWith(normalized)) {
-          score -= 0.15
-        } else if (title.includes(normalized)) {
-          score -= 0.08
-        }
+          if (group !== 'history') {
+            if (title === normalized) {
+              score -= 1
+            } else if (title.startsWith(normalized)) {
+              score -= 0.15
+            } else if (title.includes(normalized)) {
+              score -= 0.08
+            }
+          }
 
-        return {
-          ...match.item,
-          score,
-        }
-      })
-      .sort((a, b) => a.score - b.score)
-
-    const byGroup = new Map(GROUPS.map(group => [group, []]))
-    matches.forEach(item => {
-      const group = byGroup.get(item.provider)
-      if (group && group.length < 7) group.push(item)
-    })
-    const grouped = GROUPS.flatMap(group => byGroup.get(group))
+          return { ...match.item, score }
+        })
+        .sort((a, b) => a.score - b.score),
+    )
     grouped.push({
       id: 'action:filter-tasks',
       provider: 'actions',
@@ -258,7 +263,7 @@ const GlobalSearchPalette = ({
       route: `/chores?search=${encodeURIComponent(query.trim())}`,
     })
     return grouped
-  }, [documents, fuse, query, recents])
+  }, [documents, query, recents, searchIndexes])
 
   useEffect(() => {
     selectedResultRef.current?.scrollIntoView({
@@ -383,7 +388,7 @@ const GlobalSearchPalette = ({
                 <ListItemButton
                   ref={index === selectedIndex ? selectedResultRef : null}
                   selected={index === selectedIndex}
-                  onMouseEnter={() => setSelectedIndex(index)}
+                  onMouseMove={() => setSelectedIndex(index)}
                   onClick={() => selectResult(result)}
                   sx={{
                     borderRadius: 'md',

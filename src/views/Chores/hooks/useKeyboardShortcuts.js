@@ -1,15 +1,15 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 export const useKeyboardShortcuts = ({
-  isMultiSelectMode,
-  selectedChores,
   addTaskModalOpen,
-  searchTerm,
-  searchFilter,
-  filteredChores,
   choreSections,
-  openChoreSections,
+  filteredChores,
   handlers,
+  isMultiSelectMode,
+  openChoreSections,
+  searchFilter,
+  searchTerm,
+  selectedChores,
 }) => {
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
 
@@ -34,10 +34,6 @@ export const useKeyboardShortcuts = ({
       if (isHoldingCmdOrCtrl && event.key === 'j') {
         event.preventDefault()
         handlers.onNavigateToCreate()
-        return
-      } else if (isHoldingCmdOrCtrl && event.key === 'f') {
-        event.preventDefault()
-        handlers.onFocusSearch()
         return
       } else if (isHoldingCmdOrCtrl && event.key === 'x') {
         event.preventDefault()

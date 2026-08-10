@@ -86,29 +86,33 @@ registerSearchProvider({
 registerSearchProvider({
   id: 'history',
   getDocuments: ({ choresById, history, membersById }) =>
-    history.map(entry => {
+    history.flatMap(entry => {
+      const note = stripHtml(entry.notes).trim()
+      if (!note) return []
+
       const chore = choresById.get(String(entry.choreId))
       const member = membersById.get(String(entry.completedBy))
-      const note = stripHtml(entry.notes)
-      return document('history', {
-        id: `history:${entry.id}`,
-        entityId: entry.id,
-        title: chore?.name || entry.choreName || 'Task activity',
-        subtitle: [
-          member?.displayName,
-          entry.performedAt
-            ? new Date(entry.performedAt).toLocaleDateString()
-            : null,
-        ]
-          .filter(Boolean)
-          .join(' · '),
-        body: note,
-        keywords: `${HISTORY_STATUS[entry.status] || 'activity'} ${member?.displayName || ''}`,
-        route: entry.choreId
-          ? `/chores/${entry.choreId}/history`
-          : '/activities',
-        updatedAt: entry.performedAt || entry.updatedAt,
-      })
+      return [
+        document('history', {
+          id: `history:${entry.id}`,
+          entityId: entry.id,
+          title: chore?.name || entry.choreName || 'Task note',
+          subtitle: [
+            member?.displayName,
+            entry.performedAt
+              ? new Date(entry.performedAt).toLocaleDateString()
+              : null,
+          ]
+            .filter(Boolean)
+            .join(' · '),
+          body: note,
+          keywords: `${HISTORY_STATUS[entry.status] || 'activity'} ${member?.displayName || ''}`,
+          route: entry.choreId
+            ? `/chores/${entry.choreId}/history`
+            : '/activities',
+          updatedAt: entry.performedAt || entry.updatedAt,
+        }),
+      ]
     }),
 })
 
