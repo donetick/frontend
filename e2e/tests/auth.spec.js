@@ -31,7 +31,7 @@ test.describe('Auth – Sign Up', () => {
     await page.locator('#email').fill('short@donetick.test')
     await page.locator('#password').fill('ValidPass123!')
     await page.locator('#displayName').fill('Short User')
-    await page.getByRole('button', { name: 'Sign Up' }).click()
+    await page.getByRole('button', { name: 'Create account' }).click()
 
     await expect(
       page.getByText('Username must be at least 4 characters'),
@@ -52,7 +52,7 @@ test.describe('Auth – Login', () => {
 
   test('shows an error for wrong password', async ({ page }) => {
     await page.goto('/login')
-    await page.locator('#email').fill('e2e.user')
+    await page.locator('#username').fill('e2e.user')
     await page.locator('#password').fill('WrongPassword!')
     await page.getByRole('button', { name: 'Sign In' }).click()
 
