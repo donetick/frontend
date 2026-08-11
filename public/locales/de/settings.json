@@ -170,12 +170,12 @@
         "description": "Zeige technische Informationen über Authentifizierungs-Token, SSE-Verbindungen und Debug-Daten an."
       },
       "feedback": {
-        "title": "Send Feedback",
-        "description": "Tell us how Donetick is working for you or request a feature."
+        "title": "Feedback senden",
+        "description": "Funktioniert Donetick für Sie gut? Fragen Sie eine Funktion an, wenn diese fehlt."
       },
       "bugReport": {
-        "title": "Report a Bug",
-        "description": "Something not working right? Send us the details along with a technical snapshot."
+        "title": "Einen Fehler melden",
+        "description": "Hat etwas nicht richtig funktioniert? Senden Sie uns die Details zusammen mit einem technischen Protokoll."
       }
     }
   }
