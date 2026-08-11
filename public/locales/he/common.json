@@ -1,0 +1,120 @@
+```json
+{
+  "save": "שמור",
+  "cancel": "ביטול",
+  "delete": "מחיקה",
+  "edit": "עריכה",
+  "close": "סגירה",
+  "confirm": "אישור",
+  "loading": "טוען...",
+  "error": "שגיאה",
+  "success": "הצלחה",
+  "warning": "אזהרה",
+  "refresh": "רענון",
+  "copy": "העתקה",
+  "copied": "הועתק!",
+  "settings": "הגדרות",
+  "yes": "כן",
+  "no": "לא",
+  "back": "חזרה",
+  "backToCalendar": "חזרה ללוח השנה",
+  "logout": "התנתקות",
+  "version": "גרסה",
+  "navigation": {
+    "search": "חיפוש",
+    "allTasks": "כל המשימות",
+    "archived": "בארכיון",
+    "things": "דברים",
+    "labels": "תגיות",
+    "projects": "פרויקטים",
+    "filters": "מסננים",
+    "activities": "פעילויות",
+    "points": "נקודות",
+    "settings": "הגדרות"
+  },
+  "search": {
+    "title": "חיפוש",
+    "placeholder": "חיפוש ב-Donetick",
+    "inputAriaLabel": "חיפוש במשימות, בהיסטוריה, בפרויקטים, בתגיות ובהגדרות",
+    "deviceNote": "חיפוש בתוכן הזמין במכשיר הזה",
+    "escape": "Esc",
+    "recent": "חיפושים אחרונים",
+    "empty": {
+      "title": "אין התאמות ישירות",
+      "subtitle": "עדיין תוכלו לסנן את רשימת המשימות באמצעות החיפוש הזה."
+    },
+    "groups": {
+      "tasks": "משימות",
+      "history": "היסטוריה",
+      "projects": "פרויקטים",
+      "labels": "תגיות",
+      "people": "אנשים",
+      "settings": "הגדרות",
+      "actions": "פעולות מהירות"
+    },
+    "actions": {
+      "quickAction": "פעולה מהירה",
+      "navigation": "ניווט",
+      "createTask": "יצירת משימה",
+      "viewAllTasks": "הצגת כל המשימות",
+      "viewArchivedTasks": "הצגת משימות שבארכיון",
+      "openSettings": "פתיחת הגדרות",
+      "filterTasks": "הצגת משימות התואמות ל־„{{query}}“",
+      "filterTasksSubtitle": "סינון רשימת המשימות"
+    },
+    "footer": {
+      "navigate": "ניווט",
+      "open": "פתיחה",
+      "results_one": "{{count}} תוצאה",
+      "results_other": "{{count}} תוצאות",
+      "typeToSearch": "הקלידו כדי לחפש"
+    }
+  },
+  "feedback": {
+    "later": "אולי מאוחר יותר",
+    "sentiment": {
+      "title": "איך Donetick עובד עבורכם?",
+      "subtitle": "התשובה שלכם עוזרת לנו להחליט מה לפתח בהמשך.",
+      "options": {
+        "love": "אני אוהב/ת את זה",
+        "okay": "בסדר",
+        "issues": "נתקלתי בבעיות"
+      }
+    },
+    "categories": {
+      "bugs": "באגים",
+      "missingFeature": "תכונה חסרה",
+      "tooComplicated": "מסובך מדי",
+      "slow": "איטי",
+      "notifications": "התראות",
+      "ai": "AI",
+      "other": "אחר"
+    },
+    "details": {
+      "title": "מה נוכל לשפר?",
+      "messageLabel": "ספרו לנו עוד",
+      "messagePlaceholder": "מה קרה, או מה היה הופך את השימוש לטוב יותר?",
+      "contextNote": "נצרף את גרסת האפליקציה, המכשיר והפלטפורמה כדי שנוכל לשחזר בעיות.",
+      "submit": "שליחת משוב",
+      "contextNoteSelfHosted": "אתם משתמשים בשרת עצמאי, לכן שום דבר לא נשלח מהשרת שלכם — נפתח עבורכם דיווח GitHub מלא מראש, שתוכלו לבדוק ולערוך לפני השליחה.",
+      "submitSelfHosted": "המשך ל-GitHub"
+    },
+    "review": {
+      "title": "שמחים שאתם נהנים מ-Donetick!",
+      "subtitle": "דירוג או כוכב עוזרים לאנשים אחרים למצוא את Donetick.",
+      "github": "מתן כוכב ב-GitHub",
+      "appStore": "דירוג ב-App Store",
+      "playStore": "דירוג ב-Google Play"
+    },
+    "thanks": {
+      "title": "תודה על המשוב",
+      "subtitle": "אנחנו קוראים כל תגובה והיא עוזרת לנו להחליט על מה לעבוד בהמשך."
+    },
+    "github": {
+      "title": "דיווח ב-GitHub",
+      "subtitle": "מילאנו עבורכם דיווח עם ההערות ופרטי הגרסה. שום דבר עדיין לא נשלח — תוכלו לבדוק את הדיווח ולפרסם אותו כשתהיו מוכנים.",
+      "open": "פתיחת הדיווח"
+    }
+  }
+}
+```

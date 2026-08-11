@@ -20,6 +20,7 @@
   "logout": "Sair",
   "version": "Versão",
   "navigation": {
+    "search": "Pesquisar",
     "allTasks": "Todas as tarefas",
     "archived": "Arquivadas",
     "things": "Itens",
@@ -29,6 +30,44 @@
     "activities": "Atividades",
     "points": "Pontos",
     "settings": "Configurações"
+  },
+  "search": {
+    "title": "Pesquisar",
+    "placeholder": "Pesquisar no Donetick",
+    "inputAriaLabel": "Pesquisar tarefas, histórico, projetos, etiquetas e configurações",
+    "deviceNote": "Pesquisando o conteúdo disponível neste dispositivo",
+    "escape": "Esc",
+    "recent": "Recentes",
+    "empty": {
+      "title": "Nenhuma correspondência direta",
+      "subtitle": "Você ainda pode filtrar a lista de tarefas com esta pesquisa."
+    },
+    "groups": {
+      "tasks": "Tarefas",
+      "history": "Notas",
+      "projects": "Projetos",
+      "labels": "Etiquetas",
+      "people": "Pessoas",
+      "settings": "Configurações",
+      "actions": "Ações rápidas"
+    },
+    "actions": {
+      "quickAction": "Ação rápida",
+      "navigation": "Navegação",
+      "createTask": "Criar uma tarefa",
+      "viewAllTasks": "Ver todas as tarefas",
+      "viewArchivedTasks": "Ver tarefas arquivadas",
+      "openSettings": "Abrir configurações",
+      "filterTasks": "Mostrar tarefas que correspondem a “{{query}}”",
+      "filterTasksSubtitle": "Filtrar a lista de tarefas"
+    },
+    "footer": {
+      "navigate": "Navegar",
+      "open": "Abrir",
+      "results_one": "{{count}} resultado",
+      "results_other": "{{count}} resultados",
+      "typeToSearch": "Digite para pesquisar"
+    }
   },
   "feedback": {
     "later": "Maybe later",
