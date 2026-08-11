@@ -20,7 +20,7 @@
   "logout": "Logout",
   "version": "Version",
   "navigation": {
-    "search": "Search",
+    "search": "搜索",
     "allTasks": "All Tasks",
     "archived": "Archived",
     "things": "Things",
@@ -30,6 +30,44 @@
     "activities": "Activities",
     "points": "Points",
     "settings": "Settings"
+  },
+  "search": {
+    "title": "搜索",
+    "placeholder": "搜索 Donetick",
+    "inputAriaLabel": "搜索任务、历史、项目、标签和设置",
+    "deviceNote": "正在搜索此设备上可用的内容",
+    "escape": "Esc",
+    "recent": "最近",
+    "empty": {
+      "title": "没有直接匹配的结果",
+      "subtitle": "你仍然可以用此搜索筛选任务列表。"
+    },
+    "groups": {
+      "tasks": "任务",
+      "history": "备注",
+      "projects": "项目",
+      "labels": "标签",
+      "people": "成员",
+      "settings": "设置",
+      "actions": "快捷操作"
+    },
+    "actions": {
+      "quickAction": "快捷操作",
+      "navigation": "导航",
+      "createTask": "创建任务",
+      "viewAllTasks": "查看所有任务",
+      "viewArchivedTasks": "查看已归档任务",
+      "openSettings": "打开设置",
+      "filterTasks": "显示匹配“{{query}}”的任务",
+      "filterTasksSubtitle": "筛选任务列表"
+    },
+    "footer": {
+      "navigate": "导航",
+      "open": "打开",
+      "results_one": "{{count}} result",
+      "results_other": "{{count}} 个结果",
+      "typeToSearch": "输入以搜索"
+    }
   },
   "feedback": {
     "later": "Maybe later",
