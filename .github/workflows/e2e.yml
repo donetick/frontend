@@ -1,0 +1,138 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'e2e/**'
+      - '.github/workflows/e2e.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'e2e/**'
+      - '.github/workflows/e2e.yml'
+  workflow_dispatch:
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # ── Node / frontend ────────────────────────────────────────────────────
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install frontend dependencies
+        run: |
+          npm ci
+          # Platform-specific native packages required on Linux
+          npm install --force \
+            @rollup/rollup-linux-x64-gnu@4.34.9 \
+            @swc/core-linux-x64-gnu
+
+      # ── Playwright ────────────────────────────────────────────────────────
+      - name: Install Playwright dependencies
+        run: npm ci
+        working-directory: e2e
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+        working-directory: e2e
+
+      # ── Backend binary ────────────────────────────────────────────────────
+      - name: Get latest donetick release tag
+        id: release
+        run: |
+          TAG=$(curl -fsSL https://api.github.com/repos/donetick/donetick/releases/latest \
+            | grep '"tag_name"' | head -1 \
+            | sed 's/.*"tag_name": "\(.*\)".*/\1/')
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Using backend tag: $TAG"
+
+      - name: Cache donetick binary
+        id: cache-binary
+        uses: actions/cache@v4
+        with:
+          path: .donetick-bin/
+          key: donetick-${{ steps.release.outputs.tag }}-linux-x86_64
+
+      - name: Download and extract donetick binary
+        if: steps.cache-binary.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p .donetick-bin
+          curl -fsSL \
+            "https://github.com/donetick/donetick/releases/download/${{ steps.release.outputs.tag }}/donetick_Linux_x86_64.tar.gz" \
+            -o .donetick-bin/donetick_Linux_x86_64.tar.gz
+          tar -xzf .donetick-bin/donetick_Linux_x86_64.tar.gz -C .donetick-bin
+          chmod +x .donetick-bin/donetick
+
+      - name: Write backend config
+        run: |
+          mkdir -p .donetick-bin/config
+          cat > .donetick-bin/config/selfhosted.yaml << 'EOF'
+          name: "selfhosted"
+          is_done_tick_dot_com: false
+          is_user_creation_disabled: false
+          database:
+            type: "sqlite"
+            migration: true
+          jwt:
+            secret: "e2e_test_secret_32chars_long_ok!"
+            session_time: 168h
+            max_refresh: 1440h
+          server:
+            port: 2021
+            read_timeout: 10s
+            write_timeout: 10s
+            rate_period: 60s
+            rate_limit: 300
+            cors_allow_origins:
+              - "http://localhost:5173"
+              - "http://localhost:4173"
+            serve_frontend: false
+          logging:
+            level: "warn"
+            encoding: "json"
+            development: false
+          EOF
+
+      - name: Start donetick backend
+        working-directory: .donetick-bin
+        env:
+          DT_ENV: selfhosted
+          DT_SQLITE_PATH: /tmp/donetick-e2e.db
+        run: ./donetick &
+
+      # ── Frontend ──────────────────────────────────────────────────────────
+      # Build with --mode development so .env.development is loaded,
+      # which sets VITE_APP_API_URL=http://localhost:2021
+      - name: Build frontend
+        run: npx vite build --mode development
+
+      - name: Serve frontend
+        run: npx vite preview --port 5173 &
+
+      # ── Tests ─────────────────────────────────────────────────────────────
+      - name: Run Playwright tests
+        working-directory: e2e
+        env:
+          E2E_FRONTEND_URL: http://localhost:5173
+          E2E_API_URL: http://localhost:2021
+        run: npx playwright test
+
+      - name: Upload test artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            e2e/playwright-report/
+            e2e/test-results/
+          retention-days: 7
