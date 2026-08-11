@@ -153,6 +153,16 @@ const themeConfig = {
         }),
       },
     },
+    // ToggleButtonGroup is styled(StyledButtonGroup) under its own slot name, so
+    // it inherits the same geometry — and the same RTL problem — but not the
+    // JoyButtonGroup override. Its radius is left at Joy's default on purpose;
+    // only the direction-sensitive geometry needs correcting.
+    JoyToggleButtonGroup: {
+      styleOverrides: {
+        root: ({ ownerState, theme }) =>
+          theme.direction === 'rtl' ? buttonGroupRtlGeometry(ownerState) : {},
+      },
+    },
   },
 }
 

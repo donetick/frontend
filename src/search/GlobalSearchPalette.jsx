@@ -24,6 +24,7 @@ import {
 import Fuse from 'fuse.js'
 import PropTypes from 'prop-types'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
 import AppModal from '../components/common/AppModal'
@@ -38,15 +39,6 @@ const GROUPS = [
   'settings',
   'actions',
 ]
-const GROUP_LABELS = {
-  tasks: 'Tasks',
-  history: 'Notes',
-  projects: 'Projects',
-  labels: 'Labels',
-  people: 'People',
-  settings: 'Settings',
-  actions: 'Quick actions',
-}
 
 const ICONS = {
   tasks: <CheckCircleOutline />,
@@ -58,33 +50,33 @@ const ICONS = {
   actions: <AddRounded />,
 }
 
-const QUICK_ACTIONS = [
+const buildQuickActions = t => [
   {
     id: 'action:create',
     provider: 'actions',
-    title: 'Create a task',
-    subtitle: 'Quick action',
+    title: t('search.actions.createTask'),
+    subtitle: t('search.actions.quickAction'),
     route: '/chores/create',
   },
   {
     id: 'action:tasks',
     provider: 'actions',
-    title: 'View all tasks',
-    subtitle: 'Navigation',
+    title: t('search.actions.viewAllTasks'),
+    subtitle: t('search.actions.navigation'),
     route: '/chores',
   },
   {
     id: 'action:archived',
     provider: 'actions',
-    title: 'View archived tasks',
-    subtitle: 'Navigation',
+    title: t('search.actions.viewArchivedTasks'),
+    subtitle: t('search.actions.navigation'),
     route: '/archived',
   },
   {
     id: 'action:settings',
     provider: 'actions',
-    title: 'Open settings',
-    subtitle: 'Navigation',
+    title: t('search.actions.openSettings'),
+    subtitle: t('search.actions.navigation'),
     route: '/settings',
   },
 ]
@@ -142,6 +134,8 @@ const Highlight = ({ query, text }) => {
 }
 
 const SearchContainer = ({ children, onClose, presentation }) => {
+  const { t } = useTranslation()
+
   if (presentation === 'page') {
     return (
       <Box
@@ -165,7 +159,7 @@ const SearchContainer = ({ children, onClose, presentation }) => {
       open
       onClose={onClose}
       disableRestoreFocus
-      title='Search'
+      title={t('search.title')}
       size='lg'
       maxHeight='min(720px, calc(100dvh - 48px))'
       contentSx={{
@@ -189,6 +183,7 @@ const GlobalSearchPalette = ({
   presentation = 'modal',
 }) => {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const focusInputRef = useCallback(node => {
     if (node) requestAnimationFrame(() => node.focus())
   }, [])
@@ -232,7 +227,7 @@ const GlobalSearchPalette = ({
       const recentResults = recents
         .map(item => currentById.get(item.id) || item)
         .filter(item => item.provider !== 'history' || currentById.has(item.id))
-      return [...recentResults, ...QUICK_ACTIONS]
+      return [...recentResults, ...buildQuickActions(t)]
     }
 
     const grouped = GROUPS.filter(group => group !== 'actions').flatMap(group =>
@@ -258,12 +253,12 @@ const GlobalSearchPalette = ({
     grouped.push({
       id: 'action:filter-tasks',
       provider: 'actions',
-      title: `Show tasks matching “${query.trim()}”`,
-      subtitle: 'Filter the task list',
+      title: t('search.actions.filterTasks', { query: query.trim() }),
+      subtitle: t('search.actions.filterTasksSubtitle'),
       route: `/chores?search=${encodeURIComponent(query.trim())}`,
     })
     return grouped
-  }, [documents, query, recents, searchIndexes])
+  }, [documents, query, recents, searchIndexes, t])
 
   useEffect(() => {
     selectedResultRef.current?.scrollIntoView({
@@ -302,8 +297,7 @@ const GlobalSearchPalette = ({
           slotProps={{
             input: {
               ref: focusInputRef,
-              'aria-label':
-                'Search tasks, history, projects, labels and settings',
+              'aria-label': t('search.inputAriaLabel'),
             },
           }}
           value={query}
@@ -312,14 +306,14 @@ const GlobalSearchPalette = ({
             setSelectedIndex(0)
           }}
           onKeyDown={onInputKeyDown}
-          placeholder='Search Donetick'
+          placeholder={t('search.placeholder')}
           startDecorator={<SearchRounded />}
           endDecorator={
             isLoading ? (
               <CircularProgress size='sm' />
             ) : presentation === 'modal' ? (
               <Chip size='sm' variant='outlined'>
-                Esc
+                {t('search.escape')}
               </Chip>
             ) : null
           }
@@ -333,7 +327,7 @@ const GlobalSearchPalette = ({
           level='body-xs'
           sx={{ color: 'text.tertiary', mt: 1, px: 0.5 }}
         >
-          Searching content available on this device
+          {t('search.deviceNote')}
         </Typography>
       </Box>
       <Divider />
@@ -350,9 +344,9 @@ const GlobalSearchPalette = ({
             <InboxOutlined
               sx={{ fontSize: 36, color: 'text.tertiary', mb: 1 }}
             />
-            <Typography level='title-md'>No direct matches</Typography>
+            <Typography level='title-md'>{t('search.empty.title')}</Typography>
             <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-              You can still filter the task list with this search.
+              {t('search.empty.subtitle')}
             </Typography>
           </Box>
         )}
@@ -381,8 +375,8 @@ const GlobalSearchPalette = ({
                     }}
                   >
                     {!query.trim() && result.provider !== 'actions'
-                      ? 'Recent'
-                      : GROUP_LABELS[result.provider]}
+                      ? t('search.recent')
+                      : t(`search.groups.${result.provider}`)}
                   </Typography>
                 )}
                 <ListItemButton
@@ -434,12 +428,16 @@ const GlobalSearchPalette = ({
           color: 'text.tertiary',
         }}
       >
-        <Typography level='body-xs'>↑↓ Navigate</Typography>
-        <Typography level='body-xs'>↵ Open</Typography>
+        <Typography level='body-xs'>
+          ↑↓ {t('search.footer.navigate')}
+        </Typography>
+        <Typography level='body-xs'>↵ {t('search.footer.open')}</Typography>
         <Typography level='body-xs' sx={{ ml: 'auto' }}>
           {query.trim()
-            ? `${Math.max(0, results.length - 1)} results`
-            : 'Type to search'}
+            ? t('search.footer.results', {
+                count: Math.max(0, results.length - 1),
+              })
+            : t('search.footer.typeToSearch')}
         </Typography>
       </Box>
     </SearchContainer>
