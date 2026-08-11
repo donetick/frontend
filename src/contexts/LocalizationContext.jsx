@@ -1,7 +1,8 @@
-import useStickyState from '@/hooks/useStickyState'
 import moment from 'moment'
 import { createContext, useContext, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+
+import useStickyState from '@/hooks/useStickyState'
 
 const LocalizationContext = createContext()
 
@@ -21,6 +22,7 @@ export const TIME_FORMATS = {
 export const RTL_LANGUAGES = ['ar', 'he', 'fa', 'ur']
 
 export const AVAILABLE_LANGUAGES = [
+  { code: 'ar', name: 'Arabic', nativeName: 'العربية' },
   { code: 'de', name: 'German', nativeName: 'Deutsch' },
   { code: 'en', name: 'English', nativeName: 'English' },
   { code: 'es', name: 'Spanish', nativeName: 'Español' },

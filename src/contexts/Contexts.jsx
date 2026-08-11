@@ -8,8 +8,10 @@ import ThemeContext from './ThemeContext'
 const Contexts = ({ children }) => {
   const contexts = [
     AlertsProvider,
-    ThemeContext,
+    // Above ThemeContext: the theme reads the active language to pick the
+    // text direction and the matching emotion cache.
     LocalizationProvider,
+    ThemeContext,
     QueryContext,
     NotificationProvider,
     RouterContext,
