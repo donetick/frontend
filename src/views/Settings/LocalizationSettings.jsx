@@ -44,7 +44,7 @@ const LocalizationSettings = () => {
   ]
 
   return (
-    <SettingsLayout title='Localization'>
+    <SettingsLayout title={t('localization.title')}>
       <div className='grid gap-4 py-4'>
         <Typography level='body-md'>{t('localization.description')}</Typography>
 
@@ -71,12 +71,7 @@ const LocalizationSettings = () => {
             ))}
           </Select>
           {isRTL && (
-            <FormHelperText>
-              {t(
-                'localization.rtlNotice',
-                'This language uses right-to-left (RTL) text direction',
-              )}
-            </FormHelperText>
+            <FormHelperText>{t('localization.rtlNotice')}</FormHelperText>
           )}
         </FormControl>
 
@@ -110,7 +105,9 @@ const LocalizationSettings = () => {
             ))}
           </Select>
           <FormHelperText>
-            Preview: {sampleDate.format(dateFormat)}
+            {t('localization.preview', {
+              value: sampleDate.format(dateFormat),
+            })}
           </FormHelperText>
         </FormControl>
 
@@ -157,7 +154,9 @@ const LocalizationSettings = () => {
             </Option>
           </Select>
           <FormHelperText>
-            Preview: {sampleDate.format(timeFormat)}
+            {t('localization.preview', {
+              value: sampleDate.format(timeFormat),
+            })}
           </FormHelperText>
         </FormControl>
 

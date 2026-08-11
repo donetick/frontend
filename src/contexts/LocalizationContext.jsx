@@ -27,6 +27,7 @@ export const AVAILABLE_LANGUAGES = [
   { code: 'en', name: 'English', nativeName: 'English' },
   { code: 'es', name: 'Spanish', nativeName: 'Español' },
   { code: 'fr', name: 'French', nativeName: 'Français' },
+  { code: 'he', name: 'Hebrew', nativeName: 'עברית' },
   { code: 'nl', name: 'Dutch', nativeName: 'Nederlands' },
   { code: 'ja', name: 'Japanese', nativeName: '日本語' },
   { code: 'pt', name: 'Portuguese (Brazil)', nativeName: 'Português (Brasil)' },
@@ -55,7 +56,10 @@ export const LocalizationProvider = ({ children }) => {
   }, [language, i18n])
 
   useEffect(() => {
-    const isRTL = RTL_LANGUAGES.includes(language)
+    const isRTL = RTL_LANGUAGES.some(
+      rtlLanguage =>
+        language === rtlLanguage || language.startsWith(`${rtlLanguage}-`),
+    )
     document.documentElement.dir = isRTL ? 'rtl' : 'ltr'
     document.documentElement.lang = language
   }, [language])
@@ -93,7 +97,10 @@ export const LocalizationProvider = ({ children }) => {
     })
   }
 
-  const isRTL = RTL_LANGUAGES.includes(language)
+  const isRTL = RTL_LANGUAGES.some(
+    rtlLanguage =>
+      language === rtlLanguage || language.startsWith(`${rtlLanguage}-`),
+  )
 
   const fmt = {
     date: formatDate,

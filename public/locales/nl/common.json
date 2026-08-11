@@ -20,6 +20,7 @@
   "logout": "Uitloggen",
   "version": "Versie",
   "navigation": {
+    "search": "Zoeken",
     "allTasks": "Alle Taken",
     "archived": "Gearchiveerd",
     "things": "Dingen",
@@ -29,6 +30,44 @@
     "activities": "Activiteiten",
     "points": "Punten",
     "settings": "Instellingen"
+  },
+  "search": {
+    "title": "Zoeken",
+    "placeholder": "Zoeken in Donetick",
+    "inputAriaLabel": "Zoek in taken, geschiedenis, projecten, labels en instellingen",
+    "deviceNote": "Er wordt gezocht in inhoud die op dit apparaat beschikbaar is",
+    "escape": "Esc",
+    "recent": "Recent",
+    "empty": {
+      "title": "Geen directe resultaten",
+      "subtitle": "Je kunt de takenlijst nog steeds filteren met deze zoekopdracht."
+    },
+    "groups": {
+      "tasks": "Taken",
+      "history": "Notities",
+      "projects": "Projecten",
+      "labels": "Labels",
+      "people": "Personen",
+      "settings": "Instellingen",
+      "actions": "Snelle acties"
+    },
+    "actions": {
+      "quickAction": "Snelle actie",
+      "navigation": "Navigatie",
+      "createTask": "Taak aanmaken",
+      "viewAllTasks": "Alle taken bekijken",
+      "viewArchivedTasks": "Gearchiveerde taken bekijken",
+      "openSettings": "Instellingen openen",
+      "filterTasks": "Taken tonen die overeenkomen met ‘{{query}}’",
+      "filterTasksSubtitle": "De takenlijst filteren"
+    },
+    "footer": {
+      "navigate": "Navigeren",
+      "open": "Openen",
+      "results_one": "{{count}} resultaat",
+      "results_other": "{{count}} resultaten",
+      "typeToSearch": "Typ om te zoeken"
+    }
   },
   "feedback": {
     "later": "Maybe later",

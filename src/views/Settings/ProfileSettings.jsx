@@ -180,7 +180,7 @@ const ProfileSettings = () => {
             setShowCropper(false)
             setSelectedFile(null)
           }}
-          title={t('profile.editPhoto', { defaultValue: 'Edit profile photo' })}
+          title={t('profile.editPhoto')}
           size='sm'
           closeOnBackdrop={!isUploading}
           closeOnEscape={!isUploading}
