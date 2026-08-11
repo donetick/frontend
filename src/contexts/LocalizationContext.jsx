@@ -1,5 +1,3 @@
-import 'moment/locale/he'
-
 import moment from 'moment'
 import { createContext, useContext, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
