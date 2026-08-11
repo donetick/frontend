@@ -29,7 +29,8 @@
     "filters": "Filters",
     "activities": "Activities",
     "points": "Points",
-    "settings": "Settings"
+    "settings": "Settings",
+    "reportBug": "Report a Bug"
   },
   "feedback": {
     "later": "Maybe later",
