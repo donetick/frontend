@@ -122,7 +122,7 @@ const NavBar = () => {
           aria-label='Back from search'
           title={t('back')}
         >
-          <ArrowBack />
+          <ArrowBack className='rtl-flip' />
         </IconButton>
       )
     }
@@ -154,7 +154,7 @@ const NavBar = () => {
             : t('back')
         }
       >
-        <ArrowBack />
+        <ArrowBack className='rtl-flip' />
       </IconButton>
     )
   }
