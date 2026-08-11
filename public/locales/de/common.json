@@ -31,6 +31,44 @@
     "points": "Punkte",
     "settings": "Einstellungen"
   },
+  "search": {
+    "title": "Suche",
+    "placeholder": "Donetick durchsuchen",
+    "inputAriaLabel": "Aufgaben, Verlauf, Projekte, Beschriftungen und Einstellungen durchsuchen",
+    "deviceNote": "Es wird in Inhalten gesucht, die auf diesem Gerät verfügbar sind",
+    "escape": "Esc",
+    "recent": "Zuletzt verwendet",
+    "empty": {
+      "title": "Keine direkten Treffer",
+      "subtitle": "Du kannst die Aufgabenliste trotzdem mit dieser Suche filtern."
+    },
+    "groups": {
+      "tasks": "Aufgaben",
+      "history": "Notizen",
+      "projects": "Projekte",
+      "labels": "Beschriftungen",
+      "people": "Personen",
+      "settings": "Einstellungen",
+      "actions": "Schnellaktionen"
+    },
+    "actions": {
+      "quickAction": "Schnellaktion",
+      "navigation": "Navigation",
+      "createTask": "Aufgabe erstellen",
+      "viewAllTasks": "Alle Aufgaben anzeigen",
+      "viewArchivedTasks": "Archivierte Aufgaben anzeigen",
+      "openSettings": "Einstellungen öffnen",
+      "filterTasks": "Aufgaben anzeigen, die zu „{{query}}“ passen",
+      "filterTasksSubtitle": "Aufgabenliste filtern"
+    },
+    "footer": {
+      "navigate": "Navigieren",
+      "open": "Öffnen",
+      "results_one": "{{count}} Ergebnis",
+      "results_other": "{{count}} Ergebnisse",
+      "typeToSearch": "Zum Suchen tippen"
+    }
+  },
   "feedback": {
     "later": "Vielleicht später",
     "sentiment": {
