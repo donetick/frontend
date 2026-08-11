@@ -6,7 +6,8 @@
   "scripts": {
     "test": "playwright test",
     "test:headed": "playwright test --headed",
-    "test:report": "playwright show-report"
+    "test:report": "playwright show-report",
+    "test:full": "./run-e2e.sh"
   },
   "devDependencies": {
     "@playwright/test": "^1.44.0"
