@@ -6,7 +6,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 /**
  * Fill and submit the signup form through the UI.
- * After successful signup the app auto-logs in and redirects to /chores.
+ * After successful signup the app auto-logs in and walks through the
+ * onboarding flow (/circle-setup, then /ready) before landing on /chores.
  */
 export async function signUpViaUI(page, { username, email, password, displayName }) {
   await page.goto('/signup')
@@ -14,7 +15,14 @@ export async function signUpViaUI(page, { username, email, password, displayName
   await page.locator('#email').fill(email)
   await page.locator('#password').fill(password)
   await page.locator('#displayName').fill(displayName)
-  await page.getByRole('button', { name: 'Sign Up' }).click()
+  await page.getByRole('button', { name: 'Create account' }).click()
+
+  await page.waitForURL('**/circle-setup', { timeout: 10_000 })
+  await page.getByRole('button', { name: 'Continue' }).click()
+
+  await page.waitForURL('**/ready', { timeout: 10_000 })
+  await page.getByRole('button', { name: 'Continue' }).click()
+
   await page.waitForURL('**/chores', { timeout: 10_000 })
 }
 
@@ -24,8 +32,7 @@ export async function signUpViaUI(page, { username, email, password, displayName
  */
 export async function loginViaUI(page, { username, password }) {
   await page.goto('/login')
-  // The username input on the login page has id="email" (quirk of the form)
-  await page.locator('#email').fill(username)
+  await page.locator('#username').fill(username)
   await page.locator('#password').fill(password)
   await page.getByRole('button', { name: 'Sign In' }).click()
   await page.waitForURL('**/chores', { timeout: 10_000 })

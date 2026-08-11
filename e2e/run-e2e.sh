@@ -4,6 +4,7 @@
 # (2022/5180) so it never touches dev servers you may have running elsewhere
 # (e.g. another worktree on the default 2021/5173).
 set -uo pipefail
+set -m # each backgrounded job gets its own process group, so we can kill it as a unit (portable alternative to setsid, which isn't available on macOS)
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 FRONTEND_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -70,7 +71,7 @@ kill_port "$FRONTEND_PORT"
 echo "--- Starting backend on :$BACKEND_PORT (log: $LOG_DIR/backend.log) ---"
 (
   cd "$BACKEND_DIR"
-  exec setsid env \
+  exec env \
     DT_NAME=e2e-frontend-repo \
     DT_IS_DONE_TICK_DOT_COM=false \
     DT_IS_USER_CREATION_DISABLED=false \
@@ -93,7 +94,7 @@ BACKEND_PID=$!
 echo "--- Starting frontend on :$FRONTEND_PORT (log: $LOG_DIR/frontend.log) ---"
 (
   cd "$FRONTEND_DIR"
-  exec setsid env VITE_APP_API_URL="$BACKEND_URL" npx vite --port "$FRONTEND_PORT" --strictPort
+  exec env VITE_APP_API_URL="$BACKEND_URL" npx vite --port "$FRONTEND_PORT" --strictPort
 ) > "$LOG_DIR/frontend.log" 2>&1 &
 FRONTEND_PID=$!
 
