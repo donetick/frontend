@@ -64,7 +64,6 @@
     "footer": {
       "navigate": "移動",
       "open": "開く",
-      "results_one": "{{count}} result",
       "results_other": "{{count}} 件の結果",
       "typeToSearch": "入力して検索"
     }

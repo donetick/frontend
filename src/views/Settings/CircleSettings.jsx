@@ -1,4 +1,5 @@
-import { Delete, Refresh } from '@mui/icons-material'
+import { Share } from '@capacitor/share'
+import { CopyAll, Delete, IosShare, Refresh } from '@mui/icons-material'
 import {
   Box,
   Button,
@@ -9,15 +10,18 @@ import {
   Input,
   Option,
   Select,
-  Typography
+  Typography,
 } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
+import { apiClient } from '../../utils/ApiClient'
 import {
   AcceptCircleMemberRequest,
   DeleteCircleMember,
@@ -33,6 +37,7 @@ import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import SettingsLayout from './SettingsLayout'
 
 const CircleSettings = () => {
+  const { t } = useTranslation('settings')
   const { data: userProfile } = useUserProfile()
   const queryClient = useQueryClient()
   const { showNotification } = useNotification()
@@ -52,8 +57,8 @@ const CircleSettings = () => {
     message,
     title,
     onConfirm,
-    confirmText = 'Confirm',
-    cancelText = 'Cancel',
+    confirmText = t('common.confirm'),
+    cancelText = t('common.cancel'),
     color = 'primary',
   ) => {
     setConfirmModalConfig({
@@ -72,6 +77,29 @@ const CircleSettings = () => {
     })
   }
 
+  const roleOptions = [
+    {
+      value: 'member',
+      label: t('circleSettings.roles.member'),
+      description: t('circleSettings.roles.memberDescription'),
+    },
+    {
+      value: 'manager',
+      label: t('circleSettings.roles.manager'),
+      description: t('circleSettings.roles.managerDescription'),
+    },
+    {
+      value: 'admin',
+      label: t('circleSettings.roles.admin'),
+      description: t('circleSettings.roles.adminDescription'),
+    },
+  ]
+
+  // Roles come back from the API as lowercase identifiers, so fall back to the
+  // raw value for anything the translations don't cover yet.
+  const roleLabel = role =>
+    roleOptions.find(option => option.value === role)?.label ?? role
+
   const refreshMemberRequests = async () => {
     setIsRefreshing(true)
     try {
@@ -82,7 +110,7 @@ const CircleSettings = () => {
     } catch (error) {
       showNotification({
         type: 'error',
-        message: 'Failed to refresh member requests',
+        message: t('circleSettings.refreshFailed'),
       })
     } finally {
       setIsRefreshing(false)
@@ -115,99 +143,129 @@ const CircleSettings = () => {
     }
   }, [circleMembers, userProfile])
 
+  const inviteCode = userCircles[0]?.invite_code
+  const apiURL = new URL(apiClient.getApiURL(), window.location.origin)
+  const inviteOrigin =
+    apiURL.hostname === 'api.donetick.com'
+      ? 'https://app.donetick.com'
+      : `${apiURL.origin}${apiURL.pathname.replace(/\/api\/v1\/?$/, '')}`
+  const inviteLink = inviteCode
+    ? `${inviteOrigin.replace(/\/$/, '')}/circle/join?code=${encodeURIComponent(inviteCode)}`
+    : ''
+
+  const shareInvite = async () => {
+    const circleName = userCircles[0]?.name || t('circleSettings.myCircle')
+
+    try {
+      await Share.share({
+        title: t('circleSettings.shareTitle', { name: circleName }),
+        text: t('circleSettings.shareText', { name: circleName }),
+        url: inviteLink,
+        dialogTitle: t('circleSettings.shareDialogTitle'),
+      })
+    } catch (error) {
+      if (error?.message?.toLowerCase().includes('cancel')) return
+      await navigator.clipboard.writeText(inviteLink)
+      showNotification({
+        type: 'success',
+        message: t('circleSettings.linkCopied'),
+      })
+    }
+  }
+
   if (!userProfile) {
     return <LoadingComponent />
   }
 
   return (
-    <SettingsLayout title='Circle Settings'>
+    <SettingsLayout title={t('circleSettings.title')}>
       <div className='grid gap-4'>
         <Typography level='body-md'>
-          Your account is automatically connected to a Circle when you create or
-          join one. Easily invite friends by sharing the unique Circle code or
-          link below. You'll receive a notification below when someone requests
-          to join your Circle.
+          {t('circleSettings.description')}
         </Typography>
-        <Typography level='title-sm' mb={-1}>
-          {userCircles[0]?.userRole === 'member'
-            ? `You part of ${userCircles[0]?.name} `
-            : `You circle code is:`}
-
+        <Box>
+          <Typography level='title-sm' sx={{ mb: 1 }}>
+            {userCircles[0]?.userRole === 'member'
+              ? t('circleSettings.memberOf', { name: userCircles[0]?.name })
+              : t('circleSettings.yourCircleCode')}
+          </Typography>
           <Input
-            value={userCircles[0]?.invite_code}
+            value={inviteCode}
             disabled
             size='lg'
             sx={{
-              width: '220px',
+              width: { xs: '100%', sm: '220px' },
               mb: 1,
             }}
           />
-          <Button
-            variant='soft'
-            onClick={() => {
-              navigator.clipboard.writeText(userCircles[0]?.invite_code)
-              showNotification({
-                type: 'success',
-                message: 'Code copied to clipboard',
-              })
+          <Box
+            sx={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              gap: 1,
             }}
           >
-            Copy Code
-          </Button>
-          <Button
-            variant='soft'
-            sx={{ ml: 1 }}
-            onClick={() => {
-              navigator.clipboard.writeText(
-                window.location.protocol +
-                  '//' +
-                  window.location.host +
-                  `/circle/join?code=${userCircles[0]?.invite_code}`,
-              )
-              showNotification({
-                type: 'success',
-                message: 'Link copied to clipboard',
-              })
-            }}
-          >
-            Copy Link
-          </Button>
-          {userCircles.length > 0 && userCircles[0]?.userRole === 'member' && (
             <Button
-              color='danger'
-              variant='outlined'
-              sx={{ ml: 1 }}
+              variant='soft'
+              startDecorator={<CopyAll />}
               onClick={() => {
-                showConfirmation(
-                  'Are you sure you want to leave your circle?',
-                  'Leave Circle',
-                  () => {
-                    LeaveCircle(userCircles[0]?.id).then(resp => {
-                      if (resp.ok) {
-                        showNotification({
-                          type: 'success',
-                          message: 'Left circle successfully',
-                        })
-                      } else {
-                        showNotification({
-                          type: 'error',
-                          message: 'Failed to leave circle',
-                        })
-                      }
-                    })
-                  },
-                  'Leave',
-                  'Cancel',
-                  'danger',
-                )
+                navigator.clipboard.writeText(userCircles[0]?.invite_code)
+                showNotification({
+                  type: 'success',
+                  message: t('circleSettings.codeCopied'),
+                })
               }}
             >
-              Leave Circle
+              {t('circleSettings.copyCode')}
             </Button>
-          )}
-        </Typography>
+            <Button
+              variant='soft'
+              disabled={!inviteLink}
+              startDecorator={<IosShare />}
+              onClick={shareInvite}
+            >
+              {t('circleSettings.shareInvite')}
+            </Button>
+            {userCircles.length > 0 &&
+              userCircles[0]?.userRole === 'member' && (
+                <Button
+                  color='danger'
+                  variant='outlined'
+                  onClick={() => {
+                    showConfirmation(
+                      t('circleSettings.leaveConfirmMessage'),
+                      t('circleSettings.leaveConfirmTitle'),
+                      () => {
+                        LeaveCircle(userCircles[0]?.id).then(resp => {
+                          if (resp.ok) {
+                            showNotification({
+                              type: 'success',
+                              message: t('circleSettings.leftCircle'),
+                            })
+                          } else {
+                            showNotification({
+                              type: 'error',
+                              message: t('circleSettings.leaveFailed'),
+                            })
+                          }
+                        })
+                      },
+                      t('circleSettings.leaveConfirmButton'),
+                      t('common.cancel'),
+                      'danger',
+                    )
+                  }}
+                >
+                  {t('circleSettings.leave')}
+                </Button>
+              )}
+          </Box>
+        </Box>
 
-        <Typography level='title-md'>Circle Members</Typography>
+        <Typography level='title-md'>
+          {t('circleSettings.circleMembers')}
+        </Typography>
         {circleMembers.map(member => (
           <Card key={member.id} className='p-4'>
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -215,20 +273,27 @@ const CircleSettings = () => {
                 <Typography level='body-md'>
                   {member.displayName.charAt(0).toUpperCase() +
                     member.displayName.slice(1)}
-                  {member.userId === userProfile.id ? '(You)' : ''}{' '}
+                  {member.userId === userProfile.id
+                    ? t('circleSettings.you')
+                    : ''}{' '}
                   <Chip>
                     {' '}
-                    {member.isActive ? member.role : 'Pending Approval'}
+                    {member.isActive
+                      ? roleLabel(member.role)
+                      : t('circleSettings.pendingApproval')}
                   </Chip>
                 </Typography>
                 {member.isActive ? (
                   <Typography level='body-sm'>
-                    Joined on {fmt.date(member.createdAt)}
+                    {t('circleSettings.joinedOn', {
+                      date: fmt.date(member.createdAt),
+                    })}
                   </Typography>
                 ) : (
                   <Typography level='body-sm' color='danger'>
-                    Request to join{' '}
-                    {fmt.date(member.updatedAt)}
+                    {t('circleSettings.requestedToJoin', {
+                      date: fmt.date(member.updatedAt),
+                    })}
                   </Typography>
                 )}
               </Box>
@@ -240,10 +305,7 @@ const CircleSettings = () => {
                     sx={{ mr: 1 }}
                     value={member.role}
                     renderValue={() => (
-                      <Typography>
-                        {member.role.charAt(0).toUpperCase() +
-                          member.role.slice(1)}
-                      </Typography>
+                      <Typography>{roleLabel(member.role)}</Typography>
                     )}
                     onChange={(e, value) => {
                       UpdateMemberRole(member.userId, value).then(resp => {
@@ -258,27 +320,13 @@ const CircleSettings = () => {
                         } else {
                           showNotification({
                             type: 'error',
-                            message: 'Failed to update role',
+                            message: t('circleSettings.roleUpdateFailed'),
                           })
                         }
                       })
                     }}
                   >
-                    {[
-                      {
-                        value: 'member',
-                        description: 'Just a regular member of the circle',
-                      },
-                      {
-                        value: 'manager',
-                        description:
-                          'Can impersonate users and perform actions on their behalf',
-                      },
-                      {
-                        value: 'admin',
-                        description: 'Full access to the circle',
-                      },
-                    ].map((option, index) => (
+                    {roleOptions.map((option, index) => (
                       <Option value={option.value} key={index}>
                         <Box
                           sx={{
@@ -294,8 +342,7 @@ const CircleSettings = () => {
                             level='title-sm'
                             sx={{ mb: 0, mt: 0, lineHeight: 1.1 }}
                           >
-                            {option.value.charAt(0).toUpperCase() +
-                              option.value.slice(1)}
+                            {option.label}
                           </Typography>
                           <Typography
                             level='body-sm'
@@ -317,8 +364,10 @@ const CircleSettings = () => {
                       size='sm'
                       onClick={() => {
                         showConfirmation(
-                          `Are you sure you want to remove ${member.displayName} from your circle?`,
-                          'Remove Member',
+                          t('circleSettings.removeMemberMessage', {
+                            name: member.displayName,
+                          }),
+                          t('circleSettings.removeMemberTitle'),
                           () => {
                             DeleteCircleMember(
                               member.circleId,
@@ -327,7 +376,7 @@ const CircleSettings = () => {
                               if (resp.ok) {
                                 showNotification({
                                   type: 'success',
-                                  message: 'Removed member successfully',
+                                  message: t('circleSettings.memberRemoved'),
                                 })
                                 queryClient.invalidateQueries(['circleMembers'])
                                 queryClient.invalidateQueries(['userCircle'])
@@ -341,8 +390,8 @@ const CircleSettings = () => {
                               }
                             })
                           },
-                          'Remove',
-                          'Cancel',
+                          t('common.remove'),
+                          t('common.cancel'),
                           'danger',
                         )
                       }}
@@ -363,11 +412,15 @@ const CircleSettings = () => {
             mb: 1,
           }}
         >
-          <Typography level='title-md'>Circle Member Requests</Typography>
+          <Typography level='title-md'>
+            {t('circleSettings.circleMemberRequests')}
+          </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {lastRefresh && (
               <Typography level='body-sm' color='neutral'>
-                Last updated: {fmt.dateTime(lastRefresh)}
+                {t('circleSettings.lastUpdated', {
+                  time: fmt.dateTime(lastRefresh),
+                })}
               </Typography>
             )}
             <Button
@@ -379,7 +432,9 @@ const CircleSettings = () => {
                 isRefreshing ? <CircularProgress size='sm' /> : <Refresh />
               }
             >
-              {isRefreshing ? 'Refreshing...' : 'Refresh'}
+              {isRefreshing
+                ? t('circleSettings.refreshing')
+                : t('common.refresh')}
             </Button>
           </Box>
         </Box>
@@ -387,21 +442,24 @@ const CircleSettings = () => {
         {circleMemberRequests.map(request => (
           <Card key={request.id} className='p-4'>
             <Typography level='body-md'>
-              {request.displayName} wants to join your circle.
+              {t('circleSettings.wantsToJoin', { name: request.displayName })}
             </Typography>
             <Button
               variant='soft'
               color='success'
               onClick={() => {
                 showConfirmation(
-                  `Are you sure you want to accept ${request.displayName} (username: ${request.username}) to join your circle?`,
-                  'Accept Member Request',
+                  t('circleSettings.acceptRequestMessage', {
+                    name: request.displayName,
+                    username: request.username,
+                  }),
+                  t('circleSettings.acceptRequestTitle'),
                   () => {
                     AcceptCircleMemberRequest(request.id).then(resp => {
                       if (resp.ok) {
                         showNotification({
                           type: 'success',
-                          message: 'Accepted request successfully',
+                          message: t('circleSettings.requestAccepted'),
                         })
                         queryClient.invalidateQueries(['circleMembers'])
                         queryClient.invalidateQueries(['circleMemberRequests'])
@@ -416,26 +474,25 @@ const CircleSettings = () => {
                       }
                     })
                   },
-                  'Accept',
-                  'Cancel',
+                  t('circleSettings.accept'),
+                  t('common.cancel'),
                 )
               }}
             >
-              Accept
+              {t('circleSettings.accept')}
             </Button>
           </Card>
         ))}
-        <Divider> or </Divider>
+        <Divider> {t('circleSettings.or')} </Divider>
 
         <Typography level='body-md'>
-          if want to join someone else's Circle? Ask them for their unique
-          Circle code or join link. Enter the code below to join their Circle.
+          {t('circleSettings.joinOtherDescription')}
         </Typography>
 
         <Typography level='title-sm' mb={-1}>
-          Enter Circle code:
+          {t('circleSettings.enterCircleCode')}
           <Input
-            placeholder='Enter code'
+            placeholder={t('circleSettings.enterCodePlaceholder')}
             value={circleInviteCode}
             onChange={e => setCircleInviteCode(e.target.value)}
             size='lg'
@@ -451,20 +508,19 @@ const CircleSettings = () => {
                 if (resp.ok) {
                   showNotification({
                     type: 'success',
-                    message:
-                      'Joined circle successfully, wait for the circle owner to accept your request.',
+                    message: t('circleSettings.joinedPending'),
                   })
                   setTimeout(() => navigate('/'), 3000)
                 } else {
                   if (resp.status === 409) {
                     showNotification({
                       type: 'error',
-                      message: 'You are already a member of this circle',
+                      message: t('circleSettings.alreadyMember'),
                     })
                   } else {
                     showNotification({
                       type: 'error',
-                      message: 'Failed to join circle',
+                      message: t('circleSettings.joinFailed'),
                     })
                   }
                   setTimeout(() => navigate('/'), 3000)
@@ -472,7 +528,7 @@ const CircleSettings = () => {
               })
             }}
           >
-            Join Circle
+            {t('circleSettings.joinCircle')}
           </Button>
         </Typography>
       </div>

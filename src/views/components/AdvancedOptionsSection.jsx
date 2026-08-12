@@ -90,7 +90,6 @@ export const AdvancedOptionsTrigger = ({
         <Typography
           level='body-sm'
           sx={{
-            color: 'inherit',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',

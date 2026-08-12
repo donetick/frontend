@@ -1,8 +1,15 @@
+import createCache from '@emotion/cache'
+import { CacheProvider } from '@emotion/react'
 import { CssBaseline } from '@mui/joy'
 import { CssVarsProvider, extendTheme } from '@mui/joy/styles'
 import PropType from 'prop-types'
+import { useMemo } from 'react'
+import { prefixer } from 'stylis'
+import rtlPlugin from 'stylis-plugin-rtl'
 
 import { COLORS, THEME_BACKGROUND } from '@/constants/theme'
+
+import { useLocalization } from './LocalizationContext'
 
 const primaryColor = 'cyan'
 const shades = [
@@ -24,7 +31,7 @@ const primaryPalette = getPalette(primaryColor)
 const CONTROL_RADIUS = '12px'
 const ICON_BUTTON_RADIUS = '10px'
 
-const theme = extendTheme({
+const themeConfig = {
   radius: {
     xs: '6px',
     sm: '8px',
@@ -140,20 +147,93 @@ const theme = extendTheme({
     },
     JoyButtonGroup: {
       styleOverrides: {
-        root: {
+        root: ({ ownerState, theme }) => ({
           '--ButtonGroup-radius': CONTROL_RADIUS,
-        },
+          ...(theme.direction === 'rtl' && buttonGroupRtlGeometry(ownerState)),
+        }),
+      },
+    },
+    // ToggleButtonGroup is styled(StyledButtonGroup) under its own slot name, so
+    // it inherits the same geometry — and the same RTL problem — but not the
+    // JoyButtonGroup override. Its radius is left at Joy's default on purpose;
+    // only the direction-sensitive geometry needs correcting.
+    JoyToggleButtonGroup: {
+      styleOverrides: {
+        root: ({ ownerState, theme }) =>
+          theme.direction === 'rtl' ? buttonGroupRtlGeometry(ownerState) : {},
       },
     },
   },
-})
+}
 
-const ThemeContext = ({ children }) => (
-  <CssVarsProvider theme={theme}>
-    <CssBaseline />
-    {children}
-  </CssVarsProvider>
-)
+// Joy packs a ButtonGroup's direction-sensitive geometry into CSS custom
+// properties: --Button-radius as a four-corner shorthand, --Button-margin as the
+// negative overlap that collapses the seam between siblings. stylis-plugin-rtl
+// mirrors real properties only — it cannot know what a custom property will end
+// up feeding — so those two survive into RTL still in LTR order, while the
+// separator borders declared alongside them *do* flip. The result is rounded
+// corners on the wrong ends and the overlap pulling the wrong way. Re-mirror
+// them here. Vertical groups have no horizontal geometry, so they are left be.
+const GROUP_RADIUS = 'var(--ButtonGroup-radius)'
+const CHILD_RADIUS = 'var(--unstable_childRadius)'
+const OVERLAP = 'calc(var(--ButtonGroup-separatorSize) * -1)'
+
+// Corners read clockwise from top-left. [data-first-child] is the DOM-first
+// button, which in RTL renders at the *right* end of the group, so it is the one
+// that needs its right corners rounded — and vice versa for [data-last-child].
+const ROUNDED_RIGHT = `${CHILD_RADIUS} ${GROUP_RADIUS} ${GROUP_RADIUS} ${CHILD_RADIUS}`
+const ROUNDED_LEFT = `${GROUP_RADIUS} ${CHILD_RADIUS} ${CHILD_RADIUS} ${GROUP_RADIUS}`
+
+const buttonGroupRtlGeometry = ownerState => {
+  if (ownerState.orientation === 'vertical') return {}
+  return {
+    '& > [data-first-child]': {
+      '--Button-radius': ROUNDED_RIGHT,
+      '--IconButton-radius': ROUNDED_RIGHT,
+    },
+    '& > [data-last-child]': {
+      '--Button-radius': ROUNDED_LEFT,
+      '--IconButton-radius': ROUNDED_LEFT,
+    },
+    // Each non-first button overlaps the sibling to its right in RTL.
+    '& > :not([data-first-child]):not(:only-child)': {
+      '--Button-margin': `0 ${OVERLAP} 0 0`,
+      '--IconButton-margin': `0 ${OVERLAP} 0 0`,
+    },
+  }
+}
+
+// One theme and one emotion cache per direction, built once and reused. The RTL
+// cache runs every rule through stylis-plugin-rtl, which mirrors the physical
+// properties (margin-left, left, text-align, translateX, …) that `sx` emits, so
+// components written for LTR lay out correctly without per-component overrides.
+const byDirection = {
+  ltr: {
+    theme: extendTheme({ ...themeConfig, direction: 'ltr' }),
+    cache: createCache({ key: 'dt', stylisPlugins: [prefixer] }),
+  },
+  rtl: {
+    theme: extendTheme({ ...themeConfig, direction: 'rtl' }),
+    cache: createCache({ key: 'dt-rtl', stylisPlugins: [prefixer, rtlPlugin] }),
+  },
+}
+
+const ThemeContext = ({ children }) => {
+  const { isRTL } = useLocalization()
+  const { cache, theme } = useMemo(
+    () => byDirection[isRTL ? 'rtl' : 'ltr'],
+    [isRTL],
+  )
+
+  return (
+    <CacheProvider value={cache}>
+      <CssVarsProvider theme={theme}>
+        <CssBaseline />
+        {children}
+      </CssVarsProvider>
+    </CacheProvider>
+  )
+}
 
 ThemeContext.propTypes = {
   children: PropType.node,

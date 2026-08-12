@@ -89,17 +89,14 @@ const SmartTaskTitleInput = ({
     }
   }, [])
   const handleSuggestionChange = text => {
-    // if the last word start with '@' or '#' or 'P':
-    const lastWord = text.split(' ').pop()
-    if (
-      lastWord.startsWith('@') ||
-      lastWord.startsWith('#') ||
-      lastWord.startsWith('!')
-    ) {
+    // show the menu when the last word starts with a configured trigger
+    // character (e.g. '@', '#', '!', '*')
+    const lastWord = text.split(/\s+/).pop()
+    if (lastWord && suggestions?.[lastWord[0]]) {
       setSuggestionTrigger(lastWord[0])
       // last word without the first character:
       setLastWord(lastWord.slice(1))
-
+      setSelectedSuggestionIndex(0)
       setShowSuggestions(true)
     } else {
       setShowSuggestions(false)
@@ -121,6 +118,7 @@ const SmartTaskTitleInput = ({
 
     const newCursorPosition =
       cursorPosition - lastWord.length + suggestionValue.length + 1
+    setCursorPosition(newCursorPosition)
     titleInputRef.current.setSelectionRange(
       newCursorPosition,
       newCursorPosition,
@@ -376,18 +374,10 @@ const SmartTaskTitleInput = ({
             const suggestionValue = suggestions[suggestionTrigger].display
               ? suggestion[suggestions[suggestionTrigger].display]
               : suggestion
-            const newValue = `${value.slice(0, cursorPosition)}${suggestionValue}${value.slice(cursorPosition)}`
-
-            onChange(newValue)
+            // Same insertion path as keyboard selection: replace the partial
+            // word typed after the trigger instead of inserting alongside it
             titleInputRef?.current?.focus()
-
-            setCursorPosition(cursorPosition + suggestion.length)
-            titleInputRef.current.value = newValue
-            titleInputRef.current.setSelectionRange(
-              cursorPosition + suggestionValue.length,
-              cursorPosition + suggestionValue.length,
-            )
-            setShowSuggestions(false)
+            selectSuggestionText(suggestionValue)
           }}
           onCreateSuggestion={name => {
             selectSuggestionText(name)

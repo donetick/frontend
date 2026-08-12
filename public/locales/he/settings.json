@@ -1,0 +1,495 @@
+{
+  "title": "הגדרות",
+  "common": {
+    "save": "שמור",
+    "cancel": "ביטול",
+    "confirm": "אישור",
+    "remove": "הסרה",
+    "delete": "מחיקה",
+    "refresh": "רענון",
+    "loading": "טוען...",
+    "on": "מופעל",
+    "off": "מושבת",
+    "error": "שגיאה",
+    "success": "הצלחה",
+    "plusFeature": "תכונת Plus",
+    "earlyAccess": "גישה מוקדמת"
+  },
+  "overview": {
+    "title": "הגדרות",
+    "subtitle": "התאימו את חוויית השימוש שלכם ונהלו את העדפות החשבון",
+    "upgrade": {
+      "title": "שדרוג ל-Plus",
+      "description": "פתחו תכונות מתקדמות לשיפור הפרודוקטיביות שלכם",
+      "button": "שדרוג עכשיו",
+      "features": {
+        "richText": "תיאורים עם עיצוב טקסט עשיר",
+        "notifications": "התראות על משימות",
+        "apiIntegrations": "אינטגרציות API",
+        "advancedAutomation": "אוטומציה מתקדמת"
+      }
+    },
+    "sections": {
+      "profile": {
+        "title": "הגדרות פרופיל",
+        "description": "עדכנו את פרטי הפרופיל, תמונת הפרופיל, שם התצוגה והעדפות אזור הזמן."
+      },
+      "circle": {
+        "title": "הגדרות מעגל",
+        "description": "נהלו את המעגל, הזמינו חברים וטפלו בבקשות להצטרפות."
+      },
+      "account": {
+        "title": "הגדרות חשבון",
+        "description": "נהלו את המינוי, שנו את הסיסמה ואפשרויות מחיקת החשבון."
+      },
+      "subaccounts": {
+        "title": "חשבונות מנוהלים",
+        "description": "צרו ונהלו חשבונות מנוהלים שיכולים להתחבר ולהשלים משימות שהוקצו להם."
+      },
+      "notifications": {
+        "title": "התראות",
+        "description": "הגדירו התראות Push, התראות בדוא״ל ויעדי התראות עבור משימות."
+      },
+      "mfa": {
+        "title": "אימות רב-שלבי",
+        "description": "הוסיפו שכבת אבטחה נוספת באמצעות אימות רב-שלבי עם אפליקציית מאמת."
+      },
+      "apitokens": {
+        "title": "אסימוני API",
+        "description": "צרו ונהלו אסימוני גישה עבור אינטגרציות של צד שלישי וגישה ל-API."
+      },
+      "storage": {
+        "title": "הגדרות אחסון",
+        "description": "גבו ושחזרו את הנתונים שלכם, ונהלו את האחסון המקומי והעדפות הסנכרון."
+      },
+      "sidepanel": {
+        "title": "התאמת סרגל הצד",
+        "description": "התאימו את הפריסה ואת הנראות של הכרטיסים בסרגל הצד."
+      },
+      "theme": {
+        "title": "העדפות ערכת נושא",
+        "description": "בחרו את ערכת הנושא המועדפת עליכם והגדירו מצב בהיר או כהה."
+      },
+      "localization": {
+        "title": "הגדרות אזוריות",
+        "description": "התאימו את השפה, תבנית התאריך, תבנית השעה וההעדפות האזוריות."
+      },
+      "advanced": {
+        "title": "הגדרות מתקדמות",
+        "description": "הגדירו Webhooks, עדכונים בזמן אמת ותכונות מתקדמות נוספות לשיפור הפרודוקטיביות."
+      },
+      "developer": {
+        "title": "הגדרות מפתחים",
+        "description": "הציגו מידע טכני על אסימוני אימות, חיבורי SSE ונתוני ניפוי שגיאות."
+      },
+      "feedback": {
+        "title": "שליחת משוב",
+        "description": "ספרו לנו כיצד Donetick עובד עבורכם או בקשו תכונה חדשה."
+      },
+      "bugReport": {
+        "title": "דיווח על באג",
+        "description": "משהו לא עובד כראוי? שלחו לנו את הפרטים יחד עם מידע טכני שיעזור לנו לאתר את הבעיה."
+      }
+    }
+  },
+  "profile": {
+    "title": "הגדרות פרופיל",
+    "description": "עדכנו את שם התצוגה ואת תמונת הפרופיל.",
+    "photoUpdated": "התמונה עודכנה",
+    "photoUpdatedMessage": "תמונת הפרופיל עודכנה בהצלחה!",
+    "uploadFailed": "ההעלאה נכשלה",
+    "uploadFailedMessage": "לא ניתן להעלות את התמונה. נסו שוב.",
+    "profileUpdated": "הפרופיל עודכן",
+    "profileUpdatedMessage": "פרטי הפרופיל נשמרו בהצלחה!",
+    "updateFailed": "העדכון נכשל",
+    "updateFailedMessage": "לא ניתן לעדכן את הפרופיל. בדקו את החיבור ונסו שוב.",
+    "changePhoto": "שינוי תמונה",
+    "editPhoto": "עריכת תמונת פרופיל",
+    "displayName": "שם תצוגה",
+    "displayNamePlaceholder": "הזינו את שם התצוגה שלכם",
+    "timezone": "אזור זמן",
+    "timezonePlaceholder": "בחרו את אזור הזמן שלכם",
+    "save": "שמור",
+    "cancel": "ביטול"
+  },
+  "circleSettings": {
+    "title": "הגדרות מעגל",
+    "description": "החשבון שלכם מחובר אוטומטית למעגל כשאתם יוצרים מעגל או מצטרפים אליו. תוכלו להזמין בקלות חברים על ידי שיתוף קוד המעגל הייחודי או הקישור שלמטה. תקבלו כאן התראה כשמישהו יבקש להצטרף למעגל שלכם.",
+    "memberOf": "אתם חלק מ-{{name}}",
+    "yourCircleCode": "קוד המעגל שלכם:",
+    "copyCode": "העתקת קוד",
+    "shareInvite": "שיתוף הזמנה",
+    "codeCopied": "הקוד הועתק ללוח",
+    "linkCopied": "קישור ההזמנה הועתק ללוח",
+    "myCircle": "המעגל שלי",
+    "shareTitle": "הצטרפו ל-{{name}} ב-Donetick",
+    "shareText": "אני רוצה להזמין אתכם להצטרף ל-{{name}} ב-Donetick.",
+    "shareDialogTitle": "שיתוף הזמנה למעגל",
+    "leave": "עזיבת המעגל",
+    "leaveConfirmTitle": "עזיבת המעגל",
+    "leaveConfirmMessage": "האם אתם בטוחים שברצונכם לעזוב את המעגל?",
+    "leaveConfirmButton": "עזיבה",
+    "leftCircle": "עזבתם את המעגל בהצלחה",
+    "leaveFailed": "עזיבת המעגל נכשלה",
+    "circleMembers": "חברי המעגל",
+    "you": "(אתם)",
+    "pendingApproval": "ממתין לאישור",
+    "joinedOn": "הצטרפות בתאריך {{date}}",
+    "requestedToJoin": "בקשת הצטרפות בתאריך {{date}}",
+    "roles": {
+      "member": "חבר",
+      "memberDescription": "חבר רגיל במעגל",
+      "manager": "מנהל",
+      "managerDescription": "יכול לפעול בשם משתמשים אחרים ולבצע פעולות מטעמם",
+      "admin": "מנהל מערכת",
+      "adminDescription": "גישה מלאה למעגל"
+    },
+    "roleUpdateFailed": "עדכון התפקיד נכשל",
+    "removeMemberTitle": "הסרת חבר",
+    "removeMemberMessage": "האם אתם בטוחים שברצונכם להסיר את {{name}} מהמעגל?",
+    "memberRemoved": "החבר הוסר בהצלחה",
+    "circleMemberRequests": "בקשות הצטרפות למעגל",
+    "lastUpdated": "עודכן לאחרונה: {{time}}",
+    "refreshing": "מרענן...",
+    "refreshFailed": "רענון בקשות החברים נכשל",
+    "wantsToJoin": "{{name}} רוצה להצטרף למעגל שלכם.",
+    "accept": "קבלה",
+    "acceptRequestTitle": "אישור בקשת חבר",
+    "acceptRequestMessage": "האם אתם בטוחים שברצונכם לאשר את {{name}} (שם משתמש: {{username}}) להצטרף למעגל?",
+    "requestAccepted": "הבקשה אושרה בהצלחה",
+    "or": "או",
+    "joinOtherDescription": "רוצים להצטרף למעגל של מישהו אחר? בקשו ממנו את קוד המעגל הייחודי או את קישור ההצטרפות. הזינו את הקוד למטה כדי להצטרף למעגל.",
+    "enterCircleCode": "הזינו את קוד המעגל:",
+    "enterCodePlaceholder": "הזינו קוד",
+    "joinCircle": "הצטרפות למעגל",
+    "joinedPending": "הצטרפתם למעגל בהצלחה. המתינו לאישור של בעל המעגל.",
+    "alreadyMember": "אתם כבר חברים במעגל הזה",
+    "joinFailed": "ההצטרפות למעגל נכשלה"
+  },
+  "accountSettings": {
+    "title": "הגדרות חשבון",
+    "description": "שנו את הגדרות החשבון, או עדכנו את הסיסמה שלכם",
+    "accountType": "סוג חשבון: {{type}}",
+    "free": "חינמי",
+    "plus": "Plus",
+    "plusUntil": "Plus (עד {{date}})",
+    "activeDescription": "אתם מנויים כרגע לתוכנית Plus. המינוי שלכם יתחדש בתאריך {{date}}.",
+    "cancelledDescription": "ביטלתם את המינוי. החשבון שלכם יעבור לתוכנית Free בתאריך {{date}}.",
+    "freeDescription": "אתם משתמשים כרגע בתוכנית Free. שדרגו ל-Plus כדי לפתוח תכונות נוספות.",
+    "upgrade": "שדרוג",
+    "cancel": "ביטול",
+    "password": "סיסמה:",
+    "changePassword": "שינוי סיסמה",
+    "passwordChanged": "הסיסמה שונתה בהצלחה",
+    "passwordChangeFailed": "שינוי הסיסמה נכשל",
+    "dangerZone": "אזור מסוכן",
+    "dangerZoneDescription": "לאחר מחיקת החשבון לא ניתן לבטל את הפעולה. ודאו שאתם בטוחים לפני שתמשיכו.",
+    "deleteAccount": "מחיקת חשבון",
+    "accountDeleted": "החשבון נמחק בהצלחה",
+    "subscriptionCancelled": "המינוי בוטל",
+    "subscriptionCancelFailed": "ביטול המינוי נכשל",
+    "purchase": {
+      "success": "הרכישה בוצעה בהצלחה! הפעילו מחדש את האפליקציה כדי לגשת לתכונות Plus.",
+      "storeConnection": "בעיה בחיבור לחנות. בדקו את הרשת ונסו שוב.",
+      "notAllowed": "רכישות אינן מותרות במכשיר זה. בדקו את הגבלות המכשיר.",
+      "unavailable": "המינוי הזה אינו זמין. נסו שוב מאוחר יותר.",
+      "alreadyProcessed": "הרכישה הזו כבר טופלה. אם לדעתכם מדובר בשגיאה, פנו לתמיכה.",
+      "receiptMissing": "קבלת הרכישה חסרה. נסו לבצע את הרכישה שוב.",
+      "networkError": "שגיאת רשת. בדקו את החיבור ונסו שוב.",
+      "invalidReceipt": "קבלת רכישה לא תקינה. אם הבעיה נמשכת, פנו לתמיכה.",
+      "pending": "התשלום ממתין לאישור. תקבלו גישה לאחר האישור.",
+      "failed": "הרכישה נכשלה: {{error}}. נסו שוב או פנו לתמיכה.",
+      "unknownError": "שגיאה לא ידועה"
+    }
+  },
+  "subaccounts": {
+    "title": "חשבונות מנוהלים",
+    "description": "נהלו חשבונות מנוהלים. משתמשים בחשבונות מנוהלים יכולים להתחבר ולהשלים משימות שהוקצו להם.",
+    "notParentTitle": "ניהול חשבונות מנוהלים",
+    "notParentMessage": "רק משתמשים ראשיים יכולים לנהל חשבונות מנוהלים.",
+    "freePlanNotice": "בתוכנית Free ניתן ליצור חשבון מנוהל אחד בלבד. שדרגו ל-Plus כדי ליצור עד 5 חשבונות מנוהלים.",
+    "count": "חשבונות מנוהלים ({{count}})",
+    "add": "הוספת חשבון מנוהל",
+    "loading": "טוען חשבונות מנוהלים...",
+    "emptyTitle": "אין חשבונות מנוהלים",
+    "emptyDescription": "צרו חשבונות מנוהלים כדי שמשתמשים אחרים יוכלו להתחבר ולהשלים את המשימות שהוקצו להם.",
+    "addFirst": "הוספת החשבון המנוהל הראשון",
+    "username": "שם משתמש: {{username}}",
+    "created": "נוצר בתאריך: {{date}}",
+    "changePassword": "שינוי סיסמה",
+    "deleteAccount": "מחיקת חשבון",
+    "createdSuccess": "החשבון המנוהל \"{{name}}\" נוצר בהצלחה!",
+    "createFailed": "יצירת החשבון המנוהל נכשלה: {{error}}",
+    "createFailedGeneric": "יצירת החשבון המנוהל נכשלה",
+    "passwordUpdated": "הסיסמה של החשבון המנוהל עודכנה בהצלחה",
+    "passwordUpdateFailed": "עדכון הסיסמה נכשל: {{error}}",
+    "passwordUpdateFailedGeneric": "עדכון הסיסמה נכשל",
+    "deleteConfirmTitle": "מחיקת חשבון מנוהל",
+    "deleteConfirmMessage": "האם אתם בטוחים שברצונכם למחוק את החשבון המנוהל \"{{name}}\"? לא ניתן לבטל פעולה זו.",
+    "deleted": "החשבון המנוהל \"{{name}}\" נמחק בהצלחה",
+    "deleteFailed": "מחיקת החשבון המנוהל נכשלה: {{error}}",
+    "deleteFailedGeneric": "מחיקת החשבון המנוהל נכשלה",
+    "howItWorksTitle": "כיצד פועלים חשבונות מנוהלים",
+    "howItWorks1": "המשתמש הראשי יוצר חשבונות מנוהלים עבור משתמשים שצריכים אפשרות להתחבר, להשלים משימות ולאפס את הסיסמה שלהם.",
+    "howItWorks2": "משתמשים בחשבונות מנוהלים יכולים להתחבר באמצעות שם המשתמש והסיסמה שלהם.",
+    "howItWorks3": "משתמשים בחשבונות מנוהלים יכולים להשלים משימות, אך יש להם הרשאות ניהול מוגבלות.",
+    "howItWorks4": "חשבונות מנוהלים מתווספים אוטומטית למעגל שלכם."
+  },
+  "notifications": {
+    "title": "הגדרות התראות",
+    "deviceSection": "התראות במכשיר",
+    "deviceSectionDescription": "נהלו את ההתראות במכשיר שלכם",
+    "deviceLabel": "התראות במכשיר",
+    "deviceHelper": "קבלו התראה במכשיר כאשר מועד משימה מגיע",
+    "mobileOnly": "תכונה זו זמינה רק במכשירים ניידים",
+    "testNotification": "בדיקת התראה",
+    "testNotificationBody": "יש לכם משימה שמועד הביצוע שלה מתקרב",
+    "dueTitle": "התראה במועד המשימה",
+    "dueLabel": "התראה כאשר מגיע מועד המשימה",
+    "preDueTitle": "התראה לפני מועד המשימה",
+    "preDueLabel": "התראה מספר שעות לפני מועד המשימה",
+    "overdueTitle": "התראה על משימה באיחור",
+    "overdueLabel": "התראה כאשר המשימה באיחור",
+    "pushLabel": "התראות Push",
+    "pushHelper": "קבלו תזכורות, הודעות והקצאות משימות באמצעות התראות Push",
+    "registeredDevices": "מכשירים רשומים ({{count}}/5)",
+    "registeredDevicesDescription": "מכשירים הרשומים לקבלת התראות Push עבור החשבון שלכם",
+    "currentDevice": "המכשיר הנוכחי: {{platform}} {{model}}",
+    "currentDeviceNotRegistered": "המכשיר הזה אינו רשום לקבלת התראות Push",
+    "limitReached": "הגעתם למגבלה",
+    "registerDevice": "רישום מכשיר",
+    "unknownDevice": "מכשיר לא ידוע",
+    "deviceCreatedAt": "נוצר בתאריך: {{date}}",
+    "noDevices": "אין מכשירים הרשומים לקבלת התראות Push",
+    "customSection": "התראות מותאמות אישית",
+    "customSectionDescription": "קבלת התראות דרך פלטפורמות אחרות כמו Telegram או Pushover",
+    "customLabel": "התראה מותאמת אישית",
+    "customHelper": "קבלו התראות בפלטפורמה אחרת",
+    "targetNone": "ללא",
+    "targetTelegram": "Telegram",
+    "targetPushover": "Pushover",
+    "targetWebhooks": "Webhooks",
+    "telegramBotHelpBefore": "יש לשלוח הודעה לבוט כדי לאפשר קבלת התראות Telegram",
+    "telegramBotHelpAfter": "כדי להתחיל שיחה",
+    "clickHere": "לחצו כאן",
+    "chatId": "מזהה שיחה",
+    "chatIdPlaceholder": "מזהה משתמש / מזהה שיחה",
+    "telegramChatIdHelpBefore": "אם אינכם יודעים מהו מזהה השיחה שלכם, התחילו שיחה עם userinfobot והוא ישלח לכם את מזהה השיחה.",
+    "telegramChatIdHelpAfter": "כדי להתחיל שיחה עם userinfobot",
+    "userKey": "מפתח משתמש",
+    "userKeyPlaceholder": "מזהה משתמש",
+    "chatIdRequired": "נדרש מזהה שיחה",
+    "chatIdInvalid": "מזהה שיחה לא תקין",
+    "userKeyRequired": "נדרש מפתח משתמש",
+    "targetUpdated": "יעד ההתראות עודכן",
+    "targetUpdateFailed": "שגיאה בעדכון יעד ההתראות: {{error}}",
+    "deviceRegistered": "המכשיר נרשם בהצלחה לקבלת התראות Push.",
+    "deviceLimitTitle": "הגעתם למגבלת המכשירים",
+    "deviceLimitMessage": "הגעתם למספר המרבי של 5 מכשירים רשומים. הסירו מכשיר לפני רישום המכשיר הזה.",
+    "registrationFailedTitle": "הרישום נכשל",
+    "registrationFailedMessage": "רישום המכשיר האוטומטי נכשל. נסו שוב.",
+    "permissionRequiredTitle": "נדרשת הרשאה",
+    "permissionRequiredMessage": "נדרשת הרשאה לקבלת התראות Push כדי לרשום את המכשיר.",
+    "registrationInitiatedTitle": "הרישום התחיל",
+    "registrationInitiatedMessage": "רישום ההתראות התחיל. המכשיר יירשם באופן אוטומטי.",
+    "registerDeviceFailed": "רישום המכשיר נכשל. נסו שוב.",
+    "permissionDeniedTitle": "הרשאת ההתראות נדחתה",
+    "permissionDeniedMessage": "דחיתם את הרשאת ההתראות. תוכלו להפעיל אותה מאוחר יותר בהגדרות המכשיר.",
+    "pushPermissionDeniedTitle": "הרשאת התראות Push נדחתה",
+    "pushPermissionDeniedMessage": "התראות Push הושבתו. תוכלו להפעיל אותן בהגדרות המכשיר אם תרצו.",
+    "unregisterFailed": "ביטול רישום המכשיר נכשל"
+  },
+  "mfa": {
+    "title": "אימות רב-שלבי",
+    "description": "הוסיפו שכבת אבטחה נוספת לחשבון באמצעות אימות רב-שלבי (MFA). כאשר האפשרות מופעלת, תצטרכו להזין קוד אימות מאפליקציית המאמת בנוסף לסיסמה בעת הכניסה.",
+    "twoFactor": "אימות דו-שלבי",
+    "enabledSubtitle": "החשבון שלכם מוגן באמצעות אימות דו-שלבי",
+    "disabledSubtitle": "אבטחו את החשבון באמצעות אפליקציית מאמת",
+    "enable": "הפעלה",
+    "disable": "השבתה",
+    "enabledSuccess": "אימות MFA הופעל בהצלחה!",
+    "disabledSuccess": "אימות MFA הושבת בהצלחה!",
+    "errors": {
+      "qrGenerationFailed": "יצירת קוד ה-QR נכשלה",
+      "invalidResponse": "תגובה לא תקינה מהשרת. קוד ה-QR או הסוד חסרים.",
+      "notFound": "נקודת הקצה להגדרת MFA לא נמצאה. ייתכן שתכונה זו עדיין אינה זמינה.",
+      "unauthorized": "אין הרשאה. התחברו שוב.",
+      "serverError": "שגיאת שרת. נסו שוב מאוחר יותר.",
+      "setupFailed": "הגדרת MFA נכשלה ({{status}}). נסו שוב.",
+      "networkError": "שגיאת רשת. בדקו את החיבור ונסו שוב.",
+      "invalidCode": "קוד אימות לא תקין. נסו שוב.",
+      "confirmFailed": "אישור MFA נכשל. נסו שוב.",
+      "disableFailed": "השבתת MFA נכשלה. נסו שוב."
+    },
+    "setup": {
+      "title": "הגדרת אימות רב-שלבי",
+      "addedAccount": "הוספתי את החשבון",
+      "back": "חזרה",
+      "verifyAndEnable": "אימות והפעלה",
+      "savedBackupCodes": "שמרתי את קודי הגיבוי",
+      "step1Label": "שלב 1:",
+      "step1": "סרקו את קוד ה-QR שלמטה באמצעות אפליקציית המאמת שלכם (Google Authenticator, Authy וכו׳).",
+      "qrAlt": "קוד QR של MFA",
+      "qrFailed": "לא ניתן ליצור את קוד ה-QR. נסו שוב או השתמשו במפתח ההזנה הידנית שלמטה.",
+      "manualKey": "מפתח להזנה ידנית:",
+      "step2Label": "שלב 2:",
+      "step2": "הזינו את קוד האימות בן 6 הספרות מאפליקציית המאמת שלכם",
+      "codePlaceholder": "הזינו קוד בן 6 ספרות",
+      "successTitle": "MFA הופעל בהצלחה!",
+      "backupCodesTitle": "שמרו את קודי הגיבוי האלה במקום בטוח",
+      "backupCodesDescription": "תוכלו להשתמש בקודים האלה כדי לגשת לחשבון אם תאבדו את מכשיר המאמת. ניתן להשתמש בכל קוד פעם אחת בלבד."
+    },
+    "disableModal": {
+      "title": "השבתת אימות רב-שלבי",
+      "warning": "השבתת MFA תהפוך את החשבון שלכם לפחות מאובטח. האם אתם בטוחים שברצונכם להמשיך?",
+      "prompt": "הזינו קוד אימות מאפליקציית המאמת כדי לאשר:",
+      "confirm": "השבתת MFA"
+    },
+    "backupCodesModal": {
+      "title": "קודי גיבוי חדשים",
+      "warning": "קודי הגיבוי הקודמים שלכם אינם תקפים יותר. שמרו את הקודים החדשים במקום בטוח. ניתן להשתמש בכל קוד פעם אחת בלבד."
+    }
+  },
+  "apiTokens": {
+    "title": "אסימוני API",
+    "accessToken": "אסימון גישה",
+    "description": "צרו אסימון לשימוש ב-API כדי לעדכן דברים שמפעילים משימות או מטלות.",
+    "plusNotice": "אסימוני API אינם זמינים בתוכנית Basic. שדרגו ל-Plus כדי ליצור אסימוני API לצורך אינטגרציה עם מערכות חיצוניות ואוטומציה של המשימות שלכם.",
+    "showToken": "הצגת אסימון",
+    "hideToken": "הסתרת אסימון",
+    "removeTitle": "הסרת אסימון",
+    "removeMessage": "האם אתם בטוחים שברצונכם להסיר את {{name}}?",
+    "removedTitle": "הוסר",
+    "removedMessage": "אסימון ה-API הוסר",
+    "tokenCopied": "האסימון הועתק ללוח",
+    "generateNew": "יצירת אסימון חדש",
+    "nameModalTitle": "תנו שם לאסימון החדש כדי שתוכלו לזהות אותו בקלות.",
+    "generateToken": "יצירת אסימון"
+  },
+  "storage": {
+    "title": "הגדרות אחסון",
+    "serverTitle": "שימוש באחסון בשרת",
+    "serverDescription": "זהו שטח האחסון שבו משתמש החשבון שלכם בשרתים שלנו, למשל עבור קבצים, תמונות ונתונים שהעליתם.",
+    "usagePlaceholder": "-- MB בשימוש / -- MB בסך הכול (--)",
+    "usage": "{{used}} MB בשימוש / {{total}} MB בסך הכול ({{percent}}%)",
+    "basicPlanNotice": "אחסון בשרת אינו זמין בתוכנית Basic. שדרגו ל-Plus כדי לעקוב אחר השימוש באחסון בשרת.",
+    "localTitleApp": "אחסון מקומי ומטמון באפליקציה",
+    "localTitleBrowser": "אחסון מקומי ומטמון בדפדפן",
+    "localDescription": "אלה נתונים המאוחסנים באופן מקומי בדפדפן כדי לאפשר גישה מהירה יותר. ניקוי שלהם לא ישפיע על הנתונים שלכם בשרת, אך ייתכן שתנותקו מהחשבון.",
+    "clearLocal": "ניקוי כל האחסון והמטמון המקומיים",
+    "clearLocalTitle": "ניקוי כל האחסון המקומי",
+    "clearLocalMessage": "האם אתם בטוחים שברצונכם לנקות את האחסון והמטמון המקומיים? פעולה זו תסיר את כל הנתונים שלכם מהדפדפן ותדרוש התחברות מחדש.",
+    "clearAll": "ניקוי הכול",
+    "appPreferences": "העדפות האפליקציה",
+    "deviceOnly": "במכשיר בלבד",
+    "appPreferencesDescription": "אלה העדפות והגדרות שהאפליקציה שומרת באופן מקומי במכשיר שלכם. ניקוי שלהן יאפס את הגדרות האפליקציה ועלול לנתק אתכם מהחשבון, אך לא ישפיע על הנתונים שלכם בשרת.",
+    "clearPreferences": "ניקוי העדפות האפליקציה",
+    "clearPreferencesTitle": "ניקוי העדפות האפליקציה",
+    "clearPreferencesMessage": "האם אתם בטוחים שברצונכם לנקות את כל העדפות האפליקציה? פעולה זו תאפס את הגדרות האפליקציה ועלולה לדרוש התחברות מחדש."
+  },
+  "sidepanel": {
+    "title": "התאמת סרגל הצד",
+    "heading": "הגדרות סרגל הצד",
+    "description": "התאימו אילו כרטיסים יופיעו בסרגל הצד ואת הסדר שלהם. גררו ושחררו כדי לשנות את הסדר, או הפעילו וכבו את הנראות של כל כרטיס.",
+    "resetToDefaults": "איפוס לברירת המחדל",
+    "resetHelper": "פעולה זו תשחזר את הנראות והסדר של כל הכרטיסים לברירת המחדל.",
+    "cards": {
+      "welcome": {
+        "name": "החלפת משתמש",
+        "description": "מאפשרת למנהלים ולממונים לצפות במשימות כמשתמשים שונים"
+      },
+      "smartInsights": {
+        "name": "תובנות חכמות",
+        "description": "פעולות מהירות המבוססות על המשימות שלכם"
+      },
+      "assignees": {
+        "name": "משימות לפי אחראי",
+        "description": "קיבוץ משימות לפי האדם שאליו הן הוקצו"
+      },
+      "calendar": {
+        "name": "תצוגת לוח שנה",
+        "description": "הצגת משימות בפורמט של לוח שנה"
+      },
+      "activities": {
+        "name": "פעילות אחרונה",
+        "description": "הצגת השלמות משימות ופעילות אחרונה"
+      },
+      "weeklyGoals": {
+        "name": "יעדים שבועיים",
+        "description": "הצגת ההתקדמות השבועית ונתוני השלמת המשימות של המשפחה"
+      }
+    }
+  },
+  "theme": {
+    "title": "העדפות ערכת נושא",
+    "description": "בחרו כיצד האתר יוצג עבורכם. בחרו ערכת נושא אחת, או הסתנכרנו עם הגדרות המערכת כדי לעבור אוטומטית בין מצב יום ללילה.",
+    "themeMode": "מצב ערכת נושא",
+    "light": "בהיר",
+    "dark": "כהה",
+    "system": "מערכת"
+  },
+  "localization": {
+    "title": "הגדרות אזוריות",
+    "description": "התאמת השפה, תבנית התאריך וההעדפות האזוריות של החשבון.",
+    "language": "שפה",
+    "languageDescription": "בחירת השפה המועדפת",
+    "rtlNotice": "שפה זו משתמשת בכיוון טקסט מימין לשמאל (RTL)",
+    "dateFormat": "תבנית תאריך",
+    "dateFormatDescription": "בחירת אופן הצגת התאריכים ברחבי האפליקציה",
+    "timeFormat": "תבנית שעה",
+    "timeFormatDescription": "בחירת תבנית שעה של 12 או 24 שעות",
+    "preview": "תצוגה מקדימה: {{value}}",
+    "12hour": "12 שעות (AM/PM)",
+    "24hour": "24 שעות",
+    "firstDayOfWeek": "היום הראשון בשבוע",
+    "firstDayOfWeekDescription": "בחירת היום שבו מתחיל השבוע",
+    "sunday": "יום ראשון",
+    "monday": "יום שני",
+    "saturday": "שבת",
+    "formats": {
+      "mdy": "MM/DD/YYYY (ארה״ב)",
+      "dmy": "DD/MM/YYYY (אירופה)",
+      "ymd": "YYYY-MM-DD (ISO)",
+      "long": "תבנית ארוכה (לדוגמה, 1 בינואר 2024)",
+      "short": "תבנית קצרה (לדוגמה, 1 בינו׳ 2024)"
+    }
+  },
+  "advanced": {
+    "title": "הגדרות מתקדמות",
+    "description": "הגדירו תכונות מתקדמות כמו Webhooks ועדכונים בזמן אמת לשיפור הפרודוקטיביות.",
+    "offlineTitle": "תמיכה במצב לא מקוון",
+    "offlineDescription": "המשיכו להשתמש ב-Donetick גם ללא חיבור לאינטרנט במכשיר או בדפדפן הזה. השינויים שלכם יישמרו באופן מקומי ויסונכרנו כשתחזרו להיות מחוברים.",
+    "offlineToggle": "הפעלת מצב לא מקוון",
+    "offlineHelper": "כיבוי האפשרות הזו ימחק שינויים לא מסונכרנים ונתונים שנשמרו במצב לא מקוון מהמכשיר או מהדפדפן הזה.",
+    "offlineEnabled": "מצב לא מקוון הופעל עבור המכשיר או הדפדפן הזה",
+    "offlineDisabled": "מצב לא מקוון כובה והנתונים המקומיים נמחקו",
+    "offlineDisabledPartial": "מצב לא מקוון כובה, אך ייתכן שחלק מהנתונים המקומיים עדיין נשמרו",
+    "offlineDisableTitle": "כיבוי מצב לא מקוון",
+    "offlineDisableMessage": "כיבוי מצב לא מקוון ימחק שינויים לא מסונכרנים ונתונים שנשמרו במצב לא מקוון במכשיר או בדפדפן הזה. האם ברצונכם להמשיך?",
+    "offlineDisableConfirm": "כיבוי וניקוי הנתונים",
+    "webhookTitle": "אינטגרציית Webhook",
+    "webhookDescription": "Webhooks מאפשרים לשלוח התראות בזמן אמת לשירותים אחרים כאשר מתרחשים אירועים במעגל שלכם. הגדירו כתובת URL של Webhook כדי לקבל עדכונים בזמן אמת.",
+    "webhookPlusNotice": "התראות Webhook אינן זמינות בתוכנית Basic. שדרגו ל-Plus כדי לקבל עדכונים בזמן אמת באמצעות Webhooks.",
+    "webhookToggle": "הפעלת Webhook",
+    "webhookHelper": "הפעילו התראות Webhook עבור עדכוני משימות ופריטים.",
+    "webhookURL": "כתובת URL של Webhook",
+    "webhookUpdated": "כתובת ה-URL של ה-Webhook עודכנה בהצלחה",
+    "webhookUpdateFailed": "עדכון כתובת ה-URL של ה-Webhook נכשל",
+    "realtimeTitle": "עדכונים בזמן אמת",
+    "realtimeDescription": "הגדירו כיצד לקבל עדכונים בזמן אמת כאשר משימות ופעילויות משתנות במעגל שלכם.",
+    "realtime": {
+      "toggleLabel": "הפעלת עדכונים בזמן אמת",
+      "title": "עדכונים בזמן אמת",
+      "subtitle": "קבלו התראות מיידיות כאשר משימות מתעדכנות",
+      "statusLabel": "סטטוס:",
+      "basicPlan": "עדכונים בזמן אמת אינם זמינים בתוכנית Basic. שדרגו ל-Plus כדי לקבל התראות מיידיות כאשר משימות מתעדכנות.",
+      "disabled": "עדכונים בזמן אמת מושבתים. הפעילו אותם כדי לראות שינויים בזמן אמת כאשר אתם או חברים אחרים במעגל משלימים, מדלגים או משנים משימות.",
+      "connected": "עדכונים בזמן אמת פועלים. תראו שינויים בזמן אמת כאשר אתם או חברים אחרים במעגל משלימים, מדלגים או משנים משימות.",
+      "connecting": "מתחבר לעדכונים בזמן אמת...",
+      "errored": "עדכונים בזמן אמת מופעלים אך אינם פועלים: {{error}}",
+      "notConnected": "עדכונים בזמן אמת מופעלים אך אינם מחוברים כרגע.",
+      "basicPlanNotice": "עדכונים בזמן אמת אינם זמינים בתוכנית Basic. שדרגו ל-Plus כדי לקבל התראות מיידיות כאשר אתם או חברים אחרים במעגל משלימים, מדלגים או משנים משימות."
+    }
+  }
+}
+

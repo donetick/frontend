@@ -13,7 +13,12 @@ export const joinCirclePath = code =>
 
 export const setPendingInvite = code => {
   if (!code) return
-  localStorage.setItem(INVITE_KEY, code)
+
+  try {
+    localStorage.setItem(INVITE_KEY, code)
+  } catch {
+    // The redirect cookie still preserves the invite through authentication.
+  }
   // Every post-auth landing point (password login, OAuth callback, MFA) already
   // consumes `ca_redirect`, so reusing it is all the routing this needs.
   Cookies.set(REDIRECT_COOKIE, joinCirclePath(code), { expires: 1 })
@@ -31,10 +36,11 @@ export const clearPendingInvite = () => {
   try {
     localStorage.removeItem(INVITE_KEY)
   } catch {
-    // ignore
+    // Ignore unavailable storage during cleanup.
   }
+
   const redirect = Cookies.get(REDIRECT_COOKIE)
-  if (redirect && redirect.startsWith('/circle/join')) {
+  if (redirect?.startsWith('/circle/join')) {
     Cookies.remove(REDIRECT_COOKIE)
   }
 }

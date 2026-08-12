@@ -64,7 +64,11 @@
     "footer": {
       "navigate": "تنقل",
       "open": "فتح",
+      "results_zero": "لا توجد نتائج",
       "results_one": "نتيجة واحدة",
+      "results_two": "نتيجتان",
+      "results_few": "{{count}} نتائج",
+      "results_many": "{{count}} نتيجة",
       "results_other": "{{count}} نتيجة",
       "typeToSearch": "اكتب للبحث"
     }

@@ -171,7 +171,7 @@
     "description": "غيّر إعدادات حسابك أو نوع خطتك أو كلمة المرور",
     "accountType": "نوع الحساب: {{type}}",
     "free": "مجاني",
-    "plus": "بلس",
+    "plus": "Plus",
     "plusUntil": "Plus (حتى {{date}})",
     "activeDescription": "أنت مشترك حاليًا في خطة Plus. سيتجدد اشتراكك في {{date}}.",
     "cancelledDescription": "لقد ألغيت اشتراكك. سيتم خفض حسابك إلى الخطة المجانية في {{date}}.",

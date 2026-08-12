@@ -34,7 +34,7 @@ export const AuthField = ({ label, error, helper, children, ...formProps }) => (
 )
 
 export const AuthTextField = ({ label, error, helper, sx, ...inputProps }) => (
-  <AuthField label={label} error={error} helper={helper}>
+  <AuthField label={label} error={error} helper={helper} id={inputProps.id}>
     <Input size='lg' sx={{ ...authInputSx, ...sx }} {...inputProps} />
   </AuthField>
 )
@@ -49,7 +49,7 @@ export const AuthPasswordField = ({
   const [visible, setVisible] = useState(false)
 
   return (
-    <AuthField label={label} error={error} helper={helper}>
+    <AuthField label={label} error={error} helper={helper} id={inputProps.id}>
       <Input
         size='lg'
         type={visible ? 'text' : 'password'}
