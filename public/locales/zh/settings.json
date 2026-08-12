@@ -113,21 +113,21 @@
     "cancel": "取消"
   },
   "circleSettings": {
-    "title": "圈子设置",
-    "description": "当你创建或加入圈子时，账户会自动连接到该圈子。分享下方的专属圈子代码或链接即可轻松邀请好友。有人申请加入你的圈子时，下方会出现通知。",
+    "title": "Circle settings",
+    "description": "Your account is automatically connected to a Circle when you create or join one. Easily invite friends by sharing the unique Circle code or link below. You'll receive a notification below when someone requests to join your Circle. If you'd like to leave, simply hit the 'Leave Circle' button.",
     "memberOf": "你是 {{name}} 的成员",
     "yourCircleCode": "你的圈子代码是：",
     "copyCode": "复制代码",
     "shareInvite": "分享邀请",
-    "codeCopied": "代码已复制到剪贴板",
-    "linkCopied": "邀请链接已复制到剪贴板",
+    "codeCopied": "Circle code copied!",
+    "linkCopied": "Circle link copied!",
     "myCircle": "我的圈子",
     "shareTitle": "在 Donetick 加入 {{name}}",
     "shareText": "我想邀请你加入 Donetick 上的 {{name}}。",
     "shareDialogTitle": "分享圈子邀请",
     "leave": "退出圈子",
     "leaveConfirmTitle": "退出圈子",
-    "leaveConfirmMessage": "确定要退出你的圈子吗？",
+    "leaveConfirmMessage": "Are you sure you want to leave this circle?",
     "leaveConfirmButton": "退出",
     "leftCircle": "已成功退出圈子",
     "leaveFailed": "退出圈子失败",
@@ -161,7 +161,7 @@
     "joinOtherDescription": "想加入别人的圈子？向对方索取专属圈子代码或加入链接，然后在下方输入代码即可加入。",
     "enterCircleCode": "输入圈子代码：",
     "enterCodePlaceholder": "输入代码",
-    "joinCircle": "加入圈子",
+    "joinCircle": "Join a Circle",
     "joinedPending": "已成功加入圈子，请等待圈主接受你的请求。",
     "alreadyMember": "你已经是该圈子的成员",
     "joinFailed": "加入圈子失败"
@@ -178,7 +178,7 @@
     "freeDescription": "你当前使用的是免费套餐。升级到 Plus 可解锁更多功能。",
     "upgrade": "升级",
     "cancel": "取消订阅",
-    "password": "密码：",
+    "password": "Password",
     "changePassword": "修改密码",
     "passwordChanged": "密码修改成功",
     "passwordChangeFailed": "密码修改失败",
@@ -390,7 +390,7 @@
   "sidepanel": {
     "title": "侧边栏自定义",
     "heading": "侧边栏设置",
-    "description": "设置侧边栏显示哪些卡片以及它们的顺序。拖放可重新排序，也可切换每张卡片的显示状态。",
+    "description": "Customize the layout and visibility of cards in the sidepanel. This section is only available on large screen devices such as tablets and desktops.",
     "resetToDefaults": "恢复默认",
     "resetHelper": "这会将所有卡片的显示状态和顺序恢复为默认值。",
     "cards": {
@@ -421,7 +421,7 @@
     }
   },
   "theme": {
-    "title": "主题偏好",
+    "title": "Theme preferences",
     "description": "选择站点的外观。可以固定使用某个主题，也可以与系统同步，在日间和夜间主题之间自动切换。",
     "themeMode": "主题模式",
     "light": "浅色",
