@@ -214,7 +214,10 @@ export const useCreateChore = () => {
   }
 
   return useMutation({
-    mutationFn: async newTask => {
+    mutationFn: async rawTask => {
+      // `source` is analytics-only metadata (typed/voice/scan/clone) — never
+      // send it to the backend as part of the chore payload.
+      const { source, ...newTask } = rawTask
       if (isOfflineFeatureEnabled() && !networkManager.isOnline) {
         return queueOfflineCreate(newTask)
       }
@@ -236,6 +239,7 @@ export const useCreateChore = () => {
           has_recurrence: newTask.frequencyType !== 'once',
           recurrence_type: newTask.frequencyType || 'once',
           priority: typeof newTask.priority === 'number' ? newTask.priority : 0,
+          source: source || 'quick_add',
         })
         return { ...newTask, id: createdChore.res }
       } catch (error) {
@@ -297,6 +301,18 @@ export const useUpdateChore = () => {
               chore.id === updatedChore.id ? updatedChore : chore,
             ),
           }
+        })
+        track('chore_updated', {
+          has_due_date: Boolean(updatedChore.dueDate),
+          has_assignee: Boolean(updatedChore.assignedTo),
+          has_labels: Boolean(updatedChore.labelsV2?.length),
+          has_description: Boolean(updatedChore.description?.trim()),
+          has_recurrence: updatedChore.frequencyType !== 'once',
+          recurrence_type: updatedChore.frequencyType || 'once',
+          priority:
+            typeof updatedChore.priority === 'number'
+              ? updatedChore.priority
+              : 0,
         })
         return updatedChoreRes?.res || updatedChore
       } catch (error) {

@@ -1,4 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+
+import { track } from '../../analytics'
 import {
   CreateProject,
   DeleteProject,
@@ -43,6 +45,7 @@ export const useCreateProject = () => {
         const response = await CreateProject(projectData)
         if (response.ok) {
           const data = await response.json()
+          track('project_created', {})
           return data.res || data
         }
         throw new Error('Failed to create project')
@@ -79,7 +82,7 @@ export const useUpdateProject = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ projectId, projectData }) => {
+    mutationFn: async ({ projectData, projectId }) => {
       try {
         const response = await UpdateProject(projectId, projectData)
         if (response.ok) {

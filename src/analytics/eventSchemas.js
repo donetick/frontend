@@ -29,7 +29,27 @@ export const EVENT_SCHEMAS = {
     has_recurrence: 'boolean',
     recurrence_type: 'string',
     priority: 'number',
-    source: 'string',
+    // quick_add/voice/scan = the AddTaskModal popup; full_page/clone = the
+    // dedicated create page (ChoreEdit.jsx with no existing chore id).
+    source: 'enum:quick_add,voice,scan,full_page,clone',
+  }),
+  chore_updated: withCommon({
+    has_due_date: 'boolean',
+    has_assignee: 'boolean',
+    has_labels: 'boolean',
+    has_description: 'boolean',
+    has_recurrence: 'boolean',
+    recurrence_type: 'string',
+    priority: 'number',
+  }),
+
+  thing_created: withCommon({}),
+  project_created: withCommon({}),
+  filter_created: withCommon({}),
+
+  localization_setting_changed: withCommon({
+    setting: 'enum:language,date_format,time_format,first_day_of_week',
+    value: 'string',
   }),
 
   analytics_enabled: withCommon({

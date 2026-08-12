@@ -150,7 +150,13 @@ export const captureError = (errorType, properties = {}) => {
   const sanitized = sanitizeErrorProperties(errorType, properties)
   if (!sanitized) return
 
-  posthog.capture(errorType, sanitized)
+  // captureException (not capture) so this lands on PostHog's Error Tracking
+  // page, grouped by errorType — the message is deliberately generic, since
+  // any per-instance detail must go through the sanitized allowlist above,
+  // never straight into the exception message.
+  const error = new Error(errorType)
+  error.name = errorType
+  posthog.captureException(error, sanitized)
 }
 
 /**
