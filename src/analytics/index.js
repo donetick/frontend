@@ -142,6 +142,9 @@ export const track = (eventName, properties = {}) => {
   posthog.capture(eventName, sanitized)
 }
 
+/** Backend/API failures: a normal sanitized event, same as track() — not
+ * PostHog's Error Tracking product. There's no real Error object here (just
+ * an HTTP response), so there's no stack trace to gain from captureException. */
 export const captureError = (errorType, properties = {}) => {
   if (!canSend('crash')) return
   const posthog = getClientSync()
@@ -150,13 +153,54 @@ export const captureError = (errorType, properties = {}) => {
   const sanitized = sanitizeErrorProperties(errorType, properties)
   if (!sanitized) return
 
-  // captureException (not capture) so this lands on PostHog's Error Tracking
-  // page, grouped by errorType — the message is deliberately generic, since
-  // any per-instance detail must go through the sanitized allowlist above,
-  // never straight into the exception message.
-  const error = new Error(errorType)
-  error.name = errorType
+  posthog.capture(errorType, sanitized)
+}
+
+/**
+ * Frontend crashes only. Uses captureException (not capture) so these land
+ * on PostHog's Error Tracking page with a genuine message + stack trace —
+ * that text is NOT filtered by the sanitized allowlist below, since it comes
+ * from the exception object itself, not from `properties`.
+ */
+export const captureException = (error, properties = {}) => {
+  if (!canSend('crash')) return
+  const posthog = getClientSync()
+  if (!posthog) return
+
+  const sanitized = sanitizeErrorProperties('frontend_error', properties)
+  if (!sanitized) return
+
   posthog.captureException(error, sanitized)
+}
+
+let globalHandlersInstalled = false
+
+/** Reports uncaught exceptions and unhandled promise rejections to
+ * PostHog's Error Tracking, gated by the same crash consent as api_error.
+ * Complements, doesn't overlap with, src/views/Error.jsx: that's a React
+ * Router error-boundary screen for render/loader errors, which React catches
+ * before they ever reach window.onerror — a different class of failure, with
+ * its own user-initiated "Report this problem" flow via ErrorReportService.
+ * These listeners only see what bypasses React's boundaries entirely (event
+ * handlers, timers, unhandled promise rejections). Safe to call multiple
+ * times; only installs once. */
+export const installGlobalErrorHandlers = () => {
+  if (globalHandlersInstalled || typeof window === 'undefined') return
+  globalHandlersInstalled = true
+
+  window.addEventListener('error', event => {
+    const error =
+      event?.error instanceof Error
+        ? event.error
+        : new Error(event?.message || 'Unknown window error')
+    captureException(error, { source: 'window_error' })
+  })
+
+  window.addEventListener('unhandledrejection', event => {
+    const reason = event?.reason
+    const error = reason instanceof Error ? reason : new Error(String(reason))
+    captureException(error, { source: 'unhandled_rejection' })
+  })
 }
 
 /**

@@ -85,6 +85,12 @@ export const ERROR_SCHEMAS = {
     error_code: 'string',
     operation: 'string',
   },
+  // No message/stack field here by design — those come from the real Error
+  // object passed to posthog.captureException() itself, not from this
+  // sanitized properties bag. This schema only classifies how it was caught.
+  frontend_error: {
+    source: 'enum:window_error,unhandled_rejection',
+  },
 }
 
 const MAX_STRING_LENGTH = 200

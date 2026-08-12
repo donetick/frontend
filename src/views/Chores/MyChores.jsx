@@ -353,6 +353,7 @@ const MyChores = () => {
       membersData?.res &&
       choresData?.res
     ) {
+      // throw new Error('FAKE ERROR') // For testing Sentry error tracking
       const processEffectAsync = async () => {
         // Sync local state with query data to ensure updates are reflected
         setChores(processedChores)

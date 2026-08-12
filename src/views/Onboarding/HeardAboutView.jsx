@@ -3,6 +3,7 @@ import { Box, Button, Input, Link, Switch, Typography } from '@mui/joy'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import { track } from '../../analytics'
 import { isOfficialDonetickInstance } from '../../utils/FeatureToggle'
 import {
   haptic,
@@ -79,7 +80,13 @@ const AcquisitionSurvey = ({ onDone }) => {
 
   const finish = () => {
     const answer = selected === OTHER ? detail.trim() || null : selected
-    if (answer) recordAcquisitionSource(answer)
+    if (answer) {
+      recordAcquisitionSource(answer)
+      track('onboarding_option_selected', {
+        step: 'heard_about',
+        option: answer,
+      })
+    }
     onDone()
   }
 

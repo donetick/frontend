@@ -7,7 +7,10 @@ import { useRegisterSW } from 'virtual:pwa-register/react'
 
 import NavBar from '@/views/components/NavBar'
 
-import { initialize as initializeAnalytics } from './analytics'
+import {
+  initialize as initializeAnalytics,
+  installGlobalErrorHandlers,
+} from './analytics'
 import useAnalyticsIdentity from './analytics/useAnalyticsIdentity'
 import { registerCapacitorListeners } from './CapacitorListener'
 import PageTransition from './components/animations/PageTransition'
@@ -147,6 +150,7 @@ function App() {
 
   useEffect(() => {
     initializeAnalytics()
+    installGlobalErrorHandlers()
   }, [])
 
   return (
