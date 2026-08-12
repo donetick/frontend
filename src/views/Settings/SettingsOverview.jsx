@@ -11,6 +11,7 @@ import {
   Notifications,
   Palette,
   Person,
+  PrivacyTip,
   Security,
   Settings,
   Star,
@@ -123,6 +124,12 @@ const SettingsOverview = () => {
       title: t('overview.sections.advanced.title'),
       description: t('overview.sections.advanced.description'),
       icon: <Settings />,
+    },
+    {
+      id: 'privacy',
+      title: t('overview.sections.privacy.title'),
+      description: t('overview.sections.privacy.description'),
+      icon: <PrivacyTip />,
     },
     {
       id: 'developer',

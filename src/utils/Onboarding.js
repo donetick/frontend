@@ -52,22 +52,21 @@ export const recordAcquisitionSource = source => {
   }
 }
 
-const PRIVACY_PREFERENCES_KEY = 'privacyPreferences'
-
 /**
- * Stashes the self-hosted privacy opt-ins locally, same stub-for-now
- * treatment as recordAcquisitionSource: no crash reporter or PostHog is wired
- * up yet, so this is just the one place that'll change once there is one.
+ * Wires the self-hosted privacy opt-ins into the real analytics module.
+ * Analytics and crash reports are independent consent axes — a user can opt
+ * into one without the other, matching the two separate switches shown on
+ * this screen. Both default to disabled; this only ever runs once the user
+ * has made an explicit choice.
  */
-export const recordPrivacyPreferences = ({ crashReports, analytics }) => {
-  try {
-    localStorage.setItem(
-      PRIVACY_PREFERENCES_KEY,
-      JSON.stringify({ crashReports, analytics }),
-    )
-  } catch {
-    // ignore, this is best-effort telemetry
-  }
+export const recordPrivacyPreferences = async ({ analytics, crashReports }) => {
+  const { setConsent } = await import('../analytics')
+  await setConsent('analytics', analytics ? 'enabled' : 'disabled', {
+    source: 'onboarding',
+  })
+  await setConsent('crash', crashReports ? 'enabled' : 'disabled', {
+    source: 'onboarding',
+  })
 }
 
 /**
@@ -81,9 +80,8 @@ export const recordPrivacyPreferences = ({ crashReports, analytics }) => {
 export const requestNotificationPermission = async () => {
   if (!isNativeApp()) return false
   try {
-    const { LocalNotifications } = await import(
-      '@capacitor/local-notifications'
-    )
+    const { LocalNotifications } =
+      await import('@capacitor/local-notifications')
     const { Preferences } = await import('@capacitor/preferences')
 
     const result = await LocalNotifications.requestPermissions()

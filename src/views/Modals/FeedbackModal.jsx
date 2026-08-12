@@ -1,4 +1,5 @@
 import { Browser } from '@capacitor/browser'
+import { Capacitor } from '@capacitor/core'
 import { Android, Apple, Favorite, GitHub } from '@mui/icons-material'
 import {
   Box,
@@ -15,19 +16,21 @@ import {
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation } from 'react-router-dom'
+
+import { track } from '../../analytics'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal.js'
 import { useUserProfile } from '../../queries/UserQueries'
 import {
   FEEDBACK_CATEGORIES,
+  getFeedbackState,
   isCloudInstance,
   markSentiment,
   requestStoreReview,
   SENTIMENTS,
   storeLinks,
-  submitFeedback,
   SUBMIT_RESULT,
+  submitFeedback,
 } from '../../service/FeedbackService'
-import { Capacitor } from '@capacitor/core'
 
 const STEP = {
   SENTIMENT: 'sentiment',
@@ -57,7 +60,7 @@ const SENTIMENT_OPTIONS = [
  * dialog (or star links on web); anything else collects structured feedback
  * and never asks for a review.
  */
-const FeedbackModal = ({ open, onClose, onDismiss }) => {
+const FeedbackModal = ({ onClose, onDismiss, open, source = 'settings' }) => {
   const { t } = useTranslation()
   const { ResponsiveModal } = useResponsiveModal()
   const { data: userProfile } = useUserProfile()
@@ -70,6 +73,7 @@ const FeedbackModal = ({ open, onClose, onDismiss }) => {
   const [submitting, setSubmitting] = useState(false)
   const [isCloud, setIsCloud] = useState(true)
   const [githubUrl, setGithubUrl] = useState(null)
+  const [shownCount, setShownCount] = useState(0)
 
   useEffect(() => {
     if (open) {
@@ -80,18 +84,28 @@ const FeedbackModal = ({ open, onClose, onDismiss }) => {
       setSubmitting(false)
       setGithubUrl(null)
       isCloudInstance().then(setIsCloud)
+      getFeedbackState().then(state => {
+        const count = state.shownCount || 0
+        setShownCount(count)
+        track('feedback_prompt_shown', { source, shown_count: count })
+      })
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
 
   const handleClose = () => {
     // Backing out before answering counts as a dismissal for the cooldown.
-    if (step === STEP.SENTIMENT) onDismiss?.()
+    if (step === STEP.SENTIMENT) {
+      onDismiss?.()
+      track('feedback_prompt_dismissed', { source, shown_count: shownCount })
+    }
     onClose()
   }
 
   const handleSentiment = async value => {
     setSentiment(value)
     await markSentiment(value)
+    track('feedback_sentiment_selected', { sentiment: value })
 
     if (value !== SENTIMENTS.LOVE) {
       setStep(STEP.DETAILS)
@@ -110,7 +124,7 @@ const FeedbackModal = ({ open, onClose, onDismiss }) => {
 
   const handleSubmit = async () => {
     setSubmitting(true)
-    const { result, githubUrl: url } = await submitFeedback({
+    const { githubUrl: url, result } = await submitFeedback({
       sentiment,
       category,
       message,
@@ -118,6 +132,11 @@ const FeedbackModal = ({ open, onClose, onDismiss }) => {
       userProfile,
     })
     setSubmitting(false)
+    track('feedback_submitted', {
+      category,
+      has_message: message.trim().length > 0,
+      result,
+    })
 
     // Self-hosted feedback is never relayed; hand the user a pre-filled issue
     // instead so they choose what gets published.
@@ -248,7 +267,10 @@ const FeedbackModal = ({ open, onClose, onDismiss }) => {
                 variant='outlined'
                 color='neutral'
                 startDecorator={<GitHub />}
-                onClick={() => openUrl(storeLinks.github)}
+                onClick={() => {
+                  track('feedback_review_action', { action: 'github' })
+                  openUrl(storeLinks.github)
+                }}
                 sx={{ justifyContent: 'flex-start' }}
               >
                 {t('feedback.review.github')}
@@ -257,7 +279,10 @@ const FeedbackModal = ({ open, onClose, onDismiss }) => {
                 variant='outlined'
                 color='neutral'
                 startDecorator={<Apple />}
-                onClick={() => openUrl(storeLinks.appStore)}
+                onClick={() => {
+                  track('feedback_review_action', { action: 'appStore' })
+                  openUrl(storeLinks.appStore)
+                }}
                 sx={{ justifyContent: 'flex-start' }}
               >
                 {t('feedback.review.appStore')}
@@ -266,7 +291,10 @@ const FeedbackModal = ({ open, onClose, onDismiss }) => {
                 variant='outlined'
                 color='neutral'
                 startDecorator={<Android />}
-                onClick={() => openUrl(storeLinks.playStore)}
+                onClick={() => {
+                  track('feedback_review_action', { action: 'playStore' })
+                  openUrl(storeLinks.playStore)
+                }}
                 sx={{ justifyContent: 'flex-start' }}
               >
                 {t('feedback.review.playStore')}

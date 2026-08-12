@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+
+import { track } from '../analytics'
 import { networkManager } from '../hooks/NetworkManager'
 import { commandQueue, CommandType } from '../utils/CommandQueue'
 import {
@@ -226,6 +228,15 @@ export const useCreateChore = () => {
         if (!createdChore) {
           throw new Error('Failed to get created chore data')
         }
+        track('chore_created', {
+          has_due_date: Boolean(newTask.dueDate),
+          has_assignee: Boolean(newTask.assignedTo),
+          has_labels: Boolean(newTask.labelsV2?.length),
+          has_description: Boolean(newTask.description?.trim()),
+          has_recurrence: newTask.frequencyType !== 'once',
+          recurrence_type: newTask.frequencyType || 'once',
+          priority: typeof newTask.priority === 'number' ? newTask.priority : 0,
+        })
         return { ...newTask, id: createdChore.res }
       } catch (error) {
         if (isNetworkError(error)) {
@@ -458,7 +469,7 @@ export const useUpdateChoreHistory = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ choreId, historyId, historyData }) => {
+    mutationFn: async ({ choreId, historyData, historyId }) => {
       const applyOptimisticUpdate = async () => {
         queryClient.setQueryData(['choreHistory', choreId], oldData => {
           if (!oldData?.res) return oldData
@@ -581,7 +592,7 @@ export const useMarkChoreComplete = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ choreId, body, completedDate, performer }) => {
+    mutationFn: async ({ body, choreId, completedDate, performer }) => {
       if (isOfflineFeatureEnabled() && !networkManager.isOnline) {
         await commandQueue.enqueue(CommandType.COMPLETE_CHORE, choreId, {
           id: choreId,

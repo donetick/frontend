@@ -7,6 +7,8 @@ import { useRegisterSW } from 'virtual:pwa-register/react'
 
 import NavBar from '@/views/components/NavBar'
 
+import { initialize as initializeAnalytics } from './analytics'
+import useAnalyticsIdentity from './analytics/useAnalyticsIdentity'
 import { registerCapacitorListeners } from './CapacitorListener'
 import PageTransition from './components/animations/PageTransition'
 import { ImpersonateUserProvider } from './contexts/ImpersonateUserContext'
@@ -36,6 +38,7 @@ const AppContent = () => {
   const { showNotification } = useNotification()
   const location = useLocation()
   useSyncOnReconnect()
+  useAnalyticsIdentity()
 
   // Every route renders through this Outlet, so one listener here gives crash
   // reports the trail that led to the failure.
@@ -141,6 +144,10 @@ function App() {
   useEffect(() => {
     registerCapacitorListeners(navigate)
   }, [navigate])
+
+  useEffect(() => {
+    initializeAnalytics()
+  }, [])
 
   return (
     <div>

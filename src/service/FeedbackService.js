@@ -1,7 +1,8 @@
-import { InAppReview } from '@capacitor-community/in-app-review'
 import { Capacitor } from '@capacitor/core'
-import { Device } from '@capacitor/device'
 import { Preferences } from '@capacitor/preferences'
+import { InAppReview } from '@capacitor-community/in-app-review'
+
+import { getAppVersion, getDeviceContext } from '../utils/DeviceInfo'
 import { isOfficialDonetickInstance } from '../utils/FeatureToggle'
 
 const STATE_KEY = 'feedbackState'
@@ -26,6 +27,9 @@ const defaultState = {
   // null until the first prompt is shown/snoozed.
   lastPromptedAt: null,
   lastPromptedVersion: null,
+  // Cumulative across the device's lifetime, unlike lastPromptedAt/Version
+  // which only remember the most recent showing.
+  shownCount: 0,
   dismissCount: 0,
   reviewRequestedAt: null,
   lastSentiment: null,
@@ -109,31 +113,6 @@ const hasRecentError = () =>
 // ---------------------------------------------------------------------------
 // Context collection
 // ---------------------------------------------------------------------------
-
-const getAppVersion = async () => {
-  if (Capacitor.isNativePlatform()) {
-    try {
-      const { App } = await import('@capacitor/app')
-      const info = await App.getInfo()
-      return `${info.version} (${info.build})`
-    } catch {
-      // fall through to the web bundle version
-    }
-  }
-  return import.meta.env.VITE_APP_VERSION || 'web'
-}
-
-const getDeviceContext = async () => {
-  try {
-    const info = await Device.getInfo()
-    return {
-      deviceModel: [info.manufacturer, info.model].filter(Boolean).join(' '),
-      osVersion: `${info.operatingSystem} ${info.osVersion}`,
-    }
-  } catch {
-    return { deviceModel: 'unknown', osVersion: 'unknown' }
-  }
-}
 
 /**
  * Everything we attach to a submission without asking the user for it.
@@ -251,10 +230,11 @@ export const resetFeedbackState = async () => {
 }
 
 export const markPromptShown = async () => {
-  const version = await getAppVersion()
+  const [version, state] = await Promise.all([getAppVersion(), readState()])
   return writeState({
     lastPromptedAt: Date.now(),
     lastPromptedVersion: version,
+    shownCount: state.shownCount + 1,
     // A forced prompt is spent once shown, otherwise it would fire on every
     // visit to My Chores.
     devForced: false,
@@ -348,10 +328,10 @@ export const SUBMIT_RESULT = {
  * see and edit it before anything is published.
  */
 export const buildGithubIssueUrl = ({
-  sentiment,
   category,
-  message,
   context,
+  message,
+  sentiment,
 }) => {
   const labelFor = {
     bugs: 'bug',
@@ -402,10 +382,10 @@ export const buildGithubIssueUrl = ({
  * pre-filled GitHub issue URL to send the user to instead.
  */
 export const submitFeedback = async ({
-  sentiment,
   category,
-  message,
   feature,
+  message,
+  sentiment,
   userProfile,
 }) => {
   const context = await collectFeedbackContext({ feature, userProfile })

@@ -94,7 +94,7 @@ export const getServerVersion = () => serverVersion
 // ---------------------------------------------------------------------------
 
 /** Strips ids and query strings so failures group by endpoint, not by row. */
-const normalizeEndpoint = endpoint =>
+export const normalizeEndpoint = endpoint =>
   String(endpoint || '')
     .split('?')[0]
     .replace(/\/\d+/g, '/:id')
