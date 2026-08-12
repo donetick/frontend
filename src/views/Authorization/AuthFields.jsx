@@ -12,6 +12,7 @@ import {
   Typography,
 } from '@mui/joy'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { authButtonSx, authInputSx } from './authStyles'
 
 const labelSx = { fontSize: '0.875rem', fontWeight: 600, mb: 0.75 }
@@ -40,12 +41,13 @@ export const AuthTextField = ({ label, error, helper, sx, ...inputProps }) => (
 )
 
 export const AuthPasswordField = ({
-  label = 'Password',
+  label,
   error,
   helper,
   sx,
   ...inputProps
 }) => {
+  const { t } = useTranslation('auth')
   const [visible, setVisible] = useState(false)
 
   return (
@@ -60,7 +62,7 @@ export const AuthPasswordField = ({
             color='neutral'
             size='sm'
             tabIndex={-1}
-            aria-label={visible ? 'Hide password' : 'Show password'}
+            aria-label={visible ? t('hidePassword') : t('showPassword')}
             onClick={() => setVisible(v => !v)}
             sx={{ borderRadius: '8px' }}
           >
@@ -110,27 +112,31 @@ export const SocialButton = ({ icon, children, sx, ...props }) => (
   </Button>
 )
 
-export const AuthDivider = ({ children = 'or' }) => (
-  <Box
-    role='separator'
-    sx={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: 1.5,
-      my: 2.5,
-      '&::before, &::after': {
-        content: '""',
-        flex: 1,
-        height: '1px',
-        bgcolor: 'divider',
-      },
-    }}
-  >
-    <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
-      {children}
-    </Typography>
-  </Box>
-)
+export const AuthDivider = ({ children }) => {
+  const { t } = useTranslation('auth')
+
+  return (
+    <Box
+      role='separator'
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1.5,
+        my: 2.5,
+        '&::before, &::after': {
+          content: '""',
+          flex: 1,
+          height: '1px',
+          bgcolor: 'divider',
+        },
+      }}
+    >
+      <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
+        {children ?? t('or')}
+      </Typography>
+    </Box>
+  )
+}
 
 export const LegalLinks = () => (
   <Typography
