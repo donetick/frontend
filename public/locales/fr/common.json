@@ -73,7 +73,7 @@
     "later": "Maybe later",
     "sentiment": {
       "title": "How's Donetick working for you?",
-      "subtitle": "Your answer helps us decide what to build next.",
+      "subtitle": "Votre réponse nous aide à décider de ce qu'il faut construire ensuite.",
       "options": {
         "love": "Love it",
         "okay": "It's okay",
