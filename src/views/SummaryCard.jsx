@@ -1,13 +1,15 @@
 import { Card, IconButton, Typography } from '@mui/joy'
+import { useTranslation } from 'react-i18next'
 
 const SummaryCard = () => {
+  const { t } = useTranslation('common')
   return (
     <Card>
       <div className='flex justify-between'>
         <div>
           <Typography level='h2'>Summary</Typography>
           <Typography level='body-xs'>
-            This is a summary of your chores
+            {t('summaryOfChores')}
           </Typography>
         </div>
         <IconButton>

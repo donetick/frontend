@@ -5,12 +5,14 @@ import { useUserProfile } from '../queries/UserQueries'
 import { useNotification } from '../service/NotificationProvider'
 import { apiClient } from '../utils/ApiClient'
 import { isPlusAccount, resolvePhotoURL } from '../utils/Helpers'
+import { useTranslation } from 'react-i18next'
 
 export const useFileUpload = ({
   draftId,
   entityId,
   entityType = 'chore_attachment',
 } = {}) => {
+  const { t } = useTranslation('common')
   const { showError } = useNotification()
   const { data: userProfile } = useUserProfile()
 
@@ -58,14 +60,14 @@ export const useFileUpload = ({
 
         if (response.status === 507) {
           showError({
-            title: 'Storage Quota Exceeded',
-            message: 'You have exceeded your quota for uploading files.',
+            title: t('upload.quotaTitle'),
+            message: t('upload.quotaMessage'),
           })
           return null
         } else if (response.status === 413) {
           showError({
-            title: 'File Too Large',
-            message: 'The file you are trying to upload is too large.',
+            title: t('upload.tooLargeTitle'),
+            message: t('upload.tooLargeMessage'),
           })
           return null
         } else if (response.status === 403 && !isPlusAccount(userProfile)) {
@@ -76,8 +78,8 @@ export const useFileUpload = ({
           return null
         } else if (response.status === 403) {
           showError({
-            title: 'Permission Denied',
-            message: 'You do not have permission to upload files.',
+            title: t('upload.deniedTitle'),
+            message: t('upload.deniedMessage'),
           })
           return null
         } else if (!response.ok) {
@@ -105,7 +107,7 @@ export const useFileUpload = ({
         return null
       }
     },
-    [entityType, entityId, draftId, showError, userProfile],
+    [entityType, entityId, draftId, showError, userProfile, t],
   )
 
   return { uploadFile, isPlus: isPlusAccount(userProfile) }

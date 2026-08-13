@@ -1,7 +1,9 @@
 import { Chip, List, ListItem, ListItemButton, Textarea } from '@mui/joy'
+import { useTranslation } from 'react-i18next'
 import React, { useEffect, useRef, useState } from 'react'
 
 const AutocompleteInput = ({ options, ref, value, onChange, ...props }) => {
+  const { t } = useTranslation('common')
   const [filteredOptions, setFilteredOptions] = useState([])
   const [menuVisible, setMenuVisible] = useState(false)
   const [highlightedIndex, setHighlightedIndex] = useState(-1)
@@ -82,7 +84,7 @@ const AutocompleteInput = ({ options, ref, value, onChange, ...props }) => {
         value={value}
         onChange={onChange}
         onKeyDown={handleKeyDown}
-        placeholder='Type here...'
+        placeholder={t('autocompletePlaceholder')}
       />
       {menuVisible && (
         <List ref={menuRef} style={{ position: 'absolute', zIndex: 1000 }}>

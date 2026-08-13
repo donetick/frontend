@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { useTranslation } from 'react-i18next'
 import Box from '@mui/joy/Box'
 import ListItemDecorator from '@mui/joy/ListItemDecorator'
 import Tabs from '@mui/joy/Tabs'
@@ -10,6 +11,7 @@ import Search from '@mui/icons-material/Search'
 import Person from '@mui/icons-material/Person'
 
 export default function NavBarMobile() {
+  const { t } = useTranslation('common')
   const [index, setIndex] = React.useState(0)
   const colors = ['primary', 'danger', 'success', 'warning']
   return (
@@ -32,7 +34,7 @@ export default function NavBarMobile() {
     >
       <Tabs
         size='lg'
-        aria-label='Bottom Navigation'
+        aria-label={t('bottomNav')}
         value={index}
         onChange={(event, value) => setIndex(value)}
         sx={theme => ({
@@ -98,7 +100,7 @@ export default function NavBarMobile() {
             <ListItemDecorator>
               <Person />
             </ListItemDecorator>
-            Profile
+            {t('profile')}
           </Tab>
         </TabList>
       </Tabs>
