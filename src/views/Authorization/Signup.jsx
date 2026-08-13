@@ -1,6 +1,7 @@
 import { Box, Link, Typography } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../../hooks/useAuth.jsx'
@@ -16,6 +17,7 @@ import {
 import AuthShell from './AuthShell'
 
 const SignupView = () => {
+  const { t } = useTranslation('auth')
   const [username, setUsername] = React.useState('')
   const [password, setPassword] = React.useState('')
   const Navigate = useNavigate()
@@ -38,7 +40,7 @@ const SignupView = () => {
       showError({
         title: 'Almost there',
         message:
-          'Your account was created, but signing in failed. Please sign in.',
+          t('signupSignInFailed'),
       })
       Navigate('/login')
       return
@@ -72,36 +74,36 @@ const SignupView = () => {
     let isValid = true
 
     if (!username.trim()) {
-      setUsernameError('Username is required')
+      setUsernameError(t('usernameRequired'))
       isValid = false
     }
     if (username.length < 4) {
-      setUsernameError('Username must be at least 4 characters')
+      setUsernameError(t('usernameMinLength'))
       isValid = false
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setEmailError('Invalid email address')
+      setEmailError(t('invalidEmail'))
       isValid = false
     }
 
     if (password.length < 8) {
-      setPasswordError('Password must be between 8 and 64 characters')
+      setPasswordError(t('passwordLength'))
       isValid = false
     }
 
     if (password.length > 64) {
-      setPasswordError('Password must be between 8 and 64 characters')
+      setPasswordError(t('passwordLength'))
       isValid = false
     }
 
     if (!displayName.trim()) {
-      setDisplayNameError('Display name is required')
+      setDisplayNameError(t('displayNameRequired'))
       isValid = false
     }
 
     // display name should only contain letters and spaces and numbers:
     if (!/^[a-zA-Z0-9 ]+$/.test(displayName)) {
-      setDisplayNameError('Display name can only contain letters and numbers')
+      setDisplayNameError(t('displayNameChars'))
       isValid = false
     }
 
@@ -127,14 +129,14 @@ const SignupView = () => {
           handleLogin(username, password)
         } else if (response.status === 403) {
           showError({
-            title: 'Signup Failed',
-            message: 'Signup disabled, please contact admin',
+            title: t('signupFailed'),
+            message: t('signupDisabled'),
           })
         } else {
           console.log('Signup failed')
           response.json().then(res => {
             showError({
-              title: 'Signup Failed',
+              title: t('signupFailed'),
               message: res.error || 'An error occurred during signup',
             })
           })
@@ -145,7 +147,7 @@ const SignupView = () => {
 
   return (
     <AuthShell
-      title='Create your account'
+      title={t('createYourAccount')}
       subtitle={
         getPendingInvite()
           ? 'Create an account and we’ll send your circle join request right after.'
@@ -160,11 +162,11 @@ const SignupView = () => {
         sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
       >
         <AuthTextField
-          label='Display name'
+          label={t('displayNameLabel')}
           id='displayName'
           name='displayName'
           autoComplete='name'
-          placeholder='How others see your name'
+          placeholder={t('displayNamePlaceholder')}
           autoFocus
           value={displayName}
           error={displayNameError}
@@ -175,11 +177,11 @@ const SignupView = () => {
         />
 
         <AuthTextField
-          label='Username'
+          label={t('username')}
           id='username'
           name='username'
           autoComplete='username'
-          placeholder='lowercase letters, numbers, dot and dash'
+          placeholder={t('usernameHint')}
           value={username}
           error={usernameError}
           onChange={e => {
@@ -189,12 +191,12 @@ const SignupView = () => {
         />
 
         <AuthTextField
-          label='Email'
+          label={t('email')}
           id='email'
           name='email'
           type='email'
           autoComplete='email'
-          placeholder='you@example.com'
+          placeholder={t('emailPlaceholder')}
           value={email}
           error={emailError}
           onChange={e => {
@@ -207,10 +209,11 @@ const SignupView = () => {
           id='password'
           name='password'
           autoComplete='new-password'
-          placeholder='At least 8 characters'
+          label={t('passwordLabel')}
+          placeholder={t('signupPasswordPlaceholder')}
           value={password}
           error={passwordError}
-          helper='Use 8 to 64 characters.'
+          helper={t('signupPasswordHelper')}
           onChange={e => {
             setPasswordError(null)
             setPassword(e.target.value)
@@ -218,14 +221,14 @@ const SignupView = () => {
         />
 
         <AuthSubmitButton loading={isSubmitting} sx={{ mt: 1 }}>
-          Create account
+          {t('createAccountButton')}
         </AuthSubmitButton>
 
         <Typography
           level='body-xs'
           sx={{ textAlign: 'center', color: 'text.secondary' }}
         >
-          By creating an account you agree to our Terms of Service and Privacy
+          {t('termsShort')}
           Policy.
         </Typography>
       </Box>

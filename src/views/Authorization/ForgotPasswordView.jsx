@@ -1,6 +1,7 @@
 import MarkEmailReadOutlined from '@mui/icons-material/MarkEmailReadOutlined'
 import { Box, Button, Link, Typography } from '@mui/joy'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useNotification } from '../../service/NotificationProvider'
 import { ResetPassword } from '../../utils/Fetcher'
@@ -12,6 +13,7 @@ const isInvalidEmail = email =>
   !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email)
 
 const ForgotPasswordView = () => {
+  const { t } = useTranslation('auth')
   const navigate = useNavigate()
   const [resetStatusOk, setResetStatusOk] = useState(null)
   const [email, setEmail] = useState('')
@@ -40,21 +42,21 @@ const ForgotPasswordView = () => {
         setResetStatusOk(true)
         showNotification({
           type: 'success',
-          title: 'Reset Email Sent',
-          message: 'Check your email for password reset instructions',
+          title: t('resetEmailSent'),
+          message: t('resetEmailSentMsg'),
         })
       } else {
         setResetStatusOk(false)
         showError({
-          title: 'Reset Failed',
-          message: 'Failed to send reset email, please try again later',
+          title: t('resetFailed'),
+          message: t('resetFailedMsg'),
         })
       }
     } catch (error) {
       setResetStatusOk(false)
       showError({
-        title: 'Reset Failed',
-        message: 'Failed to send reset email, please try again later',
+        title: t('resetFailed'),
+        message: t('resetFailedMsg'),
       })
     } finally {
       setIsSubmitting(false)
@@ -79,7 +81,7 @@ const ForgotPasswordView = () => {
   if (resetStatusOk !== null) {
     return (
       <AuthShell
-        title='Check your email'
+        title={t('checkYourEmail')}
         subtitle={`If an account exists for ${email}, we've sent instructions for resetting your password.`}
         footer={<LegalLinks />}
         logoSize={0}
@@ -101,7 +103,7 @@ const ForgotPasswordView = () => {
             sx={authButtonSx}
             onClick={() => navigate('/login')}
           >
-            Back to sign in
+            {t('backToSignIn')}
           </Button>
         </Box>
       </AuthShell>
@@ -110,7 +112,7 @@ const ForgotPasswordView = () => {
 
   return (
     <AuthShell
-      title='Reset your password'
+      title={t('resetYourPassword')}
       subtitle="Enter your email and we'll send you a link to get back into your account."
       footer={<LegalLinks />}
       logoSize={0}
@@ -126,7 +128,7 @@ const ForgotPasswordView = () => {
           name='email'
           type='email'
           autoComplete='email'
-          placeholder='you@example.com'
+          placeholder={t('emailPlaceholder')}
           autoFocus
           value={email}
           error={emailError}
@@ -152,7 +154,7 @@ const ForgotPasswordView = () => {
           underline='hover'
           onClick={() => navigate('/login')}
         >
-          Back to sign in
+          {t('backToSignIn')}
         </Link>
       </Typography>
     </AuthShell>

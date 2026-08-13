@@ -5,6 +5,7 @@ import ModalActions from '../../components/common/ModalActions'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import { VerifyMFA } from '../../utils/Fetcher'
 import { authInputSx } from './authStyles'
+import { useTranslation } from 'react-i18next'
 
 const MFAVerificationModal = ({
   open,
@@ -13,6 +14,7 @@ const MFAVerificationModal = ({
   onSuccess,
   onError,
 }) => {
+  const { t } = useTranslation('auth')
   const [verificationCode, setVerificationCode] = useState('')
   const [isBackupCode, setIsBackupCode] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -21,7 +23,7 @@ const MFAVerificationModal = ({
 
   const handleVerify = async () => {
     if (!verificationCode.trim()) {
-      setError('Please enter a verification code')
+      setError(t('mfaModal.codeRequired'))
       return
     }
 
@@ -37,14 +39,14 @@ const MFAVerificationModal = ({
       } else {
         const errorData = await response.json()
         const message =
-          errorData.message || 'Invalid verification code. Please try again.'
+          errorData.message || t('mfaModal.invalidCode')
         setError(message)
         onError?.(message)
       }
     } catch (error) {
       // A wrong code is shown inline; a failed request is escalated to the
       // caller so it can surface a toast instead of looking like a bad code.
-      const message = 'Failed to verify code. Please try again.'
+      const message = t('mfaModal.verifyFailed')
       setError(message)
       onError?.(message)
       console.error('MFA verification error:', error)
@@ -73,23 +75,23 @@ const MFAVerificationModal = ({
       open={open}
       onClose={handleClose}
       size='md'
-      title='Two-factor authentication'
+      title={t('mfaModal.title')}
       description={
         isBackupCode
-          ? 'Enter one of the backup codes you saved when setting up two-factor authentication.'
-          : 'Enter the 6-digit code from your authenticator app.'
+          ? t('mfaModal.backupHint')
+          : t('mfaModal.codeHint')
       }
       closeOnBackdrop={!loading}
       closeOnEscape={!loading}
       footer={
         <ModalActions
           secondary={{
-            label: 'Cancel',
+            label: t('common:cancel'),
             onClick: handleClose,
             disabled: loading,
           }}
           primary={{
-            label: 'Verify & Sign In',
+            label: t('mfaModal.verify'),
             onClick: handleVerify,
             loading,
             disabled: !verificationCode.trim(),
@@ -105,12 +107,12 @@ const MFAVerificationModal = ({
             level='body-sm'
             sx={{ display: 'block', fontWeight: 600, mb: 0.75 }}
           >
-            {isBackupCode ? 'Backup code' : 'Verification code'}
+            {isBackupCode ? t('mfaModal.backupLabel') : t('mfaModal.codeLabel')}
           </Typography>
           <Input
             id='mfa-code'
             size='lg'
-            placeholder={isBackupCode ? 'Enter backup code' : '000000'}
+            placeholder={isBackupCode ? t('mfaModal.backupPlaceholder') : '000000'}
             value={verificationCode}
             onChange={e => setVerificationCode(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -157,8 +159,8 @@ const MFAVerificationModal = ({
             }}
           >
             {isBackupCode
-              ? 'Use authenticator app instead'
-              : 'Use a backup code instead'}
+              ? t('mfaModal.useAuthenticator')
+              : t('mfaModal.useBackup')}
           </Link>
         </Box>
 
@@ -167,7 +169,7 @@ const MFAVerificationModal = ({
             level='body-xs'
             sx={{ textAlign: 'center', color: 'text.secondary' }}
           >
-            Each backup code can only be used once.
+            {t('mfaModal.backupOnce')}
           </Typography>
         )}
       </Stack>

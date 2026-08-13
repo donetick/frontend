@@ -22,7 +22,7 @@ i18n
       loadPath: '/locales/{{lng}}/{{ns}}.json',
     },
 
-    ns: ['common', 'settings', 'chores'],
+    ns: ['common', 'settings', 'chores', 'auth'],
     defaultNS: 'common',
 
     detection: {

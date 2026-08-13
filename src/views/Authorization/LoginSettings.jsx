@@ -12,10 +12,12 @@ import { offlineDB } from '../../utils/OfflineDB'
 import { AuthSubmitButton, AuthTextField } from './AuthFields'
 import AuthShell from './AuthShell'
 import { authButtonSx } from './authStyles'
+import { useTranslation } from 'react-i18next'
 
 const CONNECTION_TIMEOUT_MS = 8000
 
 const LoginSettings = () => {
+  const { t } = useTranslation('auth')
   const Navigate = useNavigate()
   const { refetch: refetchResource } = useResource()
   const [serverURL, setServerURL] = React.useState('')
@@ -105,7 +107,7 @@ const LoginSettings = () => {
             return {
               ok: false,
               message:
-                'Hostname could not be resolved. Check the URL for typos or verify DNS.',
+                t('server.dnsFailed'),
             }
           }
           return {
@@ -118,7 +120,7 @@ const LoginSettings = () => {
         return {
           ok: false,
           message:
-            'Unable to reach the server. Check the URL, port, and network connection.',
+            t('server.unreachable'),
         }
       }
 
@@ -126,7 +128,7 @@ const LoginSettings = () => {
       return {
         ok: false,
         message:
-          'Unable to reach the server. Check the URL, port, and network connection.',
+          t('server.unreachable'),
       }
     }
   }
@@ -144,7 +146,7 @@ const LoginSettings = () => {
     if (!isValidURL(trimmedURL)) {
       setStatus('error')
       setErrorMessage(
-        'Invalid URL format. Include the protocol (http:// or https://) and port if needed.',
+        t('server.invalidUrl'),
       )
       return
     }
@@ -187,7 +189,7 @@ const LoginSettings = () => {
 
   return (
     <AuthShell
-      title='Server settings'
+      title={t('serverSettings')}
       subtitle='Point the app at your own self-hosted Donetick server.'
     >
       <Box
@@ -196,7 +198,7 @@ const LoginSettings = () => {
         sx={{ display: 'flex', flexDirection: 'column' }}
       >
         <AuthTextField
-          label='Server URL'
+          label={t('server.url')}
           id='serverURL'
           name='serverURL'
           inputMode='url'
@@ -243,7 +245,7 @@ const LoginSettings = () => {
             startDecorator={<CheckCircleOutlineIcon />}
             sx={{ mt: 2, borderRadius: '12px' }}
           >
-            Connected. Taking you to sign in...
+            {t('serverConnected')}
           </Alert>
         )}
 
@@ -290,7 +292,7 @@ const LoginSettings = () => {
         level='body-xs'
         sx={{ mt: 2.5, textAlign: 'center', color: 'text.secondary' }}
       >
-        Changing the server clears locally cached data on this device.
+        {t('serverChangeWarning')}
       </Typography>
     </AuthShell>
   )
