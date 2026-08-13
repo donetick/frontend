@@ -31,7 +31,6 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 
 import { version } from '../../../package.json'
 import UserProfileAvatar from '../../components/UserProfileAvatar'
-import Z_INDEX from '../../constants/zIndex'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useResource } from '../../queries/ResourceQueries'
 import { useGlobalSearch } from '../../search/GlobalSearchContext'
@@ -211,7 +210,7 @@ const NavBar = () => {
             ? `calc(var(--safe-area-inset-top, 0px))`
             : '',
         position: 'sticky',
-        zIndex: Z_INDEX.NAVBAR,
+        zIndex: 'var(--joy-zIndex-popup)',
         top: 0,
         minHeight: '35px',
         backgroundColor: 'var(--joy-palette-background-body)',
@@ -239,7 +238,6 @@ const NavBar = () => {
             // height:
             //   'calc(100vh - var(--safe-area-inset-top, 0px) - var(--safe-area-inset-bottom, 0px))',
             overflow: 'auto',
-            zIndex: Z_INDEX.DRAWER,
           },
         }}
       >
