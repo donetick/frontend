@@ -13,6 +13,9 @@ import {
 } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
+import { useLocalization } from '../../contexts/LocalizationContext'
 import useConfirmationModal from '../../hooks/useConfirmationModal'
 import { useChildUsers, useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
@@ -28,6 +31,8 @@ import PasswordChangeModal from '../Modals/Inputs/PasswordChangeModal'
 import SettingsLayout from './SettingsLayout'
 
 const ChildUserSettings = () => {
+  const { t } = useTranslation('settings')
+  const { fmt } = useLocalization()
   const { data: userProfile } = useUserProfile()
   const { data: childUsers, isLoading, refetch } = useChildUsers()
   const { showNotification } = useNotification()
@@ -54,18 +59,20 @@ const ChildUserSettings = () => {
         const result = await response.json()
         showNotification({
           type: 'success',
-          message: `Child account "${result.res.displayName}" created successfully!`,
+          message: t('subaccounts.createdSuccess', {
+            name: result.res.displayName,
+          }),
         })
         refetch()
         queryClient.invalidateQueries(['childUsers'])
       } else {
         const error = await response.json()
-        throw new Error(error.error || 'Failed to create child user')
+        throw new Error(error.error || t('subaccounts.createFailedGeneric'))
       }
     } catch (error) {
       showNotification({
         type: 'error',
-        message: `Failed to create child account: ${error.message}`,
+        message: t('subaccounts.createFailed', { error: error.message }),
       })
       throw error
     }
@@ -80,24 +87,28 @@ const ChildUserSettings = () => {
       if (response.ok) {
         showNotification({
           type: 'success',
-          message: 'Child password updated successfully',
+          message: t('subaccounts.passwordUpdated'),
         })
       } else {
         const error = await response.json()
-        throw new Error(error.error || 'Failed to update password')
+        throw new Error(
+          error.error || t('subaccounts.passwordUpdateFailedGeneric'),
+        )
       }
     } catch (error) {
       showNotification({
         type: 'error',
-        message: `Failed to update password: ${error.message}`,
+        message: t('subaccounts.passwordUpdateFailed', {
+          error: error.message,
+        }),
       })
     }
   }
 
   const handleDeleteChild = async (childId, childName) => {
     showConfirmation(
-      `Are you sure you want to delete the child account "${childName}"? This action cannot be undone.`,
-      'Delete Sub Account',
+      t('subaccounts.deleteConfirmMessage', { name: childName }),
+      t('subaccounts.deleteConfirmTitle'),
       async () => {
         setDeletingChildId(childId)
         try {
@@ -106,50 +117,46 @@ const ChildUserSettings = () => {
           if (response.ok) {
             showNotification({
               type: 'success',
-              message: `Sub account "${childName}" deleted successfully`,
+              message: t('subaccounts.deleted', { name: childName }),
             })
             refetch()
             queryClient.invalidateQueries(['childUsers'])
           } else {
             const error = await response.json()
-            throw new Error(error.error || 'Failed to delete Sub user')
+            throw new Error(error.error || t('subaccounts.deleteFailedGeneric'))
           }
         } catch (error) {
           showNotification({
             type: 'error',
-            message: `Failed to delete Sub account: ${error.message}`,
+            message: t('subaccounts.deleteFailed', { error: error.message }),
           })
         } finally {
           setDeletingChildId(null)
         }
       },
-      'Delete',
-      'Cancel',
+      t('common.delete'),
+      t('common.cancel'),
       'danger',
     )
   }
 
   if (!isParentUser) {
     return (
-      <SettingsLayout title='Sub Account Management'>
+      <SettingsLayout title={t('subaccounts.notParentTitle')}>
         <Typography level='body-md' color='warning'>
-          Only primary users can manage sub accounts.
+          {t('subaccounts.notParentMessage')}
         </Typography>
       </SettingsLayout>
     )
   }
 
   return (
-    <SettingsLayout title='Managed Accounts'>
+    <SettingsLayout title={t('subaccounts.title')}>
       <div className='grid gap-4'>
-        <Typography level='body-md'>
-          Manage sub accounts. Sub account users can log in and complete
-          assigned tasks.
-        </Typography>
+        <Typography level='body-md'>{t('subaccounts.description')}</Typography>
         {!isPlusAccount(userProfile) && (
           <Typography level='body-sm' color='warning' sx={{ mt: 1 }}>
-            Sub account limited to 1 on Free plan. Upgrade to Plus to have up to
-            5 sub accounts.
+            {t('subaccounts.freePlanNotice')}
           </Typography>
         )}
         <Box
@@ -160,33 +167,32 @@ const ChildUserSettings = () => {
           }}
         >
           <Typography level='title-lg'>
-            Sub Accounts ({childUsers?.length || 0})
+            {t('subaccounts.count', { count: childUsers?.length || 0 })}
           </Typography>
           <Button
             startDecorator={<PersonAddIcon />}
             onClick={() => setCreateModalOpen(true)}
           >
-            Add Sub Account
+            {t('subaccounts.add')}
           </Button>
         </Box>
 
         {isLoading ? (
-          <Typography>Loading sub accounts...</Typography>
+          <Typography>{t('subaccounts.loading')}</Typography>
         ) : childUsers?.length === 0 ? (
           <Card variant='soft' sx={{ textAlign: 'center', py: 4 }}>
             <CardContent>
               <Typography level='title-md' mb={1}>
-                No Sub Accounts
+                {t('subaccounts.emptyTitle')}
               </Typography>
               <Typography level='body-sm' mb={3}>
-                Create sub accounts so team members can log in and complete
-                their assigned tasks.
+                {t('subaccounts.emptyDescription')}
               </Typography>
               <Button
                 startDecorator={<PersonAddIcon />}
                 onClick={() => setCreateModalOpen(true)}
               >
-                Add Your First Sub Account
+                {t('subaccounts.addFirst')}
               </Button>
             </CardContent>
           </Card>
@@ -206,11 +212,14 @@ const ChildUserSettings = () => {
                         {child.displayName || child.username}
                       </Typography>
                       <Typography level='body-sm' color='neutral'>
-                        Username: {child.username}
+                        {t('subaccounts.username', {
+                          username: child.username,
+                        })}
                       </Typography>
                       <Typography level='body-xs' color='neutral'>
-                        Created:{' '}
-                        {new Date(child.createdAt).toLocaleDateString()}
+                        {t('subaccounts.created', {
+                          date: fmt.date(child.createdAt),
+                        })}
                       </Typography>
                     </Box>
 
@@ -222,7 +231,7 @@ const ChildUserSettings = () => {
                           setSelectedChildId(child.id)
                           setPasswordModalOpen(true)
                         }}
-                        title='Change Password'
+                        title={t('subaccounts.changePassword')}
                       >
                         <EditIcon />
                       </IconButton>
@@ -237,7 +246,7 @@ const ChildUserSettings = () => {
                           )
                         }
                         loading={deletingChildId === child.id}
-                        title='Delete Account'
+                        title={t('subaccounts.deleteAccount')}
                       >
                         <DeleteIcon />
                       </IconButton>
@@ -253,21 +262,19 @@ const ChildUserSettings = () => {
 
         <Box>
           <Typography level='title-md' mb={2}>
-            How Managed Accounts Work
+            {t('subaccounts.howItWorksTitle')}
           </Typography>
           <Typography level='body-sm' mb={1}>
-            • Managed accounts created by the primary user, these specific for
-            user you want to have ability to delete and reset password.
+            • {t('subaccounts.howItWorks1')}
           </Typography>
           <Typography level='body-sm' mb={1}>
-            • Sub accounts can log in with their own username and password.
+            • {t('subaccounts.howItWorks2')}
           </Typography>
           <Typography level='body-sm' mb={1}>
-            • Managed accounts can complete tasks but have limited
-            administrative permissions
+            • {t('subaccounts.howItWorks3')}
           </Typography>
           <Typography level='body-sm'>
-            • Managed accounts automatically added to your circle
+            • {t('subaccounts.howItWorks4')}
           </Typography>
         </Box>
       </div>

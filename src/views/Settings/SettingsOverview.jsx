@@ -280,7 +280,7 @@ const SettingsOverview = () => {
                           borderColor: 'warning.main',
                         }}
                       >
-                        Early Access
+                        {t('common.earlyAccess')}
                       </Chip>
                     )}
                   </Box>

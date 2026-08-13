@@ -576,6 +576,7 @@ const FilterView = () => {
         }}
       >
         <IconButton
+          data-testid='open-add-filter-modal'
           color='primary'
           variant='solid'
           sx={{

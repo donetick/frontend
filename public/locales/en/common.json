@@ -32,6 +32,44 @@
     "settings": "Settings",
     "reportBug": "Report a Bug"
   },
+  "search": {
+    "title": "Search",
+    "placeholder": "Search Donetick",
+    "inputAriaLabel": "Search tasks, history, projects, labels and settings",
+    "deviceNote": "Searching content available on this device",
+    "escape": "Esc",
+    "recent": "Recent",
+    "empty": {
+      "title": "No direct matches",
+      "subtitle": "You can still filter the task list with this search."
+    },
+    "groups": {
+      "tasks": "Tasks",
+      "history": "Notes",
+      "projects": "Projects",
+      "labels": "Labels",
+      "people": "People",
+      "settings": "Settings",
+      "actions": "Quick actions"
+    },
+    "actions": {
+      "quickAction": "Quick action",
+      "navigation": "Navigation",
+      "createTask": "Create a task",
+      "viewAllTasks": "View all tasks",
+      "viewArchivedTasks": "View archived tasks",
+      "openSettings": "Open settings",
+      "filterTasks": "Show tasks matching “{{query}}”",
+      "filterTasksSubtitle": "Filter the task list"
+    },
+    "footer": {
+      "navigate": "Navigate",
+      "open": "Open",
+      "results_one": "{{count}} result",
+      "results_other": "{{count}} results",
+      "typeToSearch": "Type to search"
+    }
+  },
   "feedback": {
     "later": "Maybe later",
     "sentiment": {

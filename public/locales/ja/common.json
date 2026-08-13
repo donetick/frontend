@@ -20,6 +20,7 @@
   "logout": "ログアウト",
   "version": "バージョン",
   "navigation": {
+    "search": "検索",
     "allTasks": "すべてのタスク",
     "archived": "アーカイブ済み",
     "things": "Things",
@@ -29,6 +30,43 @@
     "activities": "アクティビティ",
     "points": "ポイント",
     "settings": "設定"
+  },
+  "search": {
+    "title": "検索",
+    "placeholder": "Donetick を検索",
+    "inputAriaLabel": "タスク、履歴、プロジェクト、ラベル、設定を検索",
+    "deviceNote": "このデバイスで利用できるコンテンツを検索しています",
+    "escape": "Esc",
+    "recent": "最近",
+    "empty": {
+      "title": "一致する項目はありません",
+      "subtitle": "この検索でタスク一覧を絞り込むことはできます。"
+    },
+    "groups": {
+      "tasks": "タスク",
+      "history": "ノート",
+      "projects": "プロジェクト",
+      "labels": "ラベル",
+      "people": "メンバー",
+      "settings": "設定",
+      "actions": "クイックアクション"
+    },
+    "actions": {
+      "quickAction": "クイックアクション",
+      "navigation": "ナビゲーション",
+      "createTask": "タスクを作成",
+      "viewAllTasks": "すべてのタスクを表示",
+      "viewArchivedTasks": "アーカイブ済みのタスクを表示",
+      "openSettings": "設定を開く",
+      "filterTasks": "「{{query}}」に一致するタスクを表示",
+      "filterTasksSubtitle": "タスク一覧を絞り込む"
+    },
+    "footer": {
+      "navigate": "移動",
+      "open": "開く",
+      "results_other": "{{count}} 件の結果",
+      "typeToSearch": "入力して検索"
+    }
   },
   "feedback": {
     "later": "Maybe later",

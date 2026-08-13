@@ -4,6 +4,8 @@ import { Purchases } from '@revenuecat/purchases-capacitor'
 import { useQueryClient } from '@tanstack/react-query'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import SubscriptionModal from '../../components/SubscriptionModal'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useUserProfile } from '../../queries/UserQueries'
@@ -15,6 +17,7 @@ import UserDeletionModal from '../Modals/Inputs/UserDeletionModal'
 import SettingsLayout from './SettingsLayout'
 
 const AccountSettings = () => {
+  const { t } = useTranslation('settings')
   const { data: userProfile } = useUserProfile()
   const queryClient = useQueryClient()
   const { showNotification } = useNotification()
@@ -42,43 +45,49 @@ const AccountSettings = () => {
 
   const getSubscriptionDetails = () => {
     if (userProfile?.subscription === 'active') {
-      return `You are currently subscribed to the Plus plan. Your subscription will renew on ${fmt.date(userProfile?.expiration)}.`
+      return t('accountSettings.activeDescription', {
+        date: fmt.date(userProfile?.expiration),
+      })
     } else if (userProfile?.subscription === 'cancelled') {
-      return `You have cancelled your subscription. Your account will be downgraded to the Free plan on ${fmt.date(userProfile?.expiration)}.`
+      return t('accountSettings.cancelledDescription', {
+        date: fmt.date(userProfile?.expiration),
+      })
     } else {
-      return `You are currently on the Free plan. Upgrade to the Plus plan to unlock more features.`
+      return t('accountSettings.freeDescription')
     }
   }
 
   const getSubscriptionStatus = () => {
     if (userProfile?.subscription === 'active') {
-      return `Plus`
+      return t('accountSettings.plus')
     } else if (userProfile?.subscription === 'cancelled') {
       if (moment().isBefore(userProfile?.expiration)) {
-        return `Plus(until ${fmt.date(userProfile?.expiration)})`
+        return t('accountSettings.plusUntil', {
+          date: fmt.date(userProfile?.expiration),
+        })
       }
-      return `Free`
+      return t('accountSettings.free')
     } else {
-      return `Free`
+      return t('accountSettings.free')
     }
   }
 
   if (!userProfile) {
     return (
-      <SettingsLayout title='Account Settings'>
-        <div>Loading...</div>
+      <SettingsLayout title={t('accountSettings.title')}>
+        <div>{t('common.loading')}</div>
       </SettingsLayout>
     )
   }
 
   return (
-    <SettingsLayout title='Account Settings'>
+    <SettingsLayout title={t('accountSettings.title')}>
       <div className='grid gap-4'>
         <Typography level='body-md'>
-          Change your account settings, type or update your password
+          {t('accountSettings.description')}
         </Typography>
         <Typography level='title-md' mb={-1}>
-          Account Type : {getSubscriptionStatus()}
+          {t('accountSettings.accountType', { type: getSubscriptionStatus() })}
         </Typography>
         <Typography level='body-sm'>{getSubscriptionDetails()}</Typography>
         <Box>
@@ -95,9 +104,8 @@ const AccountSettings = () => {
             onClick={async () => {
               if (Capacitor.isNativePlatform()) {
                 try {
-                  const { RevenueCatUI } = await import(
-                    '@revenuecat/purchases-capacitor-ui'
-                  )
+                  const { RevenueCatUI } =
+                    await import('@revenuecat/purchases-capacitor-ui')
 
                   const offering = await Purchases.getOfferings()
                   await RevenueCatUI.presentPaywall({
@@ -110,8 +118,7 @@ const AccountSettings = () => {
                     queryClient.refetchQueries(['userProfile'])
                     showNotification({
                       type: 'success',
-                      message:
-                        'Purchase successful! Please restart the app to access Plus features.',
+                      message: t('accountSettings.purchase.success'),
                     })
                   }
                 } catch (error) {
@@ -122,57 +129,53 @@ const AccountSettings = () => {
                   } else if (error.code === '2') {
                     showNotification({
                       type: 'error',
-                      message:
-                        'Store connection issue. Please check your network and try again.',
+                      message: t('accountSettings.purchase.storeConnection'),
                     })
                   } else if (error.code === '3') {
                     showNotification({
                       type: 'error',
-                      message:
-                        'Purchases are not allowed on this device. Please check your device restrictions.',
+                      message: t('accountSettings.purchase.notAllowed'),
                     })
                   } else if (error.code === '4') {
                     showNotification({
                       type: 'error',
-                      message:
-                        'This subscription is not available. Please try again later.',
+                      message: t('accountSettings.purchase.unavailable'),
                     })
                   } else if (error.code === '5') {
                     showNotification({
                       type: 'error',
-                      message:
-                        'This purchase has already been processed. If you believe this is an error, please contact support.',
+                      message: t('accountSettings.purchase.alreadyProcessed'),
                     })
                   } else if (error.code === '6') {
                     showNotification({
                       type: 'error',
-                      message:
-                        'Purchase receipt missing. Please try purchasing again.',
+                      message: t('accountSettings.purchase.receiptMissing'),
                     })
                   } else if (error.code === '7') {
                     showNotification({
                       type: 'error',
-                      message:
-                        'Network error. Please check your connection and try again.',
+                      message: t('accountSettings.purchase.networkError'),
                     })
                   } else if (error.code === '8') {
                     showNotification({
                       type: 'error',
-                      message:
-                        'Invalid purchase receipt. Please contact support if this persists.',
+                      message: t('accountSettings.purchase.invalidReceipt'),
                     })
                   } else if (error.code === '9') {
                     showNotification({
                       type: 'warning',
-                      message:
-                        'Payment is pending approval. You will receive access once approved.',
+                      message: t('accountSettings.purchase.pending'),
                     })
                   } else {
                     console.error('Unexpected purchase error:', error)
                     console.error('Error occurred in purchase flow')
                     showNotification({
                       type: 'error',
-                      message: `Purchase failed: ${error.message || 'Unknown error'}. Please try again or contact support.`,
+                      message: t('accountSettings.purchase.failed', {
+                        error:
+                          error.message ||
+                          t('accountSettings.purchase.unknownError'),
+                      }),
                     })
                   }
                 }
@@ -181,7 +184,7 @@ const AccountSettings = () => {
               }
             }}
           >
-            Upgrade
+            {t('accountSettings.upgrade')}
           </Button>
 
           {userProfile?.subscription === 'active' && (
@@ -197,14 +200,14 @@ const AccountSettings = () => {
                 setNativeCancelModal(true)
               }}
             >
-              Cancel
+              {t('accountSettings.cancel')}
             </Button>
           )}
         </Box>
         {import.meta.env.VITE_IS_SELF_HOSTED === 'true' && (
           <Box>
             <Typography level='title-md' mb={1}>
-              Password :
+              {t('accountSettings.password')}
             </Typography>
             <Typography mb={1} level='body-sm'></Typography>
             <Button
@@ -213,7 +216,7 @@ const AccountSettings = () => {
                 setChangePasswordModal(true)
               }}
             >
-              Change Password
+              {t('accountSettings.changePassword')}
             </Button>
             {changePasswordModal ? (
               <PassowrdChangeModal
@@ -224,12 +227,12 @@ const AccountSettings = () => {
                       if (resp.ok) {
                         showNotification({
                           type: 'success',
-                          message: 'Password changed successfully',
+                          message: t('accountSettings.passwordChanged'),
                         })
                       } else {
                         showNotification({
                           type: 'error',
-                          message: 'Password change failed',
+                          message: t('accountSettings.passwordChangeFailed'),
                         })
                       }
                     })
@@ -243,18 +246,17 @@ const AccountSettings = () => {
 
         <Box>
           <Typography level='title-md' mb={1} color='danger'>
-            Danger Zone
+            {t('accountSettings.dangerZone')}
           </Typography>
           <Typography level='body-sm' mb={2} color='neutral'>
-            Once you delete your account, there is no going back. Please be
-            certain.
+            {t('accountSettings.dangerZoneDescription')}
           </Typography>
           <Button
             variant='outlined'
             color='danger'
             onClick={() => setUserDeletionModal(true)}
           >
-            Delete Account
+            {t('accountSettings.deleteAccount')}
           </Button>
         </Box>
       </div>
@@ -271,7 +273,7 @@ const AccountSettings = () => {
           if (success) {
             showNotification({
               type: 'success',
-              message: 'Account deleted successfully',
+              message: t('accountSettings.accountDeleted'),
             })
           }
         }}
@@ -287,13 +289,13 @@ const AccountSettings = () => {
               if (resp.ok) {
                 showNotification({
                   type: 'success',
-                  message: 'Subscription cancelled',
+                  message: t('accountSettings.subscriptionCancelled'),
                 })
                 window.location.reload()
               } else {
                 showNotification({
                   type: 'error',
-                  message: 'Failed to cancel subscription',
+                  message: t('accountSettings.subscriptionCancelFailed'),
                 })
               }
             })

@@ -1075,8 +1075,12 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
       chore.frequencyMetadata = frequency.frequencyMetadata
       chore.frequency = frequency.frequency
     }
-    if (!frequency && dueDate) {
-      // Use RFC3339/ISO-8601 format expected by backend.
+    if (dueDate) {
+      // Use RFC3339/ISO-8601 format expected by backend. The backend only
+      // derives NextDueDate from what's sent on create (handler.go never
+      // computes it from frequencyType), so this must be sent whether or
+      // not the task also repeats — otherwise a recurring task created with
+      // a due date lands with nextDueDate: null.
       chore.nextDueDate = new Date(dueDate).toISOString()
     }
     if (hasReminders && (frequency || dueDate)) {

@@ -42,7 +42,6 @@ import SyncStatusIndicator from './SyncStatusIndicator'
 const publicPages = ['/landing', '/privacy', '/terms']
 const NavBar = () => {
   const { t } = useTranslation('common')
-  const { isRTL } = useLocalization()
   const { data: resource } = useResource()
   const { openSearch } = useGlobalSearch()
 
@@ -126,7 +125,7 @@ const NavBar = () => {
           aria-label='Back from search'
           title={t('back')}
         >
-          <ArrowBack />
+          <ArrowBack className='rtl-flip' />
         </IconButton>
       )
     }
@@ -158,7 +157,7 @@ const NavBar = () => {
             : t('back')
         }
       >
-        <ArrowBack />
+        <ArrowBack className='rtl-flip' />
       </IconButton>
     )
   }
@@ -226,14 +225,19 @@ const NavBar = () => {
       <Drawer
         open={drawerOpen}
         onClose={closeDrawer}
-        anchor={isRTL ? 'right' : 'left'}
+        // Always 'left'. Joy bakes the anchor into emotion CSS (`left: 0` plus a
+        // translateX for the slide), so stylis-plugin-rtl already mirrors it to
+        // the right edge under RTL. Branching on isRTL here would flip it twice
+        // and land the drawer back on the left, half off-screen.
+        anchor='left'
         size='sm'
         onClick={closeDrawer}
         sx={{
           '& .MuiDrawer-content': {
             position: 'fixed',
             // pt: 'calc(var(--safe-area-inset-top, 0px))',
-            ...(isRTL ? { right: 0 } : { left: 0 }),
+            // Physical on purpose, so it is mirrored in step with the anchor.
+            left: 0,
             // pb: 'calc(var(--safe-area-inset-bottom, 0px))',
             // height:
             //   'calc(100vh - var(--safe-area-inset-top, 0px) - var(--safe-area-inset-bottom, 0px))',

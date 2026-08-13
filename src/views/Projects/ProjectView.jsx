@@ -495,6 +495,7 @@ const ProjectView = () => {
         }}
       >
         <IconButton
+          data-testid='open-add-project-modal'
           color='primary'
           variant='solid'
           sx={{
