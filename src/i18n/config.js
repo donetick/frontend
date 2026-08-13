@@ -23,7 +23,7 @@ i18n
     },
 
     ns: [
-      'auth'
+      'auth',
       'common',
       'settings',
       'chores',
