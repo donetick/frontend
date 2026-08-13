@@ -14,8 +14,10 @@ import ModalActions from '../../../components/common/ModalActions'
 import { useNavigate } from 'react-router-dom'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { CheckUserDeletion, DeleteUser } from '../../../utils/Fetcher'
+import { useTranslation } from 'react-i18next'
 
 function UserDeletionModal({ isOpen, onClose }) {
+  const { t } = useTranslation('settings')
   const { ResponsiveModal } = useResponsiveModal()
   const Navigate = useNavigate()
   const [step, setStep] = useState(1) // 1: Warning, 2: Transfer, 3: Confirm
@@ -47,7 +49,7 @@ function UserDeletionModal({ isOpen, onClose }) {
 
   const checkDeletionRequirements = async () => {
     if (password.trim() === '') {
-      setError('Please enter your password to continue')
+      setError(t('deletion.passwordRequired'))
       return
     }
 
@@ -97,7 +99,7 @@ function UserDeletionModal({ isOpen, onClose }) {
 
   const executeUserDeletion = async () => {
     if (password.trim() === '' || confirmation !== 'DELETE') {
-      setError('Please enter your password and type DELETE to confirm')
+      setError(t('deletion.passwordAndDelete'))
       return
     }
 
@@ -120,7 +122,7 @@ function UserDeletionModal({ isOpen, onClose }) {
       }
     } catch (err) {
       console.error('Failed to delete account:', err)
-      setError('Failed to delete account')
+      setError(t('deletion.failed'))
     } finally {
       setLoading(false)
     }
@@ -181,7 +183,7 @@ function UserDeletionModal({ isOpen, onClose }) {
           type='password'
           value={password}
           onChange={e => setPassword(e.target.value)}
-          placeholder='Enter your password'
+          placeholder={t('deletion.passwordPlaceholder')}
         />
       </FormControl>
 
@@ -196,7 +198,7 @@ function UserDeletionModal({ isOpen, onClose }) {
   const renderTransferStep = () => (
     <>
       <Typography level='body-md' mb={3}>
-        You own circles that require ownership transfer before deletion. Please
+        {t('deletion.transferIntro')}
         select new owners:
       </Typography>
 
@@ -208,7 +210,7 @@ function UserDeletionModal({ isOpen, onClose }) {
           <FormControl>
             <FormLabel>New Owner</FormLabel>
             <Select
-              placeholder='Select new owner'
+              placeholder={t('deletion.selectOwner')}
               value={
                 transferOptions.find(t => t.circleId === circle.id)
                   ?.newOwnerId || ''
@@ -237,8 +239,7 @@ function UserDeletionModal({ isOpen, onClose }) {
   const renderConfirmationStep = () => (
     <>
       <Typography level='body-md' mb={3}>
-        Please enter your password and type <strong>DELETE</strong> to confirm
-        account deletion.
+        {t('deletion.confirmPrompt')}
       </Typography>
       <Typography level='body-sm' mb={2}>
         on successful deletion, you will be logged out and redirected to the
@@ -251,7 +252,7 @@ function UserDeletionModal({ isOpen, onClose }) {
           type='password'
           value={password}
           onChange={e => setPassword(e.target.value)}
-          placeholder='Enter your password'
+          placeholder={t('deletion.passwordPlaceholder')}
         />
       </FormControl>
 
@@ -260,7 +261,7 @@ function UserDeletionModal({ isOpen, onClose }) {
         <Input
           value={confirmation}
           onChange={e => setConfirmation(e.target.value)}
-          placeholder='DELETE'
+          placeholder={t('deletion.typeDelete')}
         />
       </FormControl>
 
@@ -304,7 +305,7 @@ function UserDeletionModal({ isOpen, onClose }) {
           <ModalActions
             stackOnMobile
             secondary={{
-              label: 'Cancel',
+              label: t('accountSettings.cancel'),
               onClick: () => handleClose(false),
             }}
             primary={{
