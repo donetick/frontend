@@ -1,10 +1,12 @@
 import { Box, Button, Container, Typography } from '@mui/joy'
+import { useTranslation } from 'react-i18next'
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { useState } from 'react'
 import Logo from '../Logo'
 const Home = () => {
+  const { t } = useTranslation('common')
   const Navigate = useNavigate()
   const getCurrentUser = () => {
     return JSON.parse(localStorage.getItem('user'))
@@ -36,7 +38,7 @@ const Home = () => {
             Navigate('/chores')
           }}
         >
-          Get Started!
+          {t('getStarted')}
         </Button>
       </Box>
     </Container>

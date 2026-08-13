@@ -2,6 +2,7 @@ import { Textarea } from '@mui/joy'
 import { useState } from 'react'
 import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
+import { useTranslation } from 'react-i18next'
 
 function TextModal({
   isOpen,
@@ -12,6 +13,7 @@ function TextModal({
   okText,
   cancelText,
 }) {
+  const { t } = useTranslation('common')
   const { ResponsiveModal } = useResponsiveModal()
   const [text, setText] = useState(current)
 
@@ -35,7 +37,7 @@ function TextModal({
     >
       <Textarea
         autoFocus
-        placeholder='Type in here…'
+        placeholder={t('typeHere')}
         value={text}
         onChange={event => setText(event.target.value)}
         minRows={3}
