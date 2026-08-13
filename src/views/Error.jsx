@@ -18,6 +18,7 @@ import {
   formatErrorReport,
 } from '../service/ErrorReportService'
 import ErrorReportModal from './Modals/ErrorReportModal'
+import { useTranslation } from 'react-i18next'
 
 const getErrorKind = error => {
   if (!error)
@@ -55,6 +56,7 @@ const safeMessage = error => {
 }
 
 const Error = () => {
+  const { t } = useTranslation('common')
   const error = useRouteError()
   const [showDetails, setShowDetails] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -192,7 +194,7 @@ const Error = () => {
         textAlign='center'
         sx={{ mb: 1.5 }}
       >
-        Something went wrong
+        {t('errorScreen.title')}
       </Typography>
 
       {/* Error message */}
@@ -207,8 +209,7 @@ const Error = () => {
           wordBreak: 'break-word',
         }}
       >
-        {message ??
-          'An unexpected error occurred. Try reloading — it usually fixes it.'}
+        {message ?? t('errorScreen.fallback')}
       </Typography>
 
       {/* Primary CTA */}
@@ -220,7 +221,7 @@ const Error = () => {
         onClick={() => window.location.reload()}
         sx={{ width: '100%', mb: 1.5 }}
       >
-        Try again
+        {t('errorScreen.tryAgain')}
       </Button>
 
       {/* Reporting is one tap from the failure, where the context is still
@@ -246,7 +247,7 @@ const Error = () => {
           size='lg'
           startDecorator={<HomeRounded />}
         >
-          Home
+          {t('errorScreen.home')}
         </Button>
         <Button
           component={Link}
@@ -255,7 +256,7 @@ const Error = () => {
           color='neutral'
           size='lg'
         >
-          Login
+          {t('errorScreen.login')}
         </Button>
       </Box>
 
@@ -293,7 +294,9 @@ const Error = () => {
               }
               sx={{ mb: 1 }}
             >
-              {showDetails ? 'Hide' : 'Show'} error details
+              {showDetails
+                ? t('errorScreen.hideDetails')
+                : t('errorScreen.showDetails')}
             </Button>
 
             {showDetails && (
@@ -312,7 +315,7 @@ const Error = () => {
                   color='neutral'
                   onClick={handleCopy}
                   sx={{ position: 'absolute', top: 8, right: 8 }}
-                  title='Copy to clipboard'
+                  title={t('errorScreen.copyToClipboard')}
                 >
                   <ContentCopyRounded fontSize='small' />
                 </IconButton>
@@ -347,7 +350,7 @@ const Error = () => {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
         size='sm'
       >
-        Error details copied to clipboard
+        {t('errorScreen.copied')}
       </Snackbar>
     </Box>
   )

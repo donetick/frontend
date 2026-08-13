@@ -2,7 +2,6 @@ import { Close } from '@mui/icons-material'
 import { Box, Divider, IconButton, Modal, Sheet, Typography } from '@mui/joy'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { forwardRef, useId } from 'react'
-import { Z_INDEX } from '../../constants/zIndex'
 
 const WIDTH_BY_SIZE = {
   sm: 400,
@@ -27,6 +26,7 @@ const AppModal = forwardRef(
       size = 'md',
       fullWidth = true,
       isMobile: isMobileProp,
+      keepMounted = false,
       mobilePresentation = 'sheet',
       role = 'dialog',
       showCloseButton = true,
@@ -63,9 +63,16 @@ const AppModal = forwardRef(
         onClose={handleClose}
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
-        keepMounted
+        keepMounted={keepMounted}
         sx={{
-          zIndex: Z_INDEX.MODAL_BACKDROP,
+          // Joy raises portaled listboxes above modals, but its selector misses
+          // Menu because Menu renders with role="menu". Keep the workaround in
+          // the modal primitive so individual menus never need a z-index.
+          ...(open && {
+            '& ~ [role="menu"]': {
+              '--unstable_popup-zIndex': 'calc(var(--joy-zIndex-modal) + 1)',
+            },
+          }),
           display: 'flex',
           alignItems: isSheet ? 'flex-end' : 'center',
           justifyContent: 'center',
@@ -85,7 +92,6 @@ const AppModal = forwardRef(
           aria-describedby={descriptionId}
           variant='outlined'
           sx={{
-            zIndex: Z_INDEX.MODAL_CONTENT,
             display: 'flex',
             flexDirection: 'column',
             width: isFullscreen

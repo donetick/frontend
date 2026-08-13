@@ -10,16 +10,18 @@ import { apiClient } from '../../utils/ApiClient'
 import { endOAuthExchange } from '../../utils/OAuthExchangeState'
 import { GetUserProfile } from '../../utils/Fetcher'
 import { saveTokens } from '../../utils/TokenStorage'
+import { useTranslation } from 'react-i18next'
 import AuthShell from './AuthShell'
 import { authButtonSx } from './authStyles'
 import MFAVerificationModal from './MFAVerificationModal'
 
 const AuthenticationLoading = () => {
+  const { t } = useTranslation('auth')
   const { refetch: refetchUserProfile } = useUserProfile()
   const Navigate = useNavigate()
   const hasCalledHandleOAuth2 = useRef(false)
-  const [message, setMessage] = useState('Signing you in')
-  const [subMessage, setSubMessage] = useState('This will only take a moment.')
+  const [message, setMessage] = useState(t('authenticating.signingIn'))
+  const [subMessage, setSubMessage] = useState(t('authenticating.signingInSub'))
   const [status, setStatus] = useState('pending')
   const [mfaModalOpen, setMfaModalOpen] = useState(false)
   const [mfaSessionToken, setMfaSessionToken] = useState('')
@@ -31,8 +33,8 @@ const AuthenticationLoading = () => {
       // suppress a genuine session expiry later on.
       handleOAuth2().finally(endOAuthExchange)
     } else if (provider !== 'oauth2') {
-      setMessage('Unknown sign-in provider')
-      setSubMessage('Please contact support.')
+      setMessage(t('authenticating.unknownProvider'))
+      setSubMessage(t('authenticating.contactSupport'))
       setStatus('error')
     }
     return endOAuthExchange
@@ -71,8 +73,8 @@ const AuthenticationLoading = () => {
   const handleMFAClose = () => {
     setMfaModalOpen(false)
     setMfaSessionToken('')
-    setMessage('Sign-in failed')
-    setSubMessage('Two-factor authentication was cancelled.')
+    setMessage(t('authenticating.signInFailed'))
+    setSubMessage(t('authenticating.mfaCancelled'))
     setStatus('error')
   }
 
@@ -85,8 +87,8 @@ const AuthenticationLoading = () => {
     const storedState = localStorage.getItem('authState')
 
     if (returnedState !== storedState) {
-      setMessage('Sign-in failed')
-      setSubMessage('The sign-in request could not be verified.')
+      setMessage(t('authenticating.signInFailed'))
+      setSubMessage(t('authenticating.requestNotVerified'))
       setStatus('error')
       return
     }
@@ -112,8 +114,8 @@ const AuthenticationLoading = () => {
 
         if (!response.ok) {
           console.error('Authentication failed')
-          setMessage('Sign-in failed')
-          setSubMessage('Please try again.')
+          setMessage(t('authenticating.signInFailed'))
+          setSubMessage(t('authenticating.tryAgain'))
           setStatus('error')
           return
         }
@@ -122,22 +124,22 @@ const AuthenticationLoading = () => {
 
         if (data.mfaRequired) {
           if (!data.sessionToken) {
-            setMessage('Sign-in failed')
-            setSubMessage('The MFA session is missing. Please try again.')
+            setMessage(t('authenticating.signInFailed'))
+            setSubMessage(t('authenticating.mfaSessionMissing'))
             setStatus('error')
             return
           }
 
           setMfaSessionToken(data.sessionToken)
           setMfaModalOpen(true)
-          setMessage('Two-factor authentication')
-          setSubMessage('Verify your login to continue.')
+          setMessage(t('authenticating.twoFactor'))
+          setSubMessage(t('authenticating.verifyToContinue'))
           return
         }
 
         if (!data.token && !data.access_token) {
-          setMessage('Sign-in failed')
-          setSubMessage('No valid authentication token was returned.')
+          setMessage(t('authenticating.signInFailed'))
+          setSubMessage(t('authenticating.noToken'))
           setStatus('error')
           return
         }
@@ -158,8 +160,8 @@ const AuthenticationLoading = () => {
         }
       } catch (error) {
         console.error('Authentication request failed', error)
-        setMessage('Sign-in failed')
-        setSubMessage('Please try again.')
+        setMessage(t('authenticating.signInFailed'))
+        setSubMessage(t('authenticating.tryAgain'))
         setStatus('error')
       }
     }
@@ -188,7 +190,7 @@ const AuthenticationLoading = () => {
             fullWidth
             sx={authButtonSx}
           >
-            Back to sign in
+            {t('authenticating.backToSignIn')}
           </Button>
         )}
       </Box>
@@ -199,8 +201,8 @@ const AuthenticationLoading = () => {
         sessionToken={mfaSessionToken}
         onSuccess={handleMFASuccess}
         onError={() => {
-          setMessage('Sign-in failed')
-          setSubMessage('Two-factor authentication failed. Please try again.')
+          setMessage(t('authenticating.signInFailed'))
+          setSubMessage(t('authenticating.mfaFailed'))
         }}
       />
     </AuthShell>

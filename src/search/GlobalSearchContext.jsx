@@ -8,6 +8,7 @@ import {
   useMemo,
   useState,
 } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 import { offlineDB } from '../utils/OfflineDB'
@@ -34,6 +35,7 @@ const uniqueBy = (items, getId) => [
 
 export const GlobalSearchProvider = ({ children }) => {
   const queryClient = useQueryClient()
+  const { t } = useTranslation('settings')
   const location = useLocation()
   const navigate = useNavigate()
   const isMobile = useMediaQuery('(max-width:768px)')
@@ -110,6 +112,7 @@ export const GlobalSearchProvider = ({ children }) => {
         labels,
         members,
         isParent: isParentUser(profile),
+        t,
         choresById: new Map(chores.map(item => [String(item.id), item])),
         projectsById: new Map(projects.map(item => [String(item.id), item])),
         membersById: new Map(members.map(item => [String(item.userId), item])),
@@ -127,7 +130,7 @@ export const GlobalSearchProvider = ({ children }) => {
     } finally {
       setIsLoading(false)
     }
-  }, [queryClient])
+  }, [queryClient, t])
 
   const openSearch = useCallback(
     (query = '') => {
