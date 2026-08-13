@@ -14,6 +14,7 @@ import {
 } from '@mui/icons-material'
 import { Avatar, Box, Button, Chip, Divider, Stack, Typography } from '@mui/joy'
 import moment from 'moment'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import ModalActions from '../../components/common/ModalActions'
 import { useLocalization } from '../../contexts/LocalizationContext'
@@ -22,13 +23,13 @@ import { TASK_COLOR } from '../../utils/Colors.jsx'
 import RichTextEditor from '../components/RichTextEditor.jsx'
 
 const STATUS_CONFIG = {
-  0: { label: 'In Progress', color: 'primary', icon: <AccessTime /> },
-  1: { label: 'Completed', color: 'success', icon: <Check /> },
-  2: { label: 'Skipped', color: 'warning', icon: <Redo /> },
-  3: { label: 'Pending Approval', color: 'neutral', icon: <HourglassEmpty /> },
-  4: { label: 'Rejected', color: 'danger', icon: <ThumbDown /> },
-  5: { label: 'Missed', color: 'danger', icon: <RunningWithErrors /> },
-  6: { label: 'Rescheduled', color: 'warning', icon: <Schedule /> },
+  0: { label: t('status.inProgress'), color: 'primary', icon: <AccessTime /> },
+  1: { label: t('status.completed'), color: 'success', icon: <Check /> },
+  2: { label: t('status.skipped'), color: 'warning', icon: <Redo /> },
+  3: { label: t('status.pendingApproval'), color: 'neutral', icon: <HourglassEmpty /> },
+  4: { label: t('status.rejected'), color: 'danger', icon: <ThumbDown /> },
+  5: { label: t('status.missed'), color: 'danger', icon: <RunningWithErrors /> },
+  6: { label: t('status.rescheduled'), color: 'warning', icon: <Schedule /> },
 }
 
 const DetailRow = ({ icon, label, value, children }) => (
@@ -55,6 +56,8 @@ const DetailRow = ({ icon, label, value, children }) => (
 )
 
 const TimingBadge = ({ historyEntry }) => {
+  const { t } = useTranslation('history')
+
   if (!historyEntry.dueDate || !historyEntry.performedAt) return null
   if ([0, 5, 6].includes(historyEntry.status)) return null
 
@@ -71,7 +74,7 @@ const TimingBadge = ({ historyEntry }) => {
         sx={{ backgroundColor: TASK_COLOR.COMPLETED, color: 'white' }}
         startDecorator={<Check />}
       >
-        On Time
+        {t('badge.onTime')}
       </Chip>
     )
   } else if (performedAt.isBefore(dueDate)) {
@@ -103,6 +106,7 @@ const TimingBadge = ({ historyEntry }) => {
 }
 
 function HistoryDetailModal({ config }) {
+  const { t } = useTranslation('history')
   const { ResponsiveModal } = useResponsiveModal()
   const { fmt } = useLocalization()
   const navigate = useNavigate()
@@ -114,7 +118,9 @@ function HistoryDetailModal({ config }) {
 
   const statusCfg = STATUS_CONFIG[entry.status] ?? STATUS_CONFIG[1]
   const isFirstSchedule = entry.status === 6 && !entry.dueDate
-  const statusLabel = isFirstSchedule ? 'Scheduled' : statusCfg.label
+  const statusLabel = isFirstSchedule
+    ? t('status.scheduled')
+    : t(statusCfg.labelKey)
   const performer = performers.find(p => p.userId === entry.completedBy)
   const assignedTo = performers.find(p => p.userId === entry.assignedTo)
   const isDifferentAssignee =
@@ -138,7 +144,7 @@ function HistoryDetailModal({ config }) {
     <ResponsiveModal
       open={config?.isOpen}
       onClose={config?.onClose}
-      title='Activity Detail'
+      title={t('detail.title')}
       footer={
         <ModalActions>
           {entry.choreId && (
@@ -151,7 +157,7 @@ function HistoryDetailModal({ config }) {
                 navigate(`/chores/${entry.choreId}`)
               }}
             >
-              Open Task
+              {t('detail.openTask')}
             </Button>
           )}
           {config?.onEdit && (
@@ -159,7 +165,7 @@ function HistoryDetailModal({ config }) {
               startDecorator={<Edit sx={{ fontSize: 16 }} />}
               onClick={() => config.onEdit(entry)}
             >
-              Edit Entry
+              {t('detail.editEntry')}
             </Button>
           )}
         </ModalActions>
@@ -196,7 +202,7 @@ function HistoryDetailModal({ config }) {
         {performer && (
           <DetailRow
             icon={<Check sx={{ fontSize: 16 }} />}
-            label='Performed by'
+            label={t('detail.performedBy')}
           >
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
               <Avatar
@@ -216,7 +222,7 @@ function HistoryDetailModal({ config }) {
         {isDifferentAssignee && assignedTo && (
           <DetailRow
             icon={<Person sx={{ fontSize: 16 }} />}
-            label='Assigned to'
+            label={t('detail.assignedTo')}
             value={assignedTo.displayName}
           />
         )}
@@ -259,7 +265,7 @@ function HistoryDetailModal({ config }) {
         {showUpdatedAt && (
           <DetailRow
             icon={<Update sx={{ fontSize: 16 }} />}
-            label='Last updated'
+            label={t('detail.lastUpdated')}
             value={fmt.dateTime(entry.updatedAt)}
           />
         )}
@@ -268,7 +274,7 @@ function HistoryDetailModal({ config }) {
         {entry.duration > 0 && (
           <DetailRow
             icon={<Schedule sx={{ fontSize: 16 }} />}
-            label='Duration'
+            label={t('detail.duration')}
             value={formatDuration(entry.duration)}
           />
         )}
@@ -277,8 +283,8 @@ function HistoryDetailModal({ config }) {
         {entry.points > 0 && (
           <DetailRow
             icon={<Typography sx={{ fontSize: 14 }}>★</Typography>}
-            label='Points earned'
-            value={`${entry.points} pt${entry.points > 1 ? 's' : ''}`}
+            label={t('detail.pointsEarned')}
+            value={t('detail.points', { count: entry.points })}
           />
         )}
 

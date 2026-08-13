@@ -2,8 +2,10 @@ import { FormControl, FormHelperText, Input, Typography } from '@mui/joy'
 import { useState } from 'react'
 import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
+import { useTranslation } from 'react-i18next'
 
 function EditThingStateModal({ isOpen, onClose, onSave, currentThing }) {
+  const { t } = useTranslation('things')
   const { ResponsiveModal } = useResponsiveModal()
 
   const [state, setState] = useState(currentThing?.state || '')
@@ -13,7 +15,7 @@ function EditThingStateModal({ isOpen, onClose, onSave, currentThing }) {
     const newErrors = {}
 
     if (state.trim() === '') {
-      newErrors.state = 'State is required'
+      newErrors.state = t('errStateRequired')
     }
 
     setErrors(newErrors)
@@ -38,18 +40,18 @@ function EditThingStateModal({ isOpen, onClose, onSave, currentThing }) {
       open={isOpen}
       onClose={onClose}
       size='sm'
-      title='Update state'
+      title={t('updateState')}
       footer={
         <ModalActions
-          secondary={{ label: 'Cancel', onClick: onClose }}
-          primary={{ label: 'Update', onClick: handleSave }}
+          secondary={{ label: t('common:cancel'), onClick: onClose }}
+          primary={{ label: t('update'), onClick: handleSave }}
         />
       }
     >
       <FormControl>
-        <Typography>Value</Typography>
+        <Typography>{t('value')}</Typography>
         <Input
-          placeholder='Thing value'
+          placeholder={t('valuePlaceholder')}
           value={state || ''}
           onChange={e => setState(e.target.value)}
           sx={{ minWidth: 300 }}
