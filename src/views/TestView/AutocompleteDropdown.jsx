@@ -3,8 +3,6 @@ import { Add } from '@mui/icons-material'
 import { Divider, Menu, MenuItem } from '@mui/joy'
 import React, { useEffect } from 'react'
 
-import { Z_INDEX } from '../../constants/zIndex'
-
 const AutocompleteDropdown = ({
   currentValue,
   onCreateSuggestion, // Called when the "Create new" row is chosen
@@ -62,7 +60,6 @@ const AutocompleteDropdown = ({
         position: 'relative',
         bottom: 0,
         left: 0,
-        zIndex: Z_INDEX.MODAL_POPOVER,
       }}
     >
       {filteredOptions.map((option, index) => (

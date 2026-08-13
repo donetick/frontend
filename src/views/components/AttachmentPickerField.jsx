@@ -18,7 +18,6 @@ import {
 import { ClickAwayListener, Popper } from '@mui/material'
 import { useEffect, useRef, useState } from 'react'
 
-import { Z_INDEX } from '../../constants/zIndex'
 import { useDocumentScanner } from '../../hooks/useDocumentScanner'
 import { useFileUpload } from '../../hooks/useFileUpload'
 import { useNotification } from '../../service/NotificationProvider'
@@ -223,7 +222,7 @@ const AttachmentPickerField = ({
               options: { fallbackPlacements: ['bottom-start', 'top-start'] },
             },
           ]}
-          sx={{ zIndex: Z_INDEX.MODAL_CLOSE_BUTTON + 1 }}
+          sx={{ zIndex: 'calc(var(--joy-zIndex-modal) + 1)' }}
         >
           <ClickAwayListener onClickAway={() => setIsOpen(false)}>
             <Sheet

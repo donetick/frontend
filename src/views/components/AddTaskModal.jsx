@@ -1,5 +1,14 @@
-import { Add } from '@mui/icons-material'
-import { Box, Button, Typography } from '@mui/joy'
+import { Add, KeyboardArrowDown } from '@mui/icons-material'
+import {
+  Box,
+  Button,
+  Dropdown,
+  ListItemDecorator,
+  Menu,
+  MenuButton,
+  MenuItem,
+  Typography,
+} from '@mui/joy'
 import { useMediaQuery } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
 import * as chrono from 'chrono-node'
@@ -20,6 +29,7 @@ import LABEL_COLORS, { TASK_COLOR } from '../../utils/Colors'
 import { CreateLabel } from '../../utils/Fetcher'
 import { imageSourceToFile } from '../../utils/FileConvert'
 import { isPlusAccount } from '../../utils/Helpers'
+import { getIconComponent } from '../../utils/ProjectIcons'
 import { generateUUID } from '../../utils/UUID'
 import { useLabels } from '../Labels/LabelQueries'
 import { useProjects } from '../Projects/ProjectQueries'
@@ -122,6 +132,13 @@ const getInitialProject = () => {
   return 'default'
 }
 
+const DEFAULT_PROJECT = {
+  id: 'default',
+  name: 'Default Project',
+  color: '#9CA3AF',
+  icon: 'FolderOpen',
+}
+
 const PRIORITY_COLORS = {
   0: TASK_COLOR.NO_PRIORITY,
   1: TASK_COLOR.PRIORITY_1,
@@ -175,7 +192,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
   const { data: userLabels, isLoading: userLabelsLoading } = useLabels()
   const { data: circleMembers, isLoading: isCircleMembersLoading } =
     useCircleMembers()
-  const { isLoading: isProjectsLoading } = useProjects()
+  const { data: projects, isLoading: isProjectsLoading } = useProjects()
   const createChoreMutation = useCreateChore()
   const queryClient = useQueryClient()
 
@@ -293,6 +310,17 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
   const [useCustomTime, setUseCustomTime] = useState(false)
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
   const [projectId, setProjectId] = useState(getInitialProject)
+  const selectedProject = useMemo(
+    () =>
+      (projectId !== 'default' &&
+        projects?.find(project => project.id === projectId)) ||
+      DEFAULT_PROJECT,
+    [projects, projectId],
+  )
+  const SelectedProjectIcon = useMemo(
+    () => getIconComponent(selectedProject.icon),
+    [selectedProject],
+  )
   const [attachments, setAttachments] = useState([])
 
   const [draftId, setDraftId] = useState(() => generateUUID())
@@ -1121,6 +1149,50 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
         title='Create new task'
         footer={
           <ModalActions>
+            {!showScan && !showVoice && projects?.length >= 1 && (
+              <Dropdown>
+                <MenuButton
+                  variant='plain'
+                  color='neutral'
+                  size='sm'
+                  startDecorator={
+                    <SelectedProjectIcon
+                      sx={{ fontSize: 18, color: selectedProject.color }}
+                    />
+                  }
+                  endDecorator={<KeyboardArrowDown sx={{ fontSize: 16 }} />}
+                  sx={{
+                    mr: 'auto',
+                    color: 'text.secondary',
+                    fontWeight: 'normal',
+                  }}
+                >
+                  {selectedProject.name}
+                </MenuButton>
+                <Menu
+                  placement='top-start'
+                  sx={{ minWidth: 200, zIndex: Z_INDEX.MODAL_POPOVER }}
+                >
+                  {[DEFAULT_PROJECT, ...projects].map(project => {
+                    const ProjectIcon = getIconComponent(project.icon)
+                    return (
+                      <MenuItem
+                        key={project.id}
+                        selected={projectId === project.id}
+                        onClick={() => setProjectId(project.id)}
+                      >
+                        <ListItemDecorator>
+                          <ProjectIcon
+                            sx={{ fontSize: 18, color: project.color }}
+                          />
+                        </ListItemDecorator>
+                        {project.name}
+                      </MenuItem>
+                    )
+                  })}
+                </Menu>
+              </Dropdown>
+            )}
             <Button
               variant='outlined'
               color='neutral'

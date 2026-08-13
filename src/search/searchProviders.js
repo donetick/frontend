@@ -1,3 +1,5 @@
+import { SETTINGS_SECTIONS } from '../constants/settingsSections'
+
 const stripHtml = value => {
   if (!value) return ''
   if (typeof globalThis.document === 'undefined')
@@ -16,26 +18,6 @@ const HISTORY_STATUS = {
   5: 'missed',
   6: 'rescheduled',
 }
-
-const SETTINGS = [
-  ['profile', 'Profile', 'Name, avatar and personal details'],
-  ['circle', 'Circle', 'Members and household settings', true],
-  ['account', 'Account', 'Subscription and account management', true],
-  ['subaccounts', 'Subaccounts', 'Manage child accounts'],
-  ['notifications', 'Notifications', 'Reminders and notification preferences'],
-  ['mfa', 'Multi-factor authentication', 'Secure your account', true],
-  ['apitokens', 'API tokens', 'Manage integrations and access tokens', true],
-  ['storage', 'Storage', 'Files, backups and device storage'],
-  ['sidepanel', 'Side panel', 'Customize navigation'],
-  ['theme', 'Appearance', 'Theme, dark mode and colors'],
-  ['localization', 'Language and region', 'Language, dates and time formats'],
-  [
-    'advanced',
-    'Advanced settings',
-    'Offline support, webhooks and application behavior',
-  ],
-  ['developer', 'Developer settings', 'Diagnostics and experimental tools'],
-]
 
 const providers = []
 
@@ -166,15 +148,15 @@ registerSearchProvider({
 
 registerSearchProvider({
   id: 'settings',
-  getDocuments: ({ isParent }) =>
-    SETTINGS.filter(([, , , parentOnly]) => !parentOnly || isParent).map(
-      ([id, title, description]) =>
+  getDocuments: ({ isParent, t }) =>
+    SETTINGS_SECTIONS.filter(({ parentOnly }) => !parentOnly || isParent).map(
+      ({ id }) =>
         document('settings', {
           id: `setting:${id}`,
           entityId: id,
-          title,
+          title: t(`overview.sections.${id}.title`),
           subtitle: 'Settings',
-          body: description,
+          body: t(`overview.sections.${id}.description`),
           keywords: `preferences configuration ${id}`,
           route: `/settings/${id}`,
         }),

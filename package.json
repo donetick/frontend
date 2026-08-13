@@ -71,7 +71,7 @@
     "@jcesarmobile/capacitor-ocr": "^0.3.0",
     "@meauxt/react-swipeable-list": "^1.0.0",
     "@mui/icons-material": "^5.16.13",
-    "@mui/joy": "^5.0.0-beta.20",
+    "@mui/joy": "5.0.0-beta.52",
     "@mui/material": "^5.15.2",
     "@openreplay/tracker": "^14.0.4",
     "@revenuecat/purchases-capacitor": "^12.0.0",
