@@ -24,8 +24,10 @@ import { syncEngine } from '../../utils/SyncEngine'
 import { getRefreshTokenExpiry, isNative } from '../../utils/TokenStorage'
 import FeedbackModal from '../Modals/FeedbackModal'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
+import { useTranslation } from 'react-i18next'
 
 const DeveloperSettings = () => {
+  const { t } = useTranslation('settings')
   const queryClient = useQueryClient()
   const { confirmModalConfig, showConfirmation } = useConfirmationModal()
   const { data: userProfile } = useUserProfile()
@@ -236,7 +238,7 @@ const DeveloperSettings = () => {
       if (result.success) {
         showNotification({
           type: 'success',
-          message: 'Token refreshed successfully',
+          message: t('developer.tokenRefreshed'),
         })
 
         // Reload token expiry data
@@ -272,7 +274,7 @@ const DeveloperSettings = () => {
         const data = await response.json()
         showNotification({
           type: 'success',
-          message: 'Refresh token endpoint called successfully',
+          message: t('developer.endpointCalled'),
         })
 
         // Reload token expiry data
@@ -341,7 +343,7 @@ const DeveloperSettings = () => {
 
           showNotification({
             type: 'success',
-            message: 'Local offline database cleared. Starting full sync...',
+            message: t('developer.clearDbCleared'),
           })
 
           const didSync = await syncEngine.sync()
@@ -349,7 +351,7 @@ const DeveloperSettings = () => {
             await queryClient.invalidateQueries()
             showNotification({
               type: 'success',
-              message: 'Full sync completed from the beginning',
+              message: t('developer.clearDbDone'),
             })
           } else {
             showNotification({
@@ -437,7 +439,7 @@ const DeveloperSettings = () => {
       <Typography level='h3'>Developer Settings</Typography>
       <Divider />
       <Typography level='body-md'>
-        View technical information about your authentication tokens and session
+        {t('developer.intro')}
         state. This information is useful for debugging and development
         purposes.
       </Typography>
@@ -535,7 +537,7 @@ const DeveloperSettings = () => {
               </>
             ) : (
               <Typography level='body-sm' color='neutral'>
-                Refresh tokens are managed via HTTP-only cookies on web platform
+                {t('developer.refreshCookieNote')}
               </Typography>
             )}
           </Box>
@@ -1110,7 +1112,7 @@ const DeveloperSettings = () => {
               </Box>
             ) : (
               <Typography level='body-sm' color='neutral'>
-                No reconnection information available
+                {t('developer.noReconnectInfo')}
               </Typography>
             )}
           </Box>
@@ -1150,7 +1152,7 @@ const DeveloperSettings = () => {
               </Box>
             ) : (
               <Typography level='body-sm' color='neutral'>
-                No timeout information available
+                {t('developer.noTimeoutInfo')}
               </Typography>
             )}
           </Box>
@@ -1195,7 +1197,7 @@ const DeveloperSettings = () => {
               </Box>
             ) : (
               <Typography level='body-sm' color='neutral'>
-                No debug information available
+                {t('developer.noDebugInfo')}
               </Typography>
             )}
           </Box>
