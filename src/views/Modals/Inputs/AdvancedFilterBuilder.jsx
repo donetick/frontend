@@ -11,6 +11,7 @@ import FilterBuilderContent, {
 import { FILTER_COLORS } from '../../../utils/Colors'
 import { applyFilter } from '../../../utils/FilterEngine'
 import { useFilters } from '../../Filters/FilterQueries'
+import { useTranslation } from 'react-i18next'
 
 const EMPTY_FILTERS = []
 
@@ -25,6 +26,7 @@ const AdvancedFilterBuilder = ({
   userProfile = null,
   editingFilter = null,
 }) => {
+  const { t } = useTranslation('filters')
   const [filterName, setFilterName] = useState('')
   const [filterColor, setFilterColor] = useState(FILTER_COLORS[0].value)
   const [selections, setSelections] = useState(defaultSelections())
@@ -76,15 +78,15 @@ const AdvancedFilterBuilder = ({
 
   const handleSave = () => {
     if (!filterName.trim()) {
-      setError('Please enter a filter name')
+      setError(t('builder.errorName'))
       return
     }
     if (filterNameExists(filterName.trim(), editingFilter?.id)) {
-      setError('A filter with this name already exists')
+      setError(t('nameExists'))
       return
     }
     if (conditions.length === 0) {
-      setError('Please configure at least one filter condition')
+      setError(t('builder.errorConditions'))
       return
     }
     onSave({
@@ -106,7 +108,7 @@ const AdvancedFilterBuilder = ({
       maxHeight='92vh'
       title={
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {editingFilter ? 'Edit Filter' : 'New Filter'}
+          {editingFilter ? t('builder.editTitle') : t('builder.newTitle')}
           {activeConditionCount > 0 && (
             <Chip size='sm' variant='solid' color='primary'>
               {activeConditionCount} condition
@@ -129,17 +131,17 @@ const AdvancedFilterBuilder = ({
             {conditions.length > 0 ? (
               <>
                 <Chip size='sm' variant='soft' color='neutral'>
-                  {previewCount} task{previewCount !== 1 ? 's' : ''}
+                  {t('tasks', { count: previewCount })}
                 </Chip>
                 {previewOverdueCount > 0 && (
                   <Chip size='sm' variant='solid' color='danger'>
-                    {previewOverdueCount} overdue
+                    {t('overdue', { count: previewOverdueCount })}
                   </Chip>
                 )}
               </>
             ) : (
               <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                Add conditions to preview
+                {t('builder.addConditions')}
               </Typography>
             )}
           </Box>
@@ -147,7 +149,7 @@ const AdvancedFilterBuilder = ({
           {/* Actions */}
           <ModalActions>
             <Button variant='outlined' color='neutral' onClick={onClose}>
-              Cancel
+              {t('common:cancel')}
             </Button>
             <Button
               variant='solid'
@@ -155,7 +157,7 @@ const AdvancedFilterBuilder = ({
               startDecorator={<Save sx={{ fontSize: 16 }} />}
               onClick={handleSave}
             >
-              Save Filter
+              {t('builder.save')}
             </Button>
           </ModalActions>
         </Box>
@@ -168,10 +170,10 @@ const AdvancedFilterBuilder = ({
             level='body-xs'
             sx={{ mb: 0.75, color: 'text.secondary', fontWeight: 600 }}
           >
-            Filter Name
+            {t('builder.name')}
           </Typography>
           <Input
-            placeholder='e.g. Overdue tasks for Alice'
+            placeholder={t('builder.namePlaceholder')}
             value={filterName}
             onChange={e => {
               setFilterName(e.target.value)
@@ -193,13 +195,13 @@ const AdvancedFilterBuilder = ({
             level='body-xs'
             sx={{ mb: 0.75, color: 'text.secondary', fontWeight: 600 }}
           >
-            Color
+            {t('builder.color')}
           </Typography>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
             {FILTER_COLORS.map(c => (
               <Box
                 key={c.value}
-                title={c.name}
+                title={t(`common:colors.${c.key}`)}
                 onClick={() => setFilterColor(c.value)}
                 sx={{
                   width: 26,

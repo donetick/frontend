@@ -11,6 +11,7 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import LabelModal from '../Modals/Inputs/LabelModal'
 
 import {
@@ -32,6 +33,7 @@ import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import { useLabels } from './LabelQueries'
 
 const LabelCardContent = ({ label, currentUserId, onToggleActions }) => {
+  const { t } = useTranslation('labels')
   // Check if current user owns this label
   const isOwnedByCurrentUser = label.created_by === currentUserId
 
@@ -124,7 +126,7 @@ const LabelCardContent = ({ label, currentUserId, onToggleActions }) => {
                 fontWeight: 'md',
               }}
             >
-              Shared
+              {t('shared')}
             </Chip>
           )}
         </Box>
@@ -149,6 +151,7 @@ const LabelCardContent = ({ label, currentUserId, onToggleActions }) => {
 }
 
 const LabelView = () => {
+  const { t } = useTranslation('labels')
   const { data: labels, isLabelsLoading, isError } = useLabels()
   const { data: userProfile } = useUserProfile()
 
@@ -173,14 +176,11 @@ const LabelView = () => {
   const handleDeleteClicked = id => {
     setConfirmationModel({
       isOpen: true,
-      title: 'Delete Label',
-
-      message:
-        'Are you sure you want to delete this label? This will remove the label from all tasks.',
-
-      confirmText: 'Delete',
+      title: t('delete.title'),
+      message: t('delete.message'),
+      confirmText: t('common:delete'),
       color: 'danger',
-      cancelText: 'Cancel',
+      cancelText: t('common:cancel'),
       onClose: confirmed => {
         if (confirmed === true) {
           handleDeleteLabel(id)
@@ -230,7 +230,7 @@ const LabelView = () => {
   if (isError) {
     return (
       <Typography color='danger' textAlign='center'>
-        Failed to load labels. Please try again.
+        {t('loadError')}
       </Typography>
     )
   }
@@ -244,12 +244,10 @@ const LabelView = () => {
             level='h3'
             sx={{ fontWeight: 'lg', color: 'text.primary' }}
           >
-            Labels
+            {t('common:navigation.labels')}
           </Typography>
           <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            Manage your labels and organize your tasks effectively. Labels will
-            be automatically shared with your circle if they are used on a
-            shared task.
+            {t('blurb')}
           </Typography>
         </Stack>
       </Box>
@@ -300,7 +298,7 @@ const LabelView = () => {
                       >
                         <EditIcon sx={{ fontSize: 20 }} />
                         <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                          Edit
+                          {t('common:edit')}
                         </Typography>
                       </Box>
                     </SwipeAction>
@@ -319,7 +317,7 @@ const LabelView = () => {
                       >
                         <DeleteIcon sx={{ fontSize: 20 }} />
                         <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                          Delete
+                          {t('common:delete')}
                         </Typography>
                       </Box>
                     </SwipeAction>

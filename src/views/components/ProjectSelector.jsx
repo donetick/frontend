@@ -10,6 +10,7 @@ import {
   MenuItem,
   Typography,
 } from '@mui/joy'
+import { useTranslation } from 'react-i18next'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
@@ -25,6 +26,7 @@ const ProjectSelector = ({
   onProjectSelect,
   showKeyboardShortcuts = false,
 }) => {
+  const { t } = useTranslation('projects')
   const { data: projects = [], isLoading } = useProjects()
   const navigate = useNavigate()
 
@@ -265,7 +267,7 @@ const ProjectSelector = ({
           </ListItemDecorator>
           <ListItemContent>
             <Typography level='title-sm' sx={{ fontWeight: 600 }}>
-              Projects
+              {t('selector.title')}
             </Typography>
           </ListItemContent>
         </MenuItem>
@@ -339,7 +341,7 @@ const ProjectSelector = ({
                       : 'var(--joy-palette-text-primary)',
                 }}
               >
-                Default Project
+                {t('chores:toolbar.defaultProject')}
               </Typography>
               {effectiveSelectedProject === 'Default Project' && (
                 <Check
@@ -477,13 +479,13 @@ const ProjectSelector = ({
                 fontWeight: 500,
               }}
             >
-              Create New Project
+              {t('selector.createNew')}
             </Typography>
             <Typography
               level='body-xs'
               sx={{ color: 'var(--joy-palette-text-tertiary)' }}
             >
-              Add a custom project workspace
+              {t('selector.createNewDescription')}
             </Typography>
           </ListItemContent>
         </MenuItem>
@@ -512,13 +514,13 @@ const ProjectSelector = ({
                 fontWeight: 500,
               }}
             >
-              Manage Projects
+              {t('selector.manage')}
             </Typography>
             <Typography
               level='body-xs'
               sx={{ color: 'var(--joy-palette-text-tertiary)' }}
             >
-              View, edit, and organize all projects
+              {t('selector.manageDescription')}
             </Typography>
           </ListItemContent>
         </MenuItem>

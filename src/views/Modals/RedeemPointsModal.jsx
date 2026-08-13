@@ -11,6 +11,7 @@ import {
   Stack,
   Typography,
 } from '@mui/joy'
+import { useTranslation } from 'react-i18next'
 import { useEffect, useState } from 'react'
 
 import ModalActions from '../../components/common/ModalActions.jsx'
@@ -18,6 +19,7 @@ import { useResponsiveModal } from '../../hooks/useResponsiveModal.js'
 import { resolvePhotoURL } from '../../utils/Helpers.jsx'
 
 function RedeemPointsModal({ config }) {
+  const { t } = useTranslation('points')
   const { ResponsiveModal } = useResponsiveModal()
 
   const [points, setPoints] = useState(0)
@@ -56,12 +58,12 @@ function RedeemPointsModal({ config }) {
       open={config?.isOpen}
       onClose={config?.onClose}
       size='md'
-      title='Redeem Points'
+      title={t('redeem')}
       footer={
         <ModalActions
-          secondary={{ label: 'Cancel', onClick: config?.onClose }}
+          secondary={{ label: t('common:cancel'), onClick: config?.onClose }}
           primary={{
-            label: 'Redeem',
+            label: t('redeemModal.redeemButton'),
             startDecorator: <CreditCard />,
             disabled: !canRedeem,
             onClick: () =>
@@ -103,7 +105,7 @@ function RedeemPointsModal({ config }) {
                 startDecorator={<Toll />}
                 sx={{ mt: 0.5 }}
               >
-                {config?.available || 0} points available
+                {t('redeemModal.pointsAvailable', { count: config?.available || 0 })}
               </Chip>
             </Box>
           </Stack>
@@ -112,7 +114,7 @@ function RedeemPointsModal({ config }) {
         {/* Points Input Section */}
         <FormControl>
           <FormLabel sx={{ fontWeight: 600, mb: 1 }}>
-            Points to Redeem
+            {t('redeemModal.pointsToRedeem')}
           </FormLabel>
           <Input
             type='number'
@@ -124,7 +126,7 @@ function RedeemPointsModal({ config }) {
               input: {
                 min: 0,
                 max: config?.available || 0,
-                placeholder: 'Enter points...',
+                placeholder: t('redeemModal.placeholder'),
               },
             }}
             onChange={e => handlePointsChange(e.target.value)}
@@ -140,7 +142,7 @@ function RedeemPointsModal({ config }) {
           />
           {points > config?.available && (
             <Typography level='body-xs' sx={{ color: 'danger.500', mt: 0.5 }}>
-              Cannot exceed available points
+              {t('redeemModal.cannotExceed')}
             </Typography>
           )}
         </FormControl>
@@ -148,7 +150,7 @@ function RedeemPointsModal({ config }) {
         {/* Quick Selection Buttons */}
         <Box>
           <Typography level='body-sm' sx={{ fontWeight: 600, mb: 1.5 }}>
-            Quick Add:
+            {t('redeemModal.quickAdd')}
           </Typography>
           <Stack
             direction='row'
@@ -199,19 +201,21 @@ function RedeemPointsModal({ config }) {
             }}
           >
             <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-              You are about to redeem
+              {t('redeemModal.aboutToRedeem')}
             </Typography>
             <Typography
               level='h4'
               sx={{ color: 'primary.600', fontWeight: 700 }}
             >
-              {points} points
+              {t('redeemModal.amount', { count: points })}
             </Typography>
             <Typography
               level='body-xs'
               sx={{ color: 'text.secondary', mt: 0.5 }}
             >
-              Remaining: {(config?.available || 0) - points} points
+              {t('redeemModal.remaining', {
+                count: (config?.available || 0) - points,
+              })}
             </Typography>
           </Card>
         )}

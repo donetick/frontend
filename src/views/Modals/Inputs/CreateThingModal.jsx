@@ -10,8 +10,10 @@ import {
 import { useEffect, useState } from 'react'
 import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
+import { useTranslation } from 'react-i18next'
 
 function CreateThingModal({ isOpen, onClose, onSave, currentThing }) {
+  const { t } = useTranslation('things')
   const { ResponsiveModal } = useResponsiveModal()
 
   const [name, setName] = useState(currentThing?.name || '')
@@ -33,17 +35,17 @@ function CreateThingModal({ isOpen, onClose, onSave, currentThing }) {
   const isValid = () => {
     const newErrors = {}
     if (!name || name.trim() === '') {
-      newErrors.name = 'Name is required'
+      newErrors.name = t('errName')
     }
 
     if (type === 'number' && isNaN(state)) {
-      newErrors.state = 'State must be a number'
+      newErrors.state = t('errStateNumber')
     }
     if (type === 'boolean' && !['true', 'false'].includes(state)) {
-      newErrors.state = 'State must be true or false'
+      newErrors.state = t('errStateBool')
     }
     if ((type === 'text' && !state) || state.trim() === '') {
-      newErrors.state = 'State is required'
+      newErrors.state = t('errStateRequired')
     }
 
     setErrors(newErrors)
@@ -67,7 +69,7 @@ function CreateThingModal({ isOpen, onClose, onSave, currentThing }) {
       footer={
         <ModalActions
           secondary={{
-            label: 'Cancel',
+            label: t('common:cancel'),
             onClick: onClose,
           }}
           primary={{
@@ -78,9 +80,9 @@ function CreateThingModal({ isOpen, onClose, onSave, currentThing }) {
       }
     >
       <FormControl>
-        <Typography>Name</Typography>
+        <Typography>{t('name')}</Typography>
         <Textarea
-          placeholder='Thing name'
+          placeholder={t('namePlaceholder')}
           value={name}
           onChange={e => setName(e.target.value)}
           sx={{ minWidth: 300 }}
@@ -101,9 +103,9 @@ function CreateThingModal({ isOpen, onClose, onSave, currentThing }) {
       </FormControl>
       {type === 'text' && (
         <FormControl>
-          <Typography>Value</Typography>
+          <Typography>{t('value')}</Typography>
           <Input
-            placeholder='Thing value'
+            placeholder={t('valuePlaceholder')}
             value={state || ''}
             onChange={e => setState(e.target.value)}
             sx={{ minWidth: 300 }}
@@ -113,9 +115,9 @@ function CreateThingModal({ isOpen, onClose, onSave, currentThing }) {
       )}
       {type === 'number' && (
         <FormControl>
-          <Typography>Value</Typography>
+          <Typography>{t('value')}</Typography>
           <Input
-            placeholder='Thing value'
+            placeholder={t('valuePlaceholder')}
             type='number'
             value={state || ''}
             onChange={e => {

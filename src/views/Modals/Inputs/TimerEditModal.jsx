@@ -12,6 +12,7 @@ import {
 } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useLocalization } from '../../../contexts/LocalizationContext'
 import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
@@ -24,6 +25,7 @@ import {
 import ConfirmationModal from './ConfirmationModal'
 
 const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
+  const { t } = useTranslation('timer')
   const { ResponsiveModal } = useResponsiveModal()
   const { fmt } = useLocalization()
 
@@ -181,8 +183,8 @@ const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
         {
           onSuccess: () => {
             showSuccess({
-              title: 'Session updated',
-              message: 'Timer session has been updated successfully.',
+              title: t('toast.sessionUpdatedTitle'),
+              message: t('toast.sessionUpdatedMessage'),
             })
             refetchTimer()
             cancelEditingSession(sessionId)
@@ -190,15 +192,15 @@ const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
           },
           onError: () => {
             showError({
-              title: 'Failed to update session',
-              message: 'Please try again.',
+              title: t('toast.sessionUpdateFailTitle'),
+              message: t('toast.tryAgain'),
             })
           },
         },
       )
     } catch (error) {
       showError({
-        title: 'Error updating session',
+        title: t('toast.sessionUpdateErrorTitle'),
         message: error.message,
       })
     } finally {
@@ -213,15 +215,15 @@ const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
       {
         onSuccess: () => {
           showSuccess({
-            title: 'Session deleted',
-            message: 'Timer session has been deleted successfully.',
+            title: t('toast.sessionDeletedTitle'),
+            message: t('toast.sessionDeletedMessage'),
           })
           refetchTimer()
           onTimerUpdate?.()
         },
         onError: error => {
           showError({
-            title: 'Error deleting session',
+            title: t('toast.sessionDeleteErrorTitle'),
             message: error.message,
           })
         },
@@ -235,10 +237,10 @@ const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
   const confirmDeleteSession = sessionId => {
     setConfirmDeleteConfig({
       isOpen: true,
-      title: 'Delete Timer Session',
-      message: 'Are you sure you want to delete this timer session?',
-      confirmText: 'Delete',
-      cancelText: 'Cancel',
+      title: t('toast.deleteConfirmTitle'),
+      message: t('toast.deleteConfirmMessage'),
+      confirmText: t('common:delete'),
+      cancelText: t('common:cancel'),
       color: 'danger',
       onClose: isConfirmed => {
         if (isConfirmed) {
@@ -310,23 +312,23 @@ const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
             tertiary={
               !loading && timerData && !editingSessions[timerData.id]
                 ? {
-                    label: 'Delete',
+                    label: t('common:delete'),
                     color: 'danger',
                     onClick: () => confirmDeleteSession(timerData.id),
                   }
                 : undefined
             }
-            secondary={{ label: 'Close', onClick: handleClose }}
+            secondary={{ label: t('common:close'), onClick: handleClose }}
             primary={
               !loading && timerData
                 ? editingSessions[timerData.id]
                   ? {
-                      label: 'Save',
+                      label: t('common:save'),
                       onClick: () => saveSession(timerData.id),
                       loading,
                     }
                   : {
-                      label: 'Edit',
+                      label: t('common:edit'),
                       startDecorator: <Edit />,
                       onClick: () => startEditingSession(),
                     }
@@ -337,13 +339,13 @@ const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
       >
         {loading && (
           <Alert color='neutral' sx={{ mb: 2 }}>
-            Loading timer data...
+            {t('loading')}
           </Alert>
         )}
 
         {!loading && !timerData && (
           <Alert color='warning' sx={{ mb: 2 }}>
-            No timer data found for this chore.
+            {t('noData')}
           </Alert>
         )}
 
@@ -403,7 +405,7 @@ const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
                         color: 'text.primary',
                       }}
                     >
-                      Active Work
+                      {t('activeWork')}
                     </Typography>
                   </Box>
                   <Box>
@@ -457,7 +459,7 @@ const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
                         color: 'text.primary',
                       }}
                     >
-                      Break Time
+                      {t('breakTime')}
                     </Typography>
                   </Box>
                   <Box>
@@ -511,7 +513,7 @@ const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
                         color: 'text.primary',
                       }}
                     >
-                      Work Sessions
+                      {t('workSessions')}
                     </Typography>
                   </Box>
                   <Box>
@@ -565,7 +567,7 @@ const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
                         color: 'text.primary',
                       }}
                     >
-                      Total Time
+                      {t('totalTime')}
                     </Typography>
                   </Box>
                   <Box>
@@ -597,12 +599,12 @@ const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
                     level='body-xs'
                     sx={{ color: 'text.secondary', fontWeight: 'medium' }}
                   >
-                    Work vs Break Distribution
+                    {t('distribution')}
                   </Typography>
                   <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
                     {calculateCurrentActiveDuration() > 0
                       ? `${Math.round((calculateCurrentActiveDuration() / calculateTotalDuration()) * 100)}% active`
-                      : 'No active time yet'}
+                      : t('noActiveTime')}
                   </Typography>
                 </Box>
                 <Box
@@ -630,7 +632,7 @@ const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
             {/* Time Session */}
             <Box>
               <Typography level='h4' sx={{ mb: 2 }}>
-                Session Breakdown
+                {t('sessionBreakdown')}
               </Typography>
 
               <Box>
@@ -644,7 +646,7 @@ const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
                           level='body-sm'
                           sx={{ fontWeight: 'bold', mb: 2 }}
                         >
-                          Work Sessions ({timerData.pauseLog.length})
+                          {t('workSessions')} ({timerData.pauseLog.length})
                         </Typography>
 
                         <Box
@@ -795,7 +797,7 @@ const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
                             level='body-sm'
                             sx={{ fontWeight: 'bold' }}
                           >
-                            Sessions
+                            {t('sessions')}
                           </Typography>
                           <Button
                             size='sm'
@@ -803,7 +805,7 @@ const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
                             startDecorator={<Add />}
                             onClick={() => addPauseLogEntry(timerData.id)}
                           >
-                            Add Session
+                            {t('addSession')}
                           </Button>
                         </Box>
 
@@ -855,7 +857,7 @@ const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
                                     level='body-xs'
                                     sx={{ fontWeight: 'bold' }}
                                   >
-                                    Start Time
+                                    {t('startTime')}
                                   </Typography>
                                   <Input
                                     type='datetime-local'
@@ -878,7 +880,7 @@ const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
                                     level='body-xs'
                                     sx={{ fontWeight: 'bold' }}
                                   >
-                                    End Time
+                                    {t('endTime')}
                                   </Typography>
                                   <Input
                                     type='datetime-local'
@@ -903,7 +905,7 @@ const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
                                     }
                                   />
                                   <FormHelperText>
-                                    Leave empty if session is ongoing
+                                    {t('leaveEmpty')}
                                   </FormHelperText>
                                 </FormControl>
 
@@ -941,7 +943,7 @@ const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
 
             {!timerData && (
               <Alert color='neutral' sx={{ mt: 2 }}>
-                No timer session found for this chore.
+                {t('noSessionForChore')}
               </Alert>
             )}
           </Box>
