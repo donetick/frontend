@@ -352,7 +352,8 @@
     "backupCodesModal": {
       "title": "New Backup Codes",
       "warning": "Your previous backup codes are now invalid. Save these new codes in a safe place. Each code can only be used once."
-    }
+    },
+    "generateCodes": "Generate New Codes"
   },
   "apiTokens": {
     "title": "API Tokens",

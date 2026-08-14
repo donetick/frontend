@@ -70,7 +70,19 @@
       "paused": "Timer Paused",
       "reset": "Reset Timer",
       "delete": "Delete Session"
-    }
+    },
+    "unableUndo": "Failed to undo",
+    "offlineComplete": "You're offline — completion will sync when back online",
+    "unableComplete": "Unable to complete task",
+    "offlineSkip": "You're offline — skip will sync when back online",
+    "unableSkip": "Unable to skip task",
+    "offlineStart": "You're offline — start will sync when back online",
+    "unableStart": "Unable to start task",
+    "offlinePause": "You're offline — pause will sync when back online",
+    "unablePause": "Unable to pause task",
+    "offlineRestore": "You're offline — restore will sync when back online",
+    "restoreFailed": "Failed to restore",
+    "unableRestore": "Unable to restore task"
   },
   "toolbar": {
     "defaultProject": "Default Project"

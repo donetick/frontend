@@ -249,7 +249,7 @@ const MFASettings = () => {
               size='sm'
               onClick={handleRegenerateBackupCodes}
             >
-              Generate New Codes
+              {t('mfa.generateCodes')}
             </Button>
           </Box>
         </Card>
