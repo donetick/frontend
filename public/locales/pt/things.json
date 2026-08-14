@@ -1,0 +1,18 @@
+{
+  "errName": "Name is required",
+  "errStateNumber": "State must be a number",
+  "errStateBool": "State must be true or false",
+  "errStateRequired": "State is required",
+  "name": "Name",
+  "namePlaceholder": "Thing name",
+  "value": "Value",
+  "valuePlaceholder": "Thing value",
+  "updateState": "Update state",
+  "update": "Update",
+  "history": {
+    "overview": "Things Overview",
+    "visualization": "Data Visualization",
+    "changeHistory": "Change History",
+    "updated": "Updated"
+  }
+}
