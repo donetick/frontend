@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+
 import { useUserProfile } from '../../queries/UserQueries'
 import {
   installFeedbackErrorListeners,
@@ -31,9 +32,12 @@ const FeedbackPrompt = () => {
 
     shouldShowSentimentPrompt({ userProfile }).then(eligible => {
       if (!eligible || cancelled) return
-      timer = setTimeout(() => {
+      timer = setTimeout(async () => {
         if (cancelled) return
-        markPromptShown()
+        // Awaited so the persisted shownCount is settled before the modal
+        // reads it back for the feedback_prompt_shown event.
+        await markPromptShown()
+        if (cancelled) return
         setOpen(true)
       }, OPEN_DELAY_MS)
     })
@@ -51,6 +55,7 @@ const FeedbackPrompt = () => {
       open={open}
       onClose={() => setOpen(false)}
       onDismiss={markPromptDismissed}
+      source='auto'
     />
   )
 }

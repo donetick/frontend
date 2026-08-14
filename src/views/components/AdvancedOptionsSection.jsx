@@ -312,28 +312,6 @@ const AdvancedOptionsSection = ({
                 />
               </FieldRow>
 
-              <FieldRow
-                label='Expires after'
-                description='Hours after the due date when the task can no longer be completed'
-              >
-                <Input
-                  type='number'
-                  size='sm'
-                  placeholder='—'
-                  value={deadlineOffset > -1 ? deadlineOffset : ''}
-                  onChange={e => {
-                    const v = parseInt(e.target.value)
-                    onDeadlineOffsetChange(isNaN(v) ? -1 : Math.max(0, v))
-                  }}
-                  endDecorator={
-                    <Typography level='body-xs' textColor='text.tertiary'>
-                      hrs
-                    </Typography>
-                  }
-                  sx={{ width: 96 }}
-                  slotProps={{ input: { min: 0 } }}
-                />
-              </FieldRow>
             </>
           ) : (
             <Typography

@@ -1,11 +1,12 @@
+import '@meauxt/react-swipeable-list/dist/styles.css'
+
 import {
-  Type as ListType,
   SwipeableList,
   SwipeableListItem,
   SwipeAction,
   TrailingActions,
+  Type as ListType,
 } from '@meauxt/react-swipeable-list'
-import '@meauxt/react-swipeable-list/dist/styles.css'
 import {
   Add,
   Delete,
@@ -28,6 +29,8 @@ import {
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+
+import { track } from '../../analytics'
 import EmptyState from '../../components/common/EmptyState'
 import { useNotification } from '../../service/NotificationProvider'
 import {
@@ -42,7 +45,7 @@ import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import CreateThingModal from '../Modals/Inputs/CreateThingModal'
 import EditThingStateModal from '../Modals/Inputs/EditThingState'
 
-const ThingCardContent = ({ thing, onCardClick, onToggleActions }) => {
+const ThingCardContent = ({ onCardClick, onToggleActions, thing }) => {
   const getThingIcon = type => {
     if (type === 'text') {
       return <Flip />
@@ -242,6 +245,7 @@ const ThingsView = () => {
             const currentThings = [...things]
             currentThings.push(data.res)
             setThings(currentThings)
+            track('thing_created', {})
           }
           showNotification({
             type: 'success',

@@ -42,6 +42,7 @@ import APITokenSettings from '../views/Settings/APITokenSettings'
 import LocalizationSettings from '../views/Settings/LocalizationSettings'
 import MFASettings from '../views/Settings/MFASettings'
 import NotificationSetting from '../views/Settings/NotificationSetting'
+import PrivacyAnalyticsSettings from '../views/Settings/PrivacyAnalyticsSettings'
 import ProfileSettings from '../views/Settings/ProfileSettings'
 import SidepanelSettings from '../views/Settings/SidepanelSettings'
 import StorageSettings from '../views/Settings/StorageSettings'
@@ -121,6 +122,10 @@ const Router = createBrowserRouter([
           {
             path: 'advanced',
             element: <AdvancedSettings />,
+          },
+          {
+            path: 'privacy',
+            element: <PrivacyAnalyticsSettings />,
           },
           {
             path: 'developer',

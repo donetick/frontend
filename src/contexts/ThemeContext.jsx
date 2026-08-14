@@ -31,6 +31,32 @@ const primaryPalette = getPalette(primaryColor)
 const CONTROL_RADIUS = '12px'
 const ICON_BUTTON_RADIUS = '10px'
 
+// Select and Autocomplete both render their popup through @mui/base's Popper,
+// which defaults to popper.js's `absolute` strategy — the popup is laid out in
+// *document* coordinates. That is fine on desktop, but inside a mobile bottom
+// sheet (viewport-pinned, body scroll locked by Modal) it puts the list below
+// the fold or lets an overflow:hidden ancestor clip it, so it reads as trapped
+// inside the modal. `fixed` positions it in viewport space instead, which no
+// ancestor can clip.
+//
+// Note that slotProps coming from defaultProps are not deep merged: a call site
+// passing its own slotProps.listbox replaces this wholesale.
+const POPUP_LISTBOX = {
+  popperOptions: { strategy: 'fixed' },
+  modifiers: [
+    { name: 'flip', options: { padding: 8 } },
+    // altAxis with tether off lets the popup shift fully back into view rather
+    // than staying glued to an anchor that has no room around it.
+    {
+      name: 'preventOverflow',
+      options: { padding: 8, altAxis: true, tether: false },
+    },
+  ],
+  // Joy hardcodes 44vh, and vh resolves to the *large* viewport on mobile —
+  // taller than what is actually on screen while the browser chrome is up.
+  sx: { maxHeight: 'min(44dvh, 320px)' },
+}
+
 const themeConfig = {
   radius: {
     xs: '6px',
@@ -162,6 +188,10 @@ const themeConfig = {
         root: ({ ownerState, theme }) =>
           theme.direction === 'rtl' ? buttonGroupRtlGeometry(ownerState) : {},
       },
+    },
+    JoySelect: { defaultProps: { slotProps: { listbox: POPUP_LISTBOX } } },
+    JoyAutocomplete: {
+      defaultProps: { slotProps: { listbox: POPUP_LISTBOX } },
     },
   },
 }

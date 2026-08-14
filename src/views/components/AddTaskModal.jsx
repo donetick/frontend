@@ -283,6 +283,11 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
   // Identities (type + text) of the highlights from the previous parse, so
   // the appear animation only plays for tokens detected just now
   const prevHighlightKeysRef = useRef(new Set())
+  // Which capture method last populated the form, for chore_created's
+  // analytics `source` property. Reset to 'quick_add' whenever the modal
+  // closes — this is the AddTaskModal popup, distinct from the full-page
+  // create flow in ChoreEdit.jsx.
+  const taskSourceRef = useRef('quick_add')
   const [priority, setPriority] = useState(0)
   const [dueDate, setDueDate] = useState(null)
   const [description, setDescription] = useState(null)
@@ -895,6 +900,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
     dueDate: extractedDue,
     taskName,
   }) => {
+    taskSourceRef.current = 'scan'
     if (attachmentImage) {
       attachScannedImage(attachmentImage)
     }
@@ -918,6 +924,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
   // reviews it with the normal pickers before creating.
   const handleVoiceSingle = (text, overrides = {}) => {
     setShowVoice(false)
+    taskSourceRef.current = 'voice'
     if (Object.keys(overrides).length > 0) {
       pendingVoiceOverridesRef.current = overrides
     }
@@ -935,6 +942,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
         projectId,
         notificationTemplates,
       })
+      chore.source = 'voice'
       try {
         const result = await createChoreMutation.mutateAsync(chore)
         if (result?._pendingCreate) {
@@ -1015,6 +1023,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
     setUseCustomTime(false)
     setAttachments([])
     setDraftId(generateUUID())
+    taskSourceRef.current = 'quick_add'
   }
 
   const createChore = () => {
@@ -1063,6 +1072,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
       subTasks: subTasks?.length > 0 ? subTasks : null,
       projectId: projectId === 'default' ? null : projectId,
       draftId: draftId,
+      source: taskSourceRef.current,
     }
 
     // Reminders are a Plus feature and only make sense when the user kept at
@@ -1171,7 +1181,10 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
                 </MenuButton>
                 <Menu
                   placement='top-start'
-                  sx={{ minWidth: 200, zIndex: Z_INDEX.MODAL_POPOVER }}
+                  sx={{
+                    minWidth: 200,
+                    zIndex: 'calc(var(--joy-zIndex-modal) + 1)',
+                  }}
                 >
                   {[DEFAULT_PROJECT, ...projects].map(project => {
                     const ProjectIcon = getIconComponent(project.icon)

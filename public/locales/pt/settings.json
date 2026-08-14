@@ -490,5 +490,78 @@
       "notConnected": "As atualizações em tempo real estão ativadas, mas não há conexão no momento.",
       "basicPlanNotice": "As atualizações em tempo real não estão disponíveis no plano Básico. Mude para o Plus para receber notificações instantâneas quando você ou outros membros do círculo concluírem, pularem ou modificarem tarefas."
     }
+  },
+  "subscription": {
+    "sessionFailed": "Failed to create subscription session",
+    "errorTitle": "Subscription Error",
+    "errorMessage": "Failed to start subscription process. Please try again.",
+    "subscribe": "Subscribe",
+    "cancelAnytime": "Cancel anytime. No hidden fees. Secure payment powered by Stripe."
+  },
+  "childUsers": {
+    "errNameRequired": "Sub account name is required",
+    "errNameMin": "Sub account name must be at least 2 characters",
+    "errNameMax": "Sub account name must be less than 20 characters",
+    "errNameChars": "Sub account name can only contain lowercase letters, dot and dash",
+    "errPasswordRequired": "Password is required",
+    "errPasswordLength": "Password must be between 8 and 64 characters",
+    "errPasswordMatch": "Passwords do not match",
+    "errDisplayNameMax": "Display name must be less than 50 characters",
+    "createTitle": "Create Sub Account",
+    "createButton": "Create Account",
+    "nameLabel": "Sub Account Name *",
+    "namePlaceholder": "Enter sub account name (e.g., sarah)",
+    "displayNameLabel": "Display Name",
+    "displayNamePlaceholder": "Display name (optional, defaults to sub account name)",
+    "passwordLabel": "Password *",
+    "passwordPlaceholder": "Enter password (8-64 characters)",
+    "confirmPasswordLabel": "Confirm Password *",
+    "confirmPasswordPlaceholder": "Confirm password"
+  },
+  "passwordChange": {
+    "minLength": "Password must be at least 8 characters",
+    "maxLength": "Password must be less than 64 characters"
+  },
+  "payment": {
+    "cancelledTitle": "Payment has been cancelled",
+    "cancelledRedirect": "You will be redirected to the main page shortly.",
+    "successTitle": "Payment Successful!",
+    "successRedirect": "You will be redirected to the settings page shortly."
+  },
+  "developer": {
+    "tokenRefreshed": "Token refreshed successfully",
+    "endpointCalled": "Refresh token endpoint called successfully",
+    "clearDbCleared": "Local offline database cleared. Starting full sync...",
+    "clearDbDone": "Full sync completed from the beginning",
+    "intro": "View technical information about your authentication tokens and session",
+    "refreshCookieNote": "Refresh tokens are managed via HTTP-only cookies on web platform",
+    "noReconnectInfo": "No reconnection information available",
+    "noTimeoutInfo": "No timeout information available",
+    "noDebugInfo": "No debug information available"
+  },
+  "backup": {
+    "keyRequired": "Encryption key is required",
+    "created": "Backup created and downloaded successfully",
+    "createFailed": "Failed to create backup",
+    "selectFile": "Please select a backup file",
+    "restored": "Backup restored successfully. Please refresh the page.",
+    "restoreFailed": "Failed to restore backup",
+    "readFailed": "Failed to read backup file",
+    "createIntro": "Create an encrypted backup of your data. This backup will include all your chores, history, settings, and optionally your uploaded files.",
+    "keyPlaceholder": "Enter a strong encryption key",
+    "includeAssets": "Include uploaded files and assets",
+    "warningLabel": "Warning:",
+    "restoreWarning": "Restoring a backup will replace all your current data. This action cannot be undone.",
+    "restoreKeyPlaceholder": "Enter the encryption key used for this backup"
+  },
+  "deletion": {
+    "passwordRequired": "Please enter your password to continue",
+    "passwordAndDelete": "Please enter your password and type DELETE to confirm",
+    "failed": "Failed to delete account",
+    "passwordPlaceholder": "Enter your password",
+    "transferIntro": "You own circles that require ownership transfer before deletion. Please select new owners:",
+    "selectOwner": "Select new owner",
+    "confirmPrompt": "Please enter your password and type DELETE to confirm",
+    "typeDelete": "DELETE"
   }
 }

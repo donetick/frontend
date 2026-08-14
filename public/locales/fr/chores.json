@@ -71,5 +71,11 @@
       "reset": "Réinitialiser le Minuteur",
       "delete": "Supprimer la Session"
     }
+  },
+  "toolbar": {
+    "defaultProject": "Default Project"
+  },
+  "sort": {
+    "assignedToMe": "Assigned to me"
   }
 }

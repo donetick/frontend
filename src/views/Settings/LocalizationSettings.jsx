@@ -1,9 +1,4 @@
 import {
-  DATE_FORMATS,
-  TIME_FORMATS,
-  useLocalization,
-} from '@/contexts/LocalizationContext'
-import {
   Box,
   Button,
   ButtonGroup,
@@ -16,21 +11,29 @@ import {
 } from '@mui/joy'
 import moment from 'moment'
 import { useTranslation } from 'react-i18next'
+
+import {
+  DATE_FORMATS,
+  TIME_FORMATS,
+  useLocalization,
+} from '@/contexts/LocalizationContext'
+
+import { track } from '../../analytics'
 import SettingsLayout from './SettingsLayout'
 
 const LocalizationSettings = () => {
   const { t } = useTranslation('settings')
   const {
-    language,
-    setLanguage,
-    dateFormat,
-    setDateFormat,
-    timeFormat,
-    setTimeFormat,
-    firstDayOfWeek,
-    setFirstDayOfWeek,
     availableLanguages,
+    dateFormat,
+    firstDayOfWeek,
     isRTL,
+    language,
+    setDateFormat,
+    setFirstDayOfWeek,
+    setLanguage,
+    setTimeFormat,
+    timeFormat,
   } = useLocalization()
 
   const sampleDate = moment('2024-01-15 14:30:00')
@@ -56,7 +59,13 @@ const LocalizationSettings = () => {
         <FormControl>
           <Select
             value={language}
-            onChange={(_, value) => setLanguage(value)}
+            onChange={(_, value) => {
+              setLanguage(value)
+              track('localization_setting_changed', {
+                setting: 'language',
+                value,
+              })
+            }}
             sx={{ maxWidth: '300px' }}
           >
             {availableLanguages.map(lang => (
@@ -83,7 +92,13 @@ const LocalizationSettings = () => {
         <FormControl>
           <Select
             value={dateFormat}
-            onChange={(_, value) => setDateFormat(value)}
+            onChange={(_, value) => {
+              setDateFormat(value)
+              track('localization_setting_changed', {
+                setting: 'date_format',
+                value,
+              })
+            }}
             sx={{ maxWidth: '300px' }}
           >
             {dateFormatOptions.map(option => (
@@ -119,7 +134,13 @@ const LocalizationSettings = () => {
         <FormControl>
           <Select
             value={timeFormat}
-            onChange={(_, value) => setTimeFormat(value)}
+            onChange={(_, value) => {
+              setTimeFormat(value)
+              track('localization_setting_changed', {
+                setting: 'time_format',
+                value,
+              })
+            }}
             sx={{ maxWidth: '300px' }}
           >
             <Option value={TIME_FORMATS.HOUR_12}>
@@ -169,19 +190,37 @@ const LocalizationSettings = () => {
           <ButtonGroup variant='outlined'>
             <Button
               variant={firstDayOfWeek === 0 ? 'solid' : 'outlined'}
-              onClick={() => setFirstDayOfWeek(0)}
+              onClick={() => {
+                setFirstDayOfWeek(0)
+                track('localization_setting_changed', {
+                  setting: 'first_day_of_week',
+                  value: 'sunday',
+                })
+              }}
             >
               {t('localization.sunday')}
             </Button>
             <Button
               variant={firstDayOfWeek === 1 ? 'solid' : 'outlined'}
-              onClick={() => setFirstDayOfWeek(1)}
+              onClick={() => {
+                setFirstDayOfWeek(1)
+                track('localization_setting_changed', {
+                  setting: 'first_day_of_week',
+                  value: 'monday',
+                })
+              }}
             >
               {t('localization.monday')}
             </Button>
             <Button
               variant={firstDayOfWeek === 6 ? 'solid' : 'outlined'}
-              onClick={() => setFirstDayOfWeek(6)}
+              onClick={() => {
+                setFirstDayOfWeek(6)
+                track('localization_setting_changed', {
+                  setting: 'first_day_of_week',
+                  value: 'saturday',
+                })
+              }}
             >
               {t('localization.saturday')}
             </Button>

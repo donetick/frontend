@@ -1,8 +1,10 @@
 import { Preferences } from '@capacitor/preferences'
 
+import { captureError } from '../analytics'
 import { API_URL } from '../Config'
 import { networkManager } from '../hooks/NetworkManager'
 import {
+  normalizeEndpoint,
   recordApiFailure,
   recordServerVersionFromResponse,
 } from '../service/DiagnosticsSession'
@@ -228,6 +230,11 @@ class ApiClient {
           method: config.method,
           status: response.status,
         })
+        captureError('api_error', {
+          http_status: String(response.status),
+          method: config.method || 'GET',
+          operation: normalizeEndpoint(endpoint),
+        })
       }
 
       // 2. Check for 401 (Unauthorized)
@@ -312,6 +319,11 @@ class ApiClient {
       if (!externalAbort) {
         networkManager.setServerUnreachable()
         recordApiFailure({ endpoint, method: config.method, status: 'network' })
+        captureError('api_error', {
+          http_status: 'network',
+          method: config.method || 'GET',
+          operation: normalizeEndpoint(endpoint),
+        })
       }
       console.error('Request failed', error)
       throw error
