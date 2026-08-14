@@ -44,7 +44,7 @@ function SelectModal({
         onChange={(_, value) => setSelected(value)}
       >
         {options.map(item => (
-          <Option value={item.id} key={item[displayKey]}>
+          <Option value={item.id} key={item.id}>
             {item[displayKey]}
           </Option>
         ))}
