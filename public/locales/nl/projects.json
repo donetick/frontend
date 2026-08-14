@@ -1,0 +1,24 @@
+{
+  "iconPicker": {
+    "chooseIcon": "Choose Project Icon",
+    "availableIcons": "Available Icons"
+  },
+  "defaultChip": "Default",
+  "tasks_one": "{{count}} task",
+  "tasks_other": "{{count}} tasks",
+  "shared": "Shared",
+  "delete": {
+    "title": "Delete Project",
+    "message": "Are you sure you want to delete \"{{name}}\"? This will remove the project but keep all tasks (they'll move to the Default Project)."
+  },
+  "loadError": "Failed to load projects. Please try again.",
+  "blurb": "Organize your tasks into projects. Create custom workspaces to keep your tasks organized and easily accessible.",
+  "defaultDescription": "All tasks without a specific project",
+  "selector": {
+    "title": "Projects",
+    "createNew": "Create New Project",
+    "createNewDescription": "Add a custom project workspace",
+    "manage": "Manage Projects",
+    "manageDescription": "View, edit, and organize all projects"
+  }
+}
