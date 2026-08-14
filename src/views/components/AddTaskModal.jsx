@@ -1181,7 +1181,10 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
                 </MenuButton>
                 <Menu
                   placement='top-start'
-                  sx={{ minWidth: 200, zIndex: Z_INDEX.MODAL_POPOVER }}
+                  sx={{
+                    minWidth: 200,
+                    zIndex: 'calc(var(--joy-zIndex-modal) + 1)',
+                  }}
                 >
                   {[DEFAULT_PROJECT, ...projects].map(project => {
                     const ProjectIcon = getIconComponent(project.icon)

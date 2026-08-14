@@ -22,10 +22,10 @@ import {
   Tooltip,
   Typography,
 } from '@mui/joy'
-
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+
 import { GetAllUsers, GetChores, MarkChoreComplete } from '../utils/Fetcher'
 import DateModal from './Modals/Inputs/DateModal'
 // import moment from 'moment'
@@ -330,7 +330,7 @@ const ChoresOverview = () => {
                 response.json().then(data => {
                   const newChore = data.res
                   const newChores = [...chores]
-                  const index = newChores.findIndex(c => c.id === chore.id)
+                  const index = newChores.findIndex(c => c.id === choreId)
                   newChores[index] = newChore
                   setChores(newChores)
                   setFilteredChores(newChores)
