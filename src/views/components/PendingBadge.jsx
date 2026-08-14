@@ -12,6 +12,7 @@ import { useState } from 'react'
 import ModalActions from '../../components/common/ModalActions'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import { commandQueue } from '../../utils/CommandQueue'
+import { useTranslation } from 'react-i18next'
 
 const LABELS = {
   complete_chore: 'Complete pending',
@@ -39,6 +40,7 @@ const formatCommandLabel = commandType => {
 }
 
 function PendingBadge({ commands, size = 'sm', sx = {} }) {
+  const { t } = useTranslation('common')
   const { ResponsiveModal } = useResponsiveModal()
   const queryClient = useQueryClient()
   const [isOpen, setIsOpen] = useState(false)
@@ -145,9 +147,9 @@ function PendingBadge({ commands, size = 'sm', sx = {} }) {
         title='Pending actions'
         footer={
           <ModalActions
-            secondary={{ label: 'Close', onClick: handleClose }}
+            secondary={{ label: t('close'), onClick: handleClose }}
             primary={{
-              label: 'Cancel all',
+              label: t('cancelAll'),
               color: 'danger',
               onClick: handleCancelAll,
               loading: isCancelingAll,

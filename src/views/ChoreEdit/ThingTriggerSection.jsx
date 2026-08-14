@@ -14,6 +14,7 @@ import {
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 const isValidTrigger = (thing, condition, triggerState) => {
   const newErrors = {}
   if (!thing || !triggerState) {
@@ -54,6 +55,7 @@ const ThingTriggerSection = ({
   selected,
   isAttepmtingToSave,
 }) => {
+  const { t } = useTranslation('chores')
   const [selectedThing, setSelectedThing] = useState(null)
   const [condition, setCondition] = useState(null)
   const [triggerState, setTriggerState] = useState(null)
@@ -85,7 +87,7 @@ const ThingTriggerSection = ({
   return (
     <Card sx={{ mt: 1 }}>
       <Typography level='h5'>
-        Trigger a task when a thing state changes to a desired state
+        {t('thing.triggerHint')}
       </Typography>
       {things?.length === 0 && (
         <Typography level='body-sm'>
@@ -135,7 +137,7 @@ const ThingTriggerSection = ({
             </Box>
           )}
           renderInput={params => (
-            <TextField {...params} label='Select a thing' />
+            <TextField {...params} label={t('thing.selectThing')} />
           )}
         />
       </FormControl>
@@ -215,7 +217,7 @@ const ThingTriggerSection = ({
           <Input
             value={triggerState}
             onChange={e => setTriggerState(e.target.value)}
-            label='Enter the text to trigger the task'
+            label={t('thing.enterText')}
           />
         </Box>
       )}

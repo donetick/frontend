@@ -20,5 +20,12 @@
     "createNewDescription": "Add a custom project workspace",
     "manage": "Manage Projects",
     "manageDescription": "View, edit, and organize all projects"
+  },
+  "modal": {
+    "errorNameRequired": "Project name is required",
+    "errorUpdate": "Failed to update project",
+    "errorCreate": "Failed to create project",
+    "namePlaceholder": "Enter project name...",
+    "descriptionPlaceholder": "Optional project description..."
   }
 }

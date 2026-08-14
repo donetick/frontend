@@ -35,8 +35,10 @@ import { apiClient } from '../utils/ApiClient'
 import { isPlusAccount, resolvePhotoURL } from '../utils/Helpers'
 import UserModal from '../views/Modals/Inputs/UserModal'
 import SubscriptionModal from './SubscriptionModal'
+import { useTranslation } from 'react-i18next'
 
 const UserProfileAvatar = () => {
+  const { t } = useTranslation('common')
   const navigate = useNavigate()
   const { mode, setMode } = useColorScheme()
   const { data: userProfile } = useUserProfile()
@@ -297,7 +299,7 @@ const UserProfileAvatar = () => {
                     level='body-xs'
                     sx={{ color: 'var(--joy-palette-text-tertiary)' }}
                   >
-                    Act as another user
+                    {t('userMenu.actAsAnother')}
                   </Typography>
                 </ListItemContent>
               </MenuItem>
@@ -319,13 +321,13 @@ const UserProfileAvatar = () => {
                   </ListItemDecorator>
                   <ListItemContent>
                     <Typography level='body-sm' sx={{ fontWeight: 500 }}>
-                      Stop Impersonating
+                      {t('userMenu.stopImpersonating')}
                     </Typography>
                     <Typography
                       level='body-xs'
                       sx={{ color: 'var(--joy-palette-text-tertiary)' }}
                     >
-                      Return to your account
+                      {t('userMenu.returnToAccount')}
                     </Typography>
                   </ListItemContent>
                 </MenuItem>
@@ -349,13 +351,13 @@ const UserProfileAvatar = () => {
             </ListItemDecorator>
             <ListItemContent>
               <Typography level='body-sm' sx={{ fontWeight: 500 }}>
-                Settings
+                {t('settings')}
               </Typography>
               <Typography
                 level='body-xs'
                 sx={{ color: 'var(--joy-palette-text-tertiary)' }}
               >
-                Account & preferences
+                {t('userMenu.accountPrefs')}
               </Typography>
             </ListItemContent>
           </MenuItem>
@@ -374,13 +376,13 @@ const UserProfileAvatar = () => {
             </ListItemDecorator>
             <ListItemContent>
               <Typography level='body-sm' sx={{ fontWeight: 500 }}>
-                Invite People
+                {t('userMenu.invitePeople')}
               </Typography>
               <Typography
                 level='body-xs'
                 sx={{ color: 'var(--joy-palette-text-tertiary)' }}
               >
-                Add members to your circle
+                {t('userMenu.addMembers')}
               </Typography>
             </ListItemContent>
           </MenuItem>
@@ -401,7 +403,7 @@ const UserProfileAvatar = () => {
               </ListItemDecorator>
               <ListItemContent>
                 <Typography level='body-sm' sx={{ fontWeight: 500 }}>
-                  Side Panel Settings
+                  {t('userMenu.sidePanelSettings')}
                 </Typography>
                 <Typography
                   level='body-xs'

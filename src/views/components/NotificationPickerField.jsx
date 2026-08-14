@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import ModalActions from '../../components/common/ModalActions'
 import NotificationTemplate from '../../components/NotificationTemplate'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
+import { useTranslation } from 'react-i18next'
 
 const getDisplayLabel = templates => {
   if (!templates || templates.length === 0) return 'Remind'
@@ -27,6 +28,7 @@ const NotificationPickerField = ({
   emptyDisplay = 'icon-text',
   size = 'sm',
 }) => {
+  const { t } = useTranslation('chores')
   const [isOpen, setIsOpen] = useState(false)
   const latestTemplatesRef = useRef(value?.templates || [])
   const { ResponsiveModal } = useResponsiveModal()
@@ -52,7 +54,7 @@ const NotificationPickerField = ({
       tertiary={
         hasNotifications
           ? {
-              label: 'Remove all',
+              label: t('common:removeAll'),
               color: 'danger',
               onClick: () => {
                 onClear?.()
@@ -61,8 +63,8 @@ const NotificationPickerField = ({
             }
           : undefined
       }
-      secondary={{ label: 'Cancel', onClick: () => setIsOpen(false) }}
-      primary={{ label: 'Apply', onClick: handleSave }}
+      secondary={{ label: t('choreView.cancel'), onClick: () => setIsOpen(false) }}
+      primary={{ label: t('common:apply'), onClick: handleSave }}
     />
   )
 
@@ -130,7 +132,7 @@ const NotificationPickerField = ({
       <ResponsiveModal
         open={isOpen}
         onClose={() => setIsOpen(false)}
-        title='Reminders'
+        title={t('remind.title')}
         footer={footer}
       >
         <NotificationTemplate

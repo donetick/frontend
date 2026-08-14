@@ -70,12 +70,125 @@
       "paused": "Timer Paused",
       "reset": "Reset Timer",
       "delete": "Delete Session"
-    }
+    },
+    "unableUndo": "Failed to undo",
+    "restoreFailed": "Failed to restore"
   },
   "toolbar": {
-    "defaultProject": "Default Project"
+    "defaultProject": "Default Project",
+    "everyone": "Everyone",
+    "mine": "Mine",
+    "availableToMe": "Available to me",
+    "others": "Others",
+    "cards": "Cards",
+    "compact": "Compact",
+    "calendar": "Calendar",
+    "filters": "Filters",
+    "viewGroup": "View & Group",
+    "filterNamePlaceholder": "Filter name…",
+    "clearAll": "Clear all",
+    "saveFilter": "Save Filter",
+    "saveAsNew": "Save as New Filter",
+    "groupBy": "Group by",
+    "showTasksFor": "Show tasks for"
   },
   "sort": {
-    "assignedToMe": "Assigned to me"
+    "assignedToMe": "Assigned to me",
+    "smart": "Smart"
+  },
+  "thing": {
+    "triggerHint": "Trigger a task when a thing state changes to a desired state",
+    "selectThing": "Select a thing",
+    "enterText": "Enter the text to trigger the task"
+  },
+  "activity": {
+    "showMore": "Show more",
+    "title": "Recent Activities",
+    "loading": "Loading activities...",
+    "status": {
+      "done": "Done"
+    }
+  },
+  "group": {
+    "overdue": "Overdue",
+    "dueToday": "Due Today",
+    "pendingApproval": "Pending Approval",
+    "dueThisWeek": "Due This Week",
+    "noDueDate": "No Due Date"
+  },
+  "insights": {
+    "highPriority": "High Priority"
+  },
+  "labels": {
+    "label": "Labels"
+  },
+  "actionMenu": {
+    "view": "View",
+    "archive": "Archive"
+  },
+  "actions": {
+    "rescheduledTitle": "Task Rescheduled",
+    "rescheduledMessage": "The task due date has been updated successfully.",
+    "unplannedTitle": "Task Unplanned",
+    "unplannedMessage": "The task is now unplanned and has no due date.",
+    "archivedTitle": "Task Archived",
+    "startedTitle": "Task Started",
+    "startedMessage": "The task has been marked as started.",
+    "pausedTitle": "Task Paused",
+    "pausedMessage": "The task has been paused.",
+    "deletedMessage": "The task has been deleted.",
+    "undoable": {
+      "completed": "Task completed"
+    },
+    "completionPending": "Task completion pending",
+    "failCompleteTitle": "Failed to complete",
+    "failStartTitle": "Failed to start",
+    "failPauseTitle": "Failed to pause",
+    "failApproveTitle": "Failed to approve",
+    "failRejectTitle": "Failed to reject",
+    "deletedMessageLong": "The task has been deleted successfully.",
+    "failDeleteTitle": "Failed to delete",
+    "failArchiveTitle": "Failed to archive",
+    "failSkipTitle": "Failed to skip",
+    "movedTitle": "Task Moved",
+    "failMoveTitle": "Failed to move task",
+    "failRescheduleTitle": "Failed to reschedule",
+    "nudgeSentTitle": "Nudge Sent!",
+    "nudgeFailed": "Failed to send nudge",
+    "failNudgeTitle": "Failed to Send Nudge",
+    "bulk": {
+      "completeTitle": "Complete Tasks",
+      "completedTitle": "✅ Tasks Completed",
+      "completeFailedTitle": "Bulk Complete Failed",
+      "archiveTitle": "Archive Tasks",
+      "archivedTitle": "📦 Tasks Archived",
+      "archiveFailedTitle": "Bulk Archive Failed",
+      "deleteTitle": "Delete Tasks",
+      "skipTitle": "Skip Tasks",
+      "skippedTitle": "⏭️ Tasks Skipped",
+      "skipFailedTitle": "Bulk Skip Failed"
+    }
+  },
+  "archived": {
+    "restoredTitle": "Task Restored",
+    "restoredMsg": "The task has been restored and is now active.",
+    "deletedTitle": "Task Deleted",
+    "delete": "Delete",
+    "someFailedTitle": "Some Tasks Failed",
+    "unexpectedError": "An unexpected error occurred. Please try again.",
+    "deletedBulkTitle": "🗑️ Tasks Deleted",
+    "bulkDeleteFailTitle": "Bulk Delete Failed"
+  },
+  "edit": {
+    "deleteConfirm": "Are you sure you want to delete this chore?"
+  },
+  "list": {
+    "complete": "Complete"
+  },
+  "multiToolbar": {
+    "skip": "Skip"
+  },
+  "remind": {
+    "title": "Reminders"
   }
 }

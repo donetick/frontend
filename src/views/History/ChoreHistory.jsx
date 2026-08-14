@@ -52,8 +52,10 @@ import HistoryDetailModal from '../Modals/HistoryDetailModal'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import NoteViewerModal from '../Modals/Inputs/NoteViewerModal'
 import HistoryCard from './HistoryCard'
+import { useTranslation } from 'react-i18next'
 
 const ChoreHistory = () => {
+  const { t } = useTranslation('history')
   const [userHistory, setUserHistory] = useState([])
   const [historyInfo, setHistoryInfo] = useState([])
   const { choreId } = useParams()
@@ -96,43 +98,43 @@ const ChoreHistory = () => {
     () => [
       {
         id: 'status',
-        label: 'Status',
+        label: t('charts.status.title'),
         type: 'multi-select',
         icon: <FilterList />,
         options: [
           {
             value: ChoreHistoryStatus.COMPLETED,
-            label: 'Completed',
+            label: t('status.completed'),
             color: 'success',
             icon: <Check sx={{ fontSize: 14 }} />,
           },
           {
             value: ChoreHistoryStatus.SKIPPED,
-            label: 'Skipped',
+            label: t('status.skipped'),
             color: 'warning',
             icon: <Redo sx={{ fontSize: 14 }} />,
           },
           {
             value: ChoreHistoryStatus.PENDING_APPROVAL,
-            label: 'Pending',
+            label: t('filter.pending'),
             color: 'neutral',
             icon: <HourglassEmpty sx={{ fontSize: 14 }} />,
           },
           {
             value: ChoreHistoryStatus.REJECTED,
-            label: 'Rejected',
+            label: t('status.rejected'),
             color: 'danger',
             icon: <ThumbDown sx={{ fontSize: 14 }} />,
           },
           {
             value: 5,
-            label: 'Missed',
+            label: t('status.missed'),
             color: 'danger',
             icon: <RunningWithErrors sx={{ fontSize: 14 }} />,
           },
           {
             value: 6,
-            label: 'Rescheduled',
+            label: t('status.rescheduled'),
             color: 'warning',
             icon: <Schedule sx={{ fontSize: 14 }} />,
           },
@@ -141,14 +143,14 @@ const ChoreHistory = () => {
       },
       {
         id: 'hasNotes',
-        label: 'Has Notes',
+        label: t('filter.hasNotes'),
         type: 'boolean',
         icon: <EventNote />,
         filterFn: item => !!item.notes,
       },
       {
         id: 'completedBy',
-        label: 'Completed By',
+        label: t('filter.completedBy'),
         type: 'multi-select',
         icon: <Person />,
         options: performers.map(p => ({
@@ -160,7 +162,7 @@ const ChoreHistory = () => {
       },
       {
         id: 'dateRange',
-        label: 'Completed At',
+        label: t('filter.completedAt'),
         type: 'date-range',
         icon: <CalendarMonth />,
         filterFn: (item, value) => {
@@ -328,7 +330,7 @@ const ChoreHistory = () => {
             level='title-md'
             sx={{ fontWeight: 'lg', color: 'text.primary' }}
           >
-            Task Summary
+            {t('title.summary')}
           </Typography>
         </Box>
         <Grid container spacing={0.5} sx={{ mb: 2 }}>
@@ -405,7 +407,7 @@ const ChoreHistory = () => {
           level='title-md'
           sx={{ fontWeight: 'lg', color: 'text.primary' }}
         >
-          Task Activity
+          {t('title.activity')}
         </Typography>
       </Box>
 
@@ -425,7 +427,7 @@ const ChoreHistory = () => {
           icon={<FilterList />}
           title='No history matches these filters'
           description='There is history here, but none of it fits the filters that are currently on.'
-          primaryAction={{ label: 'Clear filters', onClick: clearAll }}
+          primaryAction={{ label: t('noResults.clear'), onClick: clearAll }}
         />
       )}
 
@@ -467,7 +469,7 @@ const ChoreHistory = () => {
                         >
                           <EditIcon sx={{ fontSize: 20 }} />
                           <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                            Edit
+                            {t('common:edit')}
                           </Typography>
                         </Box>
                       </SwipeAction>
@@ -486,7 +488,7 @@ const ChoreHistory = () => {
                         >
                           <DeleteIcon sx={{ fontSize: 20 }} />
                           <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                            Delete
+                            {t('common:delete')}
                           </Typography>
                         </Box>
                       </SwipeAction>
@@ -560,13 +562,13 @@ const ChoreHistory = () => {
                   setEditHistory(null)
                   if (data?.queued) {
                     showSuccess({
-                      title: 'History Update Queued',
+                      title: t('toast.updateQueued.title'),
                       message:
                         'You are offline. The history update will sync when connection is restored.',
                     })
                   } else {
                     showSuccess({
-                      title: 'History Updated',
+                      title: t('toast.updated.title'),
                       message: `The history record has been updated successfully.`,
                     })
                   }
@@ -590,13 +592,13 @@ const ChoreHistory = () => {
                   setEditHistory(null)
                   if (data?.queued) {
                     showSuccess({
-                      title: 'History Delete Queued',
+                      title: t('toast.deleteQueued.title'),
                       message:
                         'You are offline. The history delete will sync when connection is restored.',
                     })
                   } else {
                     showSuccess({
-                      title: 'History Deleted',
+                      title: t('toast.deleted.title'),
                       message: `The history record has been deleted successfully.`,
                     })
                   }

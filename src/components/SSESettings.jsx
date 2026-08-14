@@ -13,8 +13,10 @@ import { useSSEContext } from '../hooks/useSSEContext'
 import { useUserProfile } from '../queries/UserQueries'
 import { isPlusAccount } from '../utils/Helpers'
 import SSEConnectionStatus from './SSEConnectionStatus'
+import { useTranslation } from 'react-i18next'
 
 const SSESettings = () => {
+  const { t } = useTranslation('settings')
   const { data: userProfile } = useUserProfile()
   const {
     isConnected,
@@ -75,7 +77,7 @@ const SSESettings = () => {
         )}
         <Box sx={{ flex: 1 }}>
           <Typography level='title-md'>
-            Real-time Updates (SSE)
+            {t('realtime.titleSse')}
             {!isPlusAccount(userProfile) && (
               <Chip variant='soft' color='warning' sx={{ ml: 1 }}>
                 Plus Feature
