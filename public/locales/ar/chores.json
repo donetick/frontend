@@ -71,5 +71,11 @@
       "reset": "إعادة تعيين المؤقت",
       "delete": "حذف الجلسة"
     }
+  },
+  "toolbar": {
+    "defaultProject": "Default Project"
+  },
+  "sort": {
+    "assignedToMe": "Assigned to me"
   }
 }
