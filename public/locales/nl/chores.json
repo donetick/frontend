@@ -71,5 +71,11 @@
       "reset": "Timer Resetten",
       "delete": "Sessie Verwijderen"
     }
+  },
+  "toolbar": {
+    "defaultProject": "Default Project"
+  },
+  "sort": {
+    "assignedToMe": "Assigned to me"
   }
 }

@@ -71,5 +71,11 @@
       "reset": "タイマーをリセット",
       "delete": "セッションを削除"
     }
+  },
+  "toolbar": {
+    "defaultProject": "Default Project"
+  },
+  "sort": {
+    "assignedToMe": "Assigned to me"
   }
 }

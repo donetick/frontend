@@ -71,5 +71,11 @@
       "reset": "Timer zurücksetzen",
       "delete": "Sitzung löschen"
     }
+  },
+  "toolbar": {
+    "defaultProject": "Default Project"
+  },
+  "sort": {
+    "assignedToMe": "Assigned to me"
   }
 }

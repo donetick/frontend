@@ -71,5 +71,11 @@
       "reset": "Reiniciar cronômetro",
       "delete": "Excluir sessão"
     }
+  },
+  "toolbar": {
+    "defaultProject": "Default Project"
+  },
+  "sort": {
+    "assignedToMe": "Assigned to me"
   }
 }

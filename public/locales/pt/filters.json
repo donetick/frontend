@@ -1,0 +1,17 @@
+{
+  "builder": {
+    "errorName": "Please enter a filter name",
+    "errorConditions": "Please configure at least one filter condition",
+    "editTitle": "Edit Filter",
+    "newTitle": "New Filter",
+    "addConditions": "Add conditions to preview",
+    "save": "Save Filter",
+    "name": "Filter Name",
+    "namePlaceholder": "e.g. Overdue tasks for Alice",
+    "color": "Color"
+  },
+  "nameExists": "A filter with this name already exists",
+  "tasks_one": "{{count}} task",
+  "tasks_other": "{{count}} tasks",
+  "overdue": "{{count}} overdue"
+}
