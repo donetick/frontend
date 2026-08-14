@@ -71,5 +71,11 @@
       "reset": "Reset Timer",
       "delete": "Delete Session"
     }
+  },
+  "toolbar": {
+    "defaultProject": "Default Project"
+  },
+  "sort": {
+    "assignedToMe": "Assigned to me"
   }
 }
