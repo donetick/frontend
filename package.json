@@ -72,7 +72,7 @@
     "@meauxt/react-swipeable-list": "^1.0.0",
     "@mui/icons-material": "^5.16.13",
     "@mui/joy": "5.0.0-beta.52",
-    "@mui/material": "^5.15.2",
+    "@mui/material": "^9.3.1",
     "@openreplay/tracker": "^14.0.4",
     "@revenuecat/purchases-capacitor": "^12.0.0",
     "@revenuecat/purchases-capacitor-ui": "^12.0.0",
