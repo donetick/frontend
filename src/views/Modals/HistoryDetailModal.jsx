@@ -23,13 +23,25 @@ import { TASK_COLOR } from '../../utils/Colors.jsx'
 import RichTextEditor from '../components/RichTextEditor.jsx'
 
 const STATUS_CONFIG = {
-  0: { label: t('status.inProgress'), color: 'primary', icon: <AccessTime /> },
-  1: { label: t('status.completed'), color: 'success', icon: <Check /> },
-  2: { label: t('status.skipped'), color: 'warning', icon: <Redo /> },
-  3: { label: t('status.pendingApproval'), color: 'neutral', icon: <HourglassEmpty /> },
-  4: { label: t('status.rejected'), color: 'danger', icon: <ThumbDown /> },
-  5: { label: t('status.missed'), color: 'danger', icon: <RunningWithErrors /> },
-  6: { label: t('status.rescheduled'), color: 'warning', icon: <Schedule /> },
+  0: {
+    labelKey: 'status.inProgress',
+    color: 'primary',
+    icon: <AccessTime />,
+  },
+  1: { labelKey: 'status.completed', color: 'success', icon: <Check /> },
+  2: { labelKey: 'status.skipped', color: 'warning', icon: <Redo /> },
+  3: {
+    labelKey: 'status.pendingApproval',
+    color: 'neutral',
+    icon: <HourglassEmpty />,
+  },
+  4: { labelKey: 'status.rejected', color: 'danger', icon: <ThumbDown /> },
+  5: {
+    labelKey: 'status.missed',
+    color: 'danger',
+    icon: <RunningWithErrors />,
+  },
+  6: { labelKey: 'status.rescheduled', color: 'warning', icon: <Schedule /> },
 }
 
 const DetailRow = ({ icon, label, value, children }) => (
