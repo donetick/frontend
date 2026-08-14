@@ -46,6 +46,7 @@ import {
   useToggleFilterPin,
   useUpdateFilter,
 } from './FilterQueries'
+import { useTranslation } from 'react-i18next'
 
 const FilterCardContent = ({
   filter,
@@ -245,6 +246,7 @@ const FilterCardContent = ({
 }
 
 const FilterView = () => {
+  const { t } = useTranslation('filters')
   const navigate = useNavigate()
   const { data: userProfile } = useUserProfile()
   const { data: chores = { res: [] } } = useChores(false)
@@ -330,11 +332,11 @@ const FilterView = () => {
     const filter = savedFilters.find(f => f.id === id)
     setConfirmationModel({
       isOpen: true,
-      title: 'Delete Filter',
+      title: t('delete.title'),
       message: `Are you sure you want to delete "${filter?.name}"? This cannot be undone.`,
-      confirmText: 'Delete',
+      confirmText: t('common:delete'),
       color: 'danger',
-      cancelText: 'Cancel',
+      cancelText: t('common:cancel'),
       onClose: confirmed => {
         if (confirmed === true) {
           handleDeleteFilter(id)
@@ -421,7 +423,7 @@ const FilterView = () => {
           <EmptyState
             fullHeight
             icon={<FilterAlt />}
-            title='No saved filters yet'
+            title={t('empty.title')}
             description='Save a set of conditions once, like "overdue and assigned to me", and jump straight back to it from anywhere.'
             primaryAction={{
               label: 'Create a filter',
@@ -490,7 +492,7 @@ const FilterView = () => {
                           >
                             <EditIcon sx={{ fontSize: 20 }} />
                             <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                              Edit
+                              {t('common:edit')}
                             </Typography>
                           </Box>
                         </SwipeAction>
@@ -515,7 +517,7 @@ const FilterView = () => {
                               sx={{ mt: 0.5 }}
                               color='danger'
                             >
-                              Delete
+                              {t('common:delete')}
                             </Typography>
                           </Box>
                         </SwipeAction>

@@ -21,8 +21,10 @@ import {
   useUpdateProject,
 } from '../../Projects/ProjectQueries'
 import IconPickerModal from './IconPickerModal'
+import { useTranslation } from 'react-i18next'
 
 const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
+  const { t } = useTranslation('projects')
   const { ResponsiveModal } = useResponsiveModal()
   const [projectName, setProjectName] = useState('')
   const [projectDescription, setProjectDescription] = useState('')
@@ -58,7 +60,7 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
     e.preventDefault()
 
     if (!projectName.trim()) {
-      setError('Project name is required')
+      setError(t('modal.errorNameRequired'))
       return
     }
 
@@ -82,7 +84,7 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
           },
           onError: error => {
             console.error('Error updating project:', error)
-            setError('Failed to update project')
+            setError(t('modal.errorUpdate'))
           },
         },
       )
@@ -95,7 +97,7 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
         },
         onError: error => {
           console.error('Error creating project:', error)
-          setError('Failed to create project')
+          setError(t('modal.errorCreate'))
         },
       })
     }
@@ -130,7 +132,7 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
       footer={
         <ModalActions
           secondary={{
-            label: 'Cancel',
+            label: t('common:cancel'),
             onClick: handleClose,
             disabled: isSubmitting,
           }}
@@ -152,7 +154,7 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
             <Input
               value={projectName}
               onChange={e => setProjectName(e.target.value)}
-              placeholder='Enter project name...'
+              placeholder={t('modal.namePlaceholder')}
               autoFocus
               disabled={isSubmitting}
             />
@@ -164,7 +166,7 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
             <Textarea
               value={projectDescription}
               onChange={e => setProjectDescription(e.target.value)}
-              placeholder='Optional project description...'
+              placeholder={t('modal.descriptionPlaceholder')}
               minRows={2}
               maxRows={4}
               disabled={isSubmitting}

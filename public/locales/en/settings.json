@@ -577,5 +577,8 @@
     "selectOwner": "Select new owner",
     "confirmPrompt": "Please enter your password and type DELETE to confirm",
     "typeDelete": "DELETE"
+  },
+  "realtime": {
+    "titleSse": "Real-time Updates (SSE)"
   }
 }

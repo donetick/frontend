@@ -9,6 +9,7 @@ import {
 import { Box, Button, Chip, Sheet, Typography } from '@mui/joy'
 import { useMemo } from 'react'
 import { TASK_COLOR } from '../../utils/Colors'
+import { useTranslation } from 'react-i18next'
 
 // Static insight filter definitions – used for URL restoration
 export const INSIGHT_FILTER_DEFS = {
@@ -62,6 +63,7 @@ const SmartInsightsCard = ({
   clearTempFilter,
   tempFilter,
 }) => {
+  const { t } = useTranslation('chores')
   // Detect all possible insights from chores
   const insights = useMemo(() => {
     if (!chores || chores.length === 0) return []
@@ -84,7 +86,7 @@ const SmartInsightsCard = ({
         id: 'overdue',
         priority: 1,
         count: overdueTasks.length,
-        title: 'Overdue',
+        title: t('group.overdue'),
         description: `${overdueTasks.length} ${overdueTasks.length === 1 ? 'task is' : 'tasks are'} overdue`,
         color: 'danger',
         bgColor: TASK_COLOR.OVERDUE,
@@ -113,7 +115,7 @@ const SmartInsightsCard = ({
         id: 'due-today',
         priority: 2,
         count: dueTodayTasks.length,
-        title: 'Due Today',
+        title: t('group.dueToday'),
         description: `${dueTodayTasks.length} ${dueTodayTasks.length === 1 ? 'task' : 'tasks'} due by end of day`,
         color: 'warning',
         bgColor: '#FFA500',
@@ -138,7 +140,7 @@ const SmartInsightsCard = ({
         id: 'pending-approval',
         priority: 3,
         count: pendingApprovalTasks.length,
-        title: 'Pending Approval',
+        title: t('group.pendingApproval'),
         description: `${pendingApprovalTasks.length} ${pendingApprovalTasks.length === 1 ? 'task awaits' : 'tasks await'} approval`,
         color: 'neutral',
         bgColor: TASK_COLOR.PENDING_REVIEW,
@@ -167,7 +169,7 @@ const SmartInsightsCard = ({
         id: 'due-this-week',
         priority: 4,
         count: dueThisWeekTasks.length,
-        title: 'Due This Week',
+        title: t('group.dueThisWeek'),
         description: `${dueThisWeekTasks.length} ${dueThisWeekTasks.length === 1 ? 'task' : 'tasks'} due in the next 7 days`,
         color: 'primary',
         bgColor: TASK_COLOR.IN_PROGRESS,
@@ -194,7 +196,7 @@ const SmartInsightsCard = ({
         id: 'high-priority',
         priority: 5,
         count: highPriorityTasks.length,
-        title: 'High Priority',
+        title: t('insights.highPriority'),
         description: `${highPriorityTasks.length} ${highPriorityTasks.length === 1 ? 'task requires' : 'tasks require'} immediate attention`,
         color: 'warning',
         bgColor: '#FF6B6B',
@@ -221,7 +223,7 @@ const SmartInsightsCard = ({
         id: 'no-due-date',
         priority: 6,
         count: noDueDateTasks.length,
-        title: 'No Due Date',
+        title: t('group.noDueDate'),
         description: `${noDueDateTasks.length} ${noDueDateTasks.length === 1 ? 'task needs' : 'tasks need'} a deadline`,
         color: 'neutral',
         bgColor: '#9E9E9E',

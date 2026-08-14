@@ -31,8 +31,10 @@ import { useChores, useChoresHistory } from '../../queries/ChoreQueries'
 import { useCircleMembers } from '../../queries/UserQueries'
 import { resolvePhotoURL } from '../../utils/Helpers'
 import NoteViewerModal from '../Modals/Inputs/NoteViewerModal'
+import { useTranslation } from 'react-i18next'
 
 const ActivityItem = ({ activity, members, onViewNote }) => {
+  const { t } = useTranslation('chores')
   // Find the member who completed the activity
   const completedByMember = members?.find(
     member => member.userId === activity.completedBy,
@@ -243,7 +245,7 @@ const ActivityItem = ({ activity, members, onViewNote }) => {
                         display: 'inline-block',
                       }}
                     >
-                      Show more
+                      {t('activity.showMore')}
                     </Link>
                   )}
                 </Box>
@@ -272,7 +274,7 @@ const groupActivitiesByDate = activities => {
   return groups
 }
 
-const ActivitiesCard = ({ title = 'Recent Activities' }) => {
+const ActivitiesCard = ({ title = t('activity.title') }) => {
   const [noteViewerConfig, setNoteViewerConfig] = useState({ isOpen: false })
 
   // Use hooks to fetch data
@@ -332,7 +334,7 @@ const ActivitiesCard = ({ title = 'Recent Activities' }) => {
           }}
         >
           <Typography level='body-sm' color='neutral'>
-            Loading activities...
+            {t('activity.loading')}
           </Typography>
         </Box>
       </Sheet>
