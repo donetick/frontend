@@ -29,7 +29,8 @@
     "filters": "Filtres",
     "activities": "Activités",
     "points": "Points",
-    "settings": "Paramètres"
+    "settings": "Paramètres",
+    "reportBug": "Report a Bug"
   },
   "search": {
     "title": "Recherche",
@@ -44,7 +45,7 @@
     },
     "groups": {
       "tasks": "Tâches",
-      "history": "Notes",
+      "history": "Remarques",
       "projects": "Projets",
       "labels": "Étiquettes",
       "people": "Personnes",
@@ -70,49 +71,81 @@
     }
   },
   "feedback": {
-    "later": "Maybe later",
+    "later": "Peut-être plus tard",
     "sentiment": {
       "title": "How's Donetick working for you?",
       "subtitle": "Votre réponse nous aide à décider de ce qu'il faut construire ensuite.",
       "options": {
-        "love": "Love it",
-        "okay": "It's okay",
-        "issues": "Having issues"
+        "love": "J'adore",
+        "okay": "C'est ok",
+        "issues": "Problèmes rencontrés"
       }
     },
     "categories": {
-      "bugs": "Bugs",
-      "missingFeature": "Missing feature",
-      "tooComplicated": "Too complicated",
-      "slow": "Slow",
+      "bugs": "Anomalies",
+      "missingFeature": "Fonctionnalités manquantes",
+      "tooComplicated": "Trop compliqué",
+      "slow": "Lent",
       "notifications": "Notifications",
-      "ai": "AI",
-      "other": "Other"
+      "ai": "IA",
+      "other": "Autres"
     },
     "details": {
-      "title": "What could we improve?",
-      "messageLabel": "Tell us more",
+      "title": "Que pouvons-nous améliorer ?",
+      "messageLabel": "Dites-nous-en plus",
       "messagePlaceholder": "What happened, or what would make this better?",
       "contextNote": "We'll include your app version, device and platform so we can reproduce issues.",
-      "submit": "Send feedback",
-      "contextNoteSelfHosted": "You're on a self-hosted instance, so nothing is sent from your server — we'll open a pre-filled GitHub issue you can review and edit first.",
-      "submitSelfHosted": "Continue to GitHub"
+      "submit": "Envoyer vos remarques",
+      "contextNoteSelfHosted": "Vous êtes sur une instance autohébergée, donc rien n'est envoyé depuis votre serveur — nous allons ouvrir un problème GitHub prérempli que vous pouvez examiner et modifier si besoin.",
+      "submitSelfHosted": "Continuer sur GitHub"
     },
     "review": {
-      "title": "Glad you're enjoying it!",
+      "title": "Nous sommes ravis que vous l'appréciez !",
       "subtitle": "A rating or a star helps other people find Donetick.",
-      "github": "Star on GitHub",
-      "appStore": "Rate on the App Store",
-      "playStore": "Rate on Google Play"
+      "github": "Mettez une étoile sur GitHub",
+      "appStore": "Évaluer sur l'App Store",
+      "playStore": "Évaluer sur Google Play"
     },
     "thanks": {
-      "title": "Thanks for the feedback",
+      "title": "Merci pour votre retour",
       "subtitle": "We read every response and it shapes what we work on next."
     },
     "github": {
-      "title": "Report it on GitHub",
+      "title": "Signaler sur GitHub",
       "subtitle": "We've filled in an issue with your notes and version details. Nothing has been sent yet — review it and post when you're ready.",
-      "open": "Open the issue"
+      "open": "Ouvrir un ticket"
     }
+  },
+  "done": "Done",
+  "clearAll": "Clear all",
+  "upload": {
+    "quotaTitle": "Storage Quota Exceeded",
+    "quotaMessage": "You have exceeded your quota for uploading files.",
+    "tooLargeTitle": "File Too Large",
+    "tooLargeMessage": "The file you are trying to upload is too large.",
+    "deniedTitle": "Permission Denied",
+    "deniedMessage": "You do not have permission to upload files."
+  },
+  "getStarted": "Get Started!",
+  "imageLoadFailed": "Failed to load image.",
+  "typeHere": "Type in here…",
+  "summaryOfChores": "This is a summary of your chores",
+  "loadingOffline": "You are offline",
+  "loadingOfflineSub": "This not available while offline. Please check your internet connection and try again.",
+  "loadingSlow": "This is taking longer than usual. There might be an issue.",
+  "navigateBack": "Navigate Back",
+  "bottomNav": "Bottom Navigation",
+  "profile": "Profile",
+  "autocompletePlaceholder": "Type here...",
+  "errorScreen": {
+    "title": "Something went wrong",
+    "fallback": "An unexpected error occurred. Try reloading — it usually fixes it.",
+    "tryAgain": "Try again",
+    "home": "Home",
+    "login": "Login",
+    "hideDetails": "Hide error details",
+    "showDetails": "Show error details",
+    "copyToClipboard": "Copy to clipboard",
+    "copied": "Error details copied to clipboard"
   }
 }
