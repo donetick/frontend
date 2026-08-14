@@ -68,5 +68,51 @@
       "results_other": "{{count}} Ergebnisse",
       "typeToSearch": "Zum Suchen tippen"
     }
+  },
+  "feedback": {
+    "later": "Vielleicht später",
+    "sentiment": {
+      "title": "Was hältst du von Donetick?",
+      "subtitle": "Ihre Antwort hilft uns zu entscheiden, was wir als Nächstes entwickeln sollen.",
+      "options": {
+        "love": "Ich liebe es",
+        "okay": "Es ist in Ordnung",
+        "issues": "Ich habe Probleme"
+      }
+    },
+    "categories": {
+      "bugs": "Fehler",
+      "missingFeature": "Fehlende Funktion",
+      "tooComplicated": "Zu kompliziert",
+      "slow": "Langsam",
+      "notifications": "Benachrichtigungen",
+      "ai": "KI",
+      "other": "Sonstiges"
+    },
+    "details": {
+      "title": "Was könnten wir verbessern?",
+      "messageLabel": "Weiteres Feedback",
+      "messagePlaceholder": "Was ist passiert oder was können wir verbessern?",
+      "contextNote": "Wir werden folgende Diagnosedaten einschließen, um Probleme reproduzieren zu können: App-Version, Gerätebeschreibung und Betriebssystem.",
+      "submit": "Feedback senden",
+      "contextNoteSelfHosted": "Du befindest dich auf einem selbst-gehosteten Instanz, daher wird keine Meldung von deinem Server erstellt. Wir eröffnen ein Github-Problem welches vorausgefüllt ist. Du selbst kannst es prüfen und bearbeiten bevor es erstellt wird.",
+      "submitSelfHosted": "Weiter zu GitHub"
+    },
+    "review": {
+      "title": "Schön, dass es Ihnen gefällt!",
+      "subtitle": "Eine Bewertung oder ein Stern hilft anderen Menschen Donetich zu finden.",
+      "github": "Als GitHub Favorit setzen",
+      "appStore": "Im App Store bewerten",
+      "playStore": "Auf Google Play bewerten"
+    },
+    "thanks": {
+      "title": "Vielen Dank für Ihr Feedback!",
+      "subtitle": "Wir lesen jede Antwort und diese entscheiden was wir als Nächstes tun."
+    },
+    "github": {
+      "title": "Melde es auf GitHub,",
+      "subtitle": "Wir haben ein Problem mit Ihren Notizen und Versionsdetails vorausgefüllt. Es wurde noch nichts verschickt – überprüfe es und poste, sobald du bereit bist.",
+      "open": "Eröffne das Problem"
+    }
   }
 }

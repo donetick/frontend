@@ -2,7 +2,6 @@ import { Close } from '@mui/icons-material'
 import { Box, Button, IconButton, Sheet, Typography } from '@mui/joy'
 import { ClickAwayListener, Popper } from '@mui/material'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Z_INDEX } from '../../constants/zIndex'
 
 const BaseOptionPicker = ({
   items = [],
@@ -199,7 +198,7 @@ const BaseOptionPicker = ({
               },
             },
           ]}
-          sx={{ zIndex: Z_INDEX.MODAL_CLOSE_BUTTON + 1 }}
+          sx={{ zIndex: 'calc(var(--joy-zIndex-modal) + 1)' }}
         >
           <ClickAwayListener onClickAway={() => setIsOpen(false)}>
             <Sheet

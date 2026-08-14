@@ -1,23 +1,4 @@
-import {
-  AccountCircle,
-  Api,
-  BugReport,
-  ChevronRight,
-  Circle,
-  Code,
-  FamilyRestroom,
-  Feedback,
-  Language,
-  Notifications,
-  Palette,
-  Person,
-  PrivacyTip,
-  Security,
-  Settings,
-  Star,
-  Storage,
-  ViewSidebar,
-} from '@mui/icons-material'
+import { BugReport, ChevronRight, Feedback, Star } from '@mui/icons-material'
 import {
   Avatar,
   Box,
@@ -38,6 +19,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
+import { SETTINGS_SECTIONS } from '../../constants/settingsSections'
 import { useUserProfile } from '../../queries/UserQueries'
 import { isPlusAccount } from '../../utils/Helpers'
 import { isParentUser } from '../../utils/UserHelpers'
@@ -52,91 +34,13 @@ const SettingsOverview = () => {
   const [bugReportOpen, setBugReportOpen] = useState(false)
 
   const settingsCards = [
-    {
-      id: 'profile',
-      title: t('overview.sections.profile.title'),
-      description: t('overview.sections.profile.description'),
-      icon: <Person />,
-    },
-    {
-      id: 'circle',
-      title: t('overview.sections.circle.title'),
-      description: t('overview.sections.circle.description'),
-      icon: <Circle />,
-    },
-    {
-      id: 'account',
-      title: t('overview.sections.account.title'),
-      description: t('overview.sections.account.description'),
-      icon: <AccountCircle />,
-    },
-    {
-      id: 'subaccounts',
-      title: t('overview.sections.subaccounts.title'),
-      description: t('overview.sections.subaccounts.description'),
-      icon: <FamilyRestroom />,
-    },
-    {
-      id: 'notifications',
-      title: t('overview.sections.notifications.title'),
-      description: t('overview.sections.notifications.description'),
-      icon: <Notifications />,
-    },
-    {
-      id: 'mfa',
-      title: t('overview.sections.mfa.title'),
-      description: t('overview.sections.mfa.description'),
-      icon: <Security />,
-    },
-    {
-      id: 'apitokens',
-      title: t('overview.sections.apitokens.title'),
-      description: t('overview.sections.apitokens.description'),
-      icon: <Api />,
-    },
-    {
-      id: 'storage',
-      title: t('overview.sections.storage.title'),
-      description: t('overview.sections.storage.description'),
-      icon: <Storage />,
-    },
-    {
-      id: 'sidepanel',
-      title: t('overview.sections.sidepanel.title'),
-      description: t('overview.sections.sidepanel.description'),
-      icon: <ViewSidebar />,
-    },
-    {
-      id: 'theme',
-      title: t('overview.sections.theme.title'),
-      description: t('overview.sections.theme.description'),
-      icon: <Palette />,
-    },
-    {
-      id: 'localization',
-      title: t('overview.sections.localization.title'),
-      description: t('overview.sections.localization.description'),
-      icon: <Language />,
-      isBeta: true,
-    },
-    {
-      id: 'advanced',
-      title: t('overview.sections.advanced.title'),
-      description: t('overview.sections.advanced.description'),
-      icon: <Settings />,
-    },
-    {
-      id: 'privacy',
-      title: t('overview.sections.privacy.title'),
-      description: t('overview.sections.privacy.description'),
-      icon: <PrivacyTip />,
-    },
-    {
-      id: 'developer',
-      title: t('overview.sections.developer.title'),
-      description: t('overview.sections.developer.description'),
-      icon: <Code />,
-    },
+    ...SETTINGS_SECTIONS.map(({ icon: Icon, id, isBeta }) => ({
+      id,
+      title: t(`overview.sections.${id}.title`),
+      description: t(`overview.sections.${id}.description`),
+      icon: <Icon />,
+      isBeta,
+    })),
     {
       id: 'feedback',
       title: t('overview.sections.feedback.title'),
@@ -161,23 +65,19 @@ const SettingsOverview = () => {
     navigate(`/settings/${setting.id}`)
   }
 
+  const parentOnlyIds = SETTINGS_SECTIONS.filter(
+    section => section.parentOnly,
+  ).map(section => section.id)
+
   // Filter settings based on user type
   const getAvailableSettings = () => {
-    const parentOnlySettings = [
-      'children',
-      'mfa',
-      'apitokens',
-      'circle',
-      'account',
-    ]
-
     if (isParentUser(userProfile)) {
       // Parent users can access all settings
       return settingsCards
     } else {
       // Child users can only access basic settings
       return settingsCards.filter(
-        setting => !parentOnlySettings.includes(setting.id),
+        setting => !parentOnlyIds.includes(setting.id),
       )
     }
   }

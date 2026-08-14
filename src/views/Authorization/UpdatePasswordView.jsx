@@ -1,5 +1,6 @@
 import { Box, Button } from '@mui/joy'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import { useNotification } from '../../service/NotificationProvider'
@@ -9,6 +10,7 @@ import AuthShell from './AuthShell'
 import { authButtonSx } from './authStyles'
 
 const UpdatePasswordView = () => {
+  const { t } = useTranslation('auth')
   const navigate = useNavigate()
   const [password, setPassword] = useState('')
   const [passwordConfirm, setPasswordConfirm] = useState('')
@@ -67,23 +69,22 @@ const UpdatePasswordView = () => {
       if (response.ok) {
         showNotification({
           type: 'success',
-          title: 'Password Updated',
-          message:
-            'Your password has been updated successfully. Redirecting to login...',
+          title: t('passwordUpdated'),
+          message: t('passwordUpdatedMsg'),
         })
         setTimeout(() => {
           navigate('/login')
         }, 3000)
       } else {
         showError({
-          title: 'Password Update Failed',
-          message: 'Failed to update password, please try again later',
+          title: t('passwordUpdateFailed'),
+          message: t('passwordUpdateFailedMsg'),
         })
       }
     } catch (error) {
       showError({
-        title: 'Password Update Failed',
-        message: 'Failed to update password, please try again later',
+        title: t('passwordUpdateFailed'),
+        message: t('passwordUpdateFailedMsg'),
       })
     } finally {
       setIsSubmitting(false)
@@ -93,7 +94,7 @@ const UpdatePasswordView = () => {
   if (!verificationCode) {
     return (
       <AuthShell
-        title='This link is not valid'
+        title={t('linkInvalid')}
         subtitle='The password reset link is incomplete or has already been used. Request a new one to continue.'
         footer={<LegalLinks />}
         showLogo
@@ -106,7 +107,7 @@ const UpdatePasswordView = () => {
             sx={authButtonSx}
             onClick={() => navigate('/forgot-password')}
           >
-            Request a new link
+            {t('requestNewLink')}
           </Button>
           <Button
             fullWidth
@@ -116,7 +117,7 @@ const UpdatePasswordView = () => {
             sx={authButtonSx}
             onClick={() => navigate('/login')}
           >
-            Back to sign in
+            {t('backToSignIn')}
           </Button>
         </Box>
       </AuthShell>
@@ -125,7 +126,7 @@ const UpdatePasswordView = () => {
 
   return (
     <AuthShell
-      title='Set a new password'
+      title={t('setNewPassword')}
       subtitle='Choose a password you have not used on this account before.'
       footer={<LegalLinks />}
       // Reached from an emailed link, usually in a browser: an unbranded page
@@ -138,7 +139,7 @@ const UpdatePasswordView = () => {
         sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
       >
         <AuthPasswordField
-          label='New password'
+          label={t('newPassword')}
           id='password'
           name='password'
           autoComplete='new-password'
@@ -151,18 +152,18 @@ const UpdatePasswordView = () => {
         />
 
         <AuthPasswordField
-          label='Confirm new password'
+          label={t('confirmNewPassword')}
           id='passwordConfirm'
           name='passwordConfirm'
           autoComplete='new-password'
-          placeholder='Re-enter your password'
+          placeholder={t('reenterPassword')}
           value={passwordConfirm}
           error={passwordConfirmationError}
           onChange={handlePasswordConfirmChange}
         />
 
         <AuthSubmitButton loading={isSubmitting} sx={{ mt: 1 }}>
-          Save password
+          {t('savePassword')}
         </AuthSubmitButton>
 
         <Button
@@ -174,7 +175,7 @@ const UpdatePasswordView = () => {
           sx={authButtonSx}
           onClick={() => navigate('/login')}
         >
-          Cancel
+          {t('common:cancel')}
         </Button>
       </Box>
     </AuthShell>

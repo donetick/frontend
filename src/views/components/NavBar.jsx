@@ -2,6 +2,7 @@ import { Capacitor } from '@capacitor/core'
 import {
   Archive,
   ArrowBack,
+  BugReport,
   FilterAlt,
   FolderOpen,
   History,
@@ -30,10 +31,11 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 
 import { version } from '../../../package.json'
 import UserProfileAvatar from '../../components/UserProfileAvatar'
-import Z_INDEX from '../../constants/zIndex'
+import { useLocalization } from '../../contexts/LocalizationContext'
 import { useResource } from '../../queries/ResourceQueries'
 import { useGlobalSearch } from '../../search/GlobalSearchContext'
 import { apiClient } from '../../utils/ApiClient'
+import ErrorReportModal from '../Modals/ErrorReportModal'
 import NavBarLink from './NavBarLink'
 import SyncStatusIndicator from './SyncStatusIndicator'
 
@@ -45,6 +47,7 @@ const NavBar = () => {
 
   const navigate = useNavigate()
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [bugReportOpen, setBugReportOpen] = useState(false)
 
   const links = [
     {
@@ -206,7 +209,7 @@ const NavBar = () => {
             ? `calc(var(--safe-area-inset-top, 0px))`
             : '',
         position: 'sticky',
-        zIndex: Z_INDEX.NAVBAR,
+        zIndex: 'var(--joy-zIndex-popup)',
         top: 0,
         minHeight: '35px',
         backgroundColor: 'var(--joy-palette-background-body)',
@@ -239,7 +242,6 @@ const NavBar = () => {
             // height:
             //   'calc(100vh - var(--safe-area-inset-top, 0px) - var(--safe-area-inset-bottom, 0px))',
             overflow: 'auto',
-            zIndex: Z_INDEX.DRAWER,
           },
         }}
       >
@@ -297,6 +299,17 @@ const NavBar = () => {
               <ListItemContent>Upgrade to Plus</ListItemContent>
             </ListItemButton> */}
             <ListItemButton
+              onClick={() => setBugReportOpen(true)}
+              sx={{
+                py: 1.2,
+              }}
+            >
+              <ListItemDecorator>
+                <BugReport />
+              </ListItemDecorator>
+              <ListItemContent>{t('navigation.reportBug')}</ListItemContent>
+            </ListItemButton>
+            <ListItemButton
               onClick={() => {
                 apiClient.handleLogout()
               }}
@@ -329,6 +342,10 @@ const NavBar = () => {
           </List>
         </div>
       </Drawer>
+      <ErrorReportModal
+        open={bugReportOpen}
+        onClose={() => setBugReportOpen(false)}
+      />
     </nav>
   )
 }

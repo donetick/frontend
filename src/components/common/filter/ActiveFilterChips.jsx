@@ -1,6 +1,8 @@
 import { Add, Close } from '@mui/icons-material'
 import { Box, Button, Chip, ChipDelete, Typography } from '@mui/joy'
 
+import { useTranslation } from 'react-i18next'
+
 const ActiveFilterChips = ({
   chipSize = 'md',
   chipSx,
@@ -18,6 +20,7 @@ const ActiveFilterChips = ({
   showAddChip = false,
   totalCount,
 }) => {
+  const { t } = useTranslation('common')
   if (!chips.length) {
     return null
   }
@@ -161,7 +164,7 @@ const ActiveFilterChips = ({
             ...clearButtonSx,
           }}
         >
-          Clear all
+          {t('clearAll')}
         </Button>
       )}
     </Box>

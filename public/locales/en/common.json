@@ -29,7 +29,8 @@
     "filters": "Filters",
     "activities": "Activities",
     "points": "Points",
-    "settings": "Settings"
+    "settings": "Settings",
+    "reportBug": "Report a Bug"
   },
   "search": {
     "title": "Search",
@@ -121,5 +122,37 @@
       "subtitle": "We've filled in an issue with your notes and version details. Nothing has been sent yet — review it and post when you're ready.",
       "open": "Open the issue"
     }
+  },
+  "done": "Done",
+  "clearAll": "Clear all",
+  "upload": {
+    "quotaTitle": "Storage Quota Exceeded",
+    "quotaMessage": "You have exceeded your quota for uploading files.",
+    "tooLargeTitle": "File Too Large",
+    "tooLargeMessage": "The file you are trying to upload is too large.",
+    "deniedTitle": "Permission Denied",
+    "deniedMessage": "You do not have permission to upload files."
+  },
+  "getStarted": "Get Started!",
+  "imageLoadFailed": "Failed to load image.",
+  "typeHere": "Type in here…",
+  "summaryOfChores": "This is a summary of your chores",
+  "loadingOffline": "You are offline",
+  "loadingOfflineSub": "This not available while offline. Please check your internet connection and try again.",
+  "loadingSlow": "This is taking longer than usual. There might be an issue.",
+  "navigateBack": "Navigate Back",
+  "bottomNav": "Bottom Navigation",
+  "profile": "Profile",
+  "autocompletePlaceholder": "Type here...",
+  "errorScreen": {
+    "title": "Something went wrong",
+    "fallback": "An unexpected error occurred. Try reloading — it usually fixes it.",
+    "tryAgain": "Try again",
+    "home": "Home",
+    "login": "Login",
+    "hideDetails": "Hide error details",
+    "showDetails": "Show error details",
+    "copyToClipboard": "Copy to clipboard",
+    "copied": "Error details copied to clipboard"
   }
 }

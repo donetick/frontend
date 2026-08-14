@@ -1,4 +1,5 @@
 import { Browser } from '@capacitor/browser'
+import { useTranslation } from 'react-i18next'
 import { Capacitor } from '@capacitor/core'
 import { Download } from '@mui/icons-material'
 import { Box, CircularProgress, Typography } from '@mui/joy'
@@ -29,6 +30,7 @@ const downloadUrl = (url, fileName) => {
 }
 
 function AttachmentViewerModal({ config }) {
+  const { t } = useTranslation('common')
   const { ResponsiveModal } = useResponsiveModal()
   const [imgLoaded, setImgLoaded] = useState(false)
   const [imgError, setImgError] = useState(false)
@@ -49,7 +51,7 @@ function AttachmentViewerModal({ config }) {
       maxHeight='92vh'
       footer={
         <ModalActions
-          secondary={{ label: 'Close', onClick: handleClose }}
+          secondary={{ label: t('close'), onClick: handleClose }}
           primary={{
             label: 'Download',
             startDecorator: <Download />,
@@ -73,7 +75,7 @@ function AttachmentViewerModal({ config }) {
         )}
         {imgError ? (
           <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            Failed to load image.
+            {t('imageLoadFailed')}
           </Typography>
         ) : (
           <Box

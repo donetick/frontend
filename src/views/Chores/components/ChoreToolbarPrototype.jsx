@@ -38,16 +38,17 @@ import {
   ButtonGroup,
   Chip,
   Divider,
+  Dropdown,
   IconButton,
   Input,
   Menu,
+  MenuButton,
   MenuItem,
   Typography,
 } from '@mui/joy'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import AppModal from '../../../components/common/AppModal'
 import ActiveFilterChips from '../../../components/common/filter/ActiveFilterChips'
-import { Z_INDEX } from '../../../constants/zIndex'
 import KeyboardShortcutHint from '../../../components/common/KeyboardShortcutHint'
 import { FILTER_COLORS } from '../../../utils/Colors'
 import Priorities from '../../../utils/Priorities'
@@ -229,9 +230,8 @@ const ChoreToolbar = ({
   const [localSelections, setLocalSelections] = useState(defaultSelections())
   const [savingFilter, setSavingFilter] = useState(false)
   const [saveFilterName, setSaveFilterName] = useState('')
-  const [saveMenuAnchorEl, setSaveMenuAnchorEl] = useState(null)
+  const [saveMenuOpen, setSaveMenuOpen] = useState(false)
   const [editingSavedFilter, setEditingSavedFilter] = useState(null)
-  const saveMenuRef = useRef(null)
   const activeConditions = selectionsToConditions(localSelections)
 
   // ── badge counts ─────────────────────────────────────────────────────────────
@@ -419,13 +419,13 @@ const ChoreToolbar = ({
     }
     setSavingFilter(false)
     setSaveFilterName('')
-    setSaveMenuAnchorEl(null)
+    setSaveMenuOpen(false)
     setFilterSheetOpen(true)
   }
 
   useEffect(() => {
     if (!filterSheetOpen || savingFilter || activeConditions.length === 0) {
-      setSaveMenuAnchorEl(null)
+      setSaveMenuOpen(false)
     }
   }, [filterSheetOpen, savingFilter, activeConditions.length])
 
@@ -504,7 +504,7 @@ const ChoreToolbar = ({
       onFilterSaved?.(editingSavedFilter.name)
     })
 
-    setSaveMenuAnchorEl(null)
+    setSaveMenuOpen(false)
     setFilterSheetOpen(false)
   }
 
@@ -681,7 +681,7 @@ const ChoreToolbar = ({
         open={filterSheetOpen}
         isMobile
         onClose={() => {
-          setSaveMenuAnchorEl(null)
+          setSaveMenuOpen(false)
           setFilterSheetOpen(false)
         }}
         maxHeight='92vh'
@@ -747,7 +747,7 @@ const ChoreToolbar = ({
                 disabled={!hasAnyActive && activeConditions.length === 0}
                 onClick={() => {
                   setLocalSelections(defaultSelections())
-                  setSaveMenuAnchorEl(null)
+                  setSaveMenuOpen(false)
                   onClearAllFilters?.()
                   setFilterSheetOpen(false)
                 }}
@@ -756,33 +756,29 @@ const ChoreToolbar = ({
               </Button>
 
               {activeConditions.length > 0 ? (
-                <>
+                <Dropdown
+                  open={saveMenuOpen}
+                  onOpenChange={(_event, isOpen) => setSaveMenuOpen(isOpen)}
+                >
                   <ButtonGroup variant='solid' color='primary'>
                     <Button
                       onClick={() => {
-                        setSaveMenuAnchorEl(null)
+                        setSaveMenuOpen(false)
                         setFilterSheetOpen(false)
                       }}
                       sx={{ minWidth: 140 }}
                     >
                       {resultCount != null ? `Show ${resultCount}` : 'Done'}
                     </Button>
-                    <IconButton
-                      ref={saveMenuRef}
+                    <MenuButton
+                      slots={{ root: IconButton }}
                       aria-label='More save options'
-                      onClick={e => setSaveMenuAnchorEl(e.currentTarget)}
                     >
                       <ArrowDropDown />
-                    </IconButton>
+                    </MenuButton>
                   </ButtonGroup>
 
-                  <Menu
-                    anchorEl={saveMenuAnchorEl}
-                    open={Boolean(saveMenuAnchorEl)}
-                    onClose={() => setSaveMenuAnchorEl(null)}
-                    placement='top-end'
-                    sx={{ zIndex: Z_INDEX.MODAL_CONTENT + 10 }}
-                  >
+                  <Menu placement='top-end'>
                     <MenuItem
                       onClick={handleUpdateFilter}
                       disabled={!editingSavedFilter}
@@ -792,7 +788,7 @@ const ChoreToolbar = ({
                     </MenuItem>
                     <MenuItem
                       onClick={() => {
-                        setSaveMenuAnchorEl(null)
+                        setSaveMenuOpen(false)
                         setSaveFilterName(
                           editingSavedFilter
                             ? `${editingSavedFilter.name} Copy`
@@ -805,13 +801,13 @@ const ChoreToolbar = ({
                       Save as New Filter
                     </MenuItem>
                   </Menu>
-                </>
+                </Dropdown>
               ) : (
                 <Button
                   variant='solid'
                   color='primary'
                   onClick={() => {
-                    setSaveMenuAnchorEl(null)
+                    setSaveMenuOpen(false)
                     setFilterSheetOpen(false)
                   }}
                   sx={{ minWidth: 140 }}

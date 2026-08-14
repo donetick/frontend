@@ -10,6 +10,7 @@ import {
   TrendingUp,
   Update,
 } from '@mui/icons-material'
+import { useTranslation } from 'react-i18next'
 import {
   Avatar,
   Box,
@@ -41,6 +42,7 @@ import { useThingHistory } from '../../queries/ThingQueries'
 import LoadingComponent from '../components/Loading'
 
 const ThingsHistory = () => {
+  const { t } = useTranslation('things')
   const { id } = useParams()
   const theme = useTheme()
   const { fmt } = useLocalization()
@@ -186,7 +188,7 @@ const ThingsHistory = () => {
             level='title-md'
             sx={{ fontWeight: 'lg', color: 'text.primary' }}
           >
-            Things Overview
+            {t('history.overview')}
           </Typography>
         </Box>
 
@@ -266,7 +268,7 @@ const ThingsHistory = () => {
               level='title-md'
               sx={{ fontWeight: 'lg', color: 'text.primary' }}
             >
-              Data Visualization
+              {t('history.visualization')}
             </Typography>
           </Box>
         )}
@@ -328,7 +330,7 @@ const ThingsHistory = () => {
           level='title-md'
           sx={{ fontWeight: 'lg', color: 'text.primary' }}
         >
-          Change History
+          {t('history.changeHistory')}
         </Typography>
       </Box>
       <Box sx={{ borderRadius: 'sm', p: 1, boxShadow: 'md' }}>
@@ -379,7 +381,7 @@ const ThingsHistory = () => {
                             display: { xs: 'none', sm: 'block' },
                           }}
                         >
-                          Updated
+                          {t('history.updated')}
                         </Typography>
 
                         <Chip

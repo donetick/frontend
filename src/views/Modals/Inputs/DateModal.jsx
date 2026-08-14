@@ -2,8 +2,10 @@ import { Input } from '@mui/joy'
 import { useState } from 'react'
 import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
+import { useTranslation } from 'react-i18next'
 
 function DateModal({ isOpen, onClose, onSave, current, title }) {
+  const { t } = useTranslation('common')
   const { ResponsiveModal } = useResponsiveModal()
   const [date, setDate] = useState(
     current ? new Date(current).toISOString().split('T')[0] : '',
@@ -22,8 +24,8 @@ function DateModal({ isOpen, onClose, onSave, current, title }) {
       title={title}
       footer={
         <ModalActions
-          secondary={{ label: 'Cancel', onClick: onClose }}
-          primary={{ label: 'Save', onClick: handleSave, disabled: !date }}
+          secondary={{ label: t('cancel'), onClick: onClose }}
+          primary={{ label: t('save'), onClick: handleSave, disabled: !date }}
         />
       }
     >

@@ -11,6 +11,7 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import ProjectModal from '../Modals/Inputs/ProjectModal'
 
@@ -40,6 +41,7 @@ const ProjectCardContent = ({
   onCardClick,
   onToggleActions,
 }) => {
+  const { t } = useTranslation('projects')
   // Check if current user owns this project
   const isOwnedByCurrentUser = project.created_by === currentUserId
   const isDefaultProject = project.id === 'default'
@@ -144,7 +146,7 @@ const ProjectCardContent = ({
                 fontWeight: 'md',
               }}
             >
-              Default
+              {t('defaultChip')}
             </Chip>
           )}
         </Typography>
@@ -178,7 +180,7 @@ const ProjectCardContent = ({
               color: 'primary.500',
             }}
           >
-            {taskCount} tasks
+            {t('tasks', { count: taskCount })}
           </Chip>
 
           {!isOwnedByCurrentUser && !isDefaultProject && (
@@ -193,7 +195,7 @@ const ProjectCardContent = ({
                 fontWeight: 'md',
               }}
             >
-              Shared
+              {t('shared')}
             </Chip>
           )}
         </Box>
@@ -218,6 +220,7 @@ const ProjectCardContent = ({
 }
 
 const ProjectView = () => {
+  const { t } = useTranslation('projects')
   const { data: projects, isProjectsLoading, isError } = useProjects()
   const { data: userProfile } = useUserProfile()
   const { data: chores = { res: [] } } = useChores(false) // false to exclude archived
@@ -250,11 +253,11 @@ const ProjectView = () => {
     const project = userProjects.find(p => p.id === id)
     setConfirmationModel({
       isOpen: true,
-      title: 'Delete Project',
-      message: `Are you sure you want to delete "${project?.name}"? This will remove the project but keep all tasks (they'll move to the Default Project).`,
-      confirmText: 'Delete',
+      title: t('delete.title'),
+      message: t('delete.message', { name: project?.name }),
+      confirmText: t('common:delete'),
       color: 'danger',
-      cancelText: 'Cancel',
+      cancelText: t('common:cancel'),
       onClose: confirmed => {
         if (confirmed === true) {
           handleDeleteProject(id)
@@ -347,7 +350,7 @@ const ProjectView = () => {
   if (isError) {
     return (
       <Typography color='danger' textAlign='center'>
-        Failed to load projects. Please try again.
+        {t('loadError')}
       </Typography>
     )
   }
@@ -360,11 +363,10 @@ const ProjectView = () => {
             level='h3'
             sx={{ fontWeight: 'lg', color: 'text.primary' }}
           >
-            Projects
+            {t('common:navigation.projects')}
           </Typography>
           <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            Organize your tasks into projects. Create custom workspaces to keep
-            your tasks organized and easily accessible.
+            {t('blurb')}
           </Typography>
         </Stack>
       </Box>
@@ -378,8 +380,8 @@ const ProjectView = () => {
         <ProjectCardContent
           project={{
             id: 'default',
-            name: 'Default Project',
-            description: 'All tasks without a specific project',
+            name: t('chores:toolbar.defaultProject'),
+            description: t('defaultDescription'),
             icon: 'FolderOpen',
             color: '#1976d2',
             created_by: userProfile?.id,
@@ -389,7 +391,7 @@ const ProjectView = () => {
           onCardClick={() =>
             handleCardClick({
               id: 'default',
-              name: 'Default Project',
+              name: t('chores:toolbar.defaultProject'),
               icon: 'FolderOpen',
               color: '#1976d2',
             })
@@ -429,7 +431,7 @@ const ProjectView = () => {
                       >
                         <EditIcon sx={{ fontSize: 20 }} />
                         <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                          Edit
+                          {t('common:edit')}
                         </Typography>
                       </Box>
                     </SwipeAction>
@@ -450,7 +452,7 @@ const ProjectView = () => {
                       >
                         <DeleteIcon sx={{ fontSize: 20 }} />
                         <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                          Delete
+                          {t('common:delete')}
                         </Typography>
                       </Box>
                     </SwipeAction>

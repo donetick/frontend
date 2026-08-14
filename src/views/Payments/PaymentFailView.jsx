@@ -1,9 +1,11 @@
 import { Box, Container, Sheet, Typography } from '@mui/joy'
+import { useTranslation } from 'react-i18next'
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Logo from '../../Logo'
 
 const PaymentCancelledView = () => {
+  const { t } = useTranslation('settings')
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -37,10 +39,10 @@ const PaymentCancelledView = () => {
         >
           <Logo />
           <Typography level='h2' sx={{ mt: 2, mb: 1 }}>
-            Payment has been cancelled
+            {t('payment.cancelledTitle')}
           </Typography>
           <Typography level='body-md' sx={{ mb: 2 }}>
-            You will be redirected to the main page shortly.
+            {t('payment.cancelledRedirect')}
           </Typography>
         </Sheet>
       </Box>

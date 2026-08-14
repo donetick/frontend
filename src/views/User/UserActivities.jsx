@@ -48,14 +48,21 @@ import { useLabels } from '../Labels/LabelQueries'
 import { ChoresGrouper } from '../../utils/Chores'
 import { COLORS, TASK_COLOR } from '../../utils/Colors.jsx'
 import LoadingComponent from '../components/Loading'
+import { useTranslation } from 'react-i18next'
 
 const groupByDate = history => {
   const aggregated = {}
   for (let i = 0; i < history.length; i++) {
     const item = history[i]
-    const date = new Date(
-      item.performedAt || item.updatedAt,
-    ).toLocaleDateString()
+    // Key by a stable local ISO day (YYYY-MM-DD) so the render-time
+    // formatter (fmt.date) receives a parseable date instead of a
+    // locale-formatted string, which produced "Invalid date".
+    const d = new Date(item.performedAt || item.updatedAt || item.createdAt)
+    const date = isNaN(d.getTime())
+      ? 'unknown'
+      : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
+          d.getDate(),
+        ).padStart(2, '0')}`
     if (!aggregated[date]) {
       aggregated[date] = []
     }
@@ -83,6 +90,7 @@ const ChoreHistoryItem = ({
   onViewNote,
   onViewDetails,
 }) => {
+  const { t } = useTranslation('history')
   const cfg = statusConfig[status] ?? statusConfig[1]
 
   return (
@@ -136,7 +144,7 @@ const ChoreHistoryItem = ({
         </Typography>
         {points && (
           <Chip size='sm' color='success' startDecorator={<Toll />}>
-            {`${points} points`}
+            {t('detail.points', { count: points })}
           </Chip>
         )}
         {notes && (
@@ -151,7 +159,7 @@ const ChoreHistoryItem = ({
               onViewNote?.(notes)
             }}
           >
-            Note
+            {t('detail.note')}
           </Chip>
         )}
       </Box>
@@ -174,7 +182,7 @@ const ChoreHistoryTimeline = ({
       {Object.entries(groupedHistory).map(([date, items]) => (
         <Box key={date} sx={{ mb: 4 }}>
           <Typography level='title-sm' sx={{ mb: 0.5 }}>
-            {fmt.date(date)}
+            {date === 'unknown' ? '—' : fmt.date(date)}
           </Typography>
           <Divider />
           <Stack spacing={1}>
@@ -197,7 +205,7 @@ const ChoreHistoryTimeline = ({
   )
 }
 
-const renderPieChart = (data, size, isPrimary, chartType = null) => {
+const renderPieChart = (t, data, size, isPrimary, chartType = null) => {
   // Filter out items with zero or negative values
   const validData = data.filter(item => item.value > 0)
 
@@ -216,7 +224,7 @@ const renderPieChart = (data, size, isPrimary, chartType = null) => {
         }}
       >
         <Typography level='body-sm' color='neutral'>
-          No data available
+          {t('charts.noData')}
         </Typography>
       </Box>
     )
@@ -400,6 +408,7 @@ const USER_FILTER = (history, userId) => {
 }
 
 const UserActivites = () => {
+  const { t } = useTranslation('history')
   const { data: userProfile } = useUserProfile()
 
   const [tabValue, setTabValue] = React.useState(7)
@@ -448,16 +457,16 @@ const UserActivites = () => {
     () => [
       {
         id: 'status',
-        label: 'Status',
+        label: t('filter.status'),
         type: 'multi-select',
         icon: <Checklist />,
         options: [
-          { value: 1, label: 'Completed', color: 'success', icon: <Check sx={{ fontSize: 14 }} /> },
-          { value: 2, label: 'Skipped', color: 'warning', icon: <Redo sx={{ fontSize: 14 }} /> },
-          { value: 3, label: 'Pending', color: 'neutral', icon: <HourglassEmpty sx={{ fontSize: 14 }} /> },
-          { value: 4, label: 'Rejected', color: 'danger', icon: <ThumbDown sx={{ fontSize: 14 }} /> },
-          { value: 5, label: 'Missed', color: 'danger', icon: <RunningWithErrors sx={{ fontSize: 14 }} /> },
-          { value: 6, label: 'Rescheduled', color: 'warning', icon: <Schedule sx={{ fontSize: 14 }} /> },
+          { value: 1, label: t('status.completed'), color: 'success', icon: <Check sx={{ fontSize: 14 }} /> },
+          { value: 2, label: t('status.skipped'), color: 'warning', icon: <Redo sx={{ fontSize: 14 }} /> },
+          { value: 3, label: t('filter.pending'), color: 'neutral', icon: <HourglassEmpty sx={{ fontSize: 14 }} /> },
+          { value: 4, label: t('status.rejected'), color: 'danger', icon: <ThumbDown sx={{ fontSize: 14 }} /> },
+          { value: 5, label: t('status.missed'), color: 'danger', icon: <RunningWithErrors sx={{ fontSize: 14 }} /> },
+          { value: 6, label: t('status.rescheduled'), color: 'warning', icon: <Schedule sx={{ fontSize: 14 }} /> },
         ],
         filterFn: (item, values) => values.includes(item.status),
       },
@@ -465,7 +474,7 @@ const UserActivites = () => {
         ? [
             {
               id: 'label',
-              label: 'Labels',
+              label: t('filter.labels'),
               type: 'multi-select',
               icon: <Style />,
               options: userLabels.map(l => ({
@@ -492,20 +501,20 @@ const UserActivites = () => {
         : []),
       {
         id: 'hasNotes',
-        label: 'Has Notes',
+        label: t('filter.hasNotes'),
         type: 'boolean',
         icon: <EventNote />,
         filterFn: item => !!item.notes,
       },
       {
         id: 'hasPoints',
-        label: 'Has Points',
+        label: t('filter.hasPoints'),
         type: 'boolean',
         icon: <Toll />,
         filterFn: item => (item.points ?? 0) > 0,
       },
     ],
-    [userLabels],
+    [userLabels, t],
   )
 
   const {
@@ -520,20 +529,20 @@ const UserActivites = () => {
     () => [
       {
         id: 'timePeriod',
-        label: 'Time Period',
+        label: t('filter.timePeriod'),
         type: 'single-select',
         icon: <CalendarMonth />,
         defaultValue: 7,
         options: [
-          { value: 7, label: '7 Days' },
-          { value: 30, label: '30 Days' },
-          { value: 90, label: '90 Days' },
-          { value: 365, label: 'All Time' },
+          { value: 7, label: t('period.days', { count: 7 }) },
+          { value: 30, label: t('period.days', { count: 30 }) },
+          { value: 90, label: t('period.days', { count: 90 }) },
+          { value: 365, label: t('period.allTime') },
         ],
       },
       {
         id: 'completedBy',
-        label: 'User',
+        label: t('filter.user'),
         type: 'single-select',
         icon: <Person />,
         options: circleUsers.map(u => ({
@@ -544,7 +553,7 @@ const UserActivites = () => {
       },
       ...clientFilterDefs,
     ],
-    [circleUsers, clientFilterDefs],
+    [circleUsers, clientFilterDefs, t],
   )
 
   // Merge server-driven and client-driven active filter states for the bar
@@ -686,7 +695,7 @@ const UserActivites = () => {
         // Add unlabeled tasks if there are any
         if (unlabeledCount > 0) {
           result.push({
-            label: 'No Labels',
+            label: t('charts.noLabels'),
             value: unlabeledCount,
             color: TASK_COLOR.ANYTIME,
             id: 'unlabeled',
@@ -709,7 +718,9 @@ const UserActivites = () => {
           const assignee = circleUsers.find(
             user => user.userId === chore.assignedTo,
           )
-          const assigneeName = assignee ? assignee.displayName : 'Unassigned'
+          const assigneeName = assignee
+            ? assignee.displayName
+            : t('charts.unassigned')
           const assigneeId = chore.assignedTo || 'unassigned'
 
           if (assigneeCounts[assigneeId]) {
@@ -802,7 +813,7 @@ const UserActivites = () => {
     // Add unlabeled tasks duration if there is any
     if (unlabeledDuration > 0) {
       result.push({
-        label: 'No Labels',
+        label: t('charts.noLabels'),
         value: Math.round((unlabeledDuration / 3600) * 10) / 10, // Convert to hours and round to 1 decimal
         color: TASK_COLOR.ANYTIME,
         id: 'unlabeled',
@@ -823,7 +834,7 @@ const UserActivites = () => {
     // Iterate through ChoreHistory to get actual time spent per task
     history.forEach(historyItem => {
       const duration = historyItem.duration || 0 // duration in seconds from ChoreHistory
-      const taskName = historyItem.choreName || 'Unknown Task'
+      const taskName = historyItem.choreName || t('charts.unknownTask')
 
       if (taskDurations[taskName]) {
         taskDurations[taskName].duration += duration
@@ -886,7 +897,7 @@ const UserActivites = () => {
 
     if (totalCompleted > 0) {
       result.push({
-        label: `On time`,
+        label: t('badge.onTimeLabel'),
         value: totalCompleted,
         color: TASK_COLOR.COMPLETED,
         id: 1,
@@ -895,7 +906,7 @@ const UserActivites = () => {
 
     if (totalLate > 0) {
       result.push({
-        label: `Late`,
+        label: t('charts.late'),
         value: totalLate,
         color: TASK_COLOR.LATE,
         id: 2,
@@ -904,7 +915,7 @@ const UserActivites = () => {
 
     if (totalNoDueDate > 0) {
       result.push({
-        label: `Completed`,
+        label: t('status.completed'),
         value: totalNoDueDate,
         color: TASK_COLOR.ANYTIME,
         id: 3,
@@ -919,43 +930,43 @@ const UserActivites = () => {
   const chartData = {
     history: {
       data: historyPieChartData || [],
-      title: 'Status',
-      description: 'Completed tasks status',
+      title: t('charts.status.title'),
+      description: t('charts.status.description'),
     },
     due: {
       data: choreDuePieChartData || [],
-      title: 'Due Date',
-      description: 'Current tasks due date',
+      title: t('charts.due.title'),
+      description: t('charts.due.description'),
     },
     // assigned: {
     //   data: choresAssignedChartData,
-    //   title: 'Assigned to me',
+    //   title: t('chores:sort.assignedToMe'),
     //   description: 'Tasks assigned to you vs others',
     // },
     priority: {
       data: choresPriorityChartData || [],
-      title: 'Priority',
-      description: 'Tasks by priority',
+      title: t('charts.priority.title'),
+      description: t('charts.priority.description'),
     },
     labels: {
       data: choresLabelsChartData || [],
-      title: 'Labels',
-      description: 'Tasks by labels',
+      title: t('charts.labels.title'),
+      description: t('charts.labels.description'),
     },
     labelsDuration: {
       data: choresLabelsDurationChartData || [],
-      title: 'Labels (time)',
-      description: 'Time spent by labels (hours)',
+      title: t('charts.labelsDuration.title'),
+      description: t('charts.labelsDuration.description'),
     },
     tasksTime: {
       data: tasksTimeChartData || [],
-      title: 'Tasks (time)',
-      description: 'Time spent by individual tasks (hours)',
+      title: t('charts.tasksTime.title'),
+      description: t('charts.tasksTime.description'),
     },
     assigneeBreakdown: {
       data: choresAssigneeBreakdownChartData || [],
-      title: 'by Assignee',
-      description: 'Tasks grouped by assignee',
+      title: t('charts.assigneeBreakdown.title'),
+      description: t('charts.assigneeBreakdown.description'),
     },
   }
   if (!userProfile) {
@@ -976,7 +987,7 @@ const UserActivites = () => {
           level='title-md'
           sx={{ fontWeight: 'lg', color: 'text.primary' }}
         >
-          Activities
+          {t('activities.title')}
         </Typography>
       </Box>
 
@@ -1025,7 +1036,7 @@ const UserActivites = () => {
                 onViewNote={notes => {
                   setNoteViewerConfig({
                     isOpen: true,
-                    title: 'Note',
+                    title: t('detail.note'),
                     content: notes,
                     onClose: () => setNoteViewerConfig({ isOpen: false }),
                   })
@@ -1153,6 +1164,7 @@ const UserActivites = () => {
                       }}
                     >
                       {renderPieChart(
+                        t,
                         chartData[selectedChart].data,
                         300, // Increased size for better chart container
                         true,
@@ -1216,7 +1228,7 @@ const UserActivites = () => {
                                   alignItems: 'center',
                                 }}
                               >
-                                {renderPieChart(data, 70, false)}
+                                {renderPieChart(t, data, 70, false)}
                               </Box>
                             </Card>
                           </Grid>

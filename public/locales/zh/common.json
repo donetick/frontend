@@ -64,6 +64,7 @@
     "footer": {
       "navigate": "导航",
       "open": "打开",
+      "results_one": "{{count}} result",
       "results_other": "{{count}} 个结果",
       "typeToSearch": "输入以搜索"
     }

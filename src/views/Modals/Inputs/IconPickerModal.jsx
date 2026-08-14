@@ -3,6 +3,7 @@ import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { getTextColorFromBackgroundColor } from '../../../utils/Colors'
 import PROJECT_ICONS from '../../../utils/ProjectIcons'
+import { useTranslation } from 'react-i18next'
 
 const IconPickerModal = ({
   isOpen,
@@ -11,6 +12,7 @@ const IconPickerModal = ({
   currentIcon,
   projectColor,
 }) => {
+  const { t } = useTranslation('projects')
   const { ResponsiveModal } = useResponsiveModal()
 
   const handleIconClick = iconValue => {
@@ -25,13 +27,13 @@ const IconPickerModal = ({
       size='lg'
       fullWidth={true}
       unmountDelay={250}
-      title='Choose Project Icon'
+      title={t('iconPicker.chooseIcon')}
       footer={
-        <ModalActions secondary={{ label: 'Cancel', onClick: onClose }} />
+        <ModalActions secondary={{ label: t('common:cancel'), onClick: onClose }} />
       }
     >
       <FormControl>
-        <FormLabel>Available Icons</FormLabel>
+        <FormLabel>{t('iconPicker.availableIcons')}</FormLabel>
         <Grid
           container
           spacing={1}
@@ -85,7 +87,7 @@ const IconPickerModal = ({
                       lineHeight: 1.2,
                     }}
                   >
-                    {iconData.name}
+                    {t(`icons.${iconData.key}`)}
                   </Typography>
                 </Box>
               </Grid>

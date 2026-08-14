@@ -5,8 +5,10 @@ import AppModal from './common/AppModal'
 import ModalActions from './common/ModalActions'
 import { useNotification } from '../service/NotificationProvider'
 import { GetSubscriptionSession } from '../utils/Fetcher'
+import { useTranslation } from 'react-i18next'
 
 const SubscriptionModal = ({ open, onClose }) => {
+  const { t } = useTranslation('settings')
   const [selectedPlan, setSelectedPlan] = useState('yearly')
   const [isLoading, setIsLoading] = useState(false)
   const { showError } = useNotification()
@@ -45,7 +47,7 @@ const SubscriptionModal = ({ open, onClose }) => {
       const response = await GetSubscriptionSession()
 
       if (!response.ok) {
-        throw new Error('Failed to create subscription session')
+        throw new Error(t('subscription.sessionFailed'))
       }
 
       const data = await response.json()
@@ -59,8 +61,8 @@ const SubscriptionModal = ({ open, onClose }) => {
     } catch (error) {
       console.error('Subscription error:', error)
       showError({
-        title: 'Subscription Error',
-        message: 'Failed to start subscription process. Please try again.',
+        title: t('subscription.errorTitle'),
+        message: t('subscription.errorMessage'),
       })
     } finally {
       setIsLoading(false)
@@ -71,7 +73,7 @@ const SubscriptionModal = ({ open, onClose }) => {
     <AppModal
       open={open}
       onClose={onClose}
-      title='Upgrade to Plus'
+      title={t('overview.upgrade.title')}
       description='Unlock reminders, rich task details, and advanced automation.'
       size='lg'
       closeOnBackdrop={!isLoading}
@@ -79,9 +81,9 @@ const SubscriptionModal = ({ open, onClose }) => {
       footer={
         <ModalActions
           stackOnMobile
-          secondary={{ label: 'Cancel', onClick: onClose, disabled: isLoading }}
+          secondary={{ label: t('accountSettings.cancel'), onClick: onClose, disabled: isLoading }}
           primary={{
-            label: 'Subscribe',
+            label: t('subscription.subscribe'),
             onClick: handleSubscribe,
             loading: isLoading,
           }}
@@ -217,7 +219,7 @@ const SubscriptionModal = ({ open, onClose }) => {
         color='neutral'
         sx={{ textAlign: 'center', mt: 3 }}
       >
-        Cancel anytime. No hidden fees. Secure payment powered by Stripe.
+        {t('subscription.cancelAnytime')}
       </Typography>
     </AppModal>
   )
