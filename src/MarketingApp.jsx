@@ -23,6 +23,9 @@ const AppRedirect = () => {
 
 const router = createBrowserRouter([
   { path: '/', element: <Landing /> },
+  // Mirrors the app router, where /welcome is the canonical Landing path —
+  // without it this falls through to AppRedirect and bounces to /login.
+  { path: '/welcome', element: <Landing /> },
   { path: '/privacy', element: <PrivacyPolicyView /> },
   { path: '/terms', element: <TermsView /> },
   { path: '*', element: <AppRedirect /> },
@@ -50,17 +53,20 @@ const ThemeClass = () => {
   return null
 }
 
+// Same ordering constraint as contexts/Contexts.jsx: ThemeContext reads the
+// active language via useLocalization() to pick the text direction, so
+// LocalizationProvider has to sit above it.
 const MarketingApp = () => (
-  <ThemeContext>
-    <ThemeClass />
-    <QueryClientProvider client={queryClient}>
-      <LocalizationProvider>
+  <LocalizationProvider>
+    <ThemeContext>
+      <ThemeClass />
+      <QueryClientProvider client={queryClient}>
         <ImpersonateUserProvider>
           <RouterProvider router={router} />
         </ImpersonateUserProvider>
-      </LocalizationProvider>
-    </QueryClientProvider>
-  </ThemeContext>
+      </QueryClientProvider>
+    </ThemeContext>
+  </LocalizationProvider>
 )
 
 export default MarketingApp

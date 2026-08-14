@@ -78,6 +78,10 @@
         "title": "Advanced Settings",
         "description": "Configure webhooks, real-time updates, and other advanced features for enhanced productivity."
       },
+      "privacy": {
+        "title": "Privacy & Analytics",
+        "description": "Control anonymous usage analytics and crash reporting."
+      },
       "developer": {
         "title": "Developer Settings",
         "description": "View technical information about authentication tokens, SSE connections, and debug data."
@@ -490,6 +494,15 @@
       "notConnected": "Real-time updates are enabled but not currently connected.",
       "basicPlanNotice": "Real-time updates are not available in the Basic plan. Upgrade to Plus to receive instant notifications when you or other circle members complete, skip, or modify tasks."
     }
+  },
+  "privacyAnalytics": {
+    "title": "Privacy & Analytics",
+    "description": "Donetick never sends task names, descriptions, notes, or other task content. Session recording is never enabled.",
+    "analyticsToggle": "Anonymous analytics",
+    "analyticsHelper": "Help improve Donetick by sharing anonymous usage statistics.",
+    "crashToggle": "Crash reports",
+    "crashHelper": "Send us the error and what led to it when Donetick crashes no task content.",
+    "footnote": "You can change these choices at any time."
   },
   "subscription": {
     "sessionFailed": "Failed to create subscription session",

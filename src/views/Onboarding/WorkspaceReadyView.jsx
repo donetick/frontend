@@ -4,10 +4,13 @@ import { Box, Button, Typography } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+
+import { track } from '../../analytics'
 import Logo from '../../Logo'
 import { useUserProfile } from '../../queries/UserQueries'
 import { haptic } from '../../utils/Onboarding'
 import { authButtonSx } from '../Authorization/authStyles'
+import { isOfficialDonetickInstance } from '../../utils/FeatureToggle'
 
 const EASE = 'cubic-bezier(0.22, 1, 0.36, 1)'
 
@@ -37,7 +40,8 @@ const WorkspaceReadyView = () => {
    * and a missing offering or a store hiccup must never trap a new user here.
    */
   const showPaywall = async () => {
-    if (!Capacitor.isNativePlatform() || !userProfile?.id) return
+    const isDonetickDotCom = await isOfficialDonetickInstance()
+    if (!isDonetickDotCom || !Capacitor.isNativePlatform() || !userProfile?.id) return
 
     const { Purchases } = await import('@revenuecat/purchases-capacitor')
     const { RevenueCatUI } = await import('@revenuecat/purchases-capacitor-ui')
@@ -70,6 +74,7 @@ const WorkspaceReadyView = () => {
       console.log('Paywall skipped:', error)
     } finally {
       setBusy(false)
+      track('onboarding_completed')
       enterApp()
     }
   }

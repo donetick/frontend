@@ -58,11 +58,9 @@ const SignupView = () => {
       return
     }
 
-    // The "how did you hear about us" step (/heard-about) is
-    // temporarily skipped; new accounts go straight to circle setup.
-    // Re-enable by navigating to '/heard-about' again — that view
-    // already forwards to '/circle-setup' when done.
-    Navigate('/circle-setup', { replace: true })
+    // "How did you hear about us" (cloud) / privacy preferences (self-hosted)
+    // that view forwards to '/circle-setup' once the user answers.
+    Navigate('/heard-about', { replace: true })
   }
   const handleSignUpValidation = () => {
     // Reset errors before validation

@@ -402,6 +402,11 @@ const ChoreEdit = () => {
     let SaveFunction = createChoreMutation.mutateAsync
     if (newChoreId > 0) {
       SaveFunction = updateChoreMutation.mutateAsync
+    } else {
+      // This is the dedicated create page, distinct from the AddTaskModal
+      // popup (which sets its own quick_add/voice/scan source).
+      chore.source =
+        searchParams.get('clone') === 'true' ? 'clone' : 'full_page'
     }
 
     SaveFunction(chore)

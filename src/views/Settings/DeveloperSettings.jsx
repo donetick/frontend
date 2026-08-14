@@ -3,6 +3,8 @@ import { Refresh, Star, Token } from '@mui/icons-material'
 import { Box, Button, Card, Chip, Divider, Typography } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import { networkManager } from '../../hooks/NetworkManager'
 import useConfirmationModal from '../../hooks/useConfirmationModal'
 import { useSSEContext } from '../../hooks/useSSEContext'
@@ -16,6 +18,7 @@ import {
   setDevForcedPrompt,
 } from '../../service/FeedbackService'
 import { useNotification } from '../../service/NotificationProvider'
+import { resetPolicyUpdate } from '../../service/PolicyUpdateService'
 import { apiClient } from '../../utils/ApiClient'
 import { commandQueue } from '../../utils/CommandQueue'
 import { RefreshToken } from '../../utils/Fetcher'
@@ -24,7 +27,7 @@ import { syncEngine } from '../../utils/SyncEngine'
 import { getRefreshTokenExpiry, isNative } from '../../utils/TokenStorage'
 import FeedbackModal from '../Modals/FeedbackModal'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
-import { useTranslation } from 'react-i18next'
+import PolicyUpdateModal from '../Modals/PolicyUpdateModal'
 
 const DeveloperSettings = () => {
   const { t } = useTranslation('settings')
@@ -32,12 +35,12 @@ const DeveloperSettings = () => {
   const { confirmModalConfig, showConfirmation } = useConfirmationModal()
   const { data: userProfile } = useUserProfile()
   const {
-    isConnected,
-    isConnecting,
-    lastEvent,
     error: sseError,
     getConnectionStatus,
     getDebugInfo,
+    isConnected,
+    isConnecting,
+    lastEvent,
   } = useSSEContext()
 
   const [accessTokenExpiry, setAccessTokenExpiry] = useState(null)
@@ -55,6 +58,7 @@ const DeveloperSettings = () => {
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(false)
   const [isResettingSync, setIsResettingSync] = useState(false)
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false)
+  const [policyModalOpen, setPolicyModalOpen] = useState(false)
   const [feedbackEligibility, setFeedbackEligibility] = useState(null)
   const [syncDiagnostics, setSyncDiagnostics] = useState({
     cursor: null,
@@ -393,6 +397,15 @@ const DeveloperSettings = () => {
     showNotification({
       type: 'success',
       message: 'Next visit to My Chores will show the prompt after ~4s',
+    })
+  }
+
+  const handleForcePolicyUpdate = async () => {
+    await resetPolicyUpdate()
+    showNotification({
+      type: 'success',
+      message:
+        'Next visit to My Chores will show the policy notice after ~1.5s',
     })
   }
 
@@ -856,6 +869,35 @@ const DeveloperSettings = () => {
         </Box>
       </Card>
 
+      <Card variant='outlined'>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Typography level='title-lg'>Policy Update Notice</Typography>
+          <Divider />
+          <Typography level='body-sm' color='neutral'>
+            Shown once per POLICY_VERSION to accounts created before the policy
+            effective date. &quot;Force Next Prompt&quot; clears the
+            acknowledgement, then open My Chores to see the automatic trigger.
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+            <Button
+              size='sm'
+              variant='soft'
+              onClick={() => setPolicyModalOpen(true)}
+            >
+              Open Notice
+            </Button>
+            <Button
+              size='sm'
+              variant='outlined'
+              color='neutral'
+              onClick={handleForcePolicyUpdate}
+            >
+              Force Next Prompt
+            </Button>
+          </Box>
+        </Box>
+      </Card>
+
       {isNativePlatform && (
         <Card variant='outlined'>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -1210,6 +1252,13 @@ const DeveloperSettings = () => {
           setFeedbackModalOpen(false)
           refreshFeedbackEligibility()
         }}
+      />
+
+      {/* Preview only — deliberately does not acknowledge, so opening it here
+          never suppresses the real notice. */}
+      <PolicyUpdateModal
+        open={policyModalOpen}
+        onClose={() => setPolicyModalOpen(false)}
       />
 
       <ConfirmationModal config={confirmModalConfig} />

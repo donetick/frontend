@@ -2,6 +2,8 @@ import { CheckRounded } from '@mui/icons-material'
 import { Box, Button, Input, Link, Switch, Typography } from '@mui/joy'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+
+import { track } from '../../analytics'
 import { isOfficialDonetickInstance } from '../../utils/FeatureToggle'
 import {
   haptic,
@@ -61,7 +63,7 @@ const Shell = ({ children }) => (
 
 /**
  * A one-question attribution survey dropped right after account creation,
- * while the "why did I click install" is still fresh. Answering is optional 
+ * while the "why did I click install" is still fresh. Answering is optional
  * blocking a brand-new user on a marketing question would cost more than the
  * data is worth so Continue is always enabled. Shown only on the official
  * donetick.com instance: a self-hosted server has no marketing funnel to
@@ -78,7 +80,13 @@ const AcquisitionSurvey = ({ onDone }) => {
 
   const finish = () => {
     const answer = selected === OTHER ? detail.trim() || null : selected
-    if (answer) recordAcquisitionSource(answer)
+    if (answer) {
+      recordAcquisitionSource(answer)
+      track('onboarding_option_selected', {
+        step: 'heard_about',
+        option: answer,
+      })
+    }
     onDone()
   }
 
@@ -228,8 +236,8 @@ const PrivacyPreferences = ({ onDone }) => {
 
   const values = { crashReports, analytics }
 
-  const finish = () => {
-    recordPrivacyPreferences(values)
+  const finish = async () => {
+    await recordPrivacyPreferences(values)
     onDone()
   }
 
@@ -264,7 +272,7 @@ const PrivacyPreferences = ({ onDone }) => {
           ...enter(60),
         }}
       >
-        {PRIVACY_TOGGLES.map(({ key, label, description }) => (
+        {PRIVACY_TOGGLES.map(({ description, key, label }) => (
           <Box
             key={key}
             sx={{
