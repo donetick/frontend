@@ -1,3 +1,4 @@
+import { MoreVert } from '@mui/icons-material'
 import { Card, IconButton, Typography } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 
@@ -8,9 +9,7 @@ const SummaryCard = () => {
       <div className='flex justify-between'>
         <div>
           <Typography level='h2'>Summary</Typography>
-          <Typography level='body-xs'>
-            {t('summaryOfChores')}
-          </Typography>
+          <Typography level='body-xs'>{t('summaryOfChores')}</Typography>
         </div>
         <IconButton>
           <MoreVert />
