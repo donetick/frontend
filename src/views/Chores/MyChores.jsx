@@ -45,6 +45,7 @@ import CalendarDual from '../components/CalendarDual'
 import CalendarMonthly from '../components/CalendarMonthly.jsx'
 import FeedbackPrompt from '../components/FeedbackPrompt.jsx'
 import LoadingComponent from '../components/Loading'
+import PolicyUpdatePrompt from '../components/PolicyUpdatePrompt.jsx'
 import { useLabels } from '../Labels/LabelQueries'
 import AdvancedFilterBuilder from '../Modals/Inputs/AdvancedFilterBuilder'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
@@ -1514,6 +1515,7 @@ const MyChores = () => {
           />
         </Box>
         <NotificationAccessSnackbar />
+        <PolicyUpdatePrompt />
         <FeedbackPrompt />
         {addTaskModalOpen && (
           <TaskInput

@@ -69,6 +69,13 @@
       "typeToSearch": "Type to search"
     }
   },
+  "policyUpdate": {
+    "title": "We've updated our Privacy Policy and Terms",
+    "subtitle": "Please take a moment to review them. By continuing to use Donetick, you accept the updated documents.",
+    "readPrivacy": "Privacy Policy",
+    "readTerms": "Terms",
+    "acknowledge": "Got it"
+  },
   "feedback": {
     "later": "Maybe later",
     "sentiment": {
