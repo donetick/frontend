@@ -1,4 +1,5 @@
 import { Button, Chip, Menu, MenuItem, Typography } from '@mui/joy'
+import { useTranslation } from 'react-i18next'
 import IconButton from '@mui/joy/IconButton'
 import { useEffect, useRef, useState } from 'react'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
@@ -15,6 +16,7 @@ const IconButtonWithMenu = ({
   useChips,
   title,
 }) => {
+  const { t } = useTranslation('chores')
   const [anchorEl, setAnchorEl] = useState(null)
   const menuRef = useRef(null)
   const menuOptions = Array.isArray(options) ? options : []
@@ -120,7 +122,7 @@ const IconButtonWithMenu = ({
                 setSelectedItem?.setSelectedItem('All')
               }}
             >
-              Cancel All Filters
+              {t('filterChip.cancelAll')}
             </MenuItem>
           )} */}
       </Menu>

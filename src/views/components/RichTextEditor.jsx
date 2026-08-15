@@ -46,6 +46,7 @@ import { apiClient } from '../../utils/ApiClient'
 import { isPlusAccount, resolvePhotoURL } from '../../utils/Helpers'
 import { patchDescriptionHtml } from '../../utils/ImageCache'
 import './RichTextEditor.css'
+import { useTranslation } from 'react-i18next'
 
 const RichTextEditor = forwardRef(
   (
@@ -53,7 +54,7 @@ const RichTextEditor = forwardRef(
       value = '',
       onChange,
       isEditable = true,
-      placeholder = 'Enter description...',
+      placeholder = null,
       variant = 'outlined',
       entityId,
       entityType,
@@ -61,6 +62,7 @@ const RichTextEditor = forwardRef(
     },
     ref,
   ) => {
+    const { t } = useTranslation('chores')
     const { showError } = useNotification()
     const { data: userProfile } = useUserProfile()
     // Display-only HTML with expired image srcs swapped for cached/re-signed ones
@@ -92,9 +94,9 @@ const RichTextEditor = forwardRef(
       // Check if user has plus account
       if (!isPlusAccount(userProfile)) {
         showError({
-          title: 'Plus Feature',
+          title: t('common:upload.plusFeatureTitle'),
           message:
-            'Image uploads are not available in the Basic plan. Upgrade to Plus to add images to your content.',
+            t('common:upload.plusFeatureMessage'),
         })
         return
       }
@@ -155,33 +157,33 @@ const RichTextEditor = forwardRef(
 
           if (response.status === 507) {
             showError({
-              title: 'Storage Quota Exceeded',
-              message: 'You have exceeded your quota for uploading files.',
+              title: t('common:upload.quotaTitle'),
+              message: t('common:upload.quotaMessage'),
             })
             return
           } else if (response.status === 413) {
             showError({
-              title: 'File Too Large',
-              message: 'The file you are trying to upload is too large.',
+              title: t('common:upload.tooLargeTitle'),
+              message: t('common:upload.tooLargeMessage'),
             })
             return
           } else if (response.status === 403 && !isPlusAccount(userProfile)) {
             showError({
-              title: 'Upgrade Required',
+              title: t('common:upload.upgradeTitle'),
               message:
-                'Image uploads are only available for Plus accounts. Please ',
+                t('common:upload.upgradeMessage'),
             })
             return
           } else if (response.status === 403) {
             showError({
-              title: 'Permission Denied',
-              message: 'You do not have permission to upload files.',
+              title: t('common:upload.deniedTitle'),
+              message: t('common:upload.deniedMessage'),
             })
             return
           } else if (!response.ok) {
             showError({
-              title: 'Upload Failed',
-              message: 'Failed to upload image.',
+              title: t('common:upload.failedTitle'),
+              message: t('common:upload.failedMessage'),
             })
             return
           }
@@ -199,8 +201,8 @@ const RichTextEditor = forwardRef(
         } catch (error) {
           console.error('Error during image processing or upload:', error)
           showError({
-            title: 'Upload Failed',
-            message: 'An error occurred while processing the image.',
+            title: t('common:upload.failedTitle'),
+            message: t('common:upload.processingMessage'),
           })
         }
       }
@@ -226,7 +228,7 @@ const RichTextEditor = forwardRef(
               },
             },
           },
-          placeholder: placeholder,
+          placeholder: placeholder ?? t('descriptionPlaceholder'),
         })
         new QuillMarkdown(editorRef.current, {})
         editorRef.current.root.innerHTML = value
