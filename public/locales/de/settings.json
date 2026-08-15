@@ -78,6 +78,10 @@
         "title": "Erweiterte Einstellungen",
         "description": "Konfiguriere Webhooks, Echtzeit-Updates und weitere erweiterte Funktionen."
       },
+      "privacy": {
+        "title": "Privacy & Analytics",
+        "description": "Control anonymous usage analytics and crash reporting."
+      },
       "developer": {
         "title": "Entwicklereinstellungen",
         "description": "Sieh dir technische Informationen zu Authentifizierungstoken, SSE-Verbindungen und Debug-Daten an."
@@ -348,7 +352,8 @@
     "backupCodesModal": {
       "title": "Neue Backup-Codes",
       "warning": "Deine bisherigen Backup-Codes sind jetzt ungültig. Bewahre diese neuen Codes an einem sicheren Ort auf. Jeder Code kann nur einmal verwendet werden."
-    }
+    },
+    "generateCodes": "Generate New Codes"
   },
   "apiTokens": {
     "title": "API-Token",
@@ -491,6 +496,15 @@
       "basicPlanNotice": "Echtzeit-Updates sind im Basis-Tarif nicht verfügbar. Wechsle zu Plus, um sofort benachrichtigt zu werden, wenn du oder andere Circle-Mitglieder Aufgaben erledigen, überspringen oder ändern."
     }
   },
+  "privacyAnalytics": {
+    "title": "Privacy & Analytics",
+    "description": "Donetick never sends task names, descriptions, notes, or other task content. Session recording is never enabled.",
+    "analyticsToggle": "Anonymous analytics",
+    "analyticsHelper": "Help improve Donetick by sharing anonymous usage statistics.",
+    "crashToggle": "Crash reports",
+    "crashHelper": "Send us the error and what led to it when Donetick crashes no task content.",
+    "footnote": "You can change these choices at any time."
+  },
   "subscription": {
     "sessionFailed": "Failed to create subscription session",
     "errorTitle": "Subscription Error",
@@ -563,5 +577,8 @@
     "selectOwner": "Select new owner",
     "confirmPrompt": "Please enter your password and type DELETE to confirm",
     "typeDelete": "DELETE"
+  },
+  "realtime": {
+    "titleSse": "Real-time Updates (SSE)"
   }
 }
