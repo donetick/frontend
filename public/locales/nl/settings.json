@@ -78,6 +78,10 @@
         "title": "Geavanceerde instellingen",
         "description": "Stel webhooks, realtime-updates en andere geavanceerde functies in."
       },
+      "privacy": {
+        "title": "Privacy & Analytics",
+        "description": "Control anonymous usage analytics and crash reporting."
+      },
       "developer": {
         "title": "Ontwikkelaarsinstellingen",
         "description": "Bekijk technische informatie over authenticatietokens, SSE-verbindingen en debuggegevens."
@@ -348,7 +352,8 @@
     "backupCodesModal": {
       "title": "Nieuwe back-upcodes",
       "warning": "Je vorige back-upcodes zijn niet meer geldig. Bewaar deze nieuwe codes op een veilige plek. Elke code kan maar één keer worden gebruikt."
-    }
+    },
+    "generateCodes": "Generate New Codes"
   },
   "apiTokens": {
     "title": "API-tokens",
@@ -491,6 +496,15 @@
       "basicPlanNotice": "Realtime-updates zijn niet beschikbaar in het basisabonnement. Upgrade naar Plus om direct meldingen te ontvangen wanneer jij of andere circle-leden taken afronden, overslaan of wijzigen."
     }
   },
+  "privacyAnalytics": {
+    "title": "Privacy & Analytics",
+    "description": "Donetick never sends task names, descriptions, notes, or other task content. Session recording is never enabled.",
+    "analyticsToggle": "Anonymous analytics",
+    "analyticsHelper": "Help improve Donetick by sharing anonymous usage statistics.",
+    "crashToggle": "Crash reports",
+    "crashHelper": "Send us the error and what led to it when Donetick crashes no task content.",
+    "footnote": "You can change these choices at any time."
+  },
   "subscription": {
     "sessionFailed": "Failed to create subscription session",
     "errorTitle": "Subscription Error",
@@ -563,5 +577,8 @@
     "selectOwner": "Select new owner",
     "confirmPrompt": "Please enter your password and type DELETE to confirm",
     "typeDelete": "DELETE"
+  },
+  "realtime": {
+    "titleSse": "Real-time Updates (SSE)"
   }
 }
