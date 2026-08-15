@@ -78,6 +78,10 @@
         "title": "Ajustes avanzados",
         "description": "Configura webhooks, actualizaciones en tiempo real y otras funciones avanzadas."
       },
+      "privacy": {
+        "title": "Privacy & Analytics",
+        "description": "Control anonymous usage analytics and crash reporting."
+      },
       "developer": {
         "title": "Ajustes de desarrollador",
         "description": "Consulta información técnica sobre tokens de autenticación, conexiones SSE y datos de depuración."
@@ -348,7 +352,8 @@
     "backupCodesModal": {
       "title": "Nuevos códigos de respaldo",
       "warning": "Tus códigos de respaldo anteriores ya no son válidos. Guarda estos nuevos códigos en un lugar seguro. Cada código solo se puede usar una vez."
-    }
+    },
+    "generateCodes": "Generate New Codes"
   },
   "apiTokens": {
     "title": "Tokens de API",
@@ -491,6 +496,15 @@
       "basicPlanNotice": "Las actualizaciones en tiempo real no están disponibles en el plan Básico. Mejora a Plus para recibir notificaciones instantáneas cuando tú u otros miembros del círculo completéis, omitáis o modifiquéis tareas."
     }
   },
+  "privacyAnalytics": {
+    "title": "Privacy & Analytics",
+    "description": "Donetick never sends task names, descriptions, notes, or other task content. Session recording is never enabled.",
+    "analyticsToggle": "Anonymous analytics",
+    "analyticsHelper": "Help improve Donetick by sharing anonymous usage statistics.",
+    "crashToggle": "Crash reports",
+    "crashHelper": "Send us the error and what led to it when Donetick crashes no task content.",
+    "footnote": "You can change these choices at any time."
+  },
   "subscription": {
     "sessionFailed": "Failed to create subscription session",
     "errorTitle": "Subscription Error",
@@ -563,5 +577,8 @@
     "selectOwner": "Select new owner",
     "confirmPrompt": "Please enter your password and type DELETE to confirm",
     "typeDelete": "DELETE"
+  },
+  "realtime": {
+    "titleSse": "Real-time Updates (SSE)"
   }
 }
