@@ -15,6 +15,7 @@ import { GetChoreAttachments } from '../../../utils/Fetcher'
 import { resolvePhotoURL } from '../../../utils/Helpers'
 import { cacheChoreImages, getImageSrc } from '../../../utils/ImageCache'
 import AttachmentViewerModal from './AttachmentViewerModal'
+import { useTranslation } from 'react-i18next'
 
 const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg']
 
@@ -35,6 +36,7 @@ const downloadFile = (url, fileName) => {
 }
 
 function AttachmentBrowserModal({ choreId, isOpen, onClose }) {
+  const { t } = useTranslation('common')
   const { ResponsiveModal } = useResponsiveModal()
   const [attachments, setAttachments] = useState([])
   const [isLoading, setIsLoading] = useState(false)
@@ -45,7 +47,7 @@ function AttachmentBrowserModal({ choreId, isOpen, onClose }) {
     setIsLoading(true)
     GetChoreAttachments(choreId)
       .then(async res => {
-        if (!res.ok) throw new Error('Failed to fetch attachments')
+        if (!res.ok) throw new Error(t('chores:dataError.attachmentsFailed'))
         return res.json()
       })
       .then(data => {
@@ -56,7 +58,7 @@ function AttachmentBrowserModal({ choreId, isOpen, onClose }) {
       })
       .catch(() => setAttachments([]))
       .finally(() => setIsLoading(false))
-  }, [isOpen, choreId])
+  }, [isOpen, choreId, t])
 
   const handleClose = () => {
     setAttachments([])
@@ -86,7 +88,7 @@ function AttachmentBrowserModal({ choreId, isOpen, onClose }) {
       <ResponsiveModal
         open={!!isOpen}
         onClose={handleClose}
-        title='Attachments'
+        title={t('attachments')}
         footer={
           <ModalActions primary={{ label: 'Done', onClick: handleClose }} />
         }
@@ -126,7 +128,7 @@ function AttachmentBrowserModal({ choreId, isOpen, onClose }) {
                   )}
                   <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Typography level='body-sm' noWrap>
-                      {attachment.file_name || `File ${index + 1}`}
+                      {attachment.file_name || t('fileNumbered', { index: index + 1 })}
                     </Typography>
                     {attachment.size_bytes > 0 && (
                       <Typography

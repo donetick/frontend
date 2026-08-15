@@ -131,7 +131,14 @@
     "tooLargeTitle": "File Too Large",
     "tooLargeMessage": "The file you are trying to upload is too large.",
     "deniedTitle": "Permission Denied",
-    "deniedMessage": "You do not have permission to upload files."
+    "deniedMessage": "You do not have permission to upload files.",
+    "plusFeatureTitle": "Plus Feature",
+    "plusFeatureMessage": "Image uploads are not available in the Basic plan. Upgrade to Plus to add images to your content.",
+    "upgradeTitle": "Upgrade Required",
+    "upgradeMessage": "Image uploads are only available for Plus accounts.",
+    "failedTitle": "Upload Failed",
+    "failedMessage": "Failed to upload image.",
+    "processingMessage": "An error occurred while processing the image."
   },
   "getStarted": "Get Started!",
   "imageLoadFailed": "Failed to load image.",
@@ -191,5 +198,7 @@
     "allSynced": "All changes synced",
     "willSync": "Will sync when back online",
     "cancelAll": "Cancel All"
-  }
+  },
+  "attachments": "Attachments",
+  "fileNumbered": "File {{index}}"
 }

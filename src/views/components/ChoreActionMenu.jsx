@@ -38,6 +38,7 @@ import {
 } from '@mui/joy'
 import { useMediaQuery } from '@mui/material'
 import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import AppModal from '../../components/common/AppModal'
 import LABEL_COLORS, {
@@ -63,6 +64,7 @@ const ChoreActionMenu = ({
   sx = {},
   variant = 'soft',
 }) => {
+  const { t } = useTranslation('chores')
   const [anchorEl, setAnchorEl] = React.useState(null)
   const [isOfficialInstance, setIsOfficialInstance] = useState(false)
   const [showProjectPicker, setShowProjectPicker] = useState(false)
@@ -250,7 +252,7 @@ const ChoreActionMenu = ({
     {
       key: 'completeNote',
       icon: <NoteAdd />,
-      label: 'Complete with note',
+      label: t('actionMenu.completeWithNote'),
       onClick: () => {
         onCompleteWithNote?.()
         handleMenuClose()
@@ -259,7 +261,7 @@ const ChoreActionMenu = ({
     {
       key: 'completePast',
       icon: <Update />,
-      label: 'Complete in past',
+      label: t('actionMenu.completeInPast'),
       onClick: () => {
         onCompleteWithPastDate?.()
         handleMenuClose()
@@ -268,13 +270,13 @@ const ChoreActionMenu = ({
     {
       key: 'skip',
       icon: <SwitchAccessShortcut />,
-      label: 'Skip to next due date',
+      label: t('actionMenu.skipToNext'),
       onClick: handleSkip,
     },
     {
       key: 'delegate',
       icon: <RecordVoiceOver />,
-      label: 'Delegate to someone else',
+      label: t('modals.delegate'),
       onClick: () => {
         onChangeAssignee?.()
         handleMenuClose()
@@ -283,7 +285,7 @@ const ChoreActionMenu = ({
     isOfficialInstance && {
       key: 'nudge',
       icon: <Notifications />,
-      label: 'Send nudge',
+      label: t('actionMenu.sendNudge'),
       onClick: () => {
         onNudge?.()
         handleMenuClose()
@@ -293,7 +295,7 @@ const ChoreActionMenu = ({
     {
       key: 'history',
       icon: <ManageSearch />,
-      label: 'History',
+      label: t('actionMenu.history'),
       onClick: handleHistory,
     },
     { key: 'divider-2', type: 'divider' },
@@ -302,7 +304,7 @@ const ChoreActionMenu = ({
     {
       key: 'changeDueDate',
       icon: <MoreTime />,
-      label: 'Change due date',
+      label: t('modals.changeDueDate'),
       onClick: () => {
         onChangeDueDate?.()
         handleMenuClose()
@@ -311,15 +313,15 @@ const ChoreActionMenu = ({
     {
       key: 'writeNfc',
       icon: <Nfc />,
-      label: 'Write to NFC',
+      label: t('actionMenu.writeNFC'),
       onClick: () => {
         onWriteNFC?.()
         handleMenuClose()
       },
     },
-    { key: 'edit', icon: <Edit />, label: 'Edit', onClick: handleEdit },
-    { key: 'clone', icon: <CopyAll />, label: 'Clone', onClick: handleClone },
-    { key: 'view', icon: <ViewCarousel />, label: 'View', onClick: handleView },
+    { key: 'edit', icon: <Edit />, label: t('choreView.edit'), onClick: handleEdit },
+    { key: 'clone', icon: <CopyAll />, label: t('actionMenu.clone'), onClick: handleClone },
+    { key: 'view', icon: <ViewCarousel />, label: t('actionMenu.view'), onClick: handleView },
     {
       key: 'archive',
       icon: chore.isActive ? <Archive /> : <Unarchive />,
@@ -330,14 +332,14 @@ const ChoreActionMenu = ({
     projects.length > 0 && {
       key: 'moveToProject',
       icon: <DriveFileMove />,
-      label: 'Move to project',
+      label: t('actionMenu.moveToProject'),
       onClick: () => setShowProjectPicker(true),
     },
     { key: 'divider-4', type: 'divider' },
     {
       key: 'delete',
       icon: <Delete />,
-      label: 'Delete',
+      label: t('archived.delete'),
       onClick: handleDelete,
       color: 'danger',
     },
@@ -345,7 +347,7 @@ const ChoreActionMenu = ({
 
   const quickScheduleButtons = (
     <>
-      <Tooltip title='Today' placement='top'>
+      <Tooltip title={t('duePicker.today')} placement='top'>
         <IconButton
           size='sm'
           onClick={e => {
@@ -356,7 +358,7 @@ const ChoreActionMenu = ({
           <Today />
         </IconButton>
       </Tooltip>
-      <Tooltip title='Tomorrow' placement='top'>
+      <Tooltip title={t('duePicker.tomorrow')} placement='top'>
         <IconButton
           size='sm'
           onClick={e => {
@@ -367,7 +369,7 @@ const ChoreActionMenu = ({
           <WbSunny />
         </IconButton>
       </Tooltip>
-      <Tooltip title='Weekend' placement='top'>
+      <Tooltip title={t('duePicker.weekend')} placement='top'>
         <IconButton
           size='sm'
           onClick={e => {
@@ -378,7 +380,7 @@ const ChoreActionMenu = ({
           <Weekend />
         </IconButton>
       </Tooltip>
-      <Tooltip title='Next week' placement='top'>
+      <Tooltip title={t('duePicker.nextWeek')} placement='top'>
         <IconButton
           size='sm'
           onClick={e => {
@@ -389,7 +391,7 @@ const ChoreActionMenu = ({
           <NextWeek />
         </IconButton>
       </Tooltip>
-      <Tooltip title='Remove due date' placement='top'>
+      <Tooltip title={t('actionMenu.removeDueDate')} placement='top'>
         <IconButton
           size='sm'
           color='neutral'
@@ -529,7 +531,7 @@ const ChoreActionMenu = ({
             >
               <ArrowBack fontSize='small' />
               <Typography level='body-sm' fontWeight={600}>
-                Back
+                {t('common:back')}
               </Typography>
             </MenuItem>
           )}

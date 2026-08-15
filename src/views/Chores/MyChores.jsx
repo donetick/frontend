@@ -73,10 +73,12 @@ import {
 import NotificationAccessSnackbar from './NotificationAccessSnackbar'
 import Sidepanel from './Sidepanel'
 import { INSIGHT_FILTER_DEFS } from './SmartInsightsCard'
+import { useTranslation } from 'react-i18next'
 
 const MyChores = () => {
   const { data: userProfile, isLoading: isUserProfileLoading } =
     useUserProfile()
+  const { t } = useTranslation('chores')
   const isLargeScreen = useMediaQuery(theme => theme.breakpoints.up('md'))
   const { showError, showSuccess, showUndo, showWarning } = useNotification()
   const queryClient = useQueryClient()
@@ -192,16 +194,16 @@ const MyChores = () => {
     () => [
       {
         id: 'status',
-        label: 'Due Date',
+        label: t('group.dueDate'),
         type: 'single-select',
         icon: <CalendarMonth />,
         options: [
-          { value: 'Overdue', label: 'Overdue', color: 'danger' },
-          { value: 'Due today', label: 'Due Today', color: 'warning' },
-          { value: 'Due in week', label: 'Due This Week' },
-          { value: 'Due Later', label: 'Due Later' },
-          { value: 'No Due Date', label: 'No Due Date' },
-          { value: 'Pending Approval', label: 'Pending Approval' },
+          { value: 'Overdue', label: t('group.overdue'), color: 'danger' },
+          { value: 'Due today', label: t('group.dueToday'), color: 'warning' },
+          { value: 'Due in week', label: t('group.dueThisWeek') },
+          { value: 'Due Later', label: t('group.dueLater') },
+          { value: 'No Due Date', label: t('group.noDueDate') },
+          { value: 'Pending Approval', label: t('group.pendingApproval') },
         ],
         filterFn: (item, value) => {
           const now = new Date()
@@ -232,7 +234,7 @@ const MyChores = () => {
       },
       {
         id: 'priority',
-        label: 'Priority',
+        label: t('priority'),
         type: 'multi-select',
         icon: <PriorityHigh />,
         options: Priorities.map(p => ({
@@ -247,7 +249,7 @@ const MyChores = () => {
         ? [
             {
               id: 'label',
-              label: 'Labels',
+              label: t('labels.label'),
               type: 'multi-select',
               icon: <Style />,
               options: userLabels.map(l => ({
@@ -977,8 +979,8 @@ const MyChores = () => {
           updateFilter={updateFilter}
           onFilterSaved={name =>
             showSuccess({
-              title: 'Filter Saved',
-              message: `"${name}" has been saved`,
+              title: t('list.filterSaved'),
+              message: t('list.filterSavedMsg', { name }),
             })
           }
           onClearAllFilters={() => {
@@ -1329,7 +1331,7 @@ const MyChores = () => {
                     <EmptyState
                       size='sm'
                       icon={<EditCalendar />}
-                      title='Nothing scheduled'
+                      title={t('list.nothingScheduled')}
                       description='This day is free. Add a task if you want something to land here.'
                       primaryAction={{
                         label: 'Add task',
@@ -1471,7 +1473,7 @@ const MyChores = () => {
             onClick={() => {
               Navigate(`/chores/create`)
             }}
-            title='Create new chore (Cmd+C)'
+            title={t('list.createChore')}
           >
             <Add />
             <KeyboardShortcutHint
@@ -1581,15 +1583,15 @@ const MyChores = () => {
               operator: filter.operator,
             })
             showSuccess({
-              title: 'Filter Updated',
-              message: `"${filter.name}" has been updated successfully`,
+              title: t('list.filterUpdated'),
+              message: t('list.filterUpdatedMsg', { name: filter.name }),
             })
           } else {
             // Create new filter
             saveFilter(filter)
             showSuccess({
-              title: 'Advanced Filter Created',
-              message: `"${filter.name}" has been created successfully`,
+              title: t('list.advancedFilterCreated'),
+              message: t('list.advancedFilterCreatedMsg', { name: filter.name }),
             })
           }
           setShowAdvancedFilterBuilder(false)

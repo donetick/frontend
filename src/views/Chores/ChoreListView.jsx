@@ -17,6 +17,7 @@ import {
   ThumbDown,
 } from '@mui/icons-material'
 import { Box, Typography } from '@mui/joy'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useLongPress } from '../../hooks/useLongPress'
 import ChoreCard from './ChoreCard'
@@ -89,6 +90,7 @@ const ChoreListView = ({
   showActions = true,
 }) => {
   const navigate = useNavigate()
+  const { t } = useTranslation('chores')
   const renderChoreCard = (chore, key) => {
     const CardComponent = viewMode === 'compact' ? CompactChoreCard : ChoreCard
     return (
@@ -202,7 +204,7 @@ const ChoreListView = ({
                   <Check sx={{ fontSize: 20 }} />
                 )}
                 <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                  {chore.status !== 1 ? 'Start' : 'Complete'}
+                  {chore.status !== 1 ? t('choreView.start') : t('list.complete')}
                 </Typography>
               </Box>
             </SwipeAction>

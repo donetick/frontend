@@ -8,12 +8,14 @@ import {
   Typography,
 } from '@mui/joy'
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import KeyboardShortcutHint from '../../../components/common/KeyboardShortcutHint'
 import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { isOfficialDonetickInstanceSync } from '../../../utils/FeatureToggle'
 
 function NudgeModal({ config }) {
+  const { t } = useTranslation('chores')
   const { ResponsiveModal } = useResponsiveModal()
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
   const [message, setMessage] = useState('')
@@ -107,19 +109,19 @@ function NudgeModal({ config }) {
       size='lg'
       fullWidth={true}
       unmountDelay={250}
-      title='Send Nudge'
+      title={t('nudge.title')}
       description='Send a gentle reminder to the people assigned to this task.'
       footer={
         <ModalActions
           secondary={{
-            label: 'Cancel',
+            label: t('choreView.cancel'),
             onClick: () => handleAction(false),
             endDecorator: showKeyboardShortcuts ? (
               <KeyboardShortcutHint shortcut='X' />
             ) : undefined,
           }}
           primary={{
-            label: 'Send Nudge',
+            label: t('nudge.title'),
             onClick: () => handleAction(true),
             disabled: !isOfficialInstance,
             endDecorator: showKeyboardShortcuts ? (
@@ -144,9 +146,9 @@ function NudgeModal({ config }) {
       )}
 
       <FormControl mb={2}>
-        <FormLabel>Custom Message (optional)</FormLabel>
+        <FormLabel>{t('nudge.customMessage')}</FormLabel>
         <Textarea
-          placeholder='Add a personal message with your nudge...'
+          placeholder={t('nudge.messagePlaceholder')}
           value={message}
           onChange={e => setMessage(e.target.value)}
           minRows={3}
@@ -156,10 +158,9 @@ function NudgeModal({ config }) {
 
       <FormControl orientation='horizontal' sx={{ mb: 3 }}>
         <Box sx={{ flex: 1 }}>
-          <FormLabel>Notify All Assignees</FormLabel>
+          <FormLabel>{t('nudge.notifyAll')}</FormLabel>
           <Typography level='body-sm' color='text.secondary'>
-            If enabled, all members who can see this task will be notified.
-            Otherwise, only the assigned person will receive the nudge.
+            {t('nudge.notifyAllHint')}
           </Typography>
         </Box>
         <Switch

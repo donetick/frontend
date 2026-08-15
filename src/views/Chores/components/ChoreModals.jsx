@@ -1,4 +1,5 @@
 import { Capacitor } from '@capacitor/core'
+import { useTranslation } from 'react-i18next'
 import DateModal from '../../Modals/Inputs/DateModal'
 import DueDatePickerModal, {
   combineDueDate,
@@ -25,13 +26,14 @@ const ChoreModals = ({
   onNudge,
   onClose,
 }) => {
+  const { t } = useTranslation('chores')
   return (
     <>
       {activeModal === 'changeDueDate' && modalChore && (
         <DueDatePickerModal
           open={true}
           key={'changeDueDate' + modalChore.id}
-          title='Change due date'
+          title={t('modals.changeDueDate')}
           {...splitDueDate(modalChore.nextDueDate)}
           onClose={onClose}
           onApply={parts =>
@@ -46,7 +48,7 @@ const ChoreModals = ({
           isOpen={true}
           key={'completedInPast' + modalChore.id}
           current={modalChore.nextDueDate}
-          title='Save Chore that you completed in the past'
+          title={t('modals.completePast')}
           onClose={onClose}
           onSave={onCompleteWithPastDate}
         />
@@ -57,8 +59,8 @@ const ChoreModals = ({
           isOpen={true}
           options={membersData?.res || []}
           displayKey='displayName'
-          title='Delegate to someone else'
-          placeholder='Select a performer'
+          title={t('modals.delegate')}
+          placeholder={t('modals.selectPerformer')}
           onClose={onClose}
           onSave={selected => onAssigneeChange(selected.id)}
         />
@@ -67,9 +69,9 @@ const ChoreModals = ({
       {activeModal === 'completeWithNote' && modalChore && (
         <TextModal
           isOpen={true}
-          title='Add note to attach to this completion:'
+          title={t('modals.addNote')}
           onClose={onClose}
-          okText='Complete'
+          okText={t('modals.complete')}
           onSave={onCompleteWithNote}
         />
       )}

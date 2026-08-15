@@ -3,9 +3,11 @@ import { LocalNotifications } from '@capacitor/local-notifications'
 import { Preferences } from '@capacitor/preferences'
 import { Button, Snackbar, Stack, Typography } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { registerPushNotifications } from '../../CapacitorListener'
 
 const NotificationAccessSnackbar = () => {
+  const { t } = useTranslation('chores')
   const [open, setOpen] = useState(false)
 
   // Define the function outside of useEffect
@@ -55,10 +57,9 @@ const NotificationAccessSnackbar = () => {
       })}
     >
       <div>
-        <Typography level='title-lg'>Need Notification?</Typography>
+        <Typography level='title-lg'>{t('notifications.needTitle')}</Typography>
         <Typography sx={{ mt: 1, mb: 2 }}>
-          You need to enable permission to receive notifications, do you want to
-          enable it?
+          {t('notifications.needBody')}
         </Typography>
         <Stack direction='row' spacing={1}>
           <Button
@@ -84,7 +85,7 @@ const NotificationAccessSnackbar = () => {
               setOpen(false)
             }}
           >
-            Yes
+            {t('common:yes')}
           </Button>
           <Button
             variant='outlined'
@@ -98,7 +99,7 @@ const NotificationAccessSnackbar = () => {
               setOpen(false)
             }}
           >
-            No, Keep it Disabled
+            {t('notifications.keepDisabled')}
           </Button>
         </Stack>
       </div>

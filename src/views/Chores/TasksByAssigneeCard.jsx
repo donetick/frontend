@@ -5,8 +5,10 @@ import EmptyState from '../../components/common/EmptyState'
 import { useCircleMembers } from '../../queries/UserQueries'
 import { TASK_COLOR } from '../../utils/Colors'
 import { resolvePhotoURL } from '../../utils/Helpers'
+import { useTranslation } from 'react-i18next'
 
 const TasksByAssigneeCard = ({ chores = [] }) => {
+  const { t } = useTranslation('chores')
   const [assigneeData, setAssigneeData] = useState([])
   const { data: circleMembersData, isLoading: isCircleMembersLoading } =
     useCircleMembers()
@@ -105,7 +107,7 @@ const TasksByAssigneeCard = ({ chores = [] }) => {
         }}
       >
         <Typography level='body-sm' color='neutral'>
-          Loading tasks by assignee...
+          {t('assigneeCard.loading')}
         </Typography>
       </Sheet>
     )
@@ -164,7 +166,7 @@ const TasksByAssigneeCard = ({ chores = [] }) => {
           }}
         >
           <BarChart color='' />
-          <Typography level='title-md'>Tasks by Assignee</Typography>
+          <Typography level='title-md'>{t('assigneeCard.title')}</Typography>
         </Box>
       </Box>
 
@@ -181,22 +183,22 @@ const TasksByAssigneeCard = ({ chores = [] }) => {
         {[
           {
             key: 'inProgress',
-            label: 'In Progress',
+            label: t('filter.status.inProgress'),
             color: getStatusColor('inProgress'),
           },
           {
             key: 'overdue',
-            label: 'Overdue',
+            label: t('group.overdue'),
             color: getStatusColor('overdue'),
           },
           {
             key: 'scheduled',
-            label: 'Scheduled',
+            label: t('assigneeCard.scheduled'),
             color: getStatusColor('scheduled'),
           },
           {
             key: 'pendingReview',
-            label: 'Pending Review',
+            label: t('assigneeCard.pendingReview'),
             color: getStatusColor('pendingReview'),
           },
         ].map(status => (
