@@ -145,7 +145,10 @@
     "highPriority": "High Priority"
   },
   "labels": {
-    "label": "Labels"
+    "label": "Labels",
+    "count_one": "{{count}} label",
+    "count_other": "{{count}} labels",
+    "create": "Create label"
   },
   "actionMenu": {
     "view": "View",
@@ -284,7 +287,8 @@
     "title": "Reminders"
   },
   "assignee": {
-    "anyone": "Anyone"
+    "anyone": "Anyone",
+    "label": "Assignee"
   },
   "filterChip": {
     "cancelAll": "Cancel All Filters",
@@ -376,7 +380,8 @@
     "today": "Today",
     "tomorrow": "Tomorrow",
     "weekend": "Weekend",
-    "nextWeek": "Next week"
+    "nextWeek": "Next week",
+    "due": "Due"
   },
   "photoTask": {
     "title": "Scan photo to create task",
@@ -401,5 +406,32 @@
     "dueAlert": "Due Alert",
     "followUp": "Follow-up",
     "rememberFuture": "Remember for Future Tasks"
+  },
+  "scan": {
+    "failedTitle": "Scan Failed",
+    "cannotScan": "Could not scan the document.",
+    "unreadable": "Could not read the scanned image."
+  },
+  "attachments": {
+    "label": "Attachments",
+    "count_one": "{{count}} file",
+    "count_other": "{{count}} files"
+  },
+  "dueDateClearAria": "Clear due date",
+  "project": {
+    "default": "Default Project",
+    "label": "Project"
+  },
+  "smartInput": {
+    "selectPhoto": "Select photo",
+    "scanToCreate": "Scan to create task"
+  },
+  "voice": {
+    "speakToCreate": "Speak to create tasks"
+  },
+  "subtask": {
+    "namePlaceholder": "Task name...",
+    "delete": "Delete (Shift+Backspace)",
+    "addPlaceholder": "Add new task... (Enter to add)"
   }
 }

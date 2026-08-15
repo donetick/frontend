@@ -1,6 +1,7 @@
 import { CameraEnhance, Mic, PhotoFilter } from '@mui/icons-material'
 import { IconButton, Tooltip, useColorScheme } from '@mui/joy'
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import AutocompleteDropdown from '../TestView/AutocompleteDropdown'
 import './SmartTaskTitleInput.css'
 const renderHighlightedText = (text, cursorPosition) => {
@@ -59,6 +60,7 @@ const SmartTaskTitleInput = ({
   onPhotoSelected,
   onVoiceClick,
 }) => {
+  const { t } = useTranslation('chores')
   const { mode, setMode } = useColorScheme()
   const titleInputRef = useRef(null)
   const photoInputRef = useRef(null)
@@ -313,7 +315,11 @@ const SmartTaskTitleInput = ({
           >
             {showPhotoButtons && onPhotoSelected && (
               <>
-                <Tooltip title='Select photo' placement='top' size='sm'>
+                <Tooltip
+                  title={t('smartInput.selectPhoto')}
+                  placement='top'
+                  size='sm'
+                >
                   <IconButton
                     size='sm'
                     variant='plain'
@@ -334,7 +340,7 @@ const SmartTaskTitleInput = ({
               </>
             )}
             {showPhotoButtons && onScanClick && (
-              <Tooltip title='Scan to create task' placement='top' size='sm'>
+              <Tooltip title={t('smartInput.scanToCreate')} placement='top' size='sm'>
                 <IconButton
                   size='sm'
                   variant='plain'
@@ -347,7 +353,7 @@ const SmartTaskTitleInput = ({
               </Tooltip>
             )}
             {showVoiceButton && (
-              <Tooltip title='Speak to create tasks' placement='top' size='sm'>
+              <Tooltip title={t('voice.speakToCreate')} placement='top' size='sm'>
                 <IconButton
                   size='sm'
                   variant='plain'

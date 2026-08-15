@@ -23,6 +23,7 @@ import { useFileUpload } from '../../hooks/useFileUpload'
 import { useNotification } from '../../service/NotificationProvider'
 import { DeleteDraftAttachment } from '../../utils/Fetcher'
 import { imageSourceToFile } from '../../utils/FileConvert'
+import { useTranslation } from 'react-i18next'
 
 const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg']
 
@@ -40,6 +41,7 @@ const AttachmentPickerField = ({
   onChange,
   onClear,
 }) => {
+  const { t } = useTranslation('chores')
   const [isOpen, setIsOpen] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const buttonRef = useRef(null)
@@ -99,8 +101,8 @@ const AttachmentPickerField = ({
     if (cancelled) return
     if (error || !image) {
       showError({
-        title: 'Scan Failed',
-        message: error || 'Could not scan the document.',
+        title: t('scan.failedTitle'),
+        message: error || t('scan.cannotScan'),
       })
       return
     }
@@ -109,8 +111,8 @@ const AttachmentPickerField = ({
     setIsUploading(false)
     if (!file) {
       showError({
-        title: 'Scan Failed',
-        message: 'Could not read the scanned image.',
+        title: t('scan.failedTitle'),
+        message: t('scan.unreadable'),
       })
       return
     }
@@ -184,8 +186,8 @@ const AttachmentPickerField = ({
             }}
           >
             {isEmpty
-              ? 'Attachments'
-              : `${attachments.length} file${attachments.length !== 1 ? 's' : ''}`}
+              ? t('attachments.label')
+              : t('attachments.count', { count: attachments.length })}
           </Typography>
         </Button>
         {!isEmpty && onClear && (
