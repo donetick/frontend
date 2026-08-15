@@ -274,7 +274,9 @@ const groupActivitiesByDate = activities => {
   return groups
 }
 
-const ActivitiesCard = ({ title = t('activity.title') }) => {
+const ActivitiesCard = ({ title }) => {
+  const { t } = useTranslation('chores')
+  const displayTitle = title || t('activity.title')
   const [noteViewerConfig, setNoteViewerConfig] = useState({ isOpen: false })
 
   // Use hooks to fetch data
@@ -323,7 +325,7 @@ const ActivitiesCard = ({ title = t('activity.title') }) => {
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-          <Typography level='title-md'>{title}</Typography>
+          <Typography level='title-md'>{displayTitle}</Typography>
         </Box>
         <Box
           sx={{
@@ -380,7 +382,7 @@ const ActivitiesCard = ({ title = t('activity.title') }) => {
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
           <EventNote color='' />
-          <Typography level='title-md'>{title}</Typography>
+          <Typography level='title-md'>{displayTitle}</Typography>
         </Box>
         <Box
           sx={{
@@ -425,7 +427,7 @@ const ActivitiesCard = ({ title = t('activity.title') }) => {
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <EventNote color='' />
-            <Typography level='title-md'>{title}</Typography>
+            <Typography level='title-md'>{displayTitle}</Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Chip size='sm' variant='soft' color='neutral'>
