@@ -78,6 +78,10 @@
         "title": "詳細設定",
         "description": "Webhook、リアルタイム更新など、生産性を高める高度な機能を設定します。"
       },
+      "privacy": {
+        "title": "Privacy & Analytics",
+        "description": "Control anonymous usage analytics and crash reporting."
+      },
       "developer": {
         "title": "開発者設定",
         "description": "認証トークン、SSE接続、デバッグデータなどの技術情報を表示します。"
@@ -348,7 +352,8 @@
     "backupCodesModal": {
       "title": "新しいバックアップコード",
       "warning": "以前のバックアップコードは無効になりました。新しいコードを安全な場所に保管してください。各コードは1回のみ使用できます。"
-    }
+    },
+    "generateCodes": "Generate New Codes"
   },
   "apiTokens": {
     "title": "APIトークン",
@@ -491,6 +496,15 @@
       "basicPlanNotice": "リアルタイム更新はベーシックプランではご利用いただけません。Plusにアップグレードすると、あなたや他のサークルメンバーがタスクを完了・スキップ・変更したときにすぐ通知を受け取れます。"
     }
   },
+  "privacyAnalytics": {
+    "title": "Privacy & Analytics",
+    "description": "Donetick never sends task names, descriptions, notes, or other task content. Session recording is never enabled.",
+    "analyticsToggle": "Anonymous analytics",
+    "analyticsHelper": "Help improve Donetick by sharing anonymous usage statistics.",
+    "crashToggle": "Crash reports",
+    "crashHelper": "Send us the error and what led to it when Donetick crashes no task content.",
+    "footnote": "You can change these choices at any time."
+  },
   "subscription": {
     "sessionFailed": "Failed to create subscription session",
     "errorTitle": "Subscription Error",
@@ -563,5 +577,8 @@
     "selectOwner": "Select new owner",
     "confirmPrompt": "Please enter your password and type DELETE to confirm",
     "typeDelete": "DELETE"
+  },
+  "realtime": {
+    "titleSse": "Real-time Updates (SSE)"
   }
 }
