@@ -70,6 +70,13 @@
       "typeToSearch": "Digite para pesquisar"
     }
   },
+  "policyUpdate": {
+    "title": "We've updated our Privacy Policy and Terms",
+    "subtitle": "Please take a moment to review them. By continuing to use Donetick, you accept the updated documents.",
+    "readPrivacy": "Privacy Policy",
+    "readTerms": "Terms",
+    "acknowledge": "Got it"
+  },
   "feedback": {
     "later": "Maybe later",
     "sentiment": {
@@ -124,7 +131,14 @@
     "tooLargeTitle": "File Too Large",
     "tooLargeMessage": "The file you are trying to upload is too large.",
     "deniedTitle": "Permission Denied",
-    "deniedMessage": "You do not have permission to upload files."
+    "deniedMessage": "You do not have permission to upload files.",
+    "plusFeatureTitle": "Plus Feature",
+    "plusFeatureMessage": "Image uploads are not available in the Basic plan. Upgrade to Plus to add images to your content.",
+    "upgradeTitle": "Upgrade Required",
+    "upgradeMessage": "Image uploads are only available for Plus accounts.",
+    "failedTitle": "Upload Failed",
+    "failedMessage": "Failed to upload image.",
+    "processingMessage": "An error occurred while processing the image."
   },
   "getStarted": "Get Started!",
   "imageLoadFailed": "Failed to load image.",
@@ -147,5 +161,44 @@
     "showDetails": "Show error details",
     "copyToClipboard": "Copy to clipboard",
     "copied": "Error details copied to clipboard"
-  }
+  },
+  "userMenu": {
+    "actAsAnother": "Act as another user",
+    "stopImpersonating": "Stop Impersonating",
+    "returnToAccount": "Return to your account",
+    "accountPrefs": "Account & preferences",
+    "invitePeople": "Invite People",
+    "addMembers": "Add members to your circle",
+    "sidePanelSettings": "Side Panel Settings"
+  },
+  "realtime": {
+    "newTaskTitle": "New Task Created",
+    "connected": "You are now receiving real-time as they happen.",
+    "errorTitle": "Real-time Error",
+    "parseTitle": "Message Error",
+    "parseMessage": "Failed to parse server message",
+    "disabledTitle": "Connection Temporarily Disabled",
+    "failedTitle": "Connection Failed",
+    "stateConnectionError": "Connection error occurred",
+    "stateAuthExpired": "Authentication expired - refreshing token...",
+    "stateTokenRefreshed": "Token refreshed - reconnecting...",
+    "stateRefreshInProgress": "Token refresh in progress - reconnecting soon...",
+    "stateSessionExpired": "Session expired - please log in again",
+    "stateAuthFailed": "Authentication failed - please log in again",
+    "stateAuthError": "Authentication error - please log in again",
+    "stateTimeout": "Connection timeout - reconnecting...",
+    "connectErrorTitle": "Connection Error",
+    "connectErrorMessage": "Failed to establish real-time connection. Please try again."
+  },
+  "removeAll": "Remove all",
+  "apply": "Apply",
+  "cancelAll": "Cancel all",
+  "sync": {
+    "aria": "Open sync and network status",
+    "allSynced": "All changes synced",
+    "willSync": "Will sync when back online",
+    "cancelAll": "Cancel All"
+  },
+  "attachments": "Attachments",
+  "fileNumbered": "File {{index}}"
 }
