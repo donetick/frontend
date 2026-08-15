@@ -7,10 +7,12 @@ import {
   CircularProgress,
   Container,
   IconButton,
+  Input,
   Stack,
   Typography,
 } from '@mui/joy'
-import { useEffect, useState } from 'react'
+import Fuse from 'fuse.js'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import LabelModal from '../Modals/Inputs/LabelModal'
 
@@ -22,7 +24,14 @@ import {
   TrailingActions,
 } from '@meauxt/react-swipeable-list'
 import '@meauxt/react-swipeable-list/dist/styles.css'
-import { Add, MoreVert, Style } from '@mui/icons-material'
+import {
+  Add,
+  Close,
+  MoreVert,
+  Search,
+  SearchOff,
+  Style,
+} from '@mui/icons-material'
 import EmptyState from '../../components/common/EmptyState'
 import { useQueryClient } from '@tanstack/react-query'
 import { useUserProfile } from '../../queries/UserQueries'
@@ -162,6 +171,36 @@ const LabelView = () => {
   const queryClient = useQueryClient()
   const [confirmationModel, setConfirmationModel] = useState({})
   const [showMoreInfoId, setShowMoreInfoId] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const searchInputRef = useRef(null)
+
+  const fuse = useMemo(
+    () =>
+      new Fuse(userLabels, {
+        keys: ['name'],
+        includeScore: true,
+        isCaseSensitive: false,
+        findAllMatches: true,
+      }),
+    [userLabels],
+  )
+
+  const filteredLabels = useMemo(() => {
+    if (!searchTerm) {
+      return userLabels
+    }
+    return fuse.search(searchTerm).map(result => result.item)
+  }, [fuse, searchTerm, userLabels])
+
+  const handleSearchChange = e => {
+    setSearchTerm(e.target.value.toLowerCase())
+    setShowMoreInfoId(null)
+  }
+
+  const handleSearchClose = () => {
+    setSearchTerm('')
+    searchInputRef.current?.blur()
+  }
 
   const handleAddLabel = () => {
     setCurrentLabel(null)
@@ -251,6 +290,36 @@ const LabelView = () => {
           </Typography>
         </Stack>
       </Box>
+      {userLabels.length > 0 && (
+        <Box sx={{ px: 2, mb: 2 }}>
+          <Input
+            slotProps={{ input: { ref: searchInputRef } }}
+            placeholder={t('search.placeholder')}
+            value={searchTerm}
+            fullWidth
+            sx={{
+              borderRadius: 24,
+              height: 24,
+              borderColor: 'text.disabled',
+              padding: 1,
+            }}
+            onChange={handleSearchChange}
+            startDecorator={<Search />}
+            endDecorator={
+              searchTerm && (
+                <IconButton
+                  variant='plain'
+                  size='sm'
+                  onClick={handleSearchClose}
+                  sx={{ borderRadius: '50%' }}
+                >
+                  <Close />
+                </IconButton>
+              )
+            }
+          />
+        </Box>
+      )}
       <Box
         sx={{
           overflow: 'hidden',
@@ -269,8 +338,23 @@ const LabelView = () => {
             }}
           />
         )}
+        {userLabels.length > 0 && filteredLabels.length === 0 && (
+          <EmptyState
+            variant='no-results'
+            fullHeight
+            icon={<SearchOff />}
+            title={t('search.noResultsTitle')}
+            description={t('search.noResultsDescription', {
+              searchTerm,
+            })}
+            primaryAction={{
+              label: t('search.clear'),
+              onClick: handleSearchClose,
+            }}
+          />
+        )}
         <SwipeableList type={ListType.IOS} fullSwipe={false}>
-          {userLabels.map(label => (
+          {filteredLabels.map(label => (
             <SwipeableListItem
               key={label.id}
               swipeActionOpen={showMoreInfoId === label.id ? 'trailing' : null}

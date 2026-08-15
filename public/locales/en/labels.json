@@ -5,5 +5,11 @@
     "message": "Are you sure you want to delete this label? This will remove the label from all tasks."
   },
   "loadError": "Failed to load labels. Please try again.",
+  "search": {
+    "placeholder": "Search labels",
+    "noResultsTitle": "No labels match",
+    "noResultsDescription": "No label matches \"{{searchTerm}}\".",
+    "clear": "Clear search"
+  },
   "blurb": "Manage your labels and organize your tasks effectively. Labels will be automatically shared with your circle if they are used on a shared task."
 }
