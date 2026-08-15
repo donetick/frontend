@@ -13,5 +13,11 @@
   "nameExists": "A filter with this name already exists",
   "tasks_one": "{{count}} task",
   "tasks_other": "{{count}} tasks",
-  "overdue": "{{count}} overdue"
+  "overdue": "{{count}} overdue",
+  "delete": {
+    "title": "Delete Filter"
+  },
+  "empty": {
+    "title": "No saved filters yet"
+  }
 }
