@@ -78,6 +78,10 @@
         "title": "高级设置",
         "description": "配置 Webhook、实时更新以及其他高级功能。"
       },
+      "privacy": {
+        "title": "Privacy & Analytics",
+        "description": "Control anonymous usage analytics and crash reporting."
+      },
       "developer": {
         "title": "开发者设置",
         "description": "查看身份验证令牌、SSE 连接和调试数据等技术信息。"
@@ -348,7 +352,8 @@
     "backupCodesModal": {
       "title": "新的备用代码",
       "warning": "你之前的备用代码已失效。请将这些新代码保存在安全的地方。每个代码只能使用一次。"
-    }
+    },
+    "generateCodes": "Generate New Codes"
   },
   "apiTokens": {
     "title": "API 令牌",
@@ -491,6 +496,15 @@
       "basicPlanNotice": "基础套餐不支持实时更新。升级到 Plus，当你或其他圈子成员完成、跳过或修改任务时即可立即收到通知。"
     }
   },
+  "privacyAnalytics": {
+    "title": "Privacy & Analytics",
+    "description": "Donetick never sends task names, descriptions, notes, or other task content. Session recording is never enabled.",
+    "analyticsToggle": "Anonymous analytics",
+    "analyticsHelper": "Help improve Donetick by sharing anonymous usage statistics.",
+    "crashToggle": "Crash reports",
+    "crashHelper": "Send us the error and what led to it when Donetick crashes no task content.",
+    "footnote": "You can change these choices at any time."
+  },
   "subscription": {
     "sessionFailed": "Failed to create subscription session",
     "errorTitle": "Subscription Error",
@@ -563,5 +577,8 @@
     "selectOwner": "Select new owner",
     "confirmPrompt": "Please enter your password and type DELETE to confirm",
     "typeDelete": "DELETE"
+  },
+  "realtime": {
+    "titleSse": "Real-time Updates (SSE)"
   }
 }
