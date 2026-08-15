@@ -76,7 +76,9 @@
     "hasNotes": "Has Notes",
     "hasPoints": "Has Points",
     "timePeriod": "Time Period",
-    "user": "User"
+    "user": "User",
+    "completedBy": "Completed By",
+    "completedAt": "Completed At"
   },
   "period": {
     "days_one": "{{count}} Day",
@@ -85,5 +87,26 @@
   },
   "activities": {
     "title": "Activities"
+  },
+  "title": {
+    "summary": "Task Summary",
+    "activity": "Task Activity"
+  },
+  "noResults": {
+    "clear": "Clear filters"
+  },
+  "toast": {
+    "updateQueued": {
+      "title": "History Update Queued"
+    },
+    "updated": {
+      "title": "History Updated"
+    },
+    "deleteQueued": {
+      "title": "History Delete Queued"
+    },
+    "deleted": {
+      "title": "History Deleted"
+    }
   }
 }
