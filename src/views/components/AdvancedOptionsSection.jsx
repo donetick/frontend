@@ -319,7 +319,7 @@ const AdvancedOptionsSection = ({
               textColor='text.tertiary'
               sx={{ my: 0.5, fontStyle: 'italic' }}
             >
-              Set a due date to configure completion window and deadline.
+              Set a due date to configure completion window
             </Typography>
           )}
         </Box>

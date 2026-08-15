@@ -14,6 +14,7 @@ import {
 import Fuse from 'fuse.js'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import LabelModal from '../Modals/Inputs/LabelModal'
 
 import {
@@ -163,6 +164,7 @@ const LabelView = () => {
   const { t } = useTranslation('labels')
   const { data: labels, isLabelsLoading, isError } = useLabels()
   const { data: userProfile } = useUserProfile()
+  const navigate = useNavigate()
 
   const [userLabels, setUserLabels] = useState([])
   const [modalOpen, setModalOpen] = useState(false)
@@ -357,6 +359,7 @@ const LabelView = () => {
           {filteredLabels.map(label => (
             <SwipeableListItem
               key={label.id}
+              onClick={() => navigate(`/labels/${label.id}`)}
               swipeActionOpen={showMoreInfoId === label.id ? 'trailing' : null}
               trailingActions={
                 <TrailingActions>

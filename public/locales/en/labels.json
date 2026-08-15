@@ -11,5 +11,27 @@
     "noResultsDescription": "No label matches \"{{searchTerm}}\".",
     "clear": "Clear search"
   },
+  "detail": {
+    "taskCount_one": "{{count}} task",
+    "taskCount_other": "{{count}} tasks",
+    "labelActions": "Label actions",
+    "filters": {
+      "all": "All",
+      "overdue": "Overdue",
+      "today": "Today",
+      "undated": "No date"
+    },
+    "noMatchingStatus": "No task in this label is in that state right now.",
+    "clearFilters": "Show all tasks",
+    "searchPlaceholder": "Search tasks in this label",
+    "emptyTitle": "No tasks with this label",
+    "emptyDescription": "Nothing is tagged \"{{label}}\" yet. Add the label to a task and it will show up here.",
+    "browseTasks": "Browse tasks",
+    "noResultsTitle": "No tasks match",
+    "noResultsDescription": "No task in this label matches \"{{searchTerm}}\".",
+    "notFoundTitle": "Label not found",
+    "notFoundDescription": "This label may have been deleted or is no longer shared with you.",
+    "backToLabels": "Back to labels"
+  },
   "blurb": "Manage your labels and organize your tasks effectively. Labels will be automatically shared with your circle if they are used on a shared task."
 }

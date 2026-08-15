@@ -1,4 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
+import moment from 'moment'
 import { useCallback } from 'react'
 import {
   useArchiveChore,
@@ -16,6 +17,7 @@ import {
   SkipChore,
   UndoChoreAction,
   UpdateChoreAssignee,
+  UpdateChorePriority,
   UpdateDueDate,
 } from '../../../utils/Fetcher'
 import { offlineDB } from '../../../utils/OfflineDB'
@@ -27,6 +29,28 @@ const isNetworkError = err =>
   isOfflineFeatureEnabled() &&
   err instanceof TypeError &&
   err.message === 'Failed to fetch'
+
+const plural = count => (count === 1 ? '' : 's')
+const taskCount = count => `${count} task${plural(count)}`
+
+// "No specific time" is stored as end of day, and it has to be exactly
+// 23:59:59 — that stamp is what ChoreEdit writes and what the task card checks
+// to render "Today" rather than "Today 11:59 PM". Rebuilding from HH:mm alone
+// would land on :00 seconds and lose that meaning.
+const END_OF_DAY = '23:59'
+const atTimeOfDay = (date, time) =>
+  (!time || time === END_OF_DAY
+    ? moment(date, 'YYYY-MM-DD').endOf('day')
+    : moment(`${date} ${time}`, 'YYYY-MM-DD HH:mm')
+  ).toISOString()
+
+// Fetcher calls resolve with a Response even on 4xx/5xx, so a bulk run has to
+// check explicitly or it will report failures as successes.
+const expectOk = async request => {
+  const response = await request
+  if (!response?.ok) throw new Error('Request failed')
+  return response
+}
 
 export const useChoreActions = ({
   chores,
@@ -867,345 +891,385 @@ export const useChoreActions = ({
     [showSuccess, showError, closeModal],
   )
 
-  const handleBulkComplete = useCallback(async () => {
-    const selectedData = getSelectedChoresData(chores)
-    if (selectedData.length === 0) return
+  // ── bulk operations ────────────────────────────────────────────────────────
+  //
+  // Every bulk action is the same shape: optionally confirm, apply per chore,
+  // tally what worked, tell the user, refetch, drop the selection. `runBulk`
+  // owns that shape so each action only describes what it does to one chore.
+  //
+  // Failures are best-effort and partial: a chore that fails leaves the others
+  // applied, and the toast says how many of each.
 
-    setConfirmModelConfig({
-      isOpen: true,
-      title: 'Complete Tasks',
-      confirmText: 'Complete',
-      cancelText: 'Cancel',
-      message: `Mark ${selectedData.length} task${selectedData.length > 1 ? 's' : ''} as completed?`,
-      onClose: async isConfirmed => {
-        if (isConfirmed === true) {
-          try {
-            const completedTasks = []
-            const failedTasks = []
-
-            for (const chore of selectedData) {
-              try {
-                await MarkChoreComplete(
-                  chore.id,
-                  impersonatedUser
-                    ? { completedBy: impersonatedUser.userId }
-                    : null,
-                  null,
-                  null,
-                )
-                completedTasks.push(chore)
-              } catch (error) {
-                failedTasks.push(chore)
+  const patchLocalChores = useCallback(
+    (ids, patch) => {
+      const idSet = new Set(ids)
+      const apply = list =>
+        list.map(chore =>
+          idSet.has(chore.id)
+            ? {
+                ...chore,
+                ...(typeof patch === 'function' ? patch(chore) : patch),
               }
-            }
+            : chore,
+        )
+      setChores(apply)
+      setFilteredChores(apply)
+    },
+    [setChores, setFilteredChores],
+  )
 
-            if (completedTasks.length > 0) {
-              showSuccess({
-                title: '✅ Tasks Completed',
-                message: `Successfully completed ${completedTasks.length} task${completedTasks.length > 1 ? 's' : ''}.`,
-              })
-            }
+  const removeLocalChores = useCallback(
+    ids => {
+      const idSet = new Set(ids)
+      const drop = list => list.filter(chore => !idSet.has(chore.id))
+      setChores(drop)
+      setFilteredChores(drop)
+    },
+    [setChores, setFilteredChores],
+  )
 
-            if (failedTasks.length > 0) {
-              showError({
-                title: 'Some Tasks Failed',
-                message: `${failedTasks.length} task${failedTasks.length > 1 ? 's' : ''} could not be completed.`,
-              })
-            }
+  const runBulk = useCallback(
+    async ({
+      buildUndo,
+      // { title, confirmText, message } — omitted when the picker the user
+      // just used is itself the confirmation.
+      confirm,
+      // "completed", "rescheduled", … — reads as `2 tasks could not be ${verb}.`
+      failureVerb,
+      onSucceeded,
+      perChore,
+      successTitle,
+      // "Completed", "Rescheduled", … — reads as `${verb} 3 tasks.`
+      successVerb,
+      targets,
+    }) => {
+      if (!targets || targets.length === 0) return
 
-            refetchChores()
-            clearSelection()
-          } catch (error) {
-            showError({
-              title: 'Bulk Complete Failed',
-              message: 'An unexpected error occurred. Please try again.',
-            })
-          }
-        }
-        setConfirmModelConfig({})
-      },
-    })
-  }, [
-    getSelectedChoresData,
-    impersonatedUser,
-    showSuccess,
-    showError,
-    refetchChores,
-    clearSelection,
-    setConfirmModelConfig,
-  ])
+      const execute = async () => {
+        const succeeded = []
+        const failed = []
 
-  const handleBulkArchive = useCallback(async () => {
-    const selectedData = getSelectedChoresData(chores)
-    if (selectedData.length === 0) return
-
-    setConfirmModelConfig({
-      isOpen: true,
-      title: 'Archive Tasks',
-      confirmText: 'Archive',
-      cancelText: 'Cancel',
-      message: `Archive ${selectedData.length} task${selectedData.length > 1 ? 's' : ''}?`,
-      onClose: async isConfirmed => {
-        if (isConfirmed === true) {
+        for (const chore of targets) {
           try {
-            const archivedTasks = []
-            const failedTasks = []
-            for (const chore of selectedData) {
-              try {
-                await new Promise((resolve, reject) => {
-                  archiveChore.mutate(chore.id, {
-                    onSuccess: data => {
-                      archivedTasks.push(data)
-                      setChores(prev => prev.filter(c => c.id !== chore.id))
-                      setFilteredChores(prev =>
-                        prev.filter(c => c.id !== chore.id),
-                      )
-                      resolve(data)
-                    },
-                    onError: error => {
-                      failedTasks.push(chore)
-                      reject(error)
-                    },
-                  })
-                })
-              } catch (error) {}
-            }
-            if (archivedTasks.length > 0) {
-              showSuccess({
-                title: '📦 Tasks Archived',
-                message: `Successfully archived ${archivedTasks.length} task${archivedTasks.length > 1 ? 's' : ''}.`,
-              })
-            }
-            if (failedTasks.length > 0) {
-              showError({
-                title: 'Some Tasks Failed',
-                message: `${failedTasks.length} task${failedTasks.length > 1 ? 's' : ''} could not be archived.`,
-              })
-            }
-            refetchChores()
-            clearSelection()
+            await perChore(chore)
+            succeeded.push(chore)
           } catch (error) {
-            showError({
-              title: 'Bulk Archive Failed',
-              message: 'An unexpected error occurred. Please try again.',
-            })
+            failed.push(chore)
           }
         }
-        setConfirmModelConfig({})
-      },
-    })
-  }, [
-    getSelectedChoresData,
-    archiveChore,
-    setChores,
-    setFilteredChores,
-    showSuccess,
-    showError,
-    refetchChores,
-    clearSelection,
-    setConfirmModelConfig,
-  ])
 
-  const handleBulkDelete = useCallback(async () => {
-    const selectedData = getSelectedChoresData(chores)
-    if (selectedData.length === 0) return
-
-    setConfirmModelConfig({
-      isOpen: true,
-      title: 'Delete Tasks',
-      confirmText: 'Delete',
-      cancelText: 'Cancel',
-      message: `Delete ${selectedData.length} task${selectedData.length > 1 ? 's' : ''}?\n\nThis action cannot be undone.`,
-      onClose: async isConfirmed => {
-        if (isConfirmed === true) {
-          try {
-            const deletedTasks = []
-            const failedTasks = []
-
-            for (const chore of selectedData) {
-              try {
-                await DeleteChore(chore.id)
-                deletedTasks.push(chore)
-              } catch (error) {
-                failedTasks.push(chore)
-              }
-            }
-
-            if (deletedTasks.length > 0) {
-              showSuccess({
-                title: '🗑️ Tasks Deleted',
-                message: `Successfully deleted ${deletedTasks.length} task${deletedTasks.length > 1 ? 's' : ''}.`,
-              })
-
-              const deletedIds = new Set(deletedTasks.map(c => c.id))
-              const newChores = chores.filter(c => !deletedIds.has(c.id))
-              const newFilteredChores = filteredChores.filter(
-                c => !deletedIds.has(c.id),
-              )
-              setChores(newChores)
-              setFilteredChores(newFilteredChores)
-            }
-
-            if (failedTasks.length > 0) {
-              showError({
-                title: 'Some Tasks Failed',
-                message: `${failedTasks.length} task${failedTasks.length > 1 ? 's' : ''} could not be deleted.`,
-              })
-            }
-            refetchChores()
-            clearSelection()
-          } catch (error) {
-            showError({
-              title: 'Bulk Delete Failed',
-              message: 'An unexpected error occurred. Please try again.',
-            })
-          }
+        if (succeeded.length > 0) {
+          onSucceeded?.(succeeded)
+          showSuccess({
+            title: successTitle,
+            message: `${successVerb} ${taskCount(succeeded.length)}.`,
+            ...(buildUndo ? { undoAction: buildUndo(succeeded) } : {}),
+          })
         }
-        setConfirmModelConfig({})
-      },
-    })
-  }, [
-    getSelectedChoresData,
-    chores,
-    filteredChores,
-    setChores,
-    setFilteredChores,
-    showSuccess,
-    showError,
-    refetchChores,
-    clearSelection,
-    setConfirmModelConfig,
-  ])
 
-  const handleBulkSkip = useCallback(async () => {
-    const selectedData = getSelectedChoresData(chores)
-    if (selectedData.length === 0) return
-
-    setConfirmModelConfig({
-      isOpen: true,
-      title: 'Skip Tasks',
-      confirmText: 'Skip',
-      cancelText: 'Cancel',
-      message: `Skip ${selectedData.length} task${selectedData.length > 1 ? 's' : ''} to next due date?`,
-      onClose: async isConfirmed => {
-        if (isConfirmed === true) {
-          try {
-            const skippedTasks = []
-            const failedTasks = []
-
-            for (const chore of selectedData) {
-              try {
-                await SkipChore(chore.id)
-                skippedTasks.push(chore)
-              } catch (error) {
-                failedTasks.push(chore)
-              }
-            }
-
-            if (skippedTasks.length > 0) {
-              showSuccess({
-                title: '⏭️ Tasks Skipped',
-                message: `Successfully skipped ${skippedTasks.length} task${skippedTasks.length > 1 ? 's' : ''}.`,
-                undoAction: async () => {
-                  try {
-                    for (const chore of skippedTasks) {
-                      await UndoChoreAction(chore.id)
-                    }
-                    queryClient.invalidateQueries(['chores'])
-                    showUndo({
-                      title: 'Undo Successful',
-                      message: `Undo skip for ${skippedTasks.length} task${skippedTasks.length > 1 ? 's' : ''}.`,
-                    })
-                  } catch (error) {
-                    showError({
-                      title: 'Undo Failed',
-                      message: 'Unable to undo the action. Please try again.',
-                    })
-                  }
-                },
-              })
-            }
-
-            if (failedTasks.length > 0) {
-              showError({
-                title: 'Some Tasks Failed',
-                message: `${failedTasks.length > 1 ? 's' : ''} could not be skipped.`,
-              })
-            }
-
-            refetchChores()
-            clearSelection()
-          } catch (error) {
-            showError({
-              title: 'Bulk Skip Failed',
-              message: 'An unexpected error occurred. Please try again.',
-            })
-          }
+        if (failed.length > 0) {
+          showError({
+            title: 'Some Tasks Failed',
+            message: `${taskCount(failed.length)} could not be ${failureVerb}.`,
+          })
         }
-        setConfirmModelConfig({})
-      },
-    })
-  }, [
-    getSelectedChoresData,
-    showSuccess,
-    showError,
-    showUndo,
-    refetchChores,
-    clearSelection,
-    setConfirmModelConfig,
-  ])
 
-  const handleBulkMoveToProject = useCallback(
-    async project => {
-      const selectedData = getSelectedChoresData(chores)
-      if (selectedData.length === 0) return
+        refetchChores()
+        clearSelection()
+      }
 
-      const projectId = project?.id ?? null
-      const movedTasks = []
-      const failedTasks = []
-
-      for (const chore of selectedData) {
+      if (!confirm) {
         try {
-          const response = await SaveChore({ ...chore, projectId })
-          if (response.ok) {
-            movedTasks.push(chore)
-          } else {
-            failedTasks.push(chore)
-          }
+          await execute()
         } catch (error) {
-          failedTasks.push(chore)
+          showError({
+            title: `Bulk ${failureVerb} failed`,
+            message: 'An unexpected error occurred. Please try again.',
+          })
         }
+        return
       }
 
-      if (movedTasks.length > 0) {
-        const movedIds = new Set(movedTasks.map(c => c.id))
-        const applyMove = list =>
-          list.map(c => (movedIds.has(c.id) ? { ...c, projectId } : c))
-        setChores(applyMove)
-        setFilteredChores(applyMove)
-        showSuccess({
-          title: 'Tasks Moved',
-          message: `Moved ${movedTasks.length} task${movedTasks.length > 1 ? 's' : ''} to ${project?.name || 'Default Project'}.`,
-        })
-      }
-      if (failedTasks.length > 0) {
-        showError({
-          title: 'Some Tasks Failed',
-          message: `${failedTasks.length} task${failedTasks.length > 1 ? 's' : ''} could not be moved.`,
-        })
-      }
-
-      refetchChores()
-      clearSelection()
+      setConfirmModelConfig({
+        isOpen: true,
+        cancelText: 'Cancel',
+        ...confirm,
+        onClose: async isConfirmed => {
+          setConfirmModelConfig({})
+          if (isConfirmed !== true) return
+          try {
+            await execute()
+          } catch (error) {
+            showError({
+              title: `Bulk ${failureVerb} failed`,
+              message: 'An unexpected error occurred. Please try again.',
+            })
+          }
+        },
+      })
     },
     [
-      chores,
-      getSelectedChoresData,
-      setChores,
-      setFilteredChores,
       showSuccess,
       showError,
       refetchChores,
+      clearSelection,
+      setConfirmModelConfig,
+    ],
+  )
+
+  const handleBulkComplete = useCallback(async () => {
+    const targets = getSelectedChoresData(chores)
+    runBulk({
+      targets,
+      confirm: {
+        title: 'Complete Tasks',
+        confirmText: 'Complete',
+        message: `Mark ${taskCount(targets.length)} as completed?`,
+      },
+      perChore: chore =>
+        expectOk(
+          MarkChoreComplete(
+            chore.id,
+            impersonatedUser ? { completedBy: impersonatedUser.userId } : null,
+            null,
+            null,
+          ),
+        ),
+      successTitle: '✅ Tasks Completed',
+      successVerb: 'Completed',
+      failureVerb: 'completed',
+    })
+  }, [getSelectedChoresData, chores, impersonatedUser, runBulk])
+
+  const handleBulkSkip = useCallback(async () => {
+    const targets = getSelectedChoresData(chores)
+    runBulk({
+      targets,
+      confirm: {
+        title: 'Skip Tasks',
+        confirmText: 'Skip',
+        message: `Skip ${taskCount(targets.length)} to next due date?`,
+      },
+      perChore: chore => expectOk(SkipChore(chore.id)),
+      successTitle: '⏭️ Tasks Skipped',
+      successVerb: 'Skipped',
+      failureVerb: 'skipped',
+      buildUndo: succeeded => async () => {
+        try {
+          for (const chore of succeeded) {
+            await UndoChoreAction(chore.id)
+          }
+          queryClient.invalidateQueries(['chores'])
+          showUndo({
+            title: 'Undo Successful',
+            message: `Undo skip for ${taskCount(succeeded.length)}.`,
+          })
+        } catch (error) {
+          showError({
+            title: 'Undo Failed',
+            message: 'Unable to undo the action. Please try again.',
+          })
+        }
+      },
+    })
+  }, [getSelectedChoresData, chores, runBulk, queryClient, showUndo, showError])
+
+  const handleBulkArchive = useCallback(async () => {
+    const targets = getSelectedChoresData(chores)
+    runBulk({
+      targets,
+      confirm: {
+        title: 'Archive Tasks',
+        confirmText: 'Archive',
+        message: `Archive ${taskCount(targets.length)}?`,
+      },
+      perChore: chore =>
+        new Promise((resolve, reject) => {
+          archiveChore.mutate(chore.id, {
+            onSuccess: resolve,
+            onError: reject,
+          })
+        }),
+      successTitle: '📦 Tasks Archived',
+      successVerb: 'Archived',
+      failureVerb: 'archived',
+      onSucceeded: succeeded => removeLocalChores(succeeded.map(c => c.id)),
+    })
+  }, [getSelectedChoresData, chores, runBulk, archiveChore, removeLocalChores])
+
+  const handleBulkDelete = useCallback(async () => {
+    const targets = getSelectedChoresData(chores)
+    runBulk({
+      targets,
+      confirm: {
+        title: 'Delete Tasks',
+        confirmText: 'Delete',
+        message: `Delete ${taskCount(targets.length)}?\n\nThis action cannot be undone.`,
+      },
+      perChore: chore => expectOk(DeleteChore(chore.id)),
+      successTitle: '🗑️ Tasks Deleted',
+      successVerb: 'Deleted',
+      failureVerb: 'deleted',
+      onSucceeded: succeeded => removeLocalChores(succeeded.map(c => c.id)),
+    })
+  }, [getSelectedChoresData, chores, runBulk, removeLocalChores])
+
+  const handleBulkMoveToProject = useCallback(
+    async project => {
+      const projectId = project?.id ?? null
+      runBulk({
+        targets: getSelectedChoresData(chores),
+        perChore: chore => expectOk(SaveChore({ ...chore, projectId })),
+        successTitle: 'Tasks Moved',
+        successVerb: `Moved to ${project?.name || 'Default Project'} —`,
+        failureVerb: 'moved',
+        onSucceeded: succeeded =>
+          patchLocalChores(
+            succeeded.map(c => c.id),
+            { projectId },
+          ),
+      })
+    },
+    [getSelectedChoresData, chores, runBulk, patchLocalChores],
+  )
+
+  // Takes the picker's { dueDateOnly, dueTime, useCustomTime } parts, or null to
+  // unplan. Moving a batch is a date operation: each task keeps the time of day
+  // it was already due at, so "next week 5am" moved to tomorrow becomes
+  // "tomorrow 5am", and a task with no specific time stays at anytime. Only a
+  // time the user explicitly picked overrides that, for the whole selection.
+  const handleBulkDueDate = useCallback(
+    async parts => {
+      const clearing = !parts?.dueDateOnly
+
+      const dueDateFor = chore => {
+        if (clearing) return null
+        if (parts.useCustomTime && parts.dueTime) {
+          return atTimeOfDay(parts.dueDateOnly, parts.dueTime)
+        }
+        // A task with no due date yet has no hour to carry over, so it lands on
+        // end of day like anything else without a specific time.
+        const current = moment(chore.nextDueDate)
+        return atTimeOfDay(
+          parts.dueDateOnly,
+          chore.nextDueDate && current.isValid()
+            ? current.format('HH:mm')
+            : null,
+        )
+      }
+
+      runBulk({
+        targets: getSelectedChoresData(chores),
+        perChore: chore => expectOk(UpdateDueDate(chore.id, dueDateFor(chore))),
+        successTitle: clearing ? 'Due Date Removed' : 'Tasks Scheduled',
+        successVerb: clearing ? 'Unplanned' : 'Rescheduled',
+        failureVerb: clearing ? 'unplanned' : 'rescheduled',
+        onSucceeded: succeeded =>
+          patchLocalChores(
+            succeeded.map(c => c.id),
+            chore => ({
+              nextDueDate: dueDateFor(chore),
+            }),
+          ),
+      })
+    },
+    [getSelectedChoresData, chores, runBulk, patchLocalChores],
+  )
+
+  const handleBulkAssignee = useCallback(
+    async assigneeId => {
+      runBulk({
+        targets: getSelectedChoresData(chores),
+        perChore: chore => expectOk(UpdateChoreAssignee(chore.id, assigneeId)),
+        successTitle: 'Tasks Reassigned',
+        successVerb: 'Reassigned',
+        failureVerb: 'reassigned',
+        onSucceeded: succeeded =>
+          patchLocalChores(
+            succeeded.map(c => c.id),
+            { assignedTo: assigneeId },
+          ),
+      })
+    },
+    [getSelectedChoresData, chores, runBulk, patchLocalChores],
+  )
+
+  const handleBulkPriority = useCallback(
+    async priority => {
+      runBulk({
+        targets: getSelectedChoresData(chores),
+        perChore: chore => expectOk(UpdateChorePriority(chore.id, priority)),
+        successTitle: 'Priority Updated',
+        successVerb: 'Updated priority on',
+        failureVerb: 'updated',
+        onSucceeded: succeeded =>
+          patchLocalChores(
+            succeeded.map(c => c.id),
+            { priority },
+          ),
+      })
+    },
+    [getSelectedChoresData, chores, runBulk, patchLocalChores],
+  )
+
+  // Add/remove rather than replace: a mixed selection has no single "current"
+  // label set, and replacing would silently drop labels the user never saw.
+  // There is no per-label endpoint, so this goes through a full chore save.
+  const handleBulkLabels = useCallback(
+    async (label, mode) => {
+      if (!label) return
+      const selected = getSelectedChoresData(chores)
+      const nextLabelsFor = chore => {
+        const current = chore.labelsV2 || []
+        return mode === 'add'
+          ? [...current, label]
+          : current.filter(l => l.id !== label.id)
+      }
+
+      // Chores already in the desired state aren't worth a round trip, and
+      // counting them would inflate the toast.
+      const targets = selected.filter(chore => {
+        const hasLabel = (chore.labelsV2 || []).some(l => l.id === label.id)
+        return mode === 'add' ? !hasLabel : hasLabel
+      })
+
+      if (targets.length === 0) {
+        showSuccess({
+          title: 'No Changes',
+          message:
+            mode === 'add'
+              ? `Every selected task already has "${label.name}".`
+              : `No selected task has "${label.name}".`,
+        })
+        clearSelection()
+        return
+      }
+
+      runBulk({
+        targets,
+        perChore: chore =>
+          expectOk(SaveChore({ ...chore, labelsV2: nextLabelsFor(chore) })),
+        successTitle: mode === 'add' ? 'Label Added' : 'Label Removed',
+        successVerb:
+          mode === 'add'
+            ? `Added "${label.name}" to`
+            : `Removed "${label.name}" from`,
+        failureVerb: 'updated',
+        onSucceeded: succeeded =>
+          patchLocalChores(
+            succeeded.map(c => c.id),
+            chore => ({
+              labelsV2: nextLabelsFor(chore),
+            }),
+          ),
+      })
+    },
+    [
+      getSelectedChoresData,
+      chores,
+      runBulk,
+      patchLocalChores,
+      showSuccess,
       clearSelection,
     ],
   )
@@ -1222,5 +1286,9 @@ export const useChoreActions = ({
     handleBulkDelete,
     handleBulkSkip,
     handleBulkMoveToProject,
+    handleBulkDueDate,
+    handleBulkAssignee,
+    handleBulkPriority,
+    handleBulkLabels,
   }
 }

@@ -149,6 +149,7 @@ const MyChores = () => {
     clearSelection,
     enterMultiSelectWithChore,
     getSelectedChoresData,
+    getSelectionSummary,
     isMultiSelectMode,
     selectAllVisibleChores,
     selectedChores,
@@ -575,9 +576,13 @@ const MyChores = () => {
   const {
     handleAssigneeChange,
     handleBulkArchive,
+    handleBulkAssignee,
     handleBulkComplete,
     handleBulkDelete,
+    handleBulkDueDate,
+    handleBulkLabels,
     handleBulkMoveToProject,
+    handleBulkPriority,
     handleBulkSkip,
     handleChangeDueDate,
     handleChoreAction,
@@ -628,6 +633,13 @@ const MyChores = () => {
     searchFilteredChores,
     searchTerm,
   ])
+
+  // Drives the bulk-edit sheet's controls (current value per field, which
+  // labels are on all vs some). Only worth computing while selecting.
+  const selectionSummary = useMemo(
+    () => (isMultiSelectMode ? getSelectionSummary(chores) : null),
+    [isMultiSelectMode, getSelectionSummary, chores],
+  )
 
   const { showKeyboardShortcuts } = useKeyboardShortcuts({
     isMultiSelectMode,
@@ -1075,6 +1087,13 @@ const MyChores = () => {
           onArchive={handleBulkArchive}
           onDelete={handleBulkDelete}
           onMoveToProject={handleBulkMoveToProject}
+          onSetDueDate={handleBulkDueDate}
+          onSetAssignee={handleBulkAssignee}
+          onSetPriority={handleBulkPriority}
+          onToggleLabel={handleBulkLabels}
+          selectionSummary={selectionSummary}
+          members={membersData?.res || []}
+          labels={userLabels || []}
           projects={projects}
           showKeyboardShortcuts={showKeyboardShortcuts}
           selectAllDisabled={

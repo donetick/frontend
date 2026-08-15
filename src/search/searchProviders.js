@@ -125,7 +125,7 @@ registerSearchProvider({
         title: label.name || 'Untitled label',
         subtitle: 'Label',
         keywords: 'tag label',
-        route: '/labels',
+        route: `/labels/${label.id}`,
         color: label.color,
       }),
     ),
