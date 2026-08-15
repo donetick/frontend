@@ -9,7 +9,16 @@
     "sessionDeletedMessage": "Timer session has been deleted successfully.",
     "sessionDeleteErrorTitle": "Error deleting session",
     "deleteConfirmTitle": "Delete Timer Session",
-    "deleteConfirmMessage": "Are you sure you want to delete this timer session?"
+    "deleteConfirmMessage": "Are you sure you want to delete this timer session?",
+    "startedTitle": "Timer Started",
+    "startedMessage": "Work session has been started successfully.",
+    "startQueuedTitle": "Start queued",
+    "startFailTitle": "Failed to start timer",
+    "pausedTitle": "Timer Paused",
+    "pausedMessage": "Work session has been paused.",
+    "pauseQueuedTitle": "Pause queued",
+    "pauseFailTitle": "Failed to pause timer",
+    "deleteSessionTitle": "Delete Session"
   },
   "loading": "Loading timer data...",
   "noData": "No timer data found for this chore.",
@@ -25,5 +34,6 @@
   "startTime": "Start Time",
   "endTime": "End Time",
   "leaveEmpty": "Leave empty if session is ongoing",
-  "noSessionForChore": "No timer session found for this chore."
+  "noSessionForChore": "No timer session found for this chore.",
+  "saveChanges": "Save Changes"
 }
