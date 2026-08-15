@@ -78,6 +78,10 @@
         "title": "الإعدادات المتقدمة",
         "description": "اضبط الـ Webhooks والتحديثات الفورية وغيرها من الميزات المتقدمة."
       },
+      "privacy": {
+        "title": "Privacy & Analytics",
+        "description": "Control anonymous usage analytics and crash reporting."
+      },
       "developer": {
         "title": "إعدادات المطوّر",
         "description": "اعرض معلومات تقنية عن رموز المصادقة واتصالات SSE وبيانات التصحيح."
@@ -348,7 +352,8 @@
     "backupCodesModal": {
       "title": "رموز نسخ احتياطي جديدة",
       "warning": "لم تعد رموز النسخ الاحتياطي السابقة صالحة. احفظ هذه الرموز الجديدة في مكان آمن. يمكن استخدام كل رمز مرة واحدة فقط."
-    }
+    },
+    "generateCodes": "Generate New Codes"
   },
   "apiTokens": {
     "title": "رموز API",
@@ -491,6 +496,15 @@
       "basicPlanNotice": "التحديثات الفورية غير متاحة في الخطة الأساسية. رقِّ إلى Plus لتلقّي إشعارات فورية عندما تنجز أنت أو أعضاء دائرتك المهام أو تتخطّونها أو تعدّلونها."
     }
   },
+  "privacyAnalytics": {
+    "title": "Privacy & Analytics",
+    "description": "Donetick never sends task names, descriptions, notes, or other task content. Session recording is never enabled.",
+    "analyticsToggle": "Anonymous analytics",
+    "analyticsHelper": "Help improve Donetick by sharing anonymous usage statistics.",
+    "crashToggle": "Crash reports",
+    "crashHelper": "Send us the error and what led to it when Donetick crashes no task content.",
+    "footnote": "You can change these choices at any time."
+  },
   "subscription": {
     "sessionFailed": "Failed to create subscription session",
     "errorTitle": "Subscription Error",
@@ -563,5 +577,8 @@
     "selectOwner": "Select new owner",
     "confirmPrompt": "Please enter your password and type DELETE to confirm",
     "typeDelete": "DELETE"
+  },
+  "realtime": {
+    "titleSse": "Real-time Updates (SSE)"
   }
 }
