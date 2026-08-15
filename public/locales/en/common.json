@@ -200,5 +200,6 @@
     "cancelAll": "Cancel All"
   },
   "attachments": "Attachments",
-  "fileNumbered": "File {{index}}"
+  "fileNumbered": "File {{index}}",
+  "unknown": "Unknown"
 }

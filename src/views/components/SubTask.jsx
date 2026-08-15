@@ -30,6 +30,7 @@ import {
 } from '@mui/joy'
 import { useCallback, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
+import { useTranslation } from 'react-i18next'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext'
 import { useUserProfile } from '../../queries/UserQueries'
@@ -71,6 +72,7 @@ function SortableItem({
   performers,
 }) {
   const { fmt } = useLocalization()
+  const { t } = useTranslation('chores')
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: task.id })
 
@@ -134,7 +136,7 @@ function SortableItem({
                 },
               }}
               value={task.name}
-              placeholder='Task name...'
+              placeholder={t('subtask.namePlaceholder')}
               onChange={e =>
                 setTasks(prev =>
                   prev.map(t =>
@@ -197,7 +199,7 @@ function SortableItem({
               variant='soft'
               color='danger'
               size='sm'
-              title='Delete (Shift+Backspace)'
+              title={t('subtask.delete')}
               onClick={() =>
                 onKeyDown(
                   {
@@ -247,6 +249,7 @@ const SubTasks = ({
   performers,
   shouldFocus = false,
 }) => {
+  const { t } = useTranslation('chores')
   const [newTask, setNewTask] = useState('')
   const [expandedIds, setExpandedIds] = useState(new Set())
   const { data: userProfile } = useUserProfile()
@@ -673,7 +676,7 @@ const SubTasks = ({
             <ListItem sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Input
                 autoFocus={shouldFocus}
-                placeholder='Add new task... (Enter to add)'
+                placeholder={t('subtask.addPlaceholder')}
                 value={newTask}
                 slotProps={{ input: { ref: addInputRef } }}
                 onChange={e => setNewTask(e.target.value)}

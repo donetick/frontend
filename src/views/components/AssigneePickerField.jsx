@@ -1,6 +1,7 @@
 import { Person } from '@mui/icons-material'
 
 import BaseOptionPicker from './BaseOptionPicker'
+import { useTranslation } from 'react-i18next'
 
 const ANYONE = 'anyone'
 
@@ -14,11 +15,12 @@ const AssigneePickerField = ({
   onClear,
   values = [],
 }) => {
+  const { t } = useTranslation('chores')
   const options = [
     ...(includeAnyone ? [{ userId: ANYONE, displayName: 'Anyone' }] : []),
     ...members.map(member => ({
       userId: member.userId,
-      displayName: member.displayName || member.username || 'Unknown',
+      displayName: member.displayName || member.username || t('common:unknown'),
     })),
   ]
 
@@ -52,7 +54,7 @@ const AssigneePickerField = ({
       onValuesChange={handleValuesChange}
       onClear={onClear}
       emptyDisplay={emptyDisplay}
-      emptyLabel='Assignee'
+      emptyLabel={t('assignee.label')}
       getItemValue={item => item.userId}
       getItemLabel={item => item.displayName}
       renderTriggerIcon={() => <Person sx={{ fontSize: '20px' }} />}

@@ -1,6 +1,7 @@
 import { Add, Label } from '@mui/icons-material'
 import { Button } from '@mui/joy'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import LabelModal from '../Modals/Inputs/LabelModal'
 import BaseOptionPicker from './BaseOptionPicker'
 
@@ -11,6 +12,7 @@ const LabelsPickerField = ({
   labels = [],
   emptyDisplay = 'icon-text',
 }) => {
+  const { t } = useTranslation('chores')
   const [createOpen, setCreateOpen] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
 
@@ -31,7 +33,7 @@ const LabelsPickerField = ({
         open={pickerOpen}
         onOpenChange={setPickerOpen}
         emptyDisplay={emptyDisplay}
-        emptyLabel='Labels'
+        emptyLabel={t('labels.label')}
         getItemValue={item => item.id}
         getItemLabel={item => item.name}
         getItemColor={item => item.color}
@@ -45,9 +47,9 @@ const LabelsPickerField = ({
           />
         )}
         getTriggerText={({ selectedItems, isEmpty }) => {
-          if (isEmpty) return 'Labels'
+          if (isEmpty) return t('labels.label')
           if (selectedItems.length === 1) return selectedItems[0].name
-          return `${selectedItems.length} labels`
+          return t('labels.count', { count: selectedItems.length })
         }}
         menuMinWidth={220}
         menuFooter={
@@ -63,7 +65,7 @@ const LabelsPickerField = ({
             }}
             sx={{ width: '100%', justifyContent: 'flex-start' }}
           >
-            Create label
+            {t('labels.create')}
           </Button>
         }
       />

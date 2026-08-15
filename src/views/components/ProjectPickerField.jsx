@@ -1,4 +1,5 @@
 import { FolderOpen } from '@mui/icons-material'
+import { useTranslation } from 'react-i18next'
 import BaseOptionPicker from './BaseOptionPicker'
 
 const ProjectPickerField = ({
@@ -8,8 +9,9 @@ const ProjectPickerField = ({
   projects = [],
   emptyDisplay = 'icon-text',
 }) => {
+  const { t } = useTranslation('chores')
   const options = [
-    { id: 'default', name: 'Default Project', color: '#9CA3AF' },
+    { id: 'default', name: t('project.default'), color: '#9CA3AF' },
     ...projects.map(project => ({
       id: project.id,
       name: project.name,
@@ -24,7 +26,7 @@ const ProjectPickerField = ({
       onChange={onChange}
       onClear={onClear}
       emptyDisplay={emptyDisplay}
-      emptyLabel='Project'
+      emptyLabel={t('project.label')}
       getItemValue={item => item.id}
       getItemLabel={item => item.name}
       getItemColor={item => item.color}
@@ -38,7 +40,7 @@ const ProjectPickerField = ({
         />
       )}
       getTriggerText={({ selectedItems, isEmpty }) =>
-        isEmpty ? 'Project' : selectedItems[0].name
+        isEmpty ? t('project.label') : selectedItems[0].name
       }
       menuMinWidth={240}
     />
