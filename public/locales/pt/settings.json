@@ -78,6 +78,10 @@
         "title": "Configurações avançadas",
         "description": "Configure webhooks, atualizações em tempo real e outros recursos avançados."
       },
+      "privacy": {
+        "title": "Privacy & Analytics",
+        "description": "Control anonymous usage analytics and crash reporting."
+      },
       "developer": {
         "title": "Configurações de desenvolvedor",
         "description": "Veja informações técnicas sobre tokens de autenticação, conexões SSE e dados de depuração."
@@ -348,7 +352,8 @@
     "backupCodesModal": {
       "title": "Novos códigos de backup",
       "warning": "Seus códigos de backup anteriores não são mais válidos. Guarde estes novos códigos em um lugar seguro. Cada código só pode ser usado uma vez."
-    }
+    },
+    "generateCodes": "Generate New Codes"
   },
   "apiTokens": {
     "title": "Tokens de API",
@@ -491,6 +496,15 @@
       "basicPlanNotice": "As atualizações em tempo real não estão disponíveis no plano Básico. Mude para o Plus para receber notificações instantâneas quando você ou outros membros do círculo concluírem, pularem ou modificarem tarefas."
     }
   },
+  "privacyAnalytics": {
+    "title": "Privacy & Analytics",
+    "description": "Donetick never sends task names, descriptions, notes, or other task content. Session recording is never enabled.",
+    "analyticsToggle": "Anonymous analytics",
+    "analyticsHelper": "Help improve Donetick by sharing anonymous usage statistics.",
+    "crashToggle": "Crash reports",
+    "crashHelper": "Send us the error and what led to it when Donetick crashes no task content.",
+    "footnote": "You can change these choices at any time."
+  },
   "subscription": {
     "sessionFailed": "Failed to create subscription session",
     "errorTitle": "Subscription Error",
@@ -563,5 +577,8 @@
     "selectOwner": "Select new owner",
     "confirmPrompt": "Please enter your password and type DELETE to confirm",
     "typeDelete": "DELETE"
+  },
+  "realtime": {
+    "titleSse": "Real-time Updates (SSE)"
   }
 }
