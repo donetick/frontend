@@ -63,6 +63,8 @@
     "skip": "Overslaan",
     "cancel": "Annuleren",
     "noPriority": "Geen Prioriteit",
+    "more": "More",
+    "changeDueDate": "Change due date",
     "subtasks": "Subtaken",
     "noDescription": "Geen beschrijving beschikbaar",
     "timer": {
@@ -103,7 +105,9 @@
     "showTasksFor": "Show tasks for",
     "type": {
       "assignee": "Assignee"
-    }
+    },
+    "display": "Display",
+    "displayOptions": "Display options"
   },
   "sort": {
     "assignedToMe": "Assigned to me",
