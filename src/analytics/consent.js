@@ -2,7 +2,8 @@ import { Preferences } from '@capacitor/preferences'
 
 // Two independent consent axes, matching the existing onboarding UI
 // (HeardAboutView's PrivacyPreferences): "analytics" gates track(), "crash"
-// gates captureError(). A self-hosted user can opt into one without the other.
+// gates captureException(). A self-hosted user can opt into one without the
+// other.
 const CONSENT_KEYS = {
   analytics: 'analytics_consent',
   crash: 'analytics_crash_consent',
