@@ -74,6 +74,16 @@ import NotificationAccessSnackbar from './NotificationAccessSnackbar'
 import Sidepanel from './Sidepanel'
 import { INSIGHT_FILTER_DEFS } from './SmartInsightsCard'
 
+// Mirrors the assignee options in the toolbar, phrased to drop into a
+// sentence ("none of them are assigned to you").
+const ASSIGNEE_FILTER_LABELS = {
+  assigned_to_me: 'assigned to you',
+  available_for_me: 'available for you to pick up',
+  assigned_to_others: 'assigned to someone else',
+  assigned_to_me_tasks: 'assigned to you',
+  created_by_me: 'created by you',
+}
+
 const MyChores = () => {
   const { data: userProfile, isLoading: isUserProfileLoading } =
     useUserProfile()
@@ -884,20 +894,51 @@ const MyChores = () => {
     })
   }, [getFilteredChores, selectedCalendarDate])
 
+  // The assignee filter ("Mine", "Available to me", ...) is applied inside
+  // ChoresGrouper, not in projectFilteredChores, so it can hide every task
+  // while the unfiltered list still looks full. It narrows like any other.
+  const assigneeFilterLabel = ASSIGNEE_FILTER_LABELS[selectedChoreFilter]
+  const hasAssigneeFilter = Boolean(
+    selectedChoreFilter && selectedChoreFilter !== 'anyone',
+  )
+
   // "Narrowed" means the user actively cut the list down (search, quick
-  // filters, a saved filter). Picking a project is not narrowing: an empty
-  // project is an empty place, not a filtered-away result.
+  // filters, a saved filter, the assignee filter). Picking a project is not
+  // narrowing: an empty project is an empty place, not a filtered-away result.
   const isNarrowed = Boolean(
-    searchTerm?.length > 0 || hasQuickFilters || activeFilterId,
+    searchTerm?.length > 0 ||
+    hasQuickFilters ||
+    activeFilterId ||
+    hasAssigneeFilter,
   )
   const isCustomProjectSelected = Boolean(
     selectedProject && selectedProject.id !== 'default',
+  )
+  // Worth its own wording: the assignee filter is the one narrowing that is
+  // easy to forget you left on, so name it rather than saying "filters".
+  const isAssigneeOnlyNarrowing = Boolean(
+    assigneeFilterLabel &&
+    !searchTerm?.length &&
+    !hasQuickFilters &&
+    !activeFilterId,
+  )
+
+  // What the list actually renders. Sections are the source of truth outside
+  // of search, since they are the only place the assignee filter is applied.
+  const visibleChoreCount = useMemo(
+    () =>
+      choreSections.reduce(
+        (total, section) => total + (section.content?.length || 0),
+        0,
+      ),
+    [choreSections],
   )
 
   const clearNarrowing = () => {
     clearQuickFilters()
     setSearchTerm('')
     clearActiveFilter()
+    setSelectedChoreFilterWithCache('anyone')
     updateFilterUrl(null, null)
   }
 
@@ -1106,10 +1147,13 @@ const MyChores = () => {
 
         {/* Empty state. Three different situations, three different messages:
             nothing created yet, nothing left after narrowing, or an empty
-            project. Only the middle one is about filters. */}
-        {(isNarrowed
+            project. Only the middle one is about filters.
+            The trigger is what the list actually renders, not the pre-filter
+            count, so a view emptied purely by the assignee filter still
+            explains itself instead of showing a blank page. */}
+        {(searchTerm?.length > 0
           ? getFilteredChores.length === 0
-          : projectFilteredChores.length === 0) &&
+          : visibleChoreCount === 0) &&
           // only if not in calendar view:
           viewMode !== 'calendar' &&
           (chores.length === 0 ? (
@@ -1129,7 +1173,10 @@ const MyChores = () => {
                 onClick: () => Navigate('/chores/create'),
               }}
             />
-          ) : isNarrowed ? (
+          ) : isNarrowed &&
+            (searchTerm?.length > 0 ||
+              activeFilterId ||
+              projectFilteredChores.length > 0) ? (
             <EmptyState
               variant='no-results'
               fullHeight
@@ -1138,11 +1185,17 @@ const MyChores = () => {
               description={
                 searchTerm?.length > 0
                   ? `Nothing matches "${searchTerm}". Try a different search, or clear what is narrowing the list.`
-                  : 'You have tasks, but none of them fit the filters that are currently on.'
+                  : isAssigneeOnlyNarrowing
+                    ? `There are tasks here, but none of them are ${assigneeFilterLabel}. Switch back to everyone to see the rest.`
+                    : 'You have tasks, but none of them fit the filters that are currently on.'
               }
               primaryAction={{
                 label:
-                  searchTerm?.length > 0 ? 'Clear search' : 'Clear filters',
+                  searchTerm?.length > 0
+                    ? 'Clear search'
+                    : isAssigneeOnlyNarrowing
+                      ? "Show everyone's tasks"
+                      : 'Clear filters',
                 onClick: clearNarrowing,
               }}
             />
