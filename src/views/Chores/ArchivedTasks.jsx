@@ -4,6 +4,7 @@ import {
   CheckBoxOutlineBlank,
   Close,
   Delete,
+  FilterList,
   Label,
   Person,
   PriorityHigh,
@@ -14,6 +15,7 @@ import {
   ViewModule,
 } from '@mui/icons-material'
 import {
+  Badge,
   Box,
   Button,
   Container,
@@ -202,12 +204,15 @@ const ArchivedTasks = () => {
   )
 
   const {
+    activeFilterCount,
     activeFilters,
     clearAll,
     filteredData: filteredByBar,
     hasActiveFilters,
     setFilter,
   } = useFilter(filteredChores, filterDefs)
+
+  const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false)
 
   const [sortBy, setSortBy] = useState(
     () => localStorage.getItem('archivedChoresSortBy') || 'archivedAt',
@@ -770,6 +775,30 @@ const ArchivedTasks = () => {
           }
         />
 
+        {/* Filter Sheet Trigger */}
+        <Badge
+          badgeContent={activeFilterCount || null}
+          color='primary'
+          size='sm'
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+          sx={{ display: 'flex', alignItems: 'center' }}
+        >
+          <IconButton
+            variant={hasActiveFilters ? 'solid' : 'outlined'}
+            color={hasActiveFilters ? 'primary' : 'neutral'}
+            size='sm'
+            sx={{
+              height: 32,
+              width: 32,
+              borderRadius: '50%',
+            }}
+            onClick={() => setIsFilterSheetOpen(true)}
+            title='Filters'
+          >
+            <FilterList />
+          </IconButton>
+        </Badge>
+
         {/* Sort Menu */}
         <SortAndFilterMenu
           sortOptions={[
@@ -845,6 +874,9 @@ const ArchivedTasks = () => {
         onClearAll={clearAll}
         resultCount={finalChores.length}
         totalCount={filteredChores.length}
+        showTrigger={false}
+        open={isFilterSheetOpen}
+        onOpenChange={setIsFilterSheetOpen}
       />
 
       {/* Multi-select Toolbar */}

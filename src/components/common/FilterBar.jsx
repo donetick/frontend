@@ -147,8 +147,19 @@ const FilterBar = ({
   onClearAll,
   resultCount,
   totalCount,
+  // When the host renders its own trigger (e.g. an icon button in a toolbar
+  // row), it drives the sheet through `open`/`onOpenChange` and hides ours.
+  open,
+  onOpenChange,
+  showTrigger = true,
 }) => {
-  const [isOpen, setIsOpen] = useState(false)
+  const [internalOpen, setInternalOpen] = useState(false)
+  const isControlled = open !== undefined
+  const isOpen = isControlled ? open : internalOpen
+  const setIsOpen = next => {
+    if (!isControlled) setInternalOpen(next)
+    onOpenChange?.(next)
+  }
 
   // ── Active count ───────────────────────────────────────────────────────────
 
@@ -293,65 +304,75 @@ const FilterBar = ({
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
+  const activeChips = filterDefs
+    .map(def => ({ def, label: getActiveChipLabel(def) }))
+    .filter(({ label }) => !!label)
+    .map(({ def, label }) => ({
+      key: def.id,
+      label,
+      onClear: () => onSetFilter(def.id, null),
+    }))
+
+  // With the trigger hoisted into a toolbar, the inline row has nothing to show
+  // until a filter is on — rendering it anyway would leave a phantom gap.
+  const showInlineBar = showTrigger || activeChips.length > 0
+
   return (
     <>
       {/* ── Inline bar ─────────────────────────────────────── */}
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1,
-          flexWrap: 'wrap',
-          mb: 2,
-        }}
-      >
-        <Badge
-          badgeContent={activeFilterCount || null}
-          color='primary'
-          size='sm'
-          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-          sx={{ display: 'flex', alignItems: 'center' }}
+      {showInlineBar && (
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            flexWrap: 'wrap',
+            mb: 2,
+          }}
         >
-          <Button
-            size='md'
-            variant={hasActive ? 'solid' : 'outlined'}
-            color={hasActive ? 'primary' : 'neutral'}
-            startDecorator={<FilterList sx={{ fontSize: 16 }} />}
-            onClick={() => setIsOpen(true)}
-            sx={{
-              borderRadius: 'xl',
-              py: 0.5,
-              px: 1,
-              gap: 0.5,
-              alignItems: 'center',
-              '& .MuiButton-startDecorator': {
-                display: 'flex',
-                alignItems: 'center',
-                mr: 0.5,
-              },
-            }}
-          >
-            Filters
-          </Button>
-        </Badge>
+          {showTrigger && (
+            <Badge
+              badgeContent={activeFilterCount || null}
+              color='primary'
+              size='sm'
+              anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+              sx={{ display: 'flex', alignItems: 'center' }}
+            >
+              <Button
+                size='md'
+                variant={hasActive ? 'solid' : 'outlined'}
+                color={hasActive ? 'primary' : 'neutral'}
+                startDecorator={<FilterList sx={{ fontSize: 16 }} />}
+                onClick={() => setIsOpen(true)}
+                sx={{
+                  borderRadius: 'xl',
+                  py: 0.5,
+                  px: 1,
+                  gap: 0.5,
+                  alignItems: 'center',
+                  '& .MuiButton-startDecorator': {
+                    display: 'flex',
+                    alignItems: 'center',
+                    mr: 0.5,
+                  },
+                }}
+              >
+                Filters
+              </Button>
+            </Badge>
+          )}
 
-        <ActiveFilterChips
-          chips={filterDefs
-            .map(def => ({ def, label: getActiveChipLabel(def) }))
-            .filter(({ label }) => !!label)
-            .map(({ def, label }) => ({
-              key: def.id,
-              label,
-              onClear: () => onSetFilter(def.id, null),
-            }))}
-          onOpen={() => setIsOpen(true)}
-          onClearAll={hasActive ? onClearAll : undefined}
-          resultCount={hasActive ? resultCount : undefined}
-          totalCount={hasActive ? totalCount : undefined}
-          maxVisible={2}
-          chipSize='md'
-        />
-      </Box>
+          <ActiveFilterChips
+            chips={activeChips}
+            onOpen={() => setIsOpen(true)}
+            onClearAll={hasActive ? onClearAll : undefined}
+            resultCount={hasActive ? resultCount : undefined}
+            totalCount={hasActive ? totalCount : undefined}
+            maxVisible={2}
+            chipSize='md'
+          />
+        </Box>
+      )}
 
       {/* ── Bottom sheet ────────────────────────────────────── */}
       <AppModal

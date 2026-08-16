@@ -1,3 +1,4 @@
+import { Capacitor } from '@capacitor/core'
 import {
   Archive,
   AttachFile,
@@ -7,7 +8,7 @@ import {
   Edit,
   History,
   HourglassEmpty,
-  LowPriority,
+  MoreVert,
   OpenInFull,
   PeopleAlt,
   Person,
@@ -25,18 +26,13 @@ import {
   Checkbox,
   Chip,
   Container,
-  Dropdown,
   FormControl,
   Grid,
   IconButton,
   Input,
-  Menu,
-  MenuButton,
-  MenuItem,
   Sheet,
   Typography,
 } from '@mui/joy'
-import { Divider } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
@@ -68,20 +64,33 @@ import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import { commandQueue, CommandType } from '../../utils/CommandQueue'
 import {
   ApproveChore,
+  ArchiveChore,
+  DeleteChore,
   GetChoreDetailById,
   MarkChoreComplete,
+  NudgeChore,
   RejectChore,
+  SaveChore,
   SkipChore,
   UnArchiveChore,
   UndoChoreAction,
+  UpdateChoreAssignee,
   UpdateChorePriority,
+  UpdateDueDate,
 } from '../../utils/Fetcher'
 import { offlineDB } from '../../utils/OfflineDB'
-import Priorities from '../../utils/Priorities'
 import { getSafeBottomPadding } from '../../utils/SafeAreaUtils.js'
 import AttachmentBrowserModal from '../Modals/Inputs/AttachmentBrowserModal'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import NoteViewerModal from '../Modals/Inputs/NoteViewerModal'
+import NudgeModal from '../Modals/Inputs/NudgeModal'
+import SelectModal from '../Modals/Inputs/SelectModal'
+import WriteNFCModal from '../Modals/Inputs/WriteNFCModal'
+import ChoreActionMenu from '../components/ChoreActionMenu'
+import DueDatePickerModal, {
+  combineDueDate,
+  splitDueDate,
+} from '../components/DueDatePickerModal'
 import LoadingComponent from '../components/Loading.jsx'
 import PendingBadge from '../components/PendingBadge'
 import RichTextEditor from '../components/RichTextEditor.jsx'
@@ -106,6 +115,11 @@ const decodeHtmlEntities = value => {
 
 const hasHtmlTags = value => /<\/?[a-z][\s\S]*>/i.test(value)
 
+const getNFCUrl = choreId =>
+  Capacitor.getPlatform() === 'android' || Capacitor.getPlatform() === 'ios'
+    ? `donetick://chores/${choreId}`
+    : `${window.location.origin}/chores/${choreId}`
+
 const ChoreView = () => {
   const { t } = useTranslation('chores')
   const { fmt } = useLocalization()
@@ -124,7 +138,7 @@ const ChoreView = () => {
   const [confirmModelConfig, setConfirmModelConfig] = useState({
     isOpen: false,
   })
-  const [chorePriority, setChorePriority] = useState(null)
+  const [activeModal, setActiveModal] = useState(null)
   const [noteViewerConfig, setNoteViewerConfig] = useState({ isOpen: false })
   const [timerActionConfig, setTimerActionConfig] = useState({ isOpen: false })
   const [attachmentBrowserOpen, setAttachmentBrowserOpen] = useState(false)
@@ -165,7 +179,6 @@ const ChoreView = () => {
       return
     }
     setChore(choreData.res)
-    setChorePriority(Priorities.find(p => p.value === choreData.res.priority))
     document.title = 'Donetick: ' + choreData.res.name
 
     setPerformers(circleMembersData.res)
@@ -236,7 +249,7 @@ const ChoreView = () => {
     UpdateChorePriority(choreId, priority.value).then(response => {
       if (response.ok) {
         response.json().then(() => {
-          setChorePriority(priority)
+          setChore(prev => ({ ...prev, priority: priority.value }))
           queryClient.invalidateQueries(['chores'])
         })
       }
@@ -583,6 +596,168 @@ const ChoreView = () => {
     }
   }
 
+  const confirmSkipTask = () => {
+    setConfirmModelConfig({
+      isOpen: true,
+      title: t('choreView.skipTask'),
+      message: t('choreView.skipTaskConfirmation'),
+      confirmText: t('choreView.skip'),
+      cancelText: t('choreView.cancel'),
+      onClose: confirmed => {
+        if (confirmed) {
+          handleSkippingTask()
+        }
+        setConfirmModelConfig({})
+      },
+    })
+  }
+
+  const handleArchiveChore = async () => {
+    try {
+      const response = await ArchiveChore(choreId)
+      if (response.ok) {
+        await offlineDB.saveChores([{ ...chore, isActive: false }])
+        setChore({ ...chore, isActive: false })
+        queryClient.invalidateQueries(['chores'])
+      }
+    } catch (error) {
+      showError({
+        title: 'Failed to archive',
+        message: error?.message || 'Unable to archive task',
+      })
+    }
+  }
+
+  const confirmDeleteChore = () => {
+    setConfirmModelConfig({
+      isOpen: true,
+      title: 'Delete task',
+      message: 'Are you sure you want to delete this task?',
+      confirmText: 'Delete',
+      cancelText: t('choreView.cancel'),
+      onClose: async confirmed => {
+        setConfirmModelConfig({})
+        if (!confirmed) return
+        try {
+          const response = await DeleteChore(choreId)
+          if (response.ok) {
+            queryClient.invalidateQueries(['chores'])
+            showSuccess({
+              title: 'Task Deleted',
+              message: 'The task has been deleted successfully.',
+            })
+            navigate('/chores')
+          }
+        } catch (error) {
+          showError({
+            title: 'Failed to delete',
+            message: error?.message || 'Unable to delete task',
+          })
+        }
+      },
+    })
+  }
+
+  const handleDueDateChange = async newDate => {
+    try {
+      const response = await UpdateDueDate(choreId, newDate)
+      if (response.ok) {
+        setChore(prev => ({ ...prev, nextDueDate: newDate }))
+        queryClient.invalidateQueries(['chores'])
+      }
+    } catch (error) {
+      showError({
+        title: 'Failed to reschedule',
+        message: error?.message || 'Unable to change the due date',
+      })
+    }
+  }
+
+  const handleMoveToProject = async project => {
+    const projectId = project?.id ?? null
+    try {
+      const response = await SaveChore({ ...chore, projectId })
+      if (response.ok) {
+        setChore(prev => ({ ...prev, projectId }))
+        queryClient.invalidateQueries(['chores'])
+        showSuccess({
+          title: 'Task Moved',
+          message: `Task moved to ${project?.name || 'Default Project'}.`,
+        })
+      }
+    } catch (error) {
+      showError({
+        title: 'Failed to move task',
+        message: error?.message || 'Unable to move task to project',
+      })
+    }
+  }
+
+  const handleNudge = async ({ message, notifyAllAssignees }) => {
+    try {
+      const response = await NudgeChore(choreId, {
+        message,
+        notifyAllAssignees,
+      })
+      if (!response.ok) {
+        throw new Error('Failed to send nudge')
+      }
+      const data = await response.json()
+      showSuccess({
+        title: 'Nudge Sent!',
+        message: data.message || 'Nudge sent successfully',
+      })
+    } catch (error) {
+      showError({
+        title: 'Failed to Send Nudge',
+        message: error?.message || 'Unable to send nudge at this time',
+      })
+    }
+  }
+
+  const handleAssigneeChange = async assigneeId => {
+    try {
+      const response = await UpdateChoreAssignee(choreId, assigneeId)
+      if (response.ok) {
+        const data = await response.json()
+        setChore(data.res)
+        queryClient.invalidateQueries(['chores'])
+      }
+    } catch (error) {
+      showError({
+        title: 'Failed to delegate',
+        message: error?.message || 'Unable to change the assignee',
+      })
+    }
+  }
+
+  // Actions the menu raises that ChoreView owns; the rest of its items either
+  // navigate on their own or come in through the dedicated callbacks.
+  const handleMenuAction = (type, _chore, extraData) => {
+    switch (type) {
+      case 'skip':
+        confirmSkipTask()
+        break
+      case 'archive':
+        handleArchiveChore()
+        break
+      case 'unarchive':
+        handleUnarchiveChore()
+        break
+      case 'delete':
+        confirmDeleteChore()
+        break
+      case 'changeDueDate':
+        handleDueDateChange(extraData?.date?.toISOString() ?? null)
+        break
+      case 'moveToProject':
+        handleMoveToProject(extraData?.project)
+        break
+      default:
+        break
+    }
+  }
+
   // Check if the current user can approve/reject (admin, manager, or task owner)
   const canApproveReject = () => {
     if (!circleMembersData?.res || !chore) return false
@@ -794,64 +969,6 @@ const ChoreView = () => {
             mb: 1,
           }}
         >
-          <Dropdown>
-            <MenuButton
-              disabled={chore.isActive === false}
-              color={
-                chorePriority?.name === 'P1'
-                  ? 'danger'
-                  : chorePriority?.name === 'P2'
-                    ? 'warning'
-                    : 'neutral'
-              }
-              sx={{
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                p: 1,
-                width: '100%',
-              }}
-              variant='plain'
-            >
-              {chorePriority ? chorePriority.icon : <LowPriority />}
-              {chorePriority ? chorePriority.name : t('choreView.noPriority')}
-            </MenuButton>
-            <Menu>
-              {Priorities.map((priority, index) => (
-                <MenuItem
-                  sx={{
-                    pr: 1,
-                    py: 1,
-                  }}
-                  key={index}
-                  onClick={() => {
-                    handleUpdatePriority(priority)
-                  }}
-                  color={priority.color}
-                >
-                  {priority.icon}
-                  {priority.name}
-                </MenuItem>
-              ))}
-              <Divider />
-              <MenuItem
-                sx={{
-                  pr: 1,
-                  py: 1,
-                }}
-                onClick={() => {
-                  handleUpdatePriority({
-                    name: t('choreView.noPriority'),
-                    value: 0,
-                  })
-                  setChorePriority(null)
-                }}
-              >
-                {t('choreView.noPriority')}
-              </MenuItem>
-            </Menu>
-          </Dropdown>
-
           <Button
             size='sm'
             color='neutral'
@@ -889,6 +1006,38 @@ const ChoreView = () => {
             <Edit />
             Edit
           </Button>
+          <ChoreActionMenu
+            chore={chore}
+            hiddenActions={['view']}
+            onAction={handleMenuAction}
+            onNudge={() => setActiveModal('nudge')}
+            onWriteNFC={() => setActiveModal('writeNFC')}
+            onCompleteWithNote={() => setNote('')}
+            onCompleteWithPastDate={() =>
+              setCompletedDate(moment(new Date()).format('YYYY-MM-DDTHH:00:00'))
+            }
+            onChangeAssignee={() => setActiveModal('changeAssignee')}
+            onChangeDueDate={() => setActiveModal('changeDueDate')}
+            onChangePriority={handleUpdatePriority}
+            onDelete={confirmDeleteChore}
+            trigger={
+              <Button
+                size='sm'
+                color='neutral'
+                variant='plain'
+                fullWidth
+                sx={{
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  p: 1,
+                }}
+              >
+                <MoreVert />
+                {t('choreView.more', 'More')}
+              </Button>
+            }
+          />
         </Box>
 
         {chore.description && (
@@ -1261,21 +1410,7 @@ const ChoreView = () => {
                   <Button
                     fullWidth
                     size='lg'
-                    onClick={() => {
-                      setConfirmModelConfig({
-                        isOpen: true,
-                        title: t('choreView.skipTask'),
-                        message: t('choreView.skipTaskConfirmation'),
-                        confirmText: t('choreView.skip'),
-                        cancelText: t('choreView.cancel'),
-                        onClose: confirmed => {
-                          if (confirmed) {
-                            handleSkippingTask()
-                          }
-                          setConfirmModelConfig({})
-                        },
-                      })
-                    }}
+                    onClick={confirmSkipTask}
                     disabled={
                       notInCompletionWindow(chore) || chore.isActive === false
                     }
@@ -1348,6 +1483,52 @@ const ChoreView = () => {
         <ConfirmationModal config={confirmModelConfig} />
         <ConfirmationModal config={timerActionConfig} />
         <NoteViewerModal config={noteViewerConfig} />
+        {activeModal === 'changeDueDate' && (
+          <DueDatePickerModal
+            open={true}
+            title={t('choreView.changeDueDate', 'Change due date')}
+            {...splitDueDate(chore.nextDueDate)}
+            onClose={() => setActiveModal(null)}
+            onApply={parts => {
+              handleDueDateChange(combineDueDate(parts)?.toISOString() ?? null)
+              setActiveModal(null)
+            }}
+            onRemove={() => {
+              handleDueDateChange(null)
+              setActiveModal(null)
+            }}
+          />
+        )}
+        {activeModal === 'changeAssignee' && (
+          <SelectModal
+            isOpen={true}
+            options={performers}
+            displayKey='displayName'
+            title='Delegate to someone else'
+            placeholder='Select a performer'
+            onClose={() => setActiveModal(null)}
+            onSave={selected => handleAssigneeChange(selected.id)}
+          />
+        )}
+        {activeModal === 'nudge' && (
+          <NudgeModal
+            config={{
+              isOpen: true,
+              choreId: chore.id,
+              onClose: () => setActiveModal(null),
+              onConfirm: handleNudge,
+            }}
+          />
+        )}
+        {activeModal === 'writeNFC' && (
+          <WriteNFCModal
+            config={{
+              isOpen: true,
+              url: getNFCUrl(choreId),
+              onClose: () => setActiveModal(null),
+            }}
+          />
+        )}
         <AttachmentBrowserModal
           choreId={choreId}
           isOpen={attachmentBrowserOpen}

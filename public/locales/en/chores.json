@@ -63,6 +63,8 @@
     "skip": "Skip",
     "cancel": "Cancel",
     "noPriority": "No Priority",
+    "more": "More",
+    "changeDueDate": "Change due date",
     "subtasks": "Subtasks",
     "noDescription": "No description available",
     "timer": {
