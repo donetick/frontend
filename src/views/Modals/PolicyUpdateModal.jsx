@@ -27,13 +27,16 @@ const PolicyUpdateModal = ({ onAcknowledge, onClose, open }) => {
   const { t } = useTranslation()
   const { ResponsiveModal } = useResponsiveModal()
 
-  const handleClose = () => {
+  // Acknowledgement is the only way out: the backdrop, escape key, and close
+  // button are all disabled so the user must press "Got it".
+  const handleAcknowledge = () => {
     onAcknowledge?.()
     onClose()
   }
 
+  // Reading a document must not dismiss the notice; the modal is still waiting
+  // on an acknowledgement when the user returns from the browser.
   const openDocument = path => {
-    handleClose()
     openUrl(`${POLICY_BASE_URL}${path}`)
   }
 
@@ -47,7 +50,10 @@ const PolicyUpdateModal = ({ onAcknowledge, onClose, open }) => {
   return (
     <ResponsiveModal
       open={open}
-      onClose={handleClose}
+      onClose={handleAcknowledge}
+      closeOnBackdrop={false}
+      closeOnEscape={false}
+      showCloseButton={false}
       size='sm'
       title={t('policyUpdate.title')}
       description={t('policyUpdate.subtitle')}
@@ -55,7 +61,7 @@ const PolicyUpdateModal = ({ onAcknowledge, onClose, open }) => {
         <ModalActions
           primary={{
             label: t('policyUpdate.acknowledge'),
-            onClick: handleClose,
+            onClick: handleAcknowledge,
             sx: { width: { xs: '100%', sm: 'auto' } },
           }}
         />
