@@ -108,6 +108,8 @@ const CompactChoreCard = ({
 
     return parts.join(' • ')
   }
+  const showLeadingSlot = showActions || isMultiSelectMode
+  const showTrailingSlot = showActions && !isMultiSelectMode
 
   return (
     <Box
@@ -144,7 +146,7 @@ const CompactChoreCard = ({
       }}
     >
       {/* Priority bar clickable area */}
-      {chore.priority > 0 && (
+      {chore.priority > 0 && onChipClick && (
         <Box
           sx={{
             position: 'absolute',
@@ -169,10 +171,12 @@ const CompactChoreCard = ({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          width: 40,
+          width: showLeadingSlot ? 40 : 0,
           height: 40,
-          mr: 1.5,
+          mr: showLeadingSlot ? 1.5 : 0,
           flexShrink: 0,
+          overflow: 'hidden',
+          transition: 'width 0.3s ease-in-out, margin 0.3s ease-in-out',
         }}
       >
         {/* Complete Button */}
@@ -433,17 +437,18 @@ const CompactChoreCard = ({
               role='none'
               tabIndex={0}
               onClick={e => {
+                if (!onChipClick) return
                 e.stopPropagation()
                 onChipClick({ label: l })
               }}
               onKeyDown={e => {
-                if (e.key === 'Enter' || e.key === ' ') {
+                if (onChipClick && (e.key === 'Enter' || e.key === ' ')) {
                   e.stopPropagation()
                   onChipClick({ label: l })
                 }
               }}
               style={{
-                cursor: 'pointer',
+                cursor: onChipClick ? 'pointer' : 'inherit',
                 padding: 0,
                 margin: 0,
                 display: 'flex',
@@ -476,14 +481,14 @@ const CompactChoreCard = ({
         sx={{
           transition:
             'opacity 0.3s ease-in-out, transform 0.3s ease-in-out, width 0.3s ease-in-out, margin 0.3s ease-in-out',
-          opacity: isMultiSelectMode ? 0 : 1,
-          transform: isMultiSelectMode
-            ? 'translateX(20px) scale(0.8)'
-            : 'translateX(0) scale(1)',
-          width: isMultiSelectMode ? 0 : 32,
-          marginRight: isMultiSelectMode ? 0 : undefined,
+          opacity: showTrailingSlot ? 1 : 0,
+          transform: showTrailingSlot
+            ? 'translateX(0) scale(1)'
+            : 'translateX(20px) scale(0.8)',
+          width: showTrailingSlot ? 32 : 0,
+          marginRight: showTrailingSlot ? undefined : 0,
           overflow: 'hidden',
-          pointerEvents: isMultiSelectMode ? 'none' : 'auto',
+          pointerEvents: showTrailingSlot ? 'auto' : 'none',
         }}
       >
         {showActions && (
