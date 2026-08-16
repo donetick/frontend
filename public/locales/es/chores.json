@@ -63,6 +63,8 @@
     "skip": "Saltar",
     "cancel": "Cancelar",
     "noPriority": "Sin Prioridad",
+    "more": "More",
+    "changeDueDate": "Change due date",
     "subtasks": "Subtareas",
     "noDescription": "No hay descripción disponible",
     "timer": {
@@ -103,7 +105,9 @@
     "showTasksFor": "Show tasks for",
     "type": {
       "assignee": "Assignee"
-    }
+    },
+    "display": "Display",
+    "displayOptions": "Display options"
   },
   "sort": {
     "assignedToMe": "Assigned to me",
