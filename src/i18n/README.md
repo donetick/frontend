@@ -28,7 +28,7 @@ import { useTranslation } from 'react-i18next'
 
 function MyComponent() {
   const { t } = useTranslation('settings') // or 'common', 'chores'
-  
+
   return <h1>{t('title')}</h1>
 }
 ```
@@ -40,9 +40,9 @@ import { useLocalization } from '@/contexts/LocalizationContext'
 
 function MyComponent() {
   const { formatDate, formatDateTime, formatRelative } = useLocalization()
-  
+
   const date = new Date()
-  
+
   return (
     <div>
       <p>Date: {formatDate(date)}</p>
@@ -59,19 +59,10 @@ function MyComponent() {
 import { useLocalization } from '@/contexts/LocalizationContext'
 
 function MyComponent() {
-  const {
-    language,
-    setLanguage,
-    dateFormat,
-    setDateFormat,
-    isRTL
-  } = useLocalization()
-  
-  return (
-    <div dir={isRTL ? 'rtl' : 'ltr'}>
-      Current language: {language}
-    </div>
-  )
+  const { language, setLanguage, dateFormat, setDateFormat, isRTL } =
+    useLocalization()
+
+  return <div dir={isRTL ? 'rtl' : 'ltr'}>Current language: {language}</div>
 }
 ```
 
@@ -90,6 +81,7 @@ function MyComponent() {
 ## RTL Support
 
 Languages in the `RTL_LANGUAGES` array automatically get:
+
 - `dir="rtl"` on the document
 - RTL-specific CSS styles
 - Proper text alignment
@@ -99,6 +91,7 @@ Currently supported RTL languages: Arabic (ar), Hebrew (he), Persian (fa), Urdu 
 ## Date Format Preferences
 
 Users can choose from:
+
 - MM/DD/YYYY (US)
 - DD/MM/YYYY (Europe)
 - YYYY-MM-DD (ISO)
@@ -113,5 +106,6 @@ Users can choose from:
 ## First Day of Week
 
 Users can choose:
+
 - Sunday
 - Monday
