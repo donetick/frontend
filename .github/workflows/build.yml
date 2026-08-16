@@ -17,5 +17,10 @@ jobs:
         cache: 'npm'
     - name: Install dependencies
       run: npm i
-    - run: npm run build
+    - name: Build
+      run: npm run build
+      env:
+        POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
+        POSTHOG_PROJECT_ID: ${{ secrets.POSTHOG_PROJECT_ID }}
+        POSTHOG_HOST: ${{ secrets.POSTHOG_HOST }}
     - run: npm run lint:ci
