@@ -9,7 +9,9 @@
     "placeholder": "Search labels",
     "noResultsTitle": "No labels match",
     "noResultsDescription": "No label matches \"{{searchTerm}}\".",
-    "clear": "Clear search"
+    "noFilterResultsDescription": "No label matches the current filter.",
+    "clear": "Clear search",
+    "showAll": "Show all labels"
   },
   "detail": {
     "taskCount_one": "{{count}} task",

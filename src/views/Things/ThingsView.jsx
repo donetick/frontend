@@ -9,11 +9,14 @@ import {
 } from '@meauxt/react-swipeable-list'
 import {
   Add,
+  Close,
   Delete,
   Edit,
   Flip,
   MoreVert,
   PlusOne,
+  Search,
+  SearchOff,
   ToggleOff,
   ToggleOn,
   Widgets,
@@ -24,14 +27,17 @@ import {
   Chip,
   Container,
   IconButton,
+  Input,
   Stack,
   Typography,
 } from '@mui/joy'
-import { useEffect, useState } from 'react'
+import Fuse from 'fuse.js'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { track } from '../../analytics'
 import EmptyState from '../../components/common/EmptyState'
+import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
 import { useNotification } from '../../service/NotificationProvider'
 import {
   CreateThing,
@@ -215,7 +221,77 @@ const ThingsView = () => {
   const [createModalThing, setCreateModalThing] = useState(null)
   const [confirmModelConfig, setConfirmModelConfig] = useState({})
   const [showMoreInfoId, setShowMoreInfoId] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [sortBy, setSortBy] = useState(
+    () => localStorage.getItem('thingsSortBy') || 'name',
+  )
+  const [sortDirection, setSortDirection] = useState(
+    () => localStorage.getItem('thingsSortDirection') || 'asc',
+  )
+  const [typeFilter, setTypeFilter] = useState('all')
+  const searchInputRef = useRef(null)
   const { showError, showNotification } = useNotification()
+
+  useEffect(() => {
+    localStorage.setItem('thingsSortBy', sortBy)
+    localStorage.setItem('thingsSortDirection', sortDirection)
+  }, [sortBy, sortDirection])
+
+  const visibleThings = useMemo(
+    () =>
+      typeFilter === 'all'
+        ? things
+        : things.filter(thing => thing?.type === typeFilter),
+    [things, typeFilter],
+  )
+
+  const fuse = useMemo(
+    () =>
+      new Fuse(visibleThings, {
+        keys: ['name', 'state'],
+        includeScore: true,
+        isCaseSensitive: false,
+        findAllMatches: true,
+      }),
+    [visibleThings],
+  )
+
+  const filteredThings = useMemo(() => {
+    const matched = searchTerm
+      ? fuse.search(searchTerm).map(result => result.item)
+      : visibleThings
+
+    const direction = sortDirection === 'desc' ? -1 : 1
+    return [...matched].sort((a, b) => {
+      switch (sortBy) {
+        case 'type':
+          return direction * (a.type || '').localeCompare(b.type || '')
+        case 'state':
+          return (
+            direction *
+            String(a.state ?? '').localeCompare(String(b.state ?? ''))
+          )
+        case 'updated': {
+          const aDate = new Date(a.updatedAt || a.updated_at || 0).getTime()
+          const bDate = new Date(b.updatedAt || b.updated_at || 0).getTime()
+          return direction * (aDate - bDate)
+        }
+        case 'name':
+        default:
+          return direction * (a.name || '').localeCompare(b.name || '')
+      }
+    })
+  }, [fuse, searchTerm, visibleThings, sortBy, sortDirection])
+
+  const handleSearchChange = e => {
+    setSearchTerm(e.target.value)
+    setShowMoreInfoId(null)
+  }
+
+  const handleSearchClose = () => {
+    setSearchTerm('')
+    searchInputRef.current?.blur()
+  }
 
   useEffect(() => {
     // fetch things
@@ -404,6 +480,67 @@ const ThingsView = () => {
           </Typography>
         </Stack>
       </Box>
+      {things.length > 0 && (
+        <Box
+          sx={{ px: 2, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}
+        >
+          <Input
+            slotProps={{ input: { ref: searchInputRef } }}
+            placeholder='Search things'
+            value={searchTerm}
+            fullWidth
+            sx={{
+              borderRadius: 24,
+              height: 24,
+              borderColor: 'text.disabled',
+              padding: 1,
+            }}
+            onChange={handleSearchChange}
+            startDecorator={<Search />}
+            endDecorator={
+              searchTerm && (
+                <IconButton
+                  variant='plain'
+                  size='sm'
+                  onClick={handleSearchClose}
+                  sx={{ borderRadius: '50%' }}
+                >
+                  <Close />
+                </IconButton>
+              )
+            }
+          />
+          <SortAndFilterMenu
+            sortOptions={[
+              { name: 'Name', value: 'name' },
+              { name: 'Type', value: 'type' },
+              { name: 'State', value: 'state' },
+              { name: 'Last updated', value: 'updated' },
+            ]}
+            selectedSort={sortBy}
+            onSortChange={setSortBy}
+            sortDirection={sortDirection}
+            onSortDirectionChange={setSortDirection}
+            filterTitle='Type'
+            filterOptions={[
+              { name: 'All types', value: 'all' },
+              { name: 'Text', value: 'text' },
+              { name: 'Number', value: 'number' },
+              { name: 'Boolean', value: 'boolean' },
+            ]}
+            selectedFilter={typeFilter}
+            onFilterChange={value => {
+              setTypeFilter(value)
+              setShowMoreInfoId(null)
+            }}
+            isActive={
+              typeFilter !== 'all' ||
+              sortBy !== 'name' ||
+              sortDirection !== 'asc'
+            }
+          />
+        </Box>
+      )}
       <Box
         sx={{
           overflow: 'hidden',
@@ -425,8 +562,28 @@ const ThingsView = () => {
             }}
           />
         )}
+        {things.length > 0 && filteredThings.length === 0 && (
+          <EmptyState
+            variant='no-results'
+            fullHeight
+            icon={<SearchOff />}
+            title='No things match'
+            description={
+              searchTerm
+                ? `No thing matches "${searchTerm}".`
+                : 'No thing matches the current filter.'
+            }
+            primaryAction={{
+              label: searchTerm ? 'Clear search' : 'Show all things',
+              onClick: () => {
+                handleSearchClose()
+                setTypeFilter('all')
+              },
+            }}
+          />
+        )}
         <SwipeableList type={ListType.IOS} fullSwipe={false}>
-          {things.map(thing => (
+          {filteredThings.map(thing => (
             <SwipeableListItem
               onClick={() => navigate(`/things/${thing?.id}`)}
               key={thing.id}

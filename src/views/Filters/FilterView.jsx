@@ -9,8 +9,11 @@ import {
 } from '@meauxt/react-swipeable-list'
 import {
   Add,
+  Close,
   FilterAlt,
   MoreVert,
+  Search,
+  SearchOff,
   Star,
   StarBorder,
   Task,
@@ -24,13 +27,16 @@ import {
   CircularProgress,
   Container,
   IconButton,
+  Input,
   Stack,
   Typography,
 } from '@mui/joy'
-import { useEffect, useMemo, useState } from 'react'
+import Fuse from 'fuse.js'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import EmptyState from '../../components/common/EmptyState'
+import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
 import { useChores } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { getFilterCount, getFilterOverdueCount } from '../../utils/FilterEngine'
@@ -266,6 +272,21 @@ const FilterView = () => {
   const [editingFilter, setEditingFilter] = useState(null)
   const [confirmationModel, setConfirmationModel] = useState({})
   const [showMoreInfoId, setShowMoreInfoId] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [sortBy, setSortBy] = useState(
+    () => localStorage.getItem('filtersSortBy') || 'smart',
+  )
+  const [sortDirection, setSortDirection] = useState(
+    () => localStorage.getItem('filtersSortDirection') || 'asc',
+  )
+  const [pinnedFilter, setPinnedFilter] = useState('all')
+  const searchInputRef = useRef(null)
+
+  useEffect(() => {
+    localStorage.setItem('filtersSortBy', sortBy)
+    localStorage.setItem('filtersSortDirection', sortDirection)
+  }, [sortBy, sortDirection])
+
   // Sort filters: pinned first, then by usage count, then by last used
   const savedFilters = useMemo(() => {
     return [...filtersData].sort((a, b) => {
@@ -281,6 +302,71 @@ const FilterView = () => {
       return new Date(b.createdAt) - new Date(a.createdAt)
     })
   }, [filtersData])
+
+  const visibleFilters = useMemo(() => {
+    if (pinnedFilter === 'pinned') {
+      return savedFilters.filter(filter => filter.isPinned)
+    }
+    if (pinnedFilter === 'unpinned') {
+      return savedFilters.filter(filter => !filter.isPinned)
+    }
+    return savedFilters
+  }, [pinnedFilter, savedFilters])
+
+  const fuse = useMemo(
+    () =>
+      new Fuse(visibleFilters, {
+        keys: ['name', 'description'],
+        includeScore: true,
+        isCaseSensitive: false,
+        findAllMatches: true,
+      }),
+    [visibleFilters],
+  )
+
+  const filteredFilters = useMemo(() => {
+    const matched = searchTerm
+      ? fuse.search(searchTerm).map(result => result.item)
+      : visibleFilters
+
+    const direction = sortDirection === 'desc' ? -1 : 1
+
+    // "Smart" keeps the pinned-then-usage order the list already arrives in.
+    if (sortBy === 'smart') {
+      return direction === -1 ? [...matched].reverse() : matched
+    }
+
+    return [...matched].sort((a, b) => {
+      switch (sortBy) {
+        case 'name':
+          return direction * (a.name || '').localeCompare(b.name || '')
+        case 'usage':
+          return direction * ((a.usageCount || 0) - (b.usageCount || 0))
+        case 'lastUsed': {
+          const aUsed = new Date(a.lastUsedAt || 0).getTime()
+          const bUsed = new Date(b.lastUsedAt || 0).getTime()
+          return direction * (aUsed - bUsed)
+        }
+        case 'created': {
+          const aCreated = new Date(a.createdAt || 0).getTime()
+          const bCreated = new Date(b.createdAt || 0).getTime()
+          return direction * (aCreated - bCreated)
+        }
+        default:
+          return 0
+      }
+    })
+  }, [fuse, searchTerm, visibleFilters, sortBy, sortDirection])
+
+  const handleSearchChange = e => {
+    setSearchTerm(e.target.value)
+    setShowMoreInfoId(null)
+  }
+
+  const handleSearchClose = () => {
+    setSearchTerm('')
+    searchInputRef.current?.blur()
+  }
 
   // Calculate task counts for each filter
   useEffect(() => {
@@ -428,6 +514,68 @@ const FilterView = () => {
         </Stack>
       </Box>
 
+      {savedFilters.length > 0 && (
+        <Box
+          sx={{ px: 2, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}
+        >
+          <Input
+            slotProps={{ input: { ref: searchInputRef } }}
+            placeholder='Search filters'
+            value={searchTerm}
+            fullWidth
+            sx={{
+              borderRadius: 24,
+              height: 24,
+              borderColor: 'text.disabled',
+              padding: 1,
+            }}
+            onChange={handleSearchChange}
+            startDecorator={<Search />}
+            endDecorator={
+              searchTerm && (
+                <IconButton
+                  variant='plain'
+                  size='sm'
+                  onClick={handleSearchClose}
+                  sx={{ borderRadius: '50%' }}
+                >
+                  <Close />
+                </IconButton>
+              )
+            }
+          />
+          <SortAndFilterMenu
+            sortOptions={[
+              { name: 'Smart', value: 'smart' },
+              { name: 'Name', value: 'name' },
+              { name: 'Usage count', value: 'usage' },
+              { name: 'Last used', value: 'lastUsed' },
+              { name: 'Created date', value: 'created' },
+            ]}
+            selectedSort={sortBy}
+            onSortChange={setSortBy}
+            sortDirection={sortDirection}
+            onSortDirectionChange={setSortDirection}
+            filterTitle='Show'
+            filterOptions={[
+              { name: 'All filters', value: 'all' },
+              { name: 'Pinned', value: 'pinned' },
+              { name: 'Not pinned', value: 'unpinned' },
+            ]}
+            selectedFilter={pinnedFilter}
+            onFilterChange={value => {
+              setPinnedFilter(value)
+              setShowMoreInfoId(null)
+            }}
+            isActive={
+              pinnedFilter !== 'all' ||
+              sortBy !== 'smart' ||
+              sortDirection !== 'asc'
+            }
+          />
+        </Box>
+      )}
+
       <Box
         sx={{
           overflow: 'hidden',
@@ -445,9 +593,28 @@ const FilterView = () => {
               onClick: handleAddFilter,
             }}
           />
+        ) : filteredFilters.length === 0 ? (
+          <EmptyState
+            variant='no-results'
+            fullHeight
+            icon={<SearchOff />}
+            title='No filters match'
+            description={
+              searchTerm
+                ? `No saved filter matches "${searchTerm}".`
+                : 'No saved filter matches the current filter.'
+            }
+            primaryAction={{
+              label: searchTerm ? 'Clear search' : 'Show all filters',
+              onClick: () => {
+                handleSearchClose()
+                setPinnedFilter('all')
+              },
+            }}
+          />
         ) : (
           <SwipeableList type={ListType.IOS} fullSwipe={false}>
-            {savedFilters.map(filter => {
+            {filteredFilters.map(filter => {
               return (
                 <SwipeableListItem
                   swipeActionOpen={

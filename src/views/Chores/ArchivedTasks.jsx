@@ -32,6 +32,7 @@ import { useNavigate } from 'react-router-dom'
 import EmptyState from '../../components/common/EmptyState'
 import FilterBar from '../../components/common/FilterBar'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
+import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useFilter } from '../../hooks/useFilter'
 import { useUnArchiveChore } from '../../queries/ChoreQueries'
@@ -203,10 +204,45 @@ const ArchivedTasks = () => {
   const {
     activeFilters,
     clearAll,
-    filteredData: finalChores,
+    filteredData: filteredByBar,
     hasActiveFilters,
     setFilter,
   } = useFilter(filteredChores, filterDefs)
+
+  const [sortBy, setSortBy] = useState(
+    () => localStorage.getItem('archivedChoresSortBy') || 'archivedAt',
+  )
+  const [sortDirection, setSortDirection] = useState(
+    () => localStorage.getItem('archivedChoresSortDirection') || 'desc',
+  )
+
+  useEffect(() => {
+    localStorage.setItem('archivedChoresSortBy', sortBy)
+    localStorage.setItem('archivedChoresSortDirection', sortDirection)
+  }, [sortBy, sortDirection])
+
+  const finalChores = useMemo(() => {
+    const direction = sortDirection === 'desc' ? -1 : 1
+    return [...filteredByBar].sort((a, b) => {
+      switch (sortBy) {
+        case 'name':
+          return direction * (a.name || '').localeCompare(b.name || '')
+        case 'priority':
+          return direction * ((a.priority ?? 0) - (b.priority ?? 0))
+        case 'dueDate': {
+          const aDue = new Date(a.nextDueDate || 0).getTime()
+          const bDue = new Date(b.nextDueDate || 0).getTime()
+          return direction * (aDue - bDue)
+        }
+        case 'archivedAt':
+        default: {
+          const aDate = new Date(a.updatedAt || 0).getTime()
+          const bDate = new Date(b.updatedAt || 0).getTime()
+          return direction * (aDate - bDate)
+        }
+      }
+    })
+  }, [filteredByBar, sortBy, sortDirection])
 
   useEffect(() => {
     const loadArchivedChores = async () => {
@@ -732,6 +768,21 @@ const ArchivedTasks = () => {
               </Box>
             )
           }
+        />
+
+        {/* Sort Menu */}
+        <SortAndFilterMenu
+          sortOptions={[
+            { name: 'Archived date', value: 'archivedAt' },
+            { name: 'Name', value: 'name' },
+            { name: 'Priority', value: 'priority' },
+            { name: 'Due date', value: 'dueDate' },
+          ]}
+          selectedSort={sortBy}
+          onSortChange={setSortBy}
+          sortDirection={sortDirection}
+          onSortDirectionChange={setSortDirection}
+          isActive={sortBy !== 'archivedAt' || sortDirection !== 'desc'}
         />
 
         {/* View Mode Toggle Button */}

@@ -35,6 +35,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import EmptyState from '../../components/common/EmptyState'
+import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
 import { useUserProfile } from '../../queries/UserQueries'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors'
 import { DeleteLabel } from '../../utils/Fetcher'
@@ -176,25 +177,59 @@ const LabelView = () => {
   const [confirmationModel, setConfirmationModel] = useState({})
   const [showMoreInfoId, setShowMoreInfoId] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [sortBy, setSortBy] = useState(
+    () => localStorage.getItem('labelsSortBy') || 'name',
+  )
+  const [sortDirection, setSortDirection] = useState(
+    () => localStorage.getItem('labelsSortDirection') || 'asc',
+  )
+  const [ownershipFilter, setOwnershipFilter] = useState('all')
   const searchInputRef = useRef(null)
+
+  useEffect(() => {
+    localStorage.setItem('labelsSortBy', sortBy)
+    localStorage.setItem('labelsSortDirection', sortDirection)
+  }, [sortBy, sortDirection])
+
+  const visibleLabels = useMemo(() => {
+    if (ownershipFilter === 'mine') {
+      return userLabels.filter(label => label.created_by === userProfile?.id)
+    }
+    if (ownershipFilter === 'shared') {
+      return userLabels.filter(label => label.created_by !== userProfile?.id)
+    }
+    return userLabels
+  }, [ownershipFilter, userLabels, userProfile?.id])
 
   const fuse = useMemo(
     () =>
-      new Fuse(userLabels, {
+      new Fuse(visibleLabels, {
         keys: ['name'],
         includeScore: true,
         isCaseSensitive: false,
         findAllMatches: true,
       }),
-    [userLabels],
+    [visibleLabels],
   )
 
   const filteredLabels = useMemo(() => {
-    if (!searchTerm) {
-      return userLabels
-    }
-    return fuse.search(searchTerm).map(result => result.item)
-  }, [fuse, searchTerm, userLabels])
+    const matched = searchTerm
+      ? fuse.search(searchTerm).map(result => result.item)
+      : visibleLabels
+
+    const direction = sortDirection === 'desc' ? -1 : 1
+    return [...matched].sort((a, b) => {
+      switch (sortBy) {
+        case 'color':
+          return direction * (a.color || '').localeCompare(b.color || '')
+        case 'created':
+          return direction * ((a.id || 0) - (b.id || 0))
+        case 'name':
+        default:
+          return direction * (a.name || '').localeCompare(b.name || '')
+      }
+    })
+  }, [fuse, searchTerm, visibleLabels, sortBy, sortDirection])
 
   const handleSearchChange = e => {
     setSearchTerm(e.target.value.toLowerCase())
@@ -310,7 +345,9 @@ const LabelView = () => {
         </Stack>
       </Box>
       {userLabels.length > 0 && (
-        <Box sx={{ px: 2, mb: 2 }}>
+        <Box
+          sx={{ px: 2, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}
+        >
           <Input
             slotProps={{ input: { ref: searchInputRef } }}
             placeholder={t('search.placeholder')}
@@ -335,6 +372,33 @@ const LabelView = () => {
                   <Close />
                 </IconButton>
               )
+            }
+          />
+          <SortAndFilterMenu
+            sortOptions={[
+              { name: 'Name', value: 'name' },
+              { name: 'Color', value: 'color' },
+              { name: 'Recently created', value: 'created' },
+            ]}
+            selectedSort={sortBy}
+            onSortChange={setSortBy}
+            sortDirection={sortDirection}
+            onSortDirectionChange={setSortDirection}
+            filterTitle='Show'
+            filterOptions={[
+              { name: 'All labels', value: 'all' },
+              { name: 'Created by me', value: 'mine' },
+              { name: 'Shared with me', value: 'shared' },
+            ]}
+            selectedFilter={ownershipFilter}
+            onFilterChange={value => {
+              setOwnershipFilter(value)
+              setShowMoreInfoId(null)
+            }}
+            isActive={
+              ownershipFilter !== 'all' ||
+              sortBy !== 'name' ||
+              sortDirection !== 'asc'
             }
           />
         </Box>
@@ -363,12 +427,17 @@ const LabelView = () => {
             fullHeight
             icon={<SearchOff />}
             title={t('search.noResultsTitle')}
-            description={t('search.noResultsDescription', {
-              searchTerm,
-            })}
+            description={
+              searchTerm
+                ? t('search.noResultsDescription', { searchTerm })
+                : t('search.noFilterResultsDescription')
+            }
             primaryAction={{
-              label: t('search.clear'),
-              onClick: handleSearchClose,
+              label: searchTerm ? t('search.clear') : t('search.showAll'),
+              onClick: () => {
+                handleSearchClose()
+                setOwnershipFilter('all')
+              },
             }}
           />
         )}

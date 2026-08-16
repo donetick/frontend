@@ -12,6 +12,14 @@
     "message": "Are you sure you want to delete \"{{name}}\"? This will remove the project but keep all tasks (they'll move to the Default Project)."
   },
   "loadError": "Failed to load projects. Please try again.",
+  "search": {
+    "placeholder": "Search projects",
+    "noResultsTitle": "No projects match",
+    "noResultsDescription": "No project matches \"{{searchTerm}}\".",
+    "noFilterResultsDescription": "No project matches the current filter.",
+    "clear": "Clear search",
+    "showAll": "Show all projects"
+  },
   "blurb": "Organize your tasks into projects. Create custom workspaces to keep your tasks organized and easily accessible.",
   "defaultDescription": "All tasks without a specific project",
   "selector": {
