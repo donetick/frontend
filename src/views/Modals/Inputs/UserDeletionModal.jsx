@@ -10,11 +10,12 @@ import {
   Typography,
 } from '@mui/joy'
 import { useCallback, useEffect, useState } from 'react'
-import ModalActions from '../../../components/common/ModalActions'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+
+import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { CheckUserDeletion, DeleteUser } from '../../../utils/Fetcher'
-import { useTranslation } from 'react-i18next'
 
 function UserDeletionModal({ isOpen, onClose }) {
   const { t } = useTranslation('settings')

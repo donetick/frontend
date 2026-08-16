@@ -1,8 +1,8 @@
 import { Chip, List, ListItem, ListItemButton, Textarea } from '@mui/joy'
-import { useTranslation } from 'react-i18next'
 import React, { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
-const AutocompleteInput = ({ options, ref, value, onChange, ...props }) => {
+const AutocompleteInput = ({ onChange, options, ref, value, ...props }) => {
   const { t } = useTranslation('common')
   const [filteredOptions, setFilteredOptions] = useState([])
   const [menuVisible, setMenuVisible] = useState(false)

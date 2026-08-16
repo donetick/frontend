@@ -27,7 +27,9 @@ import {
 import { useMediaQuery } from '@mui/material'
 import moment from 'moment'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+
 import { useImpersonateUser } from '../contexts/ImpersonateUserContext'
 import useStickyState from '../hooks/useStickyState'
 import { useCircleMembers, useUserProfile } from '../queries/UserQueries'
@@ -35,7 +37,6 @@ import { apiClient } from '../utils/ApiClient'
 import { isPlusAccount, resolvePhotoURL } from '../utils/Helpers'
 import UserModal from '../views/Modals/Inputs/UserModal'
 import SubscriptionModal from './SubscriptionModal'
-import { useTranslation } from 'react-i18next'
 
 const UserProfileAvatar = () => {
   const { t } = useTranslation('common')
@@ -43,11 +44,11 @@ const UserProfileAvatar = () => {
   const { mode, setMode } = useColorScheme()
   const { data: userProfile } = useUserProfile()
   const {
+    canImpersonate,
+    getEffectiveUser,
     isImpersonating,
     startImpersonation,
     stopImpersonation,
-    canImpersonate,
-    getEffectiveUser,
   } = useImpersonateUser()
   const { data: circleMembersData } = useCircleMembers()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -129,7 +130,9 @@ const UserProfileAvatar = () => {
                   }}
                 />
                 <Avatar
-                  src={resolvePhotoURL(userProfile?.image || userProfile?.avatar)}
+                  src={resolvePhotoURL(
+                    userProfile?.image || userProfile?.avatar,
+                  )}
                   alt={userProfile?.displayName || userProfile?.name}
                   size='sm'
                   sx={{

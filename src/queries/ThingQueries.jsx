@@ -1,4 +1,5 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
+
 import { GetThingHistory } from '../utils/Fetcher'
 
 export const useThingHistory = (thingId, limit = 10) => {

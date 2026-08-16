@@ -39,8 +39,7 @@ const SignupView = () => {
     if (!result.success) {
       showError({
         title: 'Almost there',
-        message:
-          t('signupSignInFailed'),
+        message: t('signupSignInFailed'),
       })
       Navigate('/login')
       return

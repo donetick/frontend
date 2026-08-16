@@ -11,8 +11,8 @@ import {
   Stack,
   Typography,
 } from '@mui/joy'
-import { useTranslation } from 'react-i18next'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import ModalActions from '../../components/common/ModalActions.jsx'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal.js'
@@ -105,7 +105,9 @@ function RedeemPointsModal({ config }) {
                 startDecorator={<Toll />}
                 sx={{ mt: 0.5 }}
               >
-                {t('redeemModal.pointsAvailable', { count: config?.available || 0 })}
+                {t('redeemModal.pointsAvailable', {
+                  count: config?.available || 0,
+                })}
               </Chip>
             </Box>
           </Stack>

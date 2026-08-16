@@ -1,9 +1,10 @@
 import { Browser } from '@capacitor/browser'
-import { useTranslation } from 'react-i18next'
 import { Capacitor } from '@capacitor/core'
 import { Download } from '@mui/icons-material'
 import { Box, CircularProgress, Typography } from '@mui/joy'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
@@ -35,7 +36,7 @@ function AttachmentViewerModal({ config }) {
   const [imgLoaded, setImgLoaded] = useState(false)
   const [imgError, setImgError] = useState(false)
 
-  const { isOpen, url, fileName, onClose } = config || {}
+  const { fileName, isOpen, onClose, url } = config || {}
 
   const handleClose = () => {
     setImgLoaded(false)

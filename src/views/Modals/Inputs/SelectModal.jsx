@@ -1,16 +1,17 @@
 import { Option, Select } from '@mui/joy'
 import { useState } from 'react'
+
 import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
 function SelectModal({
+  displayKey,
   isOpen,
   onClose,
   onSave,
   options,
-  title,
-  displayKey,
   placeholder,
+  title,
 }) {
   const { ResponsiveModal } = useResponsiveModal()
   const [selected, setSelected] = useState(null)

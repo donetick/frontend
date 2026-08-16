@@ -3,6 +3,7 @@ import { Box, Button, Link, Typography } from '@mui/joy'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+
 import { useNotification } from '../../service/NotificationProvider'
 import { ResetPassword } from '../../utils/Fetcher'
 import { AuthSubmitButton, AuthTextField, LegalLinks } from './AuthFields'

@@ -1,6 +1,7 @@
+import 'quill/dist/quill.snow.css'
+
 import imageCompression from 'browser-image-compression'
 import Quill from 'quill'
-import 'quill/dist/quill.snow.css'
 import QuillMarkdown from 'quilljs-markdown'
 
 // Extend the built-in Image blot to preserve dt-data-path
@@ -32,6 +33,8 @@ class DtImageBlot extends ImageBlot {
 DtImageBlot.blotName = 'image'
 DtImageBlot.tagName = 'img'
 Quill.register(DtImageBlot, true)
+import './RichTextEditor.css'
+
 import {
   forwardRef,
   useCallback,
@@ -39,26 +42,26 @@ import {
   useImperativeHandle,
   useRef,
 } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import { useDescriptionHtml } from '../../hooks/useDescriptionHtml'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { apiClient } from '../../utils/ApiClient'
 import { isPlusAccount, resolvePhotoURL } from '../../utils/Helpers'
 import { patchDescriptionHtml } from '../../utils/ImageCache'
-import './RichTextEditor.css'
-import { useTranslation } from 'react-i18next'
 
 const RichTextEditor = forwardRef(
   (
     {
-      value = '',
-      onChange,
-      isEditable = true,
-      placeholder = null,
-      variant = 'outlined',
+      draftId,
       entityId,
       entityType,
-      draftId,
+      isEditable = true,
+      onChange,
+      placeholder = null,
+      value = '',
+      variant = 'outlined',
     },
     ref,
   ) => {
@@ -95,8 +98,7 @@ const RichTextEditor = forwardRef(
       if (!isPlusAccount(userProfile)) {
         showError({
           title: t('common:upload.plusFeatureTitle'),
-          message:
-            t('common:upload.plusFeatureMessage'),
+          message: t('common:upload.plusFeatureMessage'),
         })
         return
       }
@@ -170,8 +172,7 @@ const RichTextEditor = forwardRef(
           } else if (response.status === 403 && !isPlusAccount(userProfile)) {
             showError({
               title: t('common:upload.upgradeTitle'),
-              message:
-                t('common:upload.upgradeMessage'),
+              message: t('common:upload.upgradeMessage'),
             })
             return
           } else if (response.status === 403) {

@@ -1,14 +1,14 @@
-import * as React from 'react'
-import { useTranslation } from 'react-i18next'
+import FavoriteBorder from '@mui/icons-material/FavoriteBorder'
+import HomeRoundedIcon from '@mui/icons-material/HomeRounded'
+import Person from '@mui/icons-material/Person'
+import Search from '@mui/icons-material/Search'
 import Box from '@mui/joy/Box'
 import ListItemDecorator from '@mui/joy/ListItemDecorator'
-import Tabs from '@mui/joy/Tabs'
-import TabList from '@mui/joy/TabList'
 import Tab, { tabClasses } from '@mui/joy/Tab'
-import HomeRoundedIcon from '@mui/icons-material/HomeRounded'
-import FavoriteBorder from '@mui/icons-material/FavoriteBorder'
-import Search from '@mui/icons-material/Search'
-import Person from '@mui/icons-material/Person'
+import TabList from '@mui/joy/TabList'
+import Tabs from '@mui/joy/Tabs'
+import * as React from 'react'
+import { useTranslation } from 'react-i18next'
 
 export default function NavBarMobile() {
   const { t } = useTranslation('common')

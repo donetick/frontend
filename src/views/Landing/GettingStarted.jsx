@@ -11,7 +11,7 @@ import {
 import { Box, Button, Card, Container, Grid, Typography } from '@mui/joy'
 import { useNavigate } from 'react-router-dom'
 
-function StartOptionCard({ icon: Icon, title, description, button, index }) {
+function StartOptionCard({ button, description, icon: Icon, index, title }) {
   return (
     <Card
       data-aos='fade-up'

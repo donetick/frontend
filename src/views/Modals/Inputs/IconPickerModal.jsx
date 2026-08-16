@@ -1,15 +1,16 @@
 import { Avatar, Box, FormControl, FormLabel, Grid, Typography } from '@mui/joy'
+import { useTranslation } from 'react-i18next'
+
 import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { getTextColorFromBackgroundColor } from '../../../utils/Colors'
 import PROJECT_ICONS from '../../../utils/ProjectIcons'
-import { useTranslation } from 'react-i18next'
 
 const IconPickerModal = ({
+  currentIcon,
   isOpen,
   onClose,
   onSelect,
-  currentIcon,
   projectColor,
 }) => {
   const { t } = useTranslation('projects')
@@ -29,7 +30,9 @@ const IconPickerModal = ({
       unmountDelay={250}
       title={t('iconPicker.chooseIcon')}
       footer={
-        <ModalActions secondary={{ label: t('common:cancel'), onClick: onClose }} />
+        <ModalActions
+          secondary={{ label: t('common:cancel'), onClick: onClose }}
+        />
       }
     >
       <FormControl>

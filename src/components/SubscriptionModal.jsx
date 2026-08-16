@@ -1,13 +1,14 @@
 import { Check, Star } from '@mui/icons-material'
 import { Box, Card, Chip, Divider, Radio, Typography } from '@mui/joy'
 import { useState } from 'react'
-import AppModal from './common/AppModal'
-import ModalActions from './common/ModalActions'
-import { useNotification } from '../service/NotificationProvider'
-import { GetSubscriptionSession } from '../utils/Fetcher'
 import { useTranslation } from 'react-i18next'
 
-const SubscriptionModal = ({ open, onClose }) => {
+import { useNotification } from '../service/NotificationProvider'
+import { GetSubscriptionSession } from '../utils/Fetcher'
+import AppModal from './common/AppModal'
+import ModalActions from './common/ModalActions'
+
+const SubscriptionModal = ({ onClose, open }) => {
   const { t } = useTranslation('settings')
   const [selectedPlan, setSelectedPlan] = useState('yearly')
   const [isLoading, setIsLoading] = useState(false)
@@ -81,7 +82,11 @@ const SubscriptionModal = ({ open, onClose }) => {
       footer={
         <ModalActions
           stackOnMobile
-          secondary={{ label: t('accountSettings.cancel'), onClick: onClose, disabled: isLoading }}
+          secondary={{
+            label: t('accountSettings.cancel'),
+            onClick: onClose,
+            disabled: isLoading,
+          }}
           primary={{
             label: t('subscription.subscribe'),
             onClick: handleSubscribe,

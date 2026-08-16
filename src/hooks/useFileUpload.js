@@ -1,11 +1,11 @@
 import imageCompression from 'browser-image-compression'
 import { useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { useUserProfile } from '../queries/UserQueries'
 import { useNotification } from '../service/NotificationProvider'
 import { apiClient } from '../utils/ApiClient'
 import { isPlusAccount, resolvePhotoURL } from '../utils/Helpers'
-import { useTranslation } from 'react-i18next'
 
 export const useFileUpload = ({
   draftId,

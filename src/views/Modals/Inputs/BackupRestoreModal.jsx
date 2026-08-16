@@ -11,8 +11,9 @@ import {
   Tabs,
   Typography,
 } from '@mui/joy'
-import { useTranslation } from 'react-i18next'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { CreateBackup, RestoreBackup } from '../../../utils/Fetcher'
@@ -244,8 +245,7 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
   const renderRestoreTab = () => (
     <Box>
       <Typography level='body-md' mb={3} color='warning'>
-        <strong>{t('backup.warningLabel')}</strong>{' '}
-        {t('backup.restoreWarning')}
+        <strong>{t('backup.warningLabel')}</strong> {t('backup.restoreWarning')}
       </Typography>
 
       <FormControl sx={{ mb: 2 }}>

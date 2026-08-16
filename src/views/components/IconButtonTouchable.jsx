@@ -1,7 +1,7 @@
 import IconButton from '@mui/joy/IconButton'
 import React, { useRef, useState } from 'react'
 
-const IconButtonTouchable = ({ onHold, onClick, ...props }) => {
+const IconButtonTouchable = ({ onClick, onHold, ...props }) => {
   const [holdTimeout, setHoldTimeout] = useState(null)
   const holdRef = useRef(false)
 

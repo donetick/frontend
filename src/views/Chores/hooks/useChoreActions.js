@@ -1,6 +1,8 @@
 import { useQueryClient } from '@tanstack/react-query'
 import moment from 'moment'
 import { useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import {
   useArchiveChore,
   useUnArchiveChore,
@@ -22,7 +24,6 @@ import {
 } from '../../../utils/Fetcher'
 import { offlineDB } from '../../../utils/OfflineDB'
 import { isOfflineFeatureEnabled } from '../../../utils/OfflineFeatureToggle'
-import { useTranslation } from 'react-i18next'
 
 // Effectively "can this action be queued offline?" — requires the offline
 // feature, otherwise there is no command queue to replay it later.
@@ -55,22 +56,22 @@ const expectOk = async request => {
 
 export const useChoreActions = ({
   chores,
-  filteredChores,
-  setChores,
-  setFilteredChores,
-  userProfile,
-  impersonatedUser,
-  showSuccess,
-  showError,
-  showWarning,
-  showUndo,
-  refetchChores,
-  setConfirmModelConfig,
-  openModal,
-  closeModal,
-  modalChore,
-  getSelectedChoresData,
   clearSelection,
+  closeModal,
+  filteredChores,
+  getSelectedChoresData,
+  impersonatedUser,
+  modalChore,
+  openModal,
+  refetchChores,
+  setChores,
+  setConfirmModelConfig,
+  setFilteredChores,
+  showError,
+  showSuccess,
+  showUndo,
+  showWarning,
+  userProfile,
 }) => {
   const { t } = useTranslation('chores')
   const queryClient = useQueryClient()

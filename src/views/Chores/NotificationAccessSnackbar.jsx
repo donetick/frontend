@@ -4,6 +4,7 @@ import { Preferences } from '@capacitor/preferences'
 import { Button, Snackbar, Stack, Typography } from '@mui/joy'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+
 import { registerPushNotifications } from '../../CapacitorListener'
 
 const NotificationAccessSnackbar = () => {

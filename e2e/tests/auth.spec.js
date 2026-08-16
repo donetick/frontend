@@ -1,12 +1,14 @@
-import { test, expect } from '@playwright/test'
-import { signUpViaUI, loginViaUI } from '../fixtures/auth.js'
+import { expect, test } from '@playwright/test'
+
+import { loginViaUI, signUpViaUI } from '../fixtures/auth.js'
 
 // Username must match /^[a-z.-]+$/ — no digits allowed.
 // Generate a random lowercase-only suffix for uniqueness across runs.
 function randomSuffix(len = 8) {
   const chars = 'abcdefghijklmnopqrstuvwxyz'
-  return Array.from({ length: len }, () =>
-    chars[Math.floor(Math.random() * 26)],
+  return Array.from(
+    { length: len },
+    () => chars[Math.floor(Math.random() * 26)],
   ).join('')
 }
 
@@ -41,7 +43,9 @@ test.describe('Auth – Sign Up', () => {
 
 test.describe('Auth – Login', () => {
   // Re-use the shared E2E user that global-setup already created
-  test('logs in with valid credentials and lands on /chores', async ({ page }) => {
+  test('logs in with valid credentials and lands on /chores', async ({
+    page,
+  }) => {
     await loginViaUI(page, {
       username: 'e2e.user',
       password: 'E2ePassword123!',

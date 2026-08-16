@@ -1,4 +1,5 @@
 import { Network } from '@capacitor/network'
+
 import { isOfflineFeatureEnabled } from '../utils/OfflineFeatureToggle'
 
 class NetworkManager {

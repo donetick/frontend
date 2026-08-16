@@ -13,18 +13,19 @@ import {
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useLocalization } from '../../../contexts/LocalizationContext'
+
 import ModalActions from '../../../components/common/ModalActions'
+import { useLocalization } from '../../../contexts/LocalizationContext'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
-import { useNotification } from '../../../service/NotificationProvider'
 import {
   useChoreTimer,
   useDeleteTimeSession,
   useUpdateTimeSession,
 } from '../../../queries/TimeQueries'
+import { useNotification } from '../../../service/NotificationProvider'
 import ConfirmationModal from './ConfirmationModal'
 
-const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
+const TimerEditModal = ({ choreId, isOpen, onClose, onTimerUpdate }) => {
   const { t } = useTranslation('timer')
   const { ResponsiveModal } = useResponsiveModal()
   const { fmt } = useLocalization()
@@ -156,7 +157,6 @@ const TimerEditModal = ({ isOpen, onClose, choreId, onTimerUpdate }) => {
 
   const cancelEditingSession = sessionId => {
     setEditingSessions(prev => {
-      // eslint-disable-next-line no-unused-vars
       const { [sessionId]: removed, ...rest } = prev
       return rest
     })

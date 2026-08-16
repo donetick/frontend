@@ -8,6 +8,8 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import EmptyState from '../../../components/common/EmptyState'
 import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
@@ -15,7 +17,6 @@ import { GetChoreAttachments } from '../../../utils/Fetcher'
 import { resolvePhotoURL } from '../../../utils/Helpers'
 import { cacheChoreImages, getImageSrc } from '../../../utils/ImageCache'
 import AttachmentViewerModal from './AttachmentViewerModal'
-import { useTranslation } from 'react-i18next'
 
 const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg']
 
@@ -128,7 +129,8 @@ function AttachmentBrowserModal({ choreId, isOpen, onClose }) {
                   )}
                   <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Typography level='body-sm' noWrap>
-                      {attachment.file_name || t('fileNumbered', { index: index + 1 })}
+                      {attachment.file_name ||
+                        t('fileNumbered', { index: index + 1 })}
                     </Typography>
                     {attachment.size_bytes > 0 && (
                       <Typography

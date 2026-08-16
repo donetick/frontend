@@ -13,21 +13,22 @@ import {
 import IconButton from '@mui/joy/IconButton'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 
 const SortAndGrouping = ({
-  label,
-  k,
   icon,
-  onItemSelect,
-  selectedItem,
-  setSelectedItem,
-  selectedFilter,
-  setFilter,
   isActive,
-  useChips,
-  title,
+  k,
+  label,
   onCreateNewFilter,
+  onItemSelect,
+  selectedFilter,
+  selectedItem,
+  setFilter,
+  setSelectedItem,
+  title,
+  useChips,
 }) => {
   const { t } = useTranslation('chores')
   const [anchorEl, setAnchorEl] = useState(null)

@@ -11,6 +11,7 @@ import {
 } from '@mui/icons-material'
 import { Box, Button, IconButton, Snackbar, Typography } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link, useRouteError } from 'react-router-dom'
 
 import {
@@ -18,7 +19,6 @@ import {
   formatErrorReport,
 } from '../service/ErrorReportService'
 import ErrorReportModal from './Modals/ErrorReportModal'
-import { useTranslation } from 'react-i18next'
 
 const getErrorKind = error => {
   if (!error)
@@ -274,7 +274,8 @@ const Error = () => {
           textAlign='center'
           sx={{ color: 'text.tertiary', mb: 1.5 }}
         >
-          If this keeps happening, send us a report please consider sending us report so we can take a look. 
+          If this keeps happening, send us a report please consider sending us
+          report so we can take a look.
         </Typography>
 
         {(error?.stack || message) && (

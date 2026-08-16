@@ -7,7 +7,6 @@ import {
   Replay,
   TextSnippet,
 } from '@mui/icons-material'
-import { useTranslation } from 'react-i18next'
 import {
   Box,
   Button,
@@ -16,8 +15,10 @@ import {
   Typography,
 } from '@mui/joy'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useDocumentScanner } from '../../hooks/useDocumentScanner'
+import { useTranslation } from 'react-i18next'
+
 import ModalActions from '../../components/common/ModalActions'
+import { useDocumentScanner } from '../../hooks/useDocumentScanner'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import { localAIService } from '../../service/LocalAIService'
 
@@ -121,7 +122,7 @@ async function extractTaskFromOCR(ocrText) {
   }
 }
 
-const PhotoTaskModal = ({ open, onClose, onTaskExtracted }) => {
+const PhotoTaskModal = ({ onClose, onTaskExtracted, open }) => {
   const { t } = useTranslation('chores')
   const { ResponsiveModal } = useResponsiveModal()
   const { isNativeScanner, scanDocument } = useDocumentScanner()
@@ -263,7 +264,7 @@ const PhotoTaskModal = ({ open, onClose, onTaskExtracted }) => {
   }
 
   const handleNativeScan = async () => {
-    const { image, cancelled, error } = await scanDocument()
+    const { cancelled, error, image } = await scanDocument()
     if (cancelled) return
     if (error || !image) {
       setErrorMsg(

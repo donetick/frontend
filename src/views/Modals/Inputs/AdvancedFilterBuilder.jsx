@@ -1,30 +1,31 @@
 import { Save } from '@mui/icons-material'
 import { Box, Button, Chip, Divider, Input, Typography } from '@mui/joy'
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import AppModal from '../../../components/common/AppModal'
 import ModalActions from '../../../components/common/ModalActions'
+import { FILTER_COLORS } from '../../../utils/Colors'
+import { applyFilter } from '../../../utils/FilterEngine'
 import FilterBuilderContent, {
   conditionsToSelections,
   defaultSelections,
   selectionsToConditions,
 } from '../../Chores/components/FilterBuilderContent'
-import { FILTER_COLORS } from '../../../utils/Colors'
-import { applyFilter } from '../../../utils/FilterEngine'
 import { useFilters } from '../../Filters/FilterQueries'
-import { useTranslation } from 'react-i18next'
 
 const EMPTY_FILTERS = []
 
 const AdvancedFilterBuilder = ({
+  allChores = [],
+  editingFilter = null,
   isOpen,
+  labels = [],
+  members = [],
   onClose,
   onSave,
-  members = [],
-  labels = [],
   projects = [],
-  allChores = [],
   userProfile = null,
-  editingFilter = null,
 }) => {
   const { t } = useTranslation('filters')
   const [filterName, setFilterName] = useState('')

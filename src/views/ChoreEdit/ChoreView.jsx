@@ -41,6 +41,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useLocalization } from '../../contexts/LocalizationContext'
+import { useDescriptionHtml } from '../../hooks/useDescriptionHtml'
 import { usePendingCommands } from '../../hooks/usePendingCommands'
 import {
   useChoreDetails,
@@ -80,12 +81,6 @@ import {
 } from '../../utils/Fetcher'
 import { offlineDB } from '../../utils/OfflineDB'
 import { getSafeBottomPadding } from '../../utils/SafeAreaUtils.js'
-import AttachmentBrowserModal from '../Modals/Inputs/AttachmentBrowserModal'
-import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
-import NoteViewerModal from '../Modals/Inputs/NoteViewerModal'
-import NudgeModal from '../Modals/Inputs/NudgeModal'
-import SelectModal from '../Modals/Inputs/SelectModal'
-import WriteNFCModal from '../Modals/Inputs/WriteNFCModal'
 import ChoreActionMenu from '../components/ChoreActionMenu'
 import DueDatePickerModal, {
   combineDueDate,
@@ -95,9 +90,14 @@ import LoadingComponent from '../components/Loading.jsx'
 import PendingBadge from '../components/PendingBadge'
 import RichTextEditor from '../components/RichTextEditor.jsx'
 import SubTasks from '../components/SubTask.jsx'
+import AttachmentBrowserModal from '../Modals/Inputs/AttachmentBrowserModal'
+import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
+import NoteViewerModal from '../Modals/Inputs/NoteViewerModal'
+import NudgeModal from '../Modals/Inputs/NudgeModal'
+import SelectModal from '../Modals/Inputs/SelectModal'
+import WriteNFCModal from '../Modals/Inputs/WriteNFCModal'
 import TimePassedCard from './TimePassedCard.jsx'
 import TimerSplitButton from './TimerSplitButton.jsx'
-import { useDescriptionHtml } from '../../hooks/useDescriptionHtml'
 
 const isNetworkError = err =>
   err instanceof TypeError && err.message === 'Failed to fetch'
@@ -130,7 +130,7 @@ const ChoreView = () => {
   const { choreId } = useParams()
   const [note, setNote] = useState(null)
   const queryClient = useQueryClient()
-  const { showSuccess, showError, showUndo } = useNotification()
+  const { showError, showSuccess, showUndo } = useNotification()
 
   const [searchParams] = useSearchParams()
 

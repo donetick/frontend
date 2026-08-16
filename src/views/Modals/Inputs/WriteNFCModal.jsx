@@ -7,10 +7,11 @@ import {
 } from '@mui/icons-material'
 import { Box, IconButton, Input, Switch, Typography } from '@mui/joy'
 import { useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { startNativeNFCWrite } from '../../../service/NFCWriter'
-import { useTranslation } from 'react-i18next'
 
 const pulseKeyframes = `
   @keyframes nfc-pulse {
@@ -214,10 +215,18 @@ function WriteNFCModal({ config }) {
         closeOnEscape={!isWaiting}
         footer={
           isSuccess ? (
-            <ModalActions primary={{ label: t('activity.status.done'), onClick: handleClose }} />
+            <ModalActions
+              primary={{
+                label: t('activity.status.done'),
+                onClick: handleClose,
+              }}
+            />
           ) : isWaiting ? (
             <ModalActions
-              secondary={{ label: t('choreView.cancel'), onClick: handleCancel }}
+              secondary={{
+                label: t('choreView.cancel'),
+                onClick: handleCancel,
+              }}
             />
           ) : (
             <ModalActions

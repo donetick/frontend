@@ -10,6 +10,8 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import PROJECT_COLORS, {
@@ -21,7 +23,6 @@ import {
   useUpdateProject,
 } from '../../Projects/ProjectQueries'
 import IconPickerModal from './IconPickerModal'
-import { useTranslation } from 'react-i18next'
 
 const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
   const { t } = useTranslation('projects')

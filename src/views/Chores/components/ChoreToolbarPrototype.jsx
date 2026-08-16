@@ -47,27 +47,28 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import AppModal from '../../../components/common/AppModal'
 import ActiveFilterChips from '../../../components/common/filter/ActiveFilterChips'
 import KeyboardShortcutHint from '../../../components/common/KeyboardShortcutHint'
 import { FILTER_COLORS } from '../../../utils/Colors'
 import Priorities from '../../../utils/Priorities'
+import ProjectSelector from '../../components/ProjectSelector'
+import CustomFilterChips from './CustomFilterChips'
 import FilterBuilderContent, {
   CHORE_STATUSES,
-  DUE_DATE_OPTIONS,
-  POINTS_OPERATORS,
   conditionsToSelections,
   defaultSelections,
+  DUE_DATE_OPTIONS,
+  POINTS_OPERATORS,
   selectionsToConditions,
 } from './FilterBuilderContent'
 import SearchBar from './SearchBar'
-import ProjectSelector from '../../components/ProjectSelector'
-import CustomFilterChips from './CustomFilterChips'
-import { useTranslation } from 'react-i18next'
 
 // ─── sub-components for the Display sheet ────────────────────────────────────
 
-const SectionHeader = ({ icon, label, badge }) => (
+const SectionHeader = ({ badge, icon, label }) => (
   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
     {icon && (
       <Box
@@ -97,7 +98,7 @@ const SectionHeader = ({ icon, label, badge }) => (
   </Box>
 )
 
-const OptionChips = ({ options, selected, multi, onToggle }) => (
+const OptionChips = ({ multi, onToggle, options, selected }) => (
   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
     {options.map(opt => {
       const isSelected = multi
@@ -183,48 +184,48 @@ const OptionChips = ({ options, selected, multi, onToggle }) => (
  */
 const ChoreToolbar = ({
   // advanced filter
-  members = [],
-  labels = [],
-  projects = [],
-  tempFilter,
-  tempFilterMeta,
+  activeFilterId,
   applyTempFilter,
   clearTempFilter,
-  saveFilter,
-  updateFilter,
-  onFilterSaved,
-  // result counts
-  resultCount,
-  totalCount,
-  // clear all
-  onClearAllFilters,
-  // project (for Display sheet)
-  selectedProject,
-  onProjectSelect,
-  // assignee (for Display sheet)
-  selectedAssigneeFilter = 'anyone',
-  onAssigneeFilterChange,
-  // saved / custom
-  savedFilters = [],
-  activeFilterId,
-  onSavedFilterClick,
-  onSavedFilterEdit,
-  onSavedFilterDelete,
-  onSavedFilterPin,
-  // grouping
-  selectedGroupBy = 'default',
-  onGroupBySelect,
-  // view + multiselect
-  viewMode = 'default',
-  onToggleViewMode,
   isMultiSelectMode,
-  onToggleMultiSelect,
-  // search
-  searchTerm,
+  labels = [],
+  members = [],
+  onAssigneeFilterChange,
+  onClearAllFilters,
+  onFilterSaved,
+  onGroupBySelect,
+  // result counts
+  onProjectSelect,
+  onSavedFilterClick,
+  // clear all
+  onSavedFilterDelete,
+  // project (for Display sheet)
+  onSavedFilterEdit,
+  onSavedFilterPin,
+  // assignee (for Display sheet)
   onSearchChange,
   onSearchClose,
+  // saved / custom
+  onToggleMultiSelect,
+  onToggleViewMode,
+  projects = [],
+  resultCount,
+  saveFilter,
+  savedFilters = [],
+  // grouping
   searchInputRef,
+  searchTerm,
+  // view + multiselect
+  selectedAssigneeFilter = 'anyone',
+  selectedGroupBy = 'default',
+  selectedProject,
   showKeyboardShortcuts,
+  // search
+  tempFilter,
+  tempFilterMeta,
+  totalCount,
+  updateFilter,
+  viewMode = 'default',
 }) => {
   const { t } = useTranslation('chores')
   const [filterSheetOpen, setFilterSheetOpen] = useState(false)

@@ -1,5 +1,6 @@
 import { Capacitor } from '@capacitor/core'
 import { Box, Sheet, Typography } from '@mui/joy'
+
 import Logo from '../../Logo'
 
 /**
@@ -8,18 +9,18 @@ import Logo from '../../Logo'
  * its own safe-area padding (the top inset is already reserved by NavBar).
  */
 const AuthShell = ({
-  title,
-  subtitle,
   action,
   children,
   footer,
   logoSize = 48,
+  showLogo = !Capacitor.isNativePlatform(),
+  subtitle,
   // In the app the user already came through the app icon and the Get Started
   // mark, so repeating it here is noise. On the web these routes are the first
   // thing a visitor sees — often on a self-hosted domain, and with no navbar —
   // so the mark is the only thing identifying the app. Views reached from an
   // emailed link override this to always show it.
-  showLogo = !Capacitor.isNativePlatform(),
+  title,
 }) => {
   return (
     <Box

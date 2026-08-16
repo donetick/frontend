@@ -16,12 +16,12 @@ const ActionButton = ({ action, defaults, sx }) => {
  * primary action is always the final, highest-emphasis control.
  */
 const ModalActions = ({
+  children,
   primary,
   secondary,
-  tertiary,
-  children,
   stackOnMobile = false,
   sx,
+  tertiary,
 }) => {
   const responsiveButtonStyles = stackOnMobile
     ? { '& > button': { width: { xs: '100%', sm: 'auto' } } }
