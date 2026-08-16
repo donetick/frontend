@@ -249,13 +249,28 @@ export const submitErrorReport = async ({
   description,
   report,
 }) => {
+  // The relay rejects reports without an error. Manual bug reports have no
+  // thrown Error, so mark only the submitted copy while preserving the local
+  // diagnostics as a manual report.
+  const submittedReport =
+    report.kind === 'bug'
+      ? {
+          ...report,
+          error: {
+            ...report.error,
+            name: 'ManualBugReport',
+            message: 'Submitted manually from the app',
+          },
+        }
+      : report
+
   const payload = {
     source: 'donetick-app',
-    kind: report.kind === 'bug' ? 'bug-report' : 'error-report',
+    kind: 'error-report',
     reportId: report.reportId,
     description: description?.trim() || null,
     contactEmail: contactEmail?.trim() || null,
-    report,
+    report: submittedReport,
   }
 
   // Enforced here, not only in the UI, so no future caller can relay a
