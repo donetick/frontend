@@ -63,6 +63,8 @@
     "skip": "تخطي",
     "cancel": "إلغاء",
     "noPriority": "بدون أولوية",
+    "more": "More",
+    "changeDueDate": "Change due date",
     "subtasks": "المهام الفرعية",
     "noDescription": "لا يوجد وصف متاح",
     "timer": {
@@ -103,7 +105,9 @@
     "showTasksFor": "Show tasks for",
     "type": {
       "assignee": "Assignee"
-    }
+    },
+    "display": "Display",
+    "displayOptions": "Display options"
   },
   "sort": {
     "assignedToMe": "Assigned to me",
