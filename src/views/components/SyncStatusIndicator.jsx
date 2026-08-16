@@ -35,6 +35,7 @@ import {
   subscribeToOfflineFeature,
 } from '../../utils/OfflineFeatureToggle'
 import { syncEngine } from '../../utils/SyncEngine'
+import { useTranslation } from 'react-i18next'
 
 const COMMAND_LABELS = {
   create_chore: 'Create chore',
@@ -62,6 +63,7 @@ const formatCommandLabel = commandType => {
 }
 
 function SyncStatusIndicator() {
+  const { t } = useTranslation('common')
   const queryClient = useQueryClient()
   const [pendingCommands, setPendingCommands] = useState([])
   const [failedCommands, setFailedCommands] = useState([])
@@ -239,7 +241,7 @@ function SyncStatusIndicator() {
   return (
     <Dropdown>
       <MenuButton
-        aria-label='Open sync and network status'
+        aria-label={t('sync.aria')}
         variant='plain'
         sx={{
           p: 0.5,
@@ -483,7 +485,7 @@ function SyncStatusIndicator() {
               level='body-sm'
               sx={{ color: 'var(--joy-palette-text-secondary)' }}
             >
-              All changes synced
+              {t('sync.allSynced')}
             </Typography>
           </Box>
         )}
@@ -517,7 +519,7 @@ function SyncStatusIndicator() {
               level='body-xs'
               sx={{ color: 'var(--joy-palette-text-tertiary)' }}
             >
-              Will sync when back online
+              {t('sync.willSync')}
             </Typography>
           </Box>
         )}
@@ -538,7 +540,7 @@ function SyncStatusIndicator() {
             <ClearAll sx={{ fontSize: 18 }} />
           </ListItemDecorator>
           <Typography level='body-sm' sx={{ fontWeight: 500 }}>
-            Cancel All
+            {t('sync.cancelAll')}
           </Typography>
         </MenuItem>
 

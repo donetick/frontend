@@ -7,6 +7,7 @@ import {
   Replay,
   TextSnippet,
 } from '@mui/icons-material'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   Button,
@@ -121,6 +122,7 @@ async function extractTaskFromOCR(ocrText) {
 }
 
 const PhotoTaskModal = ({ open, onClose, onTaskExtracted }) => {
+  const { t } = useTranslation('chores')
   const { ResponsiveModal } = useResponsiveModal()
   const { isNativeScanner, scanDocument } = useDocumentScanner()
   const videoRef = useRef(null)
@@ -302,7 +304,7 @@ const PhotoTaskModal = ({ open, onClose, onTaskExtracted }) => {
       onClose={handleClose}
       size='md'
       fullWidth
-      title='Scan photo to create task'
+      title={t('photoTask.title')}
     >
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         {(phase === 'capture' || phase === 'preview') && (
@@ -340,7 +342,7 @@ const PhotoTaskModal = ({ open, onClose, onTaskExtracted }) => {
               <Box sx={{ textAlign: 'center', p: 3 }}>
                 <CameraAlt sx={{ fontSize: 48, opacity: 0.5, mb: 1 }} />
                 <Typography level='body-sm' sx={{ opacity: 0.7 }}>
-                  Camera not available
+                  {t('photoTask.cameraUnavailable')}
                 </Typography>
               </Box>
             )}
@@ -487,7 +489,7 @@ const PhotoTaskModal = ({ open, onClose, onTaskExtracted }) => {
                 startDecorator={<PhotoCamera />}
                 onClick={() => fileInputRef.current?.click()}
               >
-                Upload Photo
+                {t('photoTask.uploadPhoto')}
               </Button>
               <input
                 ref={fileInputRef}
@@ -503,7 +505,7 @@ const PhotoTaskModal = ({ open, onClose, onTaskExtracted }) => {
                   startDecorator={<DocumentScanner />}
                   onClick={handleNativeScan}
                 >
-                  Scan Document
+                  {t('photoTask.scanDocument')}
                 </Button>
               ) : (
                 cameraAvailable && (
@@ -513,7 +515,7 @@ const PhotoTaskModal = ({ open, onClose, onTaskExtracted }) => {
                     startDecorator={<CameraAlt />}
                     onClick={handleCapture}
                   >
-                    Capture
+                    {t('photoTask.capture')}
                   </Button>
                 )
               )}
@@ -538,7 +540,7 @@ const PhotoTaskModal = ({ open, onClose, onTaskExtracted }) => {
                     color='primary'
                     onClick={() => handleProcess('native')}
                   >
-                    Process Natively
+                    {t('photoTask.processNatively')}
                   </Button>
                 )}
               <Button
@@ -546,7 +548,7 @@ const PhotoTaskModal = ({ open, onClose, onTaskExtracted }) => {
                 color='primary'
                 onClick={() => handleProcess('tesseract')}
               >
-                Process Image
+                {t('photoTask.processImage')}
               </Button>
             </>
           )}
@@ -559,7 +561,7 @@ const PhotoTaskModal = ({ open, onClose, onTaskExtracted }) => {
                 startDecorator={<ArrowBack />}
                 onClick={handleBackToPreview}
               >
-                Back
+                {t('common:back')}
               </Button>
               <Button
                 variant='outlined'
@@ -580,7 +582,7 @@ const PhotoTaskModal = ({ open, onClose, onTaskExtracted }) => {
                 startDecorator={<ArrowBack />}
                 onClick={handleBackToPreview}
               >
-                Back
+                {t('common:back')}
               </Button>
               <Button
                 variant='outlined'
@@ -591,7 +593,7 @@ const PhotoTaskModal = ({ open, onClose, onTaskExtracted }) => {
                 Retake
               </Button>
               <Button variant='solid' color='primary' onClick={handleConfirm}>
-                Create Task
+                {t('photoTask.createTask')}
               </Button>
             </>
           )}

@@ -35,5 +35,13 @@
     "notFoundDescription": "This label may have been deleted or is no longer shared with you.",
     "backToLabels": "Back to labels"
   },
-  "blurb": "Manage your labels and organize your tasks effectively. Labels will be automatically shared with your circle if they are used on a shared task."
+  "blurb": "Manage your labels and organize your tasks effectively. Labels will be automatically shared with your circle if they are used on a shared task.",
+  "modal": {
+    "errorEmptyName": "Name cannot be empty",
+    "errorDuplicate": "Label with this name already exists",
+    "errorNoColor": "Please select a color",
+    "saveFailedTitle": "Failed to save label",
+    "saveFailedMessage": "Unable to save label. Please try again.",
+    "name": "Name"
+  }
 }

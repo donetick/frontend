@@ -5,6 +5,7 @@ import {
   Replay,
   WarningAmber,
 } from '@mui/icons-material'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   Button,
@@ -37,6 +38,7 @@ const ScanPanel = ({
   onTaskExtracted,
   open,
 }) => {
+  const { t } = useTranslation('chores')
   const {
     activate,
     cameraAvailable,
@@ -109,18 +111,18 @@ const ScanPanel = ({
     if (phase === 'capture') {
       if (isNativeScanner) {
         return {
-          label: 'Scan Document',
+          label: t('photoTask.scanDocument'),
           icon: <DocumentScanner />,
           onClick: handleNativeScan,
         }
       }
       if (cameraAvailable) {
-        return { label: 'Capture', icon: <CameraAlt />, onClick: capture }
+        return { label: t('photoTask.capture'), icon: <CameraAlt />, onClick: capture }
       }
       // No camera on this device — Upload is the only way forward, so it
       // graduates from the inline secondary to the footer's primary
       return {
-        label: 'Upload Photo',
+        label: t('photoTask.uploadPhoto'),
         icon: <PhotoCamera />,
         onClick: openFilePicker,
       }
@@ -322,7 +324,7 @@ const ScanPanel = ({
           {capturedImage && (
             <img
               src={capturedImage}
-              alt='Failed scan'
+              alt={t('photoTask.failedScan')}
               style={{
                 width: '100%',
                 display: 'block',

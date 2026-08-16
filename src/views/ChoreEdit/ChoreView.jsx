@@ -293,7 +293,7 @@ const ChoreView = () => {
                   message: t('choreView.taskCompletionUndone'),
                 })
               } else {
-                throw new Error('Failed to undo')
+                throw new Error(t('choreView.unableUndo'))
               }
             } catch (error) {
               showError({
@@ -331,7 +331,7 @@ const ChoreView = () => {
         })
         queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
         showSuccess({
-          message: "You're offline — completion will sync when back online",
+          message: t('choreView.offlineComplete'),
           undoAction: async () => {
             await commandQueue.cancel(cmdId)
             queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
@@ -340,7 +340,7 @@ const ChoreView = () => {
       } else {
         showError({
           title: t('choreView.undoFailed'),
-          message: error?.message || 'Unable to complete task',
+          message: error?.message || t('choreView.unableComplete'),
         })
       }
     }
@@ -369,7 +369,7 @@ const ChoreView = () => {
                   message: t('choreView.taskSkipUndone'),
                 })
               } else {
-                throw new Error('Failed to undo')
+                throw new Error(t('choreView.unableUndo'))
               }
             } catch (error) {
               showError({
@@ -389,7 +389,7 @@ const ChoreView = () => {
         )
         queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
         showSuccess({
-          message: "You're offline — skip will sync when back online",
+          message: t('choreView.offlineSkip'),
           undoAction: async () => {
             await commandQueue.cancel(cmdId)
             queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
@@ -398,7 +398,7 @@ const ChoreView = () => {
       } else {
         showError({
           title: t('choreView.undoFailed'),
-          message: error?.message || 'Unable to skip task',
+          message: error?.message || t('choreView.unableSkip'),
         })
       }
     }
@@ -424,7 +424,7 @@ const ChoreView = () => {
           setChore(startedChore)
           queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
           showSuccess({
-            message: "You're offline — start will sync when back online",
+            message: t('choreView.offlineStart'),
             undoAction: async () => {
               await commandQueue.cancel(cmdId)
               queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
@@ -436,7 +436,7 @@ const ChoreView = () => {
 
         showError({
           title: t('choreView.undoFailed'),
-          message: error?.message || 'Unable to start task',
+          message: error?.message || t('choreView.unableStart'),
         })
       },
     })
@@ -463,7 +463,7 @@ const ChoreView = () => {
           setChore(pausedChore)
           queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
           showSuccess({
-            message: "You're offline — pause will sync when back online",
+            message: t('choreView.offlinePause'),
             undoAction: async () => {
               await commandQueue.cancel(cmdId)
               queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
@@ -475,7 +475,7 @@ const ChoreView = () => {
 
         showError({
           title: t('choreView.undoFailed'),
-          message: error?.message || 'Unable to pause task',
+          message: error?.message || t('choreView.unablePause'),
         })
       },
     })
@@ -579,7 +579,7 @@ const ChoreView = () => {
         setChore({ ...chore, isActive: true })
         queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
         showSuccess({
-          message: "You're offline — restore will sync when back online",
+          message: t('choreView.offlineRestore'),
           undoAction: async () => {
             await commandQueue.cancel(cmdId)
             await offlineDB.saveChores([{ ...chore, isActive: false }])
@@ -589,8 +589,8 @@ const ChoreView = () => {
         })
       } else {
         showError({
-          title: 'Failed to restore',
-          message: error.message || 'Unable to restore task',
+          title: t('choreView.restoreFailed'),
+          message: error.message || t('choreView.unableRestore'),
         })
       }
     }

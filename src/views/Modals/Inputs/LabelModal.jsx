@@ -8,8 +8,10 @@ import { useNotification } from '../../../service/NotificationProvider.jsx'
 import LABEL_COLORS from '../../../utils/Colors.jsx'
 import { CreateLabel, UpdateLabel } from '../../../utils/Fetcher'
 import { useLabels } from '../../Labels/LabelQueries'
+import { useTranslation } from 'react-i18next'
 
 function LabelModal({ isOpen, onClose, label }) {
+  const { t } = useTranslation('labels')
   const { ResponsiveModal } = useResponsiveModal()
 
   const [labelName, setLabelName] = useState('')
@@ -34,7 +36,7 @@ function LabelModal({ isOpen, onClose, label }) {
   // Validation logic
   const validateLabel = () => {
     if (!labelName.trim()) {
-      setError('Name cannot be empty')
+      setError(t('modal.errorEmptyName'))
       return false
     }
     if (
@@ -42,11 +44,11 @@ function LabelModal({ isOpen, onClose, label }) {
         userLabel => userLabel.name === labelName && userLabel.id !== label?.id,
       )
     ) {
-      setError('Label with this name already exists')
+      setError(t('modal.errorDuplicate'))
       return false
     }
     if (!color) {
-      setError('Please select a color')
+      setError(t('modal.errorNoColor'))
       return false
     }
     return true
@@ -71,13 +73,13 @@ function LabelModal({ isOpen, onClose, label }) {
       .catch(err => {
         if (err.queued) {
           showError({
-            title: 'Failed to save label',
-            message: 'Unable to save label. Please try again.',
+            title: t('modal.saveFailedTitle'),
+            message: t('modal.saveFailedMessage'),
           })
         } else {
           showError({
-            title: 'Failed to save label',
-            message: 'Unable to save label. Please try again.',
+            title: t('modal.saveFailedTitle'),
+            message: t('modal.saveFailedMessage'),
           })
         }
       })
@@ -92,7 +94,7 @@ function LabelModal({ isOpen, onClose, label }) {
       title={label ? 'Edit Label' : 'Add Label'}
       footer={
         <ModalActions
-          secondary={{ label: 'Cancel', onClick: onClose }}
+          secondary={{ label: t('common:cancel'), onClick: onClose }}
           primary={{
             label: label ? 'Save Changes' : 'Add Label',
             onClick: handleSave,
@@ -103,7 +105,7 @@ function LabelModal({ isOpen, onClose, label }) {
       <Box>
         <FormControl>
           <Typography gutterBottom level='body-sm' alignSelf='start'>
-            Name
+            {t('modal.name')}
           </Typography>
           <Input
             fullWidth

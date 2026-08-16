@@ -352,7 +352,8 @@
     "backupCodesModal": {
       "title": "New Backup Codes",
       "warning": "Your previous backup codes are now invalid. Save these new codes in a safe place. Each code can only be used once."
-    }
+    },
+    "generateCodes": "Generate New Codes"
   },
   "apiTokens": {
     "title": "API Tokens",
@@ -576,5 +577,8 @@
     "selectOwner": "Select new owner",
     "confirmPrompt": "Please enter your password and type DELETE to confirm",
     "typeDelete": "DELETE"
+  },
+  "realtime": {
+    "titleSse": "Real-time Updates (SSE)"
   }
 }

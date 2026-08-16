@@ -10,6 +10,7 @@ import { useRef, useState } from 'react'
 import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { startNativeNFCWrite } from '../../../service/NFCWriter'
+import { useTranslation } from 'react-i18next'
 
 const pulseKeyframes = `
   @keyframes nfc-pulse {
@@ -105,6 +106,7 @@ function NFCIcon({ status }) {
 }
 
 function WriteNFCModal({ config }) {
+  const { t } = useTranslation('chores')
   const { ResponsiveModal } = useResponsiveModal()
   const [nfcStatus, setNfcStatus] = useState('idle')
   const [errorMessage, setErrorMessage] = useState('')
@@ -171,13 +173,11 @@ function WriteNFCModal({ config }) {
         } catch (error) {
           console.error('Error writing to NFC tag:', error)
           setNfcStatus('error')
-          setErrorMessage('Error writing to NFC tag. Please try again.')
+          setErrorMessage(t('nfc.errWrite'))
         }
       } else {
         setNfcStatus('error')
-        setErrorMessage(
-          'NFC is not supported by this browser. Copy the URL and write it to an NFC tag using a compatible device.',
-        )
+        setErrorMessage(t('nfc.errUnsupported'))
       }
     }
   }
@@ -187,20 +187,20 @@ function WriteNFCModal({ config }) {
   const isError = nfcStatus === 'error'
 
   const title = isSuccess
-    ? 'Tag written!'
+    ? t('nfc.titleSuccess')
     : isError
-      ? 'Something went wrong'
+      ? t('nfc.titleError')
       : isWaiting
-        ? 'Hold near NFC tag'
-        : 'Write to NFC'
+        ? t('nfc.titleWaiting')
+        : t('actionMenu.writeNFC')
 
   const subtitle = isSuccess
-    ? 'Your NFC tag is ready to use.'
+    ? t('nfc.subSuccess')
     : isError
       ? errorMessage
       : isWaiting
-        ? 'Keep your device near the tag until complete.'
-        : 'Encode this task link onto any NFC tag.'
+        ? t('nfc.subWaiting')
+        : t('nfc.subIdle')
 
   return (
     <>
@@ -214,14 +214,14 @@ function WriteNFCModal({ config }) {
         closeOnEscape={!isWaiting}
         footer={
           isSuccess ? (
-            <ModalActions primary={{ label: 'Done', onClick: handleClose }} />
+            <ModalActions primary={{ label: t('activity.status.done'), onClick: handleClose }} />
           ) : isWaiting ? (
             <ModalActions
-              secondary={{ label: 'Cancel', onClick: handleCancel }}
+              secondary={{ label: t('choreView.cancel'), onClick: handleCancel }}
             />
           ) : (
             <ModalActions
-              secondary={{ label: 'Cancel', onClick: handleClose }}
+              secondary={{ label: t('choreView.cancel'), onClick: handleClose }}
               primary={{
                 label: nfcStatus === 'writing' ? 'Starting…' : 'Write tag',
                 onClick: writeToNFC,
@@ -250,7 +250,7 @@ function WriteNFCModal({ config }) {
                     color: 'text.tertiary',
                   }}
                 >
-                  Tag URL
+                  {t('nfc.tagUrl')}
                 </Typography>
                 <Input
                   value={getURL()}
@@ -269,7 +269,7 @@ function WriteNFCModal({ config }) {
                       variant='plain'
                       color={copied ? 'success' : 'neutral'}
                       onClick={handleCopy}
-                      title='Copy URL'
+                      title={t('nfc.copyUrl')}
                     >
                       <ContentCopy sx={{ fontSize: 16 }} />
                     </IconButton>
@@ -280,7 +280,7 @@ function WriteNFCModal({ config }) {
                     level='body-xs'
                     sx={{ color: 'success.500', mt: 0.5, textAlign: 'right' }}
                   >
-                    Copied!
+                    {t('common:copied')}
                   </Typography>
                 )}
               </Box>
@@ -299,10 +299,10 @@ function WriteNFCModal({ config }) {
               >
                 <Box>
                   <Typography level='body-sm' fontWeight={500}>
-                    Auto-complete on scan
+                    {t('nfc.autoComplete')}
                   </Typography>
                   <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                    Mark task done when tag is tapped
+                    {t('nfc.autoCompleteHint')}
                   </Typography>
                 </Box>
                 <Switch

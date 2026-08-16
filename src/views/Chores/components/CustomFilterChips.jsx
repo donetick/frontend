@@ -7,6 +7,7 @@ import {
   Star,
   StarBorder,
 } from '@mui/icons-material'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   Chip,
@@ -28,6 +29,7 @@ const CustomFilterChips = ({
   onFilterPin,
   onFilterEdit,
 }) => {
+  const { t } = useTranslation('chores')
   const navigate = useNavigate()
   const [menuAnchor, setMenuAnchor] = useState(null)
   const [selectedFilter, setSelectedFilter] = useState(null)
@@ -237,24 +239,24 @@ const CustomFilterChips = ({
               {selectedFilter.isPinned ? (
                 <>
                   <StarBorder sx={{ mr: 1 }} />
-                  Unpin filter
+                  {t('filterChip.unpin')}
                 </>
               ) : (
                 <>
                   <Star sx={{ mr: 1 }} />
-                  Pin filter
+                  {t('filterChip.pin')}
                 </>
               )}
             </MenuItem>
             {onFilterEdit && (
               <MenuItem onClick={handleEdit}>
                 <Edit sx={{ mr: 1 }} />
-                Edit filter
+                {t('filterChip.edit')}
               </MenuItem>
             )}
             <MenuItem onClick={handleDelete} color='danger'>
               <Delete sx={{ mr: 1 }} />
-              Delete filter
+              {t('filterChip.delete')}
             </MenuItem>
           </>
         )}

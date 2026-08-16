@@ -9,6 +9,7 @@ import {
   SearchRounded,
   Warning,
 } from '@mui/icons-material'
+import { useTranslation } from 'react-i18next'
 import {
   Avatar,
   Button,
@@ -32,6 +33,7 @@ import DateModal from './Modals/Inputs/DateModal'
 
 // enum for chore status:
 const CHORE_STATUS = {
+  const { t } = useTranslation('chores')
   NO_DUE_DATE: 'No due date',
   DUE_SOON: 'Soon',
   DUE_NOW: 'Due',
@@ -119,7 +121,7 @@ const ChoresOverview = () => {
   return (
     <Container>
       <Typography level='h4' mb={1.5}>
-        Chores Overviews
+        {t('overview.title')}
       </Typography>
       {/* <SummaryCard /> */}
       <Grid container>
@@ -132,7 +134,7 @@ const ChoresOverview = () => {
           gap={2}
         >
           <Input
-            placeholder='Search'
+            placeholder={t('overview.search')}
             value={search}
             onChange={e => {
               if (e.target.value === '') {
@@ -169,7 +171,7 @@ const ChoresOverview = () => {
               Navigate(`/chores/create`)
             }}
           >
-            New Chore
+            {t('overview.newChore')}
           </Button>
         </Grid>
       </Grid>
@@ -228,7 +230,7 @@ const ChoresOverview = () => {
                     color='warning'
                     startDecorator={<Avatar color='primary'>?</Avatar>}
                   >
-                    Unassigned
+                    {t('overview.unassigned')}
                   </Chip>
                 )}
               </td>
@@ -315,7 +317,7 @@ const ChoresOverview = () => {
       <DateModal
         isOpen={isDateModalOpen}
         key={choreId}
-        title={`Change due date`}
+        title={t('overview.changeDueDate')}
         onClose={() => {
           setIsDateModalOpen(false)
         }}

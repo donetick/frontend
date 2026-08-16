@@ -3,8 +3,10 @@ import { Box, Card, IconButton, Typography } from '@mui/joy'
 import { useState } from 'react'
 import ModalActions from '../../components/common/ModalActions'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
+import { useTranslation } from 'react-i18next'
 
 const MultiSelectHelp = ({ isVisible = true }) => {
+  const { t } = useTranslation('chores')
   const { ResponsiveModal } = useResponsiveModal()
 
   const [isHelpOpen, setIsHelpOpen] = useState(false)
@@ -29,8 +31,8 @@ const MultiSelectHelp = ({ isVisible = true }) => {
           borderRadius: '50%',
           boxShadow: 'lg',
         }}
-        aria-label='Show keyboard shortcuts'
-        title='Show keyboard shortcuts'
+        aria-label={t('multiSelect.showShortcuts')}
+        title={t('multiSelect.showShortcuts')}
       >
         <HelpOutline />
       </IconButton>
@@ -39,7 +41,7 @@ const MultiSelectHelp = ({ isVisible = true }) => {
       <ResponsiveModal
         open={isHelpOpen}
         onClose={() => setIsHelpOpen(false)}
-        title='Multi-select Mode'
+        title={t('multiSelect.title')}
         description='Use these keyboard shortcuts to work more efficiently.'
         footer={
           <ModalActions
@@ -51,16 +53,16 @@ const MultiSelectHelp = ({ isVisible = true }) => {
           {/* Selection shortcuts */}
           <Card variant='soft' sx={{ p: 2 }}>
             <Typography level='title-sm' sx={{ mb: 1.5, color: 'primary.600' }}>
-              Selection
+              {t('multiSelect.selection')}
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <ShortcutItem
                 keys={['Ctrl', 'A']}
-                description='Select all visible tasks'
+                description={t('multiSelect.selectAll')}
               />
               <ShortcutItem
                 keys={['Esc']}
-                description='Clear selection or exit multi-select mode'
+                description={t('multiSelect.clearOrExit')}
               />
             </Box>
           </Card>
@@ -68,16 +70,16 @@ const MultiSelectHelp = ({ isVisible = true }) => {
           {/* Action shortcuts */}
           <Card variant='soft' sx={{ p: 2 }}>
             <Typography level='title-sm' sx={{ mb: 1.5, color: 'success.600' }}>
-              Actions
+              {t('multiSelect.actions')}
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <ShortcutItem
                 keys={['Enter']}
-                description='Mark selected tasks as completed'
+                description={t('multiSelect.markCompleted')}
               />
               <ShortcutItem
                 keys={['Del', '⌫']}
-                description='Delete selected tasks'
+                description={t('multiSelect.deleteSelected')}
               />
             </Box>
           </Card>
@@ -85,12 +87,12 @@ const MultiSelectHelp = ({ isVisible = true }) => {
           {/* Interface shortcuts */}
           <Card variant='soft' sx={{ p: 2 }}>
             <Typography level='title-sm' sx={{ mb: 1.5, color: 'warning.600' }}>
-              Interface
+              {t('multiSelect.interface')}
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <ShortcutItem
                 keys={['Ctrl', 'K']}
-                description='Quick add new task'
+                description={t('multiSelect.quickAdd')}
               />
             </Box>
           </Card>
