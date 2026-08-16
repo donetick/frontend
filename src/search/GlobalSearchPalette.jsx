@@ -1,6 +1,8 @@
 import {
   AddRounded,
+  ArchiveOutlined,
   CheckCircleOutline,
+  FilterAltOutlined,
   FolderOutlined,
   HistoryRounded,
   InboxOutlined,
@@ -8,6 +10,8 @@ import {
   PersonOutline,
   SearchRounded,
   SettingsOutlined,
+  TollOutlined,
+  WidgetsOutlined,
 } from '@mui/icons-material'
 import {
   Box,
@@ -85,30 +89,77 @@ const buildQuickActions = t => [
     keywords: 'new filter view saved search add create',
     route: '/filters?create=1',
   },
-  {
-    id: 'action:tasks',
+  // Every destination in the nav drawer is reachable from here, so the palette
+  // is a complete way to move around the app without opening the drawer.
+  ...[
+    {
+      id: 'action:tasks',
+      title: t('search.actions.viewAllTasks'),
+      keywords: 'tasks chores list all open',
+      route: '/chores',
+      icon: <InboxOutlined />,
+    },
+    {
+      id: 'action:archived',
+      title: t('search.actions.viewArchivedTasks'),
+      keywords: 'archive archived tasks completed open',
+      route: '/archived',
+      icon: <ArchiveOutlined />,
+    },
+    {
+      id: 'action:things',
+      title: t('search.actions.viewThings'),
+      keywords: 'things devices sensors trackers state open',
+      route: '/things',
+      icon: <WidgetsOutlined />,
+    },
+    {
+      id: 'action:labels',
+      title: t('search.actions.viewLabels'),
+      keywords: 'labels tags open',
+      route: '/labels',
+      icon: <LabelOutlined />,
+    },
+    {
+      id: 'action:projects',
+      title: t('search.actions.viewProjects'),
+      keywords: 'projects folders groups open',
+      route: '/projects',
+      icon: <FolderOutlined />,
+    },
+    {
+      id: 'action:filters',
+      title: t('search.actions.viewFilters'),
+      keywords: 'filters saved views open',
+      route: '/filters',
+      icon: <FilterAltOutlined />,
+    },
+    {
+      id: 'action:activities',
+      title: t('search.actions.viewActivities'),
+      keywords: 'activities history timeline log open',
+      route: '/activities',
+      icon: <HistoryRounded />,
+    },
+    {
+      id: 'action:points',
+      title: t('search.actions.viewPoints'),
+      keywords: 'points rewards score leaderboard open',
+      route: '/points',
+      icon: <TollOutlined />,
+    },
+    {
+      id: 'action:settings',
+      title: t('search.actions.openSettings'),
+      keywords: 'settings preferences configuration open',
+      route: '/settings',
+      icon: <SettingsOutlined />,
+    },
+  ].map(action => ({
+    ...action,
     provider: 'actions',
-    title: t('search.actions.viewAllTasks'),
     subtitle: t('search.actions.navigation'),
-    keywords: 'tasks chores list open',
-    route: '/chores',
-  },
-  {
-    id: 'action:archived',
-    provider: 'actions',
-    title: t('search.actions.viewArchivedTasks'),
-    subtitle: t('search.actions.navigation'),
-    keywords: 'archive archived tasks open',
-    route: '/archived',
-  },
-  {
-    id: 'action:settings',
-    provider: 'actions',
-    title: t('search.actions.openSettings'),
-    subtitle: t('search.actions.navigation'),
-    keywords: 'settings preferences configuration open',
-    route: '/settings',
-  },
+  })),
 ]
 
 const readRecents = () => {
@@ -464,7 +515,7 @@ const GlobalSearchPalette = ({
                   <ListItemDecorator
                     sx={{ mt: 0.25, color: result.color || 'text.secondary' }}
                   >
-                    {ICONS[result.provider]}
+                    {result.icon || ICONS[result.provider]}
                   </ListItemDecorator>
                   <ListItemContent>
                     <Typography

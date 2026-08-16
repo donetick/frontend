@@ -752,9 +752,6 @@ const ArchivedTasks = () => {
             padding: 1,
           }}
           onChange={handleSearchChange}
-          startDecorator={
-            showKeyboardShortcuts ? <KeyboardShortcutHint shortcut='F' /> : null
-          }
           endDecorator={
             searchTerm && (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>

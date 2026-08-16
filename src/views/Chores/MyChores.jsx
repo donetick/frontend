@@ -1543,18 +1543,22 @@ const MyChores = () => {
             onClick={() => {
               Navigate(`/chores/create`)
             }}
-            title='Create new chore (Cmd+C)'
+            title='Create new chore'
           >
             <Add />
             <KeyboardShortcutHint
               sx={{
                 position: 'absolute',
-                top: -8,
-                right: -8,
+                top: -12,
+                // Anchored left so the wider "⌘ + Shift + J" label grows to the
+                // right instead of off the left edge of the viewport.
+                left: 2,
+                whiteSpace: 'nowrap',
                 zIndex: 1000,
               }}
               show={showKeyboardShortcuts}
               shortcut='J'
+              withShift
             />
           </IconButton>
           <IconButton
@@ -1583,7 +1587,7 @@ const MyChores = () => {
           <KeyboardShortcutHint
             sx={{ position: 'relative', left: -40, top: 30 }}
             show={showKeyboardShortcuts}
-            shortcut='K'
+            shortcut='J'
           />
         </Box>
         <NotificationAccessSnackbar />

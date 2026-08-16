@@ -61,6 +61,12 @@
       "createFilter": "Create a filter",
       "viewAllTasks": "View all tasks",
       "viewArchivedTasks": "View archived tasks",
+      "viewThings": "View things",
+      "viewLabels": "View labels",
+      "viewProjects": "View projects",
+      "viewFilters": "View filters",
+      "viewActivities": "View activities",
+      "viewPoints": "View points",
       "openSettings": "Open settings",
       "filterTasks": "Show tasks matching “{{query}}”",
       "filterTasksSubtitle": "Filter the task list"

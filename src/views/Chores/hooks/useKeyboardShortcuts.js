@@ -23,17 +23,16 @@ export const useKeyboardShortcuts = ({
 
       const isHoldingCmdOrCtrl = event.ctrlKey || event.metaKey
 
-      if (isHoldingCmdOrCtrl && event.key === 'k') {
+      // Cmd/Ctrl + J opens the quick-add modal, + Shift opens the full create
+      // page. Cmd/Ctrl + K is reserved for global search and handled by
+      // GlobalSearchContext.
+      if (isHoldingCmdOrCtrl && event.key.toLowerCase() === 'j') {
         event.preventDefault()
-        handlers.onOpenTaskModal()
-        return
-      }
-
-      if (addTaskModalOpen) return
-
-      if (isHoldingCmdOrCtrl && event.key === 'j') {
-        event.preventDefault()
-        handlers.onNavigateToCreate()
+        if (event.shiftKey) {
+          handlers.onNavigateToCreate()
+        } else {
+          handlers.onOpenTaskModal()
+        }
         return
       } else if (isHoldingCmdOrCtrl && event.key === 'x') {
         event.preventDefault()
