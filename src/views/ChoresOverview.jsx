@@ -33,7 +33,6 @@ import DateModal from './Modals/Inputs/DateModal'
 
 // enum for chore status:
 const CHORE_STATUS = {
-  const { t } = useTranslation('chores')
   NO_DUE_DATE: 'No due date',
   DUE_SOON: 'Soon',
   DUE_NOW: 'Due',
@@ -41,6 +40,7 @@ const CHORE_STATUS = {
 }
 
 const ChoresOverview = () => {
+  const { t } = useTranslation('chores')
   const [chores, setChores] = useState([])
   const [filteredChores, setFilteredChores] = useState([])
   const [performers, setPerformers] = useState([])
