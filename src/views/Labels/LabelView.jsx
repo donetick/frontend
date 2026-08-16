@@ -1,3 +1,20 @@
+import '@meauxt/react-swipeable-list/dist/styles.css'
+
+import {
+  SwipeableList,
+  SwipeableListItem,
+  SwipeAction,
+  TrailingActions,
+  Type as ListType,
+} from '@meauxt/react-swipeable-list'
+import {
+  Add,
+  Close,
+  MoreVert,
+  Search,
+  SearchOff,
+  Style,
+} from '@mui/icons-material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import {
@@ -11,38 +28,22 @@ import {
   Stack,
   Typography,
 } from '@mui/joy'
+import { useQueryClient } from '@tanstack/react-query'
 import Fuse from 'fuse.js'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
-import LabelModal from '../Modals/Inputs/LabelModal'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 
-import {
-  Type as ListType,
-  SwipeableList,
-  SwipeableListItem,
-  SwipeAction,
-  TrailingActions,
-} from '@meauxt/react-swipeable-list'
-import '@meauxt/react-swipeable-list/dist/styles.css'
-import {
-  Add,
-  Close,
-  MoreVert,
-  Search,
-  SearchOff,
-  Style,
-} from '@mui/icons-material'
 import EmptyState from '../../components/common/EmptyState'
-import { useQueryClient } from '@tanstack/react-query'
 import { useUserProfile } from '../../queries/UserQueries'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors'
 import { DeleteLabel } from '../../utils/Fetcher'
 import { getSafeBottomStyles } from '../../utils/SafeAreaUtils'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
+import LabelModal from '../Modals/Inputs/LabelModal'
 import { useLabels } from './LabelQueries'
 
-const LabelCardContent = ({ label, currentUserId, onToggleActions }) => {
+const LabelCardContent = ({ currentUserId, label, onToggleActions }) => {
   const { t } = useTranslation('labels')
   // Check if current user owns this label
   const isOwnedByCurrentUser = label.created_by === currentUserId
@@ -162,9 +163,10 @@ const LabelCardContent = ({ label, currentUserId, onToggleActions }) => {
 
 const LabelView = () => {
   const { t } = useTranslation('labels')
-  const { data: labels, isLabelsLoading, isError } = useLabels()
+  const { data: labels, isError, isLabelsLoading } = useLabels()
   const { data: userProfile } = useUserProfile()
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
 
   const [userLabels, setUserLabels] = useState([])
   const [modalOpen, setModalOpen] = useState(false)
@@ -254,6 +256,21 @@ const LabelView = () => {
       setUserLabels(labels)
     }
   }, [labels])
+
+  // ?create=1 lets other surfaces (global search quick actions) land here with
+  // the create modal already open.
+  useEffect(() => {
+    if (searchParams.get('create') !== '1') return
+    setCurrentLabel(null)
+    setModalOpen(true)
+    setSearchParams(
+      params => {
+        params.delete('create')
+        return params
+      },
+      { replace: true },
+    )
+  }, [searchParams, setSearchParams])
 
   if (isLabelsLoading) {
     return (

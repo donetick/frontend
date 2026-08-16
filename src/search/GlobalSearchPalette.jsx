@@ -56,13 +56,41 @@ const buildQuickActions = t => [
     provider: 'actions',
     title: t('search.actions.createTask'),
     subtitle: t('search.actions.quickAction'),
-    route: '/chores/create',
+    keywords: 'new task chore add create',
+    // Reuses the widget deep-link param so this lands on the task list with the
+    // quick-add modal open, instead of the full create page.
+    route: '/chores?add_task=1',
+  },
+  {
+    id: 'action:create-label',
+    provider: 'actions',
+    title: t('search.actions.createLabel'),
+    subtitle: t('search.actions.quickAction'),
+    keywords: 'new label tag add create',
+    route: '/labels?create=1',
+  },
+  {
+    id: 'action:create-project',
+    provider: 'actions',
+    title: t('search.actions.createProject'),
+    subtitle: t('search.actions.quickAction'),
+    keywords: 'new project folder add create',
+    route: '/projects?create=1',
+  },
+  {
+    id: 'action:create-filter',
+    provider: 'actions',
+    title: t('search.actions.createFilter'),
+    subtitle: t('search.actions.quickAction'),
+    keywords: 'new filter view saved search add create',
+    route: '/filters?create=1',
   },
   {
     id: 'action:tasks',
     provider: 'actions',
     title: t('search.actions.viewAllTasks'),
     subtitle: t('search.actions.navigation'),
+    keywords: 'tasks chores list open',
     route: '/chores',
   },
   {
@@ -70,6 +98,7 @@ const buildQuickActions = t => [
     provider: 'actions',
     title: t('search.actions.viewArchivedTasks'),
     subtitle: t('search.actions.navigation'),
+    keywords: 'archive archived tasks open',
     route: '/archived',
   },
   {
@@ -77,6 +106,7 @@ const buildQuickActions = t => [
     provider: 'actions',
     title: t('search.actions.openSettings'),
     subtitle: t('search.actions.navigation'),
+    keywords: 'settings preferences configuration open',
     route: '/settings',
   },
 ]
@@ -192,6 +222,22 @@ const GlobalSearchPalette = ({
   const [recents] = useState(readRecents)
   const selectedResultRef = useRef(null)
 
+  const quickActions = useMemo(() => buildQuickActions(t), [t])
+  const quickActionIndex = useMemo(
+    () =>
+      new Fuse(quickActions, {
+        threshold: 0.38,
+        distance: 120,
+        ignoreLocation: true,
+        includeScore: true,
+        keys: [
+          { name: 'title', weight: 0.7 },
+          { name: 'keywords', weight: 0.3 },
+        ],
+      }),
+    [quickActions],
+  )
+
   const searchIndexes = useMemo(
     () =>
       new Map(
@@ -227,7 +273,7 @@ const GlobalSearchPalette = ({
       const recentResults = recents
         .map(item => currentById.get(item.id) || item)
         .filter(item => item.provider !== 'history' || currentById.has(item.id))
-      return [...recentResults, ...buildQuickActions(t)]
+      return [...recentResults, ...quickActions]
     }
 
     const grouped = GROUPS.filter(group => group !== 'actions').flatMap(group =>
@@ -250,15 +296,40 @@ const GlobalSearchPalette = ({
         })
         .sort((a, b) => a.score - b.score),
     )
-    grouped.push({
-      id: 'action:filter-tasks',
-      provider: 'actions',
-      title: t('search.actions.filterTasks', { query: query.trim() }),
-      subtitle: t('search.actions.filterTasksSubtitle'),
-      route: `/chores?search=${encodeURIComponent(query.trim())}`,
-    })
-    return grouped
-  }, [documents, query, recents, searchIndexes, t])
+    const actionMatches = (
+      quickActionIndex.search(normalized, { limit: 4 }) || []
+    )
+      .map(match => ({ ...match.item, score: match.score ?? 1 }))
+      .sort((a, b) => a.score - b.score)
+
+    // An action whose title the query starts spelling out ("create la…") is
+    // what the person is after, so it leads. Anything matched only through its
+    // keywords stays below the real content it shares words with.
+    const leadingActions = actionMatches.filter(action =>
+      action.title.toLocaleLowerCase().startsWith(normalized),
+    )
+    const trailingActions = actionMatches.filter(
+      action => !leadingActions.includes(action),
+    )
+
+    return [
+      ...leadingActions,
+      ...grouped,
+      ...trailingActions,
+      {
+        id: 'action:filter-tasks',
+        provider: 'actions',
+        title: t('search.actions.filterTasks', { query: query.trim() }),
+        subtitle: t('search.actions.filterTasksSubtitle'),
+        route: `/chores?search=${encodeURIComponent(query.trim())}`,
+      },
+    ]
+  }, [documents, query, quickActionIndex, recents, searchIndexes, t])
+
+  // Everything except the always-present "filter the task list" fallback.
+  const matchCount = results.filter(
+    result => result.id !== 'action:filter-tasks',
+  ).length
 
   useEffect(() => {
     selectedResultRef.current?.scrollIntoView({
@@ -339,7 +410,7 @@ const GlobalSearchPalette = ({
           pb: 'var(--safe-area-inset-bottom, 0px)',
         }}
       >
-        {!isLoading && query.trim() && results.length === 1 && (
+        {!isLoading && query.trim() && matchCount === 0 && (
           <Box sx={{ px: 3, py: 6, textAlign: 'center' }}>
             <InboxOutlined
               sx={{ fontSize: 36, color: 'text.tertiary', mb: 1 }}
@@ -434,9 +505,7 @@ const GlobalSearchPalette = ({
         <Typography level='body-xs'>↵ {t('search.footer.open')}</Typography>
         <Typography level='body-xs' sx={{ ml: 'auto' }}>
           {query.trim()
-            ? t('search.footer.results', {
-                count: Math.max(0, results.length - 1),
-              })
+            ? t('search.footer.results', { count: matchCount })
             : t('search.footer.typeToSearch')}
         </Typography>
       </Box>

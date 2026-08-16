@@ -1,11 +1,20 @@
+import '@meauxt/react-swipeable-list/dist/styles.css'
+
 import {
-  Type as ListType,
   SwipeableList,
   SwipeableListItem,
   SwipeAction,
   TrailingActions,
+  Type as ListType,
 } from '@meauxt/react-swipeable-list'
-import '@meauxt/react-swipeable-list/dist/styles.css'
+import {
+  Add,
+  FilterAlt,
+  MoreVert,
+  Star,
+  StarBorder,
+  Task,
+} from '@mui/icons-material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import {
@@ -19,22 +28,13 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 
-import {
-  Add,
-  FilterAlt,
-  MoreVert,
-  Star,
-  StarBorder,
-  Task,
-} from '@mui/icons-material'
 import EmptyState from '../../components/common/EmptyState'
 import { useChores } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { getFilterCount, getFilterOverdueCount } from '../../utils/FilterEngine'
 import { getSafeBottomStyles } from '../../utils/SafeAreaUtils'
-
 import { useLabels } from '../Labels/LabelQueries'
 import AdvancedFilterBuilder from '../Modals/Inputs/AdvancedFilterBuilder'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
@@ -49,9 +49,9 @@ import {
 
 const FilterCardContent = ({
   filter,
-  taskCount = 0,
-  overdueCount = 0,
   onToggleActions,
+  overdueCount = 0,
+  taskCount = 0,
 }) => {
   // Get condition labels for display
   const getConditionSummary = () => {
@@ -246,6 +246,7 @@ const FilterCardContent = ({
 
 const FilterView = () => {
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { data: userProfile } = useUserProfile()
   const { data: chores = { res: [] } } = useChores(false)
   const { data: labels = [] } = useLabels()
@@ -320,6 +321,21 @@ const FilterView = () => {
     setEditingFilter(null)
     setShowAdvancedFilterBuilder(true)
   }
+
+  // ?create=1 lets other surfaces (global search quick actions) land here with
+  // the filter builder already open.
+  useEffect(() => {
+    if (searchParams.get('create') !== '1') return
+    setEditingFilter(null)
+    setShowAdvancedFilterBuilder(true)
+    setSearchParams(
+      params => {
+        params.delete('create')
+        return params
+      },
+      { replace: true },
+    )
+  }, [searchParams, setSearchParams])
 
   const handleEditFilter = filter => {
     setEditingFilter(filter)
