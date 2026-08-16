@@ -5,7 +5,8 @@
  *
  * Deliberately dependency-free — ApiClient imports it on the request path, so
  * anything imported here would risk a module cycle. Everything is in memory
- * and dies with the tab; nothing is persisted.
+ * and dies with the tab, except the server build, which is remembered across
+ * launches so a crash before the first API answer still names the backend.
  */
 
 const SESSION_STARTED_AT = Date.now()
@@ -25,6 +26,7 @@ const routeTrail = []
 const apiFailures = []
 let backgroundedCount = 0
 let serverVersion = null
+let serverCommit = null
 
 // ---------------------------------------------------------------------------
 // Route trail
@@ -67,6 +69,33 @@ export const getPreviousRoute = () =>
 // Server identity
 // ---------------------------------------------------------------------------
 
+const SERVER_BUILD_KEY = 'diagnostics_server_build'
+
+// A crash on cold start happens before /resource has answered, and that is
+// exactly when knowing which backend the user is on matters most. Carrying the
+// last known build across launches keeps the report from saying "not reported".
+try {
+  const cached = JSON.parse(localStorage.getItem(SERVER_BUILD_KEY) || 'null')
+  serverVersion = cached?.version ?? null
+  serverCommit = cached?.commit ?? null
+} catch {
+  // corrupt or unavailable storage just means we start without a known build
+}
+
+const rememberServerBuild = (version, commit) => {
+  if (!version && !commit) return
+  serverVersion = version || serverVersion
+  serverCommit = commit || serverCommit
+  try {
+    localStorage.setItem(
+      SERVER_BUILD_KEY,
+      JSON.stringify({ version: serverVersion, commit: serverCommit }),
+    )
+  } catch {
+    // storage full or blocked; the in-memory copy still serves this session
+  }
+}
+
 /**
  * Picks the server build out of response headers. Costs nothing when the
  * server doesn't send them — the field simply stays null.
@@ -74,20 +103,23 @@ export const getPreviousRoute = () =>
 export const recordServerVersionFromResponse = response => {
   if (serverVersion) return
   try {
-    serverVersion =
+    rememberServerBuild(
       response?.headers?.get?.('x-donetick-version') ||
-      response?.headers?.get?.('x-api-version') ||
-      null
+        response?.headers?.get?.('x-api-version'),
+      null,
+    )
   } catch {
     // headers may be inaccessible on opaque responses; not worth reporting
   }
 }
 
-export const setServerVersion = version => {
-  if (version) serverVersion = version
-}
+/** Authoritative source: what /resource reports about the backend build. */
+export const setServerVersion = (version, commit) =>
+  rememberServerBuild(version, commit)
 
 export const getServerVersion = () => serverVersion
+
+export const getServerCommit = () => serverCommit
 
 // ---------------------------------------------------------------------------
 // API failures
@@ -176,6 +208,7 @@ export const getSessionDiagnostics = async () => {
     navigationType: NAVIGATION_TYPE,
     backgroundedCount,
     serverVersion,
+    serverCommit,
     previousRoute: getPreviousRoute(),
     routeTrail: getRouteTrail(),
     apiFailures: getApiFailures(),

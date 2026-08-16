@@ -153,7 +153,9 @@ export const formatErrorReport = report => {
     session.previousRoute ? `Came from: ${session.previousRoute}` : null,
     '',
     `App: ${app.appVersion} · ${app.platform}${app.isNative ? ' (native)' : ''}`,
-    `Server: ${session.serverVersion ?? 'not reported'}`,
+    `Server: ${session.serverVersion ?? 'not reported'}${
+      session.serverCommit ? ` (${session.serverCommit.slice(0, 8)})` : ''
+    }`,
     `Session: ${formatDuration(session.sessionDurationMs)} active · ${
       session.navigationType ?? 'unknown'
     } start · backgrounded ${session.backgroundedCount ?? 0}×`,
