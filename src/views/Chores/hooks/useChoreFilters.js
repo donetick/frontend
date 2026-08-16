@@ -1,11 +1,13 @@
 import Fuse from 'fuse.js'
 import { useCallback, useMemo, useState } from 'react'
+
 import { ChoreFilters, filterByProject } from '../../../utils/Chores'
+import { stripHtml } from '../../../utils/Helpers'
 
 export const useChoreFilters = ({
   chores,
-  selectedProject,
   impersonatedUser,
+  selectedProject,
   userProfile,
 }) => {
   const [searchTerm, setSearchTerm] = useState('')
@@ -30,9 +32,14 @@ export const useChoreFilters = ({
     const searchableChores = chores.map(chore => ({
       ...chore,
       raw_label: chore.labelsV2?.map(label => label.name).join(' '),
+      raw_description: stripHtml(chore.description),
     }))
     return new Fuse(searchableChores, {
-      keys: ['name', 'raw_label'],
+      keys: [
+        { name: 'name', weight: 0.6 },
+        { name: 'raw_label', weight: 0.25 },
+        { name: 'raw_description', weight: 0.15 },
+      ],
       includeScore: true,
       isCaseSensitive: false,
       findAllMatches: true,

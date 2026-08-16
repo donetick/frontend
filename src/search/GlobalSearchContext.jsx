@@ -152,7 +152,7 @@ export const GlobalSearchProvider = ({ children }) => {
 
   useEffect(() => {
     const onKeyDown = event => {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'f') {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault()
         isOpen ? closeSearch() : openSearch()
       }

@@ -4,6 +4,7 @@ import {
   CheckBoxOutlineBlank,
   Close,
   Delete,
+  FilterList,
   Label,
   Person,
   PriorityHigh,
@@ -14,6 +15,7 @@ import {
   ViewModule,
 } from '@mui/icons-material'
 import {
+  Badge,
   Box,
   Button,
   Container,
@@ -33,6 +35,7 @@ import { useNavigate } from 'react-router-dom'
 import EmptyState from '../../components/common/EmptyState'
 import FilterBar from '../../components/common/FilterBar'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
+import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useFilter } from '../../hooks/useFilter'
 import { useUnArchiveChore } from '../../queries/ChoreQueries'
@@ -203,12 +206,50 @@ const ArchivedTasks = () => {
   )
 
   const {
+    activeFilterCount,
     activeFilters,
     clearAll,
-    filteredData: finalChores,
+    filteredData: filteredByBar,
     hasActiveFilters,
     setFilter,
   } = useFilter(filteredChores, filterDefs)
+
+  const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false)
+
+  const [sortBy, setSortBy] = useState(
+    () => localStorage.getItem('archivedChoresSortBy') || 'archivedAt',
+  )
+  const [sortDirection, setSortDirection] = useState(
+    () => localStorage.getItem('archivedChoresSortDirection') || 'desc',
+  )
+
+  useEffect(() => {
+    localStorage.setItem('archivedChoresSortBy', sortBy)
+    localStorage.setItem('archivedChoresSortDirection', sortDirection)
+  }, [sortBy, sortDirection])
+
+  const finalChores = useMemo(() => {
+    const direction = sortDirection === 'desc' ? -1 : 1
+    return [...filteredByBar].sort((a, b) => {
+      switch (sortBy) {
+        case 'name':
+          return direction * (a.name || '').localeCompare(b.name || '')
+        case 'priority':
+          return direction * ((a.priority ?? 0) - (b.priority ?? 0))
+        case 'dueDate': {
+          const aDue = new Date(a.nextDueDate || 0).getTime()
+          const bDue = new Date(b.nextDueDate || 0).getTime()
+          return direction * (aDue - bDue)
+        }
+        case 'archivedAt':
+        default: {
+          const aDate = new Date(a.updatedAt || 0).getTime()
+          const bDate = new Date(b.updatedAt || 0).getTime()
+          return direction * (aDate - bDate)
+        }
+      }
+    })
+  }, [filteredByBar, sortBy, sortDirection])
 
   useEffect(() => {
     const loadArchivedChores = async () => {
@@ -722,9 +763,6 @@ const ArchivedTasks = () => {
             padding: 1,
           }}
           onChange={handleSearchChange}
-          startDecorator={
-            showKeyboardShortcuts ? <KeyboardShortcutHint shortcut='F' /> : null
-          }
           endDecorator={
             searchTerm && (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
@@ -743,6 +781,45 @@ const ArchivedTasks = () => {
               </Box>
             )
           }
+        />
+
+        {/* Filter Sheet Trigger */}
+        <Badge
+          badgeContent={activeFilterCount || null}
+          color='primary'
+          size='sm'
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+          sx={{ display: 'flex', alignItems: 'center' }}
+        >
+          <IconButton
+            variant={hasActiveFilters ? 'solid' : 'outlined'}
+            color={hasActiveFilters ? 'primary' : 'neutral'}
+            size='sm'
+            sx={{
+              height: 32,
+              width: 32,
+              borderRadius: '50%',
+            }}
+            onClick={() => setIsFilterSheetOpen(true)}
+            title='Filters'
+          >
+            <FilterList />
+          </IconButton>
+        </Badge>
+
+        {/* Sort Menu */}
+        <SortAndFilterMenu
+          sortOptions={[
+            { name: 'Archived date', value: 'archivedAt' },
+            { name: 'Name', value: 'name' },
+            { name: 'Priority', value: 'priority' },
+            { name: 'Due date', value: 'dueDate' },
+          ]}
+          selectedSort={sortBy}
+          onSortChange={setSortBy}
+          sortDirection={sortDirection}
+          onSortDirectionChange={setSortDirection}
+          isActive={sortBy !== 'archivedAt' || sortDirection !== 'desc'}
         />
 
         {/* View Mode Toggle Button */}
@@ -805,6 +882,9 @@ const ArchivedTasks = () => {
         onClearAll={clearAll}
         resultCount={finalChores.length}
         totalCount={filteredChores.length}
+        showTrigger={false}
+        open={isFilterSheetOpen}
+        onOpenChange={setIsFilterSheetOpen}
       />
 
       {/* Multi-select Toolbar */}

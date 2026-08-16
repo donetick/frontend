@@ -78,11 +78,16 @@ const scheduleNotificationFromTemplate = (
     const now = new Date()
     const time = getTimeFromTemplate(template, dueDate)
     const notificationId = getIdFromTemplate(chore.id, template)
-    const { title, body } = getNotificationText(chore.name, template)
+    const { title, body } = getNotificationText(
+      chore.name,
+      template,
+      dueDate,
+      time,
+    )
     if (time > now) {
       notifications.push({
         title,
-        body: `${body} at ${time.toLocaleTimeString()}`,
+        body,
         id: notificationId,
         allowWhileIdle: true,
         schedule: {
@@ -96,91 +101,50 @@ const scheduleNotificationFromTemplate = (
   }
 }
 
-const getNotificationText = (choreName, template = {}) => {
-  // Determine notification type based on template value
-  const getNotificationType = () => {
-    if (!template || template.value === undefined) {
-      return 'due'
-    }
+const getNotificationText = (
+  choreName,
+  template = {},
+  dueDate,
+  notificationTime,
+) => {
+  const startOfDay = date =>
+    new Date(date.getFullYear(), date.getMonth(), date.getDate())
+  const dayDifference = Math.round(
+    (startOfDay(dueDate) - startOfDay(notificationTime)) /
+      (24 * 60 * 60 * 1000),
+  )
+  const time = dueDate.toLocaleTimeString([], {
+    hour: 'numeric',
+    minute: '2-digit',
+  })
 
-    if (template.value < 0) {
-      return 'reminder'
-    } else if (template.value === 0) {
-      return 'due'
-    } else {
-      return 'overdue'
-    }
+  let dueTime
+  if (dayDifference === 0) {
+    dueTime = `today at ${time}`
+  } else if (dayDifference === 1) {
+    dueTime = `tomorrow at ${time}`
+  } else if (dayDifference === -1) {
+    dueTime = `yesterday at ${time}`
+  } else {
+    const date = dueDate.toLocaleDateString([], {
+      month: 'short',
+      day: 'numeric',
+    })
+    dueTime = `${date} at ${time}`
   }
 
-  const notificationType = getNotificationType()
-
-  // Truncate chore name if too long for better readability
-  const maxChoreNameLength = 25
-  const truncatedName =
-    choreName.length > maxChoreNameLength
-      ? `${choreName.substring(0, maxChoreNameLength)}...`
-      : choreName
-
-  // Generate time-based descriptive text
-  const getTimeDescription = () => {
-    if (!template || !template.value || !template.unit) {
-      return 'soon'
-    }
-
-    const { value, unit } = template
-    const absValue = Math.abs(value)
-
-    switch (unit) {
-      case 'm':
-        if (absValue === 1) return value < 0 ? 'in 1 minute' : '1 minute ago'
-        if (absValue < 60)
-          return value < 0
-            ? `in ${absValue} minutes`
-            : `${absValue} minutes ago`
-        break
-      case 'h':
-        if (absValue === 1) return value < 0 ? 'in 1 hour' : '1 hour ago'
-        if (absValue < 24)
-          return value < 0 ? `in ${absValue} hours` : `${absValue} hours ago`
-        break
-      case 'd':
-        if (absValue === 1) return value < 0 ? 'tomorrow' : 'yesterday'
-        if (absValue === 7) return value < 0 ? 'next week' : 'last week'
-        if (absValue < 7)
-          return value < 0 ? `in ${absValue} days` : `${absValue} days ago`
-        if (absValue < 30) {
-          const weeks = Math.round(absValue / 7)
-          return value < 0 ? `in ${weeks} weeks` : `${weeks} weeks ago`
-        }
-        break
-      default:
-        return value < 0 ? `in ${absValue} ${unit}` : `${absValue} ${unit} ago`
-    }
-
-    return value < 0 ? `in ${absValue} ${unit}` : `${absValue} ${unit} ago`
+  let body
+  if (template.value < 0) {
+    body = `Due ${dueTime}`
+  } else if (template.value > 0) {
+    body = `Overdue · Was due ${dueTime}`
+  } else {
+    body = 'Due now'
   }
-
-  const messages = {
-    reminder: {
-      title: `📋 ${truncatedName}`,
-      body: `Reminder: Due ${getTimeDescription()}`,
-    },
-    due: {
-      title: `🔔 ${truncatedName}`,
-      body: 'Due now - Time to get started!',
-    },
-    overdue: {
-      title: `❗ ${truncatedName}`,
-      body: `Overdue ${getTimeDescription()} - Complete when you can`,
-    },
-  }
-
-  // Fallback to due if type not found
-  const messageTemplate = messages[notificationType] || messages.due
 
   return {
-    title: messageTemplate.title,
-    body: messageTemplate.body,
+    title: choreName,
+    body,
   }
 }
 const cancelPendingNotifications = async () => {

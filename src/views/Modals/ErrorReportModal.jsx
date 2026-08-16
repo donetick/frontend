@@ -329,7 +329,7 @@ const ErrorReportModal = ({ error, errorInfo, onClose, open }) => {
               level='body-sm'
               sx={{ color: 'text.secondary', mt: 0.5 }}
             >
-              Thanks — this goes straight to the people who can fix it.
+              Thanks! this goes straight to the people who can fix it.
             </Typography>
           </Box>
 

@@ -1,13 +1,5 @@
 import { SETTINGS_SECTIONS } from '../constants/settingsSections'
-
-const stripHtml = value => {
-  if (!value) return ''
-  if (typeof globalThis.document === 'undefined')
-    return String(value).replace(/<[^>]*>/g, ' ')
-  const element = globalThis.document.createElement('div')
-  element.innerHTML = String(value)
-  return element.textContent || element.innerText || ''
-}
+import { stripHtml } from '../utils/Helpers'
 
 const HISTORY_STATUS = {
   0: 'in progress',
@@ -125,7 +117,7 @@ registerSearchProvider({
         title: label.name || 'Untitled label',
         subtitle: 'Label',
         keywords: 'tag label',
-        route: '/labels',
+        route: `/labels/${label.id}`,
         color: label.color,
       }),
     ),

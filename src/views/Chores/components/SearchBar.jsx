@@ -43,7 +43,7 @@ const SearchBar = ({
       startDecorator={
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
           <SearchRounded sx={{ fontSize: 18, color: 'text.secondary' }} />
-          <KeyboardShortcutHint shortcut='F' show={showKeyboardShortcuts} />
+          <KeyboardShortcutHint shortcut='K' show={showKeyboardShortcuts} />
         </Box>
       }
       endDecorator={

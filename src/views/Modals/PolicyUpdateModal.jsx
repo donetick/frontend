@@ -1,10 +1,22 @@
+import { Browser } from '@capacitor/browser'
+import { Capacitor } from '@capacitor/core'
 import { ChevronRight, Gavel, PrivacyTip } from '@mui/icons-material'
 import { Button, Stack } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
 
 import ModalActions from '../../components/common/ModalActions.jsx'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal.js'
+
+const POLICY_BASE_URL = 'https://app.donetick.com'
+
+// Native webviews swallow target="_blank"; route through the system browser.
+const openUrl = async url => {
+  if (Capacitor.isNativePlatform()) {
+    await Browser.open({ url })
+  } else {
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }
+}
 
 /**
  * One-time notice that the Privacy Policy and Terms changed. The frame is
@@ -14,16 +26,18 @@ import { useResponsiveModal } from '../../hooks/useResponsiveModal.js'
 const PolicyUpdateModal = ({ onAcknowledge, onClose, open }) => {
   const { t } = useTranslation()
   const { ResponsiveModal } = useResponsiveModal()
-  const navigate = useNavigate()
 
-  const handleClose = () => {
+  // Acknowledgement is the only way out: the backdrop, escape key, and close
+  // button are all disabled so the user must press "Got it".
+  const handleAcknowledge = () => {
     onAcknowledge?.()
     onClose()
   }
 
+  // Reading a document must not dismiss the notice; the modal is still waiting
+  // on an acknowledgement when the user returns from the browser.
   const openDocument = path => {
-    handleClose()
-    navigate(path)
+    openUrl(`${POLICY_BASE_URL}${path}`)
   }
 
   const documentButtonSx = {
@@ -36,7 +50,10 @@ const PolicyUpdateModal = ({ onAcknowledge, onClose, open }) => {
   return (
     <ResponsiveModal
       open={open}
-      onClose={handleClose}
+      onClose={handleAcknowledge}
+      closeOnBackdrop={false}
+      closeOnEscape={false}
+      showCloseButton={false}
       size='sm'
       title={t('policyUpdate.title')}
       description={t('policyUpdate.subtitle')}
@@ -44,7 +61,7 @@ const PolicyUpdateModal = ({ onAcknowledge, onClose, open }) => {
         <ModalActions
           primary={{
             label: t('policyUpdate.acknowledge'),
-            onClick: handleClose,
+            onClick: handleAcknowledge,
             sx: { width: { xs: '100%', sm: 'auto' } },
           }}
         />

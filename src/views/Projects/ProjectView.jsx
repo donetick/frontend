@@ -1,3 +1,20 @@
+import '@meauxt/react-swipeable-list/dist/styles.css'
+
+import {
+  SwipeableList,
+  SwipeableListItem,
+  SwipeAction,
+  TrailingActions,
+  Type as ListType,
+} from '@meauxt/react-swipeable-list'
+import {
+  Add,
+  Close,
+  MoreVert,
+  Search,
+  SearchOff,
+  Task,
+} from '@mui/icons-material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import {
@@ -7,24 +24,18 @@ import {
   CircularProgress,
   Container,
   IconButton,
+  Input,
   Stack,
   Typography,
 } from '@mui/joy'
-import { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
-import ProjectModal from '../Modals/Inputs/ProjectModal'
-
-import {
-  Type as ListType,
-  SwipeableList,
-  SwipeableListItem,
-  SwipeAction,
-  TrailingActions,
-} from '@meauxt/react-swipeable-list'
-import '@meauxt/react-swipeable-list/dist/styles.css'
-import { Add, MoreVert, Task } from '@mui/icons-material'
 import { useQueryClient } from '@tanstack/react-query'
+import Fuse from 'fuse.js'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+
+import EmptyState from '../../components/common/EmptyState'
+import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
 import { useChores } from '../../queries/ChoreQueries'
 import { useUserProfile } from '../../queries/UserQueries'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors'
@@ -33,13 +44,14 @@ import { getIconComponent } from '../../utils/ProjectIcons'
 import { getSafeBottomStyles } from '../../utils/SafeAreaUtils'
 import { useProjectFilter } from '../Chores/hooks/useProjectFilter'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
+import ProjectModal from '../Modals/Inputs/ProjectModal'
 import { useProjects } from './ProjectQueries'
 const ProjectCardContent = ({
-  project,
   currentUserId,
-  taskCounts = {},
   onCardClick,
   onToggleActions,
+  project,
+  taskCounts = {},
 }) => {
   const { t } = useTranslation('projects')
   // Check if current user owns this project
@@ -221,7 +233,7 @@ const ProjectCardContent = ({
 
 const ProjectView = () => {
   const { t } = useTranslation('projects')
-  const { data: projects, isProjectsLoading, isError } = useProjects()
+  const { data: projects, isError, isProjectsLoading } = useProjects()
   const { data: userProfile } = useUserProfile()
   const { data: chores = { res: [] } } = useChores(false) // false to exclude archived
   const { data: projectsData = [], isLoading: projectsLoading } = useProjects()
@@ -230,6 +242,7 @@ const ProjectView = () => {
     !projectsLoading,
   )
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
 
   const [userProjects, setUserProjects] = useState([])
   const [modalOpen, setModalOpen] = useState(false)
@@ -238,6 +251,83 @@ const ProjectView = () => {
   const queryClient = useQueryClient()
   const [confirmationModel, setConfirmationModel] = useState({})
   const [showMoreInfoId, setShowMoreInfoId] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [sortBy, setSortBy] = useState(
+    () => localStorage.getItem('projectsSortBy') || 'name',
+  )
+  const [sortDirection, setSortDirection] = useState(
+    () => localStorage.getItem('projectsSortDirection') || 'asc',
+  )
+  const [ownershipFilter, setOwnershipFilter] = useState('all')
+  const searchInputRef = useRef(null)
+
+  useEffect(() => {
+    localStorage.setItem('projectsSortBy', sortBy)
+    localStorage.setItem('projectsSortDirection', sortDirection)
+  }, [sortBy, sortDirection])
+
+  const visibleProjects = useMemo(() => {
+    if (ownershipFilter === 'mine') {
+      return userProjects.filter(
+        project => project.created_by === userProfile?.id,
+      )
+    }
+    if (ownershipFilter === 'shared') {
+      return userProjects.filter(
+        project => project.created_by !== userProfile?.id,
+      )
+    }
+    return userProjects
+  }, [ownershipFilter, userProjects, userProfile?.id])
+
+  const fuse = useMemo(
+    () =>
+      new Fuse(visibleProjects, {
+        keys: ['name', 'description'],
+        includeScore: true,
+        isCaseSensitive: false,
+        findAllMatches: true,
+      }),
+    [visibleProjects],
+  )
+
+  const filteredProjects = useMemo(() => {
+    const matched = searchTerm
+      ? fuse.search(searchTerm).map(result => result.item)
+      : visibleProjects
+
+    const direction = sortDirection === 'desc' ? -1 : 1
+    return [...matched].sort((a, b) => {
+      switch (sortBy) {
+        case 'tasks':
+          return direction * ((taskCounts[a.id] || 0) - (taskCounts[b.id] || 0))
+        case 'created':
+          return direction * ((a.id || 0) - (b.id || 0))
+        case 'name':
+        default:
+          return direction * (a.name || '').localeCompare(b.name || '')
+      }
+    })
+  }, [fuse, searchTerm, visibleProjects, sortBy, sortDirection, taskCounts])
+
+  // The default project is pinned above the list, so it is matched separately.
+  const showDefaultProject = useMemo(() => {
+    if (ownershipFilter === 'shared') return false
+    if (!searchTerm) return true
+    return t('chores:toolbar.defaultProject')
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
+  }, [ownershipFilter, searchTerm, t])
+
+  const handleSearchChange = e => {
+    setSearchTerm(e.target.value)
+    setShowMoreInfoId(null)
+  }
+
+  const handleSearchClose = () => {
+    setSearchTerm('')
+    searchInputRef.current?.blur()
+  }
 
   const handleAddProject = () => {
     setCurrentProject(null)
@@ -301,6 +391,21 @@ const ProjectView = () => {
       setUserProjects(projects)
     }
   }, [projects])
+
+  // ?create=1 lets other surfaces (global search quick actions) land here with
+  // the create modal already open.
+  useEffect(() => {
+    if (searchParams.get('create') !== '1') return
+    setCurrentProject(null)
+    setModalOpen(true)
+    setSearchParams(
+      params => {
+        params.delete('create')
+        return params
+      },
+      { replace: true },
+    )
+  }, [searchParams, setSearchParams])
 
   // Calculate real task counts from chores data
   useEffect(() => {
@@ -371,36 +476,114 @@ const ProjectView = () => {
         </Stack>
       </Box>
 
+      <Box sx={{ px: 2, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Input
+          slotProps={{ input: { ref: searchInputRef } }}
+          placeholder={t('search.placeholder')}
+          value={searchTerm}
+          fullWidth
+          sx={{
+            borderRadius: 24,
+            height: 24,
+            borderColor: 'text.disabled',
+            padding: 1,
+          }}
+          onChange={handleSearchChange}
+          startDecorator={<Search />}
+          endDecorator={
+            searchTerm && (
+              <IconButton
+                variant='plain'
+                size='sm'
+                onClick={handleSearchClose}
+                sx={{ borderRadius: '50%' }}
+              >
+                <Close />
+              </IconButton>
+            )
+          }
+        />
+        <SortAndFilterMenu
+          sortOptions={[
+            { name: 'Name', value: 'name' },
+            { name: 'Task count', value: 'tasks' },
+            { name: 'Recently created', value: 'created' },
+          ]}
+          selectedSort={sortBy}
+          onSortChange={setSortBy}
+          sortDirection={sortDirection}
+          onSortDirectionChange={setSortDirection}
+          filterTitle='Show'
+          filterOptions={[
+            { name: 'All projects', value: 'all' },
+            { name: 'Created by me', value: 'mine' },
+            { name: 'Shared with me', value: 'shared' },
+          ]}
+          selectedFilter={ownershipFilter}
+          onFilterChange={value => {
+            setOwnershipFilter(value)
+            setShowMoreInfoId(null)
+          }}
+          isActive={
+            ownershipFilter !== 'all' ||
+            sortBy !== 'name' ||
+            sortDirection !== 'asc'
+          }
+        />
+      </Box>
+
       <Box
         sx={{
           overflow: 'hidden',
         }}
       >
+        {!showDefaultProject && filteredProjects.length === 0 && (
+          <EmptyState
+            variant='no-results'
+            fullHeight
+            icon={<SearchOff />}
+            title={t('search.noResultsTitle')}
+            description={
+              searchTerm
+                ? t('search.noResultsDescription', { searchTerm })
+                : t('search.noFilterResultsDescription')
+            }
+            primaryAction={{
+              label: searchTerm ? t('search.clear') : t('search.showAll'),
+              onClick: () => {
+                handleSearchClose()
+                setOwnershipFilter('all')
+              },
+            }}
+          />
+        )}
         {/* Default project - not swipeable */}
-        <ProjectCardContent
-          project={{
-            id: 'default',
-            name: t('chores:toolbar.defaultProject'),
-            description: t('defaultDescription'),
-            icon: 'FolderOpen',
-            color: '#1976d2',
-            created_by: userProfile?.id,
-          }}
-          currentUserId={userProfile?.id}
-          taskCounts={{ default: taskCounts.default || 0 }}
-          onCardClick={() =>
-            handleCardClick({
+        {showDefaultProject && (
+          <ProjectCardContent
+            project={{
               id: 'default',
               name: t('chores:toolbar.defaultProject'),
+              description: t('defaultDescription'),
               icon: 'FolderOpen',
               color: '#1976d2',
-            })
-          }
-        />
+              created_by: userProfile?.id,
+            }}
+            currentUserId={userProfile?.id}
+            taskCounts={{ default: taskCounts.default || 0 }}
+            onCardClick={() =>
+              handleCardClick({
+                id: 'default',
+                name: t('chores:toolbar.defaultProject'),
+                icon: 'FolderOpen',
+                color: '#1976d2',
+              })
+            }
+          />
+        )}
 
         {/* User projects - swipeable */}
         <SwipeableList type={ListType.IOS} fullSwipe={false}>
-          {userProjects.map(project => (
+          {filteredProjects.map(project => (
             <SwipeableListItem
               onClick={() => handleCardClick(project)}
               key={project.id}

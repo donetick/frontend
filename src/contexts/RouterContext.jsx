@@ -27,6 +27,7 @@ import JoinCircleView from '../views/Circles/JoinCircle'
 import NotFound from '../views/components/NotFound'
 import FilterView from '../views/Filters/FilterView'
 import ChoreHistory from '../views/History/ChoreHistory'
+import LabelDetailView from '../views/Labels/LabelDetailView'
 import LabelView from '../views/Labels/LabelView'
 import Landing from '../views/Landing/Landing'
 import CircleSetupView from '../views/Onboarding/CircleSetupView'
@@ -261,6 +262,10 @@ const Router = createBrowserRouter([
       {
         path: 'labels/',
         element: <LabelView />,
+      },
+      {
+        path: 'labels/:labelId',
+        element: <LabelDetailView />,
       },
       {
         path: 'projects/',

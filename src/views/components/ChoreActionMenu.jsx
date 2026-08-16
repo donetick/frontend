@@ -6,6 +6,7 @@ import {
   Delete,
   DriveFileMove,
   Edit,
+  Flag,
   ManageSearch,
   MoreTime,
   MoreVert,
@@ -24,6 +25,8 @@ import {
 } from '@mui/icons-material'
 import {
   Avatar,
+  Button,
+  Chip,
   Divider,
   IconButton,
   List,
@@ -45,8 +48,20 @@ import LABEL_COLORS, {
   getTextColorFromBackgroundColor,
 } from '../../utils/Colors'
 import { isOfficialDonetickInstanceSync } from '../../utils/FeatureToggle'
+import Priorities from '../../utils/Priorities'
 import { getIconComponent } from '../../utils/ProjectIcons'
 import { useProjects } from '../Projects/ProjectQueries'
+
+const NO_PRIORITY = { name: 'No priority', value: 0, color: 'neutral' }
+
+// After hiding actions the caller does not support, the dividers around them
+// would otherwise stack up or dangle at the edges of the list.
+const collapseDividers = items =>
+  items.filter((item, index) => {
+    if (item.type !== 'divider') return true
+    if (index === 0 || index === items.length - 1) return false
+    return items[index - 1].type !== 'divider'
+  })
 
 const ChoreActionMenu = ({
   chore,
@@ -55,12 +70,15 @@ const ChoreActionMenu = ({
   onCompleteWithPastDate,
   onChangeAssignee,
   onChangeDueDate,
+  onChangePriority,
   onWriteNFC,
   onNudge,
   onDelete,
   onOpen,
   onMouseEnter,
   onMouseLeave,
+  hiddenActions = [],
+  trigger,
   sx = {},
   variant = 'soft',
 }) => {
@@ -68,6 +86,7 @@ const ChoreActionMenu = ({
   const [anchorEl, setAnchorEl] = React.useState(null)
   const [isOfficialInstance, setIsOfficialInstance] = useState(false)
   const [showProjectPicker, setShowProjectPicker] = useState(false)
+  const [showPriorityPicker, setShowPriorityPicker] = useState(false)
   const menuRef = React.useRef(null)
   const navigate = useNavigate()
   const { data: projects = [] } = useProjects()
@@ -119,6 +138,12 @@ const ChoreActionMenu = ({
   const handleMenuClose = () => {
     setAnchorEl(null)
     setShowProjectPicker(false)
+    setShowPriorityPicker(false)
+  }
+
+  const handleChangePriority = priority => {
+    onChangePriority?.(priority)
+    handleMenuClose()
   }
 
   const handleMoveToProject = project => {
@@ -246,6 +271,9 @@ const ChoreActionMenu = ({
     )
   }
 
+  const currentPriority =
+    Priorities.find(p => p.value === chore?.priority) || null
+
   // Shared action list, rendered as MenuItems on large screens and as a
   // ListItemButton list inside an AppModal sheet on small screens.
   const actionItems = [
@@ -310,6 +338,21 @@ const ChoreActionMenu = ({
         handleMenuClose()
       },
     },
+    onChangePriority && {
+      key: 'priority',
+      icon: <Flag />,
+      label: 'Priority',
+      onClick: () => setShowPriorityPicker(true),
+      endDecorator: (
+        <Chip
+          size='sm'
+          variant='soft'
+          color={currentPriority?.color || 'neutral'}
+        >
+          {currentPriority?.name.trim() || 'None'}
+        </Chip>
+      ),
+    },
     {
       key: 'writeNfc',
       icon: <Nfc />,
@@ -343,7 +386,11 @@ const ChoreActionMenu = ({
       onClick: handleDelete,
       color: 'danger',
     },
-  ].filter(Boolean)
+  ]
+    .filter(Boolean)
+    .filter(item => !hiddenActions.includes(item.key))
+
+  const visibleActionItems = collapseDividers(actionItems)
 
   const quickScheduleButtons = (
     <>
@@ -416,7 +463,7 @@ const ChoreActionMenu = ({
   }
 
   const renderMenuActionItems = () =>
-    actionItems.map(item => {
+    visibleActionItems.map(item => {
       if (item.type === 'divider') return <Divider key={item.key} />
       if (item.type === 'quickSchedule') {
         return (
@@ -444,12 +491,17 @@ const ChoreActionMenu = ({
         >
           {item.icon}
           {item.label}
+          {item.endDecorator && (
+            <ListItemDecorator sx={{ ml: 'auto', minInlineSize: 0 }}>
+              {item.endDecorator}
+            </ListItemDecorator>
+          )}
         </MenuItem>
       )
     })
 
   const renderModalActionItems = () =>
-    actionItems.map(item => {
+    visibleActionItems.map(item => {
       if (item.type === 'divider') return <Divider key={item.key} />
       if (item.type === 'quickSchedule') {
         return (
@@ -463,13 +515,62 @@ const ChoreActionMenu = ({
           <ListItemButton color={item.color} onClick={() => item.onClick()}>
             <ListItemDecorator>{item.icon}</ListItemDecorator>
             <ListItemContent>{item.label}</ListItemContent>
+            {item.endDecorator}
           </ListItemButton>
         </ListItem>
       )
     })
 
+  const priorityOptions = [...Priorities, NO_PRIORITY]
+
+  const renderModalPriorityPicker = () =>
+    priorityOptions.map(priority => (
+      <ListItem key={priority.value}>
+        <ListItemButton
+          selected={(currentPriority?.value || 0) === priority.value}
+          color={priority.color || 'neutral'}
+          onClick={() => handleChangePriority(priority)}
+        >
+          <ListItemDecorator>{priority.icon || <Flag />}</ListItemDecorator>
+          <ListItemContent>{priority.name.trim()}</ListItemContent>
+        </ListItemButton>
+      </ListItem>
+    ))
+
+  const renderMenuPriorityPicker = () => (
+    <>
+      <MenuItem
+        onClick={e => {
+          e.stopPropagation()
+          setShowPriorityPicker(false)
+        }}
+        sx={{ gap: 1 }}
+      >
+        <ArrowBack fontSize='small' />
+        <Typography level='body-sm' fontWeight={600}>
+          Priority
+        </Typography>
+      </MenuItem>
+      <Divider />
+      {priorityOptions.map(priority => (
+        <MenuItem
+          key={priority.value}
+          selected={(currentPriority?.value || 0) === priority.value}
+          color={priority.color || 'neutral'}
+          onClick={e => {
+            e.stopPropagation()
+            handleChangePriority(priority)
+          }}
+        >
+          {priority.icon || <Flag />}
+          {priority.name.trim()}
+        </MenuItem>
+      ))}
+    </>
+  )
+
   const renderModalProjectPicker = () => (
-    <List>
+    <>
       <ListItem>
         <ListItemButton
           onClick={() =>
@@ -492,53 +593,75 @@ const ChoreActionMenu = ({
           </ListItemButton>
         </ListItem>
       ))}
-    </List>
+    </>
   )
 
   return (
     <>
-      <IconButton
-        variant={variant}
-        color='success'
-        onClick={handleMenuOpen}
-        onMouseEnter={onMouseEnter}
-        onMouseLeave={onMouseLeave}
-        sx={{
-          borderRadius: '50%',
-          width: 25,
-          height: 25,
-          position: 'relative',
-          left: -10,
-          ...sx,
-        }}
-      >
-        <MoreVert />
-      </IconButton>
+      {trigger ? (
+        React.cloneElement(trigger, {
+          onClick: handleMenuOpen,
+          onMouseEnter,
+          onMouseLeave,
+        })
+      ) : (
+        <IconButton
+          variant={variant}
+          color='success'
+          onClick={handleMenuOpen}
+          onMouseEnter={onMouseEnter}
+          onMouseLeave={onMouseLeave}
+          sx={{
+            borderRadius: '50%',
+            width: 25,
+            height: 25,
+            position: 'relative',
+            left: -10,
+            ...sx,
+          }}
+        >
+          <MoreVert />
+        </IconButton>
+      )}
 
       {isSmallScreen ? (
         <AppModal
           open={Boolean(anchorEl)}
           onClose={handleMenuClose}
-          title={showProjectPicker ? 'Move to project' : chore?.name}
+          title={
+            showProjectPicker
+              ? 'Move to project'
+              : showPriorityPicker
+                ? 'Priority'
+                : chore?.name
+          }
           mobilePresentation='sheet'
           showHandle
           contentSx={{ px: 0, pb: 1 }}
         >
-          {showProjectPicker && (
-            <MenuItem
-              onClick={() => setShowProjectPicker(false)}
-              sx={{ gap: 1, mx: 2, mb: 1 }}
+          {(showProjectPicker || showPriorityPicker) && (
+            <Button
+              variant='plain'
+              color='neutral'
+              size='sm'
+              startDecorator={<ArrowBack fontSize='small' />}
+              onClick={() => {
+                setShowProjectPicker(false)
+                setShowPriorityPicker(false)
+              }}
+              sx={{ mx: 2, mb: 1 }}
             >
-              <ArrowBack fontSize='small' />
               <Typography level='body-sm' fontWeight={600}>
                 {t('common:back')}
               </Typography>
-            </MenuItem>
+            </Button>
           )}
           <List sx={{ '--ListItem-radius': '8px', px: 1 }}>
             {showProjectPicker
               ? renderModalProjectPicker()
-              : renderModalActionItems()}
+              : showPriorityPicker
+                ? renderModalPriorityPicker()
+                : renderModalActionItems()}
           </List>
         </AppModal>
       ) : (
@@ -554,7 +677,9 @@ const ChoreActionMenu = ({
             left: '50%',
           }}
         >
-          {showProjectPicker ? (
+          {showPriorityPicker ? (
+            renderMenuPriorityPicker()
+          ) : showProjectPicker ? (
             <>
               <MenuItem
                 onClick={e => {

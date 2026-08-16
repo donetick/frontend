@@ -1,8 +1,20 @@
 import moment from 'moment'
+
 import { apiClient } from './ApiClient'
 
 const isPlusAccount = userProfile => {
   return userProfile?.expiration && moment(userProfile?.expiration).isAfter()
+}
+
+// Turns rich-text/HTML content (task descriptions, notes) into plain text so it
+// can be indexed or matched by search.
+const stripHtml = value => {
+  if (!value) return ''
+  if (typeof globalThis.document === 'undefined')
+    return String(value).replace(/<[^>]*>/g, ' ')
+  const element = globalThis.document.createElement('div')
+  element.innerHTML = String(value)
+  return element.textContent || element.innerText || ''
 }
 
 const resolvePhotoURL = url => {
@@ -83,4 +95,5 @@ export {
   isPlusAccount,
   isSignedUrlExpired,
   resolvePhotoURL,
+  stripHtml,
 }

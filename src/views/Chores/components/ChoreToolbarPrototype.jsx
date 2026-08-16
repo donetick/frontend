@@ -23,13 +23,13 @@ import {
   Check,
   CheckBox,
   CheckBoxOutlineBlank,
+  DisplaySettings,
   FilterList,
   Save,
   Sort,
   Tune,
   ViewAgenda,
   ViewComfy,
-  ViewModule,
 } from '@mui/icons-material'
 import {
   Badge,
@@ -596,23 +596,19 @@ const ChoreToolbar = ({
             />
           )}
 
-        {/* Display button — View + Group combined */}
+        {/* Display button — View + Group combined.
+            Icon stays fixed: mirroring viewMode made this read as a toggle
+            showing the current view rather than a button that opens a sheet. */}
         <IconButton
           variant='outlined'
           color='neutral'
           size='sm'
           sx={{ height: 32, width: 32, borderRadius: '50%' }}
           onClick={() => setDisplaySheetOpen(true)}
-          aria-label='View and group options'
-          title={t('toolbar.viewGroup')}
+          aria-label={t('toolbar.displayOptions')}
+          title={t('toolbar.display')}
         >
-          {viewMode === 'calendar' ? (
-            <CalendarMonth />
-          ) : viewMode === 'compact' ? (
-            <ViewModule />
-          ) : (
-            <ViewAgenda />
-          )}
+          <DisplaySettings />
         </IconButton>
 
         {/* Multiselect */}
@@ -886,7 +882,7 @@ const ChoreToolbar = ({
         onClose={() => setDisplaySheetOpen(false)}
         title={
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <ViewAgenda sx={{ fontSize: 20 }} />
+            <DisplaySettings sx={{ fontSize: 20 }} />
             Display
           </Box>
         }

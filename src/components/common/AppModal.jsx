@@ -183,6 +183,7 @@ const AppModal = forwardRef(
                   onClick={handleClose}
                   sx={{
                     position: 'absolute',
+                    zIndex: 1,
                     top: isSheet && showHandle ? 6 : 12,
                     right: { xs: 10, sm: 16 },
                     borderRadius: '50%',
