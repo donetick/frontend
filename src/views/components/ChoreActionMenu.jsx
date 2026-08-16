@@ -24,6 +24,7 @@ import {
 } from '@mui/icons-material'
 import {
   Avatar,
+  Button,
   Divider,
   IconButton,
   List,
@@ -467,7 +468,7 @@ const ChoreActionMenu = ({
     })
 
   const renderModalProjectPicker = () => (
-    <List>
+    <>
       <ListItem>
         <ListItemButton
           onClick={() =>
@@ -490,7 +491,7 @@ const ChoreActionMenu = ({
           </ListItemButton>
         </ListItem>
       ))}
-    </List>
+    </>
   )
 
   return (
@@ -523,15 +524,18 @@ const ChoreActionMenu = ({
           contentSx={{ px: 0, pb: 1 }}
         >
           {showProjectPicker && (
-            <MenuItem
+            <Button
+              variant='plain'
+              color='neutral'
+              size='sm'
+              startDecorator={<ArrowBack fontSize='small' />}
               onClick={() => setShowProjectPicker(false)}
-              sx={{ gap: 1, mx: 2, mb: 1 }}
+              sx={{ mx: 2, mb: 1 }}
             >
-              <ArrowBack fontSize='small' />
               <Typography level='body-sm' fontWeight={600}>
                 Back
               </Typography>
-            </MenuItem>
+            </Button>
           )}
           <List sx={{ '--ListItem-radius': '8px', px: 1 }}>
             {showProjectPicker
