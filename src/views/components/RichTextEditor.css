@@ -57,11 +57,14 @@
   border-radius: 10px;
   overflow: hidden;
   background-color: var(--joy-palette-neutral-softBg, #f0f4f8);
-  transition: box-shadow 0.15s ease, background-color 0.15s ease;
+  transition:
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
 }
 
 .quill-root:focus-within {
-  box-shadow: 0 0 0 1px var(--joy-palette-primary-outlinedBorder, rgba(11, 107, 203, 0.15));
+  box-shadow: 0 0 0 1px
+    var(--joy-palette-primary-outlinedBorder, rgba(11, 107, 203, 0.15));
 }
 
 .quill-root:hover:not(:focus-within) {
@@ -70,7 +73,8 @@
 
 .quill-root .ql-toolbar.ql-snow {
   border: none;
-  border-bottom: 1px solid var(--joy-palette-neutral-softActiveBg, rgba(99, 107, 116, 0.16));
+  border-bottom: 1px solid
+    var(--joy-palette-neutral-softActiveBg, rgba(99, 107, 116, 0.16));
   border-radius: 0;
   background: transparent;
   box-shadow: none;
