@@ -63,6 +63,8 @@
     "skip": "スキップ",
     "cancel": "キャンセル",
     "noPriority": "優先度なし",
+    "more": "More",
+    "changeDueDate": "Change due date",
     "subtasks": "サブタスク",
     "noDescription": "説明はありません",
     "timer": {
@@ -103,7 +105,9 @@
     "showTasksFor": "Show tasks for",
     "type": {
       "assignee": "Assignee"
-    }
+    },
+    "display": "Display",
+    "displayOptions": "Display options"
   },
   "sort": {
     "assignedToMe": "Assigned to me",
