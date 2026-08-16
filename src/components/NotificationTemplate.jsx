@@ -14,6 +14,7 @@ import Select from '@mui/joy/Select'
 import Typography from '@mui/joy/Typography'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+
 import { NOTIFICATION_TYPE, TASK_COLOR } from '../utils/Colors'
 import { TIME_UNITS } from '../utils/DurationUtils'
 
@@ -26,7 +27,7 @@ const timingOptions = [
 ]
 
 function getRelativeLabel(notification, t) {
-  const { value, unit } = notification
+  const { unit, value } = notification
   const numericValue = Number(value)
   if (numericValue === 0) {
     return t('notifTemplate.onDueDate')
@@ -71,8 +72,8 @@ const NotificationTemplate = ({
   // Consumers that own an empty state themselves pass 0.
   minNotifications = 1,
   onChange,
-  value,
   showTimeline = true,
+  value,
 }) => {
   const { t } = useTranslation('chores')
   const [notifications, setNotifications] = useState(

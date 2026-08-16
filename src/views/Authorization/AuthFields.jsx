@@ -13,11 +13,12 @@ import {
 } from '@mui/joy'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+
 import { authButtonSx, authInputSx } from './authStyles'
 
 const labelSx = { fontSize: '0.875rem', fontWeight: 600, mb: 0.75 }
 
-export const AuthField = ({ label, error, helper, children, ...formProps }) => (
+export const AuthField = ({ children, error, helper, label, ...formProps }) => (
   <FormControl error={Boolean(error)} {...formProps}>
     <FormLabel sx={labelSx}>{label}</FormLabel>
     {children}
@@ -34,16 +35,16 @@ export const AuthField = ({ label, error, helper, children, ...formProps }) => (
   </FormControl>
 )
 
-export const AuthTextField = ({ label, error, helper, sx, ...inputProps }) => (
+export const AuthTextField = ({ error, helper, label, sx, ...inputProps }) => (
   <AuthField label={label} error={error} helper={helper} id={inputProps.id}>
     <Input size='lg' sx={{ ...authInputSx, ...sx }} {...inputProps} />
   </AuthField>
 )
 
 export const AuthPasswordField = ({
-  label,
   error,
   helper,
+  label,
   sx,
   ...inputProps
 }) => {
@@ -92,7 +93,7 @@ export const AuthSubmitButton = ({ children, sx, ...props }) => (
   </Button>
 )
 
-export const SocialButton = ({ icon, children, sx, ...props }) => (
+export const SocialButton = ({ children, icon, sx, ...props }) => (
   <Button
     type='button'
     size='lg'

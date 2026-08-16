@@ -10,12 +10,12 @@ import { useEffect, useRef, useState } from 'react'
 
 const TimerSplitButton = ({
   chore,
-  onAction,
-  onShowDetails,
-  onResetTimer,
-  onClearAllTime,
   disabled = false,
   fullWidth = false,
+  onAction,
+  onClearAllTime,
+  onResetTimer,
+  onShowDetails,
 }) => {
   const [anchorEl, setAnchorEl] = useState(null)
   const isMenuOpen = Boolean(anchorEl)

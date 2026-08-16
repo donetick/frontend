@@ -1,7 +1,8 @@
 import { Box, Container, Sheet, Typography } from '@mui/joy'
-import { useTranslation } from 'react-i18next'
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+
 import Logo from '../../Logo'
 
 const PaymentCancelledView = () => {

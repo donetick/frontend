@@ -43,6 +43,7 @@ import { useMediaQuery } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+
 import AppModal from '../../components/common/AppModal'
 import LABEL_COLORS, {
   getTextColorFromBackgroundColor,
@@ -65,21 +66,21 @@ const collapseDividers = items =>
 
 const ChoreActionMenu = ({
   chore,
+  hiddenActions = [],
   onAction,
-  onCompleteWithNote,
-  onCompleteWithPastDate,
   onChangeAssignee,
   onChangeDueDate,
   onChangePriority,
-  onWriteNFC,
-  onNudge,
+  onCompleteWithNote,
+  onCompleteWithPastDate,
   onDelete,
-  onOpen,
   onMouseEnter,
   onMouseLeave,
-  hiddenActions = [],
-  trigger,
+  onNudge,
+  onOpen,
+  onWriteNFC,
   sx = {},
+  trigger,
   variant = 'soft',
 }) => {
   const { t } = useTranslation('chores')
@@ -362,9 +363,24 @@ const ChoreActionMenu = ({
         handleMenuClose()
       },
     },
-    { key: 'edit', icon: <Edit />, label: t('choreView.edit'), onClick: handleEdit },
-    { key: 'clone', icon: <CopyAll />, label: t('actionMenu.clone'), onClick: handleClone },
-    { key: 'view', icon: <ViewCarousel />, label: t('actionMenu.view'), onClick: handleView },
+    {
+      key: 'edit',
+      icon: <Edit />,
+      label: t('choreView.edit'),
+      onClick: handleEdit,
+    },
+    {
+      key: 'clone',
+      icon: <CopyAll />,
+      label: t('actionMenu.clone'),
+      onClick: handleClone,
+    },
+    {
+      key: 'view',
+      icon: <ViewCarousel />,
+      label: t('actionMenu.view'),
+      onClick: handleView,
+    },
     {
       key: 'archive',
       icon: chore.isActive ? <Archive /> : <Unarchive />,

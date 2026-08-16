@@ -1,3 +1,5 @@
+import './VoicePanel.css'
+
 import {
   CalendarMonth,
   Check,
@@ -16,6 +18,7 @@ import {
 import { Box, Button, Chip, IconButton, Input, Typography } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useMemo, useRef, useState } from 'react'
+
 import { TASK_COLOR } from '../../../utils/Colors'
 import { isPlusAccount } from '../../../utils/Helpers'
 import AssigneePickerField from '../AssigneePickerField'
@@ -26,7 +29,6 @@ import PriorityPickerField from '../PriorityPickerField'
 import RepeatPickerField from '../RepeatPickerField'
 import { parseVoiceTask } from './parseVoiceTask'
 import { useVoiceToTask } from './useVoiceToTask'
-import './VoicePanel.css'
 
 const HIGHLIGHT_CLASS = {
   repeat: 'highlight-repeat',
@@ -108,7 +110,7 @@ const describeFrequency = f => {
 const buildChips = (
   effective,
   frequencyLabel,
-  { members, currentUserId, canRemind },
+  { canRemind, currentUserId, members },
 ) => {
   const chips = []
   if (effective.dueDate) {
@@ -191,11 +193,11 @@ const buildChips = (
 }
 
 const TaskPreviewCard = ({
-  segment,
-  parseCtx,
+  onPatch,
   onRemove,
   onUpdate,
-  onPatch,
+  parseCtx,
+  segment,
 }) => {
   const [expanded, setExpanded] = useState(false)
   const [draft, setDraft] = useState(segment.text)
@@ -243,7 +245,7 @@ const TaskPreviewCard = ({
         custom: hasCustomTime,
       }
       queueMicrotask(() => {
-        const { date, time, custom } = dueEditRef.current
+        const { custom, date, time } = dueEditRef.current
         dueEditRef.current = null
         if (!date) {
           onPatch({ dueDate: null })
@@ -450,24 +452,24 @@ const TaskPreviewCard = ({
  * onStateChange so the modal can label and enable that button.
  */
 const VoicePanel = ({
-  userLabels = [],
-  members = [],
-  userProfile,
   defaultNotificationTemplates = [],
+  members = [],
   onStateChange,
+  userLabels = [],
+  userProfile,
 }) => {
   const {
-    phase,
     isLocked,
-    partialText,
-    segments,
+    isNative,
     micPressDown,
     micPressUp,
-    startHandsFree,
-    removeSegment,
-    updateSegment,
+    partialText,
     patchSegment,
-    isNative,
+    phase,
+    removeSegment,
+    segments,
+    startHandsFree,
+    updateSegment,
   } = useVoiceToTask({ members, userLabels })
   const segmentsScrollRef = useRef(null)
 

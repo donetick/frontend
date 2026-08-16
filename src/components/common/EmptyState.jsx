@@ -55,7 +55,7 @@ const SIZES = {
 }
 
 const ActionButton = ({ action, ...buttonProps }) => {
-  const { label, to, onClick, ...rest } = action
+  const { label, onClick, to, ...rest } = action
   return (
     <Button
       {...buttonProps}
@@ -73,15 +73,15 @@ ActionButton.propTypes = {
 }
 
 const EmptyState = ({
-  variant = 'empty',
-  icon,
-  title,
   description,
+  fullHeight = false,
+  icon,
   primaryAction,
   secondaryAction,
   size = 'md',
-  fullHeight = false,
   sx,
+  title,
+  variant = 'empty',
   ...rest
 }) => {
   const tone = TONES[variant] || TONES.empty

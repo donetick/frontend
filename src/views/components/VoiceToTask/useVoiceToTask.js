@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+
 import { voiceInputService } from '../../../service/VoiceInputService'
 import { generateUUID } from '../../../utils/UUID'
 import {
@@ -17,9 +18,8 @@ const HANDS_FREE_EMPTY_STOP_MS = 20000
 
 const haptic = async kind => {
   try {
-    const { Haptics, ImpactStyle, NotificationType } = await import(
-      '@capacitor/haptics'
-    )
+    const { Haptics, ImpactStyle, NotificationType } =
+      await import('@capacitor/haptics')
     if (kind === 'notification') {
       await Haptics.notification({ type: NotificationType.Success })
     } else if (kind === 'medium') {
@@ -87,7 +87,7 @@ export function useVoiceToTask({ members = [], userLabels = [] } = {}) {
         members: membersRef.current,
         userLabels: userLabelsRef.current,
       })
-      const { text, dropPrevious } = applyScratchThat(normalized)
+      const { dropPrevious, text } = applyScratchThat(normalized)
       const pieces = splitSpokenSegments(text)
       if (!dropPrevious && pieces.length === 0) return
 

@@ -1,40 +1,43 @@
-import React from 'react'
-import { Box } from '@mui/joy'
-import { CSSTransition, TransitionGroup } from 'react-transition-group'
-import { useStaggeredAnimation, useReducedMotion } from '../../hooks/useAnimations'
 import './PageTransition.css'
 
-const AnimatedList = ({ 
-  children, 
-  staggerDelay = 50,
-  animationType = 'stagger', // 'stagger', 'fade', 'slide'
-  direction = 'up', // 'up', 'down', 'left', 'right'
-  renderItem,
+import { Box } from '@mui/joy'
+import React from 'react'
+import { CSSTransition, TransitionGroup } from 'react-transition-group'
+
+import {
+  useReducedMotion,
+  useStaggeredAnimation,
+} from '../../hooks/useAnimations'
+
+const AnimatedList = ({
+  animationType = 'stagger',
+  children,
+  direction = 'up', // 'stagger', 'fade', 'slide'
+  items, // 'up', 'down', 'left', 'right'
   keyExtractor,
-  items,
-  ...boxProps 
+  renderItem,
+  staggerDelay = 50,
+  ...boxProps
 }) => {
   // Handle both children and items patterns
   let childrenArray
   if (items && renderItem) {
-    childrenArray = items.map((item, index) => 
-      React.cloneElement(renderItem(item, index), { 
-        key: keyExtractor ? keyExtractor(item, index) : index 
-      })
+    childrenArray = items.map((item, index) =>
+      React.cloneElement(renderItem(item, index), {
+        key: keyExtractor ? keyExtractor(item, index) : index,
+      }),
     )
   } else {
     childrenArray = React.Children.toArray(children)
   }
-  
+
   const visibleItems = useStaggeredAnimation(childrenArray.length, staggerDelay)
   const prefersReducedMotion = useReducedMotion()
 
   // If user prefers reduced motion, render without animations
   if (prefersReducedMotion) {
     return (
-      <Box {...boxProps}>
-        {items && renderItem ? childrenArray : children}
-      </Box>
+      <Box {...boxProps}>{items && renderItem ? childrenArray : children}</Box>
     )
   }
 
@@ -55,7 +58,7 @@ const AnimatedList = ({
       <TransitionGroup component={null}>
         {childrenArray.map((child, index) => {
           const isVisible = visibleItems.has(index)
-          
+
           return (
             <CSSTransition
               key={child.key || index}

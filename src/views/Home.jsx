@@ -1,9 +1,9 @@
 import { Box, Button, Container, Typography } from '@mui/joy'
-import { useTranslation } from 'react-i18next'
 import { useEffect } from 'react'
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
-import { useState } from 'react'
 import Logo from '../Logo'
 const Home = () => {
   const { t } = useTranslation('common')

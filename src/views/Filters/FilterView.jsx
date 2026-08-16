@@ -33,6 +33,7 @@ import {
 } from '@mui/joy'
 import Fuse from 'fuse.js'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import EmptyState from '../../components/common/EmptyState'
@@ -52,7 +53,6 @@ import {
   useToggleFilterPin,
   useUpdateFilter,
 } from './FilterQueries'
-import { useTranslation } from 'react-i18next'
 
 const FilterCardContent = ({
   filter,

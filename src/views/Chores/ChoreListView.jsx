@@ -1,11 +1,12 @@
+import '@meauxt/react-swipeable-list/dist/styles.css'
+
 import {
-  Type as ListType,
   SwipeableList,
   SwipeableListItem,
   SwipeAction,
   TrailingActions,
+  Type as ListType,
 } from '@meauxt/react-swipeable-list'
-import '@meauxt/react-swipeable-list/dist/styles.css'
 import {
   Check,
   Delete,
@@ -19,6 +20,7 @@ import {
 import { Box, Typography } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+
 import { useLongPress } from '../../hooks/useLongPress'
 import ChoreCard from './ChoreCard'
 import CompactChoreCard from './CompactChoreCard'
@@ -28,16 +30,16 @@ import CompactChoreCard from './CompactChoreCard'
  * can't live in the render loop because it needs a hook.
  */
 const ChoreSwipeableItem = ({
-  trailingActions,
+  children,
+  longPressEnabled,
   onClick,
   onLongPress,
-  longPressEnabled,
-  children,
+  trailingActions,
   // SwipeableList clones its children to inject list-level config
   // (listType, fullSwipe, thresholds…), so it has to be passed through.
   ...listProps
 }) => {
-  const { handlers: longPressHandlers, cancel: cancelLongPress } = useLongPress(
+  const { cancel: cancelLongPress, handlers: longPressHandlers } = useLongPress(
     onLongPress,
     { enabled: longPressEnabled },
   )
@@ -75,19 +77,19 @@ const ChoreSwipeableItem = ({
 
 const ChoreListView = ({
   chores,
-  viewMode,
-  membersData,
-  userLabels,
-  handleLabelFiltering,
   handleChoreAction,
+  handleLabelFiltering,
   isMultiSelectMode,
-  selectedChores,
-  toggleChoreSelection,
-  userProfile,
   isOfficialInstance,
-  toggleMultiSelectMode,
+  membersData,
   onLongPressChore,
+  selectedChores,
   showActions = true,
+  toggleChoreSelection,
+  toggleMultiSelectMode,
+  userLabels,
+  userProfile,
+  viewMode,
 }) => {
   const navigate = useNavigate()
   const { t } = useTranslation('chores')
@@ -204,7 +206,9 @@ const ChoreListView = ({
                   <Check sx={{ fontSize: 20 }} />
                 )}
                 <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                  {chore.status !== 1 ? t('choreView.start') : t('list.complete')}
+                  {chore.status !== 1
+                    ? t('choreView.start')
+                    : t('list.complete')}
                 </Typography>
               </Box>
             </SwipeAction>

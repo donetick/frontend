@@ -1,10 +1,11 @@
 import { Close, NotificationsNone } from '@mui/icons-material'
 import { Box, Button, IconButton, Typography } from '@mui/joy'
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import ModalActions from '../../components/common/ModalActions'
 import NotificationTemplate from '../../components/NotificationTemplate'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
-import { useTranslation } from 'react-i18next'
 
 const getDisplayLabel = templates => {
   if (!templates || templates.length === 0) return 'Remind'
@@ -22,11 +23,11 @@ const getDisplayLabel = templates => {
 }
 
 const NotificationPickerField = ({
-  value,
+  emptyDisplay = 'icon-text',
   onChange,
   onClear,
-  emptyDisplay = 'icon-text',
   size = 'sm',
+  value,
 }) => {
   const { t } = useTranslation('chores')
   const [isOpen, setIsOpen] = useState(false)
@@ -63,7 +64,10 @@ const NotificationPickerField = ({
             }
           : undefined
       }
-      secondary={{ label: t('choreView.cancel'), onClick: () => setIsOpen(false) }}
+      secondary={{
+        label: t('choreView.cancel'),
+        onClick: () => setIsOpen(false),
+      }}
       primary={{ label: t('common:apply'), onClick: handleSave }}
     />
   )

@@ -1,7 +1,7 @@
 import {
+  closestCenter,
   DndContext,
   PointerSensor,
-  closestCenter,
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
@@ -30,8 +30,9 @@ import {
 } from '@mui/joy'
 import { useCallback, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
-import { useLocalization } from '../../contexts/LocalizationContext'
+
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext'
+import { useLocalization } from '../../contexts/LocalizationContext'
 import { useUserProfile } from '../../queries/UserQueries'
 import { CompleteSubTask } from '../../utils/Fetcher'
 
@@ -58,17 +59,17 @@ function nextTempId(tasks) {
 }
 
 function SortableItem({
-  task,
   allTasks,
-  setTasks,
-  level,
   editMode,
   expandedIds,
-  onToggleExpand,
   handleToggle,
   inputRefs,
+  level,
   onKeyDown,
+  onToggleExpand,
   performers,
+  setTasks,
+  task,
 }) {
   const { fmt } = useLocalization()
   const { attributes, listeners, setNodeRef, transform, transition } =
@@ -240,12 +241,12 @@ function SortableItem({
 }
 
 const SubTasks = ({
-  editMode = true,
   choreId = 0,
-  tasks = [],
-  setTasks,
+  editMode = true,
   performers,
+  setTasks,
   shouldFocus = false,
+  tasks = [],
 }) => {
   const [newTask, setNewTask] = useState('')
   const [expandedIds, setExpandedIds] = useState(new Set())

@@ -10,8 +10,14 @@ import { Capacitor } from '@capacitor/core'
 function normalizeScannedImage(raw) {
   if (!raw) return null
   if (raw.startsWith('data:')) return raw
-  if (raw.startsWith('http://') || raw.startsWith('https://') || raw.startsWith('content://')) return raw
-  if (raw.startsWith('/') || raw.startsWith('file://')) return Capacitor.convertFileSrc(raw)
+  if (
+    raw.startsWith('http://') ||
+    raw.startsWith('https://') ||
+    raw.startsWith('content://')
+  )
+    return raw
+  if (raw.startsWith('/') || raw.startsWith('file://'))
+    return Capacitor.convertFileSrc(raw)
   // iOS base64 without prefix
   return `data:image/jpeg;base64,${raw}`
 }
@@ -25,11 +31,16 @@ function normalizeScannedImage(raw) {
 export function useDocumentScanner() {
   const isNativeScanner = Capacitor.isNativePlatform()
 
-  const scanDocument = async ({ maxDocuments = 1, quality = 90, letUserAdjustCrop = false } = {}) => {
+  const scanDocument = async ({
+    letUserAdjustCrop = false,
+    maxDocuments = 1,
+    quality = 90,
+  } = {}) => {
     if (!isNativeScanner) return { image: null, cancelled: false }
 
     try {
-      const { DocumentScanner } = await import('@capgo/capacitor-document-scanner')
+      const { DocumentScanner } =
+        await import('@capgo/capacitor-document-scanner')
       const { scannedImages } = await DocumentScanner.scanDocument({
         croppedImageQuality: quality,
         maxNumDocuments: maxDocuments,

@@ -16,6 +16,7 @@ import {
   ThumbUpRounded,
 } from '@mui/icons-material'
 import { Box, Typography } from '@mui/joy'
+
 import {
   getPriorityColor,
   getTextColorFromBackgroundColor,
@@ -84,7 +85,7 @@ const Stage = ({ children }) => (
   </Box>
 )
 
-const Chip = ({ icon, children, color = 'primary', sx }) => (
+const Chip = ({ children, color = 'primary', icon, sx }) => (
   <Box
     sx={{
       display: 'inline-flex',
@@ -110,7 +111,7 @@ const Chip = ({ icon, children, color = 'primary', sx }) => (
 
 // Mirrors CompactChoreCard's solid, label-coloured chip (not the soft-tinted
 // `Chip` above) so a MiniChoreCard can fake a real label instead of a generic tag.
-const LabelChip = ({ label, color, sx }) => (
+const LabelChip = ({ color, label, sx }) => (
   <Box
     sx={{
       display: 'inline-flex',
@@ -146,13 +147,13 @@ const getName = name => {
  * they do in the task list.
  */
 const MiniChoreCard = ({
-  title,
   due,
   dueColor = 'primary',
-  repeat,
+  footer,
   label,
   labelColor = '#5c6bc0',
-  footer,
+  repeat,
+  title,
 }) => (
   <Box>
     <Box sx={{ display: 'flex', gap: 0.5, ml: 1.25, mb: -1.25, zIndex: 2 }}>
@@ -194,7 +195,7 @@ const MiniChoreCard = ({
   </Box>
 )
 
-const AssigneeChip = ({ name, color = 'primary', sx }) => (
+const AssigneeChip = ({ color = 'primary', name, sx }) => (
   <Box
     sx={{
       mt: 0.5,
@@ -237,7 +238,7 @@ const AssigneeChip = ({ name, color = 'primary', sx }) => (
 // container never resizes as the content changes. The keyframes are derived
 // from the child count so a two-up cycler holds each state twice as long
 // instead of leaving a third of the cycle blank.
-const Cycler = ({ children, sx, cycleMs = CYCLE_MS }) => {
+const Cycler = ({ children, cycleMs = CYCLE_MS, sx }) => {
   const items = Array.isArray(children) ? children : [children]
   const count = items.length
   const step = cycleMs / count
@@ -285,7 +286,7 @@ const SOURCES = [
   { icon: <KeyboardRounded />, label: 'Type' },
 ]
 
-const SourcePill = ({ icon, label, index }) => (
+const SourcePill = ({ icon, index, label }) => (
   <Box
     sx={{
       flex: 1,
@@ -334,7 +335,7 @@ const SourcePill = ({ icon, label, index }) => (
  * plus a local model, nothing uploaded), while speech-to-text still goes
  * through the OS speech recognizer.
  */
-const CaptureVariant = ({ card, caption, icon }) => (
+const CaptureVariant = ({ caption, card, icon }) => (
   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
     {card}
     <Chip icon={icon} sx={{ alignSelf: 'flex-start' }}>
@@ -347,7 +348,7 @@ const CaptureVariant = ({ card, caption, icon }) => (
 // in the same grid cell on one shared clock (delay = this variant's slot in
 // the outer Cycler) so the morph always lands while the variant is on screen:
 // ~0-38% holds the raw input, ~46-60% is the handoff, the rest holds the card.
-const CaptureMorph = ({ before, after, delay = 0 }) => (
+const CaptureMorph = ({ after, before, delay = 0 }) => (
   <Box sx={{ display: 'grid' }}>
     <Box
       sx={{
@@ -630,7 +631,7 @@ export const CaptureVignette = () => (
 
 /* --------------------------------- slide 2: due date vs. completion date */
 
-const Milestone = ({ label, date, tone = 'neutral', delay }) => (
+const Milestone = ({ date, delay, label, tone = 'neutral' }) => (
   <Box
     sx={{
       display: 'flex',
@@ -691,7 +692,7 @@ const Milestone = ({ label, date, tone = 'neutral', delay }) => (
   </Box>
 )
 
-const ScheduleTrack = ({ mode, next, delay }) => (
+const ScheduleTrack = ({ delay, mode, next }) => (
   <Box
     sx={{
       ...cardSx,
@@ -763,13 +764,13 @@ export const ScheduleVignette = () => (
  * chip and meta strip.
  */
 const HistoryRow = ({
-  status,
   color,
-  icon,
-  note,
-  meta,
-  performer,
   divider = true,
+  icon,
+  meta,
+  note,
+  performer,
+  status,
 }) => (
   <Box
     sx={{
@@ -856,11 +857,11 @@ const HistoryRow = ({
  * lining all five up in a row that never exists in the app.
  */
 const ActionButton = ({
+  color = 'neutral',
+  flex = 1,
   icon,
   label,
-  color = 'neutral',
   variant,
-  flex = 1,
 }) => (
   <Box
     sx={{
@@ -1273,7 +1274,7 @@ const float = (duration, delay) => ({
   },
 })
 
-const WidgetTask = ({ name, time, done }) => (
+const WidgetTask = ({ done, name, time }) => (
   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
     <Box
       sx={{
@@ -1351,11 +1352,11 @@ const TodayWidget = () => (
 /* ------------------- notification banners, stacked over the Today widget */
 
 const NotificationBanner = ({
-  icon,
-  color = 'primary',
-  title,
   body,
+  color = 'primary',
   delay,
+  icon,
+  title,
 }) => (
   <Box
     sx={{

@@ -27,11 +27,12 @@ import {
 } from '@mui/joy'
 import moment from 'moment'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import { useChores, useChoresHistory } from '../../queries/ChoreQueries'
 import { useCircleMembers } from '../../queries/UserQueries'
 import { resolvePhotoURL } from '../../utils/Helpers'
 import NoteViewerModal from '../Modals/Inputs/NoteViewerModal'
-import { useTranslation } from 'react-i18next'
 
 const ActivityItem = ({ activity, members, onViewNote }) => {
   const { t } = useTranslation('chores')

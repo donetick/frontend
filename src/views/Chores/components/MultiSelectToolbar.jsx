@@ -32,6 +32,7 @@ import {
 import moment from 'moment'
 import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+
 import AppModal from '../../../components/common/AppModal'
 import KeyboardShortcutHint from '../../../components/common/KeyboardShortcutHint'
 import LABEL_COLORS, {
@@ -134,26 +135,26 @@ const selectableChipSx = {
 
 const MultiSelectToolbar = ({
   isVisible,
-  selectedCount,
-  onSelectAll,
+  labels = [],
+  members = [],
+  onArchive,
   onClear,
   onComplete,
-  onSkip,
-  onArchive,
   onDelete,
   onMoveToProject,
-  onSetDueDate,
+  onSelectAll,
   onSetAssignee,
+  onSetDueDate,
   onSetPriority,
-  onToggleLabel,
+  onSkip,
   // Shape produced by useMultiSelect.getSelectionSummary — drives which value
   // each control shows as current, and which labels can be added vs removed.
-  selectionSummary,
-  members = [],
-  labels = [],
+  onToggleLabel,
   projects = [],
-  showKeyboardShortcuts,
   selectAllDisabled,
+  selectedCount,
+  selectionSummary,
+  showKeyboardShortcuts,
 }) => {
   const { t } = useTranslation('chores')
   const [moreOpen, setMoreOpen] = useState(false)

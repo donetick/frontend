@@ -113,9 +113,8 @@ class VoiceInputService {
   async isSupported() {
     if (this.isNative) {
       try {
-        const { SpeechRecognition } = await import(
-          '@capacitor-community/speech-recognition'
-        )
+        const { SpeechRecognition } =
+          await import('@capacitor-community/speech-recognition')
         const { available } = await SpeechRecognition.available()
         return !!available
       } catch {
@@ -134,9 +133,8 @@ class VoiceInputService {
       return 'granted'
     }
     try {
-      const { SpeechRecognition } = await import(
-        '@capacitor-community/speech-recognition'
-      )
+      const { SpeechRecognition } =
+        await import('@capacitor-community/speech-recognition')
       const current = await SpeechRecognition.checkPermissions()
       if (current.speechRecognition === 'granted') return 'granted'
       const res = await SpeechRecognition.requestPermissions()
@@ -189,9 +187,8 @@ class VoiceInputService {
     if (this.isNative) {
       let SpeechRecognition
       try {
-        ;({ SpeechRecognition } = await import(
-          '@capacitor-community/speech-recognition'
-        ))
+        ;({ SpeechRecognition } =
+          await import('@capacitor-community/speech-recognition'))
         await withTimeout(SpeechRecognition.stop(), NATIVE_CALL_TIMEOUT_MS)
       } catch {
         // recognizer may already be stopped
@@ -282,9 +279,8 @@ class VoiceInputService {
   }
 
   async _startNative() {
-    const { SpeechRecognition } = await import(
-      '@capacitor-community/speech-recognition'
-    )
+    const { SpeechRecognition } =
+      await import('@capacitor-community/speech-recognition')
     await SpeechRecognition.removeAllListeners()
 
     await SpeechRecognition.addListener('partialResults', ({ matches }) => {
@@ -342,9 +338,8 @@ class VoiceInputService {
   }
 
   async _doRestartNative() {
-    const { SpeechRecognition } = await import(
-      '@capacitor-community/speech-recognition'
-    )
+    const { SpeechRecognition } =
+      await import('@capacitor-community/speech-recognition')
     try {
       await withTimeout(SpeechRecognition.stop(), NATIVE_CALL_TIMEOUT_MS)
     } catch {

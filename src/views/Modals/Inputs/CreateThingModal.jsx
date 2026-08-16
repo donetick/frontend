@@ -8,11 +8,12 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
-import ModalActions from '../../../components/common/ModalActions'
-import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { useTranslation } from 'react-i18next'
 
-function CreateThingModal({ isOpen, onClose, onSave, currentThing }) {
+import ModalActions from '../../../components/common/ModalActions'
+import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
+
+function CreateThingModal({ currentThing, isOpen, onClose, onSave }) {
   const { t } = useTranslation('things')
   const { ResponsiveModal } = useResponsiveModal()
 

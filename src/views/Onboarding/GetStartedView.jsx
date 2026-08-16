@@ -1,6 +1,7 @@
 import { DnsOutlined } from '@mui/icons-material'
 import { Box, Button, Link, Typography } from '@mui/joy'
 import { useNavigate } from 'react-router-dom'
+
 import Logo from '../../Logo'
 import { useResource } from '../../queries/ResourceQueries'
 import { haptic, isNativeApp, markOnboardingSeen } from '../../utils/Onboarding'

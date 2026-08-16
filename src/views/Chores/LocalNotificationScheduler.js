@@ -78,7 +78,7 @@ const scheduleNotificationFromTemplate = (
     const now = new Date()
     const time = getTimeFromTemplate(template, dueDate)
     const notificationId = getIdFromTemplate(chore.id, template)
-    const { title, body } = getNotificationText(
+    const { body, title } = getNotificationText(
       chore.name,
       template,
       dueDate,

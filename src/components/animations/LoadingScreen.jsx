@@ -65,11 +65,7 @@ const LogoContainer = styled(Box)({
 
 import { useTranslation } from 'react-i18next'
 
-const LoadingScreen = ({
-  message = null,
-  showLogo = true,
-  size = 'lg',
-}) => {
+const LoadingScreen = ({ message = null, showLogo = true, size = 'lg' }) => {
   const { t } = useTranslation('common')
   return (
     <LoadingContainer>
@@ -90,7 +86,7 @@ const LoadingScreen = ({
             </Typography>
           </LogoContainer>
         )}
-        
+
         <CircularProgress
           size={size}
           sx={{
@@ -98,7 +94,7 @@ const LoadingScreen = ({
             mb: 2,
           }}
         />
-        
+
         <PulsingText level='body-md'>{message ?? t('loading')}</PulsingText>
       </LoadingContent>
     </LoadingContainer>

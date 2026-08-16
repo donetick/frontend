@@ -1,4 +1,4 @@
-import { writeFile, mkdir } from 'fs/promises'
+import { mkdir, writeFile } from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -56,7 +56,7 @@ export default async function globalSetup() {
     throw new Error(`Login failed (${loginRes.status}): ${body}`)
   }
 
-  const { token, expire } = await loginRes.json()
+  const { expire, token } = await loginRes.json()
 
   // Write a Playwright storage-state file containing the token in localStorage
   const stateDir = path.join(__dirname, '.auth')
@@ -84,7 +84,11 @@ export default async function globalSetup() {
 async function waitForServer(url, retries = 20, delayMs = 1000) {
   for (let i = 0; i < retries; i++) {
     try {
-      const res = await fetch(`${url}/api/v1/auth/login`, { method: 'POST', body: '{}', headers: { 'Content-Type': 'application/json' } })
+      const res = await fetch(`${url}/api/v1/auth/login`, {
+        method: 'POST',
+        body: '{}',
+        headers: { 'Content-Type': 'application/json' },
+      })
       if (res.status < 500) return
     } catch {
       // server not up yet

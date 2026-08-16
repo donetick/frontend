@@ -5,7 +5,6 @@ import {
   Replay,
   WarningAmber,
 } from '@mui/icons-material'
-import { useTranslation } from 'react-i18next'
 import {
   Box,
   Button,
@@ -15,6 +14,7 @@ import {
   Typography,
 } from '@mui/joy'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { useScanToTask } from './useScanToTask'
 
@@ -117,7 +117,11 @@ const ScanPanel = ({
         }
       }
       if (cameraAvailable) {
-        return { label: t('photoTask.capture'), icon: <CameraAlt />, onClick: capture }
+        return {
+          label: t('photoTask.capture'),
+          icon: <CameraAlt />,
+          onClick: capture,
+        }
       }
       // No camera on this device — Upload is the only way forward, so it
       // graduates from the inline secondary to the footer's primary

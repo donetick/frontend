@@ -1,4 +1,4 @@
-import { test as base, expect } from '@playwright/test'
+import { expect, test as base } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -9,7 +9,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
  * After successful signup the app auto-logs in and walks through the
  * onboarding flow (/circle-setup, then /ready) before landing on /chores.
  */
-export async function signUpViaUI(page, { username, email, password, displayName }) {
+export async function signUpViaUI(
+  page,
+  { displayName, email, password, username },
+) {
   await page.goto('/signup')
   await page.locator('#username').fill(username)
   await page.locator('#email').fill(email)
@@ -30,7 +33,7 @@ export async function signUpViaUI(page, { username, email, password, displayName
  * Fill and submit the login form through the UI.
  * After successful login the app redirects to /chores.
  */
-export async function loginViaUI(page, { username, password }) {
+export async function loginViaUI(page, { password, username }) {
   await page.goto('/login')
   await page.locator('#username').fill(username)
   await page.locator('#password').fill(password)

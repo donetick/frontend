@@ -1,11 +1,12 @@
 import { BarChart, Person } from '@mui/icons-material'
 import { Avatar, Box, Sheet, Typography } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import EmptyState from '../../components/common/EmptyState'
 import { useCircleMembers } from '../../queries/UserQueries'
 import { TASK_COLOR } from '../../utils/Colors'
 import { resolvePhotoURL } from '../../utils/Helpers'
-import { useTranslation } from 'react-i18next'
 
 const TasksByAssigneeCard = ({ chores = [] }) => {
   const { t } = useTranslation('chores')
