@@ -162,6 +162,19 @@ const buildQuickActions = t => [
   })),
 ]
 
+// Typing "/" as the first character switches the palette into navigation mode,
+// borrowing the slash-menu reflex from Notion and Slack. The sigil itself is
+// stripped from the visible query so the mode reads as state (the chip in the
+// input) rather than as syntax the person has to keep typing around.
+const MODE_SIGIL = '/'
+
+const parseMode = value => {
+  const text = value || ''
+  return text.startsWith(MODE_SIGIL)
+    ? { mode: 'actions', term: text.slice(MODE_SIGIL.length).trimStart() }
+    : { mode: null, term: text }
+}
+
 const readRecents = () => {
   try {
     return JSON.parse(localStorage.getItem(RECENTS_KEY)) || []
@@ -268,7 +281,8 @@ const GlobalSearchPalette = ({
   const focusInputRef = useCallback(node => {
     if (node) requestAnimationFrame(() => node.focus())
   }, [])
-  const [query, setQuery] = useState(initialQuery || '')
+  const [query, setQuery] = useState(() => parseMode(initialQuery).term)
+  const [mode, setMode] = useState(() => parseMode(initialQuery).mode)
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [recents] = useState(readRecents)
   const selectedResultRef = useRef(null)
@@ -317,8 +331,34 @@ const GlobalSearchPalette = ({
     [documents],
   )
 
+  const searchActions = useCallback(
+    normalized => {
+      const matches = (quickActionIndex.search(normalized, { limit: 8 }) || [])
+        .map(match => ({ ...match.item, score: match.score ?? 1 }))
+        .sort((a, b) => a.score - b.score)
+      // An action whose title the query starts spelling out ("create la…") is
+      // what the person is after, so it leads. Anything matched only through
+      // its keywords stays below.
+      const leading = matches.filter(action =>
+        action.title.toLocaleLowerCase().startsWith(normalized),
+      )
+      return [
+        ...leading,
+        ...matches.filter(action => !leading.includes(action)),
+      ]
+    },
+    [quickActionIndex],
+  )
+
   const results = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase()
+
+    // Navigation mode answers only with actions — an empty term lists them all,
+    // which is how the sigil teaches itself the first time someone hits "/".
+    if (mode === 'actions') {
+      return normalized ? searchActions(normalized) : quickActions
+    }
+
     if (!normalized) {
       const currentById = new Map(documents.map(item => [item.id, item]))
       const recentResults = recents
@@ -347,15 +387,9 @@ const GlobalSearchPalette = ({
         })
         .sort((a, b) => a.score - b.score),
     )
-    const actionMatches = (
-      quickActionIndex.search(normalized, { limit: 4 }) || []
-    )
-      .map(match => ({ ...match.item, score: match.score ?? 1 }))
-      .sort((a, b) => a.score - b.score)
-
-    // An action whose title the query starts spelling out ("create la…") is
-    // what the person is after, so it leads. Anything matched only through its
-    // keywords stays below the real content it shares words with.
+    // Keyword-only action matches stay below the real content they share words
+    // with; title-prefix matches lead.
+    const actionMatches = searchActions(normalized).slice(0, 4)
     const leadingActions = actionMatches.filter(action =>
       action.title.toLocaleLowerCase().startsWith(normalized),
     )
@@ -375,7 +409,16 @@ const GlobalSearchPalette = ({
         route: `/chores?search=${encodeURIComponent(query.trim())}`,
       },
     ]
-  }, [documents, query, quickActionIndex, recents, searchIndexes, t])
+  }, [
+    documents,
+    mode,
+    query,
+    quickActions,
+    recents,
+    searchActions,
+    searchIndexes,
+    t,
+  ])
 
   // Everything except the always-present "filter the task list" fallback.
   const matchCount = results.filter(
@@ -395,8 +438,25 @@ const GlobalSearchPalette = ({
     if (presentation === 'modal') onClose()
   }
 
+  const onQueryChange = value => {
+    setSelectedIndex(0)
+    if (!mode) {
+      const parsed = parseMode(value)
+      setMode(parsed.mode)
+      setQuery(parsed.term)
+      return
+    }
+    setQuery(value)
+  }
+
   const onInputKeyDown = event => {
-    if (event.key === 'ArrowDown') {
+    // Backspace on an empty term steps back out of the mode, so the sigil is
+    // one keystroke to enter and one to leave.
+    if (event.key === 'Backspace' && mode && !query) {
+      event.preventDefault()
+      setMode(null)
+      setSelectedIndex(0)
+    } else if (event.key === 'ArrowDown') {
       event.preventDefault()
       setSelectedIndex(index => Math.min(index + 1, results.length - 1))
     } else if (event.key === 'ArrowUp') {
@@ -423,13 +483,30 @@ const GlobalSearchPalette = ({
             },
           }}
           value={query}
-          onChange={event => {
-            setQuery(event.target.value)
-            setSelectedIndex(0)
-          }}
+          onChange={event => onQueryChange(event.target.value)}
           onKeyDown={onInputKeyDown}
-          placeholder={t('search.placeholder')}
-          startDecorator={<SearchRounded />}
+          placeholder={
+            mode
+              ? t('search.modes.actions.placeholder')
+              : t('search.placeholder')
+          }
+          startDecorator={
+            mode ? (
+              <Chip
+                size='sm'
+                variant='soft'
+                color='primary'
+                onClick={() => {
+                  setMode(null)
+                  setSelectedIndex(0)
+                }}
+              >
+                {t('search.modes.actions.label')}
+              </Chip>
+            ) : (
+              <SearchRounded />
+            )
+          }
           endDecorator={
             isLoading ? (
               <CircularProgress size='sm' />
@@ -468,7 +545,9 @@ const GlobalSearchPalette = ({
             />
             <Typography level='title-md'>{t('search.empty.title')}</Typography>
             <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-              {t('search.empty.subtitle')}
+              {mode
+                ? t('search.empty.actionsSubtitle')
+                : t('search.empty.subtitle')}
             </Typography>
           </Box>
         )}
@@ -554,8 +633,13 @@ const GlobalSearchPalette = ({
           ↑↓ {t('search.footer.navigate')}
         </Typography>
         <Typography level='body-xs'>↵ {t('search.footer.open')}</Typography>
+        {!mode && (
+          <Typography level='body-xs'>
+            {t('search.footer.slashHint')}
+          </Typography>
+        )}
         <Typography level='body-xs' sx={{ ml: 'auto' }}>
-          {query.trim()
+          {query.trim() || mode
             ? t('search.footer.results', { count: matchCount })
             : t('search.footer.typeToSearch')}
         </Typography>

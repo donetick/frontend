@@ -41,7 +41,8 @@
     "recent": "Recent",
     "empty": {
       "title": "No direct matches",
-      "subtitle": "You can still filter the task list with this search."
+      "subtitle": "You can still filter the task list with this search.",
+      "actionsSubtitle": "No view or action matches. Press backspace to search everything."
     },
     "groups": {
       "tasks": "Tasks",
@@ -76,7 +77,14 @@
       "open": "Open",
       "results_one": "{{count}} result",
       "results_other": "{{count}} results",
-      "typeToSearch": "Type to search"
+      "typeToSearch": "Type to search",
+      "slashHint": "/ to jump to a view"
+    },
+    "modes": {
+      "actions": {
+        "label": "Go to",
+        "placeholder": "Jump to a view or action"
+      }
     }
   },
   "policyUpdate": {
