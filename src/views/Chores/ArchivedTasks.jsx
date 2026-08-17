@@ -11,8 +11,6 @@ import {
   SearchOff,
   SelectAll,
   Unarchive,
-  ViewAgenda,
-  ViewModule,
 } from '@mui/icons-material'
 import {
   Badge,
@@ -48,9 +46,7 @@ import { isOfflineFeatureEnabled } from '../../utils/OfflineFeatureToggle'
 import Priorities from '../../utils/Priorities'
 import LoadingComponent from '../components/Loading'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
-import ChoreCard from './ChoreCard'
 import ChoreListView from './ChoreListView.jsx'
-import CompactChoreCard from './CompactChoreCard'
 import MultiSelectHelp from './MultiSelectHelp'
 
 const sortByUpdatedAtDesc = chores =>
@@ -108,9 +104,6 @@ const ArchivedTasks = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [performers, setPerformers] = useState([])
   const navigate = useNavigate()
-  const [viewMode, setViewMode] = useState(
-    localStorage.getItem('archivedChoreCardViewMode') || 'default',
-  )
   const [isLoading, setIsLoading] = useState(true)
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
   const searchInputRef = useRef(null)
@@ -372,15 +365,6 @@ const ArchivedTasks = () => {
       document.removeEventListener('keyup', handleKeyUp)
     }
   }, [isMultiSelectMode, selectedChores.size])
-
-  const toggleViewMode = () => {
-    const modes = ['default', 'compact']
-    const currentIndex = modes.indexOf(viewMode)
-    const nextIndex = (currentIndex + 1) % modes.length
-    const newMode = modes[nextIndex]
-    setViewMode(newMode)
-    localStorage.setItem('archivedChoreCardViewMode', newMode)
-  }
 
   const searchOptions = {
     keys: ['name', 'raw_label'],
@@ -672,26 +656,6 @@ const ArchivedTasks = () => {
     })
   }
 
-  // Helper function to render the appropriate card component
-  const renderChoreCard = (chore, key) => {
-    const CardComponent = viewMode === 'compact' ? CompactChoreCard : ChoreCard
-    return (
-      <CardComponent
-        key={key || chore.id}
-        chore={chore}
-        onChoreUpdate={handleChoreUpdated}
-        onChoreRemove={handleChoreDeleted}
-        performers={performers}
-        viewOnly={false}
-        showActions={false}
-        // Multi-select props
-        isMultiSelectMode={isMultiSelectMode}
-        isSelected={selectedChores.has(chore.id)}
-        onSelectionToggle={() => toggleChoreSelection(chore.id)}
-      />
-    )
-  }
-
   if (isUserProfileLoading || performers.length === 0 || isLoading) {
     return <LoadingComponent />
   }
@@ -821,26 +785,6 @@ const ArchivedTasks = () => {
           onSortDirectionChange={setSortDirection}
           isActive={sortBy !== 'archivedAt' || sortDirection !== 'desc'}
         />
-
-        {/* View Mode Toggle Button */}
-        <IconButton
-          variant='outlined'
-          color='neutral'
-          size='sm'
-          sx={{
-            height: 32,
-            width: 32,
-            borderRadius: '50%',
-          }}
-          onClick={toggleViewMode}
-          title={
-            viewMode === 'default'
-              ? t('archived.switchToCompact')
-              : t('archived.switchToCard')
-          }
-        >
-          {viewMode === 'default' ? <ViewAgenda /> : <ViewModule />}
-        </IconButton>
 
         {/* Multi-select Toggle Button */}
         <Box sx={{ position: 'relative', display: 'inline-flex' }}>
@@ -1137,12 +1081,12 @@ const ArchivedTasks = () => {
             {searchTerm && t('archived.matching', { term: searchTerm })}
           </Typography>
 
-          <List sx={{ gap: viewMode === 'compact' ? 0 : 1 }}>
+          <List sx={{ gap: 0 }}>
             <ChoreListView
               chores={finalChores}
               // viewOnly={true}
               showActions={false}
-              viewMode={viewMode}
+              viewMode='compact'
               membersData={membersData}
               isMultiSelectMode={isMultiSelectMode}
               selectedChores={selectedChores}

@@ -2,7 +2,6 @@ import { Capacitor } from '@capacitor/core'
 import {
   Archive,
   ArrowBack,
-  BugReport,
   FilterAlt,
   FolderOpen,
   History,
@@ -10,6 +9,7 @@ import {
   ListAlt,
   Logout,
   MenuRounded,
+  ReportProblem,
   SearchRounded,
   SettingsOutlined,
   Toll,
@@ -305,7 +305,7 @@ const NavBar = () => {
               }}
             >
               <ListItemDecorator>
-                <BugReport />
+                <ReportProblem />
               </ListItemDecorator>
               <ListItemContent>{t('navigation.reportBug')}</ListItemContent>
             </ListItemButton>

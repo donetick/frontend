@@ -142,20 +142,6 @@ export const track = (eventName, properties = {}) => {
   posthog.capture(eventName, sanitized)
 }
 
-/** Backend/API failures: a normal sanitized event, same as track() — not
- * PostHog's Error Tracking product. There's no real Error object here (just
- * an HTTP response), so there's no stack trace to gain from captureException. */
-export const captureError = (errorType, properties = {}) => {
-  if (!canSend('crash')) return
-  const posthog = getClientSync()
-  if (!posthog) return
-
-  const sanitized = sanitizeErrorProperties(errorType, properties)
-  if (!sanitized) return
-
-  posthog.capture(errorType, sanitized)
-}
-
 /**
  * Frontend crashes only. Uses captureException (not capture) so these land
  * on PostHog's Error Tracking page with a genuine message + stack trace —
@@ -176,7 +162,7 @@ export const captureException = (error, properties = {}) => {
 let globalHandlersInstalled = false
 
 /** Reports uncaught exceptions and unhandled promise rejections to
- * PostHog's Error Tracking, gated by the same crash consent as api_error.
+ * PostHog's Error Tracking, gated by crash consent.
  * Complements, doesn't overlap with, src/views/Error.jsx: that's a React
  * Router error-boundary screen for render/loader errors, which React catches
  * before they ever reach window.onerror — a different class of failure, with
@@ -206,7 +192,7 @@ export const installGlobalErrorHandlers = () => {
 /**
  * kind: 'analytics' | 'crash'. Enabling analytics (re-)initializes PostHog
  * if needed and sends analytics_enabled; enabling crash-only never talks to
- * PostHog by itself (it only unlocks captureError once something reports).
+ * PostHog by itself (it only unlocks captureException once something crashes).
  * Disabling never sends an event and clears identity/queued data.
  */
 export const setConsent = async (kind, value, { source } = {}) => {
@@ -236,7 +222,7 @@ export const setConsent = async (kind, value, { source } = {}) => {
   } else if (kind === 'crash') {
     // Crash reporting alone doesn't need PostHog started with the analytics
     // super-properties path, but it does need a live client + identity to
-    // send captureError() calls through.
+    // send captureException() calls through.
     if (isConfigured() && !getClientSync()) {
       await startPosthog()
     }

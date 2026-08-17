@@ -91,8 +91,8 @@
         "description": "Tell us how Donetick is working for you or request a feature."
       },
       "bugReport": {
-        "title": "Report a Bug",
-        "description": "Something not working right? Send us the details along with a technical snapshot."
+        "title": "Report an Issue",
+        "description": "Tell us what's not working and we'll attach the technical details for you."
       }
     }
   },

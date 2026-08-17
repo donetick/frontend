@@ -1,4 +1,9 @@
-import { BugReport, ChevronRight, Feedback, Star } from '@mui/icons-material'
+import {
+  ChevronRight,
+  Feedback,
+  ReportProblem,
+  Star,
+} from '@mui/icons-material'
 import {
   Avatar,
   Box,
@@ -52,7 +57,7 @@ const SettingsOverview = () => {
       id: 'bugreport',
       title: t('overview.sections.bugReport.title'),
       description: t('overview.sections.bugReport.description'),
-      icon: <BugReport />,
+      icon: <ReportProblem />,
       onSelect: () => setBugReportOpen(true),
     },
   ]

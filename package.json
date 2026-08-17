@@ -74,6 +74,7 @@
     "@mui/joy": "5.0.0-beta.52",
     "@mui/material": "^5.15.2",
     "@openreplay/tracker": "^14.0.4",
+    "@posthog/rollup-plugin": "^1.4.9",
     "@revenuecat/purchases-capacitor": "^12.0.0",
     "@revenuecat/purchases-capacitor-ui": "^12.0.0",
     "@stylistic/eslint-plugin": "^5.10.0",

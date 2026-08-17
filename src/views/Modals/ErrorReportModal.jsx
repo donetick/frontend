@@ -1,11 +1,11 @@
 import { Browser } from '@capacitor/browser'
 import { Capacitor } from '@capacitor/core'
 import {
-  BugReportRounded,
   CheckRounded,
   ContentCopyRounded,
   ExpandMoreRounded,
   GitHub,
+  ReportProblemRounded,
 } from '@mui/icons-material'
 import {
   Box,
@@ -165,7 +165,7 @@ const ErrorReportModal = ({ error, errorInfo, onClose, open }) => {
         <Stack spacing={2}>
           <Box sx={{ ...enter(0) }}>
             <IconHalo
-              icon={<BugReportRounded />}
+              icon={<ReportProblemRounded />}
               color={isBugReport ? 'warning' : 'danger'}
             />
           </Box>
@@ -175,7 +175,7 @@ const ErrorReportModal = ({ error, errorInfo, onClose, open }) => {
               level='h4'
               sx={{ fontWeight: 700, letterSpacing: '-0.01em' }}
             >
-              {isBugReport ? 'Report a bug' : 'Report this problem'}
+              {isBugReport ? 'Report an issue' : 'Report this problem'}
             </Typography>
             <Typography
               level='body-sm'
