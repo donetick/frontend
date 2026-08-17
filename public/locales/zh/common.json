@@ -30,7 +30,7 @@
     "activities": "Activities",
     "points": "Points",
     "settings": "Settings",
-    "reportBug": "Report a Bug"
+    "reportBug": "Report an Issue"
   },
   "search": {
     "title": "搜索",
@@ -41,7 +41,8 @@
     "recent": "最近",
     "empty": {
       "title": "没有直接匹配的结果",
-      "subtitle": "你仍然可以用此搜索筛选任务列表。"
+      "subtitle": "你仍然可以用此搜索筛选任务列表。",
+      "actionsSubtitle": "No view or action matches. Press backspace to search everything."
     },
     "groups": {
       "tasks": "任务",
@@ -76,7 +77,14 @@
       "open": "打开",
       "results_one": "{{count}} result",
       "results_other": "{{count}} 个结果",
-      "typeToSearch": "输入以搜索"
+      "typeToSearch": "输入以搜索",
+      "slashHint": "/ to jump to a view"
+    },
+    "modes": {
+      "actions": {
+        "label": "Go to",
+        "placeholder": "Jump to a view or action"
+      }
     }
   },
   "policyUpdate": {
