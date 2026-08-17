@@ -31,7 +31,8 @@ Build a signed, App Store-ready .ipa
 
 Upload the built .ipa to TestFlight
 
----
+----
+
 
 ## Android
 
@@ -59,7 +60,7 @@ Build a signed release .apk (for sideloading/testing)
 
 Upload the built .aab to the Play Store (internal testing track by default)
 
----
+----
 
 This README.md is auto-generated and will be re-generated every time [_fastlane_](https://fastlane.tools) is run.
 
