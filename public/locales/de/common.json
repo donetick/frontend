@@ -30,7 +30,7 @@
     "activities": "Aktivitäten",
     "points": "Punkte",
     "settings": "Einstellungen",
-    "reportBug": "Report a Bug"
+    "reportBug": "Report an Issue"
   },
   "search": {
     "title": "Suche",
@@ -41,7 +41,8 @@
     "recent": "Zuletzt verwendet",
     "empty": {
       "title": "Keine direkten Treffer",
-      "subtitle": "Du kannst die Aufgabenliste trotzdem mit dieser Suche filtern."
+      "subtitle": "Du kannst die Aufgabenliste trotzdem mit dieser Suche filtern.",
+      "actionsSubtitle": "No view or action matches. Press backspace to search everything."
     },
     "groups": {
       "tasks": "Aufgaben",
@@ -76,7 +77,14 @@
       "open": "Öffnen",
       "results_one": "{{count}} Ergebnis",
       "results_other": "{{count}} Ergebnisse",
-      "typeToSearch": "Zum Suchen tippen"
+      "typeToSearch": "Zum Suchen tippen",
+      "slashHint": "/ to jump to a view"
+    },
+    "modes": {
+      "actions": {
+        "label": "Go to",
+        "placeholder": "Jump to a view or action"
+      }
     }
   },
   "policyUpdate": {
