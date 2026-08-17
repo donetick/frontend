@@ -1,4 +1,3 @@
-import LogoSVG from '@/assets/logo.svg'
 import { Email, GitHub } from '@mui/icons-material'
 import {
   Box,
@@ -9,6 +8,9 @@ import {
   Link,
   Typography,
 } from '@mui/joy'
+
+import LogoSVG from '@/assets/logo.svg'
+
 import { version } from '../../../package.json'
 import DiscordIcon from '../../components/icons/DiscordIcon'
 import RedditIcon from '../../components/icons/RedditIcon'
@@ -333,7 +335,6 @@ const Footer = () => {
             <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
               Version {version}
             </Typography>
-         
           </Box>
         </Box>
       </Container>

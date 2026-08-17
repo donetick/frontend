@@ -4,7 +4,9 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 import WifiIcon from '@mui/icons-material/Wifi'
 import { Alert, Box, Button, CircularProgress, Typography } from '@mui/joy'
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+
 import { API_URL } from '../../Config'
 import { useResource } from '../../queries/ResourceQueries'
 import { apiClient } from '../../utils/ApiClient'
@@ -12,7 +14,6 @@ import { offlineDB } from '../../utils/OfflineDB'
 import { AuthSubmitButton, AuthTextField } from './AuthFields'
 import AuthShell from './AuthShell'
 import { authButtonSx } from './authStyles'
-import { useTranslation } from 'react-i18next'
 
 const CONNECTION_TIMEOUT_MS = 8000
 
@@ -106,8 +107,7 @@ const LoginSettings = () => {
           ) {
             return {
               ok: false,
-              message:
-                t('server.dnsFailed'),
+              message: t('server.dnsFailed'),
             }
           }
           return {
@@ -119,16 +119,14 @@ const LoginSettings = () => {
         // no-cors also timed out → server/host truly unreachable
         return {
           ok: false,
-          message:
-            t('server.unreachable'),
+          message: t('server.unreachable'),
         }
       }
 
       // Fallback (should rarely hit)
       return {
         ok: false,
-        message:
-          t('server.unreachable'),
+        message: t('server.unreachable'),
       }
     }
   }
@@ -145,9 +143,7 @@ const LoginSettings = () => {
 
     if (!isValidURL(trimmedURL)) {
       setStatus('error')
-      setErrorMessage(
-        t('server.invalidUrl'),
-      )
+      setErrorMessage(t('server.invalidUrl'))
       return
     }
 

@@ -1,10 +1,11 @@
 import { FormControl, FormHelperText, Input, Typography } from '@mui/joy'
 import { useState } from 'react'
-import ModalActions from '../../../components/common/ModalActions'
-import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { useTranslation } from 'react-i18next'
 
-function EditThingStateModal({ isOpen, onClose, onSave, currentThing }) {
+import ModalActions from '../../../components/common/ModalActions'
+import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
+
+function EditThingStateModal({ currentThing, isOpen, onClose, onSave }) {
   const { t } = useTranslation('things')
   const { ResponsiveModal } = useResponsiveModal()
 

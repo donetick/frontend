@@ -82,11 +82,15 @@
 
 /* Height utilities that account for safe areas */
 .min-h-screen-safe {
-  min-height: calc(100vh - var(--safe-area-inset-top) - var(--safe-area-inset-bottom));
+  min-height: calc(
+    100vh - var(--safe-area-inset-top) - var(--safe-area-inset-bottom)
+  );
 }
 
 .h-screen-safe {
-  height: calc(100vh - var(--safe-area-inset-top) - var(--safe-area-inset-bottom));
+  height: calc(
+    100vh - var(--safe-area-inset-top) - var(--safe-area-inset-bottom)
+  );
 }
 
 /* Top positioning that accounts for safe area */

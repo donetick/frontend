@@ -1053,7 +1053,10 @@ const ArchivedTasks = () => {
             }
             primaryAction={
               searchTerm
-                ? { label: t('archived.clearSearch'), onClick: handleSearchClose }
+                ? {
+                    label: t('archived.clearSearch'),
+                    onClick: handleSearchClose,
+                  }
                 : { label: t('archived.clearFilters'), onClick: clearAll }
             }
             secondaryAction={

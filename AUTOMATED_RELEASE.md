@@ -12,15 +12,16 @@ Builds and (optionally) uploads signed Android and iOS release artifacts from th
 
 Common flags on `release.sh`:
 
-| Flag | Effect |
-|---|---|
-| `--android` / `--ios` | Build only one platform |
-| `--bump minor\|major` | Bump type (default: `patch`) |
-| `--skip-bump` | Build with the current version, don't bump |
-| `--upload` | Upload after building |
-| `--track TRACK` | Play Store track for `--upload` (default: `internal`) |
+| Flag                  | Effect                                                |
+| --------------------- | ----------------------------------------------------- |
+| `--android` / `--ios` | Build only one platform                               |
+| `--bump minor\|major` | Bump type (default: `patch`)                          |
+| `--skip-bump`         | Build with the current version, don't bump            |
+| `--upload`            | Upload after building                                 |
+| `--track TRACK`       | Play Store track for `--upload` (default: `internal`) |
 
 Outputs:
+
 - Android: `android/app/build/outputs/bundle/release/app-release.aab`
 - iOS: `build/ios/Donetick.ipa`
 
@@ -36,15 +37,15 @@ Outputs:
 
 All secrets live in Vaultwarden (`https://www.bitwarden.com`) as Secure Notes, named exactly as below:
 
-| Vault item name | Written to | Encoding |
-|---|---|---|
-| Donetick Google Services Android | `android/app/google-services.json` | raw |
-| Donetick Android Keystore | `android/app/release/donetick.jks` | base64 |
-| Donetick Keystore Password | (used inline for `android/keystore.properties`) | raw |
-| Donetick Google Play Service Account | `android/play-service-account.json` | raw |
-| Donetick Google Services iOS | `ios/App/App/GoogleService-Info.plist` | raw |
-| Donetick App Store Connect Key | `ios/AuthKey_84F695CDQ3.p8` | base64 |
-| Donetick Env Production | `.env.production` | raw |
+| Vault item name                      | Written to                                      | Encoding |
+| ------------------------------------ | ----------------------------------------------- | -------- |
+| Donetick Google Services Android     | `android/app/google-services.json`              | raw      |
+| Donetick Android Keystore            | `android/app/release/donetick.jks`              | base64   |
+| Donetick Keystore Password           | (used inline for `android/keystore.properties`) | raw      |
+| Donetick Google Play Service Account | `android/play-service-account.json`             | raw      |
+| Donetick Google Services iOS         | `ios/App/App/GoogleService-Info.plist`          | raw      |
+| Donetick App Store Connect Key       | `ios/AuthKey_84F695CDQ3.p8`                     | base64   |
+| Donetick Env Production              | `.env.production`                               | raw      |
 
 None of these files are committed to git — all covered by `.gitignore`.
 
@@ -57,6 +58,7 @@ The App target uses **manual signing for Release**, not Automatic. This was a de
 - `fastlane/Fastfile`'s `ios release` lane passes explicit `export_options: { signingStyle: "manual", provisioningProfiles: {...} }` to `build_app` — do **not** switch this back to `-allowProvisioningUpdates`/automatic without a good reason, it re-triggers the ambiguous cert selection.
 
 **If you ever add/change an entitlement** (new Capability in Signing & Capabilities, e.g. a new permission), the existing provisioning profile becomes stale and exports will fail with an error like `"App.app" requires a provisioning profile with the X feature`. Fix:
+
 1. developer.apple.com → Identifiers → `com.donetick.app` → confirm the new capability is checked
 2. developer.apple.com → Profiles → find `Donetick App Store(fastline)` → regenerate it → download
 3. Install it locally: get its UUID (`security cms -D -i <file>.mobileprovision | plutil -extract UUID xml1 -o - -`) and copy to `~/Library/MobileDevice/Provisioning Profiles/<uuid>.mobileprovision`

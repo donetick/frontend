@@ -57,6 +57,15 @@ export default [
     },
   },
   {
+    files: ['e2e/**/*.{js,mjs}'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+        ...globals.browser,
+      },
+    },
+  },
+  {
     files: ['*.config.{mjs,ts}'],
     languageOptions: {
       ecmaVersion: 'latest',

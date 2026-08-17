@@ -194,7 +194,7 @@ class SyncEngine {
         break
 
       case CommandType.COMPLETE_CHORE: {
-        const { id, body, completedDate, performer } = cmd.payload
+        const { body, completedDate, id, performer } = cmd.payload
         response = await MarkChoreComplete(
           id,
           body || {},
@@ -221,7 +221,7 @@ class SyncEngine {
         break
 
       case CommandType.UPDATE_CHORE_HISTORY: {
-        const { choreId, historyId, historyData } = cmd.payload
+        const { choreId, historyData, historyId } = cmd.payload
         response = await UpdateChoreHistory(choreId, historyId, historyData)
         break
       }
@@ -233,7 +233,7 @@ class SyncEngine {
       }
 
       case CommandType.RESCHEDULE_CHORE: {
-        const { id, dueDate } = cmd.payload
+        const { dueDate, id } = cmd.payload
         response = await UpdateDueDate(id, dueDate)
         break
       }

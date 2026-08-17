@@ -9,22 +9,23 @@ import {
   Switch,
   Typography,
 } from '@mui/joy'
+import { useTranslation } from 'react-i18next'
+
 import { useSSEContext } from '../hooks/useSSEContext'
 import { useUserProfile } from '../queries/UserQueries'
 import { isPlusAccount } from '../utils/Helpers'
 import SSEConnectionStatus from './SSEConnectionStatus'
-import { useTranslation } from 'react-i18next'
 
 const SSESettings = () => {
   const { t } = useTranslation('settings')
   const { data: userProfile } = useUserProfile()
   const {
-    isConnected,
-    isConnecting,
     error,
     getConnectionStatus,
-    toggleSSEEnabled,
+    isConnected,
+    isConnecting,
     isSSEEnabled,
+    toggleSSEEnabled,
   } = useSSEContext()
 
   const handleToggle = () => {

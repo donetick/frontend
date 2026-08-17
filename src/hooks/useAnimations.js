@@ -8,7 +8,7 @@ export const useReducedMotion = () => {
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
     setPrefersReducedMotion(mediaQuery.matches)
 
-    const handleChange = (event) => {
+    const handleChange = event => {
       setPrefersReducedMotion(event.matches)
     }
 
@@ -32,13 +32,13 @@ export const useStaggeredAnimation = (itemCount, delay = 50) => {
     }
 
     const timeouts = []
-    
+
     // Stagger the appearance of items
     for (let i = 0; i < itemCount; i++) {
       const timeout = setTimeout(() => {
         setVisibleItems(prev => new Set([...prev, i]))
       }, i * delay)
-      
+
       timeouts.push(timeout)
     }
 
@@ -62,7 +62,7 @@ export const useInViewAnimation = (threshold = 0.1) => {
       ([entry]) => {
         setIsInView(entry.isIntersecting)
       },
-      { threshold }
+      { threshold },
     )
 
     observer.observe(element)

@@ -1,8 +1,9 @@
 import { FormControl, FormHelperText, Input, Typography } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
-import { useTranslation } from 'react-i18next'
 
 function PasswordChangeModal({ isOpen, onClose }) {
   const { t } = useTranslation('settings')
@@ -44,7 +45,10 @@ function PasswordChangeModal({ isOpen, onClose }) {
       description='Choose a password between 8 and 64 characters.'
       footer={
         <ModalActions
-          secondary={{ label: t('accountSettings.cancel'), onClick: () => handleAction(false) }}
+          secondary={{
+            label: t('accountSettings.cancel'),
+            onClick: () => handleAction(false),
+          }}
           primary={{
             label: t('accountSettings.changePassword'),
             disabled: !canSubmit,

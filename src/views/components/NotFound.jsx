@@ -1,5 +1,6 @@
 import { Explore, HomeRounded } from '@mui/icons-material'
 import { Container } from '@mui/joy'
+
 import EmptyState from '../../components/common/EmptyState'
 
 const NotFound = () => {

@@ -1,7 +1,7 @@
 # Crowdin configuration for Donetick
 # See: https://support.crowdin.com/configuration-file/
 
-project_id: "donetick"
+project_id: 'donetick'
 api_token_env: CROWDIN_API_TOKEN
 preserve_hierarchy: true
 

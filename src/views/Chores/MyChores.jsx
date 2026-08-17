@@ -23,6 +23,7 @@ import {
 import { useMediaQuery } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import EmptyState from '../../components/common/EmptyState'
@@ -73,7 +74,6 @@ import {
 import NotificationAccessSnackbar from './NotificationAccessSnackbar'
 import Sidepanel from './Sidepanel'
 import { INSIGHT_FILTER_DEFS } from './SmartInsightsCard'
-import { useTranslation } from 'react-i18next'
 
 // Mirrors the assignee options in the toolbar, phrased to drop into a
 // sentence ("none of them are assigned to you").
@@ -1667,7 +1667,9 @@ const MyChores = () => {
             saveFilter(filter)
             showSuccess({
               title: t('list.advancedFilterCreated'),
-              message: t('list.advancedFilterCreatedMsg', { name: filter.name }),
+              message: t('list.advancedFilterCreatedMsg', {
+                name: filter.name,
+              }),
             })
           }
           setShowAdvancedFilterBuilder(false)

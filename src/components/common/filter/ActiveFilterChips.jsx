@@ -1,6 +1,5 @@
 import { Add, Close } from '@mui/icons-material'
 import { Box, Button, Chip, ChipDelete, Typography } from '@mui/joy'
-
 import { useTranslation } from 'react-i18next'
 
 const ActiveFilterChips = ({

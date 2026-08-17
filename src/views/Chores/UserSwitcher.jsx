@@ -1,19 +1,19 @@
 import { SupervisorAccount } from '@mui/icons-material'
 import { Avatar, Box, Button, Sheet, Typography } from '@mui/joy'
-
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import UserModal from '../Modals/Inputs/UserModal'
 const UserSwitcher = () => {
   const { t } = useTranslation('chores')
   const {
-    impersonatedUser, 
+    canImpersonate,
+    impersonatedUser,
     isImpersonating,
-    startImpersonation, 
+    startImpersonation,
     stopImpersonation,
-    canImpersonate 
   } = useImpersonateUser()
   const { data: userProfile } = useUserProfile()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -54,7 +54,9 @@ const UserSwitcher = () => {
               }}
             >
               <SupervisorAccount color='' />
-              <Typography level='title-md'>{t('impersonate.viewAs')}</Typography>
+              <Typography level='title-md'>
+                {t('impersonate.viewAs')}
+              </Typography>
             </Box>
           </Box>
           <Box sx={{ mb: 2 }}>

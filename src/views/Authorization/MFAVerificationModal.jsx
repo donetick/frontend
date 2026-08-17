@@ -1,18 +1,18 @@
 import { Alert, Box, Input, Link, Stack, Typography } from '@mui/joy'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import ModalActions from '../../components/common/ModalActions'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import { VerifyMFA } from '../../utils/Fetcher'
 import { authInputSx } from './authStyles'
-import { useTranslation } from 'react-i18next'
 
 const MFAVerificationModal = ({
-  open,
   onClose,
-  sessionToken,
-  onSuccess,
   onError,
+  onSuccess,
+  open,
+  sessionToken,
 }) => {
   const { t } = useTranslation('auth')
   const [verificationCode, setVerificationCode] = useState('')
@@ -38,8 +38,7 @@ const MFAVerificationModal = ({
         onSuccess(data)
       } else {
         const errorData = await response.json()
-        const message =
-          errorData.message || t('mfaModal.invalidCode')
+        const message = errorData.message || t('mfaModal.invalidCode')
         setError(message)
         onError?.(message)
       }
@@ -77,9 +76,7 @@ const MFAVerificationModal = ({
       size='md'
       title={t('mfaModal.title')}
       description={
-        isBackupCode
-          ? t('mfaModal.backupHint')
-          : t('mfaModal.codeHint')
+        isBackupCode ? t('mfaModal.backupHint') : t('mfaModal.codeHint')
       }
       closeOnBackdrop={!loading}
       closeOnEscape={!loading}
@@ -112,7 +109,9 @@ const MFAVerificationModal = ({
           <Input
             id='mfa-code'
             size='lg'
-            placeholder={isBackupCode ? t('mfaModal.backupPlaceholder') : '000000'}
+            placeholder={
+              isBackupCode ? t('mfaModal.backupPlaceholder') : '000000'
+            }
             value={verificationCode}
             onChange={e => setVerificationCode(e.target.value)}
             onKeyDown={handleKeyDown}

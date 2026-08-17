@@ -9,6 +9,7 @@ import {
   TaskAlt,
 } from '@mui/icons-material'
 import { Avatar, Box, Chip, Divider, Input, Typography } from '@mui/joy'
+
 import Priorities from '../../../utils/Priorities'
 
 export const DUE_DATE_OPTIONS = [
@@ -99,7 +100,7 @@ export const selectionsToConditions = selections => {
   return conditions
 }
 
-const SectionHeader = ({ icon, label, children }) => (
+const SectionHeader = ({ children, icon, label }) => (
   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
     <Box
       sx={{
@@ -119,9 +120,9 @@ const SectionHeader = ({ icon, label, children }) => (
 )
 
 const IncludeExcludeToggle = ({
-  value,
-  onChange,
   labels = ['Include', 'Exclude'],
+  onChange,
+  value,
 }) => (
   <Box sx={{ display: 'flex', gap: 0.5, ml: 'auto' }}>
     {[
@@ -136,7 +137,11 @@ const IncludeExcludeToggle = ({
           value === o.op ? (o.op === 'isNot' ? 'danger' : 'primary') : 'neutral'
         }
         onClick={() => onChange(o.op)}
-        sx={{ cursor: 'pointer', userSelect: 'none', transition: 'all 0.15s ease' }}
+        sx={{
+          cursor: 'pointer',
+          userSelect: 'none',
+          transition: 'all 0.15s ease',
+        }}
       >
         {o.label}
       </Chip>
@@ -152,11 +157,11 @@ const IncludeExcludeToggle = ({
  * functional updater `prev => next` (same contract as React's setState setter).
  */
 const FilterBuilderContent = ({
-  selections,
-  onSelectionsChange,
-  members = [],
   labels = [],
+  members = [],
+  onSelectionsChange,
   projects = [],
+  selections,
 }) => {
   const toggleValue = (type, value) =>
     onSelectionsChange(prev => {
@@ -204,9 +209,11 @@ const FilterBuilderContent = ({
               variant={isSelected ? 'solid' : 'soft'}
               color={isSelected ? (extra.color ?? 'primary') : 'neutral'}
               startDecorator={
-                isSelected
-                  ? <Check sx={{ fontSize: 14 }} />
-                  : (extra.startDecorator ?? null)
+                isSelected ? (
+                  <Check sx={{ fontSize: 14 }} />
+                ) : (
+                  (extra.startDecorator ?? null)
+                )
               }
               onClick={() => toggleValue(type, opt.value)}
               sx={{
@@ -312,7 +319,7 @@ const FilterBuilderContent = ({
         Priorities.map(p => ({ value: p.value, label: p.name })),
         (opt, isSelected) => ({
           color: isSelected
-            ? (Priorities.find(p => p.value === opt.value)?.color || 'primary')
+            ? Priorities.find(p => p.value === opt.value)?.color || 'primary'
             : 'neutral',
           startDecorator: !isSelected
             ? Priorities.find(p => p.value === opt.value)?.icon
@@ -331,7 +338,9 @@ const FilterBuilderContent = ({
               key={opt.value}
               variant={isSelected ? 'solid' : 'soft'}
               color={isSelected ? (opt.color ?? 'primary') : 'neutral'}
-              startDecorator={isSelected ? <Check sx={{ fontSize: 14 }} /> : null}
+              startDecorator={
+                isSelected ? <Check sx={{ fontSize: 14 }} /> : null
+              }
               onClick={() => toggleDueDate(opt.value)}
               sx={{
                 cursor: 'pointer',
@@ -375,7 +384,9 @@ const FilterBuilderContent = ({
                       }}
                     />
                   }
-                  endDecorator={isSelected ? <Check sx={{ fontSize: 12 }} /> : null}
+                  endDecorator={
+                    isSelected ? <Check sx={{ fontSize: 12 }} /> : null
+                  }
                   onClick={() => toggleValue('label', lbl.id)}
                   sx={{
                     cursor: 'pointer',
@@ -425,12 +436,14 @@ const FilterBuilderContent = ({
             key={op.value}
             size='sm'
             variant={
-              selections.points.operator === op.value && selections.points.active
+              selections.points.operator === op.value &&
+              selections.points.active
                 ? 'solid'
                 : 'soft'
             }
             color={
-              selections.points.operator === op.value && selections.points.active
+              selections.points.operator === op.value &&
+              selections.points.active
                 ? 'primary'
                 : 'neutral'
             }

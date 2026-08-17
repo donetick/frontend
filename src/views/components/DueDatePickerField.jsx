@@ -2,18 +2,19 @@ import { CalendarMonth, Close } from '@mui/icons-material'
 import { Box, Button, IconButton, Typography } from '@mui/joy'
 import moment from 'moment'
 import { useMemo, useState } from 'react'
+
 import DueDatePickerModal from './DueDatePickerModal'
 
 const DueDatePickerField = ({
   dueDateOnly,
   dueTime,
-  useCustomTime,
+  emptyDisplay = 'icon-text',
+  onClear,
   onDueDateChange,
   onDueTimeChange,
   onUseCustomTimeChange,
-  onClear,
-  emptyDisplay = 'icon-text',
   size = 'sm',
+  useCustomTime,
 }) => {
   const [isOpen, setIsOpen] = useState(false)
 

@@ -6,7 +6,9 @@ const browser = await chromium.launch()
 const context = await browser.newContext({ storageState: state })
 const page = await context.newPage()
 page.on('console', msg => console.log('[console]', msg.type(), msg.text()))
-page.on('pageerror', err => console.log('[pageerror]', err.message, '\n', err.stack))
+page.on('pageerror', err =>
+  console.log('[pageerror]', err.message, '\n', err.stack),
+)
 
 await page.goto('http://localhost:5173/chores/create')
 await page.getByTestId('chore-name-input').fill('Debug Chore ' + Date.now())

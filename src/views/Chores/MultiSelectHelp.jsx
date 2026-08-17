@@ -1,9 +1,10 @@
 import { HelpOutline } from '@mui/icons-material'
 import { Box, Card, IconButton, Typography } from '@mui/joy'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import ModalActions from '../../components/common/ModalActions'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
-import { useTranslation } from 'react-i18next'
 
 const MultiSelectHelp = ({ isVisible = true }) => {
   const { t } = useTranslation('chores')
@@ -102,7 +103,7 @@ const MultiSelectHelp = ({ isVisible = true }) => {
   )
 }
 
-const ShortcutItem = ({ keys, description }) => (
+const ShortcutItem = ({ description, keys }) => (
   <Box
     sx={{
       display: 'flex',

@@ -13,8 +13,8 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 const isValidTrigger = (thing, condition, triggerState) => {
   const newErrors = {}
   if (!thing || !triggerState) {
@@ -49,11 +49,11 @@ const isValidTrigger = (thing, condition, triggerState) => {
 }
 
 const ThingTriggerSection = ({
-  things,
+  isAttepmtingToSave,
   onTriggerUpdate,
   onValidate,
   selected,
-  isAttepmtingToSave,
+  things,
 }) => {
   const { t } = useTranslation('chores')
   const [selectedThing, setSelectedThing] = useState(null)
@@ -86,9 +86,7 @@ const ThingTriggerSection = ({
 
   return (
     <Card sx={{ mt: 1 }}>
-      <Typography level='h5'>
-        {t('thing.triggerHint')}
-      </Typography>
+      <Typography level='h5'>{t('thing.triggerHint')}</Typography>
       {things?.length === 0 && (
         <Typography level='body-sm'>
           it's look like you don't have any things yet, create a thing to

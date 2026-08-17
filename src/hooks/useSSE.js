@@ -2,12 +2,13 @@ import { Capacitor } from '@capacitor/core'
 import { useQueryClient } from '@tanstack/react-query'
 import { EventSourcePolyfill } from 'event-source-polyfill'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import { useUserProfile } from '../queries/UserQueries'
 import { useAlerts } from '../service/AlertsProvider'
 import { useNotification } from '../service/NotificationProvider'
 import { apiClient } from '../utils/ApiClient'
 import { useAuth } from './useAuth.jsx'
-import { useTranslation } from 'react-i18next'
 
 const SSE_STATES = {
   CONNECTING: 0,

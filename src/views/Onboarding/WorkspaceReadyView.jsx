@@ -8,9 +8,9 @@ import { useNavigate } from 'react-router-dom'
 import { track } from '../../analytics'
 import Logo from '../../Logo'
 import { useUserProfile } from '../../queries/UserQueries'
+import { isOfficialDonetickInstance } from '../../utils/FeatureToggle'
 import { haptic } from '../../utils/Onboarding'
 import { authButtonSx } from '../Authorization/authStyles'
-import { isOfficialDonetickInstance } from '../../utils/FeatureToggle'
 
 const EASE = 'cubic-bezier(0.22, 1, 0.36, 1)'
 
@@ -41,7 +41,8 @@ const WorkspaceReadyView = () => {
    */
   const showPaywall = async () => {
     const isDonetickDotCom = await isOfficialDonetickInstance()
-    if (!isDonetickDotCom || !Capacitor.isNativePlatform() || !userProfile?.id) return
+    if (!isDonetickDotCom || !Capacitor.isNativePlatform() || !userProfile?.id)
+      return
 
     const { Purchases } = await import('@revenuecat/purchases-capacitor')
     const { RevenueCatUI } = await import('@revenuecat/purchases-capacitor-ui')

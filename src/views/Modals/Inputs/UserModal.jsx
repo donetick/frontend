@@ -1,9 +1,10 @@
 import { Avatar, Box, List, ListItem, Typography } from '@mui/joy'
-import ModalActions from '../../../components/common/ModalActions'
-import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { useTranslation } from 'react-i18next'
 
-const UserModal = ({ isOpen, performers = [], onSelect, onClose }) => {
+import ModalActions from '../../../components/common/ModalActions'
+import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
+
+const UserModal = ({ isOpen, onClose, onSelect, performers = [] }) => {
   const { t } = useTranslation('common')
   const { ResponsiveModal } = useResponsiveModal()
 

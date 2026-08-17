@@ -9,10 +9,11 @@ import {
 } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import ModalActions from '../../components/common/ModalActions'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import { commandQueue } from '../../utils/CommandQueue'
-import { useTranslation } from 'react-i18next'
 
 const LABELS = {
   complete_chore: 'Complete pending',

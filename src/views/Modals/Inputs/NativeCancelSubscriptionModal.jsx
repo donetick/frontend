@@ -1,4 +1,5 @@
 import { Box, Typography } from '@mui/joy'
+
 import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 

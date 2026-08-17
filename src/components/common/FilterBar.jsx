@@ -10,9 +10,10 @@ import {
   Typography,
 } from '@mui/joy'
 import { useState } from 'react'
+
 import AppModal from './AppModal'
-import ModalActions from './ModalActions'
 import ActiveFilterChips from './filter/ActiveFilterChips'
+import ModalActions from './ModalActions'
 
 /**
  * Reusable filter bar component.
@@ -141,17 +142,17 @@ const fmtDisplayDate = iso => {
 // ── Component ────────────────────────────────────────────────────────────────
 
 const FilterBar = ({
-  filterDefs,
   activeFilters,
-  onSetFilter,
+  filterDefs,
   onClearAll,
-  resultCount,
-  totalCount,
+  onOpenChange,
+  onSetFilter,
+  open,
   // When the host renders its own trigger (e.g. an icon button in a toolbar
   // row), it drives the sheet through `open`/`onOpenChange` and hides ours.
-  open,
-  onOpenChange,
+  resultCount,
   showTrigger = true,
+  totalCount,
 }) => {
   const [internalOpen, setInternalOpen] = useState(false)
   const isControlled = open !== undefined

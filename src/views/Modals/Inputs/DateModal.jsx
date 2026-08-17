@@ -1,10 +1,11 @@
 import { Input } from '@mui/joy'
 import { useState } from 'react'
-import ModalActions from '../../../components/common/ModalActions'
-import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { useTranslation } from 'react-i18next'
 
-function DateModal({ isOpen, onClose, onSave, current, title }) {
+import ModalActions from '../../../components/common/ModalActions'
+import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
+
+function DateModal({ current, isOpen, onClose, onSave, title }) {
   const { t } = useTranslation('common')
   const { ResponsiveModal } = useResponsiveModal()
   const [date, setDate] = useState(

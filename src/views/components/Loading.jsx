@@ -2,8 +2,9 @@ import { Box, Button, CircularProgress, Container } from '@mui/joy'
 import { Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import Logo from '../../Logo'
+
 import { networkManager } from '../../hooks/NetworkManager'
+import Logo from '../../Logo'
 
 const LoadingComponent = () => {
   const { t } = useTranslation('common')
