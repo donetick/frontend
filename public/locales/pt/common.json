@@ -30,7 +30,7 @@
     "activities": "Atividades",
     "points": "Pontos",
     "settings": "Configurações",
-    "reportBug": "Report a Bug"
+    "reportBug": "Report an Issue"
   },
   "search": {
     "title": "Pesquisar",
@@ -41,7 +41,8 @@
     "recent": "Recentes",
     "empty": {
       "title": "Nenhuma correspondência direta",
-      "subtitle": "Você ainda pode filtrar a lista de tarefas com esta pesquisa."
+      "subtitle": "Você ainda pode filtrar a lista de tarefas com esta pesquisa.",
+      "actionsSubtitle": "No view or action matches. Press backspace to search everything."
     },
     "groups": {
       "tasks": "Tarefas",
@@ -76,7 +77,14 @@
       "open": "Abrir",
       "results_one": "{{count}} resultado",
       "results_other": "{{count}} resultados",
-      "typeToSearch": "Digite para pesquisar"
+      "typeToSearch": "Digite para pesquisar",
+      "slashHint": "/ to jump to a view"
+    },
+    "modes": {
+      "actions": {
+        "label": "Go to",
+        "placeholder": "Jump to a view or action"
+      }
     }
   },
   "policyUpdate": {
