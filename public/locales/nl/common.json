@@ -30,7 +30,7 @@
     "activities": "Activiteiten",
     "points": "Punten",
     "settings": "Instellingen",
-    "reportBug": "Report a Bug"
+    "reportBug": "Report an Issue"
   },
   "search": {
     "title": "Zoeken",
@@ -41,7 +41,8 @@
     "recent": "Recent",
     "empty": {
       "title": "Geen directe resultaten",
-      "subtitle": "Je kunt de takenlijst nog steeds filteren met deze zoekopdracht."
+      "subtitle": "Je kunt de takenlijst nog steeds filteren met deze zoekopdracht.",
+      "actionsSubtitle": "No view or action matches. Press backspace to search everything."
     },
     "groups": {
       "tasks": "Taken",
@@ -76,7 +77,14 @@
       "open": "Openen",
       "results_one": "{{count}} resultaat",
       "results_other": "{{count}} resultaten",
-      "typeToSearch": "Typ om te zoeken"
+      "typeToSearch": "Typ om te zoeken",
+      "slashHint": "/ to jump to a view"
+    },
+    "modes": {
+      "actions": {
+        "label": "Go to",
+        "placeholder": "Jump to a view or action"
+      }
     }
   },
   "policyUpdate": {
