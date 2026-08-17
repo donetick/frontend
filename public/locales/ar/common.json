@@ -30,7 +30,7 @@
     "activities": "الأنشطة",
     "points": "النقاط",
     "settings": "الإعدادات",
-    "reportBug": "Report a Bug"
+    "reportBug": "Report an Issue"
   },
   "search": {
     "title": "بحث",
@@ -41,7 +41,8 @@
     "recent": "الأخيرة",
     "empty": {
       "title": "لا توجد نتائج مطابقة",
-      "subtitle": "لا يزال بإمكانك تصفية قائمة المهام باستخدام هذا البحث."
+      "subtitle": "لا يزال بإمكانك تصفية قائمة المهام باستخدام هذا البحث.",
+      "actionsSubtitle": "No view or action matches. Press backspace to search everything."
     },
     "groups": {
       "tasks": "المهام",
@@ -76,7 +77,14 @@
       "open": "فتح",
       "results_one": "نتيجة واحدة",
       "results_other": "{{count}} نتيجة",
-      "typeToSearch": "اكتب للبحث"
+      "typeToSearch": "اكتب للبحث",
+      "slashHint": "/ to jump to a view"
+    },
+    "modes": {
+      "actions": {
+        "label": "Go to",
+        "placeholder": "Jump to a view or action"
+      }
     }
   },
   "policyUpdate": {
