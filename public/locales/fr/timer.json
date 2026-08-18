@@ -35,5 +35,11 @@
   "endTime": "End Time",
   "leaveEmpty": "Leave empty if session is ongoing",
   "noSessionForChore": "No timer session found for this chore.",
-  "saveChanges": "Save Changes"
+  "saveChanges": "Save Changes",
+  "emptySessionsTitle": "No work sessions yet",
+  "emptySessionsDescription": "Start the timer on this task and each session lands here.",
+  "percentActive": "{{percent}}% active",
+  "activityTimeline": "Activity Timeline",
+  "liveSession": "Live Session",
+  "live": "Live"
 }
