@@ -15,7 +15,17 @@ import globals from 'globals'
 
 export default [
   {
-    ignores: ['dist'],
+    ignores: [
+      'dist',
+      'build',
+      'vendor',
+      'android',
+      'ios',
+      'resources',
+      'public/assets',
+      '.agents',
+      '.impeccable',
+    ],
   },
   js.configs.recommended,
   react.configs.flat.recommended,
@@ -51,7 +61,11 @@ export default [
   eslintConfigPrettier, // Disable any rules that conflict with prettier
   eslintPluginPrettierRecommended,
   {
-    files: ['*.{js,ts}'],
+    files: [
+      '*.{js,mjs,cjs,ts}',
+      'scripts/**/*.{js,mjs,cjs,ts}',
+      'workers/**/*.{js,mjs,cjs,ts}',
+    ],
     languageOptions: {
       globals: globals.node,
     },
@@ -72,9 +86,9 @@ export default [
       sourceType: 'module',
     },
     rules: {
+      // Formatting rules (indent, space-infix-ops) are owned by prettier here —
+      // re-enabling them fights prettier/prettier and makes --fix unable to converge.
       eqeqeq: 'error',
-      indent: ['error', 2],
-      'space-infix-ops': ['error', { int32Hint: false }],
     },
   },
   {

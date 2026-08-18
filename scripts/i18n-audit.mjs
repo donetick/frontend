@@ -52,7 +52,8 @@ const lookup = (ns, key) =>
 const exists = (ns, key) => {
   if (lookup(ns, key) !== null) return true
   const dot = key.lastIndexOf('.')
-  const parent = dot === -1 ? (bundles[ns] ?? null) : lookup(ns, key.slice(0, dot))
+  const parent =
+    dot === -1 ? (bundles[ns] ?? null) : lookup(ns, key.slice(0, dot))
   const leaf = key.slice(dot + 1)
   return (
     parent !== null &&
