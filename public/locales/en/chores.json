@@ -394,8 +394,23 @@
     "failedScan": "Failed scan"
   },
   "descriptionPlaceholder": "Enter description...",
-  "notifTemplate": {
+  "notificationTemplate": {
     "onDueDate": "On due date",
+    "timing": {
+      "before": "Before",
+      "ondue": "Due",
+      "after": "After"
+    },
+    "unitName": {
+      "m": "minutes",
+      "h": "hours",
+      "d": "days"
+    },
+    "unitShort": {
+      "m": "Mins",
+      "h": "Hours",
+      "d": "Days"
+    },
     "beforeDue": "{{count}} {{unit}} before due",
     "afterDue": "{{count}} {{unit}} after due",
     "errDuplicate": "This notification setting already exists. Please use a different timing.",

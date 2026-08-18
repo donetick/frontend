@@ -202,7 +202,7 @@ const AdvancedFilterBuilder = ({
             {FILTER_COLORS.map(c => (
               <Box
                 key={c.value}
-                title={t(`common:colors.${c.key}`)}
+                title={t(`common:colors.${c.name}`)}
                 onClick={() => setFilterColor(c.value)}
                 sx={{
                   width: 26,

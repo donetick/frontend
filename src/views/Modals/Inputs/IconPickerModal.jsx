@@ -90,7 +90,7 @@ const IconPickerModal = ({
                       lineHeight: 1.2,
                     }}
                   >
-                    {t(`icons.${iconData.key}`)}
+                    {t(`icons.${iconData.value}`)}
                   </Typography>
                 </Box>
               </Grid>
