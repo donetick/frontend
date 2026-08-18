@@ -243,5 +243,90 @@
     "cancelAll": "Cancel All"
   },
   "attachments": "Attachments",
-  "fileNumbered": "File {{index}}"
+  "fileNumbered": "File {{index}}",
+  "onboarding": {
+    "sources": {
+      "speak": "Speak",
+      "snap": "Snap",
+      "type": "Type"
+    },
+    "capture": {
+      "voiceCaption": "Dates, labels and points from your words",
+      "deviceCaption": "Read on your device",
+      "typeCaption": "#labels @people *points as you type",
+      "trashTitle": "♻️ Take out the trash",
+      "trashDue": "Due tomorrow",
+      "trashRepeat": "Every Monday",
+      "homeLabel": "Home",
+      "vehicleTitle": "🚗 Vehicle Registration Renewal",
+      "vehicleDue": "Due Aug 3",
+      "acTitle": "💨 Change the AC filter",
+      "acDue": "Due Fri",
+      "acRepeat": "Every 3 months"
+    },
+    "schedule": {
+      "fromDueDate": "Reschedule from due date",
+      "fromCompletionDate": "Reschedule from completion date",
+      "due": "Due",
+      "done": "Done",
+      "next": "Next"
+    },
+    "nfc": {
+      "tagOnWasher": "Tag on the washer",
+      "tapToOpen": "Tap to open",
+      "swapFilter": "Swap the washer filter",
+      "done": "Done",
+      "skip": "Skip",
+      "startTimer": "Start timer",
+      "waitingApproval": "{{name}} marked it done · waiting on you",
+      "approve": "Approve",
+      "reject": "Reject",
+      "completed": "Completed",
+      "note": "Used the delicate cycle — filter needs a clean next time.",
+      "metaJustNow": "Just now · ★ 5 pts",
+      "metaLastWeek": "Last week · ★ 5 pts"
+    },
+    "circle": {
+      "kitchenTitle": "Kitchen deep clean",
+      "kitchenDue": "Due Sat",
+      "kitchenRepeat": "Every week",
+      "takesTurns": "Takes turns"
+    },
+    "turns": {
+      "binsTitle": "🗑️ Take bins to the curb",
+      "binsDue": "Due Tomorrow",
+      "binsRepeat": "Every week",
+      "completed": "Completed",
+      "metaJustNow": "Just now · ★ 5 pts"
+    },
+    "widget": {
+      "schoolForms": "School forms",
+      "takeOutTrash": "Take out the trash",
+      "waterPlants": "Water the plants",
+      "today": "Today",
+      "left": "{{count}} left"
+    },
+    "reminders": {
+      "trashTitle": "Take out the trash",
+      "trashBody": "Due in 30 minutes · Bin night",
+      "finishedTitle": "Amalie finished Kitchen deep clean",
+      "finishedBody": "Your turn is next Saturday"
+    },
+    "things": {
+      "waterBill": "Water bill",
+      "acFilter": "AC filter",
+      "trashDay": "Trash day",
+      "dogMedicine": "Dog's medicine",
+      "whoseTurn": "Whose turn to cook",
+      "monthly": "Monthly",
+      "everyThreeMonths": "Every 3 months",
+      "everyMonday": "Every Monday",
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "tagBills": "Bills",
+      "tagHome": "Home",
+      "tagPets": "Pets",
+      "tagCooking": "Cooking"
+    }
+  }
 }

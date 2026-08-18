@@ -168,7 +168,8 @@
     "joinCircle": "Join Circle",
     "joinedPending": "Joined circle successfully, wait for the circle owner to accept your request.",
     "alreadyMember": "You are already a member of this circle",
-    "joinFailed": "Failed to join circle"
+    "joinFailed": "Failed to join circle",
+    "copyLink": "Copy Link"
   },
   "accountSettings": {
     "title": "Account Settings",
@@ -423,7 +424,8 @@
         "name": "Weekly Goals",
         "description": "Shows weekly progress and family completion stats"
       }
-    }
+    },
+    "detailedDescription": "Customize the layout and visibility of cards in the sidepanel. the section only available on large screen devices such as tablets and desktops.."
   },
   "theme": {
     "title": "Theme Preferences",
@@ -457,7 +459,8 @@
       "ymd": "YYYY-MM-DD (ISO)",
       "long": "Long format (e.g., January 1, 2024)",
       "short": "Short format (e.g., Jan 1, 2024)"
-    }
+    },
+    "descriptionLong": "Customize language, date format, and regional preferences for your account. These settings will apply throughout the application."
   },
   "advanced": {
     "title": "Advanced Settings",
