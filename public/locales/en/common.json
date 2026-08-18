@@ -338,6 +338,50 @@
       "tagHome": "Home",
       "tagPets": "Pets",
       "tagCooking": "Cooking"
+    },
+    "slides": {
+      "problemTitle": "Stop forgetting the little things",
+      "problemBody": "Donetick remembers the last time it happened, and when it's due next. So nobody else has to.",
+      "captureTitle": "Add it before you forget it",
+      "captureBody": "Type it, say it out loud, or snap a photo. Donetick fills in the due date, priority, labels, and who's on it.",
+      "scheduleTitle": "It comes back exactly when it should",
+      "scheduleBody": "Every week, every 3 months, or a month after you actually did it. Finishing late doesn't throw the rest of the year off.",
+      "circleTitle": "Everyone gets a turn, No more arguing",
+      "circleBody": "Rotate in the order you pick, or at random. Donetick remembers who went last, so turns stay fair.",
+      "remindersTitle": "A nudge right when it matters & Widgets!",
+      "remindersBody": "Get a reminder before something's due, or send a heads-up when someone forgets theirs. Today's list sits on your home screen too."
+    },
+    "carousel": {
+      "skip": "Skip",
+      "ariaLabel": "What you can do with Donetick",
+      "goToStep": "Go to step {{number}}",
+      "slidePosition": "{{index}} of {{total}}",
+      "turnOnReminders": "Turn on reminders",
+      "notNow": "Not now",
+      "next": "Next"
+    },
+    "heardAbout": {
+      "title": "Where'd you hear about Donetick?",
+      "subtitle": "Helps us know what's working. Totally optional.",
+      "detailPlaceholder": "Tell us where",
+      "continue": "Continue",
+      "skip": "Skip",
+      "sources": {
+        "appStore": "App Store / Google Play",
+        "reddit": "Reddit or a forum",
+        "friend": "Friend or family",
+        "video": "YouTube or TikTok",
+        "search": "Search engine",
+        "other": "Something else"
+      }
+    },
+    "privacy": {
+      "title": "Help us improve Donetick",
+      "subtitle": "Your server, your data. Both of these are off from this point unless you turn them on.",
+      "crashReportsLabel": "Share crash reports",
+      "crashReportsDescription": "When Donetick crashes, send us the error and what led to it (device, app version, the screen you were on) no task content. It's how we catch bugs that never show up in our own testing and ship fixes faster.",
+      "analyticsLabel": "Share anonymous usage analytics",
+      "analyticsDescription": "Send anonymous usage events which features get used, which get ignored so we know what to build next instead of guessing. No task content, no personal data, nothing tied back to you."
     }
   },
   "errorReport": {

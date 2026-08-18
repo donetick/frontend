@@ -537,7 +537,13 @@
   },
   "passwordChange": {
     "minLength": "Password must be at least 8 characters",
-    "maxLength": "Password must be less than 64 characters"
+    "maxLength": "Password must be less than 64 characters",
+    "description": "Choose a password between 8 and 64 characters.",
+    "mismatch": "Passwords do not match",
+    "newPassword": "New password",
+    "newPasswordPlaceholder": "Enter password",
+    "confirmPassword": "Confirm password",
+    "confirmPasswordPlaceholder": "Repeat password"
   },
   "payment": {
     "cancelledTitle": "Payment has been cancelled",
@@ -569,7 +575,12 @@
     "includeAssets": "Include uploaded files and assets",
     "warningLabel": "Warning:",
     "restoreWarning": "Restoring a backup will replace all your current data. This action cannot be undone.",
-    "restoreKeyPlaceholder": "Enter the encryption key used for this backup"
+    "restoreKeyPlaceholder": "Enter the encryption key used for this backup",
+    "title": "Backup & Restore",
+    "createTab": "Create Backup",
+    "restoreTab": "Restore Backup",
+    "creating": "Creating backup...",
+    "restoring": "Restoring backup..."
   },
   "deletion": {
     "passwordRequired": "Please enter your password to continue",
@@ -579,10 +590,25 @@
     "transferIntro": "You own circles that require ownership transfer before deletion. Please select new owners:",
     "selectOwner": "Select new owner",
     "confirmPrompt": "Please enter your password and type DELETE to confirm",
-    "typeDelete": "DELETE"
+    "typeDelete": "DELETE",
+    "warningLead": "This action cannot be undone.",
+    "warningIntro": "Deleting your account will permanently remove:",
+    "removesProfile": "Your user profile and authentication data",
+    "removesChores": "All your chores, chore history, and time tracking sessions",
+    "removesTokens": "API tokens, MFA sessions, and password reset tokens",
+    "removesStorage": "Storage files and usage data",
+    "removesPoints": "Points history and notifications",
+    "removesCircles": "Circle memberships and relationships",
+    "passwordToContinue": "Enter your password to continue",
+    "circleLabel": "Circle: {{name}}",
+    "newOwner": "New Owner",
+    "logoutNotice": "On successful deletion, you will be logged out and redirected to the login page.",
+    "passwordLabel": "Password",
+    "typeToConfirm": "Type \"{{word}}\" to confirm"
   },
   "realtime": {
-    "titleSse": "Real-time Updates (SSE)"
+    "titleSse": "Real-time Updates (SSE)",
+    "subtitleSse": "Get instant notifications via Server-Sent Events"
   },
   "nativeCancel": {
     "title": "Cancel Subscription",

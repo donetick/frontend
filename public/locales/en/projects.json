@@ -60,6 +60,11 @@
     "errorUpdate": "Failed to update project",
     "errorCreate": "Failed to create project",
     "namePlaceholder": "Enter project name...",
-    "descriptionPlaceholder": "Optional project description..."
+    "descriptionPlaceholder": "Optional project description...",
+    "nameLabel": "Project Name",
+    "descriptionLabel": "Description",
+    "iconLabel": "Project Icon",
+    "selectIcon": "Select Icon",
+    "colorLabel": "Project Color"
   }
 }

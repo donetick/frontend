@@ -765,7 +765,7 @@ const ArchivedTasks = () => {
               borderRadius: '50%',
             }}
             onClick={() => setIsFilterSheetOpen(true)}
-            title='Filters'
+            title={t('archived.filtersTitle')}
           >
             <FilterList />
           </IconButton>
@@ -774,10 +774,10 @@ const ArchivedTasks = () => {
         {/* Sort Menu */}
         <SortAndFilterMenu
           sortOptions={[
-            { name: 'Archived date', value: 'archivedAt' },
-            { name: 'Name', value: 'name' },
-            { name: 'Priority', value: 'priority' },
-            { name: 'Due date', value: 'dueDate' },
+            { name: t('archived.sortArchivedDate'), value: 'archivedAt' },
+            { name: t('archived.sortName'), value: 'name' },
+            { name: t('archived.sortPriority'), value: 'priority' },
+            { name: t('archived.sortDueDate'), value: 'dueDate' },
           ]}
           selectedSort={sortBy}
           onSortChange={setSortBy}
@@ -1045,11 +1045,11 @@ const ArchivedTasks = () => {
             variant='no-results'
             fullHeight
             icon={<SearchOff />}
-            title='No archived tasks match'
+            title={t('archived.noMatchTitle')}
             description={
               searchTerm
-                ? `Nothing in the archive matches "${searchTerm}".`
-                : 'There are archived tasks, but none fit the filters that are currently on.'
+                ? t('archived.noMatchSearch', { term: searchTerm })
+                : t('archived.noMatchFilters')
             }
             primaryAction={
               searchTerm
@@ -1069,9 +1069,9 @@ const ArchivedTasks = () => {
           <EmptyState
             fullHeight
             icon={<Archive />}
-            title='Nothing archived'
-            description='Archiving hides a task without deleting it. Anything you archive from your task list shows up here, ready to restore.'
-            primaryAction={{ label: 'Back to tasks', to: '/chores' }}
+            title={t('archived.emptyTitle')}
+            description={t('archived.emptyDescription')}
+            primaryAction={{ label: t('archived.backToTasks'), to: '/chores' }}
           />
         )
       ) : (

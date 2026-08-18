@@ -17,6 +17,10 @@ import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { CheckUserDeletion, DeleteUser } from '../../../utils/Fetcher'
 
+// Sent verbatim to the delete endpoint, so it stays English in every locale —
+// the label around it is what gets translated.
+const CONFIRMATION_WORD = 'DELETE'
+
 function UserDeletionModal({ isOpen, onClose }) {
   const { t } = useTranslation('settings')
   const { ResponsiveModal } = useResponsiveModal()
@@ -99,7 +103,7 @@ function UserDeletionModal({ isOpen, onClose }) {
   }
 
   const executeUserDeletion = async () => {
-    if (password.trim() === '' || confirmation !== 'DELETE') {
+    if (password.trim() === '' || confirmation !== CONFIRMATION_WORD) {
       setError(t('deletion.passwordAndDelete'))
       return
     }
@@ -153,33 +157,27 @@ function UserDeletionModal({ isOpen, onClose }) {
   const renderWarningStep = () => (
     <>
       <Typography level='body-md' mb={2}>
-        <strong>This action cannot be undone.</strong> Deleting your account
-        will permanently remove:
+        <strong>{t('deletion.warningLead')}</strong>{' '}
+        {t('deletion.warningIntro')}
       </Typography>
 
       <Box mb={3}>
-        <Typography level='body-sm' mb={1}>
-          • Your user profile and authentication data
-        </Typography>
-        <Typography level='body-sm' mb={1}>
-          • All your chores, chore history, and time tracking sessions
-        </Typography>
-        <Typography level='body-sm' mb={1}>
-          • API tokens, MFA sessions, and password reset tokens
-        </Typography>
-        <Typography level='body-sm' mb={1}>
-          • Storage files and usage data
-        </Typography>
-        <Typography level='body-sm' mb={1}>
-          • Points history and notifications
-        </Typography>
-        <Typography level='body-sm' mb={1}>
-          • Circle memberships and relationships
-        </Typography>
+        {[
+          'removesProfile',
+          'removesChores',
+          'removesTokens',
+          'removesStorage',
+          'removesPoints',
+          'removesCircles',
+        ].map(key => (
+          <Typography key={key} level='body-sm' mb={1}>
+            • {t(`deletion.${key}`)}
+          </Typography>
+        ))}
       </Box>
 
       <FormControl sx={{ mb: 2 }}>
-        <FormLabel>Enter your password to continue</FormLabel>
+        <FormLabel>{t('deletion.passwordToContinue')}</FormLabel>
         <Input
           type='password'
           value={password}
@@ -200,16 +198,15 @@ function UserDeletionModal({ isOpen, onClose }) {
     <>
       <Typography level='body-md' mb={3}>
         {t('deletion.transferIntro')}
-        select new owners:
       </Typography>
 
       {circlesRequiringTransfer.map(circle => (
         <Card key={circle.id} sx={{ mb: 2, p: 2 }}>
           <Typography level='title-sm' mb={1}>
-            Circle: {circle.name}
+            {t('deletion.circleLabel', { name: circle.name })}
           </Typography>
           <FormControl>
-            <FormLabel>New Owner</FormLabel>
+            <FormLabel>{t('deletion.newOwner')}</FormLabel>
             <Select
               placeholder={t('deletion.selectOwner')}
               value={
@@ -243,12 +240,11 @@ function UserDeletionModal({ isOpen, onClose }) {
         {t('deletion.confirmPrompt')}
       </Typography>
       <Typography level='body-sm' mb={2}>
-        on successful deletion, you will be logged out and redirected to the
-        login page.
+        {t('deletion.logoutNotice')}
       </Typography>
 
       <FormControl sx={{ mb: 2 }}>
-        <FormLabel>Password</FormLabel>
+        <FormLabel>{t('deletion.passwordLabel')}</FormLabel>
         <Input
           type='password'
           value={password}
@@ -258,7 +254,9 @@ function UserDeletionModal({ isOpen, onClose }) {
       </FormControl>
 
       <FormControl sx={{ mb: 3 }}>
-        <FormLabel>Type &quot;DELETE&quot; to confirm</FormLabel>
+        <FormLabel>
+          {t('deletion.typeToConfirm', { word: CONFIRMATION_WORD })}
+        </FormLabel>
         <Input
           value={confirmation}
           onChange={e => setConfirmation(e.target.value)}
@@ -323,7 +321,7 @@ function UserDeletionModal({ isOpen, onClose }) {
                   ? !password
                   : step === 2
                     ? circlesRequiringTransfer.length !== transferOptions.length
-                    : !password || confirmation !== 'DELETE',
+                    : !password || confirmation !== CONFIRMATION_WORD,
             }}
           />
         )

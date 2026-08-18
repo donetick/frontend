@@ -259,7 +259,18 @@
     "clearFilters": "Clear filters",
     "count_one": "{{count}} archived task",
     "count_other": "{{count}} archived tasks",
-    "matching": " matching \"{{term}}\""
+    "matching": " matching \"{{term}}\"",
+    "filtersTitle": "Filters",
+    "sortArchivedDate": "Archived date",
+    "sortName": "Name",
+    "sortPriority": "Priority",
+    "sortDueDate": "Due date",
+    "noMatchTitle": "No archived tasks match",
+    "noMatchSearch": "Nothing in the archive matches \"{{term}}\".",
+    "noMatchFilters": "There are archived tasks, but none fit the filters that are currently on.",
+    "emptyTitle": "Nothing archived",
+    "emptyDescription": "Archiving hides a task without deleting it. Anything you archive from your task list shows up here, ready to restore.",
+    "backToTasks": "Back to tasks"
   },
   "edit": {
     "deleteConfirm": "Are you sure you want to delete this chore?"
@@ -374,7 +385,11 @@
     "search": "Search",
     "newChore": "New Chore",
     "unassigned": "Unassigned",
-    "changeDueDate": "Change due date"
+    "changeDueDate": "Change due date",
+    "colDue": "Due",
+    "colChore": "Chore",
+    "colAssignee": "Assignee",
+    "colAction": "Action"
   },
   "dataError": {
     "attachmentsFailed": "Failed to fetch attachments"
@@ -404,7 +419,21 @@
     "today": "Today",
     "tomorrow": "Tomorrow",
     "weekend": "Weekend",
-    "nextWeek": "Next week"
+    "nextWeek": "Next week",
+    "title": "Due Date",
+    "apply": "Apply",
+    "remove": "Remove",
+    "quickDate": "Quick date",
+    "quickTime": "Quick time",
+    "nextMonth": "Next month",
+    "morning": "Morning",
+    "noon": "Noon",
+    "afternoon": "Afternoon",
+    "evening": "Evening",
+    "night": "Night",
+    "customTime": "Custom time",
+    "anytime": "Anytime",
+    "specificTime": "Specific time"
   },
   "photoTask": {
     "title": "Scan photo to create task",
@@ -415,7 +444,13 @@
     "processNatively": "Process Natively",
     "processImage": "Process Image",
     "createTask": "Create Task",
-    "failedScan": "Failed scan"
+    "failedScan": "Failed scan",
+    "retake": "Retake",
+    "upload": "Upload",
+    "keepAsAttachment": "Keep photo as attachment",
+    "altCaptured": "Captured document",
+    "altProcessing": "Processing",
+    "taskIdentified": "Task identified"
   },
   "descriptionPlaceholder": "Enter description...",
   "notificationTemplate": {

@@ -462,7 +462,7 @@ const TimerDetails = () => {
                           color: 'text.primary',
                         }}
                       >
-                        Active Work
+                        {t('activeWork')}
                       </Typography>
                     </Box>
                     <Box>
@@ -572,7 +572,7 @@ const TimerDetails = () => {
                           color: 'text.primary',
                         }}
                       >
-                        Sessions
+                        {t('sessions')}
                       </Typography>
                     </Box>
                     <Box>
@@ -661,12 +661,18 @@ const TimerDetails = () => {
                   level='body-sm'
                   sx={{ color: 'text.secondary', fontWeight: 'medium' }}
                 >
-                  Work vs Break Distribution
+                  {t('distribution')}
                 </Typography>
                 <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
                   {calculateCurrentActiveDuration() > 0
-                    ? `${Math.round((calculateCurrentActiveDuration() / calculateTotalDuration()) * 100)}% active`
-                    : 'No active time yet'}
+                    ? t('percentActive', {
+                        percent: Math.round(
+                          (calculateCurrentActiveDuration() /
+                            calculateTotalDuration()) *
+                            100,
+                        ),
+                      })
+                    : t('noActiveTime')}
                 </Typography>
               </Box>
               <Box
@@ -695,7 +701,7 @@ const TimerDetails = () => {
                   level='body-sm'
                   sx={{ color: 'text.secondary', fontWeight: 'medium', mb: 2 }}
                 >
-                  Activity Timeline
+                  {t('activityTimeline')}
                 </Typography>
 
                 {timerData &&
@@ -803,7 +809,7 @@ const TimerDetails = () => {
                             level='body-xs'
                             sx={{ color: 'text.tertiary' }}
                           >
-                            Active Work
+                            {t('activeWork')}
                           </Typography>
                         </Box>
                         <Box
@@ -852,7 +858,7 @@ const TimerDetails = () => {
                               level='body-xs'
                               sx={{ color: 'text.tertiary' }}
                             >
-                              Live Session
+                              {t('liveSession')}
                             </Typography>
                           </Box>
                         )}
@@ -918,7 +924,7 @@ const TimerDetails = () => {
                 mb: 2,
               }}
             >
-              <Typography level='h4'>Session Breakdown</Typography>
+              <Typography level='h4'>{t('sessionBreakdown')}</Typography>
               {!editingSessions[timerData.id] && (
                 <Button
                   variant='outlined'
@@ -1112,7 +1118,7 @@ const TimerDetails = () => {
                                         variant='soft'
                                         sx={{ fontSize: '0.7rem' }}
                                       >
-                                        Live
+                                        {t('live')}
                                       </Chip>
                                     )}
                                     {/* User chip showing who started the session */}
@@ -1211,8 +1217,8 @@ const TimerDetails = () => {
                   <EmptyState
                     size='sm'
                     icon={<AccessTime />}
-                    title='No work sessions yet'
-                    description='Start the timer on this task and each session lands here.'
+                    title={t('emptySessionsTitle')}
+                    description={t('emptySessionsDescription')}
                   />
                 )}
               </Box>
@@ -1237,7 +1243,7 @@ const TimerDetails = () => {
                       }}
                     >
                       <Typography level='body-md' sx={{ fontWeight: 'bold' }}>
-                        Sessions
+                        {t('sessions')}
                       </Typography>
                       <Button
                         size='sm'
@@ -1340,9 +1346,7 @@ const TimerDetails = () => {
                                   )
                                 }
                               />
-                              <FormHelperText>
-                                Leave empty if session is ongoing
-                              </FormHelperText>
+                              <FormHelperText>{t('leaveEmpty')}</FormHelperText>
                             </FormControl>
 
                             <Box>
