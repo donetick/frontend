@@ -30,7 +30,7 @@
     "manageDescription": "View, edit, and organize all projects"
   },
   "modal": {
-    "errorNameRequired": "Project name is required",
+    "errorNameRequired": "Le nom du projet est obligatoire",
     "errorUpdate": "Failed to update project",
     "errorCreate": "Failed to create project",
     "namePlaceholder": "Enter project name...",
