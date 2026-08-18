@@ -1,8 +1,8 @@
 {
-  "errName": "Name is required",
+  "errName": "Le nom est obligatoire",
   "errStateNumber": "State must be a number",
   "errStateBool": "State must be true or false",
-  "errStateRequired": "State is required",
+  "errStateRequired": "L'état est obligatoire",
   "name": "Name",
   "namePlaceholder": "Thing name",
   "value": "Value",
