@@ -513,11 +513,11 @@
     "cancelAnytime": "Cancel anytime. No hidden fees. Secure payment powered by Stripe."
   },
   "childUsers": {
-    "errNameRequired": "Sub account name is required",
+    "errNameRequired": "Le nom du sous-compte est obligatoire",
     "errNameMin": "Sub account name must be at least 2 characters",
     "errNameMax": "Sub account name must be less than 20 characters",
     "errNameChars": "Sub account name can only contain lowercase letters, dot and dash",
-    "errPasswordRequired": "Password is required",
+    "errPasswordRequired": "Le mot de passe est obligatoire",
     "errPasswordLength": "Password must be between 8 and 64 characters",
     "errPasswordMatch": "Passwords do not match",
     "errDisplayNameMax": "Display name must be less than 50 characters",
@@ -554,7 +554,7 @@
     "noDebugInfo": "No debug information available"
   },
   "backup": {
-    "keyRequired": "Encryption key is required",
+    "keyRequired": "La clé de chiffrement est obligatoire",
     "created": "Backup created and downloaded successfully",
     "createFailed": "Failed to create backup",
     "selectFile": "Please select a backup file",
@@ -569,7 +569,7 @@
     "restoreKeyPlaceholder": "Enter the encryption key used for this backup"
   },
   "deletion": {
-    "passwordRequired": "Please enter your password to continue",
+    "passwordRequired": "Veuillez saisir votre mot de passe pour continuer",
     "passwordAndDelete": "Please enter your password and type DELETE to confirm",
     "failed": "Failed to delete account",
     "passwordPlaceholder": "Enter your password",
