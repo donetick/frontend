@@ -30,13 +30,13 @@ function getRelativeLabel(notification, t) {
   const { unit, value } = notification
   const numericValue = Number(value)
   if (numericValue === 0) {
-    return t('notifTemplate.onDueDate')
+    return t('notificationTemplate.onDueDate')
   }
-  const unitName = t(`notifTemplate.unitName.${unit}`)
+  const unitName = t(`notificationTemplate.unitName.${unit}`)
   const absValue = Math.abs(numericValue)
   return numericValue < 0
-    ? t('notifTemplate.beforeDue', { count: absValue, unit: unitName })
-    : t('notifTemplate.afterDue', { count: absValue, unit: unitName })
+    ? t('notificationTemplate.beforeDue', { count: absValue, unit: unitName })
+    : t('notificationTemplate.afterDue', { count: absValue, unit: unitName })
 }
 
 // Helper functions to convert between internal value and UI representation
@@ -223,7 +223,7 @@ const NotificationTemplate = ({
     if (!currentNotification) return
 
     if (isDuplicate(currentNotification, idx, currentList)) {
-      setError(t('notifTemplate.errDuplicate'))
+      setError(t('notificationTemplate.errDuplicate'))
       return
     }
   }
@@ -235,14 +235,14 @@ const NotificationTemplate = ({
 
     if (type === 'due') {
       if (notificationsRef.current.some(n => Number(n.value) === 0)) {
-        setError(t('notifTemplate.errOneDue'))
+        setError(t('notificationTemplate.errOneDue'))
         return
       }
       newNotification = { value: 0, unit: 'm' }
     } else {
       newNotification = getSmartSuggestion(type)
       if (!newNotification) {
-        setError(t('notifTemplate.errAllConfigured', { type }))
+        setError(t('notificationTemplate.errAllConfigured', { type }))
         return
       }
     }
@@ -578,7 +578,7 @@ const NotificationTemplate = ({
                         value={opt.value}
                         disabled={opt.value === 'ondue' && hasOnDueElsewhere}
                       >
-                        {t(`notifTemplate.timing.${opt.value}`)}
+                        {t(`notificationTemplate.timing.${opt.value}`)}
                       </Option>
                     ))}
                   </Select>
@@ -641,7 +641,7 @@ const NotificationTemplate = ({
                   >
                     {timeUnits.map(opt => (
                       <Option key={opt.value} value={opt.value}>
-                        {t(`notifTemplate.unitShort.${opt.value}`)}
+                        {t(`notificationTemplate.unitShort.${opt.value}`)}
                       </Option>
                     ))}
                   </Select>
@@ -691,7 +691,7 @@ const NotificationTemplate = ({
             },
           }}
         >
-          {t('notifTemplate.reminder')}
+          {t('notificationTemplate.reminder')}
         </Button>
         <Button
           onClick={() => addSmartNotification('due')}
@@ -713,7 +713,7 @@ const NotificationTemplate = ({
             },
           }}
         >
-          {t('notifTemplate.dueAlert')}
+          {t('notificationTemplate.dueAlert')}
         </Button>
         <Button
           onClick={() => addSmartNotification('followup')}
@@ -732,7 +732,7 @@ const NotificationTemplate = ({
             },
           }}
         >
-          {t('notifTemplate.followUp')}
+          {t('notificationTemplate.followUp')}
         </Button>
       </Box>
       {showSaveDefault && (
@@ -765,7 +765,7 @@ const NotificationTemplate = ({
               setShowSaveDefault(false)
             }}
           >
-            {t('notifTemplate.rememberFuture')}
+            {t('notificationTemplate.rememberFuture')}
           </Button>
         </Box>
       )}

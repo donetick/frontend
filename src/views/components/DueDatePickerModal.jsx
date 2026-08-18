@@ -21,6 +21,7 @@ import {
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import Calendar from 'react-calendar'
+import { useTranslation } from 'react-i18next'
 
 import ModalActions from '../../components/common/ModalActions'
 import { useLocalization } from '../../contexts/LocalizationContext'
@@ -93,16 +94,17 @@ const toDateKey = date => moment(date).format('YYYY-MM-DD')
  * reschedule a task — task cards, swipe actions, action menus.
  */
 const DueDatePickerModal = ({
-  applyLabel = 'Apply',
+  applyLabel,
   dueDateOnly,
   dueTime,
   onApply,
   onClose,
   onRemove,
   open,
-  title = 'Due Date',
+  title,
   useCustomTime,
 }) => {
+  const { t } = useTranslation('chores')
   const { ResponsiveModal } = useResponsiveModal()
   const { firstDayOfWeek } = useLocalization()
 
@@ -172,21 +174,24 @@ const DueDatePickerModal = ({
     <ResponsiveModal
       open={open}
       onClose={onClose}
-      title={title}
+      title={title ?? t('duePicker.title')}
       fullWidth={false}
       footer={
         <ModalActions
           tertiary={
             onRemove && dueDateOnly
               ? {
-                  label: 'Remove',
+                  label: t('duePicker.remove'),
                   color: 'danger',
                   onClick: onRemove,
                 }
               : undefined
           }
-          secondary={{ label: 'Cancel', onClick: onClose }}
-          primary={{ label: applyLabel, onClick: handleSave }}
+          secondary={{ label: t('common:cancel'), onClick: onClose }}
+          primary={{
+            label: applyLabel ?? t('duePicker.apply'),
+            onClick: handleSave,
+          }}
         />
       }
     >
@@ -201,33 +206,33 @@ const DueDatePickerModal = ({
             letterSpacing: '0.05em',
           }}
         >
-          Quick date
+          {t('duePicker.quickDate')}
         </Typography>
         <List orientation='horizontal' wrap sx={{ ...pillListSx, mb: 1.5 }}>
           {[
             {
               key: 'today',
-              label: 'Today',
+              label: t('duePicker.today'),
               icon: <Today sx={{ fontSize: 14 }} />,
             },
             {
               key: 'tomorrow',
-              label: 'Tomorrow',
+              label: t('duePicker.tomorrow'),
               icon: <WbSunny sx={{ fontSize: 14 }} />,
             },
             {
               key: 'weekend',
-              label: 'Weekend',
+              label: t('duePicker.weekend'),
               icon: <Weekend sx={{ fontSize: 14 }} />,
             },
             {
               key: 'next-week',
-              label: 'Next week',
+              label: t('duePicker.nextWeek'),
               icon: <NextWeek sx={{ fontSize: 14 }} />,
             },
             {
               key: 'next-month',
-              label: 'Next month',
+              label: t('duePicker.nextMonth'),
               icon: <EventNote sx={{ fontSize: 14 }} />,
             },
           ].map(opt => {
@@ -268,33 +273,33 @@ const DueDatePickerModal = ({
             letterSpacing: '0.05em',
           }}
         >
-          Quick time
+          {t('duePicker.quickTime')}
         </Typography>
         <List orientation='horizontal' wrap sx={{ ...pillListSx, mb: 1.5 }}>
           {[
             {
               time: '09:00',
-              label: 'Morning',
+              label: t('duePicker.morning'),
               icon: <LightMode sx={{ fontSize: 14 }} />,
             },
             {
               time: '12:00',
-              label: 'Noon',
+              label: t('duePicker.noon'),
               icon: <WbSunny sx={{ fontSize: 14 }} />,
             },
             {
               time: '15:00',
-              label: 'Afternoon',
+              label: t('duePicker.afternoon'),
               icon: <WbTwilight sx={{ fontSize: 14 }} />,
             },
             {
               time: '18:00',
-              label: 'Evening',
+              label: t('duePicker.evening'),
               icon: <NightsStay sx={{ fontSize: 14 }} />,
             },
             {
               time: '22:00',
-              label: 'Night',
+              label: t('duePicker.night'),
               icon: <Bedtime sx={{ fontSize: 14 }} />,
             },
           ].map(opt => (
@@ -506,7 +511,7 @@ const DueDatePickerModal = ({
             letterSpacing: '0.05em',
           }}
         >
-          Custom time
+          {t('duePicker.customTime')}
         </Typography>
         <Input
           type='time'
@@ -525,7 +530,7 @@ const DueDatePickerModal = ({
             disabled={!localDueDateOnly}
             onClick={() => setLocalUseCustomTime(false)}
           >
-            Anytime
+            {t('duePicker.anytime')}
           </Button>
           <Button
             size='sm'
@@ -534,7 +539,7 @@ const DueDatePickerModal = ({
             disabled={!localDueDateOnly}
             onClick={() => setLocalUseCustomTime(true)}
           >
-            Specific time
+            {t('duePicker.specificTime')}
           </Button>
         </Box>
       </Box>

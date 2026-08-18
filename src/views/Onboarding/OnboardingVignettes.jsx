@@ -16,6 +16,7 @@ import {
   ThumbUpRounded,
 } from '@mui/icons-material'
 import { Box, Typography } from '@mui/joy'
+import { useTranslation } from 'react-i18next'
 
 import {
   getPriorityColor,
@@ -281,9 +282,9 @@ const CAPTURE_STEP_MS = 3000
 const CAPTURE_CYCLE_MS = CAPTURE_STEP_MS * 3
 
 const SOURCES = [
-  { icon: <MicNoneRounded />, label: 'Speak' },
-  { icon: <PhotoCameraOutlined />, label: 'Snap' },
-  { icon: <KeyboardRounded />, label: 'Type' },
+  { icon: <MicNoneRounded />, key: 'speak' },
+  { icon: <PhotoCameraOutlined />, key: 'snap' },
+  { icon: <KeyboardRounded />, key: 'type' },
 ]
 
 const SourcePill = ({ icon, index, label }) => (
@@ -553,81 +554,89 @@ const TypingField = ({ delay = 0 }) => (
   </Box>
 )
 
-export const CaptureVignette = () => (
-  <Stage>
-    <Box sx={{ display: 'flex', gap: 1 }}>
-      {SOURCES.map((source, index) => (
-        <SourcePill key={source.label} index={index} {...source} />
-      ))}
-    </Box>
+export const CaptureVignette = () => {
+  const { t } = useTranslation('common')
+  return (
+    <Stage>
+      <Box sx={{ display: 'flex', gap: 1 }}>
+        {SOURCES.map((source, index) => (
+          <SourcePill
+            key={source.key}
+            index={index}
+            icon={source.icon}
+            label={t(`onboarding.sources.${source.key}`)}
+          />
+        ))}
+      </Box>
 
-    <Cycler cycleMs={CAPTURE_CYCLE_MS}>
-      <CaptureVariant
-        icon={<MicNoneRounded />}
-        caption='Dates, labels and points from your words'
-        card={
-          <CaptureMorph
-            delay={0}
-            before={<VoiceWave delay={0} />}
-            after={
-              <MiniChoreCard
-                title='♻️ Take out the trash'
-                due='Due tomorrow'
-                repeat='Every Monday'
-                label='Home'
-                labelColor='#26a69a'
-              />
-            }
-          />
-        }
-      />
-      <CaptureVariant
-        icon={<PhoneIphoneRounded />}
-        caption='Read on your device'
-        card={
-          <CaptureMorph
-            delay={CAPTURE_STEP_MS}
-            before={<CameraFrame delay={CAPTURE_STEP_MS} />}
-            after={
-              <MiniChoreCard
-                title='🚗 Vehicle Registration Renewal'
-                due='Due Aug 3'
-                dueColor='warning'
-                footer={
-                  <Cycler>
-                    <AssigneeChip key='amalie' name='Amalie' color='blue' />
-                  </Cycler>
-                }
-              />
-            }
-          />
-        }
-      />
-      <CaptureVariant
-        icon={<KeyboardRounded />}
-        caption='#labels @people *points as you type'
-        card={
-          <CaptureMorph
-            delay={2 * CAPTURE_STEP_MS}
-            before={<TypingField delay={2 * CAPTURE_STEP_MS} />}
-            after={
-              <MiniChoreCard
-                title='💨 Change the AC filter'
-                due='Due Fri'
-                repeat='Every 3 months'
-                footer={
-                  <Cycler>
-                    <AssigneeChip key='ryan' name='Ryan' color='green' />
-                  </Cycler>
-                }
-              />
-            }
-          />
-        }
-      />
-    </Cycler>
-  </Stage>
-)
+      <Cycler cycleMs={CAPTURE_CYCLE_MS}>
+        <CaptureVariant
+          icon={<MicNoneRounded />}
+          caption={t('onboarding.capture.voiceCaption')}
+          card={
+            <CaptureMorph
+              delay={0}
+              before={<VoiceWave delay={0} />}
+              after={
+                <MiniChoreCard
+                  title={t('onboarding.capture.trashTitle')}
+                  due={t('onboarding.capture.trashDue')}
+                  repeat={t('onboarding.capture.trashRepeat')}
+                  label={t('onboarding.capture.homeLabel')}
+                  labelColor='#26a69a'
+                />
+              }
+            />
+          }
+        />
+        <CaptureVariant
+          icon={<PhoneIphoneRounded />}
+          caption={t('onboarding.capture.deviceCaption')}
+          card={
+            <CaptureMorph
+              delay={CAPTURE_STEP_MS}
+              before={<CameraFrame delay={CAPTURE_STEP_MS} />}
+              after={
+                <MiniChoreCard
+                  title={t('onboarding.capture.vehicleTitle')}
+                  due={t('onboarding.capture.vehicleDue')}
+                  dueColor='warning'
+                  footer={
+                    <Cycler>
+                      <AssigneeChip key='amalie' name='Amalie' color='blue' />
+                    </Cycler>
+                  }
+                />
+              }
+            />
+          }
+        />
+        <CaptureVariant
+          icon={<KeyboardRounded />}
+          caption={t('onboarding.capture.typeCaption')}
+          card={
+            <CaptureMorph
+              delay={2 * CAPTURE_STEP_MS}
+              before={<TypingField delay={2 * CAPTURE_STEP_MS} />}
+              after={
+                <MiniChoreCard
+                  title={t('onboarding.capture.acTitle')}
+                  due={t('onboarding.capture.acDue')}
+                  repeat={t('onboarding.capture.acRepeat')}
+                  footer={
+                    <Cycler>
+                      <AssigneeChip key='ryan' name='Ryan' color='green' />
+                    </Cycler>
+                  }
+                />
+              }
+            />
+          }
+        />
+      </Cycler>
+    </Stage>
+  )
+}
 
 /* --------------------------------- slide 2: due date vs. completion date */
 
@@ -692,69 +701,93 @@ const Milestone = ({ date, delay, label, tone = 'neutral' }) => (
   </Box>
 )
 
-const ScheduleTrack = ({ delay, mode, next }) => (
-  <Box
-    sx={{
-      ...cardSx,
-      px: 1.75,
-      py: 1.5,
-      animation: `trackIn 460ms ${EASE} ${delay}ms both`,
-      '@keyframes trackIn': {
-        from: { opacity: 0, transform: 'translateY(12px)' },
-        to: { opacity: 1, transform: 'none' },
-      },
-    }}
-  >
-    <Typography
-      level='body-xs'
-      sx={{ fontWeight: 600, color: 'text.secondary', mb: 1.25 }}
+const ScheduleTrack = ({ delay, mode, next }) => {
+  const { t } = useTranslation('common')
+  return (
+    <Box
+      sx={{
+        ...cardSx,
+        px: 1.75,
+        py: 1.5,
+        animation: `trackIn 460ms ${EASE} ${delay}ms both`,
+        '@keyframes trackIn': {
+          from: { opacity: 0, transform: 'translateY(12px)' },
+          to: { opacity: 1, transform: 'none' },
+        },
+      }}
     >
-      {mode}
-    </Typography>
-
-    <Box sx={{ position: 'relative' }}>
-      {/* Connector sits behind the milestones and draws itself first. */}
-      <Box
-        sx={{
-          position: 'absolute',
-          top: 8,
-          left: '16%',
-          right: '16%',
-          height: '2px',
-          bgcolor: 'divider',
-          transformOrigin: 'left center',
-          animation: `trackDraw 520ms ${EASE} ${delay + 120}ms both`,
-          '@keyframes trackDraw': {
-            from: { transform: 'scaleX(0)' },
-            to: { transform: 'scaleX(1)' },
-          },
-        }}
-      />
-      <Box
-        sx={{
-          position: 'relative',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-        }}
+      <Typography
+        level='body-xs'
+        sx={{ fontWeight: 600, color: 'text.secondary', mb: 1.25 }}
       >
-        <Milestone label='Due' date='Mon 6' delay={delay + 160} />
-        <Milestone label='Done' date='Wed 8' tone='done' delay={delay + 320} />
-        <Milestone label='Next' date={next} tone='next' delay={delay + 520} />
+        {mode}
+      </Typography>
+
+      <Box sx={{ position: 'relative' }}>
+        {/* Connector sits behind the milestones and draws itself first. */}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 8,
+            left: '16%',
+            right: '16%',
+            height: '2px',
+            bgcolor: 'divider',
+            transformOrigin: 'left center',
+            animation: `trackDraw 520ms ${EASE} ${delay + 120}ms both`,
+            '@keyframes trackDraw': {
+              from: { transform: 'scaleX(0)' },
+              to: { transform: 'scaleX(1)' },
+            },
+          }}
+        />
+        <Box
+          sx={{
+            position: 'relative',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+          }}
+        >
+          <Milestone
+            label={t('onboarding.schedule.due')}
+            date='Mon 6'
+            delay={delay + 160}
+          />
+          <Milestone
+            label={t('onboarding.schedule.done')}
+            date='Wed 8'
+            tone='done'
+            delay={delay + 320}
+          />
+          <Milestone
+            label={t('onboarding.schedule.next')}
+            date={next}
+            tone='next'
+            delay={delay + 520}
+          />
+        </Box>
       </Box>
     </Box>
-  </Box>
-)
+  )
+}
 
-export const ScheduleVignette = () => (
-  <Stage>
-    <ScheduleTrack mode='Reschedule from due date' next='Mon 13' delay={0} />
-    <ScheduleTrack
-      mode='Reschedule from completion date'
-      next='Wed 15'
-      delay={220}
-    />
-  </Stage>
-)
+export const ScheduleVignette = () => {
+  const { t } = useTranslation('common')
+  return (
+    <Stage>
+      <ScheduleTrack
+        mode={t('onboarding.schedule.fromDueDate')}
+        next='Mon 13'
+        delay={0}
+      />
+      <ScheduleTrack
+        mode={t('onboarding.schedule.fromCompletionDate')}
+        next='Wed 15'
+        delay={220}
+      />
+    </Stage>
+  )
+}
 
 /* ------------------------- slide 3: tap to finish, note, logged in history */
 
@@ -907,161 +940,164 @@ const ActionRow = ({ children }) => (
 // Off the deck as of the five-slide cut — NFC now rides along in the "nobody
 // has to be the nag" copy. Kept intact so it can be swapped back in as its own
 // slide without rebuilding it.
-export const NfcVignette = () => (
-  <Stage>
-    <Box
-      sx={{
-        ...cardSx,
-        px: 1.5,
-        py: 1.25,
-        display: 'flex',
-        alignItems: 'center',
-        gap: 1.5,
-      }}
-    >
+export const NfcVignette = () => {
+  const { t } = useTranslation('common')
+  return (
+    <Stage>
       <Box
         sx={{
-          position: 'relative',
-          flex: '0 0 auto',
-          width: 38,
-          height: 38,
-          borderRadius: '12px',
-          display: 'grid',
-          placeItems: 'center',
-          bgcolor: 'primary.softBg',
-          color: 'primary.plainColor',
-          '& svg': { fontSize: '1.5rem' },
-        }}
-      >
-        {/* Two rings leaving the tag: the phone reading it. */}
-        {[0, 1].map(ring => (
-          <Box
-            key={ring}
-            sx={{
-              position: 'absolute',
-              inset: 0,
-              borderRadius: '12px',
-              border: '2px solid',
-              borderColor: 'primary.400',
-              opacity: 0,
-              animation: `nfcPing 2400ms ${EASE} ${ring * 800}ms infinite both`,
-              '@keyframes nfcPing': {
-                '0%': { opacity: 0.7, transform: 'scale(1)' },
-                '70%, 100%': { opacity: 0, transform: 'scale(1.55)' },
-              },
-            }}
-          />
-        ))}
-        <ContactlessRounded />
-      </Box>
-
-      <Box sx={{ minWidth: 0 }}>
-        <Typography level='title-sm' sx={{ fontWeight: 600 }}>
-          Tag on the washer
-        </Typography>
-        <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-          Tap to open
-        </Typography>
-      </Box>
-    </Box>
-
-    {/* The task the tag opens, with the action row the app actually shows. */}
-    <Box sx={{ ...cardSx, borderRadius: 16, px: 1.5, py: 1.25 }}>
-      <Typography level='title-sm' sx={{ fontWeight: 600, mb: 1 }}>
-        Swap the washer filter
-      </Typography>
-
-      <Cycler>
-        <ActionState>
-          <ActionRow>
-            <ActionButton
-              flex={3}
-              color='success'
-              icon={<CheckRounded />}
-              label='Done'
-            />
-            <ActionButton
-              variant='outlined'
-              icon={<SwitchAccessShortcutRounded />}
-              label='Skip'
-            />
-          </ActionRow>
-          <ActionButton
-            variant='soft'
-            color='success'
-            icon={<PlayArrowRounded />}
-            label='Start timer'
-          />
-        </ActionState>
-
-        <ActionState>
-          <Chip color='neutral' icon={<HourglassEmptyRounded />}>
-            Amalie marked it done · waiting on you
-          </Chip>
-          <ActionRow>
-            <ActionButton
-              color='success'
-              icon={<ThumbUpRounded />}
-              label='Approve'
-            />
-            <ActionButton
-              color='danger'
-              icon={<ThumbDownRounded />}
-              label='Reject'
-            />
-          </ActionRow>
-        </ActionState>
-      </Cycler>
-    </Box>
-
-    {/* A tighter radius than the task cards: at radius 20 the corner clips
-        the status rule and it reads as a rendering slip. */}
-    <Box sx={{ ...cardSx, borderRadius: 14, overflow: 'hidden' }}>
-      {/* grid-template-rows animates the new entry open, pushing the older
-          one down the way the real list does — no height thrash. */}
-      <Box
-        sx={{
-          display: 'grid',
-          gridTemplateRows: '1fr',
-          animation: `historyOpen 620ms ${EASE} 900ms both`,
-          '@keyframes historyOpen': {
-            from: { gridTemplateRows: '0fr' },
-            to: { gridTemplateRows: '1fr' },
-          },
+          ...cardSx,
+          px: 1.5,
+          py: 1.25,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1.5,
         }}
       >
         <Box
           sx={{
-            minHeight: 0,
-            overflow: 'hidden',
-            animation: `historyFade 420ms ease 1120ms both`,
-            '@keyframes historyFade': {
-              from: { opacity: 0 },
-              to: { opacity: 1 },
-            },
+            position: 'relative',
+            flex: '0 0 auto',
+            width: 38,
+            height: 38,
+            borderRadius: '12px',
+            display: 'grid',
+            placeItems: 'center',
+            bgcolor: 'primary.softBg',
+            color: 'primary.plainColor',
+            '& svg': { fontSize: '1.5rem' },
           }}
         >
-          <HistoryRow
-            status='Completed'
-            color='success'
-            icon={<CheckRounded />}
-            performer='Mo'
-            note='Used the delicate cycle — filter needs a clean next time.'
-            meta='Just now · ★ 5 pts'
-          />
+          {/* Two rings leaving the tag: the phone reading it. */}
+          {[0, 1].map(ring => (
+            <Box
+              key={ring}
+              sx={{
+                position: 'absolute',
+                inset: 0,
+                borderRadius: '12px',
+                border: '2px solid',
+                borderColor: 'primary.400',
+                opacity: 0,
+                animation: `nfcPing 2400ms ${EASE} ${ring * 800}ms infinite both`,
+                '@keyframes nfcPing': {
+                  '0%': { opacity: 0.7, transform: 'scale(1)' },
+                  '70%, 100%': { opacity: 0, transform: 'scale(1.55)' },
+                },
+              }}
+            />
+          ))}
+          <ContactlessRounded />
+        </Box>
+
+        <Box sx={{ minWidth: 0 }}>
+          <Typography level='title-sm' sx={{ fontWeight: 600 }}>
+            {t('onboarding.nfc.tagOnWasher')}
+          </Typography>
+          <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+            {t('onboarding.nfc.tapToOpen')}
+          </Typography>
         </Box>
       </Box>
 
-      <HistoryRow
-        status='Completed'
-        color='success'
-        icon={<CheckRounded />}
-        performer='Amalie'
-        meta='Last week · ★ 5 pts'
-      />
-    </Box>
-  </Stage>
-)
+      {/* The task the tag opens, with the action row the app actually shows. */}
+      <Box sx={{ ...cardSx, borderRadius: 16, px: 1.5, py: 1.25 }}>
+        <Typography level='title-sm' sx={{ fontWeight: 600, mb: 1 }}>
+          {t('onboarding.nfc.swapFilter')}
+        </Typography>
+
+        <Cycler>
+          <ActionState>
+            <ActionRow>
+              <ActionButton
+                flex={3}
+                color='success'
+                icon={<CheckRounded />}
+                label={t('onboarding.nfc.done')}
+              />
+              <ActionButton
+                variant='outlined'
+                icon={<SwitchAccessShortcutRounded />}
+                label={t('onboarding.nfc.skip')}
+              />
+            </ActionRow>
+            <ActionButton
+              variant='soft'
+              color='success'
+              icon={<PlayArrowRounded />}
+              label={t('onboarding.nfc.startTimer')}
+            />
+          </ActionState>
+
+          <ActionState>
+            <Chip color='neutral' icon={<HourglassEmptyRounded />}>
+              {t('onboarding.nfc.waitingApproval', { name: 'Amalie' })}
+            </Chip>
+            <ActionRow>
+              <ActionButton
+                color='success'
+                icon={<ThumbUpRounded />}
+                label={t('onboarding.nfc.approve')}
+              />
+              <ActionButton
+                color='danger'
+                icon={<ThumbDownRounded />}
+                label={t('onboarding.nfc.reject')}
+              />
+            </ActionRow>
+          </ActionState>
+        </Cycler>
+      </Box>
+
+      {/* A tighter radius than the task cards: at radius 20 the corner clips
+        the status rule and it reads as a rendering slip. */}
+      <Box sx={{ ...cardSx, borderRadius: 14, overflow: 'hidden' }}>
+        {/* grid-template-rows animates the new entry open, pushing the older
+          one down the way the real list does — no height thrash. */}
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateRows: '1fr',
+            animation: `historyOpen 620ms ${EASE} 900ms both`,
+            '@keyframes historyOpen': {
+              from: { gridTemplateRows: '0fr' },
+              to: { gridTemplateRows: '1fr' },
+            },
+          }}
+        >
+          <Box
+            sx={{
+              minHeight: 0,
+              overflow: 'hidden',
+              animation: `historyFade 420ms ease 1120ms both`,
+              '@keyframes historyFade': {
+                from: { opacity: 0 },
+                to: { opacity: 1 },
+              },
+            }}
+          >
+            <HistoryRow
+              status={t('onboarding.nfc.completed')}
+              color='success'
+              icon={<CheckRounded />}
+              performer='Mo'
+              note={t('onboarding.nfc.note')}
+              meta={t('onboarding.nfc.metaJustNow')}
+            />
+          </Box>
+        </Box>
+
+        <HistoryRow
+          status={t('onboarding.nfc.completed')}
+          color='success'
+          icon={<CheckRounded />}
+          performer='Amalie'
+          meta={t('onboarding.nfc.metaLastWeek')}
+        />
+      </Box>
+    </Stage>
+  )
+}
 
 /* ----------------------------------------------- slide 4: share the load */
 
@@ -1075,90 +1111,93 @@ const AVATAR = 40
 const AVATAR_GAP = 12
 const STEP = AVATAR + AVATAR_GAP
 
-export const CircleVignette = () => (
-  <Stage>
-    <MiniChoreCard
-      title='Kitchen deep clean'
-      due='Due Sat'
-      repeat='Every week'
-      footer={
-        <Cycler>
-          {MEMBERS.map(member => (
-            <AssigneeChip
-              key={member.name}
-              name={member.name}
-              color={member.color}
-            />
-          ))}
-        </Cycler>
-      }
-    />
+export const CircleVignette = () => {
+  const { t } = useTranslation('common')
+  return (
+    <Stage>
+      <MiniChoreCard
+        title={t('onboarding.circle.kitchenTitle')}
+        due={t('onboarding.circle.kitchenDue')}
+        repeat={t('onboarding.circle.kitchenRepeat')}
+        footer={
+          <Cycler>
+            {MEMBERS.map(member => (
+              <AssigneeChip
+                key={member.name}
+                name={member.name}
+                color={member.color}
+              />
+            ))}
+          </Cycler>
+        }
+      />
 
-    <Box
-      sx={{
-        ...cardSx,
-        px: 1.75,
-        py: 1.5,
-        display: 'flex',
-        alignItems: 'center',
-        gap: 1.5,
-      }}
-    >
       <Box
         sx={{
-          position: 'relative',
+          ...cardSx,
+          px: 1.75,
+          py: 1.5,
           display: 'flex',
-          gap: `${AVATAR_GAP}px`,
+          alignItems: 'center',
+          gap: 1.5,
         }}
       >
-        {/* Selection ring hopping between members: the rotating assignee. */}
         <Box
           sx={{
-            position: 'absolute',
-            top: -4,
-            left: -4,
-            width: AVATAR + 8,
-            height: AVATAR + 8,
-            borderRadius: '50%',
-            border: '2px solid',
-            borderColor: 'primary.500',
-            animation: `ringHop ${CYCLE_MS}ms ${EASE} infinite both`,
-            '@keyframes ringHop': {
-              '0%, 28%': { transform: 'translateX(0)' },
-              '33%, 61%': { transform: `translateX(${STEP}px)` },
-              '66%, 94%': { transform: `translateX(${STEP * 2}px)` },
-              '100%': { transform: 'translateX(0)' },
-            },
+            position: 'relative',
+            display: 'flex',
+            gap: `${AVATAR_GAP}px`,
           }}
-        />
-        {MEMBERS.map(member => (
+        >
+          {/* Selection ring hopping between members: the rotating assignee. */}
           <Box
-            key={member.name}
             sx={{
-              width: AVATAR,
-              height: AVATAR,
+              position: 'absolute',
+              top: -4,
+              left: -4,
+              width: AVATAR + 8,
+              height: AVATAR + 8,
               borderRadius: '50%',
-              display: 'grid',
-              placeItems: 'center',
-              fontSize: '0.9375rem',
-              fontWeight: 700,
-              bgcolor: `${member.color}.softBg`,
-              // The soft palettes' own text colours land near 2:1 on their
-              // soft backgrounds; ink keeps the initials legible.
-              color: 'text.primary',
+              border: '2px solid',
+              borderColor: 'primary.500',
+              animation: `ringHop ${CYCLE_MS}ms ${EASE} infinite both`,
+              '@keyframes ringHop': {
+                '0%, 28%': { transform: 'translateX(0)' },
+                '33%, 61%': { transform: `translateX(${STEP}px)` },
+                '66%, 94%': { transform: `translateX(${STEP * 2}px)` },
+                '100%': { transform: 'translateX(0)' },
+              },
             }}
-          >
-            {member.initial}
-          </Box>
-        ))}
-      </Box>
+          />
+          {MEMBERS.map(member => (
+            <Box
+              key={member.name}
+              sx={{
+                width: AVATAR,
+                height: AVATAR,
+                borderRadius: '50%',
+                display: 'grid',
+                placeItems: 'center',
+                fontSize: '0.9375rem',
+                fontWeight: 700,
+                bgcolor: `${member.color}.softBg`,
+                // The soft palettes' own text colours land near 2:1 on their
+                // soft backgrounds; ink keeps the initials legible.
+                color: 'text.primary',
+              }}
+            >
+              {member.initial}
+            </Box>
+          ))}
+        </Box>
 
-      <Chip icon={<PeopleAltRounded />} color='neutral'>
-        Takes turns
-      </Chip>
-    </Box>
-  </Stage>
-)
+        <Chip icon={<PeopleAltRounded />} color='neutral'>
+          {t('onboarding.circle.takesTurns')}
+        </Chip>
+      </Box>
+    </Stage>
+  )
+}
 
 // One member's turn on the task, and one at a time. Slower than the shared
 // CYCLE_MS so each hand-off has room to read.
@@ -1208,52 +1247,55 @@ const historyStackKeyframes = {
  * completion onto the top of the stack — pushing the older ones back and
  * capping out at three before the oldest cycles away.
  */
-export const TakesTurnsVignette = () => (
-  <Stage>
-    <MiniChoreCard
-      title='🗑️ Take bins to the curb'
-      due='Due Tomorrow'
-      repeat='Every week'
-      footer={
-        <Cycler cycleMs={NAG_CYCLE_MS}>
-          {MEMBERS.map(member => (
-            <AssigneeChip
-              key={member.name}
-              name={member.name}
-              color={member.color}
-            />
-          ))}
-        </Cycler>
-      }
-    />
+export const TakesTurnsVignette = () => {
+  const { t } = useTranslation('common')
+  return (
+    <Stage>
+      <MiniChoreCard
+        title={t('onboarding.turns.binsTitle')}
+        due={t('onboarding.turns.binsDue')}
+        repeat={t('onboarding.turns.binsRepeat')}
+        footer={
+          <Cycler cycleMs={NAG_CYCLE_MS}>
+            {MEMBERS.map(member => (
+              <AssigneeChip
+                key={member.name}
+                name={member.name}
+                color={member.color}
+              />
+            ))}
+          </Cycler>
+        }
+      />
 
-    <Box sx={{ position: 'relative', height: 88 }}>
-      {NAG_HISTORY_ORDER.map((member, index) => (
-        <Box
-          key={member.name}
-          sx={{
-            ...cardSx,
-            position: 'absolute',
-            inset: 0,
-            borderRadius: 14,
-            overflow: 'hidden',
-            animation: `historyStack ${NAG_CYCLE_MS}ms ${EASE} ${index * NAG_STEP_MS}ms infinite both`,
-            '@keyframes historyStack': historyStackKeyframes,
-          }}
-        >
-          <HistoryRow
-            status='Completed'
-            color='success'
-            icon={<CheckRounded />}
-            performer={member.name}
-            meta='Just now · ★ 5 pts'
-            divider={false}
-          />
-        </Box>
-      ))}
-    </Box>
-  </Stage>
-)
+      <Box sx={{ position: 'relative', height: 88 }}>
+        {NAG_HISTORY_ORDER.map((member, index) => (
+          <Box
+            key={member.name}
+            sx={{
+              ...cardSx,
+              position: 'absolute',
+              inset: 0,
+              borderRadius: 14,
+              overflow: 'hidden',
+              animation: `historyStack ${NAG_CYCLE_MS}ms ${EASE} ${index * NAG_STEP_MS}ms infinite both`,
+              '@keyframes historyStack': historyStackKeyframes,
+            }}
+          >
+            <HistoryRow
+              status={t('onboarding.turns.completed')}
+              color='success'
+              icon={<CheckRounded />}
+              performer={member.name}
+              meta={t('onboarding.turns.metaJustNow')}
+              divider={false}
+            />
+          </Box>
+        ))}
+      </Box>
+    </Stage>
+  )
+}
 
 /* ------------------------------------- slide 5: widgets on the home screen */
 
@@ -1315,39 +1357,46 @@ const WidgetTask = ({ done, name, time }) => (
   </Box>
 )
 
-const TodayWidget = () => (
-  <Box sx={{ ...widgetSx, ...float(3600, 0) }}>
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 1.25 }}>
-      <Typography
-        level='body-xs'
-        sx={{ flex: 1, fontWeight: 700, letterSpacing: '-0.01em' }}
-      >
-        Today
-      </Typography>
-      <Chip color='primary'>3 left</Chip>
-      <Box
-        sx={{
-          width: 20,
-          height: 20,
-          borderRadius: '50%',
-          display: 'grid',
-          placeItems: 'center',
-          bgcolor: 'primary.500',
-          color: 'common.white',
-          '& svg': { fontSize: '0.875rem' },
-        }}
-      >
-        <AddRounded />
+const TodayWidget = () => {
+  const { t } = useTranslation('common')
+  return (
+    <Box sx={{ ...widgetSx, ...float(3600, 0) }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 1.25 }}>
+        <Typography
+          level='body-xs'
+          sx={{ flex: 1, fontWeight: 700, letterSpacing: '-0.01em' }}
+        >
+          {t('onboarding.widget.today')}
+        </Typography>
+        <Chip color='primary'>{t('onboarding.widget.left', { count: 3 })}</Chip>
+        <Box
+          sx={{
+            width: 20,
+            height: 20,
+            borderRadius: '50%',
+            display: 'grid',
+            placeItems: 'center',
+            bgcolor: 'primary.500',
+            color: 'common.white',
+            '& svg': { fontSize: '0.875rem' },
+          }}
+        >
+          <AddRounded />
+        </Box>
+      </Box>
+
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.875 }}>
+        <WidgetTask
+          name={t('onboarding.widget.schoolForms')}
+          time='8:00'
+          done
+        />
+        <WidgetTask name={t('onboarding.widget.takeOutTrash')} time='18:00' />
+        <WidgetTask name={t('onboarding.widget.waterPlants')} time='20:30' />
       </Box>
     </Box>
-
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.875 }}>
-      <WidgetTask name='School forms' time='8:00' done />
-      <WidgetTask name='Take out the trash' time='18:00' />
-      <WidgetTask name='Water the plants' time='20:30' />
-    </Box>
-  </Box>
-)
+  )
+}
 
 /* ------------------- notification banners, stacked over the Today widget */
 
@@ -1409,24 +1458,27 @@ const NotificationBanner = ({
  * and a circle update) arriving over the home-screen widget they'll be glancing
  * at all day.
  */
-export const RemindersVignette = () => (
-  <Stage>
-    <NotificationBanner
-      icon={<NotificationsActiveRounded />}
-      title='Take out the trash'
-      body='Due in 30 minutes · Bin night'
-      delay={160}
-    />
-    <NotificationBanner
-      color='success'
-      icon={<CheckRounded />}
-      title='Amalie finished Kitchen deep clean'
-      body='Your turn is next Saturday'
-      delay={520}
-    />
-    <TodayWidget />
-  </Stage>
-)
+export const RemindersVignette = () => {
+  const { t } = useTranslation('common')
+  return (
+    <Stage>
+      <NotificationBanner
+        icon={<NotificationsActiveRounded />}
+        title={t('onboarding.reminders.trashTitle')}
+        body={t('onboarding.reminders.trashBody')}
+        delay={160}
+      />
+      <NotificationBanner
+        color='success'
+        icon={<CheckRounded />}
+        title={t('onboarding.reminders.finishedTitle')}
+        body={t('onboarding.reminders.finishedBody')}
+        delay={520}
+      />
+      <TodayWidget />
+    </Stage>
+  )
+}
 
 /* -------------------------------------------- slide 1: the problem itself */
 
@@ -1440,131 +1492,134 @@ export const RemindersVignette = () => (
 // instead of a full-width list row.
 const LITTLE_THINGS = [
   {
-    label: 'Water bill',
+    key: 'waterBill',
     priority: 1,
-    frequency: 'Monthly',
-    tag: 'Bills',
+    frequencyKey: 'monthly',
+    tagKey: 'tagBills',
     tagColor: '#5c6bc0',
     from: '-28px, 18px, -6deg',
   },
   {
-    label: 'AC filter',
+    key: 'acFilter',
     priority: 2,
-    frequency: 'Every 3 months',
-    tag: 'Home',
+    frequencyKey: 'everyThreeMonths',
+    tagKey: 'tagHome',
     tagColor: '#26a69a',
     from: '30px, 22px, 5deg',
   },
   {
-    label: 'Trash day',
+    key: 'trashDay',
     priority: 2,
-    frequency: 'Every Monday',
-    tag: 'Home',
+    frequencyKey: 'everyMonday',
+    tagKey: 'tagHome',
     tagColor: '#26a69a',
     from: '-34px, 26px, -4deg',
   },
   {
-    label: "Dog's medicine",
+    key: 'dogMedicine',
     priority: 1,
-    frequency: 'Daily',
-    tag: 'Pets',
+    frequencyKey: 'daily',
+    tagKey: 'tagPets',
     tagColor: '#ec407a',
     from: '26px, 30px, 6deg',
   },
   {
-    label: 'Whose turn to cook',
+    key: 'whoseTurn',
     priority: 3,
-    frequency: 'Weekly',
-    tag: 'Cooking',
+    frequencyKey: 'weekly',
+    tagKey: 'tagCooking',
     tagColor: '#66bb6a',
     from: '-22px, 34px, -5deg',
   },
 ]
 
-export const ProblemVignette = () => (
-  <Stage>
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-      {LITTLE_THINGS.map((thing, index) => (
-        <Box
-          key={thing.label}
-          sx={{
-            ...cardSx,
-            position: 'relative',
-            overflow: 'hidden',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1.25,
-            pl: 1.75,
-            pr: 1.25,
-            py: 1,
-            animation: `thingLand 620ms ${EASE} ${index * 130}ms both`,
-            '@keyframes thingLand': {
-              from: {
-                opacity: 0,
-                transform: `translate3d(${thing.from.split(',').slice(0, 2).join(',')}, 0) rotate(${thing.from.split(',')[2]})`,
+export const ProblemVignette = () => {
+  const { t } = useTranslation('common')
+  return (
+    <Stage>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+        {LITTLE_THINGS.map((thing, index) => (
+          <Box
+            key={thing.key}
+            sx={{
+              ...cardSx,
+              position: 'relative',
+              overflow: 'hidden',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.25,
+              pl: 1.75,
+              pr: 1.25,
+              py: 1,
+              animation: `thingLand 620ms ${EASE} ${index * 130}ms both`,
+              '@keyframes thingLand': {
+                from: {
+                  opacity: 0,
+                  transform: `translate3d(${thing.from.split(',').slice(0, 2).join(',')}, 0) rotate(${thing.from.split(',')[2]})`,
+                },
+                to: { opacity: 1, transform: 'none' },
               },
-              to: { opacity: 1, transform: 'none' },
-            },
-            '&::before': {
-              content: '""',
-              position: 'absolute',
-              left: 0,
-              top: 0,
-              bottom: 0,
-              width: '4px',
-              bgcolor: getPriorityColor(thing.priority),
-            },
-          }}
-        >
-          <Box
-            aria-hidden='true'
-            sx={{
-              flex: '0 0 auto',
-              width: 22,
-              height: 22,
-              borderRadius: '50%',
-              border: '2px solid',
-              borderColor: 'neutral.outlinedBorder',
-            }}
-          />
-
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography
-              level='title-sm'
-              noWrap
-              sx={{ fontWeight: 600, fontSize: '0.8125rem' }}
-            >
-              {thing.label}
-            </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.375 }}>
-              <Repeat sx={{ fontSize: 12, color: 'text.tertiary' }} />
-              <Typography
-                level='body-xs'
-                sx={{ color: 'text.tertiary', fontSize: '0.6875rem' }}
-              >
-                {thing.frequency}
-              </Typography>
-            </Box>
-          </Box>
-
-          <Box
-            sx={{
-              flex: '0 0 auto',
-              px: 0.875,
-              py: 0.125,
-              borderRadius: '999px',
-              fontSize: '0.6875rem',
-              fontWeight: 700,
-              lineHeight: 1.6,
-              whiteSpace: 'nowrap',
-              bgcolor: thing.tagColor,
-              color: getTextColorFromBackgroundColor(thing.tagColor),
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                left: 0,
+                top: 0,
+                bottom: 0,
+                width: '4px',
+                bgcolor: getPriorityColor(thing.priority),
+              },
             }}
           >
-            {thing.tag}
+            <Box
+              aria-hidden='true'
+              sx={{
+                flex: '0 0 auto',
+                width: 22,
+                height: 22,
+                borderRadius: '50%',
+                border: '2px solid',
+                borderColor: 'neutral.outlinedBorder',
+              }}
+            />
+
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography
+                level='title-sm'
+                noWrap
+                sx={{ fontWeight: 600, fontSize: '0.8125rem' }}
+              >
+                {t(`onboarding.things.${thing.key}`)}
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.375 }}>
+                <Repeat sx={{ fontSize: 12, color: 'text.tertiary' }} />
+                <Typography
+                  level='body-xs'
+                  sx={{ color: 'text.tertiary', fontSize: '0.6875rem' }}
+                >
+                  {t(`onboarding.things.${thing.frequencyKey}`)}
+                </Typography>
+              </Box>
+            </Box>
+
+            <Box
+              sx={{
+                flex: '0 0 auto',
+                px: 0.875,
+                py: 0.125,
+                borderRadius: '999px',
+                fontSize: '0.6875rem',
+                fontWeight: 700,
+                lineHeight: 1.6,
+                whiteSpace: 'nowrap',
+                bgcolor: thing.tagColor,
+                color: getTextColorFromBackgroundColor(thing.tagColor),
+              }}
+            >
+              {t(`onboarding.things.${thing.tagKey}`)}
+            </Box>
           </Box>
-        </Box>
-      ))}
-    </Box>
-  </Stage>
-)
+        ))}
+      </Box>
+    </Stage>
+  )
+}

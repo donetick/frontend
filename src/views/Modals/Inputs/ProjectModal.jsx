@@ -151,7 +151,7 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
         <Stack spacing={3}>
           {/* Project Name */}
           <FormControl required>
-            <FormLabel>Project Name</FormLabel>
+            <FormLabel>{t('modal.nameLabel')}</FormLabel>
             <Input
               value={projectName}
               onChange={e => setProjectName(e.target.value)}
@@ -163,7 +163,7 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
 
           {/* Project Description */}
           <FormControl>
-            <FormLabel>Description</FormLabel>
+            <FormLabel>{t('modal.descriptionLabel')}</FormLabel>
             <Textarea
               value={projectDescription}
               onChange={e => setProjectDescription(e.target.value)}
@@ -176,7 +176,7 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
 
           {/* Icon Selection */}
           <FormControl>
-            <FormLabel>Project Icon</FormLabel>
+            <FormLabel>{t('modal.iconLabel')}</FormLabel>
             <Button
               variant='outlined'
               onClick={() => setIsIconPickerOpen(true)}
@@ -212,19 +212,20 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
               }
               sx={{ justifyContent: 'flex-start' }}
             >
-              {PROJECT_ICONS.find(icon => icon.value === projectIcon)?.name ||
-                'Select Icon'}
+              {PROJECT_ICONS.some(icon => icon.value === projectIcon)
+                ? t(`icons.${projectIcon}`)
+                : t('modal.selectIcon')}
             </Button>
           </FormControl>
 
           {/* Color Selection */}
           <FormControl>
-            <FormLabel>Project Color</FormLabel>
+            <FormLabel>{t('modal.colorLabel')}</FormLabel>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
               {PROJECT_COLORS.map(colorOption => (
                 <Box
                   key={colorOption.value}
-                  title={colorOption.name}
+                  title={t(`common:colors.${colorOption.name}`)}
                   onClick={() => setProjectColor(colorOption.value)}
                   sx={{
                     width: 26,

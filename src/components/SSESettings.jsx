@@ -81,12 +81,12 @@ const SSESettings = () => {
             {t('realtime.titleSse')}
             {!isPlusAccount(userProfile) && (
               <Chip variant='soft' color='warning' sx={{ ml: 1 }}>
-                Plus Feature
+                {t('common.plusFeature')}
               </Chip>
             )}
           </Typography>
           <Typography level='body-sm' color='neutral'>
-            Get instant notifications via Server-Sent Events
+            {t('realtime.subtitleSse')}
           </Typography>
         </Box>
         {isSSEEnabled() && isPlusAccount(userProfile) && (

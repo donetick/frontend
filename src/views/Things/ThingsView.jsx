@@ -33,6 +33,7 @@ import {
 } from '@mui/joy'
 import Fuse from 'fuse.js'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
 import { track } from '../../analytics'
@@ -52,6 +53,7 @@ import CreateThingModal from '../Modals/Inputs/CreateThingModal'
 import EditThingStateModal from '../Modals/Inputs/EditThingState'
 
 const ThingCardContent = ({ onCardClick, onToggleActions, thing }) => {
+  const { t } = useTranslation('things')
   const getThingIcon = type => {
     if (type === 'text') {
       return <Flip />
@@ -190,7 +192,7 @@ const ThingCardContent = ({ onCardClick, onToggleActions, thing }) => {
               px: 0.75,
             }}
           >
-            {thing?.type}
+            {t(`types.${thing?.type}`, thing?.type)}
           </Chip>
         </Box>
       </Box>
@@ -214,6 +216,7 @@ const ThingCardContent = ({ onCardClick, onToggleActions, thing }) => {
 }
 
 const ThingsView = () => {
+  const { t } = useTranslation('things')
   const navigate = useNavigate()
   const [things, setThings] = useState([])
   const [isShowCreateThingModal, setIsShowCreateThingModal] = useState(false)
@@ -325,21 +328,21 @@ const ThingsView = () => {
           }
           showNotification({
             type: 'success',
-            title: 'Saved',
-            message: 'Thing saved successfully',
+            title: t('notify.savedTitle'),
+            message: t('notify.savedMessage'),
           })
         })
       })
       .catch(error => {
         if (error?.queued) {
           showError({
-            title: 'Unable to save thing',
-            message: 'You are offline and the request has been queued',
+            title: t('notify.saveFailTitle'),
+            message: t('notify.queuedMessage'),
           })
         } else {
           showError({
-            title: 'Unable to save thing',
-            message: 'An error occurred while saving the thing',
+            title: t('notify.saveFailTitle'),
+            message: t('notify.saveFailMessage'),
           })
         }
       })
@@ -351,10 +354,10 @@ const ThingsView = () => {
   const handleDeleteClick = thing => {
     setConfirmModelConfig({
       isOpen: true,
-      title: 'Delete Things',
-      confirmText: 'Delete',
-      cancelText: 'Cancel',
-      message: 'Are you sure you want to delete this Thing?',
+      title: t('notify.deleteTitle'),
+      confirmText: t('common:delete'),
+      cancelText: t('common:cancel'),
+      message: t('notify.deleteMessage'),
       onClose: isConfirmed => {
         if (isConfirmed === true) {
           DeleteThing(thing.id)
@@ -368,8 +371,8 @@ const ThingsView = () => {
                 setThings(currentThings)
               } else if (response.status === 405) {
                 showError({
-                  title: 'Unable to Delete Thing',
-                  message: 'Unable to delete thing with associated tasks',
+                  title: t('notify.deleteBlockedTitle'),
+                  message: t('notify.deleteBlockedMessage'),
                 })
               }
               // if method not allwo show snackbar:
@@ -377,13 +380,13 @@ const ThingsView = () => {
             .catch(error => {
               if (error?.queued) {
                 showError({
-                  title: 'Unable to delete thing',
-                  message: 'You are offline and the request has been queued',
+                  title: t('notify.deleteFailTitle'),
+                  message: t('notify.queuedMessage'),
                 })
               } else {
                 showError({
-                  title: 'Unable to delete thing',
-                  message: 'An error occurred while deleting the thing',
+                  title: t('notify.deleteFailTitle'),
+                  message: t('notify.deleteFailMessage'),
                 })
               }
             })
@@ -416,21 +419,21 @@ const ThingsView = () => {
           setThings(currentThings)
           showNotification({
             type: 'success',
-            title: 'Updated',
-            message: 'Thing state updated successfully',
+            title: t('notify.updatedTitle'),
+            message: t('notify.updatedMessage'),
           })
         })
       })
       .catch(error => {
         if (error?.queued) {
           showError({
-            title: 'Unable to update thing state',
-            message: 'You are offline and the request has been queued',
+            title: t('notify.updateFailTitle'),
+            message: t('notify.queuedMessage'),
           })
         } else {
           showError({
-            title: 'Unable to update thing state',
-            message: 'An error occurred while updating the thing state',
+            title: t('notify.updateFailTitle'),
+            message: t('notify.updateFailMessage'),
           })
         }
       })
@@ -448,15 +451,15 @@ const ThingsView = () => {
           setThings(currentThings)
           showNotification({
             type: 'success',
-            title: 'Updated',
-            message: 'Thing state updated successfully',
+            title: t('notify.updatedTitle'),
+            message: t('notify.updatedMessage'),
           })
         })
       })
       .catch(error => {
         showError({
-          title: 'Unable to update thing state',
-          message: 'An error occurred while updating the thing state',
+          title: t('notify.updateFailTitle'),
+          message: t('notify.updateFailMessage'),
         })
       })
   }
@@ -470,13 +473,10 @@ const ThingsView = () => {
             level='h3'
             sx={{ fontWeight: 'lg', color: 'text.primary' }}
           >
-            Things
+            {t('view.title')}
           </Typography>
           <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            Things are custom fields that can be attached to tasks to capture
-            additional information. They can be of type text, number, or
-            boolean. You can associate things with tasks and have the task due
-            once condition is met
+            {t('view.description')}
           </Typography>
         </Stack>
       </Box>
@@ -486,7 +486,7 @@ const ThingsView = () => {
         >
           <Input
             slotProps={{ input: { ref: searchInputRef } }}
-            placeholder='Search things'
+            placeholder={t('view.searchPlaceholder')}
             value={searchTerm}
             fullWidth
             sx={{
@@ -512,21 +512,21 @@ const ThingsView = () => {
           />
           <SortAndFilterMenu
             sortOptions={[
-              { name: 'Name', value: 'name' },
-              { name: 'Type', value: 'type' },
-              { name: 'State', value: 'state' },
-              { name: 'Last updated', value: 'updated' },
+              { name: t('view.sortName'), value: 'name' },
+              { name: t('view.sortType'), value: 'type' },
+              { name: t('view.sortState'), value: 'state' },
+              { name: t('view.sortUpdated'), value: 'updated' },
             ]}
             selectedSort={sortBy}
             onSortChange={setSortBy}
             sortDirection={sortDirection}
             onSortDirectionChange={setSortDirection}
-            filterTitle='Type'
+            filterTitle={t('view.filterTitle')}
             filterOptions={[
-              { name: 'All types', value: 'all' },
-              { name: 'Text', value: 'text' },
-              { name: 'Number', value: 'number' },
-              { name: 'Boolean', value: 'boolean' },
+              { name: t('view.filterAll'), value: 'all' },
+              { name: t('types.text'), value: 'text' },
+              { name: t('types.number'), value: 'number' },
+              { name: t('types.boolean'), value: 'boolean' },
             ]}
             selectedFilter={typeFilter}
             onFilterChange={value => {
@@ -550,10 +550,10 @@ const ThingsView = () => {
           <EmptyState
             fullHeight
             icon={<Widgets />}
-            title='No things yet'
-            description='A thing tracks a value, like a counter or a switch, that other tasks can react to. Create one to trigger tasks automatically.'
+            title={t('view.emptyTitle')}
+            description={t('view.emptyDescription')}
             primaryAction={{
-              label: 'Create a thing',
+              label: t('view.emptyAction'),
               startDecorator: <Add />,
               onClick: () => {
                 setCreateModalThing(null)
@@ -567,14 +567,14 @@ const ThingsView = () => {
             variant='no-results'
             fullHeight
             icon={<SearchOff />}
-            title='No things match'
+            title={t('view.noResultsTitle')}
             description={
               searchTerm
-                ? `No thing matches "${searchTerm}".`
-                : 'No thing matches the current filter.'
+                ? t('view.noResultsSearch', { term: searchTerm })
+                : t('view.noResultsFilter')
             }
             primaryAction={{
-              label: searchTerm ? 'Clear search' : 'Show all things',
+              label: searchTerm ? t('view.clearSearch') : t('view.showAll'),
               onClick: () => {
                 handleSearchClose()
                 setTypeFilter('all')
@@ -628,7 +628,9 @@ const ThingsView = () => {
                           <ToggleOff sx={{ fontSize: 20 }} />
                         )}
                         <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                          {thing?.type === 'text' ? 'Edit' : 'Toggle'}
+                          {thing?.type === 'text'
+                            ? t('common:edit')
+                            : t('view.toggle')}
                         </Typography>
                       </Box>
                     </SwipeAction>
@@ -647,7 +649,7 @@ const ThingsView = () => {
                       >
                         <Edit sx={{ fontSize: 20 }} />
                         <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                          Edit
+                          {t('common:edit')}
                         </Typography>
                       </Box>
                     </SwipeAction>
@@ -666,7 +668,7 @@ const ThingsView = () => {
                       >
                         <Delete sx={{ fontSize: 20 }} />
                         <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                          Delete
+                          {t('common:delete')}
                         </Typography>
                       </Box>
                     </SwipeAction>

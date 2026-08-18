@@ -19,6 +19,7 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { useResponsiveModal } from '../../hooks/useResponsiveModal.js'
 import {
@@ -106,6 +107,7 @@ const IconHalo = ({ color = 'primary', icon }) => (
  */
 const ErrorReportModal = ({ error, errorInfo, onClose, open }) => {
   const { ResponsiveModal } = useResponsiveModal()
+  const { t } = useTranslation('common')
   const isBugReport = !error
 
   const [report, setReport] = useState(null)
@@ -175,21 +177,25 @@ const ErrorReportModal = ({ error, errorInfo, onClose, open }) => {
               level='h4'
               sx={{ fontWeight: 700, letterSpacing: '-0.01em' }}
             >
-              {isBugReport ? 'Report an issue' : 'Report this problem'}
+              {isBugReport
+                ? t('errorReport.titleBug')
+                : t('errorReport.titleCrash')}
             </Typography>
             <Typography
               level='body-sm'
               sx={{ color: 'text.secondary', mt: 0.5, textWrap: 'pretty' }}
             >
               {isBugReport
-                ? 'Tell us what went wrong and we’ll attach the technical details for you.'
-                : 'A sentence about what you were doing turns this into something we can actually fix.'}
+                ? t('errorReport.subtitleBug')
+                : t('errorReport.subtitleCrash')}
             </Typography>
           </Box>
 
           <FormControl sx={{ ...enter(100) }}>
             <FormLabel sx={{ fontWeight: 600 }}>
-              {isBugReport ? 'What went wrong?' : 'What were you doing?'}
+              {isBugReport
+                ? t('errorReport.labelBug')
+                : t('errorReport.labelCrash')}
             </FormLabel>
             <Textarea
               minRows={3}
@@ -199,24 +205,24 @@ const ErrorReportModal = ({ error, errorInfo, onClose, open }) => {
               onChange={e => setDescription(e.target.value)}
               placeholder={
                 isBugReport
-                  ? 'e.g. Completing a chore from the list doesn’t update the due date'
-                  : 'e.g. I tapped a chore in My Chores and the screen went blank'
+                  ? t('errorReport.placeholderBug')
+                  : t('errorReport.placeholderCrash')
               }
             />
           </FormControl>
 
           <FormControl sx={{ ...enter(140) }}>
             <FormLabel sx={{ fontWeight: 600 }}>
-              Email{' '}
+              {t('errorReport.email')}{' '}
               <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                (optional — only if you want a reply)
+                {t('errorReport.emailOptional')}
               </Typography>
             </FormLabel>
             <Input
               type='email'
               value={email}
               onChange={e => setEmail(e.target.value)}
-              placeholder='you@example.com'
+              placeholder={t('errorReport.emailPlaceholder')}
             />
           </FormControl>
 
@@ -236,7 +242,9 @@ const ErrorReportModal = ({ error, errorInfo, onClose, open }) => {
               }
               sx={{ px: 0 }}
             >
-              {showDetails ? 'Hide' : 'Show'} what gets sent
+              {showDetails
+                ? t('errorReport.hideWhatGetsSent')
+                : t('errorReport.showWhatGetsSent')}
             </Button>
 
             {showDetails && (
@@ -258,7 +266,7 @@ const ErrorReportModal = ({ error, errorInfo, onClose, open }) => {
                   color={copied ? 'success' : 'neutral'}
                   onClick={copyDetails}
                   sx={{ position: 'absolute', top: 6, right: 6, minWidth: 0 }}
-                  aria-label='Copy diagnostics'
+                  aria-label={t('errorReport.copyDiagnostics')}
                 >
                   {copied ? (
                     <CheckRounded fontSize='small' />
@@ -276,7 +284,7 @@ const ErrorReportModal = ({ error, errorInfo, onClose, open }) => {
                     color: 'text.secondary',
                   }}
                 >
-                  {reportText || 'Collecting diagnostics…'}
+                  {reportText || t('errorReport.collecting')}
                 </Typography>
               </Box>
             )}
@@ -284,7 +292,7 @@ const ErrorReportModal = ({ error, errorInfo, onClose, open }) => {
               level='body-xs'
               sx={{ color: 'text.tertiary', mt: 1, display: 'block' }}
             >
-              No chore names, notes or attachments are included.
+              {t('errorReport.privacyNote')}
             </Typography>
           </Box>
 
@@ -298,7 +306,7 @@ const ErrorReportModal = ({ error, errorInfo, onClose, open }) => {
               disabled={!report || (isBugReport && !description.trim())}
               onClick={handleSubmit}
             >
-              Send report
+              {t('errorReport.send')}
             </Button>
             <Box sx={{ textAlign: 'center' }}>
               <Link
@@ -309,7 +317,9 @@ const ErrorReportModal = ({ error, errorInfo, onClose, open }) => {
                 underline='hover'
                 onClick={onClose}
               >
-                {isBugReport ? 'Cancel' : 'Not now'}
+                {isBugReport
+                  ? t('errorReport.cancel')
+                  : t('errorReport.notNow')}
               </Link>
             </Box>
           </Stack>
@@ -323,13 +333,13 @@ const ErrorReportModal = ({ error, errorInfo, onClose, open }) => {
           </Box>
           <Box sx={{ ...enter(50) }}>
             <Typography level='h4' sx={{ fontWeight: 700 }}>
-              Report sent
+              {t('errorReport.sentTitle')}
             </Typography>
             <Typography
               level='body-sm'
               sx={{ color: 'text.secondary', mt: 0.5 }}
             >
-              Thanks! this goes straight to the people who can fix it.
+              {t('errorReport.sentBody')}
             </Typography>
           </Box>
 
@@ -350,7 +360,7 @@ const ErrorReportModal = ({ error, errorInfo, onClose, open }) => {
           >
             <Box sx={{ textAlign: 'left' }}>
               <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                Reference
+                {t('errorReport.reference')}
               </Typography>
               <Typography
                 sx={{
@@ -371,14 +381,14 @@ const ErrorReportModal = ({ error, errorInfo, onClose, open }) => {
                 setTimeout(() => setCopied(false), 2000)
               }}
               sx={{ minWidth: 0 }}
-              aria-label='Copy reference'
+              aria-label={t('errorReport.copyReference')}
             >
               {copied ? <CheckRounded /> : <ContentCopyRounded />}
             </Button>
           </Box>
 
           <Button size='lg' fullWidth onClick={onClose} sx={{ ...enter(150) }}>
-            Done
+            {t('errorReport.done')}
           </Button>
         </Stack>
       )}
@@ -390,15 +400,13 @@ const ErrorReportModal = ({ error, errorInfo, onClose, open }) => {
           </Box>
           <Box sx={{ ...enter(50) }}>
             <Typography level='h4' sx={{ fontWeight: 700 }}>
-              Finish on GitHub
+              {t('errorReport.githubTitle')}
             </Typography>
             <Typography
               level='body-sm'
               sx={{ color: 'text.secondary', mt: 0.5, textWrap: 'pretty' }}
             >
-              Nothing has been sent. We&apos;ve filled in an issue with your
-              notes and the diagnostics — review it and post when you&apos;re
-              happy with it.
+              {t('errorReport.githubBody')}
             </Typography>
           </Box>
           <Stack spacing={1} sx={{ ...enter(100) }}>
@@ -411,7 +419,7 @@ const ErrorReportModal = ({ error, errorInfo, onClose, open }) => {
                 onClose()
               }}
             >
-              Open pre-filled issue
+              {t('errorReport.openIssue')}
             </Button>
             <Button
               variant='plain'
@@ -421,7 +429,7 @@ const ErrorReportModal = ({ error, errorInfo, onClose, open }) => {
               }
               onClick={copyDetails}
             >
-              {copied ? 'Copied' : 'Copy details instead'}
+              {copied ? t('errorReport.copied') : t('errorReport.copyInstead')}
             </Button>
             <Box sx={{ textAlign: 'center' }}>
               <Link
@@ -432,7 +440,7 @@ const ErrorReportModal = ({ error, errorInfo, onClose, open }) => {
                 underline='hover'
                 onClick={onClose}
               >
-                Close
+                {t('errorReport.close')}
               </Link>
             </Box>
           </Stack>

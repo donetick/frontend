@@ -15,6 +15,7 @@ import * as chrono from 'chrono-node'
 import moment from 'moment'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
+import { useTranslation } from 'react-i18next'
 
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import ModalActions from '../../components/common/ModalActions'
@@ -186,6 +187,7 @@ const POINTS_SUGGESTIONS = {
 const PARSE_DEBOUNCE_MS = 150
 
 const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
+  const { t } = useTranslation('chores')
   const { ResponsiveModal } = useResponsiveModal()
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
   const pickerEmptyDisplay = isMobile ? 'icon' : 'icon-text'
@@ -229,13 +231,13 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
         value: 'userId',
         display: 'displayName',
         options: [
-          { userId: 'anyone', displayName: 'Anyone' },
+          { userId: 'anyone', displayName: t('addTask.anyone') },
           ...(circleMembers?.res || []),
         ],
       },
       '*': POINTS_SUGGESTIONS,
     }),
-    [userLabels, circleMembers, handleCreateLabel],
+    [userLabels, circleMembers, handleCreateLabel, t],
   )
 
   const [taskText, setTaskText] = useState('')
@@ -1156,7 +1158,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
         onClose={handleCloseModal}
         size='lg'
         fullWidth={true}
-        title='Create new task'
+        title={t('addTask.title')}
         footer={
           <ModalActions>
             {!showScan && !showVoice && projects?.length >= 1 && (
@@ -1177,7 +1179,9 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
                     fontWeight: 'normal',
                   }}
                 >
-                  {selectedProject.name}
+                  {selectedProject.id === 'default'
+                    ? t('addTask.defaultProject')
+                    : selectedProject.name}
                 </MenuButton>
                 <Menu
                   placement='top-start'
@@ -1199,7 +1203,9 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
                             sx={{ fontSize: 18, color: project.color }}
                           />
                         </ListItemDecorator>
-                        {project.name}
+                        {project.id === 'default'
+                          ? t('addTask.defaultProject')
+                          : project.name}
                       </MenuItem>
                     )
                   })}
@@ -1211,7 +1217,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
               color='neutral'
               onClick={handleCloseModal}
             >
-              Cancel
+              {t('common:cancel')}
               {showKeyboardShortcuts && (
                 <KeyboardShortcutHint
                   shortcut='Esc'
@@ -1231,10 +1237,12 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
                 onClick={handleVoiceConfirm}
               >
                 {creatingVoiceTasks
-                  ? 'Creating…'
+                  ? t('addTask.creating')
                   : voiceState.segments.length > 1
-                    ? `Create ${voiceState.segments.length} Tasks`
-                    : 'Use Task'}
+                    ? t('addTask.createCount', {
+                        count: voiceState.segments.length,
+                      })
+                    : t('addTask.useTask')}
               </Button>
             )}
             {showScan && scanState.primaryAction && (
@@ -1249,7 +1257,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
             )}
             {showScan && scanState.phase === 'processing' && (
               <Button variant='solid' color='primary' loading disabled>
-                Processing
+                {t('addTask.processing')}
               </Button>
             )}
             {!showScan && !showVoice && (
@@ -1260,7 +1268,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
                 disabled={!taskTitle.trim() || isAttachingScan}
                 onClick={submitChore}
               >
-                Create
+                {t('addTask.create')}
                 {showKeyboardShortcuts && (
                   <KeyboardShortcutHint shortcut='Enter' sx={{ ml: 1 }} />
                 )}
@@ -1349,7 +1357,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
                 onVoiceClick={
                   voiceAvailable ? () => setShowVoice(true) : undefined
                 }
-                placeholder='Type your task...'
+                placeholder={t('addTask.taskPlaceholder')}
                 onChange={text => {
                   setTaskText(text)
                   if (!text) setTaskTitle('')
@@ -1484,7 +1492,9 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
                   }}
                 >
                   <Add sx={{ fontSize: 20 }} />
-                  <Typography level='body-sm'>Description</Typography>
+                  <Typography level='body-sm'>
+                    {t('addTask.descriptionChip')}
+                  </Typography>
                 </Button>
               )}
               {!hasSubTasks && (
@@ -1507,7 +1517,9 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
                   }}
                 >
                   <Add sx={{ fontSize: 20 }} />
-                  <Typography level='body-sm'>Subtasks</Typography>
+                  <Typography level='body-sm'>
+                    {t('addTask.subtasksChip')}
+                  </Typography>
                 </Button>
               )}
               <AdvancedOptionsTrigger

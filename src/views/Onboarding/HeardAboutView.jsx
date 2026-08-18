@@ -1,6 +1,7 @@
 import { CheckRounded } from '@mui/icons-material'
 import { Box, Button, Input, Link, Switch, Typography } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
 import { track } from '../../analytics'
@@ -23,16 +24,12 @@ const enter = (delay = 0) => ({
   '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
 })
 
-const SOURCES = [
-  'App Store / Google Play',
-  'Reddit or a forum',
-  'Friend or family',
-  'YouTube or TikTok',
-  'Search engine',
-  'Something else',
-]
+// Keys, not labels: the selected value is recorded as the acquisition source,
+// so it has to stay stable across locales. Display copy lives in
+// `common:onboarding.heardAbout.sources.*`.
+const SOURCES = ['appStore', 'reddit', 'friend', 'video', 'search', 'other']
 
-const OTHER = 'Something else'
+const OTHER = 'other'
 
 const Shell = ({ children }) => (
   <Box
@@ -70,6 +67,7 @@ const Shell = ({ children }) => (
  * attribute, so it gets the privacy prompt below instead.
  */
 const AcquisitionSurvey = ({ onDone }) => {
+  const { t } = useTranslation()
   const [selected, setSelected] = useState(null)
   const [detail, setDetail] = useState('')
 
@@ -102,13 +100,13 @@ const AcquisitionSurvey = ({ onDone }) => {
             textWrap: 'balance',
           }}
         >
-          Where&apos;d you hear about Donetick?
+          {t('onboarding.heardAbout.title')}
         </Typography>
         <Typography
           level='body-md'
           sx={{ mt: 1, color: 'text.secondary', textWrap: 'pretty' }}
         >
-          Helps us know what&apos;s working. Totally optional.
+          {t('onboarding.heardAbout.subtitle')}
         </Typography>
       </Box>
 
@@ -143,7 +141,7 @@ const AcquisitionSurvey = ({ onDone }) => {
                 transition: `border-color 200ms ${EASE}, background-color 200ms ${EASE}`,
               }}
             >
-              {source}
+              {t(`onboarding.heardAbout.sources.${source}`)}
               <Box
                 sx={{
                   flex: '0 0 auto',
@@ -170,7 +168,7 @@ const AcquisitionSurvey = ({ onDone }) => {
         {selected === OTHER && (
           <Box sx={{ mt: 0.5, ...enter(0) }}>
             <Input
-              placeholder='Tell us where'
+              placeholder={t('onboarding.heardAbout.detailPlaceholder')}
               value={detail}
               onChange={e => setDetail(e.target.value)}
               size='lg'
@@ -183,7 +181,7 @@ const AcquisitionSurvey = ({ onDone }) => {
 
       <Box sx={{ mt: 3, ...enter(120) }}>
         <Button size='lg' fullWidth onClick={finish} sx={authButtonSx}>
-          Continue
+          {t('onboarding.heardAbout.continue')}
         </Button>
       </Box>
 
@@ -196,27 +194,15 @@ const AcquisitionSurvey = ({ onDone }) => {
           underline='hover'
           onClick={finish}
         >
-          Skip
+          {t('onboarding.heardAbout.skip')}
         </Link>
       </Box>
     </>
   )
 }
 
-const PRIVACY_TOGGLES = [
-  {
-    key: 'crashReports',
-    label: 'Share crash reports',
-    description:
-      "When Donetick crashes, send us the error and what led to it (device, app version, the screen you were on) no task content. It's how we catch bugs that never show up in our own testing and ship fixes faster.",
-  },
-  {
-    key: 'analytics',
-    label: 'Share anonymous usage analytics',
-    description:
-      'Send anonymous usage events which features get used, which get ignored so we know what to build next instead of guessing. No task content, no personal data, nothing tied back to you.',
-  },
-]
+// Copy lives in `common:onboarding.privacy.*`, keyed off `key`.
+const PRIVACY_TOGGLES = ['crashReports', 'analytics']
 
 /**
  * The self-hosted counterpart to the attribution survey: since a self-hosted
@@ -225,6 +211,7 @@ const PRIVACY_TOGGLES = [
  * an opt-in, not an opt-out.
  */
 const PrivacyPreferences = ({ onDone }) => {
+  const { t } = useTranslation()
   const [crashReports, setCrashReports] = useState(false)
   const [analytics, setAnalytics] = useState(false)
 
@@ -253,14 +240,13 @@ const PrivacyPreferences = ({ onDone }) => {
             textWrap: 'balance',
           }}
         >
-          Help us improve Donetick
+          {t('onboarding.privacy.title')}
         </Typography>
         <Typography
           level='body-md'
           sx={{ mt: 1, color: 'text.secondary', textWrap: 'pretty' }}
         >
-          Your server, your data. Both of these are off from this point unless
-          you turn them on.
+          {t('onboarding.privacy.subtitle')}
         </Typography>
       </Box>
 
@@ -272,7 +258,7 @@ const PrivacyPreferences = ({ onDone }) => {
           ...enter(60),
         }}
       >
-        {PRIVACY_TOGGLES.map(({ description, key, label }) => (
+        {PRIVACY_TOGGLES.map(key => (
           <Box
             key={key}
             sx={{
@@ -290,13 +276,13 @@ const PrivacyPreferences = ({ onDone }) => {
           >
             <Box sx={{ minWidth: 0 }}>
               <Typography level='title-sm' sx={{ fontWeight: 600 }}>
-                {label}
+                {t(`onboarding.privacy.${key}Label`)}
               </Typography>
               <Typography
                 level='body-sm'
                 sx={{ mt: 0.25, color: 'text.secondary' }}
               >
-                {description}
+                {t(`onboarding.privacy.${key}Description`)}
               </Typography>
             </Box>
             <Switch
@@ -310,7 +296,7 @@ const PrivacyPreferences = ({ onDone }) => {
 
       <Box sx={{ mt: 3, ...enter(120) }}>
         <Button size='lg' fullWidth onClick={finish} sx={authButtonSx}>
-          Continue
+          {t('onboarding.heardAbout.continue')}
         </Button>
       </Box>
     </>

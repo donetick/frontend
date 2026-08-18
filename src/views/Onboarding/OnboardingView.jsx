@@ -4,6 +4,7 @@ import {
 } from '@mui/icons-material'
 import { Box, Button, Typography } from '@mui/joy'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
 import { track } from '../../analytics'
@@ -31,75 +32,57 @@ const SWIPE_THRESHOLD = 56
  * back. Every title is an outcome — nobody buys "reschedule from completion
  * date", they buy never arguing about trash day again.
  */
+// Copy lives in `common:onboarding.slides.*` — this array is module-level and
+// cannot call t(), so each slide carries its key and is translated at render.
 const SLIDES = [
-  {
-    key: 'problem',
-    title: 'Stop forgetting the little things',
-    body: "Donetick remembers the last time it happened, and when it's due next. So nobody else has to.",
-    Visual: ProblemVignette,
-  },
-  {
-    key: 'capture',
-    title: 'Add it before you forget it',
-    body: "Type it, say it out loud, or snap a photo. Donetick fills in the due date, priority, labels, and who's on it.",
-    Visual: CaptureVignette,
-  },
-  // {
-  //   key: 'schedule',
-  //   title: 'It comes back exactly when it should',
-  //   body: "Every week, every 3 months, or a month after you actually did it. Finishing late doesn't throw the rest of the year off.",
-  //   Visual: ScheduleVignette,
-  // },
-  {
-    key: 'circle',
-    title: 'Everyone gets a turn, No more arguing',
-    body: 'Rotate in the order you pick, or at random. Donetick remembers who went last, so turns stay fair.',
-    Visual: TakesTurnsVignette,
-  },
-  {
-    key: 'reminders',
-    title: 'A nudge right when it matters & Widgets!',
-    body: "Get a reminder before something's due, or send  a heads-up when someone forgets theirs. Today's list sits on your home screen too.",
-    Visual: RemindersVignette,
-    permission: true,
-  },
+  { key: 'problem', Visual: ProblemVignette },
+  { key: 'capture', Visual: CaptureVignette },
+  // { key: 'schedule', Visual: ScheduleVignette },
+  { key: 'circle', Visual: TakesTurnsVignette },
+  { key: 'reminders', Visual: RemindersVignette, permission: true },
 ]
 
-const Dots = ({ activeIndex, count, onSelect }) => (
-  <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
-    {Array.from({ length: count }, (_, index) => {
-      const active = index === activeIndex
-      return (
-        <Box
-          key={index}
-          component='button'
-          type='button'
-          aria-label={`Go to step ${index + 1}`}
-          aria-current={active ? 'step' : undefined}
-          onClick={() => onSelect(index)}
-          sx={{
-            border: 'none',
-            p: 0,
-            cursor: 'pointer',
-            height: 6,
-            width: active ? 22 : 6,
-            borderRadius: '999px',
-            bgcolor: active ? 'primary.500' : 'neutral.softBg',
-            transition: `width 280ms ${EASE}, background-color 280ms ease`,
-            '&:focus-visible': {
-              outline: '2px solid',
-              outlineColor: 'primary.500',
-              outlineOffset: '3px',
-            },
-            '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
-          }}
-        />
-      )
-    })}
-  </Box>
-)
+const Dots = ({ activeIndex, count, onSelect }) => {
+  const { t } = useTranslation()
+  return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
+      {Array.from({ length: count }, (_, index) => {
+        const active = index === activeIndex
+        return (
+          <Box
+            key={index}
+            component='button'
+            type='button'
+            aria-label={t('onboarding.carousel.goToStep', {
+              number: index + 1,
+            })}
+            aria-current={active ? 'step' : undefined}
+            onClick={() => onSelect(index)}
+            sx={{
+              border: 'none',
+              p: 0,
+              cursor: 'pointer',
+              height: 6,
+              width: active ? 22 : 6,
+              borderRadius: '999px',
+              bgcolor: active ? 'primary.500' : 'neutral.softBg',
+              transition: `width 280ms ${EASE}, background-color 280ms ease`,
+              '&:focus-visible': {
+                outline: '2px solid',
+                outlineColor: 'primary.500',
+                outlineOffset: '3px',
+              },
+              '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
+            }}
+          />
+        )
+      })}
+    </Box>
+  )
+}
 
 const OnboardingView = () => {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [activeIndex, setActiveIndex] = useState(0)
   const [drag, setDrag] = useState(0)
@@ -227,7 +210,7 @@ const OnboardingView = () => {
           onClick={finish}
           sx={{ fontWeight: 600, borderRadius: '999px' }}
         >
-          Skip
+          {t('onboarding.carousel.skip')}
         </Button>
       </Box>
 
@@ -235,7 +218,7 @@ const OnboardingView = () => {
         ref={viewportRef}
         role='group'
         aria-roledescription='carousel'
-        aria-label='What you can do with Donetick'
+        aria-label={t('onboarding.carousel.ariaLabel')}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={endDrag}
@@ -270,7 +253,10 @@ const OnboardingView = () => {
                 key={slide.key}
                 role='group'
                 aria-roledescription='slide'
-                aria-label={`${index + 1} of ${SLIDES.length}`}
+                aria-label={t('onboarding.carousel.slidePosition', {
+                  index: index + 1,
+                  total: SLIDES.length,
+                })}
                 aria-hidden={!active}
                 sx={{
                   flex: '0 0 100%',
@@ -320,7 +306,7 @@ const OnboardingView = () => {
                       },
                     }}
                   >
-                    {slide.title}
+                    {t(`onboarding.slides.${slide.key}Title`)}
                   </Typography>
                   <Typography
                     level='body-md'
@@ -333,7 +319,7 @@ const OnboardingView = () => {
                       animation: `slideCopyIn 460ms ${EASE} 140ms both`,
                     }}
                   >
-                    {slide.body}
+                    {t(`onboarding.slides.${slide.key}Body`)}
                   </Typography>
                 </Box>
               </Box>
@@ -366,7 +352,7 @@ const OnboardingView = () => {
               startDecorator={<NotificationsActiveRounded />}
               sx={authButtonSx}
             >
-              Turn on reminders
+              {t('onboarding.carousel.turnOnReminders')}
             </Button>
             <Button
               variant='plain'
@@ -379,7 +365,7 @@ const OnboardingView = () => {
               onClick={finish}
               sx={{ ...authButtonSx, mt: -1.5 }}
             >
-              Not now
+              {t('onboarding.carousel.notNow')}
             </Button>
           </>
         ) : (
@@ -390,7 +376,7 @@ const OnboardingView = () => {
             endDecorator={!isLast ? <ArrowForwardRounded /> : null}
             sx={authButtonSx}
           >
-            {isLast ? 'Get started' : 'Next'}
+            {isLast ? t('getStarted') : t('onboarding.carousel.next')}
           </Button>
         )}
       </Box>

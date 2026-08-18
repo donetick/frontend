@@ -132,7 +132,7 @@ const ScanPanel = ({
       }
     }
     if (phase === 'error') {
-      return { label: 'Retake', icon: <Replay />, onClick: retake }
+      return { label: t('photoTask.retake'), icon: <Replay />, onClick: retake }
     }
     return null
   }, [
@@ -160,7 +160,7 @@ const ScanPanel = ({
       size='sm'
       checked={keepImage}
       onChange={e => setKeepImage(e.target.checked)}
-      label='Keep photo as attachment'
+      label={t('photoTask.keepAsAttachment')}
       sx={{ '--Checkbox-size': '18px' }}
     />
   )
@@ -248,7 +248,7 @@ const ScanPanel = ({
                 startDecorator={<PhotoCamera fontSize='small' />}
                 onClick={openFilePicker}
               >
-                Upload
+                {t('photoTask.upload')}
               </Button>
             )}
             {keepImageToggle}
@@ -278,7 +278,7 @@ const ScanPanel = ({
             >
               <img
                 src={capturedImage}
-                alt='Processing'
+                alt={t('photoTask.altProcessing')}
                 style={{
                   width: '100%',
                   display: 'block',

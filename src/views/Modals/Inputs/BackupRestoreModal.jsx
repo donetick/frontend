@@ -104,7 +104,7 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
         handleClose()
       } else {
         const errorData = await response.json()
-        setError(errorData.message || 'Failed to create backup')
+        setError(errorData.message || t('backup.createFailed'))
       }
     } catch (err) {
       setError(t('backup.createFailed'))
@@ -156,7 +156,7 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
             handleClose()
           } else {
             const errorData = await response.json()
-            setError(errorData.message || 'Failed to restore backup')
+            setError(errorData.message || t('backup.restoreFailed'))
           }
         } catch (err) {
           setError(t('backup.restoreFailed'))
@@ -288,7 +288,7 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
       size='lg'
       fullWidth={true}
       unmountDelay={250}
-      title='Backup & Restore'
+      title={t('backup.title')}
       closeOnBackdrop={!loading}
       closeOnEscape={!loading}
       footer={
@@ -299,7 +299,8 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
             disabled: loading,
           }}
           primary={{
-            label: activeTab === 0 ? 'Create Backup' : 'Restore Backup',
+            label:
+              activeTab === 0 ? t('backup.createTab') : t('backup.restoreTab'),
             color: activeTab === 0 ? 'primary' : 'warning',
             onClick: activeTab === 0 ? handleCreateBackup : handleRestore,
             loading,
@@ -320,7 +321,7 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
         >
           <CircularProgress />
           <Typography level='body-md' sx={{ ml: 2 }}>
-            {activeTab === 0 ? 'Creating backup...' : 'Restoring backup...'}
+            {activeTab === 0 ? t('backup.creating') : t('backup.restoring')}
           </Typography>
         </Box>
       ) : (
@@ -329,8 +330,8 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
           onChange={(event, newValue) => setActiveTab(newValue)}
         >
           <TabList>
-            <Tab>Create Backup</Tab>
-            <Tab>Restore Backup</Tab>
+            <Tab>{t('backup.createTab')}</Tab>
+            <Tab>{t('backup.restoreTab')}</Tab>
           </TabList>
 
           <TabPanel value={0}>{renderBackupTab()}</TabPanel>

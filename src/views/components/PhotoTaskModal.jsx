@@ -350,7 +350,7 @@ const PhotoTaskModal = ({ onClose, onTaskExtracted, open }) => {
             {phase === 'preview' && capturedImage && (
               <img
                 src={capturedImage}
-                alt='Captured document'
+                alt={t('photoTask.altCaptured')}
                 style={{ width: '100%', display: 'block' }}
               />
             )}
@@ -372,7 +372,7 @@ const PhotoTaskModal = ({ onClose, onTaskExtracted, open }) => {
             {capturedImage && (
               <img
                 src={capturedImage}
-                alt='Processing'
+                alt={t('photoTask.altProcessing')}
                 style={{
                   width: '100%',
                   borderRadius: 8,
@@ -408,7 +408,9 @@ const PhotoTaskModal = ({ onClose, onTaskExtracted, open }) => {
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <CheckCircle color='success' />
-              <Typography level='title-sm'>Task identified</Typography>
+              <Typography level='title-sm'>
+                {t('photoTask.taskIdentified')}
+              </Typography>
             </Box>
             <Box
               sx={{
@@ -531,7 +533,7 @@ const PhotoTaskModal = ({ onClose, onTaskExtracted, open }) => {
                 startDecorator={<Replay />}
                 onClick={handleRetake}
               >
-                Retake
+                {t('photoTask.retake')}
               </Button>
               {isNativeScanner &&
                 capturedImage &&
@@ -570,7 +572,7 @@ const PhotoTaskModal = ({ onClose, onTaskExtracted, open }) => {
                 startDecorator={<Replay />}
                 onClick={handleRetake}
               >
-                Retake
+                {t('photoTask.retake')}
               </Button>
             </>
           )}
@@ -591,7 +593,7 @@ const PhotoTaskModal = ({ onClose, onTaskExtracted, open }) => {
                 startDecorator={<Replay />}
                 onClick={handleRetake}
               >
-                Retake
+                {t('photoTask.retake')}
               </Button>
               <Button variant='solid' color='primary' onClick={handleConfirm}>
                 {t('photoTask.createTask')}

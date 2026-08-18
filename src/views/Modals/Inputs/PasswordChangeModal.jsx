@@ -18,7 +18,7 @@ function PasswordChangeModal({ isOpen, onClose }) {
     if (!passwordTouched || !confirmPasswordTouched) return
 
     if (password !== confirmPassword) {
-      setPasswordError('Passwords do not match')
+      setPasswordError(t('passwordChange.mismatch'))
     } else if (password.length < 8) {
       setPasswordError(t('passwordChange.minLength'))
     } else if (password.length > 64) {
@@ -42,7 +42,7 @@ function PasswordChangeModal({ isOpen, onClose }) {
       onClose={() => handleAction(false)}
       size='sm'
       title={t('accountSettings.changePassword')}
-      description='Choose a password between 8 and 64 characters.'
+      description={t('passwordChange.description')}
       footer={
         <ModalActions
           secondary={{
@@ -58,13 +58,15 @@ function PasswordChangeModal({ isOpen, onClose }) {
       }
     >
       <FormControl sx={{ mb: 2 }}>
-        <Typography level='body-sm'>New password</Typography>
+        <Typography level='body-sm'>
+          {t('passwordChange.newPassword')}
+        </Typography>
         <Input
           required
           name='password'
           type='password'
           autoComplete='new-password'
-          placeholder='Enter password'
+          placeholder={t('passwordChange.newPasswordPlaceholder')}
           value={password}
           onChange={event => {
             setPasswordTouched(true)
@@ -74,13 +76,15 @@ function PasswordChangeModal({ isOpen, onClose }) {
       </FormControl>
 
       <FormControl error={Boolean(passwordError)}>
-        <Typography level='body-sm'>Confirm password</Typography>
+        <Typography level='body-sm'>
+          {t('passwordChange.confirmPassword')}
+        </Typography>
         <Input
           required
           name='confirmPassword'
           type='password'
           autoComplete='new-password'
-          placeholder='Repeat password'
+          placeholder={t('passwordChange.confirmPasswordPlaceholder')}
           value={confirmPassword}
           onChange={event => {
             setConfirmPasswordTouched(true)

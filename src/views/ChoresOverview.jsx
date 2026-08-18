@@ -180,11 +180,11 @@ const ChoresOverview = () => {
         <thead>
           <tr>
             {/* first column has minium size because its icon */}
-            <th style={{ width: 100 }}>Due</th>
-            <th>Chore</th>
-            <th>Assignee</th>
-            <th>Due</th>
-            <th>Action</th>
+            <th style={{ width: 100 }}>{t('overview.colDue')}</th>
+            <th>{t('overview.colChore')}</th>
+            <th>{t('overview.colAssignee')}</th>
+            <th>{t('overview.colDue')}</th>
+            <th>{t('overview.colAction')}</th>
           </tr>
         </thead>
         <tbody>
