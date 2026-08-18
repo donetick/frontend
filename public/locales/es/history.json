@@ -21,6 +21,20 @@
     "onTime": "On Time",
     "onTimeLabel": "On time"
   },
+  "card": {
+    "wasDue": "Was due {{date}}",
+    "daysBeforeDue_one": "{{count}}d before due date",
+    "daysBeforeDue_other": "{{count}}d before due date",
+    "daysAfterDue_one": "{{count}}d after due date",
+    "daysAfterDue_other": "{{count}}d after due date",
+    "hoursBeforeDue_one": "{{count}}h before due date",
+    "hoursBeforeDue_other": "{{count}}h before due date",
+    "hoursAfterDue_one": "{{count}}h after due date",
+    "hoursAfterDue_other": "{{count}}h after due date",
+    "assignedTo": "Assigned to {{name}}",
+    "points_one": "★ {{count}} pt",
+    "points_other": "★ {{count}} pts"
+  },
   "detail": {
     "title": "Activity Detail",
     "openTask": "Open Task",
