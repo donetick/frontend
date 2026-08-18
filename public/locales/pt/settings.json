@@ -168,7 +168,8 @@
     "joinCircle": "Entrar no círculo",
     "joinedPending": "Você entrou no círculo; aguarde a pessoa proprietária aceitar sua solicitação.",
     "alreadyMember": "Você já é membro deste círculo",
-    "joinFailed": "Não foi possível entrar no círculo"
+    "joinFailed": "Não foi possível entrar no círculo",
+    "copyLink": "Copy Link"
   },
   "accountSettings": {
     "title": "Configurações da conta",
@@ -423,7 +424,8 @@
         "name": "Metas semanais",
         "description": "Mostra o progresso semanal e as estatísticas da família"
       }
-    }
+    },
+    "detailedDescription": "Customize the layout and visibility of cards in the sidepanel. the section only available on large screen devices such as tablets and desktops.."
   },
   "theme": {
     "title": "Preferências de tema",
@@ -457,7 +459,8 @@
       "ymd": "AAAA-MM-DD (ISO)",
       "long": "Formato longo (ex.: 1 de janeiro de 2024)",
       "short": "Formato curto (ex.: 1 jan 2024)"
-    }
+    },
+    "descriptionLong": "Customize language, date format, and regional preferences for your account. These settings will apply throughout the application."
   },
   "advanced": {
     "title": "Configurações avançadas",
@@ -534,7 +537,13 @@
   },
   "passwordChange": {
     "minLength": "Password must be at least 8 characters",
-    "maxLength": "Password must be less than 64 characters"
+    "maxLength": "Password must be less than 64 characters",
+    "description": "Choose a password between 8 and 64 characters.",
+    "mismatch": "Passwords do not match",
+    "newPassword": "New password",
+    "newPasswordPlaceholder": "Enter password",
+    "confirmPassword": "Confirm password",
+    "confirmPasswordPlaceholder": "Repeat password"
   },
   "payment": {
     "cancelledTitle": "Payment has been cancelled",
@@ -566,7 +575,12 @@
     "includeAssets": "Include uploaded files and assets",
     "warningLabel": "Warning:",
     "restoreWarning": "Restoring a backup will replace all your current data. This action cannot be undone.",
-    "restoreKeyPlaceholder": "Enter the encryption key used for this backup"
+    "restoreKeyPlaceholder": "Enter the encryption key used for this backup",
+    "title": "Backup & Restore",
+    "createTab": "Create Backup",
+    "restoreTab": "Restore Backup",
+    "creating": "Creating backup...",
+    "restoring": "Restoring backup..."
   },
   "deletion": {
     "passwordRequired": "Please enter your password to continue",
@@ -576,9 +590,50 @@
     "transferIntro": "You own circles that require ownership transfer before deletion. Please select new owners:",
     "selectOwner": "Select new owner",
     "confirmPrompt": "Please enter your password and type DELETE to confirm",
-    "typeDelete": "DELETE"
+    "typeDelete": "DELETE",
+    "warningLead": "This action cannot be undone.",
+    "warningIntro": "Deleting your account will permanently remove:",
+    "removesProfile": "Your user profile and authentication data",
+    "removesChores": "All your chores, chore history, and time tracking sessions",
+    "removesTokens": "API tokens, MFA sessions, and password reset tokens",
+    "removesStorage": "Storage files and usage data",
+    "removesPoints": "Points history and notifications",
+    "removesCircles": "Circle memberships and relationships",
+    "passwordToContinue": "Enter your password to continue",
+    "circleLabel": "Circle: {{name}}",
+    "newOwner": "New Owner",
+    "logoutNotice": "On successful deletion, you will be logged out and redirected to the login page.",
+    "passwordLabel": "Password",
+    "typeToConfirm": "Type \"{{word}}\" to confirm"
   },
   "realtime": {
-    "titleSse": "Real-time Updates (SSE)"
+    "titleSse": "Real-time Updates (SSE)",
+    "subtitleSse": "Get instant notifications via Server-Sent Events"
+  },
+  "nativeCancel": {
+    "title": "Cancel Subscription",
+    "dismiss": "Dismiss",
+    "cancelViaStore": "I'll cancel from my app store",
+    "cancelDesktop": "Cancel desktop subscription",
+    "intro": "To cancel your subscription, please follow the instructions for your platform (you should cancel through the same platform you used to subscribe).",
+    "iosHeading": "For iOS (iPhone/iPad):",
+    "iosStep1": "1. Open the <b>Settings</b> app on your device",
+    "iosStep2": "2. Tap your name at the top of the screen",
+    "iosStep3": "3. Tap <b>Subscriptions</b>",
+    "iosStep4": "4. Find and tap <b>Donetick</b>",
+    "iosStep5": "5. Tap <b>Cancel Subscription</b>",
+    "iosNote": "<b>Note:</b> If you subscribed through iOS and are using the web/desktop version, you must cancel through iOS Settings as described above.",
+    "androidHeading": "For Android:",
+    "androidStep1": "1. Open the <b>Google Play Store</b> app",
+    "androidStep2": "2. Tap the profile icon in the top right",
+    "androidStep3": "3. Tap <b>Payments & subscriptions</b>",
+    "androidStep4": "4. Tap <b>Subscriptions</b>",
+    "androidStep5": "5. Find and tap <b>Donetick</b>",
+    "androidStep6": "6. Tap <b>Cancel subscription</b>",
+    "androidNote": "<b>Note:</b> If you subscribed through Google Play and are using the web/desktop version, you must cancel through Google Play as described above.",
+    "webHeading": "For Web/Desktop Subscriptions:",
+    "webBody": "If you originally subscribed through our website or desktop app, you can cancel your subscription by going to the Account Settings section on our website. using a web browser",
+    "webNote": "<b>Important:</b> You must cancel your subscription through the same platform where you originally subscribed. If you subscribed through the iOS App Store or Google Play Store (even if you're now using the web/desktop version), you must cancel through that original platform using the instructions above.",
+    "footer": "Your subscription will remain active until the end of your current billing period."
   }
 }
