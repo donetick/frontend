@@ -77,13 +77,17 @@ import { INSIGHT_FILTER_DEFS } from './SmartInsightsCard'
 
 // Mirrors the assignee options in the toolbar, phrased to drop into a
 // sentence ("none of them are assigned to you").
-const ASSIGNEE_FILTER_LABELS = {
-  assigned_to_me: 'assigned to you',
-  available_for_me: 'available for you to pick up',
-  assigned_to_others: 'assigned to someone else',
-  assigned_to_me_tasks: 'assigned to you',
-  created_by_me: 'created by you',
-}
+// Which assignee filters describe a subset of "everyone" — the empty-state
+// copy for each lives under `chores:empty.assignee.*` as a whole sentence,
+// since the fragment ("assigned to you") cannot be slotted mid-sentence in
+// every language.
+const ASSIGNEE_FILTER_KEYS = [
+  'assigned_to_me',
+  'available_for_me',
+  'assigned_to_others',
+  'assigned_to_me_tasks',
+  'created_by_me',
+]
 
 const MyChores = () => {
   const { data: userProfile, isLoading: isUserProfileLoading } =
@@ -899,7 +903,8 @@ const MyChores = () => {
   // The assignee filter ("Mine", "Available to me", ...) is applied inside
   // ChoresGrouper, not in projectFilteredChores, so it can hide every task
   // while the unfiltered list still looks full. It narrows like any other.
-  const assigneeFilterLabel = ASSIGNEE_FILTER_LABELS[selectedChoreFilter]
+  const hasAssigneeNarrowing =
+    ASSIGNEE_FILTER_KEYS.includes(selectedChoreFilter)
   const hasAssigneeFilter = Boolean(
     selectedChoreFilter && selectedChoreFilter !== 'anyone',
   )
@@ -919,7 +924,7 @@ const MyChores = () => {
   // Worth its own wording: the assignee filter is the one narrowing that is
   // easy to forget you left on, so name it rather than saying "filters".
   const isAssigneeOnlyNarrowing = Boolean(
-    assigneeFilterLabel &&
+    hasAssigneeNarrowing &&
     !searchTerm?.length &&
     !hasQuickFilters &&
     !activeFilterId,
@@ -973,13 +978,12 @@ const MyChores = () => {
           variant='error'
           fullHeight
           icon={<CloudOff />}
-          title={"Can't reach Donetick"}
+          title={t('empty.errorTitle')}
           description={
-            choresErrorDetails?.message ||
-            'Your tasks are safe. We just could not load them right now, check your connection and try again.'
+            choresErrorDetails?.message || t('empty.errorDescription')
           }
           primaryAction={{
-            label: 'Try again',
+            label: t('empty.errorAction'),
             onClick: () => {
               refetchChores()
               queryClient.invalidateQueries(['circleMembers'])
@@ -1163,15 +1167,15 @@ const MyChores = () => {
               variant='empty'
               fullHeight
               icon={<EditCalendar />}
-              title='No tasks yet'
-              description='Create your first task and Donetick keeps track of when it is due, whose turn it is, and what comes next.'
+              title={t('empty.noTasksTitle')}
+              description={t('empty.noTasksDescription')}
               primaryAction={{
-                label: 'Create a task',
+                label: t('empty.createTask'),
                 startDecorator: <Add />,
                 onClick: () => setAddTaskModalOpen(true),
               }}
               secondaryAction={{
-                label: 'More options',
+                label: t('empty.moreOptions'),
                 onClick: () => Navigate('/chores/create'),
               }}
             />
@@ -1183,21 +1187,21 @@ const MyChores = () => {
               variant='no-results'
               fullHeight
               icon={<SearchOff />}
-              title='No tasks match this view'
+              title={t('empty.noMatchTitle')}
               description={
                 searchTerm?.length > 0
-                  ? `Nothing matches "${searchTerm}". Try a different search, or clear what is narrowing the list.`
+                  ? t('empty.noMatchSearch', { term: searchTerm })
                   : isAssigneeOnlyNarrowing
-                    ? `There are tasks here, but none of them are ${assigneeFilterLabel}. Switch back to everyone to see the rest.`
-                    : 'You have tasks, but none of them fit the filters that are currently on.'
+                    ? t(`empty.assignee.${selectedChoreFilter}`)
+                    : t('empty.noMatchFilters')
               }
               primaryAction={{
                 label:
                   searchTerm?.length > 0
-                    ? 'Clear search'
+                    ? t('empty.clearSearch')
                     : isAssigneeOnlyNarrowing
-                      ? "Show everyone's tasks"
-                      : 'Clear filters',
+                      ? t('empty.showEveryone')
+                      : t('empty.clearFilters'),
                 onClick: clearNarrowing,
               }}
             />
@@ -1206,15 +1210,15 @@ const MyChores = () => {
               variant='empty'
               fullHeight
               icon={<EditCalendar />}
-              title={`Nothing in ${selectedProject.name} yet`}
-              description='Tasks you add to this project show up here. Your other tasks are still where you left them.'
+              title={t('empty.projectTitle', { name: selectedProject.name })}
+              description={t('empty.projectDescription')}
               primaryAction={{
-                label: 'Add a task here',
+                label: t('empty.addTaskHere'),
                 startDecorator: <Add />,
                 onClick: () => setAddTaskModalOpen(true),
               }}
               secondaryAction={{
-                label: 'See tasks outside projects',
+                label: t('empty.seeOutsideProjects'),
                 onClick: () => setSelectedProjectWithCache(null),
               }}
             />
@@ -1223,10 +1227,10 @@ const MyChores = () => {
               variant='empty'
               fullHeight
               icon={<EditCalendar />}
-              title='No tasks here yet'
-              description='Tasks that do not belong to a project live here. Add one, or switch projects to see what is in them.'
+              title={t('empty.noProjectTitle')}
+              description={t('empty.noProjectDescription')}
               primaryAction={{
-                label: 'Create a task',
+                label: t('empty.createTask'),
                 startDecorator: <Add />,
                 onClick: () => setAddTaskModalOpen(true),
               }}
@@ -1404,9 +1408,9 @@ const MyChores = () => {
                       size='sm'
                       icon={<EditCalendar />}
                       title={t('list.nothingScheduled')}
-                      description='This day is free. Add a task if you want something to land here.'
+                      description={t('empty.dayFreeDescription')}
                       primaryAction={{
-                        label: 'Add task',
+                        label: t('empty.addTask'),
                         startDecorator: <Add />,
                         onClick: () => setAddTaskModalOpen(true),
                       }}

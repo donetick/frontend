@@ -152,7 +152,7 @@ const ChoreListView = ({
                 >
                   <ThumbDown sx={{ fontSize: 20 }} />
                   <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                    Reject
+                    {t('list.reject')}
                   </Typography>
                 </Box>
               </SwipeAction>
@@ -173,7 +173,7 @@ const ChoreListView = ({
                 >
                   <HourglassEmpty sx={{ fontSize: 20 }} />
                   <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                    Pending
+                    {t('list.pending')}
                   </Typography>
                 </Box>
               </SwipeAction>
@@ -231,7 +231,7 @@ const ChoreListView = ({
             >
               <Schedule sx={{ fontSize: 20 }} />
               <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                Schedule
+                {t('list.schedule')}
               </Typography>
             </Box>
           </SwipeAction>
@@ -251,7 +251,7 @@ const ChoreListView = ({
             >
               <Edit sx={{ fontSize: 20 }} />
               <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                Edit
+                {t('common:edit')}
               </Typography>
             </Box>
           </SwipeAction>
@@ -272,7 +272,7 @@ const ChoreListView = ({
               >
                 <Notifications sx={{ fontSize: 20 }} />
                 <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                  Nudge
+                  {t('list.nudge')}
                 </Typography>
               </Box>
             </SwipeAction>
@@ -293,7 +293,7 @@ const ChoreListView = ({
             >
               <Delete sx={{ fontSize: 20 }} />
               <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                Delete
+                {t('common:delete')}
               </Typography>
             </Box>
           </SwipeAction>

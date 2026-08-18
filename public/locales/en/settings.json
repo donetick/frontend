@@ -583,5 +583,31 @@
   },
   "realtime": {
     "titleSse": "Real-time Updates (SSE)"
+  },
+  "nativeCancel": {
+    "title": "Cancel Subscription",
+    "dismiss": "Dismiss",
+    "cancelViaStore": "I'll cancel from my app store",
+    "cancelDesktop": "Cancel desktop subscription",
+    "intro": "To cancel your subscription, please follow the instructions for your platform (you should cancel through the same platform you used to subscribe).",
+    "iosHeading": "For iOS (iPhone/iPad):",
+    "iosStep1": "1. Open the <b>Settings</b> app on your device",
+    "iosStep2": "2. Tap your name at the top of the screen",
+    "iosStep3": "3. Tap <b>Subscriptions</b>",
+    "iosStep4": "4. Find and tap <b>Donetick</b>",
+    "iosStep5": "5. Tap <b>Cancel Subscription</b>",
+    "iosNote": "<b>Note:</b> If you subscribed through iOS and are using the web/desktop version, you must cancel through iOS Settings as described above.",
+    "androidHeading": "For Android:",
+    "androidStep1": "1. Open the <b>Google Play Store</b> app",
+    "androidStep2": "2. Tap the profile icon in the top right",
+    "androidStep3": "3. Tap <b>Payments & subscriptions</b>",
+    "androidStep4": "4. Tap <b>Subscriptions</b>",
+    "androidStep5": "5. Find and tap <b>Donetick</b>",
+    "androidStep6": "6. Tap <b>Cancel subscription</b>",
+    "androidNote": "<b>Note:</b> If you subscribed through Google Play and are using the web/desktop version, you must cancel through Google Play as described above.",
+    "webHeading": "For Web/Desktop Subscriptions:",
+    "webBody": "If you originally subscribed through our website or desktop app, you can cancel your subscription by going to the Account Settings section on our website. using a web browser",
+    "webNote": "<b>Important:</b> You must cancel your subscription through the same platform where you originally subscribed. If you subscribed through the iOS App Store or Google Play Store (even if you're now using the web/desktop version), you must cancel through that original platform using the instructions above.",
+    "footer": "Your subscription will remain active until the end of your current billing period."
   }
 }

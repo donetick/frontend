@@ -78,19 +78,19 @@ const dateOnly = date => ({
 const DUE_DATE_PRESETS = [
   {
     key: 'today',
-    label: 'Today',
+    labelKey: 'presetToday',
     resolve: () => dateOnly(moment()),
     hint: () => moment().format('ddd, MMM D'),
   },
   {
     key: 'tomorrow',
-    label: 'Tomorrow',
+    labelKey: 'presetTomorrow',
     resolve: () => dateOnly(moment().add(1, 'day')),
     hint: () => moment().add(1, 'day').format('ddd, MMM D'),
   },
   {
     key: 'next-week',
-    label: 'Next week',
+    labelKey: 'presetNextWeek',
     resolve: () => dateOnly(moment().add(1, 'week').startOf('isoWeek')),
     hint: () => moment().add(1, 'week').startOf('isoWeek').format('ddd, MMM D'),
   },
@@ -189,18 +189,18 @@ const MultiSelectToolbar = ({
     }
 
   const dueDateValue = summary.dueDate?.isMixed
-    ? 'Mixed'
+    ? t('multiToolbar.mixed')
     : summary.dueDate?.value
       ? moment(summary.dueDate.value).format('MMM D')
       : null
 
   const priorityValue = summary.priority?.isMixed
-    ? 'Mixed'
+    ? t('multiToolbar.mixed')
     : Priorities.find(p => p.value === summary.priority?.value)?.name.trim() ||
       null
 
   const assigneeValue = summary.assignee?.isMixed
-    ? 'Mixed'
+    ? t('multiToolbar.mixed')
     : members.find(m => m.userId === summary.assignee?.value)?.displayName ||
       null
 
@@ -389,11 +389,11 @@ const MultiSelectToolbar = ({
                 }}
                 title={
                   dueDateValue
-                    ? `Due date on selected tasks: ${dueDateValue}`
-                    : 'Set due date on selected tasks'
+                    ? t('multiToolbar.dueTitleSet', { value: dueDateValue })
+                    : t('multiToolbar.dueTitleEmpty')
                 }
               >
-                Due
+                {t('multiToolbar.due')}
               </Button>
               <Menu
                 size='md'
@@ -414,7 +414,9 @@ const MultiSelectToolbar = ({
                       <CalendarMonth sx={{ fontSize: 18 }} />
                     </ListItemDecorator>
                     <ListItemContent>
-                      <Typography level='body-sm'>{preset.label}</Typography>
+                      <Typography level='body-sm'>
+                        {t(`multiToolbar.${preset.labelKey}`)}
+                      </Typography>
                       <Typography
                         level='body-xs'
                         sx={{ color: 'text.tertiary' }}
@@ -435,7 +437,9 @@ const MultiSelectToolbar = ({
                     <EditCalendar sx={{ fontSize: 18 }} />
                   </ListItemDecorator>
                   <ListItemContent>
-                    <Typography level='body-sm'>Pick date…</Typography>
+                    <Typography level='body-sm'>
+                      {t('multiToolbar.pickDate')}
+                    </Typography>
                   </ListItemContent>
                 </MenuItem>
                 <MenuItem
@@ -449,7 +453,9 @@ const MultiSelectToolbar = ({
                     <Remove sx={{ fontSize: 18 }} />
                   </ListItemDecorator>
                   <ListItemContent>
-                    <Typography level='body-sm'>No due date</Typography>
+                    <Typography level='body-sm'>
+                      {t('multiToolbar.noDueDate')}
+                    </Typography>
                   </ListItemContent>
                 </MenuItem>
               </Menu>
@@ -500,9 +506,9 @@ const MultiSelectToolbar = ({
                 sx={{
                   '--Button-paddingInline': { xs: '0.75rem', sm: '1rem' },
                 }}
-                title='Move selected tasks to a project'
+                title={t('multiToolbar.moveTitle')}
               >
-                Move
+                {t('multiToolbar.move')}
               </Button>
               <Menu
                 size='md'
@@ -514,14 +520,19 @@ const MultiSelectToolbar = ({
                 <MenuItem
                   onClick={() => {
                     closeProjectMenu()
-                    onMoveToProject({ id: null, name: 'Default Project' })
+                    onMoveToProject({
+                      id: null,
+                      name: t('multiToolbar.defaultProject'),
+                    })
                   }}
                 >
                   <ListItemDecorator>
                     {renderProjectAvatar(LABEL_COLORS[0].value, 'FolderOpen')}
                   </ListItemDecorator>
                   <ListItemContent>
-                    <Typography level='body-sm'>Default Project</Typography>
+                    <Typography level='body-sm'>
+                      {t('multiToolbar.defaultProject')}
+                    </Typography>
                   </ListItemContent>
                 </MenuItem>
                 {projects.map(project => (
@@ -608,9 +619,9 @@ const MultiSelectToolbar = ({
             sx={{
               '--Button-paddingInline': { xs: '0.75rem', sm: '1rem' },
             }}
-            title='Set priority, assignee, or labels'
+            title={t('multiToolbar.moreTitle')}
           >
-            More
+            {t('multiToolbar.more')}
           </Button>
         </Box>
       </Box>
@@ -634,7 +645,7 @@ const MultiSelectToolbar = ({
             onClick={() => setMoreOpen(false)}
             sx={{ minWidth: 140 }}
           >
-            Done
+            {t('multiToolbar.done')}
           </Button>
         }
       >
@@ -646,7 +657,7 @@ const MultiSelectToolbar = ({
             <>
               <SectionHeader
                 icon={<Flag />}
-                label='Priority'
+                label={t('multiToolbar.priority')}
                 value={priorityValue}
               />
               <ChipRow>
@@ -677,7 +688,7 @@ const MultiSelectToolbar = ({
                   onClick={runAndClose(() => onSetPriority(0))}
                   sx={selectableChipSx}
                 >
-                  None
+                  {t('multiToolbar.noPriority')}
                 </Chip>
               </ChipRow>
             </>
@@ -688,7 +699,7 @@ const MultiSelectToolbar = ({
               <Divider sx={{ my: 2.5 }} />
               <SectionHeader
                 icon={<Person />}
-                label='Assignee'
+                label={t('multiToolbar.assignee')}
                 value={assigneeValue}
               />
               <ChipRow>
@@ -731,8 +742,8 @@ const MultiSelectToolbar = ({
                   only some of the selection has it — tapping completes the set. */}
               <SectionHeader
                 icon={<LabelIcon />}
-                label='Labels'
-                value='Tap to add · tap again to remove'
+                label={t('multiToolbar.labels')}
+                value={t('multiToolbar.labelsHint')}
               />
               <ChipRow>
                 {labels.map(label => {

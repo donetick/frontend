@@ -252,23 +252,27 @@ const ChoreToolbar = ({
     if (!condition?.type) return 'Filter'
 
     const typeLabels = {
-      assignee: 'Assignee',
-      createdBy: 'Created By',
-      status: 'Status',
-      priority: 'Priority',
+      assignee: t('filterBuilder.assignee'),
+      createdBy: t('filterBuilder.createdBy'),
+      status: t('filterBuilder.statusHeading'),
+      priority: t('filterBuilder.priority'),
       label: t('labels.label'),
-      project: 'Project',
-      dueDate: 'Due Date',
-      points: 'Points',
+      project: t('filterBuilder.project'),
+      dueDate: t('filterBuilder.dueDate'),
+      points: t('filterBuilder.points'),
     }
 
-    const typeLabel = typeLabels[condition.type] || 'Filter'
-    const prefix = condition.operator === 'isNot' ? 'Not ' : ''
+    const typeLabel =
+      typeLabels[condition.type] || t('filterBuilder.filterFallback')
+    const prefix =
+      condition.operator === 'isNot' ? t('filterBuilder.notPrefix') : ''
 
     if (condition.type === 'dueDate') {
-      const dueDateLabel =
-        DUE_DATE_OPTIONS.find(o => o.value === condition.operator)?.label ||
-        'Custom'
+      const dueDateLabel = DUE_DATE_OPTIONS.some(
+        o => o.value === condition.operator,
+      )
+        ? t(`filterBuilder.dueDateOption.${condition.operator}`)
+        : t('filterBuilder.customDueDate')
       return `${typeLabel}: ${dueDateLabel}`
     }
 
@@ -292,9 +296,9 @@ const ChoreToolbar = ({
         return member?.displayName || member?.username || String(value)
       }
       if (condition.type === 'status') {
-        return (
-          CHORE_STATUSES.find(s => s.value === value)?.label || String(value)
-        )
+        return CHORE_STATUSES.some(s => s.value === value)
+          ? t(`filterBuilder.status.${value}`)
+          : String(value)
       }
       if (condition.type === 'priority') {
         return Priorities.find(p => p.value === value)?.name || String(value)

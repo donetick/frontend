@@ -1,5 +1,6 @@
 import { Box, Button, CircularProgress, Input, Typography } from '@mui/joy'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import useAcknowledgmentModal from '../../hooks/useAcknowledgmentModal'
@@ -23,6 +24,7 @@ const enter = (delay = 0) => ({
 })
 
 const JoinCircleView = () => {
+  const { t } = useTranslation()
   const { data: userProfile, isLoading: isProfileLoading } = useUserProfile()
   // Read the token rather than useAuth(): the provider's copy only updates
   // through its own login(), so signup and the OAuth callback — which save
@@ -49,20 +51,18 @@ const JoinCircleView = () => {
         clearPendingInvite()
         if (resp.ok) {
           showAcknowledgment(
-            'Your request has been sent. A circle admin will need to approve ' +
-              "it before you can access the circle and its chores. We'll " +
-              "notify you when it's approved.",
-            'Request sent',
+            t('joinCircle.requestSentBody'),
+            t('joinCircle.requestSentTitle'),
             () => navigate('/chores'),
-            'Got it',
+            t('joinCircle.gotIt'),
             'success',
           )
         } else {
           setIsJoining(false)
           if (resp.status === 409) {
-            showError('You are already a member of this circle')
+            showError(t('joinCircle.alreadyMember'))
           } else {
-            showError('Failed to join circle')
+            showError(t('joinCircle.joinFailed'))
           }
           navigate('/chores')
         }
@@ -70,9 +70,9 @@ const JoinCircleView = () => {
       .catch(() => {
         setIsJoining(false)
         clearPendingInvite()
-        showError('Could not send your join request. Please try again.')
+        showError(t('joinCircle.requestError'))
       })
-  }, [code, navigate, showAcknowledgment, showError])
+  }, [code, navigate, showAcknowledgment, showError, t])
 
   // Coming back from login/signup the user already said yes by opening the
   // link, so send the request instead of asking a second time. This step used
@@ -102,14 +102,13 @@ const JoinCircleView = () => {
     />
   )
 
-  let title = "You're invited to join a circle"
+  let title = t('joinCircle.title')
   let subtitle = null
   let body = null
 
   if (!code) {
-    title = 'Invite link is incomplete'
-    subtitle =
-      'This invite link is missing a code. Ask the person who invited you to send a new link.'
+    title = t('joinCircle.incompleteTitle')
+    subtitle = t('joinCircle.incompleteSubtitle')
     body = (
       <Button
         fullWidth
@@ -117,14 +116,13 @@ const JoinCircleView = () => {
         sx={authButtonSx}
         onClick={() => navigate('/chores')}
       >
-        Go to Donetick
+        {t('joinCircle.goToDonetick')}
       </Button>
     )
     // A token that no longer resolves to a profile is as good as signed out —
     // better to offer sign-in than to spin forever.
   } else if (!isAuthenticated || (!isProfileLoading && !userProfile)) {
-    subtitle =
-      "Sign in or create a Donetick account to continue. We'll send your join request once you're signed in."
+    subtitle = t('joinCircle.signedOutSubtitle')
     body = (
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
         {inviteCodeField}
@@ -134,7 +132,7 @@ const JoinCircleView = () => {
           sx={authButtonSx}
           onClick={() => goToAuth('/login')}
         >
-          Sign in
+          {t('joinCircle.signIn')}
         </Button>
         <Button
           fullWidth
@@ -144,32 +142,32 @@ const JoinCircleView = () => {
           sx={authButtonSx}
           onClick={() => goToAuth('/signup')}
         >
-          Create an account
+          {t('joinCircle.createAccount')}
         </Button>
       </Box>
     )
   } else if (isProfileLoading || isJoining) {
-    title = 'Sending your request'
-    subtitle = 'Sending your request…'
+    title = t('joinCircle.sendingTitle')
+    subtitle = t('joinCircle.sendingSubtitle')
     body = (
       <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
         <CircularProgress />
       </Box>
     )
   } else {
-    subtitle =
-      `Hi ${userProfile?.displayName || userProfile?.username}. ` +
-      "Send a request to share this circle's chores with its members."
+    subtitle = t('joinCircle.greetingSubtitle', {
+      name: userProfile?.displayName || userProfile?.username,
+    })
     body = (
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
         <Typography
           level='body-sm'
           sx={{ textAlign: 'center', color: 'text.secondary' }}
         >
-          A circle admin will review your request before you get access.
+          {t('joinCircle.adminReviewNote')}
         </Typography>
         <Button fullWidth size='lg' sx={authButtonSx} onClick={submitJoin}>
-          Send join request
+          {t('joinCircle.sendRequest')}
         </Button>
         <Button
           fullWidth
@@ -182,7 +180,7 @@ const JoinCircleView = () => {
             navigate('/chores')
           }}
         >
-          Cancel
+          {t('common:cancel')}
         </Button>
       </Box>
     )

@@ -273,7 +273,11 @@
     "filterUpdated": "Filter Updated",
     "filterUpdatedMsg": "\"{{name}}\" has been updated successfully",
     "advancedFilterCreated": "Advanced Filter Created",
-    "advancedFilterCreatedMsg": "\"{{name}}\" has been created successfully"
+    "advancedFilterCreatedMsg": "\"{{name}}\" has been created successfully",
+    "reject": "Reject",
+    "pending": "Pending",
+    "schedule": "Schedule",
+    "nudge": "Nudge"
   },
   "multiToolbar": {
     "skip": "Skip",
@@ -282,7 +286,27 @@
     "skipTitle": "Skip selected tasks (/)",
     "archiveTitle": "Archive selected tasks (X)",
     "archive": "Archive",
-    "deleteTitle": "Delete selected tasks (Shift+X)"
+    "deleteTitle": "Delete selected tasks (Shift+X)",
+    "mixed": "Mixed",
+    "due": "Due",
+    "dueTitleSet": "Due date on selected tasks: {{value}}",
+    "dueTitleEmpty": "Set due date on selected tasks",
+    "presetToday": "Today",
+    "presetTomorrow": "Tomorrow",
+    "presetNextWeek": "Next week",
+    "pickDate": "Pick date…",
+    "noDueDate": "No due date",
+    "moveTitle": "Move selected tasks to a project",
+    "move": "Move",
+    "defaultProject": "Default Project",
+    "moreTitle": "Set priority, assignee, or labels",
+    "more": "More",
+    "priority": "Priority",
+    "assignee": "Assignee",
+    "labels": "Labels",
+    "labelsHint": "Tap to add · tap again to remove",
+    "done": "Done",
+    "noPriority": "None"
   },
   "remind": {
     "title": "Reminders"
@@ -553,5 +577,231 @@
     "useTask": "Use Task",
     "processing": "Processing",
     "create": "Create"
+  },
+  "repeat": {
+    "days": {
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday",
+      "sunday": "Sunday"
+    },
+    "months": {
+      "january": "January",
+      "february": "February",
+      "march": "March",
+      "april": "April",
+      "may": "May",
+      "june": "June",
+      "july": "July",
+      "august": "August",
+      "september": "September",
+      "october": "October",
+      "november": "November",
+      "december": "December"
+    },
+    "freqType": {
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "adaptive": "Adaptive",
+      "custom": "Custom"
+    },
+    "freqMessage": {
+      "adaptive": "This chore will be scheduled dynamically based on previous completion dates.",
+      "custom": "This chore will be scheduled based on a custom frequency."
+    },
+    "weekPattern": {
+      "every_week": "Every week",
+      "week_of_month": "Specific occurrences in the month"
+    },
+    "weekPatternHelp": {
+      "every_week": "Task repeats every week on selected days",
+      "week_of_month": "Task repeats on specific day occurrences each month (e.g., 1st Monday, 3rd Friday)"
+    },
+    "occurrence": {
+      "1": "1st occurrence",
+      "2": "2nd occurrence",
+      "3": "3rd occurrence",
+      "4": "4th occurrence",
+      "last": "Last occurrence"
+    },
+    "ordinal": {
+      "1": "1st",
+      "2": "2nd",
+      "3": "3rd",
+      "4": "4th",
+      "last": "last"
+    },
+    "unit": {
+      "hours": "Hours",
+      "days": "Days",
+      "weeks": "Weeks",
+      "months": "Months",
+      "years": "Years"
+    },
+    "repeatOnType": {
+      "interval": "Interval",
+      "days_of_the_week": "Days of the week",
+      "day_of_the_month": "Day of the month"
+    },
+    "timeOfDay": "Time of day: ",
+    "every": "Every: ",
+    "unitPlaceholder": "Unit",
+    "selectAll": "Select All",
+    "unselectAll": "Unselect All",
+    "selectOccurrences": "Select which occurrences of the selected days:",
+    "occurrenceExample": "Example: \"1st Monday\" means the first Monday of each month",
+    "onThe": "on the ",
+    "ofAboveMonths": "of the above month/s",
+    "title": "Repeat:",
+    "repeatThisTask": "Repeat this task",
+    "repeatThisTaskHelp": "Is this something needed to be done regularly?",
+    "howOften": "How often should it be repeated?",
+    "repeatOn": "Repeat on:",
+    "triggerLabel": "Trigger this task based on a thing state",
+    "triggerHelp": "Is this something that should be done when a thing state changes?",
+    "triggerPlanWarning": "Thing-based triggers are not available in the Basic plan. Upgrade to Plus to automatically trigger tasks when device states change.",
+    "previewEvery": "Every {{days}} at {{time}}",
+    "previewOccurrence": "Every {{occurrences}} {{days}} of the month at {{time}}",
+    "defaultTime": "6:00 PM",
+    "daysShort": {
+      "monday": "Mon",
+      "tuesday": "Tue",
+      "wednesday": "Wed",
+      "thursday": "Thu",
+      "friday": "Fri",
+      "saturday": "Sat",
+      "sunday": "Sun"
+    },
+    "monthsShort": {
+      "january": "Jan",
+      "february": "Feb",
+      "march": "Mar",
+      "april": "Apr",
+      "may": "May",
+      "june": "Jun",
+      "july": "Jul",
+      "august": "Aug",
+      "september": "Sep",
+      "october": "Oct",
+      "november": "Nov",
+      "december": "Dec"
+    },
+    "occurrenceShort": {
+      "1": "1st",
+      "2": "2nd",
+      "3": "3rd",
+      "4": "4th",
+      "last": "Last"
+    },
+    "picker": {
+      "modalTitle": "Repeat Schedule",
+      "trigger": "Repeat",
+      "clearAria": "Clear repeat schedule",
+      "remove": "Remove",
+      "apply": "Apply",
+      "frequency": "Frequency",
+      "scheduleType": "Schedule type",
+      "timeOfDay": "Time of day",
+      "repeatEvery": "Repeat every",
+      "days": "Days",
+      "pattern": "Pattern",
+      "everyWeek": "Every week",
+      "specificWeeks": "Specific weeks",
+      "occurrences": "Occurrences",
+      "months": "Months",
+      "dayOfMonth": "Day of month"
+    }
+  },
+  "advancedOptions": {
+    "points": "Points",
+    "pointsDescription": "Award points for completing this task",
+    "requireApproval": "Require approval",
+    "requireApprovalDescription": "Task needs admin sign-off before it can be closed",
+    "limitedVisibility": "Limited visibility",
+    "limitedVisibilityDisabled": "Assign someone to enable limited visibility",
+    "limitedVisibilityDescription": "Only you and assignees can see this task",
+    "assignStrategy": "Assign strategy",
+    "assignStrategyDescription": "How to pick the next assignee each recurrence",
+    "availableFrom": "Available from",
+    "availableFromDescription": "Hours before the due date the task becomes available",
+    "strategy": {
+      "keep_last_assigned": "Keep same assignee",
+      "random": "Random",
+      "least_completed": "Least completed",
+      "round_robin": "Round robin"
+    },
+    "hrs": "hrs",
+    "setDueDateHint": "Set a due date to configure completion window",
+    "more": "More"
+  },
+  "filterBuilder": {
+    "dueDateOption": {
+      "isOverdue": "Overdue",
+      "isDueToday": "Today",
+      "isDueTomorrow": "Tomorrow",
+      "isDueThisWeek": "This Week",
+      "isDueThisMonth": "This Month",
+      "hasNoDueDate": "No Due Date",
+      "hasDueDate": "Has Due Date"
+    },
+    "status": {
+      "0": "Active",
+      "1": "Started",
+      "2": "In Progress",
+      "3": "Pending Approval"
+    },
+    "include": "Include",
+    "exclude": "Exclude",
+    "has": "Has",
+    "doesntHave": "Doesn't Have",
+    "assignee": "Assignee",
+    "createdBy": "Created By",
+    "statusHeading": "Status",
+    "priority": "Priority",
+    "dueDate": "Due Date",
+    "labels": "Labels",
+    "projects": "Projects",
+    "defaultProject": "Default Project",
+    "points": "Points",
+    "project": "Project",
+    "filterFallback": "Filter",
+    "notPrefix": "Not ",
+    "customDueDate": "Custom",
+    "clear": "Clear"
+  },
+  "empty": {
+    "errorTitle": "Can't reach Donetick",
+    "errorDescription": "Your tasks are safe. We just could not load them right now, check your connection and try again.",
+    "errorAction": "Try again",
+    "noTasksTitle": "No tasks yet",
+    "noTasksDescription": "Create your first task and Donetick keeps track of when it is due, whose turn it is, and what comes next.",
+    "createTask": "Create a task",
+    "moreOptions": "More options",
+    "noMatchTitle": "No tasks match this view",
+    "noMatchSearch": "Nothing matches \"{{term}}\". Try a different search, or clear what is narrowing the list.",
+    "noMatchFilters": "You have tasks, but none of them fit the filters that are currently on.",
+    "clearSearch": "Clear search",
+    "showEveryone": "Show everyone's tasks",
+    "clearFilters": "Clear filters",
+    "projectTitle": "Nothing in {{name}} yet",
+    "projectDescription": "Tasks you add to this project show up here. Your other tasks are still where you left them.",
+    "addTaskHere": "Add a task here",
+    "seeOutsideProjects": "See tasks outside projects",
+    "noProjectTitle": "No tasks here yet",
+    "noProjectDescription": "Tasks that do not belong to a project live here. Add one, or switch projects to see what is in them.",
+    "dayFreeDescription": "This day is free. Add a task if you want something to land here.",
+    "addTask": "Add task",
+    "assignee": {
+      "assigned_to_me": "There are tasks here, but none of them are assigned to you. Switch back to everyone to see the rest.",
+      "available_for_me": "There are tasks here, but none of them are available for you to pick up. Switch back to everyone to see the rest.",
+      "assigned_to_others": "There are tasks here, but none of them are assigned to someone else. Switch back to everyone to see the rest.",
+      "assigned_to_me_tasks": "There are tasks here, but none of them are assigned to you. Switch back to everyone to see the rest.",
+      "created_by_me": "There are tasks here, but none of them are created by you. Switch back to everyone to see the rest."
+    }
   }
 }
