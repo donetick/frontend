@@ -1,4 +1,5 @@
 import 'moment/locale/he'
+import 'moment/locale/ru'
 import 'moment/locale/ja'
 
 import i18n from 'i18next'
