@@ -365,27 +365,56 @@ const LoginView = () => {
   const handleForgotPassword = () => {
     Navigate('/forgot-password')
   }
-  const generateRandomState = () => {
-    const randomState = Math.random().toString(32).substring(5)
-    localStorage.setItem('authState', randomState)
+  const generateRandomString = entropyLen => {
+    const data = new Uint8Array(entropyLen)
+    crypto.getRandomValues(data)
+    const randomState = data.toBase64({
+      alphabet: 'base64url',
+    })
 
     return randomState
   }
 
   const handleAuthentikLogin = async () => {
     const authentikAuthorizeUrl = resource?.identity_provider?.auth_url
-    const state = generateRandomState()
+    const state = generateRandomString(16)
+    localStorage.setItem('authState', state)
+
+    const scopes = resource?.identity_provider?.scopes ?? [
+      'openid',
+      'profile',
+      'email',
+    ]
+
+    const params = new URLSearchParams({
+      response_type: 'code',
+      client_id: resource?.identity_provider?.client_id,
+      scope: scopes.join(' '),
+      state: state,
+    })
+
+    if (resource?.identity_provider?.pkce) {
+      const verifier = generateRandomString(32)
+      localStorage.setItem('authVerifier', verifier)
+
+      const challengeDigest = new Uint8Array(
+        await crypto.subtle.digest(
+          'SHA-256',
+          new TextEncoder().encode(verifier),
+        ),
+      )
+      const challenge = challengeDigest.toBase64({
+        alphabet: 'base64url',
+      })
+
+      params.set('code_challenge', challenge)
+      params.set('code_challenge_method', 'S256')
+    } else {
+      localStorage.removeItem('authVerifier')
+    }
 
     if (Capacitor.isNativePlatform()) {
-      const redirectUri = 'donetick://auth/oauth2'
-
-      const params = new URLSearchParams({
-        response_type: 'code',
-        client_id: resource?.identity_provider?.client_id,
-        redirect_uri: redirectUri,
-        scope: 'openid profile email',
-        state: state,
-      })
+      params.set('redirect_uri', 'donetick://auth/oauth2')
 
       const authUrl = `${authentikAuthorizeUrl}?${params.toString()}`
       console.log('Opening OAuth in browser:', authUrl)
@@ -406,13 +435,7 @@ const LoginView = () => {
       }
     } else {
       // For web platforms, use the current approach
-      const params = new URLSearchParams({
-        response_type: 'code',
-        client_id: resource?.identity_provider?.client_id,
-        redirect_uri: `${window.location.origin}/auth/oauth2`,
-        scope: 'openid profile email',
-        state: state,
-      })
+      params.set('redirect_uri', `${window.location.origin}/auth/oauth2`)
 
       console.log('redirect', `${authentikAuthorizeUrl}?${params.toString()}`)
       window.location.href = `${authentikAuthorizeUrl}?${params.toString()}`
