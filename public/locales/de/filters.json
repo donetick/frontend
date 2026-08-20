@@ -1,17 +1,23 @@
 {
   "builder": {
-    "errorName": "Please enter a filter name",
-    "errorConditions": "Please configure at least one filter condition",
-    "editTitle": "Edit Filter",
-    "newTitle": "New Filter",
-    "addConditions": "Add conditions to preview",
-    "save": "Save Filter",
-    "name": "Filter Name",
-    "namePlaceholder": "e.g. Overdue tasks for Alice",
-    "color": "Color"
+    "errorName": "Bitte gib einen Filternamen ein",
+    "errorConditions": "Bitte konfiguriere mindestens eine Filterbedingung",
+    "editTitle": "Filter bearbeiten",
+    "newTitle": "Neuer Filter",
+    "addConditions": "Bedingungen hinzufügen, um Vorschau anzuzeigen",
+    "save": "Filter speichern",
+    "name": "Filtername",
+    "namePlaceholder": "z. B. Überfällige Aufgaben für Alice",
+    "color": "Farbe"
   },
-  "nameExists": "A filter with this name already exists",
-  "tasks_one": "{{count}} task",
-  "tasks_other": "{{count}} tasks",
-  "overdue": "{{count}} overdue"
+  "nameExists": "Ein Filter mit diesem Namen ist bereits vorhanden",
+  "tasks_one": "{{count}} Aufgabe",
+  "tasks_other": "{{count}} Aufgaben",
+  "overdue": "{{count}} überfällig",
+  "delete": {
+    "title": "Filter löschen"
+  },
+  "empty": {
+    "title": "Noch keine gespeicherten Filter"
+  }
 }

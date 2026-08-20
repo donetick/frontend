@@ -1,9 +1,47 @@
 {
-  "shared": "Shared",
+  "shared": "Geteilt",
   "delete": {
-    "title": "Delete Label",
-    "message": "Are you sure you want to delete this label? This will remove the label from all tasks."
+    "title": "Beschriftung löschen",
+    "message": "Möchtest du diese Beschriftung wirklich löschen? Sie wird von allen Aufgaben entfernt."
   },
-  "loadError": "Failed to load labels. Please try again.",
-  "blurb": "Manage your labels and organize your tasks effectively. Labels will be automatically shared with your circle if they are used on a shared task."
+  "loadError": "Beschriftungen konnten nicht geladen werden. Bitte versuche es erneut.",
+  "search": {
+    "placeholder": "Beschriftungen durchsuchen",
+    "noResultsTitle": "Keine passenden Beschriftungen",
+    "noResultsDescription": "Keine Beschriftung passt zu „{{searchTerm}}“.",
+    "noFilterResultsDescription": "Keine Beschriftung entspricht dem aktuellen Filter.",
+    "clear": "Suche löschen",
+    "showAll": "Alle Beschriftungen anzeigen"
+  },
+  "detail": {
+    "taskCount_one": "{{count}} Aufgabe",
+    "taskCount_other": "{{count}} Aufgaben",
+    "labelActions": "Beschriftungsaktionen",
+    "filters": {
+      "all": "Alle",
+      "overdue": "Überfällig",
+      "today": "Heute",
+      "undated": "Kein Datum"
+    },
+    "noMatchingStatus": "Keine Aufgabe mit dieser Beschriftung hat derzeit diesen Status.",
+    "clearFilters": "Alle Aufgaben anzeigen",
+    "searchPlaceholder": "Aufgaben mit dieser Beschriftung durchsuchen",
+    "emptyTitle": "Keine Aufgaben mit dieser Beschriftung",
+    "emptyDescription": "Noch ist nichts mit „{{label}}“ gekennzeichnet. Füge die Beschriftung einer Aufgabe hinzu, dann erscheint sie hier.",
+    "browseTasks": "Aufgaben durchsuchen",
+    "noResultsTitle": "Keine passenden Aufgaben",
+    "noResultsDescription": "Keine Aufgabe mit dieser Beschriftung passt zu „{{searchTerm}}“.",
+    "notFoundTitle": "Beschriftung nicht gefunden",
+    "notFoundDescription": "Diese Beschriftung wurde möglicherweise gelöscht oder wird nicht mehr mit dir geteilt.",
+    "backToLabels": "Zurück zu den Beschriftungen"
+  },
+  "blurb": "Verwalte deine Beschriftungen und organisiere deine Aufgaben übersichtlich. Beschriftungen werden automatisch mit deinem Kreis geteilt, wenn sie für eine geteilte Aufgabe verwendet werden.",
+  "modal": {
+    "errorEmptyName": "Name darf nicht leer sein",
+    "errorDuplicate": "Eine Beschriftung mit diesem Namen ist bereits vorhanden",
+    "errorNoColor": "Bitte wähle eine Farbe aus",
+    "saveFailedTitle": "Beschriftung konnte nicht gespeichert werden",
+    "saveFailedMessage": "Beschriftung konnte nicht gespeichert werden. Bitte versuche es erneut.",
+    "name": "Name"
+  }
 }
