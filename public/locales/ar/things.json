@@ -1,18 +1,18 @@
 {
-  "errName": "Name is required",
-  "errStateNumber": "State must be a number",
-  "errStateBool": "State must be true or false",
-  "errStateRequired": "State is required",
-  "name": "Name",
-  "namePlaceholder": "Thing name",
-  "value": "Value",
-  "valuePlaceholder": "Thing value",
-  "updateState": "Update state",
-  "update": "Update",
+  "errName": "الاسم مطلوب",
+  "errStateNumber": "يجب أن تكون الحالة رقمًا",
+  "errStateBool": "يجب أن تكون الحالة true أو false",
+  "errStateRequired": "الحالة مطلوبة",
+  "name": "الاسم",
+  "namePlaceholder": "اسم العنصر",
+  "value": "القيمة",
+  "valuePlaceholder": "قيمة العنصر",
+  "updateState": "تحديث الحالة",
+  "update": "تحديث",
   "history": {
-    "overview": "Things Overview",
-    "visualization": "Data Visualization",
-    "changeHistory": "Change History",
-    "updated": "Updated"
+    "overview": "نظرة عامة على العناصر",
+    "visualization": "تمثيل بياني للبيانات",
+    "changeHistory": "سجل التغييرات",
+    "updated": "آخر تحديث"
   }
 }

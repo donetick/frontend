@@ -1,17 +1,32 @@
 {
   "builder": {
-    "errorName": "Please enter a filter name",
-    "errorConditions": "Please configure at least one filter condition",
-    "editTitle": "Edit Filter",
-    "newTitle": "New Filter",
-    "addConditions": "Add conditions to preview",
-    "save": "Save Filter",
-    "name": "Filter Name",
-    "namePlaceholder": "e.g. Overdue tasks for Alice",
-    "color": "Color"
+    "errorName": "أدخل اسمًا للفلتر",
+    "errorConditions": "اضبط شرطًا واحدًا على الأقل للفلتر",
+    "editTitle": "تعديل الفلتر",
+    "newTitle": "فلتر جديد",
+    "addConditions": "أضف شروطًا لعرض المعاينة",
+    "save": "حفظ الفلتر",
+    "name": "اسم الفلتر",
+    "namePlaceholder": "مثال: المهام المتأخرة الخاصة بسارة",
+    "color": "اللون"
   },
-  "nameExists": "A filter with this name already exists",
-  "tasks_one": "{{count}} task",
-  "tasks_other": "{{count}} tasks",
-  "overdue": "{{count}} overdue"
+  "nameExists": "يوجد فلتر بهذا الاسم بالفعل",
+  "tasks_zero": "لا مهام",
+  "tasks_one": "مهمة واحدة",
+  "tasks_two": "مهمتان",
+  "tasks_few": "{{count}} مهام",
+  "tasks_many": "{{count}} مهمة",
+  "tasks_other": "{{count}} مهمة",
+  "overdue_zero": "لا مهام متأخرة",
+  "overdue_one": "واحدة متأخرة",
+  "overdue_two": "اثنتان متأخرتان",
+  "overdue_few": "{{count}} متأخرة",
+  "overdue_many": "{{count}} متأخرة",
+  "overdue_other": "{{count}} متأخرة",
+  "delete": {
+    "title": "حذف الفلتر"
+  },
+  "empty": {
+    "title": "لا توجد فلاتر محفوظة بعد"
+  }
 }

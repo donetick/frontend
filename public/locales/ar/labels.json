@@ -1,9 +1,51 @@
 {
-  "shared": "Shared",
+  "shared": "مشترك",
   "delete": {
-    "title": "Delete Label",
-    "message": "Are you sure you want to delete this label? This will remove the label from all tasks."
+    "title": "حذف التصنيف",
+    "message": "هل تريد بالتأكيد حذف هذا التصنيف؟ سيُزال التصنيف من جميع المهام."
   },
-  "loadError": "Failed to load labels. Please try again.",
-  "blurb": "Manage your labels and organize your tasks effectively. Labels will be automatically shared with your circle if they are used on a shared task."
+  "loadError": "تعذّر تحميل التصنيفات. حاول مرة أخرى.",
+  "search": {
+    "placeholder": "ابحث في التصنيفات",
+    "noResultsTitle": "لا توجد تصنيفات مطابقة",
+    "noResultsDescription": "لا يوجد تصنيف يطابق \"{{searchTerm}}\".",
+    "noFilterResultsDescription": "لا يوجد تصنيف يطابق الفلتر الحالي.",
+    "clear": "مسح البحث",
+    "showAll": "عرض كل التصنيفات"
+  },
+  "detail": {
+    "taskCount_zero": "لا مهام",
+    "taskCount_one": "مهمة واحدة",
+    "taskCount_two": "مهمتان",
+    "taskCount_few": "{{count}} مهام",
+    "taskCount_many": "{{count}} مهمة",
+    "taskCount_other": "{{count}} مهمة",
+    "labelActions": "إجراءات التصنيف",
+    "filters": {
+      "all": "الكل",
+      "overdue": "متأخرة",
+      "today": "اليوم",
+      "undated": "بلا تاريخ"
+    },
+    "noMatchingStatus": "لا توجد مهمة في هذا التصنيف بهذه الحالة حاليًا.",
+    "clearFilters": "عرض كل المهام",
+    "searchPlaceholder": "ابحث في مهام هذا التصنيف",
+    "emptyTitle": "لا توجد مهام بهذا التصنيف",
+    "emptyDescription": "لم يُوسم أي شيء بـ \"{{label}}\" بعد. أضف التصنيف إلى مهمة وستظهر هنا.",
+    "browseTasks": "تصفّح المهام",
+    "noResultsTitle": "لا توجد مهام مطابقة",
+    "noResultsDescription": "لا توجد مهمة في هذا التصنيف تطابق \"{{searchTerm}}\".",
+    "notFoundTitle": "التصنيف غير موجود",
+    "notFoundDescription": "ربما حُذف هذا التصنيف أو لم يعد مشتركًا معك.",
+    "backToLabels": "العودة إلى التصنيفات"
+  },
+  "blurb": "أدر تصنيفاتك ونظّم مهامك بفعالية. تُشارَك التصنيفات تلقائيًا مع دائرتك إذا استُخدمت في مهمة مشتركة.",
+  "modal": {
+    "errorEmptyName": "لا يمكن ترك الاسم فارغًا",
+    "errorDuplicate": "يوجد تصنيف بهذا الاسم بالفعل",
+    "errorNoColor": "اختر لونًا",
+    "saveFailedTitle": "تعذّر حفظ التصنيف",
+    "saveFailedMessage": "تعذّر حفظ التصنيف. حاول مرة أخرى.",
+    "name": "الاسم"
+  }
 }

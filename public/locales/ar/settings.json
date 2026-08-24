@@ -78,6 +78,10 @@
         "title": "الإعدادات المتقدمة",
         "description": "اضبط الـ Webhooks والتحديثات الفورية وغيرها من الميزات المتقدمة."
       },
+      "privacy": {
+        "title": "الخصوصية والتحليلات",
+        "description": "تحكّم في مشاركة إحصاءات الاستخدام المجهولة وتقارير الأعطال."
+      },
       "developer": {
         "title": "إعدادات المطوّر",
         "description": "اعرض معلومات تقنية عن رموز المصادقة واتصالات SSE وبيانات التصحيح."
@@ -348,7 +352,8 @@
     "backupCodesModal": {
       "title": "رموز نسخ احتياطي جديدة",
       "warning": "لم تعد رموز النسخ الاحتياطي السابقة صالحة. احفظ هذه الرموز الجديدة في مكان آمن. يمكن استخدام كل رمز مرة واحدة فقط."
-    }
+    },
+    "generateCodes": "إنشاء رموز جديدة"
   },
   "apiTokens": {
     "title": "رموز API",
@@ -491,77 +496,89 @@
       "basicPlanNotice": "التحديثات الفورية غير متاحة في الخطة الأساسية. رقِّ إلى Plus لتلقّي إشعارات فورية عندما تنجز أنت أو أعضاء دائرتك المهام أو تتخطّونها أو تعدّلونها."
     }
   },
+  "privacyAnalytics": {
+    "title": "الخصوصية والتحليلات",
+    "description": "لا يرسل Donetick أبدًا أسماء المهام أو أوصافها أو ملاحظاتها أو أي محتوى آخر يخصّها. ولا يُفعَّل تسجيل الجلسات إطلاقًا.",
+    "analyticsToggle": "تحليلات مجهولة الهوية",
+    "analyticsHelper": "ساعدنا على تحسين Donetick بمشاركة إحصاءات استخدام مجهولة الهوية.",
+    "crashToggle": "تقارير الأعطال",
+    "crashHelper": "أرسل لنا الخطأ وما أدّى إليه عند تعطّل Donetick، دون أي محتوى للمهام.",
+    "footnote": "يمكنك تغيير هذه الخيارات في أي وقت."
+  },
   "subscription": {
-    "sessionFailed": "Failed to create subscription session",
-    "errorTitle": "Subscription Error",
-    "errorMessage": "Failed to start subscription process. Please try again.",
-    "subscribe": "Subscribe",
-    "cancelAnytime": "Cancel anytime. No hidden fees. Secure payment powered by Stripe."
+    "sessionFailed": "تعذّر إنشاء جلسة الاشتراك",
+    "errorTitle": "خطأ في الاشتراك",
+    "errorMessage": "تعذّر بدء عملية الاشتراك. حاول مرة أخرى.",
+    "subscribe": "اشترك",
+    "cancelAnytime": "يمكنك الإلغاء في أي وقت. بلا رسوم خفية. دفع آمن عبر Stripe."
   },
   "childUsers": {
-    "errNameRequired": "Sub account name is required",
-    "errNameMin": "Sub account name must be at least 2 characters",
-    "errNameMax": "Sub account name must be less than 20 characters",
-    "errNameChars": "Sub account name can only contain lowercase letters, dot and dash",
-    "errPasswordRequired": "Password is required",
-    "errPasswordLength": "Password must be between 8 and 64 characters",
-    "errPasswordMatch": "Passwords do not match",
-    "errDisplayNameMax": "Display name must be less than 50 characters",
-    "createTitle": "Create Sub Account",
-    "createButton": "Create Account",
-    "nameLabel": "Sub Account Name *",
-    "namePlaceholder": "Enter sub account name (e.g., sarah)",
-    "displayNameLabel": "Display Name",
-    "displayNamePlaceholder": "Display name (optional, defaults to sub account name)",
-    "passwordLabel": "Password *",
-    "passwordPlaceholder": "Enter password (8-64 characters)",
-    "confirmPasswordLabel": "Confirm Password *",
-    "confirmPasswordPlaceholder": "Confirm password"
+    "errNameRequired": "اسم الحساب الفرعي مطلوب",
+    "errNameMin": "يجب ألّا يقل اسم الحساب الفرعي عن حرفين",
+    "errNameMax": "يجب أن يقل اسم الحساب الفرعي عن 20 حرفًا",
+    "errNameChars": "يمكن أن يحتوي اسم الحساب الفرعي على أحرف إنجليزية صغيرة ونقطة وشرطة فقط",
+    "errPasswordRequired": "كلمة المرور مطلوبة",
+    "errPasswordLength": "يجب أن تتراوح كلمة المرور بين 8 و64 حرفًا",
+    "errPasswordMatch": "كلمتا المرور غير متطابقتين",
+    "errDisplayNameMax": "يجب أن يقل اسم العرض عن 50 حرفًا",
+    "createTitle": "إنشاء حساب فرعي",
+    "createButton": "إنشاء الحساب",
+    "nameLabel": "اسم الحساب الفرعي *",
+    "namePlaceholder": "أدخل اسم الحساب الفرعي (مثال: sarah)",
+    "displayNameLabel": "اسم العرض",
+    "displayNamePlaceholder": "اسم العرض (اختياري، الافتراضي هو اسم الحساب الفرعي)",
+    "passwordLabel": "كلمة المرور *",
+    "passwordPlaceholder": "أدخل كلمة المرور (من 8 إلى 64 حرفًا)",
+    "confirmPasswordLabel": "تأكيد كلمة المرور *",
+    "confirmPasswordPlaceholder": "أعد إدخال كلمة المرور"
   },
   "passwordChange": {
-    "minLength": "Password must be at least 8 characters",
-    "maxLength": "Password must be less than 64 characters"
+    "minLength": "يجب ألّا تقل كلمة المرور عن 8 أحرف",
+    "maxLength": "يجب أن تقل كلمة المرور عن 64 حرفًا"
   },
   "payment": {
-    "cancelledTitle": "Payment has been cancelled",
-    "cancelledRedirect": "You will be redirected to the main page shortly.",
-    "successTitle": "Payment Successful!",
-    "successRedirect": "You will be redirected to the settings page shortly."
+    "cancelledTitle": "أُلغيت عملية الدفع",
+    "cancelledRedirect": "سيتم تحويلك إلى الصفحة الرئيسية بعد لحظات.",
+    "successTitle": "تم الدفع بنجاح!",
+    "successRedirect": "سيتم تحويلك إلى صفحة الإعدادات بعد لحظات."
   },
   "developer": {
-    "tokenRefreshed": "Token refreshed successfully",
-    "endpointCalled": "Refresh token endpoint called successfully",
-    "clearDbCleared": "Local offline database cleared. Starting full sync...",
-    "clearDbDone": "Full sync completed from the beginning",
-    "intro": "View technical information about your authentication tokens and session",
-    "refreshCookieNote": "Refresh tokens are managed via HTTP-only cookies on web platform",
-    "noReconnectInfo": "No reconnection information available",
-    "noTimeoutInfo": "No timeout information available",
-    "noDebugInfo": "No debug information available"
+    "tokenRefreshed": "تم تجديد الرمز بنجاح",
+    "endpointCalled": "تم استدعاء نقطة تجديد الرمز بنجاح",
+    "clearDbCleared": "تم مسح قاعدة البيانات المحلية. جارٍ بدء مزامنة كاملة…",
+    "clearDbDone": "اكتملت المزامنة الكاملة من البداية",
+    "intro": "اعرض معلومات تقنية عن رموز المصادقة وجلستك الحالية",
+    "refreshCookieNote": "تُدار رموز التجديد عبر ملفات تعريف ارتباط HTTP-only على منصّة الويب",
+    "noReconnectInfo": "لا تتوفّر معلومات عن إعادة الاتصال",
+    "noTimeoutInfo": "لا تتوفّر معلومات عن المهلة",
+    "noDebugInfo": "لا تتوفّر معلومات تصحيح"
   },
   "backup": {
-    "keyRequired": "Encryption key is required",
-    "created": "Backup created and downloaded successfully",
-    "createFailed": "Failed to create backup",
-    "selectFile": "Please select a backup file",
-    "restored": "Backup restored successfully. Please refresh the page.",
-    "restoreFailed": "Failed to restore backup",
-    "readFailed": "Failed to read backup file",
-    "createIntro": "Create an encrypted backup of your data. This backup will include all your chores, history, settings, and optionally your uploaded files.",
-    "keyPlaceholder": "Enter a strong encryption key",
-    "includeAssets": "Include uploaded files and assets",
-    "warningLabel": "Warning:",
-    "restoreWarning": "Restoring a backup will replace all your current data. This action cannot be undone.",
-    "restoreKeyPlaceholder": "Enter the encryption key used for this backup"
+    "keyRequired": "مفتاح التشفير مطلوب",
+    "created": "تم إنشاء النسخة الاحتياطية وتنزيلها بنجاح",
+    "createFailed": "تعذّر إنشاء النسخة الاحتياطية",
+    "selectFile": "اختر ملف نسخة احتياطية",
+    "restored": "تمت استعادة النسخة الاحتياطية بنجاح. أعد تحميل الصفحة من فضلك.",
+    "restoreFailed": "تعذّرت استعادة النسخة الاحتياطية",
+    "readFailed": "تعذّرت قراءة ملف النسخة الاحتياطية",
+    "createIntro": "أنشئ نسخة احتياطية مشفّرة من بياناتك. تشمل هذه النسخة جميع مهامك وسجلّك وإعداداتك، ويمكنها أن تشمل ملفاتك المرفوعة أيضًا.",
+    "keyPlaceholder": "أدخل مفتاح تشفير قويًا",
+    "includeAssets": "تضمين الملفات والمرفقات المرفوعة",
+    "warningLabel": "تحذير:",
+    "restoreWarning": "استعادة نسخة احتياطية ستستبدل جميع بياناتك الحالية. ولا يمكن التراجع عن هذا الإجراء.",
+    "restoreKeyPlaceholder": "أدخل مفتاح التشفير المستخدَم لهذه النسخة الاحتياطية"
   },
   "deletion": {
-    "passwordRequired": "Please enter your password to continue",
-    "passwordAndDelete": "Please enter your password and type DELETE to confirm",
-    "failed": "Failed to delete account",
-    "passwordPlaceholder": "Enter your password",
-    "transferIntro": "You own circles that require ownership transfer before deletion. Please select new owners:",
-    "selectOwner": "Select new owner",
-    "confirmPrompt": "Please enter your password and type DELETE to confirm",
+    "passwordRequired": "أدخل كلمة المرور للمتابعة",
+    "passwordAndDelete": "أدخل كلمة المرور واكتب DELETE للتأكيد",
+    "failed": "تعذّر حذف الحساب",
+    "passwordPlaceholder": "أدخل كلمة المرور",
+    "transferIntro": "تملك دوائر يجب نقل ملكيتها قبل الحذف. اختر المالكين الجدد:",
+    "selectOwner": "اختر المالك الجديد",
+    "confirmPrompt": "أدخل كلمة المرور واكتب DELETE للتأكيد",
     "typeDelete": "DELETE"
+  },
+  "realtime": {
+    "titleSse": "التحديثات الفورية (SSE)"
   }
 }

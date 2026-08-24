@@ -1,24 +1,43 @@
 {
   "iconPicker": {
-    "chooseIcon": "Choose Project Icon",
-    "availableIcons": "Available Icons"
+    "chooseIcon": "اختر أيقونة المشروع",
+    "availableIcons": "الأيقونات المتاحة"
   },
-  "defaultChip": "Default",
-  "tasks_one": "{{count}} task",
-  "tasks_other": "{{count}} tasks",
-  "shared": "Shared",
+  "defaultChip": "افتراضي",
+  "tasks_zero": "لا مهام",
+  "tasks_one": "مهمة واحدة",
+  "tasks_two": "مهمتان",
+  "tasks_few": "{{count}} مهام",
+  "tasks_many": "{{count}} مهمة",
+  "tasks_other": "{{count}} مهمة",
+  "shared": "مشترك",
   "delete": {
-    "title": "Delete Project",
-    "message": "Are you sure you want to delete \"{{name}}\"? This will remove the project but keep all tasks (they'll move to the Default Project)."
+    "title": "حذف المشروع",
+    "message": "هل تريد بالتأكيد حذف \"{{name}}\"؟ سيُحذف المشروع مع الاحتفاظ بجميع المهام (ستنتقل إلى المشروع الافتراضي)."
   },
-  "loadError": "Failed to load projects. Please try again.",
-  "blurb": "Organize your tasks into projects. Create custom workspaces to keep your tasks organized and easily accessible.",
-  "defaultDescription": "All tasks without a specific project",
+  "loadError": "تعذّر تحميل المشاريع. حاول مرة أخرى.",
+  "search": {
+    "placeholder": "ابحث في المشاريع",
+    "noResultsTitle": "لا توجد مشاريع مطابقة",
+    "noResultsDescription": "لا يوجد مشروع يطابق \"{{searchTerm}}\".",
+    "noFilterResultsDescription": "لا يوجد مشروع يطابق الفلتر الحالي.",
+    "clear": "مسح البحث",
+    "showAll": "عرض كل المشاريع"
+  },
+  "blurb": "نظّم مهامك ضمن مشاريع. أنشئ مساحات عمل مخصّصة لتبقى مهامك مرتّبة وسهلة الوصول.",
+  "defaultDescription": "جميع المهام غير المرتبطة بمشروع معيّن",
   "selector": {
-    "title": "Projects",
-    "createNew": "Create New Project",
-    "createNewDescription": "Add a custom project workspace",
-    "manage": "Manage Projects",
-    "manageDescription": "View, edit, and organize all projects"
+    "title": "المشاريع",
+    "createNew": "إنشاء مشروع جديد",
+    "createNewDescription": "أضف مساحة عمل مخصّصة",
+    "manage": "إدارة المشاريع",
+    "manageDescription": "اعرض جميع المشاريع وعدّلها ونظّمها"
+  },
+  "modal": {
+    "errorNameRequired": "اسم المشروع مطلوب",
+    "errorUpdate": "تعذّر تحديث المشروع",
+    "errorCreate": "تعذّر إنشاء المشروع",
+    "namePlaceholder": "أدخل اسم المشروع…",
+    "descriptionPlaceholder": "وصف المشروع (اختياري)…"
   }
 }

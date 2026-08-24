@@ -414,7 +414,7 @@ const ChoreActionMenu = ({
     <>
       <Tooltip title={t('duePicker.today')} placement='top'>
         <IconButton
-          size='sm'
+          size={isSmallScreen ? 'md' : 'sm'}
           onClick={e => {
             e.stopPropagation()
             handleQuickSchedule('today')
@@ -425,7 +425,7 @@ const ChoreActionMenu = ({
       </Tooltip>
       <Tooltip title={t('duePicker.tomorrow')} placement='top'>
         <IconButton
-          size='sm'
+          size={isSmallScreen ? 'md' : 'sm'}
           onClick={e => {
             e.stopPropagation()
             handleQuickSchedule('tomorrow')
@@ -436,7 +436,7 @@ const ChoreActionMenu = ({
       </Tooltip>
       <Tooltip title={t('duePicker.weekend')} placement='top'>
         <IconButton
-          size='sm'
+          size={isSmallScreen ? 'md' : 'sm'}
           onClick={e => {
             e.stopPropagation()
             handleQuickSchedule('weekend')
@@ -447,7 +447,7 @@ const ChoreActionMenu = ({
       </Tooltip>
       <Tooltip title={t('duePicker.nextWeek')} placement='top'>
         <IconButton
-          size='sm'
+          size={isSmallScreen ? 'md' : 'sm'}
           onClick={e => {
             e.stopPropagation()
             handleQuickSchedule('next-week')
@@ -458,7 +458,7 @@ const ChoreActionMenu = ({
       </Tooltip>
       <Tooltip title={t('actionMenu.removeDueDate')} placement='top'>
         <IconButton
-          size='sm'
+          size={isSmallScreen ? 'md' : 'sm'}
           color='neutral'
           onClick={e => {
             e.stopPropagation()
@@ -677,7 +677,17 @@ const ChoreActionMenu = ({
               </Typography>
             </Button>
           )}
-          <List sx={{ '--ListItem-radius': '8px', px: 1 }}>
+          <List
+            sx={{
+              '--ListItem-radius': '8px',
+              // Finger-friendly rows: 48px targets with a gap so adjacent
+              // actions (delete sits next to archive) are hard to mis-tap.
+              '--List-gap': '4px',
+              '--ListItem-minHeight': '48px',
+              '--ListItem-paddingY': '10px',
+              px: 1,
+            }}
+          >
             {showProjectPicker
               ? renderModalProjectPicker()
               : showPriorityPicker
