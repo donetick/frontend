@@ -66,7 +66,7 @@ function CreateThingModal({ currentThing, isOpen, onClose, onSave }) {
       open={isOpen}
       onClose={onClose}
       size='md'
-      title={`${currentThing?.id ? 'Edit' : 'Create'} Thing`}
+      title={currentThing?.id ? t('editThingTitle') : t('createThingTitle')}
       footer={
         <ModalActions
           secondary={{
@@ -74,7 +74,7 @@ function CreateThingModal({ currentThing, isOpen, onClose, onSave }) {
             onClick: onClose,
           }}
           primary={{
-            label: currentThing?.id ? 'Update' : 'Create',
+            label: currentThing?.id ? t('update') : t('create'),
             onClick: handleSave,
           }}
         />
@@ -91,11 +91,11 @@ function CreateThingModal({ currentThing, isOpen, onClose, onSave }) {
         <FormHelperText color='danger'>{errors.name}</FormHelperText>
       </FormControl>
       <FormControl>
-        <Typography>Type</Typography>
+        <Typography>{t('type')}</Typography>
         <Select value={type} onChange={(_, value) => setType(value)}>
           {['text', 'number', 'boolean'].map(type => (
             <Option value={type} key={type}>
-              {type.charAt(0).toUpperCase() + type.slice(1)}
+              {t(`types.${type}`)}
             </Option>
           ))}
         </Select>
@@ -130,13 +130,10 @@ function CreateThingModal({ currentThing, isOpen, onClose, onSave }) {
       )}
       {type === 'boolean' && (
         <FormControl>
-          <Typography>Value</Typography>
+          <Typography>{t('value')}</Typography>
           <Select value={state} onChange={(_, value) => setState(value)}>
-            {['true', 'false'].map(value => (
-              <Option value={value} key={value}>
-                {value.charAt(0).toUpperCase() + value.slice(1)}
-              </Option>
-            ))}
+            <Option value='true'>{t('boolTrue')}</Option>
+            <Option value='false'>{t('boolFalse')}</Option>
           </Select>
         </FormControl>
       )}

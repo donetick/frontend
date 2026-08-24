@@ -15,28 +15,29 @@ import ModalActions from '../../components/common/ModalActions'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import { commandQueue } from '../../utils/CommandQueue'
 
-const LABELS = {
-  complete_chore: 'Complete pending',
-  skip_chore: 'Skip pending',
-  update_chore: 'Update pending',
-  create_chore: 'Create pending',
-  delete_chore: 'Delete pending',
-  update_chore_history: 'Edit history pending',
-  delete_chore_history: 'Delete history pending',
-  reschedule_chore: 'Reschedule pending',
-  archive_chore: 'Archive pending',
-  unarchive_chore: 'Restore pending',
-  start_chore: 'Start pending',
-  pause_chore: 'Pause pending',
+const LABEL_KEYS = {
+  complete_chore: 'completePending',
+  skip_chore: 'skipPending',
+  update_chore: 'updatePending',
+  create_chore: 'createPending',
+  delete_chore: 'deletePending',
+  update_chore_history: 'editHistoryPending',
+  delete_chore_history: 'deleteHistoryPending',
+  reschedule_chore: 'reschedulePending',
+  archive_chore: 'archivePending',
+  unarchive_chore: 'restorePending',
+  start_chore: 'startPending',
+  pause_chore: 'pausePending',
 }
 
-const formatCommandLabel = commandType => {
+const formatCommandLabel = (commandType, t) => {
+  const key = LABEL_KEYS[commandType]
+  if (key) return t(`pendingBadge.${key}`)
   return (
-    LABELS[commandType] ||
     commandType
       ?.replace(/_/g, ' ')
       ?.replace(/\b\w/g, letter => letter.toUpperCase()) ||
-    'Pending action'
+    t('sync.commandLabels.pendingAction')
   )
 }
 
@@ -48,7 +49,9 @@ function PendingBadge({ commands, size = 'sm', sx = {} }) {
   const [cancelingIds, setCancelingIds] = useState({})
   const [isCancelingAll, setIsCancelingAll] = useState(false)
 
-  const pendingSyncLabel = `${commands?.length || 0} pending action${commands?.length === 1 ? '' : 's'} to sync`
+  const pendingSyncLabel = t('sync.pendingSyncLabel', {
+    count: commands?.length || 0,
+  })
 
   if (!commands || commands.length === 0) return null
 
@@ -145,7 +148,7 @@ function PendingBadge({ commands, size = 'sm', sx = {} }) {
         open={isOpen}
         onClose={handleClose}
         size='sm'
-        title='Pending actions'
+        title={t('sync.pendingActionsTitle')}
         footer={
           <ModalActions
             secondary={{ label: t('close'), onClick: handleClose }}
@@ -160,8 +163,7 @@ function PendingBadge({ commands, size = 'sm', sx = {} }) {
         }
       >
         <Typography level='body-sm' sx={{ color: 'text.tertiary', mb: 1.5 }}>
-          {commands.length} action{commands.length > 1 ? 's' : ''} waiting to be
-          synced.
+          {t('sync.actionsWaitingToSync', { count: commands.length })}
         </Typography>
 
         <List sx={{ '--List-gap': '8px', p: 0, mb: 1 }}>
@@ -179,7 +181,7 @@ function PendingBadge({ commands, size = 'sm', sx = {} }) {
             >
               <ListItemContent>
                 <Typography level='body-sm' sx={{ fontWeight: 600 }}>
-                  {formatCommandLabel(cmd.commandType)}
+                  {formatCommandLabel(cmd.commandType, t)}
                 </Typography>
                 <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
                   {new Date(cmd.createdAt).toLocaleString()}
@@ -187,7 +189,9 @@ function PendingBadge({ commands, size = 'sm', sx = {} }) {
               </ListItemContent>
 
               <IconButton
-                aria-label={`Cancel ${formatCommandLabel(cmd.commandType)}`}
+                aria-label={t('sync.cancelActionAria', {
+                  label: formatCommandLabel(cmd.commandType, t),
+                })}
                 variant='plain'
                 color='danger'
                 size='sm'

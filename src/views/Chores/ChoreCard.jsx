@@ -21,6 +21,7 @@ import {
   IconButton,
   Typography,
 } from '@mui/joy'
+import { useTranslation } from 'react-i18next'
 
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useLocalization } from '../../contexts/LocalizationContext'
@@ -49,6 +50,7 @@ const ChoreCard = ({
   sx,
   viewOnly,
 }) => {
+  const { t } = useTranslation('chores')
   const { data: userProfile } = useUserProfile({ enabled: !viewOnly })
   const { timeFormat } = useLocalization()
   const { data: pendingCmds } = usePendingCommands(chore.id)
@@ -251,7 +253,7 @@ const ChoreCard = ({
                   {chore.assignedTo === null && (
                     <Box display='flex' alignItems='center' gap={0.5}>
                       <Chip variant='outlined' startDecorator={<Group />}>
-                        Anyone
+                        {t('choreCard.anyone')}
                       </Chip>
                     </Box>
                   )}

@@ -203,7 +203,7 @@ const LoginView = () => {
     } catch (error) {
       showError({
         title: t('loginFailed'),
-        message: error?.message || 'An error occurred, please try again',
+        message: error?.message || t('genericError'),
       })
       return
     } finally {
@@ -426,13 +426,13 @@ const LoginView = () => {
 
   return (
     <AuthShell
-      title={userProfile ? 'Welcome back' : 'Sign in'}
+      title={userProfile ? t('welcomeBack') : t('signIn')}
       subtitle={
         getPendingInvite()
-          ? 'Sign in and we’ll send your circle join request right after.'
+          ? t('pendingInviteSubtitle')
           : userProfile
-            ? 'Pick up right where you left off.'
-            : 'Sign in to your account to continue.'
+            ? t('pickUpWhereLeftOff')
+            : t('signInToContinueSubtitle')
       }
       logoSize={0}
       footer={<LegalLinks />}
@@ -478,7 +478,7 @@ const LoginView = () => {
             sx={{ ...authButtonSx, mt: 1 }}
             onClick={getUserProfileAndNavigateToHome}
           >
-            Continue as {displayName}
+            {t('continueAs', { name: displayName })}
           </Button>
           <Button
             fullWidth
@@ -566,7 +566,7 @@ const LoginView = () => {
           </Box>
 
           <AuthSubmitButton loading={isSubmitting} sx={{ mt: 3 }}>
-            {loginType === 'sub' ? 'Sign in as sub account' : 'Sign in'}
+            {loginType === 'sub' ? t('signInAsSubAccount') : t('signIn')}
           </AuthSubmitButton>
         </Box>
       )}
@@ -588,7 +588,7 @@ const LoginView = () => {
             onReject={() => {
               showError({
                 title: t('googleLoginFailed'),
-                message: "Couldn't log in with Google, please try again",
+                message: t('providerLoginFailedMsg', { provider: 'Google' }),
               })
             }}
           >
@@ -612,7 +612,7 @@ const LoginView = () => {
                   console.error('Google login error:', error)
                   showError({
                     title: t('googleLoginFailed'),
-                    message: `Couldn't log in with Google, please try again${
+                    message: `${t('providerLoginFailedMsg', { provider: 'Google' })}${
                       error?.message ? `: ${error.message}` : ''
                     }`,
                   })
@@ -641,7 +641,9 @@ const LoginView = () => {
                       console.error('Apple login error:', error)
                       showError({
                         title: t('appleLoginFailed'),
-                        message: "Couldn't log in with Apple, please try again",
+                        message: t('providerLoginFailedMsg', {
+                          provider: 'Apple',
+                        }),
                       })
                     })
                 }}
@@ -664,7 +666,7 @@ const LoginView = () => {
           level='body-sm'
           sx={{ mt: 3, textAlign: 'center', color: 'text.secondary' }}
         >
-          Don&apos;t have an account?{' '}
+          {t('dontHaveAccount')}{' '}
           <Link
             component='button'
             type='button'

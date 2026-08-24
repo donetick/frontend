@@ -61,11 +61,11 @@ const ActivityItem = ({ activity, members, onViewNote }) => {
     const diffInDays = now.diff(completed, 'days')
 
     if (diffInHours < 1) {
-      return 'Just now'
+      return t('activitiesCard.justNow')
     } else if (diffInHours < 24) {
-      return `${diffInHours}h ago`
+      return t('activitiesCard.hoursAgo', { count: diffInHours })
     } else if (diffInDays < 7) {
-      return `${diffInDays}d ago`
+      return t('activitiesCard.daysAgo', { count: diffInDays })
     } else {
       return completed.format('MMM DD')
     }
@@ -75,7 +75,7 @@ const ActivityItem = ({ activity, members, onViewNote }) => {
     if (activity.status === 0) {
       return {
         color: 'primary',
-        text: 'Started',
+        text: t('activitiesCard.statusStarted'),
         icon: <Timelapse />,
       }
     } else if (activity.status === 1) {
@@ -86,44 +86,44 @@ const ActivityItem = ({ activity, members, onViewNote }) => {
       if (wasOnTime) {
         return {
           color: 'success',
-          text: 'Done',
+          text: t('activitiesCard.statusDone'),
           icon: <CheckCircle />,
         }
       } else {
         return {
           color: 'primary',
-          text: 'Late',
+          text: t('activitiesCard.statusLate'),
           icon: <WatchLater />,
         }
       }
     } else if (activity.status === 2) {
       return {
         color: 'warning',
-        text: 'Skipped',
+        text: t('activitiesCard.statusSkipped'),
         icon: <Redo />,
       }
     } else if (activity.status === 3) {
       return {
         color: 'neutral',
-        text: 'Pending Approval',
+        text: t('activitiesCard.statusPendingApproval'),
         icon: <HourglassEmpty />,
       }
     } else if (activity.status === 4) {
       return {
         color: 'danger',
-        text: 'Rejected',
+        text: t('activitiesCard.statusRejected'),
         icon: <ThumbDown />,
       }
     } else if (activity.status === 5) {
       return {
         color: 'danger',
-        text: 'Missed',
+        text: t('activitiesCard.statusMissed'),
         icon: <EventNote />,
       }
     } else if (activity.status === 6) {
       return {
         color: 'neutral',
-        text: 'Rescheduled',
+        text: t('activitiesCard.statusRescheduled'),
         icon: <Refresh />,
       }
     }
@@ -131,7 +131,7 @@ const ActivityItem = ({ activity, members, onViewNote }) => {
     // Fallback for completed status
     return {
       color: 'success',
-      text: 'Completed',
+      text: t('activitiesCard.statusCompleted'),
       icon: <CheckCircle />,
     }
   }
@@ -178,10 +178,12 @@ const ActivityItem = ({ activity, members, onViewNote }) => {
               {getStatusInfo(activity).text}
             </Chip>
             <Typography level='body-xs' color='text.secondary' sx={{ ml: 0 }}>
-              by{' '}
-              {completedByMember?.displayName ||
-                completedByMember?.name ||
-                'Unknown'}
+              {t('activitiesCard.byUser', {
+                name:
+                  completedByMember?.displayName ||
+                  completedByMember?.name ||
+                  t('activitiesCard.unknownUser'),
+              })}
             </Typography>
             {/* Points chip */}
             {activity.points && activity.points > 0 && (
@@ -191,7 +193,7 @@ const ActivityItem = ({ activity, members, onViewNote }) => {
                 color='success'
                 startDecorator={<Toll />}
               >
-                {activity.points} pts
+                {t('activitiesCard.pointsShort', { count: activity.points })}
               </Chip>
             )}
           </Box>
@@ -350,7 +352,7 @@ const ActivitiesCard = ({ title }) => {
       const chore = chores?.find(c => c.id === history.choreId)
       return {
         ...history,
-        choreName: chore?.name || 'Unknown Chore',
+        choreName: chore?.name || t('activitiesCard.unknownChore'),
       }
     }) || []
 
@@ -396,7 +398,9 @@ const ActivitiesCard = ({ title }) => {
           }}
         >
           <EventNote sx={{ fontSize: 48, opacity: 0.3, mb: 1 }} />
-          <Typography level='body-sm'>No recent activities</Typography>
+          <Typography level='body-sm'>
+            {t('activitiesCard.noRecentActivities')}
+          </Typography>
         </Box>
       </Sheet>
     )
@@ -458,9 +462,9 @@ const ActivitiesCard = ({ title }) => {
 
           let dateLabel
           if (isToday) {
-            dateLabel = 'Today'
+            dateLabel = t('activitiesCard.today')
           } else if (isYesterday) {
-            dateLabel = 'Yesterday'
+            dateLabel = t('activitiesCard.yesterday')
           } else {
             dateLabel = moment(date).format('MMM DD')
           }
@@ -496,7 +500,9 @@ const ActivitiesCard = ({ title }) => {
                     onViewNote={notes => {
                       setNoteViewerConfig({
                         isOpen: true,
-                        title: `Note - ${activity.choreName}`,
+                        title: t('activitiesCard.noteTitle', {
+                          choreName: activity.choreName,
+                        }),
                         content: notes,
                         onClose: () => setNoteViewerConfig({ isOpen: false }),
                       })

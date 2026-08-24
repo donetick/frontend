@@ -9,7 +9,7 @@ const STATE_KEY = 'policyUpdateState'
 
 const defaultState = {
   // Highest POLICY_VERSION the user has dismissed. 0 = never acknowledged.
-  acknowledgedVersion: 0,
+  acknowledgedVersion: 2,
   acknowledgedAt: null,
   // Developer Settings escape hatch; never set in normal use.
   devForced: false,

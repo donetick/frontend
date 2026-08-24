@@ -7,11 +7,13 @@ import {
 } from '@mui/icons-material'
 import { Box, Card, Chip, Typography } from '@mui/joy'
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
 import { useLocalization } from '../../contexts/LocalizationContext'
 
 const TimePassedCard = ({ chore, handleAction, onShowDetails }) => {
+  const { t } = useTranslation('timer')
   const navigate = useNavigate()
   const { fmt } = useLocalization()
   const [time, setTime] = useState(0)
@@ -163,7 +165,7 @@ const TimePassedCard = ({ chore, handleAction, onShowDetails }) => {
               handleAction('pause')
             }}
           >
-            Pause
+            {t('pause')}
           </Chip>
         ) : (
           <Chip
@@ -175,7 +177,7 @@ const TimePassedCard = ({ chore, handleAction, onShowDetails }) => {
               handleAction('resume')
             }}
           >
-            Resume
+            {t('resume')}
           </Chip>
         )}
 

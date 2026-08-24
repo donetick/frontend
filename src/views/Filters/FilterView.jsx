@@ -60,15 +60,13 @@ const FilterCardContent = ({
   overdueCount = 0,
   taskCount = 0,
 }) => {
+  const { t } = useTranslation('filters')
   // Get condition labels for display
   const getConditionSummary = () => {
     if (!filter.conditions || filter.conditions.length === 0) {
-      return 'No conditions'
+      return t('noConditions')
     }
-    if (filter.conditions.length === 1) {
-      return '1 condition'
-    }
-    return `${filter.conditions.length} conditions`
+    return t('condition', { count: filter.conditions.length })
   }
 
   return (
@@ -182,7 +180,7 @@ const FilterCardContent = ({
               color: overdueCount > 0 ? 'danger.500' : 'primary.500',
             }}
           >
-            {taskCount} tasks
+            {t('tasks', { count: taskCount })}
           </Chip>
 
           {overdueCount > 0 && (
@@ -196,7 +194,7 @@ const FilterCardContent = ({
                 px: 0.75,
               }}
             >
-              {overdueCount} overdue
+              {t('overdue', { count: overdueCount })}
             </Chip>
           )}
 
@@ -227,7 +225,7 @@ const FilterCardContent = ({
                 color: 'success.600',
               }}
             >
-              Used {filter.usageCount}x
+              {t('usedCount', { count: filter.usageCount })}
             </Chip>
           )}
         </Box>
@@ -435,7 +433,7 @@ const FilterView = () => {
     setConfirmationModel({
       isOpen: true,
       title: t('delete.title'),
-      message: `Are you sure you want to delete "${filter?.name}"? This cannot be undone.`,
+      message: t('delete.message', { name: filter?.name }),
       confirmText: t('common:delete'),
       color: 'danger',
       cancelText: t('common:cancel'),
@@ -507,11 +505,10 @@ const FilterView = () => {
             level='h3'
             sx={{ fontWeight: 'lg', color: 'text.primary' }}
           >
-            Filters
+            {t('header.title')}
           </Typography>
           <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            Save your favorite filter combinations for quick access. Create
-            custom views to organize and find tasks faster.
+            {t('header.subtitle')}
           </Typography>
         </Stack>
       </Box>
@@ -522,7 +519,7 @@ const FilterView = () => {
         >
           <Input
             slotProps={{ input: { ref: searchInputRef } }}
-            placeholder='Search filters'
+            placeholder={t('searchPlaceholder')}
             value={searchTerm}
             fullWidth
             sx={{
@@ -548,21 +545,21 @@ const FilterView = () => {
           />
           <SortAndFilterMenu
             sortOptions={[
-              { name: 'Smart', value: 'smart' },
-              { name: 'Name', value: 'name' },
-              { name: 'Usage count', value: 'usage' },
-              { name: 'Last used', value: 'lastUsed' },
-              { name: 'Created date', value: 'created' },
+              { name: t('sort.smart'), value: 'smart' },
+              { name: t('sort.name'), value: 'name' },
+              { name: t('sort.usage'), value: 'usage' },
+              { name: t('sort.lastUsed'), value: 'lastUsed' },
+              { name: t('sort.created'), value: 'created' },
             ]}
             selectedSort={sortBy}
             onSortChange={setSortBy}
             sortDirection={sortDirection}
             onSortDirectionChange={setSortDirection}
-            filterTitle='Show'
+            filterTitle={t('show.title')}
             filterOptions={[
-              { name: 'All filters', value: 'all' },
-              { name: 'Pinned', value: 'pinned' },
-              { name: 'Not pinned', value: 'unpinned' },
+              { name: t('show.all'), value: 'all' },
+              { name: t('show.pinned'), value: 'pinned' },
+              { name: t('show.unpinned'), value: 'unpinned' },
             ]}
             selectedFilter={pinnedFilter}
             onFilterChange={value => {
@@ -588,9 +585,9 @@ const FilterView = () => {
             fullHeight
             icon={<FilterAlt />}
             title={t('empty.title')}
-            description='Save a set of conditions once, like "overdue and assigned to me", and jump straight back to it from anywhere.'
+            description={t('empty.description')}
             primaryAction={{
-              label: 'Create a filter',
+              label: t('empty.createFilter'),
               startDecorator: <Add />,
               onClick: handleAddFilter,
             }}
@@ -600,14 +597,16 @@ const FilterView = () => {
             variant='no-results'
             fullHeight
             icon={<SearchOff />}
-            title='No filters match'
+            title={t('empty.noResultsTitle')}
             description={
               searchTerm
-                ? `No saved filter matches "${searchTerm}".`
-                : 'No saved filter matches the current filter.'
+                ? t('empty.noResultsWithSearch', { search: searchTerm })
+                : t('empty.noResultsDefault')
             }
             primaryAction={{
-              label: searchTerm ? 'Clear search' : 'Show all filters',
+              label: searchTerm
+                ? t('empty.clearSearch')
+                : t('empty.showAllFilters'),
               onClick: () => {
                 handleSearchClose()
                 setPinnedFilter('all')
@@ -656,7 +655,7 @@ const FilterView = () => {
                               <StarBorder sx={{ fontSize: 20 }} />
                             )}
                             <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                              {filter.isPinned ? 'Unpin' : 'Pin'}
+                              {filter.isPinned ? t('unpin') : t('pin')}
                             </Typography>
                           </Box>
                         </SwipeAction>

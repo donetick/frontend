@@ -203,7 +203,7 @@ const ChoreView = () => {
             chore.lastCompletedDate
               ? performers.find(p => p.userId === chore.lastCompletedBy)
                   ?.displayName
-              : 'N/A'
+              : t('choreView.na')
           }`,
         },
         {
@@ -223,7 +223,11 @@ const ChoreView = () => {
 
           subtext2:
             chore.deadlineOffset > 0 && chore.nextDueDate
-              ? `Deadline: ${moment(chore.nextDueDate).add(chore.deadlineOffset, 'seconds').fromNow()}`
+              ? t('choreView.deadline', {
+                  date: moment(chore.nextDueDate)
+                    .add(chore.deadlineOffset, 'seconds')
+                    .fromNow(),
+                })
               : null,
         },
         {
@@ -622,8 +626,8 @@ const ChoreView = () => {
       }
     } catch (error) {
       showError({
-        title: 'Failed to archive',
-        message: error?.message || 'Unable to archive task',
+        title: t('choreView.failedArchive'),
+        message: error?.message || t('choreView.unableArchiveTask'),
       })
     }
   }
@@ -631,9 +635,9 @@ const ChoreView = () => {
   const confirmDeleteChore = () => {
     setConfirmModelConfig({
       isOpen: true,
-      title: 'Delete task',
-      message: 'Are you sure you want to delete this task?',
-      confirmText: 'Delete',
+      title: t('choreView.deleteTaskTitle'),
+      message: t('choreView.deleteTaskMessage'),
+      confirmText: t('common:delete'),
       cancelText: t('choreView.cancel'),
       onClose: async confirmed => {
         setConfirmModelConfig({})
@@ -643,15 +647,15 @@ const ChoreView = () => {
           if (response.ok) {
             queryClient.invalidateQueries(['chores'])
             showSuccess({
-              title: 'Task Deleted',
-              message: 'The task has been deleted successfully.',
+              title: t('choreView.taskDeletedTitle'),
+              message: t('choreView.taskDeletedMessage'),
             })
             navigate('/chores')
           }
         } catch (error) {
           showError({
-            title: 'Failed to delete',
-            message: error?.message || 'Unable to delete task',
+            title: t('choreView.failedDelete'),
+            message: error?.message || t('choreView.unableDeleteTask'),
           })
         }
       },
@@ -667,8 +671,8 @@ const ChoreView = () => {
       }
     } catch (error) {
       showError({
-        title: 'Failed to reschedule',
-        message: error?.message || 'Unable to change the due date',
+        title: t('choreView.failedReschedule'),
+        message: error?.message || t('choreView.unableChangeDueDate'),
       })
     }
   }
@@ -681,14 +685,16 @@ const ChoreView = () => {
         setChore(prev => ({ ...prev, projectId }))
         queryClient.invalidateQueries(['chores'])
         showSuccess({
-          title: 'Task Moved',
-          message: `Task moved to ${project?.name || 'Default Project'}.`,
+          title: t('choreView.taskMovedTitle'),
+          message: t('choreView.taskMovedMessage', {
+            project: project?.name || t('actionMenu.defaultProject'),
+          }),
         })
       }
     } catch (error) {
       showError({
-        title: 'Failed to move task',
-        message: error?.message || 'Unable to move task to project',
+        title: t('choreView.failedMoveTask'),
+        message: error?.message || t('choreView.unableMoveTaskToProject'),
       })
     }
   }
@@ -700,17 +706,17 @@ const ChoreView = () => {
         notifyAllAssignees,
       })
       if (!response.ok) {
-        throw new Error('Failed to send nudge')
+        throw new Error(t('choreView.failedSendNudgeError'))
       }
       const data = await response.json()
       showSuccess({
-        title: 'Nudge Sent!',
-        message: data.message || 'Nudge sent successfully',
+        title: t('choreView.nudgeSentTitle'),
+        message: data.message || t('choreView.nudgeSentMessage'),
       })
     } catch (error) {
       showError({
-        title: 'Failed to Send Nudge',
-        message: error?.message || 'Unable to send nudge at this time',
+        title: t('choreView.failedSendNudgeTitle'),
+        message: error?.message || t('choreView.unableSendNudge'),
       })
     }
   }
@@ -725,8 +731,8 @@ const ChoreView = () => {
       }
     } catch (error) {
       showError({
-        title: 'Failed to delegate',
-        message: error?.message || 'Unable to change the assignee',
+        title: t('choreView.failedDelegate'),
+        message: error?.message || t('choreView.unableChangeAssignee'),
       })
     }
   }
@@ -862,8 +868,7 @@ const ChoreView = () => {
               onClick={() => setAttachmentBrowserOpen(true)}
               sx={{ cursor: 'pointer' }}
             >
-              {chore.attachments.length}{' '}
-              {chore.attachments.length === 1 ? 'attachment' : 'attachments'}
+              {t('choreView.attachment', { count: chore.attachments.length })}
             </Chip>
           )}
         </Box>
@@ -1004,7 +1009,7 @@ const ChoreView = () => {
             }}
           >
             <Edit />
-            Edit
+            {t('choreView.edit')}
           </Button>
           <ChoreActionMenu
             chore={chore}
@@ -1429,10 +1434,11 @@ const ChoreView = () => {
                 level='body-sm'
                 sx={{ color: 'warning.plainColor', textAlign: 'center', mb: 1 }}
               >
-                Available to complete starting{' '}
-                {moment(chore.nextDueDate)
-                  .subtract(chore.completionWindow, 'hours')
-                  .format('MM/DD/YYYY hh:mm A')}
+                {t('choreView.availableToCompleteStarting', {
+                  date: moment(chore.nextDueDate)
+                    .subtract(chore.completionWindow, 'hours')
+                    .format('MM/DD/YYYY hh:mm A'),
+                })}
               </Typography>
             )}
             {/* Timer Button - Show split button when timer is active, regular button otherwise */}
@@ -1504,8 +1510,8 @@ const ChoreView = () => {
             isOpen={true}
             options={performers}
             displayKey='displayName'
-            title='Delegate to someone else'
-            placeholder='Select a performer'
+            title={t('choreView.delegateToSomeoneElse')}
+            placeholder={t('choreView.selectAPerformer')}
             onClose={() => setActiveModal(null)}
             onSave={selected => handleAssigneeChange(selected.id)}
           />

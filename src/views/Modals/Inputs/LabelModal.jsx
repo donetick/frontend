@@ -91,12 +91,12 @@ function LabelModal({ isOpen, label, onClose }) {
       onClose={onClose}
       size='lg'
       fullWidth={true}
-      title={label ? 'Edit Label' : 'Add Label'}
+      title={label ? t('modal.editTitle') : t('modal.addTitle')}
       footer={
         <ModalActions
           secondary={{ label: t('common:cancel'), onClick: onClose }}
           primary={{
-            label: label ? 'Save Changes' : 'Add Label',
+            label: label ? t('modal.saveChanges') : t('modal.addLabel'),
             onClick: handleSave,
           }}
         />
@@ -117,7 +117,7 @@ function LabelModal({ isOpen, label, onClose }) {
 
         <FormControl>
           <Typography gutterBottom level='body-sm' alignSelf='start'>
-            Color
+            {t('modal.color')}
           </Typography>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
             {LABEL_COLORS.map(colorOption => (
@@ -125,7 +125,9 @@ function LabelModal({ isOpen, label, onClose }) {
                 component='button'
                 type='button'
                 key={colorOption.value}
-                aria-label={`Select ${colorOption.name}`}
+                aria-label={t('modal.colorAriaSelect', {
+                  color: colorOption.name,
+                })}
                 aria-pressed={color === colorOption.value}
                 title={colorOption.name}
                 onClick={() => setColor(colorOption.value)}

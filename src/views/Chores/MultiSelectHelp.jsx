@@ -43,10 +43,13 @@ const MultiSelectHelp = ({ isVisible = true }) => {
         open={isHelpOpen}
         onClose={() => setIsHelpOpen(false)}
         title={t('multiSelect.title')}
-        description='Use these keyboard shortcuts to work more efficiently.'
+        description={t('multiSelect.helpDescription')}
         footer={
           <ModalActions
-            primary={{ label: 'Got it', onClick: () => setIsHelpOpen(false) }}
+            primary={{
+              label: t('multiSelect.gotIt'),
+              onClick: () => setIsHelpOpen(false),
+            }}
           />
         }
       >

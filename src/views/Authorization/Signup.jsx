@@ -38,7 +38,7 @@ const SignupView = () => {
     const result = await authLogin({ username, password })
     if (!result.success) {
       showError({
-        title: 'Almost there',
+        title: t('almostThere'),
         message: t('signupSignInFailed'),
       })
       Navigate('/login')
@@ -106,9 +106,7 @@ const SignupView = () => {
 
     // username should only contain lowercase letters, numbers, dot and dash:
     if (!/^[a-z0-9.-]+$/.test(username)) {
-      setUsernameError(
-        'Username can only contain lowercase letters, numbers, dot and dash',
-      )
+      setUsernameError(t('usernameCharsInvalid'))
       isValid = false
     }
 
@@ -134,7 +132,7 @@ const SignupView = () => {
           response.json().then(res => {
             showError({
               title: t('signupFailed'),
-              message: res.error || 'An error occurred during signup',
+              message: res.error || t('signupGenericError'),
             })
           })
         }
@@ -147,8 +145,8 @@ const SignupView = () => {
       title={t('createYourAccount')}
       subtitle={
         getPendingInvite()
-          ? 'Create an account and we’ll send your circle join request right after.'
-          : 'Track chores and tasks together, in one shared place.'
+          ? t('signupSubtitlePendingInvite')
+          : t('signupSubtitleDefault')
       }
       footer={<LegalLinks />}
       logoSize={0}
@@ -225,8 +223,7 @@ const SignupView = () => {
           level='body-xs'
           sx={{ textAlign: 'center', color: 'text.secondary' }}
         >
-          {t('termsShort')}
-          Policy.
+          {t('signupTermsNotice')}
         </Typography>
       </Box>
 
@@ -234,7 +231,7 @@ const SignupView = () => {
         level='body-sm'
         sx={{ mt: 3, textAlign: 'center', color: 'text.secondary' }}
       >
-        Already have an account?{' '}
+        {t('alreadyHaveAccount')}{' '}
         <Link
           component='button'
           type='button'
@@ -243,7 +240,7 @@ const SignupView = () => {
           underline='hover'
           onClick={() => Navigate('/login')}
         >
-          Sign in
+          {t('signIn')}
         </Link>
       </Typography>
     </AuthShell>

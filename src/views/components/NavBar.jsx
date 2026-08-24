@@ -122,7 +122,7 @@ const NavBar = () => {
             if (window.history.state?.idx > 0) navigate(-1)
             else navigate('/chores', { replace: true })
           }}
-          aria-label='Back from search'
+          aria-label={t('backFromSearch')}
           title={t('back')}
         >
           <ArrowBack className='rtl-flip' />
@@ -241,14 +241,22 @@ const NavBar = () => {
             // pb: 'calc(var(--safe-area-inset-bottom, 0px))',
             // height:
             //   'calc(100vh - var(--safe-area-inset-top, 0px) - var(--safe-area-inset-bottom, 0px))',
-            overflow: 'auto',
+            // Column layout so the footer block sits after the links instead of
+            // being absolutely pinned: in landscape the viewport is short and a
+            // pinned footer overlapped the nav items.
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
           },
         }}
       >
         {/* Safe-area padding comes from the --safe-area-inset-* variables that
             Capacitor's SystemBars keeps in sync with the live window insets.
             Top inset is left to the inner List so it isn't applied twice. */}
-        <div className='drawer-content safe-area-x safe-area-bottom'>
+        <div
+          className='drawer-content safe-area-x'
+          style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}
+        >
           {/* <div className='align-center flex px-5 pt-4'>
             <ModalClose size='sm' sx={{ top: 'unset', right: 20 }} />
           </div> */}
@@ -272,13 +280,10 @@ const NavBar = () => {
             ))}
           </List>
         </div>
-        <div>
+        <div className='safe-area-x safe-area-bottom' style={{ flexShrink: 0 }}>
           <List
             sx={{
-              p: 2,
               height: 'min-content',
-              position: 'absolute',
-              bottom: 0,
               borderRadius: 4,
               width: '100%',
               padding: 2,
@@ -333,11 +338,13 @@ const NavBar = () => {
                 p: 1,
                 color: 'text.tertiary',
                 textAlign: 'center',
-                mb: 'calc(var(--safe-area-inset-bottom, 0px) )',
-                // mb: -2,
+                // Bottom inset now comes from the wrapper's safe-area-bottom.
               }}
             >
-              V{version} (API: {resource?.api_version || 'unavailable'})
+              {t('versionInfo', {
+                version,
+                apiVersion: resource?.api_version || t('apiVersionUnavailable'),
+              })}
             </Typography>
           </List>
         </div>

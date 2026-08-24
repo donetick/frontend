@@ -1,5 +1,6 @@
 import { DnsOutlined } from '@mui/icons-material'
 import { Box, Button, Link, Typography } from '@mui/joy'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
 import Logo from '../../Logo'
@@ -25,6 +26,7 @@ const enter = (delay = 0) => ({
  * the only place credentials are handled.
  */
 const GetStartedView = () => {
+  const { t } = useTranslation('common')
   const navigate = useNavigate()
   const { data: resource } = useResource()
   const signupDisabled = Boolean(resource?.is_user_creation_disabled)
@@ -114,8 +116,8 @@ const GetStartedView = () => {
             }}
           >
             {signupDisabled
-              ? 'Sign in to your account to pick up where you left off.'
-              : 'Create an account to sync everywhere, or sign in and pick up where you left off.'}
+              ? t('onboarding.getStarted.subtitleSignupDisabled')
+              : t('onboarding.getStarted.subtitleSignupEnabled')}
           </Typography>
         </Box>
 
@@ -134,7 +136,7 @@ const GetStartedView = () => {
               onClick={() => go('/signup')}
               sx={authButtonSx}
             >
-              Create an account
+              {t('onboarding.getStarted.createAccount')}
             </Button>
           )}
           <Button
@@ -145,7 +147,9 @@ const GetStartedView = () => {
             onClick={() => go('/login')}
             sx={authButtonSx}
           >
-            {signupDisabled ? 'Sign in' : 'I already have an account'}
+            {signupDisabled
+              ? t('onboarding.getStarted.signIn')
+              : t('onboarding.getStarted.alreadyHaveAccount')}
           </Button>
         </Box>
 
@@ -160,7 +164,7 @@ const GetStartedView = () => {
               startDecorator={<DnsOutlined fontSize='small' />}
               onClick={() => navigate('/login/settings')}
             >
-              Connect to a self-hosted server
+              {t('onboarding.getStarted.connectSelfHosted')}
             </Link>
           </Box>
         )}

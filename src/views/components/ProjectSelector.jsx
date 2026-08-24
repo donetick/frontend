@@ -198,7 +198,9 @@ const ProjectSelector = ({
             whiteSpace: 'nowrap',
             backgroundColor: currentProject?.color || LABEL_COLORS[0].value,
           }}
-          title={`Current project: ${effectiveSelectedProject} (Ctrl+E)`}
+          title={t('selector.currentProjectTitle', {
+            project: effectiveSelectedProject,
+          })}
         >
           {(() => {
             const IconComponent = getIconComponent(
@@ -357,7 +359,7 @@ const ProjectSelector = ({
               level='body-xs'
               sx={{ color: 'var(--joy-palette-text-tertiary)' }}
             >
-              Built-in project workspace
+              {t('selector.builtInWorkspace')}
             </Typography>
           </ListItemContent>
         </MenuItem>
@@ -449,7 +451,7 @@ const ProjectSelector = ({
                   level='body-xs'
                   sx={{ color: 'var(--joy-palette-text-tertiary)' }}
                 >
-                  Built-in project workspace
+                  {t('selector.builtInWorkspace')}
                 </Typography>
               )}
             </ListItemContent>
