@@ -104,7 +104,7 @@ function CreateChildUserModal({ isOpen, onClose, onSuccess }) {
       open={isOpen}
       onClose={handleClose}
       title={t('childUsers.createTitle')}
-      description='Create a login that can complete tasks assigned to this account.'
+      description={t('childUsers.createDescription')}
       size='md'
       closeOnBackdrop={!isSubmitting}
       closeOnEscape={!isSubmitting}

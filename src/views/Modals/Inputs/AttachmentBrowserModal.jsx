@@ -91,7 +91,7 @@ function AttachmentBrowserModal({ choreId, isOpen, onClose }) {
         onClose={handleClose}
         title={t('attachments')}
         footer={
-          <ModalActions primary={{ label: 'Done', onClick: handleClose }} />
+          <ModalActions primary={{ label: t('done'), onClick: handleClose }} />
         }
       >
         {isLoading ? (
@@ -102,8 +102,8 @@ function AttachmentBrowserModal({ choreId, isOpen, onClose }) {
           <EmptyState
             size='sm'
             icon={<AttachFile />}
-            title='No attachments'
-            description='Photos and files added to this task will show up here.'
+            title={t('noAttachmentsTitle')}
+            description={t('noAttachmentsDescription')}
           />
         ) : (
           <List sx={{ '--ListItem-paddingX': '0px' }}>
@@ -137,7 +137,9 @@ function AttachmentBrowserModal({ choreId, isOpen, onClose }) {
                         level='body-xs'
                         sx={{ color: 'text.tertiary' }}
                       >
-                        {(attachment.size_bytes / 1024).toFixed(1)} KB
+                        {t('kbSize', {
+                          size: (attachment.size_bytes / 1024).toFixed(1),
+                        })}
                       </Typography>
                     )}
                   </Box>

@@ -17,6 +17,7 @@ import {
 } from '@mui/joy'
 import { ClickAwayListener, Popper } from '@mui/material'
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { useDocumentScanner } from '../../hooks/useDocumentScanner'
 import { useFileUpload } from '../../hooks/useFileUpload'
@@ -40,6 +41,7 @@ const AttachmentPickerField = ({
   onChange,
   onClear,
 }) => {
+  const { t } = useTranslation('chores')
   const [isOpen, setIsOpen] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const buttonRef = useRef(null)
@@ -99,8 +101,8 @@ const AttachmentPickerField = ({
     if (cancelled) return
     if (error || !image) {
       showError({
-        title: 'Scan Failed',
-        message: error || 'Could not scan the document.',
+        title: t('attachmentPicker.scanFailedTitle'),
+        message: error || t('attachmentPicker.couldNotScanDocument'),
       })
       return
     }
@@ -109,8 +111,8 @@ const AttachmentPickerField = ({
     setIsUploading(false)
     if (!file) {
       showError({
-        title: 'Scan Failed',
-        message: 'Could not read the scanned image.',
+        title: t('attachmentPicker.scanFailedTitle'),
+        message: t('attachmentPicker.couldNotReadScannedImage'),
       })
       return
     }
@@ -184,8 +186,8 @@ const AttachmentPickerField = ({
             }}
           >
             {isEmpty
-              ? 'Attachments'
-              : `${attachments.length} file${attachments.length !== 1 ? 's' : ''}`}
+              ? t('attachmentPicker.attachments')
+              : t('attachmentPicker.file', { count: attachments.length })}
           </Typography>
         </Button>
         {!isEmpty && onClear && (
@@ -339,7 +341,7 @@ const AttachmentPickerField = ({
                     />
                   }
                 >
-                  Uploading…
+                  {t('attachmentPicker.uploading')}
                 </Button>
               ) : (
                 <Box sx={{ display: 'flex', gap: 0.5 }}>
@@ -358,7 +360,9 @@ const AttachmentPickerField = ({
                       }
                       onClick={handleScan}
                     >
-                      {isNativeScanner ? 'Scan' : 'Photo'}
+                      {isNativeScanner
+                        ? t('attachmentPicker.scan')
+                        : t('attachmentPicker.photo')}
                     </Button>
                   )}
                   <Button
@@ -369,7 +373,7 @@ const AttachmentPickerField = ({
                     startDecorator={<Image sx={{ fontSize: 16 }} />}
                     onClick={() => handlePickFile({ accept: 'image/*' })}
                   >
-                    Image
+                    {t('attachmentPicker.image')}
                   </Button>
                   <Button
                     size='sm'
@@ -379,7 +383,7 @@ const AttachmentPickerField = ({
                     startDecorator={<AttachFile sx={{ fontSize: 16 }} />}
                     onClick={() => handlePickFile()}
                   >
-                    File
+                    {t('attachmentPicker.fileButton')}
                   </Button>
                 </Box>
               )}

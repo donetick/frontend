@@ -14,7 +14,7 @@ const UserModal = ({ isOpen, onClose, onSelect, performers = [] }) => {
       onClose={onClose}
       size='lg'
       fullWidth={true}
-      title='Select User'
+      title={t('selectUser')}
       footer={
         <ModalActions secondary={{ label: t('cancel'), onClick: onClose }} />
       }

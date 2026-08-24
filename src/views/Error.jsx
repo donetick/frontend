@@ -234,7 +234,7 @@ const Error = () => {
         onClick={() => setReportOpen(true)}
         sx={{ width: '100%', mb: 2 }}
       >
-        Report this problem
+        {t('errorScreen.reportProblem')}
       </Button>
 
       {/* Secondary actions */}
@@ -274,8 +274,7 @@ const Error = () => {
           textAlign='center'
           sx={{ color: 'text.tertiary', mb: 1.5 }}
         >
-          If this keeps happening, send us a report please consider sending us
-          report so we can take a look.
+          {t('errorScreen.reportHint')}
         </Typography>
 
         {(error?.stack || message) && (
@@ -330,7 +329,7 @@ const Error = () => {
                     color: 'text.secondary',
                   }}
                 >
-                  {reportText || 'Collecting error details…'}
+                  {reportText || t('errorScreen.collectingDetails')}
                 </Typography>
               </Box>
             )}

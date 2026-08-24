@@ -306,7 +306,7 @@ const TimerEditModal = ({ choreId, isOpen, onClose, onTimerUpdate }) => {
         open={isOpen}
         onClose={onClose}
         size='lg'
-        title='Timer Details'
+        title={t('title')}
         footer={
           <ModalActions
             tertiary={
@@ -603,7 +603,13 @@ const TimerEditModal = ({ choreId, isOpen, onClose, onTimerUpdate }) => {
                   </Typography>
                   <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
                     {calculateCurrentActiveDuration() > 0
-                      ? `${Math.round((calculateCurrentActiveDuration() / calculateTotalDuration()) * 100)}% active`
+                      ? t('percentActive', {
+                          percent: Math.round(
+                            (calculateCurrentActiveDuration() /
+                              calculateTotalDuration()) *
+                              100,
+                          ),
+                        })
                       : t('noActiveTime')}
                   </Typography>
                 </Box>
@@ -731,7 +737,7 @@ const TimerEditModal = ({ choreId, isOpen, onClose, onTimerUpdate }) => {
                                         variant='soft'
                                         sx={{ fontSize: '0.75rem' }}
                                       >
-                                        Live
+                                        {t('live')}
                                       </Chip>
                                     )}
                                   </Box>
@@ -753,7 +759,10 @@ const TimerEditModal = ({ choreId, isOpen, onClose, onTimerUpdate }) => {
                                         mb: 0.3,
                                       }}
                                     >
-                                      Session #{pauseIndex + 1} • {sessionDate}
+                                      {t('sessionNumber', {
+                                        number: pauseIndex + 1,
+                                        date: sessionDate,
+                                      })}
                                     </Typography>
                                     <Typography
                                       level='body-xs'
@@ -763,7 +772,9 @@ const TimerEditModal = ({ choreId, isOpen, onClose, onTimerUpdate }) => {
                                       }}
                                     >
                                       {startTime}{' '}
-                                      {endTime ? `→ ${endTime}` : '→ ongoing'}
+                                      {endTime
+                                        ? `→ ${endTime}`
+                                        : t('ongoingArrow')}
                                     </Typography>
                                   </Box>
                                 </Card>
@@ -828,7 +839,9 @@ const TimerEditModal = ({ choreId, isOpen, onClose, onTimerUpdate }) => {
                                   level='body-sm'
                                   sx={{ fontWeight: 'bold' }}
                                 >
-                                  Session #{pauseIndex + 1}
+                                  {t('sessionNumberShort', {
+                                    number: pauseIndex + 1,
+                                  })}
                                 </Typography>
                                 <Button
                                   size='sm'
@@ -914,7 +927,7 @@ const TimerEditModal = ({ choreId, isOpen, onClose, onTimerUpdate }) => {
                                     level='body-xs'
                                     sx={{ fontWeight: 'bold', mb: 0.5 }}
                                   >
-                                    Duration (Auto-calculated)
+                                    {t('durationAutoCalculated')}
                                   </Typography>
                                   <Typography
                                     level='body-xs'

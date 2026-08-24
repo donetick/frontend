@@ -41,12 +41,12 @@ const UpdatePasswordView = () => {
     let isValid = true
 
     if (password.length < 8 || password.length > 64) {
-      setPasswordError('Password must be between 8 and 64 characters')
+      setPasswordError(t('passwordLength'))
       isValid = false
     }
 
     if (passwordConfirm !== password) {
-      setPasswordConfirmationError('Passwords do not match')
+      setPasswordConfirmationError(t('passwordsNoMatch'))
       isValid = false
     }
 
@@ -95,7 +95,7 @@ const UpdatePasswordView = () => {
     return (
       <AuthShell
         title={t('linkInvalid')}
-        subtitle='The password reset link is incomplete or has already been used. Request a new one to continue.'
+        subtitle={t('linkInvalidSubtitle')}
         footer={<LegalLinks />}
         showLogo
       >
@@ -127,7 +127,7 @@ const UpdatePasswordView = () => {
   return (
     <AuthShell
       title={t('setNewPassword')}
-      subtitle='Choose a password you have not used on this account before.'
+      subtitle={t('chooseNewPasswordSubtitle')}
       footer={<LegalLinks />}
       // Reached from an emailed link, usually in a browser: an unbranded page
       // asking for a new password is the exact shape of a phishing screen.
@@ -143,11 +143,11 @@ const UpdatePasswordView = () => {
           id='password'
           name='password'
           autoComplete='new-password'
-          placeholder='At least 8 characters'
+          placeholder={t('signupPasswordPlaceholder')}
           autoFocus
           value={password}
           error={passwordError}
-          helper='Use 8 to 64 characters.'
+          helper={t('signupPasswordHelper')}
           onChange={handlePasswordChange}
         />
 

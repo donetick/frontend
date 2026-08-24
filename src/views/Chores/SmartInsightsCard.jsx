@@ -88,7 +88,7 @@ const SmartInsightsCard = ({
         priority: 1,
         count: overdueTasks.length,
         title: t('group.overdue'),
-        description: `${overdueTasks.length} ${overdueTasks.length === 1 ? 'task is' : 'tasks are'} overdue`,
+        description: t('insights.overdueDesc', { count: overdueTasks.length }),
         color: 'danger',
         bgColor: TASK_COLOR.OVERDUE,
         icon: <WatchLater />,
@@ -117,7 +117,9 @@ const SmartInsightsCard = ({
         priority: 2,
         count: dueTodayTasks.length,
         title: t('group.dueToday'),
-        description: `${dueTodayTasks.length} ${dueTodayTasks.length === 1 ? 'task' : 'tasks'} due by end of day`,
+        description: t('insights.dueTodayDesc', {
+          count: dueTodayTasks.length,
+        }),
         color: 'warning',
         bgColor: '#FFA500',
         icon: <EventNote />,
@@ -142,7 +144,9 @@ const SmartInsightsCard = ({
         priority: 3,
         count: pendingApprovalTasks.length,
         title: t('group.pendingApproval'),
-        description: `${pendingApprovalTasks.length} ${pendingApprovalTasks.length === 1 ? 'task awaits' : 'tasks await'} approval`,
+        description: t('insights.pendingApprovalDesc', {
+          count: pendingApprovalTasks.length,
+        }),
         color: 'neutral',
         bgColor: TASK_COLOR.PENDING_REVIEW,
         icon: <HourglassEmpty />,
@@ -171,7 +175,9 @@ const SmartInsightsCard = ({
         priority: 4,
         count: dueThisWeekTasks.length,
         title: t('group.dueThisWeek'),
-        description: `${dueThisWeekTasks.length} ${dueThisWeekTasks.length === 1 ? 'task' : 'tasks'} due in the next 7 days`,
+        description: t('insights.dueThisWeekDesc', {
+          count: dueThisWeekTasks.length,
+        }),
         color: 'primary',
         bgColor: TASK_COLOR.IN_PROGRESS,
         icon: <TrendingUp />,
@@ -198,7 +204,9 @@ const SmartInsightsCard = ({
         priority: 5,
         count: highPriorityTasks.length,
         title: t('insights.highPriority'),
-        description: `${highPriorityTasks.length} ${highPriorityTasks.length === 1 ? 'task requires' : 'tasks require'} immediate attention`,
+        description: t('insights.highPriorityDesc', {
+          count: highPriorityTasks.length,
+        }),
         color: 'warning',
         bgColor: '#FF6B6B',
         icon: <PriorityHigh />,
@@ -225,7 +233,9 @@ const SmartInsightsCard = ({
         priority: 6,
         count: noDueDateTasks.length,
         title: t('group.noDueDate'),
-        description: `${noDueDateTasks.length} ${noDueDateTasks.length === 1 ? 'task needs' : 'tasks need'} a deadline`,
+        description: t('insights.noDueDateDesc', {
+          count: noDueDateTasks.length,
+        }),
         color: 'neutral',
         bgColor: '#9E9E9E',
         icon: <EventBusy />,
@@ -298,18 +308,16 @@ const SmartInsightsCard = ({
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <TrendingUp color='' />
-            <Typography level='title-md'>Smart Insights</Typography>
+            <Typography level='title-md'>{t('insights.title')}</Typography>
           </Box>
           {tempFilter && (
             <Chip size='sm' variant='solid' color='primary'>
-              Active
+              {t('insights.active')}
             </Chip>
           )}
         </Box>
         <Typography level='body-xs' sx={{ mt: 0.5, color: 'text.secondary' }}>
-          {tempFilter
-            ? 'Click active filter to clear'
-            : 'Quick actions based on your tasks'}
+          {tempFilter ? t('insights.clickToClear') : t('insights.quickActions')}
         </Typography>
       </Box>
 

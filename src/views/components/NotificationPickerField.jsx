@@ -7,19 +7,24 @@ import ModalActions from '../../components/common/ModalActions'
 import NotificationTemplate from '../../components/NotificationTemplate'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 
-const getDisplayLabel = templates => {
-  if (!templates || templates.length === 0) return 'Remind'
+const getDisplayLabel = (templates, t) => {
+  if (!templates || templates.length === 0) return t('remind.remind')
   const count = templates.length
   if (count === 1) {
     const n = templates[0]
     const numericValue = Number(n.value)
-    if (numericValue === 0) return 'On due date'
-    const unitName = n.unit === 'm' ? 'min' : n.unit === 'h' ? 'hr' : 'day'
+    if (numericValue === 0) return t('remind.onDueDate')
+    const unitName =
+      n.unit === 'm'
+        ? t('remind.unitMin')
+        : n.unit === 'h'
+          ? t('remind.unitHr')
+          : t('remind.unitDay')
     const absValue = Math.abs(numericValue)
-    const plural = absValue !== 1 ? 's' : ''
-    return `${absValue} ${unitName}${plural} ${numericValue < 0 ? 'before' : 'after'}`
+    const direction = numericValue < 0 ? t('remind.before') : t('remind.after')
+    return `${t('remind.duration', { count: absValue, unit: unitName })} ${direction}`
   }
-  return `${count} reminders`
+  return t('remind.reminder', { count })
 }
 
 const NotificationPickerField = ({
@@ -43,7 +48,7 @@ const NotificationPickerField = ({
   const templates = value?.templates || []
   const hasNotifications = templates.length > 0
   const shouldShowLabel = hasNotifications || emptyDisplay === 'icon-text'
-  const displayLabel = getDisplayLabel(templates)
+  const displayLabel = getDisplayLabel(templates, t)
 
   const handleSave = () => {
     onChange({ ...value, templates: latestTemplatesRef.current })
@@ -111,7 +116,7 @@ const NotificationPickerField = ({
 
         {hasNotifications && onClear && (
           <IconButton
-            aria-label='Remove reminders'
+            aria-label={t('remind.removeAria')}
             size='sm'
             variant='soft'
             color='danger'

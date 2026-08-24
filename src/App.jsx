@@ -2,6 +2,7 @@ import './styles/safe-area.css'
 
 import { Button, Typography, useColorScheme } from '@mui/joy'
 import { useCallback, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 
@@ -38,6 +39,7 @@ const remove = className => {
 const intervalMS = 5 * 60 * 1000 // 5 minutes
 
 const AppContent = () => {
+  const { t } = useTranslation()
   const { showNotification } = useNotification()
   const location = useLocation()
   useSyncOnReconnect()
@@ -78,9 +80,7 @@ const AppContent = () => {
         type: 'custom',
         component: (
           <div>
-            <Typography level='body-md'>
-              A new version is now available. Click on reload button to update.
-            </Typography>
+            <Typography level='body-md'>{t('newVersionAvailable')}</Typography>
             <Button
               color='secondary'
               size='small'
@@ -90,7 +90,7 @@ const AppContent = () => {
               }}
               sx={{ ml: 2 }}
             >
-              Refresh
+              {t('refresh')}
             </Button>
           </div>
         ),

@@ -2,6 +2,7 @@ import { CalendarMonth, Close } from '@mui/icons-material'
 import { Box, Button, IconButton, Typography } from '@mui/joy'
 import moment from 'moment'
 import { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import DueDatePickerModal from './DueDatePickerModal'
 
@@ -16,6 +17,7 @@ const DueDatePickerField = ({
   size = 'sm',
   useCustomTime,
 }) => {
+  const { t } = useTranslation('chores')
   const [isOpen, setIsOpen] = useState(false)
 
   const handleSave = ({
@@ -36,7 +38,7 @@ const DueDatePickerField = ({
 
   const dueDateLabel = useMemo(() => {
     if (!dueDateOnly) {
-      return 'Due'
+      return t('duePicker.due')
     }
 
     const formattedDate = moment(dueDateOnly).format('MMM D')
@@ -45,7 +47,7 @@ const DueDatePickerField = ({
     }
 
     return formattedDate
-  }, [dueDateOnly, dueTime, useCustomTime])
+  }, [dueDateOnly, dueTime, useCustomTime, t])
 
   return (
     <>
@@ -91,7 +93,7 @@ const DueDatePickerField = ({
         </Button>
         {hasDueDate && onClear && (
           <IconButton
-            aria-label='Clear due date'
+            aria-label={t('duePicker.clearAria')}
             size='sm'
             variant='soft'
             color='danger'

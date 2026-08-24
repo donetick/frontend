@@ -342,7 +342,7 @@ const ChoreActionMenu = ({
     onChangePriority && {
       key: 'priority',
       icon: <Flag />,
-      label: 'Priority',
+      label: t('priority'),
       onClick: () => setShowPriorityPicker(true),
       endDecorator: (
         <Chip
@@ -350,7 +350,7 @@ const ChoreActionMenu = ({
           variant='soft'
           color={currentPriority?.color || 'neutral'}
         >
-          {currentPriority?.name.trim() || 'None'}
+          {currentPriority?.name.trim() || t('actionMenu.noPriority')}
         </Chip>
       ),
     },
@@ -384,7 +384,9 @@ const ChoreActionMenu = ({
     {
       key: 'archive',
       icon: chore.isActive ? <Archive /> : <Unarchive />,
-      label: chore.isActive ? 'Archive' : 'Unarchive',
+      label: chore.isActive
+        ? t('actionMenu.archive')
+        : t('actionMenu.unarchive'),
       onClick: handleArchive,
       color: 'neutral',
     },
@@ -564,7 +566,7 @@ const ChoreActionMenu = ({
       >
         <ArrowBack fontSize='small' />
         <Typography level='body-sm' fontWeight={600}>
-          Priority
+          {t('priority')}
         </Typography>
       </MenuItem>
       <Divider />
@@ -590,13 +592,16 @@ const ChoreActionMenu = ({
       <ListItem>
         <ListItemButton
           onClick={() =>
-            handleMoveToProject({ id: null, name: 'Default Project' })
+            handleMoveToProject({
+              id: null,
+              name: t('actionMenu.defaultProject'),
+            })
           }
         >
           <ListItemDecorator>
             {renderProjectAvatar(LABEL_COLORS[0].value, 'FolderOpen')}
           </ListItemDecorator>
-          <ListItemContent>Default Project</ListItemContent>
+          <ListItemContent>{t('actionMenu.defaultProject')}</ListItemContent>
         </ListItemButton>
       </ListItem>
       {projects.map(project => (
@@ -646,9 +651,9 @@ const ChoreActionMenu = ({
           onClose={handleMenuClose}
           title={
             showProjectPicker
-              ? 'Move to project'
+              ? t('actionMenu.moveToProject')
               : showPriorityPicker
-                ? 'Priority'
+                ? t('priority')
                 : chore?.name
           }
           mobilePresentation='sheet'
@@ -706,21 +711,26 @@ const ChoreActionMenu = ({
               >
                 <ArrowBack fontSize='small' />
                 <Typography level='body-sm' fontWeight={600}>
-                  Move to project
+                  {t('actionMenu.moveToProject')}
                 </Typography>
               </MenuItem>
               <Divider />
               <MenuItem
                 onClick={e => {
                   e.stopPropagation()
-                  handleMoveToProject({ id: null, name: 'Default Project' })
+                  handleMoveToProject({
+                    id: null,
+                    name: t('actionMenu.defaultProject'),
+                  })
                 }}
               >
                 <ListItemDecorator>
                   {renderProjectAvatar(LABEL_COLORS[0].value, 'FolderOpen')}
                 </ListItemDecorator>
                 <ListItemContent>
-                  <Typography level='body-sm'>Default Project</Typography>
+                  <Typography level='body-sm'>
+                    {t('actionMenu.defaultProject')}
+                  </Typography>
                 </ListItemContent>
               </MenuItem>
               {projects.map(project => (

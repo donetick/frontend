@@ -513,7 +513,17 @@
     "errorTitle": "Subscription Error",
     "errorMessage": "Failed to start subscription process. Please try again.",
     "subscribe": "Subscribe",
-    "cancelAnytime": "Cancel anytime. No hidden fees. Secure payment powered by Stripe."
+    "cancelAnytime": "Cancel anytime. No hidden fees. Secure payment powered by Stripe.",
+    "description": "Unlock reminders, rich task details, and advanced automation.",
+    "whatsIncluded": "What's included:",
+    "mostPopular": "Most Popular",
+    "featureNotifications": "Task notifications and reminders",
+    "featureRichText": "Rich text descriptions with images uploads",
+    "featureThingTriggers": "Thing-based task triggers",
+    "featureApiTokens": "API tokens for integrations",
+    "featureImageUploads": "Image uploads in descriptions",
+    "featureAutomation": "Advanced task automation",
+    "planYearly": "Yearly"
   },
   "childUsers": {
     "errNameRequired": "Sub account name is required",
@@ -525,6 +535,7 @@
     "errPasswordMatch": "Passwords do not match",
     "errDisplayNameMax": "Display name must be less than 50 characters",
     "createTitle": "Create Sub Account",
+    "createDescription": "Create a login that can complete tasks assigned to this account.",
     "createButton": "Create Account",
     "nameLabel": "Sub Account Name *",
     "namePlaceholder": "Enter sub account name (e.g., sarah)",

@@ -26,12 +26,12 @@ const ForgotPasswordView = () => {
     e?.preventDefault()
 
     if (!email) {
-      setEmailError('Email is required')
+      setEmailError(t('emailRequired'))
       return
     }
 
     if (isInvalidEmail(email)) {
-      setEmailError('Please enter a valid email address')
+      setEmailError(t('validEmailRequired'))
       return
     }
 
@@ -75,7 +75,7 @@ const ForgotPasswordView = () => {
 
   const handleEmailBlur = () => {
     if (email && isInvalidEmail(email)) {
-      setEmailError('Please enter a valid email address')
+      setEmailError(t('validEmailRequired'))
     }
   }
 
@@ -83,7 +83,7 @@ const ForgotPasswordView = () => {
     return (
       <AuthShell
         title={t('checkYourEmail')}
-        subtitle={`If an account exists for ${email}, we've sent instructions for resetting your password.`}
+        subtitle={t('resetInstructionsSent', { email })}
         footer={<LegalLinks />}
         logoSize={0}
       >
@@ -114,7 +114,7 @@ const ForgotPasswordView = () => {
   return (
     <AuthShell
       title={t('resetYourPassword')}
-      subtitle="Enter your email and we'll send you a link to get back into your account."
+      subtitle={t('enterEmailForReset')}
       footer={<LegalLinks />}
       logoSize={0}
     >
@@ -124,7 +124,7 @@ const ForgotPasswordView = () => {
         sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
       >
         <AuthTextField
-          label='Email address'
+          label={t('emailAddressLabel')}
           id='email'
           name='email'
           type='email'
@@ -138,7 +138,7 @@ const ForgotPasswordView = () => {
         />
 
         <AuthSubmitButton loading={isSubmitting} sx={{ mt: 1 }}>
-          Send reset link
+          {t('sendResetLink')}
         </AuthSubmitButton>
       </Box>
 
@@ -146,7 +146,7 @@ const ForgotPasswordView = () => {
         level='body-sm'
         sx={{ mt: 3, textAlign: 'center', color: 'text.secondary' }}
       >
-        Remembered it?{' '}
+        {t('rememberedIt')}{' '}
         <Link
           component='button'
           type='button'

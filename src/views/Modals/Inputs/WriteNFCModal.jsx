@@ -232,7 +232,10 @@ function WriteNFCModal({ config }) {
             <ModalActions
               secondary={{ label: t('choreView.cancel'), onClick: handleClose }}
               primary={{
-                label: nfcStatus === 'writing' ? 'Starting…' : 'Write tag',
+                label:
+                  nfcStatus === 'writing'
+                    ? t('nfc.startingLabel')
+                    : t('nfc.writeTagButton'),
                 onClick: writeToNFC,
                 disabled: nfcStatus === 'writing',
                 startDecorator: <Nfc />,
@@ -273,7 +276,7 @@ function WriteNFCModal({ config }) {
                   }}
                   endDecorator={
                     <IconButton
-                      aria-label='Copy tag URL'
+                      aria-label={t('nfc.copyUrl')}
                       size='sm'
                       variant='plain'
                       color={copied ? 'success' : 'neutral'}

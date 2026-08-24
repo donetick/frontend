@@ -111,7 +111,7 @@ function NudgeModal({ config }) {
       fullWidth={true}
       unmountDelay={250}
       title={t('nudge.title')}
-      description='Send a gentle reminder to the people assigned to this task.'
+      description={t('nudge.description')}
       footer={
         <ModalActions
           secondary={{
@@ -135,13 +135,10 @@ function NudgeModal({ config }) {
       {!isOfficialInstance && (
         <Alert color='warning' sx={{ mb: 2 }}>
           <Typography level='body-sm'>
-            <strong>Heads up!</strong>This feature avaiable on Donetick Cloud!
-            Since you&apos;re using a self-hosted instance, nudges will requires
-            you to setup Google cloud account and Firebase Cloud Messaging
-            (FCM). and build the Android or the iOS app by yourself.
+            <strong>{t('nudge.selfHostedHeading')}</strong>{' '}
+            {t('nudge.selfHostedNotice')}
             <br />
-            Will update if we come up with a solution to make this easier for to
-            configure. for selfhosters
+            {t('nudge.selfHostedFollowUp')}
           </Typography>
         </Alert>
       )}
