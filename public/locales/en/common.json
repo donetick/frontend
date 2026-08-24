@@ -545,7 +545,8 @@
   "closeDialog": "Close dialog",
   "activeFilterChips": {
     "removeFilterAria": "Remove {{label}} filter",
-    "addFilterCondition": "Add filter condition"
+    "addFilterCondition": "Add filter condition",
+    "moreCount": "+{{count}} more"
   },
   "filterBar": {
     "filtersButton": "Filters",

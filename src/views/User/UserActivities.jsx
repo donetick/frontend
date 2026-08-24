@@ -1035,16 +1035,26 @@ const UserActivites = () => {
           variant='no-results'
           fullHeight
           icon={<EventBusy />}
-          title='No activity in this range'
-          description={`Nothing was completed by ${
+          title={t('activities.emptyTitle')}
+          description={
             selectedUser === undefined || selectedUser === 'all'
-              ? 'anyone in your circle'
-              : circleUsers.find(user => user.userId === selectedUser)
-                  ?.displayName || 'this member'
-          } ${
-            tabValue === 365 ? 'so far' : `in the last ${tabValue} days`
-          }. Try a wider time range or a different member.`}
-          primaryAction={{ label: 'Back to tasks', to: '/chores' }}
+              ? t('activities.emptyDescriptionEveryone', {
+                  period:
+                    tabValue === 365
+                      ? t('activities.periodSoFar')
+                      : t('activities.periodLastDays', { count: tabValue }),
+                })
+              : t('activities.emptyDescriptionMember', {
+                  name:
+                    circleUsers.find(user => user.userId === selectedUser)
+                      ?.displayName || t('activities.unknownMember'),
+                  period:
+                    tabValue === 365
+                      ? t('activities.periodSoFar')
+                      : t('activities.periodLastDays', { count: tabValue }),
+                })
+          }
+          primaryAction={{ label: t('empty.backToTasks'), to: '/chores' }}
         />
       ) : (
         <>

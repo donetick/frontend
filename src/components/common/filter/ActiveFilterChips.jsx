@@ -106,7 +106,7 @@ const ActiveFilterChips = ({
             ...overflowChipSx,
           }}
         >
-          +{overflow} more
+          {t('activeFilterChips.moreCount', { count: overflow })}
         </Chip>
       ) : (
         showAddChip &&

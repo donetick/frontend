@@ -100,7 +100,13 @@
     "allTime": "All Time"
   },
   "activities": {
-    "title": "Activities"
+    "title": "Activities",
+    "emptyTitle": "No activity in this range",
+    "emptyDescriptionEveryone": "Nothing was completed by anyone in your circle {{period}}. Try a wider time range or a different member.",
+    "emptyDescriptionMember": "Nothing was completed by {{name}} {{period}}. Try a wider time range or a different member.",
+    "periodSoFar": "so far",
+    "periodLastDays": "in the last {{count}} days",
+    "unknownMember": "this member"
   },
   "title": {
     "summary": "Task Summary",
