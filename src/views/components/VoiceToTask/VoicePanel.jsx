@@ -18,6 +18,7 @@ import {
 import { Box, Button, Chip, IconButton, Input, Typography } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { TASK_COLOR } from '../../../utils/Colors'
 import { isPlusAccount } from '../../../utils/Helpers'
@@ -88,29 +89,35 @@ const formatDue = dueDate => {
 
 // Compact description for picker-overridden frequencies where the parser's
 // human name no longer applies
-const describeFrequency = f => {
+const describeFrequency = (f, t) => {
   if (!f) return null
   if (f.frequencyType === 'interval') {
     const unit = f.frequencyMetadata?.unit || 'days'
     return f.frequency > 1
-      ? `Every ${f.frequency} ${unit}`
-      : `Every ${unit.replace(/s$/, '')}`
+      ? t('chores:voiceToTask.frequency.everyN', {
+          count: f.frequency,
+          unit,
+        })
+      : t('chores:voiceToTask.frequency.everyUnit', {
+          unit: unit.replace(/s$/, ''),
+        })
   }
   const names = {
-    daily: 'Daily',
-    weekly: 'Weekly',
-    monthly: 'Monthly',
-    yearly: 'Yearly',
-    days_of_the_week: 'Custom days',
-    day_of_the_month: 'Monthly',
+    daily: t('chores:voiceToTask.frequency.daily'),
+    weekly: t('chores:voiceToTask.frequency.weekly'),
+    monthly: t('chores:voiceToTask.frequency.monthly'),
+    yearly: t('chores:voiceToTask.frequency.yearly'),
+    days_of_the_week: t('chores:voiceToTask.frequency.customDays'),
+    day_of_the_month: t('chores:voiceToTask.frequency.monthly'),
   }
-  return names[f.frequencyType] || 'Repeats'
+  return names[f.frequencyType] || t('chores:voiceToTask.frequency.repeats')
 }
 
 const buildChips = (
   effective,
   frequencyLabel,
   { canRemind, currentUserId, members },
+  t,
 ) => {
   const chips = []
   if (effective.dueDate) {
@@ -149,7 +156,7 @@ const buildChips = (
       key: 'reminders',
       color: 'neutral',
       icon: <NotificationsNone sx={{ fontSize: 12 }} />,
-      label: reminderCount > 1 ? `${reminderCount} reminders` : '1 reminder',
+      label: t('chores:voiceToTask.reminder', { count: reminderCount }),
     })
   }
   if (effective.points != null) {
@@ -157,7 +164,7 @@ const buildChips = (
       key: 'points',
       color: 'primary',
       icon: <Toll sx={{ fontSize: 12 }} />,
-      label: `${effective.points} pts`,
+      label: t('chores:voiceToTask.points', { count: effective.points }),
     })
   }
   effective.labelNames.forEach(name => {
@@ -173,7 +180,7 @@ const buildChips = (
       key: 'assignee',
       color: 'neutral',
       icon: <Person sx={{ fontSize: 12 }} />,
-      label: 'Anyone',
+      label: t('chores:voiceToTask.anyone'),
     })
   } else if (
     effective.assignees.length > 0 &&
@@ -199,6 +206,7 @@ const TaskPreviewCard = ({
   parseCtx,
   segment,
 }) => {
+  const { t } = useTranslation()
   const [expanded, setExpanded] = useState(false)
   const [draft, setDraft] = useState(segment.text)
   const dueEditRef = useRef(null)
@@ -223,11 +231,11 @@ const TaskPreviewCard = ({
 
   const frequencyLabel =
     'frequency' in overrides
-      ? describeFrequency(effective.frequency)
+      ? describeFrequency(effective.frequency, t)
       : parsed.frequencyName
   const chips = useMemo(
-    () => buildChips(effective, frequencyLabel, parseCtx),
-    [effective, frequencyLabel, parseCtx],
+    () => buildChips(effective, frequencyLabel, parseCtx, t),
+    [effective, frequencyLabel, parseCtx, t],
   )
 
   const due = effective.dueDate ? moment(effective.dueDate) : null
@@ -472,6 +480,7 @@ const VoicePanel = ({
     updateSegment,
   } = useVoiceToTask({ members, userLabels })
   const segmentsScrollRef = useRef(null)
+  const { t } = useTranslation()
 
   const parseCtx = useMemo(
     () => ({
@@ -513,11 +522,11 @@ const VoicePanel = ({
 
   const micCaption = isListening
     ? isLocked
-      ? 'Listening — tap to stop'
-      : 'Release to finish · quick tap locks hands-free'
+      ? t('chores:voiceToTask.captionListeningLocked')
+      : t('chores:voiceToTask.captionReleaseToFinish')
     : segments.length > 0
-      ? 'Hold to add another task'
-      : 'Hold to speak · quick tap for hands-free'
+      ? t('chores:voiceToTask.captionHoldToAddAnother')
+      : t('chores:voiceToTask.captionHoldToSpeak')
 
   return (
     <Box>
@@ -531,7 +540,9 @@ const VoicePanel = ({
         }}
       >
         <GraphicEq color='primary' fontSize='small' />
-        <Typography level='title-sm'>Speak your tasks</Typography>
+        <Typography level='title-sm'>
+          {t('chores:voiceToTask.title')}
+        </Typography>
         {isNative && (
           <Chip
             size='sm'
@@ -540,7 +551,7 @@ const VoicePanel = ({
             startDecorator={<Lock sx={{ fontSize: 12 }} />}
             sx={{ ml: 'auto' }}
           >
-            On-device
+            {t('chores:voiceToTask.onDevice')}
           </Chip>
         )}
       </Box>
@@ -553,8 +564,7 @@ const VoicePanel = ({
           >
             <WarningAmber color='warning' sx={{ mt: 0.25, flexShrink: 0 }} />
             <Typography level='body-sm'>
-              Microphone access is needed for voice capture. Enable it in your
-              device settings and try again.
+              {t('chores:voiceToTask.micDeniedMessage')}
             </Typography>
           </Box>
           <Button
@@ -563,7 +573,7 @@ const VoicePanel = ({
             color='neutral'
             onClick={startHandsFree}
           >
-            Try Again
+            {t('chores:voiceToTask.tryAgain')}
           </Button>
         </Box>
       )}
@@ -613,7 +623,7 @@ const VoicePanel = ({
               </Typography>
             ) : (
               <Typography level='body-sm' sx={{ opacity: 0.5 }}>
-                Listening…
+                {t('chores:voiceToTask.listening')}
               </Typography>
             )}
           </Box>
@@ -640,7 +650,11 @@ const VoicePanel = ({
           </div>
           <button
             type='button'
-            aria-label={isListening ? 'Stop listening' : 'Start voice capture'}
+            aria-label={
+              isListening
+                ? t('chores:voiceToTask.stopListening')
+                : t('chores:voiceToTask.startVoiceCapture')
+            }
             className={`voice-mic-btn${isListening ? ' listening' : ''}`}
             onPointerDown={e => {
               e.preventDefault()
@@ -662,8 +676,7 @@ const VoicePanel = ({
             level='body-xs'
             sx={{ opacity: 0.5, px: 2, textAlign: 'center' }}
           >
-            Pause between tasks &middot; say &ldquo;scratch that&rdquo; to
-            remove the last one
+            {t('chores:voiceToTask.hint')}
           </Typography>
         </Box>
       )}

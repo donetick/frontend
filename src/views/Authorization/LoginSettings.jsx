@@ -56,13 +56,12 @@ const LoginSettings = () => {
       if (response.status === 503) {
         return {
           ok: false,
-          message:
-            'Server is starting up or temporarily unavailable (503). Try again in a moment.',
+          message: t('server.unavailable503'),
         }
       }
       return {
         ok: false,
-        message: `Server responded with error ${response.status}. Please check your Donetick server.`,
+        message: t('server.errorStatus', { status: response.status }),
       }
     } catch (err) {
       clearTimeout(timeoutId)
@@ -70,7 +69,9 @@ const LoginSettings = () => {
       if (err.name === 'AbortError') {
         return {
           ok: false,
-          message: `Connection timed out after ${CONNECTION_TIMEOUT_MS / 1000}s. The host may be unreachable or behind a firewall — check the IP/hostname and network.`,
+          message: t('server.timeout', {
+            seconds: CONNECTION_TIMEOUT_MS / 1000,
+          }),
         }
       }
 
@@ -89,8 +90,7 @@ const LoginSettings = () => {
           // Server responded but CORS headers blocked the real request
           return {
             ok: false,
-            message:
-              'Server is reachable but blocked the request (CORS). Ensure your Donetick server allows requests from this origin, or check the server CORS config.',
+            message: t('server.corsBlocked'),
           }
         }
         // Opaque is the only expected type for no-cors success; anything else is odd
@@ -112,8 +112,7 @@ const LoginSettings = () => {
           }
           return {
             ok: false,
-            message:
-              'Connection refused. The port may be wrong or nothing is listening — verify the URL and port (default Donetick port is 2021).',
+            message: t('server.connectionRefused'),
           }
         }
         // no-cors also timed out → server/host truly unreachable
@@ -186,7 +185,7 @@ const LoginSettings = () => {
   return (
     <AuthShell
       title={t('serverSettings')}
-      subtitle='Point the app at your own self-hosted Donetick server.'
+      subtitle={t('server.settingsSubtitle')}
     >
       <Box
         component='form'
@@ -201,7 +200,7 @@ const LoginSettings = () => {
           autoCapitalize='none'
           autoCorrect='off'
           spellCheck='false'
-          placeholder='https://your-server:2021'
+          placeholder={t('server.urlPlaceholder')}
           autoFocus
           value={serverURL}
           onChange={handleURLChange}
@@ -220,7 +219,7 @@ const LoginSettings = () => {
               <ErrorOutlineIcon color='error' fontSize='small' />
             ) : null
           }
-          helper='Include the protocol (http:// or https://) and the port if needed. Donetick defaults to port 2021.'
+          helper={t('server.urlHelper')}
         />
 
         {status === 'error' && (
@@ -252,7 +251,7 @@ const LoginSettings = () => {
             startDecorator={<WifiIcon />}
             sx={{ mt: 2, borderRadius: '12px' }}
           >
-            Testing connection to server...
+            {t('server.testingConnection')}
           </Alert>
         )}
 
@@ -262,7 +261,9 @@ const LoginSettings = () => {
           startDecorator={isTesting ? <CircularProgress size='sm' /> : null}
           sx={{ mt: 3 }}
         >
-          {isTesting ? 'Testing connection' : 'Save & connect'}
+          {isTesting
+            ? t('server.testingConnectionButton')
+            : t('server.saveAndConnect')}
         </AuthSubmitButton>
 
         <Button
@@ -280,7 +281,7 @@ const LoginSettings = () => {
             Navigate('/login')
           }}
         >
-          Reset to default server
+          {t('server.resetToDefault')}
         </Button>
       </Box>
 

@@ -58,7 +58,7 @@ const ActiveFilterChips = ({
                 event.stopPropagation()
                 onClear?.()
               }}
-              aria-label={`Remove ${label} filter`}
+              aria-label={t('activeFilterChips.removeFilterAria', { label })}
               sx={{
                 '--Chip-deleteSize': chipSize === 'sm' ? '1.1rem' : '1.4rem',
                 '--Icon-fontSize': chipSize === 'sm' ? '12px' : '16px',
@@ -116,8 +116,8 @@ const ActiveFilterChips = ({
             variant='outlined'
             color='neutral'
             onClick={onAdd || onOpen}
-            aria-label='Add filter condition'
-            title='Add filter condition'
+            aria-label={t('activeFilterChips.addFilterCondition')}
+            title={t('activeFilterChips.addFilterCondition')}
             sx={{
               cursor: 'pointer',
               flexShrink: 0,

@@ -198,16 +198,16 @@ const ChoreHistory = () => {
 
   const handleDelete = historyEntry => {
     showConfirmation(
-      `Are you sure you want to delete this history record?`,
-      'Delete History Record',
+      t('delete.message'),
+      t('delete.title'),
       () => {
         deleteChoreHistory.mutate({
           choreId,
           historyId: historyEntry.id,
         })
       },
-      'Delete',
-      'Cancel',
+      t('common:delete'),
+      t('common:cancel'),
       'danger',
     )
   }
@@ -260,42 +260,50 @@ const ChoreHistory = () => {
     const historyInfo = [
       {
         icon: <Checklist />,
-        text: 'All Completed',
-        subtext: `${histories.filter(h => h.status === ChoreHistoryStatus.COMPLETED || h.status === ChoreHistoryStatus.SKIPPED).length} times`,
+        text: t('info.allCompleted'),
+        subtext: t('info.timesSuffix', {
+          count: histories.filter(
+            h =>
+              h.status === ChoreHistoryStatus.COMPLETED ||
+              h.status === ChoreHistoryStatus.SKIPPED,
+          ).length,
+        }),
       },
       {
         icon: <TrendingUp />,
-        text: 'Average Timing',
+        text: t('info.averageTiming'),
         subtext: moment.duration(averageDelayMoment).isValid()
           ? moment.duration(averageDelayMoment).humanize()
-          : 'On time',
+          : t('info.onTime'),
       },
       {
         icon: <Timelapse />,
-        text: 'Longest Delay',
+        text: t('info.longestDelay'),
         subtext: moment.duration(maxDelayMoment).isValid()
           ? moment.duration(maxDelayMoment).humanize()
-          : 'Never late',
+          : t('info.neverLate'),
       },
       {
         icon: <Star />,
-        text: 'Completed Most',
+        text: t('info.completedMost'),
         subtext: `${
           performers.find(p => p.userId === Number(userCompletedByMost))
-            ?.displayName || 'Unknown'
+            ?.displayName || t('info.unknown')
         }`,
       },
       {
         icon: <Group />,
-        text: 'Members Involved',
-        subtext: `${Object.keys(userHistories).length} members`,
+        text: t('info.membersInvolved'),
+        subtext: t('info.membersSuffix', {
+          count: Object.keys(userHistories).length,
+        }),
       },
       {
         icon: <Analytics />,
-        text: 'Last Completed',
+        text: t('info.lastCompleted'),
         subtext: `${
           performers.find(p => p.userId === Number(histories[0].completedBy))
-            ?.displayName || 'Unknown'
+            ?.displayName || t('info.unknown')
         }`,
       },
     ]
@@ -312,9 +320,9 @@ const ChoreHistory = () => {
         <EmptyState
           fullHeight
           icon={<EventBusy />}
-          title='No history yet'
-          description='Every time this task gets completed or skipped, it lands here with who did it and when. Nothing has happened yet.'
-          primaryAction={{ label: 'Back to tasks', to: '/chores' }}
+          title={t('empty.title')}
+          description={t('empty.description')}
+          primaryAction={{ label: t('empty.backToTasks'), to: '/chores' }}
         />
       </Container>
     )
@@ -427,8 +435,8 @@ const ChoreHistory = () => {
         <EmptyState
           variant='no-results'
           icon={<FilterList />}
-          title='No history matches these filters'
-          description='There is history here, but none of it fits the filters that are currently on.'
+          title={t('empty.noResultsTitle')}
+          description={t('empty.noResultsDescription')}
           primaryAction={{ label: t('noResults.clear'), onClick: clearAll }}
         />
       )}
@@ -520,7 +528,9 @@ const ChoreHistory = () => {
                   onViewNote={notes => {
                     setNoteViewerConfig({
                       isOpen: true,
-                      title: `Updated at ${fmt.dateTime(historyEntry.updatedAt)}`,
+                      title: t('noteViewer.updatedAt', {
+                        date: fmt.dateTime(historyEntry.updatedAt),
+                      }),
                       content: notes,
                       onClose: () => setNoteViewerConfig({ isOpen: false }),
                     })
@@ -565,13 +575,12 @@ const ChoreHistory = () => {
                   if (data?.queued) {
                     showSuccess({
                       title: t('toast.updateQueued.title'),
-                      message:
-                        'You are offline. The history update will sync when connection is restored.',
+                      message: t('toast.updateQueued.message'),
                     })
                   } else {
                     showSuccess({
                       title: t('toast.updated.title'),
-                      message: `The history record has been updated successfully.`,
+                      message: t('toast.updated.message'),
                     })
                   }
                 },
@@ -595,13 +604,12 @@ const ChoreHistory = () => {
                   if (data?.queued) {
                     showSuccess({
                       title: t('toast.deleteQueued.title'),
-                      message:
-                        'You are offline. The history delete will sync when connection is restored.',
+                      message: t('toast.deleteQueued.message'),
                     })
                   } else {
                     showSuccess({
                       title: t('toast.deleted.title'),
-                      message: `The history record has been deleted successfully.`,
+                      message: t('toast.deleted.message'),
                     })
                   }
                 },

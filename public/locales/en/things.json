@@ -9,6 +9,12 @@
   "valuePlaceholder": "Thing value",
   "updateState": "Update state",
   "update": "Update",
+  "create": "Create",
+  "editThingTitle": "Edit Thing",
+  "createThingTitle": "Create Thing",
+  "type": "Type",
+  "boolTrue": "True",
+  "boolFalse": "False",
   "history": {
     "overview": "Things Overview",
     "visualization": "Data Visualization",

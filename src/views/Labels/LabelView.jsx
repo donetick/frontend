@@ -376,19 +376,19 @@ const LabelView = () => {
           />
           <SortAndFilterMenu
             sortOptions={[
-              { name: 'Name', value: 'name' },
-              { name: 'Color', value: 'color' },
-              { name: 'Recently created', value: 'created' },
+              { name: t('view.sortName'), value: 'name' },
+              { name: t('view.sortColor'), value: 'color' },
+              { name: t('view.sortRecent'), value: 'created' },
             ]}
             selectedSort={sortBy}
             onSortChange={setSortBy}
             sortDirection={sortDirection}
             onSortDirectionChange={setSortDirection}
-            filterTitle='Show'
+            filterTitle={t('view.filterTitle')}
             filterOptions={[
-              { name: 'All labels', value: 'all' },
-              { name: 'Created by me', value: 'mine' },
-              { name: 'Shared with me', value: 'shared' },
+              { name: t('view.filterAll'), value: 'all' },
+              { name: t('view.filterMine'), value: 'mine' },
+              { name: t('view.filterShared'), value: 'shared' },
             ]}
             selectedFilter={ownershipFilter}
             onFilterChange={value => {
@@ -412,10 +412,10 @@ const LabelView = () => {
           <EmptyState
             fullHeight
             icon={<Style />}
-            title='No labels yet'
-            description='Labels group tasks across your circle, like "kitchen" or "bills", so you can filter down to them in one tap.'
+            title={t('view.emptyTitle')}
+            description={t('view.emptyDescription')}
             primaryAction={{
-              label: 'Create a label',
+              label: t('view.createLabel'),
               startDecorator: <Add />,
               onClick: handleAddLabel,
             }}

@@ -42,6 +42,30 @@
     "errorNoColor": "Please select a color",
     "saveFailedTitle": "Failed to save label",
     "saveFailedMessage": "Unable to save label. Please try again.",
-    "name": "Name"
+    "name": "Name",
+    "editTitle": "Edit Label",
+    "addTitle": "Add Label",
+    "color": "Color",
+    "saveChanges": "Save Changes",
+    "addLabel": "Add Label",
+    "colorAriaSelect": "Select {{color}}"
+  },
+  "picker": {
+    "label": "Labels",
+    "createLabel": "Create label",
+    "labelsCount_one": "{{count}} label",
+    "labelsCount_other": "{{count}} labels"
+  },
+  "view": {
+    "emptyTitle": "No labels yet",
+    "emptyDescription": "Labels group tasks across your circle, like \"kitchen\" or \"bills\", so you can filter down to them in one tap.",
+    "createLabel": "Create a label",
+    "filterTitle": "Show",
+    "sortName": "Name",
+    "sortColor": "Color",
+    "sortRecent": "Recently created",
+    "filterAll": "All labels",
+    "filterMine": "Created by me",
+    "filterShared": "Shared with me"
   }
 }

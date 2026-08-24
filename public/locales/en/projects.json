@@ -53,7 +53,9 @@
     "createNew": "Create New Project",
     "createNewDescription": "Add a custom project workspace",
     "manage": "Manage Projects",
-    "manageDescription": "View, edit, and organize all projects"
+    "manageDescription": "View, edit, and organize all projects",
+    "currentProjectTitle": "Current project: {{project}} (Ctrl+E)",
+    "builtInWorkspace": "Built-in project workspace"
   },
   "modal": {
     "errorNameRequired": "Project name is required",

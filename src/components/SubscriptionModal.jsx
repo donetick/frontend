@@ -31,12 +31,12 @@ const SubscriptionModal = ({ onClose, open }) => {
   }
 
   const features = [
-    'Task notifications and reminders',
-    'Rich text descriptions with images uploads',
-    'Thing-based task triggers',
-    'API tokens for integrations',
-    'Image uploads in descriptions',
-    'Advanced task automation',
+    t('subscription.featureNotifications'),
+    t('subscription.featureRichText'),
+    t('subscription.featureThingTriggers'),
+    t('subscription.featureApiTokens'),
+    t('subscription.featureImageUploads'),
+    t('subscription.featureAutomation'),
     // 'Unlimited task history',
     // 'Unlimited things history',
   ]
@@ -75,7 +75,7 @@ const SubscriptionModal = ({ onClose, open }) => {
       open={open}
       onClose={onClose}
       title={t('overview.upgrade.title')}
-      description='Unlock reminders, rich task details, and advanced automation.'
+      description={t('subscription.description')}
       size='lg'
       closeOnBackdrop={!isLoading}
       closeOnEscape={!isLoading}
@@ -98,7 +98,7 @@ const SubscriptionModal = ({ onClose, open }) => {
       {/* Features List */}
       <Box sx={{ mb: 2 }}>
         <Typography level='title-lg' sx={{ mb: 2 }}>
-          What&apos;s included:
+          {t('subscription.whatsIncluded')}
         </Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
           {features.map((feature, index) => (
@@ -158,7 +158,9 @@ const SubscriptionModal = ({ onClose, open }) => {
                 sx={{ mr: 1 }}
               />
               <Typography level='body-md' sx={{ fontWeight: 600 }}>
-                {key.charAt(0).toUpperCase() + key.slice(1)}
+                {t(
+                  `subscription.plan${key.charAt(0).toUpperCase()}${key.slice(1)}`,
+                )}
               </Typography>
               <Typography level='body-sm' sx={{ fontWeight: 500, ml: 1 }}>
                 {plan.price}
@@ -193,7 +195,7 @@ const SubscriptionModal = ({ onClose, open }) => {
                     mt: 0.8,
                   }}
                 >
-                  Most Popular
+                  {t('subscription.mostPopular')}
                 </Chip>
               )}
               {plan.savings && (

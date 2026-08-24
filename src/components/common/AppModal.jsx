@@ -2,6 +2,7 @@ import { Close } from '@mui/icons-material'
 import { Box, Divider, IconButton, Modal, Sheet, Typography } from '@mui/joy'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { forwardRef, useId } from 'react'
+import { useTranslation } from 'react-i18next'
 
 const WIDTH_BY_SIZE = {
   sm: 400,
@@ -43,6 +44,7 @@ const AppModal = forwardRef(
     },
     ref,
   ) => {
+    const { t } = useTranslation('common')
     const generatedId = useId()
     const detectedMobile = useMediaQuery('(max-width:768px)')
     const isMobile = isMobileProp ?? detectedMobile
@@ -177,7 +179,7 @@ const AppModal = forwardRef(
               )}
               {showCloseButton && (
                 <IconButton
-                  aria-label='Close dialog'
+                  aria-label={t('closeDialog')}
                   variant='plain'
                   color='neutral'
                   onClick={handleClose}

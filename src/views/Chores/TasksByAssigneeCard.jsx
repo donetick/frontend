@@ -135,8 +135,8 @@ const TasksByAssigneeCard = ({ chores = [] }) => {
           variant='no-results'
           size='sm'
           icon={<Person />}
-          title='No one has tasks yet'
-          description='Assign a task to someone in your circle and their workload shows up here.'
+          title={t('assigneeCard.emptyTitle')}
+          description={t('assigneeCard.emptyDescription')}
         />
       </Sheet>
     )

@@ -3,6 +3,7 @@ import { CheckRounded } from '@mui/icons-material'
 import { Box, Button, Typography } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
 import { track } from '../../analytics'
@@ -14,11 +15,11 @@ import { authButtonSx } from '../Authorization/authStyles'
 
 const EASE = 'cubic-bezier(0.22, 1, 0.36, 1)'
 
-const READY = [
-  'Shared chores for the whole house',
-  'Recurring schedules that survive real life',
-  'Capture by voice, photo or text',
-  'Reminders and home-screen widgets',
+const READY_KEYS = [
+  'workspaceReady.readyShared',
+  'workspaceReady.readyRecurring',
+  'workspaceReady.readyCapture',
+  'workspaceReady.readyReminders',
 ]
 
 /**
@@ -27,6 +28,7 @@ const READY = [
  * account — the upgrade offer comes after, never in place of it.
  */
 const WorkspaceReadyView = () => {
+  const { t } = useTranslation('common')
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { data: userProfile } = useUserProfile()
@@ -148,21 +150,23 @@ const WorkspaceReadyView = () => {
             }}
           >
             {userProfile?.displayName
-              ? `You're all set, ${userProfile.displayName.split(' ')[0]}`
-              : "You're all set"}
+              ? t('workspaceReady.allSetNamed', {
+                  name: userProfile.displayName.split(' ')[0],
+                })
+              : t('workspaceReady.allSet')}
           </Typography>
           <Typography
             level='body-md'
             sx={{ color: 'text.secondary', maxWidth: '30ch' }}
           >
-            Your workspace is ready. Here&apos;s what&apos;s waiting inside.
+            {t('workspaceReady.subtitle')}
           </Typography>
         </Box>
 
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
-          {READY.map((item, index) => (
+          {READY_KEYS.map((key, index) => (
             <Box
-              key={item}
+              key={key}
               sx={{
                 display: 'flex',
                 alignItems: 'center',
@@ -201,7 +205,7 @@ const WorkspaceReadyView = () => {
                 <CheckRounded />
               </Box>
               <Typography level='body-sm' sx={{ fontWeight: 600 }}>
-                {item}
+                {t(key)}
               </Typography>
             </Box>
           ))}
@@ -216,7 +220,7 @@ const WorkspaceReadyView = () => {
           onClick={handleContinue}
           sx={authButtonSx}
         >
-          Continue
+          {t('workspaceReady.continue')}
         </Button>
       </Box>
     </Box>

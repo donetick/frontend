@@ -139,29 +139,32 @@ export const AuthDivider = ({ children }) => {
   )
 }
 
-export const LegalLinks = () => (
-  <Typography
-    level='body-xs'
-    sx={{ textAlign: 'center', color: 'text.secondary' }}
-  >
-    <Link
-      href='https://donetick.com/privacy'
-      target='_blank'
-      rel='noopener'
-      color='neutral'
-      underline='hover'
+export const LegalLinks = () => {
+  const { t } = useTranslation('auth')
+  return (
+    <Typography
+      level='body-xs'
+      sx={{ textAlign: 'center', color: 'text.secondary' }}
     >
-      Privacy Policy
-    </Link>
-    {' · '}
-    <Link
-      href='https://donetick.com/terms'
-      target='_blank'
-      rel='noopener'
-      color='neutral'
-      underline='hover'
-    >
-      Terms of Use
-    </Link>
-  </Typography>
-)
+      <Link
+        href='https://donetick.com/privacy'
+        target='_blank'
+        rel='noopener'
+        color='neutral'
+        underline='hover'
+      >
+        {t('privacyPolicy')}
+      </Link>
+      {' · '}
+      <Link
+        href='https://donetick.com/terms'
+        target='_blank'
+        rel='noopener'
+        color='neutral'
+        underline='hover'
+      >
+        {t('termsOfUse')}
+      </Link>
+    </Typography>
+  )
+}

@@ -1,23 +1,25 @@
 import { Explore, HomeRounded } from '@mui/icons-material'
 import { Container } from '@mui/joy'
+import { useTranslation } from 'react-i18next'
 
 import EmptyState from '../../components/common/EmptyState'
 
 const NotFound = () => {
+  const { t } = useTranslation('common')
   return (
     <Container maxWidth='sm'>
       <EmptyState
         variant='no-results'
         fullHeight
         icon={<Explore />}
-        title='Page not found'
-        description='This link does not lead anywhere. It may have moved, or the address has a typo in it.'
+        title={t('notFound.title')}
+        description={t('notFound.description')}
         primaryAction={{
-          label: 'Go to my tasks',
+          label: t('notFound.goToMyTasks'),
           to: '/chores',
           startDecorator: <HomeRounded />,
         }}
-        secondaryAction={{ label: 'Log in', to: '/login' }}
+        secondaryAction={{ label: t('notFound.logIn'), to: '/login' }}
       />
     </Container>
   )

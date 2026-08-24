@@ -111,16 +111,47 @@
   },
   "toast": {
     "updateQueued": {
-      "title": "History Update Queued"
+      "title": "History Update Queued",
+      "message": "You are offline. The history update will sync when connection is restored."
     },
     "updated": {
-      "title": "History Updated"
+      "title": "History Updated",
+      "message": "The history record has been updated successfully."
     },
     "deleteQueued": {
-      "title": "History Delete Queued"
+      "title": "History Delete Queued",
+      "message": "You are offline. The history delete will sync when connection is restored."
     },
     "deleted": {
-      "title": "History Deleted"
+      "title": "History Deleted",
+      "message": "The history record has been deleted successfully."
     }
+  },
+  "delete": {
+    "title": "Delete History Record",
+    "message": "Are you sure you want to delete this history record?"
+  },
+  "empty": {
+    "title": "No history yet",
+    "description": "Every time this task gets completed or skipped, it lands here with who did it and when. Nothing has happened yet.",
+    "backToTasks": "Back to tasks",
+    "noResultsTitle": "No history matches these filters",
+    "noResultsDescription": "There is history here, but none of it fits the filters that are currently on."
+  },
+  "info": {
+    "allCompleted": "All Completed",
+    "timesSuffix": "{{count}} times",
+    "averageTiming": "Average Timing",
+    "onTime": "On time",
+    "longestDelay": "Longest Delay",
+    "neverLate": "Never late",
+    "completedMost": "Completed Most",
+    "unknown": "Unknown",
+    "membersInvolved": "Members Involved",
+    "membersSuffix": "{{count}} members",
+    "lastCompleted": "Last Completed"
+  },
+  "noteViewer": {
+    "updatedAt": "Updated at {{date}}"
   }
 }

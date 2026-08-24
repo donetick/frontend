@@ -11,6 +11,7 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 /**
  * Compact sort + filter menu, meant to sit next to a search input.
@@ -39,8 +40,10 @@ const SortAndFilterMenu = ({
   selectedSort,
   sortDirection = 'asc',
   sortOptions = [],
-  title = 'Sort by',
+  title,
 }) => {
+  const { t } = useTranslation('common')
+  const resolvedTitle = title ?? t('sortAndFilter.sortBy')
   const [anchorEl, setAnchorEl] = useState(null)
   const menuRef = useRef(null)
   const buttonRef = useRef(null)
@@ -90,8 +93,8 @@ const SortAndFilterMenu = ({
         color={isActive ? 'primary' : 'neutral'}
         size='sm'
         sx={{ height: 32, width: 32, borderRadius: '50%', flexShrink: 0 }}
-        aria-label='Sort and filter options'
-        title='Sort & Filter'
+        aria-label={t('sortAndFilter.ariaLabel')}
+        title={t('sortAndFilter.title')}
       >
         {icon}
       </IconButton>
@@ -112,7 +115,7 @@ const SortAndFilterMenu = ({
           zIndex: 1300,
         }}
       >
-        <SectionHeader>{title}</SectionHeader>
+        <SectionHeader>{resolvedTitle}</SectionHeader>
         <Divider sx={{ my: 1 }} />
 
         {sortOptions.map(option => (
@@ -192,7 +195,9 @@ const SortAndFilterMenu = ({
               </ListItemDecorator>
               <ListItemContent>
                 <Typography level='body-sm'>
-                  {sortDirection === 'asc' ? 'Ascending' : 'Descending'}
+                  {sortDirection === 'asc'
+                    ? t('sortAndFilter.ascending')
+                    : t('sortAndFilter.descending')}
                 </Typography>
               </ListItemContent>
             </MenuItem>
@@ -202,7 +207,9 @@ const SortAndFilterMenu = ({
         {filterOptions?.length > 0 && (
           <>
             <Divider sx={{ my: 1 }} />
-            <SectionHeader>{filterTitle || 'Filter'}</SectionHeader>
+            <SectionHeader>
+              {filterTitle || t('sortAndFilter.filter')}
+            </SectionHeader>
             {filterOptions.map(option => (
               <MenuItem
                 key={option.value}
