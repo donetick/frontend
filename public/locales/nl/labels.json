@@ -42,6 +42,30 @@
     "errorNoColor": "",
     "saveFailedTitle": "",
     "saveFailedMessage": "",
-    "name": ""
+    "name": "",
+    "editTitle": "",
+    "addTitle": "",
+    "color": "",
+    "saveChanges": "",
+    "addLabel": "",
+    "colorAriaSelect": ""
+  },
+  "picker": {
+    "label": "",
+    "createLabel": "",
+    "labelsCount_one": "",
+    "labelsCount_other": ""
+  },
+  "view": {
+    "emptyTitle": "",
+    "emptyDescription": "",
+    "createLabel": "",
+    "filterTitle": "",
+    "sortName": "",
+    "sortColor": "",
+    "sortRecent": "",
+    "filterAll": "",
+    "filterMine": "",
+    "filterShared": ""
   }
 }
