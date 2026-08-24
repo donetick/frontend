@@ -35,5 +35,19 @@
   "endTime": "وقت الانتهاء",
   "leaveEmpty": "اتركه فارغًا إذا كانت الجلسة ما زالت جارية",
   "noSessionForChore": "لا توجد جلسة مؤقّت لهذه المهمة.",
-  "saveChanges": "حفظ التغييرات"
+  "saveChanges": "حفظ التغييرات",
+  "emptySessionsTitle": "لا توجد جلسات عمل بعد",
+  "emptySessionsDescription": "ابدأ المؤقّت في هذه المهمة وستظهر كل جلسة هنا.",
+  "percentActive": "{{percent}}% نشط",
+  "activityTimeline": "الجدول الزمني للنشاط",
+  "liveSession": "جلسة مباشرة",
+  "live": "مباشر",
+  "title": "تفاصيل المؤقّت",
+  "sessionNumber": "الجلسة رقم {{number}} • {{date}}",
+  "sessionNumberShort": "الجلسة رقم {{number}}",
+  "ongoingArrow": "→ جارية",
+  "durationAutoCalculated": "المدة (تُحسب تلقائيًا)",
+  "pause": "إيقاف مؤقت",
+  "resume": "استئناف",
+  "clearAndReset": "مسح وإعادة تعيين"
 }

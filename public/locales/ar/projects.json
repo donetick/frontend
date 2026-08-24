@@ -3,6 +3,32 @@
     "chooseIcon": "اختر أيقونة المشروع",
     "availableIcons": "الأيقونات المتاحة"
   },
+  "icons": {
+    "FolderOpen": "مجلد",
+    "Work": "العمل",
+    "Home": "المنزل",
+    "School": "المدرسة",
+    "BusinessCenter": "الأعمال",
+    "Code": "البرمجة",
+    "Build": "البناء",
+    "Palette": "التصميم",
+    "SportsSoccer": "الرياضة",
+    "FitnessCenter": "اللياقة",
+    "ShoppingCart": "التسوق",
+    "Restaurant": "الطعام",
+    "Flight": "السفر",
+    "Book": "الدراسة",
+    "MusicNote": "الموسيقى",
+    "PhotoCamera": "الصور",
+    "Games": "الألعاب",
+    "Science": "العلوم",
+    "AccountBalance": "المالية",
+    "LocalHospital": "الصحة",
+    "DirectionsCar": "السيارات",
+    "Pets": "الحيوانات الأليفة",
+    "Garden": "الحديقة",
+    "Computer": "التقنية"
+  },
   "defaultChip": "افتراضي",
   "tasks_zero": "لا مهام",
   "tasks_one": "مهمة واحدة",
@@ -31,13 +57,20 @@
     "createNew": "إنشاء مشروع جديد",
     "createNewDescription": "أضف مساحة عمل مخصّصة",
     "manage": "إدارة المشاريع",
-    "manageDescription": "اعرض جميع المشاريع وعدّلها ونظّمها"
+    "manageDescription": "اعرض جميع المشاريع وعدّلها ونظّمها",
+    "currentProjectTitle": "المشروع الحالي: {{project}} (Ctrl+E)",
+    "builtInWorkspace": "مساحة عمل مشروع مدمجة"
   },
   "modal": {
     "errorNameRequired": "اسم المشروع مطلوب",
     "errorUpdate": "تعذّر تحديث المشروع",
     "errorCreate": "تعذّر إنشاء المشروع",
     "namePlaceholder": "أدخل اسم المشروع…",
-    "descriptionPlaceholder": "وصف المشروع (اختياري)…"
+    "descriptionPlaceholder": "وصف المشروع (اختياري)…",
+    "nameLabel": "اسم المشروع",
+    "descriptionLabel": "الوصف",
+    "iconLabel": "أيقونة المشروع",
+    "selectIcon": "اختيار أيقونة",
+    "colorLabel": "لون المشروع"
   }
 }

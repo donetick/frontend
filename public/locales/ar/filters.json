@@ -23,10 +23,46 @@
   "overdue_few": "{{count}} متأخرة",
   "overdue_many": "{{count}} متأخرة",
   "overdue_other": "{{count}} متأخرة",
+  "noConditions": "لا توجد شروط",
+  "condition_zero": "لا شروط",
+  "condition_one": "شرط واحد",
+  "condition_two": "شرطان",
+  "condition_few": "{{count}} شروط",
+  "condition_many": "{{count}} شرطًا",
+  "condition_other": "{{count}} شرط",
+  "usedCount": "استُخدم {{count}} مرة",
   "delete": {
-    "title": "حذف الفلتر"
+    "title": "حذف الفلتر",
+    "message": "هل تريد بالتأكيد حذف \"{{name}}\"؟ لا يمكن التراجع عن هذا الإجراء."
   },
   "empty": {
-    "title": "لا توجد فلاتر محفوظة بعد"
-  }
+    "title": "لا توجد فلاتر محفوظة بعد",
+    "description": "احفظ مجموعة من الشروط مرة واحدة، مثل \"متأخرة ومسندة إليّ\"، وارجع إليها مباشرةً من أي مكان.",
+    "createFilter": "إنشاء فلتر",
+    "noResultsTitle": "لا توجد فلاتر مطابقة",
+    "noResultsWithSearch": "لا يوجد فلتر محفوظ يطابق \"{{search}}\".",
+    "noResultsDefault": "لا يوجد فلتر محفوظ يطابق الفلتر الحالي.",
+    "clearSearch": "مسح البحث",
+    "showAllFilters": "عرض كل الفلاتر"
+  },
+  "header": {
+    "title": "الفلاتر",
+    "subtitle": "احفظ تركيبات الفلاتر المفضّلة لديك للوصول إليها بسرعة. أنشئ عروضًا مخصّصة لتنظيم المهام وإيجادها بشكل أسرع."
+  },
+  "searchPlaceholder": "ابحث في الفلاتر",
+  "sort": {
+    "smart": "ذكي",
+    "name": "الاسم",
+    "usage": "عدد مرات الاستخدام",
+    "lastUsed": "آخر استخدام",
+    "created": "تاريخ الإنشاء"
+  },
+  "show": {
+    "title": "عرض",
+    "all": "كل الفلاتر",
+    "pinned": "المثبّتة",
+    "unpinned": "غير المثبّتة"
+  },
+  "pin": "تثبيت",
+  "unpin": "إلغاء التثبيت"
 }

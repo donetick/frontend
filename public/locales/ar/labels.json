@@ -46,6 +46,34 @@
     "errorNoColor": "اختر لونًا",
     "saveFailedTitle": "تعذّر حفظ التصنيف",
     "saveFailedMessage": "تعذّر حفظ التصنيف. حاول مرة أخرى.",
-    "name": "الاسم"
+    "name": "الاسم",
+    "editTitle": "تعديل التصنيف",
+    "addTitle": "إضافة تصنيف",
+    "color": "اللون",
+    "saveChanges": "حفظ التغييرات",
+    "addLabel": "إضافة تصنيف",
+    "colorAriaSelect": "اختيار {{color}}"
+  },
+  "picker": {
+    "label": "التصنيفات",
+    "createLabel": "إنشاء تصنيف",
+    "labelsCount_zero": "لا تصنيفات",
+    "labelsCount_one": "تصنيف واحد",
+    "labelsCount_two": "تصنيفان",
+    "labelsCount_few": "{{count}} تصنيفات",
+    "labelsCount_many": "{{count}} تصنيفًا",
+    "labelsCount_other": "{{count}} تصنيف"
+  },
+  "view": {
+    "emptyTitle": "لا توجد تصنيفات بعد",
+    "emptyDescription": "تجمع التصنيفات المهام في دائرتك، مثل \"المطبخ\" أو \"الفواتير\"، حتى تتمكّن من تصفيتها بضغطة واحدة.",
+    "createLabel": "إنشاء تصنيف",
+    "filterTitle": "عرض",
+    "sortName": "الاسم",
+    "sortColor": "اللون",
+    "sortRecent": "الأحدث إنشاءً",
+    "filterAll": "كل التصنيفات",
+    "filterMine": "من إنشائي",
+    "filterShared": "مشتركة معي"
   }
 }

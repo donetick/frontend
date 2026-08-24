@@ -9,10 +9,58 @@
   "valuePlaceholder": "قيمة العنصر",
   "updateState": "تحديث الحالة",
   "update": "تحديث",
+  "create": "إنشاء",
+  "editThingTitle": "تعديل العنصر",
+  "createThingTitle": "إنشاء عنصر",
+  "type": "النوع",
+  "boolTrue": "صحيح",
+  "boolFalse": "خطأ",
   "history": {
     "overview": "نظرة عامة على العناصر",
     "visualization": "تمثيل بياني للبيانات",
     "changeHistory": "سجل التغييرات",
     "updated": "آخر تحديث"
+  },
+  "view": {
+    "title": "العناصر",
+    "description": "العناصر حقول مخصّصة يمكن إرفاقها بالمهام لتسجيل معلومات إضافية. يمكن أن تكون من نوع نص أو رقم أو قيمة منطقية. يمكنك ربط العناصر بالمهام وجعل استحقاق المهمة يتم عند تحقق شرط معيّن",
+    "searchPlaceholder": "ابحث في العناصر",
+    "sortName": "الاسم",
+    "sortType": "النوع",
+    "sortState": "الحالة",
+    "sortUpdated": "آخر تحديث",
+    "filterTitle": "النوع",
+    "filterAll": "كل الأنواع",
+    "emptyTitle": "لا توجد عناصر بعد",
+    "emptyDescription": "يتتبّع العنصر قيمة، مثل عدّاد أو مفتاح تبديل، يمكن أن تستجيب له مهام أخرى. أنشئ عنصرًا لتشغيل المهام تلقائيًا.",
+    "emptyAction": "إنشاء عنصر",
+    "noResultsTitle": "لا توجد عناصر مطابقة",
+    "noResultsSearch": "لا يوجد عنصر يطابق \"{{term}}\".",
+    "noResultsFilter": "لا يوجد عنصر يطابق الفلتر الحالي.",
+    "clearSearch": "مسح البحث",
+    "showAll": "عرض كل العناصر",
+    "toggle": "تبديل"
+  },
+  "types": {
+    "text": "نص",
+    "number": "رقم",
+    "boolean": "قيمة منطقية"
+  },
+  "notify": {
+    "savedTitle": "تم الحفظ",
+    "savedMessage": "تم حفظ العنصر بنجاح",
+    "saveFailTitle": "تعذّر حفظ العنصر",
+    "queuedMessage": "أنت غير متصل بالإنترنت وتم وضع الطلب في قائمة الانتظار",
+    "saveFailMessage": "حدث خطأ أثناء حفظ العنصر",
+    "deleteTitle": "حذف العناصر",
+    "deleteMessage": "هل تريد بالتأكيد حذف هذا العنصر؟",
+    "deleteBlockedTitle": "تعذّر حذف العنصر",
+    "deleteBlockedMessage": "تعذّر حذف عنصر مرتبط بمهام",
+    "deleteFailTitle": "تعذّر حذف العنصر",
+    "deleteFailMessage": "حدث خطأ أثناء حذف العنصر",
+    "updatedTitle": "تم التحديث",
+    "updatedMessage": "تم تحديث حالة العنصر بنجاح",
+    "updateFailTitle": "تعذّر تحديث حالة العنصر",
+    "updateFailMessage": "حدث خطأ أثناء تحديث حالة العنصر"
   }
 }

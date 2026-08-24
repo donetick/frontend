@@ -21,6 +21,20 @@
     "onTime": "في الوقت المحدد",
     "onTimeLabel": "في الوقت المحدد"
   },
+  "card": {
+    "wasDue": "كانت مستحقة {{date}}",
+    "daysBeforeDue_one": "قبل {{count}} يوم من الاستحقاق",
+    "daysBeforeDue_other": "قبل {{count}} يوم من الاستحقاق",
+    "daysAfterDue_one": "بعد {{count}} يوم من الاستحقاق",
+    "daysAfterDue_other": "بعد {{count}} يوم من الاستحقاق",
+    "hoursBeforeDue_one": "قبل {{count}} ساعة من الاستحقاق",
+    "hoursBeforeDue_other": "قبل {{count}} ساعة من الاستحقاق",
+    "hoursAfterDue_one": "بعد {{count}} ساعة من الاستحقاق",
+    "hoursAfterDue_other": "بعد {{count}} ساعة من الاستحقاق",
+    "assignedTo": "مُسنَدة إلى {{name}}",
+    "points_one": "★ {{count}} نقطة",
+    "points_other": "★ {{count}} نقطة"
+  },
   "detail": {
     "title": "تفاصيل النشاط",
     "openTask": "فتح المهمة",
@@ -94,7 +108,13 @@
     "allTime": "كامل الفترة"
   },
   "activities": {
-    "title": "الأنشطة"
+    "title": "الأنشطة",
+    "emptyTitle": "لا نشاط في هذا النطاق",
+    "emptyDescriptionEveryone": "لم يُنجز أحد في دائرتك أي شيء {{period}}. جرّب نطاقًا زمنيًا أوسع أو عضوًا آخر.",
+    "emptyDescriptionMember": "لم يُنجز {{name}} أي شيء {{period}}. جرّب نطاقًا زمنيًا أوسع أو عضوًا آخر.",
+    "periodSoFar": "حتى الآن",
+    "periodLastDays": "خلال آخر {{count}} يوم",
+    "unknownMember": "هذا العضو"
   },
   "title": {
     "summary": "ملخّص المهام",
@@ -105,16 +125,47 @@
   },
   "toast": {
     "updateQueued": {
-      "title": "تحديث السجل في قائمة الانتظار"
+      "title": "تحديث السجل في قائمة الانتظار",
+      "message": "أنت غير متصل بالإنترنت. ستتم مزامنة تحديث السجل عند استعادة الاتصال."
     },
     "updated": {
-      "title": "تم تحديث السجل"
+      "title": "تم تحديث السجل",
+      "message": "تم تحديث سجل النشاط بنجاح."
     },
     "deleteQueued": {
-      "title": "حذف السجل في قائمة الانتظار"
+      "title": "حذف السجل في قائمة الانتظار",
+      "message": "أنت غير متصل بالإنترنت. ستتم مزامنة حذف السجل عند استعادة الاتصال."
     },
     "deleted": {
-      "title": "تم حذف السجل"
+      "title": "تم حذف السجل",
+      "message": "تم حذف سجل النشاط بنجاح."
     }
+  },
+  "delete": {
+    "title": "حذف سجل النشاط",
+    "message": "هل تريد بالتأكيد حذف سجل النشاط هذا؟"
+  },
+  "empty": {
+    "title": "لا يوجد سجل بعد",
+    "description": "في كل مرة تُنجز فيها هذه المهمة أو تُتخطى، تظهر هنا مع مَن أنجزها ومتى. لم يحدث شيء بعد.",
+    "backToTasks": "العودة إلى المهام",
+    "noResultsTitle": "لا يوجد سجل يطابق هذه الفلاتر",
+    "noResultsDescription": "يوجد سجل هنا، لكن لا شيء منه يطابق الفلاتر المفعّلة حاليًا."
+  },
+  "info": {
+    "allCompleted": "كل ما أُنجز",
+    "timesSuffix": "{{count}} مرة",
+    "averageTiming": "متوسط التوقيت",
+    "onTime": "في الوقت المحدد",
+    "longestDelay": "أطول تأخير",
+    "neverLate": "لم يتأخر أبدًا",
+    "completedMost": "الأكثر إنجازًا",
+    "unknown": "غير معروف",
+    "membersInvolved": "الأعضاء المشاركون",
+    "membersSuffix": "{{count}} أعضاء",
+    "lastCompleted": "آخر إنجاز"
+  },
+  "noteViewer": {
+    "updatedAt": "حُدّثت في {{date}}"
   }
 }
