@@ -53,7 +53,9 @@
     "createNew": "",
     "createNewDescription": "",
     "manage": "",
-    "manageDescription": ""
+    "manageDescription": "",
+    "currentProjectTitle": "",
+    "builtInWorkspace": ""
   },
   "modal": {
     "errorNameRequired": "Le nom du projet est obligatoire",
