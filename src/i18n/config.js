@@ -13,7 +13,7 @@ i18n
   .init({
     fallbackLng: 'en',
     debug: import.meta.env.DEV,
-
+    returnEmptyString: false,
     interpolation: {
       escapeValue: false,
     },
