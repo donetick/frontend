@@ -41,5 +41,13 @@
   "percentActive": "",
   "activityTimeline": "",
   "liveSession": "",
-  "live": ""
+  "live": "",
+  "title": "",
+  "sessionNumber": "",
+  "sessionNumberShort": "",
+  "ongoingArrow": "",
+  "durationAutoCalculated": "",
+  "pause": "",
+  "resume": "",
+  "clearAndReset": ""
 }
