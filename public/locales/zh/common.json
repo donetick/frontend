@@ -203,7 +203,10 @@
     "hideDetails": "",
     "showDetails": "",
     "copyToClipboard": "",
-    "copied": ""
+    "copied": "",
+    "reportProblem": "",
+    "reportHint": "",
+    "collectingDetails": ""
   },
   "userMenu": {
     "actAsAnother": "",
@@ -247,14 +250,88 @@
   "removeAll": "",
   "apply": "",
   "cancelAll": "",
+  "backFromSearch": "",
+  "newVersionAvailable": "",
+  "notFound": {
+    "title": "",
+    "description": "",
+    "goToMyTasks": "",
+    "logIn": ""
+  },
+  "pendingBadge": {
+    "completePending": "",
+    "skipPending": "",
+    "updatePending": "",
+    "createPending": "",
+    "deletePending": "",
+    "editHistoryPending": "",
+    "deleteHistoryPending": "",
+    "reschedulePending": "",
+    "archivePending": "",
+    "restorePending": "",
+    "startPending": "",
+    "pausePending": ""
+  },
+  "sortAndFilter": {
+    "sortBy": "",
+    "ariaLabel": "",
+    "title": "",
+    "ascending": "",
+    "descending": "",
+    "filter": ""
+  },
+  "versionInfo": "",
+  "apiVersionUnavailable": "",
   "sync": {
     "aria": "",
     "allSynced": "",
     "willSync": "",
-    "cancelAll": ""
+    "cancelAll": "",
+    "commandLabels": {
+      "createChore": "",
+      "updateChore": "",
+      "updateChoreHistory": "",
+      "completeChore": "",
+      "skipChore": "",
+      "startChore": "",
+      "pauseChore": "",
+      "deleteChore": "",
+      "deleteChoreHistory": "",
+      "rescheduleChore": "",
+      "archiveChore": "",
+      "unarchiveChore": "",
+      "pendingAction": ""
+    },
+    "never": "",
+    "justNow": "",
+    "secondsAgo": "",
+    "minutesAgo": "",
+    "hoursAgo": "",
+    "online": "",
+    "offline": "",
+    "syncing": "",
+    "lastSync": "",
+    "offlineSince": "",
+    "errorPrefix": "",
+    "pending": "",
+    "failed": "",
+    "dismiss": "",
+    "nextAutoSync": "",
+    "checkingServer": "",
+    "retryingIn": "",
+    "syncNow": "",
+    "pendingSyncLabel_one": "",
+    "pendingSyncLabel_other": "",
+    "pendingActionsTitle": "",
+    "actionsWaitingToSync_one": "",
+    "actionsWaitingToSync_other": "",
+    "cancelActionAria": ""
   },
   "attachments": "",
   "fileNumbered": "",
+  "noAttachmentsTitle": "",
+  "noAttachmentsDescription": "",
+  "kbSize": "",
   "onboarding": {
     "sources": {
       "speak": "",
@@ -360,6 +437,14 @@
       "notNow": "",
       "next": ""
     },
+    "getStarted": {
+      "subtitleSignupEnabled": "",
+      "subtitleSignupDisabled": "",
+      "createAccount": "",
+      "alreadyHaveAccount": "",
+      "signIn": "",
+      "connectSelfHosted": ""
+    },
     "heardAbout": {
       "title": "",
       "subtitle": "",
@@ -455,5 +540,40 @@
     "alreadyMember": "",
     "joinFailed": "",
     "requestError": ""
+  },
+  "selectUser": "",
+  "closeDialog": "",
+  "activeFilterChips": {
+    "removeFilterAria": "",
+    "addFilterCondition": "",
+    "moreCount": ""
+  },
+  "filterBar": {
+    "filtersButton": "",
+    "clearAllButton": "",
+    "doneButton": "",
+    "showResults_one": "",
+    "showResults_other": "",
+    "selectedCount": "",
+    "dateRangeFallback": "",
+    "fromDate": "",
+    "untilDate": "",
+    "presetToday": "",
+    "presetYesterday": "",
+    "presetThisWeek": "",
+    "presetLast7Days": "",
+    "presetThisMonth": "",
+    "presetLast30Days": "",
+    "presetLast3Months": ""
+  },
+  "workspaceReady": {
+    "allSetNamed": "",
+    "allSet": "",
+    "subtitle": "",
+    "continue": "",
+    "readyShared": "",
+    "readyRecurring": "",
+    "readyCapture": "",
+    "readyReminders": ""
   }
 }
