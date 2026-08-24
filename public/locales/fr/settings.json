@@ -513,7 +513,17 @@
     "errorTitle": "",
     "errorMessage": "",
     "subscribe": "",
-    "cancelAnytime": ""
+    "cancelAnytime": "",
+    "description": "",
+    "whatsIncluded": "",
+    "mostPopular": "",
+    "featureNotifications": "",
+    "featureRichText": "",
+    "featureThingTriggers": "",
+    "featureApiTokens": "",
+    "featureImageUploads": "",
+    "featureAutomation": "",
+    "planYearly": ""
   },
   "childUsers": {
     "errNameRequired": "Le nom du sous-compte est obligatoire",
@@ -525,6 +535,7 @@
     "errPasswordMatch": "",
     "errDisplayNameMax": "",
     "createTitle": "",
+    "createDescription": "",
     "createButton": "",
     "nameLabel": "",
     "namePlaceholder": "",
