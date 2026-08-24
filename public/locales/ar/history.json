@@ -100,7 +100,13 @@
     "allTime": ""
   },
   "activities": {
-    "title": ""
+    "title": "",
+    "emptyTitle": "",
+    "emptyDescriptionEveryone": "",
+    "emptyDescriptionMember": "",
+    "periodSoFar": "",
+    "periodLastDays": "",
+    "unknownMember": ""
   },
   "title": {
     "summary": "",
@@ -111,16 +117,47 @@
   },
   "toast": {
     "updateQueued": {
-      "title": ""
+      "title": "",
+      "message": ""
     },
     "updated": {
-      "title": ""
+      "title": "",
+      "message": ""
     },
     "deleteQueued": {
-      "title": ""
+      "title": "",
+      "message": ""
     },
     "deleted": {
-      "title": ""
+      "title": "",
+      "message": ""
     }
+  },
+  "delete": {
+    "title": "",
+    "message": ""
+  },
+  "empty": {
+    "title": "",
+    "description": "",
+    "backToTasks": "",
+    "noResultsTitle": "",
+    "noResultsDescription": ""
+  },
+  "info": {
+    "allCompleted": "",
+    "timesSuffix": "",
+    "averageTiming": "",
+    "onTime": "",
+    "longestDelay": "",
+    "neverLate": "",
+    "completedMost": "",
+    "unknown": "",
+    "membersInvolved": "",
+    "membersSuffix": "",
+    "lastCompleted": ""
+  },
+  "noteViewer": {
+    "updatedAt": ""
   }
 }
