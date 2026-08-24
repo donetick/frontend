@@ -84,7 +84,34 @@
     "unablePause": "",
     "offlineRestore": "",
     "restoreFailed": "",
-    "unableRestore": ""
+    "unableRestore": "",
+    "deadline": "",
+    "attachment_one": "",
+    "attachment_other": "",
+    "failedArchive": "",
+    "unableArchiveTask": "",
+    "deleteTaskTitle": "",
+    "deleteTaskMessage": "",
+    "taskDeletedTitle": "",
+    "taskDeletedMessage": "",
+    "failedDelete": "",
+    "unableDeleteTask": "",
+    "failedReschedule": "",
+    "unableChangeDueDate": "",
+    "taskMovedTitle": "",
+    "taskMovedMessage": "",
+    "failedMoveTask": "",
+    "unableMoveTaskToProject": "",
+    "failedSendNudgeError": "",
+    "nudgeSentTitle": "",
+    "nudgeSentMessage": "",
+    "failedSendNudgeTitle": "",
+    "unableSendNudge": "",
+    "failedDelegate": "",
+    "unableChangeAssignee": "",
+    "availableToCompleteStarting": "",
+    "delegateToSomeoneElse": "",
+    "selectAPerformer": ""
   },
   "toolbar": {
     "defaultProject": "",
@@ -126,7 +153,25 @@
   "thing": {
     "triggerHint": "",
     "selectThing": "",
-    "enterText": ""
+    "enterText": "",
+    "noThingsMessage": "",
+    "goToThings": "",
+    "noThingsSuffix": "",
+    "conditionHint": "",
+    "stateChangeHint": "",
+    "boolTrue": "",
+    "boolFalse": "",
+    "stateIs": "",
+    "typeChip": "",
+    "stateChip": "",
+    "conditions": {
+      "eq": "",
+      "neq": "",
+      "gt": "",
+      "gte": "",
+      "lt": "",
+      "lte": ""
+    }
   },
   "activity": {
     "showMore": "",
@@ -146,7 +191,23 @@
     "dueLater": ""
   },
   "insights": {
-    "highPriority": ""
+    "highPriority": "",
+    "title": "",
+    "active": "",
+    "clickToClear": "",
+    "quickActions": "",
+    "overdueDesc_one": "",
+    "overdueDesc_other": "",
+    "dueTodayDesc_one": "",
+    "dueTodayDesc_other": "",
+    "pendingApprovalDesc_one": "",
+    "pendingApprovalDesc_other": "",
+    "dueThisWeekDesc_one": "",
+    "dueThisWeekDesc_other": "",
+    "highPriorityDesc_one": "",
+    "highPriorityDesc_other": "",
+    "noDueDateDesc_one": "",
+    "noDueDateDesc_other": ""
   },
   "labels": {
     "label": ""
@@ -162,7 +223,10 @@
     "history": "",
     "clone": "",
     "moveToProject": "",
-    "removeDueDate": ""
+    "removeDueDate": "",
+    "unarchive": "",
+    "noPriority": "",
+    "defaultProject": ""
   },
   "actions": {
     "rescheduledTitle": "",
@@ -320,7 +384,19 @@
     "noPriority": ""
   },
   "remind": {
-    "title": ""
+    "title": "",
+    "remind": "",
+    "onDueDate": "",
+    "unitMin": "",
+    "unitHr": "",
+    "unitDay": "",
+    "duration_one": "",
+    "duration_other": "",
+    "before": "",
+    "after": "",
+    "reminder_one": "",
+    "reminder_other": "",
+    "removeAria": ""
   },
   "assignee": {
     "anyone": ""
@@ -342,7 +418,9 @@
     "markCompleted": "",
     "deleteSelected": "",
     "interface": "",
-    "quickAdd": ""
+    "quickAdd": "",
+    "helpDescription": "",
+    "gotIt": ""
   },
   "notifications": {
     "needTitle": "",
@@ -353,7 +431,9 @@
     "loading": "",
     "title": "",
     "scheduled": "",
-    "pendingReview": ""
+    "pendingReview": "",
+    "emptyTitle": "",
+    "emptyDescription": ""
   },
   "filter": {
     "status": {
@@ -396,10 +476,14 @@
   },
   "nudge": {
     "title": "",
+    "description": "",
     "customMessage": "",
     "messagePlaceholder": "",
     "notifyAll": "",
-    "notifyAllHint": ""
+    "notifyAllHint": "",
+    "selfHostedHeading": "",
+    "selfHostedNotice": "",
+    "selfHostedFollowUp": ""
   },
   "nfc": {
     "errWrite": "",
@@ -413,7 +497,9 @@
     "tagUrl": "",
     "copyUrl": "",
     "autoComplete": "",
-    "autoCompleteHint": ""
+    "autoCompleteHint": "",
+    "startingLabel": "",
+    "writeTagButton": ""
   },
   "duePicker": {
     "today": "",
@@ -433,7 +519,64 @@
     "night": "",
     "customTime": "",
     "anytime": "",
-    "specificTime": ""
+    "specificTime": "",
+    "due": "",
+    "clearAria": ""
+  },
+  "attachmentPicker": {
+    "attachments": "",
+    "file_one": "",
+    "file_other": "",
+    "uploading": "",
+    "scan": "",
+    "photo": "",
+    "image": "",
+    "fileButton": "",
+    "scanFailedTitle": "",
+    "couldNotScanDocument": "",
+    "couldNotReadScannedImage": ""
+  },
+  "searchBar": {
+    "placeholder": "",
+    "clearAria": ""
+  },
+  "subTask": {
+    "namePlaceholder": "",
+    "deleteShortcut": "",
+    "addPlaceholder": ""
+  },
+  "voiceToTask": {
+    "title": "",
+    "onDevice": "",
+    "micDeniedMessage": "",
+    "tryAgain": "",
+    "captionListeningLocked": "",
+    "captionReleaseToFinish": "",
+    "captionHoldToAddAnother": "",
+    "captionHoldToSpeak": "",
+    "listening": "",
+    "stopListening": "",
+    "startVoiceCapture": "",
+    "hint": "",
+    "anyone": "",
+    "reminder_one": "",
+    "reminder_other": "",
+    "points": "",
+    "frequency": {
+      "everyN": "",
+      "everyUnit": "",
+      "daily": "",
+      "weekly": "",
+      "monthly": "",
+      "yearly": "",
+      "customDays": "",
+      "repeats": ""
+    }
+  },
+  "smartInput": {
+    "selectPhoto": "",
+    "scanToCreateTask": "",
+    "speakToCreateTasks": ""
   },
   "photoTask": {
     "title": "",
@@ -838,5 +981,40 @@
       "assigned_to_me_tasks": "",
       "created_by_me": ""
     }
+  },
+  "choreCard": {
+    "anyone": ""
+  },
+  "calendarCard": {
+    "title": "",
+    "highPriority": "",
+    "mediumPriority": "",
+    "lowPriority": "",
+    "lowestPriority": "",
+    "noPriority": "",
+    "assignedToOther": "",
+    "tasksCount": ""
+  },
+  "activitiesCard": {
+    "justNow": "",
+    "hoursAgo": "",
+    "daysAgo": "",
+    "statusStarted": "",
+    "statusDone": "",
+    "statusLate": "",
+    "statusSkipped": "",
+    "statusPendingApproval": "",
+    "statusRejected": "",
+    "statusMissed": "",
+    "statusRescheduled": "",
+    "statusCompleted": "",
+    "byUser": "",
+    "unknownUser": "",
+    "unknownChore": "",
+    "pointsShort": "",
+    "noRecentActivities": "",
+    "today": "",
+    "yesterday": "",
+    "noteTitle": ""
   }
 }
