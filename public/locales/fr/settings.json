@@ -359,7 +359,7 @@
   "apiTokens": {
     "title": "Jetons d'API",
     "accessToken": "Jeton d'accès",
-    "description": "Créez un jeton à utiliser avec l'API pour mettre à jour les éléments qui déclenchent des tâches",
+    "description": "Créez un jeton à utiliser avec l'API pour mettre à jour les Objets qui déclenchent des tâches",
     "plusNotice": "Les jetons d'API ne sont pas disponibles dans la formule de base. Passez à Plus pour générer des jetons d'API, vous intégrer à des systèmes externes et automatiser vos tâches.",
     "showToken": "Afficher le jeton",
     "hideToken": "Masquer le jeton",
