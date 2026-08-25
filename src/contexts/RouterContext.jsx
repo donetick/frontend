@@ -1,5 +1,7 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 
+import { BASE_PATH } from '../Config'
+
 import App from '@/App'
 import ChoreEdit from '@/views/ChoreEdit/ChoreEdit'
 import Error from '@/views/Error'
@@ -281,7 +283,7 @@ const Router = createBrowserRouter([
       },
     ],
   },
-])
+], { basename: BASE_PATH || '/' })
 
 const RouterContext = ({ children }) => {
   return <RouterProvider router={Router} />
