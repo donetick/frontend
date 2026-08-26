@@ -1,163 +1,163 @@
 {
   "edit": {
-    "title": "",
-    "completedDate": "",
-    "note": "",
-    "additionalNotes": "",
-    "deleteTitle": "",
-    "deleteMessage": ""
+    "title": "Modifier l'historique",
+    "completedDate": "Date de fin",
+    "note": "Note",
+    "additionalNotes": "Notes complémentaires",
+    "deleteTitle": "Supprimer l'entrée",
+    "deleteMessage": "Voulez-vous vraiment supprimer cette entrée d'historique ?"
   },
   "status": {
-    "inProgress": "",
-    "completed": "",
-    "skipped": "",
-    "pendingApproval": "",
-    "rejected": "",
-    "missed": "",
-    "rescheduled": "",
-    "scheduled": ""
+    "inProgress": "En cours",
+    "completed": "Terminée",
+    "skipped": "Passée",
+    "pendingApproval": "En attente d'approbation",
+    "rejected": "Rejetée",
+    "missed": "Manquée",
+    "rescheduled": "Replanifiée",
+    "scheduled": "Planifiée"
   },
   "badge": {
-    "onTime": "",
-    "onTimeLabel": ""
+    "onTime": "À l'heure",
+    "onTimeLabel": "À l'heure"
   },
   "card": {
-    "wasDue": "",
-    "daysBeforeDue_one": "",
-    "daysBeforeDue_other": "",
-    "daysAfterDue_one": "",
-    "daysAfterDue_other": "",
-    "hoursBeforeDue_one": "",
-    "hoursBeforeDue_other": "",
-    "hoursAfterDue_one": "",
-    "hoursAfterDue_other": "",
-    "assignedTo": "",
-    "points_one": "",
-    "points_other": ""
+    "wasDue": "Échéance prévue le {{date}}",
+    "daysBeforeDue_one": "{{count}} j avant l'échéance",
+    "daysBeforeDue_other": "{{count}} j avant l'échéance",
+    "daysAfterDue_one": "{{count}} j après l'échéance",
+    "daysAfterDue_other": "{{count}} j après l'échéance",
+    "hoursBeforeDue_one": "{{count}} h avant l'échéance",
+    "hoursBeforeDue_other": "{{count}} h avant l'échéance",
+    "hoursAfterDue_one": "{{count}} h après l'échéance",
+    "hoursAfterDue_other": "{{count}} h après l'échéance",
+    "assignedTo": "Assignée à {{name}}",
+    "points_one": "★ {{count}} point",
+    "points_other": "★ {{count}} points"
   },
   "detail": {
-    "title": "",
-    "openTask": "",
-    "editEntry": "",
-    "performedBy": "",
-    "assignedTo": "",
-    "lastUpdated": "",
-    "duration": "",
-    "pointsEarned": "",
-    "points_one": "",
-    "points_other": "",
-    "note": ""
+    "title": "Détail de l'activité",
+    "openTask": "Ouvrir la tâche",
+    "editEntry": "Modifier l'entrée",
+    "performedBy": "Effectuée par",
+    "assignedTo": "Assignée à",
+    "lastUpdated": "Dernière mise à jour",
+    "duration": "Durée",
+    "pointsEarned": "Points gagnés",
+    "points_one": "{{count}} point",
+    "points_other": "{{count}} points",
+    "note": "Note"
   },
   "charts": {
-    "noData": "",
-    "noLabels": "",
-    "unassigned": "",
-    "unknownTask": "",
-    "late": "",
+    "noData": "Aucune donnée disponible",
+    "noLabels": "Sans étiquette",
+    "unassigned": "Non assignée",
+    "unknownTask": "Tâche inconnue",
+    "late": "En retard",
     "status": {
-      "title": "",
-      "description": ""
+      "title": "Statut",
+      "description": "Statut des tâches terminées"
     },
     "due": {
-      "title": "",
-      "description": ""
+      "title": "Date d'échéance",
+      "description": "Date d'échéance des tâches actuelles"
     },
     "priority": {
-      "title": "",
-      "description": ""
+      "title": "Priorité",
+      "description": "Tâches par priorité"
     },
     "labels": {
-      "title": "",
-      "description": ""
+      "title": "Étiquettes",
+      "description": "Tâches par étiquette"
     },
     "labelsDuration": {
-      "title": "",
-      "description": ""
+      "title": "Étiquettes (temps)",
+      "description": "Temps passé par étiquette (heures)"
     },
     "tasksTime": {
-      "title": "",
-      "description": ""
+      "title": "Tâches (temps)",
+      "description": "Temps passé par tâche (heures)"
     },
     "assigneeBreakdown": {
-      "title": "",
-      "description": ""
+      "title": "Par personne assignée",
+      "description": "Tâches regroupées par personne assignée"
     }
   },
   "filter": {
-    "status": "",
-    "pending": "",
-    "labels": "",
-    "hasNotes": "",
-    "hasPoints": "",
-    "timePeriod": "",
-    "user": "",
-    "completedBy": "",
-    "completedAt": ""
+    "status": "Statut",
+    "pending": "En attente",
+    "labels": "Étiquettes",
+    "hasNotes": "Avec des notes",
+    "hasPoints": "Avec des points",
+    "timePeriod": "Période",
+    "user": "Utilisateur",
+    "completedBy": "Terminée par",
+    "completedAt": "Terminée le"
   },
   "period": {
-    "days_one": "",
-    "days_other": "",
-    "allTime": ""
+    "days_one": "{{count}} jour",
+    "days_other": "{{count}} jours",
+    "allTime": "Toute la période"
   },
   "activities": {
-    "title": "",
-    "emptyTitle": "",
-    "emptyDescriptionEveryone": "",
-    "emptyDescriptionMember": "",
-    "periodSoFar": "",
-    "periodLastDays": "",
-    "unknownMember": ""
+    "title": "Activités",
+    "emptyTitle": "Aucune activité sur cette période",
+    "emptyDescriptionEveryone": "Personne n'a terminé de tâche dans votre cercle {{period}}. Essayez une période plus longue ou un autre membre.",
+    "emptyDescriptionMember": "Aucune tâche terminée par {{name}} {{period}}. Essayez une période plus longue ou un autre membre.",
+    "periodSoFar": "jusqu'à présent",
+    "periodLastDays": "au cours des {{count}} derniers jours",
+    "unknownMember": "ce membre"
   },
   "title": {
-    "summary": "",
-    "activity": ""
+    "summary": "Récapitulatif des tâches",
+    "activity": "Activité des tâches"
   },
   "noResults": {
-    "clear": ""
+    "clear": "Effacer les filtres"
   },
   "toast": {
     "updateQueued": {
-      "title": "",
-      "message": ""
+      "title": "Mise à jour de l'historique en attente",
+      "message": "Vous êtes hors ligne. La mise à jour de l'historique sera synchronisée une fois la connexion rétablie."
     },
     "updated": {
-      "title": "",
-      "message": ""
+      "title": "Historique mis à jour",
+      "message": "L'entrée d'historique a bien été mise à jour."
     },
     "deleteQueued": {
-      "title": "",
-      "message": ""
+      "title": "Suppression de l'historique en attente",
+      "message": "Vous êtes hors ligne. La suppression de l'historique sera synchronisée une fois la connexion rétablie."
     },
     "deleted": {
-      "title": "",
-      "message": ""
+      "title": "Entrée d'historique supprimée",
+      "message": "L'entrée d'historique a bien été supprimée."
     }
   },
   "delete": {
-    "title": "",
-    "message": ""
+    "title": "Supprimer l'entrée d'historique",
+    "message": "Voulez-vous vraiment supprimer cette entrée d'historique ?"
   },
   "empty": {
-    "title": "",
-    "description": "",
-    "backToTasks": "",
-    "noResultsTitle": "",
-    "noResultsDescription": ""
+    "title": "Aucun historique pour le moment",
+    "description": "Chaque fois que cette tâche est terminée ou passée, l'entrée correspondante apparaît ici avec l'auteur et la date. Rien ne s'est encore passé.",
+    "backToTasks": "Retour aux tâches",
+    "noResultsTitle": "Aucun historique ne correspond à ces filtres",
+    "noResultsDescription": "L'historique contient des entrées, mais aucune ne correspond aux filtres actuellement appliqués."
   },
   "info": {
-    "allCompleted": "",
-    "timesSuffix": "",
-    "averageTiming": "",
-    "onTime": "",
-    "longestDelay": "",
-    "neverLate": "",
-    "completedMost": "",
-    "unknown": "",
-    "membersInvolved": "",
-    "membersSuffix": "",
-    "lastCompleted": ""
+    "allCompleted": "Tâches traitées",
+    "timesSuffix": "{{count}} fois",
+    "averageTiming": "Écart moyen à l'échéance",
+    "onTime": "À l'heure",
+    "longestDelay": "Retard maximal",
+    "neverLate": "Jamais en retard",
+    "completedMost": "Record de tâches terminées",
+    "unknown": "Inconnu",
+    "membersInvolved": "Membres impliqués",
+    "membersSuffix": "Membres : {{count}}",
+    "lastCompleted": "Dernière tâche terminée par"
   },
   "noteViewer": {
-    "updatedAt": ""
+    "updatedAt": "Mise à jour le {{date}}"
   }
 }
