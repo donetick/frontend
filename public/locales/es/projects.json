@@ -1,24 +1,72 @@
 {
   "iconPicker": {
-    "chooseIcon": "Choose Project Icon",
-    "availableIcons": "Available Icons"
+    "chooseIcon": "",
+    "availableIcons": ""
   },
-  "defaultChip": "Default",
-  "tasks_one": "{{count}} task",
-  "tasks_other": "{{count}} tasks",
-  "shared": "Shared",
+  "icons": {
+    "FolderOpen": "",
+    "Work": "",
+    "Home": "",
+    "School": "",
+    "BusinessCenter": "",
+    "Code": "",
+    "Build": "",
+    "Palette": "",
+    "SportsSoccer": "",
+    "FitnessCenter": "",
+    "ShoppingCart": "",
+    "Restaurant": "",
+    "Flight": "",
+    "Book": "",
+    "MusicNote": "",
+    "PhotoCamera": "",
+    "Games": "",
+    "Science": "",
+    "AccountBalance": "",
+    "LocalHospital": "",
+    "DirectionsCar": "",
+    "Pets": "",
+    "Garden": "",
+    "Computer": ""
+  },
+  "defaultChip": "",
+  "tasks_one": "",
+  "tasks_other": "",
+  "shared": "",
   "delete": {
-    "title": "Delete Project",
-    "message": "Are you sure you want to delete \"{{name}}\"? This will remove the project but keep all tasks (they'll move to the Default Project)."
+    "title": "",
+    "message": ""
   },
-  "loadError": "Failed to load projects. Please try again.",
-  "blurb": "Organize your tasks into projects. Create custom workspaces to keep your tasks organized and easily accessible.",
-  "defaultDescription": "All tasks without a specific project",
+  "loadError": "",
+  "search": {
+    "placeholder": "",
+    "noResultsTitle": "",
+    "noResultsDescription": "",
+    "noFilterResultsDescription": "",
+    "clear": "",
+    "showAll": ""
+  },
+  "blurb": "",
+  "defaultDescription": "",
   "selector": {
-    "title": "Projects",
-    "createNew": "Create New Project",
-    "createNewDescription": "Add a custom project workspace",
-    "manage": "Manage Projects",
-    "manageDescription": "View, edit, and organize all projects"
+    "title": "",
+    "createNew": "",
+    "createNewDescription": "",
+    "manage": "",
+    "manageDescription": "",
+    "currentProjectTitle": "",
+    "builtInWorkspace": ""
+  },
+  "modal": {
+    "errorNameRequired": "",
+    "errorUpdate": "",
+    "errorCreate": "",
+    "namePlaceholder": "",
+    "descriptionPlaceholder": "",
+    "nameLabel": "",
+    "descriptionLabel": "",
+    "iconLabel": "",
+    "selectIcon": "",
+    "colorLabel": ""
   }
 }

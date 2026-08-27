@@ -84,7 +84,34 @@
     "unablePause": "Aufgabe konnte nicht pausiert werden",
     "offlineRestore": "Du bist offline — die Wiederherstellung wird synchronisiert, sobald du wieder online bist",
     "restoreFailed": "Wiederherstellung fehlgeschlagen",
-    "unableRestore": "Aufgabe konnte nicht wiederhergestellt werden"
+    "unableRestore": "Aufgabe konnte nicht wiederhergestellt werden",
+    "deadline": "Frist: {{date}}",
+    "attachment_one": "{{count}} Anhang",
+    "attachment_other": "{{count}} Anhänge",
+    "failedArchive": "Archivieren fehlgeschlagen",
+    "unableArchiveTask": "Aufgabe konnte nicht archiviert werden",
+    "deleteTaskTitle": "Aufgabe löschen",
+    "deleteTaskMessage": "Möchtest du diese Aufgabe wirklich löschen?",
+    "taskDeletedTitle": "Aufgabe gelöscht",
+    "taskDeletedMessage": "Die Aufgabe wurde erfolgreich gelöscht.",
+    "failedDelete": "Löschen fehlgeschlagen",
+    "unableDeleteTask": "Aufgabe konnte nicht gelöscht werden",
+    "failedReschedule": "Verschieben fehlgeschlagen",
+    "unableChangeDueDate": "Fälligkeitsdatum konnte nicht geändert werden",
+    "taskMovedTitle": "Aufgabe verschoben",
+    "taskMovedMessage": "Aufgabe nach {{project}} verschoben.",
+    "failedMoveTask": "Aufgabe konnte nicht verschoben werden",
+    "unableMoveTaskToProject": "Aufgabe konnte nicht in das Projekt verschoben werden",
+    "failedSendNudgeError": "Erinnerung konnte nicht gesendet werden",
+    "nudgeSentTitle": "Erinnerung gesendet!",
+    "nudgeSentMessage": "Erinnerung erfolgreich gesendet",
+    "failedSendNudgeTitle": "Erinnerung konnte nicht gesendet werden",
+    "unableSendNudge": "Erinnerung kann derzeit nicht gesendet werden",
+    "failedDelegate": "Übertragung fehlgeschlagen",
+    "unableChangeAssignee": "Zuständige Person konnte nicht geändert werden",
+    "availableToCompleteStarting": "Ab {{date}} erledigbar",
+    "delegateToSomeoneElse": "An jemand anderen übertragen",
+    "selectAPerformer": "Wähle eine ausführende Person"
   },
   "toolbar": {
     "defaultProject": "Standardprojekt",
@@ -126,7 +153,25 @@
   "thing": {
     "triggerHint": "Eine Aufgabe auslösen, wenn sich der Zustand eines Dings auf den gewünschten Zustand ändert",
     "selectThing": "Ding auswählen",
-    "enterText": "Text eingeben, der die Aufgabe auslösen soll"
+    "enterText": "Text eingeben, der die Aufgabe auslösen soll",
+    "noThingsMessage": "Es sieht so aus, als hättest du noch keine Dinge angelegt. Erstelle ein Ding, um eine Aufgabe auszulösen, wenn sich der Zustand ändert.",
+    "goToThings": "Zu den Dingen",
+    "noThingsSuffix": "um ein Ding zu erstellen",
+    "conditionHint": "Erstelle eine Bedingung, um eine Aufgabe auszulösen, wenn der Zustand des Dings dem gewünschten Zustand entspricht",
+    "stateChangeHint": "Wenn sich der Zustand von {{name}} wie unten angegeben ändert, wird die Aufgabe fällig.",
+    "boolTrue": "Wahr",
+    "boolFalse": "Falsch",
+    "stateIs": "Zustand ist",
+    "typeChip": "Typ: {{type}}",
+    "stateChip": "Zustand: {{state}}",
+    "conditions": {
+      "eq": "Gleich",
+      "neq": "Ungleich",
+      "gt": "Größer als",
+      "gte": "Größer als oder gleich",
+      "lt": "Kleiner als",
+      "lte": "Kleiner als oder gleich"
+    }
   },
   "activity": {
     "showMore": "Mehr anzeigen",
@@ -146,7 +191,23 @@
     "dueLater": "Später fällig"
   },
   "insights": {
-    "highPriority": "Hohe Priorität"
+    "highPriority": "Hohe Priorität",
+    "title": "Intelligente Einblicke",
+    "active": "Aktiv",
+    "clickToClear": "Aktiven Filter anklicken, um ihn zu entfernen",
+    "quickActions": "Schnellaktionen basierend auf deinen Aufgaben",
+    "overdueDesc_one": "{{count}} Aufgabe ist überfällig",
+    "overdueDesc_other": "{{count}} Aufgaben sind überfällig",
+    "dueTodayDesc_one": "{{count}} Aufgabe ist bis Ende des Tages fällig",
+    "dueTodayDesc_other": "{{count}} Aufgaben sind bis Ende des Tages fällig",
+    "pendingApprovalDesc_one": "{{count}} Aufgabe wartet auf Genehmigung",
+    "pendingApprovalDesc_other": "{{count}} Aufgaben warten auf Genehmigung",
+    "dueThisWeekDesc_one": "{{count}} Aufgabe ist in den nächsten 7 Tagen fällig",
+    "dueThisWeekDesc_other": "{{count}} Aufgaben sind in den nächsten 7 Tagen fällig",
+    "highPriorityDesc_one": "{{count}} Aufgabe erfordert sofortige Aufmerksamkeit",
+    "highPriorityDesc_other": "{{count}} Aufgaben erfordern sofortige Aufmerksamkeit",
+    "noDueDateDesc_one": "{{count}} Aufgabe benötigt eine Frist",
+    "noDueDateDesc_other": "{{count}} Aufgaben benötigen eine Frist"
   },
   "labels": {
     "label": "Beschriftungen"
@@ -162,7 +223,10 @@
     "history": "Verlauf",
     "clone": "Duplizieren",
     "moveToProject": "In Projekt verschieben",
-    "removeDueDate": "Fälligkeitsdatum entfernen"
+    "removeDueDate": "Fälligkeitsdatum entfernen",
+    "unarchive": "Aus Archiv wiederherstellen",
+    "noPriority": "Keine",
+    "defaultProject": "Standardprojekt"
   },
   "actions": {
     "rescheduledTitle": "Aufgabe neu geplant",
@@ -320,7 +384,19 @@
     "noPriority": "Keine"
   },
   "remind": {
-    "title": "Erinnerungen"
+    "title": "Erinnerungen",
+    "remind": "Erinnern",
+    "onDueDate": "Am Fälligkeitsdatum",
+    "unitMin": "Min",
+    "unitHr": "Std",
+    "unitDay": "Tag",
+    "duration_one": "{{count}} {{unit}}",
+    "duration_other": "{{count}} {{unit}}",
+    "before": "vorher",
+    "after": "danach",
+    "reminder_one": "{{count}} Erinnerung",
+    "reminder_other": "{{count}} Erinnerungen",
+    "removeAria": "Erinnerungen entfernen"
   },
   "assignee": {
     "anyone": "Jeder"
@@ -342,7 +418,9 @@
     "markCompleted": "Ausgewählte Aufgaben als abgeschlossen markieren",
     "deleteSelected": "Ausgewählte Aufgaben löschen",
     "interface": "Oberfläche",
-    "quickAdd": "Neue Aufgabe schnell hinzufügen"
+    "quickAdd": "Neue Aufgabe schnell hinzufügen",
+    "helpDescription": "Nutze diese Tastenkombinationen, um effizienter zu arbeiten.",
+    "gotIt": "Verstanden"
   },
   "notifications": {
     "needTitle": "Benachrichtigungen aktivieren?",
@@ -353,7 +431,9 @@
     "loading": "Aufgaben nach zugewiesener Person werden geladen...",
     "title": "Aufgaben nach zugewiesener Person",
     "scheduled": "Geplant",
-    "pendingReview": "Prüfung ausstehend"
+    "pendingReview": "Prüfung ausstehend",
+    "emptyTitle": "Noch niemand hat Aufgaben",
+    "emptyDescription": "Weise jemandem in deinem Kreis eine Aufgabe zu, und die Auslastung erscheint hier."
   },
   "filter": {
     "status": {
@@ -396,10 +476,14 @@
   },
   "nudge": {
     "title": "Erinnerung senden",
+    "description": "Sende eine sanfte Erinnerung an die Personen, denen diese Aufgabe zugewiesen ist.",
     "customMessage": "Eigene Nachricht (optional)",
     "messagePlaceholder": "Füge der Erinnerung eine persönliche Nachricht hinzu...",
     "notifyAll": "Alle zugewiesenen Personen benachrichtigen",
-    "notifyAllHint": "Wenn aktiviert, werden alle Mitglieder benachrichtigt, die diese Aufgabe sehen können. Andernfalls erhält nur die zugewiesene Person die Erinnerung."
+    "notifyAllHint": "Wenn aktiviert, werden alle Mitglieder benachrichtigt, die diese Aufgabe sehen können. Andernfalls erhält nur die zugewiesene Person die Erinnerung.",
+    "selfHostedHeading": "Achtung!",
+    "selfHostedNotice": "Diese Funktion ist in Donetick Cloud verfügbar! Da du eine selbst gehostete Instanz verwendest, benötigst du für Erinnerungen ein Google-Cloud-Konto sowie Firebase Cloud Messaging (FCM) und musst die Android- oder iOS-App selbst erstellen.",
+    "selfHostedFollowUp": "Wir aktualisieren dies, sobald wir einen einfacheren Weg für Selbst-Hoster finden, dies einzurichten."
   },
   "nfc": {
     "errWrite": "Fehler beim Schreiben auf den NFC-Tag. Bitte versuche es erneut.",
@@ -413,7 +497,9 @@
     "tagUrl": "Tag-URL",
     "copyUrl": "URL kopieren",
     "autoComplete": "Beim Scannen automatisch abschließen",
-    "autoCompleteHint": "Aufgabe als erledigt markieren, wenn der Tag berührt wird"
+    "autoCompleteHint": "Aufgabe als erledigt markieren, wenn der Tag berührt wird",
+    "startingLabel": "Wird gestartet…",
+    "writeTagButton": "Tag beschreiben"
   },
   "duePicker": {
     "today": "Heute",
@@ -433,7 +519,64 @@
     "night": "Nachts",
     "customTime": "Benutzerdefinierte Uhrzeit",
     "anytime": "Beliebige Uhrzeit",
-    "specificTime": "Bestimmte Uhrzeit"
+    "specificTime": "Bestimmte Uhrzeit",
+    "due": "Fällig",
+    "clearAria": "Fälligkeitsdatum entfernen"
+  },
+  "attachmentPicker": {
+    "attachments": "Anhänge",
+    "file_one": "{{count}} Datei",
+    "file_other": "{{count}} Dateien",
+    "uploading": "Wird hochgeladen…",
+    "scan": "Scannen",
+    "photo": "Foto",
+    "image": "Bild",
+    "fileButton": "Datei",
+    "scanFailedTitle": "Scan fehlgeschlagen",
+    "couldNotScanDocument": "Das Dokument konnte nicht gescannt werden.",
+    "couldNotReadScannedImage": "Das gescannte Bild konnte nicht gelesen werden."
+  },
+  "searchBar": {
+    "placeholder": "Donetick durchsuchen",
+    "clearAria": "Aufgabensuche zurücksetzen"
+  },
+  "subTask": {
+    "namePlaceholder": "Aufgabenname...",
+    "deleteShortcut": "Löschen (Umschalt+Rücktaste)",
+    "addPlaceholder": "Neue Aufgabe hinzufügen... (Eingabetaste zum Hinzufügen)"
+  },
+  "voiceToTask": {
+    "title": "Sprich deine Aufgaben",
+    "onDevice": "Auf dem Gerät",
+    "micDeniedMessage": "Für die Sprachaufnahme wird Mikrofonzugriff benötigt. Aktiviere ihn in deinen Geräteeinstellungen und versuche es erneut.",
+    "tryAgain": "Erneut versuchen",
+    "captionListeningLocked": "Wird aufgenommen — tippen zum Stoppen",
+    "captionReleaseToFinish": "Loslassen zum Beenden · kurzes Tippen sperrt Freisprechmodus",
+    "captionHoldToAddAnother": "Gedrückt halten, um eine weitere Aufgabe hinzuzufügen",
+    "captionHoldToSpeak": "Gedrückt halten zum Sprechen · kurzes Tippen für Freisprechmodus",
+    "listening": "Wird aufgenommen…",
+    "stopListening": "Aufnahme stoppen",
+    "startVoiceCapture": "Sprachaufnahme starten",
+    "hint": "Pausiere zwischen den Aufgaben · sag „das war falsch“, um die letzte zu entfernen",
+    "anyone": "Jeder",
+    "reminder_one": "{{count}} Erinnerung",
+    "reminder_other": "{{count}} Erinnerungen",
+    "points": "{{count}} Pkt.",
+    "frequency": {
+      "everyN": "Alle {{count}} {{unit}}",
+      "everyUnit": "Jede(n) {{unit}}",
+      "daily": "Täglich",
+      "weekly": "Wöchentlich",
+      "monthly": "Monatlich",
+      "yearly": "Jährlich",
+      "customDays": "Benutzerdefinierte Tage",
+      "repeats": "Wiederholt sich"
+    }
+  },
+  "smartInput": {
+    "selectPhoto": "Foto auswählen",
+    "scanToCreateTask": "Scannen, um Aufgabe zu erstellen",
+    "speakToCreateTasks": "Sprechen, um Aufgaben zu erstellen"
   },
   "photoTask": {
     "title": "Foto scannen, um eine Aufgabe zu erstellen",
@@ -838,5 +981,40 @@
       "assigned_to_me_tasks": "Hier gibt es Aufgaben, aber keine davon ist dir zugewiesen. Wechsle zurück zu „Alle“, um die übrigen zu sehen.",
       "created_by_me": "Hier gibt es Aufgaben, aber keine davon wurde von dir erstellt. Wechsle zurück zu „Alle“, um die übrigen zu sehen."
     }
+  },
+  "choreCard": {
+    "anyone": "Jeder"
+  },
+  "calendarCard": {
+    "title": "Kalenderübersicht",
+    "highPriority": "Hohe Priorität",
+    "mediumPriority": "Mittlere Priorität",
+    "lowPriority": "Niedrige Priorität",
+    "lowestPriority": "Niedrigste Priorität",
+    "noPriority": "Keine Priorität",
+    "assignedToOther": "Anderer Person zugewiesen",
+    "tasksCount": "{{count}} Aufgaben"
+  },
+  "activitiesCard": {
+    "justNow": "Gerade eben",
+    "hoursAgo": "vor {{count}} Std.",
+    "daysAgo": "vor {{count}} T.",
+    "statusStarted": "Gestartet",
+    "statusDone": "Erledigt",
+    "statusLate": "Verspätet",
+    "statusSkipped": "Übersprungen",
+    "statusPendingApproval": "Genehmigung ausstehend",
+    "statusRejected": "Abgelehnt",
+    "statusMissed": "Verpasst",
+    "statusRescheduled": "Verschoben",
+    "statusCompleted": "Abgeschlossen",
+    "byUser": "von {{name}}",
+    "unknownUser": "Unbekannt",
+    "unknownChore": "Unbekannte Aufgabe",
+    "pointsShort": "{{count}} Pkt.",
+    "noRecentActivities": "Keine aktuellen Aktivitäten",
+    "today": "Heute",
+    "yesterday": "Gestern",
+    "noteTitle": "Notiz - {{choreName}}"
   }
 }

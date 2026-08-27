@@ -1,0 +1,72 @@
+{
+  "blurb": "Раскладывайте дела по проектам. Создавайте отдельные пространства, чтобы всё лежало по местам и быстро находилось.",
+  "defaultChip": "По умолчанию",
+  "defaultDescription": "Все дела без конкретного проекта",
+  "delete": {
+    "message": "Удалить проект «{{name}}»? Сам проект исчезнет, но все дела останутся — они перейдут в проект по умолчанию.",
+    "title": "Удалить проект"
+  },
+  "iconPicker": {
+    "availableIcons": "Доступные значки",
+    "chooseIcon": "Выбор значка проекта"
+  },
+  "icons": {
+    "AccountBalance": "Финансы",
+    "Book": "Учёба",
+    "Build": "Ремонт",
+    "BusinessCenter": "Работа",
+    "Code": "Код",
+    "Computer": "Техника",
+    "DirectionsCar": "Авто",
+    "FitnessCenter": "Спортзал",
+    "Flight": "Поездки",
+    "FolderOpen": "Папка",
+    "Games": "Игры",
+    "Garden": "Сад",
+    "Home": "Дом",
+    "LocalHospital": "Здоровье",
+    "MusicNote": "Музыка",
+    "Palette": "Дизайн",
+    "Pets": "Питомцы",
+    "PhotoCamera": "Фото",
+    "Restaurant": "Еда",
+    "School": "Школа",
+    "Science": "Наука",
+    "ShoppingCart": "Покупки",
+    "SportsSoccer": "Спорт",
+    "Work": "Дела"
+  },
+  "loadError": "Не удалось загрузить проекты. Попробуйте ещё раз.",
+  "modal": {
+    "colorLabel": "Цвет проекта",
+    "descriptionLabel": "Описание",
+    "descriptionPlaceholder": "Описание проекта (необязательно)...",
+    "errorCreate": "Не удалось создать проект",
+    "errorNameRequired": "Укажите название проекта",
+    "errorUpdate": "Не удалось сохранить проект",
+    "iconLabel": "Значок проекта",
+    "nameLabel": "Название проекта",
+    "namePlaceholder": "Введите название...",
+    "selectIcon": "Выбрать значок"
+  },
+  "search": {
+    "clear": "Очистить поиск",
+    "noFilterResultsDescription": "Под текущий фильтр не подходит ни один проект.",
+    "noResultsDescription": "Нет проектов по запросу «{{searchTerm}}».",
+    "noResultsTitle": "Ничего не нашлось",
+    "placeholder": "Поиск проектов",
+    "showAll": "Показать все проекты"
+  },
+  "selector": {
+    "createNew": "Новый проект",
+    "createNewDescription": "Добавить своё пространство для дел",
+    "manage": "Управление проектами",
+    "manageDescription": "Смотреть, изменять и наводить порядок в проектах",
+    "title": "Проекты"
+  },
+  "shared": "Общий",
+  "tasks_few": "{{count}} дела",
+  "tasks_many": "{{count}} дел",
+  "tasks_one": "{{count}} дело",
+  "tasks_other": "{{count}} дела"
+}

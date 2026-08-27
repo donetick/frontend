@@ -41,5 +41,13 @@
   "percentActive": "{{percent}} % aktiv",
   "activityTimeline": "Aktivitätsverlauf",
   "liveSession": "Laufende Sitzung",
-  "live": "Live"
+  "live": "Live",
+  "title": "Timer-Details",
+  "sessionNumber": "Sitzung #{{number}} • {{date}}",
+  "sessionNumberShort": "Sitzung #{{number}}",
+  "ongoingArrow": "→ laufend",
+  "durationAutoCalculated": "Dauer (automatisch berechnet)",
+  "pause": "Pause",
+  "resume": "Fortsetzen",
+  "clearAndReset": "Löschen & zurücksetzen"
 }

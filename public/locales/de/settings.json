@@ -513,7 +513,17 @@
     "errorTitle": "Abonnementfehler",
     "errorMessage": "Abonnementvorgang konnte nicht gestartet werden. Bitte versuche es erneut.",
     "subscribe": "Abonnieren",
-    "cancelAnytime": "Jederzeit kündbar. Keine versteckten Gebühren. Sichere Zahlung über Stripe."
+    "cancelAnytime": "Jederzeit kündbar. Keine versteckten Gebühren. Sichere Zahlung über Stripe.",
+    "description": "Schalte Erinnerungen, ausführliche Aufgabendetails und erweiterte Automatisierung frei.",
+    "whatsIncluded": "Das ist enthalten:",
+    "mostPopular": "Am beliebtesten",
+    "featureNotifications": "Aufgabenbenachrichtigungen und Erinnerungen",
+    "featureRichText": "Formatierte Beschreibungen mit Bild-Uploads",
+    "featureThingTriggers": "Aufgabenauslöser basierend auf Dingen",
+    "featureApiTokens": "API-Tokens für Integrationen",
+    "featureImageUploads": "Bild-Uploads in Beschreibungen",
+    "featureAutomation": "Erweiterte Aufgabenautomatisierung",
+    "planYearly": "Jährlich"
   },
   "childUsers": {
     "errNameRequired": "Name des Unterkontos ist erforderlich",
@@ -525,6 +535,7 @@
     "errPasswordMatch": "Die Passwörter stimmen nicht überein",
     "errDisplayNameMax": "Der Anzeigename muss kürzer als 50 Zeichen sein",
     "createTitle": "Unterkonto erstellen",
+    "createDescription": "Erstelle einen Zugang, mit dem diesem Konto zugewiesene Aufgaben erledigt werden können.",
     "createButton": "Konto erstellen",
     "nameLabel": "Name des Unterkontos *",
     "namePlaceholder": "Name des Unterkontos eingeben (z. B. sarah)",

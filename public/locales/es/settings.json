@@ -10,7 +10,7 @@
     "loading": "Cargando…",
     "on": "Sí",
     "off": "No",
-    "error": "Error",
+    "error": "",
     "success": "Listo",
     "plusFeature": "Función Plus",
     "earlyAccess": "Acceso anticipado"
@@ -77,6 +77,10 @@
       "advanced": {
         "title": "Ajustes avanzados",
         "description": "Configura webhooks, actualizaciones en tiempo real y otras funciones avanzadas."
+      },
+      "privacy": {
+        "title": "",
+        "description": ""
       },
       "developer": {
         "title": "Ajustes de desarrollador",
@@ -164,7 +168,8 @@
     "joinCircle": "Unirse al círculo",
     "joinedPending": "Te has unido al círculo correctamente; espera a que la persona propietaria acepte tu solicitud.",
     "alreadyMember": "Ya eres miembro de este círculo",
-    "joinFailed": "No se pudo unir al círculo"
+    "joinFailed": "No se pudo unir al círculo",
+    "copyLink": ""
   },
   "accountSettings": {
     "title": "Ajustes de cuenta",
@@ -266,9 +271,9 @@
     "customLabel": "Notificación personalizada",
     "customHelper": "Recibe notificaciones en otra plataforma",
     "targetNone": "Ninguna",
-    "targetTelegram": "Telegram",
-    "targetPushover": "Pushover",
-    "targetWebhooks": "Webhooks",
+    "targetTelegram": "",
+    "targetPushover": "",
+    "targetWebhooks": "",
     "telegramBotHelpBefore": "Debes escribir primero al bot para que funcionen las notificaciones de Telegram",
     "telegramBotHelpAfter": "para iniciar un chat",
     "clickHere": "Haz clic aquí",
@@ -348,7 +353,8 @@
     "backupCodesModal": {
       "title": "Nuevos códigos de respaldo",
       "warning": "Tus códigos de respaldo anteriores ya no son válidos. Guarda estos nuevos códigos en un lugar seguro. Cada código solo se puede usar una vez."
-    }
+    },
+    "generateCodes": ""
   },
   "apiTokens": {
     "title": "Tokens de API",
@@ -418,7 +424,8 @@
         "name": "Objetivos semanales",
         "description": "Muestra el progreso semanal y las estadísticas de la familia"
       }
-    }
+    },
+    "detailedDescription": ""
   },
   "theme": {
     "title": "Preferencias de tema",
@@ -452,7 +459,8 @@
       "ymd": "AAAA-MM-DD (ISO)",
       "long": "Formato largo (p. ej., 1 de enero de 2024)",
       "short": "Formato corto (p. ej., 1 ene 2024)"
-    }
+    },
+    "descriptionLong": ""
   },
   "advanced": {
     "title": "Ajustes avanzados",
@@ -491,77 +499,152 @@
       "basicPlanNotice": "Las actualizaciones en tiempo real no están disponibles en el plan Básico. Mejora a Plus para recibir notificaciones instantáneas cuando tú u otros miembros del círculo completéis, omitáis o modifiquéis tareas."
     }
   },
+  "privacyAnalytics": {
+    "title": "",
+    "description": "",
+    "analyticsToggle": "",
+    "analyticsHelper": "",
+    "crashToggle": "",
+    "crashHelper": "",
+    "footnote": ""
+  },
   "subscription": {
-    "sessionFailed": "Failed to create subscription session",
-    "errorTitle": "Subscription Error",
-    "errorMessage": "Failed to start subscription process. Please try again.",
-    "subscribe": "Subscribe",
-    "cancelAnytime": "Cancel anytime. No hidden fees. Secure payment powered by Stripe."
+    "sessionFailed": "",
+    "errorTitle": "",
+    "errorMessage": "",
+    "subscribe": "",
+    "cancelAnytime": "",
+    "description": "",
+    "whatsIncluded": "",
+    "mostPopular": "",
+    "featureNotifications": "",
+    "featureRichText": "",
+    "featureThingTriggers": "",
+    "featureApiTokens": "",
+    "featureImageUploads": "",
+    "featureAutomation": "",
+    "planYearly": ""
   },
   "childUsers": {
-    "errNameRequired": "Sub account name is required",
-    "errNameMin": "Sub account name must be at least 2 characters",
-    "errNameMax": "Sub account name must be less than 20 characters",
-    "errNameChars": "Sub account name can only contain lowercase letters, dot and dash",
-    "errPasswordRequired": "Password is required",
-    "errPasswordLength": "Password must be between 8 and 64 characters",
-    "errPasswordMatch": "Passwords do not match",
-    "errDisplayNameMax": "Display name must be less than 50 characters",
-    "createTitle": "Create Sub Account",
-    "createButton": "Create Account",
-    "nameLabel": "Sub Account Name *",
-    "namePlaceholder": "Enter sub account name (e.g., sarah)",
-    "displayNameLabel": "Display Name",
-    "displayNamePlaceholder": "Display name (optional, defaults to sub account name)",
-    "passwordLabel": "Password *",
-    "passwordPlaceholder": "Enter password (8-64 characters)",
-    "confirmPasswordLabel": "Confirm Password *",
-    "confirmPasswordPlaceholder": "Confirm password"
+    "errNameRequired": "",
+    "errNameMin": "",
+    "errNameMax": "",
+    "errNameChars": "",
+    "errPasswordRequired": "",
+    "errPasswordLength": "",
+    "errPasswordMatch": "",
+    "errDisplayNameMax": "",
+    "createTitle": "",
+    "createDescription": "",
+    "createButton": "",
+    "nameLabel": "",
+    "namePlaceholder": "",
+    "displayNameLabel": "",
+    "displayNamePlaceholder": "",
+    "passwordLabel": "",
+    "passwordPlaceholder": "",
+    "confirmPasswordLabel": "",
+    "confirmPasswordPlaceholder": ""
   },
   "passwordChange": {
-    "minLength": "Password must be at least 8 characters",
-    "maxLength": "Password must be less than 64 characters"
+    "minLength": "",
+    "maxLength": "",
+    "description": "",
+    "mismatch": "",
+    "newPassword": "",
+    "newPasswordPlaceholder": "",
+    "confirmPassword": "",
+    "confirmPasswordPlaceholder": ""
   },
   "payment": {
-    "cancelledTitle": "Payment has been cancelled",
-    "cancelledRedirect": "You will be redirected to the main page shortly.",
-    "successTitle": "Payment Successful!",
-    "successRedirect": "You will be redirected to the settings page shortly."
+    "cancelledTitle": "",
+    "cancelledRedirect": "",
+    "successTitle": "",
+    "successRedirect": ""
   },
   "developer": {
-    "tokenRefreshed": "Token refreshed successfully",
-    "endpointCalled": "Refresh token endpoint called successfully",
-    "clearDbCleared": "Local offline database cleared. Starting full sync...",
-    "clearDbDone": "Full sync completed from the beginning",
-    "intro": "View technical information about your authentication tokens and session",
-    "refreshCookieNote": "Refresh tokens are managed via HTTP-only cookies on web platform",
-    "noReconnectInfo": "No reconnection information available",
-    "noTimeoutInfo": "No timeout information available",
-    "noDebugInfo": "No debug information available"
+    "tokenRefreshed": "",
+    "endpointCalled": "",
+    "clearDbCleared": "",
+    "clearDbDone": "",
+    "intro": "",
+    "refreshCookieNote": "",
+    "noReconnectInfo": "",
+    "noTimeoutInfo": "",
+    "noDebugInfo": ""
   },
   "backup": {
-    "keyRequired": "Encryption key is required",
-    "created": "Backup created and downloaded successfully",
-    "createFailed": "Failed to create backup",
-    "selectFile": "Please select a backup file",
-    "restored": "Backup restored successfully. Please refresh the page.",
-    "restoreFailed": "Failed to restore backup",
-    "readFailed": "Failed to read backup file",
-    "createIntro": "Create an encrypted backup of your data. This backup will include all your chores, history, settings, and optionally your uploaded files.",
-    "keyPlaceholder": "Enter a strong encryption key",
-    "includeAssets": "Include uploaded files and assets",
-    "warningLabel": "Warning:",
-    "restoreWarning": "Restoring a backup will replace all your current data. This action cannot be undone.",
-    "restoreKeyPlaceholder": "Enter the encryption key used for this backup"
+    "keyRequired": "",
+    "created": "",
+    "createFailed": "",
+    "selectFile": "",
+    "restored": "",
+    "restoreFailed": "",
+    "readFailed": "",
+    "createIntro": "",
+    "keyPlaceholder": "",
+    "includeAssets": "",
+    "warningLabel": "",
+    "restoreWarning": "",
+    "restoreKeyPlaceholder": "",
+    "title": "",
+    "createTab": "",
+    "restoreTab": "",
+    "creating": "",
+    "restoring": ""
   },
   "deletion": {
-    "passwordRequired": "Please enter your password to continue",
-    "passwordAndDelete": "Please enter your password and type DELETE to confirm",
-    "failed": "Failed to delete account",
-    "passwordPlaceholder": "Enter your password",
-    "transferIntro": "You own circles that require ownership transfer before deletion. Please select new owners:",
-    "selectOwner": "Select new owner",
-    "confirmPrompt": "Please enter your password and type DELETE to confirm",
-    "typeDelete": "DELETE"
+    "passwordRequired": "",
+    "passwordAndDelete": "",
+    "failed": "",
+    "passwordPlaceholder": "",
+    "transferIntro": "",
+    "selectOwner": "",
+    "confirmPrompt": "",
+    "typeDelete": "",
+    "warningLead": "",
+    "warningIntro": "",
+    "removesProfile": "",
+    "removesChores": "",
+    "removesTokens": "",
+    "removesStorage": "",
+    "removesPoints": "",
+    "removesCircles": "",
+    "passwordToContinue": "",
+    "circleLabel": "",
+    "newOwner": "",
+    "logoutNotice": "",
+    "passwordLabel": "",
+    "typeToConfirm": ""
+  },
+  "realtime": {
+    "titleSse": "",
+    "subtitleSse": ""
+  },
+  "nativeCancel": {
+    "title": "",
+    "dismiss": "",
+    "cancelViaStore": "",
+    "cancelDesktop": "",
+    "intro": "",
+    "iosHeading": "",
+    "iosStep1": "",
+    "iosStep2": "",
+    "iosStep3": "",
+    "iosStep4": "",
+    "iosStep5": "",
+    "iosNote": "",
+    "androidHeading": "",
+    "androidStep1": "",
+    "androidStep2": "",
+    "androidStep3": "",
+    "androidStep4": "",
+    "androidStep5": "",
+    "androidStep6": "",
+    "androidNote": "",
+    "webHeading": "",
+    "webBody": "",
+    "webNote": "",
+    "footer": ""
   }
 }

@@ -78,6 +78,10 @@
         "title": "高级设置",
         "description": "配置 Webhook、实时更新以及其他高级功能。"
       },
+      "privacy": {
+        "title": "",
+        "description": ""
+      },
       "developer": {
         "title": "开发者设置",
         "description": "查看身份验证令牌、SSE 连接和调试数据等技术信息。"
@@ -164,14 +168,15 @@
     "joinCircle": "Join a Circle",
     "joinedPending": "已成功加入圈子，请等待圈主接受你的请求。",
     "alreadyMember": "你已经是该圈子的成员",
-    "joinFailed": "加入圈子失败"
+    "joinFailed": "加入圈子失败",
+    "copyLink": ""
   },
   "accountSettings": {
     "title": "账户设置",
     "description": "修改你的账户设置、套餐类型或密码",
     "accountType": "账户类型：{{type}}",
     "free": "免费版",
-    "plus": "Plus",
+    "plus": "",
     "plusUntil": "Plus（至 {{date}}）",
     "activeDescription": "你当前已订阅 Plus 套餐，订阅将于 {{date}} 续期。",
     "cancelledDescription": "你已取消订阅，账户将于 {{date}} 降级为免费套餐。",
@@ -266,13 +271,13 @@
     "customLabel": "自定义通知",
     "customHelper": "在其他平台上接收通知",
     "targetNone": "无",
-    "targetTelegram": "Telegram",
-    "targetPushover": "Pushover",
+    "targetTelegram": "",
+    "targetPushover": "",
     "targetWebhooks": "Webhook",
     "telegramBotHelpBefore": "你需要先向机器人发送一条消息，Telegram 通知才能生效",
     "telegramBotHelpAfter": "开始聊天",
     "clickHere": "点击这里",
-    "chatId": "Chat ID",
+    "chatId": "",
     "chatIdPlaceholder": "用户 ID / Chat ID",
     "telegramChatIdHelpBefore": "如果你不知道自己的 Chat ID，可以和 userinfobot 开始聊天，它会告诉你。",
     "telegramChatIdHelpAfter": "与 userinfobot 开始聊天",
@@ -348,7 +353,8 @@
     "backupCodesModal": {
       "title": "新的备用代码",
       "warning": "你之前的备用代码已失效。请将这些新代码保存在安全的地方。每个代码只能使用一次。"
-    }
+    },
+    "generateCodes": ""
   },
   "apiTokens": {
     "title": "API 令牌",
@@ -418,7 +424,8 @@
         "name": "每周目标",
         "description": "显示每周进度和家庭完成情况统计"
       }
-    }
+    },
+    "detailedDescription": ""
   },
   "theme": {
     "title": "Theme preferences",
@@ -452,7 +459,8 @@
       "ymd": "YYYY-MM-DD（ISO）",
       "long": "长格式（例如：2024年1月1日）",
       "short": "短格式（例如：2024年1月1日）"
-    }
+    },
+    "descriptionLong": ""
   },
   "advanced": {
     "title": "高级设置",
@@ -472,7 +480,7 @@
     "webhookPlusNotice": "基础套餐不支持 Webhook 通知。升级到 Plus 即可通过 Webhook 接收实时更新。",
     "webhookToggle": "启用 Webhook",
     "webhookHelper": "为任务和物件的更新启用 Webhook 通知。",
-    "webhookURL": "Webhook URL",
+    "webhookURL": "",
     "webhookUpdated": "Webhook URL 更新成功",
     "webhookUpdateFailed": "更新 Webhook URL 失败",
     "realtimeTitle": "实时更新",
@@ -491,77 +499,152 @@
       "basicPlanNotice": "基础套餐不支持实时更新。升级到 Plus，当你或其他圈子成员完成、跳过或修改任务时即可立即收到通知。"
     }
   },
+  "privacyAnalytics": {
+    "title": "",
+    "description": "",
+    "analyticsToggle": "",
+    "analyticsHelper": "",
+    "crashToggle": "",
+    "crashHelper": "",
+    "footnote": ""
+  },
   "subscription": {
-    "sessionFailed": "Failed to create subscription session",
-    "errorTitle": "Subscription Error",
-    "errorMessage": "Failed to start subscription process. Please try again.",
-    "subscribe": "Subscribe",
-    "cancelAnytime": "Cancel anytime. No hidden fees. Secure payment powered by Stripe."
+    "sessionFailed": "",
+    "errorTitle": "",
+    "errorMessage": "",
+    "subscribe": "",
+    "cancelAnytime": "",
+    "description": "",
+    "whatsIncluded": "",
+    "mostPopular": "",
+    "featureNotifications": "",
+    "featureRichText": "",
+    "featureThingTriggers": "",
+    "featureApiTokens": "",
+    "featureImageUploads": "",
+    "featureAutomation": "",
+    "planYearly": ""
   },
   "childUsers": {
-    "errNameRequired": "Sub account name is required",
-    "errNameMin": "Sub account name must be at least 2 characters",
-    "errNameMax": "Sub account name must be less than 20 characters",
-    "errNameChars": "Sub account name can only contain lowercase letters, dot and dash",
-    "errPasswordRequired": "Password is required",
-    "errPasswordLength": "Password must be between 8 and 64 characters",
-    "errPasswordMatch": "Passwords do not match",
-    "errDisplayNameMax": "Display name must be less than 50 characters",
-    "createTitle": "Create Sub Account",
-    "createButton": "Create Account",
-    "nameLabel": "Sub Account Name *",
-    "namePlaceholder": "Enter sub account name (e.g., sarah)",
-    "displayNameLabel": "Display Name",
-    "displayNamePlaceholder": "Display name (optional, defaults to sub account name)",
-    "passwordLabel": "Password *",
-    "passwordPlaceholder": "Enter password (8-64 characters)",
-    "confirmPasswordLabel": "Confirm Password *",
-    "confirmPasswordPlaceholder": "Confirm password"
+    "errNameRequired": "",
+    "errNameMin": "",
+    "errNameMax": "",
+    "errNameChars": "",
+    "errPasswordRequired": "",
+    "errPasswordLength": "",
+    "errPasswordMatch": "",
+    "errDisplayNameMax": "",
+    "createTitle": "",
+    "createDescription": "",
+    "createButton": "",
+    "nameLabel": "",
+    "namePlaceholder": "",
+    "displayNameLabel": "",
+    "displayNamePlaceholder": "",
+    "passwordLabel": "",
+    "passwordPlaceholder": "",
+    "confirmPasswordLabel": "",
+    "confirmPasswordPlaceholder": ""
   },
   "passwordChange": {
-    "minLength": "Password must be at least 8 characters",
-    "maxLength": "Password must be less than 64 characters"
+    "minLength": "",
+    "maxLength": "",
+    "description": "",
+    "mismatch": "",
+    "newPassword": "",
+    "newPasswordPlaceholder": "",
+    "confirmPassword": "",
+    "confirmPasswordPlaceholder": ""
   },
   "payment": {
-    "cancelledTitle": "Payment has been cancelled",
-    "cancelledRedirect": "You will be redirected to the main page shortly.",
-    "successTitle": "Payment Successful!",
-    "successRedirect": "You will be redirected to the settings page shortly."
+    "cancelledTitle": "",
+    "cancelledRedirect": "",
+    "successTitle": "",
+    "successRedirect": ""
   },
   "developer": {
-    "tokenRefreshed": "Token refreshed successfully",
-    "endpointCalled": "Refresh token endpoint called successfully",
-    "clearDbCleared": "Local offline database cleared. Starting full sync...",
-    "clearDbDone": "Full sync completed from the beginning",
-    "intro": "View technical information about your authentication tokens and session",
-    "refreshCookieNote": "Refresh tokens are managed via HTTP-only cookies on web platform",
-    "noReconnectInfo": "No reconnection information available",
-    "noTimeoutInfo": "No timeout information available",
-    "noDebugInfo": "No debug information available"
+    "tokenRefreshed": "",
+    "endpointCalled": "",
+    "clearDbCleared": "",
+    "clearDbDone": "",
+    "intro": "",
+    "refreshCookieNote": "",
+    "noReconnectInfo": "",
+    "noTimeoutInfo": "",
+    "noDebugInfo": ""
   },
   "backup": {
-    "keyRequired": "Encryption key is required",
-    "created": "Backup created and downloaded successfully",
-    "createFailed": "Failed to create backup",
-    "selectFile": "Please select a backup file",
-    "restored": "Backup restored successfully. Please refresh the page.",
-    "restoreFailed": "Failed to restore backup",
-    "readFailed": "Failed to read backup file",
-    "createIntro": "Create an encrypted backup of your data. This backup will include all your chores, history, settings, and optionally your uploaded files.",
-    "keyPlaceholder": "Enter a strong encryption key",
-    "includeAssets": "Include uploaded files and assets",
-    "warningLabel": "Warning:",
-    "restoreWarning": "Restoring a backup will replace all your current data. This action cannot be undone.",
-    "restoreKeyPlaceholder": "Enter the encryption key used for this backup"
+    "keyRequired": "",
+    "created": "",
+    "createFailed": "",
+    "selectFile": "",
+    "restored": "",
+    "restoreFailed": "",
+    "readFailed": "",
+    "createIntro": "",
+    "keyPlaceholder": "",
+    "includeAssets": "",
+    "warningLabel": "",
+    "restoreWarning": "",
+    "restoreKeyPlaceholder": "",
+    "title": "",
+    "createTab": "",
+    "restoreTab": "",
+    "creating": "",
+    "restoring": ""
   },
   "deletion": {
-    "passwordRequired": "Please enter your password to continue",
-    "passwordAndDelete": "Please enter your password and type DELETE to confirm",
-    "failed": "Failed to delete account",
-    "passwordPlaceholder": "Enter your password",
-    "transferIntro": "You own circles that require ownership transfer before deletion. Please select new owners:",
-    "selectOwner": "Select new owner",
-    "confirmPrompt": "Please enter your password and type DELETE to confirm",
-    "typeDelete": "DELETE"
+    "passwordRequired": "",
+    "passwordAndDelete": "",
+    "failed": "",
+    "passwordPlaceholder": "",
+    "transferIntro": "",
+    "selectOwner": "",
+    "confirmPrompt": "",
+    "typeDelete": "",
+    "warningLead": "",
+    "warningIntro": "",
+    "removesProfile": "",
+    "removesChores": "",
+    "removesTokens": "",
+    "removesStorage": "",
+    "removesPoints": "",
+    "removesCircles": "",
+    "passwordToContinue": "",
+    "circleLabel": "",
+    "newOwner": "",
+    "logoutNotice": "",
+    "passwordLabel": "",
+    "typeToConfirm": ""
+  },
+  "realtime": {
+    "titleSse": "",
+    "subtitleSse": ""
+  },
+  "nativeCancel": {
+    "title": "",
+    "dismiss": "",
+    "cancelViaStore": "",
+    "cancelDesktop": "",
+    "intro": "",
+    "iosHeading": "",
+    "iosStep1": "",
+    "iosStep2": "",
+    "iosStep3": "",
+    "iosStep4": "",
+    "iosStep5": "",
+    "iosNote": "",
+    "androidHeading": "",
+    "androidStep1": "",
+    "androidStep2": "",
+    "androidStep3": "",
+    "androidStep4": "",
+    "androidStep5": "",
+    "androidStep6": "",
+    "androidNote": "",
+    "webHeading": "",
+    "webBody": "",
+    "webNote": "",
+    "footer": ""
   }
 }

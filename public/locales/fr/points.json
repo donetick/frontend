@@ -1,74 +1,74 @@
 {
-  "redeem": "Redeem Points",
+  "redeem": "Utiliser des points",
   "redeemModal": {
-    "redeemButton": "Redeem",
-    "pointsAvailable": "{{count}} points available",
-    "pointsToRedeem": "Points to Redeem",
-    "placeholder": "Enter points...",
-    "cannotExceed": "Cannot exceed available points",
-    "quickAdd": "Quick Add:",
-    "aboutToRedeem": "You are about to redeem",
-    "amount": "{{count}} points",
-    "remaining": "Remaining: {{count}} points"
+    "redeemButton": "Utiliser",
+    "pointsAvailable": "Disponibles : {{count}}",
+    "pointsToRedeem": "Points à utiliser",
+    "placeholder": "Saisissez un nombre de points...",
+    "cannotExceed": "Le solde de points disponibles ne peut pas être dépassé",
+    "quickAdd": "Ajout rapide :",
+    "aboutToRedeem": "Vous allez utiliser",
+    "amount": "Points : {{count}}",
+    "remaining": "Points restants : {{count}}"
   },
   "leaderboard": {
-    "titlePoints": "Points Leaderboard",
-    "titleTasks": "Tasks Leaderboard",
-    "subtitlePoints": "Rankings based on points earned during the selected time period",
-    "subtitleTasks": "Rankings based on tasks completed during the selected time period",
+    "titlePoints": "Classement par points",
+    "titleTasks": "Classement par tâches",
+    "subtitlePoints": "Classement selon les points gagnés pendant la période sélectionnée",
+    "subtitleTasks": "Classement selon les tâches terminées pendant la période sélectionnée",
     "modePoints": "Points",
-    "modeTasks": "Tasks",
-    "you": "You",
-    "tasksAndAvg": "{{tasks}} tasks • {{avg}} avg per task",
-    "available": "{{count}} available",
+    "modeTasks": "Tâches",
+    "you": "Vous",
+    "tasksAndAvg": "{{tasks}} tâches • {{avg}} en moyenne par tâche",
+    "available": "Disponibles : {{count}}",
     "points_one": "{{count}} point",
     "points_other": "{{count}} points"
   },
   "tabs": {
-    "short7d": "7D",
-    "short6m": "6M",
-    "shortAll": "All",
-    "days7": "7 Days",
-    "months6": "6 Months",
-    "allTime": "All Time"
+    "short7d": "7 j",
+    "short6m": "6 mois",
+    "shortAll": "Tout",
+    "days7": "7 jours",
+    "months6": "6 mois",
+    "allTime": "Toute la période"
   },
   "filter": {
-    "analysisTitle": "Filter & Analysis",
-    "title": "Filter Points",
-    "showFor": "Show points for:",
-    "timePeriod": "Time period:"
+    "analysisTitle": "Filtres et analyse",
+    "title": "Filtrer les points",
+    "showFor": "Afficher les points pour :",
+    "timePeriod": "Période :"
   },
   "cards": {
     "available": {
-      "title": "Available",
-      "subtext": "Ready to redeem"
+      "title": "Disponibles",
+      "subtext": "Prêts à être utilisés"
     },
     "redeemed": {
-      "title": "Redeemed",
-      "subtext": "Previously used"
+      "title": "Utilisés",
+      "subtext": "Utilisés précédemment"
     },
     "total": {
       "title": "Total",
-      "subtext": "All time earned"
+      "subtext": "Gagnés sur toute la période"
     },
     "period": {
-      "title": "Period Points",
-      "allTime": "All time",
-      "last6Months": "Last 6 months",
-      "lastDays_one": "Last {{count}} day",
-      "lastDays_other": "Last {{count}} days"
+      "title": "Points de la période",
+      "allTime": "Toute la période",
+      "last6Months": "6 derniers mois",
+      "lastDays_one": "{{count}} dernier jour",
+      "lastDays_other": "{{count}} derniers jours"
     }
   },
   "summary": {
-    "showingFor": "Showing points for",
-    "unknownUser": "Unknown User",
-    "overThe": "over the",
-    "allTime": "All Time",
-    "last6Months": "Last 6 Months",
-    "lastDays_one": "Last {{count}} Day",
-    "lastDays_other": "Last {{count}} Days"
+    "showingFor": "Points affichés pour",
+    "unknownUser": "Utilisateur inconnu",
+    "overThe": "sur",
+    "allTime": "toute la période",
+    "last6Months": "les 6 derniers mois",
+    "lastDays_one": "{{count}} jour",
+    "lastDays_other": "{{count}} jours"
   },
   "trend": {
-    "title": "Points Trend"
+    "title": "Évolution des points"
   }
 }

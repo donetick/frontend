@@ -203,7 +203,10 @@
     "hideDetails": "Fehlerdetails ausblenden",
     "showDetails": "Fehlerdetails anzeigen",
     "copyToClipboard": "In die Zwischenablage kopieren",
-    "copied": "Fehlerdetails in die Zwischenablage kopiert"
+    "copied": "Fehlerdetails in die Zwischenablage kopiert",
+    "reportProblem": "Dieses Problem melden",
+    "reportHint": "Wenn das öfter passiert, sende uns bitte einen Bericht, damit wir es uns ansehen können.",
+    "collectingDetails": "Fehlerdetails werden gesammelt…"
   },
   "userMenu": {
     "actAsAnother": "Als anderer Benutzer agieren",
@@ -247,14 +250,88 @@
   "removeAll": "Alle entfernen",
   "apply": "Übernehmen",
   "cancelAll": "Alle abbrechen",
+  "backFromSearch": "Zurück aus der Suche",
+  "newVersionAvailable": "Eine neue Version ist jetzt verfügbar. Klicke auf die Aktualisieren-Schaltfläche, um zu aktualisieren.",
+  "notFound": {
+    "title": "Seite nicht gefunden",
+    "description": "Dieser Link führt ins Leere. Möglicherweise wurde er verschoben oder die Adresse enthält einen Tippfehler.",
+    "goToMyTasks": "Zu meinen Aufgaben",
+    "logIn": "Anmelden"
+  },
+  "pendingBadge": {
+    "completePending": "Abschließen ausstehend",
+    "skipPending": "Überspringen ausstehend",
+    "updatePending": "Aktualisierung ausstehend",
+    "createPending": "Erstellung ausstehend",
+    "deletePending": "Löschung ausstehend",
+    "editHistoryPending": "Verlaufsänderung ausstehend",
+    "deleteHistoryPending": "Verlaufslöschung ausstehend",
+    "reschedulePending": "Verschiebung ausstehend",
+    "archivePending": "Archivierung ausstehend",
+    "restorePending": "Wiederherstellung ausstehend",
+    "startPending": "Start ausstehend",
+    "pausePending": "Pause ausstehend"
+  },
+  "sortAndFilter": {
+    "sortBy": "Sortieren nach",
+    "ariaLabel": "Sortier- und Filteroptionen",
+    "title": "Sortieren & Filtern",
+    "ascending": "Aufsteigend",
+    "descending": "Absteigend",
+    "filter": "Filter"
+  },
+  "versionInfo": "V{{version}} (API: {{apiVersion}})",
+  "apiVersionUnavailable": "nicht verfügbar",
   "sync": {
     "aria": "Synchronisierungs- und Netzwerkstatus öffnen",
     "allSynced": "Alle Änderungen synchronisiert",
     "willSync": "Wird synchronisiert, sobald du wieder online bist",
-    "cancelAll": "Alle abbrechen"
+    "cancelAll": "Alle abbrechen",
+    "commandLabels": {
+      "createChore": "Aufgabe erstellen",
+      "updateChore": "Aufgabe aktualisieren",
+      "updateChoreHistory": "Verlauf bearbeiten",
+      "completeChore": "Aufgabe abschließen",
+      "skipChore": "Aufgabe überspringen",
+      "startChore": "Aufgabe starten",
+      "pauseChore": "Aufgabe pausieren",
+      "deleteChore": "Aufgabe löschen",
+      "deleteChoreHistory": "Verlauf löschen",
+      "rescheduleChore": "Aufgabe verschieben",
+      "archiveChore": "Aufgabe archivieren",
+      "unarchiveChore": "Aufgabe wiederherstellen",
+      "pendingAction": "Ausstehende Aktion"
+    },
+    "never": "Nie",
+    "justNow": "Gerade eben",
+    "secondsAgo": "vor {{count}} s",
+    "minutesAgo": "vor {{count}} Min.",
+    "hoursAgo": "vor {{count}} Std.",
+    "online": "Online",
+    "offline": "Offline",
+    "syncing": "Wird synchronisiert...",
+    "lastSync": "Letzte Synchronisierung: {{time}}",
+    "offlineSince": "Offline seit {{duration}}",
+    "errorPrefix": "Fehler: {{message}}",
+    "pending": "Ausstehend ({{count}})",
+    "failed": "Fehlgeschlagen ({{count}})",
+    "dismiss": "Verwerfen",
+    "nextAutoSync": "Nächste automatische Synchronisierung in {{seconds}} s",
+    "checkingServer": "Server wird überprüft...",
+    "retryingIn": "Erneuter Versuch in {{seconds}} s",
+    "syncNow": "Jetzt synchronisieren",
+    "pendingSyncLabel_one": "{{count}} ausstehende Aktion zu synchronisieren",
+    "pendingSyncLabel_other": "{{count}} ausstehende Aktionen zu synchronisieren",
+    "pendingActionsTitle": "Ausstehende Aktionen",
+    "actionsWaitingToSync_one": "{{count}} Aktion wartet auf Synchronisierung.",
+    "actionsWaitingToSync_other": "{{count}} Aktionen warten auf Synchronisierung.",
+    "cancelActionAria": "{{label}} abbrechen"
   },
   "attachments": "Anhänge",
   "fileNumbered": "Datei {{index}}",
+  "noAttachmentsTitle": "Keine Anhänge",
+  "noAttachmentsDescription": "Fotos und Dateien, die dieser Aufgabe hinzugefügt werden, erscheinen hier.",
+  "kbSize": "{{size}} KB",
   "onboarding": {
     "sources": {
       "speak": "Sprechen",
@@ -360,6 +437,14 @@
       "notNow": "Nicht jetzt",
       "next": "Weiter"
     },
+    "getStarted": {
+      "subtitleSignupEnabled": "Erstelle ein Konto, um überall zu synchronisieren, oder melde dich an und mach dort weiter, wo du aufgehört hast.",
+      "subtitleSignupDisabled": "Melde dich bei deinem Konto an, um dort weiterzumachen, wo du aufgehört hast.",
+      "createAccount": "Konto erstellen",
+      "alreadyHaveAccount": "Ich habe bereits ein Konto",
+      "signIn": "Anmelden",
+      "connectSelfHosted": "Mit selbst gehostetem Server verbinden"
+    },
     "heardAbout": {
       "title": "Wie hast du von Donetick erfahren?",
       "subtitle": "Hilft uns zu verstehen, was funktioniert. Völlig optional.",
@@ -455,5 +540,40 @@
     "alreadyMember": "Du bist bereits Mitglied dieses Kreises",
     "joinFailed": "Beitritt zum Kreis fehlgeschlagen",
     "requestError": "Deine Beitrittsanfrage konnte nicht gesendet werden. Bitte versuche es erneut."
+  },
+  "selectUser": "Benutzer auswählen",
+  "closeDialog": "Dialog schließen",
+  "activeFilterChips": {
+    "removeFilterAria": "Filter {{label}} entfernen",
+    "addFilterCondition": "Filterbedingung hinzufügen",
+    "moreCount": "+{{count}} weitere"
+  },
+  "filterBar": {
+    "filtersButton": "Filter",
+    "clearAllButton": "Alle löschen",
+    "doneButton": "Fertig",
+    "showResults_one": "{{count}} Ergebnis anzeigen",
+    "showResults_other": "{{count}} Ergebnisse anzeigen",
+    "selectedCount": "{{count}} ausgewählt",
+    "dateRangeFallback": "Zeitraum",
+    "fromDate": "Von {{date}}",
+    "untilDate": "Bis {{date}}",
+    "presetToday": "Heute",
+    "presetYesterday": "Gestern",
+    "presetThisWeek": "Diese Woche",
+    "presetLast7Days": "Letzte 7 Tage",
+    "presetThisMonth": "Dieser Monat",
+    "presetLast30Days": "Letzte 30 Tage",
+    "presetLast3Months": "Letzte 3 Monate"
+  },
+  "workspaceReady": {
+    "allSetNamed": "Alles bereit, {{name}}",
+    "allSet": "Alles bereit",
+    "subtitle": "Dein Arbeitsbereich ist bereit. Das erwartet dich hier.",
+    "continue": "Weiter",
+    "readyShared": "Gemeinsame Aufgaben für den ganzen Haushalt",
+    "readyRecurring": "Wiederkehrende Zeitpläne, die den Alltag überstehen",
+    "readyCapture": "Erfassung per Sprache, Foto oder Text",
+    "readyReminders": "Erinnerungen und Homescreen-Widgets"
   }
 }

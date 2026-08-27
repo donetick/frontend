@@ -1,0 +1,144 @@
+{
+  "activities": {
+    "title": "Активность"
+  },
+  "badge": {
+    "onTime": "Вовремя",
+    "onTimeLabel": "Вовремя"
+  },
+  "card": {
+    "assignedTo": "Назначено: {{name}}",
+    "daysAfterDue": "на {{count}} д позже срока",
+    "daysAfterDue_few": "{{count}}д после срока",
+    "daysAfterDue_many": "{{count}}д после срока",
+    "daysAfterDue_one": "{{count}}д после срока",
+    "daysAfterDue_other": "{{count}}д после срока",
+    "daysBeforeDue": "на {{count}} д раньше срока",
+    "daysBeforeDue_few": "{{count}}д до срока",
+    "daysBeforeDue_many": "{{count}}д до срока",
+    "daysBeforeDue_one": "{{count}}д до срока",
+    "daysBeforeDue_other": "{{count}}д до срока",
+    "hoursAfterDue": "на {{count}} ч позже срока",
+    "hoursAfterDue_few": "{{count}}ч после срока",
+    "hoursAfterDue_many": "{{count}}ч после срока",
+    "hoursAfterDue_one": "{{count}}ч после срока",
+    "hoursAfterDue_other": "{{count}}ч после срока",
+    "hoursBeforeDue": "на {{count}} ч раньше срока",
+    "hoursBeforeDue_few": "{{count}}ч до срока",
+    "hoursBeforeDue_many": "{{count}}ч до срока",
+    "hoursBeforeDue_one": "{{count}}ч до срока",
+    "hoursBeforeDue_other": "{{count}}ч до срока",
+    "points_few": "★ {{count}} балла",
+    "points_many": "★ {{count}} баллов",
+    "points_one": "★ {{count}} балл",
+    "points_other": "★ {{count}} балла",
+    "wasDue": "Срок был {{date}}"
+  },
+  "charts": {
+    "assigneeBreakdown": {
+      "description": "Дела в разрезе исполнителей",
+      "title": "По исполнителям"
+    },
+    "due": {
+      "description": "Сроки текущих дел",
+      "title": "Срок"
+    },
+    "labels": {
+      "description": "Дела по меткам",
+      "title": "Метки"
+    },
+    "labelsDuration": {
+      "description": "Время по меткам (часы)",
+      "title": "Метки (время)"
+    },
+    "late": "С опозданием",
+    "noData": "Нет данных",
+    "noLabels": "Без меток",
+    "priority": {
+      "description": "Дела по приоритету",
+      "title": "Приоритет"
+    },
+    "status": {
+      "description": "Статус выполненных дел",
+      "title": "Статус"
+    },
+    "tasksTime": {
+      "description": "Время по отдельным делам (часы)",
+      "title": "Дела (время)"
+    },
+    "unassigned": "Без исполнителя",
+    "unknownTask": "Неизвестное дело"
+  },
+  "detail": {
+    "assignedTo": "Назначено на",
+    "duration": "Длительность",
+    "editEntry": "Изменить запись",
+    "lastUpdated": "Последнее изменение",
+    "note": "Заметка",
+    "openTask": "Открыть дело",
+    "performedBy": "Выполнил",
+    "pointsEarned": "Начислено баллов",
+    "points_few": "{{count}} балла",
+    "points_many": "{{count}} баллов",
+    "points_one": "{{count}} балл",
+    "points_other": "{{count}} балла",
+    "title": "Подробности записи"
+  },
+  "edit": {
+    "additionalNotes": "Дополнительная заметка",
+    "completedDate": "Дата выполнения",
+    "deleteMessage": "Удалить эту запись истории?",
+    "deleteTitle": "Удалить запись",
+    "note": "Заметка",
+    "title": "Изменить запись"
+  },
+  "filter": {
+    "completedAt": "Когда выполнено",
+    "completedBy": "Кто выполнил",
+    "hasNotes": "С заметкой",
+    "hasPoints": "С баллами",
+    "labels": "Метки",
+    "pending": "Ожидает",
+    "status": "Статус",
+    "timePeriod": "Период",
+    "user": "Участник"
+  },
+  "noResults": {
+    "clear": "Сбросить фильтры"
+  },
+  "period": {
+    "allTime": "всё время",
+    "days_few": "{{count}} дня",
+    "days_many": "{{count}} дней",
+    "days_one": "{{count}} день",
+    "days_other": "{{count}} дня"
+  },
+  "status": {
+    "completed": "Выполнено",
+    "inProgress": "В работе",
+    "missed": "Не сделано",
+    "pendingApproval": "Ждёт одобрения",
+    "rejected": "Отклонено",
+    "rescheduled": "Перенесено",
+    "scheduled": "Запланировано",
+    "skipped": "Пропущено"
+  },
+  "title": {
+    "activity": "Активность по делу",
+    "summary": "Сводка по делу"
+  },
+  "toast": {
+    "deleteQueued": {
+      "title": "Удаление в очереди"
+    },
+    "deleted": {
+      "title": "Запись удалена"
+    },
+    "updateQueued": {
+      "title": "Изменение в очереди"
+    },
+    "updated": {
+      "title": "История изменена"
+    }
+  }
+}

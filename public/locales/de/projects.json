@@ -53,7 +53,9 @@
     "createNew": "Neues Projekt erstellen",
     "createNewDescription": "Eigenen Projektarbeitsbereich hinzufügen",
     "manage": "Projekte verwalten",
-    "manageDescription": "Alle Projekte anzeigen, bearbeiten und organisieren"
+    "manageDescription": "Alle Projekte anzeigen, bearbeiten und organisieren",
+    "currentProjectTitle": "Aktuelles Projekt: {{project}} (Strg+E)",
+    "builtInWorkspace": "Integrierter Projekt-Arbeitsbereich"
   },
   "modal": {
     "errorNameRequired": "Projektname ist erforderlich",

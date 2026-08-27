@@ -42,6 +42,30 @@
     "errorNoColor": "Bitte wähle eine Farbe aus",
     "saveFailedTitle": "Beschriftung konnte nicht gespeichert werden",
     "saveFailedMessage": "Beschriftung konnte nicht gespeichert werden. Bitte versuche es erneut.",
-    "name": "Name"
+    "name": "Name",
+    "editTitle": "Label bearbeiten",
+    "addTitle": "Label hinzufügen",
+    "color": "Farbe",
+    "saveChanges": "Änderungen speichern",
+    "addLabel": "Label hinzufügen",
+    "colorAriaSelect": "{{color}} auswählen"
+  },
+  "picker": {
+    "label": "Labels",
+    "createLabel": "Label erstellen",
+    "labelsCount_one": "{{count}} Label",
+    "labelsCount_other": "{{count}} Labels"
+  },
+  "view": {
+    "emptyTitle": "Noch keine Labels",
+    "emptyDescription": "Labels gruppieren Aufgaben in deinem Kreis, z. B. „Küche“ oder „Rechnungen“, sodass du mit einem Tipp danach filtern kannst.",
+    "createLabel": "Label erstellen",
+    "filterTitle": "Anzeigen",
+    "sortName": "Name",
+    "sortColor": "Farbe",
+    "sortRecent": "Zuletzt erstellt",
+    "filterAll": "Alle Labels",
+    "filterMine": "Von mir erstellt",
+    "filterShared": "Mit mir geteilt"
   }
 }

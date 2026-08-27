@@ -9,6 +9,12 @@
   "valuePlaceholder": "Wert des Dings",
   "updateState": "Zustand aktualisieren",
   "update": "Aktualisieren",
+  "create": "Erstellen",
+  "editThingTitle": "Ding bearbeiten",
+  "createThingTitle": "Ding erstellen",
+  "type": "Typ",
+  "boolTrue": "Wahr",
+  "boolFalse": "Falsch",
   "history": {
     "overview": "Übersicht der Dinge",
     "visualization": "Datenvisualisierung",

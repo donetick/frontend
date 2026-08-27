@@ -1,17 +1,55 @@
 {
   "builder": {
-    "errorName": "Please enter a filter name",
-    "errorConditions": "Please configure at least one filter condition",
-    "editTitle": "Edit Filter",
-    "newTitle": "New Filter",
-    "addConditions": "Add conditions to preview",
-    "save": "Save Filter",
-    "name": "Filter Name",
-    "namePlaceholder": "e.g. Overdue tasks for Alice",
-    "color": "Color"
+    "errorName": "",
+    "errorConditions": "",
+    "editTitle": "",
+    "newTitle": "",
+    "addConditions": "",
+    "save": "",
+    "name": "",
+    "namePlaceholder": "",
+    "color": ""
   },
-  "nameExists": "A filter with this name already exists",
-  "tasks_one": "{{count}} task",
-  "tasks_other": "{{count}} tasks",
-  "overdue": "{{count}} overdue"
+  "nameExists": "",
+  "tasks_one": "",
+  "tasks_other": "",
+  "overdue": "",
+  "noConditions": "",
+  "condition_one": "",
+  "condition_other": "",
+  "usedCount": "",
+  "delete": {
+    "title": "",
+    "message": ""
+  },
+  "empty": {
+    "title": "",
+    "description": "",
+    "createFilter": "",
+    "noResultsTitle": "",
+    "noResultsWithSearch": "",
+    "noResultsDefault": "",
+    "clearSearch": "",
+    "showAllFilters": ""
+  },
+  "header": {
+    "title": "",
+    "subtitle": ""
+  },
+  "searchPlaceholder": "",
+  "sort": {
+    "smart": "",
+    "name": "",
+    "usage": "",
+    "lastUsed": "",
+    "created": ""
+  },
+  "show": {
+    "title": "",
+    "all": "",
+    "pinned": "",
+    "unpinned": ""
+  },
+  "pin": "",
+  "unpin": ""
 }
