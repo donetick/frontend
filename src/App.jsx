@@ -16,6 +16,7 @@ import useAnalyticsIdentity from './analytics/useAnalyticsIdentity'
 import { registerCapacitorListeners } from './CapacitorListener'
 import PageTransition from './components/animations/PageTransition'
 import { ImpersonateUserProvider } from './contexts/ImpersonateUserContext'
+import { KeyboardShortcutScopeProvider } from './contexts/KeyboardShortcutScopeContext'
 import SSEProvider from './contexts/SSEContext'
 import { AuthProvider } from './hooks/useAuth.jsx'
 import useOnboardingGate from './hooks/useOnboardingGate'
@@ -160,7 +161,9 @@ function App() {
       <AuthProvider>
         <SSEProvider>
           <GlobalSearchProvider>
-            <AppContent />
+            <KeyboardShortcutScopeProvider>
+              <AppContent />
+            </KeyboardShortcutScopeProvider>
           </GlobalSearchProvider>
         </SSEProvider>
       </AuthProvider>

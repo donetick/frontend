@@ -3,11 +3,16 @@ import { useCallback, useEffect, useState } from 'react'
 
 import KeyboardShortcutHint from '../../../components/common/KeyboardShortcutHint'
 import ModalActions from '../../../components/common/ModalActions'
+import { useModalShortcutScope } from '../../../contexts/KeyboardShortcutScopeContext'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
 function ConfirmationModal({ config }) {
   const { ResponsiveModal } = useResponsiveModal()
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
+  // Claims the keyboard while open — if another modal (e.g. a nested
+  // confirmation) opens on top, this one's Y/X/Enter/Escape must stay
+  // silent. See KeyboardShortcutScopeContext.
+  const isShortcutScopeActive = useModalShortcutScope(config?.isOpen)
 
   const handleAction = useCallback(
     isConfirmed => {
@@ -18,7 +23,7 @@ function ConfirmationModal({ config }) {
 
   useEffect(() => {
     const handleKeyDown = event => {
-      if (!config?.isOpen) return
+      if (!isShortcutScopeActive) return
 
       if (event.ctrlKey || event.metaKey) setShowKeyboardShortcuts(true)
 
@@ -50,7 +55,7 @@ function ConfirmationModal({ config }) {
       document.removeEventListener('keydown', handleKeyDown)
       document.removeEventListener('keyup', handleKeyUp)
     }
-  }, [config?.isOpen, config?.color, handleAction])
+  }, [config?.isOpen, config?.color, handleAction, isShortcutScopeActive])
 
   const isDestructive = config?.color === 'danger'
 

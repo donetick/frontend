@@ -42,6 +42,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import DurationInput from '../../components/common/DurationInput'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
+import { usePageShortcutScope } from '../../contexts/KeyboardShortcutScopeContext'
 import NotificationTemplate from '../../components/NotificationTemplate.jsx'
 import { useDocumentScanner } from '../../hooks/useDocumentScanner'
 import {
@@ -96,6 +97,9 @@ const NO_DUE_DATE_REQUIRED_TYPE = ['no_repeat', 'once']
 const NO_DUE_DATE_ALLOWED_TYPE = ['trigger']
 const ChoreEdit = () => {
   const { t } = useTranslation('chores')
+  // Page-level shortcuts (save/cancel) must defer to whatever modal
+  // currently owns the keyboard — see KeyboardShortcutScopeContext.
+  const isPageShortcutActive = usePageShortcutScope()
   const { data: userProfile, isLoading: isUserProfileLoading } =
     useUserProfile()
 
@@ -509,6 +513,9 @@ const ChoreEdit = () => {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = event => {
+      if (!isPageShortcutActive) return
+      if (event.repeat) return
+
       const isHoldingCmd = event.ctrlKey || event.metaKey
 
       // Show keyboard shortcuts when holding Cmd/Ctrl
@@ -544,7 +551,7 @@ const ChoreEdit = () => {
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
     }
-  }, [HandleSaveChore])
+  }, [HandleSaveChore, isPageShortcutActive])
 
   useEffect(() => {
     if (isChoreLoading === false && choreData && choreId) {
