@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next'
 
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import ModalActions from '../../components/common/ModalActions'
+import { useModalShortcutScope } from '../../contexts/KeyboardShortcutScopeContext'
 import { useDocumentScanner } from '../../hooks/useDocumentScanner'
 import { useFileUpload } from '../../hooks/useFileUpload'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
@@ -188,6 +189,10 @@ const PARSE_DEBOUNCE_MS = 150
 
 const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
   const { t } = useTranslation('chores')
+  // Claims the keyboard while open so background listeners (e.g. the project
+  // selector's own Cmd+E) know to stay out of the way — see
+  // KeyboardShortcutScopeContext.
+  const isShortcutScopeActive = useModalShortcutScope(isModalOpen)
   const { ResponsiveModal } = useResponsiveModal()
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
   const pickerEmptyDisplay = isMobile ? 'icon' : 'icon-text'
@@ -409,32 +414,35 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
         dueDate,
         handleCloseModal,
         hasDescription,
-        isModalOpen,
+        isShortcutScopeActive,
         submitChore,
       } = latestRef.current
+      // Only the modal that currently owns the keyboard (the topmost open
+      // one, if this component is ever nested) should react at all —
+      // otherwise a background instance of this same component would also
+      // process keys meant for whatever's on top of it, including showing
+      // its own shortcut hints.
+      if (!isShortcutScopeActive) return
+      // Holding a key (or a fast physical double-tap that the OS coalesces
+      // into auto-repeat) re-fires 'keydown' for as long as it's down. None
+      // of the shortcuts below are meant to repeat — Cmd+J revealing
+      // subtasks a second time just steals focus away from wherever the
+      // user actually is.
+      if (event.repeat) return
+
       const isHoldingCmd = event.ctrlKey || event.metaKey
       if (isHoldingCmd) {
         setShowKeyboardShortcuts(true)
       }
-      if (
-        isHoldingCmd &&
-        event.key.toLowerCase() === 'e' &&
-        isModalOpen &&
-        !hasDescription
-      ) {
+      if (isHoldingCmd && event.key.toLowerCase() === 'e' && !hasDescription) {
         setHasDescription(true)
         setShowKeyboardShortcuts(false)
       }
-      if (isHoldingCmd && event.key.toLowerCase() === 'j' && isModalOpen) {
+      if (isHoldingCmd && event.key.toLowerCase() === 'j') {
         setHasSubTasks(true)
         setShowKeyboardShortcuts(false)
       }
-      if (
-        isHoldingCmd &&
-        event.key.toLowerCase() === 'b' &&
-        isModalOpen &&
-        !dueDate
-      ) {
+      if (isHoldingCmd && event.key.toLowerCase() === 'b' && !dueDate) {
         const tomorrow = moment().add(1, 'day')
         setDueDateOnly(tomorrow.format('YYYY-MM-DD'))
         setDueDate(tomorrow.endOf('day').format('YYYY-MM-DDTHH:mm:59'))
@@ -442,16 +450,12 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
         setDueTime(null)
         setShowKeyboardShortcuts(false)
       }
-      if (
-        event.key === 'Enter' &&
-        (event.ctrlKey || event.metaKey) &&
-        isModalOpen
-      ) {
+      if (event.key === 'Enter' && isHoldingCmd) {
         event.preventDefault()
         submitChore()
         return
       }
-      if (event.key === 'Escape' && isModalOpen) {
+      if (event.key === 'Escape') {
         event.preventDefault()
         handleCloseModal()
         return
@@ -1140,6 +1144,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
 
   latestRef.current = {
     isModalOpen,
+    isShortcutScopeActive,
     hasDescription,
     dueDate,
     createChore,

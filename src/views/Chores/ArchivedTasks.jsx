@@ -35,6 +35,7 @@ import FilterBar from '../../components/common/FilterBar'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
+import { usePageShortcutScope } from '../../contexts/KeyboardShortcutScopeContext'
 import { useFilter } from '../../hooks/useFilter'
 import { useUnArchiveChore } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
@@ -93,6 +94,9 @@ const applyPendingArchivedState = async chores => {
 
 const ArchivedTasks = () => {
   const { t } = useTranslation('chores')
+  // Page-level shortcuts (bulk restore/delete, etc.) must defer to whatever
+  // modal currently owns the keyboard — see KeyboardShortcutScopeContext.
+  const isPageShortcutActive = usePageShortcutScope()
   const { data: userProfile, isLoading: isUserProfileLoading } =
     useUserProfile()
   const { showError, showSuccess } = useNotification()
@@ -284,6 +288,9 @@ const ArchivedTasks = () => {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = event => {
+      if (!isPageShortcutActive) return
+      if (event.repeat) return
+
       const isHoldingCmdOrCtrl = event.ctrlKey || event.metaKey
 
       if (isHoldingCmdOrCtrl) {
@@ -364,7 +371,7 @@ const ArchivedTasks = () => {
       document.removeEventListener('keydown', handleKeyDown)
       document.removeEventListener('keyup', handleKeyUp)
     }
-  }, [isMultiSelectMode, selectedChores.size])
+  }, [isMultiSelectMode, selectedChores.size, isPageShortcutActive])
 
   const searchOptions = {
     keys: ['name', 'raw_label'],

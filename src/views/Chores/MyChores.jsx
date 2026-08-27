@@ -660,7 +660,6 @@ const MyChores = () => {
   const { showKeyboardShortcuts } = useKeyboardShortcuts({
     isMultiSelectMode,
     selectedChores,
-    addTaskModalOpen,
     searchTerm,
     searchFilter:
       hasQuickFilters || searchTerm?.length > 0 ? 'filtered' : 'All',
