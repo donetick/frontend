@@ -78,6 +78,10 @@
         "title": "Geavanceerde instellingen",
         "description": "Stel webhooks, realtime-updates en andere geavanceerde functies in."
       },
+      "privacy": {
+        "title": "",
+        "description": ""
+      },
       "developer": {
         "title": "Ontwikkelaarsinstellingen",
         "description": "Bekijk technische informatie over authenticatietokens, SSE-verbindingen en debuggegevens."
@@ -141,7 +145,7 @@
       "memberDescription": "Een gewoon lid van de circle",
       "manager": "Beheerder",
       "managerDescription": "Kan zich voordoen als gebruikers en namens hen handelen",
-      "admin": "Admin",
+      "admin": "",
       "adminDescription": "Volledige toegang tot de circle"
     },
     "roleUpdateFailed": "Rol bijwerken mislukt",
@@ -164,14 +168,15 @@
     "joinCircle": "Deelnemen aan circle",
     "joinedPending": "Deelname gelukt, wacht tot de eigenaar van de circle je verzoek accepteert.",
     "alreadyMember": "Je bent al lid van deze circle",
-    "joinFailed": "Deelnemen aan circle mislukt"
+    "joinFailed": "Deelnemen aan circle mislukt",
+    "copyLink": ""
   },
   "accountSettings": {
     "title": "Accountinstellingen",
     "description": "Wijzig je accountinstellingen, abonnement of wachtwoord",
     "accountType": "Accounttype: {{type}}",
     "free": "Gratis",
-    "plus": "Plus",
+    "plus": "",
     "plusUntil": "Plus (tot {{date}})",
     "activeDescription": "Je hebt momenteel een Plus-abonnement. Je abonnement wordt verlengd op {{date}}.",
     "cancelledDescription": "Je hebt je abonnement opgezegd. Je account gaat op {{date}} terug naar het gratis abonnement.",
@@ -266,9 +271,9 @@
     "customLabel": "Aangepaste melding",
     "customHelper": "Ontvang meldingen op een ander platform",
     "targetNone": "Geen",
-    "targetTelegram": "Telegram",
-    "targetPushover": "Pushover",
-    "targetWebhooks": "Webhooks",
+    "targetTelegram": "",
+    "targetPushover": "",
+    "targetWebhooks": "",
     "telegramBotHelpBefore": "Je moet eerst een bericht naar de bot sturen voordat Telegram-meldingen werken",
     "telegramBotHelpAfter": "om een chat te starten",
     "clickHere": "Klik hier",
@@ -348,7 +353,8 @@
     "backupCodesModal": {
       "title": "Nieuwe back-upcodes",
       "warning": "Je vorige back-upcodes zijn niet meer geldig. Bewaar deze nieuwe codes op een veilige plek. Elke code kan maar één keer worden gebruikt."
-    }
+    },
+    "generateCodes": ""
   },
   "apiTokens": {
     "title": "API-tokens",
@@ -418,7 +424,8 @@
         "name": "Weekdoelen",
         "description": "Toont wekelijkse voortgang en gezinsstatistieken"
       }
-    }
+    },
+    "detailedDescription": ""
   },
   "theme": {
     "title": "Themavoorkeuren",
@@ -452,7 +459,8 @@
       "ymd": "JJJJ-MM-DD (ISO)",
       "long": "Lange notatie (bijv. 1 januari 2024)",
       "short": "Korte notatie (bijv. 1 jan. 2024)"
-    }
+    },
+    "descriptionLong": ""
   },
   "advanced": {
     "title": "Geavanceerde instellingen",
@@ -481,7 +489,7 @@
       "toggleLabel": "Realtime-updates inschakelen",
       "title": "Realtime-updates",
       "subtitle": "Ontvang direct meldingen wanneer taken worden bijgewerkt",
-      "statusLabel": "Status:",
+      "statusLabel": "",
       "basicPlan": "Realtime-updates zijn niet beschikbaar in het basisabonnement. Upgrade naar Plus om direct meldingen te ontvangen wanneer taken worden bijgewerkt.",
       "disabled": "Realtime-updates staan uit. Schakel ze in om live wijzigingen te zien wanneer jij of andere circle-leden taken afronden, overslaan of wijzigen.",
       "connected": "Realtime-updates werken. Je ziet live wijzigingen wanneer jij of andere circle-leden taken afronden, overslaan of wijzigen.",
@@ -491,77 +499,152 @@
       "basicPlanNotice": "Realtime-updates zijn niet beschikbaar in het basisabonnement. Upgrade naar Plus om direct meldingen te ontvangen wanneer jij of andere circle-leden taken afronden, overslaan of wijzigen."
     }
   },
+  "privacyAnalytics": {
+    "title": "",
+    "description": "",
+    "analyticsToggle": "",
+    "analyticsHelper": "",
+    "crashToggle": "",
+    "crashHelper": "",
+    "footnote": ""
+  },
   "subscription": {
-    "sessionFailed": "Failed to create subscription session",
-    "errorTitle": "Subscription Error",
-    "errorMessage": "Failed to start subscription process. Please try again.",
-    "subscribe": "Subscribe",
-    "cancelAnytime": "Cancel anytime. No hidden fees. Secure payment powered by Stripe."
+    "sessionFailed": "",
+    "errorTitle": "",
+    "errorMessage": "",
+    "subscribe": "",
+    "cancelAnytime": "",
+    "description": "",
+    "whatsIncluded": "",
+    "mostPopular": "",
+    "featureNotifications": "",
+    "featureRichText": "",
+    "featureThingTriggers": "",
+    "featureApiTokens": "",
+    "featureImageUploads": "",
+    "featureAutomation": "",
+    "planYearly": ""
   },
   "childUsers": {
-    "errNameRequired": "Sub account name is required",
-    "errNameMin": "Sub account name must be at least 2 characters",
-    "errNameMax": "Sub account name must be less than 20 characters",
-    "errNameChars": "Sub account name can only contain lowercase letters, dot and dash",
-    "errPasswordRequired": "Password is required",
-    "errPasswordLength": "Password must be between 8 and 64 characters",
-    "errPasswordMatch": "Passwords do not match",
-    "errDisplayNameMax": "Display name must be less than 50 characters",
-    "createTitle": "Create Sub Account",
-    "createButton": "Create Account",
-    "nameLabel": "Sub Account Name *",
-    "namePlaceholder": "Enter sub account name (e.g., sarah)",
-    "displayNameLabel": "Display Name",
-    "displayNamePlaceholder": "Display name (optional, defaults to sub account name)",
-    "passwordLabel": "Password *",
-    "passwordPlaceholder": "Enter password (8-64 characters)",
-    "confirmPasswordLabel": "Confirm Password *",
-    "confirmPasswordPlaceholder": "Confirm password"
+    "errNameRequired": "",
+    "errNameMin": "",
+    "errNameMax": "",
+    "errNameChars": "",
+    "errPasswordRequired": "",
+    "errPasswordLength": "",
+    "errPasswordMatch": "",
+    "errDisplayNameMax": "",
+    "createTitle": "",
+    "createDescription": "",
+    "createButton": "",
+    "nameLabel": "",
+    "namePlaceholder": "",
+    "displayNameLabel": "",
+    "displayNamePlaceholder": "",
+    "passwordLabel": "",
+    "passwordPlaceholder": "",
+    "confirmPasswordLabel": "",
+    "confirmPasswordPlaceholder": ""
   },
   "passwordChange": {
-    "minLength": "Password must be at least 8 characters",
-    "maxLength": "Password must be less than 64 characters"
+    "minLength": "",
+    "maxLength": "",
+    "description": "",
+    "mismatch": "",
+    "newPassword": "",
+    "newPasswordPlaceholder": "",
+    "confirmPassword": "",
+    "confirmPasswordPlaceholder": ""
   },
   "payment": {
-    "cancelledTitle": "Payment has been cancelled",
-    "cancelledRedirect": "You will be redirected to the main page shortly.",
-    "successTitle": "Payment Successful!",
-    "successRedirect": "You will be redirected to the settings page shortly."
+    "cancelledTitle": "",
+    "cancelledRedirect": "",
+    "successTitle": "",
+    "successRedirect": ""
   },
   "developer": {
-    "tokenRefreshed": "Token refreshed successfully",
-    "endpointCalled": "Refresh token endpoint called successfully",
-    "clearDbCleared": "Local offline database cleared. Starting full sync...",
-    "clearDbDone": "Full sync completed from the beginning",
-    "intro": "View technical information about your authentication tokens and session",
-    "refreshCookieNote": "Refresh tokens are managed via HTTP-only cookies on web platform",
-    "noReconnectInfo": "No reconnection information available",
-    "noTimeoutInfo": "No timeout information available",
-    "noDebugInfo": "No debug information available"
+    "tokenRefreshed": "",
+    "endpointCalled": "",
+    "clearDbCleared": "",
+    "clearDbDone": "",
+    "intro": "",
+    "refreshCookieNote": "",
+    "noReconnectInfo": "",
+    "noTimeoutInfo": "",
+    "noDebugInfo": ""
   },
   "backup": {
-    "keyRequired": "Encryption key is required",
-    "created": "Backup created and downloaded successfully",
-    "createFailed": "Failed to create backup",
-    "selectFile": "Please select a backup file",
-    "restored": "Backup restored successfully. Please refresh the page.",
-    "restoreFailed": "Failed to restore backup",
-    "readFailed": "Failed to read backup file",
-    "createIntro": "Create an encrypted backup of your data. This backup will include all your chores, history, settings, and optionally your uploaded files.",
-    "keyPlaceholder": "Enter a strong encryption key",
-    "includeAssets": "Include uploaded files and assets",
-    "warningLabel": "Warning:",
-    "restoreWarning": "Restoring a backup will replace all your current data. This action cannot be undone.",
-    "restoreKeyPlaceholder": "Enter the encryption key used for this backup"
+    "keyRequired": "",
+    "created": "",
+    "createFailed": "",
+    "selectFile": "",
+    "restored": "",
+    "restoreFailed": "",
+    "readFailed": "",
+    "createIntro": "",
+    "keyPlaceholder": "",
+    "includeAssets": "",
+    "warningLabel": "",
+    "restoreWarning": "",
+    "restoreKeyPlaceholder": "",
+    "title": "",
+    "createTab": "",
+    "restoreTab": "",
+    "creating": "",
+    "restoring": ""
   },
   "deletion": {
-    "passwordRequired": "Please enter your password to continue",
-    "passwordAndDelete": "Please enter your password and type DELETE to confirm",
-    "failed": "Failed to delete account",
-    "passwordPlaceholder": "Enter your password",
-    "transferIntro": "You own circles that require ownership transfer before deletion. Please select new owners:",
-    "selectOwner": "Select new owner",
-    "confirmPrompt": "Please enter your password and type DELETE to confirm",
-    "typeDelete": "DELETE"
+    "passwordRequired": "",
+    "passwordAndDelete": "",
+    "failed": "",
+    "passwordPlaceholder": "",
+    "transferIntro": "",
+    "selectOwner": "",
+    "confirmPrompt": "",
+    "typeDelete": "",
+    "warningLead": "",
+    "warningIntro": "",
+    "removesProfile": "",
+    "removesChores": "",
+    "removesTokens": "",
+    "removesStorage": "",
+    "removesPoints": "",
+    "removesCircles": "",
+    "passwordToContinue": "",
+    "circleLabel": "",
+    "newOwner": "",
+    "logoutNotice": "",
+    "passwordLabel": "",
+    "typeToConfirm": ""
+  },
+  "realtime": {
+    "titleSse": "",
+    "subtitleSse": ""
+  },
+  "nativeCancel": {
+    "title": "",
+    "dismiss": "",
+    "cancelViaStore": "",
+    "cancelDesktop": "",
+    "intro": "",
+    "iosHeading": "",
+    "iosStep1": "",
+    "iosStep2": "",
+    "iosStep3": "",
+    "iosStep4": "",
+    "iosStep5": "",
+    "iosNote": "",
+    "androidHeading": "",
+    "androidStep1": "",
+    "androidStep2": "",
+    "androidStep3": "",
+    "androidStep4": "",
+    "androidStep5": "",
+    "androidStep6": "",
+    "androidNote": "",
+    "webHeading": "",
+    "webBody": "",
+    "webNote": "",
+    "footer": ""
   }
 }

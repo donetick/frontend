@@ -1,9 +1,71 @@
 {
-  "shared": "Shared",
+  "shared": "",
   "delete": {
-    "title": "Delete Label",
-    "message": "Are you sure you want to delete this label? This will remove the label from all tasks."
+    "title": "",
+    "message": ""
   },
-  "loadError": "Failed to load labels. Please try again.",
-  "blurb": "Manage your labels and organize your tasks effectively. Labels will be automatically shared with your circle if they are used on a shared task."
+  "loadError": "",
+  "search": {
+    "placeholder": "",
+    "noResultsTitle": "",
+    "noResultsDescription": "",
+    "noFilterResultsDescription": "",
+    "clear": "",
+    "showAll": ""
+  },
+  "detail": {
+    "taskCount_one": "",
+    "taskCount_other": "",
+    "labelActions": "",
+    "filters": {
+      "all": "",
+      "overdue": "",
+      "today": "",
+      "undated": ""
+    },
+    "noMatchingStatus": "",
+    "clearFilters": "",
+    "searchPlaceholder": "",
+    "emptyTitle": "",
+    "emptyDescription": "",
+    "browseTasks": "",
+    "noResultsTitle": "",
+    "noResultsDescription": "",
+    "notFoundTitle": "",
+    "notFoundDescription": "",
+    "backToLabels": ""
+  },
+  "blurb": "",
+  "modal": {
+    "errorEmptyName": "",
+    "errorDuplicate": "",
+    "errorNoColor": "",
+    "saveFailedTitle": "",
+    "saveFailedMessage": "",
+    "name": "",
+    "editTitle": "",
+    "addTitle": "",
+    "color": "",
+    "saveChanges": "",
+    "addLabel": "",
+    "colorAriaSelect": ""
+  },
+  "picker": {
+    "label": "",
+    "createLabel": "",
+    "labelsCount_one": "",
+    "labelsCount_other": ""
+  },
+  "view": {
+    "emptyTitle": "",
+    "emptyDescription": "",
+    "createLabel": "",
+    "filterTitle": "",
+    "sortName": "",
+    "sortColor": "",
+    "sortRecent": "",
+    "filterAll": "",
+    "filterMine": "",
+    "filterShared": ""
+  }
 }
