@@ -1,71 +1,71 @@
 {
-  "shared": "",
+  "shared": "Geteilt",
   "delete": {
-    "title": "",
-    "message": ""
+    "title": "Beschriftung löschen",
+    "message": "Möchtest du diese Beschriftung wirklich löschen? Sie wird von allen Aufgaben entfernt."
   },
-  "loadError": "",
+  "loadError": "Beschriftungen konnten nicht geladen werden. Bitte versuche es erneut.",
   "search": {
-    "placeholder": "",
-    "noResultsTitle": "",
-    "noResultsDescription": "",
-    "noFilterResultsDescription": "",
-    "clear": "",
-    "showAll": ""
+    "placeholder": "Beschriftungen durchsuchen",
+    "noResultsTitle": "Keine passenden Beschriftungen",
+    "noResultsDescription": "Keine Beschriftung passt zu „{{searchTerm}}“.",
+    "noFilterResultsDescription": "Keine Beschriftung entspricht dem aktuellen Filter.",
+    "clear": "Suche löschen",
+    "showAll": "Alle Beschriftungen anzeigen"
   },
   "detail": {
-    "taskCount_one": "",
-    "taskCount_other": "",
-    "labelActions": "",
+    "taskCount_one": "{{count}} Aufgabe",
+    "taskCount_other": "{{count}} Aufgaben",
+    "labelActions": "Beschriftungsaktionen",
     "filters": {
-      "all": "",
-      "overdue": "",
-      "today": "",
-      "undated": ""
+      "all": "Alle",
+      "overdue": "Überfällig",
+      "today": "Heute",
+      "undated": "Kein Datum"
     },
-    "noMatchingStatus": "",
-    "clearFilters": "",
-    "searchPlaceholder": "",
-    "emptyTitle": "",
-    "emptyDescription": "",
-    "browseTasks": "",
-    "noResultsTitle": "",
-    "noResultsDescription": "",
-    "notFoundTitle": "",
-    "notFoundDescription": "",
-    "backToLabels": ""
+    "noMatchingStatus": "Keine Aufgabe mit dieser Beschriftung hat derzeit diesen Status.",
+    "clearFilters": "Alle Aufgaben anzeigen",
+    "searchPlaceholder": "Aufgaben mit dieser Beschriftung durchsuchen",
+    "emptyTitle": "Keine Aufgaben mit dieser Beschriftung",
+    "emptyDescription": "Noch ist nichts mit „{{label}}“ gekennzeichnet. Füge die Beschriftung einer Aufgabe hinzu, dann erscheint sie hier.",
+    "browseTasks": "Aufgaben durchsuchen",
+    "noResultsTitle": "Keine passenden Aufgaben",
+    "noResultsDescription": "Keine Aufgabe mit dieser Beschriftung passt zu „{{searchTerm}}“.",
+    "notFoundTitle": "Beschriftung nicht gefunden",
+    "notFoundDescription": "Diese Beschriftung wurde möglicherweise gelöscht oder wird nicht mehr mit dir geteilt.",
+    "backToLabels": "Zurück zu den Beschriftungen"
   },
-  "blurb": "",
+  "blurb": "Verwalte deine Beschriftungen und organisiere deine Aufgaben übersichtlich. Beschriftungen werden automatisch mit deinem Kreis geteilt, wenn sie für eine geteilte Aufgabe verwendet werden.",
   "modal": {
-    "errorEmptyName": "",
-    "errorDuplicate": "",
-    "errorNoColor": "",
-    "saveFailedTitle": "",
-    "saveFailedMessage": "",
+    "errorEmptyName": "Name darf nicht leer sein",
+    "errorDuplicate": "Eine Beschriftung mit diesem Namen ist bereits vorhanden",
+    "errorNoColor": "Bitte wähle eine Farbe aus",
+    "saveFailedTitle": "Beschriftung konnte nicht gespeichert werden",
+    "saveFailedMessage": "Beschriftung konnte nicht gespeichert werden. Bitte versuche es erneut.",
     "name": "",
-    "editTitle": "",
-    "addTitle": "",
-    "color": "",
-    "saveChanges": "",
-    "addLabel": "",
-    "colorAriaSelect": ""
+    "editTitle": "Label bearbeiten",
+    "addTitle": "Label hinzufügen",
+    "color": "Farbe",
+    "saveChanges": "Änderungen speichern",
+    "addLabel": "Label hinzufügen",
+    "colorAriaSelect": "{{color}} auswählen"
   },
   "picker": {
     "label": "",
-    "createLabel": "",
-    "labelsCount_one": "",
-    "labelsCount_other": ""
+    "createLabel": "Label erstellen",
+    "labelsCount_one": "{{count}} Label",
+    "labelsCount_other": "{{count}} Labels"
   },
   "view": {
-    "emptyTitle": "",
-    "emptyDescription": "",
-    "createLabel": "",
-    "filterTitle": "",
+    "emptyTitle": "Noch keine Labels",
+    "emptyDescription": "Labels gruppieren Aufgaben in deinem Kreis, z. B. „Küche“ oder „Rechnungen“, sodass du mit einem Tipp danach filtern kannst.",
+    "createLabel": "Label erstellen",
+    "filterTitle": "Anzeigen",
     "sortName": "",
-    "sortColor": "",
-    "sortRecent": "",
-    "filterAll": "",
-    "filterMine": "",
-    "filterShared": ""
+    "sortColor": "Farbe",
+    "sortRecent": "Zuletzt erstellt",
+    "filterAll": "Alle Labels",
+    "filterMine": "Von mir erstellt",
+    "filterShared": "Mit mir geteilt"
   }
 }
