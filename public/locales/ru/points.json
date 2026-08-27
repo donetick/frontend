@@ -1,0 +1,80 @@
+{
+  "cards": {
+    "available": {
+      "subtext": "Можно потратить",
+      "title": "Доступно"
+    },
+    "period": {
+      "allTime": "Всё время",
+      "last6Months": "Последние 6 месяцев",
+      "lastDays_few": "Последние {{count}} дня",
+      "lastDays_many": "Последние {{count}} дней",
+      "lastDays_one": "Последний {{count}} день",
+      "lastDays_other": "Последние {{count}} дня",
+      "title": "За период"
+    },
+    "redeemed": {
+      "subtext": "Уже использовано",
+      "title": "Потрачено"
+    },
+    "total": {
+      "subtext": "Набрано за всё время",
+      "title": "Всего"
+    }
+  },
+  "filter": {
+    "analysisTitle": "Фильтр и разбор",
+    "showFor": "Показать баллы для:",
+    "timePeriod": "Период:",
+    "title": "Фильтр баллов"
+  },
+  "leaderboard": {
+    "available": "доступно {{count}}",
+    "modePoints": "Баллы",
+    "modeTasks": "Дела",
+    "points_few": "{{count}} балла",
+    "points_many": "{{count}} баллов",
+    "points_one": "{{count}} балл",
+    "points_other": "{{count}} балла",
+    "subtitlePoints": "Места по баллам, набранным за выбранный период",
+    "subtitleTasks": "Места по делам, закрытым за выбранный период",
+    "tasksAndAvg": "дел: {{tasks}} • в среднем {{avg}} за дело",
+    "titlePoints": "Рейтинг по баллам",
+    "titleTasks": "Рейтинг по делам",
+    "you": "Вы"
+  },
+  "redeem": "Потратить баллы",
+  "redeemModal": {
+    "aboutToRedeem": "Вы собираетесь потратить",
+    "amount": "{{count}} баллов",
+    "cannotExceed": "Больше, чем доступно",
+    "placeholder": "Введите количество...",
+    "pointsAvailable": "доступно {{count}}",
+    "pointsToRedeem": "Сколько баллов потратить",
+    "quickAdd": "Быстро добавить:",
+    "redeemButton": "Потратить",
+    "remaining": "Останется: {{count}}"
+  },
+  "summary": {
+    "allTime": "всё время",
+    "last6Months": "последние 6 месяцев",
+    "lastDays_few": "последние {{count}} дня",
+    "lastDays_many": "последние {{count}} дней",
+    "lastDays_one": "последний {{count}} день",
+    "lastDays_other": "последние {{count}} дня",
+    "overThe": "за",
+    "showingFor": "Показаны баллы участника",
+    "unknownUser": "Неизвестный участник"
+  },
+  "tabs": {
+    "allTime": "Всё время",
+    "days7": "7 дней",
+    "months6": "6 месяцев",
+    "short6m": "6м",
+    "short7d": "7д",
+    "shortAll": "Всё"
+  },
+  "trend": {
+    "title": "Динамика баллов"
+  }
+}
