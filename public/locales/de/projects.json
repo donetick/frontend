@@ -55,7 +55,7 @@
     "manage": "Projekte verwalten",
     "manageDescription": "Alle Projekte anzeigen, bearbeiten und organisieren",
     "currentProjectTitle": "Aktuelles Projekt: {{project}} (Strg+E)",
-    "builtInWorkspace": "Integrierter Projekt-Arbeitsbereich"
+    "builtInWorkspace": "Integrierter Projektarbeitsbereich"
   },
   "modal": {
     "errorNameRequired": "Projektname ist erforderlich",

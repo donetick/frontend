@@ -23,7 +23,7 @@
   },
   "view": {
     "title": "Dinge",
-    "description": "Dinge sind benutzerdefinierte Werte, die mit Aufgaben verknüpft werden können, um zusätzliche Informationen zu erfassen. Sie können Text, Zahl oder Wahrheitswert sein. Du kannst Dinge mit Aufgaben verknüpfen und eine Aufgabe fällig werden lassen, sobald eine Bedingung erfüllt ist.",
+    "description": "Dinge sind benutzerdefinierte Werte, die mit Aufgaben verknüpft werden können, um zusätzliche Informationen zu erfassen. Sie können Text-, Zahl- oder Boolean-Werte sein. Du kannst Dinge mit Aufgaben verknüpfen und eine Aufgabe fällig werden lassen, sobald eine Bedingung erfüllt ist.",
     "searchPlaceholder": "Dinge durchsuchen",
     "sortName": "Name",
     "sortType": "Typ",
@@ -44,7 +44,7 @@
   "types": {
     "text": "Text",
     "number": "Zahl",
-    "boolean": "Wahrheitswert"
+    "boolean": "Boolean"
   },
   "notify": {
     "savedTitle": "Gespeichert",

@@ -35,7 +35,7 @@
         "description": "Aktualisiere deine Profildaten, dein Foto, deinen Anzeigenamen und deine Zeitzone."
       },
       "circle": {
-        "title": "Kreis-Einstellungen",
+        "title": "Kreiseinstellungen",
         "description": "Verwalte deinen Kreis, lade Mitglieder ein und bearbeite Beitrittsanfragen."
       },
       "account": {
@@ -55,7 +55,7 @@
         "description": "Erhöhe deine Sicherheit mit MFA über Authenticator-Apps."
       },
       "apitokens": {
-        "title": "API-Token",
+        "title": "API-Tokens",
         "description": "Erstelle und verwalte Zugriffstoken für Drittanbieter-Integrationen und API-Zugriff."
       },
       "storage": {
@@ -142,7 +142,7 @@
     "requestedToJoin": "Beitrittsanfrage {{date}}",
     "roles": {
       "member": "Mitglied",
-      "memberDescription": "Ein normales Mitglied des Kreise",
+      "memberDescription": "Ein reguläres Mitglied des Kreises",
       "manager": "Manager",
       "managerDescription": "Kann sich als Nutzer ausgeben und in deren Namen handeln",
       "admin": "Administrator",
@@ -167,7 +167,7 @@
     "enterCodePlaceholder": "Code eingeben",
     "joinCircle": "Kreis beitreten",
     "joinedPending": "Kreis erfolgreich beigetreten, warte auf die Bestätigung durch die Kreisbesitzerin oder den Kreisbesitzer.",
-    "alreadyMember": "Du bist bereits Mitglied dieses Kreise",
+    "alreadyMember": "Du bist bereits Mitglied dieses Kreises",
     "joinFailed": "Beitritt zum Kreis fehlgeschlagen",
     "copyLink": "Link kopieren"
   },
@@ -357,7 +357,7 @@
     "generateCodes": "Neue Codes erzeugen"
   },
   "apiTokens": {
-    "title": "API-Token",
+    "title": "API-Tokens",
     "accessToken": "Zugriffstoken",
     "description": "Erstelle ein Token, um über die API Dinge zu aktualisieren, die Aufgaben auslösen",
     "plusNotice": "API-Token sind im Basis-Tarif nicht verfügbar. Wechsle zu Plus, um API-Token für die Anbindung externer Systeme und die Automatisierung deiner Aufgaben zu erstellen.",
@@ -374,11 +374,11 @@
   },
   "storage": {
     "title": "Speichereinstellungen",
-    "serverTitle": "Serverspeicher-Nutzung",
+    "serverTitle": "Serverspeichernutzung",
     "serverDescription": "Das ist der Speicher, den dein Konto auf unseren Servern belegt (z. B. Dateien, Bilder und hochgeladene Daten).",
     "usagePlaceholder": "-- MB belegt / -- MB gesamt (--)",
     "usage": "{{used}} MB belegt / {{total}} MB gesamt ({{percent}} %)",
-    "basicPlanNotice": "Serverspeicher ist im Basis-Tarif nicht verfügbar. Wechsle zu Plus, um deine Serverspeicher-Nutzung zu verfolgen.",
+    "basicPlanNotice": "Serverspeicher ist im Basis-Tarif nicht verfügbar. Wechsle zu Plus, um deine Serverspeichernutzung zu verfolgen.",
     "localTitleApp": "Lokaler App-Speicher & Cache",
     "localTitleBrowser": "Lokaler Browser-Speicher & Cache",
     "localDescription": "Das sind Daten, die für schnelleren Zugriff lokal in deinem Browser gespeichert werden. Das Löschen wirkt sich nicht auf deine Serverdaten aus, meldet dich aber möglicherweise ab.",
@@ -430,7 +430,7 @@
   "theme": {
     "title": "Design-Einstellungen",
     "description": "Lege fest, wie die Seite für dich aussieht. Wähle ein festes Design oder synchronisiere mit deinem System, um automatisch zwischen hellem und dunklem Design zu wechseln.",
-    "themeMode": "Design-Modus",
+    "themeMode": "Designmodus",
     "light": "Hell",
     "dark": "Dunkel",
     "system": "System"
@@ -446,8 +446,8 @@
     "timeFormat": "Zeitformat",
     "timeFormatDescription": "Wähle das 12- oder 24-Stunden-Format",
     "preview": "Vorschau: {{value}}",
-    "12hour": "12 Stunden (AM/PM)",
-    "24hour": "24 Stunden",
+    "12hour": "12-Stunden-Format (AM/PM)",
+    "24hour": "24-Stunden-Format",
     "firstDayOfWeek": "Erster Wochentag",
     "firstDayOfWeekDescription": "Lege fest, mit welchem Tag deine Woche beginnt",
     "sunday": "Sonntag",
@@ -583,7 +583,7 @@
     "readFailed": "Sicherungsdatei konnte nicht gelesen werden",
     "createIntro": "Erstelle eine verschlüsselte Sicherung deiner Daten. Sie enthält alle Aufgaben, den Verlauf, Einstellungen und optional deine hochgeladenen Dateien.",
     "keyPlaceholder": "Starken Verschlüsselungsschlüssel eingeben",
-    "includeAssets": "Hochgeladene Dateien und Assets einschließen",
+    "includeAssets": "Hochgeladene Dateien einschließen",
     "warningLabel": "Warnung:",
     "restoreWarning": "Beim Wiederherstellen einer Sicherung werden alle aktuellen Daten ersetzt. Diese Aktion kann nicht rückgängig gemacht werden.",
     "restoreKeyPlaceholder": "Den für diese Sicherung verwendeten Verschlüsselungsschlüssel eingeben",

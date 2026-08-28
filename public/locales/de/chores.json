@@ -26,9 +26,9 @@
     "taskCompleted": "Aufgabe abgeschlossen",
     "taskCompletedMessage": "Deine Aufgabe wurde als abgeschlossen markiert",
     "taskCompletionUndone": "Aufgabenabschluss wurde rückgängig gemacht.",
-    "taskSkipUndone": "Aufgabe überspringen wurde rückgängig gemacht.",
-    "undoSuccessful": "Rückgängig erfolgreich",
-    "undoFailed": "Rückgängig fehlgeschlagen",
+    "taskSkipUndone": "Das Überspringen der Aufgabe wurde rückgängig gemacht.",
+    "undoSuccessful": "Erfolgreich rückgängig gemacht",
+    "undoFailed": "Rückgängigmachen fehlgeschlagen",
     "undoFailedMessage": "Die Aktion konnte nicht rückgängig gemacht werden. Bitte versuche es erneut.",
     "resetTimer": "Timer zurücksetzen",
     "resetTimerConfirmation": "Bist du sicher, dass du den Timer zurücksetzen möchtest? Dies löscht alle Zeitaufzeichnungen seit du die Aufgabe gestartet hast.",
@@ -168,9 +168,9 @@
       "eq": "Gleich",
       "neq": "Ungleich",
       "gt": "Größer als",
-      "gte": "Größer als oder gleich",
+      "gte": "Größer oder gleich",
       "lt": "Kleiner als",
-      "lte": "Kleiner als oder gleich"
+      "lte": "Kleiner oder gleich"
     }
   },
   "activity": {
@@ -261,14 +261,14 @@
     "bulk": {
       "completeTitle": "Aufgaben abschließen",
       "completedTitle": "✅ Aufgaben abgeschlossen",
-      "completeFailedTitle": "Massenabschluss fehlgeschlagen",
+      "completeFailedTitle": "Mehrere Aufgaben konnten nicht abgeschlossen werden",
       "archiveTitle": "Aufgaben archivieren",
       "archivedTitle": "📦 Aufgaben archiviert",
-      "archiveFailedTitle": "Massenarchivierung fehlgeschlagen",
+      "archiveFailedTitle": "Mehrere Aufgaben konnten nicht archiviert werden",
       "deleteTitle": "Aufgaben löschen",
       "skipTitle": "Aufgaben überspringen",
       "skippedTitle": "⏭️ Aufgaben übersprungen",
-      "skipFailedTitle": "Massenüberspringen fehlgeschlagen"
+      "skipFailedTitle": "Mehrere Aufgaben konnten nicht übersprungen werden"
     }
   },
   "archived": {
@@ -276,7 +276,7 @@
     "restoredMsg": "Die Aufgabe wurde wiederhergestellt und ist jetzt aktiv.",
     "deletedTitle": "Aufgabe gelöscht",
     "delete": "Löschen",
-    "someFailedTitle": "Einige Aufgaben sind fehlgeschlagen",
+    "someFailedTitle": "Einige Aufgaben konnten nicht verarbeitet werden",
     "unexpectedError": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es erneut.",
     "deletedBulkTitle": "🗑️ Aufgaben gelöscht",
     "bulkDeleteFailTitle": "Massenlöschung fehlgeschlagen",
@@ -314,13 +314,13 @@
     "selectAllTitle": "Alle sichtbaren Aufgaben auswählen (Strg+A)",
     "all": "Alle",
     "closeMultiSelect": "Mehrfachauswahl schließen (Esc)",
-    "clearMultiSelect": "Mehrfachauswahl leeren (Esc)",
+    "clearMultiSelect": "Auswahl aufheben (Esc)",
     "close": "Schließen",
     "clear": "Leeren",
     "restoreSelectedTitle": "Ausgewählte Aufgaben wiederherstellen (R)",
     "deleteSelectedTitle": "Ausgewählte Aufgaben löschen (E)",
     "clearSearch": "Suche löschen",
-    "clearFilters": "Filter löschen",
+    "clearFilters": "Filter zurücksetzen",
     "count_one": "{{count}} archivierte Aufgabe",
     "count_other": "{{count}} archivierte Aufgaben",
     "matching": " passend zu „{{term}}“",
@@ -509,8 +509,8 @@
     "title": "Fälligkeitsdatum",
     "apply": "Übernehmen",
     "remove": "Entfernen",
-    "quickDate": "Schnellauswahl Datum",
-    "quickTime": "Schnellauswahl Uhrzeit",
+    "quickDate": "Datum schnell auswählen",
+    "quickTime": "Uhrzeit schnell auswählen",
     "nextMonth": "Nächster Monat",
     "morning": "Morgens",
     "noon": "Mittags",
@@ -546,7 +546,7 @@
     "addPlaceholder": "Neue Aufgabe hinzufügen... (Eingabetaste zum Hinzufügen)"
   },
   "voiceToTask": {
-    "title": "Sprich deine Aufgaben",
+    "title": "Aufgaben diktieren",
     "onDevice": "Auf dem Gerät",
     "micDeniedMessage": "Für die Sprachaufnahme wird Mikrofonzugriff benötigt. Aktiviere ihn in deinen Geräteeinstellungen und versuche es erneut.",
     "tryAgain": "Erneut versuchen",
@@ -564,7 +564,7 @@
     "points": "{{count}} Pkt.",
     "frequency": {
       "everyN": "Alle {{count}} {{unit}}",
-      "everyUnit": "Jede(n) {{unit}}",
+      "everyUnit": "Alle {{unit}}",
       "daily": "Täglich",
       "weekly": "Wöchentlich",
       "monthly": "Monatlich",
@@ -950,7 +950,7 @@
     "filterFallback": "Filter",
     "notPrefix": "Nicht ",
     "customDueDate": "Benutzerdefiniert",
-    "clear": "Leeren"
+    "clear": "Zurücksetzen"
   },
   "empty": {
     "errorTitle": "Donetick ist nicht erreichbar",
@@ -965,7 +965,7 @@
     "noMatchFilters": "Du hast Aufgaben, aber keine davon entspricht den aktuell gesetzten Filtern.",
     "clearSearch": "Suche löschen",
     "showEveryone": "Aufgaben aller anzeigen",
-    "clearFilters": "Filter löschen",
+    "clearFilters": "Filter zurücksetzen",
     "projectTitle": "Noch nichts in {{name}}",
     "projectDescription": "Aufgaben, die du diesem Projekt hinzufügst, erscheinen hier. Deine anderen Aufgaben bleiben dort, wo sie sind.",
     "addTaskHere": "Hier eine Aufgabe hinzufügen",

@@ -28,7 +28,7 @@
     "Ocean": "Ozean",
     "Mustard": "Senf",
     "Ruby": "Rubin",
-    "Periwinkle": "Immergrün",
+    "Periwinkle": "Lavendelblau",
     "Turquoise": "Türkis",
     "Lime": "Limette",
     "Blush": "Rosé",
@@ -104,7 +104,7 @@
       "results_one": "{{count}} Ergebnis",
       "results_other": "{{count}} Ergebnisse",
       "typeToSearch": "Zum Suchen tippen",
-      "slashHint": "/ um zu einer Ansicht zu springen"
+      "slashHint": "/ drücken, um zu einer Ansicht zu springen"
     },
     "modes": {
       "actions": {
@@ -220,7 +220,7 @@
     "planPlus": "Plus",
     "planPlusExpiring": "Plus (läuft bald ab)",
     "switchUser": "Benutzer wechseln",
-    "impersonateUser": "Benutzer übernehmen",
+    "impersonateUser": "Benutzeridentität übernehmen",
     "switchToLight": "Zum hellen Design wechseln",
     "switchToDark": "Zum dunklen Design wechseln",
     "unlockPremium": "Premium-Funktionen freischalten",
@@ -251,7 +251,7 @@
   "apply": "Übernehmen",
   "cancelAll": "Alle abbrechen",
   "backFromSearch": "Zurück aus der Suche",
-  "newVersionAvailable": "Eine neue Version ist jetzt verfügbar. Klicke auf die Aktualisieren-Schaltfläche, um zu aktualisieren.",
+  "newVersionAvailable": "Eine neue Version ist verfügbar. Klicke auf „Neu laden“, um sie zu installieren.",
   "notFound": {
     "title": "Seite nicht gefunden",
     "description": "Dieser Link führt ins Leere. Möglicherweise wurde er verschoben oder die Adresse enthält einen Tippfehler.",
@@ -320,8 +320,8 @@
     "checkingServer": "Server wird überprüft...",
     "retryingIn": "Erneuter Versuch in {{seconds}} s",
     "syncNow": "Jetzt synchronisieren",
-    "pendingSyncLabel_one": "{{count}} ausstehende Aktion zu synchronisieren",
-    "pendingSyncLabel_other": "{{count}} ausstehende Aktionen zu synchronisieren",
+    "pendingSyncLabel_one": "{{count}} Aktion wartet auf die Synchronisierung",
+    "pendingSyncLabel_other": "{{count}} Aktionen warten auf die Synchronisierung",
     "pendingActionsTitle": "Ausstehende Aktionen",
     "actionsWaitingToSync_one": "{{count}} Aktion wartet auf Synchronisierung.",
     "actionsWaitingToSync_other": "{{count}} Aktionen warten auf Synchronisierung.",
