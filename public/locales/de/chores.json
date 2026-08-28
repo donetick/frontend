@@ -210,7 +210,7 @@
     "noDueDateDesc_other": "{{count}} Aufgaben benötigen eine Frist"
   },
   "labels": {
-    "label": "Beschriftungen"
+    "label": "Labels"
   },
   "actionMenu": {
     "view": "Anzeigen",
@@ -374,11 +374,11 @@
     "moveTitle": "Ausgewählte Aufgaben in ein Projekt verschieben",
     "move": "Verschieben",
     "defaultProject": "Standardprojekt",
-    "moreTitle": "Priorität, Zuweisung oder Beschriftungen festlegen",
+    "moreTitle": "Priorität, Zuweisung oder Labels festlegen",
     "more": "Mehr",
     "priority": "Priorität",
     "assignee": "Zugewiesene Person",
-    "labels": "Beschriftungen",
+    "labels": "Labels",
     "labelsHint": "Tippen zum Hinzufügen · erneut tippen zum Entfernen",
     "done": "Fertig",
     "noPriority": "Keine"
@@ -658,9 +658,9 @@
     "project": "Projekt",
     "projectDesc": "Zu welchem Projekt gehört diese Aufgabe?",
     "defaultProject": "Standardprojekt",
-    "labels": "Beschriftungen",
+    "labels": "Labels",
     "labelsDesc": "Hinweise zu dieser Aufgabe oder Schlagwörter zur Kennzeichnung",
-    "addNewLabel": "Neue Beschriftung hinzufügen",
+    "addNewLabel": "Neues Label hinzufügen",
     "subTasks": "Unteraufgaben",
     "attachments": "Anhänge",
     "attachmentsDesc": "An diese Aufgabe angehängte Dateien",
@@ -942,7 +942,7 @@
     "statusHeading": "Status",
     "priority": "Priorität",
     "dueDate": "Fälligkeitsdatum",
-    "labels": "Beschriftungen",
+    "labels": "Labels",
     "projects": "Projekte",
     "defaultProject": "Standardprojekt",
     "points": "Punkte",
