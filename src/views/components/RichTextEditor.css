@@ -55,7 +55,7 @@
 /* Material-UI style customizations for Quill toolbar */
 .quill-root {
   border-radius: 10px;
-  overflow: hidden;
+  overflow: visible;
   background-color: var(--joy-palette-neutral-softBg, #f0f4f8);
   transition:
     box-shadow 0.15s ease,
@@ -128,10 +128,19 @@
   background: var(--joy-palette-neutral-softActiveBg, rgba(99, 107, 116, 0.12));
 }
 
+.quill-root .ql-toolbar .ql-picker.ql-expanded .ql-picker-options {
+  top: auto;
+  bottom: 100%;
+  margin-bottom: -1px;
+  z-index: 2;
+}
+
 /* Style the dropdown options */
 .quill-root .ql-toolbar .ql-picker-options {
   border-radius: 8px;
   background: var(--joy-palette-background-popup, #fff);
+  max-height: min(18rem, calc(100vh - 4rem));
+  overflow-y: auto;
   box-shadow: var(
     --joy-shadow-md,
     0px 4px 8px -2px rgba(16, 24, 40, 0.1),
