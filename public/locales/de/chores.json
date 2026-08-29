@@ -363,7 +363,7 @@
     "archive": "Archivieren",
     "deleteTitle": "Ausgewählte Aufgaben löschen (Umschalt+X)",
     "mixed": "Gemischt",
-    "due": "Fällig",
+    "due": "Fälligkeit",
     "dueTitleSet": "Fälligkeitsdatum der ausgewählten Aufgaben: {{value}}",
     "dueTitleEmpty": "Fälligkeitsdatum für ausgewählte Aufgaben festlegen",
     "presetToday": "Heute",
@@ -466,7 +466,7 @@
     "newChore": "Neue Aufgabe",
     "unassigned": "Nicht zugewiesen",
     "changeDueDate": "Fälligkeitsdatum ändern",
-    "colDue": "Fällig",
+    "colDue": "Fälligkeit",
     "colChore": "Aufgabe",
     "colAssignee": "Zugewiesene Person",
     "colAction": "Aktion"
@@ -520,7 +520,7 @@
     "customTime": "Benutzerdefinierte Uhrzeit",
     "anytime": "Beliebige Uhrzeit",
     "specificTime": "Bestimmte Uhrzeit",
-    "due": "Fällig",
+    "due": "Fälligkeit",
     "clearAria": "Fälligkeitsdatum entfernen"
   },
   "attachmentPicker": {
