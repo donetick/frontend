@@ -264,11 +264,11 @@
       "completeFailedTitle": "Abschluss mehrerer Aufgaben fehlgeschlagen",
       "archiveTitle": "Aufgaben archivieren",
       "archivedTitle": "📦 Aufgaben archiviert",
-      "archiveFailedTitle": "Mehrere Aufgaben konnten nicht archiviert werden",
+      "archiveFailedTitle": "Das Archivieren mehrerer Aufgaben ist fehlgeschlagen",
       "deleteTitle": "Aufgaben löschen",
       "skipTitle": "Aufgaben überspringen",
       "skippedTitle": "⏭️ Aufgaben übersprungen",
-      "skipFailedTitle": "Mehrere Aufgaben konnten nicht übersprungen werden"
+      "skipFailedTitle": "Das Überspringen mehrere Aufgaben ist fehlgeschlagen"
     }
   },
   "archived": {
@@ -279,7 +279,7 @@
     "someFailedTitle": "Einige Aufgaben sind fehlgeschlagen",
     "unexpectedError": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es erneut.",
     "deletedBulkTitle": "🗑️ Aufgaben gelöscht",
-    "bulkDeleteFailTitle": "Löschung mehrerer Aufgaben fehlgeschlagen",
+    "bulkDeleteFailTitle": "Die Löschung mehrerer Aufgaben ist fehlgeschlagen",
     "archivedDate": "Archivierungsdatum",
     "loadFailTitle": "Archivierte Aufgaben konnten nicht geladen werden",
     "loadFailMsg": "Bitte versuche es später erneut.",
@@ -293,7 +293,7 @@
     "restoredCount_other": "{{count}} Aufgaben wiederhergestellt{{offline}}.",
     "restoreFailCount_one": "{{count}} Aufgabe konnte nicht wiederhergestellt werden.",
     "restoreFailCount_other": "{{count}} Aufgaben konnten nicht wiederhergestellt werden.",
-    "bulkRestoreFailTitle": "Wiederherstellung mehrerer Aufgaben fehlgeschlagen",
+    "bulkRestoreFailTitle": "Die Wiederherstellung mehrerer Aufgaben ist fehlgeschlagen",
     "deleteTasksTitle": "Archivierte Aufgaben löschen",
     "deleteConfirm_one": "{{count}} archivierte Aufgabe dauerhaft löschen?\n\nDiese Aktion kann nicht rückgängig gemacht werden.",
     "deleteConfirm_other": "{{count}} archivierte Aufgaben dauerhaft löschen?\n\nDiese Aktion kann nicht rückgängig gemacht werden.",
