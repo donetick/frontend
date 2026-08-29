@@ -310,7 +310,7 @@
     "exitMultiSelect": "Mehrfachauswahl beenden (Strg+S)",
     "enableMultiSelect": "Mehrfachauswahl aktivieren (Strg+S)",
     "selected_one": "{{count}} Aufgabe ausgewählt",
-    "selected_other": "{{count}} Aufgaben ausgewählt",
+    "selected_other": "{{count}}\u00a0Aufgaben ausgewählt",
     "selectAllTitle": "Alle sichtbaren Aufgaben auswählen (Strg+A)",
     "all": "Alle",
     "closeMultiSelect": "Mehrfachauswahl schließen (Esc)",
