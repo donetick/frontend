@@ -51,11 +51,11 @@
   "selector": {
     "title": "Projekte",
     "createNew": "Neues Projekt erstellen",
-    "createNewDescription": "Eigenen Projektarbeitsbereich hinzufügen",
+    "createNewDescription": "Eigenen Projekt-Arbeitsbereich hinzufügen",
     "manage": "Projekte verwalten",
     "manageDescription": "Alle Projekte anzeigen, bearbeiten und organisieren",
     "currentProjectTitle": "Aktuelles Projekt: {{project}} (Strg+E)",
-    "builtInWorkspace": "Integrierter Projektarbeitsbereich"
+    "builtInWorkspace": "Integrierter Projekt-Arbeitsbereich"
   },
   "modal": {
     "errorNameRequired": "Projektname ist erforderlich",

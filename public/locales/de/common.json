@@ -251,7 +251,7 @@
   "apply": "Übernehmen",
   "cancelAll": "Alle abbrechen",
   "backFromSearch": "Zurück aus der Suche",
-  "newVersionAvailable": "Eine neue Version ist verfügbar. Klicke auf „Neu laden“, um sie zu installieren.",
+  "newVersionAvailable": "Eine neue Version ist verfügbar. Klicke auf die Aktualisieren-Schaltfläche, um sie zu installieren.",
   "notFound": {
     "title": "Seite nicht gefunden",
     "description": "Dieser Link führt ins Leere. Möglicherweise wurde er verschoben oder die Adresse enthält einen Tippfehler.",

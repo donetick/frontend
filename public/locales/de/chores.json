@@ -567,7 +567,7 @@
     "reminder_other": "{{count}} Erinnerungen",
     "points": "{{count}} Pkt.",
     "frequency": {
-      "everyN": "Jede(n) {{count}} {{unit}}",
+      "everyN": "Alle {{count}} {{unit}}",
       "everyUnit": "Jede(n) {{unit}}",
       "daily": "Täglich",
       "weekly": "Wöchentlich",
