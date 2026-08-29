@@ -10,6 +10,8 @@ import {
 } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import RealTimeSettings from '../../components/RealTimeSettings'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
@@ -27,6 +29,7 @@ import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import SettingsLayout from './SettingsLayout'
 
 const AdvancedSettings = () => {
+  const { t } = useTranslation('settings')
   const { data: userProfile } = useUserProfile()
   const queryClient = useQueryClient()
   const { showNotification } = useNotification()
@@ -73,7 +76,7 @@ const AdvancedSettings = () => {
       queryClient.invalidateQueries()
       showNotification({
         type: 'success',
-        message: 'Offline mode turned off and local data was cleared',
+        message: t('advanced.offlineDisabled'),
       })
     } catch {
       setOfflineFeatureEnabled(false)
@@ -82,8 +85,7 @@ const AdvancedSettings = () => {
       queryClient.invalidateQueries()
       showNotification({
         type: 'warning',
-        message:
-          'Offline mode was turned off, but some local data may still be stored',
+        message: t('advanced.offlineDisabledPartial'),
       })
     } finally {
       setOfflineLoading(false)
@@ -93,11 +95,10 @@ const AdvancedSettings = () => {
   const showDisableOfflineConfirmation = () => {
     setConfirmModalConfig({
       isOpen: true,
-      title: 'Turn Off Offline Mode',
-      message:
-        'Turning off offline mode will remove unsynced offline changes and saved offline data on this device/browser. Do you want to continue?',
-      confirmText: 'Turn Off & Clear Data',
-      cancelText: 'Cancel',
+      title: t('advanced.offlineDisableTitle'),
+      message: t('advanced.offlineDisableMessage'),
+      confirmText: t('advanced.offlineDisableConfirm'),
+      cancelText: t('common.cancel'),
       color: 'danger',
       onClose: isConfirmed => {
         setConfirmModalConfig({})
@@ -117,7 +118,7 @@ const AdvancedSettings = () => {
       queryClient.invalidateQueries()
       showNotification({
         type: 'success',
-        message: 'Offline mode turned on for this device/browser',
+        message: t('advanced.offlineEnabled'),
       })
       return
     }
@@ -134,15 +135,12 @@ const AdvancedSettings = () => {
   // }
 
   return (
-    <SettingsLayout title='Advanced Settings'>
+    <SettingsLayout title={t('advanced.title')}>
       <div className='grid gap-4'>
-        <Typography level='body-md'>
-          Configure advanced features like webhooks and real-time updates for
-          enhanced productivity.
-        </Typography>
+        <Typography level='body-md'>{t('advanced.description')}</Typography>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 2 }}>
-          <Typography level='title-lg'>Offline Support</Typography>
+          <Typography level='title-lg'>{t('advanced.offlineTitle')}</Typography>
           <Chip
             variant='outlined'
             size='sm'
@@ -154,43 +152,36 @@ const AdvancedSettings = () => {
               borderColor: 'warning.main',
             }}
           >
-            Early Access
+            {t('common.earlyAccess')}
           </Chip>
         </Box>
         <Typography level='body-md' mt={-1}>
-          Keep using Donetick when you're offline on this device/browser. Your
-          changes are saved locally and synced when you're back online.
+          {t('advanced.offlineDescription')}
         </Typography>
         <FormControl sx={{ mt: 1 }}>
           <Checkbox
             checked={offlineEnabled}
             onChange={handleOfflineToggle}
             variant='soft'
-            label='Enable Offline Support'
+            label={t('advanced.offlineToggle')}
             disabled={offlineLoading}
             overlay
           />
-          <FormHelperText>
-            Turning this off removes unsynced offline changes and saved offline
-            data from this device/browser.
-          </FormHelperText>
+          <FormHelperText>{t('advanced.offlineHelper')}</FormHelperText>
         </FormControl>
 
         {/* Webhook Settings - Only show for admins */}
         {isAdmin && (
           <>
             <Typography level='title-lg' mt={2}>
-              Webhook Integration
+              {t('advanced.webhookTitle')}
             </Typography>
             <Typography level='body-md' mt={-1}>
-              Webhooks allow you to send real-time notifications to other
-              services when events happen in your Circle. Configure a webhook
-              URL to receive real-time updates.
+              {t('advanced.webhookDescription')}
             </Typography>
             {!isPlusAccount(userProfile) && (
               <Typography level='body-sm' color='warning' sx={{ mt: 1 }}>
-                Webhook notifications are not available in the Basic plan.
-                Upgrade to Plus to receive real-time updates via webhooks.
+                {t('advanced.webhookPlusNotice')}
               </Typography>
             )}
             <FormControl sx={{ mt: 1 }}>
@@ -204,7 +195,7 @@ const AdvancedSettings = () => {
                   }
                 }}
                 variant='soft'
-                label='Enable Webhook'
+                label={t('advanced.webhookToggle')}
                 disabled={!isPlusAccount(userProfile)}
                 overlay
               />
@@ -213,10 +204,10 @@ const AdvancedSettings = () => {
                   opacity: !isPlusAccount(userProfile) ? 0.5 : 1,
                 }}
               >
-                Enable webhook notifications for tasks and things updates.{' '}
+                {t('advanced.webhookHelper')}{' '}
                 {userProfile && !isPlusAccount(userProfile) && (
                   <Chip variant='soft' color='warning'>
-                    Plus Feature
+                    {t('common.plusFeature')}
                   </Chip>
                 )}
               </FormHelperText>
@@ -224,7 +215,9 @@ const AdvancedSettings = () => {
 
             {webhookURL !== null && (
               <Box>
-                <Typography level='title-sm'>Webhook URL</Typography>
+                <Typography level='title-sm'>
+                  {t('advanced.webhookURL')}
+                </Typography>
                 <Input
                   value={webhookURL ? webhookURL : ''}
                   onChange={e => setWebhookURL(e.target.value)}
@@ -247,19 +240,19 @@ const AdvancedSettings = () => {
                       if (resp.ok) {
                         showNotification({
                           type: 'success',
-                          message: 'Webhook URL updated successfully',
+                          message: t('advanced.webhookUpdated'),
                         })
                       } else {
                         showNotification({
                           type: 'error',
-                          message: 'Failed to update webhook URL',
+                          message: t('advanced.webhookUpdateFailed'),
                         })
                       }
                     })
                   }}
                   disabled={!isPlusAccount(userProfile)}
                 >
-                  Save
+                  {t('common.save')}
                 </Button>
               </Box>
             )}
@@ -268,11 +261,10 @@ const AdvancedSettings = () => {
 
         {/* Real-time Settings */}
         <Typography level='title-lg' mt={2}>
-          Real-time Updates
+          {t('advanced.realtimeTitle')}
         </Typography>
         <Typography level='body-md' mt={-1}>
-          Configure how you receive live updates when tasks and activities
-          change in your circle.
+          {t('advanced.realtimeDescription')}
         </Typography>
         <RealTimeSettings />
 

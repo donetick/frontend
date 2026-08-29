@@ -6,6 +6,7 @@ import {
   Delete,
   DriveFileMove,
   Edit,
+  Flag,
   ManageSearch,
   MoreTime,
   MoreVert,
@@ -24,8 +25,13 @@ import {
 } from '@mui/icons-material'
 import {
   Avatar,
+  Button,
+  Chip,
   Divider,
   IconButton,
+  List,
+  ListItem,
+  ListItemButton,
   ListItemContent,
   ListItemDecorator,
   Menu,
@@ -33,37 +39,60 @@ import {
   Tooltip,
   Typography,
 } from '@mui/joy'
+import { useMediaQuery } from '@mui/material'
 import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+
+import AppModal from '../../components/common/AppModal'
 import LABEL_COLORS, {
   getTextColorFromBackgroundColor,
 } from '../../utils/Colors'
 import { isOfficialDonetickInstanceSync } from '../../utils/FeatureToggle'
+import Priorities from '../../utils/Priorities'
 import { getIconComponent } from '../../utils/ProjectIcons'
 import { useProjects } from '../Projects/ProjectQueries'
 
+const NO_PRIORITY = { name: 'No priority', value: 0, color: 'neutral' }
+
+// After hiding actions the caller does not support, the dividers around them
+// would otherwise stack up or dangle at the edges of the list.
+const collapseDividers = items =>
+  items.filter((item, index) => {
+    if (item.type !== 'divider') return true
+    if (index === 0 || index === items.length - 1) return false
+    return items[index - 1].type !== 'divider'
+  })
+
 const ChoreActionMenu = ({
   chore,
+  hiddenActions = [],
   onAction,
-  onCompleteWithNote,
-  onCompleteWithPastDate,
   onChangeAssignee,
   onChangeDueDate,
-  onWriteNFC,
-  onNudge,
+  onChangePriority,
+  onCompleteWithNote,
+  onCompleteWithPastDate,
   onDelete,
-  onOpen,
   onMouseEnter,
   onMouseLeave,
+  onNudge,
+  onOpen,
+  onWriteNFC,
   sx = {},
+  trigger,
   variant = 'soft',
 }) => {
+  const { t } = useTranslation('chores')
   const [anchorEl, setAnchorEl] = React.useState(null)
   const [isOfficialInstance, setIsOfficialInstance] = useState(false)
   const [showProjectPicker, setShowProjectPicker] = useState(false)
+  const [showPriorityPicker, setShowPriorityPicker] = useState(false)
   const menuRef = React.useRef(null)
   const navigate = useNavigate()
   const { data: projects = [] } = useProjects()
+  // Phone-only condition (matches AddTaskModal.jsx) — tablets/desktop keep the Menu
+  const isSmallScreen = useMediaQuery(theme => theme.breakpoints.down('sm'))
 
   useEffect(() => {
     try {
@@ -75,11 +104,19 @@ const ChoreActionMenu = ({
   }, [])
 
   useEffect(() => {
+    if (isSmallScreen) {
+      // AppModal owns its own backdrop/escape close behavior on small screens.
+      if (anchorEl && onOpen) {
+        onOpen()
+      }
+      return
+    }
+
     const handleMenuOutsideClick = event => {
       if (
         anchorEl &&
         !anchorEl.contains(event.target) &&
-        !menuRef.current.contains(event.target)
+        !menuRef.current?.contains(event.target)
       ) {
         handleMenuClose()
       }
@@ -92,7 +129,7 @@ const ChoreActionMenu = ({
     return () => {
       document.removeEventListener('mousedown', handleMenuOutsideClick)
     }
-  }, [anchorEl, onOpen])
+  }, [anchorEl, onOpen, isSmallScreen])
 
   const handleMenuOpen = event => {
     event.stopPropagation()
@@ -102,6 +139,12 @@ const ChoreActionMenu = ({
   const handleMenuClose = () => {
     setAnchorEl(null)
     setShowProjectPicker(false)
+    setShowPriorityPicker(false)
+  }
+
+  const handleChangePriority = priority => {
+    onChangePriority?.(priority)
+    handleMenuClose()
   }
 
   const handleMoveToProject = project => {
@@ -229,300 +272,489 @@ const ChoreActionMenu = ({
     )
   }
 
+  const currentPriority =
+    Priorities.find(p => p.value === chore?.priority) || null
+
+  // Shared action list, rendered as MenuItems on large screens and as a
+  // ListItemButton list inside an AppModal sheet on small screens.
+  const actionItems = [
+    {
+      key: 'completeNote',
+      icon: <NoteAdd />,
+      label: t('actionMenu.completeWithNote'),
+      onClick: () => {
+        onCompleteWithNote?.()
+        handleMenuClose()
+      },
+    },
+    {
+      key: 'completePast',
+      icon: <Update />,
+      label: t('actionMenu.completeInPast'),
+      onClick: () => {
+        onCompleteWithPastDate?.()
+        handleMenuClose()
+      },
+    },
+    {
+      key: 'skip',
+      icon: <SwitchAccessShortcut />,
+      label: t('actionMenu.skipToNext'),
+      onClick: handleSkip,
+    },
+    {
+      key: 'delegate',
+      icon: <RecordVoiceOver />,
+      label: t('modals.delegate'),
+      onClick: () => {
+        onChangeAssignee?.()
+        handleMenuClose()
+      },
+    },
+    isOfficialInstance && {
+      key: 'nudge',
+      icon: <Notifications />,
+      label: t('actionMenu.sendNudge'),
+      onClick: () => {
+        onNudge?.()
+        handleMenuClose()
+      },
+    },
+    { key: 'divider-1', type: 'divider' },
+    {
+      key: 'history',
+      icon: <ManageSearch />,
+      label: t('actionMenu.history'),
+      onClick: handleHistory,
+    },
+    { key: 'divider-2', type: 'divider' },
+    { key: 'quickSchedule', type: 'quickSchedule' },
+    { key: 'divider-3', type: 'divider' },
+    {
+      key: 'changeDueDate',
+      icon: <MoreTime />,
+      label: t('modals.changeDueDate'),
+      onClick: () => {
+        onChangeDueDate?.()
+        handleMenuClose()
+      },
+    },
+    onChangePriority && {
+      key: 'priority',
+      icon: <Flag />,
+      label: t('priority'),
+      onClick: () => setShowPriorityPicker(true),
+      endDecorator: (
+        <Chip
+          size='sm'
+          variant='soft'
+          color={currentPriority?.color || 'neutral'}
+        >
+          {currentPriority?.name.trim() || t('actionMenu.noPriority')}
+        </Chip>
+      ),
+    },
+    {
+      key: 'writeNfc',
+      icon: <Nfc />,
+      label: t('actionMenu.writeNFC'),
+      onClick: () => {
+        onWriteNFC?.()
+        handleMenuClose()
+      },
+    },
+    {
+      key: 'edit',
+      icon: <Edit />,
+      label: t('choreView.edit'),
+      onClick: handleEdit,
+    },
+    {
+      key: 'clone',
+      icon: <CopyAll />,
+      label: t('actionMenu.clone'),
+      onClick: handleClone,
+    },
+    {
+      key: 'view',
+      icon: <ViewCarousel />,
+      label: t('actionMenu.view'),
+      onClick: handleView,
+    },
+    {
+      key: 'archive',
+      icon: chore.isActive ? <Archive /> : <Unarchive />,
+      label: chore.isActive
+        ? t('actionMenu.archive')
+        : t('actionMenu.unarchive'),
+      onClick: handleArchive,
+      color: 'neutral',
+    },
+    projects.length > 0 && {
+      key: 'moveToProject',
+      icon: <DriveFileMove />,
+      label: t('actionMenu.moveToProject'),
+      onClick: () => setShowProjectPicker(true),
+    },
+    { key: 'divider-4', type: 'divider' },
+    {
+      key: 'delete',
+      icon: <Delete />,
+      label: t('archived.delete'),
+      onClick: handleDelete,
+      color: 'danger',
+    },
+  ]
+    .filter(Boolean)
+    .filter(item => !hiddenActions.includes(item.key))
+
+  const visibleActionItems = collapseDividers(actionItems)
+
+  const quickScheduleButtons = (
+    <>
+      <Tooltip title={t('duePicker.today')} placement='top'>
+        <IconButton
+          size='sm'
+          onClick={e => {
+            e.stopPropagation()
+            handleQuickSchedule('today')
+          }}
+        >
+          <Today />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title={t('duePicker.tomorrow')} placement='top'>
+        <IconButton
+          size='sm'
+          onClick={e => {
+            e.stopPropagation()
+            handleQuickSchedule('tomorrow')
+          }}
+        >
+          <WbSunny />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title={t('duePicker.weekend')} placement='top'>
+        <IconButton
+          size='sm'
+          onClick={e => {
+            e.stopPropagation()
+            handleQuickSchedule('weekend')
+          }}
+        >
+          <Weekend />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title={t('duePicker.nextWeek')} placement='top'>
+        <IconButton
+          size='sm'
+          onClick={e => {
+            e.stopPropagation()
+            handleQuickSchedule('next-week')
+          }}
+        >
+          <NextWeek />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title={t('actionMenu.removeDueDate')} placement='top'>
+        <IconButton
+          size='sm'
+          color='neutral'
+          onClick={e => {
+            e.stopPropagation()
+            handleQuickSchedule('remove')
+          }}
+        >
+          <Cancel />
+        </IconButton>
+      </Tooltip>
+    </>
+  )
+
+  const quickScheduleRowSx = {
+    display: 'flex',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    gap: 1,
+    px: 1.5,
+    py: 1,
+  }
+
+  const renderMenuActionItems = () =>
+    visibleActionItems.map(item => {
+      if (item.type === 'divider') return <Divider key={item.key} />
+      if (item.type === 'quickSchedule') {
+        return (
+          <MenuItem
+            key={item.key}
+            sx={{
+              ...quickScheduleRowSx,
+              cursor: 'default',
+              '&:hover': { backgroundColor: 'transparent' },
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            {quickScheduleButtons}
+          </MenuItem>
+        )
+      }
+      return (
+        <MenuItem
+          key={item.key}
+          color={item.color}
+          onClick={e => {
+            e.stopPropagation()
+            item.onClick()
+          }}
+        >
+          {item.icon}
+          {item.label}
+          {item.endDecorator && (
+            <ListItemDecorator sx={{ ml: 'auto', minInlineSize: 0 }}>
+              {item.endDecorator}
+            </ListItemDecorator>
+          )}
+        </MenuItem>
+      )
+    })
+
+  const renderModalActionItems = () =>
+    visibleActionItems.map(item => {
+      if (item.type === 'divider') return <Divider key={item.key} />
+      if (item.type === 'quickSchedule') {
+        return (
+          <ListItem key={item.key} sx={quickScheduleRowSx}>
+            {quickScheduleButtons}
+          </ListItem>
+        )
+      }
+      return (
+        <ListItem key={item.key}>
+          <ListItemButton color={item.color} onClick={() => item.onClick()}>
+            <ListItemDecorator>{item.icon}</ListItemDecorator>
+            <ListItemContent>{item.label}</ListItemContent>
+            {item.endDecorator}
+          </ListItemButton>
+        </ListItem>
+      )
+    })
+
+  const priorityOptions = [...Priorities, NO_PRIORITY]
+
+  const renderModalPriorityPicker = () =>
+    priorityOptions.map(priority => (
+      <ListItem key={priority.value}>
+        <ListItemButton
+          selected={(currentPriority?.value || 0) === priority.value}
+          color={priority.color || 'neutral'}
+          onClick={() => handleChangePriority(priority)}
+        >
+          <ListItemDecorator>{priority.icon || <Flag />}</ListItemDecorator>
+          <ListItemContent>{priority.name.trim()}</ListItemContent>
+        </ListItemButton>
+      </ListItem>
+    ))
+
+  const renderMenuPriorityPicker = () => (
+    <>
+      <MenuItem
+        onClick={e => {
+          e.stopPropagation()
+          setShowPriorityPicker(false)
+        }}
+        sx={{ gap: 1 }}
+      >
+        <ArrowBack fontSize='small' />
+        <Typography level='body-sm' fontWeight={600}>
+          {t('priority')}
+        </Typography>
+      </MenuItem>
+      <Divider />
+      {priorityOptions.map(priority => (
+        <MenuItem
+          key={priority.value}
+          selected={(currentPriority?.value || 0) === priority.value}
+          color={priority.color || 'neutral'}
+          onClick={e => {
+            e.stopPropagation()
+            handleChangePriority(priority)
+          }}
+        >
+          {priority.icon || <Flag />}
+          {priority.name.trim()}
+        </MenuItem>
+      ))}
+    </>
+  )
+
+  const renderModalProjectPicker = () => (
+    <>
+      <ListItem>
+        <ListItemButton
+          onClick={() =>
+            handleMoveToProject({
+              id: null,
+              name: t('actionMenu.defaultProject'),
+            })
+          }
+        >
+          <ListItemDecorator>
+            {renderProjectAvatar(LABEL_COLORS[0].value, 'FolderOpen')}
+          </ListItemDecorator>
+          <ListItemContent>{t('actionMenu.defaultProject')}</ListItemContent>
+        </ListItemButton>
+      </ListItem>
+      {projects.map(project => (
+        <ListItem key={project.id}>
+          <ListItemButton onClick={() => handleMoveToProject(project)}>
+            <ListItemDecorator>
+              {renderProjectAvatar(project.color, project.icon)}
+            </ListItemDecorator>
+            <ListItemContent>{project.name}</ListItemContent>
+          </ListItemButton>
+        </ListItem>
+      ))}
+    </>
+  )
+
   return (
     <>
-      <IconButton
-        variant={variant}
-        color='success'
-        onClick={handleMenuOpen}
-        onMouseEnter={onMouseEnter}
-        onMouseLeave={onMouseLeave}
-        sx={{
-          borderRadius: '50%',
-          width: 25,
-          height: 25,
-          position: 'relative',
-          left: -10,
-          ...sx,
-        }}
-      >
-        <MoreVert />
-      </IconButton>
+      {trigger ? (
+        React.cloneElement(trigger, {
+          onClick: handleMenuOpen,
+          onMouseEnter,
+          onMouseLeave,
+        })
+      ) : (
+        <IconButton
+          variant={variant}
+          color='success'
+          onClick={handleMenuOpen}
+          onMouseEnter={onMouseEnter}
+          onMouseLeave={onMouseLeave}
+          sx={{
+            borderRadius: '50%',
+            width: 25,
+            height: 25,
+            position: 'relative',
+            left: -10,
+            ...sx,
+          }}
+        >
+          <MoreVert />
+        </IconButton>
+      )}
 
-      <Menu
-        size='md'
-        ref={menuRef}
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-        sx={{
-          position: 'absolute',
-          top: '100%',
-          left: '50%',
-        }}
-      >
-        {showProjectPicker ? (
-          <>
-            <MenuItem
-              onClick={e => {
-                e.stopPropagation()
+      {isSmallScreen ? (
+        <AppModal
+          open={Boolean(anchorEl)}
+          onClose={handleMenuClose}
+          title={
+            showProjectPicker
+              ? t('actionMenu.moveToProject')
+              : showPriorityPicker
+                ? t('priority')
+                : chore?.name
+          }
+          mobilePresentation='sheet'
+          showHandle
+          contentSx={{ px: 0, pb: 1 }}
+        >
+          {(showProjectPicker || showPriorityPicker) && (
+            <Button
+              variant='plain'
+              color='neutral'
+              size='sm'
+              startDecorator={<ArrowBack fontSize='small' />}
+              onClick={() => {
                 setShowProjectPicker(false)
+                setShowPriorityPicker(false)
               }}
-              sx={{ gap: 1 }}
+              sx={{ mx: 2, mb: 1 }}
             >
-              <ArrowBack fontSize='small' />
               <Typography level='body-sm' fontWeight={600}>
-                Move to project
+                {t('common:back')}
               </Typography>
-            </MenuItem>
-            <Divider />
-            <MenuItem
-              onClick={e => {
-                e.stopPropagation()
-                handleMoveToProject({ id: null, name: 'Default Project' })
-              }}
-            >
-              <ListItemDecorator>
-                {renderProjectAvatar(LABEL_COLORS[0].value, 'FolderOpen')}
-              </ListItemDecorator>
-              <ListItemContent>
-                <Typography level='body-sm'>Default Project</Typography>
-              </ListItemContent>
-            </MenuItem>
-            {projects.map(project => (
+            </Button>
+          )}
+          <List sx={{ '--ListItem-radius': '8px', px: 1 }}>
+            {showProjectPicker
+              ? renderModalProjectPicker()
+              : showPriorityPicker
+                ? renderModalPriorityPicker()
+                : renderModalActionItems()}
+          </List>
+        </AppModal>
+      ) : (
+        <Menu
+          size='md'
+          ref={menuRef}
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleMenuClose}
+          sx={{
+            position: 'absolute',
+            top: '100%',
+            left: '50%',
+          }}
+        >
+          {showPriorityPicker ? (
+            renderMenuPriorityPicker()
+          ) : showProjectPicker ? (
+            <>
               <MenuItem
-                key={project.id}
                 onClick={e => {
                   e.stopPropagation()
-                  handleMoveToProject(project)
+                  setShowProjectPicker(false)
+                }}
+                sx={{ gap: 1 }}
+              >
+                <ArrowBack fontSize='small' />
+                <Typography level='body-sm' fontWeight={600}>
+                  {t('actionMenu.moveToProject')}
+                </Typography>
+              </MenuItem>
+              <Divider />
+              <MenuItem
+                onClick={e => {
+                  e.stopPropagation()
+                  handleMoveToProject({
+                    id: null,
+                    name: t('actionMenu.defaultProject'),
+                  })
                 }}
               >
                 <ListItemDecorator>
-                  {renderProjectAvatar(project.color, project.icon)}
+                  {renderProjectAvatar(LABEL_COLORS[0].value, 'FolderOpen')}
                 </ListItemDecorator>
                 <ListItemContent>
-                  <Typography level='body-sm'>{project.name}</Typography>
+                  <Typography level='body-sm'>
+                    {t('actionMenu.defaultProject')}
+                  </Typography>
                 </ListItemContent>
               </MenuItem>
-            ))}
-          </>
-        ) : (
-          <>
-            <MenuItem
-              onClick={e => {
-                e.stopPropagation()
-                onCompleteWithNote?.()
-                handleMenuClose()
-              }}
-            >
-              <NoteAdd />
-              Complete with note
-            </MenuItem>
-            <MenuItem
-              onClick={e => {
-                e.stopPropagation()
-                onCompleteWithPastDate?.()
-                handleMenuClose()
-              }}
-            >
-              <Update />
-              Complete in past
-            </MenuItem>
-            <MenuItem
-              onClick={e => {
-                e.stopPropagation()
-                handleSkip()
-              }}
-            >
-              <SwitchAccessShortcut />
-              Skip to next due date
-            </MenuItem>
-            <MenuItem
-              onClick={e => {
-                e.stopPropagation()
-                onChangeAssignee?.()
-                handleMenuClose()
-              }}
-            >
-              <RecordVoiceOver />
-              Delegate to someone else
-            </MenuItem>
-            {isOfficialInstance && (
-              <MenuItem
-                onClick={e => {
-                  e.stopPropagation()
-                  onNudge?.()
-                  handleMenuClose()
-                }}
-              >
-                <Notifications />
-                Send nudge
-              </MenuItem>
-            )}
-            <Divider />
-            <MenuItem
-              onClick={e => {
-                e.stopPropagation()
-                handleHistory()
-              }}
-            >
-              <ManageSearch />
-              History
-            </MenuItem>
-            <Divider />
-            <MenuItem
-              sx={{
-                display: 'flex',
-                justifyContent: 'space-around',
-                alignItems: 'center',
-                gap: 1,
-                cursor: 'default',
-                '&:hover': {
-                  backgroundColor: 'transparent',
-                },
-              }}
-              onClick={e => e.stopPropagation()}
-            >
-              <Tooltip title='Today' placement='top'>
-                <IconButton
-                  size='sm'
+              {projects.map(project => (
+                <MenuItem
+                  key={project.id}
                   onClick={e => {
                     e.stopPropagation()
-                    handleQuickSchedule('today')
+                    handleMoveToProject(project)
                   }}
                 >
-                  <Today />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title='Tomorrow' placement='top'>
-                <IconButton
-                  size='sm'
-                  onClick={e => {
-                    e.stopPropagation()
-                    handleQuickSchedule('tomorrow')
-                  }}
-                >
-                  <WbSunny />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title='Weekend' placement='top'>
-                <IconButton
-                  size='sm'
-                  onClick={e => {
-                    e.stopPropagation()
-                    handleQuickSchedule('weekend')
-                  }}
-                >
-                  <Weekend />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title='Next week' placement='top'>
-                <IconButton
-                  size='sm'
-                  onClick={e => {
-                    e.stopPropagation()
-                    handleQuickSchedule('next-week')
-                  }}
-                >
-                  <NextWeek />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title='Remove due date' placement='top'>
-                <IconButton
-                  size='sm'
-                  color='neutral'
-                  onClick={e => {
-                    e.stopPropagation()
-                    handleQuickSchedule('remove')
-                  }}
-                >
-                  <Cancel />
-                </IconButton>
-              </Tooltip>
-            </MenuItem>
-            <Divider />
-            <MenuItem
-              onClick={e => {
-                e.stopPropagation()
-                onChangeDueDate?.()
-                handleMenuClose()
-              }}
-            >
-              <MoreTime />
-              Change due date
-            </MenuItem>
-            <MenuItem
-              onClick={e => {
-                e.stopPropagation()
-                onWriteNFC?.()
-                handleMenuClose()
-              }}
-            >
-              <Nfc />
-              Write to NFC
-            </MenuItem>
-            <MenuItem
-              onClick={e => {
-                e.stopPropagation()
-                handleEdit()
-              }}
-            >
-              <Edit />
-              Edit
-            </MenuItem>
-            <MenuItem
-              onClick={e => {
-                e.stopPropagation()
-                handleClone()
-              }}
-            >
-              <CopyAll />
-              Clone
-            </MenuItem>
-            <MenuItem
-              onClick={e => {
-                e.stopPropagation()
-                handleView()
-              }}
-            >
-              <ViewCarousel />
-              View
-            </MenuItem>
-            <MenuItem
-              onClick={e => {
-                e.stopPropagation()
-                handleArchive()
-              }}
-              color='neutral'
-            >
-              {chore.isActive ? <Archive /> : <Unarchive />}
-              {chore.isActive ? 'Archive' : 'Unarchive'}
-            </MenuItem>
-            {projects.length > 0 && (
-              <MenuItem
-                onClick={e => {
-                  e.stopPropagation()
-                  setShowProjectPicker(true)
-                }}
-              >
-                <DriveFileMove />
-                Move to project
-              </MenuItem>
-            )}
-            <Divider />
-            <MenuItem
-              onClick={e => {
-                e.stopPropagation()
-                handleDelete()
-              }}
-              color='danger'
-            >
-              <Delete />
-              Delete
-            </MenuItem>
-          </>
-        )}
-      </Menu>
+                  <ListItemDecorator>
+                    {renderProjectAvatar(project.color, project.icon)}
+                  </ListItemDecorator>
+                  <ListItemContent>
+                    <Typography level='body-sm'>{project.name}</Typography>
+                  </ListItemContent>
+                </MenuItem>
+              ))}
+            </>
+          ) : (
+            renderMenuActionItems()
+          )}
+        </Menu>
+      )}
     </>
   )
 }

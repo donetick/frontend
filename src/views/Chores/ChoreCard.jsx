@@ -5,7 +5,7 @@ import {
   Pause,
   PlayArrow,
   Repeat,
-  Schedule,
+  ThumbDown,
   ThumbUp,
   TimesOneMobiledata,
   Toll,
@@ -21,6 +21,8 @@ import {
   IconButton,
   Typography,
 } from '@mui/joy'
+import { useTranslation } from 'react-i18next'
+
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { usePendingCommands } from '../../hooks/usePendingCommands'
@@ -37,18 +39,19 @@ import ChoreActionMenu from '../components/ChoreActionMenu'
 import PendingBadge from '../components/PendingBadge'
 const ChoreCard = ({
   chore,
-  performers,
-  sx,
-  viewOnly,
-  showActions = true,
-  onChipClick,
-  onAction,
-  // Multi-select props
   isMultiSelectMode = false,
   isSelected = false,
+  onAction,
+  onChipClick,
   onSelectionToggle,
+  performers,
+  // Multi-select props
+  showActions = true,
+  sx,
+  viewOnly,
 }) => {
-  const { data: userProfile } = useUserProfile()
+  const { t } = useTranslation('chores')
+  const { data: userProfile } = useUserProfile({ enabled: !viewOnly })
   const { timeFormat } = useLocalization()
   const { data: pendingCmds } = usePendingCommands(chore.id)
 
@@ -108,27 +111,29 @@ const ChoreCard = ({
         {getDueDateChipText(chore.nextDueDate, chore, timeFormat)}
       </Chip>
 
-      <Chip
-        variant='soft'
-        sx={{
-          position: 'relative',
-          top: 10,
-          zIndex: 3,
-          ml: 0.4,
-          left: 10,
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+      {!['once', 'no_repeat'].includes(chore.frequencyType) && (
+        <Chip
+          variant='soft'
+          sx={{
+            position: 'relative',
+            top: 10,
+            zIndex: 3,
+            ml: 0.4,
+            left: 10,
           }}
         >
-          {getFrequencyIcon(chore)}
-          {getRecurrentChipText(chore)}
-        </div>
-      </Chip>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            {getFrequencyIcon(chore)}
+            {getRecurrentChipText(chore)}
+          </div>
+        </Chip>
+      )}
 
       <Box sx={{ position: 'absolute', top: 10, right: 10, zIndex: 3 }}>
         <PendingBadge commands={pendingCmds} />
@@ -248,7 +253,7 @@ const ChoreCard = ({
                   {chore.assignedTo === null && (
                     <Box display='flex' alignItems='center' gap={0.5}>
                       <Chip variant='outlined' startDecorator={<Group />}>
-                        Anyone
+                        {t('choreCard.anyone')}
                       </Chip>
                     </Box>
                   )}
@@ -357,27 +362,6 @@ const ChoreCard = ({
                 justifyContent: 'center',
               }}
             >
-              {chore.status === 3 && (
-                <Chip
-                  variant='soft'
-                  color='neutral'
-                  size='sm'
-                  sx={{
-                    mb: 1,
-                    px: 0.75,
-                    py: 0.5,
-                    minHeight: 56,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    gap: 0.25,
-                  }}
-                >
-                  <Schedule sx={{ fontSize: 16 }} />
-                  <Typography level='body-xs'>Pending</Typography>
-                </Chip>
-              )}
               {showActions && (
                 <Box
                   display='flex'
@@ -398,8 +382,10 @@ const ChoreCard = ({
                           }}
                           sx={{
                             borderRadius: '50%',
+                            width: 50,
                             minWidth: 50,
                             height: 50,
+                            flexShrink: 0,
                             zIndex: 1,
                             transition: 'all 0.2s ease',
                             '&:hover': {
@@ -416,29 +402,31 @@ const ChoreCard = ({
                         >
                           <ThumbUp sx={{ fontSize: 18 }} />
                         </IconButton>
-                        {/* <IconButton
-                        variant='soft'
-                        color='danger'
-                        onClick={e => {
-                          e.stopPropagation()
-                          onAction('reject', chore)
-                        }}
-                        sx={{
-                          borderRadius: '50%',
-                          minWidth: 40,
-                          height: 40,
-                          zIndex: 1,
-                          transition: 'all 0.2s ease',
-                          '&:hover': {
-                            transform: 'scale(1.05)',
-                          },
-                          '&:active': {
-                            transform: 'scale(0.95)',
-                          },
-                        }}
-                      >
-                        <ThumbDown sx={{ fontSize: 18 }} />
-                      </IconButton> */}
+                        <IconButton
+                          variant='soft'
+                          color='danger'
+                          onClick={e => {
+                            e.stopPropagation()
+                            onAction('reject', chore)
+                          }}
+                          sx={{
+                            borderRadius: '50%',
+                            width: 50,
+                            minWidth: 50,
+                            height: 50,
+                            flexShrink: 0,
+                            zIndex: 1,
+                            transition: 'all 0.2s ease',
+                            '&:hover': {
+                              transform: 'scale(1.05)',
+                            },
+                            '&:active': {
+                              transform: 'scale(0.95)',
+                            },
+                          }}
+                        >
+                          <ThumbDown sx={{ fontSize: 18 }} />
+                        </IconButton>
                       </Box>
                     ) : (
                       <IconButton
@@ -447,8 +435,10 @@ const ChoreCard = ({
                         disabled={true}
                         sx={{
                           borderRadius: '50%',
+                          width: 50,
                           minWidth: 50,
                           height: 50,
+                          flexShrink: 0,
                           zIndex: 1,
                           opacity: 0.5,
                         }}
@@ -479,8 +469,10 @@ const ChoreCard = ({
                       disabled={notInCompletionWindow(chore)}
                       sx={{
                         borderRadius: '50%',
+                        width: 50,
                         minWidth: 50,
                         height: 50,
+                        flexShrink: 0,
                         zIndex: 1,
                         transition: 'all 0.2s ease',
                         '&:hover': {
@@ -507,6 +499,7 @@ const ChoreCard = ({
                     </IconButton>
                   )}
                   <ChoreActionMenu
+                    variant='plain'
                     chore={chore}
                     onCompleteWithNote={() =>
                       onAction('completeWithNote', chore)
@@ -522,6 +515,16 @@ const ChoreCard = ({
                     onWriteNFC={() => onAction('writeNFC', chore)}
                     onNudge={() => onAction('nudge', chore)}
                     onDelete={() => onAction('delete', chore)}
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      color: 'text.tertiary',
+                      flexShrink: 0,
+                      '&:hover': {
+                        color: 'text.secondary',
+                        bgcolor: 'background.level1',
+                      },
+                    }}
                   />
                 </Box>
               )}

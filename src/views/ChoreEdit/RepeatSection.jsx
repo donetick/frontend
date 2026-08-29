@@ -18,6 +18,7 @@ import {
 } from '@mui/joy'
 import moment from 'moment'
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useUserProfile } from '../../queries/UserQueries'
@@ -33,11 +34,7 @@ const FREQUENCY_TYPES_RADIOS = [
   'custom',
 ]
 
-const FREQUENCY_TYPE_MESSAGE = {
-  adaptive:
-    'This chore will be scheduled dynamically based on previous completion dates.',
-  custom: 'This chore will be scheduled based on a custom frequency.',
-}
+const FREQUENCY_TYPE_WITH_MESSAGE = ['adaptive', 'custom']
 const REPEAT_ON_TYPE = ['interval', 'days_of_the_week', 'day_of_the_month']
 const MONTHS = [
   'january',
@@ -64,58 +61,51 @@ const DAYS = [
   'sunday',
 ]
 
-const WEEK_PATTERNS = {
-  every_week: 'Every week',
-  week_of_month: 'Specific occurrences in the month',
-}
+const WEEK_PATTERNS = ['every_week', 'week_of_month']
 
-const DAY_OCCURRENCE_OPTIONS = [
-  { value: 1, label: '1st occurrence' },
-  { value: 2, label: '2nd occurrence' },
-  { value: 3, label: '3rd occurrence' },
-  { value: 4, label: '4th occurrence' },
-  { value: -1, label: 'Last occurrence' },
-]
+const DAY_OCCURRENCE_VALUES = [1, 2, 3, 4, -1]
+
+// -1 is the "last occurrence" sentinel; everything else keys off its number.
+const occurrenceKey = value => (value === -1 ? 'last' : String(value))
+
 // Helper function to generate schedule preview text
-const generateSchedulePreview = (metadata, formatTimeFn) => {
+const generateSchedulePreview = (metadata, formatTimeFn, t) => {
   if (!metadata?.days?.length) return ''
 
   const dayNames = metadata.days
-    .map(day => day.charAt(0).toUpperCase() + day.slice(1, 3))
+    .map(day => t(`repeat.daysShort.${day}`))
     .join(', ')
 
   const timeStr = metadata.time
     ? formatTimeFn(metadata.time)
-    : '6:00 PM'
-
-  if (metadata.weekPattern === 'every_week' || !metadata.weekPattern) {
-    return `Every ${dayNames} at ${timeStr}`
-  }
+    : t('repeat.defaultTime')
 
   if (
     metadata.weekPattern === 'week_of_month' &&
     metadata.occurrences?.length
   ) {
     const occurrenceStr = metadata.occurrences
-      .map(w => {
-        if (w === -1) return 'last'
-        return `${w}${w === 1 ? 'st' : w === 2 ? 'nd' : w === 3 ? 'rd' : 'th'}`
-      })
+      .map(w => t(`repeat.ordinal.${occurrenceKey(w)}`))
       .join(', ')
-    return `Every ${occurrenceStr} ${dayNames} of the month at ${timeStr}`
+    return t('repeat.previewOccurrence', {
+      occurrences: occurrenceStr,
+      days: dayNames,
+      time: timeStr,
+    })
   }
 
-  return `Every ${dayNames} at ${timeStr}`
+  return t('repeat.previewEvery', { days: dayNames, time: timeStr })
 }
 
 export const RepeatOnSections = ({
-  frequencyType,
   frequency,
-  onFrequencyUpdate,
   frequencyMetadata,
+  frequencyType,
   onFrequencyMetadataUpdate,
+  onFrequencyUpdate,
 }) => {
   const { fmt } = useLocalization()
+  const { t } = useTranslation('chores')
   // if time on frequencyMetadata is not set, try to set it to the nextDueDate if available,
   // otherwise set it to 18:00 of the current day
   useEffect(() => {
@@ -144,7 +134,7 @@ export const RepeatOnSections = ({
         flexDirection: 'column',
       }}
     >
-      <Typography level='h5'>Time of day: </Typography>
+      <Typography level='h5'>{t('repeat.timeOfDay')}</Typography>
       <Input
         type='time'
         sx={{ width: '150px' }}
@@ -167,7 +157,7 @@ export const RepeatOnSections = ({
       return (
         <>
           <Grid item sm={12} sx={{ display: 'flex', alignItems: 'center' }}>
-            <Typography level='h5'>Every: </Typography>
+            <Typography level='h5'>{t('repeat.every')}</Typography>
             <Input
               slotProps={{
                 input: {
@@ -182,7 +172,7 @@ export const RepeatOnSections = ({
               }}
             />
             <Select
-              placeholder='Unit'
+              placeholder={t('repeat.unitPlaceholder')}
               value={frequencyMetadata?.unit || 'days'}
               sx={{ ml: 1 }}
             >
@@ -197,7 +187,7 @@ export const RepeatOnSections = ({
                     })
                   }}
                 >
-                  {item.charAt(0).toUpperCase() + item.slice(1)}
+                  {t(`repeat.unit.${item}`)}
                 </Option>
               ))}
             </Select>
@@ -241,7 +231,7 @@ export const RepeatOnSections = ({
                       overlay
                       disableIcon
                       variant='soft'
-                      label={item.charAt(0).toUpperCase() + item.slice(1)}
+                      label={t(`repeat.days.${item}`)}
                     />
                   </ListItem>
                 ))}
@@ -270,8 +260,8 @@ export const RepeatOnSections = ({
                 disableIcon
               >
                 {frequencyMetadata?.days?.length === 7
-                  ? 'Unselect All'
-                  : 'Select All'}
+                  ? t('repeat.unselectAll')
+                  : t('repeat.selectAll')}
               </Button>
             </Card>
           </Grid>
@@ -293,20 +283,16 @@ export const RepeatOnSections = ({
                 }}
                 sx={{ gap: 1, '& > div': { p: 1 } }}
               >
-                {Object.entries(WEEK_PATTERNS).map(([value, label]) => (
+                {WEEK_PATTERNS.map(value => (
                   <FormControl key={value}>
-                    <Radio value={value} label={label} variant='soft' />
-                    {value === 'every_week' && (
-                      <FormHelperText>
-                        Task repeats every week on selected days
-                      </FormHelperText>
-                    )}
-                    {value === 'week_of_month' && (
-                      <FormHelperText>
-                        Task repeats on specific day occurrences each month
-                        (e.g., 1st Monday, 3rd Friday)
-                      </FormHelperText>
-                    )}
+                    <Radio
+                      value={value}
+                      label={t(`repeat.weekPattern.${value}`)}
+                      variant='soft'
+                    />
+                    <FormHelperText>
+                      {t(`repeat.weekPatternHelp.${value}`)}
+                    </FormHelperText>
                   </FormControl>
                 ))}
               </RadioGroup>
@@ -314,10 +300,10 @@ export const RepeatOnSections = ({
               {frequencyMetadata?.weekPattern === 'week_of_month' && (
                 <Box mt={2}>
                   <Typography level='body-sm' mb={1}>
-                    Select which occurrences of the selected days:
+                    {t('repeat.selectOccurrences')}
                   </Typography>
                   <Typography level='body-xs' color='neutral' mb={2}>
-                    Example: "1st Monday" means the first Monday of each month
+                    {t('repeat.occurrenceExample')}
                   </Typography>
                   <Card>
                     <List
@@ -328,23 +314,21 @@ export const RepeatOnSections = ({
                         '--ListItem-radius': '20px',
                       }}
                     >
-                      {DAY_OCCURRENCE_OPTIONS.map(option => (
-                        <ListItem key={option.value}>
+                      {DAY_OCCURRENCE_VALUES.map(option => (
+                        <ListItem key={option}>
                           <Checkbox
                             checked={
                               frequencyMetadata?.occurrences?.includes(
-                                option.value,
+                                option,
                               ) || false
                             }
                             onChange={() => {
                               const currentOccurrences =
                                 frequencyMetadata?.occurrences || []
                               const newOccurrences =
-                                currentOccurrences.includes(option.value)
-                                  ? currentOccurrences.filter(
-                                      w => w !== option.value,
-                                    )
-                                  : [...currentOccurrences, option.value]
+                                currentOccurrences.includes(option)
+                                  ? currentOccurrences.filter(w => w !== option)
+                                  : [...currentOccurrences, option]
                               onFrequencyMetadataUpdate({
                                 ...frequencyMetadata,
                                 occurrences: newOccurrences.sort((a, b) => {
@@ -357,7 +341,9 @@ export const RepeatOnSections = ({
                             overlay
                             disableIcon
                             variant='soft'
-                            label={option.label}
+                            label={t(
+                              `repeat.occurrence.${occurrenceKey(option)}`,
+                            )}
                           />
                         </ListItem>
                       ))}
@@ -369,7 +355,7 @@ export const RepeatOnSections = ({
                       onClick={() => {
                         if (
                           frequencyMetadata?.occurrences?.length ===
-                          DAY_OCCURRENCE_OPTIONS.length
+                          DAY_OCCURRENCE_VALUES.length
                         ) {
                           onFrequencyMetadataUpdate({
                             ...frequencyMetadata,
@@ -378,9 +364,7 @@ export const RepeatOnSections = ({
                         } else {
                           onFrequencyMetadataUpdate({
                             ...frequencyMetadata,
-                            occurrences: DAY_OCCURRENCE_OPTIONS.map(
-                              option => option.value,
-                            ),
+                            occurrences: [...DAY_OCCURRENCE_VALUES],
                           })
                         }
                       }}
@@ -388,9 +372,9 @@ export const RepeatOnSections = ({
                       disableIcon
                     >
                       {frequencyMetadata?.occurrences?.length ===
-                      DAY_OCCURRENCE_OPTIONS.length
-                        ? 'Unselect All'
-                        : 'Select All'}
+                      DAY_OCCURRENCE_VALUES.length
+                        ? t('repeat.unselectAll')
+                        : t('repeat.selectAll')}
                     </Button>
                   </Card>
                 </Box>
@@ -402,7 +386,7 @@ export const RepeatOnSections = ({
               {frequencyMetadata?.days?.length > 0 && (
                 <Card mt={2} p={2}>
                   <Typography level='body-sm' color='primary'>
-                    {generateSchedulePreview(frequencyMetadata, fmt.time)}
+                    {generateSchedulePreview(frequencyMetadata, fmt.time, t)}
                   </Typography>
                 </Card>
               )}
@@ -460,7 +444,7 @@ export const RepeatOnSections = ({
                       overlay
                       disableIcon
                       variant='soft'
-                      label={item.charAt(0).toUpperCase() + item.slice(1)}
+                      label={t(`repeat.months.${item}`)}
                     />
                   </ListItem>
                 ))}
@@ -487,8 +471,8 @@ export const RepeatOnSections = ({
                 disableIcon
               >
                 {frequencyMetadata?.months?.length === 12
-                  ? 'Unselect All'
-                  : 'Select All'}
+                  ? t('repeat.unselectAll')
+                  : t('repeat.selectAll')}
               </Button>
             </Card>
           </Grid>
@@ -499,7 +483,7 @@ export const RepeatOnSections = ({
               mb: 1.5,
             }}
           >
-            <Typography>on the </Typography>
+            <Typography>{t('repeat.onThe')}</Typography>
             <Input
               sx={{ width: '80px' }}
               type='number'
@@ -515,7 +499,7 @@ export const RepeatOnSections = ({
                 onFrequencyUpdate(e.target.value)
               }}
             />
-            <Typography>of the above month/s</Typography>
+            <Typography>{t('repeat.ofAboveMonths')}</Typography>
           </Box>
           {timePickerComponent}
         </>
@@ -527,24 +511,26 @@ export const RepeatOnSections = ({
 }
 
 const RepeatSection = ({
-  frequencyType,
-  frequency,
-  onFrequencyUpdate,
-  onFrequencyTypeUpdate,
-  frequencyMetadata,
-  onFrequencyMetadataUpdate,
-  frequencyError,
-  allUserThings,
-  onTriggerUpdate,
   OnTriggerValidate,
+  allUserThings,
+  frequency,
+  frequencyError,
+  frequencyMetadata,
+  frequencyType,
   isAttemptToSave,
+  onFrequencyMetadataUpdate,
+  onFrequencyTypeUpdate,
+  onFrequencyUpdate,
+  onTriggerUpdate,
   selectedThing,
+  viewOnly = false,
 }) => {
-  const { data: userProfile } = useUserProfile()
+  const { data: userProfile } = useUserProfile({ enabled: !viewOnly })
+  const { t } = useTranslation('chores')
 
   return (
     <Box mt={2}>
-      <Typography level='h4'>Repeat:</Typography>
+      <Typography level='h4'>{t('repeat.title')}</Typography>
       <FormControl sx={{ mt: 1 }}>
         <Checkbox
           onChange={e => {
@@ -557,16 +543,14 @@ const RepeatSection = ({
           checked={!['once', 'trigger'].includes(frequencyType)}
           value={!['once', 'trigger'].includes(frequencyType)}
           overlay
-          label='Repeat this task'
+          label={t('repeat.repeatThisTask')}
         />
-        <FormHelperText>
-          Is this something needed to be done regularly?
-        </FormHelperText>
+        <FormHelperText>{t('repeat.repeatThisTaskHelp')}</FormHelperText>
       </FormControl>
       {!['once', 'trigger'].includes(frequencyType) && (
         <>
           <Card sx={{ mt: 1 }}>
-            <Typography level='h5'>How often should it be repeated?</Typography>
+            <Typography level='h5'>{t('repeat.howOften')}</Typography>
 
             <List
               orientation='horizontal'
@@ -610,21 +594,22 @@ const RepeatSection = ({
                     overlay
                     disableIcon
                     variant='soft'
-                    label={
-                      item.charAt(0).toUpperCase() +
-                      item.slice(1).replace('_', ' ')
-                    }
+                    label={t(`repeat.freqType.${item}`)}
                   />
                 </ListItem>
               ))}
             </List>
-            <Typography>{FREQUENCY_TYPE_MESSAGE[frequencyType]}</Typography>
+            <Typography>
+              {FREQUENCY_TYPE_WITH_MESSAGE.includes(frequencyType)
+                ? t(`repeat.freqMessage.${frequencyType}`)
+                : ''}
+            </Typography>
             {frequencyType === 'custom' ||
               (REPEAT_ON_TYPE.includes(frequencyType) && (
                 <>
                   <Grid container spacing={1} mt={2}>
                     <Grid item>
-                      <Typography>Repeat on:</Typography>
+                      <Typography>{t('repeat.repeatOn')}</Typography>
                       <Box
                         sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
                       >
@@ -679,21 +664,7 @@ const RepeatSection = ({
                               }}
                               value={item}
                               disableIcon
-                              label={item
-                                .split('_')
-                                .map((i, idx) => {
-                                  // first or last word
-                                  if (
-                                    idx === 0 ||
-                                    idx === item.split('_').length - 1
-                                  ) {
-                                    return (
-                                      i.charAt(0).toUpperCase() + i.slice(1)
-                                    )
-                                  }
-                                  return i
-                                })
-                                .join(' ')}
+                              label={t(`repeat.repeatOnType.${item}`)}
                               variant='plain'
                               sx={{
                                 px: 2,
@@ -750,24 +721,23 @@ const RepeatSection = ({
           value={frequencyType === 'trigger'}
           disabled={!isPlusAccount(userProfile)}
           overlay
-          label='Trigger this task based on a thing state'
+          label={t('repeat.triggerLabel')}
         />
         <FormHelperText
           sx={{
             opacity: !isPlusAccount(userProfile) ? 0.5 : 1,
           }}
         >
-          Is this something that should be done when a thing state changes?{' '}
+          {t('repeat.triggerHelp')}{' '}
           {userProfile && !isPlusAccount(userProfile) && (
             <Chip variant='soft' color='warning'>
-              Plus Feature
+              {t('settings:common.plusFeature')}
             </Chip>
           )}
         </FormHelperText>
         {!isPlusAccount(userProfile) && (
           <Typography level='body-sm' color='warning' sx={{ mt: 1 }}>
-            Thing-based triggers are not available in the Basic plan. Upgrade to
-            Plus to automatically trigger tasks when device states change.
+            {t('repeat.triggerPlanWarning')}
           </Typography>
         )}
       </FormControl>

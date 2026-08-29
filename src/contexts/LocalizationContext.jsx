@@ -1,7 +1,8 @@
-import useStickyState from '@/hooks/useStickyState'
 import moment from 'moment'
 import { createContext, useContext, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+
+import useStickyState from '@/hooks/useStickyState'
 
 const LocalizationContext = createContext()
 
@@ -21,15 +22,19 @@ export const TIME_FORMATS = {
 export const RTL_LANGUAGES = ['ar', 'he', 'fa', 'ur']
 
 export const AVAILABLE_LANGUAGES = [
+  { code: 'ar', name: 'Arabic', nativeName: 'العربية' },
   { code: 'de', name: 'German', nativeName: 'Deutsch' },
   { code: 'en', name: 'English', nativeName: 'English' },
   { code: 'es', name: 'Spanish', nativeName: 'Español' },
   { code: 'fr', name: 'French', nativeName: 'Français' },
+  { code: 'he', name: 'Hebrew', nativeName: 'עברית' },
   { code: 'nl', name: 'Dutch', nativeName: 'Nederlands' },
   { code: 'ja', name: 'Japanese', nativeName: '日本語' },
   { code: 'pt', name: 'Portuguese (Brazil)', nativeName: 'Português (Brasil)' },
   { code: 'ja', name: 'Japanese', nativeName: '日本語' },
   { code: 'pl', name: 'Polish', nativeName: 'polski' },
+  { code: 'ru', name: 'Russian', nativeName: 'Русский' },
+  { code: 'zh-CN', name: 'Chinese (Simplified)', nativeName: '简体中文' },
 ]
 
 export const LocalizationProvider = ({ children }) => {
@@ -54,7 +59,10 @@ export const LocalizationProvider = ({ children }) => {
   }, [language, i18n])
 
   useEffect(() => {
-    const isRTL = RTL_LANGUAGES.includes(language)
+    const isRTL = RTL_LANGUAGES.some(
+      rtlLanguage =>
+        language === rtlLanguage || language.startsWith(`${rtlLanguage}-`),
+    )
     document.documentElement.dir = isRTL ? 'rtl' : 'ltr'
     document.documentElement.lang = language
   }, [language])
@@ -92,7 +100,10 @@ export const LocalizationProvider = ({ children }) => {
     })
   }
 
-  const isRTL = RTL_LANGUAGES.includes(language)
+  const isRTL = RTL_LANGUAGES.some(
+    rtlLanguage =>
+      language === rtlLanguage || language.startsWith(`${rtlLanguage}-`),
+  )
 
   const fmt = {
     date: formatDate,

@@ -1,22 +1,23 @@
-import {
-  Box,
-  Button,
-  Container,
-  Divider,
-  FormControl,
-  FormHelperText,
-  Input,
-  Sheet,
-  Typography,
-} from '@mui/joy'
+import { Box, Link, Typography } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import Logo from '../../Logo'
+
+import { useAuth } from '../../hooks/useAuth.jsx'
 import { useNotification } from '../../service/NotificationProvider'
-import { login, signUp } from '../../utils/Fetcher'
+import { signUp } from '../../utils/Fetcher'
+import { getPendingInvite, joinCirclePath } from '../../utils/PendingInvite'
+import {
+  AuthPasswordField,
+  AuthSubmitButton,
+  AuthTextField,
+  LegalLinks,
+} from './AuthFields'
+import AuthShell from './AuthShell'
 
 const SignupView = () => {
+  const { t } = useTranslation('auth')
   const [username, setUsername] = React.useState('')
   const [password, setPassword] = React.useState('')
   const Navigate = useNavigate()
@@ -27,25 +28,38 @@ const SignupView = () => {
   const [passwordError, setPasswordError] = React.useState('')
   const [emailError, setEmailError] = React.useState('')
   const [displayNameError, setDisplayNameError] = React.useState('')
+  const [isSubmitting, setIsSubmitting] = React.useState(false)
   const { showError } = useNotification()
-  const handleLogin = (username, password) => {
-    login(username, password).then(response => {
-      if (response.status === 200) {
-        response.json().then(res => {
-          localStorage.setItem('token', res.token)
-          localStorage.setItem('token_expiry', res.expire)
+  const { login: authLogin } = useAuth()
+  // Sign-in goes through the auth context, not a bare fetch: it stores the
+  // refresh token and updates the provider's own state, so the rest of the app
+  // sees the new session without a reload.
+  const handleLogin = async (username, password) => {
+    const result = await authLogin({ username, password })
+    if (!result.success) {
+      showError({
+        title: t('almostThere'),
+        message: t('signupSignInFailed'),
+      })
+      Navigate('/login')
+      return
+    }
 
-          // Invalidate user profile queries to ensure fresh data
-          queryClient.invalidateQueries(['userProfile'])
+    // Invalidate user profile queries to ensure fresh data
+    queryClient.invalidateQueries(['userProfile'])
 
-          Navigate('/chores')
-        })
-      } else {
-        console.log('Login failed', response)
+    // Someone who signed up from a circle invite is joining an existing
+    // circle, so sending them through "name your circle" is both a dead
+    // end for the invite and the wrong question.
+    const pendingInvite = getPendingInvite()
+    if (pendingInvite) {
+      Navigate(joinCirclePath(pendingInvite), { replace: true })
+      return
+    }
 
-        // Navigate('/login')
-      }
-    })
+    // "How did you hear about us" (cloud) / privacy preferences (self-hosted)
+    // that view forwards to '/circle-setup' once the user answers.
+    Navigate('/heard-about', { replace: true })
   }
   const handleSignUpValidation = () => {
     // Reset errors before validation
@@ -57,44 +71,42 @@ const SignupView = () => {
     let isValid = true
 
     if (!username.trim()) {
-      setUsernameError('Username is required')
+      setUsernameError(t('usernameRequired'))
       isValid = false
     }
     if (username.length < 4) {
-      setUsernameError('Username must be at least 4 characters')
+      setUsernameError(t('usernameMinLength'))
       isValid = false
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setEmailError('Invalid email address')
+      setEmailError(t('invalidEmail'))
       isValid = false
     }
 
     if (password.length < 8) {
-      setPasswordError('Password must be between 8 and 64 characters')
+      setPasswordError(t('passwordLength'))
       isValid = false
     }
 
     if (password.length > 64) {
-      setPasswordError('Password must be between 8 and 64 characters')
+      setPasswordError(t('passwordLength'))
       isValid = false
     }
 
     if (!displayName.trim()) {
-      setDisplayNameError('Display name is required')
+      setDisplayNameError(t('displayNameRequired'))
       isValid = false
     }
 
     // display name should only contain letters and spaces and numbers:
     if (!/^[a-zA-Z0-9 ]+$/.test(displayName)) {
-      setDisplayNameError('Display name can only contain letters and numbers')
+      setDisplayNameError(t('displayNameChars'))
       isValid = false
     }
 
-    // username should only contain lowercase letters, dot and dash:
-    if (!/^[a-z.-]+$/.test(username)) {
-      setUsernameError(
-        'Username can only contain lowercase letters, dot and dash',
-      )
+    // username should only contain lowercase letters, numbers, dot and dash:
+    if (!/^[a-z0-9.-]+$/.test(username)) {
+      setUsernameError(t('usernameCharsInvalid'))
       isValid = false
     }
 
@@ -105,208 +117,133 @@ const SignupView = () => {
     if (!handleSignUpValidation()) {
       return
     }
-    signUp(username, password, displayName, email).then(response => {
-      if (response.status === 201) {
-        handleLogin(username, password)
-      } else if (response.status === 403) {
-        showError({
-          title: 'Signup Failed',
-          message: 'Signup disabled, please contact admin',
-        })
-      } else {
-        console.log('Signup failed')
-        response.json().then(res => {
+    setIsSubmitting(true)
+    signUp(username, password, displayName, email)
+      .then(response => {
+        if (response.status === 201) {
+          handleLogin(username, password)
+        } else if (response.status === 403) {
           showError({
-            title: 'Signup Failed',
-            message: res.error || 'An error occurred during signup',
+            title: t('signupFailed'),
+            message: t('signupDisabled'),
           })
-        })
-      }
-    })
+        } else {
+          console.log('Signup failed')
+          response.json().then(res => {
+            showError({
+              title: t('signupFailed'),
+              message: res.error || t('signupGenericError'),
+            })
+          })
+        }
+      })
+      .finally(() => setIsSubmitting(false))
   }
 
   return (
-    <Container component='main' maxWidth='xs'>
+    <AuthShell
+      title={t('createYourAccount')}
+      subtitle={
+        getPendingInvite()
+          ? t('signupSubtitlePendingInvite')
+          : t('signupSubtitleDefault')
+      }
+      footer={<LegalLinks />}
+      logoSize={0}
+    >
       <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          marginTop: 4,
-        }}
+        component='form'
+        onSubmit={handleSubmit}
+        sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
       >
-        <Sheet
-          component='form'
-          sx={{
-            mt: 1,
-            width: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            // alignItems: 'center',
-            padding: 2,
-            borderRadius: '8px',
-            boxShadow: 'md',
+        <AuthTextField
+          label={t('displayNameLabel')}
+          id='displayName'
+          name='displayName'
+          autoComplete='name'
+          placeholder={t('displayNamePlaceholder')}
+          autoFocus
+          value={displayName}
+          error={displayNameError}
+          onChange={e => {
+            setDisplayNameError(null)
+            setDisplayName(e.target.value)
           }}
-        >
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              flexDirection: 'column',
-            }}
-          >
-            <Logo />
-            <Typography level='h2'>
-              Done
-              <span
-                style={{
-                  color: '#06b6d4',
-                }}
-              >
-                tick
-              </span>
-            </Typography>
-            <Typography level='body2'>
-              Create an account to get started!
-            </Typography>
-          </Box>
-          <Typography level='body2' alignSelf={'start'} mt={4}>
-            Username
-          </Typography>
-          <Input
-            margin='normal'
-            required
-            fullWidth
-            id='username'
-            label='Username'
-            name='username'
-            autoComplete='username'
-            autoFocus
-            value={username}
-            onChange={e => {
-              setUsernameError(null)
-              setUsername(e.target.value.trim())
-            }}
-          />
-          <FormControl error={usernameError}>
-            <FormHelperText c>{usernameError}</FormHelperText>
-          </FormControl>
-          {/* Error message display */}
-          <Typography level='body2' alignSelf={'start'}>
-            Email
-          </Typography>
-          <Input
-            margin='normal'
-            required
-            fullWidth
-            id='email'
-            label='email'
-            name='email'
-            autoComplete='email'
-            value={email}
-            onChange={e => {
-              setEmailError(null)
-              setEmail(e.target.value.trim())
-            }}
-          />
-          <FormControl error={emailError}>
-            <FormHelperText c>{emailError}</FormHelperText>
-          </FormControl>
-          <Typography level='body2' alignSelf={'start'}>
-            Password:
-          </Typography>
-          <Input
-            margin='normal'
-            required
-            fullWidth
-            name='password'
-            label='Password'
-            type='password'
-            id='password'
-            placeholder='Enter password (8-64 characters)'
-            value={password}
-            onChange={e => {
-              setPasswordError(null)
-              setPassword(e.target.value)
-            }}
-          />
-          <FormControl error={passwordError}>
-            <FormHelperText>{passwordError}</FormHelperText>
-          </FormControl>
-          <Typography level='body2' alignSelf={'start'}>
-            Display Name:
-          </Typography>
-          <Input
-            margin='normal'
-            required
-            fullWidth
-            name='displayName'
-            label='Display Name'
-            id='displayName'
-            placeholder='How others see your name'
-            value={displayName}
-            onChange={e => {
-              setDisplayNameError(null)
-              setDisplayName(e.target.value)
-            }}
-          />
-          <FormControl error={displayNameError}>
-            <FormHelperText>{displayNameError}</FormHelperText>
-          </FormControl>
-          <Typography
-            level='body2'
-            sx={{ mt: 2, mb: 1, textAlign: 'center', color: 'text.secondary' }}
-          >
-            By signing up, you agree to our Terms of Service and Privacy Policy
-          </Typography>
-          <Button
-            // type='submit'
-            size='lg'
-            fullWidth
-            variant='solid'
-            sx={{ mt: 1, mb: 1 }}
-            onClick={handleSubmit}
-          >
-            Sign Up
-          </Button>
-          <Divider> or </Divider>
-          <Button
-            size='lg'
-            onClick={() => {
-              Navigate('/login')
-            }}
-            fullWidth
-            variant='soft'
-            // sx={{ mt: 3, mb: 2 }}
-          >
-            Login
-          </Button>
+        />
 
-          <Box
-            sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}
-          >
-            <Button
-              variant='plain'
-              size='sm'
-              onClick={() => {
-                window.open('https://donetick.com/privacy-policy', '_blank')
-              }}
-            >
-              Privacy Policy
-            </Button>
-            <Button
-              variant='plain'
-              size='sm'
-              onClick={() => {
-                window.open('https://donetick.com/terms', '_blank')
-              }}
-            >
-              Terms of Use
-            </Button>
-          </Box>
-        </Sheet>
+        <AuthTextField
+          label={t('username')}
+          id='username'
+          name='username'
+          autoComplete='username'
+          placeholder={t('usernameHint')}
+          value={username}
+          error={usernameError}
+          onChange={e => {
+            setUsernameError(null)
+            setUsername(e.target.value.trim())
+          }}
+        />
+
+        <AuthTextField
+          label={t('email')}
+          id='email'
+          name='email'
+          type='email'
+          autoComplete='email'
+          placeholder={t('emailPlaceholder')}
+          value={email}
+          error={emailError}
+          onChange={e => {
+            setEmailError(null)
+            setEmail(e.target.value.trim())
+          }}
+        />
+
+        <AuthPasswordField
+          id='password'
+          name='password'
+          autoComplete='new-password'
+          label={t('passwordLabel')}
+          placeholder={t('signupPasswordPlaceholder')}
+          value={password}
+          error={passwordError}
+          helper={t('signupPasswordHelper')}
+          onChange={e => {
+            setPasswordError(null)
+            setPassword(e.target.value)
+          }}
+        />
+
+        <AuthSubmitButton loading={isSubmitting} sx={{ mt: 1 }}>
+          {t('createAccountButton')}
+        </AuthSubmitButton>
+
+        <Typography
+          level='body-xs'
+          sx={{ textAlign: 'center', color: 'text.secondary' }}
+        >
+          {t('signupTermsNotice')}
+        </Typography>
       </Box>
-    </Container>
+
+      <Typography
+        level='body-sm'
+        sx={{ mt: 3, textAlign: 'center', color: 'text.secondary' }}
+      >
+        {t('alreadyHaveAccount')}{' '}
+        <Link
+          component='button'
+          type='button'
+          level='body-sm'
+          fontWeight={600}
+          underline='hover'
+          onClick={() => Navigate('/login')}
+        >
+          {t('signIn')}
+        </Link>
+      </Typography>
+    </AuthShell>
   )
 }
 

@@ -1,23 +1,27 @@
-import { Box, Button, CircularProgress, Container, Typography } from '@mui/joy'
-import { useEffect, useState } from 'react'
-import Logo from '../../Logo'
-
 import { Capacitor } from '@capacitor/core'
+import { Box, Button, LinearProgress } from '@mui/joy'
 import Cookies from 'js-cookie'
+import { useEffect, useState } from 'react'
 import { useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+
 import { useUserProfile } from '../../queries/UserQueries'
 import { apiClient } from '../../utils/ApiClient'
 import { GetUserProfile } from '../../utils/Fetcher'
+import { endOAuthExchange } from '../../utils/OAuthExchangeState'
 import { saveTokens } from '../../utils/TokenStorage'
+import AuthShell from './AuthShell'
+import { authButtonSx } from './authStyles'
 import MFAVerificationModal from './MFAVerificationModal'
 
 const AuthenticationLoading = () => {
-  const { data: userProfile, refetch: refetchUserProfile } = useUserProfile()
+  const { t } = useTranslation('auth')
+  const { refetch: refetchUserProfile } = useUserProfile()
   const Navigate = useNavigate()
   const hasCalledHandleOAuth2 = useRef(false)
-  const [message, setMessage] = useState('Authenticating')
-  const [subMessage, setSubMessage] = useState('Please wait')
+  const [message, setMessage] = useState(t('authenticating.signingIn'))
+  const [subMessage, setSubMessage] = useState(t('authenticating.signingInSub'))
   const [status, setStatus] = useState('pending')
   const [mfaModalOpen, setMfaModalOpen] = useState(false)
   const [mfaSessionToken, setMfaSessionToken] = useState('')
@@ -25,15 +29,19 @@ const AuthenticationLoading = () => {
   useEffect(() => {
     if (provider === 'oauth2' && !hasCalledHandleOAuth2.current) {
       hasCalledHandleOAuth2.current = true
-      handleOAuth2()
+      // Release the guard once the exchange settles, so a stuck flag can never
+      // suppress a genuine session expiry later on.
+      handleOAuth2().finally(endOAuthExchange)
     } else if (provider !== 'oauth2') {
-      setMessage('Unknown Authentication Provider')
-      setSubMessage('Please contact support')
+      setMessage(t('authenticating.unknownProvider'))
+      setSubMessage(t('authenticating.contactSupport'))
+      setStatus('error')
     }
+    return endOAuthExchange
   }, [provider])
   const getUserProfileAndNavigateToHome = () => {
-    GetUserProfile().then(data => {
-      data.json().then(data => {
+    GetUserProfile().then(response => {
+      response.json().then(() => {
         refetchUserProfile().then(() => {
           // check if redirect url is set in cookie:
           const redirectUrl = Cookies.get('ca_redirect')
@@ -65,8 +73,8 @@ const AuthenticationLoading = () => {
   const handleMFAClose = () => {
     setMfaModalOpen(false)
     setMfaSessionToken('')
-    setMessage('Authentication failed')
-    setSubMessage('Two-factor authentication was cancelled')
+    setMessage(t('authenticating.signInFailed'))
+    setSubMessage(t('authenticating.mfaCancelled'))
     setStatus('error')
   }
 
@@ -79,8 +87,8 @@ const AuthenticationLoading = () => {
     const storedState = localStorage.getItem('authState')
 
     if (returnedState !== storedState) {
-      setMessage('Authentication failed')
-      setSubMessage('State does not match')
+      setMessage(t('authenticating.signInFailed'))
+      setSubMessage(t('authenticating.requestNotVerified'))
       setStatus('error')
       return
     }
@@ -106,8 +114,8 @@ const AuthenticationLoading = () => {
 
         if (!response.ok) {
           console.error('Authentication failed')
-          setMessage('Authentication failed')
-          setSubMessage('Please try again')
+          setMessage(t('authenticating.signInFailed'))
+          setSubMessage(t('authenticating.tryAgain'))
           setStatus('error')
           return
         }
@@ -116,22 +124,22 @@ const AuthenticationLoading = () => {
 
         if (data.mfaRequired) {
           if (!data.sessionToken) {
-            setMessage('Authentication failed')
-            setSubMessage('MFA session is missing. Please try again')
+            setMessage(t('authenticating.signInFailed'))
+            setSubMessage(t('authenticating.mfaSessionMissing'))
             setStatus('error')
             return
           }
 
           setMfaSessionToken(data.sessionToken)
           setMfaModalOpen(true)
-          setMessage('Two-Factor Authentication Required')
-          setSubMessage('Please verify your login to continue')
+          setMessage(t('authenticating.twoFactor'))
+          setSubMessage(t('authenticating.verifyToContinue'))
           return
         }
 
         if (!data.token && !data.access_token) {
-          setMessage('Authentication failed')
-          setSubMessage('No valid authentication token returned')
+          setMessage(t('authenticating.signInFailed'))
+          setSubMessage(t('authenticating.noToken'))
           setStatus('error')
           return
         }
@@ -152,66 +160,52 @@ const AuthenticationLoading = () => {
         }
       } catch (error) {
         console.error('Authentication request failed', error)
-        setMessage('Authentication failed')
-        setSubMessage('Please try again')
+        setMessage(t('authenticating.signInFailed'))
+        setSubMessage(t('authenticating.tryAgain'))
         setStatus('error')
       }
     }
   }
 
   return (
-    <Container className='flex h-full items-center justify-center'>
+    <AuthShell title={message} subtitle={subMessage}>
       <Box
-        className='flex flex-col items-center justify-center'
-        sx={{
-          minHeight: '80vh',
-        }}
+        role='status'
+        aria-live='polite'
+        sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
       >
-        <CircularProgress
-          determinate={status === 'error'}
-          color={status === 'pending' ? 'primary' : 'danger'}
-          sx={{ '--CircularProgress-size': '200px' }}
-        >
-          <Logo />
-        </CircularProgress>
-        <Box
-          className='flex items-center gap-2'
-          sx={{
-            fontWeight: 700,
-            fontSize: 24,
-            mt: 2,
-          }}
-        >
-          {message}
-        </Box>
-        <Typography level='body-md' fontWeight={500} textAlign={'center'}>
-          {subMessage}
-        </Typography>
+        {status === 'pending' && (
+          <LinearProgress
+            sx={{ width: '60%', '--LinearProgress-radius': '999px' }}
+          />
+        )}
 
         {status === 'error' && (
           <Button
+            component={Link}
+            to='/login'
             size='lg'
-            variant='outlined'
-            sx={{
-              mt: 4,
-            }}
+            variant='soft'
+            color='neutral'
+            fullWidth
+            sx={authButtonSx}
           >
-            <Link to='/login'>Go back Login</Link>
+            {t('authenticating.backToSignIn')}
           </Button>
         )}
-
-        <MFAVerificationModal
-          open={mfaModalOpen}
-          onClose={handleMFAClose}
-          sessionToken={mfaSessionToken}
-          onSuccess={handleMFASuccess}
-          onError={() => {
-            setMessage('Authentication failed')
-            setSubMessage('Two-factor authentication failed. Please try again')
-          }}
-        />
       </Box>
-    </Container>
+
+      <MFAVerificationModal
+        open={mfaModalOpen}
+        onClose={handleMFAClose}
+        sessionToken={mfaSessionToken}
+        onSuccess={handleMFASuccess}
+        onError={() => {
+          setMessage(t('authenticating.signInFailed'))
+          setSubMessage(t('authenticating.mfaFailed'))
+        }}
+      />
+    </AuthShell>
   )
 }
 

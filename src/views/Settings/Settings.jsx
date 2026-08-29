@@ -20,7 +20,9 @@ import { Purchases } from '@revenuecat/purchases-capacitor'
 import { useQueryClient } from '@tanstack/react-query'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+
 import RealTimeSettings from '../../components/RealTimeSettings'
 import SubscriptionModal from '../../components/SubscriptionModal'
 import { useLocalization } from '../../contexts/LocalizationContext'
@@ -56,6 +58,7 @@ import StorageSettings from './StorageSettings'
 import ThemeToggle from './ThemeToggle'
 
 const Settings = () => {
+  const { t } = useTranslation('settings')
   const { data: userProfile } = useUserProfile()
   const queryClient = useQueryClient()
   const { showNotification } = useNotification()
@@ -82,8 +85,8 @@ const Settings = () => {
     message,
     title,
     onConfirm,
-    confirmText = 'Confirm',
-    cancelText = 'Cancel',
+    confirmText = t('common.confirm'),
+    cancelText = t('common.cancel'),
     color = 'primary',
   ) => {
     setConfirmModalConfig({
@@ -111,7 +114,7 @@ const Settings = () => {
     } catch (error) {
       showNotification({
         type: 'error',
-        message: 'Failed to refresh member requests',
+        message: t('circleSettings.refreshFailed'),
       })
     } finally {
       setIsRefreshing(false)
@@ -194,27 +197,29 @@ const Settings = () => {
 
   const getSubscriptionDetails = () => {
     if (userProfile?.subscription === 'active') {
-      return `You are currently subscribed to the Plus plan. Your subscription will renew on ${fmt.date(
-        userProfile?.expiration,
-      )}.`
+      return t('accountSettings.activeDescription', {
+        date: fmt.date(userProfile?.expiration),
+      })
     } else if (userProfile?.subscription === 'cancelled') {
-      return `You have cancelled your subscription. Your account will be downgraded to the Free plan on ${fmt.date(
-        userProfile?.expiration,
-      )}.`
+      return t('accountSettings.cancelledDescription', {
+        date: fmt.date(userProfile?.expiration),
+      })
     } else {
-      return `You are currently on the Free plan. Upgrade to the Plus plan to unlock more features.`
+      return t('accountSettings.freeDescription')
     }
   }
   const getSubscriptionStatus = () => {
     if (userProfile?.subscription === 'active') {
-      return `Plus`
+      return t('accountSettings.plus')
     } else if (userProfile?.subscription === 'cancelled') {
       if (moment().isBefore(userProfile?.expiration)) {
-        return `Plus(until ${fmt.date(userProfile?.expiration)})`
+        return t('accountSettings.plusUntil', {
+          date: fmt.date(userProfile?.expiration),
+        })
       }
-      return `Free`
+      return t('accountSettings.free')
     } else {
-      return `Free`
+      return t('accountSettings.free')
     }
   }
 
@@ -240,18 +245,15 @@ const Settings = () => {
     <Container>
       <ProfileSettings />
       <div className='grid gap-4 py-4' id='circle'>
-        <Typography level='h3'>Circle settings</Typography>
+        <Typography level='h3'>{t('circleSettings.title')}</Typography>
         <Divider />
         <Typography level='body-md'>
-          Your account is automatically connected to a Circle when you create or
-          join one. Easily invite friends by sharing the unique Circle code or
-          link below. You'll receive a notification below when someone requests
-          to join your Circle.
+          {t('circleSettings.description')}
         </Typography>
         <Typography level='title-sm' mb={-1}>
           {userCircles[0]?.userRole === 'member'
-            ? `You part of ${userCircles[0]?.name} `
-            : `You circle code is:`}
+            ? t('circleSettings.memberOf', { name: userCircles[0]?.name })
+            : t('circleSettings.yourCircleCode')}
 
           <Input
             value={userCircles[0]?.invite_code}
@@ -268,11 +270,11 @@ const Settings = () => {
               navigator.clipboard.writeText(userCircles[0]?.invite_code)
               showNotification({
                 type: 'success',
-                message: 'Code copied to clipboard',
+                message: t('circleSettings.codeCopied'),
               })
             }}
           >
-            Copy Code
+            {t('circleSettings.copyCode')}
           </Button>
           <Button
             variant='soft'
@@ -286,11 +288,11 @@ const Settings = () => {
               )
               showNotification({
                 type: 'success',
-                message: 'Link copied to clipboard',
+                message: t('circleSettings.linkCopied'),
               })
             }}
           >
-            Copy Link
+            {t('circleSettings.copyLink')}
           </Button>
           {userCircles.length > 0 && userCircles[0]?.userRole === 'member' && (
             <Button
@@ -299,35 +301,37 @@ const Settings = () => {
               sx={{ ml: 1 }}
               onClick={() => {
                 showConfirmation(
-                  'Are you sure you want to leave your circle?',
-                  'Leave Circle',
+                  t('circleSettings.leaveConfirmMessage'),
+                  t('circleSettings.leaveConfirmTitle'),
                   () => {
                     LeaveCircle(userCircles[0]?.id).then(resp => {
                       if (resp.ok) {
                         showNotification({
                           type: 'success',
-                          message: 'Left circle successfully',
+                          message: t('circleSettings.leftCircle'),
                         })
                       } else {
                         showNotification({
                           type: 'error',
-                          message: 'Failed to leave circle',
+                          message: t('circleSettings.leaveFailed'),
                         })
                       }
                     })
                   },
-                  'Leave',
-                  'Cancel',
+                  t('circleSettings.leaveConfirmButton'),
+                  t('common.cancel'),
                   'danger',
                 )
               }}
             >
-              Leave Circle
+              {t('circleSettings.leave')}
             </Button>
           )}
         </Typography>
 
-        <Typography level='title-md'>Circle Members</Typography>
+        <Typography level='title-md'>
+          {t('circleSettings.circleMembers')}
+        </Typography>
         {circleMembers.map(member => (
           <Card key={member.id} className='p-4'>
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -335,20 +339,27 @@ const Settings = () => {
                 <Typography level='body-md'>
                   {member.displayName.charAt(0).toUpperCase() +
                     member.displayName.slice(1)}
-                  {member.userId === userProfile.id ? '(You)' : ''}{' '}
+                  {member.userId === userProfile.id
+                    ? t('circleSettings.you')
+                    : ''}{' '}
                   <Chip>
                     {' '}
-                    {member.isActive ? member.role : 'Pending Approval'}
+                    {member.isActive
+                      ? member.role
+                      : t('circleSettings.pendingApproval')}
                   </Chip>
                 </Typography>
                 {member.isActive ? (
                   <Typography level='body-sm'>
-                    Joined on {fmt.date(member.createdAt)}
+                    {t('circleSettings.joinedOn', {
+                      date: fmt.date(member.createdAt),
+                    })}
                   </Typography>
                 ) : (
                   <Typography level='body-sm' color='danger'>
-                    Request to join{' '}
-                    {fmt.date(member.updatedAt)}
+                    {t('circleSettings.requestedToJoin', {
+                      date: fmt.date(member.updatedAt),
+                    })}
                   </Typography>
                 )}
               </Box>
@@ -378,28 +389,14 @@ const Settings = () => {
                         } else {
                           showNotification({
                             type: 'error',
-                            message: 'Failed to update role',
+                            message: t('circleSettings.roleUpdateFailed'),
                           })
                         }
                       })
                     }}
                   >
-                    {[
-                      {
-                        value: 'member',
-                        description: 'Just a regular member of the circle',
-                      },
-                      {
-                        value: 'manager',
-                        description:
-                          'Can impersonate users and perform actions on their behalf',
-                      },
-                      {
-                        value: 'admin',
-                        description: 'Full access to the circle',
-                      },
-                    ].map((option, index) => (
-                      <Option value={option.value} key={index}>
+                    {['member', 'manager', 'admin'].map((option, index) => (
+                      <Option value={option} key={index}>
                         <Box
                           sx={{
                             display: 'flex',
@@ -414,14 +411,13 @@ const Settings = () => {
                             level='title-sm'
                             sx={{ mb: 0, mt: 0, lineHeight: 1.1 }}
                           >
-                            {option.value.charAt(0).toUpperCase() +
-                              option.value.slice(1)}
+                            {t(`circleSettings.roles.${option}`)}
                           </Typography>
                           <Typography
                             level='body-sm'
                             sx={{ mt: 0, mb: 0, lineHeight: 1.1 }}
                           >
-                            {option.description}
+                            {t(`circleSettings.roles.${option}Description`)}
                           </Typography>
                         </Box>
                       </Option>
@@ -437,8 +433,10 @@ const Settings = () => {
                       size='sm'
                       onClick={() => {
                         showConfirmation(
-                          `Are you sure you want to remove ${member.displayName} from your circle?`,
-                          'Remove Member',
+                          t('circleSettings.removeMemberMessage', {
+                            name: member.displayName,
+                          }),
+                          t('circleSettings.removeMemberTitle'),
                           () => {
                             DeleteCircleMember(
                               member.circleId,
@@ -447,7 +445,7 @@ const Settings = () => {
                               if (resp.ok) {
                                 showNotification({
                                   type: 'success',
-                                  message: 'Removed member successfully',
+                                  message: t('circleSettings.memberRemoved'),
                                 })
                                 // Invalidate and refetch circle-related queries
                                 queryClient.invalidateQueries(['circleMembers'])
@@ -463,8 +461,8 @@ const Settings = () => {
                               }
                             })
                           },
-                          'Remove',
-                          'Cancel',
+                          t('common.remove'),
+                          t('common.cancel'),
                           'danger',
                         )
                       }}
@@ -485,11 +483,15 @@ const Settings = () => {
             mb: 1,
           }}
         >
-          <Typography level='title-md'>Circle Member Requests</Typography>
+          <Typography level='title-md'>
+            {t('circleSettings.circleMemberRequests')}
+          </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {lastRefresh && (
               <Typography level='body-sm' color='neutral'>
-                Last updated: {fmt.dateTime(lastRefresh)}
+                {t('circleSettings.lastUpdated', {
+                  time: fmt.dateTime(lastRefresh),
+                })}
               </Typography>
             )}
             <Button
@@ -501,7 +503,9 @@ const Settings = () => {
                 isRefreshing ? <CircularProgress size='sm' /> : <Refresh />
               }
             >
-              {isRefreshing ? 'Refreshing...' : 'Refresh'}
+              {isRefreshing
+                ? t('circleSettings.refreshing')
+                : t('common.refresh')}
             </Button>
           </Box>
         </Box>
@@ -509,21 +513,24 @@ const Settings = () => {
         {circleMemberRequests.map(request => (
           <Card key={request.id} className='p-4'>
             <Typography level='body-md'>
-              {request.displayName} wants to join your circle.
+              {t('circleSettings.wantsToJoin', { name: request.displayName })}
             </Typography>
             <Button
               variant='soft'
               color='success'
               onClick={() => {
                 showConfirmation(
-                  `Are you sure you want to accept ${request.displayName} (username: ${request.username}) to join your circle?`,
-                  'Accept Member Request',
+                  t('circleSettings.acceptRequestMessage', {
+                    name: request.displayName,
+                    username: request.username,
+                  }),
+                  t('circleSettings.acceptRequestTitle'),
                   () => {
                     AcceptCircleMemberRequest(request.id).then(resp => {
                       if (resp.ok) {
                         showNotification({
                           type: 'success',
-                          message: 'Accepted request successfully',
+                          message: t('circleSettings.requestAccepted'),
                         })
                         // Invalidate and refetch circle-related queries
                         queryClient.invalidateQueries(['circleMembers'])
@@ -540,26 +547,25 @@ const Settings = () => {
                       }
                     })
                   },
-                  'Accept',
-                  'Cancel',
+                  t('circleSettings.accept'),
+                  t('common.cancel'),
                 )
               }}
             >
-              Accept
+              {t('circleSettings.accept')}
             </Button>
           </Card>
         ))}
-        <Divider> or </Divider>
+        <Divider> {t('circleSettings.or')} </Divider>
 
         <Typography level='body-md'>
-          if want to join someone else's Circle? Ask them for their unique
-          Circle code or join link. Enter the code below to join their Circle.
+          {t('circleSettings.joinOtherDescription')}
         </Typography>
 
         <Typography level='title-sm' mb={-1}>
-          Enter Circle code:
+          {t('circleSettings.enterCircleCode')}
           <Input
-            placeholder='Enter code'
+            placeholder={t('circleSettings.enterCodePlaceholder')}
             value={circleInviteCode}
             onChange={e => setCircleInviteCode(e.target.value)}
             size='lg'
@@ -575,20 +581,19 @@ const Settings = () => {
                 if (resp.ok) {
                   showNotification({
                     type: 'success',
-                    message:
-                      'Joined circle successfully, wait for the circle owner to accept your request.',
+                    message: t('circleSettings.joinedPending'),
                   })
                   setTimeout(() => navigate('/'), 3000)
                 } else {
                   if (resp.status === 409) {
                     showNotification({
                       type: 'error',
-                      message: 'You are already a member of this circle',
+                      message: t('circleSettings.alreadyMember'),
                     })
                   } else {
                     showNotification({
                       type: 'error',
-                      message: 'Failed to join circle',
+                      message: t('circleSettings.joinFailed'),
                     })
                   }
                   setTimeout(() => navigate('/'), 3000)
@@ -596,24 +601,21 @@ const Settings = () => {
               })
             }}
           >
-            Join Circle
+            {t('circleSettings.joinCircle')}
           </Button>
         </Typography>
         {circleMembers.find(m => userProfile.id == m.userId)?.role ===
           'admin' && (
           <>
             <Typography level='title-lg' mt={2}>
-              Webhook
+              {t('advanced.webhookTitle')}
             </Typography>
             <Typography level='body-md' mt={-1}>
-              Webhooks allow you to send real-time notifications to other
-              services when events happen in your Circle. Configure a webhook
-              URL to receive real-time updates.
+              {t('advanced.webhookDescription')}
             </Typography>
             {!isPlusAccount(userProfile) && (
               <Typography level='body-sm' color='warning' sx={{ mt: 1 }}>
-                Webhook notifications are not available in the Basic plan.
-                Upgrade to Plus to receive real-time updates via webhooks.
+                {t('advanced.webhookPlusNotice')}
               </Typography>
             )}
             <FormControl sx={{ mt: 1 }}>
@@ -627,7 +629,7 @@ const Settings = () => {
                   }
                 }}
                 variant='soft'
-                label='Enable Webhook'
+                label={t('advanced.webhookToggle')}
                 disabled={!isPlusAccount(userProfile)}
                 overlay
               />
@@ -636,10 +638,10 @@ const Settings = () => {
                   opacity: !isPlusAccount(userProfile) ? 0.5 : 1,
                 }}
               >
-                Enable webhook notifications for tasks and things updates.{' '}
+                {t('advanced.webhookHelper')}{' '}
                 {userProfile && !isPlusAccount(userProfile) && (
                   <Chip variant='soft' color='warning'>
-                    Plus Feature
+                    {t('common.plusFeature')}
                   </Chip>
                 )}
               </FormHelperText>
@@ -647,7 +649,9 @@ const Settings = () => {
 
             {webhookURL !== null && (
               <Box>
-                <Typography level='title-sm'>Webhook URL</Typography>
+                <Typography level='title-sm'>
+                  {t('advanced.webhookURL')}
+                </Typography>
                 <Input
                   value={webhookURL ? webhookURL : ''}
                   onChange={e => setWebhookURL(e.target.value)}
@@ -670,19 +674,19 @@ const Settings = () => {
                       if (resp.ok) {
                         showNotification({
                           type: 'success',
-                          message: 'Webhook URL updated successfully',
+                          message: t('advanced.webhookUpdated'),
                         })
                       } else {
                         showNotification({
                           type: 'error',
-                          message: 'Failed to update webhook URL',
+                          message: t('advanced.webhookUpdateFailed'),
                         })
                       }
                     })
                   }}
                   disabled={!isPlusAccount(userProfile)}
                 >
-                  Save
+                  {t('common.save')}
                 </Button>
               </Box>
             )}
@@ -695,13 +699,13 @@ const Settings = () => {
       </div>
 
       <div className='grid gap-4 py-4' id='account'>
-        <Typography level='h3'>Account Settings</Typography>
+        <Typography level='h3'>{t('accountSettings.title')}</Typography>
         <Divider />
         <Typography level='body-md'>
-          Change your account settings, type or update your password
+          {t('accountSettings.description')}
         </Typography>
         <Typography level='title-md' mb={-1}>
-          Account Type : {getSubscriptionStatus()}
+          {t('accountSettings.accountType', { type: getSubscriptionStatus() })}
         </Typography>
         <Typography level='body-sm'>{getSubscriptionDetails()}</Typography>
         <Box>
@@ -718,9 +722,8 @@ const Settings = () => {
             onClick={async () => {
               if (Capacitor.isNativePlatform()) {
                 try {
-                  const { RevenueCatUI } = await import(
-                    '@revenuecat/purchases-capacitor-ui'
-                  )
+                  const { RevenueCatUI } =
+                    await import('@revenuecat/purchases-capacitor-ui')
 
                   const offering = await Purchases.getOfferings()
                   await RevenueCatUI.presentPaywall({
@@ -734,8 +737,7 @@ const Settings = () => {
                     queryClient.refetchQueries(['userProfile'])
                     showNotification({
                       type: 'success',
-                      message:
-                        'Purchase successful! Please restart the app to access Plus features.',
+                      message: t('accountSettings.purchase.success'),
                     })
                     // invalidate user profile to get new subscription status:
                   }
@@ -750,57 +752,49 @@ const Settings = () => {
                     // Store problem
                     showNotification({
                       type: 'error',
-                      message:
-                        'Store connection issue. Please check your network and try again.',
+                      message: t('accountSettings.purchase.storeConnection'),
                     })
                   } else if (error.code === '3') {
                     // Purchase not allowed
                     showNotification({
                       type: 'error',
-                      message:
-                        'Purchases are not allowed on this device. Please check your device restrictions.',
+                      message: t('accountSettings.purchase.notAllowed'),
                     })
                   } else if (error.code === '4') {
                     // Product not available
                     showNotification({
                       type: 'error',
-                      message:
-                        'This subscription is not available. Please try again later.',
+                      message: t('accountSettings.purchase.unavailable'),
                     })
                   } else if (error.code === '5') {
                     // Receipt already in use
                     showNotification({
                       type: 'error',
-                      message:
-                        'This purchase has already been processed. If you believe this is an error, please contact support.',
+                      message: t('accountSettings.purchase.alreadyProcessed'),
                     })
                   } else if (error.code === '6') {
                     // Missing receipt file
                     showNotification({
                       type: 'error',
-                      message:
-                        'Purchase receipt missing. Please try purchasing again.',
+                      message: t('accountSettings.purchase.receiptMissing'),
                     })
                   } else if (error.code === '7') {
                     // Network error
                     showNotification({
                       type: 'error',
-                      message:
-                        'Network error. Please check your connection and try again.',
+                      message: t('accountSettings.purchase.networkError'),
                     })
                   } else if (error.code === '8') {
                     // Invalid receipt
                     showNotification({
                       type: 'error',
-                      message:
-                        'Invalid purchase receipt. Please contact support if this persists.',
+                      message: t('accountSettings.purchase.invalidReceipt'),
                     })
                   } else if (error.code === '9') {
                     // Payment pending
                     showNotification({
                       type: 'warning',
-                      message:
-                        'Payment is pending approval. You will receive access once approved.',
+                      message: t('accountSettings.purchase.pending'),
                     })
                   } else {
                     // Generic error
@@ -809,7 +803,11 @@ const Settings = () => {
                     console.error('Error occurred in purchase flow')
                     showNotification({
                       type: 'error',
-                      message: `Purchase failed: ${error.message || 'Unknown error'}. Please try again or contact support.`,
+                      message: t('accountSettings.purchase.failed', {
+                        error:
+                          error.message ||
+                          t('accountSettings.purchase.unknownError'),
+                      }),
                     })
                   }
                 }
@@ -818,7 +816,7 @@ const Settings = () => {
               }
             }}
           >
-            Upgrade
+            {t('accountSettings.upgrade')}
           </Button>
 
           {userProfile?.subscription === 'active' && (
@@ -834,14 +832,14 @@ const Settings = () => {
                 setNativeCancelModal(true)
               }}
             >
-              Cancel
+              {t('accountSettings.cancel')}
             </Button>
           )}
         </Box>
         {import.meta.env.VITE_IS_SELF_HOSTED === 'true' && (
           <Box>
             <Typography level='title-md' mb={1}>
-              Password :
+              {t('accountSettings.password')}
             </Typography>
             <Typography mb={1} level='body-sm'></Typography>
             <Button
@@ -850,7 +848,7 @@ const Settings = () => {
                 setChangePasswordModal(true)
               }}
             >
-              Change Password
+              {t('accountSettings.changePassword')}
             </Button>
             {changePasswordModal ? (
               <PassowrdChangeModal
@@ -861,12 +859,12 @@ const Settings = () => {
                       if (resp.ok) {
                         showNotification({
                           type: 'success',
-                          message: 'Password changed successfully',
+                          message: t('accountSettings.passwordChanged'),
                         })
                       } else {
                         showNotification({
                           type: 'error',
-                          message: 'Password change failed',
+                          message: t('accountSettings.passwordChangeFailed'),
                         })
                       }
                     })
@@ -880,18 +878,17 @@ const Settings = () => {
 
         <Box>
           <Typography level='title-md' mb={1} color='danger'>
-            Danger Zone
+            {t('accountSettings.dangerZone')}
           </Typography>
           <Typography level='body-sm' mb={2} color='neutral'>
-            Once you delete your account, there is no going back. Please be
-            certain.
+            {t('accountSettings.dangerZoneDescription')}
           </Typography>
           <Button
             variant='outlined'
             color='danger'
             onClick={() => setUserDeletionModal(true)}
           >
-            Delete Account
+            {t('accountSettings.deleteAccount')}
           </Button>
         </Box>
       </div>
@@ -900,32 +897,26 @@ const Settings = () => {
       <APITokenSettings />
       <StorageSettings />
       <div className='grid gap-4 py-4' id='sidepanel'>
-        <Typography level='h3'>Sidepanel Customization</Typography>
+        <Typography level='h3'>{t('sidepanel.title')}</Typography>
         <Divider />
         <Typography level='body-md'>
-          Customize the layout and visibility of cards in the sidepanel. the
-          section only available on large screen devices such as tablets and
-          desktops..
+          {t('sidepanel.detailedDescription')}
         </Typography>
         <SidepanelSettings />
       </div>
 
       <div className='grid gap-4 py-4' id='theme'>
-        <Typography level='h3'>Theme preferences</Typography>
+        <Typography level='h3'>{t('theme.title')}</Typography>
         <Divider />
-        <Typography level='body-md'>
-          Choose how the site looks to you. Select a single theme, or sync with
-          your system and automatically switch between day and night themes.
-        </Typography>
+        <Typography level='body-md'>{t('theme.description')}</Typography>
         <ThemeToggle />
       </div>
 
       <div className='grid gap-4 py-4' id='localization'>
-        <Typography level='h3'>Localization</Typography>
+        <Typography level='h3'>{t('localization.title')}</Typography>
         <Divider />
         <Typography level='body-md'>
-          Customize language, date format, and regional preferences for your
-          account. These settings will apply throughout the application.
+          {t('localization.descriptionLong')}
         </Typography>
         <LocalizationSettings />
       </div>

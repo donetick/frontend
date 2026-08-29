@@ -1,11 +1,12 @@
+import '@meauxt/react-swipeable-list/dist/styles.css'
+
 import {
-  Type as ListType,
   SwipeableList,
   SwipeableListItem,
   SwipeAction,
   TrailingActions,
+  Type as ListType,
 } from '@meauxt/react-swipeable-list'
-import '@meauxt/react-swipeable-list/dist/styles.css'
 import {
   Analytics,
   CalendarMonth,
@@ -28,10 +29,13 @@ import {
 } from '@mui/icons-material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
-import { Box, Button, Card, Container, Grid, Sheet, Typography } from '@mui/joy'
+import { Box, Card, Container, Grid, Sheet, Typography } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import { useParams } from 'react-router-dom'
+
+import EmptyState from '../../components/common/EmptyState'
 import FilterBar from '../../components/common/FilterBar'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import useConfirmationModal from '../../hooks/useConfirmationModal'
@@ -53,6 +57,7 @@ import NoteViewerModal from '../Modals/Inputs/NoteViewerModal'
 import HistoryCard from './HistoryCard'
 
 const ChoreHistory = () => {
+  const { t } = useTranslation('history')
   const [userHistory, setUserHistory] = useState([])
   const [historyInfo, setHistoryInfo] = useState([])
   const { choreId } = useParams()
@@ -63,7 +68,7 @@ const ChoreHistory = () => {
   const [showMoreInfoId, setShowMoreInfoId] = useState(null)
   const [noteViewerConfig, setNoteViewerConfig] = useState({ isOpen: false })
   const [detailModalConfig, setDetailModalConfig] = useState({ isOpen: false })
-  const { showSuccess, showError } = useNotification()
+  const { showError, showSuccess } = useNotification()
   // React Query hooks
   const { data: choreHistoryData, isLoading } = useChoreHistory(choreId)
   const { data: circleMembersData } = useCircleMembers()
@@ -95,43 +100,43 @@ const ChoreHistory = () => {
     () => [
       {
         id: 'status',
-        label: 'Status',
+        label: t('charts.status.title'),
         type: 'multi-select',
         icon: <FilterList />,
         options: [
           {
             value: ChoreHistoryStatus.COMPLETED,
-            label: 'Completed',
+            label: t('status.completed'),
             color: 'success',
             icon: <Check sx={{ fontSize: 14 }} />,
           },
           {
             value: ChoreHistoryStatus.SKIPPED,
-            label: 'Skipped',
+            label: t('status.skipped'),
             color: 'warning',
             icon: <Redo sx={{ fontSize: 14 }} />,
           },
           {
             value: ChoreHistoryStatus.PENDING_APPROVAL,
-            label: 'Pending',
+            label: t('filter.pending'),
             color: 'neutral',
             icon: <HourglassEmpty sx={{ fontSize: 14 }} />,
           },
           {
             value: ChoreHistoryStatus.REJECTED,
-            label: 'Rejected',
+            label: t('status.rejected'),
             color: 'danger',
             icon: <ThumbDown sx={{ fontSize: 14 }} />,
           },
           {
             value: 5,
-            label: 'Missed',
+            label: t('status.missed'),
             color: 'danger',
             icon: <RunningWithErrors sx={{ fontSize: 14 }} />,
           },
           {
             value: 6,
-            label: 'Rescheduled',
+            label: t('status.rescheduled'),
             color: 'warning',
             icon: <Schedule sx={{ fontSize: 14 }} />,
           },
@@ -140,14 +145,14 @@ const ChoreHistory = () => {
       },
       {
         id: 'hasNotes',
-        label: 'Has Notes',
+        label: t('filter.hasNotes'),
         type: 'boolean',
         icon: <EventNote />,
         filterFn: item => !!item.notes,
       },
       {
         id: 'completedBy',
-        label: 'Completed By',
+        label: t('filter.completedBy'),
         type: 'multi-select',
         icon: <Person />,
         options: performers.map(p => ({
@@ -159,7 +164,7 @@ const ChoreHistory = () => {
       },
       {
         id: 'dateRange',
-        label: 'Completed At',
+        label: t('filter.completedAt'),
         type: 'date-range',
         icon: <CalendarMonth />,
         filterFn: (item, value) => {
@@ -174,11 +179,11 @@ const ChoreHistory = () => {
   )
 
   const {
-    filteredData: filteredHistory,
-    activeFilters,
-    setFilter,
-    clearAll,
     activeFilterCount,
+    activeFilters,
+    clearAll,
+    filteredData: filteredHistory,
+    setFilter,
   } = useFilter(choreHistory, filterDefs)
 
   const sortedHistory = useMemo(
@@ -193,16 +198,16 @@ const ChoreHistory = () => {
 
   const handleDelete = historyEntry => {
     showConfirmation(
-      `Are you sure you want to delete this history record?`,
-      'Delete History Record',
+      t('delete.message'),
+      t('delete.title'),
       () => {
         deleteChoreHistory.mutate({
           choreId,
           historyId: historyEntry.id,
         })
       },
-      'Delete',
-      'Cancel',
+      t('common:delete'),
+      t('common:cancel'),
       'danger',
     )
   }
@@ -255,42 +260,50 @@ const ChoreHistory = () => {
     const historyInfo = [
       {
         icon: <Checklist />,
-        text: 'All Completed',
-        subtext: `${histories.filter(h => h.status === ChoreHistoryStatus.COMPLETED || h.status === ChoreHistoryStatus.SKIPPED).length} times`,
+        text: t('info.allCompleted'),
+        subtext: t('info.timesSuffix', {
+          count: histories.filter(
+            h =>
+              h.status === ChoreHistoryStatus.COMPLETED ||
+              h.status === ChoreHistoryStatus.SKIPPED,
+          ).length,
+        }),
       },
       {
         icon: <TrendingUp />,
-        text: 'Average Timing',
+        text: t('info.averageTiming'),
         subtext: moment.duration(averageDelayMoment).isValid()
           ? moment.duration(averageDelayMoment).humanize()
-          : 'On time',
+          : t('info.onTime'),
       },
       {
         icon: <Timelapse />,
-        text: 'Longest Delay',
+        text: t('info.longestDelay'),
         subtext: moment.duration(maxDelayMoment).isValid()
           ? moment.duration(maxDelayMoment).humanize()
-          : 'Never late',
+          : t('info.neverLate'),
       },
       {
         icon: <Star />,
-        text: 'Completed Most',
+        text: t('info.completedMost'),
         subtext: `${
           performers.find(p => p.userId === Number(userCompletedByMost))
-            ?.displayName || 'Unknown'
+            ?.displayName || t('info.unknown')
         }`,
       },
       {
         icon: <Group />,
-        text: 'Members Involved',
-        subtext: `${Object.keys(userHistories).length} members`,
+        text: t('info.membersInvolved'),
+        subtext: t('info.membersSuffix', {
+          count: Object.keys(userHistories).length,
+        }),
       },
       {
         icon: <Analytics />,
-        text: 'Last Completed',
+        text: t('info.lastCompleted'),
         subtext: `${
           performers.find(p => p.userId === Number(histories[0].completedBy))
-            ?.displayName || 'Unknown'
+            ?.displayName || t('info.unknown')
         }`,
       },
     ]
@@ -303,36 +316,14 @@ const ChoreHistory = () => {
   }
   if (!choreHistory.length) {
     return (
-      <Container
-        maxWidth='md'
-        sx={{
-          textAlign: 'center',
-          display: 'flex',
-          // make sure the content is centered vertically:
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexDirection: 'column',
-          height: '50vh',
-        }}
-      >
-        <EventBusy
-          sx={{
-            fontSize: '6rem',
-            // color: 'text.disabled',
-            mb: 1,
-          }}
+      <Container maxWidth='md'>
+        <EmptyState
+          fullHeight
+          icon={<EventBusy />}
+          title={t('empty.title')}
+          description={t('empty.description')}
+          primaryAction={{ label: t('empty.backToTasks'), to: '/chores' }}
         />
-
-        <Typography level='h3' gutterBottom>
-          No History Yet
-        </Typography>
-        <Typography level='body1'>
-          You haven't completed any tasks. Once you start finishing tasks,
-          they'll show up here.
-        </Typography>
-        <Button variant='soft' sx={{ mt: 2 }}>
-          <Link to='/chores'>Go back to chores</Link>
-        </Button>
       </Container>
     )
   }
@@ -349,7 +340,7 @@ const ChoreHistory = () => {
             level='title-md'
             sx={{ fontWeight: 'lg', color: 'text.primary' }}
           >
-            Task Summary
+            {t('title.summary')}
           </Typography>
         </Box>
         <Grid container spacing={0.5} sx={{ mb: 2 }}>
@@ -426,7 +417,7 @@ const ChoreHistory = () => {
           level='title-md'
           sx={{ fontWeight: 'lg', color: 'text.primary' }}
         >
-          Task Activity
+          {t('title.activity')}
         </Typography>
       </Box>
 
@@ -441,27 +432,13 @@ const ChoreHistory = () => {
         />
       </Box>
       {sortedHistory.length === 0 && activeFilterCount > 0 && (
-        <Box
-          sx={{
-            textAlign: 'center',
-            py: 6,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: 1.5,
-          }}
-        >
-          <FilterList sx={{ fontSize: '3rem', color: 'text.tertiary' }} />
-          <Typography level='title-md' sx={{ color: 'text.secondary' }}>
-            No results match your filters
-          </Typography>
-          <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
-            Try adjusting or clearing the active filters.
-          </Typography>
-          <Button variant='soft' size='sm' onClick={clearAll} sx={{ mt: 0.5 }}>
-            Clear filters
-          </Button>
-        </Box>
+        <EmptyState
+          variant='no-results'
+          icon={<FilterList />}
+          title={t('empty.noResultsTitle')}
+          description={t('empty.noResultsDescription')}
+          primaryAction={{ label: t('noResults.clear'), onClick: clearAll }}
+        />
       )}
 
       {sortedHistory.length > 0 && (
@@ -502,7 +479,7 @@ const ChoreHistory = () => {
                         >
                           <EditIcon sx={{ fontSize: 20 }} />
                           <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                            Edit
+                            {t('common:edit')}
                           </Typography>
                         </Box>
                       </SwipeAction>
@@ -521,7 +498,7 @@ const ChoreHistory = () => {
                         >
                           <DeleteIcon sx={{ fontSize: 20 }} />
                           <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                            Delete
+                            {t('common:delete')}
                           </Typography>
                         </Box>
                       </SwipeAction>
@@ -551,7 +528,9 @@ const ChoreHistory = () => {
                   onViewNote={notes => {
                     setNoteViewerConfig({
                       isOpen: true,
-                      title: `Updated at ${fmt.dateTime(historyEntry.updatedAt)}`,
+                      title: t('noteViewer.updatedAt', {
+                        date: fmt.dateTime(historyEntry.updatedAt),
+                      }),
                       content: notes,
                       onClose: () => setNoteViewerConfig({ isOpen: false }),
                     })
@@ -595,14 +574,13 @@ const ChoreHistory = () => {
                   setEditHistory(null)
                   if (data?.queued) {
                     showSuccess({
-                      title: 'History Update Queued',
-                      message:
-                        'You are offline. The history update will sync when connection is restored.',
+                      title: t('toast.updateQueued.title'),
+                      message: t('toast.updateQueued.message'),
                     })
                   } else {
                     showSuccess({
-                      title: 'History Updated',
-                      message: `The history record has been updated successfully.`,
+                      title: t('toast.updated.title'),
+                      message: t('toast.updated.message'),
                     })
                   }
                 },
@@ -625,14 +603,13 @@ const ChoreHistory = () => {
                   setEditHistory(null)
                   if (data?.queued) {
                     showSuccess({
-                      title: 'History Delete Queued',
-                      message:
-                        'You are offline. The history delete will sync when connection is restored.',
+                      title: t('toast.deleteQueued.title'),
+                      message: t('toast.deleteQueued.message'),
                     })
                   } else {
                     showSuccess({
-                      title: 'History Deleted',
-                      message: `The history record has been deleted successfully.`,
+                      title: t('toast.deleted.title'),
+                      message: t('toast.deleted.message'),
                     })
                   }
                 },

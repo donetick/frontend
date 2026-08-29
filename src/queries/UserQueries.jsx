@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+
 import {
   GetAllCircleMembers,
   GetAllUsers,
@@ -28,6 +29,7 @@ export const useAllUsers = () => {
 
 export const useCircleMembers = () => {
   const queryClient = useQueryClient()
+  const token = localStorage.getItem('token')
 
   const { data, error, isLoading } = useQuery({
     queryKey: ['allCircleMembers'],
@@ -45,6 +47,10 @@ export const useCircleMembers = () => {
         return { res: [] }
       }
     },
+    // NavBar's avatar mounts this on every route, including the signed-out
+    // ones. Without the gate the 401 tips ApiClient into a forced logout that
+    // hard-navigates to /login — which is what used to eat circle invites.
+    enabled: !!token,
   })
 
   const handleRefetch = () => {
@@ -54,7 +60,7 @@ export const useCircleMembers = () => {
   return { data, error, isLoading, handleRefetch }
 }
 
-export const useUserProfile = () => {
+export const useUserProfile = ({ enabled = true } = {}) => {
   const queryClient = useQueryClient()
   const token = localStorage.getItem('token')
 
@@ -80,7 +86,7 @@ export const useUserProfile = () => {
     },
     staleTime: 30 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
-    enabled: !!token,
+    enabled: enabled && !!token,
   })
   return {
     data,

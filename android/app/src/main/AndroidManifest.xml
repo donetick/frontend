@@ -30,6 +30,17 @@
                 <data android:scheme="donetick" />
             </intent-filter>
 
+            <!-- Verified App Link for Circle invites hosted by Donetick Cloud. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="app.donetick.com"
+                    android:pathPrefix="/circle/join" />
+            </intent-filter>
+
             <!-- NFC NDEF dispatch: open app directly when a donetick:// tag is scanned -->
             <intent-filter>
                 <action android:name="android.nfc.action.NDEF_DISCOVERED" />
@@ -71,6 +82,17 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/widget_people_info" />
+        </receiver>
+        <receiver
+            android:name=".widget.QuickCaptureWidgetProvider"
+            android:exported="false"
+            android:label="@string/widget_quick_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_quick_capture_info" />
         </receiver>
         <service
             android:name=".widget.WidgetListService"
@@ -123,4 +145,13 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.NFC" />
+
+    <!-- Voice task capture -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- Android 11+ package visibility for the system speech recognition service -->
+    <queries>
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
+        </intent>
+    </queries>
 </manifest>

@@ -1,16 +1,45 @@
-import { Add } from '@mui/icons-material'
-import { Box, Button, Typography } from '@mui/joy'
+import { Add, KeyboardArrowDown } from '@mui/icons-material'
+import {
+  Box,
+  Button,
+  Dropdown,
+  ListItemDecorator,
+  Menu,
+  MenuButton,
+  MenuItem,
+  Typography,
+} from '@mui/joy'
 import { useMediaQuery } from '@mui/material'
+import { useQueryClient } from '@tanstack/react-query'
 import * as chrono from 'chrono-node'
 import moment from 'moment'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
+import { useTranslation } from 'react-i18next'
+
+import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
+import ModalActions from '../../components/common/ModalActions'
+import { useModalShortcutScope } from '../../contexts/KeyboardShortcutScopeContext'
+import { useDocumentScanner } from '../../hooks/useDocumentScanner'
+import { useFileUpload } from '../../hooks/useFileUpload'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import { useCreateChore } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
+import { localAIService } from '../../service/LocalAIService'
+import { voiceInputService } from '../../service/VoiceInputService'
+import LABEL_COLORS, { TASK_COLOR } from '../../utils/Colors'
+import { CreateLabel } from '../../utils/Fetcher'
+import { imageSourceToFile } from '../../utils/FileConvert'
 import { isPlusAccount } from '../../utils/Helpers'
+import { getIconComponent } from '../../utils/ProjectIcons'
 import { generateUUID } from '../../utils/UUID'
 import { useLabels } from '../Labels/LabelQueries'
 import { useProjects } from '../Projects/ProjectQueries'
+import AdvancedOptionsSection, {
+  AdvancedOptionsTrigger,
+} from './AdvancedOptionsSection'
+import AssigneePickerField from './AssigneePickerField'
+import AttachmentPickerField from './AttachmentPickerField'
 import {
   parseAssignees,
   parseDueDate,
@@ -19,85 +48,264 @@ import {
   parsePriority,
   parseRepeatV2,
 } from './CustomParsers'
-import SmartTaskTitleInput from './SmartTaskTitleInput'
-
-import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
-import { useDocumentScanner } from '../../hooks/useDocumentScanner'
-import { localAIService } from '../../service/LocalAIService'
-import { TASK_COLOR } from '../../utils/Colors'
-import AdvancedOptionsSection, {
-  AdvancedOptionsTrigger,
-} from './AdvancedOptionsSection'
-import AssigneePickerField from './AssigneePickerField'
-import AttachmentPickerField from './AttachmentPickerField'
 import DueDatePickerField from './DueDatePickerField'
 import LabelsPickerField from './LabelsPickerField'
-import LearnMoreButton from './LearnMore'
 import NotificationPickerField from './NotificationPickerField'
 import PriorityPickerField from './PriorityPickerField'
 import RepeatPickerField from './RepeatPickerField'
 import RichTextEditor from './RichTextEditor'
 import ScanPanel from './ScanToTask/ScanPanel'
+import SmartTaskTitleInput from './SmartTaskTitleInput'
 import SubTasks from './SubTask'
+import { buildChorePayload, parseVoiceTask } from './VoiceToTask/parseVoiceTask'
+import VoicePanel from './VoiceToTask/VoicePanel'
+// Canonical reminder template shape, shared with NotificationTemplate and
+// LocalNotificationScheduler: a signed value plus 'm' | 'h' | 'd'. Negative is
+// before due, positive is after, zero is on due.
+const DEFAULT_NOTIFICATION_TEMPLATES = [
+  { value: -1, unit: 'd' },
+  { value: 0, unit: 'm' },
+  { value: 1, unit: 'd' },
+]
+
+const UNIT_ALIASES = {
+  minute: 'm',
+  minutes: 'm',
+  hour: 'h',
+  hours: 'h',
+  day: 'd',
+  days: 'd',
+}
+
+// Earlier builds stored {value: 1, unit: 'days', type: 'before'}. Nothing reads
+// `type`, and the scheduler's unit switch falls through on 'days', so those
+// entries fired at the due time (or collided on id) instead of offsetting.
+const normalizeTemplate = template => {
+  const unit = UNIT_ALIASES[template.unit] || template.unit
+  const value = Number(template.value) || 0
+  if (!template.type) return { value, unit }
+  if (template.type === 'ondue') return { value: 0, unit }
+  return {
+    value: template.type === 'before' ? -Math.abs(value) : Math.abs(value),
+    unit,
+  }
+}
+
 const getDefaultNotification = () => {
   const storedDefault = localStorage.getItem('defaultNotificationTemplate')
   if (storedDefault) {
-    return JSON.parse(storedDefault)
+    try {
+      const parsed = JSON.parse(storedDefault)
+      if (Array.isArray(parsed)) {
+        // An empty list is a deliberate "no reminders by default", not a
+        // missing value — respect it instead of re-seeding.
+        const normalized = parsed.map(normalizeTemplate)
+        if (JSON.stringify(normalized) !== storedDefault) {
+          localStorage.setItem(
+            'defaultNotificationTemplate',
+            JSON.stringify(normalized),
+          )
+        }
+        return normalized
+      }
+    } catch {
+      // fall through and reset to the defaults below
+    }
   }
-  const defaultNotification = [
-    { value: 1, unit: 'days', type: 'before' },
-    { value: 0, unit: 'minutes', type: 'ondue' },
-    { value: 1, unit: 'days', type: 'after' },
-  ]
 
   localStorage.setItem(
     'defaultNotificationTemplate',
-    JSON.stringify(defaultNotification),
+    JSON.stringify(DEFAULT_NOTIFICATION_TEMPLATES),
   )
-  return defaultNotification
+  return DEFAULT_NOTIFICATION_TEMPLATES
 }
 
-const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
+// Get initial project from localStorage (current active project)
+const getInitialProject = () => {
+  const saved = localStorage.getItem('selectedProject')
+  if (saved) {
+    try {
+      const project = JSON.parse(saved)
+      return project?.id || 'default'
+    } catch {
+      return 'default'
+    }
+  }
+  return 'default'
+}
+
+const DEFAULT_PROJECT = {
+  id: 'default',
+  name: 'Default Project',
+  color: '#9CA3AF',
+  icon: 'FolderOpen',
+}
+
+const PRIORITY_COLORS = {
+  0: TASK_COLOR.NO_PRIORITY,
+  1: TASK_COLOR.PRIORITY_1,
+  2: TASK_COLOR.PRIORITY_2,
+  3: TASK_COLOR.PRIORITY_3,
+  4: TASK_COLOR.PRIORITY_4,
+}
+
+const PRIORITY_LABELS = {
+  0: '--',
+  1: 'P1',
+  2: 'P2',
+  3: 'P3',
+  4: 'P4',
+}
+
+// Static option sets for the smart input's trigger suggestions
+const PRIORITY_SUGGESTIONS = {
+  value: 'id',
+  display: 'name',
+  options: [
+    { id: '1', name: 'P1' },
+    { id: '2', name: 'P2' },
+    { id: '3', name: 'P3' },
+    { id: '4', name: 'P4' },
+  ],
+}
+
+const POINTS_SUGGESTIONS = {
+  value: 'id',
+  display: 'name',
+  options: [
+    { id: '1', name: '1 point' },
+    { id: '5', name: '5 points' },
+    { id: '10', name: '10 points' },
+    { id: '25', name: '25 points' },
+    { id: '50', name: '50 points' },
+    { id: '100', name: '100 points' },
+  ],
+}
+
+// Delay between the last keystroke and the smart-input parse. Parsing (chrono
+// especially) is too heavy to run per keystroke; submitChore flushes a pending
+// parse so a fast type-then-Enter never creates from stale parsed state.
+const PARSE_DEBOUNCE_MS = 150
+
+const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
+  const { t } = useTranslation('chores')
+  // Claims the keyboard while open so background listeners (e.g. the project
+  // selector's own Cmd+E) know to stay out of the way — see
+  // KeyboardShortcutScopeContext.
+  const isShortcutScopeActive = useModalShortcutScope(isModalOpen)
   const { ResponsiveModal } = useResponsiveModal()
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
   const pickerEmptyDisplay = isMobile ? 'icon' : 'icon-text'
   const { data: userLabels, isLoading: userLabelsLoading } = useLabels()
   const { data: circleMembers, isLoading: isCircleMembersLoading } =
     useCircleMembers()
-  const { isLoading: isProjectsLoading } = useProjects()
+  const { data: projects, isLoading: isProjectsLoading } = useProjects()
   const createChoreMutation = useCreateChore()
+  const queryClient = useQueryClient()
 
   const { data: userProfile } = useUserProfile()
 
-  // Get initial project from localStorage (current active project)
-  const getInitialProject = () => {
-    const saved = localStorage.getItem('selectedProject')
-    if (saved) {
-      try {
-        const project = JSON.parse(saved)
-        return project?.id || 'default'
-      } catch {
-        return 'default'
-      }
-    }
-    return 'default'
-  }
+  // Stable identities for the voice panel: these queries are undefined while
+  // loading, and a fresh [] each render would churn the panel's parse context
+  const voiceLabels = useMemo(() => userLabels || [], [userLabels])
+  const voiceMembers = useMemo(() => circleMembers?.res || [], [circleMembers])
+
+  const handleCreateLabel = useCallback(
+    name => {
+      const color =
+        LABEL_COLORS[1 + Math.floor(Math.random() * (LABEL_COLORS.length - 1))]
+          .value
+      CreateLabel({ name, color })
+        .then(() => queryClient.invalidateQueries(['labels']))
+        .catch(error => console.error('Error creating label:', error))
+    },
+    [queryClient],
+  )
+
+  const smartInputSuggestions = useMemo(
+    () => ({
+      '#': {
+        value: 'id',
+        display: 'name',
+        options: userLabels || [],
+        creatable: true,
+        onCreate: handleCreateLabel,
+      },
+      '!': PRIORITY_SUGGESTIONS,
+      '@': {
+        value: 'userId',
+        display: 'displayName',
+        options: [
+          { userId: 'anyone', displayName: t('addTask.anyone') },
+          ...(circleMembers?.res || []),
+        ],
+      },
+      '*': POINTS_SUGGESTIONS,
+    }),
+    [userLabels, circleMembers, handleCreateLabel, t],
+  )
 
   const [taskText, setTaskText] = useState('')
   const [taskTitle, setTaskTitle] = useState('')
-  const [renderedParts, setRenderedParts] = useState([])
+  // Highlight spans paired with the text they were computed from: the parse
+  // is debounced, so while typing these lag behind taskText
+  const [renderedParts, setRenderedParts] = useState({ text: '', parts: [] })
+
+  // What the smart input overlay shows. While a parse is pending, keep every
+  // highlight span that precedes the edit point and render the rest as plain
+  // text — existing token styles must not flicker away on each keystroke.
+  const displayedParts = useMemo(() => {
+    const { parts, text } = renderedParts
+    if (text === taskText) return parts
+
+    let prefixLen = 0
+    const max = Math.min(text.length, taskText.length)
+    while (prefixLen < max && text[prefixLen] === taskText[prefixLen]) {
+      prefixLen++
+    }
+
+    const kept = []
+    let consumed = 0
+    for (const part of parts) {
+      const partText = typeof part === 'string' ? part : part.props.children
+      if (consumed + partText.length > prefixLen) break
+      kept.push(part)
+      consumed += partText.length
+    }
+    kept.push(taskText.slice(consumed))
+    return kept
+  }, [renderedParts, taskText])
 
   const richTextEditorRef = useRef(null)
   const latestRef = useRef({})
+  // Picker edits made on a voice task card, applied once after the reparse
+  // that follows landing the spoken text in the smart input
+  const pendingVoiceOverridesRef = useRef(null)
+  // True while the current assignees came from an @mention in the text, so a
+  // reparse without mentions only resets what a mention set — never a
+  // selection made directly in the assignee picker
+  const assigneesFromMentionRef = useRef(false)
+  // Pending debounced parse of the smart input text, if any
+  const parseTimerRef = useRef(null)
+  // Identities (type + text) of the highlights from the previous parse, so
+  // the appear animation only plays for tokens detected just now
+  const prevHighlightKeysRef = useRef(new Set())
+  // Which capture method last populated the form, for chore_created's
+  // analytics `source` property. Reset to 'quick_add' whenever the modal
+  // closes — this is the AddTaskModal popup, distinct from the full-page
+  // create flow in ChoreEdit.jsx.
+  const taskSourceRef = useRef('quick_add')
   const [priority, setPriority] = useState(0)
   const [dueDate, setDueDate] = useState(null)
   const [description, setDescription] = useState(null)
   const [assignees, setAssignees] = useState([])
   const [labelsV2, setLabelsV2] = useState([])
   const [frequency, setFrequency] = useState(null)
-  const [notificationMetadata, setNotificationMetadata] = useState({
+  // Lazy initializers: these read localStorage, which must not happen on
+  // every render
+  const [notificationMetadata, setNotificationMetadata] = useState(() => ({
     templates: getDefaultNotification(),
-  })
+  }))
   const [subTasks, setSubTasks] = useState(null)
   const [points, setPoints] = useState(-1)
   const [isAnyoneTask, setIsAnyoneTask] = useState(false)
@@ -113,36 +321,82 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
   const [dueTime, setDueTime] = useState(null)
   const [useCustomTime, setUseCustomTime] = useState(false)
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
-  const [projectId, setProjectId] = useState(getInitialProject())
+  const [projectId, setProjectId] = useState(getInitialProject)
+  const selectedProject = useMemo(
+    () =>
+      (projectId !== 'default' &&
+        projects?.find(project => project.id === projectId)) ||
+      DEFAULT_PROJECT,
+    [projects, projectId],
+  )
+  const SelectedProjectIcon = useMemo(
+    () => getIconComponent(selectedProject.icon),
+    [selectedProject],
+  )
   const [attachments, setAttachments] = useState([])
 
   const [draftId, setDraftId] = useState(() => generateUUID())
   const [showScan, setShowScan] = useState(false)
   const [scanAutoCapture, setScanAutoCapture] = useState(false)
   const [pendingPhotoUrl, setPendingPhotoUrl] = useState(null)
+  const [isAttachingScan, setIsAttachingScan] = useState(false)
   const [llmAvailable, setLlmAvailable] = useState(false)
+  const [showVoice, setShowVoice] = useState(false)
+  const [voiceAvailable, setVoiceAvailable] = useState(false)
+  // Voice capture state, reported up by VoicePanel so the modal footer owns
+  // the confirm action instead of the panel having its own button row
+  const [voiceState, setVoiceState] = useState({
+    segments: [],
+    isListening: false,
+  })
+  const [creatingVoiceTasks, setCreatingVoiceTasks] = useState(false)
+  // Reminder default the voice cards start from — read once so the array
+  // identity stays stable across renders of the panel
+  const voiceDefaultNotificationTemplates = useMemo(
+    () => getDefaultNotification(),
+    [],
+  )
+  // Same arrangement for the scan panel: it reports the action for its
+  // current phase and the modal footer renders it
+  const [scanState, setScanState] = useState({
+    phase: 'idle',
+    primaryAction: null,
+  })
   const { isNativeScanner } = useDocumentScanner()
+  const { uploadFile } = useFileUpload({
+    entityType: 'chore_attachment_draft',
+    draftId,
+  })
 
   useEffect(() => {
     localAIService.isAvailable().then(setLlmAvailable)
+    voiceInputService.isSupported().then(setVoiceAvailable)
   }, [])
 
-  // Priority colors
-  const priorityColors = {
-    0: TASK_COLOR.NO_PRIORITY,
-    1: TASK_COLOR.PRIORITY_1,
-    2: TASK_COLOR.PRIORITY_2,
-    3: TASK_COLOR.PRIORITY_3,
-    4: TASK_COLOR.PRIORITY_4,
-  }
+  // Quick-capture widget entry points (donetick://chores/add?mode=voice|scan)
+  // land here: open straight into the requested panel, once per modal open so
+  // backing out of the panel doesn't bounce the user right back into it.
+  const appliedInitialModeRef = useRef(false)
+  useEffect(() => {
+    if (!isModalOpen) {
+      appliedInitialModeRef.current = false
+      return
+    }
+    if (appliedInitialModeRef.current) return
 
-  const priorityLabels = {
-    0: '--',
-    1: 'P1',
-    2: 'P2',
-    3: 'P3',
-    4: 'P4',
-  }
+    // Availability resolves async — wait for the answer before deciding; if it
+    // never turns true the modal simply stays in plain text mode.
+    if (initialMode === 'voice') {
+      if (!voiceAvailable) return
+      appliedInitialModeRef.current = true
+      setShowVoice(true)
+    } else if (initialMode === 'scan') {
+      if (!llmAvailable) return
+      appliedInitialModeRef.current = true
+      setScanAutoCapture(true)
+      setShowScan(true)
+    }
+  }, [isModalOpen, initialMode, voiceAvailable, llmAvailable])
 
   // set showKeyboardShortcuts true as soon as the user hold ctrl or cmd key:
   useEffect(() => {
@@ -157,35 +411,38 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
   useEffect(() => {
     const handleKeyDown = event => {
       const {
-        isModalOpen,
-        hasDescription,
         dueDate,
-        createChore,
         handleCloseModal,
+        hasDescription,
+        isShortcutScopeActive,
+        submitChore,
       } = latestRef.current
+      // Only the modal that currently owns the keyboard (the topmost open
+      // one, if this component is ever nested) should react at all —
+      // otherwise a background instance of this same component would also
+      // process keys meant for whatever's on top of it, including showing
+      // its own shortcut hints.
+      if (!isShortcutScopeActive) return
+      // Holding a key (or a fast physical double-tap that the OS coalesces
+      // into auto-repeat) re-fires 'keydown' for as long as it's down. None
+      // of the shortcuts below are meant to repeat — Cmd+J revealing
+      // subtasks a second time just steals focus away from wherever the
+      // user actually is.
+      if (event.repeat) return
+
       const isHoldingCmd = event.ctrlKey || event.metaKey
       if (isHoldingCmd) {
         setShowKeyboardShortcuts(true)
       }
-      if (
-        isHoldingCmd &&
-        event.key.toLowerCase() === 'e' &&
-        isModalOpen &&
-        !hasDescription
-      ) {
+      if (isHoldingCmd && event.key.toLowerCase() === 'e' && !hasDescription) {
         setHasDescription(true)
         setShowKeyboardShortcuts(false)
       }
-      if (isHoldingCmd && event.key.toLowerCase() === 'j' && isModalOpen) {
+      if (isHoldingCmd && event.key.toLowerCase() === 'j') {
         setHasSubTasks(true)
         setShowKeyboardShortcuts(false)
       }
-      if (
-        isHoldingCmd &&
-        event.key.toLowerCase() === 'b' &&
-        isModalOpen &&
-        !dueDate
-      ) {
+      if (isHoldingCmd && event.key.toLowerCase() === 'b' && !dueDate) {
         const tomorrow = moment().add(1, 'day')
         setDueDateOnly(tomorrow.format('YYYY-MM-DD'))
         setDueDate(tomorrow.endOf('day').format('YYYY-MM-DDTHH:mm:59'))
@@ -193,16 +450,12 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
         setDueTime(null)
         setShowKeyboardShortcuts(false)
       }
-      if (
-        event.key === 'Enter' &&
-        (event.ctrlKey || event.metaKey) &&
-        isModalOpen
-      ) {
+      if (event.key === 'Enter' && isHoldingCmd) {
         event.preventDefault()
-        createChore()
+        submitChore()
         return
       }
-      if (event.key === 'Escape' && isModalOpen) {
+      if (event.key === 'Escape') {
         event.preventDefault()
         handleCloseModal()
         return
@@ -287,6 +540,7 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
         }
       }
 
+      const seenHighlightKeys = new Set()
       for (const highlight of resolvedHighlights) {
         if (highlight.start > lastIndex) {
           const textBefore = sentence.substring(lastIndex, highlight.start)
@@ -322,10 +576,13 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
           highlight.start,
           highlight.end,
         )
+        const highlightKey = `${highlight.type}:${highlightedText.toLowerCase()}`
+        const isNewHighlight = !prevHighlightKeysRef.current.has(highlightKey)
+        seenHighlightKeys.add(highlightKey)
         parts.push(
           <span
             key={highlight.start}
-            className={className}
+            className={`${className}${isNewHighlight ? ' highlight-appear' : ''}`}
             style={{
               textDecoration: 'underline',
               textDecorationThickness: '2px',
@@ -338,6 +595,7 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
 
         lastIndex = highlight.end
       }
+      prevHighlightKeysRef.current = seenHighlightKeys
 
       if (lastIndex < sentence.length) {
         const remainingText = sentence.substring(lastIndex)
@@ -353,14 +611,11 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
     [],
   )
 
-  const processText = useCallback(
-    sentence => {
-      const priority = parsePriority(sentence)
-      const pointsParsed = parsePoints(sentence)
-      const labels = parseLabels(sentence, userLabels || [])
-
-      const circleMembersList = circleMembers?.res || []
-      const assigneesForParsing = circleMembersList.map(member => ({
+  // Rebuilt only when the member list actually changes, so a query refetch
+  // with identical data doesn't re-trigger the parse effect below
+  const assigneesForParsing = useMemo(
+    () =>
+      (circleMembers?.res || []).map(member => ({
         userId: member.userId,
         username:
           member.username ||
@@ -368,7 +623,15 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
         displayName: member.displayName,
         name: member.displayName,
         id: member.userId,
-      }))
+      })),
+    [circleMembers],
+  )
+
+  const processText = useCallback(
+    sentence => {
+      const priority = parsePriority(sentence)
+      const pointsParsed = parsePoints(sentence)
+      const labels = parseLabels(sentence, userLabels || [])
 
       const assigneesResult = parseAssignees(sentence, assigneesForParsing)
       const repeat = parseRepeatV2(sentence)
@@ -378,25 +641,26 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
       if (priority.result) setPriority(parseInt(priority.result, 10))
       if (pointsParsed.result) setPoints(pointsParsed.result)
       if (labels.result) {
-        // parseLabels returns array of label objects, extract their IDs
-        const labelIds = labels.result
-          .filter(label => label.id) // Only labels with IDs (existing labels)
-          .map(label => label.id)
-        setLabelsV2(labelIds)
+        // parseLabels only returns #mentions matched to an existing label
+        setLabelsV2(labels.result)
       }
 
       if (assigneesResult.isAnyone) {
         // @Anyone was used - set empty assignees (anyone can do the task)
         setIsAnyoneTask(true)
         setAssignees([])
+        assigneesFromMentionRef.current = true
       } else if (assigneesResult.result && assigneesResult.result.length > 0) {
         setIsAnyoneTask(false)
         const parsedAssignees = assigneesResult.result.map(assignee => ({
           userId: assignee.userId,
         }))
         setAssignees(parsedAssignees)
-      } else {
-        // Only assign to current user if no @ mentions found and userProfile exists
+        assigneesFromMentionRef.current = true
+      } else if (assigneesFromMentionRef.current) {
+        // The @mention that set the current assignees was deleted — fall back
+        // to the implicit self default. Picker selections stay untouched.
+        assigneesFromMentionRef.current = false
         setIsAnyoneTask(false)
         if (userProfile?.id) {
           setAssignees([
@@ -434,39 +698,47 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
         syncDueDateStates(repeat.dueDate)
       }
 
-      // Create the cleaned sentence by sequentially applying all cleanups
+      // Create the cleaned sentence by sequentially applying all cleanups.
+      // Each stage only needs a reparse when an earlier cleanup actually
+      // changed the sentence; otherwise the first-pass result (computed on the
+      // identical string) is reused as-is.
       let cleanedSentence = sentence
       if (priority.result) cleanedSentence = priority.cleanedSentence
       if (pointsParsed.result) {
-        // Apply points cleaning to the current cleaned sentence
-        const pointsReparse = parsePoints(cleanedSentence)
+        const pointsReparse =
+          cleanedSentence === sentence
+            ? pointsParsed
+            : parsePoints(cleanedSentence)
         if (pointsReparse.result)
           cleanedSentence = pointsReparse.cleanedSentence
       }
       if (labels.result) {
-        // Apply labels cleaning to the current cleaned sentence
-        const labelsReparse = parseLabels(cleanedSentence, userLabels || [])
+        const labelsReparse =
+          cleanedSentence === sentence
+            ? labels
+            : parseLabels(cleanedSentence, userLabels || [])
         if (labelsReparse.result)
           cleanedSentence = labelsReparse.cleanedSentence
       }
       if (assigneesResult.result) {
-        // Apply assignees cleaning to the current cleaned sentence
-        const assigneesReparse = parseAssignees(
-          cleanedSentence,
-          assigneesForParsing,
-        )
+        const assigneesReparse =
+          cleanedSentence === sentence
+            ? assigneesResult
+            : parseAssignees(cleanedSentence, assigneesForParsing)
         if (assigneesReparse.result)
           cleanedSentence = assigneesReparse.cleanedSentence
       }
       if (repeat.result) {
-        // Apply repeat cleaning to the current cleaned sentence
-        const repeatReparse = parseRepeatV2(cleanedSentence)
+        const repeatReparse =
+          cleanedSentence === sentence ? repeat : parseRepeatV2(cleanedSentence)
         if (repeatReparse.result)
           cleanedSentence = repeatReparse.cleanedSentence
       }
       if (dueDateParsed.result) {
-        // Apply date cleaning to the current cleaned sentence
-        const dueDateReparse = parseDueDate(cleanedSentence, chrono)
+        const dueDateReparse =
+          cleanedSentence === sentence
+            ? dueDateParsed
+            : parseDueDate(cleanedSentence, chrono)
         if (dueDateReparse.result)
           cleanedSentence = dueDateReparse.cleanedSentence
       }
@@ -485,9 +757,37 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
         assigneesResult.highlight,
       )
 
-      setRenderedParts(parts)
+      setRenderedParts({ text: sentence, parts })
+
+      const overrides = pendingVoiceOverridesRef.current
+      if (overrides) {
+        pendingVoiceOverridesRef.current = null
+        if ('priority' in overrides) setPriority(overrides.priority || 0)
+        if ('frequency' in overrides) setFrequency(overrides.frequency)
+        if ('labelIds' in overrides) setLabelsV2(overrides.labelIds || [])
+        if ('notificationMetadata' in overrides) {
+          setNotificationMetadata(
+            overrides.notificationMetadata || { templates: [] },
+          )
+        }
+        if ('assignees' in overrides || 'isAnyone' in overrides) {
+          setIsAnyoneTask(!!overrides.isAnyone)
+          setAssignees(overrides.assignees || [])
+          assigneesFromMentionRef.current = false
+        }
+        if ('dueDate' in overrides) {
+          if (overrides.dueDate) {
+            syncDueDateStates(overrides.dueDate)
+          } else {
+            setDueDate(null)
+            setDueDateOnly(null)
+            setDueTime(null)
+            setUseCustomTime(false)
+          }
+        }
+      }
     },
-    [userLabels, renderHighlightedSentence, circleMembers, userProfile],
+    [userLabels, renderHighlightedSentence, assigneesForParsing, userProfile],
   )
 
   useEffect(() => {
@@ -500,7 +800,16 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
       return
     }
 
-    processText(taskText)
+    // Debounced so fast typing doesn't run the full parse pipeline per
+    // keystroke; submitChore flushes a pending parse before creating.
+    parseTimerRef.current = setTimeout(() => {
+      parseTimerRef.current = null
+      processText(taskText)
+    }, PARSE_DEBOUNCE_MS)
+    return () => {
+      clearTimeout(parseTimerRef.current)
+      parseTimerRef.current = null
+    }
   }, [
     taskText,
     userLabelsLoading,
@@ -565,14 +874,42 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
   }
 
   const handleEnterPressed = () => {
-    createChore()
+    submitChore()
+  }
+
+  // The scan keeps its source image when asked: upload it against the draft so
+  // the server promotes it onto the chore the same way manual uploads are.
+  const attachScannedImage = async imageSource => {
+    // Creating the chore promotes whatever draft attachments exist at that
+    // moment, so Create waits on this upload rather than orphaning it.
+    setIsAttachingScan(true)
+    try {
+      const file = await imageSourceToFile(
+        imageSource,
+        `scan-${Date.now()}.jpg`,
+      )
+      if (!file) return
+      const uploaded = await uploadFile(file)
+      if (!uploaded) return
+      setAttachments(prev => [
+        ...prev,
+        { url: uploaded.url, path: uploaded.path, name: uploaded.fileName },
+      ])
+    } finally {
+      setIsAttachingScan(false)
+    }
   }
 
   const handleTaskExtracted = ({
-    taskName,
+    attachmentImage,
     description: extractedDesc,
     dueDate: extractedDue,
+    taskName,
   }) => {
+    taskSourceRef.current = 'scan'
+    if (attachmentImage) {
+      attachScannedImage(attachmentImage)
+    }
     if (taskName) {
       processText(taskName)
     }
@@ -589,9 +926,80 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
     }
   }
 
+  // Single voice-captured task: land it in the smart input so the user
+  // reviews it with the normal pickers before creating.
+  const handleVoiceSingle = (text, overrides = {}) => {
+    setShowVoice(false)
+    taskSourceRef.current = 'voice'
+    if (Object.keys(overrides).length > 0) {
+      pendingVoiceOverridesRef.current = overrides
+    }
+    setTaskText(text)
+  }
+
+  // Multiple voice-captured tasks: they were reviewed as cards in the panel,
+  // so create them all directly.
+  const handleVoiceCreateMany = async parsedTasks => {
+    setCreatingVoiceTasks(true)
+    const notificationTemplates = getDefaultNotification()
+    for (const parsed of parsedTasks) {
+      const chore = buildChorePayload(parsed, {
+        userProfile,
+        projectId,
+        notificationTemplates,
+      })
+      chore.source = 'voice'
+      try {
+        const result = await createChoreMutation.mutateAsync(chore)
+        if (result?._pendingCreate) {
+          onChoreUpdate(result)
+        } else {
+          onChoreUpdate({
+            ...chore,
+            ...result,
+            id: result?.id,
+            nextDueDate: chore.dueDate,
+          })
+        }
+      } catch (error) {
+        console.error('Error creating voice task:', error)
+      }
+    }
+    setCreatingVoiceTasks(false)
+    handleCloseModal(false)
+  }
+
+  // Footer confirm while the voice panel is open: one task lands in the smart
+  // input for review, several are created straight away.
+  const handleVoiceConfirm = () => {
+    const { segments } = voiceState
+    if (segments.length === 1) {
+      handleVoiceSingle(segments[0].text, segments[0].overrides || {})
+    } else if (segments.length > 1) {
+      // Parse only at confirm time — the cards already parse for their own
+      // display, so there's no need to keep a parsed copy in modal state
+      const parseCtx = {
+        userLabels: voiceLabels,
+        members: voiceMembers,
+        currentUserId: userProfile?.id,
+      }
+      handleVoiceCreateMany(
+        segments.map(segment => ({
+          ...parseVoiceTask(segment.text, parseCtx),
+          ...(segment.overrides || {}),
+        })),
+      )
+    }
+  }
+
   const handleCloseModal = forceRefetch => {
     onClose(forceRefetch)
     setShowScan(false)
+    setShowVoice(false)
+    setVoiceState({ segments: [], isListening: false })
+    setScanState({ phase: 'idle', primaryAction: null })
+    setCreatingVoiceTasks(false)
+    setIsAttachingScan(false)
     setTaskText('')
     setTaskTitle('')
     setDueDate(null)
@@ -605,6 +1013,10 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
     setHasSubTasks(false)
     setLabelsV2([])
     setAssignees([])
+    assigneesFromMentionRef.current = false
+    // The modal closes without a final parse, so drop the highlight identities
+    // here or nothing would animate on the next open
+    prevHighlightKeysRef.current = new Set()
     setProjectId(getInitialProject())
     setDeadlineOffset(-1)
     setRequireApproval(false)
@@ -617,9 +1029,13 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
     setUseCustomTime(false)
     setAttachments([])
     setDraftId(generateUUID())
+    taskSourceRef.current = 'quick_add'
   }
 
   const createChore = () => {
+    // A scanned attachment still uploading would be orphaned by the create
+    if (isAttachingScan) return
+
     // Handle different assignee scenarios
     let finalAssignees = assignees
     let finalAssignedTo = null
@@ -657,24 +1073,34 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
       status: 0,
       frequencyType: 'once',
       frequencyMetadata: {},
+      notification: false,
       notificationMetadata: {},
       subTasks: subTasks?.length > 0 ? subTasks : null,
       projectId: projectId === 'default' ? null : projectId,
       draftId: draftId,
+      source: taskSourceRef.current,
     }
+
+    // Reminders are a Plus feature and only make sense when the user kept at
+    // least one template; without the flag the backend never schedules them.
+    const hasReminders =
+      isPlusAccount(userProfile) && notificationMetadata?.templates?.length > 0
 
     if (frequency) {
       chore.frequencyType = frequency.frequencyType
       chore.frequencyMetadata = frequency.frequencyMetadata
       chore.frequency = frequency.frequency
-      if (isPlusAccount(userProfile)) {
-        chore.notification = true
-        chore.notificationMetadata = notificationMetadata
-      }
     }
-    if (!frequency && dueDate) {
-      // Use RFC3339/ISO-8601 format expected by backend.
+    if (dueDate) {
+      // Use RFC3339/ISO-8601 format expected by backend. The backend only
+      // derives NextDueDate from what's sent on create (handler.go never
+      // computes it from frequencyType), so this must be sent whether or
+      // not the task also repeats — otherwise a recurring task created with
+      // a due date lands with nextDueDate: null.
       chore.nextDueDate = new Date(dueDate).toISOString()
+    }
+    if (hasReminders && (frequency || dueDate)) {
+      chore.notification = true
       chore.notificationMetadata = notificationMetadata
     }
 
@@ -702,11 +1128,27 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
     handleCloseModal(false)
   }
 
+  // All submit paths (Enter, Cmd+Enter, footer button) go through here: a
+  // debounce may still be holding the parse of the latest text, and creating
+  // from pre-parse state would drop the tail of what the user typed.
+  const submitChore = () => {
+    if (parseTimerRef.current) {
+      clearTimeout(parseTimerRef.current)
+      parseTimerRef.current = null
+      flushSync(() => processText(taskText))
+    }
+    // Read through latestRef: after the flush, this render's createChore
+    // closure is stale
+    latestRef.current.createChore()
+  }
+
   latestRef.current = {
     isModalOpen,
+    isShortcutScopeActive,
     hasDescription,
     dueDate,
     createChore,
+    submitChore,
     handleCloseModal,
   }
 
@@ -721,23 +1163,66 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
         onClose={handleCloseModal}
         size='lg'
         fullWidth={true}
-        title='Create new task'
+        title={t('addTask.title')}
         footer={
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'end',
-              gap: 1,
-            }}
-          >
+          <ModalActions>
+            {!showScan && !showVoice && projects?.length >= 1 && (
+              <Dropdown>
+                <MenuButton
+                  variant='plain'
+                  color='neutral'
+                  size='sm'
+                  startDecorator={
+                    <SelectedProjectIcon
+                      sx={{ fontSize: 18, color: selectedProject.color }}
+                    />
+                  }
+                  endDecorator={<KeyboardArrowDown sx={{ fontSize: 16 }} />}
+                  sx={{
+                    mr: 'auto',
+                    color: 'text.secondary',
+                    fontWeight: 'normal',
+                  }}
+                >
+                  {selectedProject.id === 'default'
+                    ? t('addTask.defaultProject')
+                    : selectedProject.name}
+                </MenuButton>
+                <Menu
+                  placement='top-start'
+                  sx={{
+                    minWidth: 200,
+                    zIndex: 'calc(var(--joy-zIndex-modal) + 1)',
+                  }}
+                >
+                  {[DEFAULT_PROJECT, ...projects].map(project => {
+                    const ProjectIcon = getIconComponent(project.icon)
+                    return (
+                      <MenuItem
+                        key={project.id}
+                        selected={projectId === project.id}
+                        onClick={() => setProjectId(project.id)}
+                      >
+                        <ListItemDecorator>
+                          <ProjectIcon
+                            sx={{ fontSize: 18, color: project.color }}
+                          />
+                        </ListItemDecorator>
+                        {project.id === 'default'
+                          ? t('addTask.defaultProject')
+                          : project.name}
+                      </MenuItem>
+                    )
+                  })}
+                </Menu>
+              </Dropdown>
+            )}
             <Button
-              size='lg'
               variant='outlined'
               color='neutral'
               onClick={handleCloseModal}
             >
-              Cancel
+              {t('common:cancel')}
               {showKeyboardShortcuts && (
                 <KeyboardShortcutHint
                   shortcut='Esc'
@@ -746,25 +1231,61 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
                 />
               )}
             </Button>
-            <Button
-              size='lg'
-              variant='solid'
-              color='primary'
-              disabled={!taskTitle.trim()}
-              onClick={createChore}
-            >
-              Create
-              {showKeyboardShortcuts && (
-                <KeyboardShortcutHint shortcut='Enter' sx={{ ml: 1 }} />
-              )}
-            </Button>
-          </Box>
+            {showVoice && (
+              <Button
+                variant='solid'
+                color='primary'
+                loading={creatingVoiceTasks}
+                disabled={
+                  voiceState.segments.length === 0 || voiceState.isListening
+                }
+                onClick={handleVoiceConfirm}
+              >
+                {creatingVoiceTasks
+                  ? t('addTask.creating')
+                  : voiceState.segments.length > 1
+                    ? t('addTask.createCount', {
+                        count: voiceState.segments.length,
+                      })
+                    : t('addTask.useTask')}
+              </Button>
+            )}
+            {showScan && scanState.primaryAction && (
+              <Button
+                variant='solid'
+                color='primary'
+                startDecorator={scanState.primaryAction.icon}
+                onClick={scanState.primaryAction.onClick}
+              >
+                {scanState.primaryAction.label}
+              </Button>
+            )}
+            {showScan && scanState.phase === 'processing' && (
+              <Button variant='solid' color='primary' loading disabled>
+                {t('addTask.processing')}
+              </Button>
+            )}
+            {!showScan && !showVoice && (
+              <Button
+                variant='solid'
+                color='primary'
+                loading={isAttachingScan}
+                disabled={!taskTitle.trim() || isAttachingScan}
+                onClick={submitChore}
+              >
+                {t('addTask.create')}
+                {showKeyboardShortcuts && (
+                  <KeyboardShortcutHint shortcut='Enter' sx={{ ml: 1 }} />
+                )}
+              </Button>
+            )}
+          </ModalActions>
         }
       >
-        {!showScan && (
+        {!showScan && !showVoice && (
           <>
-            <Box>
-              <Box
+            <Box sx={{ mt: 1 }}>
+              {/* <Box
                 sx={{
                   display: 'flex',
                   flexDirection: 'row',
@@ -815,7 +1336,7 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
                     </>
                   }
                 />
-              </Box>
+              </Box> */}
 
               <SmartTaskTitleInput
                 autoFocus
@@ -838,12 +1359,15 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
                       }
                     : undefined
                 }
-                placeholder='Type your task...'
+                onVoiceClick={
+                  voiceAvailable ? () => setShowVoice(true) : undefined
+                }
+                placeholder={t('addTask.taskPlaceholder')}
                 onChange={text => {
                   setTaskText(text)
                   if (!text) setTaskTitle('')
                 }}
-                customRenderer={renderedParts}
+                customRenderer={displayedParts}
                 onEnterPressed={handleEnterPressed}
                 onShiftEnterPressed={() => {
                   if (!hasDescription) {
@@ -851,43 +1375,7 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
                   }
                   setTimeout(() => richTextEditorRef.current?.focus(), 50)
                 }}
-                suggestions={{
-                  '#': {
-                    value: 'id',
-                    display: 'name',
-                    options: userLabels ? userLabels : [],
-                  },
-                  '!': {
-                    value: 'id',
-                    display: 'name',
-                    options: [
-                      { id: '1', name: 'P1' },
-                      { id: '2', name: 'P2' },
-                      { id: '3', name: 'P3' },
-                      { id: '4', name: 'P4' },
-                    ],
-                  },
-                  '@': {
-                    value: 'userId',
-                    display: 'displayName',
-                    options: [
-                      { userId: 'anyone', displayName: 'Anyone' },
-                      ...(circleMembers?.res || []),
-                    ],
-                  },
-                  '*': {
-                    value: 'id',
-                    display: 'name',
-                    options: [
-                      { id: '1', name: '1 point' },
-                      { id: '5', name: '5 points' },
-                      { id: '10', name: '10 points' },
-                      { id: '25', name: '25 points' },
-                      { id: '50', name: '50 points' },
-                      { id: '100', name: '100 points' },
-                    ],
-                  },
-                }}
+                suggestions={smartInputSuggestions}
               />
             </Box>
 
@@ -929,8 +1417,8 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
                 onChange={setPriority}
                 onClear={() => setPriority(0)}
                 emptyDisplay={pickerEmptyDisplay}
-                priorityColors={priorityColors}
-                priorityLabels={priorityLabels}
+                priorityColors={PRIORITY_COLORS}
+                priorityLabels={PRIORITY_LABELS}
               />
               <AssigneePickerField
                 emptyDisplay={pickerEmptyDisplay}
@@ -954,8 +1442,12 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
               />
               <LabelsPickerField
                 emptyDisplay={pickerEmptyDisplay}
-                values={labelsV2 || []}
-                onChange={setLabelsV2}
+                values={(labelsV2 || []).map(label => label.id)}
+                onChange={ids =>
+                  setLabelsV2(
+                    (userLabels || []).filter(label => ids.includes(label.id)),
+                  )
+                }
                 onClear={() => setLabelsV2([])}
                 labels={userLabels || []}
               />
@@ -1005,8 +1497,8 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
                   }}
                 >
                   <Add sx={{ fontSize: 20 }} />
-                  <Typography level='body-sm' sx={{ color: 'inherit' }}>
-                    Description
+                  <Typography level='body-sm'>
+                    {t('addTask.descriptionChip')}
                   </Typography>
                 </Button>
               )}
@@ -1030,8 +1522,8 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
                   }}
                 >
                   <Add sx={{ fontSize: 20 }} />
-                  <Typography level='body-sm' sx={{ color: 'inherit' }}>
-                    Subtasks
+                  <Typography level='body-sm'>
+                    {t('addTask.subtasksChip')}
                   </Typography>
                 </Button>
               )}
@@ -1064,7 +1556,9 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
               onAssignStrategyChange={setAssignStrategy}
               hasDueDate={!!dueDate}
               hasMultipleAssignees={assignees.length > 1}
-              hasAssignees={assignees.length > 0}
+              // Empty assignees still implicitly assigns the current user at
+              // create time; only an "Anyone" task truly has no assignee
+              hasAssignees={!isAnyoneTask}
               isPrivate={isPrivate}
               onIsPrivateChange={setIsPrivate}
             />
@@ -1097,16 +1591,29 @@ const TaskInput = ({ onChoreUpdate, isModalOpen, onClose }) => {
           </>
         )}
 
+        {showVoice && (
+          <VoicePanel
+            userLabels={voiceLabels}
+            members={voiceMembers}
+            userProfile={userProfile}
+            defaultNotificationTemplates={voiceDefaultNotificationTemplates}
+            onStateChange={setVoiceState}
+          />
+        )}
+
         {showScan && (
           <ScanPanel
             open
             autoCapture={scanAutoCapture}
+            canKeepImage={isPlusAccount(userProfile)}
             onTaskExtracted={handleTaskExtracted}
             initialImageUrl={pendingPhotoUrl}
+            onStateChange={setScanState}
             onClose={() => {
               setShowScan(false)
               setScanAutoCapture(false)
               setPendingPhotoUrl(null)
+              setScanState({ phase: 'idle', primaryAction: null })
             }}
           />
         )}

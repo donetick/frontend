@@ -10,8 +10,11 @@ import {
   Typography,
 } from '@mui/joy'
 import { useState } from 'react'
-import BottomSheetModal from './BottomSheetModal'
+import { useTranslation } from 'react-i18next'
+
+import AppModal from './AppModal'
 import ActiveFilterChips from './filter/ActiveFilterChips'
+import ModalActions from './ModalActions'
 
 /**
  * Reusable filter bar component.
@@ -38,66 +41,93 @@ const d = (date, h = 0, m = 0, s = 0, ms = 0) =>
 const DATE_RANGE_PRESETS = [
   {
     value: 'today',
-    label: 'Today',
+    labelKey: 'filterBar.presetToday',
     getRange: () => {
       const t = d(new Date())
-      return { from: t.toISOString(), to: d(new Date(), 23, 59, 59, 999).toISOString() }
+      return {
+        from: t.toISOString(),
+        to: d(new Date(), 23, 59, 59, 999).toISOString(),
+      }
     },
   },
   {
     value: 'yesterday',
-    label: 'Yesterday',
+    labelKey: 'filterBar.presetYesterday',
     getRange: () => {
       const t = d(new Date())
-      const y = new Date(t); y.setDate(t.getDate() - 1)
-      return { from: d(y).toISOString(), to: d(y, 23, 59, 59, 999).toISOString() }
+      const y = new Date(t)
+      y.setDate(t.getDate() - 1)
+      return {
+        from: d(y).toISOString(),
+        to: d(y, 23, 59, 59, 999).toISOString(),
+      }
     },
   },
   {
     value: 'this-week',
-    label: 'This Week',
+    labelKey: 'filterBar.presetThisWeek',
     getRange: () => {
       const t = d(new Date())
-      const start = new Date(t); start.setDate(t.getDate() - t.getDay())
-      const end = new Date(start); end.setDate(start.getDate() + 6)
-      return { from: d(start).toISOString(), to: d(end, 23, 59, 59, 999).toISOString() }
+      const start = new Date(t)
+      start.setDate(t.getDate() - t.getDay())
+      const end = new Date(start)
+      end.setDate(start.getDate() + 6)
+      return {
+        from: d(start).toISOString(),
+        to: d(end, 23, 59, 59, 999).toISOString(),
+      }
     },
   },
   {
     value: 'last-7-days',
-    label: 'Last 7 Days',
+    labelKey: 'filterBar.presetLast7Days',
     getRange: () => {
       const t = d(new Date())
-      const start = new Date(t); start.setDate(t.getDate() - 6)
-      return { from: d(start).toISOString(), to: d(new Date(), 23, 59, 59, 999).toISOString() }
+      const start = new Date(t)
+      start.setDate(t.getDate() - 6)
+      return {
+        from: d(start).toISOString(),
+        to: d(new Date(), 23, 59, 59, 999).toISOString(),
+      }
     },
   },
   {
     value: 'this-month',
-    label: 'This Month',
+    labelKey: 'filterBar.presetThisMonth',
     getRange: () => {
       const n = new Date()
       const start = new Date(n.getFullYear(), n.getMonth(), 1)
       const end = new Date(n.getFullYear(), n.getMonth() + 1, 0)
-      return { from: start.toISOString(), to: d(end, 23, 59, 59, 999).toISOString() }
+      return {
+        from: start.toISOString(),
+        to: d(end, 23, 59, 59, 999).toISOString(),
+      }
     },
   },
   {
     value: 'last-30-days',
-    label: 'Last 30 Days',
+    labelKey: 'filterBar.presetLast30Days',
     getRange: () => {
       const t = d(new Date())
-      const start = new Date(t); start.setDate(t.getDate() - 29)
-      return { from: d(start).toISOString(), to: d(new Date(), 23, 59, 59, 999).toISOString() }
+      const start = new Date(t)
+      start.setDate(t.getDate() - 29)
+      return {
+        from: d(start).toISOString(),
+        to: d(new Date(), 23, 59, 59, 999).toISOString(),
+      }
     },
   },
   {
     value: 'last-3-months',
-    label: 'Last 3 Months',
+    labelKey: 'filterBar.presetLast3Months',
     getRange: () => {
       const t = d(new Date())
-      const start = new Date(t); start.setMonth(t.getMonth() - 3)
-      return { from: d(start).toISOString(), to: d(new Date(), 23, 59, 59, 999).toISOString() }
+      const start = new Date(t)
+      start.setMonth(t.getMonth() - 3)
+      return {
+        from: d(start).toISOString(),
+        to: d(new Date(), 23, 59, 59, 999).toISOString(),
+      }
     },
   },
 ]
@@ -113,21 +143,34 @@ const fmtDisplayDate = iso => {
 // ── Component ────────────────────────────────────────────────────────────────
 
 const FilterBar = ({
-  filterDefs,
   activeFilters,
-  onSetFilter,
+  filterDefs,
   onClearAll,
+  onOpenChange,
+  onSetFilter,
+  open,
+  // When the host renders its own trigger (e.g. an icon button in a toolbar
+  // row), it drives the sheet through `open`/`onOpenChange` and hides ours.
   resultCount,
+  showTrigger = true,
   totalCount,
 }) => {
-  const [isOpen, setIsOpen] = useState(false)
+  const { t } = useTranslation('common')
+  const [internalOpen, setInternalOpen] = useState(false)
+  const isControlled = open !== undefined
+  const isOpen = isControlled ? open : internalOpen
+  const setIsOpen = next => {
+    if (!isControlled) setInternalOpen(next)
+    onOpenChange?.(next)
+  }
 
   // ── Active count ───────────────────────────────────────────────────────────
 
   const activeFilterCount = filterDefs.filter(def => {
     const value = activeFilters[def.id]
     if (value === undefined || value === null) return false
-    if (def.defaultValue !== undefined && value === def.defaultValue) return false
+    if (def.defaultValue !== undefined && value === def.defaultValue)
+      return false
     if (Array.isArray(value) && value.length === 0) return false
     if (def.type === 'date-range') return !!(value?.from || value?.to)
     return true
@@ -183,13 +226,18 @@ const FilterBar = ({
     if (value === undefined || value === null) return null
 
     if (def.type === 'single-select') {
-      if (def.defaultValue !== undefined && value === def.defaultValue) return null
+      if (def.defaultValue !== undefined && value === def.defaultValue)
+        return null
       return def.options?.find(o => o.value === value)?.label ?? def.label
     }
 
     if (def.type === 'boolean') return def.label
 
-    if (def.type === 'multi-select' && Array.isArray(value) && value.length > 0) {
+    if (
+      def.type === 'multi-select' &&
+      Array.isArray(value) &&
+      value.length > 0
+    ) {
       if (value.length === 1) {
         return def.options?.find(o => o.value === value[0])?.label ?? def.label
       }
@@ -199,13 +247,18 @@ const FilterBar = ({
     if (def.type === 'date-range') {
       if (!value?.from && !value?.to) return null
       if (value.preset) {
-        return DATE_RANGE_PRESETS.find(p => p.value === value.preset)?.label ?? 'Date Range'
+        const presetLabelKey = DATE_RANGE_PRESETS.find(
+          p => p.value === value.preset,
+        )?.labelKey
+        return presetLabelKey
+          ? t(presetLabelKey)
+          : t('filterBar.dateRangeFallback')
       }
       const from = fmtDisplayDate(value.from)
       const to = fmtDisplayDate(value.to)
       if (from && to) return `${from} – ${to}`
-      if (from) return `From ${from}`
-      if (to) return `Until ${to}`
+      if (from) return t('filterBar.fromDate', { date: from })
+      if (to) return t('filterBar.untilDate', { date: to })
       return null
     }
 
@@ -256,90 +309,113 @@ const FilterBar = ({
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
+  const activeChips = filterDefs
+    .map(def => ({ def, label: getActiveChipLabel(def) }))
+    .filter(({ label }) => !!label)
+    .map(({ def, label }) => ({
+      key: def.id,
+      label,
+      onClear: () => onSetFilter(def.id, null),
+    }))
+
+  // With the trigger hoisted into a toolbar, the inline row has nothing to show
+  // until a filter is on — rendering it anyway would leave a phantom gap.
+  const showInlineBar = showTrigger || activeChips.length > 0
+
   return (
     <>
       {/* ── Inline bar ─────────────────────────────────────── */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', mb: 2 }}>
-        <Badge
-          badgeContent={activeFilterCount || null}
-          color='primary'
-          size='sm'
-          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-          sx={{ display: 'flex', alignItems: 'center' }}
+      {showInlineBar && (
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            flexWrap: 'wrap',
+            mb: 2,
+          }}
         >
-          <Button
-            size='md'
-            variant={hasActive ? 'solid' : 'outlined'}
-            color={hasActive ? 'primary' : 'neutral'}
-            startDecorator={<FilterList sx={{ fontSize: 16 }} />}
-            onClick={() => setIsOpen(true)}
-            sx={{
-              borderRadius: 'xl',
-              py: 0.5,
-              px: 1,
-              gap: 0.5,
-              alignItems: 'center',
-              '& .MuiButton-startDecorator': {
-                display: 'flex',
-                alignItems: 'center',
-                mr: 0.5,
-              },
-            }}
-          >
-            Filters
-          </Button>
-        </Badge>
+          {showTrigger && (
+            <Badge
+              badgeContent={activeFilterCount || null}
+              color='primary'
+              size='sm'
+              anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+              sx={{ display: 'flex', alignItems: 'center' }}
+            >
+              <Button
+                size='md'
+                variant={hasActive ? 'solid' : 'outlined'}
+                color={hasActive ? 'primary' : 'neutral'}
+                startDecorator={<FilterList sx={{ fontSize: 16 }} />}
+                onClick={() => setIsOpen(true)}
+                sx={{
+                  borderRadius: 'xl',
+                  py: 0.5,
+                  px: 1,
+                  gap: 0.5,
+                  alignItems: 'center',
+                  '& .MuiButton-startDecorator': {
+                    display: 'flex',
+                    alignItems: 'center',
+                    mr: 0.5,
+                  },
+                }}
+              >
+                {t('filterBar.filtersButton')}
+              </Button>
+            </Badge>
+          )}
 
-        <ActiveFilterChips
-          chips={filterDefs
-            .map(def => ({ def, label: getActiveChipLabel(def) }))
-            .filter(({ label }) => !!label)
-            .map(({ def, label }) => ({
-              key: def.id,
-              label,
-              onClear: () => onSetFilter(def.id, null),
-            }))}
-          onOpen={() => setIsOpen(true)}
-          onClearAll={hasActive ? onClearAll : undefined}
-          resultCount={hasActive ? resultCount : undefined}
-          totalCount={hasActive ? totalCount : undefined}
-          maxVisible={2}
-          chipSize='md'
-        />
-      </Box>
+          <ActiveFilterChips
+            chips={activeChips}
+            onOpen={() => setIsOpen(true)}
+            onClearAll={hasActive ? onClearAll : undefined}
+            resultCount={hasActive ? resultCount : undefined}
+            totalCount={hasActive ? totalCount : undefined}
+            maxVisible={2}
+            chipSize='md'
+          />
+        </Box>
+      )}
 
       {/* ── Bottom sheet ────────────────────────────────────── */}
-      <BottomSheetModal
+      <AppModal
         open={isOpen}
+        isMobile
         onClose={() => setIsOpen(false)}
         title={
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Tune sx={{ fontSize: 20 }} />
-            Filters
+            {t('filterBar.filtersButton')}
             {hasActive && (
-              <Chip size='sm' variant='solid' color='primary' sx={modalCountChipSx}>
+              <Chip
+                size='sm'
+                variant='solid'
+                color='primary'
+                sx={modalCountChipSx}
+              >
                 {activeFilterCount}
               </Chip>
             )}
           </Box>
         }
         footer={
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1 }}>
-            <Button
-              variant='plain'
-              color='danger'
-              size='sm'
-              disabled={!hasActive}
-              onClick={onClearAll}
-            >
-              Clear all
-            </Button>
-            <Button onClick={() => setIsOpen(false)} sx={{ minWidth: 140 }}>
-              {resultCount !== undefined
-                ? `Show ${resultCount} result${resultCount !== 1 ? 's' : ''}`
-                : 'Done'}
-            </Button>
-          </Box>
+          <ModalActions
+            tertiary={{
+              label: t('filterBar.clearAllButton'),
+              color: 'danger',
+              disabled: !hasActive,
+              onClick: onClearAll,
+            }}
+            primary={{
+              label:
+                resultCount !== undefined
+                  ? t('filterBar.showResults', { count: resultCount })
+                  : t('filterBar.doneButton'),
+              onClick: () => setIsOpen(false),
+            }}
+          />
         }
       >
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
@@ -348,9 +424,18 @@ const FilterBar = ({
               {idx > 0 && <Divider sx={{ my: 2.5 }} />}
 
               {/* Section header */}
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+              <Box
+                sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}
+              >
                 {def.icon && (
-                  <Box sx={{ color: 'text.secondary', display: 'flex', alignItems: 'center', '& svg': { fontSize: 18 } }}>
+                  <Box
+                    sx={{
+                      color: 'text.secondary',
+                      display: 'flex',
+                      alignItems: 'center',
+                      '& svg': { fontSize: 18 },
+                    }}
+                  >
                     {def.icon}
                   </Box>
                 )}
@@ -359,21 +444,43 @@ const FilterBar = ({
                 </Typography>
 
                 {/* active badge in header */}
-                {def.type === 'multi-select' && (activeFilters[def.id]?.length ?? 0) > 0 && (
-                  <Chip size='sm' variant='solid' color='primary' sx={sectionBadgeChipSx}>
-                    {activeFilters[def.id].length} selected
-                  </Chip>
-                )}
-                {def.type === 'single-select' && activeFilters[def.id] != null && (() => {
-                  const opt = def.options?.find(o => o.value === activeFilters[def.id])
-                  return opt ? (
-                    <Chip size='sm' variant='solid' color='primary' sx={sectionBadgeChipSx}>
-                      {opt.label}
+                {def.type === 'multi-select' &&
+                  (activeFilters[def.id]?.length ?? 0) > 0 && (
+                    <Chip
+                      size='sm'
+                      variant='solid'
+                      color='primary'
+                      sx={sectionBadgeChipSx}
+                    >
+                      {t('filterBar.selectedCount', {
+                        count: activeFilters[def.id].length,
+                      })}
                     </Chip>
-                  ) : null
-                })()}
+                  )}
+                {def.type === 'single-select' &&
+                  activeFilters[def.id] != null &&
+                  (() => {
+                    const opt = def.options?.find(
+                      o => o.value === activeFilters[def.id],
+                    )
+                    return opt ? (
+                      <Chip
+                        size='sm'
+                        variant='solid'
+                        color='primary'
+                        sx={sectionBadgeChipSx}
+                      >
+                        {opt.label}
+                      </Chip>
+                    ) : null
+                  })()}
                 {def.type === 'date-range' && getActiveChipLabel(def) && (
-                  <Chip size='sm' variant='solid' color='primary' sx={sectionBadgeChipSx}>
+                  <Chip
+                    size='sm'
+                    variant='solid'
+                    color='primary'
+                    sx={sectionBadgeChipSx}
+                  >
                     {getActiveChipLabel(def)}
                   </Chip>
                 )}
@@ -383,18 +490,28 @@ const FilterBar = ({
               {def.type === 'multi-select' && (
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                   {def.options?.map(opt => {
-                    const isSelected = (activeFilters[def.id] || []).includes(opt.value)
+                    const isSelected = (activeFilters[def.id] || []).includes(
+                      opt.value,
+                    )
                     return (
                       <Chip
                         key={opt.value}
                         variant={isSelected ? 'solid' : 'soft'}
-                        color={isSelected ? (opt.color ?? 'primary') : 'neutral'}
+                        color={
+                          isSelected ? (opt.color ?? 'primary') : 'neutral'
+                        }
                         startDecorator={
                           opt.avatar ? (
-                            <Avatar src={opt.avatar} alt={opt.label} sx={{ '--Avatar-size': '20px' }} />
+                            <Avatar
+                              src={opt.avatar}
+                              alt={opt.label}
+                              sx={{ '--Avatar-size': '20px' }}
+                            />
                           ) : isSelected ? (
                             <Check sx={{ fontSize: 14 }} />
-                          ) : (opt.icon ?? null)
+                          ) : (
+                            (opt.icon ?? null)
+                          )
                         }
                         onClick={() => handleMultiToggle(def.id, opt.value)}
                         sx={selectableChipSx}
@@ -415,13 +532,21 @@ const FilterBar = ({
                       <Chip
                         key={opt.value}
                         variant={isSelected ? 'solid' : 'soft'}
-                        color={isSelected ? (opt.color ?? 'primary') : 'neutral'}
+                        color={
+                          isSelected ? (opt.color ?? 'primary') : 'neutral'
+                        }
                         startDecorator={
                           opt.avatar ? (
-                            <Avatar src={opt.avatar} alt={opt.label} sx={{ '--Avatar-size': '20px' }} />
+                            <Avatar
+                              src={opt.avatar}
+                              alt={opt.label}
+                              sx={{ '--Avatar-size': '20px' }}
+                            />
                           ) : isSelected ? (
                             <Check sx={{ fontSize: 14 }} />
-                          ) : (opt.icon ?? null)
+                          ) : (
+                            (opt.icon ?? null)
+                          )
                         }
                         onClick={() => handleSingleToggle(def.id, opt.value)}
                         sx={selectableChipSx}
@@ -438,7 +563,11 @@ const FilterBar = ({
                 <Chip
                   variant={activeFilters[def.id] ? 'solid' : 'soft'}
                   color={activeFilters[def.id] ? 'primary' : 'neutral'}
-                  startDecorator={activeFilters[def.id] ? <Check sx={{ fontSize: 14 }} /> : null}
+                  startDecorator={
+                    activeFilters[def.id] ? (
+                      <Check sx={{ fontSize: 14 }} />
+                    ) : null
+                  }
                   onClick={() => handleBoolToggle(def.id)}
                   sx={selectableChipSx}
                 >
@@ -447,58 +576,84 @@ const FilterBar = ({
               )}
 
               {/* date-range */}
-              {def.type === 'date-range' && (() => {
-                const val = activeFilters[def.id] || {}
-                return (
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                    {/* Preset chips */}
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                      {DATE_RANGE_PRESETS.map(preset => {
-                        const isSelected = val.preset === preset.value
-                        return (
-                          <Chip
-                            key={preset.value}
-                            variant={isSelected ? 'solid' : 'soft'}
-                            color={isSelected ? 'primary' : 'neutral'}
-                            startDecorator={isSelected ? <Check sx={{ fontSize: 14 }} /> : null}
-                            onClick={() => handleDateRangePreset(def.id, preset.value)}
-                            sx={selectableChipSx}
-                          >
-                            {preset.label}
-                          </Chip>
-                        )
-                      })}
-                    </Box>
+              {def.type === 'date-range' &&
+                (() => {
+                  const val = activeFilters[def.id] || {}
+                  return (
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 1.5,
+                      }}
+                    >
+                      {/* Preset chips */}
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                        {DATE_RANGE_PRESETS.map(preset => {
+                          const isSelected = val.preset === preset.value
+                          return (
+                            <Chip
+                              key={preset.value}
+                              variant={isSelected ? 'solid' : 'soft'}
+                              color={isSelected ? 'primary' : 'neutral'}
+                              startDecorator={
+                                isSelected ? (
+                                  <Check sx={{ fontSize: 14 }} />
+                                ) : null
+                              }
+                              onClick={() =>
+                                handleDateRangePreset(def.id, preset.value)
+                              }
+                              sx={selectableChipSx}
+                            >
+                              {t(preset.labelKey)}
+                            </Chip>
+                          )
+                        })}
+                      </Box>
 
-                    {/* Custom date inputs */}
-                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                      <Input
-                        type='date'
-                        size='sm'
-                        value={toInputDate(val.from)}
-                        onChange={e => handleDateRangeInput(def.id, 'from', e.target.value)}
-                        slotProps={{ input: { max: toInputDate(val.to) || undefined } }}
-                        sx={{ flex: 1, fontSize: '0.8rem' }}
-                      />
-                      <Typography level='body-xs' sx={{ color: 'text.tertiary', flexShrink: 0 }}>
-                        –
-                      </Typography>
-                      <Input
-                        type='date'
-                        size='sm'
-                        value={toInputDate(val.to)}
-                        onChange={e => handleDateRangeInput(def.id, 'to', e.target.value)}
-                        slotProps={{ input: { min: toInputDate(val.from) || undefined } }}
-                        sx={{ flex: 1, fontSize: '0.8rem' }}
-                      />
+                      {/* Custom date inputs */}
+                      <Box
+                        sx={{ display: 'flex', gap: 1, alignItems: 'center' }}
+                      >
+                        <Input
+                          type='date'
+                          size='sm'
+                          value={toInputDate(val.from)}
+                          onChange={e =>
+                            handleDateRangeInput(def.id, 'from', e.target.value)
+                          }
+                          slotProps={{
+                            input: { max: toInputDate(val.to) || undefined },
+                          }}
+                          sx={{ flex: 1, fontSize: '0.8rem' }}
+                        />
+                        <Typography
+                          level='body-xs'
+                          sx={{ color: 'text.tertiary', flexShrink: 0 }}
+                        >
+                          –
+                        </Typography>
+                        <Input
+                          type='date'
+                          size='sm'
+                          value={toInputDate(val.to)}
+                          onChange={e =>
+                            handleDateRangeInput(def.id, 'to', e.target.value)
+                          }
+                          slotProps={{
+                            input: { min: toInputDate(val.from) || undefined },
+                          }}
+                          sx={{ flex: 1, fontSize: '0.8rem' }}
+                        />
+                      </Box>
                     </Box>
-                  </Box>
-                )
-              })()}
+                  )
+                })()}
             </Box>
           ))}
         </Box>
-      </BottomSheetModal>
+      </AppModal>
     </>
   )
 }

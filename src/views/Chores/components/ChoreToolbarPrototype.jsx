@@ -23,13 +23,13 @@ import {
   Check,
   CheckBox,
   CheckBoxOutlineBlank,
+  DisplaySettings,
   FilterList,
   Save,
   Sort,
   Tune,
   ViewAgenda,
   ViewComfy,
-  ViewModule,
 } from '@mui/icons-material'
 import {
   Badge,
@@ -38,33 +38,37 @@ import {
   ButtonGroup,
   Chip,
   Divider,
+  Dropdown,
   IconButton,
   Input,
   Menu,
+  MenuButton,
   MenuItem,
   Typography,
 } from '@mui/joy'
-import { useEffect, useRef, useState } from 'react'
-import BottomSheetModal from '../../../components/common/BottomSheetModal'
+import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
+import AppModal from '../../../components/common/AppModal'
 import ActiveFilterChips from '../../../components/common/filter/ActiveFilterChips'
-import { Z_INDEX } from '../../../constants/zIndex'
 import KeyboardShortcutHint from '../../../components/common/KeyboardShortcutHint'
 import { FILTER_COLORS } from '../../../utils/Colors'
 import Priorities from '../../../utils/Priorities'
+import ProjectSelector from '../../components/ProjectSelector'
+import CustomFilterChips from './CustomFilterChips'
 import FilterBuilderContent, {
   CHORE_STATUSES,
-  DUE_DATE_OPTIONS,
-  POINTS_OPERATORS,
   conditionsToSelections,
   defaultSelections,
+  DUE_DATE_OPTIONS,
+  POINTS_OPERATORS,
   selectionsToConditions,
 } from './FilterBuilderContent'
 import SearchBar from './SearchBar'
-import ProjectSelector from '../../components/ProjectSelector'
 
 // ─── sub-components for the Display sheet ────────────────────────────────────
 
-const SectionHeader = ({ icon, label, badge }) => (
+const SectionHeader = ({ badge, icon, label }) => (
   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
     {icon && (
       <Box
@@ -94,7 +98,7 @@ const SectionHeader = ({ icon, label, badge }) => (
   </Box>
 )
 
-const OptionChips = ({ options, selected, multi, onToggle }) => (
+const OptionChips = ({ multi, onToggle, options, selected }) => (
   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
     {options.map(opt => {
       const isSelected = multi
@@ -104,13 +108,15 @@ const OptionChips = ({ options, selected, multi, onToggle }) => (
         <Chip
           key={opt.value}
           variant={isSelected ? 'solid' : 'soft'}
-          color={isSelected ? opt.color ?? 'primary' : 'neutral'}
+          color={isSelected ? (opt.color ?? 'primary') : 'neutral'}
           startDecorator={
-            opt.icon != null
-              ? isSelected
-                ? <Check sx={{ fontSize: 14 }} />
-                : opt.icon
-              : undefined
+            opt.icon != null ? (
+              isSelected ? (
+                <Check sx={{ fontSize: 14 }} />
+              ) : (
+                opt.icon
+              )
+            ) : undefined
           }
           onClick={() => onToggle(opt.value)}
           sx={{
@@ -178,57 +184,57 @@ const OptionChips = ({ options, selected, multi, onToggle }) => (
  */
 const ChoreToolbar = ({
   // advanced filter
-  members = [],
-  labels = [],
-  projects = [],
-  tempFilter,
-  tempFilterMeta,
+  activeFilterId,
   applyTempFilter,
   clearTempFilter,
-  saveFilter,
-  updateFilter,
-  onFilterSaved,
-  // result counts
-  resultCount,
-  totalCount,
-  // clear all
-  onClearAllFilters,
-  // project (for Display sheet)
-  selectedProject,
-  onProjectSelect,
-  // assignee (for Display sheet)
-  selectedAssigneeFilter = 'anyone',
-  onAssigneeFilterChange,
-  // saved / custom
-  savedFilters = [],
-  activeFilterId,
-  onSavedFilterClick,
-  onSavedFilterEdit,
-  onSavedFilterDelete,
-  onSavedFilterPin,
-  // grouping
-  selectedGroupBy = 'default',
-  onGroupBySelect,
-  // view + multiselect
-  viewMode = 'default',
-  onToggleViewMode,
   isMultiSelectMode,
-  onToggleMultiSelect,
-  // search
-  searchTerm,
+  labels = [],
+  members = [],
+  onAssigneeFilterChange,
+  onClearAllFilters,
+  onFilterSaved,
+  onGroupBySelect,
+  // result counts
+  onProjectSelect,
+  onSavedFilterClick,
+  // clear all
+  onSavedFilterDelete,
+  // project (for Display sheet)
+  onSavedFilterEdit,
+  onSavedFilterPin,
+  // assignee (for Display sheet)
   onSearchChange,
   onSearchClose,
+  // saved / custom
+  onToggleMultiSelect,
+  onToggleViewMode,
+  projects = [],
+  resultCount,
+  saveFilter,
+  savedFilters = [],
+  // grouping
   searchInputRef,
+  searchTerm,
+  // view + multiselect
+  selectedAssigneeFilter = 'anyone',
+  selectedGroupBy = 'default',
+  selectedProject,
   showKeyboardShortcuts,
+  // search
+  tempFilter,
+  tempFilterMeta,
+  totalCount,
+  updateFilter,
+  viewMode = 'default',
 }) => {
+  const { t } = useTranslation('chores')
   const [filterSheetOpen, setFilterSheetOpen] = useState(false)
   const [displaySheetOpen, setDisplaySheetOpen] = useState(false)
   const [localSelections, setLocalSelections] = useState(defaultSelections())
   const [savingFilter, setSavingFilter] = useState(false)
   const [saveFilterName, setSaveFilterName] = useState('')
-  const [saveMenuAnchorEl, setSaveMenuAnchorEl] = useState(null)
+  const [saveMenuOpen, setSaveMenuOpen] = useState(false)
   const [editingSavedFilter, setEditingSavedFilter] = useState(null)
-  const saveMenuRef = useRef(null)
   const activeConditions = selectionsToConditions(localSelections)
 
   // ── badge counts ─────────────────────────────────────────────────────────────
@@ -246,23 +252,27 @@ const ChoreToolbar = ({
     if (!condition?.type) return 'Filter'
 
     const typeLabels = {
-      assignee: 'Assignee',
-      createdBy: 'Created By',
-      status: 'Status',
-      priority: 'Priority',
-      label: 'Labels',
-      project: 'Project',
-      dueDate: 'Due Date',
-      points: 'Points',
+      assignee: t('filterBuilder.assignee'),
+      createdBy: t('filterBuilder.createdBy'),
+      status: t('filterBuilder.statusHeading'),
+      priority: t('filterBuilder.priority'),
+      label: t('labels.label'),
+      project: t('filterBuilder.project'),
+      dueDate: t('filterBuilder.dueDate'),
+      points: t('filterBuilder.points'),
     }
 
-    const typeLabel = typeLabels[condition.type] || 'Filter'
-    const prefix = condition.operator === 'isNot' ? 'Not ' : ''
+    const typeLabel =
+      typeLabels[condition.type] || t('filterBuilder.filterFallback')
+    const prefix =
+      condition.operator === 'isNot' ? t('filterBuilder.notPrefix') : ''
 
     if (condition.type === 'dueDate') {
-      const dueDateLabel =
-        DUE_DATE_OPTIONS.find(o => o.value === condition.operator)?.label ||
-        'Custom'
+      const dueDateLabel = DUE_DATE_OPTIONS.some(
+        o => o.value === condition.operator,
+      )
+        ? t(`filterBuilder.dueDateOption.${condition.operator}`)
+        : t('filterBuilder.customDueDate')
       return `${typeLabel}: ${dueDateLabel}`
     }
 
@@ -286,7 +296,9 @@ const ChoreToolbar = ({
         return member?.displayName || member?.username || String(value)
       }
       if (condition.type === 'status') {
-        return CHORE_STATUSES.find(s => s.value === value)?.label || String(value)
+        return CHORE_STATUSES.some(s => s.value === value)
+          ? t(`filterBuilder.status.${value}`)
+          : String(value)
       }
       if (condition.type === 'priority') {
         return Priorities.find(p => p.value === value)?.name || String(value)
@@ -312,27 +324,6 @@ const ChoreToolbar = ({
     return `${prefix}${typeLabel} (${rawValues.length})`
   }
 
-  const clearConditionAtIndex = index => {
-    const nextConditions = (tempFilter?.conditions || []).filter(
-      (_condition, conditionIndex) => conditionIndex !== index,
-    )
-
-    if (nextConditions.length === 0) {
-      setLocalSelections(defaultSelections())
-      clearTempFilter?.()
-      return
-    }
-
-    const nextFilter = {
-      ...tempFilter,
-      operator: tempFilter?.operator || 'AND',
-      conditions: nextConditions,
-    }
-
-    setLocalSelections(conditionsToSelections(nextConditions))
-    applyTempFilter?.(nextFilter)
-  }
-
   const activeSavedFilter = savedFilterActive
     ? savedFilters.find(f => f.id === activeFilterId)
     : null
@@ -341,17 +332,61 @@ const ChoreToolbar = ({
     ? activeSavedFilter?.conditions || []
     : tempFilter?.conditions || []
 
+  const savedFilterEditMeta = activeSavedFilter
+    ? {
+        name: activeSavedFilter.name,
+        description: activeSavedFilter.description,
+        sourceFilterId: activeSavedFilter.id,
+        sourceFilterName: activeSavedFilter.name,
+        sourceFilterDescription: activeSavedFilter.description,
+        sourceFilterColor: activeSavedFilter.color,
+        isEditingSavedFilter: true,
+      }
+    : null
+
+  const clearConditionAtIndex = index => {
+    const nextConditions = activeChipConditions.filter(
+      (_condition, conditionIndex) => conditionIndex !== index,
+    )
+
+    if (nextConditions.length === 0) {
+      setLocalSelections(defaultSelections())
+      clearTempFilter?.()
+      // A saved filter still owns the view until it's toggled back off.
+      if (savedFilterActive) onSavedFilterClick?.(activeFilterId)
+      return
+    }
+
+    setLocalSelections(conditionsToSelections(nextConditions))
+
+    // Dropping a condition from a saved filter detaches it into a temp filter
+    // that remembers its source, rather than editing the saved filter itself.
+    if (savedFilterActive) {
+      applyTempFilter?.(
+        {
+          conditions: nextConditions,
+          operator: activeSavedFilter?.operator || 'AND',
+        },
+        savedFilterEditMeta,
+      )
+      return
+    }
+
+    applyTempFilter?.(
+      {
+        ...tempFilter,
+        operator: tempFilter?.operator || 'AND',
+        conditions: nextConditions,
+      },
+      tempFilterMeta,
+    )
+  }
+
   activeChipConditions.forEach((condition, index) => {
     inlineChips.push({
       key: `${savedFilterActive ? '__saved' : '__temp'}_${index}`,
       label: getConditionChipLabel(condition),
-      onClear: () => {
-        if (savedFilterActive) {
-          onSavedFilterClick?.(activeFilterId)
-          return
-        }
-        clearConditionAtIndex(index)
-      },
+      onClear: () => clearConditionAtIndex(index),
     })
   })
 
@@ -362,8 +397,7 @@ const ChoreToolbar = ({
       setLocalSelections(conditionsToSelections(tempFilter.conditions))
       if (tempFilterMeta?.sourceFilterId) {
         const sourceFilter =
-          savedFilters.find(f => f.id === tempFilterMeta.sourceFilterId) ||
-          null
+          savedFilters.find(f => f.id === tempFilterMeta.sourceFilterId) || null
         setEditingSavedFilter(
           sourceFilter ||
             (tempFilterMeta.sourceFilterId
@@ -392,13 +426,13 @@ const ChoreToolbar = ({
     }
     setSavingFilter(false)
     setSaveFilterName('')
-    setSaveMenuAnchorEl(null)
+    setSaveMenuOpen(false)
     setFilterSheetOpen(true)
   }
 
   useEffect(() => {
     if (!filterSheetOpen || savingFilter || activeConditions.length === 0) {
-      setSaveMenuAnchorEl(null)
+      setSaveMenuOpen(false)
     }
   }, [filterSheetOpen, savingFilter, activeConditions.length])
 
@@ -443,7 +477,13 @@ const ChoreToolbar = ({
       FILTER_COLORS.find(c => !usedColors.includes(c.value))?.value ??
       FILTER_COLORS[0].value
 
-    saveFilter?.({ name, description: '', color, conditions, operator: 'AND' })?.then?.(() => {
+    saveFilter?.({
+      name,
+      description: '',
+      color,
+      conditions,
+      operator: 'AND',
+    })?.then?.(() => {
       applyTempFilter?.({ conditions, operator: 'AND' }, { name })
       onFilterSaved?.(name)
     })
@@ -459,54 +499,56 @@ const ChoreToolbar = ({
     const conditions = selectionsToConditions(localSelections)
     if (conditions.length === 0) return
 
-    updateFilter(
-      editingSavedFilter.id,
-      {
-        name: editingSavedFilter.name,
-        description: editingSavedFilter.description || '',
-        color: editingSavedFilter.color,
-        conditions,
-        operator: 'AND',
-      },
-    )?.then?.(() => {
+    updateFilter(editingSavedFilter.id, {
+      name: editingSavedFilter.name,
+      description: editingSavedFilter.description || '',
+      color: editingSavedFilter.color,
+      conditions,
+      operator: 'AND',
+    })?.then?.(() => {
       clearTempFilter?.()
       onSavedFilterClick?.(editingSavedFilter.id)
       onFilterSaved?.(editingSavedFilter.name)
     })
 
-    setSaveMenuAnchorEl(null)
+    setSaveMenuOpen(false)
     setFilterSheetOpen(false)
   }
 
   // ── display sheet helpers ────────────────────────────────────────────────────
 
   const filterActive = activeFilterId != null || tempConditionCount > 0
-  const projectActive = selectedProject && selectedProject.id !== 'default' ? 1 : 0
-  const assigneeActive = selectedAssigneeFilter !== 'anyone' ? 1 : 0
-  const displayActive =
-    selectedGroupBy !== 'default' ||
-    viewMode !== 'default' ||
-    projectActive > 0 ||
-    assigneeActive > 0
 
   const groupByOptions = [
-    { value: 'default', label: 'Smart' },
-    { value: 'due_date', label: 'Due Date' },
-    { value: 'priority', label: 'Priority' },
-    { value: 'labels', label: 'Labels' },
+    { value: 'default', label: t('sort.smart') },
+    { value: 'due_date', label: t('dueDate') },
+    { value: 'priority', label: t('priority') },
+    { value: 'labels', label: t('labels.label') },
   ]
 
   const assigneeOptions = [
-    { value: 'anyone', label: 'Everyone' },
-    { value: 'assigned_to_me', label: 'Mine' },
-    { value: 'available_for_me', label: 'Available to me' },
-    { value: 'assigned_to_others', label: 'Others' },
+    { value: 'anyone', label: t('toolbar.everyone') },
+    { value: 'assigned_to_me', label: t('toolbar.mine') },
+    { value: 'available_for_me', label: t('toolbar.availableToMe') },
+    { value: 'assigned_to_others', label: t('toolbar.others') },
   ]
 
   const viewOptions = [
-    { value: 'default', label: 'Cards', icon: <ViewAgenda sx={{ fontSize: 16 }} /> },
-    { value: 'compact', label: 'Compact', icon: <ViewComfy sx={{ fontSize: 16 }} /> },
-    { value: 'calendar', label: 'Calendar', icon: <CalendarMonth sx={{ fontSize: 16 }} /> },
+    {
+      value: 'default',
+      label: t('toolbar.cards'),
+      icon: <ViewAgenda sx={{ fontSize: 16 }} />,
+    },
+    {
+      value: 'compact',
+      label: t('toolbar.compact'),
+      icon: <ViewComfy sx={{ fontSize: 16 }} />,
+    },
+    {
+      value: 'calendar',
+      label: t('toolbar.calendar'),
+      icon: <CalendarMonth sx={{ fontSize: 16 }} />,
+    },
   ]
 
   return (
@@ -542,37 +584,36 @@ const ChoreToolbar = ({
             size='sm'
             sx={{ height: 32, width: 32, borderRadius: '50%' }}
             onClick={openFilterSheet}
-            title='Filters'
+            aria-label={t('toolbar.filters')}
+            title={t('toolbar.filters')}
           >
             <FilterList />
           </IconButton>
         </Badge>
 
         {/* Project selector */}
-        {!filterActive && projects.filter(p => p.id !== 'default').length > 0 && (
-          <ProjectSelector
-            selectedProject={selectedProject?.name || 'Default Project'}
-            onProjectSelect={onProjectSelect}
-            showKeyboardShortcuts={showKeyboardShortcuts}
-          />
-        )}
+        {!filterActive &&
+          projects.filter(p => p.id !== 'default').length > 0 && (
+            <ProjectSelector
+              selectedProject={selectedProject?.name || 'Default Project'}
+              onProjectSelect={onProjectSelect}
+              showKeyboardShortcuts={showKeyboardShortcuts}
+            />
+          )}
 
-        {/* Display button — View + Group combined */}
+        {/* Display button — View + Group combined.
+            Icon stays fixed: mirroring viewMode made this read as a toggle
+            showing the current view rather than a button that opens a sheet. */}
         <IconButton
-          variant={displayActive ? 'solid' : 'outlined'}
-          color={displayActive ? 'primary' : 'neutral'}
+          variant='outlined'
+          color='neutral'
           size='sm'
           sx={{ height: 32, width: 32, borderRadius: '50%' }}
           onClick={() => setDisplaySheetOpen(true)}
-          title='View & Group'
+          aria-label={t('toolbar.displayOptions')}
+          title={t('toolbar.display')}
         >
-          {viewMode === 'calendar' ? (
-            <CalendarMonth />
-          ) : viewMode === 'compact' ? (
-            <ViewModule />
-          ) : (
-            <ViewAgenda />
-          )}
+          <DisplaySettings />
         </IconButton>
 
         {/* Multiselect */}
@@ -583,6 +624,9 @@ const ChoreToolbar = ({
             size='sm'
             sx={{ height: 32, width: 32, borderRadius: '50%' }}
             onClick={onToggleMultiSelect}
+            aria-label={
+              isMultiSelectMode ? 'Exit multi-select' : 'Enter multi-select'
+            }
             title={
               isMultiSelectMode
                 ? 'Exit multi-select (Ctrl+S)'
@@ -599,11 +643,29 @@ const ChoreToolbar = ({
         </Box>
       </Box>
 
-      {/* ── Row 2: active filter chips ──────────────────────────────────────── */}
-      {hasAnyActive && (
+      {/* ── Row 2: pinned filters quick access ──────────────────────────────── */}
+      {/* Stays visible even while a saved filter is active (it self-highlights)
+          so switching between pinned filters never requires clearing first.
+          Only steps aside for an ad-hoc/temp condition set, which has no
+          matching pinned identity to show. */}
+      {tempConditionCount === 0 && (
+        <CustomFilterChips
+          filters={savedFilters}
+          activeFilterId={activeFilterId}
+          onFilterClick={onSavedFilterClick}
+          onFilterDelete={onSavedFilterDelete}
+          onFilterPin={onSavedFilterPin}
+          onFilterEdit={onSavedFilterEdit}
+        />
+      )}
+
+      {/* ── Row 3: active (temp/ad-hoc) filter chips ──────────────────────────── */}
+      {tempConditionCount > 0 && (
         <ActiveFilterChips
           chips={inlineChips}
           onOpen={openFilterSheet}
+          showAddChip
+          onAdd={openFilterSheet}
           onClearAll={() => {
             setLocalSelections(defaultSelections())
             onClearAllFilters?.()
@@ -618,10 +680,11 @@ const ChoreToolbar = ({
       )}
 
       {/* ── Unified Filter bottom sheet ─────────────────────────────────────── */}
-      <BottomSheetModal
+      <AppModal
         open={filterSheetOpen}
+        isMobile
         onClose={() => {
-          setSaveMenuAnchorEl(null)
+          setSaveMenuOpen(false)
           setFilterSheetOpen(false)
         }}
         maxHeight='92vh'
@@ -639,11 +702,16 @@ const ChoreToolbar = ({
         footer={
           savingFilter ? (
             <Box
-              sx={{ display: 'flex', gap: 1, width: '100%', alignItems: 'center' }}
+              sx={{
+                display: 'flex',
+                gap: 1,
+                width: '100%',
+                alignItems: 'center',
+              }}
             >
               <Input
                 size='sm'
-                placeholder='Filter name…'
+                placeholder={t('toolbar.filterNamePlaceholder')}
                 value={saveFilterName}
                 onChange={e => setSaveFilterName(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleSaveFilter()}
@@ -655,7 +723,7 @@ const ChoreToolbar = ({
                 onClick={handleSaveFilter}
                 disabled={!saveFilterName.trim()}
               >
-                Save
+                {t('common:save')}
               </Button>
               <Button
                 size='sm'
@@ -663,7 +731,7 @@ const ChoreToolbar = ({
                 color='neutral'
                 onClick={() => setSavingFilter(false)}
               >
-                Cancel
+                {t('choreView.cancel')}
               </Button>
             </Box>
           ) : (
@@ -682,53 +750,48 @@ const ChoreToolbar = ({
                 disabled={!hasAnyActive && activeConditions.length === 0}
                 onClick={() => {
                   setLocalSelections(defaultSelections())
-                  setSaveMenuAnchorEl(null)
+                  setSaveMenuOpen(false)
                   onClearAllFilters?.()
                   setFilterSheetOpen(false)
                 }}
               >
-                Clear all
+                {t('toolbar.clearAll')}
               </Button>
 
               {activeConditions.length > 0 ? (
-                <>
+                <Dropdown
+                  open={saveMenuOpen}
+                  onOpenChange={(_event, isOpen) => setSaveMenuOpen(isOpen)}
+                >
                   <ButtonGroup variant='solid' color='primary'>
                     <Button
                       onClick={() => {
-                        setSaveMenuAnchorEl(null)
+                        setSaveMenuOpen(false)
                         setFilterSheetOpen(false)
                       }}
                       sx={{ minWidth: 140 }}
                     >
-                      {resultCount != null
-                        ? `Show ${resultCount}`
-                        : 'Done'}
+                      {resultCount != null ? `Show ${resultCount}` : 'Done'}
                     </Button>
-                    <IconButton
-                      ref={saveMenuRef}
-                      onClick={e => setSaveMenuAnchorEl(e.currentTarget)}
+                    <MenuButton
+                      slots={{ root: IconButton }}
+                      aria-label='More save options'
                     >
                       <ArrowDropDown />
-                    </IconButton>
+                    </MenuButton>
                   </ButtonGroup>
 
-                  <Menu
-                    anchorEl={saveMenuAnchorEl}
-                    open={Boolean(saveMenuAnchorEl)}
-                    onClose={() => setSaveMenuAnchorEl(null)}
-                    placement='top-end'
-                    sx={{ zIndex: Z_INDEX.MODAL_CONTENT + 10 }}
-                  >
+                  <Menu placement='top-end'>
                     <MenuItem
                       onClick={handleUpdateFilter}
                       disabled={!editingSavedFilter}
                     >
                       <Save sx={{ fontSize: 16, mr: 1 }} />
-                      Save Filter
+                      {t('toolbar.saveFilter')}
                     </MenuItem>
                     <MenuItem
                       onClick={() => {
-                        setSaveMenuAnchorEl(null)
+                        setSaveMenuOpen(false)
                         setSaveFilterName(
                           editingSavedFilter
                             ? `${editingSavedFilter.name} Copy`
@@ -738,21 +801,21 @@ const ChoreToolbar = ({
                       }}
                     >
                       <Save sx={{ fontSize: 16, mr: 1 }} />
-                      Save as New Filter
+                      {t('toolbar.saveAsNew')}
                     </MenuItem>
                   </Menu>
-                </>
+                </Dropdown>
               ) : (
                 <Button
                   variant='solid'
                   color='primary'
                   onClick={() => {
-                    setSaveMenuAnchorEl(null)
+                    setSaveMenuOpen(false)
                     setFilterSheetOpen(false)
                   }}
                   sx={{ minWidth: 140 }}
                 >
-                  Done
+                  {t('activity.status.done')}
                 </Button>
               )}
             </Box>
@@ -815,27 +878,31 @@ const ChoreToolbar = ({
             </>
           )}
         </Box>
-      </BottomSheetModal>
+      </AppModal>
 
       {/* ── Display bottom sheet (View + Group + Assignee + Project) ──────────── */}
-      <BottomSheetModal
+      <AppModal
         open={displaySheetOpen}
+        isMobile
         onClose={() => setDisplaySheetOpen(false)}
         title={
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <ViewAgenda sx={{ fontSize: 20 }} />
+            <DisplaySettings sx={{ fontSize: 20 }} />
             Display
           </Box>
         }
         footer={
-          <Button onClick={() => setDisplaySheetOpen(false)} sx={{ minWidth: 140 }}>
-            Done
+          <Button
+            onClick={() => setDisplaySheetOpen(false)}
+            sx={{ minWidth: 140 }}
+          >
+            {t('activity.status.done')}
           </Button>
         }
       >
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
           {/* View section */}
-          <SectionHeader label='View' />
+          <SectionHeader label={t('actionMenu.view')} />
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
             {viewOptions.map(opt => (
               <Chip
@@ -843,9 +910,11 @@ const ChoreToolbar = ({
                 variant={viewMode === opt.value ? 'solid' : 'soft'}
                 color={viewMode === opt.value ? 'primary' : 'neutral'}
                 startDecorator={
-                  viewMode === opt.value
-                    ? <Check sx={{ fontSize: 14 }} />
-                    : opt.icon
+                  viewMode === opt.value ? (
+                    <Check sx={{ fontSize: 14 }} />
+                  ) : (
+                    opt.icon
+                  )
                 }
                 onClick={() => onToggleViewMode?.(opt.value)}
                 sx={{
@@ -866,7 +935,7 @@ const ChoreToolbar = ({
           {/* Group by section */}
           <SectionHeader
             icon={<Sort />}
-            label='Group by'
+            label={t('toolbar.groupBy')}
             badge={
               selectedGroupBy !== 'default'
                 ? groupByOptions.find(o => o.value === selectedGroupBy)?.label
@@ -897,10 +966,11 @@ const ChoreToolbar = ({
           <Divider sx={{ my: 2.5 }} />
           <SectionHeader
             icon={<FilterList />}
-            label='Show tasks for'
+            label={t('toolbar.showTasksFor')}
             badge={
               selectedAssigneeFilter !== 'anyone'
-                ? assigneeOptions.find(o => o.value === selectedAssigneeFilter)?.label
+                ? assigneeOptions.find(o => o.value === selectedAssigneeFilter)
+                    ?.label
                 : null
             }
           />
@@ -910,9 +980,8 @@ const ChoreToolbar = ({
             multi={false}
             onToggle={v => onAssigneeFilterChange?.(v)}
           />
-
         </Box>
-      </BottomSheetModal>
+      </AppModal>
     </>
   )
 }

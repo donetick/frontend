@@ -1,18 +1,22 @@
+import '@meauxt/react-swipeable-list/dist/styles.css'
+
 import {
-  Type as ListType,
   SwipeableList,
   SwipeableListItem,
   SwipeAction,
   TrailingActions,
+  Type as ListType,
 } from '@meauxt/react-swipeable-list'
-import '@meauxt/react-swipeable-list/dist/styles.css'
 import {
   Add,
+  Close,
   Delete,
   Edit,
   Flip,
   MoreVert,
   PlusOne,
+  Search,
+  SearchOff,
   ToggleOff,
   ToggleOn,
   Widgets,
@@ -23,11 +27,18 @@ import {
   Chip,
   Container,
   IconButton,
+  Input,
   Stack,
   Typography,
 } from '@mui/joy'
-import { useEffect, useState } from 'react'
+import Fuse from 'fuse.js'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+
+import { track } from '../../analytics'
+import EmptyState from '../../components/common/EmptyState'
+import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
 import { useNotification } from '../../service/NotificationProvider'
 import {
   CreateThing,
@@ -41,7 +52,8 @@ import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import CreateThingModal from '../Modals/Inputs/CreateThingModal'
 import EditThingStateModal from '../Modals/Inputs/EditThingState'
 
-const ThingCardContent = ({ thing, onCardClick, onToggleActions }) => {
+const ThingCardContent = ({ onCardClick, onToggleActions, thing }) => {
+  const { t } = useTranslation('things')
   const getThingIcon = type => {
     if (type === 'text') {
       return <Flip />
@@ -180,7 +192,7 @@ const ThingCardContent = ({ thing, onCardClick, onToggleActions }) => {
               px: 0.75,
             }}
           >
-            {thing?.type}
+            {t(`types.${thing?.type}`, thing?.type)}
           </Chip>
         </Box>
       </Box>
@@ -204,6 +216,7 @@ const ThingCardContent = ({ thing, onCardClick, onToggleActions }) => {
 }
 
 const ThingsView = () => {
+  const { t } = useTranslation('things')
   const navigate = useNavigate()
   const [things, setThings] = useState([])
   const [isShowCreateThingModal, setIsShowCreateThingModal] = useState(false)
@@ -211,7 +224,77 @@ const ThingsView = () => {
   const [createModalThing, setCreateModalThing] = useState(null)
   const [confirmModelConfig, setConfirmModelConfig] = useState({})
   const [showMoreInfoId, setShowMoreInfoId] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [sortBy, setSortBy] = useState(
+    () => localStorage.getItem('thingsSortBy') || 'name',
+  )
+  const [sortDirection, setSortDirection] = useState(
+    () => localStorage.getItem('thingsSortDirection') || 'asc',
+  )
+  const [typeFilter, setTypeFilter] = useState('all')
+  const searchInputRef = useRef(null)
   const { showError, showNotification } = useNotification()
+
+  useEffect(() => {
+    localStorage.setItem('thingsSortBy', sortBy)
+    localStorage.setItem('thingsSortDirection', sortDirection)
+  }, [sortBy, sortDirection])
+
+  const visibleThings = useMemo(
+    () =>
+      typeFilter === 'all'
+        ? things
+        : things.filter(thing => thing?.type === typeFilter),
+    [things, typeFilter],
+  )
+
+  const fuse = useMemo(
+    () =>
+      new Fuse(visibleThings, {
+        keys: ['name', 'state'],
+        includeScore: true,
+        isCaseSensitive: false,
+        findAllMatches: true,
+      }),
+    [visibleThings],
+  )
+
+  const filteredThings = useMemo(() => {
+    const matched = searchTerm
+      ? fuse.search(searchTerm).map(result => result.item)
+      : visibleThings
+
+    const direction = sortDirection === 'desc' ? -1 : 1
+    return [...matched].sort((a, b) => {
+      switch (sortBy) {
+        case 'type':
+          return direction * (a.type || '').localeCompare(b.type || '')
+        case 'state':
+          return (
+            direction *
+            String(a.state ?? '').localeCompare(String(b.state ?? ''))
+          )
+        case 'updated': {
+          const aDate = new Date(a.updatedAt || a.updated_at || 0).getTime()
+          const bDate = new Date(b.updatedAt || b.updated_at || 0).getTime()
+          return direction * (aDate - bDate)
+        }
+        case 'name':
+        default:
+          return direction * (a.name || '').localeCompare(b.name || '')
+      }
+    })
+  }, [fuse, searchTerm, visibleThings, sortBy, sortDirection])
+
+  const handleSearchChange = e => {
+    setSearchTerm(e.target.value)
+    setShowMoreInfoId(null)
+  }
+
+  const handleSearchClose = () => {
+    setSearchTerm('')
+    searchInputRef.current?.blur()
+  }
 
   useEffect(() => {
     // fetch things
@@ -241,24 +324,25 @@ const ThingsView = () => {
             const currentThings = [...things]
             currentThings.push(data.res)
             setThings(currentThings)
+            track('thing_created', {})
           }
           showNotification({
             type: 'success',
-            title: 'Saved',
-            message: 'Thing saved successfully',
+            title: t('notify.savedTitle'),
+            message: t('notify.savedMessage'),
           })
         })
       })
       .catch(error => {
         if (error?.queued) {
           showError({
-            title: 'Unable to save thing',
-            message: 'You are offline and the request has been queued',
+            title: t('notify.saveFailTitle'),
+            message: t('notify.queuedMessage'),
           })
         } else {
           showError({
-            title: 'Unable to save thing',
-            message: 'An error occurred while saving the thing',
+            title: t('notify.saveFailTitle'),
+            message: t('notify.saveFailMessage'),
           })
         }
       })
@@ -270,10 +354,10 @@ const ThingsView = () => {
   const handleDeleteClick = thing => {
     setConfirmModelConfig({
       isOpen: true,
-      title: 'Delete Things',
-      confirmText: 'Delete',
-      cancelText: 'Cancel',
-      message: 'Are you sure you want to delete this Thing?',
+      title: t('notify.deleteTitle'),
+      confirmText: t('common:delete'),
+      cancelText: t('common:cancel'),
+      message: t('notify.deleteMessage'),
       onClose: isConfirmed => {
         if (isConfirmed === true) {
           DeleteThing(thing.id)
@@ -287,8 +371,8 @@ const ThingsView = () => {
                 setThings(currentThings)
               } else if (response.status === 405) {
                 showError({
-                  title: 'Unable to Delete Thing',
-                  message: 'Unable to delete thing with associated tasks',
+                  title: t('notify.deleteBlockedTitle'),
+                  message: t('notify.deleteBlockedMessage'),
                 })
               }
               // if method not allwo show snackbar:
@@ -296,13 +380,13 @@ const ThingsView = () => {
             .catch(error => {
               if (error?.queued) {
                 showError({
-                  title: 'Unable to delete thing',
-                  message: 'You are offline and the request has been queued',
+                  title: t('notify.deleteFailTitle'),
+                  message: t('notify.queuedMessage'),
                 })
               } else {
                 showError({
-                  title: 'Unable to delete thing',
-                  message: 'An error occurred while deleting the thing',
+                  title: t('notify.deleteFailTitle'),
+                  message: t('notify.deleteFailMessage'),
                 })
               }
             })
@@ -335,21 +419,21 @@ const ThingsView = () => {
           setThings(currentThings)
           showNotification({
             type: 'success',
-            title: 'Updated',
-            message: 'Thing state updated successfully',
+            title: t('notify.updatedTitle'),
+            message: t('notify.updatedMessage'),
           })
         })
       })
       .catch(error => {
         if (error?.queued) {
           showError({
-            title: 'Unable to update thing state',
-            message: 'You are offline and the request has been queued',
+            title: t('notify.updateFailTitle'),
+            message: t('notify.queuedMessage'),
           })
         } else {
           showError({
-            title: 'Unable to update thing state',
-            message: 'An error occurred while updating the thing state',
+            title: t('notify.updateFailTitle'),
+            message: t('notify.updateFailMessage'),
           })
         }
       })
@@ -367,15 +451,15 @@ const ThingsView = () => {
           setThings(currentThings)
           showNotification({
             type: 'success',
-            title: 'Updated',
-            message: 'Thing state updated successfully',
+            title: t('notify.updatedTitle'),
+            message: t('notify.updatedMessage'),
           })
         })
       })
       .catch(error => {
         showError({
-          title: 'Unable to update thing state',
-          message: 'An error occurred while updating the thing state',
+          title: t('notify.updateFailTitle'),
+          message: t('notify.updateFailMessage'),
         })
       })
   }
@@ -389,44 +473,117 @@ const ThingsView = () => {
             level='h3'
             sx={{ fontWeight: 'lg', color: 'text.primary' }}
           >
-            Things
+            {t('view.title')}
           </Typography>
           <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            Things are custom fields that can be attached to tasks to capture
-            additional information. They can be of type text, number, or
-            boolean. You can associate things with tasks and have the task due
-            once condition is met
+            {t('view.description')}
           </Typography>
         </Stack>
       </Box>
+      {things.length > 0 && (
+        <Box
+          sx={{ px: 2, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}
+        >
+          <Input
+            slotProps={{ input: { ref: searchInputRef } }}
+            placeholder={t('view.searchPlaceholder')}
+            value={searchTerm}
+            fullWidth
+            sx={{
+              borderRadius: 24,
+              height: 24,
+              borderColor: 'text.disabled',
+              padding: 1,
+            }}
+            onChange={handleSearchChange}
+            startDecorator={<Search />}
+            endDecorator={
+              searchTerm && (
+                <IconButton
+                  variant='plain'
+                  size='sm'
+                  onClick={handleSearchClose}
+                  sx={{ borderRadius: '50%' }}
+                >
+                  <Close />
+                </IconButton>
+              )
+            }
+          />
+          <SortAndFilterMenu
+            sortOptions={[
+              { name: t('view.sortName'), value: 'name' },
+              { name: t('view.sortType'), value: 'type' },
+              { name: t('view.sortState'), value: 'state' },
+              { name: t('view.sortUpdated'), value: 'updated' },
+            ]}
+            selectedSort={sortBy}
+            onSortChange={setSortBy}
+            sortDirection={sortDirection}
+            onSortDirectionChange={setSortDirection}
+            filterTitle={t('view.filterTitle')}
+            filterOptions={[
+              { name: t('view.filterAll'), value: 'all' },
+              { name: t('types.text'), value: 'text' },
+              { name: t('types.number'), value: 'number' },
+              { name: t('types.boolean'), value: 'boolean' },
+            ]}
+            selectedFilter={typeFilter}
+            onFilterChange={value => {
+              setTypeFilter(value)
+              setShowMoreInfoId(null)
+            }}
+            isActive={
+              typeFilter !== 'all' ||
+              sortBy !== 'name' ||
+              sortDirection !== 'asc'
+            }
+          />
+        </Box>
+      )}
       <Box
         sx={{
           overflow: 'hidden',
         }}
       >
         {things.length === 0 && (
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              flexDirection: 'column',
-              height: '50vh',
+          <EmptyState
+            fullHeight
+            icon={<Widgets />}
+            title={t('view.emptyTitle')}
+            description={t('view.emptyDescription')}
+            primaryAction={{
+              label: t('view.emptyAction'),
+              startDecorator: <Add />,
+              onClick: () => {
+                setCreateModalThing(null)
+                setIsShowCreateThingModal(true)
+              },
             }}
-          >
-            <Widgets
-              sx={{
-                fontSize: '4rem',
-                mb: 1,
-              }}
-            />
-            <Typography level='title-md' gutterBottom>
-              No things has been created/found
-            </Typography>
-          </Box>
+          />
+        )}
+        {things.length > 0 && filteredThings.length === 0 && (
+          <EmptyState
+            variant='no-results'
+            fullHeight
+            icon={<SearchOff />}
+            title={t('view.noResultsTitle')}
+            description={
+              searchTerm
+                ? t('view.noResultsSearch', { term: searchTerm })
+                : t('view.noResultsFilter')
+            }
+            primaryAction={{
+              label: searchTerm ? t('view.clearSearch') : t('view.showAll'),
+              onClick: () => {
+                handleSearchClose()
+                setTypeFilter('all')
+              },
+            }}
+          />
         )}
         <SwipeableList type={ListType.IOS} fullSwipe={false}>
-          {things.map(thing => (
+          {filteredThings.map(thing => (
             <SwipeableListItem
               onClick={() => navigate(`/things/${thing?.id}`)}
               key={thing.id}
@@ -471,7 +628,9 @@ const ThingsView = () => {
                           <ToggleOff sx={{ fontSize: 20 }} />
                         )}
                         <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                          {thing?.type === 'text' ? 'Edit' : 'Toggle'}
+                          {thing?.type === 'text'
+                            ? t('common:edit')
+                            : t('view.toggle')}
                         </Typography>
                       </Box>
                     </SwipeAction>
@@ -490,7 +649,7 @@ const ThingsView = () => {
                       >
                         <Edit sx={{ fontSize: 20 }} />
                         <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                          Edit
+                          {t('common:edit')}
                         </Typography>
                       </Box>
                     </SwipeAction>
@@ -509,7 +668,7 @@ const ThingsView = () => {
                       >
                         <Delete sx={{ fontSize: 20 }} />
                         <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                          Delete
+                          {t('common:delete')}
                         </Typography>
                       </Box>
                     </SwipeAction>

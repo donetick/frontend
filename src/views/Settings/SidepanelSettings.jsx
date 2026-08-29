@@ -26,6 +26,8 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import {
   DEFAULT_SIDEPANEL_CONFIG,
   getSidepanelConfig,
@@ -34,7 +36,14 @@ import {
 import SettingsLayout from './SettingsLayout'
 
 const SidepanelSettings = () => {
+  const { t } = useTranslation('settings')
   const [config, setConfig] = useState(getSidepanelConfig())
+
+  // Card names/descriptions live in the config so they can be persisted, but the
+  // stored copy is English. Prefer the translated string and fall back to it.
+  const cardName = item => t(`sidepanel.cards.${item.id}.name`, item.name)
+  const cardDescription = item =>
+    t(`sidepanel.cards.${item.id}.description`, item.description)
 
   const getIcon = iconName => {
     switch (iconName) {
@@ -93,15 +102,14 @@ const SidepanelSettings = () => {
   }
 
   return (
-    <SettingsLayout title='Sidepanel Customization'>
+    <SettingsLayout title={t('sidepanel.title')}>
       <div className='grid gap-4'>
         <Box>
           <Typography level='h4' sx={{ mb: 2 }}>
-            Sidepanel Settings
+            {t('sidepanel.heading')}
           </Typography>
           <Typography level='body-md' sx={{ mb: 3 }}>
-            Customize which cards appear in the sidepanel and their order. Drag
-            and drop to reorder, or toggle visibility for each card.
+            {t('sidepanel.description')}
           </Typography>
 
           <DragDropContext onDragEnd={handleDragEnd}>
@@ -176,7 +184,7 @@ const SidepanelSettings = () => {
                                   level='title-sm'
                                   sx={{ fontWeight: 600 }}
                                 >
-                                  {item.name}
+                                  {cardName(item)}
                                 </Typography>
                                 <Typography
                                   level='body-xs'
@@ -184,7 +192,7 @@ const SidepanelSettings = () => {
                                     color: 'var(--joy-palette-text-tertiary)',
                                   }}
                                 >
-                                  - {item.description}
+                                  - {cardDescription(item)}
                                 </Typography>
                               </Box>
                             </ListItemContent>
@@ -226,10 +234,10 @@ const SidepanelSettings = () => {
               onClick={resetToDefaults}
               size='sm'
             >
-              Reset to Defaults
+              {t('sidepanel.resetToDefaults')}
             </Button>
             <FormHelperText sx={{ mt: 1 }}>
-              This will restore all cards to their default visibility and order.
+              {t('sidepanel.resetHelper')}
             </FormHelperText>
           </Box>
         </Box>

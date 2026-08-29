@@ -57,6 +57,34 @@
   color: var(--highlight-label-color);
 }
 
+/* Played once when a token is first detected: the dashed underline fades in
+   while a soft tint of the token's own color flashes and clears. Keyframe
+   values override the span's inline text-decoration while running. */
+@keyframes smart-highlight-in {
+  from {
+    text-decoration-color: transparent;
+    background-color: color-mix(in srgb, currentColor 22%, transparent);
+  }
+  60% {
+    background-color: color-mix(in srgb, currentColor 12%, transparent);
+  }
+  to {
+    text-decoration-color: currentColor;
+    background-color: transparent;
+  }
+}
+
+.highlight-appear {
+  border-radius: 4px;
+  animation: smart-highlight-in 450ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .highlight-appear {
+    animation: none;
+  }
+}
+
 .task-input {
   position: relative;
   width: 100%;
@@ -65,11 +93,14 @@
   border: none;
   background-color: var(--joy-palette-neutral-softBg, #f0f4f8);
   overflow: auto;
-  transition: box-shadow 0.15s ease, background-color 0.15s ease;
+  transition:
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
 }
 
 .task-input:focus-within {
-  box-shadow: 0 0 0 2px var(--joy-palette-primary-outlinedBorder, rgba(11, 107, 203, 0.15));
+  box-shadow: 0 0 0 2px
+    var(--joy-palette-primary-outlinedBorder, rgba(11, 107, 203, 0.15));
 }
 
 .task-input:hover:not(:focus-within) {

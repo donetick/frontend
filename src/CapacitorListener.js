@@ -6,7 +6,11 @@ import { LocalNotifications } from '@capacitor/local-notifications'
 import { Preferences } from '@capacitor/preferences'
 import { PushNotifications } from '@capacitor/push-notifications'
 import { focusManager } from '@tanstack/react-query'
+
 import { RegisterDeviceToken } from './utils/Fetcher'
+import { beginOAuthExchange } from './utils/OAuthExchangeState'
+import { hasSeenOnboarding } from './utils/Onboarding'
+import { setPendingInvite } from './utils/PendingInvite'
 
 // React Router navigate(), injected by <App /> once the router is mounted.
 // Using client-side navigation (instead of window.location.href) avoids a full
@@ -62,10 +66,41 @@ const handleNFCChoreDeepLink = (url, isColdStart) => {
 
 const handleUrlOpen = (url, isColdStart = false) => {
   console.log('[NFC] handleUrlOpen:', url)
-  if (url.startsWith('donetick://chores/add')) {
-    // Widget "+" button: land on the chore list with the quick-add modal open
-    // (MyChores watches for the add_task param and consumes it).
-    routerNavigate('/chores?add_task=1')
+  let parsedUrl
+  try {
+    parsedUrl = new URL(url)
+  } catch {
+    return
+  }
+
+  const isCircleInvite =
+    (parsedUrl.protocol === 'donetick:' &&
+      parsedUrl.host === 'circle' &&
+      parsedUrl.pathname === '/join') ||
+    (parsedUrl.protocol === 'https:' && parsedUrl.pathname === '/circle/join')
+
+  if (isCircleInvite) {
+    setPendingInvite(parsedUrl.searchParams.get('code'))
+    const needsOnboarding =
+      !hasSeenOnboarding() && !localStorage.getItem('token')
+    routerNavigate(
+      needsOnboarding ? '/onboarding' : `/circle/join${parsedUrl.search}`,
+    )
+  } else if (url.startsWith('donetick://chores/add')) {
+    // Widget "+" / quick-capture buttons: land on the chore list with the
+    // quick-add modal open (MyChores watches for the add_task param and
+    // consumes it). ?mode=scan|voice opens straight into that capture panel.
+    let mode = null
+    try {
+      mode = new URL(url).searchParams.get('mode')
+    } catch {
+      // malformed URL — fall back to plain text capture
+    }
+    routerNavigate(
+      mode === 'scan' || mode === 'voice'
+        ? `/chores?add_task=1&mode=${mode}`
+        : '/chores?add_task=1',
+    )
   } else if (url.startsWith('donetick://chores/')) {
     handleNFCChoreDeepLink(url, isColdStart)
   } else if (url.startsWith('donetick://auth/')) {
@@ -92,6 +127,13 @@ const handleOAuthDeepLink = async url => {
       if (window.location.pathname === '/auth/oauth2' && currentCode === code) {
         return
       }
+
+      // Claim the exchange window synchronously, before the first await: the
+      // resume-driven background sync fires in the same tick as this deep link,
+      // and its 401 must not be mistaken for an expired session. Set after the
+      // early return above so the flag is only ever claimed by the navigation
+      // that Authenticating.jsx will clear.
+      beginOAuthExchange()
 
       // Store the OAuth params for the app to pick up
       await Preferences.set({

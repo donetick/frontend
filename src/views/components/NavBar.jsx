@@ -9,6 +9,8 @@ import {
   ListAlt,
   Logout,
   MenuRounded,
+  ReportProblem,
+  SearchRounded,
   SettingsOutlined,
   Toll,
   Widgets,
@@ -23,31 +25,36 @@ import {
   ListItemDecorator,
   Typography,
 } from '@mui/joy'
-
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+
 import { version } from '../../../package.json'
 import UserProfileAvatar from '../../components/UserProfileAvatar'
 import { useLocalization } from '../../contexts/LocalizationContext'
+import { useResource } from '../../queries/ResourceQueries'
+import { useGlobalSearch } from '../../search/GlobalSearchContext'
+import { apiClient } from '../../utils/ApiClient'
+import ErrorReportModal from '../Modals/ErrorReportModal'
 import NavBarLink from './NavBarLink'
 import SyncStatusIndicator from './SyncStatusIndicator'
-
-import { SafeArea } from 'capacitor-plugin-safe-area'
-import Z_INDEX from '../../constants/zIndex'
-import { useResource } from '../../queries/ResourceQueries'
-import { apiClient } from '../../utils/ApiClient'
 
 const publicPages = ['/landing', '/privacy', '/terms']
 const NavBar = () => {
   const { t } = useTranslation('common')
-  const { isRTL } = useLocalization()
   const { data: resource } = useResource()
+  const { openSearch } = useGlobalSearch()
 
   const navigate = useNavigate()
   const [drawerOpen, setDrawerOpen] = useState(false)
-  
+  const [bugReportOpen, setBugReportOpen] = useState(false)
+
   const links = [
+    {
+      label: t('navigation.search'),
+      icon: <SearchRounded />,
+      onClick: () => openSearch(),
+    },
     {
       to: '/chores',
       label: t('navigation.allTasks'),
@@ -100,25 +107,28 @@ const NavBar = () => {
   ]
   const location = useLocation()
   const [searchParams] = useSearchParams()
-  useEffect(() => {
-    SafeArea.getSafeAreaInsets().then(data => {
-      const { insets } = data
-      const drawerContent = document.querySelector('.drawer-content')
-      if (drawerContent) {
-        drawerContent.style.paddingTop = `${insets.top}px`
-        drawerContent.style.paddingRight = `${insets.right}px`
-        drawerContent.style.paddingBottom = `${insets.bottom}px`
-        drawerContent.style.paddingLeft = `${insets.left}px`
-      }
-    })
-  }, [])
-
   const getMenuIcon = () => {
     const menuRounded = (
       <IconButton size='md' variant='plain' onClick={() => setDrawerOpen(true)}>
         <MenuRounded />
       </IconButton>
     )
+    if (location.pathname === '/search') {
+      return (
+        <IconButton
+          size='md'
+          variant='plain'
+          onClick={() => {
+            if (window.history.state?.idx > 0) navigate(-1)
+            else navigate('/chores', { replace: true })
+          }}
+          aria-label={t('backFromSearch')}
+          title={t('back')}
+        >
+          <ArrowBack className='rtl-flip' />
+        </IconButton>
+      )
+    }
     if (!Capacitor.isNativePlatform()) {
       return menuRounded
     }
@@ -142,10 +152,12 @@ const NavBar = () => {
           }
         }}
         title={
-          searchParams.get('from') === 'calendar' ? t('backToCalendar') : t('back')
+          searchParams.get('from') === 'calendar'
+            ? t('backToCalendar')
+            : t('back')
         }
       >
-        <ArrowBack />
+        <ArrowBack className='rtl-flip' />
       </IconButton>
     )
   }
@@ -159,6 +171,12 @@ const NavBar = () => {
       '/password/update',
       '/login/settings',
       '/welcome',
+      '/onboarding',
+      '/get-started',
+      '/ready',
+      // Reached from an invite link, often signed out: it owns its own shell
+      // and must not mount the avatar's authenticated queries.
+      '/circle/join',
     ].includes(location.pathname)
   ) {
     return (
@@ -191,7 +209,7 @@ const NavBar = () => {
             ? `calc(var(--safe-area-inset-top, 0px))`
             : '',
         position: 'sticky',
-        zIndex: Z_INDEX.NAVBAR,
+        zIndex: 'var(--joy-zIndex-popup)',
         top: 0,
         minHeight: '35px',
         backgroundColor: 'var(--joy-palette-background-body)',
@@ -207,23 +225,38 @@ const NavBar = () => {
       <Drawer
         open={drawerOpen}
         onClose={closeDrawer}
-        anchor={isRTL ? 'right' : 'left'}
+        // Always 'left'. Joy bakes the anchor into emotion CSS (`left: 0` plus a
+        // translateX for the slide), so stylis-plugin-rtl already mirrors it to
+        // the right edge under RTL. Branching on isRTL here would flip it twice
+        // and land the drawer back on the left, half off-screen.
+        anchor='left'
         size='sm'
         onClick={closeDrawer}
         sx={{
           '& .MuiDrawer-content': {
             position: 'fixed',
             // pt: 'calc(var(--safe-area-inset-top, 0px))',
-            ...(isRTL ? { right: 0 } : { left: 0 }),
+            // Physical on purpose, so it is mirrored in step with the anchor.
+            left: 0,
             // pb: 'calc(var(--safe-area-inset-bottom, 0px))',
             // height:
             //   'calc(100vh - var(--safe-area-inset-top, 0px) - var(--safe-area-inset-bottom, 0px))',
-            overflow: 'auto',
-            zIndex: Z_INDEX.DRAWER,
+            // Column layout so the footer block sits after the links instead of
+            // being absolutely pinned: in landscape the viewport is short and a
+            // pinned footer overlapped the nav items.
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
           },
         }}
       >
-        <div className='drawer-content'>
+        {/* Safe-area padding comes from the --safe-area-inset-* variables that
+            Capacitor's SystemBars keeps in sync with the live window insets.
+            Top inset is left to the inner List so it isn't applied twice. */}
+        <div
+          className='drawer-content safe-area-x'
+          style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}
+        >
           {/* <div className='align-center flex px-5 pt-4'>
             <ModalClose size='sm' sx={{ top: 'unset', right: 20 }} />
           </div> */}
@@ -247,13 +280,10 @@ const NavBar = () => {
             ))}
           </List>
         </div>
-        <div>
+        <div className='safe-area-x safe-area-bottom' style={{ flexShrink: 0 }}>
           <List
             sx={{
-              p: 2,
               height: 'min-content',
-              position: 'absolute',
-              bottom: 0,
               borderRadius: 4,
               width: '100%',
               padding: 2,
@@ -273,6 +303,17 @@ const NavBar = () => {
               </ListItemDecorator>
               <ListItemContent>Upgrade to Plus</ListItemContent>
             </ListItemButton> */}
+            <ListItemButton
+              onClick={() => setBugReportOpen(true)}
+              sx={{
+                py: 1.2,
+              }}
+            >
+              <ListItemDecorator>
+                <ReportProblem />
+              </ListItemDecorator>
+              <ListItemContent>{t('navigation.reportBug')}</ListItemContent>
+            </ListItemButton>
             <ListItemButton
               onClick={() => {
                 apiClient.handleLogout()
@@ -297,15 +338,21 @@ const NavBar = () => {
                 p: 1,
                 color: 'text.tertiary',
                 textAlign: 'center',
-                mb: 'calc(var(--safe-area-inset-bottom, 0px) )',
-                // mb: -2,
+                // Bottom inset now comes from the wrapper's safe-area-bottom.
               }}
             >
-              V{version} (API: {resource?.api_version || 'unavailable'})
+              {t('versionInfo', {
+                version,
+                apiVersion: resource?.api_version || t('apiVersionUnavailable'),
+              })}
             </Typography>
           </List>
         </div>
       </Drawer>
+      <ErrorReportModal
+        open={bugReportOpen}
+        onClose={() => setBugReportOpen(false)}
+      />
     </nav>
   )
 }

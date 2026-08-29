@@ -1,4 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+
+import { track } from '../../analytics'
 import {
   CreateFilter,
   DeleteFilter,
@@ -112,6 +114,7 @@ export const useCreateFilter = () => {
         const response = await CreateFilter(filterData)
         if (response.ok) {
           const data = await response.json()
+          track('filter_created', {})
           return data.res || data
         }
         const errorData = await response.json()
@@ -142,7 +145,7 @@ export const useUpdateFilter = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ filterId, filterData }) => {
+    mutationFn: async ({ filterData, filterId }) => {
       try {
         const response = await UpdateFilter(filterId, filterData)
         if (response.ok) {

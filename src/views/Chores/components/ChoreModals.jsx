@@ -1,4 +1,10 @@
 import { Capacitor } from '@capacitor/core'
+import { useTranslation } from 'react-i18next'
+
+import DueDatePickerModal, {
+  combineDueDate,
+  splitDueDate,
+} from '../../components/DueDatePickerModal'
 import DateModal from '../../Modals/Inputs/DateModal'
 import NudgeModal from '../../Modals/Inputs/NudgeModal'
 import SelectModal from '../../Modals/Inputs/SelectModal'
@@ -12,25 +18,29 @@ const getNFCUrl = choreId =>
 
 const ChoreModals = ({
   activeModal,
-  modalChore,
   membersData,
-  onChangeDueDate,
-  onCompleteWithPastDate,
+  modalChore,
   onAssigneeChange,
-  onCompleteWithNote,
-  onNudge,
+  onChangeDueDate,
   onClose,
+  onCompleteWithNote,
+  onCompleteWithPastDate,
+  onNudge,
 }) => {
+  const { t } = useTranslation('chores')
   return (
     <>
       {activeModal === 'changeDueDate' && modalChore && (
-        <DateModal
-          isOpen={true}
+        <DueDatePickerModal
+          open={true}
           key={'changeDueDate' + modalChore.id}
-          current={modalChore.nextDueDate}
-          title='Change due date'
+          title={t('modals.changeDueDate')}
+          {...splitDueDate(modalChore.nextDueDate)}
           onClose={onClose}
-          onSave={onChangeDueDate}
+          onApply={parts =>
+            onChangeDueDate(combineDueDate(parts)?.toISOString() ?? null)
+          }
+          onRemove={() => onChangeDueDate(null)}
         />
       )}
 
@@ -39,7 +49,7 @@ const ChoreModals = ({
           isOpen={true}
           key={'completedInPast' + modalChore.id}
           current={modalChore.nextDueDate}
-          title='Save Chore that you completed in the past'
+          title={t('modals.completePast')}
           onClose={onClose}
           onSave={onCompleteWithPastDate}
         />
@@ -50,8 +60,8 @@ const ChoreModals = ({
           isOpen={true}
           options={membersData?.res || []}
           displayKey='displayName'
-          title='Delegate to someone else'
-          placeholder='Select a performer'
+          title={t('modals.delegate')}
+          placeholder={t('modals.selectPerformer')}
           onClose={onClose}
           onSave={selected => onAssigneeChange(selected.id)}
         />
@@ -60,9 +70,9 @@ const ChoreModals = ({
       {activeModal === 'completeWithNote' && modalChore && (
         <TextModal
           isOpen={true}
-          title='Add note to attach to this completion:'
+          title={t('modals.addNote')}
           onClose={onClose}
-          okText='Complete'
+          okText={t('modals.complete')}
           onSave={onCompleteWithNote}
         />
       )}

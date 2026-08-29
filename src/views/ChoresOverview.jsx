@@ -22,10 +22,11 @@ import {
   Tooltip,
   Typography,
 } from '@mui/joy'
-
 import moment from 'moment'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+
 import { GetAllUsers, GetChores, MarkChoreComplete } from '../utils/Fetcher'
 import DateModal from './Modals/Inputs/DateModal'
 // import moment from 'moment'
@@ -39,6 +40,7 @@ const CHORE_STATUS = {
 }
 
 const ChoresOverview = () => {
+  const { t } = useTranslation('chores')
   const [chores, setChores] = useState([])
   const [filteredChores, setFilteredChores] = useState([])
   const [performers, setPerformers] = useState([])
@@ -119,7 +121,7 @@ const ChoresOverview = () => {
   return (
     <Container>
       <Typography level='h4' mb={1.5}>
-        Chores Overviews
+        {t('overview.title')}
       </Typography>
       {/* <SummaryCard /> */}
       <Grid container>
@@ -132,7 +134,7 @@ const ChoresOverview = () => {
           gap={2}
         >
           <Input
-            placeholder='Search'
+            placeholder={t('overview.search')}
             value={search}
             onChange={e => {
               if (e.target.value === '') {
@@ -169,7 +171,7 @@ const ChoresOverview = () => {
               Navigate(`/chores/create`)
             }}
           >
-            New Chore
+            {t('overview.newChore')}
           </Button>
         </Grid>
       </Grid>
@@ -178,11 +180,11 @@ const ChoresOverview = () => {
         <thead>
           <tr>
             {/* first column has minium size because its icon */}
-            <th style={{ width: 100 }}>Due</th>
-            <th>Chore</th>
-            <th>Assignee</th>
-            <th>Due</th>
-            <th>Action</th>
+            <th style={{ width: 100 }}>{t('overview.colDue')}</th>
+            <th>{t('overview.colChore')}</th>
+            <th>{t('overview.colAssignee')}</th>
+            <th>{t('overview.colDue')}</th>
+            <th>{t('overview.colAction')}</th>
           </tr>
         </thead>
         <tbody>
@@ -228,7 +230,7 @@ const ChoresOverview = () => {
                     color='warning'
                     startDecorator={<Avatar color='primary'>?</Avatar>}
                   >
-                    Unassigned
+                    {t('overview.unassigned')}
                   </Chip>
                 )}
               </td>
@@ -315,7 +317,7 @@ const ChoresOverview = () => {
       <DateModal
         isOpen={isDateModalOpen}
         key={choreId}
-        title={`Change due date`}
+        title={t('overview.changeDueDate')}
         onClose={() => {
           setIsDateModalOpen(false)
         }}
@@ -330,7 +332,7 @@ const ChoresOverview = () => {
                 response.json().then(data => {
                   const newChore = data.res
                   const newChores = [...chores]
-                  const index = newChores.findIndex(c => c.id === chore.id)
+                  const index = newChores.findIndex(c => c.id === choreId)
                   newChores[index] = newChore
                   setChores(newChores)
                   setFilteredChores(newChores)

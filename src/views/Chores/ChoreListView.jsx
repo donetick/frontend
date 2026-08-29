@@ -1,11 +1,12 @@
+import '@meauxt/react-swipeable-list/dist/styles.css'
+
 import {
-  Type as ListType,
   SwipeableList,
   SwipeableListItem,
   SwipeAction,
   TrailingActions,
+  Type as ListType,
 } from '@meauxt/react-swipeable-list'
-import '@meauxt/react-swipeable-list/dist/styles.css'
 import {
   Check,
   Delete,
@@ -17,26 +18,81 @@ import {
   ThumbDown,
 } from '@mui/icons-material'
 import { Box, Typography } from '@mui/joy'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+
+import { useLongPress } from '../../hooks/useLongPress'
 import ChoreCard from './ChoreCard'
 import CompactChoreCard from './CompactChoreCard'
 
+/**
+ * One swipeable row. Owns the press-and-hold gesture (multi-select), which
+ * can't live in the render loop because it needs a hook.
+ */
+const ChoreSwipeableItem = ({
+  children,
+  longPressEnabled,
+  onClick,
+  onLongPress,
+  trailingActions,
+  // SwipeableList clones its children to inject list-level config
+  // (listType, fullSwipe, thresholds…), so it has to be passed through.
+  ...listProps
+}) => {
+  const { cancel: cancelLongPress, handlers: longPressHandlers } = useLongPress(
+    onLongPress,
+    { enabled: longPressEnabled },
+  )
+
+  // The swipe list owns the gesture the moment it recognizes a drag — a hold
+  // that turned into a swipe must not also open multi-select.
+  const handleSwipeStart = () => {
+    cancelLongPress()
+  }
+
+  return (
+    <SwipeableListItem
+      {...listProps}
+      trailingActions={trailingActions}
+      onClick={onClick}
+      onSwipeStart={handleSwipeStart}
+      onSwipeProgress={cancelLongPress}
+    >
+      <Box
+        {...longPressHandlers}
+        sx={{
+          width: '100%',
+          // Keep a long press from selecting the task text / popping the
+          // native callout on mobile
+          userSelect: 'none',
+          WebkitUserSelect: 'none',
+          WebkitTouchCallout: 'none',
+        }}
+      >
+        {children}
+      </Box>
+    </SwipeableListItem>
+  )
+}
+
 const ChoreListView = ({
   chores,
-  viewMode,
-  membersData,
-  userLabels,
-  handleLabelFiltering,
   handleChoreAction,
+  handleLabelFiltering,
   isMultiSelectMode,
-  selectedChores,
-  toggleChoreSelection,
-  userProfile,
   isOfficialInstance,
-  toggleMultiSelectMode,
+  membersData,
+  onLongPressChore,
+  selectedChores,
   showActions = true,
+  toggleChoreSelection,
+  toggleMultiSelectMode,
+  userLabels,
+  userProfile,
+  viewMode,
 }) => {
   const navigate = useNavigate()
+  const { t } = useTranslation('chores')
   const renderChoreCard = (chore, key) => {
     const CardComponent = viewMode === 'compact' ? CompactChoreCard : ChoreCard
     return (
@@ -96,7 +152,7 @@ const ChoreListView = ({
                 >
                   <ThumbDown sx={{ fontSize: 20 }} />
                   <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                    Reject
+                    {t('list.reject')}
                   </Typography>
                 </Box>
               </SwipeAction>
@@ -117,7 +173,7 @@ const ChoreListView = ({
                 >
                   <HourglassEmpty sx={{ fontSize: 20 }} />
                   <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                    Pending
+                    {t('list.pending')}
                   </Typography>
                 </Box>
               </SwipeAction>
@@ -150,7 +206,9 @@ const ChoreListView = ({
                   <Check sx={{ fontSize: 20 }} />
                 )}
                 <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                  {chore.status !== 1 ? 'Start' : 'Complete'}
+                  {chore.status !== 1
+                    ? t('choreView.start')
+                    : t('list.complete')}
                 </Typography>
               </Box>
             </SwipeAction>
@@ -173,7 +231,7 @@ const ChoreListView = ({
             >
               <Schedule sx={{ fontSize: 20 }} />
               <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                Schedule
+                {t('list.schedule')}
               </Typography>
             </Box>
           </SwipeAction>
@@ -193,7 +251,7 @@ const ChoreListView = ({
             >
               <Edit sx={{ fontSize: 20 }} />
               <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                Edit
+                {t('common:edit')}
               </Typography>
             </Box>
           </SwipeAction>
@@ -214,7 +272,7 @@ const ChoreListView = ({
               >
                 <Notifications sx={{ fontSize: 20 }} />
                 <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                  Nudge
+                  {t('list.nudge')}
                 </Typography>
               </Box>
             </SwipeAction>
@@ -235,7 +293,7 @@ const ChoreListView = ({
             >
               <Delete sx={{ fontSize: 20 }} />
               <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                Delete
+                {t('common:delete')}
               </Typography>
             </Box>
           </SwipeAction>
@@ -248,7 +306,7 @@ const ChoreListView = ({
     return (
       <SwipeableList type={ListType.IOS} fullSwipe={false}>
         {chores.map(chore => (
-          <SwipeableListItem
+          <ChoreSwipeableItem
             key={chore.id}
             trailingActions={getTrailingActions(chore)}
             onClick={() => {
@@ -258,9 +316,11 @@ const ChoreListView = ({
                 navigate(`/chores/${chore.id}`)
               }
             }}
+            longPressEnabled={Boolean(onLongPressChore)}
+            onLongPress={() => onLongPressChore?.(chore.id)}
           >
             {renderChoreCard(chore)}
-          </SwipeableListItem>
+          </ChoreSwipeableItem>
         ))}
       </SwipeableList>
     )

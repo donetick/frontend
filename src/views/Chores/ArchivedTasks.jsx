@@ -4,15 +4,16 @@ import {
   CheckBoxOutlineBlank,
   Close,
   Delete,
+  FilterList,
   Label,
   Person,
   PriorityHigh,
+  SearchOff,
   SelectAll,
   Unarchive,
-  ViewAgenda,
-  ViewModule,
 } from '@mui/icons-material'
 import {
+  Badge,
   Box,
   Button,
   Container,
@@ -26,24 +27,27 @@ import {
 import { useQueryClient } from '@tanstack/react-query'
 import Fuse from 'fuse.js'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+
+import EmptyState from '../../components/common/EmptyState'
 import FilterBar from '../../components/common/FilterBar'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
+import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
+import { usePageShortcutScope } from '../../contexts/KeyboardShortcutScopeContext'
 import { useFilter } from '../../hooks/useFilter'
 import { useUnArchiveChore } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { commandQueue, CommandType } from '../../utils/CommandQueue'
 import { DeleteChore, GetArchivedChores } from '../../utils/Fetcher'
-import Priorities from '../../utils/Priorities'
 import { offlineDB } from '../../utils/OfflineDB'
 import { isOfflineFeatureEnabled } from '../../utils/OfflineFeatureToggle'
+import Priorities from '../../utils/Priorities'
 import LoadingComponent from '../components/Loading'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
-import ChoreCard from './ChoreCard'
 import ChoreListView from './ChoreListView.jsx'
-import CompactChoreCard from './CompactChoreCard'
 import MultiSelectHelp from './MultiSelectHelp'
 
 const sortByUpdatedAtDesc = chores =>
@@ -89,9 +93,13 @@ const applyPendingArchivedState = async chores => {
 }
 
 const ArchivedTasks = () => {
+  const { t } = useTranslation('chores')
+  // Page-level shortcuts (bulk restore/delete, etc.) must defer to whatever
+  // modal currently owns the keyboard — see KeyboardShortcutScopeContext.
+  const isPageShortcutActive = usePageShortcutScope()
   const { data: userProfile, isLoading: isUserProfileLoading } =
     useUserProfile()
-  const { showSuccess, showError } = useNotification()
+  const { showError, showSuccess } = useNotification()
   const { impersonatedUser } = useImpersonateUser()
   const queryClient = useQueryClient()
   const unArchiveChore = useUnArchiveChore()
@@ -100,9 +108,6 @@ const ArchivedTasks = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [performers, setPerformers] = useState([])
   const navigate = useNavigate()
-  const [viewMode, setViewMode] = useState(
-    localStorage.getItem('archivedChoreCardViewMode') || 'default',
-  )
   const [isLoading, setIsLoading] = useState(true)
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
   const searchInputRef = useRef(null)
@@ -129,7 +134,7 @@ const ArchivedTasks = () => {
     () => [
       {
         id: 'assignee',
-        label: 'Assignee',
+        label: t('toolbar.type.assignee'),
         type: 'multi-select',
         icon: <Person />,
         options: performers.map(p => ({
@@ -141,7 +146,7 @@ const ArchivedTasks = () => {
       },
       {
         id: 'priority',
-        label: 'Priority',
+        label: t('priority'),
         type: 'multi-select',
         icon: <PriorityHigh />,
         options: Priorities.map(p => ({
@@ -156,7 +161,7 @@ const ArchivedTasks = () => {
         ? [
             {
               id: 'label',
-              label: 'Labels',
+              label: t('labels.label'),
               type: 'multi-select',
               icon: <Label />,
               options: availableLabels.map(l => ({
@@ -183,7 +188,7 @@ const ArchivedTasks = () => {
         : []),
       {
         id: 'archivedAt',
-        label: 'Archived Date',
+        label: t('archived.archivedDate'),
         type: 'date-range',
         icon: <Archive />,
         filterFn: (item, value) => {
@@ -194,16 +199,54 @@ const ArchivedTasks = () => {
         },
       },
     ],
-    [performers, availableLabels],
+    [performers, availableLabels, t],
   )
 
   const {
-    filteredData: finalChores,
+    activeFilterCount,
     activeFilters,
-    setFilter,
     clearAll,
+    filteredData: filteredByBar,
     hasActiveFilters,
+    setFilter,
   } = useFilter(filteredChores, filterDefs)
+
+  const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false)
+
+  const [sortBy, setSortBy] = useState(
+    () => localStorage.getItem('archivedChoresSortBy') || 'archivedAt',
+  )
+  const [sortDirection, setSortDirection] = useState(
+    () => localStorage.getItem('archivedChoresSortDirection') || 'desc',
+  )
+
+  useEffect(() => {
+    localStorage.setItem('archivedChoresSortBy', sortBy)
+    localStorage.setItem('archivedChoresSortDirection', sortDirection)
+  }, [sortBy, sortDirection])
+
+  const finalChores = useMemo(() => {
+    const direction = sortDirection === 'desc' ? -1 : 1
+    return [...filteredByBar].sort((a, b) => {
+      switch (sortBy) {
+        case 'name':
+          return direction * (a.name || '').localeCompare(b.name || '')
+        case 'priority':
+          return direction * ((a.priority ?? 0) - (b.priority ?? 0))
+        case 'dueDate': {
+          const aDue = new Date(a.nextDueDate || 0).getTime()
+          const bDue = new Date(b.nextDueDate || 0).getTime()
+          return direction * (aDue - bDue)
+        }
+        case 'archivedAt':
+        default: {
+          const aDate = new Date(a.updatedAt || 0).getTime()
+          const bDate = new Date(b.updatedAt || 0).getTime()
+          return direction * (aDate - bDate)
+        }
+      }
+    })
+  }, [filteredByBar, sortBy, sortDirection])
 
   useEffect(() => {
     const loadArchivedChores = async () => {
@@ -230,8 +273,8 @@ const ArchivedTasks = () => {
             setFilteredChores(sortedChores)
           } catch {
             showError({
-              title: 'Failed to load archived tasks',
-              message: 'Please try again later.',
+              title: t('archived.loadFailTitle'),
+              message: t('archived.loadFailMsg'),
             })
           }
         } finally {
@@ -245,17 +288,13 @@ const ArchivedTasks = () => {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = event => {
+      if (!isPageShortcutActive) return
+      if (event.repeat) return
+
       const isHoldingCmdOrCtrl = event.ctrlKey || event.metaKey
 
       if (isHoldingCmdOrCtrl) {
         setShowKeyboardShortcuts(true)
-      }
-
-      // Ctrl/Cmd + F to focus search input
-      if (isHoldingCmdOrCtrl && event.key === 'f') {
-        event.preventDefault()
-        searchInputRef.current?.focus()
-        return
       }
 
       // Ctrl/Cmd + S Toggle Multi-select mode
@@ -332,16 +371,7 @@ const ArchivedTasks = () => {
       document.removeEventListener('keydown', handleKeyDown)
       document.removeEventListener('keyup', handleKeyUp)
     }
-  }, [isMultiSelectMode, selectedChores.size])
-
-  const toggleViewMode = () => {
-    const modes = ['default', 'compact']
-    const currentIndex = modes.indexOf(viewMode)
-    const nextIndex = (currentIndex + 1) % modes.length
-    const newMode = modes[nextIndex]
-    setViewMode(newMode)
-    localStorage.setItem('archivedChoreCardViewMode', newMode)
-  }
+  }, [isMultiSelectMode, selectedChores.size, isPageShortcutActive])
 
   const searchOptions = {
     keys: ['name', 'raw_label'],
@@ -390,8 +420,8 @@ const ArchivedTasks = () => {
       setFilteredChores(newFilteredChores)
 
       showSuccess({
-        title: 'Task Restored',
-        message: 'The task has been restored and is now active.',
+        title: t('archived.restoredTitle'),
+        message: t('archived.restoredMsg'),
       })
     }
   }
@@ -407,8 +437,8 @@ const ArchivedTasks = () => {
     setFilteredChores(newFilteredChores)
 
     showSuccess({
-      title: 'Task Deleted',
-      message: 'The archived task has been permanently deleted.',
+      title: t('archived.deletedTitle'),
+      message: t('archived.deletedMsg'),
     })
   }
 
@@ -430,6 +460,16 @@ const ArchivedTasks = () => {
       newSelection.add(choreId)
     }
     setSelectedChores(newSelection)
+  }
+
+  // Press-and-hold on a task card enters multi-select with that task picked
+  const enterMultiSelectWithChore = choreId => {
+    if (!isMultiSelectMode) {
+      setIsMultiSelectMode(true)
+      setSelectedChores(new Set([choreId]))
+      return
+    }
+    toggleChoreSelection(choreId)
   }
 
   const selectAllVisibleChores = () => {
@@ -459,10 +499,10 @@ const ArchivedTasks = () => {
 
     setConfirmModelConfig({
       isOpen: true,
-      title: 'Restore Tasks',
-      confirmText: 'Restore',
-      cancelText: 'Cancel',
-      message: `Restore ${selectedData.length} task${selectedData.length > 1 ? 's' : ''} to active list?`,
+      title: t('archived.restoreTasksTitle'),
+      confirmText: t('archived.restore'),
+      cancelText: t('common:cancel'),
+      message: t('archived.restoreConfirm', { count: selectedData.length }),
       onClose: async isConfirmed => {
         if (isConfirmed === true) {
           try {
@@ -527,23 +567,28 @@ const ArchivedTasks = () => {
                 queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
               }
               showSuccess({
-                title: '📤 Tasks Restored',
-                message: `Restored ${allRestored.length} task${allRestored.length > 1 ? 's' : ''}${offlineNote}.`,
+                title: t('archived.restoredBulkTitle'),
+                message: t('archived.restoredCount', {
+                  count: allRestored.length,
+                  offline: offlineNote,
+                }),
               })
             }
 
             if (failedTasks.length > 0) {
               showError({
-                title: 'Some Tasks Failed',
-                message: `${failedTasks.length} task${failedTasks.length > 1 ? 's' : ''} could not be restored.`,
+                title: t('archived.someFailedTitle'),
+                message: t('archived.restoreFailCount', {
+                  count: failedTasks.length,
+                }),
               })
             }
 
             clearSelection()
           } catch (error) {
             showError({
-              title: 'Bulk Restore Failed',
-              message: 'An unexpected error occurred. Please try again.',
+              title: t('archived.bulkRestoreFailTitle'),
+              message: t('archived.unexpectedError'),
             })
           }
         }
@@ -558,10 +603,10 @@ const ArchivedTasks = () => {
 
     setConfirmModelConfig({
       isOpen: true,
-      title: 'Delete Archived Tasks',
-      confirmText: 'Delete',
-      cancelText: 'Cancel',
-      message: `Permanently delete ${selectedData.length} archived task${selectedData.length > 1 ? 's' : ''}?\n\nThis action cannot be undone.`,
+      title: t('archived.deleteTasksTitle'),
+      confirmText: t('archived.delete'),
+      cancelText: t('common:cancel'),
+      message: t('archived.deleteConfirm', { count: selectedData.length }),
       onClose: async isConfirmed => {
         if (isConfirmed === true) {
           try {
@@ -579,8 +624,10 @@ const ArchivedTasks = () => {
 
             if (deletedTasks.length > 0) {
               showSuccess({
-                title: '🗑️ Tasks Deleted',
-                message: `Successfully deleted ${deletedTasks.length} task${deletedTasks.length > 1 ? 's' : ''}.`,
+                title: t('archived.deletedBulkTitle'),
+                message: t('archived.deletedCount', {
+                  count: deletedTasks.length,
+                }),
               })
 
               const deletedIds = new Set(deletedTasks.map(c => c.id))
@@ -596,42 +643,24 @@ const ArchivedTasks = () => {
 
             if (failedTasks.length > 0) {
               showError({
-                title: 'Some Tasks Failed',
-                message: `${failedTasks.length} task${failedTasks.length > 1 ? 's' : ''} could not be deleted.`,
+                title: t('archived.someFailedTitle'),
+                message: t('archived.deleteFailCount', {
+                  count: failedTasks.length,
+                }),
               })
             }
 
             clearSelection()
           } catch (error) {
             showError({
-              title: 'Bulk Delete Failed',
-              message: 'An unexpected error occurred. Please try again.',
+              title: t('archived.bulkDeleteFailTitle'),
+              message: t('archived.unexpectedError'),
             })
           }
         }
         setConfirmModelConfig({})
       },
     })
-  }
-
-  // Helper function to render the appropriate card component
-  const renderChoreCard = (chore, key) => {
-    const CardComponent = viewMode === 'compact' ? CompactChoreCard : ChoreCard
-    return (
-      <CardComponent
-        key={key || chore.id}
-        chore={chore}
-        onChoreUpdate={handleChoreUpdated}
-        onChoreRemove={handleChoreDeleted}
-        performers={performers}
-        viewOnly={false}
-        showActions={false}
-        // Multi-select props
-        isMultiSelectMode={isMultiSelectMode}
-        isSelected={selectedChores.has(chore.id)}
-        onSelectionToggle={() => toggleChoreSelection(chore.id)}
-      />
-    )
   }
 
   if (isUserProfileLoading || performers.length === 0 || isLoading) {
@@ -647,10 +676,10 @@ const ArchivedTasks = () => {
             level='h3'
             sx={{ fontWeight: 'lg', color: 'text.primary' }}
           >
-            Archived Tasks
+            {t('archived.title')}
           </Typography>
           <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            View and manage tasks that have been archived or completed.
+            {t('archived.subtitle')}
           </Typography>
         </Stack>
       </Box>
@@ -669,7 +698,7 @@ const ArchivedTasks = () => {
           sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
         >
           <Archive />
-          Archived Tasks
+          {t('archived.heading')}
         </Typography>
         <Button
           variant='outlined'
@@ -695,7 +724,7 @@ const ArchivedTasks = () => {
       >
         <Input
           slotProps={{ input: { ref: searchInputRef } }}
-          placeholder='Search archived tasks'
+          placeholder={t('archived.searchPlaceholder')}
           value={searchTerm}
           fullWidth
           sx={{
@@ -705,9 +734,6 @@ const ArchivedTasks = () => {
             padding: 1,
           }}
           onChange={handleSearchChange}
-          startDecorator={
-            <KeyboardShortcutHint shortcut='F' show={showKeyboardShortcuts} />
-          }
           endDecorator={
             searchTerm && (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
@@ -728,25 +754,44 @@ const ArchivedTasks = () => {
           }
         />
 
-        {/* View Mode Toggle Button */}
-        <IconButton
-          variant='outlined'
-          color='neutral'
+        {/* Filter Sheet Trigger */}
+        <Badge
+          badgeContent={activeFilterCount || null}
+          color='primary'
           size='sm'
-          sx={{
-            height: 32,
-            width: 32,
-            borderRadius: '50%',
-          }}
-          onClick={toggleViewMode}
-          title={
-            viewMode === 'default'
-              ? 'Switch to Compact View'
-              : 'Switch to Card View'
-          }
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+          sx={{ display: 'flex', alignItems: 'center' }}
         >
-          {viewMode === 'default' ? <ViewAgenda /> : <ViewModule />}
-        </IconButton>
+          <IconButton
+            variant={hasActiveFilters ? 'solid' : 'outlined'}
+            color={hasActiveFilters ? 'primary' : 'neutral'}
+            size='sm'
+            sx={{
+              height: 32,
+              width: 32,
+              borderRadius: '50%',
+            }}
+            onClick={() => setIsFilterSheetOpen(true)}
+            title={t('archived.filtersTitle')}
+          >
+            <FilterList />
+          </IconButton>
+        </Badge>
+
+        {/* Sort Menu */}
+        <SortAndFilterMenu
+          sortOptions={[
+            { name: t('archived.sortArchivedDate'), value: 'archivedAt' },
+            { name: t('archived.sortName'), value: 'name' },
+            { name: t('archived.sortPriority'), value: 'priority' },
+            { name: t('archived.sortDueDate'), value: 'dueDate' },
+          ]}
+          selectedSort={sortBy}
+          onSortChange={setSortBy}
+          sortDirection={sortDirection}
+          onSortDirectionChange={setSortDirection}
+          isActive={sortBy !== 'archivedAt' || sortDirection !== 'desc'}
+        />
 
         {/* Multi-select Toggle Button */}
         <Box sx={{ position: 'relative', display: 'inline-flex' }}>
@@ -762,8 +807,8 @@ const ArchivedTasks = () => {
             onClick={toggleMultiSelectMode}
             title={
               isMultiSelectMode
-                ? 'Exit Multi-select Mode (Ctrl+S)'
-                : 'Enable Multi-select Mode (Ctrl+S)'
+                ? t('archived.exitMultiSelect')
+                : t('archived.enableMultiSelect')
             }
           >
             {isMultiSelectMode ? <CheckBox /> : <CheckBoxOutlineBlank />}
@@ -788,6 +833,9 @@ const ArchivedTasks = () => {
         onClearAll={clearAll}
         resultCount={finalChores.length}
         totalCount={filteredChores.length}
+        showTrigger={false}
+        open={isFilterSheetOpen}
+        onOpenChange={setIsFilterSheetOpen}
       />
 
       {/* Multi-select Toolbar */}
@@ -844,8 +892,7 @@ const ArchivedTasks = () => {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <CheckBox sx={{ color: 'primary.500' }} />
                 <Typography level='body-sm' fontWeight='md'>
-                  {selectedChores.size} task
-                  {selectedChores.size !== 1 ? 's' : ''} selected
+                  {t('archived.selected', { count: selectedChores.size })}
                 </Typography>
               </Box>
 
@@ -868,9 +915,9 @@ const ArchivedTasks = () => {
                     '--Button-paddingInline': '0.75rem',
                     position: 'relative',
                   }}
-                  title='Select all visible tasks (Ctrl+A)'
+                  title={t('archived.selectAllTitle')}
                 >
-                  All
+                  {t('archived.all')}
                   {showKeyboardShortcuts && (
                     <KeyboardShortcutHint
                       shortcut='A'
@@ -899,9 +946,15 @@ const ArchivedTasks = () => {
                     '--Button-paddingInline': '0.75rem',
                     position: 'relative',
                   }}
-                  title={`${selectedChores.size === 0 ? 'Close' : 'Clear'} multi-select (Esc)`}
+                  title={
+                    selectedChores.size === 0
+                      ? t('archived.closeMultiSelect')
+                      : t('archived.clearMultiSelect')
+                  }
                 >
-                  {selectedChores.size === 0 ? 'Close' : 'Clear'}
+                  {selectedChores.size === 0
+                    ? t('archived.close')
+                    : t('archived.clear')}
                   {showKeyboardShortcuts && (
                     <KeyboardShortcutHint
                       withCtrl={false}
@@ -945,9 +998,9 @@ const ArchivedTasks = () => {
                   '--Button-paddingInline': { xs: '0.75rem', sm: '1rem' },
                   position: 'relative',
                 }}
-                title='Restore selected tasks (R)'
+                title={t('archived.restoreSelectedTitle')}
               >
-                Restore
+                {t('archived.restore')}
                 {showKeyboardShortcuts && selectedChores.size > 0 && (
                   <KeyboardShortcutHint
                     shortcut='R'
@@ -972,9 +1025,9 @@ const ArchivedTasks = () => {
                   '--Button-paddingInline': { xs: '0.75rem', sm: '1rem' },
                   position: 'relative',
                 }}
-                title='Delete selected tasks (E)'
+                title={t('archived.deleteSelectedTitle')}
               >
-                Delete
+                {t('archived.delete')}
                 {showKeyboardShortcuts && selectedChores.size > 0 && (
                   <KeyboardShortcutHint
                     shortcut='E'
@@ -994,63 +1047,58 @@ const ArchivedTasks = () => {
 
       {/* Content */}
       {finalChores.length === 0 ? (
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            flexDirection: 'column',
-            height: '50vh',
-          }}
-        >
-          <Archive sx={{ fontSize: '4rem', mb: 1, color: 'text.tertiary' }} />
-          <Typography level='title-md' gutterBottom>
-            {searchTerm || hasActiveFilters
-              ? 'No archived tasks found'
-              : 'No archived tasks'}
-          </Typography>
-          <Typography level='body-sm' color='text.secondary' sx={{ mb: 2 }}>
-            {searchTerm || hasActiveFilters
-              ? 'Try adjusting your search or filters'
-              : 'Archived tasks will appear here when you archive them from the main task list'}
-          </Typography>
-          {(searchTerm || hasActiveFilters) && (
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              {searchTerm && (
-                <Button
-                  onClick={handleSearchClose}
-                  variant='outlined'
-                  color='neutral'
-                >
-                  Clear search
-                </Button>
-              )}
-              {hasActiveFilters && (
-                <Button onClick={clearAll} variant='outlined' color='neutral'>
-                  Clear filters
-                </Button>
-              )}
-            </Box>
-          )}
-        </Box>
+        searchTerm || hasActiveFilters ? (
+          <EmptyState
+            variant='no-results'
+            fullHeight
+            icon={<SearchOff />}
+            title={t('archived.noMatchTitle')}
+            description={
+              searchTerm
+                ? t('archived.noMatchSearch', { term: searchTerm })
+                : t('archived.noMatchFilters')
+            }
+            primaryAction={
+              searchTerm
+                ? {
+                    label: t('archived.clearSearch'),
+                    onClick: handleSearchClose,
+                  }
+                : { label: t('archived.clearFilters'), onClick: clearAll }
+            }
+            secondaryAction={
+              searchTerm && hasActiveFilters
+                ? { label: t('archived.clearFilters'), onClick: clearAll }
+                : undefined
+            }
+          />
+        ) : (
+          <EmptyState
+            fullHeight
+            icon={<Archive />}
+            title={t('archived.emptyTitle')}
+            description={t('archived.emptyDescription')}
+            primaryAction={{ label: t('archived.backToTasks'), to: '/chores' }}
+          />
+        )
       ) : (
         <Box>
           <Typography level='body-sm' color='text.secondary' sx={{ mb: 2 }}>
-            {finalChores.length} archived task
-            {finalChores.length !== 1 ? 's' : ''}
-            {searchTerm && ` matching "${searchTerm}"`}
+            {t('archived.count', { count: finalChores.length })}
+            {searchTerm && t('archived.matching', { term: searchTerm })}
           </Typography>
 
-          <List sx={{ gap: viewMode === 'compact' ? 0 : 1 }}>
+          <List sx={{ gap: 0 }}>
             <ChoreListView
               chores={finalChores}
               // viewOnly={true}
               showActions={false}
-              viewMode={viewMode}
+              viewMode='compact'
               membersData={membersData}
               isMultiSelectMode={isMultiSelectMode}
               selectedChores={selectedChores}
               toggleChoreSelection={toggleChoreSelection}
+              onLongPressChore={enterMultiSelectWithChore}
             />
           </List>
         </Box>

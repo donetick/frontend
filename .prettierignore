@@ -1,0 +1,13 @@
+LICENSE.md
+dist/
+build/
+vendor/
+android/
+ios/
+resources/
+.bundle/
+.agents/
+.impeccable/
+package-lock.json
+Gemfile.lock
+skills-lock.json

@@ -1,7 +1,7 @@
 import {
+  closestCenter,
   DndContext,
   PointerSensor,
-  closestCenter,
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
@@ -30,8 +30,10 @@ import {
 } from '@mui/joy'
 import { useCallback, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
-import { useLocalization } from '../../contexts/LocalizationContext'
+import { useTranslation } from 'react-i18next'
+
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext'
+import { useLocalization } from '../../contexts/LocalizationContext'
 import { useUserProfile } from '../../queries/UserQueries'
 import { CompleteSubTask } from '../../utils/Fetcher'
 
@@ -58,18 +60,19 @@ function nextTempId(tasks) {
 }
 
 function SortableItem({
-  task,
   allTasks,
-  setTasks,
-  level,
   editMode,
   expandedIds,
-  onToggleExpand,
   handleToggle,
   inputRefs,
+  level,
   onKeyDown,
+  onToggleExpand,
   performers,
+  setTasks,
+  task,
 }) {
+  const { t } = useTranslation('chores')
   const { fmt } = useLocalization()
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: task.id })
@@ -134,7 +137,7 @@ function SortableItem({
                 },
               }}
               value={task.name}
-              placeholder='Task name...'
+              placeholder={t('subTask.namePlaceholder')}
               onChange={e =>
                 setTasks(prev =>
                   prev.map(t =>
@@ -197,7 +200,7 @@ function SortableItem({
               variant='soft'
               color='danger'
               size='sm'
-              title='Delete (Shift+Backspace)'
+              title={t('subTask.deleteShortcut')}
               onClick={() =>
                 onKeyDown(
                   {
@@ -240,13 +243,14 @@ function SortableItem({
 }
 
 const SubTasks = ({
-  editMode = true,
   choreId = 0,
-  tasks = [],
-  setTasks,
+  editMode = true,
   performers,
+  setTasks,
   shouldFocus = false,
+  tasks = [],
 }) => {
+  const { t } = useTranslation('chores')
   const [newTask, setNewTask] = useState('')
   const [expandedIds, setExpandedIds] = useState(new Set())
   const { data: userProfile } = useUserProfile()
@@ -673,7 +677,7 @@ const SubTasks = ({
             <ListItem sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Input
                 autoFocus={shouldFocus}
-                placeholder='Add new task... (Enter to add)'
+                placeholder={t('subTask.addPlaceholder')}
                 value={newTask}
                 slotProps={{ input: { ref: addInputRef } }}
                 onChange={e => setNewTask(e.target.value)}

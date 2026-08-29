@@ -1,0 +1,670 @@
+import {
+  AddRounded,
+  ArchiveOutlined,
+  CheckCircleOutline,
+  FilterAltOutlined,
+  FolderOutlined,
+  HistoryRounded,
+  InboxOutlined,
+  LabelOutlined,
+  PersonOutline,
+  SearchRounded,
+  SettingsOutlined,
+  TollOutlined,
+  WidgetsOutlined,
+} from '@mui/icons-material'
+import {
+  Box,
+  Chip,
+  CircularProgress,
+  Divider,
+  Input,
+  List,
+  ListItemButton,
+  ListItemContent,
+  ListItemDecorator,
+  Typography,
+} from '@mui/joy'
+import Fuse from 'fuse.js'
+import PropTypes from 'prop-types'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
+
+import AppModal from '../components/common/AppModal'
+
+const RECENTS_KEY = 'donetick.globalSearch.recents'
+const GROUPS = [
+  'tasks',
+  'history',
+  'projects',
+  'labels',
+  'people',
+  'settings',
+  'actions',
+]
+
+const ICONS = {
+  tasks: <CheckCircleOutline />,
+  history: <HistoryRounded />,
+  projects: <FolderOutlined />,
+  labels: <LabelOutlined />,
+  people: <PersonOutline />,
+  settings: <SettingsOutlined />,
+  actions: <AddRounded />,
+}
+
+const buildQuickActions = t => [
+  {
+    id: 'action:create',
+    provider: 'actions',
+    title: t('search.actions.createTask'),
+    subtitle: t('search.actions.quickAction'),
+    keywords: 'new task chore add create',
+    // Reuses the widget deep-link param so this lands on the task list with the
+    // quick-add modal open, instead of the full create page.
+    route: '/chores?add_task=1',
+  },
+  {
+    id: 'action:create-label',
+    provider: 'actions',
+    title: t('search.actions.createLabel'),
+    subtitle: t('search.actions.quickAction'),
+    keywords: 'new label tag add create',
+    route: '/labels?create=1',
+  },
+  {
+    id: 'action:create-project',
+    provider: 'actions',
+    title: t('search.actions.createProject'),
+    subtitle: t('search.actions.quickAction'),
+    keywords: 'new project folder add create',
+    route: '/projects?create=1',
+  },
+  {
+    id: 'action:create-filter',
+    provider: 'actions',
+    title: t('search.actions.createFilter'),
+    subtitle: t('search.actions.quickAction'),
+    keywords: 'new filter view saved search add create',
+    route: '/filters?create=1',
+  },
+  // Every destination in the nav drawer is reachable from here, so the palette
+  // is a complete way to move around the app without opening the drawer.
+  ...[
+    {
+      id: 'action:tasks',
+      title: t('search.actions.viewAllTasks'),
+      keywords: 'tasks chores list all open',
+      route: '/chores',
+      icon: <InboxOutlined />,
+    },
+    {
+      id: 'action:archived',
+      title: t('search.actions.viewArchivedTasks'),
+      keywords: 'archive archived tasks completed open',
+      route: '/archived',
+      icon: <ArchiveOutlined />,
+    },
+    {
+      id: 'action:things',
+      title: t('search.actions.viewThings'),
+      keywords: 'things devices sensors trackers state open',
+      route: '/things',
+      icon: <WidgetsOutlined />,
+    },
+    {
+      id: 'action:labels',
+      title: t('search.actions.viewLabels'),
+      keywords: 'labels tags open',
+      route: '/labels',
+      icon: <LabelOutlined />,
+    },
+    {
+      id: 'action:projects',
+      title: t('search.actions.viewProjects'),
+      keywords: 'projects folders groups open',
+      route: '/projects',
+      icon: <FolderOutlined />,
+    },
+    {
+      id: 'action:filters',
+      title: t('search.actions.viewFilters'),
+      keywords: 'filters saved views open',
+      route: '/filters',
+      icon: <FilterAltOutlined />,
+    },
+    {
+      id: 'action:activities',
+      title: t('search.actions.viewActivities'),
+      keywords: 'activities history timeline log open',
+      route: '/activities',
+      icon: <HistoryRounded />,
+    },
+    {
+      id: 'action:points',
+      title: t('search.actions.viewPoints'),
+      keywords: 'points rewards score leaderboard open',
+      route: '/points',
+      icon: <TollOutlined />,
+    },
+    {
+      id: 'action:settings',
+      title: t('search.actions.openSettings'),
+      keywords: 'settings preferences configuration open',
+      route: '/settings',
+      icon: <SettingsOutlined />,
+    },
+  ].map(action => ({
+    ...action,
+    provider: 'actions',
+    subtitle: t('search.actions.navigation'),
+  })),
+]
+
+// Typing "/" as the first character switches the palette into navigation mode,
+// borrowing the slash-menu reflex from Notion and Slack. The sigil itself is
+// stripped from the visible query so the mode reads as state (the chip in the
+// input) rather than as syntax the person has to keep typing around.
+const MODE_SIGIL = '/'
+
+const parseMode = value => {
+  const text = value || ''
+  return text.startsWith(MODE_SIGIL)
+    ? { mode: 'actions', term: text.slice(MODE_SIGIL.length).trimStart() }
+    : { mode: null, term: text }
+}
+
+const readRecents = () => {
+  try {
+    return JSON.parse(localStorage.getItem(RECENTS_KEY)) || []
+  } catch {
+    return []
+  }
+}
+
+const saveRecent = result => {
+  if (result.provider === 'actions') return
+  const recent = {
+    id: result.id,
+    provider: result.provider,
+    route: result.route,
+    title: result.title,
+    subtitle: result.subtitle,
+  }
+  localStorage.setItem(
+    RECENTS_KEY,
+    JSON.stringify(
+      [recent, ...readRecents().filter(item => item.id !== result.id)].slice(
+        0,
+        6,
+      ),
+    ),
+  )
+}
+
+const Highlight = ({ query, text }) => {
+  if (!text || !query.trim()) return text || null
+  const words = query.trim().split(/\s+/).filter(Boolean)
+  const escaped = words.map(word => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+  if (!escaped.length) return text
+  const pattern = new RegExp(`(${escaped.join('|')})`, 'ig')
+  const isMatch = new RegExp(`^(${escaped.join('|')})$`, 'i')
+  return String(text)
+    .split(pattern)
+    .map((part, index) =>
+      isMatch.test(part) ? (
+        <Box
+          component='mark'
+          key={index}
+          sx={{ bgcolor: 'warning.softBg', color: 'inherit', borderRadius: 2 }}
+        >
+          {part}
+        </Box>
+      ) : (
+        part
+      ),
+    )
+}
+
+const SearchContainer = ({ children, onClose, presentation }) => {
+  const { t } = useTranslation()
+
+  if (presentation === 'page') {
+    return (
+      <Box
+        component='main'
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: 'calc(100dvh - 56px)',
+          minHeight: 0,
+          overflow: 'hidden',
+          bgcolor: 'background.body',
+        }}
+      >
+        {children}
+      </Box>
+    )
+  }
+
+  return (
+    <AppModal
+      open
+      onClose={onClose}
+      disableRestoreFocus
+      title={t('search.title')}
+      size='lg'
+      maxHeight='min(720px, calc(100dvh - 48px))'
+      contentSx={{
+        p: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+      }}
+      sx={{ height: 'min(720px, calc(100dvh - 48px))' }}
+    >
+      {children}
+    </AppModal>
+  )
+}
+
+const GlobalSearchPalette = ({
+  documents,
+  initialQuery,
+  isLoading,
+  onClose,
+  presentation = 'modal',
+}) => {
+  const navigate = useNavigate()
+  const { t } = useTranslation()
+  const focusInputRef = useCallback(node => {
+    if (node) requestAnimationFrame(() => node.focus())
+  }, [])
+  const [query, setQuery] = useState(() => parseMode(initialQuery).term)
+  const [mode, setMode] = useState(() => parseMode(initialQuery).mode)
+  const [selectedIndex, setSelectedIndex] = useState(0)
+  const [recents] = useState(readRecents)
+  const selectedResultRef = useRef(null)
+
+  const quickActions = useMemo(() => buildQuickActions(t), [t])
+  const quickActionIndex = useMemo(
+    () =>
+      new Fuse(quickActions, {
+        threshold: 0.38,
+        distance: 120,
+        ignoreLocation: true,
+        includeScore: true,
+        keys: [
+          { name: 'title', weight: 0.7 },
+          { name: 'keywords', weight: 0.3 },
+        ],
+      }),
+    [quickActions],
+  )
+
+  const searchIndexes = useMemo(
+    () =>
+      new Map(
+        GROUPS.filter(group => group !== 'actions').map(group => [
+          group,
+          new Fuse(
+            documents.filter(item => item.provider === group),
+            {
+              threshold: 0.38,
+              distance: 120,
+              ignoreLocation: true,
+              includeScore: true,
+              keys:
+                group === 'history'
+                  ? [{ name: 'body', weight: 1 }]
+                  : [
+                      { name: 'title', weight: 0.5 },
+                      { name: 'keywords', weight: 0.25 },
+                      { name: 'body', weight: 0.17 },
+                      { name: 'subtitle', weight: 0.08 },
+                    ],
+            },
+          ),
+        ]),
+      ),
+    [documents],
+  )
+
+  const searchActions = useCallback(
+    normalized => {
+      const matches = (quickActionIndex.search(normalized, { limit: 8 }) || [])
+        .map(match => ({ ...match.item, score: match.score ?? 1 }))
+        .sort((a, b) => a.score - b.score)
+      // An action whose title the query starts spelling out ("create la…") is
+      // what the person is after, so it leads. Anything matched only through
+      // its keywords stays below.
+      const leading = matches.filter(action =>
+        action.title.toLocaleLowerCase().startsWith(normalized),
+      )
+      return [
+        ...leading,
+        ...matches.filter(action => !leading.includes(action)),
+      ]
+    },
+    [quickActionIndex],
+  )
+
+  const results = useMemo(() => {
+    const normalized = query.trim().toLocaleLowerCase()
+
+    // Navigation mode answers only with actions — an empty term lists them all,
+    // which is how the sigil teaches itself the first time someone hits "/".
+    if (mode === 'actions') {
+      return normalized ? searchActions(normalized) : quickActions
+    }
+
+    if (!normalized) {
+      const currentById = new Map(documents.map(item => [item.id, item]))
+      const recentResults = recents
+        .map(item => currentById.get(item.id) || item)
+        .filter(item => item.provider !== 'history' || currentById.has(item.id))
+      return [...recentResults, ...quickActions]
+    }
+
+    const grouped = GROUPS.filter(group => group !== 'actions').flatMap(group =>
+      (searchIndexes.get(group)?.search(normalized, { limit: 7 }) || [])
+        .map(match => {
+          const title = match.item.title?.toLocaleLowerCase() ?? ''
+          let score = match.score ?? 1
+
+          if (group !== 'history') {
+            if (title === normalized) {
+              score -= 1
+            } else if (title.startsWith(normalized)) {
+              score -= 0.15
+            } else if (title.includes(normalized)) {
+              score -= 0.08
+            }
+          }
+
+          return { ...match.item, score }
+        })
+        .sort((a, b) => a.score - b.score),
+    )
+    // Keyword-only action matches stay below the real content they share words
+    // with; title-prefix matches lead.
+    const actionMatches = searchActions(normalized).slice(0, 4)
+    const leadingActions = actionMatches.filter(action =>
+      action.title.toLocaleLowerCase().startsWith(normalized),
+    )
+    const trailingActions = actionMatches.filter(
+      action => !leadingActions.includes(action),
+    )
+
+    return [
+      ...leadingActions,
+      ...grouped,
+      ...trailingActions,
+      {
+        id: 'action:filter-tasks',
+        provider: 'actions',
+        title: t('search.actions.filterTasks', { query: query.trim() }),
+        subtitle: t('search.actions.filterTasksSubtitle'),
+        route: `/chores?search=${encodeURIComponent(query.trim())}`,
+      },
+    ]
+  }, [
+    documents,
+    mode,
+    query,
+    quickActions,
+    recents,
+    searchActions,
+    searchIndexes,
+    t,
+  ])
+
+  // Everything except the always-present "filter the task list" fallback.
+  const matchCount = results.filter(
+    result => result.id !== 'action:filter-tasks',
+  ).length
+
+  useEffect(() => {
+    selectedResultRef.current?.scrollIntoView({
+      block: 'nearest',
+      inline: 'nearest',
+    })
+  }, [selectedIndex, results])
+
+  const selectResult = result => {
+    saveRecent(result)
+    navigate(result.route)
+    if (presentation === 'modal') onClose()
+  }
+
+  const onQueryChange = value => {
+    setSelectedIndex(0)
+    if (!mode) {
+      const parsed = parseMode(value)
+      setMode(parsed.mode)
+      setQuery(parsed.term)
+      return
+    }
+    setQuery(value)
+  }
+
+  const onInputKeyDown = event => {
+    // Backspace on an empty term steps back out of the mode, so the sigil is
+    // one keystroke to enter and one to leave.
+    if (event.key === 'Backspace' && mode && !query) {
+      event.preventDefault()
+      setMode(null)
+      setSelectedIndex(0)
+    } else if (event.key === 'ArrowDown') {
+      event.preventDefault()
+      setSelectedIndex(index => Math.min(index + 1, results.length - 1))
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault()
+      setSelectedIndex(index => Math.max(index - 1, 0))
+    } else if (event.key === 'Enter' && results[selectedIndex]) {
+      event.preventDefault()
+      selectResult(results[selectedIndex])
+    } else if (event.key === 'Escape') {
+      event.preventDefault()
+      onClose()
+    }
+  }
+
+  return (
+    <SearchContainer onClose={onClose} presentation={presentation}>
+      <Box sx={{ p: { xs: 1.5, sm: 2 } }}>
+        <Input
+          autoFocus
+          slotProps={{
+            input: {
+              ref: focusInputRef,
+              'aria-label': t('search.inputAriaLabel'),
+            },
+          }}
+          value={query}
+          onChange={event => onQueryChange(event.target.value)}
+          onKeyDown={onInputKeyDown}
+          placeholder={
+            mode
+              ? t('search.modes.actions.placeholder')
+              : t('search.placeholder')
+          }
+          startDecorator={
+            mode ? (
+              <Chip
+                size='sm'
+                variant='soft'
+                color='primary'
+                onClick={() => {
+                  setMode(null)
+                  setSelectedIndex(0)
+                }}
+              >
+                {t('search.modes.actions.label')}
+              </Chip>
+            ) : (
+              <SearchRounded />
+            )
+          }
+          endDecorator={
+            isLoading ? (
+              <CircularProgress size='sm' />
+            ) : presentation === 'modal' ? (
+              <Chip size='sm' variant='outlined'>
+                {t('search.escape')}
+              </Chip>
+            ) : null
+          }
+          sx={{
+            '--Input-minHeight': '48px',
+            fontSize: 'md',
+            borderRadius: 'lg',
+          }}
+        />
+        <Typography
+          level='body-xs'
+          sx={{ color: 'text.tertiary', mt: 1, px: 0.5 }}
+        >
+          {t('search.deviceNote')}
+        </Typography>
+      </Box>
+      <Divider />
+
+      <Box
+        sx={{
+          overflowY: 'auto',
+          flex: 1,
+          pb: 'var(--safe-area-inset-bottom, 0px)',
+        }}
+      >
+        {!isLoading && query.trim() && matchCount === 0 && (
+          <Box sx={{ px: 3, py: 6, textAlign: 'center' }}>
+            <InboxOutlined
+              sx={{ fontSize: 36, color: 'text.tertiary', mb: 1 }}
+            />
+            <Typography level='title-md'>{t('search.empty.title')}</Typography>
+            <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+              {mode
+                ? t('search.empty.actionsSubtitle')
+                : t('search.empty.subtitle')}
+            </Typography>
+          </Box>
+        )}
+
+        <List aria-live='polite' sx={{ px: 1, py: 1 }}>
+          {results.map((result, index) => {
+            const hasQuery = Boolean(query.trim())
+            const showHeading = hasQuery
+              ? index === 0 || result.provider !== results[index - 1].provider
+              : index === 0 ||
+                (result.provider === 'actions' &&
+                  results[index - 1].provider !== 'actions')
+            return (
+              <Box key={result.id}>
+                {showHeading && (
+                  <Typography
+                    level='body-xs'
+                    sx={{
+                      color: 'text.tertiary',
+                      fontWeight: 'lg',
+                      px: 1.5,
+                      pt: index ? 2 : 0.5,
+                      pb: 0.5,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.08em',
+                    }}
+                  >
+                    {!query.trim() && result.provider !== 'actions'
+                      ? t('search.recent')
+                      : t(`search.groups.${result.provider}`)}
+                  </Typography>
+                )}
+                <ListItemButton
+                  ref={index === selectedIndex ? selectedResultRef : null}
+                  selected={index === selectedIndex}
+                  onMouseMove={() => setSelectedIndex(index)}
+                  onClick={() => selectResult(result)}
+                  sx={{
+                    borderRadius: 'md',
+                    py: 1.1,
+                    alignItems: 'flex-start',
+                  }}
+                >
+                  <ListItemDecorator
+                    sx={{ mt: 0.25, color: result.color || 'text.secondary' }}
+                  >
+                    {result.icon || ICONS[result.provider]}
+                  </ListItemDecorator>
+                  <ListItemContent>
+                    <Typography
+                      level='title-sm'
+                      sx={{ overflowWrap: 'anywhere' }}
+                    >
+                      <Highlight query={query} text={result.title} />
+                    </Typography>
+                    <Typography
+                      level='body-xs'
+                      sx={{ color: 'text.secondary' }}
+                      noWrap
+                    >
+                      {[result.subtitle, result.body]
+                        .filter(Boolean)
+                        .join(' · ')}
+                    </Typography>
+                  </ListItemContent>
+                </ListItemButton>
+              </Box>
+            )
+          })}
+        </List>
+      </Box>
+      <Divider />
+      <Box
+        sx={{
+          display: { xs: 'none', sm: 'flex' },
+          gap: 2,
+          px: 2,
+          py: 1,
+          color: 'text.tertiary',
+        }}
+      >
+        <Typography level='body-xs'>
+          ↑↓ {t('search.footer.navigate')}
+        </Typography>
+        <Typography level='body-xs'>↵ {t('search.footer.open')}</Typography>
+        {!mode && (
+          <Typography level='body-xs'>
+            {t('search.footer.slashHint')}
+          </Typography>
+        )}
+        <Typography level='body-xs' sx={{ ml: 'auto' }}>
+          {query.trim() || mode
+            ? t('search.footer.results', { count: matchCount })
+            : t('search.footer.typeToSearch')}
+        </Typography>
+      </Box>
+    </SearchContainer>
+  )
+}
+
+SearchContainer.propTypes = {
+  children: PropTypes.node.isRequired,
+  onClose: PropTypes.func.isRequired,
+  presentation: PropTypes.oneOf(['modal', 'page']).isRequired,
+}
+
+Highlight.propTypes = {
+  query: PropTypes.string.isRequired,
+  text: PropTypes.string,
+}
+
+GlobalSearchPalette.propTypes = {
+  documents: PropTypes.arrayOf(PropTypes.object).isRequired,
+  initialQuery: PropTypes.string,
+  isLoading: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  presentation: PropTypes.oneOf(['modal', 'page']),
+}
+
+export default GlobalSearchPalette

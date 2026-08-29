@@ -1,13 +1,21 @@
 import { Preferences } from '@capacitor/preferences'
+
 import { API_URL } from '../Config'
 import { networkManager } from '../hooks/NetworkManager'
+import {
+  recordApiFailure,
+  recordServerVersionFromResponse,
+} from '../service/DiagnosticsSession'
 import { logout, RefreshToken } from './Fetcher'
+import { isOAuthExchangeInProgress } from './OAuthExchangeState'
 import { offlineDB } from './OfflineDB'
 import {
   clearAllTokens,
   isRefreshTokenExpired,
   saveTokens,
 } from './TokenStorage'
+
+const OAUTH_EXCHANGE_IN_PROGRESS = 'OAuth exchange in progress'
 
 class ApiClient {
   constructor() {
@@ -46,6 +54,13 @@ class ApiClient {
   }
 
   async refreshToken() {
+    // No session exists yet while an OAuth code exchange is in flight, so there
+    // is nothing to refresh. Callers must treat this as a non-fatal failure
+    // (see request()) rather than an expired session.
+    if (isOAuthExchangeInProgress()) {
+      return { success: false, error: OAUTH_EXCHANGE_IN_PROGRESS }
+    }
+
     // Check if refresh token is expired BEFORE attempting refresh
     const refreshExpired = await isRefreshTokenExpired()
     if (refreshExpired) {
@@ -119,7 +134,7 @@ class ApiClient {
 
   // Process queued requests after refresh attempt
   processQueue(error, token = null) {
-    this.failedQueue.forEach(({ resolve, reject }) => {
+    this.failedQueue.forEach(({ reject, resolve }) => {
       if (error) {
         reject(error)
       } else {
@@ -132,6 +147,29 @@ class ApiClient {
 
   // Helper to avoid repeating cleanup code
   async handleLogout() {
+    // Backstop for every forced-logout path: never tear down the session while
+    // an OAuth exchange is running, or we clear the tokens it just saved and
+    // reload the page out from under it.
+    if (isOAuthExchangeInProgress()) {
+      console.log('Skipping forced logout: OAuth exchange in progress')
+      return
+    }
+
+    // An expired session on an invite link would otherwise drop the code on the
+    // way to /login. Stash it first so sign-in returns to the join.
+    try {
+      const { pathname, search } = window.location
+      if (pathname === '/circle/join') {
+        const code = new URLSearchParams(search).get('code')
+        if (code) {
+          const { setPendingInvite } = await import('./PendingInvite')
+          setPendingInvite(code)
+        }
+      }
+    } catch (e) {
+      console.error('Error preserving pending invite on logout', e)
+    }
+
     await clearAllTokens()
     try {
       await offlineDB.clearAll()
@@ -180,6 +218,17 @@ class ApiClient {
       // 1. Initial Request
       let response = await fetch(url, config)
       clearTimeout(timeoutId)
+
+      // Passive diagnostics: learn the server build from whatever it already
+      // answers, and keep the last few refusals for crash reports.
+      recordServerVersionFromResponse(response)
+      if (!response.ok) {
+        recordApiFailure({
+          endpoint,
+          method: config.method,
+          status: response.status,
+        })
+      }
 
       // 2. Check for 401 (Unauthorized)
       if (response.status === 401) {
@@ -230,6 +279,13 @@ class ApiClient {
             this.handleLogout()
             return null
           }
+        } else if (refreshResult.error === OAUTH_EXCHANGE_IN_PROGRESS) {
+          // Expected 401: the code exchange hasn't produced tokens yet. Fail
+          // just this request — logging out here would wipe storage and hard
+          // navigate to /login, aborting the exchange fetch mid-flight.
+          queuedPromise.catch(() => {}) // not returned below; keep it handled
+          this.processQueue(new Error(refreshResult.error), null)
+          return response
         } else if (refreshResult.error === 'Already refreshing') {
           // This shouldn't happen since we check isRefreshing above, but handle it anyway
           console.log('Already refreshing - waiting for refresh to complete')
@@ -255,6 +311,7 @@ class ApiClient {
         error?.name === 'AbortError' && options.signal?.aborted
       if (!externalAbort) {
         networkManager.setServerUnreachable()
+        recordApiFailure({ endpoint, method: config.method, status: 'network' })
       }
       console.error('Request failed', error)
       throw error

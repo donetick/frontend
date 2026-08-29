@@ -1,3 +1,4 @@
+import { Capacitor } from '@capacitor/core'
 import {
   Archive,
   AttachFile,
@@ -7,7 +8,7 @@ import {
   Edit,
   History,
   HourglassEmpty,
-  LowPriority,
+  MoreVert,
   OpenInFull,
   PeopleAlt,
   Person,
@@ -25,18 +26,13 @@ import {
   Checkbox,
   Chip,
   Container,
-  Dropdown,
   FormControl,
   Grid,
   IconButton,
   Input,
-  Menu,
-  MenuButton,
-  MenuItem,
   Sheet,
   Typography,
 } from '@mui/joy'
-import { Divider } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
@@ -45,6 +41,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useLocalization } from '../../contexts/LocalizationContext'
+import { useDescriptionHtml } from '../../hooks/useDescriptionHtml'
 import { usePendingCommands } from '../../hooks/usePendingCommands'
 import {
   useChoreDetails,
@@ -68,27 +65,39 @@ import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import { commandQueue, CommandType } from '../../utils/CommandQueue'
 import {
   ApproveChore,
+  ArchiveChore,
+  DeleteChore,
   GetChoreDetailById,
   MarkChoreComplete,
+  NudgeChore,
   RejectChore,
+  SaveChore,
   SkipChore,
   UnArchiveChore,
   UndoChoreAction,
+  UpdateChoreAssignee,
   UpdateChorePriority,
+  UpdateDueDate,
 } from '../../utils/Fetcher'
 import { offlineDB } from '../../utils/OfflineDB'
-import Priorities from '../../utils/Priorities'
 import { getSafeBottomPadding } from '../../utils/SafeAreaUtils.js'
-import AttachmentBrowserModal from '../Modals/Inputs/AttachmentBrowserModal'
-import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
-import NoteViewerModal from '../Modals/Inputs/NoteViewerModal'
+import ChoreActionMenu from '../components/ChoreActionMenu'
+import DueDatePickerModal, {
+  combineDueDate,
+  splitDueDate,
+} from '../components/DueDatePickerModal'
 import LoadingComponent from '../components/Loading.jsx'
 import PendingBadge from '../components/PendingBadge'
 import RichTextEditor from '../components/RichTextEditor.jsx'
 import SubTasks from '../components/SubTask.jsx'
+import AttachmentBrowserModal from '../Modals/Inputs/AttachmentBrowserModal'
+import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
+import NoteViewerModal from '../Modals/Inputs/NoteViewerModal'
+import NudgeModal from '../Modals/Inputs/NudgeModal'
+import SelectModal from '../Modals/Inputs/SelectModal'
+import WriteNFCModal from '../Modals/Inputs/WriteNFCModal'
 import TimePassedCard from './TimePassedCard.jsx'
 import TimerSplitButton from './TimerSplitButton.jsx'
-import { useDescriptionHtml } from '../../hooks/useDescriptionHtml'
 
 const isNetworkError = err =>
   err instanceof TypeError && err.message === 'Failed to fetch'
@@ -106,6 +115,11 @@ const decodeHtmlEntities = value => {
 
 const hasHtmlTags = value => /<\/?[a-z][\s\S]*>/i.test(value)
 
+const getNFCUrl = choreId =>
+  Capacitor.getPlatform() === 'android' || Capacitor.getPlatform() === 'ios'
+    ? `donetick://chores/${choreId}`
+    : `${window.location.origin}/chores/${choreId}`
+
 const ChoreView = () => {
   const { t } = useTranslation('chores')
   const { fmt } = useLocalization()
@@ -116,7 +130,7 @@ const ChoreView = () => {
   const { choreId } = useParams()
   const [note, setNote] = useState(null)
   const queryClient = useQueryClient()
-  const { showSuccess, showError, showUndo } = useNotification()
+  const { showError, showSuccess, showUndo } = useNotification()
 
   const [searchParams] = useSearchParams()
 
@@ -124,7 +138,7 @@ const ChoreView = () => {
   const [confirmModelConfig, setConfirmModelConfig] = useState({
     isOpen: false,
   })
-  const [chorePriority, setChorePriority] = useState(null)
+  const [activeModal, setActiveModal] = useState(null)
   const [noteViewerConfig, setNoteViewerConfig] = useState({ isOpen: false })
   const [timerActionConfig, setTimerActionConfig] = useState({ isOpen: false })
   const [attachmentBrowserOpen, setAttachmentBrowserOpen] = useState(false)
@@ -165,7 +179,6 @@ const ChoreView = () => {
       return
     }
     setChore(choreData.res)
-    setChorePriority(Priorities.find(p => p.value === choreData.res.priority))
     document.title = 'Donetick: ' + choreData.res.name
 
     setPerformers(circleMembersData.res)
@@ -190,7 +203,7 @@ const ChoreView = () => {
             chore.lastCompletedDate
               ? performers.find(p => p.userId === chore.lastCompletedBy)
                   ?.displayName
-              : 'N/A'
+              : t('choreView.na')
           }`,
         },
         {
@@ -210,7 +223,11 @@ const ChoreView = () => {
 
           subtext2:
             chore.deadlineOffset > 0 && chore.nextDueDate
-              ? `Deadline: ${moment(chore.nextDueDate).add(chore.deadlineOffset, 'seconds').fromNow()}`
+              ? t('choreView.deadline', {
+                  date: moment(chore.nextDueDate)
+                    .add(chore.deadlineOffset, 'seconds')
+                    .fromNow(),
+                })
               : null,
         },
         {
@@ -236,7 +253,7 @@ const ChoreView = () => {
     UpdateChorePriority(choreId, priority.value).then(response => {
       if (response.ok) {
         response.json().then(() => {
-          setChorePriority(priority)
+          setChore(prev => ({ ...prev, priority: priority.value }))
           queryClient.invalidateQueries(['chores'])
         })
       }
@@ -280,7 +297,7 @@ const ChoreView = () => {
                   message: t('choreView.taskCompletionUndone'),
                 })
               } else {
-                throw new Error('Failed to undo')
+                throw new Error(t('choreView.unableUndo'))
               }
             } catch (error) {
               showError({
@@ -318,7 +335,7 @@ const ChoreView = () => {
         })
         queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
         showSuccess({
-          message: "You're offline — completion will sync when back online",
+          message: t('choreView.offlineComplete'),
           undoAction: async () => {
             await commandQueue.cancel(cmdId)
             queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
@@ -327,7 +344,7 @@ const ChoreView = () => {
       } else {
         showError({
           title: t('choreView.undoFailed'),
-          message: error?.message || 'Unable to complete task',
+          message: error?.message || t('choreView.unableComplete'),
         })
       }
     }
@@ -356,7 +373,7 @@ const ChoreView = () => {
                   message: t('choreView.taskSkipUndone'),
                 })
               } else {
-                throw new Error('Failed to undo')
+                throw new Error(t('choreView.unableUndo'))
               }
             } catch (error) {
               showError({
@@ -376,7 +393,7 @@ const ChoreView = () => {
         )
         queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
         showSuccess({
-          message: "You're offline — skip will sync when back online",
+          message: t('choreView.offlineSkip'),
           undoAction: async () => {
             await commandQueue.cancel(cmdId)
             queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
@@ -385,7 +402,7 @@ const ChoreView = () => {
       } else {
         showError({
           title: t('choreView.undoFailed'),
-          message: error?.message || 'Unable to skip task',
+          message: error?.message || t('choreView.unableSkip'),
         })
       }
     }
@@ -411,7 +428,7 @@ const ChoreView = () => {
           setChore(startedChore)
           queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
           showSuccess({
-            message: "You're offline — start will sync when back online",
+            message: t('choreView.offlineStart'),
             undoAction: async () => {
               await commandQueue.cancel(cmdId)
               queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
@@ -423,7 +440,7 @@ const ChoreView = () => {
 
         showError({
           title: t('choreView.undoFailed'),
-          message: error?.message || 'Unable to start task',
+          message: error?.message || t('choreView.unableStart'),
         })
       },
     })
@@ -450,7 +467,7 @@ const ChoreView = () => {
           setChore(pausedChore)
           queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
           showSuccess({
-            message: "You're offline — pause will sync when back online",
+            message: t('choreView.offlinePause'),
             undoAction: async () => {
               await commandQueue.cancel(cmdId)
               queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
@@ -462,7 +479,7 @@ const ChoreView = () => {
 
         showError({
           title: t('choreView.undoFailed'),
-          message: error?.message || 'Unable to pause task',
+          message: error?.message || t('choreView.unablePause'),
         })
       },
     })
@@ -566,7 +583,7 @@ const ChoreView = () => {
         setChore({ ...chore, isActive: true })
         queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
         showSuccess({
-          message: "You're offline — restore will sync when back online",
+          message: t('choreView.offlineRestore'),
           undoAction: async () => {
             await commandQueue.cancel(cmdId)
             await offlineDB.saveChores([{ ...chore, isActive: false }])
@@ -576,10 +593,174 @@ const ChoreView = () => {
         })
       } else {
         showError({
-          title: 'Failed to restore',
-          message: error.message || 'Unable to restore task',
+          title: t('choreView.restoreFailed'),
+          message: error.message || t('choreView.unableRestore'),
         })
       }
+    }
+  }
+
+  const confirmSkipTask = () => {
+    setConfirmModelConfig({
+      isOpen: true,
+      title: t('choreView.skipTask'),
+      message: t('choreView.skipTaskConfirmation'),
+      confirmText: t('choreView.skip'),
+      cancelText: t('choreView.cancel'),
+      onClose: confirmed => {
+        if (confirmed) {
+          handleSkippingTask()
+        }
+        setConfirmModelConfig({})
+      },
+    })
+  }
+
+  const handleArchiveChore = async () => {
+    try {
+      const response = await ArchiveChore(choreId)
+      if (response.ok) {
+        await offlineDB.saveChores([{ ...chore, isActive: false }])
+        setChore({ ...chore, isActive: false })
+        queryClient.invalidateQueries(['chores'])
+      }
+    } catch (error) {
+      showError({
+        title: t('choreView.failedArchive'),
+        message: error?.message || t('choreView.unableArchiveTask'),
+      })
+    }
+  }
+
+  const confirmDeleteChore = () => {
+    setConfirmModelConfig({
+      isOpen: true,
+      title: t('choreView.deleteTaskTitle'),
+      message: t('choreView.deleteTaskMessage'),
+      confirmText: t('common:delete'),
+      cancelText: t('choreView.cancel'),
+      onClose: async confirmed => {
+        setConfirmModelConfig({})
+        if (!confirmed) return
+        try {
+          const response = await DeleteChore(choreId)
+          if (response.ok) {
+            queryClient.invalidateQueries(['chores'])
+            showSuccess({
+              title: t('choreView.taskDeletedTitle'),
+              message: t('choreView.taskDeletedMessage'),
+            })
+            navigate('/chores')
+          }
+        } catch (error) {
+          showError({
+            title: t('choreView.failedDelete'),
+            message: error?.message || t('choreView.unableDeleteTask'),
+          })
+        }
+      },
+    })
+  }
+
+  const handleDueDateChange = async newDate => {
+    try {
+      const response = await UpdateDueDate(choreId, newDate)
+      if (response.ok) {
+        setChore(prev => ({ ...prev, nextDueDate: newDate }))
+        queryClient.invalidateQueries(['chores'])
+      }
+    } catch (error) {
+      showError({
+        title: t('choreView.failedReschedule'),
+        message: error?.message || t('choreView.unableChangeDueDate'),
+      })
+    }
+  }
+
+  const handleMoveToProject = async project => {
+    const projectId = project?.id ?? null
+    try {
+      const response = await SaveChore({ ...chore, projectId })
+      if (response.ok) {
+        setChore(prev => ({ ...prev, projectId }))
+        queryClient.invalidateQueries(['chores'])
+        showSuccess({
+          title: t('choreView.taskMovedTitle'),
+          message: t('choreView.taskMovedMessage', {
+            project: project?.name || t('actionMenu.defaultProject'),
+          }),
+        })
+      }
+    } catch (error) {
+      showError({
+        title: t('choreView.failedMoveTask'),
+        message: error?.message || t('choreView.unableMoveTaskToProject'),
+      })
+    }
+  }
+
+  const handleNudge = async ({ message, notifyAllAssignees }) => {
+    try {
+      const response = await NudgeChore(choreId, {
+        message,
+        notifyAllAssignees,
+      })
+      if (!response.ok) {
+        throw new Error(t('choreView.failedSendNudgeError'))
+      }
+      const data = await response.json()
+      showSuccess({
+        title: t('choreView.nudgeSentTitle'),
+        message: data.message || t('choreView.nudgeSentMessage'),
+      })
+    } catch (error) {
+      showError({
+        title: t('choreView.failedSendNudgeTitle'),
+        message: error?.message || t('choreView.unableSendNudge'),
+      })
+    }
+  }
+
+  const handleAssigneeChange = async assigneeId => {
+    try {
+      const response = await UpdateChoreAssignee(choreId, assigneeId)
+      if (response.ok) {
+        const data = await response.json()
+        setChore(data.res)
+        queryClient.invalidateQueries(['chores'])
+      }
+    } catch (error) {
+      showError({
+        title: t('choreView.failedDelegate'),
+        message: error?.message || t('choreView.unableChangeAssignee'),
+      })
+    }
+  }
+
+  // Actions the menu raises that ChoreView owns; the rest of its items either
+  // navigate on their own or come in through the dedicated callbacks.
+  const handleMenuAction = (type, _chore, extraData) => {
+    switch (type) {
+      case 'skip':
+        confirmSkipTask()
+        break
+      case 'archive':
+        handleArchiveChore()
+        break
+      case 'unarchive':
+        handleUnarchiveChore()
+        break
+      case 'delete':
+        confirmDeleteChore()
+        break
+      case 'changeDueDate':
+        handleDueDateChange(extraData?.date?.toISOString() ?? null)
+        break
+      case 'moveToProject':
+        handleMoveToProject(extraData?.project)
+        break
+      default:
+        break
     }
   }
 
@@ -687,8 +868,7 @@ const ChoreView = () => {
               onClick={() => setAttachmentBrowserOpen(true)}
               sx={{ cursor: 'pointer' }}
             >
-              {chore.attachments.length}{' '}
-              {chore.attachments.length === 1 ? 'attachment' : 'attachments'}
+              {t('choreView.attachment', { count: chore.attachments.length })}
             </Chip>
           )}
         </Box>
@@ -794,64 +974,6 @@ const ChoreView = () => {
             mb: 1,
           }}
         >
-          <Dropdown>
-            <MenuButton
-              disabled={chore.isActive === false}
-              color={
-                chorePriority?.name === 'P1'
-                  ? 'danger'
-                  : chorePriority?.name === 'P2'
-                    ? 'warning'
-                    : 'neutral'
-              }
-              sx={{
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                p: 1,
-                width: '100%',
-              }}
-              variant='plain'
-            >
-              {chorePriority ? chorePriority.icon : <LowPriority />}
-              {chorePriority ? chorePriority.name : t('choreView.noPriority')}
-            </MenuButton>
-            <Menu>
-              {Priorities.map((priority, index) => (
-                <MenuItem
-                  sx={{
-                    pr: 1,
-                    py: 1,
-                  }}
-                  key={index}
-                  onClick={() => {
-                    handleUpdatePriority(priority)
-                  }}
-                  color={priority.color}
-                >
-                  {priority.icon}
-                  {priority.name}
-                </MenuItem>
-              ))}
-              <Divider />
-              <MenuItem
-                sx={{
-                  pr: 1,
-                  py: 1,
-                }}
-                onClick={() => {
-                  handleUpdatePriority({
-                    name: t('choreView.noPriority'),
-                    value: 0,
-                  })
-                  setChorePriority(null)
-                }}
-              >
-                {t('choreView.noPriority')}
-              </MenuItem>
-            </Menu>
-          </Dropdown>
-
           <Button
             size='sm'
             color='neutral'
@@ -887,8 +1009,40 @@ const ChoreView = () => {
             }}
           >
             <Edit />
-            Edit
+            {t('choreView.edit')}
           </Button>
+          <ChoreActionMenu
+            chore={chore}
+            hiddenActions={['view']}
+            onAction={handleMenuAction}
+            onNudge={() => setActiveModal('nudge')}
+            onWriteNFC={() => setActiveModal('writeNFC')}
+            onCompleteWithNote={() => setNote('')}
+            onCompleteWithPastDate={() =>
+              setCompletedDate(moment(new Date()).format('YYYY-MM-DDTHH:00:00'))
+            }
+            onChangeAssignee={() => setActiveModal('changeAssignee')}
+            onChangeDueDate={() => setActiveModal('changeDueDate')}
+            onChangePriority={handleUpdatePriority}
+            onDelete={confirmDeleteChore}
+            trigger={
+              <Button
+                size='sm'
+                color='neutral'
+                variant='plain'
+                fullWidth
+                sx={{
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  p: 1,
+                }}
+              >
+                <MoreVert />
+                {t('choreView.more', 'More')}
+              </Button>
+            }
+          />
         </Box>
 
         {chore.description && (
@@ -1261,21 +1415,7 @@ const ChoreView = () => {
                   <Button
                     fullWidth
                     size='lg'
-                    onClick={() => {
-                      setConfirmModelConfig({
-                        isOpen: true,
-                        title: t('choreView.skipTask'),
-                        message: t('choreView.skipTaskConfirmation'),
-                        confirmText: t('choreView.skip'),
-                        cancelText: t('choreView.cancel'),
-                        onClose: confirmed => {
-                          if (confirmed) {
-                            handleSkippingTask()
-                          }
-                          setConfirmModelConfig({})
-                        },
-                      })
-                    }}
+                    onClick={confirmSkipTask}
                     disabled={
                       notInCompletionWindow(chore) || chore.isActive === false
                     }
@@ -1294,10 +1434,11 @@ const ChoreView = () => {
                 level='body-sm'
                 sx={{ color: 'warning.plainColor', textAlign: 'center', mb: 1 }}
               >
-                Available to complete starting{' '}
-                {moment(chore.nextDueDate)
-                  .subtract(chore.completionWindow, 'hours')
-                  .format('MM/DD/YYYY hh:mm A')}
+                {t('choreView.availableToCompleteStarting', {
+                  date: moment(chore.nextDueDate)
+                    .subtract(chore.completionWindow, 'hours')
+                    .format('MM/DD/YYYY hh:mm A'),
+                })}
               </Typography>
             )}
             {/* Timer Button - Show split button when timer is active, regular button otherwise */}
@@ -1348,6 +1489,52 @@ const ChoreView = () => {
         <ConfirmationModal config={confirmModelConfig} />
         <ConfirmationModal config={timerActionConfig} />
         <NoteViewerModal config={noteViewerConfig} />
+        {activeModal === 'changeDueDate' && (
+          <DueDatePickerModal
+            open={true}
+            title={t('choreView.changeDueDate', 'Change due date')}
+            {...splitDueDate(chore.nextDueDate)}
+            onClose={() => setActiveModal(null)}
+            onApply={parts => {
+              handleDueDateChange(combineDueDate(parts)?.toISOString() ?? null)
+              setActiveModal(null)
+            }}
+            onRemove={() => {
+              handleDueDateChange(null)
+              setActiveModal(null)
+            }}
+          />
+        )}
+        {activeModal === 'changeAssignee' && (
+          <SelectModal
+            isOpen={true}
+            options={performers}
+            displayKey='displayName'
+            title={t('choreView.delegateToSomeoneElse')}
+            placeholder={t('choreView.selectAPerformer')}
+            onClose={() => setActiveModal(null)}
+            onSave={selected => handleAssigneeChange(selected.id)}
+          />
+        )}
+        {activeModal === 'nudge' && (
+          <NudgeModal
+            config={{
+              isOpen: true,
+              choreId: chore.id,
+              onClose: () => setActiveModal(null),
+              onConfirm: handleNudge,
+            }}
+          />
+        )}
+        {activeModal === 'writeNFC' && (
+          <WriteNFCModal
+            config={{
+              isOpen: true,
+              url: getNFCUrl(choreId),
+              onClose: () => setActiveModal(null),
+            }}
+          />
+        )}
         <AttachmentBrowserModal
           choreId={choreId}
           isOpen={attachmentBrowserOpen}

@@ -1,8 +1,11 @@
 import { Browser } from '@capacitor/browser'
 import { Capacitor } from '@capacitor/core'
-import { Close, Download } from '@mui/icons-material'
-import { Box, Button, CircularProgress, Typography } from '@mui/joy'
+import { Download } from '@mui/icons-material'
+import { Box, CircularProgress, Typography } from '@mui/joy'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
+import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
 const openUrl = async url => {
@@ -28,11 +31,12 @@ const downloadUrl = (url, fileName) => {
 }
 
 function AttachmentViewerModal({ config }) {
+  const { t } = useTranslation('common')
   const { ResponsiveModal } = useResponsiveModal()
   const [imgLoaded, setImgLoaded] = useState(false)
   const [imgError, setImgError] = useState(false)
 
-  const { isOpen, url, fileName, onClose } = config || {}
+  const { fileName, isOpen, onClose, url } = config || {}
 
   const handleClose = () => {
     setImgLoaded(false)
@@ -47,25 +51,15 @@ function AttachmentViewerModal({ config }) {
       title={fileName || 'Attachment'}
       maxHeight='92vh'
       footer={
-        <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
-          <Button
-            variant='plain'
-            color='neutral'
-            startDecorator={<Close />}
-            onClick={handleClose}
-          >
-            Close
-          </Button>
-          <Button
-            variant='soft'
-            color='neutral'
-            startDecorator={<Download />}
-            onClick={() => downloadUrl(url, fileName)}
-            disabled={!url}
-          >
-            Download
-          </Button>
-        </Box>
+        <ModalActions
+          secondary={{ label: t('close'), onClick: handleClose }}
+          primary={{
+            label: 'Download',
+            startDecorator: <Download />,
+            onClick: () => downloadUrl(url, fileName),
+            disabled: !url,
+          }}
+        />
       }
     >
       <Box
@@ -78,14 +72,11 @@ function AttachmentViewerModal({ config }) {
         }}
       >
         {!imgLoaded && !imgError && (
-          <CircularProgress
-            sx={{ position: 'absolute' }}
-            size='md'
-          />
+          <CircularProgress sx={{ position: 'absolute' }} size='md' />
         )}
         {imgError ? (
           <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            Failed to load image.
+            {t('imageLoadFailed')}
           </Typography>
         ) : (
           <Box

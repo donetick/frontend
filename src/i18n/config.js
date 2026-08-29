@@ -1,7 +1,10 @@
+import 'moment/locale/he'
+import 'moment/locale/ru'
+import 'moment/locale/ja'
+
 import i18n from 'i18next'
 import LanguageDetector from 'i18next-browser-languagedetector'
 import HttpBackend from 'i18next-http-backend'
-import 'moment/locale/ja'
 import { initReactI18next } from 'react-i18next'
 
 i18n
@@ -11,7 +14,7 @@ i18n
   .init({
     fallbackLng: 'en',
     debug: import.meta.env.DEV,
-    
+    returnEmptyString: false,
     interpolation: {
       escapeValue: false,
     },
@@ -20,7 +23,19 @@ i18n
       loadPath: '/locales/{{lng}}/{{ns}}.json',
     },
 
-    ns: ['common', 'settings', 'chores'],
+    ns: [
+      'auth',
+      'common',
+      'settings',
+      'chores',
+      'labels',
+      'history',
+      'filters',
+      'things',
+      'projects',
+      'timer',
+      'points',
+    ],
     defaultNS: 'common',
 
     detection: {

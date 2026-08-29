@@ -1,39 +1,38 @@
 import { Save } from '@mui/icons-material'
-import {
-  Box,
-  Button,
-  Chip,
-  Divider,
-  Input,
-  Typography,
-} from '@mui/joy'
+import { Box, Button, Chip, Divider, Input, Typography } from '@mui/joy'
 import { useEffect, useMemo, useState } from 'react'
-import BottomSheetModal from '../../../components/common/BottomSheetModal'
+import { useTranslation } from 'react-i18next'
+
+import AppModal from '../../../components/common/AppModal'
+import ModalActions from '../../../components/common/ModalActions'
+import { FILTER_COLORS } from '../../../utils/Colors'
+import { applyFilter } from '../../../utils/FilterEngine'
 import FilterBuilderContent, {
   conditionsToSelections,
   defaultSelections,
   selectionsToConditions,
 } from '../../Chores/components/FilterBuilderContent'
-import { FILTER_COLORS } from '../../../utils/Colors'
-import { applyFilter } from '../../../utils/FilterEngine'
 import { useFilters } from '../../Filters/FilterQueries'
 
+const EMPTY_FILTERS = []
+
 const AdvancedFilterBuilder = ({
+  allChores = [],
+  editingFilter = null,
   isOpen,
+  labels = [],
+  members = [],
   onClose,
   onSave,
-  members = [],
-  labels = [],
   projects = [],
-  allChores = [],
   userProfile = null,
-  editingFilter = null,
 }) => {
+  const { t } = useTranslation('filters')
   const [filterName, setFilterName] = useState('')
   const [filterColor, setFilterColor] = useState(FILTER_COLORS[0].value)
   const [selections, setSelections] = useState(defaultSelections())
   const [error, setError] = useState('')
-  const { data: existedFilters = [] } = useFilters()
+  const { data: existedFilters = EMPTY_FILTERS } = useFilters()
 
   const filterNameExists = (name, excludeId = null) =>
     existedFilters.some(
@@ -55,9 +54,12 @@ const AdvancedFilterBuilder = ({
       setSelections(defaultSelections())
     }
     setError('')
-  }, [editingFilter, isOpen])
+  }, [editingFilter, existedFilters, isOpen])
 
-  const conditions = useMemo(() => selectionsToConditions(selections), [selections])
+  const conditions = useMemo(
+    () => selectionsToConditions(selections),
+    [selections],
+  )
 
   const previewChores = useMemo(() => {
     if (conditions.length === 0) return []
@@ -77,15 +79,15 @@ const AdvancedFilterBuilder = ({
 
   const handleSave = () => {
     if (!filterName.trim()) {
-      setError('Please enter a filter name')
+      setError(t('builder.errorName'))
       return
     }
     if (filterNameExists(filterName.trim(), editingFilter?.id)) {
-      setError('A filter with this name already exists')
+      setError(t('nameExists'))
       return
     }
     if (conditions.length === 0) {
-      setError('Please configure at least one filter condition')
+      setError(t('builder.errorConditions'))
       return
     }
     onSave({
@@ -100,16 +102,18 @@ const AdvancedFilterBuilder = ({
   }
 
   return (
-    <BottomSheetModal
+    <AppModal
       open={isOpen}
+      isMobile
       onClose={onClose}
       maxHeight='92vh'
       title={
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {editingFilter ? 'Edit Filter' : 'New Filter'}
+          {editingFilter ? t('builder.editTitle') : t('builder.newTitle')}
           {activeConditionCount > 0 && (
             <Chip size='sm' variant='solid' color='primary'>
-              {activeConditionCount} condition{activeConditionCount !== 1 ? 's' : ''}
+              {activeConditionCount} condition
+              {activeConditionCount !== 1 ? 's' : ''}
             </Chip>
           )}
         </Box>
@@ -128,36 +132,35 @@ const AdvancedFilterBuilder = ({
             {conditions.length > 0 ? (
               <>
                 <Chip size='sm' variant='soft' color='neutral'>
-                  {previewCount} task{previewCount !== 1 ? 's' : ''}
+                  {t('tasks', { count: previewCount })}
                 </Chip>
                 {previewOverdueCount > 0 && (
                   <Chip size='sm' variant='solid' color='danger'>
-                    {previewOverdueCount} overdue
+                    {t('overdue', { count: previewOverdueCount })}
                   </Chip>
                 )}
               </>
             ) : (
               <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                Add conditions to preview
+                {t('builder.addConditions')}
               </Typography>
             )}
           </Box>
 
           {/* Actions */}
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button variant='plain' color='neutral' size='sm' onClick={onClose}>
-              Cancel
+          <ModalActions>
+            <Button variant='outlined' color='neutral' onClick={onClose}>
+              {t('common:cancel')}
             </Button>
             <Button
               variant='solid'
               color='primary'
-              size='sm'
               startDecorator={<Save sx={{ fontSize: 16 }} />}
               onClick={handleSave}
             >
-              Save Filter
+              {t('builder.save')}
             </Button>
-          </Box>
+          </ModalActions>
         </Box>
       }
     >
@@ -168,10 +171,10 @@ const AdvancedFilterBuilder = ({
             level='body-xs'
             sx={{ mb: 0.75, color: 'text.secondary', fontWeight: 600 }}
           >
-            Filter Name
+            {t('builder.name')}
           </Typography>
           <Input
-            placeholder='e.g. Overdue tasks for Alice'
+            placeholder={t('builder.namePlaceholder')}
             value={filterName}
             onChange={e => {
               setFilterName(e.target.value)
@@ -193,13 +196,13 @@ const AdvancedFilterBuilder = ({
             level='body-xs'
             sx={{ mb: 0.75, color: 'text.secondary', fontWeight: 600 }}
           >
-            Color
+            {t('builder.color')}
           </Typography>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
             {FILTER_COLORS.map(c => (
               <Box
                 key={c.value}
-                title={c.name}
+                title={t(`common:colors.${c.name}`)}
                 onClick={() => setFilterColor(c.value)}
                 sx={{
                   width: 26,
@@ -231,7 +234,7 @@ const AdvancedFilterBuilder = ({
           projects={projects}
         />
       </Box>
-    </BottomSheetModal>
+    </AppModal>
   )
 }
 

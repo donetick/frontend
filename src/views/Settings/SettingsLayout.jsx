@@ -1,7 +1,7 @@
 import { Box, Container, Typography } from '@mui/joy'
 import { useNavigate } from 'react-router-dom'
 
-const SettingsLayout = ({ title, children }) => {
+const SettingsLayout = ({ children, title }) => {
   const navigate = useNavigate()
 
   return (

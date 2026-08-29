@@ -5,16 +5,11 @@ import {
   ErrorOutline,
   Nfc,
 } from '@mui/icons-material'
-import {
-  Box,
-  Button,
-  CircularProgress,
-  IconButton,
-  Input,
-  Switch,
-  Typography,
-} from '@mui/joy'
+import { Box, IconButton, Input, Switch, Typography } from '@mui/joy'
 import { useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
+import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { startNativeNFCWrite } from '../../../service/NFCWriter'
 
@@ -28,9 +23,6 @@ const pulseKeyframes = `
     0% { transform: scale(1); opacity: 0.4; }
     70% { transform: scale(2.1); opacity: 0; }
     100% { transform: scale(2.1); opacity: 0; }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .nfc-pulse-ring { animation: none !important; }
   }
 `
 
@@ -55,7 +47,6 @@ function NFCIcon({ status }) {
       {isWaiting && (
         <>
           <Box
-            className='nfc-pulse-ring'
             sx={{
               position: 'absolute',
               inset: 0,
@@ -63,10 +54,10 @@ function NFCIcon({ status }) {
               border: '2px solid',
               borderColor: 'primary.400',
               animation: 'nfc-pulse 1.8s ease-out infinite',
+              '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
             }}
           />
           <Box
-            className='nfc-pulse-ring'
             sx={{
               position: 'absolute',
               inset: 0,
@@ -74,6 +65,7 @@ function NFCIcon({ status }) {
               border: '2px solid',
               borderColor: 'primary.300',
               animation: 'nfc-pulse-2 1.8s ease-out infinite 0.4s',
+              '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
             }}
           />
         </>
@@ -115,6 +107,7 @@ function NFCIcon({ status }) {
 }
 
 function WriteNFCModal({ config }) {
+  const { t } = useTranslation('chores')
   const { ResponsiveModal } = useResponsiveModal()
   const [nfcStatus, setNfcStatus] = useState('idle')
   const [errorMessage, setErrorMessage] = useState('')
@@ -181,13 +174,11 @@ function WriteNFCModal({ config }) {
         } catch (error) {
           console.error('Error writing to NFC tag:', error)
           setNfcStatus('error')
-          setErrorMessage('Error writing to NFC tag. Please try again.')
+          setErrorMessage(t('nfc.errWrite'))
         }
       } else {
         setNfcStatus('error')
-        setErrorMessage(
-          'NFC is not supported by this browser. Copy the URL and write it to an NFC tag using a compatible device.',
-        )
+        setErrorMessage(t('nfc.errUnsupported'))
       }
     }
   }
@@ -197,44 +188,65 @@ function WriteNFCModal({ config }) {
   const isError = nfcStatus === 'error'
 
   const title = isSuccess
-    ? 'Tag written!'
+    ? t('nfc.titleSuccess')
     : isError
-      ? 'Something went wrong'
+      ? t('nfc.titleError')
       : isWaiting
-        ? 'Hold near NFC tag'
-        : 'Write to NFC'
+        ? t('nfc.titleWaiting')
+        : t('actionMenu.writeNFC')
 
   const subtitle = isSuccess
-    ? 'Your NFC tag is ready to use.'
+    ? t('nfc.subSuccess')
     : isError
       ? errorMessage
       : isWaiting
-        ? 'Keep your device near the tag until complete.'
-        : 'Encode this task link onto any NFC tag.'
+        ? t('nfc.subWaiting')
+        : t('nfc.subIdle')
 
   return (
     <>
       <style>{pulseKeyframes}</style>
-      <ResponsiveModal open={config?.isOpen} onClose={handleClose}>
+      <ResponsiveModal
+        open={config?.isOpen}
+        onClose={handleClose}
+        title={title}
+        description={subtitle}
+        closeOnBackdrop={!isWaiting}
+        closeOnEscape={!isWaiting}
+        footer={
+          isSuccess ? (
+            <ModalActions
+              primary={{
+                label: t('activity.status.done'),
+                onClick: handleClose,
+              }}
+            />
+          ) : isWaiting ? (
+            <ModalActions
+              secondary={{
+                label: t('choreView.cancel'),
+                onClick: handleCancel,
+              }}
+            />
+          ) : (
+            <ModalActions
+              secondary={{ label: t('choreView.cancel'), onClick: handleClose }}
+              primary={{
+                label:
+                  nfcStatus === 'writing'
+                    ? t('nfc.startingLabel')
+                    : t('nfc.writeTagButton'),
+                onClick: writeToNFC,
+                disabled: nfcStatus === 'writing',
+                startDecorator: <Nfc />,
+              }}
+            />
+          )
+        }
+      >
         <Box sx={{ px: 0.5, pb: 1 }}>
           {/* Icon */}
           <NFCIcon status={nfcStatus} />
-
-          {/* Heading */}
-          <Typography
-            level='title-lg'
-            textAlign='center'
-            sx={{ mb: 0.75, fontWeight: 600 }}
-          >
-            {title}
-          </Typography>
-          <Typography
-            level='body-sm'
-            textAlign='center'
-            sx={{ color: 'text.secondary', mb: 3, px: 2 }}
-          >
-            {subtitle}
-          </Typography>
 
           {/* Idle / Error: URL + toggle + CTA */}
           {!isWaiting && !isSuccess && (
@@ -250,7 +262,7 @@ function WriteNFCModal({ config }) {
                     color: 'text.tertiary',
                   }}
                 >
-                  Tag URL
+                  {t('nfc.tagUrl')}
                 </Typography>
                 <Input
                   value={getURL()}
@@ -264,11 +276,12 @@ function WriteNFCModal({ config }) {
                   }}
                   endDecorator={
                     <IconButton
+                      aria-label={t('nfc.copyUrl')}
                       size='sm'
                       variant='plain'
                       color={copied ? 'success' : 'neutral'}
                       onClick={handleCopy}
-                      title='Copy URL'
+                      title={t('nfc.copyUrl')}
                     >
                       <ContentCopy sx={{ fontSize: 16 }} />
                     </IconButton>
@@ -279,7 +292,7 @@ function WriteNFCModal({ config }) {
                     level='body-xs'
                     sx={{ color: 'success.500', mt: 0.5, textAlign: 'right' }}
                   >
-                    Copied!
+                    {t('common:copied')}
                   </Typography>
                 )}
               </Box>
@@ -298,10 +311,10 @@ function WriteNFCModal({ config }) {
               >
                 <Box>
                   <Typography level='body-sm' fontWeight={500}>
-                    Auto-complete on scan
+                    {t('nfc.autoComplete')}
                   </Typography>
                   <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                    Mark task done when tag is tapped
+                    {t('nfc.autoCompleteHint')}
                   </Typography>
                 </Box>
                 <Switch
@@ -310,54 +323,7 @@ function WriteNFCModal({ config }) {
                   size='sm'
                 />
               </Box>
-
-              <Box sx={{ display: 'flex', gap: 1.5 }}>
-                <Button
-                  size='lg'
-                  variant='outlined'
-                  color='neutral'
-                  sx={{ flex: 1 }}
-                  onClick={isError ? handleClose : handleClose}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  size='lg'
-                  sx={{ flex: 1 }}
-                  onClick={writeToNFC}
-                  disabled={nfcStatus === 'writing'}
-                  startDecorator={
-                    nfcStatus === 'writing' ? (
-                      <CircularProgress size='sm' />
-                    ) : (
-                      <Nfc />
-                    )
-                  }
-                >
-                  {nfcStatus === 'writing' ? 'Starting…' : 'Write tag'}
-                </Button>
-              </Box>
             </>
-          )}
-
-          {/* Waiting state */}
-          {isWaiting && (
-            <Button
-              size='lg'
-              variant='outlined'
-              color='neutral'
-              fullWidth
-              onClick={handleCancel}
-            >
-              Cancel
-            </Button>
-          )}
-
-          {/* Success state */}
-          {isSuccess && (
-            <Button size='lg' fullWidth onClick={handleClose}>
-              Done
-            </Button>
           )}
         </Box>
       </ResponsiveModal>

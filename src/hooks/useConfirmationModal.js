@@ -1,14 +1,16 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 const useConfirmationModal = () => {
+  const { t } = useTranslation('common')
   const [confirmModalConfig, setConfirmModalConfig] = useState({})
 
   const showConfirmation = (
     message,
     title,
     onConfirm,
-    confirmText = 'Confirm',
-    cancelText = 'Cancel',
+    confirmText = t('confirm'),
+    cancelText = t('cancel'),
     color = 'primary',
   ) => {
     setConfirmModalConfig({

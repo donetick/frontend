@@ -14,8 +14,11 @@ import {
 } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
-import { getRecurrentChipText } from '../../utils/ChoreCardHelpers'
+import { useTranslation } from 'react-i18next'
+
+import ModalActions from '../../components/common/ModalActions'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
+import { getRecurrentChipText } from '../../utils/ChoreCardHelpers'
 
 const FREQUENCY_TYPES = [
   'daily',
@@ -52,13 +55,10 @@ const MONTHS = [
   'december',
 ]
 
-const OCCURRENCE_OPTIONS = [
-  { value: 1, label: '1st' },
-  { value: 2, label: '2nd' },
-  { value: 3, label: '3rd' },
-  { value: 4, label: '4th' },
-  { value: -1, label: 'Last' },
-]
+const OCCURRENCE_VALUES = [1, 2, 3, 4, -1]
+
+// -1 is the "last occurrence" sentinel; everything else keys off its number.
+const occurrenceKey = value => (value === -1 ? 'last' : String(value))
 
 const defaultMetadata = () => ({
   unit: 'days',
@@ -75,7 +75,7 @@ const initLocalState = value => {
     }
   }
 
-  let { frequencyType, frequency, frequencyMetadata } = value
+  let { frequency, frequencyMetadata, frequencyType } = value
 
   // Normalize parser output: interval/1/days → daily, etc.
   if (frequencyType === 'interval' && frequency === 1) {
@@ -117,26 +117,29 @@ const SectionLabel = ({ children }) => (
 )
 
 // Shared time-of-day picker
-const TimeRow = ({ metadata, onUpdate }) => (
-  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mt: 2 }}>
-    <SectionLabel>Time of day</SectionLabel>
-    <Input
-      type='time'
-      size='sm'
-      value={moment(metadata?.time).format('HH:mm')}
-      onChange={e =>
-        onUpdate({
-          ...metadata,
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-          time: moment(
-            moment(new Date()).format('YYYY-MM-DD') + 'T' + e.target.value,
-          ).format(),
-        })
-      }
-      sx={{ width: 120 }}
-    />
-  </Box>
-)
+const TimeRow = ({ metadata, onUpdate }) => {
+  const { t } = useTranslation('chores')
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mt: 2 }}>
+      <SectionLabel>{t('repeat.picker.timeOfDay')}</SectionLabel>
+      <Input
+        type='time'
+        size='sm'
+        value={moment(metadata?.time).format('HH:mm')}
+        onChange={e =>
+          onUpdate({
+            ...metadata,
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            time: moment(
+              moment(new Date()).format('YYYY-MM-DD') + 'T' + e.target.value,
+            ).format(),
+          })
+        }
+        sx={{ width: 120 }}
+      />
+    </Box>
+  )
+}
 
 const pillListSx = {
   '--List-gap': '8px',
@@ -147,53 +150,57 @@ const pillListSx = {
 const IntervalSection = ({
   frequency,
   frequencyMetadata,
-  onFrequencyUpdate,
   onFrequencyMetadataUpdate,
-}) => (
-  <Box>
-    <SectionLabel>Repeat every</SectionLabel>
-    <Box
-      sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}
-    >
-      <Input
-        type='number'
-        size='sm'
-        value={frequency}
-        onChange={e =>
-          onFrequencyUpdate(Math.max(1, parseInt(e.target.value, 10) || 1))
-        }
-        sx={{ width: 72 }}
-        slotProps={{ input: { min: 1, max: 999 } }}
+  onFrequencyUpdate,
+}) => {
+  const { t } = useTranslation('chores')
+  return (
+    <Box>
+      <SectionLabel>{t('repeat.picker.repeatEvery')}</SectionLabel>
+      <Box
+        sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}
+      >
+        <Input
+          type='number'
+          size='sm'
+          value={frequency}
+          onChange={e =>
+            onFrequencyUpdate(Math.max(1, parseInt(e.target.value, 10) || 1))
+          }
+          sx={{ width: 72 }}
+          slotProps={{ input: { min: 1, max: 999 } }}
+        />
+        <List orientation='horizontal' wrap sx={pillListSx}>
+          {['days', 'weeks', 'months', 'years'].map(unit => (
+            <ListItem key={unit}>
+              <Checkbox
+                checked={frequencyMetadata?.unit === unit}
+                onClick={() =>
+                  onFrequencyMetadataUpdate({ ...frequencyMetadata, unit })
+                }
+                overlay
+                disableIcon
+                variant='soft'
+                label={t(`repeat.unit.${unit}`)}
+              />
+            </ListItem>
+          ))}
+        </List>
+      </Box>
+      <TimeRow
+        metadata={frequencyMetadata}
+        onUpdate={onFrequencyMetadataUpdate}
       />
-      <List orientation='horizontal' wrap sx={pillListSx}>
-        {['days', 'weeks', 'months', 'years'].map(unit => (
-          <ListItem key={unit}>
-            <Checkbox
-              checked={frequencyMetadata?.unit === unit}
-              onClick={() =>
-                onFrequencyMetadataUpdate({ ...frequencyMetadata, unit })
-              }
-              overlay
-              disableIcon
-              variant='soft'
-              label={unit.charAt(0).toUpperCase() + unit.slice(1)}
-            />
-          </ListItem>
-        ))}
-      </List>
     </Box>
-    <TimeRow
-      metadata={frequencyMetadata}
-      onUpdate={onFrequencyMetadataUpdate}
-    />
-  </Box>
-)
+  )
+}
 
 // Days of week section
 const DaysOfWeekSection = ({
   frequencyMetadata,
   onFrequencyMetadataUpdate,
 }) => {
+  const { t } = useTranslation('chores')
   const selectedDays = frequencyMetadata?.days || []
   const weekPattern = frequencyMetadata?.weekPattern || 'every_week'
   const selectedOccurrences = frequencyMetadata?.occurrences || []
@@ -214,7 +221,7 @@ const DaysOfWeekSection = ({
 
   return (
     <Box>
-      <SectionLabel>Days</SectionLabel>
+      <SectionLabel>{t('repeat.picker.days')}</SectionLabel>
       <List orientation='horizontal' wrap sx={pillListSx}>
         {DAYS.map(day => (
           <ListItem key={day}>
@@ -224,14 +231,14 @@ const DaysOfWeekSection = ({
               overlay
               disableIcon
               variant='soft'
-              label={day.charAt(0).toUpperCase() + day.slice(1, 3)}
+              label={t(`repeat.daysShort.${day}`)}
             />
           </ListItem>
         ))}
       </List>
 
       <Box sx={{ mt: 2 }}>
-        <SectionLabel>Pattern</SectionLabel>
+        <SectionLabel>{t('repeat.picker.pattern')}</SectionLabel>
         <RadioGroup
           orientation='horizontal'
           value={weekPattern}
@@ -253,15 +260,15 @@ const DaysOfWeekSection = ({
           }}
         >
           {[
-            { value: 'every_week', label: 'Every week' },
-            { value: 'week_of_month', label: 'Specific weeks' },
+            { value: 'every_week', labelKey: 'everyWeek' },
+            { value: 'week_of_month', labelKey: 'specificWeeks' },
           ].map(opt => (
             <Radio
               key={opt.value}
               value={opt.value}
               color='neutral'
               disableIcon
-              label={opt.label}
+              label={t(`repeat.picker.${opt.labelKey}`)}
               variant='plain'
               sx={{ px: 1.5, py: 0.5 }}
               slotProps={{
@@ -282,17 +289,17 @@ const DaysOfWeekSection = ({
 
       {weekPattern === 'week_of_month' && (
         <Box sx={{ mt: 1.5 }}>
-          <SectionLabel>Occurrences</SectionLabel>
+          <SectionLabel>{t('repeat.picker.occurrences')}</SectionLabel>
           <List orientation='horizontal' wrap sx={pillListSx}>
-            {OCCURRENCE_OPTIONS.map(opt => (
-              <ListItem key={opt.value}>
+            {OCCURRENCE_VALUES.map(opt => (
+              <ListItem key={opt}>
                 <Checkbox
-                  checked={selectedOccurrences.includes(opt.value)}
-                  onClick={() => toggleOccurrence(opt.value)}
+                  checked={selectedOccurrences.includes(opt)}
+                  onClick={() => toggleOccurrence(opt)}
                   overlay
                   disableIcon
                   variant='soft'
-                  label={opt.label}
+                  label={t(`repeat.occurrenceShort.${occurrenceKey(opt)}`)}
                 />
               </ListItem>
             ))}
@@ -312,9 +319,10 @@ const DaysOfWeekSection = ({
 const DayOfMonthSection = ({
   frequency,
   frequencyMetadata,
-  onFrequencyUpdate,
   onFrequencyMetadataUpdate,
+  onFrequencyUpdate,
 }) => {
+  const { t } = useTranslation('chores')
   const selectedMonths = frequencyMetadata?.months || []
 
   const toggleMonth = month => {
@@ -326,7 +334,7 @@ const DayOfMonthSection = ({
 
   return (
     <Box>
-      <SectionLabel>Months</SectionLabel>
+      <SectionLabel>{t('repeat.picker.months')}</SectionLabel>
       <List orientation='horizontal' wrap sx={pillListSx}>
         {MONTHS.map(month => (
           <ListItem key={month}>
@@ -336,14 +344,14 @@ const DayOfMonthSection = ({
               overlay
               disableIcon
               variant='soft'
-              label={month.charAt(0).toUpperCase() + month.slice(1, 3)}
+              label={t(`repeat.monthsShort.${month}`)}
             />
           </ListItem>
         ))}
       </List>
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mt: 2 }}>
-        <SectionLabel>Day of month</SectionLabel>
+        <SectionLabel>{t('repeat.picker.dayOfMonth')}</SectionLabel>
         <Input
           type='number'
           size='sm'
@@ -369,11 +377,11 @@ const DayOfMonthSection = ({
 }
 
 const RepeatPickerField = ({
-  value,
+  emptyDisplay = 'icon-text',
   onChange,
   onClear,
-  emptyDisplay = 'icon-text',
   size = 'sm',
+  value,
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [localFrequencyType, setLocalFrequencyType] = useState('daily')
@@ -381,6 +389,7 @@ const RepeatPickerField = ({
   const [localFrequencyMetadata, setLocalFrequencyMetadata] =
     useState(defaultMetadata)
   const { ResponsiveModal } = useResponsiveModal()
+  const { t } = useTranslation('chores')
 
   useEffect(() => {
     if (!isOpen) return
@@ -392,7 +401,9 @@ const RepeatPickerField = ({
 
   const hasRepeat = Boolean(value)
   const shouldShowLabel = hasRepeat || emptyDisplay === 'icon-text'
-  const displayLabel = hasRepeat ? getRecurrentChipText(value) : 'Repeat'
+  const displayLabel = hasRepeat
+    ? getRecurrentChipText(value)
+    : t('repeat.picker.trigger')
   const displayType = getDisplayType(localFrequencyType)
 
   const handleTypeSelect = type => {
@@ -472,6 +483,7 @@ const RepeatPickerField = ({
 
         {hasRepeat && onClear && (
           <IconButton
+            aria-label={t('repeat.picker.clearAria')}
             size='sm'
             variant='soft'
             color='danger'
@@ -481,11 +493,9 @@ const RepeatPickerField = ({
             }}
             sx={{
               position: 'absolute',
-              top: -12,
-              right: -16,
+              top: -18,
+              right: -18,
               zIndex: 10,
-              maxHeight: 18,
-              maxWidth: 18,
               borderRadius: '50%',
               '&:hover': { bgcolor: 'danger.softBg' },
             }}
@@ -498,46 +508,33 @@ const RepeatPickerField = ({
       <ResponsiveModal
         open={isOpen}
         onClose={() => setIsOpen(false)}
-        title='Repeat Schedule'
+        title={t('repeat.picker.modalTitle')}
         footer={
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-            {hasRepeat && (
-              <Button
-                variant='plain'
-                color='danger'
-                size='lg'
-                onClick={() => {
-                  onClear?.()
-                  setIsOpen(false)
-                }}
-                sx={{ mr: 'auto' }}
-              >
-                Remove
-              </Button>
-            )}
-            <Button
-              variant='outlined'
-              color='neutral'
-              size='lg'
-              onClick={() => setIsOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant='solid'
-              color='primary'
-              size='lg'
-              onClick={handleSave}
-            >
-              Apply
-            </Button>
-          </Box>
+          <ModalActions
+            tertiary={
+              hasRepeat
+                ? {
+                    label: t('repeat.picker.remove'),
+                    color: 'danger',
+                    onClick: () => {
+                      onClear?.()
+                      setIsOpen(false)
+                    },
+                  }
+                : undefined
+            }
+            secondary={{
+              label: t('common:cancel'),
+              onClick: () => setIsOpen(false),
+            }}
+            primary={{ label: t('repeat.picker.apply'), onClick: handleSave }}
+          />
         }
       >
         {/* Frequency type selector */}
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
           <Box>
-            <SectionLabel>Frequency</SectionLabel>
+            <SectionLabel>{t('repeat.picker.frequency')}</SectionLabel>
             <List orientation='horizontal' wrap sx={pillListSx}>
               {FREQUENCY_TYPES.map(type => (
                 <ListItem key={type}>
@@ -547,7 +544,7 @@ const RepeatPickerField = ({
                     overlay
                     disableIcon
                     variant='soft'
-                    label={type.charAt(0).toUpperCase() + type.slice(1)}
+                    label={t(`repeat.freqType.${type}`)}
                   />
                 </ListItem>
               ))}
@@ -558,7 +555,7 @@ const RepeatPickerField = ({
           {displayType === 'custom' && (
             <>
               <Box>
-                <SectionLabel>Schedule type</SectionLabel>
+                <SectionLabel>{t('repeat.picker.scheduleType')}</SectionLabel>
                 <RadioGroup
                   orientation='horizontal'
                   value={localFrequencyType}
@@ -578,14 +575,7 @@ const RepeatPickerField = ({
                       value={type}
                       color='neutral'
                       disableIcon
-                      label={type
-                        .split('_')
-                        .map((w, i, arr) =>
-                          i === 0 || i === arr.length - 1
-                            ? w.charAt(0).toUpperCase() + w.slice(1)
-                            : w,
-                        )
-                        .join(' ')}
+                      label={t(`repeat.repeatOnType.${type}`)}
                       variant='plain'
                       sx={{ px: 1.5, py: 0.5 }}
                       slotProps={{

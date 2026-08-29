@@ -1,23 +1,19 @@
-import {
-    Avatar,
-    Box,
-    Button,
-    FormControl,
-    FormLabel,
-    Grid,
-    Typography,
-} from '@mui/joy'
+import { Avatar, Box, FormControl, FormLabel, Grid, Typography } from '@mui/joy'
+import { useTranslation } from 'react-i18next'
+
+import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { getTextColorFromBackgroundColor } from '../../../utils/Colors'
 import PROJECT_ICONS from '../../../utils/ProjectIcons'
 
 const IconPickerModal = ({
+  currentIcon,
   isOpen,
   onClose,
   onSelect,
-  currentIcon,
   projectColor,
 }) => {
+  const { t } = useTranslation('projects')
   const { ResponsiveModal } = useResponsiveModal()
 
   const handleIconClick = iconValue => {
@@ -32,11 +28,15 @@ const IconPickerModal = ({
       size='lg'
       fullWidth={true}
       unmountDelay={250}
-      title='Choose Project Icon'
+      title={t('iconPicker.chooseIcon')}
+      footer={
+        <ModalActions
+          secondary={{ label: t('common:cancel'), onClick: onClose }}
+        />
+      }
     >
-
       <FormControl>
-        <FormLabel>Available Icons</FormLabel>
+        <FormLabel>{t('iconPicker.availableIcons')}</FormLabel>
         <Grid
           container
           spacing={1}
@@ -58,7 +58,9 @@ const IconPickerModal = ({
                     border: '2px solid',
                     borderColor: isCurrentIcon ? 'primary.500' : 'transparent',
                     '&:hover': {
-                      borderColor: isCurrentIcon ? 'primary.600' : 'neutral.300',
+                      borderColor: isCurrentIcon
+                        ? 'primary.600'
+                        : 'neutral.300',
                     },
                     transition: 'border-color 0.2s',
                   }}
@@ -88,7 +90,7 @@ const IconPickerModal = ({
                       lineHeight: 1.2,
                     }}
                   >
-                    {iconData.name}
+                    {t(`icons.${iconData.value}`)}
                   </Typography>
                 </Box>
               </Grid>
@@ -96,12 +98,6 @@ const IconPickerModal = ({
           })}
         </Grid>
       </FormControl>
-
-      <Box display='flex' justifyContent='center' mt={3}>
-        <Button variant='outlined' onClick={onClose} fullWidth size='lg'>
-          Cancel
-        </Button>
-      </Box>
     </ResponsiveModal>
   )
 }

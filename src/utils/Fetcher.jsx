@@ -166,6 +166,15 @@ const MarkChoreComplete = (id, body, completedDate, performer) => {
     method: 'POST',
     headers: HEADERS(),
     body: JSON.stringify(body),
+  }).then(response => {
+    if (response?.ok) {
+      // Single choke point for completions, so queued offline completions are
+      // counted once, when they sync.
+      import('../service/FeedbackService')
+        .then(({ recordTaskCompleted }) => recordTaskCompleted())
+        .catch(() => {})
+    }
+    return response
   })
 }
 
@@ -731,7 +740,7 @@ const DeleteUser = (password, confirmation, transferOptions = []) => {
 const UploadChoreAttachment = (
   file,
   entityType,
-  { entityId, draftId } = {},
+  { draftId, entityId } = {},
 ) => {
   const formData = new FormData()
   formData.append('file', file)
@@ -977,11 +986,6 @@ const TrackFilterUsage = id => {
 
 export {
   AcceptCircleMemberRequest,
-  DeleteChoreAttachment,
-  DeleteDraftAttachment,
-  GetChoreAttachments,
-  SignAssetURL,
-  UploadChoreAttachment,
   ApproveChore,
   ArchiveChore,
   CancelSubscription,
@@ -1001,8 +1005,10 @@ export {
   CreateThing,
   DeleteChildUser,
   DeleteChore,
+  DeleteChoreAttachment,
   DeleteChoreHistory,
   DeleteCircleMember,
+  DeleteDraftAttachment,
   DeleteFilter,
   DeleteLabel,
   DeleteLongLiveToken,
@@ -1015,6 +1021,7 @@ export {
   GetAllUsers,
   GetArchivedChores,
   GetChildUsers,
+  GetChoreAttachments,
   GetChoreByID,
   GetChoreDetailById,
   GetChoreHistory,
@@ -1060,6 +1067,7 @@ export {
   SaveChore,
   SaveThing,
   SetupMFA,
+  SignAssetURL,
   signUp,
   SkipChore,
   StartChore,
@@ -1082,5 +1090,6 @@ export {
   UpdateThingState,
   UpdateTimeSession,
   UpdateUserDetails,
+  UploadChoreAttachment,
   VerifyMFA,
 }

@@ -1,21 +1,31 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
+import { usePageShortcutScope } from '../../../contexts/KeyboardShortcutScopeContext'
 
 export const useKeyboardShortcuts = ({
-  isMultiSelectMode,
-  selectedChores,
-  addTaskModalOpen,
-  searchTerm,
-  searchFilter,
-  filteredChores,
   choreSections,
-  openChoreSections,
+  filteredChores,
   handlers,
+  isMultiSelectMode,
+  openChoreSections,
+  searchFilter,
+  searchTerm,
+  selectedChores,
 }) => {
+  const { t } = useTranslation('chores')
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
+  // Any open modal (add-task, etc.) claims the keyboard for itself — see
+  // KeyboardShortcutScopeContext. These are the page's own shortcuts, so
+  // they go silent whenever something else owns it.
+  const isPageShortcutActive = usePageShortcutScope()
 
   useEffect(() => {
     const handleKeyDown = event => {
-      if (addTaskModalOpen) return
+      if (!isPageShortcutActive) return
+      // Ignore auto-repeat from a held key so e.g. Cmd+S can't toggle
+      // multi-select twice from one physical press.
+      if (event.repeat) return
 
       if (event.ctrlKey || event.metaKey) {
         setShowKeyboardShortcuts(true)
@@ -23,21 +33,16 @@ export const useKeyboardShortcuts = ({
 
       const isHoldingCmdOrCtrl = event.ctrlKey || event.metaKey
 
-      if (isHoldingCmdOrCtrl && event.key === 'k') {
+      // Cmd/Ctrl + J opens the quick-add modal, + Shift opens the full create
+      // page. Cmd/Ctrl + K is reserved for global search and handled by
+      // GlobalSearchContext.
+      if (isHoldingCmdOrCtrl && event.key.toLowerCase() === 'j') {
         event.preventDefault()
-        handlers.onOpenTaskModal()
-        return
-      }
-
-      if (addTaskModalOpen) return
-
-      if (isHoldingCmdOrCtrl && event.key === 'j') {
-        event.preventDefault()
-        handlers.onNavigateToCreate()
-        return
-      } else if (isHoldingCmdOrCtrl && event.key === 'f') {
-        event.preventDefault()
-        handlers.onFocusSearch()
+        if (event.shiftKey) {
+          handlers.onNavigateToCreate()
+        } else {
+          handlers.onOpenTaskModal()
+        }
         return
       } else if (isHoldingCmdOrCtrl && event.key === 'x') {
         event.preventDefault()
@@ -68,13 +73,13 @@ export const useKeyboardShortcuts = ({
 
             if (allVisibleSelected) {
               handlers.onShowMessage({
-                title: '✅ All Tasks Selected',
+                title: t('shortcuts.allSelectedTitle'),
                 message: `All ${visibleChores.length} filtered task${visibleChores.length !== 1 ? 's are' : ' is'} already selected.`,
               })
             } else {
               handlers.onSelectAll()
               handlers.onShowMessage({
-                title: '🎯 Tasks Selected',
+                title: t('shortcuts.someSelectedTitle'),
                 message: `Selected ${visibleChores.length} filtered task${visibleChores.length !== 1 ? 's' : ''}.`,
               })
             }
@@ -96,20 +101,20 @@ export const useKeyboardShortcuts = ({
 
             if (allChoresSelected) {
               handlers.onShowMessage({
-                title: '✅ All Tasks Selected',
+                title: t('shortcuts.allSelectedTitle'),
                 message: `All ${allChores.length} task${allChores.length !== 1 ? 's are' : ' is'} already selected (including collapsed sections).`,
               })
             } else if (allExpandedSelected) {
               handlers.onSelectAll()
               const collapsedCount = allChores.length - expandedChores.length
               handlers.onShowMessage({
-                title: '🎯 All Tasks Selected',
+                title: t('shortcuts.allSelectedAltTitle'),
                 message: `Selected all ${allChores.length} tasks (including ${collapsedCount} from collapsed sections).`,
               })
             } else {
               handlers.onSelectAll()
               handlers.onShowMessage({
-                title: '🎯 Tasks Selected',
+                title: t('shortcuts.someSelectedTitle'),
                 message: `Selected ${expandedChores.length} task${expandedChores.length !== 1 ? 's' : ''} from expanded sections.`,
               })
             }
@@ -189,7 +194,7 @@ export const useKeyboardShortcuts = ({
       document.removeEventListener('keydown', handleKeyDown)
       document.removeEventListener('keyup', handleKeyUp)
     }
-  }, [isMultiSelectMode, selectedChores.size, addTaskModalOpen])
+  }, [isMultiSelectMode, selectedChores.size, isPageShortcutActive, t])
 
   return { showKeyboardShortcuts }
 }

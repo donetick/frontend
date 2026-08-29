@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+
+import { track } from '../analytics'
 import { networkManager } from '../hooks/NetworkManager'
 import { commandQueue, CommandType } from '../utils/CommandQueue'
 import {
@@ -67,6 +69,24 @@ const isNetworkError = error =>
   ((error instanceof TypeError && error.message === 'Failed to fetch') ||
     error?.name === 'AbortError')
 
+// The backend returns { error: "..." } on failures. Surface that message when
+// it is there, flagged so callers can tell it apart from our generic fallback.
+const errorFromResponse = async (resp, fallbackMessage) => {
+  if (!resp) return new Error(fallbackMessage)
+  let serverMessage = null
+  try {
+    const body = await resp.json()
+    if (typeof body?.error === 'string' && body.error.trim() !== '') {
+      serverMessage = body.error
+    }
+  } catch {
+    // body was empty or not JSON, keep the fallback
+  }
+  const error = new Error(serverMessage || fallbackMessage)
+  error.isServerMessage = Boolean(serverMessage)
+  return error
+}
+
 const buildOfflineChore = task => ({
   ...task,
   id: 'temp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
@@ -81,7 +101,8 @@ export const useChores = (includeArchive = false) => {
     queryFn: async () => {
       if (isOfflineFeatureEnabled()) {
         try {
-          // Sync from server first (no-op if already syncing or offline)
+          // Sync from server first (coalesced with any run already in flight,
+          // so a just-created chore can't be missed by a stale cursor)
           if (networkManager.isOnline) {
             await syncEngine.sync()
           }
@@ -193,7 +214,10 @@ export const useCreateChore = () => {
   }
 
   return useMutation({
-    mutationFn: async newTask => {
+    mutationFn: async rawTask => {
+      // `source` is analytics-only metadata (typed/voice/scan/clone) — never
+      // send it to the backend as part of the chore payload.
+      const { source, ...newTask } = rawTask
       if (isOfflineFeatureEnabled() && !networkManager.isOnline) {
         return queueOfflineCreate(newTask)
       }
@@ -201,12 +225,22 @@ export const useCreateChore = () => {
       try {
         const resp = await CreateChore(newTask)
         if (!resp || !resp.ok) {
-          throw new Error('Failed to create chore')
+          throw await errorFromResponse(resp, 'Failed to create chore')
         }
         const createdChore = await resp.json()
         if (!createdChore) {
           throw new Error('Failed to get created chore data')
         }
+        track('chore_created', {
+          has_due_date: Boolean(newTask.dueDate),
+          has_assignee: Boolean(newTask.assignedTo),
+          has_labels: Boolean(newTask.labelsV2?.length),
+          has_description: Boolean(newTask.description?.trim()),
+          has_recurrence: newTask.frequencyType !== 'once',
+          recurrence_type: newTask.frequencyType || 'once',
+          priority: typeof newTask.priority === 'number' ? newTask.priority : 0,
+          source: source || 'quick_add',
+        })
         return { ...newTask, id: createdChore.res }
       } catch (error) {
         if (isNetworkError(error)) {
@@ -254,7 +288,7 @@ export const useUpdateChore = () => {
       try {
         const resp = await SaveChore(updatedChore)
         if (!resp || !resp.ok) {
-          throw new Error('Failed to save chore')
+          throw await errorFromResponse(resp, 'Failed to save chore')
         }
         const updatedChoreRes = await resp.json()
         if (!updatedChoreRes) {
@@ -267,6 +301,18 @@ export const useUpdateChore = () => {
               chore.id === updatedChore.id ? updatedChore : chore,
             ),
           }
+        })
+        track('chore_updated', {
+          has_due_date: Boolean(updatedChore.dueDate),
+          has_assignee: Boolean(updatedChore.assignedTo),
+          has_labels: Boolean(updatedChore.labelsV2?.length),
+          has_description: Boolean(updatedChore.description?.trim()),
+          has_recurrence: updatedChore.frequencyType !== 'once',
+          recurrence_type: updatedChore.frequencyType || 'once',
+          priority:
+            typeof updatedChore.priority === 'number'
+              ? updatedChore.priority
+              : 0,
         })
         return updatedChoreRes?.res || updatedChore
       } catch (error) {
@@ -439,7 +485,7 @@ export const useUpdateChoreHistory = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ choreId, historyId, historyData }) => {
+    mutationFn: async ({ choreId, historyData, historyId }) => {
       const applyOptimisticUpdate = async () => {
         queryClient.setQueryData(['choreHistory', choreId], oldData => {
           if (!oldData?.res) return oldData
@@ -562,7 +608,7 @@ export const useMarkChoreComplete = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ choreId, body, completedDate, performer }) => {
+    mutationFn: async ({ body, choreId, completedDate, performer }) => {
       if (isOfflineFeatureEnabled() && !networkManager.isOnline) {
         await commandQueue.enqueue(CommandType.COMPLETE_CHORE, choreId, {
           id: choreId,

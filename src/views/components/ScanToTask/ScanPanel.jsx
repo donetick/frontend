@@ -8,11 +8,14 @@ import {
 import {
   Box,
   Button,
+  Checkbox,
   CircularProgress,
   LinearProgress,
   Typography,
 } from '@mui/joy'
-import { useEffect } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import { useScanToTask } from './useScanToTask'
 
 /**
@@ -20,28 +23,46 @@ import { useScanToTask } from './useScanToTask'
  *
  * Flow: capture → (auto) processing → done [calls onTaskExtracted + onClose]
  *                                   → error  [retake or cancel]
+ *
+ * The primary action (Capture / Scan Document / Retake) lives in the modal
+ * footer alongside Cancel — the panel reports it up through onStateChange
+ * rather than rendering its own button row. Upload stays inline because it
+ * belongs to the capture surface and drives a hidden input in this subtree.
  */
-const ScanPanel = ({ open, onTaskExtracted, onClose, initialImageUrl, autoCapture }) => {
+const ScanPanel = ({
+  autoCapture,
+  canKeepImage = false,
+  initialImageUrl,
+  onClose,
+  onStateChange,
+  onTaskExtracted,
+  open,
+}) => {
+  const { t } = useTranslation('chores')
   const {
-    isNativeScanner,
-    phase,
-    capturedImage,
-    ocrProgress,
-    taskResult,
-    errorMsg,
+    activate,
     cameraAvailable,
-    videoRef,
     canvasRef,
-    fileInputRef,
-    startCamera,
-    stopCamera,
     capture,
+    capturedImage,
+    errorMsg,
+    fileInputRef,
     handleFileSelect,
     handleNativeScan,
-    retake,
-    activate,
+    isNativeScanner,
+    ocrProgress,
+    phase,
     reset,
+    retake,
+    startCamera,
+    stopCamera,
+    taskResult,
+    videoRef,
   } = useScanToTask()
+
+  // The scanned page is usually the task's source of truth (the bill, the
+  // notice), so keeping it is the default — the OCR text alone loses it.
+  const [keepImage, setKeepImage] = useState(false)
 
   // Start/stop based on open state
   useEffect(() => {
@@ -70,26 +91,82 @@ const ScanPanel = ({ open, onTaskExtracted, onClose, initialImageUrl, autoCaptur
   // Auto-close and populate when done
   useEffect(() => {
     if (phase === 'done' && taskResult) {
-      onTaskExtracted(taskResult)
+      onTaskExtracted({
+        ...taskResult,
+        attachmentImage: canKeepImage && keepImage ? capturedImage : null,
+      })
       onClose()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, taskResult])
 
+  const openFilePicker = useCallback(
+    () => fileInputRef.current?.click(),
+    [fileInputRef],
+  )
+
+  // The one action the footer renders for the current phase; null while
+  // processing (nothing to do but wait) and when done (the panel closes)
+  const primaryAction = useMemo(() => {
+    if (phase === 'capture') {
+      if (isNativeScanner) {
+        return {
+          label: t('photoTask.scanDocument'),
+          icon: <DocumentScanner />,
+          onClick: handleNativeScan,
+        }
+      }
+      if (cameraAvailable) {
+        return {
+          label: t('photoTask.capture'),
+          icon: <CameraAlt />,
+          onClick: capture,
+        }
+      }
+      // No camera on this device — Upload is the only way forward, so it
+      // graduates from the inline secondary to the footer's primary
+      return {
+        label: t('photoTask.uploadPhoto'),
+        icon: <PhotoCamera />,
+        onClick: openFilePicker,
+      }
+    }
+    if (phase === 'error') {
+      return { label: t('photoTask.retake'), icon: <Replay />, onClick: retake }
+    }
+    return null
+  }, [
+    phase,
+    isNativeScanner,
+    cameraAvailable,
+    capture,
+    handleNativeScan,
+    retake,
+    openFilePicker,
+  ])
+
+  useEffect(() => {
+    onStateChange?.({ phase, primaryAction })
+  }, [phase, primaryAction, onStateChange])
+
   if (!open) return null
 
   const isProcessing = phase === 'processing'
 
+  // Attachments are a Plus feature; without it the upload would only ever
+  // surface an upgrade error, so the choice isn't offered at all.
+  const keepImageToggle = !canKeepImage ? null : (
+    <Checkbox
+      size='sm'
+      checked={keepImage}
+      onChange={e => setKeepImage(e.target.checked)}
+      label={t('photoTask.keepAsAttachment')}
+      sx={{ '--Checkbox-size': '18px' }}
+    />
+  )
+
   return (
-    <Box
-      sx={{
-        borderRadius: 'md',
-        border: '1px solid',
-        borderColor: 'primary.outlinedBorder',
-        overflow: 'hidden',
-        bgcolor: 'background.level1',
-      }}
-    >
+    <Box>
       {/* ── Capture phase ── */}
       {phase === 'capture' && (
         <>
@@ -103,6 +180,8 @@ const ScanPanel = ({ open, onTaskExtracted, onClose, initialImageUrl, autoCaptur
               alignItems: 'center',
               justifyContent: 'center',
               bgcolor: 'neutral.900',
+              // The wrapper used to clip this; it owns its own corners now
+              borderRadius: 'md',
               overflow: 'hidden',
             }}
           >
@@ -111,7 +190,10 @@ const ScanPanel = ({ open, onTaskExtracted, onClose, initialImageUrl, autoCaptur
                 <DocumentScanner
                   sx={{ fontSize: 56, color: 'white', opacity: 0.5, mb: 1 }}
                 />
-                <Typography level='body-sm' sx={{ color: 'white', opacity: 0.6 }}>
+                <Typography
+                  level='body-sm'
+                  sx={{ color: 'white', opacity: 0.6 }}
+                >
                   Tap &quot;Scan Document&quot; to open the scanner
                 </Typography>
               </Box>
@@ -137,7 +219,10 @@ const ScanPanel = ({ open, onTaskExtracted, onClose, initialImageUrl, autoCaptur
                 <CameraAlt
                   sx={{ fontSize: 48, color: 'white', opacity: 0.4, mb: 1 }}
                 />
-                <Typography level='body-sm' sx={{ color: 'white', opacity: 0.6 }}>
+                <Typography
+                  level='body-sm'
+                  sx={{ color: 'white', opacity: 0.6 }}
+                >
                   Camera not available — use Upload instead
                 </Typography>
               </Box>
@@ -146,58 +231,27 @@ const ScanPanel = ({ open, onTaskExtracted, onClose, initialImageUrl, autoCaptur
 
           <Box
             sx={{
-              px: 1.5,
               py: 1,
               display: 'flex',
               alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
               gap: 1,
             }}
           >
-            <Button
-              size='sm'
-              variant='plain'
-              color='neutral'
-              startDecorator={<PhotoCamera fontSize='small' />}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              Upload
-            </Button>
-            <input
-              ref={fileInputRef}
-              type='file'
-              accept='image/*'
-              style={{ display: 'none' }}
-              onChange={handleFileSelect}
-            />
-
-            <Box sx={{ ml: 'auto', display: 'flex', gap: 1 }}>
-              <Button size='sm' variant='plain' color='neutral' onClick={onClose}>
-                Cancel
+            {/* Hidden when Upload is already the footer's primary action */}
+            {(isNativeScanner || cameraAvailable) && (
+              <Button
+                size='sm'
+                variant='plain'
+                color='neutral'
+                startDecorator={<PhotoCamera fontSize='small' />}
+                onClick={openFilePicker}
+              >
+                {t('photoTask.upload')}
               </Button>
-              {isNativeScanner ? (
-                <Button
-                  size='sm'
-                  variant='solid'
-                  color='primary'
-                  startDecorator={<DocumentScanner fontSize='small' />}
-                  onClick={handleNativeScan}
-                >
-                  Scan Document
-                </Button>
-              ) : (
-                cameraAvailable && (
-                  <Button
-                    size='sm'
-                    variant='solid'
-                    color='primary'
-                    startDecorator={<CameraAlt fontSize='small' />}
-                    onClick={capture}
-                  >
-                    Capture
-                  </Button>
-                )
-              )}
-            </Box>
+            )}
+            {keepImageToggle}
           </Box>
         </>
       )}
@@ -210,7 +264,7 @@ const ScanPanel = ({ open, onTaskExtracted, onClose, initialImageUrl, autoCaptur
             flexDirection: 'column',
             alignItems: 'center',
             gap: 1.5,
-            p: 2.5,
+            py: 2.5,
           }}
         >
           {capturedImage && (
@@ -224,7 +278,7 @@ const ScanPanel = ({ open, onTaskExtracted, onClose, initialImageUrl, autoCaptur
             >
               <img
                 src={capturedImage}
-                alt='Processing'
+                alt={t('photoTask.altProcessing')}
                 style={{
                   width: '100%',
                   display: 'block',
@@ -262,16 +316,19 @@ const ScanPanel = ({ open, onTaskExtracted, onClose, initialImageUrl, autoCaptur
               sx={{ width: '100%' }}
             />
           )}
+
+          {/* Still editable here — the choice is only read once the task lands */}
+          {keepImageToggle}
         </Box>
       )}
 
       {/* ── Error phase ── */}
       {phase === 'error' && (
-        <Box sx={{ p: 2 }}>
+        <Box sx={{ py: 2 }}>
           {capturedImage && (
             <img
               src={capturedImage}
-              alt='Failed scan'
+              alt={t('photoTask.failedScan')}
               style={{
                 width: '100%',
                 display: 'block',
@@ -283,27 +340,22 @@ const ScanPanel = ({ open, onTaskExtracted, onClose, initialImageUrl, autoCaptur
               }}
             />
           )}
-          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
             <WarningAmber color='warning' sx={{ mt: 0.25, flexShrink: 0 }} />
             <Typography level='body-sm'>{errorMsg}</Typography>
-          </Box>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button
-              size='sm'
-              variant='outlined'
-              color='neutral'
-              startDecorator={<Replay fontSize='small' />}
-              onClick={retake}
-            >
-              Retake
-            </Button>
-            <Button size='sm' variant='plain' color='neutral' onClick={onClose}>
-              Cancel
-            </Button>
           </Box>
         </Box>
       )}
 
+      {/* Kept outside the phase branches so the footer's Upload action can
+          reach it even when no capture surface is rendered */}
+      <input
+        ref={fileInputRef}
+        type='file'
+        accept='image/*'
+        style={{ display: 'none' }}
+        onChange={handleFileSelect}
+      />
       <canvas ref={canvasRef} style={{ display: 'none' }} />
     </Box>
   )

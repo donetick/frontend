@@ -13,26 +13,30 @@ import Option from '@mui/joy/Option'
 import Select from '@mui/joy/Select'
 import Typography from '@mui/joy/Typography'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import { NOTIFICATION_TYPE, TASK_COLOR } from '../utils/Colors'
 import { TIME_UNITS } from '../utils/DurationUtils'
 
 const timeUnits = TIME_UNITS
 
 const timingOptions = [
-  { label: 'Before', value: 'before' },
-  { label: 'Due', value: 'ondue' },
-  { label: 'After', value: 'after' },
+  { value: 'before' },
+  { value: 'ondue' },
+  { value: 'after' },
 ]
 
-function getRelativeLabel(notification) {
-  const { value, unit } = notification
+function getRelativeLabel(notification, t) {
+  const { unit, value } = notification
   const numericValue = Number(value)
   if (numericValue === 0) {
-    return 'On due date'
+    return t('notificationTemplate.onDueDate')
   }
-  const unitName = unit === 'm' ? 'minutes' : unit === 'h' ? 'hours' : 'days'
+  const unitName = t(`notificationTemplate.unitName.${unit}`)
   const absValue = Math.abs(numericValue)
-  return `${absValue} ${unitName} ${numericValue < 0 ? 'before' : 'after'} due`
+  return numericValue < 0
+    ? t('notificationTemplate.beforeDue', { count: absValue, unit: unitName })
+    : t('notificationTemplate.afterDue', { count: absValue, unit: unitName })
 }
 
 // Helper functions to convert between internal value and UI representation
@@ -63,10 +67,15 @@ function getInternalValue(timing, displayValue) {
 
 const NotificationTemplate = ({
   maxNotifications = 5,
+  // ChoreEdit gates this editor behind its own on/off switch, so the last row
+  // must stay put — `notification: true` with no templates is not a valid task.
+  // Consumers that own an empty state themselves pass 0.
+  minNotifications = 1,
   onChange,
-  value,
   showTimeline = true,
+  value,
 }) => {
+  const { t } = useTranslation('chores')
   const [notifications, setNotifications] = useState(
     value?.templates ||
       JSON.parse(localStorage.getItem('defaultNotificationTemplate')) ||
@@ -214,9 +223,7 @@ const NotificationTemplate = ({
     if (!currentNotification) return
 
     if (isDuplicate(currentNotification, idx, currentList)) {
-      setError(
-        'This notification setting already exists. Please use a different timing.',
-      )
+      setError(t('notificationTemplate.errDuplicate'))
       return
     }
   }
@@ -228,14 +235,14 @@ const NotificationTemplate = ({
 
     if (type === 'due') {
       if (notificationsRef.current.some(n => Number(n.value) === 0)) {
-        setError('Only one "Due Alert" notification is allowed.')
+        setError(t('notificationTemplate.errOneDue'))
         return
       }
       newNotification = { value: 0, unit: 'm' }
     } else {
       newNotification = getSmartSuggestion(type)
       if (!newNotification) {
-        setError(`All common ${type} times are already configured.`)
+        setError(t('notificationTemplate.errAllConfigured', { type }))
         return
       }
     }
@@ -259,7 +266,8 @@ const NotificationTemplate = ({
       return next
     })
 
-    onChange && onChange(updated)
+    // No direct onChange here: consumers expect { notifications }, and the
+    // effect below already emits that shape once the state settles.
     setShowSaveDefault(true)
   }
 
@@ -307,9 +315,6 @@ const NotificationTemplate = ({
 
     return (
       <Box sx={{ mt: 3, mb: 2 }}>
-        <Typography level={'body-md'} sx={{ mb: 1 }}>
-          Notification Timeline
-        </Typography>
         <Box
           sx={{
             display: 'flex',
@@ -362,7 +367,7 @@ const NotificationTemplate = ({
                   fontSize: '0.6rem',
                 }}
               >
-                Due Date
+                {t('group.dueDate')}
               </Typography>
             </Box>
 
@@ -396,7 +401,7 @@ const NotificationTemplate = ({
                       zIndex: 10,
                     },
                   }}
-                  title={getRelativeLabel(n)}
+                  title={getRelativeLabel(n, t)}
                 >
                   <Badge
                     badgeContent={
@@ -548,7 +553,7 @@ const NotificationTemplate = ({
                       fontSize: 14,
                     }}
                   >
-                    {getRelativeLabel(n)}
+                    {getRelativeLabel(n, t)}
                   </Typography>
                 </Box>
 
@@ -573,7 +578,7 @@ const NotificationTemplate = ({
                         value={opt.value}
                         disabled={opt.value === 'ondue' && hasOnDueElsewhere}
                       >
-                        {opt.label}
+                        {t(`notificationTemplate.timing.${opt.value}`)}
                       </Option>
                     ))}
                   </Select>
@@ -636,13 +641,13 @@ const NotificationTemplate = ({
                   >
                     {timeUnits.map(opt => (
                       <Option key={opt.value} value={opt.value}>
-                        {opt.label}
+                        {t(`notificationTemplate.unitShort.${opt.value}`)}
                       </Option>
                     ))}
                   </Select>
                   <IconButton
                     onClick={() => removeNotification(idx)}
-                    disabled={notifications.length === 1}
+                    disabled={notifications.length <= minNotifications}
                     color={'danger'}
                     size={'sm'}
                     variant={'soft'}
@@ -686,7 +691,7 @@ const NotificationTemplate = ({
             },
           }}
         >
-          Reminder
+          {t('notificationTemplate.reminder')}
         </Button>
         <Button
           onClick={() => addSmartNotification('due')}
@@ -708,7 +713,7 @@ const NotificationTemplate = ({
             },
           }}
         >
-          Due Alert
+          {t('notificationTemplate.dueAlert')}
         </Button>
         <Button
           onClick={() => addSmartNotification('followup')}
@@ -727,7 +732,7 @@ const NotificationTemplate = ({
             },
           }}
         >
-          Follow-up
+          {t('notificationTemplate.followUp')}
         </Button>
       </Box>
       {showSaveDefault && (
@@ -760,7 +765,7 @@ const NotificationTemplate = ({
               setShowSaveDefault(false)
             }}
           >
-            Remember for Future Tasks
+            {t('notificationTemplate.rememberFuture')}
           </Button>
         </Box>
       )}

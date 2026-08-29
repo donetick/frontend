@@ -1,11 +1,12 @@
+import '@meauxt/react-swipeable-list/dist/styles.css'
+
 import {
-  Type as ListType,
   SwipeableList,
   SwipeableListItem,
   SwipeAction,
   TrailingActions,
+  Type as ListType,
 } from '@meauxt/react-swipeable-list'
-import '@meauxt/react-swipeable-list/dist/styles.css'
 import {
   AccessTime,
   Add,
@@ -37,7 +38,10 @@ import {
 } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
+
+import EmptyState from '../../components/common/EmptyState'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import {
   useChoreTimer,
@@ -48,8 +52,8 @@ import {
 import { useCircleMembers } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { commandQueue, CommandType } from '../../utils/CommandQueue'
-import { isOfflineFeatureEnabled } from '../../utils/OfflineFeatureToggle'
 import { resolvePhotoURL } from '../../utils/Helpers'
+import { isOfflineFeatureEnabled } from '../../utils/OfflineFeatureToggle'
 import { getSafeBottom } from '../../utils/SafeAreaUtils'
 import LoadingComponent from '../components/Loading'
 
@@ -61,6 +65,7 @@ const isNetworkError = err =>
   err.message === 'Failed to fetch'
 
 const TimerDetails = () => {
+  const { t } = useTranslation('timer')
   const { choreId } = useParams()
   const { fmt } = useLocalization()
   const [timerData, setTimerData] = useState(null)
@@ -203,7 +208,6 @@ const TimerDetails = () => {
 
   const cancelEditingSession = sessionId => {
     setEditingSessions(prev => {
-      // eslint-disable-next-line no-unused-vars
       const { [sessionId]: removed, ...rest } = prev
       return rest
     })
@@ -230,23 +234,23 @@ const TimerDetails = () => {
         {
           onSuccess: () => {
             showSuccess({
-              title: 'Session updated',
-              message: 'Timer session has been updated successfully.',
+              title: t('toast.sessionUpdatedTitle'),
+              message: t('toast.sessionUpdatedMessage'),
             })
             refetchTimer()
             cancelEditingSession(sessionId)
           },
           onError: () => {
             showError({
-              title: 'Failed to update session',
-              message: 'Please try again.',
+              title: t('toast.sessionUpdateFailTitle'),
+              message: t('toast.tryAgain'),
             })
           },
         },
       )
     } catch (error) {
       showError({
-        title: 'Error updating session',
+        title: t('toast.sessionUpdateErrorTitle'),
         message: error.message,
       })
     } finally {
@@ -260,8 +264,8 @@ const TimerDetails = () => {
     startChore.mutate(choreId, {
       onSuccess: () => {
         showSuccess({
-          title: 'Timer Started',
-          message: 'Work session has been started successfully.',
+          title: t('toast.startedTitle'),
+          message: t('toast.startedMessage'),
         })
         refetchTimer()
       },
@@ -273,7 +277,7 @@ const TimerDetails = () => {
             { id: choreId },
           )
           showSuccess({
-            title: 'Start queued',
+            title: t('toast.startQueuedTitle'),
             message: "You're offline — start will sync when back online",
             undoAction: async () => {
               await commandQueue.cancel(cmdId)
@@ -283,8 +287,8 @@ const TimerDetails = () => {
         }
 
         showError({
-          title: 'Failed to start timer',
-          message: 'Please try again.',
+          title: t('toast.startFailTitle'),
+          message: t('toast.tryAgain'),
         })
       },
       onSettled: () => {
@@ -298,8 +302,8 @@ const TimerDetails = () => {
     pauseChore.mutate(choreId, {
       onSuccess: () => {
         showSuccess({
-          title: 'Timer Paused',
-          message: 'Work session has been paused.',
+          title: t('toast.pausedTitle'),
+          message: t('toast.pausedMessage'),
         })
         refetchTimer()
       },
@@ -311,7 +315,7 @@ const TimerDetails = () => {
             { id: choreId },
           )
           showSuccess({
-            title: 'Pause queued',
+            title: t('toast.pauseQueuedTitle'),
             message: "You're offline — pause will sync when back online",
             undoAction: async () => {
               await commandQueue.cancel(cmdId)
@@ -321,8 +325,8 @@ const TimerDetails = () => {
         }
 
         showError({
-          title: 'Failed to pause timer',
-          message: 'Please try again.',
+          title: t('toast.pauseFailTitle'),
+          message: t('toast.tryAgain'),
         })
       },
       onSettled: () => {
@@ -386,7 +390,7 @@ const TimerDetails = () => {
   const handleDeleteSession = sessionIndex => {
     // For now, just show an alert since we'd need to implement session deletion API
     showError({
-      title: 'Delete Session',
+      title: t('toast.deleteSessionTitle'),
       message: `Session #${sessionIndex + 1} deletion would be implemented here`,
     })
   }
@@ -401,13 +405,13 @@ const TimerDetails = () => {
 
       {loading && (
         <Alert color='neutral' sx={{ mb: 2 }}>
-          Loading timer data...
+          {t('loading')}
         </Alert>
       )}
 
       {!loading && !timerData && (
         <Alert color='warning' sx={{ mb: 2 }}>
-          No timer data found for this chore.
+          {t('noData')}
         </Alert>
       )}
 
@@ -458,7 +462,7 @@ const TimerDetails = () => {
                           color: 'text.primary',
                         }}
                       >
-                        Active Work
+                        {t('activeWork')}
                       </Typography>
                     </Box>
                     <Box>
@@ -513,7 +517,7 @@ const TimerDetails = () => {
                           color: 'text.primary',
                         }}
                       >
-                        Break Time
+                        {t('breakTime')}
                       </Typography>
                     </Box>
                     <Box>
@@ -568,7 +572,7 @@ const TimerDetails = () => {
                           color: 'text.primary',
                         }}
                       >
-                        Sessions
+                        {t('sessions')}
                       </Typography>
                     </Box>
                     <Box>
@@ -623,7 +627,7 @@ const TimerDetails = () => {
                           color: 'text.primary',
                         }}
                       >
-                        Total Time
+                        {t('totalTime')}
                       </Typography>
                     </Box>
                     <Box>
@@ -657,12 +661,18 @@ const TimerDetails = () => {
                   level='body-sm'
                   sx={{ color: 'text.secondary', fontWeight: 'medium' }}
                 >
-                  Work vs Break Distribution
+                  {t('distribution')}
                 </Typography>
                 <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
                   {calculateCurrentActiveDuration() > 0
-                    ? `${Math.round((calculateCurrentActiveDuration() / calculateTotalDuration()) * 100)}% active`
-                    : 'No active time yet'}
+                    ? t('percentActive', {
+                        percent: Math.round(
+                          (calculateCurrentActiveDuration() /
+                            calculateTotalDuration()) *
+                            100,
+                        ),
+                      })
+                    : t('noActiveTime')}
                 </Typography>
               </Box>
               <Box
@@ -691,7 +701,7 @@ const TimerDetails = () => {
                   level='body-sm'
                   sx={{ color: 'text.secondary', fontWeight: 'medium', mb: 2 }}
                 >
-                  Activity Timeline
+                  {t('activityTimeline')}
                 </Typography>
 
                 {timerData &&
@@ -799,7 +809,7 @@ const TimerDetails = () => {
                             level='body-xs'
                             sx={{ color: 'text.tertiary' }}
                           >
-                            Active Work
+                            {t('activeWork')}
                           </Typography>
                         </Box>
                         <Box
@@ -823,7 +833,7 @@ const TimerDetails = () => {
                             level='body-xs'
                             sx={{ color: 'text.tertiary' }}
                           >
-                            Break Time
+                            {t('breakTime')}
                           </Typography>
                         </Box>
                         {isTimerRunning() && (
@@ -848,7 +858,7 @@ const TimerDetails = () => {
                               level='body-xs'
                               sx={{ color: 'text.tertiary' }}
                             >
-                              Live Session
+                              {t('liveSession')}
                             </Typography>
                           </Box>
                         )}
@@ -914,7 +924,7 @@ const TimerDetails = () => {
                 mb: 2,
               }}
             >
-              <Typography level='h4'>Session Breakdown</Typography>
+              <Typography level='h4'>{t('sessionBreakdown')}</Typography>
               {!editingSessions[timerData.id] && (
                 <Button
                   variant='outlined'
@@ -923,7 +933,7 @@ const TimerDetails = () => {
                   onClick={() => startEditingSession()}
                   size='sm'
                 >
-                  Edit
+                  {t('common:edit')}
                 </Button>
               )}
               {editingSessions[timerData.id] && (
@@ -933,7 +943,7 @@ const TimerDetails = () => {
                     onClick={() => cancelEditingSession(timerData.id)}
                     size='sm'
                   >
-                    Cancel
+                    {t('common:cancel')}
                   </Button>
                   <Button
                     variant='solid'
@@ -942,7 +952,7 @@ const TimerDetails = () => {
                     loading={loading}
                     size='sm'
                   >
-                    Save Changes
+                    {t('saveChanges')}
                   </Button>
                 </Box>
               )}
@@ -1018,7 +1028,7 @@ const TimerDetails = () => {
                                           level='body-xs'
                                           sx={{ mt: 0.5 }}
                                         >
-                                          Edit
+                                          {t('common:edit')}
                                         </Typography>
                                       </Box>
                                     </SwipeAction>
@@ -1044,7 +1054,7 @@ const TimerDetails = () => {
                                           level='body-xs'
                                           sx={{ mt: 0.5 }}
                                         >
-                                          Delete
+                                          {t('common:delete')}
                                         </Typography>
                                       </Box>
                                     </SwipeAction>
@@ -1108,7 +1118,7 @@ const TimerDetails = () => {
                                         variant='soft'
                                         sx={{ fontSize: '0.7rem' }}
                                       >
-                                        Live
+                                        {t('live')}
                                       </Chip>
                                     )}
                                     {/* User chip showing who started the session */}
@@ -1204,9 +1214,12 @@ const TimerDetails = () => {
                 )}
 
                 {(!timerData.pauseLog || timerData.pauseLog.length === 0) && (
-                  <Alert color='neutral'>
-                    No work sessions found for this timer.
-                  </Alert>
+                  <EmptyState
+                    size='sm'
+                    icon={<AccessTime />}
+                    title={t('emptySessionsTitle')}
+                    description={t('emptySessionsDescription')}
+                  />
                 )}
               </Box>
             ) : (
@@ -1230,7 +1243,7 @@ const TimerDetails = () => {
                       }}
                     >
                       <Typography level='body-md' sx={{ fontWeight: 'bold' }}>
-                        Sessions
+                        {t('sessions')}
                       </Typography>
                       <Button
                         size='sm'
@@ -1238,7 +1251,7 @@ const TimerDetails = () => {
                         startDecorator={<Add />}
                         onClick={() => addPauseLogEntry(timerData.id)}
                       >
-                        Add Session
+                        {t('addSession')}
                       </Button>
                     </Box>
 
@@ -1288,7 +1301,7 @@ const TimerDetails = () => {
                                 level='body-sm'
                                 sx={{ fontWeight: 'bold', mb: 1 }}
                               >
-                                Start Time
+                                {t('startTime')}
                               </Typography>
                               <Input
                                 type='datetime-local'
@@ -1311,7 +1324,7 @@ const TimerDetails = () => {
                                 level='body-sm'
                                 sx={{ fontWeight: 'bold', mb: 1 }}
                               >
-                                End Time
+                                {t('endTime')}
                               </Typography>
                               <Input
                                 type='datetime-local'
@@ -1333,9 +1346,7 @@ const TimerDetails = () => {
                                   )
                                 }
                               />
-                              <FormHelperText>
-                                Leave empty if session is ongoing
-                              </FormHelperText>
+                              <FormHelperText>{t('leaveEmpty')}</FormHelperText>
                             </FormControl>
 
                             <Box>

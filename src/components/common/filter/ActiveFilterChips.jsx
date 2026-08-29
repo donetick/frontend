@@ -1,21 +1,25 @@
-import { Close } from '@mui/icons-material'
-import { Box, Button, Chip, Typography } from '@mui/joy'
+import { Add, Close } from '@mui/icons-material'
+import { Box, Button, Chip, ChipDelete, Typography } from '@mui/joy'
+import { useTranslation } from 'react-i18next'
 
 const ActiveFilterChips = ({
-  chips = [],
-  onOpen,
-  onClearAll,
-  resultCount,
-  totalCount,
-  maxVisible = 2,
   chipSize = 'md',
+  chipSx,
+  chips = [],
   clearButtonSize = 'sm',
   clearButtonSx,
   containerSx,
-  chipSx,
+  maxVisible = 2,
+  onAdd,
+  onClearAll,
+  onOpen,
   overflowChipSx,
+  resultCount,
   resultSx,
+  showAddChip = false,
+  totalCount,
 }) => {
+  const { t } = useTranslation('common')
   if (!chips.length) {
     return null
   }
@@ -37,20 +41,31 @@ const ActiveFilterChips = ({
         ...containerSx,
       }}
     >
-      {visible.map(({ key, label, onClear, color = 'primary' }) => (
+      {visible.map(({ color = 'primary', key, label, onClear }) => (
         <Chip
           key={key}
           size={chipSize}
           variant='soft'
           color={color}
           endDecorator={
-            <Close
-              sx={{ cursor: 'pointer', fontSize: chipSize === 'sm' ? 12 : 16 }}
-              onClick={e => {
-                e.stopPropagation()
+            // ChipDelete rather than a bare icon: Joy's chip end decorator is
+            // `pointer-events: none`, so anything else here is swallowed by the
+            // chip's own click surface and can never clear the condition.
+            <ChipDelete
+              variant='plain'
+              color={color}
+              onDelete={event => {
+                event.stopPropagation()
                 onClear?.()
               }}
-            />
+              aria-label={t('activeFilterChips.removeFilterAria', { label })}
+              sx={{
+                '--Chip-deleteSize': chipSize === 'sm' ? '1.1rem' : '1.4rem',
+                '--Icon-fontSize': chipSize === 'sm' ? '12px' : '16px',
+              }}
+            >
+              <Close />
+            </ChipDelete>
           }
           onClick={onOpen}
           sx={{
@@ -74,7 +89,10 @@ const ActiveFilterChips = ({
         </Chip>
       ))}
 
-      {overflow > 0 && (
+      {/* Everything already visible → spend that slot on a "+" for appending
+          another condition instead. With overflow, the count chip opens the
+          same sheet anyway. */}
+      {overflow > 0 ? (
         <Chip
           size={chipSize}
           variant='soft'
@@ -88,8 +106,32 @@ const ActiveFilterChips = ({
             ...overflowChipSx,
           }}
         >
-          +{overflow} more
+          {t('activeFilterChips.moreCount', { count: overflow })}
         </Chip>
+      ) : (
+        showAddChip &&
+        (onAdd || onOpen) && (
+          <Chip
+            size={chipSize}
+            variant='outlined'
+            color='neutral'
+            onClick={onAdd || onOpen}
+            aria-label={t('activeFilterChips.addFilterCondition')}
+            title={t('activeFilterChips.addFilterCondition')}
+            sx={{
+              cursor: 'pointer',
+              flexShrink: 0,
+              px: 0.75,
+              transition: 'all 0.15s ease',
+              '&:hover': { opacity: 0.85 },
+              ...overflowChipSx,
+            }}
+          >
+            <Add
+              sx={{ fontSize: chipSize === 'sm' ? 12 : 16, display: 'block' }}
+            />
+          </Chip>
+        )
       )}
 
       {resultCount != null && totalCount != null && (
@@ -121,7 +163,7 @@ const ActiveFilterChips = ({
             ...clearButtonSx,
           }}
         >
-          Clear all
+          {t('clearAll')}
         </Button>
       )}
     </Box>

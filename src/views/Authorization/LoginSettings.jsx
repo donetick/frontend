@@ -2,27 +2,23 @@ import { Preferences } from '@capacitor/preferences'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 import WifiIcon from '@mui/icons-material/Wifi'
-import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  Container,
-  Input,
-  Sheet,
-  Typography,
-} from '@mui/joy'
+import { Alert, Box, Button, CircularProgress, Typography } from '@mui/joy'
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+
 import { API_URL } from '../../Config'
-import Logo from '../../Logo'
 import { useResource } from '../../queries/ResourceQueries'
 import { apiClient } from '../../utils/ApiClient'
 import { offlineDB } from '../../utils/OfflineDB'
+import { AuthSubmitButton, AuthTextField } from './AuthFields'
+import AuthShell from './AuthShell'
+import { authButtonSx } from './authStyles'
 
 const CONNECTION_TIMEOUT_MS = 8000
 
 const LoginSettings = () => {
+  const { t } = useTranslation('auth')
   const Navigate = useNavigate()
   const { refetch: refetchResource } = useResource()
   const [serverURL, setServerURL] = React.useState('')
@@ -60,13 +56,12 @@ const LoginSettings = () => {
       if (response.status === 503) {
         return {
           ok: false,
-          message:
-            'Server is starting up or temporarily unavailable (503). Try again in a moment.',
+          message: t('server.unavailable503'),
         }
       }
       return {
         ok: false,
-        message: `Server responded with error ${response.status}. Please check your Donetick server.`,
+        message: t('server.errorStatus', { status: response.status }),
       }
     } catch (err) {
       clearTimeout(timeoutId)
@@ -74,7 +69,9 @@ const LoginSettings = () => {
       if (err.name === 'AbortError') {
         return {
           ok: false,
-          message: `Connection timed out after ${CONNECTION_TIMEOUT_MS / 1000}s. The host may be unreachable or behind a firewall — check the IP/hostname and network.`,
+          message: t('server.timeout', {
+            seconds: CONNECTION_TIMEOUT_MS / 1000,
+          }),
         }
       }
 
@@ -93,8 +90,7 @@ const LoginSettings = () => {
           // Server responded but CORS headers blocked the real request
           return {
             ok: false,
-            message:
-              'Server is reachable but blocked the request (CORS). Ensure your Donetick server allows requests from this origin, or check the server CORS config.',
+            message: t('server.corsBlocked'),
           }
         }
         // Opaque is the only expected type for no-cors success; anything else is odd
@@ -111,34 +107,31 @@ const LoginSettings = () => {
           ) {
             return {
               ok: false,
-              message:
-                'Hostname could not be resolved. Check the URL for typos or verify DNS.',
+              message: t('server.dnsFailed'),
             }
           }
           return {
             ok: false,
-            message:
-              'Connection refused. The port may be wrong or nothing is listening — verify the URL and port (default Donetick port is 2021).',
+            message: t('server.connectionRefused'),
           }
         }
         // no-cors also timed out → server/host truly unreachable
         return {
           ok: false,
-          message:
-            'Unable to reach the server. Check the URL, port, and network connection.',
+          message: t('server.unreachable'),
         }
       }
 
       // Fallback (should rarely hit)
       return {
         ok: false,
-        message:
-          'Unable to reach the server. Check the URL, port, and network connection.',
+        message: t('server.unreachable'),
       }
     }
   }
 
-  const handleSave = async () => {
+  const handleSave = async e => {
+    e.preventDefault()
     const trimmedURL = serverURL.trim()
 
     if (trimmedURL === '') {
@@ -149,9 +142,7 @@ const LoginSettings = () => {
 
     if (!isValidURL(trimmedURL)) {
       setStatus('error')
-      setErrorMessage(
-        'Invalid URL format. Include the protocol (http:// or https://) and port if needed.',
-      )
+      setErrorMessage(t('server.invalidUrl'))
       return
     }
 
@@ -192,138 +183,115 @@ const LoginSettings = () => {
   const isTesting = status === 'testing'
 
   return (
-    <Container component='main' maxWidth='xs'>
+    <AuthShell
+      title={t('serverSettings')}
+      subtitle={t('server.settingsSubtitle')}
+    >
       <Box
-        sx={{
-          marginTop: 4,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
+        component='form'
+        onSubmit={handleSave}
+        sx={{ display: 'flex', flexDirection: 'column' }}
       >
-        <Sheet
-          component='form'
-          sx={{
-            mt: 1,
-            width: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            padding: 2,
-            borderRadius: '8px',
-            boxShadow: 'md',
+        <AuthTextField
+          label={t('server.url')}
+          id='serverURL'
+          name='serverURL'
+          inputMode='url'
+          autoCapitalize='none'
+          autoCorrect='off'
+          spellCheck='false'
+          placeholder={t('server.urlPlaceholder')}
+          autoFocus
+          value={serverURL}
+          onChange={handleURLChange}
+          disabled={isTesting}
+          color={
+            status === 'success'
+              ? 'success'
+              : status === 'error'
+                ? 'danger'
+                : 'neutral'
+          }
+          endDecorator={
+            status === 'success' ? (
+              <CheckCircleOutlineIcon color='success' fontSize='small' />
+            ) : status === 'error' ? (
+              <ErrorOutlineIcon color='error' fontSize='small' />
+            ) : null
+          }
+          helper={t('server.urlHelper')}
+        />
+
+        {status === 'error' && (
+          <Alert
+            color='danger'
+            variant='soft'
+            startDecorator={<ErrorOutlineIcon />}
+            sx={{ mt: 2, borderRadius: '12px', alignItems: 'flex-start' }}
+          >
+            {errorMessage}
+          </Alert>
+        )}
+
+        {status === 'success' && (
+          <Alert
+            color='success'
+            variant='soft'
+            startDecorator={<CheckCircleOutlineIcon />}
+            sx={{ mt: 2, borderRadius: '12px' }}
+          >
+            {t('serverConnected')}
+          </Alert>
+        )}
+
+        {status === 'testing' && (
+          <Alert
+            color='neutral'
+            variant='soft'
+            startDecorator={<WifiIcon />}
+            sx={{ mt: 2, borderRadius: '12px' }}
+          >
+            {t('server.testingConnection')}
+          </Alert>
+        )}
+
+        <AuthSubmitButton
+          loading={isTesting}
+          disabled={status === 'success'}
+          startDecorator={isTesting ? <CircularProgress size='sm' /> : null}
+          sx={{ mt: 3 }}
+        >
+          {isTesting
+            ? t('server.testingConnectionButton')
+            : t('server.saveAndConnect')}
+        </AuthSubmitButton>
+
+        <Button
+          type='button'
+          fullWidth
+          size='lg'
+          variant='plain'
+          color='neutral'
+          disabled={isTesting}
+          sx={{ ...authButtonSx, mt: 1 }}
+          onClick={async () => {
+            await Preferences.set({ key: 'customServerUrl', value: API_URL })
+            await apiClient.init(true)
+            refetchResource()
+            Navigate('/login')
           }}
         >
-          <Logo />
-
-          <Typography level='h2'>
-            Done
-            <span style={{ color: '#06b6d4' }}>tick</span>
-          </Typography>
-
-          <Typography level='body2' alignSelf={'start'} mt={4}>
-            Server URL
-          </Typography>
-          <Input
-            margin='normal'
-            required
-            fullWidth
-            id='serverURL'
-            name='serverURL'
-            autoFocus
-            value={serverURL}
-            onChange={handleURLChange}
-            disabled={isTesting}
-            color={
-              status === 'success'
-                ? 'success'
-                : status === 'error'
-                  ? 'danger'
-                  : 'neutral'
-            }
-            endDecorator={
-              status === 'success' ? (
-                <CheckCircleOutlineIcon color='success' fontSize='small' />
-              ) : status === 'error' ? (
-                <ErrorOutlineIcon color='error' fontSize='small' />
-              ) : null
-            }
-          />
-
-          <Typography mt={1} level='body-xs'>
-            Change the server URL to connect to a different server, such as your
-            own self-hosted Donetick server.
-          </Typography>
-          <Typography mt={1} level='body-xs'>
-            Include the protocol (http:// or https://) and port if necessary
-            (default Donetick port is 2021).
-          </Typography>
-
-          {status === 'error' && (
-            <Alert
-              color='danger'
-              variant='soft'
-              startDecorator={<ErrorOutlineIcon />}
-              sx={{ mt: 2, width: '100%' }}
-            >
-              {errorMessage}
-            </Alert>
-          )}
-
-          {status === 'success' && (
-            <Alert
-              color='success'
-              variant='soft'
-              startDecorator={<CheckCircleOutlineIcon />}
-              sx={{ mt: 2, width: '100%' }}
-            >
-              Connected! Redirecting to login...
-            </Alert>
-          )}
-
-          {status === 'testing' && (
-            <Alert
-              color='neutral'
-              variant='soft'
-              startDecorator={<WifiIcon />}
-              sx={{ mt: 2, width: '100%' }}
-            >
-              Testing connection to server...
-            </Alert>
-          )}
-
-          <Button
-            fullWidth
-            size='lg'
-            variant='solid'
-            disabled={isTesting || status === 'success'}
-            sx={{ width: '100%', mt: 2, mb: 2, borderRadius: '8px' }}
-            onClick={handleSave}
-            startDecorator={
-              isTesting ? <CircularProgress size='sm' /> : undefined
-            }
-          >
-            {isTesting ? 'Testing...' : 'Save & Connect'}
-          </Button>
-          <Button
-            fullWidth
-            size='lg'
-            variant='soft'
-            color='danger'
-            disabled={isTesting}
-            sx={{ width: '100%', mb: 2, borderRadius: '8px' }}
-            onClick={async () => {
-              await Preferences.set({ key: 'customServerUrl', value: API_URL })
-              await apiClient.init(true)
-              refetchResource()
-              Navigate('/login')
-            }}
-          >
-            Cancel and Reset
-          </Button>
-        </Sheet>
+          {t('server.resetToDefault')}
+        </Button>
       </Box>
-    </Container>
+
+      <Typography
+        level='body-xs'
+        sx={{ mt: 2.5, textAlign: 'center', color: 'text.secondary' }}
+      >
+        {t('serverChangeWarning')}
+      </Typography>
+    </AuthShell>
   )
 }
 

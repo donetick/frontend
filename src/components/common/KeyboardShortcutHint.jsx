@@ -9,10 +9,10 @@ import PropTypes from 'prop-types'
 function KeyboardShortcutHint({
   shortcut,
   show = true,
-  withCmd = true,
-  withCtrl, // Legacy prop for backward compatibility
-  withShift = false,
   sx = {},
+  withCmd = true, // Legacy prop for backward compatibility
+  withCtrl,
+  withShift = false,
   ...props
 }) {
   if (!show) return null

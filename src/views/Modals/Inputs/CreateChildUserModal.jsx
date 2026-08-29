@@ -1,15 +1,12 @@
-import {
-  Box,
-  Button,
-  FormControl,
-  FormHelperText,
-  Input,
-  Typography,
-} from '@mui/joy'
+import { FormControl, FormHelperText, Input, Typography } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
+import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
 function CreateChildUserModal({ isOpen, onClose, onSuccess }) {
+  const { t } = useTranslation('settings')
   const { ResponsiveModal } = useResponsiveModal()
 
   const [childName, setChildName] = useState('')
@@ -25,39 +22,38 @@ function CreateChildUserModal({ isOpen, onClose, onSuccess }) {
 
     if (touched.childName) {
       if (!childName.trim()) {
-        newErrors.childName = 'Sub account name is required'
+        newErrors.childName = t('childUsers.errNameRequired')
       } else if (childName.length < 2) {
-        newErrors.childName = 'Sub account name must be at least 2 characters'
+        newErrors.childName = t('childUsers.errNameMin')
       } else if (childName.length > 20) {
-        newErrors.childName = 'Sub account name must be less than 20 characters'
+        newErrors.childName = t('childUsers.errNameMax')
       } else if (!/^[a-z.-]+$/.test(childName)) {
-        newErrors.childName =
-          'Sub account name can only contain lowercase letters, dot and dash'
+        newErrors.childName = t('childUsers.errNameChars')
       }
     }
 
     if (touched.password) {
       if (!password) {
-        newErrors.password = 'Password is required'
+        newErrors.password = t('childUsers.errPasswordRequired')
       } else if (password.length < 8) {
-        newErrors.password = 'Password must be between 8 and 64 characters'
+        newErrors.password = t('childUsers.errPasswordLength')
       } else if (password.length > 64) {
-        newErrors.password = 'Password must be between 8 and 64 characters'
+        newErrors.password = t('childUsers.errPasswordLength')
       }
     }
 
     if (touched.confirmPassword) {
       if (password !== confirmPassword) {
-        newErrors.confirmPassword = 'Passwords do not match'
+        newErrors.confirmPassword = t('childUsers.errPasswordMatch')
       }
     }
 
     if (touched.displayName && displayName.length > 50) {
-      newErrors.displayName = 'Display name must be less than 50 characters'
+      newErrors.displayName = t('childUsers.errDisplayNameMax')
     }
 
     setErrors(newErrors)
-  }, [childName, displayName, password, confirmPassword, touched])
+  }, [childName, displayName, password, confirmPassword, touched, t])
 
   const handleSubmit = async () => {
     setTouched({
@@ -104,26 +100,40 @@ function CreateChildUserModal({ isOpen, onClose, onSuccess }) {
     password === confirmPassword
 
   return (
-    <ResponsiveModal open={isOpen} onClose={handleClose}>
-      <Typography level='h4' mb={2}>
-        Create Sub Account
-      </Typography>
-
-      <Typography level='body-md' mb={3}>
-        Create a new sub account. The user will be able to log in using their
-        combined username and complete tasks assigned to them.
-      </Typography>
-
+    <ResponsiveModal
+      open={isOpen}
+      onClose={handleClose}
+      title={t('childUsers.createTitle')}
+      description={t('childUsers.createDescription')}
+      size='md'
+      closeOnBackdrop={!isSubmitting}
+      closeOnEscape={!isSubmitting}
+      footer={
+        <ModalActions
+          secondary={{
+            label: t('accountSettings.cancel'),
+            onClick: handleClose,
+            disabled: isSubmitting,
+          }}
+          primary={{
+            label: t('childUsers.createButton'),
+            onClick: handleSubmit,
+            disabled: !isValid || isSubmitting,
+            loading: isSubmitting,
+          }}
+        />
+      }
+    >
       <FormControl error={!!errors.childName} sx={{ mb: 2 }}>
         <Typography level='body2' mb={1}>
-          Sub Account Name *
+          {t('childUsers.nameLabel')}
         </Typography>
         <Input
           required
           fullWidth
           id='childName'
           name='childName'
-          placeholder='Enter sub account name (e.g., sarah)'
+          placeholder={t('childUsers.namePlaceholder')}
           value={childName}
           onChange={e => {
             setChildName(e.target.value)
@@ -137,13 +147,13 @@ function CreateChildUserModal({ isOpen, onClose, onSuccess }) {
 
       <FormControl error={!!errors.displayName} sx={{ mb: 2 }}>
         <Typography level='body2' mb={1}>
-          Display Name
+          {t('childUsers.displayNameLabel')}
         </Typography>
         <Input
           fullWidth
           id='displayName'
           name='displayName'
-          placeholder='Display name (optional, defaults to sub account name)'
+          placeholder={t('childUsers.displayNamePlaceholder')}
           value={displayName}
           onChange={e => {
             setDisplayName(e.target.value)
@@ -157,7 +167,7 @@ function CreateChildUserModal({ isOpen, onClose, onSuccess }) {
 
       <FormControl error={!!errors.password} sx={{ mb: 2 }}>
         <Typography level='body2' mb={1}>
-          Password *
+          {t('childUsers.passwordLabel')}
         </Typography>
         <Input
           required
@@ -165,7 +175,7 @@ function CreateChildUserModal({ isOpen, onClose, onSuccess }) {
           name='password'
           type='password'
           id='password'
-          placeholder='Enter password (8-64 characters)'
+          placeholder={t('childUsers.passwordPlaceholder')}
           value={password}
           onChange={e => {
             setPassword(e.target.value)
@@ -177,7 +187,7 @@ function CreateChildUserModal({ isOpen, onClose, onSuccess }) {
 
       <FormControl error={!!errors.confirmPassword} sx={{ mb: 3 }}>
         <Typography level='body2' mb={1}>
-          Confirm Password *
+          {t('childUsers.confirmPasswordLabel')}
         </Typography>
         <Input
           required
@@ -185,7 +195,7 @@ function CreateChildUserModal({ isOpen, onClose, onSuccess }) {
           name='confirmPassword'
           type='password'
           id='confirmPassword'
-          placeholder='Confirm password'
+          placeholder={t('childUsers.confirmPasswordPlaceholder')}
           value={confirmPassword}
           onChange={e => {
             setConfirmPassword(e.target.value)
@@ -196,27 +206,6 @@ function CreateChildUserModal({ isOpen, onClose, onSuccess }) {
           <FormHelperText>{errors.confirmPassword}</FormHelperText>
         )}
       </FormControl>
-
-      <Box display='flex' justifyContent='space-between' gap={2}>
-        <Button
-          size='lg'
-          variant='outlined'
-          onClick={handleClose}
-          disabled={isSubmitting}
-          sx={{ flex: 1 }}
-        >
-          Cancel
-        </Button>
-        <Button
-          size='lg'
-          onClick={handleSubmit}
-          disabled={!isValid || isSubmitting}
-          loading={isSubmitting}
-          sx={{ flex: 1 }}
-        >
-          Create Account
-        </Button>
-      </Box>
     </ResponsiveModal>
   )
 }

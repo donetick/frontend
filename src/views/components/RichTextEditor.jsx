@@ -1,6 +1,7 @@
+import 'quill/dist/quill.snow.css'
+
 import imageCompression from 'browser-image-compression'
 import Quill from 'quill'
-import 'quill/dist/quill.snow.css'
 import QuillMarkdown from 'quilljs-markdown'
 
 // Extend the built-in Image blot to preserve dt-data-path
@@ -32,6 +33,8 @@ class DtImageBlot extends ImageBlot {
 DtImageBlot.blotName = 'image'
 DtImageBlot.tagName = 'img'
 Quill.register(DtImageBlot, true)
+import './RichTextEditor.css'
+
 import {
   forwardRef,
   useCallback,
@@ -39,28 +42,30 @@ import {
   useImperativeHandle,
   useRef,
 } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import { useDescriptionHtml } from '../../hooks/useDescriptionHtml'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { apiClient } from '../../utils/ApiClient'
 import { isPlusAccount, resolvePhotoURL } from '../../utils/Helpers'
 import { patchDescriptionHtml } from '../../utils/ImageCache'
-import './RichTextEditor.css'
 
 const RichTextEditor = forwardRef(
   (
     {
-      value = '',
-      onChange,
-      isEditable = true,
-      placeholder = 'Enter description...',
-      variant = 'outlined',
+      draftId,
       entityId,
       entityType,
-      draftId,
+      isEditable = true,
+      onChange,
+      placeholder = null,
+      value = '',
+      variant = 'outlined',
     },
     ref,
   ) => {
+    const { t } = useTranslation('chores')
     const { showError } = useNotification()
     const { data: userProfile } = useUserProfile()
     // Display-only HTML with expired image srcs swapped for cached/re-signed ones
@@ -92,9 +97,8 @@ const RichTextEditor = forwardRef(
       // Check if user has plus account
       if (!isPlusAccount(userProfile)) {
         showError({
-          title: 'Plus Feature',
-          message:
-            'Image uploads are not available in the Basic plan. Upgrade to Plus to add images to your content.',
+          title: t('common:upload.plusFeatureTitle'),
+          message: t('common:upload.plusFeatureMessage'),
         })
         return
       }
@@ -155,33 +159,32 @@ const RichTextEditor = forwardRef(
 
           if (response.status === 507) {
             showError({
-              title: 'Storage Quota Exceeded',
-              message: 'You have exceeded your quota for uploading files.',
+              title: t('common:upload.quotaTitle'),
+              message: t('common:upload.quotaMessage'),
             })
             return
           } else if (response.status === 413) {
             showError({
-              title: 'File Too Large',
-              message: 'The file you are trying to upload is too large.',
+              title: t('common:upload.tooLargeTitle'),
+              message: t('common:upload.tooLargeMessage'),
             })
             return
           } else if (response.status === 403 && !isPlusAccount(userProfile)) {
             showError({
-              title: 'Upgrade Required',
-              message:
-                'Image uploads are only available for Plus accounts. Please ',
+              title: t('common:upload.upgradeTitle'),
+              message: t('common:upload.upgradeMessage'),
             })
             return
           } else if (response.status === 403) {
             showError({
-              title: 'Permission Denied',
-              message: 'You do not have permission to upload files.',
+              title: t('common:upload.deniedTitle'),
+              message: t('common:upload.deniedMessage'),
             })
             return
           } else if (!response.ok) {
             showError({
-              title: 'Upload Failed',
-              message: 'Failed to upload image.',
+              title: t('common:upload.failedTitle'),
+              message: t('common:upload.failedMessage'),
             })
             return
           }
@@ -199,8 +202,8 @@ const RichTextEditor = forwardRef(
         } catch (error) {
           console.error('Error during image processing or upload:', error)
           showError({
-            title: 'Upload Failed',
-            message: 'An error occurred while processing the image.',
+            title: t('common:upload.failedTitle'),
+            message: t('common:upload.processingMessage'),
           })
         }
       }
@@ -226,7 +229,7 @@ const RichTextEditor = forwardRef(
               },
             },
           },
-          placeholder: placeholder,
+          placeholder: placeholder ?? t('descriptionPlaceholder'),
         })
         new QuillMarkdown(editorRef.current, {})
         editorRef.current.root.innerHTML = value

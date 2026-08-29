@@ -9,20 +9,23 @@ import {
   Switch,
   Typography,
 } from '@mui/joy'
+import { useTranslation } from 'react-i18next'
+
 import { useSSEContext } from '../hooks/useSSEContext'
 import { useUserProfile } from '../queries/UserQueries'
 import { isPlusAccount } from '../utils/Helpers'
 import SSEConnectionStatus from './SSEConnectionStatus'
 
 const SSESettings = () => {
+  const { t } = useTranslation('settings')
   const { data: userProfile } = useUserProfile()
   const {
-    isConnected,
-    isConnecting,
     error,
     getConnectionStatus,
-    toggleSSEEnabled,
+    isConnected,
+    isConnecting,
     isSSEEnabled,
+    toggleSSEEnabled,
   } = useSSEContext()
 
   const handleToggle = () => {
@@ -75,15 +78,15 @@ const SSESettings = () => {
         )}
         <Box sx={{ flex: 1 }}>
           <Typography level='title-md'>
-            Real-time Updates (SSE)
+            {t('realtime.titleSse')}
             {!isPlusAccount(userProfile) && (
               <Chip variant='soft' color='warning' sx={{ ml: 1 }}>
-                Plus Feature
+                {t('common.plusFeature')}
               </Chip>
             )}
           </Typography>
           <Typography level='body-sm' color='neutral'>
-            Get instant notifications via Server-Sent Events
+            {t('realtime.subtitleSse')}
           </Typography>
         </Box>
         {isSSEEnabled() && isPlusAccount(userProfile) && (

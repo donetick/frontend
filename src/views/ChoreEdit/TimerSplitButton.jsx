@@ -5,18 +5,20 @@ import {
   Pause,
   PlayArrow,
 } from '@mui/icons-material'
-import { Box, ButtonGroup, IconButton, Menu, MenuItem } from '@mui/joy'
+import { Box, Button, ButtonGroup, IconButton, Menu, MenuItem } from '@mui/joy'
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 const TimerSplitButton = ({
   chore,
-  onAction,
-  onShowDetails,
-  onResetTimer,
-  onClearAllTime,
   disabled = false,
   fullWidth = false,
+  onAction,
+  onClearAllTime,
+  onResetTimer,
+  onShowDetails,
 }) => {
+  const { t } = useTranslation('timer')
   const [anchorEl, setAnchorEl] = useState(null)
   const isMenuOpen = Boolean(anchorEl)
   const menuRef = useRef(null)
@@ -95,36 +97,25 @@ const TimerSplitButton = ({
         disabled={disabled}
       >
         {/* Main action button */}
-        <IconButton
+        <Button
           onClick={handleMainAction}
           disabled={disabled}
           size='md'
+          startDecorator={chore.status === 1 ? <Pause /> : <PlayArrow />}
           sx={{
-            px: 3,
-            py: 1,
-            borderTopRightRadius: 0,
-            borderBottomRightRadius: 0,
             minWidth: fullWidth ? 'auto' : 120,
             flex: fullWidth ? 1 : 'none',
           }}
         >
-          {chore.status === 1 ? <Pause /> : <PlayArrow />}
-          {chore.status === 1 ? 'Pause' : 'Resume'}
-        </IconButton>
+          {chore.status === 1 ? t('pause') : t('resume')}
+        </Button>
 
         {/* Dropdown arrow button */}
         <IconButton
           onClick={handleMenuOpen}
           disabled={disabled}
-          size='lg'
-          sx={{
-            px: 1,
-            borderTopLeftRadius: 0,
-            borderBottomLeftRadius: 0,
-            borderLeft: '1px solid',
-            borderLeftColor: 'divider',
-            minWidth: 'auto',
-          }}
+          size='md'
+          sx={{ px: 1, minWidth: 'auto' }}
         >
           <ArrowDropDown />
         </IconButton>
@@ -143,7 +134,7 @@ const TimerSplitButton = ({
       >
         <MenuItem onClick={handleShowDetails}>
           <Info sx={{ mr: 1 }} />
-          Timer Details
+          {t('title')}
         </MenuItem>
         {/* <MenuItem onClick={handleResetTimer}>
           <RestartAlt sx={{ mr: 1 }} />
@@ -151,7 +142,7 @@ const TimerSplitButton = ({
         </MenuItem> */}
         <MenuItem onClick={handleClearAllTime} color='danger'>
           <DeleteSweep sx={{ mr: 1 }} />
-          Clear & Reset
+          {t('clearAndReset')}
         </MenuItem>
       </Menu>
     </Box>

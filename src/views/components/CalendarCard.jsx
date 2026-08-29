@@ -2,11 +2,12 @@ import { CalendarMonth } from '@mui/icons-material'
 import { Avatar, Box, Chip, Grid, Typography } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { getPriorityColor, TASK_COLOR } from '../../utils/Colors'
-
 import CalendarMonthly from './CalendarMonthly'
 
 const getAssigneeColor = (assignee, userProfile) => {
@@ -15,6 +16,7 @@ const getAssigneeColor = (assignee, userProfile) => {
     : TASK_COLOR.ASSIGNED_TO_OTHER
 }
 const CalendarCard = ({ chores }) => {
+  const { t } = useTranslation('chores')
   const { data: userProfile } = useUserProfile()
   const { fmt } = useLocalization()
 
@@ -35,14 +37,14 @@ const CalendarCard = ({ chores }) => {
     const tomorrow = new Date(now)
     tomorrow.setDate(tomorrow.getDate() + 1)
     tomorrow.setHours(0, 0, 0, 0) // Set to start of tomorrow
-    
+
     const msUntilTomorrow = tomorrow.getTime() - now.getTime()
 
     const timeout = setTimeout(() => {
       const today = new Date()
       const yesterday = new Date(today)
       yesterday.setDate(yesterday.getDate() - 1)
-      
+
       // Check if selected date is now yesterday and update to today
       if (selectedDate.toDateString() === yesterday.toDateString()) {
         setSeletedDate(today)
@@ -58,7 +60,9 @@ const CalendarCard = ({ chores }) => {
       return userProfile.displayName
     }
     const assignee = circleMembers.find(member => member.userId === assignedTo)
-    return assignee ? `${assignee.displayName}` : 'Assigned to other'
+    return assignee
+      ? `${assignee.displayName}`
+      : t('calendarCard.assignedToOther')
   }
 
   return (
@@ -83,7 +87,7 @@ const CalendarCard = ({ chores }) => {
         }}
       >
         <CalendarMonth />
-        <Typography level='title-md'>Calendar Overview</Typography>
+        <Typography level='title-md'>{t('calendarCard.title')}</Typography>
       </Box>
 
       <div>
@@ -119,25 +123,25 @@ const CalendarCard = ({ chores }) => {
             // Add priority levels that exist in the chores
             if (priorityLevels.has(1)) {
               legendItems.push({
-                name: 'High Priority',
+                name: t('calendarCard.highPriority'),
                 color: TASK_COLOR.PRIORITY_1,
               })
             }
             if (priorityLevels.has(2)) {
               legendItems.push({
-                name: 'Medium Priority',
+                name: t('calendarCard.mediumPriority'),
                 color: TASK_COLOR.PRIORITY_2,
               })
             }
             if (priorityLevels.has(3)) {
               legendItems.push({
-                name: 'Low Priority',
+                name: t('calendarCard.lowPriority'),
                 color: TASK_COLOR.PRIORITY_3,
               })
             }
             if (priorityLevels.has(4)) {
               legendItems.push({
-                name: 'Lowest Priority',
+                name: t('calendarCard.lowestPriority'),
                 color: TASK_COLOR.PRIORITY_4,
               })
             }
@@ -148,7 +152,7 @@ const CalendarCard = ({ chores }) => {
               )
             ) {
               legendItems.push({
-                name: 'No Priority',
+                name: t('calendarCard.noPriority'),
                 color: TASK_COLOR.NO_PRIORITY,
               })
             }
@@ -198,9 +202,7 @@ const CalendarCard = ({ chores }) => {
               width: '100%',
             }}
           >
-            <Typography level='title-md'>
-              {fmt.date(selectedDate)}
-            </Typography>
+            <Typography level='title-md'>{fmt.date(selectedDate)}</Typography>
             <Chip variant='soft' color='primary' size='md'>
               {(() => {
                 const count = chores.filter(chore => {
@@ -210,7 +212,7 @@ const CalendarCard = ({ chores }) => {
                   const selectedLocalDate = selectedDate.toLocaleDateString()
                   return choreDate === selectedLocalDate
                 }).length
-                return `${count} Tasks`
+                return t('calendarCard.tasksCount', { count })
               })()}
             </Chip>
           </Box>

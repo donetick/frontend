@@ -1,3 +1,5 @@
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+
 import App from '@/App'
 import ChoreEdit from '@/views/ChoreEdit/ChoreEdit'
 import Error from '@/views/Error'
@@ -10,7 +12,8 @@ import Settings from '@/views/Settings/Settings'
 import SettingsOverview from '@/views/Settings/SettingsOverview'
 import SettingsRoutes from '@/views/Settings/SettingsRoutes'
 import ThemeSettings from '@/views/Settings/ThemeSettings'
-import { RouterProvider, createBrowserRouter } from 'react-router-dom'
+
+import GlobalSearchPage from '../search/GlobalSearchPage'
 import AuthenticationLoading from '../views/Authorization/Authenticating'
 import ForgotPasswordView from '../views/Authorization/ForgotPasswordView'
 import LoginSettings from '../views/Authorization/LoginSettings'
@@ -24,8 +27,14 @@ import JoinCircleView from '../views/Circles/JoinCircle'
 import NotFound from '../views/components/NotFound'
 import FilterView from '../views/Filters/FilterView'
 import ChoreHistory from '../views/History/ChoreHistory'
+import LabelDetailView from '../views/Labels/LabelDetailView'
 import LabelView from '../views/Labels/LabelView'
 import Landing from '../views/Landing/Landing'
+import CircleSetupView from '../views/Onboarding/CircleSetupView'
+import GetStartedView from '../views/Onboarding/GetStartedView'
+import HeardAboutView from '../views/Onboarding/HeardAboutView'
+import OnboardingView from '../views/Onboarding/OnboardingView'
+import WorkspaceReadyView from '../views/Onboarding/WorkspaceReadyView'
 import PaymentCancelledView from '../views/Payments/PaymentFailView'
 import PaymentSuccessView from '../views/Payments/PaymentSuccessView'
 import PrivacyPolicyView from '../views/PrivacyPolicy/PrivacyPolicyView'
@@ -34,6 +43,7 @@ import APITokenSettings from '../views/Settings/APITokenSettings'
 import LocalizationSettings from '../views/Settings/LocalizationSettings'
 import MFASettings from '../views/Settings/MFASettings'
 import NotificationSetting from '../views/Settings/NotificationSetting'
+import PrivacyAnalyticsSettings from '../views/Settings/PrivacyAnalyticsSettings'
 import ProfileSettings from '../views/Settings/ProfileSettings'
 import SidepanelSettings from '../views/Settings/SidepanelSettings'
 import StorageSettings from '../views/Settings/StorageSettings'
@@ -44,16 +54,6 @@ import ThingsView from '../views/Things/ThingsView'
 import TimerDetails from '../views/Timer/TimerDetails'
 import UserActivities from '../views/User/UserActivities'
 import UserPoints from '../views/User/UserPoints'
-const getMainRoute = () => {
-  if (
-    // if domain is www.donetick.com or donetick.com  then show landing page:
-    window.location.hostname === 'www.donetick.com' ||
-    window.location.hostname === 'donetick.com'
-  ) {
-    return <Landing />
-  }
-  return <MyChores />
-}
 const Router = createBrowserRouter([
   {
     path: '/',
@@ -62,7 +62,7 @@ const Router = createBrowserRouter([
     children: [
       {
         path: '/',
-        element: getMainRoute(),
+        element: <MyChores />,
       },
       {
         path: '/settings',
@@ -125,6 +125,10 @@ const Router = createBrowserRouter([
             element: <AdvancedSettings />,
           },
           {
+            path: 'privacy',
+            element: <PrivacyAnalyticsSettings />,
+          },
+          {
             path: 'developer',
             element: <DeveloperSettings />,
           },
@@ -133,6 +137,10 @@ const Router = createBrowserRouter([
       {
         path: '/chores',
         element: <MyChores />,
+      },
+      {
+        path: '/search',
+        element: <GlobalSearchPage />,
       },
       {
         path: '/archived',
@@ -181,6 +189,26 @@ const Router = createBrowserRouter([
       {
         path: '/signup',
         element: <SignupView />,
+      },
+      {
+        path: '/onboarding',
+        element: <OnboardingView />,
+      },
+      {
+        path: '/get-started',
+        element: <GetStartedView />,
+      },
+      {
+        path: '/ready',
+        element: <WorkspaceReadyView />,
+      },
+      {
+        path: '/circle-setup',
+        element: <CircleSetupView />,
+      },
+      {
+        path: '/heard-about',
+        element: <HeardAboutView />,
       },
 
       {
@@ -234,6 +262,10 @@ const Router = createBrowserRouter([
       {
         path: 'labels/',
         element: <LabelView />,
+      },
+      {
+        path: 'labels/:labelId',
+        element: <LabelDetailView />,
       },
       {
         path: 'projects/',

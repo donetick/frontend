@@ -1,30 +1,55 @@
 import { Person } from '@mui/icons-material'
+
 import BaseOptionPicker from './BaseOptionPicker'
 
+const ANYONE = 'anyone'
+
 const AssigneePickerField = ({
-  value = null,
+  currentUserId = null,
+  emptyDisplay,
+  includeAnyone = true,
+  isAnyone = false,
+  members = [],
   onChange,
   onClear,
-  members = [],
-  includeAnyone = true,
-  emptyDisplay,
-  currentUserId = null,
+  values = [],
 }) => {
   const options = [
-    ...(includeAnyone ? [{ userId: 'anyone', displayName: 'Anyone' }] : []),
+    ...(includeAnyone ? [{ userId: ANYONE, displayName: 'Anyone' }] : []),
     ...members.map(member => ({
       userId: member.userId,
       displayName: member.displayName || member.username || 'Unknown',
     })),
   ]
 
-  const displayValue = currentUserId && value === currentUserId ? null : value
+  // An implicit self-assignment is shown as "unset" so the chip stays empty
+  // until the user picks someone explicitly.
+  const isImplicitSelf =
+    !isAnyone &&
+    currentUserId &&
+    values.length === 1 &&
+    values[0] === currentUserId
+
+  const displayValues = isAnyone ? [ANYONE] : isImplicitSelf ? [] : values
+
+  const handleValuesChange = nextValues => {
+    const wasAnyone = displayValues.includes(ANYONE)
+    const hasAnyone = nextValues.includes(ANYONE)
+
+    if (hasAnyone && !wasAnyone) {
+      onChange?.([ANYONE])
+      return
+    }
+
+    onChange?.(nextValues.filter(userId => userId !== ANYONE))
+  }
 
   return (
     <BaseOptionPicker
       items={options}
-      value={displayValue}
-      onChange={onChange}
+      multiple
+      values={displayValues}
+      onValuesChange={handleValuesChange}
       onClear={onClear}
       emptyDisplay={emptyDisplay}
       emptyLabel='Assignee'
@@ -32,9 +57,11 @@ const AssigneePickerField = ({
       getItemLabel={item => item.displayName}
       renderTriggerIcon={() => <Person sx={{ fontSize: '20px' }} />}
       renderItemStart={() => <Person sx={{ fontSize: '18px' }} />}
-      getTriggerText={({ selectedItems, isEmpty }) =>
-        isEmpty ? 'Assignee' : selectedItems[0].displayName
-      }
+      getTriggerText={({ isEmpty, selectedItems }) => {
+        if (isEmpty) return 'Assignee'
+        if (selectedItems.length === 1) return selectedItems[0].displayName
+        return `${selectedItems.length} assignees`
+      }}
       menuMinWidth={220}
     />
   )

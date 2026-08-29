@@ -1,0 +1,72 @@
+{
+  "save": "Guardar",
+  "cancel": "Cancelar",
+  "delete": "Eliminar",
+  "edit": "Editar",
+  "close": "Cerrar",
+  "confirm": "Confirmar",
+  "loading": "Cargando...",
+  "error": "Error",
+  "success": "Éxito",
+  "warning": "Advertencia",
+  "refresh": "Actualizar",
+  "copy": "Copiar",
+  "copied": "¡Copiado!",
+  "settings": "Configuración",
+  "yes": "Sí",
+  "no": "No",
+  "back": "Atrás",
+  "backToCalendar": "Volver al Calendario",
+  "logout": "Cerrar Sesión",
+  "version": "Versión",
+  "navigation": {
+    "search": "Buscar",
+    "allTasks": "Todas las Tareas",
+    "archived": "Archivadas",
+    "things": "Cosas",
+    "labels": "Etiquetas",
+    "projects": "Proyectos",
+    "filters": "Filtros",
+    "activities": "Actividades",
+    "points": "Puntos",
+    "settings": "Configuración"
+  },
+  "search": {
+    "title": "Buscar",
+    "placeholder": "Buscar en Donetick",
+    "inputAriaLabel": "Buscar tareas, historial, proyectos, etiquetas y configuración",
+    "deviceNote": "Se busca en el contenido disponible en este dispositivo",
+    "escape": "Esc",
+    "recent": "Recientes",
+    "empty": {
+      "title": "Sin coincidencias directas",
+      "subtitle": "Aún puedes filtrar la lista de tareas con esta búsqueda."
+    },
+    "groups": {
+      "tasks": "Tareas",
+      "history": "Notas",
+      "projects": "Proyectos",
+      "labels": "Etiquetas",
+      "people": "Personas",
+      "settings": "Configuración",
+      "actions": "Acciones rápidas"
+    },
+    "actions": {
+      "quickAction": "Acción rápida",
+      "navigation": "Navegación",
+      "createTask": "Crear una tarea",
+      "viewAllTasks": "Ver todas las tareas",
+      "viewArchivedTasks": "Ver tareas archivadas",
+      "openSettings": "Abrir configuración",
+      "filterTasks": "Mostrar tareas que coincidan con «{{query}}»",
+      "filterTasksSubtitle": "Filtrar la lista de tareas"
+    },
+    "footer": {
+      "navigate": "Navegar",
+      "open": "Abrir",
+      "results_one": "{{count}} resultado",
+      "results_other": "{{count}} resultados",
+      "typeToSearch": "Escribe para buscar"
+    }
+  }
+}

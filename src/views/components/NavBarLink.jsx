@@ -7,13 +7,12 @@ import {
 import { Link } from 'react-router-dom'
 
 const NavBarLink = ({ link }) => {
-  const { to, icon, label } = link
+  const { icon, label, onClick, to } = link
   return (
     <ListItem>
       <ListItemButton
         key={to}
-        component={Link}
-        to={to}
+        {...(onClick ? { onClick } : { component: Link, to })}
         variant='plain'
         color='neutral'
         sx={{

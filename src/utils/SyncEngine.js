@@ -28,6 +28,10 @@ class SyncEngine {
   constructor() {
     this.isSyncing = false
     this.listeners = []
+    // The run currently in flight, and the single follow-up run queued behind
+    // it. See sync() for why a follow-up is needed rather than just waiting.
+    this.inFlight = null
+    this.queued = null
   }
 
   // Register listener for sync state changes
@@ -42,10 +46,38 @@ class SyncEngine {
     this.listeners.forEach(cb => cb(state))
   }
 
-  // Main sync entry point — returns true if sync succeeded, false otherwise
+  // Main sync entry point — returns true if sync succeeded, false otherwise.
+  //
+  // Concurrent callers are coalesced rather than dropped. Returning early while
+  // another run is in flight used to lose writes: that run's /sync/changes
+  // request may have been issued *before* the caller's change reached the
+  // server, so its cursor skips past the change and the caller reads a cache
+  // that will never contain it until something else triggers a sync. That is
+  // why a task created from the modal could vanish on the refetch right after
+  // it was created. Waiting for the in-flight run is not enough for the same
+  // reason, so callers that arrive mid-run share one follow-up run instead.
   async sync() {
     if (!isOfflineFeatureEnabled()) return false
-    if (this.isSyncing) return false
+
+    if (this.inFlight) {
+      if (!this.queued) {
+        this.queued = this.inFlight
+          .catch(() => false)
+          .then(() => {
+            this.queued = null
+            return this.sync()
+          })
+      }
+      return this.queued
+    }
+
+    this.inFlight = this._runSync().finally(() => {
+      this.inFlight = null
+    })
+    return this.inFlight
+  }
+
+  async _runSync() {
     this.isSyncing = true
     this._notify({ syncing: true, error: null })
 
@@ -162,7 +194,7 @@ class SyncEngine {
         break
 
       case CommandType.COMPLETE_CHORE: {
-        const { id, body, completedDate, performer } = cmd.payload
+        const { body, completedDate, id, performer } = cmd.payload
         response = await MarkChoreComplete(
           id,
           body || {},
@@ -189,7 +221,7 @@ class SyncEngine {
         break
 
       case CommandType.UPDATE_CHORE_HISTORY: {
-        const { choreId, historyId, historyData } = cmd.payload
+        const { choreId, historyData, historyId } = cmd.payload
         response = await UpdateChoreHistory(choreId, historyId, historyData)
         break
       }
@@ -201,7 +233,7 @@ class SyncEngine {
       }
 
       case CommandType.RESCHEDULE_CHORE: {
-        const { id, dueDate } = cmd.payload
+        const { dueDate, id } = cmd.payload
         response = await UpdateDueDate(id, dueDate)
         break
       }

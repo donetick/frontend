@@ -1,31 +1,30 @@
 import { Box, Button, CircularProgress, Container } from '@mui/joy'
 import { Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
-import Logo from '../../Logo'
+import { useTranslation } from 'react-i18next'
+
 import { networkManager } from '../../hooks/NetworkManager'
+import Logo from '../../Logo'
 
 const LoadingComponent = () => {
-  const [message, setMessage] = useState('Loading...')
+  const { t } = useTranslation('common')
+  const [message, setMessage] = useState(t('loading'))
   const [subMessage, setSubMessage] = useState('')
   const [isOnline, setIsOnline] = useState(networkManager.isOnline)
 
   useEffect(() => {
     if (!isOnline) {
-      setMessage('You are offline')
-      setSubMessage(
-        'This not available while offline. Please check your internet connection and try again.',
-      )
+      setMessage(t('loadingOffline'))
+      setSubMessage(t('loadingOfflineSub'))
     }
-  }, [isOnline])
+  }, [isOnline, t])
   useEffect(() => {
     networkManager.registerNetworkListener(isOnline => setIsOnline(isOnline))
 
     // if loading took more than 5 seconds update submessage to mention there might be an error:
     const timeout = setTimeout(() => {
       if (networkManager.isOnline) {
-        setSubMessage(
-          'This is taking longer than usual. There might be an issue.',
-        )
+        setSubMessage(t('loadingSlow'))
       }
     }, 5000)
     return () => clearTimeout(timeout)
@@ -67,7 +66,7 @@ const LoadingComponent = () => {
             window.location.href = '/' // navigate back to the home page
           }}
         >
-          Navigate Back
+          {t('navigateBack')}
         </Button>
       </Box>
     </Container>

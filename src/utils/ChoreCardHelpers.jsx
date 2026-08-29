@@ -19,7 +19,11 @@ const allMonths = [
  * @param {Object} chore - The chore object (needed for nextDueDate null check)
  * @returns {string} The formatted due date text
  */
-export const getDueDateChipText = (nextDueDate, chore, timeFormat = 'h:mm A') => {
+export const getDueDateChipText = (
+  nextDueDate,
+  chore,
+  timeFormat = 'h:mm A',
+) => {
   if (chore?.nextDueDate === null || nextDueDate === null) return 'No Due Date'
 
   const dueDate = moment(nextDueDate)
@@ -34,16 +38,22 @@ export const getDueDateChipText = (nextDueDate, chore, timeFormat = 'h:mm A') =>
     sameElse: `MMM D ${timeFormat}`,
   }
 
-
   // if time is 23:59:59, treat as end-of-day (date only, no specific time)
-  if (dueDate.hours() === 23 && dueDate.minutes() === 59 && dueDate.seconds() === 59) {
+  if (
+    dueDate.hours() === 23 &&
+    dueDate.minutes() === 59 &&
+    dueDate.seconds() === 59
+  ) {
     if (diff < 0) {
       // For overdue dates, show calendar format for recent dates
       const absDiff = Math.abs(diff)
       if (absDiff <= 48) {
         return (
           'Overdue ' +
-          moment(nextDueDate).calendar(null, calendarFormat).split(' ')[0].toLowerCase()
+          moment(nextDueDate)
+            .calendar(null, calendarFormat)
+            .split(' ')[0]
+            .toLowerCase()
         )
       }
       return 'Overdue ' + dueDate.fromNow()

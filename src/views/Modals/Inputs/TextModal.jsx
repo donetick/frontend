@@ -1,18 +1,21 @@
-import { Box, Button, Textarea } from '@mui/joy'
+import { Textarea } from '@mui/joy'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
+import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
 function TextModal({
+  cancelText,
+  current,
   isOpen,
+  okText,
   onClose,
   onSave,
-  current,
   title,
-  okText,
-  cancelText,
 }) {
+  const { t } = useTranslation('common')
   const { ResponsiveModal } = useResponsiveModal()
-
   const [text, setText] = useState(current)
 
   const handleSave = () => {
@@ -24,28 +27,25 @@ function TextModal({
     <ResponsiveModal
       open={isOpen}
       onClose={onClose}
-      size='lg'
-      fullWidth={true}
+      size='md'
       title={title}
+      footer={
+        <ModalActions
+          secondary={{ label: cancelText || 'Cancel', onClick: onClose }}
+          primary={{ label: okText || 'Save', onClick: handleSave }}
+        />
+      }
     >
       <Textarea
-        placeholder='Type in here…'
+        autoFocus
+        placeholder={t('typeHere')}
         value={text}
-        onChange={e => setText(e.target.value)}
-        minRows={2}
-        maxRows={4}
-        sx={{ minWidth: 300 }}
+        onChange={event => setText(event.target.value)}
+        minRows={3}
+        maxRows={8}
       />
-
-      <Box display={'flex'} justifyContent={'space-around'} mt={1}>
-        <Button size='lg' onClick={handleSave} fullWidth sx={{ mr: 1 }}>
-          {okText ? okText : 'Save'}
-        </Button>
-        <Button size='lg' onClick={onClose} variant='outlined'>
-          {cancelText ? cancelText : 'Cancel'}
-        </Button>
-      </Box>
     </ResponsiveModal>
   )
 }
+
 export default TextModal

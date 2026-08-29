@@ -1,3 +1,20 @@
+import '@meauxt/react-swipeable-list/dist/styles.css'
+
+import {
+  SwipeableList,
+  SwipeableListItem,
+  SwipeAction,
+  TrailingActions,
+  Type as ListType,
+} from '@meauxt/react-swipeable-list'
+import {
+  Add,
+  Close,
+  MoreVert,
+  Search,
+  SearchOff,
+  Style,
+} from '@mui/icons-material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import {
@@ -7,30 +24,28 @@ import {
   CircularProgress,
   Container,
   IconButton,
+  Input,
   Stack,
   Typography,
 } from '@mui/joy'
-import { useEffect, useState } from 'react'
-import LabelModal from '../Modals/Inputs/LabelModal'
-
-import {
-  Type as ListType,
-  SwipeableList,
-  SwipeableListItem,
-  SwipeAction,
-  TrailingActions,
-} from '@meauxt/react-swipeable-list'
-import '@meauxt/react-swipeable-list/dist/styles.css'
-import { Add, MoreVert } from '@mui/icons-material'
 import { useQueryClient } from '@tanstack/react-query'
+import Fuse from 'fuse.js'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+
+import EmptyState from '../../components/common/EmptyState'
+import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
 import { useUserProfile } from '../../queries/UserQueries'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors'
 import { DeleteLabel } from '../../utils/Fetcher'
 import { getSafeBottomStyles } from '../../utils/SafeAreaUtils'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
+import LabelModal from '../Modals/Inputs/LabelModal'
 import { useLabels } from './LabelQueries'
 
-const LabelCardContent = ({ label, currentUserId, onToggleActions }) => {
+const LabelCardContent = ({ currentUserId, label, onToggleActions }) => {
+  const { t } = useTranslation('labels')
   // Check if current user owns this label
   const isOwnedByCurrentUser = label.created_by === currentUserId
 
@@ -123,7 +138,7 @@ const LabelCardContent = ({ label, currentUserId, onToggleActions }) => {
                 fontWeight: 'md',
               }}
             >
-              Shared
+              {t('shared')}
             </Chip>
           )}
         </Box>
@@ -148,8 +163,11 @@ const LabelCardContent = ({ label, currentUserId, onToggleActions }) => {
 }
 
 const LabelView = () => {
-  const { data: labels, isLabelsLoading, isError } = useLabels()
+  const { t } = useTranslation('labels')
+  const { data: labels, isError, isLabelsLoading } = useLabels()
   const { data: userProfile } = useUserProfile()
+  const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
 
   const [userLabels, setUserLabels] = useState([])
   const [modalOpen, setModalOpen] = useState(false)
@@ -158,6 +176,70 @@ const LabelView = () => {
   const queryClient = useQueryClient()
   const [confirmationModel, setConfirmationModel] = useState({})
   const [showMoreInfoId, setShowMoreInfoId] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [sortBy, setSortBy] = useState(
+    () => localStorage.getItem('labelsSortBy') || 'name',
+  )
+  const [sortDirection, setSortDirection] = useState(
+    () => localStorage.getItem('labelsSortDirection') || 'asc',
+  )
+  const [ownershipFilter, setOwnershipFilter] = useState('all')
+  const searchInputRef = useRef(null)
+
+  useEffect(() => {
+    localStorage.setItem('labelsSortBy', sortBy)
+    localStorage.setItem('labelsSortDirection', sortDirection)
+  }, [sortBy, sortDirection])
+
+  const visibleLabels = useMemo(() => {
+    if (ownershipFilter === 'mine') {
+      return userLabels.filter(label => label.created_by === userProfile?.id)
+    }
+    if (ownershipFilter === 'shared') {
+      return userLabels.filter(label => label.created_by !== userProfile?.id)
+    }
+    return userLabels
+  }, [ownershipFilter, userLabels, userProfile?.id])
+
+  const fuse = useMemo(
+    () =>
+      new Fuse(visibleLabels, {
+        keys: ['name'],
+        includeScore: true,
+        isCaseSensitive: false,
+        findAllMatches: true,
+      }),
+    [visibleLabels],
+  )
+
+  const filteredLabels = useMemo(() => {
+    const matched = searchTerm
+      ? fuse.search(searchTerm).map(result => result.item)
+      : visibleLabels
+
+    const direction = sortDirection === 'desc' ? -1 : 1
+    return [...matched].sort((a, b) => {
+      switch (sortBy) {
+        case 'color':
+          return direction * (a.color || '').localeCompare(b.color || '')
+        case 'created':
+          return direction * ((a.id || 0) - (b.id || 0))
+        case 'name':
+        default:
+          return direction * (a.name || '').localeCompare(b.name || '')
+      }
+    })
+  }, [fuse, searchTerm, visibleLabels, sortBy, sortDirection])
+
+  const handleSearchChange = e => {
+    setSearchTerm(e.target.value.toLowerCase())
+    setShowMoreInfoId(null)
+  }
+
+  const handleSearchClose = () => {
+    setSearchTerm('')
+    searchInputRef.current?.blur()
+  }
 
   const handleAddLabel = () => {
     setCurrentLabel(null)
@@ -172,14 +254,11 @@ const LabelView = () => {
   const handleDeleteClicked = id => {
     setConfirmationModel({
       isOpen: true,
-      title: 'Delete Label',
-
-      message:
-        'Are you sure you want to delete this label? This will remove the label from all tasks.',
-
-      confirmText: 'Delete',
+      title: t('delete.title'),
+      message: t('delete.message'),
+      confirmText: t('common:delete'),
       color: 'danger',
-      cancelText: 'Cancel',
+      cancelText: t('common:cancel'),
       onClose: confirmed => {
         if (confirmed === true) {
           handleDeleteLabel(id)
@@ -213,6 +292,21 @@ const LabelView = () => {
     }
   }, [labels])
 
+  // ?create=1 lets other surfaces (global search quick actions) land here with
+  // the create modal already open.
+  useEffect(() => {
+    if (searchParams.get('create') !== '1') return
+    setCurrentLabel(null)
+    setModalOpen(true)
+    setSearchParams(
+      params => {
+        params.delete('create')
+        return params
+      },
+      { replace: true },
+    )
+  }, [searchParams, setSearchParams])
+
   if (isLabelsLoading) {
     return (
       <Box
@@ -229,7 +323,7 @@ const LabelView = () => {
   if (isError) {
     return (
       <Typography color='danger' textAlign='center'>
-        Failed to load labels. Please try again.
+        {t('loadError')}
       </Typography>
     )
   }
@@ -243,39 +337,115 @@ const LabelView = () => {
             level='h3'
             sx={{ fontWeight: 'lg', color: 'text.primary' }}
           >
-            Labels
+            {t('common:navigation.labels')}
           </Typography>
           <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            Manage your labels and organize your tasks effectively. Labels will
-            be automatically shared with your circle if they are used on a
-            shared task.
+            {t('blurb')}
           </Typography>
         </Stack>
       </Box>
+      {userLabels.length > 0 && (
+        <Box
+          sx={{ px: 2, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}
+        >
+          <Input
+            slotProps={{ input: { ref: searchInputRef } }}
+            placeholder={t('search.placeholder')}
+            value={searchTerm}
+            fullWidth
+            sx={{
+              borderRadius: 24,
+              height: 24,
+              borderColor: 'text.disabled',
+              padding: 1,
+            }}
+            onChange={handleSearchChange}
+            startDecorator={<Search />}
+            endDecorator={
+              searchTerm && (
+                <IconButton
+                  variant='plain'
+                  size='sm'
+                  onClick={handleSearchClose}
+                  sx={{ borderRadius: '50%' }}
+                >
+                  <Close />
+                </IconButton>
+              )
+            }
+          />
+          <SortAndFilterMenu
+            sortOptions={[
+              { name: t('view.sortName'), value: 'name' },
+              { name: t('view.sortColor'), value: 'color' },
+              { name: t('view.sortRecent'), value: 'created' },
+            ]}
+            selectedSort={sortBy}
+            onSortChange={setSortBy}
+            sortDirection={sortDirection}
+            onSortDirectionChange={setSortDirection}
+            filterTitle={t('view.filterTitle')}
+            filterOptions={[
+              { name: t('view.filterAll'), value: 'all' },
+              { name: t('view.filterMine'), value: 'mine' },
+              { name: t('view.filterShared'), value: 'shared' },
+            ]}
+            selectedFilter={ownershipFilter}
+            onFilterChange={value => {
+              setOwnershipFilter(value)
+              setShowMoreInfoId(null)
+            }}
+            isActive={
+              ownershipFilter !== 'all' ||
+              sortBy !== 'name' ||
+              sortDirection !== 'asc'
+            }
+          />
+        </Box>
+      )}
       <Box
         sx={{
           overflow: 'hidden',
         }}
       >
         {userLabels.length === 0 && (
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              flexDirection: 'column',
-              height: '50vh',
+          <EmptyState
+            fullHeight
+            icon={<Style />}
+            title={t('view.emptyTitle')}
+            description={t('view.emptyDescription')}
+            primaryAction={{
+              label: t('view.createLabel'),
+              startDecorator: <Add />,
+              onClick: handleAddLabel,
             }}
-          >
-            <Typography level='title-md' gutterBottom>
-              No labels available. Add a new label to get started.
-            </Typography>
-          </Box>
+          />
+        )}
+        {userLabels.length > 0 && filteredLabels.length === 0 && (
+          <EmptyState
+            variant='no-results'
+            fullHeight
+            icon={<SearchOff />}
+            title={t('search.noResultsTitle')}
+            description={
+              searchTerm
+                ? t('search.noResultsDescription', { searchTerm })
+                : t('search.noFilterResultsDescription')
+            }
+            primaryAction={{
+              label: searchTerm ? t('search.clear') : t('search.showAll'),
+              onClick: () => {
+                handleSearchClose()
+                setOwnershipFilter('all')
+              },
+            }}
+          />
         )}
         <SwipeableList type={ListType.IOS} fullSwipe={false}>
-          {userLabels.map(label => (
+          {filteredLabels.map(label => (
             <SwipeableListItem
               key={label.id}
+              onClick={() => navigate(`/labels/${label.id}`)}
               swipeActionOpen={showMoreInfoId === label.id ? 'trailing' : null}
               trailingActions={
                 <TrailingActions>
@@ -301,7 +471,7 @@ const LabelView = () => {
                       >
                         <EditIcon sx={{ fontSize: 20 }} />
                         <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                          Edit
+                          {t('common:edit')}
                         </Typography>
                       </Box>
                     </SwipeAction>
@@ -320,7 +490,7 @@ const LabelView = () => {
                       >
                         <DeleteIcon sx={{ fontSize: 20 }} />
                         <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                          Delete
+                          {t('common:delete')}
                         </Typography>
                       </Box>
                     </SwipeAction>

@@ -3,50 +3,98 @@ import { Capacitor } from '@capacitor/core'
 import { Device } from '@capacitor/device'
 // import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth'
 import { SocialLogin } from '@capgo/capacitor-social-login'
-import { Settings } from '@mui/icons-material'
+import { SettingsOutlined } from '@mui/icons-material'
 import AppleIcon from '@mui/icons-material/Apple'
 import GoogleIcon from '@mui/icons-material/Google'
-import {
-  Avatar,
-  Box,
-  Button,
-  Container,
-  Divider,
-  IconButton,
-  Input,
-  Sheet,
-  Tab,
-  TabList,
-  TabPanel,
-  Tabs,
-  Typography,
-} from '@mui/joy'
+import { Avatar, Box, Button, IconButton, Link, Typography } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import Cookies from 'js-cookie'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { LoginSocialGoogle } from 'reactjs-social-login'
+
 import { GOOGLE_CLIENT_ID, REDIRECT_URL } from '../../Config'
 import { useAuth } from '../../hooks/useAuth.jsx'
-import Logo from '../../Logo'
 import { useResource } from '../../queries/ResourceQueries'
 import { useUserProfile } from '../../queries/UserQueries.jsx'
 import { useNotification } from '../../service/NotificationProvider'
 import { apiClient } from '../../utils/ApiClient'
+import { getPendingInvite } from '../../utils/PendingInvite'
 import { saveTokens } from '../../utils/TokenStorage'
 import { buildChildUsername, getUserDisplayInfo } from '../../utils/UserHelpers'
+import {
+  AuthDivider,
+  AuthPasswordField,
+  AuthSubmitButton,
+  AuthTextField,
+  LegalLinks,
+  SocialButton,
+} from './AuthFields'
+import AuthShell from './AuthShell'
+import { authButtonSx } from './authStyles'
 import MFAVerificationModal from './MFAVerificationModal'
 
+const SegmentedControl = ({ onChange, options, value }) => (
+  <Box
+    role='tablist'
+    sx={{
+      display: 'flex',
+      p: 0.5,
+      gap: 0.5,
+      borderRadius: '12px',
+      bgcolor: 'neutral.softBg',
+      mb: 2.5,
+    }}
+  >
+    {options.map(option => {
+      const selected = option.value === value
+      return (
+        <Box
+          key={option.value}
+          component='button'
+          type='button'
+          role='tab'
+          aria-selected={selected}
+          onClick={() => onChange(option.value)}
+          sx={{
+            flex: 1,
+            border: 'none',
+            cursor: 'pointer',
+            borderRadius: '9px',
+            py: 1,
+            fontSize: '0.875rem',
+            fontFamily: 'inherit',
+            fontWeight: 600,
+            color: selected ? 'text.primary' : 'text.secondary',
+            bgcolor: selected ? 'background.surface' : 'transparent',
+            boxShadow: selected ? 'xs' : 'none',
+            transition: 'background-color 180ms ease, color 180ms ease',
+            '&:focus-visible': {
+              outline: '2px solid',
+              outlineColor: 'primary.500',
+              outlineOffset: '2px',
+            },
+          }}
+        >
+          {option.label}
+        </Box>
+      )
+    })}
+  </Box>
+)
+
 const LoginView = () => {
+  const { t } = useTranslation('auth')
   // Use React Query client directly to invalidate the user profile query
   const queryClient = useQueryClient()
-  // const [userProfile, setUserProfile] = useState(null)
   const { data: userProfile } = useUserProfile()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [mfaModalOpen, setMfaModalOpen] = useState(false)
   const [mfaSessionToken, setMfaSessionToken] = useState('')
   const [isAppleSignInSupported, setIsAppleSignInSupported] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Child login state
   const [loginType, setLoginType] = useState('primary')
@@ -54,7 +102,7 @@ const LoginView = () => {
   const [childName, setChildName] = useState('')
 
   // Clear fields when switching login modes
-  const handleLoginModeChange = (event, newValue) => {
+  const handleLoginModeChange = newValue => {
     setLoginType(newValue)
     setUsername('')
     setParentUsername('')
@@ -94,8 +142,15 @@ const LoginView = () => {
   }, [])
   useEffect(() => {
     if (isAuthenticated && user) {
-      setUserProfile(user)
-      Navigate('/chores')
+      // An already-signed-in visitor who lands here from a deep link (a circle
+      // invite, for example) still has to end up where they were headed.
+      const redirectUrl = Cookies.get('ca_redirect')
+      if (redirectUrl && redirectUrl !== '/') {
+        Cookies.remove('ca_redirect')
+        Navigate(redirectUrl)
+      } else {
+        Navigate('/chores')
+      }
     }
   }, [isAuthenticated, user, Navigate])
   const handleSubmit = async e => {
@@ -105,23 +160,23 @@ const LoginView = () => {
     if (loginType === 'sub') {
       if (!parentUsername.trim()) {
         showError({
-          title: 'Validation Error',
-          message: 'Primary username is required for sub account login',
+          title: t('validationError'),
+          message: t('primaryUsernameRequired'),
         })
         return
       }
       if (!childName.trim()) {
         showError({
-          title: 'Validation Error',
-          message: 'Sub account name is required for sub account login',
+          title: t('validationError'),
+          message: t('subNameRequired'),
         })
         return
       }
     } else {
       if (!username.trim()) {
         showError({
-          title: 'Validation Error',
-          message: 'Username is required',
+          title: t('validationError'),
+          message: t('usernameRequired'),
         })
         return
       }
@@ -129,8 +184,8 @@ const LoginView = () => {
 
     if (!password) {
       showError({
-        title: 'Validation Error',
-        message: 'Password is required',
+        title: t('validationError'),
+        message: t('passwordRequired'),
       })
       return
     }
@@ -141,7 +196,19 @@ const LoginView = () => {
         ? buildChildUsername(parentUsername, childName)
         : username
 
-    const result = await authLogin({ username: actualUsername, password })
+    setIsSubmitting(true)
+    let result
+    try {
+      result = await authLogin({ username: actualUsername, password })
+    } catch (error) {
+      showError({
+        title: t('loginFailed'),
+        message: error?.message || t('genericError'),
+      })
+      return
+    } finally {
+      setIsSubmitting(false)
+    }
 
     if (result.success) {
       if (result.data?.mfaRequired) {
@@ -162,8 +229,8 @@ const LoginView = () => {
       }
     } else {
       showError({
-        title: 'Login Failed',
-        message: result.error || 'An error occurred, please try again',
+        title: t('loginFailed'),
+        message: result.error || t('genericError'),
       })
     }
   }
@@ -233,15 +300,15 @@ const LoginView = () => {
       } else {
         const providerName = provider === 'apple' ? 'Apple' : 'Google'
         showError({
-          title: `${providerName} Login Failed`,
-          message: `Couldn't log in with ${providerName}, please try again`,
+          title: t('providerLoginFailed', { provider: providerName }),
+          message: t('providerLoginFailedMsg', { provider: providerName }),
         })
       }
     } catch (error) {
       const providerName = provider === 'apple' ? 'Apple' : 'Google'
       showError({
-        title: `${providerName} Login Error`,
-        message: 'Network error occurred, please try again',
+        title: t('providerLoginError', { provider: providerName }),
+        message: t('networkError'),
       })
     }
   }
@@ -285,7 +352,7 @@ const LoginView = () => {
 
   const handleMFAError = errorMessage => {
     showError({
-      title: 'Two-Factor Authentication Failed',
+      title: t('mfaFailed'),
       message: errorMessage,
     })
   }
@@ -333,8 +400,8 @@ const LoginView = () => {
       } catch (error) {
         console.error('Failed to open OAuth browser:', error)
         showError({
-          title: 'OAuth Error',
-          message: 'Failed to open authentication browser',
+          title: t('oauthError'),
+          message: t('oauthBrowserFailed'),
         })
       }
     } else {
@@ -352,472 +419,266 @@ const LoginView = () => {
     }
   }
 
-  return (
-    <Container
-      component='main'
-      maxWidth='xs'
+  const displayName = userProfile?.displayName || userProfile?.username
+  const showSocialLogin = import.meta.env.VITE_IS_SELF_HOSTED !== 'true'
+  const hasSocialOptions =
+    showSocialLogin || Boolean(resource?.identity_provider?.client_id)
 
-      // make content center in the middle of the page:
+  return (
+    <AuthShell
+      title={userProfile ? t('welcomeBack') : t('signIn')}
+      subtitle={
+        getPendingInvite()
+          ? t('pendingInviteSubtitle')
+          : userProfile
+            ? t('pickUpWhereLeftOff')
+            : t('signInToContinueSubtitle')
+      }
+      logoSize={0}
+      footer={<LegalLinks />}
+      action={
+        Capacitor.isNativePlatform() ? (
+          <IconButton
+            variant='plain'
+            color='neutral'
+            aria-label={t('serverSettings')}
+            onClick={() => Navigate('/login/settings')}
+          >
+            <SettingsOutlined />
+          </IconButton>
+        ) : null
+      }
     >
-      <Box
-        sx={{
-          marginTop: 4,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <Sheet
-          component='form'
+      {userProfile ? (
+        <Box
           sx={{
-            mt: 1,
-            width: '100%',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            padding: 2,
-            borderRadius: '8px',
-            boxShadow: 'md',
+            gap: 1.5,
           }}
         >
-          {Capacitor.isNativePlatform() && (
-            <IconButton
-              //  on top right of the screen:
-              sx={{ position: 'absolute', top: 2, right: 2, color: 'black' }}
-              onClick={() => {
-                Navigate('/login/settings')
-              }}
-            >
-              {' '}
-              <Settings />
-            </IconButton>
-          )}
-          <Logo />
-
-          <Typography level='h2'>
-            Done
-            <span style={{ color: '#06b6d4' }}>tick</span>
-          </Typography>
-
-          {userProfile && (
-            <>
-              <Avatar
-                src={userProfile?.image}
-                alt={userProfile?.username}
-                size='lg'
-                sx={{ mt: 2, width: '96px', height: '96px', mb: 1 }}
-              />
-              <Typography level='body-md' alignSelf={'center'}>
-                Welcome back,{' '}
-                {userProfile?.displayName || userProfile?.username}
-                {getUserDisplayInfo(userProfile).userType === 'child' && (
-                  <Typography
-                    component='span'
-                    level='body-xs'
-                    color='neutral'
-                    sx={{ ml: 1 }}
-                  >
-                    (Sub Account)
-                  </Typography>
-                )}
+          <Avatar
+            src={userProfile?.image}
+            alt={displayName}
+            sx={{ width: 88, height: 88 }}
+          />
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography level='title-md'>{displayName}</Typography>
+            {getUserDisplayInfo(userProfile).userType === 'child' && (
+              <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
+                {t('subAccount')}
               </Typography>
-
-              <Button
-                fullWidth
-                size='lg'
-                sx={{ mt: 3, mb: 2 }}
-                onClick={() => {
-                  getUserProfileAndNavigateToHome()
-                }}
-              >
-                Continue as {userProfile.displayName || userProfile.username}
-              </Button>
-              <Button
-                type='submit'
-                fullWidth
-                size='lg'
-                variant='plain'
-                sx={{
-                  width: '100%',
-                  mb: 2,
-                  border: 'moccasin',
-                  borderRadius: '8px',
-                }}
-                onClick={() => {
-                  apiClient.handleLogout()
-                }}
-              >
-                Logout
-              </Button>
-            </>
-          )}
-          {!userProfile && (
-            <>
-              <Typography level='body2' sx={{ mb: 3 }}>
-                Sign in to your account to continue
-              </Typography>
-
-              {/* Login Type Tabs */}
-              <Tabs
-                value={loginType}
-                onChange={handleLoginModeChange}
-                sx={{ width: '100%', mb: 3 }}
-              >
-                <TabList
-                  sx={{
-                    width: '100%',
-                    p: 0.5,
-                    borderBottom: 'none',
-                    boxShadow: 'none',
-                    '&::after': {
-                      display: 'none',
-                    },
-                  }}
-                >
-                  <Tab
-                    value='primary'
-                    variant='plain'
-                    sx={{
-                      flex: 1,
-                      borderRadius: '6px',
-                      fontSize: '0.875rem',
-                      fontWeight: 500,
-                    }}
-                  >
-                    Primary Account
-                  </Tab>
-                  <Tab
-                    value='sub'
-                    variant='plain'
-                    sx={{
-                      flex: 1,
-                      borderRadius: '6px',
-                      fontSize: '0.875rem',
-                      fontWeight: 500,
-                    }}
-                  >
-                    Sub Account
-                  </Tab>
-                </TabList>
-
-                <TabPanel value='primary' sx={{ p: 0, mt: 2 }}>
-                  <Typography level='body2' alignSelf={'start'} mb={1}>
-                    Username
-                  </Typography>
-                  <Input
-                    margin='normal'
-                    required
-                    fullWidth
-                    id='email'
-                    label='Email Address'
-                    name='email'
-                    autoComplete='email'
-                    autoFocus
-                    value={username}
-                    onChange={e => {
-                      setUsername(e.target.value)
-                    }}
-                  />
-                </TabPanel>
-
-                <TabPanel value='sub' sx={{ p: 0, mt: 2 }}>
-                  <Typography level='body2' alignSelf={'start'} mb={1}>
-                    Primary Account Username
-                  </Typography>
-                  <Input
-                    margin='normal'
-                    required
-                    fullWidth
-                    id='parentUsername'
-                    name='parentUsername'
-                    placeholder='Enter primary account username'
-                    autoFocus
-                    value={parentUsername}
-                    onChange={e => {
-                      setParentUsername(e.target.value)
-                    }}
-                  />
-                  <Typography level='body2' alignSelf={'start'} mt={1} mb={1}>
-                    Sub Account Username
-                  </Typography>
-                  <Input
-                    margin='normal'
-                    required
-                    fullWidth
-                    id='childName'
-                    name='childName'
-                    placeholder='Enter sub account name'
-                    value={childName}
-                    onChange={e => {
-                      setChildName(e.target.value)
-                    }}
-                  />
-                </TabPanel>
-              </Tabs>
-
-              <Typography level='body2' alignSelf={'start'} mb={1}>
-                Password:
-              </Typography>
-              <Input
-                margin='normal'
-                required
-                fullWidth
-                name='password'
-                label='Password'
-                type='password'
-                id='password'
-                autoComplete='password'
-                value={password}
-                onChange={e => {
-                  setPassword(e.target.value)
-                }}
-              />
-
-              <Button
-                type='submit'
-                fullWidth
-                size='lg'
-                variant='solid'
-                sx={{
-                  width: '100%',
-                  mt: 3,
-                  mb: 2,
-                  border: 'moccasin',
-                  borderRadius: '8px',
-                }}
-                onClick={handleSubmit}
-              >
-                {loginType === 'sub' ? 'Sign In as Sub Account' : 'Sign In'}
-              </Button>
-              <Button
-                type='submit'
-                fullWidth
-                size='lg'
-                variant='plain'
-                sx={{
-                  width: '100%',
-                  mb: 2,
-                  border: 'moccasin',
-                  borderRadius: '8px',
-                }}
-                onClick={handleForgotPassword}
-              >
-                Forgot password?
-              </Button>
-            </>
-          )}
-          <Divider> or </Divider>
-          {import.meta.env.VITE_IS_SELF_HOSTED !== 'true' && (
-            <>
-              {!Capacitor.isNativePlatform() && (
-                <Box sx={{ width: '100%' }}>
-                  <LoginSocialGoogle
-                    client_id={GOOGLE_CLIENT_ID}
-                    redirect_uri={REDIRECT_URL}
-                    scope='openid profile email'
-                    discoveryDocs='claims_supported'
-                    access_type='online'
-                    isOnlyGetToken={true}
-                    onResolve={({ provider, data }) => {
-                      loggedWithProvider(provider, data)
-                    }}
-                    onReject={() => {
-                      showError({
-                        title: 'Google Login Failed',
-                        message:
-                          "Couldn't log in with Google, please try again",
-                      })
-                    }}
-                  >
-                    <Button
-                      variant='soft'
-                      color='neutral'
-                      size='lg'
-                      fullWidth
-                      sx={{
-                        width: '100%',
-                        mt: 1,
-                        mb: 1,
-                        border: 'moccasin',
-                        borderRadius: '8px',
-                      }}
-                    >
-                      <div className='flex gap-2'>
-                        <GoogleIcon />
-                        Continue with Google
-                      </div>
-                    </Button>
-                  </LoginSocialGoogle>
-
-                  {/* <Button
-                    fullWidth
-                    variant='soft'
-                    color='neutral'
-                    size='lg'
-                    sx={{
-                      mt: 1,
-                      mb: 1,
-                      backgroundColor: 'black',
-                      color: 'white',
-                      '&:hover': {
-                        backgroundColor: '#333',
-                      },
-                    }}
-                    onClick={() => {
-                      SocialLogin.login({
-                        provider: 'apple',
-                        options: {
-                          scopes: ['email', 'name'],
-                        },
-                      })
-                        .then(user => {
-                          console.log('Apple user', user)
-                          loggedWithProvider('apple', user)
-                        })
-                        .catch(error => {
-                          console.error('Apple login error:', error)
-                          showError({
-                            title: 'Apple Login Failed',
-                            message:
-                              "Couldn't log in with Apple, please try again",
-                          })
-                        })
-                    }}
-                  >
-                    <div className='flex gap-2'>
-                      <AppleIcon />
-                      Continue with Apple
-                    </div>
-                  </Button> */}
-                </Box>
-              )}
-
-              {Capacitor.isNativePlatform() && (
-                <Box sx={{ width: '100%' }}>
-                  <Button
-                    fullWidth
-                    variant='soft'
-                    size='lg'
-                    sx={{ mt: 3, mb: 2 }}
-                    onClick={async () => {
-                      try {
-                      
-                        const user = await SocialLogin.login({
-                          provider: 'google',
-                          options: { scopes: ['profile', 'email', 'openid'] },
-                        })
-                        console.log('Google user', user)
-                        loggedWithProvider('google', user.result)
-                      } catch (error) {
-                        console.error('Google login error:', error)
-                        showError({
-                          title: 'Google Login Failed',
-                          message: `Couldn't log in with Google, please try again${
-                            error?.message ? `: ${error.message}` : ''
-                          }`,
-                        })
-                      }
-                    }}
-                  >
-                    <div className='flex gap-2'>
-                      <GoogleIcon />
-                      Continue with Google
-                    </div>
-                  </Button>
-
-                  {/* Apple Sign In Button for Native Platforms */}
-                  {isAppleSignInSupported && (
-                    <Button
-                      fullWidth
-                      variant='soft'
-                      color='neutral'
-                      size='lg'
-                      sx={{
-                        mb: 1,
-                      }}
-                      onClick={() => {
-                        SocialLogin.login({
-                          provider: 'apple',
-                          options: {
-                            scopes: ['email', 'name'],
-                            state: 'random_string',
-                          },
-                        })
-                          .then(user => {
-                            console.log('Apple user', user)
-                            loggedWithProvider('apple', user)
-                          })
-                          .catch(error => {
-                            console.error('Apple login error:', error)
-                            showError({
-                              title: 'Apple Login Failed',
-                              message:
-                                "Couldn't log in with Apple, please try again",
-                            })
-                          })
-                      }}
-                    >
-                      <div className='flex gap-2'>
-                        <AppleIcon />
-                        Continue with Apple
-                      </div>
-                    </Button>
-                  )}
-                </Box>
-              )}
-            </>
-          )}
-          {resource?.identity_provider?.client_id && (
-            <Button
-              fullWidth
-              color='neutral'
-              variant='soft'
-              size='lg'
-              sx={{ mt: 3, mb: 2 }}
-              onClick={handleAuthentikLogin}
-            >
-              Continue with {resource?.identity_provider?.name}
-            </Button>
-          )}
-
-          {!resource?.is_user_creation_disabled && (
-            <Button
-              onClick={() => {
-                Navigate('/signup')
-              }}
-              fullWidth
-              variant='soft'
-              size='lg'
-              // sx={{ mt: 3, mb: 2 }}
-            >
-              Create new account
-            </Button>
-          )}
-
-          <Box
-            sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}
-          >
-            <Button
-              variant='plain'
-              size='sm'
-              onClick={() => {
-                window.open('https://donetick.com/privacy', '_blank')
-              }}
-            >
-              Privacy Policy
-            </Button>
-            <Button
-              variant='plain'
-              size='sm'
-              onClick={() => {
-                window.open('https://donetick.com/terms', '_blank')
-              }}
-            >
-              Terms of Use
-            </Button>
+            )}
           </Box>
-        </Sheet>
+
+          <Button
+            fullWidth
+            size='lg'
+            sx={{ ...authButtonSx, mt: 1 }}
+            onClick={getUserProfileAndNavigateToHome}
+          >
+            {t('continueAs', { name: displayName })}
+          </Button>
+          <Button
+            fullWidth
+            size='lg'
+            variant='plain'
+            color='neutral'
+            sx={authButtonSx}
+            onClick={() => apiClient.handleLogout()}
+          >
+            {t('useDifferentAccount')}
+          </Button>
+        </Box>
+      ) : (
+        <Box
+          component='form'
+          onSubmit={handleSubmit}
+          sx={{ display: 'flex', flexDirection: 'column' }}
+        >
+          <SegmentedControl
+            value={loginType}
+            onChange={handleLoginModeChange}
+            options={[
+              { value: 'primary', label: t('primaryAccount') },
+              { value: 'sub', label: t('subAccount') },
+            ]}
+          />
+
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {loginType === 'primary' ? (
+              <AuthTextField
+                label={t('username')}
+                id='username'
+                name='username'
+                autoComplete='username'
+                placeholder={t('yourUsername')}
+                autoFocus
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+              />
+            ) : (
+              <>
+                <AuthTextField
+                  label={t('primaryAccountUsernameLabel')}
+                  id='parentUsername'
+                  name='parentUsername'
+                  autoComplete='username'
+                  placeholder={t('primaryUsernamePlaceholder')}
+                  autoFocus
+                  value={parentUsername}
+                  onChange={e => setParentUsername(e.target.value)}
+                />
+                <AuthTextField
+                  label={t('subAccountNameLabel')}
+                  id='childName'
+                  name='childName'
+                  placeholder={t('subNamePlaceholder')}
+                  value={childName}
+                  onChange={e => setChildName(e.target.value)}
+                />
+              </>
+            )}
+
+            <Box>
+              <AuthPasswordField
+                id='password'
+                name='password'
+                autoComplete='current-password'
+                label={t('passwordLabel')}
+                placeholder={t('loginPasswordPlaceholder')}
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+              />
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+                <Link
+                  component='button'
+                  type='button'
+                  level='body-sm'
+                  underline='hover'
+                  onClick={handleForgotPassword}
+                >
+                  {t('forgotPassword')}
+                </Link>
+              </Box>
+            </Box>
+          </Box>
+
+          <AuthSubmitButton loading={isSubmitting} sx={{ mt: 3 }}>
+            {loginType === 'sub' ? t('signInAsSubAccount') : t('signIn')}
+          </AuthSubmitButton>
+        </Box>
+      )}
+
+      {hasSocialOptions && <AuthDivider>{t('orContinueWith')}</AuthDivider>}
+
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+        {showSocialLogin && !Capacitor.isNativePlatform() && (
+          <LoginSocialGoogle
+            client_id={GOOGLE_CLIENT_ID}
+            redirect_uri={REDIRECT_URL}
+            scope='openid profile email'
+            discoveryDocs='claims_supported'
+            access_type='online'
+            isOnlyGetToken={true}
+            onResolve={({ data, provider }) => {
+              loggedWithProvider(provider, data)
+            }}
+            onReject={() => {
+              showError({
+                title: t('googleLoginFailed'),
+                message: t('providerLoginFailedMsg', { provider: 'Google' }),
+              })
+            }}
+          >
+            <SocialButton icon={<GoogleIcon />}>Google</SocialButton>
+          </LoginSocialGoogle>
+        )}
+
+        {showSocialLogin && Capacitor.isNativePlatform() && (
+          <>
+            <SocialButton
+              icon={<GoogleIcon />}
+              onClick={async () => {
+                try {
+                  const user = await SocialLogin.login({
+                    provider: 'google',
+                    options: { scopes: ['profile', 'email', 'openid'] },
+                  })
+                  console.log('Google user', user)
+                  loggedWithProvider('google', user.result)
+                } catch (error) {
+                  console.error('Google login error:', error)
+                  showError({
+                    title: t('googleLoginFailed'),
+                    message: `${t('providerLoginFailedMsg', { provider: 'Google' })}${
+                      error?.message ? `: ${error.message}` : ''
+                    }`,
+                  })
+                }
+              }}
+            >
+              Google
+            </SocialButton>
+
+            {isAppleSignInSupported && (
+              <SocialButton
+                icon={<AppleIcon />}
+                onClick={() => {
+                  SocialLogin.login({
+                    provider: 'apple',
+                    options: {
+                      scopes: ['email', 'name'],
+                      state: 'random_string',
+                    },
+                  })
+                    .then(user => {
+                      console.log('Apple user', user)
+                      loggedWithProvider('apple', user)
+                    })
+                    .catch(error => {
+                      console.error('Apple login error:', error)
+                      showError({
+                        title: t('appleLoginFailed'),
+                        message: t('providerLoginFailedMsg', {
+                          provider: 'Apple',
+                        }),
+                      })
+                    })
+                }}
+              >
+                Apple
+              </SocialButton>
+            )}
+          </>
+        )}
+
+        {resource?.identity_provider?.client_id && (
+          <SocialButton onClick={handleAuthentikLogin}>
+            {resource?.identity_provider?.name}
+          </SocialButton>
+        )}
       </Box>
+
+      {!userProfile && !resource?.is_user_creation_disabled && (
+        <Typography
+          level='body-sm'
+          sx={{ mt: 3, textAlign: 'center', color: 'text.secondary' }}
+        >
+          {t('dontHaveAccount')}{' '}
+          <Link
+            component='button'
+            type='button'
+            level='body-sm'
+            fontWeight={600}
+            underline='hover'
+            onClick={() => Navigate('/signup')}
+          >
+            {t('createOne')}
+          </Link>
+        </Typography>
+      )}
 
       <MFAVerificationModal
         open={mfaModalOpen}
@@ -826,7 +687,7 @@ const LoginView = () => {
         onSuccess={handleMFASuccess}
         onError={handleMFAError}
       />
-    </Container>
+    </AuthShell>
   )
 }
 

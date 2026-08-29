@@ -1,14 +1,17 @@
-import { Box, Button, FormControl, Input, Typography } from '@mui/joy'
-import { useEffect, useState } from 'react'
-
+import { Box, FormControl, Input, Typography } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
+import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
+import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal.js'
 import { useNotification } from '../../../service/NotificationProvider.jsx'
 import LABEL_COLORS from '../../../utils/Colors.jsx'
 import { CreateLabel, UpdateLabel } from '../../../utils/Fetcher'
 import { useLabels } from '../../Labels/LabelQueries'
 
-function LabelModal({ isOpen, onClose, label }) {
+function LabelModal({ isOpen, label, onClose }) {
+  const { t } = useTranslation('labels')
   const { ResponsiveModal } = useResponsiveModal()
 
   const [labelName, setLabelName] = useState('')
@@ -33,7 +36,7 @@ function LabelModal({ isOpen, onClose, label }) {
   // Validation logic
   const validateLabel = () => {
     if (!labelName.trim()) {
-      setError('Name cannot be empty')
+      setError(t('modal.errorEmptyName'))
       return false
     }
     if (
@@ -41,11 +44,11 @@ function LabelModal({ isOpen, onClose, label }) {
         userLabel => userLabel.name === labelName && userLabel.id !== label?.id,
       )
     ) {
-      setError('Label with this name already exists')
+      setError(t('modal.errorDuplicate'))
       return false
     }
     if (!color) {
-      setError('Please select a color')
+      setError(t('modal.errorNoColor'))
       return false
     }
     return true
@@ -70,13 +73,13 @@ function LabelModal({ isOpen, onClose, label }) {
       .catch(err => {
         if (err.queued) {
           showError({
-            title: 'Failed to save label',
-            message: 'Unable to save label. Please try again.',
+            title: t('modal.saveFailedTitle'),
+            message: t('modal.saveFailedMessage'),
           })
         } else {
           showError({
-            title: 'Failed to save label',
-            message: 'Unable to save label. Please try again.',
+            title: t('modal.saveFailedTitle'),
+            message: t('modal.saveFailedMessage'),
           })
         }
       })
@@ -88,22 +91,21 @@ function LabelModal({ isOpen, onClose, label }) {
       onClose={onClose}
       size='lg'
       fullWidth={true}
-      title={label ? 'Edit Label' : 'Add Label'}
+      title={label ? t('modal.editTitle') : t('modal.addTitle')}
       footer={
-        <Box display='flex' justifyContent='space-around' mt={1}>
-          <Button size='lg' onClick={handleSave} fullWidth sx={{ mr: 1 }}>
-            {label ? 'Save Changes' : 'Add Label'}
-          </Button>
-          <Button size='lg' onClick={onClose} variant='outlined'>
-            Cancel
-          </Button>
-        </Box>
+        <ModalActions
+          secondary={{ label: t('common:cancel'), onClick: onClose }}
+          primary={{
+            label: label ? t('modal.saveChanges') : t('modal.addLabel'),
+            onClick: handleSave,
+          }}
+        />
       }
     >
       <Box>
         <FormControl>
           <Typography gutterBottom level='body-sm' alignSelf='start'>
-            Name
+            {t('modal.name')}
           </Typography>
           <Input
             fullWidth
@@ -115,17 +117,25 @@ function LabelModal({ isOpen, onClose, label }) {
 
         <FormControl>
           <Typography gutterBottom level='body-sm' alignSelf='start'>
-            Color
+            {t('modal.color')}
           </Typography>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
             {LABEL_COLORS.map(colorOption => (
               <Box
+                component='button'
+                type='button'
                 key={colorOption.value}
+                aria-label={t('modal.colorAriaSelect', {
+                  color: colorOption.name,
+                })}
+                aria-pressed={color === colorOption.value}
                 title={colorOption.name}
                 onClick={() => setColor(colorOption.value)}
                 sx={{
-                  width: 26,
-                  height: 26,
+                  width: 40,
+                  height: 40,
+                  border: 0,
+                  p: 0,
                   borderRadius: '50%',
                   background: colorOption.value,
                   cursor: 'pointer',
