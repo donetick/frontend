@@ -168,9 +168,9 @@
       "eq": "Gleich",
       "neq": "Ungleich",
       "gt": "Größer als",
-      "gte": "Größer oder gleich",
+      "gte": "Größer als oder gleich",
       "lt": "Kleiner als",
-      "lte": "Kleiner oder gleich"
+      "lte": "Kleiner als oder gleich"
     }
   },
   "activity": {
@@ -261,7 +261,7 @@
     "bulk": {
       "completeTitle": "Aufgaben abschließen",
       "completedTitle": "✅ Aufgaben abgeschlossen",
-      "completeFailedTitle": "Mehrere Aufgaben konnten nicht abgeschlossen werden",
+      "completeFailedTitle": "Abschluss mehrerer Aufgaben fehlgeschlagen",
       "archiveTitle": "Aufgaben archivieren",
       "archivedTitle": "📦 Aufgaben archiviert",
       "archiveFailedTitle": "Mehrere Aufgaben konnten nicht archiviert werden",
@@ -276,10 +276,10 @@
     "restoredMsg": "Die Aufgabe wurde wiederhergestellt und ist jetzt aktiv.",
     "deletedTitle": "Aufgabe gelöscht",
     "delete": "Löschen",
-    "someFailedTitle": "Einige Aufgaben konnten nicht verarbeitet werden",
+    "someFailedTitle": "Einige Aufgaben sind fehlgeschlagen",
     "unexpectedError": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es erneut.",
     "deletedBulkTitle": "🗑️ Aufgaben gelöscht",
-    "bulkDeleteFailTitle": "Massenlöschung fehlgeschlagen",
+    "bulkDeleteFailTitle": "Löschung mehrerer Aufgaben fehlgeschlagen",
     "archivedDate": "Archivierungsdatum",
     "loadFailTitle": "Archivierte Aufgaben konnten nicht geladen werden",
     "loadFailMsg": "Bitte versuche es später erneut.",
@@ -293,7 +293,7 @@
     "restoredCount_other": "{{count}} Aufgaben wiederhergestellt{{offline}}.",
     "restoreFailCount_one": "{{count}} Aufgabe konnte nicht wiederhergestellt werden.",
     "restoreFailCount_other": "{{count}} Aufgaben konnten nicht wiederhergestellt werden.",
-    "bulkRestoreFailTitle": "Massenwiederherstellung fehlgeschlagen",
+    "bulkRestoreFailTitle": "Wiederherstellung mehrerer Aufgaben fehlgeschlagen",
     "deleteTasksTitle": "Archivierte Aufgaben löschen",
     "deleteConfirm_one": "{{count}} archivierte Aufgabe dauerhaft löschen?\n\nDiese Aktion kann nicht rückgängig gemacht werden.",
     "deleteConfirm_other": "{{count}} archivierte Aufgaben dauerhaft löschen?\n\nDiese Aktion kann nicht rückgängig gemacht werden.",
@@ -509,8 +509,8 @@
     "title": "Fälligkeitsdatum",
     "apply": "Übernehmen",
     "remove": "Entfernen",
-    "quickDate": "Datum schnell auswählen",
-    "quickTime": "Uhrzeit schnell auswählen",
+    "quickDate": "Schnellauswahl Datum",
+    "quickTime": "Schnellauswahl Uhrzeit",
     "nextMonth": "Nächster Monat",
     "morning": "Morgens",
     "noon": "Mittags",
@@ -546,7 +546,7 @@
     "addPlaceholder": "Neue Aufgabe hinzufügen... (Eingabetaste zum Hinzufügen)"
   },
   "voiceToTask": {
-    "title": "Aufgaben diktieren",
+    "title": "Sprich deine Aufgaben ein",
     "onDevice": "Auf dem Gerät",
     "micDeniedMessage": "Für die Sprachaufnahme wird Mikrofonzugriff benötigt. Aktiviere ihn in deinen Geräteeinstellungen und versuche es erneut.",
     "tryAgain": "Erneut versuchen",
@@ -563,8 +563,8 @@
     "reminder_other": "{{count}} Erinnerungen",
     "points": "{{count}} Pkt.",
     "frequency": {
-      "everyN": "Alle {{count}} {{unit}}",
-      "everyUnit": "Alle {{unit}}",
+      "everyN": "Jede(n) {{count}} {{unit}}",
+      "everyUnit": "Jede(n) {{unit}}",
       "daily": "Täglich",
       "weekly": "Wöchentlich",
       "monthly": "Monatlich",
