@@ -28,7 +28,7 @@
     "Ocean": "Ozean",
     "Mustard": "Senf",
     "Ruby": "Rubin",
-    "Periwinkle": "Immergrün",
+    "Periwinkle": "Lavendelblau",
     "Turquoise": "Türkis",
     "Lime": "Limette",
     "Blush": "Rosé",
@@ -48,9 +48,9 @@
   "navigation": {
     "search": "Suche",
     "allTasks": "Alle Aufgaben",
-    "archived": "Archiviert",
+    "archived": "Archiv",
     "things": "Dinge",
-    "labels": "Beschriftungen",
+    "labels": "Labels",
     "projects": "Projekte",
     "filters": "Filter",
     "activities": "Aktivitäten",
@@ -61,7 +61,7 @@
   "search": {
     "title": "Suche",
     "placeholder": "Donetick durchsuchen",
-    "inputAriaLabel": "Aufgaben, Verlauf, Projekte, Beschriftungen und Einstellungen durchsuchen",
+    "inputAriaLabel": "Aufgaben, Verlauf, Projekte, Labels und Einstellungen durchsuchen",
     "deviceNote": "Es wird in Inhalten gesucht, die auf diesem Gerät verfügbar sind",
     "escape": "Esc",
     "recent": "Zuletzt verwendet",
@@ -74,7 +74,7 @@
       "tasks": "Aufgaben",
       "history": "Notizen",
       "projects": "Projekte",
-      "labels": "Beschriftungen",
+      "labels": "Labels",
       "people": "Personen",
       "settings": "Einstellungen",
       "actions": "Schnellaktionen"
@@ -83,13 +83,13 @@
       "quickAction": "Schnellaktion",
       "navigation": "Navigation",
       "createTask": "Aufgabe erstellen",
-      "createLabel": "Beschriftung erstellen",
+      "createLabel": "Label erstellen",
       "createProject": "Projekt erstellen",
       "createFilter": "Filter erstellen",
       "viewAllTasks": "Alle Aufgaben anzeigen",
       "viewArchivedTasks": "Archivierte Aufgaben anzeigen",
       "viewThings": "Dinge anzeigen",
-      "viewLabels": "Beschriftungen anzeigen",
+      "viewLabels": "Labels anzeigen",
       "viewProjects": "Projekte anzeigen",
       "viewFilters": "Filter anzeigen",
       "viewActivities": "Aktivitäten anzeigen",
@@ -104,7 +104,7 @@
       "results_one": "{{count}} Ergebnis",
       "results_other": "{{count}} Ergebnisse",
       "typeToSearch": "Zum Suchen tippen",
-      "slashHint": "/ um zu einer Ansicht zu springen"
+      "slashHint": "/ drücken, um zu einer Ansicht zu springen"
     },
     "modes": {
       "actions": {
@@ -220,7 +220,7 @@
     "planPlus": "Plus",
     "planPlusExpiring": "Plus (läuft bald ab)",
     "switchUser": "Benutzer wechseln",
-    "impersonateUser": "Benutzer übernehmen",
+    "impersonateUser": "Benutzeridentität übernehmen",
     "switchToLight": "Zum hellen Design wechseln",
     "switchToDark": "Zum dunklen Design wechseln",
     "unlockPremium": "Premium-Funktionen freischalten",
@@ -251,7 +251,7 @@
   "apply": "Übernehmen",
   "cancelAll": "Alle abbrechen",
   "backFromSearch": "Zurück aus der Suche",
-  "newVersionAvailable": "Eine neue Version ist jetzt verfügbar. Klicke auf die Aktualisieren-Schaltfläche, um zu aktualisieren.",
+  "newVersionAvailable": "Eine neue Version ist verfügbar. Klicke auf die Aktualisieren-Schaltfläche, um sie zu installieren.",
   "notFound": {
     "title": "Seite nicht gefunden",
     "description": "Dieser Link führt ins Leere. Möglicherweise wurde er verschoben oder die Adresse enthält einen Tippfehler.",
@@ -339,9 +339,9 @@
       "type": "Tippen"
     },
     "capture": {
-      "voiceCaption": "Datumsangaben, Beschriftungen und Punkte aus deinen Worten",
+      "voiceCaption": "Datumsangaben, Labels und Punkte aus deinen Worten",
       "deviceCaption": "Auf deinem Gerät auslesen",
-      "typeCaption": "#Beschriftungen @Personen *Punkte beim Tippen",
+      "typeCaption": "#Labels @Personen *Punkte beim Tippen",
       "trashTitle": "♻️ Müll rausbringen",
       "trashDue": "Morgen fällig",
       "trashRepeat": "Jeden Montag",
@@ -420,7 +420,7 @@
       "problemTitle": "Vergiss die kleinen Dinge nicht mehr",
       "problemBody": "Donetick merkt sich, wann etwas zuletzt erledigt wurde und wann es wieder fällig ist. So muss es sich niemand sonst merken.",
       "captureTitle": "Trag es ein, bevor du es vergisst",
-      "captureBody": "Tippe es ein, sprich es aus oder mach ein Foto. Donetick ergänzt Fälligkeitsdatum, Priorität, Beschriftungen und Zuständigkeit.",
+      "captureBody": "Tippe es ein, sprich es aus oder mach ein Foto. Donetick ergänzt Fälligkeitsdatum, Priorität, Labels und Zuständigkeit.",
       "scheduleTitle": "Es kommt genau dann wieder, wenn es soll",
       "scheduleBody": "Jede Woche, alle 3 Monate oder einen Monat nachdem du es tatsächlich erledigt hast. Ein verspäteter Abschluss verschiebt nicht gleich den Rest des Jahres.",
       "circleTitle": "Jeder kommt dran – Schluss mit Diskussionen",

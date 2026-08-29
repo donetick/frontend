@@ -26,9 +26,9 @@
     "taskCompleted": "Aufgabe abgeschlossen",
     "taskCompletedMessage": "Deine Aufgabe wurde als abgeschlossen markiert",
     "taskCompletionUndone": "Aufgabenabschluss wurde rückgängig gemacht.",
-    "taskSkipUndone": "Aufgabe überspringen wurde rückgängig gemacht.",
-    "undoSuccessful": "Rückgängig erfolgreich",
-    "undoFailed": "Rückgängig fehlgeschlagen",
+    "taskSkipUndone": "Das Überspringen der Aufgabe wurde rückgängig gemacht.",
+    "undoSuccessful": "Erfolgreich rückgängig gemacht",
+    "undoFailed": "Rückgängigmachen fehlgeschlagen",
     "undoFailedMessage": "Die Aktion konnte nicht rückgängig gemacht werden. Bitte versuche es erneut.",
     "resetTimer": "Timer zurücksetzen",
     "resetTimerConfirmation": "Bist du sicher, dass du den Timer zurücksetzen möchtest? Dies löscht alle Zeitaufzeichnungen seit du die Aufgabe gestartet hast.",
@@ -210,7 +210,7 @@
     "noDueDateDesc_other": "{{count}} Aufgaben benötigen eine Frist"
   },
   "labels": {
-    "label": "Beschriftungen"
+    "label": "Labels"
   },
   "actionMenu": {
     "view": "Anzeigen",
@@ -261,14 +261,14 @@
     "bulk": {
       "completeTitle": "Aufgaben abschließen",
       "completedTitle": "✅ Aufgaben abgeschlossen",
-      "completeFailedTitle": "Massenabschluss fehlgeschlagen",
+      "completeFailedTitle": "Abschluss mehrerer Aufgaben fehlgeschlagen",
       "archiveTitle": "Aufgaben archivieren",
       "archivedTitle": "📦 Aufgaben archiviert",
-      "archiveFailedTitle": "Massenarchivierung fehlgeschlagen",
+      "archiveFailedTitle": "Das Archivieren mehrerer Aufgaben ist fehlgeschlagen",
       "deleteTitle": "Aufgaben löschen",
       "skipTitle": "Aufgaben überspringen",
       "skippedTitle": "⏭️ Aufgaben übersprungen",
-      "skipFailedTitle": "Massenüberspringen fehlgeschlagen"
+      "skipFailedTitle": "Das Überspringen mehrere Aufgaben ist fehlgeschlagen"
     }
   },
   "archived": {
@@ -279,7 +279,7 @@
     "someFailedTitle": "Einige Aufgaben sind fehlgeschlagen",
     "unexpectedError": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es erneut.",
     "deletedBulkTitle": "🗑️ Aufgaben gelöscht",
-    "bulkDeleteFailTitle": "Massenlöschung fehlgeschlagen",
+    "bulkDeleteFailTitle": "Die Löschung mehrerer Aufgaben ist fehlgeschlagen",
     "archivedDate": "Archivierungsdatum",
     "loadFailTitle": "Archivierte Aufgaben konnten nicht geladen werden",
     "loadFailMsg": "Bitte versuche es später erneut.",
@@ -293,7 +293,7 @@
     "restoredCount_other": "{{count}} Aufgaben wiederhergestellt{{offline}}.",
     "restoreFailCount_one": "{{count}} Aufgabe konnte nicht wiederhergestellt werden.",
     "restoreFailCount_other": "{{count}} Aufgaben konnten nicht wiederhergestellt werden.",
-    "bulkRestoreFailTitle": "Massenwiederherstellung fehlgeschlagen",
+    "bulkRestoreFailTitle": "Die Wiederherstellung mehrerer Aufgaben ist fehlgeschlagen",
     "deleteTasksTitle": "Archivierte Aufgaben löschen",
     "deleteConfirm_one": "{{count}} archivierte Aufgabe dauerhaft löschen?\n\nDiese Aktion kann nicht rückgängig gemacht werden.",
     "deleteConfirm_other": "{{count}} archivierte Aufgaben dauerhaft löschen?\n\nDiese Aktion kann nicht rückgängig gemacht werden.",
@@ -310,17 +310,17 @@
     "exitMultiSelect": "Mehrfachauswahl beenden (Strg+S)",
     "enableMultiSelect": "Mehrfachauswahl aktivieren (Strg+S)",
     "selected_one": "{{count}} Aufgabe ausgewählt",
-    "selected_other": "{{count}} Aufgaben ausgewählt",
+    "selected_other": "{{count}}\u00a0Aufgaben ausgewählt",
     "selectAllTitle": "Alle sichtbaren Aufgaben auswählen (Strg+A)",
     "all": "Alle",
     "closeMultiSelect": "Mehrfachauswahl schließen (Esc)",
-    "clearMultiSelect": "Mehrfachauswahl leeren (Esc)",
+    "clearMultiSelect": "Auswahl aufheben (Esc)",
     "close": "Schließen",
     "clear": "Leeren",
     "restoreSelectedTitle": "Ausgewählte Aufgaben wiederherstellen (R)",
     "deleteSelectedTitle": "Ausgewählte Aufgaben löschen (E)",
     "clearSearch": "Suche löschen",
-    "clearFilters": "Filter löschen",
+    "clearFilters": "Filter zurücksetzen",
     "count_one": "{{count}} archivierte Aufgabe",
     "count_other": "{{count}} archivierte Aufgaben",
     "matching": " passend zu „{{term}}“",
@@ -363,7 +363,7 @@
     "archive": "Archivieren",
     "deleteTitle": "Ausgewählte Aufgaben löschen (Umschalt+X)",
     "mixed": "Gemischt",
-    "due": "Fällig",
+    "due": "Fälligkeit",
     "dueTitleSet": "Fälligkeitsdatum der ausgewählten Aufgaben: {{value}}",
     "dueTitleEmpty": "Fälligkeitsdatum für ausgewählte Aufgaben festlegen",
     "presetToday": "Heute",
@@ -374,11 +374,11 @@
     "moveTitle": "Ausgewählte Aufgaben in ein Projekt verschieben",
     "move": "Verschieben",
     "defaultProject": "Standardprojekt",
-    "moreTitle": "Priorität, Zuweisung oder Beschriftungen festlegen",
+    "moreTitle": "Priorität, Zuweisung oder Labels festlegen",
     "more": "Mehr",
     "priority": "Priorität",
     "assignee": "Zugewiesene Person",
-    "labels": "Beschriftungen",
+    "labels": "Labels",
     "labelsHint": "Tippen zum Hinzufügen · erneut tippen zum Entfernen",
     "done": "Fertig",
     "noPriority": "Keine"
@@ -399,7 +399,11 @@
     "removeAria": "Erinnerungen entfernen"
   },
   "assignee": {
-    "anyone": "Jeder"
+    "label": "Zugewiesene Person",
+    "anyone": "Jeder",
+    "unknown": "Unbekannt",
+    "selectedCount_one": "{{count}} zugewiesene Person",
+    "selectedCount_other": "{{count}} zugewiesene Personen"
   },
   "filterChip": {
     "cancelAll": "Alle Filter aufheben",
@@ -466,7 +470,7 @@
     "newChore": "Neue Aufgabe",
     "unassigned": "Nicht zugewiesen",
     "changeDueDate": "Fälligkeitsdatum ändern",
-    "colDue": "Fällig",
+    "colDue": "Fälligkeit",
     "colChore": "Aufgabe",
     "colAssignee": "Zugewiesene Person",
     "colAction": "Aktion"
@@ -520,7 +524,7 @@
     "customTime": "Benutzerdefinierte Uhrzeit",
     "anytime": "Beliebige Uhrzeit",
     "specificTime": "Bestimmte Uhrzeit",
-    "due": "Fällig",
+    "due": "Fälligkeit",
     "clearAria": "Fälligkeitsdatum entfernen"
   },
   "attachmentPicker": {
@@ -546,7 +550,7 @@
     "addPlaceholder": "Neue Aufgabe hinzufügen... (Eingabetaste zum Hinzufügen)"
   },
   "voiceToTask": {
-    "title": "Sprich deine Aufgaben",
+    "title": "Sprich deine Aufgaben ein",
     "onDevice": "Auf dem Gerät",
     "micDeniedMessage": "Für die Sprachaufnahme wird Mikrofonzugriff benötigt. Aktiviere ihn in deinen Geräteeinstellungen und versuche es erneut.",
     "tryAgain": "Erneut versuchen",
@@ -658,9 +662,9 @@
     "project": "Projekt",
     "projectDesc": "Zu welchem Projekt gehört diese Aufgabe?",
     "defaultProject": "Standardprojekt",
-    "labels": "Beschriftungen",
+    "labels": "Labels",
     "labelsDesc": "Hinweise zu dieser Aufgabe oder Schlagwörter zur Kennzeichnung",
-    "addNewLabel": "Neue Beschriftung hinzufügen",
+    "addNewLabel": "Neues Label hinzufügen",
     "subTasks": "Unteraufgaben",
     "attachments": "Anhänge",
     "attachmentsDesc": "An diese Aufgabe angehängte Dateien",
@@ -942,7 +946,7 @@
     "statusHeading": "Status",
     "priority": "Priorität",
     "dueDate": "Fälligkeitsdatum",
-    "labels": "Beschriftungen",
+    "labels": "Labels",
     "projects": "Projekte",
     "defaultProject": "Standardprojekt",
     "points": "Punkte",
@@ -950,7 +954,7 @@
     "filterFallback": "Filter",
     "notPrefix": "Nicht ",
     "customDueDate": "Benutzerdefiniert",
-    "clear": "Leeren"
+    "clear": "Zurücksetzen"
   },
   "empty": {
     "errorTitle": "Donetick ist nicht erreichbar",
@@ -965,7 +969,7 @@
     "noMatchFilters": "Du hast Aufgaben, aber keine davon entspricht den aktuell gesetzten Filtern.",
     "clearSearch": "Suche löschen",
     "showEveryone": "Aufgaben aller anzeigen",
-    "clearFilters": "Filter löschen",
+    "clearFilters": "Filter zurücksetzen",
     "projectTitle": "Noch nichts in {{name}}",
     "projectDescription": "Aufgaben, die du diesem Projekt hinzufügst, erscheinen hier. Deine anderen Aufgaben bleiben dort, wo sie sind.",
     "addTaskHere": "Hier eine Aufgabe hinzufügen",

@@ -399,7 +399,11 @@
     "removeAria": "Remove reminders"
   },
   "assignee": {
-    "anyone": "Anyone"
+    "label": "Assignee",
+    "anyone": "Anyone",
+    "unknown": "Unknown",
+    "selectedCount_one": "{{count}} assignee",
+    "selectedCount_other": "{{count}} assignees"
   },
   "filterChip": {
     "cancelAll": "Cancel All Filters",
