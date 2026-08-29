@@ -399,7 +399,11 @@
     "removeAria": "Erinnerungen entfernen"
   },
   "assignee": {
-    "anyone": "Jeder"
+    "label": "Zugewiesene Person",
+    "anyone": "Jeder",
+    "unknown": "Unbekannt",
+    "selectedCount_one": "{{count}} zugewiesene Person",
+    "selectedCount_other": "{{count}} zugewiesene Personen"
   },
   "filterChip": {
     "cancelAll": "Alle Filter aufheben",
