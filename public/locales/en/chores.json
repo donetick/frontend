@@ -709,6 +709,8 @@
     "rescheduleFromDueHelp": "the next task will be scheduled from the original due date, even if the previous task was completed late",
     "rescheduleFromCompletion": "Reschedule from completion date",
     "rescheduleFromCompletionHelp": "the next task will be scheduled from the actual completion date of the previous task",
+    "autoSkipWhenLate": "Skip automatically when late",
+    "autoSkipWhenLateHelp": "if this task is still not done once it is past due, skip it and move on to the next occurrence",
     "notifications": "Notifications",
     "notificationsPlanWarning": "Task notifications are not available in the Basic plan. Upgrade to Plus to receive reminders when tasks are due or completed.",
     "notifyForTask": "Notify for this task",
