@@ -255,6 +255,8 @@
     "movedTitle": "",
     "failMoveTitle": "",
     "failRescheduleTitle": "",
+    "failRescheduleMessage": "",
+    "failRemoveDueDateTitle": "",
     "nudgeSentTitle": "",
     "nudgeFailed": "",
     "failNudgeTitle": "",

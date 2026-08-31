@@ -38,6 +38,8 @@
     "failPauseTitle": "Не удалось поставить на паузу",
     "failRejectTitle": "Не удалось отклонить",
     "failRescheduleTitle": "Не удалось перенести срок",
+    "failRescheduleMessage": "Не удалось обновить срок выполнения",
+    "failRemoveDueDateTitle": "Не удалось удалить срок выполнения",
     "failSkipTitle": "Не удалось пропустить",
     "failStartTitle": "Не удалось начать",
     "movedTitle": "Дело перенесено",

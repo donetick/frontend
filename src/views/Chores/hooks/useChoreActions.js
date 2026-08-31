@@ -647,6 +647,14 @@ export const useChoreActions = ({
                 const eventType =
                   extraData.date === null ? 'due-date-removed' : 'rescheduled'
                 updateChoreInState(chore, eventType)
+              } else {
+                showError({
+                  title:
+                    extraData.date === null
+                      ? t('actions.failRemoveDueDateTitle')
+                      : t('actions.failRescheduleTitle'),
+                  message: t('actions.failRescheduleMessage'),
+                })
               }
             } catch (error) {
               if (isNetworkError(error)) {
@@ -760,6 +768,11 @@ export const useChoreActions = ({
             { ...modalChore, nextDueDate: newDate },
             'rescheduled',
           )
+        } else {
+          showError({
+            title: t('actions.failRescheduleTitle'),
+            message: t('actions.failRescheduleMessage'),
+          })
         }
       } catch (error) {
         if (isNetworkError(error)) {

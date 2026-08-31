@@ -255,6 +255,8 @@
     "movedTitle": "Aufgabe verschoben",
     "failMoveTitle": "Aufgabe konnte nicht verschoben werden",
     "failRescheduleTitle": "Neuplanung fehlgeschlagen",
+    "failRescheduleMessage": "Fälligkeitsdatum konnte nicht aktualisiert werden",
+    "failRemoveDueDateTitle": "Fälligkeitsdatum konnte nicht entfernt werden",
     "nudgeSentTitle": "Erinnerung gesendet!",
     "nudgeFailed": "Erinnerung konnte nicht gesendet werden",
     "failNudgeTitle": "Erinnerung konnte nicht gesendet werden",
