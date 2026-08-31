@@ -12,13 +12,14 @@ import {
   Box,
   Button,
   IconButton,
-  Input,
   Option,
   Select,
   Switch,
   Typography,
 } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
+
+import NumberInput from '../../components/common/NumberInput'
 
 const STRATEGY_VALUES = [
   'keep_last_assigned',
@@ -167,15 +168,6 @@ const AdvancedOptionsSection = ({
     onPointsChange(displayPoints + 1)
   }
 
-  const handlePointsInput = e => {
-    const v = parseInt(e.target.value)
-    if (isNaN(v) || v <= 0) {
-      onPointsChange(-1)
-    } else {
-      onPointsChange(Math.min(v, 9999))
-    }
-  }
-
   return (
     <Box
       sx={{
@@ -214,20 +206,17 @@ const AdvancedOptionsSection = ({
             >
               <Remove sx={{ fontSize: 16 }} />
             </IconButton>
-            <Input
-              type='number'
+            <NumberInput
               size='sm'
               value={displayPoints === 0 ? '' : displayPoints}
+              allowEmpty
+              emptyValue={0}
+              min={0}
+              max={9999}
               placeholder='0'
-              onChange={handlePointsInput}
+              onValueChange={next => onPointsChange(next > 0 ? next : -1)}
               sx={{ width: 64 }}
-              slotProps={{
-                input: {
-                  min: 0,
-                  max: 9999,
-                  style: { textAlign: 'center' },
-                },
-              }}
+              slotProps={{ input: { style: { textAlign: 'center' } } }}
             />
             <IconButton
               size='sm'
@@ -300,22 +289,20 @@ const AdvancedOptionsSection = ({
                 label={t('advancedOptions.availableFrom')}
                 description={t('advancedOptions.availableFromDescription')}
               >
-                <Input
-                  type='number'
+                <NumberInput
                   size='sm'
                   placeholder='—'
                   value={completionWindow > -1 ? completionWindow : ''}
-                  onChange={e => {
-                    const v = parseInt(e.target.value)
-                    onCompletionWindowChange(isNaN(v) ? -1 : Math.max(0, v))
-                  }}
+                  allowEmpty
+                  emptyValue={-1}
+                  min={0}
+                  onValueChange={onCompletionWindowChange}
                   endDecorator={
                     <Typography level='body-xs' textColor='text.tertiary'>
                       {t('advancedOptions.hrs')}
                     </Typography>
                   }
                   sx={{ width: 96 }}
-                  slotProps={{ input: { min: 0 } }}
                 />
               </FieldRow>
             </>

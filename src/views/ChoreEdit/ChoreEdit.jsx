@@ -42,8 +42,9 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import DurationInput from '../../components/common/DurationInput'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
-import { usePageShortcutScope } from '../../contexts/KeyboardShortcutScopeContext'
+import NumberInput from '../../components/common/NumberInput'
 import NotificationTemplate from '../../components/NotificationTemplate.jsx'
+import { usePageShortcutScope } from '../../contexts/KeyboardShortcutScopeContext'
 import { useDocumentScanner } from '../../hooks/useDocumentScanner'
 import {
   useArchiveChore,
@@ -1549,20 +1550,13 @@ const ChoreEdit = () => {
                   <Typography level='body-sm'>
                     {t('choreEdit.hoursLabel')}
                   </Typography>
-                  <Input
-                    type='number'
+                  <NumberInput
                     value={completionWindow}
+                    min={0}
+                    max={24 * 7}
                     sx={{ maxWidth: 100 }}
-                    slotProps={{
-                      input: {
-                        min: 0,
-                        max: 24 * 7,
-                      },
-                    }}
                     placeholder={t('choreEdit.hoursPlaceholder')}
-                    onChange={e => {
-                      setCompletionWindow(parseInt(e.target.value))
-                    }}
+                    onValueChange={setCompletionWindow}
                   />
                 </Box>
               </Card>
@@ -1760,14 +1754,14 @@ const ChoreEdit = () => {
                   <Typography level='body-sm'>
                     {t('choreEdit.telegramGroupIdLabel')}
                   </Typography>
-                  <Input
-                    type='number'
+                  <NumberInput
                     value={notificationMetadata?.circleGroupID}
+                    allowEmpty
                     placeholder={t('choreEdit.telegramGroupIdPlaceholder')}
-                    onChange={e => {
+                    onValueChange={next => {
                       setNotificationMetadata({
                         ...notificationMetadata,
-                        circleGroupID: parseInt(e.target.value),
+                        circleGroupID: next,
                       })
                     }}
                   />
@@ -1819,20 +1813,13 @@ const ChoreEdit = () => {
                 <Typography level='body-sm'>
                   {t('choreEdit.pointsLabel')}
                 </Typography>
-                <Input
-                  type='number'
+                <NumberInput
                   value={points}
+                  min={0}
+                  max={1000}
                   sx={{ maxWidth: 100 }}
-                  slotProps={{
-                    input: {
-                      min: 0,
-                      max: 1000,
-                    },
-                  }}
                   placeholder={t('choreEdit.pointsPlaceholder')}
-                  onChange={e => {
-                    setPoints(parseInt(e.target.value))
-                  }}
+                  onValueChange={setPoints}
                 />
               </Box>
             </Card>
