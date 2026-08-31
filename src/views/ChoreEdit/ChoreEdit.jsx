@@ -789,7 +789,10 @@ const ChoreEdit = () => {
     return <LoadingComponent />
   }
   return (
-    <Container maxWidth='md'>
+    <Container
+      maxWidth='md'
+      sx={{ width: '100%', minWidth: 0, overflowX: 'hidden' }}
+    >
       {/* Section 1: Basic Information */}
       <Box mb={4}>
         {/* <Typography
@@ -969,7 +972,16 @@ const ChoreEdit = () => {
             }}
             value={labelsV2?.map(l => l.name)}
             renderValue={selected => (
-              <Box sx={{ display: 'flex', gap: '0.25rem' }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '0.25rem',
+                  minWidth: 0,
+                  maxWidth: '100%',
+                  overflow: 'hidden',
+                }}
+              >
                 {labelsV2.map(selectedOption => {
                   return (
                     <Chip
@@ -990,7 +1002,7 @@ const ChoreEdit = () => {
                 })}
               </Box>
             )}
-            sx={{ minWidth: '15rem' }}
+            sx={{ width: '100%', minWidth: 0, maxWidth: '100%' }}
             slotProps={{
               listbox: {
                 sx: {
@@ -1192,7 +1204,14 @@ const ChoreEdit = () => {
                 ))}
               </Box>
             )}
-            <Box sx={{ display: 'flex', gap: 1, alignSelf: 'flex-start' }}>
+            <Box
+              sx={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: 1,
+                alignSelf: 'flex-start',
+              }}
+            >
               <Button
                 component='label'
                 variant='outlined'
@@ -1957,11 +1976,16 @@ const ChoreEdit = () => {
           bottom: 0,
           left: 0,
           right: 0,
-          p: 2, // padding
+          width: '100%',
+          maxWidth: '100vw',
+          minWidth: 0,
+          boxSizing: 'border-box',
+          p: { xs: 1, sm: 2 },
           paddingBottom: getSafeBottomPadding(2), // safe area padding for iOS
           display: 'flex',
+          flexWrap: 'wrap',
           justifyContent: 'flex-end',
-          gap: 2,
+          gap: { xs: 1, sm: 2 },
           'z-index': 1000,
           bgcolor: 'background.body',
           boxShadow: 'md', // Add a subtle shadow

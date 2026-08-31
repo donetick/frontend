@@ -37,6 +37,14 @@ import { useLocalization } from '../../contexts/LocalizationContext'
 import { useUserProfile } from '../../queries/UserQueries'
 import { CompleteSubTask } from '../../utils/Fetcher'
 
+// Keep deep trees usable on narrow screens. The hierarchy remains unlimited,
+// but indentation is capped so controls and task names never get pushed beyond
+// the container.
+const MOBILE_MAX_INDENT_LEVEL = 3
+const DESKTOP_MAX_INDENT_LEVEL = 5
+const MOBILE_INDENT_SIZE = 12
+const DESKTOP_INDENT_SIZE = 16
+
 function getVisibleOrder(tasks, expandedIds) {
   const result = []
   const addTask = task => {
@@ -86,21 +94,38 @@ function SortableItem({
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    display: 'flex',
-    alignItems: 'center',
-    touchAction: 'auto',
-    paddingLeft: `${level * 24}px`,
   }
+  const mobileIndent =
+    Math.min(level, MOBILE_MAX_INDENT_LEVEL) * MOBILE_INDENT_SIZE
+  const desktopIndent =
+    Math.min(level, DESKTOP_MAX_INDENT_LEVEL) * DESKTOP_INDENT_SIZE
 
   return (
     <>
-      <ListItem ref={setNodeRef} style={style} {...attributes}>
+      <ListItem
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
+        sx={{
+          alignItems: 'center',
+          boxSizing: 'border-box',
+          display: 'flex',
+          maxWidth: '100%',
+          minWidth: 0,
+          paddingInlineStart: {
+            xs: `${mobileIndent}px`,
+            sm: `${desktopIndent}px`,
+          },
+          touchAction: 'auto',
+          width: '100%',
+        }}
+      >
         {editMode && (
           <IconButton
             {...listeners}
             size='sm'
             data-drag-handle='true'
-            sx={{ touchAction: 'none', cursor: 'grab' }}
+            sx={{ touchAction: 'none', cursor: 'grab', flexShrink: 0 }}
           >
             <DragIndicator />
           </IconButton>
@@ -112,14 +137,23 @@ function SortableItem({
             variant='plain'
             color='neutral'
             onClick={() => onToggleExpand(task.id)}
+            sx={{ flexShrink: 0 }}
           >
             {expanded ? <ExpandMore /> : <ChevronRight />}
           </IconButton>
         ) : level > 0 ? (
-          <Box sx={{ width: 28 }} />
+          <Box sx={{ width: 28, flexShrink: 0 }} />
         ) : null}
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1 }}>
+        <Box
+          sx={{
+            alignItems: 'center',
+            display: 'flex',
+            flex: 1,
+            gap: 1,
+            minWidth: 0,
+          }}
+        >
           {!editMode && (
             <Checkbox
               checked={!!task.completedAt}
@@ -148,6 +182,7 @@ function SortableItem({
               onKeyDown={e => onKeyDown(e, task)}
               sx={{
                 flex: 1,
+                minWidth: 0,
                 border: 'none',
                 backgroundColor: 'transparent',
                 boxShadow: 'none',
@@ -167,11 +202,13 @@ function SortableItem({
                 flexDirection: 'column',
                 justifyContent: 'center',
                 cursor: 'pointer',
+                minWidth: 0,
               }}
               onClick={() => handleToggle(task.id)}
             >
               <Typography
                 sx={{
+                  overflowWrap: 'anywhere',
                   textDecoration: task.completedAt ? 'line-through' : 'none',
                 }}
               >
@@ -195,7 +232,7 @@ function SortableItem({
         </Box>
 
         {editMode && (
-          <Box sx={{ display: 'flex', gap: 1 }}>
+          <Box sx={{ display: 'flex', flexShrink: 0, gap: 0.5 }}>
             <IconButton
               variant='soft'
               color='danger'
@@ -219,7 +256,7 @@ function SortableItem({
       </ListItem>
 
       {hasChildren && expanded && (
-        <Box>
+        <Box sx={{ maxWidth: '100%', minWidth: 0, width: '100%' }}>
           {childTasks.map(childTask => (
             <SortableItem
               key={childTask.id}
@@ -648,10 +685,14 @@ const SubTasks = ({
       <SortableContext items={tasks} strategy={verticalListSortingStrategy}>
         <List
           sx={{
-            padding: 0,
+            boxSizing: 'border-box',
             maxHeight: 'inherit',
+            maxWidth: '100%',
+            minWidth: 0,
             overflow: 'visible',
+            padding: 0,
             WebkitOverflowScrolling: 'touch',
+            width: '100%',
           }}
         >
           {topLevelTasks
