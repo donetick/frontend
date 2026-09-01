@@ -545,7 +545,17 @@
   "subTask": {
     "namePlaceholder": "",
     "deleteShortcut": "",
-    "addPlaceholder": ""
+    "addPlaceholder": "",
+    "untitled": "Subtarea sin titulo",
+    "actions": "Acciones de subtarea",
+    "edit": "Editar",
+    "addBelow": "Agregar subtarea debajo",
+    "addChild": "Agregar subtarea anidada",
+    "moveUpLevel": "Subir un nivel",
+    "delete": "Eliminar",
+    "editTitle": "Editar subtarea",
+    "addTitle": "Agregar subtarea",
+    "addChildTitle": "Agregar subtarea anidada"
   },
   "voiceToTask": {
     "title": "",

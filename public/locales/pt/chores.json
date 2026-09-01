@@ -545,7 +545,17 @@
   "subTask": {
     "namePlaceholder": "",
     "deleteShortcut": "",
-    "addPlaceholder": ""
+    "addPlaceholder": "",
+    "untitled": "Subtarefa sem titulo",
+    "actions": "Acoes da subtarefa",
+    "edit": "Editar",
+    "addBelow": "Adicionar subtarefa abaixo",
+    "addChild": "Adicionar subtarefa aninhada",
+    "moveUpLevel": "Subir um nivel",
+    "delete": "Excluir",
+    "editTitle": "Editar subtarefa",
+    "addTitle": "Adicionar subtarefa",
+    "addChildTitle": "Adicionar subtarefa aninhada"
   },
   "voiceToTask": {
     "title": "",

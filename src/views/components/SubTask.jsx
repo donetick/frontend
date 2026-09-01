@@ -12,26 +12,40 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import {
+  Add,
   ChevronRight,
   Delete,
   DragIndicator,
+  Edit,
   ExpandMore,
   KeyboardReturn,
+  MoreVert,
+  PlaylistAdd,
+  SubdirectoryArrowLeft,
 } from '@mui/icons-material'
 import {
   Box,
+  Button,
   Checkbox,
   Chip,
+  Dropdown,
   IconButton,
   Input,
   List,
   ListItem,
+  Menu,
+  MenuButton,
+  MenuItem,
+  Textarea,
   Typography,
 } from '@mui/joy'
-import { useCallback, useRef, useState } from 'react'
+import useMediaQuery from '@mui/material/useMediaQuery'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 
+import AppModal from '../../components/common/AppModal'
+import ModalActions from '../../components/common/ModalActions'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useUserProfile } from '../../queries/UserQueries'
@@ -73,7 +87,12 @@ function SortableItem({
   expandedIds,
   handleToggle,
   inputRefs,
+  isSmallScreen,
   level,
+  onAddChild,
+  onAddSibling,
+  onEdit,
+  onFocusTask,
   onKeyDown,
   onToggleExpand,
   performers,
@@ -109,9 +128,11 @@ function SortableItem({
         sx={{
           alignItems: 'center',
           boxSizing: 'border-box',
+          columnGap: 0,
           display: 'flex',
           maxWidth: '100%',
           minWidth: 0,
+          paddingInlineEnd: 0,
           paddingInlineStart: {
             xs: `${mobileIndent}px`,
             sm: `${desktopIndent}px`,
@@ -125,9 +146,15 @@ function SortableItem({
             {...listeners}
             size='sm'
             data-drag-handle='true'
-            sx={{ touchAction: 'none', cursor: 'grab', flexShrink: 0 }}
+            sx={{
+              '--IconButton-size': '28px',
+              cursor: 'grab',
+              flexShrink: 0,
+              p: 0,
+              touchAction: 'none',
+            }}
           >
-            <DragIndicator />
+            <DragIndicator sx={{ fontSize: 18 }} />
           </IconButton>
         )}
 
@@ -137,12 +164,14 @@ function SortableItem({
             variant='plain'
             color='neutral'
             onClick={() => onToggleExpand(task.id)}
-            sx={{ flexShrink: 0 }}
+            sx={{ '--IconButton-size': '24px', flexShrink: 0, p: 0 }}
           >
-            {expanded ? <ExpandMore /> : <ChevronRight />}
+            {expanded ? (
+              <ExpandMore sx={{ fontSize: 18 }} />
+            ) : (
+              <ChevronRight sx={{ fontSize: 18 }} />
+            )}
           </IconButton>
-        ) : level > 0 ? (
-          <Box sx={{ width: 28, flexShrink: 0 }} />
         ) : null}
 
         <Box
@@ -162,37 +191,71 @@ function SortableItem({
           )}
 
           {editMode ? (
-            <Input
-              slotProps={{
-                input: {
-                  ref: el => {
-                    inputRefs.current[task.id] = el
+            isSmallScreen ? (
+              <Box
+                component='button'
+                type='button'
+                onClick={() => onEdit(task)}
+                sx={{
+                  appearance: 'none',
+                  bgcolor: 'transparent',
+                  border: 0,
+                  color: 'inherit',
+                  cursor: 'pointer',
+                  flex: 1,
+                  font: 'inherit',
+                  minWidth: 0,
+                  px: 0.5,
+                  py: 0.625,
+                  textAlign: 'start',
+                }}
+              >
+                <Typography
+                  level='body-md'
+                  sx={{
+                    display: '-webkit-box',
+                    overflow: 'hidden',
+                    overflowWrap: 'anywhere',
+                    WebkitBoxOrient: 'vertical',
+                    WebkitLineClamp: 2,
+                  }}
+                >
+                  {task.name || t('subTask.untitled')}
+                </Typography>
+              </Box>
+            ) : (
+              <Input
+                slotProps={{
+                  input: {
+                    ref: el => {
+                      inputRefs.current[task.id] = el
+                    },
                   },
-                },
-              }}
-              value={task.name}
-              placeholder={t('subTask.namePlaceholder')}
-              onChange={e =>
-                setTasks(prev =>
-                  prev.map(t =>
-                    t.id === task.id ? { ...t, name: e.target.value } : t,
-                  ),
-                )
-              }
-              onKeyDown={e => onKeyDown(e, task)}
-              sx={{
-                flex: 1,
-                minWidth: 0,
-                border: 'none',
-                backgroundColor: 'transparent',
-                boxShadow: 'none',
-                '--Input-focusedHighlight': 'var(--joy-palette-primary-300)',
-                '&:not(:focus-within)': {
-                  boxShadow: 'none',
+                }}
+                value={task.name}
+                placeholder={t('subTask.namePlaceholder')}
+                onChange={e =>
+                  setTasks(prev =>
+                    prev.map(t =>
+                      t.id === task.id ? { ...t, name: e.target.value } : t,
+                    ),
+                  )
+                }
+                onKeyDown={e => onKeyDown(e, task)}
+                sx={{
+                  flex: 1,
+                  minWidth: 0,
+                  border: 'none',
                   backgroundColor: 'transparent',
-                },
-              }}
-            />
+                  boxShadow: 'none',
+                  '--Input-focusedHighlight': 'var(--joy-palette-primary-300)',
+                  '&:not(:focus-within)': {
+                    boxShadow: 'none',
+                    backgroundColor: 'transparent',
+                  },
+                }}
+              />
+            )
           ) : (
             <Box
               sx={{
@@ -233,24 +296,102 @@ function SortableItem({
 
         {editMode && (
           <Box sx={{ display: 'flex', flexShrink: 0, gap: 0.5 }}>
-            <IconButton
-              variant='soft'
-              color='danger'
-              size='sm'
-              title={t('subTask.deleteShortcut')}
-              onClick={() =>
-                onKeyDown(
-                  {
-                    key: 'Backspace',
-                    shiftKey: true,
-                    preventDefault: () => {},
+            <Dropdown>
+              <MenuButton
+                slots={{ root: IconButton }}
+                slotProps={{
+                  root: {
+                    'aria-label': t('subTask.actions'),
+                    color: 'neutral',
+                    size: 'sm',
+                    sx: {
+                      '--IconButton-size': '28px',
+                      marginInlineEnd: isSmallScreen ? -0.5 : 0,
+                      p: 0,
+                    },
+                    variant: 'plain',
                   },
-                  task,
-                )
-              }
-            >
-              <Delete />
-            </IconButton>
+                }}
+              >
+                <MoreVert />
+              </MenuButton>
+              <Menu placement='bottom-end' size='sm'>
+                <MenuItem
+                  onClick={() =>
+                    isSmallScreen ? onEdit(task) : onFocusTask(task.id)
+                  }
+                >
+                  <Edit />
+                  {t('subTask.edit')}
+                </MenuItem>
+                <MenuItem
+                  onClick={() =>
+                    isSmallScreen
+                      ? onAddSibling(task)
+                      : onKeyDown(
+                          {
+                            key: 'Enter',
+                            shiftKey: false,
+                            preventDefault: () => {},
+                          },
+                          task,
+                        )
+                  }
+                >
+                  <PlaylistAdd />
+                  {t('subTask.addBelow')}
+                </MenuItem>
+                <MenuItem
+                  onClick={() =>
+                    isSmallScreen
+                      ? onAddChild(task)
+                      : onKeyDown(
+                          {
+                            key: 'Enter',
+                            shiftKey: true,
+                            preventDefault: () => {},
+                          },
+                          task,
+                        )
+                  }
+                >
+                  <Add />
+                  {t('subTask.addChild')}
+                </MenuItem>
+                <MenuItem
+                  disabled={task.parentId === null}
+                  onClick={() =>
+                    onKeyDown(
+                      {
+                        key: 'Tab',
+                        shiftKey: true,
+                        preventDefault: () => {},
+                      },
+                      task,
+                    )
+                  }
+                >
+                  <SubdirectoryArrowLeft />
+                  {t('subTask.moveUpLevel')}
+                </MenuItem>
+                <MenuItem
+                  color='danger'
+                  onClick={() =>
+                    onKeyDown(
+                      {
+                        key: 'Backspace',
+                        shiftKey: true,
+                        preventDefault: () => {},
+                      },
+                      task,
+                    )
+                  }
+                >
+                  <Delete />
+                  {t('subTask.delete')}
+                </MenuItem>
+              </Menu>
+            </Dropdown>
           </Box>
         )}
       </ListItem>
@@ -269,6 +410,11 @@ function SortableItem({
               onToggleExpand={onToggleExpand}
               handleToggle={handleToggle}
               inputRefs={inputRefs}
+              isSmallScreen={isSmallScreen}
+              onAddChild={onAddChild}
+              onAddSibling={onAddSibling}
+              onEdit={onEdit}
+              onFocusTask={onFocusTask}
               onKeyDown={onKeyDown}
               performers={performers}
             />
@@ -290,9 +436,29 @@ const SubTasks = ({
   const { t } = useTranslation('chores')
   const [newTask, setNewTask] = useState('')
   const [expandedIds, setExpandedIds] = useState(new Set())
+  const [editor, setEditor] = useState(null)
+  const [editorText, setEditorText] = useState('')
+  const isSmallScreen = useMediaQuery(theme => theme.breakpoints.down('sm'))
   const { data: userProfile } = useUserProfile()
   const { impersonatedUser } = useImpersonateUser()
   const inputRefs = useRef({})
+  const editorInputRef = useRef(null)
+
+  useEffect(() => {
+    if (!editor) return undefined
+
+    // Menus restore focus to their trigger when they close. Focusing on the
+    // next frame ensures the newly opened mobile editor wins that race.
+    const frame = requestAnimationFrame(() => {
+      const input = editorInputRef.current
+      if (!input) return
+
+      input.focus()
+      const end = input.value.length
+      input.setSelectionRange(end, end)
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [editor])
 
   const focusId = id => {
     setTimeout(() => {
@@ -380,6 +546,80 @@ const SubTasks = ({
       return next
     })
   }, [])
+
+  const openTaskEditor = useCallback(task => {
+    setEditor({ taskId: task.id })
+    setEditorText(task.name || '')
+  }, [])
+
+  const openNewChildEditor = useCallback(
+    task => {
+      setEditor({
+        parentId: task.id,
+        orderId: tasks.filter(item => item.parentId === task.id).length,
+        type: 'child',
+      })
+      setEditorText('')
+      setExpandedIds(prev => new Set([...prev, task.id]))
+    },
+    [tasks],
+  )
+
+  const openNewSiblingEditor = useCallback(task => {
+    setEditor({
+      parentId: task.parentId,
+      orderId: task.orderId + 1,
+      type: 'sibling',
+    })
+    setEditorText('')
+  }, [])
+
+  const openNewRootEditor = useCallback(() => {
+    const lastOrderId = Math.max(
+      -1,
+      ...tasks.filter(task => task.parentId === null).map(task => task.orderId),
+    )
+    setEditor({ parentId: null, orderId: lastOrderId + 1, type: 'root' })
+    setEditorText('')
+  }, [tasks])
+
+  const closeTaskEditor = () => {
+    setEditor(null)
+    setEditorText('')
+  }
+
+  const saveTaskEditor = () => {
+    const name = editorText.trim()
+    if (!name || !editor) return
+
+    if (editor.taskId !== undefined) {
+      setTasks(prev => {
+        const currentTasks = Array.isArray(prev) ? prev : []
+        return currentTasks.map(task =>
+          task.id === editor.taskId ? { ...task, name } : task,
+        )
+      })
+    } else {
+      setTasks(prev => {
+        const currentTasks = Array.isArray(prev) ? prev : []
+        return [
+          ...currentTasks.map(task =>
+            task.parentId === editor.parentId && task.orderId >= editor.orderId
+              ? { ...task, orderId: task.orderId + 1 }
+              : task,
+          ),
+          {
+            id: nextTempId(currentTasks),
+            name,
+            completedAt: null,
+            parentId: editor.parentId,
+            orderId: editor.orderId,
+          },
+        ]
+      })
+    }
+    closeTaskEditor()
+  }
 
   const handleKeyDown = useCallback(
     (e, task) => {
@@ -709,12 +949,42 @@ const SubTasks = ({
                 onToggleExpand={handleToggleExpand}
                 handleToggle={handleToggle}
                 inputRefs={inputRefs}
+                isSmallScreen={isSmallScreen}
+                onAddChild={openNewChildEditor}
+                onAddSibling={openNewSiblingEditor}
+                onEdit={openTaskEditor}
+                onFocusTask={focusId}
                 onKeyDown={handleKeyDown}
                 performers={performers}
               />
             ))}
 
-          {editMode && tasks.length === 0 && (
+          {editMode && isSmallScreen && (
+            <ListItem sx={{ p: 0.5 }}>
+              <Button
+                color='neutral'
+                fullWidth
+                onClick={openNewRootEditor}
+                startDecorator={<Add />}
+                variant='outlined'
+                sx={{
+                  bgcolor: 'background.surface',
+                  borderStyle: 'dashed',
+                  justifyContent: 'flex-start',
+                  minHeight: 40,
+                  '&:hover': {
+                    bgcolor: 'primary.softBg',
+                    borderColor: 'primary.outlinedBorder',
+                    color: 'primary.700',
+                  },
+                }}
+              >
+                {t('subTask.addTitle')}
+              </Button>
+            </ListItem>
+          )}
+
+          {editMode && !isSmallScreen && tasks.length === 0 && (
             <ListItem sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Input
                 autoFocus={shouldFocus}
@@ -737,6 +1007,44 @@ const SubTasks = ({
           )}
         </List>
       </SortableContext>
+
+      <AppModal
+        open={Boolean(editor)}
+        onClose={closeTaskEditor}
+        title={
+          editor?.taskId !== undefined
+            ? t('subTask.editTitle')
+            : editor?.type === 'child'
+              ? t('subTask.addChildTitle')
+              : t('subTask.addTitle')
+        }
+        size='sm'
+        mobilePresentation='sheet'
+        showHandle
+        footer={
+          <ModalActions
+            secondary={{
+              label: t('common:cancel'),
+              onClick: closeTaskEditor,
+            }}
+            primary={{
+              disabled: !editorText.trim(),
+              label: t('common:save'),
+              onClick: saveTaskEditor,
+            }}
+          />
+        }
+      >
+        <Textarea
+          autoFocus
+          slotProps={{ textarea: { ref: editorInputRef } }}
+          minRows={3}
+          maxRows={8}
+          placeholder={t('subTask.namePlaceholder')}
+          value={editorText}
+          onChange={event => setEditorText(event.target.value)}
+        />
+      </AppModal>
     </DndContext>
   )
 }

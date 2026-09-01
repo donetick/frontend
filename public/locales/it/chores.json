@@ -71,5 +71,17 @@
       "reset": "Reimposta timer",
       "delete": "Elimina sessione"
     }
+  },
+  "subTask": {
+    "untitled": "Sottoattivita senza titolo",
+    "actions": "Azioni sottoattivita",
+    "edit": "Modifica",
+    "addBelow": "Aggiungi sottoattivita sotto",
+    "addChild": "Aggiungi sottoattivita nidificata",
+    "moveUpLevel": "Sali di un livello",
+    "delete": "Elimina",
+    "editTitle": "Modifica sottoattivita",
+    "addTitle": "Aggiungi sottoattivita",
+    "addChildTitle": "Aggiungi sottoattivita nidificata"
   }
 }
