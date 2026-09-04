@@ -1,6 +1,13 @@
+import 'moment/locale/ar'
+import 'moment/locale/de'
+import 'moment/locale/es'
+import 'moment/locale/fr'
 import 'moment/locale/he'
 import 'moment/locale/ru'
 import 'moment/locale/ja'
+import 'moment/locale/nl'
+import 'moment/locale/pt'
+import 'moment/locale/zh-cn'
 
 import i18n from 'i18next'
 import LanguageDetector from 'i18next-browser-languagedetector'
