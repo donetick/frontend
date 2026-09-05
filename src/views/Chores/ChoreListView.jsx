@@ -106,11 +106,12 @@ const ChoreListView = ({
   }, [])
   const closeActionMenu = useCallback(() => setActionMenuAnchor(null), [])
 
+  // 'default' renders the compact card too, so the swipe-action offset below
+  // has to follow the card component, not the raw view mode.
+  const usesCompactCard = viewMode === 'compact' || viewMode === 'default'
+
   const renderChoreCard = (chore, key) => {
-    const CardComponent =
-      viewMode === 'compact' || viewMode === 'default'
-        ? CompactChoreCard
-        : ChoreCard
+    const CardComponent = usesCompactCard ? CompactChoreCard : ChoreCard
     return (
       <CardComponent
         key={key || chore.id}
@@ -135,8 +136,6 @@ const ChoreListView = ({
     if (isMultiSelectMode) return null
     if (!showActions) return null
 
-    const isCompact = viewMode === 'compact'
-
     return (
       <TrailingActions>
         <Box
@@ -146,7 +145,7 @@ const ChoreListView = ({
             zIndex: 0,
             // Offset for the floating chips above ChoreCard so swipe actions
             // align with the card body only
-            ...(!isCompact && {
+            ...(!usesCompactCard && {
               mt: '28px',
               borderRadius: '8px',
             }),
