@@ -18,10 +18,12 @@ import {
   ThumbDown,
 } from '@mui/icons-material'
 import { Box, Typography } from '@mui/joy'
+import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
 import { useLongPress } from '../../hooks/useLongPress'
+import ChoreActionMenu from '../components/ChoreActionMenu'
 import ChoreCard from './ChoreCard'
 import CompactChoreCard from './CompactChoreCard'
 
@@ -93,6 +95,17 @@ const ChoreListView = ({
 }) => {
   const navigate = useNavigate()
   const { t } = useTranslation('chores')
+
+  // One action menu for the whole list rather than one per row. `chore` is kept
+  // after closing so the menu can animate out with its content intact.
+  const [actionMenuAnchor, setActionMenuAnchor] = useState(null)
+  const [actionMenuChore, setActionMenuChore] = useState(null)
+  const openActionMenu = useCallback((anchor, chore) => {
+    setActionMenuChore(chore)
+    setActionMenuAnchor(anchor)
+  }, [])
+  const closeActionMenu = useCallback(() => setActionMenuAnchor(null), [])
+
   const renderChoreCard = (chore, key) => {
     const CardComponent =
       viewMode === 'compact' || viewMode === 'default'
@@ -109,6 +122,7 @@ const ChoreListView = ({
         isMultiSelectMode={isMultiSelectMode}
         isSelected={selectedChores.has(chore.id)}
         onSelectionToggle={() => toggleChoreSelection(chore.id)}
+        onOpenActionMenu={openActionMenu}
         showActions={showActions}
       />
     )
@@ -329,7 +343,32 @@ const ChoreListView = ({
     )
   }
 
-  return <>{renderChores(chores)}</>
+  return (
+    <>
+      {renderChores(chores)}
+      <ChoreActionMenu
+        chore={actionMenuChore}
+        anchorEl={actionMenuAnchor}
+        onClose={closeActionMenu}
+        onAction={handleChoreAction}
+        onCompleteWithNote={() =>
+          handleChoreAction('completeWithNote', actionMenuChore)
+        }
+        onCompleteWithPastDate={() =>
+          handleChoreAction('completeWithPastDate', actionMenuChore)
+        }
+        onChangeAssignee={() =>
+          handleChoreAction('changeAssignee', actionMenuChore)
+        }
+        onChangeDueDate={() =>
+          handleChoreAction('changeDueDate', actionMenuChore)
+        }
+        onWriteNFC={() => handleChoreAction('writeNFC', actionMenuChore)}
+        onNudge={() => handleChoreAction('nudge', actionMenuChore)}
+        onDelete={() => handleChoreAction('delete', actionMenuChore)}
+      />
+    </>
+  )
 }
 
 export default ChoreListView
