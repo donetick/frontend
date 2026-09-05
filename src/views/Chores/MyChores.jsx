@@ -115,13 +115,10 @@ const MyChores = () => {
   } = useCircleMembers()
 
   const [chores, setChores] = useState([])
-  const [filteredChores, setFilteredChores] = useState([])
   const [addTaskModalOpen, setAddTaskModalOpen] = useState(false)
   // 'voice' | 'scan' | null — set by the quick-capture widget deep links
   const [addTaskInitialMode, setAddTaskInitialMode] = useState(null)
-  const [taskInputFocus, setTaskInputFocus] = useState(0)
   const searchInputRef = useRef(null)
-  const [searchInputFocus, setSearchInputFocus] = useState(0)
   const [selectedChoreSection, setSelectedChoreSection] = useState(
     localStorage.getItem('selectedChoreSection') || 'default',
   )
@@ -135,12 +132,10 @@ const MyChores = () => {
   const openSectionsInitializedRef = useRef(
     localStorage.getItem('openChoreSections') !== null,
   )
-  const [anchorEl, setAnchorEl] = useState(null)
   const [viewMode, setViewMode] = useState(
     localStorage.getItem('choreCardViewMode') || 'default',
   )
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(new Date())
-  const menuRef = useRef(null)
   const [confirmModelConfig, setConfirmModelConfig] = useState({})
 
   const { projectsWithDefault, selectedProject, setSelectedProjectWithCache } =
@@ -187,7 +182,6 @@ const MyChores = () => {
     deleteFilter,
     filteredChores: customFilteredChores,
     hasFilterApplied,
-    hasProjectConditions,
     pinFilter,
     saveFilter,
     savedFilters,
@@ -386,7 +380,6 @@ const MyChores = () => {
       const processEffectAsync = async () => {
         // Sync local state with query data to ensure updates are reflected
         setChores(processedChores)
-        setFilteredChores(processedChores)
 
         // Don't set choreSections here - let the dedicated effect handle it
         // This prevents caching issues when switching between projects
@@ -425,22 +418,6 @@ const MyChores = () => {
     setOpenChoreSections(openSections)
   }, [choreSections])
 
-  useEffect(() => {
-    document.addEventListener('mousedown', handleMenuOutsideClick)
-    return () => {
-      document.removeEventListener('mousedown', handleMenuOutsideClick)
-    }
-  }, [anchorEl])
-
-  useEffect(() => {
-    if (searchInputFocus > 0 && searchInputRef.current) {
-      searchInputRef.current.focus()
-      searchInputRef.current.selectionStart =
-        searchInputRef.current.value?.length
-      searchInputRef.current.selectionEnd = searchInputRef.current.value?.length
-    }
-  }, [searchInputFocus])
-
   // A global-search result can hand a query back to the task list as a scoped filter.
   useEffect(() => {
     const query = searchParams.get('search')
@@ -469,12 +446,6 @@ const MyChores = () => {
       }
     }
   }, [
-    searchParams,
-    projects,
-    projectsWithDefault,
-    selectedProject,
-    setSelectedProjectWithCache,
-
     searchParams,
     projects,
     projectsWithDefault,
@@ -618,9 +589,7 @@ const MyChores = () => {
     handleNudge,
   } = useChoreActions({
     chores,
-    filteredChores,
     setChores,
-    setFilteredChores,
     userProfile,
     impersonatedUser,
     showSuccess,
@@ -683,8 +652,6 @@ const MyChores = () => {
       onFocusSearch: () => searchInputRef.current?.focus(),
       onCloseSearch: () => {
         setSearchTerm('')
-        setFilteredChores(chores)
-        setSearchInputFocus(0)
       },
       onToggleMultiSelect: toggleMultiSelectMode,
       onEnableMultiSelectAndSelectAll: () => {
@@ -704,24 +671,6 @@ const MyChores = () => {
       onShowMessage: showSuccess,
     },
   })
-
-  const handleMenuOutsideClick = event => {
-    if (
-      anchorEl &&
-      !anchorEl.contains(event.target) &&
-      !menuRef.current.contains(event.target)
-    ) {
-      handleFilterMenuClose()
-    }
-  }
-  const handleFilterMenuOpen = event => {
-    event.preventDefault()
-    setAnchorEl(event.currentTarget)
-  }
-
-  const handleFilterMenuClose = () => {
-    setAnchorEl(null)
-  }
 
   // Clicking a label / priority chip on a task card feeds the advanced filter
   // (as a temp filter) rather than the legacy quick filters. Clicking the same
@@ -798,7 +747,6 @@ const MyChores = () => {
     }
     const search = e.target.value
     if (search === '') {
-      setFilteredChores(selectedProject ? projectFilteredChores : chores)
       setSearchTerm('')
       setSelectedCalendarDate(null)
       return
@@ -811,8 +759,6 @@ const MyChores = () => {
   }
   const handleSearchClose = () => {
     setSearchTerm('')
-    setFilteredChores(selectedProject ? projectFilteredChores : chores)
-    setSearchInputFocus(0)
     setSelectedCalendarDate(null)
     if (searchParams.has('search')) {
       const params = new URLSearchParams(searchParams)
@@ -844,61 +790,6 @@ const MyChores = () => {
       setSelectedCalendarDate(null)
     }
   }
-
-  // const renderChoreCard = (chore, key) => {
-  //   const CardComponent = viewMode === 'compact' ? CompactChoreCard : ChoreCard
-  //   return (
-  //     <CardComponent
-  //       key={key || chore.id}
-  //       chore={chore}
-  //       performers={membersData?.res}
-  //       userLabels={userLabels}
-  //       onChipClick={handleLabelFiltering}
-  //       onAction={handleChoreAction}
-  //       isMultiSelectMode={isMultiSelectMode}
-  //       isSelected={selectedChores.has(chore.id)}
-  //       onSelectionToggle={() => toggleChoreSelection(chore.id)}
-  //     />
-  //   )
-  // }
-  // const renderChores = chores => {
-  //   return (
-  //     <SwipeableList>
-  //       {chores.map(chore => (
-  //         <SwipeableListItem
-  //           key={chore.id}
-  //           trailingActions={
-  //             <TrailingActions>
-  //               <SwipeAction>
-  //                 <Button
-  //                   variant='solid'
-  //                   color='primary'
-  //                   size='sm'
-  //                   startIcon={<Add />}
-  //                   onClick={() => setAddTaskModalOpen(true)}
-  //                 >
-  //                   Add Task
-  //                 </Button>
-  //               </SwipeAction>
-  //             </TrailingActions>
-  //           }
-  //         >
-  //           {/* <Button
-  //             variant='outlined'
-  //             color='neutral'
-  //             size='sm'
-  //             startIcon={<EditCalendar />}
-  //             onClick={() => setViewMode('calendar')}
-  //           >
-  //             View Calendar
-  //           </Button> */}
-  //           {renderChoreCard(chore)}
-  //           {/* {chores.map(chore => renderChoreCard(chore))} */}
-  //         </SwipeableListItem>
-  //       ))}
-  //     </SwipeableList>
-  //   )
-  // }
 
   const selectedDateChores = useMemo(() => {
     if (!selectedCalendarDate) return []
@@ -976,7 +867,6 @@ const MyChores = () => {
   // a closure snapshot taken before earlier calls landed.
   const updateChores = newChore => {
     setChores(prev => appendChore(prev, newChore))
-    setFilteredChores(prev => appendChore(prev, newChore))
     clearQuickFilters()
   }
 
@@ -1091,7 +981,6 @@ const MyChores = () => {
             } else {
               clearQuickFilters()
               setSearchTerm('')
-              setFilteredChores([])
               if (selectedChoreFilter !== 'anyone') {
                 setSelectedChoreFilterWithCache('anyone')
               }
@@ -1112,7 +1001,6 @@ const MyChores = () => {
           selectedGroupBy={selectedChoreSection}
           onGroupBySelect={value => {
             setSelectedChoreSectionWithCache(value)
-            setFilteredChores(chores)
             clearQuickFilters()
           }}
           viewMode={viewMode}
@@ -1415,14 +1303,6 @@ const MyChores = () => {
         )}
         <Box
           sx={{
-            // center the button
-            justifyContent: 'center',
-            mt: 2,
-          }}
-        ></Box>
-        <Box
-          // variant='outlined'
-          sx={{
             position: 'fixed',
             bottom: getSafeBottom(10, 10),
             left: 10,
@@ -1497,7 +1377,6 @@ const MyChores = () => {
         <FeedbackPrompt />
         {addTaskModalOpen && (
           <TaskInput
-            autoFocus={taskInputFocus}
             onChoreUpdate={updateChores}
             isModalOpen={addTaskModalOpen}
             initialMode={addTaskInitialMode}
@@ -1520,9 +1399,6 @@ const MyChores = () => {
         clearTempFilter={clearTempFilterAndUrl}
         tempFilter={tempFilter}
       />
-
-      {/* Multi-select Help - only show when in multi-select mode */}
-      {/* <MultiSelectHelp isVisible={isMultiSelectMode} /> */}
 
       {/* Confirmation Modal for bulk operations */}
       {confirmModelConfig?.isOpen && (
