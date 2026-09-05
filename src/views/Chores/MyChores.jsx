@@ -129,6 +129,9 @@ const MyChores = () => {
       return {}
     }
   })
+  // Last `filterId` we saw in the URL, so the URL → filter-state effect can tell
+  // a real URL change from its own write-back.
+  const lastUrlFilterIdRef = useRef(null)
   const openSectionsInitializedRef = useRef(
     localStorage.getItem('openChoreSections') !== null,
   )
@@ -479,11 +482,19 @@ const MyChores = () => {
 
     const oldFilter = searchParams.get('filter')
 
+    // This effect restores state from the URL; the effect below pushes state
+    // back into the URL. Only act when the URL itself actually changed —
+    // otherwise switching insights (state changes first, URL a tick later)
+    // makes the two effects fight and flip between the old and new insight.
+    const urlFilterIdChanged = lastUrlFilterIdRef.current !== rawFilterId
+    lastUrlFilterIdRef.current = rawFilterId
+
     // Restore smart insight temp filter from URL (e.g. on page reload)
     // Insight IDs are strings (e.g. 'overdue'), saved filter IDs are numeric
     if (
       filterId &&
       INSIGHT_FILTER_DEFS[filterId] &&
+      urlFilterIdChanged &&
       tempFilterMeta?.id !== filterId
     ) {
       const def = INSIGHT_FILTER_DEFS[filterId]
