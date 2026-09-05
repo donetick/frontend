@@ -8,9 +8,10 @@ import {
   Stars,
   TaskAlt,
 } from '@mui/icons-material'
-import { Avatar, Box, Chip, Divider, Input, Typography } from '@mui/joy'
+import { Avatar, Box, Chip, Divider, Typography } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 
+import NumberInput from '../../../components/common/NumberInput'
 import Priorities from '../../../utils/Priorities'
 
 // `labelKey` resolves against `chores:filterBuilder.dueDateOption.*` — these
@@ -484,13 +485,12 @@ const FilterBuilderContent = ({
             {op.label}
           </Chip>
         ))}
-        <Input
-          type='number'
+        <NumberInput
           size='sm'
           value={selections.points.value}
-          onChange={e => setPointsValue(parseInt(e.target.value) || 0)}
+          min={0}
+          onValueChange={setPointsValue}
           sx={{ width: 80 }}
-          slotProps={{ input: { min: 0 } }}
         />
         {selections.points.active && (
           <Chip

@@ -255,6 +255,8 @@
     "movedTitle": "Aufgabe verschoben",
     "failMoveTitle": "Aufgabe konnte nicht verschoben werden",
     "failRescheduleTitle": "Neuplanung fehlgeschlagen",
+    "failRescheduleMessage": "Fälligkeitsdatum konnte nicht aktualisiert werden",
+    "failRemoveDueDateTitle": "Fälligkeitsdatum konnte nicht entfernt werden",
     "nudgeSentTitle": "Erinnerung gesendet!",
     "nudgeFailed": "Erinnerung konnte nicht gesendet werden",
     "failNudgeTitle": "Erinnerung konnte nicht gesendet werden",
@@ -543,7 +545,17 @@
   "subTask": {
     "namePlaceholder": "Aufgabenname...",
     "deleteShortcut": "Löschen (Umschalt+Rücktaste)",
-    "addPlaceholder": "Neue Aufgabe hinzufügen... (Eingabetaste zum Hinzufügen)"
+    "addPlaceholder": "Neue Aufgabe hinzufügen... (Eingabetaste zum Hinzufügen)",
+    "untitled": "Unbenannte Unteraufgabe",
+    "actions": "Unteraufgaben-Aktionen",
+    "edit": "Bearbeiten",
+    "addBelow": "Unteraufgabe darunter hinzufugen",
+    "addChild": "Verschachtelte Unteraufgabe hinzufugen",
+    "moveUpLevel": "Eine Ebene nach oben",
+    "delete": "Loschen",
+    "editTitle": "Unteraufgabe bearbeiten",
+    "addTitle": "Unteraufgabe hinzufugen",
+    "addChildTitle": "Verschachtelte Unteraufgabe hinzufugen"
   },
   "voiceToTask": {
     "title": "Sprich deine Aufgaben",

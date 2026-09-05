@@ -75,7 +75,7 @@ const useScopeStack = () => {
 // one wins, and the previous owner resumes once it unmounts/closes.
 export const useModalShortcutScope = active => {
   const id = useId()
-  const { push, pop, stack } = useScopeStack()
+  const { pop, push, stack } = useScopeStack()
 
   useEffect(() => {
     if (!active) return undefined

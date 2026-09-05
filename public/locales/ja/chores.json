@@ -255,6 +255,8 @@
     "movedTitle": "",
     "failMoveTitle": "",
     "failRescheduleTitle": "",
+    "failRescheduleMessage": "",
+    "failRemoveDueDateTitle": "",
     "nudgeSentTitle": "",
     "nudgeFailed": "",
     "failNudgeTitle": "",
@@ -543,7 +545,17 @@
   "subTask": {
     "namePlaceholder": "",
     "deleteShortcut": "",
-    "addPlaceholder": ""
+    "addPlaceholder": "",
+    "untitled": "無題のサブタスク",
+    "actions": "サブタスク操作",
+    "edit": "編集",
+    "addBelow": "下にサブタスクを追加",
+    "addChild": "ネストしたサブタスクを追加",
+    "moveUpLevel": "1つ上の階層へ移動",
+    "delete": "削除",
+    "editTitle": "サブタスクを編集",
+    "addTitle": "サブタスクを追加",
+    "addChildTitle": "ネストしたサブタスクを追加"
   },
   "voiceToTask": {
     "title": "",

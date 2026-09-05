@@ -42,8 +42,9 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import DurationInput from '../../components/common/DurationInput'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
-import { usePageShortcutScope } from '../../contexts/KeyboardShortcutScopeContext'
+import NumberInput from '../../components/common/NumberInput'
 import NotificationTemplate from '../../components/NotificationTemplate.jsx'
+import { usePageShortcutScope } from '../../contexts/KeyboardShortcutScopeContext'
 import { useDocumentScanner } from '../../hooks/useDocumentScanner'
 import {
   useArchiveChore,
@@ -788,7 +789,10 @@ const ChoreEdit = () => {
     return <LoadingComponent />
   }
   return (
-    <Container maxWidth='md'>
+    <Container
+      maxWidth='md'
+      sx={{ width: '100%', minWidth: 0, overflowX: 'hidden' }}
+    >
       {/* Section 1: Basic Information */}
       <Box mb={4}>
         {/* <Typography
@@ -968,7 +972,16 @@ const ChoreEdit = () => {
             }}
             value={labelsV2?.map(l => l.name)}
             renderValue={selected => (
-              <Box sx={{ display: 'flex', gap: '0.25rem' }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '0.25rem',
+                  minWidth: 0,
+                  maxWidth: '100%',
+                  overflow: 'hidden',
+                }}
+              >
                 {labelsV2.map(selectedOption => {
                   return (
                     <Chip
@@ -989,7 +1002,7 @@ const ChoreEdit = () => {
                 })}
               </Box>
             )}
-            sx={{ minWidth: '15rem' }}
+            sx={{ width: '100%', minWidth: 0, maxWidth: '100%' }}
             slotProps={{
               listbox: {
                 sx: {
@@ -1191,7 +1204,14 @@ const ChoreEdit = () => {
                 ))}
               </Box>
             )}
-            <Box sx={{ display: 'flex', gap: 1, alignSelf: 'flex-start' }}>
+            <Box
+              sx={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: 1,
+                alignSelf: 'flex-start',
+              }}
+            >
               <Button
                 component='label'
                 variant='outlined'
@@ -1549,20 +1569,13 @@ const ChoreEdit = () => {
                   <Typography level='body-sm'>
                     {t('choreEdit.hoursLabel')}
                   </Typography>
-                  <Input
-                    type='number'
+                  <NumberInput
                     value={completionWindow}
+                    min={0}
+                    max={24 * 7}
                     sx={{ maxWidth: 100 }}
-                    slotProps={{
-                      input: {
-                        min: 0,
-                        max: 24 * 7,
-                      },
-                    }}
                     placeholder={t('choreEdit.hoursPlaceholder')}
-                    onChange={e => {
-                      setCompletionWindow(parseInt(e.target.value))
-                    }}
+                    onValueChange={setCompletionWindow}
                   />
                 </Box>
               </Card>
@@ -1760,14 +1773,14 @@ const ChoreEdit = () => {
                   <Typography level='body-sm'>
                     {t('choreEdit.telegramGroupIdLabel')}
                   </Typography>
-                  <Input
-                    type='number'
+                  <NumberInput
                     value={notificationMetadata?.circleGroupID}
+                    allowEmpty
                     placeholder={t('choreEdit.telegramGroupIdPlaceholder')}
-                    onChange={e => {
+                    onValueChange={next => {
                       setNotificationMetadata({
                         ...notificationMetadata,
-                        circleGroupID: parseInt(e.target.value),
+                        circleGroupID: next,
                       })
                     }}
                   />
@@ -1819,20 +1832,13 @@ const ChoreEdit = () => {
                 <Typography level='body-sm'>
                   {t('choreEdit.pointsLabel')}
                 </Typography>
-                <Input
-                  type='number'
+                <NumberInput
                   value={points}
+                  min={0}
+                  max={1000}
                   sx={{ maxWidth: 100 }}
-                  slotProps={{
-                    input: {
-                      min: 0,
-                      max: 1000,
-                    },
-                  }}
                   placeholder={t('choreEdit.pointsPlaceholder')}
-                  onChange={e => {
-                    setPoints(parseInt(e.target.value))
-                  }}
+                  onValueChange={setPoints}
                 />
               </Box>
             </Card>
@@ -1970,11 +1976,16 @@ const ChoreEdit = () => {
           bottom: 0,
           left: 0,
           right: 0,
-          p: 2, // padding
+          width: '100%',
+          maxWidth: '100vw',
+          minWidth: 0,
+          boxSizing: 'border-box',
+          p: { xs: 1, sm: 2 },
           paddingBottom: getSafeBottomPadding(2), // safe area padding for iOS
           display: 'flex',
+          flexWrap: 'wrap',
           justifyContent: 'flex-end',
-          gap: 2,
+          gap: { xs: 1, sm: 2 },
           'z-index': 1000,
           bgcolor: 'background.body',
           boxShadow: 'md', // Add a subtle shadow

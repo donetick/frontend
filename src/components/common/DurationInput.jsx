@@ -1,5 +1,5 @@
 import { Add, Remove } from '@mui/icons-material'
-import { Box, IconButton, Input, Option, Select } from '@mui/joy'
+import { Box, IconButton, Option, Select } from '@mui/joy'
 import { useEffect, useState } from 'react'
 
 import {
@@ -7,6 +7,7 @@ import {
   TIME_UNITS,
   valueAndUnitToSeconds,
 } from '../../utils/DurationUtils'
+import NumberInput from './NumberInput'
 
 /**
  * A reusable duration picker: [−] number [+] unit-select
@@ -61,16 +62,14 @@ const DurationInput = ({ minValue = 1, onChange, size = 'md', value }) => {
         <Remove fontSize='small' />
       </IconButton>
 
-      <Input
-        type='number'
+      <NumberInput
         value={displayValue}
+        min={minValue}
         size={size}
-        slotProps={{ input: { min: minValue } }}
         sx={{ maxWidth: 70, textAlign: 'center' }}
-        onChange={e => {
-          const v = Math.max(minValue, parseInt(e.target.value) || minValue)
-          setDisplayValue(v)
-          emit(v, unit)
+        onValueChange={next => {
+          setDisplayValue(next)
+          emit(next, unit)
         }}
       />
 

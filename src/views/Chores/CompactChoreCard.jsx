@@ -111,6 +111,11 @@ const CompactChoreCard = ({
   }
   const showLeadingSlot = showActions || isMultiSelectMode
   const showTrailingSlot = showActions && !isMultiSelectMode
+  const visibleLabels = chore.labelsV2?.slice(0, 2) ?? []
+  const extraLabelCount = Math.max(
+    0,
+    (chore.labelsV2?.length ?? 0) - visibleLabels.length,
+  )
 
   return (
     <Box
@@ -123,7 +128,7 @@ const CompactChoreCard = ({
         minWidth: '100%',
         cursor: 'pointer',
         position: 'relative',
-        pl: '16px',
+        pl: '8px',
         bgcolor: 'background.body',
         borderBottom: '1px solid',
         borderColor: 'divider',
@@ -374,9 +379,10 @@ const CompactChoreCard = ({
         <Box
           sx={{
             display: 'flex',
-            alignItems: 'center',
+            alignItems: 'flex-start',
             justifyContent: 'space-between',
             mb: 0.25,
+            gap: 1,
           }}
         >
           {/* Chore Name */}
@@ -385,12 +391,13 @@ const CompactChoreCard = ({
             sx={{
               fontWeight: 600,
               fontSize: 14,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
+              lineHeight: 1.4,
               mr: 1,
               flex: 1,
               minWidth: 0,
+              whiteSpace: 'normal',
+              overflowWrap: 'anywhere',
+              wordBreak: 'break-word',
             }}
           >
             {chore.name}
@@ -399,41 +406,52 @@ const CompactChoreCard = ({
             <PendingBadge commands={pendingCmds} size='xs' sx={{ mr: -0.5 }} />
           )}
           {/* Due Date - Inline with name */}
-          <Chip
-            variant='soft'
-            size='sm'
-            color={getDueDateChipColor(chore.nextDueDate, chore)}
-            sx={{
-              fontSize: 10,
-              height: 18,
-              px: 0.75,
-              flexShrink: 0,
-              ml: 1,
-            }}
-          >
-            {getDueDateChipText(chore.nextDueDate, chore, timeFormat, t)}
-          </Chip>
+          {chore.nextDueDate && (
+            <Chip
+              variant='soft'
+              size='sm'
+              color={getDueDateChipColor(chore.nextDueDate, chore)}
+              sx={{
+                fontSize: 10,
+                height: 18,
+                px: 0.75,
+                flexShrink: 0,
+                ml: 1,
+              }}
+            >
+              {getDueDateChipText(chore.nextDueDate, chore, timeFormat, t)}
+            </Chip>
+          )}
         </Box>
 
         {/* Line 2: Metadata */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 0.25,
+            rowGap: 0.5,
+          }}
+        >
           {!['once', 'no_repeat'].includes(chore.frequencyType) &&
             getFrequencyIcon(chore)}
           <Typography
             level='body-xs'
             color='text.secondary'
             sx={{
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
               fontSize: 11,
+              lineHeight: 1.4,
+              whiteSpace: 'normal',
+              overflowWrap: 'anywhere',
+              wordBreak: 'break-word',
             }}
           >
             {formatMetadata()}
           </Typography>
 
-          {/* Labels - Priority chip removed, now shown as vertical bar */}
-          {chore.labelsV2?.map(l => (
+          {/* Labels - show only a couple and summarize the rest with +N */}
+          {visibleLabels.map(l => (
             <div
               role='none'
               tabIndex={0}
@@ -452,7 +470,7 @@ const CompactChoreCard = ({
                 cursor: onChipClick ? 'pointer' : 'inherit',
                 padding: 0,
                 margin: 0,
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
               }}
               key={`compact-chorecard-${chore.id}-label-${l.id}`}
@@ -463,17 +481,30 @@ const CompactChoreCard = ({
                 size='sm'
                 sx={{
                   ml: 0.5,
-                  // height: 16,
-                  // fontSize: 9,
-                  // px: 0.5,
                   backgroundColor: `${l?.color} !important`,
                   color: getTextColorFromBackgroundColor(l?.color),
+                  whiteSpace: 'nowrap',
+                  maxWidth: 'none',
                 }}
               >
                 {l?.name}
               </Chip>
             </div>
           ))}
+          {extraLabelCount > 0 && (
+            <Chip
+              variant='soft'
+              color='neutral'
+              size='sm'
+              sx={{
+                ml: 0.5,
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+              }}
+            >
+              +{extraLabelCount}
+            </Chip>
+          )}
         </Box>
       </Box>
 

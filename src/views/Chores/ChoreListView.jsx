@@ -94,7 +94,10 @@ const ChoreListView = ({
   const navigate = useNavigate()
   const { t } = useTranslation('chores')
   const renderChoreCard = (chore, key) => {
-    const CardComponent = viewMode === 'compact' ? CompactChoreCard : ChoreCard
+    const CardComponent =
+      viewMode === 'compact' || viewMode === 'default'
+        ? CompactChoreCard
+        : ChoreCard
     return (
       <CardComponent
         key={key || chore.id}
