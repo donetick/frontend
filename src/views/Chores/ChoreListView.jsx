@@ -18,10 +18,12 @@ import {
   ThumbDown,
 } from '@mui/icons-material'
 import { Box, Typography } from '@mui/joy'
+import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
 import { useLongPress } from '../../hooks/useLongPress'
+import ChoreActionMenu from '../components/ChoreActionMenu'
 import ChoreCard from './ChoreCard'
 import CompactChoreCard from './CompactChoreCard'
 
@@ -93,11 +95,23 @@ const ChoreListView = ({
 }) => {
   const navigate = useNavigate()
   const { t } = useTranslation('chores')
+
+  // One action menu for the whole list rather than one per row. `chore` is kept
+  // after closing so the menu can animate out with its content intact.
+  const [actionMenuAnchor, setActionMenuAnchor] = useState(null)
+  const [actionMenuChore, setActionMenuChore] = useState(null)
+  const openActionMenu = useCallback((anchor, chore) => {
+    setActionMenuChore(chore)
+    setActionMenuAnchor(anchor)
+  }, [])
+  const closeActionMenu = useCallback(() => setActionMenuAnchor(null), [])
+
+  // 'default' renders the compact card too, so the swipe-action offset below
+  // has to follow the card component, not the raw view mode.
+  const usesCompactCard = viewMode === 'compact' || viewMode === 'default'
+
   const renderChoreCard = (chore, key) => {
-    const CardComponent =
-      viewMode === 'compact' || viewMode === 'default'
-        ? CompactChoreCard
-        : ChoreCard
+    const CardComponent = usesCompactCard ? CompactChoreCard : ChoreCard
     return (
       <CardComponent
         key={key || chore.id}
@@ -109,6 +123,7 @@ const ChoreListView = ({
         isMultiSelectMode={isMultiSelectMode}
         isSelected={selectedChores.has(chore.id)}
         onSelectionToggle={() => toggleChoreSelection(chore.id)}
+        onOpenActionMenu={openActionMenu}
         showActions={showActions}
       />
     )
@@ -121,8 +136,6 @@ const ChoreListView = ({
     if (isMultiSelectMode) return null
     if (!showActions) return null
 
-    const isCompact = viewMode === 'compact'
-
     return (
       <TrailingActions>
         <Box
@@ -132,7 +145,7 @@ const ChoreListView = ({
             zIndex: 0,
             // Offset for the floating chips above ChoreCard so swipe actions
             // align with the card body only
-            ...(!isCompact && {
+            ...(!usesCompactCard && {
               mt: '28px',
               borderRadius: '8px',
             }),
@@ -329,7 +342,32 @@ const ChoreListView = ({
     )
   }
 
-  return <>{renderChores(chores)}</>
+  return (
+    <>
+      {renderChores(chores)}
+      <ChoreActionMenu
+        chore={actionMenuChore}
+        anchorEl={actionMenuAnchor}
+        onClose={closeActionMenu}
+        onAction={handleChoreAction}
+        onCompleteWithNote={() =>
+          handleChoreAction('completeWithNote', actionMenuChore)
+        }
+        onCompleteWithPastDate={() =>
+          handleChoreAction('completeWithPastDate', actionMenuChore)
+        }
+        onChangeAssignee={() =>
+          handleChoreAction('changeAssignee', actionMenuChore)
+        }
+        onChangeDueDate={() =>
+          handleChoreAction('changeDueDate', actionMenuChore)
+        }
+        onWriteNFC={() => handleChoreAction('writeNFC', actionMenuChore)}
+        onNudge={() => handleChoreAction('nudge', actionMenuChore)}
+        onDelete={() => handleChoreAction('delete', actionMenuChore)}
+      />
+    </>
+  )
 }
 
 export default ChoreListView

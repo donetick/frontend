@@ -58,7 +58,6 @@ export const useChoreActions = ({
   chores,
   clearSelection,
   closeModal,
-  filteredChores,
   getSelectedChoresData,
   impersonatedUser,
   modalChore,
@@ -66,7 +65,6 @@ export const useChoreActions = ({
   refetchChores,
   setChores,
   setConfirmModelConfig,
-  setFilteredChores,
   showError,
   showSuccess,
   showUndo,
@@ -85,9 +83,6 @@ export const useChoreActions = ({
       let newChores = chores.map(c =>
         c.id === updatedChore.id ? updatedChore : c,
       )
-      let newFilteredChores = filteredChores.map(c =>
-        c.id === updatedChore.id ? updatedChore : c,
-      )
 
       if (
         event === 'archive' ||
@@ -95,13 +90,9 @@ export const useChoreActions = ({
         updatedChore.frequencyType === 'trigger'
       ) {
         newChores = newChores.filter(c => c.id !== updatedChore.id)
-        newFilteredChores = newFilteredChores.filter(
-          c => c.id !== updatedChore.id,
-        )
       }
 
       setChores(newChores)
-      setFilteredChores(newFilteredChores)
 
       if (!skipInvalidation) {
         queryClient.invalidateQueries(['chores'])
@@ -194,9 +185,7 @@ export const useChoreActions = ({
     },
     [
       chores,
-      filteredChores,
       setChores,
-      setFilteredChores,
       queryClient,
       showSuccess,
       showError,
@@ -221,7 +210,6 @@ export const useChoreActions = ({
             if (response.ok) {
               // Online: hide the chore and show undo
               setChores(prev => prev.filter(c => c.id !== chore.id))
-              setFilteredChores(prev => prev.filter(c => c.id !== chore.id))
               queryClient.setQueriesData({ queryKey: ['chores'] }, oldData => {
                 if (!oldData || !oldData.res) return oldData
                 return {
@@ -448,12 +436,7 @@ export const useChoreActions = ({
                 try {
                   const response = await DeleteChore(chore.id)
                   if (response.ok) {
-                    const newChores = chores.filter(c => c.id !== chore.id)
-                    const newFilteredChores = filteredChores.filter(
-                      c => c.id !== chore.id,
-                    )
-                    setChores(newChores)
-                    setFilteredChores(newFilteredChores)
+                    setChores(chores.filter(c => c.id !== chore.id))
                     queryClient.invalidateQueries(['chores'])
                     showSuccess({
                       title: t('archived.deletedTitle'),
@@ -468,9 +451,6 @@ export const useChoreActions = ({
                       { id: chore.id },
                     )
                     setChores(prev => prev.filter(c => c.id !== chore.id))
-                    setFilteredChores(prev =>
-                      prev.filter(c => c.id !== chore.id),
-                    )
                     queryClient.invalidateQueries({
                       queryKey: ['pendingCommands'],
                     })
@@ -483,7 +463,6 @@ export const useChoreActions = ({
                           queryKey: ['pendingCommands'],
                         })
                         setChores(prev => [...prev, chore])
-                        setFilteredChores(prev => [...prev, chore])
                       },
                     })
                   } else {
@@ -518,9 +497,6 @@ export const useChoreActions = ({
                       { ...chore, isActive: false, _pending: 'archive' },
                     ])
                     setChores(prev => prev.filter(c => c.id !== chore.id))
-                    setFilteredChores(prev =>
-                      prev.filter(c => c.id !== chore.id),
-                    )
                     queryClient.invalidateQueries({
                       queryKey: ['pendingCommands'],
                     })
@@ -536,7 +512,6 @@ export const useChoreActions = ({
                           queryKey: ['pendingCommands'],
                         })
                         setChores(prev => [...prev, chore])
-                        setFilteredChores(prev => [...prev, chore])
                       },
                     })
                     resolve()
@@ -742,9 +717,7 @@ export const useChoreActions = ({
     [
       impersonatedUser,
       chores,
-      filteredChores,
       setChores,
-      setFilteredChores,
       updateChoreInState,
       showError,
       showSuccess,
@@ -919,7 +892,7 @@ export const useChoreActions = ({
   const patchLocalChores = useCallback(
     (ids, patch) => {
       const idSet = new Set(ids)
-      const apply = list =>
+      setChores(list =>
         list.map(chore =>
           idSet.has(chore.id)
             ? {
@@ -927,21 +900,18 @@ export const useChoreActions = ({
                 ...(typeof patch === 'function' ? patch(chore) : patch),
               }
             : chore,
-        )
-      setChores(apply)
-      setFilteredChores(apply)
+        ),
+      )
     },
-    [setChores, setFilteredChores],
+    [setChores],
   )
 
   const removeLocalChores = useCallback(
     ids => {
       const idSet = new Set(ids)
-      const drop = list => list.filter(chore => !idSet.has(chore.id))
-      setChores(drop)
-      setFilteredChores(drop)
+      setChores(list => list.filter(chore => !idSet.has(chore.id)))
     },
-    [setChores, setFilteredChores],
+    [setChores],
   )
 
   const runBulk = useCallback(

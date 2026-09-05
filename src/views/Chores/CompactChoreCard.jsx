@@ -26,8 +26,22 @@ import {
   getPriorityColor,
   getTextColorFromBackgroundColor,
 } from '../../utils/Colors.jsx'
-import ChoreActionMenu from '../components/ChoreActionMenu'
+import ChoreActionMenu, {
+  ChoreActionMenuTrigger,
+} from '../components/ChoreActionMenu'
 import PendingBadge from '../components/PendingBadge'
+
+// Hoisted so emotion isn't re-serializing an identical object for every row
+const ACTION_MENU_SX = {
+  width: 32,
+  height: 32,
+  color: 'text.tertiary',
+  flexShrink: 0,
+  '&:hover': {
+    color: 'text.secondary',
+    bgcolor: 'background.level1',
+  },
+}
 
 const CompactChoreCard = ({
   chore,
@@ -35,6 +49,9 @@ const CompactChoreCard = ({
   isSelected = false,
   onAction,
   onChipClick,
+  // When given, the row renders only a trigger and the list owns one shared
+  // action menu; without it the card falls back to carrying its own.
+  onOpenActionMenu,
   onSelectionToggle,
   onlyClickable = false,
   // Multi-select props
@@ -523,32 +540,33 @@ const CompactChoreCard = ({
           pointerEvents: showTrailingSlot ? 'auto' : 'none',
         }}
       >
-        {showActions && (
-          <ChoreActionMenu
-            variant='plain'
-            chore={chore}
-            onAction={onAction}
-            onCompleteWithNote={() => onAction('completeWithNote', chore)}
-            onCompleteWithPastDate={() =>
-              onAction('completeWithPastDate', chore)
-            }
-            onChangeAssignee={() => onAction('changeAssignee', chore)}
-            onChangeDueDate={() => onAction('changeDueDate', chore)}
-            onWriteNFC={() => onAction('writeNFC', chore)}
-            onNudge={() => onAction('nudge', chore)}
-            onDelete={() => onAction('delete', chore)}
-            sx={{
-              width: 32,
-              height: 32,
-              color: 'text.tertiary',
-              flexShrink: 0,
-              '&:hover': {
-                color: 'text.secondary',
-                bgcolor: 'background.level1',
-              },
-            }}
-          />
-        )}
+        {showActions &&
+          (onOpenActionMenu ? (
+            <ChoreActionMenuTrigger
+              variant='plain'
+              onClick={event => {
+                event.stopPropagation()
+                onOpenActionMenu(event.currentTarget, chore)
+              }}
+              sx={ACTION_MENU_SX}
+            />
+          ) : (
+            <ChoreActionMenu
+              variant='plain'
+              chore={chore}
+              onAction={onAction}
+              onCompleteWithNote={() => onAction('completeWithNote', chore)}
+              onCompleteWithPastDate={() =>
+                onAction('completeWithPastDate', chore)
+              }
+              onChangeAssignee={() => onAction('changeAssignee', chore)}
+              onChangeDueDate={() => onAction('changeDueDate', chore)}
+              onWriteNFC={() => onAction('writeNFC', chore)}
+              onNudge={() => onAction('nudge', chore)}
+              onDelete={() => onAction('delete', chore)}
+              sx={ACTION_MENU_SX}
+            />
+          ))}
       </Box>
     </Box>
   )

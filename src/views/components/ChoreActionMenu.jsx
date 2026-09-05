@@ -64,13 +64,22 @@ const collapseDividers = items =>
     return items[index - 1].type !== 'divider'
   })
 
+/**
+ * Renders its own trigger button and owns its open state by default.
+ *
+ * Passing `anchorEl` switches it to controlled mode: the trigger is left to the
+ * caller and the menu is driven from outside. That lets a long list keep a
+ * single menu instance instead of one per row — see ChoreListView.
+ */
 const ChoreActionMenu = ({
+  anchorEl: controlledAnchorEl,
   chore,
   hiddenActions = [],
   onAction,
   onChangeAssignee,
   onChangeDueDate,
   onChangePriority,
+  onClose: controlledOnClose,
   onCompleteWithNote,
   onCompleteWithPastDate,
   onDelete,
@@ -84,7 +93,9 @@ const ChoreActionMenu = ({
   variant = 'soft',
 }) => {
   const { t } = useTranslation('chores')
-  const [anchorEl, setAnchorEl] = React.useState(null)
+  const isControlled = controlledAnchorEl !== undefined
+  const [uncontrolledAnchorEl, setUncontrolledAnchorEl] = React.useState(null)
+  const anchorEl = isControlled ? controlledAnchorEl : uncontrolledAnchorEl
   const [isOfficialInstance, setIsOfficialInstance] = useState(false)
   const [showProjectPicker, setShowProjectPicker] = useState(false)
   const [showPriorityPicker, setShowPriorityPicker] = useState(false)
@@ -112,9 +123,12 @@ const ChoreActionMenu = ({
       return
     }
 
+    // Only listen while open — a closed menu has nothing to dismiss, and a list
+    // of these would otherwise put one listener per row on the document.
+    if (!anchorEl) return
+
     const handleMenuOutsideClick = event => {
       if (
-        anchorEl &&
         !anchorEl.contains(event.target) &&
         !menuRef.current?.contains(event.target)
       ) {
@@ -123,7 +137,7 @@ const ChoreActionMenu = ({
     }
 
     document.addEventListener('mousedown', handleMenuOutsideClick)
-    if (anchorEl && onOpen) {
+    if (onOpen) {
       onOpen()
     }
     return () => {
@@ -131,15 +145,23 @@ const ChoreActionMenu = ({
     }
   }, [anchorEl, onOpen, isSmallScreen])
 
+  // Controlled mode renders nothing until a caller targets a chore. Every hook
+  // above has already run, so bailing here is safe.
+  if (!chore) return null
+
   const handleMenuOpen = event => {
     event.stopPropagation()
-    setAnchorEl(event.currentTarget)
+    setUncontrolledAnchorEl(event.currentTarget)
   }
 
   const handleMenuClose = () => {
-    setAnchorEl(null)
     setShowProjectPicker(false)
     setShowPriorityPicker(false)
+    if (isControlled) {
+      controlledOnClose?.()
+    } else {
+      setUncontrolledAnchorEl(null)
+    }
   }
 
   const handleChangePriority = priority => {
@@ -628,7 +650,7 @@ const ChoreActionMenu = ({
 
   return (
     <>
-      {trigger ? (
+      {isControlled ? null : trigger ? (
         React.cloneElement(trigger, {
           onClick: handleMenuOpen,
           onMouseEnter,
@@ -761,5 +783,36 @@ const ChoreActionMenu = ({
     </>
   )
 }
+
+/**
+ * The trigger button on its own, visually identical to the one ChoreActionMenu
+ * renders for itself. Rows in a long list use this and hand the click up to a
+ * single shared menu, so opening a menu costs one component instead of N.
+ */
+export const ChoreActionMenuTrigger = ({
+  onClick,
+  onMouseEnter,
+  onMouseLeave,
+  sx = {},
+  variant = 'soft',
+}) => (
+  <IconButton
+    variant={variant}
+    color='success'
+    onClick={onClick}
+    onMouseEnter={onMouseEnter}
+    onMouseLeave={onMouseLeave}
+    sx={{
+      borderRadius: '50%',
+      width: 25,
+      height: 25,
+      position: 'relative',
+      left: -10,
+      ...sx,
+    }}
+  >
+    <MoreVert />
+  </IconButton>
+)
 
 export default ChoreActionMenu

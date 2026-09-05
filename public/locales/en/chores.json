@@ -1032,5 +1032,26 @@
     "today": "Today",
     "yesterday": "Yesterday",
     "noteTitle": "Note - {{choreName}}"
+  },
+  "memberDetail": {
+    "taskCount_one": "{{count}} task assigned",
+    "taskCount_other": "{{count}} tasks assigned",
+    "you": "You",
+    "filters": {
+      "all": "All",
+      "overdue": "Overdue",
+      "today": "Today",
+      "undated": "No date"
+    },
+    "noMatchingStatus": "No task assigned to this person is in that state right now.",
+    "clearFilters": "Show all tasks",
+    "searchPlaceholder": "Search tasks assigned to this person",
+    "emptyTitle": "No tasks assigned",
+    "emptyDescription": "Nothing is assigned to {{name}} right now. Assign a task and it will show up here.",
+    "browseTasks": "Browse tasks",
+    "noResultsTitle": "No tasks match",
+    "noResultsDescription": "No task assigned to this person matches \"{{searchTerm}}\".",
+    "notFoundTitle": "Member not found",
+    "notFoundDescription": "This person may have left the circle or is no longer shared with you."
   }
 }

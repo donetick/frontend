@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
 /**
  * Generic client-side filter hook.
@@ -15,7 +15,9 @@ import { useMemo, useState } from 'react'
 export const useFilter = (data, filterDefs) => {
   const [activeFilters, setActiveFilters] = useState({})
 
-  const setFilter = (filterId, value) => {
+  // Stable identities: callers put these in effect dependency arrays, and a new
+  // function every render makes those effects re-run on every render.
+  const setFilter = useCallback((filterId, value) => {
     setActiveFilters(prev => {
       const isEmpty =
         value === null ||
@@ -28,9 +30,9 @@ export const useFilter = (data, filterDefs) => {
       }
       return { ...prev, [filterId]: value }
     })
-  }
+  }, [])
 
-  const clearAll = () => setActiveFilters({})
+  const clearAll = useCallback(() => setActiveFilters({}), [])
 
   const filteredData = useMemo(() => {
     if (!data) return []
