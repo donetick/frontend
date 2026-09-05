@@ -1,4 +1,5 @@
 import { Person } from '@mui/icons-material'
+import { useTranslation } from 'react-i18next'
 
 import BaseOptionPicker from './BaseOptionPicker'
 
@@ -14,11 +15,16 @@ const AssigneePickerField = ({
   onClear,
   values = [],
 }) => {
+  const { t } = useTranslation('chores')
+
   const options = [
-    ...(includeAnyone ? [{ userId: ANYONE, displayName: 'Anyone' }] : []),
+    ...(includeAnyone
+      ? [{ userId: ANYONE, displayName: t('assignee.anyone') }]
+      : []),
     ...members.map(member => ({
       userId: member.userId,
-      displayName: member.displayName || member.username || 'Unknown',
+      displayName:
+        member.displayName || member.username || t('assignee.unknown'),
     })),
   ]
 
@@ -52,15 +58,15 @@ const AssigneePickerField = ({
       onValuesChange={handleValuesChange}
       onClear={onClear}
       emptyDisplay={emptyDisplay}
-      emptyLabel='Assignee'
+      emptyLabel={t('assignee.label')}
       getItemValue={item => item.userId}
       getItemLabel={item => item.displayName}
       renderTriggerIcon={() => <Person sx={{ fontSize: '20px' }} />}
       renderItemStart={() => <Person sx={{ fontSize: '18px' }} />}
       getTriggerText={({ isEmpty, selectedItems }) => {
-        if (isEmpty) return 'Assignee'
+        if (isEmpty) return t('assignee.label')
         if (selectedItems.length === 1) return selectedItems[0].displayName
-        return `${selectedItems.length} assignees`
+        return t('assignee.selectedCount', { count: selectedItems.length })
       }}
       menuMinWidth={220}
     />
