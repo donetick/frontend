@@ -617,6 +617,15 @@ const ChoreActionMenu = ({
     </>
   )
 
+  let modalTitle
+  if (showProjectPicker) {
+    modalTitle = t('actionMenu.moveToProject')
+  } else if (showPriorityPicker) {
+    modalTitle = t('priority')
+  } else {
+    modalTitle = null
+  }
+
   return (
     <>
       {trigger ? (
@@ -649,13 +658,7 @@ const ChoreActionMenu = ({
         <AppModal
           open={Boolean(anchorEl)}
           onClose={handleMenuClose}
-          title={
-            showProjectPicker
-              ? t('actionMenu.moveToProject')
-              : showPriorityPicker
-                ? t('priority')
-                : chore?.name
-          }
+          title={modalTitle}
           mobilePresentation='sheet'
           showHandle
           contentSx={{ px: 0, pb: 1 }}

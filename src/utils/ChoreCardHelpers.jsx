@@ -48,29 +48,26 @@ export const getDueDateChipText = (
       // For overdue dates, show calendar format for recent dates
       const absDiff = Math.abs(diff)
       if (absDiff <= 48) {
-        return (
-          'Overdue ' +
-          moment(nextDueDate)
-            .calendar(null, calendarFormat)
-            .split(' ')[0]
-            .toLowerCase()
-        )
+        return moment(nextDueDate)
+          .calendar(null, calendarFormat)
+          .split(' ')[0]
+          .toLowerCase()
       }
-      return 'Overdue ' + dueDate.fromNow()
+      return dueDate.fromNow()
     }
     // if due in next 48 hours, show calendar format without time (e.g., "Tomorrow")
     if (diff < 48 && diff > 0) {
       return moment(nextDueDate).calendar(null, calendarFormat).split(' ')[0]
     }
     // if due date is after 48 hours, show it in format: Due in 3 days
-    return 'Due ' + dueDate.fromNow()
+    return dueDate.fromNow()
   }
 
   // if due in next 48 hours, we should show it in this format: Tomorrow 11:00
   if (diff < 48 && diff > 0) {
     return moment(nextDueDate).calendar(null, calendarFormat)
   }
-  return 'Due ' + moment(nextDueDate).fromNow()
+  return moment(nextDueDate).fromNow()
 }
 
 /**

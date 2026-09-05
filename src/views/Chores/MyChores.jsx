@@ -209,16 +209,27 @@ const MyChores = () => {
     () => [
       {
         id: 'status',
-        label: t('group.dueDate'),
+        label: t('chores:group.dueDate'),
         type: 'single-select',
         icon: <CalendarMonth />,
         options: [
-          { value: 'Overdue', label: t('group.overdue'), color: 'danger' },
-          { value: 'Due today', label: t('group.dueToday'), color: 'warning' },
-          { value: 'Due in week', label: t('group.dueThisWeek') },
-          { value: 'Due Later', label: t('group.dueLater') },
-          { value: 'No Due Date', label: t('group.noDueDate') },
-          { value: 'Pending Approval', label: t('group.pendingApproval') },
+          {
+            value: 'Overdue',
+            label: t('chores:group.overdue'),
+            color: 'danger',
+          },
+          {
+            value: 'Due today',
+            label: t('chores:group.dueToday'),
+            color: 'warning',
+          },
+          { value: 'Due in week', label: t('chores:group.dueThisWeek') },
+          { value: 'Due Later', label: t('chores:group.dueLater') },
+          { value: 'No Due Date', label: t('chores:group.noDueDate') },
+          {
+            value: 'Pending Approval',
+            label: t('chores:group.pendingApproval'),
+          },
         ],
         filterFn: (item, value) => {
           const now = new Date()
@@ -249,7 +260,7 @@ const MyChores = () => {
       },
       {
         id: 'priority',
-        label: t('priority'),
+        label: t('chores:priority'),
         type: 'multi-select',
         icon: <PriorityHigh />,
         options: Priorities.map(p => ({
@@ -264,7 +275,7 @@ const MyChores = () => {
         ? [
             {
               id: 'label',
-              label: t('labels.label'),
+              label: t('chores:labels.label'),
               type: 'multi-select',
               icon: <Style />,
               options: userLabels.map(l => ({
@@ -977,12 +988,12 @@ const MyChores = () => {
           variant='error'
           fullHeight
           icon={<CloudOff />}
-          title={t('empty.errorTitle')}
+          title={t('chores:empty.errorTitle')}
           description={
-            choresErrorDetails?.message || t('empty.errorDescription')
+            choresErrorDetails?.message || t('chores:empty.errorDescription')
           }
           primaryAction={{
-            label: t('empty.errorAction'),
+            label: t('chores:empty.errorAction'),
             onClick: () => {
               refetchChores()
               queryClient.invalidateQueries(['circleMembers'])
@@ -1015,7 +1026,7 @@ const MyChores = () => {
         flexDirection: 'row',
       }}
     >
-      <Container maxWidth='md'>
+      <Container maxWidth='md' sx={{ px: 1 }}>
         <MyChoreHeader
           activeFilterId={activeFilterId}
           activeFilter={activeFilter}
@@ -1035,8 +1046,8 @@ const MyChores = () => {
           updateFilter={updateFilter}
           onFilterSaved={name =>
             showSuccess({
-              title: t('list.filterSaved'),
-              message: t('list.filterSavedMsg', { name }),
+              title: t('chores:list.filterSaved'),
+              message: t('chores:list.filterSavedMsg', { name }),
             })
           }
           onClearAllFilters={() => {
@@ -1166,15 +1177,15 @@ const MyChores = () => {
               variant='empty'
               fullHeight
               icon={<EditCalendar />}
-              title={t('empty.noTasksTitle')}
-              description={t('empty.noTasksDescription')}
+              title={t('chores:empty.noTasksTitle')}
+              description={t('chores:empty.noTasksDescription')}
               primaryAction={{
-                label: t('empty.createTask'),
+                label: t('chores:empty.createTask'),
                 startDecorator: <Add />,
                 onClick: () => setAddTaskModalOpen(true),
               }}
               secondaryAction={{
-                label: t('empty.moreOptions'),
+                label: t('chores:empty.moreOptions'),
                 onClick: () => Navigate('/chores/create'),
               }}
             />
@@ -1186,21 +1197,21 @@ const MyChores = () => {
               variant='no-results'
               fullHeight
               icon={<SearchOff />}
-              title={t('empty.noMatchTitle')}
+              title={t('chores:empty.noMatchTitle')}
               description={
                 searchTerm?.length > 0
-                  ? t('empty.noMatchSearch', { term: searchTerm })
+                  ? t('chores:empty.noMatchSearch', { term: searchTerm })
                   : isAssigneeOnlyNarrowing
-                    ? t(`empty.assignee.${selectedChoreFilter}`)
-                    : t('empty.noMatchFilters')
+                    ? t(`chores:empty.assignee.${selectedChoreFilter}`)
+                    : t('chores:empty.noMatchFilters')
               }
               primaryAction={{
                 label:
                   searchTerm?.length > 0
-                    ? t('empty.clearSearch')
+                    ? t('chores:empty.clearSearch')
                     : isAssigneeOnlyNarrowing
-                      ? t('empty.showEveryone')
-                      : t('empty.clearFilters'),
+                      ? t('chores:empty.showEveryone')
+                      : t('chores:empty.clearFilters'),
                 onClick: clearNarrowing,
               }}
             />
@@ -1209,15 +1220,17 @@ const MyChores = () => {
               variant='empty'
               fullHeight
               icon={<EditCalendar />}
-              title={t('empty.projectTitle', { name: selectedProject.name })}
-              description={t('empty.projectDescription')}
+              title={t('chores:empty.projectTitle', {
+                name: selectedProject.name,
+              })}
+              description={t('chores:empty.projectDescription')}
               primaryAction={{
-                label: t('empty.addTaskHere'),
+                label: t('chores:empty.addTaskHere'),
                 startDecorator: <Add />,
                 onClick: () => setAddTaskModalOpen(true),
               }}
               secondaryAction={{
-                label: t('empty.seeOutsideProjects'),
+                label: t('chores:empty.seeOutsideProjects'),
                 onClick: () => setSelectedProjectWithCache(null),
               }}
             />
@@ -1226,10 +1239,10 @@ const MyChores = () => {
               variant='empty'
               fullHeight
               icon={<EditCalendar />}
-              title={t('empty.noProjectTitle')}
-              description={t('empty.noProjectDescription')}
+              title={t('chores:empty.noProjectTitle')}
+              description={t('chores:empty.noProjectDescription')}
               primaryAction={{
-                label: t('empty.createTask'),
+                label: t('chores:empty.createTask'),
                 startDecorator: <Add />,
                 onClick: () => setAddTaskModalOpen(true),
               }}
@@ -1251,121 +1264,6 @@ const MyChores = () => {
         )}
         {viewMode === 'calendar' && (
           <>
-            {/* Summary Chips when no date selected */}
-            {/* <Box
-              sx={{
-                mt: 1,
-                mb: 1,
-                display: 'flex',
-                gap: 1.5,
-                justifyContent: 'start',
-                flexWrap: 'wrap',
-              }}
-            >
-              {FILTERS['Overdue'](getFilteredChores).length > 0 && (
-                <Chip
-                  variant='soft'
-                  color='danger'
-                  size='lg'
-                  onClick={() => {
-                    // Update state directly for immediate smooth transition
-                    const overdueChores = FILTERS['Overdue'](getFilteredChores)
-                    setFilteredChores(overdueChores)
-                    setSearchFilter('Overdue')
-                    setViewMode('default')
-                    setSelectedCalendarDate(null)
-
-                    // Update URL
-                    updateFilterUrl('filter', 'overdue')
-                  }}
-                  sx={{
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    px: 1,
-                    py: 0.5,
-                  }}
-                  startDecorator={
-                    <Chip size='md' variant='solid' color='danger'>
-                      {FILTERS['Overdue'](getFilteredChores).length}
-                    </Chip>
-                  }
-                >
-                  Overdue
-                </Chip>
-              )}
-
-              {FILTERS['No Due Date'](getFilteredChores).length > 0 && (
-                <Chip
-                  variant='soft'
-                  color='neutral'
-                  size='lg'
-                  onClick={() => {
-                    // Update state directly for immediate smooth transition
-                    const unplannedChores =
-                      FILTERS['No Due Date'](getFilteredChores)
-                    setFilteredChores(unplannedChores)
-                    setSearchFilter('No Due Date')
-                    setViewMode('default')
-                    setSelectedCalendarDate(null)
-
-                    // Update URL
-                    updateFilterUrl('filter', 'unplanned')
-                  }}
-                  sx={{
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    px: 1,
-                    py: 0.5,
-                  }}
-                  startDecorator={
-                    <Chip size='md' variant='solid' color='neutral'>
-                      {FILTERS['No Due Date'](getFilteredChores).length}
-                    </Chip>
-                  }
-                >
-                  Unplanned
-                </Chip>
-              )}
-
-              {FILTERS['Pending Approval'](getFilteredChores).length > 0 && (
-                <Chip
-                  variant='soft'
-                  size='lg'
-                  onClick={() => {
-                    // Update state directly for immediate smooth transition
-                    const pendingApprovalChores =
-                      FILTERS['Pending Approval'](getFilteredChores)
-                    setFilteredChores(pendingApprovalChores)
-                    setSearchFilter('Pending Approval')
-                    setViewMode('default')
-                    setSelectedCalendarDate(null)
-
-                    // Update URL
-                    updateFilterUrl('filter', 'pending')
-                  }}
-                  sx={{
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    px: 1,
-                    py: 0.5,
-                  }}
-                  startDecorator={
-                    <Chip
-                      size='md'
-                      variant='solid'
-                      sx={{
-                        bgcolor: TASK_COLOR.PENDING_REVIEW,
-                        color: 'white',
-                      }}
-                    >
-                      {FILTERS['Pending Approval'](getFilteredChores).length}
-                    </Chip>
-                  }
-                >
-                  Pending Approval
-                </Chip>
-              )}
-            </Box> */}
             {/* Calendar Monthly View */}
             <Box sx={{ mb: 2 }}>
               {isLargeScreen ? (
@@ -1406,10 +1304,10 @@ const MyChores = () => {
                     <EmptyState
                       size='sm'
                       icon={<EditCalendar />}
-                      title={t('list.nothingScheduled')}
-                      description={t('empty.dayFreeDescription')}
+                      title={t('chores:list.nothingScheduled')}
+                      description={t('chores:empty.dayFreeDescription')}
                       primaryAction={{
-                        label: t('empty.addTask'),
+                        label: t('chores:empty.addTask'),
                         startDecorator: <Add />,
                         onClick: () => setAddTaskModalOpen(true),
                       }}
@@ -1488,11 +1386,10 @@ const MyChores = () => {
                   </Divider>
                   <AccordionDetails
                     sx={{
+                      px: 0,
                       flexDirection: 'column',
                       ['& > *']: {
-                        // px: 0.5,
-                        px: 0.5,
-                        // pr: 0,
+                        px: 0,
                       },
                     }}
                   >
@@ -1548,7 +1445,7 @@ const MyChores = () => {
             onClick={() => {
               Navigate(`/chores/create`)
             }}
-            title={t('list.createChore')}
+            title={t('chores:list.createChore')}
           >
             <Add />
             <KeyboardShortcutHint
@@ -1662,15 +1559,17 @@ const MyChores = () => {
               operator: filter.operator,
             })
             showSuccess({
-              title: t('list.filterUpdated'),
-              message: t('list.filterUpdatedMsg', { name: filter.name }),
+              title: t('chores:list.filterUpdated'),
+              message: t('chores:list.filterUpdatedMsg', {
+                name: filter.name,
+              }),
             })
           } else {
             // Create new filter
             saveFilter(filter)
             showSuccess({
-              title: t('list.advancedFilterCreated'),
-              message: t('list.advancedFilterCreatedMsg', {
+              title: t('chores:list.advancedFilterCreated'),
+              message: t('chores:list.advancedFilterCreatedMsg', {
                 name: filter.name,
               }),
             })
