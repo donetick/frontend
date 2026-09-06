@@ -255,6 +255,8 @@
     "movedTitle": "",
     "failMoveTitle": "",
     "failRescheduleTitle": "",
+    "failRescheduleMessage": "",
+    "failRemoveDueDateTitle": "",
     "nudgeSentTitle": "",
     "nudgeFailed": "",
     "failNudgeTitle": "",
@@ -399,7 +401,11 @@
     "removeAria": ""
   },
   "assignee": {
-    "anyone": ""
+    "label": "",
+    "anyone": "",
+    "unknown": "",
+    "selectedCount_one": "",
+    "selectedCount_other": ""
   },
   "filterChip": {
     "cancelAll": "",
@@ -542,6 +548,16 @@
   },
   "subTask": {
     "namePlaceholder": "",
+    "untitled": "مهمة فرعية بدون عنوان",
+    "actions": "إجراءات المهمة الفرعية",
+    "edit": "تعديل",
+    "addBelow": "إضافة مهمة فرعية أسفل",
+    "addChild": "إضافة مهمة فرعية متداخلة",
+    "moveUpLevel": "الانتقال مستوى للأعلى",
+    "delete": "حذف",
+    "editTitle": "تعديل المهمة الفرعية",
+    "addTitle": "إضافة مهمة فرعية",
+    "addChildTitle": "إضافة مهمة فرعية متداخلة",
     "deleteShortcut": "",
     "addPlaceholder": ""
   },
@@ -1016,5 +1032,26 @@
     "today": "",
     "yesterday": "",
     "noteTitle": ""
+  },
+  "memberDetail": {
+    "taskCount_one": "",
+    "taskCount_other": "",
+    "you": "",
+    "filters": {
+      "all": "",
+      "overdue": "",
+      "today": "",
+      "undated": ""
+    },
+    "noMatchingStatus": "",
+    "clearFilters": "",
+    "searchPlaceholder": "",
+    "emptyTitle": "",
+    "emptyDescription": "",
+    "browseTasks": "",
+    "noResultsTitle": "",
+    "noResultsDescription": "",
+    "notFoundTitle": "",
+    "notFoundDescription": ""
   }
 }
