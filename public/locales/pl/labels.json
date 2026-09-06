@@ -1,0 +1,75 @@
+{
+  "shared": "Udostępniona",
+  "delete": {
+    "title": "Usuń etykietę",
+    "message": "Czy na pewno chcesz usunąć tę etykietę? Spowoduje to usunięcie jej ze wszystkich zadań."
+  },
+  "loadError": "Nie udało się załadować etykiet. Spróbuj ponownie.",
+  "search": {
+    "placeholder": "Szukaj etykiet",
+    "noResultsTitle": "Brak pasujących etykiet",
+    "noResultsDescription": "Żadna etykieta nie pasuje do „{{searchTerm}}”.",
+    "noFilterResultsDescription": "Żadna etykieta nie spełnia bieżących kryteriów.",
+    "clear": "Wyczyść wyszukiwanie",
+    "showAll": "Pokaż wszystkie etykiety"
+  },
+  "detail": {
+    "taskCount_few": "{{count}} zadania",
+    "taskCount_many": "{{count}} zadań",
+    "taskCount_one": "{{count}} zadanie",
+    "taskCount_other": "{{count}} zadań",
+    "labelActions": "Działania na etykiecie",
+    "filters": {
+      "all": "Wszystkie",
+      "overdue": "Zaległe",
+      "today": "Dzisiaj",
+      "undated": "Bez daty"
+    },
+    "noMatchingStatus": "Żadne zadanie z tą etykietą nie ma obecnie takiego statusu.",
+    "clearFilters": "Pokaż wszystkie zadania",
+    "searchPlaceholder": "Szukaj zadań z tą etykietą",
+    "emptyTitle": "Brak zadań z tą etykietą",
+    "emptyDescription": "Żadne zadanie nie ma jeszcze etykiety „{{label}}”. Dodaj ją do zadania, a pojawi się tutaj.",
+    "browseTasks": "Przeglądaj zadania",
+    "noResultsTitle": "Brak pasujących zadań",
+    "noResultsDescription": "Żadne zadanie z tą etykietą nie pasuje do „{{searchTerm}}”.",
+    "notFoundTitle": "Nie znaleziono etykiety",
+    "notFoundDescription": "Ta etykieta mogła zostać usunięta lub nie jest już Ci udostępniana.",
+    "backToLabels": "Powrót do etykiet"
+  },
+  "blurb": "Zarządzaj etykietami i efektywnie organizuj swoje zadania. Etykiety zostaną automatycznie udostępnione Twojemu kręgowi, jeśli zostaną użyte we wspólnym zadaniu.",
+  "modal": {
+    "errorEmptyName": "Nazwa nie może być pusta",
+    "errorDuplicate": "Etykieta o tej nazwie już istnieje",
+    "errorNoColor": "Wybierz kolor",
+    "saveFailedTitle": "Nie udało się zapisać etykiety",
+    "saveFailedMessage": "Nie można zapisać etykiety. Spróbuj ponownie.",
+    "name": "Nazwa",
+    "editTitle": "Edytuj etykietę",
+    "addTitle": "Dodaj etykietę",
+    "color": "Kolor",
+    "saveChanges": "Zapisz zmiany",
+    "addLabel": "Dodaj etykietę",
+    "colorAriaSelect": "Wybierz {{color}}"
+  },
+  "picker": {
+    "label": "Etykiety",
+    "createLabel": "Utwórz etykietę",
+    "labelsCount_few": "{{count}} etykiety",
+    "labelsCount_many": "{{count}} etykiet",
+    "labelsCount_one": "{{count}} etykieta",
+    "labelsCount_other": "{{count}} etykiet"
+  },
+  "view": {
+    "emptyTitle": "Brak etykiet",
+    "emptyDescription": "Etykiety grupują zadania w kręgu, np. „kuchnia” lub „rachunki”, dzięki czemu przefiltrujesz je jednym kliknięciem.",
+    "createLabel": "Utwórz etykietę",
+    "filterTitle": "Pokaż",
+    "sortName": "Nazwa",
+    "sortColor": "Kolor",
+    "sortRecent": "Ostatnio utworzone",
+    "filterAll": "Wszystkie etykiety",
+    "filterMine": "Utworzone przeze mnie",
+    "filterShared": "Udostępnione dla mnie"
+  }
+}

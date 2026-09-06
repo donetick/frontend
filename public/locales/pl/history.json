@@ -1,0 +1,177 @@
+{
+  "edit": {
+    "title": "Edytuj historię",
+    "completedDate": "Data ukończenia",
+    "note": "Notatka",
+    "additionalNotes": "Dodatkowe notatki",
+    "deleteTitle": "Usuń wpis historii",
+    "deleteMessage": "Czy na pewno chcesz usunąć ten wpis z historii?"
+  },
+  "status": {
+    "inProgress": "W toku",
+    "completed": "Ukończone",
+    "skipped": "Pominięte",
+    "pendingApproval": "Oczekuje na zatwierdzenie",
+    "rejected": "Odrzucone",
+    "missed": "Przegapione",
+    "rescheduled": "Przełożone",
+    "scheduled": "Zaplanowane"
+  },
+  "badge": {
+    "onTime": "Na czas",
+    "onTimeLabel": "Na czas"
+  },
+  "card": {
+    "wasDue": "Termin upłynął {{date}}",
+    "daysBeforeDue_few": "{{count}} dni przed terminem",
+    "daysBeforeDue_many": "{{count}} dni przed terminem",
+    "daysBeforeDue_one": "{{count}} dzień przed terminem",
+    "daysBeforeDue_other": "{{count}} dni przed terminem",
+    "daysAfterDue_few": "{{count}} dni po terminie",
+    "daysAfterDue_many": "{{count}} dni po terminie",
+    "daysAfterDue_one": "{{count}} dzień po terminie",
+    "daysAfterDue_other": "{{count}} dni po terminie",
+    "hoursBeforeDue_few": "{{count}} godz. przed terminem",
+    "hoursBeforeDue_many": "{{count}} godz. przed terminem",
+    "hoursBeforeDue_one": "{{count}} godz. przed terminem",
+    "hoursBeforeDue_other": "{{count}} godz. przed terminem",
+    "hoursAfterDue_few": "{{count}} godz. po terminie",
+    "hoursAfterDue_many": "{{count}} godz. po terminie",
+    "hoursAfterDue_one": "{{count}} godz. po terminie",
+    "hoursAfterDue_other": "{{count}} godz. po terminie",
+    "assignedTo": "Przypisano do: {{name}}",
+    "points_few": "★ {{count}} pkt",
+    "points_many": "★ {{count}} pkt",
+    "points_one": "★ {{count}} pkt",
+    "points_other": "★ {{count}} pkt"
+  },
+  "detail": {
+    "title": "Szczegóły aktywności",
+    "openTask": "Otwórz zadanie",
+    "editEntry": "Edytuj wpis",
+    "performedBy": "Wykonane przez",
+    "assignedTo": "Przypisane do",
+    "lastUpdated": "Ostatnia aktualizacja",
+    "duration": "Czas trwania",
+    "pointsEarned": "Zdobyte punkty",
+    "points_few": "{{count}} pkt",
+    "points_many": "{{count}} pkt",
+    "points_one": "{{count}} pkt",
+    "points_other": "{{count}} pkt",
+    "note": "Notatka"
+  },
+  "charts": {
+    "noData": "Brak danych",
+    "noLabels": "Brak etykiet",
+    "unassigned": "Nieprzypisane",
+    "unknownTask": "Nieznane zadanie",
+    "late": "Spóźnione",
+    "status": {
+      "title": "Status",
+      "description": "Status ukończonych zadań"
+    },
+    "due": {
+      "title": "Termin",
+      "description": "Terminy bieżących zadań"
+    },
+    "priority": {
+      "title": "Priorytet",
+      "description": "Zadania według priorytetu"
+    },
+    "labels": {
+      "title": "Etykiety",
+      "description": "Zadania według etykiet"
+    },
+    "labelsDuration": {
+      "title": "Etykiety (czas)",
+      "description": "Czas poświęcony według etykiet (godziny)"
+    },
+    "tasksTime": {
+      "title": "Zadania (czas)",
+      "description": "Czas poświęcony na poszczególne zadania (godziny)"
+    },
+    "assigneeBreakdown": {
+      "title": "Według wykonawcy",
+      "description": "Zadania pogrupowane według wykonawcy"
+    }
+  },
+  "filter": {
+    "status": "Status",
+    "pending": "Oczekujące",
+    "labels": "Etykiety",
+    "hasNotes": "Ma notatki",
+    "hasPoints": "Ma punkty",
+    "timePeriod": "Okres",
+    "user": "Użytkownik",
+    "completedBy": "Ukończone przez",
+    "completedAt": "Ukończono dnia"
+  },
+  "period": {
+    "days_few": "{{count}} dni",
+    "days_many": "{{count}} dni",
+    "days_one": "{{count}} dzień",
+    "days_other": "{{count}} dni",
+    "allTime": "Od początku"
+  },
+  "activities": {
+    "title": "Aktywności",
+    "emptyTitle": "Brak aktywności w tym okresie",
+    "emptyDescriptionEveryone": "Nikt w Twoim kręgu nie ukończył żadnego zadania w okresie: {{period}}. Spróbuj wybrać szerszy zakres czasu lub innego członka.",
+    "emptyDescriptionMember": "Użytkownik {{name}} nie ukończył żadnego zadania w okresie: {{period}}. Spróbuj wybrać szerszy zakres czasu lub innego członka.",
+    "periodSoFar": "do tej pory",
+    "periodLastDays": "w ciągu ostatnich {{count}} dni",
+    "unknownMember": "ten członek"
+  },
+  "title": {
+    "summary": "Podsumowanie zadania",
+    "activity": "Aktywność zadania"
+  },
+  "noResults": {
+    "clear": "Wyczyść filtry"
+  },
+  "toast": {
+    "updateQueued": {
+      "title": "Aktualizacja historii w kolejce",
+      "message": "Jesteś offline. Aktualizacja historii zsynchronizuje się po przywróceniu połączenia."
+    },
+    "updated": {
+      "title": "Historia zaktualizowana",
+      "message": "Wpis historii został pomyślnie zaktualizowany."
+    },
+    "deleteQueued": {
+      "title": "Usunięcie historii w kolejce",
+      "message": "Jesteś offline. Usunięcie historii zsynchronizuje się po przywróceniu połączenia."
+    },
+    "deleted": {
+      "title": "Historia usunięta",
+      "message": "Wpis historii został pomyślnie usunięty."
+    }
+  },
+  "delete": {
+    "title": "Usuń wpis historii",
+    "message": "Czy na pewno chcesz usunąć ten wpis z historii?"
+  },
+  "empty": {
+    "title": "Brak historii",
+    "description": "Za każdym razem, gdy to zadanie zostanie wykonane lub pominięte, pojawi się tutaj informacja o tym, kto i kiedy to zrobił. Na razie nic się nie wydarzyło.",
+    "backToTasks": "Powrót do zadań",
+    "noResultsTitle": "Brak wpisów historii spełniających kryteria",
+    "noResultsDescription": "Historia istnieje, ale żaden wpis nie odpowiada aktualnie włączonym filtrom."
+  },
+  "info": {
+    "allCompleted": "Wszystkie ukończone",
+    "timesSuffix": "{{count}} razy",
+    "averageTiming": "Średni czas",
+    "onTime": "Na czas",
+    "longestDelay": "Najdłuższe opóźnienie",
+    "neverLate": "Zawsze na czas",
+    "completedMost": "Najwięcej ukończeń",
+    "unknown": "Nieznany",
+    "membersInvolved": "Zaangażowani członkowie",
+    "membersSuffix": "{{count}} członków",
+    "lastCompleted": "Ostatnio ukończone"
+  },
+  "noteViewer": {
+    "updatedAt": "Zaktualizowano: {{date}}"
+  }
+}
