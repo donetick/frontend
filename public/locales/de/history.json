@@ -50,7 +50,7 @@
   },
   "charts": {
     "noData": "Keine Daten verfügbar",
-    "noLabels": "Keine Beschriftungen",
+    "noLabels": "Keine Labels",
     "unassigned": "Nicht zugewiesen",
     "unknownTask": "Unbekannte Aufgabe",
     "late": "Verspätet",
@@ -68,11 +68,11 @@
     },
     "labels": {
       "title": "Beschriftungen",
-      "description": "Aufgaben nach Beschriftungen"
+      "description": "Aufgaben nach Labels"
     },
     "labelsDuration": {
-      "title": "Beschriftungen (Zeit)",
-      "description": "Aufgewendete Zeit nach Beschriftungen (Stunden)"
+      "title": "Labels (Zeit)",
+      "description": "Aufgewendete Zeit nach Labels (Stunden)"
     },
     "tasksTime": {
       "title": "Aufgaben (Zeit)",
