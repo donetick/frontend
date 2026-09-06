@@ -255,6 +255,8 @@
     "movedTitle": "",
     "failMoveTitle": "",
     "failRescheduleTitle": "",
+    "failRescheduleMessage": "",
+    "failRemoveDueDateTitle": "",
     "nudgeSentTitle": "",
     "nudgeFailed": "",
     "failNudgeTitle": "",
@@ -399,7 +401,11 @@
     "removeAria": ""
   },
   "assignee": {
-    "anyone": ""
+    "label": "",
+    "anyone": "",
+    "unknown": "",
+    "selectedCount_one": "",
+    "selectedCount_other": ""
   },
   "filterChip": {
     "cancelAll": "",
@@ -542,6 +548,16 @@
   },
   "subTask": {
     "namePlaceholder": "",
+    "untitled": "未命名子任务",
+    "actions": "子任务操作",
+    "edit": "编辑",
+    "addBelow": "在下方添加子任务",
+    "addChild": "添加嵌套子任务",
+    "moveUpLevel": "上移一级",
+    "delete": "删除",
+    "editTitle": "编辑子任务",
+    "addTitle": "添加子任务",
+    "addChildTitle": "添加嵌套子任务",
     "deleteShortcut": "",
     "addPlaceholder": ""
   },
@@ -1016,5 +1032,26 @@
     "today": "",
     "yesterday": "",
     "noteTitle": ""
+  },
+  "memberDetail": {
+    "taskCount_one": "",
+    "taskCount_other": "",
+    "you": "",
+    "filters": {
+      "all": "",
+      "overdue": "",
+      "today": "",
+      "undated": ""
+    },
+    "noMatchingStatus": "",
+    "clearFilters": "",
+    "searchPlaceholder": "",
+    "emptyTitle": "",
+    "emptyDescription": "",
+    "browseTasks": "",
+    "noResultsTitle": "",
+    "noResultsDescription": "",
+    "notFoundTitle": "",
+    "notFoundDescription": ""
   }
 }
