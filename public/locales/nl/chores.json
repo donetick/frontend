@@ -255,6 +255,8 @@
     "movedTitle": "",
     "failMoveTitle": "",
     "failRescheduleTitle": "",
+    "failRescheduleMessage": "",
+    "failRemoveDueDateTitle": "",
     "nudgeSentTitle": "",
     "nudgeFailed": "",
     "failNudgeTitle": "",
@@ -399,7 +401,11 @@
     "removeAria": ""
   },
   "assignee": {
-    "anyone": ""
+    "label": "",
+    "anyone": "",
+    "unknown": "",
+    "selectedCount_one": "",
+    "selectedCount_other": ""
   },
   "filterChip": {
     "cancelAll": "",
@@ -542,6 +548,16 @@
   },
   "subTask": {
     "namePlaceholder": "",
+    "untitled": "Naamloze subtaak",
+    "actions": "Subtaakacties",
+    "edit": "Bewerken",
+    "addBelow": "Subtaak hieronder toevoegen",
+    "addChild": "Geneste subtaak toevoegen",
+    "moveUpLevel": "Een niveau omhoog",
+    "delete": "Verwijderen",
+    "editTitle": "Subtaak bewerken",
+    "addTitle": "Subtaak toevoegen",
+    "addChildTitle": "Geneste subtaak toevoegen",
     "deleteShortcut": "",
     "addPlaceholder": ""
   },
@@ -1016,5 +1032,26 @@
     "today": "",
     "yesterday": "",
     "noteTitle": ""
+  },
+  "memberDetail": {
+    "taskCount_one": "",
+    "taskCount_other": "",
+    "you": "",
+    "filters": {
+      "all": "",
+      "overdue": "",
+      "today": "",
+      "undated": ""
+    },
+    "noMatchingStatus": "",
+    "clearFilters": "",
+    "searchPlaceholder": "",
+    "emptyTitle": "",
+    "emptyDescription": "",
+    "browseTasks": "",
+    "noResultsTitle": "",
+    "noResultsDescription": "",
+    "notFoundTitle": "",
+    "notFoundDescription": ""
   }
 }
