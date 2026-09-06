@@ -3,6 +3,7 @@ import { Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { BASE_PATH } from '../../Config'
 import { networkManager } from '../../hooks/NetworkManager'
 import Logo from '../../Logo'
 
@@ -63,7 +64,7 @@ const LoadingComponent = () => {
           color='primary'
           sx={{ mt: 4 }}
           onClick={() => {
-            window.location.href = '/' // navigate back to the home page
+            window.location.href = BASE_PATH || '/' // navigate back to the home page
           }}
         >
           {t('navigateBack')}

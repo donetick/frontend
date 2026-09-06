@@ -7,6 +7,8 @@ import LanguageDetector from 'i18next-browser-languagedetector'
 import HttpBackend from 'i18next-http-backend'
 import { initReactI18next } from 'react-i18next'
 
+import { BASE_PATH } from '../Config'
+
 i18n
   .use(HttpBackend)
   .use(LanguageDetector)
@@ -20,7 +22,7 @@ i18n
     },
 
     backend: {
-      loadPath: '/locales/{{lng}}/{{ns}}.json',
+      loadPath: `${BASE_PATH}/locales/{{lng}}/{{ns}}.json`,
     },
 
     ns: [
