@@ -255,6 +255,8 @@
     "movedTitle": "Tâche déplacée",
     "failMoveTitle": "Impossible de déplacer la tâche",
     "failRescheduleTitle": "Échec de la replanification",
+    "failRescheduleMessage": "Impossible de mettre à jour la date d'échéance",
+    "failRemoveDueDateTitle": "Échec de la suppression de la date d'échéance",
     "nudgeSentTitle": "Rappel envoyé !",
     "nudgeFailed": "Échec de l'envoi du rappel",
     "failNudgeTitle": "Échec de l'envoi du rappel",
@@ -399,7 +401,11 @@
     "removeAria": "Supprimer les rappels"
   },
   "assignee": {
-    "anyone": "Tout le monde"
+    "label": "",
+    "anyone": "Tout le monde",
+    "unknown": "",
+    "selectedCount_one": "",
+    "selectedCount_other": ""
   },
   "filterChip": {
     "cancelAll": "Annuler tous les filtres",
@@ -542,6 +548,16 @@
   },
   "subTask": {
     "namePlaceholder": "Nom de la tâche...",
+    "untitled": "Sous-tache sans titre",
+    "actions": "Actions de sous-tache",
+    "edit": "Modifier",
+    "addBelow": "Ajouter une sous-tache en dessous",
+    "addChild": "Ajouter une sous-tache imbriquee",
+    "moveUpLevel": "Remonter d'un niveau",
+    "delete": "Supprimer",
+    "editTitle": "Modifier la sous-tache",
+    "addTitle": "Ajouter une sous-tache",
+    "addChildTitle": "Ajouter une sous-tache imbriquee",
     "deleteShortcut": "Supprimer (Maj+Retour arrière)",
     "addPlaceholder": "Ajouter une nouvelle tâche... (Entrée à ajouter)"
   },
@@ -1016,5 +1032,26 @@
     "today": "Aujourd'hui",
     "yesterday": "Hier",
     "noteTitle": "Note - {{choreName}}"
+  },
+  "memberDetail": {
+    "taskCount_one": "",
+    "taskCount_other": "",
+    "you": "",
+    "filters": {
+      "all": "",
+      "overdue": "",
+      "today": "",
+      "undated": ""
+    },
+    "noMatchingStatus": "",
+    "clearFilters": "",
+    "searchPlaceholder": "",
+    "emptyTitle": "",
+    "emptyDescription": "",
+    "browseTasks": "",
+    "noResultsTitle": "",
+    "noResultsDescription": "",
+    "notFoundTitle": "",
+    "notFoundDescription": ""
   }
 }
