@@ -255,6 +255,8 @@
     "movedTitle": "",
     "failMoveTitle": "",
     "failRescheduleTitle": "",
+    "failRescheduleMessage": "",
+    "failRemoveDueDateTitle": "",
     "nudgeSentTitle": "",
     "nudgeFailed": "",
     "failNudgeTitle": "",
@@ -399,7 +401,11 @@
     "removeAria": ""
   },
   "assignee": {
-    "anyone": ""
+    "label": "",
+    "anyone": "",
+    "unknown": "",
+    "selectedCount_one": "",
+    "selectedCount_other": ""
   },
   "filterChip": {
     "cancelAll": "",
@@ -542,6 +548,16 @@
   },
   "subTask": {
     "namePlaceholder": "",
+    "untitled": "Subtarefa sem titulo",
+    "actions": "Acoes da subtarefa",
+    "edit": "Editar",
+    "addBelow": "Adicionar subtarefa abaixo",
+    "addChild": "Adicionar subtarefa aninhada",
+    "moveUpLevel": "Subir um nivel",
+    "delete": "Excluir",
+    "editTitle": "Editar subtarefa",
+    "addTitle": "Adicionar subtarefa",
+    "addChildTitle": "Adicionar subtarefa aninhada",
     "deleteShortcut": "",
     "addPlaceholder": ""
   },
@@ -1016,5 +1032,26 @@
     "today": "",
     "yesterday": "",
     "noteTitle": ""
+  },
+  "memberDetail": {
+    "taskCount_one": "",
+    "taskCount_other": "",
+    "you": "",
+    "filters": {
+      "all": "",
+      "overdue": "",
+      "today": "",
+      "undated": ""
+    },
+    "noMatchingStatus": "",
+    "clearFilters": "",
+    "searchPlaceholder": "",
+    "emptyTitle": "",
+    "emptyDescription": "",
+    "browseTasks": "",
+    "noResultsTitle": "",
+    "noResultsDescription": "",
+    "notFoundTitle": "",
+    "notFoundDescription": ""
   }
 }
