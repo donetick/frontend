@@ -33,7 +33,7 @@
     "resetTimer": "Réinitialiser le minuteur",
     "resetTimerConfirmation": "Êtes-vous sûr de vouloir réinitialiser le minuteur ? Cela effacera tous les enregistrements de temps depuis le début de la tâche.",
     "clearAllTimeRecords": "Effacer tous les enregistrements de temps",
-    "clearAllTimeConfirmation": "Cela supprimera définitivement tous les minuteurs de cette tâche et la remettra à l'état « non démarrée ».",
+    "clearAllTimeConfirmation": "Cela supprimera définitivement tous les minuteurs de cette tâche et la remettra à l'état « non démarrée ».",
     "descriptionTitle": "Description",
     "description": "Description :",
     "previousNote": "Note précédente",
@@ -1052,6 +1052,6 @@
     "noResultsTitle": "",
     "noResultsDescription": "",
     "notFoundTitle": "",
-    "notFoundDescription": ""
+    "notFoundDescription": "Cette personne a peut-être quitté le cercle ou n'est plus partagée avec vous."
   }
 }
