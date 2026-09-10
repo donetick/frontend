@@ -32,6 +32,7 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { version } from '../../../package.json'
 import UserProfileAvatar from '../../components/UserProfileAvatar'
 import { useLocalization } from '../../contexts/LocalizationContext'
+import { useCapabilities } from '../../hooks/useCapabilities'
 import { useResource } from '../../queries/ResourceQueries'
 import { useGlobalSearch } from '../../search/GlobalSearchContext'
 import { apiClient } from '../../utils/ApiClient'
@@ -44,6 +45,7 @@ const NavBar = () => {
   const { t } = useTranslation('common')
   const { data: resource } = useResource()
   const { openSearch } = useGlobalSearch()
+  const { can } = useCapabilities()
 
   const navigate = useNavigate()
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -69,6 +71,7 @@ const NavBar = () => {
       to: '/things',
       label: t('navigation.things'),
       icon: <Widgets />,
+      capability: 'things',
     },
     {
       to: 'labels',
@@ -94,13 +97,16 @@ const NavBar = () => {
       to: 'points',
       label: t('navigation.points'),
       icon: <Toll />,
+      capability: 'points',
     },
     {
       to: '/settings',
       label: t('navigation.settings'),
       icon: <SettingsOutlined />,
     },
-  ]
+    // Features the current mode can't support are hidden rather than shown
+    // broken; account mode enables every capability.
+  ].filter(link => !link.capability || can(link.capability))
   const [openDrawer, closeDrawer] = [
     () => setDrawerOpen(true),
     () => setDrawerOpen(false),

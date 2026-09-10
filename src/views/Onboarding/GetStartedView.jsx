@@ -2,6 +2,7 @@ import { DnsOutlined } from '@mui/icons-material'
 import { Box, Button, Link, Typography } from '@mui/joy'
 import { useNavigate } from 'react-router-dom'
 
+import { startLocalMode } from '../../data/localOnboarding'
 import Logo from '../../Logo'
 import { useResource } from '../../queries/ResourceQueries'
 import { haptic, isNativeApp, markOnboardingSeen } from '../../utils/Onboarding'
@@ -35,6 +36,15 @@ const GetStartedView = () => {
     markOnboardingSeen()
     haptic()
     navigate(path)
+  }
+
+  // Local-only mode: no account, no network, everything in the on-device
+  // store. `replace` so back doesn't drop the user onto this fork again.
+  const goLocal = async () => {
+    markOnboardingSeen()
+    haptic()
+    await startLocalMode()
+    navigate('/', { replace: true })
   }
 
   return (
@@ -147,6 +157,22 @@ const GetStartedView = () => {
           >
             {signupDisabled ? 'Sign in' : 'I already have an account'}
           </Button>
+          <Button
+            size='lg'
+            fullWidth
+            variant='plain'
+            color='neutral'
+            onClick={goLocal}
+            sx={authButtonSx}
+          >
+            Use without an account
+          </Button>
+          <Typography
+            level='body-xs'
+            sx={{ color: 'text.tertiary', textAlign: 'center', mt: -0.5 }}
+          >
+            Everything stays on this device. You can back up and sync later.
+          </Typography>
         </Box>
 
         {isNativeApp() && (

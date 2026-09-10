@@ -1,6 +1,8 @@
 import { Preferences } from '@capacitor/preferences'
 
 import { API_URL } from '../Config'
+import { isLocalMode } from '../data/appMode'
+import { localUnsupported } from '../data/localResponse'
 import { networkManager } from '../hooks/NetworkManager'
 import {
   recordApiFailure,
@@ -147,6 +149,10 @@ class ApiClient {
 
   // Helper to avoid repeating cleanup code
   async handleLogout() {
+    // There is no session to tear down in local mode, and bouncing the user to
+    // /login would strand them away from their own local data.
+    if (isLocalMode()) return
+
     // Backstop for every forced-logout path: never tear down the session while
     // an OAuth exchange is running, or we clear the tokens it just saved and
     // reload the page out from under it.
@@ -200,6 +206,14 @@ class ApiClient {
     // fire and forget
   }
   async request(endpoint, options = {}) {
+    // Local mode has no account, so any request that reaches here is for a
+    // feature that genuinely needs a server. Refusing locally — rather than
+    // sending it and collecting a 401 — is what keeps the app fully usable
+    // with no network and stops the 401 handler from forcing a logout.
+    if (isLocalMode()) {
+      return localUnsupported(`${endpoint} requires an account`)
+    }
+
     await this.init()
     const url = `${this.customServerURL}${endpoint}`
 

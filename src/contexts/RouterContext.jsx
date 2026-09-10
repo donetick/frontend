@@ -5,6 +5,7 @@ import ChoreEdit from '@/views/ChoreEdit/ChoreEdit'
 import Error from '@/views/Error'
 import AccountSettings from '@/views/Settings/AccountSettings'
 import AdvancedSettings from '@/views/Settings/AdvancedSettings'
+import BackupSettings from '@/views/Settings/BackupSettings'
 import ChildUserSettings from '@/views/Settings/ChildUserSettings'
 import CircleSettings from '@/views/Settings/CircleSettings'
 import DeveloperSettings from '@/views/Settings/DeveloperSettings'
@@ -103,6 +104,10 @@ const Router = createBrowserRouter([
           {
             path: 'apitokens',
             element: <APITokenSettings />,
+          },
+          {
+            path: 'backup',
+            element: <BackupSettings />,
           },
           {
             path: 'storage',

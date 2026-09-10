@@ -1,3 +1,4 @@
+import { isLocalMode } from '../data/appMode'
 import { networkManager } from '../hooks/NetworkManager'
 import { apiClient } from './ApiClient'
 import { commandQueue, CommandType } from './CommandQueue'
@@ -58,6 +59,8 @@ class SyncEngine {
   // reason, so callers that arrive mid-run share one follow-up run instead.
   async sync() {
     if (!isOfflineFeatureEnabled()) return false
+    // Local mode has no server to reconcile with; the sync layer is inert.
+    if (isLocalMode()) return false
 
     if (this.inFlight) {
       if (!this.queued) {

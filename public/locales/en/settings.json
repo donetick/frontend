@@ -58,6 +58,10 @@
         "title": "API Tokens",
         "description": "Generate and manage access tokens for third-party integrations and API access."
       },
+      "backup": {
+        "title": "Backup & Restore",
+        "description": "Download a copy of the data on this device, or restore from a backup file."
+      },
       "storage": {
         "title": "Storage Settings",
         "description": "Backup and restore your data, manage local storage and sync preferences."

@@ -29,6 +29,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import EmptyState from '../../components/common/EmptyState'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
+import { isLocalMode } from '../../data/appMode'
 import { useFilter } from '../../hooks/useFilter'
 import { useChores } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
@@ -316,7 +317,9 @@ const MyChores = () => {
   }, [choresData?.res, impersonatedUser])
 
   const choreSections = useMemo(() => {
-    if (!chores.length || !userProfile?.id) {
+    // Local mode has no account, so userProfile never resolves — gating on
+    // it here would hide every chore behind an empty list forever.
+    if (!chores.length || (!userProfile?.id && !isLocalMode())) {
       return []
     }
 
@@ -360,13 +363,16 @@ const MyChores = () => {
   ])
 
   useEffect(() => {
-    if (
+    // Local mode has no account, so userProfile and membersData never
+    // resolve (useUserProfile/useCircleMembers both gate on a token) — wait
+    // on them only in account mode, or the chore list never syncs.
+    const ready =
       !choresLoading &&
       !membersLoading &&
-      userProfile?.id &&
-      membersData?.res &&
-      choresData?.res
-    ) {
+      choresData?.res &&
+      (isLocalMode() || (userProfile?.id && membersData?.res))
+
+    if (ready) {
       // throw new Error('FAKE ERROR') // For testing Sentry error tracking
       const processEffectAsync = async () => {
         // Sync local state with query data to ensure updates are reflected
@@ -381,7 +387,7 @@ const MyChores = () => {
           scheduleChoreNotification(
             choresData.res,
             userProfile,
-            membersData.res,
+            membersData?.res,
           )
         }
       }

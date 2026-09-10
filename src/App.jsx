@@ -16,6 +16,9 @@ import { registerCapacitorListeners } from './CapacitorListener'
 import PageTransition from './components/animations/PageTransition'
 import { ImpersonateUserProvider } from './contexts/ImpersonateUserContext'
 import SSEProvider from './contexts/SSEContext'
+import { isLocalMode } from './data/appMode'
+import { ensureLocalStoreReady } from './data/health'
+import { store } from './data/store'
 import { AuthProvider } from './hooks/useAuth.jsx'
 import useOnboardingGate from './hooks/useOnboardingGate'
 import useStatusBar from './hooks/useStatusBar'
@@ -23,6 +26,7 @@ import { useSyncOnReconnect } from './hooks/useSyncOnReconnect'
 import { useResource } from './queries/ResourceQueries'
 import { GlobalSearchProvider } from './search/GlobalSearchContext'
 import { recordRoute } from './service/DiagnosticsSession'
+import { watchChoresForNotifications } from './service/LocalDueNotifications'
 import { useNotification } from './service/NotificationProvider'
 import NetworkBanner from './views/components/NetworkBanner'
 
@@ -151,6 +155,19 @@ function App() {
   useEffect(() => {
     initializeAnalytics()
     installGlobalErrorHandlers()
+  }, [])
+
+  // In local mode the document store is the source of truth, so it has to be
+  // open and migrated before the first view reads from it. Due-date reminders
+  // are scheduled from that same local data — there is no server to push them.
+  useEffect(() => {
+    if (!isLocalMode()) return undefined
+
+    let stopWatching = () => {}
+    ensureLocalStoreReady().then(() => {
+      stopWatching = watchChoresForNotifications(store)
+    })
+    return () => stopWatching()
   }, [])
 
   return (

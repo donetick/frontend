@@ -42,6 +42,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import DurationInput from '../../components/common/DurationInput'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import NotificationTemplate from '../../components/NotificationTemplate.jsx'
+import { isLocalMode } from '../../data/appMode'
 import { useDocumentScanner } from '../../hooks/useDocumentScanner'
 import {
   useArchiveChore,
@@ -367,9 +368,15 @@ const ChoreEdit = () => {
     if (searchParams.get('clone') === 'true') {
       newChoreId = null
     }
+    // Local ids are client-generated UUIDs, not positive server integers —
+    // `Number(uuid) > 0` is always false, which sent every local-mode edit
+    // down the create path instead of update.
+    const isUpdate = isLocalMode()
+      ? Boolean(newChoreId)
+      : Number(newChoreId) > 0
     const assignees = anyone ? [] : assignableTo
     const chore = {
-      id: Number(newChoreId),
+      id: isLocalMode() ? newChoreId : Number(newChoreId),
       name: name,
       description: description,
       assignees: assignees,
@@ -397,10 +404,10 @@ const ChoreEdit = () => {
       deadlineOffset: deadlineOffset < 0 ? null : deadlineOffset,
       priority: priority,
       projectId: projectId === 'default' ? null : projectId,
-      draftId: newChoreId > 0 ? undefined : draftId,
+      draftId: isUpdate ? undefined : draftId,
     }
     let SaveFunction = createChoreMutation.mutateAsync
-    if (newChoreId > 0) {
+    if (isUpdate) {
       SaveFunction = updateChoreMutation.mutateAsync
     } else {
       // This is the dedicated create page, distinct from the AddTaskModal
@@ -1900,7 +1907,7 @@ const ChoreEdit = () => {
         </Box>
       </Box>
 
-      {choreId > 0 && (
+      {Boolean(choreId) && (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mt: 3 }}>
           <Sheet
             sx={{
@@ -1912,7 +1919,10 @@ const ChoreEdit = () => {
             <Typography level='body1'>
               Created by{' '}
               <Chip variant='solid'>
-                {membersData.res.find(f => f.userId === createdBy)?.displayName}
+                {
+                  membersData?.res?.find(f => f.userId === createdBy)
+                    ?.displayName
+                }
               </Chip>{' '}
               {moment(chore.createdAt).fromNow()}
             </Typography>
@@ -1924,7 +1934,7 @@ const ChoreEdit = () => {
                   Updated by{' '}
                   <Chip variant='solid'>
                     {
-                      membersData.res.find(f => f.userId === updatedBy)
+                      membersData?.res?.find(f => f.userId === updatedBy)
                         ?.displayName
                     }
                   </Chip>{' '}
@@ -1958,7 +1968,7 @@ const ChoreEdit = () => {
           boxShadow: 'md', // Add a subtle shadow
         }}
       >
-        {choreId > 0 && (
+        {Boolean(choreId) && (
           <Dropdown>
             <ButtonGroup
               variant='outlined'
@@ -2005,7 +2015,7 @@ const ChoreEdit = () => {
           )}
         </Button>
         <Button color='primary' variant='solid' onClick={HandleSaveChore}>
-          {choreId > 0 ? 'Save' : 'Create'}
+          {choreId ? 'Save' : 'Create'}
           {showKeyboardShortcuts && (
             <KeyboardShortcutHint shortcut='Enter' sx={{ ml: 1 }} />
           )}

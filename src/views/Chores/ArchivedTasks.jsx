@@ -35,6 +35,7 @@ import FilterBar from '../../components/common/FilterBar'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
+import { isLocalMode } from '../../data/appMode'
 import { useFilter } from '../../hooks/useFilter'
 import { useUnArchiveChore } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
@@ -246,8 +247,11 @@ const ArchivedTasks = () => {
 
   useEffect(() => {
     const loadArchivedChores = async () => {
-      if (!membersLoading && userProfile) {
-        setPerformers(membersData.res)
+      // Account mode gates on the profile/members queries finishing; local
+      // mode has neither (no token means both are disabled), so it only
+      // waits on the members query settling.
+      if (!membersLoading && (userProfile || isLocalMode())) {
+        setPerformers(membersData?.res || [])
         try {
           const response = await GetArchivedChores()
           const data = await response.json()
@@ -656,7 +660,14 @@ const ArchivedTasks = () => {
     })
   }
 
-  if (isUserProfileLoading || performers.length === 0 || isLoading) {
+  // `performers.length === 0` is a reasonable "still loading" proxy in
+  // account mode (a circle always has at least its own owner), but it's
+  // permanently true in local mode — there is no circle, so it must not gate
+  // the spinner there.
+  if (
+    (!isLocalMode() && (isUserProfileLoading || performers.length === 0)) ||
+    isLoading
+  ) {
     return <LoadingComponent />
   }
 

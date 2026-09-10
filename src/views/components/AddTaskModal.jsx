@@ -18,6 +18,7 @@ import { flushSync } from 'react-dom'
 
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import ModalActions from '../../components/common/ModalActions'
+import { isLocalMode } from '../../data/appMode'
 import { useDocumentScanner } from '../../hooks/useDocumentScanner'
 import { useFileUpload } from '../../hooks/useFileUpload'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
@@ -789,7 +790,10 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
       !isModalOpen ||
       userLabelsLoading ||
       isCircleMembersLoading ||
-      !userProfile
+      // Local mode has no account, so userProfile never resolves — the parse
+      // pipeline would otherwise never run and every task would save with an
+      // empty name.
+      (!userProfile && !isLocalMode())
     ) {
       return
     }
@@ -1040,8 +1044,9 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
       finalAssignedTo = null
       finalAssignStrategy = 'no_assignee'
     } else if (assignees.length === 0) {
-      finalAssignees = [{ userId: userProfile?.id }]
-      finalAssignedTo = userProfile?.id
+      // No account in local mode, so there is no self to default to.
+      finalAssignees = userProfile?.id ? [{ userId: userProfile.id }] : []
+      finalAssignedTo = userProfile?.id ?? null
       finalAssignStrategy = assignStrategy
     } else {
       finalAssignedTo = assignees[0].userId

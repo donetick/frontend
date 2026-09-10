@@ -15,6 +15,7 @@ import { useNavigate } from 'react-router-dom'
 import { LoginSocialGoogle } from 'reactjs-social-login'
 
 import { GOOGLE_CLIENT_ID, REDIRECT_URL } from '../../Config'
+import { startLocalMode } from '../../data/localOnboarding'
 import { useAuth } from '../../hooks/useAuth.jsx'
 import { useResource } from '../../queries/ResourceQueries'
 import { useUserProfile } from '../../queries/UserQueries.jsx'
@@ -675,6 +676,28 @@ const LoginView = () => {
           >
             {t('createOne')}
           </Link>
+        </Typography>
+      )}
+
+      {!userProfile && (
+        <Typography
+          level='body-sm'
+          sx={{ mt: 1.5, textAlign: 'center', color: 'text.tertiary' }}
+        >
+          <Link
+            component='button'
+            type='button'
+            level='body-sm'
+            color='neutral'
+            underline='hover'
+            onClick={async () => {
+              await startLocalMode()
+              Navigate('/', { replace: true })
+            }}
+          >
+            Use without an account
+          </Link>{' '}
+          — everything stays on this device
         </Typography>
       )}
 

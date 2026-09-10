@@ -33,6 +33,7 @@ import { Cell, Pie, PieChart, Tooltip } from 'recharts'
 import EmptyState from '../../components/common/EmptyState'
 import FilterBar from '../../components/common/FilterBar'
 import { useLocalization } from '../../contexts/LocalizationContext'
+import { isLocalMode } from '../../data/appMode'
 import { useFilter } from '../../hooks/useFilter'
 import {
   useChores,
@@ -439,7 +440,7 @@ const UserActivites = () => {
   const {
     data: choresHistory,
     handleLimitChange: refetchHistory,
-    isChoresHistoryLoading,
+    isLoading: isChoresHistoryLoading,
   } = useChoresHistory(tabValue ? tabValue : 30, true)
   const { data: circleMembersData } = useCircleMembers()
   const [selectedUser, setSelectedUser] = React.useState('all')
@@ -998,7 +999,9 @@ const UserActivites = () => {
       description: t('charts.assigneeBreakdown.description'),
     },
   }
-  if (!userProfile) {
+  // Local mode has no token, so useUserProfile() never fetches and
+  // userProfile stays undefined forever — must not gate the spinner there.
+  if (!userProfile && !isLocalMode()) {
     return <LoadingComponent />
   }
   // Calculate activities analytics

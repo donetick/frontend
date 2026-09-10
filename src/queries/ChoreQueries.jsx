@@ -2,6 +2,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 
 import { track } from '../analytics'
+import { isLocalMode } from '../data/appMode'
+import { choreRepo } from '../data/repositories/choreRepo'
+import { historyRepo } from '../data/repositories/historyRepo'
 import { networkManager } from '../hooks/NetworkManager'
 import { commandQueue, CommandType } from '../utils/CommandQueue'
 import {
@@ -27,6 +30,7 @@ import { cacheChoreImages } from '../utils/ImageCache'
 import { offlineDB } from '../utils/OfflineDB'
 import { isOfflineFeatureEnabled } from '../utils/OfflineFeatureToggle'
 import { syncEngine } from '../utils/SyncEngine'
+import { applyLocalCompletion, applyLocalSkip } from './offlineCompletion'
 
 const mergePendingCreates = async chores => {
   const pending = await commandQueue.getPending()
@@ -99,6 +103,10 @@ export const useChores = (includeArchive = false) => {
     queryKey: ['chores', includeArchive],
     refetchOnWindowFocus: true,
     queryFn: async () => {
+      if (isLocalMode()) {
+        return { res: await choreRepo.all({ includeArchived: includeArchive }) }
+      }
+
       if (isOfflineFeatureEnabled()) {
         try {
           // Sync from server first (coalesced with any run already in flight,
@@ -149,6 +157,11 @@ export const useDeleteChores = () => {
 
   return useMutation({
     mutationFn: async choreIds => {
+      if (isLocalMode()) {
+        for (const id of choreIds) await choreRepo.remove(id)
+        return
+      }
+
       if (isOfflineFeatureEnabled() && !networkManager.isOnline) {
         await offlineDB.deleteChores(choreIds)
         await Promise.all(
@@ -218,6 +231,21 @@ export const useCreateChore = () => {
       // `source` is analytics-only metadata (typed/voice/scan/clone) — never
       // send it to the backend as part of the chore payload.
       const { source, ...newTask } = rawTask
+      if (isLocalMode()) {
+        const created = await choreRepo.save(newTask)
+        track('chore_created', {
+          has_due_date: Boolean(newTask.dueDate),
+          has_labels: Boolean(newTask.labelsV2?.length),
+          has_description: Boolean(newTask.description?.trim()),
+          has_recurrence: newTask.frequencyType !== 'once',
+          recurrence_type: newTask.frequencyType || 'once',
+          priority: typeof newTask.priority === 'number' ? newTask.priority : 0,
+          source: source || 'quick_add',
+          mode: 'local',
+        })
+        return created
+      }
+
       if (isOfflineFeatureEnabled() && !networkManager.isOnline) {
         return queueOfflineCreate(newTask)
       }
@@ -285,6 +313,10 @@ export const useUpdateChore = () => {
         return pendingChore
       }
 
+      if (isLocalMode()) {
+        return choreRepo.save(updatedChore)
+      }
+
       try {
         const resp = await SaveChore(updatedChore)
         if (!resp || !resp.ok) {
@@ -336,6 +368,8 @@ export const useChoresHistory = (initialLimit, includeMembers) => {
   const { data, error, isLoading } = useQuery({
     queryKey: ['choresHistory', limit],
     queryFn: async () => {
+      if (isLocalMode()) return historyRepo.recent(limit)
+
       try {
         const resp = await GetChoresHistory(limit, includeMembers)
         const entries = resp?.res || []
@@ -366,6 +400,8 @@ export const useChoreDetails = choreId => {
     queryKey: ['choreDetails', choreId],
     refetchOnWindowFocus: true,
     queryFn: async () => {
+      if (isLocalMode()) return { res: await choreRepo.get(choreId) }
+
       try {
         const response = await GetChoreDetailById(choreId)
         if (response && response.ok) {
@@ -392,6 +428,12 @@ export const useChore = choreId => {
     queryFn: async () => {
       if (!choreId) {
         throw new Error('Chore ID is required to fetch chore details')
+      }
+
+      if (isLocalMode()) {
+        const chore = await choreRepo.get(choreId)
+        if (!chore) throw new Error('Chore not found')
+        return { res: chore }
       }
 
       try {
@@ -423,7 +465,8 @@ export const useArchiveChore = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ArchiveChore,
+    mutationFn: id =>
+      isLocalMode() ? choreRepo.archive(id) : ArchiveChore(id),
     onSuccess: () => {
       queryClient.invalidateQueries(['chores'])
     },
@@ -434,7 +477,8 @@ export const useUnArchiveChore = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: UnArchiveChore,
+    mutationFn: id =>
+      isLocalMode() ? choreRepo.unarchive(id) : UnArchiveChore(id),
     onSuccess: () => {
       queryClient.invalidateQueries(['chores'])
     },
@@ -448,6 +492,9 @@ export const useChoreHistory = choreId => {
       if (!choreId) {
         throw new Error('Chore ID is required to fetch history')
       }
+
+      if (isLocalMode()) return { res: await historyRepo.forChore(choreId) }
+
       let json
       try {
         const response = await GetChoreHistory(choreId)
@@ -503,6 +550,10 @@ export const useUpdateChoreHistory = () => {
           _pendingUpdate: true,
         })
         return { queued: true }
+      }
+
+      if (isLocalMode()) {
+        return historyRepo.update(historyId, historyData)
       }
 
       if (isOfflineFeatureEnabled() && !networkManager.isOnline) {
@@ -568,6 +619,10 @@ export const useDeleteChoreHistory = () => {
         return { queued: true }
       }
 
+      if (isLocalMode()) {
+        return historyRepo.remove(historyId)
+      }
+
       if (isOfflineFeatureEnabled() && !networkManager.isOnline) {
         await commandQueue.enqueue(
           CommandType.DELETE_CHORE_HISTORY,
@@ -609,33 +664,16 @@ export const useMarkChoreComplete = () => {
 
   return useMutation({
     mutationFn: async ({ body, choreId, completedDate, performer }) => {
-      if (isOfflineFeatureEnabled() && !networkManager.isOnline) {
-        await commandQueue.enqueue(CommandType.COMPLETE_CHORE, choreId, {
-          id: choreId,
-          body,
-          completedDate,
-          performer,
-        })
-        await offlineDB.savePendingHistory({
-          id: -Date.now(),
-          choreId: Number(choreId),
-          completedBy: body?.completedBy || 0,
-          performedAt: completedDate || new Date().toISOString(),
-          notes: body?.note || null,
-          status: 1,
-          points: 0,
-          pending: true,
-        })
-        // Optimistically update the cache to show pending state
-        queryClient.setQueryData(['chores'], oldData => {
-          if (!oldData) return oldData
-          return {
-            res: oldData.res.map(chore =>
-              chore.id === choreId ? { ...chore, _pending: 'complete' } : chore,
-            ),
-          }
-        })
-        return { res: { _pending: 'complete' } }
+      // Runs the ported scheduler locally so a recurring chore actually
+      // advances offline instead of just showing a pending badge. The queued
+      // command still replays against the server, which stays authoritative.
+      if (isLocalMode()) {
+        return {
+          res: await choreRepo.complete(choreId, {
+            completedDate,
+            note: body?.note ?? null,
+          }),
+        }
       }
 
       const queueOfflineComplete = async () => {
@@ -645,6 +683,18 @@ export const useMarkChoreComplete = () => {
           completedDate,
           performer,
         })
+
+        const advanced = await applyLocalCompletion({
+          queryClient,
+          choreId,
+          completedDate,
+          note: body?.note || null,
+          completedBy: body?.completedBy || 0,
+        })
+        if (advanced) return { res: advanced }
+
+        // Nothing local to work from (uncached chore, unschedulable
+        // frequency) — fall back to the pending badge.
         await offlineDB.savePendingHistory({
           id: -Date.now(),
           choreId: Number(choreId),
@@ -655,15 +705,20 @@ export const useMarkChoreComplete = () => {
           points: 0,
           pending: true,
         })
-        queryClient.setQueryData(['chores'], oldData => {
-          if (!oldData) return oldData
+        queryClient.setQueriesData({ queryKey: ['chores'] }, oldData => {
+          if (!oldData?.res) return oldData
           return {
+            ...oldData,
             res: oldData.res.map(chore =>
               chore.id === choreId ? { ...chore, _pending: 'complete' } : chore,
             ),
           }
         })
         return { res: { _pending: 'complete' } }
+      }
+
+      if (isOfflineFeatureEnabled() && !networkManager.isOnline) {
+        return queueOfflineComplete()
       }
 
       try {
@@ -689,14 +744,22 @@ export const useSkipChore = () => {
 
   return useMutation({
     mutationFn: async choreId => {
-      if (isOfflineFeatureEnabled() && !networkManager.isOnline) {
+      if (isLocalMode()) {
+        return { res: await choreRepo.skip(choreId) }
+      }
+
+      const queueOfflineSkip = async () => {
         await commandQueue.enqueue(CommandType.SKIP_CHORE, choreId, {
           id: choreId,
         })
-        // Optimistically update the cache to show pending state
-        queryClient.setQueryData(['chores'], oldData => {
-          if (!oldData) return oldData
+
+        const advanced = await applyLocalSkip({ queryClient, choreId })
+        if (advanced) return { res: advanced }
+
+        queryClient.setQueriesData({ queryKey: ['chores'] }, oldData => {
+          if (!oldData?.res) return oldData
           return {
+            ...oldData,
             res: oldData.res.map(chore =>
               chore.id === choreId ? { ...chore, _pending: 'skip' } : chore,
             ),
@@ -705,22 +768,15 @@ export const useSkipChore = () => {
         return { res: { _pending: 'skip' } }
       }
 
+      if (isOfflineFeatureEnabled() && !networkManager.isOnline) {
+        return queueOfflineSkip()
+      }
+
       try {
         return await SkipChore(choreId)
       } catch (error) {
         if (isNetworkError(error)) {
-          await commandQueue.enqueue(CommandType.SKIP_CHORE, choreId, {
-            id: choreId,
-          })
-          queryClient.setQueryData(['chores'], oldData => {
-            if (!oldData) return oldData
-            return {
-              res: oldData.res.map(chore =>
-                chore.id === choreId ? { ...chore, _pending: 'skip' } : chore,
-              ),
-            }
-          })
-          return { res: { _pending: 'skip' } }
+          return queueOfflineSkip()
         }
         throw error
       }
@@ -764,6 +820,9 @@ export const useChoreAttachments = (choreId, hasAttachments = true) => {
   return useQuery({
     queryKey: ['choreAttachments', choreId],
     queryFn: async () => {
+      // Attachments need server storage, so local mode simply has none.
+      if (isLocalMode()) return { res: [] }
+
       const response = await GetChoreAttachments(choreId)
       if (response && response.ok) {
         return await response.json()

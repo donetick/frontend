@@ -25,6 +25,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
 import { SETTINGS_SECTIONS } from '../../constants/settingsSections'
+import { useCapabilities } from '../../hooks/useCapabilities'
 import { useUserProfile } from '../../queries/UserQueries'
 import { isPlusAccount } from '../../utils/Helpers'
 import { isParentUser } from '../../utils/UserHelpers'
@@ -35,11 +36,14 @@ const SettingsOverview = () => {
   const { t } = useTranslation('settings')
   const navigate = useNavigate()
   const { data: userProfile } = useUserProfile()
+  const { can } = useCapabilities()
   const [feedbackOpen, setFeedbackOpen] = useState(false)
   const [bugReportOpen, setBugReportOpen] = useState(false)
 
   const settingsCards = [
-    ...SETTINGS_SECTIONS.map(({ icon: Icon, id, isBeta }) => ({
+    ...SETTINGS_SECTIONS.filter(
+      section => !section.capability || can(section.capability),
+    ).map(({ icon: Icon, id, isBeta }) => ({
       id,
       title: t(`overview.sections.${id}.title`),
       description: t(`overview.sections.${id}.description`),

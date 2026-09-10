@@ -1,3 +1,9 @@
+import { isLocalMode } from '../data/appMode'
+import { localResponse } from '../data/localResponse'
+import { choreRepo } from '../data/repositories/choreRepo'
+import { filterRepo } from '../data/repositories/filterRepo'
+import { labelRepo } from '../data/repositories/labelRepo'
+import { projectRepo } from '../data/repositories/projectRepo'
 import { apiClient } from './ApiClient'
 
 // Migration helpers to maintain compatibility with existing code
@@ -113,18 +119,27 @@ const GetChores = () => {
   })
 }
 const GetArchivedChores = () => {
+  if (isLocalMode()) {
+    return choreRepo.archived().then(localResponse)
+  }
   return Fetch(`/chores/archived`, {
     method: 'GET',
     headers: HEADERS(),
   })
 }
 const ArchiveChore = id => {
+  if (isLocalMode()) {
+    return choreRepo.archive(id).then(localResponse)
+  }
   return Fetch(`/chores/${id}/archive`, {
     method: 'PUT',
     headers: HEADERS(),
   })
 }
 const UnArchiveChore = id => {
+  if (isLocalMode()) {
+    return choreRepo.unarchive(id).then(localResponse)
+  }
   return Fetch(`/chores/${id}/unarchive`, {
     method: 'PUT',
     headers: HEADERS(),
@@ -144,6 +159,20 @@ const GetChoreDetailById = id => {
   })
 }
 const MarkChoreComplete = (id, body, completedDate, performer) => {
+  if (isLocalMode()) {
+    return choreRepo
+      .complete(id, {
+        completedDate,
+        note: body?.note ?? null,
+      })
+      .then(result => {
+        import('../service/FeedbackService')
+          .then(({ recordTaskCompleted }) => recordTaskCompleted())
+          .catch(() => {})
+        return localResponse(result)
+      })
+  }
+
   var markChoreURL = `/chores/${id}/do`
 
   let completedDateFormated = ''
@@ -179,6 +208,9 @@ const MarkChoreComplete = (id, body, completedDate, performer) => {
 }
 
 const StartChore = id => {
+  if (isLocalMode()) {
+    return choreRepo.start(id).then(localResponse)
+  }
   return Fetch(`/chores/${id}/start`, {
     method: 'PUT',
     headers: HEADERS(),
@@ -186,6 +218,9 @@ const StartChore = id => {
 }
 
 const PauseChore = id => {
+  if (isLocalMode()) {
+    return choreRepo.pause(id).then(localResponse)
+  }
   return Fetch(`/chores/${id}/pause`, {
     method: 'PUT',
     headers: HEADERS(),
@@ -193,6 +228,11 @@ const PauseChore = id => {
 }
 
 const CompleteSubTask = (id, choreId, completedAt) => {
+  if (isLocalMode()) {
+    return choreRepo
+      .setSubtaskCompletion(choreId, id, Boolean(completedAt))
+      .then(localResponse)
+  }
   var markChoreURL = `/chores/${choreId}/subtask`
   return Fetch(markChoreURL, {
     method: 'PUT',
@@ -202,6 +242,9 @@ const CompleteSubTask = (id, choreId, completedAt) => {
 }
 
 const SkipChore = id => {
+  if (isLocalMode()) {
+    return choreRepo.skip(id).then(localResponse)
+  }
   return Fetch(`/chores/${id}/skip`, {
     method: 'POST',
     headers: {
@@ -228,6 +271,9 @@ const RejectChore = id => {
 }
 
 const UndoChoreAction = id => {
+  if (isLocalMode()) {
+    return choreRepo.undo(id).then(localResponse)
+  }
   return Fetch(`/chores/${id}/undo`, {
     method: 'POST',
     headers: HEADERS(),
@@ -266,6 +312,9 @@ const CreateChore = chore => {
 }
 
 const DeleteChore = id => {
+  if (isLocalMode()) {
+    return choreRepo.remove(id).then(localResponse)
+  }
   return Fetch(`/chores/${id}`, {
     method: 'DELETE',
     headers: HEADERS(),
@@ -273,6 +322,9 @@ const DeleteChore = id => {
 }
 
 const SaveChore = chore => {
+  if (isLocalMode()) {
+    return choreRepo.save(chore).then(localResponse)
+  }
   return Fetch(`/chores/`, {
     method: 'PUT',
     headers: HEADERS(),
@@ -281,6 +333,9 @@ const SaveChore = chore => {
 }
 
 const UpdateChorePriority = (id, priority) => {
+  if (isLocalMode()) {
+    return choreRepo.save({ id, priority }).then(localResponse)
+  }
   return Fetch(`/chores/${id}/priority `, {
     method: 'PUT',
     headers: HEADERS(),
@@ -472,7 +527,8 @@ const PutNotificationTarget = (platform, deviceToken) => {
     body: JSON.stringify({ platform, deviceToken }),
   })
 }
-const CreateLabel = label => {
+const CreateLabel = async label => {
+  if (isLocalMode()) return localResponse(await labelRepo.create(label))
   return Fetch(`/labels`, {
     method: 'POST',
     headers: HEADERS(),
@@ -481,6 +537,7 @@ const CreateLabel = label => {
 }
 
 const GetLabels = async () => {
+  if (isLocalMode()) return { res: await labelRepo.all() }
   const resp = await Fetch(`/labels`, {
     method: 'GET',
     headers: HEADERS(),
@@ -498,14 +555,16 @@ const GetResource = async () => {
   return resp.json()
 }
 
-const UpdateLabel = label => {
+const UpdateLabel = async label => {
+  if (isLocalMode()) return localResponse(await labelRepo.update(label))
   return Fetch(`/labels`, {
     method: 'PUT',
     headers: HEADERS(),
     body: JSON.stringify(label),
   })
 }
-const DeleteLabel = id => {
+const DeleteLabel = async id => {
+  if (isLocalMode()) return localResponse(await labelRepo.remove(id))
   return Fetch(`/labels/${id}`, {
     method: 'DELETE',
     headers: HEADERS(),
@@ -593,6 +652,9 @@ const VerifyMFA = (sessionToken, code) => {
 }
 
 const UpdateDueDate = (id, dueDate) => {
+  if (isLocalMode()) {
+    return choreRepo.reschedule(id, dueDate).then(localResponse)
+  }
   return Fetch(`/chores/${id}/dueDate`, {
     method: 'PUT',
     headers: {
@@ -881,21 +943,24 @@ const DeleteChildUser = childUserId => {
 }
 
 // Project-related API functions
-const GetProjects = () => {
+const GetProjects = async () => {
+  if (isLocalMode()) return localResponse(await projectRepo.all())
   return Fetch(`/projects`, {
     method: 'GET',
     headers: HEADERS(),
   })
 }
 
-const GetProjectById = id => {
+const GetProjectById = async id => {
+  if (isLocalMode()) return localResponse(await projectRepo.get(id))
   return Fetch(`/projects/${id}`, {
     method: 'GET',
     headers: HEADERS(),
   })
 }
 
-const CreateProject = project => {
+const CreateProject = async project => {
+  if (isLocalMode()) return localResponse(await projectRepo.create(project))
   return Fetch(`/projects`, {
     method: 'POST',
     headers: HEADERS(),
@@ -903,7 +968,8 @@ const CreateProject = project => {
   })
 }
 
-const UpdateProject = (id, project) => {
+const UpdateProject = async (id, project) => {
+  if (isLocalMode()) return localResponse(await projectRepo.update(id, project))
   return Fetch(`/projects/${id}`, {
     method: 'PUT',
     headers: HEADERS(),
@@ -911,7 +977,8 @@ const UpdateProject = (id, project) => {
   })
 }
 
-const DeleteProject = id => {
+const DeleteProject = async id => {
+  if (isLocalMode()) return localResponse(await projectRepo.remove(id))
   return Fetch(`/projects/${id}`, {
     method: 'DELETE',
     headers: HEADERS(),
@@ -919,35 +986,40 @@ const DeleteProject = id => {
 }
 
 // Filter-related API functions
-const GetFilters = () => {
+const GetFilters = async () => {
+  if (isLocalMode()) return localResponse(await filterRepo.all())
   return Fetch(`/filters`, {
     method: 'GET',
     headers: HEADERS(),
   })
 }
 
-const GetPinnedFilters = () => {
+const GetPinnedFilters = async () => {
+  if (isLocalMode()) return localResponse(await filterRepo.pinned())
   return Fetch(`/filters/pinned`, {
     method: 'GET',
     headers: HEADERS(),
   })
 }
 
-const GetFiltersByUsage = () => {
+const GetFiltersByUsage = async () => {
+  if (isLocalMode()) return localResponse(await filterRepo.byUsage())
   return Fetch(`/filters/by-usage`, {
     method: 'GET',
     headers: HEADERS(),
   })
 }
 
-const GetFilterById = id => {
+const GetFilterById = async id => {
+  if (isLocalMode()) return localResponse(await filterRepo.get(id))
   return Fetch(`/filters/${id}`, {
     method: 'GET',
     headers: HEADERS(),
   })
 }
 
-const CreateFilter = filter => {
+const CreateFilter = async filter => {
+  if (isLocalMode()) return localResponse(await filterRepo.create(filter))
   return Fetch(`/filters`, {
     method: 'POST',
     headers: HEADERS(),
@@ -955,7 +1027,8 @@ const CreateFilter = filter => {
   })
 }
 
-const UpdateFilter = (id, filter) => {
+const UpdateFilter = async (id, filter) => {
+  if (isLocalMode()) return localResponse(await filterRepo.update(id, filter))
   return Fetch(`/filters/${id}`, {
     method: 'PUT',
     headers: HEADERS(),
@@ -963,21 +1036,24 @@ const UpdateFilter = (id, filter) => {
   })
 }
 
-const DeleteFilter = id => {
+const DeleteFilter = async id => {
+  if (isLocalMode()) return localResponse(await filterRepo.remove(id))
   return Fetch(`/filters/${id}`, {
     method: 'DELETE',
     headers: HEADERS(),
   })
 }
 
-const ToggleFilterPin = id => {
+const ToggleFilterPin = async id => {
+  if (isLocalMode()) return localResponse(await filterRepo.togglePin(id))
   return Fetch(`/filters/${id}/toggle-pin`, {
     method: 'POST',
     headers: HEADERS(),
   })
 }
 
-const TrackFilterUsage = id => {
+const TrackFilterUsage = async id => {
+  if (isLocalMode()) return localResponse(await filterRepo.trackUsage(id))
   return Fetch(`/filters/${id}/track-usage`, {
     method: 'POST',
     headers: HEADERS(),

@@ -1,7 +1,15 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import { CreateLabel, GetLabels } from '../../utils/Fetcher'
+import {
+  CreateLabel,
+  DeleteLabel,
+  GetLabels,
+  UpdateLabel,
+} from '../../utils/Fetcher'
 import { offlineDB } from '../../utils/OfflineDB'
+
+// The Fetcher functions route themselves to the local repositories when the
+// app is in local mode, so these hooks stay mode-agnostic.
 
 export const useLabels = () => {
   return useQuery({
@@ -29,8 +37,35 @@ export const useLabels = () => {
 }
 
 export const useCreateLabel = () => {
-  return useQuery({
-    queryKey: ['createLabel'],
-    queryFn: CreateLabel,
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: CreateLabel,
+    onSuccess: () => queryClient.invalidateQueries(['labels']),
+  })
+}
+
+export const useUpdateLabel = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: UpdateLabel,
+    onSuccess: () => {
+      queryClient.invalidateQueries(['labels'])
+      // Labels are denormalised into chores, so the lists have to re-read.
+      queryClient.invalidateQueries(['chores'])
+    },
+  })
+}
+
+export const useDeleteLabel = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: DeleteLabel,
+    onSuccess: () => {
+      queryClient.invalidateQueries(['labels'])
+      queryClient.invalidateQueries(['chores'])
+    },
   })
 }

@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 
+import { isLocalMode } from '../data/appMode'
 import { setServerVersion } from '../service/DiagnosticsSession'
 import { GetResource } from '../utils/Fetcher'
 
@@ -18,6 +19,9 @@ export const useResource = () => {
   const { data, error, isLoading, refetch } = useQuery({
     queryKey: ['resource'],
     queryFn: async () => {
+      // Nothing to ask a server about without an account.
+      if (isLocalMode()) return {}
+
       const response = await GetResource()
       // The backend only names its build here, so this is also where crash
       // reports learn which server version the user was talking to.
