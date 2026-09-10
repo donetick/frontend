@@ -246,11 +246,133 @@ it looked like Phase 1/2 hadn't shipped even though `choreRepo.complete` /
 
 Fixed by adding `isLocalMode()` branches to those seven functions in
 `Fetcher.jsx`, following the existing label/project/filter pattern
-(`localResponse(await choreRepo.…)`). `ApproveChore`, `RejectChore`,
-`NudgeChore`, `UpdateChoreAssignee`, and `UndoChoreAction` were left
-unpatched — approvals/nudges/assignees are explicitly out of Phase 1 scope,
-and undo has no local domain equivalent yet (would need to be designed, not a
-one-line fix).
+(`localResponse(await choreRepo.…)`). `ApproveChore`, `RejectChore`, and
+`NudgeChore` were left unpatched — approvals/nudges/assignees are explicitly
+out of Phase 1 scope.
+
+---
+
+## Follow-up: local undo + the Archived page stuck on "Loading"
+
+### `undoChore` — local completion/skip undo
+
+Added `src/domain/completion.js#undoChore`, the counterpart to `completeChore`
+/ `skipChore`: takes the most recent undoable history entry (`COMPLETED` /
+`SKIPPED` / `PENDING_APPROVAL`, newest-first) and restores `nextDueDate` from
+`historyEntry.dueDate` — the due date the chore *had* before the action, which
+`buildHistoryEntry` was already recording — resets `status`, and reactivates a
+chore that completion had archived (one-shot/trigger). The history row is
+removed. Returns `null` when there's nothing undoable, so the caller can no-op
+rather than throw.
+
+**Known gap, accepted deliberately:** if the undone entry was a reused
+"started" timer row, the elapsed timer session is not restored — the row is
+deleted outright instead of being reverted to `STARTED`. Fine for a
+single-user local undo; would need real design work (not a one-line fix) if
+timer-undo turns out to matter.
+
+`choreRepo.undo(id)` wraps it (`src/data/repositories/choreRepo.js`), and
+`Fetcher.jsx#UndoChoreAction` now has the `isLocalMode()` branch that was
+deliberately left out of the previous fix. Tests: `completion.test.js` (4
+cases) and `repositories.test.js` (2 cases).
+
+### Archived page stuck on "Loading" in local mode
+
+Two independent bugs in `ArchivedTasks.jsx`, both instances of the same root
+cause as the chore-actions bug above — code written against account-mode
+assumptions with no local-mode branch:
+
+1. **`GetArchivedChores` had no `isLocalMode()` branch** (same gap as the
+   seven functions above) — patched the same way, plus `DeleteChore` and
+   `ArchiveChore`/`UnArchiveChore` in `Fetcher.jsx` (the latter two weren't
+   reachable from the archived list, but `ChoreView.jsx` calls them directly
+   for the same operation on the chore-detail page, so they had the identical
+   bug).
+2. **The page never got that far.** `loadArchivedChores()` was gated on
+   `!membersLoading && userProfile` — both come from `useCircleMembers()` /
+   `useUserProfile()`, which are `enabled: !!token` and so never fetch in
+   local mode (no token). `userProfile` stays `undefined` forever, so the
+   effect's body never ran and `isLoading` never left `true`. Separately, the
+   render-time spinner guard was `isUserProfileLoading || performers.length
+   === 0 || isLoading` — `performers.length === 0` is a reasonable "still
+   loading" stand-in in account mode (a circle always has at least its owner)
+   but is *permanently* true in local mode, since there is no circle. Fixed
+   both to special-case `isLocalMode()` rather than depend on account-only
+   queries resolving to truthy data that will never arrive.
+
+### `UserActivities.jsx` (Activity page) stuck on "Loading" in local mode
+
+Same root pattern again, two bugs stacked:
+
+1. `if (!userProfile) return <LoadingComponent />` — `useUserProfile()` never
+   fetches without a token, so `userProfile` is `undefined` forever in local
+   mode. Fixed to `!userProfile && !isLocalMode()`. `useChores` and
+   `useChoresHistory` were already local-aware (`ChoreQueries.jsx`), and
+   `useLabels`/`GetLabels` already had an `isLocalMode()` branch, so once this
+   gate was fixed the rest of the page's data was already there.
+2. Unrelated to local mode, found while reading the loading gate: the history
+   loading spinner check (`isChoresHistoryLoading || isChoresLoading`)
+   destructured a field, `isChoresHistoryLoading`, that `useChoresHistory`
+   never returns (it returns `isLoading`) — so it was always `undefined` and
+   silently did nothing in *both* modes. Fixed the destructure to
+   `isLoading: isChoresHistoryLoading`.
+
+`useCircleMembers()` still returns no data in local mode (no circle), which is
+correct — the assignee filter and the assignee-breakdown chart just show
+nothing/"Unassigned", which is right for a single-user local setup.
+
+### `ChoreActionMenu` "move to project" not working
+
+`useChoreActions.js`'s `case 'moveToProject'` calls `SaveChore()` from
+`Fetcher.jsx` directly instead of the local-aware `useUpdateChore` hook that
+`ChoreEdit.jsx` uses — same bug class as everything above. `SaveChore` had no
+`isLocalMode()` branch, so it silently 501'd. Fixed by adding the branch
+directly to `SaveChore` (`choreRepo.save(chore)` via `localResponse`), which
+is lower-leverage-per-line than usual: it also fixes bulk "move to project"
+and bulk label edits in `useChoreActions.js`, the project picker in
+`ChoreView.jsx`, and `SubtaskQueries.jsx` — all of which call `SaveChore`
+directly and had the identical bug.
+
+### Full audit of `Fetcher.jsx` for the same pattern
+
+Given how many instances of "raw Fetcher call bypasses the local-aware hook"
+turned up organically, did a full pass over every export in `Fetcher.jsx`
+cross-referenced against every direct call site (not just hook-wrapped ones).
+Two more were real and reachable in local mode, both fixed:
+
+- **`GetChoreByID`** — no local branch; not currently called directly by any
+  reachable view (only through the already-local-aware `useChore` hook), but
+  patched anyway since it's identical in shape to the next one.
+- **`GetChoreDetailById`** — called directly (not through `useChoreDetails`)
+  by `ChoreView.jsx`'s complete/skip/undo handlers, to refresh the on-screen
+  chore right after the action. In local mode this silently 501'd, so the
+  chore detail page didn't visually update after completing/skipping/undoing
+  from the detail page itself (the chore list elsewhere still updated via
+  `invalidateQueries`, and the detail page would eventually self-correct on
+  refocus since `useChoreDetails` has `refetchOnWindowFocus: true`, but the
+  immediate feedback was missing). Both now branch to
+  `choreRepo.get(id)` via `localResponse`.
+
+Everything else in `Fetcher.jsx` without an `isLocalMode()` branch is either
+already unreachable in local mode (called only from within a hook that
+branches before reaching it — `GetChoresNew`, `CreateChore`, `GetChoreHistory`,
+`UpdateChoreHistory`, `DeleteChoreHistory`, `GetChoresHistory`) or is a
+genuinely account-only feature that's explicitly out of Phase 1 scope per the
+plan (`ApproveChore`, `RejectChore`, `NudgeChore`, `UpdateChoreAssignee`,
+attachments, circles/members, MFA, subscriptions, API tokens).
+
+**One real gap found and deliberately not patched:** the individual
+timer-session functions — `GetChoreTimer`, `UpdateTimeSession`,
+`DeleteTimeSession`, `ResetChoreTimer`, `ClearChoreTimer` (all used from
+`TimeQueries.jsx`, reachable from `ChoreView.jsx`'s timer UI). Start/pause
+already work locally (`choreRepo.start`/`pause`, backed by a single reused
+`STARTED` history entry), but there is no local domain concept of multiple
+named timer *sessions* to view, edit, or delete — that's a real feature gap,
+not a one-line `isLocalMode()` branch, since the underlying data model isn't
+there yet. Degrades gracefully today (the timer-session query just returns no
+data, no crash/hang), but the "reset timer" affordance on the chore detail
+page is a no-op in local mode. Worth a proper look if timer editing turns out
+to matter for local users.
 
 ---
 
@@ -269,11 +391,6 @@ one-line fix).
 - **Phase 3 (adoption)** and **Phase 4 (convergence)** not started. The backend
   asks in the plan (`POST /api/v1/sync/import`, extending `/sync/changes` to
   labels/projects/subtasks) are unchanged and still needed.
-- **Undo-after-complete still fails in local mode.** The success toast after
-  completing a chore always offers "Undo", which calls the still-unpatched
-  `UndoChoreAction` and gets a 501. Either suppress the undo action in local
-  mode or design a local undo (needs the pre-completion chore snapshot, which
-  nothing currently retains).
 - **Approve/Reject/Nudge/Assignee buttons are not capability-gated** on the
   chore card action menu the way `NavBar`/`SettingsOverview` are (1.4 only
   covered those two surfaces). In local mode these buttons can still be

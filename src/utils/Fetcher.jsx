@@ -147,12 +147,18 @@ const UnArchiveChore = id => {
 }
 
 const GetChoreByID = id => {
+  if (isLocalMode()) {
+    return choreRepo.get(id).then(localResponse)
+  }
   return Fetch(`/chores/${id}`, {
     method: 'GET',
     headers: HEADERS(),
   })
 }
 const GetChoreDetailById = id => {
+  if (isLocalMode()) {
+    return choreRepo.get(id).then(localResponse)
+  }
   return Fetch(`/chores/${id}/details`, {
     method: 'GET',
     headers: HEADERS(),
