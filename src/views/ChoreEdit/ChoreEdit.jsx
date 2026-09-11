@@ -392,7 +392,12 @@ const ChoreEdit = () => {
       notification: isNotificable,
       labels: labels.map(l => l.name),
       labelsV2: labelsV2,
-      subTasks: subTasks,
+      // `SubTasks`'s "add" action leaves an empty placeholder row focused for
+      // the next entry (see `SubTask.jsx`); if it's never filled in, it must
+      // not reach the server as a nameless subtask.
+      subTasks: subTasks
+        ? subTasks.filter(task => task.name?.trim())
+        : subTasks,
       notificationMetadata: notificationMetadata,
       thingTrigger: thingTrigger,
       points: points < 0 ? null : points,

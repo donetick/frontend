@@ -31,6 +31,7 @@ import ChoreHistory from '../views/History/ChoreHistory'
 import LabelDetailView from '../views/Labels/LabelDetailView'
 import LabelView from '../views/Labels/LabelView'
 import Landing from '../views/Landing/Landing'
+import AdoptionReviewView from '../views/Onboarding/AdoptionReviewView'
 import CircleSetupView from '../views/Onboarding/CircleSetupView'
 import GetStartedView from '../views/Onboarding/GetStartedView'
 import HeardAboutView from '../views/Onboarding/HeardAboutView'
@@ -210,6 +211,10 @@ const Router = createBrowserRouter([
       {
         path: '/circle-setup',
         element: <CircleSetupView />,
+      },
+      {
+        path: '/adopt-review',
+        element: <AdoptionReviewView />,
       },
       {
         path: '/heard-about',

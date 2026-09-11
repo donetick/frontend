@@ -19,6 +19,7 @@ import SSEProvider from './contexts/SSEContext'
 import { isLocalMode } from './data/appMode'
 import { ensureLocalStoreReady } from './data/health'
 import { store } from './data/store'
+import { useAdoptionOnSignIn } from './hooks/useAdoptionOnSignIn'
 import { AuthProvider } from './hooks/useAuth.jsx'
 import useOnboardingGate from './hooks/useOnboardingGate'
 import useStatusBar from './hooks/useStatusBar'
@@ -46,6 +47,9 @@ const AppContent = () => {
   const location = useLocation()
   useSyncOnReconnect()
   useAnalyticsIdentity()
+  // Local-mode data pending review before it's mixed into an account — see
+  // `AdoptionReviewView`.
+  const isRedirectingToAdoptionReview = useAdoptionOnSignIn()
 
   // Every route renders through this Outlet, so one listener here gives crash
   // reports the trail that led to the failure.
@@ -106,7 +110,7 @@ const AppContent = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [needRefresh])
 
-  if (isRedirectingToOnboarding) return null
+  if (isRedirectingToOnboarding || isRedirectingToAdoptionReview) return null
 
   return (
     <div>

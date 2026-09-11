@@ -1,7 +1,13 @@
-import { CloudDownload, CloudUpload, Warning } from '@mui/icons-material'
+import {
+  CloudDownload,
+  CloudSync,
+  CloudUpload,
+  Warning,
+} from '@mui/icons-material'
 import { Alert, Box, Button, Card, Chip, Typography } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import { downloadBackup, importBackup } from '../../data/backup'
 import {
@@ -29,6 +35,7 @@ const formatBytes = bytes => {
 const BackupSettings = () => {
   const queryClient = useQueryClient()
   const { isLocal } = useCapabilities()
+  const navigate = useNavigate()
   const fileInputRef = useRef(null)
 
   const [diagnostics, setDiagnostics] = useState(null)
@@ -95,6 +102,27 @@ const BackupSettings = () => {
   return (
     <SettingsLayout title='Backup & restore'>
       <Box className='grid gap-4 py-4' id='backup'>
+        {isLocal && (
+          <Card sx={{ maxWidth: 560, p: 2 }}>
+            <Typography level='title-md'>Back up & sync</Typography>
+            <Typography
+              level='body-sm'
+              sx={{ color: 'text.secondary', mb: 1.5 }}
+            >
+              Create an account and everything on this device — tasks, labels,
+              projects and history — moves with you. Nothing is deleted from
+              this device until it&apos;s confirmed on the server.
+            </Typography>
+            <Button
+              startDecorator={<CloudSync />}
+              onClick={() => navigate('/signup')}
+              sx={{ alignSelf: 'flex-start' }}
+            >
+              Sign up or sign in
+            </Button>
+          </Card>
+        )}
+
         <Card sx={{ maxWidth: 560, p: 2 }}>
           <Typography level='title-md'>Export a backup</Typography>
           <Typography level='body-sm' sx={{ color: 'text.secondary', mb: 1.5 }}>
