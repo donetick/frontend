@@ -1051,7 +1051,7 @@
     "browseTasks": "",
     "noResultsTitle": "",
     "noResultsDescription": "",
-    "notFoundTitle": "",
+    "notFoundTitle": "Membre introuvable",
     "notFoundDescription": "Cette personne a peut-être quitté le cercle ou n'est plus partagée avec vous."
   }
 }
