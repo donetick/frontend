@@ -401,11 +401,11 @@
     "removeAria": "Supprimer les rappels"
   },
   "assignee": {
-    "label": "",
+    "label": "Personne assignée",
     "anyone": "Tout le monde",
-    "unknown": "",
-    "selectedCount_one": "",
-    "selectedCount_other": ""
+    "unknown": "Inconnu",
+    "selectedCount_one": "{{count}} assigné",
+    "selectedCount_other": "{{count}} assignés"
   },
   "filterChip": {
     "cancelAll": "Annuler tous les filtres",
@@ -1034,23 +1034,23 @@
     "noteTitle": "Note - {{choreName}}"
   },
   "memberDetail": {
-    "taskCount_one": "",
-    "taskCount_other": "",
-    "you": "",
+    "taskCount_one": "{{count}} tâche assignée",
+    "taskCount_other": "{{count}} tâches assignées",
+    "you": "Vous",
     "filters": {
-      "all": "",
-      "overdue": "",
-      "today": "",
-      "undated": ""
+      "all": "Tout",
+      "overdue": "En retard",
+      "today": "Aujourd'hui",
+      "undated": "Aucune date"
     },
-    "noMatchingStatus": "",
-    "clearFilters": "",
-    "searchPlaceholder": "",
-    "emptyTitle": "",
-    "emptyDescription": "",
-    "browseTasks": "",
-    "noResultsTitle": "",
-    "noResultsDescription": "",
+    "noMatchingStatus": "Aucune tâche assignée à cette personne n'est actuellement dans cet état.",
+    "clearFilters": "Afficher toutes les tâches",
+    "searchPlaceholder": "Rechercher les tâches assignées à cette personne",
+    "emptyTitle": "Aucune tâche assignée",
+    "emptyDescription": "Rien n'est assigné à {{name}} en ce moment. Assignez une tâche et elle apparaîtra ici.",
+    "browseTasks": "Parcourir les tâches",
+    "noResultsTitle": "Aucune tâche correspondante",
+    "noResultsDescription": "Aucune tâche assignée à cette personne ne correspond à «{{searchTerm}}».",
     "notFoundTitle": "Membre introuvable",
     "notFoundDescription": "Cette personne a peut-être quitté le cercle ou n'est plus partagée avec vous."
   }
