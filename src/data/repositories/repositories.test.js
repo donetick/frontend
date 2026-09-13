@@ -98,6 +98,93 @@ describe('choreRepo', () => {
     expect((await choreRepo.get(saved.id)).status).toBe(CHORE_STATUS.NO_STATUS)
   })
 
+  it('records the elapsed timer duration on the completion history entry', async () => {
+    const saved = await choreRepo.save(daily)
+    await choreRepo.start(saved.id)
+
+    // The session's `start` is real wall-clock time; completing 5 minutes
+    // "later" only requires offsetting the completedDate we pass in, not
+    // advancing the actual clock.
+    const completedDate = new Date(Date.now() + 5 * 60 * 1000).toISOString()
+    await choreRepo.complete(saved.id, { completedDate })
+
+    const history = await historyRepo.forChore(saved.id)
+    expect(history[0].status).toBe(HISTORY_STATUS.COMPLETED)
+    expect(history[0].duration).toBe(300)
+  })
+
+  it('closes a still-running session, counts it, then resets the timer for the next occurrence', async () => {
+    const saved = await choreRepo.save(daily)
+    await choreRepo.start(saved.id)
+    await choreRepo.pause(saved.id)
+    await choreRepo.start(saved.id)
+
+    const completedDate = new Date(Date.now() + 4 * 60 * 1000).toISOString()
+    await choreRepo.complete(saved.id, { completedDate })
+
+    const history = await historyRepo.forChore(saved.id)
+    expect(history[0].duration).toBeGreaterThanOrEqual(240)
+
+    // The just-closed cycle's sessions live on the history entry now; the
+    // chore itself should start its next occurrence with a clean timer.
+    const completedChore = await choreRepo.get(saved.id)
+    expect(completedChore.duration).toBe(0)
+    expect(completedChore.timerPauseLog).toEqual([])
+    expect(completedChore.timerStartTime).toBeNull()
+    expect(await choreRepo.getTimer(saved.id)).toBeNull()
+  })
+
+  it('records work sessions across start/pause cycles for the timer page', async () => {
+    const saved = await choreRepo.save(daily)
+
+    expect(await choreRepo.getTimer(saved.id)).toBeNull()
+
+    await choreRepo.start(saved.id)
+    let timer = await choreRepo.getTimer(saved.id)
+    expect(timer.pauseLog).toHaveLength(1)
+    expect(timer.pauseLog[0].end).toBeNull()
+    expect(timer.startTime).toBeTruthy()
+
+    await choreRepo.pause(saved.id)
+    timer = await choreRepo.getTimer(saved.id)
+    expect(timer.pauseLog).toHaveLength(1)
+    expect(timer.pauseLog[0].end).toBeTruthy()
+
+    // Starting again opens a second session rather than reopening the first.
+    await choreRepo.start(saved.id)
+    timer = await choreRepo.getTimer(saved.id)
+    expect(timer.pauseLog).toHaveLength(2)
+    expect(timer.pauseLog[1].end).toBeNull()
+
+    // Starting while already running is a no-op on the session log.
+    await choreRepo.start(saved.id)
+    timer = await choreRepo.getTimer(saved.id)
+    expect(timer.pauseLog).toHaveLength(2)
+  })
+
+  it('resets and edits the timer session log', async () => {
+    const saved = await choreRepo.save(daily)
+    await choreRepo.start(saved.id)
+    await choreRepo.pause(saved.id)
+
+    const updated = await choreRepo.updateTimer(saved.id, {
+      startTime: '2025-03-10T09:00:00.000Z',
+      pauseLog: [
+        {
+          start: '2025-03-10T09:00:00.000Z',
+          end: '2025-03-10T09:10:00.000Z',
+          duration: 600,
+          updatedBy: 0,
+        },
+      ],
+    })
+    expect(updated.duration).toBe(600)
+
+    await choreRepo.resetTimer(saved.id)
+    expect(await choreRepo.getTimer(saved.id)).toBeNull()
+    expect((await choreRepo.get(saved.id)).status).toBe(CHORE_STATUS.NO_STATUS)
+  })
+
   it('undoes a completion, restoring the due date and history', async () => {
     const saved = await choreRepo.save(daily)
     await choreRepo.complete(saved.id, {

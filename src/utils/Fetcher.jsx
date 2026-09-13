@@ -748,6 +748,9 @@ const GetStorageUsage = () => {
 
 // Timer/TimeSession API functions
 const GetChoreTimer = choreId => {
+  if (isLocalMode()) {
+    return choreRepo.getTimer(choreId).then(localResponse)
+  }
   return Fetch(`/chores/${choreId}/timer`, {
     method: 'GET',
     headers: HEADERS(),
@@ -755,6 +758,9 @@ const GetChoreTimer = choreId => {
 }
 
 const UpdateTimeSession = (choreId, sessionId, sessionData) => {
+  if (isLocalMode()) {
+    return choreRepo.updateTimer(choreId, sessionData).then(localResponse)
+  }
   return Fetch(`/chores/${choreId}/timer/${sessionId}`, {
     method: 'PUT',
     headers: HEADERS(),
@@ -763,6 +769,9 @@ const UpdateTimeSession = (choreId, sessionId, sessionData) => {
 }
 
 const DeleteTimeSession = (choreId, sessionId) => {
+  if (isLocalMode()) {
+    return choreRepo.deleteTimerSession(choreId, sessionId).then(localResponse)
+  }
   return Fetch(`/chores/${choreId}/timer/${sessionId}`, {
     method: 'DELETE',
     headers: HEADERS(),
@@ -770,6 +779,9 @@ const DeleteTimeSession = (choreId, sessionId) => {
 }
 
 const ResetChoreTimer = choreId => {
+  if (isLocalMode()) {
+    return choreRepo.resetTimer(choreId).then(localResponse)
+  }
   return Fetch(`/chores/${choreId}/timer/reset`, {
     method: 'PUT',
     headers: HEADERS(),
@@ -777,6 +789,9 @@ const ResetChoreTimer = choreId => {
 }
 
 const ClearChoreTimer = choreId => {
+  if (isLocalMode()) {
+    return choreRepo.clearTimer(choreId).then(localResponse)
+  }
   return Fetch(`/chores/${choreId}/timer`, {
     method: 'DELETE',
     headers: HEADERS(),

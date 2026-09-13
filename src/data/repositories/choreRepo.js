@@ -15,6 +15,10 @@ import { historyRepo } from './historyRepo'
 
 const nowISO = () => new Date().toISOString()
 
+/** Sum of every closed session's duration, in seconds. */
+const sumClosedDuration = pauseLog =>
+  pauseLog.reduce((total, session) => total + (session.duration || 0), 0)
+
 /**
  * Fields every local chore carries, so views never have to guard against a
  * missing property that the server would always have sent.
@@ -132,17 +136,47 @@ export const choreRepo = {
     const chore = await store.get(COLLECTIONS.CHORE, key)
     if (!chore) return null
 
+    // Completing while the timer is still running (no explicit pause first)
+    // must still count the open session, the same way `pause()` closes it.
+    const completed = completedDate ? new Date(completedDate) : new Date()
+    const pauseLog = chore.timerPauseLog ?? []
+    const openIndex = pauseLog.findIndex(session => !session.end)
+    const closedLog =
+      openIndex === -1
+        ? pauseLog
+        : pauseLog.map((session, index) => {
+            if (index !== openIndex) return session
+            const endedAt = completed.toISOString()
+            const duration = Math.max(
+              0,
+              Math.floor((completed - new Date(session.start)) / 1000),
+            )
+            return { ...session, end: endedAt, duration }
+          })
+    const totalDuration = sumClosedDuration(closedLog)
+
     const history = await historyRepo.forChore(key)
     const result = completeChore({
       chore: present(chore),
-      completedDate,
+      completedDate: completed,
+      duration: totalDuration,
       history,
       note,
     })
 
+    // The elapsed time is now safely on the history entry (`duration` above);
+    // clear the chore's own timer fields so the next occurrence — or a fresh
+    // start on a one-shot chore reopened via undo — doesn't inherit sessions
+    // or a running total from the cycle that just closed.
     const saved = await store.put(COLLECTIONS.CHORE, {
       ...chore,
       ...result.chore,
+      timerStartTime: null,
+      timerEndTime: null,
+      timerPauseLog: [],
+      startTime: null,
+      duration: 0,
+      timerUpdatedAt: null,
       _id: key,
       id: key,
     })
@@ -244,11 +278,139 @@ export const choreRepo = {
         createdAt: nowISO(),
       })
     }
+
+    // The timer page (`/chore/:id/timer`) reads a work-session log separate
+    // from the history entry above; a new session opens only if the last one
+    // was already closed, so repeated starts while running are a no-op.
+    const pauseLog = chore.timerPauseLog ?? []
+    const hasOpenSession = pauseLog.some(session => !session.end)
+    if (!hasOpenSession) {
+      const startedAt = nowISO()
+      await store.put(COLLECTIONS.CHORE, {
+        ...chore,
+        timerStartTime: chore.timerStartTime ?? startedAt,
+        timerPauseLog: [
+          ...pauseLog,
+          { start: startedAt, end: null, duration: 0, updatedBy: 0 },
+        ],
+        // `TimePassedCard` reads these top-level fields (mirroring the
+        // server's chore JSON) to render the live-counting timer, separate
+        // from the `timer*` fields the `/timer` page's session log uses.
+        startTime: chore.startTime ?? startedAt,
+        duration: sumClosedDuration(pauseLog),
+        timerUpdatedAt: startedAt,
+        updatedAt: nowISO(),
+      })
+    }
+
     return this.setStatus(key, CHORE_STATUS.IN_PROGRESS)
   },
 
   async pause(id) {
-    return this.setStatus(id, CHORE_STATUS.PAUSED)
+    const key = String(id)
+    const chore = await store.get(COLLECTIONS.CHORE, key)
+    if (!chore) return null
+
+    const pauseLog = chore.timerPauseLog ?? []
+    const openIndex = pauseLog.findIndex(session => !session.end)
+    if (openIndex !== -1) {
+      const endedAt = nowISO()
+      const open = pauseLog[openIndex]
+      const duration = Math.max(
+        0,
+        Math.floor((new Date(endedAt) - new Date(open.start)) / 1000),
+      )
+      const closedLog = pauseLog.map((session, index) =>
+        index === openIndex ? { ...session, end: endedAt, duration } : session,
+      )
+      await store.put(COLLECTIONS.CHORE, {
+        ...chore,
+        timerPauseLog: closedLog,
+        duration: sumClosedDuration(closedLog),
+        timerUpdatedAt: endedAt,
+        updatedAt: nowISO(),
+      })
+    }
+
+    return this.setStatus(key, CHORE_STATUS.PAUSED)
+  },
+
+  /** The timer page's view of a chore: overall span plus each work session. */
+  async getTimer(id) {
+    const key = String(id)
+    const chore = await store.get(COLLECTIONS.CHORE, key)
+    if (!chore) return null
+    const pauseLog = chore.timerPauseLog ?? []
+    if (!chore.timerStartTime && pauseLog.length === 0) return null
+    return {
+      id: key,
+      startTime: chore.timerStartTime ?? null,
+      endTime: chore.timerEndTime ?? null,
+      duration: sumClosedDuration(pauseLog),
+      pauseLog,
+    }
+  },
+
+  /** Overwrite the whole timer span/session log, as the timer page's editor does. */
+  async updateTimer(id, sessionData = {}) {
+    const key = String(id)
+    const chore = await store.get(COLLECTIONS.CHORE, key)
+    if (!chore) return null
+    const pauseLog = sessionData.pauseLog ?? chore.timerPauseLog ?? []
+    const openSession = pauseLog.find(session => !session.end)
+    await store.put(COLLECTIONS.CHORE, {
+      ...chore,
+      timerStartTime: sessionData.startTime ?? chore.timerStartTime ?? null,
+      timerEndTime: sessionData.endTime ?? null,
+      timerPauseLog: pauseLog,
+      startTime: sessionData.startTime ?? chore.startTime ?? null,
+      duration: sumClosedDuration(pauseLog),
+      timerUpdatedAt: openSession
+        ? openSession.start
+        : (pauseLog[pauseLog.length - 1]?.end ?? chore.timerUpdatedAt ?? null),
+      updatedAt: nowISO(),
+    })
+    return this.getTimer(key)
+  },
+
+  /** Drop one work session from the log by its index in `pauseLog`. */
+  async deleteTimerSession(id, sessionIndex) {
+    const key = String(id)
+    const chore = await store.get(COLLECTIONS.CHORE, key)
+    if (!chore) return null
+    const pauseLog = (chore.timerPauseLog ?? []).filter(
+      (_, index) => index !== Number(sessionIndex),
+    )
+    await store.put(COLLECTIONS.CHORE, {
+      ...chore,
+      timerPauseLog: pauseLog,
+      duration: sumClosedDuration(pauseLog),
+      updatedAt: nowISO(),
+    })
+    return this.getTimer(key)
+  },
+
+  /** Clear the session log and go back to a fresh, un-started timer. */
+  async resetTimer(id) {
+    const key = String(id)
+    const chore = await store.get(COLLECTIONS.CHORE, key)
+    if (!chore) return null
+    await store.put(COLLECTIONS.CHORE, {
+      ...chore,
+      timerStartTime: null,
+      timerEndTime: null,
+      timerPauseLog: [],
+      startTime: null,
+      duration: 0,
+      timerUpdatedAt: null,
+      updatedAt: nowISO(),
+    })
+    return this.setStatus(key, CHORE_STATUS.NO_STATUS)
+  },
+
+  /** Same as reset — there's no server-side distinction worth keeping locally. */
+  async clearTimer(id) {
+    return this.resetTimer(id)
   },
 
   /** Clear subtask completion after a recurring chore is completed. */

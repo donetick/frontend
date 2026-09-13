@@ -41,6 +41,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useLocalization } from '../../contexts/LocalizationContext'
+import { isLocalMode } from '../../data/appMode'
 import { useDescriptionHtml } from '../../hooks/useDescriptionHtml'
 import { usePendingCommands } from '../../hooks/usePendingCommands'
 import {
@@ -149,9 +150,6 @@ const ChoreView = () => {
   const descriptionHtml = useDescriptionHtml(chore?.description || '', {
     choreId: chore?.id,
   })
-  const notesHtml = useDescriptionHtml(chore?.notes || '', {
-    choreId: chore?.id,
-  })
 
   const { data: choreData, isLoading: isChoreLoading } =
     useChoreDetails(choreId)
@@ -160,13 +158,36 @@ const ChoreView = () => {
   const { data: pendingCmds } = usePendingCommands(choreId)
 
   const choreHistory = choreHistoryData?.res || []
-  const historyCompletionCount = choreHistory.filter(historyEntry => {
-    const status = Number(historyEntry?.status)
-    return status === ChoreHistoryStatus.COMPLETED
-  }).length
+  const completedHistory = choreHistory
+    .filter(
+      historyEntry =>
+        Number(historyEntry?.status) === ChoreHistoryStatus.COMPLETED,
+    )
+    .sort(
+      (a, b) =>
+        new Date(b.performedAt || b.updatedAt) -
+        new Date(a.performedAt || a.updatedAt),
+    )
+  // Derived from history rather than trusted from the chore record, so this
+  // is correct in both account mode (server sends an aggregate) and local
+  // mode (there is no aggregate — history is the only source of truth) —
+  // falling back to the server's aggregate fields only until history loads.
+  const lastCompletedEntry = completedHistory[0] || null
   const completionCount = choreHistoryData
-    ? historyCompletionCount
+    ? completedHistory.length
     : chore.totalCompletedCount || 0
+  const lastCompletedDate = choreHistoryData
+    ? lastCompletedEntry?.performedAt || null
+    : chore.lastCompletedDate
+  const lastCompletedBy = choreHistoryData
+    ? lastCompletedEntry?.completedBy
+    : chore.lastCompletedBy
+  const lastCompletionNote =
+    (lastCompletedEntry?.notes || lastCompletedEntry?.note || '').trim() || ''
+  const noteSectionContent = lastCompletionNote || chore?.notes || ''
+  const notesHtml = useDescriptionHtml(noteSectionContent, {
+    choreId: chore?.id,
+  })
 
   const startChore = useStartChore()
   const pauseChore = usePauseChore()
@@ -175,13 +196,16 @@ const ChoreView = () => {
   const { data: choreTimer } = useChoreTimer(choreId)
 
   useEffect(() => {
-    if (!choreData || !choreData.res || !circleMembersData) {
-      return
-    }
+    // useCircleMembers() is gated on a token and never resolves in local
+    // mode — there is no circle — so waiting on it here would leave `chore`
+    // at `{}` forever and the whole page blank.
+    if (!choreData || !choreData.res) return
+    if (!isLocalMode() && !circleMembersData) return
+
     setChore(choreData.res)
     document.title = 'Donetick: ' + choreData.res.name
 
-    setPerformers(circleMembersData.res)
+    setPerformers(circleMembersData?.res || [])
     if (searchParams.get('auto_complete') === 'true') {
       navigate({ search: '' }, { replace: true })
       handleTaskCompletion()
@@ -189,21 +213,25 @@ const ChoreView = () => {
   }, [choreData, circleMembersData])
 
   useEffect(() => {
-    if (chore && performers?.length > 0) {
+    if (chore) {
+      const assignedDisplayName =
+        performers.find(p => p.userId === chore.assignedTo)?.displayName ||
+        t('choreView.na')
+      const lastCompletedByDisplayName =
+        performers.find(p => p.userId === lastCompletedBy)?.displayName ||
+        t('choreView.na')
+      const createdByDisplayName =
+        performers.find(p => p.userId === chore.createdBy)?.displayName ||
+        t('choreView.na')
+
       const cards = [
         {
           size: 6,
           icon: <PeopleAlt />,
           title: t('choreView.assignment'),
-          text: `${t('choreView.assigned')}: ${
-            performers.find(p => p.userId === chore.assignedTo)?.displayName ||
-            t('choreView.na')
-          }`,
+          text: `${t('choreView.assigned')}: ${assignedDisplayName}`,
           subtext: ` ${t('choreView.last')}: ${
-            chore.lastCompletedDate
-              ? performers.find(p => p.userId === chore.lastCompletedBy)
-                  ?.displayName
-              : 'N/A'
+            lastCompletedDate ? lastCompletedByDisplayName : t('choreView.na')
           }`,
         },
         {
@@ -216,8 +244,8 @@ const ChoreView = () => {
               : t('choreView.na')
           }`,
           subtext: `${t('choreView.last')}: ${
-            chore.lastCompletedDate
-              ? moment(chore.lastCompletedDate).fromNow()
+            lastCompletedDate
+              ? moment(lastCompletedDate).fromNow()
               : t('choreView.na')
           }`,
 
@@ -236,15 +264,19 @@ const ChoreView = () => {
           size: 6,
           icon: <Person />,
           title: t('choreView.details'),
-          subtext: `${t('choreView.createdBy')}: ${
-            performers.find(p => p.userId === chore.createdBy)?.displayName ||
-            t('choreView.na')
-          }`,
+          subtext: `${t('choreView.createdBy')}: ${createdByDisplayName}`,
         },
       ]
       setInfoCards(cards)
     }
-  }, [chore, performers, completionCount, t])
+  }, [
+    chore,
+    performers,
+    completionCount,
+    lastCompletedDate,
+    lastCompletedBy,
+    t,
+  ])
   const handleUpdatePriority = priority => {
     UpdateChorePriority(choreId, priority.value).then(response => {
       if (response.ok) {
@@ -1109,7 +1141,7 @@ const ChoreView = () => {
           </>
         )}
 
-        {chore.notes && (
+        {noteSectionContent && (
           <>
             <Typography level='title-md' sx={{ mb: 1 }}>
               {t('choreView.previousNoteLabel')}
@@ -1126,7 +1158,7 @@ const ChoreView = () => {
                 setNoteViewerConfig({
                   isOpen: true,
                   title: t('choreView.previousNote'),
-                  content: chore.notes,
+                  content: noteSectionContent,
                   onClose: () => setNoteViewerConfig({ isOpen: false }),
                 })
               }}
@@ -1149,7 +1181,7 @@ const ChoreView = () => {
                 }}
               >
                 {(() => {
-                  const raw = chore.notes || ''
+                  const raw = noteSectionContent
                   const shouldRenderHtml = hasHtmlTags(raw)
 
                   return shouldRenderHtml ? (

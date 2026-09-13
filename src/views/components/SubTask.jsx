@@ -28,11 +28,13 @@ import {
   ListItem,
   Typography,
 } from '@mui/joy'
+import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext'
 import { useLocalization } from '../../contexts/LocalizationContext'
+import { isLocalMode } from '../../data/appMode'
 import { useUserProfile } from '../../queries/UserQueries'
 import { CompleteSubTask } from '../../utils/Fetcher'
 
@@ -253,6 +255,7 @@ const SubTasks = ({
   const { data: userProfile } = useUserProfile()
   const { impersonatedUser } = useImpersonateUser()
   const inputRefs = useRef({})
+  const queryClient = useQueryClient()
 
   const focusId = id => {
     setTimeout(() => {
@@ -301,8 +304,22 @@ const SubTasks = ({
       completeChildren(taskId)
     }
 
-    CompleteSubTask(taskId, Number(choreId), newCompletedAt).then(res => {
-      if (res.status !== 200) console.log('Error updating task')
+    // Local chore ids are UUID strings, not server integers — `Number()`
+    // would turn them into `NaN`, which silently fails to match the chore
+    // when persisting (the completion never actually saves, it just looks
+    // checked until the next refetch/reload).
+    const targetChoreId = isLocalMode() ? choreId : Number(choreId)
+    CompleteSubTask(taskId, targetChoreId, newCompletedAt).then(res => {
+      if (res.status !== 200) {
+        console.log('Error updating task')
+        return
+      }
+      // `setTasks` above only updates this view's in-memory chore state; the
+      // cached `['choreDetails', choreId]` query (staleTime: 5min) would
+      // otherwise still hand back the pre-toggle subtasks the next time this
+      // page mounts, making the completion look like it reverted.
+      queryClient.invalidateQueries({ queryKey: ['choreDetails', choreId] })
+      queryClient.invalidateQueries({ queryKey: ['chores'] })
     })
 
     setTasks(updatedTasks)

@@ -59,6 +59,7 @@ const sortedNewestFirst = (history = []) =>
  */
 const buildHistoryEntry = ({
   chore,
+  duration,
   existingStarted,
   note,
   performedAt,
@@ -73,6 +74,7 @@ const buildHistoryEntry = ({
       notes: note ?? null,
       status,
       ...(points === null ? {} : { points }),
+      ...(duration === null || duration === undefined ? {} : { duration }),
     }
   }
 
@@ -88,6 +90,7 @@ const buildHistoryEntry = ({
     notes: note ?? null,
     status,
     points: points ?? 0,
+    ...(duration === null || duration === undefined ? {} : { duration }),
   }
 }
 
@@ -106,6 +109,7 @@ export const completeChore = ({
   chore,
   completedBy = 0,
   completedDate,
+  duration,
   history = [],
   note = null,
 }) => {
@@ -124,6 +128,7 @@ export const completeChore = ({
       },
       historyEntry: buildHistoryEntry({
         chore,
+        duration,
         existingStarted,
         performedAt: completed,
         note,
@@ -156,6 +161,7 @@ export const completeChore = ({
     chore: updatedChore,
     historyEntry: buildHistoryEntry({
       chore,
+      duration,
       existingStarted,
       performedAt: completed,
       note,
