@@ -8,15 +8,17 @@ import {
   useUnArchiveChore,
 } from '../../../queries/ChoreQueries'
 import { usePauseChore, useStartChore } from '../../../queries/TimeQueries'
+import {
+  completeChore,
+  deleteChore,
+  saveChore,
+  skipChore,
+} from '../../../utils/choreLocalFirstWrites'
 import { commandQueue, CommandType } from '../../../utils/CommandQueue'
 import {
   ApproveChore,
-  DeleteChore,
-  MarkChoreComplete,
   NudgeChore,
   RejectChore,
-  SaveChore,
-  SkipChore,
   UndoChoreAction,
   UpdateChoreAssignee,
   UpdateChorePriority,
@@ -210,7 +212,7 @@ export const useChoreActions = ({
       switch (action) {
         case 'complete':
           try {
-            const response = await MarkChoreComplete(
+            const response = await completeChore(
               chore.id,
               impersonatedUser
                 ? { completedBy: impersonatedUser.userId }
@@ -446,7 +448,7 @@ export const useChoreActions = ({
             onClose: async isConfirmed => {
               if (isConfirmed === true) {
                 try {
-                  const response = await DeleteChore(chore.id)
+                  const response = await deleteChore(chore.id)
                   if (response.ok) {
                     const newChores = chores.filter(c => c.id !== chore.id)
                     const newFilteredChores = filteredChores.filter(
@@ -603,7 +605,7 @@ export const useChoreActions = ({
 
         case 'skip':
           try {
-            const response = await SkipChore(chore.id)
+            const response = await skipChore(chore.id)
             if (response.ok) {
               // Online: update in place (chore gets new due date)
               const data = await response.json()
@@ -702,7 +704,7 @@ export const useChoreActions = ({
           const projectId = project?.id === null ? null : project?.id
           const updatedChore = { ...chore, projectId }
           try {
-            const response = await SaveChore(updatedChore)
+            const response = await saveChore(updatedChore)
             if (response.ok) {
               updateChoreInState(updatedChore, 'moved-to-project')
               showSuccess({
@@ -809,7 +811,7 @@ export const useChoreActions = ({
   const handleCompleteWithPastDate = useCallback(
     newDate => {
       if (!modalChore) return
-      MarkChoreComplete(
+      completeChore(
         modalChore.id,
         impersonatedUser ? { completedBy: impersonatedUser.userId } : null,
         new Date(newDate).toISOString(),
@@ -846,7 +848,7 @@ export const useChoreActions = ({
   const handleCompleteWithNote = useCallback(
     note => {
       if (!modalChore) return
-      MarkChoreComplete(
+      completeChore(
         modalChore.id,
         impersonatedUser
           ? { note, completedBy: impersonatedUser.userId }
@@ -1033,7 +1035,7 @@ export const useChoreActions = ({
       },
       perChore: chore =>
         expectOk(
-          MarkChoreComplete(
+          completeChore(
             chore.id,
             impersonatedUser ? { completedBy: impersonatedUser.userId } : null,
             null,
@@ -1056,7 +1058,7 @@ export const useChoreActions = ({
         confirmText: t('multiToolbar.skip'),
         message: `Skip ${taskCount(targets.length)} to next due date?`,
       },
-      perChore: chore => expectOk(SkipChore(chore.id)),
+      perChore: chore => expectOk(skipChore(chore.id)),
       successTitle: t('actions.bulk.skippedTitle'),
       successVerb: 'Skipped',
       failureVerb: 'skipped',
@@ -1114,7 +1116,7 @@ export const useChoreActions = ({
         confirmText: t('archived.delete'),
         message: `Delete ${taskCount(targets.length)}?\n\nThis action cannot be undone.`,
       },
-      perChore: chore => expectOk(DeleteChore(chore.id)),
+      perChore: chore => expectOk(deleteChore(chore.id)),
       successTitle: t('archived.deletedBulkTitle'),
       successVerb: 'Deleted',
       failureVerb: 'deleted',
@@ -1128,7 +1130,7 @@ export const useChoreActions = ({
       const projectId = project?.id ?? null
       runBulk({
         targets: getSelectedChoresData(chores),
-        perChore: chore => expectOk(SaveChore({ ...chore, projectId })),
+        perChore: chore => expectOk(saveChore({ ...chore, projectId })),
         successTitle: 'Tasks Moved',
         successVerb: `Moved to ${project?.name || 'Default Project'} —`,
         failureVerb: 'moved',
@@ -1257,7 +1259,7 @@ export const useChoreActions = ({
       runBulk({
         targets,
         perChore: chore =>
-          expectOk(SaveChore({ ...chore, labelsV2: nextLabelsFor(chore) })),
+          expectOk(saveChore({ ...chore, labelsV2: nextLabelsFor(chore) })),
         successTitle: mode === 'add' ? 'Label Added' : 'Label Removed',
         successVerb:
           mode === 'add'

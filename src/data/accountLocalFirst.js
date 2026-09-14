@@ -5,6 +5,8 @@
 // defaults OFF: flipping it on is what puts a signed-in account through the
 // new engine instead of the legacy one, so a broken rollout can't silently
 // affect existing logged-in users.
+import { isLocalMode } from './appMode'
+
 const ACCOUNT_LOCAL_FIRST_KEY = 'account_local_first_enabled'
 const ACCOUNT_LOCAL_FIRST_EVENT = 'donetick:account-local-first-changed'
 
@@ -34,6 +36,12 @@ export const setAccountLocalFirstEnabled = enabled => {
     }),
   )
 }
+
+// Use only to decide whether a write should go through the local repository
+// first — not for capability gating, routing, or auth checks, which must
+// keep reading `isLocalMode()`/token presence directly.
+export const shouldUseLocalFirstStore = () =>
+  isLocalMode() || isAccountLocalFirstEnabled()
 
 export const subscribeToAccountLocalFirst = callback => {
   if (typeof window === 'undefined') return () => {}

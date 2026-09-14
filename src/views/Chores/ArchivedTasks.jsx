@@ -40,8 +40,9 @@ import { useFilter } from '../../hooks/useFilter'
 import { useUnArchiveChore } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
+import { deleteChore } from '../../utils/choreLocalFirstWrites'
 import { commandQueue, CommandType } from '../../utils/CommandQueue'
-import { DeleteChore, GetArchivedChores } from '../../utils/Fetcher'
+import { GetArchivedChores } from '../../utils/Fetcher'
 import { offlineDB } from '../../utils/OfflineDB'
 import { isOfflineFeatureEnabled } from '../../utils/OfflineFeatureToggle'
 import Priorities from '../../utils/Priorities'
@@ -612,7 +613,7 @@ const ArchivedTasks = () => {
 
             for (const chore of selectedData) {
               try {
-                await DeleteChore(chore.id)
+                await deleteChore(chore.id)
                 deletedTasks.push(chore)
               } catch (error) {
                 failedTasks.push(chore)

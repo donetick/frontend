@@ -1,3 +1,4 @@
+import { shouldUseLocalFirstStore } from '../data/accountLocalFirst'
 import { isLocalMode } from '../data/appMode'
 import { localResponse } from '../data/localResponse'
 import { choreRepo } from '../data/repositories/choreRepo'
@@ -119,7 +120,7 @@ const GetChores = () => {
   })
 }
 const GetArchivedChores = () => {
-  if (isLocalMode()) {
+  if (shouldUseLocalFirstStore()) {
     return choreRepo.archived().then(localResponse)
   }
   return Fetch(`/chores/archived`, {
@@ -128,7 +129,7 @@ const GetArchivedChores = () => {
   })
 }
 const ArchiveChore = id => {
-  if (isLocalMode()) {
+  if (shouldUseLocalFirstStore()) {
     return choreRepo.archive(id).then(localResponse)
   }
   return Fetch(`/chores/${id}/archive`, {
@@ -137,7 +138,7 @@ const ArchiveChore = id => {
   })
 }
 const UnArchiveChore = id => {
-  if (isLocalMode()) {
+  if (shouldUseLocalFirstStore()) {
     return choreRepo.unarchive(id).then(localResponse)
   }
   return Fetch(`/chores/${id}/unarchive`, {
@@ -147,7 +148,7 @@ const UnArchiveChore = id => {
 }
 
 const GetChoreByID = id => {
-  if (isLocalMode()) {
+  if (shouldUseLocalFirstStore()) {
     return choreRepo.get(id).then(localResponse)
   }
   return Fetch(`/chores/${id}`, {
@@ -156,7 +157,7 @@ const GetChoreByID = id => {
   })
 }
 const GetChoreDetailById = id => {
-  if (isLocalMode()) {
+  if (shouldUseLocalFirstStore()) {
     return choreRepo.get(id).then(localResponse)
   }
   return Fetch(`/chores/${id}/details`, {
@@ -214,7 +215,7 @@ const MarkChoreComplete = (id, body, completedDate, performer) => {
 }
 
 const StartChore = id => {
-  if (isLocalMode()) {
+  if (shouldUseLocalFirstStore()) {
     return choreRepo.start(id).then(localResponse)
   }
   return Fetch(`/chores/${id}/start`, {
@@ -224,7 +225,7 @@ const StartChore = id => {
 }
 
 const PauseChore = id => {
-  if (isLocalMode()) {
+  if (shouldUseLocalFirstStore()) {
     return choreRepo.pause(id).then(localResponse)
   }
   return Fetch(`/chores/${id}/pause`, {
@@ -234,7 +235,7 @@ const PauseChore = id => {
 }
 
 const CompleteSubTask = (id, choreId, completedAt) => {
-  if (isLocalMode()) {
+  if (shouldUseLocalFirstStore()) {
     return choreRepo
       .setSubtaskCompletion(choreId, id, Boolean(completedAt))
       .then(localResponse)
@@ -277,7 +278,7 @@ const RejectChore = id => {
 }
 
 const UndoChoreAction = id => {
-  if (isLocalMode()) {
+  if (shouldUseLocalFirstStore()) {
     return choreRepo.undo(id).then(localResponse)
   }
   return Fetch(`/chores/${id}/undo`, {
@@ -339,7 +340,7 @@ const SaveChore = chore => {
 }
 
 const UpdateChorePriority = (id, priority) => {
-  if (isLocalMode()) {
+  if (shouldUseLocalFirstStore()) {
     return choreRepo.save({ id, priority }).then(localResponse)
   }
   return Fetch(`/chores/${id}/priority `, {
@@ -534,7 +535,8 @@ const PutNotificationTarget = (platform, deviceToken) => {
   })
 }
 const CreateLabel = async label => {
-  if (isLocalMode()) return localResponse(await labelRepo.create(label))
+  if (shouldUseLocalFirstStore())
+    return localResponse(await labelRepo.create(label))
   return Fetch(`/labels`, {
     method: 'POST',
     headers: HEADERS(),
@@ -543,7 +545,7 @@ const CreateLabel = async label => {
 }
 
 const GetLabels = async () => {
-  if (isLocalMode()) return { res: await labelRepo.all() }
+  if (shouldUseLocalFirstStore()) return { res: await labelRepo.all() }
   const resp = await Fetch(`/labels`, {
     method: 'GET',
     headers: HEADERS(),
@@ -562,7 +564,8 @@ const GetResource = async () => {
 }
 
 const UpdateLabel = async label => {
-  if (isLocalMode()) return localResponse(await labelRepo.update(label))
+  if (shouldUseLocalFirstStore())
+    return localResponse(await labelRepo.update(label))
   return Fetch(`/labels`, {
     method: 'PUT',
     headers: HEADERS(),
@@ -570,7 +573,8 @@ const UpdateLabel = async label => {
   })
 }
 const DeleteLabel = async id => {
-  if (isLocalMode()) return localResponse(await labelRepo.remove(id))
+  if (shouldUseLocalFirstStore())
+    return localResponse(await labelRepo.remove(id))
   return Fetch(`/labels/${id}`, {
     method: 'DELETE',
     headers: HEADERS(),
@@ -658,7 +662,7 @@ const VerifyMFA = (sessionToken, code) => {
 }
 
 const UpdateDueDate = (id, dueDate) => {
-  if (isLocalMode()) {
+  if (shouldUseLocalFirstStore()) {
     return choreRepo.reschedule(id, dueDate).then(localResponse)
   }
   return Fetch(`/chores/${id}/dueDate`, {
@@ -748,7 +752,7 @@ const GetStorageUsage = () => {
 
 // Timer/TimeSession API functions
 const GetChoreTimer = choreId => {
-  if (isLocalMode()) {
+  if (shouldUseLocalFirstStore()) {
     return choreRepo.getTimer(choreId).then(localResponse)
   }
   return Fetch(`/chores/${choreId}/timer`, {
@@ -758,7 +762,7 @@ const GetChoreTimer = choreId => {
 }
 
 const UpdateTimeSession = (choreId, sessionId, sessionData) => {
-  if (isLocalMode()) {
+  if (shouldUseLocalFirstStore()) {
     return choreRepo.updateTimer(choreId, sessionData).then(localResponse)
   }
   return Fetch(`/chores/${choreId}/timer/${sessionId}`, {
@@ -769,7 +773,7 @@ const UpdateTimeSession = (choreId, sessionId, sessionData) => {
 }
 
 const DeleteTimeSession = (choreId, sessionId) => {
-  if (isLocalMode()) {
+  if (shouldUseLocalFirstStore()) {
     return choreRepo.deleteTimerSession(choreId, sessionId).then(localResponse)
   }
   return Fetch(`/chores/${choreId}/timer/${sessionId}`, {
@@ -779,7 +783,7 @@ const DeleteTimeSession = (choreId, sessionId) => {
 }
 
 const ResetChoreTimer = choreId => {
-  if (isLocalMode()) {
+  if (shouldUseLocalFirstStore()) {
     return choreRepo.resetTimer(choreId).then(localResponse)
   }
   return Fetch(`/chores/${choreId}/timer/reset`, {
@@ -789,7 +793,7 @@ const ResetChoreTimer = choreId => {
 }
 
 const ClearChoreTimer = choreId => {
-  if (isLocalMode()) {
+  if (shouldUseLocalFirstStore()) {
     return choreRepo.clearTimer(choreId).then(localResponse)
   }
   return Fetch(`/chores/${choreId}/timer`, {
@@ -965,7 +969,7 @@ const DeleteChildUser = childUserId => {
 
 // Project-related API functions
 const GetProjects = async () => {
-  if (isLocalMode()) return localResponse(await projectRepo.all())
+  if (shouldUseLocalFirstStore()) return localResponse(await projectRepo.all())
   return Fetch(`/projects`, {
     method: 'GET',
     headers: HEADERS(),
@@ -973,7 +977,8 @@ const GetProjects = async () => {
 }
 
 const GetProjectById = async id => {
-  if (isLocalMode()) return localResponse(await projectRepo.get(id))
+  if (shouldUseLocalFirstStore())
+    return localResponse(await projectRepo.get(id))
   return Fetch(`/projects/${id}`, {
     method: 'GET',
     headers: HEADERS(),
@@ -981,7 +986,8 @@ const GetProjectById = async id => {
 }
 
 const CreateProject = async project => {
-  if (isLocalMode()) return localResponse(await projectRepo.create(project))
+  if (shouldUseLocalFirstStore())
+    return localResponse(await projectRepo.create(project))
   return Fetch(`/projects`, {
     method: 'POST',
     headers: HEADERS(),
@@ -990,7 +996,8 @@ const CreateProject = async project => {
 }
 
 const UpdateProject = async (id, project) => {
-  if (isLocalMode()) return localResponse(await projectRepo.update(id, project))
+  if (shouldUseLocalFirstStore())
+    return localResponse(await projectRepo.update(id, project))
   return Fetch(`/projects/${id}`, {
     method: 'PUT',
     headers: HEADERS(),
@@ -999,7 +1006,8 @@ const UpdateProject = async (id, project) => {
 }
 
 const DeleteProject = async id => {
-  if (isLocalMode()) return localResponse(await projectRepo.remove(id))
+  if (shouldUseLocalFirstStore())
+    return localResponse(await projectRepo.remove(id))
   return Fetch(`/projects/${id}`, {
     method: 'DELETE',
     headers: HEADERS(),

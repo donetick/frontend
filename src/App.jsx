@@ -16,9 +16,10 @@ import { registerCapacitorListeners } from './CapacitorListener'
 import PageTransition from './components/animations/PageTransition'
 import { ImpersonateUserProvider } from './contexts/ImpersonateUserContext'
 import SSEProvider from './contexts/SSEContext'
-import { isLocalMode } from './data/appMode'
+import { shouldUseLocalFirstStore } from './data/accountLocalFirst'
 import { ensureLocalStoreReady } from './data/health'
 import { store } from './data/store'
+import { useAccountSyncOnReconnect } from './hooks/useAccountSyncOnReconnect'
 import { useAdoptionOnSignIn } from './hooks/useAdoptionOnSignIn'
 import { AuthProvider } from './hooks/useAuth.jsx'
 import useOnboardingGate from './hooks/useOnboardingGate'
@@ -46,6 +47,7 @@ const AppContent = () => {
   const { showNotification } = useNotification()
   const location = useLocation()
   useSyncOnReconnect()
+  useAccountSyncOnReconnect()
   useAnalyticsIdentity()
   // Local-mode data pending review before it's mixed into an account — see
   // `AdoptionReviewView`.
@@ -165,7 +167,7 @@ function App() {
   // open and migrated before the first view reads from it. Due-date reminders
   // are scheduled from that same local data — there is no server to push them.
   useEffect(() => {
-    if (!isLocalMode()) return undefined
+    if (!shouldUseLocalFirstStore()) return undefined
 
     let stopWatching = () => {}
     ensureLocalStoreReady().then(() => {

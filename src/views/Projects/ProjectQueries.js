@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { track } from '../../analytics'
+import { shouldUseLocalFirstStore } from '../../data/accountLocalFirst'
 import {
   CreateProject,
   DeleteProject,
@@ -23,7 +24,12 @@ export const useProjects = () => {
           return projects
         }
         throw new Error('Failed to fetch projects')
-      } catch {
+      } catch (error) {
+        // Under the flag, GetProjects already routed to projectRepo — a
+        // throw here is a real repo failure, not "offline, degrade
+        // gracefully", so let it surface instead of masking it with a stale
+        // KV blob.
+        if (shouldUseLocalFirstStore()) throw error
         const cached = await offlineDB.getKV('projects')
         if (cached) return cached
         return []
@@ -51,6 +57,11 @@ export const useCreateProject = () => {
         throw new Error('Failed to create project')
       } catch (error) {
         console.error('Error creating project:', error)
+        // Under the flag, CreateProject already routed to projectRepo and
+        // would have returned a real object on success — a throw here is a
+        // genuine account-mode-online failure, so let it surface instead of
+        // fabricating a fake local object that would never get pushed.
+        if (shouldUseLocalFirstStore()) throw error
         // For development, create a local project
         const localProject = {
           id: `local-${Date.now()}`,
@@ -92,6 +103,7 @@ export const useUpdateProject = () => {
         throw new Error('Failed to update project')
       } catch (error) {
         console.error('Error updating project:', error)
+        if (shouldUseLocalFirstStore()) throw error
         // For development, return updated project
         return {
           id: projectId,
@@ -136,6 +148,7 @@ export const useDeleteProject = () => {
         throw new Error('Failed to delete project')
       } catch (error) {
         console.error('Error deleting project:', error)
+        if (shouldUseLocalFirstStore()) throw error
         // For development, simulate successful deletion
         return { id: projectId, deleted: true }
       }

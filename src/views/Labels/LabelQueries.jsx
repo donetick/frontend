@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
+import { shouldUseLocalFirstStore } from '../../data/accountLocalFirst'
 import {
   CreateLabel,
   DeleteLabel,
@@ -28,6 +29,10 @@ export const useLabels = () => {
         }
         return labels
       } catch {
+        // Under the flag, GetLabels already routed to labelRepo (see
+        // Fetcher.jsx) — a throw here means the repo call itself failed, so
+        // falling back to this stale KV blob would just mask that.
+        if (shouldUseLocalFirstStore()) throw new Error('Failed to load labels')
         const cached = await offlineDB.getKV('labels')
         if (Array.isArray(cached)) return cached
         return []

@@ -1,14 +1,15 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { networkManager } from '../hooks/NetworkManager'
-import { CompleteSubTask, SaveChore } from '../utils/Fetcher'
+import { saveChore } from '../utils/choreLocalFirstWrites'
+import { CompleteSubTask } from '../utils/Fetcher'
 
 export const useUpdate = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: async updatedChore => {
-      const resp = await SaveChore(updatedChore)
+      const resp = await saveChore(updatedChore)
       if (!resp || !resp.ok) {
         throw new Error('Failed to save chore')
       }

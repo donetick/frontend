@@ -58,6 +58,12 @@ import {
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import { useNotification } from '../../service/NotificationProvider'
 import {
+  completeChore,
+  deleteChore,
+  saveChore,
+  skipChore,
+} from '../../utils/choreLocalFirstWrites'
+import {
   ChoreHistoryStatus,
   ChoreStatus,
   notInCompletionWindow,
@@ -67,13 +73,9 @@ import { commandQueue, CommandType } from '../../utils/CommandQueue'
 import {
   ApproveChore,
   ArchiveChore,
-  DeleteChore,
   GetChoreDetailById,
-  MarkChoreComplete,
   NudgeChore,
   RejectChore,
-  SaveChore,
-  SkipChore,
   UnArchiveChore,
   UndoChoreAction,
   UpdateChoreAssignee,
@@ -81,6 +83,7 @@ import {
   UpdateDueDate,
 } from '../../utils/Fetcher'
 import { offlineDB } from '../../utils/OfflineDB'
+import { isOfflineFeatureEnabled } from '../../utils/OfflineFeatureToggle'
 import { getSafeBottomPadding } from '../../utils/SafeAreaUtils.js'
 import ChoreActionMenu from '../components/ChoreActionMenu'
 import DueDatePickerModal, {
@@ -100,8 +103,12 @@ import WriteNFCModal from '../Modals/Inputs/WriteNFCModal'
 import TimePassedCard from './TimePassedCard.jsx'
 import TimerSplitButton from './TimerSplitButton.jsx'
 
+// Effectively "can this action be queued offline?" — requires the offline
+// feature, otherwise there is no command queue to replay it later.
 const isNetworkError = err =>
-  err instanceof TypeError && err.message === 'Failed to fetch'
+  isOfflineFeatureEnabled() &&
+  err instanceof TypeError &&
+  err.message === 'Failed to fetch'
 
 const decodeHtmlEntities = value => {
   if (typeof value !== 'string') return ''
@@ -289,7 +296,7 @@ const ChoreView = () => {
   }
   const handleTaskCompletion = async () => {
     try {
-      const resp = await MarkChoreComplete(
+      const resp = await completeChore(
         choreId,
         impersonatedUser
           ? { completedBy: impersonatedUser.userId, note }
@@ -379,7 +386,7 @@ const ChoreView = () => {
   }
   const handleSkippingTask = async () => {
     try {
-      const response = await SkipChore(choreId)
+      const response = await skipChore(choreId)
       if (response.ok) {
         const data = await response.json()
         setChore(data.res)
@@ -597,8 +604,6 @@ const ChoreView = () => {
         queryClient.invalidateQueries(['chores'])
       }
     } catch (error) {
-      const isNetworkError = err =>
-        err instanceof TypeError && err.message === 'Failed to fetch'
       if (isNetworkError(error)) {
         const cmdId = await commandQueue.enqueue(
           CommandType.UNARCHIVE_CHORE,
@@ -671,7 +676,7 @@ const ChoreView = () => {
         setConfirmModelConfig({})
         if (!confirmed) return
         try {
-          const response = await DeleteChore(choreId)
+          const response = await deleteChore(choreId)
           if (response.ok) {
             queryClient.invalidateQueries(['chores'])
             showSuccess({
@@ -708,7 +713,7 @@ const ChoreView = () => {
   const handleMoveToProject = async project => {
     const projectId = project?.id ?? null
     try {
-      const response = await SaveChore({ ...chore, projectId })
+      const response = await saveChore({ ...chore, projectId })
       if (response.ok) {
         setChore(prev => ({ ...prev, projectId }))
         queryClient.invalidateQueries(['chores'])

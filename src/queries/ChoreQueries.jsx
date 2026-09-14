@@ -2,10 +2,15 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 
 import { track } from '../analytics'
+import {
+  isAccountLocalFirstEnabled,
+  shouldUseLocalFirstStore,
+} from '../data/accountLocalFirst'
 import { isLocalMode } from '../data/appMode'
 import { choreRepo } from '../data/repositories/choreRepo'
 import { historyRepo } from '../data/repositories/historyRepo'
 import { networkManager } from '../hooks/NetworkManager'
+import { pull as accountSyncPull } from '../sync/accountSync'
 import { commandQueue, CommandType } from '../utils/CommandQueue'
 import {
   ApproveChore,
@@ -103,7 +108,7 @@ export const useChores = (includeArchive = false) => {
     queryKey: ['chores', includeArchive],
     refetchOnWindowFocus: true,
     queryFn: async () => {
-      if (isLocalMode()) {
+      if (shouldUseLocalFirstStore()) {
         return { res: await choreRepo.all({ includeArchived: includeArchive }) }
       }
 
@@ -157,7 +162,7 @@ export const useDeleteChores = () => {
 
   return useMutation({
     mutationFn: async choreIds => {
-      if (isLocalMode()) {
+      if (shouldUseLocalFirstStore()) {
         for (const id of choreIds) await choreRepo.remove(id)
         return
       }
@@ -231,7 +236,7 @@ export const useCreateChore = () => {
       // `source` is analytics-only metadata (typed/voice/scan/clone) — never
       // send it to the backend as part of the chore payload.
       const { source, ...newTask } = rawTask
-      if (isLocalMode()) {
+      if (shouldUseLocalFirstStore()) {
         const created = await choreRepo.save(newTask)
         track('chore_created', {
           has_due_date: Boolean(newTask.dueDate),
@@ -241,7 +246,7 @@ export const useCreateChore = () => {
           recurrence_type: newTask.frequencyType || 'once',
           priority: typeof newTask.priority === 'number' ? newTask.priority : 0,
           source: source || 'quick_add',
-          mode: 'local',
+          mode: isLocalMode() ? 'local' : 'account',
         })
         return created
       }
@@ -313,7 +318,7 @@ export const useUpdateChore = () => {
         return pendingChore
       }
 
-      if (isLocalMode()) {
+      if (shouldUseLocalFirstStore()) {
         return choreRepo.save(updatedChore)
       }
 
@@ -368,7 +373,7 @@ export const useChoresHistory = (initialLimit, includeMembers) => {
   const { data, error, isLoading } = useQuery({
     queryKey: ['choresHistory', limit],
     queryFn: async () => {
-      if (isLocalMode()) return historyRepo.recent(limit)
+      if (shouldUseLocalFirstStore()) return historyRepo.recent(limit)
 
       try {
         const resp = await GetChoresHistory(limit, includeMembers)
@@ -400,7 +405,8 @@ export const useChoreDetails = choreId => {
     queryKey: ['choreDetails', choreId],
     refetchOnWindowFocus: true,
     queryFn: async () => {
-      if (isLocalMode()) return { res: await choreRepo.get(choreId) }
+      if (shouldUseLocalFirstStore())
+        return { res: await choreRepo.get(choreId) }
 
       try {
         const response = await GetChoreDetailById(choreId)
@@ -430,7 +436,7 @@ export const useChore = choreId => {
         throw new Error('Chore ID is required to fetch chore details')
       }
 
-      if (isLocalMode()) {
+      if (shouldUseLocalFirstStore()) {
         const chore = await choreRepo.get(choreId)
         if (!chore) throw new Error('Chore not found')
         return { res: chore }
@@ -466,7 +472,7 @@ export const useArchiveChore = () => {
 
   return useMutation({
     mutationFn: id =>
-      isLocalMode() ? choreRepo.archive(id) : ArchiveChore(id),
+      shouldUseLocalFirstStore() ? choreRepo.archive(id) : ArchiveChore(id),
     onSuccess: () => {
       queryClient.invalidateQueries(['chores'])
     },
@@ -478,7 +484,7 @@ export const useUnArchiveChore = () => {
 
   return useMutation({
     mutationFn: id =>
-      isLocalMode() ? choreRepo.unarchive(id) : UnArchiveChore(id),
+      shouldUseLocalFirstStore() ? choreRepo.unarchive(id) : UnArchiveChore(id),
     onSuccess: () => {
       queryClient.invalidateQueries(['chores'])
     },
@@ -493,7 +499,8 @@ export const useChoreHistory = choreId => {
         throw new Error('Chore ID is required to fetch history')
       }
 
-      if (isLocalMode()) return { res: await historyRepo.forChore(choreId) }
+      if (shouldUseLocalFirstStore())
+        return { res: await historyRepo.forChore(choreId) }
 
       let json
       try {
@@ -552,7 +559,7 @@ export const useUpdateChoreHistory = () => {
         return { queued: true }
       }
 
-      if (isLocalMode()) {
+      if (shouldUseLocalFirstStore()) {
         return historyRepo.update(historyId, historyData)
       }
 
@@ -619,7 +626,7 @@ export const useDeleteChoreHistory = () => {
         return { queued: true }
       }
 
-      if (isLocalMode()) {
+      if (shouldUseLocalFirstStore()) {
         return historyRepo.remove(historyId)
       }
 
@@ -667,7 +674,7 @@ export const useMarkChoreComplete = () => {
       // Runs the ported scheduler locally so a recurring chore actually
       // advances offline instead of just showing a pending badge. The queued
       // command still replays against the server, which stays authoritative.
-      if (isLocalMode()) {
+      if (shouldUseLocalFirstStore()) {
         return {
           res: await choreRepo.complete(choreId, {
             completedDate,
@@ -744,7 +751,7 @@ export const useSkipChore = () => {
 
   return useMutation({
     mutationFn: async choreId => {
-      if (isLocalMode()) {
+      if (shouldUseLocalFirstStore()) {
         return { res: await choreRepo.skip(choreId) }
       }
 
@@ -795,10 +802,16 @@ export const useApproveChore = () => {
 
   return useMutation({
     mutationFn: ApproveChore,
-    onSuccess: (_, choreId) => {
+    // Approval has no local-mode meaning (another circle member has to act on
+    // it) — this stays a direct server call. Under the flag, pull so the
+    // local copy picks up whatever the approval changed server-side.
+    onSuccess: async (_, choreId) => {
       queryClient.invalidateQueries(['chores'])
       queryClient.invalidateQueries(['choreHistory', choreId])
       queryClient.invalidateQueries(['choreDetails', choreId])
+      if (isAccountLocalFirstEnabled()) {
+        await accountSyncPull().catch(() => {})
+      }
     },
   })
 }
@@ -808,10 +821,13 @@ export const useRejectChore = () => {
 
   return useMutation({
     mutationFn: RejectChore,
-    onSuccess: (_, choreId) => {
+    onSuccess: async (_, choreId) => {
       queryClient.invalidateQueries(['chores'])
       queryClient.invalidateQueries(['choreHistory', choreId])
       queryClient.invalidateQueries(['choreDetails', choreId])
+      if (isAccountLocalFirstEnabled()) {
+        await accountSyncPull().catch(() => {})
+      }
     },
   })
 }
@@ -821,7 +837,7 @@ export const useChoreAttachments = (choreId, hasAttachments = true) => {
     queryKey: ['choreAttachments', choreId],
     queryFn: async () => {
       // Attachments need server storage, so local mode simply has none.
-      if (isLocalMode()) return { res: [] }
+      if (shouldUseLocalFirstStore()) return { res: [] }
 
       const response = await GetChoreAttachments(choreId)
       if (response && response.ok) {
