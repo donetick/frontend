@@ -10,13 +10,15 @@ import {
   CompleteSubTask,
   CreateChore,
   CreateFilter,
-  CreateLabel,
-  CreateProject,
   GetChoreDetailById,
   MarkChoreComplete,
   SkipChore,
   UpdateDueDate,
 } from '../utils/Fetcher'
+import {
+  CreateLabelRemote as CreateLabel,
+  CreateProjectRemote as CreateProject,
+} from '../utils/RemoteApi'
 import { adoptLocalData } from './adopt'
 
 vi.mock('../utils/Fetcher', () => ({
@@ -24,12 +26,17 @@ vi.mock('../utils/Fetcher', () => ({
   CompleteSubTask: vi.fn(),
   CreateChore: vi.fn(),
   CreateFilter: vi.fn(),
-  CreateLabel: vi.fn(),
-  CreateProject: vi.fn(),
   GetChoreDetailById: vi.fn(),
   MarkChoreComplete: vi.fn(),
   SkipChore: vi.fn(),
   UpdateDueDate: vi.fn(),
+}))
+
+// Regression coverage for offline-first-review.md finding 1: mock at the real
+// transport boundary adopt.js imports, not at Fetcher.
+vi.mock('../utils/RemoteApi', () => ({
+  CreateLabelRemote: vi.fn(),
+  CreateProjectRemote: vi.fn(),
 }))
 
 const ok = body => ({

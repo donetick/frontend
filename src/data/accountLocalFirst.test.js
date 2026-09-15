@@ -1,10 +1,11 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import { setAppMode } from './appMode'
 import {
+  clearAccountLocalFirstEnabled,
   setAccountLocalFirstEnabled,
   shouldUseLocalFirstStore,
 } from './accountLocalFirst'
+import { setAppMode } from './appMode'
 
 describe('shouldUseLocalFirstStore', () => {
   beforeEach(() => {
@@ -32,5 +33,17 @@ describe('shouldUseLocalFirstStore', () => {
     expect(shouldUseLocalFirstStore()).toBe(true)
     setAccountLocalFirstEnabled(false)
     expect(shouldUseLocalFirstStore()).toBe(false)
+  })
+
+  it('clears the flag on logout so stale local-first state does not persist', () => {
+    setAccountLocalFirstEnabled(true)
+    expect(shouldUseLocalFirstStore()).toBe(true)
+
+    clearAccountLocalFirstEnabled()
+
+    expect(shouldUseLocalFirstStore()).toBe(false)
+    expect(
+      window.localStorage.getItem('account_local_first_enabled'),
+    ).toBeNull()
   })
 })

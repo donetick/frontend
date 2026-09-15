@@ -9,37 +9,46 @@ import { HISTORY_STATUS } from '../domain/completion'
 import { apiClient } from '../utils/ApiClient'
 import {
   CreateChore,
-  CreateLabel,
-  CreateProject,
   DeleteChore,
   DeleteChoreHistory,
-  DeleteLabel,
-  DeleteProject,
   GetChoreHistory,
   MarkChoreComplete,
   SaveChore,
   SkipChore,
   UpdateChoreHistory,
-  UpdateLabel,
-  UpdateProject,
 } from '../utils/Fetcher'
+import {
+  CreateLabelRemote as CreateLabel,
+  CreateProjectRemote as CreateProject,
+  DeleteLabelRemote as DeleteLabel,
+  DeleteProjectRemote as DeleteProject,
+  UpdateLabelRemote as UpdateLabel,
+  UpdateProjectRemote as UpdateProject,
+} from '../utils/RemoteApi'
 import { pull, push, sync } from './accountSync'
 
 vi.mock('../utils/Fetcher', () => ({
   CreateChore: vi.fn(),
-  CreateLabel: vi.fn(),
-  CreateProject: vi.fn(),
   DeleteChore: vi.fn(),
   DeleteChoreHistory: vi.fn(),
-  DeleteLabel: vi.fn(),
-  DeleteProject: vi.fn(),
   GetChoreHistory: vi.fn(),
   MarkChoreComplete: vi.fn(),
   SaveChore: vi.fn(),
   SkipChore: vi.fn(),
   UpdateChoreHistory: vi.fn(),
-  UpdateLabel: vi.fn(),
-  UpdateProject: vi.fn(),
+}))
+
+// Regression coverage for offline-first-review.md finding 1: these must be
+// mocked at the real transport boundary the sync engine imports, not at
+// Fetcher, or a routing bug that redirects them to the local repository
+// would go undetected.
+vi.mock('../utils/RemoteApi', () => ({
+  CreateLabelRemote: vi.fn(),
+  CreateProjectRemote: vi.fn(),
+  DeleteLabelRemote: vi.fn(),
+  DeleteProjectRemote: vi.fn(),
+  UpdateLabelRemote: vi.fn(),
+  UpdateProjectRemote: vi.fn(),
 }))
 
 vi.mock('../utils/ApiClient', () => ({
@@ -107,7 +116,9 @@ describe('accountSync push', () => {
     await push()
 
     expect(DeleteLabel).toHaveBeenCalledWith(501)
-    expect(await store.get(COLLECTIONS.LABEL, label._id, { includeDeleted: true })).toBeNull()
+    expect(
+      await store.get(COLLECTIONS.LABEL, label._id, { includeDeleted: true }),
+    ).toBeNull()
   })
 
   it('purges a tombstoned label that never reached the server without calling delete', async () => {
@@ -117,7 +128,9 @@ describe('accountSync push', () => {
     await push()
 
     expect(DeleteLabel).not.toHaveBeenCalled()
-    expect(await store.get(COLLECTIONS.LABEL, label._id, { includeDeleted: true })).toBeNull()
+    expect(
+      await store.get(COLLECTIONS.LABEL, label._id, { includeDeleted: true }),
+    ).toBeNull()
   })
 
   it('remaps a chore payload to already-pushed label/project server ids', async () => {
@@ -170,7 +183,12 @@ describe('accountSync push', () => {
       performedAt: '2025-03-05T09:00:00.000Z',
     })
     MarkChoreComplete.mockResolvedValue(ok({ res: {} }))
-    GetChoreHistory.mockResolvedValue(
+    // No matching row yet (pre-check, run before the replay call to guard
+    // against retrying a completion the server already committed), then the
+    // row the call itself created (post-check, to record its server id).
+    GetChoreHistory.mockResolvedValueOnce(
+      ok({ res: [] }),
+    ).mockResolvedValueOnce(
       ok({
         res: [
           {
@@ -188,7 +206,43 @@ describe('accountSync push', () => {
       42,
       { note: null },
       '2025-03-05T09:00:00.000Z',
+      undefined,
     )
+    expect(result.history.replayed).toBe(1)
+    const historyDocs = await store.all(COLLECTIONS.HISTORY)
+    expect(historyDocs[0]._serverId).toBe('9001')
+    expect(historyDocs[0]._dirty).toBe(false)
+  })
+
+  it('does not replay a completion the server already committed when the prior response was lost', async () => {
+    const chore = await store.put(COLLECTIONS.CHORE, {
+      name: 'Water plants',
+      isActive: true,
+    })
+    await store.markSynced(COLLECTIONS.CHORE, chore._id, 42)
+    await store.put(COLLECTIONS.HISTORY, {
+      choreId: chore._id,
+      status: HISTORY_STATUS.COMPLETED,
+      performedAt: '2025-03-05T09:00:00.000Z',
+    })
+    // Simulates a previous sync attempt where MarkChoreComplete succeeded
+    // server-side but the response never reached the client, so the local
+    // history row is still dirty going into this retry.
+    GetChoreHistory.mockResolvedValue(
+      ok({
+        res: [
+          {
+            id: 9001,
+            status: HISTORY_STATUS.COMPLETED,
+            performedAt: '2025-03-05T09:00:00.000Z',
+          },
+        ],
+      }),
+    )
+
+    const result = await push()
+
+    expect(MarkChoreComplete).not.toHaveBeenCalled()
     expect(result.history.replayed).toBe(1)
     const historyDocs = await store.all(COLLECTIONS.HISTORY)
     expect(historyDocs[0]._serverId).toBe('9001')

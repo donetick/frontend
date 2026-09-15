@@ -836,8 +836,11 @@ export const useChoreAttachments = (choreId, hasAttachments = true) => {
   return useQuery({
     queryKey: ['choreAttachments', choreId],
     queryFn: async () => {
-      // Attachments need server storage, so local mode simply has none.
-      if (shouldUseLocalFirstStore()) return { res: [] }
+      // Attachments need server storage — genuinely unavailable in local-only
+      // mode, but still an account capability under account-local-first, so
+      // this must not widen to shouldUseLocalFirstStore() (see
+      // docs/offline-first-review.md finding 6).
+      if (isLocalMode()) return { res: [] }
 
       const response = await GetChoreAttachments(choreId)
       if (response && response.ok) {

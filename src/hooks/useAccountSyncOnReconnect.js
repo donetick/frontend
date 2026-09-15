@@ -10,8 +10,7 @@ import { sync as accountSync } from '../sync/accountSync'
 import { isOAuthExchangeInProgress } from '../utils/OAuthExchangeState'
 import { networkManager } from './NetworkManager'
 
-export const PENDING_POLL_MS = 30_000 // retry pending pushes every 30s
-const CACHE_REFRESH_MS = 5 * 60_000 // pull fresh server state every 5 min while online
+export const PENDING_POLL_MS = 30_000 // one full pull+push cycle every 30s while online
 const SERVER_PROBE_MS = 15_000 // probe server when marked unreachable but device has network
 
 /**
@@ -28,7 +27,6 @@ export function useAccountSyncOnReconnect() {
 
   useEffect(() => {
     let pollInterval
-    let cacheRefreshInterval
     let serverProbeInterval
     let resumeListener
     let networkListener
@@ -48,8 +46,15 @@ export function useAccountSyncOnReconnect() {
       // no session yet and would just 401.
       if (isOAuthExchangeInProgress()) return
 
-      const result = await accountSync()
-      if (result) queryClient.invalidateQueries()
+      try {
+        const result = await accountSync()
+        if (result) queryClient.invalidateQueries()
+      } catch (err) {
+        // A setInterval/event-listener callback has no caller to reject to;
+        // an uncaught rejection here would surface as an unhandled rejection
+        // instead of just failing this cycle (retried next tick/interval).
+        console.warn('accountSync.sync() failed', err)
+      }
     }
 
     const init = async () => {
@@ -63,6 +68,11 @@ export function useAccountSyncOnReconnect() {
       if (isAccountLocalFirstEnabled() && !isLocalMode()) {
         await ensureLocalStoreReady()
       }
+
+      // Run the initial pull immediately — without this, a newly enabled
+      // account store renders no chores until the first 30s poll fires (see
+      // docs/offline-first-review.md finding 5).
+      await runSync()
 
       networkListener = async isOnline => {
         if (isOnline) await runSync()
@@ -81,8 +91,11 @@ export function useAccountSyncOnReconnect() {
         )
       }
 
+      // One full pull+push cycle on a single cadence — the pull is already a
+      // cheap delta fetch (`/sync/changes?since=cursor`) and the push is a
+      // no-op when nothing is dirty, so a second, slower interval doing the
+      // identical `sync()` call added no distinct behavior (finding 5).
       pollInterval = setInterval(runSync, PENDING_POLL_MS)
-      cacheRefreshInterval = setInterval(runSync, CACHE_REFRESH_MS)
       serverProbeInterval = setInterval(() => {
         if (!networkManager.isOnline && networkManager.deviceOnline) {
           runSync()
@@ -94,7 +107,6 @@ export function useAccountSyncOnReconnect() {
 
     return () => {
       if (pollInterval) clearInterval(pollInterval)
-      if (cacheRefreshInterval) clearInterval(cacheRefreshInterval)
       if (serverProbeInterval) clearInterval(serverProbeInterval)
       if (networkListener)
         networkManager.unregisterNetworkListener(networkListener)

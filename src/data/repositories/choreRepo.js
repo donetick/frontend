@@ -131,7 +131,7 @@ export const choreRepo = {
    * Complete a chore: advance the due date via the ported scheduler, write a
    * history entry, and reset subtask completion for recurring chores.
    */
-  async complete(id, { completedDate, note = null } = {}) {
+  async complete(id, { completedBy = 0, completedDate, note = null } = {}) {
     const key = String(id)
     const chore = await store.get(COLLECTIONS.CHORE, key)
     if (!chore) return null
@@ -158,6 +158,7 @@ export const choreRepo = {
     const history = await historyRepo.forChore(key)
     const result = completeChore({
       chore: present(chore),
+      completedBy,
       completedDate: completed,
       duration: totalDuration,
       history,
@@ -186,16 +187,31 @@ export const choreRepo = {
     return present(saved)
   },
 
-  /** Skip a chore: advance the due date and record a skipped history entry. */
+  /**
+   * Skip a chore: advance the due date and record a skipped history entry.
+   *
+   * Mirrors `complete()`'s timer handling — an open "started" entry is closed
+   * into the skipped row (via `skipChore`'s `history` lookup) and the chore's
+   * own timer fields are reset, so a later completion doesn't reuse the
+   * stale pre-skip started row and the next occurrence doesn't inherit old
+   * timer sessions/duration (offline-first-review.md finding 8).
+   */
   async skip(id) {
     const key = String(id)
     const chore = await store.get(COLLECTIONS.CHORE, key)
     if (!chore) return null
 
-    const result = skipChore({ chore: present(chore) })
+    const history = await historyRepo.forChore(key)
+    const result = skipChore({ chore: present(chore), history })
     const saved = await store.put(COLLECTIONS.CHORE, {
       ...chore,
       ...result.chore,
+      timerStartTime: null,
+      timerEndTime: null,
+      timerPauseLog: [],
+      startTime: null,
+      duration: 0,
+      timerUpdatedAt: null,
       _id: key,
       id: key,
     })

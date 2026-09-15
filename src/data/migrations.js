@@ -81,9 +81,20 @@ export const applyMigrations = async (from, to) => {
       if (!docs.length) continue
 
       const next = docs.map(migrate).filter(Boolean)
-      // Migrations rewrite storage, not sync state, so the dirty flags each
-      // document already carries are preserved rather than reset.
-      await store.putMany(collection, next, { dirty: false })
+      // Migrations rewrite storage, not sync state, so the dirty flag each
+      // document already carries must be preserved rather than reset —
+      // `putMany` applies one `dirty` value to the whole batch, so the batch
+      // is split by each document's own `_dirty` first (see
+      // offline-first-review.md finding 11: a single `dirty: false` call here
+      // previously cleared every migrated row's pending-push state).
+      const dirtyDocs = next.filter(doc => doc._dirty)
+      const cleanDocs = next.filter(doc => !doc._dirty)
+      if (dirtyDocs.length) {
+        await store.putMany(collection, dirtyDocs, { dirty: true })
+      }
+      if (cleanDocs.length) {
+        await store.putMany(collection, cleanDocs, { dirty: false })
+      }
       migrated += next.length
     }
   }

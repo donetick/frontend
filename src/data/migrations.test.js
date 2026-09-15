@@ -80,4 +80,43 @@ describe('applyMigrations', () => {
     await store.put(COLLECTIONS.CHORE, { name: 'Dishes' })
     expect(await applyMigrations(SCHEMA_VERSION, SCHEMA_VERSION)).toBe(0)
   })
+
+  it("preserves each document's own dirty flag rather than clearing it (finding 11)", async () => {
+    const dirty = await store.put(COLLECTIONS.CHORE, { name: 'Unsynced edit' })
+    const clean = await store.put(
+      COLLECTIONS.CHORE,
+      { name: 'Already synced' },
+      { dirty: false, serverId: 501 },
+    )
+    const tombstone = await store.remove(
+      COLLECTIONS.CHORE,
+      (await store.put(COLLECTIONS.CHORE, { name: 'Deleted' }))._id,
+    )
+
+    const target = SCHEMA_VERSION + 1
+    MIGRATIONS[target] = doc => ({ ...doc, migratedFlag: true })
+    try {
+      await applyMigrations(SCHEMA_VERSION, target)
+
+      const rewrittenDirty = await store.get(COLLECTIONS.CHORE, dirty._id)
+      const rewrittenClean = await store.get(COLLECTIONS.CHORE, clean._id)
+      const rewrittenTombstone = await store.get(
+        COLLECTIONS.CHORE,
+        tombstone._id,
+        { includeDeleted: true },
+      )
+
+      expect(rewrittenDirty._dirty).toBe(true)
+      expect(rewrittenClean._dirty).toBe(false)
+      expect(rewrittenClean._serverId).toBe('501')
+      expect(rewrittenTombstone._dirty).toBe(true)
+      expect(rewrittenTombstone._deletedAt).toBeTruthy()
+
+      expect(
+        (await store.dirty(COLLECTIONS.CHORE)).map(doc => doc._id),
+      ).toEqual(expect.arrayContaining([dirty._id, tombstone._id]))
+    } finally {
+      delete MIGRATIONS[target]
+    }
+  })
 })

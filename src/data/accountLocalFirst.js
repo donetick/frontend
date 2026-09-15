@@ -37,6 +37,16 @@ export const setAccountLocalFirstEnabled = enabled => {
   )
 }
 
+export const clearAccountLocalFirstEnabled = () => {
+  if (typeof window === 'undefined' || !window.localStorage) return
+  window.localStorage.removeItem(ACCOUNT_LOCAL_FIRST_KEY)
+  window.dispatchEvent(
+    new CustomEvent(ACCOUNT_LOCAL_FIRST_EVENT, {
+      detail: { enabled: false },
+    }),
+  )
+}
+
 // Use only to decide whether a write should go through the local repository
 // first — not for capability gating, routing, or auth checks, which must
 // keep reading `isLocalMode()`/token presence directly.

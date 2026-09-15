@@ -3,6 +3,7 @@ import { Capacitor } from '@capacitor/core'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef } from 'react'
 
+import { isAccountLocalFirstEnabled } from '../data/accountLocalFirst'
 import { commandQueue } from '../utils/CommandQueue'
 import { isOAuthExchangeInProgress } from '../utils/OAuthExchangeState'
 import { offlineDB } from '../utils/OfflineDB'
@@ -35,6 +36,12 @@ export function useSyncOnReconnect() {
     const init = async () => {
       if (initialized.current) return
       initialized.current = true
+
+      // Account-local-first (src/sync/accountSync.js) owns account-mode sync
+      // once the rollout flag is on; this legacy CommandQueue/SyncEngine path
+      // must not also poll and pull into OfflineDB at the same time (see
+      // docs/offline-first-review.md finding 5).
+      if (isAccountLocalFirstEnabled()) return
 
       if (isOfflineFeatureEnabled()) {
         await offlineDB.init()
@@ -91,6 +98,7 @@ export function useSyncOnReconnect() {
     }
 
     const runSync = async () => {
+      if (isAccountLocalFirstEnabled()) return
       if (!isOfflineFeatureEnabled()) return
       // Public routes (onboarding, login, signup) have no session to sync.
       // Calling /sync/changes here returns 401 and the global auth handler

@@ -26,20 +26,22 @@ import { HISTORY_STATUS } from '../domain/completion'
 import { apiClient } from '../utils/ApiClient'
 import {
   CreateChore,
-  CreateLabel,
-  CreateProject,
   DeleteChore,
   DeleteChoreHistory,
-  DeleteLabel,
-  DeleteProject,
   GetChoreHistory,
   MarkChoreComplete,
   SaveChore,
   SkipChore,
   UpdateChoreHistory,
-  UpdateLabel,
-  UpdateProject,
 } from '../utils/Fetcher'
+import {
+  CreateLabelRemote as CreateLabel,
+  CreateProjectRemote as CreateProject,
+  DeleteLabelRemote as DeleteLabel,
+  DeleteProjectRemote as DeleteProject,
+  UpdateLabelRemote as UpdateLabel,
+  UpdateProjectRemote as UpdateProject,
+} from '../utils/RemoteApi'
 import {
   buildChorePayload,
   describeFailure,
@@ -131,11 +133,25 @@ const pushProjects = () =>
     deleteFn: DeleteProject,
   })
 
-const pushChores = async (labelIdMap, projectIdMap) => {
+/**
+ * Push dirty chores in one of two phases (see `push()` for why): `'create'`
+ * pushes chores with no `_serverId` yet — this must run *before*
+ * `pushHistory()` so a brand-new chore's completion/skip has a server id to
+ * replay against. `'update'` pushes plain field edits on already-synced
+ * chores — this must run *after* `pushHistory()`, or a field update carrying
+ * the same locally-advanced due date `MarkChoreComplete`/`SkipChore` is about
+ * to (re)compute would land first and then get double-advanced server-side
+ * (offline-first-review.md finding 2).
+ */
+const pushChores = async (labelIdMap, projectIdMap, phase) => {
   const dirtyDocs = await store.dirty(COLLECTIONS.CHORE)
   const result = { pushed: 0, updated: 0, removed: 0, failed: [] }
 
   for (const doc of dirtyDocs) {
+    const hasServerId = Boolean(doc._serverId)
+    if (phase === 'create' && hasServerId) continue
+    if (phase === 'update' && !hasServerId) continue
+
     try {
       if (doc._deletedAt) {
         if (doc._serverId) {
@@ -230,9 +246,9 @@ const pushHistory = async () => {
         includeDeleted: true,
       })
       if (!chore?._serverId) {
-        // Chore hasn't been pushed yet (should not happen — chores push
-        // before history in the same cycle) or was deleted locally before
-        // sync; retry next cycle.
+        // Chore hasn't been pushed yet (should not happen — `push()` creates
+        // new chores before calling `pushHistory()`) or was deleted locally
+        // before sync; retry next cycle.
         continue
       }
 
@@ -246,26 +262,10 @@ const pushHistory = async () => {
           continue
         }
 
-        const resp =
-          doc.status === HISTORY_STATUS.SKIPPED
-            ? await SkipChore(Number(chore._serverId))
-            : await MarkChoreComplete(
-                Number(chore._serverId),
-                { note: doc.notes ?? doc.note ?? null },
-                doc.performedAt,
-              )
-        if (resp && resp.ok === false) {
-          throw new Error(
-            await describeFailure(resp, 'Failed to replay history'),
-          )
-        }
-
-        // Best-effort: find the row the server just created so future syncs
-        // recognize it instead of re-pulling it as a new local doc.
-        let serverHistoryId = null
-        try {
-          const historyResp = await GetChoreHistory(Number(chore._serverId))
-          if (historyResp?.ok) {
+        const findMatchingServerRow = async () => {
+          try {
+            const historyResp = await GetChoreHistory(Number(chore._serverId))
+            if (!historyResp?.ok) return null
             const body = await historyResp.json()
             const rows = body?.res ?? []
             const match = rows.find(
@@ -276,10 +276,39 @@ const pushHistory = async () => {
                 new Date(row.performedAt).getTime() ===
                   new Date(doc.performedAt).getTime(),
             )
-            serverHistoryId = match?.id ?? null
+            return match?.id ?? null
+          } catch {
+            return null
           }
-        } catch {
-          // Non-fatal — see the "known gap" note above.
+        }
+
+        // A prior attempt may have already reached the server and applied
+        // the completion/skip, only for the response to be lost (timeout,
+        // dropped connection) before this row could be marked synced — in
+        // which case replaying again would complete/skip the chore a second
+        // time. Check for an already-matching server row first (see the
+        // "known gap" note above for why this match can occasionally miss).
+        let serverHistoryId = await findMatchingServerRow()
+
+        if (!serverHistoryId) {
+          const resp =
+            doc.status === HISTORY_STATUS.SKIPPED
+              ? await SkipChore(Number(chore._serverId))
+              : await MarkChoreComplete(
+                  Number(chore._serverId),
+                  { note: doc.notes ?? doc.note ?? null },
+                  doc.performedAt,
+                  doc.completedBy || undefined,
+                )
+          if (resp && resp.ok === false) {
+            throw new Error(
+              await describeFailure(resp, 'Failed to replay history'),
+            )
+          }
+
+          // Best-effort: find the row the server just created so future
+          // syncs recognize it instead of re-pulling it as a new local doc.
+          serverHistoryId = await findMatchingServerRow()
         }
 
         if (serverHistoryId) {
@@ -310,6 +339,13 @@ const pushHistory = async () => {
   return result
 }
 
+const mergeChoreResults = (a, b) => ({
+  pushed: a.pushed + b.pushed,
+  updated: a.updated + b.updated,
+  removed: a.removed + b.removed,
+  failed: [...a.failed, ...b.failed],
+})
+
 export const push = async () => {
   const labels = await pushLabels()
   const projects = await pushProjects()
@@ -317,8 +353,14 @@ export const push = async () => {
     serverIdMap(COLLECTIONS.LABEL),
     serverIdMap(COLLECTIONS.PROJECT),
   ])
-  const chores = await pushChores(labelIdMap, projectIdMap)
+  // See pushChores' doc comment: new chores are created first so a
+  // just-created chore's history has a server id to replay against; plain
+  // field updates on already-synced chores wait until after history replay
+  // so they don't race the due-date/status change that replay itself makes.
+  const created = await pushChores(labelIdMap, projectIdMap, 'create')
   const history = await pushHistory()
+  const updated = await pushChores(labelIdMap, projectIdMap, 'update')
+  const chores = mergeChoreResults(created, updated)
   return { labels, projects, chores, history }
 }
 
@@ -331,7 +373,64 @@ const STREAM_COLLECTION = {
   choreHistories: COLLECTIONS.HISTORY,
 }
 
-/** Upsert one server row into the matching collection, preserving any local id. */
+/**
+ * Look up the permanent local id for a row referenced by its server integer
+ * id. Falls back to the deterministic `srv:<id>` id when the referenced row
+ * hasn't been pulled locally yet (it will land in the same or a later pull
+ * page, at which point this same fallback id is what `upsertServerRow`
+ * assigns it too).
+ */
+const localIdForFK = async (collection, serverId) => {
+  if (serverId === null || typeof serverId === 'undefined') return serverId
+  const existing = await store.getByServerId(collection, serverId, {
+    includeDeleted: true,
+  })
+  return existing ? existing._id : localIdForServerId(serverId)
+}
+
+/**
+ * Server foreign keys inside a pulled row are still server integers; permanent
+ * local ids are what every other local read (`choreRepo.byLabel`,
+ * `choreRepo.byProject`, `historyRepo.forChore`) filters by. Translate before
+ * `store.put`, not after — see offline-first-review.md finding 3.
+ */
+const normalizeIncomingRow = async (collection, row) => {
+  if (collection === COLLECTIONS.CHORE) {
+    const projectId =
+      row.projectId != null
+        ? await localIdForFK(COLLECTIONS.PROJECT, row.projectId)
+        : row.projectId
+    const labelsV2 = Array.isArray(row.labelsV2)
+      ? await Promise.all(
+          row.labelsV2.map(async label => ({
+            ...label,
+            id: await localIdForFK(COLLECTIONS.LABEL, label.id),
+          })),
+        )
+      : row.labelsV2
+    return { ...row, projectId, labelsV2 }
+  }
+
+  if (collection === COLLECTIONS.HISTORY) {
+    const choreId =
+      row.choreId != null
+        ? await localIdForFK(COLLECTIONS.CHORE, row.choreId)
+        : row.choreId
+    return { ...row, choreId }
+  }
+
+  return row
+}
+
+/**
+ * Upsert one server row into the matching collection, preserving any local
+ * id. If the existing local row has unpushed edits, the server copy is
+ * quarantined under `_remoteConflict` instead of silently overwriting it —
+ * "server wins" must not mean losing local work still waiting to be pushed
+ * (finding 4). Once the local edit is pushed and its `_dirty` flag clears,
+ * the quarantined snapshot is reconciled on save/read paths that check it, or
+ * superseded by the next pull naturally once the row is no longer dirty.
+ */
 const upsertServerRow = async (collection, row) => {
   const serverId = row.id ?? row.Id ?? row.ID
   if (serverId === null || typeof serverId === 'undefined') return
@@ -339,10 +438,21 @@ const upsertServerRow = async (collection, row) => {
   const existing = await store.getByServerId(collection, serverId, {
     includeDeleted: true,
   })
+  const normalized = await normalizeIncomingRow(collection, row)
+
+  if (existing?._dirty) {
+    await store.put(
+      collection,
+      { ...existing, _remoteConflict: normalized },
+      { dirty: true, serverId },
+    )
+    return
+  }
+
   const localId = existing?._id ?? localIdForServerId(serverId)
   await store.put(
     collection,
-    { ...row, _id: localId },
+    { ...normalized, _id: localId },
     { dirty: false, serverId },
   )
 }

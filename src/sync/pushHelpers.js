@@ -35,6 +35,10 @@ export const stripLocalFields = doc => {
   delete clean._updatedAt
   delete clean._deletedAt
   delete clean._dirty
+  // Quarantined server snapshot from a pull that lost a conflict with an
+  // unpushed local edit (accountSync.js `upsertServerRow`) — local-only
+  // bookkeeping, never part of the server payload.
+  delete clean._remoteConflict
   return clean
 }
 

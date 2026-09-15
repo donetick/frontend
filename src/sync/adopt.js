@@ -37,13 +37,15 @@ import {
   CompleteSubTask,
   CreateChore,
   CreateFilter,
-  CreateLabel,
-  CreateProject,
   GetChoreDetailById,
   MarkChoreComplete,
   SkipChore,
   UpdateDueDate,
 } from '../utils/Fetcher'
+import {
+  CreateLabelRemote as CreateLabel,
+  CreateProjectRemote as CreateProject,
+} from '../utils/RemoteApi'
 import {
   buildChorePayload,
   describeFailure,

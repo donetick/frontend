@@ -1,25 +1,25 @@
 import {
-  Check,
-  Group,
-  HourglassEmpty,
-  Pause,
-  PlayArrow,
-  Repeat,
-  ThumbDown,
-  ThumbUp,
-  TimesOneMobiledata,
-  Toll,
-  Webhook,
+    Check,
+    Group,
+    HourglassEmpty,
+    Pause,
+    PlayArrow,
+    Repeat,
+    ThumbDown,
+    ThumbUp,
+    TimesOneMobiledata,
+    Toll,
+    Webhook,
 } from '@mui/icons-material'
 import {
-  Avatar,
-  Box,
-  Card,
-  Checkbox,
-  Chip,
-  Grid,
-  IconButton,
-  Typography,
+    Avatar,
+    Box,
+    Card,
+    Checkbox,
+    Chip,
+    Grid,
+    IconButton,
+    Typography,
 } from '@mui/joy'
 
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
@@ -27,9 +27,9 @@ import { useLocalization } from '../../contexts/LocalizationContext'
 import { usePendingCommands } from '../../hooks/usePendingCommands'
 import { useUserProfile } from '../../queries/UserQueries.jsx'
 import {
-  getDueDateChipColor,
-  getDueDateChipText,
-  getRecurrentChipText,
+    getDueDateChipColor,
+    getDueDateChipText,
+    getRecurrentChipText,
 } from '../../utils/ChoreCardHelpers.jsx'
 import { notInCompletionWindow } from '../../utils/Chores.jsx'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
@@ -43,7 +43,7 @@ const ChoreCard = ({
   onAction,
   onChipClick,
   onSelectionToggle,
-  performers,
+  performers = [],
   // Multi-select props
   showActions = true,
   sx,

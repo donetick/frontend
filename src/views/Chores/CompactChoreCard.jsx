@@ -19,7 +19,6 @@ import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import {
   getDueDateChipColor,
   getDueDateChipText,
-  getRecurrentChipText,
 } from '../../utils/ChoreCardHelpers.jsx'
 import { notInCompletionWindow } from '../../utils/Chores.jsx'
 import {
@@ -28,6 +27,7 @@ import {
 } from '../../utils/Colors.jsx'
 import ChoreActionMenu from '../components/ChoreActionMenu'
 import PendingBadge from '../components/PendingBadge'
+import { getCompactChoreMetadataParts } from './compactChoreMetadata'
 
 const CompactChoreCard = ({
   chore,
@@ -38,7 +38,7 @@ const CompactChoreCard = ({
   onSelectionToggle,
   onlyClickable = false,
   // Multi-select props
-  performers,
+  performers = [],
   showActions = true,
   sx,
   viewOnly,
@@ -83,32 +83,8 @@ const CompactChoreCard = ({
     }
   }
 
-  const formatMetadata = () => {
-    const parts = []
-
-    // Frequency
-    if (!['once', 'no_repeat'].includes(chore.frequencyType)) {
-      parts.push(getRecurrentChipText(chore))
-    }
-
-    // Assignee
-    if (chore.assignedTo) {
-      const assignee = performers.find(
-        p => p.userId === chore.assignedTo,
-      )?.displayName
-      if (assignee) parts.push(assignee)
-    }
-    if (chore.assignedTo === null) {
-      parts.push(t('assignee.anyone'))
-    }
-
-    // Points
-    if (chore.points > 0) {
-      parts.push(`${chore.points}pts`)
-    }
-
-    return parts.join(' • ')
-  }
+  const formatMetadata = () =>
+    getCompactChoreMetadataParts(chore, performers, key => t(key))
   const showLeadingSlot = showActions || isMultiSelectMode
   const showTrailingSlot = showActions && !isMultiSelectMode
 

@@ -19,6 +19,20 @@ import { isNativeApp } from '../utils/Onboarding'
 // Staying well under it means the nearest due dates always get a slot.
 const MAX_SCHEDULED = 32
 
+// `LocalNotifications.getPending()` returns every pending notification for
+// the app, not just this module's — Donetick schedules other local
+// notifications elsewhere. Tag ours in `extra` so a rebuild only cancels its
+// own entries instead of the whole pending list (offline-first-review.md
+// finding 9).
+const NOTIFICATION_SOURCE = 'donetick-due-reminder'
+const isOwnNotification = notification =>
+  notification?.extra?.source === NOTIFICATION_SOURCE
+
+const ownPendingNotifications = async plugin => {
+  const pending = await plugin.getPending()
+  return (pending?.notifications ?? []).filter(isOwnNotification)
+}
+
 // Notification ids are derived from the chore id so a rebuild replaces rather
 // than duplicates. Capacitor requires a 32-bit int, hence the hash.
 const notificationIdFor = choreId => {
@@ -66,11 +80,11 @@ export const rescheduleDueNotifications = async () => {
 
   try {
     // Clear ours before rescheduling so a deleted or completed chore stops
-    // firing. Only notifications this module created are pending on this id
-    // space, so cancelling all of them is safe.
-    const pending = await plugin.getPending()
-    if (pending?.notifications?.length) {
-      await plugin.cancel({ notifications: pending.notifications })
+    // firing — but only ours; other pending notifications belong to other
+    // features and must survive a rebuild.
+    const ours = await ownPendingNotifications(plugin)
+    if (ours.length) {
+      await plugin.cancel({ notifications: ours })
     }
 
     const now = Date.now()
@@ -91,7 +105,7 @@ export const rescheduleDueNotifications = async () => {
         title: chore.name,
         body: 'Due now',
         schedule: { at: new Date(at), allowWhileIdle: true },
-        extra: { choreId: chore.id },
+        extra: { source: NOTIFICATION_SOURCE, choreId: chore.id },
       })),
     })
 
@@ -108,9 +122,9 @@ export const cancelDueNotifications = async () => {
   const plugin = await loadPlugin()
   if (!plugin) return
   try {
-    const pending = await plugin.getPending()
-    if (pending?.notifications?.length) {
-      await plugin.cancel({ notifications: pending.notifications })
+    const ours = await ownPendingNotifications(plugin)
+    if (ours.length) {
+      await plugin.cancel({ notifications: ours })
     }
   } catch {
     // Nothing scheduled, or the plugin is unavailable.

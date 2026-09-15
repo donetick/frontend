@@ -171,6 +171,7 @@ const MarkChoreComplete = (id, body, completedDate, performer) => {
       .complete(id, {
         completedDate,
         note: body?.note ?? null,
+        completedBy: performer ? Number(performer) : 0,
       })
       .then(result => {
         import('../service/FeedbackService')
@@ -751,8 +752,14 @@ const GetStorageUsage = () => {
 }
 
 // Timer/TimeSession API functions
+//
+// `/sync/changes` does not carry time-session data, so a local timer session
+// created under account-local-first never reaches the server and an
+// existing server session never hydrates locally — these must stay
+// `isLocalMode()`-only (genuinely no account) rather than widen to
+// `shouldUseLocalFirstStore()` (see docs/offline-first-review.md finding 6).
 const GetChoreTimer = choreId => {
-  if (shouldUseLocalFirstStore()) {
+  if (isLocalMode()) {
     return choreRepo.getTimer(choreId).then(localResponse)
   }
   return Fetch(`/chores/${choreId}/timer`, {
@@ -762,7 +769,7 @@ const GetChoreTimer = choreId => {
 }
 
 const UpdateTimeSession = (choreId, sessionId, sessionData) => {
-  if (shouldUseLocalFirstStore()) {
+  if (isLocalMode()) {
     return choreRepo.updateTimer(choreId, sessionData).then(localResponse)
   }
   return Fetch(`/chores/${choreId}/timer/${sessionId}`, {
@@ -773,7 +780,7 @@ const UpdateTimeSession = (choreId, sessionId, sessionData) => {
 }
 
 const DeleteTimeSession = (choreId, sessionId) => {
-  if (shouldUseLocalFirstStore()) {
+  if (isLocalMode()) {
     return choreRepo.deleteTimerSession(choreId, sessionId).then(localResponse)
   }
   return Fetch(`/chores/${choreId}/timer/${sessionId}`, {
@@ -783,7 +790,7 @@ const DeleteTimeSession = (choreId, sessionId) => {
 }
 
 const ResetChoreTimer = choreId => {
-  if (shouldUseLocalFirstStore()) {
+  if (isLocalMode()) {
     return choreRepo.resetTimer(choreId).then(localResponse)
   }
   return Fetch(`/chores/${choreId}/timer/reset`, {
@@ -793,7 +800,7 @@ const ResetChoreTimer = choreId => {
 }
 
 const ClearChoreTimer = choreId => {
-  if (shouldUseLocalFirstStore()) {
+  if (isLocalMode()) {
     return choreRepo.clearTimer(choreId).then(localResponse)
   }
   return Fetch(`/chores/${choreId}/timer`, {

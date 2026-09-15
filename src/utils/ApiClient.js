@@ -1,6 +1,7 @@
 import { Preferences } from '@capacitor/preferences'
 
 import { API_URL } from '../Config'
+import { clearAccountLocalFirstEnabled } from '../data/accountLocalFirst'
 import { isLocalMode } from '../data/appMode'
 import { localUnsupported } from '../data/localResponse'
 import { networkManager } from '../hooks/NetworkManager'
@@ -177,6 +178,7 @@ class ApiClient {
     }
 
     await clearAllTokens()
+    clearAccountLocalFirstEnabled()
     try {
       await offlineDB.clearAll()
     } catch (e) {

@@ -184,13 +184,22 @@ export const completeChore = ({
  *
  * @param {object} args
  * @param {object} args.chore
+ * @param {Array} [args.history] known history, newest first — used to find and
+ *   close an in-progress "started"/timer entry, the same way `completeChore`
+ *   does, so a skip doesn't leave a stale open timer session behind
  * @param {Date|string} [args.skippedAt] when the skip happened; defaults to now
  * @param {number} [args.skippedBy]
  * @returns {{chore: object, historyEntry: object}}
  */
-export const skipChore = ({ chore, skippedAt, skippedBy = 0 }) => {
+export const skipChore = ({
+  chore,
+  history = [],
+  skippedAt,
+  skippedBy = 0,
+}) => {
   const effectiveSkippedAt = toDate(skippedAt) ?? new Date()
   const scheduleFrom = toDate(chore.nextDueDate) ?? new Date()
+  const existingStarted = findStartedEntry(history)
 
   const nextDueDate = scheduleNextDueDate(chore, scheduleFrom)
 
@@ -206,7 +215,7 @@ export const skipChore = ({ chore, skippedAt, skippedBy = 0 }) => {
     chore: updatedChore,
     historyEntry: buildHistoryEntry({
       chore,
-      existingStarted: null,
+      existingStarted,
       performedAt: effectiveSkippedAt,
       note: null,
       performedBy: skippedBy,

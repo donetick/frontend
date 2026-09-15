@@ -1,10 +1,24 @@
 import { LocalNotifications } from '@capacitor/local-notifications'
 import { Refresh, Star, Token } from '@mui/icons-material'
-import { Box, Button, Card, Chip, Divider, Typography } from '@mui/joy'
+import {
+  Box,
+  Button,
+  Card,
+  Checkbox,
+  Chip,
+  Divider,
+  Typography,
+} from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import {
+  clearAccountLocalFirstEnabled,
+  isAccountLocalFirstEnabled,
+  setAccountLocalFirstEnabled,
+  subscribeToAccountLocalFirst,
+} from '../../data/accountLocalFirst'
 import { networkManager } from '../../hooks/NetworkManager'
 import useConfirmationModal from '../../hooks/useConfirmationModal'
 import { useSSEContext } from '../../hooks/useSSEContext'
@@ -45,6 +59,9 @@ const DeveloperSettings = () => {
 
   const [accessTokenExpiry, setAccessTokenExpiry] = useState(null)
   const [refreshTokenExpiry, setRefreshTokenExpiry] = useState(null)
+  const [accountLocalFirstEnabled, setAccountLocalFirstEnabledState] = useState(
+    () => isAccountLocalFirstEnabled(),
+  )
   const [timeLeft, setTimeLeft] = useState({
     access: null,
     refresh: null,
@@ -140,6 +157,14 @@ const DeveloperSettings = () => {
   }, [refreshSyncDiagnostics])
 
   useEffect(() => {
+    const unsubscribeAccountFlag = subscribeToAccountLocalFirst(
+      setAccountLocalFirstEnabledState,
+    )
+
+    return unsubscribeAccountFlag
+  }, [])
+
+  useEffect(() => {
     const unsubscribeSync = syncEngine.onSyncStateChange(state => {
       setSyncDiagnostics(prev => ({
         ...prev,
@@ -207,6 +232,17 @@ const DeveloperSettings = () => {
 
     return () => clearInterval(interval)
   }, [accessTokenExpiry, refreshTokenExpiry, getDebugInfo])
+
+  const handleAccountLocalFirstToggle = event => {
+    const nextEnabled = !!event.target.checked
+
+    if (nextEnabled) {
+      setAccountLocalFirstEnabled(true)
+      return
+    }
+
+    clearAccountLocalFirstEnabled()
+  }
 
   const formatTimeLeft = milliseconds => {
     if (milliseconds === null) return 'N/A'
@@ -554,6 +590,23 @@ const DeveloperSettings = () => {
               </Typography>
             )}
           </Box>
+        </Box>
+      </Card>
+
+      <Card variant='outlined'>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Typography level='title-lg'>Account Local-First Flag</Typography>
+          <Checkbox
+            checked={accountLocalFirstEnabled}
+            onChange={handleAccountLocalFirstToggle}
+            variant='soft'
+            label='Enable local-first account sync for signed-in users'
+            overlay
+          />
+          <Typography level='body-xs' color='neutral'>
+            Default is off. This is a developer-only escape hatch for testing
+            the account local-first sync path without forcing it for all users.
+          </Typography>
         </Box>
       </Card>
 

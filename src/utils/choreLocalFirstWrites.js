@@ -25,7 +25,11 @@ import {
 export const completeChore = (id, body, completedDate, performer) =>
   shouldUseLocalFirstStore()
     ? choreRepo
-        .complete(id, { completedDate, note: body?.note ?? null })
+        .complete(id, {
+          completedDate,
+          note: body?.note ?? null,
+          completedBy: performer ? Number(performer) : 0,
+        })
         .then(localResponse)
     : MarkChoreCompleteRemote(id, body, completedDate, performer)
 
