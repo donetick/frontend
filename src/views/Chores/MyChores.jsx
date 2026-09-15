@@ -2,10 +2,12 @@ import {
   Add,
   Bolt,
   CalendarMonth,
+  Check,
   CloudOff,
   EditCalendar,
   ExpandCircleDown,
   PriorityHigh,
+  Remove,
   SearchOff,
   Style,
 } from '@mui/icons-material'
@@ -169,6 +171,7 @@ const MyChores = () => {
     selectedChores,
     toggleChoreSelection,
     toggleMultiSelectMode,
+    toggleSectionSelection,
   } = useMultiSelect()
 
   const { activeModal, closeModal, modalChore, modalData, openModal } =
@@ -1244,44 +1247,119 @@ const MyChores = () => {
                   expanded={Boolean(openChoreSections[index])}
                 >
                   <Divider orientation='horizontal'>
-                    <Chip
-                      variant='soft'
-                      color='neutral'
-                      size='md'
-                      onClick={() => {
-                        if (openChoreSections[index]) {
-                          const newOpenChoreSections = {
-                            ...openChoreSections,
-                          }
-                          delete newOpenChoreSections[index]
-                          setOpenChoreSectionsWithCache(newOpenChoreSections)
-                        } else {
-                          setOpenChoreSectionsWithCache({
-                            ...openChoreSections,
-                            [index]: true,
-                          })
-                        }
-                      }}
-                      endDecorator={
-                        openChoreSections[index] ? (
-                          <ExpandCircleDown
-                            color='primary'
-                            sx={{ transform: 'rotate(180deg)' }}
-                          />
-                        ) : (
-                          <ExpandCircleDown color='primary' />
-                        )
-                      }
-                      startDecorator={
-                        <>
-                          <Chip color='primary' size='sm' variant='soft'>
-                            {section?.content?.length}
+                    {(() => {
+                      const sectionSelectedCount = section.content.filter(
+                        chore => selectedChores.has(chore.id),
+                      ).length
+                      const allSelected =
+                        sectionSelectedCount === section.content.length
+                      const partiallySelected =
+                        sectionSelectedCount > 0 && !allSelected
+                      return (
+                        <Box sx={{ display: 'flex', alignItems: 'stretch' }}>
+                          {/* Its own zone rather than nested inside the chip
+                              below — a checkbox inside a clickable chip is two
+                              interactive targets fighting over one tap.
+                              Butted flush against the chip (shared background,
+                              opposite corner radii) so the pair still reads as
+                              a single pill. */}
+                          {isMultiSelectMode && (
+                            <Box
+                              role='checkbox'
+                              aria-checked={
+                                allSelected
+                                  ? 'true'
+                                  : partiallySelected
+                                    ? 'mixed'
+                                    : 'false'
+                              }
+                              tabIndex={0}
+                              onClick={() =>
+                                toggleSectionSelection(section.content)
+                              }
+                              onKeyDown={e => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault()
+                                  toggleSectionSelection(section.content)
+                                }
+                              }}
+                              title={t('archived.selectSectionTitle')}
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: 30,
+                                cursor: 'pointer',
+                                borderRadius: '999px 0 0 999px',
+                                bgcolor:
+                                  allSelected || partiallySelected
+                                    ? 'primary.solidBg'
+                                    : 'neutral.softBg',
+                                color:
+                                  allSelected || partiallySelected
+                                    ? 'primary.solidColor'
+                                    : 'transparent',
+                                '&:hover': {
+                                  bgcolor:
+                                    allSelected || partiallySelected
+                                      ? 'primary.solidHoverBg'
+                                      : 'neutral.softHoverBg',
+                                },
+                              }}
+                            >
+                              {allSelected ? (
+                                <Check sx={{ fontSize: 16 }} />
+                              ) : (
+                                <Remove sx={{ fontSize: 16 }} />
+                              )}
+                            </Box>
+                          )}
+                          <Chip
+                            variant='soft'
+                            color='neutral'
+                            size='md'
+                            onClick={() => {
+                              if (openChoreSections[index]) {
+                                const newOpenChoreSections = {
+                                  ...openChoreSections,
+                                }
+                                delete newOpenChoreSections[index]
+                                setOpenChoreSectionsWithCache(
+                                  newOpenChoreSections,
+                                )
+                              } else {
+                                setOpenChoreSectionsWithCache({
+                                  ...openChoreSections,
+                                  [index]: true,
+                                })
+                              }
+                            }}
+                            sx={{
+                              borderRadius: isMultiSelectMode
+                                ? '0 999px 999px 0'
+                                : undefined,
+                            }}
+                            endDecorator={
+                              openChoreSections[index] ? (
+                                <ExpandCircleDown
+                                  color='primary'
+                                  sx={{ transform: 'rotate(180deg)' }}
+                                />
+                              ) : (
+                                <ExpandCircleDown color='primary' />
+                              )
+                            }
+                            startDecorator={
+                              <Chip color='primary' size='sm' variant='soft'>
+                                {section?.content?.length}
+                              </Chip>
+                            }
+                          >
+                            {section.name}
                           </Chip>
-                        </>
-                      }
-                    >
-                      {section.name}
-                    </Chip>
+                        </Box>
+                      )
+                    })()}
                   </Divider>
                   <AccordionDetails
                     sx={{
