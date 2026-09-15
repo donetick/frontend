@@ -950,6 +950,7 @@
       "2": "In Progress",
       "3": "Pending Approval"
     },
+    "anyOf": "Any of",
     "include": "Include",
     "exclude": "Exclude",
     "has": "Has",

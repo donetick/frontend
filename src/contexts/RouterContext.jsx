@@ -28,6 +28,7 @@ import MemberDetailView from '../views/Circles/MemberDetailView'
 import NotFound from '../views/components/NotFound'
 import FilterView from '../views/Filters/FilterView'
 import ChoreHistory from '../views/History/ChoreHistory'
+import HomeView from '../views/Home/HomeView'
 import LabelDetailView from '../views/Labels/LabelDetailView'
 import LabelView from '../views/Labels/LabelView'
 import Landing from '../views/Landing/Landing'
@@ -63,7 +64,7 @@ const Router = createBrowserRouter([
     children: [
       {
         path: '/',
-        element: <MyChores />,
+        element: <HomeView />,
       },
       {
         path: '/settings',
