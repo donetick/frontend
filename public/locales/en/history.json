@@ -99,6 +99,17 @@
     "days_other": "{{count}} Days",
     "allTime": "All Time"
   },
+  "search": {
+    "placeholder": "Search history...",
+    "clear": "Clear search"
+  },
+  "sort": {
+    "date": "Completed date",
+    "updatedDate": "Updated date",
+    "performer": "Completed by",
+    "status": "Status",
+    "points": "Points"
+  },
   "activities": {
     "title": "Activities",
     "subtitle": "See what's been completed, skipped, or missed",

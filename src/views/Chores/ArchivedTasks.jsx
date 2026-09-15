@@ -4,12 +4,12 @@ import {
   CheckBoxOutlineBlank,
   Close,
   Delete,
-  FilterList,
   Label,
   Person,
   PriorityHigh,
   SearchOff,
   SelectAll,
+  Tune,
   Unarchive,
 } from '@mui/icons-material'
 import {
@@ -774,7 +774,7 @@ const ArchivedTasks = () => {
             onClick={() => setIsFilterSheetOpen(true)}
             title={t('archived.filtersTitle')}
           >
-            <FilterList />
+            <Tune />
           </IconButton>
         </Badge>
 
