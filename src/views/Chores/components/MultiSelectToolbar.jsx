@@ -60,15 +60,6 @@ const renderProjectAvatar = (color, icon) => {
 // the picker emits, or null to unplan. The quick options move the date only and
 // leave the time unset, so each task keeps whatever hour it was already due at
 // (and stays "anytime" if it had none).
-// 23:59 is the app's "no specific time" stamp, so the picker should open on
-// Anytime for it rather than showing it as a time the user chose.
-const prefillDueDate = value => {
-  const parts = splitDueDate(value)
-  return parts.dueTime === '23:59'
-    ? { dueDateOnly: parts.dueDateOnly, dueTime: null, useCustomTime: false }
-    : parts
-}
-
 const dateOnly = date => ({
   dueDateOnly: date.format('YYYY-MM-DD'),
   dueTime: null,
@@ -793,7 +784,7 @@ const MultiSelectToolbar = ({
         <DueDatePickerModal
           open
           title={`Due date for ${selectedCount} task${selectedCount !== 1 ? 's' : ''}`}
-          {...prefillDueDate(
+          {...splitDueDate(
             summary.dueDate?.isMixed ? null : summary.dueDate?.value,
           )}
           onClose={() => setDueDatePickerOpen(false)}
