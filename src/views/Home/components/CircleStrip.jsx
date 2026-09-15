@@ -80,7 +80,9 @@ const CircleStrip = ({ members }) => {
             type='button'
             variant='plain'
             color='neutral'
-            onClick={() => navigate(`/members/${member.userId}`)}
+            onClick={() =>
+              navigate(`/chores?filterId=assignedTo:${member.userId}`)
+            }
             // The ring is decoration to a screen reader; the sentence it stands
             // for is what gets read out.
             aria-label={`${member.displayName}, ${summarize(member)}`}

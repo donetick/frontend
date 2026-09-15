@@ -6,6 +6,7 @@ import {
   CloudOff,
   EditCalendar,
   ExpandCircleDown,
+  Person,
   PriorityHigh,
   Remove,
   SearchOff,
@@ -505,6 +506,43 @@ const MyChores = () => {
       return
     }
 
+    // Deep link from a member's avatar/search result (e.g. filterId=assignedTo:42)
+    // — the assignee condition already exists in FilterEngine, so this just
+    // wires a member id straight into a temp filter, the same way an insight does.
+    if (
+      typeof filterId === 'string' &&
+      filterId.startsWith('assignedTo:') &&
+      urlFilterIdChanged &&
+      tempFilterMeta?.id !== filterId
+    ) {
+      const memberId = filterId.slice('assignedTo:'.length)
+      const member = (membersData?.res || []).find(
+        m => String(m.userId) === String(memberId),
+      )
+      const memberName = member?.displayName || member?.name || member?.username
+      applyTempFilter(
+        {
+          conditions: [
+            {
+              type: 'assignee',
+              operator: 'is',
+              // Match the type FilterBuilderContent's chip selection compares
+              // against (`m.userId`, usually a number) — the raw URL slice is
+              // always a string, and Array.includes is strict-equality.
+              value: member ? member.userId : memberId,
+            },
+          ],
+          operator: 'AND',
+        },
+        {
+          id: filterId,
+          name: memberName ? `Assigned to ${memberName}` : 'Assigned to',
+          icon: <Person sx={{ fontSize: '2rem', color: 'primary.main' }} />,
+        },
+      )
+      return
+    }
+
     // If filterId is no longer in URL but filter is still active in state, clear it
     if (!filterId && !oldFilter && activeFilterId) {
       clearActiveFilter()
@@ -546,6 +584,7 @@ const MyChores = () => {
     hasQuickFilters,
     activeFilterId,
     savedFilters,
+    membersData,
     applyCustomFilter,
     applyTempFilter,
     clearActiveFilter,
