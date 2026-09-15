@@ -182,9 +182,10 @@
   "navigateBack": "Назад",
   "navigation": {
     "activities": "Активность",
-    "allTasks": "Все дела",
+    "allTasks": "Дела",
     "archived": "Архив",
     "filters": "Фильтры",
+    "home": "Обзор",
     "labels": "Метки",
     "points": "Очки",
     "projects": "Проекты",

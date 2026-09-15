@@ -47,7 +47,8 @@
   "version": "Versie",
   "navigation": {
     "search": "Zoeken",
-    "allTasks": "Alle Taken",
+    "allTasks": "Taken",
+    "home": "Overzicht",
     "archived": "Gearchiveerd",
     "things": "Dingen",
     "labels": "",

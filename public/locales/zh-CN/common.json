@@ -21,7 +21,8 @@
   "version": "版本",
   "navigation": {
     "search": "搜索",
-    "allTasks": "所有任务",
+    "allTasks": "任务",
+    "home": "概览",
     "archived": "已归档",
     "things": "事项",
     "labels": "标签",
