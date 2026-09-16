@@ -314,6 +314,7 @@
     "selected_one": "{{count}} task selected",
     "selected_other": "{{count}} tasks selected",
     "selectAllTitle": "Select all visible tasks (Ctrl+A)",
+    "selectSectionTitle": "Select all tasks in this section",
     "all": "All",
     "closeMultiSelect": "Close multi-select (Esc)",
     "clearMultiSelect": "Clear multi-select (Esc)",

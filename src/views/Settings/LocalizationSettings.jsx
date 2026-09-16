@@ -5,6 +5,7 @@ import {
   Divider,
   FormControl,
   FormHelperText,
+  Link,
   Option,
   Select,
   Typography,
@@ -37,6 +38,8 @@ const LocalizationSettings = () => {
   } = useLocalization()
 
   const sampleDate = moment('2024-01-15 14:30:00')
+
+  const translateUrl = code => `https://crowdin.com/project/donetick/${code}`
 
   const dateFormatOptions = [
     { value: DATE_FORMATS.MDY, label: t('localization.formats.mdy') },
@@ -81,6 +84,22 @@ const LocalizationSettings = () => {
           </Select>
           {isRTL && (
             <FormHelperText>{t('localization.rtlNotice')}</FormHelperText>
+          )}
+          {language !== 'en' && (
+            <FormHelperText>
+              <Link
+                href={translateUrl(language)}
+                target='_blank'
+                rel='noopener'
+                onClick={() =>
+                  track('localization_help_translate_clicked', {
+                    language,
+                  })
+                }
+              >
+                {t('localization.helpTranslate')}
+              </Link>
+            </FormHelperText>
           )}
         </FormControl>
 

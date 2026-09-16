@@ -145,7 +145,7 @@ const CompactChoreCard = ({
         minWidth: '100%',
         cursor: 'pointer',
         position: 'relative',
-        pl: '8px',
+        pl: showLeadingSlot ? '8px' : '14px',
         bgcolor: 'background.body',
         borderBottom: '1px solid',
         borderColor: 'divider',

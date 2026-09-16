@@ -3,6 +3,7 @@ import {
   CalendarMonth,
   Check,
   Checklist,
+  Close,
   EventBusy,
   EventNote,
   HourglassEmpty,
@@ -10,28 +11,35 @@ import {
   Redo,
   RunningWithErrors,
   Schedule,
+  Search,
+  Sort,
   Style,
   ThumbDown,
-  Timeline,
   Toll,
+  Tune,
 } from '@mui/icons-material'
 import {
   Avatar,
+  Badge,
   Box,
   Card,
   Chip,
   Container,
   Divider,
   Grid,
+  IconButton,
+  Input,
   Stack,
   Typography,
 } from '@mui/joy'
-import React, { useEffect, useMemo, useState } from 'react'
+import Fuse from 'fuse.js'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Cell, Pie, PieChart, Tooltip } from 'recharts'
 
 import EmptyState from '../../components/common/EmptyState'
 import FilterBar from '../../components/common/FilterBar'
+import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useFilter } from '../../hooks/useFilter'
 import {
@@ -421,6 +429,21 @@ const UserActivites = () => {
   const updateChoreHistory = useUpdateChoreHistory()
   const deleteChoreHistory = useDeleteChoreHistory()
 
+  const [searchTerm, setSearchTerm] = useState('')
+  const [sortBy, setSortBy] = useState(
+    () => localStorage.getItem('activitiesSortBy') || 'date',
+  )
+  const [sortDirection, setSortDirection] = useState(
+    () => localStorage.getItem('activitiesSortDirection') || 'desc',
+  )
+  const [filterBarOpen, setFilterBarOpen] = useState(false)
+  const searchInputRef = useRef(null)
+
+  useEffect(() => {
+    localStorage.setItem('activitiesSortBy', sortBy)
+    localStorage.setItem('activitiesSortDirection', sortDirection)
+  }, [sortBy, sortDirection])
+
   const [historyPieChartData, setHistoryPieChartData] = React.useState([])
   const [choreDuePieChartData, setChoreDuePieChartData] = React.useState([])
   const [choresPriorityChartData, setChoresPriorityChartData] = React.useState(
@@ -552,6 +575,59 @@ const UserActivites = () => {
     filteredData: filteredTimeline,
     setFilter: setClientFilter,
   } = useFilter(selectedHistory, clientFilterDefs)
+
+  const fuse = useMemo(
+    () =>
+      new Fuse(filteredTimeline, {
+        keys: ['choreName', 'notes'],
+        includeScore: true,
+        isCaseSensitive: false,
+        findAllMatches: true,
+      }),
+    [filteredTimeline],
+  )
+
+  const sortedTimeline = useMemo(() => {
+    const matched = searchTerm
+      ? fuse.search(searchTerm).map(result => result.item)
+      : filteredTimeline
+
+    const direction = sortDirection === 'desc' ? -1 : 1
+    return [...matched].sort((a, b) => {
+      switch (sortBy) {
+        case 'name':
+          return (
+            direction * (a.choreName || '').localeCompare(b.choreName || '')
+          )
+        case 'status':
+          return direction * ((a.status ?? 0) - (b.status ?? 0))
+        case 'points':
+          return direction * ((a.points ?? 0) - (b.points ?? 0))
+        case 'date':
+        default: {
+          const aTime = new Date(
+            a.performedAt || a.updatedAt || a.createdAt,
+          ).getTime()
+          const bTime = new Date(
+            b.performedAt || b.updatedAt || b.createdAt,
+          ).getTime()
+          return direction * (aTime - bTime)
+        }
+      }
+    })
+  }, [fuse, searchTerm, filteredTimeline, sortBy, sortDirection])
+
+  const handleSearchChange = e => setSearchTerm(e.target.value)
+
+  const handleSearchClose = () => {
+    setSearchTerm('')
+    searchInputRef.current?.blur()
+  }
+
+  const filterActiveCount =
+    (tabValue !== 7 ? 1 : 0) +
+    (selectedUser !== 'all' ? 1 : 0) +
+    Object.keys(clientActiveFilters).length
 
   // All filter defs merged for FilterBar display
   const filterDefs = useMemo(
@@ -1010,14 +1086,78 @@ const UserActivites = () => {
         flexDirection: 'column',
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-        <Timeline sx={{ fontSize: '1.5rem' }} />
-        <Typography
-          level='title-md'
-          sx={{ fontWeight: 'lg', color: 'text.primary' }}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, p: 2 }}>
+        <Stack sx={{ flex: 1 }}>
+          <Typography
+            level='h3'
+            sx={{ fontWeight: 'lg', color: 'text.primary' }}
+          >
+            {t('activities.title')}
+          </Typography>
+          <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+            {t('activities.subtitle')}
+          </Typography>
+        </Stack>
+      </Box>
+
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+        <Input
+          slotProps={{ input: { ref: searchInputRef } }}
+          placeholder={t('activities.searchPlaceholder')}
+          value={searchTerm}
+          fullWidth
+          sx={{
+            borderRadius: 24,
+            height: 24,
+            borderColor: 'text.disabled',
+            padding: 1,
+          }}
+          onChange={handleSearchChange}
+          startDecorator={<Search />}
+          endDecorator={
+            searchTerm && (
+              <IconButton
+                variant='plain'
+                size='sm'
+                onClick={handleSearchClose}
+                sx={{ borderRadius: '50%' }}
+              >
+                <Close />
+              </IconButton>
+            )
+          }
+        />
+        <SortAndFilterMenu
+          icon={<Sort />}
+          sortOptions={[
+            { name: t('activities.sort.date'), value: 'date' },
+            { name: t('activities.sort.name'), value: 'name' },
+            { name: t('activities.sort.status'), value: 'status' },
+            { name: t('activities.sort.points'), value: 'points' },
+          ]}
+          selectedSort={sortBy}
+          onSortChange={setSortBy}
+          sortDirection={sortDirection}
+          onSortDirectionChange={setSortDirection}
+          isActive={sortBy !== 'date' || sortDirection !== 'desc'}
+        />
+        <Badge
+          badgeContent={filterActiveCount || null}
+          color='primary'
+          size='sm'
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         >
-          {t('activities.title')}
-        </Typography>
+          <IconButton
+            onClick={() => setFilterBarOpen(true)}
+            variant='outlined'
+            color={filterActiveCount > 0 ? 'primary' : 'neutral'}
+            size='sm'
+            sx={{ height: 32, width: 32, borderRadius: '50%', flexShrink: 0 }}
+            aria-label={t('common:filterBar.filtersButton')}
+          >
+            <Tune />
+          </IconButton>
+        </Badge>
       </Box>
 
       <FilterBar
@@ -1025,8 +1165,11 @@ const UserActivites = () => {
         activeFilters={activeFilters}
         onSetFilter={handleSetFilter}
         onClearAll={handleClearAll}
-        resultCount={filteredTimeline.length}
+        resultCount={sortedTimeline.length}
         totalCount={selectedHistory.length}
+        showTrigger={false}
+        open={filterBarOpen}
+        onOpenChange={setFilterBarOpen}
       />
 
       {/* Conditional Content Based on Data Availability */}
@@ -1070,7 +1213,7 @@ const UserActivites = () => {
             {/* Left Side - Timeline (Mobile: Full width, Desktop: Flexible) */}
             <Box sx={{ flex: 1, minWidth: 0, width: '100%' }}>
               <ChoreHistoryTimeline
-                history={filteredTimeline}
+                history={sortedTimeline}
                 performers={circleUsers}
                 onViewNote={notes => {
                   setNoteViewerConfig({
