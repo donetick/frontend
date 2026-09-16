@@ -7,6 +7,7 @@ import {
   ChoreSorter,
   ChoreStatus,
   notInCompletionWindow,
+  priorityOrder,
 } from '../../utils/Chores'
 import { getFilterCount, getFilterOverdueCount } from '../../utils/FilterEngine'
 import { useFilters } from '../Filters/FilterQueries'
@@ -43,6 +44,21 @@ export const DEFAULT_PROJECT_ID = 'default'
  */
 const isMine = (chore, userId) =>
   !chore.assignedTo || chore.assignedTo === userId
+
+/**
+ * Due date first, priority as the tiebreak. ChoreSorter (priority first) is
+ * right for a triage list, but Home's queue is a small, date-ordered lookahead.
+ */
+const dueDateFirstSorter = (a, b) => {
+  if (!a.nextDueDate && !b.nextDueDate) return 0
+  if (!a.nextDueDate) return 1
+  if (!b.nextDueDate) return -1
+
+  const dueDiff = new Date(a.nextDueDate) - new Date(b.nextDueDate)
+  if (dueDiff !== 0) return dueDiff
+
+  return priorityOrder.indexOf(a.priority) - priorityOrder.indexOf(b.priority)
+}
 
 /**
  * The one sentence at the top of the screen. Deliberately a short fixed set of
@@ -130,15 +146,17 @@ const useHomeSummary = chores => {
       chore => chore.status === ChoreStatus.PENDING_APPROVAL,
     )
 
-    // The same ordering MyChores uses: priority first, then due date.
+    // Unlike MyChores, Home orders by due date first: it's a short queue of
+    // what's coming, not a triage list, so the soonest task should lead even
+    // if a later one carries higher priority.
     const nextUp = [...dueToday, ...dueTomorrow]
       .filter(chore => !notInCompletionWindow(chore))
-      .sort(ChoreSorter)
+      .sort(dueDateFirstSorter)
       .slice(0, NEXT_UP_LIMIT)
 
     const nextUpFallback = horizon
       .filter(chore => !notInCompletionWindow(chore))
-      .sort(ChoreSorter)
+      .sort(dueDateFirstSorter)
       .slice(0, NEXT_UP_FALLBACK_LIMIT)
 
     const overduePreview = overdue
