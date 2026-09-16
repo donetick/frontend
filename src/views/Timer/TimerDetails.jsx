@@ -2,7 +2,6 @@ import '@meauxt/react-swipeable-list/dist/styles.css'
 
 import {
   SwipeableList,
-  SwipeableListItem,
   SwipeAction,
   TrailingActions,
   Type as ListType,
@@ -42,6 +41,9 @@ import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 
 import EmptyState from '../../components/common/EmptyState'
+import SwipeListItem, {
+  SWIPE_COMMIT_THRESHOLD,
+} from '../../components/common/SwipeListItem'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import {
   useChoreTimer,
@@ -970,7 +972,11 @@ const TimerDetails = () => {
                       Work Sessions ({timerData.pauseLog.length})
                     </Typography>
 
-                    <SwipeableList type={ListType.IOS} fullSwipe={false}>
+                    <SwipeableList
+                      type={ListType.IOS}
+                      fullSwipe
+                      threshold={SWIPE_COMMIT_THRESHOLD}
+                    >
                       {timerData.pauseLog
                         .sort((a, b) => moment(b.start) - moment(a.start))
                         .map((pause, pauseIndex) => {
@@ -991,7 +997,7 @@ const TimerDetails = () => {
                             : pause.duration
 
                           return (
-                            <SwipeableListItem
+                            <SwipeListItem
                               key={pauseIndex}
                               swipeActionOpen={
                                 showMoreInfoId === pauseIndex
@@ -1206,7 +1212,7 @@ const TimerDetails = () => {
                                   <MoreVert sx={{ fontSize: 18 }} />
                                 </IconButton>
                               </Card>
-                            </SwipeableListItem>
+                            </SwipeListItem>
                           )
                         })}
                     </SwipeableList>

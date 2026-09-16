@@ -60,7 +60,17 @@ const CircleStrip = ({ members }) => {
   }
 
   return (
-    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+    <Box
+      sx={{
+        display: 'flex',
+        gap: 1,
+        overflowX: 'auto',
+        // Let the strip scroll under a swipe without also dragging the page.
+        WebkitOverflowScrolling: 'touch',
+        scrollbarWidth: 'none',
+        '&::-webkit-scrollbar': { display: 'none' },
+      }}
+    >
       {members.map(member => {
         // Their week: everything they closed plus everything still on them.
         // Anchoring the ring to a floor keeps a light week from looking like a
@@ -96,6 +106,7 @@ const CircleStrip = ({ members }) => {
               cursor: 'pointer',
               display: 'flex',
               flexDirection: 'column',
+              flexShrink: 0,
               font: 'inherit',
               gap: 0.75,
               px: 0.5,

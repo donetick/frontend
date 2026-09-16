@@ -2,7 +2,6 @@ import '@meauxt/react-swipeable-list/dist/styles.css'
 
 import {
   SwipeableList,
-  SwipeableListItem,
   SwipeAction,
   TrailingActions,
   Type as ListType,
@@ -39,6 +38,9 @@ import { useNavigate } from 'react-router-dom'
 import { track } from '../../analytics'
 import EmptyState from '../../components/common/EmptyState'
 import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
+import SwipeListItem, {
+  SWIPE_COMMIT_THRESHOLD,
+} from '../../components/common/SwipeListItem'
 import { useNotification } from '../../service/NotificationProvider'
 import {
   CreateThing,
@@ -582,9 +584,13 @@ const ThingsView = () => {
             }}
           />
         )}
-        <SwipeableList type={ListType.IOS} fullSwipe={false}>
+        <SwipeableList
+          type={ListType.IOS}
+          fullSwipe
+          threshold={SWIPE_COMMIT_THRESHOLD}
+        >
           {filteredThings.map(thing => (
-            <SwipeableListItem
+            <SwipeListItem
               onClick={() => navigate(`/things/${thing?.id}`)}
               key={thing.id}
               swipeActionOpen={showMoreInfoId === thing.id ? 'trailing' : null}
@@ -695,7 +701,7 @@ const ThingsView = () => {
                   }
                 }}
               />
-            </SwipeableListItem>
+            </SwipeListItem>
           ))}
         </SwipeableList>
       </Box>

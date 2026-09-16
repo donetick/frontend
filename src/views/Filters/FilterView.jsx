@@ -2,7 +2,6 @@ import '@meauxt/react-swipeable-list/dist/styles.css'
 
 import {
   SwipeableList,
-  SwipeableListItem,
   SwipeAction,
   TrailingActions,
   Type as ListType,
@@ -38,6 +37,9 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import EmptyState from '../../components/common/EmptyState'
 import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
+import SwipeListItem, {
+  SWIPE_COMMIT_THRESHOLD,
+} from '../../components/common/SwipeListItem'
 import { useChores } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { getFilterCount, getFilterOverdueCount } from '../../utils/FilterEngine'
@@ -614,10 +616,14 @@ const FilterView = () => {
             }}
           />
         ) : (
-          <SwipeableList type={ListType.IOS} fullSwipe={false}>
+          <SwipeableList
+            type={ListType.IOS}
+            fullSwipe
+            threshold={SWIPE_COMMIT_THRESHOLD}
+          >
             {filteredFilters.map(filter => {
               return (
-                <SwipeableListItem
+                <SwipeListItem
                   swipeActionOpen={
                     showMoreInfoId === filter.id ? 'trailing' : null
                   }
@@ -732,7 +738,7 @@ const FilterView = () => {
                     taskCount={filterCounts[filter.id]?.count || 0}
                     overdueCount={filterCounts[filter.id]?.overdueCount || 0}
                   />
-                </SwipeableListItem>
+                </SwipeListItem>
               )
             })}
           </SwipeableList>

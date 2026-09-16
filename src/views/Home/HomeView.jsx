@@ -178,11 +178,7 @@ const HomeView = () => {
       maxWidth='sm'
       sx={{ pb: getSafeBottomPadding(CAPTURE_CLEARANCE), pt: 1, px: 2 }}
     >
-      <Typography level='body-sm' textColor='text.tertiary'>
-        {moment().format('dddd, MMMM D')}
-      </Typography>
-
-      <Box sx={{ mb: 2.5, mt: 0.5 }}>
+      <Box sx={{ mb: 1.5, mt: 0.5 }}>
         <Typography
           level='h2'
           sx={{
@@ -254,6 +250,16 @@ const HomeView = () => {
               chores.filter(chore => chore.nextDueDate === null).length
             }
           />
+          {circle.length > 0 && (
+            <>
+              <SectionHeader
+                title={t('home.circle.title')}
+                action={t('home.circle.action')}
+                actionTo='/settings/circle'
+              />
+              <CircleStrip members={circle} />
+            </>
+          )}
           {needsReview.length > 0 && (
             <>
               <SectionHeader
@@ -353,17 +359,6 @@ const HomeView = () => {
                 {t('home.clear.action')}
               </Button>
             </Sheet>
-          )}
-
-          {circle.length > 0 && (
-            <>
-              <SectionHeader
-                title={t('home.circle.title')}
-                action={t('home.circle.action')}
-                actionTo='/settings/circle'
-              />
-              <CircleStrip members={circle} />
-            </>
           )}
 
           {projectPulse.length > 0 && (
