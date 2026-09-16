@@ -8,6 +8,8 @@ import {
   ChoreStatus,
   notInCompletionWindow,
 } from '../../utils/Chores'
+import { getFilterCount, getFilterOverdueCount } from '../../utils/FilterEngine'
+import { useFilters } from '../Filters/FilterQueries'
 import { useProjects } from '../Projects/ProjectQueries'
 
 // Home shows three tasks and no more. A fourth turns the screen back into a
@@ -73,6 +75,7 @@ const useHomeSummary = chores => {
   const { data: userProfile, isLoading: profileLoading } = useUserProfile()
   const { data: membersData, isLoading: membersLoading } = useCircleMembers()
   const { data: projects = [], isLoading: projectsLoading } = useProjects()
+  const { data: filters = [], isLoading: filtersLoading } = useFilters()
   // The open list can't say what anyone finished, and the circle ring is a
   // week: it needs the completion log. Same window and shape the activity
   // screens already ask for, so this usually lands on a warm cache.
@@ -267,10 +270,38 @@ const useHomeSummary = chores => {
       .slice(0, STRIP_LIMIT)
   }, [chores, projects])
 
+  /**
+   * The same shortcut list the Filters screen leads with: pinned filters
+   * first, since pinning is the user's own signal of what matters, then
+   * whatever else is turning up the most matches right now.
+   */
+  const filterPulse = useMemo(() => {
+    if (!filters.length) return []
+
+    const context = { userId }
+
+    return [...filters]
+      .map(filter => ({
+        color: filter.color,
+        count: getFilterCount(chores, filter, context),
+        id: filter.id,
+        isPinned: filter.isPinned,
+        name: filter.name,
+        overdueCount: getFilterOverdueCount(chores, filter, context),
+      }))
+      .sort((a, b) => {
+        if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1
+        return b.count - a.count
+      })
+      .slice(0, STRIP_LIMIT)
+  }, [chores, filters, userId])
+
   return {
     ...summary,
     circle,
-    isLoading: profileLoading || membersLoading || projectsLoading,
+    filterPulse,
+    isLoading:
+      profileLoading || membersLoading || projectsLoading || filtersLoading,
     membersData,
     projectPulse,
     userProfile,

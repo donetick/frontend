@@ -49,6 +49,7 @@ import NativeCancelSubscriptionModal from '../Modals/Inputs/NativeCancelSubscrip
 import PassowrdChangeModal from '../Modals/Inputs/PasswordChangeModal'
 import UserDeletionModal from '../Modals/Inputs/UserDeletionModal'
 import APITokenSettings from './APITokenSettings'
+import HomeSectionsSettings from './HomeSectionsSettings'
 import LocalizationSettings from './LocalizationSettings'
 import MFASettings from './MFASettings'
 import NotificationSetting from './NotificationSetting'
@@ -903,6 +904,15 @@ const Settings = () => {
           {t('sidepanel.detailedDescription')}
         </Typography>
         <SidepanelSettings />
+      </div>
+
+      <div className='grid gap-4 py-4' id='homeSections'>
+        <Typography level='h3'>{t('homeSections.title')}</Typography>
+        <Divider />
+        <Typography level='body-md'>
+          {t('homeSections.detailedDescription')}
+        </Typography>
+        <HomeSectionsSettings />
       </div>
 
       <div className='grid gap-4 py-4' id='theme'>

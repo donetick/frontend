@@ -1,5 +1,5 @@
-import { AddTask, GroupAdd } from '@mui/icons-material'
-import { Box, Button, Container, Sheet, Typography } from '@mui/joy'
+import { AddTask, GroupAdd, Tune } from '@mui/icons-material'
+import { Box, Button, Container, IconButton, Sheet, Typography } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import moment from 'moment'
 import PropTypes from 'prop-types'
@@ -12,6 +12,7 @@ import { useImpersonateUser } from '../../contexts/ImpersonateUserContext'
 import { useChores } from '../../queries/ChoreQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { ChoreSorter } from '../../utils/Chores'
+import { getHomeSectionsConfig } from '../../utils/HomeSectionsConfig'
 import { getSafeBottomPadding } from '../../utils/SafeAreaUtils'
 import ChoreModals from '../Chores/components/ChoreModals'
 import { useChoreActions } from '../Chores/hooks/useChoreActions'
@@ -21,6 +22,7 @@ import LoadingComponent from '../components/Loading'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import CaptureBar from './components/CaptureBar'
 import CircleStrip from './components/CircleStrip'
+import FilterStrip from './components/FilterStrip'
 import HomeChoreList from './components/HomeChoreList'
 import ProjectStrip from './components/ProjectStrip'
 import TriageRow from './components/TriageRow'
@@ -112,6 +114,7 @@ const HomeView = () => {
   const {
     circle,
     dueToday,
+    filterPulse,
     hasAnyTask,
     isLoading,
     membersData,
@@ -124,6 +127,20 @@ const HomeView = () => {
     userProfile,
     verdict,
   } = useHomeSummary(chores)
+
+  // Reread on every mount and whenever the settings page saves a change, so
+  // Home reflects a reorder/hide without needing a full app reload.
+  const [sectionsConfig, setSectionsConfig] = useState(getHomeSectionsConfig)
+  useEffect(() => {
+    const onConfigChanged = () => setSectionsConfig(getHomeSectionsConfig())
+    window.addEventListener('homeSectionsConfigChanged', onConfigChanged)
+    return () =>
+      window.removeEventListener('homeSectionsConfigChanged', onConfigChanged)
+  }, [])
+  const sectionOrder = [...sectionsConfig]
+    .sort((a, b) => a.order - b.order)
+    .filter(section => section.enabled)
+    .map(section => section.id)
 
   const { activeModal, closeModal, modalChore, openModal } = useChoreModals()
 
@@ -173,26 +190,189 @@ const HomeView = () => {
     nextUpFallback.length === 0 &&
     overduePreview.length === 0
 
+  // Keyed by the same ids the customization settings page toggles and
+  // reorders, so `sectionOrder` can render this screen in any arrangement.
+  const homeSections = {
+    circle: circle.length > 0 && (
+      <>
+        <SectionHeader
+          title={t('home.circle.title')}
+          action={t('home.circle.action')}
+          actionTo='/settings/circle'
+        />
+        <CircleStrip members={circle} />
+      </>
+    ),
+    review: needsReview.length > 0 && (
+      <>
+        <SectionHeader
+          title={
+            canReviewTasks
+              ? t('home.review.title')
+              : t('home.review.pendingTitle', {
+                  defaultValue: t('home.triage.needsReview'),
+                })
+          }
+          action={t('home.review.action')}
+          actionTo='/chores?filterId=pending-approval'
+        />
+        {/* The same card again — for a pending-approval task it renders
+            approve / reject in the leading slot, so signing off happens
+            here rather than one screen away. */}
+        <HomeChoreList
+          chores={needsReview.slice(0, REVIEW_LIMIT)}
+          performers={performers}
+          onAction={handleChoreAction}
+          userProfile={userProfile}
+        />
+      </>
+    ),
+    overdue: overduePreview.length > 0 && (
+      <>
+        <SectionHeader
+          title={t('home.overdue.title')}
+          action={t('home.overdue.action')}
+          actionTo='/chores?filterId=overdue'
+        />
+        <HomeChoreList
+          chores={overduePreview}
+          performers={performers}
+          onAction={handleChoreAction}
+          userProfile={userProfile}
+        />
+      </>
+    ),
+    nextUp: (
+      <>
+        {nextUp.length > 0 && (
+          <>
+            <SectionHeader
+              title={t('home.nextUp.title')}
+              action={t('home.nextUp.action')}
+              actionTo='/chores?filterId=due-next-two-days'
+            />
+            <HomeChoreList
+              chores={nextUp}
+              performers={performers}
+              onAction={handleChoreAction}
+              userProfile={userProfile}
+            />
+          </>
+        )}
+
+        {nextUp.length === 0 && nextUpFallback.length > 0 && (
+          <>
+            <SectionHeader
+              title={t('home.nextUpFallback.title')}
+              action={t('home.nextUpFallback.action')}
+              actionTo='/chores?filterId=due-this-week'
+            />
+            <HomeChoreList
+              chores={nextUpFallback}
+              performers={performers}
+              onAction={handleChoreAction}
+              userProfile={userProfile}
+            />
+          </>
+        )}
+
+        {showClearState && (
+          <Sheet
+            variant='soft'
+            sx={{
+              borderRadius: 'lg',
+              display: 'grid',
+              gap: 0.5,
+              mt: 3.5,
+              px: 2,
+              py: 2,
+            }}
+          >
+            <Typography level='title-sm'>{t('home.clear.title')}</Typography>
+            <Typography level='body-sm' textColor='text.secondary'>
+              {t('home.clear.body')}
+            </Typography>
+            <Button
+              component={Link}
+              to='/chores'
+              variant='plain'
+              size='sm'
+              sx={{ justifySelf: 'start', mt: 0.5, mx: -1 }}
+            >
+              {t('home.clear.action')}
+            </Button>
+          </Sheet>
+        )}
+      </>
+    ),
+    filters: filterPulse.length > 0 && (
+      <>
+        <SectionHeader
+          title={t('home.filters.title')}
+          action={t('home.filters.action')}
+          actionTo='/filters'
+        />
+        <FilterStrip filters={filterPulse} />
+      </>
+    ),
+    projects: projectPulse.length > 0 && (
+      <>
+        <SectionHeader
+          title={t('home.projects.title')}
+          action={t('home.projects.action')}
+          actionTo='/projects'
+        />
+        <ProjectStrip projects={projectPulse} />
+      </>
+    ),
+  }
+
   return (
     <Container
       maxWidth='sm'
       sx={{ pb: getSafeBottomPadding(CAPTURE_CLEARANCE), pt: 1, px: 2 }}
     >
-      <Box sx={{ mb: 1.5, mt: 0.5 }}>
-        <Typography
-          level='h2'
-          sx={{
-            fontSize: 'clamp(1.5rem, 6vw, 1.75rem)',
-            letterSpacing: '-0.028em',
-            lineHeight: 1.15,
-            textWrap: 'balance',
-          }}
+      <Box
+        sx={{
+          alignItems: 'flex-start',
+          display: 'flex',
+          gap: 1,
+          justifyContent: 'space-between',
+          mb: 1.5,
+          mt: 0.5,
+        }}
+      >
+        <Box>
+          <Typography
+            level='h2'
+            sx={{
+              fontSize: 'clamp(1.5rem, 6vw, 1.75rem)',
+              letterSpacing: '-0.028em',
+              lineHeight: 1.15,
+              textWrap: 'balance',
+            }}
+          >
+            {t(`home.verdict.${verdict.id}.title`, { count: verdict.count })}
+          </Typography>
+          <Typography
+            level='body-sm'
+            textColor='text.secondary'
+            sx={{ mt: 0.5 }}
+          >
+            {t(`home.verdict.${verdict.id}.body`, { count: verdict.count })}
+          </Typography>
+        </Box>
+        <IconButton
+          component={Link}
+          to='/settings/home-sections'
+          variant='plain'
+          color='neutral'
+          size='sm'
+          aria-label={t('home.customize.action')}
+          sx={{ mt: 0.25 }}
         >
-          {t(`home.verdict.${verdict.id}.title`, { count: verdict.count })}
-        </Typography>
-        <Typography level='body-sm' textColor='text.secondary' sx={{ mt: 0.5 }}>
-          {t(`home.verdict.${verdict.id}.body`, { count: verdict.count })}
-        </Typography>
+          <Tune sx={{ fontSize: 20 }} />
+        </IconButton>
       </Box>
 
       {!hasAnyTask ? (
@@ -250,127 +430,9 @@ const HomeView = () => {
               chores.filter(chore => chore.nextDueDate === null).length
             }
           />
-          {circle.length > 0 && (
-            <>
-              <SectionHeader
-                title={t('home.circle.title')}
-                action={t('home.circle.action')}
-                actionTo='/settings/circle'
-              />
-              <CircleStrip members={circle} />
-            </>
-          )}
-          {needsReview.length > 0 && (
-            <>
-              <SectionHeader
-                title={
-                  canReviewTasks
-                    ? t('home.review.title')
-                    : t('home.review.pendingTitle', {
-                        defaultValue: t('home.triage.needsReview'),
-                      })
-                }
-                action={t('home.review.action')}
-                actionTo='/chores?filterId=pending-approval'
-              />
-              {/* The same card again — for a pending-approval task it renders
-                  approve / reject in the leading slot, so signing off happens
-                  here rather than one screen away. */}
-              <HomeChoreList
-                chores={needsReview.slice(0, REVIEW_LIMIT)}
-                performers={performers}
-                onAction={handleChoreAction}
-                userProfile={userProfile}
-              />
-            </>
-          )}
-
-          {overduePreview.length > 0 && (
-            <>
-              <SectionHeader
-                title={t('home.overdue.title')}
-                action={t('home.overdue.action')}
-                actionTo='/chores?filterId=overdue'
-              />
-              <HomeChoreList
-                chores={overduePreview}
-                performers={performers}
-                onAction={handleChoreAction}
-                userProfile={userProfile}
-              />
-            </>
-          )}
-
-          {nextUp.length > 0 && (
-            <>
-              <SectionHeader
-                title={t('home.nextUp.title')}
-                action={t('home.nextUp.action')}
-                actionTo='/chores?filterId=due-next-two-days'
-              />
-              <HomeChoreList
-                chores={nextUp}
-                performers={performers}
-                onAction={handleChoreAction}
-                userProfile={userProfile}
-              />
-            </>
-          )}
-
-          {nextUp.length === 0 && nextUpFallback.length > 0 && (
-            <>
-              <SectionHeader
-                title={t('home.nextUpFallback.title')}
-                action={t('home.nextUpFallback.action')}
-                actionTo='/chores?filterId=due-this-week'
-              />
-              <HomeChoreList
-                chores={nextUpFallback}
-                performers={performers}
-                onAction={handleChoreAction}
-                userProfile={userProfile}
-              />
-            </>
-          )}
-
-          {showClearState && (
-            <Sheet
-              variant='soft'
-              sx={{
-                borderRadius: 'lg',
-                display: 'grid',
-                gap: 0.5,
-                mt: 3.5,
-                px: 2,
-                py: 2,
-              }}
-            >
-              <Typography level='title-sm'>{t('home.clear.title')}</Typography>
-              <Typography level='body-sm' textColor='text.secondary'>
-                {t('home.clear.body')}
-              </Typography>
-              <Button
-                component={Link}
-                to='/chores'
-                variant='plain'
-                size='sm'
-                sx={{ justifySelf: 'start', mt: 0.5, mx: -1 }}
-              >
-                {t('home.clear.action')}
-              </Button>
-            </Sheet>
-          )}
-
-          {projectPulse.length > 0 && (
-            <>
-              <SectionHeader
-                title={t('home.projects.title')}
-                action={t('home.projects.action')}
-                actionTo='/projects'
-              />
-              <ProjectStrip projects={projectPulse} />
-            </>
-          )}
+          {sectionOrder.map(id => (
+            <Box key={id}>{homeSections[id]}</Box>
+          ))}
         </>
       )}
 

@@ -41,6 +41,7 @@ import PaymentSuccessView from '../views/Payments/PaymentSuccessView'
 import PrivacyPolicyView from '../views/PrivacyPolicy/PrivacyPolicyView'
 import ProjectView from '../views/Projects/ProjectView'
 import APITokenSettings from '../views/Settings/APITokenSettings'
+import HomeSectionsSettings from '../views/Settings/HomeSectionsSettings'
 import LocalizationSettings from '../views/Settings/LocalizationSettings'
 import MFASettings from '../views/Settings/MFASettings'
 import NotificationSetting from '../views/Settings/NotificationSetting'
@@ -112,6 +113,10 @@ const Router = createBrowserRouter([
           {
             path: 'sidepanel',
             element: <SidepanelSettings />,
+          },
+          {
+            path: 'home-sections',
+            element: <HomeSectionsSettings />,
           },
           {
             path: 'theme',

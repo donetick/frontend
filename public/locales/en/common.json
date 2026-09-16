@@ -578,6 +578,9 @@
     "readyReminders": "Reminders and home-screen widgets"
   },
   "home": {
+    "customize": {
+      "action": "Customize Home"
+    },
     "verdict": {
       "late": {
         "title_one": "{{count}} task slipped.",
@@ -662,6 +665,13 @@
       "tasksUnplanned_one": "{{count}} task, {{unplanned}} unplanned",
       "tasksUnplanned_other": "{{count}} tasks, {{unplanned}} unplanned",
       "clear": "All clear"
+    },
+    "filters": {
+      "title": "Filters",
+      "action": "All filters",
+      "tasks_one": "{{count}} match",
+      "tasks_other": "{{count}} matches",
+      "clear": "No matches"
     },
     "capture": {
       "placeholder": "Add a task…",
