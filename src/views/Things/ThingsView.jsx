@@ -612,22 +612,25 @@ const ThingsView = () => {
                           flexDirection: 'column',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          bgcolor: 'success.softBg',
-                          color: 'success.700',
+                          bgcolor: 'success.500',
+                          color: '#fff',
                           px: 3,
                           height: '100%',
                         }}
                       >
                         {thing?.type === 'text' ? (
-                          <Flip sx={{ fontSize: 20 }} />
+                          <Flip sx={{ fontSize: 20, color: 'white' }} />
                         ) : thing?.type === 'number' ? (
-                          <PlusOne sx={{ fontSize: 20 }} />
+                          <PlusOne sx={{ fontSize: 20, color: 'white' }} />
                         ) : thing.state === 'true' ? (
-                          <ToggleOn sx={{ fontSize: 20 }} />
+                          <ToggleOn sx={{ fontSize: 20, color: 'white' }} />
                         ) : (
-                          <ToggleOff sx={{ fontSize: 20 }} />
+                          <ToggleOff sx={{ fontSize: 20, color: 'white' }} />
                         )}
-                        <Typography level='body-xs' sx={{ mt: 0.5 }}>
+                        <Typography
+                          level='body-xs'
+                          sx={{ mt: 0.5, color: 'inherit' }}
+                        >
                           {thing?.type === 'text'
                             ? t('common:edit')
                             : t('view.toggle')}
@@ -641,14 +644,17 @@ const ThingsView = () => {
                           flexDirection: 'column',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          bgcolor: 'neutral.softBg',
-                          color: 'neutral.700',
+                          bgcolor: 'primary.500',
+                          color: '#fff',
                           px: 3,
                           height: '100%',
                         }}
                       >
-                        <Edit sx={{ fontSize: 20 }} />
-                        <Typography level='body-xs' sx={{ mt: 0.5 }}>
+                        <Edit sx={{ fontSize: 20, color: 'white' }} />
+                        <Typography
+                          level='body-xs'
+                          sx={{ mt: 0.5, color: 'inherit' }}
+                        >
                           {t('common:edit')}
                         </Typography>
                       </Box>
@@ -660,14 +666,17 @@ const ThingsView = () => {
                           flexDirection: 'column',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          bgcolor: 'danger.softBg',
-                          color: 'danger.700',
+                          bgcolor: 'danger.500',
+                          color: '#fff',
                           px: 3,
                           height: '100%',
                         }}
                       >
-                        <Delete sx={{ fontSize: 20 }} />
-                        <Typography level='body-xs' sx={{ mt: 0.5 }}>
+                        <Delete sx={{ fontSize: 20, color: 'white' }} />
+                        <Typography
+                          level='body-xs'
+                          sx={{ mt: 0.5, color: 'inherit' }}
+                        >
                           {t('common:delete')}
                         </Typography>
                       </Box>

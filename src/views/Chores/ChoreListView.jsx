@@ -8,15 +8,19 @@ import { useNavigate } from 'react-router-dom'
 import ChoreActionMenu from '../components/ChoreActionMenu'
 import ChoreCard from './ChoreCard'
 import CompactChoreCard from './CompactChoreCard'
-import ChoreSwipeableItem from './components/ChoreSwipeableItem'
-import { getChoreTrailingActions } from './components/ChoreSwipeActions'
+import ChoreSwipeableItem, {
+  SWIPE_COMMIT_THRESHOLD,
+} from './components/ChoreSwipeableItem'
+import {
+  getChoreLeadingActions,
+  getChoreTrailingActions,
+} from './components/ChoreSwipeActions'
 
 const ChoreListView = ({
   chores,
   handleChoreAction,
   handleLabelFiltering,
   isMultiSelectMode,
-  isOfficialInstance,
   membersData,
   onLongPressChore,
   selectedChores,
@@ -62,26 +66,40 @@ const ChoreListView = ({
       />
     )
   }
-  const getTrailingActions = chore =>
-    getChoreTrailingActions({
-      chore,
-      handleChoreAction,
-      isMultiSelectMode,
-      isOfficialInstance,
-      navigate,
-      showActions,
-      t,
-      usesCompactCard,
-      userProfile,
-    })
+  const swipeActionArgs = chore => ({
+    chore,
+    handleChoreAction,
+    isMultiSelectMode,
+    showActions,
+    t,
+    usesCompactCard,
+    userProfile,
+  })
 
+  // fullSwipe makes the leading action (complete/start) a single flick with no
+  // aiming. It also arms the last trailing action — delete — which is safe
+  // because delete opens a confirmation modal rather than deleting outright.
+  //
+  // The threshold has to clear the trailing tray's own width or the tray can
+  // never be fully revealed: three 76px tiles are ~58% of a phone-width row,
+  // so at the default 0.5 the swipe always commits before you can see the
+  // actions, let alone pick one. 0.8 leaves room to open the tray and tap,
+  // and keeps the full-swipe commit a deliberately long drag.
   const renderChores = chores => {
     return (
-      <SwipeableList type={ListType.IOS} fullSwipe={false}>
+      <SwipeableList
+        type={ListType.IOS}
+        fullSwipe
+        threshold={SWIPE_COMMIT_THRESHOLD}
+      >
         {chores.map(chore => (
           <ChoreSwipeableItem
             key={chore.id}
-            trailingActions={getTrailingActions(chore)}
+            leadingActions={getChoreLeadingActions(swipeActionArgs(chore))}
+            trailingActions={getChoreTrailingActions({
+              ...swipeActionArgs(chore),
+              navigate,
+            })}
             onClick={() => {
               if (isMultiSelectMode) {
                 toggleChoreSelection(chore.id)

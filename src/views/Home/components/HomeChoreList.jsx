@@ -7,8 +7,13 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
 import CompactChoreCard from '../../Chores/CompactChoreCard'
-import ChoreSwipeableItem from '../../Chores/components/ChoreSwipeableItem'
-import { getChoreTrailingActions } from '../../Chores/components/ChoreSwipeActions'
+import ChoreSwipeableItem, {
+  SWIPE_COMMIT_THRESHOLD,
+} from '../../Chores/components/ChoreSwipeableItem'
+import {
+  getChoreLeadingActions,
+  getChoreTrailingActions,
+} from '../../Chores/components/ChoreSwipeActions'
 
 /**
  * Home renders the same row the task list renders. CompactChoreCard owns the
@@ -26,10 +31,21 @@ const HomeChoreList = ({ chores, onAction, performers, userProfile }) => {
       variant='outlined'
       sx={{ borderRadius: 'lg', overflow: 'hidden', p: 0 }}
     >
-      <SwipeableList type={ListType.IOS} fullSwipe={false}>
+      {/* See ChoreListView for why fullSwipe and threshold are set this way. */}
+      <SwipeableList
+        type={ListType.IOS}
+        fullSwipe
+        threshold={SWIPE_COMMIT_THRESHOLD}
+      >
         {chores.map((chore, index) => (
           <ChoreSwipeableItem
             key={chore.id}
+            leadingActions={getChoreLeadingActions({
+              chore,
+              handleChoreAction: onAction,
+              t,
+              userProfile,
+            })}
             trailingActions={getChoreTrailingActions({
               chore,
               handleChoreAction: onAction,

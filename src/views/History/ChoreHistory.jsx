@@ -627,15 +627,18 @@ const ChoreHistory = () => {
                             flexDirection: 'column',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            bgcolor: 'neutral.softBg',
-                            color: 'neutral.700',
+                            bgcolor: 'primary.500',
+                            color: '#fff',
                             px: 3,
                             height: '100%',
                             width: '100%',
                           }}
                         >
-                          <EditIcon sx={{ fontSize: 20 }} />
-                          <Typography level='body-xs' sx={{ mt: 0.5 }}>
+                          <EditIcon sx={{ fontSize: 20, color: 'white' }} />
+                          <Typography
+                            level='body-xs'
+                            sx={{ mt: 0.5, color: 'inherit' }}
+                          >
                             {t('common:edit')}
                           </Typography>
                         </Box>
@@ -647,14 +650,17 @@ const ChoreHistory = () => {
                             flexDirection: 'column',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            bgcolor: 'danger.softBg',
-                            color: 'danger.700',
+                            bgcolor: 'danger.500',
+                            color: '#fff',
                             px: 3,
                             height: '100%',
                           }}
                         >
-                          <DeleteIcon sx={{ fontSize: 20 }} />
-                          <Typography level='body-xs' sx={{ mt: 0.5 }}>
+                          <DeleteIcon sx={{ fontSize: 20, color: 'white' }} />
+                          <Typography
+                            level='body-xs'
+                            sx={{ mt: 0.5, color: 'inherit' }}
+                          >
                             {t('common:delete')}
                           </Typography>
                         </Box>

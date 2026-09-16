@@ -643,18 +643,23 @@ const FilterView = () => {
                               flexDirection: 'column',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              bgcolor: 'warning.softBg',
-                              color: 'warning.700',
+                              bgcolor: 'warning.500',
+                              color: '#fff',
                               px: 3,
                               height: '100%',
                             }}
                           >
                             {filter.isPinned ? (
-                              <Star sx={{ fontSize: 20 }} />
+                              <Star sx={{ fontSize: 20, color: 'white' }} />
                             ) : (
-                              <StarBorder sx={{ fontSize: 20 }} />
+                              <StarBorder
+                                sx={{ fontSize: 20, color: 'white' }}
+                              />
                             )}
-                            <Typography level='body-xs' sx={{ mt: 0.5 }}>
+                            <Typography
+                              level='body-xs'
+                              sx={{ mt: 0.5, color: 'inherit' }}
+                            >
                               {filter.isPinned ? t('unpin') : t('pin')}
                             </Typography>
                           </Box>
@@ -666,14 +671,17 @@ const FilterView = () => {
                               flexDirection: 'column',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              bgcolor: 'neutral.softBg',
-                              color: 'neutral.700',
+                              bgcolor: 'primary.500',
+                              color: '#fff',
                               px: 3,
                               height: '100%',
                             }}
                           >
-                            <EditIcon sx={{ fontSize: 20 }} />
-                            <Typography level='body-xs' sx={{ mt: 0.5 }}>
+                            <EditIcon sx={{ fontSize: 20, color: 'white' }} />
+                            <Typography
+                              level='body-xs'
+                              sx={{ mt: 0.5, color: 'inherit' }}
+                            >
                               {t('common:edit')}
                             </Typography>
                           </Box>
@@ -687,17 +695,16 @@ const FilterView = () => {
                               flexDirection: 'column',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              bgcolor: 'danger.softBg',
-                              color: 'danger.700',
+                              bgcolor: 'danger.500',
+                              color: '#fff',
                               px: 3,
                               height: '100%',
                             }}
                           >
-                            <DeleteIcon sx={{ fontSize: 20 }} color='danger' />
+                            <DeleteIcon sx={{ fontSize: 20, color: 'white' }} />
                             <Typography
                               level='body-xs'
-                              sx={{ mt: 0.5 }}
-                              color='danger'
+                              sx={{ mt: 0.5, color: 'inherit' }}
                             >
                               {t('common:delete')}
                             </Typography>
