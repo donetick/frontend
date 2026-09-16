@@ -453,6 +453,7 @@
     "sunday": "Domingo",
     "monday": "Segunda-feira",
     "saturday": "Sábado",
+    "helpTranslate": "",
     "formats": {
       "mdy": "MM/DD/AAAA (EUA)",
       "dmy": "DD/MM/AAAA (Europa)",
