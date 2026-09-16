@@ -202,7 +202,7 @@ const CircleStrip = ({ members }) => {
                 fontSize: 11,
                 fontVariantNumeric: 'tabular-nums',
                 maxWidth: '100%',
-                mt: -0.5,
+                mt: -1.5,
               }}
             >
               {summarize(member)}
