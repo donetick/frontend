@@ -1,0 +1,49 @@
+{
+  "blurb": "Spend your points on rewards, or manage the reward catalog if you're an admin. Available: {{points}} points.",
+  "redeem": "Redeem",
+  "notEnoughPoints": "Not enough points",
+  "approve": "Approve",
+  "reject": "Reject",
+  "pointsCost_one": "{{count}} point",
+  "pointsCost_other": "{{count}} points",
+  "tabs": {
+    "store": "Store",
+    "requests": "Requests"
+  },
+  "status": {
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected"
+  },
+  "delete": {
+    "title": "Delete Reward",
+    "message": "Are you sure you want to delete this reward? It will no longer be available to redeem."
+  },
+  "redeemConfirm": {
+    "title": "Redeem Reward",
+    "message": "Request \"{{name}}\" for {{cost}} points? An admin will need to approve it."
+  },
+  "requests": {
+    "emptyTitle": "No redemption requests",
+    "emptyDescription": "Redemption requests will show up here once someone redeems a reward."
+  },
+  "modal": {
+    "errorEmptyName": "Name cannot be empty",
+    "errorInvalidCost": "Points cost must be a number greater than 0",
+    "saveFailedTitle": "Failed to save reward",
+    "saveFailedMessage": "Unable to save reward. Please try again.",
+    "name": "Name",
+    "description": "Description",
+    "pointsCost": "Points cost",
+    "active": "Active",
+    "editTitle": "Edit Reward",
+    "addTitle": "Add Reward",
+    "saveChanges": "Save Changes",
+    "addReward": "Add Reward"
+  },
+  "view": {
+    "emptyTitle": "No rewards yet",
+    "emptyDescription": "Add a reward — like movie night or a treat — that circle members can redeem their points for.",
+    "createReward": "Create a reward"
+  }
+}

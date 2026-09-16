@@ -36,6 +36,7 @@ i18n
       'projects',
       'timer',
       'points',
+      'rewards',
     ],
     defaultNS: 'common',
 

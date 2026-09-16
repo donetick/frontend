@@ -612,6 +612,70 @@ const RedeemPoints = (userId, points, circleID) => {
     body: JSON.stringify({ points, userId }),
   })
 }
+
+const GetRewards = async () => {
+  const resp = await Fetch(`/rewards`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+  return resp.json()
+}
+
+const CreateReward = reward => {
+  return Fetch(`/rewards`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify(reward),
+  }).then(response => response.json())
+}
+
+const UpdateReward = (id, reward) => {
+  return Fetch(`/rewards/${id}`, {
+    method: 'PUT',
+    headers: HEADERS(),
+    body: JSON.stringify(reward),
+  }).then(response => response.json())
+}
+
+const DeleteReward = id => {
+  return Fetch(`/rewards/${id}`, {
+    method: 'DELETE',
+    headers: HEADERS(),
+  })
+}
+
+const RedeemReward = (id, note) => {
+  return Fetch(`/rewards/${id}/redeem`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify({ note: note || null }),
+  }).then(response => response.json())
+}
+
+const GetRedemptions = async (status = null) => {
+  const query = status ? `?status=${status}` : ''
+  const resp = await Fetch(`/rewards/redemptions${query}`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+  return resp.json()
+}
+
+const ApproveRedemption = id => {
+  return Fetch(`/rewards/redemptions/${id}/approve`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify({}),
+  })
+}
+
+const RejectRedemption = (id, note) => {
+  return Fetch(`/rewards/redemptions/${id}/reject`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify({ note: note || null }),
+  })
+}
 const RefreshToken = async () => {
   const basedURL = apiManager.getApiURL()
 
@@ -987,6 +1051,7 @@ const TrackFilterUsage = id => {
 export {
   AcceptCircleMemberRequest,
   ApproveChore,
+  ApproveRedemption,
   ArchiveChore,
   CancelSubscription,
   ChangePassword,
@@ -1002,6 +1067,7 @@ export {
   CreateLabel,
   CreateLongLiveToken,
   CreateProject,
+  CreateReward,
   CreateThing,
   DeleteChildUser,
   DeleteChore,
@@ -1013,6 +1079,7 @@ export {
   DeleteLabel,
   DeleteLongLiveToken,
   DeleteProject,
+  DeleteReward,
   DeleteThing,
   DeleteTimeSession,
   DeleteUser,
@@ -1040,7 +1107,9 @@ export {
   GetPinnedFilters,
   GetProjectById,
   GetProjects,
+  GetRedemptions,
   GetResource,
+  GetRewards,
   GetStorageUsage,
   GetSubscriptionSession,
   GetThingHistory,
@@ -1057,10 +1126,12 @@ export {
   PutNotificationTarget,
   PutWebhookURL,
   RedeemPoints,
+  RedeemReward,
   RefreshToken,
   RegenerateBackupCodes,
   RegisterDeviceToken,
   RejectChore,
+  RejectRedemption,
   ResetChoreTimer,
   ResetPassword,
   RestoreBackup,
@@ -1087,6 +1158,7 @@ export {
   UpdateNotificationTarget,
   UpdatePassword,
   UpdateProject,
+  UpdateReward,
   UpdateThingState,
   UpdateTimeSession,
   UpdateUserDetails,
