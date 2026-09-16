@@ -33,7 +33,7 @@
     "resetTimer": "Réinitialiser le minuteur",
     "resetTimerConfirmation": "Êtes-vous sûr de vouloir réinitialiser le minuteur ? Cela effacera tous les enregistrements de temps depuis le début de la tâche.",
     "clearAllTimeRecords": "Effacer tous les enregistrements de temps",
-    "clearAllTimeConfirmation": "Cela supprimera définitivement tous les minuteurs de cette tâche et la remettra à l'état « non démarrée ».",
+    "clearAllTimeConfirmation": "Cela supprimera définitivement tous les minuteurs de cette tâche et la remettra à l'état « non démarrée ».",
     "descriptionTitle": "Description",
     "description": "Description :",
     "previousNote": "Note précédente",
@@ -401,7 +401,11 @@
     "removeAria": "Supprimer les rappels"
   },
   "assignee": {
-    "anyone": "Tout le monde"
+    "label": "Personne assignée",
+    "anyone": "Tout le monde",
+    "unknown": "Inconnu",
+    "selectedCount_one": "{{count}} assigné",
+    "selectedCount_other": "{{count}} assignés"
   },
   "filterChip": {
     "cancelAll": "Annuler tous les filtres",
@@ -544,6 +548,16 @@
   },
   "subTask": {
     "namePlaceholder": "Nom de la tâche...",
+    "untitled": "Sous-tache sans titre",
+    "actions": "Actions de sous-tache",
+    "edit": "Modifier",
+    "addBelow": "Ajouter une sous-tache en dessous",
+    "addChild": "Ajouter une sous-tache imbriquee",
+    "moveUpLevel": "Remonter d'un niveau",
+    "delete": "Supprimer",
+    "editTitle": "Modifier la sous-tache",
+    "addTitle": "Ajouter une sous-tache",
+    "addChildTitle": "Ajouter une sous-tache imbriquee",
     "deleteShortcut": "Supprimer (Maj+Retour arrière)",
     "addPlaceholder": "Ajouter une nouvelle tâche... (Entrée à ajouter)",
     "untitled": "Sous-tache sans titre",
@@ -1028,5 +1042,26 @@
     "today": "Aujourd'hui",
     "yesterday": "Hier",
     "noteTitle": "Note - {{choreName}}"
+  },
+  "memberDetail": {
+    "taskCount_one": "{{count}} tâche assignée",
+    "taskCount_other": "{{count}} tâches assignées",
+    "you": "Vous",
+    "filters": {
+      "all": "Tout",
+      "overdue": "En retard",
+      "today": "Aujourd'hui",
+      "undated": "Aucune date"
+    },
+    "noMatchingStatus": "Aucune tâche assignée à cette personne n'est actuellement dans cet état.",
+    "clearFilters": "Afficher toutes les tâches",
+    "searchPlaceholder": "Rechercher les tâches assignées à cette personne",
+    "emptyTitle": "Aucune tâche assignée",
+    "emptyDescription": "Rien n'est assigné à {{name}} en ce moment. Assignez une tâche et elle apparaîtra ici.",
+    "browseTasks": "Parcourir les tâches",
+    "noResultsTitle": "Aucune tâche correspondante",
+    "noResultsDescription": "Aucune tâche assignée à cette personne ne correspond à «{{searchTerm}}».",
+    "notFoundTitle": "Membre introuvable",
+    "notFoundDescription": "Cette personne a peut-être quitté le cercle ou n'est plus partagée avec vous."
   }
 }
