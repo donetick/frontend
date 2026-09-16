@@ -2,10 +2,12 @@ import {
   Add,
   Bolt,
   CalendarMonth,
+  Check,
   CloudOff,
   EditCalendar,
   ExpandCircleDown,
   PriorityHigh,
+  Remove,
   SearchOff,
   Style,
 } from '@mui/icons-material'
@@ -115,13 +117,10 @@ const MyChores = () => {
   } = useCircleMembers()
 
   const [chores, setChores] = useState([])
-  const [filteredChores, setFilteredChores] = useState([])
   const [addTaskModalOpen, setAddTaskModalOpen] = useState(false)
   // 'voice' | 'scan' | null — set by the quick-capture widget deep links
   const [addTaskInitialMode, setAddTaskInitialMode] = useState(null)
-  const [taskInputFocus, setTaskInputFocus] = useState(0)
   const searchInputRef = useRef(null)
-  const [searchInputFocus, setSearchInputFocus] = useState(0)
   const [selectedChoreSection, setSelectedChoreSection] = useState(
     localStorage.getItem('selectedChoreSection') || 'default',
   )
@@ -132,15 +131,16 @@ const MyChores = () => {
       return {}
     }
   })
+  // Last `filterId` we saw in the URL, so the URL → filter-state effect can tell
+  // a real URL change from its own write-back.
+  const lastUrlFilterIdRef = useRef(null)
   const openSectionsInitializedRef = useRef(
     localStorage.getItem('openChoreSections') !== null,
   )
-  const [anchorEl, setAnchorEl] = useState(null)
   const [viewMode, setViewMode] = useState(
     localStorage.getItem('choreCardViewMode') || 'default',
   )
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(new Date())
-  const menuRef = useRef(null)
   const [confirmModelConfig, setConfirmModelConfig] = useState({})
 
   const { projectsWithDefault, selectedProject, setSelectedProjectWithCache } =
@@ -171,6 +171,7 @@ const MyChores = () => {
     selectedChores,
     toggleChoreSelection,
     toggleMultiSelectMode,
+    toggleSectionSelection,
   } = useMultiSelect()
 
   const { activeModal, closeModal, modalChore, modalData, openModal } =
@@ -187,7 +188,6 @@ const MyChores = () => {
     deleteFilter,
     filteredChores: customFilteredChores,
     hasFilterApplied,
-    hasProjectConditions,
     pinFilter,
     saveFilter,
     savedFilters,
@@ -209,16 +209,27 @@ const MyChores = () => {
     () => [
       {
         id: 'status',
-        label: t('group.dueDate'),
+        label: t('chores:group.dueDate'),
         type: 'single-select',
         icon: <CalendarMonth />,
         options: [
-          { value: 'Overdue', label: t('group.overdue'), color: 'danger' },
-          { value: 'Due today', label: t('group.dueToday'), color: 'warning' },
-          { value: 'Due in week', label: t('group.dueThisWeek') },
-          { value: 'Due Later', label: t('group.dueLater') },
-          { value: 'No Due Date', label: t('group.noDueDate') },
-          { value: 'Pending Approval', label: t('group.pendingApproval') },
+          {
+            value: 'Overdue',
+            label: t('chores:group.overdue'),
+            color: 'danger',
+          },
+          {
+            value: 'Due today',
+            label: t('chores:group.dueToday'),
+            color: 'warning',
+          },
+          { value: 'Due in week', label: t('chores:group.dueThisWeek') },
+          { value: 'Due Later', label: t('chores:group.dueLater') },
+          { value: 'No Due Date', label: t('chores:group.noDueDate') },
+          {
+            value: 'Pending Approval',
+            label: t('chores:group.pendingApproval'),
+          },
         ],
         filterFn: (item, value) => {
           const now = new Date()
@@ -249,7 +260,7 @@ const MyChores = () => {
       },
       {
         id: 'priority',
-        label: t('priority'),
+        label: t('chores:priority'),
         type: 'multi-select',
         icon: <PriorityHigh />,
         options: Priorities.map(p => ({
@@ -264,7 +275,7 @@ const MyChores = () => {
         ? [
             {
               id: 'label',
-              label: t('labels.label'),
+              label: t('chores:labels.label'),
               type: 'multi-select',
               icon: <Style />,
               options: userLabels.map(l => ({
@@ -375,7 +386,6 @@ const MyChores = () => {
       const processEffectAsync = async () => {
         // Sync local state with query data to ensure updates are reflected
         setChores(processedChores)
-        setFilteredChores(processedChores)
 
         // Don't set choreSections here - let the dedicated effect handle it
         // This prevents caching issues when switching between projects
@@ -414,22 +424,6 @@ const MyChores = () => {
     setOpenChoreSections(openSections)
   }, [choreSections])
 
-  useEffect(() => {
-    document.addEventListener('mousedown', handleMenuOutsideClick)
-    return () => {
-      document.removeEventListener('mousedown', handleMenuOutsideClick)
-    }
-  }, [anchorEl])
-
-  useEffect(() => {
-    if (searchInputFocus > 0 && searchInputRef.current) {
-      searchInputRef.current.focus()
-      searchInputRef.current.selectionStart =
-        searchInputRef.current.value?.length
-      searchInputRef.current.selectionEnd = searchInputRef.current.value?.length
-    }
-  }, [searchInputFocus])
-
   // A global-search result can hand a query back to the task list as a scoped filter.
   useEffect(() => {
     const query = searchParams.get('search')
@@ -463,12 +457,6 @@ const MyChores = () => {
     projectsWithDefault,
     selectedProject,
     setSelectedProjectWithCache,
-
-    searchParams,
-    projects,
-    projectsWithDefault,
-    selectedProject,
-    setSelectedProjectWithCache,
   ])
 
   // Widget deep links (donetick://chores/add[?mode=scan|voice] →
@@ -497,11 +485,19 @@ const MyChores = () => {
 
     const oldFilter = searchParams.get('filter')
 
+    // This effect restores state from the URL; the effect below pushes state
+    // back into the URL. Only act when the URL itself actually changed —
+    // otherwise switching insights (state changes first, URL a tick later)
+    // makes the two effects fight and flip between the old and new insight.
+    const urlFilterIdChanged = lastUrlFilterIdRef.current !== rawFilterId
+    lastUrlFilterIdRef.current = rawFilterId
+
     // Restore smart insight temp filter from URL (e.g. on page reload)
     // Insight IDs are strings (e.g. 'overdue'), saved filter IDs are numeric
     if (
       filterId &&
       INSIGHT_FILTER_DEFS[filterId] &&
+      urlFilterIdChanged &&
       tempFilterMeta?.id !== filterId
     ) {
       const def = INSIGHT_FILTER_DEFS[filterId]
@@ -607,9 +603,7 @@ const MyChores = () => {
     handleNudge,
   } = useChoreActions({
     chores,
-    filteredChores,
     setChores,
-    setFilteredChores,
     userProfile,
     impersonatedUser,
     showSuccess,
@@ -660,7 +654,6 @@ const MyChores = () => {
   const { showKeyboardShortcuts } = useKeyboardShortcuts({
     isMultiSelectMode,
     selectedChores,
-    addTaskModalOpen,
     searchTerm,
     searchFilter:
       hasQuickFilters || searchTerm?.length > 0 ? 'filtered' : 'All',
@@ -673,8 +666,6 @@ const MyChores = () => {
       onFocusSearch: () => searchInputRef.current?.focus(),
       onCloseSearch: () => {
         setSearchTerm('')
-        setFilteredChores(chores)
-        setSearchInputFocus(0)
       },
       onToggleMultiSelect: toggleMultiSelectMode,
       onEnableMultiSelectAndSelectAll: () => {
@@ -694,24 +685,6 @@ const MyChores = () => {
       onShowMessage: showSuccess,
     },
   })
-
-  const handleMenuOutsideClick = event => {
-    if (
-      anchorEl &&
-      !anchorEl.contains(event.target) &&
-      !menuRef.current.contains(event.target)
-    ) {
-      handleFilterMenuClose()
-    }
-  }
-  const handleFilterMenuOpen = event => {
-    event.preventDefault()
-    setAnchorEl(event.currentTarget)
-  }
-
-  const handleFilterMenuClose = () => {
-    setAnchorEl(null)
-  }
 
   // Clicking a label / priority chip on a task card feeds the advanced filter
   // (as a temp filter) rather than the legacy quick filters. Clicking the same
@@ -788,7 +761,6 @@ const MyChores = () => {
     }
     const search = e.target.value
     if (search === '') {
-      setFilteredChores(selectedProject ? projectFilteredChores : chores)
       setSearchTerm('')
       setSelectedCalendarDate(null)
       return
@@ -801,8 +773,6 @@ const MyChores = () => {
   }
   const handleSearchClose = () => {
     setSearchTerm('')
-    setFilteredChores(selectedProject ? projectFilteredChores : chores)
-    setSearchInputFocus(0)
     setSelectedCalendarDate(null)
     if (searchParams.has('search')) {
       const params = new URLSearchParams(searchParams)
@@ -834,61 +804,6 @@ const MyChores = () => {
       setSelectedCalendarDate(null)
     }
   }
-
-  // const renderChoreCard = (chore, key) => {
-  //   const CardComponent = viewMode === 'compact' ? CompactChoreCard : ChoreCard
-  //   return (
-  //     <CardComponent
-  //       key={key || chore.id}
-  //       chore={chore}
-  //       performers={membersData?.res}
-  //       userLabels={userLabels}
-  //       onChipClick={handleLabelFiltering}
-  //       onAction={handleChoreAction}
-  //       isMultiSelectMode={isMultiSelectMode}
-  //       isSelected={selectedChores.has(chore.id)}
-  //       onSelectionToggle={() => toggleChoreSelection(chore.id)}
-  //     />
-  //   )
-  // }
-  // const renderChores = chores => {
-  //   return (
-  //     <SwipeableList>
-  //       {chores.map(chore => (
-  //         <SwipeableListItem
-  //           key={chore.id}
-  //           trailingActions={
-  //             <TrailingActions>
-  //               <SwipeAction>
-  //                 <Button
-  //                   variant='solid'
-  //                   color='primary'
-  //                   size='sm'
-  //                   startIcon={<Add />}
-  //                   onClick={() => setAddTaskModalOpen(true)}
-  //                 >
-  //                   Add Task
-  //                 </Button>
-  //               </SwipeAction>
-  //             </TrailingActions>
-  //           }
-  //         >
-  //           {/* <Button
-  //             variant='outlined'
-  //             color='neutral'
-  //             size='sm'
-  //             startIcon={<EditCalendar />}
-  //             onClick={() => setViewMode('calendar')}
-  //           >
-  //             View Calendar
-  //           </Button> */}
-  //           {renderChoreCard(chore)}
-  //           {/* {chores.map(chore => renderChoreCard(chore))} */}
-  //         </SwipeableListItem>
-  //       ))}
-  //     </SwipeableList>
-  //   )
-  // }
 
   const selectedDateChores = useMemo(() => {
     if (!selectedCalendarDate) return []
@@ -966,7 +881,6 @@ const MyChores = () => {
   // a closure snapshot taken before earlier calls landed.
   const updateChores = newChore => {
     setChores(prev => appendChore(prev, newChore))
-    setFilteredChores(prev => appendChore(prev, newChore))
     clearQuickFilters()
   }
 
@@ -978,12 +892,12 @@ const MyChores = () => {
           variant='error'
           fullHeight
           icon={<CloudOff />}
-          title={t('empty.errorTitle')}
+          title={t('chores:empty.errorTitle')}
           description={
-            choresErrorDetails?.message || t('empty.errorDescription')
+            choresErrorDetails?.message || t('chores:empty.errorDescription')
           }
           primaryAction={{
-            label: t('empty.errorAction'),
+            label: t('chores:empty.errorAction'),
             onClick: () => {
               refetchChores()
               queryClient.invalidateQueries(['circleMembers'])
@@ -1016,7 +930,7 @@ const MyChores = () => {
         flexDirection: 'row',
       }}
     >
-      <Container maxWidth='md'>
+      <Container maxWidth='md' sx={{ px: 1 }}>
         <MyChoreHeader
           activeFilterId={activeFilterId}
           activeFilter={activeFilter}
@@ -1036,8 +950,8 @@ const MyChores = () => {
           updateFilter={updateFilter}
           onFilterSaved={name =>
             showSuccess({
-              title: t('list.filterSaved'),
-              message: t('list.filterSavedMsg', { name }),
+              title: t('chores:list.filterSaved'),
+              message: t('chores:list.filterSavedMsg', { name }),
             })
           }
           onClearAllFilters={() => {
@@ -1081,7 +995,6 @@ const MyChores = () => {
             } else {
               clearQuickFilters()
               setSearchTerm('')
-              setFilteredChores([])
               if (selectedChoreFilter !== 'anyone') {
                 setSelectedChoreFilterWithCache('anyone')
               }
@@ -1102,7 +1015,6 @@ const MyChores = () => {
           selectedGroupBy={selectedChoreSection}
           onGroupBySelect={value => {
             setSelectedChoreSectionWithCache(value)
-            setFilteredChores(chores)
             clearQuickFilters()
           }}
           viewMode={viewMode}
@@ -1167,15 +1079,15 @@ const MyChores = () => {
               variant='empty'
               fullHeight
               icon={<EditCalendar />}
-              title={t('empty.noTasksTitle')}
-              description={t('empty.noTasksDescription')}
+              title={t('chores:empty.noTasksTitle')}
+              description={t('chores:empty.noTasksDescription')}
               primaryAction={{
-                label: t('empty.createTask'),
+                label: t('chores:empty.createTask'),
                 startDecorator: <Add />,
                 onClick: () => setAddTaskModalOpen(true),
               }}
               secondaryAction={{
-                label: t('empty.moreOptions'),
+                label: t('chores:empty.moreOptions'),
                 onClick: () => Navigate('/chores/create'),
               }}
             />
@@ -1187,21 +1099,21 @@ const MyChores = () => {
               variant='no-results'
               fullHeight
               icon={<SearchOff />}
-              title={t('empty.noMatchTitle')}
+              title={t('chores:empty.noMatchTitle')}
               description={
                 searchTerm?.length > 0
-                  ? t('empty.noMatchSearch', { term: searchTerm })
+                  ? t('chores:empty.noMatchSearch', { term: searchTerm })
                   : isAssigneeOnlyNarrowing
-                    ? t(`empty.assignee.${selectedChoreFilter}`)
-                    : t('empty.noMatchFilters')
+                    ? t(`chores:empty.assignee.${selectedChoreFilter}`)
+                    : t('chores:empty.noMatchFilters')
               }
               primaryAction={{
                 label:
                   searchTerm?.length > 0
-                    ? t('empty.clearSearch')
+                    ? t('chores:empty.clearSearch')
                     : isAssigneeOnlyNarrowing
-                      ? t('empty.showEveryone')
-                      : t('empty.clearFilters'),
+                      ? t('chores:empty.showEveryone')
+                      : t('chores:empty.clearFilters'),
                 onClick: clearNarrowing,
               }}
             />
@@ -1210,15 +1122,17 @@ const MyChores = () => {
               variant='empty'
               fullHeight
               icon={<EditCalendar />}
-              title={t('empty.projectTitle', { name: selectedProject.name })}
-              description={t('empty.projectDescription')}
+              title={t('chores:empty.projectTitle', {
+                name: selectedProject.name,
+              })}
+              description={t('chores:empty.projectDescription')}
               primaryAction={{
-                label: t('empty.addTaskHere'),
+                label: t('chores:empty.addTaskHere'),
                 startDecorator: <Add />,
                 onClick: () => setAddTaskModalOpen(true),
               }}
               secondaryAction={{
-                label: t('empty.seeOutsideProjects'),
+                label: t('chores:empty.seeOutsideProjects'),
                 onClick: () => setSelectedProjectWithCache(null),
               }}
             />
@@ -1227,10 +1141,10 @@ const MyChores = () => {
               variant='empty'
               fullHeight
               icon={<EditCalendar />}
-              title={t('empty.noProjectTitle')}
-              description={t('empty.noProjectDescription')}
+              title={t('chores:empty.noProjectTitle')}
+              description={t('chores:empty.noProjectDescription')}
               primaryAction={{
-                label: t('empty.createTask'),
+                label: t('chores:empty.createTask'),
                 startDecorator: <Add />,
                 onClick: () => setAddTaskModalOpen(true),
               }}
@@ -1252,121 +1166,6 @@ const MyChores = () => {
         )}
         {viewMode === 'calendar' && (
           <>
-            {/* Summary Chips when no date selected */}
-            {/* <Box
-              sx={{
-                mt: 1,
-                mb: 1,
-                display: 'flex',
-                gap: 1.5,
-                justifyContent: 'start',
-                flexWrap: 'wrap',
-              }}
-            >
-              {FILTERS['Overdue'](getFilteredChores).length > 0 && (
-                <Chip
-                  variant='soft'
-                  color='danger'
-                  size='lg'
-                  onClick={() => {
-                    // Update state directly for immediate smooth transition
-                    const overdueChores = FILTERS['Overdue'](getFilteredChores)
-                    setFilteredChores(overdueChores)
-                    setSearchFilter('Overdue')
-                    setViewMode('default')
-                    setSelectedCalendarDate(null)
-
-                    // Update URL
-                    updateFilterUrl('filter', 'overdue')
-                  }}
-                  sx={{
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    px: 1,
-                    py: 0.5,
-                  }}
-                  startDecorator={
-                    <Chip size='md' variant='solid' color='danger'>
-                      {FILTERS['Overdue'](getFilteredChores).length}
-                    </Chip>
-                  }
-                >
-                  Overdue
-                </Chip>
-              )}
-
-              {FILTERS['No Due Date'](getFilteredChores).length > 0 && (
-                <Chip
-                  variant='soft'
-                  color='neutral'
-                  size='lg'
-                  onClick={() => {
-                    // Update state directly for immediate smooth transition
-                    const unplannedChores =
-                      FILTERS['No Due Date'](getFilteredChores)
-                    setFilteredChores(unplannedChores)
-                    setSearchFilter('No Due Date')
-                    setViewMode('default')
-                    setSelectedCalendarDate(null)
-
-                    // Update URL
-                    updateFilterUrl('filter', 'unplanned')
-                  }}
-                  sx={{
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    px: 1,
-                    py: 0.5,
-                  }}
-                  startDecorator={
-                    <Chip size='md' variant='solid' color='neutral'>
-                      {FILTERS['No Due Date'](getFilteredChores).length}
-                    </Chip>
-                  }
-                >
-                  Unplanned
-                </Chip>
-              )}
-
-              {FILTERS['Pending Approval'](getFilteredChores).length > 0 && (
-                <Chip
-                  variant='soft'
-                  size='lg'
-                  onClick={() => {
-                    // Update state directly for immediate smooth transition
-                    const pendingApprovalChores =
-                      FILTERS['Pending Approval'](getFilteredChores)
-                    setFilteredChores(pendingApprovalChores)
-                    setSearchFilter('Pending Approval')
-                    setViewMode('default')
-                    setSelectedCalendarDate(null)
-
-                    // Update URL
-                    updateFilterUrl('filter', 'pending')
-                  }}
-                  sx={{
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    px: 1,
-                    py: 0.5,
-                  }}
-                  startDecorator={
-                    <Chip
-                      size='md'
-                      variant='solid'
-                      sx={{
-                        bgcolor: TASK_COLOR.PENDING_REVIEW,
-                        color: 'white',
-                      }}
-                    >
-                      {FILTERS['Pending Approval'](getFilteredChores).length}
-                    </Chip>
-                  }
-                >
-                  Pending Approval
-                </Chip>
-              )}
-            </Box> */}
             {/* Calendar Monthly View */}
             <Box sx={{ mb: 2 }}>
               {isLargeScreen ? (
@@ -1407,10 +1206,10 @@ const MyChores = () => {
                     <EmptyState
                       size='sm'
                       icon={<EditCalendar />}
-                      title={t('list.nothingScheduled')}
-                      description={t('empty.dayFreeDescription')}
+                      title={t('chores:list.nothingScheduled')}
+                      description={t('chores:empty.dayFreeDescription')}
                       primaryAction={{
-                        label: t('empty.addTask'),
+                        label: t('chores:empty.addTask'),
                         startDecorator: <Add />,
                         onClick: () => setAddTaskModalOpen(true),
                       }}
@@ -1448,52 +1247,126 @@ const MyChores = () => {
                   expanded={Boolean(openChoreSections[index])}
                 >
                   <Divider orientation='horizontal'>
-                    <Chip
-                      variant='soft'
-                      color='neutral'
-                      size='md'
-                      onClick={() => {
-                        if (openChoreSections[index]) {
-                          const newOpenChoreSections = {
-                            ...openChoreSections,
-                          }
-                          delete newOpenChoreSections[index]
-                          setOpenChoreSectionsWithCache(newOpenChoreSections)
-                        } else {
-                          setOpenChoreSectionsWithCache({
-                            ...openChoreSections,
-                            [index]: true,
-                          })
-                        }
-                      }}
-                      endDecorator={
-                        openChoreSections[index] ? (
-                          <ExpandCircleDown
-                            color='primary'
-                            sx={{ transform: 'rotate(180deg)' }}
-                          />
-                        ) : (
-                          <ExpandCircleDown color='primary' />
-                        )
-                      }
-                      startDecorator={
-                        <>
-                          <Chip color='primary' size='sm' variant='soft'>
-                            {section?.content?.length}
+                    {(() => {
+                      const sectionSelectedCount = section.content.filter(
+                        chore => selectedChores.has(chore.id),
+                      ).length
+                      const allSelected =
+                        sectionSelectedCount === section.content.length
+                      const partiallySelected =
+                        sectionSelectedCount > 0 && !allSelected
+                      return (
+                        <Box sx={{ display: 'flex', alignItems: 'stretch' }}>
+                          {/* Its own zone rather than nested inside the chip
+                              below — a checkbox inside a clickable chip is two
+                              interactive targets fighting over one tap.
+                              Butted flush against the chip (shared background,
+                              opposite corner radii) so the pair still reads as
+                              a single pill. */}
+                          {isMultiSelectMode && (
+                            <Box
+                              role='checkbox'
+                              aria-checked={
+                                allSelected
+                                  ? 'true'
+                                  : partiallySelected
+                                    ? 'mixed'
+                                    : 'false'
+                              }
+                              tabIndex={0}
+                              onClick={() =>
+                                toggleSectionSelection(section.content)
+                              }
+                              onKeyDown={e => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault()
+                                  toggleSectionSelection(section.content)
+                                }
+                              }}
+                              title={t('archived.selectSectionTitle')}
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: 30,
+                                cursor: 'pointer',
+                                borderRadius: '999px 0 0 999px',
+                                bgcolor:
+                                  allSelected || partiallySelected
+                                    ? 'primary.solidBg'
+                                    : 'neutral.softBg',
+                                color:
+                                  allSelected || partiallySelected
+                                    ? 'primary.solidColor'
+                                    : 'transparent',
+                                '&:hover': {
+                                  bgcolor:
+                                    allSelected || partiallySelected
+                                      ? 'primary.solidHoverBg'
+                                      : 'neutral.softHoverBg',
+                                },
+                              }}
+                            >
+                              {allSelected ? (
+                                <Check sx={{ fontSize: 16 }} />
+                              ) : (
+                                <Remove sx={{ fontSize: 16 }} />
+                              )}
+                            </Box>
+                          )}
+                          <Chip
+                            variant='soft'
+                            color='neutral'
+                            size='md'
+                            onClick={() => {
+                              if (openChoreSections[index]) {
+                                const newOpenChoreSections = {
+                                  ...openChoreSections,
+                                }
+                                delete newOpenChoreSections[index]
+                                setOpenChoreSectionsWithCache(
+                                  newOpenChoreSections,
+                                )
+                              } else {
+                                setOpenChoreSectionsWithCache({
+                                  ...openChoreSections,
+                                  [index]: true,
+                                })
+                              }
+                            }}
+                            sx={{
+                              borderRadius: isMultiSelectMode
+                                ? '0 999px 999px 0'
+                                : undefined,
+                            }}
+                            endDecorator={
+                              openChoreSections[index] ? (
+                                <ExpandCircleDown
+                                  color='primary'
+                                  sx={{ transform: 'rotate(180deg)' }}
+                                />
+                              ) : (
+                                <ExpandCircleDown color='primary' />
+                              )
+                            }
+                            startDecorator={
+                              <Chip color='primary' size='sm' variant='soft'>
+                                {section?.content?.length}
+                              </Chip>
+                            }
+                          >
+                            {section.name}
                           </Chip>
-                        </>
-                      }
-                    >
-                      {section.name}
-                    </Chip>
+                        </Box>
+                      )
+                    })()}
                   </Divider>
                   <AccordionDetails
                     sx={{
+                      px: 0,
                       flexDirection: 'column',
                       ['& > *']: {
-                        // px: 0.5,
-                        px: 0.5,
-                        // pr: 0,
+                        px: 0,
                       },
                     }}
                   >
@@ -1519,14 +1392,6 @@ const MyChores = () => {
         )}
         <Box
           sx={{
-            // center the button
-            justifyContent: 'center',
-            mt: 2,
-          }}
-        ></Box>
-        <Box
-          // variant='outlined'
-          sx={{
             position: 'fixed',
             bottom: getSafeBottom(10, 10),
             left: 10,
@@ -1549,7 +1414,7 @@ const MyChores = () => {
             onClick={() => {
               Navigate(`/chores/create`)
             }}
-            title={t('list.createChore')}
+            title={t('chores:list.createChore')}
           >
             <Add />
             <KeyboardShortcutHint
@@ -1601,7 +1466,6 @@ const MyChores = () => {
         <FeedbackPrompt />
         {addTaskModalOpen && (
           <TaskInput
-            autoFocus={taskInputFocus}
             onChoreUpdate={updateChores}
             isModalOpen={addTaskModalOpen}
             initialMode={addTaskInitialMode}
@@ -1624,9 +1488,6 @@ const MyChores = () => {
         clearTempFilter={clearTempFilterAndUrl}
         tempFilter={tempFilter}
       />
-
-      {/* Multi-select Help - only show when in multi-select mode */}
-      {/* <MultiSelectHelp isVisible={isMultiSelectMode} /> */}
 
       {/* Confirmation Modal for bulk operations */}
       {confirmModelConfig?.isOpen && (
@@ -1663,15 +1524,17 @@ const MyChores = () => {
               operator: filter.operator,
             })
             showSuccess({
-              title: t('list.filterUpdated'),
-              message: t('list.filterUpdatedMsg', { name: filter.name }),
+              title: t('chores:list.filterUpdated'),
+              message: t('chores:list.filterUpdatedMsg', {
+                name: filter.name,
+              }),
             })
           } else {
             // Create new filter
             saveFilter(filter)
             showSuccess({
-              title: t('list.advancedFilterCreated'),
-              message: t('list.advancedFilterCreatedMsg', {
+              title: t('chores:list.advancedFilterCreated'),
+              message: t('chores:list.advancedFilterCreatedMsg', {
                 name: filter.name,
               }),
             })

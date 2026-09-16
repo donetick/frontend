@@ -596,6 +596,13 @@ const NotificationTemplate = ({
                       if (val.includes('-')) return
 
                       setDraftValues(prev => ({ ...prev, [idx]: val }))
+
+                      // Keep the canonical template state in sync while typing so
+                      // save actions don't depend on blur firing first.
+                      if (val === '') return
+                      const numericVal = Number(val)
+                      if (!Number.isFinite(numericVal)) return
+                      handleChange(idx, 'displayValue', numericVal)
                     }}
                     onKeyDown={e => {
                       if (['-', 'e', '+', '.'].includes(e.key)) {

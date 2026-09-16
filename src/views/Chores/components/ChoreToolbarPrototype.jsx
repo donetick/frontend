@@ -587,7 +587,7 @@ const ChoreToolbar = ({
             aria-label={t('toolbar.filters')}
             title={t('toolbar.filters')}
           >
-            <FilterList />
+            <Tune />
           </IconButton>
         </Badge>
 

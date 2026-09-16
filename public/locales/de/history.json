@@ -55,7 +55,7 @@
     "unknownTask": "Unbekannte Aufgabe",
     "late": "Verspätet",
     "status": {
-      "title": "",
+      "title": "Status",
       "description": "Status abgeschlossener Aufgaben"
     },
     "due": {
@@ -67,7 +67,7 @@
       "description": "Aufgaben nach Priorität"
     },
     "labels": {
-      "title": "Beschriftungen",
+      "title": "Labels",
       "description": "Aufgaben nach Labels"
     },
     "labelsDuration": {
@@ -84,9 +84,9 @@
     }
   },
   "filter": {
-    "status": "",
+    "status": "Status",
     "pending": "Ausstehend",
-    "labels": "Beschriftungen",
+    "labels": "Labels",
     "hasNotes": "Mit Notizen",
     "hasPoints": "Mit Punkten",
     "timePeriod": "Zeitraum",

@@ -1,4 +1,5 @@
 import { Flag } from '@mui/icons-material'
+import { useTranslation } from 'react-i18next'
 
 import BaseOptionPicker from './BaseOptionPicker'
 
@@ -27,6 +28,8 @@ const PriorityPickerField = ({
   size = 'sm',
   value = 0,
 }) => {
+  const { t } = useTranslation('chores')
+
   const options = [1, 2, 3, 4].map(priorityOption => ({
     id: priorityOption,
     label: priorityLabels[priorityOption],
@@ -48,7 +51,7 @@ const PriorityPickerField = ({
       getItemColor={item => item.color}
       getTriggerText={({ isEmpty, selectedItems }) => {
         // For priority 0 (no priority), show empty string (icon only)
-        if (value === 0 || isEmpty) return 'Priority'
+        if (value === 0 || isEmpty) return t('priority')
         return selectedItems[0]?.label || ''
       }}
       renderTriggerIcon={({ isEmpty, selectedItems }) => (

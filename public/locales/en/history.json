@@ -99,14 +99,33 @@
     "days_other": "{{count}} Days",
     "allTime": "All Time"
   },
+  "search": {
+    "placeholder": "Search history...",
+    "clear": "Clear search"
+  },
+  "sort": {
+    "date": "Completed date",
+    "updatedDate": "Updated date",
+    "performer": "Completed by",
+    "status": "Status",
+    "points": "Points"
+  },
   "activities": {
     "title": "Activities",
+    "subtitle": "See what's been completed, skipped, or missed",
     "emptyTitle": "No activity in this range",
     "emptyDescriptionEveryone": "Nothing was completed by anyone in your circle {{period}}. Try a wider time range or a different member.",
     "emptyDescriptionMember": "Nothing was completed by {{name}} {{period}}. Try a wider time range or a different member.",
     "periodSoFar": "so far",
     "periodLastDays": "in the last {{count}} days",
-    "unknownMember": "this member"
+    "unknownMember": "this member",
+    "searchPlaceholder": "Search activities...",
+    "sort": {
+      "date": "Date",
+      "name": "Task name",
+      "status": "Status",
+      "points": "Points"
+    }
   },
   "title": {
     "summary": "Task Summary",

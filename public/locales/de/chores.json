@@ -168,9 +168,9 @@
       "eq": "Gleich",
       "neq": "Ungleich",
       "gt": "Größer als",
-      "gte": "Größer oder gleich",
+      "gte": "Größer als oder gleich",
       "lt": "Kleiner als",
-      "lte": "Kleiner oder gleich"
+      "lte": "Kleiner als oder gleich"
     }
   },
   "activity": {
@@ -210,7 +210,7 @@
     "noDueDateDesc_other": "{{count}} Aufgaben benötigen eine Frist"
   },
   "labels": {
-    "label": "Beschriftungen"
+    "label": "Labels"
   },
   "actionMenu": {
     "view": "Anzeigen",
@@ -278,7 +278,7 @@
     "restoredMsg": "Die Aufgabe wurde wiederhergestellt und ist jetzt aktiv.",
     "deletedTitle": "Aufgabe gelöscht",
     "delete": "Löschen",
-    "someFailedTitle": "Einige Aufgaben konnten nicht verarbeitet werden",
+    "someFailedTitle": "Einige Aufgaben sind fehlgeschlagen",
     "unexpectedError": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es erneut.",
     "deletedBulkTitle": "🗑️ Aufgaben gelöscht",
     "bulkDeleteFailTitle": "Die Löschung mehrerer Aufgaben ist fehlgeschlagen",
@@ -312,7 +312,7 @@
     "exitMultiSelect": "Mehrfachauswahl beenden (Strg+S)",
     "enableMultiSelect": "Mehrfachauswahl aktivieren (Strg+S)",
     "selected_one": "{{count}} Aufgabe ausgewählt",
-    "selected_other": "{{count}} Aufgaben ausgewählt",
+    "selected_other": "{{count}}\u00a0Aufgaben ausgewählt",
     "selectAllTitle": "Alle sichtbaren Aufgaben auswählen (Strg+A)",
     "all": "Alle",
     "closeMultiSelect": "Mehrfachauswahl schließen (Esc)",
@@ -328,7 +328,7 @@
     "matching": " passend zu „{{term}}“",
     "filtersTitle": "Filter",
     "sortArchivedDate": "Archivierungsdatum",
-    "sortName": "",
+    "sortName": "Name",
     "sortPriority": "Priorität",
     "sortDueDate": "Fälligkeitsdatum",
     "noMatchTitle": "Keine passenden archivierten Aufgaben",
@@ -380,7 +380,7 @@
     "more": "Mehr",
     "priority": "Priorität",
     "assignee": "Zugewiesene Person",
-    "labels": "Beschriftungen",
+    "labels": "Labels",
     "labelsHint": "Tippen zum Hinzufügen · erneut tippen zum Entfernen",
     "done": "Fertig",
     "noPriority": "Keine"
@@ -392,7 +392,7 @@
     "unitMin": "Min",
     "unitHr": "Std",
     "unitDay": "Tag",
-    "duration_one": "",
+    "duration_one": "{{count}} {{unit}}",
     "duration_other": "{{count}} {{unit}}",
     "before": "vorher",
     "after": "danach",
@@ -515,8 +515,8 @@
     "title": "Fälligkeitsdatum",
     "apply": "Übernehmen",
     "remove": "Entfernen",
-    "quickDate": "Datum schnell auswählen",
-    "quickTime": "Uhrzeit schnell auswählen",
+    "quickDate": "Schnellauswahl Datum",
+    "quickTime": "Schnellauswahl Uhrzeit",
     "nextMonth": "Nächster Monat",
     "morning": "Morgens",
     "noon": "Mittags",
@@ -548,6 +548,8 @@
   },
   "subTask": {
     "namePlaceholder": "Aufgabenname...",
+    "deleteShortcut": "Löschen (Umschalt+Rücktaste)",
+    "addPlaceholder": "Neue Aufgabe hinzufügen... (Eingabetaste zum Hinzufügen)",
     "untitled": "Unbenannte Unteraufgabe",
     "actions": "Unteraufgaben-Aktionen",
     "edit": "Bearbeiten",
@@ -557,9 +559,7 @@
     "delete": "Loschen",
     "editTitle": "Unteraufgabe bearbeiten",
     "addTitle": "Unteraufgabe hinzufugen",
-    "addChildTitle": "Verschachtelte Unteraufgabe hinzufugen",
-    "deleteShortcut": "Löschen (Umschalt+Rücktaste)",
-    "addPlaceholder": "Neue Aufgabe hinzufügen... (Eingabetaste zum Hinzufügen)"
+    "addChildTitle": "Verschachtelte Unteraufgabe hinzufugen"
   },
   "voiceToTask": {
     "title": "Sprich deine Aufgaben ein",
@@ -579,8 +579,8 @@
     "reminder_other": "{{count}} Erinnerungen",
     "points": "{{count}} Pkt.",
     "frequency": {
-      "everyN": "Jede(n) {{count}} {{unit}}",
-      "everyUnit": "Alle {{unit}}",
+      "everyN": "Alle {{count}} {{unit}}",
+      "everyUnit": "Jede(n) {{unit}}",
       "daily": "Täglich",
       "weekly": "Wöchentlich",
       "monthly": "Monatlich",
@@ -664,7 +664,7 @@
     "deleteAttachmentFailed": "Anhang konnte nicht gelöscht werden.",
     "deleteChoreFailed": "Aufgabe konnte nicht gelöscht werden: {{error}}",
     "deleteChoreTitle": "Aufgabe löschen",
-    "name": "",
+    "name": "Name",
     "nameDesc": "Wie heißt diese Aufgabe?",
     "description": "Beschreibung",
     "descriptionDesc": "Worum geht es bei dieser Aufgabe?",
@@ -674,7 +674,7 @@
     "project": "Projekt",
     "projectDesc": "Zu welchem Projekt gehört diese Aufgabe?",
     "defaultProject": "Standardprojekt",
-    "labels": "Beschriftungen",
+    "labels": "Labels",
     "labelsDesc": "Hinweise zu dieser Aufgabe oder Schlagwörter zur Kennzeichnung",
     "addNewLabel": "Neues Label hinzufügen",
     "subTasks": "Unteraufgaben",
@@ -786,14 +786,14 @@
       "january": "Januar",
       "february": "Februar",
       "march": "März",
-      "april": "",
+      "april": "April",
       "may": "Mai",
       "june": "Juni",
       "july": "Juli",
-      "august": "",
-      "september": "",
+      "august": "August",
+      "september": "September",
       "october": "Oktober",
-      "november": "",
+      "november": "November",
       "december": "Dezember"
     },
     "freqType": {
@@ -872,17 +872,17 @@
       "sunday": "So"
     },
     "monthsShort": {
-      "january": "",
-      "february": "",
+      "january": "Jan",
+      "february": "Feb",
       "march": "Mär",
-      "april": "",
+      "april": "Apr",
       "may": "Mai",
-      "june": "",
-      "july": "",
-      "august": "",
-      "september": "",
+      "june": "Jun",
+      "july": "Jul",
+      "august": "Aug",
+      "september": "Sep",
       "october": "Okt",
-      "november": "",
+      "november": "Nov",
       "december": "Dez"
     },
     "occurrenceShort": {
@@ -955,15 +955,15 @@
     "doesntHave": "Hat nicht",
     "assignee": "Zugewiesene Person",
     "createdBy": "Erstellt von",
-    "statusHeading": "",
+    "statusHeading": "Status",
     "priority": "Priorität",
     "dueDate": "Fälligkeitsdatum",
-    "labels": "Beschriftungen",
+    "labels": "Labels",
     "projects": "Projekte",
     "defaultProject": "Standardprojekt",
     "points": "Punkte",
     "project": "Projekt",
-    "filterFallback": "",
+    "filterFallback": "Filter",
     "notPrefix": "Nicht ",
     "customDueDate": "Benutzerdefiniert",
     "clear": "Zurücksetzen"

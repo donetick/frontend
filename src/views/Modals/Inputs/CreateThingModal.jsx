@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import ModalActions from '../../../components/common/ModalActions'
+import NumberInput from '../../../components/common/NumberInput'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
 function CreateThingModal({ currentThing, isOpen, onClose, onSave }) {
@@ -45,7 +46,7 @@ function CreateThingModal({ currentThing, isOpen, onClose, onSave }) {
     if (type === 'boolean' && !['true', 'false'].includes(state)) {
       newErrors.state = t('errStateBool')
     }
-    if ((type === 'text' && !state) || state.trim() === '') {
+    if ((type === 'text' && !state) || String(state ?? '').trim() === '') {
       newErrors.state = t('errStateRequired')
     }
 
@@ -57,7 +58,12 @@ function CreateThingModal({ currentThing, isOpen, onClose, onSave }) {
     if (!isValid()) {
       return
     }
-    onSave({ name, type, id: currentThing?.id, state: state || null })
+    onSave({
+      name,
+      type,
+      id: currentThing?.id,
+      state: state === '' ? null : state,
+    })
     onClose()
   }
 
@@ -117,13 +123,13 @@ function CreateThingModal({ currentThing, isOpen, onClose, onSave }) {
       {type === 'number' && (
         <FormControl>
           <Typography>{t('value')}</Typography>
-          <Input
+          <NumberInput
             placeholder={t('valuePlaceholder')}
-            type='number'
-            value={state || ''}
-            onChange={e => {
-              setState(e.target.value)
-            }}
+            value={state ?? ''}
+            allowEmpty
+            emptyValue=''
+            integer={false}
+            onValueChange={setState}
             sx={{ minWidth: 300 }}
           />
         </FormControl>

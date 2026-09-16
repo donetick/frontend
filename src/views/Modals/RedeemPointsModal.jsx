@@ -7,7 +7,6 @@ import {
   FormControl,
   FormLabel,
   IconButton,
-  Input,
   Stack,
   Typography,
 } from '@mui/joy'
@@ -15,6 +14,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import ModalActions from '../../components/common/ModalActions.jsx'
+import NumberInput from '../../components/common/NumberInput.jsx'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal.js'
 import { resolvePhotoURL } from '../../utils/Helpers.jsx'
 
@@ -28,19 +28,6 @@ function RedeemPointsModal({ config }) {
   useEffect(() => {
     setPoints(0)
   }, [config])
-
-  const handlePointsChange = value => {
-    const numValue = Number(value)
-    if (numValue > config.available) {
-      setPoints(config.available)
-      return
-    }
-    if (numValue < 0) {
-      setPoints(0)
-      return
-    }
-    setPoints(numValue)
-  }
 
   const addPredefinedPoints = point => {
     const newPoints = points + point
@@ -118,20 +105,15 @@ function RedeemPointsModal({ config }) {
           <FormLabel sx={{ fontWeight: 600, mb: 1 }}>
             {t('redeemModal.pointsToRedeem')}
           </FormLabel>
-          <Input
-            type='number'
+          <NumberInput
             value={points}
+            min={0}
+            max={config?.available || 0}
             size='lg'
             variant='outlined'
             startDecorator={<Toll />}
-            slotProps={{
-              input: {
-                min: 0,
-                max: config?.available || 0,
-                placeholder: t('redeemModal.placeholder'),
-              },
-            }}
-            onChange={e => handlePointsChange(e.target.value)}
+            placeholder={t('redeemModal.placeholder')}
+            onValueChange={setPoints}
             sx={{
               '--Input-decoratorChildHeight': '45px',
               fontSize: 'lg',

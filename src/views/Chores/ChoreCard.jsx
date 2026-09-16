@@ -35,14 +35,32 @@ import {
 import { notInCompletionWindow } from '../../utils/Chores.jsx'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
 import Priorities from '../../utils/Priorities'
-import ChoreActionMenu from '../components/ChoreActionMenu'
+import ChoreActionMenu, {
+  ChoreActionMenuTrigger,
+} from '../components/ChoreActionMenu'
 import PendingBadge from '../components/PendingBadge'
+
+// Hoisted so emotion isn't re-serializing an identical object for every row
+const ACTION_MENU_SX = {
+  width: 32,
+  height: 32,
+  color: 'text.tertiary',
+  flexShrink: 0,
+  '&:hover': {
+    color: 'text.secondary',
+    bgcolor: 'background.level1',
+  },
+}
+
 const ChoreCard = ({
   chore,
   isMultiSelectMode = false,
   isSelected = false,
   onAction,
   onChipClick,
+  // When given, the row renders only a trigger and the list owns one shared
+  // action menu; without it the card falls back to carrying its own.
+  onOpenActionMenu,
   onSelectionToggle,
   performers,
   // Multi-select props
@@ -498,34 +516,36 @@ const ChoreCard = ({
                       </div>
                     </IconButton>
                   )}
-                  <ChoreActionMenu
-                    variant='plain'
-                    chore={chore}
-                    onCompleteWithNote={() =>
-                      onAction('completeWithNote', chore)
-                    }
-                    onCompleteWithPastDate={() =>
-                      onAction('completeWithPastDate', chore)
-                    }
-                    onAction={(type, chore, extraData) =>
-                      onAction(type, chore, extraData)
-                    }
-                    onChangeAssignee={() => onAction('changeAssignee', chore)}
-                    onChangeDueDate={() => onAction('changeDueDate', chore)}
-                    onWriteNFC={() => onAction('writeNFC', chore)}
-                    onNudge={() => onAction('nudge', chore)}
-                    onDelete={() => onAction('delete', chore)}
-                    sx={{
-                      width: 32,
-                      height: 32,
-                      color: 'text.tertiary',
-                      flexShrink: 0,
-                      '&:hover': {
-                        color: 'text.secondary',
-                        bgcolor: 'background.level1',
-                      },
-                    }}
-                  />
+                  {onOpenActionMenu ? (
+                    <ChoreActionMenuTrigger
+                      variant='plain'
+                      onClick={event => {
+                        event.stopPropagation()
+                        onOpenActionMenu(event.currentTarget, chore)
+                      }}
+                      sx={ACTION_MENU_SX}
+                    />
+                  ) : (
+                    <ChoreActionMenu
+                      variant='plain'
+                      chore={chore}
+                      onCompleteWithNote={() =>
+                        onAction('completeWithNote', chore)
+                      }
+                      onCompleteWithPastDate={() =>
+                        onAction('completeWithPastDate', chore)
+                      }
+                      onAction={(type, chore, extraData) =>
+                        onAction(type, chore, extraData)
+                      }
+                      onChangeAssignee={() => onAction('changeAssignee', chore)}
+                      onChangeDueDate={() => onAction('changeDueDate', chore)}
+                      onWriteNFC={() => onAction('writeNFC', chore)}
+                      onNudge={() => onAction('nudge', chore)}
+                      onDelete={() => onAction('delete', chore)}
+                      sx={ACTION_MENU_SX}
+                    />
+                  )}
                 </Box>
               )}
             </Grid>

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { usePageShortcutScope } from '../../../contexts/KeyboardShortcutScopeContext'
+
 export const useKeyboardShortcuts = ({
-  addTaskModalOpen,
   choreSections,
   filteredChores,
   handlers,
@@ -14,10 +15,17 @@ export const useKeyboardShortcuts = ({
 }) => {
   const { t } = useTranslation('chores')
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
+  // Any open modal (add-task, etc.) claims the keyboard for itself — see
+  // KeyboardShortcutScopeContext. These are the page's own shortcuts, so
+  // they go silent whenever something else owns it.
+  const isPageShortcutActive = usePageShortcutScope()
 
   useEffect(() => {
     const handleKeyDown = event => {
-      if (addTaskModalOpen) return
+      if (!isPageShortcutActive) return
+      // Ignore auto-repeat from a held key so e.g. Cmd+S can't toggle
+      // multi-select twice from one physical press.
+      if (event.repeat) return
 
       if (event.ctrlKey || event.metaKey) {
         setShowKeyboardShortcuts(true)
@@ -186,7 +194,7 @@ export const useKeyboardShortcuts = ({
       document.removeEventListener('keydown', handleKeyDown)
       document.removeEventListener('keyup', handleKeyUp)
     }
-  }, [isMultiSelectMode, selectedChores.size, addTaskModalOpen, t])
+  }, [isMultiSelectMode, selectedChores.size, isPageShortcutActive, t])
 
   return { showKeyboardShortcuts }
 }

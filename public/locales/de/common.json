@@ -20,7 +20,7 @@
     "Rose": "Rosa",
     "Charcoal": "Anthrazit",
     "Sienna": "Siena",
-    "Mint": "",
+    "Mint": "Mint",
     "Amber": "Bernstein",
     "Cobalt": "Kobalt",
     "Emerald": "Smaragd",
@@ -33,7 +33,7 @@
     "Lime": "Limette",
     "Blush": "Rosé",
     "Ash": "Asche",
-    "Sand": ""
+    "Sand": "Sand"
   },
   "refresh": "Aktualisieren",
   "copy": "Kopieren",
@@ -50,7 +50,7 @@
     "allTasks": "Alle Aufgaben",
     "archived": "Archiv",
     "things": "Dinge",
-    "labels": "Beschriftungen",
+    "labels": "Labels",
     "projects": "Projekte",
     "filters": "Filter",
     "activities": "Aktivitäten",
@@ -63,7 +63,7 @@
     "placeholder": "Donetick durchsuchen",
     "inputAriaLabel": "Aufgaben, Verlauf, Projekte, Labels und Einstellungen durchsuchen",
     "deviceNote": "Es wird in Inhalten gesucht, die auf diesem Gerät verfügbar sind",
-    "escape": "",
+    "escape": "Esc",
     "recent": "Zuletzt verwendet",
     "empty": {
       "title": "Keine direkten Treffer",
@@ -74,14 +74,14 @@
       "tasks": "Aufgaben",
       "history": "Notizen",
       "projects": "Projekte",
-      "labels": "Beschriftungen",
+      "labels": "Labels",
       "people": "Personen",
       "settings": "Einstellungen",
       "actions": "Schnellaktionen"
     },
     "actions": {
       "quickAction": "Schnellaktion",
-      "navigation": "",
+      "navigation": "Navigation",
       "createTask": "Aufgabe erstellen",
       "createLabel": "Label erstellen",
       "createProject": "Projekt erstellen",
@@ -217,7 +217,7 @@
     "addMembers": "Mitglieder zu deinem Kreis hinzufügen",
     "sidePanelSettings": "Seitenleisteneinstellungen",
     "planFree": "Kostenlos",
-    "planPlus": "",
+    "planPlus": "Plus",
     "planPlusExpiring": "Plus (läuft bald ab)",
     "switchUser": "Benutzer wechseln",
     "impersonateUser": "Benutzeridentität übernehmen",
@@ -278,9 +278,9 @@
     "title": "Sortieren & Filtern",
     "ascending": "Aufsteigend",
     "descending": "Absteigend",
-    "filter": ""
+    "filter": "Filter"
   },
-  "versionInfo": "",
+  "versionInfo": "V{{version}} (API: {{apiVersion}})",
   "apiVersionUnavailable": "nicht verfügbar",
   "sync": {
     "aria": "Synchronisierungs- und Netzwerkstatus öffnen",
@@ -307,8 +307,8 @@
     "secondsAgo": "vor {{count}} s",
     "minutesAgo": "vor {{count}} Min.",
     "hoursAgo": "vor {{count}} Std.",
-    "online": "",
-    "offline": "",
+    "online": "Online",
+    "offline": "Offline",
     "syncing": "Wird synchronisiert...",
     "lastSync": "Letzte Synchronisierung: {{time}}",
     "offlineSince": "Offline seit {{duration}}",
@@ -320,8 +320,8 @@
     "checkingServer": "Server wird überprüft...",
     "retryingIn": "Erneuter Versuch in {{seconds}} s",
     "syncNow": "Jetzt synchronisieren",
-    "pendingSyncLabel_one": "{{count}} Aktion wartet auf die Synchronisierung",
-    "pendingSyncLabel_other": "{{count}} Aktionen warten auf die Synchronisierung",
+    "pendingSyncLabel_one": "{{count}} ausstehende Aktion zu synchronisieren",
+    "pendingSyncLabel_other": "{{count}} ausstehende Aktionen zu synchronisieren",
     "pendingActionsTitle": "Ausstehende Aktionen",
     "actionsWaitingToSync_one": "{{count}} Aktion wartet auf Synchronisierung.",
     "actionsWaitingToSync_other": "{{count}} Aktionen warten auf Synchronisierung.",
@@ -331,7 +331,7 @@
   "fileNumbered": "Datei {{index}}",
   "noAttachmentsTitle": "Keine Anhänge",
   "noAttachmentsDescription": "Fotos und Dateien, die dieser Aufgabe hinzugefügt werden, erscheinen hier.",
-  "kbSize": "",
+  "kbSize": "{{size}} KB",
   "onboarding": {
     "sources": {
       "speak": "Sprechen",
@@ -452,7 +452,7 @@
       "continue": "Weiter",
       "skip": "Überspringen",
       "sources": {
-        "appStore": "",
+        "appStore": "App Store / Google Play",
         "reddit": "Reddit oder ein Forum",
         "friend": "Freunde oder Familie",
         "video": "YouTube oder TikTok",

@@ -154,7 +154,11 @@ export const GlobalSearchProvider = ({ children }) => {
     const onKeyDown = event => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault()
-        isOpen ? closeSearch() : openSearch()
+        // Cmd/Ctrl+Shift+K opens search straight into "go to" navigation
+        // mode, mirroring the "/" sigil typed inside the palette itself.
+        // Piggybacking Shift on the existing Cmd/Ctrl+K chord keeps it
+        // discoverable without claiming a whole new key.
+        isOpen ? closeSearch() : openSearch(event.shiftKey ? '/' : '')
       }
     }
     window.addEventListener('keydown', onKeyDown)

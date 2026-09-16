@@ -132,8 +132,8 @@ registerSearchProvider({
         entityId: member.userId,
         title: member.displayName || member.username || 'Circle member',
         subtitle: 'Circle member',
-        keywords: `${member.username || ''} person member assignee`,
-        route: '/chores',
+        keywords: `${member.username || ''} person member assignee tasks assigned`,
+        route: `/members/${member.userId}`,
       }),
     ),
 })

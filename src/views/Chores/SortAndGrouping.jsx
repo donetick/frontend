@@ -15,6 +15,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
+import { usePageShortcutScope } from '../../contexts/KeyboardShortcutScopeContext'
 
 const SortAndGrouping = ({
   icon,
@@ -31,6 +32,10 @@ const SortAndGrouping = ({
   useChips,
 }) => {
   const { t } = useTranslation('chores')
+  // Stays mounted underneath modals (it's part of the page toolbar), so its
+  // own Cmd+G must defer to whatever modal currently owns the keyboard —
+  // see KeyboardShortcutScopeContext.
+  const isPageShortcutActive = usePageShortcutScope()
   const [anchorEl, setAnchorEl] = useState(null)
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [isKeyboardNavigating, setIsKeyboardNavigating] = useState(false)
@@ -63,10 +68,15 @@ const SortAndGrouping = ({
   // Keyboard shortcut handler
   useEffect(() => {
     const handleKeyDown = event => {
+      if (!isPageShortcutActive) return
+
       const isHoldingCmdOrCtrl = event.ctrlKey || event.metaKey
 
-      // Cmd/Ctrl + G to open sort menu
+      // Cmd/Ctrl + G to open sort menu. Repeat-guarded so holding the combo
+      // can't toggle the menu open/closed repeatedly; arrow-key navigation
+      // below is deliberately left free to repeat.
       if (isHoldingCmdOrCtrl && event.key === 'g') {
+        if (event.repeat) return
         event.preventDefault()
         if (!anchorEl) {
           setAnchorEl(buttonRef.current)
@@ -148,6 +158,7 @@ const SortAndGrouping = ({
     setSelectedItem,
     setFilter,
     onCreateNewFilter,
+    isPageShortcutActive,
   ])
 
   // Reset selected index when menu opens
@@ -160,6 +171,7 @@ const SortAndGrouping = ({
   // Keyboard shortcut hint handler
   useEffect(() => {
     const handleKeyDown = event => {
+      if (!isPageShortcutActive) return
       if (event.ctrlKey || event.metaKey) {
         setShowKeyboardShortcuts(true)
       }
@@ -177,7 +189,7 @@ const SortAndGrouping = ({
       document.removeEventListener('keydown', handleKeyDown)
       document.removeEventListener('keyup', handleKeyUp)
     }
-  }, [])
+  }, [isPageShortcutActive])
 
   const MenuItem_QuickFilter = props => {
     return (

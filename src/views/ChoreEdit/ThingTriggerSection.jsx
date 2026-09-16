@@ -15,9 +15,14 @@ import {
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+
+import NumberInput from '../../components/common/NumberInput'
+
+const hasValue = value => value !== null && value !== undefined && value !== ''
+
 const isValidTrigger = (thing, condition, triggerState) => {
   const newErrors = {}
-  if (!thing || !triggerState) {
+  if (!thing || !hasValue(triggerState)) {
     newErrors.thing = 'Please select a thing and trigger state'
     return false
   }
@@ -70,7 +75,7 @@ const ThingTriggerSection = ({
   }, [things])
 
   useEffect(() => {
-    if (selectedThing && triggerState) {
+    if (selectedThing && hasValue(triggerState)) {
       onTriggerUpdate({
         thing: selectedThing,
         condition: condition,
@@ -187,10 +192,11 @@ const ThingTriggerSection = ({
                 </Option>
               ))}
             </Select>
-            <Input
-              type='number'
+            <NumberInput
               value={triggerState}
-              onChange={e => setTriggerState(e.target.value)}
+              allowEmpty
+              integer={false}
+              onValueChange={setTriggerState}
               sx={{ width: '50%' }}
             />
           </Box>

@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next'
 
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import ModalActions from '../../components/common/ModalActions'
+import { useModalShortcutScope } from '../../contexts/KeyboardShortcutScopeContext'
 import { useDocumentScanner } from '../../hooks/useDocumentScanner'
 import { useFileUpload } from '../../hooks/useFileUpload'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
@@ -48,6 +49,7 @@ import {
   parseRepeatV2,
 } from './CustomParsers'
 import DueDatePickerField from './DueDatePickerField'
+import { combineDueDate } from './DueDatePickerModal'
 import LabelsPickerField from './LabelsPickerField'
 import NotificationPickerField from './NotificationPickerField'
 import PriorityPickerField from './PriorityPickerField'
@@ -188,6 +190,10 @@ const PARSE_DEBOUNCE_MS = 150
 
 const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
   const { t } = useTranslation('chores')
+  // Claims the keyboard while open so background listeners (e.g. the project
+  // selector's own Cmd+E) know to stay out of the way — see
+  // KeyboardShortcutScopeContext.
+  const isShortcutScopeActive = useModalShortcutScope(isModalOpen)
   const { ResponsiveModal } = useResponsiveModal()
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
   const pickerEmptyDisplay = isMobile ? 'icon' : 'icon-text'
@@ -291,7 +297,6 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
   // create flow in ChoreEdit.jsx.
   const taskSourceRef = useRef('quick_add')
   const [priority, setPriority] = useState(0)
-  const [dueDate, setDueDate] = useState(null)
   const [description, setDescription] = useState(null)
   const [assignees, setAssignees] = useState([])
   const [labelsV2, setLabelsV2] = useState([])
@@ -315,6 +320,15 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
   const [dueDateOnly, setDueDateOnly] = useState(null)
   const [dueTime, setDueTime] = useState(null)
   const [useCustomTime, setUseCustomTime] = useState(false)
+  // These three are the source of truth; the due date is only their
+  // combination. It used to be a fourth piece of state that every handler
+  // recomputed for itself, which meant the picker's Apply — three callbacks
+  // in one batch — had each of them reading stale siblings and the chosen
+  // time losing to the end-of-day fallback.
+  const dueDate = useMemo(() => {
+    const combined = combineDueDate({ dueDateOnly, dueTime, useCustomTime })
+    return combined ? moment(combined).format('YYYY-MM-DDTHH:mm:ss') : null
+  }, [dueDateOnly, dueTime, useCustomTime])
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
   const [projectId, setProjectId] = useState(getInitialProject)
   const selectedProject = useMemo(
@@ -409,49 +423,47 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
         dueDate,
         handleCloseModal,
         hasDescription,
-        isModalOpen,
+        isShortcutScopeActive,
         submitChore,
       } = latestRef.current
+      // Only the modal that currently owns the keyboard (the topmost open
+      // one, if this component is ever nested) should react at all —
+      // otherwise a background instance of this same component would also
+      // process keys meant for whatever's on top of it, including showing
+      // its own shortcut hints.
+      if (!isShortcutScopeActive) return
+      // Holding a key (or a fast physical double-tap that the OS coalesces
+      // into auto-repeat) re-fires 'keydown' for as long as it's down. None
+      // of the shortcuts below are meant to repeat — Cmd+J revealing
+      // subtasks a second time just steals focus away from wherever the
+      // user actually is.
+      if (event.repeat) return
+
       const isHoldingCmd = event.ctrlKey || event.metaKey
       if (isHoldingCmd) {
         setShowKeyboardShortcuts(true)
       }
-      if (
-        isHoldingCmd &&
-        event.key.toLowerCase() === 'e' &&
-        isModalOpen &&
-        !hasDescription
-      ) {
+      if (isHoldingCmd && event.key.toLowerCase() === 'e' && !hasDescription) {
         setHasDescription(true)
         setShowKeyboardShortcuts(false)
       }
-      if (isHoldingCmd && event.key.toLowerCase() === 'j' && isModalOpen) {
+      if (isHoldingCmd && event.key.toLowerCase() === 'j') {
         setHasSubTasks(true)
         setShowKeyboardShortcuts(false)
       }
-      if (
-        isHoldingCmd &&
-        event.key.toLowerCase() === 'b' &&
-        isModalOpen &&
-        !dueDate
-      ) {
+      if (isHoldingCmd && event.key.toLowerCase() === 'b' && !dueDate) {
         const tomorrow = moment().add(1, 'day')
         setDueDateOnly(tomorrow.format('YYYY-MM-DD'))
-        setDueDate(tomorrow.endOf('day').format('YYYY-MM-DDTHH:mm:59'))
         setUseCustomTime(false)
         setDueTime(null)
         setShowKeyboardShortcuts(false)
       }
-      if (
-        event.key === 'Enter' &&
-        (event.ctrlKey || event.metaKey) &&
-        isModalOpen
-      ) {
+      if (event.key === 'Enter' && isHoldingCmd) {
         event.preventDefault()
         submitChore()
         return
       }
-      if (event.key === 'Escape' && isModalOpen) {
+      if (event.key === 'Escape') {
         event.preventDefault()
         handleCloseModal()
         return
@@ -676,7 +688,6 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
         const dateOnly = m.format('YYYY-MM-DD')
         const timeOnly = m.format('HH:mm')
         setDueDateOnly(dateOnly)
-        setDueDate(m.format('YYYY-MM-DDTHH:mm:ss'))
         if (timeOnly !== '23:59') {
           setUseCustomTime(true)
           setDueTime(timeOnly)
@@ -775,7 +786,6 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
           if (overrides.dueDate) {
             syncDueDateStates(overrides.dueDate)
           } else {
-            setDueDate(null)
             setDueDateOnly(null)
             setDueTime(null)
             setUseCustomTime(false)
@@ -816,56 +826,24 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
   ])
 
   const handleDueDateChange = e => {
-    const dateValue = e.target.value
-    setDueDateOnly(dateValue)
-    if (useCustomTime && dueTime) {
-      setDueDate(
-        moment(`${dateValue}T${dueTime}`).format('YYYY-MM-DDTHH:mm:00'),
-      )
-    } else {
-      setUseCustomTime(false)
-      setDueTime(null)
-      setDueDate(moment(dateValue).endOf('day').format('YYYY-MM-DDTHH:mm:ss'))
-    }
+    setDueDateOnly(e.target.value || null)
   }
 
   const handleDueTimeChange = e => {
     const timeValue = e.target.value
-    setDueTime(timeValue)
-    if (dueDateOnly) {
-      if (timeValue) {
-        setUseCustomTime(true)
-        setDueDate(
-          moment(`${dueDateOnly}T${timeValue}`).format('YYYY-MM-DDTHH:mm:00'),
-        )
-      } else {
-        setUseCustomTime(false)
-        setDueDate(
-          moment(dueDateOnly).endOf('day').format('YYYY-MM-DDTHH:mm:ss'),
-        )
-      }
-    }
+    setDueTime(timeValue || null)
+    // A time typed straight into the field is itself the request for one.
+    if (timeValue) setUseCustomTime(true)
   }
 
   const handleUseCustomTimeChange = checked => {
     setUseCustomTime(checked)
+    // Turning the toggle on needs something on the clock to show. The picker
+    // sends the real time right after this, and wins.
     if (checked) {
-      const defaultTime = dueTime || '18:00'
-      if (!dueTime) {
-        setDueTime(defaultTime)
-      }
-      if (dueDateOnly) {
-        setDueDate(
-          moment(`${dueDateOnly}T${defaultTime}`).format('YYYY-MM-DDTHH:mm:00'),
-        )
-      }
+      setDueTime(prev => prev || '18:00')
     } else {
       setDueTime(null)
-      if (dueDateOnly) {
-        setDueDate(
-          moment(dueDateOnly).endOf('day').format('YYYY-MM-DDTHH:mm:ss'),
-        )
-      }
     }
   }
 
@@ -916,8 +894,10 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
     if (extractedDue) {
       const m = moment(new Date(extractedDue))
       if (m.isValid()) {
+        // The scan gives a date, never a time — end of day, as before.
         setDueDateOnly(m.format('YYYY-MM-DD'))
-        setDueDate(m.endOf('day').format('YYYY-MM-DDTHH:mm:ss'))
+        setDueTime(null)
+        setUseCustomTime(false)
       }
     }
   }
@@ -998,7 +978,6 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
     setIsAttachingScan(false)
     setTaskText('')
     setTaskTitle('')
-    setDueDate(null)
     setFrequency(null)
     setPriority(0)
     setPoints(-1)
@@ -1140,6 +1119,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
 
   latestRef.current = {
     isModalOpen,
+    isShortcutScopeActive,
     hasDescription,
     dueDate,
     createChore,
@@ -1395,7 +1375,6 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
                 onDueTimeChange={handleDueTimeChange}
                 onUseCustomTimeChange={handleUseCustomTimeChange}
                 onClear={() => {
-                  setDueDate(null)
                   setDueDateOnly(null)
                   setDueTime(null)
                   setUseCustomTime(false)

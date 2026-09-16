@@ -20,6 +20,7 @@ import moment from 'moment'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import NumberInput from '../../components/common/NumberInput'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useUserProfile } from '../../queries/UserQueries'
 import { isPlusAccount } from '../../utils/Helpers'
@@ -158,18 +159,11 @@ export const RepeatOnSections = ({
         <>
           <Grid item sm={12} sx={{ display: 'flex', alignItems: 'center' }}>
             <Typography level='h5'>{t('repeat.every')}</Typography>
-            <Input
-              slotProps={{
-                input: {
-                  min: 1,
-                  max: 1000,
-                },
-              }}
-              type='number'
+            <NumberInput
+              min={1}
+              max={1000}
               value={frequency}
-              onChange={e => {
-                onFrequencyUpdate(e.target.value)
-              }}
+              onValueChange={onFrequencyUpdate}
             />
             <Select
               placeholder={t('repeat.unitPlaceholder')}
@@ -484,20 +478,12 @@ export const RepeatOnSections = ({
             }}
           >
             <Typography>{t('repeat.onThe')}</Typography>
-            <Input
+            <NumberInput
               sx={{ width: '80px' }}
-              type='number'
+              min={1}
+              max={31}
               value={frequency}
-              onChange={e => {
-                if (e.target.value < 1) {
-                  e.target.value = 1
-                } else if (e.target.value > 31) {
-                  e.target.value = 31
-                }
-                // setDayOftheMonth(e.target.value)
-
-                onFrequencyUpdate(e.target.value)
-              }}
+              onValueChange={onFrequencyUpdate}
             />
             <Typography>{t('repeat.ofAboveMonths')}</Typography>
           </Box>

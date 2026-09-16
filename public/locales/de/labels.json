@@ -42,7 +42,7 @@
     "errorNoColor": "Bitte wähle eine Farbe aus",
     "saveFailedTitle": "Label konnte nicht gespeichert werden",
     "saveFailedMessage": "Label konnte nicht gespeichert werden. Bitte versuche es erneut.",
-    "name": "",
+    "name": "Name",
     "editTitle": "Label bearbeiten",
     "addTitle": "Label hinzufügen",
     "color": "Farbe",
@@ -51,7 +51,7 @@
     "colorAriaSelect": "{{color}} auswählen"
   },
   "picker": {
-    "label": "",
+    "label": "Labels",
     "createLabel": "Label erstellen",
     "labelsCount_one": "{{count}} Label",
     "labelsCount_other": "{{count}} Labels"
@@ -61,7 +61,7 @@
     "emptyDescription": "Labels gruppieren Aufgaben in deinem Kreis, z. B. „Küche“ oder „Rechnungen“, sodass du mit einem Tipp danach filtern kannst.",
     "createLabel": "Label erstellen",
     "filterTitle": "Anzeigen",
-    "sortName": "",
+    "sortName": "Name",
     "sortColor": "Farbe",
     "sortRecent": "Zuletzt erstellt",
     "filterAll": "Alle Labels",

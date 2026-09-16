@@ -9,11 +9,11 @@
     "Home": "Zuhause",
     "School": "Schule",
     "BusinessCenter": "Geschäftlich",
-    "Code": "",
+    "Code": "Code",
     "Build": "Werkzeug",
-    "Palette": "",
+    "Palette": "Design",
     "SportsSoccer": "Sport",
-    "FitnessCenter": "",
+    "FitnessCenter": "Fitness",
     "ShoppingCart": "Einkaufen",
     "Restaurant": "Essen",
     "Flight": "Reisen",
@@ -24,7 +24,7 @@
     "Science": "Wissenschaft",
     "AccountBalance": "Finanzen",
     "LocalHospital": "Gesundheit",
-    "DirectionsCar": "",
+    "DirectionsCar": "Auto",
     "Pets": "Haustiere",
     "Garden": "Garten",
     "Computer": "Technik"
@@ -55,7 +55,7 @@
     "manage": "Projekte verwalten",
     "manageDescription": "Alle Projekte anzeigen, bearbeiten und organisieren",
     "currentProjectTitle": "Aktuelles Projekt: {{project}} (Strg+E)",
-    "builtInWorkspace": "Integrierter Projektarbeitsbereich"
+    "builtInWorkspace": "Integrierter Projekt-Arbeitsbereich"
   },
   "modal": {
     "errorNameRequired": "Projektname ist erforderlich",

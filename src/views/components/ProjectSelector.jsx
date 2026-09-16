@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
+import { usePageShortcutScope } from '../../contexts/KeyboardShortcutScopeContext'
 import LABEL_COLORS, {
   getTextColorFromBackgroundColor,
 } from '../../utils/Colors'
@@ -30,6 +31,10 @@ const ProjectSelector = ({
   const { t } = useTranslation('projects')
   const { data: projects = [], isLoading } = useProjects()
   const navigate = useNavigate()
+  // Stays mounted underneath modals (it's part of the page toolbar), so its
+  // own Cmd+E must defer to whatever modal currently owns the keyboard —
+  // see KeyboardShortcutScopeContext.
+  const isPageShortcutActive = usePageShortcutScope()
 
   const [anchorEl, setAnchorEl] = useState(null)
   const [selectedIndex, setSelectedIndex] = useState(0)
@@ -104,10 +109,15 @@ const ProjectSelector = ({
   // Keyboard shortcut handler
   useEffect(() => {
     const handleKeyDown = event => {
+      if (!isPageShortcutActive) return
+
       const isHoldingCmdOrCtrl = event.ctrlKey || event.metaKey
 
-      // Cmd/Ctrl + E to open project menu
+      // Cmd/Ctrl + E to open project menu. Repeat-guarded so holding the
+      // combo can't toggle the menu open/closed repeatedly; arrow-key
+      // navigation below is deliberately left free to repeat.
       if (isHoldingCmdOrCtrl && event.key === 'e') {
+        if (event.repeat) return
         event.preventDefault()
         if (!anchorEl) {
           setAnchorEl(buttonRef.current)
@@ -165,7 +175,13 @@ const ProjectSelector = ({
     return () => {
       document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [anchorEl, selectedIndex, defaultProjects, isKeyboardNavigating])
+  }, [
+    anchorEl,
+    selectedIndex,
+    defaultProjects,
+    isKeyboardNavigating,
+    isPageShortcutActive,
+  ])
 
   // Reset selected index when menu opens
   useEffect(() => {

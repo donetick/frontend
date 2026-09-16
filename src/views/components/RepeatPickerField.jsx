@@ -17,6 +17,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import ModalActions from '../../components/common/ModalActions'
+import NumberInput from '../../components/common/NumberInput'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import { getRecurrentChipText } from '../../utils/ChoreCardHelpers'
 
@@ -160,15 +161,14 @@ const IntervalSection = ({
       <Box
         sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}
       >
-        <Input
-          type='number'
+        <NumberInput
           size='sm'
           value={frequency}
-          onChange={e =>
-            onFrequencyUpdate(Math.max(1, parseInt(e.target.value, 10) || 1))
-          }
+          min={1}
+          max={999}
+          selectOnFocus
+          onValueChange={onFrequencyUpdate}
           sx={{ width: 72 }}
-          slotProps={{ input: { min: 1, max: 999 } }}
         />
         <List orientation='horizontal' wrap sx={pillListSx}>
           {['days', 'weeks', 'months', 'years'].map(unit => (
@@ -352,19 +352,14 @@ const DayOfMonthSection = ({
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mt: 2 }}>
         <SectionLabel>{t('repeat.picker.dayOfMonth')}</SectionLabel>
-        <Input
-          type='number'
+        <NumberInput
           size='sm'
           value={frequency}
-          onChange={e => {
-            const v = Math.min(
-              31,
-              Math.max(1, parseInt(e.target.value, 10) || 1),
-            )
-            onFrequencyUpdate(v)
-          }}
+          min={1}
+          max={31}
+          selectOnFocus
+          onValueChange={onFrequencyUpdate}
           sx={{ width: 72 }}
-          slotProps={{ input: { min: 1, max: 31 } }}
         />
       </Box>
 

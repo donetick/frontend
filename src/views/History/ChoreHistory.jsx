@@ -12,6 +12,7 @@ import {
   CalendarMonth,
   Check,
   Checklist,
+  Close,
   EventBusy,
   EventNote,
   FilterList,
@@ -22,21 +23,36 @@ import {
   Redo,
   RunningWithErrors,
   Schedule,
+  Search,
+  Sort,
   Star,
   ThumbDown,
   Timelapse,
   TrendingUp,
+  Tune,
 } from '@mui/icons-material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
-import { Box, Card, Container, Grid, Sheet, Typography } from '@mui/joy'
+import {
+  Badge,
+  Box,
+  Card,
+  Container,
+  Grid,
+  IconButton,
+  Input,
+  Sheet,
+  Typography,
+} from '@mui/joy'
+import Fuse from 'fuse.js'
 import moment from 'moment'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 
 import EmptyState from '../../components/common/EmptyState'
 import FilterBar from '../../components/common/FilterBar'
+import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import useConfirmationModal from '../../hooks/useConfirmationModal'
 import { useFilter } from '../../hooks/useFilter'
@@ -69,6 +85,21 @@ const ChoreHistory = () => {
   const [noteViewerConfig, setNoteViewerConfig] = useState({ isOpen: false })
   const [detailModalConfig, setDetailModalConfig] = useState({ isOpen: false })
   const { showError, showSuccess } = useNotification()
+  const [searchTerm, setSearchTerm] = useState('')
+  const [sortBy, setSortBy] = useState(
+    () => localStorage.getItem('choreHistorySortBy') || 'date',
+  )
+  const [sortDirection, setSortDirection] = useState(
+    () => localStorage.getItem('choreHistorySortDirection') || 'desc',
+  )
+  const [filterBarOpen, setFilterBarOpen] = useState(false)
+  const searchInputRef = useRef(null)
+
+  useEffect(() => {
+    localStorage.setItem('choreHistorySortBy', sortBy)
+    localStorage.setItem('choreHistorySortDirection', sortDirection)
+  }, [sortBy, sortDirection])
+
   // React Query hooks
   const { data: choreHistoryData, isLoading } = useChoreHistory(choreId)
   const { data: circleMembersData } = useCircleMembers()
@@ -186,15 +217,66 @@ const ChoreHistory = () => {
     setFilter,
   } = useFilter(choreHistory, filterDefs)
 
-  const sortedHistory = useMemo(
+  const searchableHistory = useMemo(
     () =>
-      [...filteredHistory].sort(
-        (a, b) =>
-          new Date(b.performedAt || b.updatedAt) -
-          new Date(a.performedAt || a.updatedAt),
-      ),
-    [filteredHistory],
+      filteredHistory.map(item => ({
+        ...item,
+        performerName:
+          performers.find(p => p.userId === item.completedBy)?.displayName ||
+          '',
+      })),
+    [filteredHistory, performers],
   )
+
+  const fuse = useMemo(
+    () =>
+      new Fuse(searchableHistory, {
+        keys: ['notes', 'performerName'],
+        includeScore: true,
+        isCaseSensitive: false,
+        findAllMatches: true,
+      }),
+    [searchableHistory],
+  )
+
+  const sortedHistory = useMemo(() => {
+    const matched = searchTerm
+      ? fuse.search(searchTerm).map(result => result.item)
+      : searchableHistory
+
+    const direction = sortDirection === 'desc' ? -1 : 1
+    return [...matched].sort((a, b) => {
+      switch (sortBy) {
+        case 'name':
+          return (
+            direction *
+            (a.performerName || '').localeCompare(b.performerName || '')
+          )
+        case 'status':
+          return direction * ((a.status ?? 0) - (b.status ?? 0))
+        case 'points':
+          return direction * ((a.points ?? 0) - (b.points ?? 0))
+        case 'updatedDate': {
+          const aTime = new Date(a.updatedAt || a.performedAt).getTime()
+          const bTime = new Date(b.updatedAt || b.performedAt).getTime()
+          return direction * (aTime - bTime)
+        }
+        case 'date':
+        default: {
+          const aTime = new Date(a.performedAt || a.updatedAt).getTime()
+          const bTime = new Date(b.performedAt || b.updatedAt).getTime()
+          return direction * (aTime - bTime)
+        }
+      }
+    })
+  }, [fuse, searchTerm, searchableHistory, sortBy, sortDirection])
+
+  const handleSearchChange = e => setSearchTerm(e.target.value)
+
+  const handleSearchClose = () => {
+    setSearchTerm('')
+    searchInputRef.current?.blur()
+  }
 
   const handleDelete = historyEntry => {
     showConfirmation(
@@ -422,6 +504,66 @@ const ChoreHistory = () => {
       </Box>
 
       <Box sx={{ px: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+          <Input
+            slotProps={{ input: { ref: searchInputRef } }}
+            placeholder={t('search.placeholder')}
+            value={searchTerm}
+            fullWidth
+            sx={{
+              borderRadius: 24,
+              height: 24,
+              borderColor: 'text.disabled',
+              padding: 1,
+            }}
+            onChange={handleSearchChange}
+            startDecorator={<Search />}
+            endDecorator={
+              searchTerm && (
+                <IconButton
+                  variant='plain'
+                  size='sm'
+                  onClick={handleSearchClose}
+                  sx={{ borderRadius: '50%' }}
+                >
+                  <Close />
+                </IconButton>
+              )
+            }
+          />
+          <SortAndFilterMenu
+            icon={<Sort />}
+            sortOptions={[
+              { name: t('sort.date'), value: 'date' },
+              { name: t('sort.updatedDate'), value: 'updatedDate' },
+              { name: t('sort.performer'), value: 'name' },
+              { name: t('sort.status'), value: 'status' },
+              { name: t('sort.points'), value: 'points' },
+            ]}
+            selectedSort={sortBy}
+            onSortChange={setSortBy}
+            sortDirection={sortDirection}
+            onSortDirectionChange={setSortDirection}
+            isActive={sortBy !== 'date' || sortDirection !== 'desc'}
+          />
+          <Badge
+            badgeContent={activeFilterCount || null}
+            color='primary'
+            size='sm'
+            anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+          >
+            <IconButton
+              onClick={() => setFilterBarOpen(true)}
+              variant='outlined'
+              color={activeFilterCount > 0 ? 'primary' : 'neutral'}
+              size='sm'
+              sx={{ height: 32, width: 32, borderRadius: '50%', flexShrink: 0 }}
+              aria-label={t('common:filterBar.filtersButton')}
+            >
+              <Tune />
+            </IconButton>
+          </Badge>
+        </Box>
         <FilterBar
           filterDefs={filterDefs}
           activeFilters={activeFilters}
@@ -429,6 +571,9 @@ const ChoreHistory = () => {
           onClearAll={clearAll}
           resultCount={filteredHistory.length}
           totalCount={choreHistory.length}
+          showTrigger={false}
+          open={filterBarOpen}
+          onOpenChange={setFilterBarOpen}
         />
       </Box>
       {sortedHistory.length === 0 && activeFilterCount > 0 && (
@@ -438,6 +583,18 @@ const ChoreHistory = () => {
           title={t('empty.noResultsTitle')}
           description={t('empty.noResultsDescription')}
           primaryAction={{ label: t('noResults.clear'), onClick: clearAll }}
+        />
+      )}
+      {sortedHistory.length === 0 && activeFilterCount === 0 && searchTerm && (
+        <EmptyState
+          variant='no-results'
+          icon={<Search />}
+          title={t('empty.noResultsTitle')}
+          description={t('empty.noResultsDescription')}
+          primaryAction={{
+            label: t('search.clear'),
+            onClick: handleSearchClose,
+          }}
         />
       )}
 

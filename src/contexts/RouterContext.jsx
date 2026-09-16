@@ -24,6 +24,7 @@ import ChoreView from '../views/ChoreEdit/ChoreView'
 import ArchivedTasks from '../views/Chores/ArchivedTasks'
 import MyChores from '../views/Chores/MyChores'
 import JoinCircleView from '../views/Circles/JoinCircle'
+import MemberDetailView from '../views/Circles/MemberDetailView'
 import NotFound from '../views/components/NotFound'
 import FilterView from '../views/Filters/FilterView'
 import ChoreHistory from '../views/History/ChoreHistory'
@@ -266,6 +267,10 @@ const Router = createBrowserRouter([
       {
         path: 'labels/:labelId',
         element: <LabelDetailView />,
+      },
+      {
+        path: 'members/:userId',
+        element: <MemberDetailView />,
       },
       {
         path: 'projects/',

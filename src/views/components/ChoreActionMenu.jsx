@@ -64,13 +64,22 @@ const collapseDividers = items =>
     return items[index - 1].type !== 'divider'
   })
 
+/**
+ * Renders its own trigger button and owns its open state by default.
+ *
+ * Passing `anchorEl` switches it to controlled mode: the trigger is left to the
+ * caller and the menu is driven from outside. That lets a long list keep a
+ * single menu instance instead of one per row — see ChoreListView.
+ */
 const ChoreActionMenu = ({
+  anchorEl: controlledAnchorEl,
   chore,
   hiddenActions = [],
   onAction,
   onChangeAssignee,
   onChangeDueDate,
   onChangePriority,
+  onClose: controlledOnClose,
   onCompleteWithNote,
   onCompleteWithPastDate,
   onDelete,
@@ -84,7 +93,9 @@ const ChoreActionMenu = ({
   variant = 'soft',
 }) => {
   const { t } = useTranslation('chores')
-  const [anchorEl, setAnchorEl] = React.useState(null)
+  const isControlled = controlledAnchorEl !== undefined
+  const [uncontrolledAnchorEl, setUncontrolledAnchorEl] = React.useState(null)
+  const anchorEl = isControlled ? controlledAnchorEl : uncontrolledAnchorEl
   const [isOfficialInstance, setIsOfficialInstance] = useState(false)
   const [showProjectPicker, setShowProjectPicker] = useState(false)
   const [showPriorityPicker, setShowPriorityPicker] = useState(false)
@@ -112,9 +123,12 @@ const ChoreActionMenu = ({
       return
     }
 
+    // Only listen while open — a closed menu has nothing to dismiss, and a list
+    // of these would otherwise put one listener per row on the document.
+    if (!anchorEl) return
+
     const handleMenuOutsideClick = event => {
       if (
-        anchorEl &&
         !anchorEl.contains(event.target) &&
         !menuRef.current?.contains(event.target)
       ) {
@@ -123,7 +137,7 @@ const ChoreActionMenu = ({
     }
 
     document.addEventListener('mousedown', handleMenuOutsideClick)
-    if (anchorEl && onOpen) {
+    if (onOpen) {
       onOpen()
     }
     return () => {
@@ -131,15 +145,23 @@ const ChoreActionMenu = ({
     }
   }, [anchorEl, onOpen, isSmallScreen])
 
+  // Controlled mode renders nothing until a caller targets a chore. Every hook
+  // above has already run, so bailing here is safe.
+  if (!chore) return null
+
   const handleMenuOpen = event => {
     event.stopPropagation()
-    setAnchorEl(event.currentTarget)
+    setUncontrolledAnchorEl(event.currentTarget)
   }
 
   const handleMenuClose = () => {
-    setAnchorEl(null)
     setShowProjectPicker(false)
     setShowPriorityPicker(false)
+    if (isControlled) {
+      controlledOnClose?.()
+    } else {
+      setUncontrolledAnchorEl(null)
+    }
   }
 
   const handleChangePriority = priority => {
@@ -195,47 +217,22 @@ const ChoreActionMenu = ({
     handleMenuClose()
   }
 
+  // Quick-schedule always moves the date only and leaves the task at
+  // "anytime" — the app-wide no-specific-time stamp is 23:59:59 (see
+  // END_OF_DAY in useChoreActions.js and DueDatePickerModal's splitDueDate),
+  // so every option below lands there rather than an arbitrary hour.
   const getQuickScheduleDate = option => {
     const now = new Date()
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    today.setHours(23, 59, 59, 0)
 
     switch (option) {
-      case 'today': {
-        const nowHour = now.getHours()
-        const scheduled = new Date(today)
-        if (nowHour < 9) {
-          scheduled.setHours(9, 0, 0, 0)
-        } else if (nowHour < 12) {
-          scheduled.setHours(12, 0, 0, 0)
-        } else if (nowHour < 17) {
-          scheduled.setHours(17, 0, 0, 0)
-        } else {
-          scheduled.setHours(
-            now.getHours(),
-            now.getMinutes(),
-            now.getSeconds(),
-            now.getMilliseconds(),
-          )
-        }
-        return scheduled
-      }
-      case 'tomorrow-morning': {
-        const tomorrowMorning = new Date(today)
-        tomorrowMorning.setDate(today.getDate() + 1)
-        tomorrowMorning.setHours(9, 0, 0, 0)
-        return tomorrowMorning
-      }
+      case 'today':
+        return today
       case 'tomorrow': {
         const tomorrow = new Date(today)
         tomorrow.setDate(today.getDate() + 1)
-        tomorrow.setHours(12, 0, 0, 0)
         return tomorrow
-      }
-      case 'tomorrow-afternoon': {
-        const tomorrowAfternoon = new Date(today)
-        tomorrowAfternoon.setDate(today.getDate() + 1)
-        tomorrowAfternoon.setHours(14, 0, 0, 0)
-        return tomorrowAfternoon
       }
       case 'weekend': {
         const weekend = new Date(today)
@@ -617,9 +614,18 @@ const ChoreActionMenu = ({
     </>
   )
 
+  let modalTitle
+  if (showProjectPicker) {
+    modalTitle = t('actionMenu.moveToProject')
+  } else if (showPriorityPicker) {
+    modalTitle = t('priority')
+  } else {
+    modalTitle = null
+  }
+
   return (
     <>
-      {trigger ? (
+      {isControlled ? null : trigger ? (
         React.cloneElement(trigger, {
           onClick: handleMenuOpen,
           onMouseEnter,
@@ -649,13 +655,7 @@ const ChoreActionMenu = ({
         <AppModal
           open={Boolean(anchorEl)}
           onClose={handleMenuClose}
-          title={
-            showProjectPicker
-              ? t('actionMenu.moveToProject')
-              : showPriorityPicker
-                ? t('priority')
-                : chore?.name
-          }
+          title={modalTitle}
           mobilePresentation='sheet'
           showHandle
           contentSx={{ px: 0, pb: 1 }}
@@ -758,5 +758,36 @@ const ChoreActionMenu = ({
     </>
   )
 }
+
+/**
+ * The trigger button on its own, visually identical to the one ChoreActionMenu
+ * renders for itself. Rows in a long list use this and hand the click up to a
+ * single shared menu, so opening a menu costs one component instead of N.
+ */
+export const ChoreActionMenuTrigger = ({
+  onClick,
+  onMouseEnter,
+  onMouseLeave,
+  sx = {},
+  variant = 'soft',
+}) => (
+  <IconButton
+    variant={variant}
+    color='success'
+    onClick={onClick}
+    onMouseEnter={onMouseEnter}
+    onMouseLeave={onMouseLeave}
+    sx={{
+      borderRadius: '50%',
+      width: 25,
+      height: 25,
+      position: 'relative',
+      left: -10,
+      ...sx,
+    }}
+  >
+    <MoreVert />
+  </IconButton>
+)
 
 export default ChoreActionMenu

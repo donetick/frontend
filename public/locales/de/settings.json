@@ -36,7 +36,7 @@
       },
       "circle": {
         "title": "Kreiseinstellungen",
-        "description": "Verwalte deinen Circle, lade Mitglieder ein und bearbeite Beitrittsanfragen."
+        "description": "Verwalte deinen Kreis, lade Mitglieder ein und bearbeite Beitrittsanfragen."
       },
       "account": {
         "title": "Kontoeinstellungen",
@@ -117,7 +117,7 @@
     "cancel": "Abbrechen"
   },
   "circleSettings": {
-    "title": "Circle-Einstellungen",
+    "title": "Kreis-Einstellungen",
     "description": "Dein Konto wird automatisch mit einem Kreis verbunden, wenn du einen erstellst oder beitrittst. Lade Freunde ein, indem du den unten stehenden Kreiscode oder Link teilst. Du erhältst unten eine Benachrichtigung, wenn jemand deinem Kreis beitreten möchte.",
     "memberOf": "Du bist Teil von {{name}}",
     "yourCircleCode": "Dein Kreiscode lautet:",
@@ -129,8 +129,8 @@
     "shareTitle": "Tritt {{name}} auf Donetick bei",
     "shareText": "Ich möchte dich einladen, {{name}} auf Donetick beizutreten.",
     "shareDialogTitle": "Kreiseinladung teilen",
-    "leave": "Circle verlassen",
-    "leaveConfirmTitle": "Circle verlassen",
+    "leave": "Kreis verlassen",
+    "leaveConfirmTitle": "Kreis verlassen",
     "leaveConfirmMessage": "Möchtest du deinen Kreis wirklich verlassen?",
     "leaveConfirmButton": "Verlassen",
     "leftCircle": "Kreis erfolgreich verlassen",
@@ -143,7 +143,7 @@
     "roles": {
       "member": "Mitglied",
       "memberDescription": "Ein reguläres Mitglied des Kreises",
-      "manager": "",
+      "manager": "Manager",
       "managerDescription": "Kann sich als Nutzer ausgeben und in deren Namen handeln",
       "admin": "Administrator",
       "adminDescription": "Voller Zugriff auf den Kreis"
@@ -271,9 +271,9 @@
     "customLabel": "Benutzerdefinierte Benachrichtigung",
     "customHelper": "Benachrichtigungen über eine andere Plattform erhalten",
     "targetNone": "Keine",
-    "targetTelegram": "",
-    "targetPushover": "",
-    "targetWebhooks": "",
+    "targetTelegram": "Telegram",
+    "targetPushover": "Pushover",
+    "targetWebhooks": "Webhooks",
     "telegramBotHelpBefore": "Du musst dem Bot zuerst eine Nachricht senden, damit die Telegram-Benachrichtigung funktioniert",
     "telegramBotHelpAfter": "um einen Chat zu starten",
     "clickHere": "Hier klicken",
@@ -489,7 +489,7 @@
       "toggleLabel": "Echtzeit-Updates aktivieren",
       "title": "Echtzeit-Updates",
       "subtitle": "Erhalte sofort Benachrichtigungen, wenn Aufgaben aktualisiert werden",
-      "statusLabel": "",
+      "statusLabel": "Status:",
       "basicPlan": "Echtzeit-Updates sind im Basis-Tarif nicht verfügbar. Wechsle zu Plus, um sofort benachrichtigt zu werden, wenn Aufgaben aktualisiert werden.",
       "disabled": "Echtzeit-Updates sind deaktiviert. Aktiviere sie, um Live-Änderungen zu sehen, wenn du oder andere Kreismitglieder Aufgaben erledigen, überspringen oder ändern.",
       "connected": "Echtzeit-Updates funktionieren. Du siehst Live-Änderungen, wenn du oder andere Kreismitglieder Aufgaben erledigen, überspringen oder ändern.",
@@ -601,7 +601,7 @@
     "transferIntro": "Du besitzt Kreise, deren Eigentümerschaft vor dem Löschen übertragen werden muss. Bitte wähle neue Besitzer aus:",
     "selectOwner": "Neuen Besitzer auswählen",
     "confirmPrompt": "Bitte gib dein Passwort ein und tippe DELETE zur Bestätigung",
-    "typeDelete": "",
+    "typeDelete": "DELETE",
     "warningLead": "Diese Aktion kann nicht rückgängig gemacht werden.",
     "warningIntro": "Beim Löschen deines Kontos werden dauerhaft entfernt:",
     "removesProfile": "Dein Benutzerprofil und deine Authentifizierungsdaten",
