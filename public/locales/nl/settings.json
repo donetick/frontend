@@ -453,6 +453,7 @@
     "sunday": "Zondag",
     "monday": "Maandag",
     "saturday": "Zaterdag",
+    "helpTranslate": "",
     "formats": {
       "mdy": "MM/DD/JJJJ (VS)",
       "dmy": "DD-MM-JJJJ (Europa)",
