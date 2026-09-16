@@ -99,14 +99,33 @@
     "days_other": "",
     "allTime": ""
   },
+  "search": {
+    "placeholder": "",
+    "clear": ""
+  },
+  "sort": {
+    "date": "",
+    "updatedDate": "",
+    "performer": "",
+    "status": "",
+    "points": ""
+  },
   "activities": {
     "title": "",
+    "subtitle": "",
     "emptyTitle": "",
     "emptyDescriptionEveryone": "",
     "emptyDescriptionMember": "",
     "periodSoFar": "",
     "periodLastDays": "",
-    "unknownMember": ""
+    "unknownMember": "",
+    "searchPlaceholder": "",
+    "sort": {
+      "date": "",
+      "name": "",
+      "status": "",
+      "points": ""
+    }
   },
   "title": {
     "summary": "",
