@@ -9,6 +9,7 @@ import {
   Edit,
   PlayArrow,
   Schedule,
+  SkipNext,
   ThumbDown,
   ThumbUp,
 } from '@mui/icons-material'
@@ -96,12 +97,13 @@ SwipeActionTile.propTypes = {
 // against white.
 
 /**
- * Leading (swipe-right) action: the single positive, highest-frequency action
- * for the row — complete/start, or approve on a row awaiting review.
+ * Leading (swipe-right) actions: complete/start (or approve on a row
+ * awaiting review), then skip.
  *
- * It lives on its own side so it never competes for width with the destructive
- * actions, and because it is the only leading action the list's `fullSwipe`
- * makes it a one-flick gesture with no aiming.
+ * Unlike TrailingActions, LeadingActions tags its *first* child as the
+ * `fullSwipe` target, not its last — so complete/start/approve goes first to
+ * stay a one-flick gesture with no aiming. Skip sits behind it, reachable
+ * with a longer swipe or a tap once revealed.
  */
 export const getChoreLeadingActions = ({
   chore,
@@ -159,6 +161,19 @@ export const getChoreLeadingActions = ({
             )
           }
           label={isInProgress ? t('list.complete') : t('choreView.start')}
+          offsetTop={offsetTop}
+        />
+      </SwipeAction>
+      <SwipeAction
+        onClick={() => {
+          hapticMedium()
+          handleChoreAction('skip', chore)
+        }}
+      >
+        <SwipeActionTile
+          bgcolor='warning.500'
+          icon={<SkipNext sx={{ color: 'white' }} />}
+          label={t('choreView.skip')}
           offsetTop={offsetTop}
         />
       </SwipeAction>
