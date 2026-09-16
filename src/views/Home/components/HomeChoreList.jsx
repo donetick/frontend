@@ -1,48 +1,53 @@
+import '@meauxt/react-swipeable-list/dist/styles.css'
+
+import { SwipeableList, Type as ListType } from '@meauxt/react-swipeable-list'
 import { Sheet } from '@mui/joy'
 import PropTypes from 'prop-types'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
 import CompactChoreCard from '../../Chores/CompactChoreCard'
+import ChoreSwipeableItem from '../../Chores/components/ChoreSwipeableItem'
+import { getChoreTrailingActions } from '../../Chores/components/ChoreSwipeActions'
 
 /**
  * Home renders the same row the task list renders. CompactChoreCard owns the
  * priority stripe, due chip, metadata, complete / approve controls and the
  * action menu, so Home introduces no second task visual and inherits every
- * behaviour change made to the list.
+ * behaviour change made to the list — including the swipeable trailing
+ * actions, which come from the same shared helper the task list uses.
  */
-const HomeChoreList = ({ chores, onAction, performers }) => {
+const HomeChoreList = ({ chores, onAction, performers, userProfile }) => {
   const navigate = useNavigate()
-
-  /**
-   * The card has no click handler of its own — in the task list the swipeable
-   * wrapper supplies one — so opening the task is this list's job. It is
-   * delegated rather than wrapped because the card draws its own row divider
-   * with `&:last-child`, which only resolves correctly while the cards are
-   * direct children of this container.
-   *
-   * Buttons inside the card (complete, approve, the action menu) stop
-   * propagation, so they never reach this handler.
-   */
-  const openClickedRow = event => {
-    const rows = Array.from(event.currentTarget.children)
-    const index = rows.findIndex(row => row.contains(event.target))
-    if (index >= 0) navigate(`/chores/${chores[index].id}`)
-  }
+  const { t } = useTranslation('chores')
 
   return (
     <Sheet
       variant='outlined'
-      onClick={openClickedRow}
       sx={{ borderRadius: 'lg', overflow: 'hidden', p: 0 }}
     >
-      {chores.map(chore => (
-        <CompactChoreCard
-          key={chore.id}
-          chore={chore}
-          performers={performers}
-          onAction={onAction}
-        />
-      ))}
+      <SwipeableList type={ListType.IOS} fullSwipe={false}>
+        {chores.map((chore, index) => (
+          <ChoreSwipeableItem
+            key={chore.id}
+            trailingActions={getChoreTrailingActions({
+              chore,
+              handleChoreAction: onAction,
+              navigate,
+              t,
+              userProfile,
+            })}
+            onClick={() => navigate(`/chores/${chore.id}`)}
+          >
+            <CompactChoreCard
+              chore={chore}
+              performers={performers}
+              onAction={onAction}
+              showDivider={index !== chores.length - 1}
+            />
+          </ChoreSwipeableItem>
+        ))}
+      </SwipeableList>
     </Sheet>
   )
 }
@@ -51,6 +56,7 @@ HomeChoreList.propTypes = {
   chores: PropTypes.array.isRequired,
   onAction: PropTypes.func.isRequired,
   performers: PropTypes.array,
+  userProfile: PropTypes.object,
 }
 
 export default HomeChoreList

@@ -274,6 +274,7 @@ const HomeView = () => {
                 chores={needsReview.slice(0, REVIEW_LIMIT)}
                 performers={performers}
                 onAction={handleChoreAction}
+                userProfile={userProfile}
               />
             </>
           )}
@@ -289,6 +290,7 @@ const HomeView = () => {
                 chores={overduePreview}
                 performers={performers}
                 onAction={handleChoreAction}
+                userProfile={userProfile}
               />
             </>
           )}
@@ -304,6 +306,7 @@ const HomeView = () => {
                 chores={nextUp}
                 performers={performers}
                 onAction={handleChoreAction}
+                userProfile={userProfile}
               />
             </>
           )}
@@ -319,6 +322,7 @@ const HomeView = () => {
                 chores={nextUpFallback}
                 performers={performers}
                 onAction={handleChoreAction}
+                userProfile={userProfile}
               />
             </>
           )}

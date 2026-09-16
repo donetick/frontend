@@ -57,6 +57,11 @@ const CompactChoreCard = ({
   // Multi-select props
   performers,
   showActions = true,
+  // Undefined leaves the old `&:last-child` CSS rule in charge (the card is a
+  // direct sibling of its neighbours). Pass explicitly once a wrapper — like a
+  // swipeable list item — puts each card in its own single-child container,
+  // where `:last-child` always matches and would hide every divider.
+  showDivider,
   sx,
   viewOnly,
 }) => {
@@ -149,11 +154,11 @@ const CompactChoreCard = ({
         // pr: '14px',
         py: '4px',
         bgcolor: 'background.body',
-        borderBottom: '1px solid',
+        borderBottom: showDivider === false ? 'none' : '1px solid',
         borderColor: 'divider',
-        '&:last-child': {
-          borderBottom: 'none',
-        },
+        ...(showDivider === undefined && {
+          '&:last-child': { borderBottom: 'none' },
+        }),
         '&:hover': {
           bgcolor: 'background.level1',
           boxShadow: 'sm',
