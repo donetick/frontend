@@ -30,6 +30,7 @@ export const AVAILABLE_LANGUAGES = [
   { code: 'he', name: 'Hebrew', nativeName: 'עברית' },
   { code: 'nl', name: 'Dutch', nativeName: 'Nederlands' },
   { code: 'ja', name: 'Japanese', nativeName: '日本語' },
+  { code: 'pl', name: 'Polish', nativeName: 'Polski' },
   { code: 'pt', name: 'Portuguese (Brazil)', nativeName: 'Português (Brasil)' },
   { code: 'ru', name: 'Russian', nativeName: 'Русский' },
   { code: 'zh-CN', name: 'Chinese (Simplified)', nativeName: '简体中文' },

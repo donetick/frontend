@@ -1,0 +1,80 @@
+{
+  "redeem": "Wykorzystaj punkty",
+  "redeemModal": {
+    "redeemButton": "Wykorzystaj",
+    "pointsAvailable": "Dostępne punkty: {{count}}",
+    "pointsToRedeem": "Punkty do wykorzystania",
+    "placeholder": "Wpisz punkty...",
+    "cannotExceed": "Nie może przekraczać dostępnych punktów",
+    "quickAdd": "Szybkie dodawanie:",
+    "aboutToRedeem": "Za chwilę wykorzystasz",
+    "amount": "{{count}} pkt",
+    "remaining": "Pozostało: {{count}} pkt"
+  },
+  "leaderboard": {
+    "titlePoints": "Ranking punktów",
+    "titleTasks": "Ranking zadań",
+    "subtitlePoints": "Pozycje na podstawie punktów zdobytych w wybranym okresie",
+    "subtitleTasks": "Pozycje na podstawie zadań ukończonych w wybranym okresie",
+    "modePoints": "Punkty",
+    "modeTasks": "Zadania",
+    "you": "Ty",
+    "tasksAndAvg": "Zadania: {{tasks}} • Średnio {{avg}} na zadanie",
+    "available": "Dostępne: {{count}}",
+    "points_few": "{{count}} punkty",
+    "points_many": "{{count}} punktów",
+    "points_one": "{{count}} punkt",
+    "points_other": "{{count}} punktów"
+  },
+  "tabs": {
+    "short7d": "7 dni",
+    "short6m": "6 mies.",
+    "shortAll": "Wszystko",
+    "days7": "7 dni",
+    "months6": "6 miesięcy",
+    "allTime": "Od początku"
+  },
+  "filter": {
+    "analysisTitle": "Filtrowanie i analiza",
+    "title": "Filtruj punkty",
+    "showFor": "Pokaż punkty dla:",
+    "timePeriod": "Okres:"
+  },
+  "cards": {
+    "available": {
+      "title": "Dostępne",
+      "subtext": "Gotowe do wykorzystania"
+    },
+    "redeemed": {
+      "title": "Wykorzystane",
+      "subtext": "Zużyte wcześniej"
+    },
+    "total": {
+      "title": "Łącznie",
+      "subtext": "Zdobyte od początku"
+    },
+    "period": {
+      "title": "Punkty w okresie",
+      "allTime": "Od początku",
+      "last6Months": "Ostatnie 6 miesięcy",
+      "lastDays_few": "Ostatnie {{count}} dni",
+      "lastDays_many": "Ostatnie {{count}} dni",
+      "lastDays_one": "Ostatni {{count}} dzień",
+      "lastDays_other": "Ostatnie {{count}} dni"
+    }
+  },
+  "summary": {
+    "showingFor": "Wyświetlanie punktów dla",
+    "unknownUser": "Nieznany użytkownik",
+    "overThe": "w okresie:",
+    "allTime": "Od początku",
+    "last6Months": "Ostatnie 6 miesięcy",
+    "lastDays_few": "Ostatnie {{count}} dni",
+    "lastDays_many": "Ostatnie {{count}} dni",
+    "lastDays_one": "Ostatni {{count}} dzień",
+    "lastDays_other": "Ostatnie {{count}} dni"
+  },
+  "trend": {
+    "title": "Trend punktów"
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "iconPicker": {
+    "chooseIcon": "Wybierz ikonę projektu",
+    "availableIcons": "Dostępne ikony"
+  },
+  "icons": {
+    "FolderOpen": "Folder",
+    "Work": "Praca",
+    "Home": "Dom",
+    "School": "Szkoła",
+    "BusinessCenter": "Biznes",
+    "Code": "Kod",
+    "Build": "Narzędzia",
+    "Palette": "Projektowanie",
+    "SportsSoccer": "Sport",
+    "FitnessCenter": "Fitness",
+    "ShoppingCart": "Zakupy",
+    "Restaurant": "Jedzenie",
+    "Flight": "Podróże",
+    "Book": "Nauka",
+    "MusicNote": "Muzyka",
+    "PhotoCamera": "Fotografia",
+    "Games": "Gry",
+    "Science": "Nauka i badania",
+    "AccountBalance": "Finanse",
+    "LocalHospital": "Zdrowie",
+    "DirectionsCar": "Motoryzacja",
+    "Pets": "Zwierzęta",
+    "Garden": "Ogród",
+    "Computer": "Technologia"
+  },
+  "defaultChip": "Domyślny",
+  "tasks_few": "{{count}} zadania",
+  "tasks_many": "{{count}} zadań",
+  "tasks_one": "{{count}} zadanie",
+  "tasks_other": "{{count}} zadań",
+  "shared": "Udostępniony",
+  "delete": {
+    "title": "Usuń projekt",
+    "message": "Czy na pewno chcesz usunąć „{{name}}”? Spowoduje to usunięcie projektu, ale wszystkie zadania zostaną zachowane (trafią do Projektu domyślnego)."
+  },
+  "loadError": "Nie udało się załadować projektów. Spróbuj ponownie.",
+  "search": {
+    "placeholder": "Szukaj projektów",
+    "noResultsTitle": "Brak pasujących projektów",
+    "noResultsDescription": "Żaden projekt nie pasuje do „{{searchTerm}}”.",
+    "noFilterResultsDescription": "Żaden projekt nie spełnia bieżących kryteriów.",
+    "clear": "Wyczyść wyszukiwanie",
+    "showAll": "Pokaż wszystkie projekty"
+  },
+  "blurb": "Organizuj swoje zadania w projekty. Twórz własne przestrzenie, by zachować porządek i mieć łatwy dostęp do zadań.",
+  "defaultDescription": "Wszystkie zadania bez przypisanego projektu",
+  "selector": {
+    "title": "Projekty",
+    "createNew": "Utwórz nowy projekt",
+    "createNewDescription": "Dodaj własną przestrzeń projektu",
+    "manage": "Zarządzaj projektami",
+    "manageDescription": "Przeglądaj, edytuj i organizuj wszystkie projekty",
+    "currentProjectTitle": "Bieżący projekt: {{project}} (Ctrl+E)",
+    "builtInWorkspace": "Wbudowana przestrzeń projektu"
+  },
+  "modal": {
+    "errorNameRequired": "Nazwa projektu jest wymagana",
+    "errorUpdate": "Nie udało się zaktualizować projektu",
+    "errorCreate": "Nie udało się utworzyć projektu",
+    "namePlaceholder": "Wpisz nazwę projektu...",
+    "descriptionPlaceholder": "Opcjonalny opis projektu...",
+    "nameLabel": "Nazwa projektu",
+    "descriptionLabel": "Opis",
+    "iconLabel": "Ikona projektu",
+    "selectIcon": "Wybierz ikonę",
+    "colorLabel": "Kolor projektu"
+  }
+}
