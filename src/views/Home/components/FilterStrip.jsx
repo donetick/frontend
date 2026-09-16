@@ -1,5 +1,5 @@
 import { FilterAlt, Star } from '@mui/icons-material'
-import { Box, Chip, Sheet, Typography } from '@mui/joy'
+import { Box, Sheet, Typography } from '@mui/joy'
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
@@ -82,31 +82,16 @@ const FilterStrip = ({ filters }) => {
           >
             {filter.name}
           </Typography>
-          {filter.count > 0 ? (
-            <Chip
-              variant='soft'
-              color={filter.overdueCount > 0 ? 'danger' : 'primary'}
-              size='sm'
-              sx={{
-                fontSize: 10,
-                fontVariantNumeric: 'tabular-nums',
-                height: 18,
-                justifySelf: 'start',
-                px: 0.75,
-              }}
-            >
-              {t('home.filters.tasks', { count: filter.count })}
-            </Chip>
-          ) : (
-            <Typography
-              level='body-xs'
-              noWrap
-              textColor='text.tertiary'
-              sx={{ fontVariantNumeric: 'tabular-nums', width: '100%' }}
-            >
-              {t('home.filters.clear')}
-            </Typography>
-          )}
+          <Typography
+            level='body-xs'
+            noWrap
+            textColor={filter.count > 0 ? 'text.secondary' : 'text.tertiary'}
+            sx={{ fontVariantNumeric: 'tabular-nums', width: '100%' }}
+          >
+            {filter.count > 0
+              ? t('home.filters.tasks', { count: filter.count })
+              : t('home.filters.clear')}
+          </Typography>
         </Sheet>
       ))}
     </Box>

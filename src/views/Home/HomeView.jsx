@@ -193,6 +193,14 @@ const HomeView = () => {
   // Keyed by the same ids the customization settings page toggles and
   // reorders, so `sectionOrder` can render this screen in any arrangement.
   const homeSections = {
+    glance: (
+      <TriageRow
+        dueToday={dueToday.length}
+        needsReview={needsReview.length}
+        overdue={overdue.length}
+        unplanned={chores.filter(chore => chore.nextDueDate === null).length}
+      />
+    ),
     circle: circle.length > 0 && (
       <>
         <SectionHeader
@@ -342,26 +350,30 @@ const HomeView = () => {
           mt: 0.5,
         }}
       >
-        <Box>
-          <Typography
-            level='h2'
-            sx={{
-              fontSize: 'clamp(1.5rem, 6vw, 1.75rem)',
-              letterSpacing: '-0.028em',
-              lineHeight: 1.15,
-              textWrap: 'balance',
-            }}
-          >
-            {t(`home.verdict.${verdict.id}.title`, { count: verdict.count })}
-          </Typography>
-          <Typography
-            level='body-sm'
-            textColor='text.secondary'
-            sx={{ mt: 0.5 }}
-          >
-            {t(`home.verdict.${verdict.id}.body`, { count: verdict.count })}
-          </Typography>
-        </Box>
+        {sectionOrder.includes('greeting') ? (
+          <Box>
+            <Typography
+              level='h2'
+              sx={{
+                fontSize: 'clamp(1.5rem, 6vw, 1.75rem)',
+                letterSpacing: '-0.028em',
+                lineHeight: 1.15,
+                textWrap: 'balance',
+              }}
+            >
+              {t(`home.verdict.${verdict.id}.title`, { count: verdict.count })}
+            </Typography>
+            <Typography
+              level='body-sm'
+              textColor='text.secondary'
+              sx={{ mt: 0.5 }}
+            >
+              {t(`home.verdict.${verdict.id}.body`, { count: verdict.count })}
+            </Typography>
+          </Box>
+        ) : (
+          <Box />
+        )}
         <IconButton
           component={Link}
           to='/settings/home-sections'
@@ -422,17 +434,11 @@ const HomeView = () => {
         </>
       ) : (
         <>
-          <TriageRow
-            dueToday={dueToday.length}
-            needsReview={needsReview.length}
-            overdue={overdue.length}
-            unplanned={
-              chores.filter(chore => chore.nextDueDate === null).length
-            }
-          />
-          {sectionOrder.map(id => (
-            <Box key={id}>{homeSections[id]}</Box>
-          ))}
+          {sectionOrder
+            .filter(id => id !== 'greeting')
+            .map(id => (
+              <Box key={id}>{homeSections[id]}</Box>
+            ))}
         </>
       )}
 

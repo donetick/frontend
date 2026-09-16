@@ -433,6 +433,14 @@
     "resetToDefaults": "Reset to Defaults",
     "resetHelper": "This will restore all sections to their default visibility and order.",
     "sections": {
+      "greeting": {
+        "name": "Greeting",
+        "description": "The headline at the top that sums up your day"
+      },
+      "glance": {
+        "name": "At a Glance",
+        "description": "Overdue / due today / needs review / unplanned counts"
+      },
       "circle": {
         "name": "Your Circle",
         "description": "Shows what everyone in your circle is carrying this week"

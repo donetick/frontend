@@ -1,5 +1,6 @@
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd'
 import {
+  Checklist,
   DragIndicator,
   ErrorOutline,
   FactCheck,
@@ -9,6 +10,7 @@ import {
   Upcoming,
   Visibility,
   VisibilityOff,
+  WavingHand,
 } from '@mui/icons-material'
 import {
   Box,
@@ -48,6 +50,10 @@ const HomeSectionsSettings = () => {
 
   const getIcon = iconName => {
     switch (iconName) {
+      case 'WavingHand':
+        return <WavingHand />
+      case 'Checklist':
+        return <Checklist />
       case 'Groups':
         return <Groups />
       case 'FactCheck':

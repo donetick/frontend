@@ -1,11 +1,27 @@
 export const DEFAULT_HOME_SECTIONS_CONFIG = [
   {
+    id: 'greeting',
+    name: 'Greeting',
+    description: 'The headline at the top that sums up your day',
+    iconName: 'WavingHand',
+    enabled: true,
+    order: 0,
+  },
+  {
+    id: 'glance',
+    name: 'At a Glance',
+    description: 'Overdue / due today / needs review / unplanned counts',
+    iconName: 'Checklist',
+    enabled: true,
+    order: 1,
+  },
+  {
     id: 'circle',
     name: 'Your Circle',
     description: 'Shows what everyone in your circle is carrying this week',
     iconName: 'Groups',
     enabled: true,
-    order: 0,
+    order: 2,
   },
   {
     id: 'review',
@@ -13,7 +29,7 @@ export const DEFAULT_HOME_SECTIONS_CONFIG = [
     description: 'Finished tasks waiting to be signed off',
     iconName: 'FactCheck',
     enabled: true,
-    order: 1,
+    order: 3,
   },
   {
     id: 'overdue',
@@ -21,7 +37,7 @@ export const DEFAULT_HOME_SECTIONS_CONFIG = [
     description: 'Tasks that have slipped past their due date',
     iconName: 'ErrorOutline',
     enabled: true,
-    order: 2,
+    order: 4,
   },
   {
     id: 'nextUp',
@@ -29,7 +45,7 @@ export const DEFAULT_HOME_SECTIONS_CONFIG = [
     description: "What's due today and tomorrow",
     iconName: 'Upcoming',
     enabled: true,
-    order: 3,
+    order: 5,
   },
   {
     id: 'filters',
@@ -37,7 +53,7 @@ export const DEFAULT_HOME_SECTIONS_CONFIG = [
     description: 'Quick access to your pinned and most useful filters',
     iconName: 'FilterAlt',
     enabled: true,
-    order: 4,
+    order: 6,
   },
   {
     id: 'projects',
@@ -45,7 +61,7 @@ export const DEFAULT_HOME_SECTIONS_CONFIG = [
     description: 'Where the work is piling up, by project',
     iconName: 'FolderOpen',
     enabled: true,
-    order: 5,
+    order: 7,
   },
 ]
 

@@ -1,4 +1,4 @@
-import { Box, Chip, Sheet, Typography } from '@mui/joy'
+import { Box, Sheet, Typography } from '@mui/joy'
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
@@ -117,33 +117,16 @@ const ProjectStrip = ({ projects }) => {
             </Typography>
             {/* noWrap, because a second line here would make this cell taller
                 than the one beside it and the whole grid row with it. */}
-            {project.late > 0 ? (
-              <Chip
-                variant='soft'
-                color='danger'
-                size='sm'
-                sx={{
-                  fontSize: 10,
-                  fontVariantNumeric: 'tabular-nums',
-                  height: 18,
-                  justifySelf: 'start',
-                  px: 0.75,
-                }}
-              >
-                {summarize(project)}
-              </Chip>
-            ) : (
-              <Typography
-                level='body-xs'
-                noWrap
-                textColor={
-                  project.open === 0 ? 'text.tertiary' : 'text.secondary'
-                }
-                sx={{ fontVariantNumeric: 'tabular-nums', width: '100%' }}
-              >
-                {summarize(project)}
-              </Typography>
-            )}
+            <Typography
+              level='body-xs'
+              noWrap
+              textColor={
+                project.open === 0 ? 'text.tertiary' : 'text.secondary'
+              }
+              sx={{ fontVariantNumeric: 'tabular-nums', width: '100%' }}
+            >
+              {summarize(project)}
+            </Typography>
           </Sheet>
         )
       })}
