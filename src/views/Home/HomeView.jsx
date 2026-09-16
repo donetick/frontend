@@ -46,7 +46,7 @@ const SectionHeader = ({ action, actionTo, title }) => (
       gap: 2,
       justifyContent: 'space-between',
       mb: 1.25,
-      mt: 3.5,
+      mt: 2.25,
     }}
   >
     <Typography level='title-sm' sx={{ letterSpacing: '0.01em' }}>
