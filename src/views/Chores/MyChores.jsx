@@ -1433,7 +1433,7 @@ const MyChores = () => {
           sx={{
             position: 'fixed',
             bottom: getSafeBottom(10, 10),
-            left: 10,
+            left: 'calc(var(--app-navigation-width, 0px) + 10px)',
             display: 'flex',
             justifyContent: 'flex-end',
             gap: 2,

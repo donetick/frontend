@@ -1,6 +1,6 @@
 import './styles/safe-area.css'
 
-import { Button, Typography, useColorScheme } from '@mui/joy'
+import { Box, Button, Typography, useColorScheme } from '@mui/joy'
 import { useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
@@ -109,11 +109,24 @@ const AppContent = () => {
   return (
     <div>
       <ImpersonateUserProvider>
-        <NavBar />
-        <PageTransition>
-          <Outlet />
-        </PageTransition>
-        <MobileBottomNav />
+        <Box
+          sx={{
+            alignItems: 'stretch',
+            display: 'flex',
+            flexDirection: 'column',
+            minHeight: '100dvh',
+            width: '100%',
+            '@media (min-width: 1024px)': { flexDirection: 'row' },
+          }}
+        >
+          <NavBar />
+          <Box sx={{ flex: 1, minWidth: 0, width: '100%' }}>
+            <PageTransition>
+              <Outlet />
+            </PageTransition>
+            <MobileBottomNav />
+          </Box>
+        </Box>
       </ImpersonateUserProvider>
     </div>
   )

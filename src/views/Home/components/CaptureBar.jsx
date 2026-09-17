@@ -39,7 +39,8 @@ const CaptureBar = ({ onCapture }) => {
       sx={{
         bottom: getSafeBottom(12, 4),
         display: 'flex',
-        insetInline: 0,
+        insetInlineEnd: 0,
+        insetInlineStart: 'var(--app-navigation-width, 0px)',
         justifyContent: 'center',
         pointerEvents: 'none',
         position: 'fixed',
