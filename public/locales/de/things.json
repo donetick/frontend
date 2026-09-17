@@ -3,7 +3,7 @@
   "errStateNumber": "Zustand muss eine Zahl sein",
   "errStateBool": "Zustand muss wahr oder falsch sein",
   "errStateRequired": "Zustand ist erforderlich",
-  "name": "Name",
+  "name": "",
   "namePlaceholder": "Name des Dings",
   "value": "Wert",
   "valuePlaceholder": "Wert des Dings",
@@ -25,7 +25,7 @@
     "title": "Dinge",
     "description": "Dinge sind benutzerdefinierte Werte, die mit Aufgaben verknüpft werden können, um zusätzliche Informationen zu erfassen. Sie können Text-, Zahlen- oder Wahrheitswerte sein. Du kannst Dinge mit Aufgaben verknüpfen und eine Aufgabe fällig werden lassen, sobald eine Bedingung erfüllt ist.",
     "searchPlaceholder": "Dinge durchsuchen",
-    "sortName": "Name",
+    "sortName": "",
     "sortType": "Typ",
     "sortState": "Zustand",
     "sortUpdated": "Zuletzt aktualisiert",
@@ -42,7 +42,7 @@
     "toggle": "Umschalten"
   },
   "types": {
-    "text": "Text",
+    "text": "",
     "number": "Zahl",
     "boolean": "Wahrheitwert"
   },
