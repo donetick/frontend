@@ -635,7 +635,7 @@ const MultiSelectToolbar = ({
         title={
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <CheckBox sx={{ fontSize: 20 }} />
-            {selectedCount} task{selectedCount !== 1 ? 's' : ''} selected
+            {t('archived.selected', { count: selectedCount })}
           </Box>
         }
         footer={
@@ -792,7 +792,7 @@ const MultiSelectToolbar = ({
       {dueDatePickerOpen && (
         <DueDatePickerModal
           open
-          title={`Due date for ${selectedCount} task${selectedCount !== 1 ? 's' : ''}`}
+          title={t('multiToolbar.dueDateTitle', { count: selectedCount })}
           {...prefillDueDate(
             summary.dueDate?.isMixed ? null : summary.dueDate?.value,
           )}

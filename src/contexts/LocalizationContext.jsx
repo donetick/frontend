@@ -26,6 +26,7 @@ export const AVAILABLE_LANGUAGES = [
   { code: 'de', name: 'German', nativeName: 'Deutsch' },
   { code: 'en', name: 'English', nativeName: 'English' },
   { code: 'es', name: 'Spanish', nativeName: 'Español' },
+  { code: 'es-ES', name: 'Spanish (Spain)', nativeName: 'Español (España)' },
   { code: 'fr', name: 'French', nativeName: 'Français' },
   { code: 'he', name: 'Hebrew', nativeName: 'עברית' },
   { code: 'nl', name: 'Dutch', nativeName: 'Nederlands' },
