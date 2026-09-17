@@ -1029,7 +1029,9 @@ const TimerDetails = () => {
                                           height: '100%',
                                         }}
                                       >
-                                        <EditIcon sx={{ fontSize: 20, color: 'white' }} />
+                                        <EditIcon
+                                          sx={{ fontSize: 20, color: 'white' }}
+                                        />
                                         <Typography
                                           level='body-xs'
                                           sx={{ mt: 0.5, color: 'inherit' }}
@@ -1055,7 +1057,9 @@ const TimerDetails = () => {
                                           height: '100%',
                                         }}
                                       >
-                                        <DeleteIcon sx={{ fontSize: 20, color: 'white' }} />
+                                        <DeleteIcon
+                                          sx={{ fontSize: 20, color: 'white' }}
+                                        />
                                         <Typography
                                           level='body-xs'
                                           sx={{ mt: 0.5, color: 'inherit' }}
