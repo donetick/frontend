@@ -1,55 +1,55 @@
 {
   "builder": {
-    "errorName": "",
-    "errorConditions": "",
-    "editTitle": "",
-    "newTitle": "",
-    "addConditions": "",
-    "save": "",
-    "name": "",
-    "namePlaceholder": "",
+    "errorName": "Por favor, introduce un nombre para el filtro",
+    "errorConditions": "Por favor, configura al menos una condición de filtro",
+    "editTitle": "Editar Filtro",
+    "newTitle": "Nuevo Filtro",
+    "addConditions": "Añade condiciones para la vista previa",
+    "save": "Guardar Filtro",
+    "name": "Nombre del Filtro",
+    "namePlaceholder": "ej. Tareas vencidas de Alicia",
     "color": ""
   },
-  "nameExists": "",
-  "tasks_one": "",
-  "tasks_other": "",
-  "overdue": "",
-  "noConditions": "",
-  "condition_one": "",
-  "condition_other": "",
-  "usedCount": "",
+  "nameExists": "Ya existe un filtro con este nombre",
+  "tasks_one": "{{count}} tarea",
+  "tasks_other": "{{count}} tareas",
+  "overdue": "{{count}} vencida(s)",
+  "noConditions": "Sin condiciones",
+  "condition_one": "{{count}} condición",
+  "condition_other": "{{count}} condiciones",
+  "usedCount": "Usado {{count}} vez/veces",
   "delete": {
-    "title": "",
-    "message": ""
+    "title": "Eliminar Filtro",
+    "message": "¿Estás seguro de que quieres eliminar \"{{name}}\"? Esto no se puede deshacer."
   },
   "empty": {
-    "title": "",
-    "description": "",
-    "createFilter": "",
-    "noResultsTitle": "",
-    "noResultsWithSearch": "",
-    "noResultsDefault": "",
-    "clearSearch": "",
-    "showAllFilters": ""
+    "title": "Aún no hay filtros guardados",
+    "description": "Guarda un conjunto de condiciones una vez, como \"vencidas y asignadas a mí\", y vuelve directamente a ellas desde cualquier lugar.",
+    "createFilter": "Crear un filtro",
+    "noResultsTitle": "Ningún filtro coincide",
+    "noResultsWithSearch": "Ningún filtro guardado coincide con \"{{search}}\".",
+    "noResultsDefault": "Ningún filtro guardado coincide con el filtro actual.",
+    "clearSearch": "Limpiar búsqueda",
+    "showAllFilters": "Mostrar todos los filtros"
   },
   "header": {
-    "title": "",
-    "subtitle": ""
+    "title": "Filtros",
+    "subtitle": "Guarda tus combinaciones de filtros favoritas para un acceso rápido. Crea vistas personalizadas para organizar y encontrar tareas más rápido."
   },
-  "searchPlaceholder": "",
+  "searchPlaceholder": "Buscar filtros",
   "sort": {
-    "smart": "",
-    "name": "",
-    "usage": "",
-    "lastUsed": "",
-    "created": ""
+    "smart": "Inteligente",
+    "name": "Nombre",
+    "usage": "Frecuencia de uso",
+    "lastUsed": "Último uso",
+    "created": "Fecha de creación"
   },
   "show": {
-    "title": "",
-    "all": "",
-    "pinned": "",
-    "unpinned": ""
+    "title": "Mostrar",
+    "all": "Todos los filtros",
+    "pinned": "Fijados",
+    "unpinned": "No fijados"
   },
-  "pin": "",
-  "unpin": ""
+  "pin": "Fijar",
+  "unpin": "Desfijar"
 }
