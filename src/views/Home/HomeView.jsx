@@ -126,6 +126,7 @@ const HomeView = () => {
     overdue,
     overduePreview,
     projectPulse,
+    upcoming,
     userProfile,
     verdict,
   } = useHomeSummary(chores)
@@ -207,6 +208,7 @@ const HomeView = () => {
   const homeSections = {
     glance: (
       <TriageRow
+        comingUp={upcoming.length}
         dueToday={dueToday.length}
         needsReview={needsReview.length}
         overdue={overdue.length}

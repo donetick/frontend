@@ -616,6 +616,7 @@
       "overdue": "Overdue",
       "dueToday": "Due today",
       "needsReview": "Needs review",
+      "comingUp": "Coming up",
       "unplanned": "Unplanned",
       "allClear": "Nothing overdue, nothing waiting"
     },
