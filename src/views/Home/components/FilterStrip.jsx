@@ -1,12 +1,15 @@
 import { FilterAlt, Star } from '@mui/icons-material'
 import { Box, Sheet, Typography } from '@mui/joy'
+import useMediaQuery from '@mui/material/useMediaQuery'
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
-// Two rows of two, same reasoning as ProjectStrip: a fifth filter would push
-// the section past the list above it, and the header already links out.
-const GRID_LIMIT = 4
+// Two rows of two on mobile, same reasoning as ProjectStrip: a fifth filter
+// would push the section past the list above it, and the header already
+// links out. Desktop gets an extra column and row instead of bigger cards.
+const GRID_LIMIT_MOBILE = 4
+const GRID_LIMIT_DESKTOP = 6
 
 /**
  * Shortcuts into the saved filters that matter right now. Pinned filters lead
@@ -16,16 +19,18 @@ const GRID_LIMIT = 4
 const FilterStrip = ({ filters }) => {
   const { t } = useTranslation('common')
   const navigate = useNavigate()
+  const isDesktop = useMediaQuery('(min-width:769px)')
+  const gridLimit = isDesktop ? GRID_LIMIT_DESKTOP : GRID_LIMIT_MOBILE
 
   return (
     <Box
       sx={{
         display: 'grid',
         gap: 1,
-        gridTemplateColumns: '1fr 1fr',
+        gridTemplateColumns: isDesktop ? 'repeat(3, 1fr)' : '1fr 1fr',
       }}
     >
-      {filters.slice(0, GRID_LIMIT).map(filter => (
+      {filters.slice(0, gridLimit).map(filter => (
         <Sheet
           key={filter.id}
           component='button'

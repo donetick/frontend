@@ -12,6 +12,7 @@ import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
+import { useScrollDirection } from '../../hooks/useScrollDirection'
 import { OPEN_NAVIGATION_DRAWER_EVENT } from './navigationEvents'
 
 const HIDDEN_ROUTES = [
@@ -32,7 +33,7 @@ const HIDDEN_ROUTES = [
 ]
 
 const isTaskDetailRoute = pathname =>
-  /^\/chores\/(create|[^/]+(?:\/(?:edit|history|timer))?)$/.test(pathname)
+  /^\/chores\/(create|[^/]+\/(?:edit|timer))$/.test(pathname)
 
 const NavItem = ({ active, icon, label, onClick, to }) => {
   const content = (
@@ -116,6 +117,8 @@ const MobileBottomNav = () => {
     isTaskDetailRoute(location.pathname) ||
     ['www.donetick.com', 'donetick.com'].includes(window.location.hostname)
 
+  const scrolledAway = useScrollDirection({ enabled: isMobile && !hidden })
+
   if (hidden) return null
 
   const tasksActive =
@@ -140,7 +143,10 @@ const MobileBottomNav = () => {
           insetInline: 0,
           pb: 'var(--safe-area-inset-bottom, 0px)',
           position: 'fixed',
+          transform: scrolledAway ? 'translateY(100%)' : 'translateY(0)',
+          transition: 'transform 220ms ease',
           zIndex: 'var(--joy-zIndex-popup)',
+          '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
         }}
       >
         <NavItem

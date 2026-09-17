@@ -29,7 +29,12 @@
     "filters": "Filtri",
     "activities": "Attività",
     "points": "Punti",
-    "settings": "Impostazioni"
+    "settings": "Impostazioni",
+    "openMenu": "Apri menu",
+    "collapseMenu": "Comprimi menu",
+    "expandMenu": "Espandi menu",
+    "primaryNavigation": "Navigazione principale",
+    "profile": "Profilo"
   },
   "feedback": {
     "later": "Forse più tardi",

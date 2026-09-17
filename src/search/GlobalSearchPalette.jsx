@@ -171,7 +171,7 @@ const buildQuickActions = t => [
 const MODE_SIGIL = '/'
 
 const parseMode = value => {
-  const text = value || ''
+  const text = typeof value === 'string' ? value : ''
   return text.startsWith(MODE_SIGIL)
     ? { mode: 'actions', term: text.slice(MODE_SIGIL.length).trimStart() }
     : { mode: null, term: text }

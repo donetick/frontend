@@ -62,6 +62,14 @@ export const INSIGHT_FILTER_DEFS = {
       operator: 'AND',
     },
   },
+  // What Home's "Coming up" triage tile links back into: due tomorrow.
+  'coming-up': {
+    name: 'Coming Up',
+    filter: {
+      conditions: [{ type: 'dueDate', operator: 'isDueTomorrow', value: null }],
+      operator: 'AND',
+    },
+  },
   // What Home's "Next up" link opens: the week ahead plus everything already
   // late, which is the set that section is actually a preview of.
   'due-this-week-overdue': {

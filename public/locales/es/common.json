@@ -230,7 +230,12 @@
     "reportBug": "Informar de un problema",
     "search": "Buscar",
     "settings": "Ajustes",
-    "things": "Objetos"
+    "things": "Objetos",
+    "openMenu": "Abrir menú",
+    "collapseMenu": "Contraer menú",
+    "expandMenu": "Expandir menú",
+    "primaryNavigation": "Navegación principal",
+    "profile": "Perfil"
   },
   "newVersionAvailable": "Nueva versión disponible",
   "no": "No",

@@ -164,6 +164,10 @@ const useHomeSummary = chores => {
       .sort(ChoreSorter)
       .slice(0, OVERDUE_PREVIEW_LIMIT)
 
+    // The triage row's "Coming up" tile: due tomorrow, the same single-day
+    // window Next up's primary list falls back to once today is covered.
+    const upcoming = dueTomorrow
+
     return {
       dueToday,
       hasAnyTask: chores.length > 0,
@@ -173,6 +177,7 @@ const useHomeSummary = chores => {
       overdue,
       overduePreview,
       totalOpen: chores.length,
+      upcoming,
       verdict: buildVerdict({
         dueToday,
         hasAnyTask: chores.length > 0,

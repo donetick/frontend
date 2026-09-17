@@ -30,7 +30,12 @@
     "filters": "Filtres",
     "activities": "Activités",
     "points": "Points",
-    "settings": "Paramètres"
+    "settings": "Paramètres",
+    "openMenu": "Ouvrir le menu",
+    "collapseMenu": "Réduire le menu",
+    "expandMenu": "Développer le menu",
+    "primaryNavigation": "Navigation principale",
+    "profile": "Profil"
   },
   "search": {
     "title": "Recherche",

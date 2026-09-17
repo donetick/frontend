@@ -57,7 +57,12 @@
     "activities": "アクティビティ",
     "points": "ポイント",
     "settings": "設定",
-    "reportBug": "Report a Bug"
+    "reportBug": "Report a Bug",
+    "openMenu": "メニューを開く",
+    "collapseMenu": "メニューを折りたたむ",
+    "expandMenu": "メニューを展開する",
+    "primaryNavigation": "メインナビゲーション",
+    "profile": "プロフィール"
   },
   "search": {
     "title": "検索",

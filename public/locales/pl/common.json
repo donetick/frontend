@@ -56,7 +56,12 @@
     "activities": "Aktywności",
     "points": "Punkty",
     "settings": "Ustawienia",
-    "reportBug": "Zgłoś problem"
+    "reportBug": "Zgłoś problem",
+    "openMenu": "Otwórz menu",
+    "collapseMenu": "Zwiń menu",
+    "expandMenu": "Rozwiń menu",
+    "primaryNavigation": "Nawigacja główna",
+    "profile": "Profil"
   },
   "search": {
     "title": "Szukaj",

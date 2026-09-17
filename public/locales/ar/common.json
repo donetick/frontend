@@ -57,7 +57,12 @@
     "activities": "الأنشطة",
     "points": "النقاط",
     "settings": "الإعدادات",
-    "reportBug": "Report a Bug"
+    "reportBug": "Report a Bug",
+    "openMenu": "فتح القائمة",
+    "collapseMenu": "طي القائمة",
+    "expandMenu": "توسيع القائمة",
+    "primaryNavigation": "التنقل الرئيسي",
+    "profile": "الملف الشخصي"
   },
   "search": {
     "title": "بحث",

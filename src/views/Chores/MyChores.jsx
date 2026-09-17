@@ -969,7 +969,10 @@ const MyChores = () => {
         flexDirection: 'row',
       }}
     >
-      <Container maxWidth='md' sx={{ px: 1, minWidth: 0 }}>
+      <Container
+        maxWidth='md'
+        sx={{ px: 1, pt: { xs: 1, md: 3 }, minWidth: 0 }}
+      >
         <MyChoreHeader
           activeFilterId={activeFilterId}
           activeFilter={activeFilter}
@@ -1433,7 +1436,7 @@ const MyChores = () => {
           sx={{
             position: 'fixed',
             bottom: getSafeBottom(10, 10),
-            left: 10,
+            left: 'calc(var(--app-navigation-width, 0px) + 10px)',
             display: 'flex',
             justifyContent: 'flex-end',
             gap: 2,

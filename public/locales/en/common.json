@@ -60,7 +60,12 @@
     "activities": "Activities",
     "points": "Points",
     "settings": "Settings",
-    "reportBug": "Report an Issue"
+    "reportBug": "Report an Issue",
+    "openMenu": "Open menu",
+    "collapseMenu": "Collapse menu",
+    "expandMenu": "Expand menu",
+    "primaryNavigation": "Primary navigation",
+    "profile": "Profile"
   },
   "search": {
     "title": "Search",
@@ -586,9 +591,8 @@
     },
     "verdict": {
       "late": {
-        "title_one": "{{count}} task slipped.",
-        "title_other": "{{count}} tasks slipped.",
-        "body": "Everything else is still on schedule."
+        "title_one": "{{count}} task needs attention.",
+        "title_other": "{{count}} tasks need attention."
       },
       "review": {
         "title": "Something needs reviewing.",
@@ -596,9 +600,8 @@
         "body_other": "{{count}} finished tasks are waiting to be signed off."
       },
       "today": {
-        "title": "Nothing’s late.",
-        "body_one": "{{count}} task lands later today.",
-        "body_other": "{{count}} tasks land later today."
+        "title_one": "{{count}} task due today.",
+        "title_other": "{{count}} tasks due today."
       },
       "clear": {
         "title": "You’re all caught up.",
@@ -613,6 +616,7 @@
       "overdue": "Overdue",
       "dueToday": "Due today",
       "needsReview": "Needs review",
+      "comingUp": "Coming up",
       "unplanned": "Unplanned",
       "allClear": "Nothing overdue, nothing waiting"
     },

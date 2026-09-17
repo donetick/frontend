@@ -232,7 +232,6 @@
     "needTitle": "",
     "needBody": "",
     "keepDisabled": ""
->>>>>>> upstream/develop
   },
   "assigneeCard": {
     "emptyDescription": "Asigna una tarea a alguien de tu círculo y su carga de trabajo aparecerá aquí.",
@@ -1198,5 +1197,4 @@
     "title": "Di tus tareas",
     "tryAgain": "Reintentar"
   }
-}
 }

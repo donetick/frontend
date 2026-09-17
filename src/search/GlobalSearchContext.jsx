@@ -136,12 +136,13 @@ export const GlobalSearchProvider = ({ children }) => {
     (query = '') => {
       if (BLOCKED_ROUTES.some(route => location.pathname.startsWith(route)))
         return
+      const safeQuery = typeof query === 'string' ? query : ''
       if (isMobile) {
         loadDocuments()
-        navigate('/search', { state: { initialQuery: query } })
+        navigate('/search', { state: { initialQuery: safeQuery } })
         return
       }
-      setInitialQuery(query)
+      setInitialQuery(safeQuery)
       setIsOpen(true)
       loadDocuments()
     },
