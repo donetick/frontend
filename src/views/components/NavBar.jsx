@@ -29,7 +29,8 @@ import {
   ListItemDecorator,
   Typography,
 } from '@mui/joy'
-import { useState } from 'react'
+import useMediaQuery from '@mui/material/useMediaQuery'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 
@@ -41,6 +42,7 @@ import { useGlobalSearch } from '../../search/GlobalSearchContext'
 import { apiClient } from '../../utils/ApiClient'
 import ErrorReportModal from '../Modals/ErrorReportModal'
 import NavBarLink from './NavBarLink'
+import { OPEN_NAVIGATION_DRAWER_EVENT } from './navigationEvents'
 import SyncStatusIndicator from './SyncStatusIndicator'
 
 const publicPages = ['/landing', '/privacy', '/terms']
@@ -52,6 +54,14 @@ const NavBar = () => {
   const navigate = useNavigate()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [bugReportOpen, setBugReportOpen] = useState(false)
+  const isMobile = useMediaQuery('(max-width:768px)')
+
+  useEffect(() => {
+    const handleOpenDrawer = () => setDrawerOpen(true)
+    window.addEventListener(OPEN_NAVIGATION_DRAWER_EVENT, handleOpenDrawer)
+    return () =>
+      window.removeEventListener(OPEN_NAVIGATION_DRAWER_EVENT, handleOpenDrawer)
+  }, [])
 
   const links = [
     {
@@ -145,7 +155,9 @@ const NavBar = () => {
       ['/chores', '/'].includes(location.pathname) &&
       !searchParams.get('filterId')
     ) {
-      return menuRounded
+      // Primary mobile destinations use the bottom bar's More button. Keeping
+      // the top-left quiet avoids presenting two controls for the same drawer.
+      return isMobile ? null : menuRounded
     }
     return (
       <IconButton
@@ -200,6 +212,11 @@ const NavBar = () => {
   }
   // if url has /landing then remove the navbar:
   if (publicPages.includes(location.pathname)) {
+    return null
+  }
+  // Mobile search takes over the full screen with its own back button, so the
+  // top bar (and the bottom nav, hidden separately) would just double up.
+  if (isMobile && location.pathname === '/search') {
     return null
   }
   if (

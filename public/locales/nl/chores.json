@@ -314,6 +314,7 @@
     "selected_one": "",
     "selected_other": "",
     "selectAllTitle": "",
+    "selectSectionTitle": "",
     "all": "",
     "closeMultiSelect": "",
     "clearMultiSelect": "",
@@ -559,17 +560,7 @@
     "addTitle": "Subtaak toevoegen",
     "addChildTitle": "Geneste subtaak toevoegen",
     "deleteShortcut": "",
-    "addPlaceholder": "",
-    "untitled": "Naamloze subtaak",
-    "actions": "Subtaakacties",
-    "edit": "Bewerken",
-    "addBelow": "Subtaak hieronder toevoegen",
-    "addChild": "Geneste subtaak toevoegen",
-    "moveUpLevel": "Een niveau omhoog",
-    "delete": "Verwijderen",
-    "editTitle": "Subtaak bewerken",
-    "addTitle": "Subtaak toevoegen",
-    "addChildTitle": "Geneste subtaak toevoegen"
+    "addPlaceholder": ""
   },
   "voiceToTask": {
     "title": "",

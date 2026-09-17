@@ -314,6 +314,7 @@
     "selected_one": "{{count}} tâche sélectionnée",
     "selected_other": "Tâches {{count}} sélectionnées",
     "selectAllTitle": "Sélectionner toutes les tâches visibles (Ctrl+A)",
+    "selectSectionTitle": "",
     "all": "Tous",
     "closeMultiSelect": "Fermer la sélection multiple (Esc)",
     "clearMultiSelect": "Effacer la sélection multiple (Échap)",
@@ -559,17 +560,7 @@
     "addTitle": "Ajouter une sous-tache",
     "addChildTitle": "Ajouter une sous-tache imbriquee",
     "deleteShortcut": "Supprimer (Maj+Retour arrière)",
-    "addPlaceholder": "Ajouter une nouvelle tâche... (Entrée à ajouter)",
-    "untitled": "Sous-tache sans titre",
-    "actions": "Actions de sous-tache",
-    "edit": "Modifier",
-    "addBelow": "Ajouter une sous-tache en dessous",
-    "addChild": "Ajouter une sous-tache imbriquee",
-    "moveUpLevel": "Remonter d'un niveau",
-    "delete": "Supprimer",
-    "editTitle": "Modifier la sous-tache",
-    "addTitle": "Ajouter une sous-tache",
-    "addChildTitle": "Ajouter une sous-tache imbriquee"
+    "addPlaceholder": "Ajouter une nouvelle tâche... (Entrée à ajouter)"
   },
   "voiceToTask": {
     "title": "Parlez vos tâches",

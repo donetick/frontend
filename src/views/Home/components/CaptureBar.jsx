@@ -45,6 +45,9 @@ const CaptureBar = ({ onCapture }) => {
         position: 'fixed',
         px: 2,
         zIndex: 100,
+        '@media (max-width: 768px)': {
+          bottom: getSafeBottom(68, 4),
+        },
       }}
     >
       <Sheet

@@ -453,6 +453,7 @@
     "sunday": "星期日",
     "monday": "星期一",
     "saturday": "星期六",
+    "helpTranslate": "",
     "formats": {
       "mdy": "MM/DD/YYYY（美国）",
       "dmy": "DD/MM/YYYY（欧洲）",
