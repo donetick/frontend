@@ -39,7 +39,7 @@
   "searchPlaceholder": "Filter durchsuchen",
   "sort": {
     "smart": "Intelligent",
-    "name": "Name",
+    "name": "",
     "usage": "Nutzungsanzahl",
     "lastUsed": "Zuletzt verwendet",
     "created": "Erstellungsdatum"
