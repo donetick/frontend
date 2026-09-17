@@ -49,6 +49,9 @@
     "search": "Recherche",
     "allTasks": "Tâches",
     "home": "Aperçu",
+    "tasks": "",
+    "more": "",
+    "mobileNavigation": "",
     "archived": "Archivées",
     "things": "Objets",
     "labels": "Étiquettes",
@@ -57,7 +60,12 @@
     "activities": "Activités",
     "points": "Points",
     "settings": "Paramètres",
-    "reportBug": "Signaler un problème"
+    "reportBug": "Signaler un problème",
+    "openMenu": "Ouvrir le menu",
+    "collapseMenu": "Réduire le menu",
+    "expandMenu": "Développer le menu",
+    "primaryNavigation": "Navigation principale",
+    "profile": "Profil"
   },
   "search": {
     "title": "Recherche",
@@ -576,5 +584,107 @@
     "readyRecurring": "Des récurrences qui résistent à la vraie vie",
     "readyCapture": "La saisie par la voix, la photo ou le texte",
     "readyReminders": "Des rappels et des widgets sur l'écran d'accueil"
+  },
+  "home": {
+    "customize": {
+      "action": ""
+    },
+    "verdict": {
+      "late": {
+        "title_one": "",
+        "title_other": ""
+      },
+      "review": {
+        "title": "",
+        "body_one": "",
+        "body_other": ""
+      },
+      "today": {
+        "title_one": "",
+        "title_other": ""
+      },
+      "clear": {
+        "title": "",
+        "body": ""
+      },
+      "firstRun": {
+        "title": "",
+        "body": ""
+      }
+    },
+    "triage": {
+      "overdue": "",
+      "dueToday": "",
+      "needsReview": "",
+      "comingUp": "",
+      "unplanned": "",
+      "allClear": ""
+    },
+    "nextUp": {
+      "title": "",
+      "action": ""
+    },
+    "nextUpFallback": {
+      "title": "",
+      "action": ""
+    },
+    "overdue": {
+      "title": "",
+      "action": ""
+    },
+    "clear": {
+      "title": "",
+      "body": "",
+      "action": ""
+    },
+    "firstTask": {
+      "title": "",
+      "description": "",
+      "action": ""
+    },
+    "review": {
+      "title": "",
+      "pendingTitle": "",
+      "myPendingTitle": "",
+      "action": ""
+    },
+    "circle": {
+      "title": "",
+      "action": "",
+      "open_one": "",
+      "open_other": "",
+      "late_one": "",
+      "late_other": "",
+      "done_one": "",
+      "done_other": "",
+      "caughtUp": "",
+      "emptyTitle": "",
+      "emptyBody": "",
+      "emptyAction": ""
+    },
+    "projects": {
+      "title": "",
+      "action": "",
+      "tasks_one": "",
+      "tasks_other": "",
+      "tasksOverdue_one": "",
+      "tasksOverdue_other": "",
+      "tasksUnplanned_one": "",
+      "tasksUnplanned_other": "",
+      "clear": ""
+    },
+    "filters": {
+      "title": "",
+      "action": "",
+      "tasks_one": "",
+      "tasks_other": "",
+      "clear": ""
+    },
+    "capture": {
+      "placeholder": "",
+      "add": "",
+      "voice": "",
+      "scan": ""
+    }
   }
 }
