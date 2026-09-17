@@ -384,7 +384,8 @@
     "labels": "Étiquettes",
     "labelsHint": "Appuyez pour ajouter · appuyez à nouveau pour supprimer",
     "done": "Fait",
-    "noPriority": "Aucun"
+    "noPriority": "Aucun",
+    "dueDateTitle": ""
   },
   "remind": {
     "title": "Rappels",
@@ -950,6 +951,7 @@
       "2": "En cours",
       "3": "En attente d'approbation"
     },
+    "anyOf": "",
     "include": "Inclure",
     "exclude": "Exclure",
     "has": "A",
@@ -1033,26 +1035,5 @@
     "today": "Aujourd'hui",
     "yesterday": "Hier",
     "noteTitle": "Note - {{choreName}}"
-  },
-  "memberDetail": {
-    "taskCount_one": "{{count}} tâche assignée",
-    "taskCount_other": "{{count}} tâches assignées",
-    "you": "Vous",
-    "filters": {
-      "all": "Tout",
-      "overdue": "En retard",
-      "today": "Aujourd'hui",
-      "undated": "Aucune date"
-    },
-    "noMatchingStatus": "Aucune tâche assignée à cette personne n'est actuellement dans cet état.",
-    "clearFilters": "Afficher toutes les tâches",
-    "searchPlaceholder": "Rechercher les tâches assignées à cette personne",
-    "emptyTitle": "Aucune tâche assignée",
-    "emptyDescription": "Rien n'est assigné à {{name}} en ce moment. Assignez une tâche et elle apparaîtra ici.",
-    "browseTasks": "Parcourir les tâches",
-    "noResultsTitle": "Aucune tâche correspondante",
-    "noResultsDescription": "Aucune tâche assignée à cette personne ne correspond à «{{searchTerm}}».",
-    "notFoundTitle": "Membre introuvable",
-    "notFoundDescription": "Cette personne a peut-être quitté le cercle ou n'est plus partagée avec vous."
   }
 }
