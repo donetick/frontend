@@ -1,4 +1,5 @@
 import { Box, Sheet, Typography } from '@mui/joy'
+import useMediaQuery from '@mui/material/useMediaQuery'
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
@@ -6,9 +7,12 @@ import { useNavigate } from 'react-router-dom'
 import { getIconComponent } from '../../../utils/ProjectIcons'
 import { DEFAULT_PROJECT_ID } from '../useHomeSummary'
 
-// Two rows of two. A fifth project would push the section past the height of
-// the list above it, and the header already links to the full set.
-const GRID_LIMIT = 4
+// Two rows of two on mobile. A fifth project would push the section past the
+// height of the list above it, and the header already links to the full set.
+// Desktop has the width to spare, so it gets an extra column and row instead
+// of the cards themselves growing.
+const GRID_LIMIT_MOBILE = 4
+const GRID_LIMIT_DESKTOP = 6
 
 /**
  * Where the work is piling up. A project earns a mention of lateness because a
@@ -24,6 +28,8 @@ const ProjectStrip = ({ projects }) => {
   // comes from the same string the task list and the project picker use.
   const { t } = useTranslation(['common', 'chores'])
   const navigate = useNavigate()
+  const isDesktop = useMediaQuery('(min-width:769px)')
+  const gridLimit = isDesktop ? GRID_LIMIT_DESKTOP : GRID_LIMIT_MOBILE
 
   /**
    * One line, in order of what you would act on first: lateness, then work
@@ -52,10 +58,10 @@ const ProjectStrip = ({ projects }) => {
       sx={{
         display: 'grid',
         gap: 1,
-        gridTemplateColumns: '1fr 1fr',
+        gridTemplateColumns: isDesktop ? 'repeat(3, 1fr)' : '1fr 1fr',
       }}
     >
-      {projects.slice(0, GRID_LIMIT).map(project => {
+      {projects.slice(0, gridLimit).map(project => {
         const Icon = getIconComponent(project.icon)
         return (
           <Sheet
