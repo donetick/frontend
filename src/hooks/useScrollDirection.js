@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
-const DEFAULT_HIDE_THRESHOLD = 40 // cumulative downward scroll before hiding
-const DEFAULT_SHOW_THRESHOLD = 10 // cumulative upward scroll before showing
+const DEFAULT_HIDE_THRESHOLD = 400 // cumulative downward scroll before hiding
+const DEFAULT_SHOW_THRESHOLD = 5 // cumulative upward scroll before showing
 const DEFAULT_MIN_SCROLL_OFFSET = 64 // never hide until scrolled past this
 
 // Tracks window scroll direction so chrome (nav bars) can hide on a
