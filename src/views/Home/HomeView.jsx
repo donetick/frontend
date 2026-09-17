@@ -1,5 +1,6 @@
 import { AddTask, GroupAdd, Tune } from '@mui/icons-material'
 import { Box, Button, Container, IconButton, Sheet, Typography } from '@mui/joy'
+import useMediaQuery from '@mui/material/useMediaQuery'
 import { useQueryClient } from '@tanstack/react-query'
 import moment from 'moment'
 import PropTypes from 'prop-types'
@@ -89,6 +90,7 @@ SectionHeader.propTypes = {
 const HomeView = () => {
   const { t } = useTranslation('common')
   const queryClient = useQueryClient()
+  const isMobile = useMediaQuery('(max-width:768px)')
   const { showError, showSuccess, showUndo, showWarning } = useNotification()
   const { impersonatedUser } = useImpersonateUser()
 
@@ -338,7 +340,14 @@ const HomeView = () => {
   return (
     <Container
       maxWidth='sm'
-      sx={{ pb: getSafeBottomPadding(CAPTURE_CLEARANCE), pt: 1, px: 2 }}
+      sx={{
+        pb: getSafeBottomPadding(CAPTURE_CLEARANCE),
+        pt: 1,
+        px: 2,
+        '@media (max-width: 768px)': {
+          pb: getSafeBottomPadding(CAPTURE_CLEARANCE + 7),
+        },
+      }}
     >
       <Box
         sx={{
@@ -442,7 +451,7 @@ const HomeView = () => {
         </>
       )}
 
-      <CaptureBar onCapture={openCapture} />
+      {!isMobile && <CaptureBar onCapture={openCapture} />}
 
       {captureOpen && (
         <TaskInput

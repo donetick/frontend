@@ -1438,6 +1438,9 @@ const MyChores = () => {
             justifyContent: 'flex-end',
             gap: 2,
             'z-index': 100,
+            '@media (max-width: 768px)': {
+              bottom: getSafeBottom(66, 10),
+            },
           }}
         >
           <IconButton
