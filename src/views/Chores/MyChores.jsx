@@ -969,7 +969,7 @@ const MyChores = () => {
         flexDirection: 'row',
       }}
     >
-      <Container maxWidth='md' sx={{ px: 1 }}>
+      <Container maxWidth='md' sx={{ px: 1, minWidth: 0 }}>
         <MyChoreHeader
           activeFilterId={activeFilterId}
           activeFilter={activeFilter}
