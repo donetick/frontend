@@ -50,6 +50,7 @@ import CalendarMonthly from '../components/CalendarMonthly.jsx'
 import FeedbackPrompt from '../components/FeedbackPrompt.jsx'
 import LoadingComponent from '../components/Loading'
 import PolicyUpdatePrompt from '../components/PolicyUpdatePrompt.jsx'
+import ScrollHideFab from '../components/ScrollHideFab'
 import { useLabels } from '../Labels/LabelQueries'
 import AdvancedFilterBuilder from '../Modals/Inputs/AdvancedFilterBuilder'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
@@ -1432,15 +1433,10 @@ const MyChores = () => {
             })}
           </AccordionGroup>
         )}
-        <Box
+        <ScrollHideFab
           sx={{
-            position: 'fixed',
             bottom: getSafeBottom(10, 10),
             left: 'calc(var(--app-navigation-width, 0px) + 10px)',
-            display: 'flex',
-            justifyContent: 'flex-end',
-            gap: 2,
-            'z-index': 100,
             '@media (max-width: 768px)': {
               bottom: getSafeBottom(66, 10),
             },
@@ -1505,7 +1501,7 @@ const MyChores = () => {
             show={showKeyboardShortcuts}
             shortcut='J'
           />
-        </Box>
+        </ScrollHideFab>
         <NotificationAccessSnackbar />
         <PolicyUpdatePrompt />
         <FeedbackPrompt />

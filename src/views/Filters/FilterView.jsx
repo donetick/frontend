@@ -44,6 +44,7 @@ import { useChores } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { getFilterCount, getFilterOverdueCount } from '../../utils/FilterEngine'
 import { getSafeBottom, getSafeBottomStyles } from '../../utils/SafeAreaUtils'
+import ScrollHideFab from '../components/ScrollHideFab'
 import { useLabels } from '../Labels/LabelQueries'
 import AdvancedFilterBuilder from '../Modals/Inputs/AdvancedFilterBuilder'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
@@ -762,14 +763,10 @@ const FilterView = () => {
         />
       )}
 
-      <Box
+      <ScrollHideFab
         sx={{
           ...getSafeBottomStyles({ bottom: 0, padding: 16 }),
           left: 'calc(var(--app-navigation-width, 0px) + 10px)',
-          display: 'flex',
-          justifyContent: 'flex-end',
-          gap: 2,
-          'z-index': 100,
           '@media (max-width: 768px)': {
             bottom: getSafeBottom(56, 16),
           },
@@ -788,7 +785,7 @@ const FilterView = () => {
         >
           <Add />
         </IconButton>
-      </Box>
+      </ScrollHideFab>
 
       <ConfirmationModal config={confirmationModel} />
     </Container>

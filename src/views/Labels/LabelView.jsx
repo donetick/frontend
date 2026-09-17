@@ -42,6 +42,7 @@ import { useUserProfile } from '../../queries/UserQueries'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors'
 import { DeleteLabel } from '../../utils/Fetcher'
 import { getSafeBottom, getSafeBottomStyles } from '../../utils/SafeAreaUtils'
+import ScrollHideFab from '../components/ScrollHideFab'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import LabelModal from '../Modals/Inputs/LabelModal'
 import { useLabels } from './LabelQueries'
@@ -535,14 +536,10 @@ const LabelView = () => {
         />
       )}
 
-      <Box
+      <ScrollHideFab
         sx={{
           ...getSafeBottomStyles({ bottom: 0, padding: 16 }),
           left: 'calc(var(--app-navigation-width, 0px) + 10px)',
-          display: 'flex',
-          justifyContent: 'flex-end',
-          gap: 2,
-          'z-index': 100,
           '@media (max-width: 768px)': {
             bottom: getSafeBottom(56, 16),
           },
@@ -560,7 +557,7 @@ const LabelView = () => {
         >
           <Add />
         </IconButton>
-      </Box>
+      </ScrollHideFab>
       <ConfirmationModal config={confirmationModel} />
     </Container>
   )
