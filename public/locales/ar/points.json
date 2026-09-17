@@ -1,74 +1,74 @@
 {
-  "redeem": "",
+  "redeem": "استبدال النقاط",
   "redeemModal": {
-    "redeemButton": "",
+    "redeemButton": "Redeem",
     "pointsAvailable": "",
-    "pointsToRedeem": "",
-    "placeholder": "",
-    "cannotExceed": "",
-    "quickAdd": "",
-    "aboutToRedeem": "",
-    "amount": "",
-    "remaining": ""
+    "pointsToRedeem": "النقاط المراد استبدالها",
+    "placeholder": "أدخل نقاط...",
+    "cannotExceed": "لا يمكن تجاوز النقاط المتاحة",
+    "quickAdd": "إضافة سريعة:",
+    "aboutToRedeem": "أنت على وشك الاسترداد",
+    "amount": "{{count}} نقاط",
+    "remaining": "المتبقية: {{count}} نقاط"
   },
   "leaderboard": {
-    "titlePoints": "",
-    "titleTasks": "",
-    "subtitlePoints": "",
-    "subtitleTasks": "",
-    "modePoints": "",
-    "modeTasks": "",
-    "you": "",
-    "tasksAndAvg": "",
+    "titlePoints": "لائحة المتصدرين",
+    "titleTasks": "لائحة المتصدرين للمهام",
+    "subtitlePoints": "الترتيب بناء على النقاط المكتسبة خلال الفترة الزمنية المحددة",
+    "subtitleTasks": "التصنيف بناء على المهام المنجزة خلال الفترة الزمنية المحددة",
+    "modePoints": "النقاط",
+    "modeTasks": "مهام",
+    "you": "أنت",
+    "tasksAndAvg": "مهام {{tasks}} • متوسط {{avg}} لكل مهمة",
     "available": "",
     "points_one": "",
-    "points_other": ""
+    "points_other": "{{count}} نقاط"
   },
   "tabs": {
-    "short7d": "",
-    "short6m": "",
-    "shortAll": "",
-    "days7": "",
-    "months6": "",
-    "allTime": ""
+    "short7d": "7D",
+    "short6m": "6 ميغا",
+    "shortAll": "الكل",
+    "days7": "7 أيام",
+    "months6": "6 أشهر",
+    "allTime": "كل الوقت"
   },
   "filter": {
-    "analysisTitle": "",
-    "title": "",
-    "showFor": "",
-    "timePeriod": ""
+    "analysisTitle": "الفلتر والتحليل",
+    "title": "نقاط الفلتر",
+    "showFor": "إظهار النقاط لـ:",
+    "timePeriod": "الفترة الزمنية:"
   },
   "cards": {
     "available": {
-      "title": "",
-      "subtext": ""
+      "title": "متوفر",
+      "subtext": "جاهز للاسترداد"
     },
     "redeemed": {
-      "title": "",
-      "subtext": ""
+      "title": "استبدلت",
+      "subtext": "مستخدم من قبل"
     },
     "total": {
-      "title": "",
-      "subtext": ""
+      "title": "المجموع",
+      "subtext": "كل الوقت المكتسبة"
     },
     "period": {
-      "title": "",
-      "allTime": "",
-      "last6Months": "",
-      "lastDays_one": "",
-      "lastDays_other": ""
+      "title": "نقاط الفترة",
+      "allTime": "كل الوقت",
+      "last6Months": "آخر 6 أشهر",
+      "lastDays_one": "آخر {{count}} يوم",
+      "lastDays_other": "آخر {{count}} أيام"
     }
   },
   "summary": {
-    "showingFor": "",
-    "unknownUser": "",
-    "overThe": "",
-    "allTime": "",
-    "last6Months": "",
-    "lastDays_one": "",
-    "lastDays_other": ""
+    "showingFor": "عرض النقاط ل",
+    "unknownUser": "مستخدم غير معروف",
+    "overThe": "فوق",
+    "allTime": "كل الوقت",
+    "last6Months": "آخر 6 أشهر",
+    "lastDays_one": "آخر {{count}} يوم",
+    "lastDays_other": "آخر {{count}} أيام"
   },
   "trend": {
-    "title": ""
+    "title": "اتجاه النقاط"
   }
 }
