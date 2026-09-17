@@ -21,7 +21,8 @@
   "version": "النسخة",
   "navigation": {
     "search": "بحث",
-    "allTasks": "جميع المهام",
+    "allTasks": "المهام",
+    "home": "نظرة عامة",
     "archived": "المؤرشفة",
     "things": "الأشياء",
     "labels": "التسميات",

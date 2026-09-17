@@ -149,7 +149,7 @@ const LoginView = () => {
         Cookies.remove('ca_redirect')
         Navigate(redirectUrl)
       } else {
-        Navigate('/chores')
+        Navigate('/')
       }
     }
   }, [isAuthenticated, user, Navigate])
@@ -225,7 +225,7 @@ const LoginView = () => {
         Cookies.remove('ca_redirect')
         Navigate(redirectUrl)
       } else {
-        Navigate('/chores')
+        Navigate('/')
       }
     } else {
       showError({
@@ -321,7 +321,7 @@ const LoginView = () => {
         Cookies.remove('ca_redirect')
         Navigate(redirectUrl)
       } else {
-        Navigate('/chores')
+        Navigate('/')
       }
     })
   }
@@ -346,7 +346,7 @@ const LoginView = () => {
       Cookies.remove('ca_redirect')
       Navigate(redirectUrl)
     } else {
-      Navigate('/chores')
+      Navigate('/')
     }
   }
 

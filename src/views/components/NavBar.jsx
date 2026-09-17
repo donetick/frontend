@@ -2,9 +2,12 @@ import { Capacitor } from '@capacitor/core'
 import {
   Archive,
   ArrowBack,
+  Checklist,
+  Dashboard,
   FilterAlt,
   FolderOpen,
   History,
+  Home,
   Inbox,
   ListAlt,
   Logout,
@@ -12,6 +15,7 @@ import {
   ReportProblem,
   SearchRounded,
   SettingsOutlined,
+  SpaceDashboard,
   Toll,
   Widgets,
 } from '@mui/icons-material'
@@ -56,9 +60,14 @@ const NavBar = () => {
       onClick: () => openSearch(),
     },
     {
+      label: t('navigation.home'),
+      icon: <SpaceDashboard />,
+      onClick: () => navigate('/'),
+    },
+    {
       to: '/chores',
       label: t('navigation.allTasks'),
-      icon: <Inbox />,
+      icon: <Checklist />,
     },
     {
       to: '/archived',

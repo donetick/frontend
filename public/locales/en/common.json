@@ -47,7 +47,8 @@
   "version": "Version",
   "navigation": {
     "search": "Search",
-    "allTasks": "All Tasks",
+    "allTasks": "Tasks",
+    "home": "Overview",
     "archived": "Archived",
     "things": "Things",
     "labels": "Labels",
@@ -575,5 +576,108 @@
     "readyRecurring": "Recurring schedules that survive real life",
     "readyCapture": "Capture by voice, photo or text",
     "readyReminders": "Reminders and home-screen widgets"
+  },
+  "home": {
+    "customize": {
+      "action": "Customize Home"
+    },
+    "verdict": {
+      "late": {
+        "title_one": "{{count}} task slipped.",
+        "title_other": "{{count}} tasks slipped.",
+        "body": "Everything else is still on schedule."
+      },
+      "review": {
+        "title": "Something needs reviewing.",
+        "body_one": "{{count}} finished task is waiting to be signed off.",
+        "body_other": "{{count}} finished tasks are waiting to be signed off."
+      },
+      "today": {
+        "title": "Nothing’s late.",
+        "body_one": "{{count}} task lands later today.",
+        "body_other": "{{count}} tasks land later today."
+      },
+      "clear": {
+        "title": "You’re all caught up.",
+        "body": "Nothing scheduled today, nothing late."
+      },
+      "firstRun": {
+        "title": "Let’s get the first one down.",
+        "body": "Home fills in as you add tasks."
+      }
+    },
+    "triage": {
+      "overdue": "Overdue",
+      "dueToday": "Due today",
+      "needsReview": "Needs review",
+      "unplanned": "Unplanned",
+      "allClear": "Nothing overdue, nothing waiting"
+    },
+    "nextUp": {
+      "title": "Coming up",
+      "action": "View all"
+    },
+    "nextUpFallback": {
+      "title": "Next up",
+      "action": "View all"
+    },
+    "overdue": {
+      "title": "Overdue",
+      "action": "View all"
+    },
+    "clear": {
+      "title": "Plan ahead",
+      "body": "Browse upcoming chores, reschedule plans, or add the next thing.",
+      "action": "Browse all tasks"
+    },
+    "firstTask": {
+      "title": "Add your first task",
+      "description": "Type it, say it, or scan it. Anything you add shows up here when it needs you.",
+      "action": "Add a task"
+    },
+    "review": {
+      "title": "Needs your review",
+      "pendingTitle": "Pending review",
+      "myPendingTitle": "My tasks pending review",
+      "action": "Review all"
+    },
+    "circle": {
+      "title": "Your circle",
+      "action": "Manage Circle",
+      "open_one": "{{count}} open",
+      "open_other": "{{count}} open",
+      "late_one": "{{count}} overdue",
+      "late_other": "{{count}} overdue",
+      "done_one": "{{count}} done",
+      "done_other": "{{count}} done",
+      "caughtUp": "All clear",
+      "emptyTitle": "Nobody else is here yet",
+      "emptyBody": "Invite the people you share chores with, and this screen will show who’s carrying what.",
+      "emptyAction": "Invite to your circle"
+    },
+    "projects": {
+      "title": "Projects",
+      "action": "All projects",
+      "tasks_one": "{{count}} task",
+      "tasks_other": "{{count}} tasks",
+      "tasksOverdue_one": "{{count}} task, {{overdue}} overdue",
+      "tasksOverdue_other": "{{count}} tasks, {{overdue}} overdue",
+      "tasksUnplanned_one": "{{count}} task, {{unplanned}} unplanned",
+      "tasksUnplanned_other": "{{count}} tasks, {{unplanned}} unplanned",
+      "clear": "All clear"
+    },
+    "filters": {
+      "title": "Filters",
+      "action": "All filters",
+      "tasks_one": "{{count}} match",
+      "tasks_other": "{{count}} matches",
+      "clear": "No matches"
+    },
+    "capture": {
+      "placeholder": "Add a task…",
+      "add": "Add a task",
+      "voice": "Capture by voice",
+      "scan": "Scan to task"
+    }
   }
 }

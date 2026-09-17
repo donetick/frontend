@@ -1,88 +1,26 @@
 import '@meauxt/react-swipeable-list/dist/styles.css'
 
-import {
-  SwipeableList,
-  SwipeableListItem,
-  SwipeAction,
-  TrailingActions,
-  Type as ListType,
-} from '@meauxt/react-swipeable-list'
-import {
-  Check,
-  Delete,
-  Edit,
-  HourglassEmpty,
-  Notifications,
-  PlayArrow,
-  Schedule,
-  ThumbDown,
-} from '@mui/icons-material'
-import { Box, Typography } from '@mui/joy'
+import { SwipeableList, Type as ListType } from '@meauxt/react-swipeable-list'
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
-import { useLongPress } from '../../hooks/useLongPress'
 import ChoreActionMenu from '../components/ChoreActionMenu'
 import ChoreCard from './ChoreCard'
 import CompactChoreCard from './CompactChoreCard'
-
-/**
- * One swipeable row. Owns the press-and-hold gesture (multi-select), which
- * can't live in the render loop because it needs a hook.
- */
-const ChoreSwipeableItem = ({
-  children,
-  longPressEnabled,
-  onClick,
-  onLongPress,
-  trailingActions,
-  // SwipeableList clones its children to inject list-level config
-  // (listType, fullSwipe, thresholds…), so it has to be passed through.
-  ...listProps
-}) => {
-  const { cancel: cancelLongPress, handlers: longPressHandlers } = useLongPress(
-    onLongPress,
-    { enabled: longPressEnabled },
-  )
-
-  // The swipe list owns the gesture the moment it recognizes a drag — a hold
-  // that turned into a swipe must not also open multi-select.
-  const handleSwipeStart = () => {
-    cancelLongPress()
-  }
-
-  return (
-    <SwipeableListItem
-      {...listProps}
-      trailingActions={trailingActions}
-      onClick={onClick}
-      onSwipeStart={handleSwipeStart}
-      onSwipeProgress={cancelLongPress}
-    >
-      <Box
-        {...longPressHandlers}
-        sx={{
-          width: '100%',
-          // Keep a long press from selecting the task text / popping the
-          // native callout on mobile
-          userSelect: 'none',
-          WebkitUserSelect: 'none',
-          WebkitTouchCallout: 'none',
-        }}
-      >
-        {children}
-      </Box>
-    </SwipeableListItem>
-  )
-}
+import ChoreSwipeableItem, {
+  SWIPE_COMMIT_THRESHOLD,
+} from './components/ChoreSwipeableItem'
+import {
+  getChoreLeadingActions,
+  getChoreTrailingActions,
+} from './components/ChoreSwipeActions'
 
 const ChoreListView = ({
   chores,
   handleChoreAction,
   handleLabelFiltering,
   isMultiSelectMode,
-  isOfficialInstance,
   membersData,
   onLongPressChore,
   selectedChores,
@@ -128,203 +66,40 @@ const ChoreListView = ({
       />
     )
   }
-  const canApproveReject = chore => {
-    return userProfile?.role === 1 || chore.createdBy === userProfile?.id
-  }
+  const swipeActionArgs = chore => ({
+    chore,
+    handleChoreAction,
+    isMultiSelectMode,
+    showActions,
+    t,
+    usesCompactCard,
+    userProfile,
+  })
 
-  const getTrailingActions = chore => {
-    if (isMultiSelectMode) return null
-    if (!showActions) return null
-
-    return (
-      <TrailingActions>
-        <Box
-          sx={{
-            display: 'flex',
-            // boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.06)',
-            zIndex: 0,
-            // Offset for the floating chips above ChoreCard so swipe actions
-            // align with the card body only
-            ...(!usesCompactCard && {
-              mt: '28px',
-              borderRadius: '8px',
-            }),
-          }}
-        >
-          {chore.status === 3 ? (
-            canApproveReject(chore) ? (
-              <SwipeAction onClick={() => handleChoreAction('reject', chore)}>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    bgcolor: 'danger.softBg',
-                    color: 'danger.700',
-                    px: 3,
-                    height: '100%',
-                  }}
-                >
-                  <ThumbDown sx={{ fontSize: 20 }} />
-                  <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                    {t('list.reject')}
-                  </Typography>
-                </Box>
-              </SwipeAction>
-            ) : (
-              <SwipeAction onClick={() => {}}>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    bgcolor: 'neutral.softBg',
-                    color: 'neutral.700',
-                    px: 3,
-                    height: '100%',
-                    opacity: 0.5,
-                  }}
-                >
-                  <HourglassEmpty sx={{ fontSize: 20 }} />
-                  <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                    {t('list.pending')}
-                  </Typography>
-                </Box>
-              </SwipeAction>
-            )
-          ) : (
-            <SwipeAction
-              onClick={() => {
-                if (chore.status === 0 || chore.status === 2) {
-                  handleChoreAction('start', chore)
-                } else {
-                  handleChoreAction('complete', chore)
-                }
-              }}
-            >
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  bgcolor: 'success.softBg',
-                  color: 'success.700',
-                  px: 3,
-                  height: '100%',
-                }}
-              >
-                {chore.status !== 1 ? (
-                  <PlayArrow sx={{ fontSize: 20 }} />
-                ) : (
-                  <Check sx={{ fontSize: 20 }} />
-                )}
-                <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                  {chore.status !== 1
-                    ? t('choreView.start')
-                    : t('list.complete')}
-                </Typography>
-              </Box>
-            </SwipeAction>
-          )}
-
-          <SwipeAction
-            onClick={() => handleChoreAction('changeDueDate', chore)}
-          >
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                bgcolor: 'warning.softBg',
-                color: 'warning.700',
-                px: 3,
-                height: '100%',
-              }}
-            >
-              <Schedule sx={{ fontSize: 20 }} />
-              <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                {t('list.schedule')}
-              </Typography>
-            </Box>
-          </SwipeAction>
-
-          <SwipeAction onClick={() => navigate(`/chores/${chore.id}/edit`)}>
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                bgcolor: 'neutral.softBg',
-                color: 'neutral.700',
-                px: 3,
-                height: '100%',
-              }}
-            >
-              <Edit sx={{ fontSize: 20 }} />
-              <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                {t('common:edit')}
-              </Typography>
-            </Box>
-          </SwipeAction>
-
-          {isOfficialInstance && (
-            <SwipeAction onClick={() => handleChoreAction('nudge', chore)}>
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  bgcolor: 'warning.softBg',
-                  color: 'warning.700',
-                  px: 3,
-                  height: '100%',
-                }}
-              >
-                <Notifications sx={{ fontSize: 20 }} />
-                <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                  {t('list.nudge')}
-                </Typography>
-              </Box>
-            </SwipeAction>
-          )}
-
-          <SwipeAction onClick={() => handleChoreAction('delete', chore)}>
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                bgcolor: 'danger.softBg',
-                color: 'danger.700',
-                px: 3,
-                height: '100%',
-              }}
-            >
-              <Delete sx={{ fontSize: 20 }} />
-              <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                {t('common:delete')}
-              </Typography>
-            </Box>
-          </SwipeAction>
-        </Box>
-      </TrailingActions>
-    )
-  }
-
+  // fullSwipe makes the leading action (complete/start) a single flick with no
+  // aiming. It also arms the last trailing action — delete — which is safe
+  // because delete opens a confirmation modal rather than deleting outright.
+  //
+  // The threshold has to clear the trailing tray's own width or the tray can
+  // never be fully revealed: three 76px tiles are ~58% of a phone-width row,
+  // so at the default 0.5 the swipe always commits before you can see the
+  // actions, let alone pick one. 0.8 leaves room to open the tray and tap,
+  // and keeps the full-swipe commit a deliberately long drag.
   const renderChores = chores => {
     return (
-      <SwipeableList type={ListType.IOS} fullSwipe={false}>
+      <SwipeableList
+        type={ListType.IOS}
+        fullSwipe
+        threshold={SWIPE_COMMIT_THRESHOLD}
+      >
         {chores.map(chore => (
           <ChoreSwipeableItem
             key={chore.id}
-            trailingActions={getTrailingActions(chore)}
+            leadingActions={getChoreLeadingActions(swipeActionArgs(chore))}
+            trailingActions={getChoreTrailingActions({
+              ...swipeActionArgs(chore),
+              navigate,
+            })}
             onClick={() => {
               if (isMultiSelectMode) {
                 toggleChoreSelection(chore.id)

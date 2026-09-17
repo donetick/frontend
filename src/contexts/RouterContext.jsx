@@ -24,10 +24,10 @@ import ChoreView from '../views/ChoreEdit/ChoreView'
 import ArchivedTasks from '../views/Chores/ArchivedTasks'
 import MyChores from '../views/Chores/MyChores'
 import JoinCircleView from '../views/Circles/JoinCircle'
-import MemberDetailView from '../views/Circles/MemberDetailView'
 import NotFound from '../views/components/NotFound'
 import FilterView from '../views/Filters/FilterView'
 import ChoreHistory from '../views/History/ChoreHistory'
+import HomeView from '../views/Home/HomeView'
 import LabelDetailView from '../views/Labels/LabelDetailView'
 import LabelView from '../views/Labels/LabelView'
 import Landing from '../views/Landing/Landing'
@@ -41,6 +41,7 @@ import PaymentSuccessView from '../views/Payments/PaymentSuccessView'
 import PrivacyPolicyView from '../views/PrivacyPolicy/PrivacyPolicyView'
 import ProjectView from '../views/Projects/ProjectView'
 import APITokenSettings from '../views/Settings/APITokenSettings'
+import HomeSectionsSettings from '../views/Settings/HomeSectionsSettings'
 import LocalizationSettings from '../views/Settings/LocalizationSettings'
 import MFASettings from '../views/Settings/MFASettings'
 import NotificationSetting from '../views/Settings/NotificationSetting'
@@ -63,7 +64,7 @@ const Router = createBrowserRouter([
     children: [
       {
         path: '/',
-        element: <MyChores />,
+        element: <HomeView />,
       },
       {
         path: '/settings',
@@ -112,6 +113,10 @@ const Router = createBrowserRouter([
           {
             path: 'sidepanel',
             element: <SidepanelSettings />,
+          },
+          {
+            path: 'home-sections',
+            element: <HomeSectionsSettings />,
           },
           {
             path: 'theme',
@@ -267,10 +272,6 @@ const Router = createBrowserRouter([
       {
         path: 'labels/:labelId',
         element: <LabelDetailView />,
-      },
-      {
-        path: 'members/:userId',
-        element: <MemberDetailView />,
       },
       {
         path: 'projects/',

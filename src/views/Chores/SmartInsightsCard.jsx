@@ -28,6 +28,19 @@ export const INSIGHT_FILTER_DEFS = {
       operator: 'AND',
     },
   },
+  'due-next-two-days': {
+    name: 'Due Today & Tomorrow',
+    filter: {
+      conditions: [
+        {
+          type: 'dueDate',
+          operator: 'anyOf',
+          value: ['isDueToday', 'isDueTomorrow'],
+        },
+      ],
+      operator: 'AND',
+    },
+  },
   'pending-approval': {
     name: 'Pending Approval',
     filter: {
@@ -35,10 +48,32 @@ export const INSIGHT_FILTER_DEFS = {
       operator: 'AND',
     },
   },
+  unplanned: {
+    name: 'Unplanned',
+    filter: {
+      conditions: [{ type: 'dueDate', operator: 'hasNoDueDate', value: null }],
+      operator: 'AND',
+    },
+  },
   'due-this-week': {
     name: 'Due This Week',
     filter: {
       conditions: [{ type: 'dueDate', operator: 'isDueThisWeek', value: null }],
+      operator: 'AND',
+    },
+  },
+  // What Home's "Next up" link opens: the week ahead plus everything already
+  // late, which is the set that section is actually a preview of.
+  'due-this-week-overdue': {
+    name: 'Due This Week & Overdue',
+    filter: {
+      conditions: [
+        {
+          type: 'dueDate',
+          operator: 'anyOf',
+          value: ['isOverdue', 'isDueThisWeek'],
+        },
+      ],
       operator: 'AND',
     },
   },

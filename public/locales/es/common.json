@@ -47,7 +47,8 @@
   "version": "Versión",
   "navigation": {
     "search": "Buscar",
-    "allTasks": "Todas las Tareas",
+    "allTasks": "Tareas",
+    "home": "Resumen",
     "archived": "Archivadas",
     "things": "Cosas",
     "labels": "Etiquetas",

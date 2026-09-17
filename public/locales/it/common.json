@@ -20,7 +20,8 @@
   "logout": "Esci",
   "version": "Versione",
   "navigation": {
-    "allTasks": "Tutte le attività",
+    "allTasks": "Attività",
+    "home": "Panoramica",
     "archived": "Archiviate",
     "things": "Cose",
     "labels": "Etichette",

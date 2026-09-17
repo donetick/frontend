@@ -1980,8 +1980,13 @@ const ChoreEdit = () => {
           maxWidth: '100vw',
           minWidth: 0,
           boxSizing: 'border-box',
-          p: { xs: 1, sm: 2 },
-          paddingBottom: getSafeBottomPadding(2), // safe area padding for iOS
+          // Keep these as longhands: a responsive `p` compiles to
+          // `@media (min-width:0px){padding:...}`, which emotion emits *after*
+          // the plain `padding-bottom` rule and so wipes out the safe-area
+          // inset — the bar then sits under the Android system nav bar.
+          pt: { xs: 1, sm: 2 },
+          px: { xs: 1, sm: 2 },
+          pb: getSafeBottomPadding(2), // safe area padding for iOS/Android
           display: 'flex',
           flexWrap: 'wrap',
           justifyContent: 'flex-end',

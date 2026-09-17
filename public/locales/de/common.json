@@ -47,7 +47,8 @@
   "version": "Version",
   "navigation": {
     "search": "Suche",
-    "allTasks": "Alle Aufgaben",
+    "allTasks": "Aufgaben",
+    "home": "Übersicht",
     "archived": "Archiv",
     "things": "Dinge",
     "labels": "Labels",

@@ -47,7 +47,8 @@
   "version": "バージョン",
   "navigation": {
     "search": "検索",
-    "allTasks": "すべてのタスク",
+    "allTasks": "タスク",
+    "home": "概要",
     "archived": "アーカイブ済み",
     "things": "",
     "labels": "ラベル",

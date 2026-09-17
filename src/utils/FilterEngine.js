@@ -146,6 +146,14 @@ const evaluateStatus = (chore, operator, value) => {
 const evaluateDueDate = (chore, operator, value) => {
   const { nextDueDate } = chore
 
+  // Several due-date windows at once (e.g. overdue OR due this week). The
+  // windows overlap and are never all true together, so they only make sense
+  // OR'd — even though the filter as a whole is AND'd across condition types.
+  if (operator === 'anyOf') {
+    const operators = Array.isArray(value) ? value : [value]
+    return operators.some(op => evaluateDueDate(chore, op, null))
+  }
+
   // Handle "no due date" case
   if (operator === 'hasNoDueDate') {
     return nextDueDate === null || nextDueDate === undefined

@@ -2,7 +2,7 @@ import moment from 'moment'
 
 import { TASK_COLOR } from './Colors.jsx'
 
-const priorityOrder = [1, 2, 3, 4, 0]
+export const priorityOrder = [1, 2, 3, 4, 0]
 // ChoreGrouperOptions enum:
 export const GROUPING_OPTIONS = Object.freeze({
   SMART: 'default',
