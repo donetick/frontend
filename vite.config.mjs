@@ -9,27 +9,32 @@ const pkg = JSON.parse(
   fs.readFileSync(new URL('./package.json', import.meta.url), 'utf-8'),
 )
 
-export const shouldUploadPosthogSourcemaps = ({ command, env = {} }) => {
-  if (command !== 'build') return false
+export const getPosthogSourcemapConfig = ({ command, env = {} }) => {
+  if (command !== 'build') return null
 
   const uploadFlag =
     env.POSTHOG_UPLOAD_SOURCEMAPS ??
     process.env.POSTHOG_UPLOAD_SOURCEMAPS ??
     'false'
 
-  if (String(uploadFlag).toLowerCase() !== 'true') return false
+  if (String(uploadFlag).toLowerCase() !== 'true') return null
 
   const personalApiKey = env.POSTHOG_API_KEY || process.env.POSTHOG_API_KEY
   const projectId = env.POSTHOG_PROJECT_ID || process.env.POSTHOG_PROJECT_ID
   const host = env.POSTHOG_HOST || process.env.POSTHOG_HOST
 
-  return Boolean(personalApiKey && projectId && host)
+  if (!personalApiKey || !projectId || !host) return null
+
+  return { personalApiKey, projectId, host }
 }
+
+export const shouldUploadPosthogSourcemaps = options =>
+  Boolean(getPosthogSourcemapConfig(options))
 
 // https://vitejs.dev/config/
 export default ({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
-  const uploadPosthogSourcemaps = shouldUploadPosthogSourcemaps({
+  const posthogSourcemapConfig = getPosthogSourcemapConfig({
     command,
     env: { ...process.env, ...env },
   })
@@ -45,12 +50,10 @@ export default ({ command, mode }) => {
     },
     plugins: [
       react(),
-      ...(uploadPosthogSourcemaps
+      ...(posthogSourcemapConfig
         ? [
             posthog({
-              personalApiKey,
-              projectId,
-              host,
+              ...posthogSourcemapConfig,
               sourcemaps: {
                 deleteAfterUpload: true,
               },
