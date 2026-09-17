@@ -170,7 +170,6 @@
       "short": "Formato corto (p. ej., 1 ene 2024)"
     },
     "descriptionLong": ""
->>>>>>> upstream/develop
   },
   "advanced": {
     "description": "Configure advanced features like webhooks and real-time updates for enhanced productivity.",
