@@ -668,8 +668,15 @@ const ArchivedTasks = () => {
   }
 
   return (
-    <Container maxWidth='md'>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+    <Container
+      maxWidth='md'
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        px: { xs: 2, sm: 3 },
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, p: 2 }}>
         {/* <EmojiEvents sx={{ fontSize: '2rem', color: '#FFD700' }} /> */}
         <Stack sx={{ flex: 1 }}>
           <Typography

@@ -35,6 +35,7 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 
 import { version } from '../../../package.json'
 import UserProfileAvatar from '../../components/UserProfileAvatar'
+import { useScrollDirection } from '../../hooks/useScrollDirection'
 import { useResource } from '../../queries/ResourceQueries'
 import { useGlobalSearch } from '../../search/GlobalSearchContext'
 import { apiClient } from '../../utils/ApiClient'
@@ -74,6 +75,7 @@ const NavBar = () => {
   )
   const isMobile = useMediaQuery('(max-width:768px)')
   const isDesktop = useMediaQuery('(min-width:1024px)')
+  const headerHidden = useScrollDirection({ enabled: !isDesktop })
 
   useEffect(() => {
     const handleOpenDrawer = () => setDrawerOpen(true)
@@ -496,8 +498,11 @@ const NavBar = () => {
                   : 0.375,
               position: 'sticky',
               top: 0,
+              transform: headerHidden ? 'translateY(-100%)' : 'translateY(0)',
+              transition: 'transform 220ms ease',
               zIndex: 'var(--joy-zIndex-popup)',
               '@media (min-width: 1024px)': { display: 'none' },
+              '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
             }}
           >
             {getMenuIcon()}

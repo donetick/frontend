@@ -339,11 +339,11 @@ const HomeView = () => {
 
   return (
     <Container
-      maxWidth='sm'
+      maxWidth='md'
       sx={{
         pb: getSafeBottomPadding(CAPTURE_CLEARANCE),
         pt: 1,
-        px: 2,
+        px: { xs: 2, sm: 3 },
         '@media (max-width: 768px)': {
           pb: getSafeBottomPadding(CAPTURE_CLEARANCE + 7),
         },
