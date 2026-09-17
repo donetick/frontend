@@ -49,7 +49,7 @@ import {
   SaveThing,
   UpdateThingState,
 } from '../../utils/Fetcher'
-import { getSafeBottomStyles } from '../../utils/SafeAreaUtils'
+import { getSafeBottom, getSafeBottomStyles } from '../../utils/SafeAreaUtils'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import CreateThingModal from '../Modals/Inputs/CreateThingModal'
 import EditThingStateModal from '../Modals/Inputs/EditThingState'
@@ -714,6 +714,9 @@ const ThingsView = () => {
           justifyContent: 'flex-end',
           gap: 2,
           'z-index': 1000,
+          '@media (max-width: 768px)': {
+            bottom: getSafeBottom(56, 16),
+          },
         }}
       >
         <IconButton

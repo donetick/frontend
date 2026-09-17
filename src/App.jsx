@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 
+import MobileBottomNav from '@/views/components/MobileBottomNav'
 import NavBar from '@/views/components/NavBar'
 
 import {
@@ -112,6 +113,7 @@ const AppContent = () => {
         <PageTransition>
           <Outlet />
         </PageTransition>
+        <MobileBottomNav />
       </ImpersonateUserProvider>
     </div>
   )
