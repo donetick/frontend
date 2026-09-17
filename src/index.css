@@ -17,6 +17,14 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Prevent accidental horizontal overflow from ever creating a scrollable
+ * page — on iOS/WKWebView, sideways rubber-band bounce makes `position:
+ * fixed` elements (e.g. the mobile bottom nav) visibly drift during scroll. */
+html,
+body {
+  overflow-x: hidden;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

@@ -268,11 +268,16 @@ const ChoreToolbar = ({
       condition.operator === 'isNot' ? t('filterBuilder.notPrefix') : ''
 
     if (condition.type === 'dueDate') {
-      const dueDateLabel = DUE_DATE_OPTIONS.some(
-        o => o.value === condition.operator,
-      )
-        ? t(`filterBuilder.dueDateOption.${condition.operator}`)
-        : t('filterBuilder.customDueDate')
+      const describeDueDate = op =>
+        DUE_DATE_OPTIONS.some(o => o.value === op)
+          ? t(`filterBuilder.dueDateOption.${op}`)
+          : t('filterBuilder.customDueDate')
+      const dueDateLabel =
+        condition.operator === 'anyOf'
+          ? (Array.isArray(condition.value) ? condition.value : [])
+              .map(describeDueDate)
+              .join(' / ')
+          : describeDueDate(condition.operator)
       return `${typeLabel}: ${dueDateLabel}`
     }
 
@@ -587,7 +592,7 @@ const ChoreToolbar = ({
             aria-label={t('toolbar.filters')}
             title={t('toolbar.filters')}
           >
-            <FilterList />
+            <Tune />
           </IconButton>
         </Badge>
 

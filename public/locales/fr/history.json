@@ -99,14 +99,33 @@
     "days_other": "{{count}} jours",
     "allTime": "Toute la période"
   },
+  "search": {
+    "placeholder": "",
+    "clear": ""
+  },
+  "sort": {
+    "date": "",
+    "updatedDate": "",
+    "performer": "",
+    "status": "",
+    "points": ""
+  },
   "activities": {
     "title": "Activités",
+    "subtitle": "",
     "emptyTitle": "Aucune activité sur cette période",
     "emptyDescriptionEveryone": "Personne n'a terminé de tâche dans votre cercle {{period}}. Essayez une période plus longue ou un autre membre.",
     "emptyDescriptionMember": "Aucune tâche terminée par {{name}} {{period}}. Essayez une période plus longue ou un autre membre.",
     "periodSoFar": "jusqu'à présent",
     "periodLastDays": "au cours des {{count}} derniers jours",
-    "unknownMember": "ce membre"
+    "unknownMember": "ce membre",
+    "searchPlaceholder": "",
+    "sort": {
+      "date": "",
+      "name": "",
+      "status": "",
+      "points": ""
+    }
   },
   "title": {
     "summary": "Récapitulatif des tâches",

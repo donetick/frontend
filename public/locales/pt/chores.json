@@ -314,6 +314,7 @@
     "selected_one": "",
     "selected_other": "",
     "selectAllTitle": "",
+    "selectSectionTitle": "",
     "all": "",
     "closeMultiSelect": "",
     "clearMultiSelect": "",
@@ -401,7 +402,11 @@
     "removeAria": ""
   },
   "assignee": {
-    "anyone": ""
+    "label": "",
+    "anyone": "",
+    "unknown": "",
+    "selectedCount_one": "",
+    "selectedCount_other": ""
   },
   "filterChip": {
     "cancelAll": "",
@@ -544,8 +549,6 @@
   },
   "subTask": {
     "namePlaceholder": "",
-    "deleteShortcut": "",
-    "addPlaceholder": "",
     "untitled": "Subtarefa sem titulo",
     "actions": "Acoes da subtarefa",
     "edit": "Editar",
@@ -555,7 +558,9 @@
     "delete": "Excluir",
     "editTitle": "Editar subtarefa",
     "addTitle": "Adicionar subtarefa",
-    "addChildTitle": "Adicionar subtarefa aninhada"
+    "addChildTitle": "Adicionar subtarefa aninhada",
+    "deleteShortcut": "",
+    "addPlaceholder": ""
   },
   "voiceToTask": {
     "title": "",
@@ -1028,5 +1033,26 @@
     "today": "",
     "yesterday": "",
     "noteTitle": ""
+  },
+  "memberDetail": {
+    "taskCount_one": "",
+    "taskCount_other": "",
+    "you": "",
+    "filters": {
+      "all": "",
+      "overdue": "",
+      "today": "",
+      "undated": ""
+    },
+    "noMatchingStatus": "",
+    "clearFilters": "",
+    "searchPlaceholder": "",
+    "emptyTitle": "",
+    "emptyDescription": "",
+    "browseTasks": "",
+    "noResultsTitle": "",
+    "noResultsDescription": "",
+    "notFoundTitle": "",
+    "notFoundDescription": ""
   }
 }

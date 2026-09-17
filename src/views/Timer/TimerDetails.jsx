@@ -2,7 +2,6 @@ import '@meauxt/react-swipeable-list/dist/styles.css'
 
 import {
   SwipeableList,
-  SwipeableListItem,
   SwipeAction,
   TrailingActions,
   Type as ListType,
@@ -42,6 +41,9 @@ import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 
 import EmptyState from '../../components/common/EmptyState'
+import SwipeListItem, {
+  SWIPE_COMMIT_THRESHOLD,
+} from '../../components/common/SwipeListItem'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import {
   useChoreTimer,
@@ -970,7 +972,11 @@ const TimerDetails = () => {
                       Work Sessions ({timerData.pauseLog.length})
                     </Typography>
 
-                    <SwipeableList type={ListType.IOS} fullSwipe={false}>
+                    <SwipeableList
+                      type={ListType.IOS}
+                      fullSwipe
+                      threshold={SWIPE_COMMIT_THRESHOLD}
+                    >
                       {timerData.pauseLog
                         .sort((a, b) => moment(b.start) - moment(a.start))
                         .map((pause, pauseIndex) => {
@@ -991,7 +997,7 @@ const TimerDetails = () => {
                             : pause.duration
 
                           return (
-                            <SwipeableListItem
+                            <SwipeListItem
                               key={pauseIndex}
                               swipeActionOpen={
                                 showMoreInfoId === pauseIndex
@@ -1017,16 +1023,18 @@ const TimerDetails = () => {
                                           flexDirection: 'column',
                                           alignItems: 'center',
                                           justifyContent: 'center',
-                                          bgcolor: 'neutral.softBg',
-                                          color: 'neutral.700',
+                                          bgcolor: 'primary.500',
+                                          color: '#fff',
                                           px: 3,
                                           height: '100%',
                                         }}
                                       >
-                                        <EditIcon sx={{ fontSize: 20 }} />
+                                        <EditIcon
+                                          sx={{ fontSize: 20, color: 'white' }}
+                                        />
                                         <Typography
                                           level='body-xs'
-                                          sx={{ mt: 0.5 }}
+                                          sx={{ mt: 0.5, color: 'inherit' }}
                                         >
                                           {t('common:edit')}
                                         </Typography>
@@ -1043,16 +1051,18 @@ const TimerDetails = () => {
                                           flexDirection: 'column',
                                           alignItems: 'center',
                                           justifyContent: 'center',
-                                          bgcolor: 'danger.softBg',
-                                          color: 'danger.700',
+                                          bgcolor: 'danger.500',
+                                          color: '#fff',
                                           px: 3,
                                           height: '100%',
                                         }}
                                       >
-                                        <DeleteIcon sx={{ fontSize: 20 }} />
+                                        <DeleteIcon
+                                          sx={{ fontSize: 20, color: 'white' }}
+                                        />
                                         <Typography
                                           level='body-xs'
-                                          sx={{ mt: 0.5 }}
+                                          sx={{ mt: 0.5, color: 'inherit' }}
                                         >
                                           {t('common:delete')}
                                         </Typography>
@@ -1206,7 +1216,7 @@ const TimerDetails = () => {
                                   <MoreVert sx={{ fontSize: 18 }} />
                                 </IconButton>
                               </Card>
-                            </SwipeableListItem>
+                            </SwipeListItem>
                           )
                         })}
                     </SwipeableList>

@@ -2,10 +2,13 @@ import {
   Add,
   Bolt,
   CalendarMonth,
+  Check,
   CloudOff,
   EditCalendar,
   ExpandCircleDown,
+  Person,
   PriorityHigh,
+  Remove,
   SearchOff,
   Style,
 } from '@mui/icons-material'
@@ -169,6 +172,7 @@ const MyChores = () => {
     selectedChores,
     toggleChoreSelection,
     toggleMultiSelectMode,
+    toggleSectionSelection,
   } = useMultiSelect()
 
   const { activeModal, closeModal, modalChore, modalData, openModal } =
@@ -502,6 +506,43 @@ const MyChores = () => {
       return
     }
 
+    // Deep link from a member's avatar/search result (e.g. filterId=assignedTo:42)
+    // — the assignee condition already exists in FilterEngine, so this just
+    // wires a member id straight into a temp filter, the same way an insight does.
+    if (
+      typeof filterId === 'string' &&
+      filterId.startsWith('assignedTo:') &&
+      urlFilterIdChanged &&
+      tempFilterMeta?.id !== filterId
+    ) {
+      const memberId = filterId.slice('assignedTo:'.length)
+      const member = (membersData?.res || []).find(
+        m => String(m.userId) === String(memberId),
+      )
+      const memberName = member?.displayName || member?.name || member?.username
+      applyTempFilter(
+        {
+          conditions: [
+            {
+              type: 'assignee',
+              operator: 'is',
+              // Match the type FilterBuilderContent's chip selection compares
+              // against (`m.userId`, usually a number) — the raw URL slice is
+              // always a string, and Array.includes is strict-equality.
+              value: member ? member.userId : memberId,
+            },
+          ],
+          operator: 'AND',
+        },
+        {
+          id: filterId,
+          name: memberName ? `Assigned to ${memberName}` : 'Assigned to',
+          icon: <Person sx={{ fontSize: '2rem', color: 'primary.main' }} />,
+        },
+      )
+      return
+    }
+
     // If filterId is no longer in URL but filter is still active in state, clear it
     if (!filterId && !oldFilter && activeFilterId) {
       clearActiveFilter()
@@ -543,6 +584,7 @@ const MyChores = () => {
     hasQuickFilters,
     activeFilterId,
     savedFilters,
+    membersData,
     applyCustomFilter,
     applyTempFilter,
     clearActiveFilter,
@@ -927,7 +969,7 @@ const MyChores = () => {
         flexDirection: 'row',
       }}
     >
-      <Container maxWidth='md' sx={{ px: 1 }}>
+      <Container maxWidth='md' sx={{ px: 1, minWidth: 0 }}>
         <MyChoreHeader
           activeFilterId={activeFilterId}
           activeFilter={activeFilter}
@@ -1244,44 +1286,119 @@ const MyChores = () => {
                   expanded={Boolean(openChoreSections[index])}
                 >
                   <Divider orientation='horizontal'>
-                    <Chip
-                      variant='soft'
-                      color='neutral'
-                      size='md'
-                      onClick={() => {
-                        if (openChoreSections[index]) {
-                          const newOpenChoreSections = {
-                            ...openChoreSections,
-                          }
-                          delete newOpenChoreSections[index]
-                          setOpenChoreSectionsWithCache(newOpenChoreSections)
-                        } else {
-                          setOpenChoreSectionsWithCache({
-                            ...openChoreSections,
-                            [index]: true,
-                          })
-                        }
-                      }}
-                      endDecorator={
-                        openChoreSections[index] ? (
-                          <ExpandCircleDown
-                            color='primary'
-                            sx={{ transform: 'rotate(180deg)' }}
-                          />
-                        ) : (
-                          <ExpandCircleDown color='primary' />
-                        )
-                      }
-                      startDecorator={
-                        <>
-                          <Chip color='primary' size='sm' variant='soft'>
-                            {section?.content?.length}
+                    {(() => {
+                      const sectionSelectedCount = section.content.filter(
+                        chore => selectedChores.has(chore.id),
+                      ).length
+                      const allSelected =
+                        sectionSelectedCount === section.content.length
+                      const partiallySelected =
+                        sectionSelectedCount > 0 && !allSelected
+                      return (
+                        <Box sx={{ display: 'flex', alignItems: 'stretch' }}>
+                          {/* Its own zone rather than nested inside the chip
+                              below — a checkbox inside a clickable chip is two
+                              interactive targets fighting over one tap.
+                              Butted flush against the chip (shared background,
+                              opposite corner radii) so the pair still reads as
+                              a single pill. */}
+                          {isMultiSelectMode && (
+                            <Box
+                              role='checkbox'
+                              aria-checked={
+                                allSelected
+                                  ? 'true'
+                                  : partiallySelected
+                                    ? 'mixed'
+                                    : 'false'
+                              }
+                              tabIndex={0}
+                              onClick={() =>
+                                toggleSectionSelection(section.content)
+                              }
+                              onKeyDown={e => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault()
+                                  toggleSectionSelection(section.content)
+                                }
+                              }}
+                              title={t('archived.selectSectionTitle')}
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: 30,
+                                cursor: 'pointer',
+                                borderRadius: '999px 0 0 999px',
+                                bgcolor:
+                                  allSelected || partiallySelected
+                                    ? 'primary.solidBg'
+                                    : 'neutral.softBg',
+                                color:
+                                  allSelected || partiallySelected
+                                    ? 'primary.solidColor'
+                                    : 'transparent',
+                                '&:hover': {
+                                  bgcolor:
+                                    allSelected || partiallySelected
+                                      ? 'primary.solidHoverBg'
+                                      : 'neutral.softHoverBg',
+                                },
+                              }}
+                            >
+                              {allSelected ? (
+                                <Check sx={{ fontSize: 16 }} />
+                              ) : (
+                                <Remove sx={{ fontSize: 16 }} />
+                              )}
+                            </Box>
+                          )}
+                          <Chip
+                            variant='soft'
+                            color='neutral'
+                            size='md'
+                            onClick={() => {
+                              if (openChoreSections[index]) {
+                                const newOpenChoreSections = {
+                                  ...openChoreSections,
+                                }
+                                delete newOpenChoreSections[index]
+                                setOpenChoreSectionsWithCache(
+                                  newOpenChoreSections,
+                                )
+                              } else {
+                                setOpenChoreSectionsWithCache({
+                                  ...openChoreSections,
+                                  [index]: true,
+                                })
+                              }
+                            }}
+                            sx={{
+                              borderRadius: isMultiSelectMode
+                                ? '0 999px 999px 0'
+                                : undefined,
+                            }}
+                            endDecorator={
+                              openChoreSections[index] ? (
+                                <ExpandCircleDown
+                                  color='primary'
+                                  sx={{ transform: 'rotate(180deg)' }}
+                                />
+                              ) : (
+                                <ExpandCircleDown color='primary' />
+                              )
+                            }
+                            startDecorator={
+                              <Chip color='primary' size='sm' variant='soft'>
+                                {section?.content?.length}
+                              </Chip>
+                            }
+                          >
+                            {section.name}
                           </Chip>
-                        </>
-                      }
-                    >
-                      {section.name}
-                    </Chip>
+                        </Box>
+                      )
+                    })()}
                   </Divider>
                   <AccordionDetails
                     sx={{
@@ -1321,6 +1438,9 @@ const MyChores = () => {
             justifyContent: 'flex-end',
             gap: 2,
             'z-index': 100,
+            '@media (max-width: 768px)': {
+              bottom: getSafeBottom(66, 10),
+            },
           }}
         >
           <IconButton

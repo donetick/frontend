@@ -47,7 +47,8 @@
   "version": "Version",
   "navigation": {
     "search": "Recherche",
-    "allTasks": "Toutes les tâches",
+    "allTasks": "Tâches",
+    "home": "Aperçu",
     "archived": "Archivées",
     "things": "Objets",
     "labels": "Étiquettes",

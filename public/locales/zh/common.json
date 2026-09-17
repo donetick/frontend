@@ -47,7 +47,8 @@
   "version": "",
   "navigation": {
     "search": "搜索",
-    "allTasks": "",
+    "allTasks": "任务",
+    "home": "概览",
     "archived": "",
     "things": "",
     "labels": "",
@@ -56,7 +57,7 @@
     "activities": "",
     "points": "",
     "settings": "",
-    "reportBug": ""
+    "reportBug": "Report a Bug"
   },
   "search": {
     "title": "搜索",

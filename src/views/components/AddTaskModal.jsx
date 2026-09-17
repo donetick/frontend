@@ -49,6 +49,7 @@ import {
   parseRepeatV2,
 } from './CustomParsers'
 import DueDatePickerField from './DueDatePickerField'
+import { combineDueDate } from './DueDatePickerModal'
 import LabelsPickerField from './LabelsPickerField'
 import NotificationPickerField from './NotificationPickerField'
 import PriorityPickerField from './PriorityPickerField'
@@ -296,7 +297,6 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
   // create flow in ChoreEdit.jsx.
   const taskSourceRef = useRef('quick_add')
   const [priority, setPriority] = useState(0)
-  const [dueDate, setDueDate] = useState(null)
   const [description, setDescription] = useState(null)
   const [assignees, setAssignees] = useState([])
   const [labelsV2, setLabelsV2] = useState([])
@@ -320,6 +320,15 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
   const [dueDateOnly, setDueDateOnly] = useState(null)
   const [dueTime, setDueTime] = useState(null)
   const [useCustomTime, setUseCustomTime] = useState(false)
+  // These three are the source of truth; the due date is only their
+  // combination. It used to be a fourth piece of state that every handler
+  // recomputed for itself, which meant the picker's Apply — three callbacks
+  // in one batch — had each of them reading stale siblings and the chosen
+  // time losing to the end-of-day fallback.
+  const dueDate = useMemo(() => {
+    const combined = combineDueDate({ dueDateOnly, dueTime, useCustomTime })
+    return combined ? moment(combined).format('YYYY-MM-DDTHH:mm:ss') : null
+  }, [dueDateOnly, dueTime, useCustomTime])
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
   const [projectId, setProjectId] = useState(getInitialProject)
   const selectedProject = useMemo(
@@ -445,7 +454,6 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
       if (isHoldingCmd && event.key.toLowerCase() === 'b' && !dueDate) {
         const tomorrow = moment().add(1, 'day')
         setDueDateOnly(tomorrow.format('YYYY-MM-DD'))
-        setDueDate(tomorrow.endOf('day').format('YYYY-MM-DDTHH:mm:59'))
         setUseCustomTime(false)
         setDueTime(null)
         setShowKeyboardShortcuts(false)
@@ -680,7 +688,6 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
         const dateOnly = m.format('YYYY-MM-DD')
         const timeOnly = m.format('HH:mm')
         setDueDateOnly(dateOnly)
-        setDueDate(m.format('YYYY-MM-DDTHH:mm:ss'))
         if (timeOnly !== '23:59') {
           setUseCustomTime(true)
           setDueTime(timeOnly)
@@ -779,7 +786,6 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
           if (overrides.dueDate) {
             syncDueDateStates(overrides.dueDate)
           } else {
-            setDueDate(null)
             setDueDateOnly(null)
             setDueTime(null)
             setUseCustomTime(false)
@@ -820,56 +826,24 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
   ])
 
   const handleDueDateChange = e => {
-    const dateValue = e.target.value
-    setDueDateOnly(dateValue)
-    if (useCustomTime && dueTime) {
-      setDueDate(
-        moment(`${dateValue}T${dueTime}`).format('YYYY-MM-DDTHH:mm:00'),
-      )
-    } else {
-      setUseCustomTime(false)
-      setDueTime(null)
-      setDueDate(moment(dateValue).endOf('day').format('YYYY-MM-DDTHH:mm:ss'))
-    }
+    setDueDateOnly(e.target.value || null)
   }
 
   const handleDueTimeChange = e => {
     const timeValue = e.target.value
-    setDueTime(timeValue)
-    if (dueDateOnly) {
-      if (timeValue) {
-        setUseCustomTime(true)
-        setDueDate(
-          moment(`${dueDateOnly}T${timeValue}`).format('YYYY-MM-DDTHH:mm:00'),
-        )
-      } else {
-        setUseCustomTime(false)
-        setDueDate(
-          moment(dueDateOnly).endOf('day').format('YYYY-MM-DDTHH:mm:ss'),
-        )
-      }
-    }
+    setDueTime(timeValue || null)
+    // A time typed straight into the field is itself the request for one.
+    if (timeValue) setUseCustomTime(true)
   }
 
   const handleUseCustomTimeChange = checked => {
     setUseCustomTime(checked)
+    // Turning the toggle on needs something on the clock to show. The picker
+    // sends the real time right after this, and wins.
     if (checked) {
-      const defaultTime = dueTime || '18:00'
-      if (!dueTime) {
-        setDueTime(defaultTime)
-      }
-      if (dueDateOnly) {
-        setDueDate(
-          moment(`${dueDateOnly}T${defaultTime}`).format('YYYY-MM-DDTHH:mm:00'),
-        )
-      }
+      setDueTime(prev => prev || '18:00')
     } else {
       setDueTime(null)
-      if (dueDateOnly) {
-        setDueDate(
-          moment(dueDateOnly).endOf('day').format('YYYY-MM-DDTHH:mm:ss'),
-        )
-      }
     }
   }
 
@@ -920,8 +894,10 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
     if (extractedDue) {
       const m = moment(new Date(extractedDue))
       if (m.isValid()) {
+        // The scan gives a date, never a time — end of day, as before.
         setDueDateOnly(m.format('YYYY-MM-DD'))
-        setDueDate(m.endOf('day').format('YYYY-MM-DDTHH:mm:ss'))
+        setDueTime(null)
+        setUseCustomTime(false)
       }
     }
   }
@@ -1002,7 +978,6 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
     setIsAttachingScan(false)
     setTaskText('')
     setTaskTitle('')
-    setDueDate(null)
     setFrequency(null)
     setPriority(0)
     setPoints(-1)
@@ -1400,7 +1375,6 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
                 onDueTimeChange={handleDueTimeChange}
                 onUseCustomTimeChange={handleUseCustomTimeChange}
                 onClear={() => {
-                  setDueDate(null)
                   setDueDateOnly(null)
                   setDueTime(null)
                   setUseCustomTime(false)

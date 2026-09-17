@@ -47,7 +47,8 @@
   "version": "النسخة",
   "navigation": {
     "search": "بحث",
-    "allTasks": "جميع المهام",
+    "allTasks": "المهام",
+    "home": "نظرة عامة",
     "archived": "المؤرشفة",
     "things": "الأشياء",
     "labels": "التسميات",
@@ -56,7 +57,7 @@
     "activities": "الأنشطة",
     "points": "النقاط",
     "settings": "الإعدادات",
-    "reportBug": ""
+    "reportBug": "Report a Bug"
   },
   "search": {
     "title": "بحث",

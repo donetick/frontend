@@ -30,10 +30,147 @@
       "unavailable": "This subscription is not available. Please try again later.",
       "unknownError": "Unknown error"
     },
-    "subscriptionCancelFailed": "Failed to Cancelar subscription",
-    "subscriptionCancelled": "Subscription cancelled",
-    "title": "Account Ajustes",
-    "upgrade": "Upgrade"
+    "subscriptionCancelFailed": "No se pudo cancelar la suscripción",
+    "subscriptionCancelled": "Suscripción cancelada",
+    "title": "Configuración de la cuenta",
+    "upgrade": "Mejorar",
+    "setup": {
+      "title": "Configurar la autenticación multifactor",
+      "addedAccount": "Ya he añadido la cuenta",
+      "back": "Atrás",
+      "verifyAndEnable": "Verificar y activar",
+      "savedBackupCodes": "He guardado mis códigos de respaldo",
+      "step1Label": "Paso 1:",
+      "step1": "Escanea el código QR de abajo con tu app de autenticación (Google Authenticator, Authy, etc.)",
+      "qrAlt": "Código QR de MFA",
+      "qrFailed": "No se pudo generar el código QR. Inténtalo de nuevo o usa la clave manual de abajo.",
+      "manualKey": "Clave de introducción manual:",
+      "step2Label": "Paso 2:",
+      "step2": "Introduce el código de verificación de 6 dígitos de tu app de autenticación",
+      "codePlaceholder": "Introduce el código de 6 dígitos",
+      "successTitle": "¡MFA activada correctamente!",
+      "backupCodesTitle": "Guarda estos códigos de respaldo en un lugar seguro",
+      "backupCodesDescription": "Puedes usar estos códigos para acceder a tu cuenta si pierdes tu dispositivo de autenticación. Cada código solo se puede usar una vez."
+    },
+    "disableModal": {
+      "title": "Desactivar la autenticación multifactor",
+      "warning": "Desactivar la MFA hará que tu cuenta sea menos segura. ¿Seguro que quieres continuar?",
+      "prompt": "Introduce un código de verificación de tu app de autenticación para confirmar:",
+      "confirm": "Desactivar MFA"
+    },
+    "backupCodesModal": {
+      "title": "Nuevos códigos de respaldo",
+      "warning": "Tus códigos de respaldo anteriores ya no son válidos. Guarda estos nuevos códigos en un lugar seguro. Cada código solo se puede usar una vez."
+    },
+    "generateCodes": "Generar nuevos códigos"
+  },
+  "apiTokens": {
+    "title": "Tokens de API",
+    "accessToken": "Token de acceso",
+    "description": "Crea un token para usar con la API y actualizar cosas que activan tareas",
+    "plusNotice": "Los tokens de API no están disponibles en el plan Básico. Mejora a Plus para generar tokens de API e integrarte con sistemas externos y automatizar tus tareas.",
+    "showToken": "Mostrar token",
+    "hideToken": "Ocultar token",
+    "removeTitle": "Eliminar token",
+    "removeMessage": "¿Seguro que quieres eliminar {{name}}?",
+    "removedTitle": "Eliminado",
+    "removedMessage": "El token de API se ha eliminado",
+    "tokenCopied": "Token copiado al portapapeles",
+    "generateNew": "Generar nuevo token",
+    "nameModalTitle": "Dale un nombre a tu nuevo token, algo con lo que lo reconozcas.",
+    "generateToken": "Generar token"
+  },
+  "storage": {
+    "title": "Ajustes de almacenamiento",
+    "serverTitle": "Uso del almacenamiento en el servidor",
+    "serverDescription": "Este es el almacenamiento que usa tu cuenta en nuestros servidores (por ejemplo, archivos, imágenes y datos que has subido).",
+    "usagePlaceholder": "-- MB usados / -- MB en total (--)",
+    "usage": "{{used}} MB usados / {{total}} MB en total ({{percent}} %)",
+    "basicPlanNotice": "El almacenamiento en el servidor no está disponible en el plan Básico. Mejora a Plus para consultar tu uso.",
+    "localTitleApp": "Almacenamiento local y caché de la app",
+    "localTitleBrowser": "Almacenamiento local y caché del navegador",
+    "localDescription": "Son datos guardados localmente en tu navegador para un acceso más rápido. Borrarlos no afectará a tus datos del servidor, pero puede cerrar tu sesión.",
+    "clearLocal": "Borrar todo el almacenamiento local y la caché",
+    "clearLocalTitle": "Borrar todo el almacenamiento local",
+    "clearLocalMessage": "¿Seguro que quieres borrar tu almacenamiento local y la caché? Se eliminarán todos tus datos de este navegador y tendrás que iniciar sesión de nuevo.",
+    "clearAll": "Borrar todo",
+    "appPreferences": "Preferencias de la app",
+    "deviceOnly": "Solo en el dispositivo",
+    "appPreferencesDescription": "Son preferencias y ajustes que la app guarda localmente en tu dispositivo. Al borrarlos se restablecerán los ajustes de la app y puede que se cierre tu sesión, pero no afectará a tus datos del servidor.",
+    "clearPreferences": "Borrar preferencias de la app",
+    "clearPreferencesTitle": "Borrar preferencias de la app",
+    "clearPreferencesMessage": "¿Seguro que quieres borrar todas las preferencias de la app? Se restablecerán tus ajustes y puede que tengas que iniciar sesión de nuevo."
+  },
+  "sidepanel": {
+    "title": "Personalización del panel lateral",
+    "heading": "Ajustes del panel lateral",
+    "description": "Elige qué tarjetas aparecen en el panel lateral y en qué orden. Arrastra y suelta para reordenarlas o cambia su visibilidad.",
+    "resetToDefaults": "Restablecer valores predeterminados",
+    "resetHelper": "Se restablecerán la visibilidad y el orden predeterminados de todas las tarjetas.",
+    "cards": {
+      "welcome": {
+        "name": "Cambio de usuario",
+        "description": "Permite a administradores y gestores ver las tareas como otras personas"
+      },
+      "smartInsights": {
+        "name": "Ideas inteligentes",
+        "description": "Acciones rápidas basadas en tus tareas"
+      },
+      "assignees": {
+        "name": "Tareas por responsable",
+        "description": "Agrupa las tareas según a quién estén asignadas"
+      },
+      "calendar": {
+        "name": "Vista de calendario",
+        "description": "Muestra las tareas en formato de calendario"
+      },
+      "activities": {
+        "name": "Actividad reciente",
+        "description": "Muestra las tareas completadas y la actividad reciente"
+      },
+      "weeklyGoals": {
+        "name": "Objetivos semanales",
+        "description": "Muestra el progreso semanal y las estadísticas de la familia"
+      }
+    },
+    "detailedDescription": ""
+  },
+  "theme": {
+    "title": "Preferencias de tema",
+    "description": "Elige cómo se ve la aplicación. Selecciona un tema fijo o sincronízalo con tu sistema para cambiar automáticamente entre el modo claro y oscuro.",
+    "themeMode": "Modo de tema",
+    "light": "Claro",
+    "dark": "Oscuro",
+    "system": "Sistema"
+  },
+  "localization": {
+    "title": "Localización",
+    "description": "Personaliza el idioma, el formato de fecha y las preferencias regionales de tu cuenta.",
+    "language": "Idioma",
+    "languageDescription": "Selecciona tu idioma preferido",
+    "rtlNotice": "Este idioma se escribe de derecha a izquierda (RTL)",
+    "dateFormat": "Formato de fecha",
+    "dateFormatDescription": "Elige cómo se muestran las fechas en toda la aplicación",
+    "timeFormat": "Formato de hora",
+    "timeFormatDescription": "Selecciona el formato de 12 o 24 horas",
+    "preview": "Vista previa: {{value}}",
+    "12hour": "12 horas (a. m./p. m.)",
+    "24hour": "24 horas",
+    "firstDayOfWeek": "Primer día de la semana",
+    "firstDayOfWeekDescription": "Elige con qué día empieza tu semana",
+    "sunday": "Domingo",
+    "monday": "Lunes",
+    "saturday": "Sábado",
+    "helpTranslate": "",
+    "formats": {
+      "mdy": "MM/DD/AAAA (EE. UU.)",
+      "dmy": "DD/MM/AAAA (Europa)",
+      "ymd": "AAAA-MM-DD (ISO)",
+      "long": "Formato largo (p. ej., 1 de enero de 2024)",
+      "short": "Formato corto (p. ej., 1 ene 2024)"
+    },
+    "descriptionLong": ""
+>>>>>>> upstream/develop
   },
   "advanced": {
     "description": "Configure advanced features like webhooks and real-time updates for enhanced productivity.",

@@ -427,6 +427,47 @@
     },
     "detailedDescription": "Customize the layout and visibility of cards in the sidepanel. the section only available on large screen devices such as tablets and desktops.."
   },
+  "homeSections": {
+    "title": "Overview Customization",
+    "description": "Customize which sections appear on the Home screen and their order. Drag and drop to reorder, or toggle visibility for each section.",
+    "resetToDefaults": "Reset to Defaults",
+    "resetHelper": "This will restore all sections to their default visibility and order.",
+    "sections": {
+      "greeting": {
+        "name": "Greeting",
+        "description": "The headline at the top that sums up your day"
+      },
+      "glance": {
+        "name": "At a Glance",
+        "description": "Overdue / due today / needs review / unplanned counts"
+      },
+      "circle": {
+        "name": "Your Circle",
+        "description": "Shows what everyone in your circle is carrying this week"
+      },
+      "review": {
+        "name": "Needs Review",
+        "description": "Finished tasks waiting to be signed off"
+      },
+      "overdue": {
+        "name": "Overdue",
+        "description": "Tasks that have slipped past their due date"
+      },
+      "nextUp": {
+        "name": "Coming Up",
+        "description": "What's due today and tomorrow"
+      },
+      "filters": {
+        "name": "Filters",
+        "description": "Quick access to your pinned and most useful filters"
+      },
+      "projects": {
+        "name": "Projects",
+        "description": "Where the work is piling up, by project"
+      }
+    },
+    "detailedDescription": "Customize the layout and visibility of sections on the Home screen."
+  },
   "theme": {
     "title": "Theme Preferences",
     "description": "Choose how the site looks to you. Select a single theme, or sync with your system and automatically switch between day and night themes.",
@@ -453,6 +494,7 @@
     "sunday": "Sunday",
     "monday": "Monday",
     "saturday": "Saturday",
+    "helpTranslate": "Help improve this translation",
     "formats": {
       "mdy": "MM/DD/YYYY (US)",
       "dmy": "DD/MM/YYYY (Europe)",

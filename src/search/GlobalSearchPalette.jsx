@@ -1,6 +1,7 @@
 import {
   AddRounded,
   ArchiveOutlined,
+  ArrowBack,
   CheckCircleOutline,
   FilterAltOutlined,
   FolderOutlined,
@@ -18,6 +19,7 @@ import {
   Chip,
   CircularProgress,
   Divider,
+  IconButton,
   Input,
   List,
   ListItemButton,
@@ -237,7 +239,9 @@ const SearchContainer = ({ children, onClose, presentation }) => {
         sx={{
           display: 'flex',
           flexDirection: 'column',
-          height: 'calc(100dvh - 56px)',
+          height: '100dvh',
+          pt: 'var(--safe-area-inset-top, 0px)',
+          pb: 'var(--safe-area-inset-bottom, 0px)',
           minHeight: 0,
           overflow: 'hidden',
           bgcolor: 'background.body',
@@ -474,54 +478,68 @@ const GlobalSearchPalette = ({
   return (
     <SearchContainer onClose={onClose} presentation={presentation}>
       <Box sx={{ p: { xs: 1.5, sm: 2 } }}>
-        <Input
-          autoFocus
-          slotProps={{
-            input: {
-              ref: focusInputRef,
-              'aria-label': t('search.inputAriaLabel'),
-            },
-          }}
-          value={query}
-          onChange={event => onQueryChange(event.target.value)}
-          onKeyDown={onInputKeyDown}
-          placeholder={
-            mode
-              ? t('search.modes.actions.placeholder')
-              : t('search.placeholder')
-          }
-          startDecorator={
-            mode ? (
-              <Chip
-                size='sm'
-                variant='soft'
-                color='primary'
-                onClick={() => {
-                  setMode(null)
-                  setSelectedIndex(0)
-                }}
-              >
-                {t('search.modes.actions.label')}
-              </Chip>
-            ) : (
-              <SearchRounded />
-            )
-          }
-          endDecorator={
-            isLoading ? (
-              <CircularProgress size='sm' />
-            ) : presentation === 'modal' ? (
-              <Chip size='sm' variant='outlined'>
-                {t('search.escape')}
-              </Chip>
-            ) : null
-          }
-          sx={{
-            '--Input-minHeight': '48px',
-            fontSize: 'md',
-            borderRadius: 'lg',
-          }}
-        />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {presentation === 'page' && (
+            <IconButton
+              size='md'
+              variant='plain'
+              onClick={onClose}
+              aria-label={t('backFromSearch')}
+              title={t('back')}
+            >
+              <ArrowBack className='rtl-flip' />
+            </IconButton>
+          )}
+          <Input
+            autoFocus
+            slotProps={{
+              input: {
+                ref: focusInputRef,
+                'aria-label': t('search.inputAriaLabel'),
+              },
+            }}
+            value={query}
+            onChange={event => onQueryChange(event.target.value)}
+            onKeyDown={onInputKeyDown}
+            placeholder={
+              mode
+                ? t('search.modes.actions.placeholder')
+                : t('search.placeholder')
+            }
+            startDecorator={
+              mode ? (
+                <Chip
+                  size='sm'
+                  variant='soft'
+                  color='primary'
+                  onClick={() => {
+                    setMode(null)
+                    setSelectedIndex(0)
+                  }}
+                >
+                  {t('search.modes.actions.label')}
+                </Chip>
+              ) : (
+                <SearchRounded />
+              )
+            }
+            endDecorator={
+              isLoading ? (
+                <CircularProgress size='sm' />
+              ) : presentation === 'modal' ? (
+                <Chip size='sm' variant='outlined'>
+                  {t('search.escape')}
+                </Chip>
+              ) : null
+            }
+            sx={{
+              '--Input-minHeight': '48px',
+              fontSize: 'md',
+              borderRadius: 'lg',
+              flex: 1,
+            }}
+          />
+        </Box>
         <Typography
           level='body-xs'
           sx={{ color: 'text.tertiary', mt: 1, px: 0.5 }}

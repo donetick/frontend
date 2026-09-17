@@ -47,7 +47,8 @@
   "version": "Versão",
   "navigation": {
     "search": "Pesquisar",
-    "allTasks": "Todas as tarefas",
+    "allTasks": "Tarefas",
+    "home": "Visão geral",
     "archived": "Arquivadas",
     "things": "Itens",
     "labels": "Etiquetas",
@@ -56,7 +57,7 @@
     "activities": "Atividades",
     "points": "Pontos",
     "settings": "Configurações",
-    "reportBug": ""
+    "reportBug": "Report a Bug"
   },
   "search": {
     "title": "Pesquisar",

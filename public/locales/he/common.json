@@ -21,7 +21,8 @@
   "version": "גרסה",
   "navigation": {
     "search": "חיפוש",
-    "allTasks": "כל המשימות",
+    "allTasks": "משימות",
+    "home": "סקירה",
     "archived": "בארכיון",
     "things": "דברים",
     "labels": "תגיות",

@@ -2,7 +2,6 @@ import '@meauxt/react-swipeable-list/dist/styles.css'
 
 import {
   SwipeableList,
-  SwipeableListItem,
   SwipeAction,
   TrailingActions,
   Type as ListType,
@@ -39,6 +38,9 @@ import { useNavigate } from 'react-router-dom'
 import { track } from '../../analytics'
 import EmptyState from '../../components/common/EmptyState'
 import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
+import SwipeListItem, {
+  SWIPE_COMMIT_THRESHOLD,
+} from '../../components/common/SwipeListItem'
 import { useNotification } from '../../service/NotificationProvider'
 import {
   CreateThing,
@@ -47,7 +49,7 @@ import {
   SaveThing,
   UpdateThingState,
 } from '../../utils/Fetcher'
-import { getSafeBottomStyles } from '../../utils/SafeAreaUtils'
+import { getSafeBottom, getSafeBottomStyles } from '../../utils/SafeAreaUtils'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import CreateThingModal from '../Modals/Inputs/CreateThingModal'
 import EditThingStateModal from '../Modals/Inputs/EditThingState'
@@ -582,9 +584,13 @@ const ThingsView = () => {
             }}
           />
         )}
-        <SwipeableList type={ListType.IOS} fullSwipe={false}>
+        <SwipeableList
+          type={ListType.IOS}
+          fullSwipe
+          threshold={SWIPE_COMMIT_THRESHOLD}
+        >
           {filteredThings.map(thing => (
-            <SwipeableListItem
+            <SwipeListItem
               onClick={() => navigate(`/things/${thing?.id}`)}
               key={thing.id}
               swipeActionOpen={showMoreInfoId === thing.id ? 'trailing' : null}
@@ -612,22 +618,25 @@ const ThingsView = () => {
                           flexDirection: 'column',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          bgcolor: 'success.softBg',
-                          color: 'success.700',
+                          bgcolor: 'success.500',
+                          color: '#fff',
                           px: 3,
                           height: '100%',
                         }}
                       >
                         {thing?.type === 'text' ? (
-                          <Flip sx={{ fontSize: 20 }} />
+                          <Flip sx={{ fontSize: 20, color: 'white' }} />
                         ) : thing?.type === 'number' ? (
-                          <PlusOne sx={{ fontSize: 20 }} />
+                          <PlusOne sx={{ fontSize: 20, color: 'white' }} />
                         ) : thing.state === 'true' ? (
-                          <ToggleOn sx={{ fontSize: 20 }} />
+                          <ToggleOn sx={{ fontSize: 20, color: 'white' }} />
                         ) : (
-                          <ToggleOff sx={{ fontSize: 20 }} />
+                          <ToggleOff sx={{ fontSize: 20, color: 'white' }} />
                         )}
-                        <Typography level='body-xs' sx={{ mt: 0.5 }}>
+                        <Typography
+                          level='body-xs'
+                          sx={{ mt: 0.5, color: 'inherit' }}
+                        >
                           {thing?.type === 'text'
                             ? t('common:edit')
                             : t('view.toggle')}
@@ -641,14 +650,17 @@ const ThingsView = () => {
                           flexDirection: 'column',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          bgcolor: 'neutral.softBg',
-                          color: 'neutral.700',
+                          bgcolor: 'primary.500',
+                          color: '#fff',
                           px: 3,
                           height: '100%',
                         }}
                       >
-                        <Edit sx={{ fontSize: 20 }} />
-                        <Typography level='body-xs' sx={{ mt: 0.5 }}>
+                        <Edit sx={{ fontSize: 20, color: 'white' }} />
+                        <Typography
+                          level='body-xs'
+                          sx={{ mt: 0.5, color: 'inherit' }}
+                        >
                           {t('common:edit')}
                         </Typography>
                       </Box>
@@ -660,14 +672,17 @@ const ThingsView = () => {
                           flexDirection: 'column',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          bgcolor: 'danger.softBg',
-                          color: 'danger.700',
+                          bgcolor: 'danger.500',
+                          color: '#fff',
                           px: 3,
                           height: '100%',
                         }}
                       >
-                        <Delete sx={{ fontSize: 20 }} />
-                        <Typography level='body-xs' sx={{ mt: 0.5 }}>
+                        <Delete sx={{ fontSize: 20, color: 'white' }} />
+                        <Typography
+                          level='body-xs'
+                          sx={{ mt: 0.5, color: 'inherit' }}
+                        >
                           {t('common:delete')}
                         </Typography>
                       </Box>
@@ -686,7 +701,7 @@ const ThingsView = () => {
                   }
                 }}
               />
-            </SwipeableListItem>
+            </SwipeListItem>
           ))}
         </SwipeableList>
       </Box>
@@ -699,6 +714,9 @@ const ThingsView = () => {
           justifyContent: 'flex-end',
           gap: 2,
           'z-index': 1000,
+          '@media (max-width: 768px)': {
+            bottom: getSafeBottom(56, 16),
+          },
         }}
       >
         <IconButton

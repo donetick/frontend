@@ -13,7 +13,7 @@ function randomSuffix(len = 8) {
 }
 
 test.describe('Auth – Sign Up', () => {
-  test('creates a new account and lands on /chores', async ({ page }) => {
+  test('creates a new account and lands on Home', async ({ page }) => {
     const suffix = randomSuffix()
     const user = {
       username: `test.signup.${suffix}`,
@@ -24,7 +24,7 @@ test.describe('Auth – Sign Up', () => {
 
     await signUpViaUI(page, user)
 
-    await expect(page).toHaveURL(/\/chores/)
+    await expect(page).toHaveURL(/\/$/)
   })
 
   test('shows an error when username is too short', async ({ page }) => {
@@ -43,15 +43,13 @@ test.describe('Auth – Sign Up', () => {
 
 test.describe('Auth – Login', () => {
   // Re-use the shared E2E user that global-setup already created
-  test('logs in with valid credentials and lands on /chores', async ({
-    page,
-  }) => {
+  test('logs in with valid credentials and lands on Home', async ({ page }) => {
     await loginViaUI(page, {
       username: 'e2e.user',
       password: 'E2ePassword123!',
     })
 
-    await expect(page).toHaveURL(/\/chores/)
+    await expect(page).toHaveURL(/\/$/)
   })
 
   test('shows an error for wrong password', async ({ page }) => {

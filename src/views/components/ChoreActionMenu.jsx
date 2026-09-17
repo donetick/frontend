@@ -217,47 +217,22 @@ const ChoreActionMenu = ({
     handleMenuClose()
   }
 
+  // Quick-schedule always moves the date only and leaves the task at
+  // "anytime" — the app-wide no-specific-time stamp is 23:59:59 (see
+  // END_OF_DAY in useChoreActions.js and DueDatePickerModal's splitDueDate),
+  // so every option below lands there rather than an arbitrary hour.
   const getQuickScheduleDate = option => {
     const now = new Date()
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    today.setHours(23, 59, 59, 0)
 
     switch (option) {
-      case 'today': {
-        const nowHour = now.getHours()
-        const scheduled = new Date(today)
-        if (nowHour < 9) {
-          scheduled.setHours(9, 0, 0, 0)
-        } else if (nowHour < 12) {
-          scheduled.setHours(12, 0, 0, 0)
-        } else if (nowHour < 17) {
-          scheduled.setHours(17, 0, 0, 0)
-        } else {
-          scheduled.setHours(
-            now.getHours(),
-            now.getMinutes(),
-            now.getSeconds(),
-            now.getMilliseconds(),
-          )
-        }
-        return scheduled
-      }
-      case 'tomorrow-morning': {
-        const tomorrowMorning = new Date(today)
-        tomorrowMorning.setDate(today.getDate() + 1)
-        tomorrowMorning.setHours(9, 0, 0, 0)
-        return tomorrowMorning
-      }
+      case 'today':
+        return today
       case 'tomorrow': {
         const tomorrow = new Date(today)
         tomorrow.setDate(today.getDate() + 1)
-        tomorrow.setHours(12, 0, 0, 0)
         return tomorrow
-      }
-      case 'tomorrow-afternoon': {
-        const tomorrowAfternoon = new Date(today)
-        tomorrowAfternoon.setDate(today.getDate() + 1)
-        tomorrowAfternoon.setHours(14, 0, 0, 0)
-        return tomorrowAfternoon
       }
       case 'weekend': {
         const weekend = new Date(today)

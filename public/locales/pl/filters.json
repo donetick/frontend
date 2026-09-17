@@ -1,0 +1,59 @@
+{
+  "builder": {
+    "errorName": "Wprowadź nazwę filtra",
+    "errorConditions": "Skonfiguruj przynajmniej jeden warunek filtra",
+    "editTitle": "Edytuj filtr",
+    "newTitle": "Nowy filtr",
+    "addConditions": "Dodaj warunki, aby wyświetlić podgląd",
+    "save": "Zapisz filtr",
+    "name": "Nazwa filtra",
+    "namePlaceholder": "np. Zaległe zadania dla Alicji",
+    "color": "Kolor"
+  },
+  "nameExists": "Filtr o tej nazwie już istnieje",
+  "tasks_few": "{{count}} zadania",
+  "tasks_many": "{{count}} zadań",
+  "tasks_one": "{{count}} zadanie",
+  "tasks_other": "{{count}} zadań",
+  "overdue": "{{count}} po terminie",
+  "noConditions": "Brak warunków",
+  "condition_few": "{{count}} warunki",
+  "condition_many": "{{count}} warunków",
+  "condition_one": "{{count}} warunek",
+  "condition_other": "{{count}} warunków",
+  "usedCount": "Użyto {{count}}x",
+  "delete": {
+    "title": "Usuń filtr",
+    "message": "Czy na pewno chcesz usunąć filtr „{{name}}”? Tej operacji nie można cofnąć."
+  },
+  "empty": {
+    "title": "Brak zapisanych filtrów",
+    "description": "Zapisz zestaw warunków, np. „zaległe i przypisane do mnie”, i wracaj do nich w każdej chwili.",
+    "createFilter": "Utwórz filtr",
+    "noResultsTitle": "Brak pasujących filtrów",
+    "noResultsWithSearch": "Żaden zapisany filtr nie pasuje do „{{search}}”.",
+    "noResultsDefault": "Żaden zapisany filtr nie spełnia bieżących kryteriów.",
+    "clearSearch": "Wyczyść wyszukiwanie",
+    "showAllFilters": "Pokaż wszystkie filtry"
+  },
+  "header": {
+    "title": "Filtry",
+    "subtitle": "Zapisuj ulubione kombinacje filtrów, aby mieć do nich szybki dostęp. Twórz własne widoki, by sprawniej organizować i odnajdywać zadania."
+  },
+  "searchPlaceholder": "Szukaj filtrów",
+  "sort": {
+    "smart": "Inteligentne",
+    "name": "Nazwa",
+    "usage": "Liczba użyć",
+    "lastUsed": "Ostatnio użyte",
+    "created": "Data utworzenia"
+  },
+  "show": {
+    "title": "Pokaż",
+    "all": "Wszystkie filtry",
+    "pinned": "Przypięte",
+    "unpinned": "Nieprzypięte"
+  },
+  "pin": "Przypnij",
+  "unpin": "Odepnij"
+}

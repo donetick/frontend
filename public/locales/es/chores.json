@@ -202,10 +202,37 @@
   "assignedTo": "Asignado a",
   "assignee": {
     "anyone": "Cualquiera",
-    "label": "Assignee",
-    "selectedCount_one": "{{count}} assignee",
-    "selectedCount_other": "{{count}} assignees",
-    "unknown": "Unknown"
+    "label": "Asignado",
+    "selectedCount_one": "{{count}} asignado",
+    "selectedCount_other": "{{count}} asignados",
+    "unknown": "Desconocido"
+  },
+  "filterChip": {
+    "cancelAll": "",
+    "unpin": "",
+    "pin": "",
+    "edit": "",
+    "delete": ""
+  },
+  "multiSelect": {
+    "showShortcuts": "",
+    "title": "",
+    "selection": "",
+    "selectAll": "",
+    "clearOrExit": "",
+    "actions": "",
+    "markCompleted": "",
+    "deleteSelected": "",
+    "interface": "",
+    "quickAdd": "",
+    "helpDescription": "",
+    "gotIt": ""
+  },
+  "notifications": {
+    "needTitle": "",
+    "needBody": "",
+    "keepDisabled": ""
+>>>>>>> upstream/develop
   },
   "assigneeCard": {
     "emptyDescription": "Asigna una tarea a alguien de tu círculo y su carga de trabajo aparecerá aquí.",
@@ -1164,11 +1191,12 @@
     "micDeniedMessage": "Microphone access is needed for voice capture. Enable it in your device ajustes and try again.",
     "onDevice": "On-device",
     "points": "{{count}} pts",
-    "reminder_one": "{{count}} reminder",
-    "reminder_other": "{{count}} reminders",
-    "startVoiceCapture": "Start voice capture",
-    "stopListening": "Stop listening",
+    "reminder_one": "{{count}} recordatorio",
+    "reminder_other": "{{count}} recordatorios",
+    "startVoiceCapture": "Iniciar captura por voz",
+    "stopListening": "Detener escucha",
     "title": "Di tus tareas",
     "tryAgain": "Reintentar"
   }
+}
 }
