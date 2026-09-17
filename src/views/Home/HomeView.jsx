@@ -191,6 +191,16 @@ const HomeView = () => {
     nextUp.length === 0 &&
     nextUpFallback.length === 0 &&
     overduePreview.length === 0
+  // `late` and `today` have no body: their headline now states the actual
+  // actionable count directly, and TriageRow right below itemizes the rest,
+  // so a secondary line would either repeat it or (as "Everything else is on
+  // schedule" did) assert something the verdict cascade never checked.
+  // i18next's `returnEmptyString: false` config means a `defaultValue: ''`
+  // fallback would still print the raw key, so the lookup is skipped outright.
+  const verdictBody =
+    verdict.id === 'late' || verdict.id === 'today'
+      ? ''
+      : t(`home.verdict.${verdict.id}.body`, { count: verdict.count })
 
   // Keyed by the same ids the customization settings page toggles and
   // reorders, so `sectionOrder` can render this screen in any arrangement.
@@ -372,13 +382,15 @@ const HomeView = () => {
             >
               {t(`home.verdict.${verdict.id}.title`, { count: verdict.count })}
             </Typography>
-            <Typography
-              level='body-sm'
-              textColor='text.secondary'
-              sx={{ mt: 0.5 }}
-            >
-              {t(`home.verdict.${verdict.id}.body`, { count: verdict.count })}
-            </Typography>
+            {verdictBody && (
+              <Typography
+                level='body-sm'
+                textColor='text.secondary'
+                sx={{ mt: 0.5 }}
+              >
+                {verdictBody}
+              </Typography>
+            )}
           </Box>
         ) : (
           <Box />
