@@ -59,11 +59,7 @@
       "title": "Tareas (tiempo)"
     },
     "unassigned": "Sin Asignar",
-    "unknownTask": "Tarea Desconocida",
-    "assigneeBreakdown": {
-      "title": "Desglose por Asignado",
-      "description": "Distribución de tareas por persona asignada"
-    }
+    "unknownTask": "Tarea Desconocida"
   },
   "delete": {
     "message": "¿Estás seguro de que quieres eliminar este registro del historial?",

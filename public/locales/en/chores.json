@@ -384,7 +384,8 @@
     "labels": "Labels",
     "labelsHint": "Tap to add · tap again to remove",
     "done": "Done",
-    "noPriority": "None"
+    "noPriority": "None",
+    "dueDateTitle": "Due date for {{count}} task(s)"
   },
   "remind": {
     "title": "Reminders",
