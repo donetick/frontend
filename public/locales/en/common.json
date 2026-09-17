@@ -60,7 +60,12 @@
     "activities": "Activities",
     "points": "Points",
     "settings": "Settings",
-    "reportBug": "Report an Issue"
+    "reportBug": "Report an Issue",
+    "openMenu": "Open menu",
+    "collapseMenu": "Collapse menu",
+    "expandMenu": "Expand menu",
+    "primaryNavigation": "Primary navigation",
+    "profile": "Profile"
   },
   "search": {
     "title": "Search",
