@@ -192,7 +192,12 @@
     "reportBug": "Сообщить о проблеме",
     "search": "Поиск",
     "settings": "Настройки",
-    "things": "Штуки"
+    "things": "Штуки",
+    "openMenu": "Открыть меню",
+    "collapseMenu": "Свернуть меню",
+    "expandMenu": "Развернуть меню",
+    "primaryNavigation": "Основная навигация",
+    "profile": "Профиль"
   },
   "no": "Нет",
   "onboarding": {

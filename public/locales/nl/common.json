@@ -57,7 +57,12 @@
     "activities": "Activiteiten",
     "points": "Punten",
     "settings": "Instellingen",
-    "reportBug": "Report a Bug"
+    "reportBug": "Report a Bug",
+    "openMenu": "Menu openen",
+    "collapseMenu": "Menu inklappen",
+    "expandMenu": "Menu uitklappen",
+    "primaryNavigation": "Hoofdnavigatie",
+    "profile": "Profiel"
   },
   "search": {
     "title": "Zoeken",

@@ -30,7 +30,12 @@
     "filters": "מסננים",
     "activities": "פעילויות",
     "points": "נקודות",
-    "settings": "הגדרות"
+    "settings": "הגדרות",
+    "openMenu": "פתח תפריט",
+    "collapseMenu": "כווץ תפריט",
+    "expandMenu": "הרחב תפריט",
+    "primaryNavigation": "ניווט ראשי",
+    "profile": "פרופיל"
   },
   "search": {
     "title": "חיפוש",

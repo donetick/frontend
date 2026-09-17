@@ -30,7 +30,12 @@
     "filters": "筛选",
     "activities": "活动",
     "points": "积分",
-    "settings": "设置"
+    "settings": "设置",
+    "openMenu": "打开菜单",
+    "collapseMenu": "收起菜单",
+    "expandMenu": "展开菜单",
+    "primaryNavigation": "主导航",
+    "profile": "个人资料"
   },
   "search": {
     "title": "搜索",

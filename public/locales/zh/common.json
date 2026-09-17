@@ -57,7 +57,12 @@
     "activities": "",
     "points": "",
     "settings": "",
-    "reportBug": "Report a Bug"
+    "reportBug": "Report a Bug",
+    "openMenu": "打开菜单",
+    "collapseMenu": "收起菜单",
+    "expandMenu": "展开菜单",
+    "primaryNavigation": "主导航",
+    "profile": "个人资料"
   },
   "search": {
     "title": "搜索",
