@@ -384,7 +384,8 @@
     "labels": "Beschriftungen",
     "labelsHint": "Tippen zum Hinzufügen · erneut tippen zum Entfernen",
     "done": "Fertig",
-    "noPriority": "Keine"
+    "noPriority": "Keine",
+    "dueDateTitle": ""
   },
   "remind": {
     "title": "Erinnerungen",
@@ -950,6 +951,7 @@
       "2": "In Bearbeitung",
       "3": "Genehmigung ausstehend"
     },
+    "anyOf": "",
     "include": "Einschließen",
     "exclude": "Ausschließen",
     "has": "Hat",
@@ -1033,26 +1035,5 @@
     "today": "Heute",
     "yesterday": "Gestern",
     "noteTitle": "Notiz - {{choreName}}"
-  },
-  "memberDetail": {
-    "taskCount_one": "",
-    "taskCount_other": "",
-    "you": "",
-    "filters": {
-      "all": "",
-      "overdue": "",
-      "today": "",
-      "undated": ""
-    },
-    "noMatchingStatus": "",
-    "clearFilters": "",
-    "searchPlaceholder": "",
-    "emptyTitle": "",
-    "emptyDescription": "",
-    "browseTasks": "",
-    "noResultsTitle": "",
-    "noResultsDescription": "",
-    "notFoundTitle": "",
-    "notFoundDescription": ""
   }
 }

@@ -1,49 +1,71 @@
 {
-  "blurb": "Управляйте метками, чтобы удобнее раскладывать дела. Метка автоматически станет общей для группы, если её поставить на общее дело.",
+  "shared": "",
   "delete": {
-    "message": "Удалить эту метку? Она пропадёт со всех дел, где стоит.",
-    "title": "Удалить метку"
+    "title": "",
+    "message": ""
+  },
+  "loadError": "",
+  "search": {
+    "placeholder": "",
+    "noResultsTitle": "",
+    "noResultsDescription": "",
+    "noFilterResultsDescription": "",
+    "clear": "",
+    "showAll": ""
   },
   "detail": {
-    "backToLabels": "К меткам",
-    "browseTasks": "К списку дел",
-    "clearFilters": "Показать все дела",
-    "emptyDescription": "Метка «{{label}}» пока никому не присвоена. Поставьте её делу — оно появится здесь.",
-    "emptyTitle": "Нет дел с этой меткой",
+    "taskCount_one": "",
+    "taskCount_other": "",
+    "labelActions": "",
     "filters": {
-      "all": "Все",
-      "overdue": "Просроченные",
-      "today": "Сегодня",
-      "undated": "Без даты"
+      "all": "",
+      "overdue": "",
+      "today": "",
+      "undated": ""
     },
-    "labelActions": "Действия с меткой",
-    "noMatchingStatus": "Сейчас нет дел с этой меткой в таком состоянии.",
-    "noResultsDescription": "Нет дел с этой меткой по запросу «{{searchTerm}}».",
-    "noResultsTitle": "Ничего не нашлось",
-    "notFoundDescription": "Метку могли удалить, или ей больше с вами не делятся.",
-    "notFoundTitle": "Метка не найдена",
-    "searchPlaceholder": "Поиск дел с этой меткой",
-    "taskCount_few": "{{count}} дела",
-    "taskCount_many": "{{count}} дел",
-    "taskCount_one": "{{count}} дело",
-    "taskCount_other": "{{count}} дел"
+    "noMatchingStatus": "",
+    "clearFilters": "",
+    "searchPlaceholder": "",
+    "emptyTitle": "",
+    "emptyDescription": "",
+    "browseTasks": "",
+    "noResultsTitle": "",
+    "noResultsDescription": "",
+    "notFoundTitle": "",
+    "notFoundDescription": "",
+    "backToLabels": ""
   },
-  "loadError": "Не удалось загрузить метки. Попробуйте ещё раз.",
+  "blurb": "",
   "modal": {
-    "errorDuplicate": "Метка с таким названием уже есть",
-    "errorEmptyName": "Название не может быть пустым",
-    "errorNoColor": "Выберите цвет",
-    "name": "Название",
-    "saveFailedMessage": "Метка не сохранилась. Попробуйте ещё раз.",
-    "saveFailedTitle": "Не удалось сохранить метку"
+    "errorEmptyName": "",
+    "errorDuplicate": "",
+    "errorNoColor": "",
+    "saveFailedTitle": "",
+    "saveFailedMessage": "",
+    "name": "",
+    "editTitle": "",
+    "addTitle": "",
+    "color": "",
+    "saveChanges": "",
+    "addLabel": "",
+    "colorAriaSelect": ""
   },
-  "search": {
-    "clear": "Очистить поиск",
-    "noFilterResultsDescription": "Под текущий фильтр не подходит ни одна метка.",
-    "noResultsDescription": "Нет меток по запросу «{{searchTerm}}».",
-    "noResultsTitle": "Ничего не нашлось",
-    "placeholder": "Поиск меток",
-    "showAll": "Показать все метки"
+  "picker": {
+    "label": "",
+    "createLabel": "",
+    "labelsCount_one": "",
+    "labelsCount_other": ""
   },
-  "shared": "Общая"
+  "view": {
+    "emptyTitle": "",
+    "emptyDescription": "",
+    "createLabel": "",
+    "filterTitle": "",
+    "sortName": "",
+    "sortColor": "",
+    "sortRecent": "",
+    "filterAll": "",
+    "filterMine": "",
+    "filterShared": ""
+  }
 }

@@ -384,7 +384,8 @@
     "labels": "",
     "labelsHint": "",
     "done": "",
-    "noPriority": ""
+    "noPriority": "",
+    "dueDateTitle": ""
   },
   "remind": {
     "title": "",
@@ -950,6 +951,7 @@
       "2": "",
       "3": ""
     },
+    "anyOf": "",
     "include": "",
     "exclude": "",
     "has": "",
@@ -1033,26 +1035,5 @@
     "today": "",
     "yesterday": "",
     "noteTitle": ""
-  },
-  "memberDetail": {
-    "taskCount_one": "",
-    "taskCount_other": "",
-    "you": "",
-    "filters": {
-      "all": "",
-      "overdue": "",
-      "today": "",
-      "undated": ""
-    },
-    "noMatchingStatus": "",
-    "clearFilters": "",
-    "searchPlaceholder": "",
-    "emptyTitle": "",
-    "emptyDescription": "",
-    "browseTasks": "",
-    "noResultsTitle": "",
-    "noResultsDescription": "",
-    "notFoundTitle": "",
-    "notFoundDescription": ""
   }
 }

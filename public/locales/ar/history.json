@@ -1,182 +1,182 @@
 {
   "edit": {
-    "title": "",
-    "completedDate": "",
-    "note": "",
-    "additionalNotes": "",
-    "deleteTitle": "",
-    "deleteMessage": ""
+    "title": "تحرير المحفوظات",
+    "completedDate": "تاريخ الانتهاء",
+    "note": "ملاحظة",
+    "additionalNotes": "ملاحظات إضافية",
+    "deleteTitle": "حذف المحفوظات",
+    "deleteMessage": "هل أنت متأكد من أنك تريد حذف هذا السجل؟"
   },
   "status": {
-    "inProgress": "",
-    "completed": "",
-    "skipped": "",
-    "pendingApproval": "",
-    "rejected": "",
-    "missed": "",
-    "rescheduled": "",
-    "scheduled": ""
+    "inProgress": "قيد التقدم",
+    "completed": "مكتمل",
+    "skipped": "تخطي",
+    "pendingApproval": "في انتظار الموافقة",
+    "rejected": "مرفوض",
+    "missed": "فائتة",
+    "rescheduled": "إعادة جدولة",
+    "scheduled": "مجدولة"
   },
   "badge": {
-    "onTime": "",
-    "onTimeLabel": ""
+    "onTime": "في الوقت المحدد",
+    "onTimeLabel": "في الوقت المناسب"
   },
   "card": {
-    "wasDue": "",
-    "daysBeforeDue_one": "",
-    "daysBeforeDue_other": "",
-    "daysAfterDue_one": "",
-    "daysAfterDue_other": "",
+    "wasDue": "كان مستحقا {{date}}",
+    "daysBeforeDue_one": "{{count}}d قبل تاريخ الاستحقاق",
+    "daysBeforeDue_other": "{{count}}d قبل تاريخ الاستحقاق",
+    "daysAfterDue_one": "{{count}}d بعد تاريخ الاستحقاق",
+    "daysAfterDue_other": "{{count}}d بعد تاريخ الاستحقاق",
     "hoursBeforeDue_one": "",
     "hoursBeforeDue_other": "",
-    "hoursAfterDue_one": "",
-    "hoursAfterDue_other": "",
-    "assignedTo": "",
+    "hoursAfterDue_one": "{{count}}ساعة بعد تاريخ الاستحقاق",
+    "hoursAfterDue_other": "{{count}}ساعة بعد تاريخ الاستحقاق",
+    "assignedTo": "تم تعيينه إلى {{name}}",
     "points_one": "",
     "points_other": ""
   },
   "detail": {
-    "title": "",
-    "openTask": "",
-    "editEntry": "",
-    "performedBy": "",
-    "assignedTo": "",
-    "lastUpdated": "",
-    "duration": "",
-    "pointsEarned": "",
+    "title": "تفاصيل النشاط",
+    "openTask": "فتح مهمة",
+    "editEntry": "تعديل المدخل",
+    "performedBy": "منفذ بواسطة",
+    "assignedTo": "تم تعيينه إلى",
+    "lastUpdated": "آخر تحديث",
+    "duration": "المدة",
+    "pointsEarned": "النقاط المكتسبة",
     "points_one": "",
     "points_other": "",
-    "note": ""
+    "note": "ملاحظة"
   },
   "charts": {
-    "noData": "",
-    "noLabels": "",
-    "unassigned": "",
-    "unknownTask": "",
-    "late": "",
+    "noData": "لا توجد بيانات متاحة",
+    "noLabels": "لا توجد تسميات",
+    "unassigned": "غير مسند",
+    "unknownTask": "مهمة غير معروفة",
+    "late": "متأخر",
     "status": {
-      "title": "",
-      "description": ""
+      "title": "الحالة",
+      "description": "حالة المهام المكتملة"
     },
     "due": {
-      "title": "",
-      "description": ""
+      "title": "تاريخ الاستحقاق",
+      "description": "تاريخ الاستحقاق للمهام الحالية"
     },
     "priority": {
-      "title": "",
-      "description": ""
+      "title": "الأولوية",
+      "description": "المهام حسب الأولوية"
     },
     "labels": {
-      "title": "",
-      "description": ""
+      "title": "التسميات",
+      "description": "المهام حسب التسميات"
     },
     "labelsDuration": {
-      "title": "",
-      "description": ""
+      "title": "التسميات (الوقت)",
+      "description": "الوقت الذي تستغرقه التسميات (ساعات)"
     },
     "tasksTime": {
-      "title": "",
-      "description": ""
+      "title": "المهام (الوقت)",
+      "description": "الوقت الذي تستغرقه المهام الفردية (الساعات)"
     },
     "assigneeBreakdown": {
-      "title": "",
-      "description": ""
+      "title": "من قبل المحال إليه",
+      "description": "المهام المجمعة حسب المحال إليه"
     }
   },
   "filter": {
-    "status": "",
-    "pending": "",
-    "labels": "",
-    "hasNotes": "",
-    "hasPoints": "",
-    "timePeriod": "",
-    "user": "",
-    "completedBy": "",
-    "completedAt": ""
+    "status": "الحالة",
+    "pending": "معلق",
+    "labels": "التسميات",
+    "hasNotes": "لديه ملاحظات",
+    "hasPoints": "لديه نقاط",
+    "timePeriod": "الفترة الزمنية",
+    "user": "المستخدم",
+    "completedBy": "مكتملة بواسطة",
+    "completedAt": "اكتمل في"
   },
   "period": {
     "days_one": "",
-    "days_other": "",
-    "allTime": ""
+    "days_other": "{{count}} أيام",
+    "allTime": "كل الوقت"
   },
   "search": {
-    "placeholder": "",
-    "clear": ""
+    "placeholder": "سجل البحث...",
+    "clear": "مسح البحث"
   },
   "sort": {
-    "date": "",
-    "updatedDate": "",
-    "performer": "",
-    "status": "",
-    "points": ""
+    "date": "تاريخ مكتمل",
+    "updatedDate": "تاريخ التحديث",
+    "performer": "مكتملة بواسطة",
+    "status": "الحالة",
+    "points": "النقاط"
   },
   "activities": {
-    "title": "",
-    "subtitle": "",
-    "emptyTitle": "",
-    "emptyDescriptionEveryone": "",
-    "emptyDescriptionMember": "",
-    "periodSoFar": "",
-    "periodLastDays": "",
-    "unknownMember": "",
-    "searchPlaceholder": "",
+    "title": "الأنشطة",
+    "subtitle": "شاهد ما تم اكتماله، تخطي، أو لم يتم اكتماله،",
+    "emptyTitle": "لا يوجد نشاط في هذا النطاق",
+    "emptyDescriptionEveryone": "لم يكتمل أي شيء من قبل أي شخص في دائرتك {{period}}. جرب نطاق زمني أوسع أو عضو مختلف.",
+    "emptyDescriptionMember": "لم يكتمل أي شيء بواسطة {{name}} {{period}}. جرب نطاق زمني أوسع أو عضو مختلف.",
+    "periodSoFar": "حتى الآن",
+    "periodLastDays": "في آخر أيام {{count}}",
+    "unknownMember": "هذا العضو",
+    "searchPlaceholder": "البحث عن الأنشطة...",
     "sort": {
-      "date": "",
-      "name": "",
-      "status": "",
-      "points": ""
+      "date": "التاريخ",
+      "name": "اسم المهمة",
+      "status": "الحالة",
+      "points": "النقاط"
     }
   },
   "title": {
-    "summary": "",
-    "activity": ""
+    "summary": "Task Summary",
+    "activity": "نشاط المهمة"
   },
   "noResults": {
-    "clear": ""
+    "clear": "مسح الفلاتر"
   },
   "toast": {
     "updateQueued": {
-      "title": "",
-      "message": ""
+      "title": "تاريخ تحديث قائمة الانتظار",
+      "message": "أنت غير متصل. سيتم مزامنة تحديث التاريخ عند استعادة الاتصال."
     },
     "updated": {
-      "title": "",
-      "message": ""
+      "title": "تم تحديث السجل",
+      "message": "تم تحديث سجل التاريخ بنجاح."
     },
     "deleteQueued": {
-      "title": "",
-      "message": ""
+      "title": "سجل حذف قائمة الانتظار",
+      "message": "أنت غير متصل. سيتم مزامنة حذف السجل عند استعادة الاتصال."
     },
     "deleted": {
-      "title": "",
-      "message": ""
+      "title": "تم حذف المحفوظات",
+      "message": "تم حذف سجل المحفوظات بنجاح."
     }
   },
   "delete": {
-    "title": "",
-    "message": ""
+    "title": "حذف سجل السجل",
+    "message": "هل أنت متأكد من أنك تريد حذف سجل المحفوظات هذا؟"
   },
   "empty": {
-    "title": "",
-    "description": "",
-    "backToTasks": "",
-    "noResultsTitle": "",
-    "noResultsDescription": ""
+    "title": "لا يوجد تاريخ بعد",
+    "description": "في كل مرة تكتمل هذه المهمة أو تتزلى، تهبط هنا مع من قام بها ومتى لم يحدث شيء بعد.",
+    "backToTasks": "العودة إلى المهام",
+    "noResultsTitle": "لا يوجد سجل يطابق هذه الفلاتر",
+    "noResultsDescription": "هناك تاريخ هنا، ولكن لا أحد منها يناسب الفلاتر الموجودة حاليا."
   },
   "info": {
-    "allCompleted": "",
+    "allCompleted": "تم اكتمال الكل",
     "timesSuffix": "",
-    "averageTiming": "",
-    "onTime": "",
-    "longestDelay": "",
-    "neverLate": "",
-    "completedMost": "",
-    "unknown": "",
-    "membersInvolved": "",
-    "membersSuffix": "",
-    "lastCompleted": ""
+    "averageTiming": "متوسط التوقيت",
+    "onTime": "في الوقت المناسب",
+    "longestDelay": "أطول تأخير",
+    "neverLate": "لا يتأخر",
+    "completedMost": "اكتمل الاكثر",
+    "unknown": "غير معروف",
+    "membersInvolved": "الأعضاء المشمولون",
+    "membersSuffix": "{{count}} أعضاء",
+    "lastCompleted": "اخر اكتمل"
   },
   "noteViewer": {
-    "updatedAt": ""
+    "updatedAt": "تم التحديث في {{date}}"
   }
 }

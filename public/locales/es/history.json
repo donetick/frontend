@@ -5,6 +5,14 @@
     "emptyTitle": "Sin actividad en este rango",
     "periodLastDays": "en los últimos {{count}} días",
     "periodSoFar": "hasta ahora",
+    "searchPlaceholder": "",
+    "sort": {
+      "date": "",
+      "name": "",
+      "points": "",
+      "status": ""
+    },
+    "subtitle": "",
     "title": "Actividades",
     "unknownMember": "este miembro"
   },
@@ -28,8 +36,8 @@
   },
   "charts": {
     "assigneeBreakdown": {
-      "description": "Tareas agrupadas por persona asignada",
-      "title": "por Asignado"
+      "description": "Distribución de tareas por persona asignada",
+      "title": "Desglose por Asignado"
     },
     "due": {
       "description": "Fecha de vencimiento de tareas actuales",
@@ -59,11 +67,7 @@
       "title": "Tareas (tiempo)"
     },
     "unassigned": "Sin Asignar",
-    "unknownTask": "Tarea Desconocida",
-    "assigneeBreakdown": {
-      "title": "Desglose por Asignado",
-      "description": "Distribución de tareas por persona asignada"
-    }
+    "unknownTask": "Tarea Desconocida"
   },
   "delete": {
     "message": "¿Estás seguro de que quieres eliminar este registro del historial?",
@@ -131,6 +135,17 @@
     "allTime": "Todo el Tiempo",
     "days_one": "{{count}} Día",
     "days_other": "{{count}} Días"
+  },
+  "search": {
+    "clear": "",
+    "placeholder": ""
+  },
+  "sort": {
+    "date": "",
+    "performer": "",
+    "points": "",
+    "status": "",
+    "updatedDate": ""
   },
   "status": {
     "completed": "Completada",

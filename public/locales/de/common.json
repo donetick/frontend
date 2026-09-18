@@ -20,7 +20,7 @@
     "Rose": "Rosa",
     "Charcoal": "Anthrazit",
     "Sienna": "Siena",
-    "Mint": "Mint",
+    "Mint": "",
     "Amber": "Bernstein",
     "Cobalt": "Kobalt",
     "Emerald": "Smaragd",
@@ -33,7 +33,7 @@
     "Lime": "Limette",
     "Blush": "Rosé",
     "Ash": "Asche",
-    "Sand": "Sand"
+    "Sand": ""
   },
   "refresh": "Aktualisieren",
   "copy": "Kopieren",
@@ -49,9 +49,12 @@
     "search": "Suche",
     "allTasks": "Aufgaben",
     "home": "Übersicht",
+    "tasks": "",
+    "more": "",
+    "mobileNavigation": "",
     "archived": "Archiv",
     "things": "Dinge",
-    "labels": "Labels",
+    "labels": "Beschriftungen",
     "projects": "Projekte",
     "filters": "Filter",
     "activities": "Aktivitäten",
@@ -69,7 +72,7 @@
     "placeholder": "Donetick durchsuchen",
     "inputAriaLabel": "Aufgaben, Verlauf, Projekte, Labels und Einstellungen durchsuchen",
     "deviceNote": "Es wird in Inhalten gesucht, die auf diesem Gerät verfügbar sind",
-    "escape": "Esc",
+    "escape": "",
     "recent": "Zuletzt verwendet",
     "empty": {
       "title": "Keine direkten Treffer",
@@ -80,14 +83,14 @@
       "tasks": "Aufgaben",
       "history": "Notizen",
       "projects": "Projekte",
-      "labels": "Labels",
+      "labels": "Beschriftungen",
       "people": "Personen",
       "settings": "Einstellungen",
       "actions": "Schnellaktionen"
     },
     "actions": {
       "quickAction": "Schnellaktion",
-      "navigation": "Navigation",
+      "navigation": "",
       "createTask": "Aufgabe erstellen",
       "createLabel": "Label erstellen",
       "createProject": "Projekt erstellen",
@@ -223,7 +226,7 @@
     "addMembers": "Mitglieder zu deinem Kreis hinzufügen",
     "sidePanelSettings": "Seitenleisteneinstellungen",
     "planFree": "Kostenlos",
-    "planPlus": "Plus",
+    "planPlus": "",
     "planPlusExpiring": "Plus (läuft bald ab)",
     "switchUser": "Benutzer wechseln",
     "impersonateUser": "Benutzeridentität übernehmen",
@@ -284,9 +287,9 @@
     "title": "Sortieren & Filtern",
     "ascending": "Aufsteigend",
     "descending": "Absteigend",
-    "filter": "Filter"
+    "filter": ""
   },
-  "versionInfo": "V{{version}} (API: {{apiVersion}})",
+  "versionInfo": "",
   "apiVersionUnavailable": "nicht verfügbar",
   "sync": {
     "aria": "Synchronisierungs- und Netzwerkstatus öffnen",
@@ -313,8 +316,8 @@
     "secondsAgo": "vor {{count}} s",
     "minutesAgo": "vor {{count}} Min.",
     "hoursAgo": "vor {{count}} Std.",
-    "online": "Online",
-    "offline": "Offline",
+    "online": "",
+    "offline": "",
     "syncing": "Wird synchronisiert...",
     "lastSync": "Letzte Synchronisierung: {{time}}",
     "offlineSince": "Offline seit {{duration}}",
@@ -326,8 +329,8 @@
     "checkingServer": "Server wird überprüft...",
     "retryingIn": "Erneuter Versuch in {{seconds}} s",
     "syncNow": "Jetzt synchronisieren",
-    "pendingSyncLabel_one": "{{count}} ausstehende Aktion zu synchronisieren",
-    "pendingSyncLabel_other": "{{count}} ausstehende Aktionen zu synchronisieren",
+    "pendingSyncLabel_one": "{{count}} Aktion wartet auf die Synchronisierung",
+    "pendingSyncLabel_other": "{{count}} Aktionen warten auf die Synchronisierung",
     "pendingActionsTitle": "Ausstehende Aktionen",
     "actionsWaitingToSync_one": "{{count}} Aktion wartet auf Synchronisierung.",
     "actionsWaitingToSync_other": "{{count}} Aktionen warten auf Synchronisierung.",
@@ -337,7 +340,7 @@
   "fileNumbered": "Datei {{index}}",
   "noAttachmentsTitle": "Keine Anhänge",
   "noAttachmentsDescription": "Fotos und Dateien, die dieser Aufgabe hinzugefügt werden, erscheinen hier.",
-  "kbSize": "{{size}} KB",
+  "kbSize": "",
   "onboarding": {
     "sources": {
       "speak": "Sprechen",
@@ -458,7 +461,7 @@
       "continue": "Weiter",
       "skip": "Überspringen",
       "sources": {
-        "appStore": "App Store / Google Play",
+        "appStore": "",
         "reddit": "Reddit oder ein Forum",
         "friend": "Freunde oder Familie",
         "video": "YouTube oder TikTok",
@@ -581,5 +584,107 @@
     "readyRecurring": "Wiederkehrende Zeitpläne, die den Alltag überstehen",
     "readyCapture": "Erfassung per Sprache, Foto oder Text",
     "readyReminders": "Erinnerungen und Homescreen-Widgets"
+  },
+  "home": {
+    "customize": {
+      "action": ""
+    },
+    "verdict": {
+      "late": {
+        "title_one": "",
+        "title_other": ""
+      },
+      "review": {
+        "title": "",
+        "body_one": "",
+        "body_other": ""
+      },
+      "today": {
+        "title_one": "",
+        "title_other": ""
+      },
+      "clear": {
+        "title": "",
+        "body": ""
+      },
+      "firstRun": {
+        "title": "",
+        "body": ""
+      }
+    },
+    "triage": {
+      "overdue": "",
+      "dueToday": "",
+      "needsReview": "",
+      "comingUp": "",
+      "unplanned": "",
+      "allClear": ""
+    },
+    "nextUp": {
+      "title": "",
+      "action": ""
+    },
+    "nextUpFallback": {
+      "title": "",
+      "action": ""
+    },
+    "overdue": {
+      "title": "",
+      "action": ""
+    },
+    "clear": {
+      "title": "",
+      "body": "",
+      "action": ""
+    },
+    "firstTask": {
+      "title": "",
+      "description": "",
+      "action": ""
+    },
+    "review": {
+      "title": "",
+      "pendingTitle": "",
+      "myPendingTitle": "",
+      "action": ""
+    },
+    "circle": {
+      "title": "",
+      "action": "",
+      "open_one": "",
+      "open_other": "",
+      "late_one": "",
+      "late_other": "",
+      "done_one": "",
+      "done_other": "",
+      "caughtUp": "",
+      "emptyTitle": "",
+      "emptyBody": "",
+      "emptyAction": ""
+    },
+    "projects": {
+      "title": "",
+      "action": "",
+      "tasks_one": "",
+      "tasks_other": "",
+      "tasksOverdue_one": "",
+      "tasksOverdue_other": "",
+      "tasksUnplanned_one": "",
+      "tasksUnplanned_other": "",
+      "clear": ""
+    },
+    "filters": {
+      "title": "",
+      "action": "",
+      "tasks_one": "",
+      "tasks_other": "",
+      "clear": ""
+    },
+    "capture": {
+      "placeholder": "",
+      "add": "",
+      "voice": "",
+      "scan": ""
+    }
   }
 }

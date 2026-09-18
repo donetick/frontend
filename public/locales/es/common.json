@@ -8,11 +8,11 @@
   "apply": "Aplicar",
   "attachments": "Archivos adjuntos",
   "autocompletePlaceholder": "Escribe aquí...",
-  "back": "Back",
+  "back": "Atrás",
   "backFromSearch": "Volver de la búsqueda",
-  "backToCalendar": "Back to Calendar",
+  "backToCalendar": "Volver al Calendario",
   "bottomNav": "Navegación Inferior",
-  "cancel": "Cancel",
+  "cancel": "Cancelar",
   "cancelAll": "Cancelar todo",
   "circleSetup": {
     "alreadyMember": "Ya eres miembro de este círculo",
@@ -35,7 +35,7 @@
     "requestSentTitle": "Solicitud Enviada"
   },
   "clearAll": "Limpiar todo",
-  "close": "Close",
+  "close": "Cerrar",
   "closeDialog": "Cerrar diálogo",
   "colors": {
     "Amber": "Ámbar",
@@ -70,14 +70,6 @@
   "done": "Hecho",
   "edit": "Editar",
   "error": "Error",
-  "refresh": "Actualizar",
-  "settings": "Configuración",
-  "yes": "Sí",
-  "no": "No",
-  "back": "Atrás",
-  "backToCalendar": "Volver al Calendario",
-  "logout": "Cerrar Sesión",
-  "version": "Versión",
   "errorReport": {
     "cancel": "Cancelar",
     "close": "Cerrar",
@@ -190,6 +182,108 @@
     "untilDate": "Until {{date}}"
   },
   "getStarted": "Comenzar",
+  "home": {
+    "capture": {
+      "add": "",
+      "placeholder": "",
+      "scan": "",
+      "voice": ""
+    },
+    "circle": {
+      "action": "",
+      "caughtUp": "",
+      "done_one": "",
+      "done_other": "",
+      "emptyAction": "",
+      "emptyBody": "",
+      "emptyTitle": "",
+      "late_one": "",
+      "late_other": "",
+      "open_one": "",
+      "open_other": "",
+      "title": ""
+    },
+    "clear": {
+      "action": "",
+      "body": "",
+      "title": ""
+    },
+    "customize": {
+      "action": ""
+    },
+    "filters": {
+      "action": "",
+      "clear": "",
+      "tasks_one": "",
+      "tasks_other": "",
+      "title": ""
+    },
+    "firstTask": {
+      "action": "",
+      "description": "",
+      "title": ""
+    },
+    "nextUp": {
+      "action": "",
+      "title": ""
+    },
+    "nextUpFallback": {
+      "action": "",
+      "title": ""
+    },
+    "overdue": {
+      "action": "",
+      "title": ""
+    },
+    "projects": {
+      "action": "",
+      "clear": "",
+      "tasksOverdue_one": "",
+      "tasksOverdue_other": "",
+      "tasksUnplanned_one": "",
+      "tasksUnplanned_other": "",
+      "tasks_one": "",
+      "tasks_other": "",
+      "title": ""
+    },
+    "review": {
+      "action": "",
+      "myPendingTitle": "",
+      "pendingTitle": "",
+      "title": ""
+    },
+    "triage": {
+      "allClear": "",
+      "comingUp": "",
+      "dueToday": "",
+      "needsReview": "",
+      "overdue": "",
+      "unplanned": ""
+    },
+    "verdict": {
+      "clear": {
+        "body": "",
+        "title": ""
+      },
+      "firstRun": {
+        "body": "",
+        "title": ""
+      },
+      "late": {
+        "title_one": "",
+        "title_other": ""
+      },
+      "review": {
+        "body_one": "",
+        "body_other": "",
+        "title": ""
+      },
+      "today": {
+        "title_one": "",
+        "title_other": ""
+      }
+    }
+  },
   "imageLoadFailed": "Error al cargar la imagen",
   "joinCircle": {
     "adminReviewNote": "A Círculo admin will review your request before you get access.",
@@ -212,30 +306,33 @@
     "title": "You're invited to join a Círculo"
   },
   "kbSize": "{{size}} KB",
-  "loading": "Loading...",
+  "loading": "Cargando...",
   "loadingOffline": "Cargando en modo sin conexión...",
   "loadingOfflineSub": "Los datos pueden estar desactualizados.",
   "loadingSlow": "Cargando... esto está tardando un poco más de lo habitual.",
-  "logout": "Logout",
+  "logout": "Cerrar Sesión",
   "navigateBack": "Navegar hacia atrás",
   "navigation": {
     "activities": "Actividades",
-    "allTasks": "Todas las Tareas",
-    "home": "Resumen",
+    "allTasks": "Tareas",
     "archived": "Archivadas",
+    "collapseMenu": "Contraer menú",
+    "expandMenu": "Expandir menú",
     "filters": "Filtros",
+    "home": "Resumen",
     "labels": "Etiquetas",
+    "mobileNavigation": "",
+    "more": "",
+    "openMenu": "Abrir menú",
     "points": "Puntos",
+    "primaryNavigation": "Navegación principal",
+    "profile": "Perfil",
     "projects": "Proyectos",
     "reportBug": "Informar de un problema",
     "search": "Buscar",
     "settings": "Ajustes",
-    "things": "Objetos",
-    "openMenu": "Abrir menú",
-    "collapseMenu": "Contraer menú",
-    "expandMenu": "Expandir menú",
-    "primaryNavigation": "Navegación principal",
-    "profile": "Perfil"
+    "tasks": "",
+    "things": "Objetos"
   },
   "newVersionAvailable": "Nueva versión disponible",
   "no": "No",
@@ -425,9 +522,9 @@
     "stateTimeout": "Connection timeout - reconnecting...",
     "stateTokenRefreshed": "Token refreshed - reconnecting..."
   },
-  "refresh": "Refresh",
+  "refresh": "Actualizar",
   "removeAll": "Eliminar todo",
-  "save": "Save",
+  "save": "Guardar",
   "search": {
     "actions": {
       "createFilter": "Crear un filtro",
@@ -436,9 +533,9 @@
       "createTask": "Crear a Tarea",
       "filterTasks": "Mostrar tareas que coincidan con «{{query}}»",
       "filterTasksSubtitle": "Filtro the Tarea list",
-      "navigation": "Navigation",
+      "navigation": "Navegación",
       "openSettings": "Open Ajustes",
-      "quickAction": "Quick action",
+      "quickAction": "Acción rápida",
       "viewActivities": "Ver actividades",
       "viewAllTasks": "Ver todas las tareas",
       "viewArchivedTasks": "Ver tareas archivadas",
@@ -448,26 +545,26 @@
       "viewProjects": "Ver proyectos",
       "viewThings": "Ver objetos"
     },
-    "deviceNote": "Searching content available on this device",
+    "deviceNote": "Se busca en el contenido disponible en este dispositivo",
     "empty": {
       "actionsSubtitle": "Ninguna vista o acción coincide. Presiona retroceso para buscar en todo.",
       "subtitle": "You can still Filtro the Tarea list with this search.",
-      "title": "No direct matches"
+      "title": "Sin coincidencias directas"
     },
     "escape": "Esc",
     "footer": {
-      "navigate": "Navigate",
-      "open": "Open",
-      "results_one": "{{count}} result",
-      "results_other": "{{count}} results",
+      "navigate": "Navegar",
+      "open": "Abrir",
+      "results_one": "{{count}} resultado",
+      "results_other": "{{count}} resultados",
       "slashHint": "/ para ir a una vista",
-      "typeToSearch": "Type to search"
+      "typeToSearch": "Escribe para buscar"
     },
     "groups": {
-      "actions": "Quick actions",
+      "actions": "Acciones rápidas",
       "history": "notas",
       "labels": "Etiquetas",
-      "people": "People",
+      "people": "Personas",
       "projects": "Proyectos",
       "settings": "Ajustes",
       "tasks": "Tareas"
@@ -481,7 +578,7 @@
     },
     "placeholder": "Buscar tareas, acciones...",
     "recent": "Búsquedas recientes",
-    "title": "Search"
+    "title": "Buscar"
   },
   "selectUser": "Seleccionar usuario",
   "settings": "Ajustes",
@@ -493,7 +590,7 @@
     "sortBy": "Ordenar por",
     "title": "Sort & Filtro"
   },
-  "success": "Success",
+  "success": "Éxito",
   "summaryOfChores": "Resumen de tareas",
   "sync": {
     "actionsWaitingToSync_one": "{{count}} action waiting to be synced.",
@@ -576,9 +673,9 @@
     "unlockPremium": "Unlock premium features",
     "upgradeToPlus": "Upgrade to Plus"
   },
-  "version": "Version",
+  "version": "Versión",
   "versionInfo": "Información de versión",
-  "warning": "Warning",
+  "warning": "Advertencia",
   "workspaceReady": {
     "allSet": "You're all set",
     "allSetNamed": "You're all set, {{name}}",
@@ -589,5 +686,5 @@
     "readyShared": "Tareas compartidas para toda la casa",
     "subtitle": "Your workspace is ready. Here's what's waiting inside."
   },
-  "yes": "Yes"
+  "yes": "Sí"
 }

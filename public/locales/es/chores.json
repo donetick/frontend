@@ -86,14 +86,7 @@
     "loading": "Cargando actividades...",
     "showMore": "Mostrar más",
     "status": {
-      "done": "Realizada",
-      "late": "Atrasada",
-      "missed": "Perdida",
-      "pendingApproval": "Pendiente de aprobación",
-      "rejected": "Rechazada",
-      "rescheduled": "Reprogramada",
-      "skipped": "Omitida",
-      "started": "Iniciada"
+      "done": "Realizada"
     },
     "title": "Actividades Recientes"
   },
@@ -186,6 +179,7 @@
     "restoredTitle": "Tarea restaurada",
     "searchPlaceholder": "Buscar tareas archivadas",
     "selectAllTitle": "Seleccionar todas las tareas visibles (Ctrl+A)",
+    "selectSectionTitle": "",
     "selected_one": "{{count}} tarea seleccionada",
     "selected_other": "{{count}} tareas seleccionadas",
     "someFailedTitle": "Algunas tareas fallaron",
@@ -206,32 +200,6 @@
     "selectedCount_one": "{{count}} asignado",
     "selectedCount_other": "{{count}} asignados",
     "unknown": "Desconocido"
-  },
-  "filterChip": {
-    "cancelAll": "",
-    "unpin": "",
-    "pin": "",
-    "edit": "",
-    "delete": ""
-  },
-  "multiSelect": {
-    "showShortcuts": "",
-    "title": "",
-    "selection": "",
-    "selectAll": "",
-    "clearOrExit": "",
-    "actions": "",
-    "markCompleted": "",
-    "deleteSelected": "",
-    "interface": "",
-    "quickAdd": "",
-    "helpDescription": "",
-    "gotIt": ""
-  },
-  "notifications": {
-    "needTitle": "",
-    "needBody": "",
-    "keepDisabled": ""
   },
   "assigneeCard": {
     "emptyDescription": "Asigna una tarea a alguien de tu círculo y su carga de trabajo aparecerá aquí.",
@@ -385,50 +353,7 @@
     "uploadFailedMessage": "Error al subir el archivo adjunto.",
     "uploadFailedTitle": "Error de Subida",
     "uploadFile": "Subir Archivo",
-    "whoToNotify": "A Quién Notificar",
-    "approvalRequirementHelp": "La tarea necesitará la aprobación de un administrador antes de marcarse como completada",
-    "assignee": "Asignados",
-    "assigneeHelp": "¿Quién puede hacer esta tarea?",
-    "attachmentHelp": "Archivos adjuntos a esta tarea",
-    "autoComplete": "Completar automáticamente al escanear",
-    "autoCompleteHelp": "Marcar tarea como hecha cuando se toque la etiqueta",
-    "beforeDueDate": "antes de la fecha de vencimiento",
-    "cancel": "Cancelar",
-    "changePhoto": "Cambiar foto",
-    "copyUrl": "Copiar URL",
-    "descriptionHelp": "¿De qué trata esta tarea?",
-    "descriptionPlaceholder": "Escribe una descripción...",
-    "dropFiles": "Arrastra archivos aquí o haz clic para subir",
-    "dueDateHelp": "Asigna una fecha de vencimiento a la tarea",
-    "errSelectMonthDay": "Por favor, selecciona un día del mes entre 1 y 31",
-    "errUnsupportedNfc": "El navegador no admite NFC. Copia la URL y escríbela en una etiqueta NFC usando un dispositivo compatible.",
-    "errWriteNfc": "Error al escribir la etiqueta NFC. Por favor, inténtalo de nuevo.",
-    "mustCompleteBy": "La tarea debe completarse antes de una fecha determinada",
-    "nameHelp": "¿Cuál es el nombre de esta tarea?",
-    "namePlaceholder": "Nombre de la tarea",
-    "notificationsHelp": "Cuándo se deben recibir notificaciones para esta tarea",
-    "notifyForChore": "Notificar para esta tarea",
-    "nfcTagLink": "Vincular etiqueta NFC",
-    "nfcTagLinkHelp": "Permite completar o iniciar esta tarea tocando una etiqueta NFC",
-    "objectStateTrigger": "Activar esta tarea según el estado de un objeto",
-    "objectStateTriggerHelp": "¿Es algo que debe hacerse cuando cambia el estado de un objeto?",
-    "points": "Puntos",
-    "pointsHelp": "Asignar puntos por completarla",
-    "privacySettingsHelp": "¿Quién puede ver esta tarea?",
-    "publicVisibility": "Pública",
-    "publicVisibilityHelp": "Todos en tu círculo",
-    "repeat": "Repetir",
-    "repeatChore": "Repetir esta tarea",
-    "repeatHelp": "¿Es algo que debe hacerse regularmente?",
-    "requireAdminApproval": "Requerir aprobación de un administrador",
-    "saveChanges": "Guardar cambios",
-    "saving": "Guardando...",
-    "selectObject": "Seleccionar un objeto",
-    "startingNfc": "Iniciando...",
-    "tagUrl": "URL de la etiqueta",
-    "titleCreate": "Crear nueva tarea",
-    "titleEdit": "Editar tarea",
-    "writeNfcTag": "Escribir etiqueta NFC"
+    "whoToNotify": "A Quién Notificar"
   },
   "choreView": {
     "addNote": "Añadir nota",
@@ -467,7 +392,7 @@
     "markAsDone": "Marcar como hecha",
     "markComplete": "Marcar como completada",
     "more": "More",
-    "na": "N/A",
+    "na": "N/D",
     "noDescription": "Sin descripción",
     "noPriority": "Sin prioridad",
     "notePlaceholder": "Añade una nota sobre la finalización...",
@@ -602,6 +527,7 @@
     }
   },
   "filterBuilder": {
+    "anyOf": "",
     "assignee": "Persona asignada",
     "clear": "Limpiar",
     "createdBy": "Creada por",
@@ -616,11 +542,7 @@
       "isDueThisWeek": "Esta semana",
       "isDueToday": "Hoy",
       "isDueTomorrow": "Mañana",
-      "isOverdue": "Vencida",
-      "isDueMonth": "Este mes",
-      "isDueNextMonth": "El próximo mes",
-      "isDueNextWeek": "La próxima semana",
-      "isDueOverdue": "Vencida"
+      "isOverdue": "Vencida"
     },
     "exclude": "Excluir",
     "filterFallback": "Filtro",
@@ -699,27 +621,6 @@
     "pending": "Pendiente",
     "reject": "Rechazar",
     "schedule": "Programar"
-  },
-  "memberDetail": {
-    "browseTasks": "Explorar tareas",
-    "clearFilters": "Mostrar todas las tareas",
-    "emptyDescription": "No hay nada asignado a {{name}} en este momento. Asigna una tarea y aparecerá aquí.",
-    "emptyTitle": "Sin tareas asignadas",
-    "filters": {
-      "all": "Todas",
-      "overdue": "Vencidas",
-      "today": "Hoy",
-      "undated": "Sin fecha"
-    },
-    "noMatchingStatus": "Ninguna tarea asignada a esta persona está en ese estado ahora mismo.",
-    "noResultsDescription": "Ninguna tarea asignada a esta persona coincide con \"{{searchTerm}}\".",
-    "noResultsTitle": "Ninguna tarea coincide",
-    "notFoundDescription": "Es posible que esta persona haya dejado el círculo o ya no esté compartida contigo.",
-    "notFoundTitle": "Miembro no encontrado",
-    "searchPlaceholder": "Buscar tareas asignadas a esta persona",
-    "taskCount_one": "{{count}} tarea asignada",
-    "taskCount_other": "{{count}} tareas asignadas",
-    "you": "Tú"
   },
   "modals": {
     "addNote": "Añadir nota to attach to this completion:",
@@ -820,14 +721,7 @@
   "notifications": {
     "keepDisabled": "No, mantener deshabilitado",
     "needBody": "Debes conceder permisos para recibir notificaciones, ¿deseas activarlas?",
-    "needTitle": "¿Necesitas notificación?",
-    "after": "después",
-    "before": "antes",
-    "limitReached": "Límite alcanzado",
-    "limitReachedDesc": "Se pueden añadir un máximo de 5 notificaciones por tarea.",
-    "notification": "Notificación",
-    "onDueDate": "En la fecha de vencimiento",
-    "title": "Notificaciones"
+    "needTitle": "¿Necesitas notificación?"
   },
   "nudge": {
     "customMessage": "Mensaje personalizado (opcional)",
@@ -838,16 +732,7 @@
     "selfHostedFollowUp": "Actualizaremos esto si encontramos una forma más sencilla de configurarlo en autoalojado.",
     "selfHostedHeading": "¡Aviso!",
     "selfHostedNotice": "Esta función está disponible en Donetick Cloud. En instancias alojadas por ti mismo, requiere configurar Google Cloud y Firebase Cloud Messaging (FCM).",
-    "title": "Enviar toque de atención",
-    "empty": "No se puede enviar un toque de atención porque no hay nadie asignado a esta tarea.",
-    "emptyTitle": "Sin personas asignadas",
-    "errCooldown": "Debes esperar antes de enviar otro toque de atención para esta tarea.",
-    "errSend": "Error al enviar el toque de atención.",
-    "placeholder": "Añade un mensaje opcional...",
-    "send": "Enviar toque de atención",
-    "sending": "Enviando...",
-    "sent": "¡Toque de atención enviado con éxito!",
-    "subtitle": "Enviar un aviso a las personas asignadas sobre {{choreName}}"
+    "title": "Enviar toque de atención"
   },
   "overview": {
     "changeDueDate": "Cambiar fecha de vencimiento",
@@ -858,16 +743,7 @@
     "newChore": "Nueva tarea",
     "search": "Buscar",
     "title": "Resumen de tareas",
-    "unassigned": "Sin asignar",
-    "allAssigned": "Todas las asignadas",
-    "assignedCount": "{{assigned}}/{{total}} Asignadas",
-    "completionRate": "Tasa de cumplimiento",
-    "doneCount": "{{done}}/{{total}} Hechas",
-    "noTasksAssigned": "Sin tareas asignadas aún",
-    "noTasksDescription": "Asigna una tarea a alguien de tu círculo y su carga de trabajo aparecerá aquí.",
-    "tasksSummary": "Resumen de tareas",
-    "unassignedCount": "{{count}} Sin asignar",
-    "userViewNotice": "Las tareas se filtrarán para mostrar solo las asignadas al usuario seleccionado"
+    "unassigned": "Sin asignar"
   },
   "photoTask": {
     "altCaptured": "Documento capturado",
@@ -886,17 +762,7 @@
     "upload": "Subir",
     "uploadPhoto": "Subir foto"
   },
-  "priority": {
-    "high": "Alta",
-    "low": "Baja",
-    "lowest": "Muy baja",
-    "medium": "Media",
-    "none": "Sin prioridad",
-    "p1": "P1",
-    "p2": "P2",
-    "p3": "P3",
-    "p4": "P4"
-  },
+  "priority": "Prioridad",
   "remind": {
     "after": "después",
     "before": "antes",
@@ -996,8 +862,7 @@
       "2": "2.º",
       "3": "3.º",
       "4": "4.º",
-      "last": "último",
-      "5": "5.º"
+      "last": "último"
     },
     "picker": {
       "apply": "Aplicar",
@@ -1050,32 +915,6 @@
     "weekPatternHelp": {
       "every_week": "La tarea se repite cada semana en los días seleccionados",
       "week_of_month": "La tarea se repite en ocurrencias de días específicos cada mes (ej. 1er lunes, 3er viernes)"
-    },
-    "afterDueDate": "después de la fecha de vencimiento",
-    "completionDate": "fecha de finalización",
-    "helpAfterCompletion": "Se repite basándose en cuándo se completó por última vez",
-    "helpAfterDueDate": "Se repite basándose en la fecha de vencimiento programada",
-    "mode": {
-      "after_completion": "después de completarse",
-      "after_due_date": "después de la fecha de vencimiento"
-    },
-    "nthDay": "El {{ordinal}} día",
-    "nthDayOccurrence": "El {{ordinal}} {{day}}",
-    "onTheNth": "En el {{ordinal}} día",
-    "onTheNthDay": "En el {{ordinal}} {{day}}",
-    "recurrence": "Recurrencia",
-    "recurringTask": "Tarea recurrente",
-    "repeatEvery": "Repetir cada",
-    "taskRepeats": "Esta tarea se repite",
-    "types": {
-      "day": "día",
-      "days": "días",
-      "month": "mes",
-      "months": "meses",
-      "week": "semana",
-      "weeks": "semanas",
-      "year": "año",
-      "years": "años"
     }
   },
   "searchBar": {
@@ -1114,11 +953,11 @@
     "addChildTitle": "Añadir nested subtarea",
     "addPlaceholder": "Add new tarea... (Enter to add)",
     "addTitle": "Añadir subtarea",
-    "delete": "Delete",
+    "delete": "Eliminar",
     "deleteShortcut": "Delete (Shift+Backspace)",
-    "edit": "Edit",
+    "edit": "Editar",
     "editTitle": "Editar subtask",
-    "moveUpLevel": "Move up one level",
+    "moveUpLevel": "Subir un nivel",
     "namePlaceholder": "tarea name...",
     "untitled": "Untitled subtarea"
   },

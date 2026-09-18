@@ -79,8 +79,8 @@
         "description": "اضبط الـ Webhooks والتحديثات الفورية وغيرها من الميزات المتقدمة."
       },
       "privacy": {
-        "title": "",
-        "description": ""
+        "title": "الخصوصية و التحليلات",
+        "description": "التحكم في تحليلات الاستخدام المجهولة الهوية والإبلاغ عن الأعطال."
       },
       "developer": {
         "title": "إعدادات المطوّر",
@@ -169,7 +169,7 @@
     "joinedPending": "تم الانضمام إلى الدائرة بنجاح، انتظر موافقة مالك الدائرة على طلبك.",
     "alreadyMember": "أنت عضو في هذه الدائرة بالفعل",
     "joinFailed": "تعذّر الانضمام إلى الدائرة",
-    "copyLink": ""
+    "copyLink": "نسخ الرابط"
   },
   "accountSettings": {
     "title": "إعدادات الحساب",
@@ -271,9 +271,9 @@
     "customLabel": "إشعار مخصّص",
     "customHelper": "تلقَّ الإشعارات على منصة أخرى",
     "targetNone": "بدون",
-    "targetTelegram": "",
-    "targetPushover": "",
-    "targetWebhooks": "",
+    "targetTelegram": "تيليجرام",
+    "targetPushover": "الدفء",
+    "targetWebhooks": "الوب",
     "telegramBotHelpBefore": "عليك إرسال رسالة إلى البوت أولًا حتى تعمل إشعارات Telegram",
     "telegramBotHelpAfter": "لبدء محادثة",
     "clickHere": "اضغط هنا",
@@ -354,7 +354,7 @@
       "title": "رموز نسخ احتياطي جديدة",
       "warning": "لم تعد رموز النسخ الاحتياطي السابقة صالحة. احفظ هذه الرموز الجديدة في مكان آمن. يمكن استخدام كل رمز مرة واحدة فقط."
     },
-    "generateCodes": ""
+    "generateCodes": "توليد رموز جديدة"
   },
   "apiTokens": {
     "title": "رموز API",
@@ -425,7 +425,48 @@
         "description": "يعرض التقدّم الأسبوعي وإحصاءات إنجاز العائلة"
       }
     },
-    "detailedDescription": ""
+    "detailedDescription": "تخصيص تخطيط البطاقات وبروزها في الشبكة الجانبية. القسم متوفر فقط على أجهزة الشاشة الكبيرة مثل الأجهزة اللوحية وأجهزة الكمبيوتر المكتبية.."
+  },
+  "homeSections": {
+    "title": "تخصيص النظرة العامة",
+    "description": "تخصيص الأقسام التي تظهر على الشاشة الرئيسية وترتيبها. اسحب وإسقاط لإعادة الترتيب أو تبديل الرؤية لكل قسم.",
+    "resetToDefaults": "إعادة التعيين إلى الافتراضي",
+    "resetHelper": "سيؤدي هذا إلى استعادة جميع الأقسام لرؤيتها الافتراضية وترتيبها.",
+    "sections": {
+      "greeting": {
+        "name": "تحية",
+        "description": "العنوان الرئيسي في الأعلى الذي يلخص يومك"
+      },
+      "glance": {
+        "name": "في نظرة عامة",
+        "description": "المتأخرات / المتأخرة اليوم / مراجعة الاحتياجات / العد غير المخطط"
+      },
+      "circle": {
+        "name": "دائرتك",
+        "description": "يعرض ما يحمله الجميع في دائرتك هذا الأسبوع"
+      },
+      "review": {
+        "name": "تحتاج إلى مراجعة",
+        "description": "المهام المنتهية في انتظار تسجيل الدخول"
+      },
+      "overdue": {
+        "name": "متأخرة",
+        "description": "المهام التي تخلفت عن تاريخ استحقاقها"
+      },
+      "nextUp": {
+        "name": "قادمة",
+        "description": "ما هو مستحق اليوم وغدا"
+      },
+      "filters": {
+        "name": "فلاتر",
+        "description": "الوصول السريع إلى عوامل التصفية المثبتة والأكثر فائدة"
+      },
+      "projects": {
+        "name": "المشاريع",
+        "description": "أين يتكوّن العمل، حسب المشروع"
+      }
+    },
+    "detailedDescription": "تخصيص تخطيط و رؤية الأقسام على الشاشة الرئيسية."
   },
   "theme": {
     "title": "تفضيلات المظهر",
@@ -453,7 +494,7 @@
     "sunday": "الأحد",
     "monday": "الاثنين",
     "saturday": "السبت",
-    "helpTranslate": "",
+    "helpTranslate": "المساعدة في تحسين هذه الترجمة",
     "formats": {
       "mdy": "MM/DD/YYYY (الولايات المتحدة)",
       "dmy": "DD/MM/YYYY (أوروبا)",
@@ -461,7 +502,7 @@
       "long": "تنسيق طويل (مثال: 1 يناير 2024)",
       "short": "تنسيق قصير (مثال: 1 ينا 2024)"
     },
-    "descriptionLong": ""
+    "descriptionLong": "تخصيص صيغة اللغة والتاريخ والتفضيلات الإقليمية للحساب الخاص بك. سيتم تطبيق هذه الإعدادات طوال التطبيق."
   },
   "advanced": {
     "title": "الإعدادات المتقدمة",
@@ -501,151 +542,151 @@
     }
   },
   "privacyAnalytics": {
-    "title": "",
-    "description": "",
-    "analyticsToggle": "",
-    "analyticsHelper": "",
-    "crashToggle": "",
-    "crashHelper": "",
-    "footnote": ""
+    "title": "الخصوصية و التحليلات",
+    "description": "لا يقوم Doetick أبدا بإرسال أسماء المهام، والأوصاف، والملاحظات، أو أي محتوى آخر للمهمة. لا يتم تمكين تسجيل الجلسة أبدا.",
+    "analyticsToggle": "تحليلات مجهولة",
+    "analyticsHelper": "المساعدة على تحسين حاملي البيانات عن طريق مشاركة إحصائيات الاستخدام المجهول.",
+    "crashToggle": "تقارير الأعطال",
+    "crashHelper": "أرسل إلينا الخطأ وما أدى إليه عندما لا يعطل دونيتك محتوى المهمة.",
+    "footnote": "يمكنك تغيير هذه الخيارات في أي وقت."
   },
   "subscription": {
-    "sessionFailed": "",
-    "errorTitle": "",
-    "errorMessage": "",
-    "subscribe": "",
-    "cancelAnytime": "",
-    "description": "",
-    "whatsIncluded": "",
-    "mostPopular": "",
-    "featureNotifications": "",
-    "featureRichText": "",
-    "featureThingTriggers": "",
-    "featureApiTokens": "",
-    "featureImageUploads": "",
-    "featureAutomation": "",
-    "planYearly": ""
+    "sessionFailed": "فشل في إنشاء جلسة الاشتراك",
+    "errorTitle": "خطأ في الاشتراك",
+    "errorMessage": "فشل في بدء عملية الاشتراك. الرجاء المحاولة مرة أخرى.",
+    "subscribe": "اشترك",
+    "cancelAnytime": "إلغاء في أي وقت. لا توجد رسوم مخفية. الدفع الآمن مدعوم من الشريط.",
+    "description": "فتح التذكيرات وتفاصيل المهام الغنية والأتمتة المتقدمة.",
+    "whatsIncluded": "ما يشمل:",
+    "mostPopular": "الأكثر شعبية",
+    "featureNotifications": "إشعارات المهام والتذكير",
+    "featureRichText": "أوصاف النص الغني مع تحميل الصور",
+    "featureThingTriggers": "مشغلات المهام القائمة على الأشياء",
+    "featureApiTokens": "رمز API للتكامل",
+    "featureImageUploads": "تحميل الصور في الوصف",
+    "featureAutomation": "التشغيل الآلي المتقدم للمهام",
+    "planYearly": "سنوي"
   },
   "childUsers": {
-    "errNameRequired": "",
-    "errNameMin": "",
-    "errNameMax": "",
-    "errNameChars": "",
-    "errPasswordRequired": "",
-    "errPasswordLength": "",
-    "errPasswordMatch": "",
-    "errDisplayNameMax": "",
-    "createTitle": "",
-    "createDescription": "",
-    "createButton": "",
-    "nameLabel": "",
-    "namePlaceholder": "",
-    "displayNameLabel": "",
-    "displayNamePlaceholder": "",
-    "passwordLabel": "",
-    "passwordPlaceholder": "",
-    "confirmPasswordLabel": "",
-    "confirmPasswordPlaceholder": ""
+    "errNameRequired": "اسم الحساب الفرعي مطلوب",
+    "errNameMin": "اسم الحساب الفرعي يجب أن يكون على الأقل حرفين",
+    "errNameMax": "اسم الحساب الفرعي يجب أن يكون أقل من 20 حرفاً",
+    "errNameChars": "اسم الحساب الفرعي يمكن أن يحتوي فقط على أحرف صغيرة، نقطة و هاش",
+    "errPasswordRequired": "كلمة المرور مطلوبة",
+    "errPasswordLength": "يجب أن تكون كلمة المرور بين 8 و 64 حرفا",
+    "errPasswordMatch": "كلمتا المرور غير متطابقتين",
+    "errDisplayNameMax": "يجب أن يكون اسم العرض أقل من 50 حرفاً",
+    "createTitle": "إنشاء حساب فرعي",
+    "createDescription": "إنشاء تسجيل دخول يمكنه إكمال المهام المعينة لهذا الحساب.",
+    "createButton": "إنشاء حساب",
+    "nameLabel": "اسم الحساب الفرعي *",
+    "namePlaceholder": "أدخل اسم الحساب الفرعي (على سبيل المثال السارة)",
+    "displayNameLabel": "اسم العرض",
+    "displayNamePlaceholder": "عرض الاسم (اختياري، الافتراضي إلى اسم الحساب الفرعي)",
+    "passwordLabel": "كلمة المرور *",
+    "passwordPlaceholder": "أدخل كلمة المرور (8-64 حرفاً)",
+    "confirmPasswordLabel": "تأكيد كلمة المرور *",
+    "confirmPasswordPlaceholder": "تأكيد كلمة المرور"
   },
   "passwordChange": {
-    "minLength": "",
-    "maxLength": "",
-    "description": "",
-    "mismatch": "",
-    "newPassword": "",
-    "newPasswordPlaceholder": "",
-    "confirmPassword": "",
-    "confirmPasswordPlaceholder": ""
+    "minLength": "يجب أن تتكون كلمة المرور من 8 أحرف على الأقل",
+    "maxLength": "يجب أن تكون كلمة المرور أقل من 64 حرفاً",
+    "description": "اختر كلمة مرور بين 8 و 64 حرفاً.",
+    "mismatch": "كلمتا المرور غير متطابقتين",
+    "newPassword": "كلمة مرور جديدة",
+    "newPasswordPlaceholder": "أدخل كلمة المرور",
+    "confirmPassword": "تأكيد كلمة المرور",
+    "confirmPasswordPlaceholder": "كرر كلمة المرور"
   },
   "payment": {
-    "cancelledTitle": "",
-    "cancelledRedirect": "",
-    "successTitle": "",
-    "successRedirect": ""
+    "cancelledTitle": "تم إلغاء الدفع",
+    "cancelledRedirect": "سيتم إعادة توجيهك إلى الصفحة الرئيسية قريباً.",
+    "successTitle": "نجاح الدفع!",
+    "successRedirect": "سيتم إعادة توجيهك إلى صفحة الإعدادات قريباً."
   },
   "developer": {
-    "tokenRefreshed": "",
-    "endpointCalled": "",
-    "clearDbCleared": "",
-    "clearDbDone": "",
-    "intro": "",
-    "refreshCookieNote": "",
-    "noReconnectInfo": "",
-    "noTimeoutInfo": "",
-    "noDebugInfo": ""
+    "tokenRefreshed": "تم تحديث الرمز بنجاح",
+    "endpointCalled": "تحديث نقطة نهاية الرمز المسمى بنجاح",
+    "clearDbCleared": "تم مسح قاعدة البيانات المحلية دون اتصال. بدء المزامنة الكاملة...",
+    "clearDbDone": "اكتملت المزامنة الكاملة منذ البداية",
+    "intro": "عرض المعلومات الفنية حول رمز المصادقة الخاص بك والجلسة",
+    "refreshCookieNote": "تحديث الرموز يتم إدارته عبر HTTP-cookies فقط على منصة الويب",
+    "noReconnectInfo": "لا تتوفر معلومات إعادة الاتصال",
+    "noTimeoutInfo": "لا تتوفر معلومات مهلة",
+    "noDebugInfo": "لا تتوفر معلومات التصحيح"
   },
   "backup": {
-    "keyRequired": "",
-    "created": "",
-    "createFailed": "",
-    "selectFile": "",
-    "restored": "",
-    "restoreFailed": "",
-    "readFailed": "",
-    "createIntro": "",
-    "keyPlaceholder": "",
-    "includeAssets": "",
-    "warningLabel": "",
-    "restoreWarning": "",
-    "restoreKeyPlaceholder": "",
-    "title": "",
-    "createTab": "",
-    "restoreTab": "",
-    "creating": "",
-    "restoring": ""
+    "keyRequired": "مفتاح التشفير مطلوب",
+    "created": "تم إنشاء نسخة احتياطية وتحميلها بنجاح",
+    "createFailed": "فشل إنشاء نسخة احتياطية",
+    "selectFile": "الرجاء تحديد ملف النسخ الاحتياطي",
+    "restored": "تمت استعادة النسخ الاحتياطي بنجاح. الرجاء تحديث الصفحة.",
+    "restoreFailed": "فشل في استعادة النسخ الاحتياطي",
+    "readFailed": "فشل في قراءة ملف النسخ الاحتياطي",
+    "createIntro": "قم بإنشاء نسخة احتياطية مشفرة من بياناتك. ستتضمن هذه النسخة الاحتياطية جميع المهام الخاصة بك، والتاريخ، والإعدادات، واختيارياً الملفات التي قمت برفعها.",
+    "keyPlaceholder": "أدخل مفتاح تشفير قوي",
+    "includeAssets": "تضمين الملفات والأصول المحملة",
+    "warningLabel": "تحذير:",
+    "restoreWarning": "استعادة النسخة الاحتياطية ستحل محل جميع بياناتك الحالية. لا يمكن التراجع عن هذا الإجراء.",
+    "restoreKeyPlaceholder": "أدخل مفتاح التشفير المستخدم لهذا النسخ الاحتياطي",
+    "title": "النسخ الاحتياطي والاستعادة",
+    "createTab": "إنشاء نسخة احتياطية",
+    "restoreTab": "استعادة النسخ الاحتياطي",
+    "creating": "إنشاء نسخة احتياطية...",
+    "restoring": "استعادة النسخ الاحتياطي..."
   },
   "deletion": {
-    "passwordRequired": "",
-    "passwordAndDelete": "",
-    "failed": "",
-    "passwordPlaceholder": "",
-    "transferIntro": "",
-    "selectOwner": "",
-    "confirmPrompt": "",
-    "typeDelete": "",
-    "warningLead": "",
-    "warningIntro": "",
-    "removesProfile": "",
-    "removesChores": "",
-    "removesTokens": "",
-    "removesStorage": "",
-    "removesPoints": "",
-    "removesCircles": "",
-    "passwordToContinue": "",
-    "circleLabel": "",
-    "newOwner": "",
-    "logoutNotice": "",
-    "passwordLabel": "",
-    "typeToConfirm": ""
+    "passwordRequired": "الرجاء إدخال كلمة المرور للمتابعة",
+    "passwordAndDelete": "الرجاء إدخال كلمة المرور الخاصة بك وكتابة DLETE للتأكيد",
+    "failed": "فشل في حذف الحساب",
+    "passwordPlaceholder": "أدخل كلمة المرور",
+    "transferIntro": "لديك دوائر تتطلب نقل الملكية قبل الحذف. الرجاء تحديد المالكين الجدد:",
+    "selectOwner": "حدد مالك جديد",
+    "confirmPrompt": "الرجاء إدخال كلمة المرور الخاصة بك وكتابة DLETE للتأكيد",
+    "typeDelete": "حذف",
+    "warningLead": "لا يمكن التراجع عن هذا الإجراء.",
+    "warningIntro": "سيؤدي حذف حسابك إلى إزالته بشكل دائم:",
+    "removesProfile": "ملف تعريف المستخدم الخاص بك وبيانات المصادقة",
+    "removesChores": "جميع المهام الخاصة بك، والتاريخ المحفوظ وجلسات تتبع الوقت",
+    "removesTokens": "رمز API ، وجلسات MFA ، ورموز إعادة تعيين كلمة المرور",
+    "removesStorage": "ملفات التخزين وبيانات الاستخدام",
+    "removesPoints": "تاريخ النقاط والإشعارات",
+    "removesCircles": "عضوية الدائرة وعلاقاتها",
+    "passwordToContinue": "أدخل كلمة المرور للمتابعة",
+    "circleLabel": "الدائرة: {{name}}",
+    "newOwner": "مالك جديد",
+    "logoutNotice": "عند الحذف بنجاح، سيتم تسجيل الخروج وإعادة توجيهك إلى صفحة تسجيل الدخول.",
+    "passwordLabel": "كلمة المرور",
+    "typeToConfirm": "اكتب \"{{word}}\" للتأكيد"
   },
   "realtime": {
-    "titleSse": "",
-    "subtitleSse": ""
+    "titleSse": "التحديثات في الوقت الحقيقي (SSE)",
+    "subtitleSse": "الحصول على إشعارات فورية عبر أحداث الخادم المرسلة"
   },
   "nativeCancel": {
-    "title": "",
-    "dismiss": "",
-    "cancelViaStore": "",
-    "cancelDesktop": "",
-    "intro": "",
-    "iosHeading": "",
-    "iosStep1": "",
-    "iosStep2": "",
-    "iosStep3": "",
-    "iosStep4": "",
-    "iosStep5": "",
-    "iosNote": "",
-    "androidHeading": "",
-    "androidStep1": "",
-    "androidStep2": "",
-    "androidStep3": "",
-    "androidStep4": "",
-    "androidStep5": "",
-    "androidStep6": "",
-    "androidNote": "",
-    "webHeading": "",
-    "webBody": "",
-    "webNote": "",
-    "footer": ""
+    "title": "إلغاء الاشتراك",
+    "dismiss": "تجاهل",
+    "cancelViaStore": "سوف الغي من متجري التطبيقات",
+    "cancelDesktop": "إلغاء اشتراك سطح المكتب",
+    "intro": "لإلغاء اشتراكك ، يرجى اتباع التعليمات الخاصة بالمنصة الخاصة بك (يجب عليك الإلغاء من خلال نفس المنصة التي استخدمتها للاشتراك).",
+    "iosHeading": "لنظام iOS (iPhone/iPad):",
+    "iosStep1": "1. افتح تطبيق <b>إعدادات</b> على جهازك",
+    "iosStep2": "2. اضغط على اسمك في الجزء العلوي من الشاشة",
+    "iosStep3": "3. انقر <b>اشتراكات</b>",
+    "iosStep4": "4. ابحث وانقر على <b>دونيكك</b>",
+    "iosStep5": "5. انقر <b>إلغاء الاشتراك</b>",
+    "iosNote": "<b>ملاحظة:</b> إذا كنت مشترك من خلال نظام التشغيل iOS وتستخدم إصدار الويب/سطح المكتب، فيجب عليك الإلغاء من خلال إعدادات iOS كما هو مبين أعلاه.",
+    "androidHeading": "للأندرويد:",
+    "androidStep1": "1. افتح تطبيق <b>متجر Google Play</b>",
+    "androidStep2": "2. اضغط على أيقونة الملف الشخصي في الجزء العلوي الأيمن",
+    "androidStep3": "3. انقر <b>المدفوعات والاشتراكات</b>",
+    "androidStep4": "4. اضغط <b>اشتراكات</b>",
+    "androidStep5": "5. ابحث وانقر على <b>دونيكك</b>",
+    "androidStep6": "6. اضغط <b>إلغاء الاشتراك</b>",
+    "androidNote": "<b>ملاحظة:</b> إذا كنت مشترك من خلال Google Play وتستخدم إصدار الويب/سطح المكتب، فيجب عليك الإلغاء من خلال Google Play على النحو المبين أعلاه.",
+    "webHeading": "للاشتراكات في الويب/سطح المكتب:",
+    "webBody": "إذا كنت مشترك أصلا من خلال موقعنا على الإنترنت أو تطبيق سطح المكتب، يمكنك إلغاء اشتراكك عن طريق الذهاب إلى قسم إعدادات الحساب على موقعنا على شبكة الإنترنت. استخدام متصفح ويب",
+    "webNote": "<b>هام:</b> يجب عليك إلغاء اشتراكك من خلال نفس المنصة التي اشتركت فيها أصلا. إذا قمت بالاشتراك من خلال متجر تطبيقات iOS أو متجر Google Play (حتى لو كنت تستخدم الآن إصدار الويب/سطح المكتب)، يجب عليك إلغاء هذه المنصة الأصلية باستخدام التعليمات أعلاه.",
+    "footer": "سيبقى اشتراكك نشطا حتى نهاية فترة الفوترة الحالية."
   }
 }
