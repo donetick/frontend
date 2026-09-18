@@ -1,11 +1,13 @@
+import { BASE_PATH } from '../Config'
+
 // Tracks whether an OAuth authorization-code exchange is currently in flight.
 //
 // During that window the app is legitimately unauthenticated: the deep link has
 // arrived but Authenticating.jsx has not received tokens yet. Any 401 from an
 // unrelated request (background sync, a resumed query) must NOT be treated as an
 // expired session — the forced logout it triggers clears storage and does a hard
-// `window.location.href = '/login'`, which tears down the page and aborts the
-// in-flight code exchange.
+// `window.location.href = BASE_PATH + '/login'`, which tears down the page and
+// aborts the in-flight code exchange.
 let exchangeInProgress = false
 
 export const beginOAuthExchange = () => {
@@ -21,4 +23,5 @@ export const endOAuthExchange = () => {
 // full page load, so nothing has run to set the flag — the pathname check covers
 // that case (and doubles as a backstop if the flag is never cleared).
 export const isOAuthExchangeInProgress = () =>
-  exchangeInProgress || window.location.pathname === '/auth/oauth2'
+  exchangeInProgress ||
+  window.location.pathname === `${BASE_PATH}/auth/oauth2`

@@ -39,6 +39,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
+import { BASE_PATH } from '../../Config'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useDescriptionHtml } from '../../hooks/useDescriptionHtml'
@@ -118,7 +119,7 @@ const hasHtmlTags = value => /<\/?[a-z][\s\S]*>/i.test(value)
 const getNFCUrl = choreId =>
   Capacitor.getPlatform() === 'android' || Capacitor.getPlatform() === 'ios'
     ? `donetick://chores/${choreId}`
-    : `${window.location.origin}/chores/${choreId}`
+    : `${window.location.origin}${BASE_PATH}/chores/${choreId}`
 
 const ChoreView = () => {
   const { t } = useTranslation('chores')

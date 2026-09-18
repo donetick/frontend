@@ -1,6 +1,6 @@
 import { Preferences } from '@capacitor/preferences'
 
-import { API_URL } from '../Config'
+import { API_URL, BASE_PATH } from '../Config'
 import { networkManager } from '../hooks/NetworkManager'
 import {
   recordApiFailure,
@@ -19,7 +19,8 @@ const OAUTH_EXCHANGE_IN_PROGRESS = 'OAuth exchange in progress'
 
 class ApiClient {
   constructor() {
-    this.customServerURL = `${API_URL}/api/v1`
+    // When API_URL is empty (selfhosted mode), fall back to BASE_PATH (HA ingress prefix)
+    this.customServerURL = `${API_URL || BASE_PATH}/api/v1`
     this.isRefreshing = false
     this.failedQueue = []
     this.lastRefreshTime = 0
@@ -46,7 +47,7 @@ class ApiClient {
       key: 'customServerUrl',
     })
 
-    this.customServerURL = `${serverURL || API_URL}/api/v1`
+    this.customServerURL = `${serverURL || API_URL || BASE_PATH}/api/v1`
     this.initialized = true
   }
   getApiURL() {
@@ -196,7 +197,8 @@ class ApiClient {
       console.error('Error during logout', e)
     }
 
-    if (window.location.pathname !== '/login') window.location.href = '/login'
+    const loginPath = `${BASE_PATH}/login`
+    if (window.location.pathname !== loginPath) window.location.href = loginPath
     // fire and forget
   }
   async request(endpoint, options = {}) {

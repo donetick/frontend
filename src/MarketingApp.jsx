@@ -3,6 +3,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 
+import { BASE_PATH } from './Config'
+
 import { ImpersonateUserProvider } from './contexts/ImpersonateUserContext'
 import { LocalizationProvider } from './contexts/LocalizationContext'
 import ThemeContext from './contexts/ThemeContext'
@@ -29,7 +31,7 @@ const router = createBrowserRouter([
   { path: '/privacy', element: <PrivacyPolicyView /> },
   { path: '/terms', element: <TermsView /> },
   { path: '*', element: <AppRedirect /> },
-])
+], { basename: BASE_PATH || '/' })
 
 const queryClient = new QueryClient({
   defaultOptions: {
