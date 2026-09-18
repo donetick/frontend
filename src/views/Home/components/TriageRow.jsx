@@ -13,7 +13,7 @@ import { useNavigate } from 'react-router-dom'
  * The `filterId` values must stay in step with INSIGHT_FILTER_DEFS in
  * SmartInsightsCard, which is what /chores reads back out of the URL.
  */
-const TriageRow = ({ dueToday, needsReview, overdue, unplanned }) => {
+const TriageRow = ({ comingUp, dueToday, needsReview, overdue, unplanned }) => {
   const { t } = useTranslation('common')
   const navigate = useNavigate()
 
@@ -30,6 +30,12 @@ const TriageRow = ({ dueToday, needsReview, overdue, unplanned }) => {
       count: needsReview,
       filterId: 'pending-approval',
       key: 'needsReview',
+    },
+    {
+      color: 'success',
+      count: comingUp,
+      filterId: 'coming-up',
+      key: 'comingUp',
     },
     {
       color: 'neutral',
@@ -126,6 +132,7 @@ const TriageRow = ({ dueToday, needsReview, overdue, unplanned }) => {
 }
 
 TriageRow.propTypes = {
+  comingUp: PropTypes.number.isRequired,
   dueToday: PropTypes.number.isRequired,
   needsReview: PropTypes.number.isRequired,
   overdue: PropTypes.number.isRequired,

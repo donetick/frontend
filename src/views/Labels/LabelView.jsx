@@ -538,11 +538,11 @@ const LabelView = () => {
       <Box
         sx={{
           ...getSafeBottomStyles({ bottom: 0, padding: 16 }),
-          left: 10,
+          left: 'calc(var(--app-navigation-width, 0px) + 10px)',
           display: 'flex',
           justifyContent: 'flex-end',
           gap: 2,
-          'z-index': 1000,
+          'z-index': 100,
           '@media (max-width: 768px)': {
             bottom: getSafeBottom(56, 16),
           },

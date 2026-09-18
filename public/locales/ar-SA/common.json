@@ -30,7 +30,12 @@
     "filters": "الفلاتر",
     "activities": "الأنشطة",
     "points": "النقاط",
-    "settings": "الإعدادات"
+    "settings": "الإعدادات",
+    "openMenu": "فتح القائمة",
+    "collapseMenu": "طي القائمة",
+    "expandMenu": "توسيع القائمة",
+    "primaryNavigation": "التنقل الرئيسي",
+    "profile": "الملف الشخصي"
   },
   "search": {
     "title": "بحث",
