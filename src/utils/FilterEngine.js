@@ -71,6 +71,14 @@ const evaluateAssignee = (chore, operator, value, context) => {
     return true
   }
 
+  // Home's "mine" scope: unassigned chores are everyone's to pick up, so they
+  // count as available to me alongside chores actually assigned to me.
+  if (value === 'available_for_me' && userId) {
+    const isAvailableToMe =
+      !chore.assignedTo || String(chore.assignedTo) === String(userId)
+    return operator === 'is' ? isAvailableToMe : !isAvailableToMe
+  }
+
   // Handle specific user IDs (can be array for multi-select)
   const userIds = Array.isArray(value) ? value : [value]
   const isAssigned = userIds.some(
