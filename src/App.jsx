@@ -114,9 +114,15 @@ const AppContent = () => {
             alignItems: 'stretch',
             display: 'flex',
             flexDirection: 'column',
-            minHeight: '100dvh',
             width: '100%',
-            '@media (min-width: 1024px)': { flexDirection: 'row' },
+            // Only force full viewport height on desktop, where the
+            // sidebar NavBar needs to span the full column height. On
+            // mobile the NavBar isn't a sidebar, so forcing 100dvh here
+            // just leaves blank space below short pages once you scroll.
+            '@media (min-width: 1024px)': {
+              flexDirection: 'row',
+              minHeight: '100dvh',
+            },
           }}
         >
           <NavBar />

@@ -205,9 +205,12 @@ const ProjectSelector = ({
           color='neutral'
           size='sm'
           sx={{
-            height: 24,
-            borderRadius: 24,
+            height: 32,
+            minHeight: 32,
+            width: 32,
+            borderRadius: '50%',
             minWidth: 'auto',
+            p: 0,
             maxWidth: '200px',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -236,7 +239,7 @@ const ProjectSelector = ({
               // >
               <IconComponent
                 sx={{
-                  fontSize: 16,
+                  fontSize: 18,
                   color: getTextColorFromBackgroundColor(
                     currentProject?.color || LABEL_COLORS[0].value,
                   ),

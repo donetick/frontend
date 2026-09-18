@@ -45,6 +45,7 @@ import { DeleteProject } from '../../utils/Fetcher'
 import { getIconComponent } from '../../utils/ProjectIcons'
 import { getSafeBottom, getSafeBottomStyles } from '../../utils/SafeAreaUtils'
 import { useProjectFilter } from '../Chores/hooks/useProjectFilter'
+import ScrollHideFab from '../components/ScrollHideFab'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import ProjectModal from '../Modals/Inputs/ProjectModal'
 import { useProjects } from './ProjectQueries'
@@ -681,14 +682,10 @@ const ProjectView = () => {
         />
       )}
 
-      <Box
+      <ScrollHideFab
         sx={{
           ...getSafeBottomStyles({ bottom: 0, padding: 16 }),
           left: 'calc(var(--app-navigation-width, 0px) + 10px)',
-          display: 'flex',
-          justifyContent: 'flex-end',
-          gap: 2,
-          'z-index': 100,
           '@media (max-width: 768px)': {
             bottom: getSafeBottom(56, 16),
           },
@@ -707,7 +704,7 @@ const ProjectView = () => {
         >
           <Add />
         </IconButton>
-      </Box>
+      </ScrollHideFab>
 
       <ConfirmationModal config={confirmationModel} />
     </Container>

@@ -206,7 +206,12 @@ const MultiSelectToolbar = ({
         // Generous enough that the action buttons can wrap to two or three
         // rows on a narrow screen without being clipped, while still giving
         // the collapse something finite to animate to.
-        maxHeight: isVisible ? '400px' : '0',
+        // Collapsed value must be the number 0, not the string '0': MUI's
+        // sizing transform turns '0' into '0%', and a percentage max-height
+        // against an auto-height parent resolves circularly — the parent is
+        // sized with the toolbar expanded, leaving its full height as blank
+        // space below the page content.
+        maxHeight: isVisible ? '400px' : 0,
         opacity: isVisible ? 1 : 0,
         transform: isVisible ? 'translateY(0)' : 'translateY(-20px)',
         marginBottom: isVisible ? 2 : 0,

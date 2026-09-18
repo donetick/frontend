@@ -1,9 +1,11 @@
 import { Add, DocumentScanner, MicNone } from '@mui/icons-material'
 import { Box, IconButton, Sheet, Typography } from '@mui/joy'
+import useMediaQuery from '@mui/material/useMediaQuery'
 import PropTypes from 'prop-types'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { useScrollDirection } from '../../../hooks/useScrollDirection'
 import { localAIService } from '../../../service/LocalAIService'
 import { voiceInputService } from '../../../service/VoiceInputService'
 import { getSafeBottom } from '../../../utils/SafeAreaUtils'
@@ -18,6 +20,8 @@ const CaptureBar = ({ onCapture }) => {
   const { t } = useTranslation('common')
   const [voiceReady, setVoiceReady] = useState(false)
   const [scanReady, setScanReady] = useState(false)
+  const isMobile = useMediaQuery('(max-width:768px)')
+  const hidden = useScrollDirection({ enabled: isMobile })
 
   useEffect(() => {
     let alive = true
@@ -42,10 +46,14 @@ const CaptureBar = ({ onCapture }) => {
         insetInlineEnd: 0,
         insetInlineStart: 'var(--app-navigation-width, 0px)',
         justifyContent: 'center',
+        opacity: hidden ? 0 : 1,
         pointerEvents: 'none',
         position: 'fixed',
         px: 2,
+        transform: hidden ? 'translateY(150px)' : 'translateY(0)',
+        transition: 'transform 220ms ease, opacity 220ms ease',
         zIndex: 100,
+        '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
         '@media (max-width: 768px)': {
           bottom: getSafeBottom(68, 4),
         },
@@ -62,7 +70,7 @@ const CaptureBar = ({ onCapture }) => {
           // Matches the Container maxWidth='sm' content column (600 minus the
           // 2-unit gutters) so the bar lines up with the cards above it.
           maxWidth: 568,
-          pointerEvents: 'auto',
+          pointerEvents: hidden ? 'none' : 'auto',
           pl: 2,
           pr: 0.75,
           py: 0.75,

@@ -232,7 +232,7 @@ const NavBar = () => {
     </List>
   )
 
-  const footer = (compact = false) => (
+  const footer = (compact = false, showAccountRow = true) => (
     <Box
       sx={{
         borderTop: '1px solid',
@@ -240,23 +240,39 @@ const NavBar = () => {
         p: compact ? 0.5 : 1,
       }}
     >
-      <Box
-        sx={{
-          alignItems: 'center',
-          display: 'flex',
-          flexDirection: compact ? 'column' : 'row',
-          gap: compact ? 0.5 : 1,
-          minHeight: 48,
-          px: compact ? 0 : 1,
-          py: compact ? 0.5 : 0,
-        }}
-      >
-        <Tooltip
-          title={
-            compact ? t('navigation.profile', { defaultValue: 'Profile' }) : ''
-          }
-          placement='right'
+      {showAccountRow && (
+        <Box
+          sx={{
+            alignItems: 'center',
+            display: 'flex',
+            flexDirection: compact ? 'column' : 'row',
+            gap: compact ? 0.5 : 1,
+            minHeight: 48,
+            px: compact ? 0 : 1,
+            py: compact ? 0.5 : 0,
+          }}
         >
+          <Tooltip
+            title={
+              compact
+                ? t('navigation.profile', { defaultValue: 'Profile' })
+                : ''
+            }
+            placement='right'
+          >
+            <Box
+              sx={{
+                alignItems: 'center',
+                display: 'flex',
+                height: compact ? 48 : 'auto',
+                justifyContent: 'center',
+                width: compact ? 48 : 'auto',
+              }}
+            >
+              <UserProfileAvatar />
+            </Box>
+          </Tooltip>
+          {!compact && <Box sx={{ flex: 1 }} />}
           <Box
             sx={{
               alignItems: 'center',
@@ -266,22 +282,10 @@ const NavBar = () => {
               width: compact ? 48 : 'auto',
             }}
           >
-            <UserProfileAvatar />
+            <SyncStatusIndicator />
           </Box>
-        </Tooltip>
-        {!compact && <Box sx={{ flex: 1 }} />}
-        <Box
-          sx={{
-            alignItems: 'center',
-            display: 'flex',
-            height: compact ? 48 : 'auto',
-            justifyContent: 'center',
-            width: compact ? 48 : 'auto',
-          }}
-        >
-          <SyncStatusIndicator />
         </Box>
-      </Box>
+      )}
       <List size='sm' sx={{ gap: 0.25, p: 0 }}>
         <Tooltip
           title={compact ? t('navigation.reportBug') : ''}
@@ -538,7 +542,9 @@ const NavBar = () => {
             >
               {navigation(true)}
             </Box>
-            <Box className='safe-area-x safe-area-bottom'>{footer()}</Box>
+            <Box className='safe-area-x safe-area-bottom'>
+              {footer(false, false)}
+            </Box>
           </Drawer>
         </>
       )}

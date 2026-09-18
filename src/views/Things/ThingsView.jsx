@@ -50,6 +50,7 @@ import {
   UpdateThingState,
 } from '../../utils/Fetcher'
 import { getSafeBottom, getSafeBottomStyles } from '../../utils/SafeAreaUtils'
+import ScrollHideFab from '../components/ScrollHideFab'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import CreateThingModal from '../Modals/Inputs/CreateThingModal'
 import EditThingStateModal from '../Modals/Inputs/EditThingState'
@@ -705,15 +706,10 @@ const ThingsView = () => {
           ))}
         </SwipeableList>
       </Box>
-      <Box
-        // variant='outlined'
+      <ScrollHideFab
         sx={{
           ...getSafeBottomStyles({ bottom: 0, padding: 16 }),
           left: 'calc(var(--app-navigation-width, 0px) + 10px)',
-          display: 'flex',
-          justifyContent: 'flex-end',
-          gap: 2,
-          'z-index': 100,
           '@media (max-width: 768px)': {
             bottom: getSafeBottom(56, 16),
           },
@@ -734,31 +730,31 @@ const ThingsView = () => {
         >
           <Add />
         </IconButton>
-        {isShowCreateThingModal && (
-          <CreateThingModal
-            isOpen={isShowCreateThingModal}
-            onClose={() => {
-              setIsShowCreateThingModal(false)
-              setCreateModalThing(null)
-            }}
-            onSave={handleSaveThing}
-            currentThing={createModalThing}
-          />
-        )}
-        {isShowEditThingStateModal && (
-          <EditThingStateModal
-            isOpen={isShowEditThingStateModal}
-            onClose={() => {
-              setIsShowEditStateModal(false)
-              setCreateModalThing(null)
-            }}
-            onSave={handleSetThingState}
-            currentThing={createModalThing}
-          />
-        )}
+      </ScrollHideFab>
+      {isShowCreateThingModal && (
+        <CreateThingModal
+          isOpen={isShowCreateThingModal}
+          onClose={() => {
+            setIsShowCreateThingModal(false)
+            setCreateModalThing(null)
+          }}
+          onSave={handleSaveThing}
+          currentThing={createModalThing}
+        />
+      )}
+      {isShowEditThingStateModal && (
+        <EditThingStateModal
+          isOpen={isShowEditThingStateModal}
+          onClose={() => {
+            setIsShowEditStateModal(false)
+            setCreateModalThing(null)
+          }}
+          onSave={handleSetThingState}
+          currentThing={createModalThing}
+        />
+      )}
 
-        <ConfirmationModal config={confirmModelConfig} />
-      </Box>
+      <ConfirmationModal config={confirmModelConfig} />
     </Container>
   )
 }
