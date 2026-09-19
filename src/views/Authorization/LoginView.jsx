@@ -9,7 +9,7 @@ import GoogleIcon from '@mui/icons-material/Google'
 import { Avatar, Box, Button, IconButton, Link, Typography } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import Cookies from 'js-cookie'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { LoginSocialGoogle } from 'reactjs-social-login'
@@ -20,6 +20,7 @@ import { useResource } from '../../queries/ResourceQueries'
 import { useUserProfile } from '../../queries/UserQueries.jsx'
 import { useNotification } from '../../service/NotificationProvider'
 import { apiClient } from '../../utils/ApiClient'
+import { isOAuthExchangeInProgress } from '../../utils/OAuthExchangeState'
 import { getPendingInvite } from '../../utils/PendingInvite'
 import { saveTokens } from '../../utils/TokenStorage'
 import { buildChildUsername, getUserDisplayInfo } from '../../utils/UserHelpers'
@@ -419,6 +420,38 @@ const LoginView = () => {
     }
   }
 
+  // When the instance disables password auth the username/password form is dead
+  // (the backend 403s any submit), so it must not be shown at all.
+  const passwordAuthDisabled = Boolean(resource?.disable_password_auth)
+  const hasIdentityProvider = Boolean(resource?.identity_provider?.client_id)
+
+  // Escape hatch: `?login=manual` lets an admin land on the login screen and
+  // click the IdP button by hand if SSO is misconfigured, instead of being
+  // bounced straight to the provider.
+  const isManualLogin =
+    new URLSearchParams(window.location.search).get('login') === 'manual'
+
+  // With password auth off and exactly one IdP configured, the login screen has
+  // nothing to offer but the SSO button, so skip it and go straight to the IdP.
+  const autoRedirectFired = useRef(false)
+  useEffect(() => {
+    if (autoRedirectFired.current) return
+    if (!passwordAuthDisabled || !hasIdentityProvider) return
+    if (isAuthenticated || isManualLogin) return
+    // Don't re-trigger while the callback exchange is in flight (native path).
+    if (isOAuthExchangeInProgress()) return
+
+    autoRedirectFired.current = true
+    handleAuthentikLogin()
+    // handleAuthentikLogin is stable for the relevant inputs (reads `resource`).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    passwordAuthDisabled,
+    hasIdentityProvider,
+    isAuthenticated,
+    isManualLogin,
+  ])
+
   const displayName = userProfile?.displayName || userProfile?.username
   const showSocialLogin = import.meta.env.VITE_IS_SELF_HOSTED !== 'true'
   const hasSocialOptions =
@@ -491,7 +524,7 @@ const LoginView = () => {
             {t('useDifferentAccount')}
           </Button>
         </Box>
-      ) : (
+      ) : passwordAuthDisabled ? null : (
         <Box
           component='form'
           onSubmit={handleSubmit}
@@ -571,7 +604,9 @@ const LoginView = () => {
         </Box>
       )}
 
-      {hasSocialOptions && <AuthDivider>{t('orContinueWith')}</AuthDivider>}
+      {hasSocialOptions && (!passwordAuthDisabled || userProfile) && (
+        <AuthDivider>{t('orContinueWith')}</AuthDivider>
+      )}
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
         {showSocialLogin && !Capacitor.isNativePlatform() && (
@@ -661,24 +696,26 @@ const LoginView = () => {
         )}
       </Box>
 
-      {!userProfile && !resource?.is_user_creation_disabled && (
-        <Typography
-          level='body-sm'
-          sx={{ mt: 3, textAlign: 'center', color: 'text.secondary' }}
-        >
-          {t('dontHaveAccount')}{' '}
-          <Link
-            component='button'
-            type='button'
+      {!userProfile &&
+        !passwordAuthDisabled &&
+        !resource?.is_user_creation_disabled && (
+          <Typography
             level='body-sm'
-            fontWeight={600}
-            underline='hover'
-            onClick={() => Navigate('/signup')}
+            sx={{ mt: 3, textAlign: 'center', color: 'text.secondary' }}
           >
-            {t('createOne')}
-          </Link>
-        </Typography>
-      )}
+            {t('dontHaveAccount')}{' '}
+            <Link
+              component='button'
+              type='button'
+              level='body-sm'
+              fontWeight={600}
+              underline='hover'
+              onClick={() => Navigate('/signup')}
+            >
+              {t('createOne')}
+            </Link>
+          </Typography>
+        )}
 
       <MFAVerificationModal
         open={mfaModalOpen}
