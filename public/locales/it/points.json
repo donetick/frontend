@@ -1,0 +1,19 @@
+{
+  "redeem": "Riscatta punti",
+  "redeemModal": {
+    "redeemButton": "Riscatta", "pointsAvailable": "{{count}} punti disponibili", "pointsToRedeem": "Punti da riscattare", "placeholder": "Inserisci punti...", "cannotExceed": "Non puoi superare i punti disponibili", "quickAdd": "Aggiunta rapida:", "aboutToRedeem": "Stai per riscattare", "amount": "{{count}} punti", "remaining": "Rimanenti: {{count}} punti"
+  },
+  "leaderboard": {
+    "titlePoints": "Classifica punti", "titleTasks": "Classifica attività", "subtitlePoints": "Classifica basata sui punti ottenuti nel periodo selezionato", "subtitleTasks": "Classifica basata sulle attività completate nel periodo selezionato", "modePoints": "Punti", "modeTasks": "Attività", "you": "Tu", "tasksAndAvg": "{{tasks}} attività • media {{avg}} per attività", "available": "{{count}} disponibili", "points_one": "{{count}} punto", "points_other": "{{count}} punti"
+  },
+  "tabs": {"short7d": "7G", "short6m": "6M", "shortAll": "Tutto", "days7": "7 giorni", "months6": "6 mesi", "allTime": "Da sempre"},
+  "filter": {"analysisTitle": "Filtri e analisi", "title": "Filtra punti", "showFor": "Mostra punti per:", "timePeriod": "Periodo:"},
+  "cards": {
+    "available": {"title": "Disponibili", "subtext": "Pronti da riscattare"},
+    "redeemed": {"title": "Riscattati", "subtext": "Già utilizzati"},
+    "total": {"title": "Totale", "subtext": "Guadagnati complessivamente"},
+    "period": {"title": "Punti del periodo", "allTime": "Da sempre", "last6Months": "Ultimi 6 mesi", "lastDays_one": "Ultimo {{count}} giorno", "lastDays_other": "Ultimi {{count}} giorni"}
+  },
+  "summary": {"showingFor": "Punti mostrati per", "unknownUser": "Utente sconosciuto", "overThe": "nel periodo", "allTime": "Da sempre", "last6Months": "Ultimi 6 mesi", "lastDays_one": "Ultimo {{count}} giorno", "lastDays_other": "Ultimi {{count}} giorni"},
+  "trend": {"title": "Andamento punti"}
+}

@@ -1,0 +1,105 @@
+{
+  "edit": {
+    "title": "Modifica cronologia",
+    "completedDate": "Data di completamento",
+    "note": "Nota",
+    "additionalNotes": "Note aggiuntive",
+    "deleteTitle": "Elimina cronologia",
+    "deleteMessage": "Vuoi davvero eliminare questa voce della cronologia?"
+  },
+  "status": {
+    "inProgress": "In corso",
+    "completed": "Completata",
+    "skipped": "Saltata",
+    "pendingApproval": "In attesa di approvazione",
+    "rejected": "Rifiutata",
+    "missed": "Non eseguita",
+    "rescheduled": "Ripianificata",
+    "scheduled": "Pianificata"
+  },
+  "badge": {
+    "onTime": "In orario",
+    "onTimeLabel": "In orario"
+  },
+  "card": {
+    "wasDue": "Scadenza: {{date}}",
+    "daysBeforeDue_one": "{{count}} g prima della scadenza",
+    "daysBeforeDue_other": "{{count}} gg prima della scadenza",
+    "daysAfterDue_one": "{{count}} g dopo la scadenza",
+    "daysAfterDue_other": "{{count}} gg dopo la scadenza",
+    "hoursBeforeDue_one": "{{count}} h prima della scadenza",
+    "hoursBeforeDue_other": "{{count}} h prima della scadenza",
+    "hoursAfterDue_one": "{{count}} h dopo la scadenza",
+    "hoursAfterDue_other": "{{count}} h dopo la scadenza",
+    "assignedTo": "Assegnata a {{name}}",
+    "points_one": "★ {{count}} pt",
+    "points_other": "★ {{count}} pt"
+  },
+  "detail": {
+    "title": "Dettagli attività",
+    "openTask": "Apri attività",
+    "editEntry": "Modifica voce",
+    "performedBy": "Eseguita da",
+    "assignedTo": "Assegnata a",
+    "lastUpdated": "Ultimo aggiornamento",
+    "duration": "Durata",
+    "pointsEarned": "Punti ottenuti",
+    "points_one": "{{count}} pt",
+    "points_other": "{{count}} pt",
+    "note": "Nota"
+  },
+  "charts": {
+    "noData": "Nessun dato disponibile",
+    "noLabels": "Nessuna etichetta",
+    "unassigned": "Non assegnata",
+    "unknownTask": "Attività sconosciuta",
+    "late": "In ritardo",
+    "status": {"title": "Stato", "description": "Stato delle attività completate"},
+    "due": {"title": "Scadenza", "description": "Scadenza delle attività correnti"},
+    "priority": {"title": "Priorità", "description": "Attività per priorità"},
+    "labels": {"title": "Etichette", "description": "Attività per etichetta"},
+    "labelsDuration": {"title": "Etichette (tempo)", "description": "Tempo impiegato per etichetta (ore)"},
+    "tasksTime": {"title": "Attività (tempo)", "description": "Tempo impiegato per singola attività (ore)"},
+    "assigneeBreakdown": {"title": "per assegnatario", "description": "Attività raggruppate per assegnatario"}
+  },
+  "filter": {
+    "status": "Stato", "pending": "In attesa", "labels": "Etichette", "hasNotes": "Con note", "hasPoints": "Con punti", "timePeriod": "Periodo", "user": "Utente", "completedBy": "Completata da", "completedAt": "Completata il"
+  },
+  "period": {
+    "days_one": "{{count}} giorno", "days_other": "{{count}} giorni", "allTime": "Da sempre"
+  },
+  "search": {"placeholder": "Cerca nella cronologia...", "clear": "Cancella ricerca"},
+  "sort": {"date": "Data di completamento", "updatedDate": "Data di aggiornamento", "performer": "Completata da", "status": "Stato", "points": "Punti"},
+  "activities": {
+    "title": "Attività",
+    "subtitle": "Visualizza ciò che è stato completato, saltato o non eseguito",
+    "emptyTitle": "Nessuna attività in questo intervallo",
+    "emptyDescriptionEveryone": "Nessuno nella tua Cerchia ha completato attività {{period}}. Prova un intervallo più ampio o un altro membro.",
+    "emptyDescriptionMember": "{{name}} non ha completato attività {{period}}. Prova un intervallo più ampio o un altro membro.",
+    "periodSoFar": "finora",
+    "periodLastDays": "negli ultimi {{count}} giorni",
+    "unknownMember": "questo membro",
+    "searchPlaceholder": "Cerca attività...",
+    "sort": {"date": "Data", "name": "Nome attività", "status": "Stato", "points": "Punti"}
+  },
+  "title": {"summary": "Riepilogo attività", "activity": "Cronologia attività"},
+  "noResults": {"clear": "Cancella filtri"},
+  "toast": {
+    "updateQueued": {"title": "Aggiornamento cronologia in coda", "message": "Sei offline. L'aggiornamento della cronologia verrà sincronizzato quando tornerai online."},
+    "updated": {"title": "Cronologia aggiornata", "message": "La voce della cronologia è stata aggiornata correttamente."},
+    "deleteQueued": {"title": "Eliminazione cronologia in coda", "message": "Sei offline. L'eliminazione dalla cronologia verrà sincronizzata quando tornerai online."},
+    "deleted": {"title": "Cronologia eliminata", "message": "La voce della cronologia è stata eliminata correttamente."}
+  },
+  "delete": {"title": "Elimina voce della cronologia", "message": "Vuoi davvero eliminare questa voce della cronologia?"},
+  "empty": {
+    "title": "Nessuna cronologia",
+    "description": "Ogni volta che questa attività viene completata o saltata, qui compariranno chi l'ha eseguita e quando. Non è ancora successo nulla.",
+    "backToTasks": "Torna alle attività",
+    "noResultsTitle": "Nessuna voce corrisponde a questi filtri",
+    "noResultsDescription": "La cronologia contiene voci, ma nessuna corrisponde ai filtri attualmente applicati."
+  },
+  "info": {
+    "allCompleted": "Completamenti totali", "timesSuffix": "{{count}} volte", "averageTiming": "Tempistica media", "onTime": "In orario", "longestDelay": "Ritardo massimo", "neverLate": "Mai in ritardo", "completedMost": "Chi ne ha completate di più", "unknown": "Sconosciuto", "membersInvolved": "Membri coinvolti", "membersSuffix": "{{count}} membri", "lastCompleted": "Ultimo completamento"
+  },
+  "noteViewer": {"updatedAt": "Aggiornato il {{date}}"}
+}
