@@ -424,6 +424,7 @@ const LoginView = () => {
   // (the backend 403s any submit), so it must not be shown at all.
   const passwordAuthDisabled = Boolean(resource?.disable_password_auth)
   const hasIdentityProvider = Boolean(resource?.identity_provider?.client_id)
+  const showSocialLogin = import.meta.env.VITE_IS_SELF_HOSTED !== 'true'
 
   // Escape hatch: `?login=manual` lets an admin land on the login screen and
   // click the IdP button by hand if SSO is misconfigured, instead of being
@@ -431,12 +432,15 @@ const LoginView = () => {
   const isManualLogin =
     new URLSearchParams(window.location.search).get('login') === 'manual'
 
-  // With password auth off and exactly one IdP configured, the login screen has
-  // nothing to offer but the SSO button, so skip it and go straight to the IdP.
+  // Only skip the login screen when the OIDC provider is the *sole* way in.
+  // If Google/Apple social login is also enabled, the user must be left to
+  // choose between them rather than being bounced straight to OIDC.
+  const isSoleSignInMethod =
+    passwordAuthDisabled && hasIdentityProvider && !showSocialLogin
   const autoRedirectFired = useRef(false)
   useEffect(() => {
     if (autoRedirectFired.current) return
-    if (!passwordAuthDisabled || !hasIdentityProvider) return
+    if (!isSoleSignInMethod) return
     if (isAuthenticated || isManualLogin) return
     // Don't re-trigger while the callback exchange is in flight (native path).
     if (isOAuthExchangeInProgress()) return
@@ -445,15 +449,9 @@ const LoginView = () => {
     handleAuthentikLogin()
     // handleAuthentikLogin is stable for the relevant inputs (reads `resource`).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    passwordAuthDisabled,
-    hasIdentityProvider,
-    isAuthenticated,
-    isManualLogin,
-  ])
+  }, [isSoleSignInMethod, isAuthenticated, isManualLogin])
 
   const displayName = userProfile?.displayName || userProfile?.username
-  const showSocialLogin = import.meta.env.VITE_IS_SELF_HOSTED !== 'true'
   const hasSocialOptions =
     showSocialLogin || Boolean(resource?.identity_provider?.client_id)
 
