@@ -29,6 +29,7 @@ export const AVAILABLE_LANGUAGES = [
   { code: 'es-ES', name: 'Spanish (Spain)', nativeName: 'Español (España)' },
   { code: 'fr', name: 'French', nativeName: 'Français' },
   { code: 'he', name: 'Hebrew', nativeName: 'עברית' },
+  { code: 'it', name: 'Italian', nativeName: 'Italiano' },
   { code: 'nl', name: 'Dutch', nativeName: 'Nederlands' },
   { code: 'ja', name: 'Japanese', nativeName: '日本語' },
   { code: 'pl', name: 'Polish', nativeName: 'Polski' },

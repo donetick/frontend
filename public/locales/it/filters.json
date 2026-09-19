@@ -1,0 +1,55 @@
+{
+  "builder": {
+    "errorName": "Inserisci un nome per il filtro",
+    "errorConditions": "Configura almeno una condizione del filtro",
+    "editTitle": "Modifica filtro",
+    "newTitle": "Nuovo filtro",
+    "addConditions": "Aggiungi condizioni per visualizzare l'anteprima",
+    "save": "Salva filtro",
+    "name": "Nome filtro",
+    "namePlaceholder": "es. Attività scadute di Alice",
+    "color": "Colore"
+  },
+  "nameExists": "Esiste già un filtro con questo nome",
+  "tasks_one": "{{count}} attività",
+  "tasks_other": "{{count}} attività",
+  "overdue": "{{count}} scadute",
+  "noConditions": "Nessuna condizione",
+  "condition_one": "{{count}} condizione",
+  "condition_other": "{{count}} condizioni",
+  "usedCount": "Usato {{count}} volte",
+  "delete": {
+    "title": "Elimina filtro",
+    "message": "Vuoi davvero eliminare \"{{name}}\"? L'operazione non può essere annullata."
+  },
+  "empty": {
+    "title": "Nessun filtro salvato",
+    "description": "Salva una combinazione di condizioni, ad esempio \"scadute e assegnate a me\", per tornarci subito da qualsiasi schermata.",
+    "createFilter": "Crea un filtro",
+    "noResultsTitle": "Nessun filtro corrispondente",
+    "noResultsWithSearch": "Nessun filtro salvato corrisponde a \"{{search}}\".",
+    "noResultsDefault": "Nessun filtro salvato corrisponde al filtro corrente.",
+    "clearSearch": "Cancella ricerca",
+    "showAllFilters": "Mostra tutti i filtri"
+  },
+  "header": {
+    "title": "Filtri",
+    "subtitle": "Salva le combinazioni di filtri preferite per accedervi rapidamente. Crea viste personalizzate per organizzare e trovare le attività più velocemente."
+  },
+  "searchPlaceholder": "Cerca filtri",
+  "sort": {
+    "smart": "Intelligente",
+    "name": "Nome",
+    "usage": "Numero di utilizzi",
+    "lastUsed": "Ultimo utilizzo",
+    "created": "Data di creazione"
+  },
+  "show": {
+    "title": "Mostra",
+    "all": "Tutti i filtri",
+    "pinned": "Fissati",
+    "unpinned": "Non fissati"
+  },
+  "pin": "Fissa",
+  "unpin": "Rimuovi dai fissati"
+}

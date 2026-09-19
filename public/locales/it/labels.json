@@ -1,0 +1,38 @@
+{
+  "shared": "Condivisa",
+  "delete": {"title": "Elimina etichetta", "message": "Vuoi davvero eliminare questa etichetta? Verrà rimossa da tutte le attività."},
+  "loadError": "Impossibile caricare le etichette. Riprova.",
+  "search": {
+    "placeholder": "Cerca etichette",
+    "noResultsTitle": "Nessuna etichetta corrispondente",
+    "noResultsDescription": "Nessuna etichetta corrisponde a \"{{searchTerm}}\".",
+    "noFilterResultsDescription": "Nessuna etichetta corrisponde al filtro corrente.",
+    "clear": "Cancella ricerca",
+    "showAll": "Mostra tutte le etichette"
+  },
+  "detail": {
+    "taskCount_one": "{{count}} attività", "taskCount_other": "{{count}} attività", "labelActions": "Azioni etichetta",
+    "filters": {"all": "Tutte", "overdue": "Scadute", "today": "Oggi", "undated": "Senza data"},
+    "noMatchingStatus": "Nessuna attività con questa etichetta si trova attualmente in questo stato.",
+    "clearFilters": "Mostra tutte le attività",
+    "searchPlaceholder": "Cerca attività con questa etichetta",
+    "emptyTitle": "Nessuna attività con questa etichetta",
+    "emptyDescription": "Nessuna attività ha ancora l'etichetta \"{{label}}\". Aggiungila a un'attività e comparirà qui.",
+    "browseTasks": "Sfoglia attività",
+    "noResultsTitle": "Nessuna attività corrispondente",
+    "noResultsDescription": "Nessuna attività con questa etichetta corrisponde a \"{{searchTerm}}\".",
+    "notFoundTitle": "Etichetta non trovata",
+    "notFoundDescription": "Questa etichetta potrebbe essere stata eliminata o non essere più condivisa con te.",
+    "backToLabels": "Torna alle etichette"
+  },
+  "blurb": "Gestisci le etichette e organizza le attività in modo efficace. Le etichette vengono condivise automaticamente con la tua Cerchia quando sono usate in un'attività condivisa.",
+  "modal": {
+    "errorEmptyName": "Il nome non può essere vuoto", "errorDuplicate": "Esiste già un'etichetta con questo nome", "errorNoColor": "Seleziona un colore",
+    "saveFailedTitle": "Salvataggio etichetta non riuscito", "saveFailedMessage": "Impossibile salvare l'etichetta. Riprova.",
+    "name": "Nome", "editTitle": "Modifica etichetta", "addTitle": "Aggiungi etichetta", "color": "Colore", "saveChanges": "Salva modifiche", "addLabel": "Aggiungi etichetta", "colorAriaSelect": "Seleziona {{color}}"
+  },
+  "picker": {"label": "Etichette", "createLabel": "Crea etichetta", "labelsCount_one": "{{count}} etichetta", "labelsCount_other": "{{count}} etichette"},
+  "view": {
+    "emptyTitle": "Nessuna etichetta", "emptyDescription": "Le etichette raggruppano le attività nella tua Cerchia, ad esempio \"cucina\" o \"bollette\", così puoi filtrarle con un tocco.", "createLabel": "Crea un'etichetta", "filterTitle": "Mostra", "sortName": "Nome", "sortColor": "Colore", "sortRecent": "Create di recente", "filterAll": "Tutte le etichette", "filterMine": "Create da me", "filterShared": "Condivise con me"
+  }
+}
