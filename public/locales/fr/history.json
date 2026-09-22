@@ -95,36 +95,36 @@
     "completedAt": "Terminée le"
   },
   "period": {
-    "days_one": "{{count}} jour",
+    "days_one": "{{count}} jour",
     "days_other": "{{count}} jours",
     "allTime": "Toute la période"
   },
   "search": {
-    "placeholder": "",
-    "clear": ""
+    "placeholder": "Rechercher dans l'historique...",
+    "clear": "Effacer la recherche"
   },
   "sort": {
-    "date": "",
-    "updatedDate": "",
-    "performer": "",
-    "status": "",
-    "points": ""
+    "date": "Date de fin",
+    "updatedDate": "Date de mise à jour",
+    "performer": "Terminée par",
+    "status": "Statut",
+    "points": "Points"
   },
   "activities": {
     "title": "Activités",
-    "subtitle": "",
+    "subtitle": "Consultez les tâches terminées, passées ou manquées",
     "emptyTitle": "Aucune activité sur cette période",
     "emptyDescriptionEveryone": "Personne n'a terminé de tâche dans votre cercle {{period}}. Essayez une période plus longue ou un autre membre.",
     "emptyDescriptionMember": "Aucune tâche terminée par {{name}} {{period}}. Essayez une période plus longue ou un autre membre.",
     "periodSoFar": "jusqu'à présent",
     "periodLastDays": "au cours des {{count}} derniers jours",
     "unknownMember": "ce membre",
-    "searchPlaceholder": "",
+    "searchPlaceholder": "Rechercher dans les activités...",
     "sort": {
-      "date": "",
-      "name": "",
-      "status": "",
-      "points": ""
+      "date": "Date",
+      "name": "Nom de la tâche",
+      "status": "Statut",
+      "points": "Points"
     }
   },
   "title": {
@@ -173,7 +173,7 @@
     "completedMost": "Record de tâches terminées",
     "unknown": "Inconnu",
     "membersInvolved": "Membres impliqués",
-    "membersSuffix": "Membres : {{count}}",
+    "membersSuffix": "Membres : {{count}}",
     "lastCompleted": "Dernière tâche terminée par"
   },
   "noteViewer": {
