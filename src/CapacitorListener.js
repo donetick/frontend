@@ -7,7 +7,7 @@ import { Preferences } from '@capacitor/preferences'
 import { PushNotifications } from '@capacitor/push-notifications'
 import { focusManager } from '@tanstack/react-query'
 
-import { RegisterDeviceToken } from './utils/Fetcher'
+import { RegisterDeviceToken, UnregisterDeviceToken } from './utils/Fetcher'
 import { beginOAuthExchange } from './utils/OAuthExchangeState'
 import { hasSeenOnboarding } from './utils/Onboarding'
 import { setPendingInvite } from './utils/PendingInvite'
@@ -220,6 +220,39 @@ const registerTokenIfNeeded = async (token, deviceInfo, deviceId, platform) => {
   }
 }
 
+// Drop this device from the account's push targets. Must run while the access
+// token is still valid (i.e. before the logout cleanup clears it), otherwise
+// the server keeps pushing this user's chores to a signed-out device.
+const unregisterPushNotifications = async () => {
+  if (!Capacitor.isNativePlatform()) return
+
+  try {
+    const stored = await Preferences.get({ key: 'deviceRegistration' })
+    const registration = stored.value ? JSON.parse(stored.value) : null
+
+    // Fall back to the platform device id when the local record is missing
+    // (e.g. app reinstall or preferences cleared) so we still try the delete.
+    const deviceId = registration?.deviceId ?? (await Device.getId()).identifier
+    const token = registration?.token ?? null
+
+    if (deviceId || token) {
+      await UnregisterDeviceToken(deviceId, token)
+    }
+
+    await Preferences.remove({ key: 'deviceRegistration' })
+    await Preferences.set({
+      key: 'pushNotificationPreferences',
+      value: JSON.stringify({ granted: false }),
+    })
+
+    // Stop APNs/FCM delivery to this install until the next sign-in registers again
+    await PushNotifications.removeAllListeners()
+    await PushNotifications.unregister()
+  } catch (error) {
+    console.error('Error unregistering device token', error)
+  }
+}
+
 const pushNotificationListenerRegistration = async () => {
   // Check and request permissions for Android 13+
   if (Capacitor.isNativePlatform()) {
@@ -333,4 +366,5 @@ const registerCapacitorListeners = navigate => {
 export {
   registerCapacitorListeners,
   pushNotificationListenerRegistration as registerPushNotifications,
+  unregisterPushNotifications,
 }

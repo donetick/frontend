@@ -170,6 +170,16 @@ class ApiClient {
       console.error('Error preserving pending invite on logout', e)
     }
 
+    // Runs before clearAllTokens() so the DELETE still carries a valid session;
+    // dynamic import sidesteps the ApiClient <-> CapacitorListener module cycle
+    try {
+      const { unregisterPushNotifications } =
+        await import('../CapacitorListener')
+      await unregisterPushNotifications()
+    } catch (e) {
+      console.error('Error unregistering push device on logout', e)
+    }
+
     await clearAllTokens()
     try {
       await offlineDB.clearAll()
