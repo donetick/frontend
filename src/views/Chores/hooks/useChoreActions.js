@@ -813,20 +813,41 @@ export const useChoreActions = ({
     [modalChore, impersonatedUser, updateChoreInState, closeModal],
   )
 
+  // Picking a circle member who isn't yet in the chore's assignee pool must
+  // not surface the backend's "assignee not in assignees list" rejection —
+  // assigning someone should always just work, so this adds them to the pool
+  // first (existing per-chore state, no dedicated endpoint for it) and only
+  // then assigns.
   const handleAssigneeChange = useCallback(
-    assigneeId => {
+    async assigneeId => {
       if (!modalChore) return
-      UpdateChoreAssignee(modalChore.id, assigneeId).then(response => {
-        if (response.ok) {
-          response.json().then(data => {
-            const newChore = data.res
-            updateChoreInState(newChore, 'assigned')
-          })
-        }
-      })
       closeModal()
+      try {
+        const isInPool = (modalChore.assignees || []).some(
+          a => a.userId === assigneeId,
+        )
+        if (!isInPool) {
+          const saveResponse = await SaveChore({
+            ...modalChore,
+            assignees: [
+              ...(modalChore.assignees || []),
+              { userId: assigneeId },
+            ],
+          })
+          if (!saveResponse.ok) throw new Error(t('actions.failAssignMessage'))
+        }
+        const response = await UpdateChoreAssignee(modalChore.id, assigneeId)
+        if (!response.ok) throw new Error(t('actions.failAssignMessage'))
+        const data = await response.json()
+        updateChoreInState(data.res, 'assigned')
+      } catch (error) {
+        showError({
+          title: t('actions.failAssignTitle'),
+          message: error?.message || t('actions.failAssignMessage'),
+        })
+      }
     },
-    [modalChore, updateChoreInState, closeModal],
+    [modalChore, updateChoreInState, closeModal, showError, t],
   )
 
   const handleCompleteWithNote = useCallback(

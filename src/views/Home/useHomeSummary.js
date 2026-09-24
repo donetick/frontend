@@ -168,6 +168,10 @@ const useHomeSummary = chores => {
     // window Next up's primary list falls back to once today is covered.
     const upcoming = dueTomorrow
 
+    // Scoped the same as overdue/dueToday/upcoming: a task with no due date
+    // that belongs to someone else isn't mine to plan.
+    const unplanned = mine.filter(chore => chore.nextDueDate === null)
+
     return {
       dueToday,
       hasAnyTask: chores.length > 0,
@@ -177,6 +181,7 @@ const useHomeSummary = chores => {
       overdue,
       overduePreview,
       totalOpen: chores.length,
+      unplanned,
       upcoming,
       verdict: buildVerdict({
         dueToday,

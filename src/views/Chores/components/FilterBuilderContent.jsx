@@ -2,6 +2,7 @@ import {
   CalendarMonth,
   Check,
   FolderOpen,
+  HowToReg,
   Label,
   Person,
   PriorityHigh,
@@ -263,10 +264,32 @@ const FilterBuilderContent = ({
     )
   }
 
-  const personChipRow = type => {
+  const personChipRow = (type, { includeAvailableForMe = false } = {}) => {
     const selected = selections[type].values || []
+    const isAvailableForMeSelected = selected.includes('available_for_me')
     return (
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+        {includeAvailableForMe && (
+          <Chip
+            variant={isAvailableForMeSelected ? 'solid' : 'soft'}
+            color={isAvailableForMeSelected ? 'success' : 'neutral'}
+            startDecorator={
+              isAvailableForMeSelected ? (
+                <Check sx={{ fontSize: 14 }} />
+              ) : (
+                <HowToReg sx={{ fontSize: 16 }} />
+              )
+            }
+            onClick={() => toggleValue(type, 'available_for_me')}
+            sx={{
+              cursor: 'pointer',
+              userSelect: 'none',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            {t('toolbar.availableToMe')}
+          </Chip>
+        )}
         {members.map(m => {
           const isSelected = selected.includes(m.userId)
           return (
@@ -311,7 +334,7 @@ const FilterBuilderContent = ({
               onChange={op => setOperator('assignee', op)}
             />
           </SectionHeader>
-          {personChipRow('assignee')}
+          {personChipRow('assignee', { includeAvailableForMe: true })}
           <Divider sx={{ my: 2.5 }} />
         </>
       )}
