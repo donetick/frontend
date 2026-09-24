@@ -72,7 +72,7 @@
     "placeholder": "Hledat v Donetick",
     "inputAriaLabel": "Hledat úkoly, historii, projekty, štítky a nastavení",
     "deviceNote": "Hledá se v obsahu dostupném v tomto zařízení",
-    "escape": "Esc",
+    "escape": "",
     "recent": "Nedávné",
     "empty": {
       "title": "Žádné přímé shody",
@@ -111,7 +111,6 @@
       "navigate": "Pohyb",
       "open": "Otevřít",
       "results_one": "{{count}} výsledek",
-      "results_few": "{{count}} výsledky",
       "results_other": "{{count}} výsledků",
       "typeToSearch": "Pište pro hledání",
       "slashHint": "/ pro přechod na pohled"
@@ -147,7 +146,7 @@
       "tooComplicated": "Příliš složité",
       "slow": "Pomalé",
       "notifications": "Oznámení",
-      "ai": "AI",
+      "ai": "",
       "other": "Jiné"
     },
     "details": {
@@ -227,7 +226,7 @@
     "addMembers": "Přidat členy do kruhu",
     "sidePanelSettings": "Nastavení postranního panelu",
     "planFree": "Zdarma",
-    "planPlus": "Plus",
+    "planPlus": "",
     "planPlusExpiring": "Plus (brzy vyprší)",
     "switchUser": "Přepnout uživatele",
     "impersonateUser": "Zastupovat uživatele",
@@ -290,7 +289,7 @@
     "descending": "Sestupně",
     "filter": "Filtr"
   },
-  "versionInfo": "V{{version}} (API: {{apiVersion}})",
+  "versionInfo": "",
   "apiVersionUnavailable": "nedostupné",
   "sync": {
     "aria": "Otevřít stav synchronizace a sítě",
@@ -317,8 +316,8 @@
     "secondsAgo": "před {{count}} s",
     "minutesAgo": "před {{count}} min",
     "hoursAgo": "před {{count}} h",
-    "online": "Online",
-    "offline": "Offline",
+    "online": "",
+    "offline": "",
     "syncing": "Synchronizace...",
     "lastSync": "Poslední synchronizace: {{time}}",
     "offlineSince": "Offline od {{duration}}",
@@ -331,11 +330,9 @@
     "retryingIn": "Nový pokus za {{seconds}} s",
     "syncNow": "Synchronizovat nyní",
     "pendingSyncLabel_one": "{{count}} čekající akce k synchronizaci",
-    "pendingSyncLabel_few": "{{count}} čekající akce k synchronizaci",
     "pendingSyncLabel_other": "{{count}} čekajících akcí k synchronizaci",
     "pendingActionsTitle": "Čekající akce",
     "actionsWaitingToSync_one": "{{count}} akce čeká na synchronizaci.",
-    "actionsWaitingToSync_few": "{{count}} akce čekají na synchronizaci.",
     "actionsWaitingToSync_other": "{{count}} akcí čeká na synchronizaci.",
     "cancelActionAria": "Zrušit {{label}}"
   },
@@ -464,7 +461,7 @@
       "continue": "Pokračovat",
       "skip": "Přeskočit",
       "sources": {
-        "appStore": "App Store / Google Play",
+        "appStore": "",
         "reddit": "Reddit nebo fórum",
         "friend": "Přátelé nebo rodina",
         "video": "YouTube nebo TikTok",
@@ -503,7 +500,7 @@
     "notNow": "Teď ne",
     "sentTitle": "Hlášení odesláno",
     "sentBody": "Děkujeme! Jde to přímo k lidem, kteří to umí opravit.",
-    "reference": "Reference",
+    "reference": "",
     "copyReference": "Kopírovat referenci",
     "done": "Hotovo",
     "githubTitle": "Dokončete na GitHubu",
@@ -565,7 +562,6 @@
     "clearAllButton": "Vymazat vše",
     "doneButton": "Hotovo",
     "showResults_one": "Zobrazit {{count}} výsledek",
-    "showResults_few": "Zobrazit {{count}} výsledky",
     "showResults_other": "Zobrazit {{count}} výsledků",
     "selectedCount": "Vybráno: {{count}}",
     "dateRangeFallback": "Období",
@@ -596,18 +592,15 @@
     "verdict": {
       "late": {
         "title_one": "{{count}} úkol vyžaduje pozornost.",
-        "title_few": "{{count}} úkoly vyžadují pozornost.",
         "title_other": "{{count}} úkolů vyžaduje pozornost."
       },
       "review": {
         "title": "Něco čeká na kontrolu.",
         "body_one": "{{count}} dokončený úkol čeká na schválení.",
-        "body_few": "{{count}} dokončené úkoly čekají na schválení.",
         "body_other": "{{count}} dokončených úkolů čeká na schválení."
       },
       "today": {
         "title_one": "{{count}} úkol má termín dnes.",
-        "title_few": "{{count}} úkoly mají termín dnes.",
         "title_other": "{{count}} úkolů má termín dnes."
       },
       "clear": {
@@ -659,13 +652,10 @@
       "title": "Váš kruh",
       "action": "Spravovat kruh",
       "open_one": "{{count}} otevřený",
-      "open_few": "{{count}} otevřené",
       "open_other": "{{count}} otevřených",
       "late_one": "{{count}} po termínu",
-      "late_few": "{{count}} po termínu",
       "late_other": "{{count}} po termínu",
       "done_one": "{{count}} hotový",
-      "done_few": "{{count}} hotové",
       "done_other": "{{count}} hotových",
       "caughtUp": "Vše v pořádku",
       "emptyTitle": "Zatím tu nikdo další není",
@@ -676,13 +666,10 @@
       "title": "Projekty",
       "action": "Všechny projekty",
       "tasks_one": "{{count}} úkol",
-      "tasks_few": "{{count}} úkoly",
       "tasks_other": "{{count}} úkolů",
       "tasksOverdue_one": "{{count}} úkol, po termínu: {{overdue}}",
-      "tasksOverdue_few": "{{count}} úkoly, po termínu: {{overdue}}",
       "tasksOverdue_other": "{{count}} úkolů, po termínu: {{overdue}}",
       "tasksUnplanned_one": "{{count}} úkol, nenaplánované: {{unplanned}}",
-      "tasksUnplanned_few": "{{count}} úkoly, nenaplánované: {{unplanned}}",
       "tasksUnplanned_other": "{{count}} úkolů, nenaplánované: {{unplanned}}",
       "clear": "Vše v pořádku"
     },
@@ -690,7 +677,6 @@
       "title": "Filtry",
       "action": "Všechny filtry",
       "tasks_one": "{{count}} shoda",
-      "tasks_few": "{{count}} shody",
       "tasks_other": "{{count}} shod",
       "clear": "Žádné shody"
     },
