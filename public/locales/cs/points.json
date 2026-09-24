@@ -9,9 +9,6 @@
     "quickAdd": "Rychle přidat:",
     "aboutToRedeem": "Chystáte se uplatnit",
     "amount": "{{count}} b.",
-    "amount_one":"{{count}} bod",
-    "amount_few": "{{count}} body",
-    "amount_other": "{{count}} bodů",
     "remaining": "Zbývá: {{count}} b."
   },
   "leaderboard": {
@@ -25,7 +22,6 @@
     "tasksAndAvg": "Úkoly: {{tasks}} • průměrně {{avg}} na úkol",
     "available": "Dostupné: {{count}}",
     "points_one": "{{count}} bod",
-    "points_few": "{{count}} body",
     "points_other": "{{count}} bodů"
   },
   "tabs": {
@@ -60,7 +56,6 @@
       "allTime": "Celkově",
       "last6Months": "Posledních 6 měsíců",
       "lastDays_one": "Poslední {{count}} den",
-      "lastDays_few": "Poslední {{count}} dny",
       "lastDays_other": "Posledních {{count}} dní"
     }
   },
@@ -71,7 +66,6 @@
     "allTime": "celkově",
     "last6Months": "posledních 6 měsíců",
     "lastDays_one": "poslední {{count}} den",
-    "lastDays_few": "poslední {{count}} dny",
     "lastDays_other": "posledních {{count}} dní"
   },
   "trend": {
