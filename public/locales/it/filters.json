@@ -1,55 +1,55 @@
 {
   "builder": {
-    "errorName": "Inserisci un nome per il filtro",
-    "errorConditions": "Configura almeno una condizione del filtro",
-    "editTitle": "Modifica filtro",
-    "newTitle": "Nuovo filtro",
-    "addConditions": "Aggiungi condizioni per visualizzare l'anteprima",
-    "save": "Salva filtro",
-    "name": "Nome filtro",
-    "namePlaceholder": "es. Attività scadute di Alice",
-    "color": "Colore"
+    "errorName": "",
+    "errorConditions": "",
+    "editTitle": "",
+    "newTitle": "",
+    "addConditions": "",
+    "save": "",
+    "name": "",
+    "namePlaceholder": "",
+    "color": ""
   },
-  "nameExists": "Esiste già un filtro con questo nome",
-  "tasks_one": "{{count}} attività",
-  "tasks_other": "{{count}} attività",
-  "overdue": "{{count}} scadute",
-  "noConditions": "Nessuna condizione",
-  "condition_one": "{{count}} condizione",
-  "condition_other": "{{count}} condizioni",
-  "usedCount": "Usato {{count}} volte",
+  "nameExists": "",
+  "tasks_one": "",
+  "tasks_other": "",
+  "overdue": "",
+  "noConditions": "",
+  "condition_one": "",
+  "condition_other": "",
+  "usedCount": "",
   "delete": {
-    "title": "Elimina filtro",
-    "message": "Vuoi davvero eliminare \"{{name}}\"? L'operazione non può essere annullata."
+    "title": "",
+    "message": ""
   },
   "empty": {
-    "title": "Nessun filtro salvato",
-    "description": "Salva una combinazione di condizioni, ad esempio \"scadute e assegnate a me\", per tornarci subito da qualsiasi schermata.",
-    "createFilter": "Crea un filtro",
-    "noResultsTitle": "Nessun filtro corrispondente",
-    "noResultsWithSearch": "Nessun filtro salvato corrisponde a \"{{search}}\".",
-    "noResultsDefault": "Nessun filtro salvato corrisponde al filtro corrente.",
-    "clearSearch": "Cancella ricerca",
-    "showAllFilters": "Mostra tutti i filtri"
+    "title": "",
+    "description": "",
+    "createFilter": "",
+    "noResultsTitle": "",
+    "noResultsWithSearch": "",
+    "noResultsDefault": "",
+    "clearSearch": "",
+    "showAllFilters": ""
   },
   "header": {
-    "title": "Filtri",
-    "subtitle": "Salva le combinazioni di filtri preferite per accedervi rapidamente. Crea viste personalizzate per organizzare e trovare le attività più velocemente."
+    "title": "",
+    "subtitle": ""
   },
-  "searchPlaceholder": "Cerca filtri",
+  "searchPlaceholder": "",
   "sort": {
-    "smart": "Intelligente",
-    "name": "Nome",
-    "usage": "Numero di utilizzi",
-    "lastUsed": "Ultimo utilizzo",
-    "created": "Data di creazione"
+    "smart": "",
+    "name": "",
+    "usage": "",
+    "lastUsed": "",
+    "created": ""
   },
   "show": {
-    "title": "Mostra",
-    "all": "Tutti i filtri",
-    "pinned": "Fissati",
-    "unpinned": "Non fissati"
+    "title": "",
+    "all": "",
+    "pinned": "",
+    "unpinned": ""
   },
-  "pin": "Fissa",
-  "unpin": "Rimuovi dai fissati"
+  "pin": "",
+  "unpin": ""
 }
