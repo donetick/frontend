@@ -67,7 +67,7 @@
       "description": ""
     },
     "labels": {
-      "title": "",
+      "title": "תגיות",
       "description": ""
     },
     "labelsDuration": {
@@ -86,7 +86,7 @@
   "filter": {
     "status": "",
     "pending": "",
-    "labels": "",
+    "labels": "תגיות",
     "hasNotes": "",
     "hasPoints": "",
     "timePeriod": "",
@@ -108,10 +108,10 @@
     "updatedDate": "",
     "performer": "",
     "status": "",
-    "points": ""
+    "points": "נקודות"
   },
   "activities": {
-    "title": "",
+    "title": "פעילויות",
     "subtitle": "",
     "emptyTitle": "",
     "emptyDescriptionEveryone": "",
@@ -124,7 +124,7 @@
       "date": "",
       "name": "",
       "status": "",
-      "points": ""
+      "points": "נקודות"
     }
   },
   "title": {
