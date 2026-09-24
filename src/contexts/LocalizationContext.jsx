@@ -23,6 +23,7 @@ export const RTL_LANGUAGES = ['ar', 'he', 'fa', 'ur']
 
 export const AVAILABLE_LANGUAGES = [
   { code: 'ar', name: 'Arabic', nativeName: 'العربية' },
+  { code: 'cs', name: 'Czech', nativeName: 'Čeština' },
   { code: 'de', name: 'German', nativeName: 'Deutsch' },
   { code: 'en', name: 'English', nativeName: 'English' },
   { code: 'es', name: 'Spanish', nativeName: 'Español' },
