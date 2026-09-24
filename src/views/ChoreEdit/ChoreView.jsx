@@ -90,11 +90,11 @@ import LoadingComponent from '../components/Loading.jsx'
 import PendingBadge from '../components/PendingBadge'
 import RichTextEditor from '../components/RichTextEditor.jsx'
 import SubTasks from '../components/SubTask.jsx'
+import AssigneeModal from '../Modals/Inputs/AssigneeModal'
 import AttachmentBrowserModal from '../Modals/Inputs/AttachmentBrowserModal'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import NoteViewerModal from '../Modals/Inputs/NoteViewerModal'
 import NudgeModal from '../Modals/Inputs/NudgeModal'
-import SelectModal from '../Modals/Inputs/SelectModal'
 import WriteNFCModal from '../Modals/Inputs/WriteNFCModal'
 import TimePassedCard from './TimePassedCard.jsx'
 import TimerSplitButton from './TimerSplitButton.jsx'
@@ -721,14 +721,29 @@ const ChoreView = () => {
     }
   }
 
+  // Picking a circle member who isn't yet in the chore's assignee pool must
+  // not surface the backend's "assignee not in assignees list" rejection —
+  // assigning someone should always just work, so this adds them to the pool
+  // first (existing per-chore state, no dedicated endpoint for it) and only
+  // then assigns.
   const handleAssigneeChange = async assigneeId => {
     try {
-      const response = await UpdateChoreAssignee(choreId, assigneeId)
-      if (response.ok) {
-        const data = await response.json()
-        setChore(data.res)
-        queryClient.invalidateQueries(['chores'])
+      const isInPool = (chore.assignees || []).some(
+        a => a.userId === assigneeId,
+      )
+      if (!isInPool) {
+        const saveResponse = await SaveChore({
+          ...chore,
+          assignees: [...(chore.assignees || []), { userId: assigneeId }],
+        })
+        if (!saveResponse.ok)
+          throw new Error(t('choreView.unableChangeAssignee'))
       }
+      const response = await UpdateChoreAssignee(chore.id, assigneeId)
+      if (!response.ok) throw new Error(t('choreView.unableChangeAssignee'))
+      const data = await response.json()
+      setChore(data.res)
+      queryClient.invalidateQueries(['chores'])
     } catch (error) {
       showError({
         title: t('choreView.failedDelegate'),
@@ -1506,14 +1521,13 @@ const ChoreView = () => {
           />
         )}
         {activeModal === 'changeAssignee' && (
-          <SelectModal
+          <AssigneeModal
             isOpen={true}
-            options={performers}
-            displayKey='displayName'
+            members={performers}
+            assignedTo={chore.assignedTo}
             title={t('choreView.delegateToSomeoneElse')}
-            placeholder={t('choreView.selectAPerformer')}
             onClose={() => setActiveModal(null)}
-            onSave={selected => handleAssigneeChange(selected.id)}
+            onSave={handleAssigneeChange}
           />
         )}
         {activeModal === 'nudge' && (

@@ -297,6 +297,18 @@ const ChoreToolbar = ({
 
     const resolveLabel = value => {
       if (condition.type === 'assignee' || condition.type === 'createdBy') {
+        // Sentinel scope values (not real member ids) FilterEngine's
+        // evaluateAssignee special-cases — must be translated here rather
+        // than falling through to the raw member lookup below.
+        const assigneeSentinelLabels = {
+          me: t('toolbar.mine'),
+          others: t('toolbar.others'),
+          anyone: t('toolbar.everyone'),
+          available_for_me: t('toolbar.availableToMe'),
+        }
+        if (condition.type === 'assignee' && value in assigneeSentinelLabels) {
+          return assigneeSentinelLabels[value]
+        }
         const member = members.find(m => m.userId === value)
         return member?.displayName || member?.username || String(value)
       }

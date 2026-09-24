@@ -12,19 +12,35 @@ import { useTranslation } from 'react-i18next'
 
 import { TASK_COLOR } from '../../utils/Colors'
 
+// Home's triage tiles (overdue / due-today / coming-up) only count chores
+// that are "mine" — unassigned or assigned to me — and exclude anything
+// already awaiting approval, since a finished-but-unapproved task isn't
+// actionable the same way. These insight filters have to apply the same two
+// conditions, or clicking a tile opens a wider set than the number it showed.
+const MINE_NOT_PENDING_APPROVAL = [
+  { type: 'assignee', operator: 'is', value: 'available_for_me' },
+  { type: 'status', operator: 'isNot', value: 3 },
+]
+
 // Static insight filter definitions – used for URL restoration
 export const INSIGHT_FILTER_DEFS = {
   overdue: {
     name: 'Overdue',
     filter: {
-      conditions: [{ type: 'dueDate', operator: 'isOverdue', value: null }],
+      conditions: [
+        { type: 'dueDate', operator: 'isOverdue', value: null },
+        ...MINE_NOT_PENDING_APPROVAL,
+      ],
       operator: 'AND',
     },
   },
   'due-today': {
     name: 'Due Today',
     filter: {
-      conditions: [{ type: 'dueDate', operator: 'isDueToday', value: null }],
+      conditions: [
+        { type: 'dueDate', operator: 'isDueToday', value: null },
+        ...MINE_NOT_PENDING_APPROVAL,
+      ],
       operator: 'AND',
     },
   },
@@ -66,7 +82,10 @@ export const INSIGHT_FILTER_DEFS = {
   'coming-up': {
     name: 'Coming Up',
     filter: {
-      conditions: [{ type: 'dueDate', operator: 'isDueTomorrow', value: null }],
+      conditions: [
+        { type: 'dueDate', operator: 'isDueTomorrow', value: null },
+        ...MINE_NOT_PENDING_APPROVAL,
+      ],
       operator: 'AND',
     },
   },

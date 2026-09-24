@@ -124,6 +124,7 @@ const HomeView = () => {
     overdue,
     overduePreview,
     projectPulse,
+    unplanned,
     upcoming,
     userProfile,
     verdict,
@@ -210,7 +211,7 @@ const HomeView = () => {
         dueToday={dueToday.length}
         needsReview={needsReview.length}
         overdue={overdue.length}
-        unplanned={chores.filter(chore => chore.nextDueDate === null).length}
+        unplanned={unplanned.length}
       />
     ),
     circle: circle.length > 0 && (

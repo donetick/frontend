@@ -316,6 +316,13 @@ const ThingsView = () => {
     saveFunc(thing)
       .then(result => {
         result.json().then(data => {
+          if (!result.ok || !data?.res) {
+            showError({
+              title: t('notify.saveFailTitle'),
+              message: t('notify.saveFailMessage'),
+            })
+            return
+          }
           if (thing?.id) {
             const currentThings = [...things]
             const thingIndex = currentThings.findIndex(
@@ -414,6 +421,13 @@ const ThingsView = () => {
     UpdateThingState(updatedThing)
       .then(result => {
         result.json().then(data => {
+          if (!result.ok || !data?.res) {
+            showError({
+              title: t('notify.updateFailTitle'),
+              message: t('notify.updateFailMessage'),
+            })
+            return
+          }
           const currentThings = [...things]
           const thingIndex = currentThings.findIndex(
             currentThing => currentThing.id === updatedThing.id,
@@ -446,6 +460,13 @@ const ThingsView = () => {
     UpdateThingState(thing)
       .then(result => {
         result.json().then(data => {
+          if (!result.ok || !data?.res) {
+            showError({
+              title: t('notify.updateFailTitle'),
+              message: t('notify.updateFailMessage'),
+            })
+            return
+          }
           const currentThings = [...things]
           const thingIndex = currentThings.findIndex(
             currentThing => currentThing.id === thing.id,
