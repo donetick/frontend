@@ -397,7 +397,7 @@
     "title": "Personnalisation du panneau latéral",
     "heading": "Paramètres du panneau latéral",
     "description": "Choisissez les cartes qui apparaissent dans le panneau latéral et leur ordre. Faites-les glisser pour les réorganiser ou modifiez leur visibilité.",
-    "resetToDefaults": "Réinitialiser par défaut",
+    "resetToDefaults": "Rétablir les valeurs par défaut",
     "resetHelper": "La visibilité et l'ordre par défaut de toutes les cartes seront rétablis.",
     "cards": {
       "welcome": {
@@ -428,45 +428,45 @@
     "detailedDescription": "Personnalisez la disposition et la visibilité des cartes dans le panneau latéral. Cette section n'est disponible que sur les appareils à grand écran, comme les tablettes et les ordinateurs."
   },
   "homeSections": {
-    "title": "",
-    "description": "",
-    "resetToDefaults": "",
-    "resetHelper": "",
+    "title": "Personnalisation de l'aperçu",
+    "description": "Choisissez les sections affichées sur l'écran Aperçu et leur ordre. Faites-les glisser pour les réorganiser, ou affichez et masquez chacune d'elles.",
+    "resetToDefaults": "Rétablir les valeurs par défaut",
+    "resetHelper": "Toutes les sections retrouveront leur visibilité et leur ordre par défaut.",
     "sections": {
       "greeting": {
-        "name": "",
-        "description": ""
+        "name": "Message d'accueil",
+        "description": "Le titre en haut de l'écran, qui résume votre journée"
       },
       "glance": {
-        "name": "",
-        "description": ""
+        "name": "En un coup d'œil",
+        "description": "Nombre de tâches en retard, à échéance aujourd'hui, à approuver et sans échéance"
       },
       "circle": {
-        "name": "",
-        "description": ""
+        "name": "Votre cercle",
+        "description": "Montre ce dont chaque membre de votre cercle s'occupe cette semaine"
       },
       "review": {
-        "name": "",
-        "description": ""
+        "name": "À approuver",
+        "description": "Tâches terminées en attente d'approbation"
       },
       "overdue": {
-        "name": "",
-        "description": ""
+        "name": "En retard",
+        "description": "Tâches dont la date d'échéance est dépassée"
       },
       "nextUp": {
-        "name": "",
-        "description": ""
+        "name": "À venir",
+        "description": "Ce qui arrive à échéance aujourd'hui et demain"
       },
       "filters": {
-        "name": "",
-        "description": ""
+        "name": "Filtres",
+        "description": "Accès rapide à vos filtres épinglés et les plus utiles"
       },
       "projects": {
-        "name": "",
-        "description": ""
+        "name": "Projets",
+        "description": "Où le travail s'accumule, projet par projet"
       }
     },
-    "detailedDescription": ""
+    "detailedDescription": "Personnalisez la disposition et la visibilité des sections de l'écran Aperçu."
   },
   "theme": {
     "title": "Préférences de thème",
@@ -494,7 +494,7 @@
     "sunday": "Dimanche",
     "monday": "Lundi",
     "saturday": "Samedi",
-    "helpTranslate": "",
+    "helpTranslate": "Aider à améliorer cette traduction",
     "formats": {
       "mdy": "MM/JJ/AAAA (États-Unis)",
       "dmy": "JJ/MM/AAAA (Europe)",

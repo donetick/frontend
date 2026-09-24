@@ -49,9 +49,9 @@
     "search": "Recherche",
     "allTasks": "Tâches",
     "home": "Aperçu",
-    "tasks": "",
-    "more": "",
-    "mobileNavigation": "",
+    "tasks": "Tâches",
+    "more": "Menu",
+    "mobileNavigation": "Navigation principale",
     "archived": "Archivées",
     "things": "Objets",
     "labels": "Étiquettes",
@@ -587,104 +587,104 @@
   },
   "home": {
     "customize": {
-      "action": ""
+      "action": "Personnaliser l'aperçu"
     },
     "verdict": {
       "late": {
-        "title_one": "",
-        "title_other": ""
+        "title_one": "{{count}} tâche demande votre attention.",
+        "title_other": "{{count}} tâches demandent votre attention."
       },
       "review": {
-        "title": "",
-        "body_one": "",
-        "body_other": ""
+        "title": "Des tâches attendent une approbation.",
+        "body_one": "{{count}} tâche terminée attend d'être approuvée.",
+        "body_other": "{{count}} tâches terminées attendent d'être approuvées."
       },
       "today": {
-        "title_one": "",
-        "title_other": ""
+        "title_one": "{{count}} tâche à échéance aujourd'hui.",
+        "title_other": "{{count}} tâches à échéance aujourd'hui."
       },
       "clear": {
-        "title": "",
-        "body": ""
+        "title": "Tout est à jour.",
+        "body": "Rien de prévu aujourd'hui, rien en retard."
       },
       "firstRun": {
-        "title": "",
-        "body": ""
+        "title": "Commençons par une première tâche.",
+        "body": "L'aperçu se remplit à mesure que vous ajoutez des tâches."
       }
     },
     "triage": {
-      "overdue": "",
-      "dueToday": "",
-      "needsReview": "",
-      "comingUp": "",
-      "unplanned": "",
-      "allClear": ""
+      "overdue": "En retard",
+      "dueToday": "Échéance aujourd'hui",
+      "needsReview": "À approuver",
+      "comingUp": "À venir",
+      "unplanned": "Sans échéance",
+      "allClear": "Rien en retard, rien en attente"
     },
     "nextUp": {
-      "title": "",
-      "action": ""
+      "title": "À venir",
+      "action": "Tout voir"
     },
     "nextUpFallback": {
-      "title": "",
-      "action": ""
+      "title": "Prochaines tâches",
+      "action": "Tout voir"
     },
     "overdue": {
-      "title": "",
-      "action": ""
+      "title": "En retard",
+      "action": "Tout voir"
     },
     "clear": {
-      "title": "",
-      "body": "",
-      "action": ""
+      "title": "Prendre de l'avance",
+      "body": "Parcourez les tâches à venir, replanifiez-les ou ajoutez la suivante.",
+      "action": "Parcourir toutes les tâches"
     },
     "firstTask": {
-      "title": "",
-      "description": "",
-      "action": ""
+      "title": "Ajoutez votre première tâche",
+      "description": "Tapez-la, dictez-la ou scannez-la. Tout ce que vous ajoutez apparaît ici au moment de vous en occuper.",
+      "action": "Ajouter une tâche"
     },
     "review": {
-      "title": "",
-      "pendingTitle": "",
-      "myPendingTitle": "",
-      "action": ""
+      "title": "En attente de votre approbation",
+      "pendingTitle": "En attente d'approbation",
+      "myPendingTitle": "Mes tâches en attente d'approbation",
+      "action": "Tout examiner"
     },
     "circle": {
-      "title": "",
-      "action": "",
-      "open_one": "",
-      "open_other": "",
-      "late_one": "",
-      "late_other": "",
-      "done_one": "",
-      "done_other": "",
-      "caughtUp": "",
-      "emptyTitle": "",
-      "emptyBody": "",
-      "emptyAction": ""
+      "title": "Votre cercle",
+      "action": "Gérer le cercle",
+      "open_one": "{{count}} à faire",
+      "open_other": "{{count}} à faire",
+      "late_one": "{{count}} en retard",
+      "late_other": "{{count}} en retard",
+      "done_one": "{{count}} terminée",
+      "done_other": "{{count}} terminées",
+      "caughtUp": "Rien à faire",
+      "emptyTitle": "Personne d'autre pour l'instant",
+      "emptyBody": "Invitez les personnes avec qui vous partagez les tâches : cet écran montrera qui s'occupe de quoi.",
+      "emptyAction": "Inviter dans votre cercle"
     },
     "projects": {
-      "title": "",
-      "action": "",
-      "tasks_one": "",
-      "tasks_other": "",
-      "tasksOverdue_one": "",
-      "tasksOverdue_other": "",
-      "tasksUnplanned_one": "",
-      "tasksUnplanned_other": "",
-      "clear": ""
+      "title": "Projets",
+      "action": "Tous les projets",
+      "tasks_one": "{{count}} tâche",
+      "tasks_other": "{{count}} tâches",
+      "tasksOverdue_one": "{{count}} tâche, dont {{overdue}} en retard",
+      "tasksOverdue_other": "{{count}} tâches, dont {{overdue}} en retard",
+      "tasksUnplanned_one": "{{count}} tâche, dont {{unplanned}} sans échéance",
+      "tasksUnplanned_other": "{{count}} tâches, dont {{unplanned}} sans échéance",
+      "clear": "Rien à faire"
     },
     "filters": {
-      "title": "",
-      "action": "",
-      "tasks_one": "",
-      "tasks_other": "",
-      "clear": ""
+      "title": "Filtres",
+      "action": "Tous les filtres",
+      "tasks_one": "{{count}} résultat",
+      "tasks_other": "{{count}} résultats",
+      "clear": "Aucun résultat"
     },
     "capture": {
-      "placeholder": "",
-      "add": "",
-      "voice": "",
-      "scan": ""
+      "placeholder": "Ajouter une tâche...",
+      "add": "Ajouter une tâche",
+      "voice": "Saisir à la voix",
+      "scan": "Scanner pour créer une tâche"
     }
   }
 }
