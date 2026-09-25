@@ -93,10 +93,6 @@
       "bugReport": {
         "title": "Relatar um erro",
         "description": "Algo não está funcionando? Envie os detalhes junto com um retrato técnico."
-      },
-      "sidepanel": {
-        "title": "Personalização do painel lateral",
-        "description": "Personalize o layout e a visibilidade dos cartões do painel lateral."
       }
     }
   },
@@ -427,9 +423,7 @@
         "name": "Metas semanais",
         "description": "Mostra o progresso semanal e as estatísticas da família"
       }
-    },
-    "heading": "Configurações do painel lateral",
-    "detailedDescription": ""
+    }
   },
   "homeSections": {
     "title": "",
