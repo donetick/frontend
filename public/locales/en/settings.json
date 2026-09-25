@@ -118,7 +118,7 @@
   },
   "circleSettings": {
     "title": "Circle Settings",
-    "description": "Your account is automatically connected to a Circle when you create or join one. Easily invite friends by sharing the unique Circle code or link below. You'll receive a notification below when someone requests to join your Circle.",
+    "description": "Your account is automatically connected to a Circle when you create or join one. You can easily invite friends by sharing the unique Circle code or link below. You'll receive a notification below when someone requests to join your Circle.",
     "memberOf": "You are part of {{name}}",
     "yourCircleCode": "Your circle code is:",
     "copyCode": "Copy Code",
@@ -235,10 +235,10 @@
     "deleteFailed": "Failed to delete Sub account: {{error}}",
     "deleteFailedGeneric": "Failed to delete Sub user",
     "howItWorksTitle": "How Managed Accounts Work",
-    "howItWorks1": "Managed accounts created by the primary user, these specific for user you want to have ability to delete and reset password.",
+    "howItWorks1": "Sub accounts created by the primary user are specifically for users you want to give the ability to delete and reset their password.",
     "howItWorks2": "Sub accounts can log in with their own username and password.",
-    "howItWorks3": "Managed accounts can complete tasks but have limited administrative permissions",
-    "howItWorks4": "Managed accounts automatically added to your circle"
+    "howItWorks3": "Sub accounts can complete tasks but have limited administrative permissions",
+    "howItWorks4": "Sub accounts are automatically added to your circle"
   },
   "notifications": {
     "title": "Notification Settings",
