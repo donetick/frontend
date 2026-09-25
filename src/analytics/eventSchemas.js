@@ -60,21 +60,39 @@ export const EVENT_SCHEMAS = {
     source: 'enum:auto,settings',
     shown_count: 'number',
   }),
+  // `step` separates "closed without answering" from "answered, then
+  // abandoned the details form" — two very different signals.
   feedback_prompt_dismissed: withCommon({
     source: 'enum:auto,settings',
     shown_count: 'number',
+    step: 'enum:sentiment,details',
+    sentiment: 'enum:love,okay,issues',
+  }),
+  // Why an eligible-looking user never saw the prompt. Reports only the
+  // first failed gate, and at most once per app session — see
+  // FeedbackPrompt.jsx.
+  feedback_prompt_suppressed: withCommon({
+    blocker:
+      'enum:opted_out,too_few_completions,recent_error,new_account,cooldown,same_version',
   }),
   feedback_sentiment_selected: withCommon({
     sentiment: 'enum:love,okay,issues',
   }),
+  // The native OS review dialog. `requested` only means the request went
+  // through — the OS never tells us whether it actually showed anything.
+  feedback_review_requested: withCommon({
+    requested: 'boolean',
+  }),
   feedback_review_action: withCommon({
     action: 'enum:github,appStore,playStore',
+    sentiment: 'enum:love,okay,issues',
   }),
   feedback_submitted: withCommon({
     category:
       'enum:bugs,missingFeature,tooComplicated,slow,notifications,ai,other',
     has_message: 'boolean',
     result: 'enum:sent,failed,unconfigured,misconfigured,self-hosted',
+    sentiment: 'enum:love,okay,issues',
   }),
 }
 

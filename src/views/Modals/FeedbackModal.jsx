@@ -95,9 +95,20 @@ const FeedbackModal = ({ onClose, onDismiss, open, source = 'settings' }) => {
 
   const handleClose = () => {
     // Backing out before answering counts as a dismissal for the cooldown.
+    // Abandoning the details form does not — they already told us something.
     if (step === STEP.SENTIMENT) {
       onDismiss?.()
-      track('feedback_prompt_dismissed', { source, shown_count: shownCount })
+    }
+    // Tracked for both steps even though only one affects the cooldown:
+    // "closed without answering" and "answered, then gave up on the form"
+    // are the two drop-off points worth telling apart.
+    if (step === STEP.SENTIMENT || step === STEP.DETAILS) {
+      track('feedback_prompt_dismissed', {
+        source,
+        shown_count: shownCount,
+        step,
+        sentiment,
+      })
     }
     onClose()
   }
@@ -114,6 +125,7 @@ const FeedbackModal = ({ onClose, onDismiss, open, source = 'settings' }) => {
 
     if (Capacitor.isNativePlatform()) {
       const requested = await requestStoreReview()
+      track('feedback_review_requested', { requested })
       if (requested) {
         onClose()
         return
@@ -136,6 +148,7 @@ const FeedbackModal = ({ onClose, onDismiss, open, source = 'settings' }) => {
       category,
       has_message: message.trim().length > 0,
       result,
+      sentiment,
     })
 
     // Self-hosted feedback is never relayed; hand the user a pre-filled issue
@@ -268,7 +281,10 @@ const FeedbackModal = ({ onClose, onDismiss, open, source = 'settings' }) => {
                 color='neutral'
                 startDecorator={<GitHub />}
                 onClick={() => {
-                  track('feedback_review_action', { action: 'github' })
+                  track('feedback_review_action', {
+                    action: 'github',
+                    sentiment,
+                  })
                   openUrl(storeLinks.github)
                 }}
                 sx={{ justifyContent: 'flex-start' }}
@@ -280,7 +296,10 @@ const FeedbackModal = ({ onClose, onDismiss, open, source = 'settings' }) => {
                 color='neutral'
                 startDecorator={<Apple />}
                 onClick={() => {
-                  track('feedback_review_action', { action: 'appStore' })
+                  track('feedback_review_action', {
+                    action: 'appStore',
+                    sentiment,
+                  })
                   openUrl(storeLinks.appStore)
                 }}
                 sx={{ justifyContent: 'flex-start' }}
@@ -292,7 +311,10 @@ const FeedbackModal = ({ onClose, onDismiss, open, source = 'settings' }) => {
                 color='neutral'
                 startDecorator={<Android />}
                 onClick={() => {
-                  track('feedback_review_action', { action: 'playStore' })
+                  track('feedback_review_action', {
+                    action: 'playStore',
+                    sentiment,
+                  })
                   openUrl(storeLinks.playStore)
                 }}
                 sx={{ justifyContent: 'flex-start' }}
