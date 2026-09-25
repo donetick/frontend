@@ -62,9 +62,9 @@
         "title": "Configurações de armazenamento",
         "description": "Faça backup e restaure seus dados, gerencie o armazenamento local e a sincronização."
       },
-      "sidepanel": {
-        "title": "Personalização do painel lateral",
-        "description": "Personalize o layout e a visibilidade dos cartões do painel lateral."
+      "layout": {
+        "title": "Layout e navegação",
+        "description": "Escolha a tela em que o app abre e quais atalhos e painéis ficam ao redor dela."
       },
       "theme": {
         "title": "Preferências de tema",
@@ -93,6 +93,10 @@
       "bugReport": {
         "title": "Relatar um erro",
         "description": "Algo não está funcionando? Envie os detalhes junto com um retrato técnico."
+      },
+      "sidepanel": {
+        "title": "Personalização do painel lateral",
+        "description": "Personalize o layout e a visibilidade dos cartões do painel lateral."
       }
     }
   },
@@ -395,7 +399,6 @@
   },
   "sidepanel": {
     "title": "Personalização do painel lateral",
-    "heading": "Configurações do painel lateral",
     "description": "Escolha quais cartões aparecem no painel lateral e em que ordem. Arraste e solte para reordenar ou alterne a visibilidade de cada cartão.",
     "resetToDefaults": "Restaurar padrões",
     "resetHelper": "Isso restaurará a visibilidade e a ordem padrão de todos os cartões.",
@@ -425,6 +428,7 @@
         "description": "Mostra o progresso semanal e as estatísticas da família"
       }
     },
+    "heading": "Configurações do painel lateral",
     "detailedDescription": ""
   },
   "homeSections": {
@@ -467,6 +471,33 @@
       }
     },
     "detailedDescription": ""
+  },
+  "layout": {
+    "title": "Layout e navegação",
+    "detailedDescription": "Escolha a tela em que o app abre e quais atalhos e painéis ficam ao redor dela.",
+    "defaultView": {
+      "title": "Visualização padrão",
+      "description": "Escolha em qual tela o app abre.",
+      "options": {
+        "home": {
+          "name": "Visão geral",
+          "description": "Um resumo do que precisa de você hoje, com adição rápida"
+        },
+        "tasks": {
+          "name": "Lista de tarefas",
+          "description": "A lista completa de tarefas com filtros, busca e agrupamento"
+        }
+      }
+    },
+    "bottomNav": {
+      "title": "Navegação inferior",
+      "description": "Escolha até {{max}} atalhos para a barra de navegação inferior no celular e arraste para reordená-los. “Mais” sempre fica como último item e abre o menu completo.",
+      "resetToDefaults": "Restaurar padrões",
+      "resetHelper": "Isso restaurará os atalhos e a ordem padrão da navegação inferior."
+    },
+    "sidepanel": {
+      "title": "Painel lateral"
+    }
   },
   "theme": {
     "title": "Preferências de tema",

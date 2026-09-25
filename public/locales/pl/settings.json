@@ -62,9 +62,9 @@
         "title": "",
         "description": ""
       },
-      "sidepanel": {
-        "title": "",
-        "description": ""
+      "layout": {
+        "title": "Układ i nawigacja",
+        "description": "Wybierz ekran, od którego zaczyna się aplikacja, oraz skróty i panele wokół niego."
       },
       "theme": {
         "title": "",
@@ -91,6 +91,10 @@
         "description": ""
       },
       "bugReport": {
+        "title": "",
+        "description": ""
+      },
+      "sidepanel": {
         "title": "",
         "description": ""
       }
@@ -395,7 +399,6 @@
   },
   "sidepanel": {
     "title": "",
-    "heading": "",
     "description": "",
     "resetToDefaults": "",
     "resetHelper": "",
@@ -425,6 +428,7 @@
         "description": ""
       }
     },
+    "heading": "",
     "detailedDescription": ""
   },
   "homeSections": {
@@ -467,6 +471,33 @@
       }
     },
     "detailedDescription": ""
+  },
+  "layout": {
+    "title": "Układ i nawigacja",
+    "detailedDescription": "Wybierz ekran, od którego zaczyna się aplikacja, oraz to, jakie skróty i panele go otaczają.",
+    "defaultView": {
+      "title": "Widok domyślny",
+      "description": "Wybierz, od którego ekranu zaczyna się aplikacja.",
+      "options": {
+        "home": {
+          "name": "Przegląd",
+          "description": "Podsumowanie tego, co wymaga dziś twojej uwagi, z szybkim dodawaniem"
+        },
+        "tasks": {
+          "name": "Lista zadań",
+          "description": "Pełna lista zadań z filtrami, wyszukiwaniem i grupowaniem"
+        }
+      }
+    },
+    "bottomNav": {
+      "title": "Dolna nawigacja",
+      "description": "Wybierz maksymalnie {{max}} skróty dla dolnego paska nawigacji na telefonie i przeciągnij, aby zmienić ich kolejność. Pozycja „Więcej” zawsze zostaje ostatnia i otwiera pełne menu.",
+      "resetToDefaults": "Przywróć domyślne",
+      "resetHelper": "Spowoduje to przywrócenie domyślnych skrótów i kolejności w dolnej nawigacji."
+    },
+    "sidepanel": {
+      "title": "Panel boczny"
+    }
   },
   "theme": {
     "title": "",

@@ -62,9 +62,9 @@
         "title": "Speichereinstellungen",
         "description": "Sichere und stelle deine Daten wieder her, verwalte lokalen Speicher und Sync-Einstellungen."
       },
-      "sidepanel": {
-        "title": "Seitenleisten-Anpassung",
-        "description": "Passe Layout und Sichtbarkeit der Karten in der Seitenleiste an."
+      "layout": {
+        "title": "Layout & Navigation",
+        "description": "Lege fest, mit welchem Bildschirm die App startet und welche Verknüpfungen und Panels ihn umgeben."
       },
       "theme": {
         "title": "Design-Einstellungen",
@@ -93,6 +93,10 @@
       "bugReport": {
         "title": "Fehler melden",
         "description": "Etwas funktioniert nicht richtig? Schick uns die Details zusammen mit einer technischen Momentaufnahme."
+      },
+      "sidepanel": {
+        "title": "Seitenleisten-Anpassung",
+        "description": "Passe Layout und Sichtbarkeit der Karten in der Seitenleiste an."
       }
     }
   },
@@ -395,7 +399,6 @@
   },
   "sidepanel": {
     "title": "Seitenleisten-Anpassung",
-    "heading": "Seitenleisten-Einstellungen",
     "description": "Lege fest, welche Karten in der Seitenleiste erscheinen und in welcher Reihenfolge. Ziehe die Karten zum Sortieren oder schalte ihre Sichtbarkeit um.",
     "resetToDefaults": "Auf Standard zurücksetzen",
     "resetHelper": "Dadurch werden Sichtbarkeit und Reihenfolge aller Karten auf den Standard zurückgesetzt.",
@@ -425,6 +428,7 @@
         "description": "Zeigt den Wochenfortschritt und die Erledigungsstatistik der Familie"
       }
     },
+    "heading": "Seitenleisten-Einstellungen",
     "detailedDescription": "Passe Anordnung und Sichtbarkeit der Karten in der Seitenleiste an. Dieser Bereich ist nur auf Geräten mit großem Bildschirm wie Tablets und Desktop-Computern verfügbar."
   },
   "homeSections": {
@@ -467,6 +471,33 @@
       }
     },
     "detailedDescription": ""
+  },
+  "layout": {
+    "title": "Layout & Navigation",
+    "detailedDescription": "Wähle den Bildschirm, mit dem die App startet, und welche Verknüpfungen und Panels ihn umgeben.",
+    "defaultView": {
+      "title": "Standardansicht",
+      "description": "Wähle, mit welchem Bildschirm die App startet.",
+      "options": {
+        "home": {
+          "name": "Übersicht",
+          "description": "Eine Zusammenfassung dessen, was heute ansteht – mit Schnellerfassung"
+        },
+        "tasks": {
+          "name": "Aufgabenliste",
+          "description": "Die vollständige Aufgabenliste mit Filtern, Suche und Gruppierung"
+        }
+      }
+    },
+    "bottomNav": {
+      "title": "Untere Navigation",
+      "description": "Wähle bis zu {{max}} Verknüpfungen für die untere Navigationsleiste auf dem Handy und ordne sie per Drag-and-drop. „Mehr“ bleibt immer der letzte Eintrag und öffnet das vollständige Menü.",
+      "resetToDefaults": "Auf Standard zurücksetzen",
+      "resetHelper": "Dadurch werden Verknüpfungen und Reihenfolge der unteren Navigation auf den Standard zurückgesetzt."
+    },
+    "sidepanel": {
+      "title": "Seitenleiste"
+    }
   },
   "theme": {
     "title": "Design-Einstellungen",

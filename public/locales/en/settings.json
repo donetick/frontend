@@ -62,9 +62,9 @@
         "title": "Storage Settings",
         "description": "Backup and restore your data, manage local storage and sync preferences."
       },
-      "sidepanel": {
-        "title": "Sidepanel Customization",
-        "description": "Customize the layout and visibility of cards in the sidepanel interface."
+      "layout": {
+        "title": "Layout & Navigation",
+        "description": "Pick the screen the app opens on, and which shortcuts and panels surround it."
       },
       "theme": {
         "title": "Theme Preferences",
@@ -395,7 +395,6 @@
   },
   "sidepanel": {
     "title": "Sidepanel Customization",
-    "heading": "Sidepanel Settings",
     "description": "Customize which cards appear in the sidepanel and their order. Drag and drop to reorder, or toggle visibility for each card.",
     "resetToDefaults": "Reset to Defaults",
     "resetHelper": "This will restore all cards to their default visibility and order.",
@@ -424,8 +423,7 @@
         "name": "Weekly Goals",
         "description": "Shows weekly progress and family completion stats"
       }
-    },
-    "detailedDescription": "Customize the layout and visibility of cards in the sidepanel. the section only available on large screen devices such as tablets and desktops.."
+    }
   },
   "homeSections": {
     "title": "Overview Customization",
@@ -467,6 +465,33 @@
       }
     },
     "detailedDescription": "Customize the layout and visibility of sections on the Home screen."
+  },
+  "layout": {
+    "title": "Layout & Navigation",
+    "detailedDescription": "Choose the screen the app opens on and which shortcuts and panels sit around it.",
+    "defaultView": {
+      "title": "Default View",
+      "description": "Choose which screen the app opens on.",
+      "options": {
+        "home": {
+          "name": "Overview",
+          "description": "A summary of what needs you today, with quick capture"
+        },
+        "tasks": {
+          "name": "Task List",
+          "description": "The full task list with filters, search and grouping"
+        }
+      }
+    },
+    "bottomNav": {
+      "title": "Bottom Navigation",
+      "description": "Choose up to {{max}} shortcuts for the mobile bottom navigation bar and drag to reorder them. \"More\" always stays as the last item and opens the full menu.",
+      "resetToDefaults": "Reset to Defaults",
+      "resetHelper": "This will restore the bottom navigation to its default shortcuts and order."
+    },
+    "sidepanel": {
+      "title": "Sidepanel"
+    }
   },
   "theme": {
     "title": "Theme Preferences",

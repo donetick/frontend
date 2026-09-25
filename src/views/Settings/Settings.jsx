@@ -50,11 +50,11 @@ import PassowrdChangeModal from '../Modals/Inputs/PasswordChangeModal'
 import UserDeletionModal from '../Modals/Inputs/UserDeletionModal'
 import APITokenSettings from './APITokenSettings'
 import HomeSectionsSettings from './HomeSectionsSettings'
+import LayoutSettings from './LayoutSettings'
 import LocalizationSettings from './LocalizationSettings'
 import MFASettings from './MFASettings'
 import NotificationSetting from './NotificationSetting'
 import ProfileSettings from './ProfileSettings'
-import SidepanelSettings from './SidepanelSettings'
 import StorageSettings from './StorageSettings'
 import ThemeToggle from './ThemeToggle'
 
@@ -915,15 +915,6 @@ const Settings = () => {
       <MFASettings />
       <APITokenSettings />
       <StorageSettings />
-      <div className='grid gap-4 py-4' id='sidepanel'>
-        <Typography level='h3'>{t('sidepanel.title')}</Typography>
-        <Divider />
-        <Typography level='body-md'>
-          {t('sidepanel.detailedDescription')}
-        </Typography>
-        <SidepanelSettings />
-      </div>
-
       <div className='grid gap-4 py-4' id='homeSections'>
         <Typography level='h3'>{t('homeSections.title')}</Typography>
         <Divider />
@@ -931,6 +922,15 @@ const Settings = () => {
           {t('homeSections.detailedDescription')}
         </Typography>
         <HomeSectionsSettings />
+      </div>
+
+      <div className='grid gap-4 py-4' id='layout'>
+        <Typography level='h3'>{t('layout.title')}</Typography>
+        <Divider />
+        <Typography level='body-md'>
+          {t('layout.detailedDescription')}
+        </Typography>
+        <LayoutSettings />
       </div>
 
       <div className='grid gap-4 py-4' id='theme'>

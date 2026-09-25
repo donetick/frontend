@@ -62,9 +62,9 @@
         "title": "",
         "description": ""
       },
-      "sidepanel": {
-        "title": "",
-        "description": ""
+      "layout": {
+        "title": "פריסה וניווט",
+        "description": "בחרו באיזה מסך האפליקציה נפתחת, ואילו קיצורי דרך ולוחות מקיפים אותו."
       },
       "theme": {
         "title": "",
@@ -91,6 +91,10 @@
         "description": ""
       },
       "bugReport": {
+        "title": "",
+        "description": ""
+      },
+      "sidepanel": {
         "title": "",
         "description": ""
       }
@@ -395,7 +399,6 @@
   },
   "sidepanel": {
     "title": "",
-    "heading": "",
     "description": "",
     "resetToDefaults": "",
     "resetHelper": "",
@@ -425,6 +428,7 @@
         "description": ""
       }
     },
+    "heading": "",
     "detailedDescription": ""
   },
   "homeSections": {
@@ -467,6 +471,33 @@
       }
     },
     "detailedDescription": ""
+  },
+  "layout": {
+    "title": "פריסה וניווט",
+    "detailedDescription": "בחרו באיזה מסך האפליקציה נפתחת ואילו קיצורי דרך ולוחות מקיפים אותו.",
+    "defaultView": {
+      "title": "תצוגת ברירת מחדל",
+      "description": "בחרו באיזה מסך האפליקציה נפתחת.",
+      "options": {
+        "home": {
+          "name": "סקירה",
+          "description": "סיכום של מה שדורש את תשומת לבכם היום, עם הוספה מהירה"
+        },
+        "tasks": {
+          "name": "רשימת המשימות",
+          "description": "רשימת המשימות המלאה עם סינון, חיפוש וקיבוץ"
+        }
+      }
+    },
+    "bottomNav": {
+      "title": "ניווט תחתון",
+      "description": "בחרו עד {{max}} קיצורי דרך לסרגל הניווט התחתון בנייד וגררו כדי לשנות את הסדר. הפריט \"עוד\" תמיד נשאר אחרון ופותח את התפריט המלא.",
+      "resetToDefaults": "איפוס לברירת המחדל",
+      "resetHelper": "הפעולה תשחזר את קיצורי הדרך והסדר של ברירת המחדל בניווט התחתון."
+    },
+    "sidepanel": {
+      "title": "לוח צד"
+    }
   },
   "theme": {
     "title": "",

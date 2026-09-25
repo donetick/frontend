@@ -62,9 +62,9 @@
         "title": "Storage Ajustes",
         "description": "Haz copias de seguridad y restaura tus datos, gestiona el almacenamiento local y la sincronización."
       },
-      "sidepanel": {
-        "title": "Personalización del panel lateral",
-        "description": "Personaliza la disposición y la visibilidad de las tarjetas del panel lateral."
+      "layout": {
+        "title": "Diseño y navegación",
+        "description": "Elige la pantalla con la que se abre la app y qué accesos directos y paneles la rodean."
       },
       "theme": {
         "title": "Preferencias de tema",
@@ -93,6 +93,10 @@
       "bugReport": {
         "title": "Informar de un problema",
         "description": "¿Algo no funciona bien? Envíanos los detalles junto con una instantánea técnica."
+      },
+      "sidepanel": {
+        "title": "Personalización del panel lateral",
+        "description": "Personaliza la disposición y la visibilidad de las tarjetas del panel lateral."
       }
     }
   },
@@ -395,7 +399,6 @@
   },
   "sidepanel": {
     "title": "Personalización del panel lateral",
-    "heading": "Sidepanel Ajustes",
     "description": "Elige qué tarjetas aparecen en el panel lateral y en qué orden. Arrastra y suelta para reordenarlas o cambia su visibilidad.",
     "resetToDefaults": "Restablecer valores predeterminados",
     "resetHelper": "Se restablecerán la visibilidad y el orden predeterminados de todas las tarjetas.",
@@ -425,6 +428,7 @@
         "description": "Muestra el progreso semanal y las estadísticas de la familia"
       }
     },
+    "heading": "Sidepanel Ajustes",
     "detailedDescription": "Personaliza el diseño y la visibilidad de las tarjetas en el panel lateral. Esta sección solo está disponible en dispositivos con pantalla grande como tabletas y ordenadores de sobremesa."
   },
   "homeSections": {
@@ -467,6 +471,33 @@
       }
     },
     "detailedDescription": ""
+  },
+  "layout": {
+    "title": "Diseño y navegación",
+    "detailedDescription": "Elige la pantalla con la que se abre la app y qué accesos directos y paneles la acompañan.",
+    "defaultView": {
+      "title": "Vista predeterminada",
+      "description": "Elige con qué pantalla se abre la app.",
+      "options": {
+        "home": {
+          "name": "Resumen",
+          "description": "Un resumen de lo que necesita tu atención hoy, con captura rápida"
+        },
+        "tasks": {
+          "name": "Lista de tareas",
+          "description": "La lista de tareas completa con filtros, búsqueda y agrupación"
+        }
+      }
+    },
+    "bottomNav": {
+      "title": "Navegación inferior",
+      "description": "Elige hasta {{max}} accesos directos para la barra de navegación inferior en el móvil y arrástralos para ordenarlos. «Más» siempre queda como último elemento y abre el menú completo.",
+      "resetToDefaults": "Restablecer valores predeterminados",
+      "resetHelper": "Se restablecerán los accesos directos y el orden predeterminados de la navegación inferior."
+    },
+    "sidepanel": {
+      "title": "Panel lateral"
+    }
   },
   "theme": {
     "title": "Preferencias de tema",

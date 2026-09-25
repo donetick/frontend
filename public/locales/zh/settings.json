@@ -62,9 +62,9 @@
         "title": "存储设置",
         "description": "备份和恢复数据，管理本地存储与同步偏好。"
       },
-      "sidepanel": {
-        "title": "侧边栏自定义",
-        "description": "自定义侧边栏中卡片的布局和显示状态。"
+      "layout": {
+        "title": "布局与导航",
+        "description": "选择应用打开时显示的页面，以及围绕它的快捷方式和面板。"
       },
       "theme": {
         "title": "主题偏好",
@@ -93,6 +93,10 @@
       "bugReport": {
         "title": "报告问题",
         "description": "有什么不对劲吗？把详情和技术快照一起发给我们。"
+      },
+      "sidepanel": {
+        "title": "侧边栏自定义",
+        "description": "自定义侧边栏中卡片的布局和显示状态。"
       }
     }
   },
@@ -395,7 +399,6 @@
   },
   "sidepanel": {
     "title": "侧边栏自定义",
-    "heading": "侧边栏设置",
     "description": "Customize the layout and visibility of cards in the sidepanel. This section is only available on large screen devices such as tablets and desktops.",
     "resetToDefaults": "恢复默认",
     "resetHelper": "这会将所有卡片的显示状态和顺序恢复为默认值。",
@@ -425,6 +428,7 @@
         "description": "显示每周进度和家庭完成情况统计"
       }
     },
+    "heading": "侧边栏设置",
     "detailedDescription": ""
   },
   "homeSections": {
@@ -467,6 +471,33 @@
       }
     },
     "detailedDescription": ""
+  },
+  "layout": {
+    "title": "布局与导航",
+    "detailedDescription": "选择应用打开时显示的页面，以及围绕它的快捷方式和面板。",
+    "defaultView": {
+      "title": "默认视图",
+      "description": "选择应用打开时显示的页面。",
+      "options": {
+        "home": {
+          "name": "概览",
+          "description": "今天需要你处理的内容摘要，并支持快速添加"
+        },
+        "tasks": {
+          "name": "任务列表",
+          "description": "包含筛选、搜索和分组的完整任务列表"
+        }
+      }
+    },
+    "bottomNav": {
+      "title": "底部导航",
+      "description": "最多选择 {{max}} 个快捷方式放入手机底部导航栏，拖动可调整顺序。“更多”始终是最后一项，用于打开完整菜单。",
+      "resetToDefaults": "恢复默认",
+      "resetHelper": "这会将底部导航的快捷方式和顺序恢复为默认值。"
+    },
+    "sidepanel": {
+      "title": "侧边栏"
+    }
   },
   "theme": {
     "title": "Theme preferences",

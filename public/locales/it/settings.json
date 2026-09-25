@@ -62,9 +62,9 @@
         "title": "",
         "description": ""
       },
-      "sidepanel": {
-        "title": "",
-        "description": ""
+      "layout": {
+        "title": "Layout e navigazione",
+        "description": "Scegli la schermata con cui si apre l'app e quali scorciatoie e pannelli la circondano."
       },
       "theme": {
         "title": "",
@@ -91,6 +91,10 @@
         "description": ""
       },
       "bugReport": {
+        "title": "",
+        "description": ""
+      },
+      "sidepanel": {
         "title": "",
         "description": ""
       }
@@ -395,7 +399,6 @@
   },
   "sidepanel": {
     "title": "",
-    "heading": "",
     "description": "",
     "resetToDefaults": "",
     "resetHelper": "",
@@ -425,6 +428,7 @@
         "description": ""
       }
     },
+    "heading": "",
     "detailedDescription": ""
   },
   "homeSections": {
@@ -467,6 +471,33 @@
       }
     },
     "detailedDescription": ""
+  },
+  "layout": {
+    "title": "Layout e navigazione",
+    "detailedDescription": "Scegli la schermata con cui si apre l'app e quali scorciatoie e pannelli le stanno intorno.",
+    "defaultView": {
+      "title": "Vista predefinita",
+      "description": "Scegli con quale schermata si apre l'app.",
+      "options": {
+        "home": {
+          "name": "Panoramica",
+          "description": "Un riepilogo di ciò che ti serve oggi, con aggiunta rapida"
+        },
+        "tasks": {
+          "name": "Elenco attività",
+          "description": "L'elenco completo delle attività con filtri, ricerca e raggruppamento"
+        }
+      }
+    },
+    "bottomNav": {
+      "title": "Navigazione in basso",
+      "description": "Scegli fino a {{max}} scorciatoie per la barra di navigazione in basso sul cellulare e trascinale per riordinarle. «Altro» resta sempre l'ultima voce e apre il menu completo.",
+      "resetToDefaults": "Ripristina impostazioni predefinite",
+      "resetHelper": "Verranno ripristinati le scorciatoie e l'ordine predefiniti della navigazione in basso."
+    },
+    "sidepanel": {
+      "title": "Pannello laterale"
+    }
   },
   "theme": {
     "title": "",

@@ -1,19 +1,43 @@
 import {
+  Archive,
   Checklist,
   DashboardRounded,
+  FilterAlt,
+  FolderOpen,
+  History,
   InboxRounded,
+  ListAlt,
   MenuRounded,
   SearchRounded,
+  SettingsOutlined,
   SpaceDashboard,
+  Toll,
+  Widgets,
 } from '@mui/icons-material'
 import { Box, Sheet, Typography } from '@mui/joy'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import PropTypes from 'prop-types'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import { useScrollDirection } from '../../hooks/useScrollDirection'
+import { getEnabledBottomNavItems } from '../../utils/BottomNavConfig'
 import { OPEN_NAVIGATION_DRAWER_EVENT } from './navigationEvents'
+
+const ICONS = {
+  SpaceDashboard: <SpaceDashboard />,
+  Checklist: <Checklist />,
+  SearchRounded: <SearchRounded />,
+  Archive: <Archive />,
+  Widgets: <Widgets />,
+  ListAlt: <ListAlt />,
+  FolderOpen: <FolderOpen />,
+  FilterAlt: <FilterAlt />,
+  History: <History />,
+  Toll: <Toll />,
+  SettingsOutlined: <SettingsOutlined />,
+}
 
 const HIDDEN_ROUTES = [
   '/signup',
@@ -34,6 +58,21 @@ const HIDDEN_ROUTES = [
 
 const isTaskDetailRoute = pathname =>
   /^\/chores\/(create|[^/]+\/(?:edit|timer))$/.test(pathname)
+
+const isItemActive = (item, pathname) => {
+  if (item.id === 'tasks') {
+    return pathname === '/chores' || pathname === '/my/chores'
+  }
+  const to = item.to?.startsWith('/') ? item.to : `/${item.to}`
+  return pathname === to
+}
+
+const MARKETING_HOSTNAMES = ['www.donetick.com', 'donetick.com']
+
+// Shared with the settings page so the "customize bottom nav" section only
+// shows when the bar itself is eligible to render.
+export const isMobileBottomNavEligible = isMobile =>
+  isMobile && !MARKETING_HOSTNAMES.includes(window.location.hostname)
 
 const NavItem = ({ active, icon, label, onClick, to }) => {
   const content = (
@@ -111,18 +150,24 @@ const MobileBottomNav = () => {
   const location = useLocation()
   const navigate = useNavigate()
 
+  // Reread whenever the settings page saves, so a reorder/swap shows up
+  // without a reload.
+  const [items, setItems] = useState(getEnabledBottomNavItems)
+  useEffect(() => {
+    const onConfigChanged = () => setItems(getEnabledBottomNavItems())
+    window.addEventListener('bottomNavConfigChanged', onConfigChanged)
+    return () =>
+      window.removeEventListener('bottomNavConfigChanged', onConfigChanged)
+  }, [])
+
   const hidden =
-    !isMobile ||
+    !isMobileBottomNavEligible(isMobile) ||
     HIDDEN_ROUTES.some(route => location.pathname.startsWith(route)) ||
-    isTaskDetailRoute(location.pathname) ||
-    ['www.donetick.com', 'donetick.com'].includes(window.location.hostname)
+    isTaskDetailRoute(location.pathname)
 
   const scrolledAway = useScrollDirection({ enabled: isMobile && !hidden })
 
   if (hidden) return null
-
-  const tasksActive =
-    location.pathname === '/chores' || location.pathname === '/my/chores'
 
   return (
     <>
@@ -149,24 +194,20 @@ const MobileBottomNav = () => {
           '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
         }}
       >
-        <NavItem
-          active={location.pathname === '/'}
-          icon={<SpaceDashboard />}
-          label={t('navigation.home')}
-          to='/'
-        />
-        <NavItem
-          active={tasksActive}
-          icon={<Checklist />}
-          label={t('navigation.tasks', { defaultValue: 'Tasks' })}
-          to='/chores'
-        />
-        <NavItem
-          active={location.pathname === '/search'}
-          icon={<SearchRounded />}
-          label={t('navigation.search')}
-          onClick={() => navigate('/search')}
-        />
+        {items.map(item => (
+          <NavItem
+            key={item.id}
+            active={isItemActive(item, location.pathname)}
+            icon={ICONS[item.iconName]}
+            label={t(item.translationKey, {
+              defaultValue: item.translationDefault,
+            })}
+            to={item.action ? undefined : item.to}
+            onClick={
+              item.action === 'search' ? () => navigate('/search') : undefined
+            }
+          />
+        ))}
         <NavItem
           active={false}
           icon={<MenuRounded />}

@@ -393,7 +393,7 @@ const UserProfileAvatar = () => {
           </MenuItem>
           {isLargeScreen && (
             <MenuItem
-              onClick={() => navigate('/settings/detailed#sidepanel')}
+              onClick={() => navigate('/settings/layout')}
               sx={{
                 borderRadius: 'var(--joy-radius-sm)',
                 '&:hover': {

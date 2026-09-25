@@ -27,6 +27,7 @@ import JoinCircleView from '../views/Circles/JoinCircle'
 import NotFound from '../views/components/NotFound'
 import FilterView from '../views/Filters/FilterView'
 import ChoreHistory from '../views/History/ChoreHistory'
+import DefaultViewRoute from '../views/Home/DefaultViewRoute'
 import HomeView from '../views/Home/HomeView'
 import LabelDetailView from '../views/Labels/LabelDetailView'
 import LabelView from '../views/Labels/LabelView'
@@ -42,12 +43,12 @@ import PrivacyPolicyView from '../views/PrivacyPolicy/PrivacyPolicyView'
 import ProjectView from '../views/Projects/ProjectView'
 import APITokenSettings from '../views/Settings/APITokenSettings'
 import HomeSectionsSettings from '../views/Settings/HomeSectionsSettings'
+import LayoutSettings from '../views/Settings/LayoutSettings'
 import LocalizationSettings from '../views/Settings/LocalizationSettings'
 import MFASettings from '../views/Settings/MFASettings'
 import NotificationSetting from '../views/Settings/NotificationSetting'
 import PrivacyAnalyticsSettings from '../views/Settings/PrivacyAnalyticsSettings'
 import ProfileSettings from '../views/Settings/ProfileSettings'
-import SidepanelSettings from '../views/Settings/SidepanelSettings'
 import StorageSettings from '../views/Settings/StorageSettings'
 import TermsView from '../views/Terms/TermsView'
 import TestView from '../views/TestView/Test'
@@ -64,6 +65,10 @@ const Router = createBrowserRouter([
     children: [
       {
         path: '/',
+        element: <DefaultViewRoute />,
+      },
+      {
+        path: '/home',
         element: <HomeView />,
       },
       {
@@ -111,12 +116,12 @@ const Router = createBrowserRouter([
             element: <StorageSettings />,
           },
           {
-            path: 'sidepanel',
-            element: <SidepanelSettings />,
-          },
-          {
             path: 'home-sections',
             element: <HomeSectionsSettings />,
+          },
+          {
+            path: 'layout',
+            element: <LayoutSettings />,
           },
           {
             path: 'theme',

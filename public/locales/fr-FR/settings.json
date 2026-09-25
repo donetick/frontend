@@ -66,6 +66,10 @@
         "title": "Personnalisation du panneau latéral",
         "description": "Personnalisez la disposition et la visibilité des cartes du panneau latéral."
       },
+      "layout": {
+        "title": "Disposition et navigation",
+        "description": "Choisissez l'écran sur lequel l'application s'ouvre, ainsi que les raccourcis et panneaux qui l'entourent."
+      },
       "theme": {
         "title": "Préférences de thème",
         "description": "Choisissez votre thème préféré et configurez le mode clair/sombre."
@@ -418,6 +422,33 @@
         "name": "Objectifs hebdomadaires",
         "description": "Affiche la progression hebdomadaire et les statistiques de la famille"
       }
+    }
+  },
+  "layout": {
+    "title": "Disposition et navigation",
+    "detailedDescription": "Choisissez l'écran sur lequel l'application s'ouvre et les raccourcis et panneaux qui l'entourent.",
+    "defaultView": {
+      "title": "Vue par défaut",
+      "description": "Choisissez l'écran sur lequel l'application s'ouvre.",
+      "options": {
+        "home": {
+          "name": "Aperçu",
+          "description": "Un résumé de ce qui vous attend aujourd'hui, avec ajout rapide"
+        },
+        "tasks": {
+          "name": "Liste des tâches",
+          "description": "La liste complète des tâches avec filtres, recherche et regroupement"
+        }
+      }
+    },
+    "bottomNav": {
+      "title": "Navigation inférieure",
+      "description": "Choisissez jusqu'à {{max}} raccourcis pour la barre de navigation inférieure sur mobile et faites-les glisser pour les réorganiser. « Plus » reste toujours le dernier élément et ouvre le menu complet.",
+      "resetToDefaults": "Réinitialiser par défaut",
+      "resetHelper": "Les raccourcis et l'ordre par défaut de la navigation inférieure seront rétablis."
+    },
+    "sidepanel": {
+      "title": "Panneau latéral"
     }
   },
   "theme": {

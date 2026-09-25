@@ -62,9 +62,9 @@
         "title": "Nastavení úložiště",
         "description": "Zálohujte a obnovujte data, spravujte místní úložiště a synchronizaci."
       },
-      "sidepanel": {
-        "title": "Přizpůsobení postranního panelu",
-        "description": "Upravte rozložení a viditelnost karet v postranním panelu."
+      "layout": {
+        "title": "Rozvržení a navigace",
+        "description": "Vyberte obrazovku, kterou aplikace otevře, a zkratky i panely kolem ní."
       },
       "theme": {
         "title": "Předvolby motivu",
@@ -93,6 +93,10 @@
       "bugReport": {
         "title": "Nahlásit problém",
         "description": "Popište nám, co nefunguje, a technické podrobnosti přiložíme za vás."
+      },
+      "sidepanel": {
+        "title": "Přizpůsobení postranního panelu",
+        "description": "Upravte rozložení a viditelnost karet v postranním panelu."
       }
     }
   },
@@ -395,7 +399,6 @@
   },
   "sidepanel": {
     "title": "Přizpůsobení postranního panelu",
-    "heading": "Nastavení postranního panelu",
     "description": "Určete, které karty se v postranním panelu zobrazí a v jakém pořadí. Pořadí změníte přetažením, viditelnost každé karty přepínačem.",
     "resetToDefaults": "Obnovit výchozí",
     "resetHelper": "Obnoví výchozí viditelnost a pořadí všech karet.",
@@ -425,6 +428,7 @@
         "description": "Zobrazí týdenní pokrok a statistiky dokončení v rodině"
       }
     },
+    "heading": "Nastavení postranního panelu",
     "detailedDescription": "Upravte rozložení a viditelnost karet v postranním panelu. Tato sekce je dostupná pouze na zařízeních s velkou obrazovkou, jako jsou tablety a počítače."
   },
   "homeSections": {
@@ -467,6 +471,33 @@
       }
     },
     "detailedDescription": "Upravte rozložení a viditelnost sekcí na domovské obrazovce."
+  },
+  "layout": {
+    "title": "Rozvržení a navigace",
+    "detailedDescription": "Vyberte obrazovku, kterou aplikace otevře, a to, jaké zkratky a panely ji obklopují.",
+    "defaultView": {
+      "title": "Výchozí zobrazení",
+      "description": "Vyberte, kterou obrazovku aplikace otevře.",
+      "options": {
+        "home": {
+          "name": "Přehled",
+          "description": "Souhrn toho, co dnes potřebuje vaši pozornost, včetně rychlého přidání"
+        },
+        "tasks": {
+          "name": "Seznam úkolů",
+          "description": "Úplný seznam úkolů s filtry, hledáním a seskupením"
+        }
+      }
+    },
+    "bottomNav": {
+      "title": "Dolní navigace",
+      "description": "Vyberte až {{max}} zkratky pro dolní navigační lištu na mobilu a přetažením je seřaďte. Položka „Více“ vždy zůstává poslední a otevírá celé menu.",
+      "resetToDefaults": "Obnovit výchozí",
+      "resetHelper": "Obnoví výchozí zkratky a pořadí dolní navigace."
+    },
+    "sidepanel": {
+      "title": "Postranní panel"
+    }
   },
   "theme": {
     "title": "Předvolby motivu",

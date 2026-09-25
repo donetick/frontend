@@ -62,9 +62,9 @@
         "title": "Opslaginstellingen",
         "description": "Maak back-ups en herstel je gegevens, beheer lokale opslag en synchronisatie."
       },
-      "sidepanel": {
-        "title": "Zijpaneel aanpassen",
-        "description": "Pas de indeling en zichtbaarheid van de kaarten in het zijpaneel aan."
+      "layout": {
+        "title": "Indeling en navigatie",
+        "description": "Kies met welk scherm de app opent en welke snelkoppelingen en panelen eromheen staan."
       },
       "theme": {
         "title": "Themavoorkeuren",
@@ -93,6 +93,10 @@
       "bugReport": {
         "title": "Een bug melden",
         "description": "Werkt er iets niet goed? Stuur ons de details samen met een technische momentopname."
+      },
+      "sidepanel": {
+        "title": "Zijpaneel aanpassen",
+        "description": "Pas de indeling en zichtbaarheid van de kaarten in het zijpaneel aan."
       }
     }
   },
@@ -395,7 +399,6 @@
   },
   "sidepanel": {
     "title": "Zijpaneel aanpassen",
-    "heading": "Zijpaneelinstellingen",
     "description": "Bepaal welke kaarten in het zijpaneel verschijnen en in welke volgorde. Sleep om te herschikken of wissel de zichtbaarheid van elke kaart.",
     "resetToDefaults": "Standaardwaarden herstellen",
     "resetHelper": "Hiermee worden de standaardzichtbaarheid en -volgorde van alle kaarten hersteld.",
@@ -425,6 +428,7 @@
         "description": "Toont wekelijkse voortgang en gezinsstatistieken"
       }
     },
+    "heading": "Zijpaneelinstellingen",
     "detailedDescription": ""
   },
   "homeSections": {
@@ -467,6 +471,33 @@
       }
     },
     "detailedDescription": ""
+  },
+  "layout": {
+    "title": "Indeling en navigatie",
+    "detailedDescription": "Kies met welk scherm de app opent en welke snelkoppelingen en panelen eromheen staan.",
+    "defaultView": {
+      "title": "Standaardweergave",
+      "description": "Kies met welk scherm de app opent.",
+      "options": {
+        "home": {
+          "name": "Overzicht",
+          "description": "Een samenvatting van wat vandaag je aandacht vraagt, met snel toevoegen"
+        },
+        "tasks": {
+          "name": "Takenlijst",
+          "description": "De volledige takenlijst met filters, zoeken en groeperen"
+        }
+      }
+    },
+    "bottomNav": {
+      "title": "Onderste navigatie",
+      "description": "Kies maximaal {{max}} snelkoppelingen voor de onderste navigatiebalk op mobiel en sleep om ze te ordenen. ‘Meer’ blijft altijd het laatste item en opent het volledige menu.",
+      "resetToDefaults": "Standaardwaarden herstellen",
+      "resetHelper": "Hiermee worden de standaardsnelkoppelingen en -volgorde van de onderste navigatie hersteld."
+    },
+    "sidepanel": {
+      "title": "Zijpaneel"
+    }
   },
   "theme": {
     "title": "Themavoorkeuren",
