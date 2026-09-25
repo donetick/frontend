@@ -93,10 +93,6 @@
       "bugReport": {
         "title": "Informar de un problema",
         "description": "¿Algo no funciona bien? Envíanos los detalles junto con una instantánea técnica."
-      },
-      "sidepanel": {
-        "title": "Personalización del panel lateral",
-        "description": "Personaliza la disposición y la visibilidad de las tarjetas del panel lateral."
       }
     }
   },
@@ -427,9 +423,7 @@
         "name": "Objetivos semanales",
         "description": "Muestra el progreso semanal y las estadísticas de la familia"
       }
-    },
-    "heading": "Sidepanel Ajustes",
-    "detailedDescription": "Personaliza el diseño y la visibilidad de las tarjetas en el panel lateral. Esta sección solo está disponible en dispositivos con pantalla grande como tabletas y ordenadores de sobremesa."
+    }
   },
   "homeSections": {
     "title": "",
