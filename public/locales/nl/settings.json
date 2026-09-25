@@ -93,10 +93,6 @@
       "bugReport": {
         "title": "Een bug melden",
         "description": "Werkt er iets niet goed? Stuur ons de details samen met een technische momentopname."
-      },
-      "sidepanel": {
-        "title": "Zijpaneel aanpassen",
-        "description": "Pas de indeling en zichtbaarheid van de kaarten in het zijpaneel aan."
       }
     }
   },
@@ -427,9 +423,7 @@
         "name": "Weekdoelen",
         "description": "Toont wekelijkse voortgang en gezinsstatistieken"
       }
-    },
-    "heading": "Zijpaneelinstellingen",
-    "detailedDescription": ""
+    }
   },
   "homeSections": {
     "title": "",
