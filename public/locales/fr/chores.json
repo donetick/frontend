@@ -257,6 +257,8 @@
     "failRescheduleTitle": "Échec de la replanification",
     "failRescheduleMessage": "Impossible de mettre à jour la date d'échéance",
     "failRemoveDueDateTitle": "Échec de la suppression de la date d'échéance",
+    "failAssignTitle": "",
+    "failAssignMessage": "",
     "nudgeSentTitle": "Rappel envoyé !",
     "nudgeFailed": "Échec de l'envoi du rappel",
     "failNudgeTitle": "Échec de l'envoi du rappel",
