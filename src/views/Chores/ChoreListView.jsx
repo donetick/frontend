@@ -44,9 +44,9 @@ const ChoreListView = ({
   }, [])
   const closeActionMenu = useCallback(() => setActionMenuAnchor(null), [])
 
-  // 'default' renders the compact card too, so the swipe-action offset below
-  // has to follow the card component, not the raw view mode.
-  const usesCompactCard = viewMode === 'compact' || viewMode === 'default'
+  // The swipe-action offset below has to follow the card component, not the
+  // raw view mode.
+  const usesCompactCard = viewMode === 'compact'
 
   const renderChoreCard = (chore, key) => {
     const CardComponent = usesCompactCard ? CompactChoreCard : ChoreCard
