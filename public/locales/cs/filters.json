@@ -12,12 +12,10 @@
   },
   "nameExists": "Filtr s tímto názvem již existuje",
   "tasks_one": "{{count}} úkol",
-  "tasks_few": "{{count}} úkoly",
   "tasks_other": "{{count}} úkolů",
   "overdue": "{{count}} po termínu",
   "noConditions": "Žádné podmínky",
   "condition_one": "{{count}} podmínka",
-  "condition_few": "{{count}} podmínky",
   "condition_other": "{{count}} podmínek",
   "usedCount": "Použito {{count}}×",
   "delete": {

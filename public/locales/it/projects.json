@@ -1,12 +1,72 @@
 {
-  "iconPicker": {"chooseIcon": "Scegli icona progetto", "availableIcons": "Icone disponibili"},
-  "icons": {"FolderOpen": "Cartella", "Work": "Lavoro", "Home": "Casa", "School": "Scuola", "BusinessCenter": "Attività", "Code": "Codice", "Build": "Costruzione", "Palette": "Design", "SportsSoccer": "Sport", "FitnessCenter": "Fitness", "ShoppingCart": "Acquisti", "Restaurant": "Cibo", "Flight": "Viaggi", "Book": "Studio", "MusicNote": "Musica", "PhotoCamera": "Foto", "Games": "Giochi", "Science": "Scienza", "AccountBalance": "Finanze", "LocalHospital": "Salute", "DirectionsCar": "Auto", "Pets": "Animali", "Garden": "Giardino", "Computer": "Tecnologia"},
-  "defaultChip": "Predefinito", "tasks_one": "{{count}} attività", "tasks_other": "{{count}} attività", "shared": "Condiviso",
-  "delete": {"title": "Elimina progetto", "message": "Vuoi davvero eliminare \"{{name}}\"? Il progetto verrà rimosso ma tutte le attività resteranno (verranno spostate nel Progetto predefinito)."},
-  "loadError": "Impossibile caricare i progetti. Riprova.",
-  "search": {"placeholder": "Cerca progetti", "noResultsTitle": "Nessun progetto corrispondente", "noResultsDescription": "Nessun progetto corrisponde a \"{{searchTerm}}\".", "noFilterResultsDescription": "Nessun progetto corrisponde al filtro corrente.", "clear": "Cancella ricerca", "showAll": "Mostra tutti i progetti"},
-  "blurb": "Organizza le attività in progetti. Crea spazi di lavoro personalizzati per mantenerle ordinate e facilmente accessibili.",
-  "defaultDescription": "Tutte le attività senza un progetto specifico",
-  "selector": {"title": "Progetti", "createNew": "Crea nuovo progetto", "createNewDescription": "Aggiungi uno spazio di lavoro personalizzato", "manage": "Gestisci progetti", "manageDescription": "Visualizza, modifica e organizza tutti i progetti", "currentProjectTitle": "Progetto corrente: {{project}} (Ctrl+E)", "builtInWorkspace": "Spazio di lavoro integrato"},
-  "modal": {"errorNameRequired": "Il nome del progetto è obbligatorio", "errorUpdate": "Impossibile aggiornare il progetto", "errorCreate": "Impossibile creare il progetto", "namePlaceholder": "Inserisci il nome del progetto...", "descriptionPlaceholder": "Descrizione progetto facoltativa...", "nameLabel": "Nome progetto", "descriptionLabel": "Descrizione", "iconLabel": "Icona progetto", "selectIcon": "Seleziona icona", "colorLabel": "Colore progetto"}
+  "iconPicker": {
+    "chooseIcon": "",
+    "availableIcons": ""
+  },
+  "icons": {
+    "FolderOpen": "",
+    "Work": "",
+    "Home": "",
+    "School": "",
+    "BusinessCenter": "",
+    "Code": "",
+    "Build": "",
+    "Palette": "",
+    "SportsSoccer": "",
+    "FitnessCenter": "",
+    "ShoppingCart": "",
+    "Restaurant": "",
+    "Flight": "",
+    "Book": "",
+    "MusicNote": "",
+    "PhotoCamera": "",
+    "Games": "",
+    "Science": "",
+    "AccountBalance": "",
+    "LocalHospital": "",
+    "DirectionsCar": "",
+    "Pets": "",
+    "Garden": "",
+    "Computer": ""
+  },
+  "defaultChip": "",
+  "tasks_one": "",
+  "tasks_other": "",
+  "shared": "",
+  "delete": {
+    "title": "",
+    "message": ""
+  },
+  "loadError": "",
+  "search": {
+    "placeholder": "",
+    "noResultsTitle": "",
+    "noResultsDescription": "",
+    "noFilterResultsDescription": "",
+    "clear": "",
+    "showAll": ""
+  },
+  "blurb": "",
+  "defaultDescription": "",
+  "selector": {
+    "title": "",
+    "createNew": "",
+    "createNewDescription": "",
+    "manage": "",
+    "manageDescription": "",
+    "currentProjectTitle": "",
+    "builtInWorkspace": ""
+  },
+  "modal": {
+    "errorNameRequired": "",
+    "errorUpdate": "",
+    "errorCreate": "",
+    "namePlaceholder": "",
+    "descriptionPlaceholder": "",
+    "nameLabel": "",
+    "descriptionLabel": "",
+    "iconLabel": "",
+    "selectIcon": "",
+    "colorLabel": ""
+  }
 }

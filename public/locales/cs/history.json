@@ -24,20 +24,15 @@
   "card": {
     "wasDue": "Termín byl {{date}}",
     "daysBeforeDue_one": "{{count}} d před termínem",
-    "daysBeforeDue_few": "{{count}} d před termínem",
     "daysBeforeDue_other": "{{count}} d před termínem",
     "daysAfterDue_one": "{{count}} d po termínu",
-    "daysAfterDue_few": "{{count}} d po termínu",
     "daysAfterDue_other": "{{count}} d po termínu",
     "hoursBeforeDue_one": "{{count}} h před termínem",
-    "hoursBeforeDue_few": "{{count}} h před termínem",
     "hoursBeforeDue_other": "{{count}} h před termínem",
     "hoursAfterDue_one": "{{count}} h po termínu",
-    "hoursAfterDue_few": "{{count}} h po termínu",
     "hoursAfterDue_other": "{{count}} h po termínu",
     "assignedTo": "Přiřazeno: {{name}}",
     "points_one": "★ {{count}} bod",
-    "points_few": "★ {{count}} body",
     "points_other": "★ {{count}} bodů"
   },
   "detail": {
@@ -50,7 +45,6 @@
     "duration": "Doba trvání",
     "pointsEarned": "Získané body",
     "points_one": "{{count}} bod",
-    "points_few": "{{count}} body",
     "points_other": "{{count}} bodů",
     "note": "Poznámka"
   },
@@ -102,7 +96,6 @@
   },
   "period": {
     "days_one": "{{count}} den",
-    "days_few": "{{count}} dny",
     "days_other": "{{count}} dní",
     "allTime": "Celkově"
   },
@@ -125,9 +118,6 @@
     "emptyDescriptionMember": "{{name}} nic nedokončil(a) {{period}}. Zkuste delší období nebo jiného člena.",
     "periodSoFar": "zatím",
     "periodLastDays": "za posledních {{count}} dní",
-    "periodLastDays_one": "za poslední {{count}} den",
-    "periodLastDays_few": "za poslední {{count}} dny",
-    "periodLastDays_other": "za posledních {{count}} dní",
     "unknownMember": "tento člen",
     "searchPlaceholder": "Hledat aktivity...",
     "sort": {
@@ -184,9 +174,6 @@
     "unknown": "Neznámý",
     "membersInvolved": "Zapojení členové",
     "membersSuffix": "{{count}} členů",
-    "membersSuffix_one": "{{count}} člen",
-    "membersSuffix_few": "{{count}} členové",
-    "membersSuffix_other": "{{count}} členů",
     "lastCompleted": "Naposledy dokončeno"
   },
   "noteViewer": {

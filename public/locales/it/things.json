@@ -1,9 +1,66 @@
 {
-  "errName": "Il nome è obbligatorio", "errStateNumber": "Lo stato deve essere un numero", "errStateBool": "Lo stato deve essere vero o falso", "errStateRequired": "Lo stato è obbligatorio", "name": "Nome", "namePlaceholder": "Nome elemento", "value": "Valore", "valuePlaceholder": "Valore elemento", "updateState": "Aggiorna stato", "update": "Aggiorna", "create": "Crea", "editThingTitle": "Modifica elemento", "createThingTitle": "Crea elemento", "type": "Tipo", "boolTrue": "Vero", "boolFalse": "Falso",
-  "history": {"overview": "Panoramica elementi", "visualization": "Visualizzazione dati", "changeHistory": "Cronologia modifiche", "updated": "Aggiornato"},
-  "view": {
-    "title": "Elementi", "description": "Gli elementi sono campi personalizzati che possono essere collegati alle attività per memorizzare informazioni aggiuntive. Possono essere di tipo testo, numero o booleano. Puoi associare elementi alle attività e rendere l'attività in scadenza quando viene soddisfatta una condizione", "searchPlaceholder": "Cerca elementi", "sortName": "Nome", "sortType": "Tipo", "sortState": "Stato", "sortUpdated": "Ultimo aggiornamento", "filterTitle": "Tipo", "filterAll": "Tutti i tipi", "emptyTitle": "Nessun elemento", "emptyDescription": "Un elemento tiene traccia di un valore, come un contatore o un interruttore, a cui altre attività possono reagire. Creane uno per attivare automaticamente le attività.", "emptyAction": "Crea un elemento", "noResultsTitle": "Nessun elemento corrispondente", "noResultsSearch": "Nessun elemento corrisponde a \"{{term}}\".", "noResultsFilter": "Nessun elemento corrisponde al filtro corrente.", "clearSearch": "Cancella ricerca", "showAll": "Mostra tutti gli elementi", "toggle": "Commuta"
+  "errName": "",
+  "errStateNumber": "",
+  "errStateBool": "",
+  "errStateRequired": "",
+  "name": "",
+  "namePlaceholder": "",
+  "value": "",
+  "valuePlaceholder": "",
+  "updateState": "",
+  "update": "",
+  "create": "",
+  "editThingTitle": "",
+  "createThingTitle": "",
+  "type": "",
+  "boolTrue": "",
+  "boolFalse": "",
+  "history": {
+    "overview": "",
+    "visualization": "",
+    "changeHistory": "",
+    "updated": ""
   },
-  "types": {"text": "Testo", "number": "Numero", "boolean": "Booleano"},
-  "notify": {"savedTitle": "Salvato", "savedMessage": "Elemento salvato correttamente", "saveFailTitle": "Impossibile salvare l'elemento", "queuedMessage": "Sei offline e la richiesta è stata messa in coda", "saveFailMessage": "Si è verificato un errore durante il salvataggio dell'elemento", "deleteTitle": "Elimina elemento", "deleteMessage": "Vuoi davvero eliminare questo elemento?", "deleteBlockedTitle": "Impossibile eliminare l'elemento", "deleteBlockedMessage": "Impossibile eliminare un elemento associato ad attività", "deleteFailTitle": "Impossibile eliminare l'elemento", "deleteFailMessage": "Si è verificato un errore durante l'eliminazione dell'elemento", "updatedTitle": "Aggiornato", "updatedMessage": "Stato dell'elemento aggiornato correttamente", "updateFailTitle": "Impossibile aggiornare lo stato dell'elemento", "updateFailMessage": "Si è verificato un errore durante l'aggiornamento dello stato dell'elemento"}
+  "view": {
+    "title": "",
+    "description": "",
+    "searchPlaceholder": "",
+    "sortName": "",
+    "sortType": "",
+    "sortState": "",
+    "sortUpdated": "",
+    "filterTitle": "",
+    "filterAll": "",
+    "emptyTitle": "",
+    "emptyDescription": "",
+    "emptyAction": "",
+    "noResultsTitle": "",
+    "noResultsSearch": "",
+    "noResultsFilter": "",
+    "clearSearch": "",
+    "showAll": "",
+    "toggle": ""
+  },
+  "types": {
+    "text": "",
+    "number": "",
+    "boolean": ""
+  },
+  "notify": {
+    "savedTitle": "",
+    "savedMessage": "",
+    "saveFailTitle": "",
+    "queuedMessage": "",
+    "saveFailMessage": "",
+    "deleteTitle": "",
+    "deleteMessage": "",
+    "deleteBlockedTitle": "",
+    "deleteBlockedMessage": "",
+    "deleteFailTitle": "",
+    "deleteFailMessage": "",
+    "updatedTitle": "",
+    "updatedMessage": "",
+    "updateFailTitle": "",
+    "updateFailMessage": ""
+  }
 }

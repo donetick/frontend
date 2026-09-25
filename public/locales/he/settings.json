@@ -1,22 +1,22 @@
 {
-  "title": "",
+  "title": "הגדרות",
   "common": {
-    "save": "",
-    "cancel": "",
-    "confirm": "",
+    "save": "שמור",
+    "cancel": "ביטול",
+    "confirm": "אישור",
     "remove": "",
-    "delete": "",
-    "refresh": "",
-    "loading": "",
+    "delete": "מחיקה",
+    "refresh": "רענון",
+    "loading": "טוען...",
     "on": "",
     "off": "",
-    "error": "",
-    "success": "",
+    "error": "שגיאה",
+    "success": "הצלחה",
     "plusFeature": "",
     "earlyAccess": ""
   },
   "overview": {
-    "title": "",
+    "title": "הגדרות",
     "subtitle": "",
     "upgrade": {
       "title": "",
@@ -47,7 +47,7 @@
         "description": ""
       },
       "notifications": {
-        "title": "",
+        "title": "התראות",
         "description": ""
       },
       "mfa": {
@@ -113,8 +113,8 @@
     "displayNamePlaceholder": "",
     "timezone": "",
     "timezonePlaceholder": "",
-    "save": "",
-    "cancel": ""
+    "save": "שמור",
+    "cancel": "ביטול"
   },
   "circleSettings": {
     "title": "",
@@ -182,7 +182,7 @@
     "cancelledDescription": "",
     "freeDescription": "",
     "upgrade": "",
-    "cancel": "",
+    "cancel": "ביטול",
     "password": "",
     "changePassword": "",
     "passwordChanged": "",
@@ -329,7 +329,7 @@
     "setup": {
       "title": "",
       "addedAccount": "",
-      "back": "",
+      "back": "חזרה",
       "verifyAndEnable": "",
       "savedBackupCodes": "",
       "step1Label": "",
@@ -458,11 +458,11 @@
         "description": ""
       },
       "filters": {
-        "name": "",
+        "name": "מסננים",
         "description": ""
       },
       "projects": {
-        "name": "",
+        "name": "פרויקטים",
         "description": ""
       }
     },
@@ -626,7 +626,7 @@
     "createIntro": "",
     "keyPlaceholder": "",
     "includeAssets": "",
-    "warningLabel": "",
+    "warningLabel": "אזהרה:",
     "restoreWarning": "",
     "restoreKeyPlaceholder": "",
     "title": "",

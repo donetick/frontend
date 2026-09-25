@@ -15,7 +15,6 @@
   },
   "detail": {
     "taskCount_one": "{{count}} úkol",
-    "taskCount_few": "{{count}} úkoly",
     "taskCount_other": "{{count}} úkolů",
     "labelActions": "Akce štítku",
     "filters": {
@@ -55,7 +54,6 @@
     "label": "Štítky",
     "createLabel": "Vytvořit štítek",
     "labelsCount_one": "{{count}} štítek",
-    "labelsCount_few": "{{count}} štítky",
     "labelsCount_other": "{{count}} štítků"
   },
   "view": {
