@@ -114,8 +114,8 @@ const AccountSettings = () => {
 
                   const { customerInfo } = await Purchases.getCustomerInfo()
                   if (customerInfo.entitlements.active['Donetick Plus']) {
-                    queryClient.invalidateQueries(['userProfile'])
-                    queryClient.refetchQueries(['userProfile'])
+                    queryClient.invalidateQueries({ queryKey: ['userProfile'] })
+                    queryClient.refetchQueries({ queryKey: ['userProfile'] })
                     showNotification({
                       type: 'success',
                       message: t('accountSettings.purchase.success'),

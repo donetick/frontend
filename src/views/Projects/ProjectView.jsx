@@ -364,7 +364,7 @@ const ProjectView = () => {
     DeleteProject(id).then(() => {
       const updatedProjects = userProjects.filter(project => project.id !== id)
       setUserProjects(updatedProjects)
-      queryClient.invalidateQueries('projects')
+      queryClient.invalidateQueries({ queryKey: ['projects'] })
 
       // If the deleted project was the active project, clear it
       const saved = localStorage.getItem('selectedProject')

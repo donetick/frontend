@@ -217,7 +217,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
         LABEL_COLORS[1 + Math.floor(Math.random() * (LABEL_COLORS.length - 1))]
           .value
       CreateLabel({ name, color })
-        .then(() => queryClient.invalidateQueries(['labels']))
+        .then(() => queryClient.invalidateQueries({ queryKey: ['labels'] }))
         .catch(error => console.error('Error creating label:', error))
     },
     [queryClient],

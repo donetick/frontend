@@ -378,10 +378,18 @@ const CircleSettings = () => {
                                   type: 'success',
                                   message: t('circleSettings.memberRemoved'),
                                 })
-                                queryClient.invalidateQueries(['circleMembers'])
-                                queryClient.invalidateQueries(['userCircle'])
-                                queryClient.refetchQueries(['circleMembers'])
-                                queryClient.refetchQueries(['userCircle'])
+                                queryClient.invalidateQueries({
+                                  queryKey: ['circleMembers'],
+                                })
+                                queryClient.invalidateQueries({
+                                  queryKey: ['userCircle'],
+                                })
+                                queryClient.refetchQueries({
+                                  queryKey: ['circleMembers'],
+                                })
+                                queryClient.refetchQueries({
+                                  queryKey: ['userCircle'],
+                                })
                                 setCircleMembers(prevMembers =>
                                   prevMembers.filter(
                                     m => m.userId !== member.userId,
@@ -461,12 +469,22 @@ const CircleSettings = () => {
                           type: 'success',
                           message: t('circleSettings.requestAccepted'),
                         })
-                        queryClient.invalidateQueries(['circleMembers'])
-                        queryClient.invalidateQueries(['circleMemberRequests'])
-                        queryClient.invalidateQueries(['userCircle'])
-                        queryClient.refetchQueries(['circleMembers'])
-                        queryClient.refetchQueries(['circleMemberRequests'])
-                        queryClient.refetchQueries(['userCircle'])
+                        queryClient.invalidateQueries({
+                          queryKey: ['circleMembers'],
+                        })
+                        queryClient.invalidateQueries({
+                          queryKey: ['circleMemberRequests'],
+                        })
+                        queryClient.invalidateQueries({
+                          queryKey: ['userCircle'],
+                        })
+                        queryClient.refetchQueries({
+                          queryKey: ['circleMembers'],
+                        })
+                        queryClient.refetchQueries({
+                          queryKey: ['circleMemberRequests'],
+                        })
+                        queryClient.refetchQueries({ queryKey: ['userCircle'] })
                         refreshMemberRequests()
                         GetAllCircleMembers().then(data => {
                           setCircleMembers(data.res ? data.res : [])

@@ -470,11 +470,13 @@ const HomeView = () => {
         <TaskInput
           isModalOpen={captureOpen}
           initialMode={captureMode}
-          onChoreUpdate={() => queryClient.invalidateQueries(['chores'])}
+          onChoreUpdate={() =>
+            queryClient.invalidateQueries({ queryKey: ['chores'] })
+          }
           onClose={() => {
             setCaptureOpen(false)
             setCaptureMode(null)
-            queryClient.invalidateQueries(['chores'])
+            queryClient.invalidateQueries({ queryKey: ['chores'] })
           }}
         />
       )}

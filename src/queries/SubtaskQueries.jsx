@@ -20,7 +20,7 @@ export const useUpdate = () => {
       return updatedChoreRes?.res || updatedChoreRes
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['chores'])
+      queryClient.invalidateQueries({ queryKey: ['chores'] })
     },
   })
 }

@@ -146,7 +146,9 @@ export const useSSE = () => {
               eventData.type === 'chore.updated' ||
               eventData.type === 'chore.status'
             ) {
-              queryClient.invalidateQueries(['choreDetails', updatedChore.id])
+              queryClient.invalidateQueries({
+                queryKey: ['choreDetails', updatedChore.id],
+              })
               queryClient.refetchQueries({
                 queryKey: ['choreDetails', updatedChore.id],
               })

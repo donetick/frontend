@@ -64,7 +64,7 @@ const WorkspaceReadyView = () => {
 
     const { customerInfo } = await Purchases.getCustomerInfo()
     if (customerInfo.entitlements.active['Donetick Plus']) {
-      queryClient.invalidateQueries(['userProfile'])
+      queryClient.invalidateQueries({ queryKey: ['userProfile'] })
     }
   }
 

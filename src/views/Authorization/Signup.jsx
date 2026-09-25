@@ -46,7 +46,7 @@ const SignupView = () => {
     }
 
     // Invalidate user profile queries to ensure fresh data
-    queryClient.invalidateQueries(['userProfile'])
+    queryClient.invalidateQueries({ queryKey: ['userProfile'] })
 
     // Someone who signed up from a circle invite is joining an existing
     // circle, so sending them through "name your circle" is both a dead
