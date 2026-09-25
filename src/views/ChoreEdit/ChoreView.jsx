@@ -807,10 +807,9 @@ const ChoreView = () => {
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        // space between :
-        justifyContent: 'space-between',
-        // max height of the container:
-        maxHeight: 'calc(100vh - 500px)',
+        width: '100%',
+        minWidth: 0,
+        overflowX: 'hidden',
       }}
     >
       <Box

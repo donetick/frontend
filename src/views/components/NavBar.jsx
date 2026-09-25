@@ -98,7 +98,7 @@ const NavBar = () => {
       onClick: () => openSearch(),
     },
     {
-      to: '/',
+      to: '/home',
       label: t('navigation.home'),
       icon: <SpaceDashboard />,
       exact: true,
@@ -184,7 +184,7 @@ const NavBar = () => {
     if (!Capacitor.isNativePlatform()) return menuButton
 
     if (
-      ['/', '/chores'].includes(location.pathname) &&
+      ['/', '/home', '/chores'].includes(location.pathname) &&
       !searchParams.get('filterId')
     ) {
       return isMobile ? null : menuButton

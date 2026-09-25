@@ -28,7 +28,7 @@ const routerNavigate = (path, { seedHome = false } = {}) => {
   if (navigateFn) {
     // On a cold deep-link launch there is no real screen behind the target, so
     // seed the chore list as the back target before pushing the chore view.
-    if (seedHome && window.location.pathname === '/') {
+    if (seedHome && ['/', '/home'].includes(window.location.pathname)) {
       navigateFn('/chores', { replace: true })
     }
     navigateFn(path)

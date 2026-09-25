@@ -465,6 +465,10 @@
         "description": "Crea y gestiona subcuentas para iniciar sesión y completar tareas asignadas.",
         "title": "Managed Accounts"
       },
+      "layout": {
+        "title": "Diseño y navegación",
+        "description": "Elige la pantalla con la que se abre la app y qué accesos directos y paneles la rodean."
+      },
       "theme": {
         "description": "Choose your preferred theme and configure dark/light mode Ajustes.",
         "title": "Theme Preferences"
@@ -637,6 +641,33 @@
     "sessionFailed": "Error al crear la sesión de suscripción",
     "subscribe": "Suscribirse",
     "whatsIncluded": "Lo que incluye:"
+  },
+  "layout": {
+    "title": "Diseño y navegación",
+    "detailedDescription": "Elige la pantalla con la que se abre la app y qué accesos directos y paneles la acompañan.",
+    "defaultView": {
+      "title": "Vista predeterminada",
+      "description": "Elige con qué pantalla se abre la app.",
+      "options": {
+        "home": {
+          "name": "Resumen",
+          "description": "Un resumen de lo que necesita tu atención hoy, con captura rápida"
+        },
+        "tasks": {
+          "name": "Lista de tareas",
+          "description": "La lista de tareas completa con filtros, búsqueda y agrupación"
+        }
+      }
+    },
+    "bottomNav": {
+      "title": "Navegación inferior",
+      "description": "Elige hasta {{max}} accesos directos para la barra de navegación inferior en el móvil y arrástralos para ordenarlos. «Más» siempre queda como último elemento y abre el menú completo.",
+      "resetToDefaults": "Restablecer valores predeterminados",
+      "resetHelper": "Se restablecerán los accesos directos y el orden predeterminados de la navegación inferior."
+    },
+    "sidepanel": {
+      "title": "Panel lateral"
+    }
   },
   "theme": {
     "dark": "Dark",
