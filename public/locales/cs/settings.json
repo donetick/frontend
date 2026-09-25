@@ -93,10 +93,6 @@
       "bugReport": {
         "title": "Nahlásit problém",
         "description": "Popište nám, co nefunguje, a technické podrobnosti přiložíme za vás."
-      },
-      "sidepanel": {
-        "title": "Přizpůsobení postranního panelu",
-        "description": "Upravte rozložení a viditelnost karet v postranním panelu."
       }
     }
   },
@@ -427,9 +423,7 @@
         "name": "Týdenní cíle",
         "description": "Zobrazí týdenní pokrok a statistiky dokončení v rodině"
       }
-    },
-    "heading": "Nastavení postranního panelu",
-    "detailedDescription": "Upravte rozložení a viditelnost karet v postranním panelu. Tato sekce je dostupná pouze na zařízeních s velkou obrazovkou, jako jsou tablety a počítače."
+    }
   },
   "homeSections": {
     "title": "Přizpůsobení přehledu",
