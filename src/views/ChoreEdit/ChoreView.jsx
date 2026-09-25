@@ -254,7 +254,7 @@ const ChoreView = () => {
       if (response.ok) {
         response.json().then(() => {
           setChore(prev => ({ ...prev, priority: priority.value }))
-          queryClient.invalidateQueries(['chores'])
+          queryClient.invalidateQueries({ queryKey: ['chores'] })
         })
       }
     })
@@ -273,7 +273,7 @@ const ChoreView = () => {
         const data = await resp.json()
         setNote(null)
         setChore(data.res)
-        queryClient.invalidateQueries(['chores'])
+        queryClient.invalidateQueries({ queryKey: ['chores'] })
         const detailResp = await GetChoreDetailById(choreId)
         if (detailResp.ok) {
           const detailData = await detailResp.json()
@@ -290,7 +290,7 @@ const ChoreView = () => {
                 if (detailResponse.ok) {
                   const detailData = await detailResponse.json()
                   setChore(detailData.res)
-                  queryClient.invalidateQueries(['chores'])
+                  queryClient.invalidateQueries({ queryKey: ['chores'] })
                 }
                 showUndo({
                   title: t('choreView.undoSuccessful'),
@@ -355,7 +355,7 @@ const ChoreView = () => {
       if (response.ok) {
         const data = await response.json()
         setChore(data.res)
-        queryClient.invalidateQueries(['chores'])
+        queryClient.invalidateQueries({ queryKey: ['chores'] })
         showSuccess({
           message: t('choreView.skipTask'),
           undoAction: async () => {
@@ -366,7 +366,7 @@ const ChoreView = () => {
                 if (detailResponse.ok) {
                   const detailData = await detailResponse.json()
                   setChore(detailData.res)
-                  queryClient.invalidateQueries(['chores'])
+                  queryClient.invalidateQueries({ queryKey: ['chores'] })
                 }
                 showUndo({
                   title: t('choreView.undoSuccessful'),
@@ -543,7 +543,7 @@ const ChoreView = () => {
       if (response.ok) {
         response.json().then(data => {
           setChore(data.res)
-          queryClient.invalidateQueries(['chores'])
+          queryClient.invalidateQueries({ queryKey: ['chores'] })
         })
       }
     })
@@ -554,7 +554,7 @@ const ChoreView = () => {
       if (response.ok) {
         response.json().then(data => {
           setChore(data.res)
-          queryClient.invalidateQueries(['chores'])
+          queryClient.invalidateQueries({ queryKey: ['chores'] })
         })
       }
     })
@@ -566,7 +566,7 @@ const ChoreView = () => {
       if (response.ok) {
         await offlineDB.saveChores([{ ...chore, isActive: true }])
         setChore({ ...chore, isActive: true })
-        queryClient.invalidateQueries(['chores'])
+        queryClient.invalidateQueries({ queryKey: ['chores'] })
       }
     } catch (error) {
       const isNetworkError = err =>
@@ -622,7 +622,7 @@ const ChoreView = () => {
       if (response.ok) {
         await offlineDB.saveChores([{ ...chore, isActive: false }])
         setChore({ ...chore, isActive: false })
-        queryClient.invalidateQueries(['chores'])
+        queryClient.invalidateQueries({ queryKey: ['chores'] })
       }
     } catch (error) {
       showError({
@@ -645,7 +645,7 @@ const ChoreView = () => {
         try {
           const response = await DeleteChore(choreId)
           if (response.ok) {
-            queryClient.invalidateQueries(['chores'])
+            queryClient.invalidateQueries({ queryKey: ['chores'] })
             showSuccess({
               title: t('choreView.taskDeletedTitle'),
               message: t('choreView.taskDeletedMessage'),
@@ -667,7 +667,7 @@ const ChoreView = () => {
       const response = await UpdateDueDate(choreId, newDate)
       if (response.ok) {
         setChore(prev => ({ ...prev, nextDueDate: newDate }))
-        queryClient.invalidateQueries(['chores'])
+        queryClient.invalidateQueries({ queryKey: ['chores'] })
       }
     } catch (error) {
       showError({
@@ -683,7 +683,7 @@ const ChoreView = () => {
       const response = await SaveChore({ ...chore, projectId })
       if (response.ok) {
         setChore(prev => ({ ...prev, projectId }))
-        queryClient.invalidateQueries(['chores'])
+        queryClient.invalidateQueries({ queryKey: ['chores'] })
         showSuccess({
           title: t('choreView.taskMovedTitle'),
           message: t('choreView.taskMovedMessage', {
@@ -743,7 +743,7 @@ const ChoreView = () => {
       if (!response.ok) throw new Error(t('choreView.unableChangeAssignee'))
       const data = await response.json()
       setChore(data.res)
-      queryClient.invalidateQueries(['chores'])
+      queryClient.invalidateQueries({ queryKey: ['chores'] })
     } catch (error) {
       showError({
         title: t('choreView.failedDelegate'),

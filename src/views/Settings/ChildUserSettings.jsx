@@ -64,7 +64,7 @@ const ChildUserSettings = () => {
           }),
         })
         refetch()
-        queryClient.invalidateQueries(['childUsers'])
+        queryClient.invalidateQueries({ queryKey: ['childUsers'] })
       } else {
         const error = await response.json()
         throw new Error(error.error || t('subaccounts.createFailedGeneric'))
@@ -120,7 +120,7 @@ const ChildUserSettings = () => {
               message: t('subaccounts.deleted', { name: childName }),
             })
             refetch()
-            queryClient.invalidateQueries(['childUsers'])
+            queryClient.invalidateQueries({ queryKey: ['childUsers'] })
           } else {
             const error = await response.json()
             throw new Error(error.error || t('subaccounts.deleteFailedGeneric'))

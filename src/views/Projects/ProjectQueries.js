@@ -69,7 +69,7 @@ export const useCreateProject = () => {
       })
 
       // Invalidate and refetch
-      queryClient.invalidateQueries(['projects'])
+      queryClient.invalidateQueries({ queryKey: ['projects'] })
     },
     onError: error => {
       console.error('Create project mutation failed:', error)
@@ -109,7 +109,7 @@ export const useUpdateProject = () => {
       })
 
       // Invalidate and refetch
-      queryClient.invalidateQueries(['projects'])
+      queryClient.invalidateQueries({ queryKey: ['projects'] })
     },
     onError: error => {
       console.error('Update project mutation failed:', error)
@@ -147,7 +147,7 @@ export const useDeleteProject = () => {
       })
 
       // Invalidate and refetch
-      queryClient.invalidateQueries(['projects'])
+      queryClient.invalidateQueries({ queryKey: ['projects'] })
     },
     onError: error => {
       console.error('Delete project mutation failed:', error)

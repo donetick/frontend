@@ -66,7 +66,7 @@ function LabelModal({ isOpen, label, onClose }) {
         if (res?.error) {
           setError(res.error)
         } else {
-          queryClient.invalidateQueries('labels')
+          queryClient.invalidateQueries({ queryKey: ['labels'] })
           onClose()
         }
       })

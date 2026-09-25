@@ -276,12 +276,12 @@ const LabelView = () => {
       const updatedLabels = userLabels.filter(label => label.id !== id)
       setUserLabels(updatedLabels)
 
-      queryClient.invalidateQueries('labels')
+      queryClient.invalidateQueries({ queryKey: ['labels'] })
     })
   }
 
   const handleSaveLabel = newOrUpdatedLabel => {
-    queryClient.invalidateQueries('labels')
+    queryClient.invalidateQueries({ queryKey: ['labels'] })
     setModalOpen(false)
     const updatedLabels = userLabels.map(label =>
       label.id === newOrUpdatedLabel.id ? newOrUpdatedLabel : label,

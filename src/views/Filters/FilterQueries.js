@@ -132,7 +132,7 @@ export const useCreateFilter = () => {
       })
 
       // Invalidate and refetch
-      queryClient.invalidateQueries(['filters'])
+      queryClient.invalidateQueries({ queryKey: ['filters'] })
     },
     onError: error => {
       console.error('Create filter mutation failed:', error)
@@ -172,7 +172,7 @@ export const useUpdateFilter = () => {
       queryClient.setQueryData(['filters', updatedFilter.id], updatedFilter)
 
       // Invalidate and refetch
-      queryClient.invalidateQueries(['filters'])
+      queryClient.invalidateQueries({ queryKey: ['filters'] })
     },
     onError: error => {
       console.error('Update filter mutation failed:', error)
@@ -206,7 +206,7 @@ export const useDeleteFilter = () => {
       })
 
       // Invalidate and refetch
-      queryClient.invalidateQueries(['filters'])
+      queryClient.invalidateQueries({ queryKey: ['filters'] })
     },
     onError: error => {
       console.error('Delete filter mutation failed:', error)
@@ -246,8 +246,8 @@ export const useToggleFilterPin = () => {
       queryClient.setQueryData(['filters', updatedFilter.id], updatedFilter)
 
       // Invalidate related queries
-      queryClient.invalidateQueries(['filters'])
-      queryClient.invalidateQueries(['filters', 'pinned'])
+      queryClient.invalidateQueries({ queryKey: ['filters'] })
+      queryClient.invalidateQueries({ queryKey: ['filters', 'pinned'] })
     },
     onError: error => {
       console.error('Toggle filter pin mutation failed:', error)

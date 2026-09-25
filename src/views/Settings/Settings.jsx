@@ -449,10 +449,18 @@ const Settings = () => {
                                   message: t('circleSettings.memberRemoved'),
                                 })
                                 // Invalidate and refetch circle-related queries
-                                queryClient.invalidateQueries(['circleMembers'])
-                                queryClient.invalidateQueries(['userCircle'])
-                                queryClient.refetchQueries(['circleMembers'])
-                                queryClient.refetchQueries(['userCircle'])
+                                queryClient.invalidateQueries({
+                                  queryKey: ['circleMembers'],
+                                })
+                                queryClient.invalidateQueries({
+                                  queryKey: ['userCircle'],
+                                })
+                                queryClient.refetchQueries({
+                                  queryKey: ['circleMembers'],
+                                })
+                                queryClient.refetchQueries({
+                                  queryKey: ['userCircle'],
+                                })
                                 // Update local state immediately
                                 setCircleMembers(prevMembers =>
                                   prevMembers.filter(
@@ -534,12 +542,22 @@ const Settings = () => {
                           message: t('circleSettings.requestAccepted'),
                         })
                         // Invalidate and refetch circle-related queries
-                        queryClient.invalidateQueries(['circleMembers'])
-                        queryClient.invalidateQueries(['circleMemberRequests'])
-                        queryClient.invalidateQueries(['userCircle'])
-                        queryClient.refetchQueries(['circleMembers'])
-                        queryClient.refetchQueries(['circleMemberRequests'])
-                        queryClient.refetchQueries(['userCircle'])
+                        queryClient.invalidateQueries({
+                          queryKey: ['circleMembers'],
+                        })
+                        queryClient.invalidateQueries({
+                          queryKey: ['circleMemberRequests'],
+                        })
+                        queryClient.invalidateQueries({
+                          queryKey: ['userCircle'],
+                        })
+                        queryClient.refetchQueries({
+                          queryKey: ['circleMembers'],
+                        })
+                        queryClient.refetchQueries({
+                          queryKey: ['circleMemberRequests'],
+                        })
+                        queryClient.refetchQueries({ queryKey: ['userCircle'] })
                         // Refresh local state
                         refreshMemberRequests()
                         GetAllCircleMembers().then(data => {
@@ -734,8 +752,8 @@ const Settings = () => {
                   // Check if user now has entitlement after paywall interaction
                   const { customerInfo } = await Purchases.getCustomerInfo()
                   if (customerInfo.entitlements.active['Donetick Plus']) {
-                    queryClient.invalidateQueries(['userProfile'])
-                    queryClient.refetchQueries(['userProfile'])
+                    queryClient.invalidateQueries({ queryKey: ['userProfile'] })
+                    queryClient.refetchQueries({ queryKey: ['userProfile'] })
                     showNotification({
                       type: 'success',
                       message: t('accountSettings.purchase.success'),

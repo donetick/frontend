@@ -95,7 +95,7 @@ export const useChoreActions = ({
       setChores(newChores)
 
       if (!skipInvalidation) {
-        queryClient.invalidateQueries(['chores'])
+        queryClient.invalidateQueries({ queryKey: ['chores'] })
       }
 
       const undoableActions = {
@@ -112,7 +112,7 @@ export const useChoreActions = ({
             try {
               const undoResponse = await UndoChoreAction(updatedChore.id)
               if (undoResponse.ok) {
-                queryClient.invalidateQueries(['chores'])
+                queryClient.invalidateQueries({ queryKey: ['chores'] })
                 const undoMessages = {
                   completed: 'Task completion has been undone.',
                   approved: 'Task approval has been undone.',
@@ -223,7 +223,7 @@ export const useChoreActions = ({
                   try {
                     const undoResponse = await UndoChoreAction(chore.id)
                     if (undoResponse.ok) {
-                      queryClient.invalidateQueries(['chores'])
+                      queryClient.invalidateQueries({ queryKey: ['chores'] })
                       showUndo({
                         title: t('choreView.undoSuccessful'),
                         message: t('choreView.taskCompletionUndone'),
@@ -237,7 +237,7 @@ export const useChoreActions = ({
                   }
                 },
               })
-              queryClient.invalidateQueries(['chores'])
+              queryClient.invalidateQueries({ queryKey: ['chores'] })
             } else {
               refetchChores()
             }
@@ -292,7 +292,7 @@ export const useChoreActions = ({
           const startedChore = { ...chore, status: 1 }
           try {
             await startChore.mutateAsync(chore.id)
-            queryClient.cancelQueries(['chores'])
+            queryClient.cancelQueries({ queryKey: ['chores'] })
             queryClient.setQueryData(['chores', false], oldData => {
               if (!oldData?.res) return oldData
               return {
@@ -345,7 +345,7 @@ export const useChoreActions = ({
           const pausedChore = { ...chore, status: 2 }
           try {
             await pauseChore.mutateAsync(chore.id)
-            queryClient.cancelQueries(['chores'])
+            queryClient.cancelQueries({ queryKey: ['chores'] })
             queryClient.setQueryData(['chores', false], oldData => {
               if (!oldData?.res) return oldData
               return {
@@ -437,7 +437,7 @@ export const useChoreActions = ({
                   const response = await DeleteChore(chore.id)
                   if (response.ok) {
                     setChores(chores.filter(c => c.id !== chore.id))
-                    queryClient.invalidateQueries(['chores'])
+                    queryClient.invalidateQueries({ queryKey: ['chores'] })
                     showSuccess({
                       title: t('archived.deletedTitle'),
                       message: t('actions.deletedMessageLong'),
@@ -1070,7 +1070,7 @@ export const useChoreActions = ({
           for (const chore of succeeded) {
             await UndoChoreAction(chore.id)
           }
-          queryClient.invalidateQueries(['chores'])
+          queryClient.invalidateQueries({ queryKey: ['chores'] })
           showUndo({
             title: t('choreView.undoSuccessful'),
             message: `Undo skip for ${taskCount(succeeded.length)}.`,

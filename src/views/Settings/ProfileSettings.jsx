@@ -114,8 +114,8 @@ const ProfileSettings = () => {
       const userDetails = { displayName, timezone }
       const response = await UpdateUserDetails(userDetails)
       // invalidate user profile cache here if using react-query or similar:
-      queryClient.invalidateQueries(['userProfile'])
-      queryClient.refetchQueries(['userProfile'])
+      queryClient.invalidateQueries({ queryKey: ['userProfile'] })
+      queryClient.refetchQueries({ queryKey: ['userProfile'] })
 
       if (response.ok) {
         showSuccess({

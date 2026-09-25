@@ -940,7 +940,7 @@ const MyChores = () => {
             label: t('chores:empty.errorAction'),
             onClick: () => {
               refetchChores()
-              queryClient.invalidateQueries(['circleMembers'])
+              queryClient.invalidateQueries({ queryKey: ['circleMembers'] })
             },
           }}
         />

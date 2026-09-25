@@ -181,8 +181,8 @@ export const useDeleteChores = () => {
       )
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['chores'])
-      queryClient.invalidateQueries(['pendingCommands'])
+      queryClient.invalidateQueries({ queryKey: ['chores'] })
+      queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
     },
   })
 }
@@ -250,8 +250,8 @@ export const useCreateChore = () => {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['chores'])
-      queryClient.invalidateQueries(['pendingCommands'])
+      queryClient.invalidateQueries({ queryKey: ['chores'] })
+      queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
     },
   })
 }
@@ -323,9 +323,11 @@ export const useUpdateChore = () => {
       }
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries(['chores'])
-      queryClient.invalidateQueries(['choreHistory', variables.id])
-      queryClient.invalidateQueries(['pendingCommands'])
+      queryClient.invalidateQueries({ queryKey: ['chores'] })
+      queryClient.invalidateQueries({
+        queryKey: ['choreHistory', variables.id],
+      })
+      queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
     },
   })
 }
@@ -414,7 +416,7 @@ export const useChore = choreId => {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['chores'])
+      queryClient.invalidateQueries({ queryKey: ['chores'] })
     },
   })
 }
@@ -425,7 +427,7 @@ export const useArchiveChore = () => {
   return useMutation({
     mutationFn: ArchiveChore,
     onSuccess: () => {
-      queryClient.invalidateQueries(['chores'])
+      queryClient.invalidateQueries({ queryKey: ['chores'] })
     },
   })
 }
@@ -436,7 +438,7 @@ export const useUnArchiveChore = () => {
   return useMutation({
     mutationFn: UnArchiveChore,
     onSuccess: () => {
-      queryClient.invalidateQueries(['chores'])
+      queryClient.invalidateQueries({ queryKey: ['chores'] })
     },
   })
 }
@@ -538,9 +540,9 @@ export const useUpdateChoreHistory = () => {
     },
     onSuccess: (data, { choreId }) => {
       if (!data?.queued) {
-        queryClient.invalidateQueries(['choreHistory', choreId])
+        queryClient.invalidateQueries({ queryKey: ['choreHistory', choreId] })
       }
-      queryClient.invalidateQueries(['pendingCommands'])
+      queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
     },
   })
 }
@@ -597,9 +599,9 @@ export const useDeleteChoreHistory = () => {
     },
     onSuccess: (data, { choreId }) => {
       if (!data?.queued) {
-        queryClient.invalidateQueries(['choreHistory', choreId])
+        queryClient.invalidateQueries({ queryKey: ['choreHistory', choreId] })
       }
-      queryClient.invalidateQueries(['pendingCommands'])
+      queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
     },
   })
 }
@@ -676,10 +678,10 @@ export const useMarkChoreComplete = () => {
       }
     },
     onSuccess: (_, { choreId }) => {
-      queryClient.invalidateQueries(['chores'])
-      queryClient.invalidateQueries(['choreHistory', choreId])
-      queryClient.invalidateQueries(['choreDetails', choreId])
-      queryClient.invalidateQueries(['pendingCommands'])
+      queryClient.invalidateQueries({ queryKey: ['chores'] })
+      queryClient.invalidateQueries({ queryKey: ['choreHistory', choreId] })
+      queryClient.invalidateQueries({ queryKey: ['choreDetails', choreId] })
+      queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
     },
   })
 }
@@ -726,10 +728,10 @@ export const useSkipChore = () => {
       }
     },
     onSuccess: (_, choreId) => {
-      queryClient.invalidateQueries(['chores'])
-      queryClient.invalidateQueries(['choreHistory', choreId])
-      queryClient.invalidateQueries(['choreDetails', choreId])
-      queryClient.invalidateQueries(['pendingCommands'])
+      queryClient.invalidateQueries({ queryKey: ['chores'] })
+      queryClient.invalidateQueries({ queryKey: ['choreHistory', choreId] })
+      queryClient.invalidateQueries({ queryKey: ['choreDetails', choreId] })
+      queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
     },
   })
 }
@@ -740,9 +742,9 @@ export const useApproveChore = () => {
   return useMutation({
     mutationFn: ApproveChore,
     onSuccess: (_, choreId) => {
-      queryClient.invalidateQueries(['chores'])
-      queryClient.invalidateQueries(['choreHistory', choreId])
-      queryClient.invalidateQueries(['choreDetails', choreId])
+      queryClient.invalidateQueries({ queryKey: ['chores'] })
+      queryClient.invalidateQueries({ queryKey: ['choreHistory', choreId] })
+      queryClient.invalidateQueries({ queryKey: ['choreDetails', choreId] })
     },
   })
 }
@@ -753,9 +755,9 @@ export const useRejectChore = () => {
   return useMutation({
     mutationFn: RejectChore,
     onSuccess: (_, choreId) => {
-      queryClient.invalidateQueries(['chores'])
-      queryClient.invalidateQueries(['choreHistory', choreId])
-      queryClient.invalidateQueries(['choreDetails', choreId])
+      queryClient.invalidateQueries({ queryKey: ['chores'] })
+      queryClient.invalidateQueries({ queryKey: ['choreHistory', choreId] })
+      queryClient.invalidateQueries({ queryKey: ['choreDetails', choreId] })
     },
   })
 }
