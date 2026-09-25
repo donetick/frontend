@@ -257,6 +257,8 @@
     "failRescheduleTitle": "Failed to reschedule",
     "failRescheduleMessage": "Unable to update due date",
     "failRemoveDueDateTitle": "Failed to remove due date",
+    "failAssignTitle": "Failed to assign",
+    "failAssignMessage": "Unable to assign task",
     "nudgeSentTitle": "Nudge Sent!",
     "nudgeFailed": "Failed to send nudge",
     "failNudgeTitle": "Failed to Send Nudge",
