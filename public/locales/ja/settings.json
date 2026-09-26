@@ -93,10 +93,6 @@
       "bugReport": {
         "title": "不具合を報告",
         "description": "うまく動かないところがありますか？技術情報とあわせて詳細をお送りください。"
-      },
-      "sidepanel": {
-        "title": "サイドパネルのカスタマイズ",
-        "description": "サイドパネルのカードの並びと表示・非表示をカスタマイズします。"
       }
     }
   },
@@ -427,9 +423,7 @@
         "name": "週間目標",
         "description": "週の進捗と家族全体の達成状況を表示します"
       }
-    },
-    "heading": "サイドパネル設定",
-    "detailedDescription": ""
+    }
   },
   "homeSections": {
     "title": "",

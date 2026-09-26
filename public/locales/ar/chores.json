@@ -257,6 +257,8 @@
     "failRescheduleTitle": "فشل في إعادة الجدولة",
     "failRescheduleMessage": "غير قادر على تحديث تاريخ الاستحقاق",
     "failRemoveDueDateTitle": "فشل في إزالة تاريخ الاستحقاق",
+    "failAssignTitle": "",
+    "failAssignMessage": "",
     "nudgeSentTitle": "تم ارسال الدافع!",
     "nudgeFailed": "فشل في إرسال دفعة",
     "failNudgeTitle": "فشل في إرسال Nudge",

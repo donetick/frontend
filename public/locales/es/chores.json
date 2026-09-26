@@ -257,6 +257,8 @@
     "failRescheduleTitle": "Error al reprogramar",
     "failRescheduleMessage": "No se pudo actualizar la fecha de vencimiento",
     "failRemoveDueDateTitle": "Error al eliminar la fecha de vencimiento",
+    "failAssignTitle": "",
+    "failAssignMessage": "",
     "nudgeSentTitle": "¡Toque de atención enviado!",
     "nudgeFailed": "Error al enviar toque de atención",
     "failNudgeTitle": "Error al enviar toque de atención",

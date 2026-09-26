@@ -20,7 +20,7 @@
     "Rose": "Rosa",
     "Charcoal": "Anthrazit",
     "Sienna": "Siena",
-    "Mint": "",
+    "Mint": "Minze",
     "Amber": "Bernstein",
     "Cobalt": "Kobalt",
     "Emerald": "Smaragd",
@@ -33,7 +33,7 @@
     "Lime": "Limette",
     "Blush": "Rosé",
     "Ash": "Asche",
-    "Sand": ""
+    "Sand": "Sand"
   },
   "refresh": "Aktualisieren",
   "copy": "Kopieren",
@@ -49,9 +49,9 @@
     "search": "Suche",
     "allTasks": "Aufgaben",
     "home": "Übersicht",
-    "tasks": "",
-    "more": "",
-    "mobileNavigation": "",
+    "tasks": "Aufgaben",
+    "more": "Mehr",
+    "mobileNavigation": "Hauptnavigation",
     "archived": "Archiv",
     "things": "Dinge",
     "labels": "Beschriftungen",
@@ -72,7 +72,7 @@
     "placeholder": "Donetick durchsuchen",
     "inputAriaLabel": "Aufgaben, Verlauf, Projekte, Labels und Einstellungen durchsuchen",
     "deviceNote": "Es wird in Inhalten gesucht, die auf diesem Gerät verfügbar sind",
-    "escape": "",
+    "escape": "Esc",
     "recent": "Zuletzt verwendet",
     "empty": {
       "title": "Keine direkten Treffer",
@@ -90,7 +90,7 @@
     },
     "actions": {
       "quickAction": "Schnellaktion",
-      "navigation": "",
+      "navigation": "Navigation",
       "createTask": "Aufgabe erstellen",
       "createLabel": "Label erstellen",
       "createProject": "Projekt erstellen",
@@ -226,7 +226,7 @@
     "addMembers": "Mitglieder zu deinem Kreis hinzufügen",
     "sidePanelSettings": "Seitenleisteneinstellungen",
     "planFree": "Kostenlos",
-    "planPlus": "",
+    "planPlus": "Plus",
     "planPlusExpiring": "Plus (läuft bald ab)",
     "switchUser": "Benutzer wechseln",
     "impersonateUser": "Benutzeridentität übernehmen",
@@ -287,9 +287,9 @@
     "title": "Sortieren & Filtern",
     "ascending": "Aufsteigend",
     "descending": "Absteigend",
-    "filter": ""
+    "filter": "Filter"
   },
-  "versionInfo": "",
+  "versionInfo": "V{{version}} (API: {{apiVersion}})",
   "apiVersionUnavailable": "nicht verfügbar",
   "sync": {
     "aria": "Synchronisierungs- und Netzwerkstatus öffnen",
@@ -316,8 +316,8 @@
     "secondsAgo": "vor {{count}} s",
     "minutesAgo": "vor {{count}} Min.",
     "hoursAgo": "vor {{count}} Std.",
-    "online": "",
-    "offline": "",
+    "online": "Online",
+    "offline": "Offline",
     "syncing": "Wird synchronisiert...",
     "lastSync": "Letzte Synchronisierung: {{time}}",
     "offlineSince": "Offline seit {{duration}}",
@@ -340,7 +340,7 @@
   "fileNumbered": "Datei {{index}}",
   "noAttachmentsTitle": "Keine Anhänge",
   "noAttachmentsDescription": "Fotos und Dateien, die dieser Aufgabe hinzugefügt werden, erscheinen hier.",
-  "kbSize": "",
+  "kbSize": "{{size}} KB",
   "onboarding": {
     "sources": {
       "speak": "Sprechen",
@@ -461,7 +461,7 @@
       "continue": "Weiter",
       "skip": "Überspringen",
       "sources": {
-        "appStore": "",
+        "appStore": "App Store / Google Play",
         "reddit": "Reddit oder ein Forum",
         "friend": "Freunde oder Familie",
         "video": "YouTube oder TikTok",
@@ -587,25 +587,25 @@
   },
   "home": {
     "customize": {
-      "action": ""
+      "action": "Startseite anpassen"
     },
     "verdict": {
       "late": {
-        "title_one": "",
-        "title_other": ""
+        "title_one": "{{count}} Aufgabe benötigt Aufmerksamkeit.",
+        "title_other": "{{count}} Aufgaben benötigen Aufmerksamkeit."
       },
       "review": {
-        "title": "",
+        "title": "Etwas muss überprüft werden.",
         "body_one": "",
         "body_other": ""
       },
       "today": {
-        "title_one": "",
-        "title_other": ""
+        "title_one": "{{count}} Aufgabe heute fällig.",
+        "title_other": "{{count}} Aufgaben heute fällig."
       },
       "clear": {
-        "title": "",
-        "body": ""
+        "title": "Alles erledigt!",
+        "body": "Heute ist nichts geplant, nichts verspätet."
       },
       "firstRun": {
         "title": "",
@@ -613,32 +613,32 @@
       }
     },
     "triage": {
-      "overdue": "",
-      "dueToday": "",
-      "needsReview": "",
-      "comingUp": "",
-      "unplanned": "",
-      "allClear": ""
+      "overdue": "Überfällig",
+      "dueToday": "Heute fällig",
+      "needsReview": "Prüfung erforderlich",
+      "comingUp": "Demnächst",
+      "unplanned": "Nicht geplant",
+      "allClear": "Nichts ist überfällig, nichts wartet"
     },
     "nextUp": {
-      "title": "",
-      "action": ""
+      "title": "Demnächst",
+      "action": "Alle anzeigen"
     },
     "nextUpFallback": {
-      "title": "",
-      "action": ""
+      "title": "Als nächstes",
+      "action": "Alle anzeigen"
     },
     "overdue": {
-      "title": "",
-      "action": ""
+      "title": "Überfällig",
+      "action": "Alle anzeigen"
     },
     "clear": {
       "title": "",
       "body": "",
-      "action": ""
+      "action": "Alle Aufgaben durchsuchen"
     },
     "firstTask": {
-      "title": "",
+      "title": "Füge deine erste Aufgabe hinzu",
       "description": "",
       "action": ""
     },
@@ -646,45 +646,45 @@
       "title": "",
       "pendingTitle": "",
       "myPendingTitle": "",
-      "action": ""
+      "action": "Alle überprüfen"
     },
     "circle": {
-      "title": "",
-      "action": "",
-      "open_one": "",
-      "open_other": "",
-      "late_one": "",
-      "late_other": "",
-      "done_one": "",
-      "done_other": "",
+      "title": "Dein Kreis",
+      "action": "Kreis verwalten",
+      "open_one": "{{count}} offen",
+      "open_other": "{{count}} offen",
+      "late_one": "{{count}} überfällig",
+      "late_other": "{{count}} überfällig",
+      "done_one": "{{count}} erledigt",
+      "done_other": "{{count}} erledigt",
       "caughtUp": "",
-      "emptyTitle": "",
-      "emptyBody": "",
-      "emptyAction": ""
+      "emptyTitle": "Hier ist sonst noch niemand",
+      "emptyBody": "Lade die Leute ein, mit denen du deine Arbeit teilst, und dieser Bildschirm zeigt wem was zugeteilt ist.",
+      "emptyAction": "In deinen Kreis einladen"
     },
     "projects": {
-      "title": "",
-      "action": "",
-      "tasks_one": "",
-      "tasks_other": "",
-      "tasksOverdue_one": "",
-      "tasksOverdue_other": "",
-      "tasksUnplanned_one": "",
-      "tasksUnplanned_other": "",
+      "title": "Projekte",
+      "action": "Alle Projekte",
+      "tasks_one": "{{count}} Aufgabe",
+      "tasks_other": "{{count}} Aufgaben",
+      "tasksOverdue_one": "{{count}} Aufgabe, {{overdue}} überfällig",
+      "tasksOverdue_other": "{{count}} Aufgaben, {{overdue}} überfällig",
+      "tasksUnplanned_one": "{{count}} Aufgabe, {{unplanned}} ungeplant",
+      "tasksUnplanned_other": "{{count}} Aufgaben, {{unplanned}} ungeplant",
       "clear": ""
     },
     "filters": {
-      "title": "",
-      "action": "",
-      "tasks_one": "",
-      "tasks_other": "",
-      "clear": ""
+      "title": "Filter",
+      "action": "Alle Filter",
+      "tasks_one": "{{count}} Treffer",
+      "tasks_other": "{{count}} Treffer",
+      "clear": "Keine Treffer"
     },
     "capture": {
-      "placeholder": "",
-      "add": "",
-      "voice": "",
-      "scan": ""
+      "placeholder": "Aufgabe hinzufügen…",
+      "add": "Aufgabe hinzufügen",
+      "voice": "Erfassen per Stimme",
+      "scan": "An Aufgabe scannen"
     }
   }
 }

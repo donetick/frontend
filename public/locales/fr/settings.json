@@ -93,10 +93,6 @@
       "bugReport": {
         "title": "Signaler un bug",
         "description": "Quelque chose ne fonctionne pas ? Envoyez-nous les détails avec un instantané technique."
-      },
-      "sidepanel": {
-        "title": "Personnalisation du panneau latéral",
-        "description": "Personnalisez la disposition et la visibilité des cartes du panneau latéral."
       }
     }
   },
@@ -427,9 +423,7 @@
         "name": "Objectifs hebdomadaires",
         "description": "Affiche la progression hebdomadaire et les statistiques de la famille"
       }
-    },
-    "heading": "Paramètres du panneau latéral",
-    "detailedDescription": "Personnalisez la disposition et la visibilité des cartes dans le panneau latéral. Cette section n'est disponible que sur les appareils à grand écran, comme les tablettes et les ordinateurs."
+    }
   },
   "homeSections": {
     "title": "Personnalisation de l'aperçu",

@@ -63,7 +63,7 @@
         "description": "Sichere und stelle deine Daten wieder her, verwalte lokalen Speicher und Sync-Einstellungen."
       },
       "layout": {
-        "title": "Layout & Navigation",
+        "title": "",
         "description": "Lege fest, mit welchem Bildschirm die App startet und welche Verknüpfungen und Panels ihn umgeben."
       },
       "theme": {
@@ -93,10 +93,6 @@
       "bugReport": {
         "title": "Fehler melden",
         "description": "Etwas funktioniert nicht richtig? Schick uns die Details zusammen mit einer technischen Momentaufnahme."
-      },
-      "sidepanel": {
-        "title": "Seitenleisten-Anpassung",
-        "description": "Passe Layout und Sichtbarkeit der Karten in der Seitenleiste an."
       }
     }
   },
@@ -427,9 +423,7 @@
         "name": "Wochenziele",
         "description": "Zeigt den Wochenfortschritt und die Erledigungsstatistik der Familie"
       }
-    },
-    "heading": "Seitenleisten-Einstellungen",
-    "detailedDescription": "Passe Anordnung und Sichtbarkeit der Karten in der Seitenleiste an. Dieser Bereich ist nur auf Geräten mit großem Bildschirm wie Tablets und Desktop-Computern verfügbar."
+    }
   },
   "homeSections": {
     "title": "",
@@ -473,7 +467,7 @@
     "detailedDescription": ""
   },
   "layout": {
-    "title": "Layout & Navigation",
+    "title": "",
     "detailedDescription": "Wähle den Bildschirm, mit dem die App startet, und welche Verknüpfungen und Panels ihn umgeben.",
     "defaultView": {
       "title": "Standardansicht",
