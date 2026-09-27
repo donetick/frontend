@@ -15,18 +15,14 @@ export const getSafeBottom = (baseBottom = 0, extraPadding = 0) => {
   const extra =
     typeof extraPadding === 'number' ? `${extraPadding}px` : extraPadding
 
-  if (Capacitor.getPlatform() === 'android') {
-    if (extraPadding) {
-      return `calc(var(--safe-area-inset-bottom, 0px) + ${base} + ${extra})`
-    }
-    return `calc(var(--safe-area-inset-bottom, 0px) + ${base})`
-  }
-
-  // For iOS and web, safe area is already handled by the system
+  // The inset applies on every platform: index.html sets viewport-fit=cover, so
+  // on iOS the webview extends under the home indicator and bottom:0 is the
+  // physical screen edge, not the safe edge. On web the var falls back to 0px
+  // (safe-area.css), so this is a no-op there.
   if (extraPadding) {
-    return `calc(${base} + ${extra})`
+    return `calc(var(--safe-area-inset-bottom, 0px) + ${base} + ${extra})`
   }
-  return base
+  return `calc(var(--safe-area-inset-bottom, 0px) + ${base})`
 }
 
 /**
