@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { LoginSocialGoogle } from 'reactjs-social-login'
 
-import { GOOGLE_CLIENT_ID, REDIRECT_URL } from '../../Config'
+import { BASE_PATH, GOOGLE_CLIENT_ID, REDIRECT_URL } from '../../Config'
 import { useAuth } from '../../hooks/useAuth.jsx'
 import { useResource } from '../../queries/ResourceQueries'
 import { useUserProfile } from '../../queries/UserQueries.jsx'
@@ -409,7 +409,7 @@ const LoginView = () => {
       const params = new URLSearchParams({
         response_type: 'code',
         client_id: resource?.identity_provider?.client_id,
-        redirect_uri: `${window.location.origin}/auth/oauth2`,
+        redirect_uri: `${window.location.origin}${BASE_PATH}/auth/oauth2`,
         scope: 'openid profile email',
         state: state,
       })

@@ -6,6 +6,7 @@ import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
+import { BASE_PATH } from '../../Config'
 import { useUserProfile } from '../../queries/UserQueries'
 import { apiClient } from '../../utils/ApiClient'
 import { GetUserProfile } from '../../utils/Fetcher'
@@ -98,7 +99,7 @@ const AuthenticationLoading = () => {
       const baseURL = apiClient.getApiURL()
       const redirectURI = Capacitor.isNativePlatform()
         ? 'donetick://auth/oauth2'
-        : `${window.location.origin}/auth/oauth2`
+        : `${window.location.origin}${BASE_PATH}/auth/oauth2`
       try {
         const response = await fetch(`${baseURL}/auth/oauth2/callback`, {
           method: 'POST',

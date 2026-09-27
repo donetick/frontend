@@ -40,6 +40,11 @@ export default ({ command, mode }) => {
   })
 
   return defineConfig({
+    // Selfhosted builds (incl. the HA addon) may be served from an arbitrary,
+    // sometimes dynamic sub-path (e.g. HA ingress' per-session token prefix).
+    // Relative asset URLs let the browser resolve them against whatever path
+    // the page was actually loaded from, instead of the domain root.
+    base: mode === 'selfhosted' ? './' : '/',
     define: {
       'import.meta.env.VITE_APP_VERSION': JSON.stringify(pkg.version),
     },
@@ -78,12 +83,12 @@ export default ({ command, mode }) => {
           icons: [
             {
               sizes: '192x192',
-              src: '/android-chrome-192x192.png',
+              src: 'android-chrome-192x192.png',
               type: 'image/png',
             },
             {
               sizes: '512x512',
-              src: '/android-chrome-512x512.png',
+              src: 'android-chrome-512x512.png',
               type: 'image/png',
             },
             {
@@ -120,7 +125,7 @@ export default ({ command, mode }) => {
           clientsClaim: true, // Take control of uncontrolled clients as soon as the service worker becomes active
           maximumFileSizeToCacheInBytes: 6000000, // 6MB
           //Exclude API and Swagger routes from service worker navigation fallback
-          navigateFallback: '/index.html',
+          navigateFallback: mode === 'selfhosted' ? './index.html' : '/index.html',
           navigateFallbackDenylist: [
             /^\/api\//, // Exclude all API routes
             /^\/swagger/, // Exclude all Swagger routes

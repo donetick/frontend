@@ -1,3 +1,7 @@
+// Injected by nginx sub_filter when served through HA ingress; empty string otherwise
+export const BASE_PATH =
+  typeof window !== 'undefined' ? (window.__INGRESS_PATH__ ?? '') : ''
+
 export const API_URL =
   import.meta.env.VITE_APP_API_URL === 'AUTO'
     ? `${window.location.hostname}/api`
