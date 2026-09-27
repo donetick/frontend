@@ -30,6 +30,8 @@ import java.util.List;
  *
  * Snapshot JSON: {version, lastUpdated,
  *                 tasks:[{id, name, dueDate, priority, approval, assignedTo}],
+ *                 projectTasks:[{id, name, projectId, assignedTo, completed}],
+ *                 projects:[{id, name, color, icon}],
  *                 members:[{id, name, image}]}
  * Config JSON:   {serverUrl, token, userId}
  *
@@ -42,6 +44,8 @@ public final class WidgetStore {
     private static final String KEY_DATA = "widget_tasks";
     private static final String KEY_CONFIG = "widget_config";
     private static final String KEY_INCLUDE_OTHERS_PREFIX = "include_others_";
+    private static final String KEY_PROJECT_INDEX_PREFIX = "project_index_";
+    private static final String KEY_PROJECT_PAGE_PREFIX = "project_page_";
 
     // Same filtering window as src/service/WidgetService.js
     private static final int WINDOW_DAYS = 7;
@@ -67,6 +71,21 @@ public final class WidgetStore {
         public String id;
         public String name;
         public String image; // avatar URL, may be null
+    }
+
+    public static class Project {
+        public String id;
+        public String name;
+        public String color;
+        public String icon;
+    }
+
+    public static class ProjectTask {
+        public String id;
+        public String name;
+        public String projectId;
+        public String assignedTo;
+        public boolean completed;
     }
 
     private static SharedPreferences prefs(Context context) {
@@ -116,6 +135,23 @@ public final class WidgetStore {
     public static void removeWidgetOptions(Context context, int appWidgetId) {
         prefs(context).edit()
                 .remove(KEY_INCLUDE_OTHERS_PREFIX + appWidgetId)
+                .remove(KEY_PROJECT_INDEX_PREFIX + appWidgetId)
+                .remove(KEY_PROJECT_PAGE_PREFIX + appWidgetId)
+                .apply();
+    }
+
+    public static int projectIndex(Context context, int widgetId) {
+        return prefs(context).getInt(KEY_PROJECT_INDEX_PREFIX + widgetId, 0);
+    }
+
+    public static int projectPage(Context context, int widgetId) {
+        return prefs(context).getInt(KEY_PROJECT_PAGE_PREFIX + widgetId, 0);
+    }
+
+    public static void setProjectPosition(Context context, int widgetId, int index, int page) {
+        prefs(context).edit()
+                .putInt(KEY_PROJECT_INDEX_PREFIX + widgetId, Math.max(0, index))
+                .putInt(KEY_PROJECT_PAGE_PREFIX + widgetId, Math.max(0, page))
                 .apply();
     }
 
@@ -154,6 +190,53 @@ public final class WidgetStore {
             }
         } catch (Exception e) {
             Log.e(TAG, "Failed to parse widget snapshot", e);
+        }
+        return tasks;
+    }
+
+    public static List<Project> loadProjects(Context context) {
+        List<Project> projects = new ArrayList<>();
+        try {
+            String raw = prefs(context).getString(KEY_DATA, null);
+            if (raw == null) return projects;
+            JSONArray arr = new JSONObject(raw).optJSONArray("projects");
+            if (arr == null) return projects;
+            for (int i = 0; i < arr.length(); i++) {
+                JSONObject obj = arr.optJSONObject(i);
+                if (obj == null) continue;
+                Project project = new Project();
+                project.id = obj.optString("id", "default");
+                project.name = obj.optString("name", "Project");
+                project.color = obj.optString("color", "#64748B");
+                project.icon = obj.isNull("icon") ? null : obj.optString("icon", null);
+                projects.add(project);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to parse widget projects", e);
+        }
+        return projects;
+    }
+
+    public static List<ProjectTask> loadProjectTasks(Context context) {
+        List<ProjectTask> tasks = new ArrayList<>();
+        try {
+            String raw = prefs(context).getString(KEY_DATA, null);
+            if (raw == null) return tasks;
+            JSONArray arr = new JSONObject(raw).optJSONArray("projectTasks");
+            if (arr == null) return tasks;
+            for (int i = 0; i < arr.length(); i++) {
+                JSONObject obj = arr.optJSONObject(i);
+                if (obj == null || obj.opt("id") == null) continue;
+                ProjectTask task = new ProjectTask();
+                task.id = String.valueOf(obj.opt("id"));
+                task.name = obj.optString("name", "");
+                task.projectId = obj.optString("projectId", "default");
+                task.assignedTo = obj.isNull("assignedTo") ? null : obj.optString("assignedTo", null);
+                task.completed = obj.optBoolean("completed", false);
+                tasks.add(task);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to parse project widget tasks", e);
         }
         return tasks;
     }
@@ -224,9 +307,13 @@ public final class WidgetStore {
      * Safe to call from RemoteViewsFactory.onDataSetChanged (binder thread).
      */
     public static boolean refreshFromServerIfStale(Context context) {
+        return refreshFromServer(context, false);
+    }
+
+    public static boolean refreshFromServer(Context context, boolean force) {
         synchronized (REFRESH_LOCK) {
             long age = System.currentTimeMillis() - lastUpdated(context);
-            if (age < STALE_MS) return false;
+            if (!force && age < STALE_MS) return false;
 
             String rawConfig = prefs(context).getString(KEY_CONFIG, null);
             if (rawConfig == null) return false;
@@ -260,15 +347,20 @@ public final class WidgetStore {
                 // member list over from the previous snapshot (it changes
                 // rarely and the app re-pushes it on every open).
                 JSONArray members = null;
+                JSONArray projects = null;
                 String previous = prefs(context).getString(KEY_DATA, null);
                 if (previous != null) {
-                    members = new JSONObject(previous).optJSONArray("members");
+                    JSONObject old = new JSONObject(previous);
+                    members = old.optJSONArray("members");
+                    projects = old.optJSONArray("projects");
                 }
 
                 JSONObject snapshot = new JSONObject();
-                snapshot.put("version", 2);
+                snapshot.put("version", 3);
                 snapshot.put("lastUpdated", System.currentTimeMillis());
                 snapshot.put("tasks", filterChores(chores));
+                snapshot.put("projectTasks", projectTasks(chores));
+                snapshot.put("projects", projects == null ? new JSONArray() : projects);
                 snapshot.put("members", members == null ? new JSONArray() : members);
                 saveData(context, snapshot.toString());
                 return true;
@@ -279,6 +371,62 @@ public final class WidgetStore {
                 if (connection != null) connection.disconnect();
             }
         }
+    }
+
+    public static boolean completeTask(Context context, String taskId) {
+        HttpURLConnection connection = null;
+        try {
+            String raw = prefs(context).getString(KEY_CONFIG, null);
+            if (raw == null) return false;
+            JSONObject config = new JSONObject(raw);
+            URL url = new URL(config.optString("serverUrl") + "/chores/" + taskId + "/do");
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setDoOutput(true);
+            connection.setConnectTimeout(10000);
+            connection.setReadTimeout(15000);
+            connection.setRequestProperty("Authorization", "Bearer " + config.optString("token"));
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.getOutputStream().write("null".getBytes(StandardCharsets.UTF_8));
+            if (connection.getResponseCode() < 200 || connection.getResponseCode() >= 300) return false;
+
+            String data = prefs(context).getString(KEY_DATA, null);
+            if (data != null) {
+                JSONObject snapshot = new JSONObject(data);
+                JSONArray tasks = snapshot.optJSONArray("projectTasks");
+                if (tasks != null) for (int i = 0; i < tasks.length(); i++) {
+                    JSONObject task = tasks.optJSONObject(i);
+                    if (task != null && taskId.equals(String.valueOf(task.opt("id")))) {
+                        task.put("completed", true);
+                    }
+                }
+                snapshot.put("lastUpdated", System.currentTimeMillis());
+                saveData(context, snapshot.toString());
+            }
+            return true;
+        } catch (Exception e) {
+            Log.w(TAG, "Widget completion failed", e);
+            return false;
+        } finally {
+            if (connection != null) connection.disconnect();
+        }
+    }
+
+    private static JSONArray projectTasks(JSONArray chores) throws Exception {
+        JSONArray result = new JSONArray();
+        for (int i = 0; i < chores.length() && result.length() < 500; i++) {
+            JSONObject chore = chores.optJSONObject(i);
+            if (chore == null || chore.opt("id") == null) continue;
+            JSONObject task = new JSONObject();
+            task.put("id", chore.opt("id"));
+            task.put("name", chore.optString("name", ""));
+            String projectId = chore.optString("projectId", chore.optString("project_id", "default"));
+            task.put("projectId", projectId.isEmpty() ? "default" : projectId);
+            task.put("assignedTo", chore.isNull("assignedTo") ? JSONObject.NULL : String.valueOf(chore.opt("assignedTo")));
+            task.put("completed", false);
+            result.put(task);
+        }
+        return result;
     }
 
     /** Mirror of buildWidgetTasks in src/service/WidgetService.js. */

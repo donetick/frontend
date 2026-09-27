@@ -28,6 +28,8 @@
     <string name="widget_people_title">People</string>
     <string name="widget_empty_people">No circle members yet</string>
     <string name="widget_person_counts">%1$d today · %2$d this week</string>
+    <string name="widget_project_label">Project Tasks</string>
+    <string name="widget_project_description">Browse and complete tasks one project at a time.</string>
     <string name="widget_quick_label">Quick Capture</string>
     <string name="widget_quick_description">Capture a task in one tap — type it, scan it, or say it.</string>
     <string name="widget_quick_type">Type</string>

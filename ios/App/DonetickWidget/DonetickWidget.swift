@@ -59,6 +59,21 @@ struct WidgetTask: Identifiable {
     }
 }
 
+struct WidgetProjectTask: Identifiable {
+    let id: String
+    let name: String
+    let projectId: String
+    let assignedTo: String?
+    let completed: Bool
+}
+
+struct WidgetProject: Identifiable {
+    let id: String
+    let name: String
+    let color: String
+    let icon: String?
+}
+
 struct WidgetMember: Identifiable {
     let id: String
     let name: String
@@ -80,6 +95,8 @@ enum WidgetStore {
     static let appGroup = "group.com.donetick.app"
     static let dataKey = "widget_tasks"
     static let configKey = "widget_config"
+    static let projectIndexKey = "project_widget_index"
+    static let projectPageKey = "project_widget_page"
 
     // Same filtering window as src/service/WidgetService.js
     static let windowDays = 7
@@ -143,6 +160,44 @@ enum WidgetStore {
         }
     }
 
+    static func loadProjects() -> [WidgetProject] {
+        guard let items = snapshotDict()?["projects"] as? [[String: Any]] else { return [] }
+        return items.compactMap { item in
+            guard let rawId = item["id"] else { return nil }
+            return WidgetProject(
+                id: "\(rawId)",
+                name: item["name"] as? String ?? "Project",
+                color: item["color"] as? String ?? "#64748B",
+                icon: item["icon"] as? String
+            )
+        }
+    }
+
+    static func loadProjectTasks() -> [WidgetProjectTask] {
+        guard let items = snapshotDict()?["projectTasks"] as? [[String: Any]] else { return [] }
+        return items.compactMap { item in
+            guard let rawId = item["id"] else { return nil }
+            let assignee = item["assignedTo"].flatMap { $0 is NSNull ? nil : "\($0)" }
+            return WidgetProjectTask(
+                id: "\(rawId)",
+                name: item["name"] as? String ?? "",
+                projectId: item["projectId"] as? String ?? "default",
+                assignedTo: assignee,
+                completed: item["completed"] as? Bool ?? false
+            )
+        }
+    }
+
+    static var projectIndex: Int {
+        get { max(0, defaults?.integer(forKey: projectIndexKey) ?? 0) }
+        set { defaults?.set(max(0, newValue), forKey: projectIndexKey) }
+    }
+
+    static var projectPage: Int {
+        get { max(0, defaults?.integer(forKey: projectPageKey) ?? 0) }
+        set { defaults?.set(max(0, newValue), forKey: projectPageKey) }
+    }
+
     static func loadMembers() -> [WidgetMember] {
         guard let items = snapshotDict()?["members"] as? [[String: Any]] else { return [] }
         return items.compactMap { item in
@@ -181,8 +236,8 @@ enum WidgetStore {
     /// Re-fetch /chores/ when the app has not pushed a snapshot recently, so
     /// the widget stays current while the app is closed. On any failure the
     /// last snapshot stays; the UI shows staleness via "Updated …".
-    static func refreshIfStale() async {
-        if let updated = lastUpdated, Date().timeIntervalSince(updated) < staleInterval {
+    static func refreshIfStale(force: Bool = false) async {
+        if !force, let updated = lastUpdated, Date().timeIntervalSince(updated) < staleInterval {
             return
         }
         guard let raw = defaults?.string(forKey: configKey),
@@ -207,16 +262,67 @@ enum WidgetStore {
         // list over from the previous snapshot (it changes rarely and the
         // app re-pushes it on every open).
         let members = snapshotDict()?["members"] ?? [[String: Any]]()
+        let projects = snapshotDict()?["projects"] ?? [[String: Any]]()
 
         let snapshot: [String: Any] = [
-            "version": 2,
+            "version": 3,
             "lastUpdated": Date().timeIntervalSince1970 * 1000,
             "tasks": filterChores(chores),
+            "projectTasks": projectTasks(chores),
+            "projects": projects,
             "members": members,
         ]
         if let encoded = try? JSONSerialization.data(withJSONObject: snapshot),
            let string = String(data: encoded, encoding: .utf8) {
             defaults?.set(string, forKey: dataKey)
+        }
+    }
+
+    static func completeTask(id: String) async -> Bool {
+        guard let raw = defaults?.string(forKey: configKey),
+              let configData = raw.data(using: .utf8),
+              let config = try? JSONSerialization.jsonObject(with: configData) as? [String: Any],
+              let serverUrl = config["serverUrl"] as? String,
+              let token = config["token"] as? String,
+              let url = URL(string: serverUrl + "/chores/\(id)/do")
+        else { return false }
+
+        var request = URLRequest(url: url, timeoutInterval: 15)
+        request.httpMethod = "POST"
+        request.httpBody = Data("null".utf8)
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        guard let (_, response) = try? await URLSession.shared.data(for: request),
+              let status = (response as? HTTPURLResponse)?.statusCode,
+              (200..<300).contains(status), var snapshot = snapshotDict()
+        else { return false }
+
+        if var tasks = snapshot["projectTasks"] as? [[String: Any]] {
+            for index in tasks.indices where "\(tasks[index]["id"] ?? "")" == id {
+                tasks[index]["completed"] = true
+            }
+            snapshot["projectTasks"] = tasks
+            snapshot["lastUpdated"] = Date().timeIntervalSince1970 * 1000
+            if let encoded = try? JSONSerialization.data(withJSONObject: snapshot),
+               let string = String(data: encoded, encoding: .utf8) {
+                defaults?.set(string, forKey: dataKey)
+            }
+        }
+        return true
+    }
+
+    private static func projectTasks(_ chores: [[String: Any]]) -> [[String: Any]] {
+        chores.prefix(500).compactMap { chore in
+            guard let id = chore["id"] else { return nil }
+            let rawProject = chore["projectId"] ?? chore["project_id"] ?? "default"
+            let projectId = "\(rawProject)".isEmpty ? "default" : "\(rawProject)"
+            return [
+                "id": id,
+                "name": chore["name"] as? String ?? "",
+                "projectId": projectId,
+                "assignedTo": chore["assignedTo"] ?? NSNull(),
+                "completed": false,
+            ]
         }
     }
 
@@ -341,11 +447,79 @@ struct WidgetOptionsIntent: WidgetConfigurationIntent {
     var includeOthers: Bool
 }
 
+private let projectWidgetKind = "DonetickProjectWidget"
+private let projectPageSize = 5
+
+private func moveProject(_ delta: Int) {
+    let count = WidgetStore.loadProjects().count
+    guard count > 0 else { return }
+    WidgetStore.projectIndex = (WidgetStore.projectIndex + delta + count) % count
+    WidgetStore.projectPage = 0
+    WidgetCenter.shared.reloadTimelines(ofKind: projectWidgetKind)
+}
+
+struct PreviousProjectIntent: AppIntent {
+    static var title: LocalizedStringResource = "Previous Project"
+    func perform() async throws -> some IntentResult { moveProject(-1); return .result() }
+}
+
+struct NextProjectIntent: AppIntent {
+    static var title: LocalizedStringResource = "Next Project"
+    func perform() async throws -> some IntentResult { moveProject(1); return .result() }
+}
+
+struct PreviousProjectPageIntent: AppIntent {
+    static var title: LocalizedStringResource = "Previous Tasks"
+    func perform() async throws -> some IntentResult {
+        WidgetStore.projectPage = max(0, WidgetStore.projectPage - 1)
+        WidgetCenter.shared.reloadTimelines(ofKind: projectWidgetKind)
+        return .result()
+    }
+}
+
+struct NextProjectPageIntent: AppIntent {
+    static var title: LocalizedStringResource = "Next Tasks"
+    func perform() async throws -> some IntentResult {
+        let projects = WidgetStore.loadProjects()
+        guard !projects.isEmpty else { return .result() }
+        let project = projects[min(WidgetStore.projectIndex, projects.count - 1)]
+        let count = WidgetStore.loadProjectTasks().filter { $0.projectId == project.id }.count
+        WidgetStore.projectPage = min(max(0, (count - 1) / projectPageSize), WidgetStore.projectPage + 1)
+        WidgetCenter.shared.reloadTimelines(ofKind: projectWidgetKind)
+        return .result()
+    }
+}
+
+struct RefreshProjectWidgetIntent: AppIntent {
+    static var title: LocalizedStringResource = "Refresh Projects"
+    func perform() async throws -> some IntentResult {
+        await WidgetStore.refreshIfStale(force: true)
+        WidgetCenter.shared.reloadTimelines(ofKind: projectWidgetKind)
+        return .result()
+    }
+}
+
+struct CompleteProjectTaskIntent: AppIntent {
+    static var title: LocalizedStringResource = "Complete Task"
+    @Parameter(title: "Task") var taskId: String
+
+    init() {}
+    init(taskId: String) { self.taskId = taskId }
+
+    func perform() async throws -> some IntentResult {
+        _ = await WidgetStore.completeTask(id: taskId)
+        WidgetCenter.shared.reloadTimelines(ofKind: projectWidgetKind)
+        return .result()
+    }
+}
+
 // MARK: - Timeline
 
 struct TaskEntry: TimelineEntry {
     let date: Date
     let tasks: [WidgetTask]
+    let projectTasks: [WidgetProjectTask]
+    let projects: [WidgetProject]
     let members: [WidgetMember]
     let avatars: [String: UIImage]
     let lastUpdated: Date?
@@ -364,6 +538,11 @@ struct TaskEntry: TimelineEntry {
                 WidgetTask(id: "3", name: "Vacuum living room", dueDate: calendar.date(byAdding: .day, value: 1, to: today), priority: 2, approval: false, assignedTo: "2"),
                 WidgetTask(id: "4", name: "Clean the garage", dueDate: calendar.date(byAdding: .day, value: 3, to: today), priority: 0, approval: false, assignedTo: "1"),
             ],
+            projectTasks: [
+                WidgetProjectTask(id: "1", name: "Take out the trash", projectId: "home", assignedTo: "1", completed: false),
+                WidgetProjectTask(id: "2", name: "Water the plants", projectId: "home", assignedTo: "1", completed: false),
+            ],
+            projects: [WidgetProject(id: "home", name: "Home", color: "#287A5D", icon: "Home")],
             members: [
                 WidgetMember(id: "1", name: "Alex", image: nil),
                 WidgetMember(id: "2", name: "Sam", image: nil),
@@ -384,6 +563,8 @@ private func makeEntry(includeOthers: Bool) async -> TaskEntry {
     return TaskEntry(
         date: Date(),
         tasks: WidgetStore.loadTasks(),
+        projectTasks: WidgetStore.loadProjectTasks(),
+        projects: WidgetStore.loadProjects(),
         members: members,
         avatars: avatars,
         lastUpdated: WidgetStore.lastUpdated,
@@ -995,6 +1176,190 @@ struct PeopleWidget: Widget {
     }
 }
 
+// MARK: - Project tasks widget
+
+private extension WidgetProject {
+    var backgroundColor: Color {
+        var value = color.trimmingCharacters(in: .whitespacesAndNewlines)
+        if value.hasPrefix("#") { value.removeFirst() }
+        guard value.count == 6, let rgb = UInt64(value, radix: 16) else {
+            return Color(red: 0.39, green: 0.45, blue: 0.55)
+        }
+        return Color(
+            red: Double((rgb >> 16) & 0xff) / 255,
+            green: Double((rgb >> 8) & 0xff) / 255,
+            blue: Double(rgb & 0xff) / 255
+        )
+    }
+
+    var foregroundColor: Color {
+        var value = color.trimmingCharacters(in: .whitespacesAndNewlines)
+        if value.hasPrefix("#") { value.removeFirst() }
+        guard value.count == 6, let rgb = UInt64(value, radix: 16) else { return .white }
+        let luminance = (0.2126 * Double((rgb >> 16) & 0xff)
+            + 0.7152 * Double((rgb >> 8) & 0xff)
+            + 0.0722 * Double(rgb & 0xff)) / 255
+        return luminance > 0.58 ? Color(red: 0.08, green: 0.09, blue: 0.11) : .white
+    }
+
+    var systemImage: String {
+        switch icon {
+        case "Home": return "house.fill"
+        case "Work", "BusinessCenter": return "briefcase.fill"
+        case "School": return "graduationcap.fill"
+        case "Book": return "book.fill"
+        case "ShoppingCart": return "cart.fill"
+        case "FitnessCenter", "SportsSoccer": return "figure.run"
+        case "Restaurant": return "fork.knife"
+        case "Flight": return "airplane"
+        case "Pets": return "pawprint.fill"
+        case "PhotoCamera": return "camera.fill"
+        case "MusicNote": return "music.note"
+        case "Code", "Computer": return "desktopcomputer"
+        case "Build": return "wrench.and.screwdriver.fill"
+        case "Palette": return "paintpalette.fill"
+        default: return "folder.fill"
+        }
+    }
+}
+
+private struct ProjectControlButton<I: AppIntent>: View {
+    let image: String
+    let label: String
+    let intent: I
+    let foreground: Color
+
+    var body: some View {
+        Button(intent: intent) {
+            Image(systemName: image)
+                .font(.system(size: 11, weight: .bold))
+                .frame(width: 23, height: 23)
+                .background(foreground.opacity(0.14))
+                .clipShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .foregroundColor(foreground)
+        .accessibilityLabel(label)
+    }
+}
+
+struct ProjectWidgetView: View {
+    let entry: TaskEntry
+
+    private var project: WidgetProject? {
+        guard !entry.projects.isEmpty else { return nil }
+        return entry.projects[min(WidgetStore.projectIndex, entry.projects.count - 1)]
+    }
+
+    var body: some View {
+        if !entry.signedIn {
+            StateMessage(systemImage: "person.crop.circle.badge.exclamationmark",
+                         title: "Sign in", detail: "Open Donetick to see your projects")
+                .containerBackground(for: .widget) { Color(UIColor.systemBackground) }
+        } else if let project = project {
+            projectContent(project)
+                .containerBackground(for: .widget) { project.backgroundColor }
+        } else {
+            StateMessage(systemImage: "folder", title: "No projects",
+                         detail: "Open Donetick to create or sync a project")
+                .containerBackground(for: .widget) { Color(UIColor.systemBackground) }
+        }
+    }
+
+    private func projectContent(_ project: WidgetProject) -> some View {
+        let tasks = entry.projectTasks.filter { $0.projectId == project.id }
+        let maxPage = max(0, (tasks.count - 1) / projectPageSize)
+        let page = min(WidgetStore.projectPage, maxPage)
+        let visible = Array(tasks.dropFirst(page * projectPageSize).prefix(projectPageSize))
+        let mine = tasks.filter { $0.assignedTo == entry.myUserId }.count
+        let foreground = project.foregroundColor
+
+        return HStack(spacing: 7) {
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 6) {
+                    Image(systemName: project.systemImage)
+                        .font(.system(size: 15, weight: .semibold))
+                    Text(project.name)
+                        .font(.system(size: 15, weight: .bold))
+                        .lineLimit(1)
+                }
+                Text("\(tasks.count) tasks · \(mine) assigned to me")
+                    .font(.system(size: 9))
+                    .opacity(0.76)
+                    .lineLimit(1)
+                if visible.isEmpty {
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        Text("No tasks in this project")
+                            .font(.system(size: 12, weight: .medium))
+                            .opacity(0.75)
+                        Spacer()
+                    }
+                    Spacer()
+                } else {
+                    ForEach(visible) { task in
+                        HStack(spacing: 7) {
+                            if task.completed {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .font(.system(size: 16))
+                            } else {
+                                Button(intent: CompleteProjectTaskIntent(taskId: task.id)) {
+                                    Image(systemName: "circle")
+                                        .font(.system(size: 16))
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityLabel("Complete \(task.name)")
+                            }
+                            Text(task.name)
+                                .font(.system(size: 12, weight: .medium))
+                                .strikethrough(task.completed)
+                                .lineLimit(1)
+                            Spacer(minLength: 0)
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 21, alignment: .leading)
+                        .padding(.horizontal, 3)
+                        .background(task.completed ? foreground.opacity(0.10) : Color.clear)
+                        .clipShape(RoundedRectangle(cornerRadius: 5))
+                    }
+                    Spacer(minLength: 0)
+                }
+            }
+            .foregroundColor(foreground)
+
+            VStack(spacing: 3) {
+                HStack(spacing: 2) {
+                    ProjectControlButton(image: "chevron.left", label: "Previous project",
+                                         intent: PreviousProjectIntent(), foreground: foreground)
+                    ProjectControlButton(image: "chevron.right", label: "Next project",
+                                         intent: NextProjectIntent(), foreground: foreground)
+                }
+                Spacer(minLength: 2)
+                ProjectControlButton(image: "arrow.clockwise", label: "Refresh",
+                                     intent: RefreshProjectWidgetIntent(), foreground: foreground)
+                ProjectControlButton(image: "chevron.up", label: "Previous tasks",
+                                     intent: PreviousProjectPageIntent(), foreground: foreground)
+                    .opacity(page > 0 ? 1 : 0.35)
+                ProjectControlButton(image: "chevron.down", label: "Next tasks",
+                                     intent: NextProjectPageIntent(), foreground: foreground)
+                    .opacity(page < maxPage ? 1 : 0.35)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+}
+
+struct ProjectWidget: Widget {
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: projectWidgetKind, provider: PeopleProvider()) { entry in
+            ProjectWidgetView(entry: entry)
+        }
+        .configurationDisplayName("Project Tasks")
+        .description("Browse and complete tasks one project at a time.")
+        .supportedFamilies([.systemMedium, .systemLarge])
+    }
+}
+
 // MARK: - Quick Capture widget
 
 /// One of the three ways into the add-task flow. Purely a launcher — the
@@ -1102,6 +1467,7 @@ struct DonetickWidgetBundle: WidgetBundle {
         TodayWidget()
         WeekWidget()
         PeopleWidget()
+        ProjectWidget()
         QuickCaptureWidget()
     }
 }

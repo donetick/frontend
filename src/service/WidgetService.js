@@ -10,6 +10,8 @@ const WidgetBridge = registerPlugin('WidgetBridge')
 
 const WINDOW_DAYS = 7
 const MAX_TASKS = 100
+const MAX_PROJECT_TASKS = 500
+const MAX_PROJECTS = 100
 const MAX_MEMBERS = 12
 const PUSH_DEBOUNCE_MS = 1500
 
@@ -56,6 +58,42 @@ export const buildWidgetTasks = chores => {
 }
 
 // Circle members, trimmed to what the widgets render: avatar + short name.
+// The project widget is not limited to the seven-day dashboard window.
+// Keep a separate compact list so every active task can be browsed by project.
+export const buildProjectWidgetTasks = chores =>
+  (chores || [])
+    .filter(chore => chore?.id != null)
+    .map(chore => ({
+      id: chore.id,
+      name: chore.name || '',
+      projectId: String(chore.projectId || chore.project_id || 'default'),
+      assignedTo: chore.assignedTo == null ? null : String(chore.assignedTo),
+      completed: false,
+    }))
+    .slice(0, MAX_PROJECT_TASKS)
+
+export const buildWidgetProjects = projects => {
+  const normalized = (projects || [])
+    .filter(project => project?.id != null)
+    .map(project => ({
+      id: String(project.id),
+      name: project.name || 'Project',
+      color: project.color || '#1976D2',
+      icon: project.icon || null,
+    }))
+
+  // Tasks without a project belong to Donetick's implicit default project.
+  if (!normalized.some(project => project.id === 'default')) {
+    normalized.unshift({
+      id: 'default',
+      name: 'Default Project',
+      color: '#64748B',
+      icon: 'FolderOpen',
+    })
+  }
+  return normalized.slice(0, MAX_PROJECTS)
+}
+
 export const buildWidgetMembers = members => {
   return (members || [])
     .filter(member => member && member.userId != null)
@@ -83,12 +121,15 @@ const pushSnapshot = async queryClient => {
   if (!token) return
 
   const members = queryClient.getQueryData(['allCircleMembers'])?.res
+  const projects = queryClient.getQueryData(['projects']) || []
 
   await WidgetBridge.update({
     data: JSON.stringify({
-      version: 2,
+      version: 3,
       lastUpdated: Date.now(),
       tasks: buildWidgetTasks(chores),
+      projectTasks: buildProjectWidgetTasks(chores),
+      projects: buildWidgetProjects(projects),
       members: buildWidgetMembers(members),
     }),
     config: JSON.stringify({
@@ -123,7 +164,8 @@ export const initWidgetSync = queryClient => {
       event?.type === 'updated' &&
       (key?.[0] === 'chores' ||
         key?.[0] === 'userProfile' ||
-        key?.[0] === 'allCircleMembers')
+        key?.[0] === 'allCircleMembers' ||
+        key?.[0] === 'projects')
     ) {
       schedule()
     }
