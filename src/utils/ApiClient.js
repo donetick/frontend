@@ -24,6 +24,7 @@ class ApiClient {
     this.failedQueue = []
     this.lastRefreshTime = 0
     this.refreshCooldown = 3 * 1000 // 3 seconds in milliseconds
+    this.logoutPromise = null
   }
 
   async init(force = false) {
@@ -145,16 +146,28 @@ class ApiClient {
     this.failedQueue = []
   }
 
-  // Helper to avoid repeating cleanup code
+  // Share one logout operation between every caller so cleanup cannot overlap.
   async handleLogout() {
-    // Backstop for every forced-logout path: never tear down the session while
-    // an OAuth exchange is running, or we clear the tokens it just saved and
-    // reload the page out from under it.
+    // Never tear down the session while an OAuth exchange is running, or we
+    // clear the tokens it just saved and reload the page out from under it.
     if (isOAuthExchangeInProgress()) {
       console.log('Skipping forced logout: OAuth exchange in progress')
       return
     }
 
+    if (this.logoutPromise) {
+      return this.logoutPromise
+    }
+
+    this.logoutPromise = this.performLogout()
+    try {
+      await this.logoutPromise
+    } finally {
+      this.logoutPromise = null
+    }
+  }
+
+  async performLogout() {
     // An expired session on an invite link would otherwise drop the code on the
     // way to /login. Stash it first so sign-in returns to the join.
     try {
@@ -170,8 +183,8 @@ class ApiClient {
       console.error('Error preserving pending invite on logout', e)
     }
 
-    // Runs before clearAllTokens() so the DELETE still carries a valid session;
-    // dynamic import sidesteps the ApiClient <-> CapacitorListener module cycle
+    // This request bypasses 401 recovery: an already-expired session must not
+    // recursively start another refresh/logout while cleanup is in progress.
     try {
       const { unregisterPushNotifications } =
         await import('../CapacitorListener')
@@ -207,11 +220,11 @@ class ApiClient {
     }
 
     if (window.location.pathname !== '/login') window.location.href = '/login'
-    // fire and forget
   }
   async request(endpoint, options = {}) {
     await this.init()
     const url = `${this.customServerURL}${endpoint}`
+    const { skipAuthRecovery = false, ...fetchOptions } = options
 
     // Abort after 10s so a dead/unreachable server doesn't hang the UI
     const controller = new AbortController()
@@ -219,9 +232,9 @@ class ApiClient {
 
     const config = {
       // credentials: 'include',
-      ...options,
-      headers: this.getHeaders(options.headers),
-      signal: options.signal ?? controller.signal,
+      ...fetchOptions,
+      headers: this.getHeaders(fetchOptions.headers),
+      signal: fetchOptions.signal ?? controller.signal,
     }
 
     try {
@@ -238,6 +251,12 @@ class ApiClient {
           method: config.method,
           status: response.status,
         })
+      }
+
+      // Logout cleanup may legitimately receive a 401. Return it directly
+      // instead of recursively attempting refresh/logout again.
+      if (response.status === 401 && (skipAuthRecovery || this.logoutPromise)) {
+        return response
       }
 
       // 2. Check for 401 (Unauthorized)
@@ -265,6 +284,10 @@ class ApiClient {
             reject,
           })
         })
+        // Some failure branches return null/the original response rather than
+        // this promise. Keep their intentional queue rejection from becoming
+        // an unhandled promise rejection.
+        queuedPromise.catch(() => {})
 
         // If already refreshing, just return the queued promise
         if (this.isRefreshing) {
@@ -286,14 +309,13 @@ class ApiClient {
             this.processQueue(null, currentToken)
           } else {
             this.processQueue(new Error('No token available'), null)
-            this.handleLogout()
+            await this.handleLogout()
             return null
           }
         } else if (refreshResult.error === OAUTH_EXCHANGE_IN_PROGRESS) {
           // Expected 401: the code exchange hasn't produced tokens yet. Fail
           // just this request — logging out here would wipe storage and hard
           // navigate to /login, aborting the exchange fetch mid-flight.
-          queuedPromise.catch(() => {}) // not returned below; keep it handled
           this.processQueue(new Error(refreshResult.error), null)
           return response
         } else if (refreshResult.error === 'Already refreshing') {
@@ -301,9 +323,12 @@ class ApiClient {
           console.log('Already refreshing - waiting for refresh to complete')
           return queuedPromise
         } else {
-          // Actual refresh failure - logout
           this.processQueue(new Error(refreshResult.error), null)
-          this.handleLogout()
+          // An expired refresh token already awaited logout in refreshToken().
+          // Other refresh failures still need to start it here.
+          if (refreshResult.error !== 'Refresh token expired') {
+            await this.handleLogout()
+          }
           return null
         }
 
@@ -318,7 +343,7 @@ class ApiClient {
       // unreachable. Caller-initiated aborts (component unmount, query
       // cancellation) say nothing about server health, so skip those.
       const externalAbort =
-        error?.name === 'AbortError' && options.signal?.aborted
+        error?.name === 'AbortError' && fetchOptions.signal?.aborted
       if (!externalAbort) {
         networkManager.setServerUnreachable()
         recordApiFailure({ endpoint, method: config.method, status: 'network' })
