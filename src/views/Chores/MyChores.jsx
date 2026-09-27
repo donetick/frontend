@@ -1436,7 +1436,6 @@ const MyChores = () => {
         <ScrollHideFab
           sx={{
             bottom: getSafeBottom(10, 10),
-            left: 'calc(var(--app-navigation-width, 0px) + 10px)',
             '@media (max-width: 768px)': {
               bottom: getSafeBottom(66, 10),
             },

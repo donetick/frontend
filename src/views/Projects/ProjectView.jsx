@@ -685,7 +685,6 @@ const ProjectView = () => {
       <ScrollHideFab
         sx={{
           ...getSafeBottomStyles({ bottom: 0, padding: 16 }),
-          left: 'calc(var(--app-navigation-width, 0px) + 10px)',
           '@media (max-width: 768px)': {
             bottom: getSafeBottom(56, 16),
           },

@@ -18,6 +18,10 @@ const ScrollHideFab = ({ children, sx }) => {
         justifyContent: 'flex-end',
         gap: 2,
         zIndex: 100,
+        // Sit just past the desktop navigation rail on whichever side it is
+        // anchored to (inline-start, so the right edge in RTL), and follow it
+        // when it expands so the expanded rail never covers the FAB.
+        insetInlineStart: 'calc(var(--app-navigation-offset, 0px) + 10px)',
         // translateY alone isn't reliable here: some FABs have relatively
         // positioned children (secondary buttons, shortcut hints) that
         // visually overflow the wrapper's own layout box, so a percentage
@@ -27,7 +31,8 @@ const ScrollHideFab = ({ children, sx }) => {
         opacity: hidden ? 0 : 1,
         pointerEvents: hidden ? 'none' : 'auto',
         transform: hidden ? 'translateY(150px)' : 'translateY(0)',
-        transition: 'transform 220ms ease, opacity 220ms ease',
+        transition:
+          'transform 220ms ease, opacity 220ms ease, inset-inline-start 200ms ease',
         '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
         ...sx,
       }}

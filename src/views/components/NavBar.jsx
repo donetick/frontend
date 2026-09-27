@@ -84,12 +84,26 @@ const NavBar = () => {
       window.removeEventListener(OPEN_NAVIGATION_DRAWER_EVENT, handleOpenDrawer)
   }, [])
 
+  // --app-navigation-width is the reserved rail width: it stays compact so page
+  // content doesn't reflow when the rail expands over it. --app-navigation-offset
+  // is the rail's *actual* current width, for overlays (FABs) that must stay
+  // clear of it even while expanded.
   useEffect(() => {
-    const width = isDesktop ? `${COMPACT_NAV_WIDTH}px` : '0px'
-    document.documentElement.style.setProperty('--app-navigation-width', width)
-    return () =>
-      document.documentElement.style.removeProperty('--app-navigation-width')
-  }, [isDesktop])
+    const style = document.documentElement.style
+    const live = desktopExpanded ? EXPANDED_NAV_WIDTH : COMPACT_NAV_WIDTH
+    style.setProperty(
+      '--app-navigation-width',
+      isDesktop ? `${COMPACT_NAV_WIDTH}px` : '0px',
+    )
+    style.setProperty(
+      '--app-navigation-offset',
+      isDesktop ? `${live}px` : '0px',
+    )
+    return () => {
+      style.removeProperty('--app-navigation-width')
+      style.removeProperty('--app-navigation-offset')
+    }
+  }, [isDesktop, desktopExpanded])
 
   const links = [
     {
