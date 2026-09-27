@@ -827,6 +827,7 @@ const RegisterDeviceToken = (
 const UnregisterDeviceToken = (deviceId, token) => {
   return Fetch(`/devices/tokens`, {
     method: 'DELETE',
+    skipAuthRecovery: true,
     headers: HEADERS(),
     body: JSON.stringify({
       deviceId,

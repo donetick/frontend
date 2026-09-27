@@ -33,6 +33,7 @@
     "ionic:build": "npm run build",
     "ionic:serve": "npm run start",
     "android": "npm run build && npx cap sync android",
+    "ios": "npm run build && npx cap sync ios",
     "android:dev": "npx cap run android --live-reload",
     "cap": "npm run build && npx cap sync",
     "bump": "node bump-version.js patch",

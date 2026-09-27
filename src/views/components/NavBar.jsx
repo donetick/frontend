@@ -84,12 +84,26 @@ const NavBar = () => {
       window.removeEventListener(OPEN_NAVIGATION_DRAWER_EVENT, handleOpenDrawer)
   }, [])
 
+  // --app-navigation-width is the reserved rail width: it stays compact so page
+  // content doesn't reflow when the rail expands over it. --app-navigation-offset
+  // is the rail's *actual* current width, for overlays (FABs) that must stay
+  // clear of it even while expanded.
   useEffect(() => {
-    const width = isDesktop ? `${COMPACT_NAV_WIDTH}px` : '0px'
-    document.documentElement.style.setProperty('--app-navigation-width', width)
-    return () =>
-      document.documentElement.style.removeProperty('--app-navigation-width')
-  }, [isDesktop])
+    const style = document.documentElement.style
+    const live = desktopExpanded ? EXPANDED_NAV_WIDTH : COMPACT_NAV_WIDTH
+    style.setProperty(
+      '--app-navigation-width',
+      isDesktop ? `${COMPACT_NAV_WIDTH}px` : '0px',
+    )
+    style.setProperty(
+      '--app-navigation-offset',
+      isDesktop ? `${live}px` : '0px',
+    )
+    return () => {
+      style.removeProperty('--app-navigation-width')
+      style.removeProperty('--app-navigation-offset')
+    }
+  }, [isDesktop, desktopExpanded])
 
   const links = [
     {
@@ -245,10 +259,9 @@ const NavBar = () => {
           sx={{
             alignItems: 'center',
             display: 'flex',
-            flexDirection: compact ? 'column' : 'row',
-            gap: compact ? 0.5 : 1,
-            minHeight: 48,
-            px: compact ? 0 : 1,
+            flexDirection: 'column',
+            gap: compact ? 0.5 : 0.25,
+            px: compact ? 0 : 0.5,
             py: compact ? 0.5 : 0,
           }}
         >
@@ -266,23 +279,22 @@ const NavBar = () => {
                 display: 'flex',
                 height: compact ? 48 : 'auto',
                 justifyContent: 'center',
-                width: compact ? 48 : 'auto',
+                width: compact ? 48 : '100%',
               }}
             >
-              <UserProfileAvatar />
+              <UserProfileAvatar showDetails={!compact} />
             </Box>
           </Tooltip>
-          {!compact && <Box sx={{ flex: 1 }} />}
           <Box
             sx={{
               alignItems: 'center',
               display: 'flex',
               height: compact ? 48 : 'auto',
               justifyContent: 'center',
-              width: compact ? 48 : 'auto',
+              width: compact ? 48 : '100%',
             }}
           >
-            <SyncStatusIndicator />
+            <SyncStatusIndicator showLabel={!compact} />
           </Box>
         </Box>
       )}
@@ -462,6 +474,25 @@ const NavBar = () => {
                   <MenuRounded />
                 </IconButton>
               </Tooltip>
+              {desktopExpanded && (
+                <Typography
+                  component='div'
+                  level='title-lg'
+                  sx={{
+                    color: 'text.primary',
+                    fontFamily: 'var(--joy-fontFamily-display)',
+                    fontWeight: 800,
+                    letterSpacing: '-0.045em',
+                    lineHeight: 1,
+                    userSelect: 'none',
+                  }}
+                >
+                  Done
+                  <Box component='span' sx={{ color: 'primary.500' }}>
+                    tick
+                  </Box>
+                </Typography>
+              )}
             </Box>
             <Box
               sx={{
