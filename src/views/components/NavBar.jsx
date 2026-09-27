@@ -259,10 +259,9 @@ const NavBar = () => {
           sx={{
             alignItems: 'center',
             display: 'flex',
-            flexDirection: compact ? 'column' : 'row',
-            gap: compact ? 0.5 : 1,
-            minHeight: 48,
-            px: compact ? 0 : 1,
+            flexDirection: 'column',
+            gap: compact ? 0.5 : 0.25,
+            px: compact ? 0 : 0.5,
             py: compact ? 0.5 : 0,
           }}
         >
@@ -280,23 +279,22 @@ const NavBar = () => {
                 display: 'flex',
                 height: compact ? 48 : 'auto',
                 justifyContent: 'center',
-                width: compact ? 48 : 'auto',
+                width: compact ? 48 : '100%',
               }}
             >
-              <UserProfileAvatar />
+              <UserProfileAvatar showDetails={!compact} />
             </Box>
           </Tooltip>
-          {!compact && <Box sx={{ flex: 1 }} />}
           <Box
             sx={{
               alignItems: 'center',
               display: 'flex',
               height: compact ? 48 : 'auto',
               justifyContent: 'center',
-              width: compact ? 48 : 'auto',
+              width: compact ? 48 : '100%',
             }}
           >
-            <SyncStatusIndicator />
+            <SyncStatusIndicator showLabel={!compact} />
           </Box>
         </Box>
       )}
