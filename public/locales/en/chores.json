@@ -12,6 +12,8 @@
   "status": "Status",
   "description": "Description",
   "choreView": {
+    "notFoundTitle": "Task not available",
+    "notFoundDescription": "This task may have been deleted or is no longer shared with you.",
     "assignment": "Assignment",
     "assigned": "Assigned",
     "last": "Last",

@@ -2,6 +2,7 @@ import {
   Add,
   ArrowDropDown,
   AttachFile,
+  Checklist,
   Delete,
   DocumentScanner,
   HorizontalRule,
@@ -41,6 +42,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import DurationInput from '../../components/common/DurationInput'
+import EmptyState from '../../components/common/EmptyState'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import NumberInput from '../../components/common/NumberInput'
 import NotificationTemplate from '../../components/NotificationTemplate.jsx'
@@ -177,6 +179,7 @@ const ChoreEdit = () => {
   const deleteChores = useDeleteChores()
   const {
     data: choreData,
+    isError: isChoreError,
     isLoading: isChoreLoading,
     refetch: refetchChore,
   } = useChore(choreId)
@@ -798,6 +801,20 @@ const ChoreEdit = () => {
     isProjectsLoading
   ) {
     return <LoadingComponent />
+  }
+  if (isChoreError && choreId) {
+    return (
+      <Container maxWidth='sm'>
+        <EmptyState
+          variant='error'
+          fullHeight
+          icon={<Checklist />}
+          title={t('choreView.notFoundTitle')}
+          description={t('choreView.notFoundDescription')}
+          primaryAction={{ label: t('archived.backToTasks'), to: '/chores' }}
+        />
+      </Container>
+    )
   }
   return (
     <Container
