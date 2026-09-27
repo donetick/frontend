@@ -2,6 +2,9 @@ package com.donetick.app.widget;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.LinkProperties;
+import android.net.Network;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -10,14 +13,19 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Shared storage + refresh logic for the home-screen widgets.
@@ -53,6 +61,9 @@ public final class WidgetStore {
     // Don't hit the network if the app (or a previous refresh) updated the
     // snapshot recently; also guards against notify->refresh loops.
     private static final long STALE_MS = 10 * 60 * 1000;
+    // Backoff for retrying a widget completion after a cold-start DNS race
+    // (see openConnection). Index = dnsRetry attempt number.
+    private static final long[] DNS_RETRY_BACKOFF_MS = {500, 1000, 2000};
 
     private static final Object REFRESH_LOCK = new Object();
 
@@ -326,9 +337,11 @@ public final class WidgetStore {
                 if (serverUrl.isEmpty() || token.isEmpty()) return false;
 
                 URL url = new URL(serverUrl + "/chores/");
-                connection = (HttpURLConnection) url.openConnection();
-                connection.setConnectTimeout(10000);
-                connection.setReadTimeout(15000);
+                connection = openConnection(context, url);
+                // Widget broadcasts must finish within roughly ten seconds.
+                // Keep the combined network budget below that limit.
+                connection.setConnectTimeout(3000);
+                connection.setReadTimeout(5000);
                 connection.setRequestProperty("Authorization", "Bearer " + token);
                 connection.setRequestProperty("Accept", "application/json");
 
@@ -395,26 +408,63 @@ public final class WidgetStore {
     }
 
     public static boolean completeTask(Context context, String taskId) {
+        return completeTask(context, taskId, 0);
+    }
+
+    private static boolean completeTask(Context context, String taskId, int dnsRetry) {
         HttpURLConnection connection = null;
         try {
             String raw = prefs(context).getString(KEY_CONFIG, null);
             if (raw == null) return false;
             JSONObject config = new JSONObject(raw);
             URL url = new URL(config.optString("serverUrl") + "/chores/" + taskId + "/do");
-            connection = (HttpURLConnection) url.openConnection();
+            Log.i(TAG, "Sending widget completion for task " + taskId + " to " + url);
+            connection = openConnection(context, url);
             connection.setRequestMethod("POST");
             connection.setDoOutput(true);
-            connection.setConnectTimeout(10000);
-            connection.setReadTimeout(15000);
+            // ProjectWidgetProvider uses goAsync(), whose PendingResult still
+            // has a short system deadline. Never let this request trigger a
+            // BroadcastReceiver ANR when a self-hosted server is unreachable.
+            connection.setConnectTimeout(3000);
+            connection.setReadTimeout(5000);
             connection.setRequestProperty("Authorization", "Bearer " + config.optString("token"));
             connection.setRequestProperty("Content-Type", "application/json");
-            connection.getOutputStream().write("null".getBytes(StandardCharsets.UTF_8));
-            if (connection.getResponseCode() < 200 || connection.getResponseCode() >= 300) return false;
+            connection.setRequestProperty("Accept", "application/json");
+            byte[] body = "null".getBytes(StandardCharsets.UTF_8);
+            connection.setFixedLengthStreamingMode(body.length);
+            try (OutputStream output = connection.getOutputStream()) {
+                output.write(body);
+                output.flush();
+            }
+            int status = connection.getResponseCode();
+            if (status < 200 || status >= 300) {
+                Log.w(TAG, "Widget completion got HTTP " + status + " for task " + taskId);
+                return false;
+            }
 
+            Log.i(TAG, "Widget completion succeeded for task " + taskId
+                    + " with HTTP " + status);
             setProjectTaskCompleted(context, taskId, true);
             return true;
+        } catch (UnknownHostException e) {
+            if (dnsRetry < DNS_RETRY_BACKOFF_MS.length) {
+                long backoff = DNS_RETRY_BACKOFF_MS[dnsRetry];
+                Log.w(TAG, "DNS was not ready for widget completion; retrying task " + taskId
+                        + " in " + backoff + "ms (attempt " + (dnsRetry + 1) + ")");
+                try {
+                    Thread.sleep(backoff);
+                } catch (InterruptedException interrupted) {
+                    Thread.currentThread().interrupt();
+                    return false;
+                }
+                return completeTask(context, taskId, dnsRetry + 1);
+            }
+            Log.e(TAG, "Widget completion failed for task " + taskId + ": UnknownHostException: "
+                    + e.getMessage(), e);
+            return false;
         } catch (Exception e) {
-            Log.w(TAG, "Widget completion failed", e);
+            Log.e(TAG, "Widget completion failed for task " + taskId + ": "
+                    + e.getClass().getSimpleName() + ": " + e.getMessage(), e);
             return false;
         } finally {
             if (connection != null) connection.disconnect();
@@ -478,6 +528,60 @@ public final class WidgetStore {
             result.put(selected.get(i));
         }
         return result;
+    }
+
+    /**
+     * Bind widget traffic to Android's active network. A widget tap can cold
+     * start the app process before its default network's DNS is usable, which
+     * otherwise produces a transient UnknownHostException even while Wi-Fi is
+     * validated and the hostname resolves system-wide.
+     *
+     * onAvailable() alone is not enough: it fires on link-up, before
+     * LinkProperties (and therefore the network's DNS servers) are attached,
+     * so a connection opened right then can still fail to resolve. Wait for
+     * onLinkPropertiesChanged() to report a non-empty DNS server list instead.
+     */
+    private static HttpURLConnection openConnection(Context context, URL url) throws Exception {
+        ConnectivityManager manager = (ConnectivityManager) context
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (manager == null) {
+            return (HttpURLConnection) url.openConnection();
+        }
+
+        AtomicReference<Network> dnsReadyNetwork = new AtomicReference<>();
+        AtomicReference<Network> availableNetwork = new AtomicReference<>();
+        CountDownLatch dnsReady = new CountDownLatch(1);
+        ConnectivityManager.NetworkCallback callback = new ConnectivityManager.NetworkCallback() {
+            @Override
+            public void onAvailable(Network network) {
+                availableNetwork.compareAndSet(null, network);
+            }
+
+            @Override
+            public void onLinkPropertiesChanged(Network network, LinkProperties linkProperties) {
+                if (!linkProperties.getDnsServers().isEmpty()
+                        && dnsReadyNetwork.compareAndSet(null, network)) {
+                    dnsReady.countDown();
+                }
+            }
+        };
+        try {
+            manager.registerDefaultNetworkCallback(callback);
+            dnsReady.await(500, TimeUnit.MILLISECONDS);
+        } finally {
+            try {
+                manager.unregisterNetworkCallback(callback);
+            } catch (RuntimeException ignored) {
+                // The callback may not have finished registering.
+            }
+        }
+
+        Network network = dnsReadyNetwork.get();
+        if (network == null) network = availableNetwork.get();
+        if (network == null) network = manager.getActiveNetwork();
+        return (HttpURLConnection) (network != null
+                ? network.openConnection(url)
+                : url.openConnection());
     }
 
     private static Long parseDate(String value) {

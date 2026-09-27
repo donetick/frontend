@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.StrikethroughSpan;
+import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 
@@ -68,6 +69,7 @@ public class ProjectWidgetProvider extends AppWidgetProvider {
         if (ACTION_REFRESH.equals(action) || ACTION_COMPLETE.equals(action)) {
             String taskId = intent.getStringExtra(EXTRA_TASK_ID);
             if (ACTION_COMPLETE.equals(action) && taskId != null) {
+                Log.i("DonetickWidget", "Completion tap received for task " + taskId);
                 // Render the checked circle and strike-through immediately;
                 // roll back only if the server rejects the completion.
                 WidgetStore.setProjectTaskCompleted(context, taskId, true);
@@ -75,15 +77,18 @@ public class ProjectWidgetProvider extends AppWidgetProvider {
             }
             PendingResult pending = goAsync();
             new Thread(() -> {
-                if (ACTION_COMPLETE.equals(action)) {
-                    if (taskId != null && !WidgetStore.completeTask(context, taskId)) {
-                        WidgetStore.setProjectTaskCompleted(context, taskId, false);
+                try {
+                    if (ACTION_COMPLETE.equals(action)) {
+                        if (taskId != null && !WidgetStore.completeTask(context, taskId)) {
+                            WidgetStore.setProjectTaskCompleted(context, taskId, false);
+                        }
+                    } else {
+                        WidgetStore.refreshFromServer(context, true);
                     }
-                } else {
-                    WidgetStore.refreshFromServer(context, true);
+                    update(context, id);
+                } finally {
+                    pending.finish();
                 }
-                update(context, id);
-                pending.finish();
             }, "project-widget-action").start();
             return;
         }
