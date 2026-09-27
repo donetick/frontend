@@ -2,9 +2,10 @@ import { Box, Typography } from '@mui/joy'
 import { useEffect, useState } from 'react'
 import Calendar from 'react-calendar'
 import { useNavigate } from 'react-router-dom'
+
+import { useLocalization } from '../../contexts/LocalizationContext'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { getPriorityColor, TASK_COLOR } from '../../utils/Colors'
-import { useLocalization } from '../../contexts/LocalizationContext'
 import styles from './CalendarDual.module.css'
 
 const getAssigneeColor = (assignee, userProfile) => {
@@ -16,7 +17,11 @@ const CalendarDual = ({ chores, onDateChange }) => {
   const { data: userProfile } = useUserProfile()
   const { firstDayOfWeek, fmt } = useLocalization()
   const calendarType =
-    firstDayOfWeek === 1 ? 'iso8601' : firstDayOfWeek === 6 ? 'islamic' : 'gregory'
+    firstDayOfWeek === 1
+      ? 'iso8601'
+      : firstDayOfWeek === 6
+        ? 'islamic'
+        : 'gregory'
 
   const [selectedDate, setSeletedDate] = useState(null)
   const [currentDate, setCurrentDate] = useState(new Date())

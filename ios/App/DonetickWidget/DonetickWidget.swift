@@ -995,6 +995,105 @@ struct PeopleWidget: Widget {
     }
 }
 
+// MARK: - Quick Capture widget
+
+/// One of the three ways into the add-task flow. Purely a launcher — the
+/// destinations are handled in src/CapacitorListener.js.
+private struct QuickCaptureAction: Identifiable {
+    let id: String
+    let title: String
+    let systemImage: String
+    let url: URL?
+
+    static let all: [QuickCaptureAction] = [
+        QuickCaptureAction(
+            id: "type",
+            title: "Type",
+            systemImage: "plus",
+            url: URL(string: "donetick://chores/add")
+        ),
+        QuickCaptureAction(
+            id: "scan",
+            title: "Scan",
+            systemImage: "doc.viewfinder",
+            url: URL(string: "donetick://chores/add?mode=scan")
+        ),
+        QuickCaptureAction(
+            id: "voice",
+            title: "Speak",
+            systemImage: "mic.fill",
+            url: URL(string: "donetick://chores/add?mode=voice")
+        ),
+    ]
+}
+
+private struct QuickCaptureTile: View {
+    let action: QuickCaptureAction
+
+    var body: some View {
+        let tile = VStack(spacing: 5) {
+            Image(systemName: action.systemImage)
+                .font(.system(size: 22, weight: .medium))
+                .foregroundColor(Palette.accent)
+            Text(action.title)
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundColor(Palette.accent)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Palette.accentSoft)
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+
+        if let url = action.url {
+            Link(destination: url) { tile }
+        } else {
+            tile
+        }
+    }
+}
+
+struct QuickCaptureEntry: TimelineEntry {
+    let date: Date
+}
+
+/// Static content — one entry, never reloaded.
+struct QuickCaptureProvider: TimelineProvider {
+    func placeholder(in context: Context) -> QuickCaptureEntry {
+        QuickCaptureEntry(date: Date())
+    }
+
+    func getSnapshot(in context: Context, completion: @escaping (QuickCaptureEntry) -> Void) {
+        completion(QuickCaptureEntry(date: Date()))
+    }
+
+    func getTimeline(in context: Context, completion: @escaping (Timeline<QuickCaptureEntry>) -> Void) {
+        completion(Timeline(entries: [QuickCaptureEntry(date: Date())], policy: .never))
+    }
+}
+
+struct QuickCaptureWidgetView: View {
+    var body: some View {
+        HStack(spacing: 8) {
+            ForEach(QuickCaptureAction.all) { action in
+                QuickCaptureTile(action: action)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+struct QuickCaptureWidget: Widget {
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: "DonetickQuickCaptureWidget", provider: QuickCaptureProvider()) { _ in
+            QuickCaptureWidgetView().widgetShell()
+        }
+        .configurationDisplayName("Quick Capture")
+        .description("Capture a task in one tap — type it, scan it, or say it.")
+        // Medium only: systemSmall gives the whole widget a single tap target,
+        // which can't carry three separate destinations.
+        .supportedFamilies([.systemMedium])
+    }
+}
+
 // MARK: - Bundle
 
 @main
@@ -1003,5 +1102,6 @@ struct DonetickWidgetBundle: WidgetBundle {
         TodayWidget()
         WeekWidget()
         PeopleWidget()
+        QuickCaptureWidget()
     }
 }

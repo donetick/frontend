@@ -1,13 +1,9 @@
 import { Capacitor } from '@capacitor/core'
-import {
-  Button,
-  Card,
-  Chip,
-  LinearProgress,
-  Typography,
-} from '@mui/joy'
+import { Button, Card, Chip, LinearProgress, Typography } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+
 import { useUserProfile } from '../../queries/UserQueries'
 import { GetStorageUsage } from '../../utils/Fetcher'
 import { isPlusAccount } from '../../utils/Helpers'
@@ -15,6 +11,7 @@ import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import SettingsLayout from './SettingsLayout'
 
 const StorageSettings = () => {
+  const { t } = useTranslation('settings')
   const Navigate = useNavigate()
   const { data: userProfile } = useUserProfile()
   const [usage, setUsage] = useState({ used: 0, total: 0 })
@@ -25,8 +22,8 @@ const StorageSettings = () => {
     message,
     title,
     onConfirm,
-    confirmText = 'Confirm',
-    cancelText = 'Cancel',
+    confirmText = t('common.confirm'),
+    cancelText = t('common.cancel'),
     color = 'primary',
   ) => {
     setConfirmModalConfig({
@@ -62,20 +59,19 @@ const StorageSettings = () => {
   const totalMB = (usage.total / (1024 * 1024)).toFixed(2)
 
   return (
-    <SettingsLayout title='Storage Settings'>
+    <SettingsLayout title={t('storage.title')}>
       <div className='grid gap-4 py-4' id='storage'>
         <Card className='p-4' sx={{ maxWidth: 500, mb: 2 }}>
           <Typography level='title-md' sx={{ mb: 1 }}>
-            Server Storage Usage
+            {t('storage.serverTitle')}
             {!isPlusAccount(userProfile) && (
               <Chip variant='soft' color='warning' sx={{ ml: 1 }}>
-                Plus Feature
+                {t('common.plusFeature')}
               </Chip>
             )}
           </Typography>
           <Typography level='body-sm' sx={{ mb: 1 }}>
-            This is the storage used by your account on our servers (e.g. files,
-            images, and data you have uploaded).
+            {t('storage.serverDescription')}
           </Typography>
           {!isPlusAccount(userProfile) ? (
             <>
@@ -91,23 +87,26 @@ const StorageSettings = () => {
                 }}
               />
               <Typography level='body-xs' sx={{ opacity: 0.6, mb: 1 }}>
-                -- MB used / -- MB total (--)
+                {t('storage.usagePlaceholder')}
               </Typography>
               <Typography level='body-sm' color='warning'>
-                Server storage is not available in the Basic plan. Upgrade to
-                Plus to track your server storage usage.
+                {t('storage.basicPlanNotice')}
               </Typography>
             </>
           ) : loading ? (
             <>
               <LinearProgress sx={{ mb: 1 }} />
-              <Typography level='body-xs'>Loading...</Typography>
+              <Typography level='body-xs'>{t('common.loading')}</Typography>
             </>
           ) : (
             <>
               <LinearProgress determinate value={percent} sx={{ mb: 1 }} />
               <Typography level='body-xs'>
-                {usedMB} MB used / {totalMB} MB total ({percent}%)
+                {t('storage.usage', {
+                  used: usedMB,
+                  total: totalMB,
+                  percent,
+                })}
               </Typography>
             </>
           )}
@@ -115,72 +114,69 @@ const StorageSettings = () => {
 
         <Card className='p-4' sx={{ maxWidth: 500, mb: 2 }}>
           <Typography level='title-md' sx={{ mb: 1 }}>
-            {Capacitor.isNativePlatform() ? 'App' : 'Browser'} Local Storage &
-            Cache
+            {Capacitor.isNativePlatform()
+              ? t('storage.localTitleApp')
+              : t('storage.localTitleBrowser')}
           </Typography>
           <Typography level='body-sm' sx={{ mb: 1 }}>
-            This is data stored locally in your browser for faster access.
-            Clearing this will not affect your server data, but may log you out.
+            {t('storage.localDescription')}
           </Typography>
           <Button
             variant='soft'
             color='danger'
             onClick={() => {
               showConfirmation(
-                'Are you sure you want to clear your local storage and cache? This will remove all your data from this browser and require login.',
-                'Clear All Local Storage',
+                t('storage.clearLocalMessage'),
+                t('storage.clearLocalTitle'),
                 () => {
                   localStorage.clear()
                   Navigate('/login')
                 },
-                'Clear All',
-                'Cancel',
+                t('storage.clearAll'),
+                t('common.cancel'),
                 'danger',
               )
             }}
           >
-            Clear All Local Storage and Cache
+            {t('storage.clearLocal')}
           </Button>
         </Card>
 
         {Capacitor.isNativePlatform() && (
           <Card className='p-4' sx={{ maxWidth: 500, mb: 2 }}>
             <Typography level='title-md' sx={{ mb: 1 }}>
-              App Preferences
+              {t('storage.appPreferences')}
               <Chip variant='soft' color='info' sx={{ ml: 1 }}>
-                Device Only
+                {t('storage.deviceOnly')}
               </Chip>
             </Typography>
             <Typography level='body-sm' sx={{ mb: 1 }}>
-              These are preferences and settings stored locally on your device
-              by the app. Clearing them will reset app-specific settings and may
-              log you out, but will not affect your server data.
+              {t('storage.appPreferencesDescription')}
             </Typography>
             <Button
               variant='soft'
               color='danger'
               onClick={() => {
                 showConfirmation(
-                  'Are you sure you want to clear all app preferences? This will reset your app settings and may require you to log in again.',
-                  'Clear App Preferences',
+                  t('storage.clearPreferencesMessage'),
+                  t('storage.clearPreferencesTitle'),
                   async () => {
                     try {
-                      const { Preferences } = await import(
-                        '@capacitor/preferences'
-                      )
+                      const { Preferences } =
+                        await import('@capacitor/preferences')
                       await Preferences.clear()
                       Navigate('/login')
                     } catch (e) {
                       // Optionally show error feedback
                     }
                   },
-                  'Clear Preferences',
-                  'Cancel',
+                  t('storage.clearPreferences'),
+                  t('common.cancel'),
                   'danger',
                 )
               }}
             >
-              Clear App Preferences
+              {t('storage.clearPreferences')}
             </Button>
           </Card>
         )}

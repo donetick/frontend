@@ -2,6 +2,7 @@ import {
   Analytics,
   BarChart,
   CallReceived,
+  CloudOff,
   EventBusy,
   Schedule,
   Speed,
@@ -25,8 +26,8 @@ import {
 } from '@mui/joy'
 import { useTheme } from '@mui/joy/styles'
 import moment from 'moment'
-import { Link, useParams } from 'react-router-dom'
-import { useLocalization } from '../../contexts/LocalizationContext'
+import { useTranslation } from 'react-i18next'
+import { useParams } from 'react-router-dom'
 import {
   Line,
   LineChart,
@@ -35,20 +36,25 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
+
+import EmptyState from '../../components/common/EmptyState'
+import { useLocalization } from '../../contexts/LocalizationContext'
 import { useThingHistory } from '../../queries/ThingQueries'
 import LoadingComponent from '../components/Loading'
 
 const ThingsHistory = () => {
+  const { t } = useTranslation('things')
   const { id } = useParams()
   const theme = useTheme()
   const { fmt } = useLocalization()
   const {
     data,
     error,
-    isLoading,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    isLoading,
+    refetch,
   } = useThingHistory(id)
 
   // Flatten all pages of history data
@@ -152,35 +158,23 @@ const ThingsHistory = () => {
 
   if (error || !thingsHistory || thingsHistory.length === 0) {
     return (
-      <Container
-        maxWidth='md'
-        sx={{
-          textAlign: 'center',
-          display: 'flex',
-          // make sure the content is centered vertically:
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexDirection: 'column',
-          height: '50vh',
-        }}
-      >
-        <EventBusy
-          sx={{
-            fontSize: '6rem',
-            // color: 'text.disabled',
-            mb: 1,
-          }}
+      <Container maxWidth='md'>
+        <EmptyState
+          variant={error ? 'error' : 'empty'}
+          fullHeight
+          icon={error ? <CloudOff /> : <EventBusy />}
+          title={error ? "Couldn't load this history" : 'No history yet'}
+          description={
+            error
+              ? 'We could not reach the server. Check your connection and try again.'
+              : "Each time this thing's value changes, the change is recorded here."
+          }
+          primaryAction={
+            error
+              ? { label: 'Try again', onClick: () => refetch() }
+              : { label: 'Back to things', to: '/things' }
+          }
         />
-
-        <Typography level='h3' gutterBottom>
-          No history found
-        </Typography>
-        <Typography level='body1'>
-          It looks like there is no history for this thing yet.
-        </Typography>
-        <Button variant='soft' sx={{ mt: 2 }}>
-          <Link to='/things'>Go back to things</Link>
-        </Button>
       </Container>
     )
   }
@@ -195,7 +189,7 @@ const ThingsHistory = () => {
             level='title-md'
             sx={{ fontWeight: 'lg', color: 'text.primary' }}
           >
-            Things Overview
+            {t('history.overview')}
           </Typography>
         </Box>
 
@@ -275,7 +269,7 @@ const ThingsHistory = () => {
               level='title-md'
               sx={{ fontWeight: 'lg', color: 'text.primary' }}
             >
-              Data Visualization
+              {t('history.visualization')}
             </Typography>
           </Box>
         )}
@@ -305,9 +299,7 @@ const ThingsHistory = () => {
                   tickLine='true'
                   axisLine='false'
                 />
-                <Tooltip
-                  labelFormatter={label => fmt.dateTime(label)}
-                />
+                <Tooltip labelFormatter={label => fmt.dateTime(label)} />
 
                 <Line
                   type='monotone'
@@ -337,7 +329,7 @@ const ThingsHistory = () => {
           level='title-md'
           sx={{ fontWeight: 'lg', color: 'text.primary' }}
         >
-          Change History
+          {t('history.changeHistory')}
         </Typography>
       </Box>
       <Box sx={{ borderRadius: 'sm', p: 1, boxShadow: 'md' }}>
@@ -388,7 +380,7 @@ const ThingsHistory = () => {
                             display: { xs: 'none', sm: 'block' },
                           }}
                         >
-                          Updated
+                          {t('history.updated')}
                         </Typography>
 
                         <Chip

@@ -13,7 +13,7 @@
  * @returns {boolean} - Whether the chore matches the condition
  */
 export const evaluateCondition = (chore, condition, context = {}) => {
-  const { type, operator, value } = condition
+  const { operator, type, value } = condition
 
   switch (type) {
     case 'assignee':
@@ -52,32 +52,44 @@ export const evaluateCondition = (chore, condition, context = {}) => {
 const evaluateAssignee = (chore, operator, value, context) => {
   const { userId } = context
 
-  // Handle special values
-  if (value === 'me' && userId) {
-    const isAssignedToMe =
-      String(chore.assignedTo) === String(userId) ||
-      chore.assignees?.some(a => String(a.userId) === String(userId))
-    return operator === 'is' ? isAssignedToMe : !isAssignedToMe
+  // Sentinel scope values can appear alongside real member ids in a
+  // multi-select array (e.g. ['available_for_me', 42]), so each entry is
+  // resolved independently and OR'd together rather than only matching when
+  // the whole condition value is exactly one sentinel string.
+  const matchesEntry = entry => {
+    switch (entry) {
+      case 'me':
+        return Boolean(
+          userId &&
+          (String(chore.assignedTo) === String(userId) ||
+            chore.assignees?.some(a => String(a.userId) === String(userId))),
+        )
+      case 'others':
+        return Boolean(
+          userId &&
+          String(chore.assignedTo) !== String(userId) &&
+          !chore.assignees?.some(a => String(a.userId) === String(userId)),
+        )
+      case 'anyone':
+        return true
+      // Home's "mine" scope: unassigned chores are everyone's to pick up, so
+      // they count as available to me alongside chores actually assigned to
+      // me.
+      case 'available_for_me':
+        return Boolean(
+          userId &&
+          (!chore.assignedTo || String(chore.assignedTo) === String(userId)),
+        )
+      default:
+        return (
+          String(chore.assignedTo) === String(entry) ||
+          chore.assignees?.some(a => String(a.userId) === String(entry))
+        )
+    }
   }
 
-  if (value === 'others' && userId) {
-    const isAssignedToOthers =
-      String(chore.assignedTo) !== String(userId) &&
-      !chore.assignees?.some(a => String(a.userId) === String(userId))
-    return operator === 'is' ? isAssignedToOthers : !isAssignedToOthers
-  }
-
-  if (value === 'anyone') {
-    return true
-  }
-
-  // Handle specific user IDs (can be array for multi-select)
-  const userIds = Array.isArray(value) ? value : [value]
-  const isAssigned = userIds.some(
-    id =>
-      String(chore.assignedTo) === String(id) ||
-      chore.assignees?.some(a => String(a.userId) === String(id)),
-  )
+  const entries = Array.isArray(value) ? value : [value]
+  const isAssigned = entries.some(matchesEntry)
 
   return operator === 'is' ? isAssigned : !isAssigned
 }
@@ -145,6 +157,14 @@ const evaluateStatus = (chore, operator, value) => {
  */
 const evaluateDueDate = (chore, operator, value) => {
   const { nextDueDate } = chore
+
+  // Several due-date windows at once (e.g. overdue OR due this week). The
+  // windows overlap and are never all true together, so they only make sense
+  // OR'd — even though the filter as a whole is AND'd across condition types.
+  if (operator === 'anyOf') {
+    const operators = Array.isArray(value) ? value : [value]
+    return operators.some(op => evaluateDueDate(chore, op, null))
+  }
 
   // Handle "no due date" case
   if (operator === 'hasNoDueDate') {
@@ -343,7 +363,7 @@ export const getFilterOverdueCount = (chores, filter, context = {}) => {
  * @returns {Object} - { isValid: boolean, issues: Array }
  */
 export const validateFilter = (filter, context = {}) => {
-  const { members = [], labels = [], projects = [] } = context
+  const { labels = [], members = [], projects = [] } = context
   const issues = []
 
   if (!filter.conditions || filter.conditions.length === 0) {
@@ -355,7 +375,10 @@ export const validateFilter = (filter, context = {}) => {
     const { type, value } = condition
 
     // Check assignee references
-    if (type === 'assignee' && !['me', 'others', 'anyone'].includes(value)) {
+    if (
+      type === 'assignee' &&
+      !['me', 'others', 'anyone', 'available_for_me'].includes(value)
+    ) {
       const userIds = Array.isArray(value) ? value : [value]
       const invalidUsers = userIds.filter(
         id => !members.some(m => m.id === id || m.userId === id),

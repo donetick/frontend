@@ -12,22 +12,28 @@ PODS:
     - PromisesObjC (~> 2.4)
     - PromisesSwift (~> 2.4)
     - RecaptchaInterop (~> 101.0)
-  - Capacitor (8.4.1):
+  - Capacitor (8.4.2):
     - CapacitorCordova
-  - CapacitorApp (8.1.0):
+  - CapacitorApp (8.1.1):
     - Capacitor
-  - CapacitorBrowser (8.0.3):
+  - CapacitorBrowser (8.0.4):
+    - Capacitor
+  - CapacitorCommunityInAppReview (8.0.0):
+    - Capacitor
+  - CapacitorCommunitySpeechRecognition (7.0.1):
     - Capacitor
   - CapacitorCommunitySqlite (8.1.0):
     - Capacitor
     - SQLCipher
     - ZIPFoundation
-  - CapacitorCordova (8.4.1)
-  - CapacitorDevice (8.0.2):
+  - CapacitorCordova (8.4.2)
+  - CapacitorDevice (8.0.3):
+    - Capacitor
+  - CapacitorHaptics (8.0.2):
     - Capacitor
   - CapacitorLocalLlm (1.0.0):
     - Capacitor
-  - CapacitorLocalNotifications (8.2.0):
+  - CapacitorLocalNotifications (8.2.1):
     - Capacitor
   - CapacitorNetwork (8.0.1):
     - Capacitor
@@ -35,15 +41,17 @@ PODS:
     - Capacitor
   - CapacitorPreferences (8.0.1):
     - Capacitor
-  - CapacitorPushNotifications (8.1.1):
+  - CapacitorPushNotifications (8.1.2):
     - Capacitor
-  - CapacitorStatusBar (8.0.2):
+  - CapacitorShare (8.0.1):
     - Capacitor
-  - CapgoCapacitorDocumentScanner (8.4.0):
+  - CapacitorStatusBar (8.0.3):
+    - Capacitor
+  - CapgoCapacitorDocumentScanner (8.4.2):
     - Capacitor
   - CapgoCapacitorNfc (8.2.2):
     - Capacitor
-  - CapgoCapacitorSocialLogin (8.3.38):
+  - CapgoCapacitorSocialLogin (8.3.39):
     - Alamofire (~> 5.10.2)
     - Capacitor
     - GoogleSignIn (~> 9.0.0)
@@ -139,15 +147,19 @@ DEPENDENCIES:
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorApp (from `../../node_modules/@capacitor/app`)"
   - "CapacitorBrowser (from `../../node_modules/@capacitor/browser`)"
+  - "CapacitorCommunityInAppReview (from `../../node_modules/@capacitor-community/in-app-review`)"
+  - "CapacitorCommunitySpeechRecognition (from `../../node_modules/@capacitor-community/speech-recognition`)"
   - "CapacitorCommunitySqlite (from `../../node_modules/@capacitor-community/sqlite`)"
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorDevice (from `../../node_modules/@capacitor/device`)"
+  - "CapacitorHaptics (from `../../node_modules/@capacitor/haptics`)"
   - "CapacitorLocalLlm (from `../../node_modules/@capacitor/local-llm`)"
   - "CapacitorLocalNotifications (from `../../node_modules/@capacitor/local-notifications`)"
   - "CapacitorNetwork (from `../../node_modules/@capacitor/network`)"
   - CapacitorPluginSafeArea (from `../../node_modules/capacitor-plugin-safe-area`)
   - "CapacitorPreferences (from `../../node_modules/@capacitor/preferences`)"
   - "CapacitorPushNotifications (from `../../node_modules/@capacitor/push-notifications`)"
+  - "CapacitorShare (from `../../node_modules/@capacitor/share`)"
   - "CapacitorStatusBar (from `../../node_modules/@capacitor/status-bar`)"
   - "CapgoCapacitorDocumentScanner (from `../../node_modules/@capgo/capacitor-document-scanner`)"
   - "CapgoCapacitorNfc (from `../../node_modules/@capgo/capacitor-nfc`)"
@@ -189,12 +201,18 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/app"
   CapacitorBrowser:
     :path: "../../node_modules/@capacitor/browser"
+  CapacitorCommunityInAppReview:
+    :path: "../../node_modules/@capacitor-community/in-app-review"
+  CapacitorCommunitySpeechRecognition:
+    :path: "../../node_modules/@capacitor-community/speech-recognition"
   CapacitorCommunitySqlite:
     :path: "../../node_modules/@capacitor-community/sqlite"
   CapacitorCordova:
     :path: "../../node_modules/@capacitor/ios"
   CapacitorDevice:
     :path: "../../node_modules/@capacitor/device"
+  CapacitorHaptics:
+    :path: "../../node_modules/@capacitor/haptics"
   CapacitorLocalLlm:
     :path: "../../node_modules/@capacitor/local-llm"
   CapacitorLocalNotifications:
@@ -207,6 +225,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/preferences"
   CapacitorPushNotifications:
     :path: "../../node_modules/@capacitor/push-notifications"
+  CapacitorShare:
+    :path: "../../node_modules/@capacitor/share"
   CapacitorStatusBar:
     :path: "../../node_modules/@capacitor/status-bar"
   CapgoCapacitorDocumentScanner:
@@ -226,22 +246,26 @@ SPEC CHECKSUMS:
   Alamofire: 7193b3b92c74a07f85569e1a6c4f4237291e7496
   AppAuth: ef4da5a3fc2e10b90c09a0a94a9baeaedc0341d5
   AppCheckCore: 214137f5c378d1dec88a68425c467fe65aaff637
-  Capacitor: 35242afe195b1e53c58ca1b827d1b444c5e6602b
-  CapacitorApp: 449ffe26375e96f8aaaee625ac6e01e5c57c8650
-  CapacitorBrowser: c987c73d09d8bd3b5ec13f06338b1e14d5d2be69
+  Capacitor: 52f999235b8bd6a7d01694753f4f4d54d182e3a3
+  CapacitorApp: 305bd13c44f6f9d164e2ee66a4faa956ed8c0e06
+  CapacitorBrowser: 752e0208aa07c7aa63d1f7cde895a3e9519b2656
+  CapacitorCommunityInAppReview: 4492bdd34aad4d27ed87949376022cc93b294ea1
+  CapacitorCommunitySpeechRecognition: 3e03566c44c2bb3b52391a33d4518b1adbdeb38f
   CapacitorCommunitySqlite: eac6acfb852f46e7988fc59604d7f900498d354e
-  CapacitorCordova: eebe6bcf807b1b06f3f48237650f96bbcd0eef09
-  CapacitorDevice: 14cba6f88d1c3074cbf825fea977c8c526453ff8
+  CapacitorCordova: 345eacdc4c8282415446aea4acd8c77d82480bd4
+  CapacitorDevice: 708e742b60a61572cd593e44c809592e8f31da14
+  CapacitorHaptics: 296f771ecd89c7a1bd92a7b6826a7d268e2e70f5
   CapacitorLocalLlm: a05516151a02923a9e7dae9949d3817e85e321f0
-  CapacitorLocalNotifications: 2615aa008f608b95d3921a778ee1988abf1e6148
+  CapacitorLocalNotifications: 908a69a3cf7ae345426de3223d4980befb0103c6
   CapacitorNetwork: 8812ce60d11fb63d8f2e4ba51a49b2e59892ebe2
   CapacitorPluginSafeArea: 874619c00586248f1694210e72038123d422c2d9
   CapacitorPreferences: cca2021f386efb75947c850334447d9ff22b14f1
-  CapacitorPushNotifications: ec08d589c226a2c0db7c032ec1bf5b044ec85f8e
-  CapacitorStatusBar: 01d5763b4ed720de5ce2edbc938de6a98f4c8f32
-  CapgoCapacitorDocumentScanner: 7ad9e8ed9c054d551bfc948660d995b9545723d8
+  CapacitorPushNotifications: 32a7f840815f319fd9ba1c1c9b0b914be9d95237
+  CapacitorShare: 0c58305114538568059bfc07111f22dcb9cb2a82
+  CapacitorStatusBar: eca7bc2b58d9f886f1ef9edb66e57a9b29c121af
+  CapgoCapacitorDocumentScanner: 262bb84b73707f9e2e59071ca58013e3f9acf942
   CapgoCapacitorNfc: 8ea158143c441e1cf6d231a971e375511558d027
-  CapgoCapacitorSocialLogin: 5de0c9295188cbd9116d13e4581494f3bbaa3414
+  CapgoCapacitorSocialLogin: 5ea6b14b8e9b1bd74533e580d4cf0e2b85d80793
   FirebaseCore: 2e86a4ea1684d4381707069e4a6d89ac808e901e
   FirebaseCoreInternal: 6ab6a02c94446c026d2cf35cf5383842ebaa4992
   FirebaseInstallations: eb29ccbf64eaedf86fd5b2ccc7fabde567660b52
@@ -265,6 +289,6 @@ SPEC CHECKSUMS:
   SQLCipher: eb79c64049cb002b4e9fcb30edb7979bf4706dfc
   ZIPFoundation: dfd3d681c4053ff7e2f7350bc4e53b5dba3f5351
 
-PODFILE CHECKSUM: 21b805bdbbb6ac4b8a3527ee8ef346ba0a55ef65
+PODFILE CHECKSUM: 0170e6b548e03117ef7d6814596b8b140a6acce4
 
 COCOAPODS: 1.16.2

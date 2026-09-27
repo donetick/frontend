@@ -1,7 +1,11 @@
-import { Avatar, Box, Button, List, ListItem, Typography } from '@mui/joy'
+import { Avatar, Box, List, ListItem, Typography } from '@mui/joy'
+import { useTranslation } from 'react-i18next'
+
+import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
-const UserModal = ({ isOpen, performers = [], onSelect, onClose }) => {
+const UserModal = ({ isOpen, onClose, onSelect, performers = [] }) => {
+  const { t } = useTranslation('common')
   const { ResponsiveModal } = useResponsiveModal()
 
   return (
@@ -10,7 +14,10 @@ const UserModal = ({ isOpen, performers = [], onSelect, onClose }) => {
       onClose={onClose}
       size='lg'
       fullWidth={true}
-      title='Select User'
+      title={t('selectUser')}
+      footer={
+        <ModalActions secondary={{ label: t('cancel'), onClick: onClose }} />
+      }
     >
       <List sx={{ mb: 2 }}>
         {performers.map(user => (
@@ -38,11 +45,6 @@ const UserModal = ({ isOpen, performers = [], onSelect, onClose }) => {
           </ListItem>
         ))}
       </List>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-        <Button size='lg' variant='outlined' color='neutral' onClick={onClose}>
-          Cancel
-        </Button>
-      </Box>
     </ResponsiveModal>
   )
 }

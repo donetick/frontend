@@ -6,7 +6,11 @@ import { LocalNotifications } from '@capacitor/local-notifications'
 import { Preferences } from '@capacitor/preferences'
 import { PushNotifications } from '@capacitor/push-notifications'
 import { focusManager } from '@tanstack/react-query'
-import { RegisterDeviceToken } from './utils/Fetcher'
+
+import { RegisterDeviceToken, UnregisterDeviceToken } from './utils/Fetcher'
+import { beginOAuthExchange } from './utils/OAuthExchangeState'
+import { hasSeenOnboarding } from './utils/Onboarding'
+import { setPendingInvite } from './utils/PendingInvite'
 
 // React Router navigate(), injected by <App /> once the router is mounted.
 // Using client-side navigation (instead of window.location.href) avoids a full
@@ -24,7 +28,7 @@ const routerNavigate = (path, { seedHome = false } = {}) => {
   if (navigateFn) {
     // On a cold deep-link launch there is no real screen behind the target, so
     // seed the chore list as the back target before pushing the chore view.
-    if (seedHome && window.location.pathname === '/') {
+    if (seedHome && ['/', '/home'].includes(window.location.pathname)) {
       navigateFn('/chores', { replace: true })
     }
     navigateFn(path)
@@ -62,10 +66,41 @@ const handleNFCChoreDeepLink = (url, isColdStart) => {
 
 const handleUrlOpen = (url, isColdStart = false) => {
   console.log('[NFC] handleUrlOpen:', url)
-  if (url.startsWith('donetick://chores/add')) {
-    // Widget "+" button: land on the chore list with the quick-add modal open
-    // (MyChores watches for the add_task param and consumes it).
-    routerNavigate('/chores?add_task=1')
+  let parsedUrl
+  try {
+    parsedUrl = new URL(url)
+  } catch {
+    return
+  }
+
+  const isCircleInvite =
+    (parsedUrl.protocol === 'donetick:' &&
+      parsedUrl.host === 'circle' &&
+      parsedUrl.pathname === '/join') ||
+    (parsedUrl.protocol === 'https:' && parsedUrl.pathname === '/circle/join')
+
+  if (isCircleInvite) {
+    setPendingInvite(parsedUrl.searchParams.get('code'))
+    const needsOnboarding =
+      !hasSeenOnboarding() && !localStorage.getItem('token')
+    routerNavigate(
+      needsOnboarding ? '/onboarding' : `/circle/join${parsedUrl.search}`,
+    )
+  } else if (url.startsWith('donetick://chores/add')) {
+    // Widget "+" / quick-capture buttons: land on the chore list with the
+    // quick-add modal open (MyChores watches for the add_task param and
+    // consumes it). ?mode=scan|voice opens straight into that capture panel.
+    let mode = null
+    try {
+      mode = new URL(url).searchParams.get('mode')
+    } catch {
+      // malformed URL — fall back to plain text capture
+    }
+    routerNavigate(
+      mode === 'scan' || mode === 'voice'
+        ? `/chores?add_task=1&mode=${mode}`
+        : '/chores?add_task=1',
+    )
   } else if (url.startsWith('donetick://chores/')) {
     handleNFCChoreDeepLink(url, isColdStart)
   } else if (url.startsWith('donetick://auth/')) {
@@ -92,6 +127,13 @@ const handleOAuthDeepLink = async url => {
       if (window.location.pathname === '/auth/oauth2' && currentCode === code) {
         return
       }
+
+      // Claim the exchange window synchronously, before the first await: the
+      // resume-driven background sync fires in the same tick as this deep link,
+      // and its 401 must not be mistaken for an expired session. Set after the
+      // early return above so the flag is only ever claimed by the navigation
+      // that Authenticating.jsx will clear.
+      beginOAuthExchange()
 
       // Store the OAuth params for the app to pick up
       await Preferences.set({
@@ -175,6 +217,39 @@ const registerTokenIfNeeded = async (token, deviceInfo, deviceId, platform) => {
         detail: { status: 0, error: error?.message ?? 'Unknown error' },
       }),
     )
+  }
+}
+
+// Drop this device from the account's push targets. Must run while the access
+// token is still valid (i.e. before the logout cleanup clears it), otherwise
+// the server keeps pushing this user's chores to a signed-out device.
+const unregisterPushNotifications = async () => {
+  if (!Capacitor.isNativePlatform()) return
+
+  try {
+    const stored = await Preferences.get({ key: 'deviceRegistration' })
+    const registration = stored.value ? JSON.parse(stored.value) : null
+
+    // Fall back to the platform device id when the local record is missing
+    // (e.g. app reinstall or preferences cleared) so we still try the delete.
+    const deviceId = registration?.deviceId ?? (await Device.getId()).identifier
+    const token = registration?.token ?? null
+
+    if (deviceId || token) {
+      await UnregisterDeviceToken(deviceId, token)
+    }
+
+    await Preferences.remove({ key: 'deviceRegistration' })
+    await Preferences.set({
+      key: 'pushNotificationPreferences',
+      value: JSON.stringify({ granted: false }),
+    })
+
+    // Stop APNs/FCM delivery to this install until the next sign-in registers again
+    await PushNotifications.removeAllListeners()
+    await PushNotifications.unregister()
+  } catch (error) {
+    console.error('Error unregistering device token', error)
   }
 }
 
@@ -291,4 +366,5 @@ const registerCapacitorListeners = navigate => {
 export {
   registerCapacitorListeners,
   pushNotificationListenerRegistration as registerPushNotifications,
+  unregisterPushNotifications,
 }

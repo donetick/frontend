@@ -28,8 +28,34 @@
     <string name="widget_people_title">People</string>
     <string name="widget_empty_people">No circle members yet</string>
     <string name="widget_person_counts">%1$d today · %2$d this week</string>
+    <string name="widget_quick_label">Quick Capture</string>
+    <string name="widget_quick_description">Capture a task in one tap — type it, scan it, or say it.</string>
+    <string name="widget_quick_type">Type</string>
+    <string name="widget_quick_scan">Scan</string>
+    <string name="widget_quick_voice">Speak</string>
     <string name="widget_config_title">Widget options</string>
     <string name="widget_config_include_others">Show everyone\'s tasks</string>
     <string name="widget_config_include_others_hint">Include tasks assigned to other members of your circle. Their avatar appears next to their tasks.</string>
     <string name="widget_config_save">Save</string>
+
+    <!-- Sample data for the widget-picker previews (never shown on a placed
+         widget). Kept generic so it reads well in any locale. -->
+    <string name="widget_preview_updated">Updated just now</string>
+    <string name="widget_preview_task_1">Take out the bins</string>
+    <string name="widget_preview_task_2">Water the plants</string>
+    <string name="widget_preview_task_3">Book the vet</string>
+    <string name="widget_preview_meta_1">6:00 PM</string>
+    <string name="widget_preview_meta_2">8:30 PM</string>
+    <string name="widget_preview_count_today">3</string>
+    <string name="widget_preview_count_week">7</string>
+    <string name="widget_preview_count_people">4</string>
+    <string name="widget_preview_person_1">Alex</string>
+    <string name="widget_preview_person_2">Sam</string>
+    <string name="widget_preview_person_3">Jordan</string>
+    <string name="widget_preview_initials_1">A</string>
+    <string name="widget_preview_initials_2">S</string>
+    <string name="widget_preview_initials_3">J</string>
+    <string name="widget_preview_counts_1">2 today · 5 this week</string>
+    <string name="widget_preview_counts_2">1 today · 3 this week</string>
+    <string name="widget_preview_counts_3">0 today · 2 this week</string>
 </resources>

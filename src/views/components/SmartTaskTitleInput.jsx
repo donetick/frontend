@@ -1,8 +1,11 @@
-import { CameraEnhance, PhotoFilter } from '@mui/icons-material'
+import './SmartTaskTitleInput.css'
+
+import { CameraEnhance, Mic, PhotoFilter } from '@mui/icons-material'
 import { IconButton, Tooltip, useColorScheme } from '@mui/joy'
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import AutocompleteDropdown from '../TestView/AutocompleteDropdown'
-import './SmartTaskTitleInput.css'
 const renderHighlightedText = (text, cursorPosition) => {
   const parts = []
   let lastIndex = 0
@@ -46,18 +49,20 @@ const renderHighlightedText = (text, cursorPosition) => {
 }
 
 const SmartTaskTitleInput = ({
-  value,
-  placeholder,
   autoFocus,
-  onChange,
-  suggestions,
-  onEnterPressed,
-  onShiftEnterPressed,
   customRenderer,
   isNativeScanner,
-  onScanClick,
+  onChange,
+  onEnterPressed,
   onPhotoSelected,
+  onScanClick,
+  onShiftEnterPressed,
+  onVoiceClick,
+  placeholder,
+  suggestions,
+  value,
 }) => {
+  const { t } = useTranslation('chores')
   const { mode, setMode } = useColorScheme()
   const titleInputRef = useRef(null)
   const photoInputRef = useRef(null)
@@ -88,17 +93,14 @@ const SmartTaskTitleInput = ({
     }
   }, [])
   const handleSuggestionChange = text => {
-    // if the last word start with '@' or '#' or 'P':
-    const lastWord = text.split(' ').pop()
-    if (
-      lastWord.startsWith('@') ||
-      lastWord.startsWith('#') ||
-      lastWord.startsWith('!')
-    ) {
+    // show the menu when the last word starts with a configured trigger
+    // character (e.g. '@', '#', '!', '*')
+    const lastWord = text.split(/\s+/).pop()
+    if (lastWord && suggestions?.[lastWord[0]]) {
       setSuggestionTrigger(lastWord[0])
       // last word without the first character:
       setLastWord(lastWord.slice(1))
-
+      setSelectedSuggestionIndex(0)
       setShowSuggestions(true)
     } else {
       setShowSuggestions(false)
@@ -111,46 +113,72 @@ const SmartTaskTitleInput = ({
     setCursorPosition(e.target.selectionStart)
   }
 
+  const selectSuggestionText = suggestionValue => {
+    const newValue = `${value.slice(0, cursorPosition - lastWord.length)}${suggestionValue} ${value.slice(cursorPosition)}`
+    onChange(newValue)
+    titleInputRef.current.value = newValue
+
+    setShowSuggestions(false)
+
+    const newCursorPosition =
+      cursorPosition - lastWord.length + suggestionValue.length + 1
+    setCursorPosition(newCursorPosition)
+    titleInputRef.current.setSelectionRange(
+      newCursorPosition,
+      newCursorPosition,
+    )
+  }
+
   const handleTextareaKeyDown = e => {
     if (showSuggestions) {
-      const currentSuggestions = suggestions[suggestionTrigger].options.filter(
-        option => {
-          if (typeof option === 'string') {
-            return option.toLowerCase().includes(lastWord.toLowerCase())
-          }
-          return option[suggestions[suggestionTrigger].display]
-            .toLowerCase()
-            .includes(lastWord.toLowerCase())
-        },
-      )
+      const activeSuggestions = suggestions[suggestionTrigger]
+      const currentSuggestions = activeSuggestions.options.filter(option => {
+        if (typeof option === 'string') {
+          return option.toLowerCase().includes(lastWord.toLowerCase())
+        }
+        return option[activeSuggestions.display]
+          .toLowerCase()
+          .includes(lastWord.toLowerCase())
+      })
+
+      const trimmedWord = lastWord.trim()
+      const hasExactMatch = currentSuggestions.some(option => {
+        const optionText = activeSuggestions.display
+          ? option[activeSuggestions.display]
+          : option
+        return optionText.toLowerCase() === trimmedWord.toLowerCase()
+      })
+      const showCreateOption =
+        activeSuggestions.creatable && trimmedWord.length > 0 && !hasExactMatch
+      const optionCount = currentSuggestions.length + (showCreateOption ? 1 : 0)
 
       if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         e.preventDefault()
+        if (optionCount === 0) return
         const newIndex =
           e.key === 'ArrowDown'
-            ? (selectedSuggestionIndex + 1) % currentSuggestions.length
-            : (selectedSuggestionIndex - 1 + currentSuggestions.length) %
-              currentSuggestions.length
+            ? (selectedSuggestionIndex + 1) % optionCount
+            : (selectedSuggestionIndex - 1 + optionCount) % optionCount
         setSelectedSuggestionIndex(newIndex)
       } else if (e.key === 'Enter' || e.key === 'Tab') {
-        e.preventDefault()
+        if (
+          showCreateOption &&
+          selectedSuggestionIndex === currentSuggestions.length
+        ) {
+          e.preventDefault()
+          selectSuggestionText(trimmedWord)
+          activeSuggestions.onCreate?.(trimmedWord)
+          return
+        }
+
         const selectedSuggestion = currentSuggestions[selectedSuggestionIndex]
-        const suggestionValue = suggestions[suggestionTrigger].display
-          ? selectedSuggestion[suggestions[suggestionTrigger].display]
+        const suggestionValue = activeSuggestions.display
+          ? selectedSuggestion?.[activeSuggestions.display]
           : selectedSuggestion
 
         if (suggestionValue) {
-          const newValue = `${value.slice(0, cursorPosition - lastWord.length)}${suggestionValue} ${value.slice(cursorPosition)}`
-          onChange(newValue)
-          titleInputRef.current.value = newValue
-
-          setShowSuggestions(false)
-
-          const newCursorPosition = cursorPosition + suggestionValue.length + 1
-          titleInputRef.current.setSelectionRange(
-            newCursorPosition,
-            newCursorPosition,
-          )
+          e.preventDefault()
+          selectSuggestionText(suggestionValue)
         }
       } else if (e.key === 'Escape') {
         e.preventDefault()
@@ -200,13 +228,14 @@ const SmartTaskTitleInput = ({
     e.target.value = ''
   }
 
-  const showNativeButtons = isNativeScanner && !value
-  const MIC_BUTTON_WIDTH =
-    showNativeButtons && onPhotoSelected && onScanClick
-      ? '5rem'
-      : showNativeButtons
-        ? '2.5rem'
-        : '0rem'
+  const showPhotoButtons = isNativeScanner && !value
+  const showVoiceButton = !!onVoiceClick && !value
+  const visibleButtonCount =
+    (showPhotoButtons && onPhotoSelected ? 1 : 0) +
+    (showPhotoButtons && onScanClick ? 1 : 0) +
+    (showVoiceButton ? 1 : 0)
+  const showActionButtons = visibleButtonCount > 0
+  const ACTION_BUTTONS_WIDTH = `${visibleButtonCount * 2.5}rem`
 
   return (
     <div>
@@ -223,7 +252,7 @@ const SmartTaskTitleInput = ({
             position: 'absolute',
             top: 0,
             left: 0,
-            width: `calc(100% - ${MIC_BUTTON_WIDTH})`,
+            width: `calc(100% - ${ACTION_BUTTONS_WIDTH})`,
             height: '100%',
             zIndex: 1,
             resize: 'none',
@@ -274,7 +303,7 @@ const SmartTaskTitleInput = ({
           {/* Zero-width space to maintain consistent height */}
           &#8203;
         </div>
-        {showNativeButtons && (
+        {showActionButtons && (
           <span
             style={{
               position: 'absolute',
@@ -286,9 +315,13 @@ const SmartTaskTitleInput = ({
               gap: '0.1rem',
             }}
           >
-            {onPhotoSelected && (
+            {showPhotoButtons && onPhotoSelected && (
               <>
-                <Tooltip title='Select photo' placement='top' size='sm'>
+                <Tooltip
+                  title={t('smartInput.selectPhoto')}
+                  placement='top'
+                  size='sm'
+                >
                   <IconButton
                     size='sm'
                     variant='plain'
@@ -308,8 +341,12 @@ const SmartTaskTitleInput = ({
                 />
               </>
             )}
-            {onScanClick && (
-              <Tooltip title='Scan to create task' placement='top' size='sm'>
+            {showPhotoButtons && onScanClick && (
+              <Tooltip
+                title={t('smartInput.scanToCreateTask')}
+                placement='top'
+                size='sm'
+              >
                 <IconButton
                   size='sm'
                   variant='plain'
@@ -318,6 +355,23 @@ const SmartTaskTitleInput = ({
                   sx={{ borderRadius: 'xl' }}
                 >
                   <CameraEnhance fontSize='small' />
+                </IconButton>
+              </Tooltip>
+            )}
+            {showVoiceButton && (
+              <Tooltip
+                title={t('smartInput.speakToCreateTasks')}
+                placement='top'
+                size='sm'
+              >
+                <IconButton
+                  size='sm'
+                  variant='plain'
+                  color='neutral'
+                  onClick={onVoiceClick}
+                  sx={{ borderRadius: 'xl' }}
+                >
+                  <Mic fontSize='small' />
                 </IconButton>
               </Tooltip>
             )}
@@ -336,18 +390,14 @@ const SmartTaskTitleInput = ({
             const suggestionValue = suggestions[suggestionTrigger].display
               ? suggestion[suggestions[suggestionTrigger].display]
               : suggestion
-            const newValue = `${value.slice(0, cursorPosition)}${suggestionValue}${value.slice(cursorPosition)}`
-
-            onChange(newValue)
+            // Same insertion path as keyboard selection: replace the partial
+            // word typed after the trigger instead of inserting alongside it
             titleInputRef?.current?.focus()
-
-            setCursorPosition(cursorPosition + suggestion.length)
-            titleInputRef.current.value = newValue
-            titleInputRef.current.setSelectionRange(
-              cursorPosition + suggestionValue.length,
-              cursorPosition + suggestionValue.length,
-            )
-            setShowSuggestions(false)
+            selectSuggestionText(suggestionValue)
+          }}
+          onCreateSuggestion={name => {
+            selectSuggestionText(name)
+            suggestions[suggestionTrigger].onCreate?.(name)
           }}
           parentRefer={dropdownRef}
         />

@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+
 import {
   ClearChoreTimer,
   DeleteTimeSession,
@@ -32,9 +33,9 @@ export const useStartChore = () => {
   return useMutation({
     mutationFn: StartChore,
     onSuccess: (_, choreId) => {
-      queryClient.invalidateQueries(['choreTimer', choreId])
-      queryClient.invalidateQueries(['chores'])
-      queryClient.invalidateQueries(['choreHistory', choreId])
+      queryClient.invalidateQueries({ queryKey: ['choreTimer', choreId] })
+      queryClient.invalidateQueries({ queryKey: ['chores'] })
+      queryClient.invalidateQueries({ queryKey: ['choreHistory', choreId] })
     },
   })
 }
@@ -45,9 +46,9 @@ export const usePauseChore = () => {
   return useMutation({
     mutationFn: PauseChore,
     onSuccess: (_, choreId) => {
-      queryClient.invalidateQueries(['choreTimer', choreId])
-      queryClient.invalidateQueries(['chores'])
-      queryClient.invalidateQueries(['choreHistory', choreId])
+      queryClient.invalidateQueries({ queryKey: ['choreTimer', choreId] })
+      queryClient.invalidateQueries({ queryKey: ['chores'] })
+      queryClient.invalidateQueries({ queryKey: ['choreHistory', choreId] })
     },
   })
 }
@@ -56,12 +57,12 @@ export const useUpdateTimeSession = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ choreId, sessionId, sessionData }) =>
+    mutationFn: ({ choreId, sessionData, sessionId }) =>
       UpdateTimeSession(choreId, sessionId, sessionData),
     onSuccess: (_, { choreId }) => {
-      queryClient.invalidateQueries(['choreTimer', choreId])
-      queryClient.invalidateQueries(['chores'])
-      queryClient.invalidateQueries(['choreHistory', choreId])
+      queryClient.invalidateQueries({ queryKey: ['choreTimer', choreId] })
+      queryClient.invalidateQueries({ queryKey: ['chores'] })
+      queryClient.invalidateQueries({ queryKey: ['choreHistory', choreId] })
     },
   })
 }
@@ -73,9 +74,9 @@ export const useDeleteTimeSession = () => {
     mutationFn: ({ choreId, sessionId }) =>
       DeleteTimeSession(choreId, sessionId),
     onSuccess: (_, { choreId }) => {
-      queryClient.invalidateQueries(['choreTimer', choreId])
-      queryClient.invalidateQueries(['chores'])
-      queryClient.invalidateQueries(['choreHistory', choreId])
+      queryClient.invalidateQueries({ queryKey: ['choreTimer', choreId] })
+      queryClient.invalidateQueries({ queryKey: ['chores'] })
+      queryClient.invalidateQueries({ queryKey: ['choreHistory', choreId] })
     },
   })
 }
@@ -86,9 +87,9 @@ export const useResetChoreTimer = () => {
   return useMutation({
     mutationFn: ResetChoreTimer,
     onSuccess: (_, choreId) => {
-      queryClient.invalidateQueries(['choreTimer', choreId])
-      queryClient.invalidateQueries(['chores'])
-      queryClient.invalidateQueries(['choreHistory', choreId])
+      queryClient.invalidateQueries({ queryKey: ['choreTimer', choreId] })
+      queryClient.invalidateQueries({ queryKey: ['chores'] })
+      queryClient.invalidateQueries({ queryKey: ['choreHistory', choreId] })
     },
   })
 }
@@ -99,9 +100,9 @@ export const useClearChoreTimer = () => {
   return useMutation({
     mutationFn: ClearChoreTimer,
     onSuccess: (_, choreId) => {
-      queryClient.invalidateQueries(['choreTimer', choreId])
-      queryClient.invalidateQueries(['chores'])
-      queryClient.invalidateQueries(['choreHistory', choreId])
+      queryClient.invalidateQueries({ queryKey: ['choreTimer', choreId] })
+      queryClient.invalidateQueries({ queryKey: ['chores'] })
+      queryClient.invalidateQueries({ queryKey: ['choreHistory', choreId] })
     },
   })
 }

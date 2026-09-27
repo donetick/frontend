@@ -12,21 +12,23 @@ import {
   Box,
   Button,
   IconButton,
-  Input,
   Option,
   Select,
   Switch,
   Typography,
 } from '@mui/joy'
+import { useTranslation } from 'react-i18next'
 
-const STRATEGY_OPTIONS = [
-  { value: 'keep_last_assigned', label: 'Keep same assignee' },
-  { value: 'random', label: 'Random' },
-  { value: 'least_completed', label: 'Least completed' },
-  { value: 'round_robin', label: 'Round robin' },
+import NumberInput from '../../components/common/NumberInput'
+
+const STRATEGY_VALUES = [
+  'keep_last_assigned',
+  'random',
+  'least_completed',
+  'round_robin',
 ]
 
-const FieldRow = ({ label, description, children, onLabelClick }) => (
+const FieldRow = ({ children, description, label, onLabelClick }) => (
   <Box
     sx={{
       display: 'flex',
@@ -62,16 +64,21 @@ const FieldRow = ({ label, description, children, onLabelClick }) => (
 
 // Trigger button — place this inside the chip/action row
 export const AdvancedOptionsTrigger = ({
-  open,
-  onToggle,
   activeCount = 0,
   emptyDisplay = 'icon-text',
+  onToggle,
+  open,
 }) => {
+  const { t } = useTranslation('chores')
   const showLabel = emptyDisplay === 'icon-text' || open || activeCount > 0
 
   return (
     <Box
-      sx={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}
+      sx={{
+        position: 'relative',
+        display: 'inline-flex',
+        alignItems: 'center',
+      }}
     >
       <Button
         size='sm'
@@ -90,7 +97,6 @@ export const AdvancedOptionsTrigger = ({
         <Typography
           level='body-sm'
           sx={{
-            color: 'inherit',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -101,7 +107,7 @@ export const AdvancedOptionsTrigger = ({
               'max-width 0.25s ease-in-out, opacity 0.2s ease-in-out, transform 0.25s ease-in-out',
           }}
         >
-          More
+          {t('advancedOptions.more')}
         </Typography>
       </Button>
 
@@ -133,24 +139,25 @@ export const AdvancedOptionsTrigger = ({
 
 // Panel — place this as a sibling below the description/subtask sections
 const AdvancedOptionsSection = ({
-  open,
-  points,
-  onPointsChange,
-  requireApproval,
-  onRequireApprovalChange,
-  completionWindow,
-  onCompletionWindowChange,
-  deadlineOffset,
-  onDeadlineOffsetChange,
   assignStrategy,
-  onAssignStrategyChange,
-  isPrivate,
-  onIsPrivateChange,
-  isPrivacyInherited,
+  completionWindow,
+  deadlineOffset,
+  hasAssignees,
   hasDueDate,
   hasMultipleAssignees,
-  hasAssignees,
+  isPrivacyInherited,
+  isPrivate,
+  onAssignStrategyChange,
+  onCompletionWindowChange,
+  onDeadlineOffsetChange,
+  onIsPrivateChange,
+  onPointsChange,
+  onRequireApprovalChange,
+  open,
+  points,
+  requireApproval,
 }) => {
+  const { t } = useTranslation('chores')
   const displayPoints = points <= 0 ? 0 : points
 
   const handleDecrement = () => {
@@ -160,15 +167,6 @@ const AdvancedOptionsSection = ({
 
   const handleIncrement = () => {
     onPointsChange(displayPoints + 1)
-  }
-
-  const handlePointsInput = e => {
-    const v = parseInt(e.target.value)
-    if (isNaN(v) || v <= 0) {
-      onPointsChange(-1)
-    } else {
-      onPointsChange(Math.min(v, 9999))
-    }
   }
 
   return (
@@ -197,8 +195,8 @@ const AdvancedOptionsSection = ({
         >
           {/* Points */}
           <FieldRow
-            label='Points'
-            description='Award points for completing this task'
+            label={t('advancedOptions.points')}
+            description={t('advancedOptions.pointsDescription')}
           >
             <IconButton
               size='sm'
@@ -209,20 +207,17 @@ const AdvancedOptionsSection = ({
             >
               <Remove sx={{ fontSize: 16 }} />
             </IconButton>
-            <Input
-              type='number'
+            <NumberInput
               size='sm'
               value={displayPoints === 0 ? '' : displayPoints}
+              allowEmpty
+              emptyValue={0}
+              min={0}
+              max={9999}
               placeholder='0'
-              onChange={handlePointsInput}
+              onValueChange={next => onPointsChange(next > 0 ? next : -1)}
               sx={{ width: 64 }}
-              slotProps={{
-                input: {
-                  min: 0,
-                  max: 9999,
-                  style: { textAlign: 'center' },
-                },
-              }}
+              slotProps={{ input: { style: { textAlign: 'center' } } }}
             />
             <IconButton
               size='sm'
@@ -236,8 +231,8 @@ const AdvancedOptionsSection = ({
 
           {/* Require approval */}
           <FieldRow
-            label='Require approval'
-            description='Task needs admin sign-off before it can be closed'
+            label={t('advancedOptions.requireApproval')}
+            description={t('advancedOptions.requireApprovalDescription')}
             onLabelClick={() => onRequireApprovalChange(!requireApproval)}
           >
             <Switch
@@ -249,13 +244,13 @@ const AdvancedOptionsSection = ({
 
           {/* Privacy */}
           <FieldRow
-            label='Limited visibility'
+            label={t('advancedOptions.limitedVisibility')}
             description={
               isPrivacyInherited
-                ? 'Inherited from the project: tasks in a private project are always private'
+                ? t('advancedOptions.limitedVisibilityInherited')
                 : !hasAssignees
-                  ? 'Assign someone to enable limited visibility'
-                  : 'Only you and assignees can see this task'
+                  ? t('advancedOptions.limitedVisibilityDisabled')
+                  : t('advancedOptions.limitedVisibilityDescription')
             }
             onLabelClick={
               hasAssignees && !isPrivacyInherited
@@ -274,8 +269,8 @@ const AdvancedOptionsSection = ({
           {/* Assignment strategy — only shown when there are multiple assignees */}
           {hasMultipleAssignees && (
             <FieldRow
-              label='Assign strategy'
-              description='How to pick the next assignee each recurrence'
+              label={t('advancedOptions.assignStrategy')}
+              description={t('advancedOptions.assignStrategyDescription')}
             >
               <Select
                 size='sm'
@@ -283,9 +278,9 @@ const AdvancedOptionsSection = ({
                 onChange={(_, v) => onAssignStrategyChange(v)}
                 sx={{ minWidth: 190 }}
               >
-                {STRATEGY_OPTIONS.map(opt => (
-                  <Option key={opt.value} value={opt.value}>
-                    {opt.label}
+                {STRATEGY_VALUES.map(opt => (
+                  <Option key={opt} value={opt}>
+                    {t(`advancedOptions.strategy.${opt}`)}
                   </Option>
                 ))}
               </Select>
@@ -296,48 +291,23 @@ const AdvancedOptionsSection = ({
           {hasDueDate ? (
             <>
               <FieldRow
-                label='Available from'
-                description='Hours before the due date the task becomes available'
+                label={t('advancedOptions.availableFrom')}
+                description={t('advancedOptions.availableFromDescription')}
               >
-                <Input
-                  type='number'
+                <NumberInput
                   size='sm'
                   placeholder='—'
                   value={completionWindow > -1 ? completionWindow : ''}
-                  onChange={e => {
-                    const v = parseInt(e.target.value)
-                    onCompletionWindowChange(isNaN(v) ? -1 : Math.max(0, v))
-                  }}
+                  allowEmpty
+                  emptyValue={-1}
+                  min={0}
+                  onValueChange={onCompletionWindowChange}
                   endDecorator={
                     <Typography level='body-xs' textColor='text.tertiary'>
-                      hrs
+                      {t('advancedOptions.hrs')}
                     </Typography>
                   }
                   sx={{ width: 96 }}
-                  slotProps={{ input: { min: 0 } }}
-                />
-              </FieldRow>
-
-              <FieldRow
-                label='Expires after'
-                description='Hours after the due date when the task can no longer be completed'
-              >
-                <Input
-                  type='number'
-                  size='sm'
-                  placeholder='—'
-                  value={deadlineOffset > -1 ? deadlineOffset : ''}
-                  onChange={e => {
-                    const v = parseInt(e.target.value)
-                    onDeadlineOffsetChange(isNaN(v) ? -1 : Math.max(0, v))
-                  }}
-                  endDecorator={
-                    <Typography level='body-xs' textColor='text.tertiary'>
-                      hrs
-                    </Typography>
-                  }
-                  sx={{ width: 96 }}
-                  slotProps={{ input: { min: 0 } }}
                 />
               </FieldRow>
             </>
@@ -347,7 +317,7 @@ const AdvancedOptionsSection = ({
               textColor='text.tertiary'
               sx={{ my: 0.5, fontStyle: 'italic' }}
             >
-              Set a due date to configure completion window and deadline.
+              {t('advancedOptions.setDueDateHint')}
             </Typography>
           )}
         </Box>

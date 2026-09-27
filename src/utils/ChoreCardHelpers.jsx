@@ -19,7 +19,11 @@ const allMonths = [
  * @param {Object} chore - The chore object (needed for nextDueDate null check)
  * @returns {string} The formatted due date text
  */
-export const getDueDateChipText = (nextDueDate, chore, timeFormat = 'h:mm A') => {
+export const getDueDateChipText = (
+  nextDueDate,
+  chore,
+  timeFormat = 'h:mm A',
+) => {
   if (chore?.nextDueDate === null || nextDueDate === null) return 'No Due Date'
 
   const dueDate = moment(nextDueDate)
@@ -30,37 +34,45 @@ export const getDueDateChipText = (nextDueDate, chore, timeFormat = 'h:mm A') =>
     nextDay: `[Tomorrow] ${timeFormat}`,
     nextWeek: `dddd ${timeFormat}`,
     lastDay: `[Yesterday] ${timeFormat}`,
-    lastWeek: `[Last] dddd ${timeFormat}`,
+    lastWeek: `dddd ${timeFormat}`,
     sameElse: `MMM D ${timeFormat}`,
   }
 
-
   // if time is 23:59:59, treat as end-of-day (date only, no specific time)
-  if (dueDate.hours() === 23 && dueDate.minutes() === 59 && dueDate.seconds() === 59) {
+  if (
+    dueDate.hours() === 23 &&
+    dueDate.minutes() === 59 &&
+    dueDate.seconds() === 59
+  ) {
     if (diff < 0) {
-      // For overdue dates, show calendar format for recent dates
+      // For overdue dates, show calendar format for recent dates (Today/Yesterday);
+      // beyond that, use a calendar-day count ("2 days") instead of a weekday name,
+      // since a weekday alone doesn't convey how overdue the chore is
       const absDiff = Math.abs(diff)
-      if (absDiff <= 48) {
-        return (
-          'Overdue ' +
-          moment(nextDueDate).calendar(null, calendarFormat).split(' ')[0].toLowerCase()
-        )
+      if (absDiff <= 24) {
+        return moment(nextDueDate).calendar(null, calendarFormat).split(' ')[0]
       }
-      return 'Overdue ' + dueDate.fromNow()
+      if (absDiff <= 48) {
+        const daysAgo = moment()
+          .startOf('day')
+          .diff(dueDate.clone().startOf('day'), 'days')
+        return `${daysAgo} day${daysAgo === 1 ? '' : 's'}`
+      }
+      return dueDate.fromNow()
     }
     // if due in next 48 hours, show calendar format without time (e.g., "Tomorrow")
     if (diff < 48 && diff > 0) {
       return moment(nextDueDate).calendar(null, calendarFormat).split(' ')[0]
     }
     // if due date is after 48 hours, show it in format: Due in 3 days
-    return 'Due ' + dueDate.fromNow()
+    return dueDate.fromNow()
   }
 
   // if due in next 48 hours, we should show it in this format: Tomorrow 11:00
   if (diff < 48 && diff > 0) {
     return moment(nextDueDate).calendar(null, calendarFormat)
   }
-  return 'Due ' + moment(nextDueDate).fromNow()
+  return moment(nextDueDate).fromNow()
 }
 
 /**

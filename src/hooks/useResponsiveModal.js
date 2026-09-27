@@ -1,18 +1,24 @@
-import BottomSheetModal from '../components/common/BottomSheetModal'
-import FadeModal from '../components/common/FadeModal'
-import useWindowWidth from './useWindowWidth'
+import useMediaQuery from '@mui/material/useMediaQuery'
+import { createElement } from 'react'
+
+import AppModal from '../components/common/AppModal'
+
+const MobileAppModal = props =>
+  createElement(AppModal, { ...props, isMobile: true })
+const DesktopAppModal = props =>
+  createElement(AppModal, { ...props, isMobile: false })
 
 /**
- * Hook that returns the appropriate modal component based on screen size
- * @param {number} breakpoint - Screen width breakpoint to switch between modals (default: 768px)
- * @returns {Object} - { Modal: Component, isMobile: boolean }
+ * Backwards-compatible access to the app modal system.
+ *
+ * New code may render AppModal directly when it already knows the desired
+ * presentation. Existing callers can continue using ResponsiveModal.
  */
 export const useResponsiveModal = (breakpoint = 768) => {
-  const windowWidth = useWindowWidth()
-  const isMobile = windowWidth <= breakpoint
+  const isMobile = useMediaQuery(`(max-width:${breakpoint}px)`)
 
   return {
-    ResponsiveModal: isMobile ? BottomSheetModal : FadeModal,
+    ResponsiveModal: isMobile ? MobileAppModal : DesktopAppModal,
     isMobile,
   }
 }

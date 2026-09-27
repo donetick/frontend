@@ -1,4 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+
+import { track } from '../../analytics'
 import {
   CreateFilter,
   DeleteFilter,
@@ -112,6 +114,7 @@ export const useCreateFilter = () => {
         const response = await CreateFilter(filterData)
         if (response.ok) {
           const data = await response.json()
+          track('filter_created', {})
           return data.res || data
         }
         const errorData = await response.json()
@@ -129,7 +132,7 @@ export const useCreateFilter = () => {
       })
 
       // Invalidate and refetch
-      queryClient.invalidateQueries(['filters'])
+      queryClient.invalidateQueries({ queryKey: ['filters'] })
     },
     onError: error => {
       console.error('Create filter mutation failed:', error)
@@ -142,7 +145,7 @@ export const useUpdateFilter = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ filterId, filterData }) => {
+    mutationFn: async ({ filterData, filterId }) => {
       try {
         const response = await UpdateFilter(filterId, filterData)
         if (response.ok) {
@@ -169,7 +172,7 @@ export const useUpdateFilter = () => {
       queryClient.setQueryData(['filters', updatedFilter.id], updatedFilter)
 
       // Invalidate and refetch
-      queryClient.invalidateQueries(['filters'])
+      queryClient.invalidateQueries({ queryKey: ['filters'] })
     },
     onError: error => {
       console.error('Update filter mutation failed:', error)
@@ -203,7 +206,7 @@ export const useDeleteFilter = () => {
       })
 
       // Invalidate and refetch
-      queryClient.invalidateQueries(['filters'])
+      queryClient.invalidateQueries({ queryKey: ['filters'] })
     },
     onError: error => {
       console.error('Delete filter mutation failed:', error)
@@ -243,8 +246,8 @@ export const useToggleFilterPin = () => {
       queryClient.setQueryData(['filters', updatedFilter.id], updatedFilter)
 
       // Invalidate related queries
-      queryClient.invalidateQueries(['filters'])
-      queryClient.invalidateQueries(['filters', 'pinned'])
+      queryClient.invalidateQueries({ queryKey: ['filters'] })
+      queryClient.invalidateQueries({ queryKey: ['filters', 'pinned'] })
     },
     onError: error => {
       console.error('Toggle filter pin mutation failed:', error)

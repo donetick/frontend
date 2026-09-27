@@ -1,121 +1,100 @@
-import {
-    Box,
-    Button,
-    FormControl,
-    FormHelperText,
-    Input,
-    Typography,
-} from '@mui/joy'
-import React, { useEffect } from 'react'
+import { FormControl, FormHelperText, Input, Typography } from '@mui/joy'
+import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
+import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 
-function PassowrdChangeModal({ isOpen, onClose }) {
+function PasswordChangeModal({ isOpen, onClose }) {
+  const { t } = useTranslation('settings')
   const { ResponsiveModal } = useResponsiveModal()
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [passwordError, setPasswordError] = useState(null)
+  const [passwordTouched, setPasswordTouched] = useState(false)
+  const [confirmPasswordTouched, setConfirmPasswordTouched] = useState(false)
 
-  const [password, setPassword] = React.useState('')
-  const [confirmPassword, setConfirmPassword] = React.useState('')
-  const [passwordError, setPasswordError] = React.useState(false)
-  const [passwordTouched, setPasswordTouched] = React.useState(false)
-  const [confirmPasswordTouched, setConfirmPasswordTouched] =
-    React.useState(false)
   useEffect(() => {
-    if (!passwordTouched || !confirmPasswordTouched) {
-      return
-    } else if (password !== confirmPassword) {
-      setPasswordError('Passwords do not match')
+    if (!passwordTouched || !confirmPasswordTouched) return
+
+    if (password !== confirmPassword) {
+      setPasswordError(t('passwordChange.mismatch'))
     } else if (password.length < 8) {
-      setPasswordError('Password must be at least 8 characters')
+      setPasswordError(t('passwordChange.minLength'))
     } else if (password.length > 64) {
-      setPasswordError('Password must be less than 64 characters')
+      setPasswordError(t('passwordChange.maxLength'))
     } else {
       setPasswordError(null)
     }
-  }, [password, confirmPassword, passwordTouched, confirmPasswordTouched])
+  }, [password, confirmPassword, passwordTouched, confirmPasswordTouched, t])
 
-  const handleAction = isConfirmed => {
-    if (!isConfirmed) {
-      onClose(null)
-      return
-    }
-    onClose(password)
-  }
+  const handleAction = isConfirmed => onClose(isConfirmed ? password : null)
+  const canSubmit =
+    passwordTouched &&
+    confirmPasswordTouched &&
+    password.length >= 8 &&
+    password === confirmPassword &&
+    passwordError == null
 
   return (
     <ResponsiveModal
       open={isOpen}
-      onClose={onClose}
-      size='lg'
-      fullWidth={true}
-      title='Change Password'
+      onClose={() => handleAction(false)}
+      size='sm'
+      title={t('accountSettings.changePassword')}
+      description={t('passwordChange.description')}
+      footer={
+        <ModalActions
+          secondary={{
+            label: t('accountSettings.cancel'),
+            onClick: () => handleAction(false),
+          }}
+          primary={{
+            label: t('accountSettings.changePassword'),
+            disabled: !canSubmit,
+            onClick: () => handleAction(true),
+          }}
+        />
+      }
     >
-      <Typography level='body-md' gutterBottom>
-        Please enter your new password.
-      </Typography>
-      <FormControl>
-        <Typography level='body2' alignSelf={'start'}>
-          New Password
+      <FormControl sx={{ mb: 2 }}>
+        <Typography level='body-sm'>
+          {t('passwordChange.newPassword')}
         </Typography>
         <Input
-          margin='normal'
           required
-          fullWidth
           name='password'
-          label='Password'
           type='password'
-          id='password'
-          placeholder='Enter password (8-64 characters)'
+          autoComplete='new-password'
+          placeholder={t('passwordChange.newPasswordPlaceholder')}
           value={password}
-          onChange={e => {
+          onChange={event => {
             setPasswordTouched(true)
-            setPassword(e.target.value)
+            setPassword(event.target.value)
           }}
         />
       </FormControl>
 
-      <FormControl>
-        <Typography level='body2' alignSelf={'start'}>
-          Confirm Password
+      <FormControl error={Boolean(passwordError)}>
+        <Typography level='body-sm'>
+          {t('passwordChange.confirmPassword')}
         </Typography>
         <Input
-          margin='normal'
           required
-          fullWidth
           name='confirmPassword'
-          label='confirmPassword'
           type='password'
-          id='confirmPassword'
+          autoComplete='new-password'
+          placeholder={t('passwordChange.confirmPasswordPlaceholder')}
           value={confirmPassword}
-          onChange={e => {
+          onChange={event => {
             setConfirmPasswordTouched(true)
-            setConfirmPassword(e.target.value)
+            setConfirmPassword(event.target.value)
           }}
         />
-
-        <FormHelperText>{passwordError}</FormHelperText>
+        {passwordError && <FormHelperText>{passwordError}</FormHelperText>}
       </FormControl>
-      <Box display={'flex'} justifyContent={'space-around'} mt={1}>
-        <Button
-          size='lg'
-          disabled={passwordError != null}
-          onClick={() => {
-            handleAction(true)
-          }}
-          fullWidth
-          sx={{ mr: 1 }}
-        >
-          Change Password
-        </Button>
-        <Button
-          size='lg'
-          onClick={() => {
-            handleAction(false)
-          }}
-          variant='outlined'
-        >
-          Cancel
-        </Button>
-      </Box>
     </ResponsiveModal>
   )
 }
-export default PassowrdChangeModal
+
+export default PasswordChangeModal

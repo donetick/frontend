@@ -2,6 +2,8 @@
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:description="@string/widget_people_description"
     android:initialLayout="@layout/widget_shell"
+    android:previewLayout="@layout/widget_preview_people"
+    android:previewImage="@drawable/widget_preview_people"
     android:minWidth="180dp"
     android:minHeight="110dp"
     android:minResizeWidth="110dp"

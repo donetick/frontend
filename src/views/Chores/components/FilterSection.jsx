@@ -1,14 +1,15 @@
 import { Box } from '@mui/joy'
+
 import CustomFilterChips from './CustomFilterChips'
 
 const FilterSection = ({
-  savedFilters,
   activeFilterId,
-
   onFilterClick,
+
   onFilterDelete,
-  onFilterPin,
   onFilterEdit,
+  onFilterPin,
+  savedFilters,
 }) => {
   return (
     <>

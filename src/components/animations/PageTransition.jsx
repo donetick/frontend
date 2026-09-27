@@ -1,11 +1,13 @@
+import './PageTransition.css'
+
 import { useLayoutEffect, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { useLocation } from 'react-router-dom'
-import './PageTransition.css'
 
 // Route hierarchy for determining navigation direction
 const routeHierarchy = {
   '/': 0,
+  '/home': 0,
   '/my/chores': 0,
   '/chores': 1,
   '/chores/create': 2,
@@ -85,6 +87,9 @@ const PageTransition = ({ children }) => {
       location.pathname.includes('/login') ||
       location.pathname.includes('/signup') ||
       location.pathname.includes('/landing') ||
+      location.pathname.includes('/onboarding') ||
+      location.pathname.includes('/get-started') ||
+      location.pathname.includes('/ready') ||
       location.pathname.includes('/auth/')
 
     // Apply transition type as data attribute for CSS

@@ -1,4 +1,12 @@
-import { AttachFile, Close, DeleteOutline, Image } from '@mui/icons-material'
+import {
+  AttachFile,
+  Close,
+  DeleteOutline,
+  DocumentScanner,
+  Image,
+  InsertDriveFile,
+  PhotoCamera,
+} from '@mui/icons-material'
 import {
   Box,
   Button,
@@ -9,23 +17,42 @@ import {
 } from '@mui/joy'
 import { ClickAwayListener, Popper } from '@mui/material'
 import { useEffect, useRef, useState } from 'react'
-import { Z_INDEX } from '../../constants/zIndex'
+import { useTranslation } from 'react-i18next'
+
+import { useDocumentScanner } from '../../hooks/useDocumentScanner'
 import { useFileUpload } from '../../hooks/useFileUpload'
+import { useNotification } from '../../service/NotificationProvider'
 import { DeleteDraftAttachment } from '../../utils/Fetcher'
+import { imageSourceToFile } from '../../utils/FileConvert'
+
+const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg']
+
+const isImageAttachment = attachment => {
+  const ext = (attachment?.name || '').split('.').pop()?.toLowerCase()
+  return IMAGE_EXTENSIONS.includes(ext)
+}
 
 const AttachmentPickerField = ({
   attachments = [],
+  draftId,
+  emptyDisplay = 'icon-text',
+  entityId,
+  entityType = 'chore_attachment',
   onChange,
   onClear,
-  emptyDisplay = 'icon-text',
-  entityType = 'chore_attachment',
-  entityId,
-  draftId,
 }) => {
+  const { t } = useTranslation('chores')
   const [isOpen, setIsOpen] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const buttonRef = useRef(null)
   const { uploadFile } = useFileUpload({ entityType, entityId, draftId })
+  const { isNativeScanner, scanDocument } = useDocumentScanner()
+  const { showError } = useNotification()
+
+  // Without a native scanner, `capture` asks a phone for its camera directly.
+  // Desktop browsers ignore it and fall back to the file picker, which would
+  // duplicate "Image", so the button only appears on touch devices.
+  const canTakePhoto = isNativeScanner || navigator.maxTouchPoints > 0
 
   useEffect(() => {
     if (!isOpen) return
@@ -36,27 +63,60 @@ const AttachmentPickerField = ({
     return () => document.removeEventListener('keydown', handleEscape)
   }, [isOpen])
 
-  const handleAddFile = () => {
+  const upload = async file => {
+    setIsUploading(true)
+    try {
+      const uploaded = await uploadFile(file)
+      if (uploaded) {
+        onChange([
+          ...attachments,
+          { url: uploaded.url, path: uploaded.path, name: uploaded.fileName },
+        ])
+      }
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  const handlePickFile = ({ accept, capture } = {}) => {
     const input = document.createElement('input')
     input.setAttribute('type', 'file')
-    input.setAttribute('accept', 'image/*')
-    input.click()
-    input.onchange = async () => {
+    if (accept) input.setAttribute('accept', accept)
+    if (capture) input.setAttribute('capture', capture)
+    input.onchange = () => {
       const file = input.files?.[0]
-      if (!file) return
-      setIsUploading(true)
-      try {
-        const uploaded = await uploadFile(file)
-        if (uploaded) {
-          onChange([
-            ...attachments,
-            { url: uploaded.url, path: uploaded.path, name: uploaded.fileName },
-          ])
-        }
-      } finally {
-        setIsUploading(false)
-      }
+      if (file) upload(file)
     }
+    input.click()
+  }
+
+  // Native builds get the OS document scanner (edge detection + perspective
+  // correction); everywhere else "take photo" is the camera roll shortcut.
+  const handleScan = async () => {
+    if (!isNativeScanner) {
+      handlePickFile({ accept: 'image/*', capture: 'environment' })
+      return
+    }
+    const { cancelled, error, image } = await scanDocument()
+    if (cancelled) return
+    if (error || !image) {
+      showError({
+        title: t('attachmentPicker.scanFailedTitle'),
+        message: error || t('attachmentPicker.couldNotScanDocument'),
+      })
+      return
+    }
+    setIsUploading(true)
+    const file = await imageSourceToFile(image, `scan-${Date.now()}.jpg`)
+    setIsUploading(false)
+    if (!file) {
+      showError({
+        title: t('attachmentPicker.scanFailedTitle'),
+        message: t('attachmentPicker.couldNotReadScannedImage'),
+      })
+      return
+    }
+    await upload(file)
   }
 
   const handleRemove = async index => {
@@ -126,8 +186,8 @@ const AttachmentPickerField = ({
             }}
           >
             {isEmpty
-              ? 'Attachments'
-              : `${attachments.length} file${attachments.length !== 1 ? 's' : ''}`}
+              ? t('attachmentPicker.attachments')
+              : t('attachmentPicker.file', { count: attachments.length })}
           </Typography>
         </Button>
         {!isEmpty && onClear && (
@@ -164,7 +224,7 @@ const AttachmentPickerField = ({
               options: { fallbackPlacements: ['bottom-start', 'top-start'] },
             },
           ]}
-          sx={{ zIndex: Z_INDEX.MODAL_CLOSE_BUTTON + 1 }}
+          sx={{ zIndex: 'calc(var(--joy-zIndex-modal) + 1)' }}
         >
           <ClickAwayListener onClickAway={() => setIsOpen(false)}>
             <Sheet
@@ -199,26 +259,30 @@ const AttachmentPickerField = ({
                         '&:hover': { bgcolor: 'background.level1' },
                       }}
                     >
+                      {isImageAttachment(attachment) && (
+                        <Box
+                          component='img'
+                          src={attachment.url}
+                          alt={attachment.name}
+                          sx={{
+                            width: 36,
+                            height: 36,
+                            objectFit: 'cover',
+                            borderRadius: 'sm',
+                            flexShrink: 0,
+                            bgcolor: 'background.level2',
+                          }}
+                          onError={e => {
+                            e.target.style.display = 'none'
+                            e.target.nextSibling.style.display = 'flex'
+                          }}
+                        />
+                      )}
                       <Box
-                        component='img'
-                        src={attachment.url}
-                        alt={attachment.name}
                         sx={{
-                          width: 36,
-                          height: 36,
-                          objectFit: 'cover',
-                          borderRadius: 'sm',
-                          flexShrink: 0,
-                          bgcolor: 'background.level2',
-                        }}
-                        onError={e => {
-                          e.target.style.display = 'none'
-                          e.target.nextSibling.style.display = 'flex'
-                        }}
-                      />
-                      <Box
-                        sx={{
-                          display: 'none',
+                          display: isImageAttachment(attachment)
+                            ? 'none'
+                            : 'flex',
                           width: 36,
                           height: 36,
                           alignItems: 'center',
@@ -228,7 +292,15 @@ const AttachmentPickerField = ({
                           flexShrink: 0,
                         }}
                       >
-                        <Image sx={{ fontSize: 20, color: 'text.tertiary' }} />
+                        {isImageAttachment(attachment) ? (
+                          <Image
+                            sx={{ fontSize: 20, color: 'text.tertiary' }}
+                          />
+                        ) : (
+                          <InsertDriveFile
+                            sx={{ fontSize: 20, color: 'text.tertiary' }}
+                          />
+                        )}
                       </Box>
                       <Typography
                         level='body-xs'
@@ -255,26 +327,66 @@ const AttachmentPickerField = ({
                 </Box>
               )}
 
-              <Button
-                fullWidth
-                size='sm'
-                variant='outlined'
-                color='neutral'
-                startDecorator={
-                  isUploading ? (
+              {isUploading ? (
+                <Button
+                  fullWidth
+                  size='sm'
+                  variant='outlined'
+                  color='neutral'
+                  disabled
+                  startDecorator={
                     <CircularProgress
                       size='sm'
                       sx={{ '--CircularProgress-size': '14px' }}
                     />
-                  ) : (
-                    <AttachFile sx={{ fontSize: 16 }} />
-                  )
-                }
-                onClick={handleAddFile}
-                disabled={isUploading}
-              >
-                {isUploading ? 'Uploading…' : 'Add image'}
-              </Button>
+                  }
+                >
+                  {t('attachmentPicker.uploading')}
+                </Button>
+              ) : (
+                <Box sx={{ display: 'flex', gap: 0.5 }}>
+                  {canTakePhoto && (
+                    <Button
+                      size='sm'
+                      variant='outlined'
+                      color='neutral'
+                      sx={{ flex: 1 }}
+                      startDecorator={
+                        isNativeScanner ? (
+                          <DocumentScanner sx={{ fontSize: 16 }} />
+                        ) : (
+                          <PhotoCamera sx={{ fontSize: 16 }} />
+                        )
+                      }
+                      onClick={handleScan}
+                    >
+                      {isNativeScanner
+                        ? t('attachmentPicker.scan')
+                        : t('attachmentPicker.photo')}
+                    </Button>
+                  )}
+                  <Button
+                    size='sm'
+                    variant='outlined'
+                    color='neutral'
+                    sx={{ flex: 1 }}
+                    startDecorator={<Image sx={{ fontSize: 16 }} />}
+                    onClick={() => handlePickFile({ accept: 'image/*' })}
+                  >
+                    {t('attachmentPicker.image')}
+                  </Button>
+                  <Button
+                    size='sm'
+                    variant='outlined'
+                    color='neutral'
+                    sx={{ flex: 1 }}
+                    startDecorator={<AttachFile sx={{ fontSize: 16 }} />}
+                    onClick={() => handlePickFile()}
+                  >
+                    {t('attachmentPicker.fileButton')}
+                  </Button>
+                </Box>
+              )}
             </Sheet>
           </ClickAwayListener>
         </Popper>

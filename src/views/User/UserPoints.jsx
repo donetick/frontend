@@ -1,13 +1,4 @@
 import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-} from 'recharts'
-
-import {
   AccountBalanceWallet,
   Analytics,
   AssignmentTurnedIn,
@@ -39,29 +30,40 @@ import {
   Tabs,
   Typography,
 } from '@mui/joy'
+import moment from 'moment'
 import { useEffect, useState } from 'react'
-import LoadingComponent from '../components/Loading.jsx'
+import { useTranslation } from 'react-i18next'
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+} from 'recharts'
 
 import { useChoresHistory } from '../../queries/ChoreQueries.jsx'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import { RedeemPoints } from '../../utils/Fetcher.jsx'
 import { resolvePhotoURL } from '../../utils/Helpers.jsx'
+import LoadingComponent from '../components/Loading.jsx'
 import RedeemPointsModal from '../Modals/RedeemPointsModal'
 const UserPoints = () => {
+  const { t } = useTranslation('points')
   const [tabValue, setTabValue] = useState(7)
   const [isRedeemModalOpen, setIsRedeemModalOpen] = useState(false)
   const [leaderboardMode, setLeaderboardMode] = useState('points') // 'points' or 'tasks'
 
   const {
     data: circleMembersData,
-    isLoading: isCircleMembersLoading,
     handleRefetch: handleCircleMembersRefetch,
+    isLoading: isCircleMembersLoading,
   } = useCircleMembers()
 
   const {
     data: choresHistoryData,
-    isLoading: isChoresHistoryLoading,
     handleLimitChange: handleChoresHistoryLimitChange,
+    isLoading: isChoresHistoryLoading,
   } = useChoresHistory(7, true)
 
   const { data: userProfile } = useUserProfile()
@@ -104,15 +106,13 @@ const UserPoints = () => {
       const currentDate = new Date()
       currentDate.setDate(currentDate.getDate() - i)
       daysAggregated.push({
-        label: currentDate.toLocaleString('en-US', { weekday: 'short' }),
+        label: moment(currentDate).format('ddd'),
         points: 0,
         tasks: 0,
       })
     }
     history.forEach(chore => {
-      const dayName = new Date(chore.performedAt).toLocaleString('en-US', {
-        weekday: 'short',
-      })
+      const dayName = moment(chore.performedAt).format('ddd')
 
       const dayIndex = daysAggregated.findIndex(dayData => {
         if (userId)
@@ -133,15 +133,13 @@ const UserPoints = () => {
       const currentDate = new Date()
       currentDate.setDate(currentDate.getDate() - i)
       daysAggregated.push({
-        label: currentDate.toLocaleString('en-US', { day: 'numeric' }),
+        label: moment(currentDate).format('D'),
         points: 0,
         tasks: 0,
       })
     }
     history.forEach(chore => {
-      const dayName = new Date(chore.performedAt).toLocaleString('en-US', {
-        day: 'numeric',
-      })
+      const dayName = moment(chore.performedAt).format('D')
 
       const dayIndex = daysAggregated.findIndex(dayData => {
         if (userId)
@@ -164,15 +162,13 @@ const UserPoints = () => {
       const currentMonth = new Date()
       currentMonth.setMonth(currentMonth.getMonth() - i)
       monthlyAggregated.push({
-        label: currentMonth.toLocaleString('en-US', { month: 'short' }),
+        label: moment(currentMonth).format('MMM'),
         points: 0,
         tasks: 0,
       })
     }
     history.forEach(chore => {
-      const monthName = new Date(chore.performedAt).toLocaleString('en-US', {
-        month: 'short',
-      })
+      const monthName = moment(chore.performedAt).format('MMM')
 
       const monthIndex = monthlyAggregated.findIndex(monthData => {
         if (userId)
@@ -195,15 +191,13 @@ const UserPoints = () => {
       const currentYear = new Date()
       currentYear.setFullYear(currentYear.getFullYear() - i)
       yearlyAggregated.push({
-        label: currentYear.toLocaleString('en-US', { year: 'numeric' }),
+        label: moment(currentYear).format('YYYY'),
         points: 0,
         tasks: 0,
       })
     }
     history.forEach(chore => {
-      const yearName = new Date(chore.performedAt).toLocaleString('en-US', {
-        year: 'numeric',
-      })
+      const yearName = moment(chore.performedAt).format('YYYY')
 
       const yearIndex = yearlyAggregated.findIndex(yearData => {
         if (userId)
@@ -305,14 +299,14 @@ const UserPoints = () => {
                 level='h3'
                 sx={{ fontWeight: 'lg', color: 'text.primary' }}
               >
-                {leaderboardMode === 'points' ? 'Points' : 'Tasks'} Leaderboard
+                {leaderboardMode === 'points'
+                  ? t('leaderboard.titlePoints')
+                  : t('leaderboard.titleTasks')}
               </Typography>
               <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-                Rankings based on{' '}
                 {leaderboardMode === 'points'
-                  ? 'points earned'
-                  : 'tasks completed'}{' '}
-                during the selected time period
+                  ? t('leaderboard.subtitlePoints')
+                  : t('leaderboard.subtitleTasks')}
               </Typography>
             </Stack>
           </Box>
@@ -358,9 +352,9 @@ const UserPoints = () => {
                   }}
                 >
                   {[
-                    { label: '7D', value: 7 },
-                    { label: '6M', value: 6 * 30 },
-                    { label: 'All', value: 24 * 30 },
+                    { label: t('tabs.short7d'), value: 7 },
+                    { label: t('tabs.short6m'), value: 6 * 30 },
+                    { label: t('tabs.shortAll'), value: 24 * 30 },
                   ].map((tab, index) => (
                     <Tab
                       key={index}
@@ -408,7 +402,7 @@ const UserPoints = () => {
                 sx={{ cursor: 'pointer' }}
                 onClick={() => setLeaderboardMode('points')}
               >
-                Points
+                {t('leaderboard.modePoints')}
               </Chip>
               <SwapHoriz
                 sx={{ fontSize: '0.875rem', color: 'text.tertiary' }}
@@ -420,7 +414,7 @@ const UserPoints = () => {
                 sx={{ cursor: 'pointer' }}
                 onClick={() => setLeaderboardMode('tasks')}
               >
-                Tasks
+                {t('leaderboard.modeTasks')}
               </Chip>
             </Box>
           </Box>
@@ -512,7 +506,7 @@ const UserPoints = () => {
                             color='primary'
                             sx={{ ml: 1 }}
                           >
-                            You
+                            {t('leaderboard.you')}
                           </Chip>
                         )}
                       </Typography>
@@ -520,8 +514,10 @@ const UserPoints = () => {
                         level='body-xs'
                         sx={{ color: 'text.secondary' }}
                       >
-                        {user.periodTasks} tasks • {user.avgPointsPerTask} avg
-                        per task
+                        {t('leaderboard.tasksAndAvg', {
+                          tasks: user.periodTasks,
+                          avg: user.avgPointsPerTask,
+                        })}
                       </Typography>
                     </Stack>
                   </Box>
@@ -552,8 +548,12 @@ const UserPoints = () => {
                     </Box>
                     <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
                       {leaderboardMode === 'points'
-                        ? `${user.availablePoints} available`
-                        : `${user.periodPoints} points`}
+                        ? t('leaderboard.available', {
+                            count: user.availablePoints,
+                          })
+                        : t('leaderboard.points', {
+                            count: user.periodPoints,
+                          })}
                     </Typography>
                   </Stack>
 
@@ -591,7 +591,7 @@ const UserPoints = () => {
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
         <Analytics sx={{ fontSize: '1.5rem', color: 'primary.500' }} />
         <Typography level='h4' sx={{ fontWeight: 'lg', color: 'text.primary' }}>
-          Filter & Analysis
+          {t('filter.analysisTitle')}
         </Typography>
       </Box>
 
@@ -610,7 +610,7 @@ const UserPoints = () => {
       >
         <Stack spacing={2}>
           <Typography level='title-sm' sx={{ color: 'text.secondary' }}>
-            Filter Points
+            {t('filter.title')}
           </Typography>
 
           <Stack
@@ -621,7 +621,7 @@ const UserPoints = () => {
             {/* User Filter */}
             <Box sx={{ flex: 1, minWidth: 200 }}>
               <Typography level='body-sm' sx={{ mb: 1, fontWeight: 500 }}>
-                Show points for:
+                {t('filter.showFor')}
               </Typography>
               <Select
                 sx={{
@@ -688,7 +688,7 @@ const UserPoints = () => {
             {/* Time Period Filter */}
             <Box sx={{ flex: 1, minWidth: 200 }}>
               <Typography level='body-sm' sx={{ mb: 1, fontWeight: 500 }}>
-                Time period:
+                {t('filter.timePeriod')}
               </Typography>
               <Tabs
                 onChange={(e, tabValue) => {
@@ -713,9 +713,9 @@ const UserPoints = () => {
                   }}
                 >
                   {[
-                    { label: '7 Days', value: 7 },
-                    { label: '6 Months', value: 6 * 30 },
-                    { label: 'All Time', value: 24 * 30 },
+                    { label: t('tabs.days7'), value: 7 },
+                    { label: t('tabs.months6'), value: 6 * 30 },
+                    { label: t('tabs.allTime'), value: 24 * 30 },
                   ].map((tab, index) => (
                     <Tab
                       key={index}
@@ -759,7 +759,7 @@ const UserPoints = () => {
                   }}
                   sx={{ mt: 'auto' }}
                 >
-                  Redeem Points
+                  {t('redeem')}
                 </Button>
               </Box>
             )}
@@ -788,27 +788,32 @@ const UserPoints = () => {
           const pointsCards = [
             {
               icon: <Toll />,
-              title: 'Available',
-              text: `${availablePoints} points`,
-              subtext: 'Ready to redeem',
+              title: t('cards.available.title'),
+              text: t('leaderboard.points', { count: availablePoints }),
+              subtext: t('cards.available.subtext'),
             },
             {
               icon: <Redeem />,
-              title: 'Redeemed',
-              text: `${redeemedPoints} points`,
-              subtext: 'Previously used',
+              title: t('cards.redeemed.title'),
+              text: t('leaderboard.points', { count: redeemedPoints }),
+              subtext: t('cards.redeemed.subtext'),
             },
             {
               icon: <AccountBalanceWallet />,
-              title: 'Total',
-              text: `${totalPoints} points`,
-              subtext: 'All time earned',
+              title: t('cards.total.title'),
+              text: t('leaderboard.points', { count: totalPoints }),
+              subtext: t('cards.total.subtext'),
             },
             {
               icon: <TrendingUp />,
-              title: 'Period Points',
-              text: `${periodPoints} points`,
-              subtext: `${tabValue === 24 * 30 ? 'All time' : tabValue === 6 * 30 ? 'Last 6 months' : `Last ${tabValue} days`}`,
+              title: t('cards.period.title'),
+              text: t('leaderboard.points', { count: periodPoints }),
+              subtext:
+                tabValue === 24 * 30
+                  ? t('cards.period.allTime')
+                  : tabValue === 6 * 30
+                    ? t('cards.period.last6Months')
+                    : t('cards.period.lastDays', { count: tabValue }),
             },
           ]
 
@@ -871,24 +876,24 @@ const UserPoints = () => {
       {/* Current Filter Summary */}
       <Box sx={{ mb: 3, textAlign: 'center' }}>
         <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-          Showing points for{' '}
+          {t('summary.showingFor')}{' '}
           <Typography
             component='span'
             sx={{ fontWeight: 600, color: 'primary.500' }}
           >
             {circleUsers.find(user => user.userId === selectedUser)
-              ?.displayName || 'Unknown User'}
+              ?.displayName || t('summary.unknownUser')}
           </Typography>{' '}
-          over the{' '}
+          {t('summary.overThe')}{' '}
           <Typography
             component='span'
             sx={{ fontWeight: 600, color: 'primary.500' }}
           >
             {tabValue === 24 * 30
-              ? 'All Time'
+              ? t('summary.allTime')
               : tabValue === 6 * 30
-                ? 'Last 6 Months'
-                : `Last ${tabValue} Days`}
+                ? t('summary.last6Months')
+                : t('summary.lastDays', { count: tabValue })}
           </Typography>
         </Typography>
       </Box>
@@ -908,7 +913,7 @@ const UserPoints = () => {
             level='h4'
             sx={{ fontWeight: 'lg', color: 'text.primary' }}
           >
-            Points Trend
+            {t('trend.title')}
           </Typography>
         </Box>
 
@@ -947,7 +952,7 @@ const UserPoints = () => {
             isOpen: isRedeemModalOpen,
             available: availablePoints,
             user: user,
-            onSave: ({ userId, points }) => {
+            onSave: ({ points, userId }) => {
               RedeemPoints(userId, points, userProfile.circleID)
                 .then(() => {
                   setIsRedeemModalOpen(false)

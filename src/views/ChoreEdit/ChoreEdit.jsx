@@ -3,6 +3,7 @@ import {
   ArrowDropDown,
   AttachFile,
   Delete,
+  DocumentScanner,
   HorizontalRule,
   Save,
   UploadFile,
@@ -36,10 +37,15 @@ import {
 } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+
 import DurationInput from '../../components/common/DurationInput'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
+import NumberInput from '../../components/common/NumberInput'
 import NotificationTemplate from '../../components/NotificationTemplate.jsx'
+import { usePageShortcutScope } from '../../contexts/KeyboardShortcutScopeContext'
+import { useDocumentScanner } from '../../hooks/useDocumentScanner'
 import {
   useArchiveChore,
   useChore,
@@ -58,12 +64,13 @@ import {
   GetThings,
   UploadChoreAttachment,
 } from '../../utils/Fetcher'
+import { imageSourceToFile } from '../../utils/FileConvert'
 import { isPlusAccount, resolvePhotoURL } from '../../utils/Helpers'
 import { getImageSrc, removeCachedImage } from '../../utils/ImageCache'
-import { generateUUID } from '../../utils/UUID'
 import Priorities from '../../utils/Priorities.jsx'
 import { getIconComponent } from '../../utils/ProjectIcons'
 import { getSafeBottomPadding } from '../../utils/SafeAreaUtils.js'
+import { generateUUID } from '../../utils/UUID'
 import { useProjectFilter } from '../Chores/hooks/useProjectFilter.js'
 import LoadingComponent from '../components/Loading.jsx'
 import RichTextEditor from '../components/RichTextEditor.jsx'
@@ -84,11 +91,16 @@ const ASSIGN_STRATEGIES = [
   'round_robin',
   'no_assignee',
 ]
+const DEFAULT_ASSIGN_STRATEGY = ASSIGN_STRATEGIES[3] // keep_last_assigned
 const REPEAT_ON_TYPE = ['interval', 'days_of_the_week', 'day_of_the_month']
 
 const NO_DUE_DATE_REQUIRED_TYPE = ['no_repeat', 'once']
 const NO_DUE_DATE_ALLOWED_TYPE = ['trigger']
 const ChoreEdit = () => {
+  const { t } = useTranslation('chores')
+  // Page-level shortcuts (save/cancel) must defer to whatever modal
+  // currently owns the keyboard — see KeyboardShortcutScopeContext.
+  const isPageShortcutActive = usePageShortcutScope()
   const { data: userProfile, isLoading: isUserProfileLoading } =
     useUserProfile()
 
@@ -103,7 +115,7 @@ const ChoreEdit = () => {
   const [anyone, setAnyone] = useState(false)
   const [assignableTo, setAssignableTo] = useState([])
   const [performers, setPerformers] = useState([])
-  const [assignStrategy, setAssignStrategy] = useState(ASSIGN_STRATEGIES[2])
+  const [assignStrategy, setAssignStrategy] = useState(DEFAULT_ASSIGN_STRATEGY)
   const [dueDate, setDueDate] = useState(null)
   const [dueDateOnly, setDueDateOnly] = useState(null)
   const [dueTime, setDueTime] = useState(null)
@@ -151,7 +163,7 @@ const ChoreEdit = () => {
   const { data: userLabelsRaw, isLoading: isUserLabelsLoading } = useLabels()
   const { data: projects = [], isLoading: isProjectsLoading } = useProjects()
 
-  const { selectedProject, projectsWithDefault, setSelectedProjectWithCache } =
+  const { projectsWithDefault, selectedProject, setSelectedProjectWithCache } =
     useProjectFilter(projects)
 
   const [projectId, setProjectId] = useState(
@@ -170,7 +182,8 @@ const ChoreEdit = () => {
   } = useChore(choreId)
   const { data: membersData, isLoading: isMemberDataLoading } =
     useCircleMembers()
-  const { showSuccess, showError } = useNotification()
+  const { showError, showSuccess } = useNotification()
+  const { isNativeScanner, scanDocument } = useDocumentScanner()
 
   const [userLabels, setUserLabels] = useState([])
 
@@ -183,28 +196,36 @@ const ChoreEdit = () => {
   const Navigate = useNavigate()
 
   const assignees = anyone ? performers : assignableTo
+  const hasSpecificAssignees = !anyone && assignableTo.length > 0
+  const canPickStrategy = hasSpecificAssignees && assignableTo.length > 1
+  const assignStrategyValue = !hasSpecificAssignees
+    ? 'no_assignee'
+    : canPickStrategy
+      ? assignStrategy
+      : DEFAULT_ASSIGN_STRATEGY
+  const assignedToValue =
+    !hasSpecificAssignees || assignStrategyValue === 'no_assignee'
+      ? null
+      : assignableTo.some(a => a.userId === assignedTo)
+        ? assignedTo
+        : assignableTo[0].userId
+
   const HandleValidateChore = () => {
     const errors = {}
 
     if (name.trim() === '') {
-      errors.name = 'Name is required'
-    }
-    if (assignStrategy !== 'no_assignee') {
-      if (assignees.length === 0) {
-        errors.assignees = 'At least 1 assignees is required'
-      }
-      if (assignedTo === null || assignedTo < 0) {
-        errors.assignedTo = 'Assigned to is required'
-      }
+      errors.name = t('choreEdit.errNameRequired')
     }
     if (frequencyType === 'interval' && !frequency > 0) {
-      errors.frequency = `Invalid frequency, the ${frequencyMetadata.unit} should be > 0`
+      errors.frequency = t('choreEdit.errFrequencyInvalid', {
+        unit: frequencyMetadata.unit,
+      })
     }
     if (
       frequencyType === 'days_of_the_week' &&
       frequencyMetadata['days']?.length === 0
     ) {
-      errors.frequency = 'Please select at least one day of the week'
+      errors.frequency = t('choreEdit.errSelectDayOfWeek')
     }
 
     // Validate advanced scheduling patterns
@@ -214,14 +235,13 @@ const ChoreEdit = () => {
       (!frequencyMetadata?.occurrences ||
         frequencyMetadata.occurrences.length === 0)
     ) {
-      errors.frequency =
-        'Please select at least one day occurrence for the month'
+      errors.frequency = t('choreEdit.errSelectDayOccurrence')
     }
     if (
       frequencyType === 'day_of_the_month' &&
       frequencyMetadata['months']?.length === 0
     ) {
-      errors.frequency = 'Please select at least one month'
+      errors.frequency = t('choreEdit.errSelectMonth')
     }
     if (
       dueDate === null &&
@@ -231,14 +251,14 @@ const ChoreEdit = () => {
       if (REPEAT_ON_TYPE.includes(frequencyType)) {
         console.log('VALIDATION:', dueDate, frequencyType)
 
-        errors.dueDate = 'Start date is required'
+        errors.dueDate = t('choreEdit.errStartDateRequired')
       } else {
-        errors.dueDate = 'Due date is required'
+        errors.dueDate = t('choreEdit.errDueDateRequired')
       }
     }
     if (frequencyType === 'trigger') {
       if (!isThingValid) {
-        errors.thingTrigger = 'Thing trigger is invalid'
+        errors.thingTrigger = t('choreEdit.errThingTrigger')
       }
     }
 
@@ -251,7 +271,7 @@ const ChoreEdit = () => {
         <ListItem key={key}>{errors[key]}</ListItem>
       ))
       showError({
-        title: 'Please resolve the following errors:',
+        title: t('choreEdit.errTitle'),
         message: <List>{errorList}</List>,
       })
       return false
@@ -366,8 +386,8 @@ const ChoreEdit = () => {
       frequencyType: frequencyType,
       frequency: Number(frequency),
       frequencyMetadata: frequencyMetadata,
-      assignedTo: assignStrategy === 'no_assignee' ? null : assignedTo,
-      assignStrategy: assignStrategy,
+      assignedTo: assignedToValue,
+      assignStrategy: assignStrategyValue,
       isRolling: isRolling,
       isActive: isActive,
       notification: isNotificable,
@@ -390,6 +410,11 @@ const ChoreEdit = () => {
     let SaveFunction = createChoreMutation.mutateAsync
     if (newChoreId > 0) {
       SaveFunction = updateChoreMutation.mutateAsync
+    } else {
+      // This is the dedicated create page, distinct from the AddTaskModal
+      // popup (which sets its own quick_add/voice/scan source).
+      chore.source =
+        searchParams.get('clone') === 'true' ? 'clone' : 'full_page'
     }
 
     SaveFunction(chore)
@@ -400,13 +425,13 @@ const ChoreEdit = () => {
           result?.res?._pendingCreate
         ) {
           showSuccess({
-            title: 'Saved Offline',
-            message: 'Your changes will sync when you are back online.',
+            title: t('choreEdit.savedOfflineTitle'),
+            message: t('choreEdit.savedOfflineMessage'),
           })
         } else {
           showSuccess({
-            title: 'Chore Saved',
-            message: 'Your task has been saved successfully!',
+            title: t('choreEdit.savedTitle'),
+            message: t('choreEdit.savedMessage'),
           })
         }
         Navigate('/chores')
@@ -414,8 +439,10 @@ const ChoreEdit = () => {
       .catch(error => {
         console.error('Failed to save chore:', error)
         showError({
-          title: 'Save Failed',
-          message: 'Failed to save chore, please try again.',
+          title: t('choreEdit.saveFailedTitle'),
+          message: error?.isServerMessage
+            ? error.message
+            : t('choreEdit.saveFailedMessage'),
         })
       })
   }
@@ -462,6 +489,20 @@ const ChoreEdit = () => {
     }
   }, [])
   useEffect(() => {
+    if (choreId || !userProfile?.id) return
+
+    const defaultAnyoneSetting = localStorage.getItem('defaultAnyoneSetting')
+    const defaultAssigneeSetting = localStorage.getItem(
+      'defaultAssigneeSetting',
+    )
+
+    if (defaultAnyoneSetting === null && defaultAssigneeSetting === null) {
+      setAnyone(false)
+      setAssignableTo([{ userId: userProfile.id }])
+      setAssignedTo(userProfile.id)
+    }
+  }, [choreId, userProfile?.id])
+  useEffect(() => {
     const anyoneSetting = localStorage.getItem('defaultAnyoneSetting')
     const anyoneDirty = anyoneSetting !== JSON.stringify(anyone)
     const assigneeSetting = localStorage.getItem('defaultAssigneeSetting')
@@ -484,6 +525,9 @@ const ChoreEdit = () => {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = event => {
+      if (!isPageShortcutActive) return
+      if (event.repeat) return
+
       const isHoldingCmd = event.ctrlKey || event.metaKey
 
       // Show keyboard shortcuts when holding Cmd/Ctrl
@@ -519,7 +563,7 @@ const ChoreEdit = () => {
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
     }
-  }, [HandleSaveChore])
+  }, [HandleSaveChore, isPageShortcutActive])
 
   useEffect(() => {
     if (isChoreLoading === false && choreData && choreId) {
@@ -558,7 +602,7 @@ const ChoreEdit = () => {
       setAssignStrategy(
         data.res.assignStrategy
           ? data.res.assignStrategy
-          : ASSIGN_STRATEGIES[2],
+          : DEFAULT_ASSIGN_STRATEGY,
       )
       setIsRolling(data.res.isRolling)
       setIsActive(data.res.isActive)
@@ -641,20 +685,6 @@ const ChoreEdit = () => {
     }
   }, [frequencyType])
 
-  useEffect(() => {
-    if (assignees.length === 0) {
-      setAssignStrategy('no_assignee')
-      setAssignedTo(null)
-    } else {
-      if (!assignees.some(a => a.userId === assignedTo)) {
-        setAssignedTo(assignees[0].userId)
-      }
-      if (assignStrategy === 'no_assignee') {
-        setAssignStrategy(ASSIGN_STRATEGIES[2]) // default to least_completed
-      }
-    }
-  }, [assignStrategy, assignedTo, assignees])
-
   // useEffect(() => {
   //   if (performers.length > 0 && assignees.length === 0 && userProfile) {
   //     setAssignees([
@@ -672,13 +702,74 @@ const ChoreEdit = () => {
     }
   }, [assignableTo, name, frequencyMetadata, attemptToSave, dueDate])
 
+  const uploadAttachmentFile = async file => {
+    if (!file) return
+    setIsUploadingAttachment(true)
+    try {
+      const response = choreId
+        ? await UploadChoreAttachment(file, 'chore_attachment', {
+            entityId: choreId,
+          })
+        : await UploadChoreAttachment(file, 'chore_attachment_draft', {
+            draftId,
+          })
+      if (!response.ok) {
+        showError({
+          title: t('choreEdit.uploadFailedTitle'),
+          message: t('choreEdit.uploadFailedMessage'),
+        })
+        return
+      }
+      const data = await response.json()
+      setAttachments(prev => [
+        ...prev,
+        {
+          file_path: data.path,
+          file_name: data.file_name,
+          size_bytes: data.size_bytes,
+          sign: data.sign,
+        },
+      ])
+    } catch {
+      showError({
+        title: t('choreEdit.uploadFailedTitle'),
+        message: t('choreEdit.uploadFailedMessage'),
+      })
+    } finally {
+      setIsUploadingAttachment(false)
+    }
+  }
+
+  // Native only: the OS scanner returns a cropped, deskewed page which is a
+  // better attachment than a raw camera shot of the same document.
+  const handleScanAttachment = async () => {
+    const { cancelled, error, image } = await scanDocument()
+    if (cancelled) return
+    if (error || !image) {
+      showError({
+        title: t('choreEdit.scanFailedTitle'),
+        message: error || t('choreEdit.scanFailedMessage'),
+      })
+      return
+    }
+    const file = await imageSourceToFile(image, `scan-${Date.now()}.jpg`)
+    if (!file) {
+      showError({
+        title: t('choreEdit.scanFailedTitle'),
+        message: t('choreEdit.scanReadFailedMessage'),
+      })
+      return
+    }
+    await uploadAttachmentFile(file)
+  }
+
   const handleDelete = () => {
     setConfirmModelConfig({
       isOpen: true,
-      title: 'Delete Chore',
-      confirmText: 'Delete',
-      cancelText: 'Cancel',
-      message: 'Are you sure you want to delete this chore?',
+      title: t('choreEdit.deleteChoreTitle'),
+      confirmText: t('common:delete'),
+      cancelText: t('common:cancel'),
+      message: t('edit.deleteConfirm'),
       onClose: isConfirmed => {
         if (isConfirmed === true) {
           deleteChores.mutate([choreId], {
@@ -687,8 +778,10 @@ const ChoreEdit = () => {
             },
             onError: error => {
               showError({
-                title: 'Delete Failed',
-                message: `Failed to delete chore: ${error.message}`,
+                title: t('choreEdit.deleteFailedTitle'),
+                message: t('choreEdit.deleteChoreFailed', {
+                  error: error.message,
+                }),
               })
             },
           })
@@ -707,7 +800,10 @@ const ChoreEdit = () => {
     return <LoadingComponent />
   }
   return (
-    <Container maxWidth='md'>
+    <Container
+      maxWidth='md'
+      sx={{ width: '100%', minWidth: 0, overflowX: 'hidden' }}
+    >
       {/* Section 1: Basic Information */}
       <Box mb={4}>
         {/* <Typography
@@ -720,10 +816,8 @@ const ChoreEdit = () => {
 
         <Box mb={3}>
           <FormControl error={errors.name}>
-            <Typography level='h4'>Name</Typography>
-            <Typography level='body-md'>
-              What is the name of this task?
-            </Typography>
+            <Typography level='h4'>{t('choreEdit.name')}</Typography>
+            <Typography level='body-md'>{t('choreEdit.nameDesc')}</Typography>
             <Input value={name} onChange={e => setName(e.target.value)} />
             <FormHelperText error>{errors.name}</FormHelperText>
           </FormControl>
@@ -731,8 +825,10 @@ const ChoreEdit = () => {
 
         <Box mb={3}>
           <FormControl error={errors.description}>
-            <Typography level='h4'>Description</Typography>
-            <Typography level='body-md'>What is this task about?</Typography>
+            <Typography level='h4'>{t('choreEdit.description')}</Typography>
+            <Typography level='body-md'>
+              {t('choreEdit.descriptionDesc')}
+            </Typography>
             <RichTextEditor
               value={description}
               onChange={setDescription}
@@ -745,8 +841,8 @@ const ChoreEdit = () => {
         </Box>
 
         <Box mb={3}>
-          <Typography level='h4'>Priority</Typography>
-          <Typography level='body-md'>How important is this task?</Typography>
+          <Typography level='h4'>{t('choreEdit.priority')}</Typography>
+          <Typography level='body-md'>{t('choreEdit.priorityDesc')}</Typography>
 
           {/* Priority Chip Selection */}
           <Box
@@ -792,7 +888,7 @@ const ChoreEdit = () => {
                 minHeight: 34,
               }}
             >
-              No Priority
+              {t('choreEdit.noPriority')}
             </Chip>
           </Box>
         </Box>
@@ -800,9 +896,9 @@ const ChoreEdit = () => {
         {/* Project Selection - Show only if there are multiple projects */}
         {projects.length >= 1 && (
           <Box mb={3}>
-            <Typography level='h4'>Project</Typography>
+            <Typography level='h4'>{t('choreEdit.project')}</Typography>
             <Typography level='body-md'>
-              Which project does this task belong to?
+              {t('choreEdit.projectDesc')}
             </Typography>
             <Select
               value={projectId}
@@ -837,7 +933,7 @@ const ChoreEdit = () => {
                       )
                     })()}
                   </Avatar>
-                  Default Project
+                  {t('choreEdit.defaultProject')}
                 </Box>
               </Option>
               {projects.map(project => (
@@ -878,10 +974,8 @@ const ChoreEdit = () => {
         )}
 
         <Box mb={3}>
-          <Typography level='h4'>Labels</Typography>
-          <Typography level='body-md'>
-            Things to remember about this task or to tag it
-          </Typography>
+          <Typography level='h4'>{t('choreEdit.labels')}</Typography>
+          <Typography level='body-md'>{t('choreEdit.labelsDesc')}</Typography>
           <Select
             multiple
             onChange={(event, newValue) => {
@@ -889,7 +983,16 @@ const ChoreEdit = () => {
             }}
             value={labelsV2?.map(l => l.name)}
             renderValue={selected => (
-              <Box sx={{ display: 'flex', gap: '0.25rem' }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '0.25rem',
+                  minWidth: 0,
+                  maxWidth: '100%',
+                  overflow: 'hidden',
+                }}
+              >
                 {labelsV2.map(selectedOption => {
                   return (
                     <Chip
@@ -910,7 +1013,7 @@ const ChoreEdit = () => {
                 })}
               </Box>
             )}
-            sx={{ minWidth: '15rem' }}
+            sx={{ width: '100%', minWidth: 0, maxWidth: '100%' }}
             slotProps={{
               listbox: {
                 sx: {
@@ -941,13 +1044,13 @@ const ChoreEdit = () => {
               }}
             >
               <Add />
-              Add New Label
+              {t('choreEdit.addNewLabel')}
             </MenuItem>
           </Select>
         </Box>
 
         <Box>
-          <Typography level='h4'>Sub Tasks</Typography>
+          <Typography level='h4'>{t('choreEdit.subTasks')}</Typography>
           {/* <FormControl sx={{ mt: 1 }}>
             <Checkbox
               onChange={e => {
@@ -980,8 +1083,10 @@ const ChoreEdit = () => {
         </Box>
 
         <Box mt={3}>
-          <Typography level='h4'>Attachments</Typography>
-          <Typography level='body-md'>Files attached to this task</Typography>
+          <Typography level='h4'>{t('choreEdit.attachments')}</Typography>
+          <Typography level='body-md'>
+            {t('choreEdit.attachmentsDesc')}
+          </Typography>
           <Card variant='outlined' sx={{ mt: 2, p: 1.5 }}>
             {attachments.length > 0 && (
               <Box
@@ -1071,8 +1176,8 @@ const ChoreEdit = () => {
                             })
                             .catch(() => {
                               showError({
-                                title: 'Delete Failed',
-                                message: 'Failed to delete attachment.',
+                                title: t('choreEdit.deleteFailedTitle'),
+                                message: t('choreEdit.deleteAttachmentFailed'),
                               })
                             })
                         }}
@@ -1097,8 +1202,8 @@ const ChoreEdit = () => {
                             })
                             .catch(() => {
                               showError({
-                                title: 'Delete Failed',
-                                message: 'Failed to delete attachment.',
+                                title: t('choreEdit.deleteFailedTitle'),
+                                message: t('choreEdit.deleteAttachmentFailed'),
                               })
                             })
                         }}
@@ -1110,62 +1215,46 @@ const ChoreEdit = () => {
                 ))}
               </Box>
             )}
-            <Button
-              component='label'
-              variant='outlined'
-              color='neutral'
-              size='sm'
-              startDecorator={isUploadingAttachment ? null : <UploadFile />}
-              loading={isUploadingAttachment}
-              sx={{ alignSelf: 'flex-start' }}
+            <Box
+              sx={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: 1,
+                alignSelf: 'flex-start',
+              }}
             >
-              Upload File
-              <input
-                type='file'
-                hidden
-                onChange={async e => {
-                  const file = e.target.files[0]
-                  if (!file) return
-                  setIsUploadingAttachment(true)
-                  try {
-                    const response = choreId
-                      ? await UploadChoreAttachment(file, 'chore_attachment', {
-                          entityId: choreId,
-                        })
-                      : await UploadChoreAttachment(
-                          file,
-                          'chore_attachment_draft',
-                          { draftId },
-                        )
-                    if (!response.ok) {
-                      showError({
-                        title: 'Upload Failed',
-                        message: 'Failed to upload attachment.',
-                      })
-                      return
-                    }
-                    const data = await response.json()
-                    setAttachments(prev => [
-                      ...prev,
-                      {
-                        file_path: data.path,
-                        file_name: data.file_name,
-                        size_bytes: data.size_bytes,
-                        sign: data.sign,
-                      },
-                    ])
-                  } catch {
-                    showError({
-                      title: 'Upload Failed',
-                      message: 'Failed to upload attachment.',
-                    })
-                  } finally {
-                    setIsUploadingAttachment(false)
+              <Button
+                component='label'
+                variant='outlined'
+                color='neutral'
+                size='sm'
+                startDecorator={isUploadingAttachment ? null : <UploadFile />}
+                loading={isUploadingAttachment}
+              >
+                {t('choreEdit.uploadFile')}
+                <input
+                  type='file'
+                  hidden
+                  onChange={async e => {
+                    const file = e.target.files[0]
                     e.target.value = ''
-                  }
-                }}
-              />
-            </Button>
+                    await uploadAttachmentFile(file)
+                  }}
+                />
+              </Button>
+              {isNativeScanner && (
+                <Button
+                  variant='outlined'
+                  color='neutral'
+                  size='sm'
+                  startDecorator={<DocumentScanner />}
+                  disabled={isUploadingAttachment}
+                  onClick={handleScanAttachment}
+                >
+                  {t('choreEdit.scan')}
+                </Button>
+              )}
+            </Box>
           </Card>
         </Box>
       </Box>
@@ -1173,8 +1262,10 @@ const ChoreEdit = () => {
       {/* Section 2: Assignment & Responsibility */}
       <Box mb={4}>
         <Box mb={3}>
-          <Typography level='h4'>Assignees</Typography>
-          <Typography level='body-md'>Who can do this task?</Typography>
+          <Typography level='h4'>{t('choreEdit.assignees')}</Typography>
+          <Typography level='body-md'>
+            {t('choreEdit.assigneesDesc')}
+          </Typography>
           <Card>
             <List
               orientation='horizontal'
@@ -1196,7 +1287,7 @@ const ChoreEdit = () => {
                   overlay
                   disableIcon
                   variant='soft'
-                  label='Anyone'
+                  label={t('choreEdit.anyone')}
                 />
               </ListItem>
 
@@ -1262,27 +1353,35 @@ const ChoreEdit = () => {
                   setShowSaveAssigneeDefault(false)
                 }}
               >
-                Remember for Future Tasks
+                {t('choreEdit.rememberFuture')}
               </Button>
             </Box>
           )}
         </Box>
 
-        {assignees.length > 1 && (
+        {canPickStrategy && (
           <>
-            <Box mb={3}>
-              <Typography level='h4'>Currently Assigned To</Typography>
+            <Box
+              mb={3}
+              sx={{
+                display:
+                  assignStrategyValue === 'no_assignee' ? 'none' : 'block',
+              }}
+            >
+              <Typography level='h4'>
+                {t('choreEdit.currentlyAssigned')}
+              </Typography>
               <Typography level='body-md'>
-                Who is assigned the next due?
+                {t('choreEdit.currentlyAssignedDesc')}
               </Typography>
               <Select
                 placeholder={
                   assignees.length === 0
-                    ? 'No Assignees yet can perform this task'
-                    : 'Select an assignee for this task'
+                    ? t('choreEdit.noAssigneesPlaceholder')
+                    : t('choreEdit.selectAssigneePlaceholder')
                 }
                 disabled={assignees.length === 0}
-                value={assignedTo > -1 ? assignedTo : null}
+                value={assignedToValue}
                 onChange={(_, selectedUserId) => setAssignedTo(selectedUserId)}
               >
                 {performers
@@ -1296,9 +1395,11 @@ const ChoreEdit = () => {
             </Box>
 
             <Box>
-              <Typography level='h4'>Assignment Strategy</Typography>
+              <Typography level='h4'>
+                {t('choreEdit.assignStrategy')}
+              </Typography>
               <Typography level='body-md'>
-                How to pick the next assignee for the following task?
+                {t('choreEdit.assignStrategyDesc')}
               </Typography>
               <Card>
                 <List
@@ -1312,15 +1413,12 @@ const ChoreEdit = () => {
                   {ASSIGN_STRATEGIES.map((item, idx) => (
                     <ListItem key={item}>
                       <Checkbox
-                        checked={assignStrategy === item}
+                        checked={assignStrategyValue === item}
                         onClick={() => setAssignStrategy(item)}
                         overlay
                         disableIcon
                         variant='soft'
-                        label={item
-                          .split('_')
-                          .map(x => x.charAt(0).toUpperCase() + x.slice(1))
-                          .join(' ')}
+                        label={t(`choreEdit.strategy.${item}`)}
                       />
                     </ListItem>
                   ))}
@@ -1360,11 +1458,13 @@ const ChoreEdit = () => {
 
         <Box mt={3} mb={3}>
           <Typography level='h4'>
-            {REPEAT_ON_TYPE.includes(frequencyType) ? 'Start Date' : 'Due Date'}
+            {REPEAT_ON_TYPE.includes(frequencyType)
+              ? t('choreEdit.startDate')
+              : t('choreEdit.dueDate')}
           </Typography>
           {frequencyType === 'trigger' && !dueDate && (
             <Typography level='body-sm'>
-              Due Date will be set when the trigger of the thing is met
+              {t('choreEdit.triggerDueHint')}
             </Typography>
           )}
 
@@ -1390,11 +1490,9 @@ const ChoreEdit = () => {
                 defaultChecked={dueDate !== null}
                 checked={dueDate !== null}
                 overlay
-                label='Give this task a due date'
+                label={t('choreEdit.giveDueDate')}
               />
-              <FormHelperText>
-                Task needs to be completed by a specific time
-              </FormHelperText>
+              <FormHelperText>{t('choreEdit.giveDueDateHelp')}</FormHelperText>
             </FormControl>
           )}
           {dueDate && (
@@ -1402,8 +1500,8 @@ const ChoreEdit = () => {
               <FormControl error={Boolean(errors.dueDate)} sx={{ mt: 2 }}>
                 <Typography level='body-md'>
                   {REPEAT_ON_TYPE.includes(frequencyType)
-                    ? 'When does this task start?'
-                    : 'When is the next first time this task is due?'}
+                    ? t('choreEdit.startWhen')
+                    : t('choreEdit.dueWhen')}
                 </Typography>
                 <Input
                   type='date'
@@ -1419,19 +1517,19 @@ const ChoreEdit = () => {
                   checked={useCustomTime}
                   onChange={e => handleUseCustomTimeChange(e.target.checked)}
                   overlay
-                  label='Set a specific time'
+                  label={t('choreEdit.setSpecificTime')}
                 />
                 <FormHelperText>
                   {useCustomTime
-                    ? 'Task will be due at the specified time'
-                    : 'Task will be due at the end of the day (11:59 PM)'}
+                    ? t('choreEdit.dueAtSpecifiedTime')
+                    : t('choreEdit.dueEndOfDay')}
                 </FormHelperText>
               </FormControl>
 
               {useCustomTime && (
                 <Box sx={{ mt: 2, ml: 4 }}>
                   <Typography level='body-sm' mb={1}>
-                    Time:
+                    {t('choreEdit.timeLabel')}
                   </Typography>
                   <Input
                     type='time'
@@ -1447,9 +1545,9 @@ const ChoreEdit = () => {
 
         {dueDate && (
           <Box mb={3}>
-            <Typography level='h4'>Task Window</Typography>
+            <Typography level='h4'>{t('choreEdit.taskWindow')}</Typography>
             <Typography level='body-md'>
-              Define when this task can be completed and when it expires
+              {t('choreEdit.taskWindowDesc')}
             </Typography>
 
             {/* Available From (Completion Window) */}
@@ -1464,10 +1562,10 @@ const ChoreEdit = () => {
                   }
                 }}
                 overlay
-                label='Set earliest completion time'
+                label={t('choreEdit.earliestCompletion')}
               />
               <FormHelperText>
-                Task becomes available to complete X hours before the due date
+                {t('choreEdit.earliestCompletionHelp')}
               </FormHelperText>
             </FormControl>
 
@@ -1479,21 +1577,16 @@ const ChoreEdit = () => {
                     ml: 4,
                   }}
                 >
-                  <Typography level='body-sm'>Hours:</Typography>
-                  <Input
-                    type='number'
+                  <Typography level='body-sm'>
+                    {t('choreEdit.hoursLabel')}
+                  </Typography>
+                  <NumberInput
                     value={completionWindow}
+                    min={0}
+                    max={24 * 7}
                     sx={{ maxWidth: 100 }}
-                    slotProps={{
-                      input: {
-                        min: 0,
-                        max: 24 * 7,
-                      },
-                    }}
-                    placeholder='Hours'
-                    onChange={e => {
-                      setCompletionWindow(parseInt(e.target.value))
-                    }}
+                    placeholder={t('choreEdit.hoursPlaceholder')}
+                    onValueChange={setCompletionWindow}
                   />
                 </Box>
               </Card>
@@ -1537,7 +1630,9 @@ const ChoreEdit = () => {
                   size='sm'
                   minValue={0}
                 />
-                <Typography level='body-sm'>after due date</Typography>
+                <Typography level='body-sm'>
+                  {t('choreEdit.afterDueDate')}
+                </Typography>
               </Box>
             )}
           </Box>
@@ -1545,9 +1640,9 @@ const ChoreEdit = () => {
 
         {!['once', 'no_repeat'].includes(frequencyType) && (
           <Box>
-            <Typography level='h4'>Scheduling Preferences</Typography>
+            <Typography level='h4'>{t('choreEdit.schedulingPrefs')}</Typography>
             <Typography level='body-md'>
-              How to reschedule the next due date?
+              {t('choreEdit.schedulingPrefsDesc')}
             </Typography>
             <RadioGroup name='tiers' sx={{ gap: 1, '& > div': { p: 1 } }}>
               <FormControl>
@@ -1555,11 +1650,10 @@ const ChoreEdit = () => {
                   overlay
                   checked={!isRolling}
                   onClick={() => setIsRolling(false)}
-                  label='Reschedule from due date'
+                  label={t('choreEdit.rescheduleFromDue')}
                 />
                 <FormHelperText>
-                  the next task will be scheduled from the original due date,
-                  even if the previous task was completed late
+                  {t('choreEdit.rescheduleFromDueHelp')}
                 </FormHelperText>
               </FormControl>
               <FormControl>
@@ -1570,11 +1664,10 @@ const ChoreEdit = () => {
                     setIsRolling(true)
                     setDeadlineOffset(-1)
                   }}
-                  label='Reschedule from completion date'
+                  label={t('choreEdit.rescheduleFromCompletion')}
                 />
                 <FormHelperText>
-                  the next task will be scheduled from the actual completion
-                  date of the previous task
+                  {t('choreEdit.rescheduleFromCompletionHelp')}
                 </FormHelperText>
               </FormControl>
             </RadioGroup>
@@ -1583,11 +1676,10 @@ const ChoreEdit = () => {
         {/* Section 3.1: Notifications */}
 
         <Box mb={3}>
-          <Typography level='h4'>Notifications</Typography>
+          <Typography level='h4'>{t('choreEdit.notifications')}</Typography>
           {!isPlusAccount(userProfile) && (
             <Typography level='body-sm' color='warning' sx={{ mb: 1 }}>
-              Task notifications are not available in the Basic plan. Upgrade to
-              Plus to receive reminders when tasks are due or completed.
+              {t('choreEdit.notificationsPlanWarning')}
             </Typography>
           )}
 
@@ -1603,14 +1695,14 @@ const ChoreEdit = () => {
               checked={isNotificable}
               disabled={!isPlusAccount(userProfile)}
               overlay
-              label='Notify for this task'
+              label={t('choreEdit.notifyForTask')}
             />
             <FormHelperText
               sx={{
                 opacity: !isPlusAccount(userProfile) ? 0.5 : 1,
               }}
             >
-              When should receive notifications for this task
+              {t('choreEdit.notifyForTaskHelp')}
             </FormHelperText>
           </FormControl>
         </Box>
@@ -1625,7 +1717,7 @@ const ChoreEdit = () => {
           >
             <Card variant='outlined'>
               <Typography level='h4' mb={2}>
-                Notification Schedule
+                {t('choreEdit.notificationSchedule')}
               </Typography>
               <Box sx={{ p: 0.5 }}>
                 <NotificationTemplate
@@ -1643,16 +1735,18 @@ const ChoreEdit = () => {
               </Box>
 
               <Typography level='h4' mt={3} mb={2}>
-                Who to Notify
+                {t('choreEdit.whoToNotify')}
               </Typography>
               <FormControl>
                 <Checkbox
                   overlay
                   disabled={true}
                   checked={true}
-                  label='All Assignees'
+                  label={t('choreEdit.allAssignees')}
                 />
-                <FormHelperText>Notify all assignees</FormHelperText>
+                <FormHelperText>
+                  {t('choreEdit.allAssigneesHelp')}
+                </FormHelperText>
               </FormControl>
 
               <FormControl>
@@ -1673,9 +1767,11 @@ const ChoreEdit = () => {
                       ? notificationMetadata?.circleGroup
                       : false
                   }
-                  label='Specific Group'
+                  label={t('choreEdit.specificGroup')}
                 />
-                <FormHelperText>Notify a specific group</FormHelperText>
+                <FormHelperText>
+                  {t('choreEdit.specificGroupHelp')}
+                </FormHelperText>
               </FormControl>
 
               {notificationMetadata?.circleGroup && (
@@ -1685,15 +1781,17 @@ const ChoreEdit = () => {
                     ml: 4,
                   }}
                 >
-                  <Typography level='body-sm'>Telegram Group ID:</Typography>
-                  <Input
-                    type='number'
+                  <Typography level='body-sm'>
+                    {t('choreEdit.telegramGroupIdLabel')}
+                  </Typography>
+                  <NumberInput
                     value={notificationMetadata?.circleGroupID}
-                    placeholder='Telegram Group ID'
-                    onChange={e => {
+                    allowEmpty
+                    placeholder={t('choreEdit.telegramGroupIdPlaceholder')}
+                    onValueChange={next => {
                       setNotificationMetadata({
                         ...notificationMetadata,
-                        circleGroupID: parseInt(e.target.value),
+                        circleGroupID: next,
                       })
                     }}
                   />
@@ -1714,11 +1812,11 @@ const ChoreEdit = () => {
             pb: 1,
           }}
         >
-          Task Settings:
+          {t('choreEdit.taskSettings')}
         </Typography>
 
         <Box mb={3}>
-          <Typography level='h4'>Points System</Typography>
+          <Typography level='h4'>{t('choreEdit.pointsSystem')}</Typography>
           <FormControl sx={{ mt: 1 }}>
             <Checkbox
               onChange={e => {
@@ -1730,12 +1828,9 @@ const ChoreEdit = () => {
               }}
               checked={points > -1}
               overlay
-              label='Assign points for completion'
+              label={t('choreEdit.assignPoints')}
             />
-            <FormHelperText>
-              Assign points to this task and user will earn points when they
-              completed it
-            </FormHelperText>
+            <FormHelperText>{t('choreEdit.assignPointsHelp')}</FormHelperText>
           </FormControl>
           {points != -1 && (
             <Card variant='outlined' sx={{ mt: 2 }}>
@@ -1745,21 +1840,16 @@ const ChoreEdit = () => {
                   ml: 4,
                 }}
               >
-                <Typography level='body-sm'>Points:</Typography>
-                <Input
-                  type='number'
+                <Typography level='body-sm'>
+                  {t('choreEdit.pointsLabel')}
+                </Typography>
+                <NumberInput
                   value={points}
+                  min={0}
+                  max={1000}
                   sx={{ maxWidth: 100 }}
-                  slotProps={{
-                    input: {
-                      min: 0,
-                      max: 1000,
-                    },
-                  }}
-                  placeholder='Points'
-                  onChange={e => {
-                    setPoints(parseInt(e.target.value))
-                  }}
+                  placeholder={t('choreEdit.pointsPlaceholder')}
+                  onValueChange={setPoints}
                 />
               </Box>
             </Card>
@@ -1767,7 +1857,9 @@ const ChoreEdit = () => {
         </Box>
 
         <Box mb={3}>
-          <Typography level='h4'>Approval Requirement</Typography>
+          <Typography level='h4'>
+            {t('choreEdit.approvalRequirement')}
+          </Typography>
           <FormControl sx={{ mt: 1 }}>
             <Checkbox
               onChange={e => {
@@ -1775,18 +1867,17 @@ const ChoreEdit = () => {
               }}
               checked={requireApproval}
               overlay
-              label='Require admin approval'
+              label={t('choreEdit.requireApproval')}
             />
             <FormHelperText>
-              This task will need approval from an admin before being marked as
-              complete
+              {t('choreEdit.requireApprovalHelp')}
             </FormHelperText>
           </FormControl>
         </Box>
 
         <Box>
-          <Typography level='h4'>Privacy Settings</Typography>
-          <Typography level='body-md'>Who can see this task?</Typography>
+          <Typography level='h4'>{t('choreEdit.privacySettings')}</Typography>
+          <Typography level='body-md'>{t('choreEdit.privacyDesc')}</Typography>
           <RadioGroup
             name='isPrivate'
             value={isPrivate}
@@ -1804,21 +1895,27 @@ const ChoreEdit = () => {
                 overlay
                 disabled={selectedProjectIsPrivate}
                 value={false}
-                label='Public'
+                label={t('choreEdit.public')}
               />
-              <FormHelperText>Everyone in your circle</FormHelperText>
+              <FormHelperText>{t('choreEdit.publicHelp')}</FormHelperText>
             </FormControl>
             <FormControl>
               <Radio
                 overlay
-                disabled={selectedProjectIsPrivate || assignees.length === 0}
+                disabled={
+                  selectedProjectIsPrivate ||
+                  anyone ||
+                  assignableTo.length === 0
+                }
                 value={true}
-                label='Limited'
+                label={t('choreEdit.limited')}
               />
               <FormHelperText>
-                You and others that are assigned to the task
-                {assignees.length === 0 && !selectedProjectIsPrivate
-                  ? ' (No assignees selected, Limited option is disabled)'
+                {t('choreEdit.limitedHelp')}
+                {selectedProjectIsPrivate ||
+                anyone ||
+                assignableTo.length === 0
+                  ? t('choreEdit.limitedDisabledHint')
                   : ''}
               </FormHelperText>
             </FormControl>
@@ -1853,7 +1950,7 @@ const ChoreEdit = () => {
                   setShowSavePrivacyDefault(false)
                 }}
               >
-                Remember for Future Tasks
+                {t('choreEdit.rememberFuture')}
               </Button>
             </Box>
           )}
@@ -1870,7 +1967,7 @@ const ChoreEdit = () => {
             }}
           >
             <Typography level='body1'>
-              Created by{' '}
+              {t('choreEdit.createdBy')}{' '}
               <Chip variant='solid'>
                 {membersData.res.find(f => f.userId === createdBy)?.displayName}
               </Chip>{' '}
@@ -1881,7 +1978,7 @@ const ChoreEdit = () => {
                 <Divider sx={{ my: 1 }} />
 
                 <Typography level='body1'>
-                  Updated by{' '}
+                  {t('choreEdit.updatedBy')}{' '}
                   <Chip variant='solid'>
                     {
                       membersData.res.find(f => f.userId === updatedBy)
@@ -1908,11 +2005,21 @@ const ChoreEdit = () => {
           bottom: 0,
           left: 0,
           right: 0,
-          p: 2, // padding
-          paddingBottom: getSafeBottomPadding(2), // safe area padding for iOS
+          width: '100%',
+          maxWidth: '100vw',
+          minWidth: 0,
+          boxSizing: 'border-box',
+          // Keep these as longhands: a responsive `p` compiles to
+          // `@media (min-width:0px){padding:...}`, which emotion emits *after*
+          // the plain `padding-bottom` rule and so wipes out the safe-area
+          // inset — the bar then sits under the Android system nav bar.
+          pt: { xs: 1, sm: 2 },
+          px: { xs: 1, sm: 2 },
+          pb: getSafeBottomPadding(2), // safe area padding for iOS/Android
           display: 'flex',
+          flexWrap: 'wrap',
           justifyContent: 'flex-end',
-          gap: 2,
+          gap: { xs: 1, sm: 2 },
           'z-index': 1000,
           bgcolor: 'background.body',
           boxShadow: 'md', // Add a subtle shadow
@@ -1931,7 +2038,7 @@ const ChoreEdit = () => {
                     : unarchiveChore.mutate(choreId)
                 }}
               >
-                {isActive ? 'Archive' : 'Unarchive'}
+                {isActive ? t('choreEdit.archive') : t('choreEdit.unarchive')}
               </Button>
               <MenuButton
                 slots={{ root: IconButton }}
@@ -1947,7 +2054,7 @@ const ChoreEdit = () => {
             </ButtonGroup>
             <Menu placement='top-end'>
               <MenuItem color='danger' onClick={handleDelete}>
-                Delete
+                {t('common:delete')}
               </MenuItem>
             </Menu>
           </Dropdown>
@@ -1959,13 +2066,13 @@ const ChoreEdit = () => {
             window.history.back()
           }}
         >
-          Cancel
+          {t('common:cancel')}
           {showKeyboardShortcuts && (
             <KeyboardShortcutHint shortcut='Esc' sx={{ ml: 1 }} />
           )}
         </Button>
         <Button color='primary' variant='solid' onClick={HandleSaveChore}>
-          {choreId > 0 ? 'Save' : 'Create'}
+          {choreId > 0 ? t('common:save') : t('choreEdit.create')}
           {showKeyboardShortcuts && (
             <KeyboardShortcutHint shortcut='Enter' sx={{ ml: 1 }} />
           )}

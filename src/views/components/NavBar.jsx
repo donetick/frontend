@@ -2,56 +2,111 @@ import { Capacitor } from '@capacitor/core'
 import {
   Archive,
   ArrowBack,
+  Checklist,
   FilterAlt,
   FolderOpen,
   History,
-  Inbox,
   ListAlt,
   Logout,
   MenuRounded,
+  ReportProblem,
+  SearchRounded,
   SettingsOutlined,
+  SpaceDashboard,
   Toll,
   Widgets,
 } from '@mui/icons-material'
 import {
   Box,
+  Divider,
   Drawer,
   IconButton,
   List,
   ListItemButton,
-  ListItemContent,
   ListItemDecorator,
+  Sheet,
+  Tooltip,
   Typography,
 } from '@mui/joy'
-
+import useMediaQuery from '@mui/material/useMediaQuery'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+
 import { version } from '../../../package.json'
 import UserProfileAvatar from '../../components/UserProfileAvatar'
-import { useLocalization } from '../../contexts/LocalizationContext'
+import { useScrollDirection } from '../../hooks/useScrollDirection'
+import { useResource } from '../../queries/ResourceQueries'
+import { useGlobalSearch } from '../../search/GlobalSearchContext'
+import { apiClient } from '../../utils/ApiClient'
+import ErrorReportModal from '../Modals/ErrorReportModal'
 import NavBarLink from './NavBarLink'
+import { OPEN_NAVIGATION_DRAWER_EVENT } from './navigationEvents'
 import SyncStatusIndicator from './SyncStatusIndicator'
 
-import { SafeArea } from 'capacitor-plugin-safe-area'
-import Z_INDEX from '../../constants/zIndex'
-import { useResource } from '../../queries/ResourceQueries'
-import { apiClient } from '../../utils/ApiClient'
+const COMPACT_NAV_WIDTH = 60
+const EXPANDED_NAV_WIDTH = 232
+const PUBLIC_PAGES = ['/landing', '/privacy', '/terms']
+const SHELL_FREE_PAGES = [
+  '/signup',
+  '/login',
+  '/auth/oauth2',
+  '/forgot-password',
+  '/password/update',
+  '/login/settings',
+  '/welcome',
+  '/onboarding',
+  '/get-started',
+  '/ready',
+  '/circle/join',
+]
 
-const publicPages = ['/landing', '/privacy', '/terms']
 const NavBar = () => {
   const { t } = useTranslation('common')
-  const { isRTL } = useLocalization()
   const { data: resource } = useResource()
-
+  const { openSearch } = useGlobalSearch()
   const navigate = useNavigate()
+  const location = useLocation()
+  const [searchParams] = useSearchParams()
   const [drawerOpen, setDrawerOpen] = useState(false)
-  
+  const [bugReportOpen, setBugReportOpen] = useState(false)
+  const [desktopExpanded, setDesktopExpanded] = useState(
+    () => window.localStorage.getItem('desktopNavExpanded') === 'true',
+  )
+  const isMobile = useMediaQuery('(max-width:768px)')
+  const isDesktop = useMediaQuery('(min-width:1024px)')
+  const headerHidden = useScrollDirection({ enabled: !isDesktop })
+
+  useEffect(() => {
+    const handleOpenDrawer = () => setDrawerOpen(true)
+    window.addEventListener(OPEN_NAVIGATION_DRAWER_EVENT, handleOpenDrawer)
+    return () =>
+      window.removeEventListener(OPEN_NAVIGATION_DRAWER_EVENT, handleOpenDrawer)
+  }, [])
+
+  useEffect(() => {
+    const width = isDesktop ? `${COMPACT_NAV_WIDTH}px` : '0px'
+    document.documentElement.style.setProperty('--app-navigation-width', width)
+    return () =>
+      document.documentElement.style.removeProperty('--app-navigation-width')
+  }, [isDesktop])
+
   const links = [
+    {
+      label: t('navigation.search'),
+      icon: <SearchRounded />,
+      onClick: () => openSearch(),
+    },
+    {
+      to: '/home',
+      label: t('navigation.home'),
+      icon: <SpaceDashboard />,
+      exact: true,
+    },
     {
       to: '/chores',
       label: t('navigation.allTasks'),
-      icon: <Inbox />,
+      icon: <Checklist />,
     },
     {
       to: '/archived',
@@ -64,27 +119,27 @@ const NavBar = () => {
       icon: <Widgets />,
     },
     {
-      to: 'labels',
+      to: '/labels',
       label: t('navigation.labels'),
       icon: <ListAlt />,
     },
     {
-      to: 'projects',
+      to: '/projects',
       label: t('navigation.projects'),
       icon: <FolderOpen />,
     },
     {
-      to: 'filters',
+      to: '/filters',
       label: t('navigation.filters'),
       icon: <FilterAlt />,
     },
     {
-      to: 'activities',
+      to: '/activities',
       label: t('navigation.activities'),
       icon: <History />,
     },
     {
-      to: 'points',
+      to: '/points',
       label: t('navigation.points'),
       icon: <Toll />,
     },
@@ -94,219 +149,411 @@ const NavBar = () => {
       icon: <SettingsOutlined />,
     },
   ]
-  const [openDrawer, closeDrawer] = [
-    () => setDrawerOpen(true),
-    () => setDrawerOpen(false),
-  ]
-  const location = useLocation()
-  const [searchParams] = useSearchParams()
-  useEffect(() => {
-    SafeArea.getSafeAreaInsets().then(data => {
-      const { insets } = data
-      const drawerContent = document.querySelector('.drawer-content')
-      if (drawerContent) {
-        drawerContent.style.paddingTop = `${insets.top}px`
-        drawerContent.style.paddingRight = `${insets.right}px`
-        drawerContent.style.paddingBottom = `${insets.bottom}px`
-        drawerContent.style.paddingLeft = `${insets.left}px`
-      }
-    })
-  }, [])
 
   const getMenuIcon = () => {
-    const menuRounded = (
-      <IconButton size='md' variant='plain' onClick={() => setDrawerOpen(true)}>
+    const menuButton = (
+      <IconButton
+        aria-label={t('navigation.openMenu', { defaultValue: 'Open menu' })}
+        size='md'
+        variant='plain'
+        onClick={() => setDrawerOpen(true)}
+        sx={{ borderRadius: 'md', minHeight: 44, minWidth: 44 }}
+      >
         <MenuRounded />
       </IconButton>
     )
-    if (!Capacitor.isNativePlatform()) {
-      return menuRounded
+
+    if (location.pathname === '/search') {
+      return (
+        <IconButton
+          size='md'
+          variant='plain'
+          onClick={() => {
+            if (window.history.state?.idx > 0) navigate(-1)
+            else navigate('/chores', { replace: true })
+          }}
+          aria-label={t('backFromSearch')}
+          title={t('back')}
+          sx={{ borderRadius: 'md', minHeight: 44, minWidth: 44 }}
+        >
+          <ArrowBack className='rtl-flip' />
+        </IconButton>
+      )
     }
+
+    if (!Capacitor.isNativePlatform()) return menuButton
+
     if (
-      ['/chores', '/'].includes(location.pathname) &&
+      ['/', '/home', '/chores'].includes(location.pathname) &&
       !searchParams.get('filterId')
     ) {
-      return menuRounded
+      return isMobile ? null : menuButton
     }
+
     return (
       <IconButton
         size='md'
         variant='plain'
-        onClick={() => {
-          if (location.pathname === '/chores') {
-            // Navigate back to calendar view
-            navigate('/')
-          } else {
-            // Default back navigation
-            navigate(-1)
-          }
-        }}
-        title={
-          searchParams.get('from') === 'calendar' ? t('backToCalendar') : t('back')
+        onClick={() =>
+          location.pathname === '/chores' ? navigate('/') : navigate(-1)
         }
+        aria-label={
+          searchParams.get('from') === 'calendar'
+            ? t('backToCalendar')
+            : t('back')
+        }
+        title={
+          searchParams.get('from') === 'calendar'
+            ? t('backToCalendar')
+            : t('back')
+        }
+        sx={{ borderRadius: 'md', minHeight: 44, minWidth: 44 }}
       >
-        <ArrowBack />
+        <ArrowBack className='rtl-flip' />
       </IconButton>
     )
   }
 
-  if (
-    [
-      '/signup',
-      '/login',
-      '/auth/oauth2',
-      '/forgot-password',
-      '/password/update',
-      '/login/settings',
-      '/welcome',
-    ].includes(location.pathname)
-  ) {
+  const navigation = (closeOnSelect, compact = false) => (
+    <List
+      aria-label={t('navigation.primaryNavigation', {
+        defaultValue: 'Primary navigation',
+      })}
+      size='md'
+      sx={{ gap: 0.25, p: compact ? 0.5 : 1 }}
+      onClick={closeOnSelect ? () => setDrawerOpen(false) : undefined}
+    >
+      {links.map((link, index) => (
+        <Box key={link.to || link.label} sx={{ width: '100%' }}>
+          {index === 3 && <Divider sx={{ my: 1 }} />}
+          <NavBarLink compact={compact} link={link} />
+        </Box>
+      ))}
+    </List>
+  )
+
+  const footer = (compact = false, showAccountRow = true) => (
+    <Box
+      sx={{
+        borderTop: '1px solid',
+        borderColor: 'divider',
+        p: compact ? 0.5 : 1,
+      }}
+    >
+      {showAccountRow && (
+        <Box
+          sx={{
+            alignItems: 'center',
+            display: 'flex',
+            flexDirection: compact ? 'column' : 'row',
+            gap: compact ? 0.5 : 1,
+            minHeight: 48,
+            px: compact ? 0 : 1,
+            py: compact ? 0.5 : 0,
+          }}
+        >
+          <Tooltip
+            title={
+              compact
+                ? t('navigation.profile', { defaultValue: 'Profile' })
+                : ''
+            }
+            placement='right'
+          >
+            <Box
+              sx={{
+                alignItems: 'center',
+                display: 'flex',
+                height: compact ? 48 : 'auto',
+                justifyContent: 'center',
+                width: compact ? 48 : 'auto',
+              }}
+            >
+              <UserProfileAvatar />
+            </Box>
+          </Tooltip>
+          {!compact && <Box sx={{ flex: 1 }} />}
+          <Box
+            sx={{
+              alignItems: 'center',
+              display: 'flex',
+              height: compact ? 48 : 'auto',
+              justifyContent: 'center',
+              width: compact ? 48 : 'auto',
+            }}
+          >
+            <SyncStatusIndicator />
+          </Box>
+        </Box>
+      )}
+      <List size='sm' sx={{ gap: 0.25, p: 0 }}>
+        <Tooltip
+          title={compact ? t('navigation.reportBug') : ''}
+          placement='right'
+        >
+          <ListItemButton
+            aria-label={t('navigation.reportBug')}
+            onClick={() => {
+              setDrawerOpen(false)
+              setBugReportOpen(true)
+            }}
+            sx={{
+              borderRadius: 'md',
+              gap: compact ? 0 : undefined,
+              justifyContent: compact ? 'center' : 'flex-start',
+              minHeight: 48,
+              mx: compact ? 'auto' : 0,
+              px: compact ? 0 : 1.5,
+              width: compact ? 48 : '100%',
+            }}
+          >
+            <ListItemDecorator
+              sx={
+                compact
+                  ? { marginInlineEnd: '0 !important', minInlineSize: 0 }
+                  : undefined
+              }
+            >
+              <ReportProblem />
+            </ListItemDecorator>
+            {!compact && (
+              <Typography level='body-sm' sx={{ fontWeight: 400 }}>
+                {t('navigation.reportBug')}
+              </Typography>
+            )}
+          </ListItemButton>
+        </Tooltip>
+        <Tooltip title={compact ? t('logout') : ''} placement='right'>
+          <ListItemButton
+            aria-label={t('logout')}
+            onClick={() => apiClient.handleLogout()}
+            sx={{
+              borderRadius: 'md',
+              gap: compact ? 0 : undefined,
+              justifyContent: compact ? 'center' : 'flex-start',
+              minHeight: 48,
+              mx: compact ? 'auto' : 0,
+              px: compact ? 0 : 1.5,
+              width: compact ? 48 : '100%',
+            }}
+          >
+            <ListItemDecorator
+              sx={
+                compact
+                  ? { marginInlineEnd: '0 !important', minInlineSize: 0 }
+                  : undefined
+              }
+            >
+              <Logout />
+            </ListItemDecorator>
+            {!compact && (
+              <Typography level='body-sm' sx={{ fontWeight: 400 }}>
+                {t('logout')}
+              </Typography>
+            )}
+          </ListItemButton>
+        </Tooltip>
+      </List>
+      {!compact && (
+        <Typography
+          level='body-xs'
+          onClick={() => window.location.reload()}
+          sx={{ color: 'text.tertiary', cursor: 'pointer', px: 1, py: 0.75 }}
+        >
+          {t('versionInfo', {
+            version,
+            apiVersion: resource?.api_version || t('apiVersionUnavailable'),
+          })}
+        </Typography>
+      )}
+    </Box>
+  )
+
+  if (SHELL_FREE_PAGES.includes(location.pathname)) {
     return (
-      // no navbar but show the safe area padding
-      <div
-        style={{
-          paddingTop: `calc(var(--safe-area-inset-top, 0px))`,
-          top: 0,
-        }}
-      />
+      <Box aria-hidden='true' sx={{ pt: 'var(--safe-area-inset-top, 0px)' }} />
     )
   }
-  // if url has /landing then remove the navbar:
-  if (publicPages.includes(location.pathname)) {
-    return null
-  }
-  if (
-    window.location.hostname === 'www.donetick.com' ||
-    window.location.hostname === 'donetick.com'
-  ) {
+  if (PUBLIC_PAGES.includes(location.pathname)) return null
+  if (isMobile && location.pathname === '/search') return null
+  if (['www.donetick.com', 'donetick.com'].includes(window.location.hostname)) {
     return null
   }
 
   return (
-    <nav
-      className='flex gap-2 p-3'
-      style={{
-        paddingTop:
-          Capacitor.getPlatform() === 'android'
-            ? `calc(var(--safe-area-inset-top, 0px))`
-            : '',
-        position: 'sticky',
-        zIndex: Z_INDEX.NAVBAR,
-        top: 0,
-        minHeight: '35px',
-        backgroundColor: 'var(--joy-palette-background-body)',
-      }}
-    >
-      {getMenuIcon()}
-      <Box className='flex-1' />
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <SyncStatusIndicator />
-        <UserProfileAvatar />
-        {/* <ThemeToggleButton /> */}
-      </Box>
-      <Drawer
-        open={drawerOpen}
-        onClose={closeDrawer}
-        anchor={isRTL ? 'right' : 'left'}
-        size='sm'
-        onClick={closeDrawer}
-        sx={{
-          '& .MuiDrawer-content': {
-            position: 'fixed',
-            // pt: 'calc(var(--safe-area-inset-top, 0px))',
-            ...(isRTL ? { right: 0 } : { left: 0 }),
-            // pb: 'calc(var(--safe-area-inset-bottom, 0px))',
-            // height:
-            //   'calc(100vh - var(--safe-area-inset-top, 0px) - var(--safe-area-inset-bottom, 0px))',
-            overflow: 'auto',
-            zIndex: Z_INDEX.DRAWER,
-          },
-        }}
-      >
-        <div className='drawer-content'>
-          {/* <div className='align-center flex px-5 pt-4'>
-            <ModalClose size='sm' sx={{ top: 'unset', right: 20 }} />
-          </div> */}
-          <List
-            // sx={{ p: 2, height: 'min-content' }}
-
-            size='md'
-            onClick={openDrawer}
+    <>
+      {isDesktop ? (
+        <>
+          <Box
+            aria-hidden='true'
             sx={{
-              borderRadius: 4,
-              width: '100%',
-              padding: 1,
-              paddingTop:
+              flexShrink: 0,
+              width: COMPACT_NAV_WIDTH,
+            }}
+          />
+          <Sheet
+            component='aside'
+            variant='plain'
+            sx={{
+              bgcolor: 'background.surface',
+              borderInlineEnd: '1px solid',
+              borderColor: 'divider',
+              boxShadow: desktopExpanded ? 'lg' : 'none',
+              display: 'flex',
+              flexDirection: 'column',
+              flexShrink: 0,
+              fontFamily: 'var(--joy-fontFamily-body)',
+              height: '100dvh',
+              insetInlineStart: 0,
+              overflow: 'hidden',
+              position: 'fixed',
+              top: 0,
+              transition: 'width 200ms ease',
+              width: desktopExpanded ? EXPANDED_NAV_WIDTH : COMPACT_NAV_WIDTH,
+              zIndex: 'var(--joy-zIndex-popup)',
+              '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
+            }}
+          >
+            <Box
+              sx={{
+                alignItems: 'center',
+                display: 'flex',
+                gap: 1,
+                justifyContent: desktopExpanded ? 'flex-start' : 'center',
+                minHeight: 56,
+                overflow: 'hidden',
+                px: desktopExpanded ? 1.5 : 0,
+                pt: 'var(--safe-area-inset-top, 0px)',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <Tooltip
+                title={
+                  desktopExpanded
+                    ? t('navigation.collapseMenu', {
+                        defaultValue: 'Collapse menu',
+                      })
+                    : t('navigation.expandMenu', {
+                        defaultValue: 'Expand menu',
+                      })
+                }
+                placement='right'
+              >
+                <IconButton
+                  aria-label={
+                    desktopExpanded
+                      ? t('navigation.collapseMenu', {
+                          defaultValue: 'Collapse menu',
+                        })
+                      : t('navigation.expandMenu', {
+                          defaultValue: 'Expand menu',
+                        })
+                  }
+                  onClick={() => {
+                    const expanded = !desktopExpanded
+                    setDesktopExpanded(expanded)
+                    window.localStorage.setItem(
+                      'desktopNavExpanded',
+                      String(expanded),
+                    )
+                  }}
+                  sx={{ flexShrink: 0 }}
+                >
+                  <MenuRounded />
+                </IconButton>
+              </Tooltip>
+            </Box>
+            <Box
+              sx={{
+                flex: 1,
+                minHeight: 0,
+                overflowY: 'auto',
+                overflowX: 'hidden',
+              }}
+            >
+              {navigation(false, !desktopExpanded)}
+            </Box>
+            <Box sx={{ pb: 'var(--safe-area-inset-bottom, 0px)' }}>
+              {footer(!desktopExpanded)}
+            </Box>
+          </Sheet>
+        </>
+      ) : (
+        <>
+          <Sheet
+            component='header'
+            variant='plain'
+            sx={{
+              alignItems: 'center',
+              backdropFilter: 'blur(16px)',
+              bgcolor:
+                'rgba(var(--joy-palette-background-surfaceChannel) / 0.88)',
+              borderBottom: 'none',
+              borderColor: 'divider',
+              '@media (min-width: 769px)': { borderBottom: '1px solid' },
+              display: 'flex',
+              gap: 1,
+              minHeight: 56,
+              px: { xs: 1, sm: 2 },
+              pb: 0.375,
+              pt:
                 Capacitor.getPlatform() === 'android'
-                  ? `calc(var(--safe-area-inset-top, 0px))`
-                  : '',
+                  ? 'calc(var(--safe-area-inset-top, 0px) + 3px)'
+                  : 0.375,
+              position: 'sticky',
+              top: 0,
+              transform: headerHidden ? 'translateY(-100%)' : 'translateY(0)',
+              transition: 'transform 220ms ease',
+              zIndex: 'var(--joy-zIndex-popup)',
+              '@media (min-width: 1024px)': { display: 'none' },
+              '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
             }}
           >
-            {links.map((link, index) => (
-              <NavBarLink key={index} link={link} />
-            ))}
-          </List>
-        </div>
-        <div>
-          <List
+            {getMenuIcon()}
+            <Box sx={{ flex: 1 }} />
+            <SyncStatusIndicator />
+            <UserProfileAvatar />
+          </Sheet>
+
+          <Drawer
+            open={drawerOpen}
+            onClose={() => setDrawerOpen(false)}
+            anchor='left'
+            size='sm'
             sx={{
-              p: 2,
-              height: 'min-content',
-              position: 'absolute',
-              bottom: 0,
-              borderRadius: 4,
-              width: '100%',
-              padding: 2,
+              '--Drawer-horizontalSize': 'min(72vw, 248px)',
+              '@media (min-width: 1024px)': { display: 'none' },
+              '& .MuiDrawer-content': {
+                display: 'flex',
+                flexDirection: 'column',
+                fontFamily: 'var(--joy-fontFamily-body)',
+                overflow: 'hidden',
+              },
             }}
-            size='md'
-            onClick={openDrawer}
           >
-            {/*  Add List item to invite the user to upgrade to Plus: */}
-            {/* <ListItemButton
-              onClick={() => navigate('/settings#subscription')}
+            <Box
+              className='safe-area-x'
               sx={{
-                py: 1.2,
+                flex: 1,
+                minHeight: 0,
+                overflowY: 'auto',
+                pt: 'calc(var(--safe-area-inset-top, 0px) + 4px)',
               }}
             >
-              <ListItemDecorator>
-                <SwitchAccessShortcutAdd />
-              </ListItemDecorator>
-              <ListItemContent>Upgrade to Plus</ListItemContent>
-            </ListItemButton> */}
-            <ListItemButton
-              onClick={() => {
-                apiClient.handleLogout()
-              }}
-              sx={{
-                py: 1.2,
-              }}
-            >
-              <ListItemDecorator>
-                <Logout />
-              </ListItemDecorator>
-              <ListItemContent>{t('logout')}</ListItemContent>
-            </ListItemButton>
-            <Typography
-              onClick={
-                // force service worker to update:
-                () => window.location.reload(true)
-              }
-              level='body-xs'
-              sx={{
-                // p: 2,
-                p: 1,
-                color: 'text.tertiary',
-                textAlign: 'center',
-                mb: 'calc(var(--safe-area-inset-bottom, 0px) )',
-                // mb: -2,
-              }}
-            >
-              V{version} (API: {resource?.api_version || 'unavailable'})
-            </Typography>
-          </List>
-        </div>
-      </Drawer>
-    </nav>
+              {navigation(true)}
+            </Box>
+            <Box className='safe-area-x safe-area-bottom'>
+              {footer(false, false)}
+            </Box>
+          </Drawer>
+        </>
+      )}
+
+      <ErrorReportModal
+        open={bugReportOpen}
+        onClose={() => setBugReportOpen(false)}
+      />
+    </>
   )
 }
 

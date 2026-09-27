@@ -1,7 +1,7 @@
 import { WifiOff } from '@mui/icons-material'
 import { Alert, Box } from '@mui/joy'
 import { useEffect, useState } from 'react'
-import Z_INDEX from '../../constants/zIndex'
+
 import { networkManager } from '../../hooks/NetworkManager'
 
 const NetworkBanner = () => {
@@ -56,7 +56,7 @@ const NetworkBanner = () => {
             paddingTop: `calc(var(--safe-area-inset-top, 0px))`,
             top: 0,
             left: 0,
-            zIndex: Z_INDEX.NETWORK_BANNER,
+            zIndex: 'var(--joy-zIndex-snackbar)',
             pt: `calc( env(safe-area-inset-top, 0px))`,
             width: '100%',
             justifyContent: 'center',

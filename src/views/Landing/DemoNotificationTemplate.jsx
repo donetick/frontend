@@ -1,4 +1,5 @@
 import { Card, Grid, Typography } from '@mui/joy'
+
 import NotificationTemplate from '../../components/NotificationTemplate'
 
 const DemoNotificationTemplate = () => {

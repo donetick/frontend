@@ -1,19 +1,22 @@
 import {
-    Alert,
-    Box,
-    Button,
-    FormControl,
-    FormLabel,
-    Switch,
-    Textarea,
-    Typography,
+  Alert,
+  Box,
+  FormControl,
+  FormLabel,
+  Switch,
+  Textarea,
+  Typography,
 } from '@mui/joy'
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import KeyboardShortcutHint from '../../../components/common/KeyboardShortcutHint'
+import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { isOfficialDonetickInstanceSync } from '../../../utils/FeatureToggle'
 
 function NudgeModal({ config }) {
+  const { t } = useTranslation('chores')
   const { ResponsiveModal } = useResponsiveModal()
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
   const [message, setMessage] = useState('')
@@ -107,31 +110,43 @@ function NudgeModal({ config }) {
       size='lg'
       fullWidth={true}
       unmountDelay={250}
-      title='Send Nudge'
+      title={t('nudge.title')}
+      description={t('nudge.description')}
+      footer={
+        <ModalActions
+          secondary={{
+            label: t('choreView.cancel'),
+            onClick: () => handleAction(false),
+            endDecorator: showKeyboardShortcuts ? (
+              <KeyboardShortcutHint shortcut='X' />
+            ) : undefined,
+          }}
+          primary={{
+            label: t('nudge.title'),
+            onClick: () => handleAction(true),
+            disabled: !isOfficialInstance,
+            endDecorator: showKeyboardShortcuts ? (
+              <KeyboardShortcutHint shortcut='Y' />
+            ) : undefined,
+          }}
+        />
+      }
     >
-      <Typography level='body-md' mb={2}>
-        Send a gentle reminder to the assignee about this task. You can
-        customize the message and choose who gets notified.
-      </Typography>
-
       {!isOfficialInstance && (
         <Alert color='warning' sx={{ mb: 2 }}>
           <Typography level='body-sm'>
-            <strong>Heads up!</strong>This feature avaiable on Donetick Cloud!
-            Since you're using a self-hosted instance, nudges will requires you
-            to setup Google cloud account and Firebase Cloud Messaging (FCM).
-            and build the Android or the iOS app by yourself.
+            <strong>{t('nudge.selfHostedHeading')}</strong>{' '}
+            {t('nudge.selfHostedNotice')}
             <br />
-            Will update if we come up with a solution to make this easier for to
-            configure. for selfhosters
+            {t('nudge.selfHostedFollowUp')}
           </Typography>
         </Alert>
       )}
 
       <FormControl mb={2}>
-        <FormLabel>Custom Message (optional)</FormLabel>
+        <FormLabel>{t('nudge.customMessage')}</FormLabel>
         <Textarea
-          placeholder='Add a personal message with your nudge...'
+          placeholder={t('nudge.messagePlaceholder')}
           value={message}
           onChange={e => setMessage(e.target.value)}
           minRows={3}
@@ -141,10 +156,9 @@ function NudgeModal({ config }) {
 
       <FormControl orientation='horizontal' sx={{ mb: 3 }}>
         <Box sx={{ flex: 1 }}>
-          <FormLabel>Notify All Assignees</FormLabel>
+          <FormLabel>{t('nudge.notifyAll')}</FormLabel>
           <Typography level='body-sm' color='text.secondary'>
-            If enabled, all members who can see this task will be notified.
-            Otherwise, only the assigned person will receive the nudge.
+            {t('nudge.notifyAllHint')}
           </Typography>
         </Box>
         <Switch
@@ -152,33 +166,6 @@ function NudgeModal({ config }) {
           onChange={e => setNotifyAllAssignees(e.target.checked)}
         />
       </FormControl>
-
-      <Box display={'flex'} justifyContent={'space-around'} gap={1}>
-        <Button
-          size='lg'
-          onClick={() => handleAction(true)}
-          disabled={!isOfficialInstance}
-          fullWidth
-          color='primary'
-          endDecorator={
-            <KeyboardShortcutHint shortcut='Y' show={showKeyboardShortcuts} />
-          }
-        >
-          Send Nudge
-        </Button>
-
-        <Button
-          size='lg'
-          onClick={() => handleAction(false)}
-          variant='outlined'
-          fullWidth
-          endDecorator={
-            <KeyboardShortcutHint shortcut='X' show={showKeyboardShortcuts} />
-          }
-        >
-          Cancel
-        </Button>
-      </Box>
     </ResponsiveModal>
   )
 }

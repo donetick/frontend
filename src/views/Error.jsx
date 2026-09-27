@@ -10,8 +10,15 @@ import {
   SearchOffRounded,
 } from '@mui/icons-material'
 import { Box, Button, IconButton, Snackbar, Typography } from '@mui/joy'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link, useRouteError } from 'react-router-dom'
+
+import {
+  collectErrorReport,
+  formatErrorReport,
+} from '../service/ErrorReportService'
+import ErrorReportModal from './Modals/ErrorReportModal'
 
 const getErrorKind = error => {
   if (!error)
@@ -48,27 +55,31 @@ const safeMessage = error => {
   return msg
 }
 
-const buildErrorText = (error, url) => {
-  const lines = [
-    `URL: ${url}`,
-    `Time: ${new Date().toISOString()}`,
-    `Error: ${safeMessage(error) ?? String(error)}`,
-  ]
-  if (error?.stack) lines.push(`\nStack:\n${error.stack}`)
-  return lines.join('\n')
-}
-
 const Error = () => {
+  const { t } = useTranslation('common')
   const error = useRouteError()
   const [showDetails, setShowDetails] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [reportOpen, setReportOpen] = useState(false)
+  const [reportText, setReportText] = useState('')
 
-  const { color, Icon } = getErrorKind(error)
+  const { Icon, color } = getErrorKind(error)
   const message = safeMessage(error)
-  const url = window.location.href
+
+  // The same bundle the report modal sends, so what the user copies and what
+  // we receive can never disagree.
+  useEffect(() => {
+    let active = true
+    collectErrorReport({ error }).then(report => {
+      if (active) setReportText(formatErrorReport(report))
+    })
+    return () => {
+      active = false
+    }
+  }, [error])
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(buildErrorText(error, url)).then(() => {
+    navigator.clipboard.writeText(reportText).then(() => {
       setCopied(true)
     })
   }
@@ -183,7 +194,7 @@ const Error = () => {
         textAlign='center'
         sx={{ mb: 1.5 }}
       >
-        Something went wrong
+        {t('errorScreen.title')}
       </Typography>
 
       {/* Error message */}
@@ -198,8 +209,7 @@ const Error = () => {
           wordBreak: 'break-word',
         }}
       >
-        {message ??
-          'An unexpected error occurred. Try reloading — it usually fixes it.'}
+        {message ?? t('errorScreen.fallback')}
       </Typography>
 
       {/* Primary CTA */}
@@ -209,9 +219,22 @@ const Error = () => {
         size='lg'
         startDecorator={<RefreshRounded />}
         onClick={() => window.location.reload()}
+        sx={{ width: '100%', mb: 1.5 }}
+      >
+        {t('errorScreen.tryAgain')}
+      </Button>
+
+      {/* Reporting is one tap from the failure, where the context is still
+          fresh — asking people to find it in Settings afterwards never works. */}
+      <Button
+        variant='outlined'
+        color='neutral'
+        size='lg'
+        startDecorator={<BugReportRounded />}
+        onClick={() => setReportOpen(true)}
         sx={{ width: '100%', mb: 2 }}
       >
-        Try again
+        {t('errorScreen.reportProblem')}
       </Button>
 
       {/* Secondary actions */}
@@ -224,7 +247,7 @@ const Error = () => {
           size='lg'
           startDecorator={<HomeRounded />}
         >
-          Home
+          {t('errorScreen.home')}
         </Button>
         <Button
           component={Link}
@@ -233,7 +256,7 @@ const Error = () => {
           color='neutral'
           size='lg'
         >
-          Login
+          {t('errorScreen.login')}
         </Button>
       </Box>
 
@@ -251,16 +274,7 @@ const Error = () => {
           textAlign='center'
           sx={{ color: 'text.tertiary', mb: 1.5 }}
         >
-          If this keeps happening,{' '}
-          <a
-            href='https://github.com/donetick/donetick/issues/new'
-            target='_blank'
-            rel='noopener noreferrer'
-            style={{ textDecoration: 'underline' }}
-          >
-            open an issue
-          </a>{' '}
-          and include the error details below.
+          {t('errorScreen.reportHint')}
         </Typography>
 
         {(error?.stack || message) && (
@@ -280,7 +294,9 @@ const Error = () => {
               }
               sx={{ mb: 1 }}
             >
-              {showDetails ? 'Hide' : 'Show'} error details
+              {showDetails
+                ? t('errorScreen.hideDetails')
+                : t('errorScreen.showDetails')}
             </Button>
 
             {showDetails && (
@@ -299,7 +315,7 @@ const Error = () => {
                   color='neutral'
                   onClick={handleCopy}
                   sx={{ position: 'absolute', top: 8, right: 8 }}
-                  title='Copy to clipboard'
+                  title={t('errorScreen.copyToClipboard')}
                 >
                   <ContentCopyRounded fontSize='small' />
                 </IconButton>
@@ -313,13 +329,19 @@ const Error = () => {
                     color: 'text.secondary',
                   }}
                 >
-                  {buildErrorText(error, url)}
+                  {reportText || t('errorScreen.collectingDetails')}
                 </Typography>
               </Box>
             )}
           </>
         )}
       </Box>
+
+      <ErrorReportModal
+        open={reportOpen}
+        onClose={() => setReportOpen(false)}
+        error={error}
+      />
 
       <Snackbar
         open={copied}
@@ -328,7 +350,7 @@ const Error = () => {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
         size='sm'
       >
-        Error details copied to clipboard
+        {t('errorScreen.copied')}
       </Snackbar>
     </Box>
   )

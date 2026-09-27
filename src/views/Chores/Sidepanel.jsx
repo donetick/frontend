@@ -1,6 +1,7 @@
 import { Box, Sheet } from '@mui/joy'
 import { useMediaQuery } from '@mui/material'
 import { useEffect, useState } from 'react'
+
 import { useChoresHistory } from '../../queries/ChoreQueries'
 import { ChoresGrouper } from '../../utils/Chores'
 import { getSidepanelConfig } from '../../utils/SidepanelConfig'
@@ -11,9 +12,9 @@ import TasksByAssigneeCard from './TasksByAssigneeCard'
 import UserSwitcher from './UserSwitcher'
 
 const Sidepanel = ({
-  chores,
   allChores,
   applyTempFilter,
+  chores,
   clearTempFilter,
   tempFilter,
 }) => {
@@ -22,8 +23,8 @@ const Sidepanel = ({
   const [sidepanelConfig, setSidepanelConfig] = useState([])
   const {
     data: choresHistory,
-    isChoresHistoryLoading,
     handleLimitChange: refetchHistory,
+    isChoresHistoryLoading,
   } = useChoresHistory(7, true)
 
   useEffect(() => {

@@ -1,6 +1,5 @@
 import {
   Box,
-  Button,
   Card,
   CircularProgress,
   FormControl,
@@ -10,13 +9,20 @@ import {
   Select,
   Typography,
 } from '@mui/joy'
-import { data } from 'autoprefixer'
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+
+import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { CheckUserDeletion, DeleteUser } from '../../../utils/Fetcher'
 
-function UserDeletionModal({ isOpen, onClose, userProfile }) {
+// Sent verbatim to the delete endpoint, so it stays English in every locale —
+// the label around it is what gets translated.
+const CONFIRMATION_WORD = 'DELETE'
+
+function UserDeletionModal({ isOpen, onClose }) {
+  const { t } = useTranslation('settings')
   const { ResponsiveModal } = useResponsiveModal()
   const Navigate = useNavigate()
   const [step, setStep] = useState(1) // 1: Warning, 2: Transfer, 3: Confirm
@@ -48,7 +54,7 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
 
   const checkDeletionRequirements = async () => {
     if (password.trim() === '') {
-      setError('Please enter your password to continue')
+      setError(t('deletion.passwordRequired'))
       return
     }
 
@@ -70,7 +76,8 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
         setError(data.error || 'Failed to check deletion requirements')
       }
     } catch (err) {
-      setError(data.error || 'Failed to check deletion requirements')
+      console.error('Failed to check deletion requirements:', err)
+      setError('Failed to check deletion requirements')
     } finally {
       setLoading(false)
     }
@@ -96,8 +103,8 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
   }
 
   const executeUserDeletion = async () => {
-    if (password.trim() === '' || confirmation !== 'DELETE') {
-      setError('Please enter your password and type DELETE to confirm')
+    if (password.trim() === '' || confirmation !== CONFIRMATION_WORD) {
+      setError(t('deletion.passwordAndDelete'))
       return
     }
 
@@ -119,7 +126,8 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
         setError(data.message || 'Failed to delete account')
       }
     } catch (err) {
-      setError('Failed to delete account')
+      console.error('Failed to delete account:', err)
+      setError(t('deletion.failed'))
     } finally {
       setLoading(false)
     }
@@ -148,43 +156,33 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
 
   const renderWarningStep = () => (
     <>
-      <Typography level='h4' mb={2} color='danger'>
-        Delete Account
-      </Typography>
-
       <Typography level='body-md' mb={2}>
-        <strong>This action cannot be undone.</strong> Deleting your account
-        will permanently remove:
+        <strong>{t('deletion.warningLead')}</strong>{' '}
+        {t('deletion.warningIntro')}
       </Typography>
 
       <Box mb={3}>
-        <Typography level='body-sm' mb={1}>
-          • Your user profile and authentication data
-        </Typography>
-        <Typography level='body-sm' mb={1}>
-          • All your chores, chore history, and time tracking sessions
-        </Typography>
-        <Typography level='body-sm' mb={1}>
-          • API tokens, MFA sessions, and password reset tokens
-        </Typography>
-        <Typography level='body-sm' mb={1}>
-          • Storage files and usage data
-        </Typography>
-        <Typography level='body-sm' mb={1}>
-          • Points history and notifications
-        </Typography>
-        <Typography level='body-sm' mb={1}>
-          • Circle memberships and relationships
-        </Typography>
+        {[
+          'removesProfile',
+          'removesChores',
+          'removesTokens',
+          'removesStorage',
+          'removesPoints',
+          'removesCircles',
+        ].map(key => (
+          <Typography key={key} level='body-sm' mb={1}>
+            • {t(`deletion.${key}`)}
+          </Typography>
+        ))}
       </Box>
 
       <FormControl sx={{ mb: 2 }}>
-        <FormLabel>Enter your password to continue</FormLabel>
+        <FormLabel>{t('deletion.passwordToContinue')}</FormLabel>
         <Input
           type='password'
           value={password}
           onChange={e => setPassword(e.target.value)}
-          placeholder='Enter your password'
+          placeholder={t('deletion.passwordPlaceholder')}
         />
       </FormControl>
 
@@ -193,44 +191,24 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
           {error}
         </Typography>
       )}
-
-      <Box display='flex' justifyContent='space-between' mt={3} gap={2}>
-        <Button variant='outlined' onClick={() => handleClose(false)} fullWidth>
-          Cancel
-        </Button>
-        <Button
-          color='danger'
-          onClick={checkDeletionRequirements}
-          loading={loading}
-          disabled={!password}
-          fullWidth
-        >
-          Continue
-        </Button>
-      </Box>
     </>
   )
 
   const renderTransferStep = () => (
     <>
-      <Typography level='h4' mb={2} color='warning'>
-        Circle Ownership Transfer Required
-      </Typography>
-
       <Typography level='body-md' mb={3}>
-        You own circles that require ownership transfer before deletion. Please
-        select new owners:
+        {t('deletion.transferIntro')}
       </Typography>
 
       {circlesRequiringTransfer.map(circle => (
         <Card key={circle.id} sx={{ mb: 2, p: 2 }}>
           <Typography level='title-sm' mb={1}>
-            Circle: {circle.name}
+            {t('deletion.circleLabel', { name: circle.name })}
           </Typography>
           <FormControl>
-            <FormLabel>New Owner</FormLabel>
+            <FormLabel>{t('deletion.newOwner')}</FormLabel>
             <Select
-              placeholder='Select new owner'
+              placeholder={t('deletion.selectOwner')}
               value={
                 transferOptions.find(t => t.circleId === circle.id)
                   ?.newOwnerId || ''
@@ -253,54 +231,36 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
           </FormControl>
         </Card>
       ))}
-
-      <Box display='flex' justifyContent='space-between' mt={3} gap={2}>
-        <Button variant='outlined' onClick={() => handleClose(false)} fullWidth>
-          Cancel
-        </Button>
-        <Button
-          color='primary'
-          onClick={proceedToConfirmation}
-          disabled={circlesRequiringTransfer.length !== transferOptions.length}
-          fullWidth
-        >
-          Continue
-        </Button>
-      </Box>
     </>
   )
 
   const renderConfirmationStep = () => (
     <>
-      <Typography level='h4' mb={2} color='danger'>
-        Final Confirmation
-      </Typography>
-
       <Typography level='body-md' mb={3}>
-        Please enter your password and type <strong>DELETE</strong> to confirm
-        account deletion.
+        {t('deletion.confirmPrompt')}
       </Typography>
       <Typography level='body-sm' mb={2}>
-        on successful deletion, you will be logged out and redirected to the
-        login page.
+        {t('deletion.logoutNotice')}
       </Typography>
 
       <FormControl sx={{ mb: 2 }}>
-        <FormLabel>Password</FormLabel>
+        <FormLabel>{t('deletion.passwordLabel')}</FormLabel>
         <Input
           type='password'
           value={password}
           onChange={e => setPassword(e.target.value)}
-          placeholder='Enter your password'
+          placeholder={t('deletion.passwordPlaceholder')}
         />
       </FormControl>
 
       <FormControl sx={{ mb: 3 }}>
-        <FormLabel>Type "DELETE" to confirm</FormLabel>
+        <FormLabel>
+          {t('deletion.typeToConfirm', { word: CONFIRMATION_WORD })}
+        </FormLabel>
         <Input
           value={confirmation}
           onChange={e => setConfirmation(e.target.value)}
-          placeholder='DELETE'
+          placeholder={t('deletion.typeDelete')}
         />
       </FormControl>
 
@@ -309,21 +269,6 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
           {error}
         </Typography>
       )}
-
-      <Box display='flex' justifyContent='space-between' gap={2}>
-        <Button variant='outlined' onClick={() => handleClose(false)} fullWidth>
-          Cancel
-        </Button>
-        <Button
-          color='danger'
-          onClick={executeUserDeletion}
-          loading={loading}
-          disabled={!password || confirmation !== 'DELETE'}
-          fullWidth
-        >
-          Delete Account
-        </Button>
-      </Box>
     </>
   )
 
@@ -345,8 +290,42 @@ function UserDeletionModal({ isOpen, onClose, userProfile }) {
       open={isOpen}
       onClose={() => handleClose(false)}
       size='lg'
-      fullWidth={true}
-      title='Delete Account'
+      title={
+        step === 1
+          ? 'Delete Account'
+          : step === 2
+            ? 'Transfer Circle Ownership'
+            : 'Final Confirmation'
+      }
+      role={step === 3 ? 'alertdialog' : 'dialog'}
+      closeOnBackdrop={false}
+      footer={
+        !loading && (
+          <ModalActions
+            stackOnMobile
+            secondary={{
+              label: t('accountSettings.cancel'),
+              onClick: () => handleClose(false),
+            }}
+            primary={{
+              label: step === 3 ? 'Delete Account' : 'Continue',
+              color: step === 3 ? 'danger' : 'primary',
+              onClick:
+                step === 1
+                  ? checkDeletionRequirements
+                  : step === 2
+                    ? proceedToConfirmation
+                    : executeUserDeletion,
+              disabled:
+                step === 1
+                  ? !password
+                  : step === 2
+                    ? circlesRequiringTransfer.length !== transferOptions.length
+                    : !password || confirmation !== CONFIRMATION_WORD,
+            }}
+          />
+        )
+      }
     >
       {loading && step === 1 ? (
         <Box

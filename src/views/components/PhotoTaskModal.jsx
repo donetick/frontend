@@ -2,7 +2,6 @@ import {
   ArrowBack,
   CameraAlt,
   CheckCircle,
-  Close,
   DocumentScanner,
   PhotoCamera,
   Replay,
@@ -12,11 +11,13 @@ import {
   Box,
   Button,
   CircularProgress,
-  IconButton,
   LinearProgress,
   Typography,
 } from '@mui/joy'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
+import ModalActions from '../../components/common/ModalActions'
 import { useDocumentScanner } from '../../hooks/useDocumentScanner'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 import { localAIService } from '../../service/LocalAIService'
@@ -82,7 +83,10 @@ async function runNativeOCR(imageSource) {
   }
 
   const result = await Ocr.process({ image })
-  return result.results.map(r => r.text).join('\n').trim()
+  return result.results
+    .map(r => r.text)
+    .join('\n')
+    .trim()
 }
 
 async function runOCR(imageSource, onProgress) {
@@ -118,7 +122,8 @@ async function extractTaskFromOCR(ocrText) {
   }
 }
 
-const PhotoTaskModal = ({ open, onClose, onTaskExtracted }) => {
+const PhotoTaskModal = ({ onClose, onTaskExtracted, open }) => {
+  const { t } = useTranslation('chores')
   const { ResponsiveModal } = useResponsiveModal()
   const { isNativeScanner, scanDocument } = useDocumentScanner()
   const videoRef = useRef(null)
@@ -214,7 +219,9 @@ const PhotoTaskModal = ({ open, onClose, onTaskExtracted }) => {
         try {
           text = await runNativeOCR(capturedImage)
         } catch {
-          throw new Error('Native OCR is only available on iOS and Android devices.')
+          throw new Error(
+            'Native OCR is only available on iOS and Android devices.',
+          )
         }
       } else {
         text = await runOCR(capturedImage, pct => setOcrProgress(pct))
@@ -231,7 +238,9 @@ const PhotoTaskModal = ({ open, onClose, onTaskExtracted }) => {
       const task = await extractTaskFromOCR(text)
 
       if (!task || !task.taskName) {
-        setErrorMsg('Could not identify a task from this image. Please try a different photo.')
+        setErrorMsg(
+          'Could not identify a task from this image. Please try a different photo.',
+        )
         setPhase('error')
         return
       }
@@ -255,10 +264,12 @@ const PhotoTaskModal = ({ open, onClose, onTaskExtracted }) => {
   }
 
   const handleNativeScan = async () => {
-    const { image, cancelled, error } = await scanDocument()
+    const { cancelled, error, image } = await scanDocument()
     if (cancelled) return
     if (error || !image) {
-      setErrorMsg(error ? `Scanner error: ${error}` : 'Scan cancelled or failed.')
+      setErrorMsg(
+        error ? `Scanner error: ${error}` : 'Scan cancelled or failed.',
+      )
       setPhase('error')
       return
     }
@@ -294,7 +305,7 @@ const PhotoTaskModal = ({ open, onClose, onTaskExtracted }) => {
       onClose={handleClose}
       size='md'
       fullWidth
-      title='Scan photo to create task'
+      title={t('photoTask.title')}
     >
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         {(phase === 'capture' || phase === 'preview') && (
@@ -332,14 +343,14 @@ const PhotoTaskModal = ({ open, onClose, onTaskExtracted }) => {
               <Box sx={{ textAlign: 'center', p: 3 }}>
                 <CameraAlt sx={{ fontSize: 48, opacity: 0.5, mb: 1 }} />
                 <Typography level='body-sm' sx={{ opacity: 0.7 }}>
-                  Camera not available
+                  {t('photoTask.cameraUnavailable')}
                 </Typography>
               </Box>
             )}
             {phase === 'preview' && capturedImage && (
               <img
                 src={capturedImage}
-                alt='Captured document'
+                alt={t('photoTask.altCaptured')}
                 style={{ width: '100%', display: 'block' }}
               />
             )}
@@ -361,7 +372,7 @@ const PhotoTaskModal = ({ open, onClose, onTaskExtracted }) => {
             {capturedImage && (
               <img
                 src={capturedImage}
-                alt='Processing'
+                alt={t('photoTask.altProcessing')}
                 style={{
                   width: '100%',
                   borderRadius: 8,
@@ -377,7 +388,11 @@ const PhotoTaskModal = ({ open, onClose, onTaskExtracted }) => {
                 <Typography level='body-sm'>
                   Reading text from image… {ocrProgress}%
                 </Typography>
-                <LinearProgress determinate value={ocrProgress} sx={{ width: '100%' }} />
+                <LinearProgress
+                  determinate
+                  value={ocrProgress}
+                  sx={{ width: '100%' }}
+                />
               </>
             )}
             {phase === 'ocr' && ocrMethod === 'native' && (
@@ -393,7 +408,9 @@ const PhotoTaskModal = ({ open, onClose, onTaskExtracted }) => {
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <CheckCircle color='success' />
-              <Typography level='title-sm'>Task identified</Typography>
+              <Typography level='title-sm'>
+                {t('photoTask.taskIdentified')}
+              </Typography>
             </Box>
             <Box
               sx={{
@@ -466,7 +483,7 @@ const PhotoTaskModal = ({ open, onClose, onTaskExtracted }) => {
           </Box>
         )}
 
-        <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+        <ModalActions sx={{ mt: 1 }}>
           {phase === 'capture' && (
             <>
               <Button
@@ -475,7 +492,7 @@ const PhotoTaskModal = ({ open, onClose, onTaskExtracted }) => {
                 startDecorator={<PhotoCamera />}
                 onClick={() => fileInputRef.current?.click()}
               >
-                Upload Photo
+                {t('photoTask.uploadPhoto')}
               </Button>
               <input
                 ref={fileInputRef}
@@ -491,7 +508,7 @@ const PhotoTaskModal = ({ open, onClose, onTaskExtracted }) => {
                   startDecorator={<DocumentScanner />}
                   onClick={handleNativeScan}
                 >
-                  Scan Document
+                  {t('photoTask.scanDocument')}
                 </Button>
               ) : (
                 cameraAvailable && (
@@ -501,7 +518,7 @@ const PhotoTaskModal = ({ open, onClose, onTaskExtracted }) => {
                     startDecorator={<CameraAlt />}
                     onClick={handleCapture}
                   >
-                    Capture
+                    {t('photoTask.capture')}
                   </Button>
                 )
               )}
@@ -516,7 +533,7 @@ const PhotoTaskModal = ({ open, onClose, onTaskExtracted }) => {
                 startDecorator={<Replay />}
                 onClick={handleRetake}
               >
-                Retake
+                {t('photoTask.retake')}
               </Button>
               {isNativeScanner &&
                 capturedImage &&
@@ -526,7 +543,7 @@ const PhotoTaskModal = ({ open, onClose, onTaskExtracted }) => {
                     color='primary'
                     onClick={() => handleProcess('native')}
                   >
-                    Process Natively
+                    {t('photoTask.processNatively')}
                   </Button>
                 )}
               <Button
@@ -534,7 +551,7 @@ const PhotoTaskModal = ({ open, onClose, onTaskExtracted }) => {
                 color='primary'
                 onClick={() => handleProcess('tesseract')}
               >
-                Process Image
+                {t('photoTask.processImage')}
               </Button>
             </>
           )}
@@ -547,7 +564,7 @@ const PhotoTaskModal = ({ open, onClose, onTaskExtracted }) => {
                 startDecorator={<ArrowBack />}
                 onClick={handleBackToPreview}
               >
-                Back
+                {t('common:back')}
               </Button>
               <Button
                 variant='outlined'
@@ -555,7 +572,7 @@ const PhotoTaskModal = ({ open, onClose, onTaskExtracted }) => {
                 startDecorator={<Replay />}
                 onClick={handleRetake}
               >
-                Retake
+                {t('photoTask.retake')}
               </Button>
             </>
           )}
@@ -568,7 +585,7 @@ const PhotoTaskModal = ({ open, onClose, onTaskExtracted }) => {
                 startDecorator={<ArrowBack />}
                 onClick={handleBackToPreview}
               >
-                Back
+                {t('common:back')}
               </Button>
               <Button
                 variant='outlined'
@@ -576,25 +593,14 @@ const PhotoTaskModal = ({ open, onClose, onTaskExtracted }) => {
                 startDecorator={<Replay />}
                 onClick={handleRetake}
               >
-                Retake
+                {t('photoTask.retake')}
               </Button>
               <Button variant='solid' color='primary' onClick={handleConfirm}>
-                Create Task
+                {t('photoTask.createTask')}
               </Button>
             </>
           )}
-
-          {!isProcessing && (
-            <IconButton
-              variant='plain'
-              color='neutral'
-              onClick={handleClose}
-              sx={{ ml: 'auto' }}
-            >
-              <Close />
-            </IconButton>
-          )}
-        </Box>
+        </ModalActions>
       </Box>
     </ResponsiveModal>
   )

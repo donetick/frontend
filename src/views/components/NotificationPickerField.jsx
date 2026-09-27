@@ -1,32 +1,40 @@
 import { Close, NotificationsNone } from '@mui/icons-material'
 import { Box, Button, IconButton, Typography } from '@mui/joy'
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
+import ModalActions from '../../components/common/ModalActions'
 import NotificationTemplate from '../../components/NotificationTemplate'
 import { useResponsiveModal } from '../../hooks/useResponsiveModal'
 
-const getDisplayLabel = templates => {
-  if (!templates || templates.length === 0) return 'Remind'
+const getDisplayLabel = (templates, t) => {
+  if (!templates || templates.length === 0) return t('remind.remind')
   const count = templates.length
   if (count === 1) {
     const n = templates[0]
     const numericValue = Number(n.value)
-    if (numericValue === 0) return 'On due date'
+    if (numericValue === 0) return t('remind.onDueDate')
     const unitName =
-      n.unit === 'm' ? 'min' : n.unit === 'h' ? 'hr' : 'day'
+      n.unit === 'm'
+        ? t('remind.unitMin')
+        : n.unit === 'h'
+          ? t('remind.unitHr')
+          : t('remind.unitDay')
     const absValue = Math.abs(numericValue)
-    const plural = absValue !== 1 ? 's' : ''
-    return `${absValue} ${unitName}${plural} ${numericValue < 0 ? 'before' : 'after'}`
+    const direction = numericValue < 0 ? t('remind.before') : t('remind.after')
+    return `${t('remind.duration', { count: absValue, unit: unitName })} ${direction}`
   }
-  return `${count} reminders`
+  return t('remind.reminder', { count })
 }
 
 const NotificationPickerField = ({
-  value,
+  emptyDisplay = 'icon-text',
   onChange,
   onClear,
-  emptyDisplay = 'icon-text',
   size = 'sm',
+  value,
 }) => {
+  const { t } = useTranslation('chores')
   const [isOpen, setIsOpen] = useState(false)
   const latestTemplatesRef = useRef(value?.templates || [])
   const { ResponsiveModal } = useResponsiveModal()
@@ -40,7 +48,7 @@ const NotificationPickerField = ({
   const templates = value?.templates || []
   const hasNotifications = templates.length > 0
   const shouldShowLabel = hasNotifications || emptyDisplay === 'icon-text'
-  const displayLabel = getDisplayLabel(templates)
+  const displayLabel = getDisplayLabel(templates, t)
 
   const handleSave = () => {
     onChange({ ...value, templates: latestTemplatesRef.current })
@@ -48,33 +56,25 @@ const NotificationPickerField = ({
   }
 
   const footer = (
-    <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-      {hasNotifications && (
-        <Button
-          variant='plain'
-          color='danger'
-          size='lg'
-          onClick={() => {
-            onClear?.()
-            setIsOpen(false)
-          }}
-          sx={{ mr: 'auto' }}
-        >
-          Remove all
-        </Button>
-      )}
-      <Button
-        variant='outlined'
-        color='neutral'
-        size='lg'
-        onClick={() => setIsOpen(false)}
-      >
-        Cancel
-      </Button>
-      <Button variant='solid' color='primary' size='lg' onClick={handleSave}>
-        Apply
-      </Button>
-    </Box>
+    <ModalActions
+      tertiary={
+        hasNotifications
+          ? {
+              label: t('common:removeAll'),
+              color: 'danger',
+              onClick: () => {
+                onClear?.()
+                setIsOpen(false)
+              },
+            }
+          : undefined
+      }
+      secondary={{
+        label: t('choreView.cancel'),
+        onClick: () => setIsOpen(false),
+      }}
+      primary={{ label: t('common:apply'), onClick: handleSave }}
+    />
   )
 
   return (
@@ -116,6 +116,7 @@ const NotificationPickerField = ({
 
         {hasNotifications && onClear && (
           <IconButton
+            aria-label={t('remind.removeAria')}
             size='sm'
             variant='soft'
             color='danger'
@@ -125,11 +126,9 @@ const NotificationPickerField = ({
             }}
             sx={{
               position: 'absolute',
-              top: -12,
-              right: -16,
+              top: -18,
+              right: -18,
               zIndex: 10,
-              maxHeight: 18,
-              maxWidth: 18,
               borderRadius: '50%',
               '&:hover': { bgcolor: 'danger.softBg' },
             }}
@@ -142,15 +141,16 @@ const NotificationPickerField = ({
       <ResponsiveModal
         open={isOpen}
         onClose={() => setIsOpen(false)}
-        title='Reminders'
+        title={t('remind.title')}
         footer={footer}
       >
         <NotificationTemplate
           value={value}
+          minNotifications={0}
           onChange={({ notifications }) => {
             latestTemplatesRef.current = notifications
           }}
-          showTimeline
+          showTimeline={false}
         />
       </ResponsiveModal>
     </>
