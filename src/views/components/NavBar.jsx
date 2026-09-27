@@ -474,6 +474,25 @@ const NavBar = () => {
                   <MenuRounded />
                 </IconButton>
               </Tooltip>
+              {desktopExpanded && (
+                <Typography
+                  component='div'
+                  level='title-lg'
+                  sx={{
+                    color: 'text.primary',
+                    fontFamily: 'var(--joy-fontFamily-display)',
+                    fontWeight: 800,
+                    letterSpacing: '-0.045em',
+                    lineHeight: 1,
+                    userSelect: 'none',
+                  }}
+                >
+                  Done
+                  <Box component='span' sx={{ color: 'primary.500' }}>
+                    tick
+                  </Box>
+                </Typography>
+              )}
             </Box>
             <Box
               sx={{
