@@ -373,6 +373,27 @@ public final class WidgetStore {
         }
     }
 
+    /** Update the local snapshot first so a widget tap has immediate feedback. */
+    public static void setProjectTaskCompleted(Context context, String taskId, boolean completed) {
+        try {
+            String data = prefs(context).getString(KEY_DATA, null);
+            if (data == null) return;
+            JSONObject snapshot = new JSONObject(data);
+            JSONArray tasks = snapshot.optJSONArray("projectTasks");
+            if (tasks == null) return;
+            for (int i = 0; i < tasks.length(); i++) {
+                JSONObject task = tasks.optJSONObject(i);
+                if (task != null && taskId.equals(String.valueOf(task.opt("id")))) {
+                    task.put("completed", completed);
+                    break;
+                }
+            }
+            saveData(context, snapshot.toString());
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to update project task optimistically", e);
+        }
+    }
+
     public static boolean completeTask(Context context, String taskId) {
         HttpURLConnection connection = null;
         try {
@@ -390,19 +411,7 @@ public final class WidgetStore {
             connection.getOutputStream().write("null".getBytes(StandardCharsets.UTF_8));
             if (connection.getResponseCode() < 200 || connection.getResponseCode() >= 300) return false;
 
-            String data = prefs(context).getString(KEY_DATA, null);
-            if (data != null) {
-                JSONObject snapshot = new JSONObject(data);
-                JSONArray tasks = snapshot.optJSONArray("projectTasks");
-                if (tasks != null) for (int i = 0; i < tasks.length(); i++) {
-                    JSONObject task = tasks.optJSONObject(i);
-                    if (task != null && taskId.equals(String.valueOf(task.opt("id")))) {
-                        task.put("completed", true);
-                    }
-                }
-                snapshot.put("lastUpdated", System.currentTimeMillis());
-                saveData(context, snapshot.toString());
-            }
+            setProjectTaskCompleted(context, taskId, true);
             return true;
         } catch (Exception e) {
             Log.w(TAG, "Widget completion failed", e);

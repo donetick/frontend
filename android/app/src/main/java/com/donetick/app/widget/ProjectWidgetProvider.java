@@ -7,6 +7,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.Spanned;
@@ -14,6 +15,7 @@ import android.text.style.StrikethroughSpan;
 import android.view.View;
 import android.widget.RemoteViews;
 
+import com.donetick.app.MainActivity;
 import com.donetick.app.R;
 
 import java.util.ArrayList;
@@ -64,11 +66,19 @@ public class ProjectWidgetProvider extends AppWidgetProvider {
         if (id == AppWidgetManager.INVALID_APPWIDGET_ID) return;
 
         if (ACTION_REFRESH.equals(action) || ACTION_COMPLETE.equals(action)) {
+            String taskId = intent.getStringExtra(EXTRA_TASK_ID);
+            if (ACTION_COMPLETE.equals(action) && taskId != null) {
+                // Render the checked circle and strike-through immediately;
+                // roll back only if the server rejects the completion.
+                WidgetStore.setProjectTaskCompleted(context, taskId, true);
+                update(context, id);
+            }
             PendingResult pending = goAsync();
             new Thread(() -> {
                 if (ACTION_COMPLETE.equals(action)) {
-                    String taskId = intent.getStringExtra(EXTRA_TASK_ID);
-                    if (taskId != null) WidgetStore.completeTask(context, taskId);
+                    if (taskId != null && !WidgetStore.completeTask(context, taskId)) {
+                        WidgetStore.setProjectTaskCompleted(context, taskId, false);
+                    }
                 } else {
                     WidgetStore.refreshFromServer(context, true);
                 }
@@ -130,6 +140,10 @@ public class ProjectWidgetProvider extends AppWidgetProvider {
         views.setTextColor(R.id.project_counts, secondary);
         views.setTextViewText(R.id.project_title, project.name);
         views.setTextViewText(R.id.project_icon, icon(project.icon));
+        PendingIntent openProject = openProject(context, project.id, widgetId);
+        views.setOnClickPendingIntent(R.id.project_icon, openProject);
+        views.setOnClickPendingIntent(R.id.project_title, openProject);
+        views.setOnClickPendingIntent(R.id.project_counts, openProject);
         String me = WidgetStore.userId(context);
         int mine = 0;
         for (WidgetStore.ProjectTask task : tasks) if (me != null && me.equals(task.assignedTo)) mine++;
@@ -138,13 +152,18 @@ public class ProjectWidgetProvider extends AppWidgetProvider {
 
         int start = page * PAGE_SIZE;
         int visible = Math.min(PAGE_SIZE, Math.max(0, tasks.size() - start));
+        boolean darkForeground = foreground != Color.WHITE;
         for (int row = 0; row < PAGE_SIZE; row++) {
-            views.setTextColor(CHECKS[row], foreground);
             views.setTextColor(TITLES[row], foreground);
             if (row < visible) {
                 WidgetStore.ProjectTask task = tasks.get(start + row);
                 views.setViewVisibility(ROWS[row], View.VISIBLE);
-                views.setTextViewText(CHECKS[row], task.completed ? "✓" : "○");
+                int checkIcon = task.completed
+                        ? (darkForeground ? R.drawable.widget_project_check_circle_dark
+                            : R.drawable.widget_project_check_circle)
+                        : (darkForeground ? R.drawable.widget_project_circle_dark
+                            : R.drawable.widget_project_circle);
+                views.setImageViewResource(CHECKS[row], checkIcon);
                 if (task.completed) {
                     SpannableString title = new SpannableString(task.name);
                     title.setSpan(new StrikethroughSpan(), 0, title.length(),
@@ -159,6 +178,8 @@ public class ProjectWidgetProvider extends AppWidgetProvider {
                     views.setOnClickPendingIntent(CHECKS[row], action(context, widgetId,
                             ACTION_COMPLETE, task.id, 100 + row));
                 }
+                views.setOnClickPendingIntent(TITLES[row],
+                        openTask(context, task.id, widgetId, row));
             } else {
                 views.setViewVisibility(ROWS[row], View.GONE);
             }
@@ -176,6 +197,21 @@ public class ProjectWidgetProvider extends AppWidgetProvider {
         views.setOnClickPendingIntent(R.id.project_up, action(context, widgetId, ACTION_UP, null, 4));
         views.setOnClickPendingIntent(R.id.project_down, action(context, widgetId, ACTION_DOWN, null, 5));
         return views;
+    }
+
+    private static PendingIntent openProject(Context context, String projectId, int widgetId) {
+        Uri uri = new Uri.Builder().scheme("donetick").authority("chores")
+                .appendQueryParameter("project", projectId).build();
+        Intent intent = new Intent(Intent.ACTION_VIEW, uri, context, MainActivity.class);
+        return PendingIntent.getActivity(context, widgetId * 1000 + 500, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+    }
+
+    private static PendingIntent openTask(Context context, String taskId, int widgetId, int row) {
+        Intent intent = new Intent(Intent.ACTION_VIEW,
+                Uri.parse("donetick://chores/" + taskId), context, MainActivity.class);
+        return PendingIntent.getActivity(context, widgetId * 1000 + 600 + row, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
     private static PendingIntent action(Context context, int widgetId, String action,

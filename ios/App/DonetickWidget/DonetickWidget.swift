@@ -278,6 +278,19 @@ enum WidgetStore {
         }
     }
 
+    static func setProjectTaskCompleted(id: String, completed: Bool) {
+        guard var snapshot = snapshotDict(),
+              var tasks = snapshot["projectTasks"] as? [[String: Any]] else { return }
+        for index in tasks.indices where "\(tasks[index]["id"] ?? "")" == id {
+            tasks[index]["completed"] = completed
+        }
+        snapshot["projectTasks"] = tasks
+        if let encoded = try? JSONSerialization.data(withJSONObject: snapshot),
+           let string = String(data: encoded, encoding: .utf8) {
+            defaults?.set(string, forKey: dataKey)
+        }
+    }
+
     static func completeTask(id: String) async -> Bool {
         guard let raw = defaults?.string(forKey: configKey),
               let configData = raw.data(using: .utf8),
@@ -294,20 +307,10 @@ enum WidgetStore {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         guard let (_, response) = try? await URLSession.shared.data(for: request),
               let status = (response as? HTTPURLResponse)?.statusCode,
-              (200..<300).contains(status), var snapshot = snapshotDict()
+              (200..<300).contains(status)
         else { return false }
 
-        if var tasks = snapshot["projectTasks"] as? [[String: Any]] {
-            for index in tasks.indices where "\(tasks[index]["id"] ?? "")" == id {
-                tasks[index]["completed"] = true
-            }
-            snapshot["projectTasks"] = tasks
-            snapshot["lastUpdated"] = Date().timeIntervalSince1970 * 1000
-            if let encoded = try? JSONSerialization.data(withJSONObject: snapshot),
-               let string = String(data: encoded, encoding: .utf8) {
-                defaults?.set(string, forKey: dataKey)
-            }
-        }
+        setProjectTaskCompleted(id: id, completed: true)
         return true
     }
 
@@ -507,8 +510,12 @@ struct CompleteProjectTaskIntent: AppIntent {
     init(taskId: String) { self.taskId = taskId }
 
     func perform() async throws -> some IntentResult {
-        _ = await WidgetStore.completeTask(id: taskId)
+        WidgetStore.setProjectTaskCompleted(id: taskId, completed: true)
         WidgetCenter.shared.reloadTimelines(ofKind: projectWidgetKind)
+        if !(await WidgetStore.completeTask(id: taskId)) {
+            WidgetStore.setProjectTaskCompleted(id: taskId, completed: false)
+            WidgetCenter.shared.reloadTimelines(ofKind: projectWidgetKind)
+        }
         return .result()
     }
 }
@@ -1274,77 +1281,91 @@ struct ProjectWidgetView: View {
         let mine = tasks.filter { $0.assignedTo == entry.myUserId }.count
         let foreground = project.foregroundColor
 
-        return HStack(spacing: 7) {
-            VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 6) {
-                    Image(systemName: project.systemImage)
-                        .font(.system(size: 15, weight: .semibold))
-                    Text(project.name)
-                        .font(.system(size: 15, weight: .bold))
+        let encodedProjectId = project.id.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? project.id
+        let projectURL = URL(string: "donetick://chores?project=\(encodedProjectId)")
+
+        return VStack(alignment: .leading, spacing: 2) {
+            HStack(spacing: 4) {
+                if let projectURL = projectURL {
+                    Link(destination: projectURL) {
+                        HStack(spacing: 6) {
+                            Image(systemName: project.systemImage)
+                                .font(.system(size: 15, weight: .semibold))
+                            Text(project.name)
+                                .font(.system(size: 15, weight: .bold))
+                                .lineLimit(1)
+                        }
+                    }
+                }
+                Spacer(minLength: 4)
+                ProjectControlButton(image: "chevron.left", label: "Previous project",
+                                     intent: PreviousProjectIntent(), foreground: foreground)
+                ProjectControlButton(image: "chevron.right", label: "Next project",
+                                     intent: NextProjectIntent(), foreground: foreground)
+                ProjectControlButton(image: "arrow.clockwise", label: "Refresh",
+                                     intent: RefreshProjectWidgetIntent(), foreground: foreground)
+            }
+            if let projectURL = projectURL {
+                Link(destination: projectURL) {
+                    Text("\(tasks.count) tasks · \(mine) assigned to me")
+                        .font(.system(size: 9))
+                        .opacity(0.76)
                         .lineLimit(1)
                 }
-                Text("\(tasks.count) tasks · \(mine) assigned to me")
-                    .font(.system(size: 9))
-                    .opacity(0.76)
-                    .lineLimit(1)
-                if visible.isEmpty {
-                    Spacer()
-                    HStack {
-                        Spacer()
+            }
+
+            HStack(alignment: .top, spacing: 5) {
+                VStack(alignment: .leading, spacing: 2) {
+                    if visible.isEmpty {
                         Text("No tasks in this project")
                             .font(.system(size: 12, weight: .medium))
                             .opacity(0.75)
-                        Spacer()
-                    }
-                    Spacer()
-                } else {
-                    ForEach(visible) { task in
-                        HStack(spacing: 7) {
-                            if task.completed {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .font(.system(size: 16))
-                            } else {
-                                Button(intent: CompleteProjectTaskIntent(taskId: task.id)) {
-                                    Image(systemName: "circle")
+                            .frame(maxWidth: .infinity, minHeight: 44)
+                    } else {
+                        ForEach(visible) { task in
+                            HStack(spacing: 7) {
+                                if task.completed {
+                                    Image(systemName: "checkmark.circle.fill")
                                         .font(.system(size: 16))
+                                } else {
+                                    Button(intent: CompleteProjectTaskIntent(taskId: task.id)) {
+                                        Image(systemName: "circle")
+                                            .font(.system(size: 16))
+                                    }
+                                    .buttonStyle(.plain)
+                                    .accessibilityLabel("Complete \(task.name)")
                                 }
-                                .buttonStyle(.plain)
-                                .accessibilityLabel("Complete \(task.name)")
+                                if let taskURL = URL(string: "donetick://chores/\(task.id)") {
+                                    Link(destination: taskURL) {
+                                        Text(task.name)
+                                            .font(.system(size: 12, weight: .medium))
+                                            .strikethrough(task.completed)
+                                            .lineLimit(1)
+                                    }
+                                }
+                                Spacer(minLength: 0)
                             }
-                            Text(task.name)
-                                .font(.system(size: 12, weight: .medium))
-                                .strikethrough(task.completed)
-                                .lineLimit(1)
-                            Spacer(minLength: 0)
+                            .frame(maxWidth: .infinity, minHeight: 21, maxHeight: 21,
+                                   alignment: .leading)
+                            .padding(.horizontal, 3)
+                            .background(task.completed ? foreground.opacity(0.10) : Color.clear)
+                            .clipShape(RoundedRectangle(cornerRadius: 5))
                         }
-                        .frame(maxWidth: .infinity, minHeight: 21, alignment: .leading)
-                        .padding(.horizontal, 3)
-                        .background(task.completed ? foreground.opacity(0.10) : Color.clear)
-                        .clipShape(RoundedRectangle(cornerRadius: 5))
                     }
                     Spacer(minLength: 0)
                 }
-            }
-            .foregroundColor(foreground)
 
-            VStack(spacing: 3) {
-                HStack(spacing: 2) {
-                    ProjectControlButton(image: "chevron.left", label: "Previous project",
-                                         intent: PreviousProjectIntent(), foreground: foreground)
-                    ProjectControlButton(image: "chevron.right", label: "Next project",
-                                         intent: NextProjectIntent(), foreground: foreground)
+                VStack(spacing: 3) {
+                    ProjectControlButton(image: "chevron.up", label: "Previous tasks",
+                                         intent: PreviousProjectPageIntent(), foreground: foreground)
+                        .opacity(page > 0 ? 1 : 0.35)
+                    ProjectControlButton(image: "chevron.down", label: "Next tasks",
+                                         intent: NextProjectPageIntent(), foreground: foreground)
+                        .opacity(page < maxPage ? 1 : 0.35)
                 }
-                Spacer(minLength: 2)
-                ProjectControlButton(image: "arrow.clockwise", label: "Refresh",
-                                     intent: RefreshProjectWidgetIntent(), foreground: foreground)
-                ProjectControlButton(image: "chevron.up", label: "Previous tasks",
-                                     intent: PreviousProjectPageIntent(), foreground: foreground)
-                    .opacity(page > 0 ? 1 : 0.35)
-                ProjectControlButton(image: "chevron.down", label: "Next tasks",
-                                     intent: NextProjectPageIntent(), foreground: foreground)
-                    .opacity(page < maxPage ? 1 : 0.35)
             }
         }
+        .foregroundColor(foreground)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 }

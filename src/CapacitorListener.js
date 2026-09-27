@@ -101,6 +101,18 @@ const handleUrlOpen = (url, isColdStart = false) => {
         ? `/chores?add_task=1&mode=${mode}`
         : '/chores?add_task=1',
     )
+  } else if (
+    parsedUrl.protocol === 'donetick:' &&
+    parsedUrl.host === 'chores' &&
+    (parsedUrl.pathname === '' || parsedUrl.pathname === '/')
+  ) {
+    // Project widget header: open the chore list with that project selected.
+    const projectId = parsedUrl.searchParams.get('project')
+    routerNavigate(
+      projectId
+        ? `/chores?project=${encodeURIComponent(projectId)}`
+        : '/chores',
+    )
   } else if (url.startsWith('donetick://chores/')) {
     handleNFCChoreDeepLink(url, isColdStart)
   } else if (url.startsWith('donetick://auth/')) {

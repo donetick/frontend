@@ -18,8 +18,7 @@
 
     <style name="ProjectWidgetRow">
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">0dp</item>
-        <item name="android:layout_weight">1</item>
+        <item name="android:layout_height">29dp</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:orientation">horizontal</item>
         <item name="android:paddingStart">2dp</item>
@@ -28,10 +27,10 @@
 
     <style name="ProjectWidgetCheck">
         <item name="android:layout_width">30dp</item>
-        <item name="android:layout_height">match_parent</item>
-        <item name="android:gravity">center</item>
-        <item name="android:text">○</item>
-        <item name="android:textSize">20sp</item>
+        <item name="android:layout_height">29dp</item>
+        <item name="android:padding">6dp</item>
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:src">@drawable/widget_project_circle</item>
     </style>
 
     <style name="ProjectWidgetTask">
