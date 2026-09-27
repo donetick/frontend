@@ -12,6 +12,8 @@
   "status": "الحالة",
   "description": "الوصف",
   "choreView": {
+    "notFoundTitle": "المهمة غير متاحة",
+    "notFoundDescription": "ربما تم حذف هذه المهمة أو لم تعد مشاركة معك.",
     "assignment": "التعيين",
     "assigned": "المعين",
     "last": "الأخير",
@@ -257,6 +259,8 @@
     "failRescheduleTitle": "فشل في إعادة الجدولة",
     "failRescheduleMessage": "غير قادر على تحديث تاريخ الاستحقاق",
     "failRemoveDueDateTitle": "فشل في إزالة تاريخ الاستحقاق",
+    "failAssignTitle": "Failed to assign",
+    "failAssignMessage": "Unable to assign task",
     "nudgeSentTitle": "تم ارسال الدافع!",
     "nudgeFailed": "فشل في إرسال دفعة",
     "failNudgeTitle": "فشل في إرسال Nudge",

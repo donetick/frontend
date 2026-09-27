@@ -12,6 +12,8 @@
   "status": "Status",
   "description": "Beschreibung",
   "choreView": {
+    "notFoundTitle": "Aufgabe nicht verfügbar",
+    "notFoundDescription": "Diese Aufgabe wurde möglicherweise gelöscht oder wird nicht mehr mit dir geteilt.",
     "assignment": "Zuweisung",
     "assigned": "Zugewiesen",
     "last": "Letzte",
@@ -257,6 +259,8 @@
     "failRescheduleTitle": "Neuplanung fehlgeschlagen",
     "failRescheduleMessage": "Fälligkeitsdatum konnte nicht aktualisiert werden",
     "failRemoveDueDateTitle": "Fälligkeitsdatum konnte nicht entfernt werden",
+    "failAssignTitle": "Failed to assign",
+    "failAssignMessage": "Unable to assign task",
     "nudgeSentTitle": "Erinnerung gesendet!",
     "nudgeFailed": "Erinnerung konnte nicht gesendet werden",
     "failNudgeTitle": "Erinnerung konnte nicht gesendet werden",

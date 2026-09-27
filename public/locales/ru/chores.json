@@ -12,6 +12,8 @@
   "status": "",
   "description": "",
   "choreView": {
+    "notFoundTitle": "Задача недоступна",
+    "notFoundDescription": "Возможно, эта задача была удалена или больше не доступна вам для просмотра.",
     "assignment": "",
     "assigned": "",
     "last": "",
@@ -257,6 +259,8 @@
     "failRescheduleTitle": "",
     "failRescheduleMessage": "",
     "failRemoveDueDateTitle": "",
+    "failAssignTitle": "Failed to assign",
+    "failAssignMessage": "Unable to assign task",
     "nudgeSentTitle": "",
     "nudgeFailed": "",
     "failNudgeTitle": "",
@@ -337,7 +341,7 @@
     "noMatchFilters": "",
     "emptyTitle": "",
     "emptyDescription": "",
-    "backToTasks": ""
+    "backToTasks": "Назад к задачам"
   },
   "edit": {
     "deleteConfirm": ""

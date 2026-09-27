@@ -12,6 +12,8 @@
   "status": "",
   "description": "",
   "choreView": {
+    "notFoundTitle": "המשימה אינה זמינה",
+    "notFoundDescription": "ייתכן שהמשימה נמחקה או שאינה משותפת איתך יותר.",
     "assignment": "",
     "assigned": "",
     "last": "",
@@ -257,6 +259,8 @@
     "failRescheduleTitle": "",
     "failRescheduleMessage": "",
     "failRemoveDueDateTitle": "",
+    "failAssignTitle": "Failed to assign",
+    "failAssignMessage": "Unable to assign task",
     "nudgeSentTitle": "",
     "nudgeFailed": "",
     "failNudgeTitle": "",
@@ -337,7 +341,7 @@
     "noMatchFilters": "",
     "emptyTitle": "",
     "emptyDescription": "",
-    "backToTasks": ""
+    "backToTasks": "חזרה למשימות"
   },
   "edit": {
     "deleteConfirm": ""
