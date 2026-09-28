@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:padding="12dp">
 
-    <!-- Header: project identity and all top-level actions share one row. -->
+    <!-- Header: keep the project identity clear; controls live at bottom-right. -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="34dp"
@@ -29,21 +29,6 @@
             android:maxLines="1"
             android:textSize="16sp"
             android:textStyle="bold" />
-        <TextView
-            android:id="@+id/project_previous"
-            style="@style/ProjectWidgetButton"
-            android:contentDescription="Previous project"
-            android:text="‹" />
-        <TextView
-            android:id="@+id/project_next"
-            style="@style/ProjectWidgetButton"
-            android:contentDescription="Next project"
-            android:text="›" />
-        <TextView
-            android:id="@+id/project_refresh"
-            style="@style/ProjectWidgetButton"
-            android:contentDescription="Refresh"
-            android:text="↻" />
     </LinearLayout>
 
     <TextView
@@ -85,24 +70,51 @@
                 android:visibility="gone" />
         </LinearLayout>
 
-        <!-- Up/down stay in the column directly below the header refresh action. -->
+        <!-- Page controls sit above refresh; project navigation stays along the bottom. -->
         <LinearLayout
-            android:layout_width="34dp"
+            android:layout_width="102dp"
             android:layout_height="match_parent"
-            android:gravity="top"
+            android:gravity="end"
             android:orientation="vertical">
-            <TextView
-                android:id="@+id/project_up"
-                style="@style/ProjectWidgetButton"
-                android:contentDescription="Previous tasks"
-                android:text="▲"
-                android:textSize="12sp" />
-            <TextView
-                android:id="@+id/project_down"
-                style="@style/ProjectWidgetButton"
-                android:contentDescription="Next tasks"
-                android:text="▼"
-                android:textSize="12sp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="end|bottom"
+                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/project_up"
+                    style="@style/ProjectWidgetButton"
+                    android:contentDescription="Previous tasks"
+                    android:text="▲"
+                    android:textSize="12sp" />
+                <TextView
+                    android:id="@+id/project_down"
+                    style="@style/ProjectWidgetButton"
+                    android:contentDescription="Next tasks"
+                    android:text="▼"
+                    android:textSize="12sp" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="34dp"
+                android:orientation="horizontal">
+                <TextView
+                    android:id="@+id/project_previous"
+                    style="@style/ProjectWidgetButton"
+                    android:contentDescription="Previous project"
+                    android:text="‹" />
+                <TextView
+                    android:id="@+id/project_next"
+                    style="@style/ProjectWidgetButton"
+                    android:contentDescription="Next project"
+                    android:text="›" />
+                <TextView
+                    android:id="@+id/project_refresh"
+                    style="@style/ProjectWidgetButton"
+                    android:contentDescription="Refresh"
+                    android:text="↻" />
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

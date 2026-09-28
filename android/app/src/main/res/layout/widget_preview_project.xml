@@ -13,9 +13,6 @@
         android:orientation="horizontal">
         <TextView android:layout_width="24dp" android:layout_height="match_parent" android:gravity="center" android:text="⌂" android:textColor="#FFFFFF" android:textSize="17sp"/>
         <TextView android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center_vertical" android:text="Home" android:textColor="#FFFFFF" android:textSize="16sp" android:textStyle="bold"/>
-        <TextView style="@style/ProjectWidgetButton" android:text="‹" android:textColor="#FFFFFF"/>
-        <TextView style="@style/ProjectWidgetButton" android:text="›" android:textColor="#FFFFFF"/>
-        <TextView style="@style/ProjectWidgetButton" android:text="↻" android:textColor="#FFFFFF"/>
     </LinearLayout>
 
     <TextView
@@ -44,12 +41,27 @@
             <LinearLayout style="@style/ProjectWidgetRow"><ImageView style="@style/ProjectWidgetCheck"/><TextView style="@style/ProjectWidgetTask" android:text="Change air filter" android:textColor="#FFFFFF"/></LinearLayout>
         </LinearLayout>
         <LinearLayout
-            android:layout_width="34dp"
+            android:layout_width="102dp"
             android:layout_height="match_parent"
-            android:gravity="top"
+            android:gravity="end"
             android:orientation="vertical">
-            <TextView style="@style/ProjectWidgetButton" android:text="▲" android:textColor="#FFFFFF" android:textSize="12sp"/>
-            <TextView style="@style/ProjectWidgetButton" android:text="▼" android:textColor="#FFFFFF" android:textSize="12sp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="end|bottom"
+                android:orientation="vertical">
+                <TextView style="@style/ProjectWidgetButton" android:text="▲" android:textColor="#FFFFFF" android:textSize="12sp"/>
+                <TextView style="@style/ProjectWidgetButton" android:text="▼" android:textColor="#FFFFFF" android:textSize="12sp"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="34dp"
+                android:orientation="horizontal">
+                <TextView style="@style/ProjectWidgetButton" android:text="‹" android:textColor="#FFFFFF"/>
+                <TextView style="@style/ProjectWidgetButton" android:text="›" android:textColor="#FFFFFF"/>
+                <TextView style="@style/ProjectWidgetButton" android:text="↻" android:textColor="#FFFFFF"/>
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

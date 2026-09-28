@@ -1298,12 +1298,6 @@ struct ProjectWidgetView: View {
                     }
                 }
                 Spacer(minLength: 4)
-                ProjectControlButton(image: "chevron.left", label: "Previous project",
-                                     intent: PreviousProjectIntent(), foreground: foreground)
-                ProjectControlButton(image: "chevron.right", label: "Next project",
-                                     intent: NextProjectIntent(), foreground: foreground)
-                ProjectControlButton(image: "arrow.clockwise", label: "Refresh",
-                                     intent: RefreshProjectWidgetIntent(), foreground: foreground)
             }
             if let projectURL = projectURL {
                 Link(destination: projectURL) {
@@ -1355,13 +1349,22 @@ struct ProjectWidgetView: View {
                     Spacer(minLength: 0)
                 }
 
-                VStack(spacing: 3) {
+                VStack(alignment: .trailing, spacing: 3) {
+                    Spacer(minLength: 0)
                     ProjectControlButton(image: "chevron.up", label: "Previous tasks",
                                          intent: PreviousProjectPageIntent(), foreground: foreground)
                         .opacity(page > 0 ? 1 : 0.35)
                     ProjectControlButton(image: "chevron.down", label: "Next tasks",
                                          intent: NextProjectPageIntent(), foreground: foreground)
                         .opacity(page < maxPage ? 1 : 0.35)
+                    HStack(spacing: 2) {
+                        ProjectControlButton(image: "chevron.left", label: "Previous project",
+                                             intent: PreviousProjectIntent(), foreground: foreground)
+                        ProjectControlButton(image: "chevron.right", label: "Next project",
+                                             intent: NextProjectIntent(), foreground: foreground)
+                        ProjectControlButton(image: "arrow.clockwise", label: "Refresh",
+                                             intent: RefreshProjectWidgetIntent(), foreground: foreground)
+                    }
                 }
             }
         }
