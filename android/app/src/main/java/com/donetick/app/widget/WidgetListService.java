@@ -267,7 +267,11 @@ public class WidgetListService extends RemoteViewsService {
             }
 
             Intent fillIn = new Intent();
-            fillIn.setData(Uri.parse("donetick://chores"));
+            fillIn.setData(new Uri.Builder()
+                    .scheme("donetick")
+                    .authority("chores")
+                    .appendQueryParameter("filterId", "assignedTo:" + row.person.id)
+                    .build());
             views.setOnClickFillInIntent(R.id.person_root, fillIn);
             return views;
         }

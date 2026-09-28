@@ -23,6 +23,7 @@
     <string name="widget_group_tomorrow">Tomorrow</string>
     <string name="widget_updated_at">Updated %s</string>
     <string name="widget_add_task">Add task</string>
+    <string name="widget_refresh">Refresh</string>
     <string name="widget_people_label">People</string>
     <string name="widget_people_description">Everyone in your circle with their tasks for today and the week ahead.</string>
     <string name="widget_people_title">People</string>

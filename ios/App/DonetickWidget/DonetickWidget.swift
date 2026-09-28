@@ -137,6 +137,9 @@ enum WidgetStore {
     static let filterPageKey = "filter_widget_page"
     static let projectRefreshingKey = "project_widget_refreshing"
     static let filterRefreshingKey = "filter_widget_refreshing"
+    static let todayRefreshingKey = "today_widget_refreshing"
+    static let weekRefreshingKey = "week_widget_refreshing"
+    static let peopleRefreshingKey = "people_widget_refreshing"
 
     // Same filtering window as src/service/WidgetService.js
     static let windowDays = 7
@@ -330,6 +333,30 @@ enum WidgetStore {
             if newValue { defaults?.set(Date().timeIntervalSince1970, forKey: filterRefreshingKey) }
             else { defaults?.removeObject(forKey: filterRefreshingKey) }
         }
+    }
+
+    private static func isRefreshing(_ key: String) -> Bool {
+        Date().timeIntervalSince1970 - (defaults?.double(forKey: key) ?? 0) < 30
+    }
+
+    private static func setRefreshing(_ refreshing: Bool, key: String) {
+        if refreshing { defaults?.set(Date().timeIntervalSince1970, forKey: key) }
+        else { defaults?.removeObject(forKey: key) }
+    }
+
+    static var todayRefreshing: Bool {
+        get { isRefreshing(todayRefreshingKey) }
+        set { setRefreshing(newValue, key: todayRefreshingKey) }
+    }
+
+    static var weekRefreshing: Bool {
+        get { isRefreshing(weekRefreshingKey) }
+        set { setRefreshing(newValue, key: weekRefreshingKey) }
+    }
+
+    static var peopleRefreshing: Bool {
+        get { isRefreshing(peopleRefreshingKey) }
+        set { setRefreshing(newValue, key: peopleRefreshingKey) }
     }
 
     static func loadMembers() -> [WidgetMember] {
@@ -827,6 +854,9 @@ struct WidgetAppearanceIntent: WidgetConfigurationIntent {
     var theme: WidgetThemeOption
 }
 
+private let todayWidgetKind = "DonetickTodayWidget"
+private let weekWidgetKind = "DonetickWeekWidget"
+private let peopleWidgetKind = "DonetickPeopleWidget"
 private let projectWidgetKind = "DonetickProjectWidget"
 private let filterWidgetKind = "DonetickFilterWidget"
 private let projectPageSize = 5
@@ -868,6 +898,42 @@ struct NextProjectPageIntent: AppIntent {
         let count = WidgetStore.loadProjectTasks().filter { $0.projectId == project.id }.count
         WidgetStore.projectPage = min(max(0, (count - 1) / projectPageSize), WidgetStore.projectPage + 1)
         WidgetCenter.shared.reloadTimelines(ofKind: projectWidgetKind)
+        return .result()
+    }
+}
+
+struct RefreshTodayWidgetIntent: AppIntent {
+    static var title: LocalizedStringResource = "Refresh Today"
+    func perform() async throws -> some IntentResult {
+        WidgetStore.todayRefreshing = true
+        WidgetCenter.shared.reloadTimelines(ofKind: todayWidgetKind)
+        await WidgetStore.refreshIfStale(force: true)
+        WidgetStore.todayRefreshing = false
+        WidgetCenter.shared.reloadTimelines(ofKind: todayWidgetKind)
+        return .result()
+    }
+}
+
+struct RefreshWeekWidgetIntent: AppIntent {
+    static var title: LocalizedStringResource = "Refresh Next 7 Days"
+    func perform() async throws -> some IntentResult {
+        WidgetStore.weekRefreshing = true
+        WidgetCenter.shared.reloadTimelines(ofKind: weekWidgetKind)
+        await WidgetStore.refreshIfStale(force: true)
+        WidgetStore.weekRefreshing = false
+        WidgetCenter.shared.reloadTimelines(ofKind: weekWidgetKind)
+        return .result()
+    }
+}
+
+struct RefreshPeopleWidgetIntent: AppIntent {
+    static var title: LocalizedStringResource = "Refresh People"
+    func perform() async throws -> some IntentResult {
+        WidgetStore.peopleRefreshing = true
+        WidgetCenter.shared.reloadTimelines(ofKind: peopleWidgetKind)
+        await WidgetStore.refreshIfStale(force: true)
+        WidgetStore.peopleRefreshing = false
+        WidgetCenter.shared.reloadTimelines(ofKind: peopleWidgetKind)
         return .result()
     }
 }
@@ -1017,7 +1083,9 @@ struct TaskEntry: TimelineEntry {
 
 private func makeEntry(includeOthers: Bool, opacity: Double = 1,
                        colorScheme: ColorScheme? = nil) async -> TaskEntry {
-    if !WidgetStore.projectRefreshing && !WidgetStore.filterRefreshing {
+    if !WidgetStore.projectRefreshing && !WidgetStore.filterRefreshing
+        && !WidgetStore.todayRefreshing && !WidgetStore.weekRefreshing
+        && !WidgetStore.peopleRefreshing {
         await WidgetStore.refreshIfStale()
     }
     let members = WidgetStore.loadMembers()
@@ -1216,11 +1284,42 @@ struct TaskRow: View {
     }
 }
 
+enum StandardWidgetRefreshTarget {
+    case today
+    case week
+    case people
+}
+
+private struct HeaderRefreshButton<I: AppIntent>: View {
+    let intent: I
+    let refreshing: Bool
+
+    var body: some View {
+        Button(intent: intent) {
+            Group {
+                if refreshing {
+                    ProgressView().controlSize(.mini)
+                } else {
+                    Image(systemName: "arrow.clockwise")
+                        .font(.system(size: 11, weight: .bold))
+                }
+            }
+            .foregroundColor(Palette.accent)
+            .frame(width: 22, height: 22)
+            .background(Palette.accentSoft)
+            .clipShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(refreshing ? "Refreshing" : "Refresh")
+    }
+}
+
 struct WidgetHeader: View {
     let title: String
     let count: Int
     let lastUpdated: Date?
     var showAdd = false
+    var refresh: StandardWidgetRefreshTarget? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 1) {
@@ -1238,6 +1337,9 @@ struct WidgetHeader: View {
                         .background(Palette.accentSoft)
                         .clipShape(Capsule())
                 }
+                if let refresh {
+                    refreshButton(for: refresh)
+                }
                 if showAdd, let url = addTaskURL {
                     Link(destination: url) {
                         Image(systemName: "plus")
@@ -1252,6 +1354,21 @@ struct WidgetHeader: View {
             Text(subtitle)
                 .font(.system(size: 10))
                 .foregroundColor(.secondary)
+        }
+    }
+
+    @ViewBuilder
+    private func refreshButton(for target: StandardWidgetRefreshTarget) -> some View {
+        switch target {
+        case .today:
+            HeaderRefreshButton(intent: RefreshTodayWidgetIntent(),
+                                refreshing: WidgetStore.todayRefreshing)
+        case .week:
+            HeaderRefreshButton(intent: RefreshWeekWidgetIntent(),
+                                refreshing: WidgetStore.weekRefreshing)
+        case .people:
+            HeaderRefreshButton(intent: RefreshPeopleWidgetIntent(),
+                                refreshing: WidgetStore.peopleRefreshing)
         }
     }
 
@@ -1317,7 +1434,8 @@ struct TodayWidgetView: View {
             smallView
         } else if tasks.isEmpty {
             VStack(alignment: .leading, spacing: 0) {
-                WidgetHeader(title: "Today", count: 0, lastUpdated: entry.lastUpdated, showAdd: true)
+                WidgetHeader(title: "Today", count: 0, lastUpdated: entry.lastUpdated,
+                             showAdd: true, refresh: .today)
                 StateMessage(
                     systemImage: "checkmark.circle",
                     title: "All caught up!",
@@ -1332,9 +1450,14 @@ struct TodayWidgetView: View {
     private var smallView: some View {
         let overdueCount = tasks.filter(\.overdue).count
         return VStack(alignment: .leading, spacing: 2) {
-            Text("Today")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(.secondary)
+            HStack {
+                Text("Today")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(.secondary)
+                Spacer()
+                HeaderRefreshButton(intent: RefreshTodayWidgetIntent(),
+                                    refreshing: WidgetStore.todayRefreshing)
+            }
             Text("\(tasks.count)")
                 .font(.system(size: 40, weight: .bold, design: .rounded))
                 .foregroundColor(tasks.isEmpty ? .secondary : Palette.accent)
@@ -1367,7 +1490,8 @@ struct TodayWidgetView: View {
         let remaining = tasks.count - visible.count
 
         return VStack(alignment: .leading, spacing: 4) {
-            WidgetHeader(title: "Today", count: tasks.count, lastUpdated: entry.lastUpdated, showAdd: true)
+            WidgetHeader(title: "Today", count: tasks.count, lastUpdated: entry.lastUpdated,
+                         showAdd: true, refresh: .today)
             Spacer(minLength: 2)
             ForEach(visible) { task in
                 TaskRow(
@@ -1390,7 +1514,7 @@ struct TodayWidgetView: View {
 struct TodayWidget: Widget {
     var body: some WidgetConfiguration {
         AppIntentConfiguration(
-            kind: "DonetickTodayWidget",
+            kind: todayWidgetKind,
             intent: WidgetOptionsIntent.self,
             provider: DonetickProvider()
         ) { entry in
@@ -1432,7 +1556,8 @@ struct WeekWidgetView: View {
             )
         } else if tasks.isEmpty {
             VStack(alignment: .leading, spacing: 0) {
-                WidgetHeader(title: "Next 7 days", count: 0, lastUpdated: entry.lastUpdated)
+                WidgetHeader(title: "Next 7 days", count: 0, lastUpdated: entry.lastUpdated,
+                             refresh: .week)
                 StateMessage(
                     systemImage: "checkmark.circle",
                     title: "All caught up!",
@@ -1452,7 +1577,8 @@ struct WeekWidgetView: View {
         let remaining = tasks.count - visible.count
 
         return VStack(alignment: .leading, spacing: 4) {
-            WidgetHeader(title: "Next 7 days", count: tasks.count, lastUpdated: entry.lastUpdated)
+            WidgetHeader(title: "Next 7 days", count: tasks.count,
+                         lastUpdated: entry.lastUpdated, refresh: .week)
             Spacer(minLength: 2)
             ForEach(visible) { task in
                 TaskRow(
@@ -1499,7 +1625,8 @@ struct WeekWidgetView: View {
         }.count
 
         return VStack(alignment: .leading, spacing: 3) {
-            WidgetHeader(title: "Next 7 days", count: tasks.count, lastUpdated: entry.lastUpdated)
+            WidgetHeader(title: "Next 7 days", count: tasks.count,
+                         lastUpdated: entry.lastUpdated, refresh: .week)
             Spacer(minLength: 2)
             ForEach(visible) { row in
                 switch row {
@@ -1531,7 +1658,7 @@ struct WeekWidgetView: View {
 struct WeekWidget: Widget {
     var body: some WidgetConfiguration {
         AppIntentConfiguration(
-            kind: "DonetickWeekWidget",
+            kind: weekWidgetKind,
             intent: WidgetOptionsIntent.self,
             provider: DonetickProvider()
         ) { entry in
@@ -1552,6 +1679,16 @@ private struct PersonLoad: Identifiable {
     let weekCount: Int
 
     var id: String { member.id }
+
+    var deepLink: URL? {
+        var components = URLComponents()
+        components.scheme = "donetick"
+        components.host = "chores"
+        components.queryItems = [
+            URLQueryItem(name: "filterId", value: "assignedTo:\(member.id)")
+        ]
+        return components.url
+    }
 }
 
 struct PeopleWidgetView: View {
@@ -1584,7 +1721,8 @@ struct PeopleWidgetView: View {
             )
         } else if entry.members.isEmpty {
             VStack(alignment: .leading, spacing: 0) {
-                WidgetHeader(title: "People", count: 0, lastUpdated: entry.lastUpdated)
+                WidgetHeader(title: "People", count: 0, lastUpdated: entry.lastUpdated,
+                             refresh: .people)
                 StateMessage(
                     systemImage: "person.2",
                     title: "No members yet",
@@ -1602,28 +1740,20 @@ struct PeopleWidgetView: View {
     private var mediumView: some View {
         let visible = Array(people.prefix(4))
         return VStack(alignment: .leading, spacing: 6) {
-            WidgetHeader(title: "People", count: 0, lastUpdated: entry.lastUpdated)
+            WidgetHeader(title: "People", count: 0, lastUpdated: entry.lastUpdated,
+                         refresh: .people)
             Spacer(minLength: 2)
             HStack(alignment: .top, spacing: 0) {
                 ForEach(visible) { person in
-                    VStack(spacing: 3) {
-                        AvatarView(
-                            member: person.member,
-                            image: entry.avatars[person.member.id],
-                            size: 34
-                        )
-                        Text(person.member.name)
-                            .font(.system(size: 10, weight: .semibold))
-                            .foregroundColor(.primary)
-                            .lineLimit(1)
-                        Text("\(person.todayCount) today")
-                            .font(.system(size: 9, weight: person.todayCount > 0 ? .bold : .regular))
-                            .foregroundColor(person.todayCount > 0 ? Palette.accent : .secondary)
-                        Text("\(person.weekCount) this week")
-                            .font(.system(size: 9))
-                            .foregroundColor(.secondary)
+                    if let url = person.deepLink {
+                        Link(destination: url) {
+                            mediumPerson(person)
+                        }
+                        .frame(maxWidth: .infinity)
+                    } else {
+                        mediumPerson(person)
+                            .frame(maxWidth: .infinity)
                     }
-                    .frame(maxWidth: .infinity)
                 }
             }
             Spacer(minLength: 0)
@@ -1635,36 +1765,67 @@ struct PeopleWidgetView: View {
     private var largeView: some View {
         let visible = Array(people.prefix(9))
         return VStack(alignment: .leading, spacing: 4) {
-            WidgetHeader(title: "People", count: 0, lastUpdated: entry.lastUpdated)
+            WidgetHeader(title: "People", count: 0, lastUpdated: entry.lastUpdated,
+                         refresh: .people)
             Spacer(minLength: 2)
             ForEach(visible) { person in
-                HStack(spacing: 9) {
-                    AvatarView(
-                        member: person.member,
-                        image: entry.avatars[person.member.id],
-                        size: 26
-                    )
-                    Text(person.member.name)
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(.primary)
-                        .lineLimit(1)
-                    Spacer(minLength: 6)
-                    Text("\(person.todayCount) today · \(person.weekCount) this week")
-                        .font(.system(size: 11))
-                        .foregroundColor(person.todayCount > 0 ? Palette.accent : .secondary)
+                if let url = person.deepLink {
+                    Link(destination: url) {
+                        largePerson(person)
+                    }
+                } else {
+                    largePerson(person)
                 }
-                .frame(minHeight: 28)
             }
             Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+
+    private func mediumPerson(_ person: PersonLoad) -> some View {
+        VStack(spacing: 3) {
+            AvatarView(
+                member: person.member,
+                image: entry.avatars[person.member.id],
+                size: 34
+            )
+            Text(person.member.name)
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundColor(.primary)
+                .lineLimit(1)
+            Text("\(person.todayCount) today")
+                .font(.system(size: 9, weight: person.todayCount > 0 ? .bold : .regular))
+                .foregroundColor(person.todayCount > 0 ? Palette.accent : .secondary)
+            Text("\(person.weekCount) this week")
+                .font(.system(size: 9))
+                .foregroundColor(.secondary)
+        }
+    }
+
+    private func largePerson(_ person: PersonLoad) -> some View {
+        HStack(spacing: 9) {
+            AvatarView(
+                member: person.member,
+                image: entry.avatars[person.member.id],
+                size: 26
+            )
+            Text(person.member.name)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(.primary)
+                .lineLimit(1)
+            Spacer(minLength: 6)
+            Text("\(person.todayCount) today · \(person.weekCount) this week")
+                .font(.system(size: 11))
+                .foregroundColor(person.todayCount > 0 ? Palette.accent : .secondary)
+        }
+        .frame(minHeight: 28)
     }
 }
 
 struct PeopleWidget: Widget {
     var body: some WidgetConfiguration {
         AppIntentConfiguration(
-            kind: "DonetickPeopleWidget",
+            kind: peopleWidgetKind,
             intent: WidgetAppearanceIntent.self,
             provider: AppearanceProvider()
         ) { entry in

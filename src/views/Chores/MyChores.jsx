@@ -136,6 +136,10 @@ const MyChores = () => {
   // Last `filterId` we saw in the URL, so the URL → filter-state effect can tell
   // a real URL change from its own write-back.
   const lastUrlFilterIdRef = useRef(null)
+  // While an incoming deep link is being applied, the existing temp filter is
+  // stale for one render. Keep its URL-sync effect from writing that old value
+  // back over the new deep link and causing the two filters to oscillate.
+  const applyingUrlFilterIdRef = useRef(null)
   const openSectionsInitializedRef = useRef(
     localStorage.getItem('openChoreSections') !== null,
   )
@@ -503,6 +507,7 @@ const MyChores = () => {
       tempFilterMeta?.id !== filterId
     ) {
       const def = INSIGHT_FILTER_DEFS[filterId]
+      applyingUrlFilterIdRef.current = rawFilterId
       applyTempFilter(def.filter, { id: filterId, name: def.name })
       return
     }
@@ -521,6 +526,7 @@ const MyChores = () => {
         m => String(m.userId) === String(memberId),
       )
       const memberName = member?.displayName || member?.name || member?.username
+      applyingUrlFilterIdRef.current = rawFilterId
       applyTempFilter(
         {
           conditions: [
@@ -602,6 +608,17 @@ const MyChores = () => {
     const insightId = tempFilterMeta?.id
     const params = new URLSearchParams(searchParams)
     const currentFilterId = params.get('filterId')
+
+    // URL → state takes one render. During that render `tempFilterMeta` still
+    // describes the previously selected person/insight; writing it to the URL
+    // would undo the incoming widget deep link. Once state catches up, release
+    // the guard so normal in-app filter changes can keep syncing to the URL.
+    if (applyingUrlFilterIdRef.current === currentFilterId) {
+      if (insightId === currentFilterId) {
+        applyingUrlFilterIdRef.current = null
+      }
+      return
+    }
 
     if (insightId && currentFilterId !== insightId) {
       params.delete('filter_id')

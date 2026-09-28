@@ -34,7 +34,7 @@ public class FilterWidgetProvider extends AppWidgetProvider {
     private static final String ACTION_COMPLETE = "com.donetick.app.widget.FILTER_COMPLETE";
     private static final String EXTRA_TASK_ID = "task_id";
     private static final int PAGE_SIZE = 5;
-    private static final String[] REFRESH_FRAMES = { "↻", "↓", "↺", "↑" };
+    private static final String[] REFRESH_FRAMES = { "↻", "↓" };
     private static final ConcurrentHashMap<Integer, Integer> REFRESHING = new ConcurrentHashMap<>();
 
     private static final int[] ROWS = { R.id.filter_row_0, R.id.filter_row_1,
@@ -117,8 +117,7 @@ public class FilterWidgetProvider extends AppWidgetProvider {
         if (REFRESHING.putIfAbsent(id, 0) != null) return false;
         new Thread(() -> {
             int frame = 0;
-            while (REFRESHING.containsKey(id)) {
-                REFRESHING.put(id, frame++ % REFRESH_FRAMES.length);
+            while (REFRESHING.replace(id, frame++ % REFRESH_FRAMES.length) != null) {
                 update(context, id);
                 try {
                     Thread.sleep(180);

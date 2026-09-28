@@ -85,8 +85,13 @@ public final class WidgetTheme {
         views.setTextColor(R.id.widget_subtitle, textSecondary());
         views.setTextColor(R.id.widget_empty, textSecondary());
         views.setTextColor(R.id.widget_count, color(R.color.widget_accent));
+        views.setTextColor(R.id.widget_refresh, color(R.color.widget_accent));
         views.setInt(R.id.widget_count, "setBackgroundResource", pillBackground());
+        views.setInt(R.id.widget_refresh, "setBackgroundResource", pillBackground());
         views.setInt(R.id.widget_add, "setBackgroundResource", pillBackground());
+        // Vector tint resources are otherwise resolved in the launcher's device
+        // scheme, which can disagree with a widget's explicit theme override.
+        views.setInt(R.id.widget_add, "setColorFilter", color(R.color.widget_accent));
     }
 
     /**
