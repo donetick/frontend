@@ -83,6 +83,14 @@ const AuthenticationLoading = () => {
     const urlParams = new URLSearchParams(window.location.search)
     const code = urlParams.get('code')
     const returnedState = urlParams.get('state')
+    const oauthError = urlParams.get('error')
+
+    if (oauthError) {
+      setMessage(t('authenticating.signInFailed'))
+      setSubMessage(t('authenticating.tryAgain'))
+      setStatus('error')
+      return
+    }
 
     const storedState = localStorage.getItem('authState')
 
