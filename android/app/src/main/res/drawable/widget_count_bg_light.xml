@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Light-scheme copy of widget_count_bg. Forced-theme widgets can't use the
+     themed resource: RemoteViews resolve it in the launcher's configuration. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="#E3EFFB" />
+    <corners android:radius="10dp" />
+</shape>

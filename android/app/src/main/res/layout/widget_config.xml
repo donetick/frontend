@@ -1,43 +1,168 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/widget_bg"
-    android:orientation="vertical"
-    android:padding="24dp">
+    android:fillViewport="true">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/widget_config_title"
-        android:textColor="@color/widget_text_primary"
-        android:textSize="22sp"
-        android:textStyle="bold" />
-
-    <Switch
-        android:id="@+id/config_include_others"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:minHeight="48dp"
-        android:text="@string/widget_config_include_others"
-        android:textColor="@color/widget_text_primary"
-        android:textSize="16sp" />
+        android:orientation="vertical"
+        android:padding="24dp">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="@string/widget_config_include_others_hint"
-        android:textColor="@color/widget_text_secondary"
-        android:textSize="13sp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/widget_config_title"
+            android:textColor="@color/widget_text_primary"
+            android:textSize="22sp"
+            android:textStyle="bold" />
 
-    <Button
-        android:id="@+id/config_save"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:backgroundTint="@color/widget_accent"
-        android:text="@string/widget_config_save"
-        android:textColor="#FFFFFF" />
-</LinearLayout>
+        <!-- Hidden for widgets that always cover the whole circle (people,
+             project, filter) or carry no task data at all. -->
+        <LinearLayout
+            android:id="@+id/config_include_others_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <Switch
+                android:id="@+id/config_include_others"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:minHeight="48dp"
+                android:text="@string/widget_config_include_others"
+                android:textColor="@color/widget_text_primary"
+                android:textSize="16sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/widget_config_include_others_hint"
+                android:textColor="@color/widget_text_secondary"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:text="@string/widget_config_opacity"
+            android:textColor="@color/widget_text_primary"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/widget_config_opacity_hint"
+            android:textColor="@color/widget_text_secondary"
+            android:textSize="13sp" />
+
+        <CheckBox
+            android:id="@+id/config_opacity_default"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:minHeight="48dp"
+            android:textColor="@color/widget_text_primary"
+            android:textSize="15sp" />
+
+        <LinearLayout
+            android:id="@+id/config_opacity_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <SeekBar
+                android:id="@+id/config_opacity"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:max="100" />
+
+            <TextView
+                android:id="@+id/config_opacity_value"
+                android:layout_width="52dp"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:textColor="@color/widget_text_primary"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:text="@string/widget_config_theme"
+            android:textColor="@color/widget_text_primary"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/widget_config_theme_hint"
+            android:textColor="@color/widget_text_secondary"
+            android:textSize="13sp" />
+
+        <RadioGroup
+            android:id="@+id/config_theme_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="vertical">
+
+            <RadioButton
+                android:id="@+id/config_theme_inherit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="44dp"
+                android:textColor="@color/widget_text_primary"
+                android:textSize="15sp" />
+
+            <RadioButton
+                android:id="@+id/config_theme_auto"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="44dp"
+                android:text="@string/widget_theme_auto"
+                android:textColor="@color/widget_text_primary"
+                android:textSize="15sp" />
+
+            <RadioButton
+                android:id="@+id/config_theme_light"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="44dp"
+                android:text="@string/widget_theme_light"
+                android:textColor="@color/widget_text_primary"
+                android:textSize="15sp" />
+
+            <RadioButton
+                android:id="@+id/config_theme_dark"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="44dp"
+                android:text="@string/widget_theme_dark"
+                android:textColor="@color/widget_text_primary"
+                android:textSize="15sp" />
+        </RadioGroup>
+
+        <Button
+            android:id="@+id/config_save"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:backgroundTint="@color/widget_accent"
+            android:text="@string/widget_config_save"
+            android:textColor="#FFFFFF" />
+    </LinearLayout>
+</ScrollView>

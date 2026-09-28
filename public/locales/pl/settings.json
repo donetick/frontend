@@ -94,6 +94,10 @@
         "title": "",
         "description": ""
       },
+      "widgets": {
+        "title": "Widżety na ekranie głównym",
+        "description": "Ustaw, jak widżety Donetick wyglądają na ekranie głównym tego urządzenia."
+      },
       "sidepanel": {
         "title": "",
         "description": ""
@@ -493,7 +497,11 @@
       "title": "Dolna nawigacja",
       "description": "Wybierz maksymalnie {{max}} skróty dla dolnego paska nawigacji na telefonie i przeciągnij, aby zmienić ich kolejność. Pozycja „Więcej” zawsze zostaje ostatnia i otwiera pełne menu.",
       "resetToDefaults": "Przywróć domyślne",
-      "resetHelper": "Spowoduje to przywrócenie domyślnych skrótów i kolejności w dolnej nawigacji."
+      "resetHelper": "Spowoduje to przywrócenie domyślnych skrótów i kolejności w dolnej nawigacji.",
+      "hideLabels": {
+        "title": "Ukryj etykiety",
+        "description": "Pokazuj tylko ikony na dolnym pasku nawigacji, aby zrobić go mniejszym."
+      }
     },
     "sidepanel": {
       "title": "Panel boczny"
@@ -506,6 +514,26 @@
     "light": "",
     "dark": "",
     "system": ""
+  },
+  "widgets": {
+    "title": "Widżety na ekranie głównym",
+    "opacity": {
+      "title": "Krycie tła",
+      "description": "Jak pełne jest tło widżetów. Niższe wartości przepuszczają tapetę.",
+      "preview": "Wynieść śmieci",
+      "perWidgetHint": "To ustawienie domyślne dla wszystkich widżetów. Aby zmienić jeden, przytrzymaj go na ekranie głównym i otwórz jego opcje (Android) albo Edytuj widżet (iOS).",
+      "webHint": "Widżety na ekranie głównym są częścią aplikacji na iOS i Androida — tylko tam to ustawienie ma znaczenie."
+    },
+    "theme": {
+      "title": "Kolory",
+      "description": "Jakiej palety używają widżety. „Automatycznie” podąża za jasnym lub ciemnym trybem telefonu.",
+      "options": {
+        "auto": "Automatycznie",
+        "light": "Zawsze jasny",
+        "dark": "Zawsze ciemny"
+      },
+      "perWidgetHint": "To ustawienie domyślne dla wszystkich widżetów. Aby zmienić jeden, przytrzymaj go na ekranie głównym i otwórz jego opcje (Android) albo Edytuj widżet (iOS)."
+    }
   },
   "localization": {
     "title": "",

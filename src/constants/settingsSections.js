@@ -13,6 +13,7 @@ import {
   Settings,
   Storage,
   ViewSidebar,
+  Widgets,
 } from '@mui/icons-material'
 
 // Single source of truth for the settings sections: id, icon, and access
@@ -31,6 +32,8 @@ export const SETTINGS_SECTIONS = [
   // the bottom bar on mobile, the sidepanel on desktop.
   { id: 'layout', icon: ViewSidebar },
   { id: 'theme', icon: Palette },
+  // Home-screen widgets only exist in the iOS/Android builds.
+  { id: 'widgets', icon: Widgets, nativeOnly: true },
   { id: 'localization', icon: Language, isBeta: true },
   { id: 'advanced', icon: Settings },
   { id: 'privacy', icon: PrivacyTip },

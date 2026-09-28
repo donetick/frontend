@@ -94,6 +94,10 @@
         "title": "",
         "description": ""
       },
+      "widgets": {
+        "title": "Widget della schermata Home",
+        "description": "Scegli come appaiono i widget di Donetick nella schermata Home di questo dispositivo."
+      },
       "sidepanel": {
         "title": "",
         "description": ""
@@ -493,7 +497,11 @@
       "title": "Navigazione in basso",
       "description": "Scegli fino a {{max}} scorciatoie per la barra di navigazione in basso sul cellulare e trascinale per riordinarle. «Altro» resta sempre l'ultima voce e apre il menu completo.",
       "resetToDefaults": "Ripristina impostazioni predefinite",
-      "resetHelper": "Verranno ripristinati le scorciatoie e l'ordine predefiniti della navigazione in basso."
+      "resetHelper": "Verranno ripristinati le scorciatoie e l'ordine predefiniti della navigazione in basso.",
+      "hideLabels": {
+        "title": "Nascondi etichette",
+        "description": "Mostra solo le icone nella barra di navigazione in basso per renderla più piccola."
+      }
     },
     "sidepanel": {
       "title": "Pannello laterale"
@@ -506,6 +514,26 @@
     "light": "",
     "dark": "",
     "system": ""
+  },
+  "widgets": {
+    "title": "Widget della schermata Home",
+    "opacity": {
+      "title": "Opacità dello sfondo",
+      "description": "Quanto è pieno lo sfondo dei tuoi widget. I valori più bassi lasciano intravedere lo sfondo del telefono.",
+      "preview": "Portare fuori la spazzatura",
+      "perWidgetHint": "Questo è il valore predefinito per tutti i widget. Per cambiarne uno solo, tienilo premuto nella schermata Home e apri le sue opzioni (Android) o Modifica widget (iOS).",
+      "webHint": "I widget della schermata Home fanno parte delle app per iOS e Android: questa impostazione ha effetto solo lì."
+    },
+    "theme": {
+      "title": "Colori",
+      "description": "Quale palette usano i tuoi widget. «Automatico» segue la modalità chiara o scura del telefono.",
+      "options": {
+        "auto": "Automatico",
+        "light": "Sempre chiaro",
+        "dark": "Sempre scuro"
+      },
+      "perWidgetHint": "Questo è il valore predefinito per tutti i widget. Per cambiarne uno solo, tienilo premuto nella schermata Home e apri le sue opzioni (Android) o Modifica widget (iOS)."
+    }
   },
   "localization": {
     "title": "",

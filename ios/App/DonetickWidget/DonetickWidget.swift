@@ -130,6 +130,7 @@ enum WidgetStore {
     static let appGroup = "group.com.donetick.app"
     static let dataKey = "widget_tasks"
     static let configKey = "widget_config"
+    static let optionsKey = "widget_options"
     static let projectIndexKey = "project_widget_index"
     static let projectPageKey = "project_widget_page"
     static let filterIndexKey = "filter_widget_index"
@@ -153,6 +154,33 @@ enum WidgetStore {
               let millis = snapshot["lastUpdated"] as? Double, millis > 0
         else { return nil }
         return Date(timeIntervalSince1970: millis / 1000)
+    }
+
+    /// App-wide widget background opacity (0...1), set in Settings → Widgets and
+    /// pushed alongside the snapshot. Kept out of the snapshot itself so signing
+    /// out does not reset how the user's home screen looks.
+    static var globalOpacity: Double {
+        guard let raw = defaults?.string(forKey: optionsKey),
+              let data = raw.data(using: .utf8),
+              let options = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let percent = options["opacity"] as? NSNumber
+        else { return 1 }
+        return min(1, max(0, percent.doubleValue / 100))
+    }
+
+    /// App-wide widget colour scheme, from the same options blob. nil means
+    /// "automatic" — follow the phone's light/dark setting, as widgets always did.
+    static var globalColorScheme: ColorScheme? {
+        guard let raw = defaults?.string(forKey: optionsKey),
+              let data = raw.data(using: .utf8),
+              let options = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let theme = options["theme"] as? String
+        else { return nil }
+        switch theme {
+        case "light": return .light
+        case "dark": return .dark
+        default: return nil
+        }
     }
 
     static var userId: String? {
@@ -705,12 +733,98 @@ enum AvatarStore {
 
 // MARK: - Configuration intent (long-press → Edit Widget)
 
+/// Background opacity, per widget. WidgetKit configuration parameters render as
+/// pickers rather than sliders, so this is a short list of useful steps with
+/// "App setting" deferring to Settings → Widgets in the app.
+enum WidgetOpacityOption: String, AppEnum {
+    case appSetting
+    case solid
+    case high
+    case medium
+    case low
+    case faint
+
+    static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "Background")
+
+    static var caseDisplayRepresentations: [WidgetOpacityOption: DisplayRepresentation] = [
+        .appSetting: "App setting",
+        .solid: "Solid",
+        .high: "80%",
+        .medium: "60%",
+        .low: "40%",
+        .faint: "20%",
+    ]
+
+    /// nil means "inherit whatever the app-wide setting is".
+    var value: Double? {
+        switch self {
+        case .appSetting: return nil
+        case .solid: return 1
+        case .high: return 0.8
+        case .medium: return 0.6
+        case .low: return 0.4
+        case .faint: return 0.2
+        }
+    }
+
+    var resolved: Double { value ?? WidgetStore.globalOpacity }
+}
+
+/// Colour scheme, per widget. "Automatic" is what widgets do by default: follow
+/// the phone's light/dark mode. The pinned options exist for wallpapers the
+/// automatic choice reads badly against.
+enum WidgetThemeOption: String, AppEnum {
+    case appSetting
+    case automatic
+    case light
+    case dark
+
+    static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "Colors")
+
+    static var caseDisplayRepresentations: [WidgetThemeOption: DisplayRepresentation] = [
+        .appSetting: "App setting",
+        .automatic: "Automatic",
+        .light: "Always light",
+        .dark: "Always dark",
+    ]
+
+    /// nil is meaningful twice over here: .appSetting defers to the app-wide
+    /// option, .automatic resolves to "no override at all".
+    var resolved: ColorScheme? {
+        switch self {
+        case .appSetting: return WidgetStore.globalColorScheme
+        case .automatic: return nil
+        case .light: return .light
+        case .dark: return .dark
+        }
+    }
+}
+
 struct WidgetOptionsIntent: WidgetConfigurationIntent {
     static var title: LocalizedStringResource = "Widget Options"
     static var description = IntentDescription("Choose whose tasks the widget shows.")
 
     @Parameter(title: "Show everyone's tasks", default: false)
     var includeOthers: Bool
+
+    @Parameter(title: "Background", default: .appSetting)
+    var opacity: WidgetOpacityOption
+
+    @Parameter(title: "Colors", default: .appSetting)
+    var theme: WidgetThemeOption
+}
+
+/// Configuration for the widgets that have nothing to filter by assignee but
+/// still need the appearance control (people, project, filter, shortcuts).
+struct WidgetAppearanceIntent: WidgetConfigurationIntent {
+    static var title: LocalizedStringResource = "Widget Appearance"
+    static var description = IntentDescription("Choose how solid the widget's background is.")
+
+    @Parameter(title: "Background", default: .appSetting)
+    var opacity: WidgetOpacityOption
+
+    @Parameter(title: "Colors", default: .appSetting)
+    var theme: WidgetThemeOption
 }
 
 private let projectWidgetKind = "DonetickProjectWidget"
@@ -831,14 +945,19 @@ struct CompleteProjectTaskIntent: AppIntent {
 
     func perform() async throws -> some IntentResult {
         WidgetStore.setProjectTaskCompleted(id: taskId, completed: true)
-        WidgetCenter.shared.reloadTimelines(ofKind: projectWidgetKind)
-        WidgetCenter.shared.reloadTimelines(ofKind: filterWidgetKind)
+        reloadTaskWidgets()
         if !(await WidgetStore.completeTask(id: taskId)) {
             WidgetStore.setProjectTaskCompleted(id: taskId, completed: false)
-            WidgetCenter.shared.reloadTimelines(ofKind: projectWidgetKind)
-            WidgetCenter.shared.reloadTimelines(ofKind: filterWidgetKind)
+            reloadTaskWidgets()
         }
         return .result()
+    }
+
+    /// Every widget that renders the completion state of a single task.
+    private func reloadTaskWidgets() {
+        for kind in [projectWidgetKind, filterWidgetKind] {
+            WidgetCenter.shared.reloadTimelines(ofKind: kind)
+        }
     }
 }
 
@@ -857,6 +976,10 @@ struct TaskEntry: TimelineEntry {
     let signedIn: Bool
     let includeOthers: Bool
     let myUserId: String?
+    /// Background opacity 0...1 for this widget instance.
+    var opacity: Double = 1
+    /// Forced colour scheme, or nil to follow the system.
+    var colorScheme: ColorScheme? = nil
 
     static func sample() -> TaskEntry {
         let calendar = Calendar.current
@@ -892,7 +1015,8 @@ struct TaskEntry: TimelineEntry {
     }
 }
 
-private func makeEntry(includeOthers: Bool) async -> TaskEntry {
+private func makeEntry(includeOthers: Bool, opacity: Double = 1,
+                       colorScheme: ColorScheme? = nil) async -> TaskEntry {
     if !WidgetStore.projectRefreshing && !WidgetStore.filterRefreshing {
         await WidgetStore.refreshIfStale()
     }
@@ -910,13 +1034,17 @@ private func makeEntry(includeOthers: Bool) async -> TaskEntry {
         lastUpdated: WidgetStore.lastUpdated,
         signedIn: WidgetStore.signedIn,
         includeOthers: includeOthers,
-        myUserId: WidgetStore.userId
+        myUserId: WidgetStore.userId,
+        opacity: opacity,
+        colorScheme: colorScheme
     )
 }
 
-private func makeTimeline(includeOthers: Bool) async -> Timeline<TaskEntry> {
+private func makeTimeline(includeOthers: Bool, opacity: Double = 1,
+                          colorScheme: ColorScheme? = nil) async -> Timeline<TaskEntry> {
     Timeline(
-        entries: [await makeEntry(includeOthers: includeOthers)],
+        entries: [await makeEntry(includeOthers: includeOthers, opacity: opacity,
+                                  colorScheme: colorScheme)],
         policy: .after(Date().addingTimeInterval(30 * 60))
     )
 }
@@ -928,30 +1056,34 @@ struct DonetickProvider: AppIntentTimelineProvider {
 
     func snapshot(for configuration: WidgetOptionsIntent, in context: Context) async -> TaskEntry {
         if context.isPreview { return .sample() }
-        return await makeEntry(includeOthers: configuration.includeOthers)
+        return await makeEntry(includeOthers: configuration.includeOthers,
+                               opacity: configuration.opacity.resolved,
+                               colorScheme: configuration.theme.resolved)
     }
 
     func timeline(for configuration: WidgetOptionsIntent, in context: Context) async -> Timeline<TaskEntry> {
-        await makeTimeline(includeOthers: configuration.includeOthers)
+        await makeTimeline(includeOthers: configuration.includeOthers,
+                           opacity: configuration.opacity.resolved,
+                           colorScheme: configuration.theme.resolved)
     }
 }
 
-/// The People widget always covers the whole circle, so it needs no intent.
-struct PeopleProvider: TimelineProvider {
+/// The people/project/filter widgets always cover the whole circle, so their
+/// only configurable option is the appearance one.
+struct AppearanceProvider: AppIntentTimelineProvider {
     func placeholder(in context: Context) -> TaskEntry {
         .sample()
     }
 
-    func getSnapshot(in context: Context, completion: @escaping (TaskEntry) -> Void) {
-        if context.isPreview {
-            completion(.sample())
-            return
-        }
-        Task { completion(await makeEntry(includeOthers: true)) }
+    func snapshot(for configuration: WidgetAppearanceIntent, in context: Context) async -> TaskEntry {
+        if context.isPreview { return .sample() }
+        return await makeEntry(includeOthers: true, opacity: configuration.opacity.resolved,
+                               colorScheme: configuration.theme.resolved)
     }
 
-    func getTimeline(in context: Context, completion: @escaping (Timeline<TaskEntry>) -> Void) {
-        Task { completion(await makeTimeline(includeOthers: true)) }
+    func timeline(for configuration: WidgetAppearanceIntent, in context: Context) async -> Timeline<TaskEntry> {
+        await makeTimeline(includeOthers: true, opacity: configuration.opacity.resolved,
+                           colorScheme: configuration.theme.resolved)
     }
 }
 
@@ -983,8 +1115,30 @@ private let addTaskURL = URL(string: "donetick://chores/add")
 // MARK: - Shared views
 
 extension View {
-    func widgetShell() -> some View {
-        containerBackground(for: .widget) { Color(UIColor.systemBackground) }
+    /// The widget's own surface. Fading it (rather than the whole view) lets the
+    /// wallpaper through while keeping text and icons fully opaque.
+    func widgetShell(opacity: Double = 1) -> some View {
+        containerBackground(for: .widget) {
+            Color(UIColor.systemBackground).opacity(opacity)
+        }
+    }
+
+    /// Pin the view to one colour scheme, or leave it following the system when
+    /// `scheme` is nil. Every widget color is either a semantic one (.primary,
+    /// systemBackground) or built by `dynamicColor`, so overriding the
+    /// environment's scheme is enough to repaint the whole widget.
+    @ViewBuilder
+    func widgetTheme(_ scheme: ColorScheme?) -> some View {
+        if let scheme {
+            environment(\.colorScheme, scheme)
+        } else {
+            self
+        }
+    }
+
+    /// Same, for the widgets that paint a project/filter color instead.
+    func widgetShell(_ color: Color, opacity: Double) -> some View {
+        containerBackground(for: .widget) { color.opacity(opacity) }
     }
 }
 
@@ -1240,7 +1394,8 @@ struct TodayWidget: Widget {
             intent: WidgetOptionsIntent.self,
             provider: DonetickProvider()
         ) { entry in
-            TodayWidgetView(entry: entry).widgetShell()
+            TodayWidgetView(entry: entry).widgetShell(opacity: entry.opacity)
+                .widgetTheme(entry.colorScheme)
         }
         .configurationDisplayName("Today")
         .description("Tasks due today, plus anything waiting on you.")
@@ -1380,7 +1535,8 @@ struct WeekWidget: Widget {
             intent: WidgetOptionsIntent.self,
             provider: DonetickProvider()
         ) { entry in
-            WeekWidgetView(entry: entry).widgetShell()
+            WeekWidgetView(entry: entry).widgetShell(opacity: entry.opacity)
+                .widgetTheme(entry.colorScheme)
         }
         .configurationDisplayName("Next 7 Days")
         .description("Tasks for the next 7 days, grouped by day.")
@@ -1507,8 +1663,13 @@ struct PeopleWidgetView: View {
 
 struct PeopleWidget: Widget {
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: "DonetickPeopleWidget", provider: PeopleProvider()) { entry in
-            PeopleWidgetView(entry: entry).widgetShell()
+        AppIntentConfiguration(
+            kind: "DonetickPeopleWidget",
+            intent: WidgetAppearanceIntent.self,
+            provider: AppearanceProvider()
+        ) { entry in
+            PeopleWidgetView(entry: entry).widgetShell(opacity: entry.opacity)
+                .widgetTheme(entry.colorScheme)
         }
         .configurationDisplayName("People")
         .description("Everyone in your circle with their tasks for today and the week ahead.")
@@ -1602,14 +1763,14 @@ struct ProjectWidgetView: View {
         if !entry.signedIn {
             StateMessage(systemImage: "person.crop.circle.badge.exclamationmark",
                          title: "Sign in", detail: "Open Donetick to see your projects")
-                .containerBackground(for: .widget) { Color(UIColor.systemBackground) }
+                .widgetShell(opacity: entry.opacity)
         } else if let project = project {
             projectContent(project)
-                .containerBackground(for: .widget) { project.backgroundColor }
+                .widgetShell(project.backgroundColor, opacity: entry.opacity)
         } else {
             StateMessage(systemImage: "folder", title: "No projects",
                          detail: "Open Donetick to create or sync a project")
-                .containerBackground(for: .widget) { Color(UIColor.systemBackground) }
+                .widgetShell(opacity: entry.opacity)
         }
     }
 
@@ -1716,7 +1877,11 @@ struct ProjectWidgetView: View {
 
 struct ProjectWidget: Widget {
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: projectWidgetKind, provider: PeopleProvider()) { entry in
+        AppIntentConfiguration(
+            kind: projectWidgetKind,
+            intent: WidgetAppearanceIntent.self,
+            provider: AppearanceProvider()
+        ) { entry in
             ProjectWidgetView(entry: entry)
         }
         .configurationDisplayName("Project Tasks")
@@ -1764,14 +1929,14 @@ struct FilterWidgetView: View {
         if !entry.signedIn {
             StateMessage(systemImage: "person.crop.circle.badge.exclamationmark",
                          title: "Sign in", detail: "Open Donetick to see your filters")
-                .containerBackground(for: .widget) { Color(UIColor.systemBackground) }
+                .widgetShell(opacity: entry.opacity)
         } else if let filter {
             filterContent(filter)
-                .containerBackground(for: .widget) { filter.backgroundColor }
+                .widgetShell(filter.backgroundColor, opacity: entry.opacity)
         } else {
             StateMessage(systemImage: "line.3.horizontal.decrease.circle", title: "No filters",
                          detail: "Create a saved filter in Donetick")
-                .containerBackground(for: .widget) { Color(UIColor.systemBackground) }
+                .widgetShell(opacity: entry.opacity)
         }
     }
 
@@ -1865,7 +2030,11 @@ struct FilterWidgetView: View {
 
 struct FilterWidget: Widget {
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: filterWidgetKind, provider: PeopleProvider()) { entry in
+        AppIntentConfiguration(
+            kind: filterWidgetKind,
+            intent: WidgetAppearanceIntent.self,
+            provider: AppearanceProvider()
+        ) { entry in
             FilterWidgetView(entry: entry)
         }
         .configurationDisplayName("Filter Tasks")
@@ -1932,20 +2101,29 @@ private struct QuickCaptureTile: View {
 
 struct QuickCaptureEntry: TimelineEntry {
     let date: Date
+    var opacity: Double = 1
+    var colorScheme: ColorScheme? = nil
 }
 
-/// Static content — one entry, never reloaded.
-struct QuickCaptureProvider: TimelineProvider {
+/// Static content — one entry, reloaded only when the appearance option changes.
+struct QuickCaptureProvider: AppIntentTimelineProvider {
     func placeholder(in context: Context) -> QuickCaptureEntry {
         QuickCaptureEntry(date: Date())
     }
 
-    func getSnapshot(in context: Context, completion: @escaping (QuickCaptureEntry) -> Void) {
-        completion(QuickCaptureEntry(date: Date()))
+    func snapshot(for configuration: WidgetAppearanceIntent,
+                  in context: Context) async -> QuickCaptureEntry {
+        QuickCaptureEntry(date: Date(), opacity: configuration.opacity.resolved,
+                          colorScheme: configuration.theme.resolved)
     }
 
-    func getTimeline(in context: Context, completion: @escaping (Timeline<QuickCaptureEntry>) -> Void) {
-        completion(Timeline(entries: [QuickCaptureEntry(date: Date())], policy: .never))
+    func timeline(for configuration: WidgetAppearanceIntent,
+                  in context: Context) async -> Timeline<QuickCaptureEntry> {
+        Timeline(
+            entries: [QuickCaptureEntry(date: Date(), opacity: configuration.opacity.resolved,
+                                        colorScheme: configuration.theme.resolved)],
+            policy: .never
+        )
     }
 }
 
@@ -1962,8 +2140,13 @@ struct QuickCaptureWidgetView: View {
 
 struct QuickCaptureWidget: Widget {
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: "DonetickQuickCaptureWidget", provider: QuickCaptureProvider()) { _ in
-            QuickCaptureWidgetView().widgetShell()
+        AppIntentConfiguration(
+            kind: "DonetickQuickCaptureWidget",
+            intent: WidgetAppearanceIntent.self,
+            provider: QuickCaptureProvider()
+        ) { entry in
+            QuickCaptureWidgetView().widgetShell(opacity: entry.opacity)
+                .widgetTheme(entry.colorScheme)
         }
         .configurationDisplayName("Quick Capture")
         .description("Capture a task in one tap — type it, scan it, or say it.")

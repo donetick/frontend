@@ -94,6 +94,10 @@
         "title": "Informar de un problema",
         "description": "¿Algo no funciona bien? Envíanos los detalles junto con una instantánea técnica."
       },
+      "widgets": {
+        "title": "Widgets de la pantalla de inicio",
+        "description": "Controla el aspecto de los widgets de Donetick en la pantalla de inicio de este dispositivo."
+      },
       "sidepanel": {
         "title": "Personalización del panel lateral",
         "description": "Personaliza la disposición y la visibilidad de las tarjetas del panel lateral."
@@ -493,7 +497,11 @@
       "title": "Navegación inferior",
       "description": "Elige hasta {{max}} accesos directos para la barra de navegación inferior en el móvil y arrástralos para ordenarlos. «Más» siempre queda como último elemento y abre el menú completo.",
       "resetToDefaults": "Restablecer valores predeterminados",
-      "resetHelper": "Se restablecerán los accesos directos y el orden predeterminados de la navegación inferior."
+      "resetHelper": "Se restablecerán los accesos directos y el orden predeterminados de la navegación inferior.",
+      "hideLabels": {
+        "title": "Ocultar etiquetas",
+        "description": "Muestra solo los iconos en la barra de navegación inferior para hacerla más pequeña."
+      }
     },
     "sidepanel": {
       "title": "Panel lateral"
@@ -506,6 +514,26 @@
     "light": "Claro",
     "dark": "Oscuro",
     "system": "Sistema"
+  },
+  "widgets": {
+    "title": "Widgets de la pantalla de inicio",
+    "opacity": {
+      "title": "Opacidad del fondo",
+      "description": "Qué tan sólido es el fondo de tus widgets. Los valores bajos dejan ver el fondo de pantalla.",
+      "preview": "Sacar la basura",
+      "perWidgetHint": "Este es el valor predeterminado para todos los widgets. Para cambiar uno solo, mantenlo pulsado en la pantalla de inicio y abre sus opciones (Android) o Editar widget (iOS).",
+      "webHint": "Los widgets de la pantalla de inicio forman parte de las apps de iOS y Android: este ajuste solo tiene efecto ahí."
+    },
+    "theme": {
+      "title": "Colores",
+      "description": "Qué paleta usan tus widgets. «Automático» sigue el modo claro u oscuro de tu teléfono.",
+      "options": {
+        "auto": "Automático",
+        "light": "Siempre claro",
+        "dark": "Siempre oscuro"
+      },
+      "perWidgetHint": "Este es el valor predeterminado para todos los widgets. Para cambiar uno solo, mantenlo pulsado en la pantalla de inicio y abre sus opciones (Android) o Editar widget (iOS)."
+    }
   },
   "localization": {
     "title": "Localización",

@@ -94,6 +94,10 @@
         "title": "Relatar um erro",
         "description": "Algo não está funcionando? Envie os detalhes junto com um retrato técnico."
       },
+      "widgets": {
+        "title": "Widgets da tela inicial",
+        "description": "Escolha como os widgets do Donetick aparecem na tela inicial deste dispositivo."
+      },
       "sidepanel": {
         "title": "Personalização do painel lateral",
         "description": "Personalize o layout e a visibilidade dos cartões do painel lateral."
@@ -493,7 +497,11 @@
       "title": "Navegação inferior",
       "description": "Escolha até {{max}} atalhos para a barra de navegação inferior no celular e arraste para reordená-los. “Mais” sempre fica como último item e abre o menu completo.",
       "resetToDefaults": "Restaurar padrões",
-      "resetHelper": "Isso restaurará os atalhos e a ordem padrão da navegação inferior."
+      "resetHelper": "Isso restaurará os atalhos e a ordem padrão da navegação inferior.",
+      "hideLabels": {
+        "title": "Ocultar rótulos",
+        "description": "Mostra apenas os ícones na barra de navegação inferior para deixá-la menor."
+      }
     },
     "sidepanel": {
       "title": "Painel lateral"
@@ -506,6 +514,26 @@
     "light": "Claro",
     "dark": "Escuro",
     "system": "Sistema"
+  },
+  "widgets": {
+    "title": "Widgets da tela inicial",
+    "opacity": {
+      "title": "Opacidade do fundo",
+      "description": "O quanto o fundo dos seus widgets é sólido. Valores menores deixam o papel de parede aparecer.",
+      "preview": "Levar o lixo para fora",
+      "perWidgetHint": "Este é o padrão para todos os widgets. Para mudar um só, toque e segure nele na tela inicial e abra as opções (Android) ou Editar widget (iOS).",
+      "webHint": "Os widgets da tela inicial fazem parte dos apps para iOS e Android — esta configuração só vale lá."
+    },
+    "theme": {
+      "title": "Cores",
+      "description": "Qual paleta os seus widgets usam. «Automático» acompanha o modo claro ou escuro do seu telefone.",
+      "options": {
+        "auto": "Automático",
+        "light": "Sempre claro",
+        "dark": "Sempre escuro"
+      },
+      "perWidgetHint": "Este é o padrão para todos os widgets. Para mudar um só, toque e segure nele na tela inicial e abra as opções (Android) ou Editar widget (iOS)."
+    }
   },
   "localization": {
     "title": "Localização",

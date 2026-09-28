@@ -46,6 +46,7 @@ import java.util.concurrent.atomic.AtomicReference;
  *                 filters:[{id, name, color, conditions, operator}],
  *                 members:[{id, name, image}]}
  * Config JSON:   {serverUrl, token, userId}
+ * Options JSON:  {opacity, theme}  — device-wide widget appearance, kept across logout
  *
  * Since v2 the snapshot holds every member's tasks; widgets narrow it down to
  * the current user unless the per-widget "include others" option is on.
@@ -55,11 +56,18 @@ public final class WidgetStore {
     private static final String PREFS = "donetick_widget";
     private static final String KEY_DATA = "widget_tasks";
     private static final String KEY_CONFIG = "widget_config";
+    private static final String KEY_OPTIONS = "widget_options";
     private static final String KEY_INCLUDE_OTHERS_PREFIX = "include_others_";
+    private static final String KEY_OPACITY_PREFIX = "opacity_";
+    private static final String KEY_THEME_PREFIX = "theme_";
     private static final String KEY_PROJECT_INDEX_PREFIX = "project_index_";
     private static final String KEY_PROJECT_PAGE_PREFIX = "project_page_";
     private static final String KEY_FILTER_INDEX_PREFIX = "filter_index_";
     private static final String KEY_FILTER_PAGE_PREFIX = "filter_page_";
+
+    /** Per-widget opacity sentinel meaning "follow the app-wide setting". */
+    public static final int OPACITY_INHERIT = -1;
+    private static final int DEFAULT_OPACITY = 100;
 
     // Same filtering window as src/service/WidgetService.js
     private static final int WINDOW_DAYS = 7;
@@ -136,8 +144,17 @@ public final class WidgetStore {
         prefs(context).edit().putString(KEY_CONFIG, json).apply();
     }
 
+    public static void saveOptions(Context context, String json) {
+        prefs(context).edit().putString(KEY_OPTIONS, json).apply();
+    }
+
+    /**
+     * Wipe the task snapshot and API credentials on logout. Appearance options
+     * and per-widget placement settings survive: they describe widgets the user
+     * put on their home screen, not the account that was signed in.
+     */
     public static void clear(Context context) {
-        prefs(context).edit().clear().apply();
+        prefs(context).edit().remove(KEY_DATA).remove(KEY_CONFIG).apply();
     }
 
     public static boolean hasConfig(Context context) {
@@ -167,9 +184,97 @@ public final class WidgetStore {
                 .apply();
     }
 
+    /**
+     * App-wide widget background opacity in percent (0 = fully transparent,
+     * 100 = solid), set from Settings → Widgets and pushed with the snapshot.
+     */
+    public static int globalOpacity(Context context) {
+        try {
+            String raw = prefs(context).getString(KEY_OPTIONS, null);
+            if (raw == null) return DEFAULT_OPACITY;
+            return clampOpacity(new JSONObject(raw).optInt("opacity", DEFAULT_OPACITY));
+        } catch (Exception e) {
+            return DEFAULT_OPACITY;
+        }
+    }
+
+    /** Per-widget override, or {@link #OPACITY_INHERIT} when it follows the app setting. */
+    public static int opacityOverride(Context context, int appWidgetId) {
+        int stored = prefs(context).getInt(KEY_OPACITY_PREFIX + appWidgetId, OPACITY_INHERIT);
+        return stored == OPACITY_INHERIT ? OPACITY_INHERIT : clampOpacity(stored);
+    }
+
+    public static void setOpacityOverride(Context context, int appWidgetId, int percent) {
+        SharedPreferences.Editor editor = prefs(context).edit();
+        if (percent == OPACITY_INHERIT) {
+            editor.remove(KEY_OPACITY_PREFIX + appWidgetId);
+        } else {
+            editor.putInt(KEY_OPACITY_PREFIX + appWidgetId, clampOpacity(percent));
+        }
+        editor.apply();
+    }
+
+    /** The opacity a given widget instance should draw with. */
+    public static int opacity(Context context, int appWidgetId) {
+        int override = opacityOverride(context, appWidgetId);
+        return override == OPACITY_INHERIT ? globalOpacity(context) : override;
+    }
+
+    /**
+     * App-wide widget colour scheme, set from Settings → Widgets and pushed with
+     * the snapshot. Defaults to {@link WidgetTheme#MODE_AUTO} (follow the phone).
+     */
+    public static int globalTheme(Context context) {
+        try {
+            String raw = prefs(context).getString(KEY_OPTIONS, null);
+            if (raw == null) return WidgetTheme.MODE_AUTO;
+            return parseTheme(new JSONObject(raw).optString("theme", "auto"));
+        } catch (Exception e) {
+            return WidgetTheme.MODE_AUTO;
+        }
+    }
+
+    /** Per-widget override, or {@link WidgetTheme#MODE_INHERIT} when it follows the app setting. */
+    public static int themeOverride(Context context, int appWidgetId) {
+        return prefs(context).getInt(KEY_THEME_PREFIX + appWidgetId, WidgetTheme.MODE_INHERIT);
+    }
+
+    public static void setThemeOverride(Context context, int appWidgetId, int mode) {
+        SharedPreferences.Editor editor = prefs(context).edit();
+        if (mode == WidgetTheme.MODE_INHERIT) {
+            editor.remove(KEY_THEME_PREFIX + appWidgetId);
+        } else {
+            editor.putInt(KEY_THEME_PREFIX + appWidgetId, mode);
+        }
+        editor.apply();
+    }
+
+    /** The colour scheme a given widget instance should draw with. */
+    public static int theme(Context context, int appWidgetId) {
+        int override = themeOverride(context, appWidgetId);
+        return override == WidgetTheme.MODE_INHERIT ? globalTheme(context) : override;
+    }
+
+    private static int parseTheme(String value) {
+        if ("light".equals(value)) return WidgetTheme.MODE_LIGHT;
+        if ("dark".equals(value)) return WidgetTheme.MODE_DARK;
+        return WidgetTheme.MODE_AUTO;
+    }
+
+    /** 0-100 percent as an 0-255 alpha channel. */
+    public static int alphaOf(int percent) {
+        return Math.round(clampOpacity(percent) * 255f / 100f);
+    }
+
+    private static int clampOpacity(int percent) {
+        return Math.max(0, Math.min(100, percent));
+    }
+
     public static void removeWidgetOptions(Context context, int appWidgetId) {
         prefs(context).edit()
                 .remove(KEY_INCLUDE_OTHERS_PREFIX + appWidgetId)
+                .remove(KEY_OPACITY_PREFIX + appWidgetId)
+                .remove(KEY_THEME_PREFIX + appWidgetId)
                 .remove(KEY_PROJECT_INDEX_PREFIX + appWidgetId)
                 .remove(KEY_PROJECT_PAGE_PREFIX + appWidgetId)
                 .remove(KEY_FILTER_INDEX_PREFIX + appWidgetId)

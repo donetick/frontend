@@ -162,7 +162,7 @@ public class FilterWidgetProvider extends AppWidgetProvider {
         int foreground = contrastColor(background);
         int secondary = withAlphaOver(foreground, background, 0.72f);
         int completedBg = blend(background, foreground, 0.10f);
-        views.setInt(R.id.filter_widget_container, "setBackgroundColor", background);
+        WidgetUi.applyOpacity(context, views, widgetId, background);
         views.setTextColor(R.id.filter_title, foreground);
         views.setTextColor(R.id.filter_counts, secondary);
         views.setTextViewText(R.id.filter_title, filter.name);

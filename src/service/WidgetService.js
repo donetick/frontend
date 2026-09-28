@@ -9,6 +9,30 @@ import { applyFilter } from '../utils/FilterEngine'
 // SharedPreferences on Android) and asks the OS to redraw them.
 const WidgetBridge = registerPlugin('WidgetBridge')
 
+// Device-wide widget appearance, mirrored into the native side so the widgets
+// can honour it while the app is closed. Kept in localStorage (not the account)
+// because it describes this device's home screen.
+const OPACITY_STORAGE_KEY = 'widgetOpacity'
+export const DEFAULT_WIDGET_OPACITY = 100
+
+export const getWidgetOpacity = () => {
+  const stored = Number(localStorage.getItem(OPACITY_STORAGE_KEY))
+  if (!Number.isFinite(stored)) return DEFAULT_WIDGET_OPACITY
+  return Math.min(100, Math.max(0, Math.round(stored)))
+}
+
+// Widget colour scheme. 'auto' follows the phone's light/dark setting (what the
+// widgets did before this option existed); 'light'/'dark' pin them regardless of
+// the system, for wallpapers the automatic choice reads badly against.
+const THEME_STORAGE_KEY = 'widgetTheme'
+export const DEFAULT_WIDGET_THEME = 'auto'
+export const WIDGET_THEMES = ['auto', 'light', 'dark']
+
+export const getWidgetTheme = () => {
+  const stored = localStorage.getItem(THEME_STORAGE_KEY)
+  return WIDGET_THEMES.includes(stored) ? stored : DEFAULT_WIDGET_THEME
+}
+
 const WINDOW_DAYS = 7
 const MAX_TASKS = 100
 const MAX_PROJECT_TASKS = 500
@@ -188,7 +212,39 @@ const pushSnapshot = async queryClient => {
       token,
       userId,
     }),
+    options: widgetOptions(),
   })
+}
+
+// The native side stores the options blob as a whole, so every push has to
+// carry every appearance option — sending a partial object would reset the rest.
+const widgetOptions = () =>
+  JSON.stringify({ opacity: getWidgetOpacity(), theme: getWidgetTheme() })
+
+/**
+ * Push the app-wide appearance options to the native side so placed widgets
+ * redraw immediately. Stored separately from the task snapshot, so they survive
+ * logout the way the rest of the home-screen layout does.
+ */
+const pushWidgetOptions = async () => {
+  if (!isNative()) return
+  try {
+    await WidgetBridge.update({ options: widgetOptions() })
+  } catch (err) {
+    console.error('Failed to push widget options', err)
+  }
+}
+
+export const setWidgetOpacity = async percent => {
+  const value = Math.min(100, Math.max(0, Math.round(percent)))
+  localStorage.setItem(OPACITY_STORAGE_KEY, String(value))
+  await pushWidgetOptions()
+}
+
+export const setWidgetTheme = async theme => {
+  const value = WIDGET_THEMES.includes(theme) ? theme : DEFAULT_WIDGET_THEME
+  localStorage.setItem(THEME_STORAGE_KEY, value)
+  await pushWidgetOptions()
 }
 
 /**

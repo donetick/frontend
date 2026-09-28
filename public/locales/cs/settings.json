@@ -94,6 +94,10 @@
         "title": "Nahlásit problém",
         "description": "Popište nám, co nefunguje, a technické podrobnosti přiložíme za vás."
       },
+      "widgets": {
+        "title": "Widgety na domovské obrazovce",
+        "description": "Nastavte, jak widgety Donetick vypadají na domovské obrazovce tohoto zařízení."
+      },
       "sidepanel": {
         "title": "Přizpůsobení postranního panelu",
         "description": "Upravte rozložení a viditelnost karet v postranním panelu."
@@ -493,7 +497,11 @@
       "title": "Dolní navigace",
       "description": "Vyberte až {{max}} zkratky pro dolní navigační lištu na mobilu a přetažením je seřaďte. Položka „Více“ vždy zůstává poslední a otevírá celé menu.",
       "resetToDefaults": "Obnovit výchozí",
-      "resetHelper": "Obnoví výchozí zkratky a pořadí dolní navigace."
+      "resetHelper": "Obnoví výchozí zkratky a pořadí dolní navigace.",
+      "hideLabels": {
+        "title": "Skrýt popisky",
+        "description": "Zobrazit ve spodní navigační liště pouze ikony a zmenšit ji."
+      }
     },
     "sidepanel": {
       "title": "Postranní panel"
@@ -506,6 +514,26 @@
     "light": "Světlý",
     "dark": "Tmavý",
     "system": "Systémový"
+  },
+  "widgets": {
+    "title": "Widgety na domovské obrazovce",
+    "opacity": {
+      "title": "Krytí pozadí",
+      "description": "Jak plné je pozadí vašich widgetů. Nižší hodnoty nechají prosvítat tapetu.",
+      "preview": "Vynést koš",
+      "perWidgetHint": "Toto je výchozí nastavení pro všechny widgety. Jednotlivý widget změníte tak, že jej na domovské obrazovce podržíte a otevřete jeho možnosti (Android) nebo Upravit widget (iOS).",
+      "webHint": "Widgety na domovské obrazovce jsou součástí aplikací pro iOS a Android — toto nastavení se projeví jen tam."
+    },
+    "theme": {
+      "title": "Barvy",
+      "description": "Jakou paletu vaše widgety používají. Automaticky se řídí světlým nebo tmavým režimem telefonu.",
+      "options": {
+        "auto": "Automaticky",
+        "light": "Vždy světlý",
+        "dark": "Vždy tmavý"
+      },
+      "perWidgetHint": "Toto je výchozí nastavení pro všechny widgety. Jednotlivý widget změníte tak, že jej na domovské obrazovce podržíte a otevřete jeho možnosti (Android) nebo Upravit widget (iOS)."
+    }
   },
   "localization": {
     "title": "Lokalizace",

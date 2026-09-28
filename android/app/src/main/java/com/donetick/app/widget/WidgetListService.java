@@ -9,8 +9,6 @@ import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
-import androidx.core.content.ContextCompat;
-
 import com.donetick.app.R;
 
 import java.text.SimpleDateFormat;
@@ -54,11 +52,15 @@ public class WidgetListService extends RemoteViewsService {
         private final Map<String, Bitmap> avatars = new HashMap<>();
         private String myUserId;
         private boolean includeOthers;
+        // Re-resolved on every onDataSetChanged so a theme change picked up from
+        // Settings applies without the factory being recreated.
+        private WidgetTheme theme;
 
         WidgetListFactory(Context context, String mode, int appWidgetId) {
             this.context = context;
             this.mode = mode;
             this.appWidgetId = appWidgetId;
+            this.theme = WidgetTheme.of(context, appWidgetId);
         }
 
         @Override
@@ -73,6 +75,7 @@ public class WidgetListService extends RemoteViewsService {
 
             myUserId = WidgetStore.userId(context);
             includeOthers = WidgetStore.includeOthers(context, appWidgetId);
+            theme = WidgetTheme.of(context, appWidgetId);
             List<WidgetStore.Task> allTasks = WidgetStore.loadTasks(context);
             List<WidgetStore.Member> members = WidgetStore.loadMembers(context);
 
@@ -180,6 +183,9 @@ public class WidgetListService extends RemoteViewsService {
                 RemoteViews views = new RemoteViews(context.getPackageName(),
                         R.layout.widget_row_day_header);
                 views.setTextViewText(R.id.row_day, row.header);
+                if (theme.isForced()) {
+                    views.setTextColor(R.id.row_day, theme.textSecondary());
+                }
                 return views;
             }
 
@@ -191,12 +197,15 @@ public class WidgetListService extends RemoteViewsService {
             RemoteViews views = new RemoteViews(context.getPackageName(),
                     R.layout.widget_row_task);
             views.setTextViewText(R.id.row_title, task.name);
+            if (theme.isForced()) {
+                views.setTextColor(R.id.row_title, theme.textPrimary());
+            }
 
             boolean overdue = !task.approval && task.dueDate != null
                     && task.dueDate < System.currentTimeMillis();
-            int secondary = ContextCompat.getColor(context, R.color.widget_text_secondary);
-            int warning = ContextCompat.getColor(context, R.color.widget_warning);
-            int danger = ContextCompat.getColor(context, R.color.widget_overdue);
+            int secondary = theme.textSecondary();
+            int warning = theme.color(R.color.widget_warning);
+            int danger = theme.color(R.color.widget_overdue);
 
             String meta;
             int metaColor;
@@ -218,7 +227,7 @@ public class WidgetListService extends RemoteViewsService {
             if (task.approval) ringColor = warning;
             else if (overdue || task.priority == 1) ringColor = danger;
             else if (task.priority == 2) ringColor = warning;
-            else ringColor = ContextCompat.getColor(context, R.color.widget_ring_neutral);
+            else ringColor = theme.color(R.color.widget_ring_neutral);
             views.setInt(R.id.row_ring, "setColorFilter", ringColor);
 
             // In "everyone" mode, show who a task belongs to (own tasks stay clean).
@@ -250,9 +259,12 @@ public class WidgetListService extends RemoteViewsService {
                     R.string.widget_person_counts, row.todayCount, row.weekCount));
 
             // Highlight the today-count when someone has work due today.
-            int accent = ContextCompat.getColor(context, R.color.widget_accent);
-            int secondary = ContextCompat.getColor(context, R.color.widget_text_secondary);
-            views.setTextColor(R.id.person_counts, row.todayCount > 0 ? accent : secondary);
+            int accent = theme.color(R.color.widget_accent);
+            views.setTextColor(R.id.person_counts,
+                    row.todayCount > 0 ? accent : theme.textSecondary());
+            if (theme.isForced()) {
+                views.setTextColor(R.id.person_name, theme.textPrimary());
+            }
 
             Intent fillIn = new Intent();
             fillIn.setData(Uri.parse("donetick://chores"));

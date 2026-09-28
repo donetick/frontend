@@ -93,6 +93,10 @@
       "bugReport": {
         "title": "Report an Issue",
         "description": "Tell us what's not working and we'll attach the technical details for you."
+      },
+      "widgets": {
+        "title": "Home Screen Widgets",
+        "description": "Control how Donetick's home-screen widgets look on this device."
       }
     }
   },
@@ -487,7 +491,11 @@
       "title": "Bottom Navigation",
       "description": "Choose up to {{max}} shortcuts for the mobile bottom navigation bar and drag to reorder them. \"More\" always stays as the last item and opens the full menu.",
       "resetToDefaults": "Reset to Defaults",
-      "resetHelper": "This will restore the bottom navigation to its default shortcuts and order."
+      "resetHelper": "This will restore the bottom navigation to its default shortcuts and order.",
+      "hideLabels": {
+        "title": "Hide Labels",
+        "description": "Show icons only in the bottom navigation bar to make it smaller."
+      }
     },
     "sidepanel": {
       "title": "Sidepanel"
@@ -500,6 +508,26 @@
     "light": "Light",
     "dark": "Dark",
     "system": "System"
+  },
+  "widgets": {
+    "title": "Home Screen Widgets",
+    "opacity": {
+      "title": "Background opacity",
+      "description": "How solid your widgets' backgrounds are. Lower values let your wallpaper show through.",
+      "preview": "Take out the bins",
+      "perWidgetHint": "This is the default for every widget. To change a single widget, long-press it on your home screen and open its options (Android) or Edit Widget (iOS).",
+      "webHint": "Home-screen widgets are part of the iOS and Android apps — this setting only takes effect there."
+    },
+    "theme": {
+      "title": "Colors",
+      "description": "Which palette your widgets draw with. Automatic follows your phone's light or dark mode.",
+      "options": {
+        "auto": "Automatic",
+        "light": "Always light",
+        "dark": "Always dark"
+      },
+      "perWidgetHint": "This is the default for every widget. To change a single widget, long-press it on your home screen and open its options (Android) or Edit Widget (iOS)."
+    }
   },
   "localization": {
     "title": "Localization",

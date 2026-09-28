@@ -94,6 +94,10 @@
         "title": "报告问题",
         "description": "有什么不对劲吗？把详情和技术快照一起发给我们。"
       },
+      "widgets": {
+        "title": "主屏幕小组件",
+        "description": "设置 Donetick 小组件在本设备主屏幕上的外观。"
+      },
       "sidepanel": {
         "title": "侧边栏自定义",
         "description": "自定义侧边栏中卡片的布局和显示状态。"
@@ -493,7 +497,11 @@
       "title": "底部导航",
       "description": "最多选择 {{max}} 个快捷方式放入手机底部导航栏，拖动可调整顺序。“更多”始终是最后一项，用于打开完整菜单。",
       "resetToDefaults": "恢复默认",
-      "resetHelper": "这会将底部导航的快捷方式和顺序恢复为默认值。"
+      "resetHelper": "这会将底部导航的快捷方式和顺序恢复为默认值。",
+      "hideLabels": {
+        "title": "隐藏文字标签",
+        "description": "底部导航栏只显示图标，使其更小巧。"
+      }
     },
     "sidepanel": {
       "title": "侧边栏"
@@ -506,6 +514,26 @@
     "light": "浅色",
     "dark": "深色",
     "system": "跟随系统"
+  },
+  "widgets": {
+    "title": "主屏幕小组件",
+    "opacity": {
+      "title": "背景不透明度",
+      "description": "小组件背景的浓淡程度。数值越低，壁纸越容易透出来。",
+      "preview": "倒垃圾",
+      "perWidgetHint": "这是所有小组件的默认值。若只想调整某一个，请在主屏幕上长按它，打开它的选项（Android）或“编辑小组件”（iOS）。",
+      "webHint": "主屏幕小组件属于 iOS 和 Android 应用，此设置仅在那里生效。"
+    },
+    "theme": {
+      "title": "配色",
+      "description": "小组件使用的配色。“自动”会跟随手机的浅色或深色模式。",
+      "options": {
+        "auto": "自动",
+        "light": "始终浅色",
+        "dark": "始终深色"
+      },
+      "perWidgetHint": "这是所有小组件的默认值。若只想调整某一个，请在主屏幕上长按它，打开它的选项（Android）或“编辑小组件”（iOS）。"
+    }
   },
   "localization": {
     "title": "本地化",

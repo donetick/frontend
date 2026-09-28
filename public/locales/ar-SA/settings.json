@@ -62,10 +62,6 @@
         "title": "إعدادات التخزين",
         "description": "انسخ بياناتك احتياطيًا واستعدها، وأدر التخزين المحلي وتفضيلات المزامنة."
       },
-      "sidepanel": {
-        "title": "تخصيص اللوحة الجانبية",
-        "description": "خصّص ترتيب البطاقات وظهورها في اللوحة الجانبية."
-      },
       "layout": {
         "title": "التخطيط والتنقل",
         "description": "اختر الشاشة التي يفتح عليها التطبيق، والاختصارات واللوحات المحيطة بها."
@@ -82,6 +78,10 @@
         "title": "الإعدادات المتقدمة",
         "description": "اضبط الـ Webhooks والتحديثات الفورية وغيرها من الميزات المتقدمة."
       },
+      "privacy": {
+        "title": "Privacy & Analytics",
+        "description": "Control anonymous usage analytics and crash reporting."
+      },
       "developer": {
         "title": "إعدادات المطوّر",
         "description": "اعرض معلومات تقنية عن رموز المصادقة واتصالات SSE وبيانات التصحيح."
@@ -93,6 +93,14 @@
       "bugReport": {
         "title": "الإبلاغ عن خلل",
         "description": "هناك شيء لا يعمل كما ينبغي؟ أرسل لنا التفاصيل مع لقطة تقنية."
+      },
+      "widgets": {
+        "title": "أدوات الشاشة الرئيسية",
+        "description": "تحكّم في شكل أدوات Donetick على الشاشة الرئيسية لهذا الجهاز."
+      },
+      "sidepanel": {
+        "title": "تخصيص اللوحة الجانبية",
+        "description": "خصّص ترتيب البطاقات وظهورها في اللوحة الجانبية."
       }
     }
   },
@@ -168,7 +176,8 @@
     "joinCircle": "الانضمام إلى الدائرة",
     "joinedPending": "تم الانضمام إلى الدائرة بنجاح، انتظر موافقة مالك الدائرة على طلبك.",
     "alreadyMember": "أنت عضو في هذه الدائرة بالفعل",
-    "joinFailed": "تعذّر الانضمام إلى الدائرة"
+    "joinFailed": "تعذّر الانضمام إلى الدائرة",
+    "copyLink": "Copy Link"
   },
   "accountSettings": {
     "title": "إعدادات الحساب",
@@ -352,7 +361,8 @@
     "backupCodesModal": {
       "title": "رموز نسخ احتياطي جديدة",
       "warning": "لم تعد رموز النسخ الاحتياطي السابقة صالحة. احفظ هذه الرموز الجديدة في مكان آمن. يمكن استخدام كل رمز مرة واحدة فقط."
-    }
+    },
+    "generateCodes": "Generate New Codes"
   },
   "apiTokens": {
     "title": "رموز API",
@@ -393,7 +403,6 @@
   },
   "sidepanel": {
     "title": "تخصيص اللوحة الجانبية",
-    "heading": "إعدادات اللوحة الجانبية",
     "description": "حدّد البطاقات التي تظهر في اللوحة الجانبية وترتيبها. اسحب وأفلت لإعادة الترتيب، أو بدّل ظهور كل بطاقة.",
     "resetToDefaults": "استعادة الإعدادات الافتراضية",
     "resetHelper": "سيؤدي ذلك إلى استعادة الظهور والترتيب الافتراضيين لجميع البطاقات.",
@@ -422,7 +431,49 @@
         "name": "الأهداف الأسبوعية",
         "description": "يعرض التقدّم الأسبوعي وإحصاءات إنجاز العائلة"
       }
-    }
+    },
+    "heading": "إعدادات اللوحة الجانبية"
+  },
+  "homeSections": {
+    "title": "Overview Customization",
+    "description": "Customize which sections appear on the Home screen and their order. Drag and drop to reorder, or toggle visibility for each section.",
+    "resetToDefaults": "Reset to Defaults",
+    "resetHelper": "This will restore all sections to their default visibility and order.",
+    "sections": {
+      "greeting": {
+        "name": "Greeting",
+        "description": "The headline at the top that sums up your day"
+      },
+      "glance": {
+        "name": "At a Glance",
+        "description": "Overdue / due today / needs review / unplanned counts"
+      },
+      "circle": {
+        "name": "Your Circle",
+        "description": "Shows what everyone in your circle is carrying this week"
+      },
+      "review": {
+        "name": "Needs Review",
+        "description": "Finished tasks waiting to be signed off"
+      },
+      "overdue": {
+        "name": "Overdue",
+        "description": "Tasks that have slipped past their due date"
+      },
+      "nextUp": {
+        "name": "Coming Up",
+        "description": "What's due today and tomorrow"
+      },
+      "filters": {
+        "name": "Filters",
+        "description": "Quick access to your pinned and most useful filters"
+      },
+      "projects": {
+        "name": "Projects",
+        "description": "Where the work is piling up, by project"
+      }
+    },
+    "detailedDescription": "Customize the layout and visibility of sections on the Home screen."
   },
   "layout": {
     "title": "التخطيط والتنقل",
@@ -445,7 +496,11 @@
       "title": "شريط التنقل السفلي",
       "description": "اختر حتى {{max}} اختصارات لشريط التنقل السفلي على الهاتف واسحبها لإعادة ترتيبها. يبقى «المزيد» دائمًا العنصر الأخير ويفتح القائمة الكاملة.",
       "resetToDefaults": "استعادة الإعدادات الافتراضية",
-      "resetHelper": "سيؤدي ذلك إلى استعادة الاختصارات والترتيب الافتراضيين لشريط التنقل السفلي."
+      "resetHelper": "سيؤدي ذلك إلى استعادة الاختصارات والترتيب الافتراضيين لشريط التنقل السفلي.",
+      "hideLabels": {
+        "title": "إخفاء التسميات",
+        "description": "عرض الأيقونات فقط في شريط التنقل السفلي لجعله أصغر."
+      }
     },
     "sidepanel": {
       "title": "اللوحة الجانبية"
@@ -458,6 +513,26 @@
     "light": "فاتح",
     "dark": "داكن",
     "system": "النظام"
+  },
+  "widgets": {
+    "title": "أدوات الشاشة الرئيسية",
+    "opacity": {
+      "title": "عتامة الخلفية",
+      "description": "مدى صلابة خلفيات الأدوات. القيم الأقل تسمح لخلفية الشاشة بالظهور من خلالها.",
+      "preview": "أخرج سلة المهملات",
+      "perWidgetHint": "هذا هو الإعداد الافتراضي لكل الأدوات. لتغيير أداة واحدة، اضغط عليها مطولًا على الشاشة الرئيسية وافتح خياراتها (أندرويد) أو «تعديل الأداة» (iOS).",
+      "webHint": "أدوات الشاشة الرئيسية جزء من تطبيقي iOS وأندرويد — ولا يسري هذا الإعداد إلا هناك."
+    },
+    "theme": {
+      "title": "الألوان",
+      "description": "لوحة الألوان التي ترسم بها أدواتك. «تلقائي» يتبع الوضع الفاتح أو الداكن في هاتفك.",
+      "options": {
+        "auto": "تلقائي",
+        "light": "فاتح دائمًا",
+        "dark": "داكن دائمًا"
+      },
+      "perWidgetHint": "هذا هو الإعداد الافتراضي لكل الأدوات. لتغيير أداة واحدة، اضغط عليها مطولًا على الشاشة الرئيسية وافتح خياراتها (أندرويد) أو «تعديل الأداة» (iOS)."
+    }
   },
   "localization": {
     "title": "الإعدادات المحلية",
@@ -477,13 +552,15 @@
     "sunday": "الأحد",
     "monday": "الاثنين",
     "saturday": "السبت",
+    "helpTranslate": "Help improve this translation",
     "formats": {
       "mdy": "MM/DD/YYYY (الولايات المتحدة)",
       "dmy": "DD/MM/YYYY (أوروبا)",
       "ymd": "YYYY-MM-DD (ISO)",
       "long": "تنسيق طويل (مثال: 1 يناير 2024)",
       "short": "تنسيق قصير (مثال: 1 ينا 2024)"
-    }
+    },
+    "descriptionLong": "Customize language, date format, and regional preferences for your account. These settings will apply throughout the application."
   },
   "advanced": {
     "title": "الإعدادات المتقدمة",
@@ -521,5 +598,153 @@
       "notConnected": "التحديثات الفورية مفعّلة لكن لا يوجد اتصال حاليًا.",
       "basicPlanNotice": "التحديثات الفورية غير متاحة في الخطة الأساسية. رقِّ إلى Plus لتلقّي إشعارات فورية عندما تنجز أنت أو أعضاء دائرتك المهام أو تتخطّونها أو تعدّلونها."
     }
+  },
+  "privacyAnalytics": {
+    "title": "Privacy & Analytics",
+    "description": "Donetick never sends task names, descriptions, notes, or other task content. Session recording is never enabled.",
+    "analyticsToggle": "Anonymous analytics",
+    "analyticsHelper": "Help improve Donetick by sharing anonymous usage statistics.",
+    "crashToggle": "Crash reports",
+    "crashHelper": "Send us the error and what led to it when Donetick crashes no task content.",
+    "footnote": "You can change these choices at any time."
+  },
+  "subscription": {
+    "sessionFailed": "Failed to create subscription session",
+    "errorTitle": "Subscription Error",
+    "errorMessage": "Failed to start subscription process. Please try again.",
+    "subscribe": "Subscribe",
+    "cancelAnytime": "Cancel anytime. No hidden fees. Secure payment powered by Stripe.",
+    "description": "Unlock reminders, rich task details, and advanced automation.",
+    "whatsIncluded": "What's included:",
+    "mostPopular": "Most Popular",
+    "featureNotifications": "Task notifications and reminders",
+    "featureRichText": "Rich text descriptions with images uploads",
+    "featureThingTriggers": "Thing-based task triggers",
+    "featureApiTokens": "API tokens for integrations",
+    "featureImageUploads": "Image uploads in descriptions",
+    "featureAutomation": "Advanced task automation",
+    "planYearly": "Yearly"
+  },
+  "childUsers": {
+    "errNameRequired": "Sub account name is required",
+    "errNameMin": "Sub account name must be at least 2 characters",
+    "errNameMax": "Sub account name must be less than 20 characters",
+    "errNameChars": "Sub account name can only contain lowercase letters, dot and dash",
+    "errPasswordRequired": "Password is required",
+    "errPasswordLength": "Password must be between 8 and 64 characters",
+    "errPasswordMatch": "Passwords do not match",
+    "errDisplayNameMax": "Display name must be less than 50 characters",
+    "createTitle": "Create Sub Account",
+    "createDescription": "Create a login that can complete tasks assigned to this account.",
+    "createButton": "Create Account",
+    "nameLabel": "Sub Account Name *",
+    "namePlaceholder": "Enter sub account name (e.g., sarah)",
+    "displayNameLabel": "Display Name",
+    "displayNamePlaceholder": "Display name (optional, defaults to sub account name)",
+    "passwordLabel": "Password *",
+    "passwordPlaceholder": "Enter password (8-64 characters)",
+    "confirmPasswordLabel": "Confirm Password *",
+    "confirmPasswordPlaceholder": "Confirm password"
+  },
+  "passwordChange": {
+    "minLength": "Password must be at least 8 characters",
+    "maxLength": "Password must be less than 64 characters",
+    "description": "Choose a password between 8 and 64 characters.",
+    "mismatch": "Passwords do not match",
+    "newPassword": "New password",
+    "newPasswordPlaceholder": "Enter password",
+    "confirmPassword": "Confirm password",
+    "confirmPasswordPlaceholder": "Repeat password"
+  },
+  "payment": {
+    "cancelledTitle": "Payment has been cancelled",
+    "cancelledRedirect": "You will be redirected to the main page shortly.",
+    "successTitle": "Payment Successful!",
+    "successRedirect": "You will be redirected to the settings page shortly."
+  },
+  "developer": {
+    "tokenRefreshed": "Token refreshed successfully",
+    "endpointCalled": "Refresh token endpoint called successfully",
+    "clearDbCleared": "Local offline database cleared. Starting full sync...",
+    "clearDbDone": "Full sync completed from the beginning",
+    "intro": "View technical information about your authentication tokens and session",
+    "refreshCookieNote": "Refresh tokens are managed via HTTP-only cookies on web platform",
+    "noReconnectInfo": "No reconnection information available",
+    "noTimeoutInfo": "No timeout information available",
+    "noDebugInfo": "No debug information available"
+  },
+  "backup": {
+    "keyRequired": "Encryption key is required",
+    "created": "Backup created and downloaded successfully",
+    "createFailed": "Failed to create backup",
+    "selectFile": "Please select a backup file",
+    "restored": "Backup restored successfully. Please refresh the page.",
+    "restoreFailed": "Failed to restore backup",
+    "readFailed": "Failed to read backup file",
+    "createIntro": "Create an encrypted backup of your data. This backup will include all your chores, history, settings, and optionally your uploaded files.",
+    "keyPlaceholder": "Enter a strong encryption key",
+    "includeAssets": "Include uploaded files and assets",
+    "warningLabel": "Warning:",
+    "restoreWarning": "Restoring a backup will replace all your current data. This action cannot be undone.",
+    "restoreKeyPlaceholder": "Enter the encryption key used for this backup",
+    "title": "Backup & Restore",
+    "createTab": "Create Backup",
+    "restoreTab": "Restore Backup",
+    "creating": "Creating backup...",
+    "restoring": "Restoring backup..."
+  },
+  "deletion": {
+    "passwordRequired": "Please enter your password to continue",
+    "passwordAndDelete": "Please enter your password and type DELETE to confirm",
+    "failed": "Failed to delete account",
+    "passwordPlaceholder": "Enter your password",
+    "transferIntro": "You own circles that require ownership transfer before deletion. Please select new owners:",
+    "selectOwner": "Select new owner",
+    "confirmPrompt": "Please enter your password and type DELETE to confirm",
+    "typeDelete": "DELETE",
+    "warningLead": "This action cannot be undone.",
+    "warningIntro": "Deleting your account will permanently remove:",
+    "removesProfile": "Your user profile and authentication data",
+    "removesChores": "All your chores, chore history, and time tracking sessions",
+    "removesTokens": "API tokens, MFA sessions, and password reset tokens",
+    "removesStorage": "Storage files and usage data",
+    "removesPoints": "Points history and notifications",
+    "removesCircles": "Circle memberships and relationships",
+    "passwordToContinue": "Enter your password to continue",
+    "circleLabel": "Circle: {{name}}",
+    "newOwner": "New Owner",
+    "logoutNotice": "On successful deletion, you will be logged out and redirected to the login page.",
+    "passwordLabel": "Password",
+    "typeToConfirm": "Type \"{{word}}\" to confirm"
+  },
+  "realtime": {
+    "titleSse": "Real-time Updates (SSE)",
+    "subtitleSse": "Get instant notifications via Server-Sent Events"
+  },
+  "nativeCancel": {
+    "title": "Cancel Subscription",
+    "dismiss": "Dismiss",
+    "cancelViaStore": "I'll cancel from my app store",
+    "cancelDesktop": "Cancel desktop subscription",
+    "intro": "To cancel your subscription, please follow the instructions for your platform (you should cancel through the same platform you used to subscribe).",
+    "iosHeading": "For iOS (iPhone/iPad):",
+    "iosStep1": "1. Open the <b>Settings</b> app on your device",
+    "iosStep2": "2. Tap your name at the top of the screen",
+    "iosStep3": "3. Tap <b>Subscriptions</b>",
+    "iosStep4": "4. Find and tap <b>Donetick</b>",
+    "iosStep5": "5. Tap <b>Cancel Subscription</b>",
+    "iosNote": "<b>Note:</b> If you subscribed through iOS and are using the web/desktop version, you must cancel through iOS Settings as described above.",
+    "androidHeading": "For Android:",
+    "androidStep1": "1. Open the <b>Google Play Store</b> app",
+    "androidStep2": "2. Tap the profile icon in the top right",
+    "androidStep3": "3. Tap <b>Payments & subscriptions</b>",
+    "androidStep4": "4. Tap <b>Subscriptions</b>",
+    "androidStep5": "5. Find and tap <b>Donetick</b>",
+    "androidStep6": "6. Tap <b>Cancel subscription</b>",
+    "androidNote": "<b>Note:</b> If you subscribed through Google Play and are using the web/desktop version, you must cancel through Google Play as described above.",
+    "webHeading": "For Web/Desktop Subscriptions:",
+    "webBody": "If you originally subscribed through our website or desktop app, you can cancel your subscription by going to the Account Settings section on our website. using a web browser",
+    "webNote": "<b>Important:</b> You must cancel your subscription through the same platform where you originally subscribed. If you subscribed through the iOS App Store or Google Play Store (even if you're now using the web/desktop version), you must cancel through that original platform using the instructions above.",
+    "footer": "Your subscription will remain active until the end of your current billing period."
   }
 }

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tintable widget background. Drawn into an ImageView layer behind the
+     content so RemoteViews can dial its alpha (setImageAlpha) and its color
+     (setColorFilter) per widget instance — a shape set as a View background
+     can do neither. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="#FFFFFF" />
+    <corners android:radius="24dp" />
+</shape>

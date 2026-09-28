@@ -98,6 +98,7 @@ export const DEFAULT_BOTTOM_NAV_CONFIG = BOTTOM_NAV_ITEM_POOL.map(
 )
 
 const STORAGE_KEY = 'bottomNavConfig'
+const HIDE_LABELS_KEY = 'bottomNavHideLabels'
 
 export const getBottomNavConfig = () => {
   const saved = localStorage.getItem(STORAGE_KEY)
@@ -138,3 +139,11 @@ export const getEnabledBottomNavItems = () =>
       BOTTOM_NAV_ITEM_POOL.find(poolItem => poolItem.id === configItem.id),
     )
     .filter(Boolean)
+
+export const getBottomNavHideLabels = () =>
+  localStorage.getItem(HIDE_LABELS_KEY) === 'true'
+
+export const saveBottomNavHideLabels = hideLabels => {
+  localStorage.setItem(HIDE_LABELS_KEY, String(hideLabels))
+  window.dispatchEvent(new Event('bottomNavConfigChanged'))
+}

@@ -20,6 +20,7 @@ import {
   Checkbox,
   FormControl,
   FormHelperText,
+  FormLabel,
   IconButton,
   List,
   ListItem,
@@ -27,6 +28,7 @@ import {
   ListItemDecorator,
   Radio,
   RadioGroup,
+  Switch,
   Typography,
 } from '@mui/joy'
 import useMediaQuery from '@mui/material/useMediaQuery'
@@ -37,8 +39,10 @@ import {
   BOTTOM_NAV_ITEM_POOL,
   DEFAULT_BOTTOM_NAV_CONFIG,
   getBottomNavConfig,
+  getBottomNavHideLabels,
   MAX_BOTTOM_NAV_ITEMS,
   saveBottomNavConfig,
+  saveBottomNavHideLabels,
 } from '../../utils/BottomNavConfig'
 import {
   DEFAULT_VIEW_OPTIONS,
@@ -74,8 +78,14 @@ const LayoutSettings = () => {
 
   const [defaultView, setDefaultView] = useState(getDefaultView)
   const [config, setConfig] = useState(getBottomNavConfig)
+  const [hideLabels, setHideLabels] = useState(getBottomNavHideLabels)
 
   const enabledCount = config.filter(item => item.enabled).length
+
+  const handleHideLabelsChange = hide => {
+    setHideLabels(hide)
+    saveBottomNavHideLabels(hide)
+  }
 
   const handleDefaultViewChange = view => {
     setDefaultView(view)
@@ -190,6 +200,31 @@ const LayoutSettings = () => {
                 max: MAX_BOTTOM_NAV_ITEMS,
               })}
             </Typography>
+
+            <Card
+              sx={{
+                mb: 3,
+                display: 'flex',
+                alignItems: 'center',
+                flexDirection: 'row',
+                gap: 2,
+                p: 2,
+                border: '1px solid var(--joy-palette-divider)',
+              }}
+            >
+              <Box sx={{ flex: 1 }}>
+                <FormLabel sx={{ fontWeight: 600 }}>
+                  {t('layout.bottomNav.hideLabels.title')}
+                </FormLabel>
+                <FormHelperText sx={{ mt: 0.5 }}>
+                  {t('layout.bottomNav.hideLabels.description')}
+                </FormHelperText>
+              </Box>
+              <Switch
+                checked={hideLabels}
+                onChange={e => handleHideLabelsChange(e.target.checked)}
+              />
+            </Card>
 
             <DragDropContext onDragEnd={handleDragEnd}>
               <Droppable droppableId='bottom-nav-items'>

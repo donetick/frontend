@@ -94,6 +94,10 @@
         "title": "Fehler melden",
         "description": "Etwas funktioniert nicht richtig? Schick uns die Details zusammen mit einer technischen Momentaufnahme."
       },
+      "widgets": {
+        "title": "Startbildschirm-Widgets",
+        "description": "Lege fest, wie die Donetick-Widgets auf dem Startbildschirm dieses Geräts aussehen."
+      },
       "sidepanel": {
         "title": "Seitenleisten-Anpassung",
         "description": "Passe Layout und Sichtbarkeit der Karten in der Seitenleiste an."
@@ -493,7 +497,11 @@
       "title": "Untere Navigation",
       "description": "Wähle bis zu {{max}} Verknüpfungen für die untere Navigationsleiste auf dem Handy und ordne sie per Drag-and-drop. „Mehr“ bleibt immer der letzte Eintrag und öffnet das vollständige Menü.",
       "resetToDefaults": "Auf Standard zurücksetzen",
-      "resetHelper": "Dadurch werden Verknüpfungen und Reihenfolge der unteren Navigation auf den Standard zurückgesetzt."
+      "resetHelper": "Dadurch werden Verknüpfungen und Reihenfolge der unteren Navigation auf den Standard zurückgesetzt.",
+      "hideLabels": {
+        "title": "Beschriftungen ausblenden",
+        "description": "Zeige in der unteren Navigationsleiste nur Symbole an, um sie kleiner zu machen."
+      }
     },
     "sidepanel": {
       "title": "Seitenleiste"
@@ -506,6 +514,26 @@
     "light": "Hell",
     "dark": "Dunkel",
     "system": "System"
+  },
+  "widgets": {
+    "title": "Startbildschirm-Widgets",
+    "opacity": {
+      "title": "Deckkraft des Hintergrunds",
+      "description": "Wie deckend der Hintergrund deiner Widgets ist. Niedrigere Werte lassen dein Hintergrundbild durchscheinen.",
+      "preview": "Müll rausbringen",
+      "perWidgetHint": "Das ist die Vorgabe für alle Widgets. Für ein einzelnes Widget hältst du es auf dem Startbildschirm gedrückt und öffnest seine Optionen (Android) bzw. „Widget bearbeiten“ (iOS).",
+      "webHint": "Startbildschirm-Widgets gehören zu den iOS- und Android-Apps – nur dort wirkt diese Einstellung."
+    },
+    "theme": {
+      "title": "Farben",
+      "description": "Mit welcher Farbpalette deine Widgets gezeichnet werden. „Automatisch“ folgt dem Hell- oder Dunkelmodus deines Handys.",
+      "options": {
+        "auto": "Automatisch",
+        "light": "Immer hell",
+        "dark": "Immer dunkel"
+      },
+      "perWidgetHint": "Das ist die Vorgabe für alle Widgets. Für ein einzelnes Widget hältst du es auf dem Startbildschirm gedrückt und öffnest seine Optionen (Android) bzw. „Widget bearbeiten“ (iOS)."
+    }
   },
   "localization": {
     "title": "Lokalisierung",

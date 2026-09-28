@@ -1,3 +1,4 @@
+import { Capacitor } from '@capacitor/core'
 import {
   ChevronRight,
   Feedback,
@@ -39,7 +40,9 @@ const SettingsOverview = () => {
   const [bugReportOpen, setBugReportOpen] = useState(false)
 
   const settingsCards = [
-    ...SETTINGS_SECTIONS.map(({ icon: Icon, id, isBeta }) => ({
+    ...SETTINGS_SECTIONS.filter(
+      section => !section.nativeOnly || Capacitor.isNativePlatform(),
+    ).map(({ icon: Icon, id, isBeta }) => ({
       id,
       title: t(`overview.sections.${id}.title`),
       description: t(`overview.sections.${id}.description`),

@@ -38,6 +38,24 @@ public final class WidgetUi {
                 widgetIds(context, manager, PeopleWidgetProvider.class), R.id.widget_list);
         ProjectWidgetProvider.refreshAll(context);
         FilterWidgetProvider.refreshAll(context);
+        QuickCaptureWidgetProvider.refreshAll(context);
+    }
+
+    /**
+     * Fade a widget's background layer to its configured opacity. The layer is
+     * a separate ImageView so only the background goes translucent — text and
+     * icons stay fully opaque and legible over the wallpaper.
+     */
+    public static void applyOpacity(Context context, RemoteViews views, int appWidgetId) {
+        views.setInt(R.id.widget_background_layer, "setImageAlpha",
+                WidgetStore.alphaOf(WidgetStore.opacity(context, appWidgetId)));
+    }
+
+    /** Same, for widgets whose background takes a project/filter color. */
+    public static void applyOpacity(Context context, RemoteViews views, int appWidgetId,
+                                    int color) {
+        views.setInt(R.id.widget_background_layer, "setColorFilter", color);
+        applyOpacity(context, views, appWidgetId);
     }
 
     /** Redraw title/count/subtitle only — safe to call from the list factory. */
@@ -80,6 +98,10 @@ public final class WidgetUi {
         }
 
         views.setTextViewText(R.id.widget_subtitle, subtitle(context));
+
+        WidgetTheme theme = WidgetTheme.of(context, appWidgetId);
+        theme.applyBackground(context, views, appWidgetId);
+        theme.apply(views);
 
         if (!WidgetStore.hasConfig(context)) {
             views.setTextViewText(R.id.widget_empty,

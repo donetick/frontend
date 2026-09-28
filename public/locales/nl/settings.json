@@ -94,6 +94,10 @@
         "title": "Een bug melden",
         "description": "Werkt er iets niet goed? Stuur ons de details samen met een technische momentopname."
       },
+      "widgets": {
+        "title": "Widgets op het beginscherm",
+        "description": "Bepaal hoe de Donetick-widgets op het beginscherm van dit apparaat eruitzien."
+      },
       "sidepanel": {
         "title": "Zijpaneel aanpassen",
         "description": "Pas de indeling en zichtbaarheid van de kaarten in het zijpaneel aan."
@@ -493,7 +497,11 @@
       "title": "Onderste navigatie",
       "description": "Kies maximaal {{max}} snelkoppelingen voor de onderste navigatiebalk op mobiel en sleep om ze te ordenen. ‘Meer’ blijft altijd het laatste item en opent het volledige menu.",
       "resetToDefaults": "Standaardwaarden herstellen",
-      "resetHelper": "Hiermee worden de standaardsnelkoppelingen en -volgorde van de onderste navigatie hersteld."
+      "resetHelper": "Hiermee worden de standaardsnelkoppelingen en -volgorde van de onderste navigatie hersteld.",
+      "hideLabels": {
+        "title": "Labels verbergen",
+        "description": "Toon alleen iconen in de onderste navigatiebalk om deze kleiner te maken."
+      }
     },
     "sidepanel": {
       "title": "Zijpaneel"
@@ -506,6 +514,26 @@
     "light": "Licht",
     "dark": "Donker",
     "system": "Systeem"
+  },
+  "widgets": {
+    "title": "Widgets op het beginscherm",
+    "opacity": {
+      "title": "Dekking van de achtergrond",
+      "description": "Hoe dekkend de achtergrond van je widgets is. Bij lagere waarden schijnt je achtergrond erdoorheen.",
+      "preview": "Vuilnis buitenzetten",
+      "perWidgetHint": "Dit is de standaard voor alle widgets. Wil je er één aanpassen, houd hem dan ingedrukt op je beginscherm en open de opties (Android) of Widget bewerken (iOS).",
+      "webHint": "Widgets op het beginscherm horen bij de iOS- en Android-apps — daar werkt deze instelling alleen."
+    },
+    "theme": {
+      "title": "Kleuren",
+      "description": "Welk kleurenpalet je widgets gebruiken. 'Automatisch' volgt de lichte of donkere modus van je telefoon.",
+      "options": {
+        "auto": "Automatisch",
+        "light": "Altijd licht",
+        "dark": "Altijd donker"
+      },
+      "perWidgetHint": "Dit is de standaard voor alle widgets. Wil je er één aanpassen, houd hem dan ingedrukt op je beginscherm en open de opties (Android) of Widget bewerken (iOS)."
+    }
   },
   "localization": {
     "title": "Lokalisatie",

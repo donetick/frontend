@@ -162,7 +162,7 @@ public class ProjectWidgetProvider extends AppWidgetProvider {
         int foreground = contrastColor(background);
         int secondary = withAlphaOver(foreground, background, 0.72f);
         int completedBg = blend(background, foreground, 0.10f);
-        views.setInt(R.id.project_widget_container, "setBackgroundColor", background);
+        WidgetUi.applyOpacity(context, views, widgetId, background);
         views.setTextColor(R.id.project_title, foreground);
         views.setTextColor(R.id.project_icon, foreground);
         views.setTextColor(R.id.project_counts, secondary);

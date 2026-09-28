@@ -40,6 +40,16 @@
     <string name="widget_config_title">Widget options</string>
     <string name="widget_config_include_others">Show everyone\'s tasks</string>
     <string name="widget_config_include_others_hint">Include tasks assigned to other members of your circle. Their avatar appears next to their tasks.</string>
+    <string name="widget_config_opacity">Background opacity</string>
+    <string name="widget_config_opacity_hint">How solid this widget\'s background is. Lower values let your wallpaper show through.</string>
+    <string name="widget_config_opacity_default">Use the app setting (%1$d%%)</string>
+    <string name="widget_config_opacity_value">%1$d%%</string>
+    <string name="widget_config_theme">Colors</string>
+    <string name="widget_config_theme_hint">Which palette this widget draws with. Automatic follows your phone\'s light or dark mode.</string>
+    <string name="widget_config_theme_default">Use the app setting (%1$s)</string>
+    <string name="widget_theme_auto">Automatic</string>
+    <string name="widget_theme_light">Always light</string>
+    <string name="widget_theme_dark">Always dark</string>
     <string name="widget_config_save">Save</string>
 
     <!-- Sample data for the widget-picker previews (never shown on a placed

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Light-scheme copy of widget_tile_bg; see widget_count_bg_light. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="#E3EFFB" />
+    <corners android:radius="18dp" />
+</shape>
