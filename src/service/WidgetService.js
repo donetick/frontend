@@ -15,6 +15,20 @@ const MAX_PROJECTS = 100
 const MAX_MEMBERS = 12
 const PUSH_DEBOUNCE_MS = 1500
 
+const priorityRank = priority => {
+  const rank = [1, 2, 3, 4, 0].indexOf(priority || 0)
+  return rank === -1 ? 4 : rank
+}
+
+const compareDueDateThenPriority = (a, b) => {
+  if (a.dueDate !== b.dueDate) {
+    if (a.dueDate === null) return 1
+    if (b.dueDate === null) return -1
+    return a.dueDate - b.dueDate
+  }
+  return priorityRank(a.priority) - priorityRank(b.priority)
+}
+
 const isNative = () => Capacitor.isNativePlatform()
 
 // The snapshot carries every circle member's actionable tasks (due inside the
@@ -50,9 +64,7 @@ export const buildWidgetTasks = chores => {
     .filter(Boolean)
     .sort((a, b) => {
       if (a.approval !== b.approval) return a.approval ? -1 : 1
-      if (a.dueDate === null) return b.dueDate === null ? 0 : 1
-      if (b.dueDate === null) return -1
-      return a.dueDate - b.dueDate
+      return compareDueDateThenPriority(a, b)
     })
     .slice(0, MAX_TASKS)
 }
@@ -69,7 +81,10 @@ export const buildProjectWidgetTasks = chores =>
       projectId: String(chore.projectId || chore.project_id || 'default'),
       assignedTo: chore.assignedTo == null ? null : String(chore.assignedTo),
       completed: false,
+      dueDate: chore.nextDueDate ? new Date(chore.nextDueDate).getTime() : null,
+      priority: chore.priority || 0,
     }))
+    .sort(compareDueDateThenPriority)
     .slice(0, MAX_PROJECT_TASKS)
 
 export const buildWidgetProjects = projects => {
