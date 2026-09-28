@@ -18,7 +18,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -40,6 +42,8 @@ import java.util.concurrent.atomic.AtomicReference;
  *                 tasks:[{id, name, dueDate, priority, approval, assignedTo}],
  *                 projectTasks:[{id, name, projectId, assignedTo, completed}],
  *                 projects:[{id, name, color, icon}],
+ *                 filterTasks:[{id, name, filterId, assignedTo, completed}],
+ *                 filters:[{id, name, color, conditions, operator}],
  *                 members:[{id, name, image}]}
  * Config JSON:   {serverUrl, token, userId}
  *
@@ -54,6 +58,8 @@ public final class WidgetStore {
     private static final String KEY_INCLUDE_OTHERS_PREFIX = "include_others_";
     private static final String KEY_PROJECT_INDEX_PREFIX = "project_index_";
     private static final String KEY_PROJECT_PAGE_PREFIX = "project_page_";
+    private static final String KEY_FILTER_INDEX_PREFIX = "filter_index_";
+    private static final String KEY_FILTER_PAGE_PREFIX = "filter_page_";
 
     // Same filtering window as src/service/WidgetService.js
     private static final int WINDOW_DAYS = 7;
@@ -97,6 +103,24 @@ public final class WidgetStore {
         public String projectId;
         public String assignedTo;
         public boolean completed;
+        public Long dueDate;
+        public int priority;
+    }
+
+    public static class Filter {
+        public String id;
+        public String name;
+        public String color;
+    }
+
+    public static class FilterTask {
+        public String id;
+        public String name;
+        public String filterId;
+        public String assignedTo;
+        public boolean completed;
+        public Long dueDate;
+        public int priority;
     }
 
     private static SharedPreferences prefs(Context context) {
@@ -148,6 +172,8 @@ public final class WidgetStore {
                 .remove(KEY_INCLUDE_OTHERS_PREFIX + appWidgetId)
                 .remove(KEY_PROJECT_INDEX_PREFIX + appWidgetId)
                 .remove(KEY_PROJECT_PAGE_PREFIX + appWidgetId)
+                .remove(KEY_FILTER_INDEX_PREFIX + appWidgetId)
+                .remove(KEY_FILTER_PAGE_PREFIX + appWidgetId)
                 .apply();
     }
 
@@ -163,6 +189,21 @@ public final class WidgetStore {
         prefs(context).edit()
                 .putInt(KEY_PROJECT_INDEX_PREFIX + widgetId, Math.max(0, index))
                 .putInt(KEY_PROJECT_PAGE_PREFIX + widgetId, Math.max(0, page))
+                .apply();
+    }
+
+    public static int filterIndex(Context context, int widgetId) {
+        return prefs(context).getInt(KEY_FILTER_INDEX_PREFIX + widgetId, 0);
+    }
+
+    public static int filterPage(Context context, int widgetId) {
+        return prefs(context).getInt(KEY_FILTER_PAGE_PREFIX + widgetId, 0);
+    }
+
+    public static void setFilterPosition(Context context, int widgetId, int index, int page) {
+        prefs(context).edit()
+                .putInt(KEY_FILTER_INDEX_PREFIX + widgetId, Math.max(0, index))
+                .putInt(KEY_FILTER_PAGE_PREFIX + widgetId, Math.max(0, page))
                 .apply();
     }
 
@@ -228,6 +269,54 @@ public final class WidgetStore {
         return projects;
     }
 
+    public static List<Filter> loadFilters(Context context) {
+        List<Filter> filters = new ArrayList<>();
+        try {
+            String raw = prefs(context).getString(KEY_DATA, null);
+            if (raw == null) return filters;
+            JSONArray arr = new JSONObject(raw).optJSONArray("filters");
+            if (arr == null) return filters;
+            for (int i = 0; i < arr.length(); i++) {
+                JSONObject obj = arr.optJSONObject(i);
+                if (obj == null || obj.opt("id") == null) continue;
+                Filter filter = new Filter();
+                filter.id = String.valueOf(obj.opt("id"));
+                filter.name = obj.optString("name", "Filter");
+                filter.color = obj.optString("color", "#64748B");
+                filters.add(filter);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to parse widget filters", e);
+        }
+        return filters;
+    }
+
+    public static List<FilterTask> loadFilterTasks(Context context) {
+        List<FilterTask> tasks = new ArrayList<>();
+        try {
+            String raw = prefs(context).getString(KEY_DATA, null);
+            if (raw == null) return tasks;
+            JSONArray arr = new JSONObject(raw).optJSONArray("filterTasks");
+            if (arr == null) return tasks;
+            for (int i = 0; i < arr.length(); i++) {
+                JSONObject obj = arr.optJSONObject(i);
+                if (obj == null || obj.opt("id") == null) continue;
+                FilterTask task = new FilterTask();
+                task.id = String.valueOf(obj.opt("id"));
+                task.name = obj.optString("name", "");
+                task.filterId = obj.optString("filterId", "");
+                task.assignedTo = obj.isNull("assignedTo") ? null : obj.optString("assignedTo", null);
+                task.completed = obj.optBoolean("completed", false);
+                task.dueDate = obj.isNull("dueDate") ? null : obj.optLong("dueDate");
+                task.priority = obj.optInt("priority", 0);
+                tasks.add(task);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to parse filter widget tasks", e);
+        }
+        return tasks;
+    }
+
     public static List<ProjectTask> loadProjectTasks(Context context) {
         List<ProjectTask> tasks = new ArrayList<>();
         try {
@@ -244,6 +333,8 @@ public final class WidgetStore {
                 task.projectId = obj.optString("projectId", "default");
                 task.assignedTo = obj.isNull("assignedTo") ? null : obj.optString("assignedTo", null);
                 task.completed = obj.optBoolean("completed", false);
+                task.dueDate = obj.isNull("dueDate") ? null : obj.optLong("dueDate");
+                task.priority = obj.optInt("priority", 0);
                 tasks.add(task);
             }
         } catch (Exception e) {
@@ -361,19 +452,24 @@ public final class WidgetStore {
                 // rarely and the app re-pushes it on every open).
                 JSONArray members = null;
                 JSONArray projects = null;
+                JSONArray filters = null;
                 String previous = prefs(context).getString(KEY_DATA, null);
                 if (previous != null) {
                     JSONObject old = new JSONObject(previous);
                     members = old.optJSONArray("members");
                     projects = old.optJSONArray("projects");
+                    filters = old.optJSONArray("filters");
                 }
 
                 JSONObject snapshot = new JSONObject();
-                snapshot.put("version", 3);
+                snapshot.put("version", 4);
                 snapshot.put("lastUpdated", System.currentTimeMillis());
                 snapshot.put("tasks", filterChores(chores));
                 snapshot.put("projectTasks", projectTasks(chores));
                 snapshot.put("projects", projects == null ? new JSONArray() : projects);
+                snapshot.put("filterTasks", filterWidgetTasks(chores,
+                        filters == null ? new JSONArray() : filters, userId(context)));
+                snapshot.put("filters", filters == null ? new JSONArray() : filters);
                 snapshot.put("members", members == null ? new JSONArray() : members);
                 saveData(context, snapshot.toString());
                 return true;
@@ -392,18 +488,24 @@ public final class WidgetStore {
             String data = prefs(context).getString(KEY_DATA, null);
             if (data == null) return;
             JSONObject snapshot = new JSONObject(data);
-            JSONArray tasks = snapshot.optJSONArray("projectTasks");
-            if (tasks == null) return;
-            for (int i = 0; i < tasks.length(); i++) {
-                JSONObject task = tasks.optJSONObject(i);
-                if (task != null && taskId.equals(String.valueOf(task.opt("id")))) {
-                    task.put("completed", completed);
-                    break;
-                }
-            }
+            JSONArray projectTasks = snapshot.optJSONArray("projectTasks");
+            setCompleted(projectTasks, taskId, completed);
+            JSONArray filterTasks = snapshot.optJSONArray("filterTasks");
+            setCompleted(filterTasks, taskId, completed);
             saveData(context, snapshot.toString());
         } catch (Exception e) {
             Log.w(TAG, "Failed to update project task optimistically", e);
+        }
+    }
+
+    private static void setCompleted(JSONArray tasks, String taskId, boolean completed)
+            throws Exception {
+        if (tasks == null) return;
+        for (int i = 0; i < tasks.length(); i++) {
+            JSONObject task = tasks.optJSONObject(i);
+            if (task != null && taskId.equals(String.valueOf(task.opt("id")))) {
+                task.put("completed", completed);
+            }
         }
     }
 
@@ -471,6 +573,184 @@ public final class WidgetStore {
         }
     }
 
+    private static JSONArray filterWidgetTasks(JSONArray chores, JSONArray filters,
+                                                 String userId) throws Exception {
+        JSONArray result = new JSONArray();
+        for (int f = 0; f < filters.length(); f++) {
+            JSONObject filter = filters.optJSONObject(f);
+            if (filter == null || filter.opt("id") == null) continue;
+            String filterId = String.valueOf(filter.opt("id"));
+            int added = 0;
+            for (int i = 0; i < chores.length() && added < 100; i++) {
+                JSONObject chore = chores.optJSONObject(i);
+                if (chore == null || chore.opt("id") == null
+                        || !matchesFilter(chore, filter, userId)) continue;
+                JSONObject task = new JSONObject();
+                task.put("id", chore.opt("id"));
+                task.put("name", chore.optString("name", ""));
+                task.put("filterId", filterId);
+                task.put("assignedTo", chore.isNull("assignedTo")
+                        ? JSONObject.NULL : String.valueOf(chore.opt("assignedTo")));
+                task.put("completed", false);
+                Long dueDate = parseDate(chore.optString("nextDueDate", null));
+                task.put("dueDate", dueDate == null ? JSONObject.NULL : dueDate);
+                task.put("priority", chore.optInt("priority", 0));
+                result.put(task);
+                added++;
+            }
+        }
+        return result;
+    }
+
+    private static boolean matchesFilter(JSONObject chore, JSONObject filter, String userId) {
+        JSONArray conditions = filter.optJSONArray("conditions");
+        if (conditions == null || conditions.length() == 0) return true;
+        boolean useOr = "OR".equalsIgnoreCase(filter.optString("operator", "AND"));
+        for (int i = 0; i < conditions.length(); i++) {
+            JSONObject condition = conditions.optJSONObject(i);
+            boolean matches = condition == null || matchesCondition(chore, condition, userId);
+            if (useOr && matches) return true;
+            if (!useOr && !matches) return false;
+        }
+        return !useOr;
+    }
+
+    private static boolean matchesCondition(JSONObject chore, JSONObject condition, String userId) {
+        String type = condition.optString("type", "");
+        String operator = condition.optString("operator", "");
+        Object value = condition.opt("value");
+        boolean positive;
+        switch (type) {
+            case "assignee":
+                positive = valueMatches(value, entry -> assigneeMatches(chore, entry, userId));
+                return "is".equals(operator) ? positive : !positive;
+            case "createdBy":
+                positive = valueMatches(value, entry -> {
+                    String expected = "me".equals(String.valueOf(entry)) ? userId : String.valueOf(entry);
+                    return expected != null && expected.equals(String.valueOf(chore.opt("createdBy")));
+                });
+                return "is".equals(operator) ? positive : !positive;
+            case "priority":
+                return compareNumber(chore.optInt("priority", 0), operator, value);
+            case "status":
+                positive = valueMatches(value, entry -> numbersEqual(chore.optInt("status", 0), entry));
+                return "is".equals(operator) ? positive : !positive;
+            case "dueDate":
+                return matchesDueDate(chore.optString("nextDueDate", null), operator, value);
+            case "label":
+                JSONArray labels = chore.optJSONArray("labelsV2");
+                positive = valueMatches(value, entry -> arrayContainsId(labels, entry, "id"));
+                return ("has".equals(operator) || "is".equals(operator)) ? positive : !positive;
+            case "project":
+                String projectId = chore.isNull("projectId")
+                        ? chore.optString("project_id", "default")
+                        : chore.optString("projectId", "default");
+                if (projectId.isEmpty()) projectId = "default";
+                final String actualProjectId = projectId;
+                positive = valueMatches(value,
+                        entry -> actualProjectId.equals(String.valueOf(entry)));
+                return "is".equals(operator) ? positive : !positive;
+            case "points":
+                return compareNumber(chore.optDouble("points", 0), operator, value);
+            default:
+                return true;
+        }
+    }
+
+    private interface ValueMatcher { boolean matches(Object value); }
+
+    private static boolean valueMatches(Object value, ValueMatcher matcher) {
+        if (value instanceof JSONArray) {
+            JSONArray values = (JSONArray) value;
+            for (int i = 0; i < values.length(); i++) if (matcher.matches(values.opt(i))) return true;
+            return false;
+        }
+        return matcher.matches(value);
+    }
+
+    private static boolean assigneeMatches(JSONObject chore, Object entry, String userId) {
+        String value = String.valueOf(entry);
+        String assigned = chore.isNull("assignedTo") ? null : String.valueOf(chore.opt("assignedTo"));
+        JSONArray assignees = chore.optJSONArray("assignees");
+        if ("anyone".equals(value)) return true;
+        if ("me".equals(value)) value = userId;
+        if ("available_for_me".equals(value)) return userId != null
+                && (assigned == null || userId.equals(assigned));
+        if ("others".equals(value)) return userId != null && !userId.equals(assigned)
+                && !arrayContainsId(assignees, userId, "userId");
+        return value != null && (value.equals(assigned)
+                || arrayContainsId(assignees, value, "userId"));
+    }
+
+    private static boolean arrayContainsId(JSONArray array, Object value, String key) {
+        if (array == null) return false;
+        String expected = String.valueOf(value);
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject item = array.optJSONObject(i);
+            if (item != null && expected.equals(String.valueOf(item.opt(key)))) return true;
+        }
+        return false;
+    }
+
+    private static boolean numbersEqual(double number, Object value) {
+        try { return number == Double.parseDouble(String.valueOf(value)); }
+        catch (Exception ignored) { return false; }
+    }
+
+    private static boolean compareNumber(double number, String operator, Object value) {
+        if ("is".equals(operator) || "isNot".equals(operator)) {
+            boolean equal = valueMatches(value, entry -> numbersEqual(number, entry));
+            return "is".equals(operator) ? equal : !equal;
+        }
+        double target;
+        try { target = Double.parseDouble(String.valueOf(value)); }
+        catch (Exception ignored) { return false; }
+        if ("equals".equals(operator)) return number == target;
+        if ("greaterThan".equals(operator)) return number > target;
+        if ("lessThan".equals(operator)) return number < target;
+        if ("greaterThanOrEqual".equals(operator)) return number >= target;
+        if ("lessThanOrEqual".equals(operator)) return number <= target;
+        return false;
+    }
+
+    private static boolean matchesDueDate(String rawDate, String operator, Object value) {
+        if ("anyOf".equals(operator) && value instanceof JSONArray) {
+            JSONArray values = (JSONArray) value;
+            for (int i = 0; i < values.length(); i++) {
+                if (matchesDueDate(rawDate, values.optString(i), null)) return true;
+            }
+            return false;
+        }
+        Long due = parseDate(rawDate);
+        if ("hasNoDueDate".equals(operator)) return due == null;
+        if ("hasDueDate".equals(operator)) return due != null;
+        if (due == null) return false;
+        long now = System.currentTimeMillis();
+        Calendar today = Calendar.getInstance();
+        today.set(Calendar.HOUR_OF_DAY, 0); today.set(Calendar.MINUTE, 0);
+        today.set(Calendar.SECOND, 0); today.set(Calendar.MILLISECOND, 0);
+        long start = today.getTimeInMillis();
+        if ("isOverdue".equals(operator)) return due < now;
+        if ("isDueToday".equals(operator)) return due >= start && due < start + 86400000L;
+        if ("isDueTomorrow".equals(operator)) return due >= start + 86400000L && due < start + 172800000L;
+        if ("isDueThisWeek".equals(operator)) return due >= start && due < start + 7 * 86400000L;
+        Calendar dueCalendar = Calendar.getInstance(); dueCalendar.setTimeInMillis(due);
+        if ("isDueThisMonth".equals(operator)) return dueCalendar.get(Calendar.YEAR) == today.get(Calendar.YEAR)
+                && dueCalendar.get(Calendar.MONTH) == today.get(Calendar.MONTH);
+        if ("between".equals(operator) && value instanceof JSONArray) {
+            JSONArray range = (JSONArray) value;
+            Long from = parseDate(range.optString(0, null));
+            Long to = parseDate(range.optString(1, null));
+            return from != null && to != null && due >= from && due <= to;
+        }
+        String targetRaw = String.valueOf(value);
+        Long target = "today".equals(targetRaw) ? start : parseDate(targetRaw);
+        if (target == null) return false;
+        if ("before".equals(operator)) return due < target;
+        if ("after".equals(operator)) return due > target;
+        return false;
+    }
+
     private static JSONArray projectTasks(JSONArray chores) throws Exception {
         JSONArray result = new JSONArray();
         for (int i = 0; i < chores.length() && result.length() < 500; i++) {
@@ -483,6 +763,9 @@ public final class WidgetStore {
             task.put("projectId", projectId.isEmpty() ? "default" : projectId);
             task.put("assignedTo", chore.isNull("assignedTo") ? JSONObject.NULL : String.valueOf(chore.opt("assignedTo")));
             task.put("completed", false);
+            Long dueDate = parseDate(chore.optString("nextDueDate", null));
+            task.put("dueDate", dueDate == null ? JSONObject.NULL : dueDate);
+            task.put("priority", chore.optInt("priority", 0));
             result.put(task);
         }
         return result;
@@ -520,7 +803,10 @@ public final class WidgetStore {
             if (aApproval != bApproval) return aApproval ? -1 : 1;
             long aDue = a.isNull("dueDate") ? Long.MAX_VALUE : a.optLong("dueDate");
             long bDue = b.isNull("dueDate") ? Long.MAX_VALUE : b.optLong("dueDate");
-            return Long.compare(aDue, bDue);
+            int dueComparison = Long.compare(aDue, bDue);
+            if (dueComparison != 0) return dueComparison;
+            return Integer.compare(priorityRank(a.optInt("priority", 0)),
+                    priorityRank(b.optInt("priority", 0)));
         });
 
         JSONArray result = new JSONArray();
@@ -528,6 +814,11 @@ public final class WidgetStore {
             result.put(selected.get(i));
         }
         return result;
+    }
+
+    static int priorityRank(int priority) {
+        if (priority >= 1 && priority <= 4) return priority - 1;
+        return 4;
     }
 
     /**
@@ -588,8 +879,13 @@ public final class WidgetStore {
         if (value == null || value.isEmpty() || "null".equals(value)) return null;
         try {
             return OffsetDateTime.parse(value).toInstant().toEpochMilli();
-        } catch (Exception e) {
-            return null;
+        } catch (Exception ignored) {
+            try {
+                return LocalDate.parse(value).atStartOfDay(ZoneId.systemDefault())
+                        .toInstant().toEpochMilli();
+            } catch (Exception e) {
+                return null;
+            }
         }
     }
 

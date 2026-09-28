@@ -1,6 +1,7 @@
 import { Capacitor, registerPlugin } from '@capacitor/core'
 
 import { apiClient } from '../utils/ApiClient'
+import { applyFilter } from '../utils/FilterEngine'
 
 // Native bridge implemented in ios/App/App/WidgetBridgePlugin.swift and
 // android/.../widget/WidgetBridgePlugin.java. It persists the snapshot in
@@ -12,6 +13,8 @@ const WINDOW_DAYS = 7
 const MAX_TASKS = 100
 const MAX_PROJECT_TASKS = 500
 const MAX_PROJECTS = 100
+const MAX_FILTERS = 100
+const MAX_FILTER_TASKS = 100
 const MAX_MEMBERS = 12
 const PUSH_DEBOUNCE_MS = 1500
 
@@ -87,6 +90,36 @@ export const buildProjectWidgetTasks = chores =>
     .sort(compareDueDateThenPriority)
     .slice(0, MAX_PROJECT_TASKS)
 
+export const buildWidgetFilters = filters =>
+  (filters || [])
+    .filter(filter => filter?.id != null)
+    .map(filter => ({
+      id: String(filter.id),
+      name: filter.name || 'Filter',
+      color: filter.color || '#64748B',
+      conditions: filter.conditions || [],
+      operator: filter.operator || 'AND',
+    }))
+    .slice(0, MAX_FILTERS)
+
+export const buildFilterWidgetTasks = (chores, filters, userId) =>
+  buildWidgetFilters(filters).flatMap(filter =>
+    applyFilter(chores || [], filter, { userId })
+      .map(chore => ({
+        id: chore.id,
+        name: chore.name || '',
+        filterId: filter.id,
+        assignedTo: chore.assignedTo == null ? null : String(chore.assignedTo),
+        completed: false,
+        dueDate: chore.nextDueDate
+          ? new Date(chore.nextDueDate).getTime()
+          : null,
+        priority: chore.priority || 0,
+      }))
+      .sort(compareDueDateThenPriority)
+      .slice(0, MAX_FILTER_TASKS),
+  )
+
 export const buildWidgetProjects = projects => {
   const normalized = (projects || [])
     .filter(project => project?.id != null)
@@ -137,14 +170,17 @@ const pushSnapshot = async queryClient => {
 
   const members = queryClient.getQueryData(['allCircleMembers'])?.res
   const projects = queryClient.getQueryData(['projects']) || []
+  const filters = queryClient.getQueryData(['filters']) || []
 
   await WidgetBridge.update({
     data: JSON.stringify({
-      version: 3,
+      version: 4,
       lastUpdated: Date.now(),
       tasks: buildWidgetTasks(chores),
       projectTasks: buildProjectWidgetTasks(chores),
       projects: buildWidgetProjects(projects),
+      filterTasks: buildFilterWidgetTasks(chores, filters, userId),
+      filters: buildWidgetFilters(filters),
       members: buildWidgetMembers(members),
     }),
     config: JSON.stringify({
@@ -180,7 +216,8 @@ export const initWidgetSync = queryClient => {
       (key?.[0] === 'chores' ||
         key?.[0] === 'userProfile' ||
         key?.[0] === 'allCircleMembers' ||
-        key?.[0] === 'projects')
+        key?.[0] === 'projects' ||
+        key?.[0] === 'filters')
     ) {
       schedule()
     }

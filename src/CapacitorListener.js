@@ -106,12 +106,15 @@ const handleUrlOpen = (url, isColdStart = false) => {
     parsedUrl.host === 'chores' &&
     (parsedUrl.pathname === '' || parsedUrl.pathname === '/')
   ) {
-    // Project widget header: open the chore list with that project selected.
+    // Project/filter widget header: open the chore list with that saved view.
+    const filterId = parsedUrl.searchParams.get('filterId')
     const projectId = parsedUrl.searchParams.get('project')
     routerNavigate(
-      projectId
-        ? `/chores?project=${encodeURIComponent(projectId)}`
-        : '/chores',
+      filterId
+        ? `/chores?filterId=${encodeURIComponent(filterId)}`
+        : projectId
+          ? `/chores?project=${encodeURIComponent(projectId)}`
+          : '/chores',
     )
   } else if (url.startsWith('donetick://chores/')) {
     handleNFCChoreDeepLink(url, isColdStart)

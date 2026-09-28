@@ -95,6 +95,17 @@
                 android:resource="@xml/widget_project_info" />
         </receiver>
         <receiver
+            android:name=".widget.FilterWidgetProvider"
+            android:exported="false"
+            android:label="@string/widget_filter_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_filter_info" />
+        </receiver>
+        <receiver
             android:name=".widget.QuickCaptureWidgetProvider"
             android:exported="false"
             android:label="@string/widget_quick_label">

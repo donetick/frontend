@@ -37,6 +37,7 @@ public final class WidgetUi {
         manager.notifyAppWidgetViewDataChanged(
                 widgetIds(context, manager, PeopleWidgetProvider.class), R.id.widget_list);
         ProjectWidgetProvider.refreshAll(context);
+        FilterWidgetProvider.refreshAll(context);
     }
 
     /** Redraw title/count/subtitle only — safe to call from the list factory. */

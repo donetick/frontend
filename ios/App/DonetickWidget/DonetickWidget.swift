@@ -41,6 +41,23 @@ enum Palette {
 
 // MARK: - Model
 
+private func priorityRank(_ priority: Int) -> Int {
+    (1...4).contains(priority) ? priority - 1 : 4
+}
+
+private func projectTaskComesFirst(_ a: WidgetProjectTask, _ b: WidgetProjectTask) -> Bool {
+    switch (a.dueDate, b.dueDate) {
+    case let (aDate?, bDate?) where aDate != bDate:
+        return aDate < bDate
+    case (_?, nil):
+        return true
+    case (nil, _?):
+        return false
+    default:
+        return priorityRank(a.priority) < priorityRank(b.priority)
+    }
+}
+
 struct WidgetTask: Identifiable {
     let id: String
     let name: String
@@ -65,6 +82,8 @@ struct WidgetProjectTask: Identifiable {
     let projectId: String
     let assignedTo: String?
     let completed: Bool
+    let dueDate: Date?
+    let priority: Int
 }
 
 struct WidgetProject: Identifiable {
@@ -72,6 +91,22 @@ struct WidgetProject: Identifiable {
     let name: String
     let color: String
     let icon: String?
+}
+
+struct WidgetFilterTask: Identifiable {
+    let id: String
+    let name: String
+    let filterId: String
+    let assignedTo: String?
+    let completed: Bool
+    let dueDate: Date?
+    let priority: Int
+}
+
+struct WidgetFilter: Identifiable {
+    let id: String
+    let name: String
+    let color: String
 }
 
 struct WidgetMember: Identifiable {
@@ -97,6 +132,10 @@ enum WidgetStore {
     static let configKey = "widget_config"
     static let projectIndexKey = "project_widget_index"
     static let projectPageKey = "project_widget_page"
+    static let filterIndexKey = "filter_widget_index"
+    static let filterPageKey = "filter_widget_page"
+    static let projectRefreshingKey = "project_widget_refreshing"
+    static let filterRefreshingKey = "filter_widget_refreshing"
 
     // Same filtering window as src/service/WidgetService.js
     static let windowDays = 7
@@ -173,6 +212,43 @@ enum WidgetStore {
         }
     }
 
+    static func loadFilters() -> [WidgetFilter] {
+        guard let items = snapshotDict()?["filters"] as? [[String: Any]] else { return [] }
+        return items.compactMap { item in
+            guard let rawId = item["id"] else { return nil }
+            return WidgetFilter(
+                id: "\(rawId)",
+                name: item["name"] as? String ?? "Filter",
+                color: item["color"] as? String ?? "#64748B"
+            )
+        }
+    }
+
+    static func loadFilterTasks() -> [WidgetFilterTask] {
+        guard let items = snapshotDict()?["filterTasks"] as? [[String: Any]] else { return [] }
+        return items.compactMap { item in
+            guard let rawId = item["id"] else { return nil }
+            return WidgetFilterTask(
+                id: "\(rawId)",
+                name: item["name"] as? String ?? "",
+                filterId: item["filterId"] as? String ?? "",
+                assignedTo: item["assignedTo"].flatMap { $0 is NSNull ? nil : "\($0)" },
+                completed: item["completed"] as? Bool ?? false,
+                dueDate: (item["dueDate"] as? Double).map {
+                    Date(timeIntervalSince1970: $0 / 1000)
+                },
+                priority: item["priority"] as? Int ?? 0
+            )
+        }.sorted {
+            switch ($0.dueDate, $1.dueDate) {
+            case let (a?, b?) where a != b: return a < b
+            case (_?, nil): return true
+            case (nil, _?): return false
+            default: return priorityRank($0.priority) < priorityRank($1.priority)
+            }
+        }
+    }
+
     static func loadProjectTasks() -> [WidgetProjectTask] {
         guard let items = snapshotDict()?["projectTasks"] as? [[String: Any]] else { return [] }
         return items.compactMap { item in
@@ -183,9 +259,13 @@ enum WidgetStore {
                 name: item["name"] as? String ?? "",
                 projectId: item["projectId"] as? String ?? "default",
                 assignedTo: assignee,
-                completed: item["completed"] as? Bool ?? false
+                completed: item["completed"] as? Bool ?? false,
+                dueDate: (item["dueDate"] as? Double).map {
+                    Date(timeIntervalSince1970: $0 / 1000)
+                },
+                priority: item["priority"] as? Int ?? 0
             )
-        }
+        }.sorted(by: projectTaskComesFirst)
     }
 
     static var projectIndex: Int {
@@ -196,6 +276,32 @@ enum WidgetStore {
     static var projectPage: Int {
         get { max(0, defaults?.integer(forKey: projectPageKey) ?? 0) }
         set { defaults?.set(max(0, newValue), forKey: projectPageKey) }
+    }
+
+    static var filterIndex: Int {
+        get { max(0, defaults?.integer(forKey: filterIndexKey) ?? 0) }
+        set { defaults?.set(max(0, newValue), forKey: filterIndexKey) }
+    }
+
+    static var filterPage: Int {
+        get { max(0, defaults?.integer(forKey: filterPageKey) ?? 0) }
+        set { defaults?.set(max(0, newValue), forKey: filterPageKey) }
+    }
+
+    static var projectRefreshing: Bool {
+        get { Date().timeIntervalSince1970 - (defaults?.double(forKey: projectRefreshingKey) ?? 0) < 30 }
+        set {
+            if newValue { defaults?.set(Date().timeIntervalSince1970, forKey: projectRefreshingKey) }
+            else { defaults?.removeObject(forKey: projectRefreshingKey) }
+        }
+    }
+
+    static var filterRefreshing: Bool {
+        get { Date().timeIntervalSince1970 - (defaults?.double(forKey: filterRefreshingKey) ?? 0) < 30 }
+        set {
+            if newValue { defaults?.set(Date().timeIntervalSince1970, forKey: filterRefreshingKey) }
+            else { defaults?.removeObject(forKey: filterRefreshingKey) }
+        }
     }
 
     static func loadMembers() -> [WidgetMember] {
@@ -263,13 +369,16 @@ enum WidgetStore {
         // app re-pushes it on every open).
         let members = snapshotDict()?["members"] ?? [[String: Any]]()
         let projects = snapshotDict()?["projects"] ?? [[String: Any]]()
+        let filters = snapshotDict()?["filters"] as? [[String: Any]] ?? []
 
         let snapshot: [String: Any] = [
-            "version": 3,
+            "version": 4,
             "lastUpdated": Date().timeIntervalSince1970 * 1000,
             "tasks": filterChores(chores),
             "projectTasks": projectTasks(chores),
             "projects": projects,
+            "filterTasks": filterTasks(chores, filters: filters, userId: userId),
+            "filters": filters,
             "members": members,
         ]
         if let encoded = try? JSONSerialization.data(withJSONObject: snapshot),
@@ -285,6 +394,12 @@ enum WidgetStore {
             tasks[index]["completed"] = completed
         }
         snapshot["projectTasks"] = tasks
+        if var filterTasks = snapshot["filterTasks"] as? [[String: Any]] {
+            for index in filterTasks.indices where "\(filterTasks[index]["id"] ?? "")" == id {
+                filterTasks[index]["completed"] = completed
+            }
+            snapshot["filterTasks"] = filterTasks
+        }
         if let encoded = try? JSONSerialization.data(withJSONObject: snapshot),
            let string = String(data: encoded, encoding: .utf8) {
             defaults?.set(string, forKey: dataKey)
@@ -314,6 +429,144 @@ enum WidgetStore {
         return true
     }
 
+    private static func filterTasks(_ chores: [[String: Any]], filters: [[String: Any]],
+                                    userId: String?) -> [[String: Any]] {
+        filters.flatMap { filter -> [[String: Any]] in
+            guard let rawFilterId = filter["id"] else { return [] }
+            return chores.filter { matchesFilter($0, filter: filter, userId: userId) }
+                .prefix(100)
+                .compactMap { chore in
+                    guard let id = chore["id"] else { return nil }
+                    return [
+                        "id": id,
+                        "name": chore["name"] as? String ?? "",
+                        "filterId": "\(rawFilterId)",
+                        "assignedTo": chore["assignedTo"] ?? NSNull(),
+                        "completed": false,
+                        "dueDate": parseDate(chore["nextDueDate"] as? String)
+                            .map { ($0.timeIntervalSince1970 * 1000) as Any } ?? NSNull(),
+                        "priority": chore["priority"] as? Int ?? 0,
+                    ]
+                }
+        }
+    }
+
+    private static func matchesFilter(_ chore: [String: Any], filter: [String: Any],
+                                      userId: String?) -> Bool {
+        guard let conditions = filter["conditions"] as? [[String: Any]], !conditions.isEmpty
+        else { return true }
+        let matches = conditions.map { matchesCondition(chore, condition: $0, userId: userId) }
+        return (filter["operator"] as? String)?.uppercased() == "OR"
+            ? matches.contains(true) : !matches.contains(false)
+    }
+
+    private static func values(_ value: Any?) -> [Any] {
+        if let array = value as? [Any] { return array }
+        return value.map { [$0] } ?? []
+    }
+
+    private static func stringId(_ value: Any?) -> String? {
+        guard let value, !(value is NSNull) else { return nil }
+        return "\(value)"
+    }
+
+    private static func number(_ value: Any?) -> Double? {
+        if let number = value as? NSNumber { return number.doubleValue }
+        return stringId(value).flatMap(Double.init)
+    }
+
+    private static func containsId(_ items: Any?, id: String, key: String) -> Bool {
+        (items as? [[String: Any]])?.contains { stringId($0[key]) == id } ?? false
+    }
+
+    private static func matchesCondition(_ chore: [String: Any], condition: [String: Any],
+                                         userId: String?) -> Bool {
+        let type = condition["type"] as? String ?? ""
+        let op = condition["operator"] as? String ?? ""
+        let entries = values(condition["value"])
+        var matched = false
+        switch type {
+        case "assignee":
+            let assigned = stringId(chore["assignedTo"])
+            matched = entries.contains { entry in
+                let value = stringId(entry) ?? ""
+                if value == "anyone" { return true }
+                if value == "available_for_me" { return userId != nil && (assigned == nil || assigned == userId) }
+                if value == "others" { return userId != nil && assigned != userId
+                    && !containsId(chore["assignees"], id: userId!, key: "userId") }
+                let expected = value == "me" ? userId : value
+                return expected != nil && (assigned == expected
+                    || containsId(chore["assignees"], id: expected!, key: "userId"))
+            }
+            return op == "is" ? matched : !matched
+        case "createdBy":
+            let creator = stringId(chore["createdBy"])
+            matched = entries.contains { (stringId($0) == "me" ? userId : stringId($0)) == creator }
+            return op == "is" ? matched : !matched
+        case "priority", "status":
+            let actual = number(chore[type]) ?? 0
+            matched = entries.contains { number($0) == actual }
+            if op == "is" { return matched }
+            if op == "isNot" { return !matched }
+            guard let target = number(condition["value"]) else { return false }
+            return op == "greaterThan" ? actual > target : op == "lessThan" && actual < target
+        case "points":
+            let actual = number(chore["points"]) ?? 0
+            guard let target = number(condition["value"]) else { return false }
+            switch op {
+            case "equals": return actual == target
+            case "greaterThan": return actual > target
+            case "lessThan": return actual < target
+            case "greaterThanOrEqual": return actual >= target
+            case "lessThanOrEqual": return actual <= target
+            default: return false
+            }
+        case "label":
+            matched = entries.contains { entry in
+                stringId(entry).map { containsId(chore["labelsV2"], id: $0, key: "id") } ?? false
+            }
+            return ["has", "is"].contains(op) ? matched : !matched
+        case "project":
+            let projectId = stringId(chore["projectId"] ?? chore["project_id"])
+                .flatMap { $0.isEmpty ? nil : $0 } ?? "default"
+            matched = entries.contains { stringId($0) == projectId }
+            return op == "is" ? matched : !matched
+        case "dueDate":
+            return matchesDueDate(parseDate(chore["nextDueDate"] as? String), operator: op,
+                                  value: condition["value"])
+        default:
+            return true
+        }
+    }
+
+    private static func matchesDueDate(_ due: Date?, operator op: String, value: Any?) -> Bool {
+        if op == "anyOf" {
+            return values(value).contains { matchesDueDate(due, operator: stringId($0) ?? "", value: nil) }
+        }
+        if op == "hasNoDueDate" { return due == nil }
+        if op == "hasDueDate" { return due != nil }
+        guard let due else { return false }
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        switch op {
+        case "isOverdue": return due < Date()
+        case "isDueToday": return calendar.isDateInToday(due)
+        case "isDueTomorrow": return calendar.isDateInTomorrow(due)
+        case "isDueThisWeek": return due >= today && due < calendar.date(byAdding: .day, value: 7, to: today)!
+        case "isDueThisMonth": return calendar.isDate(due, equalTo: today, toGranularity: .month)
+        case "before", "after":
+            let target = stringId(value) == "today" ? today : parseDate(stringId(value))
+            guard let target else { return false }
+            return op == "before" ? due < target : due > target
+        case "between":
+            let range = values(value)
+            guard range.count == 2, let start = parseDate(stringId(range[0])),
+                  let end = parseDate(stringId(range[1])) else { return false }
+            return due >= start && due <= end
+        default: return false
+        }
+    }
+
     private static func projectTasks(_ chores: [[String: Any]]) -> [[String: Any]] {
         chores.prefix(500).compactMap { chore in
             guard let id = chore["id"] else { return nil }
@@ -325,6 +578,9 @@ enum WidgetStore {
                 "projectId": projectId,
                 "assignedTo": chore["assignedTo"] ?? NSNull(),
                 "completed": false,
+                "dueDate": parseDate(chore["nextDueDate"] as? String)
+                    .map { ($0.timeIntervalSince1970 * 1000) as Any } ?? NSNull(),
+                "priority": chore["priority"] as? Int ?? 0,
             ]
         }
     }
@@ -362,7 +618,10 @@ enum WidgetStore {
             if aApproval != bApproval { return aApproval }
             let aDue = a["dueDate"] as? Double ?? .greatestFiniteMagnitude
             let bDue = b["dueDate"] as? Double ?? .greatestFiniteMagnitude
-            return aDue < bDue
+            if aDue != bDue { return aDue < bDue }
+            let aPriority = priorityRank(a["priority"] as? Int ?? 0)
+            let bPriority = priorityRank(b["priority"] as? Int ?? 0)
+            return aPriority < bPriority
         }
         return Array(selected.prefix(maxTasks))
     }
@@ -372,7 +631,11 @@ enum WidgetStore {
         let fractional = ISO8601DateFormatter()
         fractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         if let date = fractional.date(from: value) { return date }
-        return ISO8601DateFormatter().date(from: value)
+        if let date = ISO8601DateFormatter().date(from: value) { return date }
+        let day = DateFormatter()
+        day.locale = Locale(identifier: "en_US_POSIX")
+        day.dateFormat = "yyyy-MM-dd"
+        return day.date(from: value)
     }
 }
 
@@ -451,7 +714,9 @@ struct WidgetOptionsIntent: WidgetConfigurationIntent {
 }
 
 private let projectWidgetKind = "DonetickProjectWidget"
+private let filterWidgetKind = "DonetickFilterWidget"
 private let projectPageSize = 5
+private let filterPageSize = 5
 
 private func moveProject(_ delta: Int) {
     let count = WidgetStore.loadProjects().count
@@ -496,8 +761,63 @@ struct NextProjectPageIntent: AppIntent {
 struct RefreshProjectWidgetIntent: AppIntent {
     static var title: LocalizedStringResource = "Refresh Projects"
     func perform() async throws -> some IntentResult {
-        await WidgetStore.refreshIfStale(force: true)
+        WidgetStore.projectRefreshing = true
         WidgetCenter.shared.reloadTimelines(ofKind: projectWidgetKind)
+        await WidgetStore.refreshIfStale(force: true)
+        WidgetStore.projectRefreshing = false
+        WidgetCenter.shared.reloadTimelines(ofKind: projectWidgetKind)
+        return .result()
+    }
+}
+
+private func moveFilter(_ delta: Int) {
+    let count = WidgetStore.loadFilters().count
+    guard count > 0 else { return }
+    WidgetStore.filterIndex = (WidgetStore.filterIndex + delta + count) % count
+    WidgetStore.filterPage = 0
+    WidgetCenter.shared.reloadTimelines(ofKind: filterWidgetKind)
+}
+
+struct PreviousFilterIntent: AppIntent {
+    static var title: LocalizedStringResource = "Previous Filter"
+    func perform() async throws -> some IntentResult { moveFilter(-1); return .result() }
+}
+
+struct NextFilterIntent: AppIntent {
+    static var title: LocalizedStringResource = "Next Filter"
+    func perform() async throws -> some IntentResult { moveFilter(1); return .result() }
+}
+
+struct PreviousFilterPageIntent: AppIntent {
+    static var title: LocalizedStringResource = "Previous Tasks"
+    func perform() async throws -> some IntentResult {
+        WidgetStore.filterPage = max(0, WidgetStore.filterPage - 1)
+        WidgetCenter.shared.reloadTimelines(ofKind: filterWidgetKind)
+        return .result()
+    }
+}
+
+struct NextFilterPageIntent: AppIntent {
+    static var title: LocalizedStringResource = "Next Tasks"
+    func perform() async throws -> some IntentResult {
+        let filters = WidgetStore.loadFilters()
+        guard !filters.isEmpty else { return .result() }
+        let filter = filters[min(WidgetStore.filterIndex, filters.count - 1)]
+        let count = WidgetStore.loadFilterTasks().filter { $0.filterId == filter.id }.count
+        WidgetStore.filterPage = min(max(0, (count - 1) / filterPageSize), WidgetStore.filterPage + 1)
+        WidgetCenter.shared.reloadTimelines(ofKind: filterWidgetKind)
+        return .result()
+    }
+}
+
+struct RefreshFilterWidgetIntent: AppIntent {
+    static var title: LocalizedStringResource = "Refresh Filters"
+    func perform() async throws -> some IntentResult {
+        WidgetStore.filterRefreshing = true
+        WidgetCenter.shared.reloadTimelines(ofKind: filterWidgetKind)
+        await WidgetStore.refreshIfStale(force: true)
+        WidgetStore.filterRefreshing = false
+        WidgetCenter.shared.reloadTimelines(ofKind: filterWidgetKind)
         return .result()
     }
 }
@@ -512,9 +832,11 @@ struct CompleteProjectTaskIntent: AppIntent {
     func perform() async throws -> some IntentResult {
         WidgetStore.setProjectTaskCompleted(id: taskId, completed: true)
         WidgetCenter.shared.reloadTimelines(ofKind: projectWidgetKind)
+        WidgetCenter.shared.reloadTimelines(ofKind: filterWidgetKind)
         if !(await WidgetStore.completeTask(id: taskId)) {
             WidgetStore.setProjectTaskCompleted(id: taskId, completed: false)
             WidgetCenter.shared.reloadTimelines(ofKind: projectWidgetKind)
+            WidgetCenter.shared.reloadTimelines(ofKind: filterWidgetKind)
         }
         return .result()
     }
@@ -527,6 +849,8 @@ struct TaskEntry: TimelineEntry {
     let tasks: [WidgetTask]
     let projectTasks: [WidgetProjectTask]
     let projects: [WidgetProject]
+    let filterTasks: [WidgetFilterTask]
+    let filters: [WidgetFilter]
     let members: [WidgetMember]
     let avatars: [String: UIImage]
     let lastUpdated: Date?
@@ -546,10 +870,15 @@ struct TaskEntry: TimelineEntry {
                 WidgetTask(id: "4", name: "Clean the garage", dueDate: calendar.date(byAdding: .day, value: 3, to: today), priority: 0, approval: false, assignedTo: "1"),
             ],
             projectTasks: [
-                WidgetProjectTask(id: "1", name: "Take out the trash", projectId: "home", assignedTo: "1", completed: false),
-                WidgetProjectTask(id: "2", name: "Water the plants", projectId: "home", assignedTo: "1", completed: false),
+                WidgetProjectTask(id: "1", name: "Take out the trash", projectId: "home", assignedTo: "1", completed: false, dueDate: today, priority: 1),
+                WidgetProjectTask(id: "2", name: "Water the plants", projectId: "home", assignedTo: "1", completed: false, dueDate: today, priority: 2),
             ],
             projects: [WidgetProject(id: "home", name: "Home", color: "#287A5D", icon: "Home")],
+            filterTasks: [
+                WidgetFilterTask(id: "1", name: "Take out the trash", filterId: "week", assignedTo: "1", completed: false, dueDate: today, priority: 1),
+                WidgetFilterTask(id: "2", name: "Water the plants", filterId: "week", assignedTo: "1", completed: false, dueDate: today, priority: 2),
+            ],
+            filters: [WidgetFilter(id: "week", name: "Due this week", color: "#287A5D")],
             members: [
                 WidgetMember(id: "1", name: "Alex", image: nil),
                 WidgetMember(id: "2", name: "Sam", image: nil),
@@ -564,7 +893,9 @@ struct TaskEntry: TimelineEntry {
 }
 
 private func makeEntry(includeOthers: Bool) async -> TaskEntry {
-    await WidgetStore.refreshIfStale()
+    if !WidgetStore.projectRefreshing && !WidgetStore.filterRefreshing {
+        await WidgetStore.refreshIfStale()
+    }
     let members = WidgetStore.loadMembers()
     let avatars = includeOthers ? await AvatarStore.loadAll(members) : [:]
     return TaskEntry(
@@ -572,6 +903,8 @@ private func makeEntry(includeOthers: Bool) async -> TaskEntry {
         tasks: WidgetStore.loadTasks(),
         projectTasks: WidgetStore.loadProjectTasks(),
         projects: WidgetStore.loadProjects(),
+        filterTasks: WidgetStore.loadFilterTasks(),
+        filters: WidgetStore.loadFilters(),
         members: members,
         avatars: avatars,
         lastUpdated: WidgetStore.lastUpdated,
@@ -1235,11 +1568,18 @@ private struct ProjectControlButton<I: AppIntent>: View {
     let label: String
     let intent: I
     let foreground: Color
+    var refreshing = false
 
     var body: some View {
         Button(intent: intent) {
-            Image(systemName: image)
-                .font(.system(size: 11, weight: .bold))
+            Group {
+                if refreshing {
+                    ProgressView().controlSize(.mini)
+                } else {
+                    Image(systemName: image)
+                        .font(.system(size: 11, weight: .bold))
+                }
+            }
                 .frame(width: 23, height: 23)
                 .background(foreground.opacity(0.14))
                 .clipShape(Circle())
@@ -1363,7 +1703,8 @@ struct ProjectWidgetView: View {
                         ProjectControlButton(image: "chevron.right", label: "Next project",
                                              intent: NextProjectIntent(), foreground: foreground)
                         ProjectControlButton(image: "arrow.clockwise", label: "Refresh",
-                                             intent: RefreshProjectWidgetIntent(), foreground: foreground)
+                                             intent: RefreshProjectWidgetIntent(), foreground: foreground,
+                                             refreshing: WidgetStore.projectRefreshing)
                     }
                 }
             }
@@ -1380,6 +1721,155 @@ struct ProjectWidget: Widget {
         }
         .configurationDisplayName("Project Tasks")
         .description("Browse and complete tasks one project at a time.")
+        .supportedFamilies([.systemMedium, .systemLarge])
+    }
+}
+
+// MARK: - Filter tasks widget
+
+private extension WidgetFilter {
+    var backgroundColor: Color {
+        var value = color.trimmingCharacters(in: .whitespacesAndNewlines)
+        if value.hasPrefix("#") { value.removeFirst() }
+        guard value.count == 6, let rgb = UInt64(value, radix: 16) else {
+            return Color(red: 0.39, green: 0.45, blue: 0.55)
+        }
+        return Color(
+            red: Double((rgb >> 16) & 0xff) / 255,
+            green: Double((rgb >> 8) & 0xff) / 255,
+            blue: Double(rgb & 0xff) / 255
+        )
+    }
+
+    var foregroundColor: Color {
+        var value = color.trimmingCharacters(in: .whitespacesAndNewlines)
+        if value.hasPrefix("#") { value.removeFirst() }
+        guard value.count == 6, let rgb = UInt64(value, radix: 16) else { return .white }
+        let luminance = (0.2126 * Double((rgb >> 16) & 0xff)
+            + 0.7152 * Double((rgb >> 8) & 0xff)
+            + 0.0722 * Double(rgb & 0xff)) / 255
+        return luminance > 0.58 ? Color(red: 0.08, green: 0.09, blue: 0.11) : .white
+    }
+}
+
+struct FilterWidgetView: View {
+    let entry: TaskEntry
+
+    private var filter: WidgetFilter? {
+        guard !entry.filters.isEmpty else { return nil }
+        return entry.filters[min(WidgetStore.filterIndex, entry.filters.count - 1)]
+    }
+
+    var body: some View {
+        if !entry.signedIn {
+            StateMessage(systemImage: "person.crop.circle.badge.exclamationmark",
+                         title: "Sign in", detail: "Open Donetick to see your filters")
+                .containerBackground(for: .widget) { Color(UIColor.systemBackground) }
+        } else if let filter {
+            filterContent(filter)
+                .containerBackground(for: .widget) { filter.backgroundColor }
+        } else {
+            StateMessage(systemImage: "line.3.horizontal.decrease.circle", title: "No filters",
+                         detail: "Create a saved filter in Donetick")
+                .containerBackground(for: .widget) { Color(UIColor.systemBackground) }
+        }
+    }
+
+    private func filterContent(_ filter: WidgetFilter) -> some View {
+        let tasks = entry.filterTasks.filter { $0.filterId == filter.id }
+        let maxPage = max(0, (tasks.count - 1) / filterPageSize)
+        let page = min(WidgetStore.filterPage, maxPage)
+        let visible = Array(tasks.dropFirst(page * filterPageSize).prefix(filterPageSize))
+        let foreground = filter.foregroundColor
+        let encodedId = filter.id.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? filter.id
+        let filterURL = URL(string: "donetick://chores?filterId=\(encodedId)")
+
+        return VStack(alignment: .leading, spacing: 2) {
+            if let filterURL {
+                Link(destination: filterURL) {
+                    Text(filter.name)
+                        .font(.system(size: 15, weight: .bold))
+                        .lineLimit(1)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                Link(destination: filterURL) {
+                    Text("\(tasks.count) tasks")
+                        .font(.system(size: 9))
+                        .opacity(0.76)
+                        .lineLimit(1)
+                }
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                if visible.isEmpty {
+                    Text("No tasks in this filter")
+                        .font(.system(size: 12, weight: .medium))
+                        .opacity(0.75)
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                } else {
+                    ForEach(visible) { task in
+                        HStack(spacing: 7) {
+                            if task.completed {
+                                Image(systemName: "checkmark.circle.fill").font(.system(size: 16))
+                            } else {
+                                Button(intent: CompleteProjectTaskIntent(taskId: task.id)) {
+                                    Image(systemName: "circle").font(.system(size: 16))
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityLabel("Complete \(task.name)")
+                            }
+                            if let taskURL = URL(string: "donetick://chores/\(task.id)") {
+                                Link(destination: taskURL) {
+                                    Text(task.name)
+                                        .font(.system(size: 12, weight: .medium))
+                                        .strikethrough(task.completed)
+                                        .lineLimit(1)
+                                }
+                            }
+                            Spacer(minLength: 0)
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 21, maxHeight: 21,
+                               alignment: .leading)
+                        .padding(.horizontal, 3)
+                        .background(task.completed ? foreground.opacity(0.10) : Color.clear)
+                        .clipShape(RoundedRectangle(cornerRadius: 5))
+                    }
+                }
+                Spacer(minLength: 0)
+            }
+
+            HStack {
+                ProjectControlButton(image: "chevron.left", label: "Previous filter",
+                                     intent: PreviousFilterIntent(), foreground: foreground)
+                Spacer()
+                ProjectControlButton(image: "chevron.up", label: "Previous tasks",
+                                     intent: PreviousFilterPageIntent(), foreground: foreground)
+                    .opacity(page > 0 ? 1 : 0.35)
+                Spacer()
+                ProjectControlButton(image: "arrow.clockwise", label: "Refresh",
+                                     intent: RefreshFilterWidgetIntent(), foreground: foreground,
+                                     refreshing: WidgetStore.filterRefreshing)
+                Spacer()
+                ProjectControlButton(image: "chevron.down", label: "Next tasks",
+                                     intent: NextFilterPageIntent(), foreground: foreground)
+                    .opacity(page < maxPage ? 1 : 0.35)
+                Spacer()
+                ProjectControlButton(image: "chevron.right", label: "Next filter",
+                                     intent: NextFilterIntent(), foreground: foreground)
+            }
+        }
+        .foregroundColor(foreground)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+}
+
+struct FilterWidget: Widget {
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: filterWidgetKind, provider: PeopleProvider()) { entry in
+            FilterWidgetView(entry: entry)
+        }
+        .configurationDisplayName("Filter Tasks")
+        .description("Browse and complete tasks from your saved filters.")
         .supportedFamilies([.systemMedium, .systemLarge])
     }
 }
@@ -1492,6 +1982,7 @@ struct DonetickWidgetBundle: WidgetBundle {
         WeekWidget()
         PeopleWidget()
         ProjectWidget()
+        FilterWidget()
         QuickCaptureWidget()
     }
 }

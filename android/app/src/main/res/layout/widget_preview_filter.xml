@@ -13,19 +13,11 @@
         android:orientation="horizontal">
 
         <TextView
-            android:layout_width="24dp"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:text="⌂"
-            android:textColor="#FFFFFF"
-            android:textSize="17sp" />
-
-        <TextView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center_vertical"
-            android:text="Home"
+            android:text="Due this week"
             android:textColor="#FFFFFF"
             android:textSize="16sp"
             android:textStyle="bold" />
@@ -35,7 +27,7 @@
         android:layout_width="match_parent"
         android:layout_height="16dp"
         android:gravity="center_vertical"
-        android:text="8 tasks · 5 assigned to me"
+        android:text="8 tasks"
         android:textColor="#D9FFFFFF"
         android:textSize="10sp" />
 
