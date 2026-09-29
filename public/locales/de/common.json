@@ -596,8 +596,8 @@
       },
       "review": {
         "title": "Etwas muss überprüft werden.",
-        "body_one": "",
-        "body_other": ""
+        "body_one": "{{count}} beendete Aufgabe warten auf Freigabe.",
+        "body_other": "{{count}} beendete Aufgaben warten auf Freigabe."
       },
       "today": {
         "title_one": "{{count}} Aufgabe heute fällig.",
@@ -608,8 +608,8 @@
         "body": "Heute ist nichts geplant, nichts verspätet."
       },
       "firstRun": {
-        "title": "",
-        "body": ""
+        "title": "Lass uns den ersten erledigen",
+        "body": "Dein Startbildschirm füllt sich mit jeder Aufgabe, die du hinzufügst."
       }
     },
     "triage": {
@@ -633,19 +633,19 @@
       "action": "Alle anzeigen"
     },
     "clear": {
-      "title": "",
-      "body": "",
+      "title": "Im Voraus planen",
+      "body": "Anstehende Aufgaben durchsuchen, Pläne neu planen oder das nächste Ding hinzufügen.",
       "action": "Alle Aufgaben durchsuchen"
     },
     "firstTask": {
       "title": "Füge deine erste Aufgabe hinzu",
-      "description": "",
-      "action": ""
+      "description": "Tippe es, sage es, oder scanne es. Alles was Du hinzufügst, wird hier angezeigt, wenn Du es brauchst.",
+      "action": "Aufgabe hinzufügen"
     },
     "review": {
-      "title": "",
-      "pendingTitle": "",
-      "myPendingTitle": "",
+      "title": "Erfordert Überprüfung von dir",
+      "pendingTitle": "Überprüfung ausstehend",
+      "myPendingTitle": "Meine Aufgaben die Überprüfung erfordern",
       "action": "Alle überprüfen"
     },
     "circle": {
@@ -657,7 +657,7 @@
       "late_other": "{{count}} überfällig",
       "done_one": "{{count}} erledigt",
       "done_other": "{{count}} erledigt",
-      "caughtUp": "",
+      "caughtUp": "Alles abgearbeitet",
       "emptyTitle": "Hier ist sonst noch niemand",
       "emptyBody": "Lade die Leute ein, mit denen du deine Arbeit teilst, und dieser Bildschirm zeigt wem was zugeteilt ist.",
       "emptyAction": "In deinen Kreis einladen"
@@ -671,7 +671,7 @@
       "tasksOverdue_other": "{{count}} Aufgaben, {{overdue}} überfällig",
       "tasksUnplanned_one": "{{count}} Aufgabe, {{unplanned}} ungeplant",
       "tasksUnplanned_other": "{{count}} Aufgaben, {{unplanned}} ungeplant",
-      "clear": ""
+      "clear": "Alles erledigt"
     },
     "filters": {
       "title": "Filter",
