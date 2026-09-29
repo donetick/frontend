@@ -21,6 +21,7 @@ const BaseOptionPicker = ({
   onValuesChange,
   open: openProp,
   placement = 'top-start',
+  renderItemEnd,
   renderItemStart,
   renderTriggerIcon,
   value = null,
@@ -248,6 +249,7 @@ const BaseOptionPicker = ({
                     >
                       {getItemLabel(item)}
                     </Typography>
+                    {renderItemEnd?.({ item, selected })}
                   </Button>
                 )
               })}

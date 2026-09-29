@@ -6,6 +6,7 @@ import {
   Delete,
   DocumentScanner,
   HorizontalRule,
+  Lock,
   Save,
   UploadFile,
 } from '@mui/icons-material'
@@ -983,6 +984,11 @@ const ChoreEdit = () => {
                       )}
                     </Avatar>
                     {project.name}
+                    {project.isPrivate && (
+                      <Lock
+                        sx={{ fontSize: 14, verticalAlign: 'text-bottom' }}
+                      />
+                    )}
                   </Box>
                 </Option>
               ))}
@@ -1929,9 +1935,7 @@ const ChoreEdit = () => {
               />
               <FormHelperText>
                 {t('choreEdit.limitedHelp')}
-                {selectedProjectIsPrivate ||
-                anyone ||
-                assignableTo.length === 0
+                {selectedProjectIsPrivate || anyone || assignableTo.length === 0
                   ? t('choreEdit.limitedDisabledHint')
                   : ''}
               </FormHelperText>

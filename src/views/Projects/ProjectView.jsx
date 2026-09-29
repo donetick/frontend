@@ -9,6 +9,7 @@ import {
 import {
   Add,
   Close,
+  Lock,
   MoreVert,
   Search,
   SearchOff,
@@ -176,6 +177,7 @@ const ProjectCardContent = ({
                 ml: 1,
                 fontWeight: 'md',
               }}
+              startDecorator={<Lock />}
             >
               Private
             </Chip>

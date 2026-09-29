@@ -1,4 +1,4 @@
-import { Add, KeyboardArrowDown } from '@mui/icons-material'
+import { Add, KeyboardArrowDown, Lock } from '@mui/icons-material'
 import {
   Box,
   Button,
@@ -1197,6 +1197,15 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
                         {project.id === 'default'
                           ? t('addTask.defaultProject')
                           : project.name}
+                        {project.isPrivate && (
+                          <Lock
+                            sx={{
+                              fontSize: 14,
+                              ml: 0.5,
+                              verticalAlign: 'text-bottom',
+                            }}
+                          />
+                        )}
                       </MenuItem>
                     )
                   })}

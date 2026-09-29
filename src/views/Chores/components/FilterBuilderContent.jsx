@@ -4,6 +4,7 @@ import {
   FolderOpen,
   HowToReg,
   Label,
+  Lock,
   Person,
   PriorityHigh,
   Stars,
@@ -505,7 +506,15 @@ const FilterBuilderContent = ({
             { value: 'default', label: t('filterBuilder.defaultProject') },
             ...projects
               .filter(p => p.id !== 'default')
-              .map(p => ({ value: p.id, label: p.name })),
+              .map(p => ({
+                value: p.id,
+                label: (
+                  <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
+                    {p.name}
+                    {p.isPrivate && <Lock sx={{ fontSize: 12 }} />}
+                  </Box>
+                ),
+              })),
           ])}
           <Divider sx={{ my: 2.5 }} />
         </>
