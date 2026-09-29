@@ -106,7 +106,7 @@ public class ProjectWidgetProvider extends AppWidgetProvider {
         if (ACTION_NEXT.equals(action)) { index = (index + 1) % projects.size(); page = 0; }
         if (ACTION_UP.equals(action)) page = Math.max(0, page - 1);
         if (ACTION_DOWN.equals(action)) {
-            int taskCount = tasksFor(context, projects.get(index).id).size();
+            int taskCount = tasksFor(context, projects.get(index).id, id).size();
             page = Math.min(Math.max(0, (taskCount - 1) / PAGE_SIZE), page + 1);
         }
         WidgetStore.setProjectPosition(context, id, index, page);
@@ -150,7 +150,7 @@ public class ProjectWidgetProvider extends AppWidgetProvider {
         }
         int index = Math.min(WidgetStore.projectIndex(context, widgetId), projects.size() - 1);
         WidgetStore.Project project = projects.get(index);
-        List<WidgetStore.ProjectTask> tasks = tasksFor(context, project.id);
+        List<WidgetStore.ProjectTask> tasks = tasksFor(context, project.id, widgetId);
         int maxPage = Math.max(0, (tasks.size() - 1) / PAGE_SIZE);
         int page = Math.min(WidgetStore.projectPage(context, widgetId), maxPage);
         if (page != WidgetStore.projectPage(context, widgetId)) {
@@ -254,10 +254,16 @@ public class ProjectWidgetProvider extends AppWidgetProvider {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
-    private static List<WidgetStore.ProjectTask> tasksFor(Context context, String projectId) {
+    private static List<WidgetStore.ProjectTask> tasksFor(Context context, String projectId,
+                                                           int widgetId) {
         List<WidgetStore.ProjectTask> result = new ArrayList<>();
+        boolean includeOthers = WidgetStore.includeOthers(context, widgetId, true);
+        String me = WidgetStore.userId(context);
         for (WidgetStore.ProjectTask task : WidgetStore.loadProjectTasks(context)) {
-            if (projectId.equals(task.projectId)) result.add(task);
+            if (projectId.equals(task.projectId)
+                    && (includeOthers || (me != null && me.equals(task.assignedTo)))) {
+                result.add(task);
+            }
         }
         result.sort((a, b) -> {
             long aDue = a.dueDate == null ? Long.MAX_VALUE : a.dueDate;

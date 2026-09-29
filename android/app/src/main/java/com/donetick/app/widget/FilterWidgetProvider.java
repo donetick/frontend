@@ -106,7 +106,7 @@ public class FilterWidgetProvider extends AppWidgetProvider {
         if (ACTION_NEXT.equals(action)) { index = (index + 1) % filters.size(); page = 0; }
         if (ACTION_UP.equals(action)) page = Math.max(0, page - 1);
         if (ACTION_DOWN.equals(action)) {
-            int taskCount = tasksFor(context, filters.get(index).id).size();
+            int taskCount = tasksFor(context, filters.get(index).id, id).size();
             page = Math.min(Math.max(0, (taskCount - 1) / PAGE_SIZE), page + 1);
         }
         WidgetStore.setFilterPosition(context, id, index, page);
@@ -150,7 +150,7 @@ public class FilterWidgetProvider extends AppWidgetProvider {
         }
         int index = Math.min(WidgetStore.filterIndex(context, widgetId), filters.size() - 1);
         WidgetStore.Filter filter = filters.get(index);
-        List<WidgetStore.FilterTask> tasks = tasksFor(context, filter.id);
+        List<WidgetStore.FilterTask> tasks = tasksFor(context, filter.id, widgetId);
         int maxPage = Math.max(0, (tasks.size() - 1) / PAGE_SIZE);
         int page = Math.min(WidgetStore.filterPage(context, widgetId), maxPage);
         if (page != WidgetStore.filterPage(context, widgetId)) {
@@ -248,10 +248,16 @@ public class FilterWidgetProvider extends AppWidgetProvider {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
-    private static List<WidgetStore.FilterTask> tasksFor(Context context, String filterId) {
+    private static List<WidgetStore.FilterTask> tasksFor(Context context, String filterId,
+                                                         int widgetId) {
         List<WidgetStore.FilterTask> result = new ArrayList<>();
+        boolean includeOthers = WidgetStore.includeOthers(context, widgetId, true);
+        String me = WidgetStore.userId(context);
         for (WidgetStore.FilterTask task : WidgetStore.loadFilterTasks(context)) {
-            if (filterId.equals(task.filterId)) result.add(task);
+            if (filterId.equals(task.filterId)
+                    && (includeOthers || (me != null && me.equals(task.assignedTo)))) {
+                result.add(task);
+            }
         }
         result.sort((a, b) -> {
             long aDue = a.dueDate == null ? Long.MAX_VALUE : a.dueDate;

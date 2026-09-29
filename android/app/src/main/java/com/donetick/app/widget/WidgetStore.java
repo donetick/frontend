@@ -174,9 +174,14 @@ public final class WidgetStore {
         }
     }
 
-    /** Per-widget "include tasks assigned to others" option (default off). */
+    /** Per-widget "include tasks assigned to others" option. */
     public static boolean includeOthers(Context context, int appWidgetId) {
-        return prefs(context).getBoolean(KEY_INCLUDE_OTHERS_PREFIX + appWidgetId, false);
+        return includeOthers(context, appWidgetId, false);
+    }
+
+    /** Returns the supplied default until this widget instance has been configured. */
+    public static boolean includeOthers(Context context, int appWidgetId, boolean defaultValue) {
+        return prefs(context).getBoolean(KEY_INCLUDE_OTHERS_PREFIX + appWidgetId, defaultValue);
     }
 
     public static void setIncludeOthers(Context context, int appWidgetId, boolean value) {

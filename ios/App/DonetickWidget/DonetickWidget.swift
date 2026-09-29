@@ -841,8 +841,24 @@ struct WidgetOptionsIntent: WidgetConfigurationIntent {
     var theme: WidgetThemeOption
 }
 
-/// Configuration for the widgets that have nothing to filter by assignee but
-/// still need the appearance control (people, project, filter, shortcuts).
+/// Project and filter widgets show the whole circle by default, but can be
+/// narrowed to the signed-in user's assignments.
+struct ProjectFilterOptionsIntent: WidgetConfigurationIntent {
+    static var title: LocalizedStringResource = "Widget Options"
+    static var description = IntentDescription("Choose whose tasks the widget shows.")
+
+    @Parameter(title: "Show everyone's tasks", default: true)
+    var includeOthers: Bool
+
+    @Parameter(title: "Background", default: .appSetting)
+    var opacity: WidgetOpacityOption
+
+    @Parameter(title: "Colors", default: .appSetting)
+    var theme: WidgetThemeOption
+}
+
+/// Configuration for widgets that have nothing to filter by assignee but still
+/// need appearance controls (people and shortcuts).
 struct WidgetAppearanceIntent: WidgetConfigurationIntent {
     static var title: LocalizedStringResource = "Widget Appearance"
     static var description = IntentDescription("Choose how solid the widget's background is.")
@@ -967,11 +983,19 @@ struct PreviousProjectPageIntent: AppIntent {
 
 struct NextProjectPageIntent: AppIntent {
     static var title: LocalizedStringResource = "Next Tasks"
+    @Parameter(title: "Include others", default: true) var includeOthers: Bool
+
+    init() {}
+    init(includeOthers: Bool) { self.includeOthers = includeOthers }
+
     func perform() async throws -> some IntentResult {
         let projects = WidgetStore.loadProjects()
         guard !projects.isEmpty else { return .result() }
         let project = projects[min(WidgetStore.projectIndex, projects.count - 1)]
-        let count = WidgetStore.loadProjectTasks().filter { $0.projectId == project.id }.count
+        let me = WidgetStore.userId
+        let count = WidgetStore.loadProjectTasks().filter {
+            $0.projectId == project.id && (includeOthers || $0.assignedTo == me)
+        }.count
         WidgetStore.projectPage = min(max(0, (count - 1) / projectPageSize), WidgetStore.projectPage + 1)
         WidgetCenter.shared.reloadTimelines(ofKind: projectWidgetKind)
         return .result()
@@ -1055,11 +1079,19 @@ struct PreviousFilterPageIntent: AppIntent {
 
 struct NextFilterPageIntent: AppIntent {
     static var title: LocalizedStringResource = "Next Tasks"
+    @Parameter(title: "Include others", default: true) var includeOthers: Bool
+
+    init() {}
+    init(includeOthers: Bool) { self.includeOthers = includeOthers }
+
     func perform() async throws -> some IntentResult {
         let filters = WidgetStore.loadFilters()
         guard !filters.isEmpty else { return .result() }
         let filter = filters[min(WidgetStore.filterIndex, filters.count - 1)]
-        let count = WidgetStore.loadFilterTasks().filter { $0.filterId == filter.id }.count
+        let me = WidgetStore.userId
+        let count = WidgetStore.loadFilterTasks().filter {
+            $0.filterId == filter.id && (includeOthers || $0.assignedTo == me)
+        }.count
         WidgetStore.filterPage = min(max(0, (count - 1) / filterPageSize), WidgetStore.filterPage + 1)
         WidgetCenter.shared.reloadTimelines(ofKind: filterWidgetKind)
         return .result()
@@ -1212,8 +1244,26 @@ struct DonetickProvider: AppIntentTimelineProvider {
     }
 }
 
-/// The people/project/filter widgets always cover the whole circle, so their
-/// only configurable option is the appearance one.
+struct ProjectFilterProvider: AppIntentTimelineProvider {
+    func placeholder(in context: Context) -> TaskEntry {
+        .sample()
+    }
+
+    func snapshot(for configuration: ProjectFilterOptionsIntent, in context: Context) async -> TaskEntry {
+        if context.isPreview { return .sample() }
+        return await makeEntry(includeOthers: configuration.includeOthers,
+                               opacity: configuration.opacity.resolved,
+                               colorScheme: configuration.theme.resolved)
+    }
+
+    func timeline(for configuration: ProjectFilterOptionsIntent, in context: Context) async -> Timeline<TaskEntry> {
+        await makeTimeline(includeOthers: configuration.includeOthers,
+                           opacity: configuration.opacity.resolved,
+                           colorScheme: configuration.theme.resolved)
+    }
+}
+
+/// The remaining widgets only expose appearance options.
 struct AppearanceProvider: AppIntentTimelineProvider {
     func placeholder(in context: Context) -> TaskEntry {
         .sample()
@@ -2012,7 +2062,10 @@ struct ProjectWidgetView: View {
     }
 
     private func projectContent(_ project: WidgetProject) -> some View {
-        let tasks = entry.projectTasks.filter { $0.projectId == project.id }
+        let tasks = entry.projectTasks.filter {
+            $0.projectId == project.id
+                && (entry.includeOthers || $0.assignedTo == entry.myUserId)
+        }
         let maxPage = max(0, (tasks.count - 1) / projectPageSize)
         let page = min(WidgetStore.projectPage, maxPage)
         let visible = Array(tasks.dropFirst(page * projectPageSize).prefix(projectPageSize))
@@ -2093,7 +2146,8 @@ struct ProjectWidgetView: View {
                                          intent: PreviousProjectPageIntent(), foreground: foreground)
                         .opacity(page > 0 ? 1 : 0.35)
                     ProjectControlButton(image: "chevron.down", label: "Next tasks",
-                                         intent: NextProjectPageIntent(), foreground: foreground)
+                                         intent: NextProjectPageIntent(includeOthers: entry.includeOthers),
+                                         foreground: foreground)
                         .opacity(page < maxPage ? 1 : 0.35)
                     HStack(spacing: 2) {
                         ProjectControlButton(image: "chevron.left", label: "Previous project",
@@ -2116,8 +2170,8 @@ struct ProjectWidget: Widget {
     var body: some WidgetConfiguration {
         AppIntentConfiguration(
             kind: projectWidgetKind,
-            intent: WidgetAppearanceIntent.self,
-            provider: AppearanceProvider()
+            intent: ProjectFilterOptionsIntent.self,
+            provider: ProjectFilterProvider()
         ) { entry in
             ProjectWidgetView(entry: entry)
         }
@@ -2178,7 +2232,10 @@ struct FilterWidgetView: View {
     }
 
     private func filterContent(_ filter: WidgetFilter) -> some View {
-        let tasks = entry.filterTasks.filter { $0.filterId == filter.id }
+        let tasks = entry.filterTasks.filter {
+            $0.filterId == filter.id
+                && (entry.includeOthers || $0.assignedTo == entry.myUserId)
+        }
         let maxPage = max(0, (tasks.count - 1) / filterPageSize)
         let page = min(WidgetStore.filterPage, maxPage)
         let visible = Array(tasks.dropFirst(page * filterPageSize).prefix(filterPageSize))
@@ -2253,7 +2310,8 @@ struct FilterWidgetView: View {
                                      refreshing: WidgetStore.filterRefreshing)
                 Spacer()
                 ProjectControlButton(image: "chevron.down", label: "Next tasks",
-                                     intent: NextFilterPageIntent(), foreground: foreground)
+                                     intent: NextFilterPageIntent(includeOthers: entry.includeOthers),
+                                     foreground: foreground)
                     .opacity(page < maxPage ? 1 : 0.35)
                 Spacer()
                 ProjectControlButton(image: "chevron.right", label: "Next filter",
@@ -2269,8 +2327,8 @@ struct FilterWidget: Widget {
     var body: some WidgetConfiguration {
         AppIntentConfiguration(
             kind: filterWidgetKind,
-            intent: WidgetAppearanceIntent.self,
-            provider: AppearanceProvider()
+            intent: ProjectFilterOptionsIntent.self,
+            provider: ProjectFilterProvider()
         ) { entry in
             FilterWidgetView(entry: entry)
         }

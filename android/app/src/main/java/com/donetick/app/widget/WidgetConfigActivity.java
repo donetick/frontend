@@ -44,7 +44,8 @@ public class WidgetConfigActivity extends Activity {
         setContentView(R.layout.widget_config);
 
         Switch includeOthers = findViewById(R.id.config_include_others);
-        includeOthers.setChecked(WidgetStore.includeOthers(this, appWidgetId));
+        includeOthers.setChecked(WidgetStore.includeOthers(
+                this, appWidgetId, defaultsToEveryone()));
         findViewById(R.id.config_include_others_group).setVisibility(
                 hasAssigneeOption() ? View.VISIBLE : View.GONE);
         View quickActionsGroup = findViewById(R.id.config_quick_actions_group);
@@ -137,18 +138,27 @@ public class WidgetConfigActivity extends Activity {
         }
     }
 
-    /**
-     * Whether "show everyone's tasks" means anything for the widget being
-     * configured. The people/project/filter widgets always cover the whole
-     * circle, and the shortcut widgets carry no task data at all.
-     */
+    /** Whether this widget renders tasks that can be narrowed by assignee. */
     private boolean hasAssigneeOption() {
+        String provider = providerClassName();
+        if (provider == null) return true;
+        return provider.equals(TodayWidgetProvider.class.getName())
+                || provider.equals(WeekWidgetProvider.class.getName())
+                || provider.equals(ProjectWidgetProvider.class.getName())
+                || provider.equals(FilterWidgetProvider.class.getName());
+    }
+
+    /** Project and filter widgets preserve their existing everyone-first behavior. */
+    private boolean defaultsToEveryone() {
+        String provider = providerClassName();
+        return ProjectWidgetProvider.class.getName().equals(provider)
+                || FilterWidgetProvider.class.getName().equals(provider);
+    }
+
+    private String providerClassName() {
         AppWidgetProviderInfo info =
                 AppWidgetManager.getInstance(this).getAppWidgetInfo(appWidgetId);
-        if (info == null || info.provider == null) return true;
-        String provider = info.provider.getClassName();
-        return provider.equals(TodayWidgetProvider.class.getName())
-                || provider.equals(WeekWidgetProvider.class.getName());
+        return info == null || info.provider == null ? null : info.provider.getClassName();
     }
 
     private boolean isQuickActionsWidget() {

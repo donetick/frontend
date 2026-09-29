@@ -3,13 +3,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/widget_bg"
-    android:fillViewport="true">
+    android:clipToPadding="false"
+    android:fillViewport="true"
+    android:fitsSystemWindows="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:paddingStart="24dp"
+        android:paddingTop="32dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="24dp">
 
         <TextView
             android:layout_width="wrap_content"
@@ -19,8 +24,7 @@
             android:textSize="22sp"
             android:textStyle="bold" />
 
-        <!-- Hidden for widgets that always cover the whole circle (people,
-             project, filter) or carry no task data at all. -->
+        <!-- Hidden for the people widget and widgets that carry no task data. -->
         <LinearLayout
             android:id="@+id/config_include_others_group"
             android:layout_width="match_parent"
