@@ -706,6 +706,7 @@
     "startDate": "",
     "dueDate": "",
     "triggerDueHint": "",
+    "alwaysDueHint": "Questa attività non ha una scadenza ed è sempre disponibile da completare",
     "giveDueDate": "",
     "giveDueDateHelp": "",
     "startWhen": "",
@@ -731,6 +732,7 @@
     "notificationsPlanWarning": "",
     "notifyForTask": "",
     "notifyForTaskHelp": "",
+    "notifyForTaskUnavailable": "Le notifiche non sono disponibili per attività basate su trigger o sempre disponibili",
     "notificationSchedule": "",
     "whoToNotify": "",
     "allAssignees": "",
@@ -804,10 +806,12 @@
       "monthly": "",
       "yearly": "",
       "adaptive": "",
+      "always": "Sempre",
       "custom": ""
     },
     "freqMessage": {
       "adaptive": "",
+      "always": "Questa attività non ha una scadenza e resta disponibile da completare in qualsiasi momento. Non verrà archiviata al completamento.",
       "custom": ""
     },
     "weekPattern": {

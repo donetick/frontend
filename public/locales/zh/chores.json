@@ -706,6 +706,7 @@
     "startDate": "",
     "dueDate": "",
     "triggerDueHint": "",
+    "alwaysDueHint": "此任务没有截止日期，随时可以完成",
     "giveDueDate": "",
     "giveDueDateHelp": "",
     "startWhen": "",
@@ -731,6 +732,7 @@
     "notificationsPlanWarning": "",
     "notifyForTask": "",
     "notifyForTaskHelp": "",
+    "notifyForTaskUnavailable": "基于触发器或始终可用的任务不支持通知",
     "notificationSchedule": "",
     "whoToNotify": "",
     "allAssignees": "",
@@ -804,10 +806,12 @@
       "monthly": "",
       "yearly": "",
       "adaptive": "",
+      "always": "始终",
       "custom": ""
     },
     "freqMessage": {
       "adaptive": "",
+      "always": "此任务没有截止日期，随时保持可完成状态。完成后不会被归档。",
       "custom": ""
     },
     "weekPattern": {

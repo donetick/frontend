@@ -706,6 +706,7 @@
     "startDate": "",
     "dueDate": "",
     "triggerDueHint": "",
+    "alwaysDueHint": "To zadanie nie ma terminu i jest zawsze dostępne do wykonania",
     "giveDueDate": "",
     "giveDueDateHelp": "",
     "startWhen": "",
@@ -731,6 +732,7 @@
     "notificationsPlanWarning": "",
     "notifyForTask": "",
     "notifyForTaskHelp": "",
+    "notifyForTaskUnavailable": "Powiadomienia nie są dostępne dla zadań opartych na wyzwalaczu lub zawsze dostępnych",
     "notificationSchedule": "",
     "whoToNotify": "",
     "allAssignees": "",
@@ -804,10 +806,12 @@
       "monthly": "",
       "yearly": "",
       "adaptive": "",
+      "always": "Zawsze",
       "custom": ""
     },
     "freqMessage": {
       "adaptive": "",
+      "always": "To zadanie nie ma terminu i pozostaje dostępne do wykonania w dowolnym momencie. Nie zostanie zarchiwizowane po ukończeniu.",
       "custom": ""
     },
     "weekPattern": {

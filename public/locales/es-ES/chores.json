@@ -402,7 +402,9 @@
     "tagUrl": "URL de la etiqueta",
     "titleCreate": "Crear nueva tarea",
     "titleEdit": "Editar tarea",
-    "writeNfcTag": "Escribir etiqueta NFC"
+    "writeNfcTag": "Escribir etiqueta NFC",
+    "alwaysDueHint": "Esta tarea no tiene fecha de vencimiento y está siempre disponible para completarse",
+    "notifyForTaskUnavailable": "Las notificaciones no están disponibles para tareas basadas en disparadores o siempre disponibles"
   },
   "choreView": {
     "addNote": "Añadir nota",
@@ -909,7 +911,8 @@
     "every": "Cada",
     "freqMessage": {
       "adaptive": "Esta tarea se programará dinámicamente según las fechas de finalización anteriores.",
-      "custom": "Esta tarea se programará según una frecuencia personalizada."
+      "custom": "Esta tarea se programará según una frecuencia personalizada.",
+      "always": "Esta tarea no tiene fecha de vencimiento y permanece disponible para completarse en cualquier momento. No se archivará al completarse."
     },
     "freqType": {
       "adaptive": "Adaptativa",
@@ -917,7 +920,8 @@
       "daily": "Diariamente",
       "monthly": "Mensualmente",
       "weekly": "Semanalmente",
-      "yearly": "Anualmente"
+      "yearly": "Anualmente",
+      "always": "Siempre"
     },
     "howOften": "¿Con qué frecuencia debe repetirse?",
     "months": {
@@ -970,8 +974,8 @@
       "2": "2.º",
       "3": "3.º",
       "4": "4.º",
-      "last": "último",
-      "5": "5.º"
+      "5": "5.º",
+      "last": "último"
     },
     "picker": {
       "apply": "Aplicar",

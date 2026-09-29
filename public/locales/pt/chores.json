@@ -706,6 +706,7 @@
     "startDate": "",
     "dueDate": "",
     "triggerDueHint": "",
+    "alwaysDueHint": "Esta tarefa não tem data de vencimento e está sempre disponível para ser concluída",
     "giveDueDate": "",
     "giveDueDateHelp": "",
     "startWhen": "",
@@ -731,6 +732,7 @@
     "notificationsPlanWarning": "",
     "notifyForTask": "",
     "notifyForTaskHelp": "",
+    "notifyForTaskUnavailable": "As notificações não estão disponíveis para tarefas baseadas em gatilho ou sempre disponíveis",
     "notificationSchedule": "",
     "whoToNotify": "",
     "allAssignees": "",
@@ -804,10 +806,12 @@
       "monthly": "",
       "yearly": "",
       "adaptive": "",
+      "always": "Sempre",
       "custom": ""
     },
     "freqMessage": {
       "adaptive": "",
+      "always": "Esta tarefa não tem data de vencimento e permanece disponível para conclusão a qualquer momento. Não será arquivada ao ser concluída.",
       "custom": ""
     },
     "weekPattern": {
