@@ -27,6 +27,7 @@ const FREQUENCY_TYPES = [
   'monthly',
   'yearly',
   'adaptive',
+  'always',
   'custom',
 ]
 const REPEAT_ON_TYPE = ['interval', 'days_of_the_week', 'day_of_the_month']
