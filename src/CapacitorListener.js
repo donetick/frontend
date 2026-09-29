@@ -118,6 +118,21 @@ const handleUrlOpen = (url, isColdStart = false) => {
     )
   } else if (url.startsWith('donetick://chores/')) {
     handleNFCChoreDeepLink(url, isColdStart)
+  } else if (
+    parsedUrl.protocol === 'donetick:' &&
+    parsedUrl.host === 'search'
+  ) {
+    routerNavigate('/search')
+  } else if (
+    parsedUrl.protocol === 'donetick:' &&
+    parsedUrl.host === 'projects'
+  ) {
+    routerNavigate('/projects')
+  } else if (
+    parsedUrl.protocol === 'donetick:' &&
+    parsedUrl.host === 'overview'
+  ) {
+    routerNavigate('/home')
   } else if (url.startsWith('donetick://auth/')) {
     handleOAuthDeepLink(url)
   }

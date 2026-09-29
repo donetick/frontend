@@ -854,6 +854,82 @@ struct WidgetAppearanceIntent: WidgetConfigurationIntent {
     var theme: WidgetThemeOption
 }
 
+enum QuickActionOption: String, AppEnum {
+    case text
+    case voice
+    case photo
+    case search
+    case projects
+    case overview
+
+    static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "Action")
+
+    static var caseDisplayRepresentations: [QuickActionOption: DisplayRepresentation] = [
+        .text: "Text capture",
+        .voice: "Voice capture",
+        .photo: "Photo capture",
+        .search: "Search",
+        .projects: "Projects",
+        .overview: "Overview",
+    ]
+
+    var systemImage: String {
+        switch self {
+        case .text: return "plus"
+        case .voice: return "mic.fill"
+        case .photo: return "doc.viewfinder"
+        case .search: return "magnifyingglass"
+        case .projects: return "folder.fill"
+        case .overview: return "square.grid.2x2.fill"
+        }
+    }
+
+    var title: String {
+        switch self {
+        case .text: return "Text capture"
+        case .voice: return "Voice capture"
+        case .photo: return "Photo capture"
+        case .search: return "Search"
+        case .projects: return "Projects"
+        case .overview: return "Overview"
+        }
+    }
+
+    var url: URL? {
+        switch self {
+        case .text: return URL(string: "donetick://chores/add")
+        case .voice: return URL(string: "donetick://chores/add?mode=voice")
+        case .photo: return URL(string: "donetick://chores/add?mode=scan")
+        case .search: return URL(string: "donetick://search")
+        case .projects: return URL(string: "donetick://projects")
+        case .overview: return URL(string: "donetick://overview")
+        }
+    }
+}
+
+struct QuickActionsIntent: WidgetConfigurationIntent {
+    static var title: LocalizedStringResource = "Quick Actions"
+    static var description = IntentDescription("Choose the four shortcuts in this widget.")
+
+    @Parameter(title: "Top left", default: .text)
+    var topLeft: QuickActionOption
+
+    @Parameter(title: "Top right", default: .voice)
+    var topRight: QuickActionOption
+
+    @Parameter(title: "Bottom left", default: .photo)
+    var bottomLeft: QuickActionOption
+
+    @Parameter(title: "Bottom right", default: .search)
+    var bottomRight: QuickActionOption
+
+    @Parameter(title: "Background", default: .appSetting)
+    var opacity: WidgetOpacityOption
+
+    @Parameter(title: "Colors", default: .appSetting)
+    var theme: WidgetThemeOption
+}
+
 private let todayWidgetKind = "DonetickTodayWidget"
 private let weekWidgetKind = "DonetickWeekWidget"
 private let peopleWidgetKind = "DonetickPeopleWidget"
@@ -2317,6 +2393,104 @@ struct QuickCaptureWidget: Widget {
     }
 }
 
+// MARK: - Quick Actions widget
+
+struct QuickActionsEntry: TimelineEntry {
+    let date: Date
+    let actions: [QuickActionOption]
+    var opacity: Double = 1
+    var colorScheme: ColorScheme? = nil
+}
+
+struct QuickActionsProvider: AppIntentTimelineProvider {
+    func placeholder(in context: Context) -> QuickActionsEntry {
+        QuickActionsEntry(date: Date(), actions: [.text, .voice, .photo, .search])
+    }
+
+    func snapshot(for configuration: QuickActionsIntent,
+                  in context: Context) async -> QuickActionsEntry {
+        entry(configuration)
+    }
+
+    func timeline(for configuration: QuickActionsIntent,
+                  in context: Context) async -> Timeline<QuickActionsEntry> {
+        Timeline(entries: [entry(configuration)], policy: .never)
+    }
+
+    private func entry(_ configuration: QuickActionsIntent) -> QuickActionsEntry {
+        QuickActionsEntry(
+            date: Date(),
+            actions: [configuration.topLeft, configuration.topRight,
+                      configuration.bottomLeft, configuration.bottomRight],
+            opacity: configuration.opacity.resolved,
+            colorScheme: configuration.theme.resolved
+        )
+    }
+}
+
+private struct QuickActionTile: View {
+    let action: QuickActionOption
+
+    var body: some View {
+        let tile = Image(systemName: action.systemImage)
+            .font(.system(size: 25, weight: .medium))
+            .foregroundColor(Palette.accent)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Circle().fill(Palette.accentSoft))
+
+        if let url = action.url {
+            Link(destination: url) { tile }
+                .accessibilityLabel(action.title)
+        } else {
+            tile
+        }
+    }
+}
+
+struct QuickActionsWidgetView: View {
+    let entry: QuickActionsEntry
+
+    var body: some View {
+        GeometryReader { geometry in
+            let spacing: CGFloat = 8
+            let diameter = max(0, min(
+                (geometry.size.width - spacing) / 2,
+                (geometry.size.height - spacing) / 2
+            ))
+
+            VStack(spacing: spacing) {
+                ForEach(0..<2, id: \.self) { row in
+                    HStack(spacing: spacing) {
+                        ForEach(0..<2, id: \.self) { column in
+                            QuickActionTile(action: entry.actions[row * 2 + column])
+                                .frame(width: diameter, height: diameter)
+                        }
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+        }
+        .padding(2)
+    }
+}
+
+struct QuickActionsWidget: Widget {
+    var body: some WidgetConfiguration {
+        AppIntentConfiguration(
+            kind: "DonetickQuickActionsWidget",
+            intent: QuickActionsIntent.self,
+            provider: QuickActionsProvider()
+        ) { entry in
+            QuickActionsWidgetView(entry: entry)
+                .widgetShell(opacity: entry.opacity)
+                .widgetTheme(entry.colorScheme)
+        }
+        .configurationDisplayName("Quick Actions")
+        .description("Four customizable shortcuts for capturing and navigating Donetick.")
+        .supportedFamilies([.systemSmall])
+    }
+}
+
 // MARK: - Bundle
 
 @main
@@ -2328,5 +2502,6 @@ struct DonetickWidgetBundle: WidgetBundle {
         ProjectWidget()
         FilterWidget()
         QuickCaptureWidget()
+        QuickActionsWidget()
     }
 }

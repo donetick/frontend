@@ -10,6 +10,7 @@ import android.widget.CheckBox;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -46,6 +47,18 @@ public class WidgetConfigActivity extends Activity {
         includeOthers.setChecked(WidgetStore.includeOthers(this, appWidgetId));
         findViewById(R.id.config_include_others_group).setVisibility(
                 hasAssigneeOption() ? View.VISIBLE : View.GONE);
+        View quickActionsGroup = findViewById(R.id.config_quick_actions_group);
+        boolean isQuickActions = isQuickActionsWidget();
+        quickActionsGroup.setVisibility(isQuickActions ? View.VISIBLE : View.GONE);
+        Spinner[] quickActions = {
+                findViewById(R.id.config_action_0), findViewById(R.id.config_action_1),
+                findViewById(R.id.config_action_2), findViewById(R.id.config_action_3)
+        };
+        if (isQuickActions) {
+            for (int slot = 0; slot < quickActions.length; slot++) {
+                quickActions[slot].setSelection(actionIndex(WidgetStore.quickAction(this, appWidgetId, slot)));
+            }
+        }
 
         int globalOpacity = WidgetStore.globalOpacity(this);
         int override = WidgetStore.opacityOverride(this, appWidgetId);
@@ -88,6 +101,12 @@ public class WidgetConfigActivity extends Activity {
                     useDefault.isChecked() ? WidgetStore.OPACITY_INHERIT : opacity.getProgress());
             WidgetStore.setThemeOverride(this, appWidgetId,
                     themeModeFor(themeGroup.getCheckedRadioButtonId()));
+            if (isQuickActions) {
+                for (int slot = 0; slot < quickActions.length; slot++) {
+                    WidgetStore.setQuickAction(this, appWidgetId, slot,
+                            actionValue(quickActions[slot].getSelectedItemPosition()));
+                }
+            }
             WidgetUi.refreshAll(this);
             setResult(RESULT_OK, resultIntent());
             finish();
@@ -130,6 +149,24 @@ public class WidgetConfigActivity extends Activity {
         String provider = info.provider.getClassName();
         return provider.equals(TodayWidgetProvider.class.getName())
                 || provider.equals(WeekWidgetProvider.class.getName());
+    }
+
+    private boolean isQuickActionsWidget() {
+        AppWidgetProviderInfo info =
+                AppWidgetManager.getInstance(this).getAppWidgetInfo(appWidgetId);
+        return info != null && info.provider != null
+                && info.provider.getClassName().equals(QuickActionsWidgetProvider.class.getName());
+    }
+
+    private static int actionIndex(String action) {
+        String[] values = { "type", "voice", "scan", "search", "projects", "overview" };
+        for (int i = 0; i < values.length; i++) if (values[i].equals(action)) return i;
+        return 0;
+    }
+
+    private static String actionValue(int index) {
+        String[] values = { "type", "voice", "scan", "search", "projects", "overview" };
+        return values[Math.max(0, Math.min(values.length - 1, index))];
     }
 
     private Intent resultIntent() {

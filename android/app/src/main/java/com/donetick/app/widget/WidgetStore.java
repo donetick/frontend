@@ -64,6 +64,7 @@ public final class WidgetStore {
     private static final String KEY_PROJECT_PAGE_PREFIX = "project_page_";
     private static final String KEY_FILTER_INDEX_PREFIX = "filter_index_";
     private static final String KEY_FILTER_PAGE_PREFIX = "filter_page_";
+    private static final String KEY_QUICK_ACTION_PREFIX = "quick_action_";
 
     /** Per-widget opacity sentinel meaning "follow the app-wide setting". */
     public static final int OPACITY_INHERIT = -1;
@@ -279,6 +280,23 @@ public final class WidgetStore {
                 .remove(KEY_PROJECT_PAGE_PREFIX + appWidgetId)
                 .remove(KEY_FILTER_INDEX_PREFIX + appWidgetId)
                 .remove(KEY_FILTER_PAGE_PREFIX + appWidgetId)
+                .remove(KEY_QUICK_ACTION_PREFIX + appWidgetId + "_0")
+                .remove(KEY_QUICK_ACTION_PREFIX + appWidgetId + "_1")
+                .remove(KEY_QUICK_ACTION_PREFIX + appWidgetId + "_2")
+                .remove(KEY_QUICK_ACTION_PREFIX + appWidgetId + "_3")
+                .apply();
+    }
+
+    public static String quickAction(Context context, int appWidgetId, int slot) {
+        String[] defaults = { "type", "voice", "scan", "search" };
+        int safeSlot = Math.max(0, Math.min(defaults.length - 1, slot));
+        return prefs(context).getString(KEY_QUICK_ACTION_PREFIX + appWidgetId + "_" + safeSlot,
+                defaults[safeSlot]);
+    }
+
+    public static void setQuickAction(Context context, int appWidgetId, int slot, String action) {
+        prefs(context).edit()
+                .putString(KEY_QUICK_ACTION_PREFIX + appWidgetId + "_" + slot, action)
                 .apply();
     }
 

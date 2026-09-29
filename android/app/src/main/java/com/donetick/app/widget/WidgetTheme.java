@@ -122,6 +122,11 @@ public final class WidgetTheme {
         return isDark() ? R.drawable.widget_tile_bg_dark : R.drawable.widget_tile_bg_light;
     }
 
+    /** Round counterpart of {@link #tileBackground()}, for the quick-action circles. */
+    public int actionTileBackground() {
+        return isDark() ? R.drawable.widget_action_tile_dark : R.drawable.widget_action_tile_light;
+    }
+
     private boolean isDark() {
         return (context.getResources().getConfiguration().uiMode
                 & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;

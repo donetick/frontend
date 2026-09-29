@@ -47,6 +47,7 @@ public final class WidgetUi {
         ProjectWidgetProvider.refreshAll(context);
         FilterWidgetProvider.refreshAll(context);
         QuickCaptureWidgetProvider.refreshAll(context);
+        QuickActionsWidgetProvider.refreshAll(context);
     }
 
     /**

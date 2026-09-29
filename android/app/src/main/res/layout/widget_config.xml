@@ -46,6 +46,28 @@
                 android:textSize="13sp" />
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/config_quick_actions_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/widget_config_quick_actions"
+                android:textColor="@color/widget_text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <Spinner android:id="@+id/config_action_0" android:layout_width="match_parent" android:layout_height="48dp" android:entries="@array/widget_quick_action_choices" />
+            <Spinner android:id="@+id/config_action_1" android:layout_width="match_parent" android:layout_height="48dp" android:entries="@array/widget_quick_action_choices" />
+            <Spinner android:id="@+id/config_action_2" android:layout_width="match_parent" android:layout_height="48dp" android:entries="@array/widget_quick_action_choices" />
+            <Spinner android:id="@+id/config_action_3" android:layout_width="match_parent" android:layout_height="48dp" android:entries="@array/widget_quick_action_choices" />
+        </LinearLayout>
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

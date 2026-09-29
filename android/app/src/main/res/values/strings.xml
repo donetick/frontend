@@ -38,6 +38,23 @@
     <string name="widget_quick_type">Type</string>
     <string name="widget_quick_scan">Scan</string>
     <string name="widget_quick_voice">Speak</string>
+    <string name="widget_actions_label">Quick Actions</string>
+    <string name="widget_actions_description">Four customizable shortcuts for capturing and navigating Donetick.</string>
+    <string name="widget_action_text">Text capture</string>
+    <string name="widget_action_voice">Voice capture</string>
+    <string name="widget_action_photo">Photo capture</string>
+    <string name="widget_action_search">Search</string>
+    <string name="widget_action_projects">Projects</string>
+    <string name="widget_action_overview">Overview</string>
+    <string name="widget_config_quick_actions">Actions</string>
+    <string-array name="widget_quick_action_choices">
+        <item>@string/widget_action_text</item>
+        <item>@string/widget_action_voice</item>
+        <item>@string/widget_action_photo</item>
+        <item>@string/widget_action_search</item>
+        <item>@string/widget_action_projects</item>
+        <item>@string/widget_action_overview</item>
+    </string-array>
     <string name="widget_config_title">Widget options</string>
     <string name="widget_config_include_others">Show everyone\'s tasks</string>
     <string name="widget_config_include_others_hint">Include tasks assigned to other members of your circle. Their avatar appears next to their tasks.</string>
