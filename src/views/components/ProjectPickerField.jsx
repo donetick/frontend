@@ -1,4 +1,4 @@
-import { FolderOpen } from '@mui/icons-material'
+import { FolderOpen, Lock } from '@mui/icons-material'
 
 import BaseOptionPicker from './BaseOptionPicker'
 
@@ -15,6 +15,7 @@ const ProjectPickerField = ({
       id: project.id,
       name: project.name,
       color: project.color,
+      isPrivate: project.isPrivate,
     })),
   ]
 
@@ -38,6 +39,9 @@ const ProjectPickerField = ({
           }}
         />
       )}
+      renderItemEnd={({ item }) =>
+        item.isPrivate ? <Lock sx={{ fontSize: '14px' }} /> : null
+      }
       getTriggerText={({ isEmpty, selectedItems }) =>
         isEmpty ? 'Project' : selectedItems[0].name
       }

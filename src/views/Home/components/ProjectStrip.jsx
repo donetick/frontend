@@ -1,3 +1,4 @@
+import { Lock } from '@mui/icons-material'
 import { Box, Sheet, Typography } from '@mui/joy'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import PropTypes from 'prop-types'
@@ -120,6 +121,11 @@ const ProjectStrip = ({ projects }) => {
               {project.id === DEFAULT_PROJECT_ID && !project.name
                 ? t('chores:toolbar.defaultProject')
                 : project.name}
+              {project.isPrivate && (
+                <Lock
+                  sx={{ fontSize: 12, ml: 0.5, verticalAlign: 'text-bottom' }}
+                />
+              )}
             </Typography>
             {/* noWrap, because a second line here would make this cell taller
                 than the one beside it and the whole grid row with it. */}

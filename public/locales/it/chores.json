@@ -12,6 +12,8 @@
   "status": "",
   "description": "",
   "choreView": {
+    "notFoundTitle": "Attività non disponibile",
+    "notFoundDescription": "Questa attività potrebbe essere stata eliminata o non è più condivisa con te.",
     "assignment": "",
     "assigned": "",
     "last": "",
@@ -257,6 +259,8 @@
     "failRescheduleTitle": "",
     "failRescheduleMessage": "",
     "failRemoveDueDateTitle": "",
+    "failAssignTitle": "Failed to assign",
+    "failAssignMessage": "Unable to assign task",
     "nudgeSentTitle": "",
     "nudgeFailed": "",
     "failNudgeTitle": "",
@@ -337,7 +341,7 @@
     "noMatchFilters": "",
     "emptyTitle": "",
     "emptyDescription": "",
-    "backToTasks": ""
+    "backToTasks": "Torna alle attività"
   },
   "edit": {
     "deleteConfirm": ""

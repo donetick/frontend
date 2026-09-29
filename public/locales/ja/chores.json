@@ -12,6 +12,8 @@
   "status": "ステータス",
   "description": "説明",
   "choreView": {
+    "notFoundTitle": "タスクが利用できません",
+    "notFoundDescription": "このタスクは削除された可能性があるか、共有が解除されています。",
     "assignment": "担当",
     "assigned": "担当者",
     "last": "前回",
@@ -257,6 +259,8 @@
     "failRescheduleTitle": "",
     "failRescheduleMessage": "",
     "failRemoveDueDateTitle": "",
+    "failAssignTitle": "Failed to assign",
+    "failAssignMessage": "Unable to assign task",
     "nudgeSentTitle": "",
     "nudgeFailed": "",
     "failNudgeTitle": "",
@@ -337,7 +341,7 @@
     "noMatchFilters": "",
     "emptyTitle": "",
     "emptyDescription": "",
-    "backToTasks": ""
+    "backToTasks": "タスクに戻る"
   },
   "edit": {
     "deleteConfirm": ""

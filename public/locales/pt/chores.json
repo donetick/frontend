@@ -12,6 +12,8 @@
   "status": "",
   "description": "Descrição",
   "choreView": {
+    "notFoundTitle": "Tarefa não disponível",
+    "notFoundDescription": "Esta tarefa pode ter sido excluída ou não está mais compartilhada com você.",
     "assignment": "Atribuição",
     "assigned": "Atribuída",
     "last": "Última",
@@ -257,6 +259,8 @@
     "failRescheduleTitle": "",
     "failRescheduleMessage": "",
     "failRemoveDueDateTitle": "",
+    "failAssignTitle": "Failed to assign",
+    "failAssignMessage": "Unable to assign task",
     "nudgeSentTitle": "",
     "nudgeFailed": "",
     "failNudgeTitle": "",
@@ -337,7 +341,7 @@
     "noMatchFilters": "",
     "emptyTitle": "",
     "emptyDescription": "",
-    "backToTasks": ""
+    "backToTasks": "Voltar às tarefas"
   },
   "edit": {
     "deleteConfirm": ""

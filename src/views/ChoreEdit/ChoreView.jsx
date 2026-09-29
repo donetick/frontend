@@ -39,6 +39,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
+import EmptyState from '../../components/common/EmptyState'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { useDescriptionHtml } from '../../hooks/useDescriptionHtml'
@@ -153,8 +154,11 @@ const ChoreView = () => {
     choreId: chore?.id,
   })
 
-  const { data: choreData, isLoading: isChoreLoading } =
-    useChoreDetails(choreId)
+  const {
+    data: choreData,
+    isError: isChoreError,
+    isLoading: isChoreLoading,
+  } = useChoreDetails(choreId)
   const { data: choreHistoryData } = useChoreHistory(choreId)
 
   const { data: pendingCmds } = usePendingCommands(choreId)
@@ -800,6 +804,20 @@ const ChoreView = () => {
   if (isChoreLoading || isCircleMembersLoading) {
     // while loading the chore or circle members, return a loading state
     return <LoadingComponent />
+  }
+  if (isChoreError) {
+    return (
+      <Container maxWidth='sm'>
+        <EmptyState
+          variant='error'
+          fullHeight
+          icon={<Checklist />}
+          title={t('choreView.notFoundTitle')}
+          description={t('choreView.notFoundDescription')}
+          primaryAction={{ label: t('archived.backToTasks'), to: '/chores' }}
+        />
+      </Container>
+    )
   }
   return (
     <Container

@@ -12,6 +12,8 @@
   "status": "Stav",
   "description": "Popis",
   "choreView": {
+    "notFoundTitle": "Úkol není k dispozici",
+    "notFoundDescription": "Tento úkol byl možná smazán nebo už s vámi není sdílen.",
     "assignment": "Přiřazení",
     "assigned": "Přiřazeno",
     "last": "Naposledy",
@@ -257,6 +259,8 @@
     "failRescheduleTitle": "Přeplánování se nezdařilo",
     "failRescheduleMessage": "Termín nelze aktualizovat",
     "failRemoveDueDateTitle": "Termín se nepodařilo odebrat",
+    "failAssignTitle": "Failed to assign",
+    "failAssignMessage": "Unable to assign task",
     "nudgeSentTitle": "Připomenutí odesláno!",
     "nudgeFailed": "Připomenutí se nepodařilo odeslat",
     "failNudgeTitle": "Připomenutí se nepodařilo odeslat",

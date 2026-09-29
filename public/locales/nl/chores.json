@@ -12,6 +12,8 @@
   "status": "",
   "description": "Beschrijving",
   "choreView": {
+    "notFoundTitle": "Taak niet beschikbaar",
+    "notFoundDescription": "Deze taak is mogelijk verwijderd of wordt niet meer met jou gedeeld.",
     "assignment": "Toewijzing",
     "assigned": "Toegewezen",
     "last": "Laatste",
@@ -257,6 +259,8 @@
     "failRescheduleTitle": "",
     "failRescheduleMessage": "",
     "failRemoveDueDateTitle": "",
+    "failAssignTitle": "Failed to assign",
+    "failAssignMessage": "Unable to assign task",
     "nudgeSentTitle": "",
     "nudgeFailed": "",
     "failNudgeTitle": "",
@@ -337,7 +341,7 @@
     "noMatchFilters": "",
     "emptyTitle": "",
     "emptyDescription": "",
-    "backToTasks": ""
+    "backToTasks": "Terug naar taken"
   },
   "edit": {
     "deleteConfirm": ""

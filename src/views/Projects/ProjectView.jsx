@@ -9,6 +9,7 @@ import {
 import {
   Add,
   Close,
+  Lock,
   MoreVert,
   Search,
   SearchOff,
@@ -162,6 +163,23 @@ const ProjectCardContent = ({
               }}
             >
               {t('defaultChip')}
+            </Chip>
+          )}
+          {project.isPrivate && (
+            <Chip
+              size='sm'
+              variant='soft'
+              color='neutral'
+              sx={{
+                fontSize: 9,
+                height: 16,
+                px: 0.5,
+                ml: 1,
+                fontWeight: 'md',
+              }}
+              startDecorator={<Lock />}
+            >
+              Private
             </Chip>
           )}
         </Typography>
