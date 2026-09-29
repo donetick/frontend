@@ -625,7 +625,7 @@ const ChoreEdit = () => {
         const endOfDayTime = '23:59'
 
         setDueDateOnly(dateOnly)
-        setDueDate(dueDateMoment.format('YYYY-MM-DDTHH:mm:00'))
+        setDueDate(dueDateMoment.format('YYYY-MM-DDTHH:mm:ss'))
 
         // Check if it's a custom time (not end of day)
         if (timeOnly !== endOfDayTime) {
