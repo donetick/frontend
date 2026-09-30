@@ -3,6 +3,7 @@ import {
   Api,
   CalendarMonth,
   Circle,
+  CloudQueue,
   Code,
   FamilyRestroom,
   Language,
@@ -27,6 +28,7 @@ export const SETTINGS_SECTIONS = [
   { id: 'notifications', icon: Notifications },
   { id: 'mfa', icon: Security, parentOnly: true },
   { id: 'apitokens', icon: Api, parentOnly: true },
+  { id: 'bridge', icon: CloudQueue, parentOnly: true },
   { id: 'calendar', icon: CalendarMonth },
   { id: 'storage', icon: Storage },
   // Default landing view, plus whichever chrome this device actually has:

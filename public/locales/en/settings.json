@@ -58,6 +58,10 @@
         "title": "API Tokens",
         "description": "Generate and manage access tokens for third-party integrations and API access."
       },
+      "bridge": {
+        "title": "Donetick Bridge",
+        "description": "Connect to Donetick Bridge to deliver push notifications from this self-hosted instance."
+      },
       "calendar": {
         "title": "Calendar Sync",
         "description": "Subscribe to your tasks from Apple Calendar, Google Calendar, Outlook, or another calendar app."
@@ -425,6 +429,55 @@
     "errorTitle": "Calendar sync error",
     "actionFailed": "Could not update your calendar subscription. Please try again.",
     "loadFailed": "Could not load your calendar subscription. This server may not support calendar sync yet."
+  },
+  "bridge": {
+    "title": "Donetick Bridge",
+    "description": "Donetick Bridge relays push notifications to the official Donetick mobile app through Firebase, so this self-hosted instance doesn't need its own Firebase project.",
+    "privacyNotice": "Notification content (title, body, and data) is relayed through Bridge only while a request is being processed and is never stored or logged. Bridge keeps only account, device, and delivery-count information.",
+    "adminOnly": "Only a Donetick administrator can configure Bridge.",
+    "notConnected": "Not connected",
+    "unnamedInstance": "Connected instance",
+    "connectedAs": "Bridge account: {{email}}",
+    "planFree": "Free plan",
+    "planPlus": "Plus plan",
+    "emailUnverified": "Email not verified",
+    "connectIntro": "Enter the instance ID and instance token shown once when you created or selected this instance in your Bridge account.",
+    "connect": "Connect",
+    "connectedTitle": "Connected to Bridge",
+    "rotateCredential": "Rotate credential",
+    "rotateInstructions": "Generate a new instance token from your Bridge account, then paste it below to rotate. The old token stops working immediately.",
+    "rotatedTitle": "Credential rotated",
+    "disconnect": "Disconnect",
+    "disconnectTitle": "Disconnect Bridge",
+    "disconnectMessage": "This instance will stop sending push notifications through Bridge. Local device tokens are kept, and you can reconnect at any time. This does not delete your Bridge account or usage history.",
+    "disconnectedTitle": "Disconnected",
+    "refresh": "Refresh status",
+    "upgrade": "Upgrade to Plus",
+    "manageBilling": "Manage billing",
+    "upgradeBillingNote": "Upgrade and billing are managed in your Bridge account.",
+    "connectForm": {
+      "baseUrl": "Bridge URL",
+      "instanceId": "Instance ID",
+      "instanceIdPlaceholder": "Instance ID from your Bridge account",
+      "instanceToken": "Instance token",
+      "instanceTokenPlaceholder": "Shown once when the instance was created/rotated",
+      "instanceTokenHint": "This token is sent to this server only and is never shown again after you leave this page.",
+      "required": "Bridge URL, instance ID, and instance token are all required."
+    },
+    "usage": {
+      "notifications": "Notifications this period: {{used}} / {{limit}}",
+      "devices": "Active devices: {{used}} / {{limit}}"
+    },
+    "errors": {
+      "title": "Bridge error",
+      "generic": "Something went wrong talking to Bridge. Please try again.",
+      "revokedToken": "This instance's credential was rejected. It may have been rotated or revoked from your Bridge account -- reconnect with a current instance token.",
+      "serviceUnavailable": "Bridge is temporarily unavailable. Notifications will resume once it's reachable again -- no action is needed.",
+      "rateLimited": "Too many requests right now. Please wait a moment and try again.",
+      "quotaExceeded": "This Bridge account's monthly notification quota has been reached. Upgrade to Plus or wait for the next period.",
+      "deviceLimitReached": "This Bridge account's active device limit has been reached. Remove an unused device or upgrade to Plus.",
+      "validationError": "Check the values entered and try again."
+    }
   },
   "storage": {
     "title": "Storage Settings",
