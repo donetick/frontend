@@ -194,7 +194,7 @@ const ScanPanel = ({
                   level='body-sm'
                   sx={{ color: 'white', opacity: 0.6 }}
                 >
-                  Tap &quot;Scan Document&quot; to open the scanner
+                  {t('photoTask.tapToScanHint')}
                 </Typography>
               </Box>
             )}
@@ -223,7 +223,7 @@ const ScanPanel = ({
                   level='body-sm'
                   sx={{ color: 'white', opacity: 0.6 }}
                 >
-                  Camera not available — use Upload instead
+                  {t('photoTask.cameraUnavailableUseUpload')}
                 </Typography>
               </Box>
             )}

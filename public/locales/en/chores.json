@@ -1,5 +1,7 @@
 {
   "title": "Chores",
+  "tasksForDate": "Tasks for {{date}}",
+  "createSuggestion": "Create \"{{value}}\"",
   "myChores": "My Chores",
   "allChores": "All Chores",
   "addChore": "Add Chore",
@@ -134,7 +136,11 @@
       "assignee": "Assignee"
     },
     "display": "Display",
-    "displayOptions": "Display options"
+    "displayOptions": "Display options",
+    "moreSaveOptions": "More save options",
+    "showCount": "Show {{count}}",
+    "done": "Done",
+    "savedFilters": "Saved Filters"
   },
   "sort": {
     "assignedToMe": "Assigned to me",
@@ -613,7 +619,15 @@
     "keepAsAttachment": "Keep photo as attachment",
     "altCaptured": "Captured document",
     "altProcessing": "Processing",
-    "taskIdentified": "Task identified"
+    "taskIdentified": "Task identified",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
+    "tapToScanHint": "Tap \"Scan Document\" to open the scanner",
+    "readingTextProgress": "Reading text from image… {{progress}}%",
+    "dueDate": "Due: {{date}}",
+    "hideRawText": "Hide Raw Text",
+    "showRawText": "Show Raw Text",
+    "cameraUnavailableUseUpload": "Camera not available — use Upload instead"
   },
   "descriptionPlaceholder": "Enter description...",
   "notificationTemplate": {
@@ -764,6 +778,8 @@
     "create": "Create"
   },
   "addTask": {
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:",
     "title": "Create new task",
     "defaultProject": "Default Project",
     "anyone": "Anyone",

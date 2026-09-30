@@ -225,6 +225,7 @@
     "invitePeople": "",
     "addMembers": "",
     "sidePanelSettings": "",
+    "sidePanelSettingsDescription": "Personalizar layout e cartões",
     "planFree": "",
     "planPlus": "",
     "planPlusExpiring": "",
@@ -341,11 +342,26 @@
   "noAttachmentsTitle": "",
   "noAttachmentsDescription": "",
   "kbSize": "",
+  "logoAlt": "Logo",
+  "notification": {
+    "error": "Erro",
+    "success": "Sucesso",
+    "undoneSuccessfully": "Desfeito com sucesso",
+    "warning": "Aviso",
+    "information": "Informação",
+    "title": "Notificação",
+    "unknown": "Notificação desconhecida",
+    "undo": "Desfazer",
+    "dismiss": "Dispensar"
+  },
   "onboarding": {
     "sources": {
       "speak": "",
       "snap": "",
       "type": ""
+    },
+    "voiceWave": {
+      "listening": "Ouvindo…"
     },
     "capture": {
       "voiceCaption": "",

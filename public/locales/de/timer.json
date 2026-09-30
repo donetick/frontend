@@ -25,6 +25,17 @@
   "activeWork": "Aktive Arbeitszeit",
   "breakTime": "Pausenzeit",
   "workSessions": "Arbeitssitzungen",
+  "timeline": {
+    "started": "Gestartet: {{time}}",
+    "ended": "Beendet: {{time}}",
+    "now": "Jetzt: {{time}}",
+    "active": "Aktiv: {{percent}} %",
+    "emptyState": "Keine Aktivitätszeitleiste verfügbar. Beginne zu arbeiten, um dein Aktivitätsmuster zu sehen.",
+    "workSessionsCount": "Arbeitssitzungen ({{count}})",
+    "sessionNumber": "Sitzung Nr. {{number}}",
+    "ongoing": "→ laufend",
+    "durationAutoCalculated": "Dauer (automatisch berechnet)"
+  },
   "totalTime": "Gesamtzeit",
   "distribution": "Verteilung von Arbeits- und Pausenzeit",
   "noActiveTime": "Noch keine aktive Zeit",

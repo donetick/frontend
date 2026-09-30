@@ -708,7 +708,7 @@ const ChoreToolbar = ({
         title={
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Tune sx={{ fontSize: 20 }} />
-            Filters
+            {t('toolbar.filters')}
             {hasAnyActive && (
               <Chip size='sm' variant='solid' color='primary' sx={{ ml: 0.5 }}>
                 {totalActiveCount}
@@ -788,11 +788,13 @@ const ChoreToolbar = ({
                       }}
                       sx={{ minWidth: 140 }}
                     >
-                      {resultCount != null ? `Show ${resultCount}` : 'Done'}
+                      {resultCount != null
+                        ? t('toolbar.showCount', { count: resultCount })
+                        : t('toolbar.done')}
                     </Button>
                     <MenuButton
                       slots={{ root: IconButton }}
-                      aria-label='More save options'
+                      aria-label={t('toolbar.moreSaveOptions')}
                     >
                       <ArrowDropDown />
                     </MenuButton>
@@ -854,7 +856,7 @@ const ChoreToolbar = ({
             <>
               <Divider sx={{ my: 2.5 }} />
               <Typography level='title-sm' fontWeight={600} sx={{ mb: 1.5 }}>
-                Saved Filters
+                {t('toolbar.savedFilters')}
               </Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                 {savedFilters.map(filter => {
@@ -905,7 +907,7 @@ const ChoreToolbar = ({
         title={
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <DisplaySettings sx={{ fontSize: 20 }} />
-            Display
+            {t('toolbar.display')}
           </Box>
         }
         footer={

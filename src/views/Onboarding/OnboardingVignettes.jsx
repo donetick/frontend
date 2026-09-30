@@ -385,7 +385,9 @@ const CaptureMorph = ({ after, before, delay = 0 }) => (
 const WAVE_BARS = [10, 18, 24, 14, 20, 11, 16]
 
 /** The "before": a live waveform standing in for on-device speech capture. */
-const VoiceWave = ({ delay = 0 }) => (
+const VoiceWave = ({ delay = 0 }) => {
+  const { t } = useTranslation('common')
+  return (
   <Box
     sx={{
       ...cardSx,
@@ -432,10 +434,11 @@ const VoiceWave = ({ delay = 0 }) => (
       ))}
     </Box>
     <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-      Listening…
+      {t('onboarding.voiceWave.listening')}
     </Typography>
   </Box>
-)
+  )
+}
 
 const CORNER_MARKS = [
   { top: 6, left: 6, borderWidth: '2px 0 0 2px' },

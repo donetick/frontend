@@ -225,6 +225,7 @@
     "invitePeople": "",
     "addMembers": "",
     "sidePanelSettings": "",
+    "sidePanelSettingsDescription": "自定义布局和卡片",
     "planFree": "",
     "planPlus": "",
     "planPlusExpiring": "",
@@ -341,11 +342,26 @@
   "noAttachmentsTitle": "",
   "noAttachmentsDescription": "",
   "kbSize": "",
+  "logoAlt": "徽标",
+  "notification": {
+    "error": "错误",
+    "success": "成功",
+    "undoneSuccessfully": "已成功撤销",
+    "warning": "警告",
+    "information": "信息",
+    "title": "通知",
+    "unknown": "未知通知",
+    "undo": "撤销",
+    "dismiss": "关闭"
+  },
   "onboarding": {
     "sources": {
       "speak": "",
       "snap": "",
       "type": ""
+    },
+    "voiceWave": {
+      "listening": "正在聆听…"
     },
     "capture": {
       "voiceCaption": "",

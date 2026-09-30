@@ -225,6 +225,7 @@
     "invitePeople": "Пригласить людей",
     "addMembers": "Добавить участников в группу",
     "sidePanelSettings": "Настройки боковой панели",
+    "sidePanelSettingsDescription": "Настроить макет и карточки",
     "planFree": "Бесплатный",
     "planPlus": "Плюс",
     "planPlusExpiring": "Плюс (скоро истекает)",
@@ -341,11 +342,26 @@
   "noAttachmentsTitle": "",
   "noAttachmentsDescription": "",
   "kbSize": "",
+  "logoAlt": "Логотип",
+  "notification": {
+    "error": "Ошибка",
+    "success": "Успешно",
+    "undoneSuccessfully": "Успешно отменено",
+    "warning": "Предупреждение",
+    "information": "Информация",
+    "title": "Уведомление",
+    "unknown": "Неизвестное уведомление",
+    "undo": "Отменить",
+    "dismiss": "Закрыть"
+  },
   "onboarding": {
     "sources": {
       "speak": "Голос",
       "snap": "Фото",
       "type": "Текст"
+    },
+    "voiceWave": {
+      "listening": "Слушаю…"
     },
     "capture": {
       "voiceCaption": "Даты, метки и очки — из ваших слов",

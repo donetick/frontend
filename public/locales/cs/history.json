@@ -46,7 +46,9 @@
     "pointsEarned": "Získané body",
     "points_one": "{{count}} bod",
     "points_other": "{{count}} bodů",
-    "note": "Poznámka"
+    "note": "Poznámka",
+    "reason": "Důvod",
+    "notes": "Poznámky"
   },
   "charts": {
     "noData": "Nejsou k dispozici žádná data",

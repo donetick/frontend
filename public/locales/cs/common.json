@@ -225,6 +225,7 @@
     "invitePeople": "Pozvat lidi",
     "addMembers": "Přidat členy do kruhu",
     "sidePanelSettings": "Nastavení postranního panelu",
+    "sidePanelSettingsDescription": "Přizpůsobit rozložení a karty",
     "planFree": "Zdarma",
     "planPlus": "",
     "planPlusExpiring": "Plus (brzy vyprší)",
@@ -341,11 +342,26 @@
   "noAttachmentsTitle": "Žádné přílohy",
   "noAttachmentsDescription": "Fotky a soubory přidané k tomuto úkolu se zobrazí zde.",
   "kbSize": "{{size}} kB",
+  "logoAlt": "Logo",
+  "notification": {
+    "error": "Chyba",
+    "success": "Úspěch",
+    "undoneSuccessfully": "Úspěšně vráceno zpět",
+    "warning": "Upozornění",
+    "information": "Informace",
+    "title": "Oznámení",
+    "unknown": "Neznámé oznámení",
+    "undo": "Zpět",
+    "dismiss": "Zavřít"
+  },
   "onboarding": {
     "sources": {
       "speak": "Řekněte",
       "snap": "Vyfoťte",
       "type": "Napište"
+    },
+    "voiceWave": {
+      "listening": "Poslouchám…"
     },
     "capture": {
       "voiceCaption": "Data, štítky a body z vašich slov",

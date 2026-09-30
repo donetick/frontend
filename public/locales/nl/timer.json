@@ -25,6 +25,17 @@
   "activeWork": "",
   "breakTime": "",
   "workSessions": "",
+  "timeline": {
+    "started": "Gestart: {{time}}",
+    "ended": "Beëindigd: {{time}}",
+    "now": "Nu: {{time}}",
+    "active": "Actief: {{percent}}%",
+    "emptyState": "Geen activiteitentijdlijn beschikbaar. Begin met werken om je activiteitspatroon te zien.",
+    "workSessionsCount": "Werksessies ({{count}})",
+    "sessionNumber": "Sessie #{{number}}",
+    "ongoing": "→ actief",
+    "durationAutoCalculated": "Duur (automatisch berekend)"
+  },
   "totalTime": "",
   "distribution": "",
   "noActiveTime": "",

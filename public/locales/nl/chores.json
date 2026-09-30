@@ -1,5 +1,7 @@
 {
   "title": "Taken",
+  "tasksForDate": "Taken voor {{date}}",
+  "createSuggestion": "\"{{value}}\" maken",
   "myChores": "Mijn Taken",
   "allChores": "Alle Taken",
   "addChore": "Taak Toevoegen",
@@ -134,7 +136,11 @@
       "assignee": ""
     },
     "display": "",
-    "displayOptions": ""
+    "displayOptions": "",
+    "moreSaveOptions": "Meer opslagopties",
+    "showCount": "{{count}} weergeven",
+    "done": "Klaar",
+    "savedFilters": "Opgeslagen filters"
   },
   "sort": {
     "assignedToMe": "",
@@ -257,6 +263,8 @@
     "failRescheduleTitle": "",
     "failRescheduleMessage": "",
     "failRemoveDueDateTitle": "",
+    "failAssignTitle": "Failed to assign",
+    "failAssignMessage": "Unable to assign task",
     "nudgeSentTitle": "",
     "nudgeFailed": "",
     "failNudgeTitle": "",
@@ -611,7 +619,15 @@
     "keepAsAttachment": "",
     "altCaptured": "",
     "altProcessing": "",
-    "taskIdentified": ""
+    "taskIdentified": "",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
+    "tapToScanHint": "Tik op \"Document scannen\" om de scanner te openen",
+    "readingTextProgress": "Tekst lezen uit afbeelding… {{progress}}%",
+    "dueDate": "Vervalt: {{date}}",
+    "hideRawText": "Ruwe tekst verbergen",
+    "showRawText": "Ruwe tekst weergeven",
+    "cameraUnavailableUseUpload": "Camera niet beschikbaar — gebruik in plaats daarvan Uploaden"
   },
   "descriptionPlaceholder": "",
   "notificationTemplate": {
@@ -762,6 +778,8 @@
     "create": ""
   },
   "addTask": {
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:",
     "title": "",
     "defaultProject": "",
     "anyone": "",

@@ -25,6 +25,17 @@
   "activeWork": "Trabajo Activo",
   "breakTime": "Tiempo de Descanso",
   "workSessions": "Sesiones de Trabajo",
+  "timeline": {
+    "started": "Iniciado: {{time}}",
+    "ended": "Finalizado: {{time}}",
+    "now": "Ahora: {{time}}",
+    "active": "Activo: {{percent}}%",
+    "emptyState": "No hay línea de tiempo de actividad disponible. Empieza a trabajar para ver tu patrón de actividad.",
+    "workSessionsCount": "Sesiones de trabajo ({{count}})",
+    "sessionNumber": "Sesión n.º {{number}}",
+    "ongoing": "→ en curso",
+    "durationAutoCalculated": "Duración (calculada automáticamente)"
+  },
   "totalTime": "Tiempo Total",
   "distribution": "Distribución Trabajo vs Descanso",
   "noActiveTime": "Aún no hay tiempo activo",

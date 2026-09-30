@@ -1,5 +1,7 @@
 {
   "title": "",
+  "tasksForDate": "משימות ליום {{date}}",
+  "createSuggestion": "צור \"{{value}}\"",
   "myChores": "",
   "allChores": "",
   "addChore": "",
@@ -134,7 +136,11 @@
       "assignee": ""
     },
     "display": "",
-    "displayOptions": ""
+    "displayOptions": "",
+    "moreSaveOptions": "אפשרויות שמירה נוספות",
+    "showCount": "הצג {{count}}",
+    "done": "סיום",
+    "savedFilters": "מסננים שמורים"
   },
   "sort": {
     "assignedToMe": "",
@@ -257,6 +263,8 @@
     "failRescheduleTitle": "",
     "failRescheduleMessage": "",
     "failRemoveDueDateTitle": "",
+    "failAssignTitle": "Failed to assign",
+    "failAssignMessage": "Unable to assign task",
     "nudgeSentTitle": "",
     "nudgeFailed": "",
     "failNudgeTitle": "",
@@ -611,7 +619,15 @@
     "keepAsAttachment": "",
     "altCaptured": "",
     "altProcessing": "",
-    "taskIdentified": ""
+    "taskIdentified": "",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
+    "tapToScanHint": "הקש על \"סרוק מסמך\" כדי לפתוח את הסורק",
+    "readingTextProgress": "קורא טקסט מהתמונה… {{progress}}%",
+    "dueDate": "תאריך יעד: {{date}}",
+    "hideRawText": "הסתר טקסט גולמי",
+    "showRawText": "הצג טקסט גולמי",
+    "cameraUnavailableUseUpload": "המצלמה אינה זמינה — השתמש בהעלאה במקום"
   },
   "descriptionPlaceholder": "",
   "notificationTemplate": {
@@ -762,6 +778,8 @@
     "create": ""
   },
   "addTask": {
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:",
     "title": "",
     "defaultProject": "",
     "anyone": "",

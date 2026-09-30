@@ -1,5 +1,7 @@
 {
   "title": "",
+  "tasksForDate": "Attività per {{date}}",
+  "createSuggestion": "Crea \"{{value}}\"",
   "myChores": "",
   "allChores": "",
   "addChore": "",
@@ -134,7 +136,11 @@
       "assignee": ""
     },
     "display": "",
-    "displayOptions": ""
+    "displayOptions": "",
+    "moreSaveOptions": "Altre opzioni di salvataggio",
+    "showCount": "Mostra {{count}}",
+    "done": "Fatto",
+    "savedFilters": "Filtri salvati"
   },
   "sort": {
     "assignedToMe": "",
@@ -257,6 +263,8 @@
     "failRescheduleTitle": "",
     "failRescheduleMessage": "",
     "failRemoveDueDateTitle": "",
+    "failAssignTitle": "Failed to assign",
+    "failAssignMessage": "Unable to assign task",
     "nudgeSentTitle": "",
     "nudgeFailed": "",
     "failNudgeTitle": "",
@@ -611,7 +619,15 @@
     "keepAsAttachment": "",
     "altCaptured": "",
     "altProcessing": "",
-    "taskIdentified": ""
+    "taskIdentified": "",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
+    "tapToScanHint": "Tocca \"Scansiona documento\" per aprire lo scanner",
+    "readingTextProgress": "Lettura del testo dall'immagine… {{progress}}%",
+    "dueDate": "Scadenza: {{date}}",
+    "hideRawText": "Nascondi testo grezzo",
+    "showRawText": "Mostra testo grezzo",
+    "cameraUnavailableUseUpload": "Fotocamera non disponibile — usa Carica invece"
   },
   "descriptionPlaceholder": "",
   "notificationTemplate": {
@@ -762,6 +778,8 @@
     "create": ""
   },
   "addTask": {
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:",
     "title": "",
     "defaultProject": "",
     "anyone": "",

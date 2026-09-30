@@ -664,7 +664,13 @@
     "createTab": "",
     "restoreTab": "",
     "creating": "",
-    "restoring": ""
+    "restoring": "",
+    "encryptionKeyRequired": "Chiave di crittografia *",
+    "keySafetyNotice": "Conserva questa chiave in un luogo sicuro: ti servirà per ripristinare il backup",
+    "nameOptional": "Nome backup (opzionale)",
+    "namePlaceholder": "es. backup-settimanale",
+    "fileRequired": "File di backup *",
+    "selectedFile": "Selezionato: {{name}}"
   },
   "deletion": {
     "passwordRequired": "",
@@ -692,7 +698,15 @@
   },
   "realtime": {
     "titleSse": "",
-    "subtitleSse": ""
+    "subtitleSse": "",
+    "basicPlanDescription": "Real-time updates (SSE) are not available in the Basic plan. Upgrade to Plus to receive instant notifications when chores are updated.",
+    "disabledDescription": "Real-time updates (SSE) are disabled. Enable to see live changes when you or other circle members complete, skip, or modify chores.",
+    "connectedDescription": "Real-time updates (SSE) are working. You'll see live changes when you or other circle members complete, skip, or modify chores.",
+    "connectingDescription": "Connecting to real-time updates (SSE)...",
+    "errorDescription": "Real-time updates (SSE) are enabled but not working: {{error}}",
+    "disconnectedDescription": "Real-time updates (SSE) are enabled but not currently connected.",
+    "enableLabel": "Enable Real-time Updates (SSE)",
+    "statusLabel": "Status:"
   },
   "nativeCancel": {
     "title": "",

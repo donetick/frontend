@@ -1,5 +1,7 @@
 {
   "title": "タスク",
+  "tasksForDate": "{{date}} のタスク",
+  "createSuggestion": "「{{value}}」を作成",
   "myChores": "自分のタスク",
   "allChores": "すべてのタスク",
   "addChore": "タスクを追加",
@@ -134,7 +136,11 @@
       "assignee": ""
     },
     "display": "",
-    "displayOptions": ""
+    "displayOptions": "",
+    "moreSaveOptions": "その他の保存オプション",
+    "showCount": "{{count}}件表示",
+    "done": "完了",
+    "savedFilters": "保存済みフィルター"
   },
   "sort": {
     "assignedToMe": "",
@@ -257,6 +263,8 @@
     "failRescheduleTitle": "",
     "failRescheduleMessage": "",
     "failRemoveDueDateTitle": "",
+    "failAssignTitle": "Failed to assign",
+    "failAssignMessage": "Unable to assign task",
     "nudgeSentTitle": "",
     "nudgeFailed": "",
     "failNudgeTitle": "",
@@ -611,7 +619,15 @@
     "keepAsAttachment": "",
     "altCaptured": "",
     "altProcessing": "",
-    "taskIdentified": ""
+    "taskIdentified": "",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
+    "tapToScanHint": "「ドキュメントをスキャン」をタップしてスキャナーを開く",
+    "readingTextProgress": "画像からテキストを読み取り中… {{progress}}%",
+    "dueDate": "期限: {{date}}",
+    "hideRawText": "元のテキストを非表示",
+    "showRawText": "元のテキストを表示",
+    "cameraUnavailableUseUpload": "カメラが利用できません — 代わりにアップロードを使用してください"
   },
   "descriptionPlaceholder": "",
   "notificationTemplate": {
@@ -762,6 +778,8 @@
     "create": ""
   },
   "addTask": {
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:",
     "title": "",
     "defaultProject": "",
     "anyone": "",

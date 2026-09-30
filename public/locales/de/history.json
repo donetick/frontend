@@ -46,7 +46,9 @@
     "pointsEarned": "Verdiente Punkte",
     "points_one": "{{count}} Punkt",
     "points_other": "{{count}} Punkte",
-    "note": "Notiz"
+    "note": "Notiz",
+    "reason": "Grund",
+    "notes": "Notizen"
   },
   "charts": {
     "noData": "Keine Daten verfügbar",

@@ -225,6 +225,7 @@
     "invitePeople": "دعوة أشخاص",
     "addMembers": "إضافة أعضاء إلى دائرتك",
     "sidePanelSettings": "إعدادات لوحة الجوانب",
+    "sidePanelSettingsDescription": "تخصيص التخطيط والبطاقات",
     "planFree": "مجاني",
     "planPlus": "زائد",
     "planPlusExpiring": "+ (تنتهي قريبا)",
@@ -341,11 +342,26 @@
   "noAttachmentsTitle": "لا توجد مرفقات",
   "noAttachmentsDescription": "الصور والملفات المضافة إلى هذه المهمة ستظهر هنا.",
   "kbSize": "{{size}} كيلوبايت",
+  "logoAlt": "الشعار",
+  "notification": {
+    "error": "خطأ",
+    "success": "نجاح",
+    "undoneSuccessfully": "تم التراجع بنجاح",
+    "warning": "تحذير",
+    "information": "معلومة",
+    "title": "إشعار",
+    "unknown": "إشعار غير معروف",
+    "undo": "تراجع",
+    "dismiss": "إغلاق"
+  },
   "onboarding": {
     "sources": {
       "speak": "التحدث",
       "snap": "التقط",
       "type": "نوع"
+    },
+    "voiceWave": {
+      "listening": "الاستماع…"
     },
     "capture": {
       "voiceCaption": "التواريخ والمسميات والنقاط من كلماتك",

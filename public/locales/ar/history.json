@@ -46,7 +46,9 @@
     "pointsEarned": "النقاط المكتسبة",
     "points_one": "",
     "points_other": "",
-    "note": "ملاحظة"
+    "note": "ملاحظة",
+    "reason": "السبب",
+    "notes": "ملاحظات"
   },
   "charts": {
     "noData": "لا توجد بيانات متاحة",

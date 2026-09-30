@@ -225,6 +225,7 @@
     "invitePeople": "Zaproś osoby",
     "addMembers": "Dodaj członków do swojego kręgu",
     "sidePanelSettings": "Ustawienia panelu bocznego",
+    "sidePanelSettingsDescription": "Dostosuj układ i karty",
     "planFree": "Darmowy",
     "planPlus": "",
     "planPlusExpiring": "Plus (wkrótce wygasa)",
@@ -341,11 +342,26 @@
   "noAttachmentsTitle": "Brak załączników",
   "noAttachmentsDescription": "Zdjęcia i pliki dodane do tego zadania pojawią się tutaj.",
   "kbSize": "",
+  "logoAlt": "Logo",
+  "notification": {
+    "error": "Błąd",
+    "success": "Sukces",
+    "undoneSuccessfully": "Cofnięto pomyślnie",
+    "warning": "Ostrzeżenie",
+    "information": "Informacja",
+    "title": "Powiadomienie",
+    "unknown": "Nieznane powiadomienie",
+    "undo": "Cofnij",
+    "dismiss": "Zamknij"
+  },
   "onboarding": {
     "sources": {
       "speak": "Głos",
       "snap": "Zdjęcie",
       "type": "Tekst"
+    },
+    "voiceWave": {
+      "listening": "Nasłuchiwanie…"
     },
     "capture": {
       "voiceCaption": "Terminy, etykiety i punkty z Twoich słów",
