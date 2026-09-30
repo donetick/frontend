@@ -366,7 +366,7 @@ const LoginView = () => {
     Navigate('/forgot-password')
   }
   const generateRandomState = () => {
-    const randomState = Math.random().toString(32).substring(5)
+    const randomState = crypto.randomUUID()
     localStorage.setItem('authState', randomState)
 
     return randomState
