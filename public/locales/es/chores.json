@@ -1,5 +1,7 @@
 {
   "title": "tareas",
+  "tasksForDate": "Tareas para {{date}}",
+  "createSuggestion": "Crear \"{{value}}\"",
   "myChores": "Mis tareas",
   "allChores": "Todas las tareas",
   "addChore": "Añadir tarea",
@@ -134,7 +136,11 @@
       "assignee": ""
     },
     "display": "",
-    "displayOptions": ""
+    "displayOptions": "",
+    "moreSaveOptions": "Más opciones de guardado",
+    "showCount": "Mostrar {{count}}",
+    "done": "Listo",
+    "savedFilters": "Filtros guardados"
   },
   "sort": {
     "assignedToMe": "",
@@ -613,7 +619,15 @@
     "keepAsAttachment": "Conservar foto como archivo adjunto",
     "altCaptured": "Documento capturado",
     "altProcessing": "Procesando foto",
-    "taskIdentified": "tarea identificada"
+    "taskIdentified": "tarea identificada",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
+    "tapToScanHint": "Toca \"Escanear documento\" para abrir el escáner",
+    "readingTextProgress": "Leyendo texto de la imagen… {{progress}}%",
+    "dueDate": "Vence: {{date}}",
+    "hideRawText": "Ocultar texto sin procesar",
+    "showRawText": "Mostrar texto sin procesar",
+    "cameraUnavailableUseUpload": "Cámara no disponible — usa Subir en su lugar"
   },
   "descriptionPlaceholder": "Añade una descripción...",
   "notificationTemplate": {
@@ -764,6 +778,8 @@
     "create": "Crear"
   },
   "addTask": {
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:",
     "title": "Crear nueva tarea",
     "defaultProject": "Proyecto por defecto",
     "anyone": "Cualquiera",

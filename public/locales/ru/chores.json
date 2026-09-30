@@ -1,5 +1,7 @@
 {
   "title": "",
+  "tasksForDate": "Задачи на {{date}}",
+  "createSuggestion": "Создать «{{value}}»",
   "myChores": "",
   "allChores": "",
   "addChore": "",
@@ -134,7 +136,11 @@
       "assignee": ""
     },
     "display": "",
-    "displayOptions": ""
+    "displayOptions": "",
+    "moreSaveOptions": "Дополнительные параметры сохранения",
+    "showCount": "Показать {{count}}",
+    "done": "Готово",
+    "savedFilters": "Сохранённые фильтры"
   },
   "sort": {
     "assignedToMe": "",
@@ -613,7 +619,15 @@
     "keepAsAttachment": "",
     "altCaptured": "",
     "altProcessing": "",
-    "taskIdentified": ""
+    "taskIdentified": "",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
+    "tapToScanHint": "Нажмите «Сканировать документ», чтобы открыть сканер",
+    "readingTextProgress": "Считывание текста с изображения… {{progress}}%",
+    "dueDate": "Срок: {{date}}",
+    "hideRawText": "Скрыть исходный текст",
+    "showRawText": "Показать исходный текст",
+    "cameraUnavailableUseUpload": "Камера недоступна — используйте загрузку вместо этого"
   },
   "descriptionPlaceholder": "",
   "notificationTemplate": {
@@ -764,6 +778,8 @@
     "create": ""
   },
   "addTask": {
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:",
     "title": "",
     "defaultProject": "",
     "anyone": "",

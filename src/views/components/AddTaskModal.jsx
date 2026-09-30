@@ -1539,7 +1539,9 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
 
             {hasDescription && (
               <Box>
-                <Typography level='body-sm'>Description:</Typography>
+                <Typography level='body-sm'>
+                  {t('addTask.descriptionLabel')}
+                </Typography>
                 <div>
                   <RichTextEditor
                     ref={richTextEditorRef}
@@ -1553,7 +1555,9 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
             )}
             {hasSubTasks && (
               <Box>
-                <Typography level='body-sm'>Subtasks:</Typography>
+                <Typography level='body-sm'>
+                  {t('addTask.subtasksLabel')}
+                </Typography>
                 <SubTasks
                   editMode={true}
                   tasks={subTasks ? subTasks : []}

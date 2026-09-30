@@ -1,5 +1,7 @@
 {
   "title": "",
+  "tasksForDate": "Zadania na {{date}}",
+  "createSuggestion": "Utwórz \"{{value}}\"",
   "myChores": "",
   "allChores": "",
   "addChore": "",
@@ -134,7 +136,11 @@
       "assignee": ""
     },
     "display": "",
-    "displayOptions": ""
+    "displayOptions": "",
+    "moreSaveOptions": "Więcej opcji zapisu",
+    "showCount": "Pokaż {{count}}",
+    "done": "Gotowe",
+    "savedFilters": "Zapisane filtry"
   },
   "sort": {
     "assignedToMe": "",
@@ -613,7 +619,15 @@
     "keepAsAttachment": "",
     "altCaptured": "",
     "altProcessing": "",
-    "taskIdentified": ""
+    "taskIdentified": "",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
+    "tapToScanHint": "Stuknij \"Skanuj dokument\", aby otworzyć skaner",
+    "readingTextProgress": "Odczytywanie tekstu z obrazu… {{progress}}%",
+    "dueDate": "Termin: {{date}}",
+    "hideRawText": "Ukryj surowy tekst",
+    "showRawText": "Pokaż surowy tekst",
+    "cameraUnavailableUseUpload": "Aparat niedostępny — użyj zamiast tego przesyłania"
   },
   "descriptionPlaceholder": "",
   "notificationTemplate": {
@@ -764,6 +778,8 @@
     "create": ""
   },
   "addTask": {
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:",
     "title": "",
     "defaultProject": "",
     "anyone": "",

@@ -225,6 +225,7 @@
     "invitePeople": "",
     "addMembers": "",
     "sidePanelSettings": "",
+    "sidePanelSettingsDescription": "Lay-out en kaarten aanpassen",
     "planFree": "",
     "planPlus": "",
     "planPlusExpiring": "",
@@ -341,11 +342,26 @@
   "noAttachmentsTitle": "",
   "noAttachmentsDescription": "",
   "kbSize": "",
+  "logoAlt": "Logo",
+  "notification": {
+    "error": "Fout",
+    "success": "Succes",
+    "undoneSuccessfully": "Succesvol ongedaan gemaakt",
+    "warning": "Waarschuwing",
+    "information": "Informatie",
+    "title": "Melding",
+    "unknown": "Onbekende melding",
+    "undo": "Ongedaan maken",
+    "dismiss": "Sluiten"
+  },
   "onboarding": {
     "sources": {
       "speak": "",
       "snap": "",
       "type": ""
+    },
+    "voiceWave": {
+      "listening": "Luisteren…"
     },
     "capture": {
       "voiceCaption": "",

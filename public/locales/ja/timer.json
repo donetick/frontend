@@ -25,6 +25,17 @@
   "activeWork": "",
   "breakTime": "",
   "workSessions": "",
+  "timeline": {
+    "started": "開始: {{time}}",
+    "ended": "終了: {{time}}",
+    "now": "現在: {{time}}",
+    "active": "アクティブ: {{percent}}%",
+    "emptyState": "アクティビティタイムラインがありません。作業を開始するとパターンが表示されます。",
+    "workSessionsCount": "作業セッション ({{count}})",
+    "sessionNumber": "セッション #{{number}}",
+    "ongoing": "→ 進行中",
+    "durationAutoCalculated": "所要時間（自動計算）"
+  },
   "totalTime": "",
   "distribution": "",
   "noActiveTime": "",

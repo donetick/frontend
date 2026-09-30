@@ -225,6 +225,7 @@
     "invitePeople": "",
     "addMembers": "",
     "sidePanelSettings": "",
+    "sidePanelSettingsDescription": "レイアウトとカードをカスタマイズ",
     "planFree": "",
     "planPlus": "",
     "planPlusExpiring": "",
@@ -341,11 +342,26 @@
   "noAttachmentsTitle": "",
   "noAttachmentsDescription": "",
   "kbSize": "",
+  "logoAlt": "ロゴ",
+  "notification": {
+    "error": "エラー",
+    "success": "成功",
+    "undoneSuccessfully": "元に戻しました",
+    "warning": "警告",
+    "information": "情報",
+    "title": "通知",
+    "unknown": "不明な通知",
+    "undo": "元に戻す",
+    "dismiss": "閉じる"
+  },
   "onboarding": {
     "sources": {
       "speak": "",
       "snap": "",
       "type": ""
+    },
+    "voiceWave": {
+      "listening": "聞き取り中…"
     },
     "capture": {
       "voiceCaption": "",

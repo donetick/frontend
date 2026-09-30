@@ -46,7 +46,9 @@
     "pointsEarned": "",
     "points_one": "",
     "points_other": "",
-    "note": ""
+    "note": "",
+    "reason": "Motivo",
+    "notes": "Notas"
   },
   "charts": {
     "noData": "",

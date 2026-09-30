@@ -25,6 +25,17 @@
   "activeWork": "",
   "breakTime": "",
   "workSessions": "",
+  "timeline": {
+    "started": "开始：{{time}}",
+    "ended": "结束：{{time}}",
+    "now": "现在：{{time}}",
+    "active": "活跃：{{percent}}%",
+    "emptyState": "暂无活动时间线。开始工作即可查看你的活动模式。",
+    "workSessionsCount": "工作时段（{{count}}）",
+    "sessionNumber": "时段 #{{number}}",
+    "ongoing": "→ 进行中",
+    "durationAutoCalculated": "时长（自动计算）"
+  },
   "totalTime": "",
   "distribution": "",
   "noActiveTime": "",

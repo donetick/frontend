@@ -1,5 +1,7 @@
 {
   "title": "Úkoly",
+  "tasksForDate": "Úkoly pro {{date}}",
+  "createSuggestion": "Vytvořit \"{{value}}\"",
   "myChores": "Moje úkoly",
   "allChores": "Všechny úkoly",
   "addChore": "Přidat úkol",
@@ -134,7 +136,11 @@
       "assignee": "Řešitel"
     },
     "display": "Zobrazení",
-    "displayOptions": "Možnosti zobrazení"
+    "displayOptions": "Možnosti zobrazení",
+    "moreSaveOptions": "Další možnosti uložení",
+    "showCount": "Zobrazit {{count}}",
+    "done": "Hotovo",
+    "savedFilters": "Uložené filtry"
   },
   "sort": {
     "assignedToMe": "Přiřazené mně",
@@ -613,7 +619,15 @@
     "keepAsAttachment": "Ponechat fotku jako přílohu",
     "altCaptured": "Zachycený dokument",
     "altProcessing": "Zpracovávání",
-    "taskIdentified": "Úkol rozpoznán"
+    "taskIdentified": "Úkol rozpoznán",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
+    "tapToScanHint": "Klepnutím na \"Skenovat dokument\" otevřete skener",
+    "readingTextProgress": "Čtení textu z obrázku… {{progress}} %",
+    "dueDate": "Termín: {{date}}",
+    "hideRawText": "Skrýt surový text",
+    "showRawText": "Zobrazit surový text",
+    "cameraUnavailableUseUpload": "Fotoaparát není k dispozici — použijte místo toho nahrání"
   },
   "descriptionPlaceholder": "Zadejte popis...",
   "notificationTemplate": {
@@ -764,6 +778,8 @@
     "create": "Vytvořit"
   },
   "addTask": {
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:",
     "title": "Vytvořit nový úkol",
     "defaultProject": "Výchozí projekt",
     "anyone": "Kdokoli",

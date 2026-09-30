@@ -1,5 +1,7 @@
 {
   "title": "Tâches",
+  "tasksForDate": "Tâches pour le {{date}}",
+  "createSuggestion": "Créer \"{{value}}\"",
   "myChores": "Mes tâches",
   "allChores": "Toutes les tâches",
   "addChore": "Ajouter une tâche",
@@ -134,7 +136,11 @@
       "assignee": "Personne assignée"
     },
     "display": "Afficher",
-    "displayOptions": "Options d'affichage"
+    "displayOptions": "Options d'affichage",
+    "moreSaveOptions": "Plus d'options d'enregistrement",
+    "showCount": "Afficher {{count}}",
+    "done": "Terminé",
+    "savedFilters": "Filtres enregistrés"
   },
   "sort": {
     "assignedToMe": "Assigné à moi",
@@ -613,7 +619,15 @@
     "keepAsAttachment": "Garder la photo comme pièce jointe",
     "altCaptured": "Document capturé",
     "altProcessing": "Traitement en cours",
-    "taskIdentified": "Tâche identifiée"
+    "taskIdentified": "Tâche identifiée",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
+    "tapToScanHint": "Appuyez sur \"Scanner un document\" pour ouvrir le scanner",
+    "readingTextProgress": "Lecture du texte de l'image… {{progress}} %",
+    "dueDate": "Échéance : {{date}}",
+    "hideRawText": "Masquer le texte brut",
+    "showRawText": "Afficher le texte brut",
+    "cameraUnavailableUseUpload": "Caméra non disponible — utilisez Téléverser à la place"
   },
   "descriptionPlaceholder": "Entrez la description...",
   "notificationTemplate": {
@@ -764,6 +778,8 @@
     "create": "Créer"
   },
   "addTask": {
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:",
     "title": "Créer une nouvelle tâche",
     "defaultProject": "Projet par défaut",
     "anyone": "Tout le monde",

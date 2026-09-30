@@ -225,6 +225,7 @@
     "invitePeople": "Inviter des personnes",
     "addMembers": "Ajouter des membres à votre cercle",
     "sidePanelSettings": "Paramètres du panneau latéral",
+    "sidePanelSettingsDescription": "Personnaliser la mise en page et les cartes",
     "planFree": "Basic",
     "planPlus": "Plus",
     "planPlusExpiring": "Plus (expire bientôt)",
@@ -341,11 +342,26 @@
   "noAttachmentsTitle": "Aucune pièce jointe",
   "noAttachmentsDescription": "Les photos et fichiers ajoutés à cette tâche apparaîtront ici.",
   "kbSize": "{{size}} Ko",
+  "logoAlt": "Logo",
+  "notification": {
+    "error": "Erreur",
+    "success": "Succès",
+    "undoneSuccessfully": "Annulé avec succès",
+    "warning": "Avertissement",
+    "information": "Information",
+    "title": "Notification",
+    "unknown": "Notification inconnue",
+    "undo": "Annuler",
+    "dismiss": "Fermer"
+  },
   "onboarding": {
     "sources": {
       "speak": "Dicter",
       "snap": "Photographier",
       "type": "Saisir"
+    },
+    "voiceWave": {
+      "listening": "Écoute en cours…"
     },
     "capture": {
       "voiceCaption": "Dates, étiquettes et points extraits de vos paroles",
