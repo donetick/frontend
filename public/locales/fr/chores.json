@@ -708,6 +708,7 @@
     "startDate": "Date de début",
     "dueDate": "Date d'échéance",
     "triggerDueHint": "La date d'échéance sera définie lorsque la condition de l'objet sera remplie",
+    "alwaysDueHint": "Cette tâche n'a pas de date d'échéance et est toujours disponible à réaliser",
     "giveDueDate": "Donner une date d'échéance à cette tâche",
     "giveDueDateHelp": "La tâche doit être terminée avant une heure spécifique",
     "startWhen": "Quand cette tâche démarre-t-elle ?",
@@ -733,6 +734,7 @@
     "notificationsPlanWarning": "Les notifications de tâches ne sont pas disponibles dans la formule Basic. Passez à Plus pour recevoir des rappels lorsque les tâches arrivent à échéance ou sont terminées.",
     "notifyForTask": "Notifier pour cette tâche",
     "notifyForTaskHelp": "Quand recevoir des notifications pour cette tâche",
+    "notifyForTaskUnavailable": "Les notifications ne sont pas disponibles pour les tâches basées sur une condition ou toujours disponibles",
     "notificationSchedule": "Planification des notifications",
     "whoToNotify": "Qui notifier",
     "allAssignees": "Toutes les personnes assignées",
@@ -806,10 +808,12 @@
       "monthly": "Mensuel",
       "yearly": "Annuel",
       "adaptive": "Adaptatif",
+      "always": "Toujours",
       "custom": "Personnalisé"
     },
     "freqMessage": {
       "adaptive": "Cette tâche sera planifiée dynamiquement selon les dates de fin précédentes.",
+      "always": "Cette tâche n'a pas de date d'échéance et reste disponible à tout moment. Elle ne sera pas archivée une fois terminée.",
       "custom": "Cette tâche sera planifiée selon une fréquence personnalisée."
     },
     "weekPattern": {

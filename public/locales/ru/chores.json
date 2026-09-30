@@ -708,6 +708,7 @@
     "startDate": "",
     "dueDate": "",
     "triggerDueHint": "",
+    "alwaysDueHint": "У этой задачи нет срока выполнения, и она всегда доступна для выполнения",
     "giveDueDate": "",
     "giveDueDateHelp": "",
     "startWhen": "",
@@ -733,6 +734,7 @@
     "notificationsPlanWarning": "",
     "notifyForTask": "",
     "notifyForTaskHelp": "",
+    "notifyForTaskUnavailable": "Уведомления недоступны для задач на основе триггера или всегда доступных задач",
     "notificationSchedule": "",
     "whoToNotify": "",
     "allAssignees": "",
@@ -806,10 +808,12 @@
       "monthly": "",
       "yearly": "",
       "adaptive": "",
+      "always": "Всегда",
       "custom": ""
     },
     "freqMessage": {
       "adaptive": "",
+      "always": "У этой задачи нет срока выполнения, и она остаётся доступной для выполнения в любое время. Она не будет заархивирована после выполнения.",
       "custom": ""
     },
     "weekPattern": {

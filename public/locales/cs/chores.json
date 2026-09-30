@@ -708,6 +708,7 @@
     "startDate": "Datum začátku",
     "dueDate": "Termín",
     "triggerDueHint": "Termín bude nastaven, jakmile bude splněn spouštěč věci",
+    "alwaysDueHint": "Tento úkol nemá termín a je vždy dostupný k dokončení",
     "giveDueDate": "Nastavit tomuto úkolu termín",
     "giveDueDateHelp": "Úkol je třeba dokončit do určitého času",
     "startWhen": "Kdy tento úkol začíná?",
@@ -733,6 +734,7 @@
     "notificationsPlanWarning": "Oznámení k úkolům nejsou v tarifu Basic k dispozici. Přejděte na Plus a dostávejte připomínky, když se blíží termín nebo je úkol dokončen.",
     "notifyForTask": "Upozorňovat na tento úkol",
     "notifyForTaskHelp": "Kdy dostávat oznámení k tomuto úkolu",
+    "notifyForTaskUnavailable": "Oznámení nejsou k dispozici pro úkoly založené na spouštěči nebo vždy dostupné úkoly",
     "notificationSchedule": "Plán oznámení",
     "whoToNotify": "Koho upozornit",
     "allAssignees": "Všechny řešitele",
@@ -806,10 +808,12 @@
       "monthly": "Měsíčně",
       "yearly": "Ročně",
       "adaptive": "Adaptivně",
+      "always": "Vždy",
       "custom": "Vlastní"
     },
     "freqMessage": {
       "adaptive": "Tento úkol bude plánován dynamicky podle předchozích dat dokončení.",
+      "always": "Tento úkol nemá termín a zůstává dostupný ke splnění kdykoli. Po dokončení nebude archivován.",
       "custom": "Tento úkol bude plánován podle vlastní frekvence."
     },
     "weekPattern": {

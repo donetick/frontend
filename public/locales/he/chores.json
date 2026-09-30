@@ -708,6 +708,7 @@
     "startDate": "",
     "dueDate": "",
     "triggerDueHint": "",
+    "alwaysDueHint": "למשימה זו אין תאריך יעד והיא זמינה תמיד להשלמה",
     "giveDueDate": "",
     "giveDueDateHelp": "",
     "startWhen": "",
@@ -733,6 +734,7 @@
     "notificationsPlanWarning": "",
     "notifyForTask": "",
     "notifyForTaskHelp": "",
+    "notifyForTaskUnavailable": "התראות אינן זמינות למשימות מבוססות טריגר או למשימות זמינות תמיד",
     "notificationSchedule": "",
     "whoToNotify": "",
     "allAssignees": "",
@@ -806,10 +808,12 @@
       "monthly": "",
       "yearly": "",
       "adaptive": "",
+      "always": "תמיד",
       "custom": ""
     },
     "freqMessage": {
       "adaptive": "",
+      "always": "למשימה זו אין תאריך יעד והיא נשארת זמינה להשלמה בכל עת. היא לא תועבר לארכיון לאחר השלמתה.",
       "custom": ""
     },
     "weekPattern": {

@@ -83,5 +83,17 @@
     "editTitle": "Modifier la sous-tache",
     "addTitle": "Ajouter une sous-tache",
     "addChildTitle": "Ajouter une sous-tache imbriquee"
+  },
+  "choreEdit": {
+    "alwaysDueHint": "Cette tâche n'a pas de date d'échéance et est toujours disponible à réaliser",
+    "notifyForTaskUnavailable": "Les notifications ne sont pas disponibles pour les tâches basées sur une condition ou toujours disponibles"
+  },
+  "repeat": {
+    "freqType": {
+      "always": "Toujours"
+    },
+    "freqMessage": {
+      "always": "Cette tâche n'a pas de date d'échéance et reste disponible à tout moment. Elle ne sera pas archivée une fois terminée."
+    }
   }
 }

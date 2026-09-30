@@ -1,4 +1,5 @@
 import {
+  AllInclusive,
   Check,
   HourglassEmpty,
   Pause,
@@ -100,6 +101,8 @@ const CompactChoreCard = ({
       return <TimesOneMobiledata sx={{ fontSize: 14 }} />
     } else if (chore.frequencyType === 'trigger') {
       return <Webhook sx={{ fontSize: 14 }} />
+    } else if (chore.frequencyType === 'always') {
+      return <AllInclusive sx={{ fontSize: 14 }} />
     } else {
       return <Repeat sx={{ fontSize: 14 }} />
     }
