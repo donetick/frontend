@@ -9,6 +9,7 @@
  */
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
+
 import { parseSync } from '@swc/core'
 
 const root = process.cwd()
