@@ -51,7 +51,7 @@
     "colorAriaSelect": "{{color}} auswählen"
   },
   "picker": {
-    "label": "",
+    "label": "Labels",
     "createLabel": "Label erstellen",
     "labelsCount_one": "{{count}} Label",
     "labelsCount_other": "{{count}} Labels"

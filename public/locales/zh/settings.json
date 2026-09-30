@@ -93,10 +93,6 @@
       "bugReport": {
         "title": "报告问题",
         "description": "有什么不对劲吗？把详情和技术快照一起发给我们。"
-      },
-      "sidepanel": {
-        "title": "侧边栏自定义",
-        "description": "自定义侧边栏中卡片的布局和显示状态。"
       }
     }
   },
@@ -427,9 +423,7 @@
         "name": "每周目标",
         "description": "显示每周进度和家庭完成情况统计"
       }
-    },
-    "heading": "侧边栏设置",
-    "detailedDescription": ""
+    }
   },
   "homeSections": {
     "title": "",
