@@ -257,6 +257,8 @@
     "failRescheduleTitle": "Přeplánování se nezdařilo",
     "failRescheduleMessage": "Termín nelze aktualizovat",
     "failRemoveDueDateTitle": "Termín se nepodařilo odebrat",
+    "failAssignTitle": "",
+    "failAssignMessage": "",
     "nudgeSentTitle": "Připomenutí odesláno!",
     "nudgeFailed": "Připomenutí se nepodařilo odeslat",
     "failNudgeTitle": "Připomenutí se nepodařilo odeslat",

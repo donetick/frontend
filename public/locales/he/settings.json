@@ -93,10 +93,6 @@
       "bugReport": {
         "title": "",
         "description": ""
-      },
-      "sidepanel": {
-        "title": "",
-        "description": ""
       }
     }
   },
@@ -427,9 +423,7 @@
         "name": "",
         "description": ""
       }
-    },
-    "heading": "",
-    "detailedDescription": ""
+    }
   },
   "homeSections": {
     "title": "",

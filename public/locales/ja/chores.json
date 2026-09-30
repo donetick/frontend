@@ -257,6 +257,8 @@
     "failRescheduleTitle": "",
     "failRescheduleMessage": "",
     "failRemoveDueDateTitle": "",
+    "failAssignTitle": "",
+    "failAssignMessage": "",
     "nudgeSentTitle": "",
     "nudgeFailed": "",
     "failNudgeTitle": "",

@@ -55,7 +55,7 @@
     "unknownTask": "Unbekannte Aufgabe",
     "late": "Verspätet",
     "status": {
-      "title": "",
+      "title": "Status",
       "description": "Status abgeschlossener Aufgaben"
     },
     "due": {
@@ -84,7 +84,7 @@
     }
   },
   "filter": {
-    "status": "",
+    "status": "Status",
     "pending": "Ausstehend",
     "labels": "Beschriftungen",
     "hasNotes": "Mit Notizen",
@@ -100,31 +100,31 @@
     "allTime": "Gesamter Zeitraum"
   },
   "search": {
-    "placeholder": "",
-    "clear": ""
+    "placeholder": "Verlauf durchsuchen...",
+    "clear": "Suche zurücksetzen"
   },
   "sort": {
-    "date": "",
-    "updatedDate": "",
-    "performer": "",
-    "status": "",
-    "points": ""
+    "date": "Fertigstellungsdatum",
+    "updatedDate": "Aktualisierungsdatum",
+    "performer": "Erledigt von",
+    "status": "Status",
+    "points": "Punkte"
   },
   "activities": {
     "title": "Aktivitäten",
-    "subtitle": "",
+    "subtitle": "Sieh was erledigt, übersprungen oder verpasst wurde",
     "emptyTitle": "Keine Aktivität in diesem Zeitraum",
     "emptyDescriptionEveryone": "In deinem Kreis wurde {{period}} von niemandem etwas erledigt. Versuche einen größeren Zeitraum oder ein anderes Mitglied.",
     "emptyDescriptionMember": "{{name}} hat {{period}} nichts erledigt. Versuche einen größeren Zeitraum oder ein anderes Mitglied.",
     "periodSoFar": "bisher",
     "periodLastDays": "in den letzten {{count}} Tagen",
     "unknownMember": "diesem Mitglied",
-    "searchPlaceholder": "",
+    "searchPlaceholder": "Aktivitäten suchen...",
     "sort": {
-      "date": "",
-      "name": "",
-      "status": "",
-      "points": ""
+      "date": "Datum",
+      "name": "Name der Aufgabe",
+      "status": "Status",
+      "points": "Punkte"
     }
   },
   "title": {

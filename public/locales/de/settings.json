@@ -7,7 +7,7 @@
     "remove": "Entfernen",
     "delete": "Löschen",
     "refresh": "Aktualisieren",
-    "loading": "Wird geladen …",
+    "loading": "Wird geladen…",
     "on": "An",
     "off": "Aus",
     "error": "Fehler",
@@ -36,7 +36,7 @@
       },
       "circle": {
         "title": "Kreiseinstellungen",
-        "description": "Verwalte deinen Circle, lade Mitglieder ein und bearbeite Beitrittsanfragen."
+        "description": "Verwalte deinen Kreis, lade Mitglieder ein und bearbeite Beitrittsanfragen."
       },
       "account": {
         "title": "Kontoeinstellungen",
@@ -93,10 +93,6 @@
       "bugReport": {
         "title": "Fehler melden",
         "description": "Etwas funktioniert nicht richtig? Schick uns die Details zusammen mit einer technischen Momentaufnahme."
-      },
-      "sidepanel": {
-        "title": "Seitenleisten-Anpassung",
-        "description": "Passe Layout und Sichtbarkeit der Karten in der Seitenleiste an."
       }
     }
   },
@@ -147,7 +143,7 @@
     "roles": {
       "member": "Mitglied",
       "memberDescription": "Ein reguläres Mitglied des Kreises",
-      "manager": "",
+      "manager": "Verwalter",
       "managerDescription": "Kann sich als Nutzer ausgeben und in deren Namen handeln",
       "admin": "Administrator",
       "adminDescription": "Voller Zugriff auf den Kreis"
@@ -275,9 +271,9 @@
     "customLabel": "Benutzerdefinierte Benachrichtigung",
     "customHelper": "Benachrichtigungen über eine andere Plattform erhalten",
     "targetNone": "Keine",
-    "targetTelegram": "",
-    "targetPushover": "",
-    "targetWebhooks": "",
+    "targetTelegram": "Telegram",
+    "targetPushover": "Pushover",
+    "targetWebhooks": "Webhooks",
     "telegramBotHelpBefore": "Du musst dem Bot zuerst eine Nachricht senden, damit die Telegram-Benachrichtigung funktioniert",
     "telegramBotHelpAfter": "um einen Chat zu starten",
     "clickHere": "Hier klicken",
@@ -427,50 +423,48 @@
         "name": "Wochenziele",
         "description": "Zeigt den Wochenfortschritt und die Erledigungsstatistik der Familie"
       }
-    },
-    "heading": "Seitenleisten-Einstellungen",
-    "detailedDescription": "Passe Anordnung und Sichtbarkeit der Karten in der Seitenleiste an. Dieser Bereich ist nur auf Geräten mit großem Bildschirm wie Tablets und Desktop-Computern verfügbar."
+    }
   },
   "homeSections": {
-    "title": "",
-    "description": "",
-    "resetToDefaults": "",
-    "resetHelper": "",
+    "title": "Übersicht Anpassung",
+    "description": "Lege fest, welche Abschnitte in welcher Reihenfolge auf dem Startbildschirm erscheinen. Ziehen und Ablegen um die Abschnitte neu anzuordnen oder wechsle ihre Sichtbarkeit.",
+    "resetToDefaults": "Auf Standard zurücksetzen",
+    "resetHelper": "Dadurch werden alle Abschnitte auf ihre Standard-Sichtbarkeit und Reihenfolge zurückgesetzt.",
     "sections": {
       "greeting": {
-        "name": "",
-        "description": ""
+        "name": "Willkommen",
+        "description": "Die Überschrift an der Oberseite, die deinen Tag zusammenfasst"
       },
       "glance": {
-        "name": "",
-        "description": ""
+        "name": "Auf einen Blick",
+        "description": "Verspätet / heute fällig / benötigt Überprüfung / ungeplante Anzahl"
       },
       "circle": {
-        "name": "",
-        "description": ""
+        "name": "Dein Kreis",
+        "description": "Zeigt was alle in deinem Kreis diese Woche ausführen"
       },
       "review": {
-        "name": "",
-        "description": ""
+        "name": "Benötigt Überprüfung",
+        "description": "Beendete Aufgaben warten auf Freigabe"
       },
       "overdue": {
-        "name": "",
-        "description": ""
+        "name": "Überfällig",
+        "description": "Aufgaben, deren Fälligkeitsdatum abgelaufen sind"
       },
       "nextUp": {
-        "name": "",
-        "description": ""
+        "name": "Demnächst",
+        "description": "Was ist heute und morgen fällig"
       },
       "filters": {
-        "name": "",
-        "description": ""
+        "name": "Filter",
+        "description": "Schnellzugriff auf Ihre angehefteten und nützlichsten Filter"
       },
       "projects": {
-        "name": "",
-        "description": ""
+        "name": "Projekte",
+        "description": "Wo die Arbeit sich aufgehäuft, nach Projekt geordnet"
       }
     },
-    "detailedDescription": ""
+    "detailedDescription": "Layout und Sichtbarkeit von Abschnitten auf dem Startbildschirm anpassen."
   },
   "layout": {
     "title": "Layout & Navigation",
@@ -525,7 +519,7 @@
     "sunday": "Sonntag",
     "monday": "Montag",
     "saturday": "Samstag",
-    "helpTranslate": "",
+    "helpTranslate": "Hilf mit, diese Übersetzung zu verbessern",
     "formats": {
       "mdy": "MM/TT/JJJJ (USA)",
       "dmy": "TT.MM.JJJJ (Europa)",
@@ -562,7 +556,7 @@
       "toggleLabel": "Echtzeit-Updates aktivieren",
       "title": "Echtzeit-Updates",
       "subtitle": "Erhalte sofort Benachrichtigungen, wenn Aufgaben aktualisiert werden",
-      "statusLabel": "",
+      "statusLabel": "Status:",
       "basicPlan": "Echtzeit-Updates sind im Basis-Tarif nicht verfügbar. Wechsle zu Plus, um sofort benachrichtigt zu werden, wenn Aufgaben aktualisiert werden.",
       "disabled": "Echtzeit-Updates sind deaktiviert. Aktiviere sie, um Live-Änderungen zu sehen, wenn du oder andere Kreismitglieder Aufgaben erledigen, überspringen oder ändern.",
       "connected": "Echtzeit-Updates funktionieren. Du siehst Live-Änderungen, wenn du oder andere Kreismitglieder Aufgaben erledigen, überspringen oder ändern.",
@@ -674,7 +668,7 @@
     "transferIntro": "Du besitzt Kreise, deren Eigentümerschaft vor dem Löschen übertragen werden muss. Bitte wähle neue Besitzer aus:",
     "selectOwner": "Neuen Besitzer auswählen",
     "confirmPrompt": "Bitte gib dein Passwort ein und tippe DELETE zur Bestätigung",
-    "typeDelete": "",
+    "typeDelete": "LÖSCHEN",
     "warningLead": "Diese Aktion kann nicht rückgängig gemacht werden.",
     "warningIntro": "Beim Löschen deines Kontos werden dauerhaft entfernt:",
     "removesProfile": "Dein Benutzerprofil und deine Authentifizierungsdaten",
