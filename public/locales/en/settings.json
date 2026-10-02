@@ -441,6 +441,8 @@
     "planFree": "Free plan",
     "planPlus": "Plus plan",
     "emailUnverified": "Email not verified",
+    "getStarted": "Create a Bridge account",
+    "getStartedHint": "Don't have a Bridge account yet? Create one and add an instance to get its ID and token.",
     "connectIntro": "Enter the instance ID and instance token shown once when you created or selected this instance in your Bridge account.",
     "connect": "Connect",
     "connectedTitle": "Connected to Bridge",

@@ -36,6 +36,15 @@ import SettingsLayout from './SettingsLayout'
 
 const DEFAULT_BASE_URL = 'https://bridge.donetick.com'
 
+// The owner-facing Bridge web app (signup, login, instance management,
+// Stripe checkout/billing portal) -- a separate app/origin from the API
+// base above, see donetick-bridge/web and deploy/Caddyfile's
+// app.bridge.example.internal site block. This is where "Upgrade"/"Manage
+// billing" and new-account signup actually happen; this settings page only
+// stores the instanceId/instanceToken it issues.
+const BRIDGE_WEB_URL =
+  import.meta.env.VITE_BRIDGE_WEB_URL || 'https://connect.donetick.com'
+
 // Maps Core's internal/bridge.Handler error `code` field (see
 // donetick-core internal/bridge/handler.go errorStatusCode) to a
 // translation key under settings.bridge.errors.*. Kept as an explicit
@@ -278,7 +287,7 @@ const BridgeSettings = () => {
                   color='primary'
                   endDecorator={<OpenInNew fontSize='small' />}
                   component='a'
-                  href={form.baseUrl || DEFAULT_BASE_URL}
+                  href={BRIDGE_WEB_URL}
                   target='_blank'
                   rel='noreferrer'
                 >
@@ -290,7 +299,7 @@ const BridgeSettings = () => {
                 variant='outlined'
                 endDecorator={<OpenInNew fontSize='small' />}
                 component='a'
-                href={form.baseUrl || DEFAULT_BASE_URL}
+                href={BRIDGE_WEB_URL}
                 target='_blank'
                 rel='noreferrer'
               >
@@ -373,6 +382,26 @@ const BridgeSettings = () => {
               </Alert>
             )}
 
+            <Alert
+              color='primary'
+              variant='soft'
+              sx={{ mb: 1.5 }}
+              endDecorator={
+                <Button
+                  size='sm'
+                  variant='solid'
+                  endDecorator={<OpenInNew fontSize='small' />}
+                  component='a'
+                  href={`${BRIDGE_WEB_URL}/signup`}
+                  target='_blank'
+                  rel='noreferrer'
+                >
+                  {t('bridge.getStarted')}
+                </Button>
+              }
+            >
+              {t('bridge.getStartedHint')}
+            </Alert>
             <Typography
               level='body-sm'
               sx={{ color: 'text.secondary', mb: 1.5 }}
