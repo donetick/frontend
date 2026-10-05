@@ -35,6 +35,7 @@ import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 
 import { version } from '../../../package.json'
+import DoneTickLogo from '../../assets/logo.svg'
 import UserProfileAvatar from '../../components/UserProfileAvatar'
 import { useScrollDirection } from '../../hooks/useScrollDirection'
 import { useResource } from '../../queries/ResourceQueries'
@@ -476,23 +477,40 @@ const NavBar = () => {
                 </IconButton>
               </Tooltip>
               {desktopExpanded && (
-                <Typography
-                  component='div'
-                  level='title-lg'
+                <Box
                   sx={{
-                    color: 'text.primary',
-                    fontFamily: 'var(--joy-fontFamily-display)',
-                    fontWeight: 800,
-                    letterSpacing: '-0.045em',
-                    lineHeight: 1,
-                    userSelect: 'none',
+                    alignItems: 'center',
+                    display: 'flex',
+                    gap: 0.75,
+                    minWidth: 0,
                   }}
                 >
-                  Done
-                  <Box component='span' sx={{ color: 'primary.500' }}>
-                    tick
-                  </Box>
-                </Typography>
+                  <Box
+                    aria-hidden='true'
+                    component='img'
+                    src={DoneTickLogo}
+                    sx={{
+                      display: 'block',
+                      flexShrink: 0,
+                      height: 24,
+                      width: 24,
+                    }}
+                  />
+                  <Typography
+                    component='div'
+                    level='title-md'
+                    sx={{
+                      color: 'text.primary',
+                      fontFamily: 'var(--joy-fontFamily-body)',
+                      fontWeight: 700,
+                      letterSpacing: '-0.015em',
+                      lineHeight: 1.2,
+                      userSelect: 'none',
+                    }}
+                  >
+                    Donetick
+                  </Typography>
+                </Box>
               )}
             </Box>
             <Box
