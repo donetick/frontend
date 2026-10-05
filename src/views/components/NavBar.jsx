@@ -481,7 +481,7 @@ const NavBar = () => {
                   sx={{
                     alignItems: 'center',
                     display: 'flex',
-                    gap: 0.75,
+                    gap: 1,
                     minWidth: 0,
                   }}
                 >
@@ -492,23 +492,29 @@ const NavBar = () => {
                     sx={{
                       display: 'block',
                       flexShrink: 0,
-                      height: 24,
-                      width: 24,
+                      height: 28,
+                      width: 28,
                     }}
                   />
                   <Typography
                     component='div'
                     level='title-md'
                     sx={{
+                      alignItems: 'center',
                       color: 'text.primary',
+                      display: 'flex',
                       fontFamily: 'var(--joy-fontFamily-body)',
                       fontWeight: 700,
                       letterSpacing: '-0.015em',
-                      lineHeight: 1.2,
+                      lineHeight: 1,
+                      minHeight: 28,
                       userSelect: 'none',
                     }}
                   >
-                    Donetick
+                    Done
+                    <Box component='span' sx={{ color: '#06b6d4' }}>
+                      tick
+                    </Box>
                   </Typography>
                 </Box>
               )}
