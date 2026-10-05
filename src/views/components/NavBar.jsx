@@ -8,6 +8,7 @@ import {
   History,
   ListAlt,
   Logout,
+  MenuOpenRounded,
   MenuRounded,
   ReportProblem,
   SearchRounded,
@@ -471,7 +472,11 @@ const NavBar = () => {
                   }}
                   sx={{ flexShrink: 0 }}
                 >
-                  <MenuRounded />
+                  {desktopExpanded ? (
+                    <MenuOpenRounded className='rtl-flip' />
+                  ) : (
+                    <MenuRounded />
+                  )}
                 </IconButton>
               </Tooltip>
               {desktopExpanded && (
