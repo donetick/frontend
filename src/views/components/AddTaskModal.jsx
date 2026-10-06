@@ -666,17 +666,12 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
         setAssignees(parsedAssignees)
         assigneesFromMentionRef.current = true
       } else if (assigneesFromMentionRef.current) {
-        // The @mention that set the current assignees was deleted — fall back
-        // to the implicit self default. Picker selections stay untouched.
+        // The @mention that set the current assignees was deleted. An empty
+        // selection is assigned to the current user when the task is created.
+        // Picker selections stay untouched.
         assigneesFromMentionRef.current = false
         setIsAnyoneTask(false)
-        if (userProfile?.id) {
-          setAssignees([
-            {
-              userId: userProfile.id,
-            },
-          ])
-        }
+        setAssignees([])
       }
 
       if (repeat.result) {
@@ -793,7 +788,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
         }
       }
     },
-    [userLabels, renderHighlightedSentence, assigneesForParsing, userProfile],
+    [userLabels, renderHighlightedSentence, assigneesForParsing],
   )
 
   useEffect(() => {
@@ -1411,7 +1406,6 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
                   setIsAnyoneTask(false)
                   setAssignees([])
                 }}
-                currentUserId={userProfile?.id}
                 members={circleMembers?.res || []}
               />
               <LabelsPickerField

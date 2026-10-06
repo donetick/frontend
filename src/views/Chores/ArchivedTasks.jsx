@@ -426,6 +426,73 @@ const ArchivedTasks = () => {
     }
   }
 
+  // Single-task restore, used by the per-row swipe action. Mirrors one
+  // iteration of handleBulkRestore's offline-queue handling.
+  const handleChoreRestore = async chore => {
+    const isNetworkError = err =>
+      isOfflineFeatureEnabled() &&
+      err instanceof TypeError &&
+      err.message === 'Failed to fetch'
+
+    unArchiveChore.mutate(chore.id, {
+      onSuccess: () => {
+        handleChoreUpdated(chore, 'unarchive')
+      },
+      onError: async error => {
+        if (isNetworkError(error)) {
+          await commandQueue.enqueue(CommandType.UNARCHIVE_CHORE, chore.id, {
+            id: chore.id,
+          })
+          await offlineDB.saveChores([
+            { ...chore, isActive: true, _pending: 'unarchive' },
+          ])
+          queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
+          handleChoreUpdated(chore, 'unarchive')
+        } else {
+          showError({
+            title: t('archived.bulkRestoreFailTitle'),
+            message: t('archived.unexpectedError'),
+          })
+        }
+      },
+    })
+  }
+
+  // Single-task delete, used by the per-row swipe action. Swiping to delete
+  // is the full-swipe target, so it still gets a confirmation modal rather
+  // than deleting outright.
+  const handleChoreDeleteRequest = chore => {
+    setConfirmModelConfig({
+      isOpen: true,
+      title: t('archived.deleteTasksTitle'),
+      confirmText: t('archived.delete'),
+      cancelText: t('common:cancel'),
+      message: t('archived.deleteConfirm', { count: 1 }),
+      onClose: async isConfirmed => {
+        if (isConfirmed === true) {
+          try {
+            await DeleteChore(chore.id)
+            handleChoreDeleted(chore)
+          } catch (error) {
+            showError({
+              title: t('archived.someFailedTitle'),
+              message: t('archived.deleteFailCount', { count: 1 }),
+            })
+          }
+        }
+        setConfirmModelConfig({})
+      },
+    })
+  }
+
+  const handleArchivedChoreAction = (action, chore) => {
+    if (action === 'restore') {
+      handleChoreRestore(chore)
+    } else if (action === 'delete') {
+      handleChoreDeleteRequest(chore)
+    }
+  }
+
   const handleChoreDeleted = deletedChore => {
     const newArchivedChores = archivedChores.filter(
       chore => chore.id !== deletedChore.id,
@@ -1098,10 +1165,11 @@ const ArchivedTasks = () => {
           <List sx={{ gap: 0 }}>
             <ChoreListView
               chores={finalChores}
-              // viewOnly={true}
+              isArchived
               showActions={false}
               viewMode='compact'
               membersData={membersData}
+              handleChoreAction={handleArchivedChoreAction}
               isMultiSelectMode={isMultiSelectMode}
               selectedChores={selectedChores}
               toggleChoreSelection={toggleChoreSelection}

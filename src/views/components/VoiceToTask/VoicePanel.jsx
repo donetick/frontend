@@ -423,7 +423,6 @@ const TaskPreviewCard = ({
               }
             }}
             onClear={() => onPatch({ isAnyone: false, assignees: [] })}
-            currentUserId={parseCtx.currentUserId}
             members={parseCtx.members}
           />
           <LabelsPickerField
