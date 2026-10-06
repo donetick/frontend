@@ -499,6 +499,7 @@ const NavBar = () => {
                   <Typography
                     component='div'
                     level='title-md'
+                    dir='ltr'
                     sx={{
                       alignItems: 'center',
                       color: 'text.primary',

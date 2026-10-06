@@ -225,6 +225,7 @@
     "invitePeople": "Invitar a personas",
     "addMembers": "Añadir miembros a tu círculo",
     "sidePanelSettings": "Ajustes del panel lateral",
+    "sidePanelSettingsDescription": "Personalizar diseño y tarjetas",
     "planFree": "",
     "planPlus": "",
     "planPlusExpiring": "",
@@ -341,11 +342,26 @@
   "noAttachmentsTitle": "Sin archivos adjuntos",
   "noAttachmentsDescription": "No hay archivos o imágenes adjuntas a esta tarea.",
   "kbSize": "",
+  "logoAlt": "Logo",
+  "notification": {
+    "error": "Error",
+    "success": "Éxito",
+    "undoneSuccessfully": "Deshecho con éxito",
+    "warning": "Advertencia",
+    "information": "Información",
+    "title": "Notificación",
+    "unknown": "Notificación desconocida",
+    "undo": "Deshacer",
+    "dismiss": "Descartar"
+  },
   "onboarding": {
     "sources": {
       "speak": "",
       "snap": "",
       "type": ""
+    },
+    "voiceWave": {
+      "listening": "Escuchando…"
     },
     "capture": {
       "voiceCaption": "Dates, Etiquetas and Puntos from your words",

@@ -25,6 +25,17 @@
   "activeWork": "",
   "breakTime": "",
   "workSessions": "",
+  "timeline": {
+    "started": "Начато: {{time}}",
+    "ended": "Завершено: {{time}}",
+    "now": "Сейчас: {{time}}",
+    "active": "Активно: {{percent}}%",
+    "emptyState": "Хронология активности недоступна. Начните работать, чтобы увидеть свою модель активности.",
+    "workSessionsCount": "Рабочие сессии ({{count}})",
+    "sessionNumber": "Сессия №{{number}}",
+    "ongoing": "→ продолжается",
+    "durationAutoCalculated": "Продолжительность (рассчитывается автоматически)"
+  },
   "totalTime": "",
   "distribution": "",
   "noActiveTime": "",

@@ -21,6 +21,82 @@ export const TIME_FORMATS = {
 
 export const RTL_LANGUAGES = ['ar', 'he', 'fa', 'ur']
 
+// Sensible regional defaults applied when the user switches language.
+// These are only a starting point — the user can still override any of
+// them individually afterwards.
+export const LANGUAGE_DEFAULTS = {
+  en: {
+    dateFormat: DATE_FORMATS.MDY,
+    timeFormat: TIME_FORMATS.HOUR_12,
+    firstDayOfWeek: 0,
+  },
+  ar: {
+    dateFormat: DATE_FORMATS.DMY,
+    timeFormat: TIME_FORMATS.HOUR_12,
+    firstDayOfWeek: 6,
+  },
+  cs: {
+    dateFormat: DATE_FORMATS.DMY,
+    timeFormat: TIME_FORMATS.HOUR_24,
+    firstDayOfWeek: 1,
+  },
+  de: {
+    dateFormat: DATE_FORMATS.DMY,
+    timeFormat: TIME_FORMATS.HOUR_24,
+    firstDayOfWeek: 1,
+  },
+  es: {
+    dateFormat: DATE_FORMATS.DMY,
+    timeFormat: TIME_FORMATS.HOUR_24,
+    firstDayOfWeek: 1,
+  },
+  fr: {
+    dateFormat: DATE_FORMATS.DMY,
+    timeFormat: TIME_FORMATS.HOUR_24,
+    firstDayOfWeek: 1,
+  },
+  he: {
+    dateFormat: DATE_FORMATS.DMY,
+    timeFormat: TIME_FORMATS.HOUR_24,
+    firstDayOfWeek: 0,
+  },
+  it: {
+    dateFormat: DATE_FORMATS.DMY,
+    timeFormat: TIME_FORMATS.HOUR_24,
+    firstDayOfWeek: 1,
+  },
+  nl: {
+    dateFormat: DATE_FORMATS.DMY,
+    timeFormat: TIME_FORMATS.HOUR_24,
+    firstDayOfWeek: 1,
+  },
+  ja: {
+    dateFormat: DATE_FORMATS.YMD,
+    timeFormat: TIME_FORMATS.HOUR_24,
+    firstDayOfWeek: 0,
+  },
+  pl: {
+    dateFormat: DATE_FORMATS.DMY,
+    timeFormat: TIME_FORMATS.HOUR_24,
+    firstDayOfWeek: 1,
+  },
+  pt: {
+    dateFormat: DATE_FORMATS.DMY,
+    timeFormat: TIME_FORMATS.HOUR_24,
+    firstDayOfWeek: 0,
+  },
+  ru: {
+    dateFormat: DATE_FORMATS.DMY,
+    timeFormat: TIME_FORMATS.HOUR_24,
+    firstDayOfWeek: 1,
+  },
+  'zh-CN': {
+    dateFormat: DATE_FORMATS.YMD,
+    timeFormat: TIME_FORMATS.HOUR_24,
+    firstDayOfWeek: 1,
+  },
+}
+
 export const AVAILABLE_LANGUAGES = [
   { code: 'ar', name: 'Arabic', nativeName: 'العربية' },
   { code: 'cs', name: 'Czech', nativeName: 'Čeština' },
@@ -53,7 +129,18 @@ export const LocalizationProvider = ({ children }) => {
     0,
     'firstDayOfWeek',
   ) // 0 = Sunday, 1 = Monday
-  const [language, setLanguage] = useStickyState('en', 'language')
+  const [language, setLanguageRaw] = useStickyState('en', 'language')
+
+  const setLanguage = code => {
+    setLanguageRaw(code)
+    const defaults =
+      LANGUAGE_DEFAULTS[code] || LANGUAGE_DEFAULTS[code.split('-')[0]]
+    if (defaults) {
+      setDateFormat(defaults.dateFormat)
+      setTimeFormat(defaults.timeFormat)
+      setFirstDayOfWeek(defaults.firstDayOfWeek)
+    }
+  }
 
   useEffect(() => {
     i18n.changeLanguage(language)

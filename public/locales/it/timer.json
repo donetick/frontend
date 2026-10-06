@@ -25,6 +25,17 @@
   "activeWork": "",
   "breakTime": "",
   "workSessions": "",
+  "timeline": {
+    "started": "Iniziato: {{time}}",
+    "ended": "Terminato: {{time}}",
+    "now": "Ora: {{time}}",
+    "active": "Attivo: {{percent}}%",
+    "emptyState": "Nessuna cronologia delle attività disponibile. Inizia a lavorare per vedere il tuo andamento.",
+    "workSessionsCount": "Sessioni di lavoro ({{count}})",
+    "sessionNumber": "Sessione n. {{number}}",
+    "ongoing": "→ in corso",
+    "durationAutoCalculated": "Durata (calcolata automaticamente)"
+  },
   "totalTime": "",
   "distribution": "",
   "noActiveTime": "",

@@ -1,5 +1,7 @@
 {
   "title": "Aufgaben",
+  "tasksForDate": "Aufgaben für {{date}}",
+  "createSuggestion": "\"{{value}}\" erstellen",
   "myChores": "Meine Aufgaben",
   "allChores": "Alle Aufgaben",
   "addChore": "Aufgabe hinzufügen",
@@ -134,7 +136,11 @@
       "assignee": "Zugewiesene Person"
     },
     "display": "Anzeige",
-    "displayOptions": "Anzeigeoptionen"
+    "displayOptions": "Anzeigeoptionen",
+    "moreSaveOptions": "Weitere Speicheroptionen",
+    "showCount": "{{count}} anzeigen",
+    "done": "Fertig",
+    "savedFilters": "Gespeicherte Filter"
   },
   "sort": {
     "assignedToMe": "Mir zugewiesen",
@@ -613,7 +619,15 @@
     "keepAsAttachment": "Foto als Anhang behalten",
     "altCaptured": "Erfasstes Dokument",
     "altProcessing": "Verarbeitung läuft",
-    "taskIdentified": "Aufgabe erkannt"
+    "taskIdentified": "Aufgabe erkannt",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
+    "tapToScanHint": "Tippe auf \"Dokument scannen\", um den Scanner zu öffnen",
+    "readingTextProgress": "Text wird aus Bild gelesen… {{progress}} %",
+    "dueDate": "Fällig: {{date}}",
+    "hideRawText": "Rohtext ausblenden",
+    "showRawText": "Rohtext anzeigen",
+    "cameraUnavailableUseUpload": "Kamera nicht verfügbar — stattdessen hochladen"
   },
   "descriptionPlaceholder": "Beschreibung eingeben...",
   "notificationTemplate": {
@@ -764,6 +778,8 @@
     "create": "Erstellen"
   },
   "addTask": {
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:",
     "title": "Neue Aufgabe erstellen",
     "defaultProject": "Standardprojekt",
     "anyone": "Jeder",

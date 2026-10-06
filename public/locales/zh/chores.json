@@ -1,5 +1,7 @@
 {
   "title": "",
+  "tasksForDate": "{{date}} 的任务",
+  "createSuggestion": "创建“{{value}}”",
   "myChores": "",
   "allChores": "",
   "addChore": "",
@@ -134,7 +136,11 @@
       "assignee": ""
     },
     "display": "",
-    "displayOptions": ""
+    "displayOptions": "",
+    "moreSaveOptions": "更多保存选项",
+    "showCount": "显示 {{count}} 个",
+    "done": "完成",
+    "savedFilters": "已保存的筛选器"
   },
   "sort": {
     "assignedToMe": "",
@@ -613,7 +619,15 @@
     "keepAsAttachment": "",
     "altCaptured": "",
     "altProcessing": "",
-    "taskIdentified": ""
+    "taskIdentified": "",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
+    "tapToScanHint": "点击“扫描文档”以打开扫描仪",
+    "readingTextProgress": "正在从图像中读取文本… {{progress}}%",
+    "dueDate": "截止日期：{{date}}",
+    "hideRawText": "隐藏原始文本",
+    "showRawText": "显示原始文本",
+    "cameraUnavailableUseUpload": "相机不可用 — 请改用上传"
   },
   "descriptionPlaceholder": "",
   "notificationTemplate": {
@@ -764,6 +778,8 @@
     "create": ""
   },
   "addTask": {
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:",
     "title": "",
     "defaultProject": "",
     "anyone": "",

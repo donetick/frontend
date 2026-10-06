@@ -19,7 +19,11 @@
     "overview": "",
     "visualization": "",
     "changeHistory": "",
-    "updated": ""
+    "updated": "",
+    "timeBefore": "{{time}}前",
+    "loading": "加载中...",
+    "noMoreHistory": "没有更多历史记录",
+    "loadMore": "加载更多"
   },
   "view": {
     "title": "",

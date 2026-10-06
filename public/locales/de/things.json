@@ -19,7 +19,11 @@
     "overview": "Übersicht der Dinge",
     "visualization": "Datenvisualisierung",
     "changeHistory": "Änderungsverlauf",
-    "updated": "Aktualisiert"
+    "updated": "Aktualisiert",
+    "timeBefore": "{{time}} zuvor",
+    "loading": "Wird geladen...",
+    "noMoreHistory": "Kein weiterer Verlauf",
+    "loadMore": "Mehr laden"
   },
   "view": {
     "title": "Dinge",

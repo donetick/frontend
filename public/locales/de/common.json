@@ -225,6 +225,7 @@
     "invitePeople": "Personen einladen",
     "addMembers": "Mitglieder zu deinem Kreis hinzufügen",
     "sidePanelSettings": "Seitenleisteneinstellungen",
+    "sidePanelSettingsDescription": "Layout & Karten anpassen",
     "planFree": "Kostenlos",
     "planPlus": "Plus",
     "planPlusExpiring": "Plus (läuft bald ab)",
@@ -341,11 +342,26 @@
   "noAttachmentsTitle": "Keine Anhänge",
   "noAttachmentsDescription": "Fotos und Dateien, die dieser Aufgabe hinzugefügt werden, erscheinen hier.",
   "kbSize": "{{size}} KB",
+  "logoAlt": "Logo",
+  "notification": {
+    "error": "Fehler",
+    "success": "Erfolg",
+    "undoneSuccessfully": "Erfolgreich rückgängig gemacht",
+    "warning": "Warnung",
+    "information": "Information",
+    "title": "Benachrichtigung",
+    "unknown": "Unbekannte Benachrichtigung",
+    "undo": "Rückgängig",
+    "dismiss": "Schließen"
+  },
   "onboarding": {
     "sources": {
       "speak": "Sprechen",
       "snap": "Foto",
       "type": "Tippen"
+    },
+    "voiceWave": {
+      "listening": "Hört zu…"
     },
     "capture": {
       "voiceCaption": "Datumsangaben, Labels und Punkte aus deinen Worten",

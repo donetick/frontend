@@ -19,7 +19,11 @@
     "overview": "",
     "visualization": "",
     "changeHistory": "",
-    "updated": ""
+    "updated": "",
+    "timeBefore": "{{time}}前",
+    "loading": "読み込み中...",
+    "noMoreHistory": "これ以上履歴はありません",
+    "loadMore": "もっと読み込む"
   },
   "view": {
     "title": "",

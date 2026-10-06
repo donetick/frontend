@@ -46,7 +46,9 @@
     "pointsEarned": "Puntos ganados",
     "points_one": "",
     "points_other": "",
-    "note": "Nota"
+    "note": "Nota",
+    "reason": "Motivo",
+    "notes": "Notas"
   },
   "charts": {
     "noData": "No hay datos disponibles",

@@ -19,7 +19,11 @@
     "overview": "نظرة عامة",
     "visualization": "تصور البيانات",
     "changeHistory": "تغيير التاريخ",
-    "updated": "تم التحديث"
+    "updated": "تم التحديث",
+    "timeBefore": "{{time}} قبل",
+    "loading": "جارٍ التحميل...",
+    "noMoreHistory": "لا مزيد من السجل",
+    "loadMore": "تحميل المزيد"
   },
   "view": {
     "title": "أشياء",

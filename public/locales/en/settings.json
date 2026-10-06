@@ -658,7 +658,13 @@
     "createTab": "Create Backup",
     "restoreTab": "Restore Backup",
     "creating": "Creating backup...",
-    "restoring": "Restoring backup..."
+    "restoring": "Restoring backup...",
+    "encryptionKeyRequired": "Encryption Key *",
+    "keySafetyNotice": "Keep this key safe—you'll need it to restore your backup",
+    "nameOptional": "Backup Name (Optional)",
+    "namePlaceholder": "e.g., weekly-backup",
+    "fileRequired": "Backup File *",
+    "selectedFile": "Selected: {{name}}"
   },
   "deletion": {
     "passwordRequired": "Please enter your password to continue",
@@ -686,7 +692,15 @@
   },
   "realtime": {
     "titleSse": "Real-time Updates (SSE)",
-    "subtitleSse": "Get instant notifications via Server-Sent Events"
+    "subtitleSse": "Get instant notifications via Server-Sent Events",
+    "basicPlanDescription": "Real-time updates (SSE) are not available in the Basic plan. Upgrade to Plus to receive instant notifications when chores are updated.",
+    "disabledDescription": "Real-time updates (SSE) are disabled. Enable to see live changes when you or other circle members complete, skip, or modify chores.",
+    "connectedDescription": "Real-time updates (SSE) are working. You'll see live changes when you or other circle members complete, skip, or modify chores.",
+    "connectingDescription": "Connecting to real-time updates (SSE)...",
+    "errorDescription": "Real-time updates (SSE) are enabled but not working: {{error}}",
+    "disconnectedDescription": "Real-time updates (SSE) are enabled but not currently connected.",
+    "enableLabel": "Enable Real-time Updates (SSE)",
+    "statusLabel": "Status:"
   },
   "nativeCancel": {
     "title": "Cancel Subscription",

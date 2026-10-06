@@ -62,10 +62,6 @@
         "title": "存储设置",
         "description": "备份和恢复数据，管理本地存储与同步偏好。"
       },
-      "sidepanel": {
-        "title": "侧边栏自定义",
-        "description": "自定义侧边栏中卡片的布局和显示状态。"
-      },
       "layout": {
         "title": "布局与导航",
         "description": "选择应用打开时显示的页面，以及围绕它的快捷方式和面板。"
@@ -82,6 +78,10 @@
         "title": "高级设置",
         "description": "配置 Webhook、实时更新以及其他高级功能。"
       },
+      "privacy": {
+        "title": "Privacy & Analytics",
+        "description": "Control anonymous usage analytics and crash reporting."
+      },
       "developer": {
         "title": "开发者设置",
         "description": "查看身份验证令牌、SSE 连接和调试数据等技术信息。"
@@ -93,6 +93,10 @@
       "bugReport": {
         "title": "报告问题",
         "description": "有什么不对劲吗？把详情和技术快照一起发给我们。"
+      },
+      "sidepanel": {
+        "title": "侧边栏自定义",
+        "description": "自定义侧边栏中卡片的布局和显示状态。"
       }
     }
   },
@@ -168,7 +172,8 @@
     "joinCircle": "加入圈子",
     "joinedPending": "已成功加入圈子，请等待圈主接受你的请求。",
     "alreadyMember": "你已经是该圈子的成员",
-    "joinFailed": "加入圈子失败"
+    "joinFailed": "加入圈子失败",
+    "copyLink": "Copy Link"
   },
   "accountSettings": {
     "title": "账户设置",
@@ -352,7 +357,8 @@
     "backupCodesModal": {
       "title": "新的备用代码",
       "warning": "你之前的备用代码已失效。请将这些新代码保存在安全的地方。每个代码只能使用一次。"
-    }
+    },
+    "generateCodes": "Generate New Codes"
   },
   "apiTokens": {
     "title": "API 令牌",
@@ -393,7 +399,6 @@
   },
   "sidepanel": {
     "title": "侧边栏自定义",
-    "heading": "侧边栏设置",
     "description": "设置侧边栏显示哪些卡片以及它们的顺序。拖放可重新排序，也可切换每张卡片的显示状态。",
     "resetToDefaults": "恢复默认",
     "resetHelper": "这会将所有卡片的显示状态和顺序恢复为默认值。",
@@ -422,7 +427,49 @@
         "name": "每周目标",
         "description": "显示每周进度和家庭完成情况统计"
       }
-    }
+    },
+    "heading": "侧边栏设置"
+  },
+  "homeSections": {
+    "title": "Overview Customization",
+    "description": "Customize which sections appear on the Home screen and their order. Drag and drop to reorder, or toggle visibility for each section.",
+    "resetToDefaults": "Reset to Defaults",
+    "resetHelper": "This will restore all sections to their default visibility and order.",
+    "sections": {
+      "greeting": {
+        "name": "Greeting",
+        "description": "The headline at the top that sums up your day"
+      },
+      "glance": {
+        "name": "At a Glance",
+        "description": "Overdue / due today / needs review / unplanned counts"
+      },
+      "circle": {
+        "name": "Your Circle",
+        "description": "Shows what everyone in your circle is carrying this week"
+      },
+      "review": {
+        "name": "Needs Review",
+        "description": "Finished tasks waiting to be signed off"
+      },
+      "overdue": {
+        "name": "Overdue",
+        "description": "Tasks that have slipped past their due date"
+      },
+      "nextUp": {
+        "name": "Coming Up",
+        "description": "What's due today and tomorrow"
+      },
+      "filters": {
+        "name": "Filters",
+        "description": "Quick access to your pinned and most useful filters"
+      },
+      "projects": {
+        "name": "Projects",
+        "description": "Where the work is piling up, by project"
+      }
+    },
+    "detailedDescription": "Customize the layout and visibility of sections on the Home screen."
   },
   "layout": {
     "title": "布局与导航",
@@ -477,13 +524,15 @@
     "sunday": "星期日",
     "monday": "星期一",
     "saturday": "星期六",
+    "helpTranslate": "Help improve this translation",
     "formats": {
       "mdy": "MM/DD/YYYY（美国）",
       "dmy": "DD/MM/YYYY（欧洲）",
       "ymd": "YYYY-MM-DD（ISO）",
       "long": "长格式（例如：2024年1月1日）",
       "short": "短格式（例如：2024年1月1日）"
-    }
+    },
+    "descriptionLong": "Customize language, date format, and regional preferences for your account. These settings will apply throughout the application."
   },
   "advanced": {
     "title": "高级设置",
@@ -521,5 +570,167 @@
       "notConnected": "实时更新已开启，但当前未连接。",
       "basicPlanNotice": "基础套餐不支持实时更新。升级到 Plus，当你或其他圈子成员完成、跳过或修改任务时即可立即收到通知。"
     }
+  },
+  "privacyAnalytics": {
+    "title": "Privacy & Analytics",
+    "description": "Donetick never sends task names, descriptions, notes, or other task content. Session recording is never enabled.",
+    "analyticsToggle": "Anonymous analytics",
+    "analyticsHelper": "Help improve Donetick by sharing anonymous usage statistics.",
+    "crashToggle": "Crash reports",
+    "crashHelper": "Send us the error and what led to it when Donetick crashes no task content.",
+    "footnote": "You can change these choices at any time."
+  },
+  "subscription": {
+    "sessionFailed": "Failed to create subscription session",
+    "errorTitle": "Subscription Error",
+    "errorMessage": "Failed to start subscription process. Please try again.",
+    "subscribe": "Subscribe",
+    "cancelAnytime": "Cancel anytime. No hidden fees. Secure payment powered by Stripe.",
+    "description": "Unlock reminders, rich task details, and advanced automation.",
+    "whatsIncluded": "What's included:",
+    "mostPopular": "Most Popular",
+    "featureNotifications": "Task notifications and reminders",
+    "featureRichText": "Rich text descriptions with images uploads",
+    "featureThingTriggers": "Thing-based task triggers",
+    "featureApiTokens": "API tokens for integrations",
+    "featureImageUploads": "Image uploads in descriptions",
+    "featureAutomation": "Advanced task automation",
+    "planYearly": "Yearly"
+  },
+  "childUsers": {
+    "errNameRequired": "Sub account name is required",
+    "errNameMin": "Sub account name must be at least 2 characters",
+    "errNameMax": "Sub account name must be less than 20 characters",
+    "errNameChars": "Sub account name can only contain lowercase letters, dot and dash",
+    "errPasswordRequired": "Password is required",
+    "errPasswordLength": "Password must be between 8 and 64 characters",
+    "errPasswordMatch": "Passwords do not match",
+    "errDisplayNameMax": "Display name must be less than 50 characters",
+    "createTitle": "Create Sub Account",
+    "createDescription": "Create a login that can complete tasks assigned to this account.",
+    "createButton": "Create Account",
+    "nameLabel": "Sub Account Name *",
+    "namePlaceholder": "Enter sub account name (e.g., sarah)",
+    "displayNameLabel": "Display Name",
+    "displayNamePlaceholder": "Display name (optional, defaults to sub account name)",
+    "passwordLabel": "Password *",
+    "passwordPlaceholder": "Enter password (8-64 characters)",
+    "confirmPasswordLabel": "Confirm Password *",
+    "confirmPasswordPlaceholder": "Confirm password"
+  },
+  "passwordChange": {
+    "minLength": "Password must be at least 8 characters",
+    "maxLength": "Password must be less than 64 characters",
+    "description": "Choose a password between 8 and 64 characters.",
+    "mismatch": "Passwords do not match",
+    "newPassword": "New password",
+    "newPasswordPlaceholder": "Enter password",
+    "confirmPassword": "Confirm password",
+    "confirmPasswordPlaceholder": "Repeat password"
+  },
+  "payment": {
+    "cancelledTitle": "Payment has been cancelled",
+    "cancelledRedirect": "You will be redirected to the main page shortly.",
+    "successTitle": "Payment Successful!",
+    "successRedirect": "You will be redirected to the settings page shortly."
+  },
+  "developer": {
+    "tokenRefreshed": "Token refreshed successfully",
+    "endpointCalled": "Refresh token endpoint called successfully",
+    "clearDbCleared": "Local offline database cleared. Starting full sync...",
+    "clearDbDone": "Full sync completed from the beginning",
+    "intro": "View technical information about your authentication tokens and session",
+    "refreshCookieNote": "Refresh tokens are managed via HTTP-only cookies on web platform",
+    "noReconnectInfo": "No reconnection information available",
+    "noTimeoutInfo": "No timeout information available",
+    "noDebugInfo": "No debug information available"
+  },
+  "backup": {
+    "keyRequired": "Encryption key is required",
+    "created": "Backup created and downloaded successfully",
+    "createFailed": "Failed to create backup",
+    "selectFile": "Please select a backup file",
+    "restored": "Backup restored successfully. Please refresh the page.",
+    "restoreFailed": "Failed to restore backup",
+    "readFailed": "Failed to read backup file",
+    "createIntro": "Create an encrypted backup of your data. This backup will include all your chores, history, settings, and optionally your uploaded files.",
+    "keyPlaceholder": "Enter a strong encryption key",
+    "includeAssets": "Include uploaded files and assets",
+    "warningLabel": "Warning:",
+    "restoreWarning": "Restoring a backup will replace all your current data. This action cannot be undone.",
+    "restoreKeyPlaceholder": "Enter the encryption key used for this backup",
+    "title": "Backup & Restore",
+    "createTab": "Create Backup",
+    "restoreTab": "Restore Backup",
+    "creating": "Creating backup...",
+    "restoring": "Restoring backup...",
+    "encryptionKeyRequired": "加密密钥 *",
+    "keySafetyNotice": "请妥善保管此密钥——恢复备份时需要用到它",
+    "nameOptional": "备份名称（可选）",
+    "namePlaceholder": "例如：每周备份",
+    "fileRequired": "备份文件 *",
+    "selectedFile": "已选择：{{name}}"
+  },
+  "deletion": {
+    "passwordRequired": "Please enter your password to continue",
+    "passwordAndDelete": "Please enter your password and type DELETE to confirm",
+    "failed": "Failed to delete account",
+    "passwordPlaceholder": "Enter your password",
+    "transferIntro": "You own circles that require ownership transfer before deletion. Please select new owners:",
+    "selectOwner": "Select new owner",
+    "confirmPrompt": "Please enter your password and type DELETE to confirm",
+    "typeDelete": "DELETE",
+    "warningLead": "This action cannot be undone.",
+    "warningIntro": "Deleting your account will permanently remove:",
+    "removesProfile": "Your user profile and authentication data",
+    "removesChores": "All your chores, chore history, and time tracking sessions",
+    "removesTokens": "API tokens, MFA sessions, and password reset tokens",
+    "removesStorage": "Storage files and usage data",
+    "removesPoints": "Points history and notifications",
+    "removesCircles": "Circle memberships and relationships",
+    "passwordToContinue": "Enter your password to continue",
+    "circleLabel": "Circle: {{name}}",
+    "newOwner": "New Owner",
+    "logoutNotice": "On successful deletion, you will be logged out and redirected to the login page.",
+    "passwordLabel": "Password",
+    "typeToConfirm": "Type \"{{word}}\" to confirm"
+  },
+  "realtime": {
+    "titleSse": "Real-time Updates (SSE)",
+    "subtitleSse": "Get instant notifications via Server-Sent Events",
+    "basicPlanDescription": "Real-time updates (SSE) are not available in the Basic plan. Upgrade to Plus to receive instant notifications when chores are updated.",
+    "disabledDescription": "Real-time updates (SSE) are disabled. Enable to see live changes when you or other circle members complete, skip, or modify chores.",
+    "connectedDescription": "Real-time updates (SSE) are working. You'll see live changes when you or other circle members complete, skip, or modify chores.",
+    "connectingDescription": "Connecting to real-time updates (SSE)...",
+    "errorDescription": "Real-time updates (SSE) are enabled but not working: {{error}}",
+    "disconnectedDescription": "Real-time updates (SSE) are enabled but not currently connected.",
+    "enableLabel": "Enable Real-time Updates (SSE)",
+    "statusLabel": "Status:"
+  },
+  "nativeCancel": {
+    "title": "Cancel Subscription",
+    "dismiss": "Dismiss",
+    "cancelViaStore": "I'll cancel from my app store",
+    "cancelDesktop": "Cancel desktop subscription",
+    "intro": "To cancel your subscription, please follow the instructions for your platform (you should cancel through the same platform you used to subscribe).",
+    "iosHeading": "For iOS (iPhone/iPad):",
+    "iosStep1": "1. Open the <b>Settings</b> app on your device",
+    "iosStep2": "2. Tap your name at the top of the screen",
+    "iosStep3": "3. Tap <b>Subscriptions</b>",
+    "iosStep4": "4. Find and tap <b>Donetick</b>",
+    "iosStep5": "5. Tap <b>Cancel Subscription</b>",
+    "iosNote": "<b>Note:</b> If you subscribed through iOS and are using the web/desktop version, you must cancel through iOS Settings as described above.",
+    "androidHeading": "For Android:",
+    "androidStep1": "1. Open the <b>Google Play Store</b> app",
+    "androidStep2": "2. Tap the profile icon in the top right",
+    "androidStep3": "3. Tap <b>Payments & subscriptions</b>",
+    "androidStep4": "4. Tap <b>Subscriptions</b>",
+    "androidStep5": "5. Find and tap <b>Donetick</b>",
+    "androidStep6": "6. Tap <b>Cancel subscription</b>",
+    "androidNote": "<b>Note:</b> If you subscribed through Google Play and are using the web/desktop version, you must cancel through Google Play as described above.",
+    "webHeading": "For Web/Desktop Subscriptions:",
+    "webBody": "If you originally subscribed through our website or desktop app, you can cancel your subscription by going to the Account Settings section on our website. using a web browser",
+    "webNote": "<b>Important:</b> You must cancel your subscription through the same platform where you originally subscribed. If you subscribed through the iOS App Store or Google Play Store (even if you're now using the web/desktop version), you must cancel through that original platform using the instructions above.",
+    "footer": "Your subscription will remain active until the end of your current billing period."
   }
 }

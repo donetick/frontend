@@ -25,6 +25,17 @@
   "activeWork": "",
   "breakTime": "",
   "workSessions": "",
+  "timeline": {
+    "started": "Rozpoczęto: {{time}}",
+    "ended": "Zakończono: {{time}}",
+    "now": "Teraz: {{time}}",
+    "active": "Aktywne: {{percent}}%",
+    "emptyState": "Brak dostępnej osi czasu aktywności. Zacznij pracować, aby zobaczyć swój wzorzec aktywności.",
+    "workSessionsCount": "Sesje pracy ({{count}})",
+    "sessionNumber": "Sesja nr {{number}}",
+    "ongoing": "→ trwa",
+    "durationAutoCalculated": "Czas trwania (obliczany automatycznie)"
+  },
   "totalTime": "",
   "distribution": "",
   "noActiveTime": "",

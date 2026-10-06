@@ -1,5 +1,7 @@
 {
   "title": "Домашние дела",
+  "tasksForDate": "Задачи на {{date}}",
+  "createSuggestion": "Создать «{{value}}»",
   "myChores": "Мои дела",
   "allChores": "Все дела",
   "addChore": "Добавить дело",
@@ -134,7 +136,11 @@
       "assignee": "Исполнитель"
     },
     "display": "Отображать",
-    "displayOptions": "Параметры отображения"
+    "displayOptions": "Параметры отображения",
+    "moreSaveOptions": "Дополнительные параметры сохранения",
+    "showCount": "Показать {{count}}",
+    "done": "Готово",
+    "savedFilters": "Сохранённые фильтры"
   },
   "sort": {
     "assignedToMe": "Назначенные на меня",
@@ -613,7 +619,15 @@
     "keepAsAttachment": "Оставить фото как вложение",
     "altCaptured": "Записанный документ",
     "altProcessing": "Обработка",
-    "taskIdentified": "Задача определена"
+    "taskIdentified": "Задача определена",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
+    "tapToScanHint": "Нажмите «Сканировать документ», чтобы открыть сканер",
+    "readingTextProgress": "Считывание текста с изображения… {{progress}}%",
+    "dueDate": "Срок: {{date}}",
+    "hideRawText": "Скрыть исходный текст",
+    "showRawText": "Показать исходный текст",
+    "cameraUnavailableUseUpload": "Камера недоступна — используйте загрузку вместо этого"
   },
   "descriptionPlaceholder": "Введите описание...",
   "notificationTemplate": {
@@ -764,6 +778,8 @@
     "create": "Создать"
   },
   "addTask": {
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:",
     "title": "Создать новую задачу",
     "defaultProject": "Проект по умолчанию",
     "anyone": "Кто угодно",
