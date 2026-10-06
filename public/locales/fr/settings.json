@@ -485,7 +485,7 @@
     },
     "bottomNav": {
       "title": "Navigation inférieure",
-      "description": "Choisissez jusqu'à {{max}} raccourcis pour la barre de navigation inférieure sur mobile et faites-les glisser pour les réorganiser. « Plus » reste toujours le dernier élément et ouvre le menu complet.",
+      "description": "Choisissez jusqu'à {{max}} raccourcis pour la barre de navigation inférieure sur mobile et faites-les glisser pour les réorganiser. « Menu » reste toujours le dernier élément et ouvre le menu complet.",
       "resetToDefaults": "Rétablir les valeurs par défaut",
       "resetHelper": "Les raccourcis et l'ordre par défaut de la navigation inférieure seront rétablis."
     },

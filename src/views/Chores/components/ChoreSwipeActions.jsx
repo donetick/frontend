@@ -12,6 +12,7 @@ import {
   SkipNext,
   ThumbDown,
   ThumbUp,
+  Unarchive,
 } from '@mui/icons-material'
 import { Box, Typography } from '@mui/joy'
 import PropTypes from 'prop-types'
@@ -275,4 +276,62 @@ export const getChoreTrailingActions = ({
   )
 
   return <TrailingActions>{actions}</TrailingActions>
+}
+
+/**
+ * Archived-row swipe actions: restore (leading) and delete (trailing).
+ * Nothing else from the active-task set (complete, skip, schedule, edit)
+ * applies once a task is archived, so this is a separate, much smaller pair
+ * rather than a branch inside the functions above.
+ */
+export const getArchivedLeadingActions = ({
+  chore,
+  handleChoreAction,
+  isMultiSelectMode = false,
+  t,
+}) => {
+  if (isMultiSelectMode) return null
+
+  return (
+    <LeadingActions>
+      <SwipeAction
+        onClick={() => {
+          hapticMedium()
+          handleChoreAction('restore', chore)
+        }}
+      >
+        <SwipeActionTile
+          bgcolor='success.500'
+          icon={<Unarchive sx={{ color: 'white' }} />}
+          label={t('archived.restore')}
+        />
+      </SwipeAction>
+    </LeadingActions>
+  )
+}
+
+export const getArchivedTrailingActions = ({
+  chore,
+  handleChoreAction,
+  isMultiSelectMode = false,
+  t,
+}) => {
+  if (isMultiSelectMode) return null
+
+  return (
+    <TrailingActions>
+      <SwipeAction
+        onClick={() => {
+          hapticMedium()
+          handleChoreAction('delete', chore)
+        }}
+      >
+        <SwipeActionTile
+          bgcolor='danger.500'
+          icon={<Delete sx={{ color: 'white' }} />}
+          label={t('archived.delete')}
+        />
+      </SwipeAction>
+    </TrailingActions>
+  )
 }
