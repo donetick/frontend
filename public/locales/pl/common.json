@@ -342,7 +342,7 @@
   "noAttachmentsTitle": "Brak załączników",
   "noAttachmentsDescription": "Zdjęcia i pliki dodane do tego zadania pojawią się tutaj.",
   "kbSize": "",
-  "logoAlt": "Logo",
+  "logoAlt": "",
   "notification": {
     "error": "Błąd",
     "success": "Sukces",
