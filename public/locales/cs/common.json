@@ -342,7 +342,7 @@
   "noAttachmentsTitle": "Žádné přílohy",
   "noAttachmentsDescription": "Fotky a soubory přidané k tomuto úkolu se zobrazí zde.",
   "kbSize": "{{size}} kB",
-  "logoAlt": "Logo",
+  "logoAlt": "",
   "notification": {
     "error": "Chyba",
     "success": "Úspěch",
