@@ -590,7 +590,14 @@
     "featureApiTokens": "API tokens for integrations",
     "featureImageUploads": "Image uploads in descriptions",
     "featureAutomation": "Advanced task automation",
-    "planYearly": "Yearly"
+    "planYearly": "Yearly",
+    "reasonAdvancedReminders": "Reminders before a task is due and follow-ups after it are a Plus feature. Your current plan reminds you on the due date.",
+    "reasonReminderChannels": "Sending task reminders to a Telegram group is a Plus feature.",
+    "reasonHistoryWindow": "Your current plan shows the last 30 days. Upgrade to Plus for your full history and long-term trends.",
+    "reasonThingTriggers": "Triggering tasks automatically from a thing changing state is a Plus feature.",
+    "reasonProjectLimit": "Your current plan includes {{projectLimit}} projects. Upgrade to Plus to create as many as you need.",
+    "reasonQuickFilterLimit": "Your current plan includes {{filterLimit}} saved quick filters. Upgrade to Plus for unlimited filters.",
+    "reasonFileUpload": "Attaching files and images is a Plus feature. Upgrade to Plus to add photos, scans and documents to your tasks."
   },
   "childUsers": {
     "errNameRequired": "Sub account name is required",

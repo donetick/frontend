@@ -4,6 +4,7 @@ import {
   AssignmentTurnedIn,
   CreditCard,
   EmojiEvents,
+  LockOutlined,
   MilitaryTech,
   Redeem,
   Star,
@@ -42,8 +43,10 @@ import {
   YAxis,
 } from 'recharts'
 
+import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext.jsx'
 import { useChoresHistory } from '../../queries/ChoreQueries.jsx'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
+import { isPlusHistoryWindow } from '../../utils/entitlements.js'
 import { RedeemPoints } from '../../utils/Fetcher.jsx'
 import { resolvePhotoURL } from '../../utils/Helpers.jsx'
 import LoadingComponent from '../components/Loading.jsx'
@@ -67,6 +70,23 @@ const UserPoints = () => {
   } = useChoresHistory(7, true)
 
   const { data: userProfile } = useUserProfile()
+  const { isPlus, showPaywall } = usePaywall()
+
+  // Free accounts can look back 30 days. Longer windows stay tappable and open
+  // the paywall on the attempt, so the limit is discovered by trying it.
+  const handleTimePeriodChange = days => {
+    if (!isPlus && isPlusHistoryWindow(days)) {
+      showPaywall(PAYWALL_REASON.HISTORY_WINDOW)
+      return
+    }
+    setTabValue(days)
+    handleChoresHistoryLimitChange(days)
+  }
+
+  const periodLockIcon = isPlus ? null : (
+    <LockOutlined sx={{ fontSize: 13, ml: 0.5, opacity: 0.6 }} />
+  )
+
   const [selectedUser, setSelectedUser] = useState(userProfile?.id)
   const [circleUsers, setCircleUsers] = useState([])
   const [selectedHistory, setSelectedHistory] = useState([])
@@ -329,10 +349,7 @@ const UserPoints = () => {
               }}
             >
               <Tabs
-                onChange={(e, tabValue) => {
-                  setTabValue(tabValue)
-                  handleChoresHistoryLimitChange(tabValue)
-                }}
+                onChange={(e, nextValue) => handleTimePeriodChange(nextValue)}
                 value={tabValue}
                 size='sm'
                 sx={{
@@ -353,8 +370,9 @@ const UserPoints = () => {
                 >
                   {[
                     { label: t('tabs.short7d'), value: 7 },
-                    { label: t('tabs.short6m'), value: 6 * 30 },
-                    { label: t('tabs.shortAll'), value: 24 * 30 },
+                    { label: t('tabs.short30d'), value: 30 },
+                    { label: t('tabs.short6m'), value: 6 * 30, plus: true },
+                    { label: t('tabs.shortAll'), value: 24 * 30, plus: true },
                   ].map((tab, index) => (
                     <Tab
                       key={index}
@@ -379,6 +397,7 @@ const UserPoints = () => {
                       value={tab.value}
                     >
                       {tab.label}
+                      {tab.plus ? periodLockIcon : null}
                     </Tab>
                   ))}
                 </TabList>
@@ -691,10 +710,7 @@ const UserPoints = () => {
                 {t('filter.timePeriod')}
               </Typography>
               <Tabs
-                onChange={(e, tabValue) => {
-                  setTabValue(tabValue)
-                  handleChoresHistoryLimitChange(tabValue)
-                }}
+                onChange={(e, nextValue) => handleTimePeriodChange(nextValue)}
                 value={tabValue}
                 sx={{
                   borderRadius: 8,
@@ -714,8 +730,9 @@ const UserPoints = () => {
                 >
                   {[
                     { label: t('tabs.days7'), value: 7 },
-                    { label: t('tabs.months6'), value: 6 * 30 },
-                    { label: t('tabs.allTime'), value: 24 * 30 },
+                    { label: t('tabs.days30'), value: 30 },
+                    { label: t('tabs.months6'), value: 6 * 30, plus: true },
+                    { label: t('tabs.allTime'), value: 24 * 30, plus: true },
                   ].map((tab, index) => (
                     <Tab
                       key={index}
@@ -740,6 +757,7 @@ const UserPoints = () => {
                       value={tab.value}
                     >
                       {tab.label}
+                      {tab.plus ? periodLockIcon : null}
                     </Tab>
                   ))}
                 </TabList>

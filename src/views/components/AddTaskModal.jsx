@@ -28,6 +28,7 @@ import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { localAIService } from '../../service/LocalAIService'
 import { voiceInputService } from '../../service/VoiceInputService'
 import LABEL_COLORS, { TASK_COLOR } from '../../utils/Colors'
+import { sanitizeRemindersForPlan } from '../../utils/entitlements'
 import { CreateLabel } from '../../utils/Fetcher'
 import { imageSourceToFile } from '../../utils/FileConvert'
 import { isPlusAccount } from '../../utils/Helpers'
@@ -1051,10 +1052,13 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
       source: taskSourceRef.current,
     }
 
-    // Reminders are a Plus feature and only make sense when the user kept at
-    // least one template; without the flag the backend never schedules them.
-    const hasReminders =
-      isPlusAccount(userProfile) && notificationMetadata?.templates?.length > 0
+    // Every plan gets reminders; the free plan is capped at the on-due one.
+    // Without the flag the backend never schedules them.
+    const planReminders = sanitizeRemindersForPlan(
+      notificationMetadata?.templates,
+      isPlusAccount(userProfile),
+    )
+    const hasReminders = planReminders.length > 0
 
     if (frequency) {
       chore.frequencyType = frequency.frequencyType
@@ -1071,7 +1075,10 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
     }
     if (hasReminders && (frequency || dueDate)) {
       chore.notification = true
-      chore.notificationMetadata = notificationMetadata
+      chore.notificationMetadata = {
+        ...notificationMetadata,
+        templates: planReminders,
+      }
     }
 
     createChoreMutation

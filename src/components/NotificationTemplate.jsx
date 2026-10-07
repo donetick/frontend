@@ -2,6 +2,7 @@ import { Save } from '@mui/icons-material'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import InfoIcon from '@mui/icons-material/Info'
+import LockOutlined from '@mui/icons-material/LockOutlined'
 import NotificationsIcon from '@mui/icons-material/Notifications'
 import Alert from '@mui/joy/Alert'
 import Badge from '@mui/joy/Badge'
@@ -15,8 +16,10 @@ import Typography from '@mui/joy/Typography'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { PAYWALL_REASON, usePaywall } from '../contexts/PaywallContext'
 import { NOTIFICATION_TYPE, TASK_COLOR } from '../utils/Colors'
 import { TIME_UNITS } from '../utils/DurationUtils'
+import { sanitizeRemindersForPlan } from '../utils/entitlements'
 
 const timeUnits = TIME_UNITS
 
@@ -76,6 +79,22 @@ const NotificationTemplate = ({
   value,
 }) => {
   const { t } = useTranslation('chores')
+  const { isPlanKnown, isPlus, showPaywall } = usePaywall()
+
+  // Free accounts get the on-due reminder; shifting a reminder before or after
+  // the due date is the Plus upgrade. The controls stay live either way — we
+  // surface the paywall on the attempt rather than greying the buttons out,
+  // so the user sees what they're buying.
+  const requirePlus = useCallback(() => {
+    if (isPlus) return true
+    showPaywall(PAYWALL_REASON.ADVANCED_REMINDERS)
+    return false
+  }, [isPlus, showPaywall])
+
+  // Signals which controls lead to the paywall without taking them away.
+  const plusHint = isPlus ? null : (
+    <LockOutlined sx={{ fontSize: 14, opacity: 0.6 }} />
+  )
   const [notifications, setNotifications] = useState(
     value?.templates ||
       JSON.parse(localStorage.getItem('defaultNotificationTemplate')) ||
@@ -128,6 +147,19 @@ const NotificationTemplate = ({
     updateNotificationIndices()
   }, [updateNotificationIndices])
 
+  // The saved default template (and anything authored while subscribed) can
+  // hold pre-due/follow-up rows. Drop them once we actually know the plan is
+  // free, so the editor never shows reminders that get stripped on save.
+  useEffect(() => {
+    if (!isPlanKnown || isPlus) return
+    setNotifications(prev => {
+      const allowed = sanitizeRemindersForPlan(prev, false)
+      if (allowed.length === prev.length) return prev
+      notificationsRef.current = allowed
+      return allowed
+    })
+  }, [isPlanKnown, isPlus])
+
   // Notify parent component of changes including the template name
   useEffect(() => {
     if (onChange) {
@@ -176,6 +208,9 @@ const NotificationTemplate = ({
 
     // Update the UI representation based on the field being changed
     if (field === 'timing') {
+      // Moving a reminder off the due date is the Plus capability, so the
+      // paywall belongs here rather than on a disabled <Option>.
+      if (value !== 'ondue' && !requirePlus()) return
       updatedUIRep.timing = value
       // Reset display value when switching to "On Due"
       if (value === 'ondue') {
@@ -230,6 +265,7 @@ const NotificationTemplate = ({
 
   const addSmartNotification = type => {
     if (notifications.length >= maxNotifications) return
+    if (type !== 'due' && !requirePlus()) return
     setShowSaveDefault(true)
     let newNotification
 
@@ -577,6 +613,7 @@ const NotificationTemplate = ({
                         key={opt.value}
                         value={opt.value}
                         disabled={opt.value === 'ondue' && hasOnDueElsewhere}
+                        endDecorator={opt.value === 'ondue' ? null : plusHint}
                       >
                         {t(`notificationTemplate.timing.${opt.value}`)}
                       </Option>
@@ -685,6 +722,7 @@ const NotificationTemplate = ({
           onClick={() => addSmartNotification('reminder')}
           disabled={notifications.length >= maxNotifications}
           startDecorator={<AddIcon />}
+          endDecorator={plusHint}
           size={'sm'}
           variant={'outlined'}
           sx={{
@@ -726,6 +764,7 @@ const NotificationTemplate = ({
           onClick={() => addSmartNotification('followup')}
           disabled={notifications.length >= maxNotifications}
           startDecorator={<AddIcon />}
+          endDecorator={plusHint}
           size={'sm'}
           variant={'outlined'}
           sx={{

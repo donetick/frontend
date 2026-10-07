@@ -19,6 +19,7 @@ import { registerCapacitorListeners } from './CapacitorListener'
 import PageTransition from './components/animations/PageTransition'
 import { ImpersonateUserProvider } from './contexts/ImpersonateUserContext'
 import { KeyboardShortcutScopeProvider } from './contexts/KeyboardShortcutScopeContext'
+import { PaywallProvider } from './contexts/PaywallContext'
 import SSEProvider from './contexts/SSEContext'
 import { AuthProvider } from './hooks/useAuth.jsx'
 import useOnboardingGate from './hooks/useOnboardingGate'
@@ -225,7 +226,9 @@ function App() {
         <SSEProvider>
           <GlobalSearchProvider>
             <KeyboardShortcutScopeProvider>
-              <AppContent />
+              <PaywallProvider>
+                <AppContent />
+              </PaywallProvider>
             </KeyboardShortcutScopeProvider>
           </GlobalSearchProvider>
         </SSEProvider>

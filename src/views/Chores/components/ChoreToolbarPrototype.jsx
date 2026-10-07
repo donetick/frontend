@@ -25,6 +25,7 @@ import {
   CheckBoxOutlineBlank,
   DisplaySettings,
   FilterList,
+  LockOutlined,
   Save,
   Sort,
   Tune,
@@ -52,7 +53,9 @@ import { useTranslation } from 'react-i18next'
 import AppModal from '../../../components/common/AppModal'
 import ActiveFilterChips from '../../../components/common/filter/ActiveFilterChips'
 import KeyboardShortcutHint from '../../../components/common/KeyboardShortcutHint'
+import { PAYWALL_REASON, usePaywall } from '../../../contexts/PaywallContext'
 import { FILTER_COLORS } from '../../../utils/Colors'
+import { canCreateQuickFilter } from '../../../utils/entitlements'
 import Priorities from '../../../utils/Priorities'
 import ProjectSelector from '../../components/ProjectSelector'
 import CustomFilterChips from './CustomFilterChips'
@@ -228,6 +231,7 @@ const ChoreToolbar = ({
   viewMode = 'default',
 }) => {
   const { t } = useTranslation('chores')
+  const { isPlus, showPaywall } = usePaywall()
   const [filterSheetOpen, setFilterSheetOpen] = useState(false)
   const [displaySheetOpen, setDisplaySheetOpen] = useState(false)
   const [localSelections, setLocalSelections] = useState(defaultSelections())
@@ -483,9 +487,30 @@ const ChoreToolbar = ({
 
   // ── save filter ───────────────────────────────────────────────────────────────
 
+  // Saving the current selections as a new named filter counts against the
+  // free allowance; updating one that already exists doesn't.
+  const canSaveNewFilter = canCreateQuickFilter(savedFilters.length, isPlus)
+
+  const startSavingNewFilter = () => {
+    setSaveMenuOpen(false)
+    if (!canSaveNewFilter) {
+      showPaywall(PAYWALL_REASON.QUICK_FILTER_LIMIT)
+      return
+    }
+    setSaveFilterName(
+      editingSavedFilter ? `${editingSavedFilter.name} Copy` : '',
+    )
+    setSavingFilter(true)
+  }
+
   const handleSaveFilter = () => {
     const name = saveFilterName.trim()
     if (!name) return
+    if (!canSaveNewFilter) {
+      showPaywall(PAYWALL_REASON.QUICK_FILTER_LIMIT)
+      setSavingFilter(false)
+      return
+    }
     const conditions = selectionsToConditions(localSelections)
     if (conditions.length === 0) return
 
@@ -500,10 +525,12 @@ const ChoreToolbar = ({
       color,
       conditions,
       operator: 'AND',
-    })?.then?.(() => {
-      applyTempFilter?.({ conditions, operator: 'AND' }, { name })
-      onFilterSaved?.(name)
     })
+      ?.then?.(() => {
+        applyTempFilter?.({ conditions, operator: 'AND' }, { name })
+        onFilterSaved?.(name)
+      })
+      ?.catch?.(() => {})
 
     setSavingFilter(false)
     setSaveFilterName('')
@@ -808,18 +835,12 @@ const ChoreToolbar = ({
                       <Save sx={{ fontSize: 16, mr: 1 }} />
                       {t('toolbar.saveFilter')}
                     </MenuItem>
-                    <MenuItem
-                      onClick={() => {
-                        setSaveMenuOpen(false)
-                        setSaveFilterName(
-                          editingSavedFilter
-                            ? `${editingSavedFilter.name} Copy`
-                            : '',
-                        )
-                        setSavingFilter(true)
-                      }}
-                    >
-                      <Save sx={{ fontSize: 16, mr: 1 }} />
+                    <MenuItem onClick={startSavingNewFilter}>
+                      {canSaveNewFilter ? (
+                        <Save sx={{ fontSize: 16, mr: 1 }} />
+                      ) : (
+                        <LockOutlined sx={{ fontSize: 16, mr: 1 }} />
+                      )}
                       {t('toolbar.saveAsNew')}
                     </MenuItem>
                   </Menu>
