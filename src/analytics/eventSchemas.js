@@ -101,7 +101,9 @@ export const EVENT_SCHEMAS = {
     // Keep in sync with PAYWALL_REASON — a value missing here is dropped
     // silently, leaving the event with no reason at all.
     reason:
-      'enum:advanced_reminders,reminder_channels,history_window,thing_triggers,project_limit,quick_filter_limit,file_upload,unknown',
+      'enum:advanced_reminders,reminder_channels,history_window,' +
+      'thing_triggers,project_limit,quick_filter_limit,file_upload,' +
+      'calendar_sync,unknown',
   }),
 }
 

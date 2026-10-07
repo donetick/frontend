@@ -22,6 +22,7 @@ const REASON_KEYS = {
   project_limit: 'subscription.reasonProjectLimit',
   quick_filter_limit: 'subscription.reasonQuickFilterLimit',
   file_upload: 'subscription.reasonFileUpload',
+  calendar_sync: 'subscription.reasonCalendarSync',
 }
 
 const SubscriptionModal = ({ onClose, open, reason }) => {

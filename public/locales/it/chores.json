@@ -113,7 +113,8 @@
     "unableChangeAssignee": "Impossibile cambiare l'assegnatario",
     "availableToCompleteStarting": "Disponibile per il completamento dal {{date}}",
     "delegateToSomeoneElse": "Delega a qualcun altro",
-    "selectAPerformer": "Seleziona chi la eseguirà"
+    "selectAPerformer": "Seleziona chi la eseguirà",
+    "attachment_many": "{{count}} allegati"
   },
   "toolbar": {
     "defaultProject": "Progetto predefinito",
@@ -213,7 +214,13 @@
     "highPriorityDesc_one": "{{count}} attività richiede attenzione immediata",
     "highPriorityDesc_other": "{{count}} attività richiedono attenzione immediata",
     "noDueDateDesc_one": "{{count}} attività ha bisogno di una scadenza",
-    "noDueDateDesc_other": "{{count}} attività hanno bisogno di una scadenza"
+    "noDueDateDesc_other": "{{count}} attività hanno bisogno di una scadenza",
+    "overdueDesc_many": "{{count}} attività sono scadute",
+    "dueTodayDesc_many": "{{count}} attività scadono entro fine giornata",
+    "pendingApprovalDesc_many": "{{count}} attività attendono approvazione",
+    "dueThisWeekDesc_many": "{{count}} attività scadono nei prossimi 7 giorni",
+    "highPriorityDesc_many": "{{count}} attività richiedono attenzione immediata",
+    "noDueDateDesc_many": "{{count}} attività hanno bisogno di una scadenza"
   },
   "labels": {
     "label": "Etichette"
@@ -345,7 +352,15 @@
     "noMatchFilters": "Ci sono attività archiviate, ma nessuna corrisponde ai filtri attualmente applicati.",
     "emptyTitle": "Nessuna attività archiviata",
     "emptyDescription": "L'archiviazione nasconde un'attività senza eliminarla. Tutto ciò che archivi dall'elenco delle attività comparirà qui, pronto per essere ripristinato.",
-    "backToTasks": "Torna alle attività"
+    "backToTasks": "Torna alle attività",
+    "restoreConfirm_many": "Ripristinare {{count}} attività nell'elenco attivo?",
+    "restoredCount_many": "Ripristinate {{count}} attività{{offline}}.",
+    "restoreFailCount_many": "Impossibile ripristinare {{count}} attività.",
+    "deleteConfirm_many": "Eliminare definitivamente {{count}} attività archiviate?\n\nL'operazione non può essere annullata.",
+    "deletedCount_many": "Eliminate correttamente {{count}} attività.",
+    "deleteFailCount_many": "Impossibile eliminare {{count}} attività.",
+    "selected_many": "{{count}} attività selezionate",
+    "count_many": "{{count}} attività archiviate"
   },
   "edit": {
     "deleteConfirm": "Vuoi davvero eliminare questa attività?"
@@ -408,14 +423,17 @@
     "after": "dopo",
     "reminder_one": "{{count}} promemoria",
     "reminder_other": "{{count}} promemoria",
-    "removeAria": "Rimuovi promemoria"
+    "removeAria": "Rimuovi promemoria",
+    "duration_many": "{{count}} {{unit}}",
+    "reminder_many": "{{count}} promemoria"
   },
   "assignee": {
     "label": "Assegnatario",
     "anyone": "Chiunque",
     "unknown": "Sconosciuto",
     "selectedCount_one": "{{count}} assegnatario",
-    "selectedCount_other": "{{count}} assegnatari"
+    "selectedCount_other": "{{count}} assegnatari",
+    "selectedCount_many": "{{count}} assegnatari"
   },
   "filterChip": {
     "cancelAll": "Annulla tutti i filtri",
@@ -550,7 +568,8 @@
     "fileButton": "File",
     "scanFailedTitle": "Scansione non riuscita",
     "couldNotScanDocument": "Impossibile scansionare il documento.",
-    "couldNotReadScannedImage": "Impossibile leggere l'immagine scansionata."
+    "couldNotReadScannedImage": "Impossibile leggere l'immagine scansionata.",
+    "file_many": "{{count}} file"
   },
   "searchBar": {
     "placeholder": "Cerca in Donetick",
@@ -597,7 +616,8 @@
       "yearly": "Ogni anno",
       "customDays": "Giorni personalizzati",
       "repeats": "Si ripete"
-    }
+    },
+    "reminder_many": "{{count}} promemoria"
   },
   "smartInput": {
     "selectPhoto": "Seleziona foto",

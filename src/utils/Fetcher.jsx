@@ -678,6 +678,34 @@ const GetStorageUsage = () => {
   })
 }
 
+const GetCalendarURL = () => {
+  return Fetch(`/chores/calendar/url`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+}
+
+const CreateCalendarURL = () => {
+  return Fetch(`/chores/calendar/url`, {
+    method: 'POST',
+    headers: HEADERS(),
+  })
+}
+
+const RotateCalendarURL = () => {
+  return Fetch(`/chores/calendar/url/rotate`, {
+    method: 'POST',
+    headers: HEADERS(),
+  })
+}
+
+const RevokeCalendarURL = () => {
+  return Fetch(`/chores/calendar/url`, {
+    method: 'DELETE',
+    headers: HEADERS(),
+  })
+}
+
 // Timer/TimeSession API functions
 const GetChoreTimer = choreId => {
   return Fetch(`/chores/${choreId}/timer`, {
@@ -996,6 +1024,7 @@ export {
   CompleteSubTask,
   ConfirmMFA,
   CreateBackup,
+  CreateCalendarURL,
   CreateChildUser,
   CreateChore,
   createChore,
@@ -1021,6 +1050,7 @@ export {
   GetAllCircleMembers,
   GetAllUsers,
   GetArchivedChores,
+  GetCalendarURL,
   GetChildUsers,
   GetChoreAttachments,
   GetChoreByID,
@@ -1065,6 +1095,8 @@ export {
   ResetChoreTimer,
   ResetPassword,
   RestoreBackup,
+  RevokeCalendarURL,
+  RotateCalendarURL,
   SaveChore,
   SaveThing,
   SetupMFA,

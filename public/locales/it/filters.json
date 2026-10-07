@@ -51,5 +51,7 @@
     "unpinned": "Non fissati"
   },
   "pin": "Fissa",
-  "unpin": "Rimuovi dai fissati"
+  "unpin": "Rimuovi dai fissati",
+  "tasks_many": "{{count}} attività",
+  "condition_many": "{{count}} condizioni"
 }

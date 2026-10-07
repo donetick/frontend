@@ -21,6 +21,7 @@ export const PAYWALL_REASON = {
   PROJECT_LIMIT: 'project_limit',
   QUICK_FILTER_LIMIT: 'quick_filter_limit',
   FILE_UPLOAD: 'file_upload',
+  CALENDAR_SYNC: 'calendar_sync',
 }
 
 const PaywallContext = createContext(null)

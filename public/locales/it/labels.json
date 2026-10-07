@@ -33,7 +33,8 @@
     "noResultsDescription": "Nessuna attività con questa etichetta corrisponde a \"{{searchTerm}}\".",
     "notFoundTitle": "Etichetta non trovata",
     "notFoundDescription": "Questa etichetta potrebbe essere stata eliminata o non essere più condivisa con te.",
-    "backToLabels": "Torna alle etichette"
+    "backToLabels": "Torna alle etichette",
+    "taskCount_many": "{{count}} attività"
   },
   "blurb": "Gestisci le etichette e organizza le attività in modo efficace. Le etichette vengono condivise automaticamente con la tua Cerchia quando sono usate in un'attività condivisa.",
   "modal": {
@@ -54,7 +55,8 @@
     "label": "Etichette",
     "createLabel": "Crea etichetta",
     "labelsCount_one": "{{count}} etichetta",
-    "labelsCount_other": "{{count}} etichette"
+    "labelsCount_other": "{{count}} etichette",
+    "labelsCount_many": "{{count}} etichette"
   },
   "view": {
     "emptyTitle": "Nessuna etichetta",
