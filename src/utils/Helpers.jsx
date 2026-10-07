@@ -95,6 +95,5 @@ export {
   isPlusAccount,
   isSignedUrlExpired,
   resolvePhotoURL,
-  stripHtml
+  stripHtml,
 }
-
