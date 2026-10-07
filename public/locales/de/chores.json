@@ -775,7 +775,8 @@
     "updatedBy": "Aktualisiert von",
     "archive": "Archivieren",
     "unarchive": "Archivierung aufheben",
-    "create": "Erstellen"
+    "create": "Erstellen",
+    "notificationsFreePlanNote": "Ihr Tarif enthält eine Erinnerung am Fälligkeitsdatum. Plus fügt Erinnerungen vor dem Termin und Nachfass‑Erinnerungen danach hinzu."
   },
   "addTask": {
     "descriptionLabel": "",

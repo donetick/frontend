@@ -180,5 +180,11 @@
   },
   "noteViewer": {
     "updatedAt": ""
+  },
+  "plan": {
+    "lockedTitle": "Oudere geschiedenis wordt in het Free‑plan {{days}} dagen bewaard",
+    "allLockedTitle": "De geschiedenis van deze taak is ouder dan {{days}} dagen",
+    "lockedDescription": "Items ouder dan {{days}} dagen kunnen permanent worden verwijderd. Upgrade naar Plus om je volledige geschiedenis te bewaren.",
+    "unlock": "Upgrade naar Plus"
   }
 }

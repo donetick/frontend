@@ -775,7 +775,8 @@
     "updatedBy": "",
     "archive": "",
     "unarchive": "",
-    "create": ""
+    "create": "",
+    "notificationsFreePlanNote": "O teu plan inclui um lembrete na data de vencimento. Plus adiciona lembretes antes do vencimento e acompanhamentos depois."
   },
   "addTask": {
     "descriptionLabel": "",

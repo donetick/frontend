@@ -30,7 +30,9 @@
     "shortAll": "الكل",
     "days7": "7 أيام",
     "months6": "6 أشهر",
-    "allTime": "كل الوقت"
+    "allTime": "كل الوقت",
+    "short30d": "30D",
+    "days30": "30 أيام"
   },
   "filter": {
     "analysisTitle": "الفلتر والتحليل",

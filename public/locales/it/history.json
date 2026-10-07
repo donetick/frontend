@@ -180,5 +180,11 @@
   },
   "noteViewer": {
     "updatedAt": ""
+  },
+  "plan": {
+    "lockedTitle": "La cronologia più vecchia viene conservata per {{days}} giorni nel piano Basic",
+    "allLockedTitle": "La cronologia di questa attività è più vecchia di {{days}} giorni",
+    "lockedDescription": "Le voci più vecchie di {{days}} giorni potrebbero essere eliminate definitivamente. Passa a Plus per conservare tutta la cronologia.",
+    "unlock": "Passa a Plus"
   }
 }

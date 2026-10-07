@@ -595,7 +595,14 @@
     "featureApiTokens": "API tokens for integrations",
     "featureImageUploads": "Image uploads in descriptions",
     "featureAutomation": "Advanced task automation",
-    "planYearly": "Yearly"
+    "planYearly": "Yearly",
+    "reasonAdvancedReminders": "到期前的提醒和到期后的跟进是 Plus 功能。你当前的套餐只会在到期当天提醒。",
+    "reasonReminderChannels": "将任务提醒发送到 Telegram 群组是 Plus 功能。",
+    "reasonHistoryWindow": "你当前的套餐显示最近 30 天。升级到 Plus 可查看完整历史和长期趋势。",
+    "reasonThingTriggers": "根据设备状态变化自动触发任务是 Plus 功能。",
+    "reasonProjectLimit": "你当前的套餐包含 {{projectLimit}} 个项目。升级到 Plus 可创建任意数量的项目。",
+    "reasonQuickFilterLimit": "你当前的套餐包含 {{filterLimit}} 个已保存的快速筛选。升级到 Plus 可获得无限筛选。",
+    "reasonFileUpload": "附加文件和图片是 Plus 功能。升级到 Plus 可向任务添加照片、扫描件和文档。"
   },
   "childUsers": {
     "errNameRequired": "Sub account name is required",

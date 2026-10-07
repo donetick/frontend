@@ -590,7 +590,14 @@
     "featureApiTokens": "API tokeny pro integrace",
     "featureImageUploads": "Nahrávání obrázků do popisů",
     "featureAutomation": "Pokročilá automatizace úkolů",
-    "planYearly": "Ročně"
+    "planYearly": "Ročně",
+    "reasonAdvancedReminders": "Připomínky před termínem a následná upozornění po něm jsou funkcí Plus. Váš současný tarif vás upozorňuje v den termínu.",
+    "reasonReminderChannels": "Odesílání připomenutí úkolů do skupiny Telegram je funkce Plus.",
+    "reasonHistoryWindow": "Váš aktuální tarif zobrazuje posledních 30 dnů. Přejděte na Plus pro úplnou historii a dlouhodobé trendy.",
+    "reasonThingTriggers": "Automatické spouštění úkolů při změně stavu věci je funkce Plus.",
+    "reasonProjectLimit": "Váš současný tarif obsahuje {{projectLimit}} projektů. Přejděte na Plus a vytvořte tolik, kolik potřebujete.",
+    "reasonQuickFilterLimit": "Váš současný tarif obsahuje {{filterLimit}} uložených rychlých filtrů. Přejděte na Plus pro neomezené filtry.",
+    "reasonFileUpload": "Připojování souborů a obrázků je funkcí Plus. Přejděte na Plus a přidávejte k úkolům fotky, skeny a dokumenty."
   },
   "childUsers": {
     "errNameRequired": "Název podúčtu je povinný",

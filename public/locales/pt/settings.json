@@ -590,7 +590,14 @@
     "featureApiTokens": "",
     "featureImageUploads": "",
     "featureAutomation": "",
-    "planYearly": ""
+    "planYearly": "",
+    "reasonAdvancedReminders": "Lembretes antes de uma tarefa vencer e acompanhamentos depois são uma funcionalidade do Plus. O teu plano atual lembra-te na data de vencimento.",
+    "reasonReminderChannels": "Enviar lembretes de tarefas para um grupo de Telegram é uma funcionalidade do Plus.",
+    "reasonHistoryWindow": "O teu plano atual mostra os últimos 30 dias. Atualiza para Plus para ver todo o histórico e tendências a longo prazo.",
+    "reasonThingTriggers": "Ativar tarefas automaticamente quando o estado de um objeto muda é uma funcionalidade do Plus.",
+    "reasonProjectLimit": "O teu plano atual inclui {{projectLimit}} projetos. Atualiza para Plus para criar todos os que precisares.",
+    "reasonQuickFilterLimit": "O teu plano atual inclui {{filterLimit}} filtros rápidos guardados. Atualiza para Plus para filtros ilimitados.",
+    "reasonFileUpload": "Anexar ficheiros e imagens é uma funcionalidade do Plus. Atualiza para Plus para adicionar fotos, digitalizações e documentos às tuas tarefas."
   },
   "childUsers": {
     "errNameRequired": "",

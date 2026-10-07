@@ -775,7 +775,8 @@
     "updatedBy": "Actualizado por",
     "archive": "Archivar",
     "unarchive": "Desarchivar",
-    "create": "Crear"
+    "create": "Crear",
+    "notificationsFreePlanNote": "Tu plan incluye un recordatorio en la fecha de vencimiento. Plus añade recordatorios antes del vencimiento y seguimientos después."
   },
   "addTask": {
     "descriptionLabel": "",

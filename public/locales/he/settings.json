@@ -590,7 +590,14 @@
     "featureApiTokens": "",
     "featureImageUploads": "",
     "featureAutomation": "",
-    "planYearly": ""
+    "planYearly": "",
+    "reasonAdvancedReminders": "תזכורות לפני תאריך היעד ומעקב אחרי הן תכונת Plus. התוכנית הנוכחית שלך מזכירה בתאריך היעד.",
+    "reasonReminderChannels": "שליחת תזכורות משימות לקבוצת Telegram היא תכונת Plus.",
+    "reasonHistoryWindow": "התוכנית שלך מציגה את 30 הימים האחרונים. שדרג/י ל‑Plus כדי לקבל את כל ההיסטוריה ומגמות לטווח ארוך.",
+    "reasonThingTriggers": "הפעלת משימות אוטומטית כאשר פריט משנה מצב היא תכונת Plus.",
+    "reasonProjectLimit": "לתוכנית הנוכחית שלך יש {{projectLimit}} פרויקטים. שדרג/י ל‑Plus כדי ליצור כמה שתרצה/י.",
+    "reasonQuickFilterLimit": "לתוכנית הנוכחית שלך יש {{filterLimit}} מסננים מהירים שמורים. שדרג/י ל‑Plus עבור מסננים ללא הגבלה.",
+    "reasonFileUpload": "צירוף קבצים ותמונות היא תכונת Plus. שדרג/י ל‑Plus כדי להוסיף תמונות, סריקות ומסמכים למשימות שלך."
   },
   "childUsers": {
     "errNameRequired": "",

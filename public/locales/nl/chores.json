@@ -775,7 +775,8 @@
     "updatedBy": "",
     "archive": "",
     "unarchive": "",
-    "create": ""
+    "create": "",
+    "notificationsFreePlanNote": "Je abonnement bevat een herinnering op de vervaldatum. Plus voegt herinneringen vóór de datum en opvolgherrinneringen daarna toe."
   },
   "addTask": {
     "descriptionLabel": "",

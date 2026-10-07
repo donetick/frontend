@@ -180,5 +180,11 @@
   },
   "noteViewer": {
     "updatedAt": ""
+  },
+  "plan": {
+    "lockedTitle": "Starsza historia w planie Free jest przechowywana przez {{days}} dni",
+    "allLockedTitle": "Historia tego zadania jest starsza niż {{days}} dni",
+    "lockedDescription": "Wpisy starsze niż {{days}} dni mogą zostać trwale usunięte. Przejdź na Plus, aby zachować pełną historię.",
+    "unlock": "Przejdź na Plus"
   }
 }

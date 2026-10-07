@@ -180,5 +180,11 @@
   },
   "noteViewer": {
     "updatedAt": ""
+  },
+  "plan": {
+    "lockedTitle": "無料プランでは古い履歴は{{days}}日保持されます",
+    "allLockedTitle": "このタスクの履歴は{{days}}日より古いです",
+    "lockedDescription": "{{days}}日より古いエントリは永久に削除される可能性があります。履歴をすべて残すにはPlusにアップグレードしてください。",
+    "unlock": "Plusにアップグレード"
   }
 }

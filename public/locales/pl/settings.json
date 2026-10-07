@@ -590,7 +590,14 @@
     "featureApiTokens": "",
     "featureImageUploads": "",
     "featureAutomation": "",
-    "planYearly": ""
+    "planYearly": "",
+    "reasonAdvancedReminders": "Przypomnienia przed terminem i powiadomienia po nim to funkcja Plus. Twój obecny plan przypomina jedynie w dniu terminu.",
+    "reasonReminderChannels": "Wysyłanie przypomnień o zadaniach do grupy na Telegramie to funkcja Plus.",
+    "reasonHistoryWindow": "Twój obecny plan pokazuje ostatnie 30 dni. Przejdź na Plus, aby mieć pełną historię i długoterminowe trendy.",
+    "reasonThingTriggers": "Automatyczne wywoływanie zadań po zmianie stanu urządzenia to funkcja Plus.",
+    "reasonProjectLimit": "Twój obecny plan obejmuje {{projectLimit}} projektów. Przejdź na Plus, aby tworzyć ich dowolną liczbę.",
+    "reasonQuickFilterLimit": "Twój obecny plan obejmuje {{filterLimit}} zapisanych szybkich filtrów. Przejdź na Plus, aby mieć nieograniczoną liczbę filtrów.",
+    "reasonFileUpload": "Dołączanie plików i obrazów to funkcja Plus. Przejdź na Plus, aby dodawać zdjęcia, skany i dokumenty do zadań."
   },
   "childUsers": {
     "errNameRequired": "",

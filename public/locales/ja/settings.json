@@ -590,7 +590,14 @@
     "featureApiTokens": "",
     "featureImageUploads": "",
     "featureAutomation": "",
-    "planYearly": ""
+    "planYearly": "",
+    "reasonAdvancedReminders": "期限前のリマインダーと期限後のフォローアップはPlusの機能です。現在のプランでは期限日にリマインドされます。",
+    "reasonReminderChannels": "タスクのリマインダーをTelegramグループに送信するのはPlusの機能です。",
+    "reasonHistoryWindow": "現在のプランでは直近30日分を表示します。フル履歴や長期の傾向を見るにはPlusにアップグレードしてください。",
+    "reasonThingTriggers": "状態変化によってタスクを自動でトリガーするのはPlusの機能です。",
+    "reasonProjectLimit": "現在のプランでは{{projectLimit}}プロジェクトまで作成できます。必要なだけ作るにはPlusにアップグレードしてください。",
+    "reasonQuickFilterLimit": "現在のプランでは{{filterLimit}}件の保存済みクイックフィルターが利用できます。無制限にするにはPlusにアップグレードしてください。",
+    "reasonFileUpload": "ファイルや画像を添付するのはPlusの機能です。Plusにアップグレードすると写真やスキャン、書類をタスクに追加できます。"
   },
   "childUsers": {
     "errNameRequired": "",

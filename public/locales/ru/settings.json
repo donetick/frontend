@@ -590,7 +590,14 @@
     "featureApiTokens": "",
     "featureImageUploads": "",
     "featureAutomation": "",
-    "planYearly": ""
+    "planYearly": "",
+    "reasonAdvancedReminders": "Напоминания до срока и последующие уведомления — функция Plus. Ваш текущий тариф напоминает только в день срока.",
+    "reasonReminderChannels": "Отправка напоминаний о задачах в группу Telegram — функция Plus.",
+    "reasonHistoryWindow": "В вашем тарифе отображаются последние 30 дней. Обновитесь до Plus, чтобы видеть всю историю и долгосрочные тенденции.",
+    "reasonThingTriggers": "Автоматическое создание задач при изменении состояния устройства — функция Plus.",
+    "reasonProjectLimit": "В вашем тарифе доступно {{projectLimit}} проектов. Обновитесь до Plus, чтобы создавать неограниченное количество проектов.",
+    "reasonQuickFilterLimit": "В вашем тарифе доступно {{filterLimit}} сохранённых быстрых фильтров. Обновитесь до Plus для неограниченного количества фильтров.",
+    "reasonFileUpload": "Прикрепление файлов и изображений — функция Plus. Обновитесь до Plus, чтобы добавлять фото, сканы и документы к задачам."
   },
   "childUsers": {
     "errNameRequired": "",

@@ -775,7 +775,8 @@
     "updatedBy": "",
     "archive": "",
     "unarchive": "",
-    "create": ""
+    "create": "",
+    "notificationsFreePlanNote": "あなたのプランでは期限日にリマインダーが届きます。Plusにすると、期限前のリマインダーと期限後のフォローアップが追加されます。"
   },
   "addTask": {
     "descriptionLabel": "",

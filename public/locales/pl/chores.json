@@ -775,7 +775,8 @@
     "updatedBy": "",
     "archive": "",
     "unarchive": "",
-    "create": ""
+    "create": "",
+    "notificationsFreePlanNote": "Twój plan zawiera przypomnienie w dniu terminu. Plus dodaje przypomnienia przed terminem i powiadomienia po nim."
   },
   "addTask": {
     "descriptionLabel": "",

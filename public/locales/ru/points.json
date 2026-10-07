@@ -30,7 +30,9 @@
     "shortAll": "",
     "days7": "",
     "months6": "",
-    "allTime": ""
+    "allTime": "",
+    "short30d": "30Д",
+    "days30": "30 дней"
   },
   "filter": {
     "analysisTitle": "",

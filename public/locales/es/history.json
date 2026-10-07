@@ -180,5 +180,11 @@
   },
   "noteViewer": {
     "updatedAt": "Actualizado el {{date}}"
+  },
+  "plan": {
+    "lockedTitle": "El historial antiguo se conserva durante {{days}} días en el plan Básico",
+    "allLockedTitle": "El historial de esta tarea tiene más de {{days}} días",
+    "lockedDescription": "Las entradas con más de {{days}} días pueden eliminarse de forma permanente. Actualiza a Plus para conservar todo tu historial.",
+    "unlock": "Actualizar a Plus"
   }
 }

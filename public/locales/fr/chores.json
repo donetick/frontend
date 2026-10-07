@@ -775,7 +775,8 @@
     "updatedBy": "Mis à jour par",
     "archive": "Archiver",
     "unarchive": "Désarchiver",
-    "create": "Créer"
+    "create": "Créer",
+    "notificationsFreePlanNote": "Votre formule inclut un rappel à la date d'échéance. Plus ajoute des rappels avant l'échéance et des suivis après."
   },
   "addTask": {
     "descriptionLabel": "",

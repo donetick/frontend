@@ -180,5 +180,11 @@
   },
   "noteViewer": {
     "updatedAt": ""
+  },
+  "plan": {
+    "lockedTitle": "O histórico antigo é guardado por {{days}} dias no plano Básico",
+    "allLockedTitle": "O histórico desta tarefa tem mais de {{days}} dias",
+    "lockedDescription": "Entradas com mais de {{days}} dias podem ser apagadas permanentemente. Atualiza para Plus para manter todo o teu histórico.",
+    "unlock": "Atualizar para Plus"
   }
 }

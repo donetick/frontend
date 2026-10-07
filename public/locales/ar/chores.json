@@ -775,7 +775,8 @@
     "updatedBy": "تم التحديث بواسطة",
     "archive": "أرشيف",
     "unarchive": "إلغاء الأرشيف",
-    "create": "إنشاء"
+    "create": "إنشاء",
+    "notificationsFreePlanNote": "خطتك تتضمن تذكيراً في تاريخ الاستحقاق. يضيف Plus تذكيرات قبل الاستحقاق ومتابعات بعده."
   },
   "addTask": {
     "descriptionLabel": "",

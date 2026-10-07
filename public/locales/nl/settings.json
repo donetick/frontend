@@ -590,7 +590,14 @@
     "featureApiTokens": "",
     "featureImageUploads": "",
     "featureAutomation": "",
-    "planYearly": ""
+    "planYearly": "",
+    "reasonAdvancedReminders": "Herinneringen vóór een taak en opvolgreminders daarna zijn een Plus‑functie. Je huidige abonnement herinnert je op de vervaldatum.",
+    "reasonReminderChannels": "Het verzenden van taakherinneringen naar een Telegram-groep is een Plus‑functie.",
+    "reasonHistoryWindow": "Je huidige abonnement toont de laatste 30 dagen. Upgrade naar Plus voor je volledige geschiedenis en langetermijntrends.",
+    "reasonThingTriggers": "Automatisch taken activeren wanneer een thing van status verandert is een Plus‑functie.",
+    "reasonProjectLimit": "Je huidige abonnement bevat {{projectLimit}} projecten. Upgrade naar Plus om er zoveel te maken als je nodig hebt.",
+    "reasonQuickFilterLimit": "Je huidige abonnement bevat {{filterLimit}} opgeslagen snelle filters. Upgrade naar Plus voor onbeperkte filters.",
+    "reasonFileUpload": "Het toevoegen van bestanden en afbeeldingen is een Plus‑functie. Upgrade naar Plus om foto's, scans en documenten aan je taken toe te voegen."
   },
   "childUsers": {
     "errNameRequired": "",

@@ -775,7 +775,8 @@
     "updatedBy": "Upravil(a)",
     "archive": "Archivovat",
     "unarchive": "Obnovit z archivu",
-    "create": "Vytvořit"
+    "create": "Vytvořit",
+    "notificationsFreePlanNote": "Váš tarif zahrnuje připomenutí v den termínu. Plus přidává připomenutí před termínem a následná upozornění po něm."
   },
   "addTask": {
     "descriptionLabel": "",

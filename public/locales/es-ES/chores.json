@@ -860,7 +860,8 @@
     "tagUrl": "URL de la etiqueta",
     "titleCreate": "Crear nueva tarea",
     "titleEdit": "Editar tarea",
-    "writeNfcTag": "Escribir etiqueta NFC"
+    "writeNfcTag": "Escribir etiqueta NFC",
+    "notificationsFreePlanNote": "Tu plan incluye un recordatorio en la fecha de vencimiento. Plus añade recordatorios antes del vencimiento y seguimientos después."
   },
   "addTask": {
     "descriptionLabel": "Description:",

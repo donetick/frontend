@@ -180,5 +180,11 @@
   },
   "noteViewer": {
     "updatedAt": ""
+  },
+  "plan": {
+    "lockedTitle": "免费版仅保存 {{days}} 天的旧历史",
+    "allLockedTitle": "此任务的历史已超过 {{days}} 天",
+    "lockedDescription": "早于 {{days}} 天的条目可能会被永久删除。升级到 Plus 可保留完整历史。",
+    "unlock": "升级到 Plus"
   }
 }

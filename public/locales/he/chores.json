@@ -775,7 +775,8 @@
     "updatedBy": "",
     "archive": "",
     "unarchive": "",
-    "create": ""
+    "create": "",
+    "notificationsFreePlanNote": "התוכנית שלך כוללת תזכורת בתאריך היעד. Plus מוסיף תזכורות לפני המועד ומעקב אחרי."
   },
   "addTask": {
     "descriptionLabel": "",
