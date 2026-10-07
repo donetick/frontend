@@ -42,6 +42,7 @@ import PaymentSuccessView from '../views/Payments/PaymentSuccessView'
 import PrivacyPolicyView from '../views/PrivacyPolicy/PrivacyPolicyView'
 import ProjectView from '../views/Projects/ProjectView'
 import APITokenSettings from '../views/Settings/APITokenSettings'
+import CalendarSettings from '../views/Settings/CalendarSettings'
 import HomeSectionsSettings from '../views/Settings/HomeSectionsSettings'
 import LayoutSettings from '../views/Settings/LayoutSettings'
 import LocalizationSettings from '../views/Settings/LocalizationSettings'
@@ -110,6 +111,10 @@ const Router = createBrowserRouter([
           {
             path: 'apitokens',
             element: <APITokenSettings />,
+          },
+          {
+            path: 'calendar',
+            element: <CalendarSettings />,
           },
           {
             path: 'storage',
