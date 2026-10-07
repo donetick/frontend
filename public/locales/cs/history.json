@@ -180,5 +180,11 @@
   },
   "noteViewer": {
     "updatedAt": "Aktualizováno {{date}}"
+  },
+  "plan": {
+    "lockedTitle": "",
+    "allLockedTitle": "",
+    "lockedDescription": "",
+    "unlock": ""
   }
 }
