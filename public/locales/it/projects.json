@@ -68,6 +68,5 @@
     "iconLabel": "Icona progetto",
     "selectIcon": "Seleziona icona",
     "colorLabel": "Colore progetto"
-  },
-  "tasks_many": "{{count}} attività"
+  }
 }
