@@ -7,6 +7,7 @@ import {
   EventBusy,
   EventNote,
   HourglassEmpty,
+  LockOutlined,
   Person,
   Redo,
   RunningWithErrors,
@@ -41,6 +42,7 @@ import EmptyState from '../../components/common/EmptyState'
 import FilterBar from '../../components/common/FilterBar'
 import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
 import { useLocalization } from '../../contexts/LocalizationContext'
+import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import { useFilter } from '../../hooks/useFilter'
 import {
   useChores,
@@ -51,6 +53,7 @@ import {
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import { ChoresGrouper } from '../../utils/Chores'
 import { COLORS, TASK_COLOR } from '../../utils/Colors.jsx'
+import { isPlusHistoryWindow } from '../../utils/entitlements'
 import LoadingComponent from '../components/Loading'
 import { useLabels } from '../Labels/LabelQueries'
 import EditHistoryModal from '../Modals/EditHistoryModal'
@@ -417,6 +420,12 @@ const USER_FILTER = (history, userId) => {
 const UserActivites = () => {
   const { t } = useTranslation('history')
   const { data: userProfile } = useUserProfile()
+  const { isPlus, showPaywall } = usePaywall()
+  // Memoized so `filterDefs` below isn't rebuilt on every render.
+  const historyLockIcon = useMemo(
+    () => (isPlus ? undefined : <LockOutlined sx={{ fontSize: 14 }} />),
+    [isPlus],
+  )
 
   const [tabValue, setTabValue] = React.useState(7)
   const [selectedHistory, setSelectedHistory] = React.useState([])
@@ -641,8 +650,16 @@ const UserActivites = () => {
         options: [
           { value: 7, label: t('period.days', { count: 7 }) },
           { value: 30, label: t('period.days', { count: 30 }) },
-          { value: 90, label: t('period.days', { count: 90 }) },
-          { value: 365, label: t('period.allTime') },
+          {
+            value: 90,
+            label: t('period.days', { count: 90 }),
+            icon: historyLockIcon,
+          },
+          {
+            value: 365,
+            label: t('period.allTime'),
+            icon: historyLockIcon,
+          },
         ],
       },
       {
@@ -658,7 +675,7 @@ const UserActivites = () => {
       },
       ...clientFilterDefs,
     ],
-    [circleUsers, clientFilterDefs, t],
+    [circleUsers, clientFilterDefs, historyLockIcon, t],
   )
 
   // Merge server-driven and client-driven active filter states for the bar
@@ -678,6 +695,13 @@ const UserActivites = () => {
       setSelectedHistory(enrichedHistory.filter(h => USER_FILTER(h, userId)))
     } else if (id === 'timePeriod') {
       const days = value ?? 7
+      // The window stays selectable on the free plan — reaching past 30 days
+      // is what opens the paywall, so the user sees the limit they're buying
+      // past instead of a greyed-out chip.
+      if (!isPlus && isPlusHistoryWindow(days)) {
+        showPaywall(PAYWALL_REASON.HISTORY_WINDOW)
+        return
+      }
       setTabValue(days)
       refetchHistory(days)
     } else {

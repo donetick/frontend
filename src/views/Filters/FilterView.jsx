@@ -31,7 +31,7 @@ import {
   Typography,
 } from '@mui/joy'
 import Fuse from 'fuse.js'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
@@ -40,8 +40,10 @@ import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
 import SwipeListItem, {
   SWIPE_COMMIT_THRESHOLD,
 } from '../../components/common/SwipeListItem'
+import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import { useChores } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
+import { canCreateQuickFilter } from '../../utils/entitlements'
 import { getFilterCount, getFilterOverdueCount } from '../../utils/FilterEngine'
 import { getSafeBottom, getSafeBottomStyles } from '../../utils/SafeAreaUtils'
 import ScrollHideFab from '../components/ScrollHideFab'
@@ -257,6 +259,7 @@ const FilterView = () => {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const { data: userProfile } = useUserProfile()
+  const { isPlus, showPaywall } = usePaywall()
   const { data: chores = { res: [] } } = useChores(false)
   const { data: labels = [] } = useLabels()
   const { data: projects = [] } = useProjects()
@@ -406,17 +409,20 @@ const FilterView = () => {
     }
   }, [chores, filtersData, userProfile?.id, labels, projects, membersData?.res])
 
-  const handleAddFilter = () => {
+  const handleAddFilter = useCallback(() => {
+    if (!canCreateQuickFilter(filtersData.length, isPlus)) {
+      showPaywall(PAYWALL_REASON.QUICK_FILTER_LIMIT)
+      return
+    }
     setEditingFilter(null)
     setShowAdvancedFilterBuilder(true)
-  }
+  }, [filtersData.length, isPlus, showPaywall])
 
   // ?create=1 lets other surfaces (global search quick actions) land here with
   // the filter builder already open.
   useEffect(() => {
     if (searchParams.get('create') !== '1') return
-    setEditingFilter(null)
-    setShowAdvancedFilterBuilder(true)
+    handleAddFilter()
     setSearchParams(
       params => {
         params.delete('create')
@@ -424,7 +430,7 @@ const FilterView = () => {
       },
       { replace: true },
     )
-  }, [searchParams, setSearchParams])
+  }, [searchParams, setSearchParams, handleAddFilter])
 
   const handleEditFilter = filter => {
     setEditingFilter(filter)

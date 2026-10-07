@@ -744,7 +744,6 @@
     "rescheduleFromCompletion": "Reschedule from completion date",
     "rescheduleFromCompletionHelp": "the next task will be scheduled from the actual completion date of the previous task",
     "notifications": "Notifications",
-    "notificationsPlanWarning": "Task notifications are not available in the Basic plan. Upgrade to Plus to receive reminders when tasks are due or completed.",
     "notifyForTask": "Notify for this task",
     "notifyForTaskHelp": "When should receive notifications for this task",
     "notificationSchedule": "Notification Schedule",
@@ -775,7 +774,8 @@
     "updatedBy": "Updated by",
     "archive": "Archive",
     "unarchive": "Unarchive",
-    "create": "Create"
+    "create": "Create",
+    "notificationsFreePlanNote": "Your plan includes a reminder on the due date. Plus adds reminders before it's due and follow-ups after."
   },
   "addTask": {
     "descriptionLabel": "Description:",
@@ -878,7 +878,6 @@
     "repeatOn": "Repeat on:",
     "triggerLabel": "Trigger this task based on a thing state",
     "triggerHelp": "Is this something that should be done when a thing state changes?",
-    "triggerPlanWarning": "Thing-based triggers are not available in the Basic plan. Upgrade to Plus to automatically trigger tasks when device states change.",
     "previewEvery": "Every {{days}} at {{time}}",
     "previewOccurrence": "Every {{occurrences}} {{days}} of the month at {{time}}",
     "defaultTime": "6:00 PM",

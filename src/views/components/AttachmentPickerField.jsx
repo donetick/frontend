@@ -5,6 +5,7 @@ import {
   DocumentScanner,
   Image,
   InsertDriveFile,
+  LockOutlined,
   PhotoCamera,
 } from '@mui/icons-material'
 import {
@@ -19,6 +20,7 @@ import { ClickAwayListener, Popper } from '@mui/material'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import { useDocumentScanner } from '../../hooks/useDocumentScanner'
 import { useFileUpload } from '../../hooks/useFileUpload'
 import { useNotification } from '../../service/NotificationProvider'
@@ -48,6 +50,9 @@ const AttachmentPickerField = ({
   const { uploadFile } = useFileUpload({ entityType, entityId, draftId })
   const { isNativeScanner, scanDocument } = useDocumentScanner()
   const { showError } = useNotification()
+  // Read the plan from the paywall rather than the profile directly, so the
+  // marketing app (no provider) keeps the picker unlocked.
+  const { isPlanKnown, isPlus, showPaywall } = usePaywall()
 
   // Without a native scanner, `capture` asks a phone for its camera directly.
   // Desktop browsers ignore it and fall back to the file picker, which would
@@ -143,6 +148,11 @@ const AttachmentPickerField = ({
 
   const isEmpty = attachments.length === 0
   const shouldShowLabel = !isEmpty || emptyDisplay === 'icon-text'
+  // With nothing attached, the popper holds only add-actions — all of them
+  // locked — so meet the paywall on the first click instead of opening a menu
+  // that cannot do anything. Once something is attached the popper still opens,
+  // because removing an existing file must stay possible after a downgrade.
+  const isLocked = !isPlus && isEmpty
 
   return (
     <>
@@ -152,7 +162,20 @@ const AttachmentPickerField = ({
           size='sm'
           variant={isEmpty ? 'outlined' : 'soft'}
           color='neutral'
-          onClick={() => setIsOpen(prev => !prev)}
+          onClick={() => {
+            if (isLocked) {
+              showPaywall(PAYWALL_REASON.FILE_UPLOAD)
+              return
+            }
+            setIsOpen(prev => !prev)
+          }}
+          endDecorator={
+            // Until the profile lands we don't know the plan — don't flash a
+            // lock at a Plus user.
+            isLocked && isPlanKnown ? (
+              <LockOutlined sx={{ fontSize: 14, opacity: 0.6 }} />
+            ) : null
+          }
           sx={{
             borderRadius: '128px',
             minHeight: 40,
