@@ -182,9 +182,9 @@
     "updatedAt": "Aktualisiert am {{date}}"
   },
   "plan": {
-    "lockedTitle": "",
-    "allLockedTitle": "",
-    "lockedDescription": "",
-    "unlock": ""
+    "lockedTitle": "Ältere Einträge bleiben im Free‑Tarif {{days}} Tage erhalten",
+    "allLockedTitle": "Die Historie dieser Aufgabe ist älter als {{days}} Tage",
+    "lockedDescription": "Einträge, die älter als {{days}} Tage sind, können dauerhaft gelöscht werden. Upgrade auf Plus, um Ihre vollständige Historie zu behalten.",
+    "unlock": "Auf Plus upgraden"
   }
 }
