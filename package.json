@@ -22,6 +22,7 @@
     "build-win": "del package-lock.json && npm install && npm install --force @rollup/rollup-win32-x64-msvc @swc/core-win32-x64-msvc && vite build --mode selfhosted",
     "lint": "eslint && prettier -c . && npm run lint:i18n",
     "lint:i18n": "node scripts/i18n/i18n-audit.mjs",
+    "check:i18n-pr": "node scripts/i18n/i18n-pr-safety.mjs",
     "audit:i18n:strings": "node scripts/i18n/i18n-string-audit.mjs",
     "lint:ci": "eslint -f gha && prettier -c . && npm run lint:i18n",
     "lint:fix": "eslint --fix && prettier -w .",
