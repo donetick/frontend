@@ -3,7 +3,7 @@ import moment from 'moment'
 import { apiClient } from './ApiClient'
 
 const isPlusAccount = userProfile => {
-  return !userProfile?.expiration && moment(userProfile?.expiration).isAfter()
+  return userProfile?.expiration && moment(userProfile?.expiration).isAfter()
 }
 
 // Turns rich-text/HTML content (task descriptions, notes) into plain text so it
@@ -95,5 +95,6 @@ export {
   isPlusAccount,
   isSignedUrlExpired,
   resolvePhotoURL,
-  stripHtml,
+  stripHtml
 }
+
