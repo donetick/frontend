@@ -180,5 +180,11 @@
   },
   "noteViewer": {
     "updatedAt": "Updated at {{date}}"
+  },
+  "plan": {
+    "lockedTitle": "Older history is kept for {{days}} days on Free",
+    "allLockedTitle": "This task's history is older than {{days}} days",
+    "lockedDescription": "Entries older than {{days}} days may be permanently deleted. Upgrade to Plus to keep your full history.",
+    "unlock": "Upgrade to Plus"
   }
 }

@@ -21,7 +21,6 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { TASK_COLOR } from '../../../utils/Colors'
-import { isPlusAccount } from '../../../utils/Helpers'
 import AssigneePickerField from '../AssigneePickerField'
 import DueDatePickerField from '../DueDatePickerField'
 import LabelsPickerField from '../LabelsPickerField'
@@ -432,16 +431,12 @@ const TaskPreviewCard = ({
             onClear={() => onPatch({ labelIds: [] })}
             labels={parseCtx.userLabels}
           />
-          {parseCtx.canRemind && (
-            <NotificationPickerField
-              emptyDisplay='icon'
-              value={effective.notificationMetadata}
-              onChange={metadata => onPatch({ notificationMetadata: metadata })}
-              onClear={() =>
-                onPatch({ notificationMetadata: { templates: [] } })
-              }
-            />
-          )}
+          <NotificationPickerField
+            emptyDisplay='icon'
+            value={effective.notificationMetadata}
+            onChange={metadata => onPatch({ notificationMetadata: metadata })}
+            onClear={() => onPatch({ notificationMetadata: { templates: [] } })}
+          />
         </Box>
       )}
     </Box>
@@ -486,7 +481,6 @@ const VoicePanel = ({
       userLabels,
       members,
       currentUserId: userProfile?.id,
-      canRemind: isPlusAccount(userProfile),
       defaultNotificationTemplates,
     }),
     [userLabels, members, userProfile, defaultNotificationTemplates],

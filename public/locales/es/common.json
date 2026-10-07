@@ -342,9 +342,9 @@
   "noAttachmentsTitle": "Sin archivos adjuntos",
   "noAttachmentsDescription": "No hay archivos o imágenes adjuntas a esta tarea.",
   "kbSize": "",
-  "logoAlt": "Logo",
+  "logoAlt": "",
   "notification": {
-    "error": "Error",
+    "error": "",
     "success": "Éxito",
     "undoneSuccessfully": "Deshecho con éxito",
     "warning": "Advertencia",

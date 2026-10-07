@@ -620,8 +620,8 @@
     "altCaptured": "",
     "altProcessing": "",
     "taskIdentified": "",
-    "runningNativeOcr": "Running native OCR…",
-    "identifyingTask": "Identifying task with AI…",
+    "runningNativeOcr": "",
+    "identifyingTask": "",
     "tapToScanHint": "הקש על \"סרוק מסמך\" כדי לפתוח את הסורק",
     "readingTextProgress": "קורא טקסט מהתמונה… {{progress}}%",
     "dueDate": "תאריך יעד: {{date}}",
@@ -778,8 +778,8 @@
     "create": ""
   },
   "addTask": {
-    "descriptionLabel": "Description:",
-    "subtasksLabel": "Subtasks:",
+    "descriptionLabel": "",
+    "subtasksLabel": "",
     "title": "",
     "defaultProject": "",
     "anyone": "",

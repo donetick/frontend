@@ -620,8 +620,8 @@
     "altCaptured": "Documento capturado",
     "altProcessing": "Procesando foto",
     "taskIdentified": "tarea identificada",
-    "runningNativeOcr": "Running native OCR…",
-    "identifyingTask": "Identifying task with AI…",
+    "runningNativeOcr": "",
+    "identifyingTask": "",
     "tapToScanHint": "Toca \"Escanear documento\" para abrir el escáner",
     "readingTextProgress": "Leyendo texto de la imagen… {{progress}}%",
     "dueDate": "Vence: {{date}}",
@@ -778,8 +778,8 @@
     "create": "Crear"
   },
   "addTask": {
-    "descriptionLabel": "Description:",
-    "subtasksLabel": "Subtasks:",
+    "descriptionLabel": "",
+    "subtasksLabel": "",
     "title": "Crear nueva tarea",
     "defaultProject": "Proyecto por defecto",
     "anyone": "Cualquiera",

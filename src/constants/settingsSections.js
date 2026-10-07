@@ -1,6 +1,7 @@
 import {
   AccountCircle,
   Api,
+  CalendarMonth,
   Circle,
   Code,
   FamilyRestroom,
@@ -26,6 +27,7 @@ export const SETTINGS_SECTIONS = [
   { id: 'notifications', icon: Notifications },
   { id: 'mfa', icon: Security, parentOnly: true },
   { id: 'apitokens', icon: Api, parentOnly: true },
+  { id: 'calendar', icon: CalendarMonth },
   { id: 'storage', icon: Storage },
   // Default landing view, plus whichever chrome this device actually has:
   // the bottom bar on mobile, the sidepanel on desktop.

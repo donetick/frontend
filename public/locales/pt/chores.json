@@ -620,8 +620,8 @@
     "altCaptured": "",
     "altProcessing": "",
     "taskIdentified": "",
-    "runningNativeOcr": "Running native OCR…",
-    "identifyingTask": "Identifying task with AI…",
+    "runningNativeOcr": "",
+    "identifyingTask": "",
     "tapToScanHint": "Toque em \"Digitalizar documento\" para abrir o scanner",
     "readingTextProgress": "Lendo texto da imagem… {{progress}}%",
     "dueDate": "Vencimento: {{date}}",
@@ -778,8 +778,8 @@
     "create": ""
   },
   "addTask": {
-    "descriptionLabel": "Description:",
-    "subtasksLabel": "Subtasks:",
+    "descriptionLabel": "",
+    "subtasksLabel": "",
     "title": "",
     "defaultProject": "",
     "anyone": "",

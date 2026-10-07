@@ -620,8 +620,8 @@
     "altCaptured": "",
     "altProcessing": "",
     "taskIdentified": "",
-    "runningNativeOcr": "Running native OCR…",
-    "identifyingTask": "Identifying task with AI…",
+    "runningNativeOcr": "",
+    "identifyingTask": "",
     "tapToScanHint": "点击“扫描文档”以打开扫描仪",
     "readingTextProgress": "正在从图像中读取文本… {{progress}}%",
     "dueDate": "截止日期：{{date}}",
@@ -778,8 +778,8 @@
     "create": ""
   },
   "addTask": {
-    "descriptionLabel": "Description:",
-    "subtasksLabel": "Subtasks:",
+    "descriptionLabel": "",
+    "subtasksLabel": "",
     "title": "",
     "defaultProject": "",
     "anyone": "",

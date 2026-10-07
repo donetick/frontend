@@ -29,7 +29,7 @@ import {
 } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import Fuse from 'fuse.js'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
@@ -38,9 +38,11 @@ import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
 import SwipeListItem, {
   SWIPE_COMMIT_THRESHOLD,
 } from '../../components/common/SwipeListItem'
+import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import { useChores } from '../../queries/ChoreQueries'
 import { useUserProfile } from '../../queries/UserQueries'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors'
+import { canCreateProject } from '../../utils/entitlements'
 import { DeleteProject } from '../../utils/Fetcher'
 import { getIconComponent } from '../../utils/ProjectIcons'
 import { getSafeBottom, getSafeBottomStyles } from '../../utils/SafeAreaUtils'
@@ -49,6 +51,7 @@ import ScrollHideFab from '../components/ScrollHideFab'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import ProjectModal from '../Modals/Inputs/ProjectModal'
 import { useProjects } from './ProjectQueries'
+
 const ProjectCardContent = ({
   currentUserId,
   onCardClick,
@@ -238,6 +241,7 @@ const ProjectView = () => {
   const { t } = useTranslation('projects')
   const { data: projects, isError, isProjectsLoading } = useProjects()
   const { data: userProfile } = useUserProfile()
+  const { isPlus, showPaywall } = usePaywall()
   const { data: chores = { res: [] } } = useChores(false) // false to exclude archived
   const { data: projectsData = [], isLoading: projectsLoading } = useProjects()
   const { setSelectedProjectWithCache } = useProjectFilter(
@@ -332,10 +336,16 @@ const ProjectView = () => {
     searchInputRef.current?.blur()
   }
 
-  const handleAddProject = () => {
+  // The default project is rendered separately and isn't user-created, so the
+  // allowance counts only the projects in this list.
+  const handleAddProject = useCallback(() => {
+    if (!canCreateProject(projectsData.length, isPlus)) {
+      showPaywall(PAYWALL_REASON.PROJECT_LIMIT)
+      return
+    }
     setCurrentProject(null)
     setModalOpen(true)
-  }
+  }, [projectsData.length, isPlus, showPaywall])
 
   const handleEditProject = project => {
     setCurrentProject(project)
@@ -399,8 +409,7 @@ const ProjectView = () => {
   // the create modal already open.
   useEffect(() => {
     if (searchParams.get('create') !== '1') return
-    setCurrentProject(null)
-    setModalOpen(true)
+    handleAddProject()
     setSearchParams(
       params => {
         params.delete('create')
@@ -408,7 +417,7 @@ const ProjectView = () => {
       },
       { replace: true },
     )
-  }, [searchParams, setSearchParams])
+  }, [searchParams, setSearchParams, handleAddProject])
 
   // Calculate real task counts from chores data
   useEffect(() => {

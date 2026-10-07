@@ -620,8 +620,8 @@
     "altCaptured": "Zachycený dokument",
     "altProcessing": "Zpracovávání",
     "taskIdentified": "Úkol rozpoznán",
-    "runningNativeOcr": "Running native OCR…",
-    "identifyingTask": "Identifying task with AI…",
+    "runningNativeOcr": "",
+    "identifyingTask": "",
     "tapToScanHint": "Klepnutím na \"Skenovat dokument\" otevřete skener",
     "readingTextProgress": "Čtení textu z obrázku… {{progress}} %",
     "dueDate": "Termín: {{date}}",
@@ -778,8 +778,8 @@
     "create": "Vytvořit"
   },
   "addTask": {
-    "descriptionLabel": "Description:",
-    "subtasksLabel": "Subtasks:",
+    "descriptionLabel": "",
+    "subtasksLabel": "",
     "title": "Vytvořit nový úkol",
     "defaultProject": "Výchozí projekt",
     "anyone": "Kdokoli",

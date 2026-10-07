@@ -94,6 +94,17 @@ export const EVENT_SCHEMAS = {
     result: 'enum:sent,failed,unconfigured,misconfigured,self-hosted',
     sentiment: 'enum:love,okay,issues',
   }),
+
+  // Which gate the user actually ran into. The point of logging the reason is
+  // to see which locks drive upgrades and which ones only cause friction.
+  paywall_shown: withCommon({
+    // Keep in sync with PAYWALL_REASON — a value missing here is dropped
+    // silently, leaving the event with no reason at all.
+    reason:
+      'enum:advanced_reminders,reminder_channels,history_window,' +
+      'thing_triggers,project_limit,quick_filter_limit,file_upload,' +
+      'calendar_sync,unknown',
+  }),
 }
 
 export const ERROR_SCHEMAS = {

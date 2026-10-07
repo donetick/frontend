@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { track } from '../../analytics'
+import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
+import { canCreateProject } from '../../utils/entitlements'
 import {
   CreateProject,
   DeleteProject,
@@ -38,9 +40,21 @@ export const useProjects = () => {
 // Mutation hook for creating a new project
 export const useCreateProject = () => {
   const queryClient = useQueryClient()
+  const { isPlanKnown, isPlus, showPaywall } = usePaywall()
 
   return useMutation({
     mutationFn: async projectData => {
+      // Last line of defense behind the click-time gates: an entry point that
+      // forgets to check can't push a free account past its allowance. Waits
+      // for the plan to be known so a cold load never blocks a Plus user.
+      // Thrown outside the try below so the offline fallback can't swallow it
+      // into a locally created project.
+      const existing = queryClient.getQueryData(['projects']) ?? []
+      if (isPlanKnown && !canCreateProject(existing.length, isPlus)) {
+        showPaywall(PAYWALL_REASON.PROJECT_LIMIT)
+        throw new Error('Project limit reached')
+      }
+
       try {
         const response = await CreateProject(projectData)
         if (response.ok) {

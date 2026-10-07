@@ -5,6 +5,7 @@ import {
   Delete,
   DocumentScanner,
   HorizontalRule,
+  LockOutlined,
   Save,
   UploadFile,
 } from '@mui/icons-material'
@@ -45,6 +46,7 @@ import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import NumberInput from '../../components/common/NumberInput'
 import NotificationTemplate from '../../components/NotificationTemplate.jsx'
 import { usePageShortcutScope } from '../../contexts/KeyboardShortcutScopeContext'
+import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import { useDocumentScanner } from '../../hooks/useDocumentScanner'
 import {
   useArchiveChore,
@@ -57,6 +59,7 @@ import {
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import { useNotification } from '../../service/NotificationProvider'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
+import { sanitizeRemindersForPlan } from '../../utils/entitlements'
 import {
   DeleteChoreAttachment,
   DeleteDraftAttachment,
@@ -103,6 +106,7 @@ const ChoreEdit = () => {
   const isPageShortcutActive = usePageShortcutScope()
   const { data: userProfile, isLoading: isUserProfileLoading } =
     useUserProfile()
+  const { showPaywall } = usePaywall()
 
   const [chore, setChore] = useState([])
   const [choresHistory, setChoresHistory] = useState([])
@@ -376,6 +380,13 @@ const ChoreEdit = () => {
       newChoreId = null
     }
     const assignees = anyone ? [] : assignableTo
+    // The editor blocks Plus-only reminders on the way in, but a cloned task,
+    // a queued offline edit or a task created while subscribed can still carry
+    // them — so the plan is enforced once more on the way out.
+    const planReminders = sanitizeRemindersForPlan(
+      notificationMetadata?.templates,
+      isPlusAccount(userProfile),
+    )
     const chore = {
       id: Number(newChoreId),
       name: name,
@@ -390,11 +401,14 @@ const ChoreEdit = () => {
       assignStrategy: assignStrategyValue,
       isRolling: isRolling,
       isActive: isActive,
-      notification: isNotificable,
+      notification: isNotificable && planReminders.length > 0,
       labels: labels.map(l => l.name),
       labelsV2: labelsV2,
       subTasks: subTasks,
-      notificationMetadata: notificationMetadata,
+      notificationMetadata: {
+        ...notificationMetadata,
+        templates: planReminders,
+      },
       thingTrigger: thingTrigger,
       points: points < 0 ? null : points,
       requireApproval: requireApproval,
@@ -1667,8 +1681,8 @@ const ChoreEdit = () => {
         <Box mb={3}>
           <Typography level='h4'>{t('choreEdit.notifications')}</Typography>
           {!isPlusAccount(userProfile) && (
-            <Typography level='body-sm' color='warning' sx={{ mb: 1 }}>
-              {t('choreEdit.notificationsPlanWarning')}
+            <Typography level='body-sm' color='neutral' sx={{ mb: 1 }}>
+              {t('choreEdit.notificationsFreePlanNote')}
             </Typography>
           )}
 
@@ -1682,17 +1696,10 @@ const ChoreEdit = () => {
               }}
               defaultChecked={isNotificable}
               checked={isNotificable}
-              disabled={!isPlusAccount(userProfile)}
               overlay
               label={t('choreEdit.notifyForTask')}
             />
-            <FormHelperText
-              sx={{
-                opacity: !isPlusAccount(userProfile) ? 0.5 : 1,
-              }}
-            >
-              {t('choreEdit.notifyForTaskHelp')}
-            </FormHelperText>
+            <FormHelperText>{t('choreEdit.notifyForTaskHelp')}</FormHelperText>
           </FormControl>
         </Box>
 
@@ -1742,6 +1749,15 @@ const ChoreEdit = () => {
                 <Checkbox
                   overlay
                   onClick={() => {
+                    // Routing reminders to a Telegram group is an extra
+                    // delivery channel, which stays a Plus capability.
+                    if (
+                      !notificationMetadata?.circleGroup &&
+                      !isPlusAccount(userProfile)
+                    ) {
+                      showPaywall(PAYWALL_REASON.REMINDER_CHANNELS)
+                      return
+                    }
                     if (notificationMetadata?.circleGroup) {
                       delete notificationMetadata.circleGroupID
                     }
@@ -1757,6 +1773,11 @@ const ChoreEdit = () => {
                       : false
                   }
                   label={t('choreEdit.specificGroup')}
+                  endDecorator={
+                    isPlusAccount(userProfile) ? null : (
+                      <LockOutlined sx={{ fontSize: 14, opacity: 0.6 }} />
+                    )
+                  }
                 />
                 <FormHelperText>
                   {t('choreEdit.specificGroupHelp')}

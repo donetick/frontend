@@ -342,14 +342,14 @@
   "noAttachmentsTitle": "Aucune pièce jointe",
   "noAttachmentsDescription": "Les photos et fichiers ajoutés à cette tâche apparaîtront ici.",
   "kbSize": "{{size}} Ko",
-  "logoAlt": "Logo",
+  "logoAlt": "",
   "notification": {
     "error": "Erreur",
     "success": "Succès",
     "undoneSuccessfully": "Annulé avec succès",
     "warning": "Avertissement",
-    "information": "Information",
-    "title": "Notification",
+    "information": "",
+    "title": "",
     "unknown": "Notification inconnue",
     "undo": "Annuler",
     "dismiss": "Fermer"

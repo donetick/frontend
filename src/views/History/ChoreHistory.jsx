@@ -18,6 +18,7 @@ import {
   Group,
   History,
   HourglassEmpty,
+  LockOutlined,
   Person,
   Redo,
   RunningWithErrors,
@@ -35,6 +36,7 @@ import EditIcon from '@mui/icons-material/Edit'
 import {
   Badge,
   Box,
+  Button,
   Card,
   Container,
   Grid,
@@ -56,6 +58,7 @@ import SwipeListItem, {
   SWIPE_COMMIT_THRESHOLD,
 } from '../../components/common/SwipeListItem'
 import { useLocalization } from '../../contexts/LocalizationContext'
+import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import useConfirmationModal from '../../hooks/useConfirmationModal'
 import { useFilter } from '../../hooks/useFilter'
 import { usePendingCommands } from '../../hooks/usePendingCommands'
@@ -67,6 +70,11 @@ import {
 import { useCircleMembers } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
 import { ChoreHistoryStatus } from '../../utils/Chores'
+import {
+  FREE_HISTORY_DAYS,
+  historyCutoffMs,
+  partitionHistoryByPlan,
+} from '../../utils/entitlements'
 import LoadingComponent from '../components/Loading'
 import EditHistoryModal from '../Modals/EditHistoryModal'
 import HistoryDetailModal from '../Modals/HistoryDetailModal'
@@ -83,6 +91,10 @@ const ChoreHistory = () => {
   const [editHistory, setEditHistory] = useState(null)
   const { confirmModalConfig, showConfirmation } = useConfirmationModal()
   const { fmt } = useLocalization()
+  const { isPlanKnown, isPlus, showPaywall } = usePaywall()
+  // Don't clamp until the plan is actually known — flashing an upgrade card at
+  // a paying subscriber is worse than briefly showing a free user everything.
+  const applyHistoryWindow = isPlanKnown && !isPlus
   const [showMoreInfoId, setShowMoreInfoId] = useState(null)
   const [noteViewerConfig, setNoteViewerConfig] = useState({ isOpen: false })
   const [detailModalConfig, setDetailModalConfig] = useState({ isOpen: false })
@@ -109,7 +121,18 @@ const ChoreHistory = () => {
   const deleteChoreHistory = useDeleteChoreHistory()
   const { data: pendingCmds } = usePendingCommands(choreId)
 
-  const choreHistory = choreHistoryData?.res || []
+  // Free accounts read the last 30 days. This endpoint takes no day parameter,
+  // so the window is applied here and the hidden count drives a concrete
+  // upsell instead of rows just going missing.
+  const { lockedCount, visible: choreHistory } = useMemo(
+    () =>
+      partitionHistoryByPlan(
+        choreHistoryData?.res,
+        !applyHistoryWindow,
+        entry => entry.performedAt || entry.updatedAt,
+      ),
+    [choreHistoryData, applyHistoryWindow],
+  )
   const performers = circleMembersData?.res || []
   const pendingByHistoryId = useMemo(() => {
     if (!pendingCmds?.length) return {}
@@ -218,6 +241,19 @@ const ChoreHistory = () => {
     filteredData: filteredHistory,
     setFilter,
   } = useFilter(choreHistory, filterDefs)
+
+  // Reaching for a start date older than the plan's window would otherwise
+  // just return an empty list, which reads as a bug rather than a limit.
+  const handleSetFilter = (id, value) => {
+    if (id === 'dateRange' && value?.from) {
+      const cutoff = historyCutoffMs(!applyHistoryWindow)
+      if (cutoff !== null && new Date(value.from).getTime() < cutoff) {
+        showPaywall(PAYWALL_REASON.HISTORY_WINDOW)
+        return
+      }
+    }
+    setFilter(id, value)
+  }
 
   const searchableHistory = useMemo(
     () =>
@@ -398,6 +434,26 @@ const ChoreHistory = () => {
   if (isLoading) {
     return <LoadingComponent />
   }
+  // All of this task's history predates the plan's window. Saying "no history"
+  // here would be a lie — the entries exist, they're just out of reach.
+  if (!choreHistory.length && lockedCount > 0) {
+    return (
+      <Container maxWidth='md'>
+        <EmptyState
+          fullHeight
+          icon={<LockOutlined />}
+          title={t('plan.allLockedTitle', { days: FREE_HISTORY_DAYS })}
+          description={t('plan.lockedDescription', {
+            days: FREE_HISTORY_DAYS,
+          })}
+          primaryAction={{
+            label: t('plan.unlock'),
+            onClick: () => showPaywall(PAYWALL_REASON.HISTORY_WINDOW),
+          }}
+        />
+      </Container>
+    )
+  }
   if (!choreHistory.length) {
     return (
       <Container maxWidth='md'>
@@ -569,7 +625,7 @@ const ChoreHistory = () => {
         <FilterBar
           filterDefs={filterDefs}
           activeFilters={activeFilters}
-          onSetFilter={setFilter}
+          onSetFilter={handleSetFilter}
           onClearAll={clearAll}
           resultCount={filteredHistory.length}
           totalCount={choreHistory.length}
@@ -717,6 +773,39 @@ const ChoreHistory = () => {
             ))}
           </SwipeableList>
         </Sheet>
+      )}
+
+      {lockedCount > 0 && (
+        <Box sx={{ px: 2, pt: 2 }}>
+          <Card
+            variant='soft'
+            sx={{
+              p: 2,
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              alignItems: { xs: 'flex-start', sm: 'center' },
+              gap: 1.5,
+            }}
+          >
+            <LockOutlined sx={{ opacity: 0.6, flexShrink: 0 }} />
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography level='title-sm'>
+                {t('plan.lockedTitle', { days: FREE_HISTORY_DAYS })}
+              </Typography>
+              <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
+                {t('plan.lockedDescription', { days: FREE_HISTORY_DAYS })}
+              </Typography>
+            </Box>
+            <Button
+              size='sm'
+              variant='solid'
+              onClick={() => showPaywall(PAYWALL_REASON.HISTORY_WINDOW)}
+              sx={{ flexShrink: 0, alignSelf: { xs: 'stretch', sm: 'auto' } }}
+            >
+              {t('plan.unlock')}
+            </Button>
+          </Card>
+        </Box>
       )}
       <EditHistoryModal
         config={{
