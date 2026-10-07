@@ -620,8 +620,8 @@
     "altCaptured": "",
     "altProcessing": "",
     "taskIdentified": "",
-    "runningNativeOcr": "Running native OCR…",
-    "identifyingTask": "Identifying task with AI…",
+    "runningNativeOcr": "",
+    "identifyingTask": "",
     "tapToScanHint": "「ドキュメントをスキャン」をタップしてスキャナーを開く",
     "readingTextProgress": "画像からテキストを読み取り中… {{progress}}%",
     "dueDate": "期限: {{date}}",
@@ -778,8 +778,8 @@
     "create": ""
   },
   "addTask": {
-    "descriptionLabel": "Description:",
-    "subtasksLabel": "Subtasks:",
+    "descriptionLabel": "",
+    "subtasksLabel": "",
     "title": "",
     "defaultProject": "",
     "anyone": "",

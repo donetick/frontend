@@ -342,7 +342,7 @@
   "noAttachmentsTitle": "",
   "noAttachmentsDescription": "",
   "kbSize": "",
-  "logoAlt": "Logo",
+  "logoAlt": "",
   "notification": {
     "error": "Errore",
     "success": "Successo",

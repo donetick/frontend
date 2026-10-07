@@ -620,8 +620,8 @@
     "altCaptured": "",
     "altProcessing": "",
     "taskIdentified": "",
-    "runningNativeOcr": "Running native OCR…",
-    "identifyingTask": "Identifying task with AI…",
+    "runningNativeOcr": "",
+    "identifyingTask": "",
     "tapToScanHint": "Tocca \"Scansiona documento\" per aprire lo scanner",
     "readingTextProgress": "Lettura del testo dall'immagine… {{progress}}%",
     "dueDate": "Scadenza: {{date}}",
@@ -778,8 +778,8 @@
     "create": ""
   },
   "addTask": {
-    "descriptionLabel": "Description:",
-    "subtasksLabel": "Subtasks:",
+    "descriptionLabel": "",
+    "subtasksLabel": "",
     "title": "",
     "defaultProject": "",
     "anyone": "",
