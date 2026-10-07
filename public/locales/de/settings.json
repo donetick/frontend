@@ -58,6 +58,10 @@
         "title": "API-Tokens",
         "description": "Erstelle und verwalte Zugriffstoken für Drittanbieter-Integrationen und API-Zugriff."
       },
+      "calendar": {
+        "title": "",
+        "description": ""
+      },
       "storage": {
         "title": "Speichereinstellungen",
         "description": "Sichere und stelle deine Daten wieder her, verwalte lokalen Speicher und Sync-Einstellungen."
@@ -372,6 +376,42 @@
     "nameModalTitle": "Gib deinem neuen Token einen Namen, an dem du es wiedererkennst.",
     "generateToken": "Token erstellen"
   },
+  "calendar": {
+    "title": "",
+    "description": "",
+    "plusTitle": "",
+    "plusNotice": "",
+    "upgrade": "",
+    "activeTitle": "",
+    "activeStatus": "",
+    "urlLabel": "",
+    "copy": "",
+    "copied": "",
+    "copyFailed": "",
+    "createdAt": "",
+    "lastUsedAt": "",
+    "neverUsed": "",
+    "keepPrivateTitle": "",
+    "keepPrivateDescription": "",
+    "manageTitle": "",
+    "rotate": "",
+    "rotateTitle": "",
+    "rotateMessage": "",
+    "rotated": "",
+    "revoke": "",
+    "revokeTitle": "",
+    "revokeMessage": "",
+    "revoked": "",
+    "inactiveTitle": "",
+    "inactiveDescription": "",
+    "generate": "",
+    "generated": "",
+    "howToTitle": "",
+    "howToDescription": "",
+    "errorTitle": "",
+    "actionFailed": "",
+    "loadFailed": ""
+  },
   "storage": {
     "title": "Speichereinstellungen",
     "serverTitle": "Serverspeichernutzung",
@@ -597,7 +637,8 @@
     "reasonThingTriggers": "Automatisches Auslösen von Aufgaben, wenn sich der Zustand einer Sache ändert, ist eine Plus‑Funktion.",
     "reasonProjectLimit": "Ihr aktueller Tarif umfasst {{projectLimit}} Projekte. Upgrade auf Plus, um beliebig viele Projekte zu erstellen.",
     "reasonQuickFilterLimit": "Ihr aktueller Tarif enthält {{filterLimit}} gespeicherte Schnellfilter. Upgrade auf Plus für unbegrenzte Filter.",
-    "reasonFileUpload": "Anhängen von Dateien und Bildern ist eine Plus‑Funktion. Upgrade auf Plus, um Fotos, Scans und Dokumente zu Aufgaben hinzuzufügen."
+    "reasonFileUpload": "Anhängen von Dateien und Bildern ist eine Plus‑Funktion. Upgrade auf Plus, um Fotos, Scans und Dokumente zu Aufgaben hinzuzufügen.",
+    "reasonCalendarSync": ""
   },
   "childUsers": {
     "errNameRequired": "Name des Unterkontos ist erforderlich",
