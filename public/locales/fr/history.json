@@ -180,5 +180,11 @@
   },
   "noteViewer": {
     "updatedAt": "Mise à jour le {{date}}"
+  },
+  "plan": {
+    "lockedTitle": "",
+    "allLockedTitle": "",
+    "lockedDescription": "",
+    "unlock": ""
   }
 }
