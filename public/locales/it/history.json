@@ -33,12 +33,7 @@
     "hoursAfterDue_other": "{{count}} h dopo la scadenza",
     "assignedTo": "Assegnata a {{name}}",
     "points_one": "★ {{count}} pt",
-    "points_other": "★ {{count}} pt",
-    "daysBeforeDue_many": "{{count}} gg prima della scadenza",
-    "daysAfterDue_many": "{{count}} gg dopo la scadenza",
-    "hoursBeforeDue_many": "{{count}} h prima della scadenza",
-    "hoursAfterDue_many": "{{count}} h dopo la scadenza",
-    "points_many": "★ {{count}} pt"
+    "points_other": "★ {{count}} pt"
   },
   "detail": {
     "title": "Dettagli attività",
@@ -53,8 +48,7 @@
     "points_other": "{{count}} pt",
     "note": "Nota",
     "reason": "Motivo",
-    "notes": "Note",
-    "points_many": "{{count}} pt"
+    "notes": "Note"
   },
   "charts": {
     "noData": "Nessun dato disponibile",
@@ -105,8 +99,7 @@
   "period": {
     "days_one": "{{count}} giorno",
     "days_other": "{{count}} giorni",
-    "allTime": "Da sempre",
-    "days_many": "{{count}} giorni"
+    "allTime": "Da sempre"
   },
   "search": {
     "placeholder": "Cerca nella cronologia...",
