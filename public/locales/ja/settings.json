@@ -58,6 +58,10 @@
         "title": "APIトークン",
         "description": "外部サービス連携やAPIアクセス用のアクセストークンを発行・管理します。"
       },
+      "calendar": {
+        "title": "",
+        "description": ""
+      },
       "storage": {
         "title": "ストレージ設定",
         "description": "データのバックアップと復元、ローカルストレージと同期設定を管理します。"
@@ -372,6 +376,42 @@
     "nameModalTitle": "新しいトークンに、あとで見分けられる名前を付けてください。",
     "generateToken": "トークンを生成"
   },
+  "calendar": {
+    "title": "",
+    "description": "",
+    "plusTitle": "",
+    "plusNotice": "",
+    "upgrade": "",
+    "activeTitle": "",
+    "activeStatus": "",
+    "urlLabel": "",
+    "copy": "",
+    "copied": "",
+    "copyFailed": "",
+    "createdAt": "",
+    "lastUsedAt": "",
+    "neverUsed": "",
+    "keepPrivateTitle": "",
+    "keepPrivateDescription": "",
+    "manageTitle": "",
+    "rotate": "",
+    "rotateTitle": "",
+    "rotateMessage": "",
+    "rotated": "",
+    "revoke": "",
+    "revokeTitle": "",
+    "revokeMessage": "",
+    "revoked": "",
+    "inactiveTitle": "",
+    "inactiveDescription": "",
+    "generate": "",
+    "generated": "",
+    "howToTitle": "",
+    "howToDescription": "",
+    "errorTitle": "",
+    "actionFailed": "",
+    "loadFailed": ""
+  },
   "storage": {
     "title": "ストレージ設定",
     "serverTitle": "サーバーストレージの使用量",
@@ -597,7 +637,8 @@
     "reasonThingTriggers": "状態変化によってタスクを自動でトリガーするのはPlusの機能です。",
     "reasonProjectLimit": "現在のプランでは{{projectLimit}}プロジェクトまで作成できます。必要なだけ作るにはPlusにアップグレードしてください。",
     "reasonQuickFilterLimit": "現在のプランでは{{filterLimit}}件の保存済みクイックフィルターが利用できます。無制限にするにはPlusにアップグレードしてください。",
-    "reasonFileUpload": "ファイルや画像を添付するのはPlusの機能です。Plusにアップグレードすると写真やスキャン、書類をタスクに追加できます。"
+    "reasonFileUpload": "ファイルや画像を添付するのはPlusの機能です。Plusにアップグレードすると写真やスキャン、書類をタスクに追加できます。",
+    "reasonCalendarSync": ""
   },
   "childUsers": {
     "errNameRequired": "Sub account name is required",
