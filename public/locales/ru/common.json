@@ -72,7 +72,7 @@
     "placeholder": "Поиск по Donetick",
     "inputAriaLabel": "Поиск по делам, заметкам, проектам, меткам и настройкам",
     "deviceNote": "Поиск по данным, доступным на этом устройстве",
-    "escape": "",
+    "escape": "Esc",
     "recent": "Недавнее",
     "empty": {
       "title": "Точных совпадений нет",
@@ -505,7 +505,7 @@
     "placeholderCrash": "например: нажал на дело в «Моих делах», и экран побелел",
     "email": "Почта",
     "emailOptional": "(необязательно — только если хотите ответ)",
-    "emailPlaceholder": "",
+    "emailPlaceholder": "you@example.com",
     "showWhatGetsSent": "Показать, что уйдёт",
     "hideWhatGetsSent": "Скрыть, что уйдёт",
     "copyDiagnostics": "Копировать диагностику",
