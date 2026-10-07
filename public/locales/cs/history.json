@@ -182,9 +182,9 @@
     "updatedAt": "Aktualizováno {{date}}"
   },
   "plan": {
-    "lockedTitle": "",
-    "allLockedTitle": "",
-    "lockedDescription": "",
-    "unlock": ""
+    "lockedTitle": "Starší historie na Free se uchovává {{days}} dní",
+    "allLockedTitle": "Historie tohoto úkolu je starší než {{days}} dní",
+    "lockedDescription": "Záznamy starší než {{days}} dní mohou být trvale smazány. Přejděte na Plus a uchovejte si celou historii.",
+    "unlock": "Přejít na Plus"
   }
 }
