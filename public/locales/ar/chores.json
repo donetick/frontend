@@ -744,7 +744,6 @@
     "rescheduleFromCompletion": "إعادة الجدولة من تاريخ الإكمال",
     "rescheduleFromCompletionHelp": "وستحدد مواعيد المهمة التالية اعتبارا من تاريخ الإنجاز الفعلي للمهمة السابقة.",
     "notifications": "الإشعارات",
-    "notificationsPlanWarning": "إشعارات المهام غير متوفرة في الخطة الأساسية. الترقية إلى Plus لتلقي التذكير عندما تكون المهام مستحقة أو مكتملة.",
     "notifyForTask": "إشعار لهذه المهمة",
     "notifyForTaskHelp": "متى يجب تلقي إشعارات لهذه المهمة",
     "notificationSchedule": "جدول الإشعارات",
@@ -775,7 +774,8 @@
     "updatedBy": "تم التحديث بواسطة",
     "archive": "أرشيف",
     "unarchive": "إلغاء الأرشيف",
-    "create": "إنشاء"
+    "create": "إنشاء",
+    "notificationsFreePlanNote": ""
   },
   "addTask": {
     "descriptionLabel": "",
@@ -878,7 +878,6 @@
     "repeatOn": "كرر في:",
     "triggerLabel": "تفعيل هذه المهمة استناداً إلى حالة شيء ما",
     "triggerHelp": "هل هذا شيء يجب القيام به عندما يتغير شيء؟",
-    "triggerPlanWarning": "المشغلات القائمة على الأشياء غير متوفرة في الخطة الأساسية. الترقية إلى Plus لتفعيل المهام تلقائياً عندما تتغير حالة الجهاز.",
     "previewEvery": "كل {{days}} في {{time}}",
     "previewOccurrence": "كل {{occurrences}} {{days}} من الشهر في {{time}}",
     "defaultTime": "6:00 رسالة",
