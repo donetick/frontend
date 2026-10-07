@@ -48,7 +48,7 @@
     "points_other": "{{count}} points",
     "note": "Note",
     "reason": "Motif",
-    "notes": ""
+    "notes": "Notes"
   },
   "charts": {
     "noData": "Aucune donnée disponible",
@@ -182,9 +182,9 @@
     "updatedAt": "Mise à jour le {{date}}"
   },
   "plan": {
-    "lockedTitle": "",
-    "allLockedTitle": "",
-    "lockedDescription": "",
-    "unlock": ""
+    "lockedTitle": "L'historique plus ancien est conservé pendant {{days}} jours sur Basic",
+    "allLockedTitle": "L'historique de cette tâche a plus de {{days}} jours",
+    "lockedDescription": "Les entrées de plus de {{days}} jours peuvent être supprimées définitivement. Passez à Plus pour conserver votre historique complet.",
+    "unlock": "Passer à Plus"
   }
 }
