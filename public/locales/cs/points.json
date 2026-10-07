@@ -31,8 +31,8 @@
     "days7": "7 dní",
     "months6": "6 měsíců",
     "allTime": "Celkově",
-    "short30d": "",
-    "days30": ""
+    "short30d": "30D",
+    "days30": "30 dnů"
   },
   "filter": {
     "analysisTitle": "Filtr a analýza",
