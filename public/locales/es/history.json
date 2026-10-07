@@ -32,8 +32,8 @@
     "hoursAfterDue_one": "{{count}} h después de la fecha límite",
     "hoursAfterDue_other": "{{count}} h después de la fecha límite",
     "assignedTo": "Asignada a {{name}}",
-    "points_one": "",
-    "points_other": ""
+    "points_one": "★ {{count}} pt",
+    "points_other": "★ {{count}} pts"
   },
   "detail": {
     "title": "Detalle de Actividad",
@@ -44,8 +44,8 @@
     "lastUpdated": "Última actualización",
     "duration": "Duración",
     "pointsEarned": "Puntos ganados",
-    "points_one": "",
-    "points_other": "",
+    "points_one": "{{count}} pt",
+    "points_other": "{{count}} pts",
     "note": "Nota",
     "reason": "Motivo",
     "notes": "Notas"
@@ -182,9 +182,9 @@
     "updatedAt": "Actualizado el {{date}}"
   },
   "plan": {
-    "lockedTitle": "",
-    "allLockedTitle": "",
-    "lockedDescription": "",
-    "unlock": ""
+    "lockedTitle": "El historial antiguo se conserva durante {{days}} días en el plan Básico",
+    "allLockedTitle": "El historial de esta tarea tiene más de {{days}} días",
+    "lockedDescription": "Las entradas con más de {{days}} días pueden eliminarse de forma permanente. Actualiza a Plus para conservar todo tu historial.",
+    "unlock": "Actualizar a Plus"
   }
 }
