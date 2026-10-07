@@ -24,7 +24,7 @@
     "times": "×",
     "details": "Podrobnosti",
     "createdBy": "Vytvořil(a)",
-    "na": "",
+    "na": "N/A",
     "taskCompleted": "Úkol dokončen",
     "taskCompletedMessage": "Váš úkol byl označen jako dokončený",
     "taskCompletionUndone": "Dokončení úkolu bylo vráceno zpět.",
@@ -399,10 +399,10 @@
     "title": "Připomínky",
     "remind": "Připomenout",
     "onDueDate": "V den termínu",
-    "unitMin": "",
+    "unitMin": "min",
     "unitHr": "h",
     "unitDay": "d",
-    "duration_one": "",
+    "duration_one": "{{count}} {{unit}}",
     "duration_other": "{{count}} {{unit}}",
     "before": "před",
     "after": "po",
@@ -620,8 +620,8 @@
     "altCaptured": "Zachycený dokument",
     "altProcessing": "Zpracovávání",
     "taskIdentified": "Úkol rozpoznán",
-    "runningNativeOcr": "",
-    "identifyingTask": "",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
     "tapToScanHint": "Klepnutím na \"Skenovat dokument\" otevřete skener",
     "readingTextProgress": "Čtení textu z obrázku… {{progress}} %",
     "dueDate": "Termín: {{date}}",
@@ -775,11 +775,11 @@
     "archive": "Archivovat",
     "unarchive": "Obnovit z archivu",
     "create": "Vytvořit",
-    "notificationsFreePlanNote": ""
+    "notificationsFreePlanNote": "Váš tarif zahrnuje připomenutí v den termínu. Plus přidává připomenutí před termínem a následná upozornění po něm."
   },
   "addTask": {
-    "descriptionLabel": "",
-    "subtasksLabel": "",
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:",
     "title": "Vytvořit nový úkol",
     "defaultProject": "Výchozí projekt",
     "anyone": "Kdokoli",
@@ -858,7 +858,7 @@
       "years": "Roky"
     },
     "repeatOnType": {
-      "interval": "",
+      "interval": "Interval",
       "days_of_the_week": "Dny v týdnu",
       "day_of_the_month": "Den v měsíci"
     },
