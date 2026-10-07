@@ -19,7 +19,14 @@ const NavBarLink = ({ compact = false, link }) => {
   )
 
   return (
-    <ListItem sx={{ justifyContent: compact ? 'center' : 'flex-start', p: 0 }}>
+    <ListItem
+      sx={{
+        justifyContent: compact ? 'center' : 'flex-start',
+        '--ListItem-paddingX': '0px',
+        '--ListItem-paddingY': '0px',
+        p: 0,
+      }}
+    >
       <Tooltip title={compact ? label : ''} placement='right'>
         <ListItemButton
           {...(onClick ? { onClick } : { component: Link, to })}
@@ -32,11 +39,10 @@ const NavBarLink = ({ compact = false, link }) => {
             fontFamily: 'var(--joy-fontFamily-body)',
             gap: compact ? 0 : undefined,
             justifyContent: compact ? 'center' : 'flex-start',
-            minHeight: 48,
+            '--ListItem-minHeight': '44px',
             mx: compact ? 'auto' : 0,
             px: compact ? 0 : 1.5,
             width: compact ? 48 : '100%',
-            py: 1,
             transition: 'background-color 160ms ease, color 160ms ease',
             '& .MuiListItemDecorator-root': {
               color: active ? 'primary.plainColor' : 'text.tertiary',
