@@ -58,6 +58,10 @@
         "title": "Token API",
         "description": "Genera e gestisci token di accesso per integrazioni di terze parti e accesso API."
       },
+      "calendar": {
+        "title": "",
+        "description": ""
+      },
       "storage": {
         "title": "Impostazioni di archiviazione",
         "description": "Esegui backup e ripristino dei dati, gestisci archiviazione locale e preferenze di sincronizzazione."
@@ -372,6 +376,42 @@
     "nameModalTitle": "Assegna un nome al nuovo token, così potrai riconoscerlo in seguito.",
     "generateToken": "Genera token"
   },
+  "calendar": {
+    "title": "",
+    "description": "",
+    "plusTitle": "",
+    "plusNotice": "",
+    "upgrade": "",
+    "activeTitle": "",
+    "activeStatus": "",
+    "urlLabel": "",
+    "copy": "",
+    "copied": "",
+    "copyFailed": "",
+    "createdAt": "",
+    "lastUsedAt": "",
+    "neverUsed": "",
+    "keepPrivateTitle": "",
+    "keepPrivateDescription": "",
+    "manageTitle": "",
+    "rotate": "",
+    "rotateTitle": "",
+    "rotateMessage": "",
+    "rotated": "",
+    "revoke": "",
+    "revokeTitle": "",
+    "revokeMessage": "",
+    "revoked": "",
+    "inactiveTitle": "",
+    "inactiveDescription": "",
+    "generate": "",
+    "generated": "",
+    "howToTitle": "",
+    "howToDescription": "",
+    "errorTitle": "",
+    "actionFailed": "",
+    "loadFailed": ""
+  },
   "storage": {
     "title": "Impostazioni di archiviazione",
     "serverTitle": "Utilizzo spazio sul server",
@@ -597,7 +637,8 @@
     "reasonThingTriggers": "L'attivazione automatica delle attività quando uno 'thing' cambia stato è una funzionalità di Plus.",
     "reasonProjectLimit": "Il tuo piano attuale include {{projectLimit}} progetti. Passa a Plus per crearne quanti ne servono.",
     "reasonQuickFilterLimit": "Il tuo piano attuale include {{filterLimit}} filtri rapidi salvati. Passa a Plus per filtri illimitati.",
-    "reasonFileUpload": "Allegare file e immagini è una funzionalità di Plus. Passa a Plus per aggiungere foto, scannerizzazioni e documenti alle tue attività."
+    "reasonFileUpload": "Allegare file e immagini è una funzionalità di Plus. Passa a Plus per aggiungere foto, scannerizzazioni e documenti alle tue attività.",
+    "reasonCalendarSync": ""
   },
   "childUsers": {
     "errNameRequired": "Il nome dell'account secondario è obbligatorio",
