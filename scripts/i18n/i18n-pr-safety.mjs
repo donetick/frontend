@@ -82,6 +82,16 @@ const tags = value =>
 
 const sameList = (left, right) => JSON.stringify(left) === JSON.stringify(right)
 
+const pluralSuffix = key => key.match(/_(zero|one|two|few|many|other)$/)?.[1]
+const pluralBase = key => key.replace(/_(zero|one|two|few|many|other)$/, '')
+const pluralCategoriesFor = language => {
+  try {
+    return new Intl.PluralRules(language).resolvedOptions().pluralCategories
+  } catch {
+    return ['one', 'other']
+  }
+}
+
 const failures = []
 const warnings = []
 
@@ -137,13 +147,37 @@ for (const path of localeFiles) {
   const sourceValues = headSourceValues.size
     ? headSourceValues
     : baseSourceValues
+  const language = path.split('/')[2]
+  const requiredPluralCategories = pluralCategoriesFor(language)
+  const baseSourcePluralBases = new Set(
+    [...baseSourceValues.keys()]
+      .filter(key => pluralSuffix(key))
+      .map(key => pluralBase(key)),
+  )
+  const headSourcePluralBases = new Set(
+    [...headSourceValues.keys()]
+      .filter(key => pluralSuffix(key))
+      .map(key => pluralBase(key)),
+  )
 
   for (const [key, oldValue] of oldValues) {
     if (!newValues.has(key)) {
       // A target key can be removed when its source key was also removed.
       // Checking both sides avoids false reports from stale Crowdin branches.
-      if (baseSourceValues.has(key) && headSourceValues.has(key)) {
-        failures.push(`${path}: removed key still present in English: ${key}`)
+      const sourceKeyStillExists =
+        baseSourceValues.has(key) && headSourceValues.has(key)
+      const suffix = pluralSuffix(key)
+      const requiredRuntimePlural =
+        suffix &&
+        requiredPluralCategories.includes(suffix) &&
+        baseSourcePluralBases.has(pluralBase(key)) &&
+        headSourcePluralBases.has(pluralBase(key))
+
+      if (sourceKeyStillExists || requiredRuntimePlural) {
+        const reason = requiredRuntimePlural
+          ? `required "${suffix}" plural form for ${language}`
+          : 'key still present in English'
+        failures.push(`${path}: removed ${reason}: ${key}`)
       }
       continue
     }
