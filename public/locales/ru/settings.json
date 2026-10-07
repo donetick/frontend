@@ -58,6 +58,10 @@
         "title": "API-токены",
         "description": "Создавайте и управляйте токенами доступа для сторонних интеграций и API."
       },
+      "calendar": {
+        "title": "",
+        "description": ""
+      },
       "storage": {
         "title": "Настройки хранилища",
         "description": "Резервное копирование и восстановление данных, управление локальным хранилищем и синхронизацией."
@@ -372,6 +376,42 @@
     "nameModalTitle": "Дайте новому токену имя, по которому вы его узнаете.",
     "generateToken": "Создать токен"
   },
+  "calendar": {
+    "title": "",
+    "description": "",
+    "plusTitle": "",
+    "plusNotice": "",
+    "upgrade": "",
+    "activeTitle": "",
+    "activeStatus": "",
+    "urlLabel": "",
+    "copy": "",
+    "copied": "",
+    "copyFailed": "",
+    "createdAt": "",
+    "lastUsedAt": "",
+    "neverUsed": "",
+    "keepPrivateTitle": "",
+    "keepPrivateDescription": "",
+    "manageTitle": "",
+    "rotate": "",
+    "rotateTitle": "",
+    "rotateMessage": "",
+    "rotated": "",
+    "revoke": "",
+    "revokeTitle": "",
+    "revokeMessage": "",
+    "revoked": "",
+    "inactiveTitle": "",
+    "inactiveDescription": "",
+    "generate": "",
+    "generated": "",
+    "howToTitle": "",
+    "howToDescription": "",
+    "errorTitle": "",
+    "actionFailed": "",
+    "loadFailed": ""
+  },
   "storage": {
     "title": "Хранилище",
     "serverTitle": "Использование хранилища на сервере",
@@ -597,7 +637,8 @@
     "reasonThingTriggers": "Автоматическое создание задач при изменении состояния устройства — функция Plus.",
     "reasonProjectLimit": "В вашем тарифе доступно {{projectLimit}} проектов. Обновитесь до Plus, чтобы создавать неограниченное количество проектов.",
     "reasonQuickFilterLimit": "В вашем тарифе доступно {{filterLimit}} сохранённых быстрых фильтров. Обновитесь до Plus для неограниченного количества фильтров.",
-    "reasonFileUpload": "Прикрепление файлов и изображений — функция Plus. Обновитесь до Plus, чтобы добавлять фото, сканы и документы к задачам."
+    "reasonFileUpload": "Прикрепление файлов и изображений — функция Plus. Обновитесь до Plus, чтобы добавлять фото, сканы и документы к задачам.",
+    "reasonCalendarSync": ""
   },
   "childUsers": {
     "errNameRequired": "Укажите имя суб-аккаунта",
