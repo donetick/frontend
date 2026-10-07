@@ -22,8 +22,7 @@
     "tasksAndAvg": "{{tasks}} attività • media {{avg}} per attività",
     "available": "{{count}} disponibili",
     "points_one": "{{count}} punto",
-    "points_other": "{{count}} punti",
-    "points_many": "{{count}} punti"
+    "points_other": "{{count}} punti"
   },
   "tabs": {
     "short7d": "7G",
@@ -59,8 +58,7 @@
       "allTime": "Da sempre",
       "last6Months": "Ultimi 6 mesi",
       "lastDays_one": "Ultimo {{count}} giorno",
-      "lastDays_other": "Ultimi {{count}} giorni",
-      "lastDays_many": "Ultimi {{count}} giorni"
+      "lastDays_other": "Ultimi {{count}} giorni"
     }
   },
   "summary": {
@@ -70,8 +68,7 @@
     "allTime": "Da sempre",
     "last6Months": "Ultimi 6 mesi",
     "lastDays_one": "Ultimo {{count}} giorno",
-    "lastDays_other": "Ultimi {{count}} giorni",
-    "lastDays_many": "Ultimi {{count}} giorni"
+    "lastDays_other": "Ultimi {{count}} giorni"
   },
   "trend": {
     "title": "Andamento punti"
