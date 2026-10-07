@@ -116,7 +116,7 @@
     "selectAPerformer": ""
   },
   "toolbar": {
-    "defaultProject": "",
+    "defaultProject": "Default Project",
     "everyone": "",
     "mine": "",
     "availableToMe": "",
@@ -143,7 +143,7 @@
     "savedFilters": "保存済みフィルター"
   },
   "sort": {
-    "assignedToMe": "",
+    "assignedToMe": "Assigned to me",
     "smart": "",
     "createdDate": "",
     "updatedDate": "",
@@ -620,8 +620,8 @@
     "altCaptured": "",
     "altProcessing": "",
     "taskIdentified": "",
-    "runningNativeOcr": "",
-    "identifyingTask": "",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
     "tapToScanHint": "「ドキュメントをスキャン」をタップしてスキャナーを開く",
     "readingTextProgress": "画像からテキストを読み取り中… {{progress}}%",
     "dueDate": "期限: {{date}}",
@@ -744,7 +744,7 @@
     "rescheduleFromCompletion": "",
     "rescheduleFromCompletionHelp": "",
     "notifications": "",
-    "notificationsPlanWarning": "",
+    "notificationsPlanWarning": "Task notifications are not available in the Basic plan. Upgrade to Plus to receive reminders when tasks are due or completed.",
     "notifyForTask": "",
     "notifyForTaskHelp": "",
     "notificationSchedule": "",
@@ -775,11 +775,12 @@
     "updatedBy": "",
     "archive": "",
     "unarchive": "",
-    "create": ""
+    "create": "",
+    "notificationsFreePlanNote": "あなたのプランでは期限日にリマインダーが届きます。Plusにすると、期限前のリマインダーと期限後のフォローアップが追加されます。"
   },
   "addTask": {
-    "descriptionLabel": "",
-    "subtasksLabel": "",
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:",
     "title": "",
     "defaultProject": "",
     "anyone": "",
@@ -878,7 +879,7 @@
     "repeatOn": "",
     "triggerLabel": "",
     "triggerHelp": "",
-    "triggerPlanWarning": "",
+    "triggerPlanWarning": "Thing-based triggers are not available in the Basic plan. Upgrade to Plus to automatically trigger tasks when device states change.",
     "previewEvery": "",
     "previewOccurrence": "",
     "defaultTime": "",

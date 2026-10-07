@@ -795,7 +795,8 @@
     "updatedBy": "Aggiornata da",
     "archive": "Archivia",
     "unarchive": "Ripristina",
-    "create": "Crea"
+    "create": "Crea",
+    "notificationsFreePlanNote": "Il tuo piano include un promemoria alla data di scadenza. Plus aggiunge promemoria prima della scadenza e follow-up dopo."
   },
   "addTask": {
     "descriptionLabel": "Descrizione:",

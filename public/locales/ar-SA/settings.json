@@ -595,7 +595,14 @@
     "featureApiTokens": "API tokens for integrations",
     "featureImageUploads": "Image uploads in descriptions",
     "featureAutomation": "Advanced task automation",
-    "planYearly": "Yearly"
+    "planYearly": "Yearly",
+    "reasonAdvancedReminders": "التذكيرات قبل استحقاق المهمة والمتابعات بعدها هي ميزة Plus. خطتك الحالية تُذكّرك في تاريخ الاستحقاق.",
+    "reasonReminderChannels": "إرسال تذكيرات المهام إلى مجموعة Telegram هي ميزة Plus.",
+    "reasonHistoryWindow": "خطتك الحالية تعرض آخر 30 يومًا. قم بالترقية إلى Plus للحصول على تاريخك الكامل والاتجاهات طويلة الأمد.",
+    "reasonThingTriggers": "تشغيل المهام تلقائيًا عند تغيير حالة شيء ما هي ميزة Plus.",
+    "reasonProjectLimit": "تتضمن خطتك الحالية {{projectLimit}} مشاريع. قم بالترقية إلى Plus لإنشاء العدد الذي تحتاجه.",
+    "reasonQuickFilterLimit": "تتضمن خطتك الحالية {{filterLimit}} فلاتر سريعة محفوظة. قم بالترقية إلى Plus للحصول على فلاتر غير محدودة.",
+    "reasonFileUpload": "إرفاق الملفات والصور هي ميزة Plus. قم بالترقية إلى Plus لإضافة الصور والمسح الضوئي والمستندات إلى مهامك."
   },
   "childUsers": {
     "errNameRequired": "Sub account name is required",

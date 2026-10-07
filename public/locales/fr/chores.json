@@ -620,8 +620,8 @@
     "altCaptured": "Document capturé",
     "altProcessing": "Traitement en cours",
     "taskIdentified": "Tâche identifiée",
-    "runningNativeOcr": "",
-    "identifyingTask": "",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
     "tapToScanHint": "Appuyez sur \"Scanner un document\" pour ouvrir le scanner",
     "readingTextProgress": "Lecture du texte de l'image… {{progress}} %",
     "dueDate": "Échéance : {{date}}",
@@ -775,11 +775,12 @@
     "updatedBy": "Mis à jour par",
     "archive": "Archiver",
     "unarchive": "Désarchiver",
-    "create": "Créer"
+    "create": "Créer",
+    "notificationsFreePlanNote": "Votre formule inclut un rappel à la date d'échéance. Plus ajoute des rappels avant l'échéance et des suivis après."
   },
   "addTask": {
-    "descriptionLabel": "",
-    "subtasksLabel": "",
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:",
     "title": "Créer une nouvelle tâche",
     "defaultProject": "Projet par défaut",
     "anyone": "Tout le monde",

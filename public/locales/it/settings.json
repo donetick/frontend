@@ -590,7 +590,14 @@
     "featureApiTokens": "Token API per le integrazioni",
     "featureImageUploads": "Caricamento immagini nelle descrizioni",
     "featureAutomation": "Automazione avanzata delle attività",
-    "planYearly": "Annuale"
+    "planYearly": "Annuale",
+    "reasonAdvancedReminders": "I promemoria prima della scadenza e i follow-up dopo sono una funzionalità di Plus. Il tuo piano attuale invia solo un promemoria alla data di scadenza.",
+    "reasonReminderChannels": "L'invio di promemoria delle attività a un gruppo Telegram è una funzionalità di Plus.",
+    "reasonHistoryWindow": "Il tuo piano attuale mostra gli ultimi 30 giorni. Passa a Plus per visualizzare tutta la cronologia e le tendenze a lungo termine.",
+    "reasonThingTriggers": "L'attivazione automatica delle attività quando uno 'thing' cambia stato è una funzionalità di Plus.",
+    "reasonProjectLimit": "Il tuo piano attuale include {{projectLimit}} progetti. Passa a Plus per crearne quanti ne servono.",
+    "reasonQuickFilterLimit": "Il tuo piano attuale include {{filterLimit}} filtri rapidi salvati. Passa a Plus per filtri illimitati.",
+    "reasonFileUpload": "Allegare file e immagini è una funzionalità di Plus. Passa a Plus per aggiungere foto, scannerizzazioni e documenti alle tue attività."
   },
   "childUsers": {
     "errNameRequired": "Il nome dell'account secondario è obbligatorio",

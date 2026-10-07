@@ -596,7 +596,14 @@
     "featureApiTokens": "Tokens de API para integraciones",
     "featureImageUploads": "Subida de imágenes en descripciones",
     "featureAutomation": "Automatización avanzada de tareas",
-    "planYearly": "Anual"
+    "planYearly": "Anual",
+    "reasonAdvancedReminders": "Los recordatorios antes de que venza una tarea y los seguimientos posteriores son una función de Plus. Tu plan actual te recuerda en la fecha de vencimiento.",
+    "reasonReminderChannels": "Enviar recordatorios de tareas a un grupo de Telegram es una función de Plus.",
+    "reasonHistoryWindow": "Tu plan actual muestra los últimos 30 días. Actualiza a Plus para ver todo tu historial y tendencias a largo plazo.",
+    "reasonThingTriggers": "Activar tareas automáticamente cuando cambia el estado de un objeto es una función de Plus.",
+    "reasonProjectLimit": "Tu plan actual incluye {{projectLimit}} proyectos. Actualiza a Plus para crear todos los que necesites.",
+    "reasonQuickFilterLimit": "Tu plan actual incluye {{filterLimit}} filtros rápidos guardados. Actualiza a Plus para filtros ilimitados.",
+    "reasonFileUpload": "Adjuntar archivos e imágenes es una función de Plus. Actualiza a Plus para añadir fotos, escaneos y documentos a tus tareas."
   },
   "childUsers": {
     "errNameRequired": "El nombre es obligatorio",

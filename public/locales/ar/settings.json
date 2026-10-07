@@ -590,7 +590,14 @@
     "featureApiTokens": "رمز API للتكامل",
     "featureImageUploads": "تحميل الصور في الوصف",
     "featureAutomation": "التشغيل الآلي المتقدم للمهام",
-    "planYearly": "سنوي"
+    "planYearly": "سنوي",
+    "reasonAdvancedReminders": "التذكيرات قبل استحقاق المهمة والمتابعات بعدها هي ميزة Plus. خطتك الحالية تُذكّرك في تاريخ الاستحقاق.",
+    "reasonReminderChannels": "إرسال تذكيرات المهام إلى مجموعة Telegram هي ميزة Plus.",
+    "reasonHistoryWindow": "خطتك الحالية تعرض آخر 30 يومًا. قم بالترقية إلى Plus للحصول على تاريخك الكامل والاتجاهات طويلة الأمد.",
+    "reasonThingTriggers": "تشغيل المهام تلقائيًا عند تغيير حالة شيء ما هي ميزة Plus.",
+    "reasonProjectLimit": "تتضمن خطتك الحالية {{projectLimit}} مشاريع. قم بالترقية إلى Plus لإنشاء العدد الذي تحتاجه.",
+    "reasonQuickFilterLimit": "تتضمن خطتك الحالية {{filterLimit}} فلاتر سريعة محفوظة. قم بالترقية إلى Plus للحصول على فلاتر غير محدودة.",
+    "reasonFileUpload": "إرفاق الملفات والصور هي ميزة Plus. قم بالترقية إلى Plus لإضافة الصور والمسح الضوئي والمستندات إلى مهامك."
   },
   "childUsers": {
     "errNameRequired": "اسم الحساب الفرعي مطلوب",
@@ -693,14 +700,14 @@
   "realtime": {
     "titleSse": "التحديثات في الوقت الحقيقي (SSE)",
     "subtitleSse": "الحصول على إشعارات فورية عبر أحداث الخادم المرسلة",
-    "basicPlanDescription": "",
-    "disabledDescription": "",
-    "connectedDescription": "",
-    "connectingDescription": "",
-    "errorDescription": "",
-    "disconnectedDescription": "",
-    "enableLabel": "",
-    "statusLabel": ""
+    "basicPlanDescription": "Real-time updates (SSE) are not available in the Basic plan. Upgrade to Plus to receive instant notifications when chores are updated.",
+    "disabledDescription": "Real-time updates (SSE) are disabled. Enable to see live changes when you or other circle members complete, skip, or modify chores.",
+    "connectedDescription": "Real-time updates (SSE) are working. You'll see live changes when you or other circle members complete, skip, or modify chores.",
+    "connectingDescription": "Connecting to real-time updates (SSE)...",
+    "errorDescription": "Real-time updates (SSE) are enabled but not working: {{error}}",
+    "disconnectedDescription": "Real-time updates (SSE) are enabled but not currently connected.",
+    "enableLabel": "Enable Real-time Updates (SSE)",
+    "statusLabel": "Status:"
   },
   "nativeCancel": {
     "title": "إلغاء الاشتراك",

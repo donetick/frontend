@@ -620,8 +620,8 @@
     "altCaptured": "وثيقة ملصقة",
     "altProcessing": "معالجة",
     "taskIdentified": "تم تحديد المهمة",
-    "runningNativeOcr": "",
-    "identifyingTask": "",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
     "tapToScanHint": "اضغط على \"مسح مستند\" لفتح الماسح الضوئي",
     "readingTextProgress": "جارٍ قراءة النص من الصورة… {{progress}}%",
     "dueDate": "الاستحقاق: {{date}}",
@@ -775,11 +775,12 @@
     "updatedBy": "تم التحديث بواسطة",
     "archive": "أرشيف",
     "unarchive": "إلغاء الأرشيف",
-    "create": "إنشاء"
+    "create": "إنشاء",
+    "notificationsFreePlanNote": "خطتك تتضمن تذكيراً في تاريخ الاستحقاق. يضيف Plus تذكيرات قبل الاستحقاق ومتابعات بعده."
   },
   "addTask": {
-    "descriptionLabel": "",
-    "subtasksLabel": "",
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:",
     "title": "إنشاء مهمة جديدة",
     "defaultProject": "المشروع الافتراضي",
     "anyone": "أي",

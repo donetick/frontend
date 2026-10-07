@@ -775,7 +775,8 @@
     "updatedBy": "Updated by",
     "archive": "Archive",
     "unarchive": "Unarchive",
-    "create": "Create"
+    "create": "Create",
+    "notificationsFreePlanNote": "你的套餐包含到期当天的提醒。升级到 Plus 可增加到期前的提醒和到期后的跟进通知。"
   },
   "addTask": {
     "descriptionLabel": "Description:",

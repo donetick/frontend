@@ -72,7 +72,7 @@
     "placeholder": "חיפוש ב-Donetick",
     "inputAriaLabel": "חיפוש במשימות, בהיסטוריה, בפרויקטים, בתגיות ובהגדרות",
     "deviceNote": "חיפוש בתוכן הזמין במכשיר הזה",
-    "escape": "",
+    "escape": "Esc",
     "recent": "חיפושים אחרונים",
     "empty": {
       "title": "אין התאמות ישירות",
@@ -146,7 +146,7 @@
       "tooComplicated": "מסובך מדי",
       "slow": "איטי",
       "notifications": "התראות",
-      "ai": "",
+      "ai": "AI",
       "other": "אחר"
     },
     "details": {

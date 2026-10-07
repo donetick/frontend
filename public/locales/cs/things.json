@@ -46,7 +46,7 @@
     "toggle": "Přepnout"
   },
   "types": {
-    "text": "",
+    "text": "Text",
     "number": "Číslo",
     "boolean": "Logická hodnota"
   },
