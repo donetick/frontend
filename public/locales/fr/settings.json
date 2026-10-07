@@ -631,13 +631,13 @@
     "featureImageUploads": "Ajout d'images dans les descriptions",
     "featureAutomation": "Automatisation avancée des tâches",
     "planYearly": "Annuel",
-    "reasonAdvancedReminders": "",
-    "reasonReminderChannels": "",
-    "reasonHistoryWindow": "",
-    "reasonThingTriggers": "",
-    "reasonProjectLimit": "",
-    "reasonQuickFilterLimit": "",
-    "reasonFileUpload": "",
+    "reasonAdvancedReminders": "Les rappels avant l'échéance et les suivis après sont une fonctionnalité Plus. Votre formule actuelle vous rappelle à la date d'échéance.",
+    "reasonReminderChannels": "L'envoi de rappels de tâches à un groupe Telegram est une fonctionnalité Plus.",
+    "reasonHistoryWindow": "Votre formule actuelle affiche les 30 derniers jours. Passez à Plus pour obtenir tout l'historique et les tendances à long terme.",
+    "reasonThingTriggers": "Le déclenchement automatique de tâches lorsqu'un objet change d'état est une fonctionnalité Plus.",
+    "reasonProjectLimit": "Votre formule actuelle inclut {{projectLimit}} projets. Passez à Plus pour en créer autant que nécessaire.",
+    "reasonQuickFilterLimit": "Votre formule actuelle inclut {{filterLimit}} filtres rapides enregistrés. Passez à Plus pour des filtres illimités.",
+    "reasonFileUpload": "Joindre des fichiers et des images est une fonctionnalité Plus. Passez à Plus pour ajouter photos, scans et documents à vos tâches.",
     "reasonCalendarSync": ""
   },
   "childUsers": {
@@ -741,14 +741,14 @@
   "realtime": {
     "titleSse": "Mises à jour en temps réel (SSE)",
     "subtitleSse": "Recevez des notifications instantanées via les événements envoyés par le serveur",
-    "basicPlanDescription": "",
-    "disabledDescription": "",
-    "connectedDescription": "",
-    "connectingDescription": "",
-    "errorDescription": "",
-    "disconnectedDescription": "",
-    "enableLabel": "",
-    "statusLabel": ""
+    "basicPlanDescription": "Real-time updates (SSE) are not available in the Basic plan. Upgrade to Plus to receive instant notifications when chores are updated.",
+    "disabledDescription": "Real-time updates (SSE) are disabled. Enable to see live changes when you or other circle members complete, skip, or modify chores.",
+    "connectedDescription": "Real-time updates (SSE) are working. You'll see live changes when you or other circle members complete, skip, or modify chores.",
+    "connectingDescription": "Connecting to real-time updates (SSE)...",
+    "errorDescription": "Real-time updates (SSE) are enabled but not working: {{error}}",
+    "disconnectedDescription": "Real-time updates (SSE) are enabled but not currently connected.",
+    "enableLabel": "Enable Real-time Updates (SSE)",
+    "statusLabel": "Status:"
   },
   "nativeCancel": {
     "title": "Résilier l'abonnement",
