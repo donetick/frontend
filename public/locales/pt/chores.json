@@ -11,7 +11,7 @@
   "dueDate": "Data de vencimento",
   "assignedTo": "Atribuída a",
   "priority": "Prioridade",
-  "status": "",
+  "status": "Status",
   "description": "Descrição",
   "choreView": {
     "assignment": "Atribuição",
@@ -116,7 +116,7 @@
     "selectAPerformer": ""
   },
   "toolbar": {
-    "defaultProject": "",
+    "defaultProject": "Default Project",
     "everyone": "",
     "mine": "",
     "availableToMe": "",
@@ -143,7 +143,7 @@
     "savedFilters": "Filtros salvos"
   },
   "sort": {
-    "assignedToMe": "",
+    "assignedToMe": "Assigned to me",
     "smart": "",
     "createdDate": "",
     "updatedDate": "",
@@ -620,8 +620,8 @@
     "altCaptured": "",
     "altProcessing": "",
     "taskIdentified": "",
-    "runningNativeOcr": "",
-    "identifyingTask": "",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
     "tapToScanHint": "Toque em \"Digitalizar documento\" para abrir o scanner",
     "readingTextProgress": "Lendo texto da imagem… {{progress}}%",
     "dueDate": "Vencimento: {{date}}",
@@ -775,11 +775,11 @@
     "archive": "",
     "unarchive": "",
     "create": "",
-    "notificationsFreePlanNote": ""
+    "notificationsFreePlanNote": "O teu plan inclui um lembrete na data de vencimento. Plus adiciona lembretes antes do vencimento e acompanhamentos depois."
   },
   "addTask": {
-    "descriptionLabel": "",
-    "subtasksLabel": "",
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:",
     "title": "",
     "defaultProject": "",
     "anyone": "",
