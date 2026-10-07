@@ -117,7 +117,6 @@ export default ({ command, mode }) => {
           // The PWA plugin runs after PostHog's upload/cleanup stage, so prevent
           // it from leaving separate service-worker source maps in dist.
           sourcemap: false,
-          clientsClaim: true, // Take control of uncontrolled clients as soon as the service worker becomes active
           maximumFileSizeToCacheInBytes: 6000000, // 6MB
           //Exclude API and Swagger routes from service worker navigation fallback
           navigateFallback: '/index.html',
@@ -125,7 +124,9 @@ export default ({ command, mode }) => {
             /^\/api\//, // Exclude all API routes
             /^\/swagger/, // Exclude all Swagger routes
           ],
-          skipWaiting: true, // Force the waiting service worker to become the active service worker
+          // Do not use skipWaiting/clientsClaim with the prompt flow. The new
+          // worker activates only after the user accepts the in-app update.
+          skipWaiting: false,
         },
       }),
     ],
