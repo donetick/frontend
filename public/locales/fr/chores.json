@@ -744,7 +744,6 @@
     "rescheduleFromCompletion": "Replanifier à partir de la date de fin",
     "rescheduleFromCompletionHelp": "la tâche suivante sera planifiée à partir de la date de fin réelle de la tâche précédente",
     "notifications": "Notifications",
-    "notificationsPlanWarning": "Les notifications de tâches ne sont pas disponibles dans la formule Basic. Passez à Plus pour recevoir des rappels lorsque les tâches arrivent à échéance ou sont terminées.",
     "notifyForTask": "Notifier pour cette tâche",
     "notifyForTaskHelp": "Quand recevoir des notifications pour cette tâche",
     "notificationSchedule": "Planification des notifications",
@@ -775,7 +774,8 @@
     "updatedBy": "Mis à jour par",
     "archive": "Archiver",
     "unarchive": "Désarchiver",
-    "create": "Créer"
+    "create": "Créer",
+    "notificationsFreePlanNote": ""
   },
   "addTask": {
     "descriptionLabel": "",
@@ -878,7 +878,6 @@
     "repeatOn": "Répéter le :",
     "triggerLabel": "Déclencher cette tâche selon l'état d'un objet",
     "triggerHelp": "Cette tâche doit-elle être effectuée lorsqu'un objet change d'état ?",
-    "triggerPlanWarning": "Les déclencheurs basés sur des objets ne sont pas disponibles dans la formule Basic. Passez à Plus pour déclencher automatiquement les tâches lorsque l'état d'un appareil change.",
     "previewEvery": "Chaque {{days}} à {{time}}",
     "previewOccurrence": "Chaque {{occurrences}} {{days}} du mois à {{time}}",
     "defaultTime": "18 h",
