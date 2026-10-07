@@ -11,7 +11,7 @@
   "dueDate": "Vervaldatum",
   "assignedTo": "Toegewezen aan",
   "priority": "Prioriteit",
-  "status": "",
+  "status": "Status",
   "description": "Beschrijving",
   "choreView": {
     "assignment": "Toewijzing",
@@ -22,7 +22,7 @@
     "statistics": "Statistieken",
     "completed": "Voltooid",
     "times": "keer",
-    "details": "",
+    "details": "Details",
     "createdBy": "Aangemaakt door",
     "na": "N/B",
     "taskCompleted": "Taak Voltooid",
@@ -116,7 +116,7 @@
     "selectAPerformer": ""
   },
   "toolbar": {
-    "defaultProject": "",
+    "defaultProject": "Default Project",
     "everyone": "",
     "mine": "",
     "availableToMe": "",
@@ -143,7 +143,7 @@
     "savedFilters": "Opgeslagen filters"
   },
   "sort": {
-    "assignedToMe": "",
+    "assignedToMe": "Assigned to me",
     "smart": "",
     "createdDate": "",
     "updatedDate": "",
@@ -620,8 +620,8 @@
     "altCaptured": "",
     "altProcessing": "",
     "taskIdentified": "",
-    "runningNativeOcr": "",
-    "identifyingTask": "",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
     "tapToScanHint": "Tik op \"Document scannen\" om de scanner te openen",
     "readingTextProgress": "Tekst lezen uit afbeelding… {{progress}}%",
     "dueDate": "Vervalt: {{date}}",
@@ -744,7 +744,7 @@
     "rescheduleFromCompletion": "",
     "rescheduleFromCompletionHelp": "",
     "notifications": "",
-    "notificationsPlanWarning": "",
+    "notificationsPlanWarning": "Task notifications are not available in the Basic plan. Upgrade to Plus to receive reminders when tasks are due or completed.",
     "notifyForTask": "",
     "notifyForTaskHelp": "",
     "notificationSchedule": "",
@@ -779,8 +779,8 @@
     "notificationsFreePlanNote": "Je abonnement bevat een herinnering op de vervaldatum. Plus voegt herinneringen vóór de datum en opvolgherrinneringen daarna toe."
   },
   "addTask": {
-    "descriptionLabel": "",
-    "subtasksLabel": "",
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:",
     "title": "",
     "defaultProject": "",
     "anyone": "",
@@ -879,7 +879,7 @@
     "repeatOn": "",
     "triggerLabel": "",
     "triggerHelp": "",
-    "triggerPlanWarning": "",
+    "triggerPlanWarning": "Thing-based triggers are not available in the Basic plan. Upgrade to Plus to automatically trigger tasks when device states change.",
     "previewEvery": "",
     "previewOccurrence": "",
     "defaultTime": "",

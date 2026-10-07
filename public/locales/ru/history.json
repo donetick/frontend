@@ -1,105 +1,105 @@
 {
   "edit": {
-    "title": "",
-    "completedDate": "",
-    "note": "",
-    "additionalNotes": "",
-    "deleteTitle": "",
-    "deleteMessage": ""
+    "title": "Изменить запись",
+    "completedDate": "Дата выполнения",
+    "note": "Заметка",
+    "additionalNotes": "Дополнительная заметка",
+    "deleteTitle": "Удалить запись",
+    "deleteMessage": "Удалить эту запись истории?"
   },
   "status": {
-    "inProgress": "",
-    "completed": "",
-    "skipped": "",
-    "pendingApproval": "",
-    "rejected": "",
-    "missed": "",
-    "rescheduled": "",
-    "scheduled": ""
+    "inProgress": "В работе",
+    "completed": "Выполнено",
+    "skipped": "Пропущено",
+    "pendingApproval": "Ждёт одобрения",
+    "rejected": "Отклонено",
+    "missed": "Не сделано",
+    "rescheduled": "Перенесено",
+    "scheduled": "Запланировано"
   },
   "badge": {
-    "onTime": "",
-    "onTimeLabel": ""
+    "onTime": "Вовремя",
+    "onTimeLabel": "Вовремя"
   },
   "card": {
-    "wasDue": "",
-    "daysBeforeDue_one": "",
-    "daysBeforeDue_other": "",
-    "daysAfterDue_one": "",
-    "daysAfterDue_other": "",
-    "hoursBeforeDue_one": "",
-    "hoursBeforeDue_other": "",
-    "hoursAfterDue_one": "",
-    "hoursAfterDue_other": "",
-    "assignedTo": "",
-    "points_one": "",
-    "points_other": ""
+    "wasDue": "Срок был {{date}}",
+    "daysBeforeDue_one": "{{count}}д до срока",
+    "daysBeforeDue_other": "{{count}}д до срока",
+    "daysAfterDue_one": "{{count}}д после срока",
+    "daysAfterDue_other": "{{count}}д после срока",
+    "hoursBeforeDue_one": "{{count}}ч до срока",
+    "hoursBeforeDue_other": "{{count}}ч до срока",
+    "hoursAfterDue_one": "{{count}}ч после срока",
+    "hoursAfterDue_other": "{{count}}ч после срока",
+    "assignedTo": "Назначено: {{name}}",
+    "points_one": "★ {{count}} балл",
+    "points_other": "★ {{count}} балла"
   },
   "detail": {
-    "title": "",
-    "openTask": "",
-    "editEntry": "",
-    "performedBy": "",
-    "assignedTo": "",
-    "lastUpdated": "",
-    "duration": "",
-    "pointsEarned": "",
-    "points_one": "",
-    "points_other": "",
-    "note": "",
+    "title": "Подробности записи",
+    "openTask": "Открыть дело",
+    "editEntry": "Изменить запись",
+    "performedBy": "Выполнил",
+    "assignedTo": "Назначено на",
+    "lastUpdated": "Последнее изменение",
+    "duration": "Длительность",
+    "pointsEarned": "Начислено баллов",
+    "points_one": "{{count}} балл",
+    "points_other": "{{count}} балла",
+    "note": "Заметка",
     "reason": "Причина",
     "notes": "Заметки"
   },
   "charts": {
-    "noData": "",
-    "noLabels": "",
-    "unassigned": "",
-    "unknownTask": "",
-    "late": "",
+    "noData": "Нет данных",
+    "noLabels": "Без меток",
+    "unassigned": "Без исполнителя",
+    "unknownTask": "Неизвестное дело",
+    "late": "С опозданием",
     "status": {
-      "title": "",
-      "description": ""
+      "title": "Статус",
+      "description": "Статус выполненных дел"
     },
     "due": {
-      "title": "",
-      "description": ""
+      "title": "Срок",
+      "description": "Сроки текущих дел"
     },
     "priority": {
-      "title": "",
-      "description": ""
+      "title": "Приоритет",
+      "description": "Дела по приоритету"
     },
     "labels": {
-      "title": "",
-      "description": ""
+      "title": "Метки",
+      "description": "Дела по меткам"
     },
     "labelsDuration": {
-      "title": "",
-      "description": ""
+      "title": "Метки (время)",
+      "description": "Время по меткам (часы)"
     },
     "tasksTime": {
-      "title": "",
-      "description": ""
+      "title": "Дела (время)",
+      "description": "Время по отдельным делам (часы)"
     },
     "assigneeBreakdown": {
-      "title": "",
-      "description": ""
+      "title": "По исполнителям",
+      "description": "Дела в разрезе исполнителей"
     }
   },
   "filter": {
-    "status": "",
-    "pending": "",
-    "labels": "",
-    "hasNotes": "",
-    "hasPoints": "",
-    "timePeriod": "",
-    "user": "",
-    "completedBy": "",
-    "completedAt": ""
+    "status": "Статус",
+    "pending": "Ожидает",
+    "labels": "Метки",
+    "hasNotes": "С заметкой",
+    "hasPoints": "С баллами",
+    "timePeriod": "Период",
+    "user": "Участник",
+    "completedBy": "Кто выполнил",
+    "completedAt": "Когда выполнено"
   },
   "period": {
-    "days_one": "",
-    "days_other": "",
-    "allTime": ""
+    "days_one": "{{count}} день",
+    "days_other": "{{count}} дня",
+    "allTime": "всё время"
   },
   "search": {
     "placeholder": "",
@@ -113,7 +113,7 @@
     "points": ""
   },
   "activities": {
-    "title": "",
+    "title": "Активность",
     "subtitle": "",
     "emptyTitle": "",
     "emptyDescriptionEveryone": "",
@@ -130,27 +130,27 @@
     }
   },
   "title": {
-    "summary": "",
-    "activity": ""
+    "summary": "Сводка по делу",
+    "activity": "Активность по делу"
   },
   "noResults": {
-    "clear": ""
+    "clear": "Сбросить фильтры"
   },
   "toast": {
     "updateQueued": {
-      "title": "",
+      "title": "Изменение в очереди",
       "message": ""
     },
     "updated": {
-      "title": "",
+      "title": "История изменена",
       "message": ""
     },
     "deleteQueued": {
-      "title": "",
+      "title": "Удаление в очереди",
       "message": ""
     },
     "deleted": {
-      "title": "",
+      "title": "Запись удалена",
       "message": ""
     }
   },

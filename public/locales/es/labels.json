@@ -45,7 +45,7 @@
     "name": "Nombre",
     "editTitle": "Editar Etiqueta",
     "addTitle": "Añadir Etiqueta",
-    "color": "",
+    "color": "Color",
     "saveChanges": "Guardar Cambios",
     "addLabel": "Añadir Etiqueta",
     "colorAriaSelect": "Seleccionar {{color}}"
@@ -62,7 +62,7 @@
     "createLabel": "Crear una etiqueta",
     "filterTitle": "Mostrar",
     "sortName": "Nombre",
-    "sortColor": "",
+    "sortColor": "Color",
     "sortRecent": "Creadas recientemente",
     "filterAll": "Todas las etiquetas",
     "filterMine": "Creadas por mí",

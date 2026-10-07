@@ -44,8 +44,8 @@
     "lastUpdated": "آخر تحديث",
     "duration": "المدة",
     "pointsEarned": "النقاط المكتسبة",
-    "points_one": "",
-    "points_other": "",
+    "points_one": "{{count}} pt",
+    "points_other": "{{count}} pts",
     "note": "ملاحظة",
     "reason": "السبب",
     "notes": "ملاحظات"
@@ -97,7 +97,7 @@
     "completedAt": "اكتمل في"
   },
   "period": {
-    "days_one": "",
+    "days_one": "{{count}} Day",
     "days_other": "{{count}} أيام",
     "allTime": "كل الوقت"
   },

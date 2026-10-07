@@ -32,8 +32,8 @@
     "hoursAfterDue_one": "{{count}} h después de la fecha límite",
     "hoursAfterDue_other": "{{count}} h después de la fecha límite",
     "assignedTo": "Asignada a {{name}}",
-    "points_one": "",
-    "points_other": ""
+    "points_one": "★ {{count}} pt",
+    "points_other": "★ {{count}} pts"
   },
   "detail": {
     "title": "Detalle de Actividad",
@@ -44,8 +44,8 @@
     "lastUpdated": "Última actualización",
     "duration": "Duración",
     "pointsEarned": "Puntos ganados",
-    "points_one": "",
-    "points_other": "",
+    "points_one": "{{count}} pt",
+    "points_other": "{{count}} pts",
     "note": "Nota",
     "reason": "Motivo",
     "notes": "Notas"

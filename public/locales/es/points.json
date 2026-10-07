@@ -25,8 +25,8 @@
     "points_other": "{{count}} puntos"
   },
   "tabs": {
-    "short7d": "",
-    "short6m": "",
+    "short7d": "7D",
+    "short6m": "6M",
     "shortAll": "Todo",
     "days7": "7 Días",
     "months6": "6 Meses",
@@ -50,7 +50,7 @@
       "subtext": "Usados anteriormente"
     },
     "total": {
-      "title": "",
+      "title": "Total",
       "subtext": "Ganados en total"
     },
     "period": {

@@ -72,7 +72,7 @@
     "placeholder": "Szukaj w Donetick",
     "inputAriaLabel": "Szukaj zadań, historii, projektów, etykiet i ustawień",
     "deviceNote": "Wyszukiwanie zawartości dostępnej na tym urządzeniu",
-    "escape": "",
+    "escape": "Esc",
     "recent": "Ostatnie",
     "empty": {
       "title": "Brak bezpośrednich wyników",
@@ -146,7 +146,7 @@
       "tooComplicated": "Zbyt skomplikowane",
       "slow": "Działa wolno",
       "notifications": "Powiadomienia",
-      "ai": "",
+      "ai": "AI",
       "other": "Inne"
     },
     "details": {
@@ -227,7 +227,7 @@
     "sidePanelSettings": "Ustawienia panelu bocznego",
     "sidePanelSettingsDescription": "Dostosuj układ i karty",
     "planFree": "Darmowy",
-    "planPlus": "",
+    "planPlus": "Plus",
     "planPlusExpiring": "Plus (wkrótce wygasa)",
     "switchUser": "Przełącz użytkownika",
     "impersonateUser": "Podszyj się pod użytkownika",
@@ -290,7 +290,7 @@
     "descending": "Malejąco",
     "filter": "Filtr"
   },
-  "versionInfo": "",
+  "versionInfo": "V{{version}} (API: {{apiVersion}})",
   "apiVersionUnavailable": "niedostępne",
   "sync": {
     "aria": "Otwórz status synchronizacji i sieci",
@@ -317,8 +317,8 @@
     "secondsAgo": "{{count}} s temu",
     "minutesAgo": "{{count}} min temu",
     "hoursAgo": "{{count}} godz. temu",
-    "online": "",
-    "offline": "",
+    "online": "Online",
+    "offline": "Offline",
     "syncing": "Synchronizowanie...",
     "lastSync": "Ostatnia synchronizacja: {{time}}",
     "offlineSince": "Offline od {{duration}}",
@@ -341,8 +341,8 @@
   "fileNumbered": "Plik {{index}}",
   "noAttachmentsTitle": "Brak załączników",
   "noAttachmentsDescription": "Zdjęcia i pliki dodane do tego zadania pojawią się tutaj.",
-  "kbSize": "",
-  "logoAlt": "",
+  "kbSize": "{{size}} KB",
+  "logoAlt": "Logo",
   "notification": {
     "error": "Błąd",
     "success": "Sukces",
@@ -477,7 +477,7 @@
       "continue": "Dalej",
       "skip": "Pomiń",
       "sources": {
-        "appStore": "",
+        "appStore": "App Store / Google Play",
         "reddit": "Reddit lub forum",
         "friend": "Znajomy lub rodzina",
         "video": "YouTube lub TikTok",

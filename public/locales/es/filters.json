@@ -8,7 +8,7 @@
     "save": "Guardar Filtro",
     "name": "Nombre del Filtro",
     "namePlaceholder": "ej. Tareas vencidas de Alicia",
-    "color": ""
+    "color": "Color"
   },
   "nameExists": "Ya existe un filtro con este nombre",
   "tasks_one": "{{count}} tarea",

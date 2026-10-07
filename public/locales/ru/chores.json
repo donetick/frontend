@@ -620,8 +620,8 @@
     "altCaptured": "Записанный документ",
     "altProcessing": "Обработка",
     "taskIdentified": "Задача определена",
-    "runningNativeOcr": "",
-    "identifyingTask": "",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
     "tapToScanHint": "Нажмите «Сканировать документ», чтобы открыть сканер",
     "readingTextProgress": "Считывание текста с изображения… {{progress}}%",
     "dueDate": "Срок: {{date}}",
@@ -779,8 +779,8 @@
     "notificationsFreePlanNote": "Ваш тариф включает напоминание в день срока. В Plus добавляются напоминания до срока и последующие уведомления после него."
   },
   "addTask": {
-    "descriptionLabel": "",
-    "subtasksLabel": "",
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:",
     "title": "Создать новую задачу",
     "defaultProject": "Проект по умолчанию",
     "anyone": "Кто угодно",
