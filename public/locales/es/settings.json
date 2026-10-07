@@ -58,6 +58,10 @@
         "title": "Tokens de API",
         "description": "Genera y gestiona tokens de acceso para integraciones de terceros y acceso a la API."
       },
+      "calendar": {
+        "title": "",
+        "description": ""
+      },
       "storage": {
         "title": "Storage Ajustes",
         "description": "Haz copias de seguridad y restaura tus datos, gestiona el almacenamiento local y la sincronización."
@@ -372,6 +376,42 @@
     "nameModalTitle": "Dale un nombre a tu nuevo token, algo con lo que lo reconozcas.",
     "generateToken": "Generar token"
   },
+  "calendar": {
+    "title": "",
+    "description": "",
+    "plusTitle": "",
+    "plusNotice": "",
+    "upgrade": "",
+    "activeTitle": "",
+    "activeStatus": "",
+    "urlLabel": "",
+    "copy": "",
+    "copied": "",
+    "copyFailed": "",
+    "createdAt": "",
+    "lastUsedAt": "",
+    "neverUsed": "",
+    "keepPrivateTitle": "",
+    "keepPrivateDescription": "",
+    "manageTitle": "",
+    "rotate": "",
+    "rotateTitle": "",
+    "rotateMessage": "",
+    "rotated": "",
+    "revoke": "",
+    "revokeTitle": "",
+    "revokeMessage": "",
+    "revoked": "",
+    "inactiveTitle": "",
+    "inactiveDescription": "",
+    "generate": "",
+    "generated": "",
+    "howToTitle": "",
+    "howToDescription": "",
+    "errorTitle": "",
+    "actionFailed": "",
+    "loadFailed": ""
+  },
   "storage": {
     "title": "Storage Ajustes",
     "serverTitle": "Uso del almacenamiento en el servidor",
@@ -590,7 +630,15 @@
     "featureApiTokens": "Tokens de API para integraciones",
     "featureImageUploads": "Subida de imágenes en descripciones",
     "featureAutomation": "Automatización avanzada de tareas",
-    "planYearly": "Anual"
+    "planYearly": "Anual",
+    "reasonAdvancedReminders": "",
+    "reasonReminderChannels": "",
+    "reasonHistoryWindow": "",
+    "reasonThingTriggers": "",
+    "reasonProjectLimit": "",
+    "reasonQuickFilterLimit": "",
+    "reasonFileUpload": "",
+    "reasonCalendarSync": ""
   },
   "childUsers": {
     "errNameRequired": "El nombre es obligatorio",
