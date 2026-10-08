@@ -58,6 +58,10 @@
         "title": "Tokens de API",
         "description": "Genera y gestiona tokens de acceso para integraciones de terceros y acceso a la API."
       },
+      "calendar": {
+        "title": "",
+        "description": ""
+      },
       "storage": {
         "title": "Storage Ajustes",
         "description": "Haz copias de seguridad y restaura tus datos, gestiona el almacenamiento local y la sincronización."
@@ -372,6 +376,42 @@
     "nameModalTitle": "Dale un nombre a tu nuevo token, algo con lo que lo reconozcas.",
     "generateToken": "Generar token"
   },
+  "calendar": {
+    "title": "",
+    "description": "",
+    "plusTitle": "",
+    "plusNotice": "",
+    "upgrade": "",
+    "activeTitle": "",
+    "activeStatus": "",
+    "urlLabel": "",
+    "copy": "",
+    "copied": "",
+    "copyFailed": "",
+    "createdAt": "",
+    "lastUsedAt": "",
+    "neverUsed": "",
+    "keepPrivateTitle": "",
+    "keepPrivateDescription": "",
+    "manageTitle": "",
+    "rotate": "",
+    "rotateTitle": "",
+    "rotateMessage": "",
+    "rotated": "",
+    "revoke": "",
+    "revokeTitle": "",
+    "revokeMessage": "",
+    "revoked": "",
+    "inactiveTitle": "",
+    "inactiveDescription": "",
+    "generate": "",
+    "generated": "",
+    "howToTitle": "",
+    "howToDescription": "",
+    "errorTitle": "",
+    "actionFailed": "",
+    "loadFailed": ""
+  },
   "storage": {
     "title": "Storage Ajustes",
     "serverTitle": "Uso del almacenamiento en el servidor",
@@ -597,7 +637,8 @@
     "reasonThingTriggers": "Activar tareas automáticamente cuando cambia el estado de un objeto es una función de Plus.",
     "reasonProjectLimit": "Tu plan actual incluye {{projectLimit}} proyectos. Actualiza a Plus para crear todos los que necesites.",
     "reasonQuickFilterLimit": "Tu plan actual incluye {{filterLimit}} filtros rápidos guardados. Actualiza a Plus para filtros ilimitados.",
-    "reasonFileUpload": "Adjuntar archivos e imágenes es una función de Plus. Actualiza a Plus para añadir fotos, escaneos y documentos a tus tareas."
+    "reasonFileUpload": "Adjuntar archivos e imágenes es una función de Plus. Actualiza a Plus para añadir fotos, escaneos y documentos a tus tareas.",
+    "reasonCalendarSync": ""
   },
   "childUsers": {
     "errNameRequired": "El nombre es obligatorio",
