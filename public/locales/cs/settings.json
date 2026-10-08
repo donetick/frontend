@@ -58,6 +58,10 @@
         "title": "API tokeny",
         "description": "Generujte a spravujte přístupové tokeny pro integrace třetích stran a přístup k API."
       },
+      "calendar": {
+        "title": "",
+        "description": ""
+      },
       "storage": {
         "title": "Nastavení úložiště",
         "description": "Zálohujte a obnovujte data, spravujte místní úložiště a synchronizaci."
@@ -372,6 +376,42 @@
     "nameModalTitle": "Pojmenujte nový token, abyste si pamatovali, k čemu slouží.",
     "generateToken": "Vygenerovat token"
   },
+  "calendar": {
+    "title": "",
+    "description": "",
+    "plusTitle": "",
+    "plusNotice": "",
+    "upgrade": "",
+    "activeTitle": "",
+    "activeStatus": "",
+    "urlLabel": "",
+    "copy": "",
+    "copied": "",
+    "copyFailed": "",
+    "createdAt": "",
+    "lastUsedAt": "",
+    "neverUsed": "",
+    "keepPrivateTitle": "",
+    "keepPrivateDescription": "",
+    "manageTitle": "",
+    "rotate": "",
+    "rotateTitle": "",
+    "rotateMessage": "",
+    "rotated": "",
+    "revoke": "",
+    "revokeTitle": "",
+    "revokeMessage": "",
+    "revoked": "",
+    "inactiveTitle": "",
+    "inactiveDescription": "",
+    "generate": "",
+    "generated": "",
+    "howToTitle": "",
+    "howToDescription": "",
+    "errorTitle": "",
+    "actionFailed": "",
+    "loadFailed": ""
+  },
   "storage": {
     "title": "Nastavení úložiště",
     "serverTitle": "Využití úložiště na serveru",
@@ -597,7 +637,8 @@
     "reasonThingTriggers": "Automatické spouštění úkolů při změně stavu věci je funkce Plus.",
     "reasonProjectLimit": "Váš současný tarif obsahuje {{projectLimit}} projektů. Přejděte na Plus a vytvořte tolik, kolik potřebujete.",
     "reasonQuickFilterLimit": "Váš současný tarif obsahuje {{filterLimit}} uložených rychlých filtrů. Přejděte na Plus pro neomezené filtry.",
-    "reasonFileUpload": "Připojování souborů a obrázků je funkcí Plus. Přejděte na Plus a přidávejte k úkolům fotky, skeny a dokumenty."
+    "reasonFileUpload": "Připojování souborů a obrázků je funkcí Plus. Přejděte na Plus a přidávejte k úkolům fotky, skeny a dokumenty.",
+    "reasonCalendarSync": ""
   },
   "childUsers": {
     "errNameRequired": "Název podúčtu je povinný",
