@@ -1,5 +1,6 @@
 import { Box, Card, Grid, List, Typography } from '@mui/joy'
 import moment from 'moment'
+
 import HistoryCard from '../History/HistoryCard'
 
 const DemoHistory = () => {
@@ -7,29 +8,32 @@ const DemoHistory = () => {
     {
       id: 32,
       choreId: 12,
-      completedAt: moment().hour(4).format(),
+      performedAt: moment().hour(4).format(),
       completedBy: 1,
       assignedTo: 1,
       notes: null,
       dueDate: moment().format(),
+      status: 1,
     },
     {
       id: 31,
       choreId: 12,
-      completedAt: moment().day(-1).format(),
+      performedAt: moment().day(-1).format(),
       completedBy: 1,
       assignedTo: 1,
       notes: 'Need to be replaced with a new one',
       dueDate: moment().day(-2).format(),
+      status: 1,
     },
     {
       id: 31,
       choreId: 12,
-      completedAt: moment().day(-10).hour(1).format(),
+      performedAt: moment().day(-10).hour(1).format(),
       completedBy: 2,
       assignedTo: 1,
       notes: null,
       dueDate: moment().day(-10).format(),
+      status: 1,
     },
   ]
   const performers = [
@@ -61,6 +65,7 @@ const DemoHistory = () => {
                   key={index}
                   index={index}
                   performers={performers}
+                  pendingCommands={[]}
                 />
               </div>
             ))}

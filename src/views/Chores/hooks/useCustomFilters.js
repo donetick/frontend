@@ -1,11 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
+
 import { useUserProfile } from '../../../queries/UserQueries'
-import {
-  applyFilter,
-  getFilterCount,
-  getFilterOverdueCount,
-  validateFilter,
-} from '../../../utils/FilterEngine'
+import { applyFilter, validateFilter } from '../../../utils/FilterEngine'
 import {
   useCreateFilter,
   useDeleteFilter,
@@ -43,12 +39,17 @@ export const useCustomFilters = (chores, membersData, labels, projects) => {
 
     return filtersData.map(filter => {
       const validation = validateFilter(filter, context)
-      const count = validation.isValid
-        ? getFilterCount(chores, filter, context)
-        : 0
-      const overdueCount = validation.isValid
-        ? getFilterOverdueCount(chores, filter, context)
-        : 0
+      const matchingChores = validation.isValid
+        ? applyFilter(chores, filter, context)
+        : []
+      const count = matchingChores.length
+      const now = new Date()
+      const overdueCount = matchingChores.reduce((total, chore) => {
+        if (!chore.nextDueDate || new Date(chore.nextDueDate) >= now) {
+          return total
+        }
+        return total + 1
+      }, 0)
 
       const result = {
         ...filter,

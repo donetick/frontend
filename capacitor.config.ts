@@ -16,6 +16,22 @@ const config: CapacitorConfig = {
       iconColor: '#488AFF',
       sound: 'beep.wav',
     },
+    CapacitorSQLite: {
+      // The offline cache opens databases with encrypted: false / no-encryption.
+      // @capacitor-community/sqlite defaults native encryption to true when this
+      // block is absent; on Android that can make plugin load fail with
+      // "CapacitorSQLitePlugin: null" before JS gets a chance to open the DB.
+      iosIsEncryption: false,
+      androidIsEncryption: false,
+    },
+    SocialLogin: {
+      providers: {
+        google: true,
+        facebook: false,
+        apple: true,
+        twitter: false,
+      },
+    },
     //   GoogleAuth: {
     //     scopes: ['profile', 'email', 'openid'],
     //     clientId: process.env.VITE_APP_GOOGLE_CLIENT_ID,

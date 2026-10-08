@@ -23,7 +23,10 @@ import {
   Typography,
 } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
+import PropTypes from 'prop-types'
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import { networkManager } from '../../hooks/NetworkManager'
 import {
   PENDING_POLL_MS,
@@ -36,32 +39,34 @@ import {
 } from '../../utils/OfflineFeatureToggle'
 import { syncEngine } from '../../utils/SyncEngine'
 
-const COMMAND_LABELS = {
-  create_chore: 'Create chore',
-  update_chore: 'Update chore',
-  update_chore_history: 'Edit history',
-  complete_chore: 'Complete chore',
-  skip_chore: 'Skip chore',
-  start_chore: 'Start chore',
-  pause_chore: 'Pause chore',
-  delete_chore: 'Delete chore',
-  delete_chore_history: 'Delete history',
-  reschedule_chore: 'Reschedule chore',
-  archive_chore: 'Archive chore',
-  unarchive_chore: 'Restore chore',
+const COMMAND_LABEL_KEYS = {
+  create_chore: 'createChore',
+  update_chore: 'updateChore',
+  update_chore_history: 'updateChoreHistory',
+  complete_chore: 'completeChore',
+  skip_chore: 'skipChore',
+  start_chore: 'startChore',
+  pause_chore: 'pauseChore',
+  delete_chore: 'deleteChore',
+  delete_chore_history: 'deleteChoreHistory',
+  reschedule_chore: 'rescheduleChore',
+  archive_chore: 'archiveChore',
+  unarchive_chore: 'unarchiveChore',
 }
 
-const formatCommandLabel = commandType => {
+const formatCommandLabel = (commandType, t) => {
+  const key = COMMAND_LABEL_KEYS[commandType]
+  if (key) return t(`sync.commandLabels.${key}`)
   return (
-    COMMAND_LABELS[commandType] ||
     commandType
       ?.replace(/_/g, ' ')
       ?.replace(/\b\w/g, letter => letter.toUpperCase()) ||
-    'Pending action'
+    t('sync.commandLabels.pendingAction')
   )
 }
 
-function SyncStatusIndicator() {
+function SyncStatusIndicator({ showLabel = false }) {
+  const { t } = useTranslation('common')
   const queryClient = useQueryClient()
   const [pendingCommands, setPendingCommands] = useState([])
   const [failedCommands, setFailedCommands] = useState([])
@@ -72,7 +77,9 @@ function SyncStatusIndicator() {
   })
   const [isOnline, setIsOnline] = useState(networkManager.isOnline)
   const [offlineSince, setOfflineSince] = useState(networkManager.offlineSince)
-  const [offlineReason, setOfflineReason] = useState(networkManager.offlineReason)
+  const [offlineReason, setOfflineReason] = useState(
+    networkManager.offlineReason,
+  )
 
   // Mirror the actual intervals used by useSyncOnReconnect so the countdown is accurate
   const retryInterval = useMemo(
@@ -195,21 +202,21 @@ function SyncStatusIndicator() {
   }
 
   const formatTime = timestamp => {
-    if (!timestamp) return 'Never'
+    if (!timestamp) return t('sync.never')
     const seconds = Math.floor((Date.now() - timestamp) / 1000)
-    if (seconds < 10) return 'Just now'
-    if (seconds < 60) return `${seconds}s ago`
+    if (seconds < 10) return t('sync.justNow')
+    if (seconds < 60) return t('sync.secondsAgo', { count: seconds })
     const minutes = Math.floor(seconds / 60)
-    if (minutes < 60) return `${minutes}m ago`
-    return `${Math.floor(minutes / 60)}h ago`
+    if (minutes < 60) return t('sync.minutesAgo', { count: minutes })
+    return t('sync.hoursAgo', { count: Math.floor(minutes / 60) })
   }
 
   const formatOfflineDuration = timestamp => {
     if (!timestamp) return ''
     const minutes = Math.floor((Date.now() - timestamp) / 60000)
-    if (minutes < 1) return 'just now'
-    if (minutes < 60) return `${minutes}m ago`
-    return `${Math.floor(minutes / 60)}h ago`
+    if (minutes < 1) return t('sync.justNow')
+    if (minutes < 60) return t('sync.minutesAgo', { count: minutes })
+    return t('sync.hoursAgo', { count: Math.floor(minutes / 60) })
   }
 
   const groupedPending = Object.entries(
@@ -224,14 +231,26 @@ function SyncStatusIndicator() {
   const totalBadge = pendingCount + failedCount
 
   const getStatusIcon = () => {
+    const iconSize = showLabel ? 21 : 20
+
     if (syncState.syncing)
-      return <CloudSync sx={{ fontSize: 20, color: 'primary.500' }} />
-    if (!isOnline) return <WifiOff sx={{ fontSize: 20, color: 'danger.500' }} />
+      return <CloudSync sx={{ fontSize: iconSize, color: 'primary.500' }} />
+    if (!isOnline)
+      return <WifiOff sx={{ fontSize: iconSize, color: 'danger.500' }} />
     if (failedCount > 0)
-      return <CloudQueue sx={{ fontSize: 20, color: 'danger.400' }} />
+      return <CloudQueue sx={{ fontSize: iconSize, color: 'danger.400' }} />
     if (pendingCount > 0)
-      return <CloudQueue sx={{ fontSize: 20, color: 'warning.500' }} />
-    return <CloudDone sx={{ fontSize: 20, color: 'success.500' }} />
+      return <CloudQueue sx={{ fontSize: iconSize, color: 'warning.500' }} />
+    return <CloudDone sx={{ fontSize: iconSize, color: 'success.500' }} />
+  }
+
+  const getStatusLabel = () => {
+    if (syncState.syncing) return t('sync.syncing')
+    if (!isOnline) return t('sync.offline')
+    if (failedCount > 0) return t('sync.failed', { count: failedCount })
+    if (pendingCount > 0)
+      return t('sync.pendingSyncLabel', { count: pendingCount })
+    return t('sync.allSynced')
   }
 
   if (!offlineFeatureEnabled) return null
@@ -239,10 +258,13 @@ function SyncStatusIndicator() {
   return (
     <Dropdown>
       <MenuButton
-        aria-label='Open sync and network status'
+        aria-label={t('sync.aria')}
         variant='plain'
         sx={{
-          p: 0.5,
+          minHeight: showLabel ? 48 : 'auto',
+          p: showLabel ? '8px 12px' : 0.5,
+          width: showLabel ? '100%' : 'auto',
+          justifyContent: showLabel ? 'flex-start' : 'center',
           border: 'none',
           backgroundColor: 'transparent',
           borderRadius: 'var(--joy-radius-sm)',
@@ -252,14 +274,20 @@ function SyncStatusIndicator() {
         }}
       >
         <Box
-          sx={{ display: 'flex', alignItems: 'center', position: 'relative' }}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            minWidth: 0,
+            position: 'relative',
+          }}
         >
           {syncState.syncing && (
             <CircularProgress
               size='sm'
               sx={{
                 position: 'absolute',
-                '--CircularProgress-size': '28px',
+                '--CircularProgress-size': showLabel ? '24px' : '28px',
                 '--CircularProgress-trackThickness': '2px',
                 '--CircularProgress-progressThickness': '2px',
               }}
@@ -282,6 +310,19 @@ function SyncStatusIndicator() {
             </Badge>
           ) : (
             getStatusIcon()
+          )}
+          {showLabel && (
+            <Typography
+              level='body-sm'
+              sx={{
+                fontWeight: 400,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {getStatusLabel()}
+            </Typography>
           )}
         </Box>
       </MenuButton>
@@ -319,7 +360,7 @@ function SyncStatusIndicator() {
                 }}
               />
               <Typography level='title-sm' sx={{ fontWeight: 600 }}>
-                {isOnline ? 'Online' : 'Offline'}
+                {isOnline ? t('sync.online') : t('sync.offline')}
               </Typography>
             </Box>
             {syncState.syncing && (
@@ -327,7 +368,7 @@ function SyncStatusIndicator() {
                 level='body-xs'
                 sx={{ color: 'var(--joy-palette-primary-500)' }}
               >
-                Syncing...
+                {t('sync.syncing')}
               </Typography>
             )}
           </Box>
@@ -336,7 +377,7 @@ function SyncStatusIndicator() {
             level='body-xs'
             sx={{ color: 'var(--joy-palette-text-tertiary)' }}
           >
-            Last sync: {formatTime(syncState.lastSync)}
+            {t('sync.lastSync', { time: formatTime(syncState.lastSync) })}
           </Typography>
 
           {!isOnline && offlineSince && (
@@ -344,7 +385,9 @@ function SyncStatusIndicator() {
               level='body-xs'
               sx={{ color: 'var(--joy-palette-danger-400)', mt: 0.25 }}
             >
-              Offline since {formatOfflineDuration(offlineSince)}
+              {t('sync.offlineSince', {
+                duration: formatOfflineDuration(offlineSince),
+              })}
             </Typography>
           )}
 
@@ -353,7 +396,7 @@ function SyncStatusIndicator() {
               level='body-xs'
               sx={{ color: 'var(--joy-palette-danger-500)', mt: 0.25 }}
             >
-              Error: {syncState.error}
+              {t('sync.errorPrefix', { message: syncState.error })}
             </Typography>
           )}
         </Sheet>
@@ -371,7 +414,7 @@ function SyncStatusIndicator() {
                   letterSpacing: '0.05em',
                 }}
               >
-                Pending ({pendingCount})
+                {t('sync.pending', { count: pendingCount })}
               </Typography>
             </Box>
             {groupedPending.map(([type, count]) => (
@@ -387,7 +430,7 @@ function SyncStatusIndicator() {
                 }}
               >
                 <Typography level='body-sm'>
-                  {formatCommandLabel(type)}
+                  {formatCommandLabel(type, t)}
                 </Typography>
                 <Chip size='sm' color='warning' variant='soft'>
                   {count}
@@ -411,7 +454,7 @@ function SyncStatusIndicator() {
                   letterSpacing: '0.05em',
                 }}
               >
-                Failed ({failedCount})
+                {t('sync.failed', { count: failedCount })}
               </Typography>
             </Box>
             {failedCommands.map(cmd => (
@@ -439,7 +482,7 @@ function SyncStatusIndicator() {
                       fontWeight: 500,
                     }}
                   >
-                    {formatCommandLabel(cmd.commandType)}
+                    {formatCommandLabel(cmd.commandType, t)}
                   </Typography>
                   <Button
                     size='sm'
@@ -448,7 +491,7 @@ function SyncStatusIndicator() {
                     sx={{ fontSize: 11, py: 0, minHeight: 'unset', px: 0.5 }}
                     onClick={() => handleDismissFailed(cmd.id)}
                   >
-                    Dismiss
+                    {t('sync.dismiss')}
                   </Button>
                 </Box>
                 {cmd.error && (
@@ -483,7 +526,7 @@ function SyncStatusIndicator() {
               level='body-sm'
               sx={{ color: 'var(--joy-palette-text-secondary)' }}
             >
-              All changes synced
+              {t('sync.allSynced')}
             </Typography>
           </Box>
         )}
@@ -495,7 +538,7 @@ function SyncStatusIndicator() {
               level='body-xs'
               sx={{ color: 'var(--joy-palette-text-tertiary)' }}
             >
-              Next auto-sync in {retryIn}s
+              {t('sync.nextAutoSync', { seconds: retryIn })}
             </Typography>
           </Box>
         )}
@@ -506,8 +549,8 @@ function SyncStatusIndicator() {
               sx={{ color: 'var(--joy-palette-text-tertiary)' }}
             >
               {syncState.syncing
-                ? 'Checking server...'
-                : `Retrying in ${retryIn}s`}
+                ? t('sync.checkingServer')
+                : t('sync.retryingIn', { seconds: retryIn })}
             </Typography>
           </Box>
         )}
@@ -517,7 +560,7 @@ function SyncStatusIndicator() {
               level='body-xs'
               sx={{ color: 'var(--joy-palette-text-tertiary)' }}
             >
-              Will sync when back online
+              {t('sync.willSync')}
             </Typography>
           </Box>
         )}
@@ -538,7 +581,7 @@ function SyncStatusIndicator() {
             <ClearAll sx={{ fontSize: 18 }} />
           </ListItemDecorator>
           <Typography level='body-sm' sx={{ fontWeight: 500 }}>
-            Cancel All
+            {t('sync.cancelAll')}
           </Typography>
         </MenuItem>
 
@@ -561,12 +604,16 @@ function SyncStatusIndicator() {
             )}
           </ListItemDecorator>
           <Typography level='body-sm' sx={{ fontWeight: 500 }}>
-            {syncState.syncing ? 'Syncing...' : 'Sync Now'}
+            {syncState.syncing ? t('sync.syncing') : t('sync.syncNow')}
           </Typography>
         </MenuItem>
       </Menu>
     </Dropdown>
   )
+}
+
+SyncStatusIndicator.propTypes = {
+  showLabel: PropTypes.bool,
 }
 
 export default SyncStatusIndicator

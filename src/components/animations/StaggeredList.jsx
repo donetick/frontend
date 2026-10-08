@@ -1,13 +1,14 @@
+import './PageTransition.css'
+
 import { Box } from '@mui/joy'
 import React, { useEffect, useState } from 'react'
 import { CSSTransition, TransitionGroup } from 'react-transition-group'
-import './PageTransition.css'
 
 const StaggeredList = ({
-  children,
-  staggerDelay = 50,
-  initialDelay = 0,
   animate = true,
+  children,
+  initialDelay = 0,
+  staggerDelay = 50,
 }) => {
   const [isVisible, setIsVisible] = useState(!animate)
 

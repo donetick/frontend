@@ -1,10 +1,11 @@
-import useStickyState from '@/hooks/useStickyState'
 import {
   BrightnessAuto,
   DarkModeOutlined,
   LightModeOutlined,
 } from '@mui/icons-material'
 import { FormControl, IconButton, useColorScheme } from '@mui/joy'
+
+import useStickyState from '@/hooks/useStickyState'
 
 const ELEMENTID = 'select-theme-mode'
 

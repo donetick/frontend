@@ -1,11 +1,22 @@
+import '@meauxt/react-swipeable-list/dist/styles.css'
+
 import {
-  Type as ListType,
   SwipeableList,
-  SwipeableListItem,
   SwipeAction,
   TrailingActions,
+  Type as ListType,
 } from '@meauxt/react-swipeable-list'
-import '@meauxt/react-swipeable-list/dist/styles.css'
+import {
+  Add,
+  Close,
+  FilterAlt,
+  MoreVert,
+  Search,
+  SearchOff,
+  Star,
+  StarBorder,
+  Task,
+} from '@mui/icons-material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import {
@@ -15,25 +26,27 @@ import {
   CircularProgress,
   Container,
   IconButton,
+  Input,
   Stack,
   Typography,
 } from '@mui/joy'
-import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import Fuse from 'fuse.js'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 
-import {
-  Add,
-  FilterAlt,
-  MoreVert,
-  Star,
-  StarBorder,
-  Task,
-} from '@mui/icons-material'
+import EmptyState from '../../components/common/EmptyState'
+import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
+import SwipeListItem, {
+  SWIPE_COMMIT_THRESHOLD,
+} from '../../components/common/SwipeListItem'
+import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import { useChores } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
+import { canCreateQuickFilter } from '../../utils/entitlements'
 import { getFilterCount, getFilterOverdueCount } from '../../utils/FilterEngine'
-import { getSafeBottomStyles } from '../../utils/SafeAreaUtils'
-
+import { getSafeBottom, getSafeBottomStyles } from '../../utils/SafeAreaUtils'
+import ScrollHideFab from '../components/ScrollHideFab'
 import { useLabels } from '../Labels/LabelQueries'
 import AdvancedFilterBuilder from '../Modals/Inputs/AdvancedFilterBuilder'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
@@ -48,19 +61,17 @@ import {
 
 const FilterCardContent = ({
   filter,
-  taskCount = 0,
-  overdueCount = 0,
   onToggleActions,
+  overdueCount = 0,
+  taskCount = 0,
 }) => {
+  const { t } = useTranslation('filters')
   // Get condition labels for display
   const getConditionSummary = () => {
     if (!filter.conditions || filter.conditions.length === 0) {
-      return 'No conditions'
+      return t('noConditions')
     }
-    if (filter.conditions.length === 1) {
-      return '1 condition'
-    }
-    return `${filter.conditions.length} conditions`
+    return t('condition', { count: filter.conditions.length })
   }
 
   return (
@@ -174,7 +185,7 @@ const FilterCardContent = ({
               color: overdueCount > 0 ? 'danger.500' : 'primary.500',
             }}
           >
-            {taskCount} tasks
+            {t('tasks', { count: taskCount })}
           </Chip>
 
           {overdueCount > 0 && (
@@ -188,7 +199,7 @@ const FilterCardContent = ({
                 px: 0.75,
               }}
             >
-              {overdueCount} overdue
+              {t('overdue', { count: overdueCount })}
             </Chip>
           )}
 
@@ -219,7 +230,7 @@ const FilterCardContent = ({
                 color: 'success.600',
               }}
             >
-              Used {filter.usageCount}x
+              {t('usedCount', { count: filter.usageCount })}
             </Chip>
           )}
         </Box>
@@ -244,8 +255,11 @@ const FilterCardContent = ({
 }
 
 const FilterView = () => {
+  const { t } = useTranslation('filters')
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { data: userProfile } = useUserProfile()
+  const { isPlus, showPaywall } = usePaywall()
   const { data: chores = { res: [] } } = useChores(false)
   const { data: labels = [] } = useLabels()
   const { data: projects = [] } = useProjects()
@@ -264,6 +278,21 @@ const FilterView = () => {
   const [editingFilter, setEditingFilter] = useState(null)
   const [confirmationModel, setConfirmationModel] = useState({})
   const [showMoreInfoId, setShowMoreInfoId] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [sortBy, setSortBy] = useState(
+    () => localStorage.getItem('filtersSortBy') || 'smart',
+  )
+  const [sortDirection, setSortDirection] = useState(
+    () => localStorage.getItem('filtersSortDirection') || 'asc',
+  )
+  const [pinnedFilter, setPinnedFilter] = useState('all')
+  const searchInputRef = useRef(null)
+
+  useEffect(() => {
+    localStorage.setItem('filtersSortBy', sortBy)
+    localStorage.setItem('filtersSortDirection', sortDirection)
+  }, [sortBy, sortDirection])
+
   // Sort filters: pinned first, then by usage count, then by last used
   const savedFilters = useMemo(() => {
     return [...filtersData].sort((a, b) => {
@@ -279,6 +308,71 @@ const FilterView = () => {
       return new Date(b.createdAt) - new Date(a.createdAt)
     })
   }, [filtersData])
+
+  const visibleFilters = useMemo(() => {
+    if (pinnedFilter === 'pinned') {
+      return savedFilters.filter(filter => filter.isPinned)
+    }
+    if (pinnedFilter === 'unpinned') {
+      return savedFilters.filter(filter => !filter.isPinned)
+    }
+    return savedFilters
+  }, [pinnedFilter, savedFilters])
+
+  const fuse = useMemo(
+    () =>
+      new Fuse(visibleFilters, {
+        keys: ['name', 'description'],
+        includeScore: true,
+        isCaseSensitive: false,
+        findAllMatches: true,
+      }),
+    [visibleFilters],
+  )
+
+  const filteredFilters = useMemo(() => {
+    const matched = searchTerm
+      ? fuse.search(searchTerm).map(result => result.item)
+      : visibleFilters
+
+    const direction = sortDirection === 'desc' ? -1 : 1
+
+    // "Smart" keeps the pinned-then-usage order the list already arrives in.
+    if (sortBy === 'smart') {
+      return direction === -1 ? [...matched].reverse() : matched
+    }
+
+    return [...matched].sort((a, b) => {
+      switch (sortBy) {
+        case 'name':
+          return direction * (a.name || '').localeCompare(b.name || '')
+        case 'usage':
+          return direction * ((a.usageCount || 0) - (b.usageCount || 0))
+        case 'lastUsed': {
+          const aUsed = new Date(a.lastUsedAt || 0).getTime()
+          const bUsed = new Date(b.lastUsedAt || 0).getTime()
+          return direction * (aUsed - bUsed)
+        }
+        case 'created': {
+          const aCreated = new Date(a.createdAt || 0).getTime()
+          const bCreated = new Date(b.createdAt || 0).getTime()
+          return direction * (aCreated - bCreated)
+        }
+        default:
+          return 0
+      }
+    })
+  }, [fuse, searchTerm, visibleFilters, sortBy, sortDirection])
+
+  const handleSearchChange = e => {
+    setSearchTerm(e.target.value)
+    setShowMoreInfoId(null)
+  }
+
+  const handleSearchClose = () => {
+    setSearchTerm('')
+    searchInputRef.current?.blur()
+  }
 
   // Calculate task counts for each filter
   useEffect(() => {
@@ -315,10 +409,28 @@ const FilterView = () => {
     }
   }, [chores, filtersData, userProfile?.id, labels, projects, membersData?.res])
 
-  const handleAddFilter = () => {
+  const handleAddFilter = useCallback(() => {
+    if (!canCreateQuickFilter(filtersData.length, isPlus)) {
+      showPaywall(PAYWALL_REASON.QUICK_FILTER_LIMIT)
+      return
+    }
     setEditingFilter(null)
     setShowAdvancedFilterBuilder(true)
-  }
+  }, [filtersData.length, isPlus, showPaywall])
+
+  // ?create=1 lets other surfaces (global search quick actions) land here with
+  // the filter builder already open.
+  useEffect(() => {
+    if (searchParams.get('create') !== '1') return
+    handleAddFilter()
+    setSearchParams(
+      params => {
+        params.delete('create')
+        return params
+      },
+      { replace: true },
+    )
+  }, [searchParams, setSearchParams, handleAddFilter])
 
   const handleEditFilter = filter => {
     setEditingFilter(filter)
@@ -329,11 +441,11 @@ const FilterView = () => {
     const filter = savedFilters.find(f => f.id === id)
     setConfirmationModel({
       isOpen: true,
-      title: 'Delete Filter',
-      message: `Are you sure you want to delete "${filter?.name}"? This cannot be undone.`,
-      confirmText: 'Delete',
+      title: t('delete.title'),
+      message: t('delete.message', { name: filter?.name }),
+      confirmText: t('common:delete'),
       color: 'danger',
-      cancelText: 'Cancel',
+      cancelText: t('common:cancel'),
       onClose: confirmed => {
         if (confirmed === true) {
           handleDeleteFilter(id)
@@ -402,14 +514,75 @@ const FilterView = () => {
             level='h3'
             sx={{ fontWeight: 'lg', color: 'text.primary' }}
           >
-            Filters
+            {t('header.title')}
           </Typography>
           <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            Save your favorite filter combinations for quick access. Create
-            custom views to organize and find tasks faster.
+            {t('header.subtitle')}
           </Typography>
         </Stack>
       </Box>
+
+      {savedFilters.length > 0 && (
+        <Box
+          sx={{ px: 2, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}
+        >
+          <Input
+            slotProps={{ input: { ref: searchInputRef } }}
+            placeholder={t('searchPlaceholder')}
+            value={searchTerm}
+            fullWidth
+            sx={{
+              borderRadius: 24,
+              height: 24,
+              borderColor: 'text.disabled',
+              padding: 1,
+            }}
+            onChange={handleSearchChange}
+            startDecorator={<Search />}
+            endDecorator={
+              searchTerm && (
+                <IconButton
+                  variant='plain'
+                  size='sm'
+                  onClick={handleSearchClose}
+                  sx={{ borderRadius: '50%' }}
+                >
+                  <Close />
+                </IconButton>
+              )
+            }
+          />
+          <SortAndFilterMenu
+            sortOptions={[
+              { name: t('sort.smart'), value: 'smart' },
+              { name: t('sort.name'), value: 'name' },
+              { name: t('sort.usage'), value: 'usage' },
+              { name: t('sort.lastUsed'), value: 'lastUsed' },
+              { name: t('sort.created'), value: 'created' },
+            ]}
+            selectedSort={sortBy}
+            onSortChange={setSortBy}
+            sortDirection={sortDirection}
+            onSortDirectionChange={setSortDirection}
+            filterTitle={t('show.title')}
+            filterOptions={[
+              { name: t('show.all'), value: 'all' },
+              { name: t('show.pinned'), value: 'pinned' },
+              { name: t('show.unpinned'), value: 'unpinned' },
+            ]}
+            selectedFilter={pinnedFilter}
+            onFilterChange={value => {
+              setPinnedFilter(value)
+              setShowMoreInfoId(null)
+            }}
+            isActive={
+              pinnedFilter !== 'all' ||
+              sortBy !== 'smart' ||
+              sortDirection !== 'asc'
+            }
+          />
+        </Box>
+      )}
 
       <Box
         sx={{
@@ -417,34 +590,47 @@ const FilterView = () => {
         }}
       >
         {savedFilters.length === 0 ? (
-          <Box
-            sx={{
-              p: 4,
-              textAlign: 'center',
+          <EmptyState
+            fullHeight
+            icon={<FilterAlt />}
+            title={t('empty.title')}
+            description={t('empty.description')}
+            primaryAction={{
+              label: t('empty.createFilter'),
+              startDecorator: <Add />,
+              onClick: handleAddFilter,
             }}
-          >
-            <FilterAlt
-              sx={{
-                fontSize: 48,
-                color: 'neutral.300',
-                mb: 2,
-              }}
-            />
-            <Typography
-              level='title-lg'
-              sx={{ mb: 1, color: 'text.secondary' }}
-            >
-              No saved filters yet
-            </Typography>
-            <Typography level='body-sm' sx={{ color: 'text.tertiary', mb: 2 }}>
-              Create custom filters to quickly access your most used chore
-            </Typography>
-          </Box>
+          />
+        ) : filteredFilters.length === 0 ? (
+          <EmptyState
+            variant='no-results'
+            fullHeight
+            icon={<SearchOff />}
+            title={t('empty.noResultsTitle')}
+            description={
+              searchTerm
+                ? t('empty.noResultsWithSearch', { search: searchTerm })
+                : t('empty.noResultsDefault')
+            }
+            primaryAction={{
+              label: searchTerm
+                ? t('empty.clearSearch')
+                : t('empty.showAllFilters'),
+              onClick: () => {
+                handleSearchClose()
+                setPinnedFilter('all')
+              },
+            }}
+          />
         ) : (
-          <SwipeableList type={ListType.IOS} fullSwipe={false}>
-            {savedFilters.map(filter => {
+          <SwipeableList
+            type={ListType.IOS}
+            fullSwipe
+            threshold={SWIPE_COMMIT_THRESHOLD}
+          >
+            {filteredFilters.map(filter => {
               return (
-                <SwipeableListItem
+                <SwipeListItem
                   swipeActionOpen={
                     showMoreInfoId === filter.id ? 'trailing' : null
                   }
@@ -470,19 +656,24 @@ const FilterView = () => {
                               flexDirection: 'column',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              bgcolor: 'warning.softBg',
-                              color: 'warning.700',
+                              bgcolor: 'warning.500',
+                              color: '#fff',
                               px: 3,
                               height: '100%',
                             }}
                           >
                             {filter.isPinned ? (
-                              <Star sx={{ fontSize: 20 }} />
+                              <Star sx={{ fontSize: 20, color: 'white' }} />
                             ) : (
-                              <StarBorder sx={{ fontSize: 20 }} />
+                              <StarBorder
+                                sx={{ fontSize: 20, color: 'white' }}
+                              />
                             )}
-                            <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                              {filter.isPinned ? 'Unpin' : 'Pin'}
+                            <Typography
+                              level='body-xs'
+                              sx={{ mt: 0.5, color: 'inherit' }}
+                            >
+                              {filter.isPinned ? t('unpin') : t('pin')}
                             </Typography>
                           </Box>
                         </SwipeAction>
@@ -493,15 +684,18 @@ const FilterView = () => {
                               flexDirection: 'column',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              bgcolor: 'neutral.softBg',
-                              color: 'neutral.700',
+                              bgcolor: 'primary.500',
+                              color: '#fff',
                               px: 3,
                               height: '100%',
                             }}
                           >
-                            <EditIcon sx={{ fontSize: 20 }} />
-                            <Typography level='body-xs' sx={{ mt: 0.5 }}>
-                              Edit
+                            <EditIcon sx={{ fontSize: 20, color: 'white' }} />
+                            <Typography
+                              level='body-xs'
+                              sx={{ mt: 0.5, color: 'inherit' }}
+                            >
+                              {t('common:edit')}
                             </Typography>
                           </Box>
                         </SwipeAction>
@@ -514,19 +708,18 @@ const FilterView = () => {
                               flexDirection: 'column',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              bgcolor: 'danger.softBg',
-                              color: 'danger.700',
+                              bgcolor: 'danger.500',
+                              color: '#fff',
                               px: 3,
                               height: '100%',
                             }}
                           >
-                            <DeleteIcon sx={{ fontSize: 20 }} color='danger' />
+                            <DeleteIcon sx={{ fontSize: 20, color: 'white' }} />
                             <Typography
                               level='body-xs'
-                              sx={{ mt: 0.5 }}
-                              color='danger'
+                              sx={{ mt: 0.5, color: 'inherit' }}
                             >
-                              Delete
+                              {t('common:delete')}
                             </Typography>
                           </Box>
                         </SwipeAction>
@@ -552,7 +745,7 @@ const FilterView = () => {
                     taskCount={filterCounts[filter.id]?.count || 0}
                     overdueCount={filterCounts[filter.id]?.overdueCount || 0}
                   />
-                </SwipeableListItem>
+                </SwipeListItem>
               )
             })}
           </SwipeableList>
@@ -576,17 +769,16 @@ const FilterView = () => {
         />
       )}
 
-      <Box
+      <ScrollHideFab
         sx={{
           ...getSafeBottomStyles({ bottom: 0, padding: 16 }),
-          left: 10,
-          display: 'flex',
-          justifyContent: 'flex-end',
-          gap: 2,
-          'z-index': 1000,
+          '@media (max-width: 768px)': {
+            bottom: getSafeBottom(56, 16),
+          },
         }}
       >
         <IconButton
+          data-testid='open-add-filter-modal'
           color='primary'
           variant='solid'
           sx={{
@@ -598,7 +790,7 @@ const FilterView = () => {
         >
           <Add />
         </IconButton>
-      </Box>
+      </ScrollHideFab>
 
       <ConfirmationModal config={confirmationModel} />
     </Container>

@@ -1,0 +1,76 @@
+{
+  "redeem": "Потратить баллы",
+  "redeemModal": {
+    "redeemButton": "Потратить",
+    "pointsAvailable": "доступно {{count}}",
+    "pointsToRedeem": "Сколько баллов потратить",
+    "placeholder": "Введите количество...",
+    "cannotExceed": "Больше, чем доступно",
+    "quickAdd": "Быстро добавить:",
+    "aboutToRedeem": "Вы собираетесь потратить",
+    "amount": "{{count}} баллов",
+    "remaining": "Останется: {{count}}"
+  },
+  "leaderboard": {
+    "titlePoints": "Рейтинг по баллам",
+    "titleTasks": "Рейтинг по делам",
+    "subtitlePoints": "Места по баллам, набранным за выбранный период",
+    "subtitleTasks": "Места по делам, закрытым за выбранный период",
+    "modePoints": "Баллы",
+    "modeTasks": "Дела",
+    "you": "Вы",
+    "tasksAndAvg": "дел: {{tasks}} • в среднем {{avg}} за дело",
+    "available": "доступно {{count}}",
+    "points_one": "{{count}} балл",
+    "points_other": "{{count}} балла"
+  },
+  "tabs": {
+    "short7d": "7д",
+    "short6m": "6м",
+    "shortAll": "Всё",
+    "days7": "7 дней",
+    "months6": "6 месяцев",
+    "allTime": "Всё время",
+    "short30d": "30Д",
+    "days30": "30 дней"
+  },
+  "filter": {
+    "analysisTitle": "Фильтр и разбор",
+    "title": "Фильтр баллов",
+    "showFor": "Показать баллы для:",
+    "timePeriod": "Период:"
+  },
+  "cards": {
+    "available": {
+      "title": "Доступно",
+      "subtext": "Можно потратить"
+    },
+    "redeemed": {
+      "title": "Потрачено",
+      "subtext": "Уже использовано"
+    },
+    "total": {
+      "title": "Всего",
+      "subtext": "Набрано за всё время"
+    },
+    "period": {
+      "title": "За период",
+      "allTime": "Всё время",
+      "last6Months": "Последние 6 месяцев",
+      "lastDays_one": "Последний {{count}} день",
+      "lastDays_other": "Последние {{count}} дня"
+    }
+  },
+  "summary": {
+    "showingFor": "Показаны баллы участника",
+    "unknownUser": "Неизвестный участник",
+    "overThe": "за",
+    "allTime": "всё время",
+    "last6Months": "последние 6 месяцев",
+    "lastDays_one": "последний {{count}} день",
+    "lastDays_other": "последние {{count}} дня"
+  },
+  "trend": {
+    "title": "Динамика баллов"
+  }
+}

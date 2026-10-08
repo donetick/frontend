@@ -1,30 +1,46 @@
 import { LocalNotifications } from '@capacitor/local-notifications'
-import { Refresh, Token } from '@mui/icons-material'
+import { Refresh, Star, Token } from '@mui/icons-material'
 import { Box, Button, Card, Chip, Divider, Typography } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import { networkManager } from '../../hooks/NetworkManager'
 import useConfirmationModal from '../../hooks/useConfirmationModal'
 import { useSSEContext } from '../../hooks/useSSEContext'
+import { useUserProfile } from '../../queries/UserQueries'
+import {
+  evaluatePromptEligibility,
+  isFeedbackSubmissionConfigured,
+  isRawChatWebhookConfigured,
+  requestStoreReview,
+  resetFeedbackState,
+  setDevForcedPrompt,
+} from '../../service/FeedbackService'
 import { useNotification } from '../../service/NotificationProvider'
+import { resetPolicyUpdate } from '../../service/PolicyUpdateService'
 import { apiClient } from '../../utils/ApiClient'
 import { commandQueue } from '../../utils/CommandQueue'
 import { RefreshToken } from '../../utils/Fetcher'
 import { offlineDB } from '../../utils/OfflineDB'
 import { syncEngine } from '../../utils/SyncEngine'
 import { getRefreshTokenExpiry, isNative } from '../../utils/TokenStorage'
+import FeedbackModal from '../Modals/FeedbackModal'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
+import PolicyUpdateModal from '../Modals/PolicyUpdateModal'
 
 const DeveloperSettings = () => {
+  const { t } = useTranslation('settings')
   const queryClient = useQueryClient()
   const { confirmModalConfig, showConfirmation } = useConfirmationModal()
+  const { data: userProfile } = useUserProfile()
   const {
-    isConnected,
-    isConnecting,
-    lastEvent,
     error: sseError,
     getConnectionStatus,
     getDebugInfo,
+    isConnected,
+    isConnecting,
+    lastEvent,
   } = useSSEContext()
 
   const [accessTokenExpiry, setAccessTokenExpiry] = useState(null)
@@ -41,6 +57,9 @@ const DeveloperSettings = () => {
   const [scheduledNotifications, setScheduledNotifications] = useState([])
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(false)
   const [isResettingSync, setIsResettingSync] = useState(false)
+  const [feedbackModalOpen, setFeedbackModalOpen] = useState(false)
+  const [policyModalOpen, setPolicyModalOpen] = useState(false)
+  const [feedbackEligibility, setFeedbackEligibility] = useState(null)
   const [syncDiagnostics, setSyncDiagnostics] = useState({
     cursor: null,
     lastSync: null,
@@ -223,7 +242,7 @@ const DeveloperSettings = () => {
       if (result.success) {
         showNotification({
           type: 'success',
-          message: 'Token refreshed successfully',
+          message: t('developer.tokenRefreshed'),
         })
 
         // Reload token expiry data
@@ -259,7 +278,7 @@ const DeveloperSettings = () => {
         const data = await response.json()
         showNotification({
           type: 'success',
-          message: 'Refresh token endpoint called successfully',
+          message: t('developer.endpointCalled'),
         })
 
         // Reload token expiry data
@@ -328,7 +347,7 @@ const DeveloperSettings = () => {
 
           showNotification({
             type: 'success',
-            message: 'Local offline database cleared. Starting full sync...',
+            message: t('developer.clearDbCleared'),
           })
 
           const didSync = await syncEngine.sync()
@@ -336,7 +355,7 @@ const DeveloperSettings = () => {
             await queryClient.invalidateQueries()
             showNotification({
               type: 'success',
-              message: 'Full sync completed from the beginning',
+              message: t('developer.clearDbDone'),
             })
           } else {
             showNotification({
@@ -362,6 +381,54 @@ const DeveloperSettings = () => {
     )
   }
 
+  const refreshFeedbackEligibility = useCallback(async () => {
+    const result = await evaluatePromptEligibility({ userProfile })
+    setFeedbackEligibility(result)
+    return result
+  }, [userProfile])
+
+  useEffect(() => {
+    refreshFeedbackEligibility()
+  }, [refreshFeedbackEligibility])
+
+  const handleForceFeedbackPrompt = async () => {
+    await setDevForcedPrompt(true)
+    await refreshFeedbackEligibility()
+    showNotification({
+      type: 'success',
+      message: 'Next visit to My Chores will show the prompt after ~4s',
+    })
+  }
+
+  const handleForcePolicyUpdate = async () => {
+    await resetPolicyUpdate()
+    showNotification({
+      type: 'success',
+      message:
+        'Next visit to My Chores will show the policy notice after ~1.5s',
+    })
+  }
+
+  const handleResetFeedbackState = async () => {
+    await resetFeedbackState()
+    await refreshFeedbackEligibility()
+    showNotification({
+      type: 'success',
+      message: 'Feedback state cleared (completions, cooldown, opt-out)',
+    })
+  }
+
+  const handleRequestStoreReview = async () => {
+    const requested = await requestStoreReview()
+    await refreshFeedbackEligibility()
+    showNotification({
+      type: requested ? 'success' : 'warning',
+      message: requested
+        ? 'Review requested. The OS decides whether to actually show it.'
+        : 'Not available — native platform only.',
+    })
+  }
+
   const getNotificationStatusColor = scheduleTime => {
     if (!scheduleTime) return 'neutral'
 
@@ -385,7 +452,7 @@ const DeveloperSettings = () => {
       <Typography level='h3'>Developer Settings</Typography>
       <Divider />
       <Typography level='body-md'>
-        View technical information about your authentication tokens and session
+        {t('developer.intro')}
         state. This information is useful for debugging and development
         purposes.
       </Typography>
@@ -483,7 +550,7 @@ const DeveloperSettings = () => {
               </>
             ) : (
               <Typography level='body-sm' color='neutral'>
-                Refresh tokens are managed via HTTP-only cookies on web platform
+                {t('developer.refreshCookieNote')}
               </Typography>
             )}
           </Box>
@@ -638,6 +705,195 @@ const DeveloperSettings = () => {
                 Clear DB & Full Re-Sync
               </Button>
             </Box>
+          </Box>
+        </Box>
+      </Card>
+
+      <Card variant='outlined'>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 1,
+            }}
+          >
+            <Typography level='title-lg'>Feedback & Review Prompt</Typography>
+            <Button
+              size='sm'
+              variant='soft'
+              startDecorator={<Refresh />}
+              onClick={refreshFeedbackEligibility}
+            >
+              Refresh
+            </Button>
+          </Box>
+
+          <Divider />
+
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Typography level='title-sm'>Prompt Eligibility</Typography>
+            <Typography level='body-sm'>
+              Would auto-show:{' '}
+              <Chip
+                size='sm'
+                variant='soft'
+                color={feedbackEligibility?.eligible ? 'success' : 'neutral'}
+              >
+                {feedbackEligibility?.eligible ? 'Yes' : 'No'}
+              </Chip>
+              {feedbackEligibility?.forced && (
+                <Chip size='sm' variant='soft' color='warning' sx={{ ml: 1 }}>
+                  Forced
+                </Chip>
+              )}
+            </Typography>
+            {feedbackEligibility?.blockers?.length > 0 && (
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25 }}>
+                {feedbackEligibility.blockers.map(blocker => (
+                  <Typography key={blocker} level='body-xs' color='neutral'>
+                    • {blocker}
+                  </Typography>
+                ))}
+              </Box>
+            )}
+          </Box>
+
+          <Divider />
+
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Typography level='title-sm'>State</Typography>
+            <Typography level='body-sm'>
+              Completions counted:{' '}
+              <Chip size='sm' variant='soft'>
+                {feedbackEligibility?.state?.completions ?? 'N/A'}
+              </Chip>
+            </Typography>
+            <Typography level='body-sm'>
+              Last sentiment:{' '}
+              <Chip size='sm' variant='soft'>
+                {feedbackEligibility?.state?.lastSentiment ?? 'None'}
+              </Chip>
+            </Typography>
+            <Typography level='body-sm'>
+              Dismissals:{' '}
+              <Chip size='sm' variant='soft'>
+                {feedbackEligibility?.state?.dismissCount ?? 0}
+              </Chip>
+            </Typography>
+            <Typography level='body-sm'>
+              Opted out:{' '}
+              <Chip
+                size='sm'
+                variant='soft'
+                color={
+                  feedbackEligibility?.state?.optedOut ? 'danger' : 'success'
+                }
+              >
+                {feedbackEligibility?.state?.optedOut ? 'Yes' : 'No'}
+              </Chip>
+            </Typography>
+            <Typography level='body-xs' color='neutral'>
+              Last prompted:{' '}
+              {formatDateTime(feedbackEligibility?.state?.lastPromptedAt)}
+              {feedbackEligibility?.state?.lastPromptedVersion
+                ? ` on ${feedbackEligibility.state.lastPromptedVersion}`
+                : ''}
+            </Typography>
+            <Typography level='body-xs' color='neutral'>
+              Review requested:{' '}
+              {formatDateTime(feedbackEligibility?.state?.reviewRequestedAt)}
+            </Typography>
+            <Typography level='body-xs' color='neutral'>
+              Current version: {feedbackEligibility?.version ?? 'N/A'} · Webhook{' '}
+              {isFeedbackSubmissionConfigured()
+                ? 'configured'
+                : 'NOT configured (submissions log to console)'}
+            </Typography>
+            {isRawChatWebhookConfigured() && (
+              <Typography level='body-xs' color='danger'>
+                VITE_FEEDBACK_WEBHOOK_URL points straight at a Discord/Slack
+                webhook. Discord rejects that with 50006, and the URL ships
+                inside the public bundle — deploy workers/feedback and point the
+                variable at the Worker.
+              </Typography>
+            )}
+          </Box>
+
+          <Divider />
+
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Typography level='title-sm'>Actions</Typography>
+            <Typography level='body-xs' color='neutral'>
+              &quot;Force next prompt&quot; bypasses every gate, then open My
+              Chores to see the automatic trigger.
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+              <Button
+                size='sm'
+                variant='soft'
+                onClick={() => setFeedbackModalOpen(true)}
+              >
+                Open Flow
+              </Button>
+              <Button
+                size='sm'
+                variant='outlined'
+                color='neutral'
+                onClick={handleForceFeedbackPrompt}
+              >
+                Force Next Prompt
+              </Button>
+              <Button
+                size='sm'
+                variant='outlined'
+                color='neutral'
+                startDecorator={<Star />}
+                onClick={handleRequestStoreReview}
+                disabled={!isNativePlatform}
+              >
+                Request Store Review
+              </Button>
+              <Button
+                size='sm'
+                variant='soft'
+                color='danger'
+                onClick={handleResetFeedbackState}
+              >
+                Reset State
+              </Button>
+            </Box>
+          </Box>
+        </Box>
+      </Card>
+
+      <Card variant='outlined'>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Typography level='title-lg'>Policy Update Notice</Typography>
+          <Divider />
+          <Typography level='body-sm' color='neutral'>
+            Shown once per POLICY_VERSION to accounts created before the policy
+            effective date. &quot;Force Next Prompt&quot; clears the
+            acknowledgement, then open My Chores to see the automatic trigger.
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+            <Button
+              size='sm'
+              variant='soft'
+              onClick={() => setPolicyModalOpen(true)}
+            >
+              Open Notice
+            </Button>
+            <Button
+              size='sm'
+              variant='outlined'
+              color='neutral'
+              onClick={handleForcePolicyUpdate}
+            >
+              Force Next Prompt
+            </Button>
           </Box>
         </Box>
       </Card>
@@ -898,7 +1154,7 @@ const DeveloperSettings = () => {
               </Box>
             ) : (
               <Typography level='body-sm' color='neutral'>
-                No reconnection information available
+                {t('developer.noReconnectInfo')}
               </Typography>
             )}
           </Box>
@@ -938,7 +1194,7 @@ const DeveloperSettings = () => {
               </Box>
             ) : (
               <Typography level='body-sm' color='neutral'>
-                No timeout information available
+                {t('developer.noTimeoutInfo')}
               </Typography>
             )}
           </Box>
@@ -983,12 +1239,27 @@ const DeveloperSettings = () => {
               </Box>
             ) : (
               <Typography level='body-sm' color='neutral'>
-                No debug information available
+                {t('developer.noDebugInfo')}
               </Typography>
             )}
           </Box>
         </Box>
       </Card>
+
+      <FeedbackModal
+        open={feedbackModalOpen}
+        onClose={() => {
+          setFeedbackModalOpen(false)
+          refreshFeedbackEligibility()
+        }}
+      />
+
+      {/* Preview only — deliberately does not acknowledge, so opening it here
+          never suppresses the real notice. */}
+      <PolicyUpdateModal
+        open={policyModalOpen}
+        onClose={() => setPolicyModalOpen(false)}
+      />
 
       <ConfirmationModal config={confirmModalConfig} />
     </div>

@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+
 import { networkManager } from '../hooks/NetworkManager'
 import { CompleteSubTask, SaveChore } from '../utils/Fetcher'
 
@@ -19,7 +20,7 @@ export const useUpdate = () => {
       return updatedChoreRes?.res || updatedChoreRes
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['chores'])
+      queryClient.invalidateQueries({ queryKey: ['chores'] })
     },
   })
 }

@@ -10,6 +10,8 @@ import {
 } from '@mui/icons-material'
 import { Avatar, Box, Card, Chip, IconButton, Typography } from '@mui/joy'
 import moment from 'moment'
+import { useTranslation } from 'react-i18next'
+
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { TASK_COLOR } from '../../utils/Colors.jsx'
 import PendingBadge from '../components/PendingBadge'
@@ -33,64 +35,85 @@ const stripHtmlTags = html => {
 }
 
 const statusConfig = {
-  0: { label: 'In Progress',      color: 'primary', icon: <AccessTime /> },
-  1: { label: 'Completed',        color: 'success', icon: <Check /> },
-  2: { label: 'Skipped',          color: 'warning', icon: <Redo /> },
-  3: { label: 'Pending Approval', color: 'neutral', icon: <HourglassEmpty /> },
-  4: { label: 'Rejected',         color: 'danger',  icon: <ThumbDown /> },
-  5: { label: 'Missed',           color: 'danger',  icon: <RunningWithErrors /> },
-  6: { label: 'Rescheduled',      color: 'warning', icon: <Schedule /> },
+  0: { labelKey: 'status.inProgress', color: 'primary', icon: <AccessTime /> },
+  1: { labelKey: 'status.completed', color: 'success', icon: <Check /> },
+  2: { labelKey: 'status.skipped', color: 'warning', icon: <Redo /> },
+  3: {
+    labelKey: 'status.pendingApproval',
+    color: 'neutral',
+    icon: <HourglassEmpty />,
+  },
+  4: { labelKey: 'status.rejected', color: 'danger', icon: <ThumbDown /> },
+  5: {
+    labelKey: 'status.missed',
+    color: 'danger',
+    icon: <RunningWithErrors />,
+  },
+  6: { labelKey: 'status.rescheduled', color: 'warning', icon: <Schedule /> },
 }
 
 const HistoryCard = ({
   allHistory,
-  performers,
   historyEntry,
   index,
-  pendingCommands,
   onToggleActions,
-  onViewNote,
   onViewDetails,
+  onViewNote,
+  pendingCommands,
+  performers,
 }) => {
+  const { t } = useTranslation('history')
   const { fmt } = useLocalization()
   const performer = performers.find(p => p.userId === historyEntry.completedBy)
   const assignedTo = performers.find(p => p.userId === historyEntry.assignedTo)
   const config = statusConfig[historyEntry.status] ?? statusConfig[1]
   const displayLabel =
-    historyEntry.status === 6 && !historyEntry.dueDate ? 'Scheduled' : config.label
+    historyEntry.status === 6 && !historyEntry.dueDate
+      ? t('status.scheduled')
+      : t(config.labelKey)
   const actionDate = historyEntry.performedAt || historyEntry.updatedAt
 
   const getTimingLine = () => {
-    const { status, performedAt, dueDate } = historyEntry
+    const { dueDate, performedAt, status } = historyEntry
     if (!dueDate) return null
 
-    if (status === 6) {
-      return `Was due ${moment(dueDate).format('MMM D')}`
-    }
-    if (status === 5) {
-      return `Was due ${moment(dueDate).format('MMM D')}`
+    if (status === 6 || status === 5) {
+      return t('card.wasDue', { date: fmt.date(dueDate) })
     }
     if ((status === 1 || status === 2 || status === 0) && performedAt) {
       const diffHours = moment(performedAt).diff(dueDate, 'hours')
       const abs = Math.abs(diffHours)
       if (abs <= 6) return null // chip already says "On Time"
-      if (diffHours < 0) return abs >= 48 ? `${Math.floor(abs / 24)}d before due date` : `${abs}h before due date`
-      return abs >= 48 ? `${Math.floor(abs / 24)}d after due date` : `${abs}h after due date`
+      const early = diffHours < 0
+      if (abs >= 48) {
+        const days = Math.floor(abs / 24)
+        return early
+          ? t('card.daysBeforeDue', { count: days })
+          : t('card.daysAfterDue', { count: days })
+      }
+      return early
+        ? t('card.hoursBeforeDue', { count: abs })
+        : t('card.hoursAfterDue', { count: abs })
     }
     return null
   }
 
   const timingLine = getTimingLine()
-  const noteLabel = historyEntry.status === 2 || historyEntry.status === 4 ? 'Reason' : 'Note'
-  const plainTextNotes = historyEntry.notes ? stripHtmlTags(historyEntry.notes) : ''
+  const plainTextNotes = historyEntry.notes
+    ? stripHtmlTags(historyEntry.notes)
+    : ''
 
   const metaTextParts = [
     fmt.dateTime(actionDate),
     historyEntry.completedBy !== historyEntry.assignedTo && assignedTo
-      ? `Assigned to ${assignedTo.displayName}`
+      ? t('card.assignedTo', { name: assignedTo.displayName })
       : null,
-    historyEntry?.duration > 0 ? `⏱ ${formatTime(historyEntry.duration)}` : null,
-    historyEntry?.points > 0 ? `★ ${historyEntry.points} pt${historyEntry.points > 1 ? 's' : ''}` : null,
+    historyEntry?.duration > 0
+      ? `⏱ ${formatTime(historyEntry.duration)}`
+      : null,
+    historyEntry?.points > 0
+      ? t('card.points', { count: historyEntry.points })
+      : null,
   ].filter(Boolean)
 
   return (
@@ -110,7 +133,14 @@ const HistoryCard = ({
     >
       <Box sx={{ flex: 1, minWidth: 0, px: 2, py: 1.5 }}>
         {/* Status + timing chip */}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            mb: 0.5,
+          }}
+        >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
             <Avatar
               size='sm'
@@ -120,7 +150,11 @@ const HistoryCard = ({
             >
               {config.icon}
             </Avatar>
-            <Typography level='title-sm' fontWeight='lg' sx={{ color: `${config.color}.plainColor` }}>
+            <Typography
+              level='title-sm'
+              fontWeight='lg'
+              sx={{ color: `${config.color}.plainColor` }}
+            >
               {displayLabel}
             </Typography>
           </Box>
@@ -136,31 +170,58 @@ const HistoryCard = ({
         {/* Notes inline */}
 
         {plainTextNotes && (
-        <Card 
-          variant='soft'
-          color='neutral'
-          size='sm'
-          sx={{ mt: 0.5, whiteSpace: 'pre-wrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
-        >
-          <Typography
-            level='body-xs'
-            sx={{ color: 'text.secondary', fontStyle: 'italic', mb: 0.25, cursor: 'pointer' }}
-            onClick={e => { e.stopPropagation(); onViewNote?.(historyEntry.notes) }}
+          <Card
+            variant='soft'
+            color='neutral'
+            size='sm'
+            sx={{
+              mt: 0.5,
+              whiteSpace: 'pre-wrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
           >
-            {plainTextNotes.length > 80 ? `${plainTextNotes.slice(0, 80)}…` : plainTextNotes}
-          </Typography>
-        </Card>
+            <Typography
+              level='body-xs'
+              sx={{
+                color: 'text.secondary',
+                fontStyle: 'italic',
+                mb: 0.25,
+                cursor: 'pointer',
+              }}
+              onClick={e => {
+                e.stopPropagation()
+                onViewNote?.(historyEntry.notes)
+              }}
+            >
+              {plainTextNotes.length > 80
+                ? `${plainTextNotes.slice(0, 80)}…`
+                : plainTextNotes}
+            </Typography>
+          </Card>
         )}
 
         {/* Metadata strip: performer chip + date + extras */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 0.5, flexWrap: 'wrap' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 0.75,
+            mt: 0.5,
+            flexWrap: 'wrap',
+          }}
+        >
           {performer && (
             <Chip
               size='sm'
               variant='soft'
               color='neutral'
               startDecorator={
-                <Avatar src={performer.image} alt={performer.displayName} sx={{ width: 14, height: 14 }} />
+                <Avatar
+                  src={performer.image}
+                  alt={performer.displayName}
+                  sx={{ width: 14, height: 14 }}
+                />
               }
             >
               {performer.displayName}
@@ -174,13 +235,19 @@ const HistoryCard = ({
         </Box>
       </Box>
 
-      <Box sx={{ display: 'flex', alignItems: 'center', pr: 0.5 }} onClick={e => e.stopPropagation()}>
+      <Box
+        sx={{ display: 'flex', alignItems: 'center', pr: 0.5 }}
+        onClick={e => e.stopPropagation()}
+      >
         {onToggleActions && (
           <IconButton
             color='neutral'
             variant='plain'
             size='sm'
-            onClick={e => { e.stopPropagation(); onToggleActions() }}
+            onClick={e => {
+              e.stopPropagation()
+              onToggleActions()
+            }}
           >
             <MoreVert sx={{ fontSize: 18 }} />
           </IconButton>

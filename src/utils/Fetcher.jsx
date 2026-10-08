@@ -166,6 +166,15 @@ const MarkChoreComplete = (id, body, completedDate, performer) => {
     method: 'POST',
     headers: HEADERS(),
     body: JSON.stringify(body),
+  }).then(response => {
+    if (response?.ok) {
+      // Single choke point for completions, so queued offline completions are
+      // counted once, when they sync.
+      import('../service/FeedbackService')
+        .then(({ recordTaskCompleted }) => recordTaskCompleted())
+        .catch(() => {})
+    }
+    return response
   })
 }
 
@@ -669,6 +678,34 @@ const GetStorageUsage = () => {
   })
 }
 
+const GetCalendarURL = () => {
+  return Fetch(`/chores/calendar/url`, {
+    method: 'GET',
+    headers: HEADERS(),
+  })
+}
+
+const CreateCalendarURL = () => {
+  return Fetch(`/chores/calendar/url`, {
+    method: 'POST',
+    headers: HEADERS(),
+  })
+}
+
+const RotateCalendarURL = () => {
+  return Fetch(`/chores/calendar/url/rotate`, {
+    method: 'POST',
+    headers: HEADERS(),
+  })
+}
+
+const RevokeCalendarURL = () => {
+  return Fetch(`/chores/calendar/url`, {
+    method: 'DELETE',
+    headers: HEADERS(),
+  })
+}
+
 // Timer/TimeSession API functions
 const GetChoreTimer = choreId => {
   return Fetch(`/chores/${choreId}/timer`, {
@@ -731,7 +768,7 @@ const DeleteUser = (password, confirmation, transferOptions = []) => {
 const UploadChoreAttachment = (
   file,
   entityType,
-  { entityId, draftId } = {},
+  { draftId, entityId } = {},
 ) => {
   const formData = new FormData()
   formData.append('file', file)
@@ -818,6 +855,7 @@ const RegisterDeviceToken = (
 const UnregisterDeviceToken = (deviceId, token) => {
   return Fetch(`/devices/tokens`, {
     method: 'DELETE',
+    skipAuthRecovery: true,
     headers: HEADERS(),
     body: JSON.stringify({
       deviceId,
@@ -977,11 +1015,6 @@ const TrackFilterUsage = id => {
 
 export {
   AcceptCircleMemberRequest,
-  DeleteChoreAttachment,
-  DeleteDraftAttachment,
-  GetChoreAttachments,
-  SignAssetURL,
-  UploadChoreAttachment,
   ApproveChore,
   ArchiveChore,
   CancelSubscription,
@@ -991,6 +1024,7 @@ export {
   CompleteSubTask,
   ConfirmMFA,
   CreateBackup,
+  CreateCalendarURL,
   CreateChildUser,
   CreateChore,
   createChore,
@@ -1001,8 +1035,10 @@ export {
   CreateThing,
   DeleteChildUser,
   DeleteChore,
+  DeleteChoreAttachment,
   DeleteChoreHistory,
   DeleteCircleMember,
+  DeleteDraftAttachment,
   DeleteFilter,
   DeleteLabel,
   DeleteLongLiveToken,
@@ -1014,7 +1050,9 @@ export {
   GetAllCircleMembers,
   GetAllUsers,
   GetArchivedChores,
+  GetCalendarURL,
   GetChildUsers,
+  GetChoreAttachments,
   GetChoreByID,
   GetChoreDetailById,
   GetChoreHistory,
@@ -1057,9 +1095,12 @@ export {
   ResetChoreTimer,
   ResetPassword,
   RestoreBackup,
+  RevokeCalendarURL,
+  RotateCalendarURL,
   SaveChore,
   SaveThing,
   SetupMFA,
+  SignAssetURL,
   signUp,
   SkipChore,
   StartChore,
@@ -1082,5 +1123,6 @@ export {
   UpdateThingState,
   UpdateTimeSession,
   UpdateUserDetails,
+  UploadChoreAttachment,
   VerifyMFA,
 }

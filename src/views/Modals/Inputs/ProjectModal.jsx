@@ -10,6 +10,9 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
+import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import PROJECT_COLORS, {
   getTextColorFromBackgroundColor,
@@ -22,6 +25,7 @@ import {
 import IconPickerModal from './IconPickerModal'
 
 const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
+  const { t } = useTranslation('projects')
   const { ResponsiveModal } = useResponsiveModal()
   const [projectName, setProjectName] = useState('')
   const [projectDescription, setProjectDescription] = useState('')
@@ -57,7 +61,7 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
     e.preventDefault()
 
     if (!projectName.trim()) {
-      setError('Project name is required')
+      setError(t('modal.errorNameRequired'))
       return
     }
 
@@ -81,7 +85,7 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
           },
           onError: error => {
             console.error('Error updating project:', error)
-            setError('Failed to update project')
+            setError(t('modal.errorUpdate'))
           },
         },
       )
@@ -94,7 +98,7 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
         },
         onError: error => {
           console.error('Error creating project:', error)
-          setError('Failed to create project')
+          setError(t('modal.errorCreate'))
         },
       })
     }
@@ -124,39 +128,34 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
       unmountDelay={250}
       fullWidth={true}
       title={project ? 'Edit Project' : 'Create New Project'}
+      closeOnBackdrop={!isSubmitting}
+      closeOnEscape={!isSubmitting}
       footer={
-        <Box display='flex' justifyContent='space-around' gap={1}>
-          <Button
-            type='submit'
-            form='project-form'
-            loading={isSubmitting}
-            disabled={!projectName.trim() || isSubmitting}
-            fullWidth
-            size='lg'
-          >
-            {project ? 'Update' : 'Create'}
-          </Button>
-          <Button
-            variant='outlined'
-            onClick={handleClose}
-            disabled={isSubmitting}
-            fullWidth
-            size='lg'
-          >
-            Cancel
-          </Button>
-        </Box>
+        <ModalActions
+          secondary={{
+            label: t('common:cancel'),
+            onClick: handleClose,
+            disabled: isSubmitting,
+          }}
+          primary={{
+            label: project ? 'Update' : 'Create',
+            type: 'submit',
+            form: 'project-form',
+            loading: isSubmitting,
+            disabled: !projectName.trim() || isSubmitting,
+          }}
+        />
       }
     >
       <form onSubmit={handleSubmit} id='project-form'>
         <Stack spacing={3}>
           {/* Project Name */}
           <FormControl required>
-            <FormLabel>Project Name</FormLabel>
+            <FormLabel>{t('modal.nameLabel')}</FormLabel>
             <Input
               value={projectName}
               onChange={e => setProjectName(e.target.value)}
-              placeholder='Enter project name...'
+              placeholder={t('modal.namePlaceholder')}
               autoFocus
               disabled={isSubmitting}
             />
@@ -164,11 +163,11 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
 
           {/* Project Description */}
           <FormControl>
-            <FormLabel>Description</FormLabel>
+            <FormLabel>{t('modal.descriptionLabel')}</FormLabel>
             <Textarea
               value={projectDescription}
               onChange={e => setProjectDescription(e.target.value)}
-              placeholder='Optional project description...'
+              placeholder={t('modal.descriptionPlaceholder')}
               minRows={2}
               maxRows={4}
               disabled={isSubmitting}
@@ -177,7 +176,7 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
 
           {/* Icon Selection */}
           <FormControl>
-            <FormLabel>Project Icon</FormLabel>
+            <FormLabel>{t('modal.iconLabel')}</FormLabel>
             <Button
               variant='outlined'
               onClick={() => setIsIconPickerOpen(true)}
@@ -213,19 +212,20 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
               }
               sx={{ justifyContent: 'flex-start' }}
             >
-              {PROJECT_ICONS.find(icon => icon.value === projectIcon)?.name ||
-                'Select Icon'}
+              {PROJECT_ICONS.some(icon => icon.value === projectIcon)
+                ? t(`icons.${projectIcon}`)
+                : t('modal.selectIcon')}
             </Button>
           </FormControl>
 
           {/* Color Selection */}
           <FormControl>
-            <FormLabel>Project Color</FormLabel>
+            <FormLabel>{t('modal.colorLabel')}</FormLabel>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
               {PROJECT_COLORS.map(colorOption => (
                 <Box
                   key={colorOption.value}
-                  title={colorOption.name}
+                  title={t(`common:colors.${colorOption.name}`)}
                   onClick={() => setProjectColor(colorOption.value)}
                   sx={{
                     width: 26,

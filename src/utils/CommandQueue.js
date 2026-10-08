@@ -120,6 +120,29 @@ class CommandQueue {
       .filter(Boolean)
   }
 
+  // Same as getPendingForEntity, but for every entity at once, keyed by entity
+  // id. Lets a list of cards share a single read of the store instead of each
+  // card reading it for itself.
+  async getPendingGroupedByEntity() {
+    if (!isOfflineFeatureEnabled()) return {}
+    const allCommands = await offlineDB.getCommands()
+    const grouped = {}
+    allCommands
+      .filter(c => c.status === 'pending' || c.status === 'syncing')
+      .sort((a, b) => a.createdAt - b.createdAt)
+      .forEach(c => {
+        const command = parsePayload(c)
+        if (!command) return
+        // Commands can be scoped to a sub-entity ("<choreId>:<something>");
+        // those belong to the parent, matching getPendingForEntity.
+        const key = String(c.entityId ?? '').split(':')[0]
+        if (!key) return
+        grouped[key] = grouped[key] || []
+        grouped[key].push(command)
+      })
+    return grouped
+  }
+
   // Cancel/undo a pending command
   async cancel(commandId) {
     if (!isOfflineFeatureEnabled()) return

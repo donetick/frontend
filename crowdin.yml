@@ -1,7 +1,7 @@
 # Crowdin configuration for Donetick
 # See: https://support.crowdin.com/configuration-file/
 
-project_id: "donetick"
+project_id: '878780'
 api_token_env: CROWDIN_API_TOKEN
 preserve_hierarchy: true
 
@@ -12,4 +12,8 @@ languages_mapping:
 files:
   - source: /public/locales/en/*.json
     translation: /public/locales/%two_letters_code%/%original_file_name%
+    # Required so Crowdin treats _one/_other as plurals and exports every
+    # target language's runtime categories (for example, Italian _many).
+    type: i18next_json
     update_option: update_as_unapproved
+    skip_untranslated_strings: true

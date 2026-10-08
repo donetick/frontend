@@ -1,9 +1,12 @@
 import { Box, Container, Sheet, Typography } from '@mui/joy'
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+
 import Logo from '../../Logo'
 
 const PaymentSuccessView = () => {
+  const { t } = useTranslation('settings')
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -37,10 +40,10 @@ const PaymentSuccessView = () => {
         >
           <Logo />
           <Typography level='h2' sx={{ mt: 2, mb: 1 }}>
-            Payment Successful!
+            {t('payment.successTitle')}
           </Typography>
           <Typography level='body-md' sx={{ mb: 2 }}>
-            You will be redirected to the settings page shortly.
+            {t('payment.successRedirect')}
           </Typography>
         </Sheet>
       </Box>

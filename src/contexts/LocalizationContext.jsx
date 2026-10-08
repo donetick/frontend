@@ -1,7 +1,8 @@
-import useStickyState from '@/hooks/useStickyState'
 import moment from 'moment'
 import { createContext, useContext, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+
+import useStickyState from '@/hooks/useStickyState'
 
 const LocalizationContext = createContext()
 
@@ -20,15 +21,98 @@ export const TIME_FORMATS = {
 
 export const RTL_LANGUAGES = ['ar', 'he', 'fa', 'ur']
 
+// Sensible regional defaults applied when the user switches language.
+// These are only a starting point — the user can still override any of
+// them individually afterwards.
+export const LANGUAGE_DEFAULTS = {
+  en: {
+    dateFormat: DATE_FORMATS.MDY,
+    timeFormat: TIME_FORMATS.HOUR_12,
+    firstDayOfWeek: 0,
+  },
+  ar: {
+    dateFormat: DATE_FORMATS.DMY,
+    timeFormat: TIME_FORMATS.HOUR_12,
+    firstDayOfWeek: 6,
+  },
+  cs: {
+    dateFormat: DATE_FORMATS.DMY,
+    timeFormat: TIME_FORMATS.HOUR_24,
+    firstDayOfWeek: 1,
+  },
+  de: {
+    dateFormat: DATE_FORMATS.DMY,
+    timeFormat: TIME_FORMATS.HOUR_24,
+    firstDayOfWeek: 1,
+  },
+  es: {
+    dateFormat: DATE_FORMATS.DMY,
+    timeFormat: TIME_FORMATS.HOUR_24,
+    firstDayOfWeek: 1,
+  },
+  fr: {
+    dateFormat: DATE_FORMATS.DMY,
+    timeFormat: TIME_FORMATS.HOUR_24,
+    firstDayOfWeek: 1,
+  },
+  he: {
+    dateFormat: DATE_FORMATS.DMY,
+    timeFormat: TIME_FORMATS.HOUR_24,
+    firstDayOfWeek: 0,
+  },
+  it: {
+    dateFormat: DATE_FORMATS.DMY,
+    timeFormat: TIME_FORMATS.HOUR_24,
+    firstDayOfWeek: 1,
+  },
+  nl: {
+    dateFormat: DATE_FORMATS.DMY,
+    timeFormat: TIME_FORMATS.HOUR_24,
+    firstDayOfWeek: 1,
+  },
+  ja: {
+    dateFormat: DATE_FORMATS.YMD,
+    timeFormat: TIME_FORMATS.HOUR_24,
+    firstDayOfWeek: 0,
+  },
+  pl: {
+    dateFormat: DATE_FORMATS.DMY,
+    timeFormat: TIME_FORMATS.HOUR_24,
+    firstDayOfWeek: 1,
+  },
+  pt: {
+    dateFormat: DATE_FORMATS.DMY,
+    timeFormat: TIME_FORMATS.HOUR_24,
+    firstDayOfWeek: 0,
+  },
+  ru: {
+    dateFormat: DATE_FORMATS.DMY,
+    timeFormat: TIME_FORMATS.HOUR_24,
+    firstDayOfWeek: 1,
+  },
+  'zh-CN': {
+    dateFormat: DATE_FORMATS.YMD,
+    timeFormat: TIME_FORMATS.HOUR_24,
+    firstDayOfWeek: 1,
+  },
+}
+
 export const AVAILABLE_LANGUAGES = [
+  { code: 'ar', name: 'Arabic', nativeName: 'العربية' },
+  { code: 'cs', name: 'Czech', nativeName: 'Čeština' },
   { code: 'de', name: 'German', nativeName: 'Deutsch' },
   { code: 'en', name: 'English', nativeName: 'English' },
   { code: 'es', name: 'Spanish', nativeName: 'Español' },
+  { code: 'es-ES', name: 'Spanish (Spain)', nativeName: 'Español (España)' },
   { code: 'fr', name: 'French', nativeName: 'Français' },
+  { code: 'he', name: 'Hebrew', nativeName: 'עברית' },
+  { code: 'it', name: 'Italian', nativeName: 'Italiano' },
   { code: 'nl', name: 'Dutch', nativeName: 'Nederlands' },
   { code: 'ja', name: 'Japanese', nativeName: '日本語' },
+  { code: 'pl', name: 'Polish', nativeName: 'Polski' },
   { code: 'pt', name: 'Portuguese (Brazil)', nativeName: 'Português (Brasil)' },
-  { code: 'ja', name: 'Japanese', nativeName: '日本語' },
+  { code: 'ru', name: 'Russian', nativeName: 'Русский' },
+  { code: 'zh-CN', name: 'Chinese (Simplified)', nativeName: '简体中文' },
 ]
 
 export const LocalizationProvider = ({ children }) => {
@@ -45,7 +129,18 @@ export const LocalizationProvider = ({ children }) => {
     0,
     'firstDayOfWeek',
   ) // 0 = Sunday, 1 = Monday
-  const [language, setLanguage] = useStickyState('en', 'language')
+  const [language, setLanguageRaw] = useStickyState('en', 'language')
+
+  const setLanguage = code => {
+    setLanguageRaw(code)
+    const defaults =
+      LANGUAGE_DEFAULTS[code] || LANGUAGE_DEFAULTS[code.split('-')[0]]
+    if (defaults) {
+      setDateFormat(defaults.dateFormat)
+      setTimeFormat(defaults.timeFormat)
+      setFirstDayOfWeek(defaults.firstDayOfWeek)
+    }
+  }
 
   useEffect(() => {
     i18n.changeLanguage(language)
@@ -53,7 +148,10 @@ export const LocalizationProvider = ({ children }) => {
   }, [language, i18n])
 
   useEffect(() => {
-    const isRTL = RTL_LANGUAGES.includes(language)
+    const isRTL = RTL_LANGUAGES.some(
+      rtlLanguage =>
+        language === rtlLanguage || language.startsWith(`${rtlLanguage}-`),
+    )
     document.documentElement.dir = isRTL ? 'rtl' : 'ltr'
     document.documentElement.lang = language
   }, [language])
@@ -91,7 +189,10 @@ export const LocalizationProvider = ({ children }) => {
     })
   }
 
-  const isRTL = RTL_LANGUAGES.includes(language)
+  const isRTL = RTL_LANGUAGES.some(
+    rtlLanguage =>
+      language === rtlLanguage || language.startsWith(`${rtlLanguage}-`),
+  )
 
   const fmt = {
     date: formatDate,

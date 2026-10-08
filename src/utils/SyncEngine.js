@@ -28,6 +28,10 @@ class SyncEngine {
   constructor() {
     this.isSyncing = false
     this.listeners = []
+    // The run currently in flight, and the single follow-up run queued behind
+    // it. See sync() for why a follow-up is needed rather than just waiting.
+    this.inFlight = null
+    this.queued = null
   }
 
   // Register listener for sync state changes
@@ -42,10 +46,38 @@ class SyncEngine {
     this.listeners.forEach(cb => cb(state))
   }
 
-  // Main sync entry point — returns true if sync succeeded, false otherwise
+  // Main sync entry point — returns true if sync succeeded, false otherwise.
+  //
+  // Concurrent callers are coalesced rather than dropped. Returning early while
+  // another run is in flight used to lose writes: that run's /sync/changes
+  // request may have been issued *before* the caller's change reached the
+  // server, so its cursor skips past the change and the caller reads a cache
+  // that will never contain it until something else triggers a sync. That is
+  // why a task created from the modal could vanish on the refetch right after
+  // it was created. Waiting for the in-flight run is not enough for the same
+  // reason, so callers that arrive mid-run share one follow-up run instead.
   async sync() {
     if (!isOfflineFeatureEnabled()) return false
-    if (this.isSyncing) return false
+
+    if (this.inFlight) {
+      if (!this.queued) {
+        this.queued = this.inFlight
+          .catch(() => false)
+          .then(() => {
+            this.queued = null
+            return this.sync()
+          })
+      }
+      return this.queued
+    }
+
+    this.inFlight = this._runSync().finally(() => {
+      this.inFlight = null
+    })
+    return this.inFlight
+  }
+
+  async _runSync() {
     this.isSyncing = true
     this._notify({ syncing: true, error: null })
 
@@ -162,7 +194,7 @@ class SyncEngine {
         break
 
       case CommandType.COMPLETE_CHORE: {
-        const { id, body, completedDate, performer } = cmd.payload
+        const { body, completedDate, id, performer } = cmd.payload
         response = await MarkChoreComplete(
           id,
           body || {},
@@ -189,7 +221,7 @@ class SyncEngine {
         break
 
       case CommandType.UPDATE_CHORE_HISTORY: {
-        const { choreId, historyId, historyData } = cmd.payload
+        const { choreId, historyData, historyId } = cmd.payload
         response = await UpdateChoreHistory(choreId, historyId, historyData)
         break
       }
@@ -201,7 +233,7 @@ class SyncEngine {
       }
 
       case CommandType.RESCHEDULE_CHORE: {
-        const { id, dueDate } = cmd.payload
+        const { dueDate, id } = cmd.payload
         response = await UpdateDueDate(id, dueDate)
         break
       }
@@ -232,8 +264,23 @@ class SyncEngine {
 
     let hasMore = true
     let currentCursor = cursor
+    let pages = 0
 
     while (hasMore && networkManager.deviceOnline) {
+      // Bail out if the user logged out (or switched servers) mid-sync —
+      // without this the loop below has no way to know the session it's
+      // paging through is gone, and keeps hammering the server forever.
+      if (!localStorage.getItem('token')) break
+
+      // Safety valve: a server that reports hasMore without ever advancing
+      // the cursor (bug, or mismatched /sync/changes contract on a custom
+      // server) would otherwise spin this loop indefinitely, flooding the
+      // backend with requests. Bail loudly instead.
+      pages += 1
+      if (pages > 500) {
+        throw new Error('Delta sync aborted: too many pages, possible loop')
+      }
+
       // Use apiClient.get which handles auth and returns a fetch Response
       const response = await apiClient.get(
         `/sync/changes?since=${currentCursor}`,
@@ -275,11 +322,21 @@ class SyncEngine {
       }
 
       // Always advance the cursor, even when there are no changes
+      const cursorAdvanced =
+        data.cursor != null && data.cursor !== currentCursor
       if (data.cursor != null) {
         currentCursor = data.cursor
       }
 
       hasMore = !!data.hasMore
+      // A server reporting hasMore without ever moving the cursor would spin
+      // this loop forever — treat a stuck cursor as "no more" instead.
+      if (hasMore && !cursorAdvanced) {
+        console.error(
+          'Delta sync cursor did not advance, stopping to avoid a request loop',
+        )
+        hasMore = false
+      }
     }
 
     await offlineDB.setSyncCursor(currentCursor)

@@ -97,64 +97,70 @@ export const parsePriority = inputSentence => {
   }
 }
 export const parseLabels = (inputSentence, userLabels) => {
-  let sentence = inputSentence.toLowerCase()
   const currentLabels = []
-  const newLabels = []
+  const matchedRanges = []
   const allHighlights = []
 
-  // Find all #label patterns in the sentence
-  // Use [\p{L}\p{N}_]+ to support Unicode letters (including umlauts) and numbers
-  const labelPattern = /#([\p{L}\p{N}_]+)/giu
-  const matches = [...inputSentence.matchAll(labelPattern)]
+  // Labels can contain spaces (e.g. "New Label"), so a plain word-boundary
+  // regex can't capture them — check each '#' against real label names
+  // instead, longest name first so "New Label" wins over a label named "New".
+  const sortedLabels = [...userLabels].sort(
+    (a, b) => b.name.length - a.name.length,
+  )
+  const isWordChar = ch => ch !== undefined && /[\p{L}\p{N}_]/u.test(ch)
 
-  for (const match of matches) {
-    const labelName = match[1]
-    const fullMatch = match[0]
-    const startIndex = match.index
+  const hashPattern = /#/g
+  let hashMatch
+  while ((hashMatch = hashPattern.exec(inputSentence)) !== null) {
+    const startIndex = hashMatch.index
+    const rest = inputSentence.slice(startIndex + 1)
 
-    // Check if this label already exists
-    const existingLabel = userLabels.find(
-      label => label.name.toLowerCase() === labelName.toLowerCase(),
-    )
+    const existingLabel = sortedLabels.find(label => {
+      const name = label.name
+      if (rest.toLowerCase().slice(0, name.length) !== name.toLowerCase()) {
+        return false
+      }
+      // Require a non-word boundary right after the name so "New" doesn't
+      // match inside a longer typed word like "Newer".
+      return !isWordChar(rest[name.length])
+    })
 
-    if (existingLabel) {
-      currentLabels.push(existingLabel)
-    } else {
-      // Create a new label object for new labels
-      newLabels.push({
-        name: labelName,
-        color: '#3b82f6', // Default blue color
-        isNew: true,
-      })
-    }
+    // Unmatched #mentions (no existing label, not created) are left as plain
+    // text — only #mentions resolving to a real label are extracted/cleaned.
+    if (!existingLabel) continue
 
-    allHighlights.push({
-      text: fullMatch,
+    const fullMatch = `#${existingLabel.name}`
+    currentLabels.push(existingLabel)
+    matchedRanges.push({
       start: startIndex,
       end: startIndex + fullMatch.length,
     })
-
-    // Remove the label from the sentence
-    sentence = sentence.replace(fullMatch.toLowerCase(), '')
+    allHighlights.push({
+      text: inputSentence.slice(startIndex, startIndex + fullMatch.length),
+      start: startIndex,
+      end: startIndex + fullMatch.length,
+    })
+    hashPattern.lastIndex = startIndex + fullMatch.length
   }
 
-  const allLabels = [...currentLabels, ...newLabels]
+  if (currentLabels.length > 0) {
+    let cleanedSentence = inputSentence
+    for (const range of matchedRanges
+      .slice()
+      .sort((a, b) => b.start - a.start)) {
+      cleanedSentence =
+        cleanedSentence.slice(0, range.start) + cleanedSentence.slice(range.end)
+    }
 
-  if (allLabels.length > 0) {
     return {
-      result: allLabels,
-      newLabels: newLabels,
+      result: currentLabels,
       highlight: allHighlights,
-      cleanedSentence: inputSentence
-        .replace(labelPattern, '')
-        .replace(/\s+/g, ' ')
-        .trim(),
+      cleanedSentence: cleanedSentence.replace(/\s+/g, ' ').trim(),
     }
   }
 
   return {
     result: null,
-    newLabels: [],
     cleanedSentence: inputSentence,
   }
 }

@@ -1,4 +1,6 @@
 import { Flag } from '@mui/icons-material'
+import { useTranslation } from 'react-i18next'
+
 import BaseOptionPicker from './BaseOptionPicker'
 
 const defaultPriorityColors = {
@@ -18,14 +20,16 @@ const defaultPriorityLabels = {
 }
 
 const PriorityPickerField = ({
-  value = 0,
+  emptyDisplay = 'icon-text',
   onChange,
   onClear,
-  emptyDisplay = 'icon-text',
   priorityColors = defaultPriorityColors,
   priorityLabels = defaultPriorityLabels,
   size = 'sm',
+  value = 0,
 }) => {
+  const { t } = useTranslation('chores')
+
   const options = [1, 2, 3, 4].map(priorityOption => ({
     id: priorityOption,
     label: priorityLabels[priorityOption],
@@ -45,12 +49,12 @@ const PriorityPickerField = ({
       getItemValue={item => item.id}
       getItemLabel={item => item.label}
       getItemColor={item => item.color}
-      getTriggerText={({ selectedItems, isEmpty }) => {
+      getTriggerText={({ isEmpty, selectedItems }) => {
         // For priority 0 (no priority), show empty string (icon only)
-        if (value === 0 || isEmpty) return 'Priority'
+        if (value === 0 || isEmpty) return t('priority')
         return selectedItems[0]?.label || ''
       }}
-      renderTriggerIcon={({ selectedItems, isEmpty }) => (
+      renderTriggerIcon={({ isEmpty, selectedItems }) => (
         <Flag
           sx={{
             color: isEmpty || value === 0 ? '' : selectedItems[0]?.color,

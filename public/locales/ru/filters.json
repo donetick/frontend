@@ -1,0 +1,55 @@
+{
+  "builder": {
+    "errorName": "Введите название фильтра",
+    "errorConditions": "Задайте хотя бы одно условие",
+    "editTitle": "Изменить фильтр",
+    "newTitle": "Новый фильтр",
+    "addConditions": "Добавьте условия, чтобы увидеть результат",
+    "save": "Сохранить фильтр",
+    "name": "Название фильтра",
+    "namePlaceholder": "напр. Просроченные дела Ани",
+    "color": "Цвет"
+  },
+  "nameExists": "Фильтр с таким названием уже есть",
+  "tasks_one": "{{count}} дело",
+  "tasks_other": "{{count}} дела",
+  "overdue": "просрочено: {{count}}",
+  "noConditions": "",
+  "condition_one": "",
+  "condition_other": "",
+  "usedCount": "",
+  "delete": {
+    "title": "Удалить фильтр",
+    "message": ""
+  },
+  "empty": {
+    "title": "Сохранённых фильтров пока нет",
+    "description": "",
+    "createFilter": "",
+    "noResultsTitle": "",
+    "noResultsWithSearch": "",
+    "noResultsDefault": "",
+    "clearSearch": "",
+    "showAllFilters": ""
+  },
+  "header": {
+    "title": "",
+    "subtitle": ""
+  },
+  "searchPlaceholder": "",
+  "sort": {
+    "smart": "",
+    "name": "",
+    "usage": "",
+    "lastUsed": "",
+    "created": ""
+  },
+  "show": {
+    "title": "",
+    "all": "",
+    "pinned": "",
+    "unpinned": ""
+  },
+  "pin": "",
+  "unpin": ""
+}

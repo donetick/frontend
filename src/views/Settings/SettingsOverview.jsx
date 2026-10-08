@@ -1,19 +1,8 @@
 import {
-  AccountCircle,
-  Api,
   ChevronRight,
-  Circle,
-  Code,
-  FamilyRestroom,
-  Language,
-  Notifications,
-  Palette,
-  Person,
-  Security,
-  Settings,
+  Feedback,
+  ReportProblem,
   Star,
-  Storage,
-  ViewSidebar,
 } from '@mui/icons-material'
 import {
   Avatar,
@@ -31,120 +20,69 @@ import {
   Stack,
   Typography,
 } from '@mui/joy'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+
+import { SETTINGS_SECTIONS } from '../../constants/settingsSections'
 import { useUserProfile } from '../../queries/UserQueries'
 import { isPlusAccount } from '../../utils/Helpers'
 import { isParentUser } from '../../utils/UserHelpers'
+import ErrorReportModal from '../Modals/ErrorReportModal'
+import FeedbackModal from '../Modals/FeedbackModal'
 
 const SettingsOverview = () => {
   const { t } = useTranslation('settings')
   const navigate = useNavigate()
   const { data: userProfile } = useUserProfile()
+  const [feedbackOpen, setFeedbackOpen] = useState(false)
+  const [bugReportOpen, setBugReportOpen] = useState(false)
 
   const settingsCards = [
+    ...SETTINGS_SECTIONS.map(({ icon: Icon, id, isBeta }) => ({
+      id,
+      title: t(`overview.sections.${id}.title`),
+      description: t(`overview.sections.${id}.description`),
+      icon: <Icon />,
+      isBeta,
+    })),
     {
-      id: 'profile',
-      title: t('overview.sections.profile.title'),
-      description: t('overview.sections.profile.description'),
-      icon: <Person />,
+      id: 'feedback',
+      title: t('overview.sections.feedback.title'),
+      description: t('overview.sections.feedback.description'),
+      icon: <Feedback />,
+      onSelect: () => setFeedbackOpen(true),
     },
     {
-      id: 'circle',
-      title: t('overview.sections.circle.title'),
-      description: t('overview.sections.circle.description'),
-      icon: <Circle />,
-    },
-    {
-      id: 'account',
-      title: t('overview.sections.account.title'),
-      description: t('overview.sections.account.description'),
-      icon: <AccountCircle />,
-    },
-    {
-      id: 'subaccounts',
-      title: t('overview.sections.subaccounts.title'),
-      description: t('overview.sections.subaccounts.description'),
-      icon: <FamilyRestroom />,
-    },
-    {
-      id: 'notifications',
-      title: t('overview.sections.notifications.title'),
-      description: t('overview.sections.notifications.description'),
-      icon: <Notifications />,
-    },
-    {
-      id: 'mfa',
-      title: t('overview.sections.mfa.title'),
-      description: t('overview.sections.mfa.description'),
-      icon: <Security />,
-    },
-    {
-      id: 'apitokens',
-      title: t('overview.sections.apitokens.title'),
-      description: t('overview.sections.apitokens.description'),
-      icon: <Api />,
-    },
-    {
-      id: 'storage',
-      title: t('overview.sections.storage.title'),
-      description: t('overview.sections.storage.description'),
-      icon: <Storage />,
-    },
-    {
-      id: 'sidepanel',
-      title: t('overview.sections.sidepanel.title'),
-      description: t('overview.sections.sidepanel.description'),
-      icon: <ViewSidebar />,
-    },
-    {
-      id: 'theme',
-      title: t('overview.sections.theme.title'),
-      description: t('overview.sections.theme.description'),
-      icon: <Palette />,
-    },
-    {
-      id: 'localization',
-      title: t('overview.sections.localization.title'),
-      description: t('overview.sections.localization.description'),
-      icon: <Language />,
-      isBeta: true,
-    },
-    {
-      id: 'advanced',
-      title: t('overview.sections.advanced.title'),
-      description: t('overview.sections.advanced.description'),
-      icon: <Settings />,
-    },
-    {
-      id: 'developer',
-      title: t('overview.sections.developer.title'),
-      description: t('overview.sections.developer.description'),
-      icon: <Code />,
+      id: 'bugreport',
+      title: t('overview.sections.bugReport.title'),
+      description: t('overview.sections.bugReport.description'),
+      icon: <ReportProblem />,
+      onSelect: () => setBugReportOpen(true),
     },
   ]
 
-  const handleCardClick = settingId => {
-    navigate(`/settings/${settingId}`)
+  const handleCardClick = setting => {
+    if (setting.onSelect) {
+      setting.onSelect()
+      return
+    }
+    navigate(`/settings/${setting.id}`)
   }
+
+  const parentOnlyIds = SETTINGS_SECTIONS.filter(
+    section => section.parentOnly,
+  ).map(section => section.id)
 
   // Filter settings based on user type
   const getAvailableSettings = () => {
-    const parentOnlySettings = [
-      'children',
-      'mfa',
-      'apitokens',
-      'circle',
-      'account',
-    ]
-
     if (isParentUser(userProfile)) {
       // Parent users can access all settings
       return settingsCards
     } else {
       // Child users can only access basic settings
       return settingsCards.filter(
-        setting => !parentOnlySettings.includes(setting.id),
+        setting => !parentOnlyIds.includes(setting.id),
       )
     }
   }
@@ -303,7 +241,7 @@ const SettingsOverview = () => {
           {getAvailableSettings().map((setting, index) => (
             <ListItem key={setting.id} sx={{ p: 0 }}>
               <ListItemButton
-                onClick={() => handleCardClick(setting.id)}
+                onClick={() => handleCardClick(setting)}
                 sx={{
                   '&:hover': {
                     backgroundColor: 'background.level1',
@@ -347,7 +285,7 @@ const SettingsOverview = () => {
                           borderColor: 'warning.main',
                         }}
                       >
-                        Early Access
+                        {t('common.earlyAccess')}
                       </Chip>
                     )}
                   </Box>
@@ -367,6 +305,18 @@ const SettingsOverview = () => {
           ))}
         </List>
       </Box>
+
+      <FeedbackModal
+        open={feedbackOpen}
+        onClose={() => setFeedbackOpen(false)}
+      />
+
+      {/* No error to pass: the report is about something the user saw, not
+          something the app threw, so the modal collects diagnostics only. */}
+      <ErrorReportModal
+        open={bugReportOpen}
+        onClose={() => setBugReportOpen(false)}
+      />
     </Container>
   )
 }

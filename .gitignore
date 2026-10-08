@@ -44,3 +44,7 @@ fastlane/Preview.html
 fastlane/.env
 fastlane/*.log
 vendor/bundle
+
+# Claude Code skills cache
+.agents/
+skills-lock.json

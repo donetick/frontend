@@ -273,7 +273,7 @@ const patchDescriptionHtml = async (html, meta = {}) => {
   const images = extractDescriptionImages(html)
   if (images.length === 0) return html
   let patched = html
-  for (const { path, src, rawSrc } of images) {
+  for (const { path, rawSrc, src } of images) {
     try {
       const nextSrc = await getImageSrc(path, src, {
         kind: 'description',

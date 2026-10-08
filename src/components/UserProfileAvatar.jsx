@@ -26,8 +26,11 @@ import {
 } from '@mui/joy'
 import { useMediaQuery } from '@mui/material'
 import moment from 'moment'
+import PropTypes from 'prop-types'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+
 import { useImpersonateUser } from '../contexts/ImpersonateUserContext'
 import useStickyState from '../hooks/useStickyState'
 import { useCircleMembers, useUserProfile } from '../queries/UserQueries'
@@ -36,16 +39,17 @@ import { isPlusAccount, resolvePhotoURL } from '../utils/Helpers'
 import UserModal from '../views/Modals/Inputs/UserModal'
 import SubscriptionModal from './SubscriptionModal'
 
-const UserProfileAvatar = () => {
+const UserProfileAvatar = ({ showDetails = false }) => {
+  const { t } = useTranslation('common')
   const navigate = useNavigate()
   const { mode, setMode } = useColorScheme()
   const { data: userProfile } = useUserProfile()
   const {
+    canImpersonate,
+    getEffectiveUser,
     isImpersonating,
     startImpersonation,
     stopImpersonation,
-    canImpersonate,
-    getEffectiveUser,
   } = useImpersonateUser()
   const { data: circleMembersData } = useCircleMembers()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -60,20 +64,20 @@ const UserProfileAvatar = () => {
   const isPlusUser = isPlusAccount(userProfile)
 
   const getSubscriptionStatus = () => {
-    if (!userProfile) return 'Free'
+    if (!userProfile) return t('userMenu.planFree')
 
     if (userProfile.subscription === 'active') {
-      return 'Plus'
+      return t('userMenu.planPlus')
     }
 
     if (
       userProfile.subscription === 'cancelled' &&
       moment().isBefore(userProfile.expiration)
     ) {
-      return 'Plus (expires soon)'
+      return t('userMenu.planPlusExpiring')
     }
 
-    return 'Free'
+    return t('userMenu.planFree')
   }
 
   const handleLogout = () => {
@@ -98,10 +102,11 @@ const UserProfileAvatar = () => {
         <MenuButton
           variant='plain'
           sx={{
-            p: 0,
+            p: showDetails ? 0.75 : 0,
+            width: showDetails ? '100%' : 'auto',
             border: 'none',
             backgroundColor: 'transparent',
-            borderRadius: '50%',
+            borderRadius: showDetails ? 'var(--joy-radius-md)' : '50%',
             '&:hover': {
               backgroundColor: 'var(--joy-palette-neutral-softHoverBg)',
               // transform: 'scale(1.05)',
@@ -112,11 +117,70 @@ const UserProfileAvatar = () => {
             },
           }}
         >
-          <Box sx={{ position: 'relative' }}>
-            {isImpersonating ? (
-              <Box sx={{ position: 'relative' }}>
+          <Box
+            sx={{
+              alignItems: 'center',
+              display: 'flex',
+              gap: 1,
+              minWidth: 0,
+              width: '100%',
+            }}
+          >
+            <Box sx={{ position: 'relative', flexShrink: 0 }}>
+              {isImpersonating ? (
+                <Box sx={{ position: 'relative' }}>
+                  <Avatar
+                    src={resolvePhotoURL(currentUser?.image)}
+                    alt={currentUser?.displayName || currentUser?.name}
+                    size='md'
+                    sx={{
+                      width: 36,
+                      height: 36,
+                      border: '2px solid var(--joy-palette-background-surface)',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                    }}
+                  />
+                  <Avatar
+                    src={resolvePhotoURL(
+                      userProfile?.image || userProfile?.avatar,
+                    )}
+                    alt={userProfile?.displayName || userProfile?.name}
+                    size='sm'
+                    sx={{
+                      position: 'absolute',
+                      bottom: -2,
+                      left: -2,
+                      width: 18,
+                      height: 18,
+                      border: '2px solid var(--joy-palette-background-surface)',
+                      backgroundColor: 'var(--joy-palette-background-surface)',
+                      boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
+                    }}
+                  />
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      top: -2,
+                      right: -2,
+                      width: 14,
+                      height: 14,
+                      borderRadius: '50%',
+                      backgroundColor: 'var(--joy-palette-primary-500)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: '1px solid var(--joy-palette-background-surface)',
+                      boxShadow: '0 1px 2px rgba(0,0,0,0.2)',
+                    }}
+                  >
+                    <SwapHoriz sx={{ fontSize: 8, color: 'white' }} />
+                  </Box>
+                </Box>
+              ) : (
                 <Avatar
-                  src={resolvePhotoURL(currentUser?.image)}
+                  src={resolvePhotoURL(
+                    currentUser?.image || currentUser?.avatar,
+                  )}
                   alt={currentUser?.displayName || currentUser?.name}
                   size='md'
                   sx={{
@@ -126,52 +190,33 @@ const UserProfileAvatar = () => {
                     boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                   }}
                 />
-                <Avatar
-                  src={resolvePhotoURL(userProfile?.image || userProfile?.avatar)}
-                  alt={userProfile?.displayName || userProfile?.name}
-                  size='sm'
+              )}
+            </Box>
+            {showDetails && (
+              <Box sx={{ minWidth: 0, textAlign: 'start' }}>
+                <Typography
+                  level='title-sm'
                   sx={{
-                    position: 'absolute',
-                    bottom: -2,
-                    left: -2,
-                    width: 18,
-                    height: 18,
-                    border: '2px solid var(--joy-palette-background-surface)',
-                    backgroundColor: 'var(--joy-palette-background-surface)',
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
-                  }}
-                />
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    top: -2,
-                    right: -2,
-                    width: 14,
-                    height: 14,
-                    borderRadius: '50%',
-                    backgroundColor: 'var(--joy-palette-primary-500)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    border: '1px solid var(--joy-palette-background-surface)',
-                    boxShadow: '0 1px 2px rgba(0,0,0,0.2)',
+                    fontWeight: 600,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
                   }}
                 >
-                  <SwapHoriz sx={{ fontSize: 8, color: 'white' }} />
-                </Box>
+                  {currentUser?.displayName || currentUser?.name}
+                </Typography>
+                <Typography
+                  level='body-xs'
+                  sx={{
+                    color: 'text.tertiary',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {currentUser?.email}
+                </Typography>
               </Box>
-            ) : (
-              <Avatar
-                src={resolvePhotoURL(currentUser?.image || currentUser?.avatar)}
-                alt={currentUser?.displayName || currentUser?.name}
-                size='md'
-                sx={{
-                  width: 36,
-                  height: 36,
-                  border: '2px solid var(--joy-palette-background-surface)',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                }}
-              />
             )}
           </Box>
         </MenuButton>
@@ -265,7 +310,7 @@ const UserProfileAvatar = () => {
                         fontWeight: 500,
                       }}
                     >
-                      Impersonating
+                      {t('userMenu.impersonating')}
                     </Typography>
                   </Box>
                 )}
@@ -291,13 +336,15 @@ const UserProfileAvatar = () => {
                 </ListItemDecorator>
                 <ListItemContent>
                   <Typography level='body-sm' sx={{ fontWeight: 500 }}>
-                    {isImpersonating ? 'Switch User' : 'Impersonate User'}
+                    {isImpersonating
+                      ? t('userMenu.switchUser')
+                      : t('userMenu.impersonateUser')}
                   </Typography>
                   <Typography
                     level='body-xs'
                     sx={{ color: 'var(--joy-palette-text-tertiary)' }}
                   >
-                    Act as another user
+                    {t('userMenu.actAsAnother')}
                   </Typography>
                 </ListItemContent>
               </MenuItem>
@@ -319,13 +366,13 @@ const UserProfileAvatar = () => {
                   </ListItemDecorator>
                   <ListItemContent>
                     <Typography level='body-sm' sx={{ fontWeight: 500 }}>
-                      Stop Impersonating
+                      {t('userMenu.stopImpersonating')}
                     </Typography>
                     <Typography
                       level='body-xs'
                       sx={{ color: 'var(--joy-palette-text-tertiary)' }}
                     >
-                      Return to your account
+                      {t('userMenu.returnToAccount')}
                     </Typography>
                   </ListItemContent>
                 </MenuItem>
@@ -349,13 +396,13 @@ const UserProfileAvatar = () => {
             </ListItemDecorator>
             <ListItemContent>
               <Typography level='body-sm' sx={{ fontWeight: 500 }}>
-                Settings
+                {t('settings')}
               </Typography>
               <Typography
                 level='body-xs'
                 sx={{ color: 'var(--joy-palette-text-tertiary)' }}
               >
-                Account & preferences
+                {t('userMenu.accountPrefs')}
               </Typography>
             </ListItemContent>
           </MenuItem>
@@ -374,19 +421,19 @@ const UserProfileAvatar = () => {
             </ListItemDecorator>
             <ListItemContent>
               <Typography level='body-sm' sx={{ fontWeight: 500 }}>
-                Invite People
+                {t('userMenu.invitePeople')}
               </Typography>
               <Typography
                 level='body-xs'
                 sx={{ color: 'var(--joy-palette-text-tertiary)' }}
               >
-                Add members to your circle
+                {t('userMenu.addMembers')}
               </Typography>
             </ListItemContent>
           </MenuItem>
           {isLargeScreen && (
             <MenuItem
-              onClick={() => navigate('/settings/detailed#sidepanel')}
+              onClick={() => navigate('/settings/layout')}
               sx={{
                 borderRadius: 'var(--joy-radius-sm)',
                 '&:hover': {
@@ -401,13 +448,13 @@ const UserProfileAvatar = () => {
               </ListItemDecorator>
               <ListItemContent>
                 <Typography level='body-sm' sx={{ fontWeight: 500 }}>
-                  Side Panel Settings
+                  {t('userMenu.sidePanelSettings')}
                 </Typography>
                 <Typography
                   level='body-xs'
                   sx={{ color: 'var(--joy-palette-text-tertiary)' }}
                 >
-                  Customize layout & cards
+                  {t('userMenu.sidePanelSettingsDescription')}
                 </Typography>
               </ListItemContent>
             </MenuItem>
@@ -427,13 +474,15 @@ const UserProfileAvatar = () => {
             </ListItemDecorator>
             <ListItemContent>
               <Typography level='body-sm' sx={{ fontWeight: 500 }}>
-                {isDarkMode ? 'Switch to Light' : 'Switch to Dark'}
+                {isDarkMode
+                  ? t('userMenu.switchToLight')
+                  : t('userMenu.switchToDark')}
               </Typography>
               <Typography
                 level='body-xs'
                 sx={{ color: 'var(--joy-palette-text-tertiary)' }}
               >
-                Toggle theme appearance
+                {t('userMenu.toggleThemeAppearance')}
               </Typography>
             </ListItemContent>
           </MenuItem>
@@ -460,9 +509,11 @@ const UserProfileAvatar = () => {
                     fontWeight: 500,
                   }}
                 >
-                  Upgrade to Plus
+                  {t('userMenu.upgradeToPlus')}
                 </Typography>
-                <Typography level='body-xs'>Unlock premium features</Typography>
+                <Typography level='body-xs'>
+                  {t('userMenu.unlockPremium')}
+                </Typography>
               </ListItemContent>
             </MenuItem>
           )}
@@ -511,7 +562,7 @@ const UserProfileAvatar = () => {
                 level='body-sm'
                 sx={{ fontWeight: 500, color: 'var(--joy-palette-danger-500)' }}
               >
-                Logout
+                {t('logout')}
               </Typography>
             </ListItemContent>
           </MenuItem>
@@ -534,6 +585,10 @@ const UserProfileAvatar = () => {
       />
     </>
   )
+}
+
+UserProfileAvatar.propTypes = {
+  showDetails: PropTypes.bool,
 }
 
 export default UserProfileAvatar

@@ -1,7 +1,6 @@
-import { AttachFile, Close, Image } from '@mui/icons-material'
+import { AttachFile, Image } from '@mui/icons-material'
 import {
   Box,
-  Button,
   CircularProgress,
   List,
   ListItem,
@@ -9,6 +8,10 @@ import {
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
+import EmptyState from '../../../components/common/EmptyState'
+import ModalActions from '../../../components/common/ModalActions'
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import { GetChoreAttachments } from '../../../utils/Fetcher'
 import { resolvePhotoURL } from '../../../utils/Helpers'
@@ -34,6 +37,7 @@ const downloadFile = (url, fileName) => {
 }
 
 function AttachmentBrowserModal({ choreId, isOpen, onClose }) {
+  const { t } = useTranslation('common')
   const { ResponsiveModal } = useResponsiveModal()
   const [attachments, setAttachments] = useState([])
   const [isLoading, setIsLoading] = useState(false)
@@ -44,7 +48,7 @@ function AttachmentBrowserModal({ choreId, isOpen, onClose }) {
     setIsLoading(true)
     GetChoreAttachments(choreId)
       .then(async res => {
-        if (!res.ok) throw new Error('Failed to fetch attachments')
+        if (!res.ok) throw new Error(t('chores:dataError.attachmentsFailed'))
         return res.json()
       })
       .then(data => {
@@ -55,7 +59,7 @@ function AttachmentBrowserModal({ choreId, isOpen, onClose }) {
       })
       .catch(() => setAttachments([]))
       .finally(() => setIsLoading(false))
-  }, [isOpen, choreId])
+  }, [isOpen, choreId, t])
 
   const handleClose = () => {
     setAttachments([])
@@ -85,18 +89,9 @@ function AttachmentBrowserModal({ choreId, isOpen, onClose }) {
       <ResponsiveModal
         open={!!isOpen}
         onClose={handleClose}
-        title='Attachments'
+        title={t('attachments')}
         footer={
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Button
-              variant='plain'
-              color='neutral'
-              startDecorator={<Close />}
-              onClick={handleClose}
-            >
-              Close
-            </Button>
-          </Box>
+          <ModalActions primary={{ label: t('done'), onClick: handleClose }} />
         }
       >
         {isLoading ? (
@@ -104,12 +99,12 @@ function AttachmentBrowserModal({ choreId, isOpen, onClose }) {
             <CircularProgress size='md' />
           </Box>
         ) : attachments.length === 0 ? (
-          <Typography
-            level='body-sm'
-            sx={{ color: 'text.secondary', py: 2, textAlign: 'center' }}
-          >
-            No attachments found.
-          </Typography>
+          <EmptyState
+            size='sm'
+            icon={<AttachFile />}
+            title={t('noAttachmentsTitle')}
+            description={t('noAttachmentsDescription')}
+          />
         ) : (
           <List sx={{ '--ListItem-paddingX': '0px' }}>
             {attachments.map((attachment, index) => (
@@ -134,14 +129,17 @@ function AttachmentBrowserModal({ choreId, isOpen, onClose }) {
                   )}
                   <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Typography level='body-sm' noWrap>
-                      {attachment.file_name || `File ${index + 1}`}
+                      {attachment.file_name ||
+                        t('fileNumbered', { index: index + 1 })}
                     </Typography>
                     {attachment.size_bytes > 0 && (
                       <Typography
                         level='body-xs'
                         sx={{ color: 'text.tertiary' }}
                       >
-                        {(attachment.size_bytes / 1024).toFixed(1)} KB
+                        {t('kbSize', {
+                          size: (attachment.size_bytes / 1024).toFixed(1),
+                        })}
                       </Typography>
                     )}
                   </Box>

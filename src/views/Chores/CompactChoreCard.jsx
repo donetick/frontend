@@ -1,6 +1,8 @@
 import {
+  AllInclusive,
   Check,
   HourglassEmpty,
+  OpenInNew,
   Pause,
   PlayArrow,
   Repeat,
@@ -9,7 +11,8 @@ import {
   Webhook,
 } from '@mui/icons-material'
 import { Box, Checkbox, Chip, IconButton, Typography } from '@mui/joy'
-import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
 import { useLocalization } from '../../contexts/LocalizationContext'
 import { usePendingCommands } from '../../hooks/usePendingCommands'
@@ -24,24 +27,52 @@ import {
   getPriorityColor,
   getTextColorFromBackgroundColor,
 } from '../../utils/Colors.jsx'
-import ChoreActionMenu from '../components/ChoreActionMenu'
+import {
+  getFirstHttpUrl,
+  getUrlHostname,
+  openExternalUrl,
+  splitTextAtFirstHttpUrl,
+} from '../../utils/ExternalLinks.js'
+import ChoreActionMenu, {
+  ChoreActionMenuTrigger,
+} from '../components/ChoreActionMenu'
 import PendingBadge from '../components/PendingBadge'
+
+// Hoisted so emotion isn't re-serializing an identical object for every row
+const ACTION_MENU_SX = {
+  width: 32,
+  height: 32,
+  color: 'text.tertiary',
+  flexShrink: 0,
+  '&:hover': {
+    color: 'text.secondary',
+    bgcolor: 'background.level1',
+  },
+}
 
 const CompactChoreCard = ({
   chore,
-  performers,
-  sx,
-  viewOnly,
-  showActions = true,
-  onChipClick,
-  onAction,
-  // Multi-select props
   isMultiSelectMode = false,
   isSelected = false,
+  onAction,
+  onChipClick,
+  // When given, the row renders only a trigger and the list owns one shared
+  // action menu; without it the card falls back to carrying its own.
+  onOpenActionMenu,
   onSelectionToggle,
   onlyClickable = false,
+  // Multi-select props
+  performers,
+  showActions = true,
+  // Undefined leaves the old `&:last-child` CSS rule in charge (the card is a
+  // direct sibling of its neighbours). Pass explicitly once a wrapper — like a
+  // swipeable list item — puts each card in its own single-child container,
+  // where `:last-child` always matches and would hide every divider.
+  showDivider,
+  sx,
+  viewOnly,
 }) => {
-  const navigate = useNavigate()
+  const { t } = useTranslation('chores')
 
   const { data: userProfile } = useUserProfile()
   const { timeFormat } = useLocalization()
@@ -75,6 +106,8 @@ const CompactChoreCard = ({
       return <TimesOneMobiledata sx={{ fontSize: 14 }} />
     } else if (chore.frequencyType === 'trigger') {
       return <Webhook sx={{ fontSize: 14 }} />
+    } else if (chore.frequencyType === 'always') {
+      return <AllInclusive sx={{ fontSize: 14 }} />
     } else {
       return <Repeat sx={{ fontSize: 14 }} />
     }
@@ -84,7 +117,9 @@ const CompactChoreCard = ({
     const parts = []
 
     // Frequency
-    parts.push(getRecurrentChipText(chore))
+    if (!['once', 'no_repeat'].includes(chore.frequencyType)) {
+      parts.push(getRecurrentChipText(chore))
+    }
 
     // Assignee
     if (chore.assignedTo) {
@@ -94,7 +129,7 @@ const CompactChoreCard = ({
       if (assignee) parts.push(assignee)
     }
     if (chore.assignedTo === null) {
-      parts.push('Anyone')
+      parts.push(t('assignee.anyone'))
     }
 
     // Points
@@ -104,6 +139,20 @@ const CompactChoreCard = ({
 
     return parts.join(' • ')
   }
+  const {
+    after: titleAfterUrl,
+    before: titleBeforeUrl,
+    url: titleUrl,
+  } = splitTextAtFirstHttpUrl(chore.name)
+  const descriptionUrl = getFirstHttpUrl(chore.description)
+  const showDescriptionUrl = descriptionUrl && descriptionUrl !== titleUrl
+  const showLeadingSlot = showActions || isMultiSelectMode
+  const showTrailingSlot = showActions && !isMultiSelectMode
+  const visibleLabels = chore.labelsV2?.slice(0, 2) ?? []
+  const extraLabelCount = Math.max(
+    0,
+    (chore.labelsV2?.length ?? 0) - visibleLabels.length,
+  )
 
   return (
     <Box
@@ -116,13 +165,15 @@ const CompactChoreCard = ({
         minWidth: '100%',
         cursor: 'pointer',
         position: 'relative',
-        pl: '16px',
+        pl: showLeadingSlot ? '8px' : '14px',
+        // pr: '14px',
+        py: '4px',
         bgcolor: 'background.body',
-        borderBottom: '1px solid',
+        borderBottom: showDivider === false ? 'none' : '1px solid',
         borderColor: 'divider',
-        '&:last-child': {
-          borderBottom: 'none',
-        },
+        ...(showDivider === undefined && {
+          '&:last-child': { borderBottom: 'none' },
+        }),
         '&:hover': {
           bgcolor: 'background.level1',
           boxShadow: 'sm',
@@ -140,7 +191,7 @@ const CompactChoreCard = ({
       }}
     >
       {/* Priority bar clickable area */}
-      {chore.priority > 0 && (
+      {chore.priority > 0 && onChipClick && (
         <Box
           sx={{
             position: 'absolute',
@@ -165,10 +216,12 @@ const CompactChoreCard = ({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          width: 40,
+          width: showLeadingSlot ? 40 : 0,
           height: 40,
-          mr: 1.5,
+          mr: showLeadingSlot ? 1.5 : 0,
           flexShrink: 0,
+          overflow: 'hidden',
+          transition: 'width 0.3s ease-in-out, margin 0.3s ease-in-out',
         }}
       >
         {/* Complete Button */}
@@ -365,9 +418,10 @@ const CompactChoreCard = ({
         <Box
           sx={{
             display: 'flex',
-            alignItems: 'center',
+            alignItems: 'flex-start',
             justifyContent: 'space-between',
             mb: 0.25,
+            gap: 1,
           }}
         >
           {/* Chore Name */}
@@ -376,72 +430,140 @@ const CompactChoreCard = ({
             sx={{
               fontWeight: 600,
               fontSize: 14,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
+              lineHeight: 1.4,
               mr: 1,
               flex: 1,
               minWidth: 0,
+              whiteSpace: 'normal',
+              overflowWrap: 'anywhere',
+              wordBreak: 'break-word',
             }}
           >
-            {chore.name}
+            {titleBeforeUrl}
+            {titleUrl && (
+              <Chip
+                component='span'
+                variant='soft'
+                color='primary'
+                size='sm'
+                startDecorator={<OpenInNew sx={{ fontSize: 12 }} />}
+                onClick={event => {
+                  event.stopPropagation()
+                  openExternalUrl(titleUrl)
+                }}
+                sx={{
+                  mx: 0.35,
+                  height: 20,
+                  maxWidth: 140,
+                  cursor: 'pointer',
+                  verticalAlign: 'middle',
+                  '& .MuiChip-label': {
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  },
+                }}
+                title={titleUrl}
+              >
+                {getUrlHostname(titleUrl)}
+              </Chip>
+            )}
+            {titleAfterUrl}
           </Typography>
           {(chore._pending || (pendingCmds && pendingCmds.length > 0)) && (
             <PendingBadge commands={pendingCmds} size='xs' sx={{ mr: -0.5 }} />
           )}
           {/* Due Date - Inline with name */}
-          <Chip
-            variant='soft'
-            size='sm'
-            color={getDueDateChipColor(chore.nextDueDate, chore)}
-            sx={{
-              fontSize: 10,
-              height: 18,
-              px: 0.75,
-              flexShrink: 0,
-              ml: 1,
-            }}
-          >
-            {getDueDateChipText(chore.nextDueDate, chore, timeFormat)}
-          </Chip>
+          {chore.nextDueDate && (
+            <Chip
+              variant='soft'
+              size='sm'
+              color={getDueDateChipColor(chore.nextDueDate, chore)}
+              sx={{
+                fontSize: 10,
+                height: 18,
+                px: 0.75,
+                flexShrink: 0,
+                ml: 1,
+              }}
+            >
+              {getDueDateChipText(chore.nextDueDate, chore, timeFormat, t)}
+            </Chip>
+          )}
         </Box>
 
         {/* Line 2: Metadata */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
-          {getFrequencyIcon(chore)}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 0.25,
+            rowGap: 0.5,
+          }}
+        >
+          {!['once', 'no_repeat'].includes(chore.frequencyType) &&
+            getFrequencyIcon(chore)}
           <Typography
             level='body-xs'
             color='text.secondary'
             sx={{
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
               fontSize: 11,
+              lineHeight: 1.4,
+              whiteSpace: 'normal',
+              overflowWrap: 'anywhere',
+              wordBreak: 'break-word',
             }}
           >
             {formatMetadata()}
           </Typography>
 
-          {/* Labels - Priority chip removed, now shown as vertical bar */}
-          {chore.labelsV2?.map(l => (
+          {showDescriptionUrl && (
+            <Chip
+              variant='soft'
+              color='primary'
+              size='sm'
+              startDecorator={<OpenInNew sx={{ fontSize: 13 }} />}
+              onClick={event => {
+                event.stopPropagation()
+                openExternalUrl(descriptionUrl)
+              }}
+              sx={{
+                ml: 0.5,
+                maxWidth: 140,
+                cursor: 'pointer',
+                flexShrink: 0,
+                '& .MuiChip-label': {
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                },
+              }}
+              title={descriptionUrl}
+            >
+              {getUrlHostname(descriptionUrl)}
+            </Chip>
+          )}
+
+          {/* Labels - show only a couple and summarize the rest with +N */}
+          {visibleLabels.map(l => (
             <div
               role='none'
               tabIndex={0}
               onClick={e => {
+                if (!onChipClick) return
                 e.stopPropagation()
                 onChipClick({ label: l })
               }}
               onKeyDown={e => {
-                if (e.key === 'Enter' || e.key === ' ') {
+                if (onChipClick && (e.key === 'Enter' || e.key === ' ')) {
                   e.stopPropagation()
                   onChipClick({ label: l })
                 }
               }}
               style={{
-                cursor: 'pointer',
+                cursor: onChipClick ? 'pointer' : 'inherit',
                 padding: 0,
                 margin: 0,
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
               }}
               key={`compact-chorecard-${chore.id}-label-${l.id}`}
@@ -452,17 +574,30 @@ const CompactChoreCard = ({
                 size='sm'
                 sx={{
                   ml: 0.5,
-                  // height: 16,
-                  // fontSize: 9,
-                  // px: 0.5,
                   backgroundColor: `${l?.color} !important`,
                   color: getTextColorFromBackgroundColor(l?.color),
+                  whiteSpace: 'nowrap',
+                  maxWidth: 'none',
                 }}
               >
                 {l?.name}
               </Chip>
             </div>
           ))}
+          {extraLabelCount > 0 && (
+            <Chip
+              variant='soft'
+              color='neutral'
+              size='sm'
+              sx={{
+                ml: 0.5,
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+              }}
+            >
+              +{extraLabelCount}
+            </Chip>
+          )}
         </Box>
       </Box>
 
@@ -471,42 +606,43 @@ const CompactChoreCard = ({
         sx={{
           transition:
             'opacity 0.3s ease-in-out, transform 0.3s ease-in-out, width 0.3s ease-in-out, margin 0.3s ease-in-out',
-          opacity: isMultiSelectMode ? 0 : 1,
-          transform: isMultiSelectMode
-            ? 'translateX(20px) scale(0.8)'
-            : 'translateX(0) scale(1)',
-          width: isMultiSelectMode ? 0 : 32,
-          marginRight: isMultiSelectMode ? 0 : undefined,
+          opacity: showTrailingSlot ? 1 : 0,
+          transform: showTrailingSlot
+            ? 'translateX(0) scale(1)'
+            : 'translateX(20px) scale(0.8)',
+          width: showTrailingSlot ? 32 : 0,
+          marginRight: showTrailingSlot ? undefined : 0,
           overflow: 'hidden',
-          pointerEvents: isMultiSelectMode ? 'none' : 'auto',
+          pointerEvents: showTrailingSlot ? 'auto' : 'none',
         }}
       >
-        {showActions && (
-          <ChoreActionMenu
-            variant='plain'
-            chore={chore}
-            onAction={onAction}
-            onCompleteWithNote={() => onAction('completeWithNote', chore)}
-            onCompleteWithPastDate={() =>
-              onAction('completeWithPastDate', chore)
-            }
-            onChangeAssignee={() => onAction('changeAssignee', chore)}
-            onChangeDueDate={() => onAction('changeDueDate', chore)}
-            onWriteNFC={() => onAction('writeNFC', chore)}
-            onNudge={() => onAction('nudge', chore)}
-            onDelete={() => onAction('delete', chore)}
-            sx={{
-              width: 32,
-              height: 32,
-              color: 'text.tertiary',
-              flexShrink: 0,
-              '&:hover': {
-                color: 'text.secondary',
-                bgcolor: 'background.level1',
-              },
-            }}
-          />
-        )}
+        {showActions &&
+          (onOpenActionMenu ? (
+            <ChoreActionMenuTrigger
+              variant='plain'
+              onClick={event => {
+                event.stopPropagation()
+                onOpenActionMenu(event.currentTarget, chore)
+              }}
+              sx={ACTION_MENU_SX}
+            />
+          ) : (
+            <ChoreActionMenu
+              variant='plain'
+              chore={chore}
+              onAction={onAction}
+              onCompleteWithNote={() => onAction('completeWithNote', chore)}
+              onCompleteWithPastDate={() =>
+                onAction('completeWithPastDate', chore)
+              }
+              onChangeAssignee={() => onAction('changeAssignee', chore)}
+              onChangeDueDate={() => onAction('changeDueDate', chore)}
+              onWriteNFC={() => onAction('writeNFC', chore)}
+              onNudge={() => onAction('nudge', chore)}
+              onDelete={() => onAction('delete', chore)}
+              sx={ACTION_MENU_SX}
+            />
+          ))}
       </Box>
     </Box>
   )

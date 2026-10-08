@@ -2,7 +2,9 @@ import { App as capacitorApp } from '@capacitor/app'
 import { Capacitor } from '@capacitor/core'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef } from 'react'
+
 import { commandQueue } from '../utils/CommandQueue'
+import { isOAuthExchangeInProgress } from '../utils/OAuthExchangeState'
 import { offlineDB } from '../utils/OfflineDB'
 import { isOfflineFeatureEnabled } from '../utils/OfflineFeatureToggle'
 import { syncEngine } from '../utils/SyncEngine'
@@ -90,6 +92,18 @@ export function useSyncOnReconnect() {
 
     const runSync = async () => {
       if (!isOfflineFeatureEnabled()) return
+      // Public routes (onboarding, login, signup) have no session to sync.
+      // Calling /sync/changes here returns 401 and the global auth handler
+      // hard-navigates to /login, which reloads the WebView mid-onboarding.
+      if (!localStorage.getItem('token')) return
+      // Skip while the OAuth code exchange is in flight — there's no session
+      // yet, so a sync here just 401s. Note the app-resume listener fires in
+      // the same tick as the deep link, before the route changes, so this has
+      // to test the shared flag rather than the pathname.
+      if (isOAuthExchangeInProgress()) return
+      // No session, nothing to sync — and a 401 here would force a logout that
+      // hard-navigates signed-out visitors (invite links) away to /login.
+      if (!localStorage.getItem('token')) return
       const wasOffline = !networkManager.isOnline
       const didSync = await syncEngine.sync()
       if (didSync) {

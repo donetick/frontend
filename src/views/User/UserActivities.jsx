@@ -1,62 +1,78 @@
-import { Cell, Pie, PieChart, Tooltip } from 'recharts'
-
 import {
   AccessTime,
   CalendarMonth,
   Check,
   Checklist,
+  Close,
   EventBusy,
   EventNote,
   HourglassEmpty,
+  LockOutlined,
   Person,
   Redo,
   RunningWithErrors,
   Schedule,
+  Search,
+  Sort,
   Style,
   ThumbDown,
-  Timeline,
   Toll,
+  Tune,
 } from '@mui/icons-material'
 import {
   Avatar,
+  Badge,
   Box,
-  Button,
   Card,
   Chip,
   Container,
   Divider,
   Grid,
-  Link,
+  IconButton,
+  Input,
   Stack,
   Typography,
 } from '@mui/joy'
-import React, { useEffect, useMemo, useState } from 'react'
-import FilterBar from '../../components/common/FilterBar'
-import { useFilter } from '../../hooks/useFilter'
+import Fuse from 'fuse.js'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Cell, Pie, PieChart, Tooltip } from 'recharts'
 
+import EmptyState from '../../components/common/EmptyState'
+import FilterBar from '../../components/common/FilterBar'
+import SortAndFilterMenu from '../../components/common/SortAndFilterMenu'
 import { useLocalization } from '../../contexts/LocalizationContext'
+import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
+import { useFilter } from '../../hooks/useFilter'
 import {
   useChores,
   useChoresHistory,
   useDeleteChoreHistory,
   useUpdateChoreHistory,
 } from '../../queries/ChoreQueries'
+import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
+import { ChoresGrouper } from '../../utils/Chores'
+import { COLORS, TASK_COLOR } from '../../utils/Colors.jsx'
+import { isPlusHistoryWindow } from '../../utils/entitlements'
+import LoadingComponent from '../components/Loading'
+import { useLabels } from '../Labels/LabelQueries'
 import EditHistoryModal from '../Modals/EditHistoryModal'
 import HistoryDetailModal from '../Modals/HistoryDetailModal'
 import NoteViewerModal from '../Modals/Inputs/NoteViewerModal'
-import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
-import { useLabels } from '../Labels/LabelQueries'
-import { ChoresGrouper } from '../../utils/Chores'
-import { COLORS, TASK_COLOR } from '../../utils/Colors.jsx'
-import LoadingComponent from '../components/Loading'
 
 const groupByDate = history => {
   const aggregated = {}
   for (let i = 0; i < history.length; i++) {
     const item = history[i]
-    const date = new Date(
-      item.performedAt || item.updatedAt,
-    ).toLocaleDateString()
+    // Key by a stable local ISO day (YYYY-MM-DD) so the render-time
+    // formatter (fmt.date) receives a parseable date instead of a
+    // locale-formatted string, which produced "Invalid date".
+    const d = new Date(item.performedAt || item.updatedAt || item.createdAt)
+    const date = isNaN(d.getTime())
+      ? 'unknown'
+      : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
+          d.getDate(),
+        ).padStart(2, '0')}`
     if (!aggregated[date]) {
       aggregated[date] = []
     }
@@ -76,14 +92,15 @@ const statusConfig = {
 }
 
 const ChoreHistoryItem = ({
-  time,
   name,
+  notes,
+  onViewDetails,
+  onViewNote,
   points,
   status,
-  notes,
-  onViewNote,
-  onViewDetails,
+  time,
 }) => {
+  const { t } = useTranslation('history')
   const cfg = statusConfig[status] ?? statusConfig[1]
 
   return (
@@ -137,7 +154,7 @@ const ChoreHistoryItem = ({
         </Typography>
         {points && (
           <Chip size='sm' color='success' startDecorator={<Toll />}>
-            {`${points} points`}
+            {t('detail.points', { count: points })}
           </Chip>
         )}
         {notes && (
@@ -152,7 +169,7 @@ const ChoreHistoryItem = ({
               onViewNote?.(notes)
             }}
           >
-            Note
+            {t('detail.note')}
           </Chip>
         )}
       </Box>
@@ -162,9 +179,9 @@ const ChoreHistoryItem = ({
 
 const ChoreHistoryTimeline = ({
   history,
-  performers,
-  onViewNote,
   onViewDetails,
+  onViewNote,
+  performers,
 }) => {
   const { fmt } = useLocalization()
 
@@ -175,7 +192,7 @@ const ChoreHistoryTimeline = ({
       {Object.entries(groupedHistory).map(([date, items]) => (
         <Box key={date} sx={{ mb: 4 }}>
           <Typography level='title-sm' sx={{ mb: 0.5 }}>
-            {fmt.date(date)}
+            {date === 'unknown' ? '—' : fmt.date(date)}
           </Typography>
           <Divider />
           <Stack spacing={1}>
@@ -198,7 +215,7 @@ const ChoreHistoryTimeline = ({
   )
 }
 
-const renderPieChart = (data, size, isPrimary, chartType = null) => {
+const renderPieChart = (t, data, size, isPrimary, chartType = null) => {
   // Filter out items with zero or negative values
   const validData = data.filter(item => item.value > 0)
 
@@ -217,7 +234,7 @@ const renderPieChart = (data, size, isPrimary, chartType = null) => {
         }}
       >
         <Typography level='body-sm' color='neutral'>
-          No data available
+          {t('charts.noData')}
         </Typography>
       </Box>
     )
@@ -401,7 +418,14 @@ const USER_FILTER = (history, userId) => {
 }
 
 const UserActivites = () => {
+  const { t } = useTranslation('history')
   const { data: userProfile } = useUserProfile()
+  const { isPlus, showPaywall } = usePaywall()
+  // Memoized so `filterDefs` below isn't rebuilt on every render.
+  const historyLockIcon = useMemo(
+    () => (isPlus ? undefined : <LockOutlined sx={{ fontSize: 14 }} />),
+    [isPlus],
+  )
 
   const [tabValue, setTabValue] = React.useState(7)
   const [selectedHistory, setSelectedHistory] = React.useState([])
@@ -413,6 +437,21 @@ const UserActivites = () => {
   const [editHistoryRecord, setEditHistoryRecord] = useState(null)
   const updateChoreHistory = useUpdateChoreHistory()
   const deleteChoreHistory = useDeleteChoreHistory()
+
+  const [searchTerm, setSearchTerm] = useState('')
+  const [sortBy, setSortBy] = useState(
+    () => localStorage.getItem('activitiesSortBy') || 'date',
+  )
+  const [sortDirection, setSortDirection] = useState(
+    () => localStorage.getItem('activitiesSortDirection') || 'desc',
+  )
+  const [filterBarOpen, setFilterBarOpen] = useState(false)
+  const searchInputRef = useRef(null)
+
+  useEffect(() => {
+    localStorage.setItem('activitiesSortBy', sortBy)
+    localStorage.setItem('activitiesSortDirection', sortDirection)
+  }, [sortBy, sortDirection])
 
   const [historyPieChartData, setHistoryPieChartData] = React.useState([])
   const [choreDuePieChartData, setChoreDuePieChartData] = React.useState([])
@@ -431,8 +470,8 @@ const UserActivites = () => {
   const { data: choresData, isLoading: isChoresLoading } = useChores(true)
   const {
     data: choresHistory,
-    isChoresHistoryLoading,
     handleLimitChange: refetchHistory,
+    isChoresHistoryLoading,
   } = useChoresHistory(tabValue ? tabValue : 30, true)
   const { data: circleMembersData } = useCircleMembers()
   const [selectedUser, setSelectedUser] = React.useState('all')
@@ -449,16 +488,46 @@ const UserActivites = () => {
     () => [
       {
         id: 'status',
-        label: 'Status',
+        label: t('filter.status'),
         type: 'multi-select',
         icon: <Checklist />,
         options: [
-          { value: 1, label: 'Completed', color: 'success', icon: <Check sx={{ fontSize: 14 }} /> },
-          { value: 2, label: 'Skipped', color: 'warning', icon: <Redo sx={{ fontSize: 14 }} /> },
-          { value: 3, label: 'Pending', color: 'neutral', icon: <HourglassEmpty sx={{ fontSize: 14 }} /> },
-          { value: 4, label: 'Rejected', color: 'danger', icon: <ThumbDown sx={{ fontSize: 14 }} /> },
-          { value: 5, label: 'Missed', color: 'danger', icon: <RunningWithErrors sx={{ fontSize: 14 }} /> },
-          { value: 6, label: 'Rescheduled', color: 'warning', icon: <Schedule sx={{ fontSize: 14 }} /> },
+          {
+            value: 1,
+            label: t('status.completed'),
+            color: 'success',
+            icon: <Check sx={{ fontSize: 14 }} />,
+          },
+          {
+            value: 2,
+            label: t('status.skipped'),
+            color: 'warning',
+            icon: <Redo sx={{ fontSize: 14 }} />,
+          },
+          {
+            value: 3,
+            label: t('filter.pending'),
+            color: 'neutral',
+            icon: <HourglassEmpty sx={{ fontSize: 14 }} />,
+          },
+          {
+            value: 4,
+            label: t('status.rejected'),
+            color: 'danger',
+            icon: <ThumbDown sx={{ fontSize: 14 }} />,
+          },
+          {
+            value: 5,
+            label: t('status.missed'),
+            color: 'danger',
+            icon: <RunningWithErrors sx={{ fontSize: 14 }} />,
+          },
+          {
+            value: 6,
+            label: t('status.rescheduled'),
+            color: 'warning',
+            icon: <Schedule sx={{ fontSize: 14 }} />,
+          },
         ],
         filterFn: (item, values) => values.includes(item.status),
       },
@@ -466,7 +535,7 @@ const UserActivites = () => {
         ? [
             {
               id: 'label',
-              label: 'Labels',
+              label: t('filter.labels'),
               type: 'multi-select',
               icon: <Style />,
               options: userLabels.map(l => ({
@@ -493,48 +562,109 @@ const UserActivites = () => {
         : []),
       {
         id: 'hasNotes',
-        label: 'Has Notes',
+        label: t('filter.hasNotes'),
         type: 'boolean',
         icon: <EventNote />,
         filterFn: item => !!item.notes,
       },
       {
         id: 'hasPoints',
-        label: 'Has Points',
+        label: t('filter.hasPoints'),
         type: 'boolean',
         icon: <Toll />,
         filterFn: item => (item.points ?? 0) > 0,
       },
     ],
-    [userLabels],
+    [userLabels, t],
   )
 
   const {
-    filteredData: filteredTimeline,
     activeFilters: clientActiveFilters,
-    setFilter: setClientFilter,
     clearAll: clearClientFilters,
+    filteredData: filteredTimeline,
+    setFilter: setClientFilter,
   } = useFilter(selectedHistory, clientFilterDefs)
+
+  const fuse = useMemo(
+    () =>
+      new Fuse(filteredTimeline, {
+        keys: ['choreName', 'notes'],
+        includeScore: true,
+        isCaseSensitive: false,
+        findAllMatches: true,
+      }),
+    [filteredTimeline],
+  )
+
+  const sortedTimeline = useMemo(() => {
+    const matched = searchTerm
+      ? fuse.search(searchTerm).map(result => result.item)
+      : filteredTimeline
+
+    const direction = sortDirection === 'desc' ? -1 : 1
+    return [...matched].sort((a, b) => {
+      switch (sortBy) {
+        case 'name':
+          return (
+            direction * (a.choreName || '').localeCompare(b.choreName || '')
+          )
+        case 'status':
+          return direction * ((a.status ?? 0) - (b.status ?? 0))
+        case 'points':
+          return direction * ((a.points ?? 0) - (b.points ?? 0))
+        case 'date':
+        default: {
+          const aTime = new Date(
+            a.performedAt || a.updatedAt || a.createdAt,
+          ).getTime()
+          const bTime = new Date(
+            b.performedAt || b.updatedAt || b.createdAt,
+          ).getTime()
+          return direction * (aTime - bTime)
+        }
+      }
+    })
+  }, [fuse, searchTerm, filteredTimeline, sortBy, sortDirection])
+
+  const handleSearchChange = e => setSearchTerm(e.target.value)
+
+  const handleSearchClose = () => {
+    setSearchTerm('')
+    searchInputRef.current?.blur()
+  }
+
+  const filterActiveCount =
+    (tabValue !== 7 ? 1 : 0) +
+    (selectedUser !== 'all' ? 1 : 0) +
+    Object.keys(clientActiveFilters).length
 
   // All filter defs merged for FilterBar display
   const filterDefs = useMemo(
     () => [
       {
         id: 'timePeriod',
-        label: 'Time Period',
+        label: t('filter.timePeriod'),
         type: 'single-select',
         icon: <CalendarMonth />,
         defaultValue: 7,
         options: [
-          { value: 7, label: '7 Days' },
-          { value: 30, label: '30 Days' },
-          { value: 90, label: '90 Days' },
-          { value: 365, label: 'All Time' },
+          { value: 7, label: t('period.days', { count: 7 }) },
+          { value: 30, label: t('period.days', { count: 30 }) },
+          {
+            value: 90,
+            label: t('period.days', { count: 90 }),
+            icon: historyLockIcon,
+          },
+          {
+            value: 365,
+            label: t('period.allTime'),
+            icon: historyLockIcon,
+          },
         ],
       },
       {
         id: 'completedBy',
-        label: 'User',
+        label: t('filter.user'),
         type: 'single-select',
         icon: <Person />,
         options: circleUsers.map(u => ({
@@ -545,7 +675,7 @@ const UserActivites = () => {
       },
       ...clientFilterDefs,
     ],
-    [circleUsers, clientFilterDefs],
+    [circleUsers, clientFilterDefs, historyLockIcon, t],
   )
 
   // Merge server-driven and client-driven active filter states for the bar
@@ -565,6 +695,13 @@ const UserActivites = () => {
       setSelectedHistory(enrichedHistory.filter(h => USER_FILTER(h, userId)))
     } else if (id === 'timePeriod') {
       const days = value ?? 7
+      // The window stays selectable on the free plan — reaching past 30 days
+      // is what opens the paywall, so the user sees the limit they're buying
+      // past instead of a greyed-out chip.
+      if (!isPlus && isPlusHistoryWindow(days)) {
+        showPaywall(PAYWALL_REASON.HISTORY_WINDOW)
+        return
+      }
       setTabValue(days)
       refetchHistory(days)
     } else {
@@ -687,7 +824,7 @@ const UserActivites = () => {
         // Add unlabeled tasks if there are any
         if (unlabeledCount > 0) {
           result.push({
-            label: 'No Labels',
+            label: t('charts.noLabels'),
             value: unlabeledCount,
             color: TASK_COLOR.ANYTIME,
             id: 'unlabeled',
@@ -710,7 +847,9 @@ const UserActivites = () => {
           const assignee = circleUsers.find(
             user => user.userId === chore.assignedTo,
           )
-          const assigneeName = assignee ? assignee.displayName : 'Unassigned'
+          const assigneeName = assignee
+            ? assignee.displayName
+            : t('charts.unassigned')
           const assigneeId = chore.assignedTo || 'unassigned'
 
           if (assigneeCounts[assigneeId]) {
@@ -803,7 +942,7 @@ const UserActivites = () => {
     // Add unlabeled tasks duration if there is any
     if (unlabeledDuration > 0) {
       result.push({
-        label: 'No Labels',
+        label: t('charts.noLabels'),
         value: Math.round((unlabeledDuration / 3600) * 10) / 10, // Convert to hours and round to 1 decimal
         color: TASK_COLOR.ANYTIME,
         id: 'unlabeled',
@@ -824,7 +963,7 @@ const UserActivites = () => {
     // Iterate through ChoreHistory to get actual time spent per task
     history.forEach(historyItem => {
       const duration = historyItem.duration || 0 // duration in seconds from ChoreHistory
-      const taskName = historyItem.choreName || 'Unknown Task'
+      const taskName = historyItem.choreName || t('charts.unknownTask')
 
       if (taskDurations[taskName]) {
         taskDurations[taskName].duration += duration
@@ -887,7 +1026,7 @@ const UserActivites = () => {
 
     if (totalCompleted > 0) {
       result.push({
-        label: `On time`,
+        label: t('badge.onTimeLabel'),
         value: totalCompleted,
         color: TASK_COLOR.COMPLETED,
         id: 1,
@@ -896,7 +1035,7 @@ const UserActivites = () => {
 
     if (totalLate > 0) {
       result.push({
-        label: `Late`,
+        label: t('charts.late'),
         value: totalLate,
         color: TASK_COLOR.LATE,
         id: 2,
@@ -905,7 +1044,7 @@ const UserActivites = () => {
 
     if (totalNoDueDate > 0) {
       result.push({
-        label: `Completed`,
+        label: t('status.completed'),
         value: totalNoDueDate,
         color: TASK_COLOR.ANYTIME,
         id: 3,
@@ -920,43 +1059,43 @@ const UserActivites = () => {
   const chartData = {
     history: {
       data: historyPieChartData || [],
-      title: 'Status',
-      description: 'Completed tasks status',
+      title: t('charts.status.title'),
+      description: t('charts.status.description'),
     },
     due: {
       data: choreDuePieChartData || [],
-      title: 'Due Date',
-      description: 'Current tasks due date',
+      title: t('charts.due.title'),
+      description: t('charts.due.description'),
     },
     // assigned: {
     //   data: choresAssignedChartData,
-    //   title: 'Assigned to me',
+    //   title: t('chores:sort.assignedToMe'),
     //   description: 'Tasks assigned to you vs others',
     // },
     priority: {
       data: choresPriorityChartData || [],
-      title: 'Priority',
-      description: 'Tasks by priority',
+      title: t('charts.priority.title'),
+      description: t('charts.priority.description'),
     },
     labels: {
       data: choresLabelsChartData || [],
-      title: 'Labels',
-      description: 'Tasks by labels',
+      title: t('charts.labels.title'),
+      description: t('charts.labels.description'),
     },
     labelsDuration: {
       data: choresLabelsDurationChartData || [],
-      title: 'Labels (time)',
-      description: 'Time spent by labels (hours)',
+      title: t('charts.labelsDuration.title'),
+      description: t('charts.labelsDuration.description'),
     },
     tasksTime: {
       data: tasksTimeChartData || [],
-      title: 'Tasks (time)',
-      description: 'Time spent by individual tasks (hours)',
+      title: t('charts.tasksTime.title'),
+      description: t('charts.tasksTime.description'),
     },
     assigneeBreakdown: {
       data: choresAssigneeBreakdownChartData || [],
-      title: 'by Assignee',
-      description: 'Tasks grouped by assignee',
+      title: t('charts.assigneeBreakdown.title'),
+      description: t('charts.assigneeBreakdown.description'),
     },
   }
   if (!userProfile) {
@@ -971,14 +1110,78 @@ const UserActivites = () => {
         flexDirection: 'column',
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-        <Timeline sx={{ fontSize: '1.5rem' }} />
-        <Typography
-          level='title-md'
-          sx={{ fontWeight: 'lg', color: 'text.primary' }}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, p: 2 }}>
+        <Stack sx={{ flex: 1 }}>
+          <Typography
+            level='h3'
+            sx={{ fontWeight: 'lg', color: 'text.primary' }}
+          >
+            {t('activities.title')}
+          </Typography>
+          <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+            {t('activities.subtitle')}
+          </Typography>
+        </Stack>
+      </Box>
+
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+        <Input
+          slotProps={{ input: { ref: searchInputRef } }}
+          placeholder={t('activities.searchPlaceholder')}
+          value={searchTerm}
+          fullWidth
+          sx={{
+            borderRadius: 24,
+            height: 24,
+            borderColor: 'text.disabled',
+            padding: 1,
+          }}
+          onChange={handleSearchChange}
+          startDecorator={<Search />}
+          endDecorator={
+            searchTerm && (
+              <IconButton
+                variant='plain'
+                size='sm'
+                onClick={handleSearchClose}
+                sx={{ borderRadius: '50%' }}
+              >
+                <Close />
+              </IconButton>
+            )
+          }
+        />
+        <SortAndFilterMenu
+          icon={<Sort />}
+          sortOptions={[
+            { name: t('activities.sort.date'), value: 'date' },
+            { name: t('activities.sort.name'), value: 'name' },
+            { name: t('activities.sort.status'), value: 'status' },
+            { name: t('activities.sort.points'), value: 'points' },
+          ]}
+          selectedSort={sortBy}
+          onSortChange={setSortBy}
+          sortDirection={sortDirection}
+          onSortDirectionChange={setSortDirection}
+          isActive={sortBy !== 'date' || sortDirection !== 'desc'}
+        />
+        <Badge
+          badgeContent={filterActiveCount || null}
+          color='primary'
+          size='sm'
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         >
-          Activities
-        </Typography>
+          <IconButton
+            onClick={() => setFilterBarOpen(true)}
+            variant='outlined'
+            color={filterActiveCount > 0 ? 'primary' : 'neutral'}
+            size='sm'
+            sx={{ height: 32, width: 32, borderRadius: '50%', flexShrink: 0 }}
+            aria-label={t('common:filterBar.filtersButton')}
+          >
+            <Tune />
+          </IconButton>
+        </Badge>
       </Box>
 
       <FilterBar
@@ -986,60 +1189,40 @@ const UserActivites = () => {
         activeFilters={activeFilters}
         onSetFilter={handleSetFilter}
         onClearAll={handleClearAll}
-        resultCount={filteredTimeline.length}
+        resultCount={sortedTimeline.length}
         totalCount={selectedHistory.length}
+        showTrigger={false}
+        open={filterBarOpen}
+        onOpenChange={setFilterBarOpen}
       />
 
       {/* Conditional Content Based on Data Availability */}
       {!choresData.res?.length > 0 || !choresHistory?.length > 0 ? (
-        <Container
-          maxWidth='md'
-          sx={{
-            textAlign: 'center',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexDirection: 'column',
-            height: '50vh',
-          }}
-        >
-          <EventBusy
-            sx={{
-              fontSize: '6rem',
-              mb: 1,
-            }}
-          />
-
-          <Typography level='h3' gutterBottom>
-            No activities found
-          </Typography>
-          <Typography level='body1' sx={{ mb: 1 }}>
-            No activities found for{' '}
-            <Typography
-              component='span'
-              sx={{ fontWeight: 600, color: 'primary.500' }}
-            >
-              {selectedUser === undefined || selectedUser === 'all'
-                ? 'All Users'
-                : circleUsers.find(user => user.userId === selectedUser)
-                    ?.displayName || 'Unknown User'}
-            </Typography>{' '}
-            in the{' '}
-            <Typography
-              component='span'
-              sx={{ fontWeight: 600, color: 'primary.500' }}
-            >
-              {tabValue === 365 ? 'All Time' : `Last ${tabValue} Days`}
-            </Typography>
-            .
-          </Typography>
-          <Typography level='body-sm' sx={{ color: 'text.secondary', mb: 2 }}>
-            Try selecting a different time period or user filter above.
-          </Typography>
-          <Button variant='soft' sx={{ mt: 2 }}>
-            <Link to='/chores'>Go back to chores</Link>
-          </Button>
-        </Container>
+        <EmptyState
+          variant='no-results'
+          fullHeight
+          icon={<EventBusy />}
+          title={t('activities.emptyTitle')}
+          description={
+            selectedUser === undefined || selectedUser === 'all'
+              ? t('activities.emptyDescriptionEveryone', {
+                  period:
+                    tabValue === 365
+                      ? t('activities.periodSoFar')
+                      : t('activities.periodLastDays', { count: tabValue }),
+                })
+              : t('activities.emptyDescriptionMember', {
+                  name:
+                    circleUsers.find(user => user.userId === selectedUser)
+                      ?.displayName || t('activities.unknownMember'),
+                  period:
+                    tabValue === 365
+                      ? t('activities.periodSoFar')
+                      : t('activities.periodLastDays', { count: tabValue }),
+                })
+          }
+          primaryAction={{ label: t('empty.backToTasks'), to: '/chores' }}
+        />
       ) : (
         <>
           {/* Main Content Area - Mobile: Stack vertically, Desktop: Side by side */}
@@ -1054,12 +1237,12 @@ const UserActivites = () => {
             {/* Left Side - Timeline (Mobile: Full width, Desktop: Flexible) */}
             <Box sx={{ flex: 1, minWidth: 0, width: '100%' }}>
               <ChoreHistoryTimeline
-                history={filteredTimeline}
+                history={sortedTimeline}
                 performers={circleUsers}
                 onViewNote={notes => {
                   setNoteViewerConfig({
                     isOpen: true,
-                    title: 'Note',
+                    title: t('detail.note'),
                     content: notes,
                     onClose: () => setNoteViewerConfig({ isOpen: false }),
                   })
@@ -1187,6 +1370,7 @@ const UserActivites = () => {
                       }}
                     >
                       {renderPieChart(
+                        t,
                         chartData[selectedChart].data,
                         300, // Increased size for better chart container
                         true,
@@ -1250,7 +1434,7 @@ const UserActivites = () => {
                                   alignItems: 'center',
                                 }}
                               >
-                                {renderPieChart(data, 70, false)}
+                                {renderPieChart(t, data, 70, false)}
                               </Box>
                             </Card>
                           </Grid>

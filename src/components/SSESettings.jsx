@@ -9,20 +9,23 @@ import {
   Switch,
   Typography,
 } from '@mui/joy'
+import { useTranslation } from 'react-i18next'
+
 import { useSSEContext } from '../hooks/useSSEContext'
 import { useUserProfile } from '../queries/UserQueries'
 import { isPlusAccount } from '../utils/Helpers'
 import SSEConnectionStatus from './SSEConnectionStatus'
 
 const SSESettings = () => {
+  const { t } = useTranslation('settings')
   const { data: userProfile } = useUserProfile()
   const {
-    isConnected,
-    isConnecting,
     error,
     getConnectionStatus,
-    toggleSSEEnabled,
+    isConnected,
+    isConnecting,
     isSSEEnabled,
+    toggleSSEEnabled,
   } = useSSEContext()
 
   const handleToggle = () => {
@@ -43,26 +46,26 @@ const SSESettings = () => {
 
   const getStatusDescription = () => {
     if (!isPlusAccount(userProfile)) {
-      return 'Real-time updates (SSE) are not available in the Basic plan. Upgrade to Plus to receive instant notifications when chores are updated.'
+      return t('realtime.basicPlanDescription')
     }
 
     if (!isSSEEnabled()) {
-      return 'Real-time updates (SSE) are disabled. Enable to see live changes when you or other circle members complete, skip, or modify chores.'
+      return t('realtime.disabledDescription')
     }
 
     if (isConnected) {
-      return "Real-time updates (SSE) are working. You'll see live changes when you or other circle members complete, skip, or modify chores."
+      return t('realtime.connectedDescription')
     }
 
     if (isConnecting) {
-      return 'Connecting to real-time updates (SSE)...'
+      return t('realtime.connectingDescription')
     }
 
     if (error) {
-      return `Real-time updates (SSE) are enabled but not working: ${error}`
+      return t('realtime.errorDescription', { error })
     }
 
-    return 'Real-time updates (SSE) are enabled but not currently connected.'
+    return t('realtime.disconnectedDescription')
   }
 
   return (
@@ -75,15 +78,15 @@ const SSESettings = () => {
         )}
         <Box sx={{ flex: 1 }}>
           <Typography level='title-md'>
-            Real-time Updates (SSE)
+            {t('realtime.titleSse')}
             {!isPlusAccount(userProfile) && (
               <Chip variant='soft' color='warning' sx={{ ml: 1 }}>
-                Plus Feature
+                {t('common.plusFeature')}
               </Chip>
             )}
           </Typography>
           <Typography level='body-sm' color='neutral'>
-            Get instant notifications via Server-Sent Events
+            {t('realtime.subtitleSse')}
           </Typography>
         </Box>
         {isSSEEnabled() && isPlusAccount(userProfile) && (
@@ -93,7 +96,7 @@ const SSESettings = () => {
 
       <FormControl orientation='horizontal' sx={{ mb: 2 }}>
         <Box sx={{ flex: 1 }}>
-          <FormLabel>Enable Real-time Updates (SSE)</FormLabel>
+          <FormLabel>{t('realtime.enableLabel')}</FormLabel>
           <FormHelperText sx={{ mt: 0 }}>
             {getStatusDescription()}
           </FormHelperText>
@@ -107,7 +110,9 @@ const SSESettings = () => {
           }
           variant='solid'
           endDecorator={
-            isSSEEnabled() && isPlusAccount(userProfile) ? 'On' : 'Off'
+            isSSEEnabled() && isPlusAccount(userProfile)
+              ? t('common.on')
+              : t('common.off')
           }
           slotProps={{ endDecorator: { sx: { minWidth: 24 } } }}
         />
@@ -116,7 +121,7 @@ const SSESettings = () => {
       {isSSEEnabled() && isPlusAccount(userProfile) && (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
           <Typography level='body-xs' color='neutral'>
-            Status:
+            {t('realtime.statusLabel')}
           </Typography>
           <Chip
             size='sm'
@@ -137,9 +142,7 @@ const SSESettings = () => {
 
       {!isPlusAccount(userProfile) && (
         <Typography level='body-sm' color='warning' sx={{ mt: 1 }}>
-          Real-time updates (SSE) are not available in the Basic plan. Upgrade
-          to Plus to receive instant notifications when you or other circle
-          members complete, skip, or modify chores.
+          {t('realtime.basicPlanDescription')}
         </Typography>
       )}
     </Card>

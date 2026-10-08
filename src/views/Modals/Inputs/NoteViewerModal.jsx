@@ -1,4 +1,5 @@
 import { Box } from '@mui/joy'
+
 import { useResponsiveModal } from '../../../hooks/useResponsiveModal'
 import RichTextEditor from '../../components/RichTextEditor'
 

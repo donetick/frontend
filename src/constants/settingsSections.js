@@ -1,0 +1,40 @@
+import {
+  AccountCircle,
+  Api,
+  CalendarMonth,
+  Circle,
+  Code,
+  FamilyRestroom,
+  Language,
+  Notifications,
+  Palette,
+  Person,
+  PrivacyTip,
+  Security,
+  Settings,
+  Storage,
+  ViewSidebar,
+} from '@mui/icons-material'
+
+// Single source of truth for the settings sections: id, icon, and access
+// gating. Titles/descriptions live in locales/settings.json under
+// `overview.sections.<id>`, keyed off the same ids.
+export const SETTINGS_SECTIONS = [
+  { id: 'profile', icon: Person },
+  { id: 'circle', icon: Circle, parentOnly: true },
+  { id: 'account', icon: AccountCircle, parentOnly: true },
+  { id: 'subaccounts', icon: FamilyRestroom },
+  { id: 'notifications', icon: Notifications },
+  { id: 'mfa', icon: Security, parentOnly: true },
+  { id: 'apitokens', icon: Api, parentOnly: true },
+  { id: 'calendar', icon: CalendarMonth },
+  { id: 'storage', icon: Storage },
+  // Default landing view, plus whichever chrome this device actually has:
+  // the bottom bar on mobile, the sidepanel on desktop.
+  { id: 'layout', icon: ViewSidebar },
+  { id: 'theme', icon: Palette },
+  { id: 'localization', icon: Language, isBeta: true },
+  { id: 'advanced', icon: Settings },
+  { id: 'privacy', icon: PrivacyTip },
+  { id: 'developer', icon: Code },
+]

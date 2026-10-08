@@ -1,0 +1,71 @@
+{
+  "shared": "Общая",
+  "delete": {
+    "title": "Удалить метку",
+    "message": "Удалить эту метку? Она пропадёт со всех дел, где стоит."
+  },
+  "loadError": "Не удалось загрузить метки. Попробуйте ещё раз.",
+  "search": {
+    "placeholder": "Поиск меток",
+    "noResultsTitle": "Ничего не нашлось",
+    "noResultsDescription": "Нет меток по запросу «{{searchTerm}}».",
+    "noFilterResultsDescription": "Под текущий фильтр не подходит ни одна метка.",
+    "clear": "Очистить поиск",
+    "showAll": "Показать все метки"
+  },
+  "detail": {
+    "taskCount_one": "{{count}} дело",
+    "taskCount_other": "{{count}} дел",
+    "labelActions": "Действия с меткой",
+    "filters": {
+      "all": "Все",
+      "overdue": "Просроченные",
+      "today": "Сегодня",
+      "undated": "Без даты"
+    },
+    "noMatchingStatus": "Сейчас нет дел с этой меткой в таком состоянии.",
+    "clearFilters": "Показать все дела",
+    "searchPlaceholder": "Поиск дел с этой меткой",
+    "emptyTitle": "Нет дел с этой меткой",
+    "emptyDescription": "Метка «{{label}}» пока никому не присвоена. Поставьте её делу — оно появится здесь.",
+    "browseTasks": "К списку дел",
+    "noResultsTitle": "Ничего не нашлось",
+    "noResultsDescription": "Нет дел с этой меткой по запросу «{{searchTerm}}».",
+    "notFoundTitle": "Метка не найдена",
+    "notFoundDescription": "Метку могли удалить, или ей больше с вами не делятся.",
+    "backToLabels": "К меткам"
+  },
+  "blurb": "Управляйте метками, чтобы удобнее раскладывать дела. Метка автоматически станет общей для группы, если её поставить на общее дело.",
+  "modal": {
+    "errorEmptyName": "Название не может быть пустым",
+    "errorDuplicate": "Метка с таким названием уже есть",
+    "errorNoColor": "Выберите цвет",
+    "saveFailedTitle": "Не удалось сохранить метку",
+    "saveFailedMessage": "Метка не сохранилась. Попробуйте ещё раз.",
+    "name": "Название",
+    "editTitle": "",
+    "addTitle": "",
+    "color": "",
+    "saveChanges": "",
+    "addLabel": "",
+    "colorAriaSelect": ""
+  },
+  "picker": {
+    "label": "",
+    "createLabel": "",
+    "labelsCount_one": "",
+    "labelsCount_other": ""
+  },
+  "view": {
+    "emptyTitle": "",
+    "emptyDescription": "",
+    "createLabel": "",
+    "filterTitle": "",
+    "sortName": "",
+    "sortColor": "",
+    "sortRecent": "",
+    "filterAll": "",
+    "filterMine": "",
+    "filterShared": ""
+  }
+}

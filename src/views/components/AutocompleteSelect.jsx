@@ -8,8 +8,8 @@ import * as React from 'react'
 const filter = createFilterOptions()
 
 export default function FreeSoloCreateOption({
-  options,
   onSelectChange,
+  options,
   selected,
 }) {
   React.useEffect(() => {

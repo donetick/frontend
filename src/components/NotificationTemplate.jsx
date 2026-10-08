@@ -2,6 +2,7 @@ import { Save } from '@mui/icons-material'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import InfoIcon from '@mui/icons-material/Info'
+import LockOutlined from '@mui/icons-material/LockOutlined'
 import NotificationsIcon from '@mui/icons-material/Notifications'
 import Alert from '@mui/joy/Alert'
 import Badge from '@mui/joy/Badge'
@@ -13,26 +14,32 @@ import Option from '@mui/joy/Option'
 import Select from '@mui/joy/Select'
 import Typography from '@mui/joy/Typography'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
+import { PAYWALL_REASON, usePaywall } from '../contexts/PaywallContext'
 import { NOTIFICATION_TYPE, TASK_COLOR } from '../utils/Colors'
 import { TIME_UNITS } from '../utils/DurationUtils'
+import { sanitizeRemindersForPlan } from '../utils/entitlements'
 
 const timeUnits = TIME_UNITS
 
 const timingOptions = [
-  { label: 'Before', value: 'before' },
-  { label: 'Due', value: 'ondue' },
-  { label: 'After', value: 'after' },
+  { value: 'before' },
+  { value: 'ondue' },
+  { value: 'after' },
 ]
 
-function getRelativeLabel(notification) {
-  const { value, unit } = notification
+function getRelativeLabel(notification, t) {
+  const { unit, value } = notification
   const numericValue = Number(value)
   if (numericValue === 0) {
-    return 'On due date'
+    return t('notificationTemplate.onDueDate')
   }
-  const unitName = unit === 'm' ? 'minutes' : unit === 'h' ? 'hours' : 'days'
+  const unitName = t(`notificationTemplate.unitName.${unit}`)
   const absValue = Math.abs(numericValue)
-  return `${absValue} ${unitName} ${numericValue < 0 ? 'before' : 'after'} due`
+  return numericValue < 0
+    ? t('notificationTemplate.beforeDue', { count: absValue, unit: unitName })
+    : t('notificationTemplate.afterDue', { count: absValue, unit: unitName })
 }
 
 // Helper functions to convert between internal value and UI representation
@@ -63,10 +70,31 @@ function getInternalValue(timing, displayValue) {
 
 const NotificationTemplate = ({
   maxNotifications = 5,
+  // ChoreEdit gates this editor behind its own on/off switch, so the last row
+  // must stay put — `notification: true` with no templates is not a valid task.
+  // Consumers that own an empty state themselves pass 0.
+  minNotifications = 1,
   onChange,
-  value,
   showTimeline = true,
+  value,
 }) => {
+  const { t } = useTranslation('chores')
+  const { isPlanKnown, isPlus, showPaywall } = usePaywall()
+
+  // Free accounts get the on-due reminder; shifting a reminder before or after
+  // the due date is the Plus upgrade. The controls stay live either way — we
+  // surface the paywall on the attempt rather than greying the buttons out,
+  // so the user sees what they're buying.
+  const requirePlus = useCallback(() => {
+    if (isPlus) return true
+    showPaywall(PAYWALL_REASON.ADVANCED_REMINDERS)
+    return false
+  }, [isPlus, showPaywall])
+
+  // Signals which controls lead to the paywall without taking them away.
+  const plusHint = isPlus ? null : (
+    <LockOutlined sx={{ fontSize: 14, opacity: 0.6 }} />
+  )
   const [notifications, setNotifications] = useState(
     value?.templates ||
       JSON.parse(localStorage.getItem('defaultNotificationTemplate')) ||
@@ -119,6 +147,19 @@ const NotificationTemplate = ({
     updateNotificationIndices()
   }, [updateNotificationIndices])
 
+  // The saved default template (and anything authored while subscribed) can
+  // hold pre-due/follow-up rows. Drop them once we actually know the plan is
+  // free, so the editor never shows reminders that get stripped on save.
+  useEffect(() => {
+    if (!isPlanKnown || isPlus) return
+    setNotifications(prev => {
+      const allowed = sanitizeRemindersForPlan(prev, false)
+      if (allowed.length === prev.length) return prev
+      notificationsRef.current = allowed
+      return allowed
+    })
+  }, [isPlanKnown, isPlus])
+
   // Notify parent component of changes including the template name
   useEffect(() => {
     if (onChange) {
@@ -167,6 +208,9 @@ const NotificationTemplate = ({
 
     // Update the UI representation based on the field being changed
     if (field === 'timing') {
+      // Moving a reminder off the due date is the Plus capability, so the
+      // paywall belongs here rather than on a disabled <Option>.
+      if (value !== 'ondue' && !requirePlus()) return
       updatedUIRep.timing = value
       // Reset display value when switching to "On Due"
       if (value === 'ondue') {
@@ -214,28 +258,27 @@ const NotificationTemplate = ({
     if (!currentNotification) return
 
     if (isDuplicate(currentNotification, idx, currentList)) {
-      setError(
-        'This notification setting already exists. Please use a different timing.',
-      )
+      setError(t('notificationTemplate.errDuplicate'))
       return
     }
   }
 
   const addSmartNotification = type => {
     if (notifications.length >= maxNotifications) return
+    if (type !== 'due' && !requirePlus()) return
     setShowSaveDefault(true)
     let newNotification
 
     if (type === 'due') {
       if (notificationsRef.current.some(n => Number(n.value) === 0)) {
-        setError('Only one "Due Alert" notification is allowed.')
+        setError(t('notificationTemplate.errOneDue'))
         return
       }
       newNotification = { value: 0, unit: 'm' }
     } else {
       newNotification = getSmartSuggestion(type)
       if (!newNotification) {
-        setError(`All common ${type} times are already configured.`)
+        setError(t('notificationTemplate.errAllConfigured', { type }))
         return
       }
     }
@@ -259,7 +302,8 @@ const NotificationTemplate = ({
       return next
     })
 
-    onChange && onChange(updated)
+    // No direct onChange here: consumers expect { notifications }, and the
+    // effect below already emits that shape once the state settles.
     setShowSaveDefault(true)
   }
 
@@ -307,9 +351,6 @@ const NotificationTemplate = ({
 
     return (
       <Box sx={{ mt: 3, mb: 2 }}>
-        <Typography level={'body-md'} sx={{ mb: 1 }}>
-          Notification Timeline
-        </Typography>
         <Box
           sx={{
             display: 'flex',
@@ -362,7 +403,7 @@ const NotificationTemplate = ({
                   fontSize: '0.6rem',
                 }}
               >
-                Due Date
+                {t('group.dueDate')}
               </Typography>
             </Box>
 
@@ -396,7 +437,7 @@ const NotificationTemplate = ({
                       zIndex: 10,
                     },
                   }}
-                  title={getRelativeLabel(n)}
+                  title={getRelativeLabel(n, t)}
                 >
                   <Badge
                     badgeContent={
@@ -548,7 +589,7 @@ const NotificationTemplate = ({
                       fontSize: 14,
                     }}
                   >
-                    {getRelativeLabel(n)}
+                    {getRelativeLabel(n, t)}
                   </Typography>
                 </Box>
 
@@ -572,8 +613,9 @@ const NotificationTemplate = ({
                         key={opt.value}
                         value={opt.value}
                         disabled={opt.value === 'ondue' && hasOnDueElsewhere}
+                        endDecorator={opt.value === 'ondue' ? null : plusHint}
                       >
-                        {opt.label}
+                        {t(`notificationTemplate.timing.${opt.value}`)}
                       </Option>
                     ))}
                   </Select>
@@ -591,6 +633,13 @@ const NotificationTemplate = ({
                       if (val.includes('-')) return
 
                       setDraftValues(prev => ({ ...prev, [idx]: val }))
+
+                      // Keep the canonical template state in sync while typing so
+                      // save actions don't depend on blur firing first.
+                      if (val === '') return
+                      const numericVal = Number(val)
+                      if (!Number.isFinite(numericVal)) return
+                      handleChange(idx, 'displayValue', numericVal)
                     }}
                     onKeyDown={e => {
                       if (['-', 'e', '+', '.'].includes(e.key)) {
@@ -636,13 +685,13 @@ const NotificationTemplate = ({
                   >
                     {timeUnits.map(opt => (
                       <Option key={opt.value} value={opt.value}>
-                        {opt.label}
+                        {t(`notificationTemplate.unitShort.${opt.value}`)}
                       </Option>
                     ))}
                   </Select>
                   <IconButton
                     onClick={() => removeNotification(idx)}
-                    disabled={notifications.length === 1}
+                    disabled={notifications.length <= minNotifications}
                     color={'danger'}
                     size={'sm'}
                     variant={'soft'}
@@ -673,6 +722,7 @@ const NotificationTemplate = ({
           onClick={() => addSmartNotification('reminder')}
           disabled={notifications.length >= maxNotifications}
           startDecorator={<AddIcon />}
+          endDecorator={plusHint}
           size={'sm'}
           variant={'outlined'}
           sx={{
@@ -686,7 +736,7 @@ const NotificationTemplate = ({
             },
           }}
         >
-          Reminder
+          {t('notificationTemplate.reminder')}
         </Button>
         <Button
           onClick={() => addSmartNotification('due')}
@@ -708,12 +758,13 @@ const NotificationTemplate = ({
             },
           }}
         >
-          Due Alert
+          {t('notificationTemplate.dueAlert')}
         </Button>
         <Button
           onClick={() => addSmartNotification('followup')}
           disabled={notifications.length >= maxNotifications}
           startDecorator={<AddIcon />}
+          endDecorator={plusHint}
           size={'sm'}
           variant={'outlined'}
           sx={{
@@ -727,7 +778,7 @@ const NotificationTemplate = ({
             },
           }}
         >
-          Follow-up
+          {t('notificationTemplate.followUp')}
         </Button>
       </Box>
       {showSaveDefault && (
@@ -760,7 +811,7 @@ const NotificationTemplate = ({
               setShowSaveDefault(false)
             }}
           >
-            Remember for Future Tasks
+            {t('notificationTemplate.rememberFuture')}
           </Button>
         </Box>
       )}
