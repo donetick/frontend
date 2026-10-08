@@ -58,6 +58,10 @@
         "title": "API 令牌",
         "description": "生成和管理用于第三方集成与 API 访问的访问令牌。"
       },
+      "calendar": {
+        "title": "",
+        "description": ""
+      },
       "storage": {
         "title": "存储设置",
         "description": "备份和恢复数据，管理本地存储与同步偏好。"
@@ -372,6 +376,42 @@
     "nameModalTitle": "给新令牌起个名字，方便你日后识别。",
     "generateToken": "生成令牌"
   },
+  "calendar": {
+    "title": "",
+    "description": "",
+    "plusTitle": "",
+    "plusNotice": "",
+    "upgrade": "",
+    "activeTitle": "",
+    "activeStatus": "",
+    "urlLabel": "",
+    "copy": "",
+    "copied": "",
+    "copyFailed": "",
+    "createdAt": "",
+    "lastUsedAt": "",
+    "neverUsed": "",
+    "keepPrivateTitle": "",
+    "keepPrivateDescription": "",
+    "manageTitle": "",
+    "rotate": "",
+    "rotateTitle": "",
+    "rotateMessage": "",
+    "rotated": "",
+    "revoke": "",
+    "revokeTitle": "",
+    "revokeMessage": "",
+    "revoked": "",
+    "inactiveTitle": "",
+    "inactiveDescription": "",
+    "generate": "",
+    "generated": "",
+    "howToTitle": "",
+    "howToDescription": "",
+    "errorTitle": "",
+    "actionFailed": "",
+    "loadFailed": ""
+  },
   "storage": {
     "title": "存储设置",
     "serverTitle": "服务器存储用量",
@@ -597,7 +637,8 @@
     "reasonThingTriggers": "根据设备状态变化自动触发任务是 Plus 功能。",
     "reasonProjectLimit": "你当前的套餐包含 {{projectLimit}} 个项目。升级到 Plus 可创建任意数量的项目。",
     "reasonQuickFilterLimit": "你当前的套餐包含 {{filterLimit}} 个已保存的快速筛选。升级到 Plus 可获得无限筛选。",
-    "reasonFileUpload": "附加文件和图片是 Plus 功能。升级到 Plus 可向任务添加照片、扫描件和文档。"
+    "reasonFileUpload": "附加文件和图片是 Plus 功能。升级到 Plus 可向任务添加照片、扫描件和文档。",
+    "reasonCalendarSync": ""
   },
   "childUsers": {
     "errNameRequired": "Sub account name is required",
