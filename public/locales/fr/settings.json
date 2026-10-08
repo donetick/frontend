@@ -58,6 +58,10 @@
         "title": "Jetons d'API",
         "description": "Générez et gérez des jetons d'accès pour les intégrations tierces et l'accès à l'API."
       },
+      "calendar": {
+        "title": "",
+        "description": ""
+      },
       "storage": {
         "title": "Paramètres de stockage",
         "description": "Sauvegardez et restaurez vos données, gérez le stockage local et la synchronisation."
@@ -372,6 +376,42 @@
     "nameModalTitle": "Donnez un nom à votre nouveau jeton, quelque chose qui vous permettra de le reconnaître.",
     "generateToken": "Générer le jeton"
   },
+  "calendar": {
+    "title": "",
+    "description": "",
+    "plusTitle": "",
+    "plusNotice": "",
+    "upgrade": "",
+    "activeTitle": "",
+    "activeStatus": "",
+    "urlLabel": "",
+    "copy": "",
+    "copied": "",
+    "copyFailed": "",
+    "createdAt": "",
+    "lastUsedAt": "",
+    "neverUsed": "",
+    "keepPrivateTitle": "",
+    "keepPrivateDescription": "",
+    "manageTitle": "",
+    "rotate": "",
+    "rotateTitle": "",
+    "rotateMessage": "",
+    "rotated": "",
+    "revoke": "",
+    "revokeTitle": "",
+    "revokeMessage": "",
+    "revoked": "",
+    "inactiveTitle": "",
+    "inactiveDescription": "",
+    "generate": "",
+    "generated": "",
+    "howToTitle": "",
+    "howToDescription": "",
+    "errorTitle": "",
+    "actionFailed": "",
+    "loadFailed": ""
+  },
   "storage": {
     "title": "Paramètres de stockage",
     "serverTitle": "Utilisation du stockage serveur",
@@ -597,7 +637,8 @@
     "reasonThingTriggers": "Le déclenchement automatique de tâches lorsqu'un objet change d'état est une fonctionnalité Plus.",
     "reasonProjectLimit": "Votre formule actuelle inclut {{projectLimit}} projets. Passez à Plus pour en créer autant que nécessaire.",
     "reasonQuickFilterLimit": "Votre formule actuelle inclut {{filterLimit}} filtres rapides enregistrés. Passez à Plus pour des filtres illimités.",
-    "reasonFileUpload": "Joindre des fichiers et des images est une fonctionnalité Plus. Passez à Plus pour ajouter photos, scans et documents à vos tâches."
+    "reasonFileUpload": "Joindre des fichiers et des images est une fonctionnalité Plus. Passez à Plus pour ajouter photos, scans et documents à vos tâches.",
+    "reasonCalendarSync": ""
   },
   "childUsers": {
     "errNameRequired": "Le nom du sous-compte est obligatoire",
