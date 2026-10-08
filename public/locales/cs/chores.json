@@ -1,7 +1,5 @@
 {
   "title": "Úkoly",
-  "tasksForDate": "Úkoly pro {{date}}",
-  "createSuggestion": "Vytvořit \"{{value}}\"",
   "myChores": "Moje úkoly",
   "allChores": "Všechny úkoly",
   "addChore": "Přidat úkol",
@@ -113,7 +111,9 @@
     "unableChangeAssignee": "Řešitele nelze změnit",
     "availableToCompleteStarting": "Lze dokončit od {{date}}",
     "delegateToSomeoneElse": "Předat někomu jinému",
-    "selectAPerformer": "Vyberte, kdo úkol provede"
+    "selectAPerformer": "Vyberte, kdo úkol provede",
+    "notFoundTitle": "Úkol není k dispozici",
+    "notFoundDescription": "Tento úkol byl možná smazán nebo už s vámi není sdílen."
   },
   "toolbar": {
     "defaultProject": "Výchozí projekt",
@@ -263,8 +263,6 @@
     "failRescheduleTitle": "Přeplánování se nezdařilo",
     "failRescheduleMessage": "Termín nelze aktualizovat",
     "failRemoveDueDateTitle": "Termín se nepodařilo odebrat",
-    "failAssignTitle": "",
-    "failAssignMessage": "",
     "nudgeSentTitle": "Připomenutí odesláno!",
     "nudgeFailed": "Připomenutí se nepodařilo odeslat",
     "failNudgeTitle": "Připomenutí se nepodařilo odeslat",
@@ -279,7 +277,9 @@
       "skipTitle": "Přeskočit úkoly",
       "skippedTitle": "⏭️ Úkoly přeskočeny",
       "skipFailedTitle": "Hromadné přeskočení se nezdařilo"
-    }
+    },
+    "failAssignTitle": "",
+    "failAssignMessage": ""
   },
   "archived": {
     "restoredTitle": "Úkol obnoven",
@@ -722,7 +722,6 @@
     "startDate": "Datum začátku",
     "dueDate": "Termín",
     "triggerDueHint": "Termín bude nastaven, jakmile bude splněn spouštěč věci",
-    "alwaysDueHint": "Tento úkol nemá termín a je vždy dostupný k dokončení",
     "giveDueDate": "Nastavit tomuto úkolu termín",
     "giveDueDateHelp": "Úkol je třeba dokončit do určitého času",
     "startWhen": "Kdy tento úkol začíná?",
@@ -748,7 +747,6 @@
     "notificationsPlanWarning": "Oznámení k úkolům nejsou v tarifu Basic k dispozici. Přejděte na Plus a dostávejte připomínky, když se blíží termín nebo je úkol dokončen.",
     "notifyForTask": "Upozorňovat na tento úkol",
     "notifyForTaskHelp": "Kdy dostávat oznámení k tomuto úkolu",
-    "notifyForTaskUnavailable": "Oznámení nejsou k dispozici pro úkoly založené na spouštěči nebo vždy dostupné úkoly",
     "notificationSchedule": "Plán oznámení",
     "whoToNotify": "Koho upozornit",
     "allAssignees": "Všechny řešitele",
@@ -778,11 +776,11 @@
     "archive": "Archivovat",
     "unarchive": "Obnovit z archivu",
     "create": "Vytvořit",
+    "alwaysDueHint": "Tento úkol nemá termín a je vždy dostupný k dokončení",
+    "notifyForTaskUnavailable": "Oznámení nejsou k dispozici pro úkoly založené na spouštěči nebo vždy dostupné úkoly",
     "notificationsFreePlanNote": "Váš tarif zahrnuje připomenutí v den termínu. Plus přidává připomenutí před termínem a následná upozornění po něm."
   },
   "addTask": {
-    "descriptionLabel": "Description:",
-    "subtasksLabel": "Subtasks:",
     "title": "Vytvořit nový úkol",
     "defaultProject": "Výchozí projekt",
     "anyone": "Kdokoli",
@@ -793,7 +791,9 @@
     "createCount": "Vytvořit úkoly ({{count}})",
     "useTask": "Použít úkol",
     "processing": "Zpracovávání",
-    "create": "Vytvořit"
+    "create": "Vytvořit",
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:"
   },
   "repeat": {
     "days": {
@@ -825,13 +825,13 @@
       "monthly": "Měsíčně",
       "yearly": "Ročně",
       "adaptive": "Adaptivně",
-      "always": "Vždy",
-      "custom": "Vlastní"
+      "custom": "Vlastní",
+      "always": "Vždy"
     },
     "freqMessage": {
       "adaptive": "Tento úkol bude plánován dynamicky podle předchozích dat dokončení.",
-      "always": "Tento úkol nemá termín a zůstává dostupný ke splnění kdykoli. Po dokončení nebude archivován.",
-      "custom": "Tento úkol bude plánován podle vlastní frekvence."
+      "custom": "Tento úkol bude plánován podle vlastní frekvence.",
+      "always": "Tento úkol nemá termín a zůstává dostupný ke splnění kdykoli. Po dokončení nebude archivován."
     },
     "weekPattern": {
       "every_week": "Každý týden",
@@ -1058,5 +1058,7 @@
     "today": "Dnes",
     "yesterday": "Včera",
     "noteTitle": "Poznámka – {{choreName}}"
-  }
+  },
+  "tasksForDate": "Úkoly pro {{date}}",
+  "createSuggestion": "Vytvořit \"{{value}}\""
 }

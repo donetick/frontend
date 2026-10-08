@@ -1,4 +1,4 @@
-import { Add, Check, FolderOpen, Settings } from '@mui/icons-material'
+import { Add, Check, FolderOpen, Lock, Settings } from '@mui/icons-material'
 import {
   Avatar,
   Box,
@@ -462,6 +462,15 @@ const ProjectSelector = ({
                   }}
                 >
                   {project.name}
+                  {project.isPrivate && (
+                    <Lock
+                      sx={{
+                        fontSize: 14,
+                        ml: 0.5,
+                        verticalAlign: 'text-bottom',
+                      }}
+                    />
+                  )}
                 </Typography>
                 {effectiveSelectedProject === project.name && (
                   <Check

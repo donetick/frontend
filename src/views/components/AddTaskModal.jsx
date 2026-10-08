@@ -1,4 +1,4 @@
-import { Add, KeyboardArrowDown } from '@mui/icons-material'
+import { Add, KeyboardArrowDown, Lock } from '@mui/icons-material'
 import {
   Box,
   Button,
@@ -201,7 +201,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
   const { data: userLabels, isLoading: userLabelsLoading } = useLabels()
   const { data: circleMembers, isLoading: isCircleMembersLoading } =
     useCircleMembers()
-  const { data: projects, isLoading: isProjectsLoading } = useProjects()
+  const { data: projects = [], isLoading: isProjectsLoading } = useProjects()
   const createChoreMutation = useCreateChore()
   const queryClient = useQueryClient()
 
@@ -382,6 +382,17 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
     localAIService.isAvailable().then(setLlmAvailable)
     voiceInputService.isSupported().then(setVoiceAvailable)
   }, [])
+
+  // A task in a private project is always private: the project's privacy wins over
+  // the task's own setting, so keep the form in sync with the selected project.
+  const selectedProjectIsPrivate = Boolean(
+    projects.find(project => project.id === projectId)?.isPrivate,
+  )
+  useEffect(() => {
+    if (selectedProjectIsPrivate && !isPrivate) {
+      setIsPrivate(true)
+    }
+  }, [selectedProjectIsPrivate, isPrivate])
 
   // Quick-capture widget entry points (donetick://chores/add?mode=voice|scan)
   // land here: open straight into the requested panel, once per modal open so
@@ -1201,6 +1212,15 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
                         {project.id === 'default'
                           ? t('addTask.defaultProject')
                           : project.name}
+                        {project.isPrivate && (
+                          <Lock
+                            sx={{
+                              fontSize: 14,
+                              ml: 0.5,
+                              verticalAlign: 'text-bottom',
+                            }}
+                          />
+                        )}
                       </MenuItem>
                     )
                   })}
@@ -1558,6 +1578,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
               hasAssignees={!isAnyoneTask}
               isPrivate={isPrivate}
               onIsPrivateChange={setIsPrivate}
+              isPrivacyInherited={selectedProjectIsPrivate}
             />
 
             {hasDescription && (

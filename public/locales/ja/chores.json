@@ -1,7 +1,5 @@
 {
   "title": "タスク",
-  "tasksForDate": "{{date}} のタスク",
-  "createSuggestion": "「{{value}}」を作成",
   "myChores": "自分のタスク",
   "allChores": "すべてのタスク",
   "addChore": "タスクを追加",
@@ -113,7 +111,9 @@
     "unableChangeAssignee": "",
     "availableToCompleteStarting": "",
     "delegateToSomeoneElse": "",
-    "selectAPerformer": ""
+    "selectAPerformer": "",
+    "notFoundTitle": "タスクが利用できません",
+    "notFoundDescription": "このタスクは削除された可能性があるか、共有が解除されています。"
   },
   "toolbar": {
     "defaultProject": "Default Project",
@@ -263,8 +263,6 @@
     "failRescheduleTitle": "",
     "failRescheduleMessage": "",
     "failRemoveDueDateTitle": "",
-    "failAssignTitle": "",
-    "failAssignMessage": "",
     "nudgeSentTitle": "",
     "nudgeFailed": "",
     "failNudgeTitle": "",
@@ -279,7 +277,9 @@
       "skipTitle": "",
       "skippedTitle": "",
       "skipFailedTitle": ""
-    }
+    },
+    "failAssignTitle": "",
+    "failAssignMessage": ""
   },
   "archived": {
     "restoredTitle": "",
@@ -345,7 +345,7 @@
     "noMatchFilters": "",
     "emptyTitle": "",
     "emptyDescription": "",
-    "backToTasks": ""
+    "backToTasks": "タスクに戻る"
   },
   "edit": {
     "deleteConfirm": ""
@@ -722,7 +722,6 @@
     "startDate": "",
     "dueDate": "",
     "triggerDueHint": "",
-    "alwaysDueHint": "このタスクには期限がなく、いつでも完了できます",
     "giveDueDate": "",
     "giveDueDateHelp": "",
     "startWhen": "",
@@ -748,7 +747,6 @@
     "notificationsPlanWarning": "Task notifications are not available in the Basic plan. Upgrade to Plus to receive reminders when tasks are due or completed.",
     "notifyForTask": "",
     "notifyForTaskHelp": "",
-    "notifyForTaskUnavailable": "トリガー式または常時利用可能なタスクには通知を設定できません",
     "notificationSchedule": "",
     "whoToNotify": "",
     "allAssignees": "",
@@ -778,11 +776,11 @@
     "archive": "",
     "unarchive": "",
     "create": "",
+    "alwaysDueHint": "このタスクには期限がなく、いつでも完了できます",
+    "notifyForTaskUnavailable": "トリガー式または常時利用可能なタスクには通知を設定できません",
     "notificationsFreePlanNote": "あなたのプランでは期限日にリマインダーが届きます。Plusにすると、期限前のリマインダーと期限後のフォローアップが追加されます。"
   },
   "addTask": {
-    "descriptionLabel": "Description:",
-    "subtasksLabel": "Subtasks:",
     "title": "",
     "defaultProject": "",
     "anyone": "",
@@ -793,7 +791,9 @@
     "createCount": "",
     "useTask": "",
     "processing": "",
-    "create": ""
+    "create": "",
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:"
   },
   "repeat": {
     "days": {
@@ -825,13 +825,13 @@
       "monthly": "",
       "yearly": "",
       "adaptive": "",
-      "always": "常時",
-      "custom": ""
+      "custom": "",
+      "always": "常時"
     },
     "freqMessage": {
       "adaptive": "",
-      "always": "このタスクには期限がなく、いつでも完了できる状態が続きます。完了してもアーカイブされません。",
-      "custom": ""
+      "custom": "",
+      "always": "このタスクには期限がなく、いつでも完了できる状態が続きます。完了してもアーカイブされません。"
     },
     "weekPattern": {
       "every_week": "",
@@ -1058,5 +1058,7 @@
     "today": "",
     "yesterday": "",
     "noteTitle": ""
-  }
+  },
+  "tasksForDate": "{{date}} のタスク",
+  "createSuggestion": "「{{value}}」を作成"
 }

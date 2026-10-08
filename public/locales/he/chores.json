@@ -1,7 +1,5 @@
 {
   "title": "מטלות",
-  "tasksForDate": "משימות ליום {{date}}",
-  "createSuggestion": "צור \"{{value}}\"",
   "myChores": "המטלות שלי",
   "allChores": "כל המטלות",
   "addChore": "הוספת מטלה",
@@ -113,7 +111,9 @@
     "unableChangeAssignee": "",
     "availableToCompleteStarting": "",
     "delegateToSomeoneElse": "",
-    "selectAPerformer": ""
+    "selectAPerformer": "",
+    "notFoundTitle": "המשימה אינה זמינה",
+    "notFoundDescription": "ייתכן שהמשימה נמחקה או שאינה משותפת איתך יותר."
   },
   "toolbar": {
     "defaultProject": "",
@@ -263,8 +263,6 @@
     "failRescheduleTitle": "",
     "failRescheduleMessage": "",
     "failRemoveDueDateTitle": "",
-    "failAssignTitle": "",
-    "failAssignMessage": "",
     "nudgeSentTitle": "",
     "nudgeFailed": "",
     "failNudgeTitle": "",
@@ -279,7 +277,9 @@
       "skipTitle": "",
       "skippedTitle": "",
       "skipFailedTitle": ""
-    }
+    },
+    "failAssignTitle": "",
+    "failAssignMessage": ""
   },
   "archived": {
     "restoredTitle": "",
@@ -345,7 +345,7 @@
     "noMatchFilters": "",
     "emptyTitle": "",
     "emptyDescription": "",
-    "backToTasks": ""
+    "backToTasks": "חזרה למשימות"
   },
   "edit": {
     "deleteConfirm": ""
@@ -722,7 +722,6 @@
     "startDate": "",
     "dueDate": "",
     "triggerDueHint": "",
-    "alwaysDueHint": "למשימה זו אין תאריך יעד והיא זמינה תמיד להשלמה",
     "giveDueDate": "",
     "giveDueDateHelp": "",
     "startWhen": "",
@@ -748,7 +747,6 @@
     "notificationsPlanWarning": "",
     "notifyForTask": "",
     "notifyForTaskHelp": "",
-    "notifyForTaskUnavailable": "התראות אינן זמינות למשימות מבוססות טריגר או למשימות זמינות תמיד",
     "notificationSchedule": "",
     "whoToNotify": "",
     "allAssignees": "",
@@ -778,11 +776,11 @@
     "archive": "",
     "unarchive": "",
     "create": "",
+    "alwaysDueHint": "למשימה זו אין תאריך יעד והיא זמינה תמיד להשלמה",
+    "notifyForTaskUnavailable": "התראות אינן זמינות למשימות מבוססות טריגר או למשימות זמינות תמיד",
     "notificationsFreePlanNote": "התוכנית שלך כוללת תזכורת בתאריך היעד. Plus מוסיף תזכורות לפני המועד ומעקב אחרי."
   },
   "addTask": {
-    "descriptionLabel": "Description:",
-    "subtasksLabel": "Subtasks:",
     "title": "",
     "defaultProject": "",
     "anyone": "",
@@ -793,7 +791,9 @@
     "createCount": "",
     "useTask": "",
     "processing": "",
-    "create": ""
+    "create": "",
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:"
   },
   "repeat": {
     "days": {
@@ -825,13 +825,13 @@
       "monthly": "",
       "yearly": "",
       "adaptive": "",
-      "always": "תמיד",
-      "custom": ""
+      "custom": "",
+      "always": "תמיד"
     },
     "freqMessage": {
       "adaptive": "",
-      "always": "למשימה זו אין תאריך יעד והיא נשארת זמינה להשלמה בכל עת. היא לא תועבר לארכיון לאחר השלמתה.",
-      "custom": ""
+      "custom": "",
+      "always": "למשימה זו אין תאריך יעד והיא נשארת זמינה להשלמה בכל עת. היא לא תועבר לארכיון לאחר השלמתה."
     },
     "weekPattern": {
       "every_week": "",
@@ -1058,5 +1058,7 @@
     "today": "",
     "yesterday": "",
     "noteTitle": ""
-  }
+  },
+  "tasksForDate": "משימות ליום {{date}}",
+  "createSuggestion": "צור \"{{value}}\""
 }

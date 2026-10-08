@@ -1,7 +1,5 @@
 {
   "title": "Taken",
-  "tasksForDate": "Taken voor {{date}}",
-  "createSuggestion": "\"{{value}}\" maken",
   "myChores": "Mijn Taken",
   "allChores": "Alle Taken",
   "addChore": "Taak Toevoegen",
@@ -113,7 +111,9 @@
     "unableChangeAssignee": "",
     "availableToCompleteStarting": "",
     "delegateToSomeoneElse": "",
-    "selectAPerformer": ""
+    "selectAPerformer": "",
+    "notFoundTitle": "Taak niet beschikbaar",
+    "notFoundDescription": "Deze taak is mogelijk verwijderd of wordt niet meer met jou gedeeld."
   },
   "toolbar": {
     "defaultProject": "Default Project",
@@ -263,8 +263,6 @@
     "failRescheduleTitle": "",
     "failRescheduleMessage": "",
     "failRemoveDueDateTitle": "",
-    "failAssignTitle": "",
-    "failAssignMessage": "",
     "nudgeSentTitle": "",
     "nudgeFailed": "",
     "failNudgeTitle": "",
@@ -279,7 +277,9 @@
       "skipTitle": "",
       "skippedTitle": "",
       "skipFailedTitle": ""
-    }
+    },
+    "failAssignTitle": "",
+    "failAssignMessage": ""
   },
   "archived": {
     "restoredTitle": "",
@@ -345,7 +345,7 @@
     "noMatchFilters": "",
     "emptyTitle": "",
     "emptyDescription": "",
-    "backToTasks": ""
+    "backToTasks": "Terug naar taken"
   },
   "edit": {
     "deleteConfirm": ""
@@ -722,7 +722,6 @@
     "startDate": "",
     "dueDate": "",
     "triggerDueHint": "",
-    "alwaysDueHint": "Deze taak heeft geen vervaldatum en is altijd beschikbaar om te voltooien",
     "giveDueDate": "",
     "giveDueDateHelp": "",
     "startWhen": "",
@@ -748,7 +747,6 @@
     "notificationsPlanWarning": "Task notifications are not available in the Basic plan. Upgrade to Plus to receive reminders when tasks are due or completed.",
     "notifyForTask": "",
     "notifyForTaskHelp": "",
-    "notifyForTaskUnavailable": "Meldingen zijn niet beschikbaar voor trigger-gebaseerde of altijd beschikbare taken",
     "notificationSchedule": "",
     "whoToNotify": "",
     "allAssignees": "",
@@ -778,11 +776,11 @@
     "archive": "",
     "unarchive": "",
     "create": "",
+    "alwaysDueHint": "Deze taak heeft geen vervaldatum en is altijd beschikbaar om te voltooien",
+    "notifyForTaskUnavailable": "Meldingen zijn niet beschikbaar voor trigger-gebaseerde of altijd beschikbare taken",
     "notificationsFreePlanNote": "Je abonnement bevat een herinnering op de vervaldatum. Plus voegt herinneringen vóór de datum en opvolgherrinneringen daarna toe."
   },
   "addTask": {
-    "descriptionLabel": "Description:",
-    "subtasksLabel": "Subtasks:",
     "title": "",
     "defaultProject": "",
     "anyone": "",
@@ -793,7 +791,9 @@
     "createCount": "",
     "useTask": "",
     "processing": "",
-    "create": ""
+    "create": "",
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:"
   },
   "repeat": {
     "days": {
@@ -825,13 +825,13 @@
       "monthly": "",
       "yearly": "",
       "adaptive": "",
-      "always": "Altijd",
-      "custom": ""
+      "custom": "",
+      "always": "Altijd"
     },
     "freqMessage": {
       "adaptive": "",
-      "always": "Deze taak heeft geen vervaldatum en blijft op elk moment beschikbaar om te voltooien. Ze wordt niet gearchiveerd na voltooiing.",
-      "custom": ""
+      "custom": "",
+      "always": "Deze taak heeft geen vervaldatum en blijft op elk moment beschikbaar om te voltooien. Ze wordt niet gearchiveerd na voltooiing."
     },
     "weekPattern": {
       "every_week": "",
@@ -1058,5 +1058,7 @@
     "today": "",
     "yesterday": "",
     "noteTitle": ""
-  }
+  },
+  "tasksForDate": "Taken voor {{date}}",
+  "createSuggestion": "\"{{value}}\" maken"
 }

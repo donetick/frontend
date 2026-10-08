@@ -14,6 +14,8 @@
   "status": "Status",
   "description": "Description",
   "choreView": {
+    "notFoundTitle": "Task not available",
+    "notFoundDescription": "This task may have been deleted or is no longer shared with you.",
     "assignment": "Assignment",
     "assigned": "Assigned",
     "last": "Last",
@@ -942,6 +944,7 @@
     "limitedVisibility": "Limited visibility",
     "limitedVisibilityDisabled": "Assign someone to enable limited visibility",
     "limitedVisibilityDescription": "Only you and assignees can see this task",
+    "limitedVisibilityInherited": "Inherited from the project: only you and assignees can see this task",
     "assignStrategy": "Assign strategy",
     "assignStrategyDescription": "How to pick the next assignee each recurrence",
     "availableFrom": "Available from",

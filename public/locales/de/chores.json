@@ -1,7 +1,5 @@
 {
   "title": "Aufgaben",
-  "tasksForDate": "Aufgaben für {{date}}",
-  "createSuggestion": "\"{{value}}\" erstellen",
   "myChores": "Meine Aufgaben",
   "allChores": "Alle Aufgaben",
   "addChore": "Aufgabe hinzufügen",
@@ -113,7 +111,9 @@
     "unableChangeAssignee": "Zuständige Person konnte nicht geändert werden",
     "availableToCompleteStarting": "Ab {{date}} erledigbar",
     "delegateToSomeoneElse": "An jemand anderen übertragen",
-    "selectAPerformer": "Wähle eine ausführende Person"
+    "selectAPerformer": "Wähle eine ausführende Person",
+    "notFoundTitle": "Aufgabe nicht verfügbar",
+    "notFoundDescription": "Diese Aufgabe wurde möglicherweise gelöscht oder wird nicht mehr mit dir geteilt."
   },
   "toolbar": {
     "defaultProject": "Standardprojekt",
@@ -263,8 +263,6 @@
     "failRescheduleTitle": "Neuplanung fehlgeschlagen",
     "failRescheduleMessage": "Fälligkeitsdatum konnte nicht aktualisiert werden",
     "failRemoveDueDateTitle": "Fälligkeitsdatum konnte nicht entfernt werden",
-    "failAssignTitle": "Zuweisung fehlgeschlagen",
-    "failAssignMessage": "Aufgabe konnte nicht zugewiesen werden",
     "nudgeSentTitle": "Erinnerung gesendet!",
     "nudgeFailed": "Erinnerung konnte nicht gesendet werden",
     "failNudgeTitle": "Erinnerung konnte nicht gesendet werden",
@@ -279,7 +277,9 @@
       "skipTitle": "Aufgaben überspringen",
       "skippedTitle": "⏭️ Aufgaben übersprungen",
       "skipFailedTitle": "Das Überspringen mehrere Aufgaben ist fehlgeschlagen"
-    }
+    },
+    "failAssignTitle": "Zuweisung fehlgeschlagen",
+    "failAssignMessage": "Aufgabe konnte nicht zugewiesen werden"
   },
   "archived": {
     "restoredTitle": "Aufgabe wiederhergestellt",
@@ -722,7 +722,6 @@
     "startDate": "Startdatum",
     "dueDate": "Fälligkeitsdatum",
     "triggerDueHint": "Das Fälligkeitsdatum wird gesetzt, sobald der Auslöser des Dings erfüllt ist",
-    "alwaysDueHint": "Diese Aufgabe hat kein Fälligkeitsdatum und ist jederzeit verfügbar",
     "giveDueDate": "Fälligkeitsdatum für diese Aufgabe festlegen",
     "giveDueDateHelp": "Die Aufgabe muss bis zu einem bestimmten Zeitpunkt abgeschlossen sein",
     "startWhen": "Wann beginnt diese Aufgabe?",
@@ -748,7 +747,6 @@
     "notificationsPlanWarning": "Aufgabenbenachrichtigungen sind im Basic-Tarif nicht verfügbar. Wechsle zu Plus, um Erinnerungen zu erhalten, wenn Aufgaben fällig oder abgeschlossen sind.",
     "notifyForTask": "Für diese Aufgabe benachrichtigen",
     "notifyForTaskHelp": "Wann sollen Benachrichtigungen für diese Aufgabe gesendet werden?",
-    "notifyForTaskUnavailable": "Benachrichtigungen sind für auslöserbasierte oder immer verfügbare Aufgaben nicht möglich",
     "notificationSchedule": "Benachrichtigungszeitplan",
     "whoToNotify": "Wer soll benachrichtigt werden?",
     "allAssignees": "Alle zugewiesenen Personen",
@@ -778,11 +776,11 @@
     "archive": "Archivieren",
     "unarchive": "Archivierung aufheben",
     "create": "Erstellen",
+    "alwaysDueHint": "Diese Aufgabe hat kein Fälligkeitsdatum und ist jederzeit verfügbar",
+    "notifyForTaskUnavailable": "Benachrichtigungen sind für auslöserbasierte oder immer verfügbare Aufgaben nicht möglich",
     "notificationsFreePlanNote": "Ihr Tarif enthält eine Erinnerung am Fälligkeitsdatum. Plus fügt Erinnerungen vor dem Termin und Nachfass‑Erinnerungen danach hinzu."
   },
   "addTask": {
-    "descriptionLabel": "Description:",
-    "subtasksLabel": "Subtasks:",
     "title": "Neue Aufgabe erstellen",
     "defaultProject": "Standardprojekt",
     "anyone": "Jeder",
@@ -793,7 +791,9 @@
     "createCount": "{{count}} Aufgaben erstellen",
     "useTask": "Aufgabe übernehmen",
     "processing": "Verarbeitung läuft",
-    "create": "Erstellen"
+    "create": "Erstellen",
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:"
   },
   "repeat": {
     "days": {
@@ -825,13 +825,13 @@
       "monthly": "Monatlich",
       "yearly": "Jährlich",
       "adaptive": "Adaptiv",
-      "always": "Immer",
-      "custom": "Benutzerdefiniert"
+      "custom": "Benutzerdefiniert",
+      "always": "Immer"
     },
     "freqMessage": {
       "adaptive": "Diese Aufgabe wird dynamisch anhand vorheriger Abschlussdaten geplant.",
-      "always": "Diese Aufgabe hat kein Fälligkeitsdatum und bleibt jederzeit verfügbar. Sie wird nach Abschluss nicht archiviert.",
-      "custom": "Diese Aufgabe wird anhand einer benutzerdefinierten Häufigkeit geplant."
+      "custom": "Diese Aufgabe wird anhand einer benutzerdefinierten Häufigkeit geplant.",
+      "always": "Diese Aufgabe hat kein Fälligkeitsdatum und bleibt jederzeit verfügbar. Sie wird nach Abschluss nicht archiviert."
     },
     "weekPattern": {
       "every_week": "Jede Woche",
@@ -1058,5 +1058,7 @@
     "today": "Heute",
     "yesterday": "Gestern",
     "noteTitle": "Notiz - {{choreName}}"
-  }
+  },
+  "tasksForDate": "Aufgaben für {{date}}",
+  "createSuggestion": "\"{{value}}\" erstellen"
 }
