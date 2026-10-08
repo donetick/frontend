@@ -722,6 +722,7 @@
     "startDate": "Start Date",
     "dueDate": "Due Date",
     "triggerDueHint": "Due Date will be set when the trigger of the thing is met",
+    "alwaysDueHint": "This task has no due date and is always available to complete",
     "giveDueDate": "Give this task a due date",
     "giveDueDateHelp": "Task needs to be completed by a specific time",
     "startWhen": "When does this task start?",
@@ -746,6 +747,7 @@
     "notifications": "Notifications",
     "notifyForTask": "Notify for this task",
     "notifyForTaskHelp": "When should receive notifications for this task",
+    "notifyForTaskUnavailable": "Notifications aren't available for trigger-based or always-available tasks",
     "notificationSchedule": "Notification Schedule",
     "whoToNotify": "Who to Notify",
     "allAssignees": "All Assignees",
@@ -822,10 +824,12 @@
       "monthly": "Monthly",
       "yearly": "Yearly",
       "adaptive": "Adaptive",
+      "always": "Always",
       "custom": "Custom"
     },
     "freqMessage": {
       "adaptive": "This chore will be scheduled dynamically based on previous completion dates.",
+      "always": "This chore has no due date and stays available to complete at any time. It won't be archived when completed.",
       "custom": "This chore will be scheduled based on a custom frequency."
     },
     "weekPattern": {

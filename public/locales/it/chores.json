@@ -796,7 +796,9 @@
     "archive": "Archivia",
     "unarchive": "Ripristina",
     "create": "Crea",
-    "notificationsFreePlanNote": "Il tuo piano include un promemoria alla data di scadenza. Plus aggiunge promemoria prima della scadenza e follow-up dopo."
+    "notificationsFreePlanNote": "Il tuo piano include un promemoria alla data di scadenza. Plus aggiunge promemoria prima della scadenza e follow-up dopo.",
+    "alwaysDueHint": "Questa attività non ha una scadenza ed è sempre disponibile da completare",
+    "notifyForTaskUnavailable": "Le notifiche non sono disponibili per attività basate su trigger o sempre disponibili"
   },
   "addTask": {
     "descriptionLabel": "Descrizione:",
@@ -843,11 +845,13 @@
       "monthly": "Mensile",
       "yearly": "Annuale",
       "adaptive": "Adattiva",
-      "custom": "Personalizzata"
+      "custom": "Personalizzata",
+      "always": "Sempre"
     },
     "freqMessage": {
       "adaptive": "Questa attività verrà pianificata dinamicamente in base alle date di completamento precedenti.",
-      "custom": "Questa attività verrà pianificata in base a una frequenza personalizzata."
+      "custom": "Questa attività verrà pianificata in base a una frequenza personalizzata.",
+      "always": "Questa attività non ha una scadenza e resta disponibile da completare in qualsiasi momento. Non verrà archiviata al completamento."
     },
     "weekPattern": {
       "every_week": "Ogni settimana",

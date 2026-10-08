@@ -776,7 +776,9 @@
     "archive": "Archive",
     "unarchive": "Unarchive",
     "create": "Create",
-    "notificationsFreePlanNote": "Votre formule inclut un rappel à la date d'échéance. Plus ajoute des rappels avant l'échéance et des suivis après."
+    "notificationsFreePlanNote": "Votre formule inclut un rappel à la date d'échéance. Plus ajoute des rappels avant l'échéance et des suivis après.",
+    "alwaysDueHint": "Cette tâche n'a pas de date d'échéance et est toujours disponible à réaliser",
+    "notifyForTaskUnavailable": "Les notifications ne sont pas disponibles pour les tâches basées sur une condition ou toujours disponibles"
   },
   "addTask": {
     "descriptionLabel": "Description:",
@@ -823,11 +825,13 @@
       "monthly": "Monthly",
       "yearly": "Yearly",
       "adaptive": "Adaptive",
-      "custom": "Custom"
+      "custom": "Custom",
+      "always": "Toujours"
     },
     "freqMessage": {
       "adaptive": "This chore will be scheduled dynamically based on previous completion dates.",
-      "custom": "This chore will be scheduled based on a custom frequency."
+      "custom": "This chore will be scheduled based on a custom frequency.",
+      "always": "Cette tâche n'a pas de date d'échéance et reste disponible à tout moment. Elle ne sera pas archivée une fois terminée."
     },
     "weekPattern": {
       "every_week": "Every week",

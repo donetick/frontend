@@ -722,6 +722,7 @@
     "startDate": "",
     "dueDate": "",
     "triggerDueHint": "",
+    "alwaysDueHint": "このタスクには期限がなく、いつでも完了できます",
     "giveDueDate": "",
     "giveDueDateHelp": "",
     "startWhen": "",
@@ -747,6 +748,7 @@
     "notificationsPlanWarning": "Task notifications are not available in the Basic plan. Upgrade to Plus to receive reminders when tasks are due or completed.",
     "notifyForTask": "",
     "notifyForTaskHelp": "",
+    "notifyForTaskUnavailable": "トリガー式または常時利用可能なタスクには通知を設定できません",
     "notificationSchedule": "",
     "whoToNotify": "",
     "allAssignees": "",
@@ -823,10 +825,12 @@
       "monthly": "",
       "yearly": "",
       "adaptive": "",
+      "always": "常時",
       "custom": ""
     },
     "freqMessage": {
       "adaptive": "",
+      "always": "このタスクには期限がなく、いつでも完了できる状態が続きます。完了してもアーカイブされません。",
       "custom": ""
     },
     "weekPattern": {

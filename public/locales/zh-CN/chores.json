@@ -776,7 +776,9 @@
     "archive": "Archive",
     "unarchive": "Unarchive",
     "create": "Create",
-    "notificationsFreePlanNote": "你的套餐包含到期当天的提醒。升级到 Plus 可增加到期前的提醒和到期后的跟进通知。"
+    "notificationsFreePlanNote": "你的套餐包含到期当天的提醒。升级到 Plus 可增加到期前的提醒和到期后的跟进通知。",
+    "alwaysDueHint": "此任务没有截止日期，随时可以完成",
+    "notifyForTaskUnavailable": "基于触发器或始终可用的任务不支持通知"
   },
   "addTask": {
     "descriptionLabel": "Description:",
@@ -823,11 +825,13 @@
       "monthly": "Monthly",
       "yearly": "Yearly",
       "adaptive": "Adaptive",
-      "custom": "Custom"
+      "custom": "Custom",
+      "always": "始终"
     },
     "freqMessage": {
       "adaptive": "This chore will be scheduled dynamically based on previous completion dates.",
-      "custom": "This chore will be scheduled based on a custom frequency."
+      "custom": "This chore will be scheduled based on a custom frequency.",
+      "always": "此任务没有截止日期，随时保持可完成状态。完成后不会被归档。"
     },
     "weekPattern": {
       "every_week": "Every week",

@@ -33,10 +33,11 @@ const FREQUENCY_TYPES_RADIOS = [
   'monthly',
   'yearly',
   'adaptive',
+  'always',
   'custom',
 ]
 
-const FREQUENCY_TYPE_WITH_MESSAGE = ['adaptive', 'custom']
+const FREQUENCY_TYPE_WITH_MESSAGE = ['adaptive', 'custom', 'always']
 const REPEAT_ON_TYPE = ['interval', 'days_of_the_week', 'day_of_the_month']
 const MONTHS = [
   'january',

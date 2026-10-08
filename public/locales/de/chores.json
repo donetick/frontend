@@ -722,6 +722,7 @@
     "startDate": "Startdatum",
     "dueDate": "Fälligkeitsdatum",
     "triggerDueHint": "Das Fälligkeitsdatum wird gesetzt, sobald der Auslöser des Dings erfüllt ist",
+    "alwaysDueHint": "Diese Aufgabe hat kein Fälligkeitsdatum und ist jederzeit verfügbar",
     "giveDueDate": "Fälligkeitsdatum für diese Aufgabe festlegen",
     "giveDueDateHelp": "Die Aufgabe muss bis zu einem bestimmten Zeitpunkt abgeschlossen sein",
     "startWhen": "Wann beginnt diese Aufgabe?",
@@ -747,6 +748,7 @@
     "notificationsPlanWarning": "Aufgabenbenachrichtigungen sind im Basic-Tarif nicht verfügbar. Wechsle zu Plus, um Erinnerungen zu erhalten, wenn Aufgaben fällig oder abgeschlossen sind.",
     "notifyForTask": "Für diese Aufgabe benachrichtigen",
     "notifyForTaskHelp": "Wann sollen Benachrichtigungen für diese Aufgabe gesendet werden?",
+    "notifyForTaskUnavailable": "Benachrichtigungen sind für auslöserbasierte oder immer verfügbare Aufgaben nicht möglich",
     "notificationSchedule": "Benachrichtigungszeitplan",
     "whoToNotify": "Wer soll benachrichtigt werden?",
     "allAssignees": "Alle zugewiesenen Personen",
@@ -823,10 +825,12 @@
       "monthly": "Monatlich",
       "yearly": "Jährlich",
       "adaptive": "Adaptiv",
+      "always": "Immer",
       "custom": "Benutzerdefiniert"
     },
     "freqMessage": {
       "adaptive": "Diese Aufgabe wird dynamisch anhand vorheriger Abschlussdaten geplant.",
+      "always": "Diese Aufgabe hat kein Fälligkeitsdatum und bleibt jederzeit verfügbar. Sie wird nach Abschluss nicht archiviert.",
       "custom": "Diese Aufgabe wird anhand einer benutzerdefinierten Häufigkeit geplant."
     },
     "weekPattern": {

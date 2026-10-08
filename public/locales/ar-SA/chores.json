@@ -776,7 +776,9 @@
     "archive": "Archive",
     "unarchive": "Unarchive",
     "create": "Create",
-    "notificationsFreePlanNote": "خطتك تتضمن تذكيراً في تاريخ الاستحقاق. يضيف Plus تذكيرات قبل الاستحقاق ومتابعات بعده."
+    "notificationsFreePlanNote": "خطتك تتضمن تذكيراً في تاريخ الاستحقاق. يضيف Plus تذكيرات قبل الاستحقاق ومتابعات بعده.",
+    "alwaysDueHint": "هذه المهمة ليس لها تاريخ استحقاق وهي متاحة دائماً للإنجاز",
+    "notifyForTaskUnavailable": "الإشعارات غير متوفرة للمهام القائمة على مشغل أو المتاحة دائماً"
   },
   "addTask": {
     "descriptionLabel": "Description:",
@@ -823,11 +825,13 @@
       "monthly": "Monthly",
       "yearly": "Yearly",
       "adaptive": "Adaptive",
-      "custom": "Custom"
+      "custom": "Custom",
+      "always": "دائماً"
     },
     "freqMessage": {
       "adaptive": "This chore will be scheduled dynamically based on previous completion dates.",
-      "custom": "This chore will be scheduled based on a custom frequency."
+      "custom": "This chore will be scheduled based on a custom frequency.",
+      "always": "ليس لهذه المهمة تاريخ استحقاق وتبقى متاحة للإنجاز في أي وقت. لن يتم أرشفتها عند إكمالها."
     },
     "weekPattern": {
       "every_week": "Every week",

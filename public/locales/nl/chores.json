@@ -722,6 +722,7 @@
     "startDate": "",
     "dueDate": "",
     "triggerDueHint": "",
+    "alwaysDueHint": "Deze taak heeft geen vervaldatum en is altijd beschikbaar om te voltooien",
     "giveDueDate": "",
     "giveDueDateHelp": "",
     "startWhen": "",
@@ -747,6 +748,7 @@
     "notificationsPlanWarning": "Task notifications are not available in the Basic plan. Upgrade to Plus to receive reminders when tasks are due or completed.",
     "notifyForTask": "",
     "notifyForTaskHelp": "",
+    "notifyForTaskUnavailable": "Meldingen zijn niet beschikbaar voor trigger-gebaseerde of altijd beschikbare taken",
     "notificationSchedule": "",
     "whoToNotify": "",
     "allAssignees": "",
@@ -823,10 +825,12 @@
       "monthly": "",
       "yearly": "",
       "adaptive": "",
+      "always": "Altijd",
       "custom": ""
     },
     "freqMessage": {
       "adaptive": "",
+      "always": "Deze taak heeft geen vervaldatum en blijft op elk moment beschikbaar om te voltooien. Ze wordt niet gearchiveerd na voltooiing.",
       "custom": ""
     },
     "weekPattern": {

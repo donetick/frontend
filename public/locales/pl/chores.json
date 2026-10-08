@@ -776,7 +776,9 @@
     "archive": "Zarchiwizuj",
     "unarchive": "Przywróć z archiwum",
     "create": "Utwórz",
-    "notificationsFreePlanNote": "Twój plan zawiera przypomnienie w dniu terminu. Plus dodaje przypomnienia przed terminem i powiadomienia po nim."
+    "notificationsFreePlanNote": "Twój plan zawiera przypomnienie w dniu terminu. Plus dodaje przypomnienia przed terminem i powiadomienia po nim.",
+    "alwaysDueHint": "To zadanie nie ma terminu i jest zawsze dostępne do wykonania",
+    "notifyForTaskUnavailable": "Powiadomienia nie są dostępne dla zadań opartych na wyzwalaczu lub zawsze dostępnych"
   },
   "addTask": {
     "descriptionLabel": "Description:",
@@ -823,11 +825,13 @@
       "monthly": "Co miesiąc",
       "yearly": "Co roku",
       "adaptive": "Adaptacyjnie",
-      "custom": "Niestandardowo"
+      "custom": "Niestandardowo",
+      "always": "Zawsze"
     },
     "freqMessage": {
       "adaptive": "To zadanie będzie planowane dynamicznie na podstawie dat poprzednich ukończeń.",
-      "custom": "To zadanie będzie planowane według niestandardowej częstotliwości."
+      "custom": "To zadanie będzie planowane według niestandardowej częstotliwości.",
+      "always": "To zadanie nie ma terminu i pozostaje dostępne do wykonania w dowolnym momencie. Nie zostanie zarchiwizowane po ukończeniu."
     },
     "weekPattern": {
       "every_week": "Co tydzień",

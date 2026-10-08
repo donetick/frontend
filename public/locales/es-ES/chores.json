@@ -861,7 +861,9 @@
     "titleCreate": "Crear nueva tarea",
     "titleEdit": "Editar tarea",
     "writeNfcTag": "Escribir etiqueta NFC",
-    "notificationsFreePlanNote": "Tu plan incluye un recordatorio en la fecha de vencimiento. Plus añade recordatorios antes del vencimiento y seguimientos después."
+    "notificationsFreePlanNote": "Tu plan incluye un recordatorio en la fecha de vencimiento. Plus añade recordatorios antes del vencimiento y seguimientos después.",
+    "alwaysDueHint": "Esta tarea no tiene fecha de vencimiento y está siempre disponible para completarse",
+    "notifyForTaskUnavailable": "Las notificaciones no están disponibles para tareas basadas en disparadores o siempre disponibles"
   },
   "addTask": {
     "descriptionLabel": "Description:",
@@ -908,11 +910,13 @@
       "monthly": "Mensualmente",
       "yearly": "Anualmente",
       "adaptive": "Adaptativa",
-      "custom": "Personalizada"
+      "custom": "Personalizada",
+      "always": "Siempre"
     },
     "freqMessage": {
       "adaptive": "Esta tarea se programará dinámicamente según las fechas de finalización anteriores.",
-      "custom": "Esta tarea se programará según una frecuencia personalizada."
+      "custom": "Esta tarea se programará según una frecuencia personalizada.",
+      "always": "Esta tarea no tiene fecha de vencimiento y permanece disponible para completarse en cualquier momento. No se archivará al completarse."
     },
     "weekPattern": {
       "every_week": "Cada semana",
