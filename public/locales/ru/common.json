@@ -72,7 +72,7 @@
     "placeholder": "Поиск по Donetick",
     "inputAriaLabel": "Поиск по делам, заметкам, проектам, меткам и настройкам",
     "deviceNote": "Поиск по данным, доступным на этом устройстве",
-    "escape": "",
+    "escape": "Esc",
     "recent": "Недавнее",
     "empty": {
       "title": "Точных совпадений нет",
@@ -225,6 +225,7 @@
     "invitePeople": "Пригласить людей",
     "addMembers": "Добавить участников в группу",
     "sidePanelSettings": "Настройки боковой панели",
+    "sidePanelSettingsDescription": "Настроить макет и карточки",
     "planFree": "Бесплатный",
     "planPlus": "Плюс",
     "planPlusExpiring": "Плюс (скоро истекает)",
@@ -341,11 +342,26 @@
   "noAttachmentsTitle": "",
   "noAttachmentsDescription": "",
   "kbSize": "",
+  "logoAlt": "Логотип",
+  "notification": {
+    "error": "Ошибка",
+    "success": "Успешно",
+    "undoneSuccessfully": "Успешно отменено",
+    "warning": "Предупреждение",
+    "information": "Информация",
+    "title": "Уведомление",
+    "unknown": "Неизвестное уведомление",
+    "undo": "Отменить",
+    "dismiss": "Закрыть"
+  },
   "onboarding": {
     "sources": {
       "speak": "Голос",
       "snap": "Фото",
       "type": "Текст"
+    },
+    "voiceWave": {
+      "listening": "Слушаю…"
     },
     "capture": {
       "voiceCaption": "Даты, метки и очки — из ваших слов",
@@ -489,7 +505,7 @@
     "placeholderCrash": "например: нажал на дело в «Моих делах», и экран побелел",
     "email": "Почта",
     "emailOptional": "(необязательно — только если хотите ответ)",
-    "emailPlaceholder": "",
+    "emailPlaceholder": "you@example.com",
     "showWhatGetsSent": "Показать, что уйдёт",
     "hideWhatGetsSent": "Скрыть, что уйдёт",
     "copyDiagnostics": "Копировать диагностику",

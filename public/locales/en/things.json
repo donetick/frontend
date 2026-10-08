@@ -19,7 +19,11 @@
     "overview": "Things Overview",
     "visualization": "Data Visualization",
     "changeHistory": "Change History",
-    "updated": "Updated"
+    "updated": "Updated",
+    "timeBefore": "{{time}} before",
+    "loading": "Loading...",
+    "noMoreHistory": "No more history",
+    "loadMore": "Load more"
   },
   "view": {
     "title": "Things",

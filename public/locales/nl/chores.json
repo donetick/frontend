@@ -1,5 +1,7 @@
 {
   "title": "Taken",
+  "tasksForDate": "Taken voor {{date}}",
+  "createSuggestion": "\"{{value}}\" maken",
   "myChores": "Mijn Taken",
   "allChores": "Alle Taken",
   "addChore": "Taak Toevoegen",
@@ -9,7 +11,7 @@
   "dueDate": "Vervaldatum",
   "assignedTo": "Toegewezen aan",
   "priority": "Prioriteit",
-  "status": "",
+  "status": "Status",
   "description": "Beschrijving",
   "choreView": {
     "assignment": "Toewijzing",
@@ -20,7 +22,7 @@
     "statistics": "Statistieken",
     "completed": "Voltooid",
     "times": "keer",
-    "details": "",
+    "details": "Details",
     "createdBy": "Aangemaakt door",
     "na": "N/B",
     "taskCompleted": "Taak Voltooid",
@@ -114,7 +116,7 @@
     "selectAPerformer": ""
   },
   "toolbar": {
-    "defaultProject": "",
+    "defaultProject": "Default Project",
     "everyone": "",
     "mine": "",
     "availableToMe": "",
@@ -134,10 +136,14 @@
       "assignee": ""
     },
     "display": "",
-    "displayOptions": ""
+    "displayOptions": "",
+    "moreSaveOptions": "Meer opslagopties",
+    "showCount": "{{count}} weergeven",
+    "done": "Klaar",
+    "savedFilters": "Opgeslagen filters"
   },
   "sort": {
-    "assignedToMe": "",
+    "assignedToMe": "Assigned to me",
     "smart": "",
     "createdDate": "",
     "updatedDate": "",
@@ -257,6 +263,8 @@
     "failRescheduleTitle": "",
     "failRescheduleMessage": "",
     "failRemoveDueDateTitle": "",
+    "failAssignTitle": "",
+    "failAssignMessage": "",
     "nudgeSentTitle": "",
     "nudgeFailed": "",
     "failNudgeTitle": "",
@@ -611,7 +619,15 @@
     "keepAsAttachment": "",
     "altCaptured": "",
     "altProcessing": "",
-    "taskIdentified": ""
+    "taskIdentified": "",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
+    "tapToScanHint": "Tik op \"Document scannen\" om de scanner te openen",
+    "readingTextProgress": "Tekst lezen uit afbeelding… {{progress}}%",
+    "dueDate": "Vervalt: {{date}}",
+    "hideRawText": "Ruwe tekst verbergen",
+    "showRawText": "Ruwe tekst weergeven",
+    "cameraUnavailableUseUpload": "Camera niet beschikbaar — gebruik in plaats daarvan Uploaden"
   },
   "descriptionPlaceholder": "",
   "notificationTemplate": {
@@ -729,7 +745,7 @@
     "rescheduleFromCompletion": "",
     "rescheduleFromCompletionHelp": "",
     "notifications": "",
-    "notificationsPlanWarning": "",
+    "notificationsPlanWarning": "Task notifications are not available in the Basic plan. Upgrade to Plus to receive reminders when tasks are due or completed.",
     "notifyForTask": "",
     "notifyForTaskHelp": "",
     "notifyForTaskUnavailable": "Meldingen zijn niet beschikbaar voor trigger-gebaseerde of altijd beschikbare taken",
@@ -761,9 +777,12 @@
     "updatedBy": "",
     "archive": "",
     "unarchive": "",
-    "create": ""
+    "create": "",
+    "notificationsFreePlanNote": "Je abonnement bevat een herinnering op de vervaldatum. Plus voegt herinneringen vóór de datum en opvolgherrinneringen daarna toe."
   },
   "addTask": {
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:",
     "title": "",
     "defaultProject": "",
     "anyone": "",
@@ -864,7 +883,7 @@
     "repeatOn": "",
     "triggerLabel": "",
     "triggerHelp": "",
-    "triggerPlanWarning": "",
+    "triggerPlanWarning": "Thing-based triggers are not available in the Basic plan. Upgrade to Plus to automatically trigger tasks when device states change.",
     "previewEvery": "",
     "previewOccurrence": "",
     "defaultTime": "",

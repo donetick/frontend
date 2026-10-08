@@ -335,7 +335,7 @@ const PhotoTaskModal = ({ onClose, onTaskExtracted, open }) => {
               <Box sx={{ textAlign: 'center', p: 4 }}>
                 <DocumentScanner sx={{ fontSize: 64, opacity: 0.4, mb: 1 }} />
                 <Typography level='body-sm' sx={{ opacity: 0.6 }}>
-                  Tap &quot;Scan Document&quot; to open the scanner
+                  {t('photoTask.tapToScanHint')}
                 </Typography>
               </Box>
             )}
@@ -386,7 +386,9 @@ const PhotoTaskModal = ({ onClose, onTaskExtracted, open }) => {
             {phase === 'ocr' && ocrMethod === 'tesseract' && (
               <>
                 <Typography level='body-sm'>
-                  Reading text from image… {ocrProgress}%
+                  {t('photoTask.readingTextProgress', {
+                    progress: ocrProgress,
+                  })}
                 </Typography>
                 <LinearProgress
                   determinate
@@ -396,10 +398,14 @@ const PhotoTaskModal = ({ onClose, onTaskExtracted, open }) => {
               </>
             )}
             {phase === 'ocr' && ocrMethod === 'native' && (
-              <Typography level='body-sm'>Running native OCR…</Typography>
+              <Typography level='body-sm'>
+                {t('photoTask.runningNativeOcr')}
+              </Typography>
             )}
             {phase === 'llm' && (
-              <Typography level='body-sm'>Identifying task with AI…</Typography>
+              <Typography level='body-sm'>
+                {t('photoTask.identifyingTask')}
+              </Typography>
             )}
           </Box>
         )}
@@ -429,7 +435,7 @@ const PhotoTaskModal = ({ onClose, onTaskExtracted, open }) => {
               )}
               {taskResult.dueDate && (
                 <Typography level='body-xs' sx={{ mt: 0.5, opacity: 0.7 }}>
-                  Due: {taskResult.dueDate}
+                  {t('photoTask.dueDate', { date: taskResult.dueDate })}
                 </Typography>
               )}
             </Box>
@@ -443,7 +449,9 @@ const PhotoTaskModal = ({ onClose, onTaskExtracted, open }) => {
                   onClick={() => setShowRawText(v => !v)}
                   sx={{ alignSelf: 'flex-start' }}
                 >
-                  {showRawText ? 'Hide Raw Text' : 'Show Raw Text'}
+                  {showRawText
+                    ? t('photoTask.hideRawText')
+                    : t('photoTask.showRawText')}
                 </Button>
                 {showRawText && (
                   <Box

@@ -44,6 +44,7 @@ import {
 } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import { useDescriptionHtml } from '../../hooks/useDescriptionHtml'
 import { useUserProfile } from '../../queries/UserQueries'
 import { useNotification } from '../../service/NotificationProvider'
@@ -68,6 +69,7 @@ const RichTextEditor = forwardRef(
     const { t } = useTranslation('chores')
     const { showError } = useNotification()
     const { data: userProfile } = useUserProfile()
+    const { showPaywall } = usePaywall()
     // Display-only HTML with expired image srcs swapped for cached/re-signed ones
     const displayHtml = useDescriptionHtml(value)
     const quillRef = useRef(null)
@@ -94,12 +96,10 @@ const RichTextEditor = forwardRef(
 
     // Image upload handler - wrapped in useCallback to avoid recreating on every render
     const handleImageUpload = useCallback(() => {
-      // Check if user has plus account
+      // Image uploads are a Plus feature — meet the paywall on the attempt,
+      // before the file picker opens.
       if (!isPlusAccount(userProfile)) {
-        showError({
-          title: t('common:upload.plusFeatureTitle'),
-          message: t('common:upload.plusFeatureMessage'),
-        })
+        showPaywall(PAYWALL_REASON.FILE_UPLOAD)
         return
       }
 
@@ -170,10 +170,7 @@ const RichTextEditor = forwardRef(
             })
             return
           } else if (response.status === 403 && !isPlusAccount(userProfile)) {
-            showError({
-              title: t('common:upload.upgradeTitle'),
-              message: t('common:upload.upgradeMessage'),
-            })
+            showPaywall(PAYWALL_REASON.FILE_UPLOAD)
             return
           } else if (response.status === 403) {
             showError({
@@ -207,7 +204,7 @@ const RichTextEditor = forwardRef(
           })
         }
       }
-    }, [entityId, entityType, draftId, showError, userProfile]) // Dependencies for useCallback
+    }, [entityId, entityType, draftId, showError, showPaywall, userProfile]) // Dependencies for useCallback
 
     useEffect(() => {
       if (!quillRef.current) return

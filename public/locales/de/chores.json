@@ -1,5 +1,7 @@
 {
   "title": "Aufgaben",
+  "tasksForDate": "Aufgaben für {{date}}",
+  "createSuggestion": "\"{{value}}\" erstellen",
   "myChores": "Meine Aufgaben",
   "allChores": "Alle Aufgaben",
   "addChore": "Aufgabe hinzufügen",
@@ -134,7 +136,11 @@
       "assignee": "Zugewiesene Person"
     },
     "display": "Anzeige",
-    "displayOptions": "Anzeigeoptionen"
+    "displayOptions": "Anzeigeoptionen",
+    "moreSaveOptions": "Weitere Speicheroptionen",
+    "showCount": "{{count}} anzeigen",
+    "done": "Fertig",
+    "savedFilters": "Gespeicherte Filter"
   },
   "sort": {
     "assignedToMe": "Mir zugewiesen",
@@ -257,6 +263,8 @@
     "failRescheduleTitle": "Neuplanung fehlgeschlagen",
     "failRescheduleMessage": "Fälligkeitsdatum konnte nicht aktualisiert werden",
     "failRemoveDueDateTitle": "Fälligkeitsdatum konnte nicht entfernt werden",
+    "failAssignTitle": "Zuweisung fehlgeschlagen",
+    "failAssignMessage": "Aufgabe konnte nicht zugewiesen werden",
     "nudgeSentTitle": "Erinnerung gesendet!",
     "nudgeFailed": "Erinnerung konnte nicht gesendet werden",
     "failNudgeTitle": "Erinnerung konnte nicht gesendet werden",
@@ -314,7 +322,7 @@
     "selected_one": "{{count}} Aufgabe ausgewählt",
     "selected_other": "{{count}} Aufgaben ausgewählt",
     "selectAllTitle": "Alle sichtbaren Aufgaben auswählen (Strg+A)",
-    "selectSectionTitle": "",
+    "selectSectionTitle": "Alle Aufgaben in diesem Abschnitt auswählen",
     "all": "Alle",
     "closeMultiSelect": "Mehrfachauswahl schließen (Esc)",
     "clearMultiSelect": "Auswahl aufheben (Esc)",
@@ -329,7 +337,7 @@
     "matching": " passend zu „{{term}}“",
     "filtersTitle": "Filter",
     "sortArchivedDate": "Archivierungsdatum",
-    "sortName": "",
+    "sortName": "Name",
     "sortPriority": "Priorität",
     "sortDueDate": "Fälligkeitsdatum",
     "noMatchTitle": "Keine passenden archivierten Aufgaben",
@@ -385,7 +393,7 @@
     "labelsHint": "Tippen zum Hinzufügen · erneut tippen zum Entfernen",
     "done": "Fertig",
     "noPriority": "Keine",
-    "dueDateTitle": ""
+    "dueDateTitle": "Fälligkeitsdatum für {{count}} Aufgabe(n)"
   },
   "remind": {
     "title": "Erinnerungen",
@@ -394,7 +402,7 @@
     "unitMin": "Min",
     "unitHr": "Std",
     "unitDay": "Tag",
-    "duration_one": "",
+    "duration_one": "{{count}} {{unit}}",
     "duration_other": "{{count}} {{unit}}",
     "before": "vorher",
     "after": "danach",
@@ -611,7 +619,15 @@
     "keepAsAttachment": "Foto als Anhang behalten",
     "altCaptured": "Erfasstes Dokument",
     "altProcessing": "Verarbeitung läuft",
-    "taskIdentified": "Aufgabe erkannt"
+    "taskIdentified": "Aufgabe erkannt",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
+    "tapToScanHint": "Tippe auf \"Dokument scannen\", um den Scanner zu öffnen",
+    "readingTextProgress": "Text wird aus Bild gelesen… {{progress}} %",
+    "dueDate": "Fällig: {{date}}",
+    "hideRawText": "Rohtext ausblenden",
+    "showRawText": "Rohtext anzeigen",
+    "cameraUnavailableUseUpload": "Kamera nicht verfügbar — stattdessen hochladen"
   },
   "descriptionPlaceholder": "Beschreibung eingeben...",
   "notificationTemplate": {
@@ -666,7 +682,7 @@
     "deleteAttachmentFailed": "Anhang konnte nicht gelöscht werden.",
     "deleteChoreFailed": "Aufgabe konnte nicht gelöscht werden: {{error}}",
     "deleteChoreTitle": "Aufgabe löschen",
-    "name": "",
+    "name": "Name",
     "nameDesc": "Wie heißt diese Aufgabe?",
     "description": "Beschreibung",
     "descriptionDesc": "Worum geht es bei dieser Aufgabe?",
@@ -761,9 +777,12 @@
     "updatedBy": "Aktualisiert von",
     "archive": "Archivieren",
     "unarchive": "Archivierung aufheben",
-    "create": "Erstellen"
+    "create": "Erstellen",
+    "notificationsFreePlanNote": "Ihr Tarif enthält eine Erinnerung am Fälligkeitsdatum. Plus fügt Erinnerungen vor dem Termin und Nachfass‑Erinnerungen danach hinzu."
   },
   "addTask": {
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:",
     "title": "Neue Aufgabe erstellen",
     "defaultProject": "Standardprojekt",
     "anyone": "Jeder",
@@ -790,14 +809,14 @@
       "january": "Januar",
       "february": "Februar",
       "march": "März",
-      "april": "",
+      "april": "April",
       "may": "Mai",
       "june": "Juni",
       "july": "Juli",
-      "august": "",
-      "september": "",
+      "august": "August",
+      "september": "September",
       "october": "Oktober",
-      "november": "",
+      "november": "November",
       "december": "Dezember"
     },
     "freqType": {
@@ -878,17 +897,17 @@
       "sunday": "So"
     },
     "monthsShort": {
-      "january": "",
-      "february": "",
+      "january": "Jan",
+      "february": "Feb",
       "march": "Mär",
-      "april": "",
+      "april": "Apr",
       "may": "Mai",
-      "june": "",
-      "july": "",
-      "august": "",
-      "september": "",
+      "june": "Jun",
+      "july": "Jul",
+      "august": "Aug",
+      "september": "Sep",
       "october": "Okt",
-      "november": "",
+      "november": "Nov",
       "december": "Dez"
     },
     "occurrenceShort": {
@@ -955,14 +974,14 @@
       "2": "In Bearbeitung",
       "3": "Genehmigung ausstehend"
     },
-    "anyOf": "",
+    "anyOf": "Beliebige von",
     "include": "Einschließen",
     "exclude": "Ausschließen",
     "has": "Hat",
     "doesntHave": "Hat nicht",
     "assignee": "Zugewiesene Person",
     "createdBy": "Erstellt von",
-    "statusHeading": "",
+    "statusHeading": "Status",
     "priority": "Priorität",
     "dueDate": "Fälligkeitsdatum",
     "labels": "Beschriftungen",
@@ -970,7 +989,7 @@
     "defaultProject": "Standardprojekt",
     "points": "Punkte",
     "project": "Projekt",
-    "filterFallback": "",
+    "filterFallback": "Filter",
     "notPrefix": "Nicht ",
     "customDueDate": "Benutzerdefiniert",
     "clear": "Zurücksetzen"

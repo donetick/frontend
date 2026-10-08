@@ -93,10 +93,6 @@
       "bugReport": {
         "title": "Signaler un bug",
         "description": "Quelque chose ne fonctionne pas ? Envoyez-nous les détails avec un instantané technique."
-      },
-      "sidepanel": {
-        "title": "Personnalisation du panneau latéral",
-        "description": "Personnalisez la disposition et la visibilité des cartes du panneau latéral."
       }
     }
   },
@@ -427,9 +423,7 @@
         "name": "Objectifs hebdomadaires",
         "description": "Affiche la progression hebdomadaire et les statistiques de la famille"
       }
-    },
-    "heading": "Paramètres du panneau latéral",
-    "detailedDescription": "Personnalisez la disposition et la visibilité des cartes dans le panneau latéral. Cette section n'est disponible que sur les appareils à grand écran, comme les tablettes et les ordinateurs."
+    }
   },
   "homeSections": {
     "title": "Personnalisation de l'aperçu",
@@ -491,7 +485,7 @@
     },
     "bottomNav": {
       "title": "Navigation inférieure",
-      "description": "Choisissez jusqu'à {{max}} raccourcis pour la barre de navigation inférieure sur mobile et faites-les glisser pour les réorganiser. « Plus » reste toujours le dernier élément et ouvre le menu complet.",
+      "description": "Choisissez jusqu'à {{max}} raccourcis pour la barre de navigation inférieure sur mobile et faites-les glisser pour les réorganiser. « Menu » reste toujours le dernier élément et ouvre le menu complet.",
       "resetToDefaults": "Rétablir les valeurs par défaut",
       "resetHelper": "Les raccourcis et l'ordre par défaut de la navigation inférieure seront rétablis."
     },
@@ -596,7 +590,14 @@
     "featureApiTokens": "Jetons d'API pour les intégrations",
     "featureImageUploads": "Ajout d'images dans les descriptions",
     "featureAutomation": "Automatisation avancée des tâches",
-    "planYearly": "Annuel"
+    "planYearly": "Annuel",
+    "reasonAdvancedReminders": "Les rappels avant l'échéance et les suivis après sont une fonctionnalité Plus. Votre formule actuelle vous rappelle à la date d'échéance.",
+    "reasonReminderChannels": "L'envoi de rappels de tâches à un groupe Telegram est une fonctionnalité Plus.",
+    "reasonHistoryWindow": "Votre formule actuelle affiche les 30 derniers jours. Passez à Plus pour obtenir tout l'historique et les tendances à long terme.",
+    "reasonThingTriggers": "Le déclenchement automatique de tâches lorsqu'un objet change d'état est une fonctionnalité Plus.",
+    "reasonProjectLimit": "Votre formule actuelle inclut {{projectLimit}} projets. Passez à Plus pour en créer autant que nécessaire.",
+    "reasonQuickFilterLimit": "Votre formule actuelle inclut {{filterLimit}} filtres rapides enregistrés. Passez à Plus pour des filtres illimités.",
+    "reasonFileUpload": "Joindre des fichiers et des images est une fonctionnalité Plus. Passez à Plus pour ajouter photos, scans et documents à vos tâches."
   },
   "childUsers": {
     "errNameRequired": "Le nom du sous-compte est obligatoire",
@@ -664,7 +665,13 @@
     "createTab": "Créer une sauvegarde",
     "restoreTab": "Restaurer une sauvegarde",
     "creating": "Création de la sauvegarde...",
-    "restoring": "Restauration de la sauvegarde..."
+    "restoring": "Restauration de la sauvegarde...",
+    "encryptionKeyRequired": "Clé de chiffrement *",
+    "keySafetyNotice": "Conservez cette clé en lieu sûr — vous en aurez besoin pour restaurer votre sauvegarde",
+    "nameOptional": "Nom de la sauvegarde (facultatif)",
+    "namePlaceholder": "ex. : sauvegarde-hebdomadaire",
+    "fileRequired": "Fichier de sauvegarde *",
+    "selectedFile": "Sélectionné : {{name}}"
   },
   "deletion": {
     "passwordRequired": "Veuillez saisir votre mot de passe pour continuer",
@@ -692,7 +699,15 @@
   },
   "realtime": {
     "titleSse": "Mises à jour en temps réel (SSE)",
-    "subtitleSse": "Recevez des notifications instantanées via les événements envoyés par le serveur"
+    "subtitleSse": "Recevez des notifications instantanées via les événements envoyés par le serveur",
+    "basicPlanDescription": "Real-time updates (SSE) are not available in the Basic plan. Upgrade to Plus to receive instant notifications when chores are updated.",
+    "disabledDescription": "Real-time updates (SSE) are disabled. Enable to see live changes when you or other circle members complete, skip, or modify chores.",
+    "connectedDescription": "Real-time updates (SSE) are working. You'll see live changes when you or other circle members complete, skip, or modify chores.",
+    "connectingDescription": "Connecting to real-time updates (SSE)...",
+    "errorDescription": "Real-time updates (SSE) are enabled but not working: {{error}}",
+    "disconnectedDescription": "Real-time updates (SSE) are enabled but not currently connected.",
+    "enableLabel": "Enable Real-time Updates (SSE)",
+    "statusLabel": "Status:"
   },
   "nativeCancel": {
     "title": "Résilier l'abonnement",

@@ -3,6 +3,7 @@ import {
   Check,
   Group,
   HourglassEmpty,
+  OpenInNew,
   Pause,
   PlayArrow,
   Repeat,
@@ -35,6 +36,12 @@ import {
 } from '../../utils/ChoreCardHelpers.jsx'
 import { notInCompletionWindow } from '../../utils/Chores.jsx'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
+import {
+  getFirstHttpUrl,
+  getUrlHostname,
+  openExternalUrl,
+  splitTextAtFirstHttpUrl,
+} from '../../utils/ExternalLinks.js'
 import Priorities from '../../utils/Priorities'
 import ChoreActionMenu, {
   ChoreActionMenuTrigger,
@@ -113,6 +120,15 @@ const ChoreCard = ({
     }
     return name
   }
+  const displayName = getName(chore.name)
+  const {
+    after: titleAfterUrl,
+    before: titleBeforeUrl,
+    url: titleUrl,
+  } = splitTextAtFirstHttpUrl(displayName)
+  const descriptionUrl = getFirstHttpUrl(chore.description)
+  const showDescriptionUrl = descriptionUrl && descriptionUrl !== titleUrl
+
   return (
     <Box
       key={chore.id + '-box'}
@@ -250,7 +266,34 @@ const ChoreCard = ({
                 </Avatar>
                 <Box display='flex' flexDirection='column'>
                   <Typography level='title-md'>
-                    {getName(chore.name)}
+                    {titleBeforeUrl}
+                    {titleUrl && (
+                      <Chip
+                        component='span'
+                        variant='soft'
+                        color='primary'
+                        size='sm'
+                        startDecorator={<OpenInNew sx={{ fontSize: 14 }} />}
+                        onClick={event => {
+                          event.stopPropagation()
+                          openExternalUrl(titleUrl)
+                        }}
+                        sx={{
+                          mx: 0.4,
+                          maxWidth: 180,
+                          cursor: 'pointer',
+                          verticalAlign: 'middle',
+                          '& .MuiChip-label': {
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                          },
+                        }}
+                        title={titleUrl}
+                      >
+                        {getUrlHostname(titleUrl)}
+                      </Chip>
+                    )}
+                    {titleAfterUrl}
                   </Typography>
                   {chore.assignedTo && (
                     <Box display='flex' alignItems='center' gap={0.5}>
@@ -320,6 +363,32 @@ const ChoreCard = ({
                         startDecorator={<Toll />}
                       >
                         {chore.points}
+                      </Chip>
+                    )}
+                    {showDescriptionUrl && (
+                      <Chip
+                        variant='soft'
+                        color='primary'
+                        startDecorator={<OpenInNew sx={{ fontSize: 16 }} />}
+                        onClick={event => {
+                          event.stopPropagation()
+                          openExternalUrl(descriptionUrl)
+                        }}
+                        sx={{
+                          position: 'relative',
+                          mr: 0.5,
+                          top: 2,
+                          zIndex: 1,
+                          maxWidth: 180,
+                          cursor: 'pointer',
+                          '& .MuiChip-label': {
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                          },
+                        }}
+                        title={descriptionUrl}
+                      >
+                        {getUrlHostname(descriptionUrl)}
                       </Chip>
                     )}
                     {chore.labelsV2?.map((l, index) => {

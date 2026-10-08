@@ -205,7 +205,7 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
       </Typography>
 
       <FormControl sx={{ mb: 2 }}>
-        <FormLabel>Encryption Key *</FormLabel>
+        <FormLabel>{t('backup.encryptionKeyRequired')}</FormLabel>
         <Input
           type='password'
           value={encryptionKey}
@@ -213,16 +213,16 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
           placeholder={t('backup.keyPlaceholder')}
         />
         <Typography level='body-xs' sx={{ mt: 0.5 }}>
-          Keep this key safe—you&apos;ll need it to restore your backup
+          {t('backup.keySafetyNotice')}
         </Typography>
       </FormControl>
 
       <FormControl sx={{ mb: 2 }}>
-        <FormLabel>Backup Name (Optional)</FormLabel>
+        <FormLabel>{t('backup.nameOptional')}</FormLabel>
         <Input
           value={backupName}
           onChange={e => setBackupName(e.target.value)}
-          placeholder='e.g., weekly-backup'
+          placeholder={t('backup.namePlaceholder')}
         />
       </FormControl>
 
@@ -249,7 +249,7 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
       </Typography>
 
       <FormControl sx={{ mb: 2 }}>
-        <FormLabel>Backup File *</FormLabel>
+        <FormLabel>{t('backup.fileRequired')}</FormLabel>
         <Input
           type='file'
           accept='.backup'
@@ -258,13 +258,13 @@ function BackupRestoreModal({ isOpen, onClose, showNotification }) {
         />
         {backupFile && (
           <Typography level='body-xs' sx={{ mt: 0.5 }}>
-            Selected: {backupFile.name}
+            {t('backup.selectedFile', { name: backupFile.name })}
           </Typography>
         )}
       </FormControl>
 
       <FormControl sx={{ mb: 3 }}>
-        <FormLabel>Encryption Key *</FormLabel>
+        <FormLabel>{t('backup.encryptionKeyRequired')}</FormLabel>
         <Input
           type='password'
           value={restoreEncryptionKey}

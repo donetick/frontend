@@ -44,9 +44,11 @@
     "lastUpdated": "آخر تحديث",
     "duration": "المدة",
     "pointsEarned": "النقاط المكتسبة",
-    "points_one": "",
-    "points_other": "",
-    "note": "ملاحظة"
+    "points_one": "{{count}} pt",
+    "points_other": "{{count}} pts",
+    "note": "ملاحظة",
+    "reason": "السبب",
+    "notes": "ملاحظات"
   },
   "charts": {
     "noData": "لا توجد بيانات متاحة",
@@ -95,7 +97,7 @@
     "completedAt": "اكتمل في"
   },
   "period": {
-    "days_one": "",
+    "days_one": "{{count}} Day",
     "days_other": "{{count}} أيام",
     "allTime": "كل الوقت"
   },
@@ -178,5 +180,11 @@
   },
   "noteViewer": {
     "updatedAt": "تم التحديث في {{date}}"
+  },
+  "plan": {
+    "lockedTitle": "يتم الاحتفاظ بالتاريخ الأقدم لمدة {{days}} يومًا في الخطة المجانية",
+    "allLockedTitle": "سجل هذه المهمة أقدم من {{days}} يومًا",
+    "lockedDescription": "قد تُحذف الإدخالات الأقدم من {{days}} يومًا نهائيًا. قم بالترقية إلى Plus للاحتفاظ بتاريخك الكامل.",
+    "unlock": "الترقية إلى Plus"
   }
 }

@@ -1,5 +1,7 @@
 {
   "title": "Úkoly",
+  "tasksForDate": "Úkoly pro {{date}}",
+  "createSuggestion": "Vytvořit \"{{value}}\"",
   "myChores": "Moje úkoly",
   "allChores": "Všechny úkoly",
   "addChore": "Přidat úkol",
@@ -22,7 +24,7 @@
     "times": "×",
     "details": "Podrobnosti",
     "createdBy": "Vytvořil(a)",
-    "na": "",
+    "na": "N/A",
     "taskCompleted": "Úkol dokončen",
     "taskCompletedMessage": "Váš úkol byl označen jako dokončený",
     "taskCompletionUndone": "Dokončení úkolu bylo vráceno zpět.",
@@ -134,7 +136,11 @@
       "assignee": "Řešitel"
     },
     "display": "Zobrazení",
-    "displayOptions": "Možnosti zobrazení"
+    "displayOptions": "Možnosti zobrazení",
+    "moreSaveOptions": "Další možnosti uložení",
+    "showCount": "Zobrazit {{count}}",
+    "done": "Hotovo",
+    "savedFilters": "Uložené filtry"
   },
   "sort": {
     "assignedToMe": "Přiřazené mně",
@@ -257,6 +263,8 @@
     "failRescheduleTitle": "Přeplánování se nezdařilo",
     "failRescheduleMessage": "Termín nelze aktualizovat",
     "failRemoveDueDateTitle": "Termín se nepodařilo odebrat",
+    "failAssignTitle": "",
+    "failAssignMessage": "",
     "nudgeSentTitle": "Připomenutí odesláno!",
     "nudgeFailed": "Připomenutí se nepodařilo odeslat",
     "failNudgeTitle": "Připomenutí se nepodařilo odeslat",
@@ -391,10 +399,10 @@
     "title": "Připomínky",
     "remind": "Připomenout",
     "onDueDate": "V den termínu",
-    "unitMin": "",
+    "unitMin": "min",
     "unitHr": "h",
     "unitDay": "d",
-    "duration_one": "",
+    "duration_one": "{{count}} {{unit}}",
     "duration_other": "{{count}} {{unit}}",
     "before": "před",
     "after": "po",
@@ -611,7 +619,15 @@
     "keepAsAttachment": "Ponechat fotku jako přílohu",
     "altCaptured": "Zachycený dokument",
     "altProcessing": "Zpracovávání",
-    "taskIdentified": "Úkol rozpoznán"
+    "taskIdentified": "Úkol rozpoznán",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
+    "tapToScanHint": "Klepnutím na \"Skenovat dokument\" otevřete skener",
+    "readingTextProgress": "Čtení textu z obrázku… {{progress}} %",
+    "dueDate": "Termín: {{date}}",
+    "hideRawText": "Skrýt surový text",
+    "showRawText": "Zobrazit surový text",
+    "cameraUnavailableUseUpload": "Fotoaparát není k dispozici — použijte místo toho nahrání"
   },
   "descriptionPlaceholder": "Zadejte popis...",
   "notificationTemplate": {
@@ -761,9 +777,12 @@
     "updatedBy": "Upravil(a)",
     "archive": "Archivovat",
     "unarchive": "Obnovit z archivu",
-    "create": "Vytvořit"
+    "create": "Vytvořit",
+    "notificationsFreePlanNote": "Váš tarif zahrnuje připomenutí v den termínu. Plus přidává připomenutí před termínem a následná upozornění po něm."
   },
   "addTask": {
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:",
     "title": "Vytvořit nový úkol",
     "defaultProject": "Výchozí projekt",
     "anyone": "Kdokoli",
@@ -844,7 +863,7 @@
       "years": "Roky"
     },
     "repeatOnType": {
-      "interval": "",
+      "interval": "Interval",
       "days_of_the_week": "Dny v týdnu",
       "day_of_the_month": "Den v měsíci"
     },

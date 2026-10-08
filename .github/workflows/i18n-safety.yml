@@ -1,0 +1,42 @@
+name: Translation safety
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Check locale regressions
+    runs-on: ubuntu-latest
+
+    steps:
+      # pull_request_target intentionally checks out trusted code from the base
+      # branch. The PR itself is only read as Git data and is never executed.
+      - name: Check out trusted base branch
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          fetch-depth: 0
+
+      - name: Fetch pull request commit
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          git fetch --no-tags origin "pull/$PR_NUMBER/head"
+          test "$(git rev-parse FETCH_HEAD)" = "$HEAD_SHA"
+
+      - name: Check translation changes
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          args=("--base=$BASE_SHA" "--head=$HEAD_SHA")
+          if [[ "$HEAD_BRANCH" == l10n_* ]]; then
+            args+=(--crowdin)
+          fi
+          node scripts/i18n/i18n-pr-safety.mjs "${args[@]}"

@@ -454,7 +454,7 @@ const UserProfileAvatar = ({ showDetails = false }) => {
                   level='body-xs'
                   sx={{ color: 'var(--joy-palette-text-tertiary)' }}
                 >
-                  Customize layout & cards
+                  {t('userMenu.sidePanelSettingsDescription')}
                 </Typography>
               </ListItemContent>
             </MenuItem>

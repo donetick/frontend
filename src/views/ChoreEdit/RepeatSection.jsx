@@ -1,9 +1,9 @@
+import { LockOutlined } from '@mui/icons-material'
 import {
   Box,
   Button,
   Card,
   Checkbox,
-  Chip,
   FormControl,
   FormHelperText,
   Grid,
@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next'
 
 import NumberInput from '../../components/common/NumberInput'
 import { useLocalization } from '../../contexts/LocalizationContext'
+import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import { useUserProfile } from '../../queries/UserQueries'
 import { isPlusAccount } from '../../utils/Helpers'
 import ThingTriggerSection from './ThingTriggerSection'
@@ -513,6 +514,7 @@ const RepeatSection = ({
   viewOnly = false,
 }) => {
   const { data: userProfile } = useUserProfile({ enabled: !viewOnly })
+  const { showPaywall } = usePaywall()
   const { t } = useTranslation('chores')
 
   return (
@@ -697,6 +699,12 @@ const RepeatSection = ({
       <FormControl sx={{ mt: 1 }}>
         <Checkbox
           onChange={e => {
+            // Let free users reach for it and meet the paywall on the attempt,
+            // rather than greying the row out — one lock affordance, not three.
+            if (e.target.checked && !isPlusAccount(userProfile)) {
+              showPaywall(PAYWALL_REASON.THING_TRIGGERS)
+              return
+            }
             onFrequencyTypeUpdate(e.target.checked ? 'trigger' : 'once')
             //  if unchecked, set selectedThing to null:
             if (!e.target.checked) {
@@ -706,27 +714,15 @@ const RepeatSection = ({
           defaultChecked={frequencyType === 'trigger'}
           checked={frequencyType === 'trigger'}
           value={frequencyType === 'trigger'}
-          disabled={!isPlusAccount(userProfile)}
           overlay
           label={t('repeat.triggerLabel')}
+          endDecorator={
+            isPlusAccount(userProfile) ? null : (
+              <LockOutlined sx={{ fontSize: 14, opacity: 0.6 }} />
+            )
+          }
         />
-        <FormHelperText
-          sx={{
-            opacity: !isPlusAccount(userProfile) ? 0.5 : 1,
-          }}
-        >
-          {t('repeat.triggerHelp')}{' '}
-          {userProfile && !isPlusAccount(userProfile) && (
-            <Chip variant='soft' color='warning'>
-              {t('settings:common.plusFeature')}
-            </Chip>
-          )}
-        </FormHelperText>
-        {!isPlusAccount(userProfile) && (
-          <Typography level='body-sm' color='warning' sx={{ mt: 1 }}>
-            {t('repeat.triggerPlanWarning')}
-          </Typography>
-        )}
+        <FormHelperText>{t('repeat.triggerHelp')}</FormHelperText>
       </FormControl>
       {frequencyType === 'trigger' && (
         <ThingTriggerSection

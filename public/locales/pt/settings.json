@@ -79,8 +79,8 @@
         "description": "Configure webhooks, atualizações em tempo real e outros recursos avançados."
       },
       "privacy": {
-        "title": "",
-        "description": ""
+        "title": "Privacy & Analytics",
+        "description": "Control anonymous usage analytics and crash reporting."
       },
       "developer": {
         "title": "Configurações de desenvolvedor",
@@ -93,10 +93,6 @@
       "bugReport": {
         "title": "Relatar um erro",
         "description": "Algo não está funcionando? Envie os detalhes junto com um retrato técnico."
-      },
-      "sidepanel": {
-        "title": "Personalização do painel lateral",
-        "description": "Personalize o layout e a visibilidade dos cartões do painel lateral."
       }
     }
   },
@@ -173,14 +169,14 @@
     "joinedPending": "Você entrou no círculo; aguarde a pessoa proprietária aceitar sua solicitação.",
     "alreadyMember": "Você já é membro deste círculo",
     "joinFailed": "Não foi possível entrar no círculo",
-    "copyLink": ""
+    "copyLink": "Copiar link"
   },
   "accountSettings": {
     "title": "Configurações da conta",
     "description": "Altere as configurações da sua conta, o plano ou a sua senha",
     "accountType": "Tipo de conta: {{type}}",
     "free": "Gratuito",
-    "plus": "",
+    "plus": "Plus",
     "plusUntil": "Plus (até {{date}})",
     "activeDescription": "No momento você tem o plano Plus. Sua assinatura será renovada em {{date}}.",
     "cancelledDescription": "Você cancelou sua assinatura. Sua conta voltará ao plano Gratuito em {{date}}.",
@@ -275,9 +271,9 @@
     "customLabel": "Notificação personalizada",
     "customHelper": "Receba notificações em outra plataforma",
     "targetNone": "Nenhuma",
-    "targetTelegram": "",
-    "targetPushover": "",
-    "targetWebhooks": "",
+    "targetTelegram": "Telegram",
+    "targetPushover": "Pushover",
+    "targetWebhooks": "Webhooks",
     "telegramBotHelpBefore": "Você precisa enviar uma mensagem ao bot primeiro para que a notificação do Telegram funcione",
     "telegramBotHelpAfter": "para iniciar uma conversa",
     "clickHere": "Clique aqui",
@@ -427,9 +423,7 @@
         "name": "Metas semanais",
         "description": "Mostra o progresso semanal e as estatísticas da família"
       }
-    },
-    "heading": "Configurações do painel lateral",
-    "detailedDescription": ""
+    }
   },
   "homeSections": {
     "title": "",
@@ -562,7 +556,7 @@
       "toggleLabel": "Ativar atualizações em tempo real",
       "title": "Atualizações em tempo real",
       "subtitle": "Receba notificações instantâneas quando as tarefas forem atualizadas",
-      "statusLabel": "",
+      "statusLabel": "Status:",
       "basicPlan": "As atualizações em tempo real não estão disponíveis no plano Básico. Mude para o Plus para receber notificações instantâneas quando as tarefas forem atualizadas.",
       "disabled": "As atualizações em tempo real estão desativadas. Ative-as para ver as mudanças ao vivo quando você ou outros membros do círculo concluírem, pularem ou modificarem tarefas.",
       "connected": "As atualizações em tempo real estão funcionando. Você verá as mudanças ao vivo quando você ou outros membros do círculo concluírem, pularem ou modificarem tarefas.",
@@ -573,20 +567,20 @@
     }
   },
   "privacyAnalytics": {
-    "title": "",
-    "description": "",
-    "analyticsToggle": "",
-    "analyticsHelper": "",
-    "crashToggle": "",
-    "crashHelper": "",
-    "footnote": ""
+    "title": "Privacy & Analytics",
+    "description": "Donetick never sends task names, descriptions, notes, or other task content. Session recording is never enabled.",
+    "analyticsToggle": "Anonymous analytics",
+    "analyticsHelper": "Help improve Donetick by sharing anonymous usage statistics.",
+    "crashToggle": "Crash reports",
+    "crashHelper": "Send us the error and what led to it when Donetick crashes no task content.",
+    "footnote": "You can change these choices at any time."
   },
   "subscription": {
-    "sessionFailed": "",
-    "errorTitle": "",
-    "errorMessage": "",
-    "subscribe": "",
-    "cancelAnytime": "",
+    "sessionFailed": "Failed to create subscription session",
+    "errorTitle": "Subscription Error",
+    "errorMessage": "Failed to start subscription process. Please try again.",
+    "subscribe": "Subscribe",
+    "cancelAnytime": "Cancel anytime. No hidden fees. Secure payment powered by Stripe.",
     "description": "",
     "whatsIncluded": "",
     "mostPopular": "",
@@ -596,32 +590,39 @@
     "featureApiTokens": "",
     "featureImageUploads": "",
     "featureAutomation": "",
-    "planYearly": ""
+    "planYearly": "",
+    "reasonAdvancedReminders": "Lembretes antes de uma tarefa vencer e acompanhamentos depois são uma funcionalidade do Plus. O teu plano atual lembra-te na data de vencimento.",
+    "reasonReminderChannels": "Enviar lembretes de tarefas para um grupo de Telegram é uma funcionalidade do Plus.",
+    "reasonHistoryWindow": "O teu plano atual mostra os últimos 30 dias. Atualiza para Plus para ver todo o histórico e tendências a longo prazo.",
+    "reasonThingTriggers": "Ativar tarefas automaticamente quando o estado de um objeto muda é uma funcionalidade do Plus.",
+    "reasonProjectLimit": "O teu plano atual inclui {{projectLimit}} projetos. Atualiza para Plus para criar todos os que precisares.",
+    "reasonQuickFilterLimit": "O teu plano atual inclui {{filterLimit}} filtros rápidos guardados. Atualiza para Plus para filtros ilimitados.",
+    "reasonFileUpload": "Anexar ficheiros e imagens é uma funcionalidade do Plus. Atualiza para Plus para adicionar fotos, digitalizações e documentos às tuas tarefas."
   },
   "childUsers": {
-    "errNameRequired": "",
-    "errNameMin": "",
-    "errNameMax": "",
-    "errNameChars": "",
-    "errPasswordRequired": "",
-    "errPasswordLength": "",
-    "errPasswordMatch": "",
-    "errDisplayNameMax": "",
-    "createTitle": "",
+    "errNameRequired": "Sub account name is required",
+    "errNameMin": "Sub account name must be at least 2 characters",
+    "errNameMax": "Sub account name must be less than 20 characters",
+    "errNameChars": "Sub account name can only contain lowercase letters, dot and dash",
+    "errPasswordRequired": "Password is required",
+    "errPasswordLength": "Password must be between 8 and 64 characters",
+    "errPasswordMatch": "Passwords do not match",
+    "errDisplayNameMax": "Display name must be less than 50 characters",
+    "createTitle": "Create Sub Account",
     "createDescription": "",
-    "createButton": "",
-    "nameLabel": "",
-    "namePlaceholder": "",
-    "displayNameLabel": "",
-    "displayNamePlaceholder": "",
-    "passwordLabel": "",
-    "passwordPlaceholder": "",
-    "confirmPasswordLabel": "",
-    "confirmPasswordPlaceholder": ""
+    "createButton": "Create Account",
+    "nameLabel": "Sub Account Name *",
+    "namePlaceholder": "Enter sub account name (e.g., sarah)",
+    "displayNameLabel": "Display Name",
+    "displayNamePlaceholder": "Display name (optional, defaults to sub account name)",
+    "passwordLabel": "Password *",
+    "passwordPlaceholder": "Enter password (8-64 characters)",
+    "confirmPasswordLabel": "Confirm Password *",
+    "confirmPasswordPlaceholder": "Confirm password"
   },
   "passwordChange": {
-    "minLength": "",
-    "maxLength": "",
+    "minLength": "Password must be at least 8 characters",
+    "maxLength": "Password must be less than 64 characters",
     "description": "",
     "mismatch": "",
     "newPassword": "",
@@ -630,51 +631,57 @@
     "confirmPasswordPlaceholder": ""
   },
   "payment": {
-    "cancelledTitle": "",
-    "cancelledRedirect": "",
-    "successTitle": "",
-    "successRedirect": ""
+    "cancelledTitle": "Payment has been cancelled",
+    "cancelledRedirect": "You will be redirected to the main page shortly.",
+    "successTitle": "Payment Successful!",
+    "successRedirect": "You will be redirected to the settings page shortly."
   },
   "developer": {
-    "tokenRefreshed": "",
-    "endpointCalled": "",
-    "clearDbCleared": "",
-    "clearDbDone": "",
-    "intro": "",
-    "refreshCookieNote": "",
-    "noReconnectInfo": "",
-    "noTimeoutInfo": "",
-    "noDebugInfo": ""
+    "tokenRefreshed": "Token refreshed successfully",
+    "endpointCalled": "Refresh token endpoint called successfully",
+    "clearDbCleared": "Local offline database cleared. Starting full sync...",
+    "clearDbDone": "Full sync completed from the beginning",
+    "intro": "View technical information about your authentication tokens and session",
+    "refreshCookieNote": "Refresh tokens are managed via HTTP-only cookies on web platform",
+    "noReconnectInfo": "No reconnection information available",
+    "noTimeoutInfo": "No timeout information available",
+    "noDebugInfo": "No debug information available"
   },
   "backup": {
-    "keyRequired": "",
-    "created": "",
-    "createFailed": "",
-    "selectFile": "",
-    "restored": "",
-    "restoreFailed": "",
-    "readFailed": "",
-    "createIntro": "",
-    "keyPlaceholder": "",
-    "includeAssets": "",
-    "warningLabel": "",
-    "restoreWarning": "",
-    "restoreKeyPlaceholder": "",
+    "keyRequired": "Encryption key is required",
+    "created": "Backup created and downloaded successfully",
+    "createFailed": "Failed to create backup",
+    "selectFile": "Please select a backup file",
+    "restored": "Backup restored successfully. Please refresh the page.",
+    "restoreFailed": "Failed to restore backup",
+    "readFailed": "Failed to read backup file",
+    "createIntro": "Create an encrypted backup of your data. This backup will include all your chores, history, settings, and optionally your uploaded files.",
+    "keyPlaceholder": "Enter a strong encryption key",
+    "includeAssets": "Include uploaded files and assets",
+    "warningLabel": "Warning:",
+    "restoreWarning": "Restoring a backup will replace all your current data. This action cannot be undone.",
+    "restoreKeyPlaceholder": "Enter the encryption key used for this backup",
     "title": "",
     "createTab": "",
     "restoreTab": "",
     "creating": "",
-    "restoring": ""
+    "restoring": "",
+    "encryptionKeyRequired": "Chave de criptografia *",
+    "keySafetyNotice": "Guarde esta chave em segurança — você precisará dela para restaurar seu backup",
+    "nameOptional": "Nome do backup (opcional)",
+    "namePlaceholder": "ex.: backup-semanal",
+    "fileRequired": "Arquivo de backup *",
+    "selectedFile": "Selecionado: {{name}}"
   },
   "deletion": {
-    "passwordRequired": "",
-    "passwordAndDelete": "",
-    "failed": "",
-    "passwordPlaceholder": "",
-    "transferIntro": "",
-    "selectOwner": "",
-    "confirmPrompt": "",
-    "typeDelete": "",
+    "passwordRequired": "Please enter your password to continue",
+    "passwordAndDelete": "Please enter your password and type DELETE to confirm",
+    "failed": "Failed to delete account",
+    "passwordPlaceholder": "Enter your password",
+    "transferIntro": "You own circles that require ownership transfer before deletion. Please select new owners:",
+    "selectOwner": "Select new owner",
+    "confirmPrompt": "Please enter your password and type DELETE to confirm",
+    "typeDelete": "DELETE",
     "warningLead": "",
     "warningIntro": "",
     "removesProfile": "",
@@ -692,7 +699,15 @@
   },
   "realtime": {
     "titleSse": "",
-    "subtitleSse": ""
+    "subtitleSse": "",
+    "basicPlanDescription": "Real-time updates (SSE) are not available in the Basic plan. Upgrade to Plus to receive instant notifications when chores are updated.",
+    "disabledDescription": "Real-time updates (SSE) are disabled. Enable to see live changes when you or other circle members complete, skip, or modify chores.",
+    "connectedDescription": "Real-time updates (SSE) are working. You'll see live changes when you or other circle members complete, skip, or modify chores.",
+    "connectingDescription": "Connecting to real-time updates (SSE)...",
+    "errorDescription": "Real-time updates (SSE) are enabled but not working: {{error}}",
+    "disconnectedDescription": "Real-time updates (SSE) are enabled but not currently connected.",
+    "enableLabel": "Enable Real-time Updates (SSE)",
+    "statusLabel": "Status:"
   },
   "nativeCancel": {
     "title": "",
