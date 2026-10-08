@@ -113,8 +113,7 @@
       "results_one": "{{count}} risultato",
       "results_other": "{{count}} risultati",
       "typeToSearch": "Digita per cercare",
-      "slashHint": "/ per passare a una vista",
-      "results_many": "{{count}} risultati"
+      "slashHint": "/ per passare a una vista"
     },
     "modes": {
       "actions": {
@@ -336,9 +335,7 @@
     "pendingActionsTitle": "Azioni in attesa",
     "actionsWaitingToSync_one": "{{count}} azione in attesa di essere sincronizzata.",
     "actionsWaitingToSync_other": "{{count}} azioni in attesa di essere sincronizzate.",
-    "cancelActionAria": "Annulla {{label}}",
-    "pendingSyncLabel_many": "{{count}} azioni in attesa di sincronizzazione",
-    "actionsWaitingToSync_many": "{{count}} azioni in attesa di essere sincronizzate."
+    "cancelActionAria": "Annulla {{label}}"
   },
   "attachments": "Allegati",
   "fileNumbered": "File {{index}}",
@@ -592,8 +589,7 @@
     "presetLast7Days": "Ultimi 7 giorni",
     "presetThisMonth": "Questo mese",
     "presetLast30Days": "Ultimi 30 giorni",
-    "presetLast3Months": "Ultimi 3 mesi",
-    "showResults_many": "Mostra {{count}} risultati"
+    "presetLast3Months": "Ultimi 3 mesi"
   },
   "workspaceReady": {
     "allSetNamed": "È tutto pronto, {{name}}",
@@ -612,19 +608,16 @@
     "verdict": {
       "late": {
         "title_one": "{{count}} attività richiede attenzione.",
-        "title_other": "{{count}} attività richiedono attenzione.",
-        "title_many": "{{count}} attività richiedono attenzione."
+        "title_other": "{{count}} attività richiedono attenzione."
       },
       "review": {
         "title": "C'è qualcosa da verificare.",
         "body_one": "{{count}} attività completata è in attesa di approvazione.",
-        "body_other": "{{count}} attività completate sono in attesa di approvazione.",
-        "body_many": "{{count}} attività completate sono in attesa di approvazione."
+        "body_other": "{{count}} attività completate sono in attesa di approvazione."
       },
       "today": {
         "title_one": "{{count}} attività scade oggi.",
-        "title_other": "{{count}} attività scadono oggi.",
-        "title_many": "{{count}} attività scadono oggi."
+        "title_other": "{{count}} attività scadono oggi."
       },
       "clear": {
         "title": "Sei in pari.",
@@ -683,10 +676,7 @@
       "caughtUp": "Tutto a posto",
       "emptyTitle": "Non c'è ancora nessun altro",
       "emptyBody": "Invita le persone con cui condividi le attività e questa schermata mostrerà chi si sta occupando di cosa.",
-      "emptyAction": "Invita nella tua Cerchia",
-      "open_many": "{{count}} aperte",
-      "late_many": "{{count}} scadute",
-      "done_many": "{{count}} completate"
+      "emptyAction": "Invita nella tua Cerchia"
     },
     "projects": {
       "title": "Progetti",
@@ -697,18 +687,14 @@
       "tasksOverdue_other": "{{count}} attività, {{overdue}} scadute",
       "tasksUnplanned_one": "{{count}} attività, {{unplanned}} non pianificata",
       "tasksUnplanned_other": "{{count}} attività, {{unplanned}} non pianificate",
-      "clear": "Tutto a posto",
-      "tasks_many": "{{count}} attività",
-      "tasksOverdue_many": "{{count}} attività, {{overdue}} scadute",
-      "tasksUnplanned_many": "{{count}} attività, {{unplanned}} non pianificate"
+      "clear": "Tutto a posto"
     },
     "filters": {
       "title": "Filtri",
       "action": "Tutti i filtri",
       "tasks_one": "{{count}} corrispondenza",
       "tasks_other": "{{count}} corrispondenze",
-      "clear": "Nessuna corrispondenza",
-      "tasks_many": "{{count}} corrispondenze"
+      "clear": "Nessuna corrispondenza"
     },
     "capture": {
       "placeholder": "Aggiungi un'attività…",
