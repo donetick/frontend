@@ -6,12 +6,15 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
 import ChoreActionMenu from '../components/ChoreActionMenu'
+import ArchivedChoreCard from './ArchivedChoreCard'
 import ChoreCard from './ChoreCard'
 import CompactChoreCard from './CompactChoreCard'
 import ChoreSwipeableItem, {
   SWIPE_COMMIT_THRESHOLD,
 } from './components/ChoreSwipeableItem'
 import {
+  getArchivedLeadingActions,
+  getArchivedTrailingActions,
   getChoreLeadingActions,
   getChoreTrailingActions,
 } from './components/ChoreSwipeActions'
@@ -20,6 +23,7 @@ const ChoreListView = ({
   chores,
   handleChoreAction,
   handleLabelFiltering,
+  isArchived = false,
   isMultiSelectMode,
   membersData,
   onLongPressChore,
@@ -49,6 +53,18 @@ const ChoreListView = ({
   const usesCompactCard = viewMode === 'compact'
 
   const renderChoreCard = (chore, key) => {
+    if (isArchived) {
+      return (
+        <ArchivedChoreCard
+          key={key || chore.id}
+          chore={chore}
+          performers={membersData?.res}
+          isMultiSelectMode={isMultiSelectMode}
+          isSelected={selectedChores.has(chore.id)}
+          onSelectionToggle={() => toggleChoreSelection(chore.id)}
+        />
+      )
+    }
     const CardComponent = usesCompactCard ? CompactChoreCard : ChoreCard
     return (
       <CardComponent
@@ -95,11 +111,19 @@ const ChoreListView = ({
         {chores.map(chore => (
           <ChoreSwipeableItem
             key={chore.id}
-            leadingActions={getChoreLeadingActions(swipeActionArgs(chore))}
-            trailingActions={getChoreTrailingActions({
-              ...swipeActionArgs(chore),
-              navigate,
-            })}
+            leadingActions={
+              isArchived
+                ? getArchivedLeadingActions(swipeActionArgs(chore))
+                : getChoreLeadingActions(swipeActionArgs(chore))
+            }
+            trailingActions={
+              isArchived
+                ? getArchivedTrailingActions(swipeActionArgs(chore))
+                : getChoreTrailingActions({
+                    ...swipeActionArgs(chore),
+                    navigate,
+                  })
+            }
             onClick={() => {
               if (isMultiSelectMode) {
                 toggleChoreSelection(chore.id)

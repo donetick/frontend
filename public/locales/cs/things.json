@@ -19,7 +19,11 @@
     "overview": "Přehled věcí",
     "visualization": "Vizualizace dat",
     "changeHistory": "Historie změn",
-    "updated": "Aktualizováno"
+    "updated": "Aktualizováno",
+    "timeBefore": "{{time}} předtím",
+    "loading": "Načítání...",
+    "noMoreHistory": "Žádná další historie",
+    "loadMore": "Načíst další"
   },
   "view": {
     "title": "Věci",
@@ -42,7 +46,7 @@
     "toggle": "Přepnout"
   },
   "types": {
-    "text": "",
+    "text": "Text",
     "number": "Číslo",
     "boolean": "Logická hodnota"
   },

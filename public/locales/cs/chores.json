@@ -12,8 +12,6 @@
   "status": "Stav",
   "description": "Popis",
   "choreView": {
-    "notFoundTitle": "Úkol není k dispozici",
-    "notFoundDescription": "Tento úkol byl možná smazán nebo už s vámi není sdílen.",
     "assignment": "Přiřazení",
     "assigned": "Přiřazeno",
     "last": "Naposledy",
@@ -24,7 +22,7 @@
     "times": "×",
     "details": "Podrobnosti",
     "createdBy": "Vytvořil(a)",
-    "na": "",
+    "na": "N/A",
     "taskCompleted": "Úkol dokončen",
     "taskCompletedMessage": "Váš úkol byl označen jako dokončený",
     "taskCompletionUndone": "Dokončení úkolu bylo vráceno zpět.",
@@ -113,7 +111,9 @@
     "unableChangeAssignee": "Řešitele nelze změnit",
     "availableToCompleteStarting": "Lze dokončit od {{date}}",
     "delegateToSomeoneElse": "Předat někomu jinému",
-    "selectAPerformer": "Vyberte, kdo úkol provede"
+    "selectAPerformer": "Vyberte, kdo úkol provede",
+    "notFoundTitle": "Úkol není k dispozici",
+    "notFoundDescription": "Tento úkol byl možná smazán nebo už s vámi není sdílen."
   },
   "toolbar": {
     "defaultProject": "Výchozí projekt",
@@ -136,7 +136,11 @@
       "assignee": "Řešitel"
     },
     "display": "Zobrazení",
-    "displayOptions": "Možnosti zobrazení"
+    "displayOptions": "Možnosti zobrazení",
+    "moreSaveOptions": "Další možnosti uložení",
+    "showCount": "Zobrazit {{count}}",
+    "done": "Hotovo",
+    "savedFilters": "Uložené filtry"
   },
   "sort": {
     "assignedToMe": "Přiřazené mně",
@@ -259,8 +263,6 @@
     "failRescheduleTitle": "Přeplánování se nezdařilo",
     "failRescheduleMessage": "Termín nelze aktualizovat",
     "failRemoveDueDateTitle": "Termín se nepodařilo odebrat",
-    "failAssignTitle": "Failed to assign",
-    "failAssignMessage": "Unable to assign task",
     "nudgeSentTitle": "Připomenutí odesláno!",
     "nudgeFailed": "Připomenutí se nepodařilo odeslat",
     "failNudgeTitle": "Připomenutí se nepodařilo odeslat",
@@ -275,7 +277,9 @@
       "skipTitle": "Přeskočit úkoly",
       "skippedTitle": "⏭️ Úkoly přeskočeny",
       "skipFailedTitle": "Hromadné přeskočení se nezdařilo"
-    }
+    },
+    "failAssignTitle": "",
+    "failAssignMessage": ""
   },
   "archived": {
     "restoredTitle": "Úkol obnoven",
@@ -395,10 +399,10 @@
     "title": "Připomínky",
     "remind": "Připomenout",
     "onDueDate": "V den termínu",
-    "unitMin": "",
+    "unitMin": "min",
     "unitHr": "h",
     "unitDay": "d",
-    "duration_one": "",
+    "duration_one": "{{count}} {{unit}}",
     "duration_other": "{{count}} {{unit}}",
     "before": "před",
     "after": "po",
@@ -615,7 +619,15 @@
     "keepAsAttachment": "Ponechat fotku jako přílohu",
     "altCaptured": "Zachycený dokument",
     "altProcessing": "Zpracovávání",
-    "taskIdentified": "Úkol rozpoznán"
+    "taskIdentified": "Úkol rozpoznán",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
+    "tapToScanHint": "Klepnutím na \"Skenovat dokument\" otevřete skener",
+    "readingTextProgress": "Čtení textu z obrázku… {{progress}} %",
+    "dueDate": "Termín: {{date}}",
+    "hideRawText": "Skrýt surový text",
+    "showRawText": "Zobrazit surový text",
+    "cameraUnavailableUseUpload": "Fotoaparát není k dispozici — použijte místo toho nahrání"
   },
   "descriptionPlaceholder": "Zadejte popis...",
   "notificationTemplate": {
@@ -763,7 +775,10 @@
     "updatedBy": "Upravil(a)",
     "archive": "Archivovat",
     "unarchive": "Obnovit z archivu",
-    "create": "Vytvořit"
+    "create": "Vytvořit",
+    "alwaysDueHint": "Tento úkol nemá termín a je vždy dostupný k dokončení",
+    "notifyForTaskUnavailable": "Oznámení nejsou k dispozici pro úkoly založené na spouštěči nebo vždy dostupné úkoly",
+    "notificationsFreePlanNote": "Váš tarif zahrnuje připomenutí v den termínu. Plus přidává připomenutí před termínem a následná upozornění po něm."
   },
   "addTask": {
     "title": "Vytvořit nový úkol",
@@ -776,7 +791,9 @@
     "createCount": "Vytvořit úkoly ({{count}})",
     "useTask": "Použít úkol",
     "processing": "Zpracovávání",
-    "create": "Vytvořit"
+    "create": "Vytvořit",
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:"
   },
   "repeat": {
     "days": {
@@ -808,11 +825,13 @@
       "monthly": "Měsíčně",
       "yearly": "Ročně",
       "adaptive": "Adaptivně",
-      "custom": "Vlastní"
+      "custom": "Vlastní",
+      "always": "Vždy"
     },
     "freqMessage": {
       "adaptive": "Tento úkol bude plánován dynamicky podle předchozích dat dokončení.",
-      "custom": "Tento úkol bude plánován podle vlastní frekvence."
+      "custom": "Tento úkol bude plánován podle vlastní frekvence.",
+      "always": "Tento úkol nemá termín a zůstává dostupný ke splnění kdykoli. Po dokončení nebude archivován."
     },
     "weekPattern": {
       "every_week": "Každý týden",
@@ -844,7 +863,7 @@
       "years": "Roky"
     },
     "repeatOnType": {
-      "interval": "",
+      "interval": "Interval",
       "days_of_the_week": "Dny v týdnu",
       "day_of_the_month": "Den v měsíci"
     },
@@ -1039,5 +1058,7 @@
     "today": "Dnes",
     "yesterday": "Včera",
     "noteTitle": "Poznámka – {{choreName}}"
-  }
+  },
+  "tasksForDate": "Úkoly pro {{date}}",
+  "createSuggestion": "Vytvořit \"{{value}}\""
 }

@@ -93,10 +93,6 @@
       "bugReport": {
         "title": "Nahlásit problém",
         "description": "Popište nám, co nefunguje, a technické podrobnosti přiložíme za vás."
-      },
-      "sidepanel": {
-        "title": "Přizpůsobení postranního panelu",
-        "description": "Upravte rozložení a viditelnost karet v postranním panelu."
       }
     }
   },
@@ -180,7 +176,7 @@
     "description": "Změňte nastavení účtu, jeho typ nebo heslo",
     "accountType": "Typ účtu: {{type}}",
     "free": "Zdarma",
-    "plus": "",
+    "plus": "Plus",
     "plusUntil": "Plus (do {{date}})",
     "activeDescription": "Aktuálně máte předplatné Plus. Vaše předplatné se obnoví {{date}}.",
     "cancelledDescription": "Zrušili jste předplatné. Váš účet bude {{date}} převeden na tarif Zdarma.",
@@ -275,8 +271,8 @@
     "customLabel": "Vlastní oznámení",
     "customHelper": "Dostávat oznámení na jiné platformě",
     "targetNone": "Žádné",
-    "targetTelegram": "",
-    "targetPushover": "",
+    "targetTelegram": "Telegram",
+    "targetPushover": "Pushover",
     "targetWebhooks": "Webhooky",
     "telegramBotHelpBefore": "Aby oznámení přes Telegram fungovala, musíte botovi nejprve napsat zprávu",
     "telegramBotHelpAfter": "a zahajte chat",
@@ -427,9 +423,7 @@
         "name": "Týdenní cíle",
         "description": "Zobrazí týdenní pokrok a statistiky dokončení v rodině"
       }
-    },
-    "heading": "Nastavení postranního panelu",
-    "detailedDescription": "Upravte rozložení a viditelnost karet v postranním panelu. Tato sekce je dostupná pouze na zařízeních s velkou obrazovkou, jako jsou tablety a počítače."
+    }
   },
   "homeSections": {
     "title": "Přizpůsobení přehledu",
@@ -529,7 +523,7 @@
     "formats": {
       "mdy": "MM/DD/YYYY (USA)",
       "dmy": "DD/MM/YYYY (Evropa)",
-      "ymd": "",
+      "ymd": "YYYY-MM-DD (ISO)",
       "long": "Dlouhý formát (např. January 1, 2024)",
       "short": "Krátký formát (např. Jan 1, 2024)"
     },
@@ -596,7 +590,14 @@
     "featureApiTokens": "API tokeny pro integrace",
     "featureImageUploads": "Nahrávání obrázků do popisů",
     "featureAutomation": "Pokročilá automatizace úkolů",
-    "planYearly": "Ročně"
+    "planYearly": "Ročně",
+    "reasonAdvancedReminders": "Připomínky před termínem a následná upozornění po něm jsou funkcí Plus. Váš současný tarif vás upozorňuje v den termínu.",
+    "reasonReminderChannels": "Odesílání připomenutí úkolů do skupiny Telegram je funkce Plus.",
+    "reasonHistoryWindow": "Váš aktuální tarif zobrazuje posledních 30 dnů. Přejděte na Plus pro úplnou historii a dlouhodobé trendy.",
+    "reasonThingTriggers": "Automatické spouštění úkolů při změně stavu věci je funkce Plus.",
+    "reasonProjectLimit": "Váš současný tarif obsahuje {{projectLimit}} projektů. Přejděte na Plus a vytvořte tolik, kolik potřebujete.",
+    "reasonQuickFilterLimit": "Váš současný tarif obsahuje {{filterLimit}} uložených rychlých filtrů. Přejděte na Plus pro neomezené filtry.",
+    "reasonFileUpload": "Připojování souborů a obrázků je funkcí Plus. Přejděte na Plus a přidávejte k úkolům fotky, skeny a dokumenty."
   },
   "childUsers": {
     "errNameRequired": "Název podúčtu je povinný",
@@ -664,7 +665,13 @@
     "createTab": "Vytvořit zálohu",
     "restoreTab": "Obnovit zálohu",
     "creating": "Vytváření zálohy...",
-    "restoring": "Obnovování zálohy..."
+    "restoring": "Obnovování zálohy...",
+    "encryptionKeyRequired": "Šifrovací klíč *",
+    "keySafetyNotice": "Uchovejte tento klíč v bezpečí — budete ho potřebovat k obnovení zálohy",
+    "nameOptional": "Název zálohy (volitelné)",
+    "namePlaceholder": "např. týdenní záloha",
+    "fileRequired": "Soubor zálohy *",
+    "selectedFile": "Vybráno: {{name}}"
   },
   "deletion": {
     "passwordRequired": "Pro pokračování zadejte své heslo",
@@ -674,7 +681,7 @@
     "transferIntro": "Vlastníte kruhy, u kterých je před smazáním nutné převést vlastnictví. Vyberte nové vlastníky:",
     "selectOwner": "Vyberte nového vlastníka",
     "confirmPrompt": "Zadejte své heslo a pro potvrzení napište DELETE",
-    "typeDelete": "",
+    "typeDelete": "DELETE",
     "warningLead": "Tuto akci nelze vrátit.",
     "warningIntro": "Smazáním účtu trvale odstraníte:",
     "removesProfile": "Váš uživatelský profil a ověřovací údaje",
@@ -692,7 +699,15 @@
   },
   "realtime": {
     "titleSse": "Aktualizace v reálném čase (SSE)",
-    "subtitleSse": "Dostávejte okamžitá oznámení prostřednictvím Server-Sent Events"
+    "subtitleSse": "Dostávejte okamžitá oznámení prostřednictvím Server-Sent Events",
+    "basicPlanDescription": "Real-time updates (SSE) are not available in the Basic plan. Upgrade to Plus to receive instant notifications when chores are updated.",
+    "disabledDescription": "Real-time updates (SSE) are disabled. Enable to see live changes when you or other circle members complete, skip, or modify chores.",
+    "connectedDescription": "Real-time updates (SSE) are working. You'll see live changes when you or other circle members complete, skip, or modify chores.",
+    "connectingDescription": "Connecting to real-time updates (SSE)...",
+    "errorDescription": "Real-time updates (SSE) are enabled but not working: {{error}}",
+    "disconnectedDescription": "Real-time updates (SSE) are enabled but not currently connected.",
+    "enableLabel": "Enable Real-time Updates (SSE)",
+    "statusLabel": "Status:"
   },
   "nativeCancel": {
     "title": "Zrušit předplatné",

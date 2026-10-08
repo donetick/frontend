@@ -9,11 +9,9 @@
   "dueDate": "Data de vencimento",
   "assignedTo": "Atribuída a",
   "priority": "Prioridade",
-  "status": "",
+  "status": "Status",
   "description": "Descrição",
   "choreView": {
-    "notFoundTitle": "Tarefa não disponível",
-    "notFoundDescription": "Esta tarefa pode ter sido excluída ou não está mais compartilhada com você.",
     "assignment": "Atribuição",
     "assigned": "Atribuída",
     "last": "Última",
@@ -113,10 +111,12 @@
     "unableChangeAssignee": "",
     "availableToCompleteStarting": "",
     "delegateToSomeoneElse": "",
-    "selectAPerformer": ""
+    "selectAPerformer": "",
+    "notFoundTitle": "Tarefa não disponível",
+    "notFoundDescription": "Esta tarefa pode ter sido excluída ou não está mais compartilhada com você."
   },
   "toolbar": {
-    "defaultProject": "",
+    "defaultProject": "Default Project",
     "everyone": "",
     "mine": "",
     "availableToMe": "",
@@ -136,10 +136,14 @@
       "assignee": ""
     },
     "display": "",
-    "displayOptions": ""
+    "displayOptions": "",
+    "moreSaveOptions": "Mais opções de salvamento",
+    "showCount": "Mostrar {{count}}",
+    "done": "Concluído",
+    "savedFilters": "Filtros salvos"
   },
   "sort": {
-    "assignedToMe": "",
+    "assignedToMe": "Assigned to me",
     "smart": "",
     "createdDate": "",
     "updatedDate": "",
@@ -259,8 +263,6 @@
     "failRescheduleTitle": "",
     "failRescheduleMessage": "",
     "failRemoveDueDateTitle": "",
-    "failAssignTitle": "Failed to assign",
-    "failAssignMessage": "Unable to assign task",
     "nudgeSentTitle": "",
     "nudgeFailed": "",
     "failNudgeTitle": "",
@@ -275,7 +277,9 @@
       "skipTitle": "",
       "skippedTitle": "",
       "skipFailedTitle": ""
-    }
+    },
+    "failAssignTitle": "",
+    "failAssignMessage": ""
   },
   "archived": {
     "restoredTitle": "",
@@ -615,7 +619,15 @@
     "keepAsAttachment": "",
     "altCaptured": "",
     "altProcessing": "",
-    "taskIdentified": ""
+    "taskIdentified": "",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
+    "tapToScanHint": "Toque em \"Digitalizar documento\" para abrir o scanner",
+    "readingTextProgress": "Lendo texto da imagem… {{progress}}%",
+    "dueDate": "Vencimento: {{date}}",
+    "hideRawText": "Ocultar texto bruto",
+    "showRawText": "Mostrar texto bruto",
+    "cameraUnavailableUseUpload": "Câmera indisponível — use Enviar em vez disso"
   },
   "descriptionPlaceholder": "",
   "notificationTemplate": {
@@ -732,7 +744,7 @@
     "rescheduleFromCompletion": "",
     "rescheduleFromCompletionHelp": "",
     "notifications": "",
-    "notificationsPlanWarning": "",
+    "notificationsPlanWarning": "Task notifications are not available in the Basic plan. Upgrade to Plus to receive reminders when tasks are due or completed.",
     "notifyForTask": "",
     "notifyForTaskHelp": "",
     "notificationSchedule": "",
@@ -763,7 +775,10 @@
     "updatedBy": "",
     "archive": "",
     "unarchive": "",
-    "create": ""
+    "create": "",
+    "alwaysDueHint": "Esta tarefa não tem data de vencimento e está sempre disponível para ser concluída",
+    "notifyForTaskUnavailable": "As notificações não estão disponíveis para tarefas baseadas em gatilho ou sempre disponíveis",
+    "notificationsFreePlanNote": "O teu plan inclui um lembrete na data de vencimento. Plus adiciona lembretes antes do vencimento e acompanhamentos depois."
   },
   "addTask": {
     "title": "",
@@ -776,7 +791,9 @@
     "createCount": "",
     "useTask": "",
     "processing": "",
-    "create": ""
+    "create": "",
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:"
   },
   "repeat": {
     "days": {
@@ -808,11 +825,13 @@
       "monthly": "",
       "yearly": "",
       "adaptive": "",
-      "custom": ""
+      "custom": "",
+      "always": "Sempre"
     },
     "freqMessage": {
       "adaptive": "",
-      "custom": ""
+      "custom": "",
+      "always": "Esta tarefa não tem data de vencimento e permanece disponível para conclusão a qualquer momento. Não será arquivada ao ser concluída."
     },
     "weekPattern": {
       "every_week": "",
@@ -864,7 +883,7 @@
     "repeatOn": "",
     "triggerLabel": "",
     "triggerHelp": "",
-    "triggerPlanWarning": "",
+    "triggerPlanWarning": "Thing-based triggers are not available in the Basic plan. Upgrade to Plus to automatically trigger tasks when device states change.",
     "previewEvery": "",
     "previewOccurrence": "",
     "defaultTime": "",
@@ -1039,5 +1058,7 @@
     "today": "",
     "yesterday": "",
     "noteTitle": ""
-  }
+  },
+  "tasksForDate": "Tarefas para {{date}}",
+  "createSuggestion": "Criar \"{{value}}\""
 }

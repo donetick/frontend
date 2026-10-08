@@ -72,7 +72,7 @@
     "placeholder": "חיפוש ב-Donetick",
     "inputAriaLabel": "חיפוש במשימות, בהיסטוריה, בפרויקטים, בתגיות ובהגדרות",
     "deviceNote": "חיפוש בתוכן הזמין במכשיר הזה",
-    "escape": "",
+    "escape": "Esc",
     "recent": "חיפושים אחרונים",
     "empty": {
       "title": "אין התאמות ישירות",
@@ -146,7 +146,7 @@
       "tooComplicated": "מסובך מדי",
       "slow": "איטי",
       "notifications": "התראות",
-      "ai": "",
+      "ai": "AI",
       "other": "אחר"
     },
     "details": {
@@ -225,6 +225,7 @@
     "invitePeople": "",
     "addMembers": "",
     "sidePanelSettings": "",
+    "sidePanelSettingsDescription": "התאמה אישית של פריסה וכרטיסים",
     "planFree": "",
     "planPlus": "",
     "planPlusExpiring": "",
@@ -341,11 +342,26 @@
   "noAttachmentsTitle": "",
   "noAttachmentsDescription": "",
   "kbSize": "",
+  "logoAlt": "לוגו",
+  "notification": {
+    "error": "שגיאה",
+    "success": "הצלחה",
+    "undoneSuccessfully": "בוטל בהצלחה",
+    "warning": "אזהרה",
+    "information": "מידע",
+    "title": "התראה",
+    "unknown": "התראה לא ידועה",
+    "undo": "בטל",
+    "dismiss": "סגור"
+  },
   "onboarding": {
     "sources": {
       "speak": "",
       "snap": "",
       "type": ""
+    },
+    "voiceWave": {
+      "listening": "מאזין…"
     },
     "capture": {
       "voiceCaption": "",

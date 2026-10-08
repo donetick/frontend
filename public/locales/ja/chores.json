@@ -12,8 +12,6 @@
   "status": "ステータス",
   "description": "説明",
   "choreView": {
-    "notFoundTitle": "タスクが利用できません",
-    "notFoundDescription": "このタスクは削除された可能性があるか、共有が解除されています。",
     "assignment": "担当",
     "assigned": "担当者",
     "last": "前回",
@@ -113,10 +111,12 @@
     "unableChangeAssignee": "",
     "availableToCompleteStarting": "",
     "delegateToSomeoneElse": "",
-    "selectAPerformer": ""
+    "selectAPerformer": "",
+    "notFoundTitle": "タスクが利用できません",
+    "notFoundDescription": "このタスクは削除された可能性があるか、共有が解除されています。"
   },
   "toolbar": {
-    "defaultProject": "",
+    "defaultProject": "Default Project",
     "everyone": "",
     "mine": "",
     "availableToMe": "",
@@ -136,10 +136,14 @@
       "assignee": ""
     },
     "display": "",
-    "displayOptions": ""
+    "displayOptions": "",
+    "moreSaveOptions": "その他の保存オプション",
+    "showCount": "{{count}}件表示",
+    "done": "完了",
+    "savedFilters": "保存済みフィルター"
   },
   "sort": {
-    "assignedToMe": "",
+    "assignedToMe": "Assigned to me",
     "smart": "",
     "createdDate": "",
     "updatedDate": "",
@@ -259,8 +263,6 @@
     "failRescheduleTitle": "",
     "failRescheduleMessage": "",
     "failRemoveDueDateTitle": "",
-    "failAssignTitle": "Failed to assign",
-    "failAssignMessage": "Unable to assign task",
     "nudgeSentTitle": "",
     "nudgeFailed": "",
     "failNudgeTitle": "",
@@ -275,7 +277,9 @@
       "skipTitle": "",
       "skippedTitle": "",
       "skipFailedTitle": ""
-    }
+    },
+    "failAssignTitle": "",
+    "failAssignMessage": ""
   },
   "archived": {
     "restoredTitle": "",
@@ -615,7 +619,15 @@
     "keepAsAttachment": "",
     "altCaptured": "",
     "altProcessing": "",
-    "taskIdentified": ""
+    "taskIdentified": "",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
+    "tapToScanHint": "「ドキュメントをスキャン」をタップしてスキャナーを開く",
+    "readingTextProgress": "画像からテキストを読み取り中… {{progress}}%",
+    "dueDate": "期限: {{date}}",
+    "hideRawText": "元のテキストを非表示",
+    "showRawText": "元のテキストを表示",
+    "cameraUnavailableUseUpload": "カメラが利用できません — 代わりにアップロードを使用してください"
   },
   "descriptionPlaceholder": "",
   "notificationTemplate": {
@@ -732,7 +744,7 @@
     "rescheduleFromCompletion": "",
     "rescheduleFromCompletionHelp": "",
     "notifications": "",
-    "notificationsPlanWarning": "",
+    "notificationsPlanWarning": "Task notifications are not available in the Basic plan. Upgrade to Plus to receive reminders when tasks are due or completed.",
     "notifyForTask": "",
     "notifyForTaskHelp": "",
     "notificationSchedule": "",
@@ -763,7 +775,10 @@
     "updatedBy": "",
     "archive": "",
     "unarchive": "",
-    "create": ""
+    "create": "",
+    "alwaysDueHint": "このタスクには期限がなく、いつでも完了できます",
+    "notifyForTaskUnavailable": "トリガー式または常時利用可能なタスクには通知を設定できません",
+    "notificationsFreePlanNote": "あなたのプランでは期限日にリマインダーが届きます。Plusにすると、期限前のリマインダーと期限後のフォローアップが追加されます。"
   },
   "addTask": {
     "title": "",
@@ -776,7 +791,9 @@
     "createCount": "",
     "useTask": "",
     "processing": "",
-    "create": ""
+    "create": "",
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:"
   },
   "repeat": {
     "days": {
@@ -808,11 +825,13 @@
       "monthly": "",
       "yearly": "",
       "adaptive": "",
-      "custom": ""
+      "custom": "",
+      "always": "常時"
     },
     "freqMessage": {
       "adaptive": "",
-      "custom": ""
+      "custom": "",
+      "always": "このタスクには期限がなく、いつでも完了できる状態が続きます。完了してもアーカイブされません。"
     },
     "weekPattern": {
       "every_week": "",
@@ -864,7 +883,7 @@
     "repeatOn": "",
     "triggerLabel": "",
     "triggerHelp": "",
-    "triggerPlanWarning": "",
+    "triggerPlanWarning": "Thing-based triggers are not available in the Basic plan. Upgrade to Plus to automatically trigger tasks when device states change.",
     "previewEvery": "",
     "previewOccurrence": "",
     "defaultTime": "",
@@ -1039,5 +1058,7 @@
     "today": "",
     "yesterday": "",
     "noteTitle": ""
-  }
+  },
+  "tasksForDate": "{{date}} のタスク",
+  "createSuggestion": "「{{value}}」を作成"
 }

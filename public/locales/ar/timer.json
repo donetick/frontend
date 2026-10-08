@@ -25,6 +25,17 @@
   "activeWork": "العمل النشط",
   "breakTime": "وقت الاستراحة",
   "workSessions": "جلسات العمل",
+  "timeline": {
+    "started": "بدأ: {{time}}",
+    "ended": "انتهى: {{time}}",
+    "now": "الآن: {{time}}",
+    "active": "نشط: {{percent}}%",
+    "emptyState": "لا يوجد مخطط زمني للنشاط. ابدأ العمل لرؤية نمط نشاطك.",
+    "workSessionsCount": "جلسات العمل ({{count}})",
+    "sessionNumber": "الجلسة رقم {{number}}",
+    "ongoing": "→ جارٍ",
+    "durationAutoCalculated": "المدة (محسوبة تلقائيًا)"
+  },
   "totalTime": "إجمالي الوقت",
   "distribution": "العمل ضد التوزيع الفاصل",
   "noActiveTime": "لا يوجد وقت نشط بعد",

@@ -13,7 +13,7 @@
   "nameExists": "يوجد عامل تصفية بهذا الاسم مسبقاً",
   "tasks_one": "مهمة {{count}}",
   "tasks_other": "مهام {{count}}",
-  "overdue": "",
+  "overdue": "{{count}} overdue",
   "noConditions": "لا توجد شروط",
   "condition_one": "شرط {{count}}",
   "condition_other": "",

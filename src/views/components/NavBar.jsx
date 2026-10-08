@@ -8,6 +8,7 @@ import {
   History,
   ListAlt,
   Logout,
+  MenuOpenRounded,
   MenuRounded,
   ReportProblem,
   SearchRounded,
@@ -34,6 +35,7 @@ import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 
 import { version } from '../../../package.json'
+import DoneTickLogo from '../../assets/logo.svg'
 import UserProfileAvatar from '../../components/UserProfileAvatar'
 import { useScrollDirection } from '../../hooks/useScrollDirection'
 import { useResource } from '../../queries/ResourceQueries'
@@ -84,12 +86,20 @@ const NavBar = () => {
       window.removeEventListener(OPEN_NAVIGATION_DRAWER_EVENT, handleOpenDrawer)
   }, [])
 
+  // Keep page content and overlays clear of the navigation's current width.
   useEffect(() => {
-    const width = isDesktop ? `${COMPACT_NAV_WIDTH}px` : '0px'
-    document.documentElement.style.setProperty('--app-navigation-width', width)
-    return () =>
-      document.documentElement.style.removeProperty('--app-navigation-width')
-  }, [isDesktop])
+    const style = document.documentElement.style
+    const live = desktopExpanded ? EXPANDED_NAV_WIDTH : COMPACT_NAV_WIDTH
+    style.setProperty('--app-navigation-width', isDesktop ? `${live}px` : '0px')
+    style.setProperty(
+      '--app-navigation-offset',
+      isDesktop ? `${live}px` : '0px',
+    )
+    return () => {
+      style.removeProperty('--app-navigation-width')
+      style.removeProperty('--app-navigation-offset')
+    }
+  }, [isDesktop, desktopExpanded])
 
   const links = [
     {
@@ -245,10 +255,9 @@ const NavBar = () => {
           sx={{
             alignItems: 'center',
             display: 'flex',
-            flexDirection: compact ? 'column' : 'row',
-            gap: compact ? 0.5 : 1,
-            minHeight: 48,
-            px: compact ? 0 : 1,
+            flexDirection: 'column',
+            gap: compact ? 0.5 : 0.25,
+            px: compact ? 0 : 0.5,
             py: compact ? 0.5 : 0,
           }}
         >
@@ -266,23 +275,22 @@ const NavBar = () => {
                 display: 'flex',
                 height: compact ? 48 : 'auto',
                 justifyContent: 'center',
-                width: compact ? 48 : 'auto',
+                width: compact ? 48 : '100%',
               }}
             >
-              <UserProfileAvatar />
+              <UserProfileAvatar showDetails={!compact} />
             </Box>
           </Tooltip>
-          {!compact && <Box sx={{ flex: 1 }} />}
           <Box
             sx={{
               alignItems: 'center',
               display: 'flex',
               height: compact ? 48 : 'auto',
               justifyContent: 'center',
-              width: compact ? 48 : 'auto',
+              width: compact ? 48 : '100%',
             }}
           >
-            <SyncStatusIndicator />
+            <SyncStatusIndicator showLabel={!compact} />
           </Box>
         </Box>
       )}
@@ -388,7 +396,9 @@ const NavBar = () => {
             aria-hidden='true'
             sx={{
               flexShrink: 0,
-              width: COMPACT_NAV_WIDTH,
+              transition: 'width 200ms ease',
+              width: desktopExpanded ? EXPANDED_NAV_WIDTH : COMPACT_NAV_WIDTH,
+              '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
             }}
           />
           <Sheet
@@ -459,9 +469,56 @@ const NavBar = () => {
                   }}
                   sx={{ flexShrink: 0 }}
                 >
-                  <MenuRounded />
+                  {desktopExpanded ? (
+                    <MenuOpenRounded className='rtl-flip' />
+                  ) : (
+                    <MenuRounded />
+                  )}
                 </IconButton>
               </Tooltip>
+              {desktopExpanded && (
+                <Box
+                  sx={{
+                    alignItems: 'center',
+                    display: 'flex',
+                    gap: 1,
+                    minWidth: 0,
+                  }}
+                >
+                  <Box
+                    aria-hidden='true'
+                    component='img'
+                    src={DoneTickLogo}
+                    sx={{
+                      display: 'block',
+                      flexShrink: 0,
+                      height: 28,
+                      width: 28,
+                    }}
+                  />
+                  <Typography
+                    component='div'
+                    level='title-md'
+                    dir='ltr'
+                    sx={{
+                      alignItems: 'center',
+                      color: 'text.primary',
+                      display: 'flex',
+                      fontFamily: 'var(--joy-fontFamily-body)',
+                      fontWeight: 700,
+                      letterSpacing: '-0.015em',
+                      lineHeight: 1,
+                      minHeight: 28,
+                      userSelect: 'none',
+                    }}
+                  >
+                    Done
+                    <Box component='span' sx={{ color: '#06b6d4' }}>
+                      tick
+                    </Box>
+                  </Typography>
+                </Box>
+              )}
             </Box>
             <Box
               sx={{

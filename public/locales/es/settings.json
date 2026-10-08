@@ -10,7 +10,7 @@
     "loading": "Cargando…",
     "on": "Sí",
     "off": "No",
-    "error": "",
+    "error": "Error",
     "success": "Listo",
     "plusFeature": "Función Plus",
     "earlyAccess": "Acceso anticipado"
@@ -93,10 +93,6 @@
       "bugReport": {
         "title": "Informar de un problema",
         "description": "¿Algo no funciona bien? Envíanos los detalles junto con una instantánea técnica."
-      },
-      "sidepanel": {
-        "title": "Personalización del panel lateral",
-        "description": "Personaliza la disposición y la visibilidad de las tarjetas del panel lateral."
       }
     }
   },
@@ -275,9 +271,9 @@
     "customLabel": "Custom Notificación",
     "customHelper": "Receive Notificación on other platform",
     "targetNone": "Ninguna",
-    "targetTelegram": "",
-    "targetPushover": "",
-    "targetWebhooks": "",
+    "targetTelegram": "Telegram",
+    "targetPushover": "Pushover",
+    "targetWebhooks": "Webhooks",
     "telegramBotHelpBefore": "You need to initiate a message to the bot in order for the Telegram Notificación to work",
     "telegramBotHelpAfter": "para iniciar un chat",
     "clickHere": "Haz clic aquí",
@@ -427,9 +423,7 @@
         "name": "Objetivos semanales",
         "description": "Muestra el progreso semanal y las estadísticas de la familia"
       }
-    },
-    "heading": "Sidepanel Ajustes",
-    "detailedDescription": "Personaliza el diseño y la visibilidad de las tarjetas en el panel lateral. Esta sección solo está disponible en dispositivos con pantalla grande como tabletas y ordenadores de sobremesa."
+    }
   },
   "homeSections": {
     "title": "",
@@ -596,7 +590,14 @@
     "featureApiTokens": "Tokens de API para integraciones",
     "featureImageUploads": "Subida de imágenes en descripciones",
     "featureAutomation": "Automatización avanzada de tareas",
-    "planYearly": "Anual"
+    "planYearly": "Anual",
+    "reasonAdvancedReminders": "Los recordatorios antes de que venza una tarea y los seguimientos posteriores son una función de Plus. Tu plan actual te recuerda en la fecha de vencimiento.",
+    "reasonReminderChannels": "Enviar recordatorios de tareas a un grupo de Telegram es una función de Plus.",
+    "reasonHistoryWindow": "Tu plan actual muestra los últimos 30 días. Actualiza a Plus para ver todo tu historial y tendencias a largo plazo.",
+    "reasonThingTriggers": "Activar tareas automáticamente cuando cambia el estado de un objeto es una función de Plus.",
+    "reasonProjectLimit": "Tu plan actual incluye {{projectLimit}} proyectos. Actualiza a Plus para crear todos los que necesites.",
+    "reasonQuickFilterLimit": "Tu plan actual incluye {{filterLimit}} filtros rápidos guardados. Actualiza a Plus para filtros ilimitados.",
+    "reasonFileUpload": "Adjuntar archivos e imágenes es una función de Plus. Actualiza a Plus para añadir fotos, escaneos y documentos a tus tareas."
   },
   "childUsers": {
     "errNameRequired": "El nombre es obligatorio",
@@ -664,7 +665,13 @@
     "createTab": "Crear Copia",
     "restoreTab": "Restaurar Copia",
     "creating": "Creando copia de seguridad...",
-    "restoring": "Restaurando copia de seguridad..."
+    "restoring": "Restaurando copia de seguridad...",
+    "encryptionKeyRequired": "Clave de cifrado *",
+    "keySafetyNotice": "Guarda esta clave en un lugar seguro; la necesitarás para restaurar tu copia de seguridad",
+    "nameOptional": "Nombre de la copia de seguridad (opcional)",
+    "namePlaceholder": "p. ej., copia-semanal",
+    "fileRequired": "Archivo de copia de seguridad *",
+    "selectedFile": "Seleccionado: {{name}}"
   },
   "deletion": {
     "passwordRequired": "Introduce tu contraseña para confirmar la eliminación de la cuenta",
@@ -692,7 +699,15 @@
   },
   "realtime": {
     "titleSse": "Actualizaciones en Tiempo Real (SSE)",
-    "subtitleSse": "Recibe notificaciones instantáneas mediante Server-Sent Events"
+    "subtitleSse": "Recibe notificaciones instantáneas mediante Server-Sent Events",
+    "basicPlanDescription": "Real-time updates (SSE) are not available in the Basic plan. Upgrade to Plus to receive instant notifications when chores are updated.",
+    "disabledDescription": "Real-time updates (SSE) are disabled. Enable to see live changes when you or other circle members complete, skip, or modify chores.",
+    "connectedDescription": "Real-time updates (SSE) are working. You'll see live changes when you or other circle members complete, skip, or modify chores.",
+    "connectingDescription": "Connecting to real-time updates (SSE)...",
+    "errorDescription": "Real-time updates (SSE) are enabled but not working: {{error}}",
+    "disconnectedDescription": "Real-time updates (SSE) are enabled but not currently connected.",
+    "enableLabel": "Enable Real-time Updates (SSE)",
+    "statusLabel": "Status:"
   },
   "nativeCancel": {
     "title": "Cancelar Suscripción",

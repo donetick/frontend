@@ -12,8 +12,6 @@
   "status": "Statut",
   "description": "Description",
   "choreView": {
-    "notFoundTitle": "Tâche indisponible",
-    "notFoundDescription": "Cette tâche a peut-être été supprimée ou n'est plus partagée avec vous.",
     "assignment": "Attribution",
     "assigned": "Assigné",
     "last": "Dernier",
@@ -65,8 +63,6 @@
     "skip": "Passer",
     "cancel": "Annuler",
     "noPriority": "Aucune Priorité",
-    "more": "More",
-    "changeDueDate": "Change due date",
     "subtasks": "Sous-tâches",
     "noDescription": "Aucune description disponible",
     "timer": {
@@ -75,6 +71,10 @@
       "reset": "Réinitialiser le Minuteur",
       "delete": "Supprimer la Session"
     },
+    "notFoundTitle": "Tâche indisponible",
+    "notFoundDescription": "Cette tâche a peut-être été supprimée ou n'est plus partagée avec vous.",
+    "more": "More",
+    "changeDueDate": "Change due date",
     "unableUndo": "Failed to undo",
     "offlineComplete": "You're offline — completion will sync when back online",
     "unableComplete": "Unable to complete task",
@@ -115,6 +115,21 @@
     "delegateToSomeoneElse": "Delegate to someone else",
     "selectAPerformer": "Select a performer"
   },
+  "subTask": {
+    "untitled": "Sous-tache sans titre",
+    "actions": "Actions de sous-tache",
+    "edit": "Modifier",
+    "addBelow": "Ajouter une sous-tache en dessous",
+    "addChild": "Ajouter une sous-tache imbriquee",
+    "moveUpLevel": "Remonter d'un niveau",
+    "delete": "Supprimer",
+    "editTitle": "Modifier la sous-tache",
+    "addTitle": "Ajouter une sous-tache",
+    "addChildTitle": "Ajouter une sous-tache imbriquee",
+    "namePlaceholder": "Task name...",
+    "deleteShortcut": "Delete (Shift+Backspace)",
+    "addPlaceholder": "Add new task... (Enter to add)"
+  },
   "toolbar": {
     "defaultProject": "Default Project",
     "everyone": "Everyone",
@@ -136,7 +151,11 @@
       "assignee": "Assignee"
     },
     "display": "Display",
-    "displayOptions": "Display options"
+    "displayOptions": "Display options",
+    "moreSaveOptions": "Plus d'options d'enregistrement",
+    "showCount": "Afficher {{count}}",
+    "done": "Terminé",
+    "savedFilters": "Filtres enregistrés"
   },
   "sort": {
     "assignedToMe": "Assigned to me",
@@ -552,21 +571,6 @@
     "placeholder": "Search Donetick",
     "clearAria": "Clear task search"
   },
-  "subTask": {
-    "namePlaceholder": "Task name...",
-    "untitled": "Sous-tache sans titre",
-    "actions": "Actions de sous-tache",
-    "edit": "Modifier",
-    "addBelow": "Ajouter une sous-tache en dessous",
-    "addChild": "Ajouter une sous-tache imbriquee",
-    "moveUpLevel": "Remonter d'un niveau",
-    "delete": "Supprimer",
-    "editTitle": "Modifier la sous-tache",
-    "addTitle": "Ajouter une sous-tache",
-    "addChildTitle": "Ajouter une sous-tache imbriquee",
-    "deleteShortcut": "Delete (Shift+Backspace)",
-    "addPlaceholder": "Add new task... (Enter to add)"
-  },
   "voiceToTask": {
     "title": "Speak your tasks",
     "onDevice": "On-device",
@@ -615,7 +619,15 @@
     "keepAsAttachment": "Keep photo as attachment",
     "altCaptured": "Captured document",
     "altProcessing": "Processing",
-    "taskIdentified": "Task identified"
+    "taskIdentified": "Task identified",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
+    "tapToScanHint": "Appuyez sur \"Scanner un document\" pour ouvrir le scanner",
+    "readingTextProgress": "Lecture du texte de l'image… {{progress}} %",
+    "dueDate": "Échéance : {{date}}",
+    "hideRawText": "Masquer le texte brut",
+    "showRawText": "Afficher le texte brut",
+    "cameraUnavailableUseUpload": "Caméra non disponible — utilisez Téléverser à la place"
   },
   "descriptionPlaceholder": "Enter description...",
   "notificationTemplate": {
@@ -763,7 +775,10 @@
     "updatedBy": "Updated by",
     "archive": "Archive",
     "unarchive": "Unarchive",
-    "create": "Create"
+    "create": "Create",
+    "notificationsFreePlanNote": "Votre formule inclut un rappel à la date d'échéance. Plus ajoute des rappels avant l'échéance et des suivis après.",
+    "alwaysDueHint": "Cette tâche n'a pas de date d'échéance et est toujours disponible à réaliser",
+    "notifyForTaskUnavailable": "Les notifications ne sont pas disponibles pour les tâches basées sur une condition ou toujours disponibles"
   },
   "addTask": {
     "title": "Create new task",
@@ -776,7 +791,9 @@
     "createCount": "Create {{count}} Tasks",
     "useTask": "Use Task",
     "processing": "Processing",
-    "create": "Create"
+    "create": "Create",
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:"
   },
   "repeat": {
     "days": {
@@ -808,11 +825,13 @@
       "monthly": "Monthly",
       "yearly": "Yearly",
       "adaptive": "Adaptive",
-      "custom": "Custom"
+      "custom": "Custom",
+      "always": "Toujours"
     },
     "freqMessage": {
       "adaptive": "This chore will be scheduled dynamically based on previous completion dates.",
-      "custom": "This chore will be scheduled based on a custom frequency."
+      "custom": "This chore will be scheduled based on a custom frequency.",
+      "always": "Cette tâche n'a pas de date d'échéance et reste disponible à tout moment. Elle ne sera pas archivée une fois terminée."
     },
     "weekPattern": {
       "every_week": "Every week",
@@ -1039,5 +1058,7 @@
     "today": "Today",
     "yesterday": "Yesterday",
     "noteTitle": "Note - {{choreName}}"
-  }
+  },
+  "tasksForDate": "Tâches pour le {{date}}",
+  "createSuggestion": "Créer \"{{value}}\""
 }

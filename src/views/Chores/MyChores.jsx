@@ -1234,7 +1234,9 @@ const MyChores = () => {
             {selectedCalendarDate && (
               <Box sx={{ mt: 2 }}>
                 <Typography level='title-md' gutterBottom>
-                  Tasks for {selectedCalendarDate.toLocaleDateString()}
+                  {t('tasksForDate', {
+                    date: selectedCalendarDate.toLocaleDateString(),
+                  })}
                 </Typography>
                 <Box
                   sx={{
@@ -1436,7 +1438,6 @@ const MyChores = () => {
         <ScrollHideFab
           sx={{
             bottom: getSafeBottom(10, 10),
-            left: 'calc(var(--app-navigation-width, 0px) + 10px)',
             '@media (max-width: 768px)': {
               bottom: getSafeBottom(66, 10),
             },
@@ -1571,14 +1572,18 @@ const MyChores = () => {
               }),
             })
           } else {
-            // Create new filter
+            // Create new filter — the mutation re-checks the plan allowance,
+            // so only announce it once it actually saved.
             saveFilter(filter)
-            showSuccess({
-              title: t('chores:list.advancedFilterCreated'),
-              message: t('chores:list.advancedFilterCreatedMsg', {
-                name: filter.name,
-              }),
-            })
+              .then(() => {
+                showSuccess({
+                  title: t('chores:list.advancedFilterCreated'),
+                  message: t('chores:list.advancedFilterCreatedMsg', {
+                    name: filter.name,
+                  }),
+                })
+              })
+              .catch(() => {})
           }
           setShowAdvancedFilterBuilder(false)
           setEditingFilter(null)

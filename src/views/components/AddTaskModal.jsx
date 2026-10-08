@@ -28,6 +28,7 @@ import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { localAIService } from '../../service/LocalAIService'
 import { voiceInputService } from '../../service/VoiceInputService'
 import LABEL_COLORS, { TASK_COLOR } from '../../utils/Colors'
+import { sanitizeRemindersForPlan } from '../../utils/entitlements'
 import { CreateLabel } from '../../utils/Fetcher'
 import { imageSourceToFile } from '../../utils/FileConvert'
 import { isPlusAccount } from '../../utils/Helpers'
@@ -677,17 +678,12 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
         setAssignees(parsedAssignees)
         assigneesFromMentionRef.current = true
       } else if (assigneesFromMentionRef.current) {
-        // The @mention that set the current assignees was deleted — fall back
-        // to the implicit self default. Picker selections stay untouched.
+        // The @mention that set the current assignees was deleted. An empty
+        // selection is assigned to the current user when the task is created.
+        // Picker selections stay untouched.
         assigneesFromMentionRef.current = false
         setIsAnyoneTask(false)
-        if (userProfile?.id) {
-          setAssignees([
-            {
-              userId: userProfile.id,
-            },
-          ])
-        }
+        setAssignees([])
       }
 
       if (repeat.result) {
@@ -804,7 +800,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
         }
       }
     },
-    [userLabels, renderHighlightedSentence, assigneesForParsing, userProfile],
+    [userLabels, renderHighlightedSentence, assigneesForParsing],
   )
 
   useEffect(() => {
@@ -1040,11 +1036,20 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
       finalAssignStrategy = assignStrategy
     }
 
+    // "always" chores never have a due date — backend keeps nextDueDate null
+    // and never archives them on completion (see RepeatSection.jsx for the
+    // full-edit-form equivalent).
+    const isAlwaysAvailable = frequency?.frequencyType === 'always'
+
     const chore = {
       name: taskTitle,
       description: description,
       assignees: finalAssignees,
-      dueDate: dueDate ? new Date(dueDate).toISOString() : null,
+      dueDate: isAlwaysAvailable
+        ? null
+        : dueDate
+          ? new Date(dueDate).toISOString()
+          : null,
       assignedTo: finalAssignedTo,
       assignStrategy: finalAssignStrategy,
       isRolling: false,
@@ -1053,7 +1058,9 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
       points: points > -1 ? points : null,
       deadlineOffset: deadlineOffset < 0 ? null : deadlineOffset,
       completionWindow:
-        completionWindow < 0 || !dueDate ? null : completionWindow,
+        completionWindow < 0 || !dueDate || isAlwaysAvailable
+          ? null
+          : completionWindow,
       requireApproval: requireApproval,
       isPrivate: isPrivate,
       status: 0,
@@ -1067,17 +1074,22 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
       source: taskSourceRef.current,
     }
 
-    // Reminders are a Plus feature and only make sense when the user kept at
-    // least one template; without the flag the backend never schedules them.
-    const hasReminders =
-      isPlusAccount(userProfile) && notificationMetadata?.templates?.length > 0
+    // Every plan gets reminders; the free plan is capped at the on-due one.
+    // Without the flag the backend never schedules them. "always" chores are
+    // rejected with forbidden_with_trigger_frequency if notification is true,
+    // same rule as trigger frequencies.
+    const planReminders = sanitizeRemindersForPlan(
+      notificationMetadata?.templates,
+      isPlusAccount(userProfile),
+    )
+    const hasReminders = planReminders.length > 0 && !isAlwaysAvailable
 
     if (frequency) {
       chore.frequencyType = frequency.frequencyType
       chore.frequencyMetadata = frequency.frequencyMetadata
       chore.frequency = frequency.frequency
     }
-    if (dueDate) {
+    if (dueDate && !isAlwaysAvailable) {
       // Use RFC3339/ISO-8601 format expected by backend. The backend only
       // derives NextDueDate from what's sent on create (handler.go never
       // computes it from frequencyType), so this must be sent whether or
@@ -1087,7 +1099,10 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
     }
     if (hasReminders && (frequency || dueDate)) {
       chore.notification = true
-      chore.notificationMetadata = notificationMetadata
+      chore.notificationMetadata = {
+        ...notificationMetadata,
+        templates: planReminders,
+      }
     }
 
     createChoreMutation
@@ -1403,7 +1418,16 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
               <RepeatPickerField
                 emptyDisplay={pickerEmptyDisplay}
                 value={frequency}
-                onChange={setFrequency}
+                onChange={newFrequency => {
+                  setFrequency(newFrequency)
+                  // "always" tasks never have a due date — clear whatever
+                  // was picked so the chips don't show a contradictory state
+                  if (newFrequency?.frequencyType === 'always') {
+                    setDueDateOnly(null)
+                    setDueTime(null)
+                    setUseCustomTime(false)
+                  }
+                }}
                 onClear={() => setFrequency(null)}
               />
               <PriorityPickerField
@@ -1431,7 +1455,6 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
                   setIsAnyoneTask(false)
                   setAssignees([])
                 }}
-                currentUserId={userProfile?.id}
                 members={circleMembers?.res || []}
               />
               <LabelsPickerField
@@ -1560,7 +1583,9 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
 
             {hasDescription && (
               <Box>
-                <Typography level='body-sm'>Description:</Typography>
+                <Typography level='body-sm'>
+                  {t('addTask.descriptionLabel')}
+                </Typography>
                 <div>
                   <RichTextEditor
                     ref={richTextEditorRef}
@@ -1574,7 +1599,9 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
             )}
             {hasSubTasks && (
               <Box>
-                <Typography level='body-sm'>Subtasks:</Typography>
+                <Typography level='body-sm'>
+                  {t('addTask.subtasksLabel')}
+                </Typography>
                 <SubTasks
                   editMode={true}
                   tasks={subTasks ? subTasks : []}

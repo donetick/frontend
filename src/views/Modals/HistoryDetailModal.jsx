@@ -310,7 +310,9 @@ function HistoryDetailModal({ config }) {
                 level='body-xs'
                 sx={{ color: 'text.tertiary', mb: 0.5 }}
               >
-                {entry.status === 2 || entry.status === 4 ? 'Reason' : 'Notes'}
+                {entry.status === 2 || entry.status === 4
+                  ? t('detail.reason')
+                  : t('detail.notes')}
               </Typography>
               <Box sx={{ overflowY: 'auto', maxHeight: '60vh' }}>
                 <RichTextEditor value={entry.notes || ''} isEditable={false} />

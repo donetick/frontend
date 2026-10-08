@@ -30,7 +30,9 @@
     "shortAll": "Tout",
     "days7": "7 jours",
     "months6": "6 mois",
-    "allTime": "Toute la période"
+    "allTime": "Toute la période",
+    "short30d": "30J",
+    "days30": "30 jours"
   },
   "filter": {
     "analysisTitle": "Filtres et analyse",

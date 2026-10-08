@@ -1,5 +1,7 @@
 {
   "title": "Chores",
+  "tasksForDate": "Tasks for {{date}}",
+  "createSuggestion": "Create \"{{value}}\"",
   "myChores": "My Chores",
   "allChores": "All Chores",
   "addChore": "Add Chore",
@@ -136,7 +138,11 @@
       "assignee": "Assignee"
     },
     "display": "Display",
-    "displayOptions": "Display options"
+    "displayOptions": "Display options",
+    "moreSaveOptions": "More save options",
+    "showCount": "Show {{count}}",
+    "done": "Done",
+    "savedFilters": "Saved Filters"
   },
   "sort": {
     "assignedToMe": "Assigned to me",
@@ -615,7 +621,15 @@
     "keepAsAttachment": "Keep photo as attachment",
     "altCaptured": "Captured document",
     "altProcessing": "Processing",
-    "taskIdentified": "Task identified"
+    "taskIdentified": "Task identified",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
+    "tapToScanHint": "Tap \"Scan Document\" to open the scanner",
+    "readingTextProgress": "Reading text from image… {{progress}}%",
+    "dueDate": "Due: {{date}}",
+    "hideRawText": "Hide Raw Text",
+    "showRawText": "Show Raw Text",
+    "cameraUnavailableUseUpload": "Camera not available — use Upload instead"
   },
   "descriptionPlaceholder": "Enter description...",
   "notificationTemplate": {
@@ -710,6 +724,7 @@
     "startDate": "Start Date",
     "dueDate": "Due Date",
     "triggerDueHint": "Due Date will be set when the trigger of the thing is met",
+    "alwaysDueHint": "This task has no due date and is always available to complete",
     "giveDueDate": "Give this task a due date",
     "giveDueDateHelp": "Task needs to be completed by a specific time",
     "startWhen": "When does this task start?",
@@ -732,9 +747,9 @@
     "rescheduleFromCompletion": "Reschedule from completion date",
     "rescheduleFromCompletionHelp": "the next task will be scheduled from the actual completion date of the previous task",
     "notifications": "Notifications",
-    "notificationsPlanWarning": "Task notifications are not available in the Basic plan. Upgrade to Plus to receive reminders when tasks are due or completed.",
     "notifyForTask": "Notify for this task",
     "notifyForTaskHelp": "When should receive notifications for this task",
+    "notifyForTaskUnavailable": "Notifications aren't available for trigger-based or always-available tasks",
     "notificationSchedule": "Notification Schedule",
     "whoToNotify": "Who to Notify",
     "allAssignees": "All Assignees",
@@ -763,9 +778,12 @@
     "updatedBy": "Updated by",
     "archive": "Archive",
     "unarchive": "Unarchive",
-    "create": "Create"
+    "create": "Create",
+    "notificationsFreePlanNote": "Your plan includes a reminder on the due date. Plus adds reminders before it's due and follow-ups after."
   },
   "addTask": {
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:",
     "title": "Create new task",
     "defaultProject": "Default Project",
     "anyone": "Anyone",
@@ -808,10 +826,12 @@
       "monthly": "Monthly",
       "yearly": "Yearly",
       "adaptive": "Adaptive",
+      "always": "Always",
       "custom": "Custom"
     },
     "freqMessage": {
       "adaptive": "This chore will be scheduled dynamically based on previous completion dates.",
+      "always": "This chore has no due date and stays available to complete at any time. It won't be archived when completed.",
       "custom": "This chore will be scheduled based on a custom frequency."
     },
     "weekPattern": {
@@ -864,7 +884,6 @@
     "repeatOn": "Repeat on:",
     "triggerLabel": "Trigger this task based on a thing state",
     "triggerHelp": "Is this something that should be done when a thing state changes?",
-    "triggerPlanWarning": "Thing-based triggers are not available in the Basic plan. Upgrade to Plus to automatically trigger tasks when device states change.",
     "previewEvery": "Every {{days}} at {{time}}",
     "previewOccurrence": "Every {{occurrences}} {{days}} of the month at {{time}}",
     "defaultTime": "6:00 PM",
@@ -925,6 +944,7 @@
     "limitedVisibility": "Limited visibility",
     "limitedVisibilityDisabled": "Assign someone to enable limited visibility",
     "limitedVisibilityDescription": "Only you and assignees can see this task",
+    "limitedVisibilityInherited": "Inherited from the project: only you and assignees can see this task",
     "assignStrategy": "Assign strategy",
     "assignStrategyDescription": "How to pick the next assignee each recurrence",
     "availableFrom": "Available from",

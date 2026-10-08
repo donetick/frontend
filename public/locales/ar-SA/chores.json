@@ -12,8 +12,6 @@
   "status": "الحالة",
   "description": "الوصف",
   "choreView": {
-    "notFoundTitle": "المهمة غير متاحة",
-    "notFoundDescription": "ربما تم حذف هذه المهمة أو لم تعد مشاركة معك.",
     "assignment": "التعيين",
     "assigned": "المعين",
     "last": "الأخير",
@@ -65,8 +63,6 @@
     "skip": "تخطي",
     "cancel": "إلغاء",
     "noPriority": "بدون أولوية",
-    "more": "More",
-    "changeDueDate": "Change due date",
     "subtasks": "المهام الفرعية",
     "noDescription": "لا يوجد وصف متاح",
     "timer": {
@@ -75,6 +71,10 @@
       "reset": "إعادة تعيين المؤقت",
       "delete": "حذف الجلسة"
     },
+    "notFoundTitle": "المهمة غير متاحة",
+    "notFoundDescription": "ربما تم حذف هذه المهمة أو لم تعد مشاركة معك.",
+    "more": "More",
+    "changeDueDate": "Change due date",
     "unableUndo": "Failed to undo",
     "offlineComplete": "You're offline — completion will sync when back online",
     "unableComplete": "Unable to complete task",
@@ -115,6 +115,21 @@
     "delegateToSomeoneElse": "Delegate to someone else",
     "selectAPerformer": "Select a performer"
   },
+  "subTask": {
+    "untitled": "مهمة فرعية بدون عنوان",
+    "actions": "إجراءات المهمة الفرعية",
+    "edit": "تعديل",
+    "addBelow": "إضافة مهمة فرعية أسفل",
+    "addChild": "إضافة مهمة فرعية متداخلة",
+    "moveUpLevel": "الانتقال مستوى للأعلى",
+    "delete": "حذف",
+    "editTitle": "تعديل المهمة الفرعية",
+    "addTitle": "إضافة مهمة فرعية",
+    "addChildTitle": "إضافة مهمة فرعية متداخلة",
+    "namePlaceholder": "Task name...",
+    "deleteShortcut": "Delete (Shift+Backspace)",
+    "addPlaceholder": "Add new task... (Enter to add)"
+  },
   "toolbar": {
     "defaultProject": "Default Project",
     "everyone": "Everyone",
@@ -136,7 +151,11 @@
       "assignee": "Assignee"
     },
     "display": "Display",
-    "displayOptions": "Display options"
+    "displayOptions": "Display options",
+    "moreSaveOptions": "المزيد من خيارات الحفظ",
+    "showCount": "عرض {{count}}",
+    "done": "تم",
+    "savedFilters": "الفلاتر المحفوظة"
   },
   "sort": {
     "assignedToMe": "Assigned to me",
@@ -552,21 +571,6 @@
     "placeholder": "Search Donetick",
     "clearAria": "Clear task search"
   },
-  "subTask": {
-    "namePlaceholder": "Task name...",
-    "untitled": "مهمة فرعية بدون عنوان",
-    "actions": "إجراءات المهمة الفرعية",
-    "edit": "تعديل",
-    "addBelow": "إضافة مهمة فرعية أسفل",
-    "addChild": "إضافة مهمة فرعية متداخلة",
-    "moveUpLevel": "الانتقال مستوى للأعلى",
-    "delete": "حذف",
-    "editTitle": "تعديل المهمة الفرعية",
-    "addTitle": "إضافة مهمة فرعية",
-    "addChildTitle": "إضافة مهمة فرعية متداخلة",
-    "deleteShortcut": "Delete (Shift+Backspace)",
-    "addPlaceholder": "Add new task... (Enter to add)"
-  },
   "voiceToTask": {
     "title": "Speak your tasks",
     "onDevice": "On-device",
@@ -615,7 +619,15 @@
     "keepAsAttachment": "Keep photo as attachment",
     "altCaptured": "Captured document",
     "altProcessing": "Processing",
-    "taskIdentified": "Task identified"
+    "taskIdentified": "Task identified",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
+    "tapToScanHint": "اضغط على \"مسح مستند\" لفتح الماسح الضوئي",
+    "readingTextProgress": "جارٍ قراءة النص من الصورة… {{progress}}%",
+    "dueDate": "الاستحقاق: {{date}}",
+    "hideRawText": "إخفاء النص الخام",
+    "showRawText": "إظهار النص الخام",
+    "cameraUnavailableUseUpload": "الكاميرا غير متاحة — استخدم الرفع بدلاً من ذلك"
   },
   "descriptionPlaceholder": "Enter description...",
   "notificationTemplate": {
@@ -763,7 +775,10 @@
     "updatedBy": "Updated by",
     "archive": "Archive",
     "unarchive": "Unarchive",
-    "create": "Create"
+    "create": "Create",
+    "notificationsFreePlanNote": "خطتك تتضمن تذكيراً في تاريخ الاستحقاق. يضيف Plus تذكيرات قبل الاستحقاق ومتابعات بعده.",
+    "alwaysDueHint": "هذه المهمة ليس لها تاريخ استحقاق وهي متاحة دائماً للإنجاز",
+    "notifyForTaskUnavailable": "الإشعارات غير متوفرة للمهام القائمة على مشغل أو المتاحة دائماً"
   },
   "addTask": {
     "title": "Create new task",
@@ -776,7 +791,9 @@
     "createCount": "Create {{count}} Tasks",
     "useTask": "Use Task",
     "processing": "Processing",
-    "create": "Create"
+    "create": "Create",
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:"
   },
   "repeat": {
     "days": {
@@ -808,11 +825,13 @@
       "monthly": "Monthly",
       "yearly": "Yearly",
       "adaptive": "Adaptive",
-      "custom": "Custom"
+      "custom": "Custom",
+      "always": "دائماً"
     },
     "freqMessage": {
       "adaptive": "This chore will be scheduled dynamically based on previous completion dates.",
-      "custom": "This chore will be scheduled based on a custom frequency."
+      "custom": "This chore will be scheduled based on a custom frequency.",
+      "always": "ليس لهذه المهمة تاريخ استحقاق وتبقى متاحة للإنجاز في أي وقت. لن يتم أرشفتها عند إكمالها."
     },
     "weekPattern": {
       "every_week": "Every week",
@@ -1039,5 +1058,7 @@
     "today": "Today",
     "yesterday": "Yesterday",
     "noteTitle": "Note - {{choreName}}"
-  }
+  },
+  "tasksForDate": "المهام ليوم {{date}}",
+  "createSuggestion": "إنشاء \"{{value}}\""
 }

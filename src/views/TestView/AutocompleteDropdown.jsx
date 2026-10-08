@@ -2,6 +2,7 @@
 import { Add } from '@mui/icons-material'
 import { Divider, Menu, MenuItem } from '@mui/joy'
 import React, { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 
 const AutocompleteDropdown = ({
   currentValue,
@@ -12,6 +13,7 @@ const AutocompleteDropdown = ({
   selectedIndex,
   suggestions,
 }) => {
+  const { t } = useTranslation('chores')
   // Scroll selected item into view
   const dropdownMenuRef = React.useRef(null)
   useEffect(() => {
@@ -97,7 +99,7 @@ const AutocompleteDropdown = ({
             }}
           >
             <Add fontSize='small' />
-            Create &quot;{trimmedValue}&quot;
+            {t('createSuggestion', { value: trimmedValue })}
           </MenuItem>
         </>
       )}

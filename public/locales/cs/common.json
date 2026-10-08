@@ -72,7 +72,7 @@
     "placeholder": "Hledat v Donetick",
     "inputAriaLabel": "Hledat úkoly, historii, projekty, štítky a nastavení",
     "deviceNote": "Hledá se v obsahu dostupném v tomto zařízení",
-    "escape": "",
+    "escape": "Esc",
     "recent": "Nedávné",
     "empty": {
       "title": "Žádné přímé shody",
@@ -146,7 +146,7 @@
       "tooComplicated": "Příliš složité",
       "slow": "Pomalé",
       "notifications": "Oznámení",
-      "ai": "",
+      "ai": "AI",
       "other": "Jiné"
     },
     "details": {
@@ -225,8 +225,9 @@
     "invitePeople": "Pozvat lidi",
     "addMembers": "Přidat členy do kruhu",
     "sidePanelSettings": "Nastavení postranního panelu",
+    "sidePanelSettingsDescription": "Přizpůsobit rozložení a karty",
     "planFree": "Zdarma",
-    "planPlus": "",
+    "planPlus": "Plus",
     "planPlusExpiring": "Plus (brzy vyprší)",
     "switchUser": "Přepnout uživatele",
     "impersonateUser": "Zastupovat uživatele",
@@ -289,7 +290,7 @@
     "descending": "Sestupně",
     "filter": "Filtr"
   },
-  "versionInfo": "",
+  "versionInfo": "V{{version}} (API: {{apiVersion}})",
   "apiVersionUnavailable": "nedostupné",
   "sync": {
     "aria": "Otevřít stav synchronizace a sítě",
@@ -316,8 +317,8 @@
     "secondsAgo": "před {{count}} s",
     "minutesAgo": "před {{count}} min",
     "hoursAgo": "před {{count}} h",
-    "online": "",
-    "offline": "",
+    "online": "Online",
+    "offline": "Offline",
     "syncing": "Synchronizace...",
     "lastSync": "Poslední synchronizace: {{time}}",
     "offlineSince": "Offline od {{duration}}",
@@ -341,11 +342,26 @@
   "noAttachmentsTitle": "Žádné přílohy",
   "noAttachmentsDescription": "Fotky a soubory přidané k tomuto úkolu se zobrazí zde.",
   "kbSize": "{{size}} kB",
+  "logoAlt": "Logo",
+  "notification": {
+    "error": "Chyba",
+    "success": "Úspěch",
+    "undoneSuccessfully": "Úspěšně vráceno zpět",
+    "warning": "Upozornění",
+    "information": "Informace",
+    "title": "Oznámení",
+    "unknown": "Neznámé oznámení",
+    "undo": "Zpět",
+    "dismiss": "Zavřít"
+  },
   "onboarding": {
     "sources": {
       "speak": "Řekněte",
       "snap": "Vyfoťte",
       "type": "Napište"
+    },
+    "voiceWave": {
+      "listening": "Poslouchám…"
     },
     "capture": {
       "voiceCaption": "Data, štítky a body z vašich slov",
@@ -461,7 +477,7 @@
       "continue": "Pokračovat",
       "skip": "Přeskočit",
       "sources": {
-        "appStore": "",
+        "appStore": "App Store / Google Play",
         "reddit": "Reddit nebo fórum",
         "friend": "Přátelé nebo rodina",
         "video": "YouTube nebo TikTok",
@@ -500,7 +516,7 @@
     "notNow": "Teď ne",
     "sentTitle": "Hlášení odesláno",
     "sentBody": "Děkujeme! Jde to přímo k lidem, kteří to umí opravit.",
-    "reference": "",
+    "reference": "Reference",
     "copyReference": "Kopírovat referenci",
     "done": "Hotovo",
     "githubTitle": "Dokončete na GitHubu",

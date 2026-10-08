@@ -1,7 +1,7 @@
 {
   "iconPicker": {
-    "chooseIcon": "",
-    "availableIcons": ""
+    "chooseIcon": "Choose Project Icon",
+    "availableIcons": "Available Icons"
   },
   "icons": {
     "FolderOpen": "",
@@ -29,15 +29,15 @@
     "Garden": "",
     "Computer": ""
   },
-  "defaultChip": "",
-  "tasks_one": "",
-  "tasks_other": "",
-  "shared": "",
+  "defaultChip": "Default",
+  "tasks_one": "{{count}} task",
+  "tasks_other": "{{count}} tasks",
+  "shared": "Shared",
   "delete": {
-    "title": "",
-    "message": ""
+    "title": "Delete Project",
+    "message": "Are you sure you want to delete \"{{name}}\"? This will remove the project but keep all tasks (they'll move to the Default Project)."
   },
-  "loadError": "",
+  "loadError": "Failed to load projects. Please try again.",
   "search": {
     "placeholder": "",
     "noResultsTitle": "",
@@ -46,14 +46,14 @@
     "clear": "",
     "showAll": ""
   },
-  "blurb": "",
-  "defaultDescription": "",
+  "blurb": "Organize your tasks into projects. Create custom workspaces to keep your tasks organized and easily accessible.",
+  "defaultDescription": "All tasks without a specific project",
   "selector": {
-    "title": "",
-    "createNew": "",
-    "createNewDescription": "",
-    "manage": "",
-    "manageDescription": "",
+    "title": "Projects",
+    "createNew": "Create New Project",
+    "createNewDescription": "Add a custom project workspace",
+    "manage": "Manage Projects",
+    "manageDescription": "View, edit, and organize all projects",
     "currentProjectTitle": "",
     "builtInWorkspace": ""
   },

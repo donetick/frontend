@@ -12,8 +12,6 @@
   "status": "状态",
   "description": "描述",
   "choreView": {
-    "notFoundTitle": "任务不可用",
-    "notFoundDescription": "此任务可能已被删除，或不再与您共享。",
     "assignment": "分配",
     "assigned": "已分配",
     "last": "上次",
@@ -65,8 +63,6 @@
     "skip": "跳过",
     "cancel": "取消",
     "noPriority": "无优先级",
-    "more": "More",
-    "changeDueDate": "Change due date",
     "subtasks": "子任务",
     "noDescription": "暂无描述",
     "timer": {
@@ -75,6 +71,10 @@
       "reset": "重置计时器",
       "delete": "删除会话"
     },
+    "notFoundTitle": "任务不可用",
+    "notFoundDescription": "此任务可能已被删除，或不再与您共享。",
+    "more": "More",
+    "changeDueDate": "Change due date",
     "unableUndo": "Failed to undo",
     "offlineComplete": "You're offline — completion will sync when back online",
     "unableComplete": "Unable to complete task",
@@ -115,6 +115,21 @@
     "delegateToSomeoneElse": "Delegate to someone else",
     "selectAPerformer": "Select a performer"
   },
+  "subTask": {
+    "untitled": "未命名子任务",
+    "actions": "子任务操作",
+    "edit": "编辑",
+    "addBelow": "在下方添加子任务",
+    "addChild": "添加嵌套子任务",
+    "moveUpLevel": "上移一级",
+    "delete": "删除",
+    "editTitle": "编辑子任务",
+    "addTitle": "添加子任务",
+    "addChildTitle": "添加嵌套子任务",
+    "namePlaceholder": "Task name...",
+    "deleteShortcut": "Delete (Shift+Backspace)",
+    "addPlaceholder": "Add new task... (Enter to add)"
+  },
   "toolbar": {
     "defaultProject": "Default Project",
     "everyone": "Everyone",
@@ -136,7 +151,11 @@
       "assignee": "Assignee"
     },
     "display": "Display",
-    "displayOptions": "Display options"
+    "displayOptions": "Display options",
+    "moreSaveOptions": "更多保存选项",
+    "showCount": "显示 {{count}} 个",
+    "done": "完成",
+    "savedFilters": "已保存的筛选器"
   },
   "sort": {
     "assignedToMe": "Assigned to me",
@@ -552,21 +571,6 @@
     "placeholder": "Search Donetick",
     "clearAria": "Clear task search"
   },
-  "subTask": {
-    "namePlaceholder": "Task name...",
-    "untitled": "未命名子任务",
-    "actions": "子任务操作",
-    "edit": "编辑",
-    "addBelow": "在下方添加子任务",
-    "addChild": "添加嵌套子任务",
-    "moveUpLevel": "上移一级",
-    "delete": "删除",
-    "editTitle": "编辑子任务",
-    "addTitle": "添加子任务",
-    "addChildTitle": "添加嵌套子任务",
-    "deleteShortcut": "Delete (Shift+Backspace)",
-    "addPlaceholder": "Add new task... (Enter to add)"
-  },
   "voiceToTask": {
     "title": "Speak your tasks",
     "onDevice": "On-device",
@@ -615,7 +619,15 @@
     "keepAsAttachment": "Keep photo as attachment",
     "altCaptured": "Captured document",
     "altProcessing": "Processing",
-    "taskIdentified": "Task identified"
+    "taskIdentified": "Task identified",
+    "runningNativeOcr": "Running native OCR…",
+    "identifyingTask": "Identifying task with AI…",
+    "tapToScanHint": "点击“扫描文档”以打开扫描仪",
+    "readingTextProgress": "正在从图像中读取文本… {{progress}}%",
+    "dueDate": "截止日期：{{date}}",
+    "hideRawText": "隐藏原始文本",
+    "showRawText": "显示原始文本",
+    "cameraUnavailableUseUpload": "相机不可用 — 请改用上传"
   },
   "descriptionPlaceholder": "Enter description...",
   "notificationTemplate": {
@@ -763,7 +775,10 @@
     "updatedBy": "Updated by",
     "archive": "Archive",
     "unarchive": "Unarchive",
-    "create": "Create"
+    "create": "Create",
+    "notificationsFreePlanNote": "你的套餐包含到期当天的提醒。升级到 Plus 可增加到期前的提醒和到期后的跟进通知。",
+    "alwaysDueHint": "此任务没有截止日期，随时可以完成",
+    "notifyForTaskUnavailable": "基于触发器或始终可用的任务不支持通知"
   },
   "addTask": {
     "title": "Create new task",
@@ -776,7 +791,9 @@
     "createCount": "Create {{count}} Tasks",
     "useTask": "Use Task",
     "processing": "Processing",
-    "create": "Create"
+    "create": "Create",
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:"
   },
   "repeat": {
     "days": {
@@ -808,11 +825,13 @@
       "monthly": "Monthly",
       "yearly": "Yearly",
       "adaptive": "Adaptive",
-      "custom": "Custom"
+      "custom": "Custom",
+      "always": "始终"
     },
     "freqMessage": {
       "adaptive": "This chore will be scheduled dynamically based on previous completion dates.",
-      "custom": "This chore will be scheduled based on a custom frequency."
+      "custom": "This chore will be scheduled based on a custom frequency.",
+      "always": "此任务没有截止日期，随时保持可完成状态。完成后不会被归档。"
     },
     "weekPattern": {
       "every_week": "Every week",
@@ -1039,5 +1058,7 @@
     "today": "Today",
     "yesterday": "Yesterday",
     "noteTitle": "Note - {{choreName}}"
-  }
+  },
+  "tasksForDate": "{{date}} 的任务",
+  "createSuggestion": "创建“{{value}}”"
 }

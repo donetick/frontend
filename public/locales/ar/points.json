@@ -2,7 +2,7 @@
   "redeem": "استبدال النقاط",
   "redeemModal": {
     "redeemButton": "Redeem",
-    "pointsAvailable": "",
+    "pointsAvailable": "{{count}} points available",
     "pointsToRedeem": "النقاط المراد استبدالها",
     "placeholder": "أدخل نقاط...",
     "cannotExceed": "لا يمكن تجاوز النقاط المتاحة",
@@ -20,8 +20,8 @@
     "modeTasks": "مهام",
     "you": "أنت",
     "tasksAndAvg": "مهام {{tasks}} • متوسط {{avg}} لكل مهمة",
-    "available": "",
-    "points_one": "",
+    "available": "{{count}} available",
+    "points_one": "{{count}} point",
     "points_other": "{{count}} نقاط"
   },
   "tabs": {
@@ -30,7 +30,9 @@
     "shortAll": "الكل",
     "days7": "7 أيام",
     "months6": "6 أشهر",
-    "allTime": "كل الوقت"
+    "allTime": "كل الوقت",
+    "short30d": "30D",
+    "days30": "30 أيام"
   },
   "filter": {
     "analysisTitle": "الفلتر والتحليل",

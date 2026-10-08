@@ -16,9 +16,11 @@ import { useNavigate } from 'react-router-dom'
 
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import { usePageShortcutScope } from '../../contexts/KeyboardShortcutScopeContext'
+import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import LABEL_COLORS, {
   getTextColorFromBackgroundColor,
 } from '../../utils/Colors'
+import { canCreateProject } from '../../utils/entitlements'
 import { getIconComponent } from '../../utils/ProjectIcons'
 import ProjectModal from '../Modals/Inputs/ProjectModal'
 import { useProjects } from '../Projects/ProjectQueries'
@@ -30,6 +32,7 @@ const ProjectSelector = ({
 }) => {
   const { t } = useTranslation('projects')
   const { data: projects = [], isLoading } = useProjects()
+  const { isPlus, showPaywall } = usePaywall()
   const navigate = useNavigate()
   // Stays mounted underneath modals (it's part of the page toolbar), so its
   // own Cmd+E must defer to whatever modal currently owns the keyboard —
@@ -80,8 +83,12 @@ const ProjectSelector = ({
   }
 
   const handleAddProjectClick = () => {
-    setIsProjectModalOpen(true)
     handleMenuClose()
+    if (!canCreateProject(projects.length, isPlus)) {
+      showPaywall(PAYWALL_REASON.PROJECT_LIMIT)
+      return
+    }
+    setIsProjectModalOpen(true)
   }
 
   const handleProjectModalSave = project => {

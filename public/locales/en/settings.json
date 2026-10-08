@@ -58,6 +58,10 @@
         "title": "API Tokens",
         "description": "Generate and manage access tokens for third-party integrations and API access."
       },
+      "calendar": {
+        "title": "Calendar Sync",
+        "description": "Subscribe to your tasks from Apple Calendar, Google Calendar, Outlook, or another calendar app."
+      },
       "storage": {
         "title": "Storage Settings",
         "description": "Backup and restore your data, manage local storage and sync preferences."
@@ -372,6 +376,42 @@
     "nameModalTitle": "Give a name for your new token, something to remember it by.",
     "generateToken": "Generate Token"
   },
+  "calendar": {
+    "title": "Calendar Sync",
+    "description": "Keep your Donetick tasks visible in your preferred calendar app with a private iCalendar subscription.",
+    "plusTitle": "Calendar sync is a Plus feature",
+    "plusNotice": "Upgrade to Plus to subscribe to your tasks from Apple Calendar, Google Calendar, Outlook, and other calendar apps.",
+    "upgrade": "Upgrade to Plus",
+    "activeTitle": "Calendar subscription",
+    "activeStatus": "Active",
+    "urlLabel": "Private calendar subscription URL",
+    "copy": "Copy URL",
+    "copied": "Calendar URL copied to clipboard",
+    "copyFailed": "Could not copy the calendar URL. Please copy it from the field instead.",
+    "createdAt": "Created {{date}}",
+    "lastUsedAt": "Last fetched {{date}}",
+    "neverUsed": "This calendar has not been fetched yet.",
+    "keepPrivateTitle": "Keep this URL private",
+    "keepPrivateDescription": "Anyone with this URL can view your task calendar without signing in. Rotate or revoke it immediately if it is shared accidentally.",
+    "manageTitle": "Manage subscription",
+    "rotate": "Rotate URL",
+    "rotateTitle": "Rotate calendar URL?",
+    "rotateMessage": "Your current URL will stop working immediately. You will need to add the new URL to every calendar app again.",
+    "rotated": "Calendar URL rotated successfully",
+    "revoke": "Revoke URL",
+    "revokeTitle": "Revoke calendar URL?",
+    "revokeMessage": "Your current URL will stop working immediately and subscribed calendar apps will no longer receive updates.",
+    "revoked": "Calendar URL revoked successfully",
+    "inactiveTitle": "No calendar subscription yet",
+    "inactiveDescription": "Generate a private URL, then add it as a subscribed calendar in your calendar app. Updates are pulled automatically by the app.",
+    "generate": "Generate calendar URL",
+    "generated": "Calendar URL generated successfully",
+    "howToTitle": "Add it to your calendar",
+    "howToDescription": "Copy the URL and choose “Add calendar by URL” or “Subscribe to calendar” in your calendar app. Refresh timing is controlled by that app, so changes may not appear immediately.",
+    "errorTitle": "Calendar sync error",
+    "actionFailed": "Could not update your calendar subscription. Please try again.",
+    "loadFailed": "Could not load your calendar subscription. This server may not support calendar sync yet."
+  },
   "storage": {
     "title": "Storage Settings",
     "serverTitle": "Server Storage Usage",
@@ -590,7 +630,15 @@
     "featureApiTokens": "API tokens for integrations",
     "featureImageUploads": "Image uploads in descriptions",
     "featureAutomation": "Advanced task automation",
-    "planYearly": "Yearly"
+    "planYearly": "Yearly",
+    "reasonAdvancedReminders": "Reminders before a task is due and follow-ups after it are a Plus feature. Your current plan reminds you on the due date.",
+    "reasonReminderChannels": "Sending task reminders to a Telegram group is a Plus feature.",
+    "reasonHistoryWindow": "Your current plan shows the last 30 days. Upgrade to Plus for your full history and long-term trends.",
+    "reasonThingTriggers": "Triggering tasks automatically from a thing changing state is a Plus feature.",
+    "reasonProjectLimit": "Your current plan includes {{projectLimit}} projects. Upgrade to Plus to create as many as you need.",
+    "reasonQuickFilterLimit": "Your current plan includes {{filterLimit}} saved quick filters. Upgrade to Plus for unlimited filters.",
+    "reasonFileUpload": "Attaching files and images is a Plus feature. Upgrade to Plus to add photos, scans and documents to your tasks.",
+    "reasonCalendarSync": "Subscribing to your tasks from Apple Calendar, Google Calendar, Outlook, or another calendar app is a Plus feature."
   },
   "childUsers": {
     "errNameRequired": "Sub account name is required",
@@ -658,7 +706,13 @@
     "createTab": "Create Backup",
     "restoreTab": "Restore Backup",
     "creating": "Creating backup...",
-    "restoring": "Restoring backup..."
+    "restoring": "Restoring backup...",
+    "encryptionKeyRequired": "Encryption Key *",
+    "keySafetyNotice": "Keep this key safe—you'll need it to restore your backup",
+    "nameOptional": "Backup Name (Optional)",
+    "namePlaceholder": "e.g., weekly-backup",
+    "fileRequired": "Backup File *",
+    "selectedFile": "Selected: {{name}}"
   },
   "deletion": {
     "passwordRequired": "Please enter your password to continue",
@@ -686,7 +740,15 @@
   },
   "realtime": {
     "titleSse": "Real-time Updates (SSE)",
-    "subtitleSse": "Get instant notifications via Server-Sent Events"
+    "subtitleSse": "Get instant notifications via Server-Sent Events",
+    "basicPlanDescription": "Real-time updates (SSE) are not available in the Basic plan. Upgrade to Plus to receive instant notifications when chores are updated.",
+    "disabledDescription": "Real-time updates (SSE) are disabled. Enable to see live changes when you or other circle members complete, skip, or modify chores.",
+    "connectedDescription": "Real-time updates (SSE) are working. You'll see live changes when you or other circle members complete, skip, or modify chores.",
+    "connectingDescription": "Connecting to real-time updates (SSE)...",
+    "errorDescription": "Real-time updates (SSE) are enabled but not working: {{error}}",
+    "disconnectedDescription": "Real-time updates (SSE) are enabled but not currently connected.",
+    "enableLabel": "Enable Real-time Updates (SSE)",
+    "statusLabel": "Status:"
   },
   "nativeCancel": {
     "title": "Cancel Subscription",

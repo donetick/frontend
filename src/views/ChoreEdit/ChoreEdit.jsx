@@ -7,6 +7,7 @@ import {
   DocumentScanner,
   HorizontalRule,
   Lock,
+  LockOutlined,
   Save,
   UploadFile,
 } from '@mui/icons-material'
@@ -48,6 +49,7 @@ import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import NumberInput from '../../components/common/NumberInput'
 import NotificationTemplate from '../../components/NotificationTemplate.jsx'
 import { usePageShortcutScope } from '../../contexts/KeyboardShortcutScopeContext'
+import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import { useDocumentScanner } from '../../hooks/useDocumentScanner'
 import {
   useArchiveChore,
@@ -60,6 +62,7 @@ import {
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries.jsx'
 import { useNotification } from '../../service/NotificationProvider'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors.jsx'
+import { sanitizeRemindersForPlan } from '../../utils/entitlements'
 import {
   DeleteChoreAttachment,
   DeleteDraftAttachment,
@@ -98,7 +101,8 @@ const DEFAULT_ASSIGN_STRATEGY = ASSIGN_STRATEGIES[3] // keep_last_assigned
 const REPEAT_ON_TYPE = ['interval', 'days_of_the_week', 'day_of_the_month']
 
 const NO_DUE_DATE_REQUIRED_TYPE = ['no_repeat', 'once']
-const NO_DUE_DATE_ALLOWED_TYPE = ['trigger']
+const NO_DUE_DATE_ALLOWED_TYPE = ['trigger', 'always']
+const NOTIFICATION_FORBIDDEN_TYPE = ['trigger', 'always']
 const ChoreEdit = () => {
   const { t } = useTranslation('chores')
   // Page-level shortcuts (save/cancel) must defer to whatever modal
@@ -106,6 +110,7 @@ const ChoreEdit = () => {
   const isPageShortcutActive = usePageShortcutScope()
   const { data: userProfile, isLoading: isUserProfileLoading } =
     useUserProfile()
+  const { showPaywall } = usePaywall()
 
   const [chore, setChore] = useState([])
   const [choresHistory, setChoresHistory] = useState([])
@@ -380,6 +385,13 @@ const ChoreEdit = () => {
       newChoreId = null
     }
     const assignees = anyone ? [] : assignableTo
+    // The editor blocks Plus-only reminders on the way in, but a cloned task,
+    // a queued offline edit or a task created while subscribed can still carry
+    // them — so the plan is enforced once more on the way out.
+    const planReminders = sanitizeRemindersForPlan(
+      notificationMetadata?.templates,
+      isPlusAccount(userProfile),
+    )
     const chore = {
       id: Number(newChoreId),
       name: name,
@@ -394,11 +406,14 @@ const ChoreEdit = () => {
       assignStrategy: assignStrategyValue,
       isRolling: isRolling,
       isActive: isActive,
-      notification: isNotificable,
+      notification: isNotificable && planReminders.length > 0,
       labels: labels.map(l => l.name),
       labelsV2: labelsV2,
       subTasks: subTasks,
-      notificationMetadata: notificationMetadata,
+      notificationMetadata: {
+        ...notificationMetadata,
+        templates: planReminders,
+      },
       thingTrigger: thingTrigger,
       points: points < 0 ? null : points,
       requireApproval: requireApproval,
@@ -640,7 +655,7 @@ const ChoreEdit = () => {
         const endOfDayTime = '23:59'
 
         setDueDateOnly(dateOnly)
-        setDueDate(dueDateMoment.format('YYYY-MM-DDTHH:mm:00'))
+        setDueDate(dueDateMoment.format('YYYY-MM-DDTHH:mm:ss'))
 
         // Check if it's a custom time (not end of day)
         if (timeOnly !== endOfDayTime) {
@@ -686,6 +701,12 @@ const ChoreEdit = () => {
       setDueDateOnly(null)
       setUseCustomTime(false)
       setDueTime(null)
+    }
+    // backend rejects notification: true for these frequency types
+    // (forbidden_with_trigger_frequency), so clear it client-side too
+    if (NOTIFICATION_FORBIDDEN_TYPE.includes(frequencyType)) {
+      setIsNotificable(false)
+      setNotificationMetadata({})
     }
   }, [frequencyType])
 
@@ -1479,92 +1500,106 @@ const ChoreEdit = () => {
           selectedThing={thingTrigger}
         />
 
-        <Box mt={3} mb={3}>
-          <Typography level='h4'>
-            {REPEAT_ON_TYPE.includes(frequencyType)
-              ? t('choreEdit.startDate')
-              : t('choreEdit.dueDate')}
-          </Typography>
-          {frequencyType === 'trigger' && !dueDate && (
-            <Typography level='body-sm'>
-              {t('choreEdit.triggerDueHint')}
+        {frequencyType !== 'always' && (
+          <Box mt={3} mb={3}>
+            <Typography level='h4'>
+              {REPEAT_ON_TYPE.includes(frequencyType)
+                ? t('choreEdit.startDate')
+                : t('choreEdit.dueDate')}
             </Typography>
-          )}
+            {frequencyType === 'trigger' && !dueDate && (
+              <Typography level='body-sm'>
+                {t('choreEdit.triggerDueHint')}
+              </Typography>
+            )}
 
-          {NO_DUE_DATE_REQUIRED_TYPE.includes(frequencyType) && (
-            <FormControl sx={{ mt: 1 }}>
-              <Checkbox
-                onChange={e => {
-                  if (e.target.checked) {
-                    const today = moment(new Date()).format('YYYY-MM-DD')
-                    setDueDateOnly(today)
-                    setDueDate(
-                      moment(today).endOf('day').format('YYYY-MM-DDTHH:mm:59'),
-                    )
-                    setUseCustomTime(false)
-                    setDueTime(null)
-                  } else {
-                    setDueDate(null)
-                    setDueDateOnly(null)
-                    setUseCustomTime(false)
-                    setDueTime(null)
-                  }
-                }}
-                defaultChecked={dueDate !== null}
-                checked={dueDate !== null}
-                overlay
-                label={t('choreEdit.giveDueDate')}
-              />
-              <FormHelperText>{t('choreEdit.giveDueDateHelp')}</FormHelperText>
-            </FormControl>
-          )}
-          {dueDate && (
-            <>
-              <FormControl error={Boolean(errors.dueDate)} sx={{ mt: 2 }}>
-                <Typography level='body-md'>
-                  {REPEAT_ON_TYPE.includes(frequencyType)
-                    ? t('choreEdit.startWhen')
-                    : t('choreEdit.dueWhen')}
-                </Typography>
-                <Input
-                  type='date'
-                  value={dueDateOnly || ''}
-                  onChange={handleDueDateChange}
-                />
-                <FormHelperText>{errors.dueDate}</FormHelperText>
-              </FormControl>
-
-              {/* Optional time picker */}
-              <FormControl sx={{ mt: 2 }}>
+            {NO_DUE_DATE_REQUIRED_TYPE.includes(frequencyType) && (
+              <FormControl sx={{ mt: 1 }}>
                 <Checkbox
-                  checked={useCustomTime}
-                  onChange={e => handleUseCustomTimeChange(e.target.checked)}
+                  onChange={e => {
+                    if (e.target.checked) {
+                      const today = moment(new Date()).format('YYYY-MM-DD')
+                      setDueDateOnly(today)
+                      setDueDate(
+                        moment(today)
+                          .endOf('day')
+                          .format('YYYY-MM-DDTHH:mm:59'),
+                      )
+                      setUseCustomTime(false)
+                      setDueTime(null)
+                    } else {
+                      setDueDate(null)
+                      setDueDateOnly(null)
+                      setUseCustomTime(false)
+                      setDueTime(null)
+                    }
+                  }}
+                  defaultChecked={dueDate !== null}
+                  checked={dueDate !== null}
                   overlay
-                  label={t('choreEdit.setSpecificTime')}
+                  label={t('choreEdit.giveDueDate')}
                 />
                 <FormHelperText>
-                  {useCustomTime
-                    ? t('choreEdit.dueAtSpecifiedTime')
-                    : t('choreEdit.dueEndOfDay')}
+                  {t('choreEdit.giveDueDateHelp')}
                 </FormHelperText>
               </FormControl>
-
-              {useCustomTime && (
-                <Box sx={{ mt: 2, ml: 4 }}>
-                  <Typography level='body-sm' mb={1}>
-                    {t('choreEdit.timeLabel')}
+            )}
+            {dueDate && (
+              <>
+                <FormControl error={Boolean(errors.dueDate)} sx={{ mt: 2 }}>
+                  <Typography level='body-md'>
+                    {REPEAT_ON_TYPE.includes(frequencyType)
+                      ? t('choreEdit.startWhen')
+                      : t('choreEdit.dueWhen')}
                   </Typography>
                   <Input
-                    type='time'
-                    value={dueTime || '18:00'}
-                    onChange={handleDueTimeChange}
-                    sx={{ maxWidth: 200 }}
+                    type='date'
+                    value={dueDateOnly || ''}
+                    onChange={handleDueDateChange}
                   />
-                </Box>
-              )}
-            </>
-          )}
-        </Box>
+                  <FormHelperText>{errors.dueDate}</FormHelperText>
+                </FormControl>
+
+                {/* Optional time picker */}
+                <FormControl sx={{ mt: 2 }}>
+                  <Checkbox
+                    checked={useCustomTime}
+                    onChange={e => handleUseCustomTimeChange(e.target.checked)}
+                    overlay
+                    label={t('choreEdit.setSpecificTime')}
+                  />
+                  <FormHelperText>
+                    {useCustomTime
+                      ? t('choreEdit.dueAtSpecifiedTime')
+                      : t('choreEdit.dueEndOfDay')}
+                  </FormHelperText>
+                </FormControl>
+
+                {useCustomTime && (
+                  <Box sx={{ mt: 2, ml: 4 }}>
+                    <Typography level='body-sm' mb={1}>
+                      {t('choreEdit.timeLabel')}
+                    </Typography>
+                    <Input
+                      type='time'
+                      value={dueTime || '18:00'}
+                      onChange={handleDueTimeChange}
+                      sx={{ maxWidth: 200 }}
+                    />
+                  </Box>
+                )}
+              </>
+            )}
+          </Box>
+        )}
+        {frequencyType === 'always' && (
+          <Box mt={3} mb={3}>
+            <Typography level='h4'>{t('choreEdit.dueDate')}</Typography>
+            <Typography level='body-sm'>
+              {t('choreEdit.alwaysDueHint')}
+            </Typography>
+          </Box>
+        )}
 
         {dueDate && (
           <Box mb={3}>
@@ -1661,7 +1696,7 @@ const ChoreEdit = () => {
           </Box>
         )}
 
-        {!['once', 'no_repeat'].includes(frequencyType) && (
+        {!['once', 'no_repeat', 'always'].includes(frequencyType) && (
           <Box>
             <Typography level='h4'>{t('choreEdit.schedulingPrefs')}</Typography>
             <Typography level='body-md'>
@@ -1701,8 +1736,8 @@ const ChoreEdit = () => {
         <Box mb={3}>
           <Typography level='h4'>{t('choreEdit.notifications')}</Typography>
           {!isPlusAccount(userProfile) && (
-            <Typography level='body-sm' color='warning' sx={{ mb: 1 }}>
-              {t('choreEdit.notificationsPlanWarning')}
+            <Typography level='body-sm' color='neutral' sx={{ mb: 1 }}>
+              {t('choreEdit.notificationsFreePlanNote')}
             </Typography>
           )}
 
@@ -1716,113 +1751,126 @@ const ChoreEdit = () => {
               }}
               defaultChecked={isNotificable}
               checked={isNotificable}
-              disabled={!isPlusAccount(userProfile)}
+              disabled={NOTIFICATION_FORBIDDEN_TYPE.includes(frequencyType)}
               overlay
               label={t('choreEdit.notifyForTask')}
             />
-            <FormHelperText
-              sx={{
-                opacity: !isPlusAccount(userProfile) ? 0.5 : 1,
-              }}
-            >
-              {t('choreEdit.notifyForTaskHelp')}
+            <FormHelperText>
+              {NOTIFICATION_FORBIDDEN_TYPE.includes(frequencyType)
+                ? t('choreEdit.notifyForTaskUnavailable')
+                : t('choreEdit.notifyForTaskHelp')}
             </FormHelperText>
           </FormControl>
         </Box>
 
-        {isNotificable && (
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 2,
-            }}
-          >
-            <Card variant='outlined'>
-              <Typography level='h4' mb={2}>
-                {t('choreEdit.notificationSchedule')}
-              </Typography>
-              <Box sx={{ p: 0.5 }}>
-                <NotificationTemplate
-                  onChange={metadata => {
-                    const newTemplates = metadata.notifications
-                    if (notificationMetadata?.templates !== newTemplates) {
-                      setNotificationMetadata({
-                        ...notificationMetadata,
-                        templates: newTemplates,
-                      })
-                    }
-                  }}
-                  value={notificationMetadata}
-                />
-              </Box>
-
-              <Typography level='h4' mt={3} mb={2}>
-                {t('choreEdit.whoToNotify')}
-              </Typography>
-              <FormControl>
-                <Checkbox
-                  overlay
-                  disabled={true}
-                  checked={true}
-                  label={t('choreEdit.allAssignees')}
-                />
-                <FormHelperText>
-                  {t('choreEdit.allAssigneesHelp')}
-                </FormHelperText>
-              </FormControl>
-
-              <FormControl>
-                <Checkbox
-                  overlay
-                  onClick={() => {
-                    if (notificationMetadata?.circleGroup) {
-                      delete notificationMetadata.circleGroupID
-                    }
-
-                    setNotificationMetadata({
-                      ...notificationMetadata,
-                      circleGroup: !notificationMetadata?.circleGroup,
-                    })
-                  }}
-                  checked={
-                    notificationMetadata
-                      ? notificationMetadata?.circleGroup
-                      : false
-                  }
-                  label={t('choreEdit.specificGroup')}
-                />
-                <FormHelperText>
-                  {t('choreEdit.specificGroupHelp')}
-                </FormHelperText>
-              </FormControl>
-
-              {notificationMetadata?.circleGroup && (
-                <Box
-                  sx={{
-                    mt: 0,
-                    ml: 4,
-                  }}
-                >
-                  <Typography level='body-sm'>
-                    {t('choreEdit.telegramGroupIdLabel')}
-                  </Typography>
-                  <NumberInput
-                    value={notificationMetadata?.circleGroupID}
-                    allowEmpty
-                    placeholder={t('choreEdit.telegramGroupIdPlaceholder')}
-                    onValueChange={next => {
-                      setNotificationMetadata({
-                        ...notificationMetadata,
-                        circleGroupID: next,
-                      })
+        {isNotificable &&
+          !NOTIFICATION_FORBIDDEN_TYPE.includes(frequencyType) && (
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 2,
+              }}
+            >
+              <Card variant='outlined'>
+                <Typography level='h4' mb={2}>
+                  {t('choreEdit.notificationSchedule')}
+                </Typography>
+                <Box sx={{ p: 0.5 }}>
+                  <NotificationTemplate
+                    onChange={metadata => {
+                      const newTemplates = metadata.notifications
+                      if (notificationMetadata?.templates !== newTemplates) {
+                        setNotificationMetadata({
+                          ...notificationMetadata,
+                          templates: newTemplates,
+                        })
+                      }
                     }}
+                    value={notificationMetadata}
                   />
                 </Box>
-              )}
-            </Card>
-          </Box>
-        )}
+
+                <Typography level='h4' mt={3} mb={2}>
+                  {t('choreEdit.whoToNotify')}
+                </Typography>
+                <FormControl>
+                  <Checkbox
+                    overlay
+                    disabled={true}
+                    checked={true}
+                    label={t('choreEdit.allAssignees')}
+                  />
+                  <FormHelperText>
+                    {t('choreEdit.allAssigneesHelp')}
+                  </FormHelperText>
+                </FormControl>
+
+                <FormControl>
+                  <Checkbox
+                    overlay
+                    onClick={() => {
+                      // Routing reminders to a Telegram group is an extra
+                      // delivery channel, which stays a Plus capability.
+                      if (
+                        !notificationMetadata?.circleGroup &&
+                        !isPlusAccount(userProfile)
+                      ) {
+                        showPaywall(PAYWALL_REASON.REMINDER_CHANNELS)
+                        return
+                      }
+                      if (notificationMetadata?.circleGroup) {
+                        delete notificationMetadata.circleGroupID
+                      }
+
+                      setNotificationMetadata({
+                        ...notificationMetadata,
+                        circleGroup: !notificationMetadata?.circleGroup,
+                      })
+                    }}
+                    checked={
+                      notificationMetadata
+                        ? notificationMetadata?.circleGroup
+                        : false
+                    }
+                    label={t('choreEdit.specificGroup')}
+                    endDecorator={
+                      isPlusAccount(userProfile) ? null : (
+                        <LockOutlined sx={{ fontSize: 14, opacity: 0.6 }} />
+                      )
+                    }
+                  />
+                  <FormHelperText>
+                    {t('choreEdit.specificGroupHelp')}
+                  </FormHelperText>
+                </FormControl>
+
+                {notificationMetadata?.circleGroup && (
+                  <Box
+                    sx={{
+                      mt: 0,
+                      ml: 4,
+                    }}
+                  >
+                    <Typography level='body-sm'>
+                      {t('choreEdit.telegramGroupIdLabel')}
+                    </Typography>
+                    <NumberInput
+                      value={notificationMetadata?.circleGroupID}
+                      allowEmpty
+                      placeholder={t('choreEdit.telegramGroupIdPlaceholder')}
+                      onValueChange={next => {
+                        setNotificationMetadata({
+                          ...notificationMetadata,
+                          circleGroupID: next,
+                        })
+                      }}
+                    />
+                  </Box>
+                )}
+              </Card>
+            </Box>
+          )}
       </Box>
 
       {/* Section 4: Task Settings */}

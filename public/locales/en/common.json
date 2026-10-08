@@ -225,6 +225,7 @@
     "invitePeople": "Invite People",
     "addMembers": "Add members to your circle",
     "sidePanelSettings": "Side Panel Settings",
+    "sidePanelSettingsDescription": "Customize layout & cards",
     "planFree": "Free",
     "planPlus": "Plus",
     "planPlusExpiring": "Plus (expires soon)",
@@ -341,11 +342,26 @@
   "noAttachmentsTitle": "No attachments",
   "noAttachmentsDescription": "Photos and files added to this task will show up here.",
   "kbSize": "{{size}} KB",
+  "logoAlt": "Logo",
+  "notification": {
+    "error": "Error",
+    "success": "Success",
+    "undoneSuccessfully": "Undone Successfully",
+    "warning": "Warning",
+    "information": "Information",
+    "title": "Notification",
+    "unknown": "Unknown notification",
+    "undo": "Undo",
+    "dismiss": "Dismiss"
+  },
   "onboarding": {
     "sources": {
       "speak": "Speak",
       "snap": "Snap",
       "type": "Type"
+    },
+    "voiceWave": {
+      "listening": "Listening…"
     },
     "capture": {
       "voiceCaption": "Dates, labels and points from your words",

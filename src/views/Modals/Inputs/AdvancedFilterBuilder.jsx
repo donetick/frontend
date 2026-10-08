@@ -112,8 +112,7 @@ const AdvancedFilterBuilder = ({
           {editingFilter ? t('builder.editTitle') : t('builder.newTitle')}
           {activeConditionCount > 0 && (
             <Chip size='sm' variant='solid' color='primary'>
-              {activeConditionCount} condition
-              {activeConditionCount !== 1 ? 's' : ''}
+              {t('condition', { count: activeConditionCount })}
             </Chip>
           )}
         </Box>

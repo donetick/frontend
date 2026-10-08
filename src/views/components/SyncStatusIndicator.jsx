@@ -23,6 +23,7 @@ import {
   Typography,
 } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
+import PropTypes from 'prop-types'
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -64,7 +65,7 @@ const formatCommandLabel = (commandType, t) => {
   )
 }
 
-function SyncStatusIndicator() {
+function SyncStatusIndicator({ showLabel = false }) {
   const { t } = useTranslation('common')
   const queryClient = useQueryClient()
   const [pendingCommands, setPendingCommands] = useState([])
@@ -230,14 +231,26 @@ function SyncStatusIndicator() {
   const totalBadge = pendingCount + failedCount
 
   const getStatusIcon = () => {
+    const iconSize = showLabel ? 21 : 20
+
     if (syncState.syncing)
-      return <CloudSync sx={{ fontSize: 20, color: 'primary.500' }} />
-    if (!isOnline) return <WifiOff sx={{ fontSize: 20, color: 'danger.500' }} />
+      return <CloudSync sx={{ fontSize: iconSize, color: 'primary.500' }} />
+    if (!isOnline)
+      return <WifiOff sx={{ fontSize: iconSize, color: 'danger.500' }} />
     if (failedCount > 0)
-      return <CloudQueue sx={{ fontSize: 20, color: 'danger.400' }} />
+      return <CloudQueue sx={{ fontSize: iconSize, color: 'danger.400' }} />
     if (pendingCount > 0)
-      return <CloudQueue sx={{ fontSize: 20, color: 'warning.500' }} />
-    return <CloudDone sx={{ fontSize: 20, color: 'success.500' }} />
+      return <CloudQueue sx={{ fontSize: iconSize, color: 'warning.500' }} />
+    return <CloudDone sx={{ fontSize: iconSize, color: 'success.500' }} />
+  }
+
+  const getStatusLabel = () => {
+    if (syncState.syncing) return t('sync.syncing')
+    if (!isOnline) return t('sync.offline')
+    if (failedCount > 0) return t('sync.failed', { count: failedCount })
+    if (pendingCount > 0)
+      return t('sync.pendingSyncLabel', { count: pendingCount })
+    return t('sync.allSynced')
   }
 
   if (!offlineFeatureEnabled) return null
@@ -248,7 +261,10 @@ function SyncStatusIndicator() {
         aria-label={t('sync.aria')}
         variant='plain'
         sx={{
-          p: 0.5,
+          minHeight: showLabel ? 48 : 'auto',
+          p: showLabel ? '8px 12px' : 0.5,
+          width: showLabel ? '100%' : 'auto',
+          justifyContent: showLabel ? 'flex-start' : 'center',
           border: 'none',
           backgroundColor: 'transparent',
           borderRadius: 'var(--joy-radius-sm)',
@@ -258,14 +274,20 @@ function SyncStatusIndicator() {
         }}
       >
         <Box
-          sx={{ display: 'flex', alignItems: 'center', position: 'relative' }}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            minWidth: 0,
+            position: 'relative',
+          }}
         >
           {syncState.syncing && (
             <CircularProgress
               size='sm'
               sx={{
                 position: 'absolute',
-                '--CircularProgress-size': '28px',
+                '--CircularProgress-size': showLabel ? '24px' : '28px',
                 '--CircularProgress-trackThickness': '2px',
                 '--CircularProgress-progressThickness': '2px',
               }}
@@ -288,6 +310,19 @@ function SyncStatusIndicator() {
             </Badge>
           ) : (
             getStatusIcon()
+          )}
+          {showLabel && (
+            <Typography
+              level='body-sm'
+              sx={{
+                fontWeight: 400,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {getStatusLabel()}
+            </Typography>
           )}
         </Box>
       </MenuButton>
@@ -575,6 +610,10 @@ function SyncStatusIndicator() {
       </Menu>
     </Dropdown>
   )
+}
+
+SyncStatusIndicator.propTypes = {
+  showLabel: PropTypes.bool,
 }
 
 export default SyncStatusIndicator
