@@ -58,6 +58,10 @@
         "title": "API-tokens",
         "description": "Genereer en beheer toegangstokens voor integraties van derden en API-toegang."
       },
+      "calendar": {
+        "title": "",
+        "description": ""
+      },
       "storage": {
         "title": "Opslaginstellingen",
         "description": "Maak back-ups en herstel je gegevens, beheer lokale opslag en synchronisatie."
@@ -372,6 +376,42 @@
     "nameModalTitle": "Geef je nieuwe token een naam waaraan je het herkent.",
     "generateToken": "Token genereren"
   },
+  "calendar": {
+    "title": "",
+    "description": "",
+    "plusTitle": "",
+    "plusNotice": "",
+    "upgrade": "",
+    "activeTitle": "",
+    "activeStatus": "",
+    "urlLabel": "",
+    "copy": "",
+    "copied": "",
+    "copyFailed": "",
+    "createdAt": "",
+    "lastUsedAt": "",
+    "neverUsed": "",
+    "keepPrivateTitle": "",
+    "keepPrivateDescription": "",
+    "manageTitle": "",
+    "rotate": "",
+    "rotateTitle": "",
+    "rotateMessage": "",
+    "rotated": "",
+    "revoke": "",
+    "revokeTitle": "",
+    "revokeMessage": "",
+    "revoked": "",
+    "inactiveTitle": "",
+    "inactiveDescription": "",
+    "generate": "",
+    "generated": "",
+    "howToTitle": "",
+    "howToDescription": "",
+    "errorTitle": "",
+    "actionFailed": "",
+    "loadFailed": ""
+  },
   "storage": {
     "title": "Opslaginstellingen",
     "serverTitle": "Serveropslaggebruik",
@@ -597,7 +637,8 @@
     "reasonThingTriggers": "Automatisch taken activeren wanneer een thing van status verandert is een Plus‑functie.",
     "reasonProjectLimit": "Je huidige abonnement bevat {{projectLimit}} projecten. Upgrade naar Plus om er zoveel te maken als je nodig hebt.",
     "reasonQuickFilterLimit": "Je huidige abonnement bevat {{filterLimit}} opgeslagen snelle filters. Upgrade naar Plus voor onbeperkte filters.",
-    "reasonFileUpload": "Het toevoegen van bestanden en afbeeldingen is een Plus‑functie. Upgrade naar Plus om foto's, scans en documenten aan je taken toe te voegen."
+    "reasonFileUpload": "Het toevoegen van bestanden en afbeeldingen is een Plus‑functie. Upgrade naar Plus om foto's, scans en documenten aan je taken toe te voegen.",
+    "reasonCalendarSync": ""
   },
   "childUsers": {
     "errNameRequired": "Sub account name is required",
