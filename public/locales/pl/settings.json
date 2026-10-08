@@ -58,6 +58,10 @@
         "title": "Tokeny API",
         "description": "Generuj i zarządzaj tokenami dostępu do integracji zewnętrznych i API."
       },
+      "calendar": {
+        "title": "",
+        "description": ""
+      },
       "storage": {
         "title": "Ustawienia pamięci",
         "description": "Twórz i przywracaj kopie zapasowe, zarządzaj pamięcią lokalną i preferencjami synchronizacji."
@@ -372,6 +376,42 @@
     "nameModalTitle": "Podaj nazwę dla nowego tokenu, aby łatwo go rozpoznać.",
     "generateToken": "Wygeneruj token"
   },
+  "calendar": {
+    "title": "",
+    "description": "",
+    "plusTitle": "",
+    "plusNotice": "",
+    "upgrade": "",
+    "activeTitle": "",
+    "activeStatus": "",
+    "urlLabel": "",
+    "copy": "",
+    "copied": "",
+    "copyFailed": "",
+    "createdAt": "",
+    "lastUsedAt": "",
+    "neverUsed": "",
+    "keepPrivateTitle": "",
+    "keepPrivateDescription": "",
+    "manageTitle": "",
+    "rotate": "",
+    "rotateTitle": "",
+    "rotateMessage": "",
+    "rotated": "",
+    "revoke": "",
+    "revokeTitle": "",
+    "revokeMessage": "",
+    "revoked": "",
+    "inactiveTitle": "",
+    "inactiveDescription": "",
+    "generate": "",
+    "generated": "",
+    "howToTitle": "",
+    "howToDescription": "",
+    "errorTitle": "",
+    "actionFailed": "",
+    "loadFailed": ""
+  },
   "storage": {
     "title": "Ustawienia pamięci",
     "serverTitle": "Pamięć na serwerze",
@@ -597,7 +637,8 @@
     "reasonThingTriggers": "Automatyczne wywoływanie zadań po zmianie stanu urządzenia to funkcja Plus.",
     "reasonProjectLimit": "Twój obecny plan obejmuje {{projectLimit}} projektów. Przejdź na Plus, aby tworzyć ich dowolną liczbę.",
     "reasonQuickFilterLimit": "Twój obecny plan obejmuje {{filterLimit}} zapisanych szybkich filtrów. Przejdź na Plus, aby mieć nieograniczoną liczbę filtrów.",
-    "reasonFileUpload": "Dołączanie plików i obrazów to funkcja Plus. Przejdź na Plus, aby dodawać zdjęcia, skany i dokumenty do zadań."
+    "reasonFileUpload": "Dołączanie plików i obrazów to funkcja Plus. Przejdź na Plus, aby dodawać zdjęcia, skany i dokumenty do zadań.",
+    "reasonCalendarSync": ""
   },
   "childUsers": {
     "errNameRequired": "Nazwa podkonta jest wymagana",
