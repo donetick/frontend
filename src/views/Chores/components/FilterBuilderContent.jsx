@@ -509,7 +509,13 @@ const FilterBuilderContent = ({
               .map(p => ({
                 value: p.id,
                 label: (
-                  <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
+                  <Box
+                    sx={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 0.5,
+                    }}
+                  >
                     {p.name}
                     {p.isPrivate && <Lock sx={{ fontSize: 12 }} />}
                   </Box>
