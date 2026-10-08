@@ -135,24 +135,13 @@ export const useSSE = () => {
             }
             const updatedChore = eventData.data.chore
 
-            // Update individual chore cache
-            queryClient.setQueryData(['chore', updatedChore.id], oldData => {
-              if (!oldData) return { res: updatedChore }
-              return { res: { ...oldData.res, ...updatedChore } }
+            // Refetch rather than merge: the payload is the sender's view of the chore.
+            // Keys are strings to match the route param used by ChoreView/ChoreEdit.
+            const choreId = String(updatedChore.id)
+            queryClient.invalidateQueries({ queryKey: ['chore', choreId] })
+            queryClient.invalidateQueries({
+              queryKey: ['choreDetails', choreId],
             })
-
-            // If chore update then also refetch chore details:
-            if (
-              eventData.type === 'chore.updated' ||
-              eventData.type === 'chore.status'
-            ) {
-              queryClient.invalidateQueries({
-                queryKey: ['choreDetails', updatedChore.id],
-              })
-              queryClient.refetchQueries({
-                queryKey: ['choreDetails', updatedChore.id],
-              })
-            }
 
             // Update chores list cache - add debugging
             queryClient.setQueryData(['chores', false], oldData => {
