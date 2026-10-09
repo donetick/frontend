@@ -101,16 +101,6 @@
   animation: voice-card-in 0.25s ease-out;
 }
 
-/* Prevent iOS Safari from auto-zooming on focus (triggered when font-size <
-   16px). The card's title editor is a size="sm" Input, so it would otherwise
-   zoom the whole modal in — and iOS never zooms back out on blur. */
-@supports (-webkit-touch-callout: none) {
-  .voice-task-card input,
-  .voice-task-card textarea {
-    font-size: 16px;
-  }
-}
-
 @keyframes voice-card-in {
   from {
     opacity: 0;

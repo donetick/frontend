@@ -38,11 +38,18 @@ body {
   border-radius: 4px;
 }
 
-/* Prevent iOS Safari from auto-zooming on input focus (triggered when font-size < 16px) */
+/* Prevent iOS Safari from auto-zooming on input focus (triggered when font-size
+   < 16px — and iOS never zooms back out on blur, so the page stays zoomed).
+   Joy's Input/Textarea slots set `font-size: inherit` on the native element via
+   an emotion class, which out-specifies a bare `input` selector and leaves
+   size="sm" fields at 14px — hence the element+class compounds below. */
 @supports (-webkit-touch-callout: none) {
   input,
   textarea,
-  select {
+  select,
+  input.MuiInput-input,
+  input.MuiAutocomplete-input,
+  textarea.MuiTextarea-textarea {
     font-size: max(16px, 1em);
   }
 }
