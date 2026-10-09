@@ -608,7 +608,7 @@ const ChoreEdit = () => {
 
       setNotificationMetadata(data.res.notificationMetadata)
       setCompletionActions(data.res.completionActions || [])
-      setPoints(data.res.points && data.res.points > -1 ? data.res.points : -1)
+      setPoints(data.res.points != null && data.res.points >= 0 ? data.res.points : -1)
       setRequireApproval(data.res.requireApproval || false)
       setIsPrivate(data.res.isPrivate || false)
       setCompletionWindow(
@@ -1894,47 +1894,7 @@ const ChoreEdit = () => {
         </Typography>
 
         <CompletionActionsSection actions={completionActions} onChange={setCompletionActions}
-          onValidate={setCompletionActionsValid} />
-        <Box mb={3}>
-          <Typography level='h4'>{t('choreEdit.pointsSystem')}</Typography>
-          <FormControl sx={{ mt: 1 }}>
-            <Checkbox
-              onChange={e => {
-                if (e.target.checked) {
-                  setPoints(1)
-                } else {
-                  setPoints(-1)
-                }
-              }}
-              checked={points > -1}
-              overlay
-              label={t('choreEdit.assignPoints')}
-            />
-            <FormHelperText>{t('choreEdit.assignPointsHelp')}</FormHelperText>
-          </FormControl>
-          {points != -1 && (
-            <Card variant='outlined' sx={{ mt: 2 }}>
-              <Box
-                sx={{
-                  mt: 0,
-                  ml: 4,
-                }}
-              >
-                <Typography level='body-sm'>
-                  {t('choreEdit.pointsLabel')}
-                </Typography>
-                <NumberInput
-                  value={points}
-                  min={0}
-                  max={1000}
-                  sx={{ maxWidth: 100 }}
-                  placeholder={t('choreEdit.pointsPlaceholder')}
-                  onValueChange={setPoints}
-                />
-              </Box>
-            </Card>
-          )}
-        </Box>
+          points={points} onPointsChange={setPoints} onValidate={setCompletionActionsValid} />
 
         <Box mb={3}>
           <Typography level='h4'>
