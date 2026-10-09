@@ -87,6 +87,7 @@ import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import LabelModal from '../Modals/Inputs/LabelModal'
 import { useProjects } from '../Projects/ProjectQueries'
 import RepeatSection from './RepeatSection'
+import CompletionActionsSection from './CompletionActionsSection'
 
 const ASSIGN_STRATEGIES = [
   'random',
@@ -135,6 +136,8 @@ const ChoreEdit = () => {
   const [labels, setLabels] = useState([])
   const [labelsV2, setLabelsV2] = useState([])
   const [priority, setPriority] = useState(0)
+  const [completionActions, setCompletionActions] = useState([])
+  const [completionActionsValid, setCompletionActionsValid] = useState(true)
   const [points, setPoints] = useState(-1)
   const [requireApproval, setRequireApproval] = useState(false)
   const [isPrivate, setIsPrivate] = useState(false)
@@ -270,6 +273,8 @@ const ChoreEdit = () => {
         errors.thingTrigger = t('choreEdit.errThingTrigger')
       }
     }
+
+    if (!completionActionsValid) errors.completionActions = 'Check the completion actions: select a Thing and enter a valid value'
 
     // if there is any error then return false:
     setErrors(errors)
@@ -415,6 +420,7 @@ const ChoreEdit = () => {
         templates: planReminders,
       },
       thingTrigger: thingTrigger,
+      completionActions,
       points: points < 0 ? null : points,
       requireApproval: requireApproval,
       isPrivate: isPrivate,
@@ -601,6 +607,7 @@ const ChoreEdit = () => {
       setFrequency(data.res.frequency)
 
       setNotificationMetadata(data.res.notificationMetadata)
+      setCompletionActions(data.res.completionActions || [])
       setPoints(data.res.points && data.res.points > -1 ? data.res.points : -1)
       setRequireApproval(data.res.requireApproval || false)
       setIsPrivate(data.res.isPrivate || false)
@@ -1886,6 +1893,8 @@ const ChoreEdit = () => {
           {t('choreEdit.taskSettings')}
         </Typography>
 
+        <CompletionActionsSection actions={completionActions} onChange={setCompletionActions}
+          onValidate={setCompletionActionsValid} />
         <Box mb={3}>
           <Typography level='h4'>{t('choreEdit.pointsSystem')}</Typography>
           <FormControl sx={{ mt: 1 }}>
