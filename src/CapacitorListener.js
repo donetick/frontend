@@ -11,6 +11,7 @@ import { RegisterDeviceToken, UnregisterDeviceToken } from './utils/Fetcher'
 import { beginOAuthExchange } from './utils/OAuthExchangeState'
 import { hasSeenOnboarding } from './utils/Onboarding'
 import { setPendingInvite } from './utils/PendingInvite'
+import statusBarManager from './utils/StatusBarManager'
 
 // React Router navigate(), injected by <App /> once the router is mounted.
 // Using client-side navigation (instead of window.location.href) avoids a full
@@ -349,6 +350,12 @@ const registerCapacitorListeners = navigate => {
 
   mobileApp.addListener('appStateChange', ({ isActive }) => {
     focusManager.setFocused(isActive)
+  })
+
+  // On iOS, dismissing SFSafariViewController can leave the WebView laid out
+  // underneath the status bar even though overlaysWebView is disabled.
+  Browser.addListener('browserFinished', () => {
+    void statusBarManager.restoreAfterBrowserDismissal()
   })
 
   mobileApp.addListener('backButton', ({ canGoBack }) => {
