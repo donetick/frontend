@@ -1641,7 +1641,7 @@ const ChoreEdit = () => {
                   <NumberInput
                     value={completionWindow}
                     min={0}
-                    max={24 * 7}
+                    max={24 * 31}
                     sx={{ maxWidth: 100 }}
                     placeholder={t('choreEdit.hoursPlaceholder')}
                     onValueChange={setCompletionWindow}
