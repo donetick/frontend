@@ -148,6 +148,7 @@ const ChoreEdit = () => {
   const [notificationMetadata, setNotificationMetadata] = useState({})
 
   const [isRolling, setIsRolling] = useState(false)
+  const [autoSkipWhenLate, setAutoSkipWhenLate] = useState(false)
   const [isNotificable, setIsNotificable] = useState(false)
   const [isActive, setIsActive] = useState(true)
   const [updatedBy, setUpdatedBy] = useState(0)
@@ -405,6 +406,7 @@ const ChoreEdit = () => {
       assignedTo: assignedToValue,
       assignStrategy: assignStrategyValue,
       isRolling: isRolling,
+      autoSkipWhenLate: autoSkipWhenLate,
       isActive: isActive,
       notification: isNotificable && planReminders.length > 0,
       labels: labels.map(l => l.name),
@@ -624,6 +626,7 @@ const ChoreEdit = () => {
           : DEFAULT_ASSIGN_STRATEGY,
       )
       setIsRolling(data.res.isRolling)
+      setAutoSkipWhenLate(Boolean(data.res.autoSkipWhenLate))
       setIsActive(data.res.isActive)
       setSubTasks(data.res.subTasks ? data.res.subTasks : [])
       setProjectId(data.res.projectId || 'default')
@@ -1729,6 +1732,19 @@ const ChoreEdit = () => {
                 </FormHelperText>
               </FormControl>
             </RadioGroup>
+            {!['trigger', 'adaptive'].includes(frequencyType) && (
+              <FormControl sx={{ mt: 1 }}>
+                <Checkbox
+                  checked={autoSkipWhenLate}
+                  onChange={e => setAutoSkipWhenLate(e.target.checked)}
+                  overlay
+                  label={t('choreEdit.autoSkipWhenLate')}
+                />
+                <FormHelperText>
+                  {t('choreEdit.autoSkipWhenLateHelp')}
+                </FormHelperText>
+              </FormControl>
+            )}
           </Box>
         )}
         {/* Section 3.1: Notifications */}
