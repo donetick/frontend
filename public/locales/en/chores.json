@@ -1133,6 +1133,7 @@
     "awardPoints": "Award points",
     "removePointsAction": "Remove points action",
     "removeCompletionAction": "Remove completion action",
+    "removeApprovalAction": "Remove approval action",
     "action": "Action",
     "setValue": "Set value",
     "increaseDecrease": "Increase / decrease",

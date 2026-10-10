@@ -1109,7 +1109,7 @@ const ChoreEdit = () => {
           display: singlePageEditor || wizardStep === 0 ? 'block' : 'none',
         },
         '& [data-editor-section="task"]': {
-          display: singlePageEditor || wizardStep < 3 ? 'block' : 'none',
+          display: singlePageEditor || wizardStep === 0 ? 'block' : 'none',
         },
         '& [data-editor-section="schedule"]': {
           display: singlePageEditor || wizardStep === 1 ? 'block' : 'none',
@@ -1360,14 +1360,7 @@ const ChoreEdit = () => {
               hideHeading={!singlePageEditor}
               collapsible={singlePageEditor}
               defaultOpen
-              error={
-                errors.name ||
-                errors.assignees ||
-                errors.assignedTo ||
-                errors.frequency ||
-                errors.dueDate ||
-                errors.thingTrigger
-              }
+              error={errors.name}
             >
               <Box data-wizard-name>
                 <FormControl error={errors.name}>
@@ -1382,327 +1375,370 @@ const ChoreEdit = () => {
                   <FormHelperText error>{errors.name}</FormHelperText>
                 </FormControl>
               </Box>
+            </EditorSection>
 
-              <Box
-                data-editor-section='schedule'
-                sx={{
-                  mt: 3,
-                  pt: 3,
-                  borderTop: '1px solid',
-                  borderColor: 'divider',
-                }}
+            <EditorSection
+              title={t('taskEditor.schedule')}
+              icon={CalendarMonthOutlined}
+              section='schedule'
+              collapsible
+              defaultOpen
+              error={errors.frequency || errors.dueDate || errors.thingTrigger}
+              summary={scheduleSummary}
+            >
+              <Typography
+                level='body-sm'
+                textColor='text.tertiary'
+                sx={{ mb: 2 }}
               >
+                {t('taskEditor.chooseWhenThisTaskIsDueAnd')}
+              </Typography>
+
+              <RepeatSection
+                frequency={frequency}
+                onFrequencyUpdate={setFrequency}
+                frequencyType={frequencyType}
+                onFrequencyTypeUpdate={value => {
+                  setFrequencyType(value)
+                  if (value === 'always') {
+                    setDueDate(null)
+                    setDueDateOnly(null)
+                    setDueTime(null)
+                    setUseCustomTime(false)
+                  }
+                }}
+                frequencyMetadata={frequencyMetadata}
+                onFrequencyMetadataUpdate={setFrequencyMetadata}
+                frequencyError={errors?.frequency}
+                allUserThings={allUserThings}
+                onTriggerUpdate={thingUpdate => {
+                  if (thingUpdate === null) {
+                    setThingTrigger(null)
+                    return
+                  }
+                  setThingTrigger({
+                    triggerState: thingUpdate.triggerState,
+                    condition: thingUpdate.condition,
+                    thingID: thingUpdate.thing.id,
+                  })
+                }}
+                OnTriggerValidate={setIsThingValid}
+                isAttemptToSave={attemptToSave}
+                selectedThing={thingTrigger}
+              />
+
+              {frequencyType !== 'always' &&
+                (frequencyType !== 'trigger' || dueDate) && (
+                  <Box mt={3} mb={2}>
+                    <Typography level='h4'>
+                      {choreId ? 'Next due date' : 'First due date'}
+                    </Typography>
+                    {frequencyType === 'trigger' && !dueDate && (
+                      <Typography level='body-sm'>
+                        {t('taskEditor.theTaskBecomesDueWhenItsThing')}
+                      </Typography>
+                    )}
+
+                    {NO_DUE_DATE_REQUIRED_TYPE.includes(frequencyType) && (
+                      <FormControl sx={{ mt: 1 }}>
+                        <Checkbox
+                          onChange={e => {
+                            if (e.target.checked) {
+                              const today = moment(new Date()).format(
+                                'YYYY-MM-DD',
+                              )
+                              setDueDateOnly(today)
+                              setDueDate(
+                                moment(today)
+                                  .endOf('day')
+                                  .format('YYYY-MM-DDTHH:mm:59'),
+                              )
+                              setUseCustomTime(false)
+                              setDueTime(null)
+                            } else {
+                              setDueDate(null)
+                              setDueDateOnly(null)
+                              setUseCustomTime(false)
+                              setDueTime(null)
+                            }
+                          }}
+                          defaultChecked={dueDate !== null}
+                          checked={dueDate !== null}
+                          overlay
+                          label={t('choreEdit.giveDueDate')}
+                        />
+                      </FormControl>
+                    )}
+                    {dueDate && (
+                      <Box
+                        sx={{
+                          display: 'grid',
+                          gridTemplateColumns: {
+                            xs: 'minmax(0, 1fr)',
+                            sm: 'repeat(2, minmax(0, 1fr))',
+                          },
+                          gap: 2,
+                          mt: 2,
+                          alignItems: 'start',
+                        }}
+                      >
+                        <FormControl error={Boolean(errors.dueDate)}>
+                          <Typography level='h4'>
+                            {REPEAT_ON_TYPE.includes(frequencyType)
+                              ? 'Start date'
+                              : 'Date'}
+                          </Typography>
+                          <Input
+                            type='date'
+                            aria-label={t('taskEditor.dueDate')}
+                            value={dueDateOnly || ''}
+                            onChange={handleDueDateChange}
+                          />
+                          {errors.dueDate && (
+                            <FormHelperText>{errors.dueDate}</FormHelperText>
+                          )}
+                        </FormControl>
+                        <FormControl>
+                          <Typography level='h4'>
+                            {t('taskEditor.time')}
+                          </Typography>
+                          {useCustomTime ? (
+                            <Input
+                              type='time'
+                              aria-label={t('taskEditor.dueTime')}
+                              value={dueTime || '18:00'}
+                              onChange={handleDueTimeChange}
+                            />
+                          ) : (
+                            <Button
+                              variant='outlined'
+                              color='neutral'
+                              onClick={() => handleUseCustomTimeChange(true)}
+                              sx={{
+                                minHeight: 44,
+                                justifyContent: 'flex-start',
+                                fontWeight: 400,
+                              }}
+                            >
+                              {t('taskEditor.addATime')}
+                            </Button>
+                          )}
+                          {useCustomTime && (
+                            <Button
+                              size='sm'
+                              variant='plain'
+                              color='neutral'
+                              sx={{ alignSelf: 'flex-start', mt: 0.5 }}
+                              onClick={() => handleUseCustomTimeChange(false)}
+                            >
+                              {t('taskEditor.removeTime')}
+                            </Button>
+                          )}
+                        </FormControl>
+                      </Box>
+                    )}
+                  </Box>
+                )}
+
+              {!['once', 'no_repeat', 'trigger', 'always'].includes(
+                frequencyType,
+              ) && (
+                <Box>
+                  <Typography level='h4'>
+                    {t('choreEdit.schedulingPrefs')}
+                  </Typography>
+                  <RadioGroup name='tiers' sx={{ gap: 1, '& > div': { p: 1 } }}>
+                    <FormControl>
+                      <Radio
+                        overlay
+                        checked={!isRolling}
+                        onClick={() => setIsRolling(false)}
+                        label={t('choreEdit.rescheduleFromDue')}
+                      />
+                      <FormHelperText>
+                        {t('taskEditor.theNextOccurrenceIsScheduledFromThe')}
+                      </FormHelperText>
+                    </FormControl>
+                    <FormControl>
+                      <Radio
+                        overlay
+                        checked={isRolling}
+                        onClick={() => {
+                          setIsRolling(true)
+                          setDeadlineOffset(-1)
+                        }}
+                        label={t('choreEdit.rescheduleFromCompletion')}
+                      />
+                      <FormHelperText>
+                        {t('taskEditor.theNextOccurrenceIsScheduledFromThe2')}
+                      </FormHelperText>
+                    </FormControl>
+                  </RadioGroup>
+                </Box>
+              )}
+            </EditorSection>
+
+            <EditorSection
+              title={t('choreView.assignment')}
+              icon={GroupOutlined}
+              section='assignment'
+              collapsible
+              defaultOpen
+              error={errors.assignees || errors.assignedTo}
+              summary={assignmentSummary}
+            >
+              <Box mb={2}>
                 <Box
                   sx={{
                     display: 'flex',
-                    alignItems: 'baseline',
+                    alignItems: 'center',
                     justifyContent: 'space-between',
-                    flexWrap: 'wrap',
                     gap: 1,
                     mb: 1,
                   }}
                 >
-                  <Typography level='title-sm'>
-                    {t('taskEditor.schedule')}
+                  <Typography level='h4' sx={{ mb: '0 !important' }}>
+                    {t('taskEditor.assignTo')}
                   </Typography>
-                  <Typography level='body-sm' textColor='text.tertiary'>
-                    {scheduleSummary}
-                  </Typography>
+                  {!showSaveAssigneeDefault && (
+                    <Chip
+                      size='sm'
+                      variant='soft'
+                      color='neutral'
+                      startDecorator={<Check sx={{ fontSize: 14 }} />}
+                    >
+                      {t('taskEditor.savedDefault')}
+                    </Chip>
+                  )}
+                  {showSaveAssigneeDefault && (
+                    <Box sx={{ display: 'flex', justifyContent: 'start' }}>
+                      <Button
+                        variant='plain'
+                        size='sm'
+                        color='neutral'
+                        startDecorator={<Save sx={{ fontSize: 16 }} />}
+                        sx={{
+                          borderRadius: 6,
+                          fontWeight: 500,
+                          '&:hover': {
+                            background: 'neutral.softHoverBg',
+                          },
+                        }}
+                        onClick={() => {
+                          localStorage.setItem(
+                            'defaultAnyoneSetting',
+                            JSON.stringify(anyone),
+                          )
+                          localStorage.setItem(
+                            'defaultAssigneeSetting',
+                            JSON.stringify(assignableTo),
+                          )
+                          setShowSaveAssigneeDefault(false)
+                        }}
+                      >
+                        {t('taskEditor.useAsDefault')}
+                      </Button>
+                    </Box>
+                  )}
                 </Box>
                 <Typography
                   level='body-sm'
                   textColor='text.tertiary'
-                  sx={{ mb: 2 }}
+                  sx={{ mb: 1.5 }}
                 >
-                  {t('taskEditor.chooseWhenThisTaskIsDueAnd')}
+                  {t('taskEditor.chooseWhoCanBeAssignedThisTask')}
                 </Typography>
-
-                <RepeatSection
-                  frequency={frequency}
-                  onFrequencyUpdate={setFrequency}
-                  frequencyType={frequencyType}
-                  onFrequencyTypeUpdate={value => {
-                    setFrequencyType(value)
-                    if (value === 'always') {
-                      setDueDate(null)
-                      setDueDateOnly(null)
-                      setDueTime(null)
-                      setUseCustomTime(false)
-                    }
-                  }}
-                  frequencyMetadata={frequencyMetadata}
-                  onFrequencyMetadataUpdate={setFrequencyMetadata}
-                  frequencyError={errors?.frequency}
-                  allUserThings={allUserThings}
-                  onTriggerUpdate={thingUpdate => {
-                    if (thingUpdate === null) {
-                      setThingTrigger(null)
-                      return
-                    }
-                    setThingTrigger({
-                      triggerState: thingUpdate.triggerState,
-                      condition: thingUpdate.condition,
-                      thingID: thingUpdate.thing.id,
-                    })
-                  }}
-                  OnTriggerValidate={setIsThingValid}
-                  isAttemptToSave={attemptToSave}
-                  selectedThing={thingTrigger}
-                />
-
-                {frequencyType !== 'always' &&
-                  (frequencyType !== 'trigger' || dueDate) && (
-                    <Box mt={3} mb={2}>
-                      <Typography level='h4'>
-                        {choreId ? 'Next due date' : 'First due date'}
-                      </Typography>
-                      {frequencyType === 'trigger' && !dueDate && (
-                        <Typography level='body-sm'>
-                          {t('taskEditor.theTaskBecomesDueWhenItsThing')}
-                        </Typography>
-                      )}
-
-                      {NO_DUE_DATE_REQUIRED_TYPE.includes(frequencyType) && (
-                        <FormControl sx={{ mt: 1 }}>
-                          <Checkbox
-                            onChange={e => {
-                              if (e.target.checked) {
-                                const today = moment(new Date()).format(
-                                  'YYYY-MM-DD',
-                                )
-                                setDueDateOnly(today)
-                                setDueDate(
-                                  moment(today)
-                                    .endOf('day')
-                                    .format('YYYY-MM-DDTHH:mm:59'),
-                                )
-                                setUseCustomTime(false)
-                                setDueTime(null)
-                              } else {
-                                setDueDate(null)
-                                setDueDateOnly(null)
-                                setUseCustomTime(false)
-                                setDueTime(null)
-                              }
-                            }}
-                            defaultChecked={dueDate !== null}
-                            checked={dueDate !== null}
-                            overlay
-                            label={t('choreEdit.giveDueDate')}
-                          />
-                        </FormControl>
-                      )}
-                      {dueDate && (
-                        <Box
-                          sx={{
-                            display: 'grid',
-                            gridTemplateColumns: {
-                              xs: 'minmax(0, 1fr)',
-                              sm: 'repeat(2, minmax(0, 1fr))',
-                            },
-                            gap: 2,
-                            mt: 2,
-                            alignItems: 'start',
-                          }}
-                        >
-                          <FormControl error={Boolean(errors.dueDate)}>
-                            <Typography level='h4'>
-                              {REPEAT_ON_TYPE.includes(frequencyType)
-                                ? 'Start date'
-                                : 'Date'}
-                            </Typography>
-                            <Input
-                              type='date'
-                              aria-label={t('taskEditor.dueDate')}
-                              value={dueDateOnly || ''}
-                              onChange={handleDueDateChange}
-                            />
-                            {errors.dueDate && (
-                              <FormHelperText>{errors.dueDate}</FormHelperText>
-                            )}
-                          </FormControl>
-                          <FormControl>
-                            <Typography level='h4'>
-                              {t('taskEditor.time')}
-                            </Typography>
-                            {useCustomTime ? (
-                              <Input
-                                type='time'
-                                aria-label={t('taskEditor.dueTime')}
-                                value={dueTime || '18:00'}
-                                onChange={handleDueTimeChange}
-                              />
-                            ) : (
-                              <Button
-                                variant='outlined'
-                                color='neutral'
-                                onClick={() => handleUseCustomTimeChange(true)}
-                                sx={{
-                                  minHeight: 44,
-                                  justifyContent: 'flex-start',
-                                  fontWeight: 400,
-                                }}
-                              >
-                                {t('taskEditor.addATime')}
-                              </Button>
-                            )}
-                            {useCustomTime && (
-                              <Button
-                                size='sm'
-                                variant='plain'
-                                color='neutral'
-                                sx={{ alignSelf: 'flex-start', mt: 0.5 }}
-                                onClick={() => handleUseCustomTimeChange(false)}
-                              >
-                                {t('taskEditor.removeTime')}
-                              </Button>
-                            )}
-                          </FormControl>
-                        </Box>
-                      )}
-                    </Box>
-                  )}
-
-                {!['once', 'no_repeat', 'trigger', 'always'].includes(
-                  frequencyType,
-                ) && (
-                  <Box>
-                    <Typography level='h4'>
-                      {t('choreEdit.schedulingPrefs')}
-                    </Typography>
-                    <RadioGroup
-                      name='tiers'
-                      sx={{ gap: 1, '& > div': { p: 1 } }}
-                    >
-                      <FormControl>
-                        <Radio
-                          overlay
-                          checked={!isRolling}
-                          onClick={() => setIsRolling(false)}
-                          label={t('choreEdit.rescheduleFromDue')}
-                        />
-                        <FormHelperText>
-                          {t('taskEditor.theNextOccurrenceIsScheduledFromThe')}
-                        </FormHelperText>
-                      </FormControl>
-                      <FormControl>
-                        <Radio
-                          overlay
-                          checked={isRolling}
-                          onClick={() => {
-                            setIsRolling(true)
-                            setDeadlineOffset(-1)
-                          }}
-                          label={t('choreEdit.rescheduleFromCompletion')}
-                        />
-                        <FormHelperText>
-                          {t('taskEditor.theNextOccurrenceIsScheduledFromThe2')}
-                        </FormHelperText>
-                      </FormControl>
-                    </RadioGroup>
-                  </Box>
-                )}
-              </Box>
-              <Box
-                data-editor-section='assignment'
-                sx={{
-                  mt: 3,
-                  pt: 3,
-                  borderTop: '1px solid',
-                  borderColor: 'divider',
-                }}
-              >
-                <Box mb={2}>
-                  <Box
+                <Card variant='plain' sx={{ p: 0, bgcolor: 'transparent' }}>
+                  <List
+                    orientation='horizontal'
+                    wrap
                     sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: 1,
-                      mb: 1,
+                      '--List-gap': '8px',
+                      '--ListItem-radius': '20px',
+                      p: 0,
+                      '& .MuiListItem-root': { minHeight: 36, px: 1.5 },
                     }}
                   >
-                    <Typography level='h4' sx={{ mb: '0 !important' }}>
-                      {t('taskEditor.assignTo')}
-                    </Typography>
-                    {!showSaveAssigneeDefault && (
-                      <Chip
-                        size='sm'
-                        variant='soft'
-                        color='neutral'
-                        startDecorator={<Check sx={{ fontSize: 14 }} />}
-                      >
-                        {t('taskEditor.savedDefault')}
-                      </Chip>
-                    )}
-                    {showSaveAssigneeDefault && (
-                      <Box sx={{ display: 'flex', justifyContent: 'start' }}>
-                        <Button
-                          variant='plain'
-                          size='sm'
-                          color='neutral'
-                          startDecorator={<Save sx={{ fontSize: 16 }} />}
-                          sx={{
-                            borderRadius: 6,
-                            fontWeight: 500,
-                            '&:hover': {
-                              background: 'neutral.softHoverBg',
-                            },
-                          }}
-                          onClick={() => {
-                            localStorage.setItem(
-                              'defaultAnyoneSetting',
-                              JSON.stringify(anyone),
-                            )
-                            localStorage.setItem(
-                              'defaultAssigneeSetting',
-                              JSON.stringify(assignableTo),
-                            )
-                            setShowSaveAssigneeDefault(false)
-                          }}
-                        >
-                          {t('taskEditor.useAsDefault')}
-                        </Button>
-                      </Box>
-                    )}
-                  </Box>
-                  <Typography
-                    level='body-sm'
-                    textColor='text.tertiary'
-                    sx={{ mb: 1.5 }}
-                  >
-                    {t('taskEditor.chooseWhoCanBeAssignedThisTask')}
-                  </Typography>
-                  <Card variant='plain' sx={{ p: 0, bgcolor: 'transparent' }}>
-                    <List
-                      orientation='horizontal'
-                      wrap
+                    {/* add one for Anyone if no specific assignee is selected */}
+
+                    <ListItem
+                      key={'anyone'}
                       sx={{
-                        '--List-gap': '8px',
-                        '--ListItem-radius': '20px',
-                        p: 0,
-                        '& .MuiListItem-root': { minHeight: 36, px: 1.5 },
+                        border: '1px solid',
+                        borderColor: anyone
+                          ? 'primary.outlinedBorder'
+                          : 'neutral.outlinedBorder',
+                        bgcolor: anyone
+                          ? 'primary.softBg'
+                          : 'background.surface',
                       }}
                     >
-                      {/* add one for Anyone if no specific assignee is selected */}
+                      <Checkbox
+                        checked={anyone}
+                        onClick={() => {
+                          setAnyone(!anyone)
+                          setIsPrivate(false)
+                        }}
+                        overlay
+                        disableIcon
+                        variant='plain'
+                        label={
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 0.75,
+                            }}
+                          >
+                            {t('choreEdit.anyone')}
+                            {anyone && <Check sx={{ fontSize: 16 }} />}
+                          </Box>
+                        }
+                      />
+                    </ListItem>
 
+                    {performers?.map((item, index) => (
                       <ListItem
-                        key={'anyone'}
+                        key={item.id}
                         sx={{
                           border: '1px solid',
-                          borderColor: anyone
-                            ? 'primary.outlinedBorder'
-                            : 'neutral.outlinedBorder',
-                          bgcolor: anyone
-                            ? 'primary.softBg'
-                            : 'background.surface',
+                          borderColor:
+                            !anyone &&
+                            assignableTo.some(a => a.userId === item.userId)
+                              ? 'primary.outlinedBorder'
+                              : 'neutral.outlinedBorder',
+                          bgcolor:
+                            !anyone &&
+                            assignableTo.some(a => a.userId === item.userId)
+                              ? 'primary.softBg'
+                              : 'background.surface',
                         }}
                       >
                         <Checkbox
-                          checked={anyone}
+                          checked={
+                            !anyone &&
+                            assignableTo.some(a => a.userId == item.userId)
+                          }
                           onClick={() => {
-                            setAnyone(!anyone)
-                            setIsPrivate(false)
+                            if (anyone) {
+                              setAnyone(false)
+                              setAssignableTo([{ userId: item.userId }])
+                              return
+                            }
+                            const assignees = assignableTo
+                            const setAssignees = setAssignableTo
+                            if (assignees.some(a => a.userId === item.userId)) {
+                              const newAssignees = assignees.filter(
+                                a => a.userId !== item.userId,
+                              )
+                              setAnyone(newAssignees.length === 0)
+                              setAssignees(newAssignees)
+                            } else {
+                              setAssignees([
+                                ...assignees,
+                                { userId: item.userId },
+                              ])
+                            }
                           }}
                           overlay
                           disableIcon
@@ -1715,158 +1751,92 @@ const ChoreEdit = () => {
                                 gap: 0.75,
                               }}
                             >
-                              {t('choreEdit.anyone')}
-                              {anyone && <Check sx={{ fontSize: 16 }} />}
+                              <Avatar
+                                sx={{ width: 22, height: 22, fontSize: 12 }}
+                                color='primary'
+                              >
+                                {item.displayName?.charAt(0).toUpperCase()}
+                              </Avatar>
+                              {item.displayName}
+                              {!anyone &&
+                                assignableTo.some(
+                                  a => a.userId === item.userId,
+                                ) && <Check sx={{ fontSize: 16 }} />}
                             </Box>
                           }
                         />
                       </ListItem>
-
-                      {performers?.map((item, index) => (
-                        <ListItem
-                          key={item.id}
-                          sx={{
-                            border: '1px solid',
-                            borderColor:
-                              !anyone &&
-                              assignableTo.some(a => a.userId === item.userId)
-                                ? 'primary.outlinedBorder'
-                                : 'neutral.outlinedBorder',
-                            bgcolor:
-                              !anyone &&
-                              assignableTo.some(a => a.userId === item.userId)
-                                ? 'primary.softBg'
-                                : 'background.surface',
-                          }}
-                        >
-                          <Checkbox
-                            checked={
-                              !anyone &&
-                              assignableTo.some(a => a.userId == item.userId)
-                            }
-                            onClick={() => {
-                              if (anyone) {
-                                setAnyone(false)
-                                setAssignableTo([{ userId: item.userId }])
-                                return
-                              }
-                              const assignees = assignableTo
-                              const setAssignees = setAssignableTo
-                              if (
-                                assignees.some(a => a.userId === item.userId)
-                              ) {
-                                const newAssignees = assignees.filter(
-                                  a => a.userId !== item.userId,
-                                )
-                                setAnyone(newAssignees.length === 0)
-                                setAssignees(newAssignees)
-                              } else {
-                                setAssignees([
-                                  ...assignees,
-                                  { userId: item.userId },
-                                ])
-                              }
-                            }}
-                            overlay
-                            disableIcon
-                            variant='plain'
-                            label={
-                              <Box
-                                sx={{
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: 0.75,
-                                }}
-                              >
-                                <Avatar
-                                  sx={{ width: 22, height: 22, fontSize: 12 }}
-                                  color='primary'
-                                >
-                                  {item.displayName?.charAt(0).toUpperCase()}
-                                </Avatar>
-                                {item.displayName}
-                                {!anyone &&
-                                  assignableTo.some(
-                                    a => a.userId === item.userId,
-                                  ) && <Check sx={{ fontSize: 16 }} />}
-                              </Box>
-                            }
-                          />
-                        </ListItem>
-                      ))}
-                    </List>
-                  </Card>
-                  <Typography
-                    level='body-xs'
-                    textColor='text.tertiary'
-                    sx={{ mt: 1 }}
+                    ))}
+                  </List>
+                </Card>
+                <Typography
+                  level='body-xs'
+                  textColor='text.tertiary'
+                  sx={{ mt: 1 }}
+                >
+                  {!showSaveAssigneeDefault
+                    ? 'This assignment matches your default for new tasks in this browser.'
+                    : 'Use as default applies this assignment to new tasks in this browser.'}
+                </Typography>
+                {(errors.assignees || errors.assignedTo) && (
+                  <FormControl
+                    error={Boolean(errors.assignees || errors.assignedTo)}
                   >
-                    {!showSaveAssigneeDefault
-                      ? 'This assignment matches your default for new tasks in this browser.'
-                      : 'Use as default applies this assignment to new tasks in this browser.'}
-                  </Typography>
-                  {(errors.assignees || errors.assignedTo) && (
-                    <FormControl
-                      error={Boolean(errors.assignees || errors.assignedTo)}
-                    >
-                      <FormHelperText>
-                        {errors.assignees || errors.assignedTo}
-                      </FormHelperText>
-                    </FormControl>
-                  )}
-                </Box>
-
-                {assignees.length > 1 && (
-                  <Box className='task-properties'>
-                    <Box mb={2}>
-                      <Typography level='h4'>
-                        {t('taskEditor.assignedNow')}
-                      </Typography>
-                      <Select
-                        placeholder={
-                          assignees.length === 0
-                            ? 'No Assignees yet can perform this task'
-                            : 'Select an assignee for this task'
-                        }
-                        disabled={assignees.length === 0}
-                        value={assignedTo > -1 ? assignedTo : null}
-                        onChange={(_, selectedUserId) =>
-                          setAssignedTo(selectedUserId)
-                        }
-                      >
-                        {performers
-                          ?.filter(p =>
-                            assignees.some(a => a.userId == p.userId),
-                          )
-                          .map((item, index) => (
-                            <Option value={item.userId} key={item.displayName}>
-                              {item.displayName}
-                            </Option>
-                          ))}
-                      </Select>
-                    </Box>
-
-                    <Box>
-                      <Typography level='h4'>
-                        {t('taskEditor.nextAssignment')}
-                      </Typography>
-                      <Select
-                        aria-label={t('taskEditor.nextAssignment')}
-                        value={assignStrategy}
-                        onChange={(_, value) => {
-                          if (value) setAssignStrategy(value)
-                        }}
-                      >
-                        {ASSIGN_STRATEGIES.map(value => (
-                          <Option key={value} value={value}>
-                            {STRATEGY_LABELS[value]}
-                          </Option>
-                        ))}
-                      </Select>
-                    </Box>
-                  </Box>
+                    <FormHelperText>
+                      {errors.assignees || errors.assignedTo}
+                    </FormHelperText>
+                  </FormControl>
                 )}
               </Box>
+
+              {assignees.length > 1 && (
+                <Box className='task-properties'>
+                  <Box mb={2}>
+                    <Typography level='h4'>
+                      {t('taskEditor.assignedNow')}
+                    </Typography>
+                    <Select
+                      placeholder={
+                        assignees.length === 0
+                          ? 'No Assignees yet can perform this task'
+                          : 'Select an assignee for this task'
+                      }
+                      disabled={assignees.length === 0}
+                      value={assignedTo > -1 ? assignedTo : null}
+                      onChange={(_, selectedUserId) =>
+                        setAssignedTo(selectedUserId)
+                      }
+                    >
+                      {performers
+                        ?.filter(p => assignees.some(a => a.userId == p.userId))
+                        .map((item, index) => (
+                          <Option value={item.userId} key={item.displayName}>
+                            {item.displayName}
+                          </Option>
+                        ))}
+                    </Select>
+                  </Box>
+
+                  <Box>
+                    <Typography level='h4'>
+                      {t('taskEditor.nextAssignment')}
+                    </Typography>
+                    <Select
+                      aria-label={t('taskEditor.nextAssignment')}
+                      value={assignStrategy}
+                      onChange={(_, value) => {
+                        if (value) setAssignStrategy(value)
+                      }}
+                    >
+                      {ASSIGN_STRATEGIES.map(value => (
+                        <Option key={value} value={value}>
+                          {STRATEGY_LABELS[value]}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Box>
+                </Box>
+              )}
             </EditorSection>
             <EditorSection
               title={t('taskEditor.descriptionAttachments')}
@@ -2392,7 +2362,9 @@ const ChoreEdit = () => {
               icon={BoltOutlined}
               section='actions'
               collapsible
-              defaultOpen={points >= 0 || completionActions.length > 0}
+              defaultOpen={
+                points >= 0 || completionActions.length > 0 || requireApproval
+              }
               error={errors.completionActions}
               summary={
                 [
@@ -2400,9 +2372,11 @@ const ChoreEdit = () => {
                   completionActions.length
                     ? `${completionActions.length} Thing action${completionActions.length === 1 ? '' : 's'}`
                     : '',
+                  requireApproval ? 'Approval required' : '',
                 ]
                   .filter(Boolean)
-                  .join(' · ') || 'Award points or update Things when completed'
+                  .join(' · ') ||
+                'Award points, require approval, or update Things when completed'
               }
             >
               <CompletionActionsSection
@@ -2411,6 +2385,8 @@ const ChoreEdit = () => {
                 showHeading={false}
                 points={points}
                 onPointsChange={setPoints}
+                requireApproval={requireApproval}
+                onRequireApprovalChange={setRequireApproval}
                 onValidate={setCompletionActionsValid}
               />
             </EditorSection>
@@ -2421,7 +2397,6 @@ const ChoreEdit = () => {
               collapsible
               summary={[
                 isNotificable ? 'Reminders enabled' : 'Reminders off',
-                requireApproval ? 'Approval required' : '',
                 isPrivate
                   ? 'Visible to assigned users'
                   : 'Visible to your circle',
@@ -2672,25 +2647,6 @@ const ChoreEdit = () => {
                   )}
                 </Box>
               )}
-
-              <Box mb={2}>
-                <Typography level='h4'>
-                  {t('choreEdit.approvalRequirement')}
-                </Typography>
-                <FormControl sx={{ mt: 1 }}>
-                  <Checkbox
-                    onChange={e => {
-                      setRequireApproval(e.target.checked)
-                    }}
-                    checked={requireApproval}
-                    overlay
-                    label={t('choreEdit.requireApproval')}
-                  />
-                  <FormHelperText>
-                    {t('choreEdit.requireApprovalHelp')}
-                  </FormHelperText>
-                </FormControl>
-              </Box>
 
               <Box>
                 <Typography level='h4'>
