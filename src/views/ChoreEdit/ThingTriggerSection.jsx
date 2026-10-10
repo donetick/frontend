@@ -3,13 +3,10 @@ import {
   Autocomplete,
   Box,
   Button,
-  Card,
-  Chip,
   FormControl,
   Input,
   Option,
   Select,
-  TextField,
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
@@ -62,20 +59,27 @@ const ThingTriggerSection = ({
 }) => {
   const { t } = useTranslation('chores')
   const [selectedThing, setSelectedThing] = useState(null)
+  const [thingSearch, setThingSearch] = useState('')
   const [condition, setCondition] = useState(null)
   const [triggerState, setTriggerState] = useState(null)
   const navigate = useNavigate()
 
   useEffect(() => {
     if (selected) {
-      setSelectedThing(things?.find(t => t.id === selected.thingId))
+      setSelectedThing(
+        things?.find(t => t.id === (selected.thingId ?? selected.thingID)),
+      )
       setCondition(selected.condition)
       setTriggerState(selected.triggerState)
     }
   }, [things])
 
   useEffect(() => {
-    if (selectedThing && hasValue(triggerState)) {
+    setThingSearch(selectedThing?.name || '')
+  }, [selectedThing])
+
+  useEffect(() => {
+    if (selectedThing && triggerState) {
       onTriggerUpdate({
         thing: selectedThing,
         condition: condition,
@@ -90,132 +94,128 @@ const ThingTriggerSection = ({
   }, [selectedThing, condition, triggerState])
 
   return (
-    <Card sx={{ mt: 1 }}>
-      <Typography level='h5'>{t('thing.triggerHint')}</Typography>
-      {things?.length === 0 && (
-        <Typography level='body-sm'>
-          {t('thing.noThingsMessage')}
+    <Box sx={{ mt: 2 }}>
+      {things?.length === 0 ? (
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            flexWrap: 'wrap',
+          }}
+        >
+          <Typography level='body-sm'>
+            {t('taskEditor.createAThingToUseItAs')}
+          </Typography>
           <Button
             startDecorator={<Widgets />}
             size='sm'
-            onClick={() => {
-              navigate('/things')
-            }}
+            variant='soft'
+            onClick={() => navigate('/things')}
           >
             {t('thing.goToThings')}
-          </Button>{' '}
-          {t('thing.noThingsSuffix')}
-        </Typography>
-      )}
-      <FormControl error={isAttepmtingToSave && !selectedThing}>
-        <Autocomplete
-          options={things}
-          value={selectedThing}
-          onChange={(e, newValue) => setSelectedThing(newValue)}
-          getOptionLabel={option => option.name}
-          renderOption={(props, option) => (
-            <Box {...props}>
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  p: 1,
-                }}
-              >
-                <Box sx={{ alignSelf: 'flex-start' }}>
-                  <Typography level='body-lg' textColor='primary'>
-                    {option.name}
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography level='body2' textColor='text.secondary'>
-                    <Chip>{t('thing.typeChip', { type: option.type })}</Chip>{' '}
-                    <Chip>{t('thing.stateChip', { state: option.state })}</Chip>
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
-          )}
-          renderInput={params => (
-            <TextField {...params} label={t('thing.selectThing')} />
-          )}
-        />
-      </FormControl>
-      <Typography level='body-sm'>{t('thing.conditionHint')}</Typography>
-      {selectedThing?.type == 'boolean' && (
-        <Box>
-          <Typography level='body-sm'>
-            {t('thing.stateChangeHint', { name: selectedThing.name })}
-          </Typography>
-          <Select
-            value={triggerState}
-            onChange={e => {
-              if (e?.target.value === 'true' || e?.target.value === 'false')
-                setTriggerState(e.target.value)
-              else setTriggerState('false')
+          </Button>
+        </Box>
+      ) : (
+        <>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: {
+                xs: 'minmax(0, 1fr)',
+                sm: 'repeat(2, minmax(0, 1fr))',
+              },
+              gap: 2,
+              alignItems: 'start',
             }}
           >
-            <Option value='true' onClick={() => setTriggerState('true')}>
-              {t('thing.boolTrue')}
-            </Option>
-            <Option value='false' onClick={() => setTriggerState('false')}>
-              {t('thing.boolFalse')}
-            </Option>
-          </Select>
-        </Box>
-      )}
-      {selectedThing?.type == 'number' && (
-        <Box>
-          <Typography level='body-sm'>
-            {t('thing.stateChangeHint', { name: selectedThing.name })}
-          </Typography>
-
-          <Box sx={{ display: 'flex', gap: 1, direction: 'row' }}>
-            <Typography level='body-sm'>{t('thing.stateIs')}</Typography>
-            <Select value={condition} sx={{ width: '50%' }}>
-              {[
-                { name: t('thing.conditions.eq'), value: 'eq' },
-                { name: t('thing.conditions.neq'), value: 'neq' },
-                { name: t('thing.conditions.gt'), value: 'gt' },
-                { name: t('thing.conditions.gte'), value: 'gte' },
-                { name: t('thing.conditions.lt'), value: 'lt' },
-                { name: t('thing.conditions.lte'), value: 'lte' },
-              ].map(condition => (
-                <Option
-                  key={condition.value}
-                  value={condition.value}
-                  onClick={() => setCondition(condition.value)}
+            <FormControl error={isAttepmtingToSave && !selectedThing}>
+              <Typography level='h4'>{t('taskEditor.thing')}</Typography>
+              <Autocomplete
+                aria-label={t('taskEditor.triggerThing')}
+                options={things}
+                value={selectedThing}
+                inputValue={thingSearch}
+                onInputChange={(_, value, reason) =>
+                  setThingSearch(
+                    reason === 'input' ? value : selectedThing?.name || '',
+                  )
+                }
+                onChange={(_, value) => setSelectedThing(value)}
+                getOptionLabel={option => option.name}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                placeholder={t('taskEditor.selectAThing')}
+              />
+            </FormControl>
+            {selectedThing?.type === 'boolean' && (
+              <FormControl>
+                <Typography level='h4'>{t('taskEditor.becomes')}</Typography>
+                <Select
+                  aria-label={t('taskEditor.triggerState')}
+                  value={triggerState}
+                  onChange={(_, value) => setTriggerState(value)}
                 >
-                  {condition.name}
-                </Option>
-              ))}
-            </Select>
-            <NumberInput
-              value={triggerState}
-              allowEmpty
-              integer={false}
-              onValueChange={setTriggerState}
-              sx={{ width: '50%' }}
-            />
+                  <Option value='true'>{t('thing.boolTrue')}</Option>
+                  <Option value='false'>{t('thing.boolFalse')}</Option>
+                </Select>
+              </FormControl>
+            )}
+            {selectedThing?.type === 'text' && (
+              <FormControl>
+                <Typography level='h4'>
+                  {t('taskEditor.matchesText')}
+                </Typography>
+                <Input
+                  aria-label={t('taskEditor.triggerText')}
+                  value={triggerState || ''}
+                  onChange={e => setTriggerState(e.target.value)}
+                />
+              </FormControl>
+            )}
+            {selectedThing?.type === 'number' && (
+              <FormControl>
+                <Typography level='h4'>{t('taskEditor.condition')}</Typography>
+                <Box sx={{ display: 'flex', gap: 1, minWidth: 0 }}>
+                  <Select
+                    aria-label={t('taskEditor.triggerCondition')}
+                    value={condition}
+                    onChange={(_, value) => setCondition(value)}
+                    sx={{ flex: 1 }}
+                  >
+                    {[
+                      { name: 'Equal to', value: 'eq' },
+                      { name: 'Not equal to', value: 'neq' },
+                      { name: 'Greater than', value: 'gt' },
+                      { name: 'At least', value: 'gte' },
+                      { name: 'Less than', value: 'lt' },
+                      { name: 'At most', value: 'lte' },
+                    ].map(item => (
+                      <Option key={item.value} value={item.value}>
+                        {item.name}
+                      </Option>
+                    ))}
+                  </Select>
+                  <Input
+                    aria-label={t('taskEditor.triggerValue')}
+                    type='number'
+                    value={triggerState || ''}
+                    onChange={e => setTriggerState(e.target.value)}
+                    sx={{ width: 88 }}
+                  />
+                </Box>
+              </FormControl>
+            )}
           </Box>
-        </Box>
-      )}
-      {selectedThing?.type == 'text' && (
-        <Box>
-          <Typography level='body-sm'>
-            {t('thing.stateChangeHint', { name: selectedThing.name })}
+          <Typography
+            level='body-sm'
+            textColor='text.tertiary'
+            sx={{ mt: 1.5 }}
+          >
+            {t('taskEditor.theTaskBecomesDueWhenThisCondition')}
           </Typography>
-
-          <Input
-            value={triggerState}
-            onChange={e => setTriggerState(e.target.value)}
-            label={t('thing.enterText')}
-          />
-        </Box>
+        </>
       )}
-    </Card>
+    </Box>
   )
 }
 
