@@ -1,5 +1,9 @@
 import {
   Add,
+  ArrowBack,
+  ArrowForward,
+  Close,
+  EditOutlined,
   AssignmentOutlined,
   CalendarMonthOutlined,
   DescriptionOutlined,
@@ -30,7 +34,6 @@ import {
   Card,
   Checkbox,
   Chip,
-  Container,
   Divider,
   Dropdown,
   FormControl,
@@ -104,6 +107,7 @@ import { useProjects } from '../Projects/ProjectQueries'
 import RepeatSection from './RepeatSection'
 import CompletionActionsSection from './CompletionActionsSection'
 import EditorSection from './EditorSection'
+import WizardContainer from './WizardContainer'
 
 const STRATEGY_LABELS = {
   random: 'Random user',
@@ -144,6 +148,9 @@ const ChoreEdit = () => {
   const [userHistory, setUserHistory] = useState({})
   const { choreId } = useParams()
   const [searchParams, setSearchParams] = useSearchParams()
+  const [wizardStep, setWizardStep] = useState(0)
+  const wizardSteps = ['Task', 'Schedule', 'Assignment', 'Review']
+  const wizardBodyRef = useRef(null)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [confirmModelConfig, setConfirmModelConfig] = useState({})
@@ -350,13 +357,27 @@ const ChoreEdit = () => {
     completionActions: 'actions',
   }
   const focusError = key => {
-    const section = document.querySelector(
-      `[data-editor-section="${errorSections[key] || 'additional'}"]`,
-    )
-    section?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    section
-      ?.querySelector('input, select, textarea, [role="combobox"]')
-      ?.focus({ preventScroll: true })
+    const step =
+      {
+        name: 0,
+        description: 0,
+        assignees: 2,
+        assignedTo: 2,
+        frequency: 1,
+        dueDate: 1,
+        thingTrigger: 1,
+        completionActions: 3,
+      }[key] ?? 3
+    setWizardStep(step)
+    requestAnimationFrame(() => {
+      const section = document.querySelector(
+        `[data-editor-section="${errorSections[key] || 'additional'}"]`,
+      )
+      section?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      section
+        ?.querySelector('input, select, textarea, [role="combobox"]')
+        ?.focus({ preventScroll: true })
+    })
   }
   const dueSummary = dueDate
     ? moment(dueDate).format(useCustomTime ? 'D MMM · HH:mm' : 'D MMM')
@@ -385,8 +406,8 @@ const ChoreEdit = () => {
           ? `${frequencySummary} · ${dueSummary}`
           : dueSummary
 
-  const HandleValidateChore = () => {
-    const errors = {}
+  const HandleValidateChore = (step = null) => {
+    let errors = {}
 
     if (name.trim() === '') {
       errors.name = 'Name is required'
@@ -449,6 +470,17 @@ const ChoreEdit = () => {
       errors.completionActions = 'Check the completion actions and their values'
 
     // if there is any error then return false:
+    if (step !== null) {
+      const fields = [
+        ['name', 'description'],
+        ['frequency', 'dueDate', 'thingTrigger'],
+        ['assignees', 'assignedTo'],
+      ][step]
+      if (fields)
+        errors = Object.fromEntries(
+          Object.entries(errors).filter(([key]) => fields.includes(key)),
+        )
+    }
     setErrors(errors)
     if (Object.keys(errors).length > 0) {
       requestAnimationFrame(() =>
@@ -992,6 +1024,21 @@ const ChoreEdit = () => {
       },
     })
   }
+  const changeWizardStep = next => {
+    if (next > wizardStep && !HandleValidateChore(wizardStep)) return
+    setWizardStep(next)
+    wizardBodyRef.current?.scrollTo({ top: 0 })
+    requestAnimationFrame(() => {
+      if (window.matchMedia('(min-width:600px)').matches)
+        window.scrollTo({ top: 0, behavior: 'instant' })
+    })
+  }
+  const assignmentSummary = anyone
+    ? 'Anyone in your circle'
+    : performers
+        .filter(user => assignableTo.some(a => a.userId === user.userId))
+        .map(user => user.displayName)
+        .join(', ') || 'No eligible users selected'
   if (
     (isChoreLoading && choreId) ||
     isUserLabelsLoading ||
@@ -1016,13 +1063,14 @@ const ChoreEdit = () => {
     )
   }
   return (
-    <Container
+    <WizardContainer
       maxWidth='md'
+      onClose={() => Navigate(choreId ? `/chores/${choreId}` : '/chores')}
       onClickCapture={captureInitialValues}
       onChangeCapture={captureInitialValues}
       onKeyDownCapture={captureInitialValues}
       sx={{
-        pb: 12,
+        pb: { xs: 0, sm: 3 },
         pt: { xs: 1, sm: 3 },
         maxWidth: '820px !important',
         '& .task-editor-grid h4, & .task-editor-grid h5': {
@@ -1045,12 +1093,37 @@ const ChoreEdit = () => {
           '& > :last-child:nth-child(3)': { gridColumn: '1 / -1' },
         },
         '& .task-editor-grid .MuiCard-root': { boxShadow: 'none' },
+        '& [data-wizard-name]': {
+          display: wizardStep === 0 ? 'block' : 'none',
+        },
+        '& [data-editor-section="task"]': {
+          display: wizardStep < 3 ? 'block' : 'none',
+        },
+        '& [data-editor-section="schedule"]': {
+          display: wizardStep === 1 ? 'block' : 'none',
+          mt: '0 !important',
+          pt: '0 !important',
+          borderTop: '0 !important',
+        },
+        '& [data-editor-section="assignment"]': {
+          display: wizardStep === 2 ? 'block' : 'none',
+          mt: '0 !important',
+          pt: '0 !important',
+          borderTop: '0 !important',
+        },
+        '& [data-editor-section="description"], & [data-editor-section="organization"], & [data-editor-section="subtasks"]':
+          { display: wizardStep === 0 ? 'block' : 'none' },
+        '& [data-editor-section="actions"], & [data-editor-section="additional"], & [data-editor-section="metadata"]':
+          { display: wizardStep === 3 ? 'block' : 'none' },
       }}
     >
       <Sheet
         variant='outlined'
         sx={{
-          borderRadius: 'lg',
+          borderRadius: { xs: '20px 20px 0 0', sm: 'lg' },
+          display: 'flex',
+          flexDirection: 'column',
+          maxHeight: { xs: 'calc(100dvh - 48px)', sm: 'none' },
           overflow: 'hidden',
           bgcolor: 'background.surface',
           boxShadow: 'sm',
@@ -1058,12 +1131,24 @@ const ChoreEdit = () => {
       >
         <Box
           sx={{
+            display: { xs: 'block', sm: 'none' },
+            width: 36,
+            height: 4,
+            bgcolor: 'neutral.600',
+            borderRadius: 2,
+            mx: 'auto',
+            mt: 1.25,
+          }}
+        />
+        <Box
+          sx={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             gap: 2,
             px: { xs: 2, sm: 3 },
-            py: 2.5,
+            py: 2,
+            flexShrink: 0,
             borderBottom: '1px solid',
             borderColor: 'divider',
           }}
@@ -1073,433 +1158,591 @@ const ChoreEdit = () => {
               {choreId ? 'Edit task' : 'Create task'}
             </Typography>
           </Box>
-          {isDirty && (
-            <Chip variant='soft' color='warning'>
-              Unsaved changes
-            </Chip>
-          )}
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+            {isDirty && (
+              <Chip variant='soft' color='warning'>
+                Unsaved
+              </Chip>
+            )}
+            <IconButton
+              aria-label='Close task editor'
+              color='neutral'
+              variant='plain'
+              onClick={() =>
+                Navigate(choreId ? `/chores/${choreId}` : '/chores')
+              }
+            >
+              <Close />
+            </IconButton>
+          </Box>
         </Box>
-        {Object.keys(errors).length > 0 && (
-          <Alert color='danger' variant='soft' sx={{ mb: 2 }}>
-            <Box>
-              <Typography level='title-sm'>
-                Check these settings before saving
-              </Typography>
-              {Object.entries(errors).map(([key, message]) => (
-                <Button
-                  key={key}
-                  variant='plain'
-                  color='danger'
-                  size='sm'
-                  onClick={() => focusError(key)}
-                >
-                  {message}
-                </Button>
-              ))}
-            </Box>
-          </Alert>
-        )}
-        <Box className='task-editor-grid'>
-          <EditorSection
-            title='Task'
-            section='task'
-            hideHeading
-            error={
-              errors.name ||
-              errors.assignees ||
-              errors.assignedTo ||
-              errors.frequency ||
-              errors.dueDate ||
-              errors.thingTrigger
-            }
+        <Box
+          sx={{
+            px: { xs: 2, sm: 3 },
+            py: 2,
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            flexShrink: 0,
+          }}
+        >
+          <Typography
+            level='body-sm'
+            sx={{
+              display: { xs: 'block', sm: 'none' },
+              mb: name && wizardStep > 0 ? 1 : 0,
+            }}
           >
-            <Box>
-              <FormControl error={errors.name}>
-                <Typography level='h4'>Task name</Typography>
-                <Input
-                  aria-label='Task name'
-                  placeholder='What needs to be done?'
-                  sx={{ minHeight: 48, fontSize: 'lg' }}
-                  value={name}
-                  onChange={e => setName(e.target.value)}
-                />
-                <FormHelperText error>{errors.name}</FormHelperText>
-              </FormControl>
-            </Box>
-
-            <Box
-              data-editor-section='schedule'
+            Step {wizardStep + 1} of 4 · {wizardSteps[wizardStep]}
+          </Typography>
+          <Box
+            component='nav'
+            aria-label='Task creation steps'
+            sx={{
+              display: { xs: 'none', sm: 'flex' },
+              gap: 1,
+              mb: name && wizardStep > 0 ? 2 : 0,
+            }}
+          >
+            {wizardSteps.map((label, index) => (
+              <Button
+                key={label}
+                variant='plain'
+                color={index === wizardStep ? 'primary' : 'neutral'}
+                aria-current={index === wizardStep ? 'step' : undefined}
+                onClick={() => changeWizardStep(index)}
+                sx={{ flex: 1, flexDirection: 'column', gap: 0.75, py: 1 }}
+                startDecorator={
+                  <Box
+                    sx={{
+                      width: 30,
+                      height: 30,
+                      borderRadius: '50%',
+                      display: 'grid',
+                      placeItems: 'center',
+                      bgcolor:
+                        index <= wizardStep
+                          ? 'primary.solidBg'
+                          : 'background.level1',
+                      color:
+                        index <= wizardStep
+                          ? 'primary.solidColor'
+                          : 'text.secondary',
+                      border: '1px solid',
+                      borderColor:
+                        index <= wizardStep ? 'primary.solidBg' : 'divider',
+                    }}
+                  >
+                    {index < wizardStep ? (
+                      <Check sx={{ fontSize: 18 }} />
+                    ) : (
+                      index + 1
+                    )}
+                  </Box>
+                }
+              >
+                {label}
+              </Button>
+            ))}
+          </Box>
+          {name && wizardStep > 0 && (
+            <Sheet
+              variant='soft'
               sx={{
-                mt: 3,
-                pt: 3,
-                borderTop: '1px solid',
-                borderColor: 'divider',
+                px: 1.5,
+                py: 1,
+                borderRadius: 'md',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
               }}
             >
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'baseline',
-                  justifyContent: 'space-between',
-                  flexWrap: 'wrap',
-                  gap: 1,
-                  mb: 1,
-                }}
-              >
-                <Typography level='title-sm'>Schedule</Typography>
-                <Typography level='body-sm' textColor='text.tertiary'>
-                  {scheduleSummary}
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography
+                  level='title-sm'
+                  sx={{
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {name}
                 </Typography>
+                <Typography level='body-xs'>Task</Typography>
               </Box>
+              <IconButton
+                aria-label='Edit task details'
+                size='sm'
+                onClick={() => changeWizardStep(0)}
+              >
+                <EditOutlined sx={{ fontSize: 18 }} />
+              </IconButton>
+            </Sheet>
+          )}
+        </Box>
+        <Box
+          ref={wizardBodyRef}
+          tabIndex={-1}
+          role='region'
+          aria-label={wizardSteps[wizardStep]}
+          sx={{
+            minHeight: 0,
+            outline: 0,
+            overflowY: { xs: 'auto', sm: 'visible' },
+            flex: 1,
+          }}
+        >
+          {Object.keys(errors).length > 0 && (
+            <Alert color='danger' variant='soft' sx={{ mb: 2 }}>
+              <Box>
+                <Typography level='title-sm'>
+                  Check these settings before saving
+                </Typography>
+                {Object.entries(errors).map(([key, message]) => (
+                  <Button
+                    key={key}
+                    variant='plain'
+                    color='danger'
+                    size='sm'
+                    onClick={() => focusError(key)}
+                  >
+                    {message}
+                  </Button>
+                ))}
+              </Box>
+            </Alert>
+          )}
+          {wizardStep === 3 && (
+            <Box
+              data-wizard-review
+              tabIndex={-1}
+              sx={{ px: { xs: 2, sm: 3 }, py: 2.5 }}
+            >
+              <Typography level='title-lg'>Review task</Typography>
               <Typography
                 level='body-sm'
                 textColor='text.tertiary'
                 sx={{ mb: 2 }}
               >
-                Choose when this task is due and whether it repeats.
+                Check the details, then{' '}
+                {choreId ? 'save your changes' : 'create your task'}.
               </Typography>
-
-              <RepeatSection
-                frequency={frequency}
-                onFrequencyUpdate={setFrequency}
-                frequencyType={frequencyType}
-                onFrequencyTypeUpdate={value => {
-                  setFrequencyType(value)
-                  if (value === 'always') {
-                    setDueDate(null)
-                    setDueDateOnly(null)
-                    setDueTime(null)
-                    setUseCustomTime(false)
-                  }
-                }}
-                frequencyMetadata={frequencyMetadata}
-                onFrequencyMetadataUpdate={setFrequencyMetadata}
-                frequencyError={errors?.frequency}
-                allUserThings={allUserThings}
-                onTriggerUpdate={thingUpdate => {
-                  if (thingUpdate === null) {
-                    setThingTrigger(null)
-                    return
-                  }
-                  setThingTrigger({
-                    triggerState: thingUpdate.triggerState,
-                    condition: thingUpdate.condition,
-                    thingID: thingUpdate.thing.id,
-                  })
-                }}
-                OnTriggerValidate={setIsThingValid}
-                isAttemptToSave={attemptToSave}
-                selectedThing={thingTrigger}
-              />
-
-              {frequencyType !== 'always' &&
-                (frequencyType !== 'trigger' || dueDate) && (
-                  <Box mt={3} mb={2}>
-                    <Typography level='h4'>
-                      {choreId ? 'Next due date' : 'First due date'}
-                    </Typography>
-                    {frequencyType === 'trigger' && !dueDate && (
-                      <Typography level='body-sm'>
-                        The task becomes due when its Thing condition is met.
-                      </Typography>
-                    )}
-
-                    {NO_DUE_DATE_REQUIRED_TYPE.includes(frequencyType) && (
-                      <FormControl sx={{ mt: 1 }}>
-                        <Checkbox
-                          onChange={e => {
-                            if (e.target.checked) {
-                              const today = moment(new Date()).format(
-                                'YYYY-MM-DD',
-                              )
-                              setDueDateOnly(today)
-                              setDueDate(
-                                moment(today)
-                                  .endOf('day')
-                                  .format('YYYY-MM-DDTHH:mm:59'),
-                              )
-                              setUseCustomTime(false)
-                              setDueTime(null)
-                            } else {
-                              setDueDate(null)
-                              setDueDateOnly(null)
-                              setUseCustomTime(false)
-                              setDueTime(null)
-                            }
-                          }}
-                          defaultChecked={dueDate !== null}
-                          checked={dueDate !== null}
-                          overlay
-                          label='Give this task a due date'
-                        />
-                      </FormControl>
-                    )}
-                    {dueDate && (
-                      <Box
-                        sx={{
-                          display: 'grid',
-                          gridTemplateColumns: {
-                            xs: 'minmax(0, 1fr)',
-                            sm: 'repeat(2, minmax(0, 1fr))',
-                          },
-                          gap: 2,
-                          mt: 2,
-                          alignItems: 'start',
-                        }}
-                      >
-                        <FormControl error={Boolean(errors.dueDate)}>
-                          <Typography level='h4'>
-                            {REPEAT_ON_TYPE.includes(frequencyType)
-                              ? 'Start date'
-                              : 'Date'}
-                          </Typography>
-                          <Input
-                            type='date'
-                            aria-label='Due date'
-                            value={dueDateOnly || ''}
-                            onChange={handleDueDateChange}
-                          />
-                          {errors.dueDate && (
-                            <FormHelperText>{errors.dueDate}</FormHelperText>
-                          )}
-                        </FormControl>
-                        <FormControl>
-                          <Typography level='h4'>Time</Typography>
-                          {useCustomTime ? (
-                            <Input
-                              type='time'
-                              aria-label='Due time'
-                              value={dueTime || '18:00'}
-                              onChange={handleDueTimeChange}
-                            />
-                          ) : (
-                            <Button
-                              variant='outlined'
-                              color='neutral'
-                              onClick={() => handleUseCustomTimeChange(true)}
-                              sx={{
-                                minHeight: 44,
-                                justifyContent: 'flex-start',
-                                fontWeight: 400,
-                              }}
-                            >
-                              Add a time
-                            </Button>
-                          )}
-                          {useCustomTime && (
-                            <Button
-                              size='sm'
-                              variant='plain'
-                              color='neutral'
-                              sx={{ alignSelf: 'flex-start', mt: 0.5 }}
-                              onClick={() => handleUseCustomTimeChange(false)}
-                            >
-                              Remove time
-                            </Button>
-                          )}
-                        </FormControl>
-                      </Box>
-                    )}
-                  </Box>
-                )}
-
-              {!['once', 'no_repeat', 'trigger', 'always'].includes(
-                frequencyType,
-              ) && (
-                <Box>
-                  <Typography level='h4'>Scheduling Preferences</Typography>
-                  <RadioGroup name='tiers' sx={{ gap: 1, '& > div': { p: 1 } }}>
-                    <FormControl>
-                      <Radio
-                        overlay
-                        checked={!isRolling}
-                        onClick={() => setIsRolling(false)}
-                        label='Reschedule from due date'
-                      />
-                      <FormHelperText>
-                        The next occurrence is scheduled from the original due
-                        date, even if you complete this one late.
-                      </FormHelperText>
-                    </FormControl>
-                    <FormControl>
-                      <Radio
-                        overlay
-                        checked={isRolling}
-                        onClick={() => {
-                          setIsRolling(true)
-                          setDeadlineOffset(-1)
-                        }}
-                        label='Reschedule from completion date'
-                      />
-                      <FormHelperText>
-                        The next occurrence is scheduled from the date you
-                        complete this task.
-                      </FormHelperText>
-                    </FormControl>
-                  </RadioGroup>
-                </Box>
-              )}
-            </Box>
-            <Box
-              data-editor-section='assignment'
-              sx={{
-                mt: 3,
-                pt: 3,
-                borderTop: '1px solid',
-                borderColor: 'divider',
-              }}
-            >
-              <Box mb={2}>
-                <Box
+              {[
+                { label: 'Task', value: name, step: 0 },
+                { label: 'Schedule', value: scheduleSummary, step: 1 },
+                { label: 'Assignment', value: assignmentSummary, step: 2 },
+              ].map(item => (
+                <Sheet
+                  key={item.label}
+                  variant='outlined'
                   sx={{
                     display: 'flex',
                     alignItems: 'center',
+                    gap: 1,
+                    px: 1.5,
+                    py: 1.5,
+                    mb: 1,
+                    borderRadius: 'md',
+                  }}
+                >
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography level='body-xs' textColor='text.tertiary'>
+                      {item.label}
+                    </Typography>
+                    <Typography
+                      level='title-sm'
+                      sx={{ overflowWrap: 'anywhere' }}
+                    >
+                      {item.value}
+                    </Typography>
+                  </Box>
+                  <IconButton
+                    aria-label={'Edit ' + item.label.toLowerCase()}
+                    onClick={() => changeWizardStep(item.step)}
+                  >
+                    <EditOutlined sx={{ fontSize: 18 }} />
+                  </IconButton>
+                </Sheet>
+              ))}
+              <Box sx={{ mt: 2 }}>
+                {' '}
+                {choreId > 0 && (
+                  <Dropdown>
+                    <ButtonGroup variant='outlined' color='neutral'>
+                      <Button
+                        onClick={() => {
+                          isActive
+                            ? archiveChore.mutate(choreId)
+                            : unarchiveChore.mutate(choreId)
+                        }}
+                      >
+                        {isActive ? 'Archive' : 'Unarchive'}
+                      </Button>
+                      <MenuButton
+                        slots={{ root: IconButton }}
+                        slotProps={{
+                          root: {
+                            variant: 'outlined',
+                            color: 'neutral',
+                          },
+                        }}
+                      >
+                        <ArrowDropDown />
+                      </MenuButton>
+                    </ButtonGroup>
+                    <Menu placement='top-end'>
+                      <MenuItem color='danger' onClick={handleDelete}>
+                        Delete
+                      </MenuItem>
+                    </Menu>
+                  </Dropdown>
+                )}
+              </Box>
+            </Box>
+          )}
+          <Box className='task-editor-grid'>
+            <EditorSection
+              title='Task'
+              section='task'
+              hideHeading
+              error={
+                errors.name ||
+                errors.assignees ||
+                errors.assignedTo ||
+                errors.frequency ||
+                errors.dueDate ||
+                errors.thingTrigger
+              }
+            >
+              <Box data-wizard-name>
+                <FormControl error={errors.name}>
+                  <Typography level='h4'>Task name *</Typography>
+                  <Input
+                    aria-label='Task name'
+                    placeholder='What needs to be done?'
+                    sx={{ minHeight: 48, fontSize: 'lg' }}
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                  />
+                  <FormHelperText error>{errors.name}</FormHelperText>
+                </FormControl>
+              </Box>
+
+              <Box
+                data-editor-section='schedule'
+                sx={{
+                  mt: 3,
+                  pt: 3,
+                  borderTop: '1px solid',
+                  borderColor: 'divider',
+                }}
+              >
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'baseline',
                     justifyContent: 'space-between',
+                    flexWrap: 'wrap',
                     gap: 1,
                     mb: 1,
                   }}
                 >
-                  <Typography level='h4' sx={{ mb: '0 !important' }}>
-                    Assign to
+                  <Typography level='title-sm'>Schedule</Typography>
+                  <Typography level='body-sm' textColor='text.tertiary'>
+                    {scheduleSummary}
                   </Typography>
-                  {!showSaveAssigneeDefault && (
-                    <Chip
-                      size='sm'
-                      variant='soft'
-                      color='neutral'
-                      startDecorator={<Check sx={{ fontSize: 14 }} />}
-                    >
-                      Saved default
-                    </Chip>
-                  )}
-                  {showSaveAssigneeDefault && (
-                    <Box sx={{ display: 'flex', justifyContent: 'start' }}>
-                      <Button
-                        variant='plain'
-                        size='sm'
-                        color='neutral'
-                        startDecorator={<Save sx={{ fontSize: 16 }} />}
-                        sx={{
-                          borderRadius: 6,
-                          fontWeight: 500,
-                          '&:hover': {
-                            background: 'neutral.softHoverBg',
-                          },
-                        }}
-                        onClick={() => {
-                          localStorage.setItem(
-                            'defaultAnyoneSetting',
-                            JSON.stringify(anyone),
-                          )
-                          localStorage.setItem(
-                            'defaultAssigneeSetting',
-                            JSON.stringify(assignableTo),
-                          )
-                          setShowSaveAssigneeDefault(false)
-                        }}
-                      >
-                        Use as default
-                      </Button>
-                    </Box>
-                  )}
                 </Box>
                 <Typography
                   level='body-sm'
                   textColor='text.tertiary'
-                  sx={{ mb: 1.5 }}
+                  sx={{ mb: 2 }}
                 >
-                  Choose who can be assigned this task.
+                  Choose when this task is due and whether it repeats.
                 </Typography>
-                <Card variant='plain' sx={{ p: 0, bgcolor: 'transparent' }}>
-                  <List
-                    orientation='horizontal'
-                    wrap
+
+                <RepeatSection
+                  frequency={frequency}
+                  onFrequencyUpdate={setFrequency}
+                  frequencyType={frequencyType}
+                  onFrequencyTypeUpdate={value => {
+                    setFrequencyType(value)
+                    if (value === 'always') {
+                      setDueDate(null)
+                      setDueDateOnly(null)
+                      setDueTime(null)
+                      setUseCustomTime(false)
+                    }
+                  }}
+                  frequencyMetadata={frequencyMetadata}
+                  onFrequencyMetadataUpdate={setFrequencyMetadata}
+                  frequencyError={errors?.frequency}
+                  allUserThings={allUserThings}
+                  onTriggerUpdate={thingUpdate => {
+                    if (thingUpdate === null) {
+                      setThingTrigger(null)
+                      return
+                    }
+                    setThingTrigger({
+                      triggerState: thingUpdate.triggerState,
+                      condition: thingUpdate.condition,
+                      thingID: thingUpdate.thing.id,
+                    })
+                  }}
+                  OnTriggerValidate={setIsThingValid}
+                  isAttemptToSave={attemptToSave}
+                  selectedThing={thingTrigger}
+                />
+
+                {frequencyType !== 'always' &&
+                  (frequencyType !== 'trigger' || dueDate) && (
+                    <Box mt={3} mb={2}>
+                      <Typography level='h4'>
+                        {choreId ? 'Next due date' : 'First due date'}
+                      </Typography>
+                      {frequencyType === 'trigger' && !dueDate && (
+                        <Typography level='body-sm'>
+                          The task becomes due when its Thing condition is met.
+                        </Typography>
+                      )}
+
+                      {NO_DUE_DATE_REQUIRED_TYPE.includes(frequencyType) && (
+                        <FormControl sx={{ mt: 1 }}>
+                          <Checkbox
+                            onChange={e => {
+                              if (e.target.checked) {
+                                const today = moment(new Date()).format(
+                                  'YYYY-MM-DD',
+                                )
+                                setDueDateOnly(today)
+                                setDueDate(
+                                  moment(today)
+                                    .endOf('day')
+                                    .format('YYYY-MM-DDTHH:mm:59'),
+                                )
+                                setUseCustomTime(false)
+                                setDueTime(null)
+                              } else {
+                                setDueDate(null)
+                                setDueDateOnly(null)
+                                setUseCustomTime(false)
+                                setDueTime(null)
+                              }
+                            }}
+                            defaultChecked={dueDate !== null}
+                            checked={dueDate !== null}
+                            overlay
+                            label='Give this task a due date'
+                          />
+                        </FormControl>
+                      )}
+                      {dueDate && (
+                        <Box
+                          sx={{
+                            display: 'grid',
+                            gridTemplateColumns: {
+                              xs: 'minmax(0, 1fr)',
+                              sm: 'repeat(2, minmax(0, 1fr))',
+                            },
+                            gap: 2,
+                            mt: 2,
+                            alignItems: 'start',
+                          }}
+                        >
+                          <FormControl error={Boolean(errors.dueDate)}>
+                            <Typography level='h4'>
+                              {REPEAT_ON_TYPE.includes(frequencyType)
+                                ? 'Start date'
+                                : 'Date'}
+                            </Typography>
+                            <Input
+                              type='date'
+                              aria-label='Due date'
+                              value={dueDateOnly || ''}
+                              onChange={handleDueDateChange}
+                            />
+                            {errors.dueDate && (
+                              <FormHelperText>{errors.dueDate}</FormHelperText>
+                            )}
+                          </FormControl>
+                          <FormControl>
+                            <Typography level='h4'>Time</Typography>
+                            {useCustomTime ? (
+                              <Input
+                                type='time'
+                                aria-label='Due time'
+                                value={dueTime || '18:00'}
+                                onChange={handleDueTimeChange}
+                              />
+                            ) : (
+                              <Button
+                                variant='outlined'
+                                color='neutral'
+                                onClick={() => handleUseCustomTimeChange(true)}
+                                sx={{
+                                  minHeight: 44,
+                                  justifyContent: 'flex-start',
+                                  fontWeight: 400,
+                                }}
+                              >
+                                Add a time
+                              </Button>
+                            )}
+                            {useCustomTime && (
+                              <Button
+                                size='sm'
+                                variant='plain'
+                                color='neutral'
+                                sx={{ alignSelf: 'flex-start', mt: 0.5 }}
+                                onClick={() => handleUseCustomTimeChange(false)}
+                              >
+                                Remove time
+                              </Button>
+                            )}
+                          </FormControl>
+                        </Box>
+                      )}
+                    </Box>
+                  )}
+
+                {!['once', 'no_repeat', 'trigger', 'always'].includes(
+                  frequencyType,
+                ) && (
+                  <Box>
+                    <Typography level='h4'>Scheduling Preferences</Typography>
+                    <RadioGroup
+                      name='tiers'
+                      sx={{ gap: 1, '& > div': { p: 1 } }}
+                    >
+                      <FormControl>
+                        <Radio
+                          overlay
+                          checked={!isRolling}
+                          onClick={() => setIsRolling(false)}
+                          label='Reschedule from due date'
+                        />
+                        <FormHelperText>
+                          The next occurrence is scheduled from the original due
+                          date, even if you complete this one late.
+                        </FormHelperText>
+                      </FormControl>
+                      <FormControl>
+                        <Radio
+                          overlay
+                          checked={isRolling}
+                          onClick={() => {
+                            setIsRolling(true)
+                            setDeadlineOffset(-1)
+                          }}
+                          label='Reschedule from completion date'
+                        />
+                        <FormHelperText>
+                          The next occurrence is scheduled from the date you
+                          complete this task.
+                        </FormHelperText>
+                      </FormControl>
+                    </RadioGroup>
+                  </Box>
+                )}
+              </Box>
+              <Box
+                data-editor-section='assignment'
+                sx={{
+                  mt: 3,
+                  pt: 3,
+                  borderTop: '1px solid',
+                  borderColor: 'divider',
+                }}
+              >
+                <Box mb={2}>
+                  <Box
                     sx={{
-                      '--List-gap': '8px',
-                      '--ListItem-radius': '20px',
-                      p: 0,
-                      '& .MuiListItem-root': { minHeight: 36, px: 1.5 },
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: 1,
+                      mb: 1,
                     }}
                   >
-                    {/* add one for Anyone if no specific assignee is selected */}
-
-                    <ListItem
-                      key={'anyone'}
+                    <Typography level='h4' sx={{ mb: '0 !important' }}>
+                      Assign to
+                    </Typography>
+                    {!showSaveAssigneeDefault && (
+                      <Chip
+                        size='sm'
+                        variant='soft'
+                        color='neutral'
+                        startDecorator={<Check sx={{ fontSize: 14 }} />}
+                      >
+                        Saved default
+                      </Chip>
+                    )}
+                    {showSaveAssigneeDefault && (
+                      <Box sx={{ display: 'flex', justifyContent: 'start' }}>
+                        <Button
+                          variant='plain'
+                          size='sm'
+                          color='neutral'
+                          startDecorator={<Save sx={{ fontSize: 16 }} />}
+                          sx={{
+                            borderRadius: 6,
+                            fontWeight: 500,
+                            '&:hover': {
+                              background: 'neutral.softHoverBg',
+                            },
+                          }}
+                          onClick={() => {
+                            localStorage.setItem(
+                              'defaultAnyoneSetting',
+                              JSON.stringify(anyone),
+                            )
+                            localStorage.setItem(
+                              'defaultAssigneeSetting',
+                              JSON.stringify(assignableTo),
+                            )
+                            setShowSaveAssigneeDefault(false)
+                          }}
+                        >
+                          Use as default
+                        </Button>
+                      </Box>
+                    )}
+                  </Box>
+                  <Typography
+                    level='body-sm'
+                    textColor='text.tertiary'
+                    sx={{ mb: 1.5 }}
+                  >
+                    Choose who can be assigned this task.
+                  </Typography>
+                  <Card variant='plain' sx={{ p: 0, bgcolor: 'transparent' }}>
+                    <List
+                      orientation='horizontal'
+                      wrap
                       sx={{
-                        border: '1px solid',
-                        borderColor: anyone
-                          ? 'primary.outlinedBorder'
-                          : 'neutral.outlinedBorder',
-                        bgcolor: anyone
-                          ? 'primary.softBg'
-                          : 'background.surface',
+                        '--List-gap': '8px',
+                        '--ListItem-radius': '20px',
+                        p: 0,
+                        '& .MuiListItem-root': { minHeight: 36, px: 1.5 },
                       }}
                     >
-                      <Checkbox
-                        checked={anyone}
-                        onClick={() => {
-                          setAnyone(!anyone)
-                          setIsPrivate(false)
-                        }}
-                        overlay
-                        disableIcon
-                        variant='plain'
-                        label={
-                          <Box
-                            sx={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 0.75,
-                            }}
-                          >
-                            Anyone{anyone && <Check sx={{ fontSize: 16 }} />}
-                          </Box>
-                        }
-                      />
-                    </ListItem>
+                      {/* add one for Anyone if no specific assignee is selected */}
 
-                    {performers?.map((item, index) => (
                       <ListItem
-                        key={item.id}
+                        key={'anyone'}
                         sx={{
                           border: '1px solid',
-                          borderColor:
-                            !anyone &&
-                            assignableTo.some(a => a.userId === item.userId)
-                              ? 'primary.outlinedBorder'
-                              : 'neutral.outlinedBorder',
-                          bgcolor:
-                            !anyone &&
-                            assignableTo.some(a => a.userId === item.userId)
-                              ? 'primary.softBg'
-                              : 'background.surface',
+                          borderColor: anyone
+                            ? 'primary.outlinedBorder'
+                            : 'neutral.outlinedBorder',
+                          bgcolor: anyone
+                            ? 'primary.softBg'
+                            : 'background.surface',
                         }}
                       >
                         <Checkbox
-                          checked={
-                            !anyone &&
-                            assignableTo.some(a => a.userId == item.userId)
-                          }
+                          checked={anyone}
                           onClick={() => {
-                            if (anyone) {
-                              setAnyone(false)
-                              setAssignableTo([{ userId: item.userId }])
-                              return
-                            }
-                            const assignees = assignableTo
-                            const setAssignees = setAssignableTo
-                            if (assignees.some(a => a.userId === item.userId)) {
-                              const newAssignees = assignees.filter(
-                                a => a.userId !== item.userId,
-                              )
-                              setAnyone(newAssignees.length === 0)
-                              setAssignees(newAssignees)
-                            } else {
-                              setAssignees([
-                                ...assignees,
-                                { userId: item.userId },
-                              ])
-                            }
+                            setAnyone(!anyone)
+                            setIsPrivate(false)
                           }}
                           overlay
                           disableIcon
@@ -1512,426 +1755,462 @@ const ChoreEdit = () => {
                                 gap: 0.75,
                               }}
                             >
-                              <Avatar
-                                sx={{ width: 22, height: 22, fontSize: 12 }}
-                                color='primary'
-                              >
-                                {item.displayName?.charAt(0).toUpperCase()}
-                              </Avatar>
-                              {item.displayName}
-                              {!anyone &&
-                                assignableTo.some(
-                                  a => a.userId === item.userId,
-                                ) && <Check sx={{ fontSize: 16 }} />}
+                              Anyone{anyone && <Check sx={{ fontSize: 16 }} />}
                             </Box>
                           }
                         />
                       </ListItem>
-                    ))}
-                  </List>
-                </Card>
-                <Typography
-                  level='body-xs'
-                  textColor='text.tertiary'
-                  sx={{ mt: 1 }}
-                >
-                  {!showSaveAssigneeDefault
-                    ? 'This assignment matches your default for new tasks in this browser.'
-                    : 'Use as default applies this assignment to new tasks in this browser.'}
-                </Typography>
-                {(errors.assignees || errors.assignedTo) && (
-                  <FormControl
-                    error={Boolean(errors.assignees || errors.assignedTo)}
-                  >
-                    <FormHelperText>
-                      {errors.assignees || errors.assignedTo}
-                    </FormHelperText>
-                  </FormControl>
-                )}
-              </Box>
 
-              {assignees.length > 1 && (
-                <Box className='task-properties'>
-                  <Box mb={2}>
-                    <Typography level='h4'>Assigned now</Typography>
-                    <Select
-                      placeholder={
-                        assignees.length === 0
-                          ? 'No Assignees yet can perform this task'
-                          : 'Select an assignee for this task'
-                      }
-                      disabled={assignees.length === 0}
-                      value={assignedTo > -1 ? assignedTo : null}
-                      onChange={(_, selectedUserId) =>
-                        setAssignedTo(selectedUserId)
-                      }
+                      {performers?.map((item, index) => (
+                        <ListItem
+                          key={item.id}
+                          sx={{
+                            border: '1px solid',
+                            borderColor:
+                              !anyone &&
+                              assignableTo.some(a => a.userId === item.userId)
+                                ? 'primary.outlinedBorder'
+                                : 'neutral.outlinedBorder',
+                            bgcolor:
+                              !anyone &&
+                              assignableTo.some(a => a.userId === item.userId)
+                                ? 'primary.softBg'
+                                : 'background.surface',
+                          }}
+                        >
+                          <Checkbox
+                            checked={
+                              !anyone &&
+                              assignableTo.some(a => a.userId == item.userId)
+                            }
+                            onClick={() => {
+                              if (anyone) {
+                                setAnyone(false)
+                                setAssignableTo([{ userId: item.userId }])
+                                return
+                              }
+                              const assignees = assignableTo
+                              const setAssignees = setAssignableTo
+                              if (
+                                assignees.some(a => a.userId === item.userId)
+                              ) {
+                                const newAssignees = assignees.filter(
+                                  a => a.userId !== item.userId,
+                                )
+                                setAnyone(newAssignees.length === 0)
+                                setAssignees(newAssignees)
+                              } else {
+                                setAssignees([
+                                  ...assignees,
+                                  { userId: item.userId },
+                                ])
+                              }
+                            }}
+                            overlay
+                            disableIcon
+                            variant='plain'
+                            label={
+                              <Box
+                                sx={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: 0.75,
+                                }}
+                              >
+                                <Avatar
+                                  sx={{ width: 22, height: 22, fontSize: 12 }}
+                                  color='primary'
+                                >
+                                  {item.displayName?.charAt(0).toUpperCase()}
+                                </Avatar>
+                                {item.displayName}
+                                {!anyone &&
+                                  assignableTo.some(
+                                    a => a.userId === item.userId,
+                                  ) && <Check sx={{ fontSize: 16 }} />}
+                              </Box>
+                            }
+                          />
+                        </ListItem>
+                      ))}
+                    </List>
+                  </Card>
+                  <Typography
+                    level='body-xs'
+                    textColor='text.tertiary'
+                    sx={{ mt: 1 }}
+                  >
+                    {!showSaveAssigneeDefault
+                      ? 'This assignment matches your default for new tasks in this browser.'
+                      : 'Use as default applies this assignment to new tasks in this browser.'}
+                  </Typography>
+                  {(errors.assignees || errors.assignedTo) && (
+                    <FormControl
+                      error={Boolean(errors.assignees || errors.assignedTo)}
                     >
-                      {performers
-                        ?.filter(p => assignees.some(a => a.userId == p.userId))
-                        .map((item, index) => (
-                          <Option value={item.userId} key={item.displayName}>
-                            {item.displayName}
+                      <FormHelperText>
+                        {errors.assignees || errors.assignedTo}
+                      </FormHelperText>
+                    </FormControl>
+                  )}
+                </Box>
+
+                {assignees.length > 1 && (
+                  <Box className='task-properties'>
+                    <Box mb={2}>
+                      <Typography level='h4'>Assigned now</Typography>
+                      <Select
+                        placeholder={
+                          assignees.length === 0
+                            ? 'No Assignees yet can perform this task'
+                            : 'Select an assignee for this task'
+                        }
+                        disabled={assignees.length === 0}
+                        value={assignedTo > -1 ? assignedTo : null}
+                        onChange={(_, selectedUserId) =>
+                          setAssignedTo(selectedUserId)
+                        }
+                      >
+                        {performers
+                          ?.filter(p =>
+                            assignees.some(a => a.userId == p.userId),
+                          )
+                          .map((item, index) => (
+                            <Option value={item.userId} key={item.displayName}>
+                              {item.displayName}
+                            </Option>
+                          ))}
+                      </Select>
+                    </Box>
+
+                    <Box>
+                      <Typography level='h4'>Next assignment</Typography>
+                      <Select
+                        aria-label='Next assignment'
+                        value={assignStrategy}
+                        onChange={(_, value) => {
+                          if (value) setAssignStrategy(value)
+                        }}
+                      >
+                        {ASSIGN_STRATEGIES.map(value => (
+                          <Option key={value} value={value}>
+                            {STRATEGY_LABELS[value]}
                           </Option>
                         ))}
-                    </Select>
+                      </Select>
+                    </Box>
                   </Box>
-
-                  <Box>
-                    <Typography level='h4'>Next assignment</Typography>
-                    <Select
-                      aria-label='Next assignment'
-                      value={assignStrategy}
-                      onChange={(_, value) => {
-                        if (value) setAssignStrategy(value)
-                      }}
-                    >
-                      {ASSIGN_STRATEGIES.map(value => (
-                        <Option key={value} value={value}>
-                          {STRATEGY_LABELS[value]}
-                        </Option>
-                      ))}
-                    </Select>
-                  </Box>
-                </Box>
-              )}
-            </Box>
-          </EditorSection>
-          <EditorSection
-            title='Description & attachments'
-            icon={DescriptionOutlined}
-            section='description'
-            collapsible
-            defaultOpen
-            error={errors.description}
-            summary={
-              [
-                description.replace(/<[^>]*>/g, '').trim()
-                  ? 'Instructions added'
-                  : '',
-                attachments.length
-                  ? `${attachments.length} file${attachments.length === 1 ? '' : 's'}`
-                  : '',
-              ]
-                .filter(Boolean)
-                .join(' · ') || 'Instructions, notes and supporting files'
-            }
-          >
-            <Box mb={2}>
-              <FormControl error={errors.description}>
-                <RichTextEditor
-                  value={description}
-                  onChange={setDescription}
-                  entityId={choreId}
-                  entityType={'chore_description'}
-                  draftId={draftId}
-                />
-                <FormHelperText error>{errors.description}</FormHelperText>
-              </FormControl>
-            </Box>
-            <Box sx={{ display: 'flex', mb: attachments.length ? 2 : 0 }}>
-              <Button
-                component='label'
-                variant='outlined'
-                color='neutral'
-                size='sm'
-                startDecorator={isUploadingAttachment ? null : <UploadFile />}
-                loading={isUploadingAttachment}
-                sx={{ flexShrink: 0 }}
-              >
-                Upload attachment
-                <input
-                  type='file'
-                  hidden
-                  onChange={async e => {
-                    const file = e.target.files[0]
-                    if (!file) return
-                    setIsUploadingAttachment(true)
-                    try {
-                      const response = choreId
-                        ? await UploadChoreAttachment(
-                            file,
-                            'chore_attachment',
-                            {
-                              entityId: choreId,
-                            },
-                          )
-                        : await UploadChoreAttachment(
-                            file,
-                            'chore_attachment_draft',
-                            { draftId },
-                          )
-                      if (!response.ok) {
+                )}
+              </Box>
+            </EditorSection>
+            <EditorSection
+              title='Description & attachments'
+              icon={DescriptionOutlined}
+              section='description'
+              collapsible
+              defaultOpen
+              error={errors.description}
+              summary={
+                [
+                  description.replace(/<[^>]*>/g, '').trim()
+                    ? 'Instructions added'
+                    : '',
+                  attachments.length
+                    ? `${attachments.length} file${attachments.length === 1 ? '' : 's'}`
+                    : '',
+                ]
+                  .filter(Boolean)
+                  .join(' · ') || 'Instructions, notes and supporting files'
+              }
+            >
+              <Box mb={2}>
+                <FormControl error={errors.description}>
+                  <RichTextEditor
+                    value={description}
+                    onChange={setDescription}
+                    entityId={choreId}
+                    entityType={'chore_description'}
+                    draftId={draftId}
+                  />
+                  <FormHelperText error>{errors.description}</FormHelperText>
+                </FormControl>
+              </Box>
+              <Box sx={{ display: 'flex', mb: attachments.length ? 2 : 0 }}>
+                <Button
+                  component='label'
+                  variant='outlined'
+                  color='neutral'
+                  size='sm'
+                  startDecorator={isUploadingAttachment ? null : <UploadFile />}
+                  loading={isUploadingAttachment}
+                  sx={{ flexShrink: 0 }}
+                >
+                  Upload attachment
+                  <input
+                    type='file'
+                    hidden
+                    onChange={async e => {
+                      const file = e.target.files[0]
+                      if (!file) return
+                      setIsUploadingAttachment(true)
+                      try {
+                        const response = choreId
+                          ? await UploadChoreAttachment(
+                              file,
+                              'chore_attachment',
+                              {
+                                entityId: choreId,
+                              },
+                            )
+                          : await UploadChoreAttachment(
+                              file,
+                              'chore_attachment_draft',
+                              { draftId },
+                            )
+                        if (!response.ok) {
+                          showError({
+                            title: 'Upload Failed',
+                            message: 'Failed to upload attachment.',
+                          })
+                          return
+                        }
+                        const data = await response.json()
+                        setAttachments(prev => [
+                          ...prev,
+                          {
+                            file_path: data.path,
+                            file_name: data.file_name,
+                            size_bytes: data.size_bytes,
+                            sign: data.sign,
+                          },
+                        ])
+                      } catch {
                         showError({
                           title: 'Upload Failed',
                           message: 'Failed to upload attachment.',
                         })
-                        return
+                      } finally {
+                        setIsUploadingAttachment(false)
+                        e.target.value = ''
                       }
-                      const data = await response.json()
-                      setAttachments(prev => [
-                        ...prev,
-                        {
-                          file_path: data.path,
-                          file_name: data.file_name,
-                          size_bytes: data.size_bytes,
-                          sign: data.sign,
-                        },
-                      ])
-                    } catch {
-                      showError({
-                        title: 'Upload Failed',
-                        message: 'Failed to upload attachment.',
-                      })
-                    } finally {
-                      setIsUploadingAttachment(false)
-                      e.target.value = ''
+                    }}
+                  />
+                </Button>
+              </Box>
+              {attachments.length > 0 && (
+                <Box sx={{ mt: 0 }}>
+                  <Box>
+                    {attachments.length > 0 && (
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: 1,
+                          mb: 1.5,
+                        }}
+                      >
+                        {attachments.map((att, idx) => (
+                          <Box
+                            key={att.file_path || idx}
+                            onClick={async () => {
+                              const url = await getImageSrc(
+                                att.file_path,
+                                att.sign ? resolvePhotoURL(att.sign) : null,
+                                { choreId, kind: 'attachment' },
+                              ).catch(() =>
+                                resolvePhotoURL(att.sign || att.file_path),
+                              )
+                              const ext = (att.file_name || '')
+                                .split('.')
+                                .pop()
+                                .toLowerCase()
+                              const isImage = [
+                                'jpg',
+                                'jpeg',
+                                'png',
+                                'gif',
+                                'webp',
+                                'bmp',
+                                'svg',
+                              ].includes(ext)
+                              if (isImage) {
+                                setAttachmentViewerConfig({
+                                  isOpen: true,
+                                  url,
+                                  fileName: att.file_name,
+                                  onClose: () =>
+                                    setAttachmentViewerConfig({
+                                      isOpen: false,
+                                    }),
+                                })
+                              } else {
+                                const a = document.createElement('a')
+                                a.href = url
+                                a.download = att.file_name || 'attachment'
+                                document.body.appendChild(a)
+                                a.click()
+                                document.body.removeChild(a)
+                              }
+                            }}
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 1,
+                              p: 1,
+                              borderRadius: 'sm',
+                              border: '1px solid',
+                              borderColor: 'neutral.outlinedBorder',
+                              cursor: 'pointer',
+                              '&:hover': { bgcolor: 'neutral.softHoverBg' },
+                            }}
+                          >
+                            <AttachFile
+                              sx={{ fontSize: 18, color: 'neutral.500' }}
+                            />
+                            <Typography
+                              level='body-sm'
+                              sx={{ flex: 1, wordBreak: 'break-all' }}
+                            >
+                              {att.file_name}
+                            </Typography>
+                            {att.size_bytes && (
+                              <Typography level='body-xs' color='neutral'>
+                                {(att.size_bytes / 1024).toFixed(1)} KB
+                              </Typography>
+                            )}
+                            {choreId && (
+                              <IconButton
+                                size='sm'
+                                variant='plain'
+                                color='danger'
+                                onClick={event => {
+                                  event.stopPropagation()
+                                  DeleteChoreAttachment(choreId, att.file_path)
+                                    .then(() => {
+                                      removeCachedImage(att.file_path)
+                                      setAttachments(prev =>
+                                        prev.filter(
+                                          a => a.file_path !== att.file_path,
+                                        ),
+                                      )
+                                    })
+                                    .catch(() => {
+                                      showError({
+                                        title: 'Delete Failed',
+                                        message: 'Failed to delete attachment.',
+                                      })
+                                    })
+                                }}
+                              >
+                                <Delete sx={{ fontSize: 18 }} />
+                              </IconButton>
+                            )}
+                            {!choreId && (
+                              <IconButton
+                                size='sm'
+                                variant='plain'
+                                color='danger'
+                                onClick={event => {
+                                  event.stopPropagation()
+                                  // Draft uploads live server-side too — delete there
+                                  // so they are not promoted onto the chore on save.
+                                  DeleteDraftAttachment(att.file_path)
+                                    .then(() => {
+                                      setAttachments(prev =>
+                                        prev.filter((_, i) => i !== idx),
+                                      )
+                                    })
+                                    .catch(() => {
+                                      showError({
+                                        title: 'Delete Failed',
+                                        message: 'Failed to delete attachment.',
+                                      })
+                                    })
+                                }}
+                              >
+                                <Delete sx={{ fontSize: 18 }} />
+                              </IconButton>
+                            )}
+                          </Box>
+                        ))}
+                      </Box>
+                    )}
+                  </Box>
+                </Box>
+              )}
+            </EditorSection>
+
+            <EditorSection
+              title='Organization'
+              icon={LabelOutlined}
+              section='organization'
+              collapsible
+              summary={[
+                priority
+                  ? Priorities.find(
+                      item => item.value === priority,
+                    )?.name.trim()
+                  : 'No priority',
+                projectId !== 'default'
+                  ? projects.find(item => item.id === projectId)?.name
+                  : '',
+                labelsV2.length
+                  ? `${labelsV2.length} label${labelsV2.length === 1 ? '' : 's'}`
+                  : '',
+              ]
+                .filter(Boolean)
+                .join(' · ')}
+            >
+              <Box className='task-properties'>
+                <FormControl>
+                  <Typography level='h4'>Priority</Typography>
+                  <Select
+                    aria-label='Priority'
+                    value={priority}
+                    onChange={(_, value) => {
+                      if (value !== null) setPriority(value)
+                    }}
+                    startDecorator={
+                      Priorities.find(item => item.value === priority)
+                        ?.icon || <HorizontalRule />
                     }
-                  }}
-                />
-              </Button>
-            </Box>
-            {attachments.length > 0 && (
-              <Box sx={{ mt: 0 }}>
-                <Box>
-                  {attachments.length > 0 && (
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: 1,
-                        mb: 1.5,
-                      }}
-                    >
-                      {attachments.map((att, idx) => (
+                  >
+                    <Option value={0}>No priority</Option>
+                    {Priorities.map(item => (
+                      <Option key={item.value} value={item.value}>
                         <Box
-                          key={att.file_path || idx}
-                          onClick={async () => {
-                            const url = await getImageSrc(
-                              att.file_path,
-                              att.sign ? resolvePhotoURL(att.sign) : null,
-                              { choreId, kind: 'attachment' },
-                            ).catch(() =>
-                              resolvePhotoURL(att.sign || att.file_path),
-                            )
-                            const ext = (att.file_name || '')
-                              .split('.')
-                              .pop()
-                              .toLowerCase()
-                            const isImage = [
-                              'jpg',
-                              'jpeg',
-                              'png',
-                              'gif',
-                              'webp',
-                              'bmp',
-                              'svg',
-                            ].includes(ext)
-                            if (isImage) {
-                              setAttachmentViewerConfig({
-                                isOpen: true,
-                                url,
-                                fileName: att.file_name,
-                                onClose: () =>
-                                  setAttachmentViewerConfig({
-                                    isOpen: false,
-                                  }),
-                              })
-                            } else {
-                              const a = document.createElement('a')
-                              a.href = url
-                              a.download = att.file_name || 'attachment'
-                              document.body.appendChild(a)
-                              a.click()
-                              document.body.removeChild(a)
-                            }
-                          }}
                           sx={{
                             display: 'flex',
                             alignItems: 'center',
                             gap: 1,
-                            p: 1,
-                            borderRadius: 'sm',
-                            border: '1px solid',
-                            borderColor: 'neutral.outlinedBorder',
-                            cursor: 'pointer',
-                            '&:hover': { bgcolor: 'neutral.softHoverBg' },
+                            color: item.color
+                              ? `${item.color}.500`
+                              : 'text.primary',
                           }}
                         >
-                          <AttachFile
-                            sx={{ fontSize: 18, color: 'neutral.500' }}
-                          />
-                          <Typography
-                            level='body-sm'
-                            sx={{ flex: 1, wordBreak: 'break-all' }}
-                          >
-                            {att.file_name}
-                          </Typography>
-                          {att.size_bytes && (
-                            <Typography level='body-xs' color='neutral'>
-                              {(att.size_bytes / 1024).toFixed(1)} KB
-                            </Typography>
-                          )}
-                          {choreId && (
-                            <IconButton
-                              size='sm'
-                              variant='plain'
-                              color='danger'
-                              onClick={event => {
-                                event.stopPropagation()
-                                DeleteChoreAttachment(choreId, att.file_path)
-                                  .then(() => {
-                                    removeCachedImage(att.file_path)
-                                    setAttachments(prev =>
-                                      prev.filter(
-                                        a => a.file_path !== att.file_path,
-                                      ),
-                                    )
-                                  })
-                                  .catch(() => {
-                                    showError({
-                                      title: 'Delete Failed',
-                                      message: 'Failed to delete attachment.',
-                                    })
-                                  })
-                              }}
-                            >
-                              <Delete sx={{ fontSize: 18 }} />
-                            </IconButton>
-                          )}
-                          {!choreId && (
-                            <IconButton
-                              size='sm'
-                              variant='plain'
-                              color='danger'
-                              onClick={event => {
-                                event.stopPropagation()
-                                // Draft uploads live server-side too — delete there
-                                // so they are not promoted onto the chore on save.
-                                DeleteDraftAttachment(att.file_path)
-                                  .then(() => {
-                                    setAttachments(prev =>
-                                      prev.filter((_, i) => i !== idx),
-                                    )
-                                  })
-                                  .catch(() => {
-                                    showError({
-                                      title: 'Delete Failed',
-                                      message: 'Failed to delete attachment.',
-                                    })
-                                  })
-                              }}
-                            >
-                              <Delete sx={{ fontSize: 18 }} />
-                            </IconButton>
-                          )}
+                          {item.icon}
+                          {item.name.trim()}
                         </Box>
-                      ))}
-                    </Box>
-                  )}
-                </Box>
-              </Box>
-            )}
-          </EditorSection>
-
-          <EditorSection
-            title='Organization'
-            icon={LabelOutlined}
-            section='organization'
-            collapsible
-            summary={[
-              priority
-                ? Priorities.find(item => item.value === priority)?.name.trim()
-                : 'No priority',
-              projectId !== 'default'
-                ? projects.find(item => item.id === projectId)?.name
-                : '',
-              labelsV2.length
-                ? `${labelsV2.length} label${labelsV2.length === 1 ? '' : 's'}`
-                : '',
-            ]
-              .filter(Boolean)
-              .join(' · ')}
-          >
-            <Box className='task-properties'>
-              <FormControl>
-                <Typography level='h4'>Priority</Typography>
-                <Select
-                  aria-label='Priority'
-                  value={priority}
-                  onChange={(_, value) => {
-                    if (value !== null) setPriority(value)
-                  }}
-                  startDecorator={
-                    Priorities.find(item => item.value === priority)?.icon || (
-                      <HorizontalRule />
-                    )
-                  }
-                >
-                  <Option value={0}>No priority</Option>
-                  {Priorities.map(item => (
-                    <Option key={item.value} value={item.value}>
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 1,
-                          color: item.color
-                            ? `${item.color}.500`
-                            : 'text.primary',
-                        }}
-                      >
-                        {item.icon}
-                        {item.name.trim()}
-                      </Box>
-                    </Option>
-                  ))}
-                </Select>
-              </FormControl>
-              {/* Project Selection - Show only if there are multiple projects */}
-              {projects.length >= 1 && (
-                <Box mb={2}>
-                  <Typography level='h4'>Project</Typography>
-                  <Select
-                    value={projectId}
-                    onChange={(event, newValue) => setProjectId(newValue)}
-                    defaultValue='default'
-                    sx={{ minWidth: 0, width: '100%' }}
-                  >
-                    {/*               id: 'default',
+                      </Option>
+                    ))}
+                  </Select>
+                </FormControl>
+                {/* Project Selection - Show only if there are multiple projects */}
+                {projects.length >= 1 && (
+                  <Box mb={2}>
+                    <Typography level='h4'>Project</Typography>
+                    <Select
+                      value={projectId}
+                      onChange={(event, newValue) => setProjectId(newValue)}
+                      defaultValue='default'
+                      sx={{ minWidth: 0, width: '100%' }}
+                    >
+                      {/*               id: 'default',
               name: 'Default Project',
               color: LABEL_COLORS[0].value,
               icon: 'FolderOpen',
                */}
-                    <Option key='default' value='default'>
-                      <Box
-                        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                      >
-                        <Avatar
-                          size='sm'
-                          sx={{
-                            width: 24,
-                            height: 24,
-                            bgcolor: '#1976d2',
-                          }}
-                        >
-                          {(() => {
-                            const IconComponent = getIconComponent('FolderOpen')
-                            return (
-                              <IconComponent
-                                sx={{
-                                  fontSize: 14,
-                                  color:
-                                    getTextColorFromBackgroundColor('#1976d2'),
-                                }}
-                              />
-                            )
-                          })()}
-                        </Avatar>
-                        Default Project
-                      </Box>
-                    </Option>
-                    {projects.map(project => (
-                      <Option key={project.id} value={project.id}>
+                      <Option key='default' value='default'>
                         <Box
                           sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
                         >
@@ -1940,122 +2219,158 @@ const ChoreEdit = () => {
                             sx={{
                               width: 24,
                               height: 24,
-                              bgcolor: project.color || '#1976d2',
+                              bgcolor: '#1976d2',
                             }}
                           >
-                            {project.icon ? (
-                              (() => {
-                                const IconComponent = getIconComponent(
-                                  project.icon,
-                                )
-                                return (
-                                  <IconComponent
-                                    sx={{
-                                      fontSize: 14,
-                                      color: getTextColorFromBackgroundColor(
-                                        project.color || '#1976d2',
+                            {(() => {
+                              const IconComponent =
+                                getIconComponent('FolderOpen')
+                              return (
+                                <IconComponent
+                                  sx={{
+                                    fontSize: 14,
+                                    color:
+                                      getTextColorFromBackgroundColor(
+                                        '#1976d2',
                                       ),
-                                    }}
-                                  />
-                                )
-                              })()
-                            ) : (
-                              <></>
-                            )}
+                                  }}
+                                />
+                              )
+                            })()}
                           </Avatar>
-                          {project.name}
+                          Default Project
                         </Box>
                       </Option>
-                    ))}
-                  </Select>
-                </Box>
-              )}
-
-              <Box mb={2}>
-                <Typography level='h4'>Labels</Typography>
-                <Select
-                  multiple
-                  onChange={(event, newValue) => {
-                    setLabelsV2(
-                      userLabels.filter(l => newValue.indexOf(l.name) > -1),
-                    )
-                  }}
-                  placeholder='Add labels'
-                  value={labelsV2?.map(l => l.name)}
-                  renderValue={selected => (
-                    <Box sx={{ display: 'flex', gap: '0.25rem' }}>
-                      {labelsV2.map(selectedOption => {
-                        return (
-                          <Chip
-                            variant='soft'
-                            color='primary'
-                            key={selectedOption.id}
-                            size='lg'
+                      {projects.map(project => (
+                        <Option key={project.id} value={project.id}>
+                          <Box
                             sx={{
-                              background: selectedOption.color,
-                              color: getTextColorFromBackgroundColor(
-                                selectedOption.color,
-                              ),
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 1,
                             }}
                           >
-                            {selectedOption.name}
-                          </Chip>
-                        )
-                      })}
-                    </Box>
-                  )}
-                  sx={{ minWidth: 0, width: '100%' }}
-                  slotProps={{
-                    listbox: {
-                      sx: {
-                        width: '100%',
+                            <Avatar
+                              size='sm'
+                              sx={{
+                                width: 24,
+                                height: 24,
+                                bgcolor: project.color || '#1976d2',
+                              }}
+                            >
+                              {project.icon ? (
+                                (() => {
+                                  const IconComponent = getIconComponent(
+                                    project.icon,
+                                  )
+                                  return (
+                                    <IconComponent
+                                      sx={{
+                                        fontSize: 14,
+                                        color: getTextColorFromBackgroundColor(
+                                          project.color || '#1976d2',
+                                        ),
+                                      }}
+                                    />
+                                  )
+                                })()
+                              ) : (
+                                <></>
+                              )}
+                            </Avatar>
+                            {project.name}
+                          </Box>
+                        </Option>
+                      ))}
+                    </Select>
+                  </Box>
+                )}
+
+                <Box mb={2}>
+                  <Typography level='h4'>Labels</Typography>
+                  <Select
+                    multiple
+                    onChange={(event, newValue) => {
+                      setLabelsV2(
+                        userLabels.filter(l => newValue.indexOf(l.name) > -1),
+                      )
+                    }}
+                    placeholder='Add labels'
+                    value={labelsV2?.map(l => l.name)}
+                    renderValue={selected => (
+                      <Box sx={{ display: 'flex', gap: '0.25rem' }}>
+                        {labelsV2.map(selectedOption => {
+                          return (
+                            <Chip
+                              variant='soft'
+                              color='primary'
+                              key={selectedOption.id}
+                              size='lg'
+                              sx={{
+                                background: selectedOption.color,
+                                color: getTextColorFromBackgroundColor(
+                                  selectedOption.color,
+                                ),
+                              }}
+                            >
+                              {selectedOption.name}
+                            </Chip>
+                          )
+                        })}
+                      </Box>
+                    )}
+                    sx={{ minWidth: 0, width: '100%' }}
+                    slotProps={{
+                      listbox: {
+                        sx: {
+                          width: '100%',
+                        },
                       },
-                    },
-                  }}
-                >
-                  {userLabels &&
-                    userLabels.map(label => (
-                      <Option key={label.id + label.name} value={label.name}>
-                        <div
-                          style={{
-                            width: '20 px',
-                            height: '20 px',
-                            borderRadius: '50%',
-                            background: label.color,
-                          }}
-                        />
-                        {label.name}
-                      </Option>
-                    ))}
-                  <MenuItem
-                    key={'addNewLabel'}
-                    value={' New Label'}
-                    onClick={() => {
-                      setAddLabelModalOpen(true)
                     }}
                   >
-                    <Add />
-                    Add New Label
-                  </MenuItem>
-                </Select>
+                    {userLabels &&
+                      userLabels.map(label => (
+                        <Option key={label.id + label.name} value={label.name}>
+                          <div
+                            style={{
+                              width: '20 px',
+                              height: '20 px',
+                              borderRadius: '50%',
+                              background: label.color,
+                            }}
+                          />
+                          {label.name}
+                        </Option>
+                      ))}
+                    <MenuItem
+                      key={'addNewLabel'}
+                      value={' New Label'}
+                      onClick={() => {
+                        setAddLabelModalOpen(true)
+                      }}
+                    >
+                      <Add />
+                      Add New Label
+                    </MenuItem>
+                  </Select>
+                </Box>
               </Box>
-            </Box>
-          </EditorSection>
-          <Box>
-            <EditorSection
-              title='Subtasks'
-              icon={Checklist}
-              section='subtasks'
-              collapsible
-              defaultOpen={Boolean(subTasks?.length)}
-              summary={
-                subTasks?.length
-                  ? `${subTasks.length} subtask${subTasks.length === 1 ? '' : 's'}`
-                  : 'A checklist of steps to complete this task'
-              }
-            >
-              <Box>
-                {/* <FormControl sx={{ mt: 1 }}>
+            </EditorSection>
+            <Box>
+              <EditorSection
+                title='Subtasks'
+                icon={Checklist}
+                section='subtasks'
+                collapsible
+                defaultOpen={Boolean(subTasks?.length)}
+                summary={
+                  subTasks?.length
+                    ? `${subTasks.length} subtask${subTasks.length === 1 ? '' : 's'}`
+                    : 'A checklist of steps to complete this task'
+                }
+              >
+                <Box>
+                  {/* <FormControl sx={{ mt: 1 }}>
             <Checkbox
               onChange={e => {
                 if (e.target.checked) {
@@ -2070,248 +2385,250 @@ const ChoreEdit = () => {
             />
             <FormHelperText>Break this task into smaller steps</FormHelperText>
           </FormControl> */}
-                <Card
-                  variant='outlined'
-                  sx={{
-                    p: 1,
-                    mt: 2,
-                  }}
-                >
-                  <SubTasks
-                    editMode={true}
-                    tasks={subTasks ? subTasks : []}
-                    setTasks={setSubTasks}
-                    choreId={choreId}
-                  />
-                </Card>
-              </Box>
+                  <Card
+                    variant='outlined'
+                    sx={{
+                      p: 1,
+                      mt: 2,
+                    }}
+                  >
+                    <SubTasks
+                      editMode={true}
+                      tasks={subTasks ? subTasks : []}
+                      setTasks={setSubTasks}
+                      choreId={choreId}
+                    />
+                  </Card>
+                </Box>
+              </EditorSection>
+            </Box>
+            <EditorSection
+              title='On completion'
+              icon={BoltOutlined}
+              section='actions'
+              collapsible
+              defaultOpen={points >= 0 || completionActions.length > 0}
+              error={errors.completionActions}
+              summary={
+                [
+                  points >= 0 ? `${points} points` : '',
+                  completionActions.length
+                    ? `${completionActions.length} Thing action${completionActions.length === 1 ? '' : 's'}`
+                    : '',
+                ]
+                  .filter(Boolean)
+                  .join(' · ') || 'Award points or update Things when completed'
+              }
+            >
+              <CompletionActionsSection
+                actions={completionActions}
+                onChange={setCompletionActions}
+                showHeading={false}
+                points={points}
+                onPointsChange={setPoints}
+                onValidate={setCompletionActionsValid}
+              />
             </EditorSection>
-          </Box>
-          <EditorSection
-            title='On completion'
-            icon={BoltOutlined}
-            section='actions'
-            collapsible
-            defaultOpen={points >= 0 || completionActions.length > 0}
-            error={errors.completionActions}
-            summary={
-              [
-                points >= 0 ? `${points} points` : '',
-                completionActions.length
-                  ? `${completionActions.length} Thing action${completionActions.length === 1 ? '' : 's'}`
-                  : '',
+            <EditorSection
+              title='Notifications and privacy'
+              icon={SettingsOutlined}
+              section='additional'
+              collapsible
+              summary={[
+                isNotificable ? 'Reminders enabled' : 'Reminders off',
+                requireApproval ? 'Approval required' : '',
+                isPrivate
+                  ? 'Visible to assigned users'
+                  : 'Visible to your circle',
+                completionWindow >= 0 ? 'Completion window set' : '',
               ]
                 .filter(Boolean)
-                .join(' · ') || 'Award points or update Things when completed'
-            }
-          >
-            <CompletionActionsSection
-              actions={completionActions}
-              onChange={setCompletionActions}
-              showHeading={false}
-              points={points}
-              onPointsChange={setPoints}
-              onValidate={setCompletionActionsValid}
-            />
-          </EditorSection>
-          <EditorSection
-            title='Notifications and privacy'
-            icon={SettingsOutlined}
-            section='additional'
-            collapsible
-            summary={[
-              isNotificable ? 'Reminders enabled' : 'Reminders off',
-              requireApproval ? 'Approval required' : '',
-              isPrivate
-                ? 'Visible to assigned users'
-                : 'Visible to your circle',
-              completionWindow >= 0 ? 'Completion window set' : '',
-            ]
-              .filter(Boolean)
-              .join(' · ')}
-          >
-            {/* Section 3.1: Notifications */}
+                .join(' · ')}
+            >
+              {/* Section 3.1: Notifications */}
 
-            <Box mb={2}>
-              <Typography level='h4'>Notifications</Typography>
-              {!isPlusAccount(userProfile) && (
-                <Typography level='body-sm' color='warning' sx={{ mb: 1 }}>
-                  Task notifications are not available in the Basic plan.
-                  Upgrade to Plus to receive reminders when tasks are due or
-                  completed.
-                </Typography>
-              )}
-
-              <FormControl sx={{ mt: 1 }}>
-                <Checkbox
-                  onChange={e => {
-                    setIsNotificable(e.target.checked)
-                    if (!e.target.checked) {
-                      setNotificationMetadata({})
-                    }
-                  }}
-                  defaultChecked={isNotificable}
-                  checked={isNotificable}
-                  disabled={!isPlusAccount(userProfile)}
-                  overlay
-                  label='Notify for this task'
-                />
-                <FormHelperText
-                  sx={{
-                    opacity: !isPlusAccount(userProfile) ? 0.5 : 1,
-                  }}
-                >
-                  Choose which task events send notifications.
-                </FormHelperText>
-              </FormControl>
-            </Box>
-
-            {isNotificable && (
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 2,
-                }}
-              >
-                <Card variant='outlined'>
-                  <Typography level='h4' mb={2}>
-                    Notification Schedule
-                  </Typography>
-                  <Box sx={{ p: 0.5 }}>
-                    <NotificationTemplate
-                      onChange={metadata => {
-                        const newTemplates = metadata.notifications
-                        if (notificationMetadata?.templates !== newTemplates) {
-                          setNotificationMetadata({
-                            ...notificationMetadata,
-                            templates: newTemplates,
-                          })
-                        }
-                      }}
-                      value={notificationMetadata}
-                    />
-                  </Box>
-
-                  <Typography level='h4' mt={3} mb={2}>
-                    Who to Notify
-                  </Typography>
-                  <FormControl>
-                    <Checkbox
-                      overlay
-                      disabled={true}
-                      checked={true}
-                      label='All Assignees'
-                    />
-                    <FormHelperText>Notify all assignees</FormHelperText>
-                  </FormControl>
-
-                  <FormControl>
-                    <Checkbox
-                      overlay
-                      onClick={() => {
-                        if (notificationMetadata?.circleGroup) {
-                          delete notificationMetadata.circleGroupID
-                        }
-
-                        setNotificationMetadata({
-                          ...notificationMetadata,
-                          circleGroup: !notificationMetadata?.circleGroup,
-                        })
-                      }}
-                      checked={
-                        notificationMetadata
-                          ? notificationMetadata?.circleGroup
-                          : false
-                      }
-                      label='Specific Group'
-                    />
-                    <FormHelperText>Notify a specific group</FormHelperText>
-                  </FormControl>
-
-                  {notificationMetadata?.circleGroup && (
-                    <Box
-                      sx={{
-                        mt: 0,
-                        ml: 4,
-                      }}
-                    >
-                      <Typography level='body-sm'>
-                        Telegram Group ID:
-                      </Typography>
-                      <Input
-                        type='number'
-                        value={notificationMetadata?.circleGroupID}
-                        placeholder='Telegram Group ID'
-                        onChange={e => {
-                          setNotificationMetadata({
-                            ...notificationMetadata,
-                            circleGroupID: parseInt(e.target.value),
-                          })
-                        }}
-                      />
-                    </Box>
-                  )}
-                </Card>
-              </Box>
-            )}
-            {dueDate && (
               <Box mb={2}>
-                <Typography level='h4'>Task Window</Typography>
-                <Typography level='body-md'>
-                  Define when this task can be completed and when it expires
-                </Typography>
-
-                {/* Available From (Completion Window) */}
-                <FormControl sx={{ mt: 1 }}>
-                  <Checkbox
-                    checked={completionWindow !== -1}
-                    onChange={e => {
-                      if (e.target.checked) {
-                        setCompletionWindow(1) // default 1 hour in seconds
-                      } else {
-                        setCompletionWindow(-1)
-                      }
-                    }}
-                    overlay
-                    label='Set earliest completion time'
-                  />
-                  <FormHelperText>
-                    Task becomes available to complete X hours before the due
-                    date
-                  </FormHelperText>
-                </FormControl>
-
-                {completionWindow !== -1 && (
-                  <Card variant='outlined'>
-                    <Box
-                      sx={{
-                        mt: 0,
-                        ml: 4,
-                      }}
-                    >
-                      <Typography level='body-sm'>Hours:</Typography>
-                      <Input
-                        type='number'
-                        value={completionWindow}
-                        sx={{ maxWidth: 100 }}
-                        slotProps={{
-                          input: {
-                            min: 0,
-                            max: 24 * 7,
-                          },
-                        }}
-                        placeholder='Hours'
-                        onChange={e => {
-                          setCompletionWindow(parseInt(e.target.value))
-                        }}
-                      />
-                    </Box>
-                  </Card>
+                <Typography level='h4'>Notifications</Typography>
+                {!isPlusAccount(userProfile) && (
+                  <Typography level='body-sm' color='warning' sx={{ mb: 1 }}>
+                    Task notifications are not available in the Basic plan.
+                    Upgrade to Plus to receive reminders when tasks are due or
+                    completed.
+                  </Typography>
                 )}
 
-                {/* Expires After (Deadline) */}
-                {/* <FormControl sx={{ mt: 2 }}>
+                <FormControl sx={{ mt: 1 }}>
+                  <Checkbox
+                    onChange={e => {
+                      setIsNotificable(e.target.checked)
+                      if (!e.target.checked) {
+                        setNotificationMetadata({})
+                      }
+                    }}
+                    defaultChecked={isNotificable}
+                    checked={isNotificable}
+                    disabled={!isPlusAccount(userProfile)}
+                    overlay
+                    label='Notify for this task'
+                  />
+                  <FormHelperText
+                    sx={{
+                      opacity: !isPlusAccount(userProfile) ? 0.5 : 1,
+                    }}
+                  >
+                    Choose which task events send notifications.
+                  </FormHelperText>
+                </FormControl>
+              </Box>
+
+              {isNotificable && (
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 2,
+                  }}
+                >
+                  <Card variant='outlined'>
+                    <Typography level='h4' mb={2}>
+                      Notification Schedule
+                    </Typography>
+                    <Box sx={{ p: 0.5 }}>
+                      <NotificationTemplate
+                        onChange={metadata => {
+                          const newTemplates = metadata.notifications
+                          if (
+                            notificationMetadata?.templates !== newTemplates
+                          ) {
+                            setNotificationMetadata({
+                              ...notificationMetadata,
+                              templates: newTemplates,
+                            })
+                          }
+                        }}
+                        value={notificationMetadata}
+                      />
+                    </Box>
+
+                    <Typography level='h4' mt={3} mb={2}>
+                      Who to Notify
+                    </Typography>
+                    <FormControl>
+                      <Checkbox
+                        overlay
+                        disabled={true}
+                        checked={true}
+                        label='All Assignees'
+                      />
+                      <FormHelperText>Notify all assignees</FormHelperText>
+                    </FormControl>
+
+                    <FormControl>
+                      <Checkbox
+                        overlay
+                        onClick={() => {
+                          if (notificationMetadata?.circleGroup) {
+                            delete notificationMetadata.circleGroupID
+                          }
+
+                          setNotificationMetadata({
+                            ...notificationMetadata,
+                            circleGroup: !notificationMetadata?.circleGroup,
+                          })
+                        }}
+                        checked={
+                          notificationMetadata
+                            ? notificationMetadata?.circleGroup
+                            : false
+                        }
+                        label='Specific Group'
+                      />
+                      <FormHelperText>Notify a specific group</FormHelperText>
+                    </FormControl>
+
+                    {notificationMetadata?.circleGroup && (
+                      <Box
+                        sx={{
+                          mt: 0,
+                          ml: 4,
+                        }}
+                      >
+                        <Typography level='body-sm'>
+                          Telegram Group ID:
+                        </Typography>
+                        <Input
+                          type='number'
+                          value={notificationMetadata?.circleGroupID}
+                          placeholder='Telegram Group ID'
+                          onChange={e => {
+                            setNotificationMetadata({
+                              ...notificationMetadata,
+                              circleGroupID: parseInt(e.target.value),
+                            })
+                          }}
+                        />
+                      </Box>
+                    )}
+                  </Card>
+                </Box>
+              )}
+              {dueDate && (
+                <Box mb={2}>
+                  <Typography level='h4'>Task Window</Typography>
+                  <Typography level='body-md'>
+                    Define when this task can be completed and when it expires
+                  </Typography>
+
+                  {/* Available From (Completion Window) */}
+                  <FormControl sx={{ mt: 1 }}>
+                    <Checkbox
+                      checked={completionWindow !== -1}
+                      onChange={e => {
+                        if (e.target.checked) {
+                          setCompletionWindow(1) // default 1 hour in seconds
+                        } else {
+                          setCompletionWindow(-1)
+                        }
+                      }}
+                      overlay
+                      label='Set earliest completion time'
+                    />
+                    <FormHelperText>
+                      Task becomes available to complete X hours before the due
+                      date
+                    </FormHelperText>
+                  </FormControl>
+
+                  {completionWindow !== -1 && (
+                    <Card variant='outlined'>
+                      <Box
+                        sx={{
+                          mt: 0,
+                          ml: 4,
+                        }}
+                      >
+                        <Typography level='body-sm'>Hours:</Typography>
+                        <Input
+                          type='number'
+                          value={completionWindow}
+                          sx={{ maxWidth: 100 }}
+                          slotProps={{
+                            input: {
+                              min: 0,
+                              max: 24 * 7,
+                            },
+                          }}
+                          placeholder='Hours'
+                          onChange={e => {
+                            setCompletionWindow(parseInt(e.target.value))
+                          }}
+                        />
+                      </Box>
+                    </Card>
+                  )}
+
+                  {/* Expires After (Deadline) */}
+                  {/* <FormControl sx={{ mt: 2 }}>
               <Checkbox
                 checked={deadlineOffset !== -1}
                 disabled={isRolling}
@@ -2332,253 +2649,237 @@ const ChoreEdit = () => {
               </FormHelperText>
             </FormControl> */}
 
-                {deadlineOffset !== -1 && (
-                  <Box
-                    sx={{
-                      mt: 1,
-                      ml: 4,
-                      display: 'flex',
-                      gap: 1,
-                      alignItems: 'center',
+                  {deadlineOffset !== -1 && (
+                    <Box
+                      sx={{
+                        mt: 1,
+                        ml: 4,
+                        display: 'flex',
+                        gap: 1,
+                        alignItems: 'center',
+                      }}
+                    >
+                      <DurationInput
+                        value={deadlineOffset}
+                        onChange={setDeadlineOffset}
+                        size='sm'
+                        minValue={0}
+                      />
+                      <Typography level='body-sm'>after due date</Typography>
+                    </Box>
+                  )}
+                </Box>
+              )}
+
+              <Box mb={2}>
+                <Typography level='h4'>Approval Requirement</Typography>
+                <FormControl sx={{ mt: 1 }}>
+                  <Checkbox
+                    onChange={e => {
+                      setRequireApproval(e.target.checked)
                     }}
-                  >
-                    <DurationInput
-                      value={deadlineOffset}
-                      onChange={setDeadlineOffset}
-                      size='sm'
-                      minValue={0}
+                    checked={requireApproval}
+                    overlay
+                    label='Require admin approval'
+                  />
+                  <FormHelperText>
+                    This task will need approval from an admin before being
+                    marked as complete
+                  </FormHelperText>
+                </FormControl>
+              </Box>
+
+              <Box>
+                <Typography level='h4'>Privacy Settings</Typography>
+                <RadioGroup
+                  name='isPrivate'
+                  value={isPrivate}
+                  onChange={event => {
+                    const newValue =
+                      event.target.value === 'true' ? true : false
+                    setIsPrivate(newValue)
+                    setShowSavePrivacyDefault(true)
+                  }}
+                  sx={{
+                    '& > div': { py: 1 },
+                  }}
+                >
+                  <FormControl>
+                    <Radio overlay value={false} label='Public' />
+                    <FormHelperText>
+                      Visible to everyone in your circle.
+                    </FormHelperText>
+                  </FormControl>
+                  <FormControl>
+                    <Radio
+                      overlay
+                      disabled={assignees.length === 0}
+                      value={true}
+                      label='Limited'
                     />
-                    <Typography level='body-sm'>after due date</Typography>
+                    <FormHelperText>
+                      Visible to you and the people eligible for assignment.
+                      {assignees.length === 0
+                        ? ' (No assignees selected, Limited option is disabled)'
+                        : ''}
+                    </FormHelperText>
+                  </FormControl>
+                </RadioGroup>
+
+                {showSavePrivacyDefault && (
+                  <Box sx={{ mt: 0, display: 'flex', justifyContent: 'start' }}>
+                    <Button
+                      variant='outlined'
+                      size='sm'
+                      color='neutral'
+                      startDecorator={<Save />}
+                      sx={{
+                        borderRadius: 6,
+                        fontWeight: 500,
+                        '&:hover': {
+                          background: 'neutral.softHoverBg',
+                        },
+                      }}
+                      onClick={() => {
+                        localStorage.setItem(
+                          'defaultPrivacySetting',
+                          JSON.stringify(isPrivate),
+                        )
+                        setShowSavePrivacyDefault(false)
+                      }}
+                    >
+                      Use as default
+                    </Button>
                   </Box>
                 )}
               </Box>
-            )}
+            </EditorSection>
+          </Box>
 
-            <Box mb={2}>
-              <Typography level='h4'>Approval Requirement</Typography>
-              <FormControl sx={{ mt: 1 }}>
-                <Checkbox
-                  onChange={e => {
-                    setRequireApproval(e.target.checked)
-                  }}
-                  checked={requireApproval}
-                  overlay
-                  label='Require admin approval'
-                />
-                <FormHelperText>
-                  This task will need approval from an admin before being marked
-                  as complete
-                </FormHelperText>
-              </FormControl>
-            </Box>
-
-            <Box>
-              <Typography level='h4'>Privacy Settings</Typography>
-              <RadioGroup
-                name='isPrivate'
-                value={isPrivate}
-                onChange={event => {
-                  const newValue = event.target.value === 'true' ? true : false
-                  setIsPrivate(newValue)
-                  setShowSavePrivacyDefault(true)
-                }}
+          {choreId > 0 && (
+            <EditorSection
+              title='Task log'
+              icon={InfoOutlined}
+              section='metadata'
+              summary='Who created and last edited this task'
+              collapsible
+            >
+              <Sheet
                 sx={{
-                  '& > div': { py: 1 },
+                  p: 2,
+                  borderRadius: 'md',
+                  boxShadow: 'sm',
                 }}
               >
-                <FormControl>
-                  <Radio overlay value={false} label='Public' />
-                  <FormHelperText>
-                    Visible to everyone in your circle.
-                  </FormHelperText>
-                </FormControl>
-                <FormControl>
-                  <Radio
-                    overlay
-                    disabled={assignees.length === 0}
-                    value={true}
-                    label='Limited'
-                  />
-                  <FormHelperText>
-                    Visible to you and the people eligible for assignment.
-                    {assignees.length === 0
-                      ? ' (No assignees selected, Limited option is disabled)'
-                      : ''}
-                  </FormHelperText>
-                </FormControl>
-              </RadioGroup>
+                <Typography level='body1'>
+                  Created by{' '}
+                  <Chip variant='solid'>
+                    {
+                      membersData.res.find(f => f.userId === createdBy)
+                        ?.displayName
+                    }
+                  </Chip>{' '}
+                  {moment(chore.createdAt).fromNow()}
+                </Typography>
+                {(chore.updatedAt && updatedBy > 0 && (
+                  <>
+                    <Divider sx={{ my: 1 }} />
 
-              {showSavePrivacyDefault && (
-                <Box sx={{ mt: 0, display: 'flex', justifyContent: 'start' }}>
-                  <Button
-                    variant='outlined'
-                    size='sm'
-                    color='neutral'
-                    startDecorator={<Save />}
-                    sx={{
-                      borderRadius: 6,
-                      fontWeight: 500,
-                      '&:hover': {
-                        background: 'neutral.softHoverBg',
-                      },
-                    }}
-                    onClick={() => {
-                      localStorage.setItem(
-                        'defaultPrivacySetting',
-                        JSON.stringify(isPrivate),
-                      )
-                      setShowSavePrivacyDefault(false)
-                    }}
-                  >
-                    Use as default
-                  </Button>
-                </Box>
-              )}
-            </Box>
-          </EditorSection>
+                    <Typography level='body1'>
+                      Updated by{' '}
+                      <Chip variant='solid'>
+                        {
+                          membersData.res.find(f => f.userId === updatedBy)
+                            ?.displayName
+                        }
+                      </Chip>{' '}
+                      {moment(chore.updatedAt).fromNow()}
+                    </Typography>
+                  </>
+                )) || <></>}
+              </Sheet>
+            </EditorSection>
+          )}
         </Box>
-
-        {choreId > 0 && (
-          <EditorSection
-            title='Task log'
-            icon={InfoOutlined}
-            section='metadata'
-            summary='Who created and last edited this task'
-            collapsible
-          >
-            <Sheet
-              sx={{
-                p: 2,
-                borderRadius: 'md',
-                boxShadow: 'sm',
-              }}
-            >
-              <Typography level='body1'>
-                Created by{' '}
-                <Chip variant='solid'>
-                  {
-                    membersData.res.find(f => f.userId === createdBy)
-                      ?.displayName
-                  }
-                </Chip>{' '}
-                {moment(chore.createdAt).fromNow()}
-              </Typography>
-              {(chore.updatedAt && updatedBy > 0 && (
-                <>
-                  <Divider sx={{ my: 1 }} />
-
-                  <Typography level='body1'>
-                    Updated by{' '}
-                    <Chip variant='solid'>
-                      {
-                        membersData.res.find(f => f.userId === updatedBy)
-                          ?.displayName
-                      }
-                    </Chip>{' '}
-                    {moment(chore.updatedAt).fromNow()}
-                  </Typography>
-                </>
-              )) || <></>}
-            </Sheet>
-          </EditorSection>
-        )}
-      </Sheet>
-
-      {/* <Box mt={2} alignSelf={'flex-start'} display='flex' gap={2}>
-        <Button onClick={SaveChore}>Save</Button>
-      </Box> */}
-      <Sheet
-        variant='outlined'
-        sx={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          width: '100%',
-          maxWidth: '100vw',
-          minWidth: 0,
-          boxSizing: 'border-box',
-          // Keep these as longhands: a responsive `p` compiles to
-          // `@media (min-width:0px){padding:...}`, which emotion emits *after*
-          // the plain `padding-bottom` rule and so wipes out the safe-area
-          // inset — the bar then sits under the Android system nav bar.
-          pt: { xs: 1, sm: 2 },
-          px: { xs: 1, sm: 2 },
-          pb: getSafeBottomPadding(2), // safe area padding for iOS/Android
-          display: 'flex',
-          justifyContent: 'center',
-          'z-index': 1000,
-          bgcolor: 'background.body',
-          boxShadow: 'md', // Add a subtle shadow
-        }}
-      >
-        <Box
+        <Sheet
+          variant='outlined'
           sx={{
-            width: '100%',
-            maxWidth: 740,
+            position: 'relative',
+            flexShrink: 0,
+            border: 0,
+            borderTop: '1px solid',
+            borderColor: 'divider',
+            p: 2, // padding
+            paddingBottom: getSafeBottomPadding(2), // safe area padding for iOS
             display: 'flex',
-            alignItems: 'center',
-            gap: { xs: 1, sm: 1.5 },
+            justifyContent: 'center',
+            'z-index': 1000,
+            bgcolor: 'background.body',
+            boxShadow: 'none',
           }}
         >
-          {choreId > 0 && (
-            <Dropdown>
-              <ButtonGroup variant='outlined' color='neutral'>
-                <Button
-                  onClick={() => {
-                    isActive
-                      ? archiveChore.mutate(choreId)
-                      : unarchiveChore.mutate(choreId)
-                  }}
-                >
-                  {isActive ? 'Archive' : 'Unarchive'}
-                </Button>
-                <MenuButton
-                  slots={{ root: IconButton }}
-                  slotProps={{
-                    root: {
-                      variant: 'outlined',
-                      color: 'neutral',
-                    },
-                  }}
-                >
-                  <ArrowDropDown />
-                </MenuButton>
-              </ButtonGroup>
-              <Menu placement='top-end'>
-                <MenuItem color='danger' onClick={handleDelete}>
-                  Delete
-                </MenuItem>
-              </Menu>
-            </Dropdown>
-          )}
-          <Box sx={{ flex: 1 }} />
-          <Button
-            color='neutral'
-            variant='plain'
-            onClick={() => {
-              Navigate(choreId ? `/chores/${choreId}` : '/chores')
+          <Box
+            sx={{
+              width: '100%',
+              maxWidth: 740,
+              display: 'flex',
+              alignItems: 'center',
+              gap: { xs: 1, sm: 1.5 },
             }}
           >
-            Cancel
-            {showKeyboardShortcuts && (
-              <KeyboardShortcutHint shortcut='Esc' sx={{ ml: 1 }} />
+            {wizardStep > 0 && (
+              <Button
+                variant='outlined'
+                color='neutral'
+                startDecorator={<ArrowBack />}
+                onClick={() => changeWizardStep(wizardStep - 1)}
+              >
+                Back
+              </Button>
             )}
-          </Button>
-          <Button
-            color='primary'
-            variant='solid'
-            loading={
-              updateChoreMutation.isPending || createChoreMutation.isPending
-            }
-            onClick={HandleSaveChore}
-          >
-            {choreId > 0 ? 'Save' : 'Create'}
-            {showKeyboardShortcuts && (
-              <KeyboardShortcutHint shortcut='Enter' sx={{ ml: 1 }} />
+            <Box sx={{ flex: 1 }} />
+            <Button
+              sx={{
+                display: {
+                  xs: wizardStep === 0 ? 'inline-flex' : 'none',
+                  sm: 'inline-flex',
+                },
+              }}
+              color='neutral'
+              variant='plain'
+              onClick={() => {
+                Navigate(choreId ? `/chores/${choreId}` : '/chores')
+              }}
+            >
+              Cancel
+              {showKeyboardShortcuts && (
+                <KeyboardShortcutHint shortcut='Esc' sx={{ ml: 1 }} />
+              )}
+            </Button>
+            {wizardStep < 3 ? (
+              <Button
+                endDecorator={<ArrowForward />}
+                onClick={() => changeWizardStep(wizardStep + 1)}
+              >
+                Next
+              </Button>
+            ) : (
+              <Button
+                color='primary'
+                variant='solid'
+                loading={
+                  updateChoreMutation.isPending || createChoreMutation.isPending
+                }
+                onClick={HandleSaveChore}
+              >
+                {choreId > 0 ? 'Save' : 'Create'}
+                {showKeyboardShortcuts && (
+                  <KeyboardShortcutHint shortcut='Enter' sx={{ ml: 1 }} />
+                )}
+              </Button>
             )}
-          </Button>
-        </Box>
+          </Box>
+        </Sheet>
       </Sheet>
       <AttachmentViewerModal config={attachmentViewerConfig} />
       <ConfirmationModal config={confirmModelConfig} />
@@ -2599,7 +2900,7 @@ const ChoreEdit = () => {
         />
       )}
       {/* <ChoreHistory ChoreHistory={choresHistory} UsersData={performers} /> */}
-    </Container>
+    </WizardContainer>
   )
 }
 
