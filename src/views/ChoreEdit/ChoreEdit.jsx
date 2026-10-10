@@ -57,6 +57,7 @@ import { useEffect, useRef, useState } from 'react'
 import {
   useBlocker,
   useNavigate,
+  useLocation,
   useParams,
   useSearchParams,
 } from 'react-router-dom'
@@ -108,6 +109,7 @@ import RepeatSection from './RepeatSection'
 import CompletionActionsSection from './CompletionActionsSection'
 import EditorSection from './EditorSection'
 import WizardContainer from './WizardContainer'
+import WizardStepper from './WizardStepper'
 
 const STRATEGY_LABELS = {
   random: 'Random user',
@@ -139,6 +141,10 @@ const ChoreEdit = () => {
   // Page-level shortcuts (save/cancel) must defer to whatever modal
   // currently owns the keyboard — see KeyboardShortcutScopeContext.
   const isPageShortcutActive = usePageShortcutScope()
+  const location = useLocation()
+  const [createAnother, setCreateAnother] = useState(
+    location.state?.createAnother === true,
+  )
   const { data: userProfile, isLoading: isUserProfileLoading } =
     useUserProfile()
   const { showPaywall } = usePaywall()
@@ -577,6 +583,7 @@ const ChoreEdit = () => {
     }
   }
   const HandleSaveChore = () => {
+    if (updateChoreMutation.isPending || createChoreMutation.isPending) return
     setAttemptToSave(true)
     if (!HandleValidateChore()) {
       console.log('validation failed')
@@ -659,7 +666,9 @@ const ChoreEdit = () => {
         }
         dirtyGuard.current = false
         setSavedSnapshot(latestSnapshot.current)
-        Navigate('/chores')
+        Navigate(createAnother ? '/chores/create' : '/chores', {
+          state: createAnother ? { createAnother: true } : null,
+        })
       })
       .catch(error => {
         console.error('Failed to save chore:', error)
@@ -1194,56 +1203,12 @@ const ChoreEdit = () => {
           >
             Step {wizardStep + 1} of 4 · {wizardSteps[wizardStep]}
           </Typography>
-          <Box
-            component='nav'
-            aria-label='Task creation steps'
-            sx={{
-              display: { xs: 'none', sm: 'flex' },
-              gap: 1,
-              mb: name && wizardStep > 0 ? 2 : 0,
-            }}
-          >
-            {wizardSteps.map((label, index) => (
-              <Button
-                key={label}
-                variant='plain'
-                color={index === wizardStep ? 'primary' : 'neutral'}
-                aria-current={index === wizardStep ? 'step' : undefined}
-                onClick={() => changeWizardStep(index)}
-                sx={{ flex: 1, flexDirection: 'column', gap: 0.75, py: 1 }}
-                startDecorator={
-                  <Box
-                    sx={{
-                      width: 30,
-                      height: 30,
-                      borderRadius: '50%',
-                      display: 'grid',
-                      placeItems: 'center',
-                      bgcolor:
-                        index <= wizardStep
-                          ? 'primary.solidBg'
-                          : 'background.level1',
-                      color:
-                        index <= wizardStep
-                          ? 'primary.solidColor'
-                          : 'text.secondary',
-                      border: '1px solid',
-                      borderColor:
-                        index <= wizardStep ? 'primary.solidBg' : 'divider',
-                    }}
-                  >
-                    {index < wizardStep ? (
-                      <Check sx={{ fontSize: 18 }} />
-                    ) : (
-                      index + 1
-                    )}
-                  </Box>
-                }
-              >
-                {label}
-              </Button>
-            ))}
-          </Box>
+          <WizardStepper
+            steps={wizardSteps}
+            activeStep={wizardStep}
+            onStepChange={changeWizardStep}
+            sx={{ mb: name && wizardStep > 0 ? 2 : 0 }}
+          />
           {name && wizardStep > 0 && (
             <Sheet
               variant='soft'
@@ -1363,40 +1328,6 @@ const ChoreEdit = () => {
                   </IconButton>
                 </Sheet>
               ))}
-              <Box sx={{ mt: 2 }}>
-                {' '}
-                {choreId > 0 && (
-                  <Dropdown>
-                    <ButtonGroup variant='outlined' color='neutral'>
-                      <Button
-                        onClick={() => {
-                          isActive
-                            ? archiveChore.mutate(choreId)
-                            : unarchiveChore.mutate(choreId)
-                        }}
-                      >
-                        {isActive ? 'Archive' : 'Unarchive'}
-                      </Button>
-                      <MenuButton
-                        slots={{ root: IconButton }}
-                        slotProps={{
-                          root: {
-                            variant: 'outlined',
-                            color: 'neutral',
-                          },
-                        }}
-                      >
-                        <ArrowDropDown />
-                      </MenuButton>
-                    </ButtonGroup>
-                    <Menu placement='top-end'>
-                      <MenuItem color='danger' onClick={handleDelete}>
-                        Delete
-                      </MenuItem>
-                    </Menu>
-                  </Dropdown>
-                )}
-              </Box>
             </Box>
           )}
           <Box className='task-editor-grid'>
@@ -2802,6 +2733,7 @@ const ChoreEdit = () => {
           )}
         </Box>
         <Sheet
+          data-wizard-footer
           variant='outlined'
           sx={{
             position: 'relative',
@@ -2822,13 +2754,78 @@ const ChoreEdit = () => {
             sx={{
               width: '100%',
               maxWidth: 740,
-              display: 'flex',
+              display: {
+                xs:
+                  (choreId > 0 || createAnother) && wizardStep === 3
+                    ? 'grid'
+                    : 'flex',
+                sm: 'flex',
+              },
+              gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
+              gridTemplateAreas:
+                choreId > 0
+                  ? '"management cancel" "back save"'
+                  : '"back cancel" "save save"',
               alignItems: 'center',
               gap: { xs: 1, sm: 1.5 },
+              '& [data-footer-management]': {
+                gridArea: 'management',
+                justifySelf: 'start',
+                flexShrink: 0,
+              },
+              '& [data-footer-back]': {
+                gridArea: 'back',
+                justifySelf: 'start',
+              },
+              '& [data-footer-cancel]': {
+                gridArea: 'cancel',
+                justifySelf: 'end',
+              },
+              '& [data-footer-save]': {
+                gridArea: 'save',
+                justifySelf: 'end',
+                flexShrink: 0,
+              },
             }}
           >
+            {choreId > 0 && wizardStep === 3 && (
+              <Box data-footer-management>
+                {' '}
+                <Dropdown>
+                  <ButtonGroup variant='outlined' color='neutral'>
+                    <Button
+                      onClick={() => {
+                        isActive
+                          ? archiveChore.mutate(choreId)
+                          : unarchiveChore.mutate(choreId)
+                      }}
+                    >
+                      {isActive ? 'Archive' : 'Unarchive'}
+                    </Button>
+                    <MenuButton
+                      aria-label='More task actions'
+                      slots={{ root: IconButton }}
+                      slotProps={{
+                        root: {
+                          variant: 'outlined',
+                          color: 'neutral',
+                        },
+                      }}
+                    >
+                      <ArrowDropDown />
+                    </MenuButton>
+                  </ButtonGroup>
+                  <Menu disablePortal placement='top-end'>
+                    <MenuItem color='danger' onClick={handleDelete}>
+                      Delete
+                    </MenuItem>
+                  </Menu>
+                </Dropdown>
+              </Box>
+            )}
             {wizardStep > 0 && (
               <Button
+                data-footer-back
                 variant='outlined'
                 color='neutral'
                 startDecorator={<ArrowBack />}
@@ -2837,14 +2834,20 @@ const ChoreEdit = () => {
                 Back
               </Button>
             )}
-            <Box sx={{ flex: 1 }} />
-            <Button
+            <Box
               sx={{
+                flex: 1,
                 display: {
-                  xs: wizardStep === 0 ? 'inline-flex' : 'none',
-                  sm: 'inline-flex',
+                  xs:
+                    (choreId > 0 || createAnother) && wizardStep === 3
+                      ? 'none'
+                      : 'block',
+                  sm: 'block',
                 },
               }}
+            />
+            <Button
+              data-footer-cancel
               color='neutral'
               variant='plain'
               onClick={() => {
@@ -2864,19 +2867,90 @@ const ChoreEdit = () => {
                 Next
               </Button>
             ) : (
-              <Button
-                color='primary'
-                variant='solid'
-                loading={
-                  updateChoreMutation.isPending || createChoreMutation.isPending
-                }
-                onClick={HandleSaveChore}
-              >
-                {choreId > 0 ? 'Save' : 'Create'}
-                {showKeyboardShortcuts && (
-                  <KeyboardShortcutHint shortcut='Enter' sx={{ ml: 1 }} />
-                )}
-              </Button>
+              <Box data-footer-save>
+                <Dropdown>
+                  <ButtonGroup variant='solid' color='primary'>
+                    <Button
+                      loading={
+                        updateChoreMutation.isPending ||
+                        createChoreMutation.isPending
+                      }
+                      onClick={() => HandleSaveChore()}
+                    >
+                      {createAnother ? (
+                        <>
+                          <Box
+                            component='span'
+                            sx={{ display: { xs: 'none', sm: 'inline' } }}
+                          >
+                            {choreId > 0
+                              ? 'Save and create another'
+                              : 'Create and add another'}
+                          </Box>
+                          <Box
+                            component='span'
+                            sx={{ display: { xs: 'inline', sm: 'none' } }}
+                          >
+                            {choreId > 0 ? 'Save & new' : 'Create & new'}
+                          </Box>
+                        </>
+                      ) : choreId > 0 ? (
+                        'Save'
+                      ) : (
+                        'Create'
+                      )}
+                      {showKeyboardShortcuts && (
+                        <KeyboardShortcutHint shortcut='Enter' sx={{ ml: 1 }} />
+                      )}
+                    </Button>
+                    <MenuButton
+                      aria-label='More save options'
+                      slots={{ root: IconButton }}
+                      slotProps={{
+                        root: {
+                          variant: 'solid',
+                          color: 'primary',
+                          disabled:
+                            updateChoreMutation.isPending ||
+                            createChoreMutation.isPending,
+                        },
+                      }}
+                    >
+                      <ArrowDropDown />
+                    </MenuButton>
+                  </ButtonGroup>
+                  <Menu disablePortal placement='top-end'>
+                    <MenuItem
+                      selected={!createAnother}
+                      disabled={
+                        updateChoreMutation.isPending ||
+                        createChoreMutation.isPending
+                      }
+                      onClick={() => setCreateAnother(false)}
+                    >
+                      <Box sx={{ width: 20 }}>
+                        {!createAnother && <Check fontSize='small' />}
+                      </Box>
+                      {choreId > 0 ? 'Save' : 'Create'}
+                    </MenuItem>
+                    <MenuItem
+                      selected={createAnother}
+                      disabled={
+                        updateChoreMutation.isPending ||
+                        createChoreMutation.isPending
+                      }
+                      onClick={() => setCreateAnother(true)}
+                    >
+                      <Box sx={{ width: 20 }}>
+                        {createAnother && <Check fontSize='small' />}
+                      </Box>
+                      {choreId > 0
+                        ? 'Save and create another task'
+                        : 'Create and add another task'}
+                    </MenuItem>
+                  </Menu>
+                </Dropdown>
+              </Box>
             )}
           </Box>
         </Sheet>
@@ -2904,4 +2978,7 @@ const ChoreEdit = () => {
   )
 }
 
-export default ChoreEdit
+export default function ChoreEditorRoute() {
+  const location = useLocation()
+  return <ChoreEdit key={location.key} />
+}
