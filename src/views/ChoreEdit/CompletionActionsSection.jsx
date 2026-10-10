@@ -25,6 +25,7 @@ export default function CompletionActionsSection({
   onValidate,
   points,
   onPointsChange,
+  showHeading = true,
 }) {
   const [things, setThings] = useState([])
   const [loaded, setLoaded] = useState(false)
@@ -71,7 +72,7 @@ export default function CompletionActionsSection({
     )
   return (
     <Box mb={3}>
-      <Typography level='h4'>On completion</Typography>
+      {showHeading && <Typography level='h4'>On completion</Typography>}
       <Typography level='body-sm' mb={1}>
         Award points or change Things when this task is completed. Skipping or
         postponing does not run these actions.
