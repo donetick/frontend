@@ -4,29 +4,32 @@ import {
   Button,
   Card,
   Dropdown,
-  Menu,
-  MenuButton,
-  MenuItem,
   FormControl,
   FormHelperText,
   FormLabel,
   IconButton,
   Input,
+  Menu,
+  MenuButton,
+  MenuItem,
   Option,
   Select,
   Typography,
 } from '@mui/joy'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import { GetThings } from '../../utils/Fetcher'
 
 export default function CompletionActionsSection({
   actions,
   onChange,
+  onPointsChange,
   onValidate,
   points,
-  onPointsChange,
   showHeading = true,
 }) {
+  const { t } = useTranslation('chores')
   const [things, setThings] = useState([])
   const [loaded, setLoaded] = useState(false)
   const [loadError, setLoadError] = useState(false)
@@ -72,19 +75,20 @@ export default function CompletionActionsSection({
     )
   return (
     <Box mb={3}>
-      {showHeading && <Typography level='h4'>On completion</Typography>}
+      {showHeading && (
+        <Typography level='h4'>{t('taskEditor.onCompletion')}</Typography>
+      )}
       <Typography level='body-sm' mb={1}>
-        Award points or change Things when this task is completed. Skipping or
-        postponing does not run these actions.
+        {t('taskEditor.awardPointsOrChangeThingsWhenThis')}
       </Typography>
       {loadError && (
         <Typography color='danger'>
-          Unable to load Things. Reload to try again.
+          {t('taskEditor.unableToLoadThingsReloadToTry')}
         </Typography>
       )}
       {loaded && !loadError && things.length === 0 && (
         <Typography level='body-sm'>
-          Create a Thing on the Things page to add Thing actions.
+          {t('taskEditor.createAThingOnTheThingsPage')}
         </Typography>
       )}
       {hasPoints && (
@@ -97,16 +101,18 @@ export default function CompletionActionsSection({
               gap: 1,
             }}
           >
-            <Typography level='title-md'>Award points</Typography>
+            <Typography level='title-md'>
+              {t('taskEditor.awardPoints')}
+            </Typography>
             <IconButton
-              aria-label='Remove points action'
+              aria-label={t('taskEditor.removePointsAction')}
               onClick={() => onPointsChange(-1)}
             >
               <Delete />
             </IconButton>
           </Box>
           <FormControl error={!pointsValid}>
-            <FormLabel>Points</FormLabel>
+            <FormLabel>{t('choreEdit.pointsPlaceholder')}</FormLabel>
             <Input
               type='number'
               value={points}
@@ -131,10 +137,10 @@ export default function CompletionActionsSection({
           <Card key={index} variant='outlined' sx={{ mb: 1 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <FormControl sx={{ flex: 1 }}>
-                <FormLabel>Thing</FormLabel>
+                <FormLabel>{t('taskEditor.thing')}</FormLabel>
                 <Select
                   value={action.thingId || null}
-                  placeholder='Select a Thing'
+                  placeholder={t('taskEditor.selectAThing')}
                   onChange={(_, id) => {
                     if (id == null) return
                     const selected = things.find(item => item.id === id)
@@ -158,23 +164,23 @@ export default function CompletionActionsSection({
                 </Select>
               </FormControl>
               <IconButton
-                aria-label='Remove completion action'
+                aria-label={t('taskEditor.removeCompletionAction')}
                 onClick={() => onChange(actions.filter((_, i) => i !== index))}
               >
                 <Delete />
               </IconButton>
             </Box>
             <FormControl>
-              <FormLabel>Action</FormLabel>
+              <FormLabel>{t('taskEditor.action')}</FormLabel>
               <Select
                 value={action.operation}
                 onChange={(_, operation) => {
                   if (operation) update(index, { operation })
                 }}
               >
-                <Option value='set'>Set value</Option>
+                <Option value='set'>{t('taskEditor.setValue')}</Option>
                 <Option value='add' disabled={thing?.type !== 'number'}>
-                  Increase / decrease
+                  {t('taskEditor.increaseDecrease')}
                 </Option>
               </Select>
             </FormControl>
@@ -187,8 +193,8 @@ export default function CompletionActionsSection({
                   value={action.value}
                   onChange={(_, value) => update(index, { value })}
                 >
-                  <Option value='false'>False</Option>
-                  <Option value='true'>True</Option>
+                  <Option value='false'>{t('thing.boolFalse')}</Option>
+                  <Option value='true'>{t('thing.boolTrue')}</Option>
                 </Select>
               ) : (
                 <Input
@@ -201,12 +207,12 @@ export default function CompletionActionsSection({
               )}
               {action.operation === 'add' && (
                 <FormHelperText>
-                  Use a negative amount to decrease the value.
+                  {t('taskEditor.useANegativeAmountToDecreaseThe')}
                 </FormHelperText>
               )}
               {loaded && !isValid(action) && (
                 <FormHelperText>
-                  Select a Thing and enter a valid value.
+                  {t('taskEditor.selectAThingAndEnterAValid')}
                 </FormHelperText>
               )}
             </FormControl>
@@ -220,11 +226,11 @@ export default function CompletionActionsSection({
             root: { variant: 'outlined', size: 'sm', startDecorator: <Add /> },
           }}
         >
-          Add action
+          {t('taskEditor.addAction')}
         </MenuButton>
         <Menu>
           <MenuItem disabled={hasPoints} onClick={() => onPointsChange(1)}>
-            Award points
+            {t('taskEditor.awardPoints')}
           </MenuItem>
           <MenuItem
             disabled={
@@ -237,7 +243,7 @@ export default function CompletionActionsSection({
               ])
             }
           >
-            Change a Thing
+            {t('taskEditor.changeAThing')}
           </MenuItem>
         </Menu>
       </Dropdown>

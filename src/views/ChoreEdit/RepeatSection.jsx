@@ -522,9 +522,9 @@ const RepeatSection = ({
   return (
     <Box>
       <FormControl>
-        <Typography level='h4'>Schedule type</Typography>
+        <Typography level='h4'>{t('repeat.picker.scheduleType')}</Typography>
         <Select
-          aria-label='Schedule type'
+          aria-label={t('repeat.picker.scheduleType')}
           value={
             ['once', 'no_repeat'].includes(frequencyType)
               ? 'once'
@@ -540,13 +540,13 @@ const RepeatSection = ({
             if (mode !== 'trigger') onTriggerUpdate(null)
           }}
         >
-          <Option value='once'>One-time task</Option>
-          <Option value='repeat'>Repeating task</Option>
+          <Option value='once'>{t('taskEditor.oneTimeTask')}</Option>
+          <Option value='repeat'>{t('taskEditor.repeatingTask')}</Option>
           <Option value='trigger' disabled={!isPlusAccount(userProfile)}>
-            Triggered by a Thing
+            {t('taskEditor.triggeredByAThing')}
           </Option>
           {frequencyType === 'always' && (
-            <Option value='always'>Always available</Option>
+            <Option value='always'>{t('taskEditor.alwaysAvailable')}</Option>
           )}
         </Select>
       </FormControl>
@@ -556,7 +556,7 @@ const RepeatSection = ({
             variant='plain'
             sx={{ mt: 2, p: 0, bgcolor: 'transparent', gap: 1.5 }}
           >
-            <Typography level='h5'>Repeats</Typography>
+            <Typography level='h5'>{t('taskEditor.repeats')}</Typography>
 
             <List
               orientation='horizontal'

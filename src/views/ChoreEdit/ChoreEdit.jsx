@@ -1,28 +1,27 @@
 import {
   Add,
   ArrowBack,
+  ArrowDropDown,
   ArrowForward,
-  Close,
-  EditOutlined,
   AssignmentOutlined,
+  AttachFile,
+  BoltOutlined,
   CalendarMonthOutlined,
+  Check,
+  Checklist,
+  Close,
+  Delete,
   DescriptionOutlined,
+  DocumentScanner,
+  EditOutlined,
   GroupOutlined,
+  HorizontalRule,
   InfoOutlined,
   LabelOutlined,
-  SettingsOutlined,
-  BoltOutlined,
-  Checklist,
-  Check,
-  ArrowDropDown,
-  AttachFile,
-  Checklist,
-  Delete,
-  DocumentScanner,
-  HorizontalRule,
   Lock,
   LockOutlined,
   Save,
+  SettingsOutlined,
   UploadFile,
 } from '@mui/icons-material'
 import {
@@ -34,6 +33,7 @@ import {
   Card,
   Checkbox,
   Chip,
+  Container,
   Divider,
   Dropdown,
   FormControl,
@@ -54,14 +54,15 @@ import {
 } from '@mui/joy'
 import moment from 'moment'
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   useBlocker,
-  useNavigate,
   useLocation,
+  useNavigate,
   useParams,
   useSearchParams,
 } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
+
 import DurationInput from '../../components/common/DurationInput'
 import EmptyState from '../../components/common/EmptyState'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
@@ -92,11 +93,11 @@ import {
 import { imageSourceToFile } from '../../utils/FileConvert'
 import { isPlusAccount, resolvePhotoURL } from '../../utils/Helpers'
 import { getImageSrc, removeCachedImage } from '../../utils/ImageCache'
-import { generateUUID } from '../../utils/UUID'
-import { useSinglePageTaskEditor } from '../../utils/TaskEditorPreferences'
 import Priorities from '../../utils/Priorities.jsx'
 import { getIconComponent } from '../../utils/ProjectIcons'
 import { getSafeBottomPadding } from '../../utils/SafeAreaUtils.js'
+import { useSinglePageTaskEditor } from '../../utils/TaskEditorPreferences'
+import { generateUUID } from '../../utils/UUID'
 import { useProjectFilter } from '../Chores/hooks/useProjectFilter.js'
 import LoadingComponent from '../components/Loading.jsx'
 import RichTextEditor from '../components/RichTextEditor.jsx'
@@ -106,9 +107,9 @@ import AttachmentViewerModal from '../Modals/Inputs/AttachmentViewerModal'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import LabelModal from '../Modals/Inputs/LabelModal'
 import { useProjects } from '../Projects/ProjectQueries'
-import RepeatSection from './RepeatSection'
 import CompletionActionsSection from './CompletionActionsSection'
 import EditorSection from './EditorSection'
+import RepeatSection from './RepeatSection'
 import WizardContainer from './WizardContainer'
 import WizardStepper from './WizardStepper'
 
@@ -420,11 +421,11 @@ const ChoreEdit = () => {
     if (name.trim() === '') {
       errors.name = 'Name is required'
     }
-    if (assignStrategy !== 'no_assignee') {
+    if (assignStrategyValue !== 'no_assignee') {
       if (assignees.length === 0) {
         errors.assignees = 'Choose at least one eligible user'
       }
-      if (assignedTo === null || assignedTo < 0) {
+      if (assignedToValue === null || assignedToValue < 0) {
         errors.assignedTo = 'Choose who is assigned to this task'
       }
     }
@@ -1180,11 +1181,11 @@ const ChoreEdit = () => {
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
             {isDirty && (
               <Chip variant='soft' color='warning'>
-                Unsaved
+                {t('taskEditor.unsaved')}
               </Chip>
             )}
             <IconButton
-              aria-label='Close task editor'
+              aria-label={t('taskEditor.closeTaskEditor')}
               color='neutral'
               variant='plain'
               onClick={() =>
@@ -1212,7 +1213,10 @@ const ChoreEdit = () => {
                 mb: name && wizardStep > 0 ? 1 : 0,
               }}
             >
-              Step {wizardStep + 1} of 4 · {wizardSteps[wizardStep]}
+              {t('taskEditor.step')}
+              {wizardStep + 1}
+              {t('taskEditor.of4')}
+              {wizardSteps[wizardStep]}
             </Typography>
             <WizardStepper
               steps={wizardSteps}
@@ -1243,10 +1247,12 @@ const ChoreEdit = () => {
                   >
                     {name}
                   </Typography>
-                  <Typography level='body-xs'>Task</Typography>
+                  <Typography level='body-xs'>
+                    {t('taskEditor.task')}
+                  </Typography>
                 </Box>
                 <IconButton
-                  aria-label='Edit task details'
+                  aria-label={t('taskEditor.editTaskDetails')}
                   size='sm'
                   onClick={() => changeWizardStep(0)}
                 >
@@ -1274,7 +1280,7 @@ const ChoreEdit = () => {
             <Alert color='danger' variant='soft' sx={{ mb: 2 }}>
               <Box>
                 <Typography level='title-sm'>
-                  Check these settings before saving
+                  {t('taskEditor.checkTheseSettingsBeforeSaving')}
                 </Typography>
                 {Object.entries(errors).map(([key, message]) => (
                   <Button
@@ -1296,13 +1302,15 @@ const ChoreEdit = () => {
               tabIndex={-1}
               sx={{ px: { xs: 2, sm: 3 }, py: 2.5 }}
             >
-              <Typography level='title-lg'>Review task</Typography>
+              <Typography level='title-lg'>
+                {t('taskEditor.reviewTask')}
+              </Typography>
               <Typography
                 level='body-sm'
                 textColor='text.tertiary'
                 sx={{ mb: 2 }}
               >
-                Check the details, then{' '}
+                {t('taskEditor.checkTheDetailsThen')}{' '}
                 {choreId ? 'save your changes' : 'create your task'}.
               </Typography>
               {[
@@ -1346,7 +1354,7 @@ const ChoreEdit = () => {
           )}
           <Box className='task-editor-grid'>
             <EditorSection
-              title='Task'
+              title={t('taskEditor.task')}
               section='task'
               hideHeading
               error={
@@ -1360,10 +1368,10 @@ const ChoreEdit = () => {
             >
               <Box data-wizard-name>
                 <FormControl error={errors.name}>
-                  <Typography level='h4'>Task name *</Typography>
+                  <Typography level='h4'>{t('taskEditor.taskName')}</Typography>
                   <Input
-                    aria-label='Task name'
-                    placeholder='What needs to be done?'
+                    aria-label={t('taskEditor.taskName2')}
+                    placeholder={t('taskEditor.whatNeedsToBeDone')}
                     sx={{ minHeight: 48, fontSize: 'lg' }}
                     value={name}
                     onChange={e => setName(e.target.value)}
@@ -1391,7 +1399,9 @@ const ChoreEdit = () => {
                     mb: 1,
                   }}
                 >
-                  <Typography level='title-sm'>Schedule</Typography>
+                  <Typography level='title-sm'>
+                    {t('taskEditor.schedule')}
+                  </Typography>
                   <Typography level='body-sm' textColor='text.tertiary'>
                     {scheduleSummary}
                   </Typography>
@@ -1401,7 +1411,7 @@ const ChoreEdit = () => {
                   textColor='text.tertiary'
                   sx={{ mb: 2 }}
                 >
-                  Choose when this task is due and whether it repeats.
+                  {t('taskEditor.chooseWhenThisTaskIsDueAnd')}
                 </Typography>
 
                 <RepeatSection
@@ -1445,7 +1455,7 @@ const ChoreEdit = () => {
                       </Typography>
                       {frequencyType === 'trigger' && !dueDate && (
                         <Typography level='body-sm'>
-                          The task becomes due when its Thing condition is met.
+                          {t('taskEditor.theTaskBecomesDueWhenItsThing')}
                         </Typography>
                       )}
 
@@ -1475,7 +1485,7 @@ const ChoreEdit = () => {
                             defaultChecked={dueDate !== null}
                             checked={dueDate !== null}
                             overlay
-                            label='Give this task a due date'
+                            label={t('choreEdit.giveDueDate')}
                           />
                         </FormControl>
                       )}
@@ -1500,7 +1510,7 @@ const ChoreEdit = () => {
                             </Typography>
                             <Input
                               type='date'
-                              aria-label='Due date'
+                              aria-label={t('taskEditor.dueDate')}
                               value={dueDateOnly || ''}
                               onChange={handleDueDateChange}
                             />
@@ -1509,11 +1519,13 @@ const ChoreEdit = () => {
                             )}
                           </FormControl>
                           <FormControl>
-                            <Typography level='h4'>Time</Typography>
+                            <Typography level='h4'>
+                              {t('taskEditor.time')}
+                            </Typography>
                             {useCustomTime ? (
                               <Input
                                 type='time'
-                                aria-label='Due time'
+                                aria-label={t('taskEditor.dueTime')}
                                 value={dueTime || '18:00'}
                                 onChange={handleDueTimeChange}
                               />
@@ -1528,7 +1540,7 @@ const ChoreEdit = () => {
                                   fontWeight: 400,
                                 }}
                               >
-                                Add a time
+                                {t('taskEditor.addATime')}
                               </Button>
                             )}
                             {useCustomTime && (
@@ -1539,7 +1551,7 @@ const ChoreEdit = () => {
                                 sx={{ alignSelf: 'flex-start', mt: 0.5 }}
                                 onClick={() => handleUseCustomTimeChange(false)}
                               >
-                                Remove time
+                                {t('taskEditor.removeTime')}
                               </Button>
                             )}
                           </FormControl>
@@ -1552,7 +1564,9 @@ const ChoreEdit = () => {
                   frequencyType,
                 ) && (
                   <Box>
-                    <Typography level='h4'>Scheduling Preferences</Typography>
+                    <Typography level='h4'>
+                      {t('choreEdit.schedulingPrefs')}
+                    </Typography>
                     <RadioGroup
                       name='tiers'
                       sx={{ gap: 1, '& > div': { p: 1 } }}
@@ -1562,11 +1576,10 @@ const ChoreEdit = () => {
                           overlay
                           checked={!isRolling}
                           onClick={() => setIsRolling(false)}
-                          label='Reschedule from due date'
+                          label={t('choreEdit.rescheduleFromDue')}
                         />
                         <FormHelperText>
-                          The next occurrence is scheduled from the original due
-                          date, even if you complete this one late.
+                          {t('taskEditor.theNextOccurrenceIsScheduledFromThe')}
                         </FormHelperText>
                       </FormControl>
                       <FormControl>
@@ -1577,11 +1590,10 @@ const ChoreEdit = () => {
                             setIsRolling(true)
                             setDeadlineOffset(-1)
                           }}
-                          label='Reschedule from completion date'
+                          label={t('choreEdit.rescheduleFromCompletion')}
                         />
                         <FormHelperText>
-                          The next occurrence is scheduled from the date you
-                          complete this task.
+                          {t('taskEditor.theNextOccurrenceIsScheduledFromThe2')}
                         </FormHelperText>
                       </FormControl>
                     </RadioGroup>
@@ -1608,7 +1620,7 @@ const ChoreEdit = () => {
                     }}
                   >
                     <Typography level='h4' sx={{ mb: '0 !important' }}>
-                      Assign to
+                      {t('taskEditor.assignTo')}
                     </Typography>
                     {!showSaveAssigneeDefault && (
                       <Chip
@@ -1617,7 +1629,7 @@ const ChoreEdit = () => {
                         color='neutral'
                         startDecorator={<Check sx={{ fontSize: 14 }} />}
                       >
-                        Saved default
+                        {t('taskEditor.savedDefault')}
                       </Chip>
                     )}
                     {showSaveAssigneeDefault && (
@@ -1646,7 +1658,7 @@ const ChoreEdit = () => {
                             setShowSaveAssigneeDefault(false)
                           }}
                         >
-                          Use as default
+                          {t('taskEditor.useAsDefault')}
                         </Button>
                       </Box>
                     )}
@@ -1656,7 +1668,7 @@ const ChoreEdit = () => {
                     textColor='text.tertiary'
                     sx={{ mb: 1.5 }}
                   >
-                    Choose who can be assigned this task.
+                    {t('taskEditor.chooseWhoCanBeAssignedThisTask')}
                   </Typography>
                   <Card variant='plain' sx={{ p: 0, bgcolor: 'transparent' }}>
                     <List
@@ -1700,7 +1712,8 @@ const ChoreEdit = () => {
                                 gap: 0.75,
                               }}
                             >
-                              Anyone{anyone && <Check sx={{ fontSize: 16 }} />}
+                              {t('choreEdit.anyone')}
+                              {anyone && <Check sx={{ fontSize: 16 }} />}
                             </Box>
                           }
                         />
@@ -1803,7 +1816,9 @@ const ChoreEdit = () => {
                 {assignees.length > 1 && (
                   <Box className='task-properties'>
                     <Box mb={2}>
-                      <Typography level='h4'>Assigned now</Typography>
+                      <Typography level='h4'>
+                        {t('taskEditor.assignedNow')}
+                      </Typography>
                       <Select
                         placeholder={
                           assignees.length === 0
@@ -1829,9 +1844,11 @@ const ChoreEdit = () => {
                     </Box>
 
                     <Box>
-                      <Typography level='h4'>Next assignment</Typography>
+                      <Typography level='h4'>
+                        {t('taskEditor.nextAssignment')}
+                      </Typography>
                       <Select
-                        aria-label='Next assignment'
+                        aria-label={t('taskEditor.nextAssignment')}
                         value={assignStrategy}
                         onChange={(_, value) => {
                           if (value) setAssignStrategy(value)
@@ -1849,7 +1866,7 @@ const ChoreEdit = () => {
               </Box>
             </EditorSection>
             <EditorSection
-              title='Description & attachments'
+              title={t('taskEditor.descriptionAttachments')}
               icon={DescriptionOutlined}
               section='description'
               collapsible={!singlePageEditor}
@@ -1880,7 +1897,14 @@ const ChoreEdit = () => {
                   <FormHelperText error>{errors.description}</FormHelperText>
                 </FormControl>
               </Box>
-              <Box sx={{ display: 'flex', mb: attachments.length ? 2 : 0 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: 1,
+                  mb: attachments.length ? 2 : 0,
+                }}
+              >
                 <Button
                   component='label'
                   variant='outlined'
@@ -1890,7 +1914,7 @@ const ChoreEdit = () => {
                   loading={isUploadingAttachment}
                   sx={{ flexShrink: 0 }}
                 >
-                  Upload attachment
+                  {t('taskEditor.uploadAttachment')}
                   <input
                     type='file'
                     hidden
@@ -1941,6 +1965,18 @@ const ChoreEdit = () => {
                     }}
                   />
                 </Button>
+                {isNativeScanner && (
+                  <Button
+                    variant='outlined'
+                    color='neutral'
+                    size='sm'
+                    startDecorator={<DocumentScanner />}
+                    disabled={isUploadingAttachment}
+                    onClick={handleScanAttachment}
+                  >
+                    {t('choreEdit.scan')}
+                  </Button>
+                )}
               </Box>
               {attachments.length > 0 && (
                 <Box sx={{ mt: 0 }}>
@@ -2020,7 +2056,8 @@ const ChoreEdit = () => {
                             </Typography>
                             {att.size_bytes && (
                               <Typography level='body-xs' color='neutral'>
-                                {(att.size_bytes / 1024).toFixed(1)} KB
+                                {(att.size_bytes / 1024).toFixed(1)}
+                                {t('taskEditor.kb')}
                               </Typography>
                             )}
                             {choreId && (
@@ -2086,7 +2123,7 @@ const ChoreEdit = () => {
             </EditorSection>
 
             <EditorSection
-              title='Organization'
+              title={t('taskEditor.organization')}
               icon={LabelOutlined}
               section='organization'
               collapsible={!singlePageEditor}
@@ -2108,9 +2145,9 @@ const ChoreEdit = () => {
             >
               <Box className='task-properties'>
                 <FormControl>
-                  <Typography level='h4'>Priority</Typography>
+                  <Typography level='h4'>{t('choreEdit.priority')}</Typography>
                   <Select
-                    aria-label='Priority'
+                    aria-label={t('choreEdit.priority')}
                     value={priority}
                     onChange={(_, value) => {
                       if (value !== null) setPriority(value)
@@ -2120,7 +2157,7 @@ const ChoreEdit = () => {
                         ?.icon || <HorizontalRule />
                     }
                   >
-                    <Option value={0}>No priority</Option>
+                    <Option value={0}>{t('taskEditor.noPriority')}</Option>
                     {Priorities.map(item => (
                       <Option key={item.value} value={item.value}>
                         <Box
@@ -2143,7 +2180,7 @@ const ChoreEdit = () => {
                 {/* Project Selection - Show only if there are multiple projects */}
                 {projects.length >= 1 && (
                   <Box mb={2}>
-                    <Typography level='h4'>Project</Typography>
+                    <Typography level='h4'>{t('choreEdit.project')}</Typography>
                     <Select
                       value={projectId}
                       onChange={(event, newValue) => setProjectId(newValue)}
@@ -2183,7 +2220,7 @@ const ChoreEdit = () => {
                               )
                             })()}
                           </Avatar>
-                          Default Project
+                          {t('choreEdit.defaultProject')}
                         </Box>
                       </Option>
                       {projects.map(project => (
@@ -2232,7 +2269,7 @@ const ChoreEdit = () => {
                 )}
 
                 <Box mb={2}>
-                  <Typography level='h4'>Labels</Typography>
+                  <Typography level='h4'>{t('choreEdit.labels')}</Typography>
                   <Select
                     multiple
                     onChange={(event, newValue) => {
@@ -2240,7 +2277,7 @@ const ChoreEdit = () => {
                         userLabels.filter(l => newValue.indexOf(l.name) > -1),
                       )
                     }}
-                    placeholder='Add labels'
+                    placeholder={t('taskEditor.addLabels')}
                     value={labelsV2?.map(l => l.name)}
                     renderValue={selected => (
                       <Box sx={{ display: 'flex', gap: '0.25rem' }}>
@@ -2295,7 +2332,7 @@ const ChoreEdit = () => {
                       }}
                     >
                       <Add />
-                      Add New Label
+                      {t('choreEdit.addNewLabel')}
                     </MenuItem>
                   </Select>
                 </Box>
@@ -2303,7 +2340,7 @@ const ChoreEdit = () => {
             </EditorSection>
             <Box>
               <EditorSection
-                title='Subtasks'
+                title={t('taskEditor.subtasks')}
                 icon={Checklist}
                 section='subtasks'
                 collapsible={!singlePageEditor}
@@ -2348,7 +2385,7 @@ const ChoreEdit = () => {
               </EditorSection>
             </Box>
             <EditorSection
-              title='On completion'
+              title={t('taskEditor.onCompletion')}
               icon={BoltOutlined}
               section='actions'
               collapsible={!singlePageEditor}
@@ -2375,7 +2412,7 @@ const ChoreEdit = () => {
               />
             </EditorSection>
             <EditorSection
-              title='Notifications and privacy'
+              title={t('taskEditor.notificationsAndPrivacy')}
               icon={SettingsOutlined}
               section='additional'
               collapsible={!singlePageEditor}
@@ -2393,12 +2430,12 @@ const ChoreEdit = () => {
               {/* Section 3.1: Notifications */}
 
               <Box mb={2}>
-                <Typography level='h4'>Notifications</Typography>
+                <Typography level='h4'>
+                  {t('choreEdit.notifications')}
+                </Typography>
                 {!isPlusAccount(userProfile) && (
                   <Typography level='body-sm' color='warning' sx={{ mb: 1 }}>
-                    Task notifications are not available in the Basic plan.
-                    Upgrade to Plus to receive reminders when tasks are due or
-                    completed.
+                    {t('taskEditor.taskNotificationsAreNotAvailableInThe')}
                   </Typography>
                 )}
 
@@ -2412,116 +2449,130 @@ const ChoreEdit = () => {
                     }}
                     defaultChecked={isNotificable}
                     checked={isNotificable}
-                    disabled={!isPlusAccount(userProfile)}
+                    disabled={
+                      !isPlusAccount(userProfile) ||
+                      NOTIFICATION_FORBIDDEN_TYPE.includes(frequencyType)
+                    }
                     overlay
-                    label='Notify for this task'
+                    label={t('choreEdit.notifyForTask')}
                   />
                   <FormHelperText
                     sx={{
                       opacity: !isPlusAccount(userProfile) ? 0.5 : 1,
                     }}
                   >
-                    Choose which task events send notifications.
+                    {NOTIFICATION_FORBIDDEN_TYPE.includes(frequencyType)
+                      ? t('choreEdit.notifyForTaskUnavailable')
+                      : t('choreEdit.notifyForTaskHelp')}
                   </FormHelperText>
                 </FormControl>
               </Box>
 
-              {isNotificable && (
-                <Box
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 2,
-                  }}
-                >
-                  <Card variant='outlined'>
-                    <Typography level='h4' mb={2}>
-                      Notification Schedule
-                    </Typography>
-                    <Box sx={{ p: 0.5 }}>
-                      <NotificationTemplate
-                        onChange={metadata => {
-                          const newTemplates = metadata.notifications
-                          if (
-                            notificationMetadata?.templates !== newTemplates
-                          ) {
-                            setNotificationMetadata({
-                              ...notificationMetadata,
-                              templates: newTemplates,
-                            })
-                          }
-                        }}
-                        value={notificationMetadata}
-                      />
-                    </Box>
-
-                    <Typography level='h4' mt={3} mb={2}>
-                      Who to Notify
-                    </Typography>
-                    <FormControl>
-                      <Checkbox
-                        overlay
-                        disabled={true}
-                        checked={true}
-                        label='All Assignees'
-                      />
-                      <FormHelperText>Notify all assignees</FormHelperText>
-                    </FormControl>
-
-                    <FormControl>
-                      <Checkbox
-                        overlay
-                        onClick={() => {
-                          if (notificationMetadata?.circleGroup) {
-                            delete notificationMetadata.circleGroupID
-                          }
-
-                          setNotificationMetadata({
-                            ...notificationMetadata,
-                            circleGroup: !notificationMetadata?.circleGroup,
-                          })
-                        }}
-                        checked={
-                          notificationMetadata
-                            ? notificationMetadata?.circleGroup
-                            : false
-                        }
-                        label='Specific Group'
-                      />
-                      <FormHelperText>Notify a specific group</FormHelperText>
-                    </FormControl>
-
-                    {notificationMetadata?.circleGroup && (
-                      <Box
-                        sx={{
-                          mt: 0,
-                          ml: 4,
-                        }}
-                      >
-                        <Typography level='body-sm'>
-                          Telegram Group ID:
-                        </Typography>
-                        <Input
-                          type='number'
-                          value={notificationMetadata?.circleGroupID}
-                          placeholder='Telegram Group ID'
-                          onChange={e => {
-                            setNotificationMetadata({
-                              ...notificationMetadata,
-                              circleGroupID: parseInt(e.target.value),
-                            })
+              {isNotificable &&
+                !NOTIFICATION_FORBIDDEN_TYPE.includes(frequencyType) && (
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 2,
+                    }}
+                  >
+                    <Card variant='outlined'>
+                      <Typography level='h4' mb={2}>
+                        {t('choreEdit.notificationSchedule')}
+                      </Typography>
+                      <Box sx={{ p: 0.5 }}>
+                        <NotificationTemplate
+                          onChange={metadata => {
+                            const newTemplates = metadata.notifications
+                            if (
+                              notificationMetadata?.templates !== newTemplates
+                            ) {
+                              setNotificationMetadata({
+                                ...notificationMetadata,
+                                templates: newTemplates,
+                              })
+                            }
                           }}
+                          value={notificationMetadata}
                         />
                       </Box>
-                    )}
-                  </Card>
-                </Box>
-              )}
+
+                      <Typography level='h4' mt={3} mb={2}>
+                        {t('choreEdit.whoToNotify')}
+                      </Typography>
+                      <FormControl>
+                        <Checkbox
+                          overlay
+                          disabled={true}
+                          checked={true}
+                          label={t('choreEdit.allAssignees')}
+                        />
+                        <FormHelperText>
+                          {t('choreEdit.allAssigneesHelp')}
+                        </FormHelperText>
+                      </FormControl>
+
+                      <FormControl>
+                        <Checkbox
+                          overlay
+                          onClick={() => {
+                            if (notificationMetadata?.circleGroup) {
+                              delete notificationMetadata.circleGroupID
+                            }
+
+                            setNotificationMetadata({
+                              ...notificationMetadata,
+                              circleGroup: !notificationMetadata?.circleGroup,
+                            })
+                          }}
+                          checked={
+                            notificationMetadata
+                              ? notificationMetadata?.circleGroup
+                              : false
+                          }
+                          label={t('choreEdit.specificGroup')}
+                        />
+                        <FormHelperText>
+                          {t('choreEdit.specificGroupHelp')}
+                        </FormHelperText>
+                      </FormControl>
+
+                      {notificationMetadata?.circleGroup && (
+                        <Box
+                          sx={{
+                            mt: 0,
+                            ml: 4,
+                          }}
+                        >
+                          <Typography level='body-sm'>
+                            {t('choreEdit.telegramGroupIdLabel')}
+                          </Typography>
+                          <Input
+                            type='number'
+                            value={notificationMetadata?.circleGroupID}
+                            placeholder={t(
+                              'choreEdit.telegramGroupIdPlaceholder',
+                            )}
+                            onChange={e => {
+                              setNotificationMetadata({
+                                ...notificationMetadata,
+                                circleGroupID: parseInt(e.target.value),
+                              })
+                            }}
+                          />
+                        </Box>
+                      )}
+                    </Card>
+                  </Box>
+                )}
               {dueDate && (
                 <Box mb={2}>
-                  <Typography level='h4'>Task Window</Typography>
+                  <Typography level='h4'>
+                    {t('choreEdit.taskWindow')}
+                  </Typography>
                   <Typography level='body-md'>
-                    Define when this task can be completed and when it expires
+                    {t('choreEdit.taskWindowDesc')}
                   </Typography>
 
                   {/* Available From (Completion Window) */}
@@ -2536,11 +2587,10 @@ const ChoreEdit = () => {
                         }
                       }}
                       overlay
-                      label='Set earliest completion time'
+                      label={t('choreEdit.earliestCompletion')}
                     />
                     <FormHelperText>
-                      Task becomes available to complete X hours before the due
-                      date
+                      {t('choreEdit.earliestCompletionHelp')}
                     </FormHelperText>
                   </FormControl>
 
@@ -2552,7 +2602,9 @@ const ChoreEdit = () => {
                           ml: 4,
                         }}
                       >
-                        <Typography level='body-sm'>Hours:</Typography>
+                        <Typography level='body-sm'>
+                          {t('choreEdit.hoursLabel')}
+                        </Typography>
                         <Input
                           type='number'
                           value={completionWindow}
@@ -2563,7 +2615,7 @@ const ChoreEdit = () => {
                               max: 24 * 7,
                             },
                           }}
-                          placeholder='Hours'
+                          placeholder={t('choreEdit.hoursPlaceholder')}
                           onChange={e => {
                             setCompletionWindow(parseInt(e.target.value))
                           }}
@@ -2610,14 +2662,18 @@ const ChoreEdit = () => {
                         size='sm'
                         minValue={0}
                       />
-                      <Typography level='body-sm'>after due date</Typography>
+                      <Typography level='body-sm'>
+                        {t('choreEdit.afterDueDate')}
+                      </Typography>
                     </Box>
                   )}
                 </Box>
               )}
 
               <Box mb={2}>
-                <Typography level='h4'>Approval Requirement</Typography>
+                <Typography level='h4'>
+                  {t('choreEdit.approvalRequirement')}
+                </Typography>
                 <FormControl sx={{ mt: 1 }}>
                   <Checkbox
                     onChange={e => {
@@ -2625,17 +2681,18 @@ const ChoreEdit = () => {
                     }}
                     checked={requireApproval}
                     overlay
-                    label='Require admin approval'
+                    label={t('choreEdit.requireApproval')}
                   />
                   <FormHelperText>
-                    This task will need approval from an admin before being
-                    marked as complete
+                    {t('choreEdit.requireApprovalHelp')}
                   </FormHelperText>
                 </FormControl>
               </Box>
 
               <Box>
-                <Typography level='h4'>Privacy Settings</Typography>
+                <Typography level='h4'>
+                  {t('choreEdit.privacySettings')}
+                </Typography>
                 <RadioGroup
                   name='isPrivate'
                   value={isPrivate}
@@ -2650,20 +2707,29 @@ const ChoreEdit = () => {
                   }}
                 >
                   <FormControl>
-                    <Radio overlay value={false} label='Public' />
+                    <Radio
+                      overlay
+                      value={false}
+                      disabled={selectedProjectIsPrivate}
+                      label={t('choreEdit.public')}
+                    />
                     <FormHelperText>
-                      Visible to everyone in your circle.
+                      {t('taskEditor.visibleToEveryoneInYourCircle')}
                     </FormHelperText>
                   </FormControl>
                   <FormControl>
                     <Radio
                       overlay
-                      disabled={assignees.length === 0}
+                      disabled={
+                        selectedProjectIsPrivate ||
+                        anyone ||
+                        assignableTo.length === 0
+                      }
                       value={true}
-                      label='Limited'
+                      label={t('choreEdit.limited')}
                     />
                     <FormHelperText>
-                      Visible to you and the people eligible for assignment.
+                      {t('taskEditor.visibleToYouAndThePeopleEligible')}
                       {assignees.length === 0
                         ? ' (No assignees selected, Limited option is disabled)'
                         : ''}
@@ -2671,7 +2737,12 @@ const ChoreEdit = () => {
                   </FormControl>
                 </RadioGroup>
 
-                {showSavePrivacyDefault && (
+                {selectedProjectIsPrivate && (
+                  <Typography level='body-sm' color='neutral'>
+                    {t('taskEditor.inheritedFromTheProjectTasksInA')}
+                  </Typography>
+                )}
+                {showSavePrivacyDefault && !selectedProjectIsPrivate && (
                   <Box sx={{ mt: 0, display: 'flex', justifyContent: 'start' }}>
                     <Button
                       variant='outlined'
@@ -2693,7 +2764,7 @@ const ChoreEdit = () => {
                         setShowSavePrivacyDefault(false)
                       }}
                     >
-                      Use as default
+                      {t('taskEditor.useAsDefault')}
                     </Button>
                   </Box>
                 )}
@@ -2703,10 +2774,10 @@ const ChoreEdit = () => {
 
           {choreId > 0 && (
             <EditorSection
-              title='Task log'
+              title={t('taskEditor.taskLog')}
               icon={InfoOutlined}
               section='metadata'
-              summary='Who created and last edited this task'
+              summary={t('taskEditor.whoCreatedAndLastEditedThisTask')}
               collapsible={!singlePageEditor}
             >
               <Sheet
@@ -2717,7 +2788,7 @@ const ChoreEdit = () => {
                 }}
               >
                 <Typography level='body1'>
-                  Created by{' '}
+                  {t('choreEdit.createdBy')}{' '}
                   <Chip variant='solid'>
                     {
                       membersData.res.find(f => f.userId === createdBy)
@@ -2731,7 +2802,7 @@ const ChoreEdit = () => {
                     <Divider sx={{ my: 1 }} />
 
                     <Typography level='body1'>
-                      Updated by{' '}
+                      {t('choreEdit.updatedBy')}{' '}
                       <Chip variant='solid'>
                         {
                           membersData.res.find(f => f.userId === updatedBy)
@@ -2755,8 +2826,9 @@ const ChoreEdit = () => {
             border: 0,
             borderTop: '1px solid',
             borderColor: 'divider',
-            p: 2, // padding
-            paddingBottom: getSafeBottomPadding(2), // safe area padding for iOS
+            pt: 2,
+            px: 2,
+            pb: getSafeBottomPadding(2),
             display: 'flex',
             justifyContent: 'center',
             'z-index': 1000,
@@ -2821,7 +2893,7 @@ const ChoreEdit = () => {
                       {isActive ? 'Archive' : 'Unarchive'}
                     </Button>
                     <MenuButton
-                      aria-label='More task actions'
+                      aria-label={t('taskEditor.moreTaskActions')}
                       slots={{ root: IconButton }}
                       slotProps={{
                         root: {
@@ -2835,7 +2907,7 @@ const ChoreEdit = () => {
                   </ButtonGroup>
                   <Menu disablePortal placement='top-end'>
                     <MenuItem color='danger' onClick={handleDelete}>
-                      Delete
+                      {t('taskEditor.delete')}
                     </MenuItem>
                   </Menu>
                 </Dropdown>
@@ -2849,7 +2921,7 @@ const ChoreEdit = () => {
                 startDecorator={<ArrowBack />}
                 onClick={() => changeWizardStep(wizardStep - 1)}
               >
-                Back
+                {t('taskEditor.back')}
               </Button>
             )}
             <Box
@@ -2873,7 +2945,7 @@ const ChoreEdit = () => {
                 Navigate(choreId ? `/chores/${choreId}` : '/chores')
               }}
             >
-              Cancel
+              {t('taskEditor.cancel')}
               {showKeyboardShortcuts && (
                 <KeyboardShortcutHint shortcut='Esc' sx={{ ml: 1 }} />
               )}
@@ -2883,7 +2955,7 @@ const ChoreEdit = () => {
                 endDecorator={<ArrowForward />}
                 onClick={() => changeWizardStep(wizardStep + 1)}
               >
-                Next
+                {t('taskEditor.next')}
               </Button>
             ) : (
               <Box data-footer-save>
@@ -2923,7 +2995,7 @@ const ChoreEdit = () => {
                       )}
                     </Button>
                     <MenuButton
-                      aria-label='More save options'
+                      aria-label={t('taskEditor.moreSaveOptions')}
                       slots={{ root: IconButton }}
                       slotProps={{
                         root: {

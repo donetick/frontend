@@ -105,7 +105,7 @@ const ThingTriggerSection = ({
           }}
         >
           <Typography level='body-sm'>
-            Create a Thing to use it as a task trigger.
+            {t('taskEditor.createAThingToUseItAs')}
           </Typography>
           <Button
             startDecorator={<Widgets />}
@@ -113,7 +113,7 @@ const ThingTriggerSection = ({
             variant='soft'
             onClick={() => navigate('/things')}
           >
-            Go to Things
+            {t('thing.goToThings')}
           </Button>
         </Box>
       ) : (
@@ -130,37 +130,43 @@ const ThingTriggerSection = ({
             }}
           >
             <FormControl error={isAttepmtingToSave && !selectedThing}>
-              <Typography level='h4'>Thing</Typography>
+              <Typography level='h4'>{t('taskEditor.thing')}</Typography>
               <Autocomplete
-                aria-label='Trigger Thing'
+                aria-label={t('taskEditor.triggerThing')}
                 options={things}
                 value={selectedThing}
                 inputValue={thingSearch}
-                onInputChange={(_, value, reason) => setThingSearch(reason === 'input' ? value : selectedThing?.name || '')}
+                onInputChange={(_, value, reason) =>
+                  setThingSearch(
+                    reason === 'input' ? value : selectedThing?.name || '',
+                  )
+                }
                 onChange={(_, value) => setSelectedThing(value)}
                 getOptionLabel={option => option.name}
                 isOptionEqualToValue={(option, value) => option.id === value.id}
-                placeholder='Select a Thing'
+                placeholder={t('taskEditor.selectAThing')}
               />
             </FormControl>
             {selectedThing?.type === 'boolean' && (
               <FormControl>
-                <Typography level='h4'>Becomes</Typography>
+                <Typography level='h4'>{t('taskEditor.becomes')}</Typography>
                 <Select
-                  aria-label='Trigger state'
+                  aria-label={t('taskEditor.triggerState')}
                   value={triggerState}
                   onChange={(_, value) => setTriggerState(value)}
                 >
-                  <Option value='true'>True</Option>
-                  <Option value='false'>False</Option>
+                  <Option value='true'>{t('thing.boolTrue')}</Option>
+                  <Option value='false'>{t('thing.boolFalse')}</Option>
                 </Select>
               </FormControl>
             )}
             {selectedThing?.type === 'text' && (
               <FormControl>
-                <Typography level='h4'>Matches text</Typography>
+                <Typography level='h4'>
+                  {t('taskEditor.matchesText')}
+                </Typography>
                 <Input
-                  aria-label='Trigger text'
+                  aria-label={t('taskEditor.triggerText')}
                   value={triggerState || ''}
                   onChange={e => setTriggerState(e.target.value)}
                 />
@@ -168,10 +174,10 @@ const ThingTriggerSection = ({
             )}
             {selectedThing?.type === 'number' && (
               <FormControl>
-                <Typography level='h4'>Condition</Typography>
+                <Typography level='h4'>{t('taskEditor.condition')}</Typography>
                 <Box sx={{ display: 'flex', gap: 1, minWidth: 0 }}>
                   <Select
-                    aria-label='Trigger condition'
+                    aria-label={t('taskEditor.triggerCondition')}
                     value={condition}
                     onChange={(_, value) => setCondition(value)}
                     sx={{ flex: 1 }}
@@ -190,7 +196,7 @@ const ThingTriggerSection = ({
                     ))}
                   </Select>
                   <Input
-                    aria-label='Trigger value'
+                    aria-label={t('taskEditor.triggerValue')}
                     type='number'
                     value={triggerState || ''}
                     onChange={e => setTriggerState(e.target.value)}
@@ -205,7 +211,7 @@ const ThingTriggerSection = ({
             textColor='text.tertiary'
             sx={{ mt: 1.5 }}
           >
-            The task becomes due when this condition is met.
+            {t('taskEditor.theTaskBecomesDueWhenThisCondition')}
           </Typography>
         </>
       )}
