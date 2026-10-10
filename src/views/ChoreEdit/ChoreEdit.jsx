@@ -87,6 +87,7 @@ import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import LabelModal from '../Modals/Inputs/LabelModal'
 import { useProjects } from '../Projects/ProjectQueries'
 import RepeatSection from './RepeatSection'
+import CompletionActionsSection from './CompletionActionsSection'
 
 const ASSIGN_STRATEGIES = [
   'random',
@@ -135,6 +136,8 @@ const ChoreEdit = () => {
   const [labels, setLabels] = useState([])
   const [labelsV2, setLabelsV2] = useState([])
   const [priority, setPriority] = useState(0)
+  const [completionActions, setCompletionActions] = useState([])
+  const [completionActionsValid, setCompletionActionsValid] = useState(true)
   const [points, setPoints] = useState(-1)
   const [requireApproval, setRequireApproval] = useState(false)
   const [isPrivate, setIsPrivate] = useState(false)
@@ -270,6 +273,10 @@ const ChoreEdit = () => {
         errors.thingTrigger = t('choreEdit.errThingTrigger')
       }
     }
+
+    if (!completionActionsValid)
+      errors.completionActions =
+        'Check the completion actions: select a Thing and enter a valid value'
 
     // if there is any error then return false:
     setErrors(errors)
@@ -415,6 +422,7 @@ const ChoreEdit = () => {
         templates: planReminders,
       },
       thingTrigger: thingTrigger,
+      completionActions,
       points: points < 0 ? null : points,
       requireApproval: requireApproval,
       isPrivate: isPrivate,
@@ -601,7 +609,10 @@ const ChoreEdit = () => {
       setFrequency(data.res.frequency)
 
       setNotificationMetadata(data.res.notificationMetadata)
-      setPoints(data.res.points && data.res.points > -1 ? data.res.points : -1)
+      setCompletionActions(data.res.completionActions || [])
+      setPoints(
+        data.res.points != null && data.res.points >= 0 ? data.res.points : -1,
+      )
       setRequireApproval(data.res.requireApproval || false)
       setIsPrivate(data.res.isPrivate || false)
       setCompletionWindow(
@@ -1886,46 +1897,13 @@ const ChoreEdit = () => {
           {t('choreEdit.taskSettings')}
         </Typography>
 
-        <Box mb={3}>
-          <Typography level='h4'>{t('choreEdit.pointsSystem')}</Typography>
-          <FormControl sx={{ mt: 1 }}>
-            <Checkbox
-              onChange={e => {
-                if (e.target.checked) {
-                  setPoints(1)
-                } else {
-                  setPoints(-1)
-                }
-              }}
-              checked={points > -1}
-              overlay
-              label={t('choreEdit.assignPoints')}
-            />
-            <FormHelperText>{t('choreEdit.assignPointsHelp')}</FormHelperText>
-          </FormControl>
-          {points != -1 && (
-            <Card variant='outlined' sx={{ mt: 2 }}>
-              <Box
-                sx={{
-                  mt: 0,
-                  ml: 4,
-                }}
-              >
-                <Typography level='body-sm'>
-                  {t('choreEdit.pointsLabel')}
-                </Typography>
-                <NumberInput
-                  value={points}
-                  min={0}
-                  max={1000}
-                  sx={{ maxWidth: 100 }}
-                  placeholder={t('choreEdit.pointsPlaceholder')}
-                  onValueChange={setPoints}
-                />
-              </Box>
-            </Card>
-          )}
-        </Box>
+        <CompletionActionsSection
+          actions={completionActions}
+          onChange={setCompletionActions}
+          points={points}
+          onPointsChange={setPoints}
+          onValidate={setCompletionActionsValid}
+        />
 
         <Box mb={3}>
           <Typography level='h4'>
