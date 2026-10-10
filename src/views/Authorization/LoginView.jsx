@@ -365,14 +365,17 @@ const LoginView = () => {
   const handleForgotPassword = () => {
     Navigate('/forgot-password')
   }
+  // Unpadded base64url (RFC 4648 §5), as required by RFC 7636 for PKCE
+  const toBase64Url = bytes =>
+    btoa(String.fromCharCode(...bytes))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '')
+
   const generateRandomString = entropyLen => {
     const data = new Uint8Array(entropyLen)
     crypto.getRandomValues(data)
-    const randomState = data.toBase64({
-      alphabet: 'base64url',
-    })
-
-    return randomState
+    return toBase64Url(data)
   }
 
   const handleAuthentikLogin = async () => {
@@ -403,9 +406,7 @@ const LoginView = () => {
           new TextEncoder().encode(verifier),
         ),
       )
-      const challenge = challengeDigest.toBase64({
-        alphabet: 'base64url',
-      })
+      const challenge = toBase64Url(challengeDigest)
 
       params.set('code_challenge', challenge)
       params.set('code_challenge_method', 'S256')
