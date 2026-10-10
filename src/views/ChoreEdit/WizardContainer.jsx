@@ -42,7 +42,14 @@ export default function WizardContainer({ children, onClose, sx, ...props }) {
           return
         onClose?.(event, reason)
       }}
-      sx={{ '--Modal-backdropBackground': 'rgba(0, 0, 0, 0.6)' }}
+      sx={{
+        '--Modal-backdropBackground': 'rgba(0, 0, 0, 0.6)',
+        // Joy's built-in modal rule only raises portaled listboxes. Menus use
+        // role="menu", so without this they render behind the mobile editor.
+        '& ~ [role="menu"]': {
+          '--unstable_popup-zIndex': 'calc(var(--joy-zIndex-modal) + 1)',
+        },
+      }}
     >
       {content}
     </Modal>

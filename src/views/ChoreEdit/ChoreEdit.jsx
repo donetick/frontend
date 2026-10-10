@@ -1140,13 +1140,14 @@ const ChoreEdit = () => {
       <Sheet
         variant='outlined'
         sx={{
-          borderRadius: { xs: '20px 20px 0 0', sm: 'lg' },
+          borderRadius: { xs: '20px 20px 0 0', sm: 0 },
+          border: { sm: 0 },
           display: 'flex',
           flexDirection: 'column',
           maxHeight: { xs: 'calc(100dvh - 48px)', sm: 'none' },
           overflow: 'hidden',
           bgcolor: 'background.surface',
-          boxShadow: 'sm',
+          boxShadow: { xs: 'sm', sm: 'none' },
         }}
       >
         <Box
@@ -1356,7 +1357,9 @@ const ChoreEdit = () => {
             <EditorSection
               title={t('taskEditor.task')}
               section='task'
-              hideHeading
+              hideHeading={!singlePageEditor}
+              collapsible={singlePageEditor}
+              defaultOpen
               error={
                 errors.name ||
                 errors.assignees ||
@@ -1869,7 +1872,7 @@ const ChoreEdit = () => {
               title={t('taskEditor.descriptionAttachments')}
               icon={DescriptionOutlined}
               section='description'
-              collapsible={!singlePageEditor}
+              collapsible
               defaultOpen
               error={errors.description}
               summary={
@@ -2126,7 +2129,7 @@ const ChoreEdit = () => {
               title={t('taskEditor.organization')}
               icon={LabelOutlined}
               section='organization'
-              collapsible={!singlePageEditor}
+              collapsible
               summary={[
                 priority
                   ? Priorities.find(
@@ -2343,7 +2346,7 @@ const ChoreEdit = () => {
                 title={t('taskEditor.subtasks')}
                 icon={Checklist}
                 section='subtasks'
-                collapsible={!singlePageEditor}
+                collapsible
                 defaultOpen={Boolean(subTasks?.length)}
                 summary={
                   subTasks?.length
@@ -2388,7 +2391,7 @@ const ChoreEdit = () => {
               title={t('taskEditor.onCompletion')}
               icon={BoltOutlined}
               section='actions'
-              collapsible={!singlePageEditor}
+              collapsible
               defaultOpen={points >= 0 || completionActions.length > 0}
               error={errors.completionActions}
               summary={
@@ -2415,7 +2418,7 @@ const ChoreEdit = () => {
               title={t('taskEditor.notificationsAndPrivacy')}
               icon={SettingsOutlined}
               section='additional'
-              collapsible={!singlePageEditor}
+              collapsible
               summary={[
                 isNotificable ? 'Reminders enabled' : 'Reminders off',
                 requireApproval ? 'Approval required' : '',
@@ -2778,7 +2781,7 @@ const ChoreEdit = () => {
               icon={InfoOutlined}
               section='metadata'
               summary={t('taskEditor.whoCreatedAndLastEditedThisTask')}
-              collapsible={!singlePageEditor}
+              collapsible
             >
               <Sheet
                 sx={{
@@ -2832,7 +2835,7 @@ const ChoreEdit = () => {
             display: 'flex',
             justifyContent: 'center',
             'z-index': 1000,
-            bgcolor: 'background.body',
+            bgcolor: 'background.surface',
             boxShadow: 'none',
           }}
         >
