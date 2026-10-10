@@ -3,7 +3,6 @@ import {
   ArrowBack,
   ArrowDropDown,
   ArrowForward,
-  AssignmentOutlined,
   AttachFile,
   BoltOutlined,
   CalendarMonthOutlined,
@@ -18,8 +17,6 @@ import {
   HorizontalRule,
   InfoOutlined,
   LabelOutlined,
-  Lock,
-  LockOutlined,
   Save,
   SettingsOutlined,
   UploadFile,
@@ -66,10 +63,9 @@ import {
 import DurationInput from '../../components/common/DurationInput'
 import EmptyState from '../../components/common/EmptyState'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
-import NumberInput from '../../components/common/NumberInput'
 import NotificationTemplate from '../../components/NotificationTemplate.jsx'
 import { usePageShortcutScope } from '../../contexts/KeyboardShortcutScopeContext'
-import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
+import { usePaywall } from '../../contexts/PaywallContext'
 import { useDocumentScanner } from '../../hooks/useDocumentScanner'
 import {
   useArchiveChore,
@@ -503,6 +499,11 @@ const ChoreEdit = () => {
 
   const handleDueDateChange = e => {
     const dateValue = e.target.value // YYYY-MM-DD format
+    if (!dateValue) {
+      setDueDateOnly(null)
+      setDueDate(null)
+      return
+    }
     setDueDateOnly(dateValue)
 
     // Combine date with time or end of day
@@ -585,7 +586,10 @@ const ChoreEdit = () => {
       }
     }
   }
-  const HandleSaveChore = () => {
+  // `shouldCreateAnother` is passed explicitly by the split-button menu so a
+  // menu pick performs the save right away instead of only changing the
+  // default (state updates wouldn't be visible to this call anyway).
+  const HandleSaveChore = (shouldCreateAnother = createAnother) => {
     if (updateChoreMutation.isPending || createChoreMutation.isPending) return
     setAttemptToSave(true)
     if (!HandleValidateChore()) {
@@ -669,8 +673,8 @@ const ChoreEdit = () => {
         }
         dirtyGuard.current = false
         setSavedSnapshot(latestSnapshot.current)
-        Navigate(createAnother ? '/chores/create' : '/chores', {
-          state: createAnother ? { createAnother: true } : null,
+        Navigate(shouldCreateAnother ? '/chores/create' : '/chores', {
+          state: shouldCreateAnother ? { createAnother: true } : null,
         })
       })
       .catch(error => {
@@ -1076,15 +1080,15 @@ const ChoreEdit = () => {
   }
   return (
     <WizardContainer
-      maxWidth='lg'
+      maxWidth={false}
       onClose={() => Navigate(choreId ? `/chores/${choreId}` : '/chores')}
       onClickCapture={captureInitialValues}
       onChangeCapture={captureInitialValues}
       onKeyDownCapture={captureInitialValues}
       sx={{
-        pb: { xs: 0, sm: 3 },
-        pt: { xs: 1, sm: 3 },
-        maxWidth: singlePageEditor ? '1120px !important' : '960px !important',
+        p: 0,
+        maxWidth: 'none !important',
+        minHeight: { sm: '100dvh' },
         '& .task-editor-grid h4, & .task-editor-grid h5': {
           fontSize: 14,
           fontWeight: 500,
@@ -1138,13 +1142,14 @@ const ChoreEdit = () => {
       }}
     >
       <Sheet
-        variant='outlined'
+        // variant='outlined'
         sx={{
           borderRadius: { xs: '20px 20px 0 0', sm: 0 },
           border: { sm: 0 },
           display: 'flex',
           flexDirection: 'column',
           maxHeight: { xs: 'calc(100dvh - 48px)', sm: 'none' },
+          minHeight: { sm: '100dvh' },
           overflow: 'hidden',
           bgcolor: 'background.surface',
           boxShadow: { xs: 'sm', sm: 'none' },
@@ -1439,104 +1444,88 @@ const ChoreEdit = () => {
                       </Typography>
                     )}
 
-                    {NO_DUE_DATE_REQUIRED_TYPE.includes(frequencyType) && (
-                      <FormControl sx={{ mt: 1 }}>
-                        <Checkbox
-                          onChange={e => {
-                            if (e.target.checked) {
-                              const today = moment(new Date()).format(
-                                'YYYY-MM-DD',
-                              )
-                              setDueDateOnly(today)
-                              setDueDate(
-                                moment(today)
-                                  .endOf('day')
-                                  .format('YYYY-MM-DDTHH:mm:59'),
-                              )
-                              setUseCustomTime(false)
-                              setDueTime(null)
-                            } else {
+                    <Box
+                      sx={{
+                        display: 'grid',
+                        gridTemplateColumns: {
+                          xs: 'minmax(0, 1fr)',
+                          sm: 'repeat(2, minmax(0, 1fr))',
+                        },
+                        gap: 2,
+                        mt: 2,
+                        alignItems: 'start',
+                      }}
+                    >
+                      <FormControl error={Boolean(errors.dueDate)}>
+                        <Typography level='h4'>
+                          {REPEAT_ON_TYPE.includes(frequencyType)
+                            ? 'Start date'
+                            : 'Date'}
+                        </Typography>
+                        <Input
+                          type='date'
+                          aria-label={t('taskEditor.dueDate')}
+                          value={dueDateOnly || ''}
+                          onChange={handleDueDateChange}
+                        />
+                        {dueDate && (
+                          <Button
+                            size='sm'
+                            variant='plain'
+                            color='neutral'
+                            sx={{ alignSelf: 'flex-start', mt: 0.5 }}
+                            onClick={() => {
                               setDueDate(null)
                               setDueDateOnly(null)
-                              setUseCustomTime(false)
                               setDueTime(null)
-                            }
-                          }}
-                          defaultChecked={dueDate !== null}
-                          checked={dueDate !== null}
-                          overlay
-                          label={t('choreEdit.giveDueDate')}
-                        />
+                              setUseCustomTime(false)
+                            }}
+                          >
+                            {t('actionMenu.removeDueDate')}
+                          </Button>
+                        )}
+                        {errors.dueDate && (
+                          <FormHelperText>{errors.dueDate}</FormHelperText>
+                        )}
                       </FormControl>
-                    )}
-                    {dueDate && (
-                      <Box
-                        sx={{
-                          display: 'grid',
-                          gridTemplateColumns: {
-                            xs: 'minmax(0, 1fr)',
-                            sm: 'repeat(2, minmax(0, 1fr))',
-                          },
-                          gap: 2,
-                          mt: 2,
-                          alignItems: 'start',
-                        }}
-                      >
-                        <FormControl error={Boolean(errors.dueDate)}>
-                          <Typography level='h4'>
-                            {REPEAT_ON_TYPE.includes(frequencyType)
-                              ? 'Start date'
-                              : 'Date'}
-                          </Typography>
+                      <FormControl>
+                        <Typography level='h4'>
+                          {t('taskEditor.time')}
+                        </Typography>
+                        {useCustomTime ? (
                           <Input
-                            type='date'
-                            aria-label={t('taskEditor.dueDate')}
-                            value={dueDateOnly || ''}
-                            onChange={handleDueDateChange}
+                            type='time'
+                            aria-label={t('taskEditor.dueTime')}
+                            value={dueTime || '18:00'}
+                            onChange={handleDueTimeChange}
                           />
-                          {errors.dueDate && (
-                            <FormHelperText>{errors.dueDate}</FormHelperText>
-                          )}
-                        </FormControl>
-                        <FormControl>
-                          <Typography level='h4'>
-                            {t('taskEditor.time')}
-                          </Typography>
-                          {useCustomTime ? (
-                            <Input
-                              type='time'
-                              aria-label={t('taskEditor.dueTime')}
-                              value={dueTime || '18:00'}
-                              onChange={handleDueTimeChange}
-                            />
-                          ) : (
-                            <Button
-                              variant='outlined'
-                              color='neutral'
-                              onClick={() => handleUseCustomTimeChange(true)}
-                              sx={{
-                                minHeight: 44,
-                                justifyContent: 'flex-start',
-                                fontWeight: 400,
-                              }}
-                            >
-                              {t('taskEditor.addATime')}
-                            </Button>
-                          )}
-                          {useCustomTime && (
-                            <Button
-                              size='sm'
-                              variant='plain'
-                              color='neutral'
-                              sx={{ alignSelf: 'flex-start', mt: 0.5 }}
-                              onClick={() => handleUseCustomTimeChange(false)}
-                            >
-                              {t('taskEditor.removeTime')}
-                            </Button>
-                          )}
-                        </FormControl>
-                      </Box>
-                    )}
+                        ) : (
+                          <Button
+                            variant='outlined'
+                            color='neutral'
+                            onClick={() => handleUseCustomTimeChange(true)}
+                            sx={{
+                              minHeight: 44,
+                              justifyContent: 'flex-start',
+                              fontWeight: 400,
+                            }}
+                          >
+                            {t('taskEditor.addATime')}
+                          </Button>
+                        )}
+                        {useCustomTime && (
+                          <Button
+                            size='sm'
+                            variant='plain'
+                            color='neutral'
+                            sx={{ alignSelf: 'flex-start', mt: 0.5 }}
+                            onClick={() => handleUseCustomTimeChange(false)}
+                          >
+                            {t('taskEditor.removeTime')}
+                          </Button>
+                        )}
+                      </FormControl>
+                    </Box>
                   </Box>
                 )}
 
@@ -2799,41 +2788,33 @@ const ChoreEdit = () => {
             sx={{
               width: '100%',
               maxWidth: singlePageEditor ? 'none' : 880,
-              display: {
-                xs:
-                  (choreId > 0 || createAnother) &&
-                  (singlePageEditor || wizardStep === 3)
-                    ? 'grid'
-                    : 'flex',
-                sm: 'flex',
-              },
-              gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
-              gridTemplateAreas: singlePageEditor
-                ? choreId > 0
-                  ? '"management cancel" "save save"'
-                  : '"cancel cancel" "save save"'
-                : choreId > 0
-                  ? '"management cancel" "back save"'
-                  : '"back cancel" "save save"',
+              // Everything stays on a single row, including mobile: the
+              // management, back, cancel and save controls shrink rather than
+              // wrap, and the save label already has a short xs variant.
+              display: 'flex',
+              flexWrap: 'nowrap',
               alignItems: 'center',
-              gap: { xs: 1, sm: 1.5 },
-              '& [data-footer-management]': {
-                gridArea: 'management',
-                justifySelf: 'start',
-                flexShrink: 0,
+              gap: { xs: 0.5, sm: 1.5 },
+              // The secondary controls absorb the squeeze on narrow screens;
+              // save keeps its full padding so the primary action stays the
+              // visually dominant target.
+              '& [data-footer-management], & [data-footer-back], & [data-footer-cancel]':
+                {
+                  minWidth: 0,
+                  flexShrink: 1,
+                },
+              '& [data-footer-back], & [data-footer-cancel]': {
+                px: { xs: 1, sm: 1.5 },
               },
-              '& [data-footer-back]': {
-                gridArea: 'back',
-                justifySelf: 'start',
-              },
-              '& [data-footer-cancel]': {
-                gridArea: 'cancel',
-                justifySelf: 'end',
+              '& [data-footer-management] button': {
+                px: { xs: 1, sm: 1.5 },
+                whiteSpace: 'nowrap',
               },
               '& [data-footer-save]': {
-                gridArea: 'save',
-                justifySelf: 'end',
                 flexShrink: 0,
+              },
+              '& [data-footer-save] button': {
+                whiteSpace: 'nowrap',
               },
             }}
           >
@@ -2883,19 +2864,7 @@ const ChoreEdit = () => {
                 {t('taskEditor.back')}
               </Button>
             )}
-            <Box
-              sx={{
-                flex: 1,
-                display: {
-                  xs:
-                    (choreId > 0 || createAnother) &&
-                    (singlePageEditor || wizardStep === 3)
-                      ? 'none'
-                      : 'block',
-                  sm: 'block',
-                },
-              }}
-            />
+            <Box sx={{ flex: 1, minWidth: 0 }} />
             <Button
               data-footer-cancel
               color='neutral'
@@ -2926,6 +2895,7 @@ const ChoreEdit = () => {
                         createChoreMutation.isPending
                       }
                       onClick={() => HandleSaveChore()}
+                      sx={{ minWidth: 96 }}
                     >
                       {createAnother ? (
                         <>
@@ -2976,7 +2946,10 @@ const ChoreEdit = () => {
                         updateChoreMutation.isPending ||
                         createChoreMutation.isPending
                       }
-                      onClick={() => setCreateAnother(false)}
+                      onClick={() => {
+                        setCreateAnother(false)
+                        HandleSaveChore(false)
+                      }}
                     >
                       <Box sx={{ width: 20 }}>
                         {!createAnother && <Check fontSize='small' />}
@@ -2989,7 +2962,10 @@ const ChoreEdit = () => {
                         updateChoreMutation.isPending ||
                         createChoreMutation.isPending
                       }
-                      onClick={() => setCreateAnother(true)}
+                      onClick={() => {
+                        setCreateAnother(true)
+                        HandleSaveChore(true)
+                      }}
                     >
                       <Box sx={{ width: 20 }}>
                         {createAnother && <Check fontSize='small' />}
