@@ -274,7 +274,9 @@ const ChoreEdit = () => {
       }
     }
 
-    if (!completionActionsValid) errors.completionActions = 'Check the completion actions: select a Thing and enter a valid value'
+    if (!completionActionsValid)
+      errors.completionActions =
+        'Check the completion actions: select a Thing and enter a valid value'
 
     // if there is any error then return false:
     setErrors(errors)
@@ -608,7 +610,9 @@ const ChoreEdit = () => {
 
       setNotificationMetadata(data.res.notificationMetadata)
       setCompletionActions(data.res.completionActions || [])
-      setPoints(data.res.points != null && data.res.points >= 0 ? data.res.points : -1)
+      setPoints(
+        data.res.points != null && data.res.points >= 0 ? data.res.points : -1,
+      )
       setRequireApproval(data.res.requireApproval || false)
       setIsPrivate(data.res.isPrivate || false)
       setCompletionWindow(
@@ -1893,8 +1897,13 @@ const ChoreEdit = () => {
           {t('choreEdit.taskSettings')}
         </Typography>
 
-        <CompletionActionsSection actions={completionActions} onChange={setCompletionActions}
-          points={points} onPointsChange={setPoints} onValidate={setCompletionActionsValid} />
+        <CompletionActionsSection
+          actions={completionActions}
+          onChange={setCompletionActions}
+          points={points}
+          onPointsChange={setPoints}
+          onValidate={setCompletionActionsValid}
+        />
 
         <Box mb={3}>
           <Typography level='h4'>
