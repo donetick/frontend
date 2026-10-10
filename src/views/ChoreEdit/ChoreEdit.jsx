@@ -1142,16 +1142,15 @@ const ChoreEdit = () => {
       }}
     >
       <Sheet
-        // variant='outlined'
         sx={{
           borderRadius: { xs: '20px 20px 0 0', sm: 0 },
-          border: { sm: 0 },
+          border: 0,
           display: 'flex',
           flexDirection: 'column',
           maxHeight: { xs: 'calc(100dvh - 48px)', sm: 'none' },
           minHeight: { sm: '100dvh' },
           overflow: 'hidden',
-          bgcolor: 'background.surface',
+          bgcolor: { xs: 'background.surface', sm: 'transparent' },
           boxShadow: { xs: 'sm', sm: 'none' },
         }}
       >
@@ -1197,6 +1196,7 @@ const ChoreEdit = () => {
               onClick={() =>
                 Navigate(choreId ? `/chores/${choreId}` : '/chores')
               }
+              sx={{ display: { xs: 'inline-flex', sm: 'none' } }}
             >
               <Close />
             </IconButton>
