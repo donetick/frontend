@@ -31,7 +31,17 @@ export default function WizardContainer({ children, onClose, sx, ...props }) {
   return mobile ? (
     <Modal
       open
-      onClose={onClose}
+      onClose={(event, reason) => {
+        if (
+          reason === 'escapeKeyDown' &&
+          (event.defaultPrevented ||
+            event.target?.closest?.(
+              '[role="menu"], [role="listbox"], [aria-haspopup="menu"][aria-expanded="true"], [role="combobox"][aria-expanded="true"]',
+            ))
+        )
+          return
+        onClose?.(event, reason)
+      }}
       sx={{ '--Modal-backdropBackground': 'rgba(0, 0, 0, 0.6)' }}
     >
       {content}
