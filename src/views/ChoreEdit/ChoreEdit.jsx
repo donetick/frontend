@@ -92,10 +92,11 @@ import {
 import { imageSourceToFile } from '../../utils/FileConvert'
 import { isPlusAccount, resolvePhotoURL } from '../../utils/Helpers'
 import { getImageSrc, removeCachedImage } from '../../utils/ImageCache'
+import { generateUUID } from '../../utils/UUID'
+import { useSinglePageTaskEditor } from '../../utils/TaskEditorPreferences'
 import Priorities from '../../utils/Priorities.jsx'
 import { getIconComponent } from '../../utils/ProjectIcons'
 import { getSafeBottomPadding } from '../../utils/SafeAreaUtils.js'
-import { generateUUID } from '../../utils/UUID'
 import { useProjectFilter } from '../Chores/hooks/useProjectFilter.js'
 import LoadingComponent from '../components/Loading.jsx'
 import RichTextEditor from '../components/RichTextEditor.jsx'
@@ -141,6 +142,7 @@ const ChoreEdit = () => {
   // Page-level shortcuts (save/cancel) must defer to whatever modal
   // currently owns the keyboard — see KeyboardShortcutScopeContext.
   const isPageShortcutActive = usePageShortcutScope()
+  const singlePageEditor = useSinglePageTaskEditor()
   const location = useLocation()
   const [createAnother, setCreateAnother] = useState(
     location.state?.createAnother === true,
@@ -374,7 +376,7 @@ const ChoreEdit = () => {
         thingTrigger: 1,
         completionActions: 3,
       }[key] ?? 3
-    setWizardStep(step)
+    if (!singlePageEditor) setWizardStep(step)
     requestAnimationFrame(() => {
       const section = document.querySelector(
         `[data-editor-section="${errorSections[key] || 'additional'}"]`,
@@ -1073,7 +1075,7 @@ const ChoreEdit = () => {
   }
   return (
     <WizardContainer
-      maxWidth='md'
+      maxWidth='lg'
       onClose={() => Navigate(choreId ? `/chores/${choreId}` : '/chores')}
       onClickCapture={captureInitialValues}
       onChangeCapture={captureInitialValues}
@@ -1081,7 +1083,7 @@ const ChoreEdit = () => {
       sx={{
         pb: { xs: 0, sm: 3 },
         pt: { xs: 1, sm: 3 },
-        maxWidth: '820px !important',
+        maxWidth: singlePageEditor ? '1120px !important' : '960px !important',
         '& .task-editor-grid h4, & .task-editor-grid h5': {
           fontSize: 14,
           fontWeight: 500,
@@ -1103,27 +1105,35 @@ const ChoreEdit = () => {
         },
         '& .task-editor-grid .MuiCard-root': { boxShadow: 'none' },
         '& [data-wizard-name]': {
-          display: wizardStep === 0 ? 'block' : 'none',
+          display: singlePageEditor || wizardStep === 0 ? 'block' : 'none',
         },
         '& [data-editor-section="task"]': {
-          display: wizardStep < 3 ? 'block' : 'none',
+          display: singlePageEditor || wizardStep < 3 ? 'block' : 'none',
         },
         '& [data-editor-section="schedule"]': {
-          display: wizardStep === 1 ? 'block' : 'none',
-          mt: '0 !important',
-          pt: '0 !important',
-          borderTop: '0 !important',
+          display: singlePageEditor || wizardStep === 1 ? 'block' : 'none',
+          ...(singlePageEditor
+            ? {}
+            : {
+                mt: '0 !important',
+                pt: '0 !important',
+                borderTop: '0 !important',
+              }),
         },
         '& [data-editor-section="assignment"]': {
-          display: wizardStep === 2 ? 'block' : 'none',
-          mt: '0 !important',
-          pt: '0 !important',
-          borderTop: '0 !important',
+          display: singlePageEditor || wizardStep === 2 ? 'block' : 'none',
+          ...(singlePageEditor
+            ? {}
+            : {
+                mt: '0 !important',
+                pt: '0 !important',
+                borderTop: '0 !important',
+              }),
         },
         '& [data-editor-section="description"], & [data-editor-section="organization"], & [data-editor-section="subtasks"]':
-          { display: wizardStep === 0 ? 'block' : 'none' },
+          { display: singlePageEditor || wizardStep === 0 ? 'block' : 'none' },
         '& [data-editor-section="actions"], & [data-editor-section="additional"], & [data-editor-section="metadata"]':
-          { display: wizardStep === 3 ? 'block' : 'none' },
+          { display: singlePageEditor || wizardStep === 3 ? 'block' : 'none' },
       }}
     >
       <Sheet
@@ -1185,70 +1195,74 @@ const ChoreEdit = () => {
             </IconButton>
           </Box>
         </Box>
-        <Box
-          sx={{
-            px: { xs: 2, sm: 3 },
-            py: 2,
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            flexShrink: 0,
-          }}
-        >
-          <Typography
-            level='body-sm'
+        {!singlePageEditor && (
+          <Box
             sx={{
-              display: { xs: 'block', sm: 'none' },
-              mb: name && wizardStep > 0 ? 1 : 0,
+              px: { xs: 2, sm: 3 },
+              py: 2,
+              borderBottom: '1px solid',
+              borderColor: 'divider',
+              flexShrink: 0,
             }}
           >
-            Step {wizardStep + 1} of 4 · {wizardSteps[wizardStep]}
-          </Typography>
-          <WizardStepper
-            steps={wizardSteps}
-            activeStep={wizardStep}
-            onStepChange={changeWizardStep}
-            sx={{ mb: name && wizardStep > 0 ? 2 : 0 }}
-          />
-          {name && wizardStep > 0 && (
-            <Sheet
-              variant='soft'
+            <Typography
+              level='body-sm'
               sx={{
-                px: 1.5,
-                py: 1,
-                borderRadius: 'md',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
+                display: { xs: 'block', sm: 'none' },
+                mb: name && wizardStep > 0 ? 1 : 0,
               }}
             >
-              <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Typography
-                  level='title-sm'
-                  sx={{
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {name}
-                </Typography>
-                <Typography level='body-xs'>Task</Typography>
-              </Box>
-              <IconButton
-                aria-label='Edit task details'
-                size='sm'
-                onClick={() => changeWizardStep(0)}
+              Step {wizardStep + 1} of 4 · {wizardSteps[wizardStep]}
+            </Typography>
+            <WizardStepper
+              steps={wizardSteps}
+              activeStep={wizardStep}
+              onStepChange={changeWizardStep}
+              sx={{ mb: name && wizardStep > 0 ? 2 : 0 }}
+            />
+            {name && wizardStep > 0 && (
+              <Sheet
+                variant='soft'
+                sx={{
+                  px: 1.5,
+                  py: 1,
+                  borderRadius: 'md',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                }}
               >
-                <EditOutlined sx={{ fontSize: 18 }} />
-              </IconButton>
-            </Sheet>
-          )}
-        </Box>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography
+                    level='title-sm'
+                    sx={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {name}
+                  </Typography>
+                  <Typography level='body-xs'>Task</Typography>
+                </Box>
+                <IconButton
+                  aria-label='Edit task details'
+                  size='sm'
+                  onClick={() => changeWizardStep(0)}
+                >
+                  <EditOutlined sx={{ fontSize: 18 }} />
+                </IconButton>
+              </Sheet>
+            )}
+          </Box>
+        )}
         <Box
           ref={wizardBodyRef}
           tabIndex={-1}
           role='region'
-          aria-label={wizardSteps[wizardStep]}
+          aria-label={
+            singlePageEditor ? 'Task settings' : wizardSteps[wizardStep]
+          }
           sx={{
             minHeight: 0,
             outline: 0,
@@ -1276,7 +1290,7 @@ const ChoreEdit = () => {
               </Box>
             </Alert>
           )}
-          {wizardStep === 3 && (
+          {!singlePageEditor && wizardStep === 3 && (
             <Box
               data-wizard-review
               tabIndex={-1}
@@ -1838,7 +1852,7 @@ const ChoreEdit = () => {
               title='Description & attachments'
               icon={DescriptionOutlined}
               section='description'
-              collapsible
+              collapsible={!singlePageEditor}
               defaultOpen
               error={errors.description}
               summary={
@@ -2075,7 +2089,7 @@ const ChoreEdit = () => {
               title='Organization'
               icon={LabelOutlined}
               section='organization'
-              collapsible
+              collapsible={!singlePageEditor}
               summary={[
                 priority
                   ? Priorities.find(
@@ -2292,7 +2306,7 @@ const ChoreEdit = () => {
                 title='Subtasks'
                 icon={Checklist}
                 section='subtasks'
-                collapsible
+                collapsible={!singlePageEditor}
                 defaultOpen={Boolean(subTasks?.length)}
                 summary={
                   subTasks?.length
@@ -2337,7 +2351,7 @@ const ChoreEdit = () => {
               title='On completion'
               icon={BoltOutlined}
               section='actions'
-              collapsible
+              collapsible={!singlePageEditor}
               defaultOpen={points >= 0 || completionActions.length > 0}
               error={errors.completionActions}
               summary={
@@ -2364,7 +2378,7 @@ const ChoreEdit = () => {
               title='Notifications and privacy'
               icon={SettingsOutlined}
               section='additional'
-              collapsible
+              collapsible={!singlePageEditor}
               summary={[
                 isNotificable ? 'Reminders enabled' : 'Reminders off',
                 requireApproval ? 'Approval required' : '',
@@ -2693,7 +2707,7 @@ const ChoreEdit = () => {
               icon={InfoOutlined}
               section='metadata'
               summary='Who created and last edited this task'
-              collapsible
+              collapsible={!singlePageEditor}
             >
               <Sheet
                 sx={{
@@ -2753,17 +2767,21 @@ const ChoreEdit = () => {
           <Box
             sx={{
               width: '100%',
-              maxWidth: 740,
+              maxWidth: singlePageEditor ? 'none' : 880,
               display: {
                 xs:
-                  (choreId > 0 || createAnother) && wizardStep === 3
+                  (choreId > 0 || createAnother) &&
+                  (singlePageEditor || wizardStep === 3)
                     ? 'grid'
                     : 'flex',
                 sm: 'flex',
               },
               gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
-              gridTemplateAreas:
-                choreId > 0
+              gridTemplateAreas: singlePageEditor
+                ? choreId > 0
+                  ? '"management cancel" "save save"'
+                  : '"cancel cancel" "save save"'
+                : choreId > 0
                   ? '"management cancel" "back save"'
                   : '"back cancel" "save save"',
               alignItems: 'center',
@@ -2788,7 +2806,7 @@ const ChoreEdit = () => {
               },
             }}
           >
-            {choreId > 0 && wizardStep === 3 && (
+            {choreId > 0 && (singlePageEditor || wizardStep === 3) && (
               <Box data-footer-management>
                 {' '}
                 <Dropdown>
@@ -2823,7 +2841,7 @@ const ChoreEdit = () => {
                 </Dropdown>
               </Box>
             )}
-            {wizardStep > 0 && (
+            {!singlePageEditor && wizardStep > 0 && (
               <Button
                 data-footer-back
                 variant='outlined'
@@ -2839,7 +2857,8 @@ const ChoreEdit = () => {
                 flex: 1,
                 display: {
                   xs:
-                    (choreId > 0 || createAnother) && wizardStep === 3
+                    (choreId > 0 || createAnother) &&
+                    (singlePageEditor || wizardStep === 3)
                       ? 'none'
                       : 'block',
                   sm: 'block',
@@ -2859,7 +2878,7 @@ const ChoreEdit = () => {
                 <KeyboardShortcutHint shortcut='Esc' sx={{ ml: 1 }} />
               )}
             </Button>
-            {wizardStep < 3 ? (
+            {!singlePageEditor && wizardStep < 3 ? (
               <Button
                 endDecorator={<ArrowForward />}
                 onClick={() => changeWizardStep(wizardStep + 1)}

@@ -25,11 +25,16 @@ import {
   subscribeToOfflineFeature,
 } from '../../utils/OfflineFeatureToggle'
 import { syncEngine } from '../../utils/SyncEngine'
+import {
+  setSinglePageTaskEditor,
+  useSinglePageTaskEditor,
+} from '../../utils/TaskEditorPreferences'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import SettingsLayout from './SettingsLayout'
 
 const AdvancedSettings = () => {
   const { t } = useTranslation('settings')
+  const singlePageTaskEditor = useSinglePageTaskEditor()
   const { data: userProfile } = useUserProfile()
   const queryClient = useQueryClient()
   const { showNotification } = useNotification()
@@ -168,6 +173,22 @@ const AdvancedSettings = () => {
             overlay
           />
           <FormHelperText>{t('advanced.offlineHelper')}</FormHelperText>
+        </FormControl>
+
+        <Typography level='title-lg' mt={2}>
+          Task editor
+        </Typography>
+        <FormControl>
+          <Checkbox
+            checked={singlePageTaskEditor}
+            onChange={event => setSinglePageTaskEditor(event.target.checked)}
+            variant='soft'
+            label='Show task editor on one page'
+          />
+          <FormHelperText>
+            Show all task settings in one scrolling page instead of separate
+            steps. Saved for this device/browser.
+          </FormHelperText>
         </FormControl>
 
         {/* Webhook Settings - Only show for admins */}
