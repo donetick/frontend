@@ -290,7 +290,7 @@ const RichTextEditor = forwardRef(
           ref={quillRef}
           style={{
             minHeight: 120,
-            background: 'var(--joy-palette-background-surface, #fff)',
+            background: 'var(--joy-palette-background-level1, #f0f4f8)',
           }}
         />
       </div>
