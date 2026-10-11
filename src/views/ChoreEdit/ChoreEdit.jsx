@@ -22,6 +22,7 @@ import {
   NotificationsOutlined,
   Save,
   TimerOutlined,
+  TitleOutlined,
   UploadFile,
 } from '@mui/icons-material'
 import {
@@ -1363,7 +1364,8 @@ const ChoreEdit = () => {
           )}
           <Box className='task-editor-grid'>
             <EditorSection
-              title={t('taskEditor.task')}
+              title={t('taskEditor.name')}
+              icon={TitleOutlined}
               section='task'
               hideHeading={!singlePageEditor}
               collapsible={singlePageEditor}
@@ -1376,10 +1378,15 @@ const ChoreEdit = () => {
                 errors.dueDate ||
                 errors.thingTrigger
               }
+              summary={name}
             >
               <Box data-wizard-name>
                 <FormControl error={errors.name}>
-                  <Typography level='h4'>{t('taskEditor.taskName')}</Typography>
+                  {!singlePageEditor && (
+                    <Typography level='h4'>
+                      {t('taskEditor.taskName')}
+                    </Typography>
+                  )}
                   <Input
                     aria-label={t('taskEditor.taskName2')}
                     placeholder={t('taskEditor.whatNeedsToBeDone')}
