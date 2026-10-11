@@ -947,6 +947,16 @@ const DeleteProject = id => {
   })
 }
 
+// Server-side dry run of a change of who can see a project: which tasks change
+// assignees and who gains or loses access. Nothing is written.
+const PreviewProjectAccess = (id, access) => {
+  return Fetch(`/projects/${id}/access-preview`, {
+    method: 'POST',
+    headers: HEADERS(),
+    body: JSON.stringify(access),
+  })
+}
+
 // Filter-related API functions
 const GetFilters = () => {
   return Fetch(`/filters`, {
@@ -1085,6 +1095,7 @@ export {
   MarkChoreComplete,
   NudgeChore,
   PauseChore,
+  PreviewProjectAccess,
   PutNotificationTarget,
   PutWebhookURL,
   RedeemPoints,

@@ -1,4 +1,4 @@
-import { Add, Check, FolderOpen, Lock, Settings } from '@mui/icons-material'
+import { Add, Check, FolderOpen, Settings } from '@mui/icons-material'
 import {
   Avatar,
   Box,
@@ -24,6 +24,7 @@ import { canCreateProject } from '../../utils/entitlements'
 import { getIconComponent } from '../../utils/ProjectIcons'
 import ProjectModal from '../Modals/Inputs/ProjectModal'
 import { useProjects } from '../Projects/ProjectQueries'
+import { ProjectAccessIcon } from '../Projects/ProjectVisibilityField'
 
 const ProjectSelector = ({
   onProjectSelect,
@@ -462,15 +463,14 @@ const ProjectSelector = ({
                   }}
                 >
                   {project.name}
-                  {project.isPrivate && (
-                    <Lock
-                      sx={{
-                        fontSize: 14,
-                        ml: 0.5,
-                        verticalAlign: 'text-bottom',
-                      }}
-                    />
-                  )}
+                  <ProjectAccessIcon
+                    project={project}
+                    sx={{
+                      fontSize: 14,
+                      ml: 0.5,
+                      verticalAlign: 'text-bottom',
+                    }}
+                  />
                 </Typography>
                 {effectiveSelectedProject === project.name && (
                   <Check

@@ -210,6 +210,14 @@ export const useSSE = () => {
 
             break
 
+          case 'project.updated':
+            // A project or who can see it changed. The event carries no project
+            // details on purpose: refetch what this user may see now, and let the
+            // task list resync (it drops tasks this user lost access to).
+            queryClient.invalidateQueries({ queryKey: ['projects'] })
+            queryClient.invalidateQueries({ queryKey: ['chores'] })
+            break
+
           case 'subtask.updated':
           case 'subtask.completed':
             queryClient.setQueryData(
