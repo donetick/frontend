@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- Keep the existing editor callbacks together across wizard and single-page layouts. */
 import {
   Add,
   ArrowBack,
@@ -2543,7 +2544,9 @@ const ChoreEdit = () => {
                           label={t('choreEdit.specificGroup')}
                           endDecorator={
                             isPlusAccount(userProfile) ? null : (
-                              <LockOutlined sx={{ fontSize: 14, opacity: 0.6 }} />
+                              <LockOutlined
+                                sx={{ fontSize: 14, opacity: 0.6 }}
+                              />
                             )
                           }
                         />

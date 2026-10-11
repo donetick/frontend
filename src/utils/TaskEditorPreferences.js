@@ -4,7 +4,7 @@ const STORAGE_KEY = 'singlePageTaskEditor'
 const CHANGE_EVENT = 'donetick:task-editor-preference-changed'
 
 const getSinglePagePreference = () =>
-  localStorage.getItem(STORAGE_KEY) === 'true'
+  localStorage.getItem(STORAGE_KEY) !== 'false'
 
 const subscribe = callback => {
   const handleStorage = event => {
@@ -24,4 +24,4 @@ export const setSinglePageTaskEditor = enabled => {
 }
 
 export const useSinglePageTaskEditor = () =>
-  useSyncExternalStore(subscribe, getSinglePagePreference, () => false)
+  useSyncExternalStore(subscribe, getSinglePagePreference, () => true)

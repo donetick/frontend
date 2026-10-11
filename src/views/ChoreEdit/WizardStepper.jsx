@@ -1,7 +1,7 @@
 import { Check } from '@mui/icons-material'
 import { Box, Typography } from '@mui/joy'
 
-export default function WizardStepper({ steps, activeStep, onStepChange, sx }) {
+export default function WizardStepper({ activeStep, onStepChange, steps, sx }) {
   return (
     <Box
       component='nav'

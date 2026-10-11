@@ -3,16 +3,16 @@ import { Box, Typography } from '@mui/joy'
 import { useEffect, useState } from 'react'
 
 export default function EditorSection({
-  title,
-  icon: Icon,
-  summary,
   children,
-  section,
   collapsible = false,
   defaultOpen = false,
-  hideHeading = false,
   error,
+  hideHeading = false,
+  icon: Icon,
+  section,
+  summary,
   sx,
+  title,
 }) {
   const [open, setOpen] = useState(defaultOpen)
   useEffect(() => {
