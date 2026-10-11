@@ -323,10 +323,12 @@ export const useUpdateChore = () => {
       }
     },
     onSuccess: (_, variables) => {
+      // Detail query keys hold the route param, which is a string
+      const choreId = String(variables.id)
       queryClient.invalidateQueries({ queryKey: ['chores'] })
-      queryClient.invalidateQueries({
-        queryKey: ['choreHistory', variables.id],
-      })
+      queryClient.invalidateQueries({ queryKey: ['chore', choreId] })
+      queryClient.invalidateQueries({ queryKey: ['choreDetails', choreId] })
+      queryClient.invalidateQueries({ queryKey: ['choreHistory', choreId] })
       queryClient.invalidateQueries({ queryKey: ['pendingCommands'] })
     },
   })
