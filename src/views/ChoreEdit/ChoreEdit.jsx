@@ -1092,7 +1092,8 @@ const ChoreEdit = () => {
       sx={{
         p: 0,
         maxWidth: 'none !important',
-        minHeight: { sm: '100dvh' },
+        minHeight: { sm: 'calc(100dvh - 56px)' },
+        '@media (min-width: 1024px)': { minHeight: '100dvh' },
         '& .task-editor-grid h4, & .task-editor-grid h5': {
           fontSize: 14,
           fontWeight: 500,
@@ -1151,9 +1152,18 @@ const ChoreEdit = () => {
           border: 0,
           display: 'flex',
           flexDirection: 'column',
-          maxHeight: { xs: 'calc(100dvh - 48px)', sm: 'none' },
-          minHeight: { sm: '100dvh' },
+          height: { xs: 'auto', sm: 'calc(100dvh - 56px)' },
+          maxHeight: {
+            xs: 'calc(100dvh - 48px)',
+            sm: 'calc(100dvh - 56px)',
+          },
+          minHeight: { sm: 'calc(100dvh - 56px)' },
           overflow: 'hidden',
+          '@media (min-width: 1024px)': {
+            height: '100dvh',
+            maxHeight: '100dvh',
+            minHeight: '100dvh',
+          },
           bgcolor: { xs: 'background.surface', sm: 'transparent' },
           boxShadow: { xs: 'sm', sm: 'none' },
         }}
@@ -1282,7 +1292,7 @@ const ChoreEdit = () => {
           sx={{
             minHeight: 0,
             outline: 0,
-            overflowY: { xs: 'auto', sm: 'visible' },
+            overflowY: 'auto',
             flex: 1,
           }}
         >
@@ -2808,8 +2818,8 @@ const ChoreEdit = () => {
             pb: getSafeBottomPadding(2),
             display: 'flex',
             justifyContent: 'center',
-            'z-index': 1000,
-            bgcolor: 'background.body',
+            zIndex: 1000,
+            bgcolor: 'background.surface',
             boxShadow: 'none',
           }}
         >
