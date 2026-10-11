@@ -19,6 +19,7 @@ import {
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import NumberInput from '../../components/common/NumberInput'
 import { GetThings } from '../../utils/Fetcher'
 
 export default function CompletionActionsSection({
@@ -113,15 +114,11 @@ export default function CompletionActionsSection({
           </Box>
           <FormControl error={!pointsValid}>
             <FormLabel>{t('choreEdit.pointsPlaceholder')}</FormLabel>
-            <Input
-              type='number'
+            <NumberInput
               value={points}
-              slotProps={{ input: { min: 0, max: 1000, step: 1 } }}
-              onChange={event =>
-                onPointsChange(
-                  event.target.value === '' ? '' : Number(event.target.value),
-                )
-              }
+              min={0}
+              max={1000}
+              onValueChange={onPointsChange}
             />
             <FormHelperText>
               {pointsValid

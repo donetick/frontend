@@ -79,11 +79,9 @@ const generateSchedulePreview = (metadata, formatTimeFn, t) => {
     .map(day => t(`repeat.daysShort.${day}`))
     .join(', ')
 
-  const timeStr = metadata.time ? formatTimeFn(metadata.time) : '6:00 PM'
-
-  if (metadata.weekPattern === 'every_week' || !metadata.weekPattern) {
-    return `Every ${dayNames} at ${timeStr}`
-  }
+  const timeStr = metadata.time
+    ? formatTimeFn(metadata.time)
+    : t('repeat.defaultTime')
 
   if (
     metadata.weekPattern === 'week_of_month' &&
@@ -536,14 +534,21 @@ const RepeatSection = ({
           }
           onChange={(_, mode) => {
             if (!mode) return
+            if (mode === 'trigger' && !isPlusAccount(userProfile)) {
+              showPaywall(PAYWALL_REASON.THING_TRIGGERS)
+              return
+            }
             onFrequencyTypeUpdate(mode === 'repeat' ? 'daily' : mode)
             if (mode !== 'trigger') onTriggerUpdate(null)
           }}
         >
           <Option value='once'>{t('taskEditor.oneTimeTask')}</Option>
           <Option value='repeat'>{t('taskEditor.repeatingTask')}</Option>
-          <Option value='trigger' disabled={!isPlusAccount(userProfile)}>
+          <Option value='trigger'>
             {t('taskEditor.triggeredByAThing')}
+            {!isPlusAccount(userProfile) && (
+              <LockOutlined sx={{ fontSize: 14, opacity: 0.6 }} />
+            )}
           </Option>
           {frequencyType === 'always' && (
             <Option value='always'>{t('taskEditor.alwaysAvailable')}</Option>

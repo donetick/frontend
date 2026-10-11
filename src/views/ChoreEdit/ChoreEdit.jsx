@@ -419,7 +419,7 @@ const ChoreEdit = () => {
     let errors = {}
 
     if (name.trim() === '') {
-      errors.name = 'Name is required'
+      errors.name = t('choreEdit.errNameRequired')
     }
     if (assignStrategyValue !== 'no_assignee') {
       if (assignees.length === 0) {
@@ -2517,6 +2517,15 @@ const ChoreEdit = () => {
                         <Checkbox
                           overlay
                           onClick={() => {
+                            // Routing reminders to a Telegram group is an extra
+                            // delivery channel, which stays a Plus capability.
+                            if (
+                              !notificationMetadata?.circleGroup &&
+                              !isPlusAccount(userProfile)
+                            ) {
+                              showPaywall(PAYWALL_REASON.REMINDER_CHANNELS)
+                              return
+                            }
                             if (notificationMetadata?.circleGroup) {
                               delete notificationMetadata.circleGroupID
                             }
@@ -2532,6 +2541,11 @@ const ChoreEdit = () => {
                               : false
                           }
                           label={t('choreEdit.specificGroup')}
+                          endDecorator={
+                            isPlusAccount(userProfile) ? null : (
+                              <LockOutlined sx={{ fontSize: 14, opacity: 0.6 }} />
+                            )
+                          }
                         />
                         <FormHelperText>
                           {t('choreEdit.specificGroupHelp')}
@@ -2548,16 +2562,16 @@ const ChoreEdit = () => {
                           <Typography level='body-sm'>
                             {t('choreEdit.telegramGroupIdLabel')}
                           </Typography>
-                          <Input
-                            type='number'
+                          <NumberInput
                             value={notificationMetadata?.circleGroupID}
+                            allowEmpty
                             placeholder={t(
                               'choreEdit.telegramGroupIdPlaceholder',
                             )}
-                            onChange={e => {
+                            onValueChange={next => {
                               setNotificationMetadata({
                                 ...notificationMetadata,
-                                circleGroupID: parseInt(e.target.value),
+                                circleGroupID: next,
                               })
                             }}
                           />
@@ -2605,20 +2619,13 @@ const ChoreEdit = () => {
                         <Typography level='body-sm'>
                           {t('choreEdit.hoursLabel')}
                         </Typography>
-                        <Input
-                          type='number'
+                        <NumberInput
                           value={completionWindow}
+                          min={0}
+                          max={24 * 7}
                           sx={{ maxWidth: 100 }}
-                          slotProps={{
-                            input: {
-                              min: 0,
-                              max: 24 * 7,
-                            },
-                          }}
                           placeholder={t('choreEdit.hoursPlaceholder')}
-                          onChange={e => {
-                            setCompletionWindow(parseInt(e.target.value))
-                          }}
+                          onValueChange={setCompletionWindow}
                         />
                       </Box>
                     </Card>

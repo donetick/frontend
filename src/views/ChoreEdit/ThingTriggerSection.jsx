@@ -79,7 +79,7 @@ const ThingTriggerSection = ({
   }, [selectedThing])
 
   useEffect(() => {
-    if (selectedThing && triggerState) {
+    if (selectedThing && hasValue(triggerState)) {
       onTriggerUpdate({
         thing: selectedThing,
         condition: condition,
@@ -183,23 +183,24 @@ const ThingTriggerSection = ({
                     sx={{ flex: 1 }}
                   >
                     {[
-                      { name: 'Equal to', value: 'eq' },
-                      { name: 'Not equal to', value: 'neq' },
-                      { name: 'Greater than', value: 'gt' },
-                      { name: 'At least', value: 'gte' },
-                      { name: 'Less than', value: 'lt' },
-                      { name: 'At most', value: 'lte' },
+                      { name: t('thing.conditions.eq'), value: 'eq' },
+                      { name: t('thing.conditions.neq'), value: 'neq' },
+                      { name: t('thing.conditions.gt'), value: 'gt' },
+                      { name: t('thing.conditions.gte'), value: 'gte' },
+                      { name: t('thing.conditions.lt'), value: 'lt' },
+                      { name: t('thing.conditions.lte'), value: 'lte' },
                     ].map(item => (
                       <Option key={item.value} value={item.value}>
                         {item.name}
                       </Option>
                     ))}
                   </Select>
-                  <Input
+                  <NumberInput
                     aria-label={t('taskEditor.triggerValue')}
-                    type='number'
-                    value={triggerState || ''}
-                    onChange={e => setTriggerState(e.target.value)}
+                    value={triggerState}
+                    allowEmpty
+                    integer={false}
+                    onValueChange={setTriggerState}
                     sx={{ width: 88 }}
                   />
                 </Box>
