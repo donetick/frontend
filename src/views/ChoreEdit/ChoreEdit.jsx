@@ -18,8 +18,10 @@ import {
   HorizontalRule,
   InfoOutlined,
   LabelOutlined,
+  LockOutlined,
+  NotificationsOutlined,
   Save,
-  SettingsOutlined,
+  TimerOutlined,
   UploadFile,
 } from '@mui/icons-material'
 import {
@@ -377,7 +379,7 @@ const ChoreEdit = () => {
     if (!singlePageEditor) setWizardStep(step)
     requestAnimationFrame(() => {
       const section = document.querySelector(
-        `[data-editor-section="${errorSections[key] || 'additional'}"]`,
+        `[data-editor-section="${errorSections[key] || 'actions'}"]`,
       )
       section?.scrollIntoView({ behavior: 'smooth', block: 'center' })
       section
@@ -1138,7 +1140,7 @@ const ChoreEdit = () => {
         },
         '& [data-editor-section="description"], & [data-editor-section="organization"], & [data-editor-section="subtasks"]':
           { display: singlePageEditor || wizardStep === 0 ? 'block' : 'none' },
-        '& [data-editor-section="actions"], & [data-editor-section="additional"], & [data-editor-section="metadata"]':
+        '& [data-editor-section="actions"], & [data-editor-section="notifications"], & [data-editor-section="window"], & [data-editor-section="privacy"], & [data-editor-section="metadata"]':
           { display: singlePageEditor || wizardStep === 3 ? 'block' : 'none' },
       }}
     >
@@ -2388,26 +2390,14 @@ const ChoreEdit = () => {
               />
             </EditorSection>
             <EditorSection
-              title={t('taskEditor.notificationsAndPrivacy')}
-              icon={SettingsOutlined}
-              section='additional'
+              title={t('choreEdit.notifications')}
+              icon={NotificationsOutlined}
+              section='notifications'
               collapsible={!singlePageEditor}
-              summary={[
-                isNotificable ? 'Reminders enabled' : 'Reminders off',
-                isPrivate
-                  ? 'Visible to assigned users'
-                  : 'Visible to your circle',
-                completionWindow >= 0 ? 'Completion window set' : '',
-              ]
-                .filter(Boolean)
-                .join(' · ')}
+              defaultOpen={isNotificable}
+              summary={isNotificable ? 'Reminders enabled' : 'Reminders off'}
             >
-              {/* Section 3.1: Notifications */}
-
               <Box mb={2}>
-                <Typography level='h4'>
-                  {t('choreEdit.notifications')}
-                </Typography>
                 {!isPlusAccount(userProfile) && (
                   <Typography level='body-sm' color='warning' sx={{ mb: 1 }}>
                     {t('taskEditor.taskNotificationsAreNotAvailableInThe')}
@@ -2557,15 +2547,21 @@ const ChoreEdit = () => {
                     </Card>
                   </Box>
                 )}
-              {dueDate && (
+            </EditorSection>
+            {dueDate && (
+              <EditorSection
+                title={t('choreEdit.taskWindow')}
+                icon={TimerOutlined}
+                section='window'
+                collapsible
+                defaultOpen={completionWindow !== -1}
+                summary={
+                  completionWindow !== -1
+                    ? `Completable ${completionWindow}h before due`
+                    : t('choreEdit.taskWindowDesc')
+                }
+              >
                 <Box mb={2}>
-                  <Typography level='h4'>
-                    {t('choreEdit.taskWindow')}
-                  </Typography>
-                  <Typography level='body-md'>
-                    {t('choreEdit.taskWindowDesc')}
-                  </Typography>
-
                   {/* Available From (Completion Window) */}
                   <FormControl sx={{ mt: 1 }}>
                     <Checkbox
@@ -2652,12 +2648,21 @@ const ChoreEdit = () => {
                     </Box>
                   )}
                 </Box>
-              )}
-
+              </EditorSection>
+            )}
+            <EditorSection
+              title={t('choreEdit.privacySettings')}
+              icon={LockOutlined}
+              section='privacy'
+              collapsible
+              defaultOpen={isPrivate}
+              summary={
+                isPrivate
+                  ? 'Visible to assigned users'
+                  : 'Visible to your circle'
+              }
+            >
               <Box>
-                <Typography level='h4'>
-                  {t('choreEdit.privacySettings')}
-                </Typography>
                 <RadioGroup
                   name='isPrivate'
                   value={isPrivate}
