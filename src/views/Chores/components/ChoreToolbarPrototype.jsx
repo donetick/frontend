@@ -329,7 +329,9 @@ const ChoreToolbar = ({
       }
       if (condition.type === 'project') {
         if (value === 'default') return 'Default Project'
-        return projects.find(p => p.id === value)?.name || String(value)
+        const project = projects.find(p => p.id === value)
+        if (!project) return String(value)
+        return project.isPrivate ? `🔒 ${project.name}` : project.name
       }
       return String(value)
     }

@@ -120,6 +120,8 @@ export const getRecurrentChipText = chore => {
   }
   if (chore.frequencyType === 'once') {
     return 'Once'
+  } else if (chore.frequencyType === 'always') {
+    return 'Always'
   } else if (chore.frequencyType === 'trigger') {
     return 'Trigger'
   } else if (chore.frequencyType === 'daily') {

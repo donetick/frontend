@@ -1,4 +1,4 @@
-import { Add, KeyboardArrowDown } from '@mui/icons-material'
+import { Add, KeyboardArrowDown, Lock } from '@mui/icons-material'
 import {
   Box,
   Button,
@@ -201,7 +201,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
   const { data: userLabels, isLoading: userLabelsLoading } = useLabels()
   const { data: circleMembers, isLoading: isCircleMembersLoading } =
     useCircleMembers()
-  const { data: projects, isLoading: isProjectsLoading } = useProjects()
+  const { data: projects = [], isLoading: isProjectsLoading } = useProjects()
   const createChoreMutation = useCreateChore()
   const queryClient = useQueryClient()
 
@@ -382,6 +382,17 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
     localAIService.isAvailable().then(setLlmAvailable)
     voiceInputService.isSupported().then(setVoiceAvailable)
   }, [])
+
+  // A task in a private project is always private: the project's privacy wins over
+  // the task's own setting, so keep the form in sync with the selected project.
+  const selectedProjectIsPrivate = Boolean(
+    projects.find(project => project.id === projectId)?.isPrivate,
+  )
+  useEffect(() => {
+    if (selectedProjectIsPrivate && !isPrivate) {
+      setIsPrivate(true)
+    }
+  }, [selectedProjectIsPrivate, isPrivate])
 
   // Quick-capture widget entry points (donetick://chores/add?mode=voice|scan)
   // land here: open straight into the requested panel, once per modal open so
@@ -1025,11 +1036,20 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
       finalAssignStrategy = assignStrategy
     }
 
+    // "always" chores never have a due date — backend keeps nextDueDate null
+    // and never archives them on completion (see RepeatSection.jsx for the
+    // full-edit-form equivalent).
+    const isAlwaysAvailable = frequency?.frequencyType === 'always'
+
     const chore = {
       name: taskTitle,
       description: description,
       assignees: finalAssignees,
-      dueDate: dueDate ? new Date(dueDate).toISOString() : null,
+      dueDate: isAlwaysAvailable
+        ? null
+        : dueDate
+          ? new Date(dueDate).toISOString()
+          : null,
       assignedTo: finalAssignedTo,
       assignStrategy: finalAssignStrategy,
       isRolling: false,
@@ -1038,7 +1058,9 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
       points: points > -1 ? points : null,
       deadlineOffset: deadlineOffset < 0 ? null : deadlineOffset,
       completionWindow:
-        completionWindow < 0 || !dueDate ? null : completionWindow,
+        completionWindow < 0 || !dueDate || isAlwaysAvailable
+          ? null
+          : completionWindow,
       requireApproval: requireApproval,
       isPrivate: isPrivate,
       status: 0,
@@ -1053,19 +1075,21 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
     }
 
     // Every plan gets reminders; the free plan is capped at the on-due one.
-    // Without the flag the backend never schedules them.
+    // Without the flag the backend never schedules them. "always" chores are
+    // rejected with forbidden_with_trigger_frequency if notification is true,
+    // same rule as trigger frequencies.
     const planReminders = sanitizeRemindersForPlan(
       notificationMetadata?.templates,
       isPlusAccount(userProfile),
     )
-    const hasReminders = planReminders.length > 0
+    const hasReminders = planReminders.length > 0 && !isAlwaysAvailable
 
     if (frequency) {
       chore.frequencyType = frequency.frequencyType
       chore.frequencyMetadata = frequency.frequencyMetadata
       chore.frequency = frequency.frequency
     }
-    if (dueDate) {
+    if (dueDate && !isAlwaysAvailable) {
       // Use RFC3339/ISO-8601 format expected by backend. The backend only
       // derives NextDueDate from what's sent on create (handler.go never
       // computes it from frequencyType), so this must be sent whether or
@@ -1188,6 +1212,15 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
                         {project.id === 'default'
                           ? t('addTask.defaultProject')
                           : project.name}
+                        {project.isPrivate && (
+                          <Lock
+                            sx={{
+                              fontSize: 14,
+                              ml: 0.5,
+                              verticalAlign: 'text-bottom',
+                            }}
+                          />
+                        )}
                       </MenuItem>
                     )
                   })}
@@ -1385,7 +1418,16 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
               <RepeatPickerField
                 emptyDisplay={pickerEmptyDisplay}
                 value={frequency}
-                onChange={setFrequency}
+                onChange={newFrequency => {
+                  setFrequency(newFrequency)
+                  // "always" tasks never have a due date — clear whatever
+                  // was picked so the chips don't show a contradictory state
+                  if (newFrequency?.frequencyType === 'always') {
+                    setDueDateOnly(null)
+                    setDueTime(null)
+                    setUseCustomTime(false)
+                  }
+                }}
                 onClear={() => setFrequency(null)}
               />
               <PriorityPickerField
@@ -1536,6 +1578,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
               hasAssignees={!isAnyoneTask}
               isPrivate={isPrivate}
               onIsPrivateChange={setIsPrivate}
+              isPrivacyInherited={selectedProjectIsPrivate}
             />
 
             {hasDescription && (

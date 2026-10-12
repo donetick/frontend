@@ -1,7 +1,5 @@
 {
   "title": "Домашние дела",
-  "tasksForDate": "Задачи на {{date}}",
-  "createSuggestion": "Создать «{{value}}»",
   "myChores": "Мои дела",
   "allChores": "Все дела",
   "addChore": "Добавить дело",
@@ -113,7 +111,9 @@
     "unableChangeAssignee": "Не удалось изменить исполнителя",
     "availableToCompleteStarting": "Доступно для начала {{date}}",
     "delegateToSomeoneElse": "Поручить другому",
-    "selectAPerformer": "Выберите исполнителя"
+    "selectAPerformer": "Выберите исполнителя",
+    "notFoundTitle": "Задача недоступна",
+    "notFoundDescription": "Возможно, эта задача была удалена или больше не доступна вам для просмотра."
   },
   "toolbar": {
     "defaultProject": "Проект по умолчанию",
@@ -263,8 +263,6 @@
     "failRescheduleTitle": "Не удалось перенести",
     "failRescheduleMessage": "Нельзя обновить срок выполнения",
     "failRemoveDueDateTitle": "Не удалось удалить срок выполнения",
-    "failAssignTitle": "Не удалось назначить",
-    "failAssignMessage": "Нельзя назначить задачу",
     "nudgeSentTitle": "Напоминание отправлено!",
     "nudgeFailed": "Не удалось отправить напоминание",
     "failNudgeTitle": "Не удалось отправить напоминание",
@@ -279,7 +277,9 @@
       "skipTitle": "Пропустить задачи",
       "skippedTitle": "Пропущенные задачи",
       "skipFailedTitle": "Массовый пропуск не удался"
-    }
+    },
+    "failAssignTitle": "Не удалось назначить",
+    "failAssignMessage": "Нельзя назначить задачу"
   },
   "archived": {
     "restoredTitle": "Восстановленные задачи",
@@ -776,11 +776,11 @@
     "archive": "В архив",
     "unarchive": "Вернуть из архива",
     "create": "Создать",
-    "notificationsFreePlanNote": "Ваш тариф включает напоминание в день срока. В Plus добавляются напоминания до срока и последующие уведомления после него."
+    "notificationsFreePlanNote": "Ваш тариф включает напоминание в день срока. В Plus добавляются напоминания до срока и последующие уведомления после него.",
+    "alwaysDueHint": "У этой задачи нет срока выполнения, и она всегда доступна для выполнения",
+    "notifyForTaskUnavailable": "Уведомления недоступны для задач на основе триггера или всегда доступных задач"
   },
   "addTask": {
-    "descriptionLabel": "Description:",
-    "subtasksLabel": "Subtasks:",
     "title": "Создать новую задачу",
     "defaultProject": "Проект по умолчанию",
     "anyone": "Кто угодно",
@@ -791,7 +791,9 @@
     "createCount": "Создать {{count}} задач",
     "useTask": "Использовать задачу",
     "processing": "Обработка",
-    "create": "Создать"
+    "create": "Создать",
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:"
   },
   "repeat": {
     "days": {
@@ -823,11 +825,13 @@
       "monthly": "Ежемесячно",
       "yearly": "Ежегодно",
       "adaptive": "Адаптивная планировка",
-      "custom": "Пользовательская частота"
+      "custom": "Пользовательская частота",
+      "always": "Всегда"
     },
     "freqMessage": {
       "adaptive": "Это дело будет запланировано динамически на основе предыдущих дат выполнения.",
-      "custom": "Это дело будет запланировано на основе пользовательской частоты."
+      "custom": "Это дело будет запланировано на основе пользовательской частоты.",
+      "always": "У этой задачи нет срока выполнения, и она остаётся доступной для выполнения в любое время. Она не будет заархивирована после выполнения."
     },
     "weekPattern": {
       "every_week": "Каждую неделю",
@@ -1054,5 +1058,7 @@
     "today": "Сегодня",
     "yesterday": "Вчера",
     "noteTitle": "Примечание - {{choreName}}"
-  }
+  },
+  "tasksForDate": "Задачи на {{date}}",
+  "createSuggestion": "Создать «{{value}}»"
 }

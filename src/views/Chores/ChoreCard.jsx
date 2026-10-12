@@ -1,4 +1,5 @@
 import {
+  AllInclusive,
   Check,
   Group,
   HourglassEmpty,
@@ -105,6 +106,8 @@ const ChoreCard = ({
       return <TimesOneMobiledata />
     } else if (chore.frequencyType === 'trigger') {
       return <Webhook />
+    } else if (chore.frequencyType === 'always') {
+      return <AllInclusive />
     } else {
       return <Repeat />
     }
@@ -132,18 +135,20 @@ const ChoreCard = ({
       minWidth={'100%'}
       sx={{ position: 'relative' }}
     >
-      <Chip
-        variant='soft'
-        sx={{
-          position: 'relative',
-          top: 10,
-          zIndex: 3,
-          left: 10,
-        }}
-        color={getDueDateChipColor(chore.nextDueDate, chore)}
-      >
-        {getDueDateChipText(chore.nextDueDate, chore, timeFormat)}
-      </Chip>
+      {chore.frequencyType !== 'always' && (
+        <Chip
+          variant='soft'
+          sx={{
+            position: 'relative',
+            top: 10,
+            zIndex: 3,
+            left: 10,
+          }}
+          color={getDueDateChipColor(chore.nextDueDate, chore)}
+        >
+          {getDueDateChipText(chore.nextDueDate, chore, timeFormat)}
+        </Chip>
+      )}
 
       {!['once', 'no_repeat'].includes(chore.frequencyType) && (
         <Chip

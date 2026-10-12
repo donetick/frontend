@@ -1,15 +1,32 @@
+/* eslint-disable max-lines -- Keep the existing editor callbacks together across wizard and single-page layouts. */
 import {
   Add,
+  ArrowBack,
   ArrowDropDown,
+  ArrowForward,
   AttachFile,
+  BoltOutlined,
+  CalendarMonthOutlined,
+  Check,
+  Checklist,
+  Close,
   Delete,
+  DescriptionOutlined,
   DocumentScanner,
+  EditOutlined,
+  GroupOutlined,
   HorizontalRule,
+  InfoOutlined,
+  LabelOutlined,
   LockOutlined,
+  NotificationsOutlined,
   Save,
+  TimerOutlined,
+  TitleOutlined,
   UploadFile,
 } from '@mui/icons-material'
 import {
+  Alert,
   Avatar,
   Box,
   Button,
@@ -37,16 +54,22 @@ import {
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import {
+  useBlocker,
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from 'react-router-dom'
 
 import DurationInput from '../../components/common/DurationInput'
+import EmptyState from '../../components/common/EmptyState'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
-import NumberInput from '../../components/common/NumberInput'
 import NotificationTemplate from '../../components/NotificationTemplate.jsx'
 import { usePageShortcutScope } from '../../contexts/KeyboardShortcutScopeContext'
-import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
+import { usePaywall } from '../../contexts/PaywallContext'
 import { useDocumentScanner } from '../../hooks/useDocumentScanner'
 import {
   useArchiveChore,
@@ -73,6 +96,7 @@ import { getImageSrc, removeCachedImage } from '../../utils/ImageCache'
 import Priorities from '../../utils/Priorities.jsx'
 import { getIconComponent } from '../../utils/ProjectIcons'
 import { getSafeBottomPadding } from '../../utils/SafeAreaUtils.js'
+import { useSinglePageTaskEditor } from '../../utils/TaskEditorPreferences'
 import { generateUUID } from '../../utils/UUID'
 import { useProjectFilter } from '../Chores/hooks/useProjectFilter.js'
 import LoadingComponent from '../components/Loading.jsx'
@@ -83,7 +107,21 @@ import AttachmentViewerModal from '../Modals/Inputs/AttachmentViewerModal'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import LabelModal from '../Modals/Inputs/LabelModal'
 import { useProjects } from '../Projects/ProjectQueries'
+import CompletionActionsSection from './CompletionActionsSection'
+import EditorSection from './EditorSection'
 import RepeatSection from './RepeatSection'
+import WizardContainer from './WizardContainer'
+import WizardStepper from './WizardStepper'
+
+const STRATEGY_LABELS = {
+  random: 'Random user',
+  least_assigned: 'Least often assigned',
+  least_completed: 'Fewest completions',
+  keep_last_assigned: 'Keep the same user',
+  random_except_last_assigned: 'Random, excluding the last user',
+  round_robin: 'Rotate in order',
+  no_assignee: 'Leave unassigned',
+}
 
 const ASSIGN_STRATEGIES = [
   'random',
@@ -98,12 +136,18 @@ const DEFAULT_ASSIGN_STRATEGY = ASSIGN_STRATEGIES[3] // keep_last_assigned
 const REPEAT_ON_TYPE = ['interval', 'days_of_the_week', 'day_of_the_month']
 
 const NO_DUE_DATE_REQUIRED_TYPE = ['no_repeat', 'once']
-const NO_DUE_DATE_ALLOWED_TYPE = ['trigger']
+const NO_DUE_DATE_ALLOWED_TYPE = ['trigger', 'always']
+const NOTIFICATION_FORBIDDEN_TYPE = ['trigger', 'always']
 const ChoreEdit = () => {
   const { t } = useTranslation('chores')
   // Page-level shortcuts (save/cancel) must defer to whatever modal
   // currently owns the keyboard — see KeyboardShortcutScopeContext.
   const isPageShortcutActive = usePageShortcutScope()
+  const singlePageEditor = useSinglePageTaskEditor()
+  const location = useLocation()
+  const [createAnother, setCreateAnother] = useState(
+    location.state?.createAnother === true,
+  )
   const { data: userProfile, isLoading: isUserProfileLoading } =
     useUserProfile()
   const { showPaywall } = usePaywall()
@@ -113,6 +157,9 @@ const ChoreEdit = () => {
   const [userHistory, setUserHistory] = useState({})
   const { choreId } = useParams()
   const [searchParams, setSearchParams] = useSearchParams()
+  const [wizardStep, setWizardStep] = useState(0)
+  const wizardSteps = ['Task', 'Schedule', 'Assignment', 'Review']
+  const wizardBodyRef = useRef(null)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [confirmModelConfig, setConfirmModelConfig] = useState({})
@@ -131,6 +178,8 @@ const ChoreEdit = () => {
   const [labels, setLabels] = useState([])
   const [labelsV2, setLabelsV2] = useState([])
   const [priority, setPriority] = useState(0)
+  const [completionActions, setCompletionActions] = useState([])
+  const [completionActionsValid, setCompletionActionsValid] = useState(true)
   const [points, setPoints] = useState(-1)
   const [requireApproval, setRequireApproval] = useState(false)
   const [isPrivate, setIsPrivate] = useState(false)
@@ -181,6 +230,7 @@ const ChoreEdit = () => {
   const deleteChores = useDeleteChores()
   const {
     data: choreData,
+    isError: isChoreError,
     isLoading: isChoreLoading,
     refetch: refetchChore,
   } = useChore(choreId)
@@ -214,11 +264,170 @@ const ChoreEdit = () => {
         ? assignedTo
         : assignableTo[0].userId
 
-  const HandleValidateChore = () => {
-    const errors = {}
+  const snapshot = JSON.stringify({
+    name,
+    description,
+    priority,
+    projectId,
+    labelsV2,
+    anyone,
+    assignableTo,
+    assignedTo,
+    assignStrategy,
+    dueDate,
+    dueDateOnly,
+    dueTime,
+    useCustomTime,
+    frequencyType,
+    frequency,
+    frequencyMetadata,
+    thingTrigger: thingTrigger
+      ? {
+          thingID: thingTrigger.thingID ?? thingTrigger.thingId,
+          triggerState: thingTrigger.triggerState,
+          condition: thingTrigger.condition || '',
+        }
+      : null,
+    subTasks,
+    attachments,
+    completionActions,
+    points,
+    requireApproval,
+    isPrivate,
+    isNotificable,
+    notificationMetadata,
+    isRolling,
+    completionWindow,
+    deadlineOffset,
+  })
+  const latestSnapshot = useRef(snapshot)
+  latestSnapshot.current = snapshot
+  const [savedSnapshot, setSavedSnapshot] = useState(null)
+  const dirtyGuard = useRef(false)
+  const hasInteracted = useRef(false)
+  const isDirty = savedSnapshot !== null && snapshot !== savedSnapshot
+  dirtyGuard.current = isDirty
+  const formLoading =
+    (isChoreLoading && choreId) ||
+    isUserLabelsLoading ||
+    isUserProfileLoading ||
+    isMemberDataLoading ||
+    isProjectsLoading
+  useEffect(() => {
+    if (formLoading || hasInteracted.current) return
+    // Async defaults and child controls can normalize values after the first render.
+    setSavedSnapshot(snapshot)
+  }, [formLoading, snapshot])
+  const captureInitialValues = () => {
+    if (hasInteracted.current) return
+    hasInteracted.current = true
+    setSavedSnapshot(latestSnapshot.current)
+  }
+  useEffect(() => {
+    const protect = event => {
+      if (dirtyGuard.current) {
+        event.preventDefault()
+        event.returnValue = ''
+      }
+    }
+    window.addEventListener('beforeunload', protect)
+    return () => window.removeEventListener('beforeunload', protect)
+  }, [])
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      dirtyGuard.current && currentLocation.pathname !== nextLocation.pathname,
+  )
+  useEffect(() => {
+    if (blocker.state !== 'blocked') return
+    setConfirmModelConfig({
+      isOpen: true,
+      title: 'Discard unsaved changes?',
+      message: 'Your changes have not been saved.',
+      confirmText: 'Discard changes',
+      cancelText: 'Keep editing',
+      color: 'danger',
+      onClose: confirmed => {
+        setConfirmModelConfig({})
+        if (confirmed) {
+          dirtyGuard.current = false
+          blocker.proceed()
+        } else blocker.reset()
+      },
+    })
+  }, [blocker.state])
+  const errorSections = {
+    name: 'task',
+    description: 'description',
+    assignees: 'assignment',
+    assignedTo: 'assignment',
+    frequency: 'schedule',
+    dueDate: 'schedule',
+    thingTrigger: 'schedule',
+    completionActions: 'actions',
+  }
+  const focusError = key => {
+    const step =
+      {
+        name: 0,
+        description: 0,
+        assignees: 2,
+        assignedTo: 2,
+        frequency: 1,
+        dueDate: 1,
+        thingTrigger: 1,
+        completionActions: 3,
+      }[key] ?? 3
+    if (!singlePageEditor) setWizardStep(step)
+    requestAnimationFrame(() => {
+      const section = document.querySelector(
+        `[data-editor-section="${errorSections[key] || 'actions'}"]`,
+      )
+      section?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      section
+        ?.querySelector('input, select, textarea, [role="combobox"]')
+        ?.focus({ preventScroll: true })
+    })
+  }
+  const dueSummary = dueDate
+    ? moment(dueDate).format(useCustomTime ? 'D MMM · HH:mm' : 'D MMM')
+    : 'No due date'
+  const triggerThing = allUserThings.find(
+    item => item.id === (thingTrigger?.thingID ?? thingTrigger?.thingId),
+  )
+  const frequencySummary = {
+    daily: 'Daily',
+    weekly: 'Weekly',
+    monthly: 'Monthly',
+    yearly: 'Yearly',
+    adaptive: 'Adaptive schedule',
+    interval: `Every ${frequency} ${frequencyMetadata?.unit || 'days'}`,
+    days_of_the_week: frequencyMetadata?.days?.join(', ') || 'Choose weekdays',
+    day_of_the_month: 'Selected days of the month',
+  }[frequencyType]
+  const scheduleSummary =
+    frequencyType === 'trigger'
+      ? triggerThing
+        ? `When ${triggerThing.name} ${{ eq: 'is', neq: 'is not', gt: 'is greater than', gte: 'is at least', lt: 'is less than', lte: 'is at most' }[thingTrigger?.condition] || 'is'} ${thingTrigger?.triggerState}`
+        : 'Choose a Thing condition'
+      : frequencyType === 'always'
+        ? 'Available without a due date'
+        : frequencySummary
+          ? `${frequencySummary} · ${dueSummary}`
+          : dueSummary
+
+  const HandleValidateChore = (step = null) => {
+    let errors = {}
 
     if (name.trim() === '') {
       errors.name = t('choreEdit.errNameRequired')
+    }
+    if (assignStrategyValue !== 'no_assignee') {
+      if (assignees.length === 0) {
+        errors.assignees = 'Choose at least one eligible user'
+      }
+      if (assignedToValue === null || assignedToValue < 0) {
+        errors.assignedTo = 'Choose who is assigned to this task'
+      }
     }
     if (frequencyType === 'interval' && !frequency > 0) {
       errors.frequency = t('choreEdit.errFrequencyInvalid', {
@@ -266,18 +475,26 @@ const ChoreEdit = () => {
       }
     }
 
+    if (!completionActionsValid)
+      errors.completionActions = 'Check the completion actions and their values'
+
     // if there is any error then return false:
+    if (step !== null) {
+      const fields = [
+        ['name', 'description'],
+        ['frequency', 'dueDate', 'thingTrigger'],
+        ['assignees', 'assignedTo'],
+      ][step]
+      if (fields)
+        errors = Object.fromEntries(
+          Object.entries(errors).filter(([key]) => fields.includes(key)),
+        )
+    }
     setErrors(errors)
     if (Object.keys(errors).length > 0) {
-      // generate a list with error and set it in snackbar:
-
-      const errorList = Object.keys(errors).map(key => (
-        <ListItem key={key}>{errors[key]}</ListItem>
-      ))
-      showError({
-        title: t('choreEdit.errTitle'),
-        message: <List>{errorList}</List>,
-      })
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => focusError(Object.keys(errors)[0])),
+      )
       return false
     }
 
@@ -286,6 +503,11 @@ const ChoreEdit = () => {
 
   const handleDueDateChange = e => {
     const dateValue = e.target.value // YYYY-MM-DD format
+    if (!dateValue) {
+      setDueDateOnly(null)
+      setDueDate(null)
+      return
+    }
     setDueDateOnly(dateValue)
 
     // Combine date with time or end of day
@@ -368,7 +590,11 @@ const ChoreEdit = () => {
       }
     }
   }
-  const HandleSaveChore = () => {
+  // `shouldCreateAnother` is passed explicitly by the split-button menu so a
+  // menu pick performs the save right away instead of only changing the
+  // default (state updates wouldn't be visible to this call anyway).
+  const HandleSaveChore = (shouldCreateAnother = createAnother) => {
+    if (updateChoreMutation.isPending || createChoreMutation.isPending) return
     setAttemptToSave(true)
     if (!HandleValidateChore()) {
       console.log('validation failed')
@@ -410,6 +636,7 @@ const ChoreEdit = () => {
         templates: planReminders,
       },
       thingTrigger: thingTrigger,
+      completionActions,
       points: points < 0 ? null : points,
       requireApproval: requireApproval,
       isPrivate: isPrivate,
@@ -448,7 +675,11 @@ const ChoreEdit = () => {
             message: t('choreEdit.savedMessage'),
           })
         }
-        Navigate('/chores')
+        dirtyGuard.current = false
+        setSavedSnapshot(latestSnapshot.current)
+        Navigate(shouldCreateAnother ? '/chores/create' : '/chores', {
+          state: shouldCreateAnother ? { createAnother: true } : null,
+        })
       })
       .catch(error => {
         console.error('Failed to save chore:', error)
@@ -525,6 +756,17 @@ const ChoreEdit = () => {
     setShowSaveAssigneeDefault(dirty)
   }, [anyone, assignableTo])
 
+  // A task in a private project is always private: the project's privacy wins over
+  // the task's own setting, so keep the form in sync with the selected project.
+  const selectedProjectIsPrivate = Boolean(
+    projects.find(project => project.id === projectId)?.isPrivate,
+  )
+  useEffect(() => {
+    if (selectedProjectIsPrivate && !isPrivate) {
+      setIsPrivate(true)
+    }
+  }, [selectedProjectIsPrivate, isPrivate])
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = event => {
@@ -548,7 +790,7 @@ const ChoreEdit = () => {
       // Cmd/Ctrl + Escape key to cancel
       if (event.key === 'Escape' && (event.ctrlKey || event.metaKey)) {
         event.preventDefault()
-        window.history.back()
+        Navigate(choreId ? `/chores/${choreId}` : '/chores')
         return
       }
     }
@@ -585,7 +827,10 @@ const ChoreEdit = () => {
       setFrequency(data.res.frequency)
 
       setNotificationMetadata(data.res.notificationMetadata)
-      setPoints(data.res.points && data.res.points > -1 ? data.res.points : -1)
+      setCompletionActions(data.res.completionActions || [])
+      setPoints(
+        data.res.points != null && data.res.points >= 0 ? data.res.points : -1,
+      )
       setRequireApproval(data.res.requireApproval || false)
       setIsPrivate(data.res.isPrivate || false)
       setCompletionWindow(
@@ -685,6 +930,12 @@ const ChoreEdit = () => {
       setDueDateOnly(null)
       setUseCustomTime(false)
       setDueTime(null)
+    }
+    // backend rejects notification: true for these frequency types
+    // (forbidden_with_trigger_frequency), so clear it client-side too
+    if (NOTIFICATION_FORBIDDEN_TYPE.includes(frequencyType)) {
+      setIsNotificable(false)
+      setNotificationMetadata({})
     }
   }, [frequencyType])
 
@@ -793,6 +1044,21 @@ const ChoreEdit = () => {
       },
     })
   }
+  const changeWizardStep = next => {
+    if (next > wizardStep && !HandleValidateChore(wizardStep)) return
+    setWizardStep(next)
+    wizardBodyRef.current?.scrollTo({ top: 0 })
+    requestAnimationFrame(() => {
+      if (window.matchMedia('(min-width:600px)').matches)
+        window.scrollTo({ top: 0, behavior: 'instant' })
+    })
+  }
+  const assignmentSummary = anyone
+    ? 'Anyone in your circle'
+    : performers
+        .filter(user => assignableTo.some(a => a.userId === user.userId))
+        .map(user => user.displayName)
+        .join(', ') || 'No eligible users selected'
   if (
     (isChoreLoading && choreId) ||
     isUserLabelsLoading ||
@@ -802,259 +1068,1280 @@ const ChoreEdit = () => {
   ) {
     return <LoadingComponent />
   }
+  if (isChoreError && choreId) {
+    return (
+      <Container maxWidth='sm'>
+        <EmptyState
+          variant='error'
+          fullHeight
+          icon={<Checklist />}
+          title={t('choreView.notFoundTitle')}
+          description={t('choreView.notFoundDescription')}
+          primaryAction={{ label: t('archived.backToTasks'), to: '/chores' }}
+        />
+      </Container>
+    )
+  }
   return (
-    <Container
-      maxWidth='md'
-      sx={{ width: '100%', minWidth: 0, overflowX: 'hidden' }}
+    <WizardContainer
+      maxWidth={false}
+      onClose={() => Navigate(choreId ? `/chores/${choreId}` : '/chores')}
+      onClickCapture={captureInitialValues}
+      onChangeCapture={captureInitialValues}
+      onKeyDownCapture={captureInitialValues}
+      sx={{
+        p: 0,
+        maxWidth: 'none !important',
+        minHeight: { sm: 'calc(100dvh - 56px)' },
+        '@media (min-width: 1024px)': { minHeight: '100dvh' },
+        '& .task-editor-grid h4, & .task-editor-grid h5': {
+          fontSize: 14,
+          fontWeight: 500,
+          mb: 0.75,
+          color: 'text.secondary',
+        },
+        '& .task-editor-grid .MuiInput-root, & .task-editor-grid .MuiSelect-root, & .task-editor-grid .MuiAutocomplete-root':
+          { minHeight: 44, borderRadius: 'md', minWidth: 0 },
+        '& .task-properties': {
+          display: 'grid',
+          gridTemplateColumns: {
+            xs: 'minmax(0, 1fr)',
+            sm: 'repeat(2, minmax(0, 1fr))',
+          },
+          gap: 2,
+          alignItems: 'start',
+          '& > .MuiBox-root': { mb: 0 },
+          '& > :last-child:nth-child(3)': { gridColumn: '1 / -1' },
+        },
+        '& .task-editor-grid .MuiCard-root': { boxShadow: 'none' },
+        '& [data-wizard-name]': {
+          display: singlePageEditor || wizardStep === 0 ? 'block' : 'none',
+        },
+        '& [data-editor-section="task"]': {
+          display: singlePageEditor || wizardStep === 0 ? 'block' : 'none',
+        },
+        '& [data-editor-section="schedule"]': {
+          display: singlePageEditor || wizardStep === 1 ? 'block' : 'none',
+          ...(singlePageEditor
+            ? {}
+            : {
+                mt: '0 !important',
+                pt: '0 !important',
+                borderTop: '0 !important',
+              }),
+        },
+        '& [data-editor-section="assignment"]': {
+          display: singlePageEditor || wizardStep === 2 ? 'block' : 'none',
+          ...(singlePageEditor
+            ? {}
+            : {
+                mt: '0 !important',
+                pt: '0 !important',
+                borderTop: '0 !important',
+              }),
+        },
+        '& [data-editor-section="description"], & [data-editor-section="organization"], & [data-editor-section="subtasks"]':
+          { display: singlePageEditor || wizardStep === 0 ? 'block' : 'none' },
+        '& [data-editor-section="actions"], & [data-editor-section="notifications"], & [data-editor-section="window"], & [data-editor-section="privacy"], & [data-editor-section="metadata"]':
+          { display: singlePageEditor || wizardStep === 3 ? 'block' : 'none' },
+      }}
     >
-      {/* Section 1: Basic Information */}
-      <Box mb={4}>
-        {/* <Typography
-          level='h4'
-          mb={2}
-          sx={{ borderBottom: '2px solid', borderColor: 'primary.main', pb: 1 }}
+      <Sheet
+        sx={{
+          borderRadius: { xs: '20px 20px 0 0', sm: 0 },
+          border: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          height: { xs: 'auto', sm: 'calc(100dvh - 56px)' },
+          maxHeight: {
+            xs: 'calc(100dvh - 48px)',
+            sm: 'calc(100dvh - 56px)',
+          },
+          minHeight: { sm: 'calc(100dvh - 56px)' },
+          overflow: 'hidden',
+          '@media (min-width: 1024px)': {
+            height: '100dvh',
+            maxHeight: '100dvh',
+            minHeight: '100dvh',
+          },
+          bgcolor: { xs: 'background.surface', sm: 'transparent' },
+          boxShadow: { xs: 'sm', sm: 'none' },
+        }}
+      >
+        <Box
+          sx={{
+            display: { xs: 'block', sm: 'none' },
+            width: 36,
+            height: 4,
+            bgcolor: 'neutral.600',
+            borderRadius: 2,
+            mx: 'auto',
+            mt: 1.25,
+          }}
+        />
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 2,
+            px: { xs: 2, sm: 3 },
+            py: 2,
+            flexShrink: 0,
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+          }}
         >
-          Basic Information
-        </Typography> */}
-
-        <Box mb={3}>
-          <FormControl error={errors.name}>
-            <Typography level='h4'>{t('choreEdit.name')}</Typography>
-            <Typography level='body-md'>{t('choreEdit.nameDesc')}</Typography>
-            <Input value={name} onChange={e => setName(e.target.value)} />
-            <FormHelperText error>{errors.name}</FormHelperText>
-          </FormControl>
-        </Box>
-
-        <Box mb={3}>
-          <FormControl error={errors.description}>
-            <Typography level='h4'>{t('choreEdit.description')}</Typography>
-            <Typography level='body-md'>
-              {t('choreEdit.descriptionDesc')}
+          <Box>
+            <Typography level='h4'>
+              {choreId ? 'Edit task' : 'Create task'}
             </Typography>
-            <RichTextEditor
-              value={description}
-              onChange={setDescription}
-              entityId={choreId}
-              entityType={'chore_description'}
-              draftId={draftId}
-            />
-            <FormHelperText error>{errors.description}</FormHelperText>
-          </FormControl>
+          </Box>
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+            {isDirty && (
+              <Chip variant='soft' color='warning'>
+                {t('taskEditor.unsaved')}
+              </Chip>
+            )}
+            <IconButton
+              aria-label={t('taskEditor.closeTaskEditor')}
+              color='neutral'
+              variant='plain'
+              onClick={() =>
+                Navigate(choreId ? `/chores/${choreId}` : '/chores')
+              }
+              sx={{ display: { xs: 'inline-flex', sm: 'none' } }}
+            >
+              <Close />
+            </IconButton>
+          </Box>
         </Box>
-
-        <Box mb={3}>
-          <Typography level='h4'>{t('choreEdit.priority')}</Typography>
-          <Typography level='body-md'>{t('choreEdit.priorityDesc')}</Typography>
-
-          {/* Priority Chip Selection */}
+        {!singlePageEditor && (
           <Box
             sx={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 2,
-              mt: 2,
+              px: { xs: 2, sm: 3 },
+              py: 2,
+              borderBottom: '1px solid',
+              borderColor: 'divider',
+              flexShrink: 0,
             }}
           >
-            {/* Priority Chips P1-P4 */}
-            {Priorities.map(priorityItem => (
-              <Chip
-                key={priorityItem.value}
-                variant={priority === priorityItem.value ? 'solid' : 'outlined'}
-                color={
-                  priority === priorityItem.value
-                    ? priorityItem.color || 'primary'
-                    : 'neutral'
-                }
-                size='lg'
-                onClick={() => setPriority(priorityItem.value)}
-                startDecorator={priorityItem.icon}
-                sx={{
-                  fontWeight: 'md',
-                  cursor: 'pointer',
-                  minHeight: 34,
-                }}
-              >
-                {priorityItem.name}
-              </Chip>
-            ))}
-            {/* No Priority Chip */}
-            <Chip
-              variant={priority === 0 ? 'solid' : 'outlined'}
-              color='neutral'
-              size='lg'
-              onClick={() => setPriority(0)}
-              startDecorator={<HorizontalRule />}
+            <Typography
+              level='body-sm'
               sx={{
-                fontWeight: 'md',
-                cursor: 'pointer',
-                minHeight: 34,
+                display: { xs: 'block', sm: 'none' },
+                mb: name && wizardStep > 0 ? 1 : 0,
               }}
             >
-              {t('choreEdit.noPriority')}
-            </Chip>
-          </Box>
-        </Box>
-
-        {/* Project Selection - Show only if there are multiple projects */}
-        {projects.length >= 1 && (
-          <Box mb={3}>
-            <Typography level='h4'>{t('choreEdit.project')}</Typography>
-            <Typography level='body-md'>
-              {t('choreEdit.projectDesc')}
+              {t('taskEditor.step')}
+              {wizardStep + 1}
+              {t('taskEditor.of4')}
+              {wizardSteps[wizardStep]}
             </Typography>
-            <Select
-              value={projectId}
-              onChange={(event, newValue) => setProjectId(newValue)}
-              defaultValue='default'
-              sx={{ minWidth: '15rem' }}
-            >
-              {/*               id: 'default',
-              name: 'Default Project',
-              color: LABEL_COLORS[0].value,
-              icon: 'FolderOpen',
-               */}
-              <Option key='default' value='default'>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Avatar
-                    size='sm'
+            <WizardStepper
+              steps={wizardSteps}
+              activeStep={wizardStep}
+              onStepChange={changeWizardStep}
+              sx={{ mb: name && wizardStep > 0 ? 2 : 0 }}
+            />
+            {name && wizardStep > 0 && (
+              <Sheet
+                variant='soft'
+                sx={{
+                  px: 1.5,
+                  py: 1,
+                  borderRadius: 'md',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                }}
+              >
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography
+                    level='title-sm'
                     sx={{
-                      width: 24,
-                      height: 24,
-                      bgcolor: '#1976d2',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
                     }}
                   >
-                    {(() => {
-                      const IconComponent = getIconComponent('FolderOpen')
-                      return (
-                        <IconComponent
-                          sx={{
-                            fontSize: 14,
-                            color: getTextColorFromBackgroundColor('#1976d2'),
-                          }}
-                        />
-                      )
-                    })()}
-                  </Avatar>
-                  {t('choreEdit.defaultProject')}
+                    {name}
+                  </Typography>
+                  <Typography level='body-xs'>
+                    {t('taskEditor.task')}
+                  </Typography>
                 </Box>
-              </Option>
-              {projects.map(project => (
-                <Option key={project.id} value={project.id}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Avatar
-                      size='sm'
-                      sx={{
-                        width: 24,
-                        height: 24,
-                        bgcolor: project.color || '#1976d2',
-                      }}
-                    >
-                      {project.icon ? (
-                        (() => {
-                          const IconComponent = getIconComponent(project.icon)
-                          return (
-                            <IconComponent
-                              sx={{
-                                fontSize: 14,
-                                color: getTextColorFromBackgroundColor(
-                                  project.color || '#1976d2',
-                                ),
-                              }}
-                            />
-                          )
-                        })()
-                      ) : (
-                        <></>
-                      )}
-                    </Avatar>
-                    {project.name}
-                  </Box>
-                </Option>
-              ))}
-            </Select>
+                <IconButton
+                  aria-label={t('taskEditor.editTaskDetails')}
+                  size='sm'
+                  onClick={() => changeWizardStep(0)}
+                >
+                  <EditOutlined sx={{ fontSize: 18 }} />
+                </IconButton>
+              </Sheet>
+            )}
           </Box>
         )}
+        <Box
+          ref={wizardBodyRef}
+          tabIndex={-1}
+          role='region'
+          aria-label={
+            singlePageEditor ? 'Task settings' : wizardSteps[wizardStep]
+          }
+          sx={{
+            minHeight: 0,
+            outline: 0,
+            overflowY: 'auto',
+            flex: 1,
+          }}
+        >
+          {Object.keys(errors).length > 0 && (
+            <Alert color='danger' variant='soft' sx={{ mb: 2 }}>
+              <Box>
+                <Typography level='title-sm'>
+                  {t('taskEditor.checkTheseSettingsBeforeSaving')}
+                </Typography>
+                {Object.entries(errors).map(([key, message]) => (
+                  <Button
+                    key={key}
+                    variant='plain'
+                    color='danger'
+                    size='sm'
+                    onClick={() => focusError(key)}
+                  >
+                    {message}
+                  </Button>
+                ))}
+              </Box>
+            </Alert>
+          )}
+          {!singlePageEditor && wizardStep === 3 && (
+            <Box
+              data-wizard-review
+              tabIndex={-1}
+              sx={{ px: { xs: 2, sm: 3 }, py: 2.5 }}
+            >
+              <Typography level='title-lg'>
+                {t('taskEditor.reviewTask')}
+              </Typography>
+              <Typography
+                level='body-sm'
+                textColor='text.tertiary'
+                sx={{ mb: 2 }}
+              >
+                {t('taskEditor.checkTheDetailsThen')}{' '}
+                {choreId ? 'save your changes' : 'create your task'}.
+              </Typography>
+              {[
+                { label: 'Task', value: name, step: 0 },
+                { label: 'Schedule', value: scheduleSummary, step: 1 },
+                { label: 'Assignment', value: assignmentSummary, step: 2 },
+              ].map(item => (
+                <Sheet
+                  key={item.label}
+                  variant='outlined'
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    px: 1.5,
+                    py: 1.5,
+                    mb: 1,
+                    borderRadius: 'md',
+                  }}
+                >
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography level='body-xs' textColor='text.tertiary'>
+                      {item.label}
+                    </Typography>
+                    <Typography
+                      level='title-sm'
+                      sx={{ overflowWrap: 'anywhere' }}
+                    >
+                      {item.value}
+                    </Typography>
+                  </Box>
+                  <IconButton
+                    aria-label={'Edit ' + item.label.toLowerCase()}
+                    onClick={() => changeWizardStep(item.step)}
+                  >
+                    <EditOutlined sx={{ fontSize: 18 }} />
+                  </IconButton>
+                </Sheet>
+              ))}
+            </Box>
+          )}
+          <Box className='task-editor-grid'>
+            <EditorSection
+              title={t('taskEditor.name')}
+              icon={TitleOutlined}
+              section='task'
+              hideHeading={!singlePageEditor}
+              collapsible={singlePageEditor}
+              defaultOpen
+              error={
+                errors.name ||
+                errors.assignees ||
+                errors.assignedTo ||
+                errors.frequency ||
+                errors.dueDate ||
+                errors.thingTrigger
+              }
+              summary={name}
+            >
+              <Box data-wizard-name>
+                <FormControl error={errors.name}>
+                  {!singlePageEditor && (
+                    <Typography level='h4'>
+                      {t('taskEditor.taskName')}
+                    </Typography>
+                  )}
+                  <Input
+                    aria-label={t('taskEditor.taskName2')}
+                    placeholder={t('taskEditor.whatNeedsToBeDone')}
+                    sx={{ minHeight: 48, fontSize: 'lg' }}
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                  />
+                  <FormHelperText error>{errors.name}</FormHelperText>
+                </FormControl>
+              </Box>
+            </EditorSection>
 
-        <Box mb={3}>
-          <Typography level='h4'>{t('choreEdit.labels')}</Typography>
-          <Typography level='body-md'>{t('choreEdit.labelsDesc')}</Typography>
-          <Select
-            multiple
-            onChange={(event, newValue) => {
-              setLabelsV2(userLabels.filter(l => newValue.indexOf(l.name) > -1))
-            }}
-            value={labelsV2?.map(l => l.name)}
-            renderValue={selected => (
+            <EditorSection
+              title={t('taskEditor.schedule')}
+              icon={CalendarMonthOutlined}
+              section='schedule'
+              collapsible
+              defaultOpen
+              error={errors.frequency || errors.dueDate || errors.thingTrigger}
+              summary={scheduleSummary}
+            >
+              <Typography
+                level='body-sm'
+                textColor='text.tertiary'
+                sx={{ mb: 2 }}
+              >
+                {t('taskEditor.chooseWhenThisTaskIsDueAnd')}
+              </Typography>
+
+              <RepeatSection
+                frequency={frequency}
+                onFrequencyUpdate={setFrequency}
+                frequencyType={frequencyType}
+                onFrequencyTypeUpdate={value => {
+                  setFrequencyType(value)
+                  if (value === 'always') {
+                    setDueDate(null)
+                    setDueDateOnly(null)
+                    setDueTime(null)
+                    setUseCustomTime(false)
+                  }
+                }}
+                frequencyMetadata={frequencyMetadata}
+                onFrequencyMetadataUpdate={setFrequencyMetadata}
+                frequencyError={errors?.frequency}
+                allUserThings={allUserThings}
+                onTriggerUpdate={thingUpdate => {
+                  if (thingUpdate === null) {
+                    setThingTrigger(null)
+                    return
+                  }
+                  setThingTrigger({
+                    triggerState: thingUpdate.triggerState,
+                    condition: thingUpdate.condition,
+                    thingID: thingUpdate.thing.id,
+                  })
+                }}
+                OnTriggerValidate={setIsThingValid}
+                isAttemptToSave={attemptToSave}
+                selectedThing={thingTrigger}
+              />
+
+              {frequencyType !== 'always' &&
+                (frequencyType !== 'trigger' || dueDate) && (
+                  <Box mt={3} mb={2}>
+                    <Typography level='h4'>
+                      {choreId ? 'Next due date' : 'First due date'}
+                    </Typography>
+                    {frequencyType === 'trigger' && !dueDate && (
+                      <Typography level='body-sm'>
+                        {t('taskEditor.theTaskBecomesDueWhenItsThing')}
+                      </Typography>
+                    )}
+
+                    <Box
+                      sx={{
+                        display: 'grid',
+                        gridTemplateColumns: {
+                          xs: 'minmax(0, 1fr)',
+                          sm: 'repeat(2, minmax(0, 1fr))',
+                        },
+                        gap: 2,
+                        mt: 2,
+                        alignItems: 'start',
+                      }}
+                    >
+                      <FormControl error={Boolean(errors.dueDate)}>
+                        <Typography level='h4'>
+                          {REPEAT_ON_TYPE.includes(frequencyType)
+                            ? 'Start date'
+                            : 'Date'}
+                        </Typography>
+                        <Input
+                          type='date'
+                          aria-label={t('taskEditor.dueDate')}
+                          value={dueDateOnly || ''}
+                          onChange={handleDueDateChange}
+                        />
+                        {dueDate && (
+                          <Button
+                            size='sm'
+                            variant='plain'
+                            color='neutral'
+                            sx={{ alignSelf: 'flex-start', mt: 0.5 }}
+                            onClick={() => {
+                              setDueDate(null)
+                              setDueDateOnly(null)
+                              setDueTime(null)
+                              setUseCustomTime(false)
+                            }}
+                          >
+                            {t('actionMenu.removeDueDate')}
+                          </Button>
+                        )}
+                        {errors.dueDate && (
+                          <FormHelperText>{errors.dueDate}</FormHelperText>
+                        )}
+                      </FormControl>
+                      <FormControl>
+                        <Typography level='h4'>
+                          {t('taskEditor.time')}
+                        </Typography>
+                        {useCustomTime ? (
+                          <Input
+                            type='time'
+                            aria-label={t('taskEditor.dueTime')}
+                            value={dueTime || '18:00'}
+                            onChange={handleDueTimeChange}
+                          />
+                        ) : (
+                          <Button
+                            variant='outlined'
+                            color='neutral'
+                            onClick={() => handleUseCustomTimeChange(true)}
+                            sx={{
+                              minHeight: 44,
+                              justifyContent: 'flex-start',
+                              fontWeight: 400,
+                            }}
+                          >
+                            {t('taskEditor.addATime')}
+                          </Button>
+                        )}
+                        {useCustomTime && (
+                          <Button
+                            size='sm'
+                            variant='plain'
+                            color='neutral'
+                            sx={{ alignSelf: 'flex-start', mt: 0.5 }}
+                            onClick={() => handleUseCustomTimeChange(false)}
+                          >
+                            {t('taskEditor.removeTime')}
+                          </Button>
+                        )}
+                      </FormControl>
+                    </Box>
+                  </Box>
+                )}
+
+              {!['once', 'no_repeat', 'trigger', 'always'].includes(
+                frequencyType,
+              ) && (
+                <Box>
+                  <Typography level='h4'>
+                    {t('choreEdit.schedulingPrefs')}
+                  </Typography>
+                  <RadioGroup name='tiers' sx={{ gap: 1, '& > div': { p: 1 } }}>
+                    <FormControl>
+                      <Radio
+                        overlay
+                        checked={!isRolling}
+                        onClick={() => setIsRolling(false)}
+                        label={t('choreEdit.rescheduleFromDue')}
+                      />
+                      <FormHelperText>
+                        {t('taskEditor.theNextOccurrenceIsScheduledFromThe')}
+                      </FormHelperText>
+                    </FormControl>
+                    <FormControl>
+                      <Radio
+                        overlay
+                        checked={isRolling}
+                        onClick={() => {
+                          setIsRolling(true)
+                          setDeadlineOffset(-1)
+                        }}
+                        label={t('choreEdit.rescheduleFromCompletion')}
+                      />
+                      <FormHelperText>
+                        {t('taskEditor.theNextOccurrenceIsScheduledFromThe2')}
+                      </FormHelperText>
+                    </FormControl>
+                  </RadioGroup>
+                </Box>
+              )}
+            </EditorSection>
+
+            <EditorSection
+              title={t('choreView.assignment')}
+              icon={GroupOutlined}
+              section='assignment'
+              collapsible
+              defaultOpen
+              error={errors.assignees || errors.assignedTo}
+              summary={assignmentSummary}
+            >
+              <Box mb={2}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 1,
+                    mb: 1,
+                  }}
+                >
+                  <Typography level='h4' sx={{ mb: '0 !important' }}>
+                    {t('taskEditor.assignTo')}
+                  </Typography>
+                  {!showSaveAssigneeDefault && (
+                    <Chip
+                      size='sm'
+                      variant='soft'
+                      color='neutral'
+                      startDecorator={<Check sx={{ fontSize: 14 }} />}
+                    >
+                      {t('taskEditor.savedDefault')}
+                    </Chip>
+                  )}
+                  {showSaveAssigneeDefault && (
+                    <Box sx={{ display: 'flex', justifyContent: 'start' }}>
+                      <Button
+                        variant='plain'
+                        size='sm'
+                        color='neutral'
+                        startDecorator={<Save sx={{ fontSize: 16 }} />}
+                        sx={{
+                          borderRadius: 6,
+                          fontWeight: 500,
+                          '&:hover': {
+                            background: 'neutral.softHoverBg',
+                          },
+                        }}
+                        onClick={() => {
+                          localStorage.setItem(
+                            'defaultAnyoneSetting',
+                            JSON.stringify(anyone),
+                          )
+                          localStorage.setItem(
+                            'defaultAssigneeSetting',
+                            JSON.stringify(assignableTo),
+                          )
+                          setShowSaveAssigneeDefault(false)
+                        }}
+                      >
+                        {t('taskEditor.useAsDefault')}
+                      </Button>
+                    </Box>
+                  )}
+                </Box>
+                <Typography
+                  level='body-sm'
+                  textColor='text.tertiary'
+                  sx={{ mb: 1.5 }}
+                >
+                  {t('taskEditor.chooseWhoCanBeAssignedThisTask')}
+                </Typography>
+                <Card variant='plain' sx={{ p: 0, bgcolor: 'transparent' }}>
+                  <List
+                    orientation='horizontal'
+                    wrap
+                    sx={{
+                      '--List-gap': '8px',
+                      '--ListItem-radius': '20px',
+                      p: 0,
+                      '& .MuiListItem-root': { minHeight: 36, px: 1.5 },
+                    }}
+                  >
+                    {/* add one for Anyone if no specific assignee is selected */}
+
+                    <ListItem
+                      key={'anyone'}
+                      sx={{
+                        border: '1px solid',
+                        borderColor: anyone
+                          ? 'primary.outlinedBorder'
+                          : 'neutral.outlinedBorder',
+                        bgcolor: anyone
+                          ? 'primary.softBg'
+                          : 'background.surface',
+                      }}
+                    >
+                      <Checkbox
+                        checked={anyone}
+                        onClick={() => {
+                          setAnyone(!anyone)
+                          setIsPrivate(false)
+                        }}
+                        overlay
+                        disableIcon
+                        variant='plain'
+                        label={
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 0.75,
+                            }}
+                          >
+                            {t('choreEdit.anyone')}
+                            {anyone && <Check sx={{ fontSize: 16 }} />}
+                          </Box>
+                        }
+                      />
+                    </ListItem>
+
+                    {performers?.map((item, index) => (
+                      <ListItem
+                        key={item.id}
+                        sx={{
+                          border: '1px solid',
+                          borderColor:
+                            !anyone &&
+                            assignableTo.some(a => a.userId === item.userId)
+                              ? 'primary.outlinedBorder'
+                              : 'neutral.outlinedBorder',
+                          bgcolor:
+                            !anyone &&
+                            assignableTo.some(a => a.userId === item.userId)
+                              ? 'primary.softBg'
+                              : 'background.surface',
+                        }}
+                      >
+                        <Checkbox
+                          checked={
+                            !anyone &&
+                            assignableTo.some(a => a.userId == item.userId)
+                          }
+                          onClick={() => {
+                            if (anyone) {
+                              setAnyone(false)
+                              setAssignableTo([{ userId: item.userId }])
+                              return
+                            }
+                            const assignees = assignableTo
+                            const setAssignees = setAssignableTo
+                            if (assignees.some(a => a.userId === item.userId)) {
+                              const newAssignees = assignees.filter(
+                                a => a.userId !== item.userId,
+                              )
+                              setAnyone(newAssignees.length === 0)
+                              setAssignees(newAssignees)
+                            } else {
+                              setAssignees([
+                                ...assignees,
+                                { userId: item.userId },
+                              ])
+                            }
+                          }}
+                          overlay
+                          disableIcon
+                          variant='plain'
+                          label={
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 0.75,
+                              }}
+                            >
+                              <Avatar
+                                sx={{ width: 22, height: 22, fontSize: 12 }}
+                                color='primary'
+                              >
+                                {item.displayName?.charAt(0).toUpperCase()}
+                              </Avatar>
+                              {item.displayName}
+                              {!anyone &&
+                                assignableTo.some(
+                                  a => a.userId === item.userId,
+                                ) && <Check sx={{ fontSize: 16 }} />}
+                            </Box>
+                          }
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
+                </Card>
+                <Typography
+                  level='body-xs'
+                  textColor='text.tertiary'
+                  sx={{ mt: 1 }}
+                >
+                  {!showSaveAssigneeDefault
+                    ? 'This assignment matches your default for new tasks in this browser.'
+                    : 'Use as default applies this assignment to new tasks in this browser.'}
+                </Typography>
+                {(errors.assignees || errors.assignedTo) && (
+                  <FormControl
+                    error={Boolean(errors.assignees || errors.assignedTo)}
+                  >
+                    <FormHelperText>
+                      {errors.assignees || errors.assignedTo}
+                    </FormHelperText>
+                  </FormControl>
+                )}
+              </Box>
+
+              {assignees.length > 1 && (
+                <Box className='task-properties'>
+                  <Box mb={2}>
+                    <Typography level='h4'>
+                      {t('taskEditor.assignedNow')}
+                    </Typography>
+                    <Select
+                      placeholder={
+                        assignees.length === 0
+                          ? 'No Assignees yet can perform this task'
+                          : 'Select an assignee for this task'
+                      }
+                      disabled={assignees.length === 0}
+                      value={assignedTo > -1 ? assignedTo : null}
+                      onChange={(_, selectedUserId) =>
+                        setAssignedTo(selectedUserId)
+                      }
+                    >
+                      {performers
+                        ?.filter(p => assignees.some(a => a.userId == p.userId))
+                        .map((item, index) => (
+                          <Option value={item.userId} key={item.displayName}>
+                            {item.displayName}
+                          </Option>
+                        ))}
+                    </Select>
+                  </Box>
+
+                  <Box>
+                    <Typography level='h4'>
+                      {t('taskEditor.nextAssignment')}
+                    </Typography>
+                    <Select
+                      aria-label={t('taskEditor.nextAssignment')}
+                      value={assignStrategy}
+                      onChange={(_, value) => {
+                        if (value) setAssignStrategy(value)
+                      }}
+                    >
+                      {ASSIGN_STRATEGIES.map(value => (
+                        <Option key={value} value={value}>
+                          {STRATEGY_LABELS[value]}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Box>
+                </Box>
+              )}
+            </EditorSection>
+            <EditorSection
+              title={t('taskEditor.descriptionAttachments')}
+              icon={DescriptionOutlined}
+              section='description'
+              collapsible={!singlePageEditor}
+              defaultOpen
+              error={errors.description}
+              summary={
+                [
+                  description.replace(/<[^>]*>/g, '').trim()
+                    ? 'Instructions added'
+                    : '',
+                  attachments.length
+                    ? `${attachments.length} file${attachments.length === 1 ? '' : 's'}`
+                    : '',
+                ]
+                  .filter(Boolean)
+                  .join(' · ') || 'Instructions, notes and supporting files'
+              }
+            >
+              <Box mb={2}>
+                <FormControl error={errors.description}>
+                  <RichTextEditor
+                    value={description}
+                    onChange={setDescription}
+                    entityId={choreId}
+                    entityType={'chore_description'}
+                    draftId={draftId}
+                  />
+                  <FormHelperText error>{errors.description}</FormHelperText>
+                </FormControl>
+              </Box>
               <Box
                 sx={{
                   display: 'flex',
                   flexWrap: 'wrap',
-                  gap: '0.25rem',
-                  minWidth: 0,
-                  maxWidth: '100%',
-                  overflow: 'hidden',
+                  gap: 1,
+                  mb: attachments.length ? 2 : 0,
                 }}
               >
-                {labelsV2.map(selectedOption => {
-                  return (
-                    <Chip
-                      variant='soft'
-                      color='primary'
-                      key={selectedOption.id}
-                      size='lg'
-                      sx={{
-                        background: selectedOption.color,
-                        color: getTextColorFromBackgroundColor(
-                          selectedOption.color,
-                        ),
-                      }}
-                    >
-                      {selectedOption.name}
-                    </Chip>
-                  )
-                })}
-              </Box>
-            )}
-            sx={{ width: '100%', minWidth: 0, maxWidth: '100%' }}
-            slotProps={{
-              listbox: {
-                sx: {
-                  width: '100%',
-                },
-              },
-            }}
-          >
-            {userLabels &&
-              userLabels.map(label => (
-                <Option key={label.id + label.name} value={label.name}>
-                  <div
-                    style={{
-                      width: '20 px',
-                      height: '20 px',
-                      borderRadius: '50%',
-                      background: label.color,
+                <Button
+                  component='label'
+                  variant='outlined'
+                  color='neutral'
+                  size='sm'
+                  startDecorator={isUploadingAttachment ? null : <UploadFile />}
+                  loading={isUploadingAttachment}
+                  sx={{ flexShrink: 0 }}
+                >
+                  {t('taskEditor.uploadAttachment')}
+                  <input
+                    type='file'
+                    hidden
+                    onChange={async e => {
+                      const file = e.target.files[0]
+                      if (!file) return
+                      setIsUploadingAttachment(true)
+                      try {
+                        const response = choreId
+                          ? await UploadChoreAttachment(
+                              file,
+                              'chore_attachment',
+                              {
+                                entityId: choreId,
+                              },
+                            )
+                          : await UploadChoreAttachment(
+                              file,
+                              'chore_attachment_draft',
+                              { draftId },
+                            )
+                        if (!response.ok) {
+                          showError({
+                            title: 'Upload Failed',
+                            message: 'Failed to upload attachment.',
+                          })
+                          return
+                        }
+                        const data = await response.json()
+                        setAttachments(prev => [
+                          ...prev,
+                          {
+                            file_path: data.path,
+                            file_name: data.file_name,
+                            size_bytes: data.size_bytes,
+                            sign: data.sign,
+                          },
+                        ])
+                      } catch {
+                        showError({
+                          title: 'Upload Failed',
+                          message: 'Failed to upload attachment.',
+                        })
+                      } finally {
+                        setIsUploadingAttachment(false)
+                        e.target.value = ''
+                      }
                     }}
                   />
-                  {label.name}
-                </Option>
-              ))}
-            <MenuItem
-              key={'addNewLabel'}
-              value={' New Label'}
-              onClick={() => {
-                setAddLabelModalOpen(true)
-              }}
-            >
-              <Add />
-              {t('choreEdit.addNewLabel')}
-            </MenuItem>
-          </Select>
-        </Box>
+                </Button>
+                {isNativeScanner && (
+                  <Button
+                    variant='outlined'
+                    color='neutral'
+                    size='sm'
+                    startDecorator={<DocumentScanner />}
+                    disabled={isUploadingAttachment}
+                    onClick={handleScanAttachment}
+                  >
+                    {t('choreEdit.scan')}
+                  </Button>
+                )}
+              </Box>
+              {attachments.length > 0 && (
+                <Box sx={{ mt: 0 }}>
+                  <Box>
+                    {attachments.length > 0 && (
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: 1,
+                          mb: 1.5,
+                        }}
+                      >
+                        {attachments.map((att, idx) => (
+                          <Box
+                            key={att.file_path || idx}
+                            onClick={async () => {
+                              const url = await getImageSrc(
+                                att.file_path,
+                                att.sign ? resolvePhotoURL(att.sign) : null,
+                                { choreId, kind: 'attachment' },
+                              ).catch(() =>
+                                resolvePhotoURL(att.sign || att.file_path),
+                              )
+                              const ext = (att.file_name || '')
+                                .split('.')
+                                .pop()
+                                .toLowerCase()
+                              const isImage = [
+                                'jpg',
+                                'jpeg',
+                                'png',
+                                'gif',
+                                'webp',
+                                'bmp',
+                                'svg',
+                              ].includes(ext)
+                              if (isImage) {
+                                setAttachmentViewerConfig({
+                                  isOpen: true,
+                                  url,
+                                  fileName: att.file_name,
+                                  onClose: () =>
+                                    setAttachmentViewerConfig({
+                                      isOpen: false,
+                                    }),
+                                })
+                              } else {
+                                const a = document.createElement('a')
+                                a.href = url
+                                a.download = att.file_name || 'attachment'
+                                document.body.appendChild(a)
+                                a.click()
+                                document.body.removeChild(a)
+                              }
+                            }}
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 1,
+                              p: 1,
+                              borderRadius: 'sm',
+                              border: '1px solid',
+                              borderColor: 'neutral.outlinedBorder',
+                              cursor: 'pointer',
+                              '&:hover': { bgcolor: 'neutral.softHoverBg' },
+                            }}
+                          >
+                            <AttachFile
+                              sx={{ fontSize: 18, color: 'neutral.500' }}
+                            />
+                            <Typography
+                              level='body-sm'
+                              sx={{ flex: 1, wordBreak: 'break-all' }}
+                            >
+                              {att.file_name}
+                            </Typography>
+                            {att.size_bytes && (
+                              <Typography level='body-xs' color='neutral'>
+                                {(att.size_bytes / 1024).toFixed(1)}
+                                {t('taskEditor.kb')}
+                              </Typography>
+                            )}
+                            {choreId && (
+                              <IconButton
+                                size='sm'
+                                variant='plain'
+                                color='danger'
+                                onClick={event => {
+                                  event.stopPropagation()
+                                  DeleteChoreAttachment(choreId, att.file_path)
+                                    .then(() => {
+                                      removeCachedImage(att.file_path)
+                                      setAttachments(prev =>
+                                        prev.filter(
+                                          a => a.file_path !== att.file_path,
+                                        ),
+                                      )
+                                    })
+                                    .catch(() => {
+                                      showError({
+                                        title: 'Delete Failed',
+                                        message: 'Failed to delete attachment.',
+                                      })
+                                    })
+                                }}
+                              >
+                                <Delete sx={{ fontSize: 18 }} />
+                              </IconButton>
+                            )}
+                            {!choreId && (
+                              <IconButton
+                                size='sm'
+                                variant='plain'
+                                color='danger'
+                                onClick={event => {
+                                  event.stopPropagation()
+                                  // Draft uploads live server-side too — delete there
+                                  // so they are not promoted onto the chore on save.
+                                  DeleteDraftAttachment(att.file_path)
+                                    .then(() => {
+                                      setAttachments(prev =>
+                                        prev.filter((_, i) => i !== idx),
+                                      )
+                                    })
+                                    .catch(() => {
+                                      showError({
+                                        title: 'Delete Failed',
+                                        message: 'Failed to delete attachment.',
+                                      })
+                                    })
+                                }}
+                              >
+                                <Delete sx={{ fontSize: 18 }} />
+                              </IconButton>
+                            )}
+                          </Box>
+                        ))}
+                      </Box>
+                    )}
+                  </Box>
+                </Box>
+              )}
+            </EditorSection>
 
-        <Box>
-          <Typography level='h4'>{t('choreEdit.subTasks')}</Typography>
-          {/* <FormControl sx={{ mt: 1 }}>
+            <EditorSection
+              title={t('taskEditor.organization')}
+              icon={LabelOutlined}
+              section='organization'
+              collapsible={!singlePageEditor}
+              summary={[
+                priority
+                  ? Priorities.find(
+                      item => item.value === priority,
+                    )?.name.trim()
+                  : 'No priority',
+                projectId !== 'default'
+                  ? projects.find(item => item.id === projectId)?.name
+                  : '',
+                labelsV2.length
+                  ? `${labelsV2.length} label${labelsV2.length === 1 ? '' : 's'}`
+                  : '',
+              ]
+                .filter(Boolean)
+                .join(' · ')}
+            >
+              <Box className='task-properties'>
+                <FormControl>
+                  <Typography level='h4'>{t('choreEdit.priority')}</Typography>
+                  <Select
+                    aria-label={t('choreEdit.priority')}
+                    value={priority}
+                    onChange={(_, value) => {
+                      if (value !== null) setPriority(value)
+                    }}
+                    startDecorator={
+                      Priorities.find(item => item.value === priority)
+                        ?.icon || <HorizontalRule />
+                    }
+                  >
+                    <Option value={0}>{t('taskEditor.noPriority')}</Option>
+                    {Priorities.map(item => (
+                      <Option key={item.value} value={item.value}>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1,
+                            color: item.color
+                              ? `${item.color}.500`
+                              : 'text.primary',
+                          }}
+                        >
+                          {item.icon}
+                          {item.name.trim()}
+                        </Box>
+                      </Option>
+                    ))}
+                  </Select>
+                </FormControl>
+                {/* Project Selection - Show only if there are multiple projects */}
+                {projects.length >= 1 && (
+                  <Box mb={2}>
+                    <Typography level='h4'>{t('choreEdit.project')}</Typography>
+                    <Select
+                      value={projectId}
+                      onChange={(event, newValue) => setProjectId(newValue)}
+                      defaultValue='default'
+                      sx={{ minWidth: 0, width: '100%' }}
+                    >
+                      {/*               id: 'default',
+              name: 'Default Project',
+              color: LABEL_COLORS[0].value,
+              icon: 'FolderOpen',
+               */}
+                      <Option key='default' value='default'>
+                        <Box
+                          sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                        >
+                          <Avatar
+                            size='sm'
+                            sx={{
+                              width: 24,
+                              height: 24,
+                              bgcolor: '#1976d2',
+                            }}
+                          >
+                            {(() => {
+                              const IconComponent =
+                                getIconComponent('FolderOpen')
+                              return (
+                                <IconComponent
+                                  sx={{
+                                    fontSize: 14,
+                                    color:
+                                      getTextColorFromBackgroundColor(
+                                        '#1976d2',
+                                      ),
+                                  }}
+                                />
+                              )
+                            })()}
+                          </Avatar>
+                          {t('choreEdit.defaultProject')}
+                        </Box>
+                      </Option>
+                      {projects.map(project => (
+                        <Option key={project.id} value={project.id}>
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 1,
+                            }}
+                          >
+                            <Avatar
+                              size='sm'
+                              sx={{
+                                width: 24,
+                                height: 24,
+                                bgcolor: project.color || '#1976d2',
+                              }}
+                            >
+                              {project.icon ? (
+                                (() => {
+                                  const IconComponent = getIconComponent(
+                                    project.icon,
+                                  )
+                                  return (
+                                    <IconComponent
+                                      sx={{
+                                        fontSize: 14,
+                                        color: getTextColorFromBackgroundColor(
+                                          project.color || '#1976d2',
+                                        ),
+                                      }}
+                                    />
+                                  )
+                                })()
+                              ) : (
+                                <></>
+                              )}
+                            </Avatar>
+                            {project.name}
+                          </Box>
+                        </Option>
+                      ))}
+                    </Select>
+                  </Box>
+                )}
+
+                <Box mb={2}>
+                  <Typography level='h4'>{t('choreEdit.labels')}</Typography>
+                  <Select
+                    multiple
+                    onChange={(event, newValue) => {
+                      setLabelsV2(
+                        userLabels.filter(l => newValue.indexOf(l.name) > -1),
+                      )
+                    }}
+                    placeholder={t('taskEditor.addLabels')}
+                    value={labelsV2?.map(l => l.name)}
+                    renderValue={selected => (
+                      <Box sx={{ display: 'flex', gap: '0.25rem' }}>
+                        {labelsV2.map(selectedOption => {
+                          return (
+                            <Chip
+                              variant='soft'
+                              color='primary'
+                              key={selectedOption.id}
+                              size='lg'
+                              sx={{
+                                background: selectedOption.color,
+                                color: getTextColorFromBackgroundColor(
+                                  selectedOption.color,
+                                ),
+                              }}
+                            >
+                              {selectedOption.name}
+                            </Chip>
+                          )
+                        })}
+                      </Box>
+                    )}
+                    sx={{ minWidth: 0, width: '100%' }}
+                    slotProps={{
+                      listbox: {
+                        sx: {
+                          width: '100%',
+                        },
+                      },
+                    }}
+                  >
+                    {userLabels &&
+                      userLabels.map(label => (
+                        <Option key={label.id + label.name} value={label.name}>
+                          <div
+                            style={{
+                              width: '20 px',
+                              height: '20 px',
+                              borderRadius: '50%',
+                              background: label.color,
+                            }}
+                          />
+                          {label.name}
+                        </Option>
+                      ))}
+                    <MenuItem
+                      key={'addNewLabel'}
+                      value={' New Label'}
+                      onClick={() => {
+                        setAddLabelModalOpen(true)
+                      }}
+                    >
+                      <Add />
+                      {t('choreEdit.addNewLabel')}
+                    </MenuItem>
+                  </Select>
+                </Box>
+              </Box>
+            </EditorSection>
+            <Box>
+              <EditorSection
+                title={t('taskEditor.subtasks')}
+                icon={Checklist}
+                section='subtasks'
+                collapsible={!singlePageEditor}
+                defaultOpen={Boolean(subTasks?.length)}
+                summary={
+                  subTasks?.length
+                    ? `${subTasks.length} subtask${subTasks.length === 1 ? '' : 's'}`
+                    : 'A checklist of steps to complete this task'
+                }
+              >
+                <Box>
+                  {/* <FormControl sx={{ mt: 1 }}>
             <Checkbox
               onChange={e => {
                 if (e.target.checked) {
@@ -1069,534 +2356,273 @@ const ChoreEdit = () => {
             />
             <FormHelperText>Break this task into smaller steps</FormHelperText>
           </FormControl> */}
-          <Card
-            variant='outlined'
-            sx={{
-              p: 1,
-              mt: 2,
-            }}
-          >
-            <SubTasks
-              editMode={true}
-              tasks={subTasks ? subTasks : []}
-              setTasks={setSubTasks}
-              choreId={choreId}
-            />
-          </Card>
-        </Box>
-
-        <Box mt={3}>
-          <Typography level='h4'>{t('choreEdit.attachments')}</Typography>
-          <Typography level='body-md'>
-            {t('choreEdit.attachmentsDesc')}
-          </Typography>
-          <Card variant='outlined' sx={{ mt: 2, p: 1.5 }}>
-            {attachments.length > 0 && (
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 1,
-                  mb: 1.5,
-                }}
-              >
-                {attachments.map((att, idx) => (
-                  <Box
-                    key={att.file_path || idx}
-                    onClick={async () => {
-                      const url = await getImageSrc(
-                        att.file_path,
-                        att.sign ? resolvePhotoURL(att.sign) : null,
-                        { choreId, kind: 'attachment' },
-                      ).catch(() => resolvePhotoURL(att.sign || att.file_path))
-                      const ext = (att.file_name || '')
-                        .split('.')
-                        .pop()
-                        .toLowerCase()
-                      const isImage = [
-                        'jpg',
-                        'jpeg',
-                        'png',
-                        'gif',
-                        'webp',
-                        'bmp',
-                        'svg',
-                      ].includes(ext)
-                      if (isImage) {
-                        setAttachmentViewerConfig({
-                          isOpen: true,
-                          url,
-                          fileName: att.file_name,
-                          onClose: () =>
-                            setAttachmentViewerConfig({ isOpen: false }),
-                        })
-                      } else {
-                        const a = document.createElement('a')
-                        a.href = url
-                        a.download = att.file_name || 'attachment'
-                        document.body.appendChild(a)
-                        a.click()
-                        document.body.removeChild(a)
-                      }
-                    }}
+                  <Card
+                    variant='outlined'
                     sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 1,
                       p: 1,
-                      borderRadius: 'sm',
-                      border: '1px solid',
-                      borderColor: 'neutral.outlinedBorder',
-                      cursor: 'pointer',
-                      '&:hover': { bgcolor: 'neutral.softHoverBg' },
+                      mt: 2,
                     }}
                   >
-                    <AttachFile sx={{ fontSize: 18, color: 'neutral.500' }} />
-                    <Typography
-                      level='body-sm'
-                      sx={{ flex: 1, wordBreak: 'break-all' }}
-                    >
-                      {att.file_name}
-                    </Typography>
-                    {att.size_bytes && (
-                      <Typography level='body-xs' color='neutral'>
-                        {(att.size_bytes / 1024).toFixed(1)} KB
-                      </Typography>
-                    )}
-                    {choreId && (
-                      <IconButton
-                        size='sm'
-                        variant='plain'
-                        color='danger'
-                        onClick={event => {
-                          event.stopPropagation()
-                          DeleteChoreAttachment(choreId, att.file_path)
-                            .then(() => {
-                              removeCachedImage(att.file_path)
-                              setAttachments(prev =>
-                                prev.filter(a => a.file_path !== att.file_path),
-                              )
-                            })
-                            .catch(() => {
-                              showError({
-                                title: t('choreEdit.deleteFailedTitle'),
-                                message: t('choreEdit.deleteAttachmentFailed'),
-                              })
-                            })
-                        }}
-                      >
-                        <Delete sx={{ fontSize: 18 }} />
-                      </IconButton>
-                    )}
-                    {!choreId && (
-                      <IconButton
-                        size='sm'
-                        variant='plain'
-                        color='danger'
-                        onClick={event => {
-                          event.stopPropagation()
-                          // Draft uploads live server-side too — delete there
-                          // so they are not promoted onto the chore on save.
-                          DeleteDraftAttachment(att.file_path)
-                            .then(() => {
-                              setAttachments(prev =>
-                                prev.filter((_, i) => i !== idx),
-                              )
-                            })
-                            .catch(() => {
-                              showError({
-                                title: t('choreEdit.deleteFailedTitle'),
-                                message: t('choreEdit.deleteAttachmentFailed'),
-                              })
-                            })
-                        }}
-                      >
-                        <Delete sx={{ fontSize: 18 }} />
-                      </IconButton>
-                    )}
-                  </Box>
-                ))}
-              </Box>
-            )}
-            <Box
-              sx={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: 1,
-                alignSelf: 'flex-start',
-              }}
-            >
-              <Button
-                component='label'
-                variant='outlined'
-                color='neutral'
-                size='sm'
-                startDecorator={isUploadingAttachment ? null : <UploadFile />}
-                loading={isUploadingAttachment}
-              >
-                {t('choreEdit.uploadFile')}
-                <input
-                  type='file'
-                  hidden
-                  onChange={async e => {
-                    const file = e.target.files[0]
-                    e.target.value = ''
-                    await uploadAttachmentFile(file)
-                  }}
-                />
-              </Button>
-              {isNativeScanner && (
-                <Button
-                  variant='outlined'
-                  color='neutral'
-                  size='sm'
-                  startDecorator={<DocumentScanner />}
-                  disabled={isUploadingAttachment}
-                  onClick={handleScanAttachment}
-                >
-                  {t('choreEdit.scan')}
-                </Button>
-              )}
+                    <SubTasks
+                      editMode={true}
+                      tasks={subTasks ? subTasks : []}
+                      setTasks={setSubTasks}
+                      choreId={choreId}
+                    />
+                  </Card>
+                </Box>
+              </EditorSection>
             </Box>
-          </Card>
-        </Box>
-      </Box>
-
-      {/* Section 2: Assignment & Responsibility */}
-      <Box mb={4}>
-        <Box mb={3}>
-          <Typography level='h4'>{t('choreEdit.assignees')}</Typography>
-          <Typography level='body-md'>
-            {t('choreEdit.assigneesDesc')}
-          </Typography>
-          <Card>
-            <List
-              orientation='horizontal'
-              wrap
-              sx={{
-                '--List-gap': '8px',
-                '--ListItem-radius': '20px',
-              }}
+            <EditorSection
+              title={t('taskEditor.onCompletion')}
+              icon={BoltOutlined}
+              section='actions'
+              collapsible={!singlePageEditor}
+              defaultOpen={
+                points >= 0 || completionActions.length > 0 || requireApproval
+              }
+              error={errors.completionActions}
+              summary={
+                [
+                  points >= 0 ? `${points} points` : '',
+                  completionActions.length
+                    ? `${completionActions.length} Thing action${completionActions.length === 1 ? '' : 's'}`
+                    : '',
+                  requireApproval ? 'Approval required' : '',
+                ]
+                  .filter(Boolean)
+                  .join(' · ') ||
+                'Award points, require approval, or update Things when completed'
+              }
             >
-              {/* add one for Anyone if no specific assignee is selected */}
+              <CompletionActionsSection
+                actions={completionActions}
+                onChange={setCompletionActions}
+                showHeading={false}
+                points={points}
+                onPointsChange={setPoints}
+                requireApproval={requireApproval}
+                onRequireApprovalChange={setRequireApproval}
+                onValidate={setCompletionActionsValid}
+              />
+            </EditorSection>
+            <EditorSection
+              title={t('choreEdit.notifications')}
+              icon={NotificationsOutlined}
+              section='notifications'
+              collapsible={!singlePageEditor}
+              defaultOpen={isNotificable}
+              summary={isNotificable ? 'Reminders enabled' : 'Reminders off'}
+            >
+              <Box mb={2}>
+                {!isPlusAccount(userProfile) && (
+                  <Typography level='body-sm' color='warning' sx={{ mb: 1 }}>
+                    {t('taskEditor.taskNotificationsAreNotAvailableInThe')}
+                  </Typography>
+                )}
 
-              <ListItem key={'anyone'}>
-                <Checkbox
-                  checked={anyone}
-                  onClick={() => {
-                    setAnyone(!anyone)
-                    setIsPrivate(false)
-                  }}
-                  overlay
-                  disableIcon
-                  variant='soft'
-                  label={t('choreEdit.anyone')}
-                />
-              </ListItem>
-
-              {performers?.map((item, index) => (
-                <ListItem key={item.id}>
+                <FormControl sx={{ mt: 1 }}>
                   <Checkbox
-                    checked={assignableTo.some(a => a.userId == item.userId)}
-                    disabled={anyone}
-                    onClick={() => {
-                      if (anyone) {
-                        setAnyone(false)
-                        setAssignableTo([{ userId: item.userId }])
-                        return
-                      }
-                      const assignees = assignableTo
-                      const setAssignees = setAssignableTo
-                      if (assignees.some(a => a.userId === item.userId)) {
-                        const newAssignees = assignees.filter(
-                          a => a.userId !== item.userId,
-                        )
-                        setAnyone(newAssignees.length === 0)
-                        setAssignees(newAssignees)
-                      } else {
-                        setAssignees([...assignees, { userId: item.userId }])
+                    onChange={e => {
+                      setIsNotificable(e.target.checked)
+                      if (!e.target.checked) {
+                        setNotificationMetadata({})
                       }
                     }}
+                    defaultChecked={isNotificable}
+                    checked={isNotificable}
+                    disabled={
+                      !isPlusAccount(userProfile) ||
+                      NOTIFICATION_FORBIDDEN_TYPE.includes(frequencyType)
+                    }
                     overlay
-                    disableIcon
-                    variant='soft'
-                    label={item.displayName}
+                    label={t('choreEdit.notifyForTask')}
                   />
-                </ListItem>
-              ))}
-            </List>
-          </Card>
-          <FormControl error={Boolean(errors.assignee)}>
-            <FormHelperText error>{Boolean(errors.assignee)}</FormHelperText>
-          </FormControl>
+                  <FormHelperText
+                    sx={{
+                      opacity: !isPlusAccount(userProfile) ? 0.5 : 1,
+                    }}
+                  >
+                    {NOTIFICATION_FORBIDDEN_TYPE.includes(frequencyType)
+                      ? t('choreEdit.notifyForTaskUnavailable')
+                      : t('choreEdit.notifyForTaskHelp')}
+                  </FormHelperText>
+                </FormControl>
+              </Box>
 
-          {showSaveAssigneeDefault && (
-            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'start' }}>
-              <Button
-                variant='outlined'
-                size='sm'
-                color='neutral'
-                startDecorator={<Save />}
-                sx={{
-                  borderRadius: 6,
-                  fontWeight: 500,
-                  '&:hover': {
-                    background: 'neutral.softHoverBg',
-                  },
-                }}
-                onClick={() => {
-                  localStorage.setItem(
-                    'defaultAnyoneSetting',
-                    JSON.stringify(anyone),
-                  )
-                  localStorage.setItem(
-                    'defaultAssigneeSetting',
-                    JSON.stringify(assignableTo),
-                  )
-                  setShowSaveAssigneeDefault(false)
-                }}
-              >
-                {t('choreEdit.rememberFuture')}
-              </Button>
-            </Box>
-          )}
-        </Box>
+              {isNotificable &&
+                !NOTIFICATION_FORBIDDEN_TYPE.includes(frequencyType) && (
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 2,
+                    }}
+                  >
+                    <Card variant='outlined'>
+                      <Typography level='h4' mb={2}>
+                        {t('choreEdit.notificationSchedule')}
+                      </Typography>
+                      <Box sx={{ p: 0.5 }}>
+                        <NotificationTemplate
+                          onChange={metadata => {
+                            const newTemplates = metadata.notifications
+                            if (
+                              notificationMetadata?.templates !== newTemplates
+                            ) {
+                              setNotificationMetadata({
+                                ...notificationMetadata,
+                                templates: newTemplates,
+                              })
+                            }
+                          }}
+                          value={notificationMetadata}
+                        />
+                      </Box>
 
-        {canPickStrategy && (
-          <>
-            <Box
-              mb={3}
-              sx={{
-                display:
-                  assignStrategyValue === 'no_assignee' ? 'none' : 'block',
-              }}
-            >
-              <Typography level='h4'>
-                {t('choreEdit.currentlyAssigned')}
-              </Typography>
-              <Typography level='body-md'>
-                {t('choreEdit.currentlyAssignedDesc')}
-              </Typography>
-              <Select
-                placeholder={
-                  assignees.length === 0
-                    ? t('choreEdit.noAssigneesPlaceholder')
-                    : t('choreEdit.selectAssigneePlaceholder')
+                      <Typography level='h4' mt={3} mb={2}>
+                        {t('choreEdit.whoToNotify')}
+                      </Typography>
+                      <FormControl>
+                        <Checkbox
+                          overlay
+                          disabled={true}
+                          checked={true}
+                          label={t('choreEdit.allAssignees')}
+                        />
+                        <FormHelperText>
+                          {t('choreEdit.allAssigneesHelp')}
+                        </FormHelperText>
+                      </FormControl>
+
+                      <FormControl>
+                        <Checkbox
+                          overlay
+                          onClick={() => {
+                            // Routing reminders to a Telegram group is an extra
+                            // delivery channel, which stays a Plus capability.
+                            if (
+                              !notificationMetadata?.circleGroup &&
+                              !isPlusAccount(userProfile)
+                            ) {
+                              showPaywall(PAYWALL_REASON.REMINDER_CHANNELS)
+                              return
+                            }
+                            if (notificationMetadata?.circleGroup) {
+                              delete notificationMetadata.circleGroupID
+                            }
+
+                            setNotificationMetadata({
+                              ...notificationMetadata,
+                              circleGroup: !notificationMetadata?.circleGroup,
+                            })
+                          }}
+                          checked={
+                            notificationMetadata
+                              ? notificationMetadata?.circleGroup
+                              : false
+                          }
+                          label={t('choreEdit.specificGroup')}
+                          endDecorator={
+                            isPlusAccount(userProfile) ? null : (
+                              <LockOutlined
+                                sx={{ fontSize: 14, opacity: 0.6 }}
+                              />
+                            )
+                          }
+                        />
+                        <FormHelperText>
+                          {t('choreEdit.specificGroupHelp')}
+                        </FormHelperText>
+                      </FormControl>
+
+                      {notificationMetadata?.circleGroup && (
+                        <Box
+                          sx={{
+                            mt: 0,
+                            ml: 4,
+                          }}
+                        >
+                          <Typography level='body-sm'>
+                            {t('choreEdit.telegramGroupIdLabel')}
+                          </Typography>
+                          <NumberInput
+                            value={notificationMetadata?.circleGroupID}
+                            allowEmpty
+                            placeholder={t(
+                              'choreEdit.telegramGroupIdPlaceholder',
+                            )}
+                            onValueChange={next => {
+                              setNotificationMetadata({
+                                ...notificationMetadata,
+                                circleGroupID: next,
+                              })
+                            }}
+                          />
+                        </Box>
+                      )}
+                    </Card>
+                  </Box>
+                )}
+            </EditorSection>
+            {dueDate && (
+              <EditorSection
+                title={t('choreEdit.taskWindow')}
+                icon={TimerOutlined}
+                section='window'
+                collapsible
+                defaultOpen={completionWindow !== -1}
+                summary={
+                  completionWindow !== -1
+                    ? `Completable ${completionWindow}h before due`
+                    : t('choreEdit.taskWindowDesc')
                 }
-                disabled={assignees.length === 0}
-                value={assignedToValue}
-                onChange={(_, selectedUserId) => setAssignedTo(selectedUserId)}
               >
-                {performers
-                  ?.filter(p => assignees.some(a => a.userId == p.userId))
-                  .map((item, index) => (
-                    <Option value={item.userId} key={item.displayName}>
-                      {item.displayName}
-                    </Option>
-                  ))}
-              </Select>
-            </Box>
+                <Box mb={2}>
+                  {/* Available From (Completion Window) */}
+                  <FormControl sx={{ mt: 1 }}>
+                    <Checkbox
+                      checked={completionWindow !== -1}
+                      onChange={e => {
+                        if (e.target.checked) {
+                          setCompletionWindow(1) // default 1 hour in seconds
+                        } else {
+                          setCompletionWindow(-1)
+                        }
+                      }}
+                      overlay
+                      label={t('choreEdit.earliestCompletion')}
+                    />
+                    <FormHelperText>
+                      {t('choreEdit.earliestCompletionHelp')}
+                    </FormHelperText>
+                  </FormControl>
 
-            <Box>
-              <Typography level='h4'>
-                {t('choreEdit.assignStrategy')}
-              </Typography>
-              <Typography level='body-md'>
-                {t('choreEdit.assignStrategyDesc')}
-              </Typography>
-              <Card>
-                <List
-                  orientation='horizontal'
-                  wrap
-                  sx={{
-                    '--List-gap': '8px',
-                    '--ListItem-radius': '20px',
-                  }}
-                >
-                  {ASSIGN_STRATEGIES.map((item, idx) => (
-                    <ListItem key={item}>
-                      <Checkbox
-                        checked={assignStrategyValue === item}
-                        onClick={() => setAssignStrategy(item)}
-                        overlay
-                        disableIcon
-                        variant='soft'
-                        label={t(`choreEdit.strategy.${item}`)}
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-              </Card>
-            </Box>
-          </>
-        )}
-      </Box>
+                  {completionWindow !== -1 && (
+                    <Card variant='outlined'>
+                      <Box
+                        sx={{
+                          mt: 0,
+                          ml: 4,
+                        }}
+                      >
+                        <Typography level='body-sm'>
+                          {t('choreEdit.hoursLabel')}
+                        </Typography>
+                        <NumberInput
+                          value={completionWindow}
+                          min={0}
+                          max={24 * 7}
+                          sx={{ maxWidth: 100 }}
+                          placeholder={t('choreEdit.hoursPlaceholder')}
+                          onValueChange={setCompletionWindow}
+                        />
+                      </Box>
+                    </Card>
+                  )}
 
-      {/* Section 3: Schedule & Timing */}
-      <Box mb={4}>
-        <RepeatSection
-          frequency={frequency}
-          onFrequencyUpdate={setFrequency}
-          frequencyType={frequencyType}
-          onFrequencyTypeUpdate={setFrequencyType}
-          frequencyMetadata={frequencyMetadata}
-          onFrequencyMetadataUpdate={setFrequencyMetadata}
-          frequencyError={errors?.frequency}
-          allUserThings={allUserThings}
-          onTriggerUpdate={thingUpdate => {
-            if (thingUpdate === null) {
-              setThingTrigger(null)
-              return
-            }
-            setThingTrigger({
-              triggerState: thingUpdate.triggerState,
-              condition: thingUpdate.condition,
-              thingID: thingUpdate.thing.id,
-            })
-          }}
-          OnTriggerValidate={setIsThingValid}
-          isAttemptToSave={attemptToSave}
-          selectedThing={thingTrigger}
-        />
-
-        <Box mt={3} mb={3}>
-          <Typography level='h4'>
-            {REPEAT_ON_TYPE.includes(frequencyType)
-              ? t('choreEdit.startDate')
-              : t('choreEdit.dueDate')}
-          </Typography>
-          {frequencyType === 'trigger' && !dueDate && (
-            <Typography level='body-sm'>
-              {t('choreEdit.triggerDueHint')}
-            </Typography>
-          )}
-
-          {NO_DUE_DATE_REQUIRED_TYPE.includes(frequencyType) && (
-            <FormControl sx={{ mt: 1 }}>
-              <Checkbox
-                onChange={e => {
-                  if (e.target.checked) {
-                    const today = moment(new Date()).format('YYYY-MM-DD')
-                    setDueDateOnly(today)
-                    setDueDate(
-                      moment(today).endOf('day').format('YYYY-MM-DDTHH:mm:59'),
-                    )
-                    setUseCustomTime(false)
-                    setDueTime(null)
-                  } else {
-                    setDueDate(null)
-                    setDueDateOnly(null)
-                    setUseCustomTime(false)
-                    setDueTime(null)
-                  }
-                }}
-                defaultChecked={dueDate !== null}
-                checked={dueDate !== null}
-                overlay
-                label={t('choreEdit.giveDueDate')}
-              />
-              <FormHelperText>{t('choreEdit.giveDueDateHelp')}</FormHelperText>
-            </FormControl>
-          )}
-          {dueDate && (
-            <>
-              <FormControl error={Boolean(errors.dueDate)} sx={{ mt: 2 }}>
-                <Typography level='body-md'>
-                  {REPEAT_ON_TYPE.includes(frequencyType)
-                    ? t('choreEdit.startWhen')
-                    : t('choreEdit.dueWhen')}
-                </Typography>
-                <Input
-                  type='date'
-                  value={dueDateOnly || ''}
-                  onChange={handleDueDateChange}
-                />
-                <FormHelperText>{errors.dueDate}</FormHelperText>
-              </FormControl>
-
-              {/* Optional time picker */}
-              <FormControl sx={{ mt: 2 }}>
-                <Checkbox
-                  checked={useCustomTime}
-                  onChange={e => handleUseCustomTimeChange(e.target.checked)}
-                  overlay
-                  label={t('choreEdit.setSpecificTime')}
-                />
-                <FormHelperText>
-                  {useCustomTime
-                    ? t('choreEdit.dueAtSpecifiedTime')
-                    : t('choreEdit.dueEndOfDay')}
-                </FormHelperText>
-              </FormControl>
-
-              {useCustomTime && (
-                <Box sx={{ mt: 2, ml: 4 }}>
-                  <Typography level='body-sm' mb={1}>
-                    {t('choreEdit.timeLabel')}
-                  </Typography>
-                  <Input
-                    type='time'
-                    value={dueTime || '18:00'}
-                    onChange={handleDueTimeChange}
-                    sx={{ maxWidth: 200 }}
-                  />
-                </Box>
-              )}
-            </>
-          )}
-        </Box>
-
-        {dueDate && (
-          <Box mb={3}>
-            <Typography level='h4'>{t('choreEdit.taskWindow')}</Typography>
-            <Typography level='body-md'>
-              {t('choreEdit.taskWindowDesc')}
-            </Typography>
-
-            {/* Available From (Completion Window) */}
-            <FormControl sx={{ mt: 1 }}>
-              <Checkbox
-                checked={completionWindow !== -1}
-                onChange={e => {
-                  if (e.target.checked) {
-                    setCompletionWindow(1) // default 1 hour in seconds
-                  } else {
-                    setCompletionWindow(-1)
-                  }
-                }}
-                overlay
-                label={t('choreEdit.earliestCompletion')}
-              />
-              <FormHelperText>
-                {t('choreEdit.earliestCompletionHelp')}
-              </FormHelperText>
-            </FormControl>
-
-            {completionWindow !== -1 && (
-              <Card variant='outlined'>
-                <Box
-                  sx={{
-                    mt: 0,
-                    ml: 4,
-                  }}
-                >
-                  <Typography level='body-sm'>
-                    {t('choreEdit.hoursLabel')}
-                  </Typography>
-                  <NumberInput
-                    value={completionWindow}
-                    min={0}
-                    max={24 * 7}
-                    sx={{ maxWidth: 100 }}
-                    placeholder={t('choreEdit.hoursPlaceholder')}
-                    onValueChange={setCompletionWindow}
-                  />
-                </Box>
-              </Card>
-            )}
-
-            {/* Expires After (Deadline) */}
-            {/* <FormControl sx={{ mt: 2 }}>
+                  {/* Expires After (Deadline) */}
+                  {/* <FormControl sx={{ mt: 2 }}>
               <Checkbox
                 checked={deadlineOffset !== -1}
                 disabled={isRolling}
@@ -1617,458 +2643,382 @@ const ChoreEdit = () => {
               </FormHelperText>
             </FormControl> */}
 
-            {deadlineOffset !== -1 && (
-              <Box
-                sx={{
-                  mt: 1,
-                  ml: 4,
-                  display: 'flex',
-                  gap: 1,
-                  alignItems: 'center',
-                }}
-              >
-                <DurationInput
-                  value={deadlineOffset}
-                  onChange={setDeadlineOffset}
-                  size='sm'
-                  minValue={0}
-                />
-                <Typography level='body-sm'>
-                  {t('choreEdit.afterDueDate')}
-                </Typography>
-              </Box>
+                  {deadlineOffset !== -1 && (
+                    <Box
+                      sx={{
+                        mt: 1,
+                        ml: 4,
+                        display: 'flex',
+                        gap: 1,
+                        alignItems: 'center',
+                      }}
+                    >
+                      <DurationInput
+                        value={deadlineOffset}
+                        onChange={setDeadlineOffset}
+                        size='sm'
+                        minValue={0}
+                      />
+                      <Typography level='body-sm'>
+                        {t('choreEdit.afterDueDate')}
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+              </EditorSection>
             )}
-          </Box>
-        )}
-
-        {!['once', 'no_repeat'].includes(frequencyType) && (
-          <Box>
-            <Typography level='h4'>{t('choreEdit.schedulingPrefs')}</Typography>
-            <Typography level='body-md'>
-              {t('choreEdit.schedulingPrefsDesc')}
-            </Typography>
-            <RadioGroup name='tiers' sx={{ gap: 1, '& > div': { p: 1 } }}>
-              <FormControl>
-                <Radio
-                  overlay
-                  checked={!isRolling}
-                  onClick={() => setIsRolling(false)}
-                  label={t('choreEdit.rescheduleFromDue')}
-                />
-                <FormHelperText>
-                  {t('choreEdit.rescheduleFromDueHelp')}
-                </FormHelperText>
-              </FormControl>
-              <FormControl>
-                <Radio
-                  overlay
-                  checked={isRolling}
-                  onClick={() => {
-                    setIsRolling(true)
-                    setDeadlineOffset(-1)
+            <EditorSection
+              title={t('choreEdit.privacySettings')}
+              icon={LockOutlined}
+              section='privacy'
+              collapsible
+              defaultOpen={isPrivate}
+              summary={
+                isPrivate
+                  ? 'Visible to assigned users'
+                  : 'Visible to your circle'
+              }
+            >
+              <Box>
+                <RadioGroup
+                  name='isPrivate'
+                  value={isPrivate}
+                  onChange={event => {
+                    const newValue =
+                      event.target.value === 'true' ? true : false
+                    setIsPrivate(newValue)
+                    setShowSavePrivacyDefault(true)
                   }}
-                  label={t('choreEdit.rescheduleFromCompletion')}
-                />
-                <FormHelperText>
-                  {t('choreEdit.rescheduleFromCompletionHelp')}
-                </FormHelperText>
-              </FormControl>
-            </RadioGroup>
-          </Box>
-        )}
-        {/* Section 3.1: Notifications */}
-
-        <Box mb={3}>
-          <Typography level='h4'>{t('choreEdit.notifications')}</Typography>
-          {!isPlusAccount(userProfile) && (
-            <Typography level='body-sm' color='neutral' sx={{ mb: 1 }}>
-              {t('choreEdit.notificationsFreePlanNote')}
-            </Typography>
-          )}
-
-          <FormControl sx={{ mt: 1 }}>
-            <Checkbox
-              onChange={e => {
-                setIsNotificable(e.target.checked)
-                if (!e.target.checked) {
-                  setNotificationMetadata({})
-                }
-              }}
-              defaultChecked={isNotificable}
-              checked={isNotificable}
-              overlay
-              label={t('choreEdit.notifyForTask')}
-            />
-            <FormHelperText>{t('choreEdit.notifyForTaskHelp')}</FormHelperText>
-          </FormControl>
-        </Box>
-
-        {isNotificable && (
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 2,
-            }}
-          >
-            <Card variant='outlined'>
-              <Typography level='h4' mb={2}>
-                {t('choreEdit.notificationSchedule')}
-              </Typography>
-              <Box sx={{ p: 0.5 }}>
-                <NotificationTemplate
-                  onChange={metadata => {
-                    const newTemplates = metadata.notifications
-                    if (notificationMetadata?.templates !== newTemplates) {
-                      setNotificationMetadata({
-                        ...notificationMetadata,
-                        templates: newTemplates,
-                      })
-                    }
-                  }}
-                  value={notificationMetadata}
-                />
-              </Box>
-
-              <Typography level='h4' mt={3} mb={2}>
-                {t('choreEdit.whoToNotify')}
-              </Typography>
-              <FormControl>
-                <Checkbox
-                  overlay
-                  disabled={true}
-                  checked={true}
-                  label={t('choreEdit.allAssignees')}
-                />
-                <FormHelperText>
-                  {t('choreEdit.allAssigneesHelp')}
-                </FormHelperText>
-              </FormControl>
-
-              <FormControl>
-                <Checkbox
-                  overlay
-                  onClick={() => {
-                    // Routing reminders to a Telegram group is an extra
-                    // delivery channel, which stays a Plus capability.
-                    if (
-                      !notificationMetadata?.circleGroup &&
-                      !isPlusAccount(userProfile)
-                    ) {
-                      showPaywall(PAYWALL_REASON.REMINDER_CHANNELS)
-                      return
-                    }
-                    if (notificationMetadata?.circleGroup) {
-                      delete notificationMetadata.circleGroupID
-                    }
-
-                    setNotificationMetadata({
-                      ...notificationMetadata,
-                      circleGroup: !notificationMetadata?.circleGroup,
-                    })
-                  }}
-                  checked={
-                    notificationMetadata
-                      ? notificationMetadata?.circleGroup
-                      : false
-                  }
-                  label={t('choreEdit.specificGroup')}
-                  endDecorator={
-                    isPlusAccount(userProfile) ? null : (
-                      <LockOutlined sx={{ fontSize: 14, opacity: 0.6 }} />
-                    )
-                  }
-                />
-                <FormHelperText>
-                  {t('choreEdit.specificGroupHelp')}
-                </FormHelperText>
-              </FormControl>
-
-              {notificationMetadata?.circleGroup && (
-                <Box
                   sx={{
-                    mt: 0,
-                    ml: 4,
+                    '& > div': { py: 1 },
                   }}
                 >
-                  <Typography level='body-sm'>
-                    {t('choreEdit.telegramGroupIdLabel')}
+                  <FormControl>
+                    <Radio
+                      overlay
+                      value={false}
+                      disabled={selectedProjectIsPrivate}
+                      label={t('choreEdit.public')}
+                    />
+                    <FormHelperText>
+                      {t('taskEditor.visibleToEveryoneInYourCircle')}
+                    </FormHelperText>
+                  </FormControl>
+                  <FormControl>
+                    <Radio
+                      overlay
+                      disabled={
+                        selectedProjectIsPrivate ||
+                        anyone ||
+                        assignableTo.length === 0
+                      }
+                      value={true}
+                      label={t('choreEdit.limited')}
+                    />
+                    <FormHelperText>
+                      {t('taskEditor.visibleToYouAndThePeopleEligible')}
+                      {assignees.length === 0
+                        ? ' (No assignees selected, Limited option is disabled)'
+                        : ''}
+                    </FormHelperText>
+                  </FormControl>
+                </RadioGroup>
+
+                {selectedProjectIsPrivate && (
+                  <Typography level='body-sm' color='neutral'>
+                    {t('taskEditor.inheritedFromTheProjectTasksInA')}
                   </Typography>
-                  <NumberInput
-                    value={notificationMetadata?.circleGroupID}
-                    allowEmpty
-                    placeholder={t('choreEdit.telegramGroupIdPlaceholder')}
-                    onValueChange={next => {
-                      setNotificationMetadata({
-                        ...notificationMetadata,
-                        circleGroupID: next,
-                      })
-                    }}
-                  />
-                </Box>
-              )}
-            </Card>
-          </Box>
-        )}
-      </Box>
-
-      {/* Section 4: Task Settings */}
-      <Box mb={4}>
-        <Typography
-          level='h3'
-          mb={2}
-          sx={{
-            borderColor: 'primary.main',
-            pb: 1,
-          }}
-        >
-          {t('choreEdit.taskSettings')}
-        </Typography>
-
-        <Box mb={3}>
-          <Typography level='h4'>{t('choreEdit.pointsSystem')}</Typography>
-          <FormControl sx={{ mt: 1 }}>
-            <Checkbox
-              onChange={e => {
-                if (e.target.checked) {
-                  setPoints(1)
-                } else {
-                  setPoints(-1)
-                }
-              }}
-              checked={points > -1}
-              overlay
-              label={t('choreEdit.assignPoints')}
-            />
-            <FormHelperText>{t('choreEdit.assignPointsHelp')}</FormHelperText>
-          </FormControl>
-          {points != -1 && (
-            <Card variant='outlined' sx={{ mt: 2 }}>
-              <Box
-                sx={{
-                  mt: 0,
-                  ml: 4,
-                }}
-              >
-                <Typography level='body-sm'>
-                  {t('choreEdit.pointsLabel')}
-                </Typography>
-                <NumberInput
-                  value={points}
-                  min={0}
-                  max={1000}
-                  sx={{ maxWidth: 100 }}
-                  placeholder={t('choreEdit.pointsPlaceholder')}
-                  onValueChange={setPoints}
-                />
+                )}
+                {showSavePrivacyDefault && !selectedProjectIsPrivate && (
+                  <Box sx={{ mt: 0, display: 'flex', justifyContent: 'start' }}>
+                    <Button
+                      variant='outlined'
+                      size='sm'
+                      color='neutral'
+                      startDecorator={<Save />}
+                      sx={{
+                        borderRadius: 6,
+                        fontWeight: 500,
+                        '&:hover': {
+                          background: 'neutral.softHoverBg',
+                        },
+                      }}
+                      onClick={() => {
+                        localStorage.setItem(
+                          'defaultPrivacySetting',
+                          JSON.stringify(isPrivate),
+                        )
+                        setShowSavePrivacyDefault(false)
+                      }}
+                    >
+                      {t('taskEditor.useAsDefault')}
+                    </Button>
+                  </Box>
+                )}
               </Box>
-            </Card>
-          )}
-        </Box>
+            </EditorSection>
+          </Box>
 
-        <Box mb={3}>
-          <Typography level='h4'>
-            {t('choreEdit.approvalRequirement')}
-          </Typography>
-          <FormControl sx={{ mt: 1 }}>
-            <Checkbox
-              onChange={e => {
-                setRequireApproval(e.target.checked)
-              }}
-              checked={requireApproval}
-              overlay
-              label={t('choreEdit.requireApproval')}
-            />
-            <FormHelperText>
-              {t('choreEdit.requireApprovalHelp')}
-            </FormHelperText>
-          </FormControl>
-        </Box>
-
-        <Box>
-          <Typography level='h4'>{t('choreEdit.privacySettings')}</Typography>
-          <Typography level='body-md'>{t('choreEdit.privacyDesc')}</Typography>
-          <RadioGroup
-            name='isPrivate'
-            value={isPrivate}
-            onChange={event => {
-              const newValue = event.target.value === 'true' ? true : false
-              setIsPrivate(newValue)
-              setShowSavePrivacyDefault(true)
-            }}
-            sx={{
-              '& > div': { py: 1 },
-            }}
-          >
-            <FormControl>
-              <Radio overlay value={false} label={t('choreEdit.public')} />
-              <FormHelperText>{t('choreEdit.publicHelp')}</FormHelperText>
-            </FormControl>
-            <FormControl>
-              <Radio
-                overlay
-                disabled={anyone || assignableTo.length === 0}
-                value={true}
-                label={t('choreEdit.limited')}
-              />
-              <FormHelperText>
-                {t('choreEdit.limitedHelp')}
-                {anyone || assignableTo.length === 0
-                  ? t('choreEdit.limitedDisabledHint')
-                  : ''}
-              </FormHelperText>
-            </FormControl>
-          </RadioGroup>
-
-          {showSavePrivacyDefault && (
-            <Box sx={{ mt: 0, display: 'flex', justifyContent: 'start' }}>
-              <Button
-                variant='outlined'
-                size='sm'
-                color='neutral'
-                startDecorator={<Save />}
+          {choreId > 0 && (
+            <EditorSection
+              title={t('taskEditor.taskLog')}
+              icon={InfoOutlined}
+              section='metadata'
+              summary={t('taskEditor.whoCreatedAndLastEditedThisTask')}
+              collapsible={!singlePageEditor}
+            >
+              <Sheet
                 sx={{
-                  borderRadius: 6,
-                  fontWeight: 500,
-                  '&:hover': {
-                    background: 'neutral.softHoverBg',
-                  },
-                }}
-                onClick={() => {
-                  localStorage.setItem(
-                    'defaultPrivacySetting',
-                    JSON.stringify(isPrivate),
-                  )
-                  setShowSavePrivacyDefault(false)
+                  p: 2,
+                  borderRadius: 'md',
+                  boxShadow: 'sm',
                 }}
               >
-                {t('choreEdit.rememberFuture')}
-              </Button>
-            </Box>
-          )}
-        </Box>
-      </Box>
-
-      {choreId > 0 && (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mt: 3 }}>
-          <Sheet
-            sx={{
-              p: 2,
-              borderRadius: 'md',
-              boxShadow: 'sm',
-            }}
-          >
-            <Typography level='body1'>
-              {t('choreEdit.createdBy')}{' '}
-              <Chip variant='solid'>
-                {membersData.res.find(f => f.userId === createdBy)?.displayName}
-              </Chip>{' '}
-              {moment(chore.createdAt).fromNow()}
-            </Typography>
-            {(chore.updatedAt && updatedBy > 0 && (
-              <>
-                <Divider sx={{ my: 1 }} />
-
                 <Typography level='body1'>
-                  {t('choreEdit.updatedBy')}{' '}
+                  {t('choreEdit.createdBy')}{' '}
                   <Chip variant='solid'>
                     {
-                      membersData.res.find(f => f.userId === updatedBy)
+                      membersData.res.find(f => f.userId === createdBy)
                         ?.displayName
                     }
                   </Chip>{' '}
-                  {moment(chore.updatedAt).fromNow()}
+                  {moment(chore.createdAt).fromNow()}
                 </Typography>
-              </>
-            )) || <></>}
-          </Sheet>
+                {(chore.updatedAt && updatedBy > 0 && (
+                  <>
+                    <Divider sx={{ my: 1 }} />
+
+                    <Typography level='body1'>
+                      {t('choreEdit.updatedBy')}{' '}
+                      <Chip variant='solid'>
+                        {
+                          membersData.res.find(f => f.userId === updatedBy)
+                            ?.displayName
+                        }
+                      </Chip>{' '}
+                      {moment(chore.updatedAt).fromNow()}
+                    </Typography>
+                  </>
+                )) || <></>}
+              </Sheet>
+            </EditorSection>
+          )}
         </Box>
-      )}
-
-      <Divider sx={{ mb: 9 }} />
-
-      {/* <Box mt={2} alignSelf={'flex-start'} display='flex' gap={2}>
-        <Button onClick={SaveChore}>Save</Button>
-      </Box> */}
-      <Sheet
-        variant='outlined'
-        sx={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          width: '100%',
-          maxWidth: '100vw',
-          minWidth: 0,
-          boxSizing: 'border-box',
-          // Keep these as longhands: a responsive `p` compiles to
-          // `@media (min-width:0px){padding:...}`, which emotion emits *after*
-          // the plain `padding-bottom` rule and so wipes out the safe-area
-          // inset — the bar then sits under the Android system nav bar.
-          pt: { xs: 1, sm: 2 },
-          px: { xs: 1, sm: 2 },
-          pb: getSafeBottomPadding(2), // safe area padding for iOS/Android
-          display: 'flex',
-          flexWrap: 'wrap',
-          justifyContent: 'flex-end',
-          gap: { xs: 1, sm: 2 },
-          'z-index': 1000,
-          bgcolor: 'background.body',
-          boxShadow: 'md', // Add a subtle shadow
-        }}
-      >
-        {choreId > 0 && (
-          <Dropdown>
-            <ButtonGroup
-              variant='outlined'
-              color={isActive ? 'danger' : 'neutral'}
-            >
-              <Button
-                onClick={() => {
-                  isActive
-                    ? archiveChore.mutate(choreId)
-                    : unarchiveChore.mutate(choreId)
-                }}
-              >
-                {isActive ? t('choreEdit.archive') : t('choreEdit.unarchive')}
-              </Button>
-              <MenuButton
-                slots={{ root: IconButton }}
-                slotProps={{
-                  root: {
-                    variant: 'outlined',
-                    color: isActive ? 'danger' : 'neutral',
-                  },
-                }}
-              >
-                <ArrowDropDown />
-              </MenuButton>
-            </ButtonGroup>
-            <Menu placement='top-end'>
-              <MenuItem color='danger' onClick={handleDelete}>
-                {t('common:delete')}
-              </MenuItem>
-            </Menu>
-          </Dropdown>
-        )}
-        <Button
-          color='neutral'
+        <Sheet
+          data-wizard-footer
           variant='outlined'
-          onClick={() => {
-            window.history.back()
+          sx={{
+            position: 'relative',
+            flexShrink: 0,
+            border: 0,
+            borderTop: '1px solid',
+            borderColor: 'divider',
+            pt: 2,
+            px: 2,
+            pb: getSafeBottomPadding(2),
+            display: 'flex',
+            justifyContent: 'center',
+            zIndex: 1000,
+            bgcolor: 'background.surface',
+            boxShadow: 'none',
           }}
         >
-          {t('common:cancel')}
-          {showKeyboardShortcuts && (
-            <KeyboardShortcutHint shortcut='Esc' sx={{ ml: 1 }} />
-          )}
-        </Button>
-        <Button color='primary' variant='solid' onClick={HandleSaveChore}>
-          {choreId > 0 ? t('common:save') : t('choreEdit.create')}
-          {showKeyboardShortcuts && (
-            <KeyboardShortcutHint shortcut='Enter' sx={{ ml: 1 }} />
-          )}
-        </Button>
+          <Box
+            sx={{
+              width: '100%',
+              maxWidth: singlePageEditor ? 'none' : 880,
+              // Everything stays on a single row, including mobile: the
+              // management, back, cancel and save controls shrink rather than
+              // wrap, and the save label already has a short xs variant.
+              display: 'flex',
+              flexWrap: 'nowrap',
+              alignItems: 'center',
+              gap: { xs: 0.5, sm: 1.5 },
+              // The secondary controls absorb the squeeze on narrow screens;
+              // save keeps its full padding so the primary action stays the
+              // visually dominant target.
+              '& [data-footer-management], & [data-footer-back], & [data-footer-cancel]':
+                {
+                  minWidth: 0,
+                  flexShrink: 1,
+                },
+              '& [data-footer-back], & [data-footer-cancel]': {
+                px: { xs: 1, sm: 1.5 },
+              },
+              '& [data-footer-management] button': {
+                px: { xs: 1, sm: 1.5 },
+                whiteSpace: 'nowrap',
+              },
+              '& [data-footer-save]': {
+                flexShrink: 0,
+              },
+              '& [data-footer-save] button': {
+                whiteSpace: 'nowrap',
+              },
+            }}
+          >
+            {choreId > 0 && (singlePageEditor || wizardStep === 3) && (
+              <Box data-footer-management>
+                {' '}
+                <Dropdown>
+                  <ButtonGroup variant='outlined' color='neutral'>
+                    <Button
+                      onClick={() => {
+                        isActive
+                          ? archiveChore.mutate(choreId)
+                          : unarchiveChore.mutate(choreId)
+                      }}
+                    >
+                      {isActive ? 'Archive' : 'Unarchive'}
+                    </Button>
+                    <MenuButton
+                      aria-label={t('taskEditor.moreTaskActions')}
+                      slots={{ root: IconButton }}
+                      slotProps={{
+                        root: {
+                          variant: 'outlined',
+                          color: 'neutral',
+                        },
+                      }}
+                    >
+                      <ArrowDropDown />
+                    </MenuButton>
+                  </ButtonGroup>
+                  <Menu disablePortal placement='top-end'>
+                    <MenuItem color='danger' onClick={handleDelete}>
+                      {t('taskEditor.delete')}
+                    </MenuItem>
+                  </Menu>
+                </Dropdown>
+              </Box>
+            )}
+            {!singlePageEditor && wizardStep > 0 && (
+              <Button
+                data-footer-back
+                variant='outlined'
+                color='neutral'
+                startDecorator={<ArrowBack />}
+                onClick={() => changeWizardStep(wizardStep - 1)}
+              >
+                {t('taskEditor.back')}
+              </Button>
+            )}
+            <Box sx={{ flex: 1, minWidth: 0 }} />
+            <Button
+              data-footer-cancel
+              color='neutral'
+              variant='plain'
+              onClick={() => {
+                Navigate(choreId ? `/chores/${choreId}` : '/chores')
+              }}
+            >
+              {t('taskEditor.cancel')}
+              {showKeyboardShortcuts && (
+                <KeyboardShortcutHint shortcut='Esc' sx={{ ml: 1 }} />
+              )}
+            </Button>
+            {!singlePageEditor && wizardStep < 3 ? (
+              <Button
+                endDecorator={<ArrowForward />}
+                onClick={() => changeWizardStep(wizardStep + 1)}
+              >
+                {t('taskEditor.next')}
+              </Button>
+            ) : (
+              <Box data-footer-save>
+                <Dropdown>
+                  <ButtonGroup variant='solid' color='primary'>
+                    <Button
+                      loading={
+                        updateChoreMutation.isPending ||
+                        createChoreMutation.isPending
+                      }
+                      onClick={() => HandleSaveChore()}
+                      sx={{ minWidth: 96 }}
+                    >
+                      {createAnother ? (
+                        <>
+                          <Box
+                            component='span'
+                            sx={{ display: { xs: 'none', sm: 'inline' } }}
+                          >
+                            {choreId > 0
+                              ? 'Save and create another'
+                              : 'Create and add another'}
+                          </Box>
+                          <Box
+                            component='span'
+                            sx={{ display: { xs: 'inline', sm: 'none' } }}
+                          >
+                            {choreId > 0 ? 'Save & new' : 'Create & new'}
+                          </Box>
+                        </>
+                      ) : choreId > 0 ? (
+                        'Save'
+                      ) : (
+                        'Create'
+                      )}
+                      {showKeyboardShortcuts && (
+                        <KeyboardShortcutHint shortcut='Enter' sx={{ ml: 1 }} />
+                      )}
+                    </Button>
+                    <MenuButton
+                      aria-label={t('taskEditor.moreSaveOptions')}
+                      slots={{ root: IconButton }}
+                      slotProps={{
+                        root: {
+                          variant: 'solid',
+                          color: 'primary',
+                          disabled:
+                            updateChoreMutation.isPending ||
+                            createChoreMutation.isPending,
+                        },
+                      }}
+                    >
+                      <ArrowDropDown />
+                    </MenuButton>
+                  </ButtonGroup>
+                  <Menu disablePortal placement='top-end'>
+                    <MenuItem
+                      selected={!createAnother}
+                      disabled={
+                        updateChoreMutation.isPending ||
+                        createChoreMutation.isPending
+                      }
+                      onClick={() => {
+                        setCreateAnother(false)
+                        HandleSaveChore(false)
+                      }}
+                    >
+                      <Box sx={{ width: 20 }}>
+                        {!createAnother && <Check fontSize='small' />}
+                      </Box>
+                      {choreId > 0 ? 'Save' : 'Create'}
+                    </MenuItem>
+                    <MenuItem
+                      selected={createAnother}
+                      disabled={
+                        updateChoreMutation.isPending ||
+                        createChoreMutation.isPending
+                      }
+                      onClick={() => {
+                        setCreateAnother(true)
+                        HandleSaveChore(true)
+                      }}
+                    >
+                      <Box sx={{ width: 20 }}>
+                        {createAnother && <Check fontSize='small' />}
+                      </Box>
+                      {choreId > 0
+                        ? 'Save and create another task'
+                        : 'Create and add another task'}
+                    </MenuItem>
+                  </Menu>
+                </Dropdown>
+              </Box>
+            )}
+          </Box>
+        </Sheet>
       </Sheet>
       <AttachmentViewerModal config={attachmentViewerConfig} />
       <ConfirmationModal config={confirmModelConfig} />
@@ -2089,8 +3039,11 @@ const ChoreEdit = () => {
         />
       )}
       {/* <ChoreHistory ChoreHistory={choresHistory} UsersData={performers} /> */}
-    </Container>
+    </WizardContainer>
   )
 }
 
-export default ChoreEdit
+export default function ChoreEditorRoute() {
+  const location = useLocation()
+  return <ChoreEdit key={location.key} />
+}

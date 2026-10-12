@@ -8,6 +8,7 @@ import {
   DriveFileMove,
   Edit,
   Flag,
+  Lock,
   ManageSearch,
   MoreTime,
   MoreVert,
@@ -703,7 +704,14 @@ const ChoreActionMenu = ({
               <ListItemDecorator>
                 {renderProjectAvatar(project.color, project.icon)}
               </ListItemDecorator>
-              <ListItemContent>{project.name}</ListItemContent>
+              <ListItemContent>
+                {project.name}
+                {project.isPrivate && (
+                  <Lock
+                    sx={{ fontSize: 14, ml: 0.5, verticalAlign: 'text-bottom' }}
+                  />
+                )}
+              </ListItemContent>
             </ListItemButton>
           </ListItem>
         ) : (
@@ -717,7 +725,14 @@ const ChoreActionMenu = ({
             <ListItemDecorator>
               {renderProjectAvatar(project.color, project.icon)}
             </ListItemDecorator>
-            <ListItemContent>{project.name}</ListItemContent>
+            <ListItemContent>
+              {project.name}
+              {project.isPrivate && (
+                <Lock
+                  sx={{ fontSize: 14, ml: 0.5, verticalAlign: 'text-bottom' }}
+                />
+              )}
+            </ListItemContent>
           </Item>
         ),
       )}

@@ -289,6 +289,7 @@ const useHomeSummary = chores => {
       .map(project => ({
         icon: project.icon,
         id: project.id,
+        isPrivate: project.isPrivate,
         late: counts.get(project.id)?.late ?? 0,
         name: project.name,
         open: counts.get(project.id)?.open ?? 0,
