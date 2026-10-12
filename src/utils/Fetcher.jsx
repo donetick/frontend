@@ -359,6 +359,13 @@ const AcceptCircleMemberRequest = id => {
   })
 }
 
+const DeclineCircleMemberRequest = id => {
+  return Fetch(`/circles/members/requests/decline?requestId=${id}`, {
+    method: 'DELETE',
+    headers: HEADERS(),
+  })
+}
+
 const LeaveCircle = id => {
   return Fetch(`/circles/leave?circle_id=${id}`, {
     method: 'DELETE',
@@ -1033,6 +1040,7 @@ export {
   CreateLongLiveToken,
   CreateProject,
   CreateThing,
+  DeclineCircleMemberRequest,
   DeleteChildUser,
   DeleteChore,
   DeleteChoreAttachment,
@@ -1124,5 +1132,6 @@ export {
   UpdateTimeSession,
   UpdateUserDetails,
   UploadChoreAttachment,
-  VerifyMFA,
+  VerifyMFA
 }
+

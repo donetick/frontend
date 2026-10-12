@@ -24,6 +24,7 @@ import { useNotification } from '../../service/NotificationProvider'
 import { apiClient } from '../../utils/ApiClient'
 import {
   AcceptCircleMemberRequest,
+  DeclineCircleMemberRequest,
   DeleteCircleMember,
   GetAllCircleMembers,
   GetCircleMemberRequests,
@@ -143,6 +144,14 @@ const CircleSettings = () => {
     }
   }, [circleMembers, userProfile])
 
+  const myMembership = circleMembers.find(
+    member => member.userId === userProfile?.id,
+  )
+  const isPendingApproval =
+    userCircles[0]?.userRole === 'member' &&
+    myMembership &&
+    !myMembership.isActive
+
   const inviteCode = userCircles[0]?.invite_code
   const apiURL = new URL(apiClient.getApiURL(), window.location.origin)
   const inviteOrigin =
@@ -185,82 +194,125 @@ const CircleSettings = () => {
         </Typography>
         <Box>
           <Typography level='title-sm' sx={{ mb: 1 }}>
-            {userCircles[0]?.userRole === 'member'
-              ? t('circleSettings.memberOf', { name: userCircles[0]?.name })
-              : t('circleSettings.yourCircleCode')}
-          </Typography>
-          <Input
-            value={inviteCode}
-            disabled
-            size='lg'
-            sx={{
-              width: { xs: '100%', sm: '220px' },
-              mb: 1,
-            }}
-          />
-          <Box
-            sx={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              alignItems: 'center',
-              gap: 1,
-            }}
-          >
-            <Button
-              variant='soft'
-              startDecorator={<CopyAll />}
-              onClick={() => {
-                navigator.clipboard.writeText(userCircles[0]?.invite_code)
-                showNotification({
-                  type: 'success',
-                  message: t('circleSettings.codeCopied'),
+            {isPendingApproval
+              ? t('circleSettings.pendingApprovalMessage', {
+                  name: userCircles[0]?.name,
                 })
+              : userCircles[0]?.userRole === 'member'
+                ? t('circleSettings.memberOf', { name: userCircles[0]?.name })
+                : t('circleSettings.yourCircleCode')}
+          </Typography>
+          {isPendingApproval ? (
+            <Button
+              color='danger'
+              variant='outlined'
+              onClick={() => {
+                showConfirmation(
+                  t('circleSettings.cancelRequestMessage'),
+                  t('circleSettings.cancelRequestTitle'),
+                  () => {
+                    LeaveCircle(userCircles[0]?.id).then(resp => {
+                      if (resp.ok) {
+                        showNotification({
+                          type: 'success',
+                          message: t('circleSettings.requestCancelled'),
+                        })
+                        queryClient.invalidateQueries({
+                          queryKey: ['userCircle'],
+                        })
+                        setUserCircles([])
+                      } else {
+                        showNotification({
+                          type: 'error',
+                          message: t('circleSettings.cancelRequestFailed'),
+                        })
+                      }
+                    })
+                  },
+                  t('circleSettings.cancelRequestButton'),
+                  t('common.cancel'),
+                  'danger',
+                )
               }}
             >
-              {t('circleSettings.copyCode')}
+              {t('circleSettings.cancelRequest')}
             </Button>
-            <Button
-              variant='soft'
-              disabled={!inviteLink}
-              startDecorator={<IosShare />}
-              onClick={shareInvite}
-            >
-              {t('circleSettings.shareInvite')}
-            </Button>
-            {userCircles.length > 0 &&
-              userCircles[0]?.userRole === 'member' && (
+          ) : (
+            <>
+              <Input
+                value={inviteCode}
+                disabled
+                size='lg'
+                sx={{
+                  width: { xs: '100%', sm: '220px' },
+                  mb: 1,
+                }}
+              />
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  alignItems: 'center',
+                  gap: 1,
+                }}
+              >
                 <Button
-                  color='danger'
-                  variant='outlined'
+                  variant='soft'
+                  startDecorator={<CopyAll />}
                   onClick={() => {
-                    showConfirmation(
-                      t('circleSettings.leaveConfirmMessage'),
-                      t('circleSettings.leaveConfirmTitle'),
-                      () => {
-                        LeaveCircle(userCircles[0]?.id).then(resp => {
-                          if (resp.ok) {
-                            showNotification({
-                              type: 'success',
-                              message: t('circleSettings.leftCircle'),
-                            })
-                          } else {
-                            showNotification({
-                              type: 'error',
-                              message: t('circleSettings.leaveFailed'),
-                            })
-                          }
-                        })
-                      },
-                      t('circleSettings.leaveConfirmButton'),
-                      t('common.cancel'),
-                      'danger',
-                    )
+                    navigator.clipboard.writeText(userCircles[0]?.invite_code)
+                    showNotification({
+                      type: 'success',
+                      message: t('circleSettings.codeCopied'),
+                    })
                   }}
                 >
-                  {t('circleSettings.leave')}
+                  {t('circleSettings.copyCode')}
                 </Button>
-              )}
-          </Box>
+                <Button
+                  variant='soft'
+                  disabled={!inviteLink}
+                  startDecorator={<IosShare />}
+                  onClick={shareInvite}
+                >
+                  {t('circleSettings.shareInvite')}
+                </Button>
+                {userCircles.length > 0 &&
+                  userCircles[0]?.userRole === 'member' && (
+                    <Button
+                      color='danger'
+                      variant='outlined'
+                      onClick={() => {
+                        showConfirmation(
+                          t('circleSettings.leaveConfirmMessage'),
+                          t('circleSettings.leaveConfirmTitle'),
+                          () => {
+                            LeaveCircle(userCircles[0]?.id).then(resp => {
+                              if (resp.ok) {
+                                showNotification({
+                                  type: 'success',
+                                  message: t('circleSettings.leftCircle'),
+                                })
+                              } else {
+                                showNotification({
+                                  type: 'error',
+                                  message: t('circleSettings.leaveFailed'),
+                                })
+                              }
+                            })
+                          },
+                          t('circleSettings.leaveConfirmButton'),
+                          t('common.cancel'),
+                          'danger',
+                        )
+                      }}
+                    >
+                      {t('circleSettings.leave')}
+                    </Button>
+                  )}
+              </Box>
+            </>
+          )}
         </Box>
 
         <Typography level='title-md'>
@@ -452,53 +504,96 @@ const CircleSettings = () => {
             <Typography level='body-md'>
               {t('circleSettings.wantsToJoin', { name: request.displayName })}
             </Typography>
-            <Button
-              variant='soft'
-              color='success'
-              onClick={() => {
-                showConfirmation(
-                  t('circleSettings.acceptRequestMessage', {
-                    name: request.displayName,
-                    username: request.username,
-                  }),
-                  t('circleSettings.acceptRequestTitle'),
-                  () => {
-                    AcceptCircleMemberRequest(request.id).then(resp => {
-                      if (resp.ok) {
-                        showNotification({
-                          type: 'success',
-                          message: t('circleSettings.requestAccepted'),
-                        })
-                        queryClient.invalidateQueries({
-                          queryKey: ['circleMembers'],
-                        })
-                        queryClient.invalidateQueries({
-                          queryKey: ['circleMemberRequests'],
-                        })
-                        queryClient.invalidateQueries({
-                          queryKey: ['userCircle'],
-                        })
-                        queryClient.refetchQueries({
-                          queryKey: ['circleMembers'],
-                        })
-                        queryClient.refetchQueries({
-                          queryKey: ['circleMemberRequests'],
-                        })
-                        queryClient.refetchQueries({ queryKey: ['userCircle'] })
-                        refreshMemberRequests()
-                        GetAllCircleMembers().then(data => {
-                          setCircleMembers(data.res ? data.res : [])
-                        })
-                      }
-                    })
-                  },
-                  t('circleSettings.accept'),
-                  t('common.cancel'),
-                )
-              }}
-            >
-              {t('circleSettings.accept')}
-            </Button>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Button
+                variant='soft'
+                color='success'
+                onClick={() => {
+                  showConfirmation(
+                    t('circleSettings.acceptRequestMessage', {
+                      name: request.displayName,
+                      username: request.username,
+                    }),
+                    t('circleSettings.acceptRequestTitle'),
+                    () => {
+                      AcceptCircleMemberRequest(request.id).then(resp => {
+                        if (resp.ok) {
+                          showNotification({
+                            type: 'success',
+                            message: t('circleSettings.requestAccepted'),
+                          })
+                          queryClient.invalidateQueries({
+                            queryKey: ['circleMembers'],
+                          })
+                          queryClient.invalidateQueries({
+                            queryKey: ['circleMemberRequests'],
+                          })
+                          queryClient.invalidateQueries({
+                            queryKey: ['userCircle'],
+                          })
+                          queryClient.refetchQueries({
+                            queryKey: ['circleMembers'],
+                          })
+                          queryClient.refetchQueries({
+                            queryKey: ['circleMemberRequests'],
+                          })
+                          queryClient.refetchQueries({
+                            queryKey: ['userCircle'],
+                          })
+                          refreshMemberRequests()
+                          GetAllCircleMembers().then(data => {
+                            setCircleMembers(data.res ? data.res : [])
+                          })
+                        }
+                      })
+                    },
+                    t('circleSettings.accept'),
+                    t('common.cancel'),
+                  )
+                }}
+              >
+                {t('circleSettings.accept')}
+              </Button>
+              <Button
+                variant='outlined'
+                color='danger'
+                onClick={() => {
+                  showConfirmation(
+                    t('circleSettings.declineRequestMessage', {
+                      name: request.displayName,
+                      username: request.username,
+                    }),
+                    t('circleSettings.declineRequestTitle'),
+                    () => {
+                      DeclineCircleMemberRequest(request.id).then(resp => {
+                        if (resp.ok) {
+                          showNotification({
+                            type: 'success',
+                            message: t('circleSettings.requestDeclined'),
+                          })
+                          setCircleMemberRequests(prevRequests =>
+                            prevRequests.filter(r => r.id !== request.id),
+                          )
+                          queryClient.invalidateQueries({
+                            queryKey: ['circleMemberRequests'],
+                          })
+                        } else {
+                          showNotification({
+                            type: 'error',
+                            message: t('circleSettings.declineRequestFailed'),
+                          })
+                        }
+                      })
+                    },
+                    t('circleSettings.declineRequestButton'),
+                    t('common.cancel'),
+                    'danger',
+                  )
+                }}
+              >
+                {t('circleSettings.decline')}
+              </Button>
+            </Box>
           </Card>
         ))}
         <Divider> {t('circleSettings.or')} </Divider>
