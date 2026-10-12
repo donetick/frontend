@@ -1,7 +1,5 @@
 {
   "title": "Tarefas",
-  "tasksForDate": "Tarefas para {{date}}",
-  "createSuggestion": "Criar \"{{value}}\"",
   "myChores": "Minhas tarefas",
   "allChores": "Todas as tarefas",
   "addChore": "Adicionar tarefa",
@@ -113,7 +111,9 @@
     "unableChangeAssignee": "",
     "availableToCompleteStarting": "",
     "delegateToSomeoneElse": "",
-    "selectAPerformer": ""
+    "selectAPerformer": "",
+    "notFoundTitle": "Tarefa não disponível",
+    "notFoundDescription": "Esta tarefa pode ter sido excluída ou não está mais compartilhada com você."
   },
   "toolbar": {
     "defaultProject": "Default Project",
@@ -263,8 +263,6 @@
     "failRescheduleTitle": "",
     "failRescheduleMessage": "",
     "failRemoveDueDateTitle": "",
-    "failAssignTitle": "",
-    "failAssignMessage": "",
     "nudgeSentTitle": "",
     "nudgeFailed": "",
     "failNudgeTitle": "",
@@ -279,7 +277,9 @@
       "skipTitle": "",
       "skippedTitle": "",
       "skipFailedTitle": ""
-    }
+    },
+    "failAssignTitle": "",
+    "failAssignMessage": ""
   },
   "archived": {
     "restoredTitle": "",
@@ -345,7 +345,7 @@
     "noMatchFilters": "",
     "emptyTitle": "",
     "emptyDescription": "",
-    "backToTasks": ""
+    "backToTasks": "Voltar às tarefas"
   },
   "edit": {
     "deleteConfirm": ""
@@ -722,7 +722,6 @@
     "startDate": "",
     "dueDate": "",
     "triggerDueHint": "",
-    "alwaysDueHint": "Esta tarefa não tem data de vencimento e está sempre disponível para ser concluída",
     "giveDueDate": "",
     "giveDueDateHelp": "",
     "startWhen": "",
@@ -748,7 +747,6 @@
     "notificationsPlanWarning": "Task notifications are not available in the Basic plan. Upgrade to Plus to receive reminders when tasks are due or completed.",
     "notifyForTask": "",
     "notifyForTaskHelp": "",
-    "notifyForTaskUnavailable": "As notificações não estão disponíveis para tarefas baseadas em gatilho ou sempre disponíveis",
     "notificationSchedule": "",
     "whoToNotify": "",
     "allAssignees": "",
@@ -778,11 +776,11 @@
     "archive": "",
     "unarchive": "",
     "create": "",
+    "alwaysDueHint": "Esta tarefa não tem data de vencimento e está sempre disponível para ser concluída",
+    "notifyForTaskUnavailable": "As notificações não estão disponíveis para tarefas baseadas em gatilho ou sempre disponíveis",
     "notificationsFreePlanNote": "O teu plan inclui um lembrete na data de vencimento. Plus adiciona lembretes antes do vencimento e acompanhamentos depois."
   },
   "addTask": {
-    "descriptionLabel": "Description:",
-    "subtasksLabel": "Subtasks:",
     "title": "",
     "defaultProject": "",
     "anyone": "",
@@ -793,7 +791,9 @@
     "createCount": "",
     "useTask": "",
     "processing": "",
-    "create": ""
+    "create": "",
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:"
   },
   "repeat": {
     "days": {
@@ -825,13 +825,13 @@
       "monthly": "",
       "yearly": "",
       "adaptive": "",
-      "always": "Sempre",
-      "custom": ""
+      "custom": "",
+      "always": "Sempre"
     },
     "freqMessage": {
       "adaptive": "",
-      "always": "Esta tarefa não tem data de vencimento e permanece disponível para conclusão a qualquer momento. Não será arquivada ao ser concluída.",
-      "custom": ""
+      "custom": "",
+      "always": "Esta tarefa não tem data de vencimento e permanece disponível para conclusão a qualquer momento. Não será arquivada ao ser concluída."
     },
     "weekPattern": {
       "every_week": "",
@@ -1058,5 +1058,7 @@
     "today": "",
     "yesterday": "",
     "noteTitle": ""
-  }
+  },
+  "tasksForDate": "Tarefas para {{date}}",
+  "createSuggestion": "Criar \"{{value}}\""
 }

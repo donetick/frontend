@@ -1,7 +1,5 @@
 {
   "title": "tareas",
-  "tasksForDate": "Tareas para {{date}}",
-  "createSuggestion": "Crear \"{{value}}\"",
   "myChores": "Mis tareas",
   "allChores": "Todas las tareas",
   "addChore": "Añadir tarea",
@@ -113,7 +111,9 @@
     "unableChangeAssignee": "Unable to change the assignee",
     "availableToCompleteStarting": "Available to complete starting {{date}}",
     "delegateToSomeoneElse": "Delegate to someone else",
-    "selectAPerformer": "Seleccionar a performer"
+    "selectAPerformer": "Seleccionar a performer",
+    "notFoundTitle": "Tarea no disponible",
+    "notFoundDescription": "Es posible que esta tarea haya sido eliminada o ya no esté compartida contigo."
   },
   "toolbar": {
     "defaultProject": "Proyecto por defecto",
@@ -263,8 +263,6 @@
     "failRescheduleTitle": "Error al reprogramar",
     "failRescheduleMessage": "No se pudo actualizar la fecha de vencimiento",
     "failRemoveDueDateTitle": "Error al eliminar la fecha de vencimiento",
-    "failAssignTitle": "",
-    "failAssignMessage": "",
     "nudgeSentTitle": "¡Toque de atención enviado!",
     "nudgeFailed": "Error al enviar toque de atención",
     "failNudgeTitle": "Error al enviar toque de atención",
@@ -279,7 +277,9 @@
       "skipTitle": "Omitir tareas",
       "skippedTitle": "⏭️ Tareas omitidas",
       "skipFailedTitle": "Error al omitir en lote"
-    }
+    },
+    "failAssignTitle": "",
+    "failAssignMessage": ""
   },
   "archived": {
     "restoredTitle": "Tarea restaurada",
@@ -722,7 +722,6 @@
     "startDate": "Fecha de Inicio",
     "dueDate": "Fecha de vencimiento",
     "triggerDueHint": "La fecha de vencimiento se establecerá cuando se cumpla el disparador del objeto",
-    "alwaysDueHint": "Esta tarea no tiene fecha de vencimiento y está siempre disponible para completarse",
     "giveDueDate": "Dar a esta tarea una fecha de vencimiento",
     "giveDueDateHelp": "La tarea debe completarse antes de una hora específica",
     "startWhen": "¿Cuándo comienza esta tarea?",
@@ -748,7 +747,6 @@
     "notificationsPlanWarning": "Las notificaciones de tareas no están disponibles en el plan Básico. Actualiza a Plus para recibir recordatorios cuando las tareas vencen o se completan.",
     "notifyForTask": "Notificar para esta tarea",
     "notifyForTaskHelp": "Cuándo se deben recibir notificaciones para esta tarea",
-    "notifyForTaskUnavailable": "Las notificaciones no están disponibles para tareas basadas en disparadores o siempre disponibles",
     "notificationSchedule": "Programación de notificaciones",
     "whoToNotify": "A Quién Notificar",
     "allAssignees": "Todas las personas asignadas",
@@ -778,11 +776,11 @@
     "archive": "Archivar",
     "unarchive": "Desarchivar",
     "create": "Crear",
+    "alwaysDueHint": "Esta tarea no tiene fecha de vencimiento y está siempre disponible para completarse",
+    "notifyForTaskUnavailable": "Las notificaciones no están disponibles para tareas basadas en disparadores o siempre disponibles",
     "notificationsFreePlanNote": "Tu plan incluye un recordatorio en la fecha de vencimiento. Plus añade recordatorios antes del vencimiento y seguimientos después."
   },
   "addTask": {
-    "descriptionLabel": "Description:",
-    "subtasksLabel": "Subtasks:",
     "title": "Crear nueva tarea",
     "defaultProject": "Proyecto por defecto",
     "anyone": "Cualquiera",
@@ -793,7 +791,9 @@
     "createCount": "Crear {{count}} tareas",
     "useTask": "Usar tarea",
     "processing": "Procesando",
-    "create": "Crear"
+    "create": "Crear",
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:"
   },
   "repeat": {
     "days": {
@@ -825,13 +825,13 @@
       "monthly": "Mensualmente",
       "yearly": "Anualmente",
       "adaptive": "Adaptativa",
-      "always": "Siempre",
-      "custom": "Personalizada"
+      "custom": "Personalizada",
+      "always": "Siempre"
     },
     "freqMessage": {
       "adaptive": "Esta tarea se programará dinámicamente según las fechas de finalización anteriores.",
-      "always": "Esta tarea no tiene fecha de vencimiento y permanece disponible para completarse en cualquier momento. No se archivará al completarse.",
-      "custom": "Esta tarea se programará según una frecuencia personalizada."
+      "custom": "Esta tarea se programará según una frecuencia personalizada.",
+      "always": "Esta tarea no tiene fecha de vencimiento y permanece disponible para completarse en cualquier momento. No se archivará al completarse."
     },
     "weekPattern": {
       "every_week": "Cada semana",
@@ -1058,5 +1058,7 @@
     "today": "Hoy",
     "yesterday": "Ayer",
     "noteTitle": "Nota - {{choreName}}"
-  }
+  },
+  "tasksForDate": "Tareas para {{date}}",
+  "createSuggestion": "Crear \"{{value}}\""
 }

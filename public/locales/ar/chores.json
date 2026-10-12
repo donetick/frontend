@@ -1,7 +1,5 @@
 {
   "title": "المهام",
-  "tasksForDate": "المهام ليوم {{date}}",
-  "createSuggestion": "إنشاء \"{{value}}\"",
   "myChores": "مهامي",
   "allChores": "جميع المهام",
   "addChore": "إضافة مهمة",
@@ -113,7 +111,9 @@
     "unableChangeAssignee": "تعذر تغيير المحال إليه",
     "availableToCompleteStarting": "متاح لإكمال بدء {{date}}",
     "delegateToSomeoneElse": "مندوب إلى شخص آخر",
-    "selectAPerformer": "حدد الأداء"
+    "selectAPerformer": "حدد الأداء",
+    "notFoundTitle": "المهمة غير متاحة",
+    "notFoundDescription": "ربما تم حذف هذه المهمة أو لم تعد مشاركة معك."
   },
   "toolbar": {
     "defaultProject": "المشروع الافتراضي",
@@ -263,8 +263,6 @@
     "failRescheduleTitle": "فشل في إعادة الجدولة",
     "failRescheduleMessage": "غير قادر على تحديث تاريخ الاستحقاق",
     "failRemoveDueDateTitle": "فشل في إزالة تاريخ الاستحقاق",
-    "failAssignTitle": "",
-    "failAssignMessage": "",
     "nudgeSentTitle": "تم ارسال الدافع!",
     "nudgeFailed": "فشل في إرسال دفعة",
     "failNudgeTitle": "فشل في إرسال Nudge",
@@ -279,7 +277,9 @@
       "skipTitle": "تخطي المهام",
       "skippedTitle": "⏭️ تخطي المهام",
       "skipFailedTitle": "فشل تخطي الكتلة"
-    }
+    },
+    "failAssignTitle": "",
+    "failAssignMessage": ""
   },
   "archived": {
     "restoredTitle": "تم استعادة المهمة",
@@ -722,7 +722,6 @@
     "startDate": "تاريخ البدء",
     "dueDate": "تاريخ الاستحقاق",
     "triggerDueHint": "سيتم تعيين تاريخ الاستحقاق عندما يتم استيفاء المشغل",
-    "alwaysDueHint": "هذه المهمة ليس لها تاريخ استحقاق وهي متاحة دائماً للإنجاز",
     "giveDueDate": "اعطي هذه المهمة تاريخ الاستحقاق",
     "giveDueDateHelp": "المهمة تحتاج إلى أن تكتمل في وقت محدد",
     "startWhen": "متى تبدأ هذه المهمة؟",
@@ -748,7 +747,6 @@
     "notificationsPlanWarning": "إشعارات المهام غير متوفرة في الخطة الأساسية. الترقية إلى Plus لتلقي التذكير عندما تكون المهام مستحقة أو مكتملة.",
     "notifyForTask": "إشعار لهذه المهمة",
     "notifyForTaskHelp": "متى يجب تلقي إشعارات لهذه المهمة",
-    "notifyForTaskUnavailable": "الإشعارات غير متوفرة للمهام القائمة على مشغل أو المتاحة دائماً",
     "notificationSchedule": "جدول الإشعارات",
     "whoToNotify": "من يجب إشعاره",
     "allAssignees": "جميع المحال إليهم",
@@ -778,11 +776,11 @@
     "archive": "أرشيف",
     "unarchive": "إلغاء الأرشيف",
     "create": "إنشاء",
+    "alwaysDueHint": "هذه المهمة ليس لها تاريخ استحقاق وهي متاحة دائماً للإنجاز",
+    "notifyForTaskUnavailable": "الإشعارات غير متوفرة للمهام القائمة على مشغل أو المتاحة دائماً",
     "notificationsFreePlanNote": "خطتك تتضمن تذكيراً في تاريخ الاستحقاق. يضيف Plus تذكيرات قبل الاستحقاق ومتابعات بعده."
   },
   "addTask": {
-    "descriptionLabel": "Description:",
-    "subtasksLabel": "Subtasks:",
     "title": "إنشاء مهمة جديدة",
     "defaultProject": "المشروع الافتراضي",
     "anyone": "أي",
@@ -793,7 +791,9 @@
     "createCount": "إنشاء مهام {{count}}",
     "useTask": "استخدام المهمة",
     "processing": "معالجة",
-    "create": "إنشاء"
+    "create": "إنشاء",
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:"
   },
   "repeat": {
     "days": {
@@ -825,13 +825,13 @@
       "monthly": "شهريا",
       "yearly": "سنوي",
       "adaptive": "التكييف",
-      "always": "دائماً",
-      "custom": "مخصص"
+      "custom": "مخصص",
+      "always": "دائماً"
     },
     "freqMessage": {
       "adaptive": "وستحدد مواعيد هذا المبنى بشكل دينامي استنادا إلى تواريخ الإنجاز السابقة.",
-      "always": "ليس لهذه المهمة تاريخ استحقاق وتبقى متاحة للإنجاز في أي وقت. لن يتم أرشفتها عند إكمالها.",
-      "custom": "سيتم جدولة هذا الجزء استنادا إلى تردد مخصص."
+      "custom": "سيتم جدولة هذا الجزء استنادا إلى تردد مخصص.",
+      "always": "ليس لهذه المهمة تاريخ استحقاق وتبقى متاحة للإنجاز في أي وقت. لن يتم أرشفتها عند إكمالها."
     },
     "weekPattern": {
       "every_week": "كل أسبوع",
@@ -1058,5 +1058,7 @@
     "today": "اليوم",
     "yesterday": "أمس",
     "noteTitle": "ملاحظة - {{choreName}}"
-  }
+  },
+  "tasksForDate": "المهام ليوم {{date}}",
+  "createSuggestion": "إنشاء \"{{value}}\""
 }

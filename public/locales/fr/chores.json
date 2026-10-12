@@ -1,7 +1,5 @@
 {
   "title": "Tâches",
-  "tasksForDate": "Tâches pour le {{date}}",
-  "createSuggestion": "Créer \"{{value}}\"",
   "myChores": "Mes tâches",
   "allChores": "Toutes les tâches",
   "addChore": "Ajouter une tâche",
@@ -113,7 +111,9 @@
     "unableChangeAssignee": "Impossible de changer la personne assignée",
     "availableToCompleteStarting": "Peut être terminée à partir du {{date}}",
     "delegateToSomeoneElse": "Déléguer à quelqu'un d'autre",
-    "selectAPerformer": "Sélectionnez qui a effectué la tâche"
+    "selectAPerformer": "Sélectionnez qui a effectué la tâche",
+    "notFoundTitle": "Tâche indisponible",
+    "notFoundDescription": "Cette tâche a peut-être été supprimée ou n'est plus partagée avec vous."
   },
   "toolbar": {
     "defaultProject": "Projet par défaut",
@@ -263,8 +263,6 @@
     "failRescheduleTitle": "Échec de la replanification",
     "failRescheduleMessage": "Impossible de mettre à jour la date d'échéance",
     "failRemoveDueDateTitle": "Échec de la suppression de la date d'échéance",
-    "failAssignTitle": "Échec de l'assignation",
-    "failAssignMessage": "Impossible d'assigner la tâche",
     "nudgeSentTitle": "Rappel envoyé !",
     "nudgeFailed": "Échec de l'envoi du rappel",
     "failNudgeTitle": "Échec de l'envoi du rappel",
@@ -279,7 +277,9 @@
       "skipTitle": "Passer les tâches",
       "skippedTitle": "⏭️ Tâches passées",
       "skipFailedTitle": "Impossible de passer les tâches"
-    }
+    },
+    "failAssignTitle": "Échec de l'assignation",
+    "failAssignMessage": "Impossible d'assigner la tâche"
   },
   "archived": {
     "restoredTitle": "Tâche restaurée",
@@ -722,7 +722,6 @@
     "startDate": "Date de début",
     "dueDate": "Date d'échéance",
     "triggerDueHint": "La date d'échéance sera définie lorsque la condition de l'objet sera remplie",
-    "alwaysDueHint": "Cette tâche n'a pas de date d'échéance et est toujours disponible à réaliser",
     "giveDueDate": "Donner une date d'échéance à cette tâche",
     "giveDueDateHelp": "La tâche doit être terminée avant une heure précise",
     "startWhen": "Quand cette tâche démarre-t-elle ?",
@@ -748,7 +747,6 @@
     "notificationsPlanWarning": "Les notifications de tâches ne sont pas disponibles dans la formule Basic. Passez à Plus pour recevoir des rappels lorsque les tâches arrivent à échéance ou sont terminées.",
     "notifyForTask": "Notifier pour cette tâche",
     "notifyForTaskHelp": "Quand recevoir des notifications pour cette tâche",
-    "notifyForTaskUnavailable": "Les notifications ne sont pas disponibles pour les tâches basées sur une condition ou toujours disponibles",
     "notificationSchedule": "Planification des notifications",
     "whoToNotify": "Qui notifier",
     "allAssignees": "Toutes les personnes assignées",
@@ -778,11 +776,11 @@
     "archive": "Archiver",
     "unarchive": "Désarchiver",
     "create": "Créer",
+    "alwaysDueHint": "Cette tâche n'a pas de date d'échéance et est toujours disponible à réaliser",
+    "notifyForTaskUnavailable": "Les notifications ne sont pas disponibles pour les tâches basées sur une condition ou toujours disponibles",
     "notificationsFreePlanNote": "Votre formule inclut un rappel à la date d'échéance. Plus ajoute des rappels avant l'échéance et des suivis après."
   },
   "addTask": {
-    "descriptionLabel": "Description:",
-    "subtasksLabel": "Subtasks:",
     "title": "Créer une nouvelle tâche",
     "defaultProject": "Projet par défaut",
     "anyone": "Tout le monde",
@@ -793,7 +791,9 @@
     "createCount": "Créer {{count}} tâches",
     "useTask": "Utiliser la tâche",
     "processing": "Traitement en cours",
-    "create": "Créer"
+    "create": "Créer",
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:"
   },
   "repeat": {
     "days": {
@@ -825,13 +825,13 @@
       "monthly": "Mensuel",
       "yearly": "Annuel",
       "adaptive": "Adaptatif",
-      "always": "Toujours",
-      "custom": "Personnalisé"
+      "custom": "Personnalisé",
+      "always": "Toujours"
     },
     "freqMessage": {
       "adaptive": "Cette tâche sera planifiée dynamiquement selon les dates de fin précédentes.",
-      "always": "Cette tâche n'a pas de date d'échéance et reste disponible à tout moment. Elle ne sera pas archivée une fois terminée.",
-      "custom": "Cette tâche sera planifiée selon une fréquence personnalisée."
+      "custom": "Cette tâche sera planifiée selon une fréquence personnalisée.",
+      "always": "Cette tâche n'a pas de date d'échéance et reste disponible à tout moment. Elle ne sera pas archivée une fois terminée."
     },
     "weekPattern": {
       "every_week": "Chaque semaine",
@@ -1058,5 +1058,7 @@
     "today": "Aujourd'hui",
     "yesterday": "Hier",
     "noteTitle": "Note - {{choreName}}"
-  }
+  },
+  "tasksForDate": "Tâches pour le {{date}}",
+  "createSuggestion": "Créer \"{{value}}\""
 }

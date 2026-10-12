@@ -1,7 +1,5 @@
 {
   "title": "Attività",
-  "tasksForDate": "Attività per {{date}}",
-  "createSuggestion": "Crea \"{{value}}\"",
   "myChores": "Le mie attività",
   "allChores": "Tutte le attività",
   "addChore": "Aggiungi attività",
@@ -114,6 +112,8 @@
     "availableToCompleteStarting": "Disponibile per il completamento dal {{date}}",
     "delegateToSomeoneElse": "Delega a qualcun altro",
     "selectAPerformer": "Seleziona chi la eseguirà",
+    "notFoundTitle": "Attività non disponibile",
+    "notFoundDescription": "Questa attività potrebbe essere stata eliminata o non è più condivisa con te.",
     "attachment_many": "{{count}} allegati"
   },
   "toolbar": {
@@ -270,8 +270,6 @@
     "failRescheduleTitle": "Ripianificazione non riuscita",
     "failRescheduleMessage": "Impossibile aggiornare la data di scadenza",
     "failRemoveDueDateTitle": "Rimozione della scadenza non riuscita",
-    "failAssignTitle": "Assegnazione non riuscita",
-    "failAssignMessage": "Impossibile assegnare l'attività",
     "nudgeSentTitle": "Sollecito inviato!",
     "nudgeFailed": "Invio sollecito non riuscito",
     "failNudgeTitle": "Invio sollecito non riuscito",
@@ -286,7 +284,9 @@
       "skipTitle": "Salta attività",
       "skippedTitle": "⏭️ Attività saltate",
       "skipFailedTitle": "Salto multiplo non riuscito"
-    }
+    },
+    "failAssignTitle": "Assegnazione non riuscita",
+    "failAssignMessage": "Impossibile assegnare l'attività"
   },
   "archived": {
     "restoredTitle": "Attività ripristinata",
@@ -801,8 +801,6 @@
     "notifyForTaskUnavailable": "Le notifiche non sono disponibili per attività basate su trigger o sempre disponibili"
   },
   "addTask": {
-    "descriptionLabel": "Descrizione:",
-    "subtasksLabel": "Sottoattività:",
     "title": "Crea nuova attività",
     "defaultProject": "Progetto predefinito",
     "anyone": "Chiunque",
@@ -813,7 +811,9 @@
     "createCount": "Crea {{count}} attività",
     "useTask": "Usa attività",
     "processing": "Elaborazione",
-    "create": "Crea"
+    "create": "Crea",
+    "descriptionLabel": "Descrizione:",
+    "subtasksLabel": "Sottoattività:"
   },
   "repeat": {
     "days": {
@@ -1078,5 +1078,7 @@
     "today": "Oggi",
     "yesterday": "Ieri",
     "noteTitle": "Nota - {{choreName}}"
-  }
+  },
+  "tasksForDate": "Attività per {{date}}",
+  "createSuggestion": "Crea \"{{value}}\""
 }

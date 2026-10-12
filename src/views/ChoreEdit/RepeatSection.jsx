@@ -294,7 +294,7 @@ export const RepeatOnSections = ({
               </RadioGroup>
 
               {frequencyMetadata?.weekPattern === 'week_of_month' && (
-                <Box mt={2}>
+                <Box>
                   <Typography level='body-sm' mb={1}>
                     {t('repeat.selectOccurrences')}
                   </Typography>
@@ -518,28 +518,50 @@ const RepeatSection = ({
   const { t } = useTranslation('chores')
 
   return (
-    <Box mt={2}>
-      <Typography level='h4'>{t('repeat.title')}</Typography>
-      <FormControl sx={{ mt: 1 }}>
-        <Checkbox
-          onChange={e => {
-            onFrequencyTypeUpdate(e.target.checked ? 'daily' : 'once')
-            if (e.target.checked) {
-              onTriggerUpdate(null)
+    <Box>
+      <FormControl>
+        <Typography level='h4'>{t('repeat.picker.scheduleType')}</Typography>
+        <Select
+          aria-label={t('repeat.picker.scheduleType')}
+          value={
+            ['once', 'no_repeat'].includes(frequencyType)
+              ? 'once'
+              : frequencyType === 'trigger'
+                ? 'trigger'
+                : frequencyType === 'always'
+                  ? 'always'
+                  : 'repeat'
+          }
+          onChange={(_, mode) => {
+            if (!mode) return
+            if (mode === 'trigger' && !isPlusAccount(userProfile)) {
+              showPaywall(PAYWALL_REASON.THING_TRIGGERS)
+              return
             }
+            onFrequencyTypeUpdate(mode === 'repeat' ? 'daily' : mode)
+            if (mode !== 'trigger') onTriggerUpdate(null)
           }}
-          defaultChecked={!['once', 'trigger'].includes(frequencyType)}
-          checked={!['once', 'trigger'].includes(frequencyType)}
-          value={!['once', 'trigger'].includes(frequencyType)}
-          overlay
-          label={t('repeat.repeatThisTask')}
-        />
-        <FormHelperText>{t('repeat.repeatThisTaskHelp')}</FormHelperText>
+        >
+          <Option value='once'>{t('taskEditor.oneTimeTask')}</Option>
+          <Option value='repeat'>{t('taskEditor.repeatingTask')}</Option>
+          <Option value='trigger'>
+            {t('taskEditor.triggeredByAThing')}
+            {!isPlusAccount(userProfile) && (
+              <LockOutlined sx={{ fontSize: 14, opacity: 0.6 }} />
+            )}
+          </Option>
+          {frequencyType === 'always' && (
+            <Option value='always'>{t('taskEditor.alwaysAvailable')}</Option>
+          )}
+        </Select>
       </FormControl>
-      {!['once', 'trigger'].includes(frequencyType) && (
+      {!['once', 'no_repeat', 'trigger', 'always'].includes(frequencyType) && (
         <>
-          <Card sx={{ mt: 1 }}>
-            <Typography level='h5'>{t('repeat.howOften')}</Typography>
+          <Card
+            variant='plain'
+            sx={{ mt: 2, p: 0, bgcolor: 'transparent', gap: 1.5 }}
+          >
+            <Typography level='h5'>{t('taskEditor.repeats')}</Typography>
 
             <List
               orientation='horizontal'
@@ -696,34 +718,6 @@ const RepeatSection = ({
           </Card>
         </>
       )}
-      <FormControl sx={{ mt: 1 }}>
-        <Checkbox
-          onChange={e => {
-            // Let free users reach for it and meet the paywall on the attempt,
-            // rather than greying the row out — one lock affordance, not three.
-            if (e.target.checked && !isPlusAccount(userProfile)) {
-              showPaywall(PAYWALL_REASON.THING_TRIGGERS)
-              return
-            }
-            onFrequencyTypeUpdate(e.target.checked ? 'trigger' : 'once')
-            //  if unchecked, set selectedThing to null:
-            if (!e.target.checked) {
-              onTriggerUpdate(null)
-            }
-          }}
-          defaultChecked={frequencyType === 'trigger'}
-          checked={frequencyType === 'trigger'}
-          value={frequencyType === 'trigger'}
-          overlay
-          label={t('repeat.triggerLabel')}
-          endDecorator={
-            isPlusAccount(userProfile) ? null : (
-              <LockOutlined sx={{ fontSize: 14, opacity: 0.6 }} />
-            )
-          }
-        />
-        <FormHelperText>{t('repeat.triggerHelp')}</FormHelperText>
-      </FormControl>
       {frequencyType === 'trigger' && (
         <ThingTriggerSection
           things={allUserThings}

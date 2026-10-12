@@ -11,6 +11,7 @@ import {
   EditCalendar,
   Flag,
   Label as LabelIcon,
+  Lock,
   MoreHoriz,
   Person,
   Remove,
@@ -543,7 +544,18 @@ const MultiSelectToolbar = ({
                       {renderProjectAvatar(project.color, project.icon)}
                     </ListItemDecorator>
                     <ListItemContent>
-                      <Typography level='body-sm'>{project.name}</Typography>
+                      <Typography level='body-sm'>
+                        {project.name}
+                        {project.isPrivate && (
+                          <Lock
+                            sx={{
+                              fontSize: 14,
+                              ml: 0.5,
+                              verticalAlign: 'text-bottom',
+                            }}
+                          />
+                        )}
+                      </Typography>
                     </ListItemContent>
                   </MenuItem>
                 ))}

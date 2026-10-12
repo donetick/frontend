@@ -1,7 +1,5 @@
 {
   "title": "Zadania",
-  "tasksForDate": "Zadania na {{date}}",
-  "createSuggestion": "Utwórz \"{{value}}\"",
   "myChores": "Moje zadania",
   "allChores": "Wszystkie zadania",
   "addChore": "Dodaj zadanie",
@@ -113,7 +111,9 @@
     "unableChangeAssignee": "Nie można zmienić wykonawcy",
     "availableToCompleteStarting": "Dostępne do wykonania od {{date}}",
     "delegateToSomeoneElse": "Przekaż komuś innemu",
-    "selectAPerformer": "Wybierz wykonawcę"
+    "selectAPerformer": "Wybierz wykonawcę",
+    "notFoundTitle": "Zadanie niedostępne",
+    "notFoundDescription": "To zadanie mogło zostać usunięte lub nie jest już z Tobą udostępniane."
   },
   "toolbar": {
     "defaultProject": "Projekt domyślny",
@@ -263,8 +263,6 @@
     "failRescheduleTitle": "Nie udało się przełożyć",
     "failRescheduleMessage": "Nie można zaktualizować terminu wykonania",
     "failRemoveDueDateTitle": "Nie udało się usunąć terminu",
-    "failAssignTitle": "",
-    "failAssignMessage": "",
     "nudgeSentTitle": "Ponaglenie wysłane!",
     "nudgeFailed": "Nie udało się wysłać ponaglenia",
     "failNudgeTitle": "Nie udało się wysłać ponaglenia",
@@ -279,7 +277,9 @@
       "skipTitle": "Pomiń zadania",
       "skippedTitle": "⏭️ Zadania pominięte",
       "skipFailedTitle": "Masowe pominięcie nie powiodło się"
-    }
+    },
+    "failAssignTitle": "",
+    "failAssignMessage": ""
   },
   "archived": {
     "restoredTitle": "Zadanie przywrócone",
@@ -781,8 +781,6 @@
     "notifyForTaskUnavailable": "Powiadomienia nie są dostępne dla zadań opartych na wyzwalaczu lub zawsze dostępnych"
   },
   "addTask": {
-    "descriptionLabel": "Description:",
-    "subtasksLabel": "Subtasks:",
     "title": "Utwórz nowe zadanie",
     "defaultProject": "Projekt domyślny",
     "anyone": "Dowolna osoba",
@@ -793,7 +791,9 @@
     "createCount": "Utwórz {{count}} zadań",
     "useTask": "Użyj zadania",
     "processing": "Przetwarzanie",
-    "create": "Utwórz"
+    "create": "Utwórz",
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:"
   },
   "repeat": {
     "days": {
@@ -1058,5 +1058,7 @@
     "today": "Dzisiaj",
     "yesterday": "Wczoraj",
     "noteTitle": "Notatka — {{choreName}}"
-  }
+  },
+  "tasksForDate": "Zadania na {{date}}",
+  "createSuggestion": "Utwórz \"{{value}}\""
 }

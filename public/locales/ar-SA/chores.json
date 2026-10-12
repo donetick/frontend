@@ -1,7 +1,5 @@
 {
   "title": "المهام",
-  "tasksForDate": "المهام ليوم {{date}}",
-  "createSuggestion": "إنشاء \"{{value}}\"",
   "myChores": "مهامي",
   "allChores": "جميع المهام",
   "addChore": "إضافة مهمة",
@@ -65,8 +63,6 @@
     "skip": "تخطي",
     "cancel": "إلغاء",
     "noPriority": "بدون أولوية",
-    "more": "More",
-    "changeDueDate": "Change due date",
     "subtasks": "المهام الفرعية",
     "noDescription": "لا يوجد وصف متاح",
     "timer": {
@@ -75,6 +71,10 @@
       "reset": "إعادة تعيين المؤقت",
       "delete": "حذف الجلسة"
     },
+    "notFoundTitle": "المهمة غير متاحة",
+    "notFoundDescription": "ربما تم حذف هذه المهمة أو لم تعد مشاركة معك.",
+    "more": "More",
+    "changeDueDate": "Change due date",
     "unableUndo": "Failed to undo",
     "offlineComplete": "You're offline — completion will sync when back online",
     "unableComplete": "Unable to complete task",
@@ -114,6 +114,21 @@
     "availableToCompleteStarting": "Available to complete starting {{date}}",
     "delegateToSomeoneElse": "Delegate to someone else",
     "selectAPerformer": "Select a performer"
+  },
+  "subTask": {
+    "untitled": "مهمة فرعية بدون عنوان",
+    "actions": "إجراءات المهمة الفرعية",
+    "edit": "تعديل",
+    "addBelow": "إضافة مهمة فرعية أسفل",
+    "addChild": "إضافة مهمة فرعية متداخلة",
+    "moveUpLevel": "الانتقال مستوى للأعلى",
+    "delete": "حذف",
+    "editTitle": "تعديل المهمة الفرعية",
+    "addTitle": "إضافة مهمة فرعية",
+    "addChildTitle": "إضافة مهمة فرعية متداخلة",
+    "namePlaceholder": "Task name...",
+    "deleteShortcut": "Delete (Shift+Backspace)",
+    "addPlaceholder": "Add new task... (Enter to add)"
   },
   "toolbar": {
     "defaultProject": "Default Project",
@@ -345,7 +360,7 @@
     "noMatchFilters": "There are archived tasks, but none fit the filters that are currently on.",
     "emptyTitle": "Nothing archived",
     "emptyDescription": "Archiving hides a task without deleting it. Anything you archive from your task list shows up here, ready to restore.",
-    "backToTasks": "Back to tasks"
+    "backToTasks": "العودة إلى المهام"
   },
   "edit": {
     "deleteConfirm": "Are you sure you want to delete this chore?"
@@ -555,21 +570,6 @@
   "searchBar": {
     "placeholder": "Search Donetick",
     "clearAria": "Clear task search"
-  },
-  "subTask": {
-    "namePlaceholder": "Task name...",
-    "untitled": "مهمة فرعية بدون عنوان",
-    "actions": "إجراءات المهمة الفرعية",
-    "edit": "تعديل",
-    "addBelow": "إضافة مهمة فرعية أسفل",
-    "addChild": "إضافة مهمة فرعية متداخلة",
-    "moveUpLevel": "الانتقال مستوى للأعلى",
-    "delete": "حذف",
-    "editTitle": "تعديل المهمة الفرعية",
-    "addTitle": "إضافة مهمة فرعية",
-    "addChildTitle": "إضافة مهمة فرعية متداخلة",
-    "deleteShortcut": "Delete (Shift+Backspace)",
-    "addPlaceholder": "Add new task... (Enter to add)"
   },
   "voiceToTask": {
     "title": "Speak your tasks",
@@ -781,8 +781,6 @@
     "notifyForTaskUnavailable": "الإشعارات غير متوفرة للمهام القائمة على مشغل أو المتاحة دائماً"
   },
   "addTask": {
-    "descriptionLabel": "Description:",
-    "subtasksLabel": "Subtasks:",
     "title": "Create new task",
     "defaultProject": "Default Project",
     "anyone": "Anyone",
@@ -793,7 +791,9 @@
     "createCount": "Create {{count}} Tasks",
     "useTask": "Use Task",
     "processing": "Processing",
-    "create": "Create"
+    "create": "Create",
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:"
   },
   "repeat": {
     "days": {
@@ -1058,5 +1058,7 @@
     "today": "Today",
     "yesterday": "Yesterday",
     "noteTitle": "Note - {{choreName}}"
-  }
+  },
+  "tasksForDate": "المهام ليوم {{date}}",
+  "createSuggestion": "إنشاء \"{{value}}\""
 }

@@ -1,7 +1,5 @@
 {
   "title": "Tâches",
-  "tasksForDate": "Tâches pour le {{date}}",
-  "createSuggestion": "Créer \"{{value}}\"",
   "myChores": "Mes Tâches",
   "allChores": "Toutes les Tâches",
   "addChore": "Ajouter une Tâche",
@@ -65,8 +63,6 @@
     "skip": "Passer",
     "cancel": "Annuler",
     "noPriority": "Aucune Priorité",
-    "more": "More",
-    "changeDueDate": "Change due date",
     "subtasks": "Sous-tâches",
     "noDescription": "Aucune description disponible",
     "timer": {
@@ -75,6 +71,10 @@
       "reset": "Réinitialiser le Minuteur",
       "delete": "Supprimer la Session"
     },
+    "notFoundTitle": "Tâche indisponible",
+    "notFoundDescription": "Cette tâche a peut-être été supprimée ou n'est plus partagée avec vous.",
+    "more": "More",
+    "changeDueDate": "Change due date",
     "unableUndo": "Failed to undo",
     "offlineComplete": "You're offline — completion will sync when back online",
     "unableComplete": "Unable to complete task",
@@ -114,6 +114,21 @@
     "availableToCompleteStarting": "Available to complete starting {{date}}",
     "delegateToSomeoneElse": "Delegate to someone else",
     "selectAPerformer": "Select a performer"
+  },
+  "subTask": {
+    "untitled": "Sous-tache sans titre",
+    "actions": "Actions de sous-tache",
+    "edit": "Modifier",
+    "addBelow": "Ajouter une sous-tache en dessous",
+    "addChild": "Ajouter une sous-tache imbriquee",
+    "moveUpLevel": "Remonter d'un niveau",
+    "delete": "Supprimer",
+    "editTitle": "Modifier la sous-tache",
+    "addTitle": "Ajouter une sous-tache",
+    "addChildTitle": "Ajouter une sous-tache imbriquee",
+    "namePlaceholder": "Task name...",
+    "deleteShortcut": "Delete (Shift+Backspace)",
+    "addPlaceholder": "Add new task... (Enter to add)"
   },
   "toolbar": {
     "defaultProject": "Default Project",
@@ -345,7 +360,7 @@
     "noMatchFilters": "There are archived tasks, but none fit the filters that are currently on.",
     "emptyTitle": "Nothing archived",
     "emptyDescription": "Archiving hides a task without deleting it. Anything you archive from your task list shows up here, ready to restore.",
-    "backToTasks": "Back to tasks"
+    "backToTasks": "Retour aux tâches"
   },
   "edit": {
     "deleteConfirm": "Are you sure you want to delete this chore?"
@@ -555,21 +570,6 @@
   "searchBar": {
     "placeholder": "Search Donetick",
     "clearAria": "Clear task search"
-  },
-  "subTask": {
-    "namePlaceholder": "Task name...",
-    "untitled": "Sous-tache sans titre",
-    "actions": "Actions de sous-tache",
-    "edit": "Modifier",
-    "addBelow": "Ajouter une sous-tache en dessous",
-    "addChild": "Ajouter une sous-tache imbriquee",
-    "moveUpLevel": "Remonter d'un niveau",
-    "delete": "Supprimer",
-    "editTitle": "Modifier la sous-tache",
-    "addTitle": "Ajouter une sous-tache",
-    "addChildTitle": "Ajouter une sous-tache imbriquee",
-    "deleteShortcut": "Delete (Shift+Backspace)",
-    "addPlaceholder": "Add new task... (Enter to add)"
   },
   "voiceToTask": {
     "title": "Speak your tasks",
@@ -781,8 +781,6 @@
     "notifyForTaskUnavailable": "Les notifications ne sont pas disponibles pour les tâches basées sur une condition ou toujours disponibles"
   },
   "addTask": {
-    "descriptionLabel": "Description:",
-    "subtasksLabel": "Subtasks:",
     "title": "Create new task",
     "defaultProject": "Default Project",
     "anyone": "Anyone",
@@ -793,7 +791,9 @@
     "createCount": "Create {{count}} Tasks",
     "useTask": "Use Task",
     "processing": "Processing",
-    "create": "Create"
+    "create": "Create",
+    "descriptionLabel": "Description:",
+    "subtasksLabel": "Subtasks:"
   },
   "repeat": {
     "days": {
@@ -1058,5 +1058,7 @@
     "today": "Today",
     "yesterday": "Yesterday",
     "noteTitle": "Note - {{choreName}}"
-  }
+  },
+  "tasksForDate": "Tâches pour le {{date}}",
+  "createSuggestion": "Créer \"{{value}}\""
 }

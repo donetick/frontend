@@ -76,8 +76,8 @@ class StatusBarManager {
    * Apply safe area insets using CSS custom properties
    * Components should use env() variables or CSS custom properties for proper safe area handling
    */
-  async applySafeAreaInsets() {
-    if (!this.isNativePlatform || this.safeAreaApplied) return
+  async applySafeAreaInsets(force = false) {
+    if (!this.isNativePlatform || (this.safeAreaApplied && !force)) return
 
     try {
       // Get safe area insets
@@ -121,6 +121,37 @@ class StatusBarManager {
       document.body.style.paddingRight = `${insets.right}px`
       document.body.style.paddingBottom = `${insets.bottom}px`
       document.body.style.paddingLeft = `${insets.left}px`
+    }
+  }
+
+  /**
+   * Restore the WebView frame after dismissing a native browser on iOS.
+   *
+   * SFSafariViewController can leave Capacitor's WebView at the full-screen
+   * frame. The StatusBar plugin remembers that overlay is already disabled,
+   * so setting it to false again is a no-op. Toggling the value forces the
+   * plugin to recalculate the WebView frame below the status bar.
+   */
+  async restoreAfterBrowserDismissal() {
+    if (!this.isNativePlatform) return
+
+    try {
+      // browserFinished can arrive while the dismissal animation is still
+      // completing. Wait until UIKit has restored the app view hierarchy.
+      await new Promise(resolve => setTimeout(resolve, 250))
+
+      await StatusBar.show()
+      if (this.platform === 'ios') {
+        await StatusBar.setOverlaysWebView({ overlay: true })
+      }
+      await StatusBar.setOverlaysWebView({ overlay: false })
+      await this.setTheme(this.currentTheme)
+      await this.applySafeAreaInsets(true)
+    } catch (error) {
+      console.error(
+        'StatusBarManager: Failed to restore after browser dismissal:',
+        error,
+      )
     }
   }
 
