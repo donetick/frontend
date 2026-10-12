@@ -26,8 +26,10 @@ export default function CompletionActionsSection({
   actions,
   onChange,
   onPointsChange,
+  onRequireApprovalChange,
   onValidate,
   points,
+  requireApproval = false,
   showHeading = true,
 }) {
   const { t } = useTranslation('chores')
@@ -126,6 +128,33 @@ export default function CompletionActionsSection({
                 : 'Enter a whole number from 0 to 1000.'}
             </FormHelperText>
           </FormControl>
+        </Card>
+      )}
+      {requireApproval && (
+        <Card variant='outlined' sx={{ mb: 1 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 1,
+            }}
+          >
+            <Box>
+              <Typography level='title-md'>
+                {t('choreEdit.requireApproval')}
+              </Typography>
+              <Typography level='body-sm' textColor='text.tertiary'>
+                {t('choreEdit.requireApprovalHelp')}
+              </Typography>
+            </Box>
+            <IconButton
+              aria-label={t('taskEditor.removeApprovalAction')}
+              onClick={() => onRequireApprovalChange(false)}
+            >
+              <Delete />
+            </IconButton>
+          </Box>
         </Card>
       )}
       {actions.map((action, index) => {
@@ -228,6 +257,12 @@ export default function CompletionActionsSection({
         <Menu>
           <MenuItem disabled={hasPoints} onClick={() => onPointsChange(1)}>
             {t('taskEditor.awardPoints')}
+          </MenuItem>
+          <MenuItem
+            disabled={requireApproval}
+            onClick={() => onRequireApprovalChange(true)}
+          >
+            {t('choreEdit.requireApproval')}
           </MenuItem>
           <MenuItem
             disabled={
