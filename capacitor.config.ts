@@ -8,6 +8,13 @@ const config: CapacitorConfig = {
     allowMixedContent: true,
   },
   plugins: {
+    // Keep this in native config as well as setting it at runtime. On iOS the
+    // StatusBar plugin reapplies its native config whenever the app's view
+    // appears (including after dismissing Capacitor Browser). Without this it
+    // falls back to overlay=true and the WebView jumps under the status bar.
+    StatusBar: {
+      overlaysWebView: false,
+    },
     PushNotifications: {
       presentationOptions: ['badge', 'sound', 'alert'],
     },
