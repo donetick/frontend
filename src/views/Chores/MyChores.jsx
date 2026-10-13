@@ -95,6 +95,33 @@ const ASSIGNEE_FILTER_KEYS = [
   'created_by_me',
 ]
 
+const sortChores = (a, b, sortBy, direction) => {
+  const multiplier = direction === 'desc' ? -1 : 1
+
+  if (sortBy === 'smart') return ChoreSorter(a, b) * multiplier
+
+  if (sortBy === 'priority') {
+    const priorityA = a.priority ?? Number.MAX_SAFE_INTEGER
+    const priorityB = b.priority ?? Number.MAX_SAFE_INTEGER
+    return (priorityA - priorityB) * multiplier
+  }
+
+  const dateField =
+    sortBy === 'due_date'
+      ? 'nextDueDate'
+      : sortBy === 'created_date'
+        ? 'createdAt'
+        : 'updatedAt'
+  const dateA = a[dateField] || a[`${dateField.replace('At', '')}_at`]
+  const dateB = b[dateField] || b[`${dateField.replace('At', '')}_at`]
+
+  // Unscheduled/unknown dates remain at the end in either direction.
+  if (!dateA && !dateB) return 0
+  if (!dateA) return 1
+  if (!dateB) return -1
+  return (new Date(dateA).getTime() - new Date(dateB).getTime()) * multiplier
+}
+
 const MyChores = () => {
   const { data: userProfile, isLoading: isUserProfileLoading } =
     useUserProfile()
@@ -128,6 +155,12 @@ const MyChores = () => {
   const searchInputRef = useRef(null)
   const [selectedChoreSection, setSelectedChoreSection] = useState(
     localStorage.getItem('selectedChoreSection') || 'default',
+  )
+  const [choreSortBy, setChoreSortBy] = useState(
+    () => localStorage.getItem('choreSortBy') || 'smart',
+  )
+  const [choreSortDirection, setChoreSortDirection] = useState(
+    () => localStorage.getItem('choreSortDirection') || 'asc',
   )
   const [openChoreSections, setOpenChoreSections] = useState(() => {
     try {
@@ -479,9 +512,15 @@ const MyChores = () => {
       ChoreFilters(impersonatedUser?.userId || userProfile?.id)[
         selectedChoreFilter
       ],
+      choreSortDirection,
     )
 
-    return sections
+    return sections.map(section => ({
+      ...section,
+      content: [...section.content].sort((a, b) =>
+        sortChores(a, b, choreSortBy, choreSortDirection),
+      ),
+    }))
   }, [
     chores,
     quickFilteredChores,
@@ -491,6 +530,8 @@ const MyChores = () => {
     hasQuickFilters,
     selectedChoreSection,
     selectedChoreFilter,
+    choreSortBy,
+    choreSortDirection,
     selectedProject,
     impersonatedUser?.userId,
     userProfile?.id,
@@ -946,6 +987,16 @@ const MyChores = () => {
     localStorage.setItem('selectedChoreSection', value)
   }
 
+  const setChoreSortByWithCache = value => {
+    setChoreSortBy(value)
+    localStorage.setItem('choreSortBy', value)
+  }
+
+  const setChoreSortDirectionWithCache = value => {
+    setChoreSortDirection(value)
+    localStorage.setItem('choreSortDirection', value)
+  }
+
   const setOpenChoreSectionsWithCache = value => {
     setOpenChoreSections(value)
     localStorage.setItem('openChoreSections', JSON.stringify(value))
@@ -1170,6 +1221,10 @@ const MyChores = () => {
             setSelectedChoreSectionWithCache(value)
             clearQuickFilters()
           }}
+          selectedSort={choreSortBy}
+          onSortChange={setChoreSortByWithCache}
+          sortDirection={choreSortDirection}
+          onSortDirectionChange={setChoreSortDirectionWithCache}
           viewMode={viewMode}
           onToggleViewMode={toggleViewMode}
           isMultiSelectMode={isMultiSelectMode}

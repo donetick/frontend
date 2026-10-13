@@ -1,4 +1,10 @@
-import { Add, Check, FolderOpen, Settings } from '@mui/icons-material'
+import {
+  Add,
+  Check,
+  FolderOpen,
+  KeyboardArrowDown,
+  Settings,
+} from '@mui/icons-material'
 import {
   Avatar,
   Box,
@@ -213,47 +219,71 @@ const ProjectSelector = ({
           color='neutral'
           size='sm'
           sx={{
+            '--Button-gap': '8px',
             height: 32,
             minHeight: 32,
-            width: 32,
-            borderRadius: '50%',
-            minWidth: 'auto',
-            p: 0,
+            borderRadius: 'lg',
+            minWidth: '150px',
+            justifyContent: 'flex-start',
+            pl: 0.75,
+            pr: 1.25,
             maxWidth: '200px',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-            backgroundColor: currentProject?.color || LABEL_COLORS[0].value,
+            borderColor: 'divider',
+            bgcolor: 'background.surface',
+            '&:hover': {
+              bgcolor: 'background.level1',
+              borderColor: 'neutral.outlinedHoverBorder',
+            },
           }}
           title={t('selector.currentProjectTitle', {
             project: effectiveSelectedProject,
           })}
         >
           {(() => {
+            const projectColor = currentProject?.color || LABEL_COLORS[0].value
             const IconComponent = getIconComponent(
               currentProject?.icon || 'FolderOpen',
             )
             return (
-              // <Avatar
-              //   size='sm'
-              //   sx={{
-              //     width: 24,
-              //     height: 24,
-              //     backgroundColor: project.color || LABEL_COLORS[0].value,
-              //     display: 'flex',
-              //     alignItems: 'center',
-              //     justifyContent: 'center',
-              //   }}
-              // >
-              <IconComponent
-                sx={{
-                  fontSize: 18,
-                  color: getTextColorFromBackgroundColor(
-                    currentProject?.color || LABEL_COLORS[0].value,
-                  ),
-                }}
-              />
-              // </Avatar>
+              <>
+                <KeyboardArrowDown
+                  sx={{
+                    fontSize: 18,
+                    flexShrink: 0,
+                    color: 'text.tertiary',
+                  }}
+                />
+                <Avatar
+                  size='sm'
+                  sx={{
+                    width: 24,
+                    height: 24,
+                    bgcolor: projectColor,
+                  }}
+                >
+                  <IconComponent
+                    sx={{
+                      fontSize: 14,
+                      color: getTextColorFromBackgroundColor(projectColor),
+                    }}
+                  />
+                </Avatar>
+                <Typography
+                  level='body-xs'
+                  sx={{
+                    marginInlineStart: '8px',
+                    fontWeight: 500,
+                    color: 'text.primary',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {effectiveSelectedProject === 'Default Project'
+                    ? t('chores:toolbar.defaultProject')
+                    : effectiveSelectedProject}
+                </Typography>
+              </>
             )
           })()}
         </Button>

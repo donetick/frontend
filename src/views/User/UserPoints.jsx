@@ -1,44 +1,38 @@
 import {
-  AccountBalanceWallet,
-  Analytics,
-  AssignmentTurnedIn,
-  CreditCard,
-  EmojiEvents,
+  AssignmentTurnedInRounded,
+  EmojiEventsRounded,
+  KeyboardArrowDownRounded,
   LockOutlined,
-  MilitaryTech,
-  Redeem,
-  Star,
-  SwapHoriz,
-  Timeline,
-  Toll,
-  TrendingUp,
-  WorkspacePremium,
+  MilitaryTechRounded,
+  RedeemRounded,
+  TollRounded,
+  TrendingUpRounded,
+  WorkspacePremiumRounded,
 } from '@mui/icons-material'
 import {
   Avatar,
   Box,
   Button,
-  Card,
-  CardContent,
   Chip,
   Container,
-  Grid,
+  Divider,
   Option,
   Select,
-  Stack,
+  Sheet,
   Tab,
   TabList,
   Tabs,
   Typography,
 } from '@mui/joy'
 import moment from 'moment'
-import { useEffect, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Bar,
   BarChart,
   CartesianGrid,
   ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
 } from 'recharts'
@@ -51,225 +45,159 @@ import { RedeemPoints } from '../../utils/Fetcher.jsx'
 import { resolvePhotoURL } from '../../utils/Helpers.jsx'
 import LoadingComponent from '../components/Loading.jsx'
 import RedeemPointsModal from '../Modals/RedeemPointsModal'
+
+const PERIODS = [
+  { shortKey: 'tabs.short7d', value: 7 },
+  { shortKey: 'tabs.short30d', value: 30 },
+  { shortKey: 'tabs.short6m', value: 6 * 30, plus: true },
+  { shortKey: 'tabs.shortAll', value: 24 * 30, plus: true },
+]
+
+const surfaceSx = {
+  bgcolor: 'background.surface',
+  border: '1px solid',
+  borderColor: 'divider',
+  borderRadius: 'xl',
+}
+
+const buildHistorySummary = (history, userId, period) => {
+  let count
+  let unit
+  let keyFormat
+  let labelFormat
+
+  if (period === 7) {
+    count = 7
+    unit = 'day'
+    keyFormat = 'YYYY-MM-DD'
+    labelFormat = 'ddd'
+  } else if (period === 30) {
+    count = 30
+    unit = 'day'
+    keyFormat = 'YYYY-MM-DD'
+    labelFormat = 'D'
+  } else if (period === 6 * 30) {
+    count = 6
+    unit = 'month'
+    keyFormat = 'YYYY-MM'
+    labelFormat = 'MMM'
+  } else {
+    count = 12
+    unit = 'year'
+    keyFormat = 'YYYY'
+    labelFormat = 'YYYY'
+  }
+
+  const buckets = Array.from({ length: count }, (_, index) => {
+    const date = moment().subtract(count - index - 1, unit)
+    return {
+      key: date.format(keyFormat),
+      label: date.format(labelFormat),
+      points: 0,
+      tasks: 0,
+    }
+  })
+  const bucketByKey = new Map(buckets.map(bucket => [bucket.key, bucket]))
+
+  history.forEach(entry => {
+    if (userId && entry.completedBy !== userId) return
+    const bucket = bucketByKey.get(moment(entry.performedAt).format(keyFormat))
+    if (!bucket) return
+    bucket.points += entry.points || 0
+    bucket.tasks += 1
+  })
+
+  return buckets
+}
+
+const getRankIcon = rank => {
+  if (rank === 1)
+    return <EmojiEventsRounded sx={{ color: '#D99B16', fontSize: 21 }} />
+  if (rank === 2)
+    return <WorkspacePremiumRounded sx={{ color: '#8B95A5', fontSize: 21 }} />
+  if (rank === 3)
+    return <MilitaryTechRounded sx={{ color: '#B87345', fontSize: 21 }} />
+  return (
+    <Typography
+      level='body-sm'
+      textColor='text.tertiary'
+      sx={{ fontWeight: 650 }}
+    >
+      {rank}
+    </Typography>
+  )
+}
+
+const getPeriodLabel = (period, t) => {
+  if (period === 24 * 30) return t('summary.allTime')
+  if (period === 6 * 30) return t('summary.last6Months')
+  return t('summary.lastDays', { count: period })
+}
+
 const UserPoints = () => {
   const { t } = useTranslation('points')
-  const [tabValue, setTabValue] = useState(7)
+  const [period, setPeriod] = useState(7)
+  const [selectedUser, setSelectedUser] = useState(null)
+  const [leaderboardMode, setLeaderboardMode] = useState('points')
   const [isRedeemModalOpen, setIsRedeemModalOpen] = useState(false)
-  const [leaderboardMode, setLeaderboardMode] = useState('points') // 'points' or 'tasks'
 
   const {
     data: circleMembersData,
-    handleRefetch: handleCircleMembersRefetch,
+    handleRefetch: refetchCircleMembers,
     isLoading: isCircleMembersLoading,
   } = useCircleMembers()
-
   const {
     data: choresHistoryData,
-    handleLimitChange: handleChoresHistoryLimitChange,
+    handleLimitChange: changeHistoryLimit,
     isLoading: isChoresHistoryLoading,
   } = useChoresHistory(7, true)
-
   const { data: userProfile } = useUserProfile()
   const { isPlus, showPaywall } = usePaywall()
 
-  // Free accounts can look back 30 days. Longer windows stay tappable and open
-  // the paywall on the attempt, so the limit is discovered by trying it.
-  const handleTimePeriodChange = days => {
-    if (!isPlus && isPlusHistoryWindow(days)) {
+  const circleUsers = useMemo(
+    () => circleMembersData?.res || [],
+    [circleMembersData?.res],
+  )
+  const history = useMemo(() => choresHistoryData || [], [choresHistoryData])
+  const activeSelectedUser = selectedUser || userProfile?.id
+
+  const handlePeriodChange = nextPeriod => {
+    if (!isPlus && isPlusHistoryWindow(nextPeriod)) {
       showPaywall(PAYWALL_REASON.HISTORY_WINDOW)
       return
     }
-    setTabValue(days)
-    handleChoresHistoryLimitChange(days)
+    setPeriod(nextPeriod)
+    changeHistoryLimit(nextPeriod)
   }
 
-  const periodLockIcon = isPlus ? null : (
-    <LockOutlined sx={{ fontSize: 13, ml: 0.5, opacity: 0.6 }} />
+  const selectedHistory = useMemo(
+    () => buildHistorySummary(history, activeSelectedUser, period),
+    [activeSelectedUser, history, period],
   )
 
-  const [selectedUser, setSelectedUser] = useState(userProfile?.id)
-  const [circleUsers, setCircleUsers] = useState([])
-  const [selectedHistory, setSelectedHistory] = useState([])
+  const leaderboardData = useMemo(() => {
+    const stats = new Map(
+      circleUsers.map(user => [
+        user.userId,
+        {
+          ...user,
+          availablePoints: (user.points || 0) - (user.pointsRedeemed || 0),
+          periodPoints: 0,
+          periodTasks: 0,
+        },
+      ]),
+    )
 
-  useEffect(() => {
-    if (circleMembersData && choresHistoryData && userProfile) {
-      setCircleUsers(circleMembersData.res)
-      setSelectedHistory(
-        generateWeeklySummary(choresHistoryData, userProfile?.id),
-      )
-    }
-  }, [circleMembersData, choresHistoryData, userProfile])
-
-  useEffect(() => {
-    if (choresHistoryData) {
-      var history
-      if (tabValue === 7) {
-        history = generateWeeklySummary(choresHistoryData, selectedUser)
-      } else if (tabValue === 30) {
-        history = generateMonthSummary(choresHistoryData, selectedUser)
-      } else if (tabValue === 6 * 30) {
-        history = generateMonthlySummary(choresHistoryData, selectedUser)
-      } else {
-        history = generateYearlySummary(choresHistoryData, selectedUser)
-      }
-      setSelectedHistory(history)
-    }
-  }, [selectedUser, choresHistoryData, tabValue])
-
-  useEffect(() => {
-    setSelectedUser(userProfile?.id)
-  }, [userProfile])
-
-  const generateWeeklySummary = (history, userId) => {
-    const daysAggregated = []
-    for (let i = 6; i > -1; i--) {
-      const currentDate = new Date()
-      currentDate.setDate(currentDate.getDate() - i)
-      daysAggregated.push({
-        label: moment(currentDate).format('ddd'),
-        points: 0,
-        tasks: 0,
-      })
-    }
-    history.forEach(chore => {
-      const dayName = moment(chore.performedAt).format('ddd')
-
-      const dayIndex = daysAggregated.findIndex(dayData => {
-        if (userId)
-          return dayData.label === dayName && chore.completedBy === userId
-        return dayData.label === dayName
-      })
-      if (dayIndex !== -1) {
-        if (chore.points) daysAggregated[dayIndex].points += chore.points
-        daysAggregated[dayIndex].tasks += 1
-      }
-    })
-    return daysAggregated
-  }
-
-  const generateMonthSummary = (history, userId) => {
-    const daysAggregated = []
-    for (let i = 29; i > -1; i--) {
-      const currentDate = new Date()
-      currentDate.setDate(currentDate.getDate() - i)
-      daysAggregated.push({
-        label: moment(currentDate).format('D'),
-        points: 0,
-        tasks: 0,
-      })
-    }
-    history.forEach(chore => {
-      const dayName = moment(chore.performedAt).format('D')
-
-      const dayIndex = daysAggregated.findIndex(dayData => {
-        if (userId)
-          return dayData.label === dayName && chore.completedBy === userId
-        return dayData.label === dayName
-      })
-
-      if (dayIndex !== -1) {
-        if (chore.points) daysAggregated[dayIndex].points += chore.points
-        daysAggregated[dayIndex].tasks += 1
-      }
+    history.forEach(entry => {
+      const user = stats.get(entry.completedBy)
+      if (!user) return
+      user.periodPoints += entry.points || 0
+      user.periodTasks += 1
     })
 
-    return daysAggregated
-  }
-
-  const generateMonthlySummary = (history, userId) => {
-    const monthlyAggregated = []
-    for (let i = 5; i > -1; i--) {
-      const currentMonth = new Date()
-      currentMonth.setMonth(currentMonth.getMonth() - i)
-      monthlyAggregated.push({
-        label: moment(currentMonth).format('MMM'),
-        points: 0,
-        tasks: 0,
-      })
-    }
-    history.forEach(chore => {
-      const monthName = moment(chore.performedAt).format('MMM')
-
-      const monthIndex = monthlyAggregated.findIndex(monthData => {
-        if (userId)
-          return monthData.label === monthName && chore.completedBy === userId
-        return monthData.label === monthName
-      })
-
-      if (monthIndex !== -1) {
-        if (chore.points) monthlyAggregated[monthIndex].points += chore.points
-        monthlyAggregated[monthIndex].tasks += 1
-      }
-    })
-    return monthlyAggregated
-  }
-
-  const generateYearlySummary = (history, userId) => {
-    const yearlyAggregated = []
-
-    for (let i = 11; i > -1; i--) {
-      const currentYear = new Date()
-      currentYear.setFullYear(currentYear.getFullYear() - i)
-      yearlyAggregated.push({
-        label: moment(currentYear).format('YYYY'),
-        points: 0,
-        tasks: 0,
-      })
-    }
-    history.forEach(chore => {
-      const yearName = moment(chore.performedAt).format('YYYY')
-
-      const yearIndex = yearlyAggregated.findIndex(yearData => {
-        if (userId)
-          return yearData.label === yearName && chore.completedBy === userId
-        return yearData.label === yearName
-      })
-
-      if (yearIndex !== -1) {
-        if (chore.points) yearlyAggregated[yearIndex].points += chore.points
-        yearlyAggregated[yearIndex].tasks += 1
-      }
-    })
-    return yearlyAggregated
-  }
-
-  if (isChoresHistoryLoading || isCircleMembersLoading || !userProfile) {
-    return <LoadingComponent />
-  }
-
-  // Calculate leaderboard data for the current time period
-  const calculateLeaderboard = () => {
-    if (!choresHistoryData || !circleUsers.length) return []
-
-    // Calculate points for each user in the current time period
-    const userPeriodStats = {}
-
-    // Initialize stats for all users
-    circleUsers.forEach(user => {
-      userPeriodStats[user.userId] = {
-        userId: user.userId,
-        displayName: user.displayName,
-        image: user.image,
-        totalPoints: user.points || 0,
-        availablePoints: (user.points || 0) - (user.pointsRedeemed || 0),
-        periodPoints: 0,
-        periodTasks: 0,
-      }
-    })
-
-    // Calculate period-specific stats from history
-    choresHistoryData.forEach(historyEntry => {
-      const userId = historyEntry.completedBy
-      if (userPeriodStats[userId]) {
-        userPeriodStats[userId].periodPoints += historyEntry.points || 0
-        userPeriodStats[userId].periodTasks += 1
-      }
-    })
-
-    // Convert to array and sort by selected mode
     const sortField =
       leaderboardMode === 'points' ? 'periodPoints' : 'periodTasks'
-    return Object.values(userPeriodStats)
+    return [...stats.values()]
       .sort((a, b) => b[sortField] - a[sortField])
       .map((user, index) => ({
         ...user,
@@ -279,689 +207,484 @@ const UserPoints = () => {
             ? (user.periodPoints / user.periodTasks).toFixed(1)
             : 0,
       }))
+  }, [circleUsers, history, leaderboardMode])
+
+  if (isChoresHistoryLoading || isCircleMembersLoading || !userProfile) {
+    return <LoadingComponent />
   }
 
-  const leaderboardData = calculateLeaderboard()
-
-  // Get trophy icons for top 3
-  const getTrophyIcon = rank => {
-    switch (rank) {
-      case 1:
-        return <EmojiEvents sx={{ color: '#FFD700', fontSize: '1.2rem' }} /> // Gold
-      case 2:
-        return (
-          <WorkspacePremium sx={{ color: '#C0C0C0', fontSize: '1.2rem' }} />
-        ) // Silver
-      case 3:
-        return <MilitaryTech sx={{ color: '#CD7F32', fontSize: '1.2rem' }} /> // Bronze
-      default:
-        return <Star sx={{ color: 'text.secondary', fontSize: '1rem' }} />
-    }
-  }
+  const selectedUserData = circleUsers.find(
+    user => user.userId === activeSelectedUser,
+  )
+  const totalPoints = selectedUserData?.points || 0
+  const redeemedPoints = selectedUserData?.pointsRedeemed || 0
+  const availablePoints = totalPoints - redeemedPoints
+  const periodPoints = selectedHistory.reduce(
+    (sum, bucket) => sum + bucket.points,
+    0,
+  )
+  const isAdmin =
+    circleUsers.find(user => user.userId === userProfile.id)?.role === 'admin'
+  const periodLabel = getPeriodLabel(period, t)
 
   return (
     <Container
       maxWidth='md'
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        px: { xs: 2, sm: 3 },
-      }}
+      sx={{ px: { xs: 2, sm: 3 }, pb: 6, pt: { xs: 1, sm: 2 } }}
     >
-      {/* Enhanced Leaderboard Header Section */}
-      <Box sx={{ mb: 4 }}>
-        <Stack spacing={2}>
-          {/* Filters Row - Responsive */}
-          <Box
+      <Box
+        sx={{
+          alignItems: { xs: 'flex-start', sm: 'center' },
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          gap: 2,
+          justifyContent: 'space-between',
+          mb: 3,
+        }}
+      >
+        <Box>
+          <Typography
+            level='h2'
             sx={{
-              display: 'flex',
-              flexDirection: { xs: 'column', sm: 'row' },
-              gap: 2,
-              alignItems: { xs: 'stretch', sm: 'center' },
-              justifyContent: { xs: 'flex-start', sm: 'space-between' },
+              fontSize: 'clamp(1.5rem, 6vw, 1.75rem)',
+              letterSpacing: '-0.028em',
+              lineHeight: 1.15,
             }}
           >
-            {/* Time Period Filter */}
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: { xs: 'center', sm: 'flex-start' },
-              }}
-            >
-              <Tabs
-                onChange={(e, nextValue) => handleTimePeriodChange(nextValue)}
-                value={tabValue}
-                size='sm'
+            {t(
+              `leaderboard.title${leaderboardMode === 'points' ? 'Points' : 'Tasks'}`,
+            )}
+          </Typography>
+          <Typography
+            level='body-sm'
+            textColor='text.secondary'
+            sx={{ mt: 0.5, maxWidth: 520, textWrap: 'pretty' }}
+          >
+            {t(
+              `leaderboard.subtitle${leaderboardMode === 'points' ? 'Points' : 'Tasks'}`,
+            )}
+          </Typography>
+        </Box>
+
+        <Tabs
+          value={period}
+          onChange={(event, value) => handlePeriodChange(value)}
+          size='sm'
+          sx={{ bgcolor: 'background.level1', borderRadius: 'lg', p: 0.5 }}
+        >
+          <TabList disableUnderline sx={{ gap: 0.25 }}>
+            {PERIODS.map(item => (
+              <Tab
+                key={item.value}
+                value={item.value}
+                disableIndicator
                 sx={{
-                  borderRadius: 6,
-                  backgroundColor: 'background.surface',
-                  border: '1px solid',
-                  borderColor: 'divider',
+                  borderRadius: 'md',
+                  minWidth: 0,
+                  px: { xs: 1.25, sm: 1.75 },
+                  '&.Mui-selected': {
+                    bgcolor: 'background.surface',
+                    boxShadow: 'sm',
+                  },
                 }}
               >
-                <TabList
-                  disableUnderline
-                  sx={{
-                    borderRadius: 6,
-                    backgroundColor: 'transparent',
-                    p: 0.3,
-                    gap: 0.3,
-                  }}
-                >
-                  {[
-                    { label: t('tabs.short7d'), value: 7 },
-                    { label: t('tabs.short30d'), value: 30 },
-                    { label: t('tabs.short6m'), value: 6 * 30, plus: true },
-                    { label: t('tabs.shortAll'), value: 24 * 30, plus: true },
-                  ].map((tab, index) => (
-                    <Tab
-                      key={index}
-                      sx={{
-                        borderRadius: 4,
-                        minWidth: 'auto',
-                        px: 1.5,
-                        py: 0.5,
-                        fontSize: 'xs',
-                        fontWeight: 500,
-                        color: 'text.secondary',
-                        '&.Mui-selected': {
-                          color: 'primary.plainColor',
-                          backgroundColor: 'primary.softBg',
-                          fontWeight: 600,
-                        },
-                        '&:hover': {
-                          backgroundColor: 'neutral.softHoverBg',
-                        },
-                      }}
-                      disableIndicator
-                      value={tab.value}
-                    >
-                      {tab.label}
-                      {tab.plus ? periodLockIcon : null}
-                    </Tab>
-                  ))}
-                </TabList>
-              </Tabs>
-            </Box>
+                {t(item.shortKey)}
+                {item.plus && !isPlus && (
+                  <LockOutlined sx={{ fontSize: 13, ml: 0.5, opacity: 0.55 }} />
+                )}
+              </Tab>
+            ))}
+          </TabList>
+        </Tabs>
+      </Box>
 
-            {/* Toggle between points and tasks */}
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: { xs: 'center', sm: 'flex-end' },
-                gap: 1,
-                mb: 1,
-              }}
-            >
-              <Chip
-                variant={leaderboardMode === 'points' ? 'solid' : 'outlined'}
-                color='primary'
-                size='sm'
-                sx={{ cursor: 'pointer' }}
-                onClick={() => setLeaderboardMode('points')}
-              >
-                {t('leaderboard.modePoints')}
-              </Chip>
-              <SwapHoriz
-                sx={{ fontSize: '0.875rem', color: 'text.tertiary' }}
-              />
-              <Chip
-                variant={leaderboardMode === 'tasks' ? 'solid' : 'outlined'}
-                color='primary'
-                size='sm'
-                sx={{ cursor: 'pointer' }}
-                onClick={() => setLeaderboardMode('tasks')}
-              >
-                {t('leaderboard.modeTasks')}
-              </Chip>
-            </Box>
-          </Box>
-        </Stack>
-
-        {/* Leaderboard Cards */}
-        <Card
-          variant='outlined'
-          sx={{ borderRadius: 'lg', overflow: 'hidden' }}
+      <Sheet sx={{ ...surfaceSx, overflow: 'hidden', mb: 3 }}>
+        <Box
+          sx={{
+            alignItems: { xs: 'flex-start', sm: 'center' },
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            gap: 2,
+            justifyContent: 'space-between',
+            p: { xs: 2, sm: 2.5 },
+          }}
         >
-          <Stack spacing={0}>
-            {leaderboardData.map((user, index) => (
-              <Box key={user.userId}>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    p: 2.5,
-                    backgroundColor:
-                      user.userId === userProfile.id
-                        ? 'primary.softBg'
-                        : 'transparent',
-                    position: 'relative',
-                    '&:hover': {
-                      backgroundColor:
-                        user.userId === userProfile.id
-                          ? 'primary.softHoverBg'
-                          : 'neutral.softHoverBg',
-                    },
-                    cursor:
-                      user.userId === selectedUser ? 'default' : 'pointer',
-                    transition: 'background-color 0.2s ease',
-                  }}
-                  onClick={() => {
-                    if (user.userId !== selectedUser) {
-                      setSelectedUser(user.userId)
-                      setSelectedHistory(
-                        generateWeeklySummary(choresHistoryData, user.userId),
-                      )
-                    }
-                  }}
-                >
-                  {/* Rank Badge */}
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      minWidth: 40,
-                      mr: 2,
-                    }}
-                  >
-                    {getTrophyIcon(user.rank)}
+          <Box
+            sx={{
+              alignItems: 'center',
+              display: 'flex',
+              gap: 1.5,
+              minWidth: 0,
+            }}
+          >
+            <Avatar
+              size='lg'
+              src={resolvePhotoURL(selectedUserData?.image)}
+              sx={{ bgcolor: 'primary.softBg', color: 'primary.softColor' }}
+            >
+              {selectedUserData?.displayName?.charAt(0)}
+            </Avatar>
+            <Box sx={{ minWidth: 0 }}>
+              {circleUsers.length > 1 ? (
+                <Select
+                  value={activeSelectedUser}
+                  onChange={(event, value) => value && setSelectedUser(value)}
+                  variant='plain'
+                  size='sm'
+                  indicator={<KeyboardArrowDownRounded />}
+                  aria-label={t('summary.selectUser')}
+                  renderValue={() => (
                     <Typography
                       level='body-sm'
-                      sx={{
-                        ml: 0.5,
-                        fontWeight: user.rank <= 3 ? 'bold' : 'normal',
-                        color:
-                          user.rank <= 3 ? 'text.primary' : 'text.secondary',
-                      }}
+                      textColor='text.secondary'
+                      sx={{ fontWeight: 650 }}
+                      noWrap
                     >
-                      #{user.rank}
+                      {selectedUserData?.displayName ||
+                        t('summary.unknownUser')}
                     </Typography>
-                  </Box>
-
-                  {/* User Avatar and Info */}
-                  <Box sx={{ display: 'flex', alignItems: 'center', flex: 1 }}>
-                    <Avatar
-                      src={user.image ? resolvePhotoURL(user.image) : undefined}
-                      sx={{ width: 40, height: 40, mr: 2 }}
-                    >
-                      {user.displayName?.charAt(0)}
-                    </Avatar>
-                    <Stack sx={{ flex: 1 }}>
-                      <Typography
-                        level='body-md'
+                  )}
+                  sx={{
+                    ml: -0.75,
+                    minHeight: 0,
+                    px: 0.75,
+                    py: 0.25,
+                    '&:hover': { bgcolor: 'background.level1' },
+                  }}
+                >
+                  {circleUsers.map(user => (
+                    <Option key={user.userId} value={user.userId}>
+                      <Box
                         sx={{
-                          fontWeight:
-                            user.userId === userProfile.id ? 'bold' : 'normal',
-                          color: 'text.primary',
+                          alignItems: 'center',
+                          display: 'flex',
+                          gap: 1,
+                          width: '100%',
                         }}
                       >
-                        {user.displayName}
+                        <Avatar
+                          size='sm'
+                          src={resolvePhotoURL(user.image)}
+                          sx={{ '--Avatar-size': '22px' }}
+                        >
+                          {user.displayName?.charAt(0)}
+                        </Avatar>
+                        <Typography level='body-sm' sx={{ flex: 1 }} noWrap>
+                          {user.displayName}
+                        </Typography>
                         {user.userId === userProfile.id && (
-                          <Chip
-                            size='sm'
-                            variant='soft'
-                            color='primary'
-                            sx={{ ml: 1 }}
-                          >
+                          <Chip size='sm' variant='soft' color='primary'>
                             {t('leaderboard.you')}
                           </Chip>
                         )}
-                      </Typography>
-                      <Typography
-                        level='body-xs'
-                        sx={{ color: 'text.secondary' }}
-                      >
-                        {t('leaderboard.tasksAndAvg', {
-                          tasks: user.periodTasks,
-                          avg: user.avgPointsPerTask,
-                        })}
-                      </Typography>
-                    </Stack>
-                  </Box>
+                      </Box>
+                    </Option>
+                  ))}
+                </Select>
+              ) : (
+                <Typography level='body-sm' textColor='text.secondary' noWrap>
+                  {selectedUserData?.displayName || t('summary.unknownUser')}
+                </Typography>
+              )}
+              <Box sx={{ alignItems: 'baseline', display: 'flex', gap: 0.75 }}>
+                <Typography
+                  sx={{
+                    fontSize: 'clamp(2rem, 9vw, 2.75rem)',
+                    fontWeight: 700,
+                    letterSpacing: '-0.045em',
+                    lineHeight: 1.05,
+                  }}
+                >
+                  {availablePoints}
+                </Typography>
+                <Typography level='title-sm' textColor='text.secondary'>
+                  {t('cards.available.title')}
+                </Typography>
+              </Box>
+              <Typography level='body-xs' textColor='text.tertiary'>
+                {t('cards.available.subtext')}
+              </Typography>
+            </Box>
+          </Box>
 
-                  {/* Metric Display */}
-                  <Stack alignItems='flex-end' spacing={0.5}>
+          {isAdmin && (
+            <Button
+              variant='soft'
+              startDecorator={<RedeemRounded />}
+              onClick={() => setIsRedeemModalOpen(true)}
+              sx={{ width: { xs: '100%', sm: 'auto' } }}
+            >
+              {t('redeem')}
+            </Button>
+          )}
+        </Box>
+
+        <Divider />
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            bgcolor: 'background.level1',
+          }}
+        >
+          {[
+            { label: t('cards.period.title'), value: periodPoints },
+            { label: t('cards.total.title'), value: totalPoints },
+            { label: t('cards.redeemed.title'), value: redeemedPoints },
+          ].map((stat, index) => (
+            <Box
+              key={stat.label}
+              sx={{
+                borderLeft: index ? '1px solid' : 0,
+                borderColor: 'divider',
+                minWidth: 0,
+                px: { xs: 1.25, sm: 2.5 },
+                py: 1.5,
+              }}
+            >
+              <Typography level='title-md' sx={{ fontWeight: 650 }}>
+                {stat.value}
+              </Typography>
+              <Typography level='body-xs' textColor='text.secondary' noWrap>
+                {stat.label}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+      </Sheet>
+
+      <Box component='section' sx={{ mb: 3.5 }}>
+        <Box
+          sx={{
+            alignItems: 'flex-end',
+            display: 'flex',
+            justifyContent: 'space-between',
+            mb: 1.25,
+          }}
+        >
+          <Box>
+            <Typography level='title-md' sx={{ fontWeight: 650 }}>
+              {t('trend.title')}
+            </Typography>
+            <Typography level='body-xs' textColor='text.tertiary'>
+              {periodLabel}
+            </Typography>
+          </Box>
+          <Chip
+            size='sm'
+            variant='soft'
+            color='primary'
+            startDecorator={<TrendingUpRounded />}
+          >
+            {t('leaderboard.points', { count: periodPoints })}
+          </Chip>
+        </Box>
+        <Sheet sx={{ ...surfaceSx, height: 260, p: { xs: 1, sm: 2 } }}>
+          <ResponsiveContainer width='100%' height='100%'>
+            <BarChart
+              data={selectedHistory}
+              margin={{ top: 12, right: 8, left: -24, bottom: 0 }}
+            >
+              <CartesianGrid
+                vertical={false}
+                stroke='var(--joy-palette-divider)'
+              />
+              <XAxis
+                dataKey='label'
+                axisLine={false}
+                tickLine={false}
+                tick={{
+                  fill: 'var(--joy-palette-text-tertiary)',
+                  fontSize: 11,
+                }}
+                interval={period === 30 ? 4 : 0}
+              />
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                allowDecimals={false}
+                tick={{
+                  fill: 'var(--joy-palette-text-tertiary)',
+                  fontSize: 11,
+                }}
+              />
+              <Tooltip
+                cursor={{ fill: 'var(--joy-palette-background-level1)' }}
+                contentStyle={{
+                  background: 'var(--joy-palette-background-surface)',
+                  border: '1px solid var(--joy-palette-divider)',
+                  borderRadius: 10,
+                  boxShadow: 'var(--joy-shadow-md)',
+                  fontSize: 12,
+                }}
+              />
+              <Bar
+                dataKey='points'
+                fill='var(--joy-palette-primary-500)'
+                maxBarSize={32}
+                radius={[6, 6, 2, 2]}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </Sheet>
+      </Box>
+
+      <Box component='section'>
+        <Box
+          sx={{
+            alignItems: 'center',
+            display: 'flex',
+            gap: 1.5,
+            justifyContent: 'space-between',
+            mb: 1.25,
+          }}
+        >
+          <Typography level='title-md' sx={{ fontWeight: 650 }}>
+            {t(
+              `leaderboard.title${leaderboardMode === 'points' ? 'Points' : 'Tasks'}`,
+            )}
+          </Typography>
+          <Tabs
+            value={leaderboardMode}
+            onChange={(event, value) => setLeaderboardMode(value)}
+            size='sm'
+            sx={{ bgcolor: 'background.level1', borderRadius: 'lg', p: 0.375 }}
+          >
+            <TabList disableUnderline>
+              <Tab
+                value='points'
+                disableIndicator
+                sx={{ borderRadius: 'md', px: 1.25 }}
+              >
+                {t('leaderboard.modePoints')}
+              </Tab>
+              <Tab
+                value='tasks'
+                disableIndicator
+                sx={{ borderRadius: 'md', px: 1.25 }}
+              >
+                {t('leaderboard.modeTasks')}
+              </Tab>
+            </TabList>
+          </Tabs>
+        </Box>
+
+        <Sheet sx={{ ...surfaceSx, overflow: 'hidden' }}>
+          {leaderboardData.map((user, index) => {
+            const isSelected = user.userId === activeSelectedUser
+            const isCurrentUser = user.userId === userProfile.id
+            return (
+              <Box key={user.userId}>
+                {index > 0 && <Divider sx={{ ml: 7.5 }} />}
+                <Box
+                  component='button'
+                  type='button'
+                  onClick={() => setSelectedUser(user.userId)}
+                  aria-pressed={isSelected}
+                  sx={{
+                    alignItems: 'center',
+                    appearance: 'none',
+                    bgcolor: isSelected ? 'primary.softBg' : 'transparent',
+                    border: 0,
+                    color: 'inherit',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    font: 'inherit',
+                    gap: 1.25,
+                    p: { xs: 1.25, sm: 1.5 },
+                    textAlign: 'start',
+                    transition: 'background-color 150ms ease',
+                    width: '100%',
+                    '&:hover': {
+                      bgcolor: isSelected
+                        ? 'primary.softHoverBg'
+                        : 'background.level1',
+                    },
+                    '&:focus-visible': {
+                      outline: '2px solid',
+                      outlineColor: 'primary.500',
+                      outlineOffset: -2,
+                    },
+                  }}
+                >
+                  <Box
+                    sx={{ display: 'grid', placeItems: 'center', width: 28 }}
+                  >
+                    {getRankIcon(user.rank)}
+                  </Box>
+                  <Avatar size='sm' src={resolvePhotoURL(user.image)}>
+                    {user.displayName?.charAt(0)}
+                  </Avatar>
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Box
-                      sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
+                      sx={{ alignItems: 'center', display: 'flex', gap: 0.75 }}
                     >
-                      {leaderboardMode === 'points' ? (
-                        <Toll sx={{ fontSize: '1rem', color: 'success.500' }} />
-                      ) : (
-                        <AssignmentTurnedIn
-                          sx={{ fontSize: '1rem', color: 'success.500' }}
-                        />
-                      )}
-                      <Typography
-                        level='title-md'
-                        sx={{
-                          fontWeight: 'bold',
-                          color: 'success.600',
-                        }}
-                      >
-                        {leaderboardMode === 'points'
-                          ? user.periodPoints
-                          : user.periodTasks}
+                      <Typography level='title-sm' noWrap>
+                        {user.displayName}
                       </Typography>
+                      {isCurrentUser && (
+                        <Chip size='sm' variant='soft' color='primary'>
+                          {t('leaderboard.you')}
+                        </Chip>
+                      )}
                     </Box>
-                    <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+                    <Typography
+                      level='body-xs'
+                      textColor='text.secondary'
+                      noWrap
+                    >
+                      {t('leaderboard.tasksAndAvg', {
+                        tasks: user.periodTasks,
+                        avg: user.avgPointsPerTask,
+                      })}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ textAlign: 'end', flex: '0 0 auto' }}>
+                    <Typography
+                      level='title-md'
+                      startDecorator={
+                        leaderboardMode === 'points' ? (
+                          <TollRounded sx={{ fontSize: 16 }} />
+                        ) : (
+                          <AssignmentTurnedInRounded sx={{ fontSize: 16 }} />
+                        )
+                      }
+                      sx={{ color: 'primary.plainColor', fontWeight: 700 }}
+                    >
+                      {leaderboardMode === 'points'
+                        ? user.periodPoints
+                        : user.periodTasks}
+                    </Typography>
+                    <Typography level='body-xs' textColor='text.tertiary'>
                       {leaderboardMode === 'points'
                         ? t('leaderboard.available', {
                             count: user.availablePoints,
                           })
-                        : t('leaderboard.points', {
-                            count: user.periodPoints,
-                          })}
+                        : t('leaderboard.points', { count: user.periodPoints })}
                     </Typography>
-                  </Stack>
-
-                  {/* Selection Indicator */}
-                  {user.userId === selectedUser && (
-                    <Box
-                      sx={{
-                        position: 'absolute',
-                        left: 0,
-                        top: 0,
-                        bottom: 0,
-                        width: 4,
-                        backgroundColor: 'primary.500',
-                        borderRadius: '0 4px 4px 0',
-                      }}
-                    />
-                  )}
+                  </Box>
                 </Box>
-                {index < leaderboardData.length - 1 && (
-                  <Box
-                    sx={{
-                      height: 1,
-                      backgroundColor: 'divider',
-                      mx: 2.5,
-                    }}
-                  />
-                )}
               </Box>
-            ))}
-          </Stack>
-        </Card>
-      </Box>
-
-      {/* Filters Section Header */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-        <Analytics sx={{ fontSize: '1.5rem', color: 'primary.500' }} />
-        <Typography level='h4' sx={{ fontWeight: 'lg', color: 'text.primary' }}>
-          {t('filter.analysisTitle')}
-        </Typography>
-      </Box>
-
-      {/* Improved Filter Bar */}
-      <Card
-        variant='outlined'
-        sx={{
-          width: '100%',
-          p: 2,
-          mb: 3,
-          borderRadius: 12,
-          background:
-            'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
-          backdropFilter: 'blur(10px)',
-        }}
-      >
-        <Stack spacing={2}>
-          <Typography level='title-sm' sx={{ color: 'text.secondary' }}>
-            {t('filter.title')}
-          </Typography>
-
-          <Stack
-            direction={{ xs: 'column', sm: 'row' }}
-            spacing={2}
-            alignItems={{ xs: 'stretch', sm: 'center' }}
-          >
-            {/* User Filter */}
-            <Box sx={{ flex: 1, minWidth: 200 }}>
-              <Typography level='body-sm' sx={{ mb: 1, fontWeight: 500 }}>
-                {t('filter.showFor')}
-              </Typography>
-              <Select
-                sx={{
-                  width: '100%',
-                }}
-                variant='outlined'
-                value={selectedUser}
-                onChange={(e, selected) => {
-                  setSelectedUser(selected)
-                  setSelectedHistory(
-                    generateWeeklySummary(choresHistoryData, selected),
-                  )
-                }}
-                renderValue={() => {
-                  return (
-                    <Typography
-                      startDecorator={
-                        <Avatar
-                          color='primary'
-                          size='sm'
-                          src={resolvePhotoURL(
-                            circleUsers.find(
-                              user => user.userId === selectedUser,
-                            )?.image,
-                          )}
-                        >
-                          {circleUsers
-                            .find(user => user.userId === selectedUser)
-                            ?.displayName?.charAt(0)}
-                        </Avatar>
-                      }
-                    >
-                      {
-                        circleUsers.find(user => user.userId === selectedUser)
-                          ?.displayName
-                      }
-                    </Typography>
-                  )
-                }}
-              >
-                {circleUsers.map(user => (
-                  <Option key={user.userId} value={user.userId}>
-                    <Avatar
-                      color='primary'
-                      size='sm'
-                      src={resolvePhotoURL(user.image)}
-                    >
-                      {user.displayName?.charAt(0)}
-                    </Avatar>
-                    <Typography>{user.displayName}</Typography>
-                    <Chip
-                      color='success'
-                      size='sm'
-                      variant='soft'
-                      startDecorator={<Toll />}
-                    >
-                      {user.points - user.pointsRedeemed}
-                    </Chip>
-                  </Option>
-                ))}
-              </Select>
-            </Box>
-
-            {/* Time Period Filter */}
-            <Box sx={{ flex: 1, minWidth: 200 }}>
-              <Typography level='body-sm' sx={{ mb: 1, fontWeight: 500 }}>
-                {t('filter.timePeriod')}
-              </Typography>
-              <Tabs
-                onChange={(e, nextValue) => handleTimePeriodChange(nextValue)}
-                value={tabValue}
-                sx={{
-                  borderRadius: 8,
-                  backgroundColor: 'background.surface',
-                  border: '1px solid',
-                  borderColor: 'divider',
-                }}
-              >
-                <TabList
-                  disableUnderline
-                  sx={{
-                    borderRadius: 8,
-                    backgroundColor: 'transparent',
-                    p: 0.5,
-                    gap: 0.5,
-                  }}
-                >
-                  {[
-                    { label: t('tabs.days7'), value: 7 },
-                    { label: t('tabs.days30'), value: 30 },
-                    { label: t('tabs.months6'), value: 6 * 30, plus: true },
-                    { label: t('tabs.allTime'), value: 24 * 30, plus: true },
-                  ].map((tab, index) => (
-                    <Tab
-                      key={index}
-                      sx={{
-                        borderRadius: 6,
-                        minWidth: 'auto',
-                        px: 2,
-                        py: 1,
-                        fontSize: 'sm',
-                        fontWeight: 500,
-                        color: 'text.secondary',
-                        '&.Mui-selected': {
-                          color: 'primary.plainColor',
-                          backgroundColor: 'primary.softBg',
-                          fontWeight: 600,
-                        },
-                        '&:hover': {
-                          backgroundColor: 'neutral.softHoverBg',
-                        },
-                      }}
-                      disableIndicator
-                      value={tab.value}
-                    >
-                      {tab.label}
-                      {tab.plus ? periodLockIcon : null}
-                    </Tab>
-                  ))}
-                </TabList>
-              </Tabs>
-            </Box>
-
-            {/* Redeem Points Button */}
-            {circleUsers.find(user => user.userId === userProfile.id)?.role ===
-              'admin' && (
-              <Box sx={{ display: 'flex', alignItems: 'flex-end' }}>
-                <Button
-                  variant='soft'
-                  size='md'
-                  startDecorator={<CreditCard />}
-                  onClick={() => {
-                    setIsRedeemModalOpen(true)
-                  }}
-                  sx={{ mt: 'auto' }}
-                >
-                  {t('redeem')}
-                </Button>
-              </Box>
-            )}
-          </Stack>
-        </Stack>
-      </Card>
-
-      {/* Points Status Cards */}
-      <Grid container spacing={1} sx={{ mb: 3 }}>
-        {(() => {
-          const selectedUserData = circleUsers.find(
-            user => user.userId === selectedUser,
-          )
-          const totalPoints = selectedUserData?.points || 0
-          const redeemedPoints = selectedUserData?.pointsRedeemed || 0
-          const availablePoints = totalPoints - redeemedPoints
-
-          const periodStats = leaderboardData.find(
-            user => user.userId === selectedUser,
-          )
-          const periodPoints = selectedHistory.reduce(
-            (sum, item) => sum + (item.points || 0),
-            0,
-          )
-
-          const pointsCards = [
-            {
-              icon: <Toll />,
-              title: t('cards.available.title'),
-              text: t('leaderboard.points', { count: availablePoints }),
-              subtext: t('cards.available.subtext'),
-            },
-            {
-              icon: <Redeem />,
-              title: t('cards.redeemed.title'),
-              text: t('leaderboard.points', { count: redeemedPoints }),
-              subtext: t('cards.redeemed.subtext'),
-            },
-            {
-              icon: <AccountBalanceWallet />,
-              title: t('cards.total.title'),
-              text: t('leaderboard.points', { count: totalPoints }),
-              subtext: t('cards.total.subtext'),
-            },
-            {
-              icon: <TrendingUp />,
-              title: t('cards.period.title'),
-              text: t('leaderboard.points', { count: periodPoints }),
-              subtext:
-                tabValue === 24 * 30
-                  ? t('cards.period.allTime')
-                  : tabValue === 6 * 30
-                    ? t('cards.period.last6Months')
-                    : t('cards.period.lastDays', { count: tabValue }),
-            },
-          ]
-
-          return pointsCards.map((card, index) => (
-            <Grid item xs={6} sm={6} key={index}>
-              <Card
-                variant='soft'
-                sx={{
-                  borderRadius: 'md',
-                  boxShadow: 1,
-                  px: 2,
-                  py: 1,
-                  minHeight: 90,
-                  height: '100%',
-                  justifyContent: 'start',
-                }}
-              >
-                <CardContent>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'start',
-                      mb: 0.5,
-                    }}
-                  >
-                    {card.icon}
-                    <Typography
-                      level='body-md'
-                      sx={{
-                        ml: 1,
-                        fontWeight: '500',
-                        color: 'text.primary',
-                      }}
-                    >
-                      {card.title}
-                    </Typography>
-                  </Box>
-                  <Box>
-                    <Typography
-                      level='body-sm'
-                      sx={{ color: 'text.secondary', lineHeight: 1.5 }}
-                    >
-                      {card.text}
-                    </Typography>
-                    <Typography
-                      level='body-sm'
-                      sx={{ color: 'text.secondary', lineHeight: 1.5 }}
-                    >
-                      {card.subtext}
-                    </Typography>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))
-        })()}
-      </Grid>
-
-      {/* Current Filter Summary */}
-      <Box sx={{ mb: 3, textAlign: 'center' }}>
-        <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-          {t('summary.showingFor')}{' '}
-          <Typography
-            component='span'
-            sx={{ fontWeight: 600, color: 'primary.500' }}
-          >
-            {circleUsers.find(user => user.userId === selectedUser)
-              ?.displayName || t('summary.unknownUser')}
-          </Typography>{' '}
-          {t('summary.overThe')}{' '}
-          <Typography
-            component='span'
-            sx={{ fontWeight: 600, color: 'primary.500' }}
-          >
-            {tabValue === 24 * 30
-              ? t('summary.allTime')
-              : tabValue === 6 * 30
-                ? t('summary.last6Months')
-                : t('summary.lastDays', { count: tabValue })}
-          </Typography>
-        </Typography>
-      </Box>
-
-      <Box
-        sx={{
-          mb: 4,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 3,
-        }}
-      >
-        {/* Chart Section Header */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-          <Timeline sx={{ fontSize: '1.5rem', color: 'primary.500' }} />
-          <Typography
-            level='h4'
-            sx={{ fontWeight: 'lg', color: 'text.primary' }}
-          >
-            {t('trend.title')}
-          </Typography>
-        </Box>
-
-        {/* Bar Chart for points overtime */}
-        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
-          <ResponsiveContainer height={300}>
-            <BarChart
-              data={selectedHistory}
-              margin={{ top: 5, left: -20, bottom: 5 }}
-            >
-              <CartesianGrid strokeDasharray={'3 3'} />
-              <XAxis dataKey='label' axisLine={false} tickLine={false} />
-              <YAxis axisLine={false} tickLine={false} />
-              <Bar
-                fill='#4183F2'
-                dataKey='points'
-                barSize={30}
-                radius={[5, 5, 0, 0]}
-              />
-            </BarChart>
-          </ResponsiveContainer>
-        </Box>
+            )
+          })}
+        </Sheet>
       </Box>
 
       <RedeemPointsModal
-        config={(() => {
-          const user = circleUsers.find(u => u.userId === selectedUser)
-          const availablePoints = user
-            ? (user.points || 0) - (user.pointsRedeemed || 0)
-            : 0
-
-          return {
-            onClose: () => {
-              setIsRedeemModalOpen(false)
-            },
-            isOpen: isRedeemModalOpen,
-            available: availablePoints,
-            user: user,
-            onSave: ({ points, userId }) => {
-              RedeemPoints(userId, points, userProfile.circleID)
-                .then(() => {
-                  setIsRedeemModalOpen(false)
-                  handleCircleMembersRefetch()
-                })
-                .catch(err => {
-                  console.log(err)
-                })
-            },
-          }
-        })()}
+        config={{
+          isOpen: isRedeemModalOpen,
+          available: availablePoints,
+          user: selectedUserData,
+          onClose: () => setIsRedeemModalOpen(false),
+          onSave: ({ points, userId }) => {
+            RedeemPoints(userId, points, userProfile.circleID)
+              .then(() => {
+                setIsRedeemModalOpen(false)
+                refetchCircleMembers()
+              })
+              .catch(error => console.error(error))
+          },
+        }}
       />
     </Container>
   )
