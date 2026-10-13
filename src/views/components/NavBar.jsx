@@ -44,6 +44,7 @@ import { useGlobalSearch } from '../../search/GlobalSearchContext'
 import { apiClient } from '../../utils/ApiClient'
 import ErrorReportModal from '../Modals/ErrorReportModal'
 import NavBarLink from './NavBarLink'
+import NavBarProjectSwitcher from './NavBarProjectSwitcher'
 import { OPEN_NAVIGATION_DRAWER_EVENT } from './navigationEvents'
 import SyncStatusIndicator from './SyncStatusIndicator'
 
@@ -77,7 +78,7 @@ const SHELL_FREE_PAGES = [
 const NavBar = () => {
   const { t } = useTranslation('common')
   const { data: resource } = useResource()
-  const { navBarTitle: dynamicNavBarTitle } = useNavBarTitleContext()
+  const { navBarConfig } = useNavBarTitleContext()
   const { openSearch } = useGlobalSearch()
   const navigate = useNavigate()
   const location = useLocation()
@@ -95,9 +96,9 @@ const NavBar = () => {
       ? location.pathname.replace(/\/$/, '')
       : location.pathname
   const navbarTitleKey = NAVBAR_TITLE_KEYS[normalizedPath]
+  const dynamicNavBarConfig = normalizedPath === '/chores' ? navBarConfig : null
   const navbarTitle =
-    (normalizedPath === '/chores' && dynamicNavBarTitle) ||
-    (navbarTitleKey ? t(navbarTitleKey) : null)
+    dynamicNavBarConfig?.title || (navbarTitleKey ? t(navbarTitleKey) : null)
 
   useEffect(() => {
     const handleOpenDrawer = () => setDrawerOpen(true)
@@ -587,10 +588,15 @@ const NavBar = () => {
             }}
           >
             {getMenuIcon()}
-            {navbarTitle && (
+            {dynamicNavBarConfig?.projectSwitcher ? (
+              <NavBarProjectSwitcher
+                projectSwitcher={dynamicNavBarConfig.projectSwitcher}
+                title={navbarTitle}
+              />
+            ) : navbarTitle ? (
               <Typography
                 component='h1'
-                level='title-lg'
+                level='title-md'
                 sx={{
                   flex: 1,
                   fontWeight: 'lg',
@@ -602,8 +608,9 @@ const NavBar = () => {
               >
                 {navbarTitle}
               </Typography>
+            ) : (
+              <Box sx={{ flex: 1 }} />
             )}
-            {!navbarTitle && <Box sx={{ flex: 1 }} />}
             <SyncStatusIndicator />
             <UserProfileAvatar />
           </Sheet>

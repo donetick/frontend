@@ -25,7 +25,7 @@ import {
 } from '@mui/joy'
 import { useMediaQuery } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
@@ -85,6 +85,8 @@ import { INSIGHT_FILTER_DEFS } from './SmartInsightsCard'
 // copy for each lives under `chores:empty.assignee.*` as a whole sentence,
 // since the fragment ("assigned to you") cannot be slotted mid-sentence in
 // every language.
+const EMPTY_PROJECTS = []
+
 const ASSIGNEE_FILTER_KEYS = [
   'assigned_to_me',
   'available_for_me',
@@ -104,7 +106,8 @@ const MyChores = () => {
   const Navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const { data: userLabels, isLoading: userLabelsLoading } = useLabels()
-  const { data: projects = [], isLoading: projectsLoading } = useProjects()
+  const { data: projects = EMPTY_PROJECTS, isLoading: projectsLoading } =
+    useProjects()
   const {
     data: choresData,
     error: choresErrorDetails,
@@ -203,14 +206,49 @@ const MyChores = () => {
     projectsWithDefault,
   )
 
+  const handleProjectSelect = useCallback(
+    project => {
+      setSelectedProjectWithCache(project)
+      clearActiveFilter()
+    },
+    [clearActiveFilter, setSelectedProjectWithCache],
+  )
+
+  const hasCustomProjects = projectsWithDefault.some(
+    project => project.id !== 'default',
+  )
+  const isDefaultProject = !selectedProject || selectedProject.id === 'default'
   const choreViewTitle = tempFilter
     ? tempFilterMeta?.name || t('common:navigation.filters')
     : activeFilterId
       ? activeFilter?.name || t('common:navigation.filters')
-      : selectedProject && selectedProject.id !== 'default'
+      : !isDefaultProject
         ? selectedProject.name
-        : t('common:navigation.allTasks')
-  useNavBarTitle(choreViewTitle)
+        : hasCustomProjects
+          ? t('toolbar.defaultProject')
+          : t('common:navigation.allTasks')
+  const projectSwitcher = useMemo(
+    () =>
+      hasCustomProjects && !activeFilterId && !tempFilter
+        ? {
+            onSelect: handleProjectSelect,
+            projects: projectsWithDefault,
+            selectedProjectId: isDefaultProject
+              ? 'default'
+              : selectedProject.id,
+          }
+        : null,
+    [
+      activeFilterId,
+      handleProjectSelect,
+      hasCustomProjects,
+      isDefaultProject,
+      projectsWithDefault,
+      selectedProject?.id,
+      tempFilter,
+    ],
+  )
+  useNavBarTitle(choreViewTitle, projectSwitcher)
 
   const [showAdvancedFilterBuilder, setShowAdvancedFilterBuilder] =
     useState(false)
@@ -1019,10 +1057,7 @@ const MyChores = () => {
               : undefined
           }
           selectedProject={selectedProject}
-          onProjectSelect={project => {
-            setSelectedProjectWithCache(project)
-            clearActiveFilter()
-          }}
+          onProjectSelect={handleProjectSelect}
           selectedAssigneeFilter={selectedChoreFilter}
           onAssigneeFilterChange={filter => {
             setSelectedChoreFilterWithCache(filter)
