@@ -640,11 +640,18 @@ const ChoreToolbar = ({
         {/* Project selector */}
         {!filterActive &&
           projects.filter(p => p.id !== 'default').length > 0 && (
-            <ProjectSelector
-              selectedProject={selectedProject?.name || 'Default Project'}
-              onProjectSelect={onProjectSelect}
-              showKeyboardShortcuts={showKeyboardShortcuts}
-            />
+            <Box
+              sx={{
+                display: 'none',
+                '@media (min-width: 1024px)': { display: 'inline-flex' },
+              }}
+            >
+              <ProjectSelector
+                selectedProject={selectedProject?.name || 'Default Project'}
+                onProjectSelect={onProjectSelect}
+                showKeyboardShortcuts={showKeyboardShortcuts}
+              />
+            </Box>
           )}
 
         {/* Display button — View + Group combined.

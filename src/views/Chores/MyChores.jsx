@@ -25,13 +25,14 @@ import {
 } from '@mui/joy'
 import { useMediaQuery } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import EmptyState from '../../components/common/EmptyState'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
+import { useNavBarTitle } from '../../contexts/NavBarTitleContext'
 import { useFilter } from '../../hooks/useFilter'
 import { useChores } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
@@ -63,7 +64,6 @@ import {
   selectionsToConditions,
 } from './components/FilterBuilderContent'
 import MultiSelectToolbar from './components/MultiSelectToolbar'
-import MyChoreHeader from './components/MyChoreHeader'
 import { useChoreActions } from './hooks/useChoreActions'
 import { useChoreFilters } from './hooks/useChoreFilters'
 import { useChoreModals } from './hooks/useChoreModals'
@@ -85,6 +85,8 @@ import { INSIGHT_FILTER_DEFS } from './SmartInsightsCard'
 // copy for each lives under `chores:empty.assignee.*` as a whole sentence,
 // since the fragment ("assigned to you") cannot be slotted mid-sentence in
 // every language.
+const EMPTY_PROJECTS = []
+
 const ASSIGNEE_FILTER_KEYS = [
   'assigned_to_me',
   'available_for_me',
@@ -104,7 +106,8 @@ const MyChores = () => {
   const Navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const { data: userLabels, isLoading: userLabelsLoading } = useLabels()
-  const { data: projects = [], isLoading: projectsLoading } = useProjects()
+  const { data: projects = EMPTY_PROJECTS, isLoading: projectsLoading } =
+    useProjects()
   const {
     data: choresData,
     error: choresErrorDetails,
@@ -201,6 +204,123 @@ const MyChores = () => {
     membersData?.res,
     userLabels,
     projectsWithDefault,
+  )
+
+  const handleProjectSelect = useCallback(
+    project => {
+      setSelectedProjectWithCache(project)
+      clearActiveFilter()
+    },
+    [clearActiveFilter, setSelectedProjectWithCache],
+  )
+
+  const hasCustomProjects = projectsWithDefault.some(
+    project => project.id !== 'default',
+  )
+  const isDefaultProject = !selectedProject || selectedProject.id === 'default'
+  const handleSavedFilterSelect = useCallback(
+    filter => {
+      setSearchTerm('')
+      setSelectedChoreFilterWithCache('anyone')
+      if (filter.conditions?.some(condition => condition.type === 'project')) {
+        setSelectedProjectWithCache(null)
+      }
+      applyCustomFilter(filter.id)
+      setSearchParams(
+        params => {
+          params.delete('filter')
+          params.delete('filter_id')
+          params.set('filterId', String(filter.id))
+          return params
+        },
+        { replace: true },
+      )
+    },
+    [
+      applyCustomFilter,
+      setSearchParams,
+      setSearchTerm,
+      setSelectedChoreFilterWithCache,
+      setSelectedProjectWithCache,
+    ],
+  )
+
+  const handleLabelSelect = useCallback(
+    label => {
+      clearActiveFilter()
+      setSearchTerm('')
+      applyTempFilter(
+        {
+          conditions: [{ type: 'label', operator: 'is', value: [label.id] }],
+          operator: 'AND',
+        },
+        { name: label.name },
+      )
+    },
+    [applyTempFilter, clearActiveFilter, setSearchTerm],
+  )
+
+  const choreViewTitle = tempFilter
+    ? tempFilterMeta?.name || t('common:navigation.filters')
+    : activeFilterId
+      ? activeFilter?.name || t('common:navigation.filters')
+      : !isDefaultProject
+        ? selectedProject.name
+        : hasCustomProjects
+          ? t('toolbar.defaultProject')
+          : t('common:navigation.allTasks')
+  const projectSelector = useMemo(
+    () =>
+      hasCustomProjects && !activeFilterId && !tempFilter
+        ? {
+            items: projectsWithDefault,
+            onSelect: handleProjectSelect,
+            selectedId: isDefaultProject ? 'default' : selectedProject.id,
+            type: 'project',
+          }
+        : null,
+    [
+      activeFilterId,
+      handleProjectSelect,
+      hasCustomProjects,
+      isDefaultProject,
+      projectsWithDefault,
+      selectedProject?.id,
+      tempFilter,
+    ],
+  )
+  const labelSelector = useMemo(() => {
+    const conditions = tempFilter?.conditions || []
+    const condition = conditions.length === 1 ? conditions[0] : null
+    const values = Array.isArray(condition?.value)
+      ? condition.value
+      : condition?.value != null
+        ? [condition.value]
+        : []
+    if (condition?.type !== 'label' || values.length !== 1) return null
+
+    return {
+      items: userLabels || [],
+      onSelect: handleLabelSelect,
+      selectedId: values[0],
+      type: 'label',
+    }
+  }, [handleLabelSelect, tempFilter?.conditions, userLabels])
+  const filterSelector = useMemo(
+    () =>
+      activeFilterId && savedFilters.length > 0
+        ? {
+            items: savedFilters,
+            onSelect: handleSavedFilterSelect,
+            selectedId: activeFilterId,
+            type: 'filter',
+          }
+        : null,
+    [activeFilterId, handleSavedFilterSelect, savedFilters],
+  )
+  useNavBarTitle(
+    choreViewTitle,
+    filterSelector || labelSelector || projectSelector,
   )
 
   const [showAdvancedFilterBuilder, setShowAdvancedFilterBuilder] =
@@ -974,13 +1094,6 @@ const MyChores = () => {
         maxWidth='md'
         sx={{ px: 1, pt: { xs: 1, md: 3 }, minWidth: 0 }}
       >
-        <MyChoreHeader
-          activeFilterId={activeFilterId}
-          activeFilter={activeFilter}
-          selectedProject={selectedProject}
-          tempFilter={tempFilter}
-          tempFilterMeta={tempFilterMeta}
-        />
         <ChoreToolbar
           members={membersData?.res || []}
           labels={userLabels || []}
@@ -1017,10 +1130,7 @@ const MyChores = () => {
               : undefined
           }
           selectedProject={selectedProject}
-          onProjectSelect={project => {
-            setSelectedProjectWithCache(project)
-            clearActiveFilter()
-          }}
+          onProjectSelect={handleProjectSelect}
           selectedAssigneeFilter={selectedChoreFilter}
           onAssigneeFilterChange={filter => {
             setSelectedChoreFilterWithCache(filter)

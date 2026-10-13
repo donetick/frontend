@@ -37,18 +37,30 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { version } from '../../../package.json'
 import DoneTickLogo from '../../assets/logo.svg'
 import UserProfileAvatar from '../../components/UserProfileAvatar'
+import { useNavBarTitleContext } from '../../contexts/NavBarTitleContext'
 import { useScrollDirection } from '../../hooks/useScrollDirection'
 import { useResource } from '../../queries/ResourceQueries'
 import { useGlobalSearch } from '../../search/GlobalSearchContext'
 import { apiClient } from '../../utils/ApiClient'
 import ErrorReportModal from '../Modals/ErrorReportModal'
 import NavBarLink from './NavBarLink'
+import NavBarResourceSwitcher from './NavBarResourceSwitcher'
 import { OPEN_NAVIGATION_DRAWER_EVENT } from './navigationEvents'
 import SyncStatusIndicator from './SyncStatusIndicator'
 
 const COMPACT_NAV_WIDTH = 60
 const EXPANDED_NAV_WIDTH = 232
 const PUBLIC_PAGES = ['/landing', '/privacy', '/terms']
+const NAVBAR_TITLE_KEYS = {
+  '/activities': 'navigation.activities',
+  '/archived': 'navigation.archived',
+  '/chores': 'navigation.allTasks',
+  '/filters': 'navigation.filters',
+  '/labels': 'navigation.labels',
+  '/points': 'navigation.points',
+  '/projects': 'navigation.projects',
+  '/things': 'navigation.things',
+}
 const SHELL_FREE_PAGES = [
   '/signup',
   '/login',
@@ -66,6 +78,7 @@ const SHELL_FREE_PAGES = [
 const NavBar = () => {
   const { t } = useTranslation('common')
   const { data: resource } = useResource()
+  const { navBarConfig } = useNavBarTitleContext()
   const { openSearch } = useGlobalSearch()
   const navigate = useNavigate()
   const location = useLocation()
@@ -78,6 +91,16 @@ const NavBar = () => {
   const isMobile = useMediaQuery('(max-width:768px)')
   const isDesktop = useMediaQuery('(min-width:1024px)')
   const headerHidden = useScrollDirection({ enabled: !isDesktop })
+  const normalizedPath =
+    location.pathname.length > 1
+      ? location.pathname.replace(/\/$/, '')
+      : location.pathname
+  const navbarTitleKey = NAVBAR_TITLE_KEYS[normalizedPath]
+  const supportsDynamicNavBar =
+    normalizedPath === '/chores' || /^\/labels\/[^/]+$/.test(normalizedPath)
+  const dynamicNavBarConfig = supportsDynamicNavBar ? navBarConfig : null
+  const navbarTitle =
+    dynamicNavBarConfig?.title || (navbarTitleKey ? t(navbarTitleKey) : null)
 
   useEffect(() => {
     const handleOpenDrawer = () => setDrawerOpen(true)
@@ -567,7 +590,29 @@ const NavBar = () => {
             }}
           >
             {getMenuIcon()}
-            <Box sx={{ flex: 1 }} />
+            {dynamicNavBarConfig?.selector ? (
+              <NavBarResourceSwitcher
+                selector={dynamicNavBarConfig.selector}
+                title={navbarTitle}
+              />
+            ) : navbarTitle ? (
+              <Typography
+                component='h1'
+                level='title-md'
+                sx={{
+                  flex: 1,
+                  fontWeight: 'lg',
+                  minWidth: 0,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {navbarTitle}
+              </Typography>
+            ) : (
+              <Box sx={{ flex: 1 }} />
+            )}
             <SyncStatusIndicator />
             <UserProfileAvatar />
           </Sheet>
