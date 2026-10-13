@@ -40,10 +40,16 @@ import SwipeListItem, {
 } from '../../components/common/SwipeListItem'
 import { PAYWALL_REASON, usePaywall } from '../../contexts/PaywallContext'
 import { useChores } from '../../queries/ChoreQueries'
-import { useUserProfile } from '../../queries/UserQueries'
+import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors'
 import { canCreateProject } from '../../utils/entitlements'
 import { DeleteProject } from '../../utils/Fetcher'
+import { resolvePhotoURL } from '../../utils/Helpers'
+import {
+  getProjectAudienceIds,
+  getProjectVisibility,
+  PROJECT_VISIBILITY,
+} from '../../utils/ProjectAccess'
 import { getIconComponent } from '../../utils/ProjectIcons'
 import { getSafeBottom, getSafeBottomStyles } from '../../utils/SafeAreaUtils'
 import { useProjectFilter } from '../Chores/hooks/useProjectFilter'
@@ -51,9 +57,63 @@ import ScrollHideFab from '../components/ScrollHideFab'
 import ConfirmationModal from '../Modals/Inputs/ConfirmationModal'
 import ProjectModal from '../Modals/Inputs/ProjectModal'
 import { useProjects } from './ProjectQueries'
-import { ProjectVisibilityChip } from './ProjectVisibilityField'
+
+const MAX_VISIBLE_MEMBER_AVATARS = 3
+
+// Overlapping avatar stack with a "+N" overflow badge, for showing who has
+// access to a project at a glance (the pattern used for group members).
+const ProjectMembersStack = ({ members = [] }) => {
+  if (members.length === 0) return null
+  const visible = members.slice(0, MAX_VISIBLE_MEMBER_AVATARS)
+  const overflow = members.length - visible.length
+
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0, ml: 1 }}>
+      {visible.map((member, index) => (
+        <Avatar
+          key={member.userId}
+          size='sm'
+          src={resolvePhotoURL(member.image)}
+          sx={{
+            width: 24,
+            height: 24,
+            fontSize: 11,
+            bgcolor: 'background.level2',
+            color: 'text.secondary',
+            border: '2px solid',
+            borderColor: 'background.surface',
+            ml: index === 0 ? 0 : -1,
+            zIndex: visible.length - index,
+          }}
+        >
+          {(member.displayName || member.username || '?').charAt(0).toUpperCase()}
+        </Avatar>
+      ))}
+      {overflow > 0 && (
+        <Avatar
+          size='sm'
+          sx={{
+            width: 24,
+            height: 24,
+            fontSize: 10,
+            fontWeight: 'lg',
+            bgcolor: 'neutral.softBg',
+            color: 'text.secondary',
+            border: '2px solid',
+            borderColor: 'background.surface',
+            ml: -1,
+            zIndex: 0,
+          }}
+        >
+          +{overflow}
+        </Avatar>
+      )}
+    </Box>
+  )
+}
 
 const ProjectCardContent = ({
+  circleMembers = [],
   currentUserId,
   onCardClick,
   onToggleActions,
@@ -65,6 +125,19 @@ const ProjectCardContent = ({
   const isOwnedByCurrentUser = project.created_by === currentUserId
   const isDefaultProject = project.id === 'default'
   const taskCount = taskCounts[project.id] || 0
+
+  const audienceIds = getProjectAudienceIds(project)
+  const projectMembers = audienceIds
+    ? circleMembers.filter(member => audienceIds.includes(member.userId))
+    : circleMembers
+
+  const visibility = getProjectVisibility(project)
+  const audienceLabel =
+    isDefaultProject || visibility === PROJECT_VISIBILITY.CIRCLE
+      ? t('visibility.chip.everyone')
+      : visibility === PROJECT_VISIBILITY.PRIVATE
+        ? t('visibility.chip.private')
+        : t('visibility.chip.members', { count: projectMembers.length })
 
   return (
     <Box
@@ -168,7 +241,6 @@ const ProjectCardContent = ({
               {t('defaultChip')}
             </Chip>
           )}
-          <ProjectVisibilityChip project={project} />
         </Typography>
 
         {/* Project Info */}
@@ -202,25 +274,31 @@ const ProjectCardContent = ({
           >
             {t('tasks', { count: taskCount })}
           </Chip>
-
-          {!isOwnedByCurrentUser && !isDefaultProject && (
-            <Chip
-              size='sm'
-              variant='soft'
-              color='warning'
-              sx={{
-                fontSize: 9,
-                height: 16,
-                px: 0.5,
-                fontWeight: 'md',
-              }}
-            >
-              {t('shared')}
-            </Chip>
-          )}
         </Box>
       </Box>
-      <Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-end',
+            gap: 0.25,
+            mr: 0.5,
+          }}
+        >
+          <Typography
+            level='body-xs'
+            sx={{
+              fontSize: 9,
+              color: 'text.tertiary',
+              fontWeight: 'md',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {audienceLabel}
+          </Typography>
+          <ProjectMembersStack members={projectMembers} />
+        </Box>
         {onToggleActions && (
           <IconButton
             color='neutral'
@@ -246,6 +324,11 @@ const ProjectView = () => {
   const { isPlus, showPaywall } = usePaywall()
   const { data: chores = { res: [] } } = useChores(false) // false to exclude archived
   const { data: projectsData = [], isLoading: projectsLoading } = useProjects()
+  const { data: circleMembersData } = useCircleMembers()
+  const activeCircleMembers = useMemo(
+    () => (circleMembersData?.res || []).filter(m => m.isActive !== false),
+    [circleMembersData],
+  )
   const { setSelectedProjectWithCache } = useProjectFilter(
     projectsData,
     !projectsLoading,
@@ -582,6 +665,7 @@ const ProjectView = () => {
               color: '#1976d2',
               created_by: userProfile?.id,
             }}
+            circleMembers={activeCircleMembers}
             currentUserId={userProfile?.id}
             taskCounts={{ default: taskCounts.default || 0 }}
             onCardClick={() =>
@@ -669,6 +753,7 @@ const ProjectView = () => {
             >
               <ProjectCardContent
                 project={project}
+                circleMembers={activeCircleMembers}
                 currentUserId={userProfile?.id}
                 taskCounts={taskCounts}
                 onToggleActions={() => {

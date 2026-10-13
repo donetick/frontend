@@ -3,7 +3,6 @@ import {
   Avatar,
   Box,
   Checkbox,
-  Chip,
   FormControl,
   FormHelperText,
   FormLabel,
@@ -167,30 +166,6 @@ const ProjectVisibilityField = ({
         </Box>
       )}
     </FormControl>
-  )
-}
-
-// Small badge describing a project's audience, for lists and pickers.
-export const ProjectVisibilityChip = ({ project, size = 'sm' }) => {
-  const { t } = useTranslation('projects')
-  const visibility =
-    project?.visibility || (project?.isPrivate ? 'private' : 'circle')
-  if (visibility === PROJECT_VISIBILITY.CIRCLE) return null
-  const count = (project.memberIds || []).length
-  return (
-    <Chip
-      size={size}
-      variant='soft'
-      color={visibility === PROJECT_VISIBILITY.MEMBERS ? 'primary' : 'neutral'}
-      startDecorator={
-        visibility === PROJECT_VISIBILITY.MEMBERS ? <People /> : <Lock />
-      }
-      sx={{ fontSize: 9, height: 16, px: 0.5, ml: 1, fontWeight: 'md' }}
-    >
-      {visibility === PROJECT_VISIBILITY.MEMBERS
-        ? t('visibility.chip.members', { count })
-        : t('visibility.chip.private')}
-    </Chip>
   )
 }
 

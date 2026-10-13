@@ -32,7 +32,6 @@
   "defaultChip": "Default",
   "tasks_one": "{{count}} task",
   "tasks_other": "{{count}} tasks",
-  "shared": "Shared",
   "delete": {
     "title": "Delete Project",
     "message": "Are you sure you want to delete \"{{name}}\"? This will remove the project but keep all tasks (they'll move to the Default Project)."
@@ -95,9 +94,10 @@
       "description": "Everyone in the circle sees the project: {{names}}"
     },
     "chip": {
-      "private": "Only me",
+      "private": "Only you",
       "members_one": "{{count}} member",
-      "members_other": "{{count}} members"
+      "members_other": "{{count}} members",
+      "everyone": "Everyone"
     },
     "review": {
       "title": "Check before saving",
