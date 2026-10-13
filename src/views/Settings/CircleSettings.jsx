@@ -1,5 +1,6 @@
 import { Share } from '@capacitor/share'
 import {
+  CloseRounded,
   ContentCopyRounded,
   DeleteOutlineRounded,
   GroupAddRounded,
@@ -33,6 +34,7 @@ import { useNotification } from '../../service/NotificationProvider'
 import { apiClient } from '../../utils/ApiClient'
 import {
   AcceptCircleMemberRequest,
+  DeclineCircleMemberRequest,
   DeleteCircleMember,
   GetAllCircleMembers,
   GetCircleMemberRequests,
@@ -74,6 +76,7 @@ const CircleSettings = () => {
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [isJoining, setIsJoining] = useState(false)
   const [acceptingRequest, setAcceptingRequest] = useState(null)
+  const [decliningRequest, setDecliningRequest] = useState(null)
   const [confirmModalConfig, setConfirmModalConfig] = useState({})
 
   const showConfirmation = (
@@ -158,6 +161,11 @@ const CircleSettings = () => {
     member => member.userId === userProfile?.id && member.role === 'admin',
   )
   const circle = userCircles[0]
+  const myMembership = circleMembers.find(
+    member => member.userId === userProfile?.id,
+  )
+  const isPendingApproval =
+    circle?.userRole === 'member' && myMembership && !myMembership.isActive
   const inviteCode = circle?.invite_code || ''
   const apiURL = new URL(apiClient.getApiURL(), window.location.origin)
   const inviteOrigin =
@@ -222,6 +230,68 @@ const CircleSettings = () => {
       },
       t('circleSettings.accept'),
       t('common.cancel'),
+    )
+  }
+
+  const declineRequest = request => {
+    showConfirmation(
+      t('circleSettings.declineRequestMessage', {
+        name: request.displayName,
+        username: request.username,
+      }),
+      t('circleSettings.declineRequestTitle'),
+      async () => {
+        setDecliningRequest(request.id)
+        try {
+          const resp = await DeclineCircleMemberRequest(request.id)
+          if (!resp.ok) {
+            showNotification({
+              type: 'error',
+              message: t('circleSettings.declineRequestFailed'),
+            })
+            return
+          }
+          showNotification({
+            type: 'success',
+            message: t('circleSettings.requestDeclined'),
+          })
+          setCircleMemberRequests(requests =>
+            requests.filter(item => item.id !== request.id),
+          )
+          queryClient.invalidateQueries({ queryKey: ['circleMemberRequests'] })
+        } finally {
+          setDecliningRequest(null)
+        }
+      },
+      t('circleSettings.declineRequestButton'),
+      t('common.cancel'),
+      'danger',
+    )
+  }
+
+  const cancelJoinRequest = () => {
+    showConfirmation(
+      t('circleSettings.cancelRequestMessage'),
+      t('circleSettings.cancelRequestTitle'),
+      async () => {
+        const resp = await LeaveCircle(circle.id)
+        if (resp.ok) {
+          showNotification({
+            type: 'success',
+            message: t('circleSettings.requestCancelled'),
+          })
+          queryClient.invalidateQueries({ queryKey: ['userCircle'] })
+          setUserCircles([])
+        } else {
+          showNotification({
+            type: 'error',
+            message: t('circleSettings.cancelRequestFailed'),
+          })
+        }
+      },
+      t('circleSettings.cancelRequestButton'),
+      t('common.cancel'),
+      'danger',
     )
   }
 
@@ -293,59 +363,74 @@ const CircleSettings = () => {
                 {circle?.name || t('circleSettings.myCircle')}
               </Typography>
               <Typography level='body-sm' textColor='text.secondary'>
-                {circle?.userRole === 'member'
-                  ? t('circleSettings.memberOf', { name: circle?.name })
-                  : t('circleSettings.yourCircleCode')}
+                {isPendingApproval
+                  ? t('circleSettings.pendingApprovalMessage', {
+                      name: circle?.name,
+                    })
+                  : circle?.userRole === 'member'
+                    ? t('circleSettings.memberOf', { name: circle?.name })
+                    : t('circleSettings.yourCircleCode')}
               </Typography>
             </Box>
           </Box>
 
-          <Box
-            sx={{
-              alignItems: { xs: 'stretch', sm: 'center' },
-              bgcolor: 'background.level1',
-              borderRadius: 'lg',
-              display: 'flex',
-              flexDirection: { xs: 'column', sm: 'row' },
-              gap: 1.5,
-              justifyContent: 'space-between',
-              p: 1.5,
-            }}
-          >
-            <Typography
+          {isPendingApproval ? (
+            <Button
+              color='danger'
+              variant='soft'
+              startDecorator={<CloseRounded />}
+              onClick={cancelJoinRequest}
+            >
+              {t('circleSettings.cancelRequest')}
+            </Button>
+          ) : (
+            <Box
               sx={{
-                fontFamily:
-                  'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
-                fontSize: 'clamp(1.25rem, 5vw, 1.5rem)',
-                fontWeight: 700,
-                letterSpacing: '0.08em',
-                minWidth: 0,
-                overflowWrap: 'anywhere',
+                alignItems: { xs: 'stretch', sm: 'center' },
+                bgcolor: 'background.level1',
+                borderRadius: 'lg',
+                display: 'flex',
+                flexDirection: { xs: 'column', sm: 'row' },
+                gap: 1.5,
+                justifyContent: 'space-between',
+                p: 1.5,
               }}
             >
-              {inviteCode}
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button
-                variant='soft'
-                disabled={!inviteCode}
-                startDecorator={<ContentCopyRounded />}
-                onClick={copyInviteCode}
-                sx={{ flex: { xs: 1, sm: 'none' } }}
+              <Typography
+                sx={{
+                  fontFamily:
+                    'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
+                  fontSize: 'clamp(1.25rem, 5vw, 1.5rem)',
+                  fontWeight: 700,
+                  letterSpacing: '0.08em',
+                  minWidth: 0,
+                  overflowWrap: 'anywhere',
+                }}
               >
-                {t('circleSettings.copyCode')}
-              </Button>
-              <Button
-                variant='solid'
-                disabled={!inviteLink}
-                startDecorator={<IosShareRounded />}
-                onClick={shareInvite}
-                sx={{ flex: { xs: 1, sm: 'none' } }}
-              >
-                {t('circleSettings.shareInvite')}
-              </Button>
+                {inviteCode}
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button
+                  variant='soft'
+                  disabled={!inviteCode}
+                  startDecorator={<ContentCopyRounded />}
+                  onClick={copyInviteCode}
+                  sx={{ flex: { xs: 1, sm: 'none' } }}
+                >
+                  {t('circleSettings.copyCode')}
+                </Button>
+                <Button
+                  variant='solid'
+                  disabled={!inviteLink}
+                  startDecorator={<IosShareRounded />}
+                  onClick={shareInvite}
+                  sx={{ flex: { xs: 1, sm: 'none' } }}
+                >
+                  {t('circleSettings.shareInvite')}
+                </Button>
+              </Box>
             </Box>
-          </Box>
+          )}
         </Sheet>
 
         {isAdmin && (
@@ -416,15 +501,26 @@ const CircleSettings = () => {
                           })}
                         </Typography>
                       </Box>
-                      <Button
-                        size='sm'
-                        color='success'
-                        variant='soft'
-                        loading={acceptingRequest === request.id}
-                        onClick={() => acceptRequest(request)}
-                      >
-                        {t('circleSettings.accept')}
-                      </Button>
+                      <Box sx={{ display: 'flex', gap: 0.75 }}>
+                        <Button
+                          size='sm'
+                          color='success'
+                          variant='soft'
+                          loading={acceptingRequest === request.id}
+                          onClick={() => acceptRequest(request)}
+                        >
+                          {t('circleSettings.accept')}
+                        </Button>
+                        <Button
+                          size='sm'
+                          color='danger'
+                          variant='soft'
+                          loading={decliningRequest === request.id}
+                          onClick={() => declineRequest(request)}
+                        >
+                          {t('circleSettings.decline')}
+                        </Button>
+                      </Box>
                     </Box>
                   </Box>
                 ))}
@@ -663,7 +759,7 @@ const CircleSettings = () => {
           </Sheet>
         </Box>
 
-        {circle && circle.userRole === 'member' && (
+        {circle && circle.userRole === 'member' && !isPendingApproval && (
           <Box
             sx={{
               mt: 3.5,
