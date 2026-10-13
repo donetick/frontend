@@ -4,7 +4,6 @@ import {
   FolderOpen,
   HowToReg,
   Label,
-  Lock,
   Person,
   PriorityHigh,
   Stars,
@@ -15,6 +14,7 @@ import { useTranslation } from 'react-i18next'
 
 import NumberInput from '../../../components/common/NumberInput'
 import Priorities from '../../../utils/Priorities'
+import { ProjectAccessIcon } from '../../Projects/ProjectVisibilityField'
 
 // `labelKey` resolves against `chores:filterBuilder.dueDateOption.*` — these
 // are also read by ChoreToolbarPrototype, which translates them the same way.
@@ -517,7 +517,7 @@ const FilterBuilderContent = ({
                     }}
                   >
                     {p.name}
-                    {p.isPrivate && <Lock sx={{ fontSize: 12 }} />}
+                    <ProjectAccessIcon project={p} sx={{ fontSize: 12 }} />
                   </Box>
                 ),
               })),

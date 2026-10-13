@@ -11,7 +11,6 @@ import {
   EditCalendar,
   Flag,
   Label as LabelIcon,
-  Lock,
   MoreHoriz,
   Person,
   Remove,
@@ -44,6 +43,7 @@ import { getIconComponent } from '../../../utils/ProjectIcons'
 import DueDatePickerModal, {
   splitDueDate,
 } from '../../components/DueDatePickerModal'
+import { ProjectAccessIcon } from '../../Projects/ProjectVisibilityField'
 
 const renderProjectAvatar = (color, icon) => {
   const bg = color || LABEL_COLORS[0].value
@@ -546,15 +546,14 @@ const MultiSelectToolbar = ({
                     <ListItemContent>
                       <Typography level='body-sm'>
                         {project.name}
-                        {project.isPrivate && (
-                          <Lock
-                            sx={{
-                              fontSize: 14,
-                              ml: 0.5,
-                              verticalAlign: 'text-bottom',
-                            }}
-                          />
-                        )}
+                        <ProjectAccessIcon
+                          project={project}
+                          sx={{
+                            fontSize: 14,
+                            ml: 0.5,
+                            verticalAlign: 'text-bottom',
+                          }}
+                        />
                       </Typography>
                     </ListItemContent>
                   </MenuItem>

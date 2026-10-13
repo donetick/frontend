@@ -1141,6 +1141,8 @@
     "useANegativeAmountToDecreaseThe": "Use a negative amount to decrease the value.",
     "selectAThingAndEnterAValid": "Select a Thing and enter a valid value.",
     "addAction": "Add action",
-    "changeAThing": "Change a Thing"
+    "changeAThing": "Change a Thing",
+    "inheritedFromSharedProject": "Inherited from the project: only its members can see tasks in it",
+    "onlyProjectAudienceAssignable": "Only people who can see the project “{{project}}” can be assigned."
   }
 }

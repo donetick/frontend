@@ -32,6 +32,10 @@ import { sanitizeRemindersForPlan } from '../../utils/entitlements'
 import { CreateLabel } from '../../utils/Fetcher'
 import { imageSourceToFile } from '../../utils/FileConvert'
 import { isPlusAccount } from '../../utils/Helpers'
+import {
+  filterMembersForProject,
+  getProjectAudienceIds,
+} from '../../utils/ProjectAccess'
 import { getIconComponent } from '../../utils/ProjectIcons'
 import { generateUUID } from '../../utils/UUID'
 import { useLabels } from '../Labels/LabelQueries'
@@ -210,7 +214,6 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
   // Stable identities for the voice panel: these queries are undefined while
   // loading, and a fresh [] each render would churn the panel's parse context
   const voiceLabels = useMemo(() => userLabels || [], [userLabels])
-  const voiceMembers = useMemo(() => circleMembers?.res || [], [circleMembers])
 
   const handleCreateLabel = useCallback(
     name => {
@@ -222,29 +225,6 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
         .catch(error => console.error('Error creating label:', error))
     },
     [queryClient],
-  )
-
-  const smartInputSuggestions = useMemo(
-    () => ({
-      '#': {
-        value: 'id',
-        display: 'name',
-        options: userLabels || [],
-        creatable: true,
-        onCreate: handleCreateLabel,
-      },
-      '!': PRIORITY_SUGGESTIONS,
-      '@': {
-        value: 'userId',
-        display: 'displayName',
-        options: [
-          { userId: 'anyone', displayName: t('addTask.anyone') },
-          ...(circleMembers?.res || []),
-        ],
-      },
-      '*': POINTS_SUGGESTIONS,
-    }),
-    [userLabels, circleMembers, handleCreateLabel, t],
   )
 
   const [taskText, setTaskText] = useState('')
@@ -383,16 +363,63 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
     voiceInputService.isSupported().then(setVoiceAvailable)
   }, [])
 
-  // A task in a private project is always private: the project's privacy wins over
-  // the task's own setting, so keep the form in sync with the selected project.
-  const selectedProjectIsPrivate = Boolean(
-    projects.find(project => project.id === projectId)?.isPrivate,
-  )
+  // A task in a private or shared project is always private: the project's
+  // privacy wins over the task's own setting, so keep the form in sync with the
+  // selected project.
+  const taskProject = projects.find(project => project.id === projectId)
+  const selectedProjectIsPrivate = Boolean(taskProject?.isPrivate)
   useEffect(() => {
     if (selectedProjectIsPrivate && !isPrivate) {
       setIsPrivate(true)
     }
   }, [selectedProjectIsPrivate, isPrivate])
+
+  // Only people who can see the selected project can be assigned (the server
+  // rejects anybody else), so the picker and @mentions offer just them.
+  const assignableMembers = useMemo(
+    () => filterMembersForProject(circleMembers?.res || [], taskProject),
+    [circleMembers, taskProject],
+  )
+
+  // Voice tasks land in the selected project as well, so they offer the same
+  // people (assignableMembers is memoized, so the panel's parse context stays put).
+  const voiceMembers = assignableMembers
+
+  const smartInputSuggestions = useMemo(
+    () => ({
+      '#': {
+        value: 'id',
+        display: 'name',
+        options: userLabels || [],
+        creatable: true,
+        onCreate: handleCreateLabel,
+      },
+      '!': PRIORITY_SUGGESTIONS,
+      '@': {
+        value: 'userId',
+        display: 'displayName',
+        options: [
+          { userId: 'anyone', displayName: t('addTask.anyone') },
+          ...assignableMembers,
+        ],
+      },
+      '*': POINTS_SUGGESTIONS,
+    }),
+    [userLabels, assignableMembers, handleCreateLabel, t],
+  )
+
+  const projectAudienceKey = (getProjectAudienceIds(taskProject) || []).join(
+    ',',
+  )
+  useEffect(() => {
+    const audience = getProjectAudienceIds(taskProject)
+    if (!audience) return
+    setAssignees(current => {
+      const kept = current.filter(a => audience.includes(a.userId))
+      return kept.length === current.length ? current : kept
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectAudienceKey])
 
   // Quick-capture widget entry points (donetick://chores/add?mode=voice|scan)
   // land here: open straight into the requested panel, once per modal open so
@@ -635,7 +662,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
   // with identical data doesn't re-trigger the parse effect below
   const assigneesForParsing = useMemo(
     () =>
-      (circleMembers?.res || []).map(member => ({
+      assignableMembers.map(member => ({
         userId: member.userId,
         username:
           member.username ||
@@ -644,7 +671,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
         name: member.displayName,
         id: member.userId,
       })),
-    [circleMembers],
+    [assignableMembers],
   )
 
   const processText = useCallback(
@@ -1455,7 +1482,7 @@ const TaskInput = ({ initialMode, isModalOpen, onChoreUpdate, onClose }) => {
                   setIsAnyoneTask(false)
                   setAssignees([])
                 }}
-                members={circleMembers?.res || []}
+                members={assignableMembers}
               />
               <LabelsPickerField
                 emptyDisplay={pickerEmptyDisplay}
