@@ -1,14 +1,23 @@
 import {
+  AccessTimeRounded,
+  AddAPhotoRounded,
+  PersonOutlineRounded,
+} from '@mui/icons-material'
+import {
   Autocomplete,
   Avatar,
   Box,
   Button,
-  Card,
+  FormControl,
+  FormLabel,
+  IconButton,
   Input,
+  Sheet,
   Typography,
 } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
 import imageCompression from 'browser-image-compression'
+import PropTypes from 'prop-types'
 import { useRef, useState } from 'react'
 import Cropper from 'react-easy-crop'
 import { useTranslation } from 'react-i18next'
@@ -21,16 +30,30 @@ import { apiClient } from '../../utils/ApiClient'
 import { UpdateUserDetails } from '../../utils/Fetcher'
 import { resolvePhotoURL } from '../../utils/Helpers'
 import { getCroppedImg } from '../../utils/imageCropUtils'
+import LoadingComponent from '../components/Loading'
 import SettingsLayout from './SettingsLayout'
 
-const ProfileSettings = () => {
+const surfaceSx = {
+  bgcolor: 'background.surface',
+  border: '1px solid',
+  borderColor: 'divider',
+  borderRadius: 'xl',
+}
+
+const getTimezones = () => {
+  if (typeof Intl.supportedValuesOf === 'function') {
+    return Intl.supportedValuesOf('timeZone')
+  }
+  return [Intl.DateTimeFormat().resolvedOptions().timeZone]
+}
+
+const ProfileContent = ({ refetchUserProfile, userProfile }) => {
   const { t } = useTranslation('settings')
   const queryClient = useQueryClient()
-  const { data: userProfile, refetch: refetchUserProfile } = useUserProfile()
   const { showError, showSuccess } = useNotification()
-  const [displayName, setDisplayName] = useState(userProfile?.displayName || '')
+  const [displayName, setDisplayName] = useState(userProfile.displayName || '')
   const [timezone, setTimezone] = useState(
-    userProfile?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+    userProfile.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
   )
   const [isUploading, setIsUploading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -41,21 +64,26 @@ const ProfileSettings = () => {
   const [showCropper, setShowCropper] = useState(false)
   const [selectedFile, setSelectedFile] = useState(null)
 
-  // Get available timezones
-  const timezones = Intl.supportedValuesOf('timeZone')
+  const timezones = getTimezones()
 
-  const onCropComplete = (croppedArea, croppedAreaPixels) => {
-    setCroppedAreaPixels(croppedAreaPixels)
+  const closeCropper = () => {
+    if (selectedFile) URL.revokeObjectURL(selectedFile)
+    setShowCropper(false)
+    setSelectedFile(null)
+    setCrop({ x: 0, y: 0 })
+    setZoom(1)
+    if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
-  const handlePhotoChange = e => {
-    const file = e.target.files[0]
+  const handlePhotoChange = event => {
+    const file = event.target.files[0]
     if (!file) return
     setSelectedFile(URL.createObjectURL(file))
     setShowCropper(true)
   }
 
   const handleCropSave = async () => {
+    if (!croppedAreaPixels) return
     setIsUploading(true)
     try {
       const croppedBlob = await getCroppedImg(
@@ -65,69 +93,51 @@ const ProfileSettings = () => {
         160,
         'image/jpeg',
       )
-
-      // Compress the cropped image
-      const compressionOptions = {
-        maxSizeMB: 0.02, // Smaller size for profile images
-        maxWidthOrHeight: 160, // Match the cropped dimensions
+      const compressedFile = await imageCompression(croppedBlob, {
+        maxSizeMB: 0.02,
+        maxWidthOrHeight: 160,
         useWebWorker: true,
         fileType: 'image/jpeg',
         initialQuality: 0.8,
-      }
-
-      const compressedFile = await imageCompression(
-        croppedBlob,
-        compressionOptions,
-      )
-
-      console.log(`Original size: ${(croppedBlob.size / 1024).toFixed(2)} KB`)
-      console.log(
-        `Compressed size: ${(compressedFile.size / 1024).toFixed(2)} KB`,
-      )
+      })
 
       const formData = new FormData()
       formData.append('file', compressedFile, 'profile.jpg')
       const response = await apiClient.upload('/users/profile_photo', formData)
       if (!response.ok) throw new Error('Upload failed')
       await response.json()
-
-      refetchUserProfile() // Refresh user profile to get the new photoURL
+      await refetchUserProfile()
       showSuccess({
         title: t('profile.photoUpdated'),
         message: t('profile.photoUpdatedMessage'),
       })
-    } catch (err) {
+      closeCropper()
+    } catch (error) {
       showError({
         title: t('profile.uploadFailed'),
         message: t('profile.uploadFailedMessage'),
       })
     } finally {
       setIsUploading(false)
-      setShowCropper(false)
-      setSelectedFile(null)
     }
   }
 
   const handleSave = async () => {
+    if (!displayName.trim() || !timezone) return
     setIsSaving(true)
     try {
-      const userDetails = { displayName, timezone }
-      const response = await UpdateUserDetails(userDetails)
-      // invalidate user profile cache here if using react-query or similar:
-      queryClient.invalidateQueries({ queryKey: ['userProfile'] })
-      queryClient.refetchQueries({ queryKey: ['userProfile'] })
+      const response = await UpdateUserDetails({
+        displayName: displayName.trim(),
+        timezone,
+      })
+      if (!response.ok) throw new Error('Failed to update profile')
 
-      if (response.ok) {
-        showSuccess({
-          title: t('profile.profileUpdated'),
-          message: t('profile.profileUpdatedMessage'),
-        })
-      } else {
-        throw new Error('Failed to update profile')
-      }
-    } catch (err) {
-      console.log(err)
-
+      await queryClient.invalidateQueries({ queryKey: ['userProfile'] })
+      showSuccess({
+        title: t('profile.profileUpdated'),
+        message: t('profile.profileUpdatedMessage'),
+      })
+    } catch (error) {
       showError({
         title: t('profile.updateFailed'),
         message: t('profile.updateFailedMessage'),
@@ -137,32 +147,85 @@ const ProfileSettings = () => {
     }
   }
 
-  // Helper to resolve photoURL with baseURL if needed
+  const hasChanges =
+    displayName.trim() !== (userProfile.displayName || '') ||
+    timezone !==
+      (userProfile.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone)
+  const initials = (displayName || userProfile.displayName || '?')
+    .charAt(0)
+    .toUpperCase()
 
   return (
     <SettingsLayout title={t('profile.title')}>
-      <div className='grid gap-4 py-4' id='profile'>
-        <Typography level='body-md'>{t('profile.description')}</Typography>
-        <Card
+      <Box id='profile' sx={{ maxWidth: 680, pb: 4 }}>
+        <Typography
+          level='body-md'
+          textColor='text.secondary'
+          sx={{ maxWidth: 560, mb: 3, mt: -1, textWrap: 'pretty' }}
+        >
+          {t('profile.description')}
+        </Typography>
+
+        <Sheet
           sx={{
-            display: 'flex',
+            ...surfaceSx,
             alignItems: 'center',
-            gap: 2,
-            p: 2,
-            maxWidth: 400,
+            display: 'flex',
+            gap: { xs: 2, sm: 2.5 },
+            mb: 2,
+            p: { xs: 2, sm: 2.5 },
           }}
         >
-          <Avatar
-            src={resolvePhotoURL(userProfile?.image)}
-            sx={{ width: 64, height: 64 }}
-          />
-          <Box sx={{ flex: 1 }}>
-            <Button
-              variant='soft'
+          <Box sx={{ flex: '0 0 auto', position: 'relative' }}>
+            <Avatar
+              src={resolvePhotoURL(userProfile.image)}
+              sx={{
+                bgcolor: 'primary.softBg',
+                color: 'primary.softColor',
+                fontSize: '1.75rem',
+                fontWeight: 650,
+                height: { xs: 76, sm: 88 },
+                width: { xs: 76, sm: 88 },
+              }}
+            >
+              {initials}
+            </Avatar>
+            <IconButton
+              size='sm'
+              variant='solid'
               color='primary'
-              onClick={() => fileInputRef.current.click()}
+              aria-label={t('profile.changePhoto')}
+              onClick={() => fileInputRef.current?.click()}
+              sx={{
+                border: '3px solid',
+                borderColor: 'background.surface',
+                borderRadius: '50%',
+                bottom: -3,
+                position: 'absolute',
+                right: -3,
+              }}
+            >
+              <AddAPhotoRounded sx={{ fontSize: 17 }} />
+            </IconButton>
+          </Box>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography level='title-lg' noWrap>
+              {displayName || userProfile.displayName}
+            </Typography>
+            <Typography
+              level='body-sm'
+              textColor='text.secondary'
+              noWrap
+              sx={{ mb: 1.25 }}
+            >
+              {userProfile.username || userProfile.email}
+            </Typography>
+            <Button
+              size='sm'
+              variant='soft'
+              startDecorator={<AddAPhotoRounded />}
+              onClick={() => fileInputRef.current?.click()}
               loading={isUploading}
-              sx={{ mb: 1 }}
             >
               {t('profile.changePhoto')}
             </Button>
@@ -170,118 +233,148 @@ const ProfileSettings = () => {
               ref={fileInputRef}
               type='file'
               accept='image/*'
-              style={{ display: 'none' }}
+              hidden
               onChange={handlePhotoChange}
             />
           </Box>
-        </Card>
-        <AppModal
-          open={showCropper}
-          onClose={() => {
-            setShowCropper(false)
-            setSelectedFile(null)
-          }}
-          title={t('profile.editPhoto')}
-          size='sm'
-          closeOnBackdrop={!isUploading}
-          closeOnEscape={!isUploading}
-          footer={
-            <ModalActions
-              secondary={{
-                label: t('profile.cancel'),
-                disabled: isUploading,
-                onClick: () => {
-                  setShowCropper(false)
-                  setSelectedFile(null)
-                },
+        </Sheet>
+
+        <Sheet sx={{ ...surfaceSx, p: { xs: 2, sm: 2.5 } }}>
+          <Box sx={{ display: 'grid', gap: 2.25 }}>
+            <FormControl required>
+              <FormLabel>{t('profile.displayName')}</FormLabel>
+              <Input
+                size='lg'
+                value={displayName}
+                onChange={event => setDisplayName(event.target.value)}
+                placeholder={t('profile.displayNamePlaceholder')}
+                startDecorator={<PersonOutlineRounded />}
+              />
+            </FormControl>
+
+            <FormControl required>
+              <FormLabel>{t('profile.timezone')}</FormLabel>
+              <Autocomplete
+                size='lg'
+                value={timezone}
+                onChange={(event, newValue) => setTimezone(newValue)}
+                options={timezones}
+                getOptionLabel={tz => {
+                  if (!tz) return ''
+                  const formattedTimezone = tz.replace(/_/g, ' ')
+                  const currentTime = new Date().toLocaleString(undefined, {
+                    timeZone: tz,
+                    timeStyle: 'short',
+                  })
+                  return `${formattedTimezone} (${currentTime})`
+                }}
+                filterOptions={(options, { inputValue }) => {
+                  if (!inputValue) return options
+                  const searchTerms = inputValue.toLowerCase().split(/\s+/)
+                  return options.filter(tz => {
+                    const timezoneLower = tz.toLowerCase()
+                    const timezoneParts = timezoneLower.split(/[/_]/)
+                    return searchTerms.every(
+                      term =>
+                        timezoneLower.includes(term) ||
+                        timezoneParts.some(part => part.includes(term)),
+                    )
+                  })
+                }}
+                placeholder={t('profile.timezonePlaceholder')}
+                startDecorator={<AccessTimeRounded />}
+              />
+            </FormControl>
+
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: { xs: 'stretch', sm: 'flex-end' },
+                mt: 0.5,
               }}
-              primary={{
-                label: t('profile.save'),
-                loading: isUploading,
-                onClick: handleCropSave,
-              }}
-            />
-          }
-        >
-          <Box
-            sx={{
-              width: '100%',
-              maxWidth: 320,
-              aspectRatio: '1',
-              position: 'relative',
-              mx: 'auto',
-            }}
-          >
-            <Cropper
-              image={selectedFile}
-              crop={crop}
-              zoom={zoom}
-              aspect={1}
-              cropShape='round'
-              showGrid={false}
-              onCropChange={setCrop}
-              onZoomChange={setZoom}
-              onCropComplete={onCropComplete}
-            />
+            >
+              <Button
+                size='lg'
+                loading={isSaving}
+                disabled={!hasChanges || !displayName.trim() || !timezone}
+                onClick={handleSave}
+                sx={{ minWidth: 120, width: { xs: '100%', sm: 'auto' } }}
+              >
+                {t('profile.save')}
+              </Button>
+            </Box>
           </Box>
-        </AppModal>
-        <Box sx={{ maxWidth: 400, mt: 3 }}>
-          <Typography level='body-sm' sx={{ mb: 0.5 }}>
-            {t('profile.displayName')}
-          </Typography>
-          <Input
-            value={displayName}
-            onChange={e => setDisplayName(e.target.value)}
-            placeholder={t('profile.displayNamePlaceholder')}
-            sx={{ mb: 2 }}
-          />
+        </Sheet>
+      </Box>
 
-          <Typography level='body-sm' sx={{ mb: 0.5 }}>
-            {t('profile.timezone')}
-          </Typography>
-          <Autocomplete
-            value={timezone}
-            onChange={(e, newValue) => setTimezone(newValue)}
-            options={timezones}
-            getOptionLabel={tz => {
-              const formattedTimezone = tz.replace(/_/g, ' ')
-              const currentTime = new Date().toLocaleString('en-US', {
-                timeZone: tz,
-                timeStyle: 'short',
-              })
-              return `${formattedTimezone} (${currentTime})`
+      <AppModal
+        open={showCropper}
+        onClose={closeCropper}
+        title={t('profile.editPhoto')}
+        size='sm'
+        closeOnBackdrop={!isUploading}
+        closeOnEscape={!isUploading}
+        footer={
+          <ModalActions
+            secondary={{
+              label: t('profile.cancel'),
+              disabled: isUploading,
+              onClick: closeCropper,
             }}
-            filterOptions={(options, { inputValue }) => {
-              if (!inputValue) return options
-
-              const searchTerms = inputValue.toLowerCase().split(/\s+/)
-              return options.filter(tz => {
-                const timezoneLower = tz.toLowerCase()
-                const timezoneParts = tz.toLowerCase().split(/[/_]/)
-
-                return searchTerms.every(
-                  term =>
-                    timezoneLower.includes(term) ||
-                    timezoneParts.some(part => part.includes(term)),
-                )
-              })
+            primary={{
+              label: t('profile.save'),
+              loading: isUploading,
+              disabled: !croppedAreaPixels,
+              onClick: handleCropSave,
             }}
-            placeholder={t('profile.timezonePlaceholder')}
-            sx={{ mb: 2 }}
           />
-
-          <Button
-            variant='soft'
-            color='primary'
-            onClick={handleSave}
-            loading={isSaving}
-            sx={{ width: 120 }}
-          >
-            {t('profile.save')}
-          </Button>
+        }
+      >
+        <Box
+          sx={{
+            aspectRatio: '1',
+            bgcolor: 'background.level2',
+            borderRadius: 'lg',
+            maxWidth: 360,
+            mx: 'auto',
+            overflow: 'hidden',
+            position: 'relative',
+            width: '100%',
+          }}
+        >
+          <Cropper
+            image={selectedFile}
+            crop={crop}
+            zoom={zoom}
+            aspect={1}
+            cropShape='round'
+            showGrid={false}
+            onCropChange={setCrop}
+            onZoomChange={setZoom}
+            onCropComplete={(croppedArea, pixels) =>
+              setCroppedAreaPixels(pixels)
+            }
+          />
         </Box>
-      </div>
+      </AppModal>
     </SettingsLayout>
+  )
+}
+
+ProfileContent.propTypes = {
+  userProfile: PropTypes.object.isRequired,
+  refetchUserProfile: PropTypes.func.isRequired,
+}
+
+const ProfileSettings = () => {
+  const { data: userProfile, refetch: refetchUserProfile } = useUserProfile()
+  if (!userProfile) return <LoadingComponent />
+
+  return (
+    <ProfileContent
+      userProfile={userProfile}
+      refetchUserProfile={refetchUserProfile}
+    />
   )
 }
 
