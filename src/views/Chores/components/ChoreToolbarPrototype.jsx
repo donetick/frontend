@@ -6,11 +6,12 @@
  *        + FilterBar (Due Date / Priority / Labels chips row)
  *        + FilterSection (saved/pinned filter chips row)
  *
- *   NEW: [Search] [Filter(n)] [Group ▾] [View] [Multiselect]
- *        + active filter chips appear inline next to Filter button
+ *   NEW: [Search] [Project] [Filter(n)] [Sort + Group] [Display] [Multiselect]
+ *        + active filter chips appear below the toolbar
  *        + Filter button opens ONE unified bottom sheet containing:
  *            Assignee · Created By · Status · Priority · Due Date · Labels · Projects · Points
  *            + Saved Filters section
+ *        + Sort and Group share a focused menu; Display handles presentation
  *
  * How to try it: in MyChores.jsx, replace the <Box sx={{display:'flex'...}}> toolbar block
  * and the two rows below it (FilterBar + FilterSection) with:
@@ -53,6 +54,7 @@ import { useTranslation } from 'react-i18next'
 import AppModal from '../../../components/common/AppModal'
 import ActiveFilterChips from '../../../components/common/filter/ActiveFilterChips'
 import KeyboardShortcutHint from '../../../components/common/KeyboardShortcutHint'
+import SortAndFilterMenu from '../../../components/common/SortAndFilterMenu'
 import { PAYWALL_REASON, usePaywall } from '../../../contexts/PaywallContext'
 import { FILTER_COLORS } from '../../../utils/Colors'
 import { canCreateQuickFilter } from '../../../utils/entitlements'
@@ -174,6 +176,10 @@ const OptionChips = ({ multi, onToggle, options, selected }) => (
  *  onAssigneeFilterChange – (key) => void
  *  selectedGroupBy   – 'default' | 'due_date' | 'priority' | 'labels'
  *  onGroupBySelect   – (value) => void
+ *  selectedSort      – 'smart' | 'due_date' | 'priority' | 'created_date' | 'updated_date'
+ *  onSortChange      – (value) => void
+ *  sortDirection     – 'asc' | 'desc'
+ *  onSortDirectionChange – (value) => void
  *  viewMode          – 'default' | 'compact' | 'calendar'
  *  onToggleViewMode  – (value?) => void
  *
@@ -208,6 +214,8 @@ const ChoreToolbar = ({
   // assignee (for Display sheet)
   onSearchChange,
   onSearchClose,
+  onSortChange,
+  onSortDirectionChange,
   // saved / custom
   onToggleMultiSelect,
   onToggleViewMode,
@@ -222,7 +230,9 @@ const ChoreToolbar = ({
   selectedAssigneeFilter = 'anyone',
   selectedGroupBy = 'default',
   selectedProject,
+  selectedSort = 'smart',
   showKeyboardShortcuts,
+  sortDirection = 'asc',
   // search
   tempFilter,
   tempFilterMeta,
@@ -565,11 +575,19 @@ const ChoreToolbar = ({
 
   const filterActive = activeFilterId != null || tempConditionCount > 0
 
+  const sortOptions = [
+    { value: 'smart', name: t('sort.smart') },
+    { value: 'due_date', name: t('dueDate') },
+    { value: 'priority', name: t('priority') },
+    { value: 'created_date', name: t('sort.createdDate') },
+    { value: 'updated_date', name: t('sort.updatedDate') },
+  ]
+
   const groupByOptions = [
-    { value: 'default', label: t('sort.smart') },
-    { value: 'due_date', label: t('dueDate') },
-    { value: 'priority', label: t('priority') },
-    { value: 'labels', label: t('labels.label') },
+    { value: 'default', name: t('sort.smart') },
+    { value: 'due_date', name: t('dueDate') },
+    { value: 'priority', name: t('priority') },
+    { value: 'labels', name: t('labels.label') },
   ]
 
   const assigneeOptions = [
@@ -617,7 +635,24 @@ const ChoreToolbar = ({
           inputRef={searchInputRef}
         />
 
-        {/* Filter button */}
+        {/* Project selector */}
+        {!filterActive &&
+          projects.filter(p => p.id !== 'default').length > 0 && (
+            <Box
+              sx={{
+                display: 'none',
+                '@media (min-width: 1024px)': { display: 'inline-flex' },
+              }}
+            >
+              <ProjectSelector
+                selectedProject={selectedProject?.name || 'Default Project'}
+                onProjectSelect={onProjectSelect}
+                showKeyboardShortcuts={showKeyboardShortcuts}
+              />
+            </Box>
+          )}
+
+        {/* Filter */}
         <Badge
           badgeContent={totalActiveCount || null}
           color='primary'
@@ -637,26 +672,28 @@ const ChoreToolbar = ({
           </IconButton>
         </Badge>
 
-        {/* Project selector */}
-        {!filterActive &&
-          projects.filter(p => p.id !== 'default').length > 0 && (
-            <Box
-              sx={{
-                display: 'none',
-                '@media (min-width: 1024px)': { display: 'inline-flex' },
-              }}
-            >
-              <ProjectSelector
-                selectedProject={selectedProject?.name || 'Default Project'}
-                onProjectSelect={onProjectSelect}
-                showKeyboardShortcuts={showKeyboardShortcuts}
-              />
-            </Box>
-          )}
+        {/* Sorting and grouping are list-organization controls, so they live
+            together in a dedicated menu rather than under Display. */}
+        <SortAndFilterMenu
+          title={t('sort.sortAndGroup')}
+          icon={<Sort />}
+          sortOptions={sortOptions}
+          selectedSort={selectedSort}
+          onSortChange={onSortChange}
+          sortDirection={sortDirection}
+          onSortDirectionChange={onSortDirectionChange}
+          filterTitle={t('toolbar.groupBy')}
+          filterOptions={groupByOptions}
+          selectedFilter={selectedGroupBy}
+          onFilterChange={onGroupBySelect}
+          isActive={
+            selectedSort !== 'smart' ||
+            sortDirection !== 'asc' ||
+            selectedGroupBy !== 'default'
+          }
+        />
 
-        {/* Display button — View + Group combined.
-            Icon stays fixed: mirroring viewMode made this read as a toggle
-            showing the current view rather than a button that opens a sheet. */}
+        {/* Display */}
         <IconButton
           variant='outlined'
           color='neutral'
@@ -929,7 +966,7 @@ const ChoreToolbar = ({
         </Box>
       </AppModal>
 
-      {/* ── Display bottom sheet (View + Group + Assignee + Project) ──────────── */}
+      {/* ── Display bottom sheet (View + Assignee) ───────────────────────────── */}
       <AppModal
         open={displaySheetOpen}
         isMobile
@@ -966,38 +1003,6 @@ const ChoreToolbar = ({
                   )
                 }
                 onClick={() => onToggleViewMode?.(opt.value)}
-                sx={{
-                  py: 0.64,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                  userSelect: 'none',
-                  '&:hover': { opacity: 0.85 },
-                }}
-              >
-                {opt.label}
-              </Chip>
-            ))}
-          </Box>
-
-          <Divider sx={{ my: 2.5 }} />
-
-          {/* Group by section */}
-          <SectionHeader
-            icon={<Sort />}
-            label={t('toolbar.groupBy')}
-            badge={
-              selectedGroupBy !== 'default'
-                ? groupByOptions.find(o => o.value === selectedGroupBy)?.label
-                : null
-            }
-          />
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-            {groupByOptions.map(opt => (
-              <Chip
-                key={opt.value}
-                variant={selectedGroupBy === opt.value ? 'solid' : 'soft'}
-                color={selectedGroupBy === opt.value ? 'primary' : 'neutral'}
-                onClick={() => onGroupBySelect?.(opt.value)}
                 sx={{
                   py: 0.64,
                   cursor: 'pointer',
