@@ -340,7 +340,8 @@ const UserPoints = () => {
                       sx={{ fontWeight: 650 }}
                       noWrap
                     >
-                      {selectedUserData?.displayName || t('summary.unknownUser')}
+                      {selectedUserData?.displayName ||
+                        t('summary.unknownUser')}
                     </Typography>
                   )}
                   sx={{
