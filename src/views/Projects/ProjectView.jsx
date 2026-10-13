@@ -86,7 +86,9 @@ const ProjectMembersStack = ({ members = [] }) => {
             zIndex: visible.length - index,
           }}
         >
-          {(member.displayName || member.username || '?').charAt(0).toUpperCase()}
+          {(member.displayName || member.username || '?')
+            .charAt(0)
+            .toUpperCase()}
         </Avatar>
       ))}
       {overflow > 0 && (
@@ -244,7 +246,9 @@ const ProjectCardContent = ({
         </Typography>
 
         {/* Project Info */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, minWidth: 0 }}>
+        <Box
+          sx={{ display: 'flex', alignItems: 'center', gap: 0.75, minWidth: 0 }}
+        >
           {project.description && (
             <>
               <Typography
