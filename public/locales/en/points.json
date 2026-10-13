@@ -63,6 +63,7 @@
   },
   "summary": {
     "showingFor": "Showing points for",
+    "selectUser": "Select member to view points for",
     "unknownUser": "Unknown User",
     "overThe": "over the",
     "allTime": "All Time",

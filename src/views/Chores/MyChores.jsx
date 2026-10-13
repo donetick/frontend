@@ -512,6 +512,7 @@ const MyChores = () => {
       ChoreFilters(impersonatedUser?.userId || userProfile?.id)[
         selectedChoreFilter
       ],
+      choreSortDirection,
     )
 
     return sections.map(section => ({

@@ -588,6 +588,8 @@ const ChoreToolbar = ({
     { value: 'due_date', name: t('dueDate') },
     { value: 'priority', name: t('priority') },
     { value: 'labels', name: t('labels.label') },
+    { value: 'created_date', name: t('sort.createdDate') },
+    { value: 'updated_date', name: t('sort.updatedDate') },
   ]
 
   const assigneeOptions = [
