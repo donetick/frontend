@@ -21,7 +21,6 @@ import {
   IconButton,
   Input,
   List,
-  Stack,
   Typography,
 } from '@mui/joy'
 import { useQueryClient } from '@tanstack/react-query'
@@ -743,20 +742,6 @@ const ArchivedTasks = () => {
         px: { xs: 2, sm: 3 },
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, p: 2 }}>
-        {/* <EmojiEvents sx={{ fontSize: '2rem', color: '#FFD700' }} /> */}
-        <Stack sx={{ flex: 1 }}>
-          <Typography
-            level='h3'
-            sx={{ fontWeight: 'lg', color: 'text.primary' }}
-          >
-            {t('archived.title')}
-          </Typography>
-          <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            {t('archived.subtitle')}
-          </Typography>
-        </Stack>
-      </Box>
       {/* Header */}
       {/* <Box
         sx={{

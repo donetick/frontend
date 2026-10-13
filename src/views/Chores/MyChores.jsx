@@ -32,6 +32,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import EmptyState from '../../components/common/EmptyState'
 import KeyboardShortcutHint from '../../components/common/KeyboardShortcutHint'
 import { useImpersonateUser } from '../../contexts/ImpersonateUserContext.jsx'
+import { useNavBarTitle } from '../../contexts/NavBarTitleContext'
 import { useFilter } from '../../hooks/useFilter'
 import { useChores } from '../../queries/ChoreQueries'
 import { useCircleMembers, useUserProfile } from '../../queries/UserQueries'
@@ -63,7 +64,6 @@ import {
   selectionsToConditions,
 } from './components/FilterBuilderContent'
 import MultiSelectToolbar from './components/MultiSelectToolbar'
-import MyChoreHeader from './components/MyChoreHeader'
 import { useChoreActions } from './hooks/useChoreActions'
 import { useChoreFilters } from './hooks/useChoreFilters'
 import { useChoreModals } from './hooks/useChoreModals'
@@ -202,6 +202,15 @@ const MyChores = () => {
     userLabels,
     projectsWithDefault,
   )
+
+  const choreViewTitle = tempFilter
+    ? tempFilterMeta?.name || t('common:navigation.filters')
+    : activeFilterId
+      ? activeFilter?.name || t('common:navigation.filters')
+      : selectedProject && selectedProject.id !== 'default'
+        ? selectedProject.name
+        : t('common:navigation.allTasks')
+  useNavBarTitle(choreViewTitle)
 
   const [showAdvancedFilterBuilder, setShowAdvancedFilterBuilder] =
     useState(false)
@@ -974,13 +983,6 @@ const MyChores = () => {
         maxWidth='md'
         sx={{ px: 1, pt: { xs: 1, md: 3 }, minWidth: 0 }}
       >
-        <MyChoreHeader
-          activeFilterId={activeFilterId}
-          activeFilter={activeFilter}
-          selectedProject={selectedProject}
-          tempFilter={tempFilter}
-          tempFilterMeta={tempFilterMeta}
-        />
         <ChoreToolbar
           members={membersData?.res || []}
           labels={userLabels || []}

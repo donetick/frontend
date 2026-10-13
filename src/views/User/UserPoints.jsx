@@ -311,26 +311,6 @@ const UserPoints = () => {
       {/* Enhanced Leaderboard Header Section */}
       <Box sx={{ mb: 4 }}>
         <Stack spacing={2}>
-          {/* Title Row */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <EmojiEvents sx={{ fontSize: '2rem', color: '#FFD700' }} />
-            <Stack sx={{ flex: 1 }}>
-              <Typography
-                level='h3'
-                sx={{ fontWeight: 'lg', color: 'text.primary' }}
-              >
-                {leaderboardMode === 'points'
-                  ? t('leaderboard.titlePoints')
-                  : t('leaderboard.titleTasks')}
-              </Typography>
-              <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-                {leaderboardMode === 'points'
-                  ? t('leaderboard.subtitlePoints')
-                  : t('leaderboard.subtitleTasks')}
-              </Typography>
-            </Stack>
-          </Box>
-
           {/* Filters Row - Responsive */}
           <Box
             sx={{
