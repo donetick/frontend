@@ -244,36 +244,50 @@ const ProjectCardContent = ({
         </Typography>
 
         {/* Project Info */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, minWidth: 0 }}>
           {project.description && (
-            <Typography
-              level='body-xs'
-              sx={{
-                color: 'text.tertiary',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                maxWidth: '200px',
-              }}
-            >
-              {project.description}
-            </Typography>
+            <>
+              <Typography
+                level='body-xs'
+                sx={{
+                  color: 'text.tertiary',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  maxWidth: '180px',
+                }}
+              >
+                {project.description}
+              </Typography>
+              <Box
+                sx={{
+                  width: 3,
+                  height: 3,
+                  borderRadius: '50%',
+                  bgcolor: 'text.tertiary',
+                  flexShrink: 0,
+                }}
+              />
+            </>
           )}
 
-          <Chip
-            size='sm'
-            variant='soft'
-            startDecorator={<Task />}
+          <Box
             sx={{
-              fontSize: 10,
-              height: 18,
-              px: 0.75,
-              bgcolor: 'primary.softBg',
-              color: 'primary.500',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.375,
+              flexShrink: 0,
+              color: 'text.tertiary',
             }}
           >
-            {t('tasks', { count: taskCount })}
-          </Chip>
+            <Task sx={{ fontSize: 13 }} />
+            <Typography
+              level='body-xs'
+              sx={{ color: 'inherit', whiteSpace: 'nowrap' }}
+            >
+              {t('tasks', { count: taskCount })}
+            </Typography>
+          </Box>
         </Box>
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
