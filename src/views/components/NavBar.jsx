@@ -44,7 +44,7 @@ import { useGlobalSearch } from '../../search/GlobalSearchContext'
 import { apiClient } from '../../utils/ApiClient'
 import ErrorReportModal from '../Modals/ErrorReportModal'
 import NavBarLink from './NavBarLink'
-import NavBarProjectSwitcher from './NavBarProjectSwitcher'
+import NavBarResourceSwitcher from './NavBarResourceSwitcher'
 import { OPEN_NAVIGATION_DRAWER_EVENT } from './navigationEvents'
 import SyncStatusIndicator from './SyncStatusIndicator'
 
@@ -96,7 +96,9 @@ const NavBar = () => {
       ? location.pathname.replace(/\/$/, '')
       : location.pathname
   const navbarTitleKey = NAVBAR_TITLE_KEYS[normalizedPath]
-  const dynamicNavBarConfig = normalizedPath === '/chores' ? navBarConfig : null
+  const supportsDynamicNavBar =
+    normalizedPath === '/chores' || /^\/labels\/[^/]+$/.test(normalizedPath)
+  const dynamicNavBarConfig = supportsDynamicNavBar ? navBarConfig : null
   const navbarTitle =
     dynamicNavBarConfig?.title || (navbarTitleKey ? t(navbarTitleKey) : null)
 
@@ -588,9 +590,9 @@ const NavBar = () => {
             }}
           >
             {getMenuIcon()}
-            {dynamicNavBarConfig?.projectSwitcher ? (
-              <NavBarProjectSwitcher
-                projectSwitcher={dynamicNavBarConfig.projectSwitcher}
+            {dynamicNavBarConfig?.selector ? (
+              <NavBarResourceSwitcher
+                selector={dynamicNavBarConfig.selector}
                 title={navbarTitle}
               />
             ) : navbarTitle ? (

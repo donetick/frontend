@@ -1,8 +1,10 @@
 import {
   Check,
+  FilterAlt,
   FolderOpen,
   KeyboardArrowDown,
   Settings,
+  Style,
 } from '@mui/icons-material'
 import {
   Avatar,
@@ -22,8 +24,42 @@ import { useNavigate } from 'react-router-dom'
 import { getTextColorFromBackgroundColor } from '../../utils/Colors'
 import { getIconComponent } from '../../utils/ProjectIcons'
 
-const ProjectAvatar = ({ isSelected, project }) => {
-  const color = project?.color || '#1976d2'
+const TYPE_CONFIG = {
+  filter: {
+    fallbackColor: '#64748b',
+    headerKey: 'common:navigation.filters',
+    manageKey: 'common:navigation.filters',
+    managePath: '/filters',
+  },
+  label: {
+    fallbackColor: '#64748b',
+    headerKey: 'common:navigation.labels',
+    manageKey: 'common:navigation.labels',
+    managePath: '/labels',
+  },
+  project: {
+    fallbackColor: '#1976d2',
+    headerKey: 'projects:selector.title',
+    manageKey: 'projects:selector.manage',
+    managePath: '/projects',
+  },
+}
+
+const ResourceAvatar = ({ isSelected, item, type }) => {
+  const config = TYPE_CONFIG[type] || TYPE_CONFIG.project
+  const color = item?.color || config.fallbackColor
+  const iconColor = getTextColorFromBackgroundColor(color)
+  let icon = <FolderOpen sx={{ color: iconColor, fontSize: 14 }} />
+
+  if (type === 'project') {
+    icon = createElement(getIconComponent(item?.icon || 'FolderOpen'), {
+      sx: { color: iconColor, fontSize: 14 },
+    })
+  } else if (type === 'filter') {
+    icon = <FilterAlt sx={{ color: iconColor, fontSize: 14 }} />
+  } else if (type === 'label') {
+    icon = <Style sx={{ color: iconColor, fontSize: 14 }} />
+  }
 
   return (
     <Avatar
@@ -35,29 +71,42 @@ const ProjectAvatar = ({ isSelected, project }) => {
         border: '2px solid',
         borderColor: isSelected ? color : 'background.surface',
         boxShadow: isSelected ? `0 0 0 1px ${color}` : 'sm',
+        color: iconColor,
       }}
     >
-      {createElement(getIconComponent(project?.icon || 'FolderOpen'), {
-        sx: { fontSize: 14, color: getTextColorFromBackgroundColor(color) },
-      })}
+      {icon}
     </Avatar>
   )
 }
 
-const NavBarProjectSwitcher = ({ projectSwitcher, title }) => {
-  const { t } = useTranslation(['common', 'projects', 'chores'])
+const NavBarResourceSwitcher = ({ selector, title }) => {
+  const { t } = useTranslation(['common', 'projects', 'chores', 'filters'])
   const navigate = useNavigate()
-  const { onSelect, projects, selectedProjectId } = projectSwitcher
-  const selectedProject = projects.find(
-    project => String(project.id) === String(selectedProjectId),
+  const { items, onSelect, selectedId, type } = selector
+  const config = TYPE_CONFIG[type] || TYPE_CONFIG.project
+  const selectedItem = items.find(
+    item => String(item.id) === String(selectedId),
   )
+
+  const getItemName = item =>
+    type === 'project' && item.id === 'default'
+      ? t('chores:toolbar.defaultProject')
+      : item.name
+
+  const getItemDescription = item => {
+    if (type === 'project' && item.id === 'default') {
+      return t('projects:defaultDescription')
+    }
+    if (type === 'filter') {
+      return t('filters:tasks', { count: item.count || 0 })
+    }
+    return null
+  }
 
   return (
     <Dropdown>
       <MenuButton
-        aria-label={t('projects:selector.currentProjectTitle', {
-          project: title,
-        })}
+        aria-label={`${t(config.headerKey)}: ${title}`}
         variant='plain'
         color='neutral'
         sx={{
@@ -73,9 +122,10 @@ const NavBarProjectSwitcher = ({ projectSwitcher, title }) => {
         }}
       >
         <KeyboardArrowDown sx={{ fontSize: 20, color: 'text.tertiary' }} />
-        {selectedProject && selectedProject.id !== 'default' && (
-          <ProjectAvatar project={selectedProject} />
-        )}
+        {selectedItem &&
+          !(type === 'project' && selectedItem.id === 'default') && (
+            <ResourceAvatar item={selectedItem} type={type} />
+          )}
         <Typography
           component='span'
           level='title-md'
@@ -119,18 +169,18 @@ const NavBarProjectSwitcher = ({ projectSwitcher, title }) => {
             textTransform: 'uppercase',
           }}
         >
-          {t('projects:selector.title')}
+          {t(config.headerKey)}
         </Typography>
 
-        {projects.map(project => {
-          const isDefault = project.id === 'default'
-          const isSelected = String(project.id) === String(selectedProjectId)
+        {items.map(item => {
+          const isSelected = String(item.id) === String(selectedId)
+          const description = getItemDescription(item)
 
           return (
             <MenuItem
-              key={project.id}
+              key={item.id}
               selected={isSelected}
-              onClick={() => onSelect(project)}
+              onClick={() => onSelect(item)}
               sx={{
                 alignItems: 'center',
                 borderRadius: '12px',
@@ -146,39 +196,23 @@ const NavBarProjectSwitcher = ({ projectSwitcher, title }) => {
               }}
             >
               <ListItemDecorator sx={{ minInlineSize: 0 }}>
-                {isDefault ? (
-                  <Avatar
-                    size='sm'
-                    sx={{
-                      width: 26,
-                      height: 26,
-                      bgcolor: '#1976d2',
-                      border: '2px solid',
-                      borderColor: isSelected
-                        ? '#1976d2'
-                        : 'background.surface',
-                      boxShadow: isSelected ? '0 0 0 1px #1976d2' : 'sm',
-                    }}
-                  >
-                    <FolderOpen sx={{ fontSize: 14, color: '#fff' }} />
-                  </Avatar>
-                ) : (
-                  <ProjectAvatar project={project} isSelected={isSelected} />
-                )}
+                <ResourceAvatar
+                  isSelected={isSelected}
+                  item={item}
+                  type={type}
+                />
               </ListItemDecorator>
               <ListItemContent>
                 <Typography level='title-sm' fontWeight='lg' noWrap>
-                  {isDefault
-                    ? t('chores:toolbar.defaultProject')
-                    : project.name}
+                  {getItemName(item)}
                 </Typography>
-                {isDefault && (
+                {description && (
                   <Typography
                     level='body-xs'
                     noWrap
                     sx={{ color: 'text.tertiary' }}
                   >
-                    {t('projects:defaultDescription')}
+                    {description}
                   </Typography>
                 )}
               </ListItemContent>
@@ -191,7 +225,7 @@ const NavBarProjectSwitcher = ({ projectSwitcher, title }) => {
 
         <Divider sx={{ my: 0.5 }} />
         <MenuItem
-          onClick={() => navigate('/projects')}
+          onClick={() => navigate(config.managePath)}
           sx={{
             alignItems: 'center',
             borderRadius: '12px',
@@ -212,7 +246,7 @@ const NavBarProjectSwitcher = ({ projectSwitcher, title }) => {
           </ListItemDecorator>
           <ListItemContent>
             <Typography level='title-sm' fontWeight='lg'>
-              {t('projects:selector.manage')}
+              {t(config.manageKey)}
             </Typography>
           </ListItemContent>
         </MenuItem>
@@ -221,4 +255,4 @@ const NavBarProjectSwitcher = ({ projectSwitcher, title }) => {
   )
 }
 
-export default NavBarProjectSwitcher
+export default NavBarResourceSwitcher

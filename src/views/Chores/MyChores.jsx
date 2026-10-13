@@ -218,6 +218,48 @@ const MyChores = () => {
     project => project.id !== 'default',
   )
   const isDefaultProject = !selectedProject || selectedProject.id === 'default'
+  const handleSavedFilterSelect = useCallback(
+    filter => {
+      setSearchTerm('')
+      setSelectedChoreFilterWithCache('anyone')
+      if (filter.conditions?.some(condition => condition.type === 'project')) {
+        setSelectedProjectWithCache(null)
+      }
+      applyCustomFilter(filter.id)
+      setSearchParams(
+        params => {
+          params.delete('filter')
+          params.delete('filter_id')
+          params.set('filterId', String(filter.id))
+          return params
+        },
+        { replace: true },
+      )
+    },
+    [
+      applyCustomFilter,
+      setSearchParams,
+      setSearchTerm,
+      setSelectedChoreFilterWithCache,
+      setSelectedProjectWithCache,
+    ],
+  )
+
+  const handleLabelSelect = useCallback(
+    label => {
+      clearActiveFilter()
+      setSearchTerm('')
+      applyTempFilter(
+        {
+          conditions: [{ type: 'label', operator: 'is', value: [label.id] }],
+          operator: 'AND',
+        },
+        { name: label.name },
+      )
+    },
+    [applyTempFilter, clearActiveFilter, setSearchTerm],
+  )
+
   const choreViewTitle = tempFilter
     ? tempFilterMeta?.name || t('common:navigation.filters')
     : activeFilterId
@@ -227,15 +269,14 @@ const MyChores = () => {
         : hasCustomProjects
           ? t('toolbar.defaultProject')
           : t('common:navigation.allTasks')
-  const projectSwitcher = useMemo(
+  const projectSelector = useMemo(
     () =>
       hasCustomProjects && !activeFilterId && !tempFilter
         ? {
+            items: projectsWithDefault,
             onSelect: handleProjectSelect,
-            projects: projectsWithDefault,
-            selectedProjectId: isDefaultProject
-              ? 'default'
-              : selectedProject.id,
+            selectedId: isDefaultProject ? 'default' : selectedProject.id,
+            type: 'project',
           }
         : null,
     [
@@ -248,7 +289,39 @@ const MyChores = () => {
       tempFilter,
     ],
   )
-  useNavBarTitle(choreViewTitle, projectSwitcher)
+  const labelSelector = useMemo(() => {
+    const conditions = tempFilter?.conditions || []
+    const condition = conditions.length === 1 ? conditions[0] : null
+    const values = Array.isArray(condition?.value)
+      ? condition.value
+      : condition?.value != null
+        ? [condition.value]
+        : []
+    if (condition?.type !== 'label' || values.length !== 1) return null
+
+    return {
+      items: userLabels || [],
+      onSelect: handleLabelSelect,
+      selectedId: values[0],
+      type: 'label',
+    }
+  }, [handleLabelSelect, tempFilter?.conditions, userLabels])
+  const filterSelector = useMemo(
+    () =>
+      activeFilterId && savedFilters.length > 0
+        ? {
+            items: savedFilters,
+            onSelect: handleSavedFilterSelect,
+            selectedId: activeFilterId,
+            type: 'filter',
+          }
+        : null,
+    [activeFilterId, handleSavedFilterSelect, savedFilters],
+  )
+  useNavBarTitle(
+    choreViewTitle,
+    filterSelector || labelSelector || projectSelector,
+  )
 
   const [showAdvancedFilterBuilder, setShowAdvancedFilterBuilder] =
     useState(false)

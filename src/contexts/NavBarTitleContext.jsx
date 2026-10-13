@@ -34,51 +34,44 @@ export const useNavBarTitleContext = () => {
   return context
 }
 
-export const useNavBarTitle = (title, projectSwitcher = null) => {
+export const useNavBarTitle = (title, selector = null) => {
   const { setNavBarConfig } = useNavBarTitleContext()
-  const projectSwitcherRef = useRef(projectSwitcher)
-  projectSwitcherRef.current = projectSwitcher
+  const selectorRef = useRef(selector)
+  selectorRef.current = selector
 
-  // Router setters can change identity between renders. Exposing those
-  // callbacks directly through context would make this layout effect update
-  // the provider on every render, creating a provider → page → provider loop.
-  const handleProjectSelect = useCallback(
-    project => projectSwitcherRef.current?.onSelect(project),
+  // Router setters can change identity between renders. Keep the callback
+  // behind a ref so a fresh function cannot trigger a provider → page loop.
+  const handleSelect = useCallback(
+    item => selectorRef.current?.onSelect(item),
     [],
   )
-  const hasProjectSwitcher = Boolean(projectSwitcher)
-  const selectedProjectId = projectSwitcher?.selectedProjectId ?? null
-  const projectsSignature = (projectSwitcher?.projects || [])
+  const hasSelector = Boolean(selector)
+  const selectedId = selector?.selectedId ?? null
+  const selectorType = selector?.type ?? null
+  const selectorSignature = (selector?.items || [])
     .map(
-      project =>
-        `${project.id}:${project.name}:${project.color || ''}:${project.icon || ''}`,
+      item =>
+        `${item.id}:${item.name}:${item.color || ''}:${item.icon || ''}:${item.description || ''}:${item.count ?? ''}:${item.conditions?.length ?? ''}`,
     )
     .join('|')
-  const stableProjectSwitcher = useMemo(() => {
-    if (!hasProjectSwitcher) return null
+  const stableSelector = useMemo(() => {
+    if (!hasSelector) return null
     return {
-      onSelect: handleProjectSelect,
-      projects: projectSwitcherRef.current.projects,
-      selectedProjectId,
+      items: selectorRef.current.items,
+      onSelect: handleSelect,
+      selectedId,
+      type: selectorRef.current.type,
     }
-  }, [
-    handleProjectSelect,
-    hasProjectSwitcher,
-    projectsSignature,
-    selectedProjectId,
-  ])
+  }, [handleSelect, hasSelector, selectedId, selectorSignature, selectorType])
 
   useLayoutEffect(() => {
     setNavBarConfig(current => {
-      if (
-        current?.title === title &&
-        current?.projectSwitcher === stableProjectSwitcher
-      ) {
+      if (current?.title === title && current?.selector === stableSelector) {
         return current
       }
-      return { projectSwitcher: stableProjectSwitcher, title }
+      return { selector: stableSelector, title }
     })
-  }, [setNavBarConfig, stableProjectSwitcher, title])
+  }, [setNavBarConfig, stableSelector, title])
 
   useLayoutEffect(
     () => () => {
